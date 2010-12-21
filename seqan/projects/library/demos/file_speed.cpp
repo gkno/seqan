@@ -27,14 +27,14 @@ void testThroughput(const char *fileName)
 
 	SEQAN_PROTIMESTART(iotime);
 
-	awriteAt(myFile, toCString(block1), blockSize, 0 * blockSize, req1);
-	awriteAt(myFile, toCString(block2), blockSize, 1 * blockSize, req2);
+	asyncWriteAt(myFile, toCString(block1), blockSize, 0 * blockSize, req1);
+	asyncWriteAt(myFile, toCString(block2), blockSize, 1 * blockSize, req2);
 	for (int i = 1; i < repeats; ++i) 
 	{
 		waitFor(req1);
-		awriteAt(myFile, toCString(block1), blockSize,    2*i  * blockSize, req1);
+		asyncWriteAt(myFile, toCString(block1), blockSize,    2*i  * blockSize, req1);
 		waitFor(req2);
-		awriteAt(myFile, toCString(block2), blockSize, (2*i+1) * blockSize, req2);
+		asyncWriteAt(myFile, toCString(block2), blockSize, (2*i+1) * blockSize, req2);
 	}
 	waitFor(req1);
 	waitFor(req2);

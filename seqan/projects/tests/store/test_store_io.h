@@ -49,7 +49,7 @@ SEQAN_DEFINE_TEST(test_store_io_writeme)
     
 	std::ifstream samFile(buffer);
 	SEQAN_ASSERT_TRUE(samFile);
-	read(samFile, store, SAM());
+	read(samFile, store, Sam());
 	
     strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
     strcat(buffer, "/projects/tests/store/ex1.fa");
@@ -62,7 +62,7 @@ SEQAN_DEFINE_TEST(test_store_io_writeme)
     
 	std::ofstream samFileOut(buffer);
 	SEQAN_ASSERT_TRUE(samFileOut);
-	write(samFileOut, store, SAM());
+	write(samFileOut, store, Sam());
 }
 */
 SEQAN_DEFINE_TEST(test_store_io_sam) 
@@ -76,10 +76,10 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 	split(sam1, Raw());
     
 	{
-		// read reference SAM from file
+		// read reference Sam from file
 		std::ifstream samFile(buffer);
 		SEQAN_ASSERT_TRUE(samFile);
-		read(samFile, store, SAM());
+		read(samFile, store, Sam());
 	}
 	
     strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
@@ -89,10 +89,10 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 
     strcpy(buffer, SEQAN_TEMP_FILENAME());
 	{
-		// write SAM to temp file
+		// write Sam to temp file
 		std::ofstream samFileOut(buffer);
 		SEQAN_ASSERT_TRUE(samFileOut);
-		write(samFileOut, store, SAM());
+		write(samFileOut, store, Sam());
 	}
 	
 	MultiSeqFile sam2;

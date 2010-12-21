@@ -313,7 +313,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_nested_modifier) {
 }
 
 
-// Test the convertInPlace() function.
+// Test the convert() function.
 SEQAN_DEFINE_TEST(test_modifier_convert_in_place) {
     CharString const originalStr = "This is a test!";
     CharString const expectedResult = "Uijt jt b uftu!";
@@ -321,7 +321,7 @@ SEQAN_DEFINE_TEST(test_modifier_convert_in_place) {
     // Non-const variant on string.
     {
         CharString strCopy = originalStr;
-        convertInPlace(strCopy, CaesarChiffre<char>(1));
+        convert(strCopy, CaesarChiffre<char>(1));
         SEQAN_ASSERT_EQ(expectedResult, strCopy);
     }
 
@@ -329,7 +329,7 @@ SEQAN_DEFINE_TEST(test_modifier_convert_in_place) {
     {
         CharString strCopy = originalStr;
         Segment<CharString, InfixSegment> stringInfix(strCopy);
-        convertInPlace(strCopy, CaesarChiffre<char>(1));
+        convert(strCopy, CaesarChiffre<char>(1));
         SEQAN_ASSERT_EQ(expectedResult, strCopy);
     }
 
@@ -337,7 +337,7 @@ SEQAN_DEFINE_TEST(test_modifier_convert_in_place) {
     {
         CharString strCopy = originalStr;
         Segment<CharString, InfixSegment> const stringInfix(strCopy);
-        convertInPlace(strCopy, CaesarChiffre<char>(1));
+        convert(strCopy, CaesarChiffre<char>(1));
         SEQAN_ASSERT_EQ(expectedResult, strCopy);
     }
 }

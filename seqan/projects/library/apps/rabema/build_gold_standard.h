@@ -161,7 +161,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     std::cerr << __FILE__ << ":" << __LINE__ << " readId = " << readId << ", name = " << readNames[readId] << ", contigId = " << contigId << ", endPos = " << endPos << std::endl;
 //     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
-    // In oracle SAM mode, the maximum error is the error at the position given in the SAM alignment.
+    // In oracle Sam mode, the maximum error is the error at the position given in the Sam alignment.
     bool oracleSamMode = false;
     if (maxError == -1) {
         oracleSamMode = true;
@@ -420,7 +420,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     smoothErrorCurve(tempMatches);
     appendValue(tempMatches, WeightedMatch(0, 0, 0, relativeMinScore - 1, 0));  // Sentinel.
     if (oracleSamMode) {
-        // In oracle SAM mode, we only want the lake with last pos endPos-1.
+        // In oracle Sam mode, we only want the lake with last pos endPos-1.
         String<WeightedMatch> buffer;
         bool flag = false;
         for (size_t i = 0; i < length(tempMatches); ++i) {
@@ -486,7 +486,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     if (length(fragments.alignedReadStore) == 0)
         return;  // Do nothing if the aligned read store is empty.
 
-    // In oracle SAM mode, we store the distance of the alignment from the SAM file for each read.
+    // In oracle Sam mode, we store the distance of the alignment from the Sam file for each read.
     String<int> readAlignmentDistances;
     if (options.oracleSamMode)
         resize(readAlignmentDistances, length(fragments.readNameStore), -1);
@@ -570,7 +570,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
 
                 int maxError;
                 if (options.oracleSamMode) {
-                    // In oracle SAM mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position from the SAM file.
+                    // In oracle Sam mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position from the Sam file.
                     maxError = -1;
                 } else {
                     // In normal mode, convert from error rate from options to error count.
@@ -636,7 +636,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
 int buildGoldStandard(Options<BuildGoldStandard> const & options)
 {
     // =================================================================
-    // Load contigs and SAM file.
+    // Load contigs and Sam file.
     // =================================================================
     typedef FragmentStore<> TFragmentStore;
     TFragmentStore fragmentStore;
@@ -646,15 +646,15 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         return 1;
     }
     
-    // Load SAM file.
+    // Load Sam file.
     {
         std::fstream fstrm(toCString(options.perfectMapFilename),
                            std::ios_base::in | std::ios_base::binary);
         if (!fstrm.is_open()) {
-            std::cerr << "Could not open SAM file." << std::endl;
+            std::cerr << "Could not open Sam file." << std::endl;
             return 1;
         }
-        read(fstrm, fragmentStore, SAM());
+        read(fstrm, fragmentStore, Sam());
     }
 
     // =================================================================
@@ -671,7 +671,7 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // =================================================================
     if (options.verify) {
         if (options.oracleSamMode) {
-            std::cerr << "WARNING: Not verifying since we run in oracle SAM mode!" << std::endl;
+            std::cerr << "WARNING: Not verifying since we run in oracle Sam mode!" << std::endl;
         } else {
             bool valid;
             if (options.distanceFunction == "edit")

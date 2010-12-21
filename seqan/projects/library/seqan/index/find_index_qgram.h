@@ -69,7 +69,7 @@ Finds q-grams in a @Spec.IndexQGram@ index using the hash table.
 		QGramFindLookup const)
 	{
 		typedef Index<TText, TSpec>									TIndex;
-		typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
+		typedef typename Fibre<TIndex, QGramSA>::Type				TSA;
 		typedef typename Fibre<TIndex, QGramShape>::Type			TShape;
 		typedef typename Fibre<TIndex, QGramDir>::Type				TDir;
 		typedef typename Iterator<TSA const, Standard>::Type		TSAIterator;

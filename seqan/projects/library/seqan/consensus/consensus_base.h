@@ -123,7 +123,7 @@ public:
 	// 1: afg output format
 	// 2: frg output format
 	// 3: cgb output format
-    // 4: SAM output format
+    // 4: Sam output format
 	int output;
 
 	// Multi-read alignment
@@ -141,8 +141,8 @@ public:
 	// Various input and output files
 	std::string readsfile;				// File of reads in FASTA format
 	std::string afgfile;				// AMOS afg file input
-	std::string samfile;				// SAM file input
-	std::string contigsfile;			// FASTA reference file for SAM input
+	std::string samfile;				// Sam file input
+	std::string contigsfile;			// FASTA reference file for Sam input
 	std::string outfile;				// Output file name
 	
 	// Initialization

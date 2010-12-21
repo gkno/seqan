@@ -406,7 +406,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options<EvaluateResults> const 
                     std::cerr << "WARNING: ";
                 else
                     std::cerr << "PANIC: ";
-                std::cerr << "A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
+                std::cerr << "A read in the Sam file aligns out of all target intervals for this read in the WIT file." << std::endl;
                 std::cerr << "bestScore = " << bestScore << std::endl;
                 std::cerr << "read name = " << fragments.readNameStore[it->readId] << std::endl;
                 std::cerr << "read is = " << fragments.readSeqStore[it->readId] << std::endl;
@@ -809,7 +809,7 @@ void evaluateFoundIntervals(ComparisonResult & comparisonResult,
 int evaluateReadMapperResult(Options<EvaluateResults> const & options)
 {
     // =================================================================
-    // Load FASTA Sequence And SAM File Into FragmentStore.
+    // Load FASTA Sequence And Sam File Into FragmentStore.
     // =================================================================
     typedef FragmentStore<> TFragmentStore;
     TFragmentStore fragments;
@@ -823,17 +823,17 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     }
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
 
-    // Load SAM File.
-    std::cerr << "Reading SAM file file " << options.samFileName << " ..." << std::endl;
+    // Load Sam File.
+    std::cerr << "Reading Sam file file " << options.samFileName << " ..." << std::endl;
     startTime = sysTime();
     {
         std::fstream fstrm(toCString(options.samFileName),
                            std::ios_base::in | std::ios_base::binary);
         if (!fstrm.is_open()) {
-            std::cerr << "Could not open SAM file." << std::endl;
+            std::cerr << "Could not open Sam file." << std::endl;
             return 1;
         }
-        read(fstrm, fragments, SAM());
+        read(fstrm, fragments, Sam());
     }
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
     //for (unsigned i = 0; i < length(fragments.readNameStore); ++i) {
@@ -850,9 +850,9 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
 
     // =================================================================
-    // Compare The SAM Hits Against WIT Intervals.
+    // Compare The Sam Hits Against WIT Intervals.
     // =================================================================
-    std::cerr << "Compare reader hits from SAM file against WIT file." << std::endl;
+    std::cerr << "Compare reader hits from Sam file against WIT file." << std::endl;
     startTime = sysTime();
     typedef Position<WitStore::TIntervalStore>::Type TPos;
     // The result will be a list of ids to entries in witStore.

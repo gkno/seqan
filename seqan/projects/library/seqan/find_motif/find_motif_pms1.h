@@ -37,19 +37,19 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// PMS1
+// Pms1
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.PMS1:
-..summary: Represents the PMS1 algorithm developed by Rajasekaran et al.
+.Spec.Pms1:
+..summary: Represents the Pms1 algorithm developed by Rajasekaran et al.
 ..general:Class.MotifFinder
 ..cat:Motif Search
-..signature:MotifFinder<TValue, PMS1>
+..signature:MotifFinder<TValue, Pms1>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
-..remarks:The exact @Spec.PMS1|PMS1 algorithm@ (Planted Motif Search 1) searches in the space
+..remarks:The exact @Spec.Pms1|Pms1 algorithm@ (Planted Motif Search 1) searches in the space
           of possible motifs such as @Spec.EPatternBranching@. The procedure of the algorithm
 		  is quite simple. For every l-mer in each input sequence the algorithm generates
 		  all possible length-l patterns in the Hamming distance $d$-neighborhood of $x$.
@@ -59,13 +59,13 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/find_motif.h
 */
 
-///.Class.MotifFinder.param.TSpec.type:Spec.PMS1
+///.Class.MotifFinder.param.TSpec.type:Spec.Pms1
 
 struct Pms1_;
-typedef Tag<Pms1_> const PMS1;
+typedef Tag<Pms1_> const Pms1;
 
 //////////////////////////////////////////////////////////////////////////////
-// MotifFinder - PMS1 Spec
+// MotifFinder - Pms1 Spec
 //
 // t:=dataset size (number of sequences)
 // n:=average sequence size
@@ -74,7 +74,7 @@ typedef Tag<Pms1_> const PMS1;
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue>
-class MotifFinder<TValue, PMS1>
+class MotifFinder<TValue, Pms1>
 {
 //_________________________________________________________________________________
 
@@ -128,7 +128,7 @@ public:
 	}
 //_________________________________________________________________________________
 
-}; // class MotifFinder<TValue, PMS1>
+}; // class MotifFinder<TValue, Pms1>
 
 //////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -136,7 +136,7 @@ public:
 
 template<typename TSeqType, typename TStrings, typename TModel>
 inline void
-findMotif(MotifFinder<TSeqType, PMS1> & finder, 
+findMotif(MotifFinder<TSeqType, Pms1> & finder, 
 		  TStrings & dataset, 
 		  TModel seq_model)
 {
@@ -153,7 +153,7 @@ findMotif(MotifFinder<TSeqType, PMS1> & finder,
 
 /*
 .Function.pms1:
-..summary:Represents the PMS1 algorithm.
+..summary:Represents the Pms1 algorithm.
 ..cat:Motif Search
 ..signature:pms1(result_set,dataset,l,d,is_exact,h,model_type)
 ..param.result_set:The result_set object.
@@ -167,17 +167,17 @@ findMotif(MotifFinder<TSeqType, PMS1> & finder,
 ..param.is_exact:The size of Hamming distance.
 ...type:$bool$
 ..param.model_type:The model_type object.
-...type:Tag.OOPS
-...type:Tag.OMOPS
-...type:Tag.ZOOPS
-...type:Tag.TCM
-..remarks:The PMS1 algorithm is able to run in OOPS, OMOPS, ZOOPS and TCM mode.
-..remarks:The resulted motif candidates found by the PMS1 algorithm will be stored in the result_set object.
+...type:Tag.Oops
+...type:Tag.Omops
+...type:Tag.Zoops
+...type:Tag.Tcm
+..remarks:The Pms1 algorithm is able to run in Oops, Omops, Zoops and Tcm mode.
+..remarks:The resulted motif candidates found by the Pms1 algorithm will be stored in the result_set object.
 ..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
-//	OOPS model
+//	Oops model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStrings, typename TType>
@@ -187,7 +187,7 @@ pms1(TStrings & result_set,
 	 TType const & l,
 	 TType const & d, 
 	 bool const & is_exact,
-	 OOPS const & /*model_type*/)
+	 Oops const & /*model_type*/)
 {
     SEQAN_CHECKPOINT;
 
@@ -295,7 +295,7 @@ pms1(TStrings & result_set,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	OMOPS model
+//	Omops model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStrings, typename TType>
@@ -305,7 +305,7 @@ pms1(TStrings & result_set,
 	 TType const & l,
 	 TType const & d, 
 	 bool const & is_exact,
-	 OMOPS const & /*model_type*/)
+	 Omops const & /*model_type*/)
 {
     SEQAN_CHECKPOINT;
 
@@ -385,7 +385,7 @@ pms1(TStrings & result_set,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	ZOOPS model
+//	Zoops model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStrings, typename TType>
@@ -395,7 +395,7 @@ pms1(TStrings & result_set,
 	 TType const & l,
 	 TType const & d, 
 	 bool const & is_exact,
-	 ZOOPS const & model_type)
+	 Zoops const & model_type)
 {
     SEQAN_CHECKPOINT;
 
@@ -494,7 +494,7 @@ pms1(TStrings & result_set,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	TCM model
+//	Tcm model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStrings, typename TType>
@@ -504,7 +504,7 @@ pms1(TStrings & result_set,
 	 TType const & l,
 	 TType const & d, 
 	 bool const & is_exact,
-	 TCM const & model_type)
+	 Tcm const & model_type)
 {
     SEQAN_CHECKPOINT;
 

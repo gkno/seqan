@@ -39,23 +39,23 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-	struct BWT {};
+	struct Bwt {};
 
 
     //////////////////////////////////////////////////////////////////////////////
-    // external BWT algorithm
+    // external Bwt algorithm
     //////////////////////////////////////////////////////////////////////////////
 
 
     template < typename TTextInput, typename TSuffixArrayInput >
-    struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, BWT > > {
+    struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Bwt > > {
         typedef typename Value<TTextInput>::Type Type;
     };
 
 	//////////////////////////////////////////////////////////////////////////////
     // bwt class
     template < typename TTextInput, typename TSuffixArrayInput >
-    struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, BWT >
+    struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Bwt >
     {
         // *** SPECIALIZATION ***
 
@@ -122,19 +122,19 @@ namespace SEQAN_NAMESPACE_MAIN
     // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
     // for the first we would need no _in member
 	template < typename TInput, typename TTextInput_, typename TSuffixArrayInput_ >
-    inline bool operator<<(Pipe< TInput, BWT > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
+    inline bool operator<<(Pipe< TInput, Bwt > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
 
 
     //////////////////////////////////////////////////////////////////////////////
-    // external BWT algorithm (optimized for multiple sequences)
+    // external Bwt algorithm (optimized for multiple sequences)
     //////////////////////////////////////////////////////////////////////////////
 
 
     template < typename TTextInput, typename TSuffixArrayInput, typename TPair, typename TLimitsString >
-    struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<BWT, TPair, TLimitsString> > > {
+    struct Value< Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<Bwt, TPair, TLimitsString> > > {
         typedef typename Value<TTextInput>::Type Type;
     };
 
@@ -152,7 +152,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
     // bwt class
     template < typename TTextInput, typename TSuffixArrayInput, typename TPair, typename TLimitsString >
-    struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<BWT, TPair, TLimitsString> >
+    struct Pipe< Bundle2< TTextInput, TSuffixArrayInput >, Multi<Bwt, TPair, TLimitsString> >
     {
         // *** SPECIALIZATION ***
 
@@ -238,14 +238,14 @@ namespace SEQAN_NAMESPACE_MAIN
     // you can call "bwt << pipe" or "bwt_t bwt(pipe); bwt.process()"
     // for the first we would need no _in member
 	template < typename TInput, typename TTextInput_, typename TSuffixArrayInput_, typename TPair, typename TLimitsString >
-    inline bool operator<<(Pipe< TInput, Multi<BWT, TPair, TLimitsString> > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
+    inline bool operator<<(Pipe< TInput, Multi<Bwt, TPair, TLimitsString> > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
 
 
     //////////////////////////////////////////////////////////////////////////////
-    // internal BWT algorithm
+    // internal Bwt algorithm
     //////////////////////////////////////////////////////////////////////////////
 
 

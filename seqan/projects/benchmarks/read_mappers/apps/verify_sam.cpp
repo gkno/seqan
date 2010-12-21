@@ -1,5 +1,5 @@
 /*
-  Simple "verifier" for SAM files that checks whether all matches of
+  Simple "verifier" for Sam files that checks whether all matches of
   reads in a contig are actually fund.
 
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
@@ -187,7 +187,7 @@ void checkMatches(String<std::map<size_t, std::pair<size_t, bool> > > & interval
         }
         it->second.second = true;
     }
-    std::cout << "Total number of alignments for read " << readId << " in SAM file: " << alignedReadCount << std::endl;
+    std::cout << "Total number of alignments for read " << readId << " in Sam file: " << alignedReadCount << std::endl;
 
     typedef std::map<size_t, std::pair<size_t, bool> > TMap;
     size_t totalIntervals = 0;
@@ -212,9 +212,9 @@ void checkMatches(String<std::map<size_t, std::pair<size_t, bool> > > & interval
     std::cout << "Intervals hit: " << intervalsHit << " / " << totalIntervals << std::endl;
     
     if (!foundError)
-        std::cout << "SAM file contains all hits and no errorneous ones." << std::endl;
+        std::cout << "Sam file contains all hits and no errorneous ones." << std::endl;
     else
-        std::cout << "SAM file NOT CORRECT (see above)." << std::endl;
+        std::cout << "Sam file NOT CORRECT (see above)." << std::endl;
 }
 
 
@@ -232,20 +232,20 @@ int main(int argc, const char *argv[]) {
     // Load fragment store from file.
     typedef FragmentStore<> TFragmentStore;
     TFragmentStore fragments;
-    // Load contigs and SAM file.  Reads are already in the SAM file.
+    // Load contigs and Sam file.  Reads are already in the Sam file.
     std::cout << "Loading fragment store..." << std::endl;
     if (!loadContigs(fragments, kContigsPath)) {
         std::cerr << "Could not read contigs from file " << kContigsPath << std::endl;
         return 1;
     }
-    // Read SAM file.
+    // Read Sam file.
     {
         std::fstream fstrm(kMapsPath, std::ios_base::in | std::ios_base::binary);
         if (!fstrm.is_open()) {
-            std::cerr << "Could not open SAM file." << std::endl;
+            std::cerr << "Could not open Sam file." << std::endl;
             return 1;
         }
-        read(fstrm, fragments, SAM());
+        read(fstrm, fragments, Sam());
     }
 
     // Search reads in contigs.
@@ -278,7 +278,7 @@ int main(int argc, const char *argv[]) {
     intervalizeMatches(intervalMaps, matches, fragments);
 
     // Check whether RazerS hits all lakes.
-    std::cout << "Checking whether all lakes are hit by SAM file..." << std::endl;
+    std::cout << "Checking whether all lakes are hit by Sam file..." << std::endl;
     checkMatches(intervalMaps, fragments, readId);
 
     return 0;

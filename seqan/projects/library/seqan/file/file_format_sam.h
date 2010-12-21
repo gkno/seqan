@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN {
                    TValue const val);
     
 	//////////////////////////////////////////////////////////////////////////////
-	// File Formats - SAM
+	// File Formats - Sam
 	//////////////////////////////////////////////////////////////////////////////
 	
 	template<typename TSpec>
@@ -53,24 +53,24 @@ namespace SEQAN_NAMESPACE_MAIN {
 		
 	/**
 	 .Tag.File Format.tag.Sam:
-        SAM file format for alignments.
+        Sam file format for alignments.
 	 ..remark:According to the http://samtools.sourceforge.net/|specification 0.1.2
 	 */
 	struct Sam_;
-	typedef Tag<TagSBam_<Sam_> > const SAM;
+	typedef Tag<TagSBam_<Sam_> > const Sam;
 	
 	/**
 	 .Tag.File Format.tag.Bam:
-        BAM file format for alignments.
+        Bam file format for alignments.
 	 ..remark:According to the http://samtools.sourceforge.net/|specification 0.1.2
 	 */
 	struct Bam_;
-	typedef Tag<TagSBam_<Bam_> > const BAM;
+	typedef Tag<TagSBam_<Bam_> > const Bam;
 	
 	/**
 	 .Class.SAMFileMeta
 	 ..cat:Input/Output
-	 ..summary:Data structure to store information of header in the SAM of BAM file format.
+	 ..summary:Data structure to store information of header in the Sam of Bam file format.
 	 
 	 */
 	class SAMFileMeta {
@@ -80,7 +80,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 	/**
 	 .Class.SAMMeta
 	 ..cat:Input/Output
-	 ..summary:Data structure to store information belonging to one sequence. Needed for output in SAM and BAM file format.
+	 ..summary:Data structure to store information belonging to one sequence. Needed for output in Sam and Bam file format.
 	 */
 	class SAMMeta {
 			
@@ -373,7 +373,7 @@ namespace SEQAN_NAMESPACE_MAIN {
         _streamWrite(target, meta.qual);
 
         //======== Write addional Metadata ==
-        _writeAdditionalMeta(target, meta.additional, SAM());
+        _writeAdditionalMeta(target, meta.additional, Sam());
         
         // end of line
 		_streamPut(target, '\n');
@@ -389,7 +389,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 		int /*read*/,
 		const CharString & /*refName*/,
 		const CharString & /*readName*/,
-		BAM)
+		Bam)
 	{
 		//TODO: binaeres Format implementieren
 	}
@@ -420,7 +420,7 @@ namespace SEQAN_NAMESPACE_MAIN {
     read(TFile & file,
          Align<DnaString, TGapsSpec> & /*data*/,
          SAMMeta & /*meta*/,
-         SAM)
+         Sam)
     {
         while(! _streamEOF(file) && _streamGet(file) != '\n' ){
             while(_streamGet(file) != '\t'){
@@ -434,7 +434,7 @@ namespace SEQAN_NAMESPACE_MAIN {
     void
     read(TFile & file,
            String<Pair<CharString, String<Pair<CharString, CharString> > > > & data,
-           SAM)
+           Sam)
     {
         typedef typename Position<TFile>::Type TPos;
         typedef Pair<CharString, CharString> TTag;

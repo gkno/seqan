@@ -82,7 +82,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 			"Kasai        ",
 			"KasaiInPlace ",
 			"KasaiExt     ",
-			"ChildTab     ",
+			"Childtab     ",
 			"ChildTabExt  "
 		};
 
@@ -231,7 +231,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 			for(int i=0; i<size; ++i)
 				child[i] = maxValue<unsigned>();
 			timeDelta[TI] = -SEQAN_PROGETTIME;
-			createChildTable(child, lcp);
+			createChildtab(child, lcp);
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			std::cout << "."; std::cout.flush();
 
@@ -242,7 +242,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 
 			resize(childExt, size);
 			timeDelta[TI] = -SEQAN_PROGETTIME;
-			createChildTableExt(childExt, lcp);
+			createChildtabExt(childExt, lcp);
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			std::cout << "."; std::cout.flush();
 

@@ -487,7 +487,7 @@ public:
 	// we store the read sequences in a seperate stringset to reduce the memory overhead 
 	TReadSeqStore		readSeqStore;
 
-	// extra SAM fields
+	// extra Sam fields
 	TAlignQualityStore		alignQualityStore;
 	TAlignedReadTagStore	alignedReadTagStore;
 
@@ -1623,7 +1623,7 @@ void printAlignment(
 			{
 				reverseComplement(readSeq);
 				readSeqString = readSeq;
-				toLowerInPlace(readSeqString);
+				toLower(readSeqString);
 			} else
 				readSeqString = readSeq;
 			

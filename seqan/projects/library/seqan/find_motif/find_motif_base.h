@@ -51,8 +51,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The motif finding algorithm to search with.
 ...type:Spec.Projection
 ...type:Spec.EPatternBranching
-...type:Spec.PMS1
-...type:Spec.PMSP
+...type:Spec.Pms1
+...type:Spec.Pmsp
 ..include:seqan/find_motif.h
 */
 
@@ -91,16 +91,16 @@ struct Value< MotifFinder<TValue, TSpec> const>
 ..param.dataset:The dataset object representing the input sequences.
 ...type:Class.StringSet
 ..param.seq_model:The seq_model object.
-...type:Tag.OOPS
-...type:Tag.OMOPS
-...type:Tag.ZOOPS
-...type:Tag.TCM
+...type:Tag.Oops
+...type:Tag.Omops
+...type:Tag.Zoops
+...type:Tag.Tcm
 ...remarks:The sequence models rely on different assumptions about the distribution of motif occurrences
            across the sample sequences. 
-..remarks:The PROJECTION algorithm is able to run in @Tag.OOPS@, @Tag.ZOOPS@ and @Tag.TCM@ mode.
-..remarks:The ePatternBranching algorithm is able to run in @Tag.OOPS@ and @Tag.OMOPS@ mode.
-..remarks:The PMS1 and PMSP algorithm is able to run in  @Tag.OOPS@,  @Tag.OMOPS@,  @Tag.ZOOPS@ and  
-          @Tag.TCM@ mode.
+..remarks:The PROJECTION algorithm is able to run in @Tag.Oops@, @Tag.Zoops@ and @Tag.Tcm@ mode.
+..remarks:The ePatternBranching algorithm is able to run in @Tag.Oops@ and @Tag.Omops@ mode.
+..remarks:The Pms1 and Pmsp algorithm is able to run in  @Tag.Oops@,  @Tag.Omops@,  @Tag.Zoops@ and  
+          @Tag.Tcm@ mode.
 ..include:seqan/find_motif.h
 */
 

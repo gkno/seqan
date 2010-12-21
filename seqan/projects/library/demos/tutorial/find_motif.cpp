@@ -30,7 +30,7 @@ int main()
 	TMotifFinder finder_proj(seqCount, motifLength, numPos, mm, is_exact);
 
 // FRAGMENT(search)
-	findMotif(finder_proj, dataset, OOPS());
+	findMotif(finder_proj, dataset, Oops());
 
 	for (int i = 0; i < (int) motifCount(finder_proj); ++i)
 		std::cout << i << ": " << getMotif(finder_proj, i) << ::std::endl;

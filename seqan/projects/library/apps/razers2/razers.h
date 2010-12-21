@@ -1761,7 +1761,7 @@ void mapSingleReads(
 	{
 	SEQAN_CHECKPOINT
 		typename Fibre<TIndex, QGramText>::Type const &text  = indexText(index);
-		typename Fibre<TIndex, QGram_SA>::Type         &sa    = indexSA(index);
+		typename Fibre<TIndex, QGramSA>::Type         &sa    = indexSA(index);
 		typename Fibre<TIndex, QGramDir>::Type        &dir   = indexDir(index);
 		typename Fibre<TIndex, QGramShape>::Type      &shape = indexShape(index);
 		

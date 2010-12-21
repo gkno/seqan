@@ -39,14 +39,14 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
 
-	struct ChildTab {};
+	struct Childtab {};
 
     //////////////////////////////////////////////////////////////////////////////
     // external childtab algorithm
     //////////////////////////////////////////////////////////////////////////////
 
     template < typename TLCPInput >
-    struct Value< Pipe< TLCPInput, ChildTab > > {
+    struct Value< Pipe< TLCPInput, Childtab > > {
         typedef typename Size<TLCPInput>::Type Type;
     };
 
@@ -132,7 +132,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
     // Enhanced class (outputs only the childtab (3rd) column of the Enhanced Suffix Array)
     template < typename TLCPInput >
-    struct Pipe< TLCPInput, ChildTab >
+    struct Pipe< TLCPInput, Childtab >
     {
         // *** SPECIALIZATION ***
 
@@ -176,18 +176,18 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template < typename TInput, typename TLcpInput_ >
-    inline bool operator<<(Pipe< TInput, ChildTab > &me, TLcpInput_ const &in) {
+    inline bool operator<<(Pipe< TInput, Childtab > &me, TLcpInput_ const &in) {
  	    return me.process(in);
     }
 
 	template < typename TLCPTable,
                typename TChildTable >
-    void createChildTableExt(
+    void createChildtabExt(
 		TChildTable &childtab,
 		TLCPTable &lcp)
 	{
 		typedef Pipe< TLCPTable, Source<> >	TSource;
-		typedef Pipe< TSource, ChildTab >	TESA;
+		typedef Pipe< TSource, Childtab >	TESA;
 
 		TSource source(lcp);
 		TESA	esa(source);
@@ -196,10 +196,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 /**
-.Function.createChildTable:
+.Function.createChildtab:
 ..summary:Creates a child table from a given lcp table.
 ..cat:Index
-..signature:createChildTable(childTab, lcp[, algo_tag])
+..signature:createChildtab(childTab, lcp[, algo_tag])
 ..param.childTab:A reference to the resulting child table.
 ..param.lcp:A given lcp table.
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
@@ -209,11 +209,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TLCPTable,
                typename TValue,
 			   typename TConfig >
-    inline void createChildTable(
+    inline void createChildtab(
 		String<TValue, External<TConfig> > &childtab,
 		TLCPTable &lcp)
 	{
-		createChildTableExt(childtab, lcp);
+		createChildtabExt(childtab, lcp);
 	}
 
 	
@@ -223,7 +223,7 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 
 	template < typename TLCPInput, typename TDest >
-	inline void createChildTable(TDest &dest, TLCPInput const &lcpIn)
+	inline void createChildtab(TDest &dest, TLCPInput const &lcpIn)
 	{
 		typedef typename Value<TLCPInput>::Type				TValue;
 		typedef typename Size<TLCPInput>::Type				TSize;

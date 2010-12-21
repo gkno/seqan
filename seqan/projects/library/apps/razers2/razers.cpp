@@ -299,7 +299,7 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "1 = enhanced Fasta format");
 	addHelpLine(parser, "2 = Eland format");
 	addHelpLine(parser, "3 = Gff format");
-	addHelpLine(parser, "4 = SAM format");
+	addHelpLine(parser, "4 = Sam format");
 	addHelpLine(parser, "5 = Amos AFG format");
 	addOption(parser, CommandLineOption("gn", "genome-naming",     "select how genomes are named", OptionType::Int | OptionType::Label, options.genomeNaming));
 	addHelpLine(parser, "0 = use Fasta id");

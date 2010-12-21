@@ -94,7 +94,7 @@ struct Options<Global>
     // possibly with a ".1" or ".2" before the ".fastq" if mate pairs
     // are simulated.
     CharString outputFile;
-    // Path to the SAM file to generate.  Defaults to fastq file name
+    // Path to the Sam file to generate.  Defaults to fastq file name
     // with suffix ".sam"
     CharString samFile;
     // true iff qualities are to be simulated.
@@ -604,14 +604,14 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         else
             write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fasta());
     }
-    std::cerr << "Writing SAM file \"" << options.samFile << "\"" << std::endl;
+    std::cerr << "Writing Sam file \"" << options.samFile << "\"" << std::endl;
     {
         std::fstream fstrm(toCString(options.samFile), std::ios_base::out);
         if (!fstrm.is_open()) {
-            std::cerr << "Could not open SAM file \"" << options.samFile << "\"" << std::endl;
+            std::cerr << "Could not open Sam file \"" << options.samFile << "\"" << std::endl;
             return 1;
         }
-        write(fstrm, fragmentStore, SAM());
+        write(fstrm, fragmentStore, Sam());
     }
     return 0;
 }

@@ -180,13 +180,37 @@ The default behaviour can be modified by the following command line options:
 3.1.2. SplazerS-Specific Main Options
 ---------------------------------------------------------------------------
 
-Split Mapping Options:
-  -sm,   --split-mapping NUM       min. match length for prefix/suffix mapping (to disable split mapping, set to 0) (default 23)
-  -maxG, --max-gap NUM             max. length of middle gap (default 10000)
-  -minG, --min-gap NUM             min. length of middle gap (for edit distance mapping about 10% of read length is recommended) (default 0)
-  -ep,   --errors-prefix NUM       max. number of errors in prefix match (default -1)
-  -es,   --errors-suffix NUM       max. number of errors in suffix match (default -1)
-  -gl,   --genome-len NUM          genome length, for expected match number computation (default 3000000000 for human genome)
+
+  [ -sm NUM ],  [ --split-mapping NUM ]
+  
+  Minimum length for prefix/suffix matches in split read mapping (default 23).
+  If set to 0, split mapping is switched off.
+
+  [ -maxG NUM], [ --max-gap NUM ]
+ 
+  Maximum length of middle gap (default 10000). This parameters puts a 
+  constraint on the distance between prefix and suffix match.
+
+  [ -minG NUM], [ --min-gap NUM ]
+  
+  Minimum length of middle gap (default 0). If edit distance is used, i.e. 
+  option -id is specified, it is recommended to use at least 5-10% of the 
+  read length to avoid overlap between split-edit-distance and regular 
+  edit-distance for small gaps.
+
+  [ -ep NUM], [ --errors-prefix NUM ]
+ 
+  Maximum number of errors allowed on the prefix match of minimum length.
+
+  [ -es NUM], [ --errors-suffix NUM ]
+ 
+  Maximum number of errors allowed on the suffix match of minimum length.
+
+  [ -gl NUM], [ --genome-len NUM ]
+
+  Genome length, needs to be specified if the expected number of random 
+  matches is supposed to be computated (default 3000000000 for human genome).
+  The computed statistics are only reported in verbose mode.
 
 
 
@@ -471,7 +495,9 @@ Note that the cigar string is given with respect to the read sequence.
 
 
 
+
 For examples of usage of RazerS see the RazerS README file.
+
 ---------------------------------------------------------------------------
 6. Contact
 ---------------------------------------------------------------------------

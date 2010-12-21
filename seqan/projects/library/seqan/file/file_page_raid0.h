@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		#endif
 		pf.dirty = false;
 		pf.status = pf.READING;
-		return areadAt(
+		return asyncReadAt(
 			file[pageNo % FILE_COUNT], 
 			(TValue*)pf.begin, 
 			size(pf), 
@@ -78,7 +78,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			::std::cerr << " from page " << ::std::dec << pageNo << ::std::endl;
 		#endif
 		pf.status = pf.WRITING;
-		return awriteAt(
+		return asyncWriteAt(
 			file[pageNo % FILE_COUNT], 
 			(TValue*)pf.begin, 
 			size(pf), 
@@ -196,7 +196,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			::std::cerr << " size " << size(pf) << ::std::endl;
 		#endif
         if (pf.end == pf.begin) return true;
-        if (awriteAt(file[pf.pageNo % FILE_COUNT], pf.begin, size(pf), (pos_t)(pf.pageNo / FILE_COUNT) * (pos_t)pageSize(pf) + pageOfs, pf.request)) {
+        if (asyncWriteAt(file[pf.pageNo % FILE_COUNT], pf.begin, size(pf), (pos_t)(pf.pageNo / FILE_COUNT) * (pos_t)pageSize(pf) + pageOfs, pf.request)) {
             pf.status = pf.WRITING;
             pageOfs += size(pf);
             return true;

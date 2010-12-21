@@ -13,7 +13,7 @@ function and evolutionary relationships of the corresponding genes or proteins.
 ...text:
 The Motif Finder, consisting of the class @Class.MotifFinder@ and the function @Function.findMotif@, 
 provides four different motif finding algorithms, the two heuristic algorithms, @Spec.Projection|PROJECTION@ and 
-@Spec.EPatternBranching|ePatternBranching@, and the two exact algorithms, @Spec.PMS1|PMS1@ and @Spec.PMSP|PMSP@. 
+@Spec.EPatternBranching|ePatternBranching@, and the two exact algorithms, @Spec.Pms1|Pms1@ and @Spec.Pmsp|Pmsp@. 
 In the following, the tutorial will shortly explain the structure of @Class.MotifFinder@ and @Function.findMotif@ and 
 give some instructions on how to apply them in order to start a motif search. 
 
@@ -38,7 +38,7 @@ MotifFinder<AminoAcid, TAlgorithm> finder;
 ...text:
 The second template parameter $TAlgorithm$ specifies the desired motif search algorithm for finding motifs in a set of 
 sequences. Four different motif finding algorithms are available: @Spec.Projection@, 
-@Spec.EPatternBranching|ePatternBranching@, @Spec.PMS1@ and @Spec.PMSP@. Depending on the chosen parameter $TAlgorithm$ 
+@Spec.EPatternBranching|ePatternBranching@, @Spec.Pms1@ and @Spec.Pmsp@. Depending on the chosen parameter $TAlgorithm$ 
 there are different @Class.MotifFinder@ constructors with different arguments.
 
 ...subsection:#.# Projection Motif Finder
@@ -90,43 +90,43 @@ different arguments. The parameter $h$ can be passed either directly as construc
 In the latter case, it is necessary to pass an integer array ($n_ar$) for the computation of $h$ containing values which 
 represent the respective sequence lengths of each input sequence. 
 
-...subsection:#.# PMS1 Motif Finder
+...subsection:#.# Pms1 Motif Finder
 ...text:
-The @Spec.PMS1|PMS1 Motif Finder@ denotes the partial specialized @Class.MotifFinder@ with @Spec.PMS1@ as second template 
+The @Spec.Pms1|Pms1 Motif Finder@ denotes the partial specialized @Class.MotifFinder@ with @Spec.Pms1@ as second template 
 parameter.
 
 ...text:
-The PMS1 algorithm developed by Rajasekaran et al. searches in the space of possible motifs such as the ePatternBranching 
-algorithm. The procedure of the PMS1 algorithm is quite simple. For every $l$-mer $x$ in each input sequence the algorithm 
+The Pms1 algorithm developed by Rajasekaran et al. searches in the space of possible motifs such as the ePatternBranching 
+algorithm. The procedure of the Pms1 algorithm is quite simple. For every $l$-mer $x$ in each input sequence the algorithm 
 generates all possible length-$l$ patterns in the Hamming distance $d$-neighborhood of $x$. The neighbor sets for each 
 sequence are then intersected so that at the end of the process we get a group of $l$-mers or a single $l$-mer that occurs 
 in each input sequence with exactly $d$ substitutions.
 ...text: Syntax:
 ...code:
-MotifFinder<TSeqType, PMS1> finder;
-MotifFinder<TSeqType, PMS1> finder(l,d,is_exact);
+MotifFinder<TSeqType, Pms1> finder;
+MotifFinder<TSeqType, Pms1> finder(l,d,is_exact);
 
 ...text:
 The non-default constructor has the three constructor arguments $l$ (length of motif), 
 $d$ (number of substitutions) and the boolean parameter $is_exact$ (size of Hamming distance).
 
-...subsection:#.# PMSP Motif Finder
+...subsection:#.# Pmsp Motif Finder
 ...text:
-The @Spec.PMSP|PMSP Motif Finder@ denotes the partial specialized @Class.MotifFinder@ with @Spec.PMSP@ as second template
+The @Spec.Pmsp|Pmsp Motif Finder@ denotes the partial specialized @Class.MotifFinder@ with @Spec.Pmsp@ as second template
 parameter.
 
 ...text:
-The PMSP algorithm of Davila et al. is an improvement of the PMS1 algorithm. It examines each possible $l$-mer of the first 
+The Pmsp algorithm of Davila et al. is an improvement of the Pms1 algorithm. It examines each possible $l$-mer of the first 
 input sequence, explores its neighborhood and finally checks whether an $l$-mer in the neighborhood is a motif instance.
 ...text: Syntax:
 ...code:
-MotifFinder<TSeqType, PMSP> finder;
-MotifFinder<TSeqType, PMSP> finder(l,d,is_exact);
+MotifFinder<TSeqType, Pmsp> finder;
+MotifFinder<TSeqType, Pmsp> finder(l,d,is_exact);
 
 
 ...text:
-The non-default constructor of the @Spec.PMSP|PMSP Motif Finder@ has the same three arguments $l$, $d$ and $is_exact$ 
-as the PMS1 Motif Finder.
+The non-default constructor of the @Spec.Pmsp|Pmsp Motif Finder@ has the same three arguments $l$, $d$ and $is_exact$ 
+as the Pms1 Motif Finder.
 
 ...section:# Function template findMotif
 ...text: Syntax:
@@ -135,11 +135,11 @@ findMotif(finder, dataset, sequence_model);
 
 ...tableheader: Parameter|Description
 ...table:$finder$|A $MotifFinder$ object. (Types: Projection Motif Finder, ePatternBranching Motif Finder, 
-PMS1 Motif finder, PMSP Motif Finder)
+Pms1 Motif finder, Pmsp Motif Finder)
 ...table:$dataset$|A group of DNA or protein sequences (the training set). (Types: @Class.StringSet.StringSet<String<Dna> >@ 
 (@Shortcut.DnaString@), @Class.StringSet.StringSet<String<AminoAcid> >@ (@Shortcut.Peptide@)) 
-...table:$sequence_model$|A model type for sequence data. (The type of motif distribution to assume.) (Types:$OOPS$, 
-$OMOPS$, $ZOOPS$, $TCM$)
+...table:$sequence_model$|A model type for sequence data. (The type of motif distribution to assume.) (Types:$Oops$, 
+$Omops$, $Zoops$, $Tcm$)
 
 ...text:
 The function @Function.findMotif@ starts the search for noticeable motif patterns within the sequences in the $dataset$. 
@@ -158,16 +158,16 @@ Depending on the chosen Motif Finder there are different types for sequence data
 by the user.
 
 ...tableheader: Type of MotifFinder|Possible options for 'sequence_model'
-...table:$MotifFinder<TSeqType, Projection>$|OOPS, OMOPS, ZOOPS, TCM
-...table:$MotifFinder<TSeqType, ePatternBranching>$|OOPS, OMOPS
-...table:$MotifFinder<TSeqType, PMS1>$|OOPS, OMOPS
-...table:$MotifFinder<TSeqType, PMSP>$|OOPS, OMOPS, ZOOPS, TCM
+...table:$MotifFinder<TSeqType, Projection>$|Oops, Omops, Zoops, Tcm
+...table:$MotifFinder<TSeqType, ePatternBranching>$|Oops, Omops
+...table:$MotifFinder<TSeqType, Pms1>$|Oops, Omops
+...table:$MotifFinder<TSeqType, Pmsp>$|Oops, Omops, Zoops, Tcm
 
 ...text:
-The @Spec.Projection|Projection Motif Finder@ is able to run in @Tag.OOPS@, @Tag.OMOPS@, @Tag.ZOOPS@ and @Tag.TCM@ mode, 
-while the @Spec.EPatternBranching|ePatternBranching Motif Finder@ only supports the two sequence models, @Tag.OOPS@ and 
-@Tag.OMOPS@. The @Spec.PMS1|PMS1 Motif Finder@ and the @Spec.PMSP|PMSP Motif Finder@, on the other hand, 
-are able to run in all the four modes @Tag.OOPS@, @Tag.OMOPS@, @Tag.ZOOPS@ and @Tag.TCM@.
+The @Spec.Projection|Projection Motif Finder@ is able to run in @Tag.Oops@, @Tag.Omops@, @Tag.Zoops@ and @Tag.Tcm@ mode, 
+while the @Spec.EPatternBranching|ePatternBranching Motif Finder@ only supports the two sequence models, @Tag.Oops@ and 
+@Tag.Omops@. The @Spec.Pms1|Pms1 Motif Finder@ and the @Spec.Pmsp|Pmsp Motif Finder@, on the other hand, 
+are able to run in all the four modes @Tag.Oops@, @Tag.Omops@, @Tag.Zoops@ and @Tag.Tcm@.
 
 ...section:# Performing the search for motif occurrences in SeqAn
 ...text:
@@ -206,9 +206,9 @@ appendValue(dataset, String<Dna>("TCAAATGATGCTAGCCGTCGGAATCTGGCGAGTGCATAAAAAGAGT
 Step 2: Choosing the appropriate @Class.MotifFinder|Motif Finder@
 ...text:As mentioned before, SeqAn provides the four @Class.MotifFinder|Motif Finder@ types: 
 @Spec.Projection|Projection Motif Finder@, @Spec.EPatternBranching|ePatternBranching Motif Finder@, 
-@Spec.PMS1|PMS1 Motif Finder@ and @Spec.PMSP|PMSP Motif Finder@. Each of them represents one specific motif finding 
+@Spec.Pms1|Pms1 Motif Finder@ and @Spec.Pmsp|Pmsp Motif Finder@. Each of them represents one specific motif finding 
 algorithm of the same name. If the user is interested in examining all possible motifs which occur in the sample sequences, 
-it is advisable to choose the @Spec.PMS1|PMS1@ or the @Spec.PMSP|PMSP Motif Finder@, because the other two
+it is advisable to choose the @Spec.Pms1|Pms1@ or the @Spec.Pmsp|Pmsp Motif Finder@, because the other two
 Motif Finder types, @Spec.Projection|Projection Motif Finder@ and @Spec.EPatternBranching|ePatternBranching Motif Finder@, 
 are both approximation algorithms.
 
@@ -216,31 +216,31 @@ are both approximation algorithms.
 ...table:Projection|The Projection algorithm is able to handle both short and longer motifs within a reasonable time.
 ...table:ePatternBranching|The ePatternBranching algorithm works with good experimental success rates and does not 
                            show any considerable loss of accuracy when comparing its performance results with those
-                           of the exact algorithms PMSP and PMS1. However, the algorithm has
+                           of the exact algorithms Pmsp and Pms1. However, the algorithm has
 a prohibitive run time,
                            especially for the challenging problems and for those motif finding problems having a set of
                            parameters $l$ and $d$ which is close to challenging instances.
-...table:PMS1|The PMS1 algorithm has a run time similar to PMSP and a lower run time than ePatternBranching.
+...table:Pms1|The Pms1 algorithm has a run time similar to Pmsp and a lower run time than ePatternBranching.
               It works well for values of $d$ which are lower/equal to $3$. If $d$ is greater than $3$, the memory
-              requirements of PMS1 will increase drastically so that it will not work any longer for the search for
-              ZOOPS and TCM motifs.
-...table:PMSP|The PMSP algorithm is more space efficient than PMS1 and can solve the motif problems by making use of 
+              requirements of Pms1 will increase drastically so that it will not work any longer for the search for
+              Zoops and Tcm motifs.
+...table:Pmsp|The Pmsp algorithm is more space efficient than Pms1 and can solve the motif problems by making use of 
               significantly less memory. But its running time significantly increases with the size of the motif's length 
               $l$ so that bigger challenging problems can not reported due to the long processing times.
 
 ...text: Example:
 ...code:
-MotifFinder<Dna, PMSP> motif_finder(10,2,true);
+MotifFinder<Dna, Pmsp> motif_finder(10,2,true);
 
 ...text:
 Step 3: Performing the motif search using function @Function.findMotif@
 ...text:In order to begin the motif search, the function template @Function.findMotif@ must be applied to the input dataset. 
 Since instances of the variant motif are planted exactly once in each sample sequence, we set the third input parameter 
-$sequence_model$ to @Tag.OOPS@.
+$sequence_model$ to @Tag.Oops@.
 For example:
 
 ...code:
-findMotif(motif_finder,dataset,OOPS());
+findMotif(motif_finder,dataset,Oops());
 
 ...text:
 Step 4: Handling results obtained from the motif finding algorithm

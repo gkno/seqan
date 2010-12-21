@@ -286,7 +286,7 @@ void writeTranscripts(TStream &target, TContigOrderings &orderings, TFragmentSto
 					{
 						tmp = infix(store.contigStore[anno.contigId].seq, anno.endPos, anno.beginPos);
 						reverseComplement(tmp);
-						toLowerInPlace(tmp);
+						toLower(tmp);
 						append(transcript, tmp);
 					}
 				} 

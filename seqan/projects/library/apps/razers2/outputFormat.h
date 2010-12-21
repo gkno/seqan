@@ -1159,7 +1159,7 @@ void dumpMatches(
 				++filecount;
 			}
 			break;
-		case 4: // SAM
+		case 4: // Sam
 			convertMatchesToGlobalAlignment(store, scoreType, True());
 			/*{
 			String<String<unsigned> > layout;
@@ -1167,7 +1167,7 @@ void dumpMatches(
 			for (unsigned i=0;i<length(store.contigStore);++i)
 				printAlignment(std::cout, layout, store, i, 0, 2000, 0, 100, -1);
 			}*/
-			write(file, store, SAM());
+			write(file, store, Sam());
 			break;
 		case 5: // AFG
 			convertMatchesToGlobalAlignment(store, scoreType, True());

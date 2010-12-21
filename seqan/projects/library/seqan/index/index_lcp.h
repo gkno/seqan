@@ -261,7 +261,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typename TLCP,
 		typename TText,
 		typename TSA >
-    struct LCPCreatorRandomAccess_<TLCP, TText, TSA, Kasai>
+    struct LcpCreatorRandomAccess_<TLCP, TText, TSA, Kasai>
     {
         typedef typename AllowsFastRandomAccess<TLCP>::Type  TRandomLCP;
         typedef typename AllowsFastRandomAccess<TSA>::Type   TRandomSA;

@@ -51,10 +51,10 @@ struct Options {
     // Print the missed intervals to stderr for debugging purposes.
     bool showMissedIntervals;
 
-    // Print superflous intervals (intervals found in SAM file but have too bad score).
+    // Print superflous intervals (intervals found in Sam file but have too bad score).
     bool showSuperflousIntervals;
 
-    // Print additional intervals (intervals found in SAM with good score that are not in WIT file).
+    // Print additional intervals (intervals found in Sam with good score that are not in WIT file).
     bool showAdditionalIntervals;
 
     // Print the hit intervals to stderr for debugging purposes.
@@ -87,7 +87,7 @@ struct Options {
     // Name of WIT file.
     CharString witFileName;
 
-    // Name of SAM file.
+    // Name of Sam file.
     CharString samFileName;
 
     // Return true iff distanceFunction is a valid distance function.
@@ -473,7 +473,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                     std::cerr << "WARNING: ";
                 else
                     std::cerr << "PANIC: ";
-                std::cerr << "A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
+                std::cerr << "A read in the Sam file aligns out of all target intervals for this read in the WIT file." << std::endl;
                 std::cerr << "bestScore = " << bestScore << std::endl;
                 std::cerr << "read name = " << fragments.readNameStore[it->readId] << std::endl;
                 std::cerr << "read is = " << fragments.readSeqStore[it->readId] << std::endl;

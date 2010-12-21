@@ -93,7 +93,7 @@
 
 //file formats for alignments
 #include <seqan/file/file_format_fasta_align.h>
-// TODO: include SAM file format specification
+// TODO: include Sam file format specification
 #include <seqan/file/file_format_sam.h>
 
 //others

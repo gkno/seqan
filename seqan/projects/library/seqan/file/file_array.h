@@ -401,7 +401,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest >
-    inline bool areadAt(File< Chained<FILE_SIZE, TFile> > &me, TValue *memPtr, TSize count, TOffset offset, TRequest &req) {
+    inline bool asyncReadAt(File< Chained<FILE_SIZE, TFile> > &me, TValue *memPtr, TSize count, TOffset offset, TRequest &req) {
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -409,7 +409,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (count != xmitSize) {
 				if (!readAt(file, memPtr, xmitSize, fileOfs)) return false;
 			} else
-				if (!areadAt(file, memPtr, xmitSize, fileOfs, req)) return false;
+				if (!asyncReadAt(file, memPtr, xmitSize, fileOfs, req)) return false;
 			count -= xmitSize;
 			offset += xmitSize;
 			memPtr += xmitSize;
@@ -418,7 +418,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
     
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest  >
-    inline bool awriteAt(File< Chained<FILE_SIZE, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset, TRequest &req) {
+    inline bool asyncWriteAt(File< Chained<FILE_SIZE, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset, TRequest &req) {
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -426,7 +426,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (count != xmitSize) {
 				if (!writeAt(file, memPtr, xmitSize, fileOfs)) return false;
 			} else
-				if (!awriteAt(file, memPtr, xmitSize, fileOfs, req)) return false;
+				if (!asyncWriteAt(file, memPtr, xmitSize, fileOfs, req)) return false;
 			count -= xmitSize;
 			offset += xmitSize;
 			memPtr += xmitSize;

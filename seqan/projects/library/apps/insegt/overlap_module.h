@@ -813,13 +813,13 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 #endif 
 	// build contigStore from FASTA file
 #ifdef DEBUG_OVERLAP_MODULE
-	std::cout << "load SAM..." << std::endl;
+	std::cout << "load Sam..." << std::endl;
 #endif 
-	// read aligned reads in FragmentStore from SAM files
+	// read aligned reads in FragmentStore from Sam files
 	std::fstream fileSAM;
 	fileSAM.open(toCString(nameSAM), std::ios_base::in | std::ios_base::binary);
 	if(!fileSAM.is_open()) return false;
-	read(fileSAM, me, SAM());
+	read(fileSAM, me, Sam());
 	fileSAM.close();
 
 	// readAnnotations from Gff or Gtf:
@@ -909,8 +909,8 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 	
 #ifdef DEBUG_OVERLAP_MODULE
 	std::cout << "ngsOverlapper-function took: \t" << SEQAN_PROTIMEDIFF(find1_time) << " seconds" << std::endl;
-	std::cout << "ngsOverlapper-function without reading SAM took: \t" << SEQAN_PROTIMEDIFF(find2_time) << " seconds" << std::endl;
-	std::cout << "ngsOverlapper-function and create IntervalTreeStore without reading SAM took:\t" << SEQAN_PROTIMEDIFF(find2_time) - SEQAN_PROTIMEDIFF(find3_time) << " seconds" << std::endl;
+	std::cout << "ngsOverlapper-function without reading Sam took: \t" << SEQAN_PROTIMEDIFF(find2_time) << " seconds" << std::endl;
+	std::cout << "ngsOverlapper-function and create IntervalTreeStore without reading Sam took:\t" << SEQAN_PROTIMEDIFF(find2_time) - SEQAN_PROTIMEDIFF(find3_time) << " seconds" << std::endl;
 #endif 
 	return true;
 }

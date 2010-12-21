@@ -86,7 +86,7 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
         static const double defaultAlpha;
 	public:
 		typedef typename Fibre<Index, QGramText>::Type			TText;
-		typedef typename Fibre<Index, QGram_SA>::Type			TSA;
+		typedef typename Fibre<Index, QGramSA>::Type			TSA;
 		typedef typename Fibre<Index, QGramDir>::Type			TDir;
 		typedef typename Fibre<Index, QGramCounts>::Type		TCounts;
 		typedef typename Fibre<Index, QGramCountsDir>::Type	TCountsDir;

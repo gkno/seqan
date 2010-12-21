@@ -1,4 +1,4 @@
-///A simple SAM viewer. Convert a SAM alignment file into a SVG vector graphic.
+///A simple Sam viewer. Convert a Sam alignment file into a SVG vector graphic.
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -17,8 +17,8 @@ int main(int argc, const char *argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
 	CommandLineParser parser;
-	addUsageLine(parser, "[OPTION]... <SAM file> <SVG file>");
-	addUsageLine(parser, "[OPTION]... <SAM file> <GENOME file> <SVG file>");
+	addUsageLine(parser, "[OPTION]... <Sam file> <SVG file>");
+	addUsageLine(parser, "[OPTION]... <Sam file> <GENOME file> <SVG file>");
 
 	addOption(parser, CommandLineOption("c",  "contig",    "display only contig #NUM (default: show all contigs)", OptionType::Int | OptionType::Label | OptionType::List));
 	addOption(parser, CommandLineOption("p",  "pos",    2, "set begin and end position (default: show whole strands)", OptionType::Int | OptionType::Label));
@@ -73,8 +73,8 @@ int main(int argc, const char *argv[])
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
-	// Load SAM file
-	if (!stop) read(samFile, store, SAM());
+	// Load Sam file
+	if (!stop) read(samFile, store, Sam());
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Choose contigs

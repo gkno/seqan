@@ -123,7 +123,7 @@ void crossIndices()
 SEQAN_DEFINE_TEST(testIndexCrossCompare)
 {
 	crossIndices<IndexEsa<>, IndexWotd<> >();
-	crossIndices<IndexWotd<>, IndexWotd<DFI<> > >();
+	crossIndices<IndexWotd<>, IndexWotd<Dfi<> > >();
 }
 
 //////////////////////////////////////////////////////////////////////////////

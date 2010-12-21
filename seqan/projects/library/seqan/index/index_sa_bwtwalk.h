@@ -407,7 +407,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				// current char already exists (case 2. in the paper)
 				TValue pLeft = getValue(lexprevpos, p+1); // walking left
 				TValue pRight = getValue(lexnextpos, p+1); // walking right
-				// walk along BWT in both directions
+				// walk along Bwt in both directions
 				while (true) {
 					// check if we have found the insertion position while walking to the left side
 					if (pLeft == NIL) {

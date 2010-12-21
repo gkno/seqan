@@ -18,7 +18,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 		{
 			::MSufSort * msufsort = new MSufSort;
 			unsigned int index;
-			msufsort->BWT(buffer, nBytes, index);
+			msufsort->Bwt(buffer, nBytes, index);
 			delete msufsort;
 			return index;
 		}

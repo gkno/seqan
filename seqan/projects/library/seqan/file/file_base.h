@@ -543,7 +543,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
     inline typename AsyncRequest<File>::Type
-    areadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    asyncReadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
         readAt(me, memPtr, count, fileOfs);
@@ -554,7 +554,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
     inline typename AsyncRequest<File>::Type
-    awriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
+    asyncWriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
         result = writeAt(me, memPtr, count, fileOfs);
@@ -591,7 +591,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aEvent >
     inline typename AsyncRequest<File>::Type
-    areadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    asyncReadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
         readAt(me, memPtr, count, fileOfs);
@@ -602,7 +602,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aEvent >
     inline typename AsyncRequest<File>::Type
-    awriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
+    asyncWriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
         writeAt(me, memPtr, count, fileOfs);
@@ -615,10 +615,10 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     // queue-less request based pseudo asychronous read/write
 
 /**
-.Function.areadAt:
+.Function.asyncReadAt:
 ..summary:Asynchronously loads records from a specific position in a file.
 ..cat:Input/Output
-..signature:areadAt(file, memPtr, count, fileOfs, request)
+..signature:asyncReadAt(file, memPtr, count, fileOfs, request)
 ..param.file:A File object.
 ...type:Class.File
 ..param.memPtr:A pointer to the first destination record in memory.
@@ -633,17 +633,17 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename AsyncRequest >
     inline bool 
-	areadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+	asyncReadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         AsyncRequest &)
     {
         return readAt(me, memPtr, count, fileOfs);
     }
     
 /**
-.Function.awriteAt:
+.Function.asyncWriteAt:
 ..summary:Asynchronously saves records to a specific position in a file.
 ..cat:Input/Output
-..signature:awriteAt(file, memPtr, count, fileOfs, request)
+..signature:asyncWriteAt(file, memPtr, count, fileOfs, request)
 ..param.file:A File object.
 ...type:Class.File
 ..param.memPtr:A pointer to the first source record in memory.
@@ -658,7 +658,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename AsyncRequest >
     inline bool
-	awriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
+	asyncWriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         AsyncRequest &)
     {
         return writeAt(me, memPtr, count, fileOfs);

@@ -332,7 +332,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 		TAlgSpec const &alg)
 	{
 	SEQAN_CHECKPOINT
-        _createLCPTableWrapper(lcp, s, sa, alg, typename LCPCreatorRandomAccess_<TLCP, TText, TSA, TAlgSpec>::Type());
+        _createLCPTableWrapper(lcp, s, sa, alg, typename LcpCreatorRandomAccess_<TLCP, TText, TSA, TAlgSpec>::Type());
     }
 
 
@@ -462,7 +462,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 		// specialization
 		typedef Pipe< TText, Source<> >						srcText_t;
 		typedef Pipe< TSA, Source<> >   					srcSA_t;
-	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, BWT >	creator_t;
+	    typedef Pipe< Bundle2< srcText_t, srcSA_t >, Bwt >	creator_t;
 
 		// instantiation and processing
 		srcText_t	srcText(s);
@@ -591,7 +591,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, TSpec> &index, FibreBwt, BWT const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, FibreBwt, Bwt const) {
 	SEQAN_CHECKPOINT
 		resize(indexBwt(index), length(indexRawText(index)), Exact());
 		createBWTable(indexBwt(index), indexText(index), indexRawSA(index));
@@ -599,10 +599,10 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, TSpec> &index, FibreChildtab, ChildTab const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, FibreChildtab, Childtab const) {
 	SEQAN_CHECKPOINT
-		resize(indexChildTab(index), length(indexRawText(index)), Exact());
-		createChildTable(indexChildTab(index), indexLcp(index));
+		resize(indexChildtab(index), length(indexRawText(index)), Exact());
+		createChildtab(indexChildtab(index), indexLcp(index));
 		return true;
 	}
 

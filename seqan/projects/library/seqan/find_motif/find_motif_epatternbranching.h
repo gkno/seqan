@@ -274,14 +274,14 @@ findMotif(MotifFinder<TSeqType ,EPatternBranching> & epb2,
 ...type:$bool$
 ..param.h:The size of the neighborhood considering at first.
 ..param.seq_model:The seq_model object.
-...type:Tag.OOPS
-...type:Tag.OMOPS
-..remarks:The ePatternBranching algorithm is able to run in OOPS and OMOPS mode.
+...type:Tag.Oops
+...type:Tag.Omops
+..remarks:The ePatternBranching algorithm is able to run in Oops and Omops mode.
 ..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
-//	original version = OMOPS model
+//	original version = Omops model
 //////////////////////////////////////////////////////////////////////////////
 
 //considering only the first input sequence
@@ -293,7 +293,7 @@ ePatternBranching(TStrings & result_set,
 				   TType const & d,
 				   bool const & is_exact,
 				   TType & h,
-				   OMOPS const & /*omops*/)
+				   Omops const & /*omops*/)
 {
     SEQAN_CHECKPOINT;
 
@@ -384,7 +384,7 @@ ePatternBranching(TStrings & result_set,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	OOPS model
+//	Oops model
 //////////////////////////////////////////////////////////////////////////////
 
 //we only consider l-mers from the first input sequence as starting points
@@ -396,7 +396,7 @@ ePatternBranching(TStrings & result_set,
 				  TType const & d, 
 				  bool const & is_exact,
 				  TType & h,
-				  OOPS const & /*oops*/)
+				  Oops const & /*oops*/)
 {
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;

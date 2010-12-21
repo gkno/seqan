@@ -52,7 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:$QGramText$ and $QGram_RawText$ fibres are equal by default.
 They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
 
-..tag.QGram_SA:The suffix array.
+..tag.QGramSA:The suffix array.
 ...remarks:Contains all occurrences of q-grams, s.t. the occurrences of a single q-gram are stored in a contiguous block (q-gram bucket).
 q-grams exceeding the end of the text are ignored.
 The beginning of each bucket can be determined by the q-gram directory ($QGramDir$, see below).
@@ -61,7 +61,7 @@ The beginning of each bucket can be determined by the q-gram directory ($QGramDi
 
 ..tag.QGramDir:The directory/hash table.
 ...remarks:The directory contains for every possible q-gram hash value the start index of the q-gram bucket.
-A q-gram bucket is a contiguous interval in the suffix array ($QGram_SA$, see above).
+A q-gram bucket is a contiguous interval in the suffix array ($QGramSA$, see above).
 Each suffix in this interval begins with the same q-gram.
 The end index is the start index of the next bucket.
 ...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
@@ -116,7 +116,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 
 	typedef FibreText		QGramText;
 	typedef FibreRawText	QGram_RawText;
-	typedef FibreSA		QGram_SA;
+	typedef FibreSA		QGramSA;
 	typedef FibreRawSA		QGramRawSA;
 	typedef FibreDir		QGramDir;
 	typedef FibreSADir		QGramSADir;
@@ -141,7 +141,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..param.TSpec:The specializing type.
 ...default:Default
 ...type:Spec.OpenAddressing
-..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array sorted by the first q characters (see @Tag.QGram Index Fibres.QGram_SA@) and a q-gram directory (see @Tag.QGram Index Fibres.QGramDir@).
+..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array sorted by the first q characters (see @Tag.QGram Index Fibres.QGramSA@) and a q-gram directory (see @Tag.QGram Index Fibres.QGramDir@).
 ..include:seqan/index.h
 */
 
@@ -181,7 +181,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 	class Index<TObject, IndexQGram<TShapeSpec, TSpec> > {
 	public:
 		typedef typename Fibre<Index, QGramText>::Type			TText;
-		typedef typename Fibre<Index, QGram_SA>::Type			TSA;
+		typedef typename Fibre<Index, QGramSA>::Type			TSA;
 		typedef typename Fibre<Index, QGramDir>::Type			TDir;
 		typedef typename Fibre<Index, QGramCounts>::Type		TCounts;
 		typedef typename Fibre<Index, QGramCountsDir>::Type	TCountsDir;
@@ -1185,7 +1185,7 @@ The resulting tables must have appropriate size before calling this function.
 	{
 	SEQAN_CHECKPOINT
 		typename Fibre<TIndex, QGramText>::Type const &text      = indexText(index);
-		typename Fibre<TIndex, QGram_SA>::Type         &sa        = indexSA(index);
+		typename Fibre<TIndex, QGramSA>::Type         &sa        = indexSA(index);
 		typename Fibre<TIndex, QGramDir>::Type        &dir       = indexDir(index);
 		typename Fibre<TIndex, QGramShape>::Type      &shape     = indexShape(index);
 		typename Fibre<TIndex, QGramBucketMap>::Type  &bucketMap = index.bucketMap;
@@ -2240,7 +2240,7 @@ If the type of $index$ is $TIndex$ the return type is $SAValue<TIndex>::Type$.
 ...note:The shape stores the q-gram of the last call to @Function.hash@ or @Function.hashNext@.
 ...type:Class.Shape
 ..returns:All positions where the q-gram stored in $shape$ occurs in the text (see @Tag.QGram Index Fibres.QGramText@).
-If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram_SA>::Type const>::Type$.
+If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGramSA>::Type const>::Type$.
 ..remarks:The necessary index tables are built on-demand via @Function.indexRequire@ if index is not $const$.
 ..include:seqan/index.h
 */
@@ -2348,7 +2348,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 	template < typename TText, typename TShapeSpec, typename TSpec >
 	inline void clear(Index<TText, IndexQGram<TShapeSpec, TSpec> > &index)
 	{
-		clear(getFibre(index, QGram_SA()));
+		clear(getFibre(index, QGramSA()));
 		clear(getFibre(index, QGramDir()));
 		clear(getFibre(index, QGramCounts()));
 		clear(getFibre(index, QGramCountsDir()));
@@ -2370,7 +2370,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 			(!open(getFibre(index, QGramText()), fileName, openMode)))
 			result = false;
 
-		name = fileName;	append(name, ".sa");	open(getFibre(index, QGram_SA()), toCString(name), openMode);
+		name = fileName;	append(name, ".sa");	open(getFibre(index, QGramSA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	open(getFibre(index, QGramDir()), toCString(name), openMode);
 		return result;
 	}
@@ -2397,7 +2397,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 		if ((!save(getFibre(index, QGramText()), toCString(name), openMode)) && 
 			(!save(getFibre(index, QGramText()), fileName, openMode))) return false;
 
-		name = fileName;	append(name, ".sa");	save(getFibre(index, QGram_SA()), toCString(name), openMode);
+		name = fileName;	append(name, ".sa");	save(getFibre(index, QGramSA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	save(getFibre(index, QGramDir()), toCString(name), openMode);
 		return true;
 	}

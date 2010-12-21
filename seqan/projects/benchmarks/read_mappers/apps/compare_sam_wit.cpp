@@ -21,7 +21,7 @@
 
    Call as "compare_sam_wit --help" for a full list of options.
   
-   This program is used to compare the read mapper results in a SAM file
+   This program is used to compare the read mapper results in a Sam file
    with the golden standard in a WIT file.  Log messages are printed to
    stderr, the result is written to the first line of stdout.
 
@@ -32,7 +32,7 @@
                            rate in the WIT file.
    * found_intervals       Number of intervals in the WIT file that were
                            found by the read mapper.
-   * superflous_intervals  Number of alignments in the SAM file that do not
+   * superflous_intervals  Number of alignments in the Sam file that do not
                            have their end position in an interval from the
                            WIT file and the alignment at this position has
                            a higher error rate than the specified one.
@@ -43,7 +43,7 @@
                            For the weighted case, this happens if RazerS does
                            not find the alignment with low weighted but too
                            high unweighted error rate and the read mapper
-                           generating the SAM file finds it.  Read the paper
+                           generating the Sam file finds it.  Read the paper
                            and/or manual for more details.
                            In the non-weighte case, the program will exit
                            with a non-zero exit code and print a PANIC message.
@@ -85,8 +85,8 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addVersionLine(parser, versionString);
 
     // Add usage lines.
-    addTitleLine(parser, "Compare SAM hits against WIT file.");
-    addUsageLine(parser, "[OPTIONS] <SEQUENCE FILE> <SAM FILE> <WIT FILE>");
+    addTitleLine(parser, "Compare Sam hits against WIT file.");
+    addUsageLine(parser, "[OPTIONS] <SEQUENCE FILE> <Sam FILE> <WIT FILE>");
 
     // Set options.
     addOption(parser, CommandLineOption("e", "max-error-rate", "the maximal error rate in percent, default: 0", OptionType::Int));
@@ -97,8 +97,8 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addOption(parser, CommandLineOption("sm", "show-missed-intervals", "the missed intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("sh", "show-hit-intervals", "the hit intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("st", "show-try-hit-intervals", "The last positions tried to hit against an intervals are printd to stderr if set.", OptionType::Boolean));
-    addOption(parser, CommandLineOption("ss", "show-superflous-intervals", "The intervals that are in the SAM file but have a too bad score are printed to stderr if set.", OptionType::Boolean));
-    addOption(parser, CommandLineOption("sa", "show-additional-intervals", "The intervals that are in the SAM with good score but not in WIT file to stderr if set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("ss", "show-superflous-intervals", "The intervals that are in the Sam file but have a too bad score are printed to stderr if set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("sa", "show-additional-intervals", "The intervals that are in the Sam with good score but not in WIT file to stderr if set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("mN", "match-N", "If set, N matches all as a wildcard character, otherwise it never matches.", OptionType::Boolean));
     addOption(parser, CommandLineOption("wm", "weighted-distances", "If set, use weighted distances instead of unit ones.", OptionType::Boolean));
     addOption(parser, CommandLineOption("c", "benchmark-category", "The benchmark category to compare for.  One of {all, any-best, all-best}.  Default: all.", OptionType::String));
@@ -203,7 +203,7 @@ int main(int argc, const char *argv[]) {
         return ret;
 
     // =================================================================
-    // Load FASTA Sequence And SAM File Into FragmentStore.
+    // Load FASTA Sequence And Sam File Into FragmentStore.
     // =================================================================
     typedef FragmentStore<> TFragmentStore;
     TFragmentStore fragments;
@@ -217,17 +217,17 @@ int main(int argc, const char *argv[]) {
     }
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
 
-    // Load SAM File.
-    std::cerr << "Reading SAM file file " << options.samFileName << " ..." << std::endl;
+    // Load Sam File.
+    std::cerr << "Reading Sam file file " << options.samFileName << " ..." << std::endl;
     startTime = sysTime();
     {
         std::fstream fstrm(toCString(options.samFileName),
                            std::ios_base::in | std::ios_base::binary);
         if (not fstrm.is_open()) {
-            std::cerr << "Could not open SAM file." << std::endl;
+            std::cerr << "Could not open Sam file." << std::endl;
             return kRetIoErr;
         }
-        read(fstrm, fragments, SAM());
+        read(fstrm, fragments, Sam());
     }
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
     //for (unsigned i = 0; i < length(fragments.readNameStore); ++i) {
@@ -249,9 +249,9 @@ int main(int argc, const char *argv[]) {
     performIntervalScoreLowering(witStore, options.maxError);
 
     // =================================================================
-    // Compare The SAM Hits Against WIT Intervals.
+    // Compare The Sam Hits Against WIT Intervals.
     // =================================================================
-    std::cerr << "Compare reader hits from SAM file against WIT file." << std::endl;
+    std::cerr << "Compare reader hits from Sam file against WIT file." << std::endl;
     startTime = sysTime();
     typedef Position<WitStore::TIntervalStore>::Type TPos;
     // The result will be a list of ids to entries in witStore.

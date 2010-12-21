@@ -375,13 +375,13 @@ _computeNumOfTrials(TType const & t,
 ..param.dataset:The dataset object representing the input sequences.
 ...type:Class.StringSet
 ..param.seq_model:The seq_model object.
-...type:Tag.OOPS
-...type:Tag.ZOOPS
-...type:Tag.TCM
+...type:Tag.Oops
+...type:Tag.Zoops
+...type:Tag.Tcm
 ...remarks:The sequence models rely on different assumptions about the distribution of motif occurrences
            across the sample sequences. 
 ..remarks:The PROJECTION algorithm which consists of two steps, the filtering and the refinement step,
-          is able to run in OOPS, ZOOPS and TCM mode.
+          is able to run in Oops, Zoops and Tcm mode.
 ..remarks:The algorithm uses the EM procedure during the refinement phase which was introduced by Bailey 
           and Elkan.
 ..include:seqan/find_motif.h
@@ -578,7 +578,7 @@ _filteringStep(TBucketAr & buckets,
 */
 
 //////////////////////////////////////////////////////////////////////////////
-//	OOPS model
+//	Oops model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TType>
@@ -589,7 +589,7 @@ _refinementStep(TString & consensus_seq,
 				TType const & l,
 				TType const & d,
 				bool const & is_exact,
-				OOPS const & oops)
+				Oops const & oops)
 {
     SEQAN_CHECKPOINT;
 
@@ -661,7 +661,7 @@ _refinementStep(TString & consensus_seq,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	OMOPS model
+//	Omops model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TType>
@@ -672,7 +672,7 @@ _refinementStep(TString & consensus_seq,
 				TType const & l,
 				TType const & d,
 				bool const & is_exact,
-				OMOPS const & /*omops*/)
+				Omops const & /*omops*/)
 {
 	typedef String<TString> TStrings;
 	typedef typename Value<TString>::Type TValue;
@@ -698,7 +698,7 @@ _refinementStep(TString & consensus_seq,
 
 	while(iterations>0)
 	{
-		likelihood_score = em(profile, begin(dataset), t, l, OOPS());
+		likelihood_score = em(profile, begin(dataset), t, l, Oops());
 		--iterations;
 	}
 
@@ -739,7 +739,7 @@ _refinementStep(TString & consensus_seq,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	ZOOPS model
+//	Zoops model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TType>
@@ -750,7 +750,7 @@ _refinementStep(TString & consensus_seq,
 				TType const & l,
 				TType const & d,
 				bool const & is_exact,
-				ZOOPS const & zoops)
+				Zoops const & zoops)
 {
     SEQAN_CHECKPOINT;
 
@@ -841,7 +841,7 @@ _refinementStep(TString & consensus_seq,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	TCM model
+//	Tcm model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TType>
@@ -852,7 +852,7 @@ _refinementStep(TString & consensus_seq,
 				TType const & l,
 				TType const & d,
 				bool const & is_exact,
-				TCM const & tcm)
+				Tcm const & tcm)
 {
     SEQAN_CHECKPOINT;
 

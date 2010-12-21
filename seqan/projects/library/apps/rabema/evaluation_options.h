@@ -44,10 +44,10 @@ public:
     // Print the missed intervals to stderr for debugging purposes.
     bool showMissedIntervals;
 
-    // Print superflous intervals (intervals found in SAM file but have too bad score).
+    // Print superflous intervals (intervals found in Sam file but have too bad score).
     bool showSuperflousIntervals;
 
-    // Print additional intervals (intervals found in SAM with good score that are not in WIT file).
+    // Print additional intervals (intervals found in Sam with good score that are not in WIT file).
     bool showAdditionalIntervals;
 
     // Print the hit intervals to stderr for debugging purposes.
@@ -83,7 +83,7 @@ public:
     // Name of WIT file.
     CharString witFileName;
 
-    // Name of SAM file.
+    // Name of Sam file.
     CharString samFileName;
 
     Options()
@@ -142,7 +142,7 @@ void setUpCommandLineParser(CommandLineParser & parser, EvaluateResults const & 
     setUpCommandLineParser(parser);
 
     // Add usage lines.
-    addUsageLine(parser, "compare [OPTIONS] <SEQUENCE FILE> <SAM FILE> <WIT FILE>");
+    addUsageLine(parser, "compare [OPTIONS] <SEQUENCE FILE> <Sam FILE> <WIT FILE>");
 
     // Set options.
     addOption(parser, CommandLineOption("e", "max-error-rate", "Maximal error rate in percent [0].", OptionType::Int));
@@ -153,8 +153,8 @@ void setUpCommandLineParser(CommandLineParser & parser, EvaluateResults const & 
     addOption(parser, CommandLineOption("sm", "show-missed-intervals", "Missed intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("sh", "show-hit-intervals", "Hit intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("st", "show-try-hit-intervals", "Last positions tried to hit against an intervals are printd to stderr if set.", OptionType::Boolean));
-    addOption(parser, CommandLineOption("ss", "show-superflous-intervals", "Intervals that are in the SAM file but have a too bad score are printed to stderr if set.", OptionType::Boolean));
-    addOption(parser, CommandLineOption("sa", "show-additional-intervals", "Intervals that are in the SAM with good score but not in WIT file to stderr if set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("ss", "show-superflous-intervals", "Intervals that are in the Sam file but have a too bad score are printed to stderr if set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("sa", "show-additional-intervals", "Intervals that are in the Sam with good score but not in WIT file to stderr if set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("mN", "match-N", "If set, N matches all as a wildcard character, otherwise it never matches.", OptionType::Boolean));
     addOption(parser, CommandLineOption("wm", "weighted-distances", "If set, use weighted distances instead of unit ones.", OptionType::Boolean));
     addOption(parser, CommandLineOption("c", "benchmark-category", "The benchmark category to compare for.  One of {all, any-best, all-best}.  Default: all.", OptionType::String));

@@ -1,9 +1,9 @@
  /*==========================================================================
-                     DFI - The Deferred Frequency Index
+                     Dfi - The Deferred Frequency Index
                    http://www.seqan.de/projects/dfi.html
 
  ============================================================================
-  This is an application of the DFI algorithm in
+  This is an application of the Dfi algorithm in
   "Efficient string mining under constraints via the deferred frequency index"
 
  ============================================================================
@@ -399,36 +399,36 @@ inline void compactSameSuffLinkFreqMatches(TMatchString &matches, TIndex const &
 namespace seqan {
 /*
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreSA> 
+	struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > >, FibreSA> 
 	{
-		typedef Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > TIndex;
+		typedef Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > > TIndex;
 		typedef String< 
 			typename SAValue<TIndex>::Type,
 			MMap<>
 		> Type;
 	};
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > const, FibreSA>:
-		public struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreSA> {};
+	struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > > const, FibreSA>:
+		public struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > >, FibreSA> {};
 */
 
 /*	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreDir> 
+	struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > >, FibreDir> 
 	{
-		typedef Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > TIndex;
+		typedef Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > > TIndex;
 		typedef String< 
 			typename Size<TIndex>::Type,
 			MMap<>
 		> Type;
 	};
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > const, FibreDir>: 
-		public struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreDir> {};
+	struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > > const, FibreDir>: 
+		public struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > >, FibreDir> {};
 */
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Create DFI and output substrings within constraints band
+// Create Dfi and output substrings within constraints band
 //
 // TPred .......... frequency predicate
 // TPredHull ...... monotonic hull of the predicate above
@@ -455,7 +455,7 @@ int runDFI(
 	typedef String<TAlphabet, Alloc<> >								TString;
 	typedef StringSet<TString>										TStringSet;
 	typedef Index<TStringSet, IndexWotd<
-		DFI<TPredHull, TPred> > >								TIndex;
+		Dfi<TPredHull, TPred> > >								TIndex;
 	typedef Iter<TIndex, VSTree<TopDown<ParentLinks<> > > >			TIter;
 	typedef SubstringEntry<typename Size<TIndex>::Type>				TSubstringEntry;
 
@@ -635,12 +635,12 @@ int main(int argc, const char *argv[])
 		
 	CommandLineParser parser;
 	string rev = "$Revision$";
-	addVersionLine(parser, "DFI version 2.0 20100107 [" + rev.substr(11, 4) + "]");
+	addVersionLine(parser, "Dfi version 2.0 20100107 [" + rev.substr(11, 4) + "]");
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
 	addTitleLine(parser, "**************************************************************");
-	addTitleLine(parser, "***           DFI - The Deferred Frequency Index           ***");
+	addTitleLine(parser, "***           Dfi - The Deferred Frequency Index           ***");
 	addTitleLine(parser, "*** (c) Copyright 2010 by David Weese and Marcel H. Schulz ***");
 	addTitleLine(parser, "**************************************************************");
 	addUsageLine(parser, "[OPTION]... --minmax  <min_1> <max_1> <database 1> ... --minmax <min_m> <max_m> <database m>");

@@ -7,7 +7,7 @@ using namespace seqan;
 // FRAGMENT(typedefs)
 int main() 
 {
-    typedef MotifFinder<Dna, PMS1> TMotifFinder;
+    typedef MotifFinder<Dna, Pms1> TMotifFinder;
     typedef String<DnaString> TString;
     typedef Size<TString>::Type TSize;
 
@@ -25,7 +25,7 @@ int main()
 	TMotifFinder finder_pms1(motifLength, mm, is_exact);
 
 // FRAGMENT(search)
-	findMotif(finder_pms1, dataset, OMOPS());
+	findMotif(finder_pms1, dataset, Omops());
 
 	for (int i = 0; i < (int) motifCount(finder_pms1); ++i)
 		std::cout << i << ": " << getMotif(finder_pms1, i) << ::std::endl;

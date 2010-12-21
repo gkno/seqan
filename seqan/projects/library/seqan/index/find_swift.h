@@ -567,7 +567,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 {
 	typedef Pattern<TIndex, Swift<TSpec> >						TPattern;
 	typedef typename Size<TIndex>::Type							TSize;
-	typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
+	typedef typename Fibre<TIndex, QGramSA>::Type				TSA;
 	typedef typename Iterator<TSA, Standard>::Type				TSAIter;
 	typedef typename TPattern::TBucket							TBucket;
 	typedef typename TBucket::TSize								TBucketSize;
@@ -876,7 +876,7 @@ inline bool _swiftMultiProcessQGram(
 	typedef Pattern<TIndex, Swift<TSpec> >						TPattern;
 
 	typedef typename Size<TIndex>::Type							TSize;
-	typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
+	typedef typename Fibre<TIndex, QGramSA>::Type				TSA;
 	typedef typename Iterator<TSA, Standard>::Type				TSAIter;
 	typedef typename TPattern::TBucketString					TBucketString;
 	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIter;
@@ -1009,7 +1009,7 @@ inline bool _swiftMultiProcessQGram(
 	typedef Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec_> > > >	TPattern;
 
 	typedef typename Size<TIndex>::Type							TSize;
-	typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
+	typedef typename Fibre<TIndex, QGramSA>::Type				TSA;
 	typedef typename Iterator<TSA, Standard>::Type				TSAIter;
 	typedef typename TPattern::TBucketString					TBucketString;
 	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIter;

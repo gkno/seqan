@@ -355,9 +355,9 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 		for(unsigned i=0; i < length(indexLcp(index)); ++i)
 			::std::cout << i << ":  " << indexLcp(index)[i] << ::std::endl;
 
-		::std::cout << ::std::endl << "  ChildTab" << ::std::endl;
-		for(unsigned i=0; i < length(indexChildTab(index)); ++i)
-			::std::cout << i << ":  " << indexChildTab(index)[i] << ::std::endl;
+		::std::cout << ::std::endl << "  Childtab" << ::std::endl;
+		for(unsigned i=0; i < length(indexChildtab(index)); ++i)
+			::std::cout << i << ":  " << indexChildtab(index)[i] << ::std::endl;
 
 		::std::cout << ::std::endl;
 	}
@@ -480,7 +480,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 	template < typename TIndex, typename TSize >
 	inline typename Size<TIndex>::Type
-	repLength(TIndex const &index, VertexESA<TSize> const &vDesc) 
+	repLength(TIndex const &index, VertexEsa<TSize> const &vDesc) 
 	{
 		if (_isLeaf(vDesc)) return suffixLength(saAt(vDesc.range.i1, index), index);
 		if (_isRoot(vDesc)) return 0;
@@ -747,8 +747,8 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	}
 */
 	template < typename TSize >
-	inline typename Id< VertexESA<TSize> const >::Type
-	_getId(VertexESA<TSize> const &desc) 
+	inline typename Id< VertexEsa<TSize> const >::Type
+	_getId(VertexEsa<TSize> const &desc) 
 	{
 		TSize i2 = getValueI2(desc.range);
 		if (_isSizeInval(i2) || i2 == desc.parentRight)
@@ -761,10 +761,10 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	}
 
 	template < typename TSize >
-	inline typename Id< VertexESA<TSize> >::Type
-	_getId(VertexESA<TSize> &desc) 
+	inline typename Id< VertexEsa<TSize> >::Type
+	_getId(VertexEsa<TSize> &desc) 
 	{
-		return _getId(const_cast<VertexESA<TSize> const &>(desc));
+		return _getId(const_cast<VertexEsa<TSize> const &>(desc));
 	}
 
 
@@ -1216,7 +1216,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 		goRoot(it);
 
-		if (IsSameType<typename TTraits::DFSOrder, Postorder_>::VALUE) {
+		if (IsSameType<typename TTraits::DfsOrder, Postorder_>::VALUE) {
 			while (goDown(it)) ;
 			return;
 		}
@@ -1382,10 +1382,10 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	// goDown
 
 	// go down the leftmost edge (including empty $-edges)
-	template < typename TText, class TIndexSpec, class TSpec, typename TDFSOrder >
+	template < typename TText, class TIndexSpec, class TSpec, typename TDfsOrder >
 	inline bool _goDown(
 		Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
-		VSTreeIteratorTraits<TDFSOrder, False> const)
+		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
 		typedef Index<TText, IndexEsa<TIndexSpec> >	TIndex;
 
@@ -1402,10 +1402,10 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 	// go down the leftmost edge (skip empty $-edges)
-	template < typename TText, class TIndexSpec, class TSpec, typename TDFSOrder >
+	template < typename TText, class TIndexSpec, class TSpec, typename TDfsOrder >
 	inline bool _goDown(
 		Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
-		VSTreeIteratorTraits<TDFSOrder, True> const)
+		VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
 		typedef Index<TText, IndexEsa<TIndexSpec> >	TIndex;
 		
@@ -1651,10 +1651,10 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 */
 
 	// go right to the lexic. next sibling
-	template < typename TText, class TIndexSpec, class TSpec, typename TDFSOrder, typename THideEmptyEdges >
+	template < typename TText, class TIndexSpec, class TSpec, typename TDfsOrder, typename THideEmptyEdges >
 	inline bool _goRight(
 		Iter< Index<TText, IndexEsa<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it, 
-		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const) 
+		VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges> const) 
 	{
 		typedef Index<TText, IndexEsa<TIndexSpec> > TIndex;
 
@@ -1903,7 +1903,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 	template < typename TSize >
-	inline bool _isRoot(VertexESA<TSize> const &value) 
+	inline bool _isRoot(VertexEsa<TSize> const &value) 
 	{
 		return _isSizeInval(value.range.i2);
 	}
@@ -2159,26 +2159,26 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 */
 
 	template < typename TSize >
-	inline bool _isLeaf(VertexESA<TSize> const &vDesc)
+	inline bool _isLeaf(VertexEsa<TSize> const &vDesc)
 	{
 		// is this a leaf?
 		return vDesc.range.i1 + 1 >= vDesc.range.i2;
 	}
 
 	// is this a leaf? (including empty $-edges)
-	template < typename TIndex, class TSpec, typename TDFSOrder >
+	template < typename TIndex, class TSpec, typename TDfsOrder >
 	inline bool _isLeaf(
 		Iter<TIndex, VSTree<TSpec> > const &it,
-		VSTreeIteratorTraits<TDFSOrder, False> const)
+		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
 		return _isLeaf(value(it));
 	}
 
 	// is this a leaf? (hide empty $-edges)
-	template < typename TIndex, class TSpec, typename TDFSOrder >
+	template < typename TIndex, class TSpec, typename TDfsOrder >
 	inline bool _isLeaf(
 		Iter<TIndex, VSTree<TSpec> > const &it,
-		VSTreeIteratorTraits<TDFSOrder, True> const)
+		VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
 		typedef typename Infix< typename Fibre<TIndex, EsaSA>::Type const >::Type TOccs;
 		typedef typename Iterator<TOccs, Standard>::Type TIter;

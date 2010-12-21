@@ -156,7 +156,7 @@ namespace seqan  {
 
 	// use a mmap string for storing the q-grams
 	template <>
-	struct Fibre< TFionaQgramIndex, QGram_SA > 
+	struct Fibre< TFionaQgramIndex, QGramSA > 
 	{
 		typedef String<TSAValue, MMap<> > Type;
 	};
@@ -164,9 +164,9 @@ namespace seqan  {
 #ifdef FIONA_PARALLEL
 
 	template <>
-	struct Fibre< TFionaIndex, QGram_SA > 
+	struct Fibre< TFionaIndex, QGramSA > 
 	{
-		typedef Fibre< TFionaQgramIndex, QGram_SA >::Type TSA;
+		typedef Fibre< TFionaQgramIndex, QGramSA >::Type TSA;
 		typedef Infix<TSA>::Type Type;
 	};
 

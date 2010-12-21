@@ -364,12 +364,12 @@ assignModViewFunctor(ModifiedString<THost, ModView<TFunctor> > & me, TFunctor co
 
 
 //////////////////////////////////////////////////////////////////////////////
-// convertInPlace
+// convert
 //////////////////////////////////////////////////////////////////////////////
 
 template < typename TSequence, typename TFunctor >
 inline void
-convertInPlace(TSequence & sequence, TFunctor const &F)
+convert(TSequence & sequence, TFunctor const &F)
 {
 	SEQAN_CHECKPOINT;
 #if defined (_OPENMP) && defined (SEQAN_PARALLEL)
@@ -393,7 +393,7 @@ convertInPlace(TSequence & sequence, TFunctor const &F)
 
 template < typename TSequence, typename TFunctor >
 inline void
-convertInPlace(TSequence const & sequence, TFunctor const &F)
+convert(TSequence const & sequence, TFunctor const &F)
 {
 	SEQAN_CHECKPOINT;
 #if defined (_OPENMP) && defined (SEQAN_PARALLEL)

@@ -75,14 +75,14 @@ template <typename T, typename TValue, typename TSize> inline void allocate(T co
 template <typename TSpec, typename TValue, typename TSize> inline void allocate( File<Async<TSpec> > const & me, TValue * & data, TSize count);       	// "projects/library/seqan/file/file_async.h"(351)
 
 //____________________________________________________________________________
-// areadAt
+// asyncReadAt
 
-template <typename TSpec, typename TValue, typename TSize, typename TPos > bool areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs, aiocb &request);       	// "projects/library/seqan/file/file_async.h"(136)
+template <typename TSpec, typename TValue, typename TSize, typename TPos > bool asyncReadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs, aiocb &request);       	// "projects/library/seqan/file/file_async.h"(136)
 
 //____________________________________________________________________________
-// awriteAt
+// asyncWriteAt
 
-template <typename TSpec, typename TValue, typename TSize, typename TPos > bool awriteAt(File<Async<TSpec> > & me, const TValue *memPtr, TSize const count, TPos const fileOfs, aiocb &request);       	// "projects/library/seqan/file/file_async.h"(160)
+template <typename TSpec, typename TValue, typename TSize, typename TPos > bool asyncWriteAt(File<Async<TSpec> > & me, const TValue *memPtr, TSize const count, TPos const fileOfs, aiocb &request);       	// "projects/library/seqan/file/file_async.h"(160)
 
 //____________________________________________________________________________
 // cancel

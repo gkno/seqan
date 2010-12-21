@@ -304,7 +304,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
     template < typename TSpec, typename TValue, typename TSize, typename TPos >
-    inline bool areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    inline bool asyncReadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb_win32 &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -337,7 +337,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
     
     template < typename TSpec, typename TValue, typename TSize, typename TPos >
-    inline bool awriteAt(File<Async<TSpec> > & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
+    inline bool asyncWriteAt(File<Async<TSpec> > & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         aiocb_win32 &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -432,7 +432,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         typename AsyncRequest<File<Async<TSpec> > >::Type request = 
-            me.queue->areadAt(
+            me.queue->asyncReadAt(
                 me.handleAsync,
                 me.position,
                 memPtr,
@@ -451,7 +451,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         typename AsyncRequest<File<Async<TSpec> > >::Type request = 
-            me.queue->awriteAt(
+            me.queue->asyncWriteAt(
                 memPtr,
                 me.handleAsync,
                 me.position,
@@ -465,11 +465,11 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
     inline typename AsyncRequest<File<Async<TSpec> > >::Type
-    areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    asyncReadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        return me.queue->areadAt(
+        return me.queue->asyncReadAt(
             me.handleAsync,
             fileOfs * sizeof(TValue),
             memPtr,
@@ -481,11 +481,11 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
     inline typename AsyncRequest<File<Async<TSpec> > >::Type
-    awriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    asyncWriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        return me.queue->awriteAt(
+        return me.queue->asyncWriteAt(
             memPtr,
             me.handleAsync,
             fileOfs * sizeof(TValue),
@@ -506,7 +506,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         typename AsyncRequest<File<Async<TSpec> > >::Type request = 
-            me.queue->areadAt(
+            me.queue->asyncReadAt(
                 me.handleAsync,
                 me.position,
                 memPtr,
@@ -524,7 +524,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
         typename AsyncRequest<File<Async<TSpec> > >::Type request =  
-            me.queue->awriteAt(
+            me.queue->asyncWriteAt(
                 memPtr,
                 me.handleAsync,
                 me.position,
@@ -537,11 +537,11 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aEvent >
     inline typename AsyncRequest<File<Async<TSpec> > >::Type
-    areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    asyncReadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        return me.queue->areadAt(
+        return me.queue->asyncReadAt(
             me.handleAsync,
             fileOfs * sizeof(TValue),
             memPtr,
@@ -552,11 +552,11 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TSpec, TValue, typename TSize, typename TPos,
                typename aEvent >
     inline typename AsyncRequest<File<Async<TSpec> > >::Type
-    awriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    asyncWriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        return me.queue->awriteAt(
+        return me.queue->asyncWriteAt(
             memPtr,
             me.handleAsync,
             fileOfs * sizeof(TValue),
@@ -735,7 +735,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
     template < typename TSpec, typename TValue, typename TSize, typename TPos >
-    bool areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
+    bool asyncReadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -767,14 +767,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 #ifdef SEQAN_DEBUG
 			else
-				::std::cerr << "areadAt returned " << result << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
+				::std::cerr << "asyncReadAt returned " << result << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
 #endif
         }
 		return result == 0;
     }
     
     template < typename TSpec, typename TValue, typename TSize, typename TPos >
-    bool awriteAt(File<Async<TSpec> > & me, const TValue *memPtr, TSize const count, TPos const fileOfs,
+    bool asyncWriteAt(File<Async<TSpec> > & me, const TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb &request)
     {
         SEQAN_PROTIMESTART(tw);
@@ -806,7 +806,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 #ifdef SEQAN_DEBUG
 			else
-				::std::cerr << "awriteAt returned " << result << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
+				::std::cerr << "asyncWriteAt returned " << result << " and errno=" << errno << " " << ::strerror(errno) << ::std::endl;
 #endif
         }
         return result == 0;

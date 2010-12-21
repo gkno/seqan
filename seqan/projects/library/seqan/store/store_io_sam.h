@@ -45,12 +45,12 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.File Format.tag.SAM:
-	SAM mapping file.
+.Tag.File Format.tag.Sam:
+	Sam mapping file.
 ..include:seqan/store.h
 */
 //struct TagSAM_;
-//typedef Tag<TagSAM_> const SAM;
+//typedef Tag<TagSAM_> const Sam;
 
 
     
@@ -311,7 +311,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
-// read functions for SAM
+// read functions for Sam
 //////////////////////////////////////////////////////////////////////////////
 
     
@@ -404,14 +404,14 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // read
 
-///.Function.read.param.tag.type:Tag.File Format.tag.SAM
+///.Function.read.param.tag.type:Tag.File Format.tag.Sam
     
     template<typename TFile, typename TSpec, typename TConfig>
     inline void 
     read(
 		TFile & file,
 		FragmentStore<TSpec, TConfig> & fragStore,
-		SAM)
+		Sam)
     {
         typedef Value<FILE>::Type TValue;
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -433,10 +433,10 @@ namespace SEQAN_NAMESPACE_MAIN
         char c = _streamGet(file);
         
         // Read in header section
-        _readHeader(file, fragStore, c, SAM());
+        _readHeader(file, fragStore, c, Sam());
         
         // Read in alignments section
-        _readAlignments(file, fragStore, contigAnchorGaps, matchMateInfos, c, SAM());
+        _readAlignments(file, fragStore, contigAnchorGaps, matchMateInfos, c, Sam());
         
         // set the match mate IDs using the information stored in matchMateInfos
         _generatePairMatchIds(fragStore, matchMateInfos);
@@ -453,7 +453,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TFile & file,
 		FragmentStore<TSpec, TConfig> &,
 		TChar & c,
-		SAM)
+		Sam)
     {
         // skip header for now
         while (c == '@')
@@ -463,7 +463,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // _readAlignments
 //
-// reads in alignement sections from a SAM file
+// reads in alignement sections from a Sam file
     
     template<typename TFile, typename TSpec, typename TConfig, typename TContigAnchorGaps, typename TMatchMateInfos, typename TChar>
     inline void 
@@ -473,9 +473,9 @@ namespace SEQAN_NAMESPACE_MAIN
         TContigAnchorGaps & contigAnchorGaps,	
         TMatchMateInfos & matchMateInfos,
         TChar & c,
-        SAM)
+        Sam)
     {
-        // create dummy entries in SAM specific aligned read quality store and aligned read tag store
+        // create dummy entries in Sam specific aligned read quality store and aligned read tag store
         // is needed so the ID in the aligned store can be use to access the other stores
         // even if there exists previous entries without
 		typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -499,14 +499,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		refresh(fragStore.readNameStoreCache);
 
         while (!_streamEOF(file))
-            _readOneAlignment(file, fragStore, contigAnchorGaps, matchMateInfos, c, SAM(), contextSAM);
+            _readOneAlignment(file, fragStore, contigAnchorGaps, matchMateInfos, c, Sam(), contextSAM);
     }
     
     
 //////////////////////////////////////////////////////////////////////////////
 // _readOneAlignment
 //
-// reads in one alignement section from a SAM file
+// reads in one alignement section from a Sam file
     
     template<typename TFile, typename TSpec, typename TConfig, typename TContigAnchorGaps, typename TMatchMateInfos, typename TChar, typename TContextSAM>
     inline void 
@@ -516,7 +516,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TContigAnchorGaps & contigAnchorGaps,
 		TMatchMateInfos & matchMateInfos,
 		TChar & c,
-		SAM,
+		Sam,
 		TContextSAM & contextSAM)
     {
         // Basic types
@@ -569,7 +569,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// read begin position
         TContigPos beginPos;
         beginPos = _parseReadNumber(file, c);
-        --beginPos; // SAM stores positions starting at 1 the fragment store starting at 0
+        --beginPos; // Sam stores positions starting at 1 the fragment store starting at 0
         _parseSkipWhitespace(file, c);
 
         // read map quality
@@ -605,7 +605,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// read mate position
         TContigPos mPos;
         mPos = _parseReadNumber(file, c);
-        --mPos; // SAM stores positions starting at 1 the fragment store starting at 0
+        --mPos; // Sam stores positions starting at 1 the fragment store starting at 0
         _parseSkipWhitespace(file, c);
 
 		// read iSize
@@ -627,7 +627,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TReadGaps readGaps(readSeq, readGapAnchors);
         cigarToGapAnchorRead(cigar, readGaps);
         
-        // read in SAM tags
+        // read in Sam tags
         String<char> tags;
         _parseSkipSpace(file, c);
         _parseReadCharsUntilEndOfLine(file, tags, c);
@@ -655,7 +655,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TContigGapsPW contigGaps(back(contigAnchorGaps));
         cigarToGapAnchorContig(cigar, contigGaps);
 		
-		// create entries in SAM specific stores
+		// create entries in Sam specific stores
         appendValue(fragStore.alignQualityStore, mapQ, Generous());
         appendValue(fragStore.alignedReadTagStore, tags, Generous());
         
@@ -678,7 +678,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
-// write functions for SAM
+// write functions for Sam
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
@@ -687,7 +687,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template<typename TFile, typename TSpec, typename TConfig>
 	inline void _writeHeader(TFile & target,
                                  FragmentStore<TSpec, TConfig> & store,
-                                 SAM)
+                                 Sam)
     {
 		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 		typedef typename TFragmentStore::TLibraryStore					TLibraryStore;
@@ -742,7 +742,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template<typename TFile, typename TSpec, typename TConfig>
 	inline void _writeAlignments(TFile & target,
                                  FragmentStore<TSpec, TConfig> & store,
-                                 SAM)
+                                 Sam)
     {
 		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
@@ -925,18 +925,18 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // write
 
-///.Function.write.param.tag.type:Tag.File Format.tag.SAM
+///.Function.write.param.tag.type:Tag.File Format.tag.Sam
     
     template<typename TFile, typename TSpec, typename TConfig>
     inline void write(TFile & target,
                       FragmentStore<TSpec, TConfig> & store,
-                      SAM)
+                      Sam)
     {
         // write header
-		_writeHeader(target, store, SAM());
+		_writeHeader(target, store, Sam());
         
         // write aligments
-        _writeAlignments(target, store, SAM());
+        _writeAlignments(target, store, Sam());
     }
     
 }// namespace SEQAN_NAMESPACE_MAIN

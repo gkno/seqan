@@ -42,15 +42,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 /**
-.Tag.OOPS:
+.Tag.Oops:
 ..summary:Represents the One Occurrence Per Sequence model.
 ..cat:Motif Search
-..remarks:The @Tag.OOPS@ model, which was introduced by Lawrence and Reilly permits 
+..remarks:The @Tag.Oops@ model, which was introduced by Lawrence and Reilly permits 
           exactly one motif occurrence in each sequence.
 ..include:seqan/find_motif.h
 */
 
-struct OOPS
+struct Oops
 {
 	enum{VALUE=0};
 };
@@ -58,15 +58,15 @@ struct OOPS
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.OMOPS:
+.Tag.Omops:
 ..summary:Represents the One or More Occurences Per Sequence model.
 ..cat:Motif Search
-..remarks:The @Tag.OMOPS@ model is comparable with the @Tag.TCM@ model with the one difference
+..remarks:The @Tag.Omops@ model is comparable with the @Tag.Tcm@ model with the one difference
           that zero occurrence in a sample sequence is not permitted.
 ..include:seqan/find_motif.h
 */
 
-struct OMOPS
+struct Omops
 {
 	enum{VALUE=1};
 };
@@ -74,28 +74,28 @@ struct OMOPS
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.ZOOPS:
+.Tag.Zoops:
 ..summary:Represents the Zero or One Occurence Per Sequence model.
 ..cat:Motif Search
-..remarks:The @Tag.ZOOPS@ model formulated by Bailey and Elkan permits at most one
+..remarks:The @Tag.Zoops@ model formulated by Bailey and Elkan permits at most one
           motif occurrence in each sequence.
 ..include:seqan/find_motif.h
 */
 
-struct ZOOPS
+struct Zoops
 {
 	enum{VALUE=2};
 	double threshold;
 
-	ZOOPS():
+	Zoops():
 		threshold((double)0.5)
 	{
 	}
-	ZOOPS(double val):
+	Zoops(double val):
 		threshold(val)
 	{
 	}
-	~ZOOPS()
+	~Zoops()
 	{
 	}
 };
@@ -103,28 +103,28 @@ struct ZOOPS
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.TCM:
+.Tag.Tcm:
 ..summary:Represents the Two-Component-Mixture Sequence model.
 ..cat:Motif Search
-..remarks:The @Tag.TCM@ model formulated by Bailey and Elkan permits any number pf
+..remarks:The @Tag.Tcm@ model formulated by Bailey and Elkan permits any number pf
           non-overlapping motif occurrences per sequence.
 ..include:seqan/find_motif.h
 */
 
-struct TCM
+struct Tcm
 {
 	enum{VALUE=3};
 	double threshold;
 
-	TCM():
+	Tcm():
 		threshold((double)0.5)
 	{
 	}
-	TCM(double val):
+	Tcm(double val):
 		threshold(val)
 	{
 	}
-	~TCM()
+	~Tcm()
 	{
 	}
 };

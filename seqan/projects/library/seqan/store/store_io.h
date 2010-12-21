@@ -116,7 +116,7 @@ getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
 .Function.read
 ..cat:Fragment Store
 ..signature:read(file, fragStore, tag)
-..param.fragStore:A fragment store. Currently @Tag.File Format.tag.Amos message file@ and @Tag.File Format.tag.SAM@ formats are supported.
+..param.fragStore:A fragment store. Currently @Tag.File Format.tag.Amos message file@ and @Tag.File Format.tag.Sam@ formats are supported.
 ...type:Class.FragmentStore
 ..param.tag.type:Tag.File Format.tag.Amos message file
 ..include:seqan/store.h

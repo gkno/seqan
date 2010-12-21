@@ -49,13 +49,13 @@ void setUpCommandLineParser(CommandLineParser & parser)
 
 	addUsageLine(parser, "-r <FASTA file with reads> [Options]");
 	addUsageLine(parser, "-a <AMOS message file> [Options]");
-	addUsageLine(parser, "-s <SAM file> [-c <FASTA contigs file>] [Options]");
+	addUsageLine(parser, "-s <Sam file> [-c <FASTA contigs file>] [Options]");
 
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("r", "reads", "file with reads", OptionType::String), "<FASTA reads file>"));
 	addOption(parser, addArgumentText(CommandLineOption("a", "afg", "message file", OptionType::String), "<AMOS afg file>"));
-	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "SAM file", OptionType::String), "<SAM file>"));
-	addOption(parser, addArgumentText(CommandLineOption("c", "contigs", "FASTA file with contigs, ignored if not SAM input", OptionType::String), "<FASTA contigs file>"));
+	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "Sam file", OptionType::String), "<Sam file>"));
+	addOption(parser, addArgumentText(CommandLineOption("c", "contigs", "FASTA file with contigs, ignored if not Sam input", OptionType::String), "<FASTA contigs file>"));
 	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", (int)OptionType::String, "align.txt"), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", (int)OptionType::String, "afg"), "[seqan | afg | sam]"));
 	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", (int)OptionType::String, "realign"), "[realign | msa]"));
@@ -170,9 +170,9 @@ int loadFiles(TFragmentStore & fragStore, TSize & numberOfContigs, ConsensusOpti
                 return 1;
             }
         }
-		// Load SAM message file
+		// Load Sam message file
         std::fstream strmReads(consOpt.samfile.c_str(), std::fstream::in | std::fstream::binary);
-		read(strmReads, fragStore, SAM());
+		read(strmReads, fragStore, Sam());
 		numberOfContigs = length(fragStore.contigStore);
 	} else {
 		return 1;
@@ -205,9 +205,9 @@ int writeOutput(TFragmentStore /*const*/ & fragStore, ConsensusOptions const & c
 		_writeCeleraCgb(strmWrite, fragStore);	
 		fclose(strmWrite);
 	} else if (consOpt.output == 4) {
-		// Write out resulting MSA in a SAM file.
+		// Write out resulting MSA in a Sam file.
 		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-		write(strmWrite, fragStore, SAM());
+		write(strmWrite, fragStore, Sam());
 		fclose(strmWrite);
 		// Write out resulting consensus sequence.
 		char buffer[10*1024];

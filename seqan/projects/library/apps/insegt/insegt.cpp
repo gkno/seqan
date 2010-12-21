@@ -57,7 +57,7 @@ int main( int argc, const char *argv[] )
 	addTitleLine(parser, "**********************************************************************");
 
 	addSection(parser, "Main Options:");
-	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "SAM-file with aligned reads", (int)OptionType::String), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "Sam-file with aligned reads", (int)OptionType::String), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("g", "gff", "GFF_file with annotations", (int)OptionType::String), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("p", "outputPath", "path for output-files", (int)OptionType::String, ""), "<String>"));
 	addOption(parser, addArgumentText(CommandLineOption("n", "nTuple", "nTuple", (int)OptionType::Int, 2), "<Int>"));

@@ -95,12 +95,12 @@ int main(int argc, char **argv) {
     // =================================================================
     if (argc != 3) {
         std::cerr << "Invalid number of arguments." << std::endl
-                  << "USAGE:  sam_quality_scale CONTIGS.FASTA ALIGNMENT.SAM" << std::endl;
+                  << "USAGE:  sam_quality_scale CONTIGS.FASTA ALIGNMENT.Sam" << std::endl;
         return 1;
     }
 
     // =================================================================
-    // Read contigs and SAM file.
+    // Read contigs and Sam file.
     // =================================================================
     FragmentStore<> store;
 
@@ -111,13 +111,13 @@ int main(int argc, char **argv) {
     }
     
     {
-        std::cerr << "Loading SAM file " << argv[2] << std::endl;
+        std::cerr << "Loading Sam file " << argv[2] << std::endl;
         std::fstream fstrm(argv[2], std::ios_base::in | std::ios_base::binary);
         if (!fstrm.is_open()) {
-            std::cerr << "Could not open SAM file." << std::endl;
+            std::cerr << "Could not open Sam file." << std::endl;
             return 1;
         }
-        read(fstrm, store, SAM());
+        read(fstrm, store, Sam());
     }
 
     // =================================================================

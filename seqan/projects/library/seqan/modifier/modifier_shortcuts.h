@@ -98,21 +98,21 @@ typedef ModifiedString<
 ...type:Class.Segment
 ..include:seqan/modifier.h
 ..see:Function.reverseComplement
-..see:Function.toLowerInPlace
-..see:Function.toUpperInPlace
+..see:Function.toLower
+..see:Function.toUpper
  */
 template < typename TSequence >
 inline void complement(TSequence & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
 template < typename TSequence >
 inline void complement(TSequence const & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
 /**
@@ -150,14 +150,14 @@ inline void complement(StringSet<TSequence, TSpec> const & stringSet)
 ...type:Class.Segment
 ..include:seqan/modifier.h
 ..see:Function.complement
-..see:Function.toLowerInPlace
-..see:Function.toUpperInPlace
+..see:Function.toLower
+..see:Function.toUpper
  */
 template < typename TSequence >
 inline void reverseComplement(TSequence & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 	reverse(sequence);
 } 
 
@@ -166,7 +166,7 @@ template < typename TSequence >
 inline void reverseComplement(TSequence const & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 	reverse(sequence);
 } 
 
@@ -199,111 +199,111 @@ inline void reverseComplement(StringSet<TSequence, TSpec> const & stringSet)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.toLowerInPlace:
+.Function.toLower:
 ..cat:Modifier
 ..summary:Convert characters in sequence or @Class.StringSet@ to lower case in-place.
-..signature:toLowerInPlace(sequence)
+..signature:toLower(sequence)
 ..param.sequence:The sequence to convert into lowercase.
 ...type:Class.String
 ...type:Class.Segment
 ..include:seqan/modifier.h
-..see:Function.toUpperInPlace
+..see:Function.toUpper
 ..see:Function.reverseComplement
 ..see:Function.complement
  */
 template < typename TSequence >
-inline void toLowerInPlace(TSequence & sequence) 
+inline void toLower(TSequence & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
 } 
 
 // TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence >
-inline void toLowerInPlace(TSequence const & sequence) 
+inline void toLower(TSequence const & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
 } 
 
 /**
-.Function.toLowerInPlace:
-..signature:toLowerInPlace(stringSet)
+.Function.toLower:
+..signature:toLower(stringSet)
 ..param.stringSet:The @Class.StringSet@ to convert into lowercase.
 ...type:Class.StringSet
 ..include:seqan/modifier.h
  */	
 template < typename TSequence, typename TSpec >
-inline void toLowerInPlace(StringSet<TSequence, TSpec> & stringSet)
+inline void toLower(StringSet<TSequence, TSpec> & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		toLowerInPlace(stringSet[seqNo]);
+		toLower(stringSet[seqNo]);
 }
 
 // TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence, typename TSpec >
-inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
+inline void toLower(StringSet<TSequence, TSpec> const & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		toLowerInPlace(stringSet[seqNo]);
+		toLower(stringSet[seqNo]);
 }
 
 /**
-.Function.toUpperInPlace:
+.Function.toUpper:
 ..cat:Modifier
 ..summary:Convert characters in sequence or @Class.StringSet@ to lower case in-place.
-..signature:toUpperInPlace(sequence)
+..signature:toUpper(sequence)
 ..param.sequence:The sequence to convert into uppercase.
 ...type:Class.String
 ...type:Class.Segment
 ..include:seqan/modifier.h
-..see:Function.toLowerInPlace
+..see:Function.toLower
 ..see:Function.reverseComplement
 ..see:Function.complement
  */
 template < typename TSequence >
-inline void toUpperInPlace(TSequence & sequence) 
+inline void toUpper(TSequence & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
 } 
 
 // TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence >
-inline void toUpperInPlace(TSequence const & sequence) 
+inline void toUpper(TSequence const & sequence) 
 {
     SEQAN_CHECKPOINT;
-	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
+	convert(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
 } 
 
 /**
-.Function.toUpperInPlace:
-..signature:toUpperInPlace(stringSet)
+.Function.toUpper:
+..signature:toUpper(stringSet)
 ..param.stringSet:The @Class.StringSet@ to convert into uppercase.
 ...type:Class.StringSet
 ..include:seqan/modifier.h
  */	
 template < typename TSequence, typename TSpec >
-inline void toUpperInPlace(StringSet<TSequence, TSpec> & stringSet)
+inline void toUpper(StringSet<TSequence, TSpec> & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		toUpperInPlace(stringSet[seqNo]);
+		toUpper(stringSet[seqNo]);
 }
 
 // TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence, typename TSpec >
-inline void toUpperInPlace(StringSet<TSequence, TSpec> const & stringSet)
+inline void toUpper(StringSet<TSequence, TSpec> const & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		toUpperInPlace(stringSet[seqNo]);
+		toUpper(stringSet[seqNo]);
 }
 
 //////////////////////////////////////////////////////////////////////////////

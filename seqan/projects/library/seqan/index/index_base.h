@@ -47,15 +47,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct LarssonSadakane;
 	struct ManberMyers;
 	struct SAQSort;
-	struct QGram_Alg;
+	struct QGramAlg;
 
 	// lcp table construction algorithms
 	struct Kasai;
 	struct KasaiOriginal;	// original, but more space-consuming algorithm
 
 	// enhanced suffix array construction algorithms
-	struct ChildTab;
-	struct BWT;
+	struct Childtab;
+	struct Bwt;
 
 /**
 .Tag.Index Find Algorithm
@@ -249,7 +249,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 		typename TText,
 		typename TSA,
         typename TAlgSpec >
-    struct LCPCreatorRandomAccess_
+    struct LcpCreatorRandomAccess_
     {
         typedef typename AllowsFastRandomAccess<TText>::Type TRandomText;
         typedef typename AllowsFastRandomAccess<TLCP>::Type  TRandomLCP;
@@ -559,12 +559,12 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 	template < typename TText, typename TSpec >
 	struct DefaultIndexCreator<Index<TText, TSpec>, FibreBwt> {
-        typedef BWT Type;
+        typedef Bwt Type;
     };
 
 	template < typename TText, typename TSpec >
 	struct DefaultIndexCreator<Index<TText, TSpec>, FibreChildtab> {
-        typedef ChildTab Type;
+        typedef Childtab Type;
     };
 
 
@@ -953,7 +953,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.childAt:
-..summary:Shortcut for $value(indexChildTab(..), ..)$.
+..summary:Shortcut for $value(indexChildtab(..), ..)$.
 ..cat:Index
 ..signature:childAt(position, index)
 ..param.position:A position in the array on which the value should be accessed.
@@ -1159,10 +1159,10 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexChildTab:
+.Function.indexChildtab:
 ..summary:Shortcut for $getFibre(.., EsaChildtab)$.
 ..cat:Index
-..signature:indexChildTab(index)
+..signature:indexChildtab(index)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaChildtab@ fibre (child table).
@@ -1170,9 +1170,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type & indexChildTab(Index<TText, TSpec> &index) { return getFibre(index, FibreChildtab()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type & indexChildtab(Index<TText, TSpec> &index) { return getFibre(index, FibreChildtab()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type & indexChildTab(Index<TText, TSpec> const &index) { return getFibre(index, FibreChildtab()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type & indexChildtab(Index<TText, TSpec> const &index) { return getFibre(index, FibreChildtab()); }
 
 }
 

@@ -315,12 +315,12 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_to_lower_in_place_string) {
     CharString const kExpectedResult = "this is a test!";
 
     // Test non-const version.
-    toLowerInPlace(str);
+    toLower(str);
     SEQAN_ASSERT_EQ(kExpectedResult, str);
 
     // Test const version.
     // TODO(holtgrew): This should not be possible!
-    toLowerInPlace(kStr);
+    toLower(kStr);
     SEQAN_ASSERT_EQ(kExpectedResult, kStr);
 }
 
@@ -336,7 +336,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_to_lower_in_place_string_set) {
     appendValue(strSet, str1);
     appendValue(strSet, str2);
 
-    toLowerInPlace(strSet);
+    toLower(strSet);
     SEQAN_ASSERT_EQ(2u, length(strSet));
     SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSet[0]);
     SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSet[1]);
@@ -344,7 +344,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_to_lower_in_place_string_set) {
     // Test const version.
     StringSet<CharString> const kStrSet = strSet;
 
-    toLowerInPlace(kStrSet);
+    toLower(kStrSet);
     SEQAN_ASSERT_EQ(2u, length(kStrSet));
     SEQAN_ASSERT_EQ(EXPECTED_STRING1, kStrSet[0]);
     SEQAN_ASSERT_EQ(EXPECTED_STRING2, kStrSet[1]);
@@ -357,12 +357,12 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_to_upper_in_place_string) {
     CharString const kExpectedResult = "THIS IS A TEST!";
 
     // Test non-const version.
-    toUpperInPlace(str);
+    toUpper(str);
     SEQAN_ASSERT_EQ(kExpectedResult, str);
 
     // Test const version.
     // TODO(holtgrew): This should not be possible!
-    toUpperInPlace(kStr);
+    toUpper(kStr);
     SEQAN_ASSERT_EQ(kExpectedResult, kStr);
 }
 
@@ -378,7 +378,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_to_upper_in_place_string_set) {
     appendValue(strSet, str1);
     appendValue(strSet, str2);
 
-    toUpperInPlace(strSet);
+    toUpper(strSet);
     SEQAN_ASSERT_EQ(2u, length(strSet));
     SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSet[0]);
     SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSet[1]);
@@ -386,7 +386,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_to_upper_in_place_string_set) {
     // Test const version.
     StringSet<CharString> const kStrSet = strSet;
 
-    toUpperInPlace(kStrSet);
+    toUpper(kStrSet);
     SEQAN_ASSERT_EQ(2u, length(kStrSet));
     SEQAN_ASSERT_EQ(EXPECTED_STRING1, kStrSet[0]);
     SEQAN_ASSERT_EQ(EXPECTED_STRING2, kStrSet[1]);

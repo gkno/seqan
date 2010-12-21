@@ -410,10 +410,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// is this a leaf? (including empty $-edges)
-	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder >
+	template < typename TText, typename TIndexSpec, typename TSpec, typename TDfsOrder >
 	inline bool _isLeaf(
 		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TSpec> > const &it,
-		VSTreeIteratorTraits<TDFSOrder, False> const)
+		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
 		typedef Index<TText, IndexWotd<TIndexSpec> > TIndex;
 		TIndex const &index = container(it);
@@ -421,10 +421,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// is this a leaf? (excluding empty $-edges)
-	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder >
+	template < typename TText, typename TIndexSpec, typename TSpec, typename TDfsOrder >
 	inline bool _isLeaf(
 		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TSpec> > const &it,
-		VSTreeIteratorTraits<TDFSOrder, True> const)
+		VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
 		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
@@ -652,11 +652,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// go down the leftmost edge (including empty $-edges)
-	template < typename TText, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
+	template < typename TText, typename TSpec, typename TDfsOrder, typename THideEmptyEdges >
 	inline bool 
 	_goDown(
 		Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
-		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const)
+		VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges> const)
 	{
 		typedef Index<TText, IndexWotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
@@ -688,11 +688,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// go down the leftmost edge (excluding empty $-edges)
-	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
+	template < typename TText, typename TIndexSpec, typename TSpec, typename TDfsOrder, typename THideEmptyEdges >
 	inline bool 
 	_goDown(
 		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
-		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const)
+		VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges> const)
 	{
 		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
@@ -724,11 +724,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// go right to the lexic. next sibling
-	template < typename TText, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
+	template < typename TText, typename TSpec, typename TDfsOrder, typename THideEmptyEdges >
 	inline bool 
 	_goRight(
 		Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
-		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const) 
+		VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges> const) 
 	{
 		typedef Index<TText, IndexWotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
@@ -748,11 +748,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
 
-	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
+	template < typename TText, typename TIndexSpec, typename TSpec, typename TDfsOrder, typename THideEmptyEdges >
 	inline bool 
 	_goRight(
 		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
-		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const) 
+		VSTreeIteratorTraits<TDfsOrder, THideEmptyEdges> const) 
 	{
 		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;

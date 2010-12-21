@@ -40,9 +40,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Preorder_;
 	struct Postorder_;
 
-	template <typename TDFSOrder = Postorder_, typename THideEmptyEdges = True>
+	template <typename TDfsOrder = Postorder_, typename THideEmptyEdges = True>
 	struct VSTreeIteratorTraits {
-		typedef TDFSOrder DFSOrder;
+		typedef TDfsOrder DfsOrder;
 		typedef THideEmptyEdges HideEmptyEdges;
 	};
 
@@ -169,37 +169,37 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSize>
-	struct VertexESA {
+	struct VertexEsa {
 		Pair<TSize> range;			// current SA interval of hits (unique node identifier)
 		TSize		parentRight;	// right boundary of parent node's range (allows to go right)
 
-		VertexESA() {}
+		VertexEsa() {}
 
-		VertexESA(MinimalCtor):
+		VertexEsa(MinimalCtor):
 			range(0,0),
 			parentRight(0) {}
 
-		VertexESA(TSize otherRangeLeft, TSize otherRangeRight, TSize otherParentRight):
+		VertexEsa(TSize otherRangeLeft, TSize otherRangeRight, TSize otherParentRight):
 			range(Pair<TSize>(otherRangeLeft, otherRangeRight)),
 			parentRight(otherParentRight) {}
 
-		VertexESA(Pair<TSize> const &otherRange, TSize otherParentRight):
+		VertexEsa(Pair<TSize> const &otherRange, TSize otherParentRight):
 			range(otherRange),
 			parentRight(otherParentRight) {}
 
-		VertexESA(VertexESA const &other):
+		VertexEsa(VertexEsa const &other):
 			range(other.range),
 			parentRight(other.parentRight) {}
 	};
 	
 	template <typename TSize>
-	inline bool operator==(VertexESA<TSize> const &a, VertexESA<TSize> const &b)
+	inline bool operator==(VertexEsa<TSize> const &a, VertexEsa<TSize> const &b)
 	{
 		return a.range == b.range;
 	}
 
 	template <typename TSize>
-	inline bool operator!=(VertexESA<TSize> const &a, VertexESA<TSize> const &b)
+	inline bool operator!=(VertexEsa<TSize> const &a, VertexEsa<TSize> const &b)
 	{
 		return a.range != b.range;
 	}
@@ -210,7 +210,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 	template < typename TText, typename TSpec >
 	struct VertexDescriptor< Index<TText, IndexEsa<TSpec> > > {
 		typedef typename Size< Index<TText, IndexEsa<TSpec> > >::Type TSize;
-		typedef VertexESA<TSize> Type;
+		typedef VertexEsa<TSize> Type;
 	};
 
 

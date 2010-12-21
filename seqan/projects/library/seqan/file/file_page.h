@@ -419,7 +419,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		pf.dirty = false;
 		pf.status = pf.READING;
 //        resize(pf, pageSize(pf));
-		return areadAt(file, (TValue*)pf.begin, size(pf), (pos_t)pageNo * (pos_t)pageSize(pf), pf.request);
+		return asyncReadAt(file, (TValue*)pf.begin, size(pf), (pos_t)pageNo * (pos_t)pageSize(pf), pf.request);
 	}
 
 	template < typename TValue, typename TFile, typename TSpec > inline
@@ -432,7 +432,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		#endif
 		pf.status = pf.WRITING;
 //        resize(pf, pageSize(pf));
-		return awriteAt(file, (TValue*)pf.begin, size(pf), (pos_t)pageNo * (pos_t)pageSize(pf), pf.request);
+		return asyncWriteAt(file, (TValue*)pf.begin, size(pf), (pos_t)pageNo * (pos_t)pageSize(pf), pf.request);
 	}
 
 	template < typename TValue, typename TFile, typename TSpec, typename TSize> inline
@@ -565,7 +565,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			::std::cerr << " size " << size(pf) << ::std::endl;
 		#endif
         if (pf.end == pf.begin) return true;
-        if (awriteAt(file, pf.begin, size(pf), (pos_t)pf.pageNo * (pos_t)pageSize(pf) + pageOfs, pf.request)) {
+        if (asyncWriteAt(file, pf.begin, size(pf), (pos_t)pf.pageNo * (pos_t)pageSize(pf) + pageOfs, pf.request)) {
             pf.status = pf.WRITING;
             pageOfs += size(pf);
             return true;

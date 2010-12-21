@@ -54,23 +54,23 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.oops_model:The oops_model object.
-...type:Tag.OOPS
+...type:Tag.Oops
 ..param.zoops_model:The zoops_model object.
-...type:Tag.ZOOPS
+...type:Tag.Zoops
 ..param.tcm_model:The tcm_model object.
-...type:Tag.TCM
+...type:Tag.Tcm
 ..param.gamma:The probability of sequence having a motif occurence.
 ..param.lambda:The probability of starting a motif occurence 
 ...remarks:$lambda$ is calculated by dividing $gamma$ by the length of the corresponding sequence.
 ..remarks:This version of EM is used in the MEME program of Bailey and Elkan. It is a Bayesian
           variant of the basic EM which allows multiple occurrences of a motif in any sequence and can 
-		  therefore be performed on sequences of one of the model types @Tag.OOPS@, @Tag.ZOOPS@ and 
-		  @Tag.TCM@. We use the EM algorithm of MEME for the refinement step of PROJECTION.
+		  therefore be performed on sequences of one of the model types @Tag.Oops@, @Tag.Zoops@ and 
+		  @Tag.Tcm@. We use the EM algorithm of MEME for the refinement step of PROJECTION.
 ..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
-//	OOPS model
+//	Oops model
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TProfile, typename TIter, typename TType>
@@ -79,7 +79,7 @@ em(TProfile & profile,
    TIter dataset_start, 
    TType const & t,
    TType const & l,
-   OOPS const & oops)
+   Oops const & oops)
 {
 	// matrix w - allocate space (memory)
 	TType row_size = t;
@@ -104,7 +104,7 @@ em(TProfile & profile,
 
 /*
 .Function._computeEStep:
-..summary:Represents the E-step of the EM algorithm for OOPS models.
+..summary:Represents the E-step of the EM algorithm for Oops models.
 ..cat:Motif Search
 ..signature:_computeEStep(matrix_w,joint_log_likelihood,profile,dataset_start,t,l,oops_model)
 ..param.matrix_w:The matrix_w object.
@@ -118,7 +118,7 @@ em(TProfile & profile,
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.oops_model:The oops_model object.
-...type:Tag.OOPS
+...type:Tag.Oops
 ..remarks:The joint log likelihood is not computed in the M-step as MEME does, but rather in the E-step
           of the algorithm.
 ..include:seqan/find_motif.h
@@ -132,7 +132,7 @@ _computeEStep(TMatrix & matrix_w,
 	TIter dataset_start, //start iterator of dataset 
 	TType const & t,
 	TType const & l,
-	OOPS const & /*oops*/)
+	Oops const & /*oops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -205,7 +205,7 @@ _computeEStep(TMatrix & matrix_w,
 
 /*
 .Function._computeStep_M:
-..summary:Represents the M-step of the EM algorithm for OOPS models.
+..summary:Represents the M-step of the EM algorithm for Oops models.
           Refines the background and motif component.
 ..cat:Motif Search
 ..signature:_computeStep_M(profile,dataset_start,matrix_w,t,l,oops_model)
@@ -219,7 +219,7 @@ _computeEStep(TMatrix & matrix_w,
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.oops_model:The oops_model object.
-...type:Tag.OOPS
+...type:Tag.Oops
 ..remarks:The joint log likelihood is computed in the E-step of the algorithm.
 ..include:seqan/find_motif.h
 */
@@ -231,7 +231,7 @@ _computeMStep(TProfile & profile,
 	TMatrix const & matrix_w,
 	TType const & t,
 	TType const & l,
-	OOPS const & /*oops*/)
+	Oops const & /*oops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -291,7 +291,7 @@ _computeMStep(TProfile & profile,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	ZOOPS model
+//	Zoops model
 //////////////////////////////////////////////////////////////////////////////
 
 // gamma=(1/t)*sum(i,1,t,Qi), Qi=sum(j,1,m,zij) (i=1,...,t)
@@ -303,7 +303,7 @@ em(TProfile & profile,
    TType const & t,
    TType const & l,
    double & gamma,
-   ZOOPS const & zoops)
+   Zoops const & zoops)
 {
 	// matrix w - allocate space (memory)
 	TType row_size = t;
@@ -328,7 +328,7 @@ em(TProfile & profile,
 
 /*
 .Function._computeEStep:
-..summary:Represents the E-step of the EM algorithm for ZOOPS models.
+..summary:Represents the E-step of the EM algorithm for Zoops models.
 ..cat:Motif Search
 ..signature:_computeEStep(matrix_w,joint_log_likelihood,profile,dataset_start,gamma,t,l,zoops_model)
 ..param.matrix_w:The matrix_w object.
@@ -344,7 +344,7 @@ em(TProfile & profile,
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.zoops_model:The oops_model object.
-...type:Tag.ZOOPS
+...type:Tag.Zoops
 ..remarks:The joint log likelihood is not computed in the M-step as MEME does, but rather in the E-step
           of the algorithm.
 ..remarks:The parameter gamma is reestimated during the E-step to save calculation time.
@@ -360,7 +360,7 @@ _computeEStep(TMatrix & matrix_w,
 			  double & gamma,
 			  TType const & t,
 			  TType const & l,
-			  ZOOPS const & /*zoops*/)
+			  Zoops const & /*zoops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -464,7 +464,7 @@ _computeEStep(TMatrix & matrix_w,
 
 /*
 .Function._computeStep_M:
-..summary:Represents the M-step of the EM algorithm for ZOOPS models.
+..summary:Represents the M-step of the EM algorithm for Zoops models.
           Refines the background and motif component.
 ..cat:Motif Search
 ..signature:_computeStep_M(profile,dataset_start,matrix_w,t,l,zoops_model)
@@ -478,7 +478,7 @@ _computeEStep(TMatrix & matrix_w,
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.zoops_model:The zoops_model object.
-...type:Tag.ZOOPS
+...type:Tag.Zoops
 ..remarks:The joint log likelihood is computed in the E-step of the algorithm.
 ..include:seqan/find_motif.h
 */
@@ -490,7 +490,7 @@ _computeMStep(TProfile & profile,
 			  TMatrix const & matrix_w,
 			  TType const & t,
 	          TType const & l,
-			  ZOOPS const & /*zoops*/)
+			  Zoops const & /*zoops*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -550,7 +550,7 @@ _computeMStep(TProfile & profile,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//	TCM model
+//	Tcm model
 //////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -570,7 +570,7 @@ em(TProfile & profile,
    TType const & t,
    TType const & l,
    double & lambda,
-   TCM const & tcm)
+   Tcm const & tcm)
 {
 	// matrix z - allocate space (memory)
 	TType row_size = t;
@@ -595,7 +595,7 @@ em(TProfile & profile,
 
 /*
 .Function._computeEStep:
-..summary:Represents the E-step of the EM algorithm for TCM models.
+..summary:Represents the E-step of the EM algorithm for Tcm models.
 ..cat:Motif Search
 ..signature:_computeEStep(matrix_w,joint_log_likelihood,profile,dataset_start,lambda,t,l,tcm_model)
 ..param.matrix_w:The matrix_w object.
@@ -611,7 +611,7 @@ em(TProfile & profile,
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.tcm_model:The tcm_model object.
-...type:Tag.TCM
+...type:Tag.Tcm
 ..remarks:The joint log likelihood is not computed in the M-step as MEME does, but rather in the E-step
           of the algorithm.
 ..remarks:The parameter lambda is reestimated during the E-step to save calculation time.
@@ -627,7 +627,7 @@ _computeEStep(TMatrix & matrix_w,
 			  double & lambda,
 			  TType const & t,
 			  TType const & l,
-			  TCM const & /*tcm*/)
+			  Tcm const & /*tcm*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -698,7 +698,7 @@ _computeEStep(TMatrix & matrix_w,
 
 /*
 .Function._computeStep_M:
-..summary:Represents the M-step of the EM algorithm for TCM models.
+..summary:Represents the M-step of the EM algorithm for Tcm models.
           Refines the background and motif component.
 ..cat:Motif Search
 ..signature:_computeStep_M(profile,dataset_start,matrix_w,t,l,tcm_model)
@@ -712,7 +712,7 @@ _computeEStep(TMatrix & matrix_w,
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.tcm_model:The tcm_model object.
-...type:Tag.TCM
+...type:Tag.Tcm
 ..remarks:The joint log likelihood is computed in the E-step of the algorithm.
 ..include:seqan/find_motif.h
 */
@@ -724,7 +724,7 @@ _computeMStep(TProfile & profile,
 			  TMatrix const & matrix_w,
 			  TType const & t,
 	          TType const & l,
-			  TCM const & /*tcm*/)
+			  Tcm const & /*tcm*/)
 {
 	typedef typename Value<TProfile>::Type TFrequencyDist;
 	typedef typename Value<TFrequencyDist>::Type TValue;
@@ -790,7 +790,7 @@ _computeMStep(TProfile & profile,
 ..param.dataset_start:An iterator pointing to the first input sequence of a given dataset.
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
-..remarks:Function is used by the EM algorithm for TCM models.
+..remarks:Function is used by the EM algorithm for Tcm models.
 ..include:seqan/find_motif.h
 */
 

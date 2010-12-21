@@ -1069,7 +1069,7 @@ void dumpVariantsRealignBatchWrap(
 	
 //	std::fstream tmpfile;
 //	tmpfile.open("Z:/seqan071010/projects/library/apps/chr4.beforeTotal.sam", ::std::ios_base::out);
-//	write(tmpfile, fragmentStore, SAM());
+//	write(tmpfile, fragmentStore, Sam());
 //	tmpfile.close();
 
 #ifdef SNPSTORE_DEBUG
@@ -1621,7 +1621,7 @@ void dumpVariantsRealignBatch(
 
 //	std::fstream tmpfile;
 //  	tmpfile.open("Z:/seqan071010/projects/library/apps/chr4.before.sam", ::std::ios_base::out);
-//  	write(tmpfile, fragmentStore, SAM());
+//  	write(tmpfile, fragmentStore, Sam());
 //  	tmpfile.close()
 ;
 	// convert matches in fragmentstore into a globally consistent alignment
@@ -1631,7 +1631,7 @@ void dumpVariantsRealignBatch(
 
 //	std::fstream tmpfile2;
 //	tmpfile2.open("Z:/seqan071010/projects/library/apps/chr4.after.sam", ::std::ios_base::out);
-//	write(tmpfile2, fragmentStore, SAM());
+//	write(tmpfile2, fragmentStore, Sam());
 //	tmpfile2.close();
 
 #ifdef SNPSTORE_DEBUG
@@ -1724,14 +1724,14 @@ void dumpVariantsRealignBatch(
 		printAlignment(std::cout, Raw(), layout, fragmentStore, 0, (TContigPos)0, (TContigPos)maxPos, 0, 150);
 		std::fstream tmpfile3;
 		tmpfile3.open("test.realigned.sam", ::std::ios_base::out);
-		write(tmpfile3, fragmentStore, SAM());
+		write(tmpfile3, fragmentStore, Sam());
 		tmpfile3.close();
 	}
 	::std::cout << "done." << std::flush;
 
 	//	std::fstream tmpfile2;
 	//	tmpfile2.open("tmpfile_realigned.sam", ::std::ios_base::out);
-	//	write(tmpfile2, fragmentStore, SAM());
+	//	write(tmpfile2, fragmentStore, Sam());
 	//	tmpfile2.close();
 
 #endif

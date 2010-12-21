@@ -149,11 +149,11 @@ int mapReads(
 
 		cerr << "___SETTINGS____________" << endl;
 		cerr << "Genome file:                     \t" << genomeFileNames[0] << endl;
-		if (empty(readFileNames[1]))
-			cerr << "Read file:                       \t" << readFileNames[0] << endl;
+		if (length(readFileNames)<2)
+			cerr << "Read file:                       \t" << std::flush << readFileNames[0] << endl;
 		else
 		{
-			cerr << "Read files:                      \t" << readFileNames[0] << endl;
+			cerr << "Read files:                      \t" << std::flush << readFileNames[0] << endl;
 			for (unsigned i = 1; i < length(readFileNames); ++i)
 				cerr << "                                 \t" << readFileNames[i] << endl;
 		}
@@ -331,7 +331,7 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = gap space");
 	addHelpLine(parser, "1 = position space");
 
-#ifdef DIRECT_MAQ_MAPPING
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
 	addOption(parser, CommandLineOption("mcl", "min-clipped-len",  "min. read length for read clipping", OptionType::Int | OptionType::Label, options.minClippedLen));
 	addOption(parser, CommandLineOption("qih", "quality-in-header","quality string in fasta header", OptionType::Boolean));
 #endif
@@ -421,7 +421,7 @@ int main(int argc, const char *argv[])
  	getOptionValueLong(parser, "errors-suffix", options.maxSuffixErrors);
  	getOptionValueLong(parser, "genome-len", options.specifiedGenomeLen);
 	
-#ifdef DIRECT_MAQ_MAPPING
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
 	getOptionValueLong(parser, "min-clipped-len", options.minClippedLen);
 	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
 #endif	
@@ -442,8 +442,7 @@ int main(int argc, const char *argv[])
 	appendValue(genomeFileNames, getArgumentValue(parser, 0));
 	for (unsigned i = 1; i < argumentCount(parser) && i < maxFiles; ++i)
 		appendValue(readFileNames, getArgumentValue(parser, i), Generous());
-
-	if(argumentCount(parser)>2)
+	if(argumentCount(parser) == 3)
 		options.minMatchLen = 0;  //switch off split mapping if mate pairs are given
 
 	//////////////////////////////////////////////////////////////////////////////
