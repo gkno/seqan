@@ -11,9 +11,9 @@ Folders:
 
 "apps":  SeqAn applications
 "cmake": CMake files to create your own project files
-"demos": SeqAn demos, see also "docs/INDEXPAGE_Demo.html"
+"demos": SeqAn demos, see also http://www.seqan.de/dddoc/html/INDEXPAGE_Demo.html
 "docs":  HTML-Documentation
-"seqan": SeqAn library (add the folder that contains "seqan" to 
+"seqan": SeqAn library (add the folder that contains "seqan" to
          your include path)
 
 
