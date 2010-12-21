@@ -88,7 +88,6 @@ set  (APP_chopsuey_SOURCES ${SEQAN_LIBRARY}/apps/transquant/chopsuey.cpp)
 # Manually set predefined sets of source files for some targets
 set (APP_razers_SOURCES ${SEQAN_LIBRARY}/apps/razers/razers.cpp ${RAZERS_HEADERS})
 set (APP_razers2_SOURCES ${SEQAN_LIBRARY}/apps/razers2/razers.cpp ${RAZERS2_HEADERS})
-set (APP_razers3_SOURCES ${SEQAN_LIBRARY}/apps/razers3/razers.cpp ${RAZERS3_HEADERS})
 set (APP_micro_razers_SOURCES ${SEQAN_LIBRARY}/apps/micro_razers/micro_razers.cpp ${RAZERS_HEADERS})
 set (APP_paramChooser_SOURCES ${SEQAN_LIBRARY}/apps/razers/paramChooser.cpp ${RAZERS_HEADERS})
 set (APP_insegt_SOURCES ${SEQAN_LIBRARY}/apps/insegt/insegt.cpp ${INSEGT_HEADERS})
@@ -100,6 +99,14 @@ else (Boost_FOUND)
   set (APP_transquant_NOBUILD TRUE)
   list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/transquant)
 endif (Boost_FOUND)
+if (OPENMP_FOUND)
+  set (APP_razers3_SOURCES ${SEQAN_LIBRARY}/apps/razers3/razers.cpp ${RAZERS3_HEADERS})
+else (OPENMP_FOUND)
+  message ("WARNING OpenMP not found, not building razers3!")
+  # Disable building of RazerS 3.
+  set (APP_razers3_NOBUILD true)
+  list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/razers3)
+endif (OPENMP_FOUND)
 
 # Make sure the compiler can find object files from the TBB library.
 link_directories (${SEQAN_LIBRARY}/lib)
