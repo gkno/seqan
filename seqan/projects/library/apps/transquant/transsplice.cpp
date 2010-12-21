@@ -260,6 +260,7 @@ void writeTranscripts(TStream &target, TContigOrderings &orderings, TFragmentSto
 	CharString id;
 	CharString tmp, transcript;
 	typedef typename TFragmentStore::TAnnotationStore TAnnotationStore;
+	typedef typename TFragmentStore::TContigPos TContigPos;
 	typedef typename Value<TAnnotationStore>::Type TAnnotation;
 
 	for (unsigned i = 0; i < length(orderings); ++i)
@@ -277,7 +278,7 @@ void writeTranscripts(TStream &target, TContigOrderings &orderings, TFragmentSto
 			for (unsigned j = 0; j < length(orderings[i]); ++j)
 			{
 				TAnnotation &anno = store.annotationStore[orderings[i][j]];
-				if (_max(anno.beginPos, anno.endPos) < length(store.contigStore[anno.contigId].seq))
+				if (_max(anno.beginPos, anno.endPos) < (TContigPos)length(store.contigStore[anno.contigId].seq))
 				{
 					if (anno.beginPos < anno.endPos)
 						append(transcript, infix(store.contigStore[anno.contigId].seq, anno.beginPos, anno.endPos));
