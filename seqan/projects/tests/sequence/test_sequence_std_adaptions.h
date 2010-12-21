@@ -264,11 +264,8 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_memory_std_vector)
 		
 		SEQAN_ASSERT_EQ(vec_target[3],100);
 		SEQAN_ASSERT_EQ(vec_target[4],10);
-		SEQAN_ASSERT_EQ(length(vec_target),9);
-	
+		SEQAN_ASSERT_EQ(length(vec_target),9u);
 	}
-	
-	
 }
 
 
