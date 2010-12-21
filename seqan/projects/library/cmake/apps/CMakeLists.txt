@@ -63,6 +63,9 @@ link_directories (${SEQAN_LIBRARY}/lib
 
 # TODO(holtgrew): Disable apps if dependencies are missing.  This would mean removing the automatic generation of targets but this invites errors anyway.
 
+# pseudo-target to build all apps
+add_custom_target (apps)
+
 # Find targets automatically
 get_filename_component (SEQAN_APPS_ABS ${SEQAN_LIBRARY}/apps ABSOLUTE)
 file (GLOB SEQAN_APPS ${SEQAN_APPS_ABS}/[A-z]*)
@@ -145,6 +148,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 			  add_executable (${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
 			endif (APP_${APP_DIR_REL}_CUDA)
 			add_dependencies (${APP_DIR_REL} ${SEQAN_TARGET})
+			add_dependencies (apps ${APP_DIR_REL})
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (${APP_DIR_REL} rt)
 			endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
