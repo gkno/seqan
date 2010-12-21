@@ -1,0 +1,9 @@
+= SeqAn Changelog =
+
+Add a new list item for each change (excluding trivial things like changes to whitespace and comments).
+Link to changsets with `[CHANGESET-NUMBER]` and tickets with `#TICKET-NUMBER` whenever possible.
+You can use Trac wiki syntax.
+
+== Trunk ==
+
+== Release 1.3 ==
