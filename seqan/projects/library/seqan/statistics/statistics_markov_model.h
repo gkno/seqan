@@ -600,6 +600,7 @@ String<TValue> _ludcmp(Matrix<TValue,2> &result)
     double const TINY = 1.0e-20;
 	int n = length(result,0);
 	int i, imax, j, k,d;
+	imax = MinValue<int>::VALUE;
 	double big,dum,sum,temp;
 	String<TValue> vv;
 	resize(vv, n, 1.0);
