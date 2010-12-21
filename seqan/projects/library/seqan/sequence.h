@@ -72,9 +72,6 @@
 #include <seqan/sequence/string_packed.h>
 #include <seqan/sequence/string_value_expand.h>
 
-#include <seqan/sequence/std_string.h>
-#include <seqan/sequence/std_vector.h>
-
 #include <seqan/sequence/sequence_multiple.h>
 #include <seqan/sequence/sequence_shortcuts.h>
 
@@ -82,5 +79,7 @@
 // Adaptions
 
 #include <seqan/sequence/adapt_std_list.h>
+#include <seqan/sequence/adapt_std_string.h>
+#include <seqan/sequence/adapt_std_vector.h>
 
 #endif //#ifndef SEQAN_HEADER_...

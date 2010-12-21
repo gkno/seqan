@@ -29,15 +29,14 @@
 // DAMAGE.
 //
 // ==========================================================================
-// ==========================================================================
 // Author: Andreas Gogol-Doering <doering@mdc-berlin.de
 // Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 // Adaptions for STL strings to SeqAn strings.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_STD_STRING_H
-#define SEQAN_HEADER_STD_STRING_H
+#ifndef SEQAN_SEQUENCE_ADAPT_STD_STRING_H_
+#define SEQAN_SEQUENCE_ADAPT_STD_STRING_H_
 
 #include <string>
 
@@ -694,4 +693,4 @@ fill(
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_HEADER_STD_STRING_H
+#endif  // #ifndef SEQAN_SEQUENCE_ADAPT_STD_STRING_H_

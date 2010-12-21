@@ -34,8 +34,8 @@
 // Adaptions for STL vectors to SeqAn strings.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_STD_VECTOR_H
-#define SEQAN_HEADER_STD_VECTOR_H
+#ifndef SEQAN_SEQUENCE_ADAPT_STD_VECTOR_H_
+#define SEQAN_SEQUENCE_ADAPT_STD_VECTOR_H_
 
 namespace seqan {
 
@@ -705,4 +705,4 @@ fill(
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_HEADER_STD_STRING_H
+#endif  // #ifndef SEQAN_SEQUENCE_ADAPT_STD_VECTOR_H_
