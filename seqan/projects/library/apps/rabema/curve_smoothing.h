@@ -1,8 +1,7 @@
 // ==========================================================================
-//                              Application Name
+//                      RABEMA Read Alignment Benchmark
 // ==========================================================================
-// <one line to give the program's name and a brief idea of what it does.>
-// Copyright (C) <year>  FU Berlin
+// Copyright (C) 2010 Manuel Holtgrewe, FU Berlin
 //
 // This program is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
