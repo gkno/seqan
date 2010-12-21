@@ -8,20 +8,17 @@
 ..contents
 
 ..section:# Getting Started
-..text:Follow the @Page.Installation|installation instructions@ to install SeqAn on your system.
-..text:A good starting point for learning more about SeqAn is to read the tutorials, which are listed at the end of this page.
+..text:Follow the @http://trac.mi.fu-berlin.de/seqan/wiki/Tutorial/GettingStarted|getting started instructions@ to install SeqAn on your system.
+..text:A good starting point for learning more about SeqAn is to read the @http://trac.mi.fu-berlin.de/seqan/wiki/Tutorial|tutorial@ in our @http://trac.mi.fu-berlin.de/seqan/wiki|Wiki@.
     This will introduce you into the basic concepts of the library and give you an overview about the content of the library.
 ..text:Refer to the @Page.Glossary|glossary@ if you encounter questionable terminology.
-..text:The @Demo|collection of example programs@ demonstrate how to use the data structures and functions offered by SeqAn.
- Find instructions for the installation of the library and how to use the example programs @Page.Installation|here@.    
-..text:For more information about SeqAn visit the SeqAn homepage @http://www.seqan.de|www.seqan.de@.
+..text:The collection of @Demo|example programs@ in this documentation and the assignments in the @http://trac.mi.fu-berlin.de/seqan/wiki/Tutorial|Tutorial@ demonstrate how to use the data structures and functions offered by SeqAn.
 
 ..section:# Contents of this Documentation
 ..table:Overview|An introduction to the basic techniques of SeqAn and tutorials to the parts of the library.
-    Here you can also find the @Page.Glossary|glossary@.
 ..table:@Concept|Concepts@|The ontology of the generic interfaces used in SeqAn. 
 ..table:@Class|Classes@|The data structures, most of them are class templates (some of these templates have @Spec|specializations@).
-..table:@Spec|Specializations@|Specializations of @Class|class templates@ using @Page.Template Subclassing@.
+..table:@Spec|Specializations@|Specializations of @Class|class templates@ using @glos:Template Subclassing@.
 ..table:@Shortcut|Shortcuts@|Abreviations for often used types, i.e. @Class|classes@ and @Spec|specializations@.
 ..table:@Function|Functions@|Global functions that work on data structures.
 ..table:@Metafunction|Metafunctions@|@glos:Metafunction|Metafunctions@ that are used to determine depending types or constants depending on given types or constants at compile time.

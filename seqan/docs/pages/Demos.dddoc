@@ -88,7 +88,6 @@
 ..cat:Searching
 ..summary:Exact string matching.
 ..file:../projects/library/demos/find_exact.cpp
-..see:Page.Searching
 .
 
 .Demo.Approximate Searching
@@ -119,7 +118,6 @@ bybanan matches with score -2
 end: 10
 begin: 4
 banana matches with score -1
-..see:Page.Searching
 ..demofor:Function.find
 ..demofor:Function.findBegin
 ..demofor:Function._getMatchScore
@@ -141,7 +139,6 @@ banana matches with score -1
 109
 116
 ...text:Note that the printed positions are the positions of the last characters of the matches.
-..see:Page.Searching
 ..demofor:Spec.WildShiftAnd
 .
 

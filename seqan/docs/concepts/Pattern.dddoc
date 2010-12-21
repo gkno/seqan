@@ -1,6 +1,5 @@
 .Concept.Pattern:
 ..summary:Object that stores information about the @glos:needle@ of a search.
-..see:Page.Searching
 ..see:Concept.Finder
 
 
