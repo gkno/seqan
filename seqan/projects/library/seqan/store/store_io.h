@@ -350,7 +350,7 @@ read(TFile & file,
 						typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
 						int offset = 0;
 						if ((clr1 < clr2) && (clr1>0)) offset = clr1;
-						else if ((clr1 > clr2) && (clr1 < lenRead)) offset = lenRead - clr1;
+						else if ((clr1 > clr2) && (clr1 < static_cast<TContigPos>(lenRead))) offset = lenRead - clr1;
 						int diff = -1 * (int) (offset);
 						// Clipped begin
 						if (offset != 0) appendValue(alignEl.gaps, TContigGapAnchor(offset, 0), Generous() );
@@ -380,7 +380,7 @@ read(TFile & file,
 						}
 						if (gapLen > 0) appendValue(alignEl.gaps, TContigGapAnchor(offset + lastGap, offset + lastGap + diff), Generous() );
 						// Clipped end
-						if ((clr1 < clr2) && (clr2 < lenRead)) {
+						if ((clr1 < clr2) && (clr2 < static_cast<TContigPos>(lenRead))) {
 							diff -= (lenRead - clr2);				
 							appendValue(alignEl.gaps, TContigGapAnchor(lenRead, lenRead + diff), Generous() );
 						} else if ((clr1 > clr2) && (clr2 > 0)) {

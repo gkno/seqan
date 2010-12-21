@@ -45,20 +45,20 @@ _gap_sequence(TGapsAnchorArray const & gaps,
     TSize gapped_position = 0;
 
     for(TSize g = 0; g < length(gaps) ; ++g) {
-        while(ungapped_position < gaps[g].seqPos && ungapped_position < endClr) {
+        while (static_cast<TReadPos>(ungapped_position) < gaps[g].seqPos && static_cast<TReadPos>(ungapped_position) < endClr) {
             // put 
             append(seq, TGappedValue(ungapped_sequence[ungapped_position] , ungapped_position));
             ++ungapped_position;
             ++gapped_position;
         }
-        while(gapped_position < gaps[g].gapPos) {
+        while (static_cast<TReadPos>(gapped_position) < gaps[g].gapPos) {
             append(seq, TGappedValue('-', endClr + 1));        
             ++gapped_position;
         }
     }
 
     // fill up the rest
-    while(ungapped_position < endClr) {
+    while (static_cast<TReadPos>(ungapped_position) < endClr) {
         append(seq, TGappedValue(ungapped_sequence[ungapped_position] , ungapped_position));
         ++ungapped_position;
     }
@@ -78,6 +78,7 @@ parseContig(FragmentStore<TSpec, TConfig> const& fragStore,
 
     typedef FragmentStore<TSpec, TConfig> TFragmentStore;
     typedef typename Size<TFragmentStore>::Type TSize;
+    typedef typename TFragmentStore::TContigPos TContigPos;
     typedef typename TFragmentStore::TReadPos TReadPos;
     
     typedef typename Value<TAnnotatedCandidateColumn, 2>::Type TCandidateColumn;
@@ -131,12 +132,12 @@ parseContig(FragmentStore<TSpec, TConfig> const& fragStore,
         // check if we need to remove some of the reads
         TAlignedReadSetIter end_erase = current_read_set.begin();
         TAlignedReadSetIter set_end = current_read_set.end();
-        if(end_erase != set_end && _max(end_erase->beginPos, end_erase->endPos) == p) {
+        if(end_erase != set_end && _max(end_erase->beginPos, end_erase->endPos) == static_cast<TContigPos>(p)) {
             // we need to remove some of our AlignedReads
 
             TAlignedReadSetIter start_erase = end_erase;
 
-            while(end_erase != set_end && _max(end_erase->beginPos, end_erase->endPos) == p) {
+            while (end_erase != set_end && _max(end_erase->beginPos, end_erase->endPos) == static_cast<TContigPos>(p)) {
 #ifdef REPSEP_DEBUG_ASSEMBLY_COL_PARSER
                 cout << "-> will remove: " << end_erase->readId << " (" << fragStore.readNameStore[end_erase->readId] << ")" << endl;
 #endif                
@@ -148,7 +149,7 @@ parseContig(FragmentStore<TSpec, TConfig> const& fragStore,
         }
 
         // add all open reads into set
-        while(alignIt != alignItEnd && _min(alignIt->beginPos, alignIt->endPos) == p) {
+        while(alignIt != alignItEnd && _min(alignIt->beginPos, alignIt->endPos) == static_cast<TContigPos>(p)) {
             // add
             current_read_set.insert(*alignIt);
 #ifdef REPSEP_DEBUG_ASSEMBLY_COL_PARSER
