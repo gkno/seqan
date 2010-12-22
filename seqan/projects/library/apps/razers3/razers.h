@@ -1483,7 +1483,7 @@ matchVerify(
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
 	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
-	::std::cout<<"Read:   "<<readSet[readId]<<::std::endl;
+	::std::cout<<"Read:   "<<readSet[readId] << "(id: " << readId << ")" <<::std::endl;
 #endif
 
     unsigned ndlLength = sequenceLength(readId, readSet);
@@ -2049,22 +2049,22 @@ int _mapReads(
     //             return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
     //     }
     // } else {
-        if (options.gapMode == RAZERS_GAPPED)
-        {
-            if (options.alignMode == RAZERS_LOCAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
-            if (options.alignMode == RAZERS_PREFIX)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
+        // if (options.gapMode == RAZERS_GAPPED)
+        // {
+            // if (options.alignMode == RAZERS_LOCAL)
+            //     return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
+            // if (options.alignMode == RAZERS_PREFIX)
+            //     return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
             if (options.alignMode == RAZERS_GLOBAL)
                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesNone_>());
-        } else {
-            if (options.alignMode == RAZERS_LOCAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
-            if (options.alignMode == RAZERS_PREFIX)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
-            if (options.alignMode == RAZERS_GLOBAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
-        }
+        // } else {
+        //     if (options.alignMode == RAZERS_LOCAL)
+        //         return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
+        //     if (options.alignMode == RAZERS_PREFIX)
+        //         return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
+        //     if (options.alignMode == RAZERS_GLOBAL)
+        //         return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
+        // }
     // }
 	return RAZERS_INVALID_OPTIONS;
 }

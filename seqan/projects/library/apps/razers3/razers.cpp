@@ -21,7 +21,7 @@
 
 #define SEQAN_PROFILE					// enable time measuring
 //#define SEQAN_DEBUG_SWIFT				// test SWIFT correctness and print bucket parameters
-//#define RAZERS_DEBUG					// print verification regions
+#define RAZERS_DEBUG					// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX		// ignore highly abundant q-grams
 #define RAZERS_CONCATREADS				// use <ConcatDirect> StringSet to store reads
 // #define RAZERS_MEMOPT					// optimize memory consumption
