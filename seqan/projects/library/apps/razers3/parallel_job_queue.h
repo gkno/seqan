@@ -66,8 +66,9 @@ size_t
 length(TaskQueue<TJob, OmpLock> & queue)
 {
     omp_set_lock(&queue.lock_);
-    return queue.queue_.size();
+    size_t res = queue.queue_.size();
     omp_unset_lock(&queue.lock_);
+    return res;
 }
 
 template <typename TJob>

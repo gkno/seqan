@@ -444,7 +444,7 @@ struct MicroRNA{};
 		bool			oneMatchPerBucket;
 		TPatternState	patternState;
 		
-		MatchVerifier() {}
+		MatchVerifier() : onReverseComplement(false), genomeLength(0), oneMatchPerBucket(false) {}
                
 		MatchVerifier(TFragmentStore_ &_store, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(&_store),
@@ -1462,8 +1462,11 @@ matchVerify(
 	TReadSet &readSet,													// reads
 	RazerSMode<RazerSGlobal, RazerSGapped, RazerSErrors, TMatchNPolicy> const &) // Mismatches and Indels
 {
+    if (length(inf) == 0u)
+      return false;
+
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
-	typedef typename Value<TReadSet>::Type					TRead;
+	//typedef typename Value<TReadSet>::Type					TRead;
 	typedef typename Position<TGenomeInfix>::Type			TPosition;
 
 	// find read match end
@@ -1809,15 +1812,17 @@ int _mapSingleReads(
 	swiftPattern.params.printDots = options._debugLevel > 0; 
 
 	// init edit distance verifiers
-	unsigned readCount = countSequences(readIndex);
 	options.compMask[4] = (options.matchN)? 15: 0;
 	
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	unsigned readCount = countSequences(readIndex);
 	if (options.maqMapping)
 	{
 		resize(cnts, 2);
 		for (unsigned i = 0; i < length(cnts); ++i)
 			resize(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
 	}
+#endif  // #ifdef RAZERS_DIRECT_MAQ_MAPPING
 
 	// clear stats
 	options.countFiltration = 0;
