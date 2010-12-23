@@ -1478,6 +1478,7 @@ swiftInfix(TSwiftHit const &hit, TText &text)
 
 	if (hitBegin < 0) hitBegin = 0;
 	if (hitEnd > textEnd) hitEnd = textEnd;
+	SEQAN_ASSERT_LEQ(hitBegin, hitEnd);
 	return infix(text, hitBegin, hitEnd);
 }
 

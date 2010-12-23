@@ -1076,6 +1076,9 @@ SEQAN_CHECKPOINT
 //	if (diagWidth >= length(needle))
 //		diagWidth = length() - 1;
 	unsigned blockCount = diagWidth / state.MACHINE_WORD_SIZE + 1;
+
+    SEQAN_ASSERT_GT(length(container(finder)), 0u);
+	state.errors = 0;
     
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
     clear(state.DPMat);
