@@ -267,6 +267,7 @@ void clear(VerificationResults<TFragmentStore, TSwiftPattern, TOptions> & verifi
     verificationResults.blocksTotal = 0;
     verificationResults.blocksDone = 0;
     deallocateStores(*verificationResults.globalState, verificationResults.localStores);
+    clear(verificationResults.localStores);
     omp_unset_lock(&verificationResults.lock_);
 }
 
@@ -296,10 +297,11 @@ public:
     unsigned blockId;
     TFragmentStore * fragmentStore;  // global FragmentStore
     VerificationResults<TFragmentStore, TSwiftPattern, TOptions> * verificationResults;
+    bool writeBackOnly;
     //THitString hitString;
 
     JobData(int jobId_, unsigned contigId_, unsigned blockId_, TFragmentStore *fragmentStore_, GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState_)
-            : jobId(jobId_), contigId(contigId_), blockId(blockId_), fragmentStore(fragmentStore_), verificationResults(new VerificationResults<TFragmentStore, TSwiftPattern, TOptions>(globalState_))
+            : jobId(jobId_), contigId(contigId_), blockId(blockId_), fragmentStore(fragmentStore_), verificationResults(new VerificationResults<TFragmentStore, TSwiftPattern, TOptions>(globalState_)), writeBackOnly(false)
     {}
 };
 
@@ -500,31 +502,47 @@ void
 writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData)
 {
     TFragmentStore & localStore = tls.globalState->blockLocalStorages[jobData.blockId].store;
+  std::cerr << "Writing back for block " << jobData.blockId << "(current size == " << length(localStore.alignedReadStore) << ")" << std::endl;
+
+    // TODO(holtgrew): Reserve enough space in localStore.
 
     // Write back all matches from verification to the block local store.
     for (unsigned i = 0; i < length(jobData.verificationResults->localStores); ++i) {
         TFragmentStore * bucket = jobData.verificationResults->localStores[i];
+        std::cerr << "  length(*jobData.verificationResults->localStores[i]) == " << length(*jobData.verificationResults->localStores[i]) << std::endl;
         for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
             bucket->alignedReadStore[j].id = length(localStore.alignedReadStore);
             appendValue(localStore.alignedReadStore, bucket->alignedReadStore[j], Generous());
             appendValue(localStore.alignQualityStore, bucket->alignQualityStore[j], Generous());
+
+            std::cerr << __LINE__ << " back(alrs) == " << back(localStore.alignedReadStore).id << ", " << back(localStore.alignedReadStore).beginPos << ", " << back(localStore.alignedReadStore).endPos << ", " << back(localStore.alignedReadStore).readId << std::endl;
         }
     }
+
+    SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), length(localStore.alignQualityStore));
+    if (!empty(localStore.alignedReadStore))
+      SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), back(localStore.alignedReadStore).id + 1);
+
     // Possibly compact matches.
     if (length(localStore.alignedReadStore) > tls.options.compactThresh)
     {
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
         typename Size<TAlignedReadStore>::Type oldSize = length(localStore.alignedReadStore);
 
-        if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-            maskDuplicates(localStore, TRazerSMode());  // overlapping parallelograms cause duplicates
-
         fprintf(stderr, "[compact]");
+        if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+          maskDuplicates(localStore, TRazerSMode());  // overlapping parallelograms cause duplicates
+
         compactMatches(localStore, tls.counts, tls.options, TRazerSMode(), tls.globalState->blockLocalStorages[jobData.blockId], COMPACT);
     
         if (length(localStore.alignedReadStore) * 4 > oldSize)      // the threshold should not be raised
             tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
     }
+
+    SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), length(localStore.alignQualityStore));
+    if (!empty(localStore.alignedReadStore))
+      SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), back(localStore.alignedReadStore).id + 1);
+    std::cerr << "Wrote back for block " << jobData.blockId << "(current size == " << length(localStore.alignedReadStore) << ")" << std::endl;
 }
 
 template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode>
@@ -538,18 +556,27 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
 	typedef typename TSwiftFinder::THitString THitString;
 
     // First, wait for all verification jobs to complete, write back hits to thread local store and compact this store.
+    typedef VerificationResults<TFragmentStore, TSwiftPattern, TOptions> TVerificationResults;
+    // TODO(holtgrew): Verification results should be block local.
+    TVerificationResults * verificationResults = jobData.verificationResults;
     while (jobData.verificationResults->blocksTotal != jobData.verificationResults->blocksDone) {
         // Busy waiting.
         SEQAN_ASSERT_LEQ(jobData.verificationResults->blocksTotal, jobData.verificationResults->blocksDone);
     }
+    SEQAN_ASSERT_EQ(jobData.verificationResults->blocksTotal, length(jobData.verificationResults->localStores));
     // Set current block local storage for disabling in compaction.
     tls.currentBlockLocalStorage = &tls.globalState->blockLocalStorages[jobData.blockId];
     // Write back hits into local store or global store.
     writeBackToLocal(tls, jobData);
     // Clear verification results struct for now.
+    std::cerr << "LINE " << __LINE__ << " block = " << jobData.blockId << "(current size == " << length(tls.globalState->blockLocalStorages[jobData.blockId].store.alignedReadStore) << ")" << std::endl;
     clear(*jobData.verificationResults);
+    std::cerr << "LINE " << __LINE__ << " block = " << jobData.blockId << "(current size == " << length(tls.globalState->blockLocalStorages[jobData.blockId].store.alignedReadStore) << ")" << std::endl;
     // Set current swift handler to none, should never be called in thread-local verification.
     tls.currentBlockLocalStorage = 0;
+
+    if (jobData.writeBackOnly)
+      return;
 
     // Make sure that the SWIFT finder is correctly initialized.
     initializeFiltration(tls, jobData);
@@ -566,8 +593,14 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     // Enqueue filtration job for remaining sequence, if any.  We simply copy over the data.
     // TODO(holtgrew): Job with this data MUST NOT BE STOLEN since we update it below. Add to queue at all?
     if (referenceLeft) {
-        pushFront(jobQueue(tls), TJob(new TFiltrationJobData(jobData)));
+        TFiltrationJobData * data = new TFiltrationJobData(jobData);
+        verificationResults = data->verificationResults;
+        pushFront(jobQueue(tls), TJob(data));
     } else {
+        TFiltrationJobData * data = new TFiltrationJobData(jobData);
+        data->writeBackOnly = true;
+        verificationResults = data->verificationResults;
+        pushFront(jobQueue(tls), TJob(data));
         tls.swiftPattern->params.printDots = false;
         windowFindEnd(tls.swiftFinder, *tls.swiftPattern);
     }
@@ -582,11 +615,12 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     //clear(jobData.hitString);
     //swap(jobData.hitString, hits);
     for (unsigned i = 1; i < length(splitters); ++i) {
+        std::cerr << "Creating verification jobs." << std::endl;
         unsigned j = length(splitters) - i;
         // Each verification job gets a local FragmentStore from the free list in the global state.
         TFragmentStore * localStorePtr;
-        allocateLocalStore(localStorePtr, *jobData.verificationResults);
-        appendValue(jobs, TJob(new TVerificationJobData(jobData.fragmentStore, jobData.contigId, jobData.blockId, jobData.verificationResults, localStorePtr, hits, splitters[j - 1], splitters[j])));
+        allocateLocalStore(localStorePtr, *verificationResults);
+        appendValue(jobs, TJob(new TVerificationJobData(jobData.fragmentStore, jobData.contigId, jobData.blockId, verificationResults, localStorePtr, hits, splitters[j - 1], splitters[j])));
     }
     pushFront(jobQueue(tls), jobs);
 }

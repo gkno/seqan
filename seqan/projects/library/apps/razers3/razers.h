@@ -475,6 +475,7 @@ struct MicroRNA{};
 					m.id = length(store->alignedReadStore);
 					appendValue(store->alignedReadStore, m, Generous());
 					appendValue(store->alignQualityStore, q, Generous());
+            std::cerr << __LINE__ << " back(alrs) == " << back(store->alignedReadStore).id << ", " << back(store->alignedReadStore).beginPos << ", " << back(store->alignedReadStore).endPos << ", " << back(store->alignedReadStore).readId << std::endl;
 					if (length(store->alignedReadStore) > options->compactThresh)
 					{
 						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
