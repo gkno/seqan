@@ -475,7 +475,6 @@ struct MicroRNA{};
 					m.id = length(store->alignedReadStore);
 					appendValue(store->alignedReadStore, m, Generous());
 					appendValue(store->alignQualityStore, q, Generous());
-            std::cerr << __LINE__ << " back(alrs) == " << back(store->alignedReadStore).id << ", " << back(store->alignedReadStore).beginPos << ", " << back(store->alignedReadStore).endPos << ", " << back(store->alignedReadStore).readId << std::endl;
 					if (length(store->alignedReadStore) > options->compactThresh)
 					{
 						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
@@ -1071,7 +1070,7 @@ void compactMatches(
 		if ((*it).id == TAlignedRead::INVALID_ID) continue;
 		int score = store.alignQualityStore[(*it).id].score;
 		int errors = store.alignQualityStore[(*it).id].errors;
-										if (readNo == 643) std::cerr <<"["<<score<<","<<errors<<"] "<<::std::flush;
+										//if (readNo == 643) std::cerr <<"["<<score<<","<<errors<<"] "<<::std::flush;
 		if (readNo == (*it).readId && (*it).pairMatchId == TAlignedRead::INVALID_ID)
 		{ 
 			if (score <= scoreCutOff || errors >= errorCutOff) continue;

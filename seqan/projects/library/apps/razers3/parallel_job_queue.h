@@ -3,6 +3,12 @@
 #ifndef RAZERS_PARALLEL_JOB_QUEUE_H_
 #define RAZERS_PARALLEL_JOB_QUEUE_H_
 
+#define SEQAN_PARALLEL_DEBUG 1
+#ifndef SEQAN_PARALLEL_DEBUG
+#define SEQAN_PARALLEL_DEBUG 0
+#endif  // #ifndef SEQAN_PARALLEL_DEBUG
+
+
 #include <omp.h>
 
 #include <seqan/basic.h>
@@ -278,6 +284,30 @@ void work(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, TPredi
             }
         }
     }
+
+//#if SEQAN_PARALLEL_DEBUG
+//    std::cerr << ".-- Queue work" << std::endl;
+//    for (int i = 0; i < maxThreads; ++i) {
+//        char const * jobTypeNames = {"filtration", "verification"};
+//        if (length(workTimes[i]) == 0u)
+//            continue;
+//        std::cerr << "| " << i << ": ";
+//        double first = front(workTimes[i]);
+//        for (unsigned j = 0; j < length(workTimes[i]); j += 2) {
+//            int k = 1;
+//            /*
+//            for (; j + k < length(workTimes[i]); k += 2) {
+//                if (fabs(workTimes[i][j + k] - workTimes[i][j + k + 1]) > 0.01)
+//                  break;
+//            }
+//            */
+//            std::cerr << "[" << workTimes[i][j] - first << " (" << jobTypeNames[workTypes[j / 2]] << ") " << workTimes[i][j + k] - first << "] ";
+//            j += k - 1;
+//        }
+//        std::cerr << std::endl;
+//    }
+//    std::cerr << "`--" << std::endl;
+//#endif  // #if SEQAN_PARALLEL_DEBUG
 
     // Sanity check: All queues empty? No thread working?
     for (int i = 0; i < omp_get_max_threads(); ++i) {

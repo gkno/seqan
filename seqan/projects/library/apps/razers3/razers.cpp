@@ -222,7 +222,7 @@ inline void whichMacros(){
 // Command line parsing and parameter choosing
 int main(int argc, const char *argv[]) 
 {
-	whichMacros();
+	//whichMacros();
 	
 	RazerSOptions<>			options;
 	ParamChooserOptions		pm_options;
