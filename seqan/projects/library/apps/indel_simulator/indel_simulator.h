@@ -335,13 +335,13 @@ int readGFF(
 	{
 		
 		if(c == '#')
-			_parse_skipLine(file,c);	
+			_parseSkipLine(file,c);	
 	
 		// skip whitespaces just in case (actually there shouldnt be a whitespace at the beginning of a line)
 		_parseSkipWhitespace(file, c);
 	
 		if(c == '#')
-			_parse_skipLine(file,c);	
+			_parseSkipLine(file,c);	
 		// and read entry in column 1  --> genomeID
 		CharString temp_str;
 		_parseReadWordUntilWhitespace(file,temp_str,c); 
@@ -356,7 +356,7 @@ int readGFF(
 		if(it != gIdStringToIdNumMap.end()) contigId = it->second;
 		else
 		{
-			_parse_skipLine(file,c);
+			_parseSkipLine(file,c);
 			continue;
 		}
 		
@@ -386,7 +386,7 @@ int readGFF(
 		indel.duplication = 0;
 		if(indel.originalPos + indel.indelSize > length(genomes[contigId]) )
 		{
-			_parse_skipLine(file,c);
+			_parseSkipLine(file,c);
 			continue;
 		}
 
@@ -460,7 +460,7 @@ int readGFF(
 			else
 			{
 				if(current_tag=="duplication") indel.duplication = true;
-		//		else _parse_skipLine(file,c);
+		//		else _parseSkipLine(file,c);
 			}
 		}
 		appendValue(indelSet,indel);

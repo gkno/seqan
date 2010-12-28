@@ -467,7 +467,7 @@ int loadSampleCounts(ModelParameters<TSpec> & modelParameters, TFragmentStore /*
         _parseReadSamIdentifier(file, contigName, c);
         _parseSkipUntilChar(file, '\t', c);
         sampleCount = _parseReadNumber(file, c);
-        _parse_skipLine(file, c);
+        _parseSkipLine(file, c);
 
         size_t contigId = 0;
         if (!getIdByName(fragmentStore.contigNameStore, contigName, contigId, fragmentStore.contigNameStoreCache)) {

@@ -223,7 +223,7 @@ _readOneAnnotation (
 	_parseReadGffIdentifier(file, ctx.contigName, c);
 	if (!empty(ctx.contigName) && ctx.contigName[0] == '#')
 	{
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		return false;
 	}
 	_parseSkipUntilChar(file, '\t', c);

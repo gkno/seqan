@@ -126,9 +126,9 @@ read(TFile & file,
 	TValue c;
 	if (_streamEOF(file)) return;
 	else c = _streamGet(file);
-	_parse_skipLine(file, c);
+	_parseSkipLine(file, c);
 	TSize nseq = (TSize) _parseReadNumber(file, c);
-	_parse_skipLine(file, c);
+	_parseSkipLine(file, c);
 
 	// Read sequences
 	typedef String<TSize> TMapping;
@@ -138,7 +138,7 @@ read(TFile & file,
 		TName myName;
 		_parseReadIdentifier(file, myName, c);
 		value(posMap, i) = namePosMap.find(myName)->second;
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 	}
 
 	bool seq1ToN = false;
@@ -171,14 +171,14 @@ read(TFile & file,
 			seq1 = value(posMap, seq1);
 			seq2 = value(posMap, seq2);
 		} else if (c == '!') {
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 		} else {
 			TSize res1 = _parseReadNumber(file, c);
 			_parseSkipWhitespace(file,c);
 			TSize res2 = _parseReadNumber(file, c);
 			_parseSkipWhitespace(file,c);
 			TScoreValue weight = _parseReadNumber(file, c);
-			_parse_skipLine(file,c);
+			_parseSkipLine(file,c);
 
 			if (seq1 < seq2) {
 				TSize index = seq1 * nseq + seq2;
@@ -243,12 +243,12 @@ read(TFile & file,
 	else c = _streamGet(file);
 
 	// Ignore first line
-	_parse_skipLine(file, c);
+	_parseSkipLine(file, c);
 	
 	// Read number of sequences
 	TSize nSeq = (TSize) _parseReadNumber(file, c);
 	resize(oriStr, nSeq);
-	_parse_skipLine(file, c);
+	_parseSkipLine(file, c);
 
 	// Read sequences
 	for(TSize i=0; i<nSeq; ++i) {
@@ -257,7 +257,7 @@ read(TFile & file,
 		_parseReadNumber(file, c);
 		_parseSkipWhitespace(file, c);
 		_parseReadSequenceData(file,c,oriStr[i]);
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 	}
 }
 
@@ -374,7 +374,7 @@ read(TFile & file,
 			}
 			c = _streamGet(file);
 			appendValue(names, _parseReadIdentifier(file, c));
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 		} else if ((c == '-') || (c == '.') || (c == '\n') || (c == '\r')) {
 			c = _streamGet(file);
 		} else {
@@ -478,7 +478,7 @@ read(TFile & file,
 			clear(nextSeq);
 			_parseReadIdentifier(file, nextSeq, c);
 			appendValue(names, nextSeq);
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 		} else if ((c == '\n') || (c == '\r')) {
 			c = _streamGet(file);
 		} else {
@@ -580,7 +580,7 @@ read(TFile & file,
 		_parseSkipWhitespace(file, c);
 		seq2 = _parseReadIdentifier(file, c);
 		if (seq1 == seq2) {
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 			continue;
 		}
 		TSize seq1Id = namePosMap[seq1];
@@ -617,7 +617,7 @@ read(TFile & file,
 
 		_appendFragment(matches, seq1Id, --beg1, seq2Id, --beg2, len, reversed);
 		appendValue(scores, rawScore);
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 	}
 }
 
@@ -787,7 +787,7 @@ read(TFile & file,
 			 _parseSkipWhitespace(file, c);
 			 if (c == 'R') {
 				 reversed = true;
-				 _parse_skipLine(file, c);
+				 _parseSkipLine(file, c);
 			 } else reversed = false;
 		} else {
 			_parseSkipWhitespace(file, c);
@@ -802,7 +802,7 @@ read(TFile & file,
 			TSize beg1 = _parseReadNumber(file, c);
 			_parseSkipWhitespace(file, c);
 			TSize len = _parseReadNumber(file, c);
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 			if (seq1Id == seq2Id) continue;
 			
 			if (!reversed) _appendNewMatch(matches, scores, seq1Id, seq2Id, --beg1, --beg2, len, reversed);

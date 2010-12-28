@@ -400,7 +400,7 @@ _getNextHspFilePos(TFile & file,
 	(it.data_host->data_host)->act_c = c;
 
 	_parseSkipWhitespace(file,c);
-	_parse_skipLine(file,c);
+	_parseSkipLine(file,c);
 
 	TPosition next_event_pos;
 	bool last_hit = true;

@@ -269,7 +269,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 	while (!_streamEOF(file))
 	{
 		while (c != '>' && !_streamEOF(file))
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 		if (_streamEOF(file)) break;
 		
 		c = _streamGet(file);
@@ -282,7 +282,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 			break;
 		}
 
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 
 		int locusNum = -1;
 		int transNum = -1;
@@ -980,7 +980,7 @@ loadAlignments(FragmentStore<TSpec, TConfig> & store, CharString const &fileName
 		_parseSkipWhitespace(file, c);
 		int posEnd = _parseReadNumber(file, c);	// end position in transcript
 
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 	}
 	std::string header;
 

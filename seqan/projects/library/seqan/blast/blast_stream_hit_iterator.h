@@ -429,7 +429,7 @@ _getNextHitFilePos(TFile & file,
 	it.data_host->act_c = c;
 
 	_parseSkipWhitespace(file,c);
-	_parse_skipLine(file,c);
+	_parseSkipLine(file,c);
 
 //	String<char> delim = ">";
 	if(_parseUntilBeginLine(file,c,'>'))

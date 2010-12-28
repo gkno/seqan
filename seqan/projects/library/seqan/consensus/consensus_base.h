@@ -1376,7 +1376,7 @@ _convertSimpleReadFile(TFile& file,
 					}
 				}
 			}
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 			_parseSkipWhitespace(file, c);
 			while ((!_streamEOF(file)) && (c != '>')) {
 				_parseReadSequenceData(file,c, seq);
@@ -1431,7 +1431,7 @@ _convertSimpleReadFile(TFile& file,
 			appendValue(fragStore.alignedReadStore, alignEl, Generous());
 			++count;
 		} else {
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 		}
 	}
 
@@ -1451,14 +1451,14 @@ _convertSimpleReadFile(TFile& file,
 					appendValue(contigEid, c, Generous());
 					c = _streamGet(strmRef);
 				}
-				_parse_skipLine(strmRef, c);
+				_parseSkipLine(strmRef, c);
 				_parseSkipWhitespace(strmRef, c);
 				while ((!_streamEOF(strmRef)) && (c != '>')) {
 					_parseReadSequenceData(strmRef,c,contigEl.seq);
 					_parseSkipWhitespace(strmRef, c);
 				}
 			} else {
-				_parse_skipLine(strmRef, c);
+				_parseSkipLine(strmRef, c);
 			}
 		}
 		fclose(strmRef);
@@ -1516,7 +1516,7 @@ _convertSimpleReadFile(TFile& file,
 						}
 					}
 				}
-				_parse_skipLine(strmFrag, c);
+				_parseSkipLine(strmFrag, c);
 				_parseSkipWhitespace(strmFrag, c);
 
 				// Read the two reads belonging to this mate pair
@@ -1524,7 +1524,7 @@ _convertSimpleReadFile(TFile& file,
 				c = _streamGet(strmFrag);
 				_parseSkipWhitespace(strmFrag, c);
 				matePairEl.readId[1] = _parseReadNumber(strmFrag, c);
-				_parse_skipLine(strmFrag, c);
+				_parseSkipLine(strmFrag, c);
 
 				// Insert mate pair
 				if (matePairEl.readId[0] != matePairEl.readId[1]) {
@@ -1533,7 +1533,7 @@ _convertSimpleReadFile(TFile& file,
 					appendValue(fragStore.matePairNameStore, eid, Generous());
 				}
 			} else {
-				_parse_skipLine(strmFrag, c);
+				_parseSkipLine(strmFrag, c);
 			}
 		}
 		fclose(strmFrag);
@@ -1582,7 +1582,7 @@ _convertSimpleReadFile(TFile& file,
 						}
 					}
 				}
-				_parse_skipLine(strmLib, c);
+				_parseSkipLine(strmLib, c);
 				_parseSkipWhitespace(strmLib, c);
 
 				// Read the mean and standard deviation
@@ -1590,14 +1590,14 @@ _convertSimpleReadFile(TFile& file,
 				c = _streamGet(strmLib);
 				_parseSkipWhitespace(strmLib, c);
 				libEl.std = _parseReadNumber(strmLib, c);
-				_parse_skipLine(strmLib, c);
+				_parseSkipLine(strmLib, c);
 
 				// Insert mate pair
 				libIdMap.insert(std::make_pair(id, length(fragStore.libraryStore)));
 				appendValue(fragStore.libraryStore, libEl, Generous());
 				appendValue(fragStore.libraryNameStore, eid, Generous());
 			} else {
-				_parse_skipLine(strmLib, c);
+				_parseSkipLine(strmLib, c);
 			}
 		}
 		fclose(strmLib);

@@ -275,7 +275,7 @@ void loadWitFile(WitStore & store,
     while (!_streamEOF(fstrm)) {
         // Skip comments.
         if (c == '#') {
-            _parse_skipLine(fstrm, c);
+            _parseSkipLine(fstrm, c);
             continue;
         }
 
@@ -300,7 +300,7 @@ void loadWitFile(WitStore & store,
         firstPos = _parseReadNumber(fstrm, c);
         _parseSkipWhitespace(fstrm, c);
         lastPos = _parseReadNumber(fstrm, c);
-        _parse_skipLine(fstrm, c);
+        _parseSkipLine(fstrm, c);
 
         // Insert record into read store.
         //

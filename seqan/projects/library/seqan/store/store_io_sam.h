@@ -457,7 +457,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         // skip header for now
         while (c == '@')
-            _parse_skipLine(file, c);
+            _parseSkipLine(file, c);
     }
     
 //////////////////////////////////////////////////////////////////////////////

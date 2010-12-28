@@ -93,7 +93,9 @@ void initializeBlockLocalStorages(
         TPosition jBegin = splitters[i];
         TPosition jEnd = splitters[i + 1];
         for (TPosition j = jBegin; j < jEnd; ++j)
-            appendValue(value(index.text), store.readSeqStore[j]);
+            appendValue(indexText(index), store.readSeqStore[j]);
+        unsigned x = length(indexText(index));
+        fprintf(stderr, "Index #%d has %u entries.\n", i, x);
         index.shape = shape;
 
 #ifdef RAZERS_OPENADDRESSING
@@ -186,6 +188,9 @@ struct WorkRecord
   int type;
 
   WorkRecord() : begin(0), end(0), type(0) {}
+
+  WorkRecord(double begin_, double end_, int type_)
+      : begin(begin_), end(end_), type(type_) {}
 };
 
 // Simple thread local storage implementation.
@@ -224,8 +229,10 @@ public:
 enum RazerSJobType
 {
     JOB_NONE,
+    JOB_FILTRATION_INIT,
     JOB_FILTRATION,
-    JOB_VERIFICATION
+    JOB_VERIFICATION,
+    JOB_WRITEBACK
 };
 
 // Stores the results of the verification.
@@ -400,6 +407,13 @@ public:
     }
 };
 
+template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode>
+inline
+bool isVerification(Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > const & job)
+{
+  return job.jobType == JOB_VERIFICATION;
+}
+
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
@@ -553,6 +567,100 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
       SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), back(localStore.alignedReadStore).id + 1);
 }
 
+// work Filtration
+//
+// initialize
+// while not done:
+//   find window
+//   add verification jobs
+//   while take verification job out of queue:
+//     work for job
+// find window end
+
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode>
+void
+workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData)
+{
+    //fprintf(stderr, "[filtration]");
+    double beginTime = sysTime();
+    typedef JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TFiltrationJobData;
+    typedef JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TVerificationJobData;
+
+	typedef typename TSwiftFinder::THitString THitString;
+    
+    // Set current block local storage for disabling in compaction.
+    tls.currentBlockLocalStorage = &tls.globalState->blockLocalStorages[jobData.blockId];
+    // Clear verification results struct for now.
+    clear(*jobData.verificationResults);
+    // Set current swift handler to none, should never be called in thread-local verification.
+    tls.currentBlockLocalStorage = 0;
+
+    // Make sure that the SWIFT finder is correctly initialized.
+    initializeFiltration(tls, jobData);
+    double endTime = sysTime();
+    appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_FILTRATION_INIT));
+  
+    // Perform alternating filtration and verification work for current block and contig.
+    while (true) {
+        // Filter reads in the next window.
+        double beginTime = sysTime();
+        bool referenceLeft = windowFindNext(tls.swiftFinder, *tls.swiftPattern, tls.options.windowSize);
+        THitString & hits = getSwiftHits(tls.swiftFinder);
+        tls.globalState->blockLocalStorages[jobData.blockId].options.countFiltration += length(hits);
+        // {
+        //     int swiftHits = length(hits);
+        //     fprintf(stderr, "Thread %ud Found %d SWIFT hits!\n", tls.threadId, swiftHits);
+        // }
+
+        // Enqueue verification jobs, if any.
+        if (length(hits) > 0u) {
+            String<unsigned> splitters;
+            computeSplittersBySlotSize(splitters, length(hits), tls.options.verificationPackageSize);
+
+            String<TJob> jobs;
+            reserve(jobs, length(splitters) - 1);
+            for (unsigned i = 1; i < length(splitters); ++i) {
+                unsigned j = length(splitters) - i;
+                // Each verification job gets a local FragmentStore from the free list in the global state.
+                TFragmentStore * localStorePtr;
+                allocateLocalStore(localStorePtr, *jobData.verificationResults);
+                appendValue(jobs, TJob(new TVerificationJobData(jobData.fragmentStore, jobData.contigId, jobData.blockId, jobData.verificationResults, localStorePtr, hits, splitters[j - 1], splitters[j])));
+            }
+            pushFront(jobQueue(tls), jobs);
+        }
+        double endTime = sysTime();
+        appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_FILTRATION));
+
+        beginTime = sysTime();
+        // Work through verification jobs, allowing work-stealing by other thread.
+        {
+            while (work(tls, onlyVerificationStealable<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode>, omp_get_thread_num()))
+                continue;
+        }
+        endTime = sysTime();
+        appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_VERIFICATION));
+
+        beginTime = sysTime();
+        // Wait until verification for this block has finished.
+        while (jobData.verificationResults->blocksTotal != jobData.verificationResults->blocksDone) {
+            // Busy waiting.
+            SEQAN_ASSERT_LEQ(jobData.verificationResults->blocksTotal, jobData.verificationResults->blocksDone);
+        }
+        // Write back hits into local store or global store.
+        writeBackToLocal(tls, jobData);
+        endTime = sysTime();
+        if (endTime - beginTime > 0.001)
+            appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_WRITEBACK));
+        
+        // If there is no more sequence left then finalize finder and break out of loop.
+        if (!referenceLeft) {
+            windowFindEnd(tls.swiftFinder, *tls.swiftPattern);
+            break;
+        }
+    }
+}
+
+/*
 template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode>
 void
 workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData)
@@ -629,11 +737,13 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     }
     pushFront(jobQueue(tls), jobs);
 }
+*/
 
 template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TThreadId, typename TCounts, typename TRazerSMode>
 void
 workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData, TThreadId thisThreadId, TThreadId jobThreadId)
 {
+    double beginTime = sysTime();
     //fprintf(stderr, "[verification]");
     typedef JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TVerificationJobData;
     typedef typename TVerificationJobData::THitString THitString;
@@ -672,6 +782,9 @@ workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     // TODO(holtgrew): Unused?
     (void) thisThreadId;
     (void) jobThreadId;
+
+    double endTime = sysTime();
+    appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_VERIFICATION));
 }
 
 template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TThreadId, typename TCounts, typename TRazerSMode>
@@ -683,8 +796,6 @@ work(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwif
 {
     typedef JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TFiltrationJobData;
     typedef JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TVerificationJobData;
-
-    appendValue(tls.workRecords, WorkRecord(
 
     if (job.jobType == JOB_FILTRATION)
         workFiltration(tls, *static_cast<TFiltrationJobData *>(job.jobData));
@@ -772,8 +883,7 @@ void _mapSingleReadsParallelToContig(
     // Fire up filtration jobs.
     int oldThreshold = globalState.globalOptions->compactThresh;
     globalState.globalOptions->compactThresh = MaxValue<unsigned>::VALUE;
-    work(threadLocalStorages, onlyVerificationStealable<TFragmentStore, TSwiftFinder,
-         TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode>, StealOne());
+    workInParallel(threadLocalStorages, onlyVerificationStealable<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode>, StealOne());
     globalState.globalOptions->compactThresh = oldThreshold;
 
     // Restore orientation of contig
@@ -861,10 +971,54 @@ int _mapSingleReadsParallel(
 			_mapSingleReadsParallelToContig(store, threadLocalStorages, globalState, contigId, cnts, 'F', options, shape, mode);
 		double beginReverse = sysTime();
         std::cerr << "  TIME forward mapping (" << contigId << ") " << (beginReverse - beginForward) << " s" << std::endl;
+        std::cerr << ".-- Queue work" << std::endl;
+        for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
+            char const * jobTypeNames[] = {"NONE", "filtration init", "filtration", "verification", "writeback", "5", "6"};
+            if (length(threadLocalStorages[i].workRecords) == 0u)
+                continue;
+            std::cerr << "| " << i << ": ";
+            double first = front(threadLocalStorages[i].workRecords).begin;
+            for (unsigned j = 0; j < length(threadLocalStorages[i].workRecords); ++j) {
+                int k = 0;
+                for (; j + k < length(threadLocalStorages[i].workRecords); ++k) {
+                    if (fabs(threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j + k + 1].begin) > 0.01)
+                      break;
+                    if (threadLocalStorages[i].workRecords[j + k].type != threadLocalStorages[i].workRecords[j + k + 1].type)
+                      break;
+                }
+                std::cerr << "[" << threadLocalStorages[i].workRecords[j].begin - first << " (" << jobTypeNames[threadLocalStorages[i].workRecords[j].type] << ", " << threadLocalStorages[i].workRecords[j].end - threadLocalStorages[i].workRecords[j].begin << "s) " << threadLocalStorages[i].workRecords[j + k].end - first << "] ";
+                j += k;
+            }
+            std::cerr << std::endl;
+            clear(threadLocalStorages[i].workRecords);
+        }
+        std::cerr << "`--" << std::endl;
 		if (options.reverse)
 			_mapSingleReadsParallelToContig(store, threadLocalStorages, globalState, contigId, cnts, 'R', options, shape, mode);
 		double endReverse = sysTime();
         std::cerr << "  TIME reverse mapping (" << contigId << ") " << (endReverse - beginReverse) << " s" << std::endl;
+        std::cerr << ".-- Queue work" << std::endl;
+        for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
+            char const * jobTypeNames[] = {"NONE", "filtration init", "filtration", "verification", "writeback", "5", "6"};
+            if (length(threadLocalStorages[i].workRecords) == 0u)
+                continue;
+            std::cerr << "| " << i << ": ";
+            double first = front(threadLocalStorages[i].workRecords).begin;
+            for (unsigned j = 0; j < length(threadLocalStorages[i].workRecords); ++j) {
+                int k = 0;
+                for (; j + k < length(threadLocalStorages[i].workRecords); ++k) {
+                    if (fabs(threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j + k + 1].begin) > 0.01)
+                      break;
+                    if (threadLocalStorages[i].workRecords[j + k].type != threadLocalStorages[i].workRecords[j + k + 1].type)
+                      break;
+                }
+                std::cerr << "[" << threadLocalStorages[i].workRecords[j].begin - first << " (" << jobTypeNames[threadLocalStorages[i].workRecords[j].type] << ", " << threadLocalStorages[i].workRecords[j].end - threadLocalStorages[i].workRecords[j].begin << "s) " << threadLocalStorages[i].workRecords[j + k].end - first << "] ";
+                j += k;
+            }
+            std::cerr << std::endl;
+            clear(threadLocalStorages[i].workRecords);
+        }
+        std::cerr << "`--" << std::endl;
 		unlockAndFreeContig(store, contigId);
     }
     double endMapping = sysTime();

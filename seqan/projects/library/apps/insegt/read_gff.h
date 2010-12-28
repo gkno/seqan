@@ -59,7 +59,7 @@ readAnnotationsFromGFF(FragmentStore<TSpec, TConfig> & me,
 	while (!_streamEOF(file))
 	{
 		c = _streamGet(file);
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		++count;
 	}
 	file.close();
@@ -111,7 +111,7 @@ readAnnotationsFromGFF(FragmentStore<TSpec, TConfig> & me,
 		if (_parseReadIdentifier(file, c) != "ID") 
 		{
 			std::cout << "first feature field should be 'ID'"<< std::endl; 
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 			resize(me.annotationNameStore, length(me.annotationNameStore) - 1, Generous());
 			continue;
 		}
@@ -126,7 +126,7 @@ readAnnotationsFromGFF(FragmentStore<TSpec, TConfig> & me,
 			if(_parseReadWord(file,c) != "ParentID") 
 			{
 				std::cout << "second feature field should be 'ParentID'"<< std::endl;
-				_parse_skipLine(file, c);
+				_parseSkipLine(file, c);
 				resize(me.annotationNameStore, length(me.annotationNameStore) - 1, Generous());	
 				continue;
 			}
@@ -167,7 +167,7 @@ readAnnotationsFromGFF(FragmentStore<TSpec, TConfig> & me,
 			}
 		}
 		
-		_parse_skipLine(file, c);	
+		_parseSkipLine(file, c);	
 	}
 	file.close();
 
@@ -272,7 +272,7 @@ readAnnotationsFromGFF(FragmentStore<TSpec, TConfig> & me,
 		_parseSkipWhitespace(file, c);
 		if (_parseReadWord(file, c) != "ID") 
 		{
-			_parse_skipLine(file, c);	
+			_parseSkipLine(file, c);	
 			continue;
 		}
 		c =_streamGet(file);
@@ -285,7 +285,7 @@ readAnnotationsFromGFF(FragmentStore<TSpec, TConfig> & me,
 		{
 			if(_parseReadWord(file,c) != "ParentID") 
 			{
-				_parse_skipLine(file, c);	
+				_parseSkipLine(file, c);	
 				continue;
 			}
 			c = _streamGet(file);
@@ -352,7 +352,7 @@ readAnnotationsFromGFF(FragmentStore<TSpec, TConfig> & me,
 			goNext(itName);
 			goNext(itStore);
 		}
-		_parse_skipLine(file, c);		
+		_parseSkipLine(file, c);		
 	}
 	file.close();
 }

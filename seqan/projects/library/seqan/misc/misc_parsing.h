@@ -54,7 +54,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TFile, typename TChar>
 inline void 
-_parse_skipLine(TFile& file, TChar& c)
+_parseSkipLine(TFile& file, TChar& c)
 {
 	if (c == '\n') {
 		c = _streamGet(file);
@@ -414,7 +414,7 @@ SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
 	while (!_streamEOF(file) && c != x){
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file)) return true;
@@ -439,7 +439,7 @@ SEQAN_CHECKPOINT
 		if(c == word[0])
 			if(word == _parseReadWord(file,c,len))
 				break;
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file)) return true;
@@ -472,7 +472,7 @@ SEQAN_CHECKPOINT
 		if(i >= num_lines)
 			break;
 		++i;
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file) && found) return true;
@@ -502,7 +502,7 @@ SEQAN_CHECKPOINT
 				break;
 			}
 		if(found) break;
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file)) return true;

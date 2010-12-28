@@ -175,7 +175,7 @@ int rectify(CharString const &src, CharString const &dst, TFragStore &fragStore,
 		_parseSkipBlanks(srcFile, c);
 		line.ids = _parseReadFilepath(srcFile, c);
 		assign(ids, line.ids);
-		_parse_skipLine(srcFile, c);
+		_parseSkipLine(srcFile, c);
 		
 		if (line.type != "Exon")
 		{

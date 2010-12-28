@@ -151,7 +151,7 @@ _readOneAnnotation (
 	_parseReadUcscIdentifier(file, ctx.transName, c);
 	if (!empty(ctx.transName) && ctx.transName[0] == '#')
 	{
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		return false;
 	}
 	_parseSkipUntilChar(file, '\t', c);
@@ -166,7 +166,7 @@ _readOneAnnotation (
 	{
 		ctx.format = ctx.KNOWN_ISOFORMS;
 		assign(prefix(ctx.transName, 0), "GENE");
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		return true;
 	}
 	ctx.format = ctx.KNOWN_GENE;

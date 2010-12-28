@@ -168,7 +168,7 @@ template <typename TStream, typename TChar>
     if (tmp != CharString("VN:1.0"))
         std::cerr << "WARNING: Version is not \"VN:1.0\"" << std::endl;
     // Skip to and after end of line.
-    _parse_skipLine(stream, c);
+    _parseSkipLine(stream, c);
 }
 
 // Represents an entry in a WIT file.
@@ -241,7 +241,7 @@ bool readWitRecord(TStream &stream, TString &readName,
 
     // Maybe skip comments.
     while (not _streamEOF(stream) and c == '#')
-        _parse_skipLine(stream, c);
+        _parseSkipLine(stream, c);
     if (_streamEOF(stream))
         return false;
 
@@ -258,7 +258,7 @@ bool readWitRecord(TStream &stream, TString &readName,
 //     std::cout << "readName, score, first, last, " << readName << ", " << score << ", " << first << ", " << last << std::endl;
     
     // Skip to and after end of line.
-    _parse_skipLine(stream, c);
+    _parseSkipLine(stream, c);
     return true;
 }
 */

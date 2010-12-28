@@ -59,7 +59,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 	while (!_streamEOF(file))
 	{
 		c = _streamGet(file);
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		++count;
 	}
 	file.close();
@@ -111,7 +111,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 		if (_parseReadIdentifier(file, c) != "gene_id") 
 		{
 			std::cout << "first feature field should be 'gene_id'"<< std::endl; 
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 			resize(me.annotationNameStore, length(me.annotationNameStore) - 1, Generous());
 			continue;
 		}
@@ -127,7 +127,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 			if(_parseReadIdentifier(file,c) != "transcript_id") 
 			{
 				std::cout << "second feature field should be 'transcript_id'"<< std::endl;
-				_parse_skipLine(file, c);
+				_parseSkipLine(file, c);
 				resize(me.annotationNameStore, length(me.annotationNameStore) - 1, Generous());	
 				continue;
 			}
@@ -169,7 +169,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 			}
 		}
 		
-		_parse_skipLine(file, c);	
+		_parseSkipLine(file, c);	
 	}
 	file.close();
 
@@ -273,7 +273,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 		_parseSkipWhitespace(file, c);
 		if (_parseReadIdentifier(file, c) != "gene_id") 
 		{
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 			continue;
 		}
 		_parseSkipWhitespace(file, c); 
@@ -287,7 +287,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 		{
 			if(_parseReadIdentifier(file,c) != "transcript_id") 
 			{
-				_parse_skipLine(file, c);	
+				_parseSkipLine(file, c);	
 				continue;
 			}
 			_parseSkipWhitespace(file, c); 
@@ -353,7 +353,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 			goNext(itName);
 			goNext(itStore);
 		}
-		_parse_skipLine(file, c);		
+		_parseSkipLine(file, c);		
 	}
 	file.close();
 }

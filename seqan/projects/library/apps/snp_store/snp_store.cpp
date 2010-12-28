@@ -1091,7 +1091,7 @@ int readMatchesFromGFF_Batch(
 		if(it != gIdStringToIdNumMap.end()) contigId = it->second;
 		else
 		{
-			_parse_skipLine(*file,c);
+			_parseSkipLine(*file,c);
 			continue;
 		}
 		if((int)contigId < (int)highestChrId)
@@ -1103,7 +1103,7 @@ int readMatchesFromGFF_Batch(
 		highestChrId = contigId;
 		if(contigId < currSeqNo)	// havent reached the sequence of interest yet
 		{
-			_parse_skipLine(*file,c);
+			_parseSkipLine(*file,c);
 			continue;
 		}
 		
@@ -1151,7 +1151,7 @@ int readMatchesFromGFF_Batch(
 			::std::cout << endPos << "\t";
 		if(endPos + (TContigPos)options.windowBuff < currentBegin)	//we havent reached a relevant read yet
 		{
-			_parse_skipLine(*file,c);
+			_parseSkipLine(*file,c);
 			continue;
 		}
 		
@@ -1385,7 +1385,7 @@ int readMatchesFromGFF_Batch(
 					curr_read = temp_read;
 				}
 			}
-			if(qualityFound ) {_parse_skipLine(*file,c); break;}
+			if(qualityFound ) {_parseSkipLine(*file,c); break;}
 			
 		}
 		if (options._debugLevel>0&&(rSeq%1000000)==0)cout <<rSeq<<".."<<std::flush;

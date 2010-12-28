@@ -403,7 +403,7 @@ SEQAN_CHECKPOINT
 	String<char> search = "Lambda";
 	if(_parseUntilBeginLine(file,c,search,6))
 	{
-		_parse_skipLine(file, c);
+		_parseSkipLine(file, c);
 		_parseSkipWhitespace(file,c);
 		pfloat = _parseReadFloat(file,c);
 		blastObj.lambda = pfloat;
@@ -415,7 +415,7 @@ SEQAN_CHECKPOINT
 		blastObj.h = pfloat;
 		if(_parseUntilBeginLine(file,c,search,6,4))
 		{
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 			_parseSkipWhitespace(file,c);
 			pfloat = _parseReadFloat(file,c);
 			blastObj.gapped_lambda = pfloat;

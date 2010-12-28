@@ -889,8 +889,8 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
         }
 	if(c == 's') //header line
 	{
-		_parse_skipLine(file,c);
-		_parse_skipLine(file,c);
+		_parseSkipLine(file,c);
+		_parseSkipLine(file,c);
 	}
 	
 	bool atLeastOneFound = false;
@@ -900,7 +900,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 		_parseSkipWhitespace(file,c);
 		if(numErrors != errorsWanted)
 		{
-			_parse_skipLine(file,c);
+			_parseSkipLine(file,c);
 			continue;
 		}
 
@@ -908,7 +908,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 		_parse_readShape(file, c, currShape);
 		if((pm_options.chooseUngappedOnly && numGaps(currShape)>0) || (pm_options.chooseOneGappedOnly && numGaps(currShape)>1))
 		{
-			_parse_skipLine(file,c); 
+			_parseSkipLine(file,c); 
 			continue;
 		}
 		_parseSkipWhitespace(file,c);
@@ -939,7 +939,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 						//next measure: threshold
 						if(thresholds[weight-1] > currThreshold) 
 						{
-							_parse_skipLine(file,c); 
+							_parseSkipLine(file,c); 
 							continue;
 						}
 						else if(thresholds[weight-1] == currThreshold) undecided = true;
@@ -947,7 +947,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 						//if still undecided: next measure: span
 						if(undecided && length(shapes[weight-1]) > length(currShape))
 						{
-							_parse_skipLine(file,c); 
+							_parseSkipLine(file,c); 
 							continue;
 						}
 						else if(undecided && length(shapes[weight-1]) < length(currShape)) undecided = false;
@@ -955,7 +955,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 						//if still undecided: next measure: lossrate
 						if(undecided && lossrates[weight-1] < currLossrate)
 						{
-							_parse_skipLine(file,c); 
+							_parseSkipLine(file,c); 
 							continue;
 						}
 					}
@@ -977,7 +977,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 			
 			}
 		}
-		_parse_skipLine(file,c);
+		_parseSkipLine(file,c);
 
         }
 	if(!atLeastOneFound)

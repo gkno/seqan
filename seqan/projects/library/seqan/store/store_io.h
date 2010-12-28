@@ -161,7 +161,7 @@ read(TFile & file,
 			c = _streamGet(file);
 			String<char> blockIdentifier;
 			_parseReadIdentifier(file, blockIdentifier, c);
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 
 			// Library block
 			if (blockIdentifier == "LIB") {
@@ -175,24 +175,24 @@ read(TFile & file,
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
 						id = _parseReadNumber(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != '\n') && (c != '\r')) {
 							appendValue(eid, c, Generous());
 							c = _streamGet(file);
 						}
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "mea") {
 						c = _streamGet(file);
 						libEl.mean = _parseReadDouble(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "std") {
 						c = _streamGet(file);
 						libEl.std = _parseReadDouble(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else {
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					}
 				}
 				libIdMap.insert(std::make_pair(id, length(fragStore.libraryStore)));
@@ -210,27 +210,27 @@ read(TFile & file,
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
 						id = _parseReadNumber(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != '\n') && (c != '\r')) {
 							appendValue(eid, c, Generous() );
 							c = _streamGet(file);
 						}
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "lib") {
 						c = _streamGet(file);
 						matePairEl.libId = _parseReadNumber(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "rds") {
 						foundRds = true;
 						c = _streamGet(file);
 						matePairEl.readId[0] = _parseReadNumber(file, c);
 						c = _streamGet(file);
 						matePairEl.readId[1] = _parseReadNumber(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else {
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					}
 				}
 				// Only insert valid mate pairs
@@ -252,18 +252,18 @@ read(TFile & file,
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
 						id = _parseReadNumber(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != '\n') && (c != '\r')) {
 							appendValue(eid, c, Generous() );
 							c = _streamGet(file);
 						}
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "frg") {
 						c = _streamGet(file);
 						matePairId = _parseReadNumber(file, c);
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "seq") {
 						c = _streamGet(file);
 						_parseSkipWhitespace(file, c);
@@ -280,7 +280,7 @@ read(TFile & file,
 							c = _streamGet(file);
 						}
 					} else {
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 					}
 				}
 				// Set quality
@@ -314,18 +314,18 @@ read(TFile & file,
 							if (fdIdentifier == "src") {
 								c = _streamGet(file);
 								alignEl.readId = _parseReadNumber(file, c);
-								_parse_skipLine(file, c);
+								_parseSkipLine(file, c);
 							} else if (fdIdentifier == "off") {
 								c = _streamGet(file);
 								if (c != '-') offsetPos = _parseReadNumber(file, c);
 								else offsetPos = 0;
-								_parse_skipLine(file, c);
+								_parseSkipLine(file, c);
 							} else if (fdIdentifier == "clr") {
 								c = _streamGet(file);
 								clr1 = _parseReadNumber(file, c);
 								c = _streamGet(file);
 								clr2 = _parseReadNumber(file, c);
-								_parse_skipLine(file, c);
+								_parseSkipLine(file, c);
 							} else if (fdIdentifier == "gap") {
 								c = _streamGet(file);
 								_parseSkipWhitespace(file, c);
@@ -337,10 +337,10 @@ read(TFile & file,
 									c = _streamGet(file);
 								}
 							} else {
-								_parse_skipLine(file, c);
+								_parseSkipLine(file, c);
 							}
 						}
-						_parse_skipLine(file, c);
+						_parseSkipLine(file, c);
 
 						// Get the length of the read
 						TId readId = (readIdMap.find(alignEl.readId))->second;
@@ -406,14 +406,14 @@ read(TFile & file,
 						if (fieldIdentifier == "iid") {
 							c = _streamGet(file);
 							id = _parseReadNumber(file, c);
-							_parse_skipLine(file, c);
+							_parseSkipLine(file, c);
 						} else if (fieldIdentifier == "eid") {
 							c = _streamGet(file);
 							while ((c != '\n') && (c != '\r')) {
 								appendValue(eid, c, Generous() );
 								c = _streamGet(file);
 							}
-							_parse_skipLine(file, c);
+							_parseSkipLine(file, c);
 						} else if (fieldIdentifier == "seq") {
 							c = _streamGet(file);
 							_parseSkipWhitespace(file, c);
@@ -433,7 +433,7 @@ read(TFile & file,
 								c = _streamGet(file);
 							}
 						} else {
-							_parse_skipLine(file, c);
+							_parseSkipLine(file, c);
 						}
 					}
 				}
@@ -475,10 +475,10 @@ read(TFile & file,
 				appendValue(fragStore.contigStore, contigEl, Generous() );
 				appendValue(fragStore.contigNameStore, eid, Generous() );
 			} else {
-				_parse_skipLine(file, c);
+				_parseSkipLine(file, c);
 			}	
 		} else {
-			_parse_skipLine(file, c);
+			_parseSkipLine(file, c);
 		}
 	}
 
