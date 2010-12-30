@@ -6,6 +6,8 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Experimental BAM reading/writing.
+ * Allowing the store elements of fragment stores to be comparable.
  * Adding bundled version of ''samtools''.
  * Fixing documentation for `resize()`, `reAlign()`, `reverse()`, and `score()`.
  * Fixing `lowerBoundAlignedReads()` and `lowerBoundAlignedReads()` when searching by begin and end position.

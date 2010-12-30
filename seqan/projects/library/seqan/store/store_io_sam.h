@@ -58,6 +58,8 @@ namespace SEQAN_NAMESPACE_MAIN
 // CIGAR struct
 //////////////////////////////////////////////////////////////////////////////
 
+    struct FromBam_;
+    typedef Tag<FromBam_> FromBam;
     
     template <typename TOperation_ = char, typename TCount_ = unsigned>
 	struct CigarElement
@@ -73,8 +75,184 @@ namespace SEQAN_NAMESPACE_MAIN
 		CigarElement(TOperation o, TCount c):
 			operation(o),
 			count(c) {}
+
+        CigarElement(uint32_t bamCigarElement, FromBam const &)
+        {
+            SEQAN_ASSERT_LEQ(bamCigarElement & BAM_CIGAR_MASK, 8u);
+            operation = "MIDNSHP=X"[bamCigarElement & BAM_CIGAR_MASK];
+            count = bamCigarElement >> 4;
+        }
 	};
-	
+
+template <typename TOperation, typename TCount>
+uint32_t toBamCigarElement(CigarElement<TOperation, TCount> const & cigarElement)
+{
+    char operation = 0;
+    switch (cigarElement.operation) {
+        case 'X': operation += 1;
+        case '=': operation += 1;
+        case 'P': operation += 1;
+        case 'H': operation += 1;
+        case 'S': operation += 1;
+        case 'N': operation += 1;
+        case 'D': operation += 1;
+        case 'I': operation += 1;
+        case 'M': break;
+    }
+    return (cigarElement.count << 4) | operation;
+}
+
+//____________________________________________________________________________
+
+template <
+	typename TCigar,
+	typename TGaps1,
+	typename TGaps2,
+	typename TThresh>
+inline void
+getCigarString(
+	TCigar &cigar,
+	TGaps1 &gaps1,
+	TGaps2 &gaps2,
+	TThresh splicedGapThresh)
+{
+	typename Iterator<TGaps1>::Type it1 = begin(gaps1);
+	typename Iterator<TGaps2>::Type it2 = begin(gaps2);
+	clear(cigar);
+	char op, lastOp = ' ';
+	unsigned numOps = 0;
+
+//	std::cout << gaps1 << std::endl;
+//	std::cout << gaps2 << std::endl;
+	for (; !atEnd(it1) && !atEnd(it2); goNext(it1), goNext(it2))
+	{
+		if (isGap(it1))
+		{
+			if (isGap(it2))
+				op = 'P';
+			else if (isClipped(it2))
+				op = '?';
+			else
+				op = 'I';
+		} 
+		else if (isClipped(it1))
+		{
+			op = '?';
+		}
+		else 
+		{
+			if (isGap(it2))
+				op = 'D';
+			else if (isClipped(it2))
+				op = 'S';
+			else
+				op = 'M';
+		}
+		if (lastOp != op)
+		{
+			if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
+				lastOp = 'N';
+			if (numOps > 0)
+			{
+				std::stringstream num;
+				num << numOps;
+				append(cigar, num.str());
+				appendValue(cigar, lastOp);
+			}
+			numOps = 0;
+			lastOp = op;
+		}
+		++numOps;
+	}
+	SEQAN_ASSERT_EQ(atEnd(it1), atEnd(it2));
+	if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
+		lastOp = 'N';
+	if (numOps > 0)
+	{
+		std::stringstream num;
+		num << numOps;
+		append(cigar, num.str());
+		appendValue(cigar, lastOp);
+	}
+}
+
+template <
+	typename TCigar,
+	typename TGaps1,
+	typename TGaps2>
+inline void
+getCigarString(
+	TCigar &cigar,
+	TGaps1 &gaps1,
+	TGaps2 &gaps2)
+{
+	return getCigarString(cigar, gaps1, gaps2, 20);
+}
+
+template <
+    typename TOperation,
+    typename TCount,
+	typename TSpec,
+	typename TGaps1,
+	typename TGaps2,
+	typename TThresh>
+inline void
+getCigarString(
+        String<CigarElement<TOperation, TCount>, TSpec> &cigar,
+        TGaps1 &gaps1,
+        TGaps2 &gaps2,
+        TThresh splicedGapThresh)
+{
+	typename Iterator<TGaps1>::Type it1 = begin(gaps1);
+	typename Iterator<TGaps2>::Type it2 = begin(gaps2);
+	clear(cigar);
+	char op, lastOp = ' ';
+	unsigned numOps = 0;
+
+//	std::cout << gaps1 << std::endl;
+//	std::cout << gaps2 << std::endl;
+	for (; !atEnd(it1) && !atEnd(it2); goNext(it1), goNext(it2))
+	{
+		if (isGap(it1))
+		{
+			if (isGap(it2))
+				op = 'P';
+			else if (isClipped(it2))
+				op = '?';
+			else
+				op = 'I';
+		} 
+		else if (isClipped(it1))
+		{
+			op = '?';
+		}
+		else 
+		{
+			if (isGap(it2))
+				op = 'D';
+			else if (isClipped(it2))
+				op = 'S';
+			else
+				op = 'M';
+		}
+		if (lastOp != op)
+		{
+			if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
+				lastOp = 'N';
+			if (numOps > 0)
+				appendValue(cigar, CigarElement<>(op, numOps));
+			numOps = 0;
+			lastOp = op;
+		}
+		++numOps;
+	}
+	SEQAN_ASSERT_EQ(atEnd(it1), atEnd(it2));
+	if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
+		lastOp = 'N';
+	if (numOps > 0)
+        appendValue(cigar, CigarElement<>(op, numOps));
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // _getClippedLength
     
@@ -616,7 +794,7 @@ namespace SEQAN_NAMESPACE_MAIN
         TReadSeq2 readSeq;
         _parseReadDnaSeq(file, readSeq, c);
         SEQAN_ASSERT_GT(length(readSeq), 0u);
-		if (reverse)
+		if (reverse)  // TODO(holtgrew): Why not after parsing quality? ib. for BAM...
 			reverseComplement(readSeq);
         _parseSkipWhitespace(file, c);
 
@@ -773,9 +951,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		TAlignIter mit = it;
 		CharString cigar;
 		TReadSeq readSeq;
-		
+
+        int i = 0;
         for(; it != itEnd; ++it)
 		{
+            std::cerr << "alignment " << i++ << std::endl;
             TId alignedId = (*it).id;
 			TId readId = (*it).readId;
 			TId mateIdx = TRead::INVALID_ID;
@@ -874,6 +1054,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			
             // <cigar>
 			TReadGaps readGaps(readSeq, (*it).gaps);
+            typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps2;
+			// TContigGaps	contigGaps2(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
+            // if (i == 4)
+            //     printf("It's it!\n");
+            // std::cerr << "read gaps:  " << readGaps << std::endl;
+            // std::cerr << "contig gaps:" << contigGaps2 << std::endl;
 			getCigarString(cigar, contigGaps, readGaps);
 			
 			_streamWrite(target, cigar);

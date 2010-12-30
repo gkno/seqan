@@ -42,6 +42,10 @@
 #include <algorithm>
 #include <set>
 
+// TODO(holtgrew): Enable BAM by some flags.
+#include <sam.h>
+#include <bam.h>
+
 //////////////////////////////////////////////////////////////////////////////
 // FRAGMENT STORE SUB-CONTAINERS
 //////////////////////////////////////////////////////////////////////////////
@@ -62,5 +66,6 @@
 #include <seqan/store/store_io_sam.h>
 #include <seqan/store/store_io_gff.h>
 #include <seqan/store/store_io_ucsc.h>
+#include <seqan/store/store_io_bam.h>
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -79,6 +79,11 @@ struct LibraryStoreElement
 	TStd		std;	// library size variance
 
 	LibraryStoreElement() : mean(0), std(0) {}
+
+    inline bool operator==(LibraryStoreElement const & other) const
+    {
+        return mean == other.mean && std == other.std;
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -90,6 +90,13 @@ struct MatePairStoreElement
 		readId[0] = INVALID_ID;
 		readId[1] = INVALID_ID;
 	}
+
+    inline bool operator==(MatePairStoreElement const & other) const
+    {
+        return readId[0] == other.readId[0] &&
+                readId[1] == other.readId[1] &&
+                libId == other.libId;
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////////

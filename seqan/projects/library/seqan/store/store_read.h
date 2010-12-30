@@ -79,6 +79,13 @@ struct ReadStoreElement
 	TId matePairId;				// refers to the mate-pair, INVALID_ID if not part of a mate-pair
 
 	ReadStoreElement() : matePairId(INVALID_ID) {}
+
+    inline
+    bool
+    operator==(ReadStoreElement const & other)
+    {
+        return matePairId == other.matePairId;
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////////

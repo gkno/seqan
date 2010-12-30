@@ -128,6 +128,16 @@ struct ContigStoreElement
 	TPos		fileEndPos;
 
 	ContigStoreElement() : usage(0), fileId(INVALID_ID), fileBeginPos(0), fileEndPos(0) {}
+
+    inline bool operator==(ContigStoreElement const & other) const
+    {
+        return usage == other.usage &&
+                fileId == other.fileId &&
+                fileBeginPos == other.fileBeginPos &&
+                fileEndPos == other.fileEndPos &&
+                seq == other.seq &&
+                gaps == other.gaps;
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -173,6 +183,13 @@ struct ContigFile
 	CharString		fileName;
 	AutoSeqFormat	format;
 	TId				firstContigId;	// first sequence of the file corresponds to this contigId
+
+    inline bool operator==(ContigFile const & other) const
+    {
+        return fileName == other.fileName &&
+                format == other.format &&
+                firstContigId == other.firstContigId;
+    }
 };
 
 //////////////////////////////////////////////////////////////////////////////
