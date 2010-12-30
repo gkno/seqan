@@ -152,6 +152,17 @@ struct AlignedReadStoreElement
 		beginPos(_beginPos), 
 		endPos(_endPos),
 		gaps(_gaps) {}
+
+    inline bool operator==(AlignedReadStoreElement const & other) const
+    {
+        return id == other.id &&
+                readId == other.readId &&
+                contigId == other.contigId &&
+                pairMatchId == other.pairMatchId &&
+                beginPos == other.beginPos &&
+                endPos == other.endPos &&
+                gaps == other.gaps;
+    }
 };
 
 
@@ -210,6 +221,13 @@ struct AlignQualityStoreElement
 		pairScore(0),
 		score(0),
 		errors(0) {}
+
+    inline bool operator==(AlignQualityStoreElement const & other)
+    {
+        return pairScore == other.pairScore &&
+                score == other.score &&
+                errors == other.errors;
+    }
 };
 
 
@@ -222,6 +240,8 @@ struct AlignQualityStoreElement
 ..summary:Tag to select a specific field to stably sort the @Memvar.FragmentStore#alignedReadStore@ by.
 ..cat:Fragment Store
 ..see:Function.sortAlignedReads
+..see:Function.lowerBoundAlignedReads
+..see:Function.upperBoundAlignedReads
 ..tag.SortContigId:
 ...summary:Sort alignedReads by $contigId$.
 ...signature:SortContigId
@@ -350,6 +370,32 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 ..param.lessFunctor:STL-less functor to compare two @Class.AlignedReadStoreElement.AlignedReadStoreElements@.
 ..remarks:This function calls $std::stable_sort$ to sort $alignStore$.
 ..include:seqan/store.h
+..see:Function.lowerBoundAlignedReads
+..see:Function.upperBoundAlignedReads
+
+.Function.lowerBoundAlignedReads
+..summary:Performs a binary lower bound search on the aligned reads.
+..cat:Fragment Store
+..signature:sortAlignedReads(alignStore, sortTag)
+..param.alignStore:A sequence of @Class.AlignedReadStoreElement@ to be sorted, e.g. @Memvar.FragmentStore#alignedReadStore@.
+..param.sortTag:Selects the field for the comparison in the binary search.
+...type:Tag.sortAlignedRead Tags
+..remarks:This is equivalent to calling $std::lower_bound$ on $alignStore$ with according parameters.
+..include:seqan/store.h
+..see:Function.sortAlignedReads
+..see:Function.upperBoundAlignedReads
+
+.Function.upperBoundAlignedReads
+..summary:Performs a binary upper bound search on the aligned reads.
+..cat:Fragment Store
+..signature:sortAlignedReads(alignStore, sortTag)
+..param.alignStore:A sequence of @Class.AlignedReadStoreElement@ to be sorted, e.g. @Memvar.FragmentStore#alignedReadStore@.
+..param.sortTag:Selects the field for the comparison in the binary search.
+...type:Tag.sortAlignedRead Tags
+..remarks:This is equivalent to calling $std::lower_bound$ on $alignStore$ with according parameters.
+..include:seqan/store.h
+..see:Function.sortAlignedReads
+..see:Function.lowerBoundAlignedReads
 */
 
 template <typename TAlign, typename TSortSpec>
@@ -1397,93 +1443,6 @@ inline void
 goFurther(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > & me, TSize steps)
 {
 	_goToGapAnchorIterator(me, me.current.gapPos + steps);
-}
-
-//____________________________________________________________________________
-
-template <
-	typename TCigar,
-	typename TGaps1,
-	typename TGaps2,
-	typename TThresh>
-inline void
-getCigarString(
-	TCigar &cigar,
-	TGaps1 &gaps1,
-	TGaps2 &gaps2,
-	TThresh splicedGapThresh)
-{
-	typename Iterator<TGaps1>::Type it1 = begin(gaps1);
-	typename Iterator<TGaps2>::Type it2 = begin(gaps2);
-	clear(cigar);
-	char op, lastOp = ' ';
-	unsigned numOps = 0;
-
-//	std::cout << gaps1 << std::endl;
-//	std::cout << gaps2 << std::endl;
-	for (; !atEnd(it1) && !atEnd(it2); goNext(it1), goNext(it2))
-	{
-		if (isGap(it1))
-		{
-			if (isGap(it2))
-				op = 'P';
-			else if (isClipped(it2))
-				op = '?';
-			else
-				op = 'I';
-		} 
-		else if (isClipped(it1))
-		{
-			op = '?';
-		}
-		else 
-		{
-			if (isGap(it2))
-				op = 'D';
-			else if (isClipped(it2))
-				op = 'S';
-			else
-				op = 'M';
-		}
-		if (lastOp != op)
-		{
-			if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
-				lastOp = 'N';
-			if (numOps > 0)
-			{
-				std::stringstream num;
-				num << numOps;
-				append(cigar, num.str());
-				appendValue(cigar, lastOp);
-			}
-			numOps = 0;
-			lastOp = op;
-		}
-		++numOps;
-	}
-	SEQAN_ASSERT_EQ(atEnd(it1), atEnd(it2));
-	if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
-		lastOp = 'N';
-	if (numOps > 0)
-	{
-		std::stringstream num;
-		num << numOps;
-		append(cigar, num.str());
-		appendValue(cigar, lastOp);
-	}
-}
-
-template <
-	typename TCigar,
-	typename TGaps1,
-	typename TGaps2>
-inline void
-getCigarString(
-	TCigar &cigar,
-	TGaps1 &gaps1,
-	TGaps2 &gaps2)
-{
-	return getCigarString(cigar, gaps1, gaps2, 20);
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
