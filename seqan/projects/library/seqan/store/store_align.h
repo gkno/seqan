@@ -376,8 +376,9 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 .Function.lowerBoundAlignedReads
 ..summary:Performs a binary lower bound search on the aligned reads.
 ..cat:Fragment Store
-..signature:sortAlignedReads(alignStore, sortTag)
+..signature:lowerBoundAlignedReads(alignStore, value, sortTag)
 ..param.alignStore:A sequence of @Class.AlignedReadStoreElement@ to be sorted, e.g. @Memvar.FragmentStore#alignedReadStore@.
+..param.value:The value to use for the comparison.
 ..param.sortTag:Selects the field for the comparison in the binary search.
 ...type:Tag.sortAlignedRead Tags
 ..remarks:This is equivalent to calling $std::lower_bound$ on $alignStore$ with according parameters.
@@ -388,8 +389,9 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 .Function.upperBoundAlignedReads
 ..summary:Performs a binary upper bound search on the aligned reads.
 ..cat:Fragment Store
-..signature:sortAlignedReads(alignStore, sortTag)
+..signature:upperBoundAlignedReads(alignStore, value, sortTag)
 ..param.alignStore:A sequence of @Class.AlignedReadStoreElement@ to be sorted, e.g. @Memvar.FragmentStore#alignedReadStore@.
+..param.value:The value to use for the comparison.
 ..param.sortTag:Selects the field for the comparison in the binary search.
 ...type:Tag.sortAlignedRead Tags
 ..remarks:This is equivalent to calling $std::lower_bound$ on $alignStore$ with according parameters.
