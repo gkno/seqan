@@ -191,10 +191,10 @@ void readWitHeader(TStream &stream, TChar &c) {
     if (tmp != CharString("VN:1.0"))
         std::cerr << "WARNING: Version is not \"VN:1.0\"" << std::endl;
     // Skip to and after end of line.
-    _parse_skipLine(stream, c);
+    _parseSkipLine(stream, c);
     // Maybe read/skip additional header lines.
     while (c == '@')
-      _parse_skipLine(stream, c);
+      _parseSkipLine(stream, c);
 }
 
 
@@ -217,7 +217,7 @@ bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
 
     // Maybe skip comments.
     while (not _streamEOF(stream) && c == '#')
-        _parse_skipLine(stream, c);
+        _parseSkipLine(stream, c);
     if (_streamEOF(stream))
         return false;
 
@@ -236,7 +236,7 @@ bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
     record.lastPos = _parseReadNumber(stream, c);
     
     // Skip to and after end of line.
-    _parse_skipLine(stream, c);
+    _parseSkipLine(stream, c);
     return true;
 }
 
