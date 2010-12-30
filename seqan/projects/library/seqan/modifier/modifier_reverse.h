@@ -512,14 +512,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Function.reverse
-..summary:Reverse a container in-place.
+..summary:Reverse an object/container in-place.
 ..cat:Modifiers
-..signature:reverse(container)
-..param.container:The container whose elements to reverse.
+..signature:reverse(object)
+..param.object:The object/container whose elements to reverse.
 ...type:Concept.Container
 ...type:Adaption.std::list
 ..include:seqan/modifier.h
- */
+*/
 	template < typename TSequence >
 	inline void
 	reverse(TSequence & sequence) 

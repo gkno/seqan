@@ -182,9 +182,15 @@ scoreGapVertical(
 
 
 /**
-.Function.score
+.Function.score:
 ..cat:Scoring
 ..signature:score(score, pos1, pos2, seq1, seq2)
+..param.score:The scoring scheme to use.
+...type:Class.Score
+..param.pos1:Position of the first character.
+..param.pos2:Position of the first character.
+..param.pos1:First sequence of characters.
+..param.pos2:Second sequence of characters.
 ..summary:Returns the score for aligning character $seq1[pos1]$ to $seq2[pos2]$.
 ..include:seqan/score.h
  */

@@ -735,16 +735,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 
 //____________________________________________________________________________
 	
-/**
-.Function.reverse:
-..cat:Index
-..summary:Reverses an object.
-..signature:reverse(shape)
-..param.shape:Shape object.
-...type:Spec.SimpleShape
-..see:Function.stringToShape
-..include:seqan/index.h
-*/
+///.Function.reverse.param.object.type:Spec.SimpleShape
 
 	template <typename TValue, typename TSpec>
 	inline void

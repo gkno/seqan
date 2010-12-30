@@ -354,7 +354,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 //____________________________________________________________________________
-///.Function.reverse.param.shape.type:Spec.OneGappedShape
+///.Function.reverse.param.object.type:Spec.OneGappedShape
 
 	template <typename TValue>
 	inline void

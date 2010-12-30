@@ -644,7 +644,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	}
 
 //____________________________________________________________________________
-///.Function.reverse.param.shape.type:Spec.GenericShape
+///.Function.reverse.param.object.type:Spec.GenericShape
 
 	template <typename TValue, typename TSpec>
 	inline void
