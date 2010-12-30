@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Fixing documentation about include for ''misc/misc_cmdparser.h'', was ''seqan/misc.h'', corrected to ''seqan/misc/misc_cmdparser.h''.
  * Assertion in semiglobal SWIFT finder that hits begin <= end.
  * Initializing state.errors in Myers Ukkonen banded pattern initialization.
 

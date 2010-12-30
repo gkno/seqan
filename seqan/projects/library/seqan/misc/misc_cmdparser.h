@@ -253,7 +253,7 @@ Although not suggested the short-name can contain more than 1 character.
 ..returns:The option extended by the argument text.
 Instead of using $option$, the return value can be used as argument for @Function.addOption@.
 ..remarks:The result type is a @Class.CommandLineOption@ object.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline CommandLineOption
@@ -275,7 +275,7 @@ addArgumentText(CommandLineOption const & opt, CharString const & text)
 ...type:Class.CommandLineOption
 ..returns:A @Shortcut.CharString@ holding the long name of the CommandLine Option (e.g. $help$ in case of $-h/--help$)
 ..remarks:The result type is @Shortcut.CharString@.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline CharString &
@@ -297,7 +297,7 @@ longName(CommandLineOption const & me){
 ...type:Class.CommandLineOption
 ..param.newName:A @Shortcut.CharString@ containing the new long name of the option.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline void
@@ -315,7 +315,7 @@ setLongName(CommandLineOption & me, CharString const & newName){
 ...type:Class.CommandLineOption
 ..returns:A @Shortcut.CharString@ holding the short name of the CommandLine Option (e.g. $h$ in case of $-h/--help$)
 ..remarks:The result type is @Shortcut.CharString@.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline CharString &
@@ -336,7 +336,7 @@ shortName(CommandLineOption const & me){
 ..param.option:The @Class.CommandLineOption@ object.
 ...type:Class.CommandLineOption
 ..param.newName:A @Shortcut.CharString@ containing the new short name of the option.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline void
@@ -354,7 +354,7 @@ setShortName(CommandLineOption & me, CharString const & newName){
 ...type:Class.CommandLineOption
 ..returns:A @Shortcut.CharString@ holding the help text of the CommandLine Option
 ..remarks:The result type is @Shortcut.CharString@.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 inline CharString &
 helpText(CommandLineOption & me){
@@ -375,7 +375,7 @@ helpText(CommandLineOption const & me){
 ...type:Class.CommandLineOption
 ..param.newHelpText:A @Shortcut.CharString@ containing the new help text.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 inline void
 setHelpText(CommandLineOption & me, CharString const & newHelp){
@@ -392,7 +392,7 @@ setHelpText(CommandLineOption & me, CharString const & newHelp){
 ...type:Class.CommandLineOption
 ..returns:$true$ if the option argument can be a string.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -410,7 +410,7 @@ isStringOption(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..returns:$true$ if the option is a switch.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -428,7 +428,7 @@ isBooleanOption(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..returns:$true$ if the option argument can be a double.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -446,7 +446,7 @@ isDoubleOption(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..returns:$true$ if the option argument can be an integer.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -464,7 +464,7 @@ isIntOption(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..returns:$true$ if the option is hidden on the help screen.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -482,7 +482,7 @@ isHiddenOption(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..returns:$true$ if the option is mandatory.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -500,7 +500,7 @@ isOptionMandatory(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..returns:$true$ if an option label should be printed on the help screen.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -518,7 +518,7 @@ isLabelOption(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..returns:$true$ if the option can be given multiple times on command line.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -536,7 +536,7 @@ isOptionList(CommandLineOption const & me)
 ...type:Class.CommandLineOption
 ..param.newOptionType:Option Type.
 ..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline void
@@ -555,7 +555,7 @@ setOptionType(CommandLineOption & me, const int _newOptionType)
 ...type:Class.CommandLineOption
 ..returns:A text consisting of label and help text of the option.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline CharString
@@ -629,7 +629,7 @@ operator << (TStream & target, CommandLineOption const & source)
 ..cat:Miscellaneous
 ..summary:Stores multiple @Class.CommandLineOption@ objects and parses the command line arguments for these options.
 ..signature:CommandLineParser
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 class CommandLineParser
@@ -707,7 +707,7 @@ public:
 ...type:Class.CommandLineParser
 ..param.option:The new @Class.CommandLineOption@ object that should be added.
 ...type:Class.CommandLineOption
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline void
@@ -747,7 +747,7 @@ addOption(CommandLineParser & me, CommandLineOption const & opt)
 ...type:Class.CommandLineParser
 ..param.text:A line of text that will be added to the help output.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TString>
@@ -767,7 +767,7 @@ addLine(CommandLineParser & me, TString const & line)
 ...type:Class.CommandLineParser
 ..param.text:A line of text that will be added below the help text of an option.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TString>
@@ -787,7 +787,7 @@ addHelpLine(CommandLineParser & me, TString const & line)
 ...type:Class.CommandLineParser
 ..param.text:A section header that will be added to the help output.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TString>
@@ -808,7 +808,7 @@ addSection(CommandLineParser & me, TString const & line)
 ...type:Class.CommandLineParser
 ..param.text:A text line that will be added to the title output.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TString>
@@ -828,7 +828,7 @@ addTitleLine(CommandLineParser & me, TString const & line)
 ...type:Class.CommandLineParser
 ..param.text:A text line that will be added to the version output.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TString>
@@ -850,7 +850,7 @@ addVersionLine(CommandLineParser & me, TString const & line)
 ...type:Class.CommandLineParser
 ..param.text:A text line that will be added to the usage output.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline void
@@ -869,7 +869,7 @@ addUsageLine(CommandLineParser & me, CharString const & line)
 ...type:Class.CommandLineParser
 ..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name option.
 ..returns:$true$ if the option is registered.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool 
@@ -887,7 +887,7 @@ hasOptionLong(CommandLineParser const & me, CharString const & _long)
 ...type:Class.CommandLineParser
 ..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name option.
 ..returns:$true$ if the option is registered.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool 
@@ -906,7 +906,7 @@ hasOptionShort(CommandLineParser const & me, CharString const & _short)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.count:A $unsigned int$ defining the amount of non-parameterized options requried by the program.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline void
@@ -975,7 +975,7 @@ _title(CommandLineParser const & me, TStream & target)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.stream:Target stream (e.g. $std::cerr$).
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TStream>
@@ -1006,7 +1006,7 @@ shortHelp(CommandLineParser const & me)
 ...type:Class.CommandLineParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 ...default: $std::cerr$
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TStream>
@@ -1100,7 +1100,7 @@ help(CommandLineParser const & me)
 ...type:Class.CommandLineParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 ...default: $std::cerr$
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TStream>
@@ -1126,7 +1126,7 @@ version(CommandLineParser const & me)
 ...type:Class.CommandLineParser
 ..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name option.
 ..returns:$true$ if the option was set.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -1149,7 +1149,7 @@ isSetShort(CommandLineParser & me, CharString const & shortName)
 ...type:Class.CommandLineParser
 ..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name option.
 ..returns:$true$ if the option was set.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline bool
@@ -1249,7 +1249,7 @@ _assignOptionValue(CommandLineParser & me, unsigned option_index, CharString con
 ..param.errorStream:A stream where error messages are sent to.
 ..remarks:Must be called before retrieving options or arguments.
 ..returns:$true$ if all required arguments are set and parseable and neither the help nor version argument is set.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template<typename TErrorStream>
@@ -1531,7 +1531,7 @@ _convertOptionValue(CommandLineOption const & opt, TObject & dst, CharString con
 ..param.value:The variable where the resulting value should be stored.
 ...remarks:The type of $value$ must be compatible the option type.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TValue>
@@ -1568,7 +1568,7 @@ getOptionValueShort(CommandLineParser & me, CharString const & shortName, TValue
 ...type:Class.CommandLineParser
 ..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name of the option.
 ..returns: A $String<CharString>$ of option values.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline String<CharString> const &
@@ -1601,7 +1601,7 @@ getOptionValuesShort(CommandLineParser & me,CharString const & shortName)
 ..param.value:The variable where the resulting value should be stored.
 ...remarks:The type of $value$ must be compatible the option type.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TValue>
@@ -1638,7 +1638,7 @@ getOptionValueLong(CommandLineParser & me,CharString const & longName, TValue & 
 ...type:Class.CommandLineParser
 ..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name of the option.
 ..returns: A $String<CharString>$ of option values.
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline String<CharString> const &
@@ -1669,7 +1669,7 @@ getOptionValuesLong(CommandLineParser & me, CharString const & longName)
 ..param.position:A zero based $int$ indicating which argument you want to get.
 ..returns:The command line argument or an empty string if it doesn't exist.
 ...type:Shortcut.CharString
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline CharString const &
@@ -1690,7 +1690,7 @@ getArgumentValue(CommandLineParser const & me, unsigned position)
 ...type:Class.CommandLineParser
 ..returns:All command line arguments as a $String<CharString>$.
 ..see:Function.getArgumentValue
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline String<CharString> const &
@@ -1707,7 +1707,7 @@ getArgumentValues(CommandLineParser const & me)
 ..signature:argumentCount(parser)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..include:seqan/misc.h
+..include:seqan/misc/misc_cmdparser.h
 */
 
 inline Size<String<CharString> >::Type
