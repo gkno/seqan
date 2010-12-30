@@ -28,6 +28,21 @@ include_directories (${SEQAN_LIBRARY})
 link_directories (${SEQAN_LIBRARY}/lib)
 
 ################################################################################
+# Define which tests are to link against libbam.
+################################################################################
+
+MACRO(LIST_CONTAINS var value)
+  SET(${var})
+  FOREACH (value2 ${ARGN})
+    IF (${value} STREQUAL ${value2})
+      SET(${var} TRUE)
+    ENDIF (${value} STREQUAL ${value2})
+  ENDFOREACH (value2)
+ENDMACRO(LIST_CONTAINS)
+
+set(SEQAN_LINK_LIBBAM ${SEQAN_LINK_LIBBAM} test_store)
+
+################################################################################
 # Tests
 ################################################################################
 
@@ -54,6 +69,13 @@ get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
 			add_executable (test_${TEST_DIR_REL} ${TEST_SOURCES})
 			add_dependencies (test_${TEST_DIR_REL} ${SEQAN_TARGET})
 	    add_dependencies (tests test_${TEST_DIR_REL})
+        
+    # Conditionally link against libbam.
+    LIST_CONTAINS(contains test_${TEST_DIR_REL} ${SEQAN_LINK_LIBBAM})
+    if (contains)
+        target_link_libraries(test_${TEST_DIR_REL} bam ${ZLIB_LIBRARIES})
+    endif (contains)
+    
       # Create a variable with the paths to the tests for memory checks.
       # TODO(holtgrew): For MSVC the paths are different, but does not matter as not run on Windows yet.
       if (MODEL MATCHES ".*Mem.*Check")

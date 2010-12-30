@@ -156,6 +156,9 @@ foreach (APP_DIR ${SEQAN_APPS})
 			endif (APP_${APP_DIR_REL}_CUDA)
 			add_dependencies (${APP_DIR_REL} ${SEQAN_TARGET})
 			add_dependencies (apps ${APP_DIR_REL})
+            # Link against libz everywhere, used for reading BAM, for example.
+			target_link_libraries (${APP_DIR_REL} z)
+            # Link against librt on Linux for real-time clock.
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (${APP_DIR_REL} rt)
 			endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

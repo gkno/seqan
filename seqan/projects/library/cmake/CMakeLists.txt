@@ -12,6 +12,9 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH})
 find_package (PythonInterp)
 
+find_package(ZLIB REQUIRED)
+include_directories(${CMAKE_INCLUDE_PATH})
+
 ################################################################################
 # Set Path Variables
 ################################################################################
@@ -28,6 +31,12 @@ get_filename_component (SEQAN_SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../.. A
 get_filename_component (SEQAN_BINARY_ROOT ${CMAKE_CURRENT_BINARY_DIR}/../../.. ABSOLUTE)
 
 set (SEQAN_TARGET "Seqan")
+
+################################################################################
+# Include paths for vendor copies of libraries.
+################################################################################
+
+INCLUDE_DIRECTORIES(${SEQAN_LIBRARY}/lib/samtools)
 
 ################################################################################
 # Define SeqAn Library Related Variables
@@ -199,3 +208,4 @@ add_subdirectory (apps)
 add_subdirectory (demos)
 add_subdirectory (tests)
 add_subdirectory (benchmarks)
+add_subdirectory (libs)
