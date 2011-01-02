@@ -616,7 +616,7 @@ SEQAN_CHECKPOINT
 /**
 .Metafunction.LENGTH:
 ..summary:Number of elements in a fixed-size container.
-..signature:LENGTH<T>::Type
+..signature:LENGTH<T>::VALUE
 ..param.T:Type for which the number of elements is determined.
 ..returns.param.VALUE:Number of elements.
 ..remarks.text:The default return value is 1 for dynamic-size containers.
