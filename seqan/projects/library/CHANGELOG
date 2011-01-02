@@ -6,8 +6,9 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Renaming `string_stack.h` to `string_block.h` and adding header field for author.
  * Adding comment about value expand string, also see #839.
- * Renamign `lexical.h` to `sequence_lexical.h` adding note on the location of `ordValue`, also see #838.
+ * Renaming `lexical.h` to `sequence_lexical.h` adding note on the location of `ordValue`, also see #838.
  * Renaming `string_pointer.h` to `adapt_array_pointer.h` and adding some notes for issues to review, e.g. #837.
  * Improving coding style compliance of Array String implementation.
  * Making documentation about assigning to CStyle SeqAn strings more clear, adjusting comments.

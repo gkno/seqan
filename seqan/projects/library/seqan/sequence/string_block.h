@@ -29,6 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: David Weese <david.weese@fu-berlin.de>
+// ==========================================================================
+// Implementation of the Block String which allows constant-sized, e.g.
+// linear expansion
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_GRAPH_STACK_H
 #define SEQAN_HEADER_GRAPH_STACK_H

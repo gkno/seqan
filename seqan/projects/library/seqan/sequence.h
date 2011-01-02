@@ -57,10 +57,11 @@
 
 //____________________________________________________________________________
 // Miscellaneous sequence-related code.
+
 #include <seqan/sequence/sequence_lexical.h>
 
 //____________________________________________________________________________
-// segments (suffix, ...)
+// Segments: Suffixes, Infixes, Prefixes.
 
 #include <seqan/sequence/segment_base.h>
 #include <seqan/sequence/segment_infix.h>
@@ -74,7 +75,7 @@
 #include <seqan/sequence/string_array.h>
 #include <seqan/sequence/string_alloc.h>
 #include <seqan/sequence/string_cstyle.h>
-#include <seqan/sequence/string_stack.h>
+#include <seqan/sequence/string_block.h>
 #include <seqan/sequence/string_packed.h>
 #include <seqan/sequence/string_value_expand.h>
 
