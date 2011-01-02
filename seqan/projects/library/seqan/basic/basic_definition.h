@@ -92,6 +92,11 @@ struct TagSelector
 	{
 		tagId = 0;
 	}
+
+    inline bool operator==(TagSelector const & other) const
+    {
+        return other.tagId == tagId;
+    }
 };
 
 /**
