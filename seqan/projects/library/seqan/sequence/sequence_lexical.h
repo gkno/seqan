@@ -29,6 +29,9 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_LEXICAL_H
 #define SEQAN_HEADER_LEXICAL_H
@@ -42,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Prefix Order:
-..summary:Specify whether a prefix is smaller or greater.
+..summary:Specify whether less-than or greather-than comparison is meant.
 ..tag.TagPrefixLess:A prefix is smaller.
 ...text:For example: $"abc" < "abcde"$.
 ..tag.TagPrefixGreater:A prefix is greater.
@@ -297,6 +300,7 @@ compare(Lexical<TSpec> & lexical,
 	compare_(lexical, left, right);
 }
 
+// TODO(holtgrew): Are these bugs present in currently supported VC++ versions or is this only a legacy issue?
 //workaround for VC++ "const arrays" bug
 template <typename TSpec, typename TLeftValue, typename TRight>
 inline void
@@ -746,6 +750,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // lcpLength
 //////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.lcpLength:
 ..summary:Length of longest common prefix.
@@ -778,8 +783,11 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// lcpLength
+// ordValue
 //////////////////////////////////////////////////////////////////////////////
+
+// TODO(holtgrew): Why is this the place for the definition of ordValue? Should this not go into the alphabet interface header? #838
+
 /**
 .Function.ordValue:
 ..summary:Maps an alphabet 1-to-1 to the interval [0..ValueSize).
@@ -794,30 +802,28 @@ You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is
 */
 
 template <typename TValue>
-inline unsigned ordValue(TValue const &c) 
+inline unsigned ordValue(TValue const & c) 
 {
-	return (typename MakeUnsigned_<TValue>::Type const &)c;
+	return static_cast<typename MakeUnsigned_<TValue>::Type const &>(c);
 }
 
 template <typename TValue, typename TSpec>
-inline unsigned ordValue(SimpleType<TValue,TSpec> const &c) 
+inline unsigned ordValue(SimpleType<TValue, TSpec> const & c) 
 {
 	return c;
 }
 
 template <typename TValue>
-inline unsigned _internalOrdValue(TValue const &c) 
+inline unsigned _internalOrdValue(TValue const & c) 
 {
 	return ordValue(c);
 }
 
 template <typename TValue, typename TSpec>
-inline unsigned _internalOrdValue(SimpleType<TValue,TSpec> const &c) 
+inline unsigned _internalOrdValue(SimpleType<TValue, TSpec> const & c) 
 {
 	return c.value;
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 

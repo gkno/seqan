@@ -29,6 +29,13 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// A string that allows to get a value from a map if the second string's
+// value at a position is equal to the max value of the alphabet.
+//
+// TODO(holtgrew): This is a deletion candidate.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_STRING_VALUEEXPAND_H
 #define SEQAN_HEADER_SEQUENCE_STRING_VALUEEXPAND_H

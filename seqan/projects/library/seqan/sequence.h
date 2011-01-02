@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Module header for the sequence module.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_H
 #define SEQAN_HEADER_SEQUENCE_H
@@ -50,7 +54,10 @@
 
 #include <seqan/sequence/sequence_interface.h>
 #include <seqan/sequence/sequence_stream.h>
-#include <seqan/sequence/lexical.h>
+
+//____________________________________________________________________________
+// Miscellaneous sequence-related code.
+#include <seqan/sequence/sequence_lexical.h>
 
 //____________________________________________________________________________
 // segments (suffix, ...)
@@ -64,9 +71,8 @@
 // strings
 
 #include <seqan/sequence/string_base.h>
-#include <seqan/sequence/string_pointer.h>
-#include <seqan/sequence/string_alloc.h>
 #include <seqan/sequence/string_array.h>
+#include <seqan/sequence/string_alloc.h>
 #include <seqan/sequence/string_cstyle.h>
 #include <seqan/sequence/string_stack.h>
 #include <seqan/sequence/string_packed.h>
@@ -81,5 +87,6 @@
 #include <seqan/sequence/adapt_std_list.h>
 #include <seqan/sequence/adapt_std_string.h>
 #include <seqan/sequence/adapt_std_vector.h>
+#include <seqan/sequence/adapt_array_pointer.h>
 
 #endif //#ifndef SEQAN_HEADER_...
