@@ -29,6 +29,8 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Tobias Rausch <rausch@embl.de>
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQAN_CONSENSUS_SCORE_H
 #define SEQAN_HEADER_SEQAN_CONSENSUS_SCORE_H

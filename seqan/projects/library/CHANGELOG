@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Documenting `reAlign()`, various small comment and whitespace fixes in consensus module.
  * Comparison operator for tag selector.
  * Experimental BAM reading/writing.
  * Allowing the store elements of fragment stores to be comparable.

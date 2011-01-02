@@ -29,9 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Tobias Rausch <rausch@embl.de>
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_CONSENSUS_REALIGN_H
-#define SEQAN_HEADER_CONSENSUS_REALIGN_H
+#ifndef SEQAN_CONSENSUS_CONSENSUS_REALIGN_H_
+#define SEQAN_CONSENSUS_CONSENSUS_REALIGN_H_
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -178,10 +180,11 @@ scoreConsensus(TConsensus& consensus)
 	return score;
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////////////
 
+// Perform one realignment round.
+// TODO(holtgrew): Rename to reflect this more clearly.
+// TODO(holtgrew): TConsensus/consensus are profiles, really.
 template<typename TFragSpec, typename TConfig, typename TAlignedRead, typename TSpec, typename TConsensus, typename TScore, typename TMethod, typename TBandwidth>
 inline void 
 reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
@@ -205,14 +208,15 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	typedef typename Value<TConsensus>::Type TProfileChar;
 	TSize gapPos = ValueSize<TProfileChar>::VALUE - 1;
 
-	// Remove each fragment and realign it to the profile
-	TAlignedReadIter alignIt = begin(contigReads, Standard() );
-	TAlignedReadIter alignItEnd = end(contigReads, Standard() );
-	if (includeReference) --alignItEnd;
+	// Remove each fragment and realign it to the profile.
+	TAlignedReadIter alignIt = begin(contigReads, Standard());
+	TAlignedReadIter alignItEnd = end(contigReads, Standard());
+	if (includeReference)
+        --alignItEnd;
 	TConsensus bandConsensus;
 	TConsensus myRead;
 	TConsensus newConsensus;
-	for(;alignIt != alignItEnd; ++alignIt) {
+	for (; alignIt != alignItEnd; ++alignIt) {
 		//// Debug code
 		//for(TSize i = 0; i<length(consensus); ++i) {
 		//	std::cout << consensus[i] << std::endl;
@@ -231,10 +235,10 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		//}
 
 		TSize itConsPos = 0;
-		TConsIter itCons = begin(consensus, Standard() );
-		TConsIter itConsEnd = end(consensus, Standard() );
+		TConsIter itCons = begin(consensus, Standard());
+		TConsIter itConsEnd = end(consensus, Standard());
 
-		// Initialize the consensus of the band
+		// Initialize the consensus of the band.
 		clear(myRead);
 		resize(myRead, length(fragStore.readSeqStore[alignIt->readId]), TProfileChar());
 		resize(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos), Generous());
@@ -251,19 +255,18 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		int increaseBand = 0;
 		int removedBeginPos = 0;
 		int removedEndPos = 0;
-		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos && itCons != itConsEnd; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
+		for (TReadPos iPos = bandOffset; iPos < alignIt->beginPos && itCons != itConsEnd; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
 			*bandConsIt = *itCons; // fill in positions left of readbegin
 		TSize itConsPosBegin = itConsPos;  // start position of read basically, right? if(itConsPosBegin != alignIt->beginPos) std::cout <<"nicht unbedingt gleich\n";
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
 
-
 		// Remove sequence from profile and add to the consensus
 		typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
-		TReadIter itRead = begin(fragStore.readSeqStore[alignIt->readId], Standard() );
-		TReadIter itReadEnd = end(fragStore.readSeqStore[alignIt->readId], Standard() );
+		TReadIter itRead = begin(fragStore.readSeqStore[alignIt->readId], Standard());
+		TReadIter itReadEnd = end(fragStore.readSeqStore[alignIt->readId], Standard());
 		typedef typename Iterator<String<TGapAnchor>, Standard>::Type TReadGapsIter;
-		TReadGapsIter itGaps = begin(alignIt->gaps, Standard() );
-		TReadGapsIter itGapsEnd = end(alignIt->gaps, Standard() );
+		TReadGapsIter itGaps = begin(alignIt->gaps, Standard());
+		TReadGapsIter itGapsEnd = end(alignIt->gaps, Standard());
 		TReadPos old = 0;
 		int diff = 0;
 		TReadPos clippedBeginPos = 0;
@@ -278,7 +281,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			++itGaps;
 			SEQAN_ASSERT_LT(itRead, itReadEnd);
 		}
-		for(;itGaps != itGapsEnd && itCons != itConsEnd; ++itGaps) {
+		for (; itGaps != itGapsEnd && itCons != itConsEnd; ++itGaps) {
 			// limit should never be larger than read length 
 			TReadPos limit = itGaps->seqPos;
 			SEQAN_ASSERT_LT(itGaps->seqPos, (TReadPos)length(fragStore.readSeqStore[alignIt->readId]));
@@ -288,8 +291,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				clippedEndPos = diff - newDiff;
 				limit -= clippedEndPos;
 			}
-			for(;old < limit && itCons != itConsEnd && itRead != itReadEnd; ++old, ++itRead) {
-		                //SEQAN_ASSERT_LT(itCons, itConsEnd);
+			for (; old < limit && itCons != itConsEnd && itRead != itReadEnd; ++old, ++itRead) {
+                //SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[ordValue(*itRead)];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
@@ -306,9 +309,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				(*myReadIt).count[0] = ordValue(*itRead); 
 				++myReadIt;
 				++itCons;
-                		//SEQAN_ASSERT_LT(itRead, itReadEnd);
+                //SEQAN_ASSERT_LT(itRead, itReadEnd);
 			}
-			for(;diff < newDiff && itCons != itConsEnd; ++diff) {
+			for (; diff < newDiff && itCons != itConsEnd; ++diff) {
 				++increaseBand;
 				//SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[gapPos];
@@ -321,16 +324,16 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			}
 		}
 		if (!clippedEndPos) {
-			for(;itRead!=itReadEnd && itCons != itConsEnd; ++itRead) {
+			for (; itRead!=itReadEnd && itCons != itConsEnd; ++itRead) {
 				//SEQAN_ASSERT_LT(itCons, itConsEnd);
-        		        //SEQAN_ASSERT_LT(itRead, itReadEnd);
-				--(*itCons).count[ordValue(*itRead)];//subtract the read base to get bandConsensus wo myRead
+                //SEQAN_ASSERT_LT(itRead, itReadEnd);
+				--(*itCons).count[ordValue(*itRead)];  //subtract the read base to get bandConsensus wo myRead
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
 					++bandConsIt;
 					++itConsPos;
 					removedEndPos = 0;
-				} else {// only gaps left in this column after removing myRead
+				} else {  // only gaps left in this column after removing myRead
 					if (itConsPosBegin != itConsPos) {
 						++increaseBand;
 						++removedEndPos; 
@@ -346,12 +349,12 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		increaseBand -= removedEndPos;
 
 		// Go further up to the bandwidth
-		for(TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); ++itCons, ++iPos, ++bandConsIt)
-				*bandConsIt = *itCons;
+		for (TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); ++itCons, ++iPos, ++bandConsIt)
+            *bandConsIt = *itCons;
 		resize(bandConsensus, bandConsIt - begin(bandConsensus, Standard()), Generous());
 		resize(myRead, myReadIt - begin(myRead, Standard()), Generous());
 
-		// ReAlign the consensus with the sequence
+		// Realign the consensus with the sequence.
 		typedef StringSet<TConsensus, Dependent<> > TStringSet;
 		TStringSet pairSet;
 		appendValue(pairSet, bandConsensus);
@@ -370,12 +373,13 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		TFragmentString matches;
 		assignProfile(consScore, bandConsensus);
 
-		
 		leftDiag -= removedBeginPos;
 		rightDiag -= removedBeginPos;
 		if (!singleton) {
-			if (rmethod == 0) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
-			else if (rmethod == 1) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
+			if (rmethod == 0)
+                globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+			else if (rmethod == 1)
+                globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
 		}
 
 		//// Debug code
@@ -384,14 +388,14 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		//std::cout << sc1 << std::endl;
 		//std::cout << g1 << std::endl;
 		
-		// Add the read back to the consensus and build the new consensus
+		// Add the read back to the consensus and build the new consensus.
 		resize(newConsensus, length(bandConsensus) + length(myRead), Generous());
 		TConsIter newConsIt = begin(newConsensus, Standard());
 		TConsIter bandIt = begin(bandConsensus, Standard());
 		TConsIter bandItEnd = end(bandConsensus, Standard());
 		typedef typename Iterator<TFragmentString, Standard>::Type TFragIter;
-		TFragIter fragIt = end(matches, Standard() );
-		TFragIter fragItEnd = begin(matches, Standard() );
+		TFragIter fragIt = end(matches, Standard());
+		TFragIter fragItEnd = begin(matches, Standard());
 		TReadPos consPos = 0;
 		TReadPos readPos = 0;
 		TReadPos alignPos = 0;
@@ -407,7 +411,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				--fragIt;
 				int gapLen = fragIt->begin1 - consPos;
 				if (firstMatch) gapLen = 0; // gap between two adjacent segment matches
-				while(consPos < (TReadPos)fragIt->begin1) { // cons stretch before newCons start
+				while (consPos < (TReadPos)fragIt->begin1) { // cons stretch before newCons start
 					SEQAN_ASSERT_LT(bandIt, bandItEnd);
 					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 					if (!firstMatch) ++(*bandIt).count[gapPos]; // fill with gaps if we are between two segment matches
@@ -417,7 +421,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					++consPos; 
 					++alignPos;
 				}
-				while(readPos < (TReadPos)fragIt->begin2) { // read stretch before newCons start
+				while (readPos < (TReadPos)fragIt->begin2) { // read stretch before newCons start
 					SEQAN_ASSERT_LT(readPos, (TReadPos)length(fragStore.readSeqStore[alignIt->readId]));
 					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 					if (gapLen) {
@@ -432,7 +436,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					*newConsIt = tmpChar; ++newConsIt;
 					++readPos; ++alignPos;
 				}
-				for(TSize i = 0; i<fragIt->len; ++i, ++bandIt, ++consPos, ++readPos, ++alignPos, ++newConsIt) {
+				for (TSize i = 0; i<fragIt->len; ++i, ++bandIt, ++consPos, ++readPos, ++alignPos, ++newConsIt) {
 					SEQAN_ASSERT_LT(bandIt, bandItEnd);
 					SEQAN_ASSERT_LT(readPos, (TReadPos)length(fragStore.readSeqStore[alignIt->readId]));
 					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
@@ -451,7 +455,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			} while (fragIt != fragItEnd);
 		}
 		
-		for(; readPos < (TReadPos)length(myRead); ++readPos) {
+		for (; readPos < (TReadPos)length(myRead); ++readPos) {
 			int numGaps = insertGap(contigReads, bandOffset + alignPos);
 			TProfileChar tmpChar;
 			++tmpChar.count[myRead[readPos].count[0]];
@@ -466,7 +470,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			diff -= clippedEndPos;
 			appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos + clippedEndPos, clippedBeginPos + readPos + clippedEndPos + diff), Generous() );
 		}
-		for(;bandIt != bandItEnd; ++bandIt, ++newConsIt) 
+		for (; bandIt != bandItEnd; ++bandIt, ++newConsIt) 
 		{
 			SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 			*newConsIt = *bandIt;
@@ -477,9 +481,17 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	}
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): realignmentMethod should not be optional or moved to the end of the list.
+// TODO(holtgrew): The method should be selected with an enum instead of an int.
+/**
+.Function.reAlign:
+..summary:Perform realignment similar to Anson-Myers algorithm.
+..signature:reAlignment(fragmentStore, consensusScore, contigId, [realignmentMethod,] bandwidth, includeReference)
+..category:Alignments
+..remark:The consensus sequence will be appended to the readSeqStore of fragmentStore if includeReference is true.
+*/
 template<typename TSpec, typename TConfig, typename TScore, typename TId, typename TMethod, typename TBandwidth>
 inline void 
 reAlign(FragmentStore<TSpec, TConfig>& fragStore,
@@ -507,44 +519,57 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef typename Value<TAlignedReadStore>::Type TAlignedElement;
 	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadElement;
 
+    double beginTime, endTime;
+    
+    beginTime = sysTime();
+    // TODO(holtgrew): Unnecessary, only required once.
 	// Sort according to contigId
 	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
 	
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore, Standard>::Type TAlignIter;
+	typedef typename Iterator<TAlignedReadStore, Standard>::Type TAlignIter;
 	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 
-	// Sort the reads according to the begin position
+	// Sort the reads according to their begin position.
 	sortAlignedReads(infix(fragStore.alignedReadStore, alignIt - begin(fragStore.alignedReadStore, Standard()), alignItEnd - begin(fragStore.alignedReadStore, Standard())), SortBeginPos());
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+    endTime = sysTime();
+    std::cerr << "TIME sorting " << endTime - beginTime << std::endl;
 
-	// Copy all reads belonging to this contig and reverse complement them if necessary
-	TAlignedReadStore contigReads;
+    beginTime = sysTime();
+	// Copy all reads belonging to this contig and reverse complement them if necessary.
+	TAlignedReadStore contigReads;  // TODO(holtgrew): Rather contigAlignedReads?
 	TReadPos maxPos = 0;
 	TReadPos minPos = MaxValue<TReadPos>::VALUE;
-	for(;alignIt != alignItEnd; ++alignIt) {
+	for (; alignIt != alignItEnd; ++alignIt) {
 		if (alignIt->beginPos > alignIt->endPos) {
 			reverseComplement(fragStore.readSeqStore[alignIt->readId]);
 			TAlignedElement alignedEl = *alignIt;
 			TReadPos tmp = alignedEl.beginPos;
 			alignedEl.beginPos = alignedEl.endPos;
 			alignedEl.endPos = tmp;
-			if (alignedEl.beginPos < minPos) minPos = alignedEl.beginPos;
-			if (alignedEl.endPos > maxPos) maxPos = alignedEl.endPos;
+			if (alignedEl.beginPos < minPos)
+                minPos = alignedEl.beginPos;
+			if (alignedEl.endPos > maxPos)
+                maxPos = alignedEl.endPos;
 			appendValue(contigReads, alignedEl, Generous() );
 		} else {
-			if (alignIt->beginPos < minPos) minPos = alignIt->beginPos;
-			if (alignIt->endPos > maxPos) maxPos = alignIt->endPos;
+			if (alignIt->beginPos < minPos)
+                minPos = alignIt->beginPos;
+			if (alignIt->endPos > maxPos)
+                maxPos = alignIt->endPos;
 			appendValue(contigReads, value(alignIt), Generous() );
 		}
 	}
+
+    // Append reference sequence to aligned reads for contigs if requested to do so.
 	if (includeReference) {
 		TId dummyReadId = length(fragStore.readSeqStore);
-
 		appendRead(fragStore, fragStore.contigStore[contigId].seq);
 		appendValue(fragStore.readNameStore, fragStore.contigNameStore[contigId], Generous());
 		fragStore.contigNameStore[contigId] += "Consensus_";
+        
 		TAlignedElement el;
 		el.readId = dummyReadId;
 		el.contigId = contigId;
@@ -553,10 +578,12 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		maxPos = el.endPos = _max(maxPos,(TReadPos)positionSeqToGap(contigGaps,length(fragStore.contigStore[contigId].seq)-1)+1);
 		maxPos = el.endPos = _max(maxPos,(TReadPos)length(fragStore.contigStore[contigId].seq));
 		el.gaps = fragStore.contigStore[contigId].gaps;
-		appendValue(contigReads, el, Generous() );
-		SEQAN_ASSERT_EQ(length(fragStore.readSeqStore[dummyReadId]), length(fragStore.readSeqStore[el.readId]));
+		appendValue(contigReads, el, Generous());
 	}
+    endTime = sysTime();
+    std::cerr << "TIME copying " << endTime - beginTime << std::endl;
 
+    beginTime = sysTime();
 	// Create the consensus sequence
 	TSize gapPos = ValueSize<TAlphabet>::VALUE;
 	typedef ProfileType<TAlphabet> TProfile;
@@ -612,25 +639,33 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 				++(value(itCons++)).count[ordValue(*itRead)];
 		}
 	}
-
+    endTime = sysTime();
+    std::cerr << "TIME consensus " << endTime - beginTime << std::endl;
 	
+    beginTime = sysTime();
 	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
+    endTime = sysTime();
+    std::cerr << "TIME realign" << endTime - beginTime << std::endl;
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
-	while(score < oldScore) {
-	//	std::cout << "Score: " << score << std::endl;
+	while (score < oldScore) {
+		std::cout << "Score: " << score << std::endl;
 		oldScore = score;
+        double beginTime = sysTime();
 		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
+        double endTime = sysTime();
+        std::cerr << "TIME realign" << endTime - beginTime << std::endl;
 		score = scoreConsensus(consensus);
 	}
-	//std::cout << "FinalScore: " << score << std::endl;
+	std::cout << "FinalScore: " << score << std::endl;
+    endTime = sysTime();
+    std::cerr << "TIME total realigning " << endTime - beginTime << std::endl;
 
-	
-
+    beginTime = sysTime();
 	// Update all the aligned reads and the new consensus
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter contigReadIt = begin(contigReads, Standard());
-	for(;alignIt != alignItEnd; ++alignIt) {
+	for (; alignIt != alignItEnd; ++alignIt) {
 		if (alignIt->beginPos > alignIt->endPos) {
 			reverseComplement(fragStore.readSeqStore[alignIt->readId]);
 			alignIt->beginPos = contigReadIt->endPos;
@@ -664,7 +699,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	int diff = 0;
 	clear(contigEl.seq);
 	clear(contigEl.gaps);
-	for(;itConsensus != itConsensusEnd; ++itConsensus, ++contigPos) {
+	for (; itConsensus != itConsensusEnd; ++itConsensus, ++contigPos) {
 		if ((char) *itConsensus == gapChar) ++gapLen;
 		else {
 			if (gapLen) {
@@ -683,10 +718,13 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	}
 	if (includeReference) 
 		appendValue(fragStore.alignedReadStore, contigReads[length(contigReads) - 1], Generous() );
+    endTime = sysTime();
+    std::cerr << "TIME finalizing " << endTime - beginTime << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
+// Forwards to the overload that accepts the alignment method.
 template<typename TSpec, typename TConfig, typename TScore, typename TId, typename TBandwidth>
 inline void 
 reAlign(FragmentStore<TSpec, TConfig>& fragStore,
@@ -698,6 +736,6 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	reAlign(fragStore, consScore, contigId, 0, bandwidth, includeReference);
 }
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_CONSENSUS_CONSENSUS_REALIGN_H_
