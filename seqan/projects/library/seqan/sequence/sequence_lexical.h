@@ -31,6 +31,7 @@
 // ==========================================================================
 // Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
 // ==========================================================================
+// Implementation of efficient lexical sequence comparison.
 // ==========================================================================
 
 #ifndef SEQAN_HEADER_LEXICAL_H

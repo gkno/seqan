@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Implementation of the Packed String class.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_PACKED_H
 #define SEQAN_HEADER_SEQUENCE_PACKED_H

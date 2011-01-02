@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Declarations related to and implementation of the Segment class.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEGMENT_BASE_H
 #define SEQAN_HEADER_SEGMENT_BASE_H

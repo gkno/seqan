@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+// ==========================================================================
+// Manual forwards for the sequence module.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_FORWARDS_H 
 #define SEQAN_HEADER_SEQUENCE_FORWARDS_H 
@@ -40,6 +44,7 @@
 namespace SEQAN_NAMESPACE_MAIN 
 {
 
+// TODO(holtgrew): Still required since we dropped support for VS2003?
 // Workaround (copied from generated forwards) for VS 2003.
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
 template <unsigned int SPACE > struct Block;       	// "projects\library\seqan/sequence\string_stack.h"(48)

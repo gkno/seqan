@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Implementation of the Prefix Segment specialization.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEGMENT_PREFIX_H
 #define SEQAN_HEADER_SEGMENT_PREFIX_H

@@ -29,6 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Tags, declarations and generic code for the String class and its
+// specializations.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_ARRAY_BASE_H
 #define SEQAN_HEADER_SEQUENCE_ARRAY_BASE_H

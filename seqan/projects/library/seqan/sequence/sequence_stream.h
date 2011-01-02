@@ -29,6 +29,12 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: David Weese <david.weese@fu-berlin.de>
+// ==========================================================================
+// Code that allows strings to be treated like streams.
+//
+// TODO(holtgrew): This could be called ${module}_adapt_sequence.h, where $module is the name of a future streaming/I/O module.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_STREAM_H
 #define SEQAN_HEADER_SEQUENCE_STREAM_H

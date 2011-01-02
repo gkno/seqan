@@ -29,6 +29,12 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
+// ==========================================================================
+// Implementation of the StringSet class, its specializations and
+// concat virtual iterator.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_STRING_SET_H
 #define SEQAN_HEADER_STRING_SET_H
@@ -2322,6 +2328,7 @@ For all other StringSets a @Class.ConcatenatorManyToOne@ object is returned.
 	template < typename TDelimiter = void >
 	struct ConcatVirtual;
 
+    // TODO(holtgrew): Is this necessary?
     template < typename TStringSet, typename TSpec >
 	class Iter< TStringSet, ConcatVirtual<TSpec> > 
 	{
@@ -2388,6 +2395,7 @@ For all other StringSets a @Class.ConcatenatorManyToOne@ object is returned.
         }
 //____________________________________________________________________________
 
+        // TODO(holtgrew): Strong deletion candidate, defined for no other class/specialization and used nowhere.
 		inline bool _atEndOfSequence() {
 			if (_cur == _begin && objNo > 0) return true;
 			if (_cur == _end) return true;

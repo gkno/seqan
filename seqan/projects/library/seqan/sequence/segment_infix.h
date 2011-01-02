@@ -29,11 +29,13 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Implementation of the Infix Segment specialization.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEGMENT_INFIX_H
 #define SEQAN_HEADER_SEGMENT_INFIX_H
-
-#include <cassert>  // assert()
 
 namespace SEQAN_NAMESPACE_MAIN
 {

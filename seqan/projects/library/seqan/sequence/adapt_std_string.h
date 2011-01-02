@@ -38,8 +38,6 @@
 #ifndef SEQAN_SEQUENCE_ADAPT_STD_STRING_H_
 #define SEQAN_SEQUENCE_ADAPT_STD_STRING_H_
 
-#include <string>
-
 namespace seqan {
 
 // ===========================================================================

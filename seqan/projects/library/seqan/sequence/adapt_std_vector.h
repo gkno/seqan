@@ -51,7 +51,6 @@ namespace seqan {
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
-
     
 ///.Metafunction.IsContiguous.param.T.type:Adaption.std::vector
 template <typename TChar, typename TAlloc>

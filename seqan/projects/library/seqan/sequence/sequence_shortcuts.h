@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Shortcuts for certain often-used string types.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_SHORTCUTS_H
 #define SEQAN_HEADER_SEQUENCE_SHORTCUTS_H

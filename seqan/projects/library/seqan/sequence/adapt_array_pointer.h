@@ -32,24 +32,24 @@
 // Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
 // ==========================================================================
 // Adaptions for pointer and arrays to SeqAn strings.
+//
 // TODO(holtgrew): Break out into adapt_pointer.h and adapt_array.h? The important main distinction is the fixed size at compile time.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_SEQUENCE_POINTER_H
-#define SEQAN_HEADER_SEQUENCE_POINTER_H
+#ifndef SEQAN_SEQUENCE_ADAPT_ARRAY_POINTER_H_
+#define SEQAN_SEQUENCE_ADAPT_ARRAY_POINTER_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-//////////////////////////////////////////////////////////////////////////////
+namespace seqan {
 
+// ===========================================================================
+// Enums, Tags, Classes, Specializations
+// ===========================================================================
+    
 /**
 .Adaption.char array:
 ..summary:Zero terminated $char[]$ or $wchar_t[]$.
 ..remarks:Char arrays only support the Insist @Tag.Overflow Strategy.overflow strategy@.
 */
-
-
-//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Adaption.char array.remarks:The default overflow strategy 
@@ -61,27 +61,33 @@ template <typename TValue>
 struct DefaultOverflowImplicit;
 
 template <typename TValue>
-struct DefaultOverflowImplicit< TValue * >
+struct DefaultOverflowImplicit<TValue *>
 {
 	typedef Insist Type;
 };
+    
 template <typename TValue>
-struct DefaultOverflowImplicit< TValue * const>
+struct DefaultOverflowImplicit<TValue * const>
 {
 	typedef Insist Type;
 };
+    
 template <typename TValue, size_t SIZE>
-struct DefaultOverflowImplicit< TValue [SIZE] >
+struct DefaultOverflowImplicit<TValue [SIZE]>
 {
 	typedef Insist Type;
 };
+    
 template <typename TValue, size_t SIZE>
-struct DefaultOverflowImplicit< TValue const [SIZE] >
+struct DefaultOverflowImplicit<TValue const [SIZE]>
 {
 	typedef Insist Type;
 };
-//____________________________________________________________________________
 
+// ===========================================================================
+// Metafunctions
+// ===========================================================================
+    
 template <typename TValue>
 struct DefaultOverflowExplicit;
 
@@ -106,8 +112,6 @@ struct DefaultOverflowExplicit< TValue const [SIZE] >
 	typedef Insist Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 ///.Metafunction.IsContiguous.param.T.type:Adaption.char array
 
 template <typename TValue>
@@ -119,12 +123,14 @@ struct IsContiguous< TValue * >
     typedef True Type;
 	enum { VALUE = true };
 };
+    
 template <typename TValue, size_t SIZE>
 struct IsContiguous< TValue [SIZE] >
 {
     typedef True Type;
 	enum { VALUE = true };
 };
+    
 template <typename TValue, size_t SIZE>
 struct IsContiguous< TValue const [SIZE] >
 {
@@ -156,8 +162,9 @@ struct IsSequence< TValue const [SIZE] >
 	enum { VALUE = true };
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
+// ===========================================================================
+// Functions
+// ===========================================================================
 
 template <typename T>
 inline typename Iterator<T *, typename DefaultGetIteratorSpec<T>::Type>::Type 
@@ -209,8 +216,6 @@ SEQAN_CHECKPOINT
 	return TIterator(me, begin(me, Standard()));
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 ///.Function.end.param.object.type:Adaption.char array
 
 template <typename TValue>
@@ -250,9 +255,6 @@ SEQAN_CHECKPOINT
 	return begin(me, tag_) + length(me);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-
 ///.Function.value.param.container.type:Adaption.char array
 
 template <typename TValue, typename TPos>
@@ -273,9 +275,7 @@ SEQAN_CHECKPOINT
 	return me[pos];
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// assignValue
-//////////////////////////////////////////////////////////////////////////////
+///.Function.assignValue.param.container.type:Adaption.char array
 
 template <typename TValue, typename TPos>
 inline void
@@ -287,9 +287,7 @@ SEQAN_CHECKPOINT
 	assign(value(me, pos), _value);
 } 
 
-//////////////////////////////////////////////////////////////////////////////
-// moveValue
-//////////////////////////////////////////////////////////////////////////////
+///.Function.moveValue.param.container.type:Adaption.char array
 
 template <typename TValue, typename TPos>
 inline void
@@ -301,7 +299,7 @@ SEQAN_CHECKPOINT
 	move(value(me, pos), _value);
 } 
 
-//////////////////////////////////////////////////////////////////////////////
+// Function atEnd for pointers / array iterators.
 
 template <typename TValue>
 inline bool
@@ -311,8 +309,6 @@ SEQAN_CHECKPOINT
 	return *pos == 0;
 }
 
-//____________________________________________________________________________
-
 template <typename TValue>
 inline bool
 atEnd(TValue const * pos, 
@@ -321,8 +317,6 @@ atEnd(TValue const * pos,
 SEQAN_CHECKPOINT
 	return *pos == 0;
 }
-
-//////////////////////////////////////////////////////////////////////////////
 
 ///.Function.length.param.object.type:Adaption.char array
 
@@ -364,8 +358,6 @@ SEQAN_CHECKPOINT
 	return ::std::strlen(me);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 template <typename TValue>
 inline void
 _setLength(TValue * me,
@@ -374,8 +366,6 @@ _setLength(TValue * me,
 SEQAN_CHECKPOINT
 	me[new_length] = 0;
 }
-
-//////////////////////////////////////////////////////////////////////////////
 
 ///.Function.clear.param.object.type:Adaption.char array
 
@@ -389,8 +379,6 @@ SEQAN_CHECKPOINT
 	_setLength(me, 0);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 ///.Function.empty.param.object.type:Adaption.char array
 
 template <typename TValue>
@@ -400,9 +388,6 @@ empty(TValue * me)
 SEQAN_CHECKPOINT
 	return !me || (*me == TValue());
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
 
 template<typename TValue, typename TExpand>
 inline size_t 
@@ -450,10 +435,6 @@ SEQAN_CHECKPOINT
 	return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// assign
-//////////////////////////////////////////////////////////////////////////////
-
 ///.Function.assign.param.target.type:.Adaption.char array
 ///.Function.assign.param.source.type:.Adaption.char array
 
@@ -477,8 +458,6 @@ SEQAN_CHECKPOINT
 	typedef TTargetValue * TTarget;
 	assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
-
-//____________________________________________________________________________
 
 template<typename TTargetValue, typename TSource, typename TExpand>
 inline void 
@@ -525,9 +504,7 @@ SEQAN_CHECKPOINT
 	AssignString_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// move
-//////////////////////////////////////////////////////////////////////////////
+///.Function.move.param.target.type:Adaption.char array
 
 //overload of binary version for strings: 
 
@@ -853,8 +830,8 @@ SEQAN_CHECKPOINT
 */
 //////////////////////////////////////////////////////////////////////////////
 
-} //namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
 //____________________________________________________________________________
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_SEQUENCE_ADAPT_ARRAY_POINTER_H_

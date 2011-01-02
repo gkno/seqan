@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Implementation of the Alloc string class.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_STRING_ALLOC_H
 #define SEQAN_HEADER_SEQUENCE_STRING_ALLOC_H

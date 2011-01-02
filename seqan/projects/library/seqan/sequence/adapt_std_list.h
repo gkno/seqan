@@ -37,8 +37,6 @@
 #ifndef SEQAN_SEQUENCE_ADAPT_STD_LIST_H_
 #define SEQAN_SEQUENCE_ADAPT_STD_LIST_H_
 
-#include <list>
-
 namespace seqan {
 
 // ===========================================================================
