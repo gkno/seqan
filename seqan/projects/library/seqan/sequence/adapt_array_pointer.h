@@ -29,6 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Adaptions for pointer and arrays to SeqAn strings.
+// TODO(holtgrew): Break out into adapt_pointer.h and adapt_array.h? The important main distinction is the fixed size at compile time.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_POINTER_H
 #define SEQAN_HEADER_SEQUENCE_POINTER_H
@@ -127,8 +132,8 @@ struct IsContiguous< TValue const [SIZE] >
 	enum { VALUE = true };
 };
 
-/*DISABLED 
-.Metafunction.IsString.param.T.type:Adaption.char array
+/*
+.Metafunction.IsSequence.param.T.type:Adaption.char array
 ..include:seqan/sequence.h
 */
 
@@ -173,6 +178,7 @@ SEQAN_CHECKPOINT
 	return me;
 }
 
+// TODO(holtgrew): Is the following still required since we dropped support for VC++ 2003?
 //folgende Versionen wurde wegen seltsamer Phaenomene bei VC++ 2003 hinzugenommen
 template <typename TValue>
 inline typename Iterator<TValue const *, Standard>::Type  
@@ -378,6 +384,7 @@ inline void
 clear(TValue * me)
 {
 SEQAN_CHECKPOINT
+    // TODO(holtgrew): Review this.
 	//arrayDestruct(begin(me), length(me)); //??? Die Laengenbestimmung ist meistens nutzlos, braucht man sowieso nur fuer non-pod
 	_setLength(me, 0);
 }
@@ -705,6 +712,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// TODO(holtgrew): Review this problem, and document in ticket system.
 //PROBLEM: ambiguitiy "pointer/iterator" and "c-style string"
 //workaround: disable all operators
 /*

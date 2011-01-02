@@ -262,10 +262,10 @@ struct IsContiguous< String<TValue, Array<LENGTH> > >
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.LENGTH.param.T.type:Spec.Array String
-template <typename TValue, unsigned int LENGTH>
-struct LENGTH< String<TValue, Array<LENGTH> > >
+template <typename TValue, unsigned int LENGTH_>
+struct LENGTH< String<TValue, Array<LENGTH_> > >
 {
-	enum { VALUE = LENGTH };
+	enum { VALUE = LENGTH_ };
 };
 
 //////////////////////////////////////////////////////////////////////////////
