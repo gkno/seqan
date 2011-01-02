@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Improving coding style compliance of Array String implementation.
  * Making documentation about assigning to CStyle SeqAn strings more clear, adjusting comments.
  * Documenting `reAlign()`, various small comment and whitespace fixes in consensus module.
  * Comparison operator for tag selector.
