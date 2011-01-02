@@ -39,32 +39,6 @@
 
 using namespace seqan;
 
-/*
-SEQAN_DEFINE_TEST(test_store_io_writeme) 
-{
-	FragmentStore<> store;
-    char buffer[1023];
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
-    strcat(buffer, "/projects/tests/store/ex1.sam");
-    
-	std::ifstream samFile(buffer);
-	SEQAN_ASSERT_TRUE(samFile);
-	read(samFile, store, Sam());
-	
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
-    strcat(buffer, "/projects/tests/store/ex1.fa");
-    
-	loadContigs(store, buffer);
-
-
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
-    strcat(buffer, "/projects/tests/store/ex1.sam.copy");
-    
-	std::ofstream samFileOut(buffer);
-	SEQAN_ASSERT_TRUE(samFileOut);
-	write(samFileOut, store, Sam());
-}
-*/
 SEQAN_DEFINE_TEST(test_store_io_sam) 
 {
 	FragmentStore<> store;

@@ -952,10 +952,10 @@ getCigarString(
 		CharString cigar;
 		TReadSeq readSeq;
 
-        int i = 0;
+//        int i = 0;
         for(; it != itEnd; ++it)
 		{
-            std::cerr << "alignment " << i++ << std::endl;
+//            std::cerr << "alignment " << i++ << std::endl;
             TId alignedId = (*it).id;
 			TId readId = (*it).readId;
 			TId mateIdx = TRead::INVALID_ID;
