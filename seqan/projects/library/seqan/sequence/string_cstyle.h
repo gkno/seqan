@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Implementation of the CStyle String specialization, 
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_CSTYLE_H
 #define SEQAN_HEADER_SEQUENCE_CSTYLE_H
@@ -47,11 +51,13 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:String<TValue, CStyle>
 ..param.TValue:The value type, that is the type of the items/characters stored in the string.
 ...remarks:Use @Metafunction.Value@ to get the value type for a given class.
-...note:$TValue$ must be a simple type.???(Link)
+...note:$TValue$ must be a @Concept.Simple Type@.
+..remarks:
+..text:Assigning a string $TValue *$ to a CStyle String will not create a copy of the string but just copy pointers.
 ..remarks:
 ...text:The purpose of this class is to access to the content of a sequence 
 in a "zero terminated string" style. 
-This can be useful if SEQAN classes has to be integrated in programs that use $char$ arrays
+This can be useful if SeqAn classes has to be integrated in programs that use $char$ arrays
 to store strings.
 Instances of $String<TValue, CStyle>$ can implicitely converted to a $TValue *$ that
 points to a zero terminated CStyle of $TValue$. 
@@ -59,18 +65,18 @@ points to a zero terminated CStyle of $TValue$.
 The content of a c-style string can eighter be stored in a separate buffer, that is the source string
 is copied. Or the buffer of the source string itself is used instead, in this case the c-style string
 depends on the source string and gets invalid as soon as the buffer of the source string is destroyed.
-...text:Hence, this class is a kind of adaptor from an arbitrary SEQAN string to char arrays.
+...text:Hence, this class is a kind of adaptor from an arbitrary SeqAn string to char arrays.
 Of course, the opposite way is possible too: 
-Read @Adaption.char array.here@ about adapting char arrays to SEQAN strings.
+Read @Adaption.char array.here@ about adapting char arrays to SeqAn strings.
 ..example:
-...code://Create a string str:
+...code:// Create a string str:
 String<char> str = "this is a test string";
 
-//Create a c-style string object for str:
-String<char, CStyle> c_style = str;
+// Create a c-style string object for str:
+String<char, CStyle> cStyle = str;
 
-//Now use c_style as char array:
-strcmp(c_style, "compare it to this string");
+// Now use cStyle as char array:
+strcmp(cStyle, "compare it to this string");
 ...text:If the c-style string is needed only temporarily, the function $toCString$ can be used:
 ...code:String<char> str = "this is a test string";
 strcmp(toCString(str), "compare it to this string");
@@ -93,9 +99,11 @@ class String <TValue, CStyle >
 public:
 	TValue * data_begin;
 	TValue * data_end;
-	size_t data_size; //if data_size > 0, then the buffer is owned by me and must be deallocated
+    // If data_size > 0, then the buffer is owned by me and must be deallocated.
+	size_t data_size;
 
 public:
+    // TODO(holtgrew): Maybe better point to 0?
 	static TValue EMPTY_STRING;
 //____________________________________________________________________________
 
