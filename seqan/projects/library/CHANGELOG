@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Setting flags for RelDebug build type correctly for apps.
  * Removed unused and undocumented `string_value_expand.h` / `String<TValue, ValueExpand<...> >`
  * Various comment / formatting / documentation changes and annotations in sequence module.
  * Renaming `string_stack.h` to `string_block.h` and adding header field for author.
