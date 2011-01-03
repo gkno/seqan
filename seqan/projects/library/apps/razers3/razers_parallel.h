@@ -552,7 +552,8 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
         typename Size<TAlignedReadStore>::Type oldSize = length(localStore.alignedReadStore);
 
-        //fprintf(stderr, "[compact]");
+        if (tls.threadId == 0u)
+            fprintf(stderr, "[compact]");
         if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
           maskDuplicates(localStore, TRazerSMode());  // overlapping parallelograms cause duplicates
 
@@ -644,7 +645,7 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
         // Wait until verification for this block has finished.
         while (jobData.verificationResults->blocksTotal != jobData.verificationResults->blocksDone) {
             // Busy waiting.
-            SEQAN_ASSERT_LEQ(jobData.verificationResults->blocksTotal, jobData.verificationResults->blocksDone);
+            SEQAN_ASSERT_GEQ(jobData.verificationResults->blocksTotal, jobData.verificationResults->blocksDone);
         }
         // Write back hits into local store or global store.
         writeBackToLocal(tls, jobData);
@@ -950,6 +951,12 @@ int _mapSingleReadsParallel(
     typedef Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > TJob;
     typedef ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > TThreadLocalStorage;
     typedef String<TThreadLocalStorage> TThreadLocalStorages;
+
+    // Clear global stats.
+	options.countFiltration = 0;
+	options.countVerification = 0;
+	options.timeMapReads = 0;
+	options.timeDumpResults = 0;
 
     TThreadLocalStorages threadLocalStorages;
     resize(threadLocalStorages, options.threadCount);
