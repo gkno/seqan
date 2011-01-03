@@ -1885,7 +1885,7 @@ windowFindNext(
 	// iterate over all non-repeat regions within the window
 	for (; finder.curPos < windowEnd; )
 	{
-		THstkPos localEnd = finder.endPos;
+		THstkPos localEnd = finder.endPos - length(pattern.shape) + 1;
 		if (localEnd > windowEnd) localEnd = windowEnd;
         
 		// filter a non-repeat region within the window
