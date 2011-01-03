@@ -320,6 +320,7 @@ public:
     bool writeBackOnly;
     //THitString hitString;
 
+    // TODO(holtgrew): The verificationResults leak. Maybe store in block local storage instead?
     JobData(int jobId_, unsigned contigId_, unsigned blockId_, TFragmentStore *fragmentStore_, GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState_)
             : jobId(jobId_), contigId(contigId_), blockId(blockId_), fragmentStore(fragmentStore_), verificationResults(new VerificationResults<TFragmentStore, TSwiftPattern, TOptions>(globalState_)), writeBackOnly(false)
     {}
@@ -928,6 +929,12 @@ int _mapSingleReadsParallel(
     int oldMaxThreads = omp_get_max_threads();
     omp_set_num_threads(options.threadCount);
 
+    // Clear global stats.
+	options.countFiltration = 0;
+	options.countVerification = 0;
+	options.timeMapReads = 0;
+	options.timeDumpResults = 0;
+
     // Global state stores free list of local stores, splitters, for example.
     GlobalState<TFragmentStore, TSwiftPattern, TOptions> globalState;
     globalState.globalOptions = &options;
@@ -951,12 +958,6 @@ int _mapSingleReadsParallel(
     typedef Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > TJob;
     typedef ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > TThreadLocalStorage;
     typedef String<TThreadLocalStorage> TThreadLocalStorages;
-
-    // Clear global stats.
-	options.countFiltration = 0;
-	options.countVerification = 0;
-	options.timeMapReads = 0;
-	options.timeDumpResults = 0;
 
     TThreadLocalStorages threadLocalStorages;
     resize(threadLocalStorages, options.threadCount);
@@ -993,7 +994,7 @@ int _mapSingleReadsParallel(
                     if (threadLocalStorages[i].workRecords[j + k].type != threadLocalStorages[i].workRecords[j + k + 1].type)
                       break;
                 }
-                std::cerr << "[" << threadLocalStorages[i].workRecords[j].begin - first << " (" << jobTypeNames[threadLocalStorages[i].workRecords[j].type] << ", " << threadLocalStorages[i].workRecords[j].end - threadLocalStorages[i].workRecords[j].begin << "s) " << threadLocalStorages[i].workRecords[j + k].end - first << "] ";
+                std::cerr << "[" << threadLocalStorages[i].workRecords[j].begin - first << " (" << jobTypeNames[threadLocalStorages[i].workRecords[j].type] << ", " << threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j].begin << "s) " << threadLocalStorages[i].workRecords[j + k].end - first << "] ";
                 j += k;
             }
             std::cerr << std::endl;
@@ -1049,6 +1050,8 @@ int _mapSingleReadsParallel(
 	if (options._debugLevel >= 2) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
+		for (unsigned i = 0; i < options.threadCount; ++i)
+          ::std::cerr << "Filtration counter:      " << threadLocalStorages[i].options.countFiltration << ::std::endl;
 		::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
 		::std::cerr << "Successful verfications: " << options.countVerification << ::std::endl;
 	}

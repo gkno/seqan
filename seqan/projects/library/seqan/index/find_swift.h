@@ -1900,7 +1900,7 @@ windowFindNext(
             
 		if (pattern.params.printDots) _printDots(finder);
 
-		if (finder.curPos == finder.endPos)
+		if (finder.curPos == finder.endPos - length(pattern.shape) + 1)
 			if (!_nextNonRepeatRange(finder, pattern))
                 return false;
 	}
