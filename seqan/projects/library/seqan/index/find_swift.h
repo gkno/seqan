@@ -1882,8 +1882,10 @@ windowFindNext(
 	clear(finder.hits);
     
 	THstkPos windowEnd = finder.curPos + finderWindowLength;
+    if (windowEnd > finder.endPos - length(pattern.shape) + 1)
+        windowEnd = finder.endPos - length(pattern.shape) + 1;
 	// iterate over all non-repeat regions within the window
-	for (; finder.curPos < windowEnd - length(pattern.shape) + 1; )
+	for (; finder.curPos < windowEnd; )
 	{
 		THstkPos localEnd = finder.endPos - length(pattern.shape) + 1;
 		if (localEnd > windowEnd) localEnd = windowEnd;
