@@ -553,15 +553,17 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
         typename Size<TAlignedReadStore>::Type oldSize = length(localStore.alignedReadStore);
 
-        if (tls.threadId == 0u)
-            fprintf(stderr, "[compact]");
+        // if (tls.threadId == 0u)
+        //     fprintf(stderr, "[compact]");
         if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
           maskDuplicates(localStore, TRazerSMode());  // overlapping parallelograms cause duplicates
 
         compactMatches(localStore, tls.counts, tls.options, TRazerSMode(), tls.globalState->blockLocalStorages[jobData.blockId], COMPACT);
     
-        if (length(localStore.alignedReadStore) * 4 > oldSize)      // the threshold should not be raised
+        if (length(localStore.alignedReadStore) * 4 > oldSize) {     // the threshold should not be raised
+            fprintf(stderr, "[raising threshold]");
             tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
+        }
     }
 
     SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), length(localStore.alignQualityStore));
@@ -972,6 +974,8 @@ int _mapSingleReadsParallel(
     std::cerr << "TIME initialization: " << (endInit - beginInit) << " s" << std::endl;
 
     // For each contig: Map reads in parallel.
+    double times[5] = {0, 0, 0, 0, 0};
+    char const * jobTypeNames[] = {"NONE", "filtration init", "filtration", "verification", "writeback", "5", "6"};
     for (unsigned contigId = 0; contigId < length(store.contigStore); ++contigId) {
 		lockContig(store, contigId);
 		double beginForward = sysTime();
@@ -981,7 +985,6 @@ int _mapSingleReadsParallel(
         std::cerr << "  TIME forward mapping (" << contigId << ") " << (beginReverse - beginForward) << " s" << std::endl;
         std::cerr << ".-- Queue work" << std::endl;
         for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
-            char const * jobTypeNames[] = {"NONE", "filtration init", "filtration", "verification", "writeback", "5", "6"};
             if (length(threadLocalStorages[i].workRecords) == 0u)
                 continue;
             std::cerr << "| " << i << ": ";
@@ -995,6 +998,7 @@ int _mapSingleReadsParallel(
                       break;
                 }
                 std::cerr << "[" << threadLocalStorages[i].workRecords[j].begin - first << " (" << jobTypeNames[threadLocalStorages[i].workRecords[j].type] << ", " << threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j].begin << "s) " << threadLocalStorages[i].workRecords[j + k].end - first << "] ";
+                times[threadLocalStorages[i].workRecords[j].type] += threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j].begin;
                 j += k;
             }
             std::cerr << std::endl;
@@ -1007,7 +1011,6 @@ int _mapSingleReadsParallel(
         std::cerr << "  TIME reverse mapping (" << contigId << ") " << (endReverse - beginReverse) << " s" << std::endl;
         std::cerr << ".-- Queue work" << std::endl;
         for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
-            char const * jobTypeNames[] = {"NONE", "filtration init", "filtration", "verification", "writeback", "5", "6"};
             if (length(threadLocalStorages[i].workRecords) == 0u)
                 continue;
             std::cerr << "| " << i << ": ";
@@ -1021,6 +1024,7 @@ int _mapSingleReadsParallel(
                       break;
                 }
                 std::cerr << "[" << threadLocalStorages[i].workRecords[j].begin - first << " (" << jobTypeNames[threadLocalStorages[i].workRecords[j].type] << ", " << threadLocalStorages[i].workRecords[j].end - threadLocalStorages[i].workRecords[j].begin << "s) " << threadLocalStorages[i].workRecords[j + k].end - first << "] ";
+                times[threadLocalStorages[i].workRecords[j].type] += threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j].begin;
                 j += k;
             }
             std::cerr << std::endl;
@@ -1031,6 +1035,8 @@ int _mapSingleReadsParallel(
     }
     double endMapping = sysTime();
     std::cerr << "TIME mapping: " << (endMapping - endInit) << " s" << std::endl;
+    for (int i = 0; i < 5; ++i)
+        std::cerr << "  in " << jobTypeNames[i] << ": " << times[i] << " s" << std::endl;
 
     // Write back local stores to global stores.
     writeBackToGlobalStore(store, globalState.blockLocalStorages);

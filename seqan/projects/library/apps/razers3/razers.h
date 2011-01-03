@@ -484,8 +484,10 @@ struct MicroRNA{};
 		
 						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
 						
-						if (length(store->alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+						if (length(store->alignedReadStore) * 4 > oldSize) {			// the threshold should not be raised
+                            fprintf(stderr, "[raising threshold]");
 							options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
+                        }
 						
 //						if (options._debugLevel >= 2)
 //							::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
@@ -1044,6 +1046,7 @@ void compactMatches(
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
+    fprintf(stderr, "[compact]");
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
