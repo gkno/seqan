@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: David Weese <weese@fu-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SEQAN_HEADER_FIND_SWIFT_H
@@ -1882,25 +1882,27 @@ windowFindNext(
 	clear(finder.hits);
     
 	THstkPos windowEnd = finder.curPos + finderWindowLength;
-    if (windowEnd > finder.endPos - length(pattern.shape) + 1)
-        windowEnd = finder.endPos - length(pattern.shape) + 1;
+
 	// iterate over all non-repeat regions within the window
 	for (; finder.curPos < windowEnd; )
 	{
-		THstkPos localEnd = finder.endPos - length(pattern.shape) + 1;
-		if (localEnd > windowEnd) localEnd = windowEnd;
+        THstkPos nonRepeatEnd = finder.endPos - length(pattern.shape) + 1;
+		THstkPos localEnd = _min(windowEnd, nonRepeatEnd);
         
 		// filter a non-repeat region within the window
-		TShape &shape = pattern.shape;
-		_swiftMultiProcessQGram(finder, pattern, hash(shape, hostIterator(hostIterator(finder))));
-        
-		for (++finder.curPos, ++finder; finder.curPos < localEnd; ++finder.curPos, ++finder){
-			_swiftMultiProcessQGram(finder, pattern, hashNext(shape, hostIterator(hostIterator(finder))));			
+        if (finder.curPos < localEnd)
+        {
+            TShape &shape = pattern.shape;
+            _swiftMultiProcessQGram(finder, pattern, hash(shape, hostIterator(hostIterator(finder))));
+            
+            for (++finder.curPos, ++finder; finder.curPos < localEnd; ++finder.curPos, ++finder){
+                _swiftMultiProcessQGram(finder, pattern, hashNext(shape, hostIterator(hostIterator(finder))));			
+            }
         }
             
 		if (pattern.params.printDots) _printDots(finder);
 
-		if (finder.curPos == finder.endPos - length(pattern.shape) + 1)
+		if (finder.curPos >= nonRepeatEnd)
 			if (!_nextNonRepeatRange(finder, pattern))
                 return false;
 	}
