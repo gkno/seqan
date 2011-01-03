@@ -90,7 +90,6 @@
 #include <seqan/sequence/string_cstyle.h>
 #include <seqan/sequence/string_block.h>
 #include <seqan/sequence/string_packed.h>
-#include <seqan/sequence/string_value_expand.h>
 
 #include <seqan/sequence/sequence_multiple.h>
 #include <seqan/sequence/sequence_shortcuts.h>
