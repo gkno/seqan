@@ -187,11 +187,12 @@ scoreGapVertical(
 ..signature:score(score, pos1, pos2, seq1, seq2)
 ..param.score:The scoring scheme to use.
 ...type:Class.Score
-..param.pos1:Position of the first character.
-..param.pos2:Position of the first character.
-..param.pos1:First sequence of characters.
-..param.pos2:Second sequence of characters.
-..summary:Returns the score for aligning character $seq1[pos1]$ to $seq2[pos2]$.
+..param.pos1:Position of the aligned character in $seq1$.
+..param.pos2:Position of the aligned character in $seq2$.
+..param.seq1:First sequence.
+..param.seq2:Second sequence.
+..summary:Returns the score for aligning the characters $seq1[pos1]$ and $seq2[pos2]$.
+This function allows to define a position-dependent scoring scheme.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>

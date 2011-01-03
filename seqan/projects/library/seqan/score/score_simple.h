@@ -350,9 +350,11 @@ setScoreGap(Score<TValue, TSpec> & me, TValue const & value) {
 ..signature:score(score, value1, value2) [deprecated]
 ..param.score:A scoring scheme.
 ...type:Class.Score
-..param.value1:first value.
-..param.value2:second value.
-..status:The version that explicitely requires two values is deprecated. For using or defining custom scoring schemes better use the functions @Function.score@, @Function.scoreGapOpenVertical@, @Function.scoreGapExtendVertical@, @Function.scoreGapOpenHorizontal@ and @Function.scoreGapExtendHorizontal@.
+..param.value1:Aligned character in the first sequence.
+..param.value2:Aligned character in the second sequence.
+..status:The version that explicitely requires two characters is deprecated. For using (or defining) custom scoring schemes better use the functions
+@Function.score@, @Function.scoreGapOpenVertical@, @Function.scoreGapExtendVertical@, @Function.scoreGapOpenHorizontal@ and @Function.scoreGapExtendHorizontal@ 
+as they require character positions and sequences and allow for position-dependent scoring schemes.
 ..include:seqan/score.h
 */
 template <typename TValue, typename TSpec, typename TVal1, typename TVal2>
