@@ -980,7 +980,7 @@ int _mapSingleReadsParallel(
             double first = front(threadLocalStorages[i].workRecords).begin;
             for (unsigned j = 0; j < length(threadLocalStorages[i].workRecords); ++j) {
                 int k = 0;
-                for (; j + k < length(threadLocalStorages[i].workRecords); ++k) {
+                for (; j + k + 1 < length(threadLocalStorages[i].workRecords); ++k) {
                     if (fabs(threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j + k + 1].begin) > 0.01)
                       break;
                     if (threadLocalStorages[i].workRecords[j + k].type != threadLocalStorages[i].workRecords[j + k + 1].type)
@@ -1006,7 +1006,7 @@ int _mapSingleReadsParallel(
             double first = front(threadLocalStorages[i].workRecords).begin;
             for (unsigned j = 0; j < length(threadLocalStorages[i].workRecords); ++j) {
                 int k = 0;
-                for (; j + k < length(threadLocalStorages[i].workRecords); ++k) {
+                for (; j + k + 1 < length(threadLocalStorages[i].workRecords); ++k) {
                     if (fabs(threadLocalStorages[i].workRecords[j + k].end - threadLocalStorages[i].workRecords[j + k + 1].begin) > 0.01)
                       break;
                     if (threadLocalStorages[i].workRecords[j + k].type != threadLocalStorages[i].workRecords[j + k + 1].type)
