@@ -1937,8 +1937,8 @@ namespace std {
 
 template <typename TAlphabet, typename TSpec>
 inline void
-swap(String<TAlphabet, TSpec> & left,
-     String<TAlphabet, TSpec> & right)
+swap(::SEQAN_NAMESPACE_MAIN::String<TAlphabet, TSpec> & left,
+     ::SEQAN_NAMESPACE_MAIN::String<TAlphabet, TSpec> & right)
 {
     ::SEQAN_NAMESPACE_MAIN::swap(left, right);
 }
@@ -1946,8 +1946,8 @@ swap(String<TAlphabet, TSpec> & left,
 // TODO(holtgrew): This actually belongs into sequence_multiple.h.
 template <typename TString, typename TSpec>
 inline void
-swap(StringSet<TString, TSpec> & left,
-     StringSet<TString, TSpec> & right)
+swap(::SEQAN_NAMESPACE_MAIN::StringSet<TString, TSpec> & left,
+     ::SEQAN_NAMESPACE_MAIN::StringSet<TString, TSpec> & right)
 {
     ::SEQAN_NAMESPACE_MAIN::swap(left, right);
 }
