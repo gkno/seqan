@@ -12,8 +12,18 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH})
 find_package (PythonInterp)
 
-find_package(ZLIB REQUIRED)
-include_directories(${CMAKE_INCLUDE_PATH})
+# Hacky conditional inclusion of samtools.
+find_package(ZLIB QUIET)
+if (ZLIB_FOUND)
+  set(SAMTOOLS_FOUND "1")
+  set(SAMTOOLS_CXX_FLAGS "-DSEQAN_HAS_SAMTOOLS=1")
+  set(SAMTOOLS_LIBRARIES "bam")
+else (ZLIB_FOUND)
+  message("WARNING: zlib not found!")
+  set(SAMTOOLS_FOUND "0")
+endif (ZLIB_FOUND)
+
+include_directories(${CMAKE_INCLUDE_PATH} ${ZLIB_INCLUDE_DIRS})
 
 ################################################################################
 # Set Path Variables
@@ -204,8 +214,8 @@ endmacro(SEQAN_ADD_EXECUTABLE seqan_target)
 # Include Sub-Projects
 ################################################################################
 
+add_subdirectory (libs)
 add_subdirectory (apps)
 add_subdirectory (demos)
 add_subdirectory (tests)
 add_subdirectory (benchmarks)
-add_subdirectory (libs)

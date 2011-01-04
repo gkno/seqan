@@ -58,8 +58,10 @@ namespace SEQAN_NAMESPACE_MAIN
 // CIGAR struct
 //////////////////////////////////////////////////////////////////////////////
 
+#if SEQAN_HAS_SAMTOOLS
     struct FromBam_;
     typedef Tag<FromBam_> FromBam;
+#endif  // #if SEQAN_HAS_SAMTOOLS
     
     template <typename TOperation_ = char, typename TCount_ = unsigned>
 	struct CigarElement
@@ -76,12 +78,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			operation(o),
 			count(c) {}
 
+#if SEQAN_HAS_SAMTOOLS
         CigarElement(uint32_t bamCigarElement, FromBam const &)
         {
             SEQAN_ASSERT_LEQ(bamCigarElement & BAM_CIGAR_MASK, 8u);
             operation = "MIDNSHP=X"[bamCigarElement & BAM_CIGAR_MASK];
             count = bamCigarElement >> 4;
         }
+#endif  // #if SEQAN_HAS_SAMTOOLS
 	};
 
 template <typename TOperation, typename TCount>

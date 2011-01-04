@@ -5,7 +5,7 @@ project (Seqan_Tests)
 # For the tests, we switch SeqAn into testing mode.
 ################################################################################
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SAMTOOLS_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
 # Also enable flags for coverage analysis.
 if (MODEL STREQUAL "NightlyCoverage")
   if (CMAKE_COMPILER_IS_GNUCXX)
@@ -71,10 +71,12 @@ get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
 	    add_dependencies (tests test_${TEST_DIR_REL})
         
     # Conditionally link against libbam.
-    LIST_CONTAINS(contains test_${TEST_DIR_REL} ${SEQAN_LINK_LIBBAM})
-    if (contains)
-        target_link_libraries(test_${TEST_DIR_REL} bam ${ZLIB_LIBRARIES})
-    endif (contains)
+    if (SAMTOOLS_FOUND)
+      LIST_CONTAINS(contains test_${TEST_DIR_REL} ${SEQAN_LINK_LIBBAM})
+      if (contains)
+        target_link_libraries(test_${TEST_DIR_REL} ${SAMTOOLS_LIBRARIES} ${ZLIB_LIBRARIES})
+      endif (contains)
+    endif (SAMTOOLS_FOUND)
     
       # Create a variable with the paths to the tests for memory checks.
       # TODO(holtgrew): For MSVC the paths are different, but does not matter as not run on Windows yet.
