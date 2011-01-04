@@ -524,6 +524,7 @@ writeBackToGlobalStore(
         TFragmentStore & target,
         String<BlockLocalStorage<TFragmentStore, TSwiftPattern, TOptions> > /*const*/ & blockLocalStorages)
 {
+    // TODO(holtgrew): It would be possible to use local sorting and multiway merging, removes necessity to sort in compactMatches/maskDuplicates.
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
 	typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
@@ -531,12 +532,11 @@ writeBackToGlobalStore(
 	// Update the IDs and calculate new size so the prefix increment can be
 	// used in the loops.
 	TAlignedReadStoreSize oldSize = length(target.alignedReadStore);
-	TAlignedReadStoreSize sizeSum = --oldSize;  // TODO(holtgrew): Maybe no prefix-- here, below suffix++ and below that no ++.
+	TAlignedReadStoreSize sizeSum = oldSize;  // TODO(holtgrew): Maybe no prefix-- here, below suffix++ and below that no ++.
 	
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i)
 		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j)
-			blockLocalStorages[i].store.alignedReadStore[j].id = ++sizeSum;
-	++sizeSum;
+			blockLocalStorages[i].store.alignedReadStore[j].id = sizeSum++;
 	
 	// Resize first so copying happens at most once and not every for each
 	// block in the worst case
@@ -546,8 +546,8 @@ writeBackToGlobalStore(
 	// Append single block stores.
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i) {
 		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j){
-			target.alignedReadStore[++oldSize] = blockLocalStorages[i].store.alignedReadStore[j];
-			target.alignQualityStore[oldSize] = blockLocalStorages[i].store.alignQualityStore[j];
+			move(target.alignedReadStore[++oldSize], blockLocalStorages[i].store.alignedReadStore[j]);
+			move(target.alignQualityStore[oldSize], blockLocalStorages[i].store.alignQualityStore[j]);
 		}
 	}
 }
@@ -556,17 +556,32 @@ template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typenam
 void
 writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData)
 {
+    // TODO(holtgrew): It would be possible to use local sorting and multiway merging, removes necessity to sort in compactMatches/maskDuplicates.
+	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
+
     TFragmentStore & localStore = tls.globalState->blockLocalStorages[jobData.blockId].store;
 
-    // TODO(holtgrew): Reserve enough space in localStore.
+    // Update IDs and calculate new size so the prefix increment can be used in the loops.
+    TAlignedReadStoreSize oldSize = length(localStore.alignedReadStore);
+    TAlignedReadStoreSize sizeSum = length(localStore.alignedReadStore);
+
+    for (unsigned i = 0; i < length(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores); ++i) {
+        TFragmentStore * bucket = jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores[i];
+        for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
+            bucket->alignedReadStore[j].id = sizeSum++;
+        }
+    }
+
+    // Resize the local read stores appropriately.
+	resize(localStore.alignedReadStore, sizeSum, Exact());
+	resize(localStore.alignQualityStore, sizeSum, Exact());			
 
     // Write back all matches from verification to the block local store.
     for (unsigned i = 0; i < length(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores); ++i) {
         TFragmentStore * bucket = jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores[i];
         for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
-            bucket->alignedReadStore[j].id = length(localStore.alignedReadStore);
-            appendValue(localStore.alignedReadStore, bucket->alignedReadStore[j], Generous());
-            appendValue(localStore.alignQualityStore, bucket->alignQualityStore[j], Generous());
+            move(localStore.alignedReadStore[++oldSize], bucket->alignedReadStore[j]);
+            move(localStore.alignQualityStore[oldSize], bucket->alignQualityStore[j]);
         }
     }
 

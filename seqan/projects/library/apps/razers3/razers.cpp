@@ -485,6 +485,12 @@ int main(int argc, const char *argv[])
 		return RAZERS_INVALID_OPTIONS;
 	}
 
+#ifdef _OPENMP
+    // Set maximal number of threads.
+    int oldMaxThreads = omp_get_max_threads();
+    omp_set_num_threads(options.threadCount == 0 ? 1 : options.threadCount);
+#endif  // #ifdef _OPENMP
+
 	//////////////////////////////////////////////////////////////////////////////
 	// get read length
 	int readLength = estimateReadLength(toCString(readFileNames[0]));
@@ -557,5 +563,11 @@ int main(int argc, const char *argv[])
 	int result = mapReads(genomeFileNames, readFileNames, errorPrbFileName, options);
 	if (result != 0)
 		cerr << "Exiting ..." << endl;
+
+#ifdef _OPENMP
+    // Restoring number of threads for side-effect freeness.
+    omp_set_num_threads(oldMaxThreads);
+#endif  // #ifdef _OPENMP
+
 	return result;
 }
