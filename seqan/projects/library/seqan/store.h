@@ -42,9 +42,14 @@
 #include <algorithm>
 #include <set>
 
-// TODO(holtgrew): Enable BAM by some flags.
+#ifndef SEQAN_HAS_SAMTOOLS 
+#define SEQAN_HAS_SAMTOOLS 0
+#endif  // #ifndef SEQAN_HAS_SAMTOOLS 
+
+#if SEQAN_HAS_SAMTOOLS
 #include <sam.h>
 #include <bam.h>
+#endif  // #if SEQAN_HAS_SAMTOOLS
 
 //////////////////////////////////////////////////////////////////////////////
 // FRAGMENT STORE SUB-CONTAINERS
@@ -66,6 +71,8 @@
 #include <seqan/store/store_io_sam.h>
 #include <seqan/store/store_io_gff.h>
 #include <seqan/store/store_io_ucsc.h>
+#if SEQAN_HAS_SAMTOOLS
 #include <seqan/store/store_io_bam.h>
+#endif  // #if SEQAN_HAS_SAMTOOLS
 
 #endif //#ifndef SEQAN_HEADER_...
