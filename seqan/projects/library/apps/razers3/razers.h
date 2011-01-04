@@ -1124,8 +1124,11 @@ void compactMatches(
 		*dit = *it;
 		++dit;
 	}
+	unsigned origSize = length(store.alignedReadStore);
 	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
 	compactAlignedReads(store);
+	unsigned newSize = length(store.alignedReadStore);
+	fprintf(stderr, "\nCompacted from %u to %u\n", origSize, newSize);
 }
 
 //////////////////////////////////////////////////////////////////////////////

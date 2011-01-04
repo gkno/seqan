@@ -6,6 +6,10 @@
 
 namespace SEQAN_NAMESPACE_MAIN {
 
+// Forwards.
+template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
+class GlobalState;
+
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
@@ -21,6 +25,53 @@ struct RazerSStats
 template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode>
 struct MapSingleReads {};
 
+struct Lock
+{
+    omp_lock_t lock_;
+
+    Lock() { omp_init_lock(&lock_); }
+
+    ~Lock() { omp_destroy_lock(&lock_); }
+};
+
+// Stores the results of the verification.
+//
+// Put into its own class so it can be put into a (shared) pointer and still be locked centrally.
+template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
+class VerificationResults
+{
+public:
+    GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState;
+    volatile unsigned blocksTotal;
+    volatile unsigned blocksDone;
+    String<TFragmentStore *> localStores;
+    Lock * lock;
+
+    VerificationResults() : globalState(0), blocksTotal(0), blocksDone(0), lock(new Lock())
+    { }
+
+    VerificationResults(VerificationResults const & other)
+        : globalState(other.globalState), blocksTotal(other.blocksTotal), blocksDone(other.blocksDone), lock(new Lock())
+    {
+        // Not thread-safe copying since this is only used at the beginning when resizing block local storages string.
+    }
+
+    VerificationResults & operator=(VerificationResults const & other)
+    {
+        if (this == &other)
+            return *this;
+        globalState = other.globalState;
+        blocksTotal = other.blocksTotal;
+        blocksDone = other.blocksDone;
+    }
+
+    ~VerificationResults()
+    {
+        delete lock;
+    }
+};
+
+
 // For each block, we have one BlockLocalStorage object.
 //
 // Also works as the "parallel SWIFT pattern handler", i.e. deactivates
@@ -34,6 +85,7 @@ public:
     TSwiftPattern swiftPattern;
     // Need options locally since compaction threshold is modified.
     TOptions options;
+    VerificationResults<TFragmentStore, TSwiftPattern, TOptions> verificationResults;
 };
 
 // Uses the read ID to find the correct SWIFT pattern in the string handled by
@@ -63,6 +115,7 @@ template <typename TFragmentStore,
           typename TOptions>
 void initializeBlockLocalStorages(
         String<BlockLocalStorage<TFragmentStore, TSwiftPattern, TOptions> > & blockLocalStorages,
+        GlobalState<TFragmentStore, TSwiftPattern, TOptions> & globalState,
         TFragmentStore /*const*/ & store,
         TOptions const & options,
         TShape const & shape,
@@ -79,6 +132,9 @@ void initializeBlockLocalStorages(
     #pragma omp parallel for schedule(dynamic, 1)
     for (int i = 0; i < blockCount; ++i) {
         blockLocalStorages[i].options = options;
+
+        // Initialize verification results.
+        blockLocalStorages[i].verificationResults.globalState = &globalState;
 
         // Clear pattern and set parameters.
         TSwiftPattern & swiftPattern = blockLocalStorages[i].swiftPattern;
@@ -235,60 +291,31 @@ enum RazerSJobType
     JOB_WRITEBACK
 };
 
-// Stores the results of the verification.
-//
-// Put into its own class so it can be put into a (shared) pointer and still be locked centrally.
-template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
-class VerificationResults
-{
-public:
-    omp_lock_t lock_;
-    GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState;
-    volatile unsigned blocksTotal;
-    volatile unsigned blocksDone;
-    String<TFragmentStore *> localStores;
-
-    VerificationResults(GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState_)
-            : globalState(globalState_), blocksTotal(0), blocksDone(0)
-    {
-        omp_init_lock(&lock_);
-    }
-
-    ~VerificationResults()
-    {
-        omp_destroy_lock(&lock_);
-    }
-
-private:
-    VerificationResults(VerificationResults const &) {}
-    VerificationResults operator=(VerificationResults const &) {}
-};
-
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
 inline
 void
 allocateLocalStore(TFragmentStore * & localStorePtr, VerificationResults<TFragmentStore, TSwiftPattern, TOptions> & verificationResults)
 {
-    omp_set_lock(&verificationResults.lock_);
+    omp_set_lock(&verificationResults.lock->lock_);
     verificationResults.blocksTotal += 1;
     allocateStore(localStorePtr, *verificationResults.globalState);
     appendValue(verificationResults.localStores, localStorePtr);
     // appendValue(verificationResults.localStores, localStorePtr);
-    omp_unset_lock(&verificationResults.lock_);
+    omp_unset_lock(&verificationResults.lock->lock_);
 }
 
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
 inline
 void clear(VerificationResults<TFragmentStore, TSwiftPattern, TOptions> & verificationResults)
 {
-    omp_set_lock(&verificationResults.lock_);
+    omp_set_lock(&verificationResults.lock->lock_);
     SEQAN_ASSERT_EQ_MSG(verificationResults.blocksTotal, verificationResults.blocksDone, "Can only clear completed verification results.");
 
     verificationResults.blocksTotal = 0;
     verificationResults.blocksDone = 0;
     deallocateStores(*verificationResults.globalState, verificationResults.localStores);
     clear(verificationResults.localStores);
-    omp_unset_lock(&verificationResults.lock_);
+    omp_unset_lock(&verificationResults.lock->lock_);
 }
 
 template <typename TSpec>
@@ -316,13 +343,13 @@ public:
     unsigned contigId;
     unsigned blockId;
     TFragmentStore * fragmentStore;  // global FragmentStore
-    VerificationResults<TFragmentStore, TSwiftPattern, TOptions> * verificationResults;
+    GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState;
     bool writeBackOnly;
     //THitString hitString;
 
     // TODO(holtgrew): The verificationResults leak. Maybe store in block local storage instead?
     JobData(int jobId_, unsigned contigId_, unsigned blockId_, TFragmentStore *fragmentStore_, GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState_)
-            : jobId(jobId_), contigId(contigId_), blockId(blockId_), fragmentStore(fragmentStore_), verificationResults(new VerificationResults<TFragmentStore, TSwiftPattern, TOptions>(globalState_)), writeBackOnly(false)
+            : jobId(jobId_), contigId(contigId_), blockId(blockId_), fragmentStore(fragmentStore_), globalState(globalState_)
     {}
 };
 
@@ -340,14 +367,14 @@ public:
     unsigned contigId;
     unsigned blockId;
     
-    VerificationResults<TFragmentStore, TSwiftPattern, TOptions> * verificationResults;
+    VerificationResults<TFragmentStore, TSwiftPattern, TOptions> & verificationResults;
     TFragmentStore * localStore;
 
     THitString & hitString;
     TPosition matchBeginIndex;
     TPosition matchEndIndex;
 
-    JobData(TFragmentStore * fragmentStore_, unsigned contigId_, unsigned blockId_, VerificationResults<TFragmentStore, TSwiftPattern, TOptions> * & verificationResults_, TFragmentStore * & localStore_, THitString & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
+    JobData(TFragmentStore * fragmentStore_, unsigned contigId_, unsigned blockId_, VerificationResults<TFragmentStore, TSwiftPattern, TOptions> & verificationResults_, TFragmentStore * & localStore_, THitString & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
             : fragmentStore(fragmentStore_), contigId(contigId_), blockId(blockId_), verificationResults(verificationResults_), localStore(localStore_), hitString(hitString_), matchBeginIndex(matchBeginIndex_), matchEndIndex(matchEndIndex_)
     {
     }
@@ -534,8 +561,8 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     // TODO(holtgrew): Reserve enough space in localStore.
 
     // Write back all matches from verification to the block local store.
-    for (unsigned i = 0; i < length(jobData.verificationResults->localStores); ++i) {
-        TFragmentStore * bucket = jobData.verificationResults->localStores[i];
+    for (unsigned i = 0; i < length(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores); ++i) {
+        TFragmentStore * bucket = jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores[i];
         for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
             bucket->alignedReadStore[j].id = length(localStore.alignedReadStore);
             appendValue(localStore.alignedReadStore, bucket->alignedReadStore[j], Generous());
@@ -595,7 +622,7 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     // Set current block local storage for disabling in compaction.
     tls.currentBlockLocalStorage = &tls.globalState->blockLocalStorages[jobData.blockId];
     // Clear verification results struct for now.
-    clear(*jobData.verificationResults);
+    clear(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults);
     // Set current swift handler to none, should never be called in thread-local verification.
     tls.currentBlockLocalStorage = 0;
 
@@ -627,8 +654,8 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
                 unsigned j = length(splitters) - i;
                 // Each verification job gets a local FragmentStore from the free list in the global state.
                 TFragmentStore * localStorePtr;
-                allocateLocalStore(localStorePtr, *jobData.verificationResults);
-                appendValue(jobs, TJob(new TVerificationJobData(jobData.fragmentStore, jobData.contigId, jobData.blockId, jobData.verificationResults, localStorePtr, hits, splitters[j - 1], splitters[j])));
+                allocateLocalStore(localStorePtr, jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults);
+                appendValue(jobs, TJob(new TVerificationJobData(jobData.fragmentStore, jobData.contigId, jobData.blockId, jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults, localStorePtr, hits, splitters[j - 1], splitters[j])));
             }
             pushFront(jobQueue(tls), jobs);
         }
@@ -646,16 +673,19 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
 
         beginTime = sysTime();
         // Wait until verification for this block has finished.
-        while (jobData.verificationResults->blocksTotal != jobData.verificationResults->blocksDone) {
+        while (jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksTotal != jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksDone) {
             // Busy waiting.
-            SEQAN_ASSERT_GEQ(jobData.verificationResults->blocksTotal, jobData.verificationResults->blocksDone);
+            SEQAN_ASSERT_GEQ(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksTotal, jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksDone);
         }
         // Write back hits into local store or global store.
         writeBackToLocal(tls, jobData);
         endTime = sysTime();
         if (endTime - beginTime > 0.001)
             appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_WRITEBACK));
-        
+
+        // Clear verification results.
+        clear(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults);
+
         // If there is no more sequence left then finalize finder and break out of loop.
         if (!referenceLeft) {
             windowFindEnd(tls.swiftFinder, *tls.swiftPattern);
@@ -679,11 +709,11 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     typedef VerificationResults<TFragmentStore, TSwiftPattern, TOptions> TVerificationResults;
     // TODO(holtgrew): Verification results should be block local.
     TVerificationResults * verificationResults = jobData.verificationResults;
-    while (jobData.verificationResults->blocksTotal != jobData.verificationResults->blocksDone) {
+    while (jobData.verificationResults.blocksTotal != jobData.verificationResults.blocksDone) {
         // Busy waiting.
-        SEQAN_ASSERT_LEQ(jobData.verificationResults->blocksTotal, jobData.verificationResults->blocksDone);
+        SEQAN_ASSERT_LEQ(jobData.verificationResults.blocksTotal, jobData.verificationResults.blocksDone);
     }
-    SEQAN_ASSERT_EQ(jobData.verificationResults->blocksTotal, length(jobData.verificationResults->localStores));
+    SEQAN_ASSERT_EQ(jobData.verificationResults.blocksTotal, length(jobData.verificationResults.localStores));
     // Set current block local storage for disabling in compaction.
     tls.currentBlockLocalStorage = &tls.globalState->blockLocalStorages[jobData.blockId];
     // Write back hits into local store or global store.
@@ -775,7 +805,7 @@ workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     }
     // Mark one more job as done in verification results.
     #pragma omp atomic
-    jobData.verificationResults->blocksDone += 1;
+    jobData.verificationResults.blocksDone += 1;
 
     // Reset verifier.
     tls.verifier.store = 0;
@@ -951,7 +981,7 @@ int _mapSingleReadsParallel(
 		::std::cerr << ::std::endl << "Number of threads:               \t" << options.threadCount << std::endl;
 		::std::cerr << ::std::endl << "Number of blocks:                \t" << blockCount << std::endl;
 	}
-    initializeBlockLocalStorages(globalState.blockLocalStorages, store, options, shape, globalState.splitters);
+    initializeBlockLocalStorages(globalState.blockLocalStorages, globalState, store, options, shape, globalState.splitters);
 
     // Create thread local storages.
     typedef RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> TRazerSMode;
