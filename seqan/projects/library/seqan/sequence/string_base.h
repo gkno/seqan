@@ -162,7 +162,7 @@ This is equivalent to using move three times with a temporary variable.
 
 Note that this function has the same name as the STL function $std::swap$.
 We only specialize it for Class.String and Class.StringSet.
-With Koenig-lookup, this function is then used within the STL for efficient swapping of strings and string sets within $std::sort$, for example.
+We also specialize std::swap that then call these functions.
 ..see:Function.move
 ..include:seqan/sequence.h
 */
@@ -181,6 +181,7 @@ swap(String<TAlphabet, TSpec> & left,
     move(right, tmp);
 }
 
+// TODO(holtgrew): This actually belongs into sequence_multiple.h.
 template <typename TString, typename TSpec>
 inline void
 swap(StringSet<TString, TSpec> & left,
@@ -1926,11 +1927,32 @@ struct GetValue<String<Converter<TTarget, TSource>, TSpec> >:
 
 //////////////////////////////////////////////////////////////////////////////
 
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
+
+// STL swap for strings.
+
+namespace std {
+
+template <typename TAlphabet, typename TSpec>
+inline void
+swap(String<TAlphabet, TSpec> & left,
+     String<TAlphabet, TSpec> & right)
+{
+    ::SEQAN_NAMESPACE_MAIN::swap(left, right);
+}
+
+// TODO(holtgrew): This actually belongs into sequence_multiple.h.
+template <typename TString, typename TSpec>
+inline void
+swap(StringSet<TString, TSpec> & left,
+     StringSet<TString, TSpec> & right)
+{
+    ::SEQAN_NAMESPACE_MAIN::swap(left, right);
+}
+
+}  // namespace std
 
 //////////////////////////////////////////////////////////////////////////////
 
