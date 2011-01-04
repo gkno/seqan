@@ -443,14 +443,17 @@ struct MicroRNA{};
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
 		TPatternState	patternState;
+
+        double compactionTime;
 		
-		MatchVerifier() : onReverseComplement(false), genomeLength(0), oneMatchPerBucket(false) {}
+		MatchVerifier() : onReverseComplement(false), genomeLength(0), oneMatchPerBucket(false), compactionTime(0) {}
                
 		MatchVerifier(TFragmentStore_ &_store, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(&_store),
 			options(&_options),
 			swiftPattern(&_swiftPattern),
-			cnts(&_cnts)
+			cnts(&_cnts),
+            compactionTime(0)
 			// , patternState()
 		{
 			onReverseComplement = false;
@@ -477,6 +480,7 @@ struct MicroRNA{};
 					appendValue(store->alignQualityStore, q, Generous());
 					if (length(store->alignedReadStore) > options->compactThresh)
 					{
+                        double beginTime = sysTime();
 						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
 
 						if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
@@ -491,6 +495,8 @@ struct MicroRNA{};
 						
 //						if (options._debugLevel >= 2)
 //							::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+                        double endTime = sysTime();
+                        compactionTime += (endTime - beginTime);
 					}
 				}
 				++options->countVerification;
@@ -1773,6 +1779,8 @@ void _mapSingleReadsToContig(
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate))
 	{
+        if (length(infix(swiftFinder)) < length(readSet[(*swiftFinder.curHit).ndlSeqNo]))
+            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
 			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, mode);
@@ -1780,6 +1788,7 @@ void _mapSingleReadsToContig(
 	}
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
 		if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
+    std::cerr << "Compaction time: " << verifier.compactionTime << " s" << std::endl;
 }
 
 

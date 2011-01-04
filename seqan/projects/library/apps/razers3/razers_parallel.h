@@ -279,7 +279,9 @@ public:
 
     String<WorkRecord> workRecords;
 
-    ThreadLocalStorage() : previousFiltrationJobId(-1), globalState(0), currentBlockLocalStorage(0) {}
+    double compactionTime;
+
+    ThreadLocalStorage() : previousFiltrationJobId(-1), globalState(0), currentBlockLocalStorage(0), compactionTime(0) {}
 };
 
 enum RazerSJobType
@@ -592,6 +594,7 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     // Possibly compact matches.
     if (length(localStore.alignedReadStore) > tls.options.compactThresh)
     {
+        double beginTime = sysTime();
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
         typename Size<TAlignedReadStore>::Type oldSize = length(localStore.alignedReadStore);
 
@@ -603,9 +606,12 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
         compactMatches(localStore, tls.counts, tls.options, TRazerSMode(), tls.globalState->blockLocalStorages[jobData.blockId], COMPACT);
 
         if (length(localStore.alignedReadStore) * 4 > oldSize) {     // the threshold should not be raised
-            fprintf(stderr, "[raising threshold]");
-            tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
+            while (tls.options.compactThresh < oldSize)
+                tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
+            fprintf(stderr, "[raising threshold to %u]", unsigned(tls.options.compactThresh));
         }
+        double endTime = sysTime();
+        tls.compactionTime += (endTime - beginTime);
     }
 
     SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), length(localStore.alignQualityStore));
@@ -811,6 +817,9 @@ workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
 //     std::cerr << "  jobData.matchBeginIndex == " << jobData.matchBeginIndex << std::endl;
 // #endif  // #ifdef RAZERS_DEBUG
     for (THitStringIterator it = iter(jobData.hitString, jobData.matchBeginIndex), itEnd = iter(jobData.hitString, jobData.matchEndIndex); it != itEnd; ++it) {
+        if (length(swiftInfix(value(it), jobData.fragmentStore->contigStore[jobData.contigId].seq)) < length(tls.globalStore->readSeqStore[value(it).ndlSeqNo]))
+            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
+
         // std::cerr << "value(it).ndlSeqNo == " << value(it).ndlSeqNo << std::endl;
         unsigned absReadId = offset + value(it).ndlSeqNo;
         tls.verifier.m.readId = absReadId;
@@ -1098,11 +1107,16 @@ int _mapSingleReadsParallel(
         options.countVerification += globalState.blockLocalStorages[i].options.countVerification;
     }
 
+    double compactionTimeSum = 0;
+    for (unsigned i = 0; i < options.threadCount; ++i) {
+        compactionTimeSum += threadLocalStorages[i].compactionTime;
+        ::std::cerr << "Compaction time thread #" << i << " " << threadLocalStorages[i].compactionTime << ::std::endl;
+    }
+    ::std::cerr << "Compaction time TOTAL " << compactionTimeSum << std::endl;
+
 	if (options._debugLevel >= 2) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
-		for (unsigned i = 0; i < options.threadCount; ++i)
-          ::std::cerr << "Filtration counter:      " << threadLocalStorages[i].options.countFiltration << ::std::endl;
 		::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
 		::std::cerr << "Successful verfications: " << options.countVerification << ::std::endl;
 	}
