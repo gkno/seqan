@@ -546,8 +546,8 @@ writeBackToGlobalStore(
 	// Append single block stores.
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i) {
 		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j){
-			move(target.alignedReadStore[oldSize++], blockLocalStorages[i].store.alignedReadStore[j]);
-			move(target.alignQualityStore[oldSize], blockLocalStorages[i].store.alignQualityStore[j]);
+			move(target.alignedReadStore[oldSize], blockLocalStorages[i].store.alignedReadStore[j]);
+			move(target.alignQualityStore[oldSize++], blockLocalStorages[i].store.alignQualityStore[j]);
 		}
 	}
 }
@@ -563,7 +563,7 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
 
     // Update IDs and calculate new size so the prefix increment can be used in the loops.
     TAlignedReadStoreSize oldSize = length(localStore.alignedReadStore);
-    TAlignedReadStoreSize sizeSum = length(localStore.alignedReadStore);
+    TAlignedReadStoreSize sizeSum = oldSize;
 
     for (unsigned i = 0; i < length(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores); ++i) {
         TFragmentStore * bucket = jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores[i];
@@ -580,8 +580,8 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     for (unsigned i = 0; i < length(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores); ++i) {
         TFragmentStore * bucket = jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores[i];
         for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
-            move(localStore.alignedReadStore[oldSize++], bucket->alignedReadStore[j]);
-            move(localStore.alignQualityStore[oldSize], bucket->alignQualityStore[j]);
+            move(localStore.alignedReadStore[oldSize], bucket->alignedReadStore[j]);
+            move(localStore.alignQualityStore[oldSize++], bucket->alignQualityStore[j]);
         }
     }
 
