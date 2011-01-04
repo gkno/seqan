@@ -92,8 +92,8 @@ public:
 // the ParallelSwiftPatternHandler, and the correct local ID within this SWIFT
 // pattern to update the max errors.
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions, typename TReadNo, typename TMaxErrors>
-inline 
-void 
+inline
+void
 setMaxErrors(BlockLocalStorage<TFragmentStore, TSwiftPattern, TOptions> & bls,
              TReadNo readNo,
              TMaxErrors maxErrors)
@@ -141,7 +141,7 @@ void initializeBlockLocalStorages(
         clear(swiftPattern);
         swiftPattern.params.minThreshold = options.threshold;
         swiftPattern.params.tabooLength = options.tabooLength;
-        
+
         // Initialize the index.
         TIndex & index = host(blockLocalStorages[i].swiftPattern);
         clear(index);
@@ -259,7 +259,7 @@ public:
     volatile bool working_;
 
     unsigned threadId;
-    
+
     int previousFiltrationJobId;
     TFragmentStore * globalStore;
     GlobalState<TFragmentStore, TSwiftPattern, TOptions> * globalState;
@@ -366,7 +366,7 @@ public:
     TFragmentStore * fragmentStore;
     unsigned contigId;
     unsigned blockId;
-    
+
     VerificationResults<TFragmentStore, TSwiftPattern, TOptions> & verificationResults;
     TFragmentStore * localStore;
 
@@ -398,7 +398,7 @@ public:
         else if (jobType == JOB_VERIFICATION)
             jobData = new TVerificationJobData(*static_cast<TVerificationJobData *>(other.jobData));
     }
-    
+
     Job() : jobType(JOB_NONE), jobData(0) {}
 
     Job(TFiltrationJobData * jobData_)
@@ -528,25 +528,25 @@ writeBackToGlobalStore(
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
 	typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
-	
+
 	// Update the IDs and calculate new size so the prefix increment can be
 	// used in the loops.
 	TAlignedReadStoreSize oldSize = length(target.alignedReadStore);
 	TAlignedReadStoreSize sizeSum = oldSize;  // TODO(holtgrew): Maybe no prefix-- here, below suffix++ and below that no ++.
-	
+
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i)
 		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j)
 			blockLocalStorages[i].store.alignedReadStore[j].id = sizeSum++;
-	
+
 	// Resize first so copying happens at most once and not every for each
 	// block in the worst case
 	resize(target.alignedReadStore, sizeSum, Exact());
-	resize(target.alignQualityStore, sizeSum, Exact());			
-	
+	resize(target.alignQualityStore, sizeSum, Exact());
+
 	// Append single block stores.
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i) {
 		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j){
-			move(target.alignedReadStore[++oldSize], blockLocalStorages[i].store.alignedReadStore[j]);
+			move(target.alignedReadStore[oldSize++], blockLocalStorages[i].store.alignedReadStore[j]);
 			move(target.alignQualityStore[oldSize], blockLocalStorages[i].store.alignQualityStore[j]);
 		}
 	}
@@ -574,13 +574,13 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
 
     // Resize the local read stores appropriately.
 	resize(localStore.alignedReadStore, sizeSum, Exact());
-	resize(localStore.alignQualityStore, sizeSum, Exact());			
+	resize(localStore.alignQualityStore, sizeSum, Exact());
 
     // Write back all matches from verification to the block local store.
     for (unsigned i = 0; i < length(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores); ++i) {
         TFragmentStore * bucket = jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores[i];
         for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
-            move(localStore.alignedReadStore[++oldSize], bucket->alignedReadStore[j]);
+            move(localStore.alignedReadStore[oldSize++], bucket->alignedReadStore[j]);
             move(localStore.alignQualityStore[oldSize], bucket->alignQualityStore[j]);
         }
     }
@@ -601,7 +601,7 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
           maskDuplicates(localStore, TRazerSMode());  // overlapping parallelograms cause duplicates
 
         compactMatches(localStore, tls.counts, tls.options, TRazerSMode(), tls.globalState->blockLocalStorages[jobData.blockId], COMPACT);
-    
+
         if (length(localStore.alignedReadStore) * 4 > oldSize) {     // the threshold should not be raised
             fprintf(stderr, "[raising threshold]");
             tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
@@ -633,7 +633,7 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     typedef JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TVerificationJobData;
 
 	typedef typename TSwiftFinder::THitString THitString;
-    
+
     // Set current block local storage for disabling in compaction.
     tls.currentBlockLocalStorage = &tls.globalState->blockLocalStorages[jobData.blockId];
     // Clear verification results struct for now.
@@ -645,7 +645,7 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     initializeFiltration(tls, jobData);
     double endTime = sysTime();
     appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_FILTRATION_INIT));
-  
+
     // Perform alternating filtration and verification work for current block and contig.
     while (true) {
         // Filter reads in the next window.
@@ -814,7 +814,7 @@ workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
         // std::cerr << "value(it).ndlSeqNo == " << value(it).ndlSeqNo << std::endl;
         unsigned absReadId = offset + value(it).ndlSeqNo;
         tls.verifier.m.readId = absReadId;
-  
+
         // TODO(holtgrew): Unsure about global/local indices and global/local store.
 		matchVerify(tls.verifier, swiftInfix(value(it), jobData.fragmentStore->contigStore[jobData.contigId].seq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
     }
@@ -857,13 +857,13 @@ work(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwif
 // Create thread local storages for each thread, fill with filtration
 // jobs and fire up using the queue system.
 template <
-	typename TFSSpec, 
+	typename TFSSpec,
 	typename TFSConfig,
 	typename TThreadLocalStorages,
     typename TContigId,
 	typename TCounts,
     typename TSwiftPattern,
-	typename TSpec, 
+	typename TSpec,
 	typename TShape,
     typename TAlignMode,
 	typename TGapMode,
@@ -899,7 +899,7 @@ void _mapSingleReadsParallelToContig(
 
     typedef Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > TJob;
     typedef JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TFiltrationJobData;
-	
+
 	// Debug output...
 	if (options._debugLevel >= 1)
 	{
@@ -944,10 +944,10 @@ void _mapSingleReadsParallelToContig(
 // Performs splitting of reads, initialization of OpenMP and the calls
 // mapSingleReadsParallelToContig for each contig.
 template <
-	typename TFSSpec, 
-	typename TFSConfig, 
+	typename TFSSpec,
+	typename TFSConfig,
 	typename TCounts,
-	typename TSpec, 
+	typename TSpec,
 	typename TShape,
     typename TAlignMode,
 	typename TGapMode,
