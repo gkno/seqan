@@ -158,7 +158,9 @@ foreach (APP_DIR ${SEQAN_APPS})
 			add_dependencies (${APP_DIR_REL} ${SEQAN_TARGET})
 			add_dependencies (apps ${APP_DIR_REL})
             # Link against libz everywhere, used for reading BAM, for example.
-			target_link_libraries (${APP_DIR_REL} z)
+            if (ZLIB_FOUND)
+			  target_link_libraries (${APP_DIR_REL} z)
+            endif (ZLIB_FOUND)
             # Link against librt on Linux for real-time clock.
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (${APP_DIR_REL} rt)
