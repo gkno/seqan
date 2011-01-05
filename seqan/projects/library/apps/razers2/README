@@ -68,10 +68,13 @@ RazerS expects the names of two or three DNA (multi-)Fasta files. The first
 contains a reference genome and the second (and third) contains genomic reads
 that should be mapped onto the reference. If two read files are given, both 
 have to contain exactly the same number of reads, which are considered as
-mate-pairs. Without any additional parameters RazerS would map all reads onto
-both strands of the reference genome with 92% identity (i.e. 8% errors per
-read) and dump all found matches in an output file. The output file name is
-the read file name extended by the suffix ".result". The default behaviour 
+mate-pairs. To save memory RazerS uses bit fields which limit the maximal
+number of reads to 16.7 mil. and the read length to 256 bps. If your read set
+exceeds this limitation please remove "#define RAZERS_MEMOPT" in razers.cpp
+and recompile. Without any additional parameters RazerS would map all reads
+onto both strands of the reference genome with 92% identity (i.e. 8% errors
+per read) and dump all found matches in an output file. The output file name
+is the read file name extended by the suffix ".result". The default behaviour
 can be modified by adding the following options to the command line:
 
 ---------------------------------------------------------------------------
