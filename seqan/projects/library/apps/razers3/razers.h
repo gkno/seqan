@@ -581,6 +581,7 @@ bool loadReads(
 	CharString		id;
 	
 	unsigned kickoutcount = 0;
+	unsigned maxReadLength = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
 		if (options.readNaming == 0
@@ -624,10 +625,29 @@ bool loadReads(
 			resize(seq, options.trimLength);
 
 		appendRead(store, seq, id);
+		if (maxReadLength < length(seq))
+			maxReadLength = length(seq);
 	}
 	// memory optimization
 	reserve(store.readSeqStore.concat, length(store.readSeqStore.concat), Exact());
 //	reserve(store.readNameStore.concat, length(store.readNameStore.concat), Exact());
+
+	typedef Shape<Dna, SimpleShape> TShape;
+	typedef typename SAValue< Index<StringSet<TRead>, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
+	TSAValue sa;
+	sa.i1 = -1;
+	sa.i2 = -1;
+	
+	if ((unsigned)sa.i1 < length(store.readSeqStore) - 1)
+	{
+		::std::cerr << "Maximal read number of " << (unsigned)sa.i1 + 1 << " exceeded. Please remove \"#define RAZERS_MEMOPT\" in razers.cpp and recompile." << ::std::endl;
+		seqCount = 0;
+	}
+	if ((unsigned)sa.i2 < maxReadLength - 1)
+	{
+		::std::cerr << "Maximal read length of " << (unsigned)sa.i2 + 1 << " bps exceeded. Please remove \"#define RAZERS_MEMOPT\" in razers.cpp and recompile." << ::std::endl;
+		seqCount = 0;
+	}
 
 	if (options._debugLevel > 1 && kickoutcount > 0) 
 		::std::cerr << "Ignoring " << kickoutcount << " low quality reads.\n";
