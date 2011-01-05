@@ -18,12 +18,13 @@ if (ZLIB_FOUND)
   set(SAMTOOLS_FOUND "1")
   set(SAMTOOLS_CXX_FLAGS "-DSEQAN_HAS_SAMTOOLS=1")
   set(SAMTOOLS_LIBRARIES "bam")
+  include_directories(${ZLIB_INCLUDE_DIRS})
 else (ZLIB_FOUND)
   message("WARNING: zlib not found!")
   set(SAMTOOLS_FOUND "0")
 endif (ZLIB_FOUND)
 
-include_directories(${CMAKE_INCLUDE_PATH} ${ZLIB_INCLUDE_DIRS})
+include_directories(${CMAKE_INCLUDE_PATH})
 
 ################################################################################
 # Set Path Variables
