@@ -20,9 +20,13 @@ void computeSplittersBySlotCount(String<TPos> & splitters, TSize size, TCount co
     SEQAN_ASSERT_EQ(back(splitters), size);
 }
 
-template <typename TPos, typename TDataSize, typename TSlotSize>
-void computeSplittersBySlotSize(String<TPos> & splitters, TDataSize size, TSlotSize slotSize)
+template <typename TPos, typename TDataSize, typename TSlotSize, typename TPackageCount>
+void computeSplittersBySlotSize(String<TPos> & splitters, TDataSize size, TSlotSize slotSize, TPackageCount maxPackageCount)
 {
+    // Limit maximal number of verification packages.
+    if (maxPackageCount > 0 && (size / slotSize > maxPackageCount))
+        slotSize = size / maxPackageCount + static_cast<TSlotSize>(size % maxPackageCount) > static_cast<TSlotSize>(0);
+    // Compute splitters.
     unsigned count = size / slotSize + (static_cast<TSlotSize>(size % slotSize) > static_cast<TSlotSize>(0));
     resize(splitters, count + 1);
     splitters[0] = 0;
@@ -31,6 +35,12 @@ void computeSplittersBySlotSize(String<TPos> & splitters, TDataSize size, TSlotS
     splitters[count] = size;
 
     SEQAN_ASSERT_LEQ(splitters[count] - splitters[count - 1], slotSize);
+}
+
+template <typename TPos, typename TDataSize, typename TSlotSize>
+void computeSplittersBySlotSize(String<TPos> & splitters, TDataSize size, TSlotSize slotSize)
+{
+    computeSplittersBySlotSize(splitters, size, slotSize, 0u);
 }
 
 }  // namespace seqan

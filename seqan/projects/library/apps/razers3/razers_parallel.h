@@ -667,7 +667,7 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
         // Enqueue verification jobs, if any.
         if (length(hits) > 0u) {
             String<unsigned> splitters;
-            computeSplittersBySlotSize(splitters, length(hits), tls.options.verificationPackageSize);
+            computeSplittersBySlotSize(splitters, length(hits), tls.options.verificationPackageSize, tls.options.maxVerificationPackageCount);
 
             String<TJob> jobs;
             reserve(jobs, length(splitters) - 1);
@@ -918,7 +918,7 @@ void _mapSingleReadsParallelToContig(
 	}
 
     // Lock contig and possibly reverse-complement it.
-	lockContig(store, contigId);
+	// lockContig(store, contigId);
 	TContigSeq & contigSeq = store.contigStore[contigId].seq;
 	if (orientation == 'R')
 		reverseComplement(contigSeq);
@@ -946,8 +946,8 @@ void _mapSingleReadsParallelToContig(
 
     // Restore orientation of contig
     // TODO(holtgrew): Always reverse-complemented again since outer caller locks!
-	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
-        if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
+	// if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
+    //     if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
 }
 
 // Performs splitting of reads, initialization of OpenMP and the calls

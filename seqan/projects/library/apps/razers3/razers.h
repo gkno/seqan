@@ -170,6 +170,7 @@ namespace SEQAN_NAMESPACE_MAIN
         unsigned    splitFactor;  // This many blocks per thread.
         unsigned    windowSize;  // Collect SWIFT hits in windows of this length.
         unsigned    verificationPackageSize;  // This number of SWIFT hits per verification.
+        unsigned    maxVerificationPackageCount;  // Maximum number of verification packages to create.
 
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -245,6 +246,7 @@ namespace SEQAN_NAMESPACE_MAIN
             // TODO(holtgrew): Tune this!
             windowSize = 500000;
             verificationPackageSize = 1000;
+            maxVerificationPackageCount = 100;
 
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
