@@ -29,6 +29,8 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Konrad Ludwig Moritz Rudolph <konrad.rudolph@fu-berlin.de>
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_INDEX_PIZZACHILI_FIND_H
 #define SEQAN_HEADER_INDEX_PIZZACHILI_FIND_H

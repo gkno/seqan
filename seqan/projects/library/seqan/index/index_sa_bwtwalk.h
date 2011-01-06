@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Authors: Tobias Marschall <tobias.marschall@cs.uni-dortmund.de>
+//          Marcel Martin <marcel.martin@tu-dortmund.de>
+//          David Weese <david.weese@fu-berlin.de>
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_INDEX_SA_BWTWALK_H
 #define SEQAN_HEADER_INDEX_SA_BWTWALK_H

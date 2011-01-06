@@ -29,6 +29,8 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Konrad Ludwig Moritz Rudolph <konrad.rudolph@fu-berlin.de>
+// ==========================================================================
 
 //SEQAN_xNO_GENERATED_FORWARDS: no forwards are generated for this file
 

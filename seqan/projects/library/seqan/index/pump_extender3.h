@@ -29,6 +29,8 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: David Weese <david.weese@fu-berlin.de>
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_PUMP_EXTENDER3_H
 #define SEQAN_HEADER_PUMP_EXTENDER3_H
