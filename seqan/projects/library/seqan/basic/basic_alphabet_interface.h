@@ -141,12 +141,18 @@ struct ValueConstructorProxy_
 
 struct ValueDestructor_ 
 {
+	template <typename TValue>
+	static inline void
+	_destruct(TValue* p)
+	{
+		p->~TValue();
+	}
+
 	template <typename TIterator>
 	static inline void
 	destruct(TIterator it)
 	{
-		typedef typename Value<TIterator>::Type TValue;
-		value(it).~TValue();
+		_destruct(&value(it));
 	}
 };
 struct ValueDestructorProxy_ 
