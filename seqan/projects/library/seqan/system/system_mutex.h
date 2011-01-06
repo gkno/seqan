@@ -71,9 +71,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            if (CloseHandle(hMutex)) return true;
+            bool success = CloseHandle(hMutex);
 			hMutex = NULL;
-			return false;
+			return success;
         }
 
         inline bool lock(DWORD timeout_millis = INFINITE) {
@@ -126,7 +126,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            return !(pthread_mutex_destroy(hMutex) || (hMutex = NULL));
+			bool success = (pthread_mutex_destroy(hMutex) == 0);
+			hMutex = NULL;
+			return success;
         }
 
         inline bool lock() {

@@ -93,9 +93,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            if (CloseHandle(hEvent)) return true;
+            bool success = CloseHandle(hEvent);
 			hEvent = NULL;
-			return false;
+			return success;
         }
 
         inline bool wait(DWORD timeout_millis = Infinite) {
@@ -204,8 +204,11 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            return !(pthread_cond_destroy(hEvent) || (hEvent = NULL) || !Mutex::close());
-        }
+            bool success = (pthread_cond_destroy(hEvent) == 0);
+		    success &= Mutex::close();
+            hEvent = NULL;
+            return success;
+		}
 
         inline bool wait() {
             if (!hEvent) return true;

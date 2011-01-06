@@ -366,17 +366,20 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     };
 
-	inline bool fileExists(const char *fileName) {
+	inline bool fileExists(const char *fileName)
+	{
 		struct stat buf;
 		return stat(fileName, &buf) != -1;
 	}
 
-	inline bool fileUnlink(const char *fileName) {
+	inline bool fileUnlink(const char *fileName)
+	{
 		return unlink(fileName) == 0;
 	}
 
     template < typename TSpec, typename TSize >
-    inline void resize(File<Sync<TSpec> > &me, TSize new_length) {
+    inline void resize(File<Sync<TSpec> > &me, TSize new_length)
+	{
 		me.resize(new_length);
     }
 
