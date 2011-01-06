@@ -136,11 +136,11 @@ popFront(TJob & job, TaskQueue<TJob, OmpLock> & queue, TPredicate const & predic
         return false;
     }
     job = queue.queue_.front();
-    queue.queue_.pop_front();
     if (!predicate(job)) {
         omp_unset_lock(&queue.lock_);
         return false;
     }
+    queue.queue_.pop_front();
     omp_unset_lock(&queue.lock_);
     return true;
 }
