@@ -1233,10 +1233,10 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		};
 
         inline TPageFrame &getPage(
-            int pageNo, 
-            typename TPageFrame::Priority maxLevel = TPageFrame::NORMAL_LEVEL, 
-            typename TPageFrame::Priority newLevel = TPageFrame::NORMAL_LEVEL,
-            int prefetchPages = 0)
+            int pageNo,
+            typename TPageFrame::Priority maxLevel,
+            typename TPageFrame::Priority newLevel,
+            int prefetchPages)
         {
 			int frameNo = pager[pageNo];
 			if (frameNo >= 0) {					// cache hit
@@ -1293,6 +1293,11 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                 waitFor(pf);    							// wait for i/o transfer to complete
 				return pf;
 			}
+		}
+        
+		inline TPageFrame &getPage(int pageNo)
+        {
+			return getPage(pageNo, TPageFrame::NORMAL_LEVEL, TPageFrame::NORMAL_LEVEL, 0);
 		}
 
         // prefetch is non-blocking and should speed up swapping

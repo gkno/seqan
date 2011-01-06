@@ -67,9 +67,9 @@
 
 #include <seqan/file/file_base.h>
 #include <seqan/file/file_cstyle.h>
-#include <seqan/file/file_array.h>
-
 #include <seqan/system.h>	// async file (default file type of File<>)
+
+#include <seqan/file/file_array.h>
 /*#include <seqan/system/file_sync.h>
 #include <seqan/system/system_event.h>
 #include <seqan/system/file_async.h>

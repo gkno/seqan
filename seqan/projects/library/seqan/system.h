@@ -30,13 +30,13 @@
 //
 // ==========================================================================
 
+#include <seqan/file.h>
+
 #ifndef SEQAN_HEADER_SYSTEM_H
 #define SEQAN_HEADER_SYSTEM_H
 
 //____________________________________________________________________________
 // prerequisites
-
-#include <seqan/file.h>
 
 #include <cstdio>
 #include <ctime>
