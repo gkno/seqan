@@ -44,15 +44,18 @@
 #include <iostream>
 
 #ifdef PLATFORM_WINDOWS
-# include <windows.h>
+
+#include <windows.h>
+
 #else //#ifdef PLATFORM_WINDOWS
-# include <cstdlib>
-# include <climits>
-# include <pthread.h>
-# include <errno.h>
-# include <semaphore.h>
-# include <aio.h>
-# include <sys/mman.h>
+
+#include <cstdlib>
+#include <climits>
+#include <pthread.h>
+#include <errno.h>
+#include <semaphore.h>
+#include <aio.h>
+#include <sys/mman.h>
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
