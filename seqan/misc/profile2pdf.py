@@ -17,15 +17,32 @@ import cairo
 IGNORE_LIMIT = 0.00001
 
 # Automatic legend colors.
-COLORS = [(1, 0, 0),
-          (0, 1, 0),
-          (0, 0, 1),
-          (0.3, 0.3, 0.3),
-          (1, 1, 0),
-          (0, 1, 1),
-          (1, 0, 255),
-          (.5, 1, .5),
-          (1, .5, .5)]
+COLORS = [
+  "#3366FF",
+  "#FF33CC",
+  "#FF6633",
+  "#CCFF33",
+  "#33FF66",
+  "#33CCFF",
+  "#002EB8",
+  "#B88A00",
+  "#CC33FF",
+  "#FF3366",
+  "#FFCC33",
+  "#66FF33",
+  "#33FFCC",
+  "#003DF5",
+  "#F5B800"
+  ]
+def htmlColorToRgb(colorstring):
+    colorstring = colorstring.strip()
+    if colorstring[0] == '#': colorstring = colorstring[1:]
+    if len(colorstring) != 6:
+        raise ValueError, "input #%s is not in #RRGGBB format" % colorstring
+    r, g, b = colorstring[:2], colorstring[2:4], colorstring[4:]
+    r, g, b = [int(n, 16) for n in (r, g, b)]
+    return (r / 255.0, g / 255.0, b / 255.0)
+COLORS = map(htmlColorToRgb, COLORS)  
 
 class Meta(object):
   def __init__(self, beginTimestamp, endTimestamp):
@@ -142,6 +159,19 @@ def loadFile(path):
         break
       events.append(Event.fromString(line.strip()))
       line = f.readline()
+    # Remove redundant entries.
+    if False:
+      events2 = []
+      for i in range(len(events)):
+        if not events2 or not i + 1 < len(events):
+          events2.append(events[i])
+          continue
+        while True:
+          if not events2[-1].isBegin and events[i].isBegin and events[-1].jobType == events[i].jobType and events[-1].threadId == events[i].threadId and events[-1].timestamp - events[i].timestamp < 0.0001 and not events[i + 1].isBegin and events[i].jobType == events[i + 1].jobType and events[i].threadId == events[i + 1].threadId:
+            i += 2
+          else:
+            break
+        events2.append(events[i])
   return meta, jobTypes, events
 
 POINTS_SPACE_OUTER = 10
@@ -156,7 +186,7 @@ def drawBox(cr, jobTypes, section, offset, threadId, level):
   y = POINTS_SPACE_OUTER + POINTS_SPACE * threadId + POINTS_BAR_HEIGHT * threadId + level * 0.1 * POINTS_BAR_HEIGHT
   width = (section.endTime - section.beginTime) * POINTS_PER_SECOND
   height = (1.0 - 0.1 * level) * POINTS_BAR_HEIGHT
-  print 'rectangle(%s, %s, %s, %s), level = %s' % (x, y, width, height, level)
+  #print 'rectangle(%s, %s, %s, %s), level = %s' % (x, y, width, height, level)
   cr.set_source_rgb(*jobTypes[section.jobType].color)
   cr.rectangle(x, y, width, height)
   cr.fill()
@@ -164,7 +194,7 @@ def drawBox(cr, jobTypes, section, offset, threadId, level):
 def drawBoxesForSection(cr, jobTypes, section, offset, threadId, level=0):
   drawBox(cr, jobTypes, section, offset, threadId, level)
   for s in section.children:
-    drawBox(cr, jobTypes, s, offset, threadId, level + 1)
+    drawBoxesForSection(cr, jobTypes, s, offset, threadId, level + 1)
 
 def drawKey(cr, jobTypes, threadCount):
   for i, jobType in enumerate(jobTypes):
@@ -183,30 +213,46 @@ def drawKey(cr, jobTypes, threadCount):
 def drawScale(cr, totalBegin, totalEnd, threadCount):
   cr.set_line_width(0.2)
   cr.set_font_size(POINTS_KEY_ENTRY_HEIGHT * 0.5)
-  for i in range(0, int(totalEnd-totalBegin) + 1, 5):
+  for i in range(0, int(totalEnd-totalBegin) + 1):
     # Draw ticks at top.
     cr.set_source_rgb(0, 0, 0)
     cr.move_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i, POINTS_SPACE_OUTER)
-    cr.line_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i, 0.8 * POINTS_SPACE_OUTER);
+    if i % 5:  # small tick
+      cr.line_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i, 0.9 * POINTS_SPACE_OUTER);
+    else:  # large tick
+      cr.line_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i, 0.8 * POINTS_SPACE_OUTER);
     cr.stroke()
     # Draw grid.
     cr.set_source_rgba(.3, .3, .3, 0.5)
     cr.move_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i, POINTS_SPACE_OUTER)
-    cr.line_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i, POINTS_SPACE_OUTER * (threadCount + 1) + POINTS_BAR_HEIGHT * threadCount);
+    cr.line_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i, POINTS_SPACE_OUTER + POINTS_SPACE * (threadCount - 1) + POINTS_BAR_HEIGHT * threadCount);
     cr.stroke()
-    # Draw seconds display.
-    cr.set_source_rgb(0, 0, 0)
-    extents = cr.text_extents(str(i))
-    cr.move_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i - extents[2] / 2.0, 0.75 * POINTS_SPACE_OUTER);
-    cr.show_text(str(i))
+    if not i % 5:  # at large ticks
+      # Draw seconds display.
+      cr.set_source_rgb(0, 0, 0)
+      extents = cr.text_extents(str(i))
+      cr.move_to(POINTS_SPACE_OUTER + POINTS_PER_SECOND * i - extents[2] / 2.0, 0.75 * POINTS_SPACE_OUTER);
+      cr.show_text(str(i))
 
-def createDiagram(jobTypes, forests, path):
-  # Compute total time.
-  totalBegin = float('inf')
-  totalEnd = 0
-  for threadId, forest in forests.iteritems():
-    totalBegin = min(totalBegin, forest[0].beginTime)
-    totalEnd = max(totalBegin, forest[-1].endTime)
+def breakDownTimesHelper(counter, section):
+  counter[section.jobType] = counter.get(section.jobType, 0) + section.endTime - section.beginTime
+  if section.parent:
+    counter[section.parent.jobType] -= section.endTime - section.beginTime
+  for child in section.children:
+    breakDownTimesHelper(counter, child)
+
+def breakDownTimes(jobTypes, forests):
+  for threadId in sorted(forests.keys()):
+    print 'Breakdown for thread #%d' % threadId
+    counter = {}
+    for section in forests[threadId]:
+      breakDownTimesHelper(counter, section)
+    for jobType in jobTypes:
+      print '  %20s %10.5f' % (jobType.shortName, counter.get(jobType.identifier, 0))
+
+def createDiagram(meta, jobTypes, forests, path):
+  totalBegin = meta.beginTimestamp
+  totalEnd = meta.endTimestamp
   totalTime = totalEnd - totalBegin
   # Create Cairo PDF surface.
   width = math.ceil(totalTime) * POINTS_PER_SECOND + POINTS_SPACE + 2 * POINTS_SPACE_OUTER
@@ -230,13 +276,16 @@ def main(args):
     return 1
   
   # Load input file.
+  print >>sys.stderr, 'Loading file', args[1]
   meta, jobTypes, events = loadFile(args[1])
   # Partition events by thread id.
+  print >>sys.stderr, 'Partition events'
   eventsForThread = {}
   for e in events:
     eventsForThread.setdefault(e.threadId, []).append(e)
 
   # Build sections list and forest for each thread.
+  print >>sys.stderr, 'Build sections'
   forests = {}
   sections = {}
   for threadId in sorted(eventsForThread.keys()):
@@ -249,7 +298,12 @@ def main(args):
     #  printSection(x, jobTypes, s[0].beginTime)
 
   # Build diagram.
-  createDiagram(jobTypes, forests, args[2])
+  print >>sys.stderr, 'Create diagram'
+  createDiagram(meta, jobTypes, forests, args[2])
+
+  # Show how much time each thread spent in each job type.
+  breakDownTimes(jobTypes, forests)
+  print 'TOTAL TIME: %f s' % (meta.endTimestamp - meta.beginTimestamp)
   
   return 0
 
