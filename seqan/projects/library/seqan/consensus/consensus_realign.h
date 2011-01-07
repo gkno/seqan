@@ -186,14 +186,18 @@ scoreConsensus(TConsensus& consensus)
 // TODO(holtgrew): Rename to reflect this more clearly.
 // TODO(holtgrew): TConsensus/consensus are profiles, really.
 template<typename TFragSpec, typename TConfig, typename TAlignedRead, typename TSpec, typename TConsensus, typename TScore, typename TMethod, typename TBandwidth>
-inline void 
+void 
 reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		String<TAlignedRead, TSpec>& contigReads,
 		TConsensus& consensus,
 		TScore& consScore,
 		TMethod const rmethod,
 		TBandwidth const bandwidth,
-		bool includeReference)
+		bool includeReference,
+        double & timeBeforeAlign,
+        double & timeAlign,
+        double & timeAfterAlign
+        )
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef String<TAlignedRead, TSpec> TAlignedReadStore;
@@ -209,6 +213,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	TSize gapPos = ValueSize<TProfileChar>::VALUE - 1;
 
 	// Remove each fragment and realign it to the profile.
+	TAlignedReadIter beg = begin(contigReads, Standard());
 	TAlignedReadIter alignIt = begin(contigReads, Standard());
 	TAlignedReadIter alignItEnd = end(contigReads, Standard());
 	if (includeReference)
@@ -216,8 +221,15 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	TConsensus bandConsensus;
 	TConsensus myRead;
 	TConsensus newConsensus;
+    int i = 0;
 	for (; alignIt != alignItEnd; ++alignIt) {
-	  printf("realigning %u/%u\r", unsigned(alignIt-beg), unsigned(alignItEnd-beg));
+        double tBegin = sysTime();
+        if (i++ > 1000 || i == 1) {
+            printf("realigning %u/%u\r", unsigned(alignIt-beg), unsigned(alignItEnd-beg));
+            if (i != 1)
+                i = 0;
+            fflush(stdout);
+        }
 		//// Debug code
 		//for(TSize i = 0; i<length(consensus); ++i) {
 		//	std::cout << consensus[i] << std::endl;
@@ -374,6 +386,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		TFragmentString matches;
 		assignProfile(consScore, bandConsensus);
 
+        double tBegAlign = sysTime();
 		leftDiag -= removedBeginPos;
 		rightDiag -= removedBeginPos;
 		if (!singleton) {
@@ -382,6 +395,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			else if (rmethod == 1)
                 globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
 		}
+        double tEndAlign = sysTime();
 
 		//// Debug code
 		//Graph<Alignment<TStringSet, void, WithoutEdgeId> > g1(pairSet);
@@ -479,8 +493,12 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		resize(newConsensus, newConsIt - begin(newConsensus, Standard()), Generous());
 
 		infix(consensus, bandOffset, itCons - begin(consensus)) = newConsensus;
+        double tEnd = sysTime();
+
+        timeBeforeAlign += tBegAlign - tBegin;
+        timeAlign += tEndAlign - tBegAlign;
+        timeAfterAlign += tEnd -tEndAlign;
 	}
-	printf("\nNext round\n");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -495,7 +513,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 ..remark:The consensus sequence will be appended to the readSeqStore of fragmentStore if includeReference is true.
 */
 template<typename TSpec, typename TConfig, typename TScore, typename TId, typename TMethod, typename TBandwidth>
-inline void 
+void 
 reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		TScore& consScore,
 		TId const contigId,
@@ -645,18 +663,22 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
     std::cerr << "TIME consensus " << endTime - beginTime << std::endl;
 	
     beginTime = sysTime();
-	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
+    double tBefore = 0, tAlign = 0, tAfter = 0;
+	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference, tBefore, tAlign, tAfter);
+    fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
     endTime = sysTime();
-    std::cerr << "TIME realign" << endTime - beginTime << std::endl;
+    std::cerr << "TIME realign " << endTime - beginTime << std::endl;
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
 		std::cout << "Score: " << score << std::endl;
 		oldScore = score;
         double beginTime = sysTime();
-		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
+        double tBefore = 0, tAlign = 0, tAfter = 0;
+		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference, tBefore, tAlign, tAfter);
+        fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
         double endTime = sysTime();
-        std::cerr << "TIME realign" << endTime - beginTime << std::endl;
+        std::cerr << "TIME realign " << endTime - beginTime << std::endl;
 		score = scoreConsensus(consensus);
 	}
 	std::cout << "FinalScore: " << score << std::endl;
