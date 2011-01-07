@@ -217,6 +217,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	TConsensus myRead;
 	TConsensus newConsensus;
 	for (; alignIt != alignItEnd; ++alignIt) {
+	  printf("realigning %u/%u\r", unsigned(alignIt-beg), unsigned(alignItEnd-beg));
 		//// Debug code
 		//for(TSize i = 0; i<length(consensus); ++i) {
 		//	std::cout << consensus[i] << std::endl;
@@ -260,7 +261,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		TSize itConsPosBegin = itConsPos;  // start position of read basically, right? if(itConsPosBegin != alignIt->beginPos) std::cout <<"nicht unbedingt gleich\n";
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
 
-		// Remove sequence from profile and add to the consensus
+		// Remove sequence from profile (and add to the consensus??)  // TODO(holtgrew): Add to consensus part right?
 		typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
 		TReadIter itRead = begin(fragStore.readSeqStore[alignIt->readId], Standard());
 		TReadIter itReadEnd = end(fragStore.readSeqStore[alignIt->readId], Standard());
@@ -479,6 +480,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 		infix(consensus, bandOffset, itCons - begin(consensus)) = newConsensus;
 	}
+	printf("\nNext round\n");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -648,7 +650,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
     std::cerr << "TIME realign" << endTime - beginTime << std::endl;
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
-	while (score < oldScore) {
+	while(score < oldScore) {
 		std::cout << "Score: " << score << std::endl;
 		oldScore = score;
         double beginTime = sysTime();
@@ -658,8 +660,6 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		score = scoreConsensus(consensus);
 	}
 	std::cout << "FinalScore: " << score << std::endl;
-    endTime = sysTime();
-    std::cerr << "TIME total realigning " << endTime - beginTime << std::endl;
 
     beginTime = sysTime();
 	// Update all the aligned reads and the new consensus
