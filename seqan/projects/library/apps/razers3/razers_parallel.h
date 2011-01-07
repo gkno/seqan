@@ -4,7 +4,24 @@
 #include "parallel_misc.h"
 #include "parallel_job_queue.h"
 
+#ifdef RAZERS_PROFILE
+#include "profile_timeline.h"
+#endif  // #ifdef RAZERS_PROFILE
+
 namespace SEQAN_NAMESPACE_MAIN {
+
+#ifdef RAZERS_PROFILE
+enum {
+    TASK_WAIT,
+    TASK_ON_CONTIG,
+    TASK_INIT,
+    TASK_REVCOMP,
+    TASK_FILTER,
+    TASK_VERIFY,
+    TASK_WRITEBACK,
+    TASK_COMPACT
+};
+#endif  // #ifdef RAZERS_PROFILE
 
 // Forwards.
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
@@ -150,8 +167,8 @@ void initializeBlockLocalStorages(
         TPosition jEnd = splitters[i + 1];
         for (TPosition j = jBegin; j < jEnd; ++j)
             appendValue(indexText(index), store.readSeqStore[j]);
-        unsigned x = length(indexText(index));
-        fprintf(stderr, "Index #%d has %u entries.\n", i, x);
+        // unsigned x = length(indexText(index));
+        // fprintf(stderr, "Index #%d has %u entries.\n", i, x);
         index.shape = shape;
 
 #ifdef RAZERS_OPENADDRESSING
@@ -534,7 +551,7 @@ writeBackToGlobalStore(
 	// Update the IDs and calculate new size so the prefix increment can be
 	// used in the loops.
 	TAlignedReadStoreSize oldSize = length(target.alignedReadStore);
-	TAlignedReadStoreSize sizeSum = oldSize;  // TODO(holtgrew): Maybe no prefix-- here, below suffix++ and below that no ++.
+	TAlignedReadStoreSize sizeSum = oldSize;
 
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i)
 		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j)
@@ -547,7 +564,7 @@ writeBackToGlobalStore(
 
 	// Append single block stores.
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i) {
-		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j){
+		for (unsigned j = 0; j < length(blockLocalStorages[i].store.alignedReadStore); ++j) {
 			move(target.alignedReadStore[oldSize], blockLocalStorages[i].store.alignedReadStore[j]);
 			move(target.alignQualityStore[oldSize++], blockLocalStorages[i].store.alignQualityStore[j]);
 		}
@@ -558,6 +575,11 @@ template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typenam
 void
 writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData)
 {
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_WRITEBACK);
+#endif  // #ifdef RAZERS_PROFILE
+    if (tls.threadId == 0u && tls.options._debugLevel >= 3)
+        fprintf(stderr, "[writeback]");
     // TODO(holtgrew): It would be possible to use local sorting and multiway merging, removes necessity to sort in compactMatches/maskDuplicates.
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 
@@ -594,29 +616,41 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     // Possibly compact matches.
     if (length(localStore.alignedReadStore) > tls.options.compactThresh)
     {
+#ifdef RAZERS_PROFILE
+        timelineBeginTask(TASK_COMPACT);
+#endif  // #ifdef RAZERS_PROFILE
         double beginTime = sysTime();
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
         typename Size<TAlignedReadStore>::Type oldSize = length(localStore.alignedReadStore);
 
-        // if (tls.threadId == 0u)
-        //     fprintf(stderr, "[compact]");
+        if (tls.threadId == 0u && tls.options._debugLevel >= 3)
+            fprintf(stderr, "[compact]");
         if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
           maskDuplicates(localStore, TRazerSMode());  // overlapping parallelograms cause duplicates
 
         compactMatches(localStore, tls.counts, tls.options, TRazerSMode(), tls.globalState->blockLocalStorages[jobData.blockId], COMPACT);
 
-        if (length(localStore.alignedReadStore) * 4 > oldSize) {     // the threshold should not be raised
+        if (length(localStore.alignedReadStore) * 4 > oldSize) {     // the threshold should not be raised if too many matches were removed
             while (tls.options.compactThresh < oldSize)
-                tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
-            fprintf(stderr, "[raising threshold to %u]", unsigned(tls.options.compactThresh));
+                tls.options.compactThresh *= 2;  // Using * 2 in parallel version for scalability reasons.
+                // tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
+            if (tls.threadId == 0u && tls.options._debugLevel >= 3)
+                fprintf(stderr, "[raising threshold to %u]", unsigned(tls.options.compactThresh));
         }
         double endTime = sysTime();
         tls.compactionTime += (endTime - beginTime);
+#ifdef RAZERS_PROFILE
+        timelineEndTask(TASK_COMPACT);
+#endif  // #ifdef RAZERS_PROFILE
     }
 
     SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), length(localStore.alignQualityStore));
     if (!empty(localStore.alignedReadStore))
       SEQAN_ASSERT_EQ(length(localStore.alignedReadStore), back(localStore.alignedReadStore).id + 1);
+
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_WRITEBACK);
+#endif  // #ifdef RAZERS_PROFILE
 }
 
 // work Filtration
@@ -633,7 +667,11 @@ template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typenam
 void
 workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData)
 {
-    //fprintf(stderr, "[filtration]");
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_FILTER);
+#endif  // #ifdef RAZERS_PROFILE
+    if (tls.threadId == 0u && tls.options._debugLevel >= 3)
+        fprintf(stderr, "[filtration]");
     double beginTime = sysTime();
     typedef JobData<Filtration<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TFiltrationJobData;
     typedef JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TVerificationJobData;
@@ -694,10 +732,16 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
 
         beginTime = sysTime();
         // Wait until verification for this block has finished.
+#ifdef RAZERS_PROFILE
+        timelineBeginTask(TASK_WAIT);
+#endif  // #ifdef RAZERS_PROFILE
         while (jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksTotal != jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksDone) {
             // Busy waiting.
             SEQAN_ASSERT_GEQ(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksTotal, jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.blocksDone);
         }
+#ifdef RAZERS_PROFILE
+        timelineEndTask(TASK_WAIT);
+#endif  // #ifdef RAZERS_PROFILE
         // Write back hits into local store or global store.
         writeBackToLocal(tls, jobData);
         endTime = sysTime();
@@ -713,6 +757,9 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
             break;
         }
     }
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_FILTER);
+#endif  // #ifdef RAZERS_PROFILE
 }
 
 /*
@@ -798,8 +845,13 @@ template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typenam
 void
 workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > & jobData, TThreadId thisThreadId, TThreadId jobThreadId)
 {
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_VERIFY);
+#endif  // #ifdef RAZERS_PROFILE
+
     double beginTime = sysTime();
-    //fprintf(stderr, "[verification]");
+    if (tls.threadId == 0u && tls.options._debugLevel >= 3)
+        fprintf(stderr, "[verification]");
     typedef JobData<Verification<TFragmentStore, TSwiftFinder, TSwiftPattern, TOptions> > TVerificationJobData;
     typedef typename TVerificationJobData::THitString THitString;
     typedef typename Iterator<THitString>::Type THitStringIterator;
@@ -843,6 +895,10 @@ workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
 
     double endTime = sysTime();
     appendValue(tls.workRecords, WorkRecord(beginTime, endTime, JOB_VERIFICATION));
+
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_VERIFY);
+#endif  // #ifdef RAZERS_PROFILE
 }
 
 template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TThreadId, typename TCounts, typename TRazerSMode>
@@ -889,6 +945,9 @@ void _mapSingleReadsParallelToContig(
 	TShape const											& /*shape*/,
 	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const      & /*mode*/)
 {
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_ON_CONTIG);
+#endif  // #ifdef RAZERS_PROFILE
 	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
 	typedef typename TFragmentStore::TContigSeq				TContigSeq;
 	typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
@@ -920,8 +979,14 @@ void _mapSingleReadsParallelToContig(
     // Lock contig and possibly reverse-complement it.
 	// lockContig(store, contigId);
 	TContigSeq & contigSeq = store.contigStore[contigId].seq;
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_REVCOMP);
+#endif  // #ifdef RAZERS_PROFILE
 	if (orientation == 'R')
 		reverseComplement(contigSeq);
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_REVCOMP);
+#endif  // #ifdef RAZERS_PROFILE
 
     // Fill thread local storages with filtration jobs.
     for (unsigned i = 0, k = 0; i < options.threadCount; ++i) {
@@ -948,6 +1013,9 @@ void _mapSingleReadsParallelToContig(
     // TODO(holtgrew): Always reverse-complemented again since outer caller locks!
 	// if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
     //     if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_ON_CONTIG);
+#endif  // #ifdef RAZERS_PROFILE
 }
 
 // Performs splitting of reads, initialization of OpenMP and the calls
@@ -995,6 +1063,9 @@ int _mapSingleReadsParallel(
     GlobalState<TFragmentStore, TSwiftPattern, TOptions> globalState;
     globalState.globalOptions = &options;
 
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_INIT);
+#endif  // #ifdef RAZERS_PROFILE
     double beginInit = sysTime();
     // Compute initial load balancing / number of blocks and initialize the
     // block-specific data structures.
@@ -1026,6 +1097,9 @@ int _mapSingleReadsParallel(
     }
     double endInit = sysTime();
     std::cerr << "TIME initialization: " << (endInit - beginInit) << " s" << std::endl;
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_INIT);
+#endif  // #ifdef RAZERS_PROFILE
 
     // For each contig: Map reads in parallel.
     double times[5] = {0, 0, 0, 0, 0};

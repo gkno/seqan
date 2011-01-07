@@ -491,7 +491,7 @@ struct MicroRNA{};
 						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
 						
 						if (length(store->alignedReadStore) * 4 > oldSize) {			// the threshold should not be raised
-                            fprintf(stderr, "[raising threshold]");
+                            // fprintf(stderr, "[raising threshold]");
 							options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
                         }
 						
@@ -1043,8 +1043,8 @@ template < typename TSwift, typename TReadNo, typename TMaxErrors >
 inline void 
 setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 {
-	if (readNo==643)
-		std::cout<<"dman"<<std::endl;
+	// if (readNo==643)
+	// 	std::cout<<"dman"<<std::endl;
 	int minT = _qgramLemma(swift, readNo, maxErrors);
 	if (minT > 1)
 	{
@@ -1074,7 +1074,7 @@ void compactMatches(
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
-    fprintf(stderr, "[compact]");
+    //fprintf(stderr, "[compact]");
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
@@ -1152,11 +1152,11 @@ void compactMatches(
 		*dit = *it;
 		++dit;
 	}
-	unsigned origSize = length(store.alignedReadStore);
+	// unsigned origSize = length(store.alignedReadStore);
 	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
 	compactAlignedReads(store);
-	unsigned newSize = length(store.alignedReadStore);
-	fprintf(stderr, "\nCompacted from %u to %u\n", origSize, newSize);
+	// unsigned newSize = length(store.alignedReadStore);
+	//fprintf(stderr, "\nCompacted from %u to %u\n", origSize, newSize);
 }
 
 //////////////////////////////////////////////////////////////////////////////

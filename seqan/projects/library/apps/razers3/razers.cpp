@@ -36,6 +36,7 @@
 #define SEQAN_PARALLEL
 #define RAZERS_OPENADDRESSING	
 #endif
+#define RAZERS_PROFILE                // Extensive profiling information.
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
@@ -65,6 +66,12 @@
 #endif
 
 #include "razers_parallel.h"
+
+#include "profile_timeline.h"
+
+#ifdef RAZERS_PROFILE
+#include "profile_timeline.h"
+#endif  // #ifdef RAZERS_PROFILE
 
 using namespace std;
 using namespace seqan;
@@ -223,6 +230,19 @@ inline void whichMacros(){
 int main(int argc, const char *argv[]) 
 {
 	//whichMacros();
+
+#ifdef RAZERS_PROFILE
+    initTimeline();
+    unsigned x = timelineAddTaskType("ON_CONTIG", "Work on contig.");
+    (void)x;  // Disable warning if assertions are disable.
+    SEQAN_ASSERT_EQ(x, 1u);  // The following will be OK, too.
+    timelineAddTaskType("INIT", "Initialization.");
+    timelineAddTaskType("REVCOMP", "Reverse-complementing contig.");
+    timelineAddTaskType("FILTER", "Filtration using SWIFT.");
+    timelineAddTaskType("VERIFY", "Verification of SWIFT hits.");
+    timelineAddTaskType("WRITEBACK", "Write back to block-local store.");
+    timelineAddTaskType("COMPACT", "Compaction");
+#endif  // #ifndef RAZERS_PROFILE
 	
 	RazerSOptions<>			options;
 	ParamChooserOptions		pm_options;
@@ -322,6 +342,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("psf", "parallel-split-factor",   "Use this many blocks per thread.", OptionType::Int | OptionType::Label, options.splitFactor));
 	addOption(parser, CommandLineOption("pws", "parallel-window-size",   "Collect SWIFT hits in windows of this length.", OptionType::Int | OptionType::Label, options.windowSize));
 	addOption(parser, CommandLineOption("pvs", "parallel-verification-size",   "Verify SWIFT hits in packages of this size.", OptionType::Int | OptionType::Label, options.verificationPackageSize));
+	addOption(parser, CommandLineOption("pvmpc", "parallel-verification-max-package-count",   "Largest number of packages to create for verification, go over package size if this limit is reached..", OptionType::Int | OptionType::Label, options.maxVerificationPackageCount));
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -366,6 +387,7 @@ int main(int argc, const char *argv[])
     getOptionValueLong(parser, "parallel-split-factor", options.splitFactor);
     getOptionValueLong(parser, "parallel-window-size", options.windowSize);
     getOptionValueLong(parser, "parallel-verification-size", options.verificationPackageSize);
+    getOptionValueLong(parser, "parallel-verification-max-package-count", options.maxVerificationPackageCount);
 #ifdef RAZERS_OPENADDRESSING
 	getOptionValueLong(parser, "load-factor", options.loadFactor);
 #endif 
@@ -568,6 +590,10 @@ int main(int argc, const char *argv[])
     // Restoring number of threads for side-effect freeness.
     omp_set_num_threads(oldMaxThreads);
 #endif  // #ifdef _OPENMP
+
+#ifdef RAZERS_PROFILE
+    dumpTimeline("razers.profile.txt", true);
+#endif  // #ifndef RAZERS_PROFILE
 
 	return result;
 }
