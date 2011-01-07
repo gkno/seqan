@@ -661,6 +661,9 @@ int dumpMatches(
 		countMatches(store, stats, mode);
 	}
 
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_COMPACT);
+#endif  // #ifdef RAZERS_PROFILE
 	Nothing nothing;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping)
@@ -673,6 +676,9 @@ int dumpMatches(
 	else	 
 #endif
 	compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_COMPACT);
+#endif  // #ifdef RAZERS_PROFILE
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
 	calculateInsertSizes(libSize, store);

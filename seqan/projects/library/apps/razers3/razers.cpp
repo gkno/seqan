@@ -24,7 +24,7 @@
 //#define RAZERS_DEBUG					// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX		// ignore highly abundant q-grams
 #define RAZERS_CONCATREADS				// use <ConcatDirect> StringSet to store reads
-// #define RAZERS_MEMOPT					// optimize memory consumption
+#define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 
@@ -128,6 +128,9 @@ int mapReads(
 	// circumvent numerical obstacles
 	options.errorRate += 0.0000001;
 
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_LOAD);
+#endif  // #ifdef RAZERS_PROFILE
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 1: Load reads
 	SEQAN_PROTIMESTART(load_time);
@@ -157,8 +160,8 @@ int mapReads(
 		cerr << "Loading reads took               \t" << options.timeLoadFiles << " seconds" << endl;
 		
 	#ifdef RAZERS_MEMOPT
-		if(length(store.readSeqStore) > 16777216){
-			cerr << "more than 2^24 reads. Switch of RAZERS_MEMOPT in razers.cpp or use less."
+		if (length(store.readSeqStore) > 16777216) {
+			cerr << "more than 2^24 reads. Switch of RAZERS_MEMOPT in razers.cpp or use less." << std::endl;
 			return 1;
 		}
 	#endif
@@ -174,6 +177,9 @@ int mapReads(
 			return result;
 		}
 	}
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_LOAD);
+#endif  // #ifdef RAZERS_PROFILE
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Find matches using SWIFT
@@ -196,8 +202,14 @@ int mapReads(
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 4: Remove duplicates and output matches
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_DUMP_MATCHES);
+#endif  // #ifdef RAZERS_PROFILE
 	if (!options.spec.DONT_DUMP_RESULTS)
 		dumpMatches(store, stats, readFileNames[0], errorPrbFileName, options);
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_DUMP_MATCHES);
+#endif  // #ifdef RAZERS_PROFILE
 
 	return 0;
 }	
@@ -242,6 +254,8 @@ int main(int argc, const char *argv[])
     timelineAddTaskType("VERIFY", "Verification of SWIFT hits.");
     timelineAddTaskType("WRITEBACK", "Write back to block-local store.");
     timelineAddTaskType("COMPACT", "Compaction");
+    timelineAddTaskType("DUMP_MATCHES", "Dump matches.");
+    timelineAddTaskType("LOAD", "Load input.");
 #endif  // #ifndef RAZERS_PROFILE
 	
 	RazerSOptions<>			options;
@@ -318,6 +332,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("pf", "position-format",   "select begin/end position numbering", OptionType::Int | OptionType::Label, options.sortOrder));
 	addHelpLine(parser, "0 = gap space");
 	addHelpLine(parser, "1 = position space");
+	addOption(parser, CommandLineOption("ga", "global-alignment",   "compute global alignment (in SAM output)", OptionType::Bool, options.computeGlobal));
 	addSection(parser, "Filtration Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s",  "shape",             "set k-mer shape", OptionType::String | OptionType::Label, options.shape), "BITSTRING"));
 	addOption(parser, CommandLineOption("t",  "threshold",         "set minimum k-mer threshold", OptionType::Int | OptionType::Label, options.threshold));
@@ -342,7 +357,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("psf", "parallel-split-factor",   "Use this many blocks per thread.", OptionType::Int | OptionType::Label, options.splitFactor));
 	addOption(parser, CommandLineOption("pws", "parallel-window-size",   "Collect SWIFT hits in windows of this length.", OptionType::Int | OptionType::Label, options.windowSize));
 	addOption(parser, CommandLineOption("pvs", "parallel-verification-size",   "Verify SWIFT hits in packages of this size.", OptionType::Int | OptionType::Label, options.verificationPackageSize));
-	addOption(parser, CommandLineOption("pvmpc", "parallel-verification-max-package-count",   "Largest number of packages to create for verification, go over package size if this limit is reached..", OptionType::Int | OptionType::Label, options.maxVerificationPackageCount));
+	addOption(parser, CommandLineOption("pvmpc", "parallel-verification-max-package-count",   "Largest number of packages to create for verification per thread-1, go over package size if this limit is reached..", OptionType::Int | OptionType::Label, options.maxVerificationPackageCount));
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -372,6 +387,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "genome-naming", options.genomeNaming);
 	getOptionValueLong(parser, "read-naming", options.readNaming);
 	getOptionValueLong(parser, "position-format", options.positionFormat);
+	if (isSetLong(parser, "global-alignment")) options.computeGlobal = true;
 	getOptionValueLong(parser, "shape", options.shape);
 	getOptionValueLong(parser, "threshold", options.threshold);
 	getOptionValueLong(parser, "overabundance-cut", options.abundanceCut);

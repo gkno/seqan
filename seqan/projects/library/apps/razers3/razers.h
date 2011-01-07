@@ -31,11 +31,30 @@
 #include <seqan/index.h>
 #include <seqan/store.h>
 
+#ifdef RAZERS_PROFILE
+#include "profile_timeline.h"
+#endif  // #ifdef RAZERS_PROFILE
+
 // No parallelism for less than MIN_PARALLEL_WORK reads.
 const unsigned MIN_PARALLEL_WORK = 100/*0*/;
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
+#ifdef RAZERS_PROFILE
+enum {
+    TASK_WAIT,
+    TASK_ON_CONTIG,
+    TASK_INIT,
+    TASK_REVCOMP,
+    TASK_FILTER,
+    TASK_VERIFY,
+    TASK_WRITEBACK,
+    TASK_COMPACT,
+    TASK_DUMP_MATCHES,
+    TASK_LOAD
+};
+#endif  // #ifdef RAZERS_PROFILE
 
 //////////////////////////////////////////////////////////////////////////////
 // RazerS modes
@@ -119,6 +138,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	positionFormat;		// 0..gap space
 										// 1..position space
 		const char	*runID;				// runID needed for gff output
+        bool        computeGlobal;      // compute global alignment in SAM output
 
 	// filtration parameters
 		::std::string shape;			// shape (e.g. 11111111111)
@@ -201,6 +221,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			sortOrder = 0;
 			positionFormat = 0;
 			runID = "s"; 	//
+            computeGlobal = false;
 
 			matchN = false;
 			shape = "11111111111";
@@ -245,7 +266,7 @@ namespace SEQAN_NAMESPACE_MAIN
             splitFactor = 1;
             // TODO(holtgrew): Tune this!
             windowSize = 500000;
-            verificationPackageSize = 1000;
+            verificationPackageSize = 100;
             maxVerificationPackageCount = 100;
 
 #ifdef RAZERS_OPENADDRESSING
@@ -492,7 +513,8 @@ struct MicroRNA{};
 						
 						if (length(store->alignedReadStore) * 4 > oldSize) {			// the threshold should not be raised
                             // fprintf(stderr, "[raising threshold]");
-							options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
+							// options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
+							options->compactThresh *= 2;  // TODO(holtgrew): Increasing threshold by 2 for performance reasons at the cost of memory, for the sake of comparison with parallel.
                         }
 						
 //						if (options._debugLevel >= 2)

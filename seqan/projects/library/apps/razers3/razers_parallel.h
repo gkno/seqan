@@ -4,24 +4,7 @@
 #include "parallel_misc.h"
 #include "parallel_job_queue.h"
 
-#ifdef RAZERS_PROFILE
-#include "profile_timeline.h"
-#endif  // #ifdef RAZERS_PROFILE
-
 namespace SEQAN_NAMESPACE_MAIN {
-
-#ifdef RAZERS_PROFILE
-enum {
-    TASK_WAIT,
-    TASK_ON_CONTIG,
-    TASK_INIT,
-    TASK_REVCOMP,
-    TASK_FILTER,
-    TASK_VERIFY,
-    TASK_WRITEBACK,
-    TASK_COMPACT
-};
-#endif  // #ifdef RAZERS_PROFILE
 
 // Forwards.
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
@@ -219,39 +202,42 @@ private:
 };
 
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
-void allocateStore(TFragmentStore * & result, GlobalState<TFragmentStore, TSwiftPattern, TOptions> & globalState)
+void allocateStore(TFragmentStore * & result, GlobalState<TFragmentStore, TSwiftPattern, TOptions> & /*globalState*/)
 {
-    omp_set_lock(&globalState.lock);
+    // omp_set_lock(&globalState.lock);
+    // // if (length(globalState.localStores) == 0u) {
     // if (length(globalState.localStores) == 0u) {
-    if (length(globalState.localStores) == 0u) {
-        omp_unset_lock(&globalState.lock);
+    //     omp_unset_lock(&globalState.lock);
         result = new TFragmentStore();
-        return;
-    }
-    result = back(globalState.localStores);
-    clear(result->alignedReadStore);
-    clear(result->alignQualityStore);
-    eraseBack(globalState.localStores);
+    //     return;
+    // }
     // result = back(globalState.localStores);
+    // clear(result->alignedReadStore);
+    // clear(result->alignQualityStore);
     // eraseBack(globalState.localStores);
-    omp_unset_lock(&globalState.lock);
+    // // result = back(globalState.localStores);
+    // // eraseBack(globalState.localStores);
+    // omp_unset_lock(&globalState.lock);
 }
 
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
-void deallocateStore(GlobalState<TFragmentStore, TSwiftPattern, TOptions> & globalState, TFragmentStore * const & store)
+void deallocateStore(GlobalState<TFragmentStore, TSwiftPattern, TOptions> & /*globalState*/, TFragmentStore * const & store)
 {
-    omp_set_lock(&globalState.lock);
-    appendValue(globalState.localStores, store);
-    omp_unset_lock(&globalState.lock);
+    delete store;
+    // omp_set_lock(&globalState.lock);
+    // appendValue(globalState.localStores, store);
+    // omp_unset_lock(&globalState.lock);
 }
 
 template <typename TFragmentStore, typename TSwiftPattern, typename TOptions>
-void deallocateStores(GlobalState<TFragmentStore, TSwiftPattern, TOptions> & globalState, String<TFragmentStore *> & stores)
+void deallocateStores(GlobalState<TFragmentStore, TSwiftPattern, TOptions> & /*globalState*/, String<TFragmentStore *> & stores)
 {
-    omp_set_lock(&globalState.lock);
     for (unsigned i = 0; i < length(stores); ++i)
-        appendValue(globalState.localStores, stores[i]);
-    omp_unset_lock(&globalState.lock);
+        delete stores[i];
+    // omp_set_lock(&globalState.lock);
+    // for (unsigned i = 0; i < length(stores); ++i)
+    //     appendValue(globalState.localStores, stores[i]);
+    // omp_unset_lock(&globalState.lock);
 }
 
 struct WorkRecord
@@ -317,7 +303,8 @@ allocateLocalStore(TFragmentStore * & localStorePtr, VerificationResults<TFragme
 {
     omp_set_lock(&verificationResults.lock->lock_);
     verificationResults.blocksTotal += 1;
-    allocateStore(localStorePtr, *verificationResults.globalState);
+    localStorePtr = new TFragmentStore();
+    // allocateStore(localStorePtr, *verificationResults.globalState);
     appendValue(verificationResults.localStores, localStorePtr);
     // appendValue(verificationResults.localStores, localStorePtr);
     omp_unset_lock(&verificationResults.lock->lock_);
@@ -705,8 +692,11 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
         // Enqueue verification jobs, if any.
         if (length(hits) > 0u) {
             String<unsigned> splitters;
-            computeSplittersBySlotSize(splitters, length(hits), tls.options.verificationPackageSize, tls.options.maxVerificationPackageCount);
+            unsigned packageCount = tls.options.maxVerificationPackageCount * (omp_get_max_threads() - 1);
+            packageCount += packageCount == 0;
+            computeSplittersBySlotSize(splitters, length(hits), tls.options.verificationPackageSize, packageCount);
 
+            // fprintf(stderr, "[%u splitters]", unsigned(length(splitters)));
             String<TJob> jobs;
             reserve(jobs, length(splitters) - 1);
             for (unsigned i = 1; i < length(splitters); ++i) {

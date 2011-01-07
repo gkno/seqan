@@ -25,7 +25,7 @@ void computeSplittersBySlotSize(String<TPos> & splitters, TDataSize size, TSlotS
 {
     // Limit maximal number of verification packages.
     if (maxPackageCount > 0 && (size / slotSize > maxPackageCount))
-        slotSize = size / maxPackageCount + static_cast<TSlotSize>(size % maxPackageCount) > static_cast<TSlotSize>(0);
+        slotSize = size / maxPackageCount + (static_cast<TSlotSize>(size % maxPackageCount) > static_cast<TSlotSize>(0));
     // Compute splitters.
     unsigned count = size / slotSize + (static_cast<TSlotSize>(size % slotSize) > static_cast<TSlotSize>(0));
     resize(splitters, count + 1);
