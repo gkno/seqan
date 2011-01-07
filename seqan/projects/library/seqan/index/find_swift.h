@@ -577,13 +577,13 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 
 	double _newErrorRate = errorRate;
 	TSize seqCount = countSequences(host(pattern));
+
+	clear(pattern.verifyList);
 	
 	if (pattern._currentErrorRate != _newErrorRate || pattern._currentMinLengthForAll != minLengthForAll)
 	{
 		// settings have been changed -> initialize bucket parameters
 	
-		clear(pattern.verifyList);
-
 		pattern._currentErrorRate = _newErrorRate;
 		pattern._currentMinLengthForAll = minLengthForAll;
 		pattern.finderPosOffset = 0;
@@ -962,7 +962,7 @@ inline bool _swiftMultiProcessQGram(
 
 			if (hitCount == (*bkt).threshold && (*bkt).notListed) {
 				// append bkt no to patterns verify list
-				append(pattern.verifyList, Pair<unsigned>(getSeqNo(ndlPos), bktNo));
+				appendValue(pattern.verifyList, Pair<unsigned>(getSeqNo(ndlPos), bktNo));
 				(*bkt).notListed = false;
 			}
 
@@ -1187,6 +1187,8 @@ inline bool _swiftMultiFlushBuckets(
 			_resetBucket(*bkt, (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength);
 		}
 	}
+
+	clear(pattern.verifyList);
 
 	finder.curHit = begin(finder.hits, Standard());
 	finder.endHit = end(finder.hits, Standard());
