@@ -546,8 +546,8 @@ writeBackToGlobalStore(
 
 	// Resize first so copying happens at most once and not every for each
 	// block in the worst case
-	resize(target.alignedReadStore, sizeSum, Exact());
-	resize(target.alignQualityStore, sizeSum, Exact());
+	resize(target.alignedReadStore, sizeSum, Generous());
+	resize(target.alignQualityStore, sizeSum, Generous());
 
 	// Append single block stores.
 	for (unsigned i = 0; i < length(blockLocalStorages); ++i) {
@@ -584,8 +584,8 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     }
 
     // Resize the local read stores appropriately.
-	resize(localStore.alignedReadStore, sizeSum, Exact());
-	resize(localStore.alignQualityStore, sizeSum, Exact());
+	resize(localStore.alignedReadStore, sizeSum, Generous());
+	resize(localStore.alignQualityStore, sizeSum, Generous());
 
     // Write back all matches from verification to the block local store.
     for (unsigned i = 0; i < length(jobData.globalState->blockLocalStorages[jobData.blockId].verificationResults.localStores); ++i) {

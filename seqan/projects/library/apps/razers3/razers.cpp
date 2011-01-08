@@ -256,6 +256,7 @@ int main(int argc, const char *argv[])
     timelineAddTaskType("COMPACT", "Compaction");
     timelineAddTaskType("DUMP_MATCHES", "Dump matches.");
     timelineAddTaskType("LOAD", "Load input.");
+    timelineAddTaskType("SORT", "Sorting.");
 #endif  // #ifndef RAZERS_PROFILE
 	
 	RazerSOptions<>			options;

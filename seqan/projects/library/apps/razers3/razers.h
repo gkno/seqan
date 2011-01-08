@@ -52,7 +52,8 @@ enum {
     TASK_WRITEBACK,
     TASK_COMPACT,
     TASK_DUMP_MATCHES,
-    TASK_LOAD
+    TASK_LOAD,
+    TASK_SORT
 };
 #endif  // #ifdef RAZERS_PROFILE
 
@@ -903,7 +904,13 @@ void maskDuplicates(TFragmentStore &store, TRazerSMode)
 	typedef LessRNoGPos<TAlignedReadStore, TLessScore>						TLessBeginPos;
 	typedef LessRNoGEndPos<TAlignedReadStore, TLessScore>					TLessEndPos;
 	
+#ifdef RAZERS_PROFILE
+  timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	sortAlignedReads(store.alignedReadStore, TLessEndPos(TLessScore(store.alignQualityStore)));
+#ifdef RAZERS_PROFILE
+  timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 
 	TContigPos	beginPos = -1;
 	TContigPos	endPos = -1;
@@ -933,7 +940,13 @@ void maskDuplicates(TFragmentStore &store, TRazerSMode)
 	//////////////////////////////////////////////////////////////////////////////
 	// remove matches with equal begins
 
+#ifdef RAZERS_PROFILE
+  timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
+#ifdef RAZERS_PROFILE
+  timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 
 	contigId = TAlignedRead::INVALID_ID;
 	it = begin(store.alignedReadStore, Standard());
@@ -1033,7 +1046,13 @@ void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode const &)
 	__int64 count = 0;
 	__int64 maxVal = MaxValue<TValue>::VALUE;
 
+#ifdef RAZERS_PROFILE
+  timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+#ifdef RAZERS_PROFILE
+  timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 
 	for (; it != itEnd; ++it) 
 	{
@@ -1111,7 +1130,13 @@ void compactMatches(
 	int errorRangeBest = options.errorDistanceRange;// (IsSameType<TScoreMode, RazerSErrors>::VALUE)? options.scoreDistanceRange: 0;
 	int scoreRangeBest = (IsSameType<TAlignMode, RazerSGlobal>::VALUE && !IsSameType<TScoreMode, RazerSScore>::VALUE)? -(int)options.scoreDistanceRange : MaxValue<int>::VALUE;
 
+#ifdef RAZERS_PROFILE
+  timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+#ifdef RAZERS_PROFILE
+  timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 
 	TIterator it = begin(store.alignedReadStore, Standard());
 	TIterator itEnd = end(store.alignedReadStore, Standard());
@@ -1207,7 +1232,13 @@ void compactMatches(
 	
 	unsigned readNo = -1;
 
+#ifdef RAZERS_PROFILE
+  timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+#ifdef RAZERS_PROFILE
+  timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 		
 	TIterator it = begin(store.alignedReadStore, Standard());
 	TIterator itEnd = end(store.alignedReadStore, Standard());
