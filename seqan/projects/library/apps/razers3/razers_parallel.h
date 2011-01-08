@@ -692,8 +692,7 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
         // Enqueue verification jobs, if any.
         if (length(hits) > 0u) {
             String<unsigned> splitters;
-            unsigned packageCount = tls.options.maxVerificationPackageCount * (omp_get_max_threads() - 1);
-            packageCount += packageCount == 0;
+            unsigned packageCount = tls.options.maxVerificationPackageCount;
             computeSplittersBySlotSize(splitters, length(hits), tls.options.verificationPackageSize, packageCount);
 
             // fprintf(stderr, "[%u splitters]", unsigned(length(splitters)));
