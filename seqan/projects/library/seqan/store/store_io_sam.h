@@ -79,7 +79,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			count(c) {}
 
 #if SEQAN_HAS_SAMTOOLS
-        CigarElement(uint32_t bamCigarElement, FromBam const &)
+        CigarElement(__uint32 bamCigarElement, FromBam const &)
         {
             SEQAN_ASSERT_LEQ(bamCigarElement & BAM_CIGAR_MASK, 8u);
             operation = "MIDNSHP=X"[bamCigarElement & BAM_CIGAR_MASK];
@@ -89,7 +89,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 template <typename TOperation, typename TCount>
-uint32_t toBamCigarElement(CigarElement<TOperation, TCount> const & cigarElement)
+__uint32 toBamCigarElement(CigarElement<TOperation, TCount> const & cigarElement)
 {
     char operation = 0;
     switch (cigarElement.operation) {

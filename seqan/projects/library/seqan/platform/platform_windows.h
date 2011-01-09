@@ -51,6 +51,7 @@
 #define finline __forceinline
 
 typedef unsigned __int64 __uint64;
+typedef unsigned __int32 __uint32;
 
 // Workaround for missing round() from C99 in Visual Studio.
 template <typename T>

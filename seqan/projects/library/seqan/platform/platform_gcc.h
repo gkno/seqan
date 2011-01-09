@@ -54,6 +54,9 @@
 typedef int64_t __int64;
 typedef uint64_t __uint64;
 
+// default 32bit type
+typedef int32_t __int32;
+typedef uint32_t __uint32;
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
