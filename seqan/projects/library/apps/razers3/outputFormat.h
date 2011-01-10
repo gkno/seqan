@@ -767,7 +767,7 @@ int dumpMatches(
 					if (no == 0) file << libSize[(*it).pairMatchId];
 					if (no == 1) file << -libSize[(*it).pairMatchId];
 				}
-				file << std::endl;
+				file << '\n';
 
 				if (options.dumpAlignment) 
 				{
@@ -854,9 +854,9 @@ int dumpMatches(
 				file << ",fragId=" << fragId;
 				file << ",contigId=" << store.contigNameStore[(*it).contigId];
 				file << ",errors=" << (unsigned)qual.errors << ",percId=" << std::setprecision(5) << percId;
-				file << ",ambiguity=" << ambig << ']' << std::endl;
+				file << ",ambiguity=" << ambig << ']' << '\n';
 
-				file << store.readSeqStore[(*it).readId] << std::endl;
+				file << store.readSeqStore[(*it).readId] << '\n';
 			}
 			break;
 
@@ -884,12 +884,12 @@ int dumpMatches(
 				if (it == itEnd || readNo < (*it).readId)
 				{
 					if (!empty(store.readSeqStore[readNo]))
-						file << store.readSeqStore[readNo] << _sep_ << "NM" << _sep_ << '0' << _sep_ << '0' << _sep_ << '0' << std::endl;
+						file << store.readSeqStore[readNo] << _sep_ << "NM" << _sep_ << '0' << _sep_ << '0' << _sep_ << '0' << '\n';
 					else
 					{
 						for (unsigned i = 0; i < maxReadLength; ++i)
 							file << '.';
-						file << _sep_ << "QC" << _sep_ << '0' << _sep_ << '0' << _sep_ << '0' << std::endl;
+						file << _sep_ << "QC" << _sep_ << '0' << _sep_ << '0' << _sep_ << '0' << '\n';
 					}
 				} else
 				{
@@ -945,7 +945,7 @@ int dumpMatches(
 									file << _sep_ << i + 1 << gInf[i];
 						}
 					}
-					file << std::endl;
+					file << '\n';
 					++it;
 				}
 			}
@@ -1165,7 +1165,7 @@ int dumpMatches(
 						}
 #endif
 						//std::cout << "hier6\n";
-						file << std::endl;
+						file << '\n';
 						++it;
 					}
 				}
@@ -1218,7 +1218,7 @@ int dumpMatches(
 			file << (double)posError[0] / (double)unique;
 			for (unsigned i = 1; i < length(posError); ++i)
 				file << '\t' << (double)posError[i] / (double)unique;
-			file << std::endl;
+			file << '\n';
 			file.close();
 		} else
 			std::cerr << "Failed to open error distribution file" << std::endl;
