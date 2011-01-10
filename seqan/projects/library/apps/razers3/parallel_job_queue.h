@@ -47,8 +47,8 @@ public:
     }
 };
 
-template <typename TJob, typename TSpec>
-class ThreadLocalStorage;
+// template <typename TJob, typename TSpec>
+// class ThreadLocalStorage;
 
 template <typename TSpec>
 class Job;
@@ -216,110 +216,110 @@ popBack(TJob & job, TaskQueue<TJob, OmpLock> & queue, TPredicate const & predica
 // void
 // setWorking(ThreadLocalStorage<TJob> & tls, bool b);
 
-template <typename TJob, typename TSpec, typename TPredicate, typename TThreadId>
-inline
-bool
-work(ThreadLocalStorage<TJob, TSpec> & tls, TPredicate & predicate, TThreadId threadId)
-{
-    // fprintf(stderr, "Thread %d tries to work...\n", omp_get_thread_num());
-    TJob job;
-    if (!popFront(job, jobQueue(tls), predicate))
-        return false;
-    work(tls, job, threadId, threadId);
-    return true;
-}
+// template <typename TJob, typename TSpec, typename TPredicate, typename TThreadId>
+// inline
+// bool
+// work(ThreadLocalStorage<TJob, TSpec> & tls, TPredicate & predicate, TThreadId threadId)
+// {
+//     // fprintf(stderr, "Thread %d tries to work...\n", omp_get_thread_num());
+//     TJob job;
+//     if (!popFront(job, jobQueue(tls), predicate))
+//         return false;
+//     work(tls, job, threadId, threadId);
+//     return true;
+// }
 
-template <typename TJob, typename TSpec, typename TThreadId>
-inline
-bool
-work(ThreadLocalStorage<TJob, TSpec> & tls, TThreadId threadId)
-{
-    return work(tls, predicateTrue<TJob>, threadId);
-}
+// template <typename TJob, typename TSpec, typename TThreadId>
+// inline
+// bool
+// work(ThreadLocalStorage<TJob, TSpec> & tls, TThreadId threadId)
+// {
+//     return work(tls, predicateTrue<TJob>, threadId);
+// }
 
-template <typename TJob, typename TSpec, typename TPredicate>
-inline
-bool
-stealWork(TJob & job, ThreadLocalStorage<TJob, TSpec> & tls, TPredicate const & predicate)
-{
-    return popBack(job, jobQueue(tls), predicate);
-}
+// template <typename TJob, typename TSpec, typename TPredicate>
+// inline
+// bool
+// stealWork(TJob & job, ThreadLocalStorage<TJob, TSpec> & tls, TPredicate const & predicate)
+// {
+//     return popBack(job, jobQueue(tls), predicate);
+// }
 
-// Load balancing / work stealing algorithm.
+// // Load balancing / work stealing algorithm.
 
-struct StealOne_;
-typedef Tag<StealOne_> StealOne;
+// struct StealOne_;
+// typedef Tag<StealOne_> StealOne;
 
-// Main loop for parallel work stealing with multiple jobs.
-template <typename TJob, typename TSpec, typename TPredicate>
-void workInParallel(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, TPredicate const & predicate, StealOne const &)
-{
-    // Initialization.
-    int maxThreads = omp_get_max_threads();
-    volatile int workingCount = maxThreads;
-    #pragma omp parallel
-    {
-        setWorking(threadLocalStorages[omp_get_thread_num()], true);
-    }
+// // Main loop for parallel work stealing with multiple jobs.
+// template <typename TJob, typename TSpec, typename TPredicate>
+// void workInParallel(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, TPredicate const & predicate, StealOne const &)
+// {
+//     // Initialization.
+//     int maxThreads = omp_get_max_threads();
+//     volatile int workingCount = maxThreads;
+//     #pragma omp parallel
+//     {
+//         setWorking(threadLocalStorages[omp_get_thread_num()], true);
+//     }
 
-    // Work loop.
-    #pragma omp parallel
-    {
-        int p = omp_get_thread_num();
-        unsigned x = 73 * p;  // LCG pseudorandomess :-O
-        while (workingCount > 0) {
-            // Try to steal work if not working.
-            if (!isWorking(threadLocalStorages[p]) && maxThreads > 1) {
-                // Select thread to steal from.
-                x = 1664525 * x + 1013904223;
-                int targetId = x % (maxThreads - 1);
-                targetId += targetId >= p;
+//     // Work loop.
+//     #pragma omp parallel
+//     {
+//         int p = omp_get_thread_num();
+//         unsigned x = 73 * p;  // LCG pseudorandomess :-O
+//         while (workingCount > 0) {
+//             // Try to steal work if not working.
+//             if (!isWorking(threadLocalStorages[p]) && maxThreads > 1) {
+//                 // Select thread to steal from.
+//                 x = 1664525 * x + 1013904223;
+//                 int targetId = x % (maxThreads - 1);
+//                 targetId += targetId >= p;
 
-                // Try to steal a job and process it if successful.
-                TJob stolenJob;
-                if (stealWork(stolenJob, threadLocalStorages[targetId], predicate)) {
-                    //fprintf(stderr, "Thread %d stole from %d\n", p, targetId);
-                    // Stealing was successful, become active again.
-                    #pragma omp atomic
-                    workingCount += 1;
-                    setWorking(threadLocalStorages[p], true);
-                    #pragma omp flush(workingCount)
+//                 // Try to steal a job and process it if successful.
+//                 TJob stolenJob;
+//                 if (stealWork(stolenJob, threadLocalStorages[targetId], predicate)) {
+//                     //fprintf(stderr, "Thread %d stole from %d\n", p, targetId);
+//                     // Stealing was successful, become active again.
+//                     #pragma omp atomic
+//                     workingCount += 1;
+//                     setWorking(threadLocalStorages[p], true);
+//                     #pragma omp flush(workingCount)
 
-                    // fprintf(stderr, "%d could steal\n", p);
-                    work(threadLocalStorages[p], stolenJob, p, targetId);
-                }
-                continue;  // Next iteration.
-            }
+//                     // fprintf(stderr, "%d could steal\n", p);
+//                     work(threadLocalStorages[p], stolenJob, p, targetId);
+//                 }
+//                 continue;  // Next iteration.
+//             }
             
-            bool res = work(threadLocalStorages[p], p);
-            if (!res) {
-                // No more work, could steal some in next
-                // iteration and become active again, though.
-                // fprintf(stderr, "Thread %d is done for now.\n", omp_get_thread_num());
-                #pragma omp atomic
-                workingCount -= 1;
-                setWorking(threadLocalStorages[p], false);
-                #pragma omp flush(workingCount)
-            }
-        }
-    }
+//             bool res = work(threadLocalStorages[p], p);
+//             if (!res) {
+//                 // No more work, could steal some in next
+//                 // iteration and become active again, though.
+//                 // fprintf(stderr, "Thread %d is done for now.\n", omp_get_thread_num());
+//                 #pragma omp atomic
+//                 workingCount -= 1;
+//                 setWorking(threadLocalStorages[p], false);
+//                 #pragma omp flush(workingCount)
+//             }
+//         }
+//     }
 
-    // Sanity check: All queues empty? No thread working?
-    for (int i = 0; i < omp_get_max_threads(); ++i) {
-        if (isWorking(threadLocalStorages[i])) {
-            std::cerr << "ERROR: Thread " << i << " still working!" << std::endl;
-        }
-        if (length(jobQueue(threadLocalStorages[i])) > 0u) {
-            std::cerr << "ERROR: Queue of thread " << i << " not empty!" << std::endl;
-        }
-    }
-}
+//     // Sanity check: All queues empty? No thread working?
+//     for (int i = 0; i < omp_get_max_threads(); ++i) {
+//         if (isWorking(threadLocalStorages[i])) {
+//             std::cerr << "ERROR: Thread " << i << " still working!" << std::endl;
+//         }
+//         if (length(jobQueue(threadLocalStorages[i])) > 0u) {
+//             std::cerr << "ERROR: Queue of thread " << i << " not empty!" << std::endl;
+//         }
+//     }
+// }
 
-template <typename TJob, typename TSpec>
-void workInParallel(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, StealOne const & tag)
-{
-    work(threadLocalStorages, predicateTrue<TJob>, tag);
-}
+// template <typename TJob, typename TSpec>
+// void workInParallel(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, StealOne const & tag)
+// {
+//     work(threadLocalStorages, predicateTrue<TJob>, tag);
+// }
 
 }  // namespace seqan
 

@@ -355,7 +355,6 @@ int main(int argc, const char *argv[])
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
 	addSection(parser, "Parallelism Options:");
 	addOption(parser, CommandLineOption("tc", "thread-count",   "Set the number of threads to use (0 to force sequential mode).", OptionType::Int | OptionType::Label, options.threadCount));
-	addOption(parser, CommandLineOption("psf", "parallel-split-factor",   "Use this many blocks per thread.", OptionType::Int | OptionType::Label, options.splitFactor));
 	addOption(parser, CommandLineOption("pws", "parallel-window-size",   "Collect SWIFT hits in windows of this length.", OptionType::Int | OptionType::Label, options.windowSize));
 	addOption(parser, CommandLineOption("pvs", "parallel-verification-size",   "Verify SWIFT hits in packages of this size.", OptionType::Int | OptionType::Label, options.verificationPackageSize));
 	addOption(parser, CommandLineOption("pvmpc", "parallel-verification-max-package-count",   "Largest number of packages to create for verification per thread-1, go over package size if this limit is reached..", OptionType::Int | OptionType::Label, options.maxVerificationPackageCount));
@@ -401,7 +400,6 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "low-memory", options.lowMemory);
 #endif
     getOptionValueLong(parser, "thread-count", options.threadCount);
-    getOptionValueLong(parser, "parallel-split-factor", options.splitFactor);
     getOptionValueLong(parser, "parallel-window-size", options.windowSize);
     getOptionValueLong(parser, "parallel-verification-size", options.verificationPackageSize);
     getOptionValueLong(parser, "parallel-verification-max-package-count", options.maxVerificationPackageCount);

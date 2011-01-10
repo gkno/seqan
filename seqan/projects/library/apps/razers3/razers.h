@@ -188,7 +188,6 @@ enum {
 	// multi-threading
 
         unsigned    threadCount;  // Number of threads to use in the parallel version.
-        unsigned    splitFactor;  // This many blocks per thread.
         unsigned    windowSize;  // Collect SWIFT hits in windows of this length.
         unsigned    verificationPackageSize;  // This number of SWIFT hits per verification.
         unsigned    maxVerificationPackageCount;  // Maximum number of verification packages to create.
@@ -264,7 +263,6 @@ enum {
 #else  // #ifdef _OPENMP
             threadCount = 1;
 #endif  // #ifdef _OPENMP
-            splitFactor = 1;
             // TODO(holtgrew): Tune this!
             windowSize = 500000;
             verificationPackageSize = 100;
@@ -1115,7 +1113,7 @@ void compactMatches(
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
-    //fprintf(stderr, "[compact]");
+    fprintf(stderr, "[compact]");
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
