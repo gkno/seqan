@@ -40,6 +40,7 @@
 #define finline __inline__
 
 typedef unsigned __int64 __uint64;
+typedef unsigned __int32 __uint32;
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
