@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Fixing problem with MaxValue<>, MinValue<> of RNG with multiple compilation units.
  * Also defining `std::swap` for strings and string sets.
  * Fixing bug in `windowFindNext()`.
  * Setting flags for RelDebug build type correctly for apps.

@@ -91,8 +91,47 @@ class Pdf;
 ///.Metafunction.Value.param.T.type:Class.Rng
 ///.Metafunction.MinValue.param.T.type:Class.Rng
 ///.Metafunction.MaxValue.param.T.type:Class.Rng
-// specification only
+	
+template <typename TSpec>
+struct MaxValue<Rng<TSpec> >
+{
+    typedef typename Value<Rng<TSpec> >::Type TValue_;
+    static const TValue_ VALUE;
+};
+	
+template <typename TSpec>
+const typename Value<Rng<TSpec> >::Type MaxValue<Rng<TSpec> >::VALUE = MaxValue<typename Value<Rng<TSpec> >::Type>::VALUE;
 
+template <typename TSpec>
+struct MaxValue<Rng<TSpec> const>
+{
+	typedef typename Value<Rng<TSpec> const>::Type TValue_;
+	static const TValue_ VALUE;
+};
+
+template <typename TSpec>
+const typename Value<Rng<TSpec> const>::Type MaxValue<Rng<TSpec> const>::VALUE = MaxValue<typename Value<Rng<TSpec> const>::Type>::VALUE;
+
+template <typename TSpec>
+struct MinValue<Rng<TSpec> >
+{
+	typedef typename Value<Rng<TSpec> >::Type TValue_;
+	static const TValue_ VALUE;
+};
+
+template <typename TSpec>
+const typename Value<Rng<TSpec> >::Type MinValue<Rng<TSpec> >::VALUE = MinValue<typename Value<Rng<TSpec> >::Type>::VALUE;
+
+template <typename TSpec>
+struct MinValue<Rng<TSpec> const>
+{
+	typedef typename Value<Rng<TSpec> const>::Type TValue_;
+	static const TValue_ VALUE;
+};
+
+template <typename TSpec>
+const typename Value<Rng<TSpec> const>::Type MinValue<Rng<TSpec> const>::VALUE = MinValue<typename Value<Rng<TSpec> const>::Type>::VALUE;
+	
 // ===========================================================================
 // Functions
 // ===========================================================================

@@ -47,6 +47,7 @@ SEQAN_BEGIN_TESTSUITE(test_random) {
     // Call Tests.
     SEQAN_CALL_TEST(test_random_mt19937_constructors);
     SEQAN_CALL_TEST(test_random_mt19937_pick);
+    SEQAN_CALL_TEST(test_random_mt19937_metafunctions);
 
     SEQAN_CALL_TEST(test_random_rng_functor_constructors);
     SEQAN_CALL_TEST(test_random_rng_functor_pick);

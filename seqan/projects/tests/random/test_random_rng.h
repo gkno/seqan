@@ -66,6 +66,19 @@ SEQAN_DEFINE_TEST(test_random_mt19937_pick)
     SEQAN_ASSERT_NEQ(mt(), mt());
 }
 
+// Test metafunctiosn for mersenne twister RNG.
+SEQAN_DEFINE_TEST(test_random_mt19937_metafunctions)
+{
+	using namespace seqan;
+	
+	typedef Value<Rng<MersenneTwister> >::Type TValue;
+	
+	TValue m = MinValue<Rng<MersenneTwister> >::VALUE;
+	SEQAN_ASSERT_EQ(MinValue<TValue>::VALUE, m);
+	TValue M = MaxValue<Rng<MersenneTwister> >::VALUE;
+	SEQAN_ASSERT_EQ(MaxValue<TValue>::VALUE, M);
+}
+
 // Construct RngFunctor specialization in all possible ways.
 SEQAN_DEFINE_TEST(test_random_rng_functor_constructors)
 {
