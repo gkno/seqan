@@ -29,6 +29,8 @@
 #include "razers.h"
 #include <seqan/align.h>
 
+#include "parallel_store.h"
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -683,19 +685,43 @@ int dumpMatches(
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
 	calculateInsertSizes(libSize, store);
 
-	typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode> TLess;
-	switch (options.sortOrder) {
-		case 0:
-			sortAlignedReads(
-				store.alignedReadStore, 
-				LessRNoGPos<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
-			break;
-		case 1:
-			sortAlignedReads(
-				store.alignedReadStore, 
-				LessGPosRNo<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
-			break;
-	}
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
+    if (options.threadCount > 0) {
+        typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode> TLess;
+        switch (options.sortOrder) {
+            case 0:
+                sortAlignedReads(
+                    store.alignedReadStore, 
+                    LessRNoGPos<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)),
+                    Parallel());
+                break;
+            case 1:
+                sortAlignedReads(
+                    store.alignedReadStore, 
+                    LessGPosRNo<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)),
+                    Parallel());
+                break;
+        }
+    } else {
+        typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode> TLess;
+        switch (options.sortOrder) {
+            case 0:
+                sortAlignedReads(
+                    store.alignedReadStore, 
+                    LessRNoGPos<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
+                break;
+            case 1:
+                sortAlignedReads(
+                    store.alignedReadStore, 
+                    LessGPosRNo<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
+                break;
+        }
+    }
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	
 	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
 	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
