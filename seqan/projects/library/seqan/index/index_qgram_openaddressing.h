@@ -87,15 +87,15 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
     private:
         static const double defaultAlpha;
 	public:
-		typedef typename Fibre<Index, QGramText>::Type			TText;
-		typedef typename Fibre<Index, QGramSA>::Type			TSA;
-		typedef typename Fibre<Index, QGramDir>::Type			TDir;
-		typedef typename Fibre<Index, QGramCounts>::Type		TCounts;
+		typedef typename Fibre<Index, QGramText>::Type		TText;
+		typedef typename Fibre<Index, QGramSA>::Type		TSA;
+		typedef typename Fibre<Index, QGramDir>::Type		TDir;
+		typedef typename Fibre<Index, QGramCounts>::Type	TCounts;
 		typedef typename Fibre<Index, QGramCountsDir>::Type	TCountsDir;
 		typedef typename Fibre<Index, QGramShape>::Type		TShape;
 		typedef typename Fibre<Index, QGramBucketMap>::Type	TBucketMap;
-		typedef typename Cargo<Index>::Type						TCargo;
-		typedef typename Size<Index>::Type						TSize;
+		typedef typename Cargo<Index>::Type					TCargo;
+		typedef typename Size<Index>::Type					TSize;
 
 		Holder<TText>	text;		// underlying text
 		TSA				sa;			// suffix array sorted by the first q chars
@@ -107,7 +107,7 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 		TBucketMap		bucketMap;	// bucketMap table (used by open-addressing index)
 		TSize			stepSize;	// store every <stepSize>'th q-gram in the index
 
-		double			alpha;
+		double			alpha;		// for m entries the hash map has at least size alpha*m
 
 		Index():
 			stepSize(1),
@@ -188,15 +188,18 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 	{
 		typedef unsigned long TSize;
 		// get size of the index
-		TSize hlen = length(bucketMap.qgramHash) - 1;
-		
-		// check whether bucket map is disabled
-		if (hlen == (TSize)-1)
-			return hash;
-		
+
+		// check whether bucket map is disabled and
 		// where the hash should be found if no collision took place before
-		TSize h1 = (TSize)(hash % hlen);
-		
+#ifdef SEQAN_OPENADDRESSING_COMPACT
+		register TSize hlen = length(bucketMap.qgramHash) - 1;
+		if (hlen == (TSize)-1) return hash;		
+		register TSize h1 = (TSize)(hash % hlen);
+#else
+		register TSize hlen = length(bucketMap.qgramHash) - 2;
+		if (hlen == (TSize)-2) return hash;
+		register TSize h1 = (TSize)(hash & hlen);
+#endif
 		// -1 is the undefiend value, hence the method works not for the largest word of length 32
 		// if there is no collision with another hash value
 		// the bucket is still empty
@@ -216,17 +219,20 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 			else 
 			{
 				// TSize step = 1 + (hash % bucketMap.prime);
-				TSize step = (TSize)bucketMap.prime;
+				register TSize step = (TSize)bucketMap.prime;
 				// look 'step' buckets further untill one is free or was requested by this hash earlier
 				do {
+#ifdef SEQAN_OPENADDRESSING_COMPACT
 					h1 = (h1 + step) % hlen;
+#else
+					h1 = (h1 + step) & hlen;
+#endif
 				} while (bucketMap.qgramHash[h1] != (THashValue)-1 && bucketMap.qgramHash[h1] != hash);
 				bucketMap.qgramHash[h1] = hash;
 				return h1;
 			}
 		}
 	}
-
 	
 	// looks up the bucket for the hash
 	// returns the position of the bucket
@@ -236,14 +242,18 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 	{
 		typedef unsigned long TSize;
 		// get size of the index
-		TSize hlen = length(bucketMap.qgramHash) - 1;
-
-		// check whether bucket map is disabled
-		if (hlen == (TSize)-1)
-			return hash;
 		
+		// check whether bucket map is disabled and
 		// where the hash should be found if no collision took place before
-		TSize h1 = hash % hlen;
+#ifdef SEQAN_OPENADDRESSING_COMPACT
+		register TSize hlen = length(bucketMap.qgramHash) - 1;
+		if (hlen == (TSize)-1) return hash;		
+		register TSize h1 = (TSize)(hash % hlen);
+#else
+		register TSize hlen = length(bucketMap.qgramHash) - 2;
+		if (hlen == (TSize)-2) return hash;
+		register TSize h1 = (TSize)(hash & hlen);
+#endif
 		
 		// -1 is the undefiend value, hence the method works not for the largest word of length 32
 		// if there is no collision with another hash value
@@ -263,7 +273,11 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 				TSize step = bucketMap.prime;
 				// look 'step' buckets further untill one is free or was requested by this hash earlier
 				do {
+#ifdef SEQAN_OPENADDRESSING_COMPACT
 					h1 = (h1 + step) % hlen;
+#else
+					h1 = (h1 + step) & hlen;
+#endif
 				} while (bucketMap.qgramHash[h1] != (THashValue)-1 && bucketMap.qgramHash[h1] != hash);
 				return h1;
 			}
@@ -305,6 +319,12 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 		if (num_qgrams * (sizeof(TDirValue) + sizeof(THashValue)) < max_qgrams * sizeof(TDirValue))
 		{
 			qgrams = (__int64)ceil(num_qgrams);
+#ifndef SEQAN_OPENADDRESSING_COMPACT
+			__int64 power2 = 1;
+			while (power2 < qgrams)
+				power2 <<= 1;
+			qgrams = power2;
+#endif
 			resize(const_cast<TIndex &>(index).bucketMap.qgramHash, qgrams + 1, Exact());
 		} else
 		{

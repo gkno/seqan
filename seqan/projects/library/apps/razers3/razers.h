@@ -2172,15 +2172,15 @@ int _mapReads(
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options)
 {
-    // if (options.matchN) {
+    if (options.matchN) {
     //     if (options.gapMode == RAZERS_GAPPED)
     //     {
     //         if (options.alignMode == RAZERS_LOCAL)
     //             return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
     //         if (options.alignMode == RAZERS_PREFIX)
     //             return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
-    //         if (options.alignMode == RAZERS_GLOBAL)
-    //             return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
+             if (options.alignMode == RAZERS_GLOBAL)
+                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
     //     } else {
     //         if (options.alignMode == RAZERS_LOCAL)
     //             return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
@@ -2189,7 +2189,7 @@ int _mapReads(
     //         if (options.alignMode == RAZERS_GLOBAL)
     //             return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
     //     }
-    // } else {
+    } else {
         // if (options.gapMode == RAZERS_GAPPED)
         // {
             // if (options.alignMode == RAZERS_LOCAL)
@@ -2206,7 +2206,7 @@ int _mapReads(
         //     if (options.alignMode == RAZERS_GLOBAL)
         //         return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
         // }
-    // }
+    }
 	return RAZERS_INVALID_OPTIONS;
 }
 

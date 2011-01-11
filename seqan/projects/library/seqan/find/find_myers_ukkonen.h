@@ -1131,7 +1131,7 @@ _patternInit(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & patt
 
 template <typename TFinder, typename TNeedle, typename TSpec, typename THasState, typename THasState2, typename TFindBeginPatternSpec, typename TSize>
 inline bool _findMyersLargePatterns (TFinder & finder, 
-									 Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
+									 Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & pattern,
 									 PatternState_<TNeedle, Myers<TSpec, THasState2, TFindBeginPatternSpec> > & state,
 									 TSize haystack_length) 
 {
@@ -1247,7 +1247,7 @@ template <typename TFinder, typename TNeedle, typename TSpec, typename THasState
 inline bool 
 _findMyersSmallPatterns(
 	TFinder & finder, 
-	Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
+	Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & pattern,
 	PatternState_<TNeedle, Myers<TSpec, THasState2, TFindBeginPatternSpec> > & state,
 	TSize haystack_length) 
 {
@@ -1432,7 +1432,7 @@ inline bool find (TFinder & finder,
 // First two for AlignTextBanded
 template <typename TFinder, typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename THasState, typename TFindBeginPatternSpec>
 inline bool find (TFinder & finder, 
-				  Pattern<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, THasState, TFindBeginPatternSpec> > & pattern,
+				  Pattern<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, THasState, TFindBeginPatternSpec> > const & pattern,
                   PatternState_<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
 {
 SEQAN_CHECKPOINT
@@ -1441,7 +1441,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFinder, typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
 inline bool find (TFinder & finder,
-				  Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
+				  Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & pattern,
 				  PatternState_<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & state)
 {
 SEQAN_CHECKPOINT
@@ -1494,7 +1494,7 @@ inline bool find (TFinder & finder,
 
 template <typename TFinder, typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
 inline bool find (TFinder & finder,
-				  Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
+				  Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & pattern,
 				  PatternState_<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & state,
 				  int const minScore)
 {
