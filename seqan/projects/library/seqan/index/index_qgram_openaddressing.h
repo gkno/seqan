@@ -270,7 +270,7 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 			// another hash is occupying this bucket already
 			else 
 			{
-				TSize step = bucketMap.prime;
+				register TSize step = bucketMap.prime;
 				// look 'step' buckets further untill one is free or was requested by this hash earlier
 				do {
 #ifdef SEQAN_OPENADDRESSING_COMPACT
