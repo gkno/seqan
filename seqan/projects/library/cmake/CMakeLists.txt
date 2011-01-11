@@ -172,6 +172,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   # This is mainly important for 64 bit but does not get into the way
   # on 32 bit either at minimal performance impact.
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer")
+  set(CMAKE_CXX_FLAGS_RELDEBUG "${CMAKE_CXX_FLAGS_RELEASE} -g")# -fno-omit-frame-pointer")
   
   # Pass CXX flags to flags.
   #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_CXX_FLAGS_=\"${CMAKE_CXX_FLAGS}\"")
