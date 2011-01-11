@@ -645,7 +645,7 @@ int dumpMatches(
 		append(fileName, ".result");
 	}
 
-	file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc);
+	file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
 	if (!file.is_open()) {
 		std::cerr << "Failed to open output file" << std::endl;
 		return false;
