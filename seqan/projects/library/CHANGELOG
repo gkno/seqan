@@ -6,6 +6,8 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Slightly optimized assign for strings when source and target are empty.
+ * Slightly optimized `empty()` for strings.
  * Fixing problem with MaxValue<>, MinValue<> of RNG with multiple compilation units.
  * Also defining `std::swap` for strings and string sets.
  * Fixing bug in `windowFindNext()`.
