@@ -8,5 +8,28 @@
    fun:_ZSt8pop_heapIN9__gnu_cxx17__normal_iteratorIPSt4pairImjESt6vectorIS3_SaIS3_EEEESt4lessIS3_EEvT_SB_T0_
    fun:_ZNSt14priority_queueISt4pairImjESt6vectorIS1_SaIS1_EESt4lessIS1_EE3popEv
    fun:_ZN5seqan16topological_sort*
+   ...
+   fun:main
+}
+
+# Suppress "still reachable" memory from libgomp, the library with the runtime
+# for OpenMP in GCC.
+{
+   supp_libgomp_set_num_threads
+   Memcheck:Leak
+   fun:malloc
+   fun:gomp_malloc
+   fun:gomp_new_icv
+   ...
+   fun:main
+}
+{
+   supp_libgomp_team_start
+   Memcheck:Leak
+   fun:malloc
+   fun:gomp_malloc
+   fun:gomp_team_start
+   ...
+   fun:main
 }
 
