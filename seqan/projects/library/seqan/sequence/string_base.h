@@ -263,6 +263,18 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Function.length.param.object.type:Class.String
+	
+template <typename TValue, typename TSpec>
+inline bool
+empty(String<TValue, TSpec> const & me)
+{
+	SEQAN_CHECKPOINT
+	return end(me, Standard()) == begin(me, Standard());
+}
+	
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.clear:
 ..cat:Containers
@@ -851,6 +863,8 @@ struct AssignString_
 		TTarget & target,
 		TSource & source)
 	{
+		if (empty(source) && empty(target))
+			return;  // Do nothing if both source and target are empty.
 		if (!id(source) || !shareResources(target, source))
 		{
 SEQAN_CHECKPOINT
