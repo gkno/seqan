@@ -324,12 +324,12 @@ struct MicroRNA{};
 
 	typedef Dna5String									TGenome;
 	typedef StringSet<TGenome>							TGenomeSet;
-//	typedef Dna5String									TRead;
-	typedef String<Dna5Q>								TRead;
+//	typedef Dna5String									TReadSeq;
+	typedef String<Dna5Q>								TReadSeq;
 /*#ifdef RAZERS_CONCATREADS
-	typedef StringSet<TRead, Owner<ConcatDirect<> > >	TReadSet;
+	typedef StringSet<TReadSeq, Owner<ConcatDirect<> > >	TReadSet;
 #else
-	typedef StringSet<TRead>							TReadSet;
+	typedef StringSet<TReadSeq>							TReadSet;
 #endif
 */
 /*	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
@@ -434,7 +434,8 @@ struct MicroRNA{};
 		typename TRazerSOptions_,
 		typename TRazerSMode_,
 		typename TSwiftPattern_,
-		typename TCounts_
+		typename TCounts_,
+        typename _TPreprocessing	
 	>
 	struct MatchVerifier
 	{
@@ -443,21 +444,30 @@ struct MicroRNA{};
 		typedef TRazerSMode_									TRazerSMode;
 		typedef TSwiftPattern_									TSwiftPattern;
 		typedef TCounts_										TCounts;
-
+        typedef _TPreprocessing                                 TPreprocessing;
+		
         typedef typename TRazerSMode::TMatchNPolicy             TMatchNPolicy;
 		
+		typedef typename TFragmentStore::TReadSeqStore			TReadSeqStore;
+		typedef typename Value<TReadSeqStore>::Type const		TRead;
 		typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
 		typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
 		typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TGenome>::Type					TSize;
 		
+#ifdef RAZERS_BANDED_MYERS
 		typedef PatternState_<TRead, Myers<AlignTextBanded<TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
+#else
+		typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern; 
+		typedef typename PatternState<TMyersPattern>::Type		TPatternState; 
+#endif
 
 		TFragmentStore	*store;
 		TOptions		*options;			// RazerS options
 		TSwiftPattern	*swiftPattern;
 		TCounts			*cnts;
+		TPreprocessing  *preprocessing;
 
 		TAlignedRead	m;
 		TAlignQuality	q;
@@ -656,7 +666,7 @@ bool loadReads(
 //	reserve(store.readNameStore.concat, length(store.readNameStore.concat), Exact());
 
 	typedef Shape<Dna, SimpleShape> TShape;
-	typedef typename SAValue< Index<StringSet<TRead>, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
+	typedef typename SAValue< Index<StringSet<TReadSeq>, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
 	TSAValue sa;
 	sa.i1 = -1;
 	sa.i2 = -1;
@@ -1551,12 +1561,14 @@ matchVerify(
       return false;
 
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
-	//typedef typename Value<TReadSet>::Type					TRead;
+	typedef typename Value<TReadSet>::Type const			TRead;
 	typedef typename Position<TGenomeInfix>::Type			TPosition;
 
 	// find read match end
 	typedef Finder<TGenomeInfix>							TMyersFinder;
 	typedef typename TMatchVerifier::TPatternState			TPatternState;
+    typedef typename TMatchVerifier::TPreprocessing         TPreprocessing; 
+	typedef typename Value<TPreprocessing>::Type			TMyersPattern;
 
 	// find read match begin
     // TODO(holtgrew): Use reverse-search here, as well!
@@ -1566,6 +1578,9 @@ matchVerify(
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>			TMyersPatternRev;
 
 	TMyersFinder myersFinder(inf);
+#ifndef RAZERS_BANDED_MYERS
+    TMyersPattern &myersPattern = (*verifier.preprocessing)[readId]; 
+#endif
 	TPatternState & state = verifier.patternState;
 	
 #ifdef RAZERS_DEBUG
@@ -1582,9 +1597,12 @@ matchVerify(
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
 
 	// find end of best semi-global alignment
-    TRead read(readSet[readId]);  // TODO(holtgrew): Copying unnecessary!
+#ifdef RAZERS_BANDED_MYERS
+    TRead read(readSet[readId]);  // here only infixes (no sequence) is copied
 	while (find(myersFinder, read, state, minScore))
-	// while (find(myersFinder, myersPattern, minScore))
+#else
+    while (find(myersFinder, myersPattern, state, minScore)) 
+#endif
 	{
 		TPosition pos = position(hostIterator(myersFinder));
 		if (lastPos + minDistance < pos)
@@ -1805,7 +1823,8 @@ template <
 	typename TSwiftSpec, 
 	typename TCounts,
 	typename TRazerSOptions,
-	typename TRazerSMode >
+	typename TRazerSMode,
+	typename TPreprocessing>
 void _mapSingleReadsToContig(
 	TFragmentStore							& store,
 	unsigned								  contigId,				// ... and its sequence number
@@ -1813,7 +1832,12 @@ void _mapSingleReadsToContig(
 	TCounts									& cnts,
 	char									  orientation,				// q-gram index of reads
 	TRazerSOptions							& options,
-	TRazerSMode						  const & mode)
+	TRazerSMode						  const & mode,
+#ifdef RAZERS_BANDED_MYERS
+	 TPreprocessing							&)
+#else
+	 TPreprocessing							& preprocessing)
+#endif
 {
 	// FILTRATION
 	typedef typename TFragmentStore::TContigSeq				TContigSeq;
@@ -1826,7 +1850,8 @@ void _mapSingleReadsToContig(
 		TRazerSOptions, 
 		TRazerSMode,
 		TSwiftPattern,
-		TCounts >											TVerifier;
+		TCounts,
+		TPreprocessing>											TVerifier;
 	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	
 	// iterate all genomic sequences
@@ -1843,6 +1868,10 @@ void _mapSingleReadsToContig(
 	TReadSet		&readSet = host(host(swiftPattern));
 	TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
 	TVerifier		verifier(store, options, swiftPattern, cnts);
+
+#ifndef RAZERS_BANDED_MYERS
+	verifier.preprocessing = &preprocessing;
+#endif
 
 	// initialize verifier
 	verifier.onReverseComplement = (orientation == 'R');
@@ -1885,11 +1914,14 @@ int _mapSingleReads(
 	TReadIndex											& readIndex)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
+	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
 	typedef typename If<
 				IsSameType<TGapMode,RazerSGapped>::VALUE,
 				SwiftSemiGlobal,
 				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
 	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >		TSwiftPattern;	// filter
+	
+	typedef typename Value<TReadSeqStore>::Type	const	TRead;
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 	// typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern;	// verifier
 	
@@ -1901,6 +1933,22 @@ int _mapSingleReads(
 
 	// init edit distance verifiers
 	options.compMask[4] = (options.matchN)? 15: 0;
+#ifdef RAZERS_BANDED_MYERS
+	Nothing preprocessing;
+#else
+    String<TMyersPattern> preprocessing;
+	if (options.gapMode == RAZERS_GAPPED) 
+	{
+		unsigned readCount = countSequences(readIndex);
+		resize(preprocessing, readCount, Exact()); 
+		for(unsigned i = 0; i < readCount; ++i) 
+		{ 
+			setHost(preprocessing[i], indexText(readIndex)[i]); 
+			_patternMatchNOfPattern(preprocessing[i], options.matchN); 
+			_patternMatchNOfFinder(preprocessing[i], options.matchN); 
+		} 
+	}
+#endif
 	
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	unsigned readCount = countSequences(readIndex);
@@ -1927,14 +1975,14 @@ int _mapSingleReads(
 		lockContig(store, contigId);
 #ifndef RAZERS_WINDOW
 		if (options.forward)
-			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'F', options, mode);
+			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'F', options, mode, preprocessing);
 		if (options.reverse)
-			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'R', options, mode);
+			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'R', options, mode, preprocessing);
 #else
 		if (options.forward)
-			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'F', options, mode);
+			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'F', options, mode, preprocessing);
 		if (options.reverse)
-			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'R', options, mode);
+			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'R', options, mode, preprocessing);
 #endif
 		unlockAndFreeContig(store, contigId);
 	}

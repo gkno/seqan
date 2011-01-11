@@ -29,6 +29,7 @@
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
+#define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyrö, 2001)
 
 #ifdef _OPENMP
 #include <omp.h>
