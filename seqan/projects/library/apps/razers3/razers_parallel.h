@@ -88,6 +88,7 @@ public:
     // Each thread needs its local options since the compactionThreshold is changed.
     // TODO(holtgrew): Change overall program structure so this is factorized out of the options struct.
     TOptions options;
+    TOptions /*const*/ * globalOptions;
 
     // Each thread has its own SWIFT finder and pattern object.
     TSwiftFinder swiftFinder;
@@ -405,20 +406,27 @@ void _mapSingleReadsParallelToContig(
 
     #pragma omp parallel
     {
-#ifdef RAZERS_PROFILE
-        timelineBeginTask(TASK_FILTER);
-#endif  // #ifdef RAZERS_PROFILE
         unsigned windowsDone = 0;
 
         // Initialization.
         TThreadLocalStorage & tls = threadLocalStorages[omp_get_thread_num()];
         tls.swiftFinder = TSwiftFinder(store.contigStore[contigId].seq, tls.options.repeatLength, 1);
+#ifdef RAZERS_PROFILE
+        timelineBeginTask(TASK_FILTER);
+#endif  // #ifdef RAZERS_PROFILE
         if (!windowFindBegin(tls.swiftFinder, tls.swiftPattern, tls.options.errorRate))
             std::cerr << "ERROR: windowFindBegin() failed in thread " << tls.threadId << std::endl;
+#ifdef RAZERS_PROFILE
+        timelineEndTask(TASK_FILTER);
+#endif  // #ifdef RAZERS_PROFILE
 
         // For each filtration window...
         bool hasMore = false;
         do {
+#ifdef RAZERS_PROFILE
+            timelineBeginTask(TASK_FILTER);
+#endif  // #ifdef RAZERS_PROFILE
+            fprintf(stderr, "[filter]");
             hasMore = windowFindNext(tls.swiftFinder, tls.swiftPattern, tls.options.windowSize);
 
             windowsDone += 1;  // Local windows done count.
@@ -452,9 +460,12 @@ void _mapSingleReadsParallelToContig(
                 String<TVerificationJob> jobs;
                 reserve(jobs, length(splitters) - 1);
                 for (unsigned i = 1; i < length(splitters); ++i)
-                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, hitsPtr, splitters[i - 1], splitters[i], tls.options, tls.swiftPattern));
+                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, hitsPtr, splitters[i - 1], splitters[i], *tls.globalOptions, tls.swiftPattern));
                 pushFront(taskQueue, jobs);
             }
+#ifdef RAZERS_PROFILE
+        timelineEndTask(TASK_FILTER);
+#endif  // #ifdef RAZERS_PROFILE
 
             // Perform verification as long as we are a leader and there are filtration jobs to perform.
             #pragma omp flush(leaderWindowsDone)
@@ -462,6 +473,7 @@ void _mapSingleReadsParallelToContig(
                 TVerificationJob job;
                 if (!popFront(job, taskQueue))
                     break;
+                fprintf(stderr, "[verify]");
                 workVerification(tls, job, splitters);
                 #pragma omp flush(leaderWindowsDone)
             }
@@ -480,10 +492,6 @@ void _mapSingleReadsParallelToContig(
 
         // Finalization
         windowFindEnd(tls.swiftFinder, tls.swiftPattern);
-
-#ifdef RAZERS_PROFILE
-        timelineEndTask(TASK_FILTER);
-#endif  // #ifdef RAZERS_PROFILE
 
         #pragma omp atomic
         threadsFiltering -= 1;
@@ -516,7 +524,7 @@ void initializeThreadLocalStorages(TThreadLocalStorages & threadLocalStorages,
                                    TFragmentStore /*const*/ & store,
                                    TSplitters const & splitters,
                                    TShape /*const*/ & shape,
-                                   TOptions const & options)
+                                   TOptions /*const*/ & options)
 {
     SEQAN_ASSERT_GT(length(splitters), 1u);
     int threadCount = length(splitters) - 1;
@@ -535,6 +543,7 @@ void initializeThreadLocalStorages(TThreadLocalStorages & threadLocalStorages,
         tls.globalStore = & store;
         tls.shape = shape;
         tls.options = options;  // TODO(holtgrew): Copy for stats and threshold, really good?
+        tls.globalOptions = &options;
         tls.splitters = splitters;
 
         // Clear pattern and set parameters.
