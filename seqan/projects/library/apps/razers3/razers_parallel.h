@@ -299,6 +299,14 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder,
 #endif  // #ifdef RAZERS_PROFILE
 }
 
+template <typename TFragmentStore>
+void clearLocalStores(String<TFragmentStore *> & localStores)
+{
+  for (unsigned i = 0; i < length(localStores); ++i)
+    delete localStores[i];
+  clear(localStores);
+}
+
 // Create thread local storages for each thread, fill with filtration
 // jobs and fire up using the queue system.
 template <
@@ -463,6 +471,7 @@ void _mapSingleReadsParallelToContig(
             omp_unset_lock(&tls.verificationResults.lock->lock_);
             // Write back the contents of these stores to the thread-local store.
             writeBackToLocal(tls, localStores);
+            clearLocalStores(localStores);
         } while (hasMore);
 
         // Finalization
@@ -486,6 +495,7 @@ void _mapSingleReadsParallelToContig(
         // After every thread is done with everything, write back once more.
         #pragma omp barrier
         writeBackToLocal(tls, tls.verificationResults.localStores);
+        clearLocalStores(tls.verificationResults.localStores);
     }
 
     // NOTE: We never undo the reverse-complementing!
@@ -537,8 +547,8 @@ void initializeThreadLocalStorages(TThreadLocalStorages & threadLocalStorages,
         TPosition jEnd = splitters[i + 1];
         for (TPosition j = jBegin; j < jEnd; ++j)
             appendValue(indexText(index), store.readSeqStore[j]);
-        unsigned x = length(indexText(index));
-        fprintf(stderr, "Index #%d has %u entries.\n", i, x);
+        //unsigned x = length(indexText(index));
+        //fprintf(stderr, "Index #%d has %u entries.\n", i, x);
         index.shape = shape;
 
 #ifdef RAZERS_OPENADDRESSING
@@ -580,6 +590,7 @@ writeBackToGlobalStore(
 	resize(target.alignQualityStore, sizeSum, Exact());
 
 	// Append single block stores.
+	// TODO(holtgrew): Do in parallel!
 	for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
 		for (unsigned j = 0; j < length(threadLocalStorages[i].store.alignedReadStore); ++j) {
 			move(target.alignedReadStore[oldSize], threadLocalStorages[i].store.alignedReadStore[j]);
@@ -642,9 +653,6 @@ int _mapSingleReadsParallel(
 	options.countVerification = 0;
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
-    // Save compaction threshold.
-    int oldThreshold = options.compactThresh;
-    options.compactThresh = MaxValue<unsigned>::VALUE;
 
     // -----------------------------------------------------------------------
     // Initialize thread local storages.
@@ -653,6 +661,10 @@ int _mapSingleReadsParallel(
     computeSplittersBySlotCount(splitters, length(store.readNameStore), options.threadCount);
     String<TThreadLocalStorage> threadLocalStorages;
     initializeThreadLocalStorages(threadLocalStorages, store, splitters, shape, options);
+
+    // Save compaction threshold and set global threshold to infinity, so matchVerify does not compact!
+    int oldThreshold = options.compactThresh;
+    options.compactThresh = MaxValue<unsigned>::VALUE;
 
 #ifdef RAZERS_PROFILE
     double endInit = sysTime();
