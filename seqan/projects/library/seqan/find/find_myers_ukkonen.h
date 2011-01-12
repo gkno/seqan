@@ -984,7 +984,7 @@ _patternInitSmallStateBanded(
     register TWord VP = -1;
     register TWord VN = 0;
     register unsigned errors = 0;
-    register unsigned cutOff = state.maxErrors + (length(container(finder)) - length(needle));
+    register unsigned const cutOff = state.maxErrors + (length(container(finder)) - length(needle));
 
 //    std::cerr<<std::hex<<"\t  "<<std::setw(17)<<' '<<"\tVN"<<std::setw(17)<<VN<<"\tVP"<<std::setw(17)<<VP<<std::dec<<std::endl;
 
@@ -1077,8 +1077,7 @@ SEQAN_CHECKPOINT
 //		diagWidth = length() - 1;
 	unsigned blockCount = diagWidth / state.MACHINE_WORD_SIZE + 1;
 
-    SEQAN_ASSERT_GT(length(container(finder)), 0u);
-	state.errors = 0;
+    SEQAN_ASSERT_GEQ(length(container(finder)), length(needle));
     
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
     clear(state.DPMat);
@@ -1109,6 +1108,9 @@ SEQAN_CHECKPOINT
 
 		clear(largeState.VN);
 		resize(largeState.VN, blockCount, 0, Exact());
+        
+        state.errors = 0;
+        
         return true;
 	}
 }
@@ -1320,6 +1322,7 @@ SEQAN_CHECKPOINT
     register TWord VN = state.VN0;
     register TWord errors = state.errors;
     register TWord const maxErrors = state.maxErrors;
+	register unsigned short const shift = length(needle);
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
     unsigned col = position(finder) + 1;
@@ -1330,7 +1333,6 @@ SEQAN_CHECKPOINT
 		// PART 2: go right
 
 		// normal Myers
-		const unsigned short shift = length(needle);
 		register TWord X = _myersGetBitmask(state, ordValue(*finder), shift, typename MyersSmallAlphabet_<TValue>::Type()) | VN;
 		register TWord D0 = ((VP + (X & VP)) ^ VP) | X;
 		register TWord HN = VP & D0;
@@ -1406,7 +1408,10 @@ inline bool find (TFinder & finder,
 	{
 		_finderSetNonEmpty(finder);
 		if (!_stateInit(finder, needle, state))
+        {
             goEnd(finder);
+            return false;
+        }
             
         if (state.errors <= state.maxErrors)
         {
