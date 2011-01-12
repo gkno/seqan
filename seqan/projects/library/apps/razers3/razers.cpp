@@ -23,7 +23,6 @@
 //#define SEQAN_DEBUG_SWIFT				// test SWIFT correctness and print bucket parameters
 //#define RAZERS_DEBUG					// print verification regions
 #define RAZERS_PRUNE_QGRAM_INDEX		// ignore highly abundant q-grams
-#define RAZERS_CONCATREADS				// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
@@ -78,6 +77,25 @@
 using namespace std;
 using namespace seqan;
 
+struct MyFragStoreConfig 
+{
+	typedef String<Dna5>	TReadSeq;
+	typedef String<Dna5>	TContigSeq;
+	
+	typedef double			TMean;
+	typedef double			TStd;
+	typedef signed char		TMappingQuality;
+		
+	typedef void					TReadStoreElementSpec;
+	typedef Owner<ConcatDirect<> >	TReadSeqStoreSpec;
+	typedef void					TMatePairStoreElementSpec;
+	typedef void					TLibraryStoreElementSpec;
+	typedef void					TContigStoreElementSpec;
+	typedef void					TContigFileSpec;
+	typedef void					TAlignedReadStoreElementSpec;
+	typedef Owner<ConcatDirect<> >	TAlignedReadTagStoreSpec;
+	typedef void					TAnnotationStoreElementSpec;
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // Main read mapper function
@@ -88,8 +106,8 @@ int mapReads(
 	CharString & errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
-	FragmentStore<>			store;			// stores all of the tables
-	MultiFasta				genomeSet;
+	FragmentStore<MyFragStoreConfig>    store;			// stores all of the tables
+	MultiFasta                          genomeSet;
 	String<String<unsigned short> > 	stats;		// needed for mapping quality calculation 
 
 	// dump configuration in verbose mode

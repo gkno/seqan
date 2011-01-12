@@ -287,30 +287,7 @@ struct MicroRNA{};
 	
 //////////////////////////////////////////////////////////////////////////////
 // Typedefs
-/*
-	// definition of a Read match
-	template <typename TGPos_>
-	struct ReadMatch 
-	{
-		typedef typename MakeSigned_<TGPos_>::Type TGPos;
 
-		unsigned		gseqNo;			// genome seqNo
-		unsigned		rseqNo;			// read seqNo
-		TGPos			beginPos;			// begin position of the match in the genome
-		TGPos			gEnd;			// end position of the match in the genome
-#ifdef RAZERS_MATEPAIRS
-		unsigned		pairId;			// unique id for the two mate-pair matches (0 if unpaired)
-		int				mateDelta:24;	// outer coordinate delta to the other mate 
-		int				pairScore:8;	// combined score of both mates
-#endif
-		unsigned short	editDist;		// Levenshtein distance
-#ifdef RAZERS_EXTENDED_MATCH
-		short	 		mScore;
-		short			seedEditDist;
-#endif
-		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
-	};
-*/	
 	enum RAZERS_ERROR 
 	{
 		RAZERS_INVALID_OPTIONS = -1,
@@ -321,20 +298,6 @@ struct MicroRNA{};
 
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
-
-	typedef Dna5String									TGenome;
-	typedef StringSet<TGenome>							TGenomeSet;
-//	typedef Dna5String									TReadSeq;
-	typedef String<Dna5Q>								TReadSeq;
-/*#ifdef RAZERS_CONCATREADS
-	typedef StringSet<TReadSeq, Owner<ConcatDirect<> > >	TReadSet;
-#else
-	typedef StringSet<TReadSeq>							TReadSet;
-#endif
-*/
-/*	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
-	typedef String<TMatch>								TMatches;	// array of matches
-*/
 
 	template <typename TReadSet, typename TShape, typename TSpec>
 	struct Cargo< Index<TReadSet, IndexQGram<TShape, TSpec> > > {
@@ -452,9 +415,10 @@ struct MicroRNA{};
 		typedef typename Value<TReadSeqStore>::Type const		TRead;
 		typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
 		typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
+		typedef typename TFragmentStore::TContigSeq             TContigSeq;
 		typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
-		typedef typename Size<TGenome>::Type					TSize;
+		typedef typename Size<TContigSeq>::Type					TSize;
 		
 #ifdef RAZERS_BANDED_MYERS
 		typedef PatternState_<TRead, Myers<AlignTextBanded<TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
@@ -666,7 +630,7 @@ bool loadReads(
 //	reserve(store.readNameStore.concat, length(store.readNameStore.concat), Exact());
 
 	typedef Shape<Dna, SimpleShape> TShape;
-	typedef typename SAValue< Index<StringSet<TReadSeq>, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
+	typedef typename SAValue< Index<StringSet<Dna5String>, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
 	TSAValue sa(0, 0);
 	sa.i1 = ~sa.i1;
 	sa.i2 = ~sa.i2;
