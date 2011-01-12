@@ -1,11 +1,14 @@
 cmake_minimum_required (VERSION 2.6)
 project (Seqan_Tests)
 
+# Some tests need OpenMP.
+find_package (OpenMP QUIET)
+
 ################################################################################
 # For the tests, we switch SeqAn into testing mode.
 ################################################################################
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SAMTOOLS_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} ${SAMTOOLS_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
 # Also enable flags for coverage analysis.
 if (MODEL STREQUAL "NightlyCoverage")
   if (CMAKE_COMPILER_IS_GNUCXX)
