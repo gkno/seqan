@@ -419,12 +419,16 @@ struct MicroRNA{};
 		typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TContigSeq>::Type					TSize;
+		typedef ModifiedString<TRead, ModReverse>				TRevRead;
 		
 #ifdef RAZERS_BANDED_MYERS
-		typedef PatternState_<TRead, Myers<AlignTextBanded<TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
+		typedef PatternState_<TRead,	Myers<AlignTextBanded<FindInfix, TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
+		typedef PatternState_<TRevRead, Myers<AlignTextBanded<FindPrefix, TMatchNPolicy, TMatchNPolicy>, True, void> > TRPatternState;
 #else  // #ifdef RAZERS_BANDED_MYERS
-		typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern; 
-		typedef typename PatternState<TMyersPattern>::Type		TPatternState; 
+		typedef Pattern<TRead, Myers<FindInfix, False, void> >		TMyersPattern; 
+		typedef Pattern<TRevRead, Myers<FindInfix, False, void> >	TRevMyersPattern; 
+		typedef typename PatternState<TMyersPattern>::Type			TPatternState;
+		typedef typename PatternState<TRevMyersPattern>::Type		TRPatternState;
 #endif  // #ifdef RAZERS_BANDED_MYERS
 
 		TFragmentStore	*store;
@@ -439,6 +443,7 @@ struct MicroRNA{};
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
 		TPatternState	patternState;
+		TRPatternState  revPatternState;
 
         double compactionTime;
 		
@@ -450,7 +455,6 @@ struct MicroRNA{};
 			swiftPattern(&_swiftPattern),
 			cnts(&_cnts),
             compactionTime(0)
-			// , patternState()
 		{
 			onReverseComplement = false;
 			genomeLength = 0;
@@ -1596,11 +1600,15 @@ matchVerify(
 					
 					TReadRev			readRev(readSet[readId]);
 					TMyersFinderRev		myersFinderRev(infRev);
+#ifdef RAZERS_BANDED_MYERS
+					while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore))
+#else
 					TMyersPatternRev	myersPatternRev(readRev);
 
 					_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
 					_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
 					while (find(myersFinderRev, myersPatternRev, maxScore))
+#endif
 						verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 
 					setBeginPosition(inf, infBeginPos);
