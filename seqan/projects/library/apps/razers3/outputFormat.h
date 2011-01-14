@@ -747,6 +747,7 @@ int dumpMatches(
 				{
 					// 0..filename is the read's Fasta id
 					case 0:
+					case 3:  // same as 0 if non-paired
 						file << store.readNameStore[(*it).readId];
 						break;
 
@@ -897,6 +898,7 @@ int dumpMatches(
 				{
 					// 0..filename is the read's Fasta id
 					case 0:
+					case 3:  // same as 0 if non-paired
 						file << '>' << store.readNameStore[readNo] << _sep_;
 						break;
 

@@ -36,7 +36,7 @@
 #endif  // #ifdef RAZERS_PROFILE
 
 // No parallelism for less than MIN_PARALLEL_WORK reads.
-const unsigned MIN_PARALLEL_WORK = 100/*0*/;
+const unsigned MIN_PARALLEL_WORK = 100/*0*/; // TODO(holtgrew): Set to some useful value after development.
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -131,9 +131,11 @@ enum {
 		bool		dumpAlignment;		// compute and dump the match alignments in the result files
 		unsigned	genomeNaming;		// 0..use Fasta id
 										// 1..enumerate reads beginning with 1
+        // TODO(holtgrew): SAM export should imply --read-naming 3
 		unsigned	readNaming;			// 0..use Fasta id
 										// 1..enumerate reads beginning with 1
 										// 2..use the read sequence (only for short reads!)
+										// 3..use Fasta id, do not append /L and /R for mate pairs.
 		unsigned	sortOrder;			// 0..sort keys: 1. read number, 2. genome position
 										// 1..           1. genome pos50ition, 2. read number
 		unsigned	positionFormat;		// 0..gap space
@@ -585,7 +587,7 @@ bool loadReads(
 	unsigned maxReadLength = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
-		if (options.readNaming == 0
+		if (options.readNaming == 0 || options.readNaming == 3
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 			|| options.fastaIdQual
 #endif
@@ -597,7 +599,7 @@ bool loadReads(
 		if(options.fastaIdQual)
 		{
 			qual = suffix(id, length(id) - length(seq));
-			if (options.readNaming == 0)
+			if (options.readNaming == 0 || options.readNaming == 3)
 				id = prefix(id,length(id) - length(seq));
 			else 
 				clear(id);
@@ -2082,8 +2084,7 @@ int _mapReads(
         // Parallel RazerS
         #ifdef RAZERS_MATEPAIRS
         if (options.libraryLength >= 0)
-            // TODO(holtgrew): Parallelize mate pair mapping.
-            return _mapMatePairReads(store, cnts, options, shape, mode);
+            return _mapMatePairReadsParallel(store, cnts, options, shape, mode);
         else
         #endif  // #ifndef RAZERS_MATEPAIRS
             return _mapSingleReadsParallel(store, cnts, options, shape, mode);

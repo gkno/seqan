@@ -144,12 +144,15 @@ bool loadReads(
 	unsigned maxReadLength = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
-		if (options.readNaming == 0)
+		if (options.readNaming == 0 || options.readNaming == 3)
 		{
 			assignSeqId(id[0], leftMates[i], formatL);				// read left Fasta id
 			assignSeqId(id[1], rightMates[i], formatR);				// read right Fasta id
-			append(id[0], "/L");
-			append(id[1], "/R");
+			if (options.readNaming == 0)
+			{
+				append(id[0], "/L");
+				append(id[1], "/R");
+			}
 		}
 		
 		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence
@@ -782,12 +785,12 @@ int _mapMatePairReads(
 	swiftPatternL.params.printDots = false; // only one should print the dots
 	swiftPatternR.params.printDots = options._debugLevel > 0;
 
+    // Verifier preprocessing.
 #ifdef RAZERS_BANDED_MYERS
 	typedef Nothing TPreprocessing;
 	TPreprocessing forwardPatternsL;
 	TPreprocessing forwardPatternsR;
 #else  // #ifdef RAZERS_BANDED_MYERS
-	// init edit distance verifiers
     typedef String<TMyersPattern> TPreprocessing;
 	TPreprocessing forwardPatternsL;
 	TPreprocessing forwardPatternsR;
@@ -814,6 +817,8 @@ int _mapMatePairReads(
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
 	
+	options.timeDumpResults = 0;
+	SEQAN_PROTIMESTART(find_time);
 	
 	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId) {
 		// lock to prevent releasing and loading the same contig twice
@@ -829,6 +834,7 @@ int _mapMatePairReads(
 		unlockAndFreeContig(store, contigId);
 	}
 
+	options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
@@ -837,6 +843,7 @@ int _mapMatePairReads(
 		::std::cerr << "Filtration counter:  " << options.countFiltration << ::std::endl;
 		::std::cerr << "Verfication counter: " << options.countVerification << ::std::endl;
 	}
+
 	return 0;
 }
 
