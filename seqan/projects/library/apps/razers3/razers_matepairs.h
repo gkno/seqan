@@ -773,9 +773,15 @@ int _mapMatePairReads(
 	swiftPatternL.params.printDots = false; // only one should print the dots
 	swiftPatternR.params.printDots = options._debugLevel > 0;
 
+#ifdef RAZERS_BANDED_MYERS
+	typedef Nothing TPreprocessing;
+	TPreprocessing forwardPatternsL;
+	TPreprocessing forwardPatternsR;
+#else  // #ifdef RAZERS_BANDED_MYERS
 	// init edit distance verifiers
-	String<TMyersPattern> forwardPatternsL;
-	String<TMyersPattern> forwardPatternsR;
+    typedef String<TMyersPattern> TPreprocessing;
+	TPreprocessing forwardPatternsL;
+	TPreprocessing forwardPatternsR;
 	options.compMask[4] = (options.matchN)? 15: 0;
 	if (options.gapMode == RAZERS_GAPPED)
 	{
@@ -791,6 +797,7 @@ int _mapMatePairReads(
 			_patternMatchNOfFinder(forwardPatternsR[i], options.matchN);
 		}
 	}
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	// clear stats
 	options.countFiltration = 0;
