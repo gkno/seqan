@@ -34,11 +34,9 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
 
-typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
-
 #ifdef RAZERS_MEMOPT
 
-	template <typename TShape>
+    template <typename TMPReadSet, typename TShape>
 	struct SAValue< Index<TMPReadSet, IndexQGram<TShape> > > {
 		typedef Pair<
 			unsigned,				
@@ -49,7 +47,7 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 	
 #else
 
-	template <typename TShape>
+	template <typename TMPReadSet, typename TShape>
 	struct SAValue< Index<TMPReadSet, IndexQGram<TShape> > > {
 		typedef Pair<
 			unsigned,			// many reads
@@ -61,19 +59,19 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 #endif
 
 	
-template <typename TShape, typename TSpec>
-struct Cargo< Index<TMPReadSet, IndexQGram<TShape, TSpec> > > {
-	typedef struct {
-		double		abundanceCut;
-		int			_debugLevel;
-	} Type;
-};
+// template <typename TMPReadSet, typename TShape, typename TSpec>
+// struct Cargo< Index<TMPReadSet, IndexQGram<TShape, TSpec> > > {
+// 	typedef struct {
+// 		double		abundanceCut;
+// 		int			_debugLevel;
+// 	} Type;
+// };
 
 #ifdef RAZERS_PRUNE_QGRAM_INDEX
 
 //////////////////////////////////////////////////////////////////////////////
 // Repeat masker
-template <typename TShape>
+template <typename TMPReadSet, typename TShape>
 inline bool _qgramDisableBuckets(Index<TMPReadSet, IndexQGram<TShape> > &index) 
 {
 	typedef Index<TMPReadSet, IndexQGram<TShape>	>	TReadIndex;
@@ -199,10 +197,10 @@ bool loadReads(
 //	reserve(store.readNameStore.concat, length(store.readNameStore.concat), Exact());
 
 	typedef Shape<Dna, SimpleShape> TShape;
-	typedef typename SAValue< Index<TMPReadSet, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
-	TSAValue sa;
-	sa.i1 = -1;
-	sa.i2 = -1;
+	typedef typename SAValue< Index<StringSet<Dna5String>, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
+	TSAValue sa(0, 0);
+	sa.i1 = ~sa.i1;
+	sa.i2 = ~sa.i2;
 	
 	if ((unsigned)sa.i1 < length(store.readSeqStore) - 1)
 	{
@@ -373,12 +371,17 @@ void _mapMatePairReads(
 	unsigned								  contigId,				// ... and its sequence number
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternL,
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternR,
+#ifdef RAZERS_BANDED_MYERS
+	TPreprocessing							&,
+	TPreprocessing							&,
+#else  // #ifdef RAZERS_BANDED_MYERS
 	TPreprocessing							& preprocessingL,
 	TPreprocessing							& preprocessingR,
+#endif  // #ifdef RAZERS_BANDED_MYERS
 	TCounts									& cnts,
 	char									  orientation,			// q-gram index of reads
 	TRazerSOptions							& options,
-	TRazerSMode								& mode)
+	TRazerSMode						  const & mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TMatePairStore			TMatePairStore;
@@ -411,9 +414,9 @@ void _mapMatePairReads(
 		TFragmentStore, 
 		TRazerSOptions, 
 		TRazerSMode, 
-		TPreprocessing, 
 		TSwiftPattern,
-		TCounts >											TVerifier;
+		TCounts,
+        TPreprocessing>											TVerifier;
 
 	const unsigned NOT_VERIFIED = 1u << (8*sizeof(unsigned)-1);
 
@@ -433,8 +436,13 @@ void _mapMatePairReads(
 
 	TReadSet	&readSetL = host(host(swiftPatternL));
 	TReadSet	&readSetR = host(host(swiftPatternR));
-	TVerifier	verifierL(store, options, preprocessingL, swiftPatternL, cnts);
-	TVerifier	verifierR(store, options, preprocessingR, swiftPatternR, cnts);
+	TVerifier	verifierL(store, options, swiftPatternL, cnts);
+	TVerifier	verifierR(store, options, swiftPatternR, cnts);
+
+#ifndef RAZERS_BANDED_MYERS
+	verifierL.preprocessing = &preprocessingL;
+	verifierR.preprocessing = &preprocessingR;
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	verifierL.oneMatchPerBucket = true;
 	verifierR.oneMatchPerBucket = true;
@@ -708,13 +716,14 @@ template <
 	typename TShape,
 	typename TAlignMode,
 	typename TGapMode,
-	typename TScoreMode >
+	typename TScoreMode,
+    typename TMatchNPolicy>
 int _mapMatePairReads(
 	FragmentStore<TFSSpec, TFSConfig>					& store,
 	TCounts												& cnts,
 	RazerSOptions<TSpec>								& options,
 	TShape const										& shape,
-	RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode)
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy>  const & mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;

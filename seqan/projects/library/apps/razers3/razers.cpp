@@ -41,7 +41,7 @@
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
-//#define RAZERS_MATEPAIRS				// enable paired-end matching
+#define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
