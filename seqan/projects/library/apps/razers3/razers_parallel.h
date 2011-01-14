@@ -5,6 +5,8 @@
 
 #include <tr1/memory>
 
+#include <seqan/parallel.h>
+
 #include "parallel_misc.h"
 #include "parallel_job_queue.h"
 
@@ -273,8 +275,8 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder,
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
         typename Size<TAlignedReadStore>::Type oldSize = length(tls.store.alignedReadStore);
 
-        if (tls.threadId == 0u && tls.options._debugLevel >= 3)
-            fprintf(stderr, "[compact]");
+        // if (tls.threadId == 0u && tls.options._debugLevel >= 3)
+        //     fprintf(stderr, "[compact]");
         if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
           maskDuplicates(tls.store, TRazerSMode());  // overlapping parallelograms cause duplicates
 
@@ -426,22 +428,11 @@ void _mapSingleReadsParallelToContig(
 #ifdef RAZERS_PROFILE
             timelineBeginTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
-            fprintf(stderr, "[filter]");
+            // fprintf(stderr, "[filter]");
             hasMore = windowFindNext(tls.swiftFinder, tls.swiftPattern, tls.options.windowSize);
 
             windowsDone += 1;  // Local windows done count.
-            // Update global window count for leaders, basically this is a
-            // leaderWindowsDone "windowsDone = max(windowsDone, leaderWindowsDone)".
-            {
-                #pragma omp flush(leaderWindowsDone)
-                unsigned unsafeDone = leaderWindowsDone;
-                while (unsafeDone < windowsDone) {
-                    // TODO(holtgrew): GCC intrinsic is non-portable.
-                    __sync_val_compare_and_swap(&leaderWindowsDone, unsafeDone, windowsDone);
-                    unsafeDone = leaderWindowsDone;
-                    #pragma omp flush(leaderWindowsDone)
-                }
-            }
+            atomicMax(leaderWindowsDone, windowsDone);
 
             std::tr1::shared_ptr<THitString> hitsPtr(new THitString());
             std::swap(*hitsPtr, getSwiftHits(tls.swiftFinder));
@@ -464,7 +455,7 @@ void _mapSingleReadsParallelToContig(
                 pushFront(taskQueue, jobs);
             }
 #ifdef RAZERS_PROFILE
-        timelineEndTask(TASK_FILTER);
+            timelineEndTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
 
             // Perform verification as long as we are a leader and there are filtration jobs to perform.
@@ -473,7 +464,7 @@ void _mapSingleReadsParallelToContig(
                 TVerificationJob job;
                 if (!popFront(job, taskQueue))
                     break;
-                fprintf(stderr, "[verify]");
+                // fprintf(stderr, "[verify]");
                 workVerification(tls, job, splitters);
                 #pragma omp flush(leaderWindowsDone)
             }
