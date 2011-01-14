@@ -236,21 +236,33 @@ int mapReads(
 
 inline void whichMacros(){
 #ifdef RAZERS_OPENADDRESSING
-	std::cerr << "Index:   Open addressing" << std::endl;
+	std::cerr << "Index:    Open addressing" << std::endl;
 #else
-	std::cerr << "Index:   Normal" << std::endl;
+	std::cerr << "Index:    Normal" << std::endl;
 #endif
 	
 #ifdef RAZERS_TIMER
-	std::cerr << "Timer:   ON" << std::endl;
+	std::cerr << "Timer:    ON" << std::endl;
 #else
-	std::cerr << "Timer:   OFF" << std::endl;
+	std::cerr << "Timer:    OFF" << std::endl;
 #endif
 
 #ifdef _OPENMP
-	std::cerr << "OpenMP:  ON" << std::endl;
+	std::cerr << "OpenMP:   ON" << std::endl;
 #else
-	std::cerr << "OpenMP:  OFF" << std::endl;
+	std::cerr << "OpenMP:   OFF" << std::endl;
+#endif
+
+#ifdef RAZERS_BANDED_MYERS
+	std::cerr << "Myers:    Banded" << std::endl;
+#else
+	std::cerr << "Myers:    Unbanded" << std::endl;
+#endif
+
+#ifdef RAZERS_PROFILE
+	std::cerr << "Timeline: ON" << std::endl;
+#else
+	std::cerr << "Timeline: OFF" << std::endl;
 #endif
 	
 	std::cerr << std::endl;
