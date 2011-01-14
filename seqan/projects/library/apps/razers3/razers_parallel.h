@@ -38,32 +38,35 @@ public:
 // Put into its own class so it can be locked independently of other class
 // members.
 template <typename TFragmentStore>
-class VerificationResults
+class SingleVerificationResults
 {
 public:
     String<TFragmentStore *> localStores;
     Lock<Omp> * lock;
 
-    VerificationResults() : lock(new Lock<Omp>()) {}
+    SingleVerificationResults() : lock(new Lock<Omp>()) {}
 
-    VerificationResults(VerificationResults const & other)
+    SingleVerificationResults(SingleVerificationResults const & other)
             : localStores(other.localStores), lock(new Lock<Omp>())
     {
         // Not thread-safe copying since this is only used at the beginning when resizing block local storages string.
     }
 
-    VerificationResults & operator=(VerificationResults const & other)
+    SingleVerificationResults & operator=(SingleVerificationResults const & other)
     {
         if (this == &other)
             return *this;
         localStores = other.localStores;
     }
 
-    ~VerificationResults()
+    ~SingleVerificationResults()
     {
         delete lock;
     }
 };
+
+template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+struct MapSingleReads {};
 
 /**
 .Class.ThreadLocalStorage:Encapsulates the thread-local data.
@@ -72,9 +75,6 @@ public:
  */
 template <typename TSpec>
 class ThreadLocalStorage;
-
-template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
-struct MapSingleReads {};
 
 // ThreadLocalStorage specialization for single-end read mapping in RazerS.
 template <typename TFragmentStore, typename TSwiftFinder_, typename TSwiftPattern_, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
@@ -107,23 +107,21 @@ public:
     TMatchVerifier verifier;
 
     // Mailbox for the verification results.
-    VerificationResults<TFragmentStore> verificationResults;
+    SingleVerificationResults<TFragmentStore> verificationResults;
 
     String<unsigned> splitters;
-
-    unsigned completeWindows;
 
     ThreadLocalStorage() {}
 };
 
 template <typename TFragmentStore, typename THitString, typename TOptions, typename TSwiftPattern>
-struct Verification;
+struct SingleVerification;
 
 template <typename TFragmentStore, typename THitString_, typename TOptions, typename TSwiftPattern>
-class Job<Verification<TFragmentStore, THitString_, TOptions, TSwiftPattern> >
+class Job<SingleVerification<TFragmentStore, THitString_, TOptions, TSwiftPattern> >
 {
 public:
-    typedef VerificationResults<TFragmentStore> TVerificationResults;
+    typedef SingleVerificationResults<TFragmentStore> TVerificationResults;
     typedef THitString_ THitString;
 
     int threadId;
@@ -154,7 +152,7 @@ public:
 template <typename TFragmentStore>
 inline
 void
-appendToVerificationResults(VerificationResults<TFragmentStore> & verificationResults, TFragmentStore * storePtr)
+appendToVerificationResults(SingleVerificationResults<TFragmentStore> & verificationResults, TFragmentStore * storePtr)
 {
     omp_set_lock(&verificationResults.lock->lock_);
     appendValue(verificationResults.localStores, storePtr);
@@ -184,7 +182,7 @@ setMaxErrors(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder_, TS
 
 template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename THitString, typename TPreprocessing>
 void workVerification(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls,
-                      Job<Verification<TFragmentStore, THitString, TOptions, TSwiftPattern> > & job,
+                      Job<SingleVerification<TFragmentStore, THitString, TOptions, TSwiftPattern> > & job,
                       String<unsigned> const & splitters)
 {
 #ifdef RAZERS_PROFILE
@@ -362,7 +360,7 @@ void _mapSingleReadsParallelToContig(
     typedef RazerSOptions<TSpec> TOptions;
 
 	typedef typename TSwiftFinder::THitString THitString;
-    typedef Job<Verification<TFragmentStore, THitString, TOptions, TSwiftPattern> > TVerificationJob;
+    typedef Job<SingleVerification<TFragmentStore, THitString, TOptions, TSwiftPattern> > TVerificationJob;
 
 	// Debug output...
 	if (options._debugLevel >= 1)
@@ -390,7 +388,6 @@ void _mapSingleReadsParallelToContig(
     // -----------------------------------------------------------------------
     // TODO(holtgrew): Maybe put into its own function?
     for (unsigned i = 0; i < options.threadCount; ++i) {
-        threadLocalStorages[i].completeWindows = 0;
 		// Initialize verifier object.
 		threadLocalStorages[i].verifier.onReverseComplement = (orientation == 'R');
 		threadLocalStorages[i].verifier.genomeLength = length(contigSeq);
@@ -511,11 +508,11 @@ void _mapSingleReadsParallelToContig(
 
 // Global initialization of block local storages.
 template <typename TThreadLocalStorages, typename TFragmentStore, typename TSplitters, typename TShape, typename TOptions>
-void initializeThreadLocalStorages(TThreadLocalStorages & threadLocalStorages,
-                                   TFragmentStore /*const*/ & store,
-                                   TSplitters const & splitters,
-                                   TShape /*const*/ & shape,
-                                   TOptions /*const*/ & options)
+void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStorages,
+                                         TFragmentStore /*const*/ & store,
+                                         TSplitters const & splitters,
+                                         TShape /*const*/ & shape,
+                                         TOptions /*const*/ & options)
 {
     SEQAN_ASSERT_GT(length(splitters), 1u);
     int threadCount = length(splitters) - 1;
@@ -531,7 +528,7 @@ void initializeThreadLocalStorages(TThreadLocalStorages & threadLocalStorages,
         TThreadLocalStorage & tls = threadLocalStorages[i];
 
         tls.threadId = i;
-        tls.globalStore = & store;
+        tls.globalStore = &store;
         tls.shape = shape;
         tls.options = options;  // TODO(holtgrew): Copy for stats and threshold, really good?
         tls.globalOptions = &options;
@@ -547,9 +544,7 @@ void initializeThreadLocalStorages(TThreadLocalStorages & threadLocalStorages,
         TIndex & index = host(tls.swiftPattern);
         clear(index);
         clear(indexText(index));
-        TPosition jBegin = splitters[i];
-        TPosition jEnd = splitters[i + 1];
-        for (TPosition j = jBegin; j < jEnd; ++j)
+        for (TPosition j = splitters[i]; j < splitters[i + 1]; ++j)
             appendValue(indexText(index), store.readSeqStore[j]);
         //unsigned x = length(indexText(index));
         //fprintf(stderr, "Index #%d has %u entries.\n", i, x);
@@ -639,12 +634,23 @@ int _mapSingleReadsParallel(
 	typedef typename TFragmentStore::TContigSeq						TContigSeq;
 	typedef Finder<TContigSeq, Swift<TSwiftSpec> >					TSwiftFinder;
 
+    // -----------------------------------------------------------------------
+    // Initialize global information.
+    // -----------------------------------------------------------------------
+
+    // Save OpenMP maximal thread count so we can restore it below, then set
+    // from options.
+	if (options._debugLevel >= 1)
+		::std::cerr << ::std::endl << "Number of threads:               \t" << options.threadCount << std::endl;
+    int oldMaxThreads = omp_get_max_threads();
+    omp_set_num_threads(options.threadCount);
 
     // Verifier preprocessing
 #ifdef RAZERS_BANDED_MYERS
 	typedef Nothing TPreprocessing;
 	TPreprocessing preprocessing;
 #else
+    // TODO(holtgrew): Parallelize preprocessing?
 	typedef String<TMyersPattern> TPreprocessing;
     TPreprocessing preprocessing;
 	if (options.gapMode == RAZERS_GAPPED) 
@@ -660,19 +666,10 @@ int _mapSingleReadsParallel(
 	}
 #endif
 
-    typedef ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
-
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_INIT);
     double beginInit = sysTime();
 #endif  // #ifdef RAZERS_PROFILE
-
-    // Save OpenMP maximal thread count so we can restore it below, then set
-    // from options.
-	if (options._debugLevel >= 1)
-		::std::cerr << ::std::endl << "Number of threads:               \t" << options.threadCount << std::endl;
-    int oldMaxThreads = omp_get_max_threads();
-    omp_set_num_threads(options.threadCount);
 
     // Clear/initialize global stats.
 	options.countFiltration = 0;
@@ -683,22 +680,32 @@ int _mapSingleReadsParallel(
     // -----------------------------------------------------------------------
     // Initialize thread local storages.
     // -----------------------------------------------------------------------
+	SEQAN_PROTIMESTART(initTime);
     String<unsigned> splitters;
     computeSplittersBySlotCount(splitters, length(store.readNameStore), options.threadCount);
+    typedef ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
     String<TThreadLocalStorage> threadLocalStorages;
-    initializeThreadLocalStorages(threadLocalStorages, store, splitters, shape, options);
-
-    // Save compaction threshold and set global threshold to infinity, so matchVerify does not compact!
-    int oldThreshold = options.compactThresh;
-    options.compactThresh = MaxValue<unsigned>::VALUE;
+    initializeThreadLocalStoragesSingle(threadLocalStorages, store, splitters, shape, options);
 
 #ifdef RAZERS_PROFILE
     double endInit = sysTime();
     std::cerr << "TIME initialization: " << (endInit - beginInit) << " s";
     timelineEndTask(TASK_INIT);
 #endif  // #ifdef RAZERS_PROFILE
+	double timeInitialization = SEQAN_PROTIMEDIFF(initTime);
+	if (options._debugLevel >= 1)
+		::std::cerr << ::std::endl << "Initialization took              \t" << timeInitialization << " seconds" << ::std::endl;
+
+    // -----------------------------------------------------------------------
+    // Perform parallel mapping.
+    // -----------------------------------------------------------------------
+
+    // Save compaction threshold and set global threshold to infinity, so matchVerify does not compact!
+    int oldThreshold = options.compactThresh;
+    options.compactThresh = MaxValue<unsigned>::VALUE;
 
     // For each contig: Map reads in parallel.
+	SEQAN_PROTIMESTART(findTime);
     for (unsigned contigId = 0; contigId < length(store.contigStore); ++contigId) {
 		lockContig(store, contigId);
 		if (options.forward)
@@ -734,6 +741,9 @@ int _mapSingleReadsParallel(
         options.countVerification += threadLocalStorages[i].options.countVerification;
     }
 
+	options.timeMapReads = SEQAN_PROTIMEDIFF(findTime);
+	if (options._debugLevel >= 1)
+		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
