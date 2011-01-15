@@ -114,6 +114,27 @@ double width = 0.5;
 unsigned histSize = 18;
 
 
+template <typename TSequence>
+void removeEqualElements(TSequence &seq)
+{
+	typedef typename Iterator<TSequence, Standard>::Type TIter;
+
+	TIter itBegin = begin(seq, Standard());
+	TIter itEnd = end(seq, Standard());
+	TIter src = itBegin;
+	TIter dst = itBegin;
+	for (; src != itEnd; ++src)
+	{
+		if (*dst != *src)
+		{
+			++dst;
+			*dst = *src;
+		}
+	}
+	if (itBegin != itEnd)
+		resize(seq, dst - itBegin + 1);
+}
+
 template <typename TId, typename TName>
 inline void 
 appendLocus(TId & locusId, TName const & locusName)
@@ -275,7 +296,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		c = _streamGet(file);
 		assign(transName, _parseReadIdentifier(file, c));
 		size_t locusPos = transName.find("Locus_");
-		size_t transPos = transName.find("Transcript__");
+		size_t transPos = transName.find("Transcript_");
 		if (locusPos == transName.npos || transPos == transName.npos)
 		{
 			std::cerr << "Error parsing: " << transName << std::endl;
@@ -653,7 +674,7 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		size_t posContigId = line.find("contigId=");
 		size_t posAmbig = line.find("ambiguity=");
 		size_t posErrors = line.find(",errors=");
-//		size_t posConf = line.find("Confidence__");
+//		size_t posConf = line.find("Confidence_");
 		if (posId == line.npos || posFragId == line.npos || posContigId == line.npos || posAmbig == line.npos || posErrors == line.npos)
 		{
 			std::cerr << "Error parsing: " << line << std::endl;
@@ -790,22 +811,54 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 	fileName = prefix;
 	append(fileName, ".locus");
 	file.open(toCString(fileName), ios_base::out | ios_base::binary);
-	file << "id\tname\tisoforms" << std::endl;
+	file << "id\tname\tisoforms\tnodes\tcoverage" << std::endl;
+
+	String<int> nodes;
 	for (unsigned i = 0; i < length(locusNames); ++i)
-		file << i << '\t' << locusNames[i] << '\t' << length(transToDContig[i]) << std::endl;
+	{
+		file << i << '\t' << locusNames[i] << '\t' << length(transToDContig[i]);
+
+		// get and sort all nodes of the locus i
+		clear(nodes);
+		for (unsigned j = 0; j < length(transToDContig[i]); ++j)
+		{
+			unsigned l = transToDContig[i][j];
+			for (int k = dContigToAnno[l]; k < dContigToAnno[l + 1]; ++k)
+				appendValue(nodes, store.annotationStore[k].countId, Generous());
+		}
+
+		// sort and remove nodes that are contained in multiple isoforms
+		std::sort(begin(nodes, Standard()), end(nodes, Standard()));
+		removeEqualElements(nodes);
+
+		// count coverage over all segments of the locus
+		double locusCoverage = 0.0;
+		for (unsigned j = 0; j < length(nodes); ++j)
+			locusCoverage += stats.contigStats[nodes[j]].i1;
+
+		file << '\t' << length(nodes) << '\t' << locusCoverage << std::endl;
+	}
 	file.close();	
 	
 	// dump transcript names
 	fileName = prefix;
 	append(fileName, ".trans");
 	file.open(toCString(fileName), ios_base::out | ios_base::binary);
-	file << "id\tname\tnodes\tlength" << std::endl;
+	file << "id\tname\tnodes\tlength\tcoverage" << std::endl;
 	for (unsigned i = 0; i < length(transNames); ++i)
-		file << i << '\t' << transNames[i] << '\t' << (dContigToAnno[i+1]-dContigToAnno[i]) << '\t' << dContigLength[i] << std::endl;
+	{
+		file << i << '\t' << transNames[i] << '\t' << (dContigToAnno[i+1]-dContigToAnno[i]) << '\t' << dContigLength[i];
+
+		// count coverage over all segments of the isoform
+		double transCoverage = 0.0;
+		for (int k = dContigToAnno[i]; k < dContigToAnno[i + 1]; ++k)
+			transCoverage += stats.contigStats[store.annotationStore[k].countId].i1;
+		file << '\t' << transCoverage << std::endl;
+	}
 	file.close();	
 	
 	// dump indicator matrices
-	String<int> headerNodes, nodes;
+	String<int> headerNodes;
 #ifdef SINGLE_MAT_FILE
 	fileName = prefix;
 	append(fileName, ".mat");
@@ -815,21 +868,27 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 	{
 		// get and sort all nodes of the locus i
 		clear(headerNodes);
-		double locusCoverage = 0.0;
 		for (unsigned j = 0; j < length(transToDContig[i]); ++j)
 		{
 			unsigned l = transToDContig[i][j];
 			for (int k = dContigToAnno[l]; k < dContigToAnno[l + 1]; ++k)
-			{
 				appendValue(headerNodes, store.annotationStore[k].countId, Generous());
-				locusCoverage += stats.contigStats[back(headerNodes)].i1;
-			}
 		}
+
+		// sort and remove nodes that are contained in multiple isoforms
+		std::sort(begin(headerNodes, Standard()), end(headerNodes, Standard()));
+		removeEqualElements(headerNodes);
+
+		// count coverage over all segments of the locus
+		double locusCoverage = 0.0;
+		for (unsigned j = 0; j < length(headerNodes); ++j)
+			locusCoverage += stats.contigStats[headerNodes[j]].i1;
+
 #ifdef OMIT_UNCOVERED_MATS
 		if (locusCoverage == 0.0) continue;
 #endif		
-		std::sort(begin(headerNodes, Standard()), end(headerNodes, Standard()));
 
+		
 #ifdef SINGLE_MAT_FILE
 		if (empty(transToDContig[i])) continue;
 		file << ">" << i << "\tcvrg=" << locusCoverage << std::endl;
