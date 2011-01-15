@@ -308,7 +308,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		int locusNum = -1;
 		int transNum = -1;
 		
-		appendLocus(locusNum, transName.substr(locusPos + 6, transPos - (locusPos + 6)));
+		appendLocus(locusNum, transName.substr(locusPos + 6, transPos - 1 - (locusPos + 6)));
 		unsigned contigId = appendTrans(locusNum, transNum, transName);
 
 		int beginPos = 0;
@@ -400,6 +400,8 @@ countSingleMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches
 		
 		int transPosBegin = 0;
 		int transPosEnd = 0;
+		double overlapRelBegin = 0.0;
+		double overlapRelEnd = 0.0;
 		for (; it != itEnd; ++it)
 		{
 			if ((*m).posEnd <= (int)(*it).beginPos) 
@@ -416,7 +418,7 @@ countSingleMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches
 			}
 			
 			// here we have an overlap
-			
+		
 			if ((*m).posBegin >= (int)(*it).beginPos)
 			{
 				// read begin is in the node
@@ -427,14 +429,17 @@ countSingleMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches
 			{
 				// read end is in the node
 				transPosEnd += (*m).posEnd - (int)(*it).beginPos;
+				overlapRelEnd = 1.0;
 			} else
 			{
 				// read end is right of the node
 				transPosEnd += (int)(*it).endPos - (int)(*it).beginPos;
+				overlapRelEnd = ((int)(*it).endPos - (*m).posBegin) / (double)((*m).posEnd - (*m).posBegin);
 			}
 			
 			appendValue(ids, (*it).countId, Generous());
-			stats.contigStats[(*it).countId].i1 += 1.0 / ambig;
+			stats.contigStats[(*it).countId].i1 += (overlapRelEnd - overlapRelBegin) / ambig;
+			overlapRelBegin = overlapRelEnd;
 		}
 		if (empty(ids))
 		{
@@ -891,7 +896,8 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 		
 #ifdef SINGLE_MAT_FILE
 		if (empty(transToDContig[i])) continue;
-		file << ">" << i << "\tcvrg=" << locusCoverage << std::endl;
+//		file << ">" << i << "\tcvrg=" << locusCoverage << std::endl;
+		file << ">" << i << std::endl;
 #else
 		std::ostringstream ss;
 		ss.resize('0');
