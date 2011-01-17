@@ -1283,14 +1283,14 @@ position(Pattern<TIndex, Swift<TSpec> > & pattern)
 //____________________________________________________________________________
 
 template <typename THaystack, typename TSpec>
-inline typename Position<Finder<THaystack, Swift<TSpec> > >::Type
+inline __int64
 beginPosition(Finder<THaystack, Swift<TSpec> > const & finder)
 {
 	return (*finder.curHit).hstkPos;
 }
 
 template <typename THaystack, typename TSpec>
-inline typename Position<Finder<THaystack, Swift<TSpec> > >::Type
+inline __int64
 beginPosition(Finder<THaystack, Swift<TSpec> > & finder)
 {
 	return beginPosition(const_cast<Finder<THaystack, Swift<TSpec> > const &>(finder));
