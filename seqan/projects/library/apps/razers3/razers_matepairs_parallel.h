@@ -76,7 +76,7 @@ class ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL_, TSwiftFi
 {
 public:
 	typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
-	typedef typename Value<TReadSeqStore>::Type	     				TRead;
+	typedef typename Value<TReadSeqStore>::Type						TRead;
 	typedef StringSet<TRead>										TReadSet;
     typedef TShape_ TShape;
 
@@ -444,8 +444,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                     //							options, TSwiftSpec()))
                     if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
                     {
-                        if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-                                        matePairId, readSetL, TRazerSMode()))
+#ifdef RAZERS_BANDED_MYERS
+						verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
+#endif
+						if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
+										matePairId, readSetL, TRazerSMode()))
                         {
                             verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
                             (*it).i2 = verifierL.m;
@@ -743,7 +746,7 @@ void _mapMatePairReadsParallel(
     // -----------------------------------------------------------------------
     // TODO(holtgrew): Maybe put into its own function?
     #pragma omp parallel for schedule(static, 1)
-    for (unsigned i = 0; i < options.threadCount; ++i) {
+    for (int i = 0; i < (int)options.threadCount; ++i) {
 		// Initialize verifier objects.
 		threadLocalStorages[i].verifierL.onReverseComplement = (orientation == 'R');
 		threadLocalStorages[i].verifierL.genomeLength = length(genome);
@@ -785,11 +788,6 @@ void _mapMatePairReadsParallel(
         // TVerifier	&verifierR = tls.verifierR;  // XXX
 
         SEQAN_ASSERT_NOT(empty(readSetL));
-
-#ifndef RAZERS_BANDED_MYERS
-        verifierL.preprocessing = &preprocessingL;
-        verifierR.preprocessing = &preprocessingR;
-#endif  // #ifdef RAZERS_BANDED_MYERS
         
 #ifdef RAZERS_PROFILE
         timelineBeginTask(TASK_FILTER);
@@ -931,7 +929,7 @@ int _mapMatePairReadsParallel(
 				SwiftSemiGlobal,
 				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
-	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
+	typedef Pattern<TRead const, MyersUkkonen>				TMyersPattern;	// verifier
 
 	typedef typename TFragmentStore::TContigSeq						TContigSeq;
 	typedef Finder<TContigSeq, Swift<TSwiftSpec> >					TSwiftFinderL;
@@ -962,12 +960,16 @@ int _mapMatePairReadsParallel(
 	options.compMask[4] = (options.matchN)? 15: 0;
 	if (options.gapMode == RAZERS_GAPPED)
 	{
+	    unsigned pairCount = length(store.matePairStore);
 		resize(forwardPatternsL, pairCount, Exact());
 		resize(forwardPatternsR, pairCount, Exact());
+		Dna5String tmp;
 		for(unsigned i = 0; i < pairCount; ++i)
 		{
-			setHost(forwardPatternsL[i], readSetL[i]);
-			setHost(forwardPatternsR[i], readSetR[i]);
+			setHost(forwardPatternsL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
+			tmp = store.readSeqStore[store.matePairStore[i].readId[1]];
+			reverseComplement(tmp);
+			setHost(forwardPatternsR[i], tmp);
 			_patternMatchNOfPattern(forwardPatternsL[i], options.matchN);
 			_patternMatchNOfPattern(forwardPatternsR[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatternsL[i], options.matchN);

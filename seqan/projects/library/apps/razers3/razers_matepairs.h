@@ -520,7 +520,7 @@ void _mapMatePairReads(
 					lastPotMatchNo[swiftPatternL.curSeqNo] = lastNo++;
 					
 					fL.i2.readId = store.matePairStore[swiftPatternL.curSeqNo].readId[0] | NOT_VERIFIED;
-					fL.i2.beginPos = gPair.i1;
+					fL.i2.beginPos = beginPosition(swiftFinderL);
 					fL.i2.endPos = gPair.i2;
 					
 					pushBack(fifo, fL);
@@ -552,7 +552,10 @@ void _mapMatePairReads(
 //							options, TSwiftSpec()))
 					if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
-						if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
+#ifdef RAZERS_BANDED_MYERS
+							verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
+#endif						
+							if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
 								matePairId, readSetL, mode))
 						{
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
@@ -744,7 +747,7 @@ int _mapMatePairReads(
 				SwiftSemiGlobal,
 				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
-	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
+	typedef Pattern<TRead const, MyersUkkonen>			TMyersPattern;	// verifier
 
 //	std::cout << "SA-TYPE:" <<sizeof(typename SAValue<TIndex>::Type)<<std::endl;
 

@@ -213,6 +213,9 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFi
         unsigned absReadId = offset + value(it).ndlSeqNo;
         tls.verifier.m.readId = absReadId;
 
+#ifdef RAZERS_BANDED_MYERS
+		tls.verifier.patternState.leftClip = (value(it).hstkPos >= 0)? 0: -value(it).hstkPos;	// left clip if match begins left of the genome
+#endif
         // TODO(holtgrew): Unsure about global/local indices and global/local store.
 		matchVerify(tls.verifier, swiftInfix(value(it), job.globalStore->contigStore[job.contigId].seq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
     }
@@ -435,7 +438,7 @@ void _mapSingleReadsParallelToContig(
             windowsDone += 1;  // Local windows done count.
             atomicMax(leaderWindowsDone, windowsDone);
 
-            std::tr1::shared_ptr<THitString> hitsPtr(new THitString());
+            std::tr1::shared_ptr<THitString> hitsPtr(new THitString());	//TODO (weese:) Could we reuse memory here?
             std::swap(*hitsPtr, getSwiftHits(tls.swiftFinder));
             THitString & hits = *hitsPtr;
             tls.options.countFiltration += length(hits);

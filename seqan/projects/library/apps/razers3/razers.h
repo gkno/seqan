@@ -1577,7 +1577,7 @@ matchVerify(
     while (find(myersFinder, myersPattern, state, minScore)) 
 #endif  // #ifdef RAZERS_BANDED_MYERS
 	{
-		TPosition pos = position(hostIterator(myersFinder));
+		TPosition const pos = position(hostIterator(myersFinder));
 		if (lastPos + minDistance < pos)
 		{
 			if (minScore <= maxScore)
@@ -1594,7 +1594,12 @@ matchVerify(
 
 					// find beginning of best semi-global alignment
 					TGenomeInfixRev infRev(inf);
-					setEndPosition(inf, verifier.m.endPos = (beginPosition(inf) + maxPos + 1));
+					
+					TPosition newInfEndPos = infBeginPos + maxPos + 1;
+#ifdef RAZERS_BANDED_MYERS
+					verifier.revPatternState.leftClip = infEndPos - newInfEndPos;
+#endif
+					setEndPosition(inf, verifier.m.endPos = newInfEndPos);
 
 					// limit the beginning to needle length plus errors (== -maxScore)
 					if (length(inf) > ndlLength - maxScore)
@@ -1858,8 +1863,11 @@ void _mapSingleReadsToContig(
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate))
 	{
-        if (length(infix(swiftFinder)) < length(readSet[(*swiftFinder.curHit).ndlSeqNo]))
-            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
+//        if (length(infix(swiftFinder)) < length(readSet[(*swiftFinder.curHit).ndlSeqNo]))
+//            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
+#ifdef RAZERS_BANDED_MYERS
+		verifier.patternState.leftClip = (beginPosition(swiftFinder) >= 0)? 0: -beginPosition(swiftFinder);	// left clip if match begins left of the genome
+#endif
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
 			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, mode);
