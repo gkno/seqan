@@ -234,10 +234,14 @@ struct MyersSmallState_<TNeedle, AlignTextBanded<TSpec, TFinderCSP, TPatternCSP>
 	TWord VN0;					// VN[0]
     unsigned short errors;      // the current number of errors
     unsigned short maxErrors;   // the maximal number of errors allowed
-
+    unsigned short leftClip;    // clip that many characters from the text begin
+//    unsigned short rightClip;   // stop alignment that many characters before the end   <<<< currently unused (autom. determined)
+    
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
     String<int> DPMat;
 #endif
+    MyersSmallState_():
+        leftClip(0) {}
 };
 
 // large state
@@ -981,7 +985,7 @@ _patternInitSmallStateBanded(
 	typedef typename Value<TNeedle>::Type TValue;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
-    int col = 1;
+    int col = state.leftClip + 1;
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
     std::cerr << "     ";
     for (int i = length(needle); i != 0; --i)
@@ -996,45 +1000,169 @@ _patternInitSmallStateBanded(
 
     _myersPreInit(state, typename MyersSmallAlphabet_<TValue>::Type());
 
-	TIter ndlIter = begin(needle, Standard());
-	TIter ndlEnd = end(needle, Standard());
+	typename Size<TNeedle>::Type const ndlLength = length(needle);
+	
+	// Initialize row 0 either with zeros or increasing numbers
+	// This can be realized using the following DP pattern and
+	// assuming character mismatches at rows -1, -2,... 
+	// Thus we initialize the bitmasks and VN with 0. 
+	// VP depends on global/local alignment
+	//
+	//  0  1  2  3  4   -2 -2 -2 -2 -2   (row -2)
+	//  0  1  2  3  4   -1 -1 -1 -1 -1   (row -1)
+	//	0  1  2  3  4    0  0  0  0  0   (row  0)
+	//  1                1
+	//	    global           local
+	//
+	//  VP = 100...      VP = 111...
+	//
 
-    register TWord VP = (MyersUkkonenHP0_<TSpec>::VALUE == 1)? 0: -1;
+    register TWord VP = (MyersUkkonenHP0_<TSpec>::VALUE == 1)? (TWord)1 << ((int)BitsPerValue<TWord>::VALUE-1): -1; // HP[0]==1 <-> global, HP[0]==0 <-> local
     register TWord VN = 0;
+	
+	// Errors are counted along the lowest diagonal and the
+	// lowest row of the band.
+	// The errors in the top-left corner are 0.
+	//
+	// 0 * * * *
+	//   x * * * *
+	//     x * * * * 
+	//       x x x x x
+	//
+	//       |-------|
+	//     diagWidth + 1 = 5
+	//
+	// diagWidth = length(container(finder)) + state.leftClip + state.rightClip - length(needle)
+	
     register unsigned errors = 0;
-    register unsigned const cutOff = state.maxErrors + (length(container(hostIterator(finder))) - length(needle));
+	TIter ndlIter = begin(needle, Standard());
+	TIter ndlEnd;
+	
+	// The errors along the diagonal can only increase or stay the same.
+	// There is only the last row of length diagWidth where errors can decrease.
+	// If errors exceeds cutOff it cannot reach maxErrors again.
+	
+	
+	typename Size<TFinder>::Type const columns = length(container(hostIterator(finder))) + state.leftClip;
+    register unsigned cutOff = state.maxErrors;
+	if (columns > ndlLength)
+	{
+		cutOff += columns - ndlLength;		// clipping case *0
+		ndlEnd = end(needle, Standard());
+	} else {
+		ndlEnd = ndlIter + columns;			// clipping case *1
+	}
 
 //    std::cerr<<std::hex<<"\t  "<<std::setw(17)<<' '<<"\tVN"<<std::setw(17)<<VN<<"\tVP"<<std::setw(17)<<VP<<std::dec<<std::endl;
 
-    for (register unsigned short shift = 0; ndlIter != ndlEnd; ++ndlIter, goNext(finder), ++shift)
+	register unsigned short shift = 0;
+	
+	if (state.leftClip != 0)
+	{
+		//////////////////////////////////////////////////////////////////
+		// PART 0: go down the parallelogram in a empty (clipped) area
+		//////////////////////////////////////////////////////////////////
+
+		errors = state.leftClip;
+		if (errors > ndlLength) errors = ndlLength;
+		if (errors > cutOff) return false;
+
+	// leftClip = 2
+	//   |-|
+	//
+	//   . . * * *
+	//     . * * * *
+	//       * * * * * 
+	//         * * * * .
+	//           * * * . . 
+	//             * * . . .
+	//
+	//                 |---|
+	//               rightClip = 3
+    //
+	// We divide the parallelogam into 3 sections:
+	//
+	//   A A A A
+	//     A A A B
+	//       A A B B
+	//         A B B C
+	//           B B C C
+	//             B C C C
+	//               C C C C
+	//
+	// Depending on where the clipping ends we identify 4 different clipping cases:
+	// 
+	//	 case 00            case 10            case 01            case 11
+	//   . . * *            . . . .            . . * *            . . . .
+	//     . * * *            . . . *            . * * *            . . . *
+	//       * * * *            . . * *            * * * .            . . * .
+	//         * * * *            . * * *            * * . .            . * . .
+	//           * * * .            * * * .            * . . .            * . . .
+	//             * * . .            * * . .            . . . .            . . . .
+	//
+		
+		// adjust bitmasks (errors = number of needle chars to preprocess)
+		for (; shift < errors; ++ndlIter, ++shift)
+			_myersAdjustBitmask(state, getValue(ndlIter), shift, typename MyersSmallAlphabet_<TValue>::Type());
+		
+		// initialise left column with
+		//
+		//  0  1  2  3  4   -2 -2 -2 -2 -2
+		//  0  1  2  3  4   -1 -1 -1 -1 -1
+		//	0  1  2  3  4    0  0  0  0  0
+		//	1                1
+		//	2   global       2   local
+		//	3                3
+		//	4                4
+		//
+		//  VP = 111100...   VP = 111111...
+		if (errors < (unsigned)BitsPerValue<TWord>::VALUE-1)
+			VP |= ((TWord) -1) << ((unsigned)BitsPerValue<TWord>::VALUE-1 - errors);
+		else
+			VP = -1;
+	}
+	
+    for (; ndlIter != ndlEnd; ++ndlIter, goNext(finder), ++shift)
     {
+		//////////////////////////////////////////////////////////////////
         // PART 1: go down the parallelogram
+		//////////////////////////////////////////////////////////////////
         
         // adjust bitmask
         _myersAdjustBitmask(state, getValue(ndlIter), shift, typename MyersSmallAlphabet_<TValue>::Type());
         
-        // diagonal Myers
+		/////////////////////////
+        // DIAGONAL MYERS CORE
+		
+		// VP/VN --> D0  (original Myers)
         register TWord X = _myersGetBitmask(state, ordValue(*finder), shift, typename MyersSmallAlphabet_<TValue>::Type()) | VN;
         register TWord D0 = ((VP + (X & VP)) ^ VP) | X;
+		
+		// adjust errors corresponding to rightmost bit of D0
+        errors += (~D0 >> (BitsPerValue<TWord>::VALUE - 1)) & 1;
+        if (errors > cutOff) return false;
+
+		// D0 --> HP/HN  (original Myers)
         register TWord HN = VP & D0;
         register TWord HP = VN | ~(VP | D0);
     //    const int PADDING = sizeof(TWord)*2 + 1;
     //    std::cerr << std::hex;
     //    std::cerr << "\tD0"<<std::setw(PADDING)<<(__uint64)D0<<"\tHN"<<std::setw(PADDING)<<(__uint64)HN<<"\tHP"<<std::setw(PADDING)<<(__uint64)HP << std::endl;
+
+		// moving register down corresponds to shifting HP/HN up (right shift)
+		// HP/HN --> shift --> VP/VN (modified Myers)
         X = D0 >> 1;
         VN = X & HP;
         VP = HN | ~(X | HP);
     //    std::cerr << "\t  "<<std::setw(PADDING)<<' '<<"\tVN"<<std::setw(PADDING)<<(__uint64)VN<<"\tVP"<<std::setw(PADDING)<<(__uint64)VP << std::endl;
     //    std::cerr << std::dec;
-        errors += (~D0 >> (BitsPerValue<TWord>::VALUE - 1)) & 1;
-        if (errors > cutOff) return false;
-
+    
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
         std::cerr << "diag ";        
 #endif
         int val = errors;
-        state.DPMat[col*(length(needle)+1)+col] = val;
+        state.DPMat[(col-state.leftClip)*(length(needle)+1)+col] = val;
         for (int i = length(needle); i >=0; --i)
         {
             if (i > col)
@@ -1053,7 +1181,7 @@ _patternInitSmallStateBanded(
                         val -= ((VP & mask) != (TWord)0)? 1:0;
                         val += ((VN & mask) != (TWord)0)? 1:0;
                     }
-                    state.DPMat[col*(length(needle)+1)+i] = val;
+                    state.DPMat[(col-state.leftClip)*(length(needle)+1)+i] = val;
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR_DUMP
                     std::cerr << std::setw(5) << val;
                 } else

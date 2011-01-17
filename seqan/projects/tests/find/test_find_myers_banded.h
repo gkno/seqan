@@ -61,12 +61,16 @@ void dumpMat(TMatrix &mat, TSeq1 &seq1, TSeq2 &seq2)
     }
 }
 
-template <typename TString>
-bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true) 
+// seq1 .. Pattern
+// seq2 .. Text
+template <typename TFindSpec, typename TString>
+bool testMyersUkkonen(TString seq1, TString seq2, int leftClip = 0, bool dump = true) 
 {
 	Finder<TString> finder(seq2);
 //	Pattern<TString, MyersUkkonenBanded> pattern(seq1);
-	PatternState_<TString,  Myers<AlignTextBanded<NMatchesN_,NMatchesN_>, True, void> > state;
+	PatternState_<TString, Myers<AlignTextBanded<TFindSpec, NMatchesN_, NMatchesN_>, True, void> > state;
+	
+	state.leftClip = leftClip;
 
 	bool equal = true;
 	int delta = length(seq2) - length(seq1);
@@ -74,10 +78,20 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 	clear(mat);
 	resize(mat, (length(seq1)+1) * (length(seq2)+1), -9, Exact());
 
+	// initialize first DP column
     for (unsigned i = 0; i <= length(seq1); ++i)
         mat[i] = i;
-    for (unsigned i = 0; i <= length(seq2); ++i)
-        mat[i * (length(seq1) + 1)] = (i < length(seq1))? 0 : i - length(seq1) + 1;
+	
+	if (IsSameType<TFindSpec, FindInfix>::VALUE)
+	{
+		for (unsigned i = 0; i <= length(seq2); ++i)
+			mat[i * (length(seq1) + 1)] = (i < length(seq1))? 0 : i - length(seq1) + 1;
+	}
+	else 
+	{
+		for (unsigned i = 0; i <= length(seq2); ++i)
+			mat[i * (length(seq1) + 1)] = i;
+	}
 
     while (!atEnd(finder))
         find(finder, seq1, state, -1000);
@@ -91,7 +105,7 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 	for(unsigned j = 1; j <= length(seq2); ++j)
 		for(unsigned i = 1; i <= length(seq1); ++i) 
         {
-			int diag = j-i;
+			int diag = j+leftClip - i;
 			if (0 <= diag && (diag <= delta || i+delta >= length(seq1)))
 			{
 				int d = mat[(j-1) * (length(seq1)+1) + i-1];
@@ -116,7 +130,7 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 	// real banded DP alignment
 	for(int j = 1; j <= length(seq2); ++j)
 		for(int i = 1; i <= length(seq1); ++i) {
-			int diag = j-i;
+			int diag = j+leftClip - i;
 			if (0 <= diag && diag <= delta)
 			{
 				int d = mat[(j-1) * (length(seq1)+1) + i-1];
@@ -162,7 +176,7 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 template <typename TFinderCSP, typename TPatternCSP, typename TText, typename TNeedle>
 void testCSPImpl(TText &text, TNeedle &needle, int errors)
 {
-	PatternState_<TNeedle, Myers<AlignTextBanded<TFinderCSP,TPatternCSP>, True, void> > state;
+	PatternState_<TNeedle, Myers<AlignTextBanded<FindInfix, TFinderCSP,TPatternCSP>, True, void> > state;
 	Finder<TText> finder(text);
     SEQAN_ASSERT_TRUE(find(finder, needle, state, -1000));
     SEQAN_ASSERT_EQ(position(finder), length(text) - 1) ;
@@ -193,25 +207,36 @@ SEQAN_DEFINE_TEST(test_myers_find_banded_csp)
 
 //////////////////////////////////////////////////////////////////////////////
 
-SEQAN_DEFINE_TEST(test_myers_find_banded)
+template <typename TFindSpec>
+void testMyersFindBanded()
 {
 	typedef Dna TValue;
 	String<Dna> seq1 = "tgtaaaggagt";
 	String<Dna> seq2 = "tgtgtaaaggagttgtggagttgtaaaaaggagt";
 
-	for(unsigned li=2; li<=length(seq1); ++li)
-		for(unsigned lj=li; lj<=length(seq2) && lj-li<8; ++lj)
-			for(unsigned i=0; i+li<=length(seq1); ++i) 
-            if (li > 8)
-			{
-				String<TValue> s1 = infix(seq1, i, i+li);
-				for(unsigned j=0; j+lj<=length(seq2); ++j) 
+	for (unsigned li=2; li<=length(seq1); ++li)
+	{
+		//std::cout<<'.'<<std::flush;
+		for (unsigned lj=li; lj<=length(seq2) && lj-li<8; ++lj)
+			for (unsigned i=0; i+li<=length(seq1); ++i) 
+				for (unsigned leftClip = 0; leftClip < lj; ++leftClip)
+				if (li > 8)
 				{
-					String<TValue> s2 = infix(seq2, j, j+lj);
-					if (!testMyersUkkonen(s1, s2, false)) {
-						std::cerr << "DIFFERENCE("<<right<<") for " << s1 << "," << s2 << std::endl;
-						testMyersUkkonen(s1, s2, true);
+					String<TValue> s1 = infix(seq1, i, i+li);
+					for(unsigned j=0; j+lj<=length(seq2); ++j) 
+					{
+						String<TValue> s2 = infix(seq2, j, j+lj);
+						if (!testMyersUkkonen<TFindSpec>(s1, s2, leftClip, false)) {
+							std::cerr << "DIFFERENCE("<<right<<") for " << s1 << "," << s2 << std::endl;
+							testMyersUkkonen<TFindSpec>(s1, s2, leftClip, true);
+						}
 					}
 				}
-			}
+	}
+}
+
+SEQAN_DEFINE_TEST(test_myers_find_banded)
+{
+	testMyersFindBanded<FindInfix>();
+	testMyersFindBanded<FindPrefix>();
 }
