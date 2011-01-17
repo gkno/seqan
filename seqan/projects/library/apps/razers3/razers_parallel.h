@@ -233,7 +233,6 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder,
 #endif  // #ifdef RAZERS_PROFILE
     if (tls.threadId == 0u && tls.options._debugLevel >= 3)
         fprintf(stderr, "[writeback]");
-    // TODO(holtgrew): It would be possible to use local sorting and multiway merging, removes necessity to sort in compactMatches/maskDuplicates.
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 
     // Update IDs and calculate new size so the prefix increment can be used in the loops.
@@ -309,8 +308,13 @@ void clearLocalStores(String<TFragmentStore *> & localStores)
   clear(localStores);
 }
 
-// Create thread local storages for each thread, fill with filtration
-// jobs and fire up using the queue system.
+// Find read matches in one genome sequence.
+//
+// The parallelization is simple.  We perform the filtering window-wise.
+// Then, we generate verification jobs from the swift hits.  The SWIFT hits
+// are distributed by a simple static load balancing of adjacent hits.  These
+// are then processed by all "leading" threads, where leading threads are
+// those with the largest number of processed windows.
 template <
 	typename TFSSpec,
 	typename TFSConfig,
@@ -456,14 +460,12 @@ void _mapSingleReadsParallelToContig(
 #endif  // #ifdef RAZERS_PROFILE
 
             // Perform verification as long as we are a leader and there are filtration jobs to perform.
-            #pragma omp flush(leaderWindowsDone)
             while (leaderWindowsDone == windowsDone) {
                 TVerificationJob job;
                 if (!popFront(job, taskQueue))
                     break;
                 // fprintf(stderr, "[verify]");
                 workVerification(tls, job, splitters);
-                #pragma omp flush(leaderWindowsDone)
             }
 
             // Write back verification results for this thread so far.
@@ -489,7 +491,6 @@ void _mapSingleReadsParallelToContig(
             TVerificationJob job;
             if (popFront(job, taskQueue))
                 workVerification(tls, job, splitters);
-            #pragma omp flush(threadsFiltering)  // TODO(holtgrew): Look at OpenMP memory model and understand whether we have to do this here.
         }
 
         // After every thread is done with everything, write back once more.
