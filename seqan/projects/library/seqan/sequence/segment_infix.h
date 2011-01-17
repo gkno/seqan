@@ -463,6 +463,7 @@ SEQAN_CHECKPOINT
 .Metafunction.Infix:
 ..summary:Infix sequence type.
 ..signature:Infix<T>::Type
+..remarks:Note that an infix of a @Class.Segment@ object is an @Spec.InfixSegment@ object having the same host type.
 ..param.T:A sequence type.
 ...type:Class.String
 ..returns.param.Type:The infix type.
@@ -739,6 +740,7 @@ value(Segment<THost, TSpec> const & me,
 ...remarks:The type of the infix is given by @Metafunction.Infix@.
 ..remarks:Notational sugar.
 ..see:Spec.InfixSegment
+..see.Metafunction.Infix
 ..include:seqan/sequence.h
 */
 
@@ -778,6 +780,34 @@ SEQAN_CHECKPOINT
 		host(t), 
 		beginPosition(t) + pos_begin, 
 		beginPosition(t) + pos_end);
+}
+
+// infix() with iterators
+
+template <typename T, typename TSpec, typename TIterSpec>
+inline typename Infix<Segment<T, TSpec> >::Type
+infix(Segment<T, TSpec> & t,
+      Iter<Segment<T, TSpec>, TIterSpec> const & iterBegin,
+      Iter<Segment<T, TSpec>, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Infix<Segment<T, TSpec> >::Type (
+		host(t), 
+		iterBegin, 
+		iterEnd);
+}
+
+template <typename T, typename TSpec, typename TIterSpec>
+inline typename Infix<Segment<T, TSpec> const>::Type
+infix(Segment<T, TSpec> const & t,
+      Iter<Segment<T, TSpec> const, TIterSpec> const & iterBegin,
+      Iter<Segment<T, TSpec> const, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Infix<Segment<T, TSpec> >::Type (
+		host(t), 
+		iterBegin, 
+		iterEnd);
 }
 
 //////////////////////////////////////////////////////////////////////////////

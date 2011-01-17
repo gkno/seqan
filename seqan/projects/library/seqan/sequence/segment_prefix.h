@@ -529,6 +529,7 @@ operator --(Segment<THost, PrefixSegment> & segment)
 ..cat:Containers
 ..summary:Creates prefix object.
 ..signature:prefix(host, end)
+..remarks:Note that a prefix of a @Class.Segment@ object is an @Spec.SuffixSegment@ object having the same host type.
 ..param.host:The complete sequence.
 ...type:Class.String
 ...type:Adaption.char array
@@ -541,6 +542,7 @@ operator --(Segment<THost, PrefixSegment> & segment)
 ..see:Spec.PrefixSegment
 ..see:Function.suffix
 ..see:Function.infix
+..see:Function.Suffix
 ..include:seqan/sequence.h
 */
 
@@ -633,6 +635,110 @@ SEQAN_CHECKPOINT
 		host(t), 
 		beginPosition(t),
 		beginPosition(t) + pos_end);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+// prefix() with iterators
+
+template <typename T, typename TIterSpec>
+inline typename Prefix<T>::Type
+prefix(T & t,
+       Iter<Segment<T, PrefixSegment>, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<T>::Type(t, iterEnd);
+}
+template <typename T, typename TIterSpec>
+inline typename Prefix<T const>::Type
+prefix(T const & t,
+       Iter<Segment<T, PrefixSegment>, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<T const>::Type(t, iterEnd);
+}
+
+template <typename T, typename TIterSpec>
+inline typename Prefix<T *>::Type
+prefix(T * t,
+       Iter<Segment<T, PrefixSegment>, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<T *>::Type (t, iterEnd);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// A prefix of a prefix -> is a prefix
+template <typename T, typename TIterSpec>
+inline typename Prefix<Segment<T, PrefixSegment> >::Type
+prefix(Segment<T, PrefixSegment> & t,
+       Iter<Segment<T, PrefixSegment>, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, PrefixSegment> >::Type (
+		host(t), 
+		iterEnd);
+}
+template <typename T, typename TIterSpec>
+inline typename Prefix<Segment<T, PrefixSegment> const>::Type
+prefix(Segment<T, PrefixSegment> const & t,
+       Iter<Segment<T, PrefixSegment> const, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, PrefixSegment> const>::Type (
+		host(t), 
+		iterEnd);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// A prefix of an infix -> is an infix
+template <typename T, typename TIterSpec>
+inline typename Prefix<Segment<T, InfixSegment> >::Type
+prefix(Segment<T, InfixSegment> & t,
+       Iter<Segment<T, InfixSegment>, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, InfixSegment> >::Type (
+		host(t), 
+		begin(t),
+		iterEnd);
+}
+template <typename T, typename TIterSpec>
+inline typename Prefix<Segment<T, InfixSegment> const>::Type
+prefix(Segment<T, InfixSegment> const & t,
+       Iter<Segment<T, InfixSegment> const, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, InfixSegment> const>::Type (
+		host(t), 
+		begin(t),
+		iterEnd);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// A prefix of an suffix -> is an infix
+template <typename T, typename TIterSpec>
+inline typename Prefix<Segment<T, SuffixSegment> >::Type
+prefix(Segment<T, SuffixSegment> & t,
+       Iter<Segment<T, SuffixSegment> const, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, SuffixSegment> >::Type (
+		host(t), 
+		begin(t),
+		iterEnd);
+}
+template <typename T, typename TIterSpec>
+inline typename Prefix<Segment<T, SuffixSegment> const>::Type
+prefix(Segment<T, SuffixSegment> const & t,
+       Iter<Segment<T, SuffixSegment> const, TIterSpec> const & iterEnd)
+{
+SEQAN_CHECKPOINT
+	return typename Prefix<Segment<T, SuffixSegment> const>::Type (
+		host(t), 
+		begin(t),
+		iterEnd);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -278,3 +278,16 @@ SEQAN_DEFINE_TEST(Ticket317)
     TEST_IT(begin(text), begin(sub2));
 #   undef TEST_IT
 }
+
+SEQAN_DEFINE_TEST(ticket848)
+{
+    // http://trac.mi.fu-berlin.de/seqan/ticket/848
+
+    CharString text = "012345";
+
+    Infix<CharString>::Type inf1 = infix(text, begin(text) + 1, begin(text) + 5);
+    SEQAN_ASSERT_EQ(CharString("1234"), CharString(inf1));
+
+    Infix<Infix<CharString>::Type>::Type inf2 = infix(inf1, begin(inf1) + 1, begin(inf1) + 3);
+    SEQAN_ASSERT_EQ(CharString("23"), CharString(inf2));
+}

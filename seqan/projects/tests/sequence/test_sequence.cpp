@@ -99,13 +99,14 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
     SEQAN_CALL_TEST(Infix);
     SEQAN_CALL_TEST(Suffix);
     SEQAN_CALL_TEST(Ticket317);
+    SEQAN_CALL_TEST(ticket848);
 
     // -----------------------------------------------------------------------
     // Checkpoint Verification
     // -----------------------------------------------------------------------
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_string.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_vector.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_list.h");
+    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_string.h");
+    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_vector.h");
+    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_list.h");
     // TODO(holtgrew): Add more checkpoints.
 }
 SEQAN_END_TESTSUITE

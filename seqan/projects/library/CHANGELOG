@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Fixing a bug in `iter()` with iterator (#848).
  * Adding module '''parallel''', bootstrapping with atomic primitives and atomic `min()`/`max()` functions, fully tested.
  * Slightly optimized assign for strings when source and target are empty.
  * Slightly optimized `empty()` for strings.
