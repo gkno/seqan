@@ -29,6 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Implementation of SimpleType, the biological sequence types and conversion
+// tables.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_BASIC_ALPHABET_SIMPLE_H
 #define SEQAN_HEADER_BASIC_ALPHABET_SIMPLE_H
@@ -66,6 +71,7 @@ it could be convenient to do so.
 ..implements:Concept.Simple Type
 ..include:seqan/basic.h
 */
+// TODO(holtgrew): This should actually be a class.
 template <typename TValue, typename TSpec>
 struct SimpleType
 {
@@ -104,6 +110,7 @@ SEQAN_CHECKPOINT
 		assign(*this, other);
 		return *this;
 	}
+
 	template <typename T>
 	SimpleType & operator=(T const & other) 
 	{ 
@@ -119,8 +126,15 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 
-	//this cannot be a template since a template would be in conflict to
-	//the template c'tor
+
+    // Class.SimpleType specifies type conversion operators for all built-in
+    // integer types since there is no way to extend the build-in types with
+    // copy and assignment constructors in C++.
+    //
+    // This cannot be a template since it would conflict to the template
+    // constructor.
+
+    // TODO(holtgrew): These are candidates for breaking the style convention and simply write each function in one line.
 
 	operator __int64() const
 	{
@@ -138,53 +152,50 @@ SEQAN_CHECKPOINT
 		return c;
 	}
 
+	operator __int32() const
+	{
+SEQAN_CHECKPOINT
+		__int32 c;
+		assign(c, *this);
+		return c;
+	}
 
-	operator int() const
+	operator __uint32() const
 	{
 SEQAN_CHECKPOINT
-		int c;
+		__uint32 c;
 		assign(c, *this);
 		return c;
 	}
-	operator unsigned int() const
+
+	operator __int16() const
 	{
 SEQAN_CHECKPOINT
-		unsigned int c;
+		__int16 c;
 		assign(c, *this);
 		return c;
 	}
-	operator short() const
+
+	operator __uint16() const
 	{
 SEQAN_CHECKPOINT
-		short c;
+		__uint16 c;
 		assign(c, *this);
 		return c;
 	}
-	operator unsigned short() const
+
+	operator __int8() const
 	{
 SEQAN_CHECKPOINT
-		unsigned short c;
+		__int8 c;
 		assign(c, *this);
 		return c;
 	}
-	operator char() const
+
+	operator __uint8() const
 	{
 SEQAN_CHECKPOINT
-		char c;
-		assign(c, *this);
-		return c;
-	}
-	operator signed char() const
-	{
-SEQAN_CHECKPOINT
-		signed char c;
-		assign(c, *this);
-		return c;
-	}
-	operator unsigned char() const
-	{
-SEQAN_CHECKPOINT
-		unsigned char c;
+		__uint8 c;
 		assign(c, *this);
 		return c;
 	}

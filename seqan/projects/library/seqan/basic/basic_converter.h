@@ -29,6 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Basic conversion code.
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_BASIC_CONVERTER_H
 #define SEQAN_HEADER_BASIC_CONVERTER_H

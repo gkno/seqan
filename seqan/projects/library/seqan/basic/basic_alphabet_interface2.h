@@ -29,6 +29,8 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
 
 #ifndef SEQAN_HEADER_BASIC_ALPHABET_INTERFACE2_H
 #define SEQAN_HEADER_BASIC_ALPHABET_INTERFACE2_H
