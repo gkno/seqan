@@ -216,7 +216,6 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFi
 #ifdef RAZERS_BANDED_MYERS
 		tls.verifier.patternState.leftClip = (value(it).hstkPos >= 0)? 0: -value(it).hstkPos;	// left clip if match begins left of the genome
 #endif
-        // TODO(holtgrew): Unsure about global/local indices and global/local store.
 		matchVerify(tls.verifier, swiftInfix(value(it), job.globalStore->contigStore[job.contigId].seq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
     }
 

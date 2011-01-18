@@ -489,6 +489,7 @@ void _mapMatePairReads(
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{		
+        // std::cerr << " R(" << (*swiftFinderR.curHit).hstkPos << ", " << (*swiftFinderR.curHit).hstkPos + (*swiftFinderR.curHit).bucketWidth << ")" << std::flush;
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
@@ -515,6 +516,7 @@ void _mapMatePairReads(
 				gPair = positionRange(swiftFinderL);
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
 				{
+                    // std::cerr << " L(" << (*swiftFinderR.curHit).hstkPos << ", " << (*swiftFinderR.curHit).hstkPos + (*swiftFinderR.curHit).bucketWidth << ")" << std::flush;
 					// link in
 					fL.i1 = lastPotMatchNo[swiftPatternL.curSeqNo];
 					lastPotMatchNo[swiftPatternL.curSeqNo] = lastNo++;
@@ -538,6 +540,7 @@ void _mapMatePairReads(
 		__int64 lastPositive = (__int64)-1;
 		for (__int64 i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
 		{
+            // std::cerr << " [last pot loop]" << std::flush;
 			it = &value(fifo, i - firstNo);
 
 			// search left mate

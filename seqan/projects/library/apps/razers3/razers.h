@@ -36,7 +36,7 @@
 #endif  // #ifdef RAZERS_PROFILE
 
 // No parallelism for less than MIN_PARALLEL_WORK reads.
-const unsigned MIN_PARALLEL_WORK = 100/*0*/; // TODO(holtgrew): Set to some useful value after development.
+const unsigned MIN_PARALLEL_WORK = 0;//100/*0*/; // TODO(holtgrew): Set to some useful value after development.
 
 namespace SEQAN_NAMESPACE_MAIN
 {

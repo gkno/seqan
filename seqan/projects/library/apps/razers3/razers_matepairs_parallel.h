@@ -84,6 +84,9 @@ public:
     typedef TSwiftFinderL_ TSwiftFinderL;
     typedef TSwiftFinderR_ TSwiftFinderR;
     
+	typedef typename TFragmentStore::TContigSeq				TGenome;
+    typedef typename Infix<TGenome>::Type TGenomeInfix;
+
     // The id of this thread.
     unsigned threadId;
 
@@ -116,6 +119,8 @@ public:
     String<unsigned> splitters;
 
     unsigned completeWindows;
+
+    TGenomeInfix genomeInf;
 
     ThreadLocalStorage() {}
 };
@@ -201,7 +206,7 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
         resize(readSetR, pairCount, Exact());
 
         unsigned offset = splitters[i];
-        for (unsigned j = 0; j < pairCount; ++i) {
+        for (unsigned j = 0; j < pairCount; ++j) {
             assign(readSetL[j], store.readSeqStore[store.matePairStore[offset + j].readId[0]]);
             assign(readSetR[j], store.readSeqStore[store.matePairStore[offset + j].readId[1]]);
         }
@@ -224,6 +229,7 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
         TIndex & indexL = host(tls.swiftPatternL);
         clear(indexL);
         clear(indexText(indexL));
+        reserve(indexText(indexL), length(readSetL), Exact());
         for (TPosition j = 0, jEnd = length(readSetL); j < jEnd; ++j)
             appendValue(indexText(indexL), readSetL[j]);
         indexL.shape = shape;
@@ -234,9 +240,10 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
         cargo(indexL)._debugLevel = options._debugLevel;
         indexRequire(indexL, QGramSADir());
 
-        TIndex & indexR = host(tls.swiftPatternL);
+        TIndex & indexR = host(tls.swiftPatternR);
         clear(indexR);
         clear(indexText(indexR));
+        reserve(indexText(indexR), length(readSetR), Exact());
         for (TPosition j = 0, jEnd = length(readSetR); j < jEnd; ++j)
             appendValue(indexText(indexR), readSetR[j]);
         indexR.shape = shape;
@@ -251,7 +258,8 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
 
 template <typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename THitString, typename TPreprocessing>
 void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls,
-                      Job<PairedVerification<TFragmentStore, THitString, TOptions, TSwiftPattern> > & job)
+                      Job<PairedVerification<TFragmentStore, THitString, TOptions, TSwiftPattern> > & job,
+                      String<unsigned> const & splitters)
 {
     typedef ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
 
@@ -297,12 +305,30 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     timelineBeginTask(TASK_VERIFY);
 #endif  // #ifdef RAZERS_PROFILE
 
+    // Allocate fragmentstore for job's results.
+    TFragmentStore * localStore = new TFragmentStore();
+
+    // Job-wide offset for reads.
+    unsigned jobIdOffset = splitters[job.threadId];
+
+    // Initialize verifiers.
+    tls.verifierL.store = localStore;
+    tls.verifierL.options = job.options;
+    tls.verifierL.swiftPattern = job.swiftPatternL;
+    tls.verifierL.cnts = 0;
+
+    tls.verifierR.store = localStore;
+    tls.verifierR.options = job.options;
+    tls.verifierR.swiftPattern = job.swiftPatternR;
+    tls.verifierR.cnts = 0;
+
 	const unsigned NOT_VERIFIED = 1u << (8 * sizeof(unsigned) - 1);
 
     TOptions & options = tls.options;
 
     TSwiftPattern & swiftPatternL = tls.swiftPatternL;
     TSwiftPattern & swiftPatternR = tls.swiftPatternR;
+    (void)swiftPatternR;
     // TSwiftFinderL & swiftFinderL = tls.swiftFinderL;
     TSwiftFinderR & swiftFinderR = tls.swiftFinderR;
     TReadSet	&readSetL = tls.readSetL;
@@ -313,11 +339,13 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 	// distance <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
 	// distance >= libLen - libErr - 2*parWidth + shapeLen
 	TSize readLength = length(tls.readSetL[0]);
-	TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(tls.swiftPatternL)));
-	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(tls.swiftPatternL)));
+	TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(swiftPatternL)));
+	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(swiftPatternL)));
 	TGPos scanShift = (minDistance < 0) ? 0: minDistance;
 
     TDequeue fifo;						// stores left-mate potential matches
+    // TODO(holtgrew): lastPotMatchNo -- one per thread should be enough!
+    // String<Pair<unsigned, __int64> > lastPotMatchNo;		// last number of a left-mate potential
     String<__int64> lastPotMatchNo;		// last number of a left-mate potential
     __int64 lastNo = 0;					// last number over all left-mate pot. matches in the queue
     __int64 firstNo = 0;				// first number over all left-mate pot. match in the queue
@@ -325,7 +353,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 
     resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
     
-	TGenome & genome = tls.store.contigStore[job.contigId].seq;
+	TGenome & genome = tls.globalStore->contigStore[job.contigId].seq;
 
     TSize gLength = length(genome);
     
@@ -338,7 +366,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     // -----------------------------------------------------------------------
     // Enqueue hits from the previous left window.
     // -----------------------------------------------------------------------
-    if (length(*job.prevHitsPtrL) > 0u) {
+    if (job.prevHitsPtrL.get() != 0 && length(*job.prevHitsPtrL) > 0u) {
         THitStringIter it = end(*job.prevHitsPtrL, Standard());
         THitStringIter itBegin = begin(*job.prevHitsPtrL, Standard());
 
@@ -354,9 +382,12 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             ++it;
 
         // Now enqueue all hits in the overlap that belong to this job.
-        for (THitStringIter itEnd = begin(*job.prevHitsPtrL, Standard()); it != itEnd; ++it) {
+        for (THitStringIter itEnd = end(*job.prevHitsPtrL, Standard()); it != itEnd; ++it) {
             if (it->ndlSeqNo % job.stride != job.offset)
                 continue;  // Skip hits that are not to be processed in this job.
+
+            // std::cerr << " [from left window]" << std::flush;
+            gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), it->hstkPos), _min(it->hstkPos + it->bucketWidth, static_cast<TSignedGPos>(length(genome))));
 
             fL.i1 = lastPotMatchNo[it->ndlSeqNo];
             lastPotMatchNo[it->ndlSeqNo] = lastNo++;
@@ -375,10 +406,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     THitStringIter itL = begin(*job.hitsPtrL, Standard());
     THitStringIter itEndL = end(*job.hitsPtrL, Standard());
     for (THitStringIter itR = begin(*job.hitsPtrR, Standard()), itEndR = end(*job.hitsPtrR, Standard()); itR != itEndR; ++itR)
-    {		
+    {
+        // std::cerr << " R(" << itR->hstkPos << ", " << itR->hstkPos + itR->bucketWidth << ")" << std::flush;
         unsigned matePairId = itR->ndlSeqNo;;
-        TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
-        TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
+        TGPos rEndPos = itR->hstkPos + itR->bucketWidth + scanShift;
+        TGPos doubleParWidth = 2 * itR->bucketWidth;
 		
         // (1) Remove out-of-window left mates from fifo.
         while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
@@ -404,11 +436,12 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                 gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), itL->hstkPos), _min(itL->hstkPos + itL->bucketWidth, static_cast<TSignedGPos>(length(genome))));
                 if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
                 {
+                    // std::cerr << " L(" << itR->hstkPos << ", " << itR->hstkPos + itR->bucketWidth << ")" << std::flush;
                     // link in
                     fL.i1 = lastPotMatchNo[itL->ndlSeqNo];
                     lastPotMatchNo[itL->ndlSeqNo] = lastNo++;
 					
-                    fL.i2.readId = tls.store.matePairStore[itL->ndlSeqNo].readId[0] | NOT_VERIFIED;
+                    fL.i2.readId = tls.globalStore->matePairStore[itL->ndlSeqNo].readId[0] | NOT_VERIFIED;
                     fL.i2.beginPos = gPair.i1;
                     fL.i2.endPos = gPair.i2;
 					
@@ -426,10 +459,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
         TDequeueIterator bestLeft = TDequeueIterator();
 
         TDequeueIterator it;
-        unsigned leftReadId = tls.store.matePairStore[matePairId].readId[0];
+        unsigned leftReadId = tls.globalStore->matePairStore[matePairId].readId[0];
         __int64 lastPositive = (__int64)-1;
         for (__int64 i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
         {
+            // std::cerr << " [last pot loop]" << std::flush;
             it = &value(fifo, i - firstNo);
 
             // search left mate
@@ -450,7 +484,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 						if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
 										matePairId, readSetL, TRazerSMode()))
                         {
-                            verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
+                            // Translate from thread-local to global id.
+                            verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;  // has been verified positively
                             (*it).i2 = verifierL.m;
                             (*it).i3 = verifierL.q;
 							
@@ -514,7 +549,10 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             //					mR, qR, infix(swiftFinderR),
             //					matePairId, readSetR, forwardPatternsR,
             //					options, TSwiftSpec()))
-            if (matchVerify(verifierR, infix(swiftFinderR), 
+            // std::cerr << " [verify]" << std::flush;
+
+            verifierR.m.readId = jobIdOffset + itR->ndlSeqNo;  // Translate from thread-local to global id.
+            if (matchVerify(verifierR, swiftInfix(*itR, haystack(swiftFinderR)),
                             matePairId, readSetR, TRazerSMode()))
             {
                 // distance between left mate beginning and right mate end
@@ -529,7 +567,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                     fL.i3 = (*bestLeft).i3;
 					
                     // transform mate readNo to global readNo
-                    TMatePair &mp = tls.store.matePairStore[matePairId];
+                    TMatePair &mp = tls.globalStore->matePairStore[matePairId];
                     fL.i2.readId = mp.readId[0];
                     mR.readId    = mp.readId[1];
 					
@@ -568,6 +606,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                                                     //							std::cout << " R_" << mR.beginPos << "_" << mR.endPos << "_" << mR.editDist;
                                                     std::cout << std::endl;
                     */
+                    // TODO(holtgrew): Should add to local store!
+#if 0
                     if (!options.spec.DONT_DUMP_RESULTS)
                     {
                         fL.i2.id = length(tls.store.alignedReadStore);
@@ -594,12 +634,16 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                         }
                         */
                     }
+#endif  // #if 0
                     ++options.countVerification;
                 }
                 ++options.countFiltration;
             }
         }
     }
+
+    // TODO(holtgrew): Add to verification results!
+    delete localStore;
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_VERIFY);
@@ -648,6 +692,7 @@ void _mapMatePairReadsParallel(
 	FragmentStore<TFSSpec, TFSConfig>		& store,
 	unsigned								  contigId,				// ... and its sequence number
     TThreadLocalStorages                    & threadLocalStorages,
+    String<unsigned> const & splitters,
 	TPreprocessing							& preprocessingL,
 	TPreprocessing							& preprocessingR,
 	TCounts									& /*cnts*/,  // TODO(holtgrew): What about this?
@@ -746,7 +791,7 @@ void _mapMatePairReadsParallel(
     // -----------------------------------------------------------------------
     // TODO(holtgrew): Maybe put into its own function?
     #pragma omp parallel for schedule(static, 1)
-    for (int i = 0; i < (int)options.threadCount; ++i) {
+    for (int i = 0; i < static_cast<int>(options.threadCount); ++i) {
 		// Initialize verifier objects.
 		threadLocalStorages[i].verifierL.onReverseComplement = (orientation == 'R');
 		threadLocalStorages[i].verifierL.genomeLength = length(genome);
@@ -761,8 +806,8 @@ void _mapMatePairReadsParallel(
 		threadLocalStorages[i].verifierR.preprocessing = &preprocessingR;
 
         threadLocalStorages[i].swiftFinderL  = TSwiftFinderL(genome, options.repeatLength, 1);
-        TGenomeInf genomeInf = infix(genome, scanShift, length(genome));
-        threadLocalStorages[i].swiftFinderR  = TSwiftFinderR(genomeInf, options.repeatLength, 1);
+        threadLocalStorages[i].genomeInf = infix(genome, scanShift, length(genome));
+        threadLocalStorages[i].swiftFinderR  = TSwiftFinderR(threadLocalStorages[i].genomeInf, options.repeatLength, 1);
     }
 
     // -----------------------------------------------------------------------
@@ -787,6 +832,7 @@ void _mapMatePairReadsParallel(
         // TVerifier	&verifierL = tls.verifierL;  // XXX
         // TVerifier	&verifierR = tls.verifierR;  // XXX
 
+        (void)readSetL;
         SEQAN_ASSERT_NOT(empty(readSetL));
         
 #ifdef RAZERS_PROFILE
@@ -828,11 +874,13 @@ void _mapMatePairReadsParallel(
 
             // Search for hits from next window.
             hasMore = windowFindNext(tls.swiftFinderR, tls.swiftPatternR, tls.options.windowSize);
-            windowFindNext(tls.swiftFinderL, tls.swiftPatternR, tls.options.windowSize);
+            bool ret = windowFindNext(tls.swiftFinderL, tls.swiftPatternL, tls.options.windowSize);
+            (void) ret;
+            SEQAN_ASSERT_TRUE(ret == hasMore);
             windowsDone += 1;  // Local windows done count.
             atomicMax(leaderWindowsDone, windowsDone);
 
-            size_t rightWindowBegin = tls.options.windowSize * windowsDone;
+            size_t rightWindowBegin = beginPosition(tls.genomeInf) + tls.options.windowSize * (windowsDone - 1);
 
             // Create verification jobs.
             String<TVerificationJob> jobs;
@@ -856,7 +904,7 @@ void _mapMatePairReadsParallel(
                 TVerificationJob job;
                 if (!popFront(job, taskQueue))
                     break;
-                workVerification(tls, job);
+                workVerification(tls, job, splitters);
             }
         } while(hasMore);
 
@@ -871,7 +919,7 @@ void _mapMatePairReadsParallel(
         while (threadsFiltering > 0u) {
             TVerificationJob job;
             if (popFront(job, taskQueue))
-                workVerification(tls, job);
+                workVerification(tls, job, splitters);
         }
 
         // After every thread is done with everything, write back once more.
@@ -1022,9 +1070,9 @@ int _mapMatePairReadsParallel(
 		// (once per _mapSingleReadsToContig call)
 		lockContig(store, contigId);
 		if (options.forward)
-			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, forwardPatternsL, forwardPatternsR, cnts, 'F', options, mode);
+			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, splitters, forwardPatternsL, forwardPatternsR, cnts, 'F', options, mode);
 		if (options.reverse)
-			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, forwardPatternsL, forwardPatternsR, cnts, 'R', options, mode);
+			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, splitters, forwardPatternsL, forwardPatternsR, cnts, 'R', options, mode);
 		unlockAndFreeContig(store, contigId);
 	}
 #ifdef RAZERS_PROFILE
