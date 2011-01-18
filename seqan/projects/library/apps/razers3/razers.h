@@ -36,7 +36,7 @@
 #endif  // #ifdef RAZERS_PROFILE
 
 // No parallelism for less than MIN_PARALLEL_WORK reads.
-const unsigned MIN_PARALLEL_WORK = 0;//100/*0*/; // TODO(holtgrew): Set to some useful value after development.
+const unsigned MIN_PARALLEL_WORK = 1;//100/*0*/; // TODO(holtgrew): Set to some useful value after development.
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -1532,6 +1532,14 @@ matchVerify(
 {
     if (length(inf) == 0u)
       return false;
+
+    #pragma omp critical
+    {
+        ::std::cout<<"\n# Thread: "<<omp_get_thread_num() <<::std::endl;
+        ::std::cout<<"# Verify: "<<::std::endl;
+        ::std::cout<<"# Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
+        ::std::cout<<"# Read:   "<<readSet[readId] << "(id: " << readId << ")" <<::std::endl;
+    }
 
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;

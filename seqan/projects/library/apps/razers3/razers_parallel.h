@@ -159,9 +159,9 @@ appendToVerificationResults(SingleVerificationResults<TFragmentStore> & verifica
     omp_unset_lock(&verificationResults.lock->lock_);
 }
 
-// Uses the read ID to find the correct SWIFT pattern in the string handled by
-// the ParallelSwiftPatternHandler, and the correct local ID within this SWIFT
-// pattern to update the max errors.
+// Uses the read ID to find the correct SWIFT pattern of the TLS, and
+// the correct local ID within this SWIFT pattern to update the max
+// errors.
 //
 // We do not disable the read right 
 template <typename TFragmentStore, typename TSwiftFinder_, typename TSwiftPattern_, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TReadNo, typename TMaxErrors, typename TPreprocessing>

@@ -143,6 +143,14 @@ int mapReads(
 		cerr << "Repeat threshold:                \t" << options.repeatLength << endl;
 		cerr << "Overabundance threshold:         \t" << options.abundanceCut << endl;
 		cerr << "Taboo length:                    \t" << options.tabooLength << endl;
+        if (options._debugLevel >= 2) {
+#ifdef PLATFORM_WINDOWS
+            int pid = _getpid();
+#else // #ifdef PLATFORM_WINDOWS
+            int pid = getpid();
+#endif // #ifdef PLATFORM_WINDOWS
+            cerr << "Program PID:                     \t" << pid << endl;
+        }
 		cerr << endl;
 	}
 	
@@ -634,6 +642,8 @@ int main(int argc, const char *argv[])
 	int result = mapReads(genomeFileNames, readFileNames, errorPrbFileName, options);
 	if (result != 0)
 		cerr << "Exiting ..." << endl;
+
+    std::cout << "# ---------" << std::endl;
 
 #ifdef _OPENMP
     // Restoring number of threads for side-effect freeness.

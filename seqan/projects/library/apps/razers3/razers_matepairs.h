@@ -282,8 +282,8 @@ void compactPairMatches(
 
 template < typename TFragmentStore, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
 void compactPairMatches(
-	TFragmentStore			& mainStore, // need to separate them for the parallel version
-	TFragmentStore			& threadStore,
+	TFragmentStore			& mainStore,   // all but aligned reads up to the global writeback
+	TFragmentStore			& threadStore, // aligned read only
 	TCounts					&, 
 	RazerSOptions<TSpec>	& options, 
 	TSwiftL					& swiftL, 
@@ -297,6 +297,8 @@ void compactPairMatches(
 	typedef typename Value<TAlignQualityStore>::Type				TQual;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
 	
+    fprintf(stderr, "[pair-compact]");
+    double beginTime = sysTime();
 	unsigned matePairId = -2;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
@@ -353,8 +355,14 @@ void compactPairMatches(
 		*dit = *it;	++dit; ++it;
 		*dit = *it;	++dit;
 	}
+	unsigned origSize = length(mainStore.alignedReadStore);
 	resize(threadStore.alignedReadStore, dit - begin(threadStore.alignedReadStore, Standard()));
 	compactAlignedReads(threadStore);
+
+    double endTime = sysTime();
+    fprintf(stderr, "[pair-compacted in %f s]", endTime - beginTime);
+	unsigned newSize = length(mainStore.alignedReadStore);
+	fprintf(stderr, "[pair-compacted from %u to %u]", origSize, newSize);
 }
 
 
@@ -691,7 +699,9 @@ void _mapMatePairReads(
 						if (length(store.alignedReadStore) > options.compactThresh)
 						{
 							typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
-//									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
+                            // TODO(weese): Duplicates are hard to mask in paired-end mode.
+                            // if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+                            //   maskDuplicates(matches);	// overlapping parallelograms cause duplicates
 							compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
 							
 							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
