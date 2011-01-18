@@ -152,50 +152,53 @@ SEQAN_CHECKPOINT
 		return c;
 	}
 
-	operator __int32() const
+
+	operator int() const
 	{
 SEQAN_CHECKPOINT
-		__int32 c;
+		int c;
 		assign(c, *this);
 		return c;
 	}
-
-	operator __uint32() const
+	operator unsigned int() const
 	{
 SEQAN_CHECKPOINT
-		__uint32 c;
+		unsigned int c;
 		assign(c, *this);
 		return c;
 	}
-
-	operator __int16() const
+	operator short() const
 	{
 SEQAN_CHECKPOINT
-		__int16 c;
+		short c;
 		assign(c, *this);
 		return c;
 	}
-
-	operator __uint16() const
+	operator unsigned short() const
 	{
 SEQAN_CHECKPOINT
-		__uint16 c;
+		unsigned short c;
 		assign(c, *this);
 		return c;
 	}
-
-	operator __int8() const
+	operator char() const
 	{
 SEQAN_CHECKPOINT
-		__int8 c;
+		char c;
 		assign(c, *this);
 		return c;
 	}
-
-	operator __uint8() const
+	operator signed char() const
 	{
 SEQAN_CHECKPOINT
-		__uint8 c;
+		signed char c;
+		assign(c, *this);
+		return c;
+	}
+	operator unsigned char() const
+	{
+SEQAN_CHECKPOINT
+		unsigned char c;
 		assign(c, *this);
 		return c;
 	}
