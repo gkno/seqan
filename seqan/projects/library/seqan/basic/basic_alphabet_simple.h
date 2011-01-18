@@ -1268,8 +1268,8 @@ SEQAN_CHECKPOINT
 //DNA (4 letters)
 
 template <>
-struct CompareType<Dna, Byte> { typedef Dna Type; };
-inline void assign(Dna & target, Byte c_source)
+struct CompareType<Dna, __uint8> { typedef Dna Type; };
+inline void assign(Dna & target, __uint8 c_source)
 {
 SEQAN_CHECKPOINT
 	target.value = TranslateTableByteToDna_<>::VALUE[c_source];
@@ -1315,8 +1315,8 @@ SEQAN_CHECKPOINT
 //DNA (5 letters)
 
 template <>
-struct CompareType<Dna5, Byte> { typedef Dna5 Type; };
-inline void assign(Dna5 & target, Byte c_source)
+struct CompareType<Dna5, __uint8> { typedef Dna5 Type; };
+inline void assign(Dna5 & target, __uint8 c_source)
 {
 SEQAN_CHECKPOINT
 	target.value = TranslateTableByteToDna5_<>::VALUE[c_source];
@@ -1362,8 +1362,8 @@ SEQAN_CHECKPOINT
 //RNA (4 letters)
 
 template <>
-struct CompareType<Rna, Byte> { typedef Rna Type; };
-inline void assign(Rna & target, Byte c_source)
+struct CompareType<Rna, __uint8> { typedef Rna Type; };
+inline void assign(Rna & target, __uint8 c_source)
 {
 	SEQAN_CHECKPOINT
 	target.value = TranslateTableByteToRna_<>::VALUE[c_source];
@@ -1400,8 +1400,8 @@ SEQAN_CHECKPOINT
 //RNA (5 letters)
 
 template <>
-struct CompareType<Rna5, Byte> { typedef Rna5 Type; };
-inline void assign(Rna5 & target, Byte c_source)
+struct CompareType<Rna5, __uint8> { typedef Rna5 Type; };
+inline void assign(Rna5 & target, __uint8 c_source)
 {
 	SEQAN_CHECKPOINT
 	target.value = TranslateTableByteToRna5_<>::VALUE[c_source];
@@ -1438,8 +1438,8 @@ SEQAN_CHECKPOINT
 //IUPAC (4 bits)
 
 template <>
-struct CompareType<Iupac, Byte> { typedef Iupac Type; };
-inline void assign(Iupac & target, Byte c_source)
+struct CompareType<Iupac, __uint8> { typedef Iupac Type; };
+inline void assign(Iupac & target, __uint8 c_source)
 {
 SEQAN_CHECKPOINT
 	target.value = TranslateTableByteToIupac_<>::VALUE[c_source];
@@ -1481,8 +1481,8 @@ SEQAN_CHECKPOINT
 //Amino Acid (5 bits)
 
 template <>
-struct CompareType<AminoAcid, Byte> { typedef AminoAcid Type; };
-inline void assign(AminoAcid & target, Byte c_source)
+struct CompareType<AminoAcid, __uint8> { typedef AminoAcid Type; };
+inline void assign(AminoAcid & target, __uint8 c_source)
 {
 SEQAN_CHECKPOINT
 	target.value = TranslateTableByteToAA_<>::VALUE[c_source];
@@ -1764,8 +1764,8 @@ SEQAN_CHECKPOINT
 }
 
 template <>
-struct CompareType<DnaQ, Byte> { typedef Dna Type; };
-inline void assign(DnaQ & target, Byte c_source)
+struct CompareType<DnaQ, __uint8> { typedef Dna Type; };
+inline void assign(DnaQ & target, __uint8 c_source)
 {
 SEQAN_CHECKPOINT
 	assign(target, (Dna) c_source);
@@ -1839,8 +1839,8 @@ SEQAN_CHECKPOINT
 
 
 template <>
-struct CompareType<Dna5Q, Byte> { typedef Dna5 Type; };
-inline void assign(Dna5Q & target, Byte c_source)
+struct CompareType<Dna5Q, __uint8> { typedef Dna5 Type; };
+inline void assign(Dna5Q & target, __uint8 c_source)
 {
 SEQAN_CHECKPOINT
 	assign(target, (Dna5)c_source);

@@ -401,37 +401,37 @@ SEQAN_DEFINE_TEST(TestSimpleTypeConversions) {
 	TestConversion<Ascii, AminoAcid>();
 
 	TestConversion<Dna, Ascii>();
-	TestConversion<Dna, Byte>();
+	TestConversion<Dna, __uint8>();
 	TestConversion<Dna, Unicode>();
 	TestConversion<Dna, int>();
 	TestConversion<Dna, Dna5>();
 	TestConversion<Dna, Iupac>();
 
 	TestConversion<Dna5, Ascii>();
-	TestConversion<Dna5, Byte>();
+	TestConversion<Dna5, __uint8>();
 	TestConversion<Dna5, Unicode>();
 	TestConversion<Dna5, Dna>();
 	TestConversion<Dna5, Iupac>();
 
 	TestConversion<Rna, Ascii>();
-	TestConversion<Rna, Byte>();
+	TestConversion<Rna, __uint8>();
 	TestConversion<Rna, Unicode>();
 	TestConversion<Rna, int>();
 	TestConversion<Rna, Rna5>();
 
 	TestConversion<Rna5, Ascii>();
-	TestConversion<Rna5, Byte>();
+	TestConversion<Rna5, __uint8>();
 	TestConversion<Rna5, Unicode>();
 	TestConversion<Rna5, Rna>();
 
 	TestConversion<Iupac, Ascii>();
-	TestConversion<Iupac, Byte>();
+	TestConversion<Iupac, __uint8>();
 	TestConversion<Iupac, Unicode>();
 	TestConversion<Iupac, Dna>();
 	TestConversion<Iupac, Dna5>();
 
 	TestConversion<AminoAcid, Ascii>();
-	TestConversion<AminoAcid, Byte>();
+	TestConversion<AminoAcid, __uint8>();
 	TestConversion<AminoAcid, Unicode>();
 
 	typedef SimpleType<int, void> ST;

@@ -73,7 +73,7 @@ struct IsSimple<T const>:
 //very basic Alphabets
 
 typedef char Ascii;
-typedef unsigned char Byte;
+//typedef unsigned char Byte;  // TODO(holtgrew): Disabling, remove together with Ascii and Unicode with #849
 typedef wchar_t Unicode;
 
 //////////////////////////////////////////////////////////////////////////////
