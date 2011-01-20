@@ -43,39 +43,39 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 /**
-.Spec.MUMs Iterator:
+.Spec.Mums Iterator:
 ..cat:Index
 ..general:Spec.BottomUp Iterator
 ..summary:Iterator to search for all maximum unique matches.
-..signature:Iterator<TContainer, MUMs>::Type
-..signature:Iter<TContainer, VSTree< BottomUp<MUMs> > >
+..signature:Iterator<TContainer, Mums>::Type
+..signature:Iter<TContainer, VSTree< BottomUp<Mums> > >
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
 ...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
 
-.Memfunc.MUMs Iterator#Iterator
-..class:Spec.MUMs Iterator
+.Memfunc.Mums Iterator#Iterator
+..class:Spec.Mums Iterator
 ..summary:Constructor
 ..signature:Iterator(index[, minLength])
 ..signature:Iterator(iterator)
 ..param.index:An index object.
 ..param.minLength:Minimum length of the maximal unique matches, default value is 1.
-..param.iterator:Another MUMs iterator. (copy constructor)
-...type:Spec.MUMs Iterator
+..param.iterator:Another Mums iterator. (copy constructor)
+...type:Spec.Mums Iterator
 */
 
 	//////////////////////////////////////////////////////////////////////////////
-	// MUMs - generalized suffix tree version
+	// Mums - generalized suffix tree version
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TSTree >
-	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MUMs> > > > {
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<Mums> > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
 	template < typename TSTree >
-	class Iter< TSTree, VSTree< BottomUp<MUMs> > >:
+	class Iter< TSTree, VSTree< BottomUp<Mums> > >:
 		public Iter< TSTree, VSTree< BottomUp<> > > 
 	{
 	public:
@@ -120,7 +120,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template < typename TSTree >
-	inline void goNext(Iter< TSTree, VSTree< BottomUp<MUMs> > > &it) {
+	inline void goNext(Iter< TSTree, VSTree< BottomUp<Mums> > > &it) {
 		do {
 			goNext(it, PostorderEmptyEdges());
 		} while (!atEnd(it) && 
@@ -134,30 +134,30 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	
 /**
-.Spec.MultiMEMs Iterator:
+.Spec.MultiMems Iterator:
 ..cat:Index
 ..general:Spec.BottomUp Iterator
-..summary:Iterator to search for MultiMEMs.
-..signature:Iterator<TContainer, MultiMEMs>::Type
-..signature:Iter<TContainer, VSTree< BottomUp<MultiMEMs> > >
+..summary:Iterator to search for MultiMems.
+..signature:Iterator<TContainer, MultiMems>::Type
+..signature:Iter<TContainer, VSTree< BottomUp<MultiMems> > >
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
 ...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
 
-.Memfunc.MultiMEMs Iterator#Iterator
-..class:Spec.MultiMEMs Iterator
+.Memfunc.MultiMems Iterator#Iterator
+..class:Spec.MultiMems Iterator
 ..summary:Constructor
 ..signature:Iterator(index[, minLength])
 ..signature:Iterator(iterator)
 ..param.index:An index object.
 ..param.minLength:Minimum length of the multiple maximal exact matches, default value is 1.
-..param.iterator:Another MultiMEMs iterator. (copy constructor)
-...type:Spec.MultiMEMs Iterator
+..param.iterator:Another MultiMems iterator. (copy constructor)
+...type:Spec.MultiMems Iterator
 */
 
 	//////////////////////////////////////////////////////////////////////////////
-	// MultiMEMs
+	// MultiMems
 	//////////////////////////////////////////////////////////////////////////////
 
 	// contains a set of fraction compounds
@@ -172,7 +172,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TSTree >
-	class Iter< TSTree, VSTree< BottomUp<MultiMEMs> > >:
+	class Iter< TSTree, VSTree< BottomUp<MultiMems> > >:
 		public Iter< TSTree, VSTree< BottomUp<> > > 
 	{
 	public:
@@ -374,7 +374,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TSTree >
-	inline void _dfsOnLeaf(Iter<TSTree, VSTree< BottomUp<MultiMEMs> > > &it) 
+	inline void _dfsOnLeaf(Iter<TSTree, VSTree< BottomUp<MultiMems> > > &it) 
 	{
 		typedef Iter<TSTree, VSTree< BottomUp<> > > TBase;
 		_dfsOnLeaf((TBase&)it);
@@ -422,44 +422,44 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSTree>
-	struct MultiMEM {
-//		Iter< TSTree, VSTree<BottomUp<MultiMEMs> > > &it;
+	struct MultiMem {
+//		Iter< TSTree, VSTree<BottomUp<MultiMems> > > &it;
 	};
 
 	template <typename TSTree>
-	struct Value< MultiMEM<TSTree> > {
+	struct Value< MultiMem<TSTree> > {
 		typedef Pair< typename SAValue<TSTree>::Type > Type;
 	};
 
 	template <typename TSTree>
-	struct Size< MultiMEM<TSTree> > {
+	struct Size< MultiMem<TSTree> > {
 		typedef typename Size<TSTree>::Type Type;
 	};
 
 
 	template <typename TSTree>
-	inline typename Size< MultiMEM<TSTree> >::Type 
-	length(MultiMEM<TSTree> const &repeat) {
+	inline typename Size< MultiMem<TSTree> >::Type 
+	length(MultiMem<TSTree> const &repeat) {
 		return repeat.it.countRepeats();
 	}
 
 /*
 	template <typename TSTree>
-	inline typename Iterator< MultiMEM<TSTree> >::Type 
-	begin(MultiMEM<TSTree> &repeat) {
-		return Iterator< MultiMEM<TSTree> >::Type(repeat.it);
+	inline typename Iterator< MultiMem<TSTree> >::Type 
+	begin(MultiMem<TSTree> &repeat) {
+		return Iterator< MultiMem<TSTree> >::Type(repeat.it);
 	}
 
 	template <typename TSTree>
-	inline typename Iterator< MultiMEM<TSTree> const >::Type 
-	begin(MultiMEM<TSTree> const &repeat) {
-		return Iterator< MultiMEM<TSTree> >::Type(repeat.it);
+	inline typename Iterator< MultiMem<TSTree> const >::Type 
+	begin(MultiMem<TSTree> const &repeat) {
+		return Iterator< MultiMem<TSTree> >::Type(repeat.it);
 	}
 */
 
 
 	template <typename TSTree>
-	class Iter< MultiMEM<TSTree>, MultiMEMOccurences > {
+	class Iter< MultiMem<TSTree>, MultiMemOccurences > {
 	public:
 
 		typedef typename Value<TSTree>::Type	TValue;
@@ -471,7 +471,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename TFractionCompound::TSet const	TSet;
 		typedef typename Iterator<TSet>::Type			TSetIterator;
 
-		typedef Iter<TSTree, VSTree<BottomUp<MultiMEMs> > >	const	TIterator;
+		typedef Iter<TSTree, VSTree<BottomUp<MultiMems> > >	const	TIterator;
 		typedef typename TIterator::TPositionList const				TPositionList;
 
 		TIterator	*mmemIt;
@@ -594,7 +594,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		String<SubState>	subState;
 
 
-		inline Iter(Iter<TSTree, VSTree<BottomUp<MultiMEMs> > > const &_maxIt):
+		inline Iter(Iter<TSTree, VSTree<BottomUp<MultiMems> > > const &_maxIt):
 			mmemIt(&_maxIt),
 			seqCount(countSequences(container(_maxIt)))
 		{
@@ -655,21 +655,21 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TRepeat >
-	inline typename Value< Iter<TRepeat, MultiMEMOccurences> >::Type &
-	value(Iter<TRepeat, MultiMEMOccurences> const &it)  {
+	inline typename Value< Iter<TRepeat, MultiMemOccurences> >::Type &
+	value(Iter<TRepeat, MultiMemOccurences> const &it)  {
 		return it.tmp;
 	}
 
 	template < typename TRepeat >
-	inline typename Value< Iter<TRepeat, MultiMEMOccurences> >::Type &
-	value(Iter<TRepeat, MultiMEMOccurences> &it)  {
+	inline typename Value< Iter<TRepeat, MultiMemOccurences> >::Type &
+	value(Iter<TRepeat, MultiMemOccurences> &it)  {
 		return it.tmp;
 	}
 
 //TODO:fix me
 	template < typename TRepeat >
-	inline Iter<TRepeat, MultiMEMOccurences> &
-	goNext(Iter<TRepeat, MultiMEMOccurences> &it)  {
+	inline Iter<TRepeat, MultiMemOccurences> &
+	goNext(Iter<TRepeat, MultiMemOccurences> &it)  {
 		if (it._innerStep()) {
 //			it.tmp.i1 = saAt(it.subState.parentPtr, container(*it.mmemIt));
 //			it.tmp.i2 = saAt(it.subState.childPtr, container(*it.mmemIt));
@@ -683,23 +683,23 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TRepeat >
-	inline bool atEnd(Iter<TRepeat, MultiMEMOccurences> const &it) {
+	inline bool atEnd(Iter<TRepeat, MultiMemOccurences> const &it) {
 		return it._atEnd;
 	}
 
 	template < typename TRepeat >
-	inline bool atEnd(Iter<TRepeat, MultiMEMOccurences> &it) {
+	inline bool atEnd(Iter<TRepeat, MultiMemOccurences> &it) {
 		return it._atEnd;
 	}
 
 
 	template <typename TSTree>
-	struct Iterator< MultiMEM<TSTree> > {
-		typedef Iter<MultiMEM<TSTree>, MultiMEMOccurences> Type;
+	struct Iterator< MultiMem<TSTree> > {
+		typedef Iter<MultiMem<TSTree>, MultiMemOccurences> Type;
 	};
 
 	template <typename TSTree>
-	struct Size< Iter<MultiMEM<TSTree>, MultiMEMOccurences> > {
+	struct Size< Iter<MultiMem<TSTree>, MultiMemOccurences> > {
 		typedef typename Size<TSTree>::Type Type;
 	};
 
@@ -709,8 +709,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TObject>
-	struct Iterator< TObject, MUMs > {
-		typedef Iter< TObject, VSTree< BottomUp<MUMs> > > Type;
+	struct Iterator< TObject, Mums > {
+		typedef Iter< TObject, VSTree< BottomUp<Mums> > > Type;
 	};
 
 //}

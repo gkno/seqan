@@ -434,8 +434,8 @@ SEQAN_DEFINE_TEST(testMultiMEMs)
 		write(dotFile, esa, DotDrawing());
 		fclose(dotFile);
 
-        Iterator< Index<TMulti>, MultiMEMs >::Type it(esa, 3);
-		typedef MultiMEM< Index<TMulti> > TMultiMEM;
+        Iterator< Index<TMulti>, MultiMems >::Type it(esa, 3);
+		typedef MultiMem< Index<TMulti> > TMultiMEM;
         while (!atEnd(it)) {
 			std::cout << representative(it) << ":";
 			Iterator<TMultiMEM>::Type mit(it);
@@ -522,7 +522,7 @@ SEQAN_DEFINE_TEST(testMUMs)
 		for(int i = 0; i < 3; ++i)
 			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
 
-		Iterator<TIndex, MUMs>::Type  it(esa, 3);		// set minimum MUM length to 3
+		Iterator<TIndex, Mums>::Type  it(esa, 3);		// set minimum MUM length to 3
 		typedef SAValue<TIndex>::Type TPair;
 		String<TPair> occs;								// temp. string storing the hit positions
 

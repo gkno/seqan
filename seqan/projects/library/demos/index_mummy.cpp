@@ -9,7 +9,7 @@ using namespace seqan;
 template <typename TIndex>
 void findMUMs(TIndex &esa, unsigned minLen)
 {
-	typename Iterator<TIndex, MUMs>::Type it(esa, minLen);  // set minimum MUM length
+	typename Iterator<TIndex, Mums>::Type it(esa, minLen);  // set minimum MUM length
 	String< typename SAValue<TIndex>::Type > occs;          // temp. string storing the hit positions
 
 	cout << resetiosflags(ios::left);

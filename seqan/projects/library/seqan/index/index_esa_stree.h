@@ -881,7 +881,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:A local alignment corresponding to the seed of the $iterator$.
-..remarks:The @Function.representative@ must uniquely occur in every sequence (e.g. in MUMs), 
+..remarks:The @Function.representative@ must uniquely occur in every sequence (e.g. in Mums), 
 otherwise the seed returned is one many.
 ..include:seqan/index.h
 */

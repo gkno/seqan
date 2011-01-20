@@ -28,7 +28,7 @@ int main(int argc, const char *argv[])
 	typedef Index<TSequenceSet> TIndex;
 	TIndex index(seqs);
 	
-	Iterator<TIndex,MUMs>::Type mumIt(index, 5);
+	Iterator<TIndex,Mums>::Type mumIt(index, 5);
 	String<SAValue<TIndex>::Type> occs;
 	
 	while (!atEnd(mumIt)) 

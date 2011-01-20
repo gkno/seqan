@@ -121,7 +121,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 	struct HideEmptyEdges:		VSTreeIteratorTraits<Postorder_, True> {};
 	struct EmptyEdges:			VSTreeIteratorTraits<Postorder_, False> {};	// empty edges (with $-label)
 	
-	// MultiMEMs are more specialized MaxRepeats
+	// MultiMems are more specialized MaxRepeats
 	template <typename TSpec = void>
 	struct MaxRepeats_;	// base class
 	struct MultiMems_;	// subclass tag
@@ -146,12 +146,12 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 
 			struct	SuperMaxRepeats;					// maximal repeat and not part of a longer repeat
 			struct	SuperMaxRepeatsFast;
-			struct	MUMs;								// Maximal Unique Match (unique in every sequence)
+			struct	Mums;								// Maximal Unique Match (unique in every sequence)
 
 			typedef MaxRepeats_<void>		MaxRepeats;	// maximal repeat
 			struct	MaxRepeatOccurrences;
-			typedef MaxRepeats_<MultiMems_> MultiMEMs;	// Multiple Maximal Exact Match
-			struct	MultiMEMOccurences;					// i.e. maximal match over different sequences
+			typedef MaxRepeats_<MultiMems_> MultiMems;	// Multiple Maximal Exact Match
+			struct	MultiMemOccurences;					// i.e. maximal match over different sequences
 
 
 /**

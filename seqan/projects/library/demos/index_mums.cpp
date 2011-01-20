@@ -1,4 +1,4 @@
-///A tutorial about finding MUMs.
+///A tutorial about finding Mums.
 #include <iostream>
 #include <seqan/index.h>
 
@@ -17,9 +17,9 @@ int main ()
 	typedef Index< StringSet<String<char> > > TMyIndex;
 	TMyIndex myIndex(mySet);
 
-///To find maximal unique matches (MUMs), we use the @Spec.MUMs Iterator@
+///To find maximal unique matches (Mums), we use the @Spec.Mums Iterator@
 ///and set the minimum MUM length to 3.
-	Iterator< TMyIndex, MUMs >::Type myMUMiterator(myIndex, 3);
+	Iterator< TMyIndex, Mums >::Type myMUMiterator(myIndex, 3);
 	String< SAValue<TMyIndex>::Type > occs;
 
 	while (!atEnd(myMUMiterator)) {

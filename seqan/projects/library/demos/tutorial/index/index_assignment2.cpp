@@ -14,7 +14,7 @@ int main ()
 	TMyIndex myIndex(myStringSet);
 
 // FRAGMENT(iteration)
-	Iterator< TMyIndex, MUMs >::Type myIterator(myIndex);
+	Iterator< TMyIndex, Mums >::Type myIterator(myIndex);
 
 	while (!atEnd(myIterator))
 	{

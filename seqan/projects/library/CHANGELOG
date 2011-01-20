@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adjusting `MUM` and `MEM` to new naming schema. (#836)
  * Adding `SEQAN_OMP_PRAGMA` to hide `#pragma omp` when not compiling with OpenMP to suppress warnings. (#353)
  * The test system deletes all files with the same name as temporary file names generated during the tests. (#377)
  * Adding documentation for the alphabets `Dna5Q` and `DnaQ` which allow to store 5/4 nucleotides along with the quality in one byte (`char`).
