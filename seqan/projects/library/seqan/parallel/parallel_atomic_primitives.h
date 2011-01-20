@@ -93,11 +93,11 @@ namespace seqan {
 .Function.atomicAdd
 ..summary:Atomically add an integer to another integer.
 ..cat:Atomic Operations
-..signature:atomicAdd(x, value)
+..signature:atomicAdd(x, y)
 ..param.x:Integer, by reference.
 ..param.y:Integer to add to the given value.
 ..returns:The old value of $x$.
-..remarks:This is equivalent to an atomic $x += value$.
+..remarks:This is equivalent to an atomic $x += y$.
 ..see:Function.atomicInc
 ..see:Function.atomicDec
 ..see:Function.atomicOr
@@ -124,7 +124,7 @@ namespace seqan {
 ..summary:Atomically combine wto integers with $XOR$ operation.
 ..cat:Atomic Operations
 ..signature:atomicXor(x, y)
-..param.intPtr:x, by reference.
+..param.x:x, by reference.
 ..param.y:Integer to combine with $XOR$ operation.
 ..returns:The old value of $x$.
 ..remarks:This is equivalent to an atomic $x ^= y$.
