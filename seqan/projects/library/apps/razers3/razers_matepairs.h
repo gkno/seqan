@@ -497,6 +497,10 @@ void _mapMatePairReads(
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{
+        // XXX
+		++options.countFiltration;
+        // XXX
+
         // CharString readName = store.readNameStore[swiftPatternR.curSeqNo];
         // readName = prefix(readName, length("SRR001665.22388 "));
         // if (readName == "SRR001665.22388 ")
@@ -532,6 +536,9 @@ void _mapMatePairReads(
 		{
 			if (find(swiftFinderL, swiftPatternL, options.errorRate))
 			{
+				// XXX
+				++options.countFiltration;
+				// XXX
                 std::cerr << "\nSWIFT\tL\t" << swiftPatternL.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternL.curSeqNo] << "\t" << beginPosition(swiftFinderL) << "\t" << endPosition(swiftFinderL) << std::endl;
 				gPair = positionRange(swiftFinderL);
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
@@ -561,15 +568,18 @@ void _mapMatePairReads(
         // XXX
 		TDequeueIterator it;
 		unsigned leftReadId = store.matePairStore[matePairId].readId[0];
-		__int64 lastPositive = (__int64)-1;
+		__int64 last = (__int64)-1;
+		__int64 lastValid = (__int64)-1;
         __int64 i;
-		for (i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
+		for (i = lastPotMatchNo[matePairId]; firstNo <= i; last = i, i = (*it).i1)
 		{
             // std::cerr << " [last pot loop]" << std::flush;
 			it = &value(fifo, i - firstNo);
 
 			// search left mate
-//			if (((*it).i2.readId & ~NOT_VERIFIED) == leftReadId)
+//			if (((*it).i2.readId & ~NOT_VERIFIED) == leftReadId)	
+//			        ^== we need not to test anymore, as only corr. left mates are traversed
+//						via the linked list beginning from lastPotMatchNo[matePairId] 
 			{
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.readId & NOT_VERIFIED)
@@ -585,46 +595,52 @@ void _mapMatePairReads(
 #endif						
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
                         if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-                                        matePairId, readSetL, mode, False()))
+                                        matePairId, readSetL, mode))
 						{
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
 
-                            // XXX
-                            if (!rightVerified) {
-                                std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
-                                if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode, False())) {
-                                    std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
-                                    rightVerified = true;
-                                    mR = verifierR.m;
-                                } else {
-                                    std::cerr << "  NO" << std::endl;
-                                    // Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
-                                    // be executed since bestLeftScore remains untouched.
-                                    break;
-                                }
-                            }
-                            // XXX
-                            
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 							(*it).i3 = verifierL.q;
 							
-							// short-cut negative matches
-							if (lastPositive == (__int64)-1)
-								lastPotMatchNo[matePairId] = i;
-							else
-								value(fifo, lastPositive - firstNo).i1 = i;
-							lastPositive = i;
 						} else {
 							(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
                             std::cerr << "  NO" << std::endl;
-                        }
+							continue;										// we intentionally do not set lastPositive to i
+                        }													// to remove i from linked list
 					} else {
-						lastPositive = i;
+						lastValid = i;
+						continue;											// left pot. hit is out of tolerance window
                     }
-				} else {
-					lastPositive = i;
-                }
+				} //else {}													// left match is verified already
+
+				// short-cut negative matches
+				if (last != lastValid)
+				{
+					if (lastValid == (__int64)-1)
+						lastPotMatchNo[matePairId] = i;
+					else
+						value(fifo, lastValid - firstNo).i1 = i;
+				}
+				lastValid = i;
+
+				// XXX
+				if (!rightVerified)											// here a verfied left match is available
+				{
+					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
+					if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode)) {
+						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
+						rightVerified = true;
+						mR = verifierR.m;
+					} else {
+						std::cerr << "  NO" << std::endl;
+						// Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
+						// be executed since bestLeftScore remains untouched.
+						break;
+					}
+				}
+				// XXX
+				
 /*
 				if ((*it).i2.readId == leftReadId)
 				{
@@ -675,10 +691,13 @@ void _mapMatePairReads(
 		}
 
 		// short-cut negative matches
-		if (lastPositive == (__int64)-1)
-			lastPotMatchNo[matePairId] = i;
-		else
-			value(fifo, lastPositive - firstNo).i1 = i;
+		if (last != lastValid)
+		{
+			if (lastValid == (__int64)-1)
+				lastPotMatchNo[matePairId] = i;
+			else
+				value(fifo, lastValid - firstNo).i1 = i;
+		}
 		
 		// verify right mate, if left mate matches
 		if (bestLeftScore != MinValue<int>::VALUE)
@@ -777,11 +796,9 @@ void _mapMatePairReads(
 								::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
 						}
 					}
-					++options.countVerification;
                     // XXX
 				// }
                 // XXX
-				++options.countFiltration;
 			}
             // XXX
 		// }

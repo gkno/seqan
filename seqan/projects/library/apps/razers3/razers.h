@@ -463,11 +463,7 @@ struct MicroRNA{};
 			oneMatchPerBucket = false;
 		}
 
-		inline void push(False const /*appendToStore*/) const
-		{
-		}
-
-		inline void push(True const /*appendToStore*/)
+		inline void push()
 		{			
 			if (onReverseComplement) 
 			{
@@ -1310,16 +1306,14 @@ template <
 	typename TMatchVerifier,
 	typename TGenome, 
 	typename TReadSet,
-    typename TMatchNPolicy,
-	typename TAppendToStore >
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,									// potential match genome region
 	unsigned readId,													// read number
 	TReadSet &readSet,													// reads
-	RazerSMode<RazerSPrefix, RazerSUngapped, RazerSErrors, TMatchNPolicy> const &,	// Hamming only
-    TAppendToStore)
+	RazerSMode<RazerSPrefix, RazerSUngapped, RazerSErrors, TMatchNPolicy> const &)	// Hamming only
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
@@ -1374,7 +1368,7 @@ matchVerify(
 				verifier.m.endPos = verifier.m.beginPos + bestHitLength;
 				verifier.q.pairScore = verifier.q.score = bestHitLength;
 				verifier.q.errors = minErrors;
-				verifier.push(TAppendToStore());
+				verifier.push();
 				minErrors = maxErrors + 2;
 			}
 		}
@@ -1386,7 +1380,7 @@ matchVerify(
 		verifier.q.pairScore = verifier.q.score = bestHitLength;
 		verifier.q.errors = minErrors;
 		if (!verifier.oneMatchPerBucket)
-			verifier.push(TAppendToStore());
+			verifier.push();
 		return true;
 	}
 	return false;
@@ -1405,16 +1399,14 @@ template <
 	typename TGenome, 
 	typename TReadSet,
 	typename TScoreMode,
-    typename TMatchNPolicy,
-	typename TAppendToStore >
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,								// potential match genome region
 	unsigned readId,												// read number
 	TReadSet &readSet,												// reads
-	RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode, TMatchNPolicy> const &, // Semi-global, no gaps
-    TAppendToStore)
+	RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode, TMatchNPolicy> const &) // Semi-global, no gaps
 {
 	typedef Segment<TGenome, InfixSegment>							TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const					TRead;
@@ -1505,7 +1497,7 @@ matchVerify(
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
 				verifier.q.pairScore = verifier.q.score = maxScore;
 				if (!verifier.oneMatchPerBucket)
-					verifier.push(TAppendToStore());
+					verifier.push();
 				maxScore = minScore - 1;
 			}
 		}
@@ -1516,7 +1508,7 @@ matchVerify(
 		verifier.m.endPos = verifier.m.beginPos + ndlLength;
 		verifier.q.pairScore = verifier.q.score = maxScore;
 		if (!verifier.oneMatchPerBucket)
-			verifier.push(TAppendToStore());
+			verifier.push();
 		return true;
 	}
 	return false;
@@ -1529,16 +1521,14 @@ template <
 	typename TMatchVerifier,
 	typename TGenome, 
 	typename TReadSet,
-    typename TMatchNPolicy,
-	typename TAppendToStore >
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,									// potential match genome region
 	unsigned readId,														// read number
 	TReadSet &readSet,													// reads
-	RazerSMode<RazerSGlobal, RazerSGapped, RazerSErrors, TMatchNPolicy> const &, // Mismatches and Indels
-	TAppendToStore)
+	RazerSMode<RazerSGlobal, RazerSGapped, RazerSErrors, TMatchNPolicy> const &) // Mismatches and Indels
 {
     if (length(inf) == 0u)
       return false;
@@ -1632,7 +1622,7 @@ matchVerify(
 					setEndPosition(inf, infEndPos);
 				}
 				if (!verifier.oneMatchPerBucket)
-					verifier.push(TAppendToStore());
+					verifier.push();
 				maxScore = minScore - 1;
 			}
 		}
@@ -1674,7 +1664,7 @@ matchVerify(
 		}
 
 		if (!verifier.oneMatchPerBucket)
-			verifier.push(TAppendToStore());
+			verifier.push();
         
 #ifdef RAZERS_DEBUG
         std::cout << "OK" << std::endl; 
@@ -1695,16 +1685,14 @@ template <
 	typename TMatchVerifier,
 	typename TGenome, 
 	typename TReadSet,
-    typename TMatchNPolicy,
-	typename TAppendToStore >
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,												// potential match genome region
 	unsigned readId,																	// read number
 	TReadSet &readSet,																// reads
-	RazerSMode<RazerSGlobal, RazerSUngapped, RazerSQuality<RazerSMAQ>, TMatchNPolicy> const &,	// Hamming only
-	TAppendToStore)
+	RazerSMode<RazerSGlobal, RazerSUngapped, RazerSQuality<RazerSMAQ>, TMatchNPolicy> const &)	// Hamming only
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
@@ -1768,7 +1756,7 @@ matchVerify(
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
 				verifier.q.pairScore = verifier.q.score = -(int)minQualSum;
 				verifier.q.errors = minErrors;
-				verifier.push(TAppendToStore());
+				verifier.push();
 				minQualSum = verifier.options->absMaxQualSumErrors + 1;
 			}
 		}
@@ -1780,7 +1768,7 @@ matchVerify(
 		verifier.q.pairScore = verifier.q.score = -(int)minQualSum;
 		verifier.q.errors = minErrors;
 		if (!verifier.oneMatchPerBucket)
-			verifier.push(TAppendToStore());
+			verifier.push();
 		return true;
 	}
 	return false;
@@ -1795,16 +1783,14 @@ template <
 	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
-    typename TMatchNPolicy,
-	typename TAppendToStore >
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &,
 	Segment<TGenome, InfixSegment>,								// potential match genome region
 	unsigned,													// read number
 	TReadSet &,													// reads
-	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const &,
-	TAppendToStore)
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const &)
 {
 	std::cerr << "Verification not implemented!" << std::endl;
 	return false;
@@ -1884,7 +1870,7 @@ void _mapSingleReadsToContig(
 #endif
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
-			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, mode, True());
+			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, mode);
 		++options.countFiltration;
 	}
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
