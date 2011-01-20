@@ -168,49 +168,57 @@ atomic
 // We break the standard code layout here since we only wrap compiler
 // intrinsics and it's easier to see things with one glance this way.
 
-inline __int16  atomicInc(__int16  volatile & x) { return _InterlockedIncrement16(&x); }
-inline __int32  atomicInc(__int32  volatile & x) { return _InterlockedIncrement(&x); }
-inline __int64  atomicInc(__int64  volatile & x) { return _InterlockedIncrement64(&x); }
-inline __uint16 atomicInc(__uint16 volatile & x) { return _InterlockedIncrement16(&x); }
-inline __uint32 atomicInc(__uint32 volatile & x) { return _InterlockedIncrement(&x); }
-inline __uint64 atomicInc(__uint64 volatile & x) { return _InterlockedIncrement64(&x); }
+inline          long atomicInc(         long volatile & x) { return InterlockedIncrement(&x); }
+inline unsigned long atomicInc(unsigned long volatile & x) { return InterlockedIncrement(reinterpret_cast<long volatile *>(&x)); }
+#ifdef _WIN64
+inline       __int64 atomicInc( __int64 volatile & x) { return _InterlockedIncrement64(&x); }
+inline      __uint64 atomicInc(__uint64 volatile & x) { return _InterlockedIncrement64(reinterpret_cast<__int64 volatile *>(&x)); }
+#endif  // #ifdef _WIN64
 
-inline __int16  atomicDec(__int16  volatile & x) { return _InterlockedDecrement16(&x); }
-inline __int32  atomicDec(__int32  volatile & x) { return _InterlockedDecrement(&x); }
-inline __int64  atomicDec(__int64  volatile & x) { return _InterlockedDecrement64(&x); }
-inline __uint16 atomicDec(__uint16 volatile & x) { return _InterlockedDecrement16(&x); }
-inline __uint32 atomicDec(__uint32 volatile & x) { return _InterlockedDecrement(&x); }
-inline __uint64 atomicDec(__uint64 volatile & x) { return _InterlockedDecrement64(&x); }
+inline          long atomicDec(         long volatile & x) { return _InterlockedDecrement(&x); }
+inline unsigned long atomicDec(unsigned long volatile & x) { return _InterlockedDecrement(reinterpret_cast<long volatile *>(&x)); }
+#ifdef _WIN64
+inline       __int64 atomicDec( __int64 volatile & x) { return _InterlockedDecrement(&x); }
+inline      __uint64 atomicInc(__uint64 volatile & x) { return _InterlockedDecrement(reinterpret_cast<__int64 volatile *>(&x)); }
+#endif  // #ifdef _WIN64
 
-inline __int32  atomicAdd(__int32  volatile & x, __int32  y) { return _InterlockedExchangeAdd(&x, y); }
-inline __int64  atomicAdd(__int64  volatile & x, __int64  y) { return _InterlockedExchangeAdd64(&x, y); }
-inline __uint32 atomicAdd(__uint32 volatile & x, __uint32 y) { return _InterlockedExchangeAdd(&x, y); }
-inline __uint64 atomicAdd(__uint64 volatile & x, __uint64 y) { return _InterlockedExchangeAdd64(&x, y); }
+inline          long atomicAdd(         long volatile & x, long y) { return _InterlockedExchangeAdd(&x, y); }
+inline unsigned long atomicAdd(unsigned long volatile & x, long y) { return _InterlockedExchangeAdd(reinterpret_cast<long volatile *>(&x), y); }
+#ifdef _WIN64
+inline       __int64 atomicAdd( __int64 volatile & x,  _uint64 y) { return _InterlockedExchangeAdd(&x, y); }
+inline      __uint64 atomicAdd(__uint64 volatile & x, __uint64 y) { return _InterlockedExchangeAdd(reinterpret_cast<long volatile *>(&x), y); }
+#endif  // #ifdef _WIN64
 
-inline __int8   atomicOr(__int8   volatile & x, __int8   y) { return _InterlockedOr8(x, y); }
-inline __int16  atomicOr(__int16  volatile & x, __int16  y) { return _InterlockedOr16(x, y); }
-inline __int32  atomicOr(__int32  volatile & x, __int32  y) { return _InterlockedOr(x, y); }
-inline __int64  atomicOr(__int64  volatile & x, __int64  y) { return _InterlockedOr64(x, y); }
-inline __uint8  atomicOr(__uint8  volatile & x, __uint8  y) { return _InterlockedOr8(x, y); }
-inline __uint16 atomicOr(__uint16 volatile & x, __uint16 y) { return _InterlockedOr16(x, y); }
-inline __uint32 atomicOr(__uint32 volatile & x, __uint32 y) { return _InterlockedOr(x, y); }
-inline __uint64 atomicOr(__uint64 volatile & x, __uint64 y) { return _InterlockedOr64(x, y); }
+inline           char atomicOr(          char volatile & x,           char y) { return _InterlockedOr8(&x, y); }
+inline unsigned  char atomicOr(unsigned  char volatile & x, unsigned  char y) { return _InterlockedOr8(reinterpret_cast<char volatile *>(&x), y); }
+inline          short atomicOr(         short volatile & x,          short y) { return _InterlockedOr16(&x, y); }
+inline unsigned short atomicOr(unsigned short volatile & x, unsigned short y) { return _InterlockedOr16(reinterpret_cast<short volatile *>(&x), y); }
+inline           long atomicOr(          long volatile & x,           long y) { return _InterlockedOr(&x, y); }
+inline unsigned  long atomicOr(unsigned  long volatile & x, unsigned  long y) { return _InterlockedOr(reinterpret_cast<long volatile *>(&x), y); }
+#ifdef _WIN64
+inline        __int64 atomicOr(       __int64 volatile & x,        __int64 y) { return _InterlockedOr64(&x, y); }
+inline       __uint64 atomicOr(      __uint64 volatile & x,       __uint64 y) { return _InterlockedOr64(reinterpret_cast<__int64 volatile*>(&x), y); }
+#endif  // #ifdef _WIN64
 
-inline __int8   atomicXor(__int8   volatile & x, __int8   y) { return _InterlockedXor8(x, y); }
-inline __int16  atomicXor(__int16  volatile & x, __int16  y) { return _InterlockedXor16(x, y); }
-inline __int32  atomicXor(__int32  volatile & x, __int32  y) { return _InterlockedXor(x, y); }
-inline __int64  atomicXor(__int64  volatile & x, __int64  y) { return _InterlockedXor64(x, y); }
-inline __uint8  atomicXor(__uint8  volatile & x, __uint8  y) { return _InterlockedXor8(x, y); }
-inline __uint16 atomicXor(__uint16 volatile & x, __uint16 y) { return _InterlockedXor16(x, y); }
-inline __uint32 atomicXor(__uint32 volatile & x, __uint32 y) { return _InterlockedXor(x, y); }
-inline __uint64 atomicXor(__uint64 volatile & x, __uint64 y) { return _InterlockedXor64(x, y); }
+inline           char atomicXor(          char volatile & x,           char y) { return _InterlockedXor8(&x, y); }
+inline unsigned  char atomicXor(unsigned  char volatile & x, unsigned  char y) { return _InterlockedXor8(reinterpret_cast<char volatile *>(&x), y); }
+inline          short atomicXor(         short volatile & x,          short y) { return _InterlockedXor16(&x, y); }
+inline unsigned short atomicXor(unsigned short volatile & x, unsigned short y) { return _InterlockedXor16(reinterpret_cast<short volatile *>(&x), y); }
+inline           long atomicXor(          long volatile & x,           long y) { return _InterlockedXor(&x, y); }
+inline unsigned  long atomicXor(unsigned  long volatile & x, unsigned  long y) { return _InterlockedXor(reinterpret_cast<long volatile *>(&x), y); }
+#ifdef _WIN64
+inline        __int64 atomicXor(       __int64 volatile & x,        __int64 y) { return _InterlockedXor64(&x, y); }
+inline       __uint64 atomicXor(      __uint64 volatile & x,       __uint64 y) { return _InterlockedXor64(reinterpret_cast<__int64 volatile*>(&x), y); }
+#endif  // #ifdef _WIN64
 
-inline __int16  atomicCas(__int16  volatile & x, __int16  cmp, __int16  y) { return _InterlockedCompareExchange16(&x, cmp, y); }
-inline __int32  atomicCas(__int32  volatile & x, __int32  cmp, __int32  y) { return _InterlockedCompareExchange(&x, cmp, y); }
-inline __int64  atomicCas(__int64  volatile & x, __int64  cmp, __int64  y) { return _InterlockedCompareExchange64(&x, cmp, y); }
-inline __uint16 atomicCas(__uint16 volatile & x, __uint16 cmp, __uint16 y) { return _InterlockedCompareExchange16(&x, cmp, y); }
-inline __uint32 atomicCas(__uint32 volatile & x, __uint32 cmp, __uint32 y) { return _InterlockedCompareExchange(&x, cmp, y); }
-inline __uint64 atomicCas(__uint64 volatile & x, __uint64 cmp, __uint64 y) { return _InterlockedCompareExchange64(&x, cmp, y); }
+inline          short atomicCas(         short volatile & x,          short cmp,          short y) { return _InterlockedCompareExchange16(&x, y, cmp); }
+inline unsigned short atomicCas(unsigned short volatile & x, unsigned short cmp, unsigned short y) { return _InterlockedCompareExchange16(reinterpret_cast<short volatile *>(&x), y, cmp); }
+inline           long atomicCas(          long volatile & x,           long cmp,           long y) { return _InterlockedCompareExchange(&x, y, cmp); }
+inline unsigned  long atomicCas(unsigned  long volatile & x, unsigned  long cmp, unsigned  long y) { return _InterlockedCompareExchange(reinterpret_cast<long volatile *>(&x), y, cmp); }
+#ifdef _WIN64
+inline        __int64 atomicCas(       __int64 volatile & x,        __int64 cmp,        __int64 y) { return _InterlockedCompareExchange64(&x, y, cmp); }
+inline       __uint64 atomicCas(      __uint64 volatile & x,       __uint64 cmp,       __uint64 y) { return _InterlockedCompareExchange64(reinterpret_cast<__int64 volatile *>(&x), y, cmp); }
+#endif  // #ifdef _WIN64
 
 #else  // #ifdef PLATFORM_WINDOWS
 

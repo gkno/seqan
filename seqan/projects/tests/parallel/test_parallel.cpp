@@ -58,7 +58,7 @@ SEQAN_BEGIN_TESTSUITE(test_parallel) {
     SEQAN_CALL_TEST(test_parallel_atomic_add);
     SEQAN_CALL_TEST(test_parallel_atomic_or);
     SEQAN_CALL_TEST(test_parallel_atomic_xor);
-    SEQAN_CALL_TEST(test_template_others_cas);
+    SEQAN_CALL_TEST(test_parallel_atomic_cas);
 
     // Tests for misc simpmle atomic operations.
     SEQAN_CALL_TEST(test_parallel_atomic_min);

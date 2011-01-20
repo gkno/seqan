@@ -51,7 +51,7 @@ void atomicMinTestImpl(T const &)
     // Generate pseudorandom numbers to compute minimum of.
     T expectedMin = MaxValue<T>::VALUE;
     T arr[ARR_SIZE];
-    T x = 3;
+    T volatile x = 3;
     for (int i = 0; i < ARR_SIZE; ++i) {
         x = 32456 * x + 9874;
         arr[i] = x;
@@ -98,18 +98,35 @@ void atomicMaxTestImpl(T const &)
 SEQAN_DEFINE_TEST(test_parallel_atomic_min)
 {
     using namespace seqan;
+    typedef unsigned short SEQAN_ushort;
+    typedef unsigned long SEQAN_ulong;
 
-    atomicMinTestImpl(__int16());
-    atomicMinTestImpl(__int32());
+    // Tests are limited to the types where MSVC allows atomic Compare-And-Swap.
+    atomicMinTestImpl(short());
+    atomicMinTestImpl(SEQAN_ushort());
+    atomicMinTestImpl(long());
+    atomicMinTestImpl(SEQAN_ulong());
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicMinTestImpl(__int64());
+    atomicMinTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_max)
 {
     using namespace seqan;
-    atomicMaxTestImpl(__int16());
-    atomicMaxTestImpl(__int32());
+    typedef unsigned short SEQAN_ushort;
+    typedef unsigned long SEQAN_ulong;
+
+    // Tests are limited to the types where MSVC allows atomic Compare-And-Swap.
+    atomicMaxTestImpl(short());
+    atomicMaxTestImpl(SEQAN_ushort());
+    atomicMaxTestImpl(long());
+    atomicMaxTestImpl(SEQAN_ulong());
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicMaxTestImpl(__int64());
+    atomicMaxTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
 #endif  // TEST_PARALLEL_TEST_PARALLEL_ATOMIC_MISC_H_

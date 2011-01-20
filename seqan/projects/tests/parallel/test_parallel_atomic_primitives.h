@@ -49,7 +49,7 @@ void atomicIncTestImpl(T const &)
 
     T const ITERATIONS = 4 * 1024;
 
-    T x = 0;
+    T volatile x = 0;
     #pragma omp parallel for schedule(static, 1)
     for (int i = 0; i < static_cast<int>(ITERATIONS); ++i)
         atomicInc(x);
@@ -64,7 +64,7 @@ void atomicDecTestImpl(T const &)
 
     T const ITERATIONS = 4 * 1024;
 
-    T x = 2 * ITERATIONS;
+    T volatile x = 2 * ITERATIONS;
     #pragma omp parallel for schedule(static, 1)
     for (int i = 0; i < static_cast<int>(ITERATIONS); ++i)
         atomicDec(x);
@@ -79,7 +79,7 @@ void atomicAddTestImpl(T const &)
 
     T const ITERATIONS = 4 * 1024;
 
-    T x = 0;
+    T volatile x = 0;
     #pragma omp parallel for schedule(static, 1)
     for (int i = 0; i < static_cast<int>(ITERATIONS); ++i)
         atomicAdd(x, 1);
@@ -92,16 +92,16 @@ void atomicOrTestImpl(T const &)
 {
     using namespace seqan;
 
-    T const ITERATIONS = 4 * 1024;
+    int const ITERATIONS = 4 * 1024;
 
     T expected = 0;
-    for (T i = 0; i < ITERATIONS; ++i)
-        expected |= i;
+    for (int i = 0; i < ITERATIONS; ++i)
+        expected |= static_cast<T>(i);
     
-    T x = 0;
+    T volatile x = 0;
     #pragma omp parallel for schedule(static, 1)
-    for (T i = 0; i < ITERATIONS; ++i)
-        atomicOr(x, i);
+    for (int i = 0; i < ITERATIONS; ++i)
+        atomicOr(x, static_cast<T>(i));
 
     SEQAN_ASSERT_EQ(expected, x);
 }
@@ -111,16 +111,16 @@ void atomicXorTestImpl(T const &)
 {
     using namespace seqan;
 
-    T const ITERATIONS = 4 * 1024;
+    int const ITERATIONS = 4 * 1024;
 
     T expected = 0;
-    for (T i = 0; i < ITERATIONS; ++i)
-        expected ^= i;
+    for (int i = 0; i < ITERATIONS; ++i)
+        expected ^= static_cast<T>(i);
     
-    T x = 0;
+    T volatile x = 0;
     #pragma omp parallel for schedule(static, 1)
-    for (T i = 0; i < ITERATIONS; ++i)
-        atomicXor(x, i);
+    for (int i = 0; i < ITERATIONS; ++i)
+        atomicXor(x, static_cast<T>(i));
 
     SEQAN_ASSERT_EQ(expected, x);
 }
@@ -137,7 +137,7 @@ void atomicCasTestImpl(T const &)
     // Generate pseudorandom numbers to compute minimum of.
     T expectedMin = MaxValue<T>::VALUE;
     T arr[ARR_SIZE];
-    T x = 3;
+    T volatile x = 3;
     for (int i = 0; i < ARR_SIZE; ++i) {
         x = 32456 * x + 9874;
         arr[i] = x;
@@ -161,55 +161,101 @@ void atomicCasTestImpl(T const &)
 SEQAN_DEFINE_TEST(test_parallel_atomic_inc)
 {
     using namespace seqan;
+    typedef unsigned long SEQAN_ulong;
 
-    atomicIncTestImpl(__int16());
-    atomicIncTestImpl(__int32());
+    // Tests are limited to the types where MSVC allows atomic inc.
+    atomicIncTestImpl(long());
+    atomicIncTestImpl(SEQAN_ulong());
+    // TODO(holtgrew): Also for the tests below: Does GCC bail on 32 bit Linux?
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicIncTestImpl(__int64());
+    atomicIncTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_dec)
 {
     using namespace seqan;
+    typedef unsigned long SEQAN_ulong;
 
-    atomicDecTestImpl(__int16());
-    atomicDecTestImpl(__int32());
+    // Tests are limited to the types where MSVC allows atomic dec.
+    atomicDecTestImpl(long());
+    atomicDecTestImpl(SEQAN_ulong());
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicDecTestImpl(__int64());
+    atomicDecTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_add)
 {
     using namespace seqan;
+    typedef unsigned long SEQAN_ulong;
 
-    atomicAddTestImpl(__int16());
-    atomicAddTestImpl(__int32());
+    // Tests are limited to the types where MSVC allows atomic add.
+    atomicAddTestImpl(long());
+    atomicAddTestImpl(SEQAN_ulong());
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicAddTestImpl(__int64());
+    atomicAddTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_or)
 {
     using namespace seqan;
+    typedef unsigned char SEQAN_uchar;
+    typedef unsigned short SEQAN_ushort;
+    typedef unsigned long SEQAN_ulong;
 
-    atomicOrTestImpl(__int16());
-    atomicOrTestImpl(__int32());
+    // Tests are limited to the types where MSVC allows atomic or.
+    atomicOrTestImpl(char());
+    atomicOrTestImpl(SEQAN_uchar());
+    atomicOrTestImpl(short());
+    atomicOrTestImpl(SEQAN_ushort());
+    atomicOrTestImpl(long());
+    atomicOrTestImpl(SEQAN_ulong());
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicOrTestImpl(__int64());
+    atomicOrTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_xor)
 {
     using namespace seqan;
+    typedef unsigned char SEQAN_uchar;
+    typedef unsigned short SEQAN_ushort;
+    typedef unsigned long SEQAN_ulong;
 
-    atomicXorTestImpl(__int16());
-    atomicXorTestImpl(__int32());
+    // Tests are limited to the types where MSVC allows atomic Xor.
+    atomicXorTestImpl(char());
+    atomicXorTestImpl(SEQAN_uchar());
+    atomicXorTestImpl(short());
+    atomicXorTestImpl(SEQAN_ushort());
+    atomicXorTestImpl(long());
+    atomicXorTestImpl(SEQAN_ulong());
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicXorTestImpl(__int64());
+    atomicXorTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
-SEQAN_DEFINE_TEST(test_template_others_cas)
+SEQAN_DEFINE_TEST(test_parallel_atomic_cas)
 {
     using namespace seqan;
+    typedef unsigned short SEQAN_ushort;
+    typedef unsigned long SEQAN_ulong;
 
-    atomicCasTestImpl(__int16());
-    atomicCasTestImpl(__int32());
+    // Tests are limited to the types where MSVC allows atomic Compare-And-Swap.
+    atomicCasTestImpl(short());
+    atomicCasTestImpl(SEQAN_ushort());
+    atomicCasTestImpl(long());
+    atomicCasTestImpl(SEQAN_ulong());
+#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
     atomicCasTestImpl(__int64());
+    atomicCasTestImpl(__uint64());
+#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
 }
 
 #endif  // TEST_PARALLEL_TEST_PARALLEL_ATOMIC_PRIMITIVES_H_
