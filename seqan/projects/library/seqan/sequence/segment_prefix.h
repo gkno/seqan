@@ -542,7 +542,7 @@ operator --(Segment<THost, PrefixSegment> & segment)
 ..see:Spec.PrefixSegment
 ..see:Function.suffix
 ..see:Function.infix
-..see:Function.Suffix
+..see:Function.suffix
 ..include:seqan/sequence.h
 */
 
