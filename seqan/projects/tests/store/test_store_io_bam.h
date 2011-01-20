@@ -138,5 +138,5 @@ SEQAN_DEFINE_TEST(test_store_io_bam_write)
     // write(tmpBuffer, samStore, Bam());
     FILE * outFb = fopen(tmpBuffer, "wb");
     write(outFb, samStore, Sam());
-    fclose(samFp);
+    fclose(outFb);
 }

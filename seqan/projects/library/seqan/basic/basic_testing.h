@@ -45,6 +45,14 @@
 #include <cstdlib>   // exit()
 #include <cstdarg>   // va_start, va_list, va_end
 #include <set>
+#include <vector>
+#include <string>
+
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>  // DeleteFile()
+#else  // #ifdef PLATFORM_WINDOWS
+#include <unistd.h>  // unlink()
+#endif  // #ifdef PLATFORM_WINDOWS
 
 // SeqAn's has three global debug/testing levels: testing, debug and
 // release.  Depending on the level, the SEQAN_ASSERT_* and
@@ -193,6 +201,14 @@ namespace ClassTest {
             static int result = 0;
             return result;
         }
+
+        // Names of temporary files as returned by tempFileName.  This
+        // global state is used to remove any existing such files
+        // after completing the testsuite.
+        static ::std::vector<std::string> & tempFileNames() {
+            static ::std::vector<std::string> filenames;
+            return filenames;
+        }
     };
 
 // Open a temporary file, unlink it, return posix handle.  Note: This has not been tested yet.
@@ -232,6 +248,7 @@ const char *tempFileName() {
     }
     strcpy(fileNameBuffer, fileName);
     free(fileName);
+    StaticData::tempFileNames().push_back(fileNameBuffer);
     return fileNameBuffer;
 #else  // ifdef PLATFORM_WINDOWS_VS
     strcpy(fileNameBuffer, "/tmp/SEQAN.XXXXXXXXXXXXXXXXXXXX");
@@ -242,6 +259,7 @@ const char *tempFileName() {
     mkstemp(fileNameBuffer);
     unlink(fileNameBuffer);
 #endif  // #ifdef PLATFORM_WINDOWS_MINGW
+    StaticData::tempFileNames().push_back(fileNameBuffer);
     return fileNameBuffer;
 #endif  // ifdef PLATFORM_WINDOWS_VS
 }
@@ -322,6 +340,15 @@ const char *tempFileName() {
         if (StaticData::totalCheckPointCount() != StaticData::foundCheckPointCount())
             return 1;
         */
+        // Delete all temporary files that still exist.
+        for (unsigned i = 0; i < StaticData::tempFileNames().size(); ++i) {
+#ifdef PLATFORM_WINDOWS
+            DeleteFile(StaticData::tempFileNames()[i].c_str());
+#else  // #ifdef PLATFORM_WINDOWS
+            unlink(StaticData::tempFileNames()[i].c_str());
+#endif  // #ifdef PLATFORM_WINDOWS
+        }
+
         return 0;
     }
 
