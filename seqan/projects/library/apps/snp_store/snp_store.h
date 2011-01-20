@@ -2662,7 +2662,7 @@ void dumpShortIndelPolymorphismsBatch(
 			if(extraV) ::std::cout << "read=" << read << " beg,end="<<(*matchIt).beginPos << ","<<(*matchIt).endPos <<::std::endl;
 #endif
 			assignSource(row(align, 0), reads[(*matchIt).readId]);
-			assignSource(row(align, 1), infix(genome, min((*matchIt).beginPos,(*matchIt).endPos), max((*matchIt).beginPos,(*matchIt).endPos)));
+			assignSource(row(align, 1), infix(genome, _min((*matchIt).beginPos,(*matchIt).endPos), _max((*matchIt).beginPos,(*matchIt).endPos)));
 			if ((*matchIt).beginPos > (*matchIt).endPos)
 				reverseComplement(source(row(align, 0))); // check if reversing read is better for gap placement
 			

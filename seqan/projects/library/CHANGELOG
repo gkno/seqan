@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Making snp_store compile with LLVM.
  * Removing type `Byte` since it clashes with zlib (#843).  Note that the types `Ascii` and `Unicode` are deprecated and will be removed soon (#849).
  * Fixing a bug in `iter()` with iterator (#848).
  * Adding module '''parallel''', bootstrapping with atomic primitives and atomic `min()`/`max()` functions, fully tested.
