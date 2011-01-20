@@ -61,6 +61,8 @@ namespace seqan {
 // Functions
 // ============================================================================
 
+// TODO(holtgrew): What about correct alignment?!
+
 /**
 .Function.atomicInc
 ..summary:Atomically increment an integer.

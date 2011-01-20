@@ -46,6 +46,9 @@
 //____________________________________________________________________________
 // Module Headers
 
+// Misc.
+#include <seqan/parallel/parallel_macros.h>
+
 // Atomic operations.
 #include <seqan/parallel/parallel_atomic_primitives.h>
 #include <seqan/parallel/parallel_atomic_misc.h>
