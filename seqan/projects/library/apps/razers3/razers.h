@@ -1313,7 +1313,8 @@ matchVerify(
 	Segment<TGenome, InfixSegment> inf,									// potential match genome region
 	unsigned readId,													// read number
 	TReadSet &readSet,													// reads
-	RazerSMode<RazerSPrefix, RazerSUngapped, RazerSErrors, TMatchNPolicy> const &)		// Hamming only
+	RazerSMode<RazerSPrefix, RazerSUngapped, RazerSErrors, TMatchNPolicy> const &,
+    bool dontPush = false)		// Hamming only
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
@@ -1532,14 +1533,6 @@ matchVerify(
 {
     if (length(inf) == 0u)
       return false;
-
-    #pragma omp critical
-    {
-        ::std::cout<<"\n# Thread: "<<omp_get_thread_num() <<::std::endl;
-        ::std::cout<<"# Verify: "<<::std::endl;
-        ::std::cout<<"# Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
-        ::std::cout<<"# Read:   "<<readSet[readId] << "(id: " << readId << ")" <<::std::endl;
-    }
 
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;

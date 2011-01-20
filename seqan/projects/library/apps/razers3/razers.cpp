@@ -643,8 +643,6 @@ int main(int argc, const char *argv[])
 	if (result != 0)
 		cerr << "Exiting ..." << endl;
 
-    std::cout << "# ---------" << std::endl;
-
 #ifdef _OPENMP
     // Restoring number of threads for side-effect freeness.
     omp_set_num_threads(oldMaxThreads);

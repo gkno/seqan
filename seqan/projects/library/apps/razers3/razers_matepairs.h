@@ -491,12 +491,19 @@ void _mapMatePairReads(
 	TAlignedRead mR;
 	TAlignQuality qR;
 	TDequeueValue fL(-1, mR, qR);	// to supress uninitialized warnings
-	
+
 //	unsigned const preFetchMatches = 2048;
 
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
-	{		
+	{
+        // CharString readName = store.readNameStore[swiftPatternR.curSeqNo];
+        // readName = prefix(readName, length("SRR001665.22388 "));
+        // if (readName == "SRR001665.22388 ")
+        //     std::cerr << readName << std::endl;
+
+        std::cerr << "\nSWIFT\tR\t" << swiftPatternR.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternR.curSeqNo + 1] << "\t" << scanShift + beginPosition(swiftFinderR) << "\t" << scanShift + endPosition(swiftFinderR) << std::endl;
+        
         // std::cerr << " R(" << (*swiftFinderR.curHit).hstkPos << ", " << (*swiftFinderR.curHit).hstkPos + (*swiftFinderR.curHit).bucketWidth << ")" << std::flush;
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
@@ -505,6 +512,10 @@ void _mapMatePairReads(
 		// remove out-of-window left mates from fifo
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
+            if (front(fifo).i2.readId > length(store.readNameStore))
+                std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
+            else
+                std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
 			popFront(fifo);
 			++firstNo;
 		}
@@ -521,6 +532,7 @@ void _mapMatePairReads(
 		{
 			if (find(swiftFinderL, swiftPatternL, options.errorRate))
 			{
+                std::cerr << "\nSWIFT\tL\t" << swiftPatternL.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternL.curSeqNo] << "\t" << beginPosition(swiftFinderL) << "\t" << endPosition(swiftFinderL) << std::endl;
 				gPair = positionRange(swiftFinderL);
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
 				{
@@ -535,18 +547,23 @@ void _mapMatePairReads(
 					
 					pushBack(fifo, fL);
 				}
-			} else
+			} else {
 				break;
+            }
 		}
 
 		int	bestLeftScore = MinValue<int>::VALUE;
 		int bestLibSizeError = MaxValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
 
+        // XXX
+        bool rightVerified = false;
+        // XXX
 		TDequeueIterator it;
 		unsigned leftReadId = store.matePairStore[matePairId].readId[0];
 		__int64 lastPositive = (__int64)-1;
-		for (__int64 i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
+        __int64 i;
+		for (i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
 		{
             // std::cerr << " [last pot loop]" << std::flush;
 			it = &value(fifo, i - firstNo);
@@ -564,11 +581,30 @@ void _mapMatePairReads(
 					if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
 #ifdef RAZERS_BANDED_MYERS
-							verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
+                        verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
 #endif						
-							if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-								matePairId, readSetL, mode))
+                        std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
+                        if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
+                                        matePairId, readSetL, mode))
 						{
+                            std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
+
+                            // XXX
+                            if (!rightVerified) {
+                                std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
+                                if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode)) {
+                                    std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
+                                    rightVerified = true;
+                                    mR = verifierR.m;
+                                } else {
+                                    std::cerr << "  NO" << std::endl;
+                                    // Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
+                                    // be executed since bestLeftScore remains untouched.
+                                    break;
+                                }
+                            }
+                            // XXX
+                            
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 							(*it).i3 = verifierL.q;
@@ -579,12 +615,16 @@ void _mapMatePairReads(
 							else
 								value(fifo, lastPositive - firstNo).i1 = i;
 							lastPositive = i;
-						} else
+						} else {
 							(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
-					} else
+                            std::cerr << "  NO" << std::endl;
+                        }
+					} else {
 						lastPositive = i;
-				} else
+                    }
+				} else {
 					lastPositive = i;
+                }
 /*
 				if ((*it).i2.readId == leftReadId)
 				{
@@ -598,8 +638,20 @@ void _mapMatePairReads(
 					int score = (*it).i3.score;
 					if (bestLeftScore <= score)
 					{
-						int libSizeError = options.libraryLength - (int)((__int64)mR.endPos - (__int64)(*it).i2.beginPos);
-						if (libSizeError < 0) libSizeError = -libSizeError;
+                        // XXX
+                        // std::cerr << "(__int64)mR.endPos == " << (__int64)mR.endPos << ", (__int64)(*it).i2.beginPos == " <<  (__int64)(*it).i2.beginPos << std::endl;
+                        // distance between left mate beginning and right mate end
+                        __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*it).i2.beginPos;
+                        // XXX
+                        
+						int libSizeError = options.libraryLength - dist;
+                        std::cerr << "    libSizeError = " << libSizeError << std::endl;
+						if (libSizeError < 0)
+                            libSizeError = -libSizeError;
+                        // XXX
+                        if (libSizeError > options.libraryError)
+                            continue;
+                        // XXX
 						if (bestLeftScore == score)
 						{
 							if (bestLibSizeError > libSizeError)
@@ -613,7 +665,9 @@ void _mapMatePairReads(
 							bestLeftScore = score;
 							bestLibSizeError = libSizeError;
 							bestLeft = it;
-							if (bestLeftScore == 0) break;	// TODO: replace if we have real qualities
+                            // XXX
+							// if (bestLeftScore == 0) break;	// TODO: replace if we have real qualities
+                            // XXX
 						}
 					}
 				}
@@ -622,26 +676,34 @@ void _mapMatePairReads(
 
 		// short-cut negative matches
 		if (lastPositive == (__int64)-1)
-			lastPotMatchNo[matePairId] = (__int64)-1;
+			lastPotMatchNo[matePairId] = i;
 		else
-			value(fifo, lastPositive - firstNo).i1 = (__int64)-1;
+			value(fifo, lastPositive - firstNo).i1 = i;
 		
 		// verify right mate, if left mate matches
 		if (bestLeftScore != MinValue<int>::VALUE)
 		{
-//			if (matchVerify(
-//					mR, qR, infix(swiftFinderR),
-//					matePairId, readSetR, forwardPatternsR,
-//					options, TSwiftSpec()))
-			if (matchVerify(verifierR, infix(swiftFinderR), 
-					matePairId, readSetR, mode))
-			{
+// //			if (matchVerify(
+// //					mR, qR, infix(swiftFinderR),
+// //					matePairId, readSetR, forwardPatternsR,
+// //					options, TSwiftSpec()))
+            // XXX
+// 			if (matchVerify(verifierR, infix(swiftFinderR), 
+// 					matePairId, readSetR, mode))
+// 			{
+            // XXX
+                // XXX
 				// distance between left mate beginning and right mate end
-				__int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
-				if (dist <= options.libraryLength + options.libraryError &&
-					options.libraryLength <= dist + options.libraryError)
-				{
-					mR = verifierR.m;
+				// __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
+                // std::cerr << "    COND = " << (dist <= options.libraryLength + options.libraryError) << " && " << (options.libraryLength <= dist + options.libraryError) << std::endl;
+                // std::cerr << "    dist = " << dist << std::endl;
+                // XXX
+                // XXX
+				// if (dist <= options.libraryLength + options.libraryError &&
+				// 	options.libraryLength <= dist + options.libraryError)
+				// {
+                // XXX
+					// mR = verifierR.m;
 					qR = verifierR.q;
 					
 					fL.i2 = (*bestLeft).i2;
@@ -665,7 +727,9 @@ void _mapMatePairReads(
 						TSize temp = mR.beginPos;
 						mR.beginPos = gLength - mR.endPos;
 						mR.endPos = gLength - temp;
-						dist = -dist;
+                        // XXX
+						// dist = -dist;
+                        // XXX
 					}
 					
 					// set a unique pair id
@@ -695,6 +759,8 @@ void _mapMatePairReads(
 						mR.id = length(store.alignedReadStore);
 						appendValue(store.alignedReadStore, mR, Generous());
 						appendValue(store.alignQualityStore, qR, Generous());
+                        std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << store.readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
+                        std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << store.readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
 
 						if (length(store.alignedReadStore) > options.compactThresh)
 						{
@@ -712,15 +778,18 @@ void _mapMatePairReads(
 						}
 					}
 					++options.countVerification;
-				}
+                    // XXX
+				// }
+                // XXX
 				++options.countFiltration;
 			}
-		}
+            // XXX
+		// }
+        // XXX
 	}
 	
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
 		if (orientation == 'R')	reverseComplement(genome);	// we have to restore original orientation
-
 }
 
 
