@@ -479,7 +479,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                 continue;  // Skip hits that are not to be processed in this job.
 
             // std::cerr << " [from left window]" << std::flush;
-            gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), it->hstkPos), _min(it->hstkPos + it->bucketWidth, static_cast<TSignedGPos>(length(genome))));
+            gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), static_cast<TSignedGPos>(it->hstkPos)), _min(it->hstkPos + it->bucketWidth, static_cast<TSignedGPos>(length(genome))));
 
             fL.i1 = tls.fifoLastPotMatchNo[it->ndlSeqNo];
             tls.fifoLastPotMatchNo[it->ndlSeqNo] = tls.fifoLastNo++;
@@ -538,7 +538,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             if (itL != itEndL)
             {
                 // std::cerr << "\nSWIFT\tL\t" << itL->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itL->ndlSeqNo] << "\t" << itL->hstkPos << "\t" << itL->hstkPos + itL->bucketWidth << std::endl;
-                gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), itL->hstkPos), _min(itL->hstkPos + itL->bucketWidth, static_cast<TSignedGPos>(length(genome))));
+                gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), static_cast<TSignedGPos>(itL->hstkPos)), _min(itL->hstkPos + itL->bucketWidth, static_cast<TSignedGPos>(length(genome))));
                 if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
                 {
                     // std::cerr << " L(" << itR->hstkPos << ", " << itR->hstkPos + itR->bucketWidth << ")" << std::flush;
@@ -593,7 +593,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 #endif
                         // std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
 						if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-										matePairId, readSetL, TRazerSMode()))
+										matePairId, readSetL, TRazerSMode(), False()))
                         {
                             // std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
 
@@ -601,7 +601,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                             if (!rightVerified) {
                                 verifierR.m.readId = threadIdOffset + itR->ndlSeqNo;  // Translate from thread-local to global id.
                                 // std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
-                                if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode())) {
+                                if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode(), False())) {
                                     // std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
                                     rightVerified = true;
                                     mR = verifierR.m;

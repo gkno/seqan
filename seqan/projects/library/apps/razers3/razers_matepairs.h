@@ -585,14 +585,14 @@ void _mapMatePairReads(
 #endif						
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
                         if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-                                        matePairId, readSetL, mode))
+                                        matePairId, readSetL, mode, False()))
 						{
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
 
                             // XXX
                             if (!rightVerified) {
                                 std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
-                                if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode)) {
+                                if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode, False())) {
                                     std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
                                     rightVerified = true;
                                     mR = verifierR.m;
