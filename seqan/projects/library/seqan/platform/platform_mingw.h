@@ -35,25 +35,13 @@
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_MINGW
 
-#include <inttypes.h>
-
 #define finline __inline__
 
-// default 64bit type
-typedef int64_t __int64;
-typedef uint64_t __uint64;
-
-// default 32bit type
-typedef int32_t __int32;
-typedef uint32_t __uint32;
-
-// default 16bit type
-typedef int16_t __int16;
-typedef uint16_t __uint16;
-
-// default 8bit type
-typedef int8_t __int8;
-typedef uint8_t __uint8;
+// Define unsigned variants of builtin Windows compiler types.
+typedef unsigned __int64_t __uint64;
+typedef unsigned __int32_t __uint32;
+typedef unsigned __int16_t __uint16;
+typedef unsigned __int8_t __uint8;
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
