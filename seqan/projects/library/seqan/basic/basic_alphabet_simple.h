@@ -1531,22 +1531,22 @@ struct BaseAlphabet
 //////////////////////////////////////////////////////////////////////////////
 
 // //DnaQ and Dna5Q
-// 
-// /**
-// .Spec.DnaQ:
-// ..cat:Alphabets
-// ..summary:Alphabet for DNA plus phred quality.
-// ..general:Class.SimpleType
-// ..signature:DnaQ
-// ..remarks:
-// ...text:The @Metafunction.ValueSize@ of $DnaQ$ is 4. 
-// The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3$.
-// ...text:Objects of type $DnaQ$ can be converted to various other types and vice versa. 
-// ...text:$DnaQ$ is typedef for $SimpleType<char,DnaQ_>$, while $DnaQ_$ is a helper
-// specialization tag class.
-// ..see:Metafunction.ValueSize
-// ..see:Spec.Dna5Q
-// */
+
+/**
+.Spec.DnaQ:
+..cat:Alphabets
+..summary:Alphabet for DNA plus phred quality.
+..general:Class.SimpleType
+..signature:DnaQ
+..remarks:
+...text:The @Metafunction.ValueSize@ of $DnaQ$ is 4. 
+The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3$.
+...text:Objects of type $DnaQ$ can be converted to various other types and vice versa. 
+...text:$DnaQ$ is typedef for $SimpleType<char,DnaQ_>$, while $DnaQ_$ is a helper
+specialization tag class.
+..see:Metafunction.ValueSize
+..see:Spec.Dna5Q
+*/
 struct DnaQ_ {};
 typedef SimpleType <unsigned char, DnaQ_> DnaQ;
 
@@ -1562,21 +1562,21 @@ struct BaseAlphabet<DnaQ>
 
 //____________________________________________________________________________
  
-// /**
-// .Spec.Dna5Q:
-// ..cat:Alphabets
-// ..summary:Alphabet for DNA plus phred quality including 'N' character.
-// ..general:Class.SimpleType
-// ..signature:Dna5Q
-// ..remarks:
-// ...text:The @Metafunction.ValueSize@ of $Dna5Q$ is 5. 
-// The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3$. 
-// The 'N' character ("unkown nucleotide") is encoded by 4.
-// ...text:Objects of type $Dna5$ can be converted to various other types and vice versa. 
-// ...text:$Dna5Q$ is typedef for $SimpleType<char,Dna5Q_>$, while $Dna5Q_$ is a helper
-// specialization tag class.
-// ..see:Metafunction.ValueSize
-// */
+/**
+.Spec.Dna5Q:
+..cat:Alphabets
+..summary:Alphabet for DNA plus phred quality including 'N' character.
+..general:Class.SimpleType
+..signature:Dna5Q
+..remarks:
+...text:The @Metafunction.ValueSize@ of $Dna5Q$ is 5. 
+The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3$. 
+The 'N' character ("unkown nucleotide") is encoded by 4.
+...text:Objects of type $Dna5$ can be converted to various other types and vice versa. 
+...text:$Dna5Q$ is typedef for $SimpleType<char,Dna5Q_>$, while $Dna5Q_$ is a helper
+specialization tag class.
+..see:Metafunction.ValueSize
+*/
 struct Dna5Q_ {};
 typedef SimpleType <unsigned char, Dna5Q_> Dna5Q;
 
@@ -2271,7 +2271,19 @@ void convertQuality(Ascii & c, int q)
 }
 
 
-
+// TODO(holtgrew): What about different quality types? Guess scaling? Look at how other packages do this.
+/**
+.Function.assignQualityValue
+..cat:Alphabets
+..signature:assignQualityValue(c, q)
+..summary:Assign quality to a character from an alphabet with integrated quality.
+..param.c:Target character to assign quality to.
+...type:Spec.DnaQ
+..param.q:Quality to assign to the quality.
+...type:nolink:int
+...type:nolink:char
+..remarks:If $q$ is a $char$ then $'!'$ is subtracted from $q$. This is useful for ASCII encoded PHRED scores.
+ */
 //set quality value
 inline 
 void assignQualityValue(DnaQ &c, int q)
@@ -2282,6 +2294,7 @@ void assignQualityValue(DnaQ &c, int q)
 	c.value = (c.value & 3) | (q << 2);
 }
 
+///.Function.assignQualityValue.param.c.type:Spec.Dna5Q
 inline 
 void assignQualityValue(Dna5Q &c, int q) 
 {
@@ -2312,6 +2325,18 @@ void assignQualityValue(Dna5Q &c, Ascii q)
 	assignQualityValue(c, q1);
 }
 
+/**
+.Function.assignQualities
+..cat:Alphabets
+..summary:Assign quality value between strings.
+..signature:assignQualities(target, source)
+..param.target:Target string
+...type:nolink:@Class.String@ of any alphabet with qualities, e.g. @Spec.DnaQ@, @Spec.Dna5Q@
+..param.source:Source string.
+...type:nolink:@Class.String@ of $int$ or $char$.
+..remarks:This funciton calls @Function.assignQualityValue@ for all entries of $target$ and $source$, look at the documentation of @Function.assignQualityValue@ on how the values of $source$ are interpreted.
+..see:Function.assignQualityValue
+ */
 template <typename TDest, typename TSource>
 void assignQualities(TDest &dst, TSource const &src)
 {

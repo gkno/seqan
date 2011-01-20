@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adding documentation for the alphabets `Dna5Q` and `DnaQ` which allow to store 5/4 nucleotides along with the quality in one byte (`char`).
  * Defining integer types (__int8, __uint8, ...) for MinGW, too.
  * Making snp_store compile with LLVM.
  * Removing type `Byte` since it clashes with zlib (#843).  Note that the types `Ascii` and `Unicode` are deprecated and will be removed soon (#849).
