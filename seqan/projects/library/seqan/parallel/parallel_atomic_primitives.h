@@ -71,6 +71,8 @@ namespace seqan {
 ..param.x:Integer, by reference.
 ..returns:The old value of $x.
 ..remarks:This is equivalent to an atomic $++x$.
+..remarks:Note that atomic increments are limited to 32 bit and 64 bit with MSVC (64 bit is only available on 64 bit Windows).
+..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ..see:Function.atomicDec
 ..see:Function.atomicAdd
 ..see:Function.atomicOr
@@ -85,6 +87,8 @@ namespace seqan {
 ..param.x:Integer, by reference.
 ..returns:The old value of $x$.
 ..remarks:This is equivalent to an atomic $--x$.
+..remarks:Note that atomic decrements are limited to 32 bit and 64 bit with MSVC (64 bit is only available on 64 bit Windows).
+..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ..see:Function.atomicInc
 ..see:Function.atomicAdd
 ..see:Function.atomicOr
@@ -100,6 +104,8 @@ namespace seqan {
 ..param.y:Integer to add to the given value.
 ..returns:The old value of $x$.
 ..remarks:This is equivalent to an atomic $x += y$.
+..remarks:Note that atomic fetch-and-add is limited to 32 bit and 64 bit with MSVC (64 bit is only available on 64 bit Windows).
+..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ..see:Function.atomicInc
 ..see:Function.atomicDec
 ..see:Function.atomicOr
@@ -115,6 +121,8 @@ namespace seqan {
 ..param.y:Integer to combine with $OR$ operation.
 ..returns:The old value of $x$.
 ..remarks:This is equivalent to an atomic $x |= y$.
+..remarks:Atomic fetch-and-or for 64 bit integers is only available on 64 bit processors when targeting Intel.
+..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ..see:Function.atomicInc
 ..see:Function.atomicDec
 ..see:Function.atomicAdd
@@ -130,6 +138,8 @@ namespace seqan {
 ..param.y:Integer to combine with $XOR$ operation.
 ..returns:The old value of $x$.
 ..remarks:This is equivalent to an atomic $x ^= y$.
+..remarks:Atomic fetch-and-xor for 64 bit integers is only available on 64 bit processors when targeting Intel.
+..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ..see:Function.atomicInc
 ..see:Function.atomicDec
 ..see:Function.atomicAdd
@@ -145,6 +155,8 @@ namespace seqan {
 ..param.cmp:Value to compare $x$ with.
 ..param.y:Value to set $x$ to if it is equal to $cmp$.
 ..remarks:The pseudo code for this is
+..remarks:On Windows, atomic CAS is only available for 16, 32, and 64 bit integers, 64 bit is only available on 64 bit Windows.
+..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ...code:
 atomic
 {

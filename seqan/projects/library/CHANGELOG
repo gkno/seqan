@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adding `SEQAN_IS_64_BIT` and `SEQAN_IS_64_BIT` macros, defined to either `0` or `1`, depending on the platform.
  * Adjusting `MUM` and `MEM` to new naming schema. (#836)
  * Adding `SEQAN_OMP_PRAGMA` to hide `#pragma omp` when not compiling with OpenMP to suppress warnings. (#353)
  * The test system deletes all files with the same name as temporary file names generated during the tests. (#377)

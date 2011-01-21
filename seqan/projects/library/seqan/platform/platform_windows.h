@@ -55,6 +55,16 @@ typedef unsigned __int32 __uint32;
 typedef unsigned __int16 __uint16;
 typedef unsigned __int8 __uint8;
 
+// The symbols SEQAN_IS_64_BIT and SEQAN_IS_32_BIT can be used to check
+// whether we are on a 32 bit or on a 64 bit machine.
+#if defined(_WIN64)
+#define SEQAN_IS_64_BIT 1
+#define SEQAN_IS_32_BIT 0
+#else
+#define SEQAN_IS_64_BIT 0
+#define SEQAN_IS_32_BIT 1
+#endif  // #if defined(_WIN64)
+
 // Workaround for missing round() from C99 in Visual Studio.
 template <typename T>
 inline T round(T const & x)
