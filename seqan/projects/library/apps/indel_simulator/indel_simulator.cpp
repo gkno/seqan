@@ -92,10 +92,10 @@ int main(int argc, const char *argv[])
 	while (!_streamEOF(file))
 	{
 		parse_skipWhitespace(file,c);
-		int rangeBegin = parse_readDouble(file,c);
+		int rangeBegin = static_cast<int>(parse_readDouble(file,c));
 		if(abs(rangeBegin) > absMaxValue) absMaxValue = abs(rangeBegin);
 		parse_skipWhitespace(file,c);
-		int rangeEnd = parse_readDouble(file,c);
+		int rangeEnd = static_cast<int>(parse_readDouble(file,c));
 		if(abs(rangeEnd) > absMaxValue) absMaxValue = abs(rangeEnd);
 		appendValue(options.ranges,Pair<int,int>(rangeBegin,rangeEnd));
 	}
