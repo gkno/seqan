@@ -499,37 +499,36 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     // -----------------------------------------------------------------------
     THitStringIter itL = begin(*job.hitsPtrL, Standard());
     THitStringIter itEndL = end(*job.hitsPtrL, Standard());
+    // Iterate over all filtration results are returned by SWIFT.
     for (THitStringIter itR = begin(*job.hitsPtrR, Standard()), itEndR = end(*job.hitsPtrR, Standard()); itR != itEndR; ++itR)
     {
+        ++options.countFiltration;
+
+#ifdef RAZERS_DEBUG_MATEPAIRS
+        std::cerr << "\nSWIFT\tR\t" << itR->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itR->ndlSeqNo + 1] << "\t" << scanShift + itR->hstkPos << "\t" << scanShift + itR->hstkPos + itR->bucketWidth << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+
+        // TODO(holtgrew): Rather, sort by package number when creating the jobs.
         if (itR->ndlSeqNo % job.stride != job.offset)
             continue;  // Skip hits that are not to be processed in this job.
 
-        // std::cerr << " R(" << itR->hstkPos << ", " << itR->hstkPos + itR->bucketWidth << ")" << std::flush;
         unsigned matePairId = itR->ndlSeqNo;
         TGPos rEndPos = itR->hstkPos + itR->bucketWidth + scanShift;
         TGPos doubleParWidth = 2 * itR->bucketWidth;
 
-        // CharString readName = tls.globalStore->readNameStore[splitters[job.threadId] + itR->ndlSeqNo];
-        // readName = prefix(readName, length("SRR001665.22388 "));
-        // if (readName == "SRR001665.22388 ")
-        //     std::cerr << readName << std::endl;
-
-        // std::cerr << "\nSWIFT\tR\t" << itR->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itR->ndlSeqNo + 1] << "\t" << scanShift + itR->hstkPos << "\t" << scanShift + itR->hstkPos + itR->bucketWidth << std::endl;
-
         // (1) Remove out-of-window left mates from fifo.
         while (!empty(tls.fifo) && (TSignedGPos)front(tls.fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
         {
+#ifdef RAZERS_DEBUG_MATEPAIRS
+            if (front(tls.fifo).i2.readId > length(tls.globalStore->readNameStore))
+                std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(tls.fifo).i2.beginPos << "\t" << front(tls.fifo).i2.endPos << std::endl;
+            else
+                std::cerr << "\nPOP\tL\t" << tls.globalStore->readNameStore[front(tls.fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(tls.fifo).i2.beginPos << "\t" << front(tls.fifo).i2.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
             popFront(tls.fifo);
             ++tls.fifoFirstNo;
         }
-        /*		
-                if (empty(tls.fifo) || back(tls.fifo).endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
-                for (unsigned i = 0; i < preFetchMatches; ++i)
-                if (find(swiftFinderL, swiftPatternL, options.errorRate, false))
-                pushBack(tls.fifo, mL);
-                else
-                break;
-        */
+
         // (2) Add within-window left mates to fifo.
         while (empty(tls.fifo) || (TSignedGPos)back(tls.fifo).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
         {
@@ -537,11 +536,13 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             // corresponds to a find() in the sequential non-window case.
             if (itL != itEndL)
             {
-                // std::cerr << "\nSWIFT\tL\t" << itL->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itL->ndlSeqNo] << "\t" << itL->hstkPos << "\t" << itL->hstkPos + itL->bucketWidth << std::endl;
+				++options.countFiltration;
+#ifdef RAZERS_DEBUG_MATEPAIRS
+                std::cerr << "\nSWIFT\tL\t" << itL->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itL->ndlSeqNo] << "\t" << itL->hstkPos << "\t" << itL->hstkPos + itL->bucketWidth << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                 gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), static_cast<TSignedGPos>(itL->hstkPos)), _min(itL->hstkPos + itL->bucketWidth, static_cast<TSignedGPos>(length(genome))));
                 if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
                 {
-                    // std::cerr << " L(" << itR->hstkPos << ", " << itR->hstkPos + itR->bucketWidth << ")" << std::flush;
                     // link in
                     fL.i1 = tls.fifoLastPotMatchNo[itL->ndlSeqNo];
                     tls.fifoLastPotMatchNo[itL->ndlSeqNo] = tls.fifoLastNo++;
@@ -564,20 +565,20 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
         int bestLibSizeError = MaxValue<int>::VALUE;
         TDequeueIterator bestLeft = TDequeueIterator();
 
-        // XXX
         bool rightVerified = false;
-        // XXX
         TDequeueIterator it;
         unsigned leftReadId = tls.globalStore->matePairStore[threadIdOffset + matePairId].readId[0];
-        __int64 lastPositive = (__int64)-1;
+		__int64 last = (__int64)-1;
+		__int64 lastValid = (__int64)-1;
         __int64 i;
         for (i = tls.fifoLastPotMatchNo[matePairId]; tls.fifoFirstNo <= i; i = (*it).i1)
         {
-            // std::cerr << " [last pot loop]" << std::flush;
             it = &value(tls.fifo, i - tls.fifoFirstNo);
 
             // search left mate
             //			if (((*it).i2.readId & ~NOT_VERIFIED) == leftReadId)
+            //			        ^== we need not to test anymore, as only corr. left mates are traversed
+            //						via the linked list beginning from lastPotMatchNo[matePairId] 
             {
                 // verify left mate (equal seqNo), if not done already
                 if ((*it).i2.readId & NOT_VERIFIED)
@@ -591,49 +592,67 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 #ifdef RAZERS_BANDED_MYERS
 						verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
 #endif
-                        // std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
+#ifdef RAZERS_DEBUG_MATEPAIRS
+                        std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+                        ++options.countVerification;
 						if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
 										matePairId, readSetL, TRazerSMode()))
                         {
-                            // std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
+#ifdef RAZERS_DEBUG_MATEPAIRS
+                            std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 
-                            // XXX
-                            if (!rightVerified) {
-                                verifierR.m.readId = threadIdOffset + itR->ndlSeqNo;  // Translate from thread-local to global id.
-                                // std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
-                                if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode())) {
-                                    // std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
-                                    rightVerified = true;
-                                    mR = verifierR.m;
-                                } else {
-                                    // std::cerr << "  NO" << std::endl;
-                                    // Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
-                                    // be executed since bestLeftScore remains untouched.
-                                    break;
-                                }
-                            }
-                            // XXX
-
-                            verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;  // has been verified positively, translate to global id
-                            (*it).i2 = verifierL.m;
-                            (*it).i3 = verifierL.q;
-							
-                            // short-cut negative matches
-                            if (lastPositive == (__int64)-1)
-                                tls.fifoLastPotMatchNo[matePairId] = i;
-                            else
-                                value(tls.fifo, lastPositive - tls.fifoFirstNo).i1 = i;
-                            lastPositive = i;
-                        } else {
-                            (*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
-                            // std::cerr << "  NO" << std::endl;
-                        }
-                    } else {
-                        lastPositive = i;
+							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
+							(*it).i2 = verifierL.m;
+							(*it).i3 = verifierL.q;
+						} else {
+							(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
+#ifdef RAZERS_DEBUG_MATEPAIRS
+                            std::cerr << "  NO" << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+							continue;										// we intentionally do not set lastPositive to i
+                        }													// to remove i from linked list
+					} else {
+						lastValid = i;
+						continue;											// left pot. hit is out of tolerance window
                     }
-                } else {
-                    lastPositive = i;
+				} //else {}													// left match is verified already
+
+				// short-cut negative matches
+				if (last != lastValid)
+				{
+					if (lastValid == (__int64)-1)
+						tls.fifoLastPotMatchNo[matePairId] = i;
+					else
+						value(tls.fifo, lastValid - tls.fifoFirstNo).i1 = i;
+				}
+				lastValid = i;
+
+				// XXX
+				if (!rightVerified)											// here a verfied left match is available
+				{
+#ifdef RAZERS_DEBUG_MATEPAIRS
+					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * matePairId + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth + scanShift << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+                    ++options.countVerification;
+					if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode())) {
+#ifdef RAZERS_DEBUG_MATEPAIRS
+						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+						rightVerified = true;
+						mR = verifierR.m;
+					} else {
+#ifdef RAZERS_DEBUG_MATEPAIRS
+						std::cerr << "  NO" << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+						// Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
+						// be executed since bestLeftScore remains untouched.
+						break;
+					}
+
                 }
+
                 /*
                   if ((*it).i2.readId == leftReadId)
                   {
@@ -647,8 +666,12 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                     int score = (*it).i3.score;
                     if (bestLeftScore <= score)
                     {
+                        // distance between left mate beginning and right mate end
                         __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*it).i2.beginPos;
                         int libSizeError = options.libraryLength - dist;
+#ifdef RAZERS_DEBUG_MATEPAIRS
+                        std::cerr << "    libSizeError = " << libSizeError << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                         if (libSizeError < 0)
                             libSizeError = -libSizeError;
                         if (libSizeError > options.libraryError)
@@ -674,10 +697,13 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
         }
 
         // (3) Short-cut negative matches.
-        if (lastPositive == (__int64)-1)
-            tls.fifoLastPotMatchNo[matePairId] = i;
-        else
-            value(tls.fifo, lastPositive - tls.fifoFirstNo).i1 = i;
+		if (last != lastValid)
+		{
+			if (lastValid == (__int64)-1)
+				tls.fifoLastPotMatchNo[matePairId] = i;
+			else
+				value(tls.fifo, lastValid - tls.fifoFirstNo).i1 = i;
+		}
 		
         // (4) Verify right mate, if left mate matches.
         if (bestLeftScore != MinValue<int>::VALUE)
@@ -751,12 +777,13 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                         appendValue(localStore->alignedReadStore, mR, Generous());
                         appendValue(localStore->alignQualityStore, qR, Generous());
 
-                        // std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << tls.globalStore->readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
-                        // std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << tls.globalStore->readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
+#ifdef RAZERS_DEBUG_MATEPAIRS
+                        std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << tls.globalStore->readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
+                        std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << tls.globalStore->readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     }
                     ++options.countVerification;
                 // }
-                ++options.countFiltration;
             }
         // }
     }

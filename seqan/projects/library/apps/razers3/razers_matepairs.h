@@ -492,58 +492,44 @@ void _mapMatePairReads(
 	TAlignQuality qR;
 	TDequeueValue fL(-1, mR, qR);	// to supress uninitialized warnings
 
-//	unsigned const preFetchMatches = 2048;
-
-	// iterate all verification regions returned by SWIFT
+    // Iterate over all filtration results are returned by SWIFT.
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{
-        // XXX
 		++options.countFiltration;
-        // XXX
 
-        // CharString readName = store.readNameStore[swiftPatternR.curSeqNo];
-        // readName = prefix(readName, length("SRR001665.22388 "));
-        // if (readName == "SRR001665.22388 ")
-        //     std::cerr << readName << std::endl;
-
+#ifdef RAZERS_DEBUG_MATEPAIRS
         std::cerr << "\nSWIFT\tR\t" << swiftPatternR.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternR.curSeqNo + 1] << "\t" << scanShift + beginPosition(swiftFinderR) << "\t" << scanShift + endPosition(swiftFinderR) << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
         
-        // std::cerr << " R(" << (*swiftFinderR.curHit).hstkPos << ", " << (*swiftFinderR.curHit).hstkPos + (*swiftFinderR.curHit).bucketWidth << ")" << std::flush;
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 		
-		// remove out-of-window left mates from fifo
+        // (1) Remove out-of-window left mates from fifo.
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
+#ifdef RAZERS_DEBUG_MATEPAIRS
             if (front(fifo).i2.readId > length(store.readNameStore))
                 std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
             else
                 std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 			popFront(fifo);
 			++firstNo;
 		}
-/*		
-		if (empty(fifo) || back(fifo).endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
-			for (unsigned i = 0; i < preFetchMatches; ++i)
-				if (find(swiftFinderL, swiftPatternL, options.errorRate, false))
-					pushBack(fifo, mL);
-				else
-					break;
-*/
-		// add within-window left mates to fifo
+
+        // (2) Add within-window left mates to fifo.
 		while (empty(fifo) || (TSignedGPos)back(fifo).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
 			if (find(swiftFinderL, swiftPatternL, options.errorRate))
 			{
-				// XXX
 				++options.countFiltration;
-				// XXX
+#ifdef RAZERS_DEBUG_MATEPAIRS
                 std::cerr << "\nSWIFT\tL\t" << swiftPatternL.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternL.curSeqNo] << "\t" << beginPosition(swiftFinderL) << "\t" << endPosition(swiftFinderL) << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 				gPair = positionRange(swiftFinderL);
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
 				{
-                    // std::cerr << " L(" << (*swiftFinderR.curHit).hstkPos << ", " << (*swiftFinderR.curHit).hstkPos + (*swiftFinderR.curHit).bucketWidth << ")" << std::flush;
 					// link in
 					fL.i1 = lastPotMatchNo[swiftPatternL.curSeqNo];
 					lastPotMatchNo[swiftPatternL.curSeqNo] = lastNo++;
@@ -563,9 +549,7 @@ void _mapMatePairReads(
 		int bestLibSizeError = MaxValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
 
-        // XXX
         bool rightVerified = false;
-        // XXX
 		TDequeueIterator it;
 		unsigned leftReadId = store.matePairStore[matePairId].readId[0];
 		__int64 last = (__int64)-1;
@@ -573,7 +557,6 @@ void _mapMatePairReads(
         __int64 i;
 		for (i = lastPotMatchNo[matePairId]; firstNo <= i; last = i, i = (*it).i1)
 		{
-            // std::cerr << " [last pot loop]" << std::flush;
 			it = &value(fifo, i - firstNo);
 
 			// search left mate
@@ -593,22 +576,25 @@ void _mapMatePairReads(
 #ifdef RAZERS_BANDED_MYERS
                         verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
 #endif						
+#ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
-                        // XXX
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                         ++options.countVerification;
-                        // XXX
                         if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
                                         matePairId, readSetL, mode))
 						{
+#ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 							(*it).i3 = verifierL.q;
-							
 						} else {
 							(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
+#ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  NO" << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 							continue;										// we intentionally do not set lastPositive to i
                         }													// to remove i from linked list
 					} else {
@@ -630,50 +616,50 @@ void _mapMatePairReads(
 				// XXX
 				if (!rightVerified)											// here a verfied left match is available
 				{
+#ifdef RAZERS_DEBUG_MATEPAIRS
 					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
-                    // XXX
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     ++options.countVerification;
-                    // XXX
 					if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode)) {
+#ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						rightVerified = true;
 						mR = verifierR.m;
 					} else {
+#ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  NO" << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						// Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
 						// be executed since bestLeftScore remains untouched.
 						break;
 					}
 				}
-				// XXX
 				
-/*
+                /*
 				if ((*it).i2.readId == leftReadId)
 				{
 					bestLeft = it;
 					bestLeftScore = (*it).i3.score;
 					break;
 				}
-*/
+                */
 				if ((*it).i2.readId == leftReadId)
 				{
 					int score = (*it).i3.score;
 					if (bestLeftScore <= score)
 					{
-                        // XXX
-                        // std::cerr << "(__int64)mR.endPos == " << (__int64)mR.endPos << ", (__int64)(*it).i2.beginPos == " <<  (__int64)(*it).i2.beginPos << std::endl;
                         // distance between left mate beginning and right mate end
                         __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*it).i2.beginPos;
-                        // XXX
                         
 						int libSizeError = options.libraryLength - dist;
+#ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "    libSizeError = " << libSizeError << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						if (libSizeError < 0)
                             libSizeError = -libSizeError;
-                        // XXX
                         if (libSizeError > options.libraryError)
                             continue;
-                        // XXX
 						if (bestLeftScore == score)
 						{
 							if (bestLibSizeError > libSizeError)
@@ -687,16 +673,14 @@ void _mapMatePairReads(
 							bestLeftScore = score;
 							bestLibSizeError = libSizeError;
 							bestLeft = it;
-                            // XXX
 							// if (bestLeftScore == 0) break;	// TODO: replace if we have real qualities
-                            // XXX
 						}
 					}
 				}
 			}
 		}
 
-		// short-cut negative matches
+        // (3) Short-cut negative matches.
 		if (last != lastValid)
 		{
 			if (lastValid == (__int64)-1)
@@ -752,9 +736,7 @@ void _mapMatePairReads(
 						TSize temp = mR.beginPos;
 						mR.beginPos = gLength - mR.endPos;
 						mR.endPos = gLength - temp;
-                        // XXX
 						// dist = -dist;
-                        // XXX
 					}
 					
 					// set a unique pair id
@@ -784,8 +766,10 @@ void _mapMatePairReads(
 						mR.id = length(store.alignedReadStore);
 						appendValue(store.alignedReadStore, mR, Generous());
 						appendValue(store.alignQualityStore, qR, Generous());
+#ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << store.readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
                         std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << store.readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 
 						if (length(store.alignedReadStore) > options.compactThresh)
 						{
