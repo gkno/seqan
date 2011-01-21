@@ -30,12 +30,13 @@
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 #define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
 //#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)
+//#define RAZERS_DEBUG_MATEPAIRS
 
 #ifdef _OPENMP
 #include <omp.h>
 //#define _GLIBCXX_PARALLEL               // parallel STL if available
 #define SEQAN_PARALLEL
-#define RAZERS_OPENADDRESSING	
+#define RAZERS_OPENADDRESSING
 #endif
 #define RAZERS_PROFILE                // Extensive profiling information.
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times

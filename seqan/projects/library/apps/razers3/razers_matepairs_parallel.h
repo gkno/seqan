@@ -439,7 +439,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     // TODO(holtgrew): Could do length(...)/job.stride but would have to do so everywhere else below, too.
     // TODO(holtgrew): Get around the clear() and resize-with-fill somehow.
     clear(tls.fifoLastPotMatchNo);
-    resize(tls.fifoLastPotMatchNo, length(indexText(host(swiftPatternL))), (__int64)-1);
+    resize(tls.fifoLastPotMatchNo, length(indexText(host(swiftPatternL))), (__int64)-2);
     
 	TGenome & genome = tls.globalStore->contigStore[job.contigId].seq;
 
@@ -447,7 +447,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     
     TAlignedRead mR;
     TAlignQuality qR;
-    TDequeueValue fL(-1, mR, qR);	// to supress uninitialized warnings
+    TDequeueValue fL(-2, mR, qR);	// to supress uninitialized warnings
 
     //	unsigned const preFetchMatches = 2048;
 
@@ -622,6 +622,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 				// short-cut negative matches
 				if (last != lastValid)
 				{
+                    SEQAN_ASSERT_NEQ(lastValid, i);
 					if (lastValid == (__int64)-1)
 						tls.fifoLastPotMatchNo[matePairId] = i;
 					else
@@ -648,6 +649,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						// Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
 						// be executed since bestLeftScore remains untouched.
+						i = (*it).i1;
 						break;
 					}
 
@@ -699,6 +701,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
         // (3) Short-cut negative matches.
 		if (last != lastValid)
 		{
+			SEQAN_ASSERT_NEQ(lastValid, i);
 			if (lastValid == (__int64)-1)
 				tls.fifoLastPotMatchNo[matePairId] = i;
 			else

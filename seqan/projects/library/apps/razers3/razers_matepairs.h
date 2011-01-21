@@ -484,13 +484,13 @@ void _mapMatePairReads(
 	__int64 firstNo = 0;				// first number over all left-mate pot. match in the queue
 	Pair<TGPos> gPair;
 
-	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
+	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-2, Exact());
 
 	TSize gLength = length(genome);
 
 	TAlignedRead mR;
 	TAlignQuality qR;
-	TDequeueValue fL(-1, mR, qR);	// to supress uninitialized warnings
+	TDequeueValue fL(-2, mR, qR);	// to supress uninitialized warnings
 
     // Iterate over all filtration results are returned by SWIFT.
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
@@ -575,7 +575,7 @@ void _mapMatePairReads(
 					{
 #ifdef RAZERS_BANDED_MYERS
                         verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
-#endif						
+#endif
 #ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
@@ -606,6 +606,7 @@ void _mapMatePairReads(
 				// short-cut negative matches
 				if (last != lastValid)
 				{
+					SEQAN_ASSERT_NEQ(lastValid, i);
 					if (lastValid == (__int64)-1)
 						lastPotMatchNo[matePairId] = i;
 					else
@@ -632,6 +633,7 @@ void _mapMatePairReads(
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						// Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
 						// be executed since bestLeftScore remains untouched.
+						i = (*it).i1;
 						break;
 					}
 				}
@@ -683,6 +685,7 @@ void _mapMatePairReads(
         // (3) Short-cut negative matches.
 		if (last != lastValid)
 		{
+			SEQAN_ASSERT_NEQ(lastValid, i);
 			if (lastValid == (__int64)-1)
 				lastPotMatchNo[matePairId] = i;
 			else
