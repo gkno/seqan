@@ -594,6 +594,9 @@ void _mapMatePairReads(
                         verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
 #endif						
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
+                        // XXX
+                        ++options.countVerification;
+                        // XXX
                         if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
                                         matePairId, readSetL, mode))
 						{
@@ -628,6 +631,9 @@ void _mapMatePairReads(
 				if (!rightVerified)											// here a verfied left match is available
 				{
 					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
+                    // XXX
+                    ++options.countVerification;
+                    // XXX
 					if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode)) {
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 						rightVerified = true;
