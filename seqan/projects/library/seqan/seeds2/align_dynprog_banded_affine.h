@@ -431,7 +431,7 @@ _alignBandedTraceback(TAlignmentIterator & alignmentIt0, TAlignmentIterator & al
         // std::cerr << "upperTriangleEdgeLength = " << upperTriangleEdgeLength << std::endl;
         if (pos0 <= static_cast<TPosition>(1))
           break;
-        if (pos0 <= upperTriangleEdgeLength && pos1 <= static_cast<TPosition>(upperTriangleEdgeLength + 1 - pos0))
+        if (pos0 <= static_cast<TPosition>(upperTriangleEdgeLength) && pos1 <= static_cast<TPosition>(upperTriangleEdgeLength + 1 - pos0))
           break;
 
         SEQAN_ASSERT_GT(pos1, static_cast<TPosition>(0));
