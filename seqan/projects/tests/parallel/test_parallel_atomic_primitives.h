@@ -163,14 +163,14 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_inc)
     using namespace seqan;
     typedef unsigned long SEQAN_ulong;
 
-    // Tests are limited to the types where MSVC allows atomic inc.
+    // Tests are limited to the types where MSVC allows atomic
+    // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
     atomicIncTestImpl(long());
     atomicIncTestImpl(SEQAN_ulong());
-    // TODO(holtgrew): Also for the tests below: Does GCC bail on 32 bit Linux?
-#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#if SEQAN_IS_64_BIT
     atomicIncTestImpl(__int64());
     atomicIncTestImpl(__uint64());
-#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#endif  // #if SEQAN_IS_64_BIT
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_dec)
@@ -178,13 +178,14 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_dec)
     using namespace seqan;
     typedef unsigned long SEQAN_ulong;
 
-    // Tests are limited to the types where MSVC allows atomic dec.
+    // Tests are limited to the types where MSVC allows atomic
+    // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
     atomicDecTestImpl(long());
     atomicDecTestImpl(SEQAN_ulong());
-#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#if SEQAN_IS_64_BIT
     atomicDecTestImpl(__int64());
     atomicDecTestImpl(__uint64());
-#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#endif  // #if SEQAN_IS_64_BIT
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_add)
@@ -192,13 +193,14 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_add)
     using namespace seqan;
     typedef unsigned long SEQAN_ulong;
 
-    // Tests are limited to the types where MSVC allows atomic add.
+    // Tests are limited to the types where MSVC allows atomic
+    // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
     atomicAddTestImpl(long());
     atomicAddTestImpl(SEQAN_ulong());
-#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#if SEQAN_IS_64_BIT
     atomicAddTestImpl(__int64());
     atomicAddTestImpl(__uint64());
-#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#endif  // #if SEQAN_IS_64_BIT
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_or)
@@ -208,17 +210,18 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_or)
     typedef unsigned short SEQAN_ushort;
     typedef unsigned long SEQAN_ulong;
 
-    // Tests are limited to the types where MSVC allows atomic or.
+    // Tests are limited to the types where MSVC allows atomic
+    // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
     atomicOrTestImpl(char());
     atomicOrTestImpl(SEQAN_uchar());
     atomicOrTestImpl(short());
     atomicOrTestImpl(SEQAN_ushort());
     atomicOrTestImpl(long());
     atomicOrTestImpl(SEQAN_ulong());
-#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#if SEQAN_IS_64_BIT
     atomicOrTestImpl(__int64());
     atomicOrTestImpl(__uint64());
-#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#endif  // #if SEQAN_IS_64_BIT
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_xor)
@@ -228,6 +231,7 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_xor)
     typedef unsigned short SEQAN_ushort;
     typedef unsigned long SEQAN_ulong;
 
+    // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
     // Tests are limited to the types where MSVC allows atomic Xor.
     atomicXorTestImpl(char());
     atomicXorTestImpl(SEQAN_uchar());
@@ -235,10 +239,10 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_xor)
     atomicXorTestImpl(SEQAN_ushort());
     atomicXorTestImpl(long());
     atomicXorTestImpl(SEQAN_ulong());
-#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#if SEQAN_IS_64_BIT
     atomicXorTestImpl(__int64());
     atomicXorTestImpl(__uint64());
-#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#endif  // #if SEQAN_IS_64_BIT
 }
 
 SEQAN_DEFINE_TEST(test_parallel_atomic_cas)
@@ -247,15 +251,16 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_cas)
     typedef unsigned short SEQAN_ushort;
     typedef unsigned long SEQAN_ulong;
 
-    // Tests are limited to the types where MSVC allows atomic Compare-And-Swap.
+    // Tests are limited to the types where MSVC allows atomic
+    // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
     atomicCasTestImpl(short());
     atomicCasTestImpl(SEQAN_ushort());
     atomicCasTestImpl(long());
     atomicCasTestImpl(SEQAN_ulong());
-#if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#if SEQAN_IS_64_BIT
     atomicCasTestImpl(__int64());
     atomicCasTestImpl(__uint64());
-#endif  // #if !defined(PLATFORM_WINDOWS) || defined(_WIN64)
+#endif  // #if SEQAN_IS_64_BIT
 }
 
 #endif  // TEST_PARALLEL_TEST_PARALLEL_ATOMIC_PRIMITIVES_H_
