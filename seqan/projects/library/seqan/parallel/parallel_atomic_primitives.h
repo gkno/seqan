@@ -227,6 +227,8 @@ inline       __uint64 atomicXor(      __uint64 volatile & x,       __uint64 y) {
 
 inline          short atomicCas(         short volatile & x,          short cmp,          short y) { return _InterlockedCompareExchange16(&x, y, cmp); }
 inline unsigned short atomicCas(unsigned short volatile & x, unsigned short cmp, unsigned short y) { return _InterlockedCompareExchange16(reinterpret_cast<short volatile *>(&x), y, cmp); }
+inline           long atomicCas(           int volatile & x,            int cmp,            int y) { return _InterlockedCompareExchange(reinterpret_cast<long volatile *>(&x), y, cmp); }
+inline unsigned  long atomicCas(unsigned   int volatile & x, unsigned   int cmp, unsigned   int y) { return _InterlockedCompareExchange(reinterpret_cast<long volatile *>(&x), y, cmp); }
 inline           long atomicCas(          long volatile & x,           long cmp,           long y) { return _InterlockedCompareExchange(&x, y, cmp); }
 inline unsigned  long atomicCas(unsigned  long volatile & x, unsigned  long cmp, unsigned  long y) { return _InterlockedCompareExchange(reinterpret_cast<long volatile *>(&x), y, cmp); }
 #ifdef _WIN64
