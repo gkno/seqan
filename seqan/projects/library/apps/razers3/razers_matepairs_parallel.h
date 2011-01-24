@@ -540,7 +540,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             fL.i1 = tls.fifoLastPotMatchNo[it->ndlSeqNo];
             tls.fifoLastPotMatchNo[it->ndlSeqNo] = tls.fifoLastNo++;
 					
-            fL.i2.readId = tls.globalStore->matePairStore[it->ndlSeqNo].readId[0] | NOT_VERIFIED;
+            fL.i2.readId = tls.globalStore->matePairStore[threadIdOffset + it->ndlSeqNo].readId[0] | NOT_VERIFIED;
             fL.i2.beginPos = gPair.i1;
             fL.i2.endPos = gPair.i2;
 
@@ -560,8 +560,17 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     {
         ++options.countFiltration;
 
+        // CharString pref = prefix(tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1], length("SRR001665.798 "));
+        // CharString s = "SRR001665.798 ";
+        // if (pref == s)
+        //     std::cerr << "GOTCHA" << std::endl;
+        // #pragma omp critical
+        // {
+        //     std::cerr << tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1] << std::endl;
+        // }
+        
 #ifdef RAZERS_DEBUG_MATEPAIRS
-        std::cerr << "\nSWIFT\tR\t" << itR->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itR->ndlSeqNo + 1] << "\t" << scanShift + itR->hstkPos << "\t" << scanShift + itR->hstkPos + itR->bucketWidth << std::endl;
+        std::cerr << "\nSWIFT\tR\t" << itR->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1] << "\t" << scanShift + itR->hstkPos << "\t" << scanShift + itR->hstkPos + itR->bucketWidth << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 
         unsigned matePairId = itR->ndlSeqNo;
@@ -575,7 +584,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             if (front(tls.fifo).i2.readId > length(tls.globalStore->readNameStore))
                 std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(tls.fifo).i2.beginPos << "\t" << front(tls.fifo).i2.endPos << std::endl;
             else
-                std::cerr << "\nPOP\tL\t" << tls.globalStore->readNameStore[front(tls.fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(tls.fifo).i2.beginPos << "\t" << front(tls.fifo).i2.endPos << std::endl;
+                std::cerr << "\nPOP\tL\t" << tls.globalStore->readNameStore[(threadIdOffset + front(tls.fifo).i2.readId) & ~NOT_VERIFIED] << "\t" << front(tls.fifo).i2.beginPos << "\t" << front(tls.fifo).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
             popFront(tls.fifo);
             ++tls.fifoFirstNo;
@@ -590,7 +599,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             {
 				++options.countFiltration;
 #ifdef RAZERS_DEBUG_MATEPAIRS
-                std::cerr << "\nSWIFT\tL\t" << itL->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itL->ndlSeqNo] << "\t" << itL->hstkPos << "\t" << itL->hstkPos + itL->bucketWidth << std::endl;
+                std::cerr << "\nSWIFT\tL\t" << itL->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + itL->ndlSeqNo)] << "\t" << itL->hstkPos << "\t" << itL->hstkPos + itL->bucketWidth << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                 gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), static_cast<TSignedGPos>(itL->hstkPos)), _min(itL->hstkPos + itL->bucketWidth, static_cast<TSignedGPos>(length(genome))));
                 if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
@@ -600,7 +609,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                     tls.fifoLastPotMatchNo[itL->ndlSeqNo] = tls.fifoLastNo++;
 					
                     // Translate from thread-local to global id.
-                    fL.i2.readId = (tls.globalStore->matePairStore[threadIdOffset + itL->ndlSeqNo].readId[0]) | NOT_VERIFIED;
+                    fL.i2.readId = (tls.globalStore->matePairStore[(threadIdOffset + itL->ndlSeqNo)].readId[0]) | NOT_VERIFIED;
                     fL.i2.beginPos = gPair.i1;
                     fL.i2.endPos = gPair.i2;
 					
@@ -619,7 +628,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 
         bool rightVerified = false;
         TDequeueIterator it;
-        unsigned leftReadId = tls.globalStore->matePairStore[threadIdOffset + matePairId].readId[0];
+        unsigned leftReadId = tls.globalStore->matePairStore[(threadIdOffset + matePairId)].readId[0];
 		__int64 last = (__int64)-1;
 		__int64 lastValid = (__int64)-1;
         __int64 i;
@@ -645,7 +654,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 						verifierL.patternState.leftClip = ((*it).i2.beginPos >= 0)? 0: -(*it).i2.beginPos;	// left clip if match begins left of the genome
 #endif
 #ifdef RAZERS_DEBUG_MATEPAIRS
-                        std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
+                        std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId)] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                         ++options.countVerification;
 						if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
@@ -686,7 +695,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 				if (!rightVerified)											// here a verfied left match is available
 				{
 #ifdef RAZERS_DEBUG_MATEPAIRS
-					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * matePairId + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth + scanShift << std::endl;
+					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId) + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth + scanShift << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     ++options.countVerification;
 					if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode())) {
@@ -784,7 +793,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                     fL.i3 = (*bestLeft).i3;
 					
                     // transform mate readNo to global readNo
-                    TMatePair &mp = tls.globalStore->matePairStore[threadIdOffset + matePairId];
+                    TMatePair &mp = tls.globalStore->matePairStore[(threadIdOffset + matePairId)];
                     fL.i2.readId = mp.readId[0];
                     mR.readId    = mp.readId[1];
 					
@@ -833,8 +842,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                         appendValue(localStore->alignQualityStore, qR, Generous());
 
 #ifdef RAZERS_DEBUG_MATEPAIRS
-                        std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << tls.globalStore->readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
-                        std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << tls.globalStore->readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
+                        std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << tls.globalStore->readNameStore[threadIdOffset + fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
+                        std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << tls.globalStore->readNameStore[threadIdOffset + mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     }
                 // }
