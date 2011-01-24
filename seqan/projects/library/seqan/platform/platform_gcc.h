@@ -50,7 +50,7 @@
 #if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
 #define SEQAN_IS_64_BIT 1
 #define SEQAN_IS_32_BIT 0
-#else
+#else  // #if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
 #define SEQAN_IS_64_BIT 0
 #define SEQAN_IS_32_BIT 1
 #endif  // #if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
