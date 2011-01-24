@@ -757,7 +757,7 @@ inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
 iter(T & me, 
 	 TPos pos)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return iter(me, pos, typename DefaultGetIteratorSpec<T>::Type());
 } 
 template <typename T, typename TPos>
@@ -765,8 +765,8 @@ inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Typ
 iter(T const & me, 
 	 TPos pos)
 {
-SEQAN_CHECKPOINT
-	return iter(me, pos, typename DefaultGetIteratorSpec<T const>::Type());
+    SEQAN_CHECKPOINT;
+	return iter(me, pos, typename DefaultGetIteratorSpec<T>::Type());
 } 
 
 
@@ -776,7 +776,8 @@ iter(T & me,
 	 TPos pos,
 	 Tag<TTag> const tag_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_LEQ_MSG(pos, static_cast<TPos>(length(me)), "Trying to get an iterator behind a container through iter().");
 	return begin(me, tag_) + pos;
 } 
 template <typename T, typename TPos, typename TTag>
@@ -785,7 +786,8 @@ iter(T const & me,
 	 TPos pos,
 	 Tag<TTag> const tag_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_LEQ_MSG(pos, static_cast<TPos>(length(me)), "Trying to get an iterator behind a container through iter().");
 	return begin(me, tag_) + pos;
 } 
 
