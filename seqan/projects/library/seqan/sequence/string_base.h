@@ -160,9 +160,9 @@ template<typename TString, typename TSpec> class StringSet;
 ..remarks:The function swaps the values of variables left and right.
 This is equivalent to using move three times with a temporary variable.
 
-Note that this function has the same name as the STL function $std::swap$.
+Note that this function has the same name as the STL function $std::swap$ but is in a different namespace.
+Argument Dependent Lookup (ADL, aka Koenig lookup) will take care that the right $swap$ function is called from STL $sort$, for example.
 We only specialize it for Class.String and Class.StringSet.
-We also specialize std::swap that then call these functions.
 ..see:Function.move
 ..include:seqan/sequence.h
 */
@@ -1944,30 +1944,5 @@ struct GetValue<String<Converter<TTarget, TSource>, TSpec> >:
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
-
-// STL swap for strings.
-
-namespace std {
-
-template <typename TAlphabet, typename TSpec>
-inline void
-swap(::SEQAN_NAMESPACE_MAIN::String<TAlphabet, TSpec> & left,
-     ::SEQAN_NAMESPACE_MAIN::String<TAlphabet, TSpec> & right)
-{
-    ::SEQAN_NAMESPACE_MAIN::swap(left, right);
-}
-
-// TODO(holtgrew): This actually belongs into sequence_multiple.h.
-template <typename TString, typename TSpec>
-inline void
-swap(::SEQAN_NAMESPACE_MAIN::StringSet<TString, TSpec> & left,
-     ::SEQAN_NAMESPACE_MAIN::StringSet<TString, TSpec> & right)
-{
-    ::SEQAN_NAMESPACE_MAIN::swap(left, right);
-}
-
-}  // namespace std
-
-//////////////////////////////////////////////////////////////////////////////
 
 #endif //#ifndef SEQAN_HEADER_...
