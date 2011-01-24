@@ -3,7 +3,11 @@
 
 // TODO(holtgrew): Ideally, we do not need any locks.
 
+#ifdef PLATFORM_WINDOWS
+#include <memory>
+#else  // #ifdef PLATFORM_WINDOWS
 #include <tr1/memory>
+#endif  // #ifdef PLATFORM_WINDOWS
 
 #include <seqan/parallel.h>
 
