@@ -1004,8 +1004,8 @@ _patternInitSmallStateBanded(
 	
 	// Initialize row 0 either with zeros or increasing numbers
 	// This can be realized using the following DP pattern and
-	// assuming character mismatches at rows -1, -2,... 
-	// Thus we initialize the bitmasks and VN with 0. 
+	// assuming character mismatches at rows -1, -2,...
+	// Thus we initialize the bitmasks and VN with 0.
 	// VP depends on global/local alignment
 	//
 	//  0  1  2  3  4   -2 -2 -2 -2 -2   (row -2)
@@ -1026,7 +1026,7 @@ _patternInitSmallStateBanded(
 	//
 	// 0 * * * *
 	//   x * * * *
-	//     x * * * * 
+	//     x * * * *
 	//       x x x x x
 	//
 	//       |-------|
@@ -1072,9 +1072,9 @@ _patternInitSmallStateBanded(
 	//
 	//   . . * * *
 	//     . * * * *
-	//       * * * * * 
+	//       * * * * *
 	//         * * * * .
-	//           * * * . . 
+	//           * * * . .
 	//             * * . . .
 	//
 	//                 |---|
@@ -1091,7 +1091,7 @@ _patternInitSmallStateBanded(
 	//               C C C C
 	//
 	// Depending on where the clipping ends we identify 4 different clipping cases:
-	// 
+	//
 	//	 case 00            case 10            case 01            case 11
 	//   . . * *            . . . .            . . * *            . . . .
 	//     . * * *            . . . *            . * * *            . . . *
@@ -1100,11 +1100,11 @@ _patternInitSmallStateBanded(
 	//           * * * .            * * * .            * . . .            * . . .
 	//             * * . .            * * . .            . . . .            . . . .
 	//
-		
+
 		// adjust bitmasks (errors = number of needle chars to preprocess)
 		for (; shift < errors; ++ndlIter, ++shift)
 			_myersAdjustBitmask(state, getValue(ndlIter), shift, typename MyersSmallAlphabet_<TValue>::Type());
-		
+
 		// initialise left column with
 		//
 		//  0  1  2  3  4   -2 -2 -2 -2 -2
@@ -1121,7 +1121,7 @@ _patternInitSmallStateBanded(
 		else
 			VP = -1;
 	}
-	
+
     for (; ndlIter != ndlEnd; ++ndlIter, goNext(finder), ++shift)
     {
 		//////////////////////////////////////////////////////////////////
@@ -1209,7 +1209,7 @@ _patternInitSmallStateBanded(
 template <typename TFinder, typename TNeedle, typename TNeedle2, typename TSpec, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
 bool _stateInit(
 	TFinder &finder,
-	TNeedle const & needle, 
+	TNeedle const & needle,
 	PatternState_<TNeedle2, Myers<AlignTextBanded<TSpec, TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
 {
 SEQAN_CHECKPOINT
@@ -1218,13 +1218,12 @@ SEQAN_CHECKPOINT
     typedef typename TState::TLargeState TLargeState;
 	typedef typename Value<TNeedle>::Type TValue;
 
-	unsigned diagWidth = length(container(hostIterator(finder))) - length(needle);
-//	if (diagWidth >= length(needle))
-//		diagWidth = length() - 1;
-	unsigned blockCount = diagWidth / state.MACHINE_WORD_SIZE + 1;
+//	unsigned diagWidth = length(container(hostIterator(finder))) + state.leftClip - length(needle);
+//	unsigned blockCount = diagWidth / state.MACHINE_WORD_SIZE + 1;
+	unsigned blockCount = 1;
 
-    SEQAN_ASSERT_GEQ(length(container(hostIterator(finder))), length(needle));
-    
+//    SEQAN_ASSERT_GEQ(length(container(hostIterator(finder))), length(needle));
+
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
     clear(state.DPMat);
     resize(state.DPMat, (length(container(finder)) + 1) * (length(needle) + 1), -9);
@@ -1239,8 +1238,8 @@ SEQAN_CHECKPOINT
         delete state.largeState;
         state.largeState = NULL;
         return _patternInitSmallStateBanded(finder, needle, state);
-	} 
-	else 
+	}
+	else
 	{
 		// TODO: is that good here?
 		if (state.largeState == NULL)
