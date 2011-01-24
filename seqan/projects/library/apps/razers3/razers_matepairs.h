@@ -310,7 +310,13 @@ void compactPairMatches(
 	TIterator ditBeg = it;
 
 	// sort 
+#ifdef RAZERS_PROFILE
+  timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	sortAlignedReads(threadStore.alignedReadStore, LessPairScore<TFragmentStore>(mainStore, threadStore));
+#ifdef RAZERS_PROFILE
+  timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 
 	for (; it != itEnd; ++it) 
 	{
@@ -614,7 +620,6 @@ void _mapMatePairReads(
 				}
 				lastValid = i;
 
-				// XXX
 				if (!rightVerified)											// here a verfied left match is available
 				{
 #ifdef RAZERS_DEBUG_MATEPAIRS

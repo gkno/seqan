@@ -24,6 +24,8 @@
 #ifndef SEQAN_HEADER_RAZERS_MATEPAIRS_PARALLEL_H
 #define SEQAN_HEADER_RAZERS_MATEPAIRS_PARALLEL_H
 
+#include <numeric>
+
 #include <seqan/misc/misc_dequeue.h>
 
 #include "razers_parallel.h"
@@ -158,6 +160,54 @@ public:
 template <typename TFragmentStore, typename THitString, typename TOptions, typename TSwiftPattern>
 struct PairedVerification;
 
+template <typename THitString>
+void
+buildHitSplittersAndPartitionHits(String<size_t> & splitters, THitString & hitString, unsigned packageCount, unsigned matePairCount)
+{
+    typedef typename Iterator<THitString>::Type THitStringIterator;
+
+    (void)matePairCount;
+
+    // TODO(holtgrew): Optimize with packageCount power of 2 and/or use libdiv?
+    // TODO(holtgrew): Or maybe logarithmic search faster than modulo?
+
+    // Partition hitString into buckets by ndlSeqNo % packageCount.
+    //
+    // First, build counters.
+    clear(splitters);
+    resize(splitters, packageCount + 1, 0);
+    splitters[0] = 0;
+    for (THitStringIterator it = begin(hitString, Standard()), itEnd = end(hitString, Standard()); it != itEnd; ++it) {
+        SEQAN_ASSERT_LEQ(it->ndlSeqNo, matePairCount);
+        splitters[it->ndlSeqNo % packageCount + 1] += 1;
+        SEQAN_ASSERT_LEQ(splitters[it->ndlSeqNo % packageCount + 1], length(hitString));
+    }
+    std::partial_sum(begin(splitters, Standard()), end(splitters, Standard()), begin(splitters, Standard()));
+    // Second, copy into temporary buffer.
+    String<size_t> offsets(splitters);
+    THitString buffer;
+    resize(buffer, length(hitString));
+    for (THitStringIterator it = begin(hitString, Standard()), itEnd = end(hitString, Standard()); it != itEnd; ++it) {
+        unsigned idx = it->ndlSeqNo % packageCount;
+        buffer[offsets[idx]] = *it;
+        offsets[idx] += 1;
+        if (idx < length(offsets) - 1)
+            SEQAN_ASSERT_LEQ(offsets[idx], offsets[idx + 1]);
+        if (idx > 0u)
+            SEQAN_ASSERT_LEQ(offsets[idx - 1], offsets[idx]);
+    }
+
+    // Finally, write out results.
+    swap(hitString, buffer);
+
+    // std::cout << "SPLITTERS: ";
+    // for (unsigned i = 0; i < length(splitters); ++i) {
+    //     std::cout << splitters[i] << " ";
+    // }
+    // std::cout << " last should be " << length(hitString) << std::endl;
+}
+
+
 template <typename TFragmentStore, typename THitString_, typename TOptions, typename TSwiftPattern>
 class Job<PairedVerification<TFragmentStore, THitString_, TOptions, TSwiftPattern> >
 {
@@ -173,22 +223,31 @@ public:
     char orientation;
     // Hit strings of previous window for the left finder.
     THitStringPtr prevHitsPtrL;
+    size_t prevHitsLBegin, prevHitsLEnd;
     // Current hit string of current finder.
     THitStringPtr hitsPtrL;
+    size_t hitsLBegin, hitsLEnd;
     THitStringPtr hitsPtrR;
+    size_t hitsRBegin, hitsREnd;
     __int64 rightWindowBegin;
-    // Offset and stride in the read ids.
-    unsigned stride;
-    unsigned offset;
     TOptions * options;
     TSwiftPattern * swiftPatternL;
     TSwiftPattern * swiftPatternR;
 
     Job() {}
 
-    Job(int threadId_, TVerificationResults & verificationResults_, TFragmentStore & globalStore_, unsigned contigId_, char orientation_, THitStringPtr & prevHitsPtrL_, THitStringPtr & hitsPtrL_, THitStringPtr & hitsPtrR_, __int64 rightWindowBegin_, unsigned stride_, unsigned offset_, TOptions & options_, TSwiftPattern & swiftPatternL_, TSwiftPattern & swiftPatternR_)
-            : threadId(threadId_), verificationResults(&verificationResults_), globalStore(&globalStore_), contigId(contigId_), orientation(orientation_), prevHitsPtrL(prevHitsPtrL_), hitsPtrL(hitsPtrL_), hitsPtrR(hitsPtrR_), rightWindowBegin(rightWindowBegin_), stride(stride_), offset(offset_), options(&options_), swiftPatternL(&swiftPatternL_), swiftPatternR(&swiftPatternR_)
-    {}
+    Job(int threadId_, TVerificationResults & verificationResults_, TFragmentStore & globalStore_, unsigned contigId_, char orientation_, THitStringPtr & prevHitsPtrL_, size_t prevHitsLBegin_, size_t prevHitsLEnd_, THitStringPtr & hitsPtrL_, size_t hitsLBegin_, size_t hitsLEnd_, THitStringPtr & hitsPtrR_, size_t hitsRBegin_, size_t hitsREnd_, __int64 rightWindowBegin_, TOptions & options_, TSwiftPattern & swiftPatternL_, TSwiftPattern & swiftPatternR_)
+            : threadId(threadId_), verificationResults(&verificationResults_), globalStore(&globalStore_), contigId(contigId_), orientation(orientation_), prevHitsPtrL(prevHitsPtrL_), prevHitsLBegin(prevHitsLBegin_), prevHitsLEnd(prevHitsLEnd_), hitsPtrL(hitsPtrL_), hitsLBegin(hitsLBegin_), hitsLEnd(hitsLEnd_), hitsPtrR(hitsPtrR_), hitsRBegin(hitsRBegin_), hitsREnd(hitsREnd_), rightWindowBegin(rightWindowBegin_), options(&options_), swiftPatternL(&swiftPatternL_), swiftPatternR(&swiftPatternR_)
+    {
+        SEQAN_ASSERT_LEQ(hitsLBegin, length(*hitsPtrL));
+        SEQAN_ASSERT_LEQ(hitsLEnd, length(*hitsPtrL));
+        SEQAN_ASSERT_LEQ(hitsRBegin, length(*hitsPtrR));
+        SEQAN_ASSERT_LEQ(hitsREnd, length(*hitsPtrR));
+        if (prevHitsPtrL.get() != 0) {
+            SEQAN_ASSERT_LEQ(prevHitsLBegin, length(*prevHitsPtrL));
+            SEQAN_ASSERT_LEQ(prevHitsLEnd, length(*prevHitsPtrL));
+        }
+    }
 };
 
 // ===========================================================================
@@ -458,9 +517,9 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     //     std::cerr << "\nLENGTH NO PREV HITS" << std::endl;
     // else
     //     std::cerr << "\nLENGTH length(*job.prevHitsPtrL) == " << length(*job.prevHitsPtrL) << std::endl;
-    if (job.prevHitsPtrL.get() != 0 && length(*job.prevHitsPtrL) > 0u) {
-        THitStringIter it = end(*job.prevHitsPtrL, Standard());
-        THitStringIter itBegin = begin(*job.prevHitsPtrL, Standard());
+    if (job.prevHitsPtrL.get() != 0 && job.prevHitsLEnd > job.prevHitsLBegin) {
+        THitStringIter it = iter(*job.prevHitsPtrL, job.prevHitsLEnd, Standard());
+        THitStringIter itBegin = iter(*job.prevHitsPtrL, job.prevHitsLBegin, Standard());
 
         do {
             --it;
@@ -474,10 +533,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
             ++it;
 
         // Now enqueue all hits in the overlap that belong to this job.
-        for (THitStringIter itEnd = end(*job.prevHitsPtrL, Standard()); it != itEnd; ++it) {
-            if (it->ndlSeqNo % job.stride != job.offset)
-                continue;  // Skip hits that are not to be processed in this job.
-
+        for (THitStringIter itEnd = iter(*job.prevHitsPtrL, job.prevHitsLEnd, Standard()); it != itEnd; ++it) {
             // std::cerr << " [from left window]" << std::flush;
             gPair = Pair<TGPos, TGPos>(_max(static_cast<TSignedGPos>(0), static_cast<TSignedGPos>(it->hstkPos)), _min(it->hstkPos + it->bucketWidth, static_cast<TSignedGPos>(length(genome))));
 
@@ -497,20 +553,16 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     // -----------------------------------------------------------------------
     // Perform paired-end verification.
     // -----------------------------------------------------------------------
-    THitStringIter itL = begin(*job.hitsPtrL, Standard());
-    THitStringIter itEndL = end(*job.hitsPtrL, Standard());
+    THitStringIter itL = iter(*job.hitsPtrL, job.hitsLBegin, Standard());
+    THitStringIter itEndL = iter(*job.hitsPtrL, job.hitsLEnd, Standard());
     // Iterate over all filtration results are returned by SWIFT.
-    for (THitStringIter itR = begin(*job.hitsPtrR, Standard()), itEndR = end(*job.hitsPtrR, Standard()); itR != itEndR; ++itR)
+    for (THitStringIter itR = iter(*job.hitsPtrR, job.hitsRBegin, Standard()), itEndR = iter(*job.hitsPtrR, job.hitsREnd, Standard()); itR != itEndR; ++itR)
     {
         ++options.countFiltration;
 
 #ifdef RAZERS_DEBUG_MATEPAIRS
         std::cerr << "\nSWIFT\tR\t" << itR->ndlSeqNo << "\t" << tls.globalStore->readNameStore[2 * itR->ndlSeqNo + 1] << "\t" << scanShift + itR->hstkPos << "\t" << scanShift + itR->hstkPos + itR->bucketWidth << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
-
-        // TODO(holtgrew): Rather, sort by package number when creating the jobs.
-        if (itR->ndlSeqNo % job.stride != job.offset)
-            continue;  // Skip hits that are not to be processed in this job.
 
         unsigned matePairId = itR->ndlSeqNo;
         TGPos rEndPos = itR->hstkPos + itR->bucketWidth + scanShift;
@@ -785,7 +837,6 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                         std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << tls.globalStore->readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     }
-                    ++options.countVerification;
                 // }
             }
         // }
@@ -1056,6 +1107,11 @@ void _mapMatePairReadsParallel(
         std::tr1::shared_ptr<THitString> previousLeftHits;
         std::tr1::shared_ptr<THitString> leftHits;
         std::tr1::shared_ptr<THitString> rightHits;
+        // Declare hits splitters and initialize for left since we need it as "previous left" below.
+        String<size_t> leftHitsSplitters;
+        resize(leftHitsSplitters, options.maxVerificationPackageCount + 1, 0);
+        String<size_t> rightHitsSplitters;
+        String<size_t> previousLeftHitsSplitters;
 
         // For each filtration window...
         bool hasMore = false;
@@ -1095,17 +1151,28 @@ void _mapMatePairReadsParallel(
             //     std::cerr << "\nPOSITION       \t" << tls.swiftFinderL.curPos << "\t" << tls.swiftFinderR.curPos << std::endl;
             if (length(getSwiftHits(tls.swiftFinderL)) > 0u || length(getSwiftHits(tls.swiftFinderR)) > 0u) {
                 String<TVerificationJob> jobs;
-                unsigned verificationPackageSize = _min(length(host(swiftPatternL)), tls.options.verificationPackageSize);
-                unsigned verificationPackageCount = static_cast<unsigned>(ceil(1.0 * length(host(swiftPatternL)) / verificationPackageSize));
 
+                // Update previous left hits and splitters.
                 previousLeftHits = leftHits;
+                swap(previousLeftHitsSplitters, leftHitsSplitters);
+                // Update new left hits and splitters.
                 leftHits.reset(new THitString());
                 std::swap(*leftHits, getSwiftHits(tls.swiftFinderL));
+                buildHitSplittersAndPartitionHits(leftHitsSplitters, *leftHits, options.maxVerificationPackageCount, length(indexText(host(swiftPatternL))));
                 rightHits.reset(new THitString());
                 std::swap(*rightHits, getSwiftHits(tls.swiftFinderR));
+                buildHitSplittersAndPartitionHits(rightHitsSplitters, *rightHits, options.maxVerificationPackageCount, length(host(swiftPatternL)));
 
-                for (unsigned i = 0; i < verificationPackageCount; ++i)
-                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, orientation, previousLeftHits, leftHits, rightHits, rightWindowBegin, verificationPackageCount, i, *tls.globalOptions, tls.swiftPatternL, tls.swiftPatternR));
+                for (unsigned i = 0; i < options.maxVerificationPackageCount; ++i) {
+                    // std::cerr << "i == " << i << " length(leftHitsSplitters) == " << length(leftHitsSplitters) << ", length(rightHitsSplitters) == " << length(rightHitsSplitters) << ", length(previousLeftHitsSplitters) == " << length(previousLeftHitsSplitters) << ", verificationPackageCount == " << options.maxVerificationPackageCount << std::endl;
+                    // std::cerr << "length(leftHits) == " << length(leftHits) << ", length(rightHits) == " << length(rightHits) << std::endl;
+                    SEQAN_ASSERT_LEQ(previousLeftHitsSplitters[i], previousLeftHitsSplitters[i + 1]);
+                    SEQAN_ASSERT_LEQ(rightHitsSplitters[i], rightHitsSplitters[i + 1]);
+                    SEQAN_ASSERT_LEQ(leftHitsSplitters[i], leftHitsSplitters[i + 1]);
+                    if (rightHitsSplitters[i] == rightHitsSplitters[i + 1] || (previousLeftHitsSplitters[i] == previousLeftHitsSplitters[i + 1] && leftHitsSplitters[i] == leftHitsSplitters[i + 1]))
+                        continue;
+                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, orientation, previousLeftHits, previousLeftHitsSplitters[i], previousLeftHitsSplitters[i + 1], leftHits, leftHitsSplitters[i], leftHitsSplitters[i + 1], rightHits, rightHitsSplitters[i], rightHitsSplitters[i + 1], rightWindowBegin, *tls.globalOptions, tls.swiftPatternL, tls.swiftPatternR));
+                }
 
                 pushFront(taskQueue, jobs);
             }
