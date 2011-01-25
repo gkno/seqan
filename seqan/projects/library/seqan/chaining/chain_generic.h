@@ -72,7 +72,7 @@ struct ChainGenericSortFragsPredFunctional_
 
 	template <typename TFrags>
 	inline bool 
-	operator() (TFrags & left, TFrags & right)
+	operator() (TFrags const & left, TFrags const & right) const
 	{
 		return leftPosition(source[left.me], 0) < leftPosition(source[right.me], 0);
 	}
