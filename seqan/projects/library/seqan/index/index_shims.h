@@ -361,7 +361,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 		String< TValue, TSpec > &LCPE,
 		TObject const &text,
 		TSA const &suffixArray,
-        TLCP const &LCP,
+        TLCP const & /*LCP*/,
 		TAlgSpec const)
 	{
 	SEQAN_CHECKPOINT

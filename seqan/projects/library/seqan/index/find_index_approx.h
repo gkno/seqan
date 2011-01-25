@@ -125,7 +125,7 @@ struct AddSingleResultsFunctor
 	String<TSAValue> results;
     
     template <typename TPattern, typename TIter>
-    void operator() (TPattern &pattern, TIter &iter)
+    void operator() (TPattern & /*pattern*/, TIter &iter)
     {
         append(results, getOccurrences(iter));
     }
