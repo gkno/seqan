@@ -52,6 +52,10 @@ SEQAN_BEGIN_TESTSUITE(test_parallel) {
         omp_set_num_threads(2);
 #endif  // #if defined(_OPENMP)
 
+    // TODO(holtgrew): Re-enable tests on LLVM when bug 9041 is fixed.
+    // LLVM has problems with atomic operation builtins, re-enable when
+    // this problem is fixed. See http://llvm.org/bugs/show_bug.cgi?id=9041
+#ifndef __llvm__
     // Tests for atomic primitives.
     SEQAN_CALL_TEST(test_parallel_atomic_inc);
     SEQAN_CALL_TEST(test_parallel_atomic_dec);
@@ -63,5 +67,6 @@ SEQAN_BEGIN_TESTSUITE(test_parallel) {
     // Tests for misc simpmle atomic operations.
     SEQAN_CALL_TEST(test_parallel_atomic_min);
     SEQAN_CALL_TEST(test_parallel_atomic_max);
+#endif  // #ifndef __llvm__
 }
 SEQAN_END_TESTSUITE
