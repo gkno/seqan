@@ -45,9 +45,15 @@
 // for disabling OpenMP pragmas on compilers that do not support OpenMP to
 // suppress warnings.
 #ifdef _OPENMP
-#define SEQAN_OMP_PRAGMA(x) _Pragma (#x)
+  #ifndef PLATFORM_WINDOWS
+    // GCC _Pragma operator
+    #define SEQAN_OMP_PRAGMA(x) _Pragma (#x)
+  #else  // #ifdef PLATFORM_WINDOWS
+    // MSVC __pragma-operator
+    #define SEQAN_OMP_PRAGMA(x) __pragma (x)
+  #endif // #ifdef PLATFORM_WINDOWS
 #else  // #ifdef _OPENMP
-#define SEQAN_OMP_PRAGMA(x)
+  #define SEQAN_OMP_PRAGMA(x)
 #endif  // #ifdef _OPENMP
 
 #endif  // SEQAN_PARALLEL_PARALLEL_MACROS_H_
