@@ -192,15 +192,15 @@ inline      __uint64 atomicInc(__uint64 volatile & x) { return _InterlockedIncre
 inline          long atomicDec(         long volatile & x) { return _InterlockedDecrement(&x); }
 inline unsigned long atomicDec(unsigned long volatile & x) { return _InterlockedDecrement(reinterpret_cast<long volatile *>(&x)); }
 #ifdef _WIN64
-inline       __int64 atomicDec( __int64 volatile & x) { return _InterlockedDecrement(&x); }
-inline      __uint64 atomicInc(__uint64 volatile & x) { return _InterlockedDecrement(reinterpret_cast<__int64 volatile *>(&x)); }
+inline       __int64 atomicDec( __int64 volatile & x) { return _InterlockedDecrement64(&x); }
+inline      __uint64 atomicDec(__uint64 volatile & x) { return _InterlockedDecrement64(reinterpret_cast<__int64 volatile *>(&x)); }
 #endif  // #ifdef _WIN64
 
 inline          long atomicAdd(         long volatile & x, long y) { return _InterlockedExchangeAdd(&x, y); }
 inline unsigned long atomicAdd(unsigned long volatile & x, long y) { return _InterlockedExchangeAdd(reinterpret_cast<long volatile *>(&x), y); }
 #ifdef _WIN64
-inline       __int64 atomicAdd( __int64 volatile & x,  _uint64 y) { return _InterlockedExchangeAdd(&x, y); }
-inline      __uint64 atomicAdd(__uint64 volatile & x, __uint64 y) { return _InterlockedExchangeAdd(reinterpret_cast<long volatile *>(&x), y); }
+inline       __int64 atomicAdd( __int64 volatile & x,  __int64 y) { return _InterlockedExchangeAdd64(&x, y); }
+inline      __uint64 atomicAdd(__uint64 volatile & x, __uint64 y) { return _InterlockedExchangeAdd64(reinterpret_cast<__int64 volatile *>(&x), y); }
 #endif  // #ifdef _WIN64
 
 inline           char atomicOr(          char volatile & x,           char y) { return _InterlockedOr8(&x, y); }
