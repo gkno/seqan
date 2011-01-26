@@ -12,6 +12,7 @@ find_package (TBB QUIET)
 find_package (CUDA)
 find_package (OpenMP QUIET)
 find_package (Boost 1.35.0)  # >= 1.35 for math/distributions, however broken?
+find_package (TR1)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} ${SAMTOOLS_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
 set (CMAKE_CXX_FLAGS_RELDEBUG "${CMAKE_CXX_FLAGS_RELDEBUG} -DSEQAN_ENABLE_DEBUG=0")
@@ -59,6 +60,16 @@ link_directories (${SEQAN_LIBRARY}/lib
 # ^-- currently not working because cmake appends Debug|Release to ../lib/
 
 ################################################################################
+# Auto-generate headers.
+################################################################################
+
+# Generate configuration header for RazerS 3.
+#
+# TODO(holtgrew): We probably want this for all apps if a config.h.in file exists!
+configure_file (${SEQAN_LIBRARY}/apps/razers3/config.h.in
+                ${SEQAN_LIBRARY}/apps/razers3/config.h)
+
+################################################################################
 # Applications
 ################################################################################
 
@@ -101,7 +112,15 @@ else (Boost_FOUND)
   list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/transquant)
 endif (Boost_FOUND)
 if (OpenMP_CXX_FLAGS)
-  set (APP_razers3_SOURCES ${SEQAN_LIBRARY}/apps/razers3/razers.cpp ${RAZERS3_HEADERS})
+  if (Boost_FOUND OR TR1_SHARED_PTR_FOUND)
+    set (APP_razers3_SOURCES ${SEQAN_LIBRARY}/apps/razers3/razers.cpp ${RAZERS3_HEADERS})
+  else (Boost_FOUND OR TR1_SHARED_PTR_FOUND)
+    # TODO(holtgrew): Is there a better way to specify complex dependencies?
+    message ("WARNING neither TR1 nor Boost found, not building razers3!")
+    # Disable building of RazerS 3.
+    set (APP_razers3_NOBUILD true)
+    list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/razers3)
+  endif (Boost_FOUND OR TR1_SHARED_PTR_FOUND)
 else (OpenMP_CXX_FLAGS)
   message ("WARNING OpenMP not found, not building razers3!")
   # Disable building of RazerS 3.

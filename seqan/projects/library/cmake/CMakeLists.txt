@@ -9,6 +9,7 @@ project (Seqan)
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindTBB/"
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cuda"
+    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/"
     ${CMAKE_MODULE_PATH})
 find_package (PythonInterp)
 
@@ -215,7 +216,6 @@ macro(SEQAN_ADD_EXECUTABLE seqan_target)
 	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
 endmacro(SEQAN_ADD_EXECUTABLE seqan_target)
-
 
 ################################################################################
 # Include Sub-Projects
