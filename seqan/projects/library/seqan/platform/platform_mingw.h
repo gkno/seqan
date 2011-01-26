@@ -37,6 +37,8 @@
 
 #define finline __inline__
 
+#include <inttypes.h>
+
 // Define unsigned variants of builtin Windows compiler types.
 typedef unsigned __int64 __uint64;
 typedef unsigned __int32 __uint32;
