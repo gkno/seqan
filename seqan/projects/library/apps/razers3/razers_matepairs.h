@@ -503,6 +503,15 @@ void _mapMatePairReads(
 	{
 		++options.countFiltration;
 
+        CharString pref = prefix(store.readNameStore[2 * swiftPatternR.curSeqNo + 1], length("EAS20_8_6_1_248_1397"));
+        CharString s = "EAS20_8_6_1_248_1397";
+        if (pref == s)
+            std::cerr << "GOTCHA" << std::endl;
+        // #pragma omp critical
+        // {
+        //     std::cerr << tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1] << std::endl;
+        // }
+
 #ifdef RAZERS_DEBUG_MATEPAIRS
         std::cerr << "\nSWIFT\tR\t" << swiftPatternR.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternR.curSeqNo + 1] << "\t" << scanShift + beginPosition(swiftFinderR) << "\t" << scanShift + endPosition(swiftFinderR) << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
@@ -626,12 +635,16 @@ void _mapMatePairReads(
 					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     ++options.countVerification;
+                    if (pref == s)
+                        std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
 					if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode)) {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						rightVerified = true;
 						mR = verifierR.m;
+                        if (pref == s)
+                            std::cerr << "BREAK HERE" << std::endl;
 					} else {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  NO" << std::endl;
@@ -774,6 +787,11 @@ void _mapMatePairReads(
 						mR.id = length(store.alignedReadStore);
 						appendValue(store.alignedReadStore, mR, Generous());
 						appendValue(store.alignQualityStore, qR, Generous());
+                        if (pref == s) {
+                            std::cerr << "ADDED" << std::endl;
+                            std::cerr << "  (" << mR.beginPos << ", " << mR.endPos << ")" << std::endl;
+                            std::cerr << "  (" << fL.i2.beginPos << ", " << fL.i2.endPos << ")" << std::endl;
+                        }
 #ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << store.readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
                         std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << store.readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;

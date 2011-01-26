@@ -112,7 +112,12 @@ public:
 
     TShape shape;
 
+    #ifdef RAZERS_BANDED_MYERS
     typedef MatchVerifier<TFragmentStore, TOptions, TRazerSMode, TSwiftPattern, TCounts, TPreprocessing> TMatchVerifier;
+    #else  // #ifdef RAZERS_BANDED_MYERS
+    typedef MatchVerifier<TFragmentStore, TOptions, TRazerSMode, TSwiftPattern, TCounts, typename Infix<TPreprocessing>::Type> TMatchVerifier;
+    typename Infix<TPreprocessing>::Type preprocessingInfixL, preprocessingInfixR;
+    #endif  // #ifdef RAZERS_BANDED_MYERS
     TMatchVerifier verifierL, verifierR;
 
     // Mailbox for the verification results.
@@ -171,6 +176,9 @@ buildHitSplittersAndPartitionHits(String<size_t> & splitters, THitString & hitSt
     // TODO(holtgrew): Optimize with packageCount power of 2 and/or use libdiv?
     // TODO(holtgrew): Or maybe logarithmic search faster than modulo?
 
+    unsigned const a = 1664525;
+    unsigned const c = 1013904223;
+
     // Partition hitString into buckets by ndlSeqNo % packageCount.
     //
     // First, build counters.
@@ -179,7 +187,8 @@ buildHitSplittersAndPartitionHits(String<size_t> & splitters, THitString & hitSt
     splitters[0] = 0;
     for (THitStringIterator it = begin(hitString, Standard()), itEnd = end(hitString, Standard()); it != itEnd; ++it) {
         SEQAN_ASSERT_LEQ(it->ndlSeqNo, matePairCount);
-        splitters[it->ndlSeqNo % packageCount + 1] += 1;
+        unsigned idx = (a * it->ndlSeqNo + c) % packageCount + 1;
+        splitters[idx] += 1;
         SEQAN_ASSERT_LEQ(splitters[it->ndlSeqNo % packageCount + 1], length(hitString));
     }
     std::partial_sum(begin(splitters, Standard()), end(splitters, Standard()), begin(splitters, Standard()));
@@ -188,7 +197,7 @@ buildHitSplittersAndPartitionHits(String<size_t> & splitters, THitString & hitSt
     THitString buffer;
     resize(buffer, length(hitString));
     for (THitStringIterator it = begin(hitString, Standard()), itEnd = end(hitString, Standard()); it != itEnd; ++it) {
-        unsigned idx = it->ndlSeqNo % packageCount;
+        unsigned idx = (a * it->ndlSeqNo + c) % packageCount;
         buffer[offsets[idx]] = *it;
         offsets[idx] += 1;
         if (idx < length(offsets) - 1)
@@ -435,7 +444,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 		TRazerSMode, 
 		TSwiftPattern,
 		TCounts,
-        TPreprocessing>											TVerifier;
+#ifdef RAZERS_BANDED_MYERS
+        TPreprocessing>										TVerifier;
+#else  // #ifdef RAZERS_BANDED_MYERS
+        typename Infix<TPreprocessing>::Type>	            TVerifier;
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	// MATE-PAIR FILTRATION
 	typedef Triple<__int64, TAlignedRead, TAlignQuality>	TDequeueValue;
@@ -461,11 +474,19 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     tls.verifierL.options = job.options;
     tls.verifierL.swiftPattern = job.swiftPatternL;
     tls.verifierL.cnts = 0;
+#ifndef RAZERS_BANDED_MYERS
+    setBeginPosition(*tls.verifierL.preprocessing, splitters[job.threadId]);
+    setEndPosition(*tls.verifierL.preprocessing, splitters[job.threadId + 1]);
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
     tls.verifierR.store = localStore;
     tls.verifierR.options = job.options;
     tls.verifierR.swiftPattern = job.swiftPatternR;
     tls.verifierR.cnts = 0;
+#ifndef RAZERS_BANDED_MYERS
+    setBeginPosition(*tls.verifierR.preprocessing, splitters[job.threadId]);
+    setEndPosition(*tls.verifierR.preprocessing, splitters[job.threadId + 1]);
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	const unsigned NOT_VERIFIED = 1u << (8 * sizeof(unsigned) - 1);
 
@@ -560,10 +581,10 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     {
         ++options.countFiltration;
 
-        // CharString pref = prefix(tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1], length("SRR001665.798 "));
-        // CharString s = "SRR001665.798 ";
-        // if (pref == s)
-        //     std::cerr << "GOTCHA" << std::endl;
+        CharString pref = prefix(tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1], length("EAS20_8_6_1_248_1397"));
+        CharString s = "EAS20_8_6_1_248_1397";
+        if (pref == s)
+            std::cerr << "GOTCHA" << std::endl;
         // #pragma omp critical
         // {
         //     std::cerr << tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1] << std::endl;
@@ -695,15 +716,19 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 				if (!rightVerified)											// here a verfied left match is available
 				{
 #ifdef RAZERS_DEBUG_MATEPAIRS
-					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId) + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth + scanShift << std::endl;
+					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId) + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     ++options.countVerification;
-					if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode())) {
+                    if (pref == s)
+                        std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId) + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth << std::endl;
+                    if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode())) {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						rightVerified = true;
 						mR = verifierR.m;
+                        if (pref == s)
+                            std::cerr << "BREAK HERE" << std::endl;
 					} else {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  NO" << std::endl;
@@ -786,7 +811,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                 // if (dist <= options.libraryLength + options.libraryError &&
                 //     options.libraryLength <= dist + options.libraryError)
                 // {
-                    // mR = verifierR.m;
+                    //mR = verifierR.m;
                     qR = verifierR.q;
 					
                     fL.i2 = (*bestLeft).i2;
@@ -840,6 +865,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                         mR.id = length(localStore->alignedReadStore);
                         appendValue(localStore->alignedReadStore, mR, Generous());
                         appendValue(localStore->alignQualityStore, qR, Generous());
+                        if (pref == s) {
+                            std::cerr << "ADDED" << std::endl;
+                            std::cerr << "  (" << mR.beginPos << ", " << mR.endPos << ")" << std::endl;
+                            std::cerr << "  (" << fL.i2.beginPos << ", " << fL.i2.endPos << ")" << std::endl;
+                        }
 
 #ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << tls.globalStore->readNameStore[threadIdOffset + fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
@@ -1004,7 +1034,11 @@ void _mapMatePairReadsParallel(
 		TRazerSMode, 
 		TSwiftPattern,
 		TCounts,
-        TPreprocessing>											TVerifier;
+#ifdef RAZERS_BANDED_MYERS
+        TPreprocessing>										TVerifier;
+#else  // #ifdef RAZERS_BANDED_MYERS
+        typename Infix<TPreprocessing>::Type>	            TVerifier;
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	typedef typename TSwiftFinderL::THitString THitString;
     typedef Job<PairedVerification<TFragmentStore, THitString, TOptions, TSwiftPattern> > TVerificationJob;
@@ -1063,13 +1097,23 @@ void _mapMatePairReadsParallel(
 		threadLocalStorages[i].verifierL.genomeLength = length(genome);
 		threadLocalStorages[i].verifierL.oneMatchPerBucket = true;
 		threadLocalStorages[i].verifierL.m.contigId = contigId;
+#ifdef RAZERS_BANDED_MYERS
 		threadLocalStorages[i].verifierL.preprocessing = &preprocessingL;
+#else  // #ifdef RAZERS_BANDED_MYERS
+        set(threadLocalStorages[i].preprocessingInfixL, infix(preprocessingL, 0, length(preprocessingL)));
+		threadLocalStorages[i].verifierL.preprocessing = &threadLocalStorages[i].preprocessingInfixL;
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
 		threadLocalStorages[i].verifierR.onReverseComplement = (orientation == 'R');
 		threadLocalStorages[i].verifierR.genomeLength = length(genome);
 		threadLocalStorages[i].verifierR.oneMatchPerBucket = true;
 		threadLocalStorages[i].verifierR.m.contigId = contigId;
+#ifdef RAZERS_BANDED_MYERS
 		threadLocalStorages[i].verifierR.preprocessing = &preprocessingR;
+#else  // #ifdef RAZERS_BANDED_MYERS
+        set(threadLocalStorages[i].preprocessingInfixR, infix(preprocessingR, 0, length(preprocessingR)));
+		threadLocalStorages[i].verifierR.preprocessing = &threadLocalStorages[i].preprocessingInfixR;
+#endif  // #ifdef RAZERS_BANDED_MYERS
 
         threadLocalStorages[i].swiftFinderL  = TSwiftFinderL(genome, options.repeatLength, 1);
         threadLocalStorages[i].genomeInf = infix(genome, scanShift, length(genome));
@@ -1207,7 +1251,7 @@ void _mapMatePairReadsParallel(
             // Write back the contents of these stores to the thread-local store.
             writeBackToLocal(tls, localStores);
             clearLocalStores(localStores);
-        } while(hasMore);
+        } while (hasMore);
 
         // Finalization
         windowFindEnd(swiftFinderL, swiftPatternL);
@@ -1296,29 +1340,35 @@ int _mapMatePairReadsParallel(
     int oldMaxThreads = omp_get_max_threads();
     omp_set_num_threads(options.threadCount);
 
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_INIT);
+    double beginInit = sysTime();
+#endif  // #ifdef RAZERS_PROFILE
+
     // Verifier preprocessing.
 #ifdef RAZERS_BANDED_MYERS
 	typedef Nothing TPreprocessing;
 	TPreprocessing forwardPatternsL;
 	TPreprocessing forwardPatternsR;
 #else  // #ifdef RAZERS_BANDED_MYERS
-    // TODO(holtgrew): Parallelize preprocessing?
     typedef String<TMyersPattern> TPreprocessing;
 	TPreprocessing forwardPatternsL;
 	TPreprocessing forwardPatternsR;
 	options.compMask[4] = (options.matchN)? 15: 0;
 	if (options.gapMode == RAZERS_GAPPED)
 	{
-	    unsigned pairCount = length(store.matePairStore);
+	    int pairCount = length(store.matePairStore);
 		resize(forwardPatternsL, pairCount, Exact());
 		resize(forwardPatternsR, pairCount, Exact());
-		Dna5String tmp;
-		for(unsigned i = 0; i < pairCount; ++i)
+		String<Dna5String> tmps;
+        resize(tmps, omp_get_max_threads());
+        #pragma omp parallel for schedule(static)
+		for (int i = 0; i < pairCount; ++i)
 		{
 			setHost(forwardPatternsL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
-			tmp = store.readSeqStore[store.matePairStore[i].readId[1]];
-			reverseComplement(tmp);
-			setHost(forwardPatternsR[i], tmp);
+			tmps[omp_get_thread_num()] = store.readSeqStore[store.matePairStore[i].readId[1]];
+			reverseComplement(tmps[omp_get_thread_num()]);
+			setHost(forwardPatternsR[i], tmps[omp_get_thread_num()]);
 			_patternMatchNOfPattern(forwardPatternsL[i], options.matchN);
 			_patternMatchNOfPattern(forwardPatternsR[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatternsL[i], options.matchN);
@@ -1326,11 +1376,6 @@ int _mapMatePairReadsParallel(
 		}
 	}
 #endif  // #ifdef RAZERS_BANDED_MYERS
-
-#ifdef RAZERS_PROFILE
-    timelineBeginTask(TASK_INIT);
-    double beginInit = sysTime();
-#endif  // #ifdef RAZERS_PROFILE
 
     // Clear/initialize global stats.
 	options.countFiltration = 0;

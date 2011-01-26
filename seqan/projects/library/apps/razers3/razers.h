@@ -1607,16 +1607,24 @@ matchVerify(
 					
 					TReadRev			readRev(readSet[readId]);
 					TMyersFinderRev		myersFinderRev(infRev);
+                    #if SEQAN_ENABLE_DEBUG
+                    bool foundOneReverse = false;
+                    #endif  // #if SEQAN_ENABLE_DEBUG
 #ifdef RAZERS_BANDED_MYERS
-					while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore))
+					while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
 #else
 					TMyersPatternRev	myersPatternRev(readRev);
 
 					_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
 					_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
-					while (find(myersFinderRev, myersPatternRev, maxScore))
+					while (find(myersFinderRev, myersPatternRev, maxScore)) {
 #endif
+                        #if SEQAN_ENABLE_DEBUG
+                        foundOneReverse = true;
+                        #endif  // #if SEQAN_ENABLE_DEBUG
 						verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+                    }
+                    SEQAN_ASSERT_TRUE(foundOneReverse);
 
 					setBeginPosition(inf, infBeginPos);
 					setEndPosition(inf, infEndPos);
@@ -1645,7 +1653,11 @@ matchVerify(
 			verifier.m.beginPos = verifier.m.endPos - ndlLength;
 		else
 		{
-			setEndPosition(inf, verifier.m.endPos);
+            TPosition newInfEndPos = beginPosition(inf) + maxPos + 1;
+#ifdef RAZERS_BANDED_MYERS
+            verifier.revPatternState.leftClip = endPosition(inf) - newInfEndPos;
+#endif
+            setEndPosition(inf, verifier.m.endPos = newInfEndPos);
 
 			// limit the beginning to needle length plus errors (== -maxScore)
 			if (length(inf) > ndlLength - maxScore)
@@ -1659,8 +1671,23 @@ matchVerify(
 
 			_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
 			_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
-			while (find(myersFinderRev, myersPatternRev, maxScore))
+            #if SEQAN_ENABLE_DEBUG
+            bool foundOneReverse = false;
+            #endif  // #if SEQAN_ENABLE_DEBUG
+#ifdef RAZERS_BANDED_MYERS
+            while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
+#else
+            
+            _patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
+            _patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
+            while (find(myersFinderRev, myersPatternRev, maxScore)) {
+#endif
+                #if SEQAN_ENABLE_DEBUG
+                foundOneReverse = true;
+                #endif  // #if SEQAN_ENABLE_DEBUG
 				verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+            }
+            SEQAN_ASSERT_TRUE(foundOneReverse);
 		}
 
 		if (!verifier.oneMatchPerBucket)

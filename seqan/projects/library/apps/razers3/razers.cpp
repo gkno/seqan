@@ -43,7 +43,7 @@
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
 #define RAZERS_MATEPAIRS				// enable paired-end matching
-// #define RAZERS_DEBUG_MATEPAIRS
+//#define RAZERS_DEBUG_MATEPAIRS
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
@@ -55,6 +55,8 @@
 #include <seqan/file.h>
 #include <seqan/store.h>
 #include <seqan/misc/misc_cmdparser.h>
+
+#include "config.h"
 
 #include "razers.h"
 #include "outputFormat.h"
