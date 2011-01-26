@@ -37,9 +37,9 @@
 #ifndef SEQAN_PARALLEL_PARALLEL_ATOMIC_PRIMITIVES_H_
 #define SEQAN_PARALLEL_PARALLEL_ATOMIC_PRIMITIVES_H_
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
 #include <intrin.h>
-#endif  // #ifdef PLATFORM_WINDOWS
+#endif  // #if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
 
 namespace seqan {
 
@@ -278,7 +278,7 @@ inline T atomicCas(T volatile & x, T cmp, T y)
     return __sync_val_compare_and_swap(&x, cmp, y);
 }
 
-#endif  // #ifdef PLATFORM_WINDOWS
+#endif  // #if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
 	
 } // namespace seqan
 
