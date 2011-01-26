@@ -173,7 +173,7 @@ atomic
 ..include:seqan/parallel.h
  */
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
 
 // ----------------------------------------------------------------------------
 // Implementation in MSVC
@@ -236,7 +236,7 @@ inline        __int64 atomicCas(       __int64 volatile & x,        __int64 cmp,
 inline       __uint64 atomicCas(      __uint64 volatile & x,       __uint64 cmp,       __uint64 y) { return _InterlockedCompareExchange64(reinterpret_cast<__int64 volatile *>(&x), y, cmp); }
 #endif  // #ifdef _WIN64
 
-#else  // #ifdef PLATFORM_WINDOWS
+#else  // #if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
 
 // ----------------------------------------------------------------------------
 // Implementation in GCC (LLVM is GCC compatible)
@@ -282,4 +282,4 @@ inline T atomicCas(T volatile & x, T cmp, T y)
 	
 } // namespace seqan
 
-#endif  // #define SEQAN_PARALLEL_PARALLEL_ATOMIC_PRIMITIVES_H_
+#endif  // #if defined(PLATFORM_WINDOWS) && !defined(PLATFORM_WINDOWS_MINGW)
