@@ -211,7 +211,7 @@ namespace SEQAN_NAMESPACE_MAIN
  			minGap = 0;
  			maxPrefixErrors = -1;
  			maxSuffixErrors = -1;
- 			specifiedGenomeLen = 3000000000; //whole human genome default
+ 			specifiedGenomeLen = 3000000000U; //whole human genome default
 
  			maxReadLength = 0;
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index

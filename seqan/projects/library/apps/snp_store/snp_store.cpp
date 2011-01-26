@@ -295,8 +295,8 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
 			appendValue(tmpQualities,fragmentStore.alignQualityStore[(*mIt).id]);
 			appendValue(tmpReadCigars,readCigars[(*mIt).id]);
 			appendValue(tmpReadClips,TPair(0,0));
-			if(_max((*mIt).beginPos,(*mIt).endPos) > options.maxCoord) options.maxCoord = _max((*mIt).beginPos,(*mIt).endPos);
-			if(_min((*mIt).beginPos,(*mIt).endPos) < options.minCoord) options.minCoord = _min((*mIt).beginPos,(*mIt).endPos);
+			if(_max((*mIt).beginPos,(*mIt).endPos) > (TContigPos)options.maxCoord) options.maxCoord = (unsigned) _max((*mIt).beginPos,(*mIt).endPos);
+			if(_min((*mIt).beginPos,(*mIt).endPos) < (TContigPos)options.minCoord) options.minCoord = (unsigned) _min((*mIt).beginPos,(*mIt).endPos);
 			
 		}
 		--mIt;
@@ -1083,8 +1083,8 @@ int readMatchesFromGFF_Batch(
 				options.maxHitLength = endPos - beginPos;
 			
 			// remember min and max positions seen
-			if(beginPos < options.minCoord) options.minCoord = beginPos;
-			if(endPos > options.maxCoord) options.maxCoord = endPos;
+			if(beginPos < (TContigPos)options.minCoord) options.minCoord = (unsigned)beginPos;
+			if(endPos > (TContigPos)options.maxCoord) options.maxCoord =  (unsigned)endPos;
 			
 			// create match m
 			TMatch m;

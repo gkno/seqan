@@ -1385,6 +1385,7 @@ SEQAN_CHECKPOINT
 
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TPropertyMap>::Type TProperty;
+	typedef typename Value<TProperty>::Type    TPropertyValue;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
 	resize(result,0);
@@ -1398,10 +1399,10 @@ SEQAN_CHECKPOINT
 	{
 		TOutEdgeIterator it(g, act_knot);
 		act_prop = property(pm,act_knot);
-		if(act_prop.center < query)
+		if(act_prop.center < (TPropertyValue)query)
 		{
 			unsigned int i = 0;
-			while(i < length(act_prop.list2) && rightBoundary(value(act_prop.list2,i)) > query)
+			while(i < length(act_prop.list2) && (TValue) rightBoundary(value(act_prop.list2,i)) > (TPropertyValue)query)
 			{
 				appendValue(result,cargo(value(act_prop.list2,i)), Generous());
 				++i;	
@@ -1418,10 +1419,10 @@ SEQAN_CHECKPOINT
 			act_knot = targetVertex(it);
 		}
 		else{
-			if(query < act_prop.center)
+			if((TPropertyValue)query < act_prop.center)
 			{
 				unsigned int i = 0;
-				while(i < length(act_prop.list1) && leftBoundary(value(act_prop.list1,i)) <= query)
+				while(i < length(act_prop.list1) && leftBoundary(value(act_prop.list1,i)) <= (TPropertyValue)query)
 				{
 					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
 					++i;
