@@ -38,10 +38,10 @@
 #define finline __inline__
 
 // Define unsigned variants of builtin Windows compiler types.
-typedef unsigned __int64_t __uint64;
-typedef unsigned __int32_t __uint32;
-typedef unsigned __int16_t __uint16;
-typedef unsigned __int8_t __uint8;
+typedef unsigned __int64 __uint64;
+typedef unsigned __int32 __uint32;
+typedef unsigned __int16 __uint16;
+typedef unsigned __int8 __uint8;
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
