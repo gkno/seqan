@@ -73,7 +73,7 @@ char **__bam_get_lines(const char *fn, int *_n) // for bam_plcmd.c only
 {
 	char **list = 0, *s;
 	int n = 0, dret, m = 0;
-	gzFile fp = (strcmp(fn, "-") == 0)? gzdopen(fileno(stdin), "r") : (gzFile)((long long)gzopen(fn, "r"));
+	gzFile fp = (strcmp(fn, "-") == 0)? gzdopen(fileno(stdin), "r") : (gzFile)((size_t)gzopen(fn, "r"));
 	kstream_t *ks;
 	kstring_t *str;
 	str = (kstring_t*)calloc(1, sizeof(kstring_t));
@@ -123,7 +123,7 @@ bam_header_t *sam_header_read2(const char *fn)
 	kh_ref_t *hash;
 	khiter_t k;
 	if (fn == 0) return 0;
-	fp = (strcmp(fn, "-") == 0)? gzdopen(fileno(stdin), "r") : (gzFile)((long long)gzopen(fn, "r"));
+	fp = (strcmp(fn, "-") == 0)? gzdopen(fileno(stdin), "r") : (gzFile)((size_t)gzopen(fn, "r"));
 	if (fp == 0) return 0;
 	hash = kh_init(ref);
 	ks = ks_init(fp);
@@ -439,7 +439,7 @@ int sam_read1(tamFile fp, bam_header_t *header, bam1_t *b)
 tamFile sam_open(const char *fn)
 {
 	tamFile fp;
-	gzFile gzfp = (strcmp(fn, "-") == 0)? gzdopen(fileno(stdin), "rb") : (gzFile)((long long)gzopen(fn, "rb"));
+	gzFile gzfp = (strcmp(fn, "-") == 0)? gzdopen(fileno(stdin), "rb") : (gzFile)((size_t)gzopen(fn, "rb"));
 	if (gzfp == 0) return 0;
 	fp = (tamFile)calloc(1, sizeof(struct __tamFile_t));
 	fp->str = (kstring_t*)calloc(1, sizeof(kstring_t));
