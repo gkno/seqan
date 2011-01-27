@@ -1131,8 +1131,8 @@ void dumpMatches(
 							// transform first and last read character to genomic positions
 							viewPosReadFirst  = toViewPosition(row(align, 0), 0);
 							viewPosReadLast   = toViewPosition(row(align, 0), readLen - 1);
-							unsigned genomePosReadFirst = toSourcePosition(row(align, 1), viewPosReadFirst);
-							unsigned genomePosReadLast  = toSourcePosition(row(align, 1), viewPosReadLast);
+							TGPos genomePosReadFirst = toSourcePosition(row(align, 1), viewPosReadFirst);
+							TGPos genomePosReadLast  = toSourcePosition(row(align, 1), viewPosReadLast);
 							if ((*it).orientation == 'R')
 							{
 								// watch out at chromosome borders
@@ -1141,7 +1141,7 @@ void dumpMatches(
 							}
 							else
 							{
-								(*it).gEnd = (*it).gBegin + _min((TGPos)(genomePosReadLast + 1),length(currGenome)-(*it).gBegin);
+								(*it).gEnd = (*it).gBegin + _min(genomePosReadLast + 1, static_cast<TGPos>(length(currGenome) - (*it).gBegin));
 								(*it).gBegin += genomePosReadFirst;
 							}
 							
