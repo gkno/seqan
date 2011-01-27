@@ -1402,7 +1402,7 @@ SEQAN_CHECKPOINT
 		if(act_prop.center < (TPropertyValue)query)
 		{
 			unsigned int i = 0;
-			while(i < length(act_prop.list2) && (TValue) rightBoundary(value(act_prop.list2,i)) > (TPropertyValue)query)
+			while(i < length(act_prop.list2) && rightBoundary(value(act_prop.list2,i)) > (TPropertyValue)query)
 			{
 				appendValue(result,cargo(value(act_prop.list2,i)), Generous());
 				++i;	
