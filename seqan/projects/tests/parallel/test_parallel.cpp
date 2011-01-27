@@ -55,7 +55,9 @@ SEQAN_BEGIN_TESTSUITE(test_parallel) {
     // TODO(holtgrew): Re-enable tests on LLVM when bug 9041 is fixed.
     // LLVM has problems with atomic operation builtins, re-enable when
     // this problem is fixed. See http://llvm.org/bugs/show_bug.cgi?id=9041
-#ifndef __llvm__
+    //
+    // There is a problem with compare-and-swap on MinGW, too.
+#if !defined(__llvm__) && !defined(PLATFORM_WINDOWS_MINGW)
     // Tests for atomic primitives.
     SEQAN_CALL_TEST(test_parallel_atomic_inc);
     SEQAN_CALL_TEST(test_parallel_atomic_dec);
@@ -67,6 +69,6 @@ SEQAN_BEGIN_TESTSUITE(test_parallel) {
     // Tests for misc simpmle atomic operations.
     SEQAN_CALL_TEST(test_parallel_atomic_min);
     SEQAN_CALL_TEST(test_parallel_atomic_max);
-#endif  // #ifndef __llvm__
+#endif  // #if !defined(__llvm__) && !defined(PLATFORM_WINDOWS_MINGW)
 }
 SEQAN_END_TESTSUITE
