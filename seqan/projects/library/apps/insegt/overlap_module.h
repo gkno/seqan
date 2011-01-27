@@ -83,16 +83,16 @@ getIdsForRead(TAnnoIds & ids, FragmentStore<TSpec, TConfig> & me, TIntervalTree 
 			// begin of read
 			if (itR == begin(ids) && length(ids) > 1)
 			{
-				if (getValue(itI).i2 + offsetInterval < endPos) // if the borders don't fit: delete annotation-id
+				if (static_cast<TContigPos>(getValue(itI).i2 + offsetInterval) < endPos) // if the borders don't fit: delete annotation-id
 				{
 					erase(value(itR), i);
 					--i;
 				}
 			}
 			// end of read
-			else if (position(itR, ids) == endPosition(ids) - 1 && length(ids) > 1)
+			else if (position(itR, ids) == endPosition(ids) - 1 && length(ids) > 1u)
 			{
-				if (getValue(itI).i1 - offsetInterval > beginPos)
+				if (static_cast<TContigPos>(getValue(itI).i1 - offsetInterval) > beginPos)
 				{
 					erase(value(itR), i);
 					--i;
@@ -101,12 +101,12 @@ getIdsForRead(TAnnoIds & ids, FragmentStore<TSpec, TConfig> & me, TIntervalTree 
 			// in the middle of the read
 			else if (length(ids) > 2)
 			{
-				if (getValue(itI).i2 + offsetInterval < endPos)
+				if (static_cast<TContigPos>(getValue(itI).i2 + offsetInterval) < endPos)
 				{
 					erase(value(itR), i);
 					--i;
 				}
-				else if (getValue(itI).i1 - offsetInterval > beginPos)
+				else if (static_cast<TContigPos>(getValue(itI).i1 - offsetInterval) > beginPos)
 				{
 					erase(value(itR), i);
 					--i;
