@@ -37,6 +37,16 @@
 
 #define finline __inline__
 
+// The symbols SEQAN_IS_64_BIT and SEQAN_IS_32_BIT can be used to check
+// whether we are on a 32 bit or on a 64 bit machine.
+#if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
+#define SEQAN_IS_64_BIT 1
+#define SEQAN_IS_32_BIT 0
+#else  // #if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
+#define SEQAN_IS_64_BIT 0
+#define SEQAN_IS_32_BIT 1
+#endif  // #if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
+
 #include <inttypes.h>
 
 // Define unsigned variants of builtin Windows compiler types.
