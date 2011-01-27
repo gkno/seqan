@@ -122,7 +122,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline Result operator()(const InType &a, const InType &b) const
         {
             return (a.i3[0] <  b.i3[0] ||
-                    a.i3[0] == b.i3[0] && a.i2[0] < b.i2[0])? -1 : 1;
+                    (a.i3[0] == b.i3[0] && a.i2[0] < b.i2[0])) ? -1 : 1;
         }
     };
 
@@ -325,13 +325,13 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename T, typename ST> inline
     bool _leqSkew3(T a1, ST a2,   T b1, ST b2)
     { // lexic. order for pairs
-        return (lexLess(a1, b1) || a1 == b1 && a2 <= b2);
+        return (lexLess(a1, b1) || (a1 == b1 && a2 <= b2));
     }
 
     template <typename T, typename ST> inline
     bool _leqSkew3(T a1, T a2, ST a3,   T b1, T b2, ST b3)
     { // and triples
-        return (lexLess(a1, b1) || a1 == b1 && _leqSkew3(a2,a3, b2,b3));
+        return (lexLess(a1, b1) || (a1 == b1 && _leqSkew3(a2,a3, b2,b3)));
     }
 
 

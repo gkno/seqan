@@ -71,7 +71,7 @@ namespace SEQAN_NAMESPACE_MAIN
         static inline bool less1(const InType0& i0, const InType12& i12)
         { // lexic. order for pairs
             return (i0.i3[0] <  i12.i3[0] ||
-                    i0.i3[0] == i12.i3[0] && i0.i2[0] < i12.i2[1]);
+                    (i0.i3[0] == i12.i3[0] && i0.i2[0] < i12.i2[1]));
         }
 
         static inline bool less2(const InType0& i0, const InType12& i12)
