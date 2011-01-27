@@ -788,9 +788,9 @@ typedef Tag<TagFastq_> const Fastq;
 		// directory, each corresponding to 10MB worth of DNA.
 		static CharString const standalone_name = "sorted.txt";
 		typename Size<TFilename>::Type len = length(fname);
-		return len >= length(standalone_name) &&
-			suffix(fname, len - length(standalone_name)) == standalone_name ||
-			_isQSeqFile(fname);
+        bool const bLen = len >= length(standalone_name);
+        bool const bSuff = suffix(fname, len - length(standalone_name)) == standalone_name;
+		return (bLen && bSuff) || _isQSeqFile(fname);
 	}
 
 	// split stringset into single QSeq sequences
