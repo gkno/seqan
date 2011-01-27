@@ -517,7 +517,7 @@ SEQAN_CHECKPOINT
 
     template < typename TValue, typename TConfig, typename TScheme, typename TBeginPos, typename TEndPos >
 	inline int
-	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme scheme, TBeginPos beginPos, TEndPos endPos)
+	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme const & scheme, TBeginPos const & beginPos, TEndPos const & endPos)
 	{
 		me.scheme = scheme;
 //		posix_fadvise(me.file.handle, beginPos * sizeof(TValue), (endPos - beginPos) * sizeof(TValue), scheme);
