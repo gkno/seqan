@@ -1050,6 +1050,7 @@ _patternInitSmallStateBanded(
 		cutOff += columns - ndlLength;		// clipping case *0
 		ndlEnd = end(needle, Standard());
 	} else {
+        errors += ndlLength - columns;
 		ndlEnd = ndlIter + columns;			// clipping case *1
 	}
 
@@ -1063,7 +1064,7 @@ _patternInitSmallStateBanded(
 		// PART 0: go down the parallelogram in a empty (clipped) area
 		//////////////////////////////////////////////////////////////////
 
-		errors = state.leftClip;
+		errors += state.leftClip;
 		if (errors > ndlLength) errors = ndlLength;
 		if (errors > cutOff) return false;
 
