@@ -212,10 +212,12 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_or)
 
     // Tests are limited to the types where MSVC allows atomic
     // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
+#if !defined(SEQAN_PLATFORM_WINDOWS)  // 8 and 16 bit do not work on x64 Windows and are not enabled in primitives header.
     atomicOrTestImpl(char());
     atomicOrTestImpl(SEQAN_uchar());
     atomicOrTestImpl(short());
     atomicOrTestImpl(SEQAN_ushort());
+#endif  // #if !defined(SEQAN_PLATFORM_WINDOWS)
     atomicOrTestImpl(long());
     atomicOrTestImpl(SEQAN_ulong());
 #if SEQAN_IS_64_BIT
@@ -233,10 +235,12 @@ SEQAN_DEFINE_TEST(test_parallel_atomic_xor)
 
     // Compare-And-Swap, also 64 bit CAS is not available on 32 bit Intel.
     // Tests are limited to the types where MSVC allows atomic Xor.
+#if !defined(SEQAN_PLATFORM_WINDOWS)  // 8 and 16 bit do not work on x64 Windows and are not enabled in primitives header.
     atomicXorTestImpl(char());
     atomicXorTestImpl(SEQAN_uchar());
     atomicXorTestImpl(short());
     atomicXorTestImpl(SEQAN_ushort());
+#endif  // #if !defined(SEQAN_PLATFORM_WINDOWS)
     atomicXorTestImpl(long());
     atomicXorTestImpl(SEQAN_ulong());
 #if SEQAN_IS_64_BIT
