@@ -557,9 +557,9 @@ bool loadReads(
 
 	typedef Shape<Dna, SimpleShape> TShape;
 	typedef typename SAValue< Index<TReadSet, IndexQGram<TShape, OpenAddressing> > >::Type TSAValue;
-	TSAValue sa;
-	sa.i1 = -1;
-	sa.i2 = -1;
+	TSAValue sa(0, 0);
+	sa.i1 = ~sa.i1;
+	sa.i2 = ~sa.i2;
 	
 	if ((unsigned)sa.i1 < length(reads) - 1)
 	{
