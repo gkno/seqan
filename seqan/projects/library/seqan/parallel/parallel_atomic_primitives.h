@@ -122,6 +122,7 @@ namespace seqan {
 ..returns:The old value of $x$.
 ..remarks:This is equivalent to an atomic $x |= y$.
 ..remarks:Atomic fetch-and-or for 64 bit integers is only available on 64 bit processors when targeting Intel.
+..remarks:Atomic fetch-and-or does not work in VS8 on 64 bit Windows, you can only use $atomicOr()$ portably on 32 and 64 bit integers.
 ..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ..see:Function.atomicInc
 ..see:Function.atomicDec
@@ -139,6 +140,7 @@ namespace seqan {
 ..returns:The old value of $x$.
 ..remarks:This is equivalent to an atomic $x ^= y$.
 ..remarks:Atomic fetch-and-xor for 64 bit integers is only available on 64 bit processors when targeting Intel.
+..remarks:Atomic fetch-and-xor does not work in VS8 on 64 bit Windows, you can only use $atomicXor()$ portably on 32 and 64 bit integers.
 ..remarks:You are responsible for correctly aligning $x$ such that the atomic increment works on the hardware you target.
 ..see:Function.atomicInc
 ..see:Function.atomicDec
@@ -203,10 +205,12 @@ inline       __int64 atomicAdd( __int64 volatile & x,  __int64 y) { return _Inte
 inline      __uint64 atomicAdd(__uint64 volatile & x, __uint64 y) { return _InterlockedExchangeAdd64(reinterpret_cast<__int64 volatile *>(&x), y); }
 #endif  // #ifdef _WIN64
 
-inline           char atomicOr(          char volatile & x,           char y) { return _InterlockedOr8(&x, y); }
-inline unsigned  char atomicOr(unsigned  char volatile & x, unsigned  char y) { return _InterlockedOr8(reinterpret_cast<char volatile *>(&x), y); }
-inline          short atomicOr(         short volatile & x,          short y) { return _InterlockedOr16(&x, y); }
-inline unsigned short atomicOr(unsigned short volatile & x, unsigned short y) { return _InterlockedOr16(reinterpret_cast<short volatile *>(&x), y); }
+// TODO(holtgrew): Although documented to work, you get a linker error (LNK2019) in MS VS8 on 64 bit Windows.
+//   LNK2019: unresolved external symbol _InterlockedOr8 referenced in function "char __cdecl seqan::atomicOr(char volatile &,char)" (?atomicOr@seqan@@YADAECDD@Z)
+// inline           char atomicOr(          char volatile & x,           char y) { return _InterlockedOr8(&x, y); }
+// inline unsigned  char atomicOr(unsigned  char volatile & x, unsigned  char y) { return _InterlockedOr8(reinterpret_cast<char volatile *>(&x), y); }
+// inline          short atomicOr(         short volatile & x,          short y) { return _InterlockedOr16(&x, y); }
+// inline unsigned short atomicOr(unsigned short volatile & x, unsigned short y) { return _InterlockedOr16(reinterpret_cast<short volatile *>(&x), y); }
 inline           long atomicOr(          long volatile & x,           long y) { return _InterlockedOr(&x, y); }
 inline unsigned  long atomicOr(unsigned  long volatile & x, unsigned  long y) { return _InterlockedOr(reinterpret_cast<long volatile *>(&x), y); }
 #ifdef _WIN64
@@ -214,10 +218,12 @@ inline        __int64 atomicOr(       __int64 volatile & x,        __int64 y) { 
 inline       __uint64 atomicOr(      __uint64 volatile & x,       __uint64 y) { return _InterlockedOr64(reinterpret_cast<__int64 volatile*>(&x), y); }
 #endif  // #ifdef _WIN64
 
-inline           char atomicXor(          char volatile & x,           char y) { return _InterlockedXor8(&x, y); }
-inline unsigned  char atomicXor(unsigned  char volatile & x, unsigned  char y) { return _InterlockedXor8(reinterpret_cast<char volatile *>(&x), y); }
-inline          short atomicXor(         short volatile & x,          short y) { return _InterlockedXor16(&x, y); }
-inline unsigned short atomicXor(unsigned short volatile & x, unsigned short y) { return _InterlockedXor16(reinterpret_cast<short volatile *>(&x), y); }
+// TODO(holtgrew): Although documented to work, you get a linker error (LNK2019) in MS VS8 on 64 bit Windows.
+//   LNK2019: unresolved external symbol _InterlockedOr8 referenced in function "char __cdecl seqan::atomicOr(char volatile &,char)" (?atomicOr@seqan@@YADAECDD@Z)
+// inline           char atomicXor(          char volatile & x,           char y) { return _InterlockedXor8(&x, y); }
+// inline unsigned  char atomicXor(unsigned  char volatile & x, unsigned  char y) { return _InterlockedXor8(reinterpret_cast<char volatile *>(&x), y); }
+// inline          short atomicXor(         short volatile & x,          short y) { return _InterlockedXor16(&x, y); }
+// inline unsigned short atomicXor(unsigned short volatile & x, unsigned short y) { return _InterlockedXor16(reinterpret_cast<short volatile *>(&x), y); }
 inline           long atomicXor(          long volatile & x,           long y) { return _InterlockedXor(&x, y); }
 inline unsigned  long atomicXor(unsigned  long volatile & x, unsigned  long y) { return _InterlockedXor(reinterpret_cast<long volatile *>(&x), y); }
 #ifdef _WIN64
