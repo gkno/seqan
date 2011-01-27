@@ -12,11 +12,15 @@
 //#define SEQAN_VERBOSE
 //#define SEQAN_VVERBOSE
 
-#ifdef _OPENMP
+#if defined(_OPENMP)
 #include <omp.h>
 #define SEQAN_PARALLEL
+#if !defined(PLATFORM_WINDOWS_MINGW)
+// The parallel STL generates warnings in MinGW: "...parallel/compatibility.h:167:42: note: #pragma message: slow __fetch_and_add_64".
+// Thus, we do not enable it in this case.
 #define _GLIBCXX_PARALLEL
-#endif
+#endif  // #if !defined(PLATFORM_WINDOWS_MINGW)
+#endif  // #if defined(_OPENMP)
 
 #include <iostream>
 #include <fstream>
