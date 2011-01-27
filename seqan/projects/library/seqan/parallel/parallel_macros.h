@@ -45,13 +45,13 @@
 // for disabling OpenMP pragmas on compilers that do not support OpenMP to
 // suppress warnings.
 #ifdef _OPENMP
-  #ifndef PLATFORM_WINDOWS
+  #if defined(PLATFORM_WINDOWS_MINGW) || defined(PLATFORM_GCC)
     // GCC _Pragma operator
     #define SEQAN_OMP_PRAGMA(x) _Pragma (#x)
-  #else  // #ifdef PLATFORM_WINDOWS
+  #else  // #if defined(PLATFORM_WINDOWS_MINGW) || defined(PLATFORM_GCC)
     // MSVC __pragma-operator
     #define SEQAN_OMP_PRAGMA(x) __pragma (x)
-  #endif // #ifdef PLATFORM_WINDOWS
+  #endif // #if defined(PLATFORM_WINDOWS_MINGW) || defined(PLATFORM_GCC)
 #else  // #ifdef _OPENMP
   #define SEQAN_OMP_PRAGMA(x)
 #endif  // #ifdef _OPENMP
