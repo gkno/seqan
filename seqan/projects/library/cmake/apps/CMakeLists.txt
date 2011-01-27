@@ -117,6 +117,8 @@ if (OpenMP_CXX_FLAGS)
       set (APP_razers3_SOURCES ${SEQAN_LIBRARY}/apps/razers3/razers.cpp ${RAZERS3_HEADERS})
     else (NOT MINGW)
       message ("RazerS 3 is not built on MinGW since __sync_val_compare_and_swap is missing.")
+      set (APP_razers3_NOBUILD true)
+      list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/razers3)
     endif (NOT MINGW)
   else (Boost_FOUND OR TR1_SHARED_PTR_FOUND)
     # TODO(holtgrew): Is there a better way to specify complex dependencies?
