@@ -253,7 +253,7 @@ namespace SEQAN_NAMESPACE_MAIN
         PageFrame():
 			TBase(),
             dirty(false),
-            pageNo(-1u),
+            pageNo(MaxValue<unsigned>::VALUE),
 			status(READY),
 			next(NULL) {}
     };
