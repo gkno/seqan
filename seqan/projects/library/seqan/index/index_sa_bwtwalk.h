@@ -238,6 +238,141 @@ namespace SEQAN_NAMESPACE_MAIN
 	// short enough such that the most significant bit (MSB) of the entries in the
 	// SA can be used as a flag bit, which is needed to invert a permutation in place.
 	// Otherwise, an additional length(s) bits of memory are used.
+
+    // This is a helper function for the case "length(s) >= (NIL && NOTFLAGBIT)".
+	template < typename TSA, typename TText, typename TValue, typename TArray >
+	inline void _createSuffixArray(
+		TSA &SA,
+        TArray & lexxorpos,
+        TValue & p,
+		TText const &s,
+        TValue const & NIL,
+        TValue const &,
+        TValue const &,
+		BwtWalk<BwtWalkInPlace> const &,
+		True const &,
+        True const &)
+    {
+        // If the string is too long, we cannot use the MSB of the SA entries as a flag.
+        // Instead, we allocate a separate bitvector
+        String<bool, Packed<> > visited;
+        resize(visited, length(s), false);
+
+        // 2) convert into inverse suffix array
+        TValue n = 0;
+        TValue previous = NIL;
+        while (p != NIL) {
+            TValue tmp = p;
+            p = getValue(lexxorpos, p) ^ previous;
+            previous = tmp;
+            value(lexxorpos, previous) = n++;
+        }
+
+        // 3) invert array in place to obtain suffix array
+        for (n = 0; n < length(s); ++n) {
+            TValue i = getValue(SA, n);
+            // check if current position has already been processed
+            if (!getValue(visited, i)) {
+                // if not, invert current cycle
+                TValue previous = n;
+                while (i != n) {
+                    TValue next = getValue(SA, i);
+                    value(SA, i) = previous;
+                    value(visited, i) = true;
+                    previous = i;
+                    i = next;
+                }
+                value(visited, n) = true;
+                value(SA, i) = previous;
+            }
+        }
+    }
+
+    // This is a helper function for the case "length(s) < (NIL && NOTFLAGBIT)".
+	template < typename TSA, typename TText, typename TValue, typename TArray >
+	inline void _createSuffixArray(
+		TSA &SA,
+        TArray & lexxorpos,
+        TValue & p,
+		TText const &s,
+        TValue const & NIL,
+        TValue const & FLAGBIT,
+        TValue const & NOTFLAGBIT,
+		BwtWalk<BwtWalkInPlace> const &,
+		True const &,
+        False const &)
+    {
+        // The string is short enough, we can use the MSB of the SA entries as a flag.
+
+        // 2) convert into inverse suffix array and set every flag
+        TValue n = 0;
+        TValue previous = NIL;
+        while (p != NIL) {
+            TValue tmp = p;
+            p = getValue(lexxorpos, p) ^ previous;
+            previous = tmp;
+            value(lexxorpos, previous) = FLAGBIT | n++;
+        }
+
+        // 3) invert array in place to obtain suffix array
+        for (n = 0; n < length(s); ++n) {
+            TValue i = getValue(SA, n);
+            // check if current position has already been processed
+            if ((i & FLAGBIT) != 0) {
+                // if not, invert current cycle
+                i &= NOTFLAGBIT;
+                TValue previous = n;
+                while (i != n) {
+                    TValue next = getValue(SA, i) & NOTFLAGBIT;
+                    value(SA, i) = previous;
+                    previous = i;
+                    i = next;
+                }
+                value(SA, i) = previous;
+            }
+        }
+    }
+
+    // This takes care of the case where the suffix array's entry type is
+    // longer than the string length type to circumvent some warnings.
+	template < typename TSA, typename TText, typename TValue, typename TArray >
+	inline void _createSuffixArrayHandleTooLongSuffixArrayType(
+		TSA &SA,
+        TArray & lexxorpos,
+        TValue & p,
+		TText const &s,
+        TValue const & NIL,
+        TValue const & FLAGBIT,
+        TValue const & NOTFLAGBIT,
+		BwtWalk<BwtWalkInPlace> const &,
+		True const &,
+        True const &)
+    {
+        _createSuffixArray(SA, lexxorpos, p, s, NIL, FLAGBIT, NOTFLAGBIT, BwtWalk<BwtWalkInPlace>(), True(), False());
+    }
+
+    // This takes care of the case where the suffix array's entry type is NOT
+    // longer than the string length type to circumvent some warnings.
+	template < typename TSA, typename TText, typename TValue, typename TArray >
+	inline void _createSuffixArrayHandleTooLongSuffixArrayType(
+		TSA &SA,
+        TArray & lexxorpos,
+        TValue & p,
+		TText const &s,
+        TValue const & NIL,
+        TValue const & FLAGBIT,
+        TValue const & NOTFLAGBIT,
+		BwtWalk<BwtWalkInPlace> const &,
+		True const &,
+        False const &)
+    {
+        if (length(s) >= (NIL & NOTFLAGBIT))
+            _createSuffixArray(SA, lexxorpos, p, s, NIL, FLAGBIT, NOTFLAGBIT, BwtWalk<BwtWalkInPlace>(), True(), True());
+        else 
+            _createSuffixArray(SA, lexxorpos, p, s, NIL, FLAGBIT, NOTFLAGBIT, BwtWalk<BwtWalkInPlace>(), True(), False());
+    }
+
+    // This is the main entry point.
 	template < typename TSA, typename TText >
 	inline void _createSuffixArray(
 		TSA &SA,
@@ -256,87 +391,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (empty(s)) return;
 		
 		// since SA is capable of fast random access, we can temporarily use it as the lexxorpos array
-		TArray &lexxorpos = SA;
+		TArray & lexxorpos = SA;
 		std::fill(begin(lexxorpos, Standard()), end(lexxorpos, Standard()), 0);
 
 		// finally create suffix array
 		//   1) first suffix is returned ...
 		TValue p = _createXoredSuffixList(lexxorpos, s);
 
-#ifdef PLATFORM_WINDOWS_MINGW
-        // MinGW's GCC warns that it is smart enough to optimize away the
-        // following conditional expression.
-        // Also see: http://gcc.gnu.org/ml/gcc-patches/2005-06/msg01876.html.
-        volatile TValue val = NIL & NOTFLAGBIT;
-		if (length(s) >= val) {
-#else  // PLATFORM_WINDOWS_MINGW
-		if (length(s) >= (NIL & NOTFLAGBIT)) {
-#endif  // PLATFORM_WINDOWS_MINGW
-			// If the string is too long, we cannot use the MSB of the SA entries as a flag.
-			// Instead, we allocate a separate bitvector
-			String<bool, Packed<> > visited;
-			resize(visited, length(s), false);
-
-			// 2) convert into inverse suffix array
-			TValue n = 0;
-			TValue previous = NIL;
-			while (p != NIL) {
-				TValue tmp = p;
-				p = getValue(lexxorpos, p) ^ previous;
-				previous = tmp;
-				value(lexxorpos, previous) = n++;
-			}
-
-			// 3) invert array in place to obtain suffix array
-			for (n = 0; n < length(s); ++n) {
-				TValue i = getValue(SA, n);
-				// check if current position has already been processed
-				if (!getValue(visited, i)) {
-					// if not, invert current cycle
-					TValue previous = n;
-					while (i != n) {
-						TValue next = getValue(SA, i);
-						value(SA, i) = previous;
-						value(visited, i) = true;
-						previous = i;
-						i = next;
-					}
-					value(visited, n) = true;
-					value(SA, i) = previous;
-				}
-			}
-		}
-		else {
-			// The string is short enough, we can use the MSB of the SA entries as a flag.
-
-			// 2) convert into inverse suffix array and set every flag
-			TValue n = 0;
-			TValue previous = NIL;
-			while (p != NIL) {
-				TValue tmp = p;
-				p = getValue(lexxorpos, p) ^ previous;
-				previous = tmp;
-				value(lexxorpos, previous) = FLAGBIT | n++;
-			}
-
-			// 3) invert array in place to obtain suffix array
-			for (n = 0; n < length(s); ++n) {
-				TValue i = getValue(SA, n);
-				// check if current position has already been processed
-				if ((i & FLAGBIT) != 0) {
-					// if not, invert current cycle
-					i &= NOTFLAGBIT;
-					TValue previous = n;
-					while (i != n) {
-						TValue next = getValue(SA, i) & NOTFLAGBIT;
-						value(SA, i) = previous;
-						previous = i;
-						i = next;
-					}
-					value(SA, i) = previous;
-				}
-			}
-		}
+        typedef typename Size<TText>::Type TSize;
+        typedef typename Eval<!(sizeof(TSize) <= sizeof(TValue))>::Type TBool;
+        _createSuffixArrayHandleTooLongSuffixArrayType(SA, lexxorpos, p, s, NIL, FLAGBIT, NOTFLAGBIT, BwtWalk<BwtWalkInPlace>(), True(), TBool());
 	}
 
 	template < typename TArray, typename TValue >
