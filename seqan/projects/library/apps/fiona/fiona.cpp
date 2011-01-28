@@ -15,11 +15,11 @@
 #if defined(_OPENMP)
 #include <omp.h>
 #define SEQAN_PARALLEL
-#if !defined(PLATFORM_WINDOWS_MINGW)
+#if !defined(__MINGW32__) || defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
 // The parallel STL generates warnings in MinGW: "...parallel/compatibility.h:167:42: note: #pragma message: slow __fetch_and_add_64".
 // Thus, we do not enable it in this case.
 #define _GLIBCXX_PARALLEL
-#endif  // #if !defined(PLATFORM_WINDOWS_MINGW)
+#endif  // #if !defined(__MINGW32__) || defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
 #endif  // #if defined(_OPENMP)
 
 #include <iostream>
