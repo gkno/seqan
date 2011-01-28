@@ -183,7 +183,7 @@ SEQAN_DEFINE_TEST(test_statistics_statistics)
     SEQAN_ASSERT_LEQ(x2, 8.9);
     SEQAN_ASSERT_GEQ(x2, 8.8);
     double x3=zscore(W, X, mm, WuManber());
-    SEQAN_ASSERT_EQ(x, x3);
+    SEQAN_ASSERT_IN_DELTA(x, x3, 0.0001);
     // TODO(holtgrew): Porting zscore program as a test with best effort. Nobody knowledgeable was around to verify this.
 }
 
