@@ -11,3 +11,8 @@ set(CTEST_DROP_METHOD "http")
 set(CTEST_DROP_SITE "www.seqan.de")
 set(CTEST_DROP_LOCATION "/cdash/submit.php?project=SeqAn")
 set(CTEST_DROP_SITE_CDASH TRUE)
+
+SET(CTEST_CUSTOM_WARNING_EXCEPTION
+  ${CTEST_CUSTOM_WARNING_EXCEPTION}
+  "WARNING non-zero return value in ctest from"
+)
