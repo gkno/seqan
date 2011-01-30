@@ -1607,10 +1607,9 @@ matchVerify(
 					
 					TReadRev			readRev(readSet[readId]);
 					TMyersFinderRev		myersFinderRev(infRev);
-                    #if SEQAN_ENABLE_DEBUG
-                    bool foundOneReverse = false;
-                    #endif  // #if SEQAN_ENABLE_DEBUG
+
 #ifdef RAZERS_BANDED_MYERS
+					verifier.m.beginPos = verifier.m.endPos;
 					while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
 #else
 					TMyersPatternRev	myersPatternRev(readRev);
@@ -1619,18 +1618,22 @@ matchVerify(
 					_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
 					while (find(myersFinderRev, myersPatternRev, maxScore)) {
 #endif
-                        #if SEQAN_ENABLE_DEBUG
-                        foundOneReverse = true;
-                        #endif  // #if SEQAN_ENABLE_DEBUG
 						verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
                     }
-                    SEQAN_ASSERT_TRUE(foundOneReverse);
 
 					setBeginPosition(inf, infBeginPos);
 					setEndPosition(inf, infEndPos);
 				}
-				if (!verifier.oneMatchPerBucket)
+				// minDistance implicitly forbids to get here with verifier.oneMatchPerBucket == true
+				SEQAN_ASSERT_NOT(verifier.oneMatchPerBucket);
+#ifdef RAZERS_BANDED_MYERS
+				if (verifier.m.beginPos != verifier.m.endPos)
 					verifier.push();
+#else  // RAZERS_BANDED_MYERS
+				SEQAN_ASSERT_LT(verifier.m.beginPos, verifier.m.endPos);
+				verifier.push();
+#endif // RAZERS_BANDED_MYERS
+
 				maxScore = minScore - 1;
 			}
 		}
@@ -1669,25 +1672,27 @@ matchVerify(
 			TMyersFinderRev		myersFinderRev(infRev);
 			TMyersPatternRev	myersPatternRev(readRev);
 
-			_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
-			_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
-            #if SEQAN_ENABLE_DEBUG
-            bool foundOneReverse = false;
-            #endif  // #if SEQAN_ENABLE_DEBUG
 #ifdef RAZERS_BANDED_MYERS
+			verifier.m.beginPos = verifier.m.endPos;
             while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
 #else
-            
             _patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
             _patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
             while (find(myersFinderRev, myersPatternRev, maxScore)) {
 #endif
-                #if SEQAN_ENABLE_DEBUG
-                foundOneReverse = true;
-                #endif  // #if SEQAN_ENABLE_DEBUG
 				verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
             }
-            SEQAN_ASSERT_TRUE(foundOneReverse);
+#ifdef RAZERS_BANDED_MYERS
+			if (verifier.m.beginPos == verifier.m.endPos)
+			{
+#ifdef RAZERS_DEBUG
+			    std::cout << "FAILED" << std::endl; 
+#endif
+				return false;
+			}
+#else  // RAZERS_BANDED_MYERS
+			SEQAN_ASSERT_LT(verifier.m.beginPos, verifier.m.endPos);
+#endif // RAZERS_BANDED_MYERS
 		}
 
 		if (!verifier.oneMatchPerBucket)
