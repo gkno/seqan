@@ -60,16 +60,6 @@ link_directories (${SEQAN_LIBRARY}/lib
 # ^-- currently not working because cmake appends Debug|Release to ../lib/
 
 ################################################################################
-# Auto-generate headers.
-################################################################################
-
-# Generate configuration header for RazerS 3.
-#
-# TODO(holtgrew): We probably want this for all apps if a config.h.in file exists!
-configure_file (${SEQAN_LIBRARY}/apps/razers3/config.h.in
-                ${SEQAN_LIBRARY}/apps/razers3/config.h)
-
-################################################################################
 # Applications
 ################################################################################
 
@@ -133,6 +123,21 @@ else (OpenMP_CXX_FLAGS)
   set (APP_razers3_NOBUILD true)
   list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/razers3)
 endif (OpenMP_CXX_FLAGS)
+
+################################################################################
+# Auto-generate headers.
+################################################################################
+
+foreach (APP_DIR ${SEQAN_APPS})
+  if (EXISTS ${APP_DIR}/config.h.in)
+    configure_file (${APP_DIR}/config.h.in
+                    ${APP_DIR}/config.h)
+  endif (EXISTS ${APP_DIR}/config.h.in)
+endforeach (APP_DIR ${SEQAN_APPS})
+
+################################################################################
+# Build applications.
+################################################################################
 
 # Make sure the compiler can find object files from the TBB library.
 link_directories (${SEQAN_LIBRARY}/lib)
