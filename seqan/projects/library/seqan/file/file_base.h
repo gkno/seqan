@@ -225,6 +225,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ...remarks:To open a file read-only, write-only or to read and write use $OPEN_RDONLY$, $OPEN_WRONLY$, or $OPEN_RDWR$.
 ...remarks:To create or overwrite a file add $OPEN_CREATE$.
 ...remarks:To append a file if existing add $OPEN_APPEND$.
+...remarks:To circumvent problems, files are always opened in binary mode.
 ...default:$OPEN_RDWR | OPEN_CREATE | OPEN_APPEND$
 ..returns:A $bool$ which is $true$ on success.
 ..include:seqan/file.h
