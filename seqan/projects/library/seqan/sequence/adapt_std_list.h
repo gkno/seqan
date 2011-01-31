@@ -47,7 +47,7 @@ namespace seqan {
 .Adaption."std::list"
 ..summary:Adaption for STL list objects.
 */
-    
+
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
@@ -67,7 +67,7 @@ struct IsContiguous< ::std::basic_string<TChar, TAlloc> const>
 template <typename TValue, typename TAlloc>
 struct Value< ::std::list<TValue, TAlloc> >
 {
-	typedef typename ::std::list<TValue, TAlloc>::value_type Type;
+    typedef typename ::std::list<TValue, TAlloc>::value_type Type;
 };
 
 template <typename TValue, typename TAlloc>
@@ -78,49 +78,49 @@ struct Value< ::std::list<TValue, TAlloc> const>
 template <typename TValue, typename TAlloc>
 struct GetValue< ::std::list<TValue, TAlloc> >
 {
-	typedef typename ::std::list<TValue, TAlloc>::reference Type;
+    typedef typename ::std::list<TValue, TAlloc>::reference Type;
 };
 
 template <typename TValue, typename TAlloc>
 struct GetValue< ::std::list<TValue, TAlloc> const>
 {
-	typedef typename ::std::list<TValue, TAlloc>::const_reference Type;
+    typedef typename ::std::list<TValue, TAlloc>::const_reference Type;
 };
 
 ///.Metafunction.Iterator.param.T.type:Adaption.std::list
 template <typename TValue, typename TAlloc>
 struct Iterator< ::std::list<TValue, TAlloc>, Rooted>
 {
-	typedef ::std::list<TValue, TAlloc> TString_;
-	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
-	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
+    typedef ::std::list<TValue, TAlloc> TString_;
+    typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+    typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TValue, typename TAlloc>
 struct Iterator< ::std::list<TValue, TAlloc> const, Rooted>
 {
-	typedef ::std::list<TValue, TAlloc> const TString_;
-	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
-	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
+    typedef ::std::list<TValue, TAlloc> const TString_;
+    typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+    typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TValue, typename TAlloc>
 struct Iterator< ::std::list<TValue, TAlloc>, Standard>
 {
-	typedef Iter< ::std::list<TValue, TAlloc>, StdIteratorAdaptor> Type;
+    typedef Iter< ::std::list<TValue, TAlloc>, StdIteratorAdaptor> Type;
 };
 
 template <typename TValue, typename TAlloc>
 struct Iterator< ::std::list<TValue, TAlloc> const, Standard>
 {
-	typedef Iter< ::std::list<TValue, TAlloc> const, StdIteratorAdaptor> Type;
+    typedef Iter< ::std::list<TValue, TAlloc> const, StdIteratorAdaptor> Type;
 };
 
 ///.Metafunction.Position.param.T.type:Adaption.std::list
 template <typename TValue, typename TAlloc>
 struct Position< ::std::list<TValue, TAlloc> >
 {
-	typedef typename ::std::list<TValue, TAlloc>::size_type Type;
+    typedef typename ::std::list<TValue, TAlloc>::size_type Type;
 };
 
 template <typename TValue, typename TAlloc>
@@ -131,7 +131,7 @@ struct Position< ::std::list<TValue, TAlloc> const>
 template <typename TValue, typename TAlloc>
 struct Size< ::std::list<TValue, TAlloc> >
 {
-	typedef typename ::std::list<TValue, TAlloc>::size_type Type;
+    typedef typename ::std::list<TValue, TAlloc>::size_type Type;
 };
 
 template <typename TValue, typename TAlloc>
@@ -148,15 +148,15 @@ struct Size< ::std::list<TValue, TAlloc> const>
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> >
 {
-	typedef ::std::list<TValue, TAlloc> TContainer_;
-	typedef typename TContainer_::iterator Type;
+    typedef ::std::list<TValue, TAlloc> TContainer_;
+    typedef typename TContainer_::iterator Type;
 };
 
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> const>
 {
-	typedef ::std::list<TValue, TAlloc> TContainer_;
-	typedef typename TContainer_::const_iterator Type;
+    typedef ::std::list<TValue, TAlloc> TContainer_;
+    typedef typename TContainer_::const_iterator Type;
 };
 
 // ===========================================================================
@@ -171,7 +171,7 @@ begin(std::list<TValue> & list,
       Standard const &)
 {
     SEQAN_CHECKPOINT;
-	return list.begin();
+    return list.begin();
 }
 
 template <typename TValue>
@@ -181,7 +181,7 @@ begin(std::list<TValue> const & list,
       Standard const &)
 {
     SEQAN_CHECKPOINT;
-	return list.begin();
+    return list.begin();
 }
 
 ///.Function.end.param.object.type:Adaption.std::list
@@ -192,7 +192,7 @@ end(std::list<TValue> & list,
       Standard const &)
 {
     SEQAN_CHECKPOINT;
-	return list.end();
+    return list.end();
 }
 
 template <typename TValue>
@@ -202,7 +202,7 @@ end(std::list<TValue> const & list,
       Standard const &)
 {
     SEQAN_CHECKPOINT;
-	return list.end();
+    return list.end();
 }
 
 ///.Function.Container#front.param.container.type:Adaption.std::list
@@ -267,21 +267,21 @@ length(std::list<TValue> const & list)
 */
 template <typename T, typename T2>
 inline void
-prependValue(std::list<T> & list, 
+prependValue(std::list<T> & list,
              T2 value)
 {
     SEQAN_CHECKPOINT;
-	list.push_front(value);
+    list.push_front(value);
 }
 
 ///.Function.appendValue.param.target.type:Adaption.std::list
 template <typename T, typename T2>
 inline void
-appendValue(std::list<T> & list, 
-			T2 value)
+appendValue(std::list<T> & list,
+            T2 value)
 {
     SEQAN_CHECKPOINT;
-	list.push_back(value);
+    list.push_back(value);
 }
 
 ///.Function.clear.param.object.type:Adaption.std::list

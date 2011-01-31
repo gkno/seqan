@@ -252,8 +252,8 @@ struct Spec<Lexical<TSpec> const>
 
 template <typename TSpec, typename TLeft, typename TRight>
 inline void
-compare_(Lexical<TSpec> & lexical, 
-		 TLeft & left, 
+compare_(Lexical<TSpec> & lexical,
+		 TLeft & left,
 		 TRight & right)
 {
 SEQAN_CHECKPOINT
@@ -294,8 +294,8 @@ SEQAN_CHECKPOINT
 
 template <typename TSpec, typename TLeft, typename TRight>
 inline void
-compare(Lexical<TSpec> & lexical, 
-		TLeft const & left, 
+compare(Lexical<TSpec> & lexical,
+		TLeft const & left,
 		TRight const & right)
 {
 	compare_(lexical, left, right);
@@ -305,24 +305,24 @@ compare(Lexical<TSpec> & lexical,
 //workaround for VC++ "const arrays" bug
 template <typename TSpec, typename TLeftValue, typename TRight>
 inline void
-compare(Lexical<TSpec> & lexical, 
-		TLeftValue const * left, 
+compare(Lexical<TSpec> & lexical,
+		TLeftValue const * left,
 		TRight const & right)
 {
 	compare_(lexical, left, right);
 }
 template <typename TSpec, typename TLeftValue, typename TRightValue>
 inline void
-compare(Lexical<TSpec> & lexical, 
-		TLeftValue const * left, 
+compare(Lexical<TSpec> & lexical,
+		TLeftValue const * left,
 		TRightValue const * right)
 {
 	compare_(lexical, left, right);
 }
 template <typename TSpec, typename TLeft, typename TRightValue>
 inline void
-compare(Lexical<TSpec> & lexical, 
-		TLeft const & left, 
+compare(Lexical<TSpec> & lexical,
+		TLeft const & left,
 		TRightValue const * right)
 {
 	compare_(lexical, left, right);
@@ -348,7 +348,7 @@ compare(Lexical<TSpec> & lexical,
 */
 template <typename TLeft, typename TRight >
 inline bool
-isEqual(TLeft const & left, 
+isEqual(TLeft const & left,
 		TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -383,7 +383,7 @@ SEQAN_CHECKPOINT
 */
 template <typename TLeft, typename TRight >
 inline bool
-isNotEqual(TLeft const & left, 
+isNotEqual(TLeft const & left,
 		 TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -425,7 +425,7 @@ SEQAN_CHECKPOINT
 */
 template <typename TLeft, typename TRight, typename TPrefixOrder >
 inline bool
-isLess(TLeft const & left, 
+isLess(TLeft const & left,
 	   TRight const & right,
 	   Tag<TPrefixOrder> const tag)
 {
@@ -435,7 +435,7 @@ SEQAN_CHECKPOINT
 }
 template <typename TLeft, typename TRight>
 inline bool
-isLess(TLeft const & left, 
+isLess(TLeft const & left,
 	   TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -494,7 +494,7 @@ SEQAN_CHECKPOINT
 
 template <typename TLeft, typename TRight, typename TPrefixOrder >
 inline bool
-isLessOrEqual(TLeft const & left, 
+isLessOrEqual(TLeft const & left,
 		TRight const & right,
 		Tag<TPrefixOrder> const tag)
 {
@@ -504,7 +504,7 @@ SEQAN_CHECKPOINT
 }
 template <typename TLeft, typename TRight>
 inline bool
-isLessOrEqual(TLeft const & left, 
+isLessOrEqual(TLeft const & left,
 		TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -562,7 +562,7 @@ SEQAN_CHECKPOINT
 */
 template <typename TLeft, typename TRight, typename TPrefixOrder >
 inline bool
-isGreater(TLeft const & left, 
+isGreater(TLeft const & left,
 		TRight const & right,
 		Tag<TPrefixOrder> const tag)
 {
@@ -572,7 +572,7 @@ SEQAN_CHECKPOINT
 }
 template <typename TLeft, typename TRight>
 inline bool
-isGreater(TLeft const & left, 
+isGreater(TLeft const & left,
 		TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -631,7 +631,7 @@ SEQAN_CHECKPOINT
 
 template <typename TLeft, typename TRight, typename TPrefixOrder >
 inline bool
-isGreaterOrEqual(TLeft const & left, 
+isGreaterOrEqual(TLeft const & left,
 		TRight const & right,
 		Tag<TPrefixOrder> const tag)
 {
@@ -641,7 +641,7 @@ SEQAN_CHECKPOINT
 }
 template <typename TLeft, typename TRight>
 inline bool
-isGreaterOrEqual(TLeft const & left, 
+isGreaterOrEqual(TLeft const & left,
 		TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -694,7 +694,7 @@ SEQAN_CHECKPOINT
 
 template <typename TLeft, typename TRight >
 inline bool
-isPrefix(TLeft const & left, 
+isPrefix(TLeft const & left,
 		TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -733,7 +733,7 @@ SEQAN_CHECKPOINT
 
 template <typename TLeft, typename TRight >
 inline bool
-hasPrefix(TLeft const & left, 
+hasPrefix(TLeft const & left,
 		TRight const & right)
 {
 SEQAN_CHECKPOINT
@@ -803,25 +803,25 @@ You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is
 */
 
 template <typename TValue>
-inline unsigned ordValue(TValue const & c) 
+inline unsigned ordValue(TValue const & c)
 {
 	return static_cast<typename MakeUnsigned_<TValue>::Type const &>(c);
 }
 
 template <typename TValue, typename TSpec>
-inline unsigned ordValue(SimpleType<TValue, TSpec> const & c) 
+inline unsigned ordValue(SimpleType<TValue, TSpec> const & c)
 {
 	return c;
 }
 
 template <typename TValue>
-inline unsigned _internalOrdValue(TValue const & c) 
+inline unsigned _internalOrdValue(TValue const & c)
 {
 	return ordValue(c);
 }
 
 template <typename TValue, typename TSpec>
-inline unsigned _internalOrdValue(SimpleType<TValue, TSpec> const & c) 
+inline unsigned _internalOrdValue(SimpleType<TValue, TSpec> const & c)
 {
 	return c.value;
 }

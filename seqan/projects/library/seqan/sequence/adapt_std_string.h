@@ -53,7 +53,7 @@ namespace seqan {
 // Metafunctions
 // ===========================================================================
 
-    
+
 ///.Metafunction.IsContiguous.param.T.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct IsContiguous< ::std::basic_string<TChar, TCharTraits, TAlloc> >
@@ -69,7 +69,7 @@ struct IsContiguous< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Value< ::std::basic_string<TChar, TCharTraits, TAlloc> >
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::value_type Type;
+    typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::value_type Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
@@ -81,13 +81,13 @@ struct Value< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct GetValue< ::std::basic_string<TChar, TCharTraits, TAlloc> >
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::reference Type;
+    typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::reference Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct GetValue< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::const_reference Type;
+    typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::const_reference Type;
 };
 
 ///.Metafunction.GetValue.param.T.type:Adaption.std::basic_string
@@ -95,49 +95,49 @@ struct GetValue< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Reference< ::std::basic_string<TChar, TCharTraits, TAlloc> >
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::reference Type;
+    typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::reference Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Reference< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::const_reference Type;
+    typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::const_reference Type;
 };
 
 ///.Metafunction.Iterator.param.T.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>
 {
-	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> TString_;
-	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
-	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
+    typedef ::std::basic_string<TChar, TCharTraits, TAlloc> TString_;
+    typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+    typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Rooted>
 {
-	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> const TString_;
-	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
-	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
+    typedef ::std::basic_string<TChar, TCharTraits, TAlloc> const TString_;
+    typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+    typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard >
 {
-	typedef Iter< ::std::basic_string<TChar, TCharTraits, TAlloc>, StdIteratorAdaptor > Type;
+    typedef Iter< ::std::basic_string<TChar, TCharTraits, TAlloc>, StdIteratorAdaptor > Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>
 {
-	typedef Iter< ::std::basic_string<TChar, TCharTraits, TAlloc> const, StdIteratorAdaptor > Type;
+    typedef Iter< ::std::basic_string<TChar, TCharTraits, TAlloc> const, StdIteratorAdaptor > Type;
 };
 
 ///.Metafunction.Position.param.T.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::size_type Type;
+    typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::size_type Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
@@ -148,7 +148,7 @@ struct Position< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >
 {
-	typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::size_type Type;
+    typedef typename ::std::basic_string<TChar, TCharTraits, TAlloc>::size_type Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
@@ -159,7 +159,7 @@ struct Size< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct DefaultOverflowImplicit< ::std::basic_string<TChar, TCharTraits, TAlloc> >
 {
-	typedef Generous Type;
+    typedef Generous Type;
 };
 
 // ===========================================================================
@@ -168,68 +168,68 @@ struct DefaultOverflowImplicit< ::std::basic_string<TChar, TCharTraits, TAlloc> 
 
 ///.Function.id.param.object.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
-inline void const * 
+inline void const *
 id(::std::basic_string<TChar, TCharTraits, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	if (me.empty())
-		return NULL;
-	else
-		return (& *(me.end() - 1)) + 1;
+    if (me.empty())
+        return NULL;
+    else
+        return (& *(me.end() - 1)) + 1;
 }
 
 ///.Function.begin.param.object.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
-inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type 
+inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type
 begin(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
-	  Standard)
+      Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type(me.begin());
+    return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type(me.begin());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc>
-inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type 
+inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type
 begin(::std::basic_string<TChar, TCharTraits, TAlloc> const & me,
-	  Standard)
+      Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type(me.begin());
+    return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type(me.begin());
 }
 
 ///.Function.end.param.object.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
-inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type 
+inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type
 end(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
-	Standard)
+    Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type(me.end());
+    return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Standard>::Type(me.end());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc>
-inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type 
+inline typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type
 end(::std::basic_string<TChar, TCharTraits, TAlloc> const & me,
-	Standard)
+    Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type(me.end());
+    return typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Standard>::Type(me.end());
 }
 
 ///.Function.value.param.container.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TPos>
 inline typename GetValue< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
-value(::std::basic_string<TChar, TCharTraits, TAlloc> & me, 
-	  TPos pos)
+value(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
+      TPos pos)
 {
     SEQAN_CHECKPOINT;
-	return me[pos];
-} 
+    return me[pos];
+}
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TPos>
 inline typename GetValue< ::std::basic_string<TChar, TCharTraits, TAlloc> const>::Type
-value(::std::basic_string<TChar, TCharTraits, TAlloc> const & me, 
-	  TPos pos)
+value(::std::basic_string<TChar, TCharTraits, TAlloc> const & me,
+      TPos pos)
 {
     SEQAN_CHECKPOINT;
-	return me[pos];
+    return me[pos];
 }
 
 ///.Function.length.param.object.type:Adaption.std::basic_string
@@ -238,7 +238,7 @@ inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 length(::std::basic_string<TChar, TCharTraits, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	return me.length();
+    return me.length();
 }
 
 ///.Function.capacity.param.object.type:Adaption.std::basic_string
@@ -247,7 +247,7 @@ inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 capacity(::std::basic_string<TChar, TCharTraits, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	return me.capacity();
+    return me.capacity();
 }
 
 ///.Function.empty.param.object.type:Adaption.std::basic_string
@@ -256,7 +256,7 @@ inline bool
 empty(::std::basic_string<TChar, TCharTraits, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	return me.empty();
+    return me.empty();
 }
 
 ///.Function.clear.param.object.type:Adaption.std::basic_string
@@ -265,7 +265,7 @@ inline void
 clear(::std::basic_string<TChar, TCharTraits, TAlloc> & me)
 {
     SEQAN_CHECKPOINT;
-	me.clear();
+    me.clear();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -275,149 +275,149 @@ clear(::std::basic_string<TChar, TCharTraits, TAlloc> & me)
 ///.Function.assign.param.source.type:Adaption.std::basic_string
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource & source)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource & source)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, Generous());
+    assign(target, source, Generous());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, Generous());
+    assign(target, source, Generous());
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TSize>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource & source,
-	   TSize limit)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource & source,
+       TSize limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TSize>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   TSize limit)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       TSize limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 
 //____________________________________________________________________________
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource & source,
-	   Generous)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource & source,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	target.assign(begin(source, Standard()), end(source, Standard()));
+    target.assign(begin(source, Standard()), end(source, Standard()));
 }
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   Generous)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	target.assign(begin(source, Standard()), end(source, Standard()));
+    target.assign(begin(source, Standard()), end(source, Standard()));
 }
 
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign_std_string_Generous_impl(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-								TSource & source,
-								typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit)
+inline void
+assign_std_string_Generous_impl(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+                                TSource & source,
+                                typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit)
 {
     SEQAN_CHECKPOINT;
-	typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
-	typename Size<TSource const>::Type source_length = length(source);
-	if (source_length > limit)
-	{
-		source_length = limit;
-	}
-	target.assign(source_begin, source_begin + source_length);
+    typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
+    typename Size<TSource const>::Type source_length = length(source);
+    if (source_length > limit)
+    {
+        source_length = limit;
+    }
+    target.assign(source_begin, source_begin + source_length);
 }
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource & source,
-	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-	   Generous)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource & source,
+       typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	assign_std_string_Generous_impl(target, source, limit);
+    assign_std_string_Generous_impl(target, source, limit);
 }
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-	   Generous)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	assign_std_string_Generous_impl(target, source, limit);
+    assign_std_string_Generous_impl(target, source, limit);
 }
 
 //____________________________________________________________________________
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource & source,
-	   Limit)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource & source,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, target.capacity(), Generous());
+    assign(target, source, target.capacity(), Generous());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   Limit)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, target.capacity(), Generous());
+    assign(target, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource & source,
-	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-	   Limit)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource & source,
+       typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
 
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-	   Limit)
+inline void
+assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
 
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -427,67 +427,67 @@ assign(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
 ///.Function.append.param.source.type:Adaption.std::basic_string
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-append(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   Generous)
+inline void
+append(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	target.append(begin(source, Standard()), end(source, Standard()));
+    target.append(begin(source, Standard()), end(source, Standard()));
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-append(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-	   Generous)
+inline void
+append(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type target_length = target.length();
-	if (target_length > limit)
-	{
-		target.resize(limit);
-	}
-	else
-	{
-		limit -= target_length;
-		typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
-		typename Size<TSource const>::Type source_length = length(source);
-		if (source_length > limit)
-		{
-			source_length = limit;
-		}
-		target.append(source_begin, source_begin + source_length);
-	}
+    typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type target_length = target.length();
+    if (target_length > limit)
+    {
+        target.resize(limit);
+    }
+    else
+    {
+        limit -= target_length;
+        typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
+        typename Size<TSource const>::Type source_length = length(source);
+        if (source_length > limit)
+        {
+            source_length = limit;
+        }
+        target.append(source_begin, source_begin + source_length);
+    }
 }
 
 //____________________________________________________________________________
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-append(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   Limit)
+inline void
+append(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	append(target, source, target.capacity(), Generous());
+    append(target, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-append(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-	   Limit)
+inline void
+append(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
 
-	append(target, source, limit, Generous());
+    append(target, source, limit, Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -495,23 +495,23 @@ append(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TValue, typename TTag>
 inline void
-appendValue(::std::basic_string<TChar, TCharTraits, TAlloc> & me, 
-			TValue const & _value,
-			TTag)
+appendValue(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
+            TValue const & _value,
+            TTag)
 {
     SEQAN_CHECKPOINT;
-	me.push_back(_value);
-} 
+    me.push_back(_value);
+}
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TValue>
 inline void
-appendValue(::std::basic_string<TChar, TCharTraits, TAlloc> & me, 
-			TValue const & _value,
-			Limit)
+appendValue(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
+            TValue const & _value,
+            Limit)
 {
     SEQAN_CHECKPOINT;
-	if (capacity(me) > length(me)) me.push_back(_value);
-} 
+    if (capacity(me) > length(me)) me.push_back(_value);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //replace to ::std::basic_string
@@ -520,80 +520,80 @@ appendValue(::std::basic_string<TChar, TCharTraits, TAlloc> & me,
 ///.Function.replace.param.source.type:Adaption.std::basic_string
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
+inline void
 replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
-		TSource const & source,
-		Generous)
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
+        TSource const & source,
+        Generous)
 {
     SEQAN_CHECKPOINT;
-	target.replace(target.begin() + pos_begin, target.begin() + pos_end, begin(source, Standard()), end(source, Standard()));
+    target.replace(target.begin() + pos_begin, target.begin() + pos_end, begin(source, Standard()), end(source, Standard()));
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
-		TSource const & source,
-		typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-		Generous)
-{
-    SEQAN_CHECKPOINT;
-	if (pos_begin >= limit)
-	{
-		target.resize(limit);
-	}
-	else
-	{
-		typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
-		typename Size<TSource const>::Type source_length = length(source);
-		typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_mid = pos_begin + source_length;
-		if (pos_mid > limit)
-		{
-			target.replace(target.begin() + pos_begin, target.begin() + limit, source_begin, source_begin + limit - pos_begin);
-			target.resize(limit);
-		}
-		else
-		{
-			target.replace(target.begin() + pos_begin, target.begin() + pos_end, source_begin, end(source, Standard()));
-			if (target.length() > limit)
-			{
-				target.resize(limit);
-			}
-		}
-	}
-}
-
-template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
+inline void
 replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
-		TSource const & source,
-		Limit)
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
+        TSource const & source,
+        typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+        Generous)
 {
     SEQAN_CHECKPOINT;
-	replace(target, pos_begin, pos_end, source, target.capacity(), Generous());
+    if (pos_begin >= limit)
+    {
+        target.resize(limit);
+    }
+    else
+    {
+        typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
+        typename Size<TSource const>::Type source_length = length(source);
+        typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_mid = pos_begin + source_length;
+        if (pos_mid > limit)
+        {
+            target.replace(target.begin() + pos_begin, target.begin() + limit, source_begin, source_begin + limit - pos_begin);
+            target.resize(limit);
+        }
+        else
+        {
+            target.replace(target.begin() + pos_begin, target.begin() + pos_end, source_begin, end(source, Standard()));
+            if (target.length() > limit)
+            {
+                target.resize(limit);
+            }
+        }
+    }
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
-inline void 
-replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target, 
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
-		typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
-		TSource const & source,
-		typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-		Limit)
+inline void
+replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
+        TSource const & source,
+        Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
+    replace(target, pos_begin, pos_end, source, target.capacity(), Generous());
+}
 
-	replace(target, pos_begin, pos_end, source, limit, Generous());
+template <typename TChar, typename TCharTraits, typename TAlloc, typename TSource>
+inline void
+replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_begin,
+        typename Position< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type pos_end,
+        TSource const & source,
+        typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+        Limit)
+{
+    SEQAN_CHECKPOINT;
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
+
+    replace(target, pos_begin, pos_end, source, limit, Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -601,91 +601,91 @@ replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
 
 /*
 template<typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
-		typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_begin,
-		typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_end,
-		TSource & source,
-		Tag<TExpand> const tag)
+        typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_begin,
+        typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_end,
+        TSource & source,
+        Tag<TExpand> const tag)
 {
-	replace(target, position(pos_begin), position(pos_end), source, tag);
+    replace(target, position(pos_begin), position(pos_end), source, tag);
 }
 
 template<typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
-		typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_begin,
-		typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_end,
-		TSource & source,
-		typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
-		Tag<TExpand> const tag)
+        typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_begin,
+        typename Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_end,
+        TSource & source,
+        typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type limit,
+        Tag<TExpand> const tag)
 {
-	replace(target,  position(pos_begin),  position(pos_end), source, tag);
+    replace(target,  position(pos_begin),  position(pos_end), source, tag);
 }
 */
 
 ///.Function.reserve.param.object.type:Adaption.std::basic_string
 ///.Function.reserve.remarks:For @Adaption.std::basic_string|STL Adaptions@, $reserve$ is only guaranteed to have the specified behaviour with $Insist$ and $Generous$.
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize, typename TExpand>
-inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
+inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 reserve(
-	::std::basic_string<TChar, TCharTraits, TAlloc> & seq, 
-	TSize new_capacity,
-	Tag<TExpand> const & tag)
+    ::std::basic_string<TChar, TCharTraits, TAlloc> & seq,
+    TSize new_capacity,
+    Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     seq.reserve(new_capacity);
-	return _capacityReturned(seq, new_capacity, tag);
+    return _capacityReturned(seq, new_capacity, tag);
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize>
-inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
+inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 reserve(
-	::std::basic_string<TChar, TCharTraits, TAlloc> & seq, 
-	TSize new_capacity,
-	Insist const &)
+    ::std::basic_string<TChar, TCharTraits, TAlloc> & seq,
+    TSize new_capacity,
+    Insist const &)
 {
     SEQAN_CHECKPOINT;
-	// do nothing
-	return _capacityReturned(seq, new_capacity, Insist());
+    // do nothing
+    return _capacityReturned(seq, new_capacity, Insist());
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize>
-inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
+inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 reserve(
-	::std::basic_string<TChar, TCharTraits, TAlloc> & seq, 
-	TSize new_capacity,
-	Limit const &)
+    ::std::basic_string<TChar, TCharTraits, TAlloc> & seq,
+    TSize new_capacity,
+    Limit const &)
 {
     SEQAN_CHECKPOINT;
-	// do nothing
-	return _capacityReturned(seq, new_capacity, Limit());
+    // do nothing
+    return _capacityReturned(seq, new_capacity, Limit());
 }
 
 ///.Function.resize.param.object.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize, typename TExpand>
-inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
+inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 resize(
-	::std::basic_string<TChar, TCharTraits, TAlloc> & me,
-	TSize new_length,
-	Tag<TExpand> const &)
+    ::std::basic_string<TChar, TCharTraits, TAlloc> & me,
+    TSize new_length,
+    Tag<TExpand> const &)
 {
     SEQAN_CHECKPOINT;
     me.resize(new_length);
-	return me.length();
+    return me.length();
 }
 
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize, typename TExpand>
-inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
+inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type
 resize(
-	::std::basic_string<TChar, TCharTraits, TAlloc> & me,
-	TSize new_length,
-	TChar const & val,
-	Tag<TExpand> const &)
+    ::std::basic_string<TChar, TCharTraits, TAlloc> & me,
+    TSize new_length,
+    TChar const & val,
+    Tag<TExpand> const &)
 {
     SEQAN_CHECKPOINT;
     me.resize(new_length, val);
-	return me.length();
+    return me.length();
 }
 
 }  // namespace seqan

@@ -46,28 +46,28 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TContainer, typename TSpec>
-inline bool 
+inline bool
 _streamEOF(Iter<TContainer, TSpec> const & iter)
 {
 SEQAN_CHECKPOINT
-	return atEnd(iter);
+    return atEnd(iter);
 }
 
 //////////////////////////////////////////////////////////////////////////////
- 
+
 template <typename TValue, typename TContainer, typename TSpec>
-inline ::std::streamsize 
+inline ::std::streamsize
 _streamRead(TValue * target,
-			Iter<TContainer, TSpec> & source,
-			::std::streamsize limit)
+            Iter<TContainer, TSpec> & source,
+            ::std::streamsize limit)
 {
 SEQAN_CHECKPOINT
-	if (position(target) + limit > length(container(target)))
-		limit = length(container(target)) - position(target);
-	Iter<TContainer, TSpec> sourceEnd = source + limit;
-	for (; source != sourceEnd; ++source, ++target)
-		*target = *source;
-	return limit;
+    if (position(target) + limit > length(container(target)))
+        limit = length(container(target)) - position(target);
+    Iter<TContainer, TSpec> sourceEnd = source + limit;
+    for (; source != sourceEnd; ++source, ++target)
+        *target = *source;
+    return limit;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -77,19 +77,19 @@ inline typename Value<Iter<TContainer, TSpec> >::Type
 _streamGet(Iter<TContainer, TSpec> & source)
 {
 SEQAN_CHECKPOINT
-	typename Value<Iter<TContainer, TSpec> >::Type _val = getValue(source);
-	goNext(source);
-	return _val;
+    typename Value<Iter<TContainer, TSpec> >::Type _val = getValue(source);
+    goNext(source);
+    return _val;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TContainer, typename TSpec>
-inline typename Value<Iter<TContainer, TSpec> >::Type 
+inline typename Value<Iter<TContainer, TSpec> >::Type
 _streamPeek(Iter<TContainer, TSpec> & source)
 {
 SEQAN_CHECKPOINT
-	return getValue(source);
+    return getValue(source);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -97,16 +97,16 @@ SEQAN_CHECKPOINT
 template <typename TContainer, typename TSpec, typename TChar>
 inline void
 _streamPut(Iter<TContainer, TSpec> & target,
-		   TChar character)
+           TChar character)
 {
 SEQAN_CHECKPOINT
-	if (atEnd(target))
-	{
-		typename Container<Iter<TContainer, TSpec> >::Type & container_ = container(target);
-		appendValue(container_, character);
-		target = begin(container_) + (length(container_) - 1);
-	} else
-		*target = character;
+    if (atEnd(target))
+    {
+        typename Container<Iter<TContainer, TSpec> >::Type & container_ = container(target);
+        appendValue(container_, character);
+        target = begin(container_) + (length(container_) - 1);
+    } else
+        *target = character;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ inline typename Position<Iter<TContainer, TSpec> >::Type
 _streamTellG(Iter<TContainer, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return position(me);
+    return position(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ inline typename Position<Iter<TContainer, TSpec> >::Type
 _streamTellP(Iter<TContainer, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return position(me);
+    return position(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -134,10 +134,10 @@ SEQAN_CHECKPOINT
 template <typename TContainer, typename TSpec>
 inline void
 _streamSeekG(Iter<TContainer, TSpec> & me,
-	 typename Position<Iter<TContainer, TSpec> >::Type pos)
+     typename Position<Iter<TContainer, TSpec> >::Type pos)
 {
 SEQAN_CHECKPOINT
-	me = begin(container(me)) + pos;
+    me = begin(container(me)) + pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -145,10 +145,10 @@ SEQAN_CHECKPOINT
 template <typename TContainer, typename TSpec>
 inline void
 _streamSeekP(Iter<TContainer, TSpec> & me,
-	 typename Position<Iter<TContainer, TSpec> >::Type pos)
+     typename Position<Iter<TContainer, TSpec> >::Type pos)
 {
 SEQAN_CHECKPOINT
-	me = begin(container(me)) + pos;
+    me = begin(container(me)) + pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -156,10 +156,10 @@ SEQAN_CHECKPOINT
 template <typename TContainer, typename TSpec>
 inline void
 _streamSeek2G(Iter<TContainer, TSpec> & me,
-	 int off)
+     int off)
 {
 SEQAN_CHECKPOINT
-	me = begin(container(me)) + (position(me) + off);
+    me = begin(container(me)) + (position(me) + off);
 }
 
 

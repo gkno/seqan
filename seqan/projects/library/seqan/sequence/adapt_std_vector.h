@@ -51,7 +51,7 @@ namespace seqan {
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
-    
+
 ///.Metafunction.IsContiguous.param.T.type:Adaption.std::vector
 template <typename TChar, typename TAlloc>
 struct IsContiguous< ::std::vector<TChar, TAlloc> >
@@ -67,7 +67,7 @@ struct IsContiguous< ::std::vector<TChar, TAlloc> const>
 template <typename TChar, typename TAlloc>
 struct Value< ::std::vector<TChar, TAlloc> >
 {
-	typedef typename ::std::vector<TChar, TAlloc>::value_type Type;
+    typedef typename ::std::vector<TChar, TAlloc>::value_type Type;
 };
 
 template <typename TChar, typename TAlloc>
@@ -79,13 +79,13 @@ struct Value< ::std::vector<TChar, TAlloc> const>
 template <typename TChar, typename TAlloc>
 struct GetValue< ::std::vector<TChar, TAlloc> >
 {
-	typedef typename ::std::vector<TChar, TAlloc>::reference Type;
+    typedef typename ::std::vector<TChar, TAlloc>::reference Type;
 };
 
 template <typename TChar, typename TAlloc>
 struct GetValue< ::std::vector<TChar,  TAlloc> const>
 {
-	typedef typename ::std::vector<TChar, TAlloc>::const_reference Type;
+    typedef typename ::std::vector<TChar, TAlloc>::const_reference Type;
 };
 
 ///.Metafunction.GetValue.param.T.type:Adaption.std::vector
@@ -93,49 +93,49 @@ struct GetValue< ::std::vector<TChar,  TAlloc> const>
 template <typename TChar, typename TAlloc>
 struct Reference< ::std::vector<TChar, TAlloc> >
 {
-	typedef typename ::std::vector<TChar, TAlloc>::reference Type;
+    typedef typename ::std::vector<TChar, TAlloc>::reference Type;
 };
 
 template <typename TChar,  typename TAlloc>
 struct Reference< ::std::vector<TChar, TAlloc> const>
 {
-	typedef typename ::std::vector<TChar,  TAlloc>::const_reference Type;
+    typedef typename ::std::vector<TChar,  TAlloc>::const_reference Type;
 };
 
 ///.Metafunction.Iterator.param.T.type:Adaption.std::vector
 template <typename TChar, typename TAlloc>
 struct Iterator< ::std::vector<TChar, TAlloc>, Rooted>
 {
-	typedef ::std::vector<TChar, TAlloc> TVector_;
-	typedef Iter<TVector_, StdIteratorAdaptor> TIterator_;
-	typedef Iter<TVector_, AdaptorIterator<TIterator_> > Type;
+    typedef ::std::vector<TChar, TAlloc> TVector_;
+    typedef Iter<TVector_, StdIteratorAdaptor> TIterator_;
+    typedef Iter<TVector_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TChar, typename TAlloc>
 struct Iterator< ::std::vector<TChar, TAlloc> const, Rooted>
 {
-	typedef ::std::vector<TChar, TAlloc> const TVector_;
-	typedef Iter<TVector_, StdIteratorAdaptor> TIterator_;
-	typedef Iter<TVector_, AdaptorIterator<TIterator_> > Type;
+    typedef ::std::vector<TChar, TAlloc> const TVector_;
+    typedef Iter<TVector_, StdIteratorAdaptor> TIterator_;
+    typedef Iter<TVector_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TChar,  typename TAlloc>
 struct Iterator< ::std::vector<TChar, TAlloc>, Standard >
 {
-	typedef Iter< ::std::vector<TChar,  TAlloc>, StdIteratorAdaptor > Type;
+    typedef Iter< ::std::vector<TChar,  TAlloc>, StdIteratorAdaptor > Type;
 };
 
 template <typename TChar,  typename TAlloc>
 struct Iterator< ::std::vector<TChar,  TAlloc> const, Standard>
 {
-	typedef Iter< ::std::vector<TChar, TAlloc> const, StdIteratorAdaptor > Type;
+    typedef Iter< ::std::vector<TChar, TAlloc> const, StdIteratorAdaptor > Type;
 };
 
 ///.Metafunction.Position.param.T.type:Adaption.std::vector
 template <typename TChar,  typename TAlloc>
 struct Position< ::std::vector<TChar, TAlloc> >
 {
-	typedef typename ::std::vector<TChar,  TAlloc>::size_type Type;
+    typedef typename ::std::vector<TChar,  TAlloc>::size_type Type;
 };
 
 template <typename TChar,  typename TAlloc>
@@ -146,7 +146,7 @@ struct Position< ::std::vector<TChar,  TAlloc> const>
 template <typename TChar,  typename TAlloc>
 struct Size< ::std::vector<TChar, TAlloc> >
 {
-	typedef typename ::std::vector<TChar, TAlloc>::size_type Type;
+    typedef typename ::std::vector<TChar, TAlloc>::size_type Type;
 };
 
 template <typename TChar, typename TAlloc>
@@ -157,7 +157,7 @@ struct Size< ::std::vector<TChar, TAlloc> const>
 template <typename TChar, typename TAlloc>
 struct DefaultOverflowImplicit< ::std::vector<TChar, TAlloc> >
 {
-	typedef Generous Type;
+    typedef Generous Type;
 };
 
 // ===========================================================================
@@ -166,68 +166,68 @@ struct DefaultOverflowImplicit< ::std::vector<TChar, TAlloc> >
 
 ///.Function.id.param.object.type:Adaption.std::vector
 template <typename TChar,  typename TAlloc>
-inline void const * 
+inline void const *
 id(::std::vector<TChar, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	if (me.empty())
-		return NULL;
-	else
-		return (& *(me.end() - 1)) + 1;
+    if (me.empty())
+        return NULL;
+    else
+        return (& *(me.end() - 1)) + 1;
 }
 
 ///.Function.begin.param.object.type:Adaption.std::vector
 template <typename TChar,  typename TAlloc>
-inline typename Iterator< ::std::vector<TChar,  TAlloc>, Standard>::Type 
+inline typename Iterator< ::std::vector<TChar,  TAlloc>, Standard>::Type
 begin(::std::vector<TChar,  TAlloc> & me,
-	  Standard)
+      Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::vector<TChar,  TAlloc>, Standard>::Type(me.begin());
+    return typename Iterator< ::std::vector<TChar,  TAlloc>, Standard>::Type(me.begin());
 }
 template <typename TChar,  typename TAlloc>
-inline typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type 
+inline typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type
 begin(::std::vector<TChar, TAlloc> const & me,
-	  Standard)
+      Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type(me.begin());
+    return typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type(me.begin());
 }
 
 ///.Function.end.param.object.type:Adaption.std::vector
 template <typename TChar, typename TAlloc>
-inline typename Iterator< ::std::vector<TChar, TAlloc>, Standard>::Type 
+inline typename Iterator< ::std::vector<TChar, TAlloc>, Standard>::Type
 end(::std::vector<TChar,  TAlloc> & me,
-	Standard)
+    Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::vector<TChar, TAlloc>, Standard>::Type(me.end());
+    return typename Iterator< ::std::vector<TChar, TAlloc>, Standard>::Type(me.end());
 }
 template <typename TChar,  typename TAlloc>
-inline typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type 
+inline typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type
 end(::std::vector<TChar,  TAlloc> const & me,
-	Standard)
+    Standard)
 {
     SEQAN_CHECKPOINT;
-	return typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type(me.end());
+    return typename Iterator< ::std::vector<TChar,  TAlloc> const, Standard>::Type(me.end());
 }
 
 ///.Function.value.param.container.type:Adaption.std::vector
 template <typename TChar,  typename TAlloc, typename TPos>
 inline typename GetValue< ::std::vector<TChar, TAlloc> >::Type
-value(::std::vector<TChar,  TAlloc> & me, 
-	  TPos pos)
+value(::std::vector<TChar,  TAlloc> & me,
+      TPos pos)
 {
     SEQAN_CHECKPOINT;
-	return me[pos];
-} 
+    return me[pos];
+}
 template <typename TChar,  typename TAlloc, typename TPos>
 inline typename GetValue< ::std::vector<TChar,  TAlloc> const>::Type
-value(::std::vector<TChar, TAlloc> const & me, 
-	  TPos pos)
+value(::std::vector<TChar, TAlloc> const & me,
+      TPos pos)
 {
     SEQAN_CHECKPOINT;
-	return me[pos];
+    return me[pos];
 }
 
 ///.Function.length.param.object.type:Adaption.std::vector
@@ -236,7 +236,7 @@ inline typename Size< ::std::vector<TChar, TAlloc> >::Type
 length(::std::vector<TChar, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	return me.size();
+    return me.size();
 }
 
 ///.Function.capacity.param.object.type:Adaption.std::vector
@@ -245,7 +245,7 @@ inline typename Size< ::std::vector<TChar, TAlloc> >::Type
 capacity(::std::vector<TChar, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	return me.capacity();
+    return me.capacity();
 }
 
 ///.Function.empty.param.object.type:Adaption.std::vector
@@ -254,7 +254,7 @@ inline bool
 empty(::std::vector<TChar, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
-	return me.empty();
+    return me.empty();
 }
 
 ///.Function.clear.param.object.type:Adaption.std::vector
@@ -263,7 +263,7 @@ inline void
 clear(::std::vector<TChar, TAlloc> & me)
 {
     SEQAN_CHECKPOINT;
-	me.clear();
+    me.clear();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -273,149 +273,149 @@ clear(::std::vector<TChar, TAlloc> & me)
 ///.Function.assign.param.source.type:Adaption.std::vector
 
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource & source)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource & source)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, Generous());
+    assign(target, source, Generous());
 }
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource const & source)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource const & source)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, Generous());
+    assign(target, source, Generous());
 }
 
 template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource & source,
-	   TSize limit)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource & source,
+       TSize limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 template <typename TChar,  typename TAlloc, typename TSource, typename TSize>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource const & source,
-	   TSize limit)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource const & source,
+       TSize limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 
 //____________________________________________________________________________
 
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar, TAlloc> & target, 
-	   TSource & source,
-	   Generous)
+inline void
+assign(::std::vector<TChar, TAlloc> & target,
+       TSource & source,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	target.assign(begin(source, Standard()), end(source, Standard()));
+    target.assign(begin(source, Standard()), end(source, Standard()));
 }
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar, TAlloc> & target, 
-	   TSource const & source,
-	   Generous)
+inline void
+assign(::std::vector<TChar, TAlloc> & target,
+       TSource const & source,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	target.assign(begin(source, Standard()), end(source, Standard()));
+    target.assign(begin(source, Standard()), end(source, Standard()));
 }
 
 
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
-assign_std_vector_Generous_impl(::std::vector<TChar,  TAlloc> & target, 
-								TSource & source,
-								typename Size< ::std::vector<TChar,  TAlloc> >::Type limit)
+inline void
+assign_std_vector_Generous_impl(::std::vector<TChar,  TAlloc> & target,
+                                TSource & source,
+                                typename Size< ::std::vector<TChar,  TAlloc> >::Type limit)
 {
     SEQAN_CHECKPOINT;
-	typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
-	typename Size<TSource const>::Type source_length = length(source);
-	if (source_length > limit)
-	{
-		source_length = limit;
-	}
-	target.assign(source_begin, source_begin + source_length);
+    typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
+    typename Size<TSource const>::Type source_length = length(source);
+    if (source_length > limit)
+    {
+        source_length = limit;
+    }
+    target.assign(source_begin, source_begin + source_length);
 }
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource & source,
-	   typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-	   Generous)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource & source,
+       typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	assign_std_vector_Generous_impl(target, source, limit);
+    assign_std_vector_Generous_impl(target, source, limit);
 }
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-	   Generous)
+inline void
+assign(::std::vector<TChar, TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	assign_std_vector_Generous_impl(target, source, limit);
+    assign_std_vector_Generous_impl(target, source, limit);
 }
 
 //____________________________________________________________________________
 
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource & source,
-	   Limit)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource & source,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, target.capacity(), Generous());
+    assign(target, source, target.capacity(), Generous());
 }
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource const & source,
-	   Limit)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource const & source,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	assign(target, source, target.capacity(), Generous());
+    assign(target, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar, TAlloc> & target, 
-	   TSource & source,
-	   typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-	   Limit)
+inline void
+assign(::std::vector<TChar, TAlloc> & target,
+       TSource & source,
+       typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
 
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-assign(::std::vector<TChar,  TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::vector<TChar,  TAlloc> >::Type limit,
-	   Limit)
+inline void
+assign(::std::vector<TChar,  TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::vector<TChar,  TAlloc> >::Type limit,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
 
-	assign(target, source, limit, Generous());
+    assign(target, source, limit, Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -425,68 +425,68 @@ assign(::std::vector<TChar,  TAlloc> & target,
 ///.Function.append.param.source.type:Adaption.std::vector
 
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-append(::std::vector<TChar,  TAlloc> & target, 
-	   TSource const & source,
-	   Generous)
+inline void
+append(::std::vector<TChar,  TAlloc> & target,
+       TSource const & source,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	target.insert(target.end(), begin(source, Standard()), end(source, Standard()));
+    target.insert(target.end(), begin(source, Standard()), end(source, Standard()));
 }
 
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
-append(::std::vector<TChar, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-	   Generous)
+inline void
+append(::std::vector<TChar, TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+       Generous)
 {
     SEQAN_CHECKPOINT;
-	typename Size< ::std::vector<TChar, TAlloc> >::Type target_length = target.length();
-	if (target_length > limit)
-	{
-		target.resize(limit);
-	}
-	else
-	{
-		limit -= target_length;
-		typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
-		typename Size<TSource const>::Type source_length = length(source);
-		if (source_length > limit)
-		{
-			source_length = limit;
-		}
+    typename Size< ::std::vector<TChar, TAlloc> >::Type target_length = target.length();
+    if (target_length > limit)
+    {
+        target.resize(limit);
+    }
+    else
+    {
+        limit -= target_length;
+        typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
+        typename Size<TSource const>::Type source_length = length(source);
+        if (source_length > limit)
+        {
+            source_length = limit;
+        }
 
-		target.insert(target.end(), source_begin, source_begin + source_length);
-	}
+        target.insert(target.end(), source_begin, source_begin + source_length);
+    }
 }
 
 //____________________________________________________________________________
 
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-append(::std::vector<TChar,  TAlloc> & target, 
-	   TSource const & source,
-	   Limit)
+inline void
+append(::std::vector<TChar,  TAlloc> & target,
+       TSource const & source,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	append(target, source, target.capacity(), Generous());
+    append(target, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-append(::std::vector<TChar, TAlloc> & target, 
-	   TSource const & source,
-	   typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-	   Limit)
+inline void
+append(::std::vector<TChar, TAlloc> & target,
+       TSource const & source,
+       typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+       Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
 
-	append(target, source, limit, Generous());
+    append(target, source, limit, Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -494,23 +494,23 @@ append(::std::vector<TChar, TAlloc> & target,
 
 template <typename TChar, typename TAlloc, typename TValue, typename TTag>
 inline void
-appendValue(::std::vector<TChar, TAlloc> & me, 
-			TValue const & _value,
-			TTag)
+appendValue(::std::vector<TChar, TAlloc> & me,
+            TValue const & _value,
+            TTag)
 {
     SEQAN_CHECKPOINT;
-	me.push_back(_value);
-} 
+    me.push_back(_value);
+}
 
 template <typename TChar, typename TAlloc, typename TValue>
 inline void
-appendValue(::std::vector<TChar,  TAlloc> & me, 
-			TValue const & _value,
-			Limit)
+appendValue(::std::vector<TChar,  TAlloc> & me,
+            TValue const & _value,
+            Limit)
 {
     SEQAN_CHECKPOINT;
-	if (capacity(me) > length(me)) me.push_back(_value);
-} 
+    if (capacity(me) > length(me)) me.push_back(_value);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //replace to ::std::vector
@@ -519,122 +519,122 @@ appendValue(::std::vector<TChar,  TAlloc> & me,
 ///.Function.replace.param.source.type:Adaption.std::vector
 
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
+inline void
 replace(::std::vector<TChar, TAlloc> & target,
-		typename Position< ::std::vector<TChar, TAlloc> >::Type pos_begin,
-		typename Position< ::std::vector<TChar, TAlloc> >::Type pos_end,
-		TSource const & source,
-		Generous)
+        typename Position< ::std::vector<TChar, TAlloc> >::Type pos_begin,
+        typename Position< ::std::vector<TChar, TAlloc> >::Type pos_end,
+        TSource const & source,
+        Generous)
 {
     SEQAN_CHECKPOINT;
-	typename Size< ::std::vector<TChar, TAlloc> >::Type target_size = pos_end-pos_begin;
-	typename Size< ::std::vector<TChar, TAlloc> >::Type source_size =length(source);
-	
-	if(target_size >= source_size)
-		{
-			copy(source.begin(),source.end(), target.begin()+pos_begin);
-			if( target_size > source_size )
-				target.erase(target.begin()+pos_begin+source_size,target.begin()+pos_end);
- 	    }
-	else			
-		{
-			copy(source.begin(),source.begin()+target_size,target.begin()+pos_begin);
-			target.insert(target.begin()+pos_end,source.begin()+target_size,source.end());
-		}
+    typename Size< ::std::vector<TChar, TAlloc> >::Type target_size = pos_end-pos_begin;
+    typename Size< ::std::vector<TChar, TAlloc> >::Type source_size =length(source);
+
+    if(target_size >= source_size)
+        {
+            copy(source.begin(),source.end(), target.begin()+pos_begin);
+            if( target_size > source_size )
+                target.erase(target.begin()+pos_begin+source_size,target.begin()+pos_end);
+        }
+    else
+        {
+            copy(source.begin(),source.begin()+target_size,target.begin()+pos_begin);
+            target.insert(target.begin()+pos_end,source.begin()+target_size,source.end());
+        }
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-replace(::std::vector<TChar, TAlloc> & target, 
-		typename Position< ::std::vector<TChar, TAlloc> >::Type pos_begin,
-		typename Position< ::std::vector<TChar, TAlloc> >::Type pos_end,
-		TSource const & source,
-		typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-		Generous)
+inline void
+replace(::std::vector<TChar, TAlloc> & target,
+        typename Position< ::std::vector<TChar, TAlloc> >::Type pos_begin,
+        typename Position< ::std::vector<TChar, TAlloc> >::Type pos_end,
+        TSource const & source,
+        typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+        Generous)
 {
     SEQAN_CHECKPOINT;
-	if (pos_begin >= limit)
-	{
-		target.resize(limit);
-	}
-	else
-	{
-		typename Size<TSource const>::Type source_length = length(source);
-		typename Size< ::std::vector<TChar, TAlloc> >::Type pos_mid = pos_begin + source_length;
-		typename Size< ::std::vector<TChar, TAlloc> >::Type pos_limit(limit); 
-		if (pos_mid > limit)
-		{
-			target.resize(limit);
-			replace(target,pos_begin,pos_limit,source);
-			target.resize(limit);
-		}
-		else
-		{
-			replace(target,pos_begin,pos_end,source);
-			if (target.size() > limit)
-			{
-				target.resize(limit);
-			}
-		}
-	}
+    if (pos_begin >= limit)
+    {
+        target.resize(limit);
+    }
+    else
+    {
+        typename Size<TSource const>::Type source_length = length(source);
+        typename Size< ::std::vector<TChar, TAlloc> >::Type pos_mid = pos_begin + source_length;
+        typename Size< ::std::vector<TChar, TAlloc> >::Type pos_limit(limit);
+        if (pos_mid > limit)
+        {
+            target.resize(limit);
+            replace(target,pos_begin,pos_limit,source);
+            target.resize(limit);
+        }
+        else
+        {
+            replace(target,pos_begin,pos_end,source);
+            if (target.size() > limit)
+            {
+                target.resize(limit);
+            }
+        }
+    }
 
 }
 
 template <typename TChar,  typename TAlloc, typename TSource>
-inline void 
+inline void
 replace(::std::vector<TChar,  TAlloc> & target,
-		typename Position< ::std::vector<TChar, TAlloc> >::Type pos_begin,
-		typename Position< ::std::vector<TChar, TAlloc> >::Type pos_end,
-		TSource const & source,
-		Limit)
+        typename Position< ::std::vector<TChar, TAlloc> >::Type pos_begin,
+        typename Position< ::std::vector<TChar, TAlloc> >::Type pos_end,
+        TSource const & source,
+        Limit)
 {
     SEQAN_CHECKPOINT;
-	replace(target, pos_begin, pos_end, source, target.capacity(), Generous());
+    replace(target, pos_begin, pos_end, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
-inline void 
-replace(::std::vector<TChar, TAlloc> & target, 
-		typename Position< ::std::vector<TChar,  TAlloc> >::Type pos_begin,
-		typename Position< ::std::vector<TChar,  TAlloc> >::Type pos_end,
-		TSource const & source,
-		typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-		Limit)
+inline void
+replace(::std::vector<TChar, TAlloc> & target,
+        typename Position< ::std::vector<TChar,  TAlloc> >::Type pos_begin,
+        typename Position< ::std::vector<TChar,  TAlloc> >::Type pos_end,
+        TSource const & source,
+        typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+        Limit)
 {
     SEQAN_CHECKPOINT;
-	if (limit > target.capacity()) 
-	{
-		limit = target.capacity();
-	}
-	replace(target, pos_begin, pos_end, source, limit, Generous());
+    if (limit > target.capacity())
+    {
+        limit = target.capacity();
+    }
+    replace(target, pos_begin, pos_end, source, limit, Generous());
 }
-	
+
 
 //////////////////////////////////////////////////////////////////////////////
 // handling of iterators as begin and end
 
 template<typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(::std::vector<TChar, TAlloc> & target,
-		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_begin,
-		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_end,
-		TSource & source,
-		Tag<TExpand> const tag)
+        typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_begin,
+        typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_end,
+        TSource & source,
+        Tag<TExpand> const tag)
 {
-	replace(target, position(pos_begin), position(pos_end), source, tag);
+    replace(target, position(pos_begin), position(pos_end), source, tag);
 }
 
 /*
 template<typename TChar, typename TAlloc, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(::std::vector<TChar, TAlloc> & target,
-		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_begin,
-		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_end,
-		TSource & source,
-		typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
-		Tag<TExpand> const tag)
+        typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_begin,
+        typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_end,
+        TSource & source,
+        typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
+        Tag<TExpand> const tag)
 {
-	replace(target,  position(pos_begin),  position(pos_end), source, tag);
+    replace(target,  position(pos_begin),  position(pos_end), source, tag);
 }
 */
 
@@ -642,65 +642,65 @@ replace(::std::vector<TChar, TAlloc> & target,
 ///.Function.reserve.param.object.type:Adaption.std::vector
 ///.Function.reserve.remarks:For @Adaption.std::vector|STL Adaptions@, $reserve$ is only guaranteed to have the specified behaviour with $Insist$ and $Generous$.
 template <typename TChar,  typename TAlloc, typename TSize, typename TExpand>
-inline typename Size< ::std::vector<TChar, TAlloc> >::Type 
+inline typename Size< ::std::vector<TChar, TAlloc> >::Type
 reserve(
-	::std::vector<TChar, TAlloc> & seq, 
-	TSize new_capacity,
-	Tag<TExpand> const & tag)
+    ::std::vector<TChar, TAlloc> & seq,
+    TSize new_capacity,
+    Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     seq.reserve(new_capacity);
-	return _capacityReturned(seq, new_capacity, tag);
+    return _capacityReturned(seq, new_capacity, tag);
 }
 
 template <typename TChar, typename TAlloc, typename TSize>
-inline typename Size< ::std::vector<TChar, TAlloc> >::Type 
+inline typename Size< ::std::vector<TChar, TAlloc> >::Type
 reserve(
-	::std::vector<TChar, TAlloc> & seq, 
-	TSize new_capacity,
-	Insist const &)
+    ::std::vector<TChar, TAlloc> & seq,
+    TSize new_capacity,
+    Insist const &)
 {
     SEQAN_CHECKPOINT;
-	// do nothing
-	return _capacityReturned(seq, new_capacity, Insist());
+    // do nothing
+    return _capacityReturned(seq, new_capacity, Insist());
 }
 
 template <typename TChar,  typename TAlloc, typename TSize>
-inline typename Size< ::std::vector<TChar, TAlloc> >::Type 
+inline typename Size< ::std::vector<TChar, TAlloc> >::Type
 reserve(
-	::std::vector<TChar,  TAlloc> & seq, 
-	TSize new_capacity,
-	Limit const &)
+    ::std::vector<TChar,  TAlloc> & seq,
+    TSize new_capacity,
+    Limit const &)
 {
     SEQAN_CHECKPOINT;
-	// do nothing
-	return _capacityReturned(seq, new_capacity, Limit());
+    // do nothing
+    return _capacityReturned(seq, new_capacity, Limit());
 }
 
 ///.Function.resize.param.object.type:Adaption.std::vector
 template <typename TChar,  typename TAlloc, typename TSize, typename TExpand>
-inline typename Size< ::std::vector<TChar,  TAlloc> >::Type 
+inline typename Size< ::std::vector<TChar,  TAlloc> >::Type
 resize(
-	::std::vector<TChar, TAlloc> & me,
-	TSize new_length,
-	Tag<TExpand> const &)
+    ::std::vector<TChar, TAlloc> & me,
+    TSize new_length,
+    Tag<TExpand> const &)
 {
     SEQAN_CHECKPOINT;
     me.resize(new_length);
-	return me.size();
+    return me.size();
 }
 
 template <typename TChar, typename TAlloc, typename TSize, typename TExpand>
-inline typename Size< ::std::vector<TChar,  TAlloc> >::Type 
+inline typename Size< ::std::vector<TChar,  TAlloc> >::Type
 fill(
-	::std::vector<TChar, TAlloc> & me,
-	TSize new_length,
-	TChar const & val,
-	Tag<TExpand> const &)
+    ::std::vector<TChar, TAlloc> & me,
+    TSize new_length,
+    TChar const & val,
+    Tag<TExpand> const &)
 {
     SEQAN_CHECKPOINT;
     me.resize(new_length, val);
-	return me.length();
+    return me.length();
 }
 
 }  // namespace seqan

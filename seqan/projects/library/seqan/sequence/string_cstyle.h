@@ -31,14 +31,21 @@
 // ==========================================================================
 // Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
 // ==========================================================================
-// Implementation of the CStyle String specialization, 
+// Implementation of the CStyle String specialization,
 // ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_CSTYLE_H
 #define SEQAN_HEADER_SEQUENCE_CSTYLE_H
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
+
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
 //////////////////////////////////////////////////////////////////////////////
 //string that exports an interface to cstyle strings.
@@ -55,18 +62,18 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:
 ..text:Assigning a string $TValue *$ to a CStyle String will not create a copy of the string but just copy pointers.
 ..remarks:
-...text:The purpose of this class is to access to the content of a sequence 
-in a "zero terminated string" style. 
+...text:The purpose of this class is to access to the content of a sequence
+in a "zero terminated string" style.
 This can be useful if SeqAn classes has to be integrated in programs that use $char$ arrays
 to store strings.
 Instances of $String<TValue, CStyle>$ can implicitely converted to a $TValue *$ that
-points to a zero terminated CStyle of $TValue$. 
-...text:The stored c-style string object can be set by constructors or assignment. 
+points to a zero terminated CStyle of $TValue$.
+...text:The stored c-style string object can be set by constructors or assignment.
 The content of a c-style string can eighter be stored in a separate buffer, that is the source string
 is copied. Or the buffer of the source string itself is used instead, in this case the c-style string
 depends on the source string and gets invalid as soon as the buffer of the source string is destroyed.
 ...text:Hence, this class is a kind of adaptor from an arbitrary SeqAn string to char arrays.
-Of course, the opposite way is possible too: 
+Of course, the opposite way is possible too:
 Read @Adaption.char array.here@ about adapting char arrays to SeqAn strings.
 ..example:
 ...code:// Create a string str:
@@ -97,221 +104,269 @@ template <typename TValue>
 class String <TValue, CStyle >
 {
 public:
-	TValue * data_begin;
-	TValue * data_end;
+    TValue * data_begin;
+    TValue * data_end;
     // If data_size > 0, then the buffer is owned by me and must be deallocated.
-	size_t data_size;
+    size_t data_size;
 
 public:
     // TODO(holtgrew): Maybe better point to 0?
-	static TValue EMPTY_STRING;
+    static TValue EMPTY_STRING;
 //____________________________________________________________________________
 
 public:
-	String():
-		data_begin(&EMPTY_STRING),
-		data_end(&EMPTY_STRING),
-		data_size(0)
-	{
-SEQAN_CHECKPOINT
-	}
+    String():
+        data_begin(&EMPTY_STRING),
+        data_end(&EMPTY_STRING),
+        data_size(0)
+    {
+        SEQAN_CHECKPOINT;
+    }
 
 //____________________________________________________________________________
 
-	template <typename TString>
-	String(TString & str):
-		data_size(0)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-	}
-	template <typename TString>
-	String(TString const & str):
-		data_size(0)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-	}
+    template <typename TString>
+    String(TString & str):
+        data_size(0)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+    }
+    template <typename TString>
+    String(TString const & str):
+        data_size(0)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+    }
 
-	String(String & str):
-		data_size(0)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-	}
-	String(String const & str):
-		data_size(0)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-	}
+    String(String & str):
+        data_size(0)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+    }
+    String(String const & str):
+        data_size(0)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+    }
 
-	String(TValue * str):
-		data_begin(str),
-		data_end(end(str)),
-		data_size(0)
-	{
-SEQAN_CHECKPOINT
-	}
-
-//____________________________________________________________________________
-
-	template <typename TString>
-	String & operator = (TString & str)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-		return *this;
-	}
-	template <typename TString>
-	String & operator = (TString const & str)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-		return *this;
-	}
-	String & operator = (String & str)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-		return *this;
-	}
-	String & operator = (String const & str)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, str);
-		return *this;
-	}
-
-	~String()
-	{
-SEQAN_CHECKPOINT
-		clear(*this);
-	}
+    String(TValue * str):
+        data_begin(str),
+        data_end(end(str)),
+        data_size(0)
+    {
+        SEQAN_CHECKPOINT;
+    }
 
 //____________________________________________________________________________
 
-	operator TValue * ()
-	{
-SEQAN_CHECKPOINT
-		return data_begin;
-	}
+    template <typename TString>
+    String & operator = (TString & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
+    template <typename TString>
+    String & operator = (TString const & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
+    String & operator = (String & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
+    String & operator = (String const & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
 
-	operator TValue const * () const
-	{
-SEQAN_CHECKPOINT
-		return data_begin;
-	}
+    ~String()
+    {
+        SEQAN_CHECKPOINT;
+        clear(*this);
+    }
 
 //____________________________________________________________________________
+
+    operator TValue * ()
+    {
+        SEQAN_CHECKPOINT;
+        return data_begin;
+    }
+
+    operator TValue const * () const
+    {
+        SEQAN_CHECKPOINT;
+        return data_begin;
+    }
 };
+
+// Define the static member
+template <typename TValue>
+TValue String<TValue, CStyle >::EMPTY_STRING = TValue();
 
 #ifdef PLATFORM_WINDOWS_VS
 // Reset warning state to previous one for C4521, C4522.
 #pragma warning( pop )
 #endif  // PLATFORM_WINDOWS_VS
 
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Metafunction DefaultOverflowImplicit
+// --------------------------------------------------------------------------
+
 template <typename TValue>
-inline void 
-move(
-	String <TValue, CStyle > & target,
-	String <TValue, CStyle > & source)
+struct DefaultOverflowImplicit<String<TValue, CStyle> >
 {
-SEQAN_CHECKPOINT
-	clear(target);
+    typedef Exact Type;
+};
 
-	target.data_begin = source.data_begin;
-	target.data_end = source.data_end;
-	target.data_size = source.data_size;
+// --------------------------------------------------------------------------
+// Metafunction IsContiguous
+// --------------------------------------------------------------------------
 
-	source.data_begin = 0;
-	source.data_end = 0;
-	source.data_size = 0;
+template <typename TValue>
+struct IsContiguous< String<TValue, CStyle > >
+{
+    typedef True Type;
+    enum { VALUE = true };
+};
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// --------------------------------------------------------------------------
+// Function move()
+// --------------------------------------------------------------------------
+
+template <typename TValue>
+inline void
+move(
+    String <TValue, CStyle > & target,
+    String <TValue, CStyle > & source)
+{
+    SEQAN_CHECKPOINT;
+    clear(target);
+
+    target.data_begin = source.data_begin;
+    target.data_end = source.data_end;
+    target.data_size = source.data_size;
+
+    source.data_begin = 0;
+    source.data_end = 0;
+    source.data_size = 0;
 }
 
 template <typename TValue>
-inline void 
+inline void
 move(
-	String <TValue, CStyle > & target,
-	String <TValue, CStyle > const & source)
+    String <TValue, CStyle > & target,
+    String <TValue, CStyle > const & source)
 {
-SEQAN_CHECKPOINT
-	move(target, const_cast<String<TValue, CStyle> &>(source));	
+    SEQAN_CHECKPOINT;
+    move(target, const_cast<String<TValue, CStyle> &>(source));
 }
 
-//____________________________________________________________________________
+// --------------------------------------------------------------------------
+// Function begin()
+// --------------------------------------------------------------------------
 
 template <typename TValue>
 inline typename Iterator<String<TValue, CStyle >, Standard>::Type
 begin(String <TValue, CStyle > & me,
-	Standard)
+    Standard)
 {
-SEQAN_CHECKPOINT
-	return me.data_begin;
+    SEQAN_CHECKPOINT;
+    return me.data_begin;
 }
+
 template <typename TValue>
 inline typename Iterator<String<TValue, CStyle > const, Standard>::Type
 begin(String <TValue, CStyle > const & me,
-	Standard)
+    Standard)
 {
-SEQAN_CHECKPOINT
-	return me.data_begin;
+    SEQAN_CHECKPOINT;
+    return me.data_begin;
 }
 
-//____________________________________________________________________________
+// --------------------------------------------------------------------------
+// Function _setBegin()
+// --------------------------------------------------------------------------
 
 template <typename TValue, typename TValue2>
 inline void
 _setBegin(String <TValue, CStyle > & me, TValue2 new_begin)
 {
-SEQAN_CHECKPOINT
-	me.data_begin = new_begin;
+    SEQAN_CHECKPOINT;
+    me.data_begin = new_begin;
 }
-//____________________________________________________________________________
+
+// --------------------------------------------------------------------------
+// Function end()
+// --------------------------------------------------------------------------
 
 template <typename TValue>
 inline typename Iterator<String <TValue, CStyle >, Standard>::Type
 end(String <TValue, CStyle > & me,
-	Standard)
+    Standard)
 {
-SEQAN_CHECKPOINT
-	return me.data_end;
+    SEQAN_CHECKPOINT;
+    return me.data_end;
 }
+
 template <typename TValue>
 inline typename Iterator<String <TValue, CStyle > const, Standard>::Type
 end(String <TValue, CStyle > const & me,
-	Standard)
+    Standard)
 {
-SEQAN_CHECKPOINT
-	return me.data_end;
+    SEQAN_CHECKPOINT;
+    return me.data_end;
 }
 
-//____________________________________________________________________________
+// --------------------------------------------------------------------------
+// Function _setEnd()
+// --------------------------------------------------------------------------
 
 template <typename TValue, typename TValue2>
 inline void
 _setEnd(String <TValue, CStyle > & me, TValue2 new_end)
 {
-SEQAN_CHECKPOINT
-	me.data_end = new_end;
-	if (new_end != NULL)
-		*new_end = TValue(); //??? ist das wirklich sinnvoll fuer typen, die weder char noch wchar_t sind?
+    SEQAN_CHECKPOINT;
+    me.data_end = new_end;
+    if (new_end != NULL)
+        *new_end = TValue(); //??? ist das wirklich sinnvoll fuer typen, die weder char noch wchar_t sind?
 }
 
-//____________________________________________________________________________
+// --------------------------------------------------------------------------
+// Function capacity()
+// --------------------------------------------------------------------------
 
 template <typename TValue>
-inline size_t 
+inline size_t
 capacity(String <TValue, CStyle > const & me)
 {
-SEQAN_CHECKPOINT
-	if (me.data_size) return me.data_size -1;
-	else return me.data_end - me.data_begin;
+    SEQAN_CHECKPOINT;
+    if (me.data_size) return me.data_size -1;
+    else return me.data_end - me.data_begin;
 }
 
-//____________________________________________________________________________
+// --------------------------------------------------------------------------
+// Function _reallocateStorage()
+// --------------------------------------------------------------------------
 
 ///.Internal._reallocateStorage.param.object.type:Spec.CStyle String
 ///.Internal._reallocateStorage.param.resize_tag.remarks:@Spec.CStyle String@ only supports @Tag.Overflow Strategy.exact@.
@@ -319,42 +374,47 @@ SEQAN_CHECKPOINT
 template <typename TValue>
 inline TValue *
 _reallocateStorage(
-	String <TValue, CStyle > & me, 
-	size_t new_capacity,
-	Exact)
+    String <TValue, CStyle > & me,
+    size_t new_capacity,
+    Exact)
 {
-SEQAN_CHECKPOINT
-	TValue * _returnValue;
-	if (me.data_size)
-	{//dependent
-		_returnValue = me.data_begin;
-	}
-	else
-	{//not dependent
-		_returnValue = 0;
-	}
+    SEQAN_CHECKPOINT;
+    TValue * _returnValue;
+    if (me.data_size)
+    {//dependent
+        _returnValue = me.data_begin;
+    }
+    else
+    {//not dependent
+        _returnValue = 0;
+    }
 
-	me.data_size = new_capacity + 1; //+1 for zero termination
-	allocate(me, me.data_begin, me.data_size, TagAllocateStorage());
-	return _returnValue;
+    me.data_size = new_capacity + 1; //+1 for zero termination
+    allocate(me, me.data_begin, me.data_size, TagAllocateStorage());
+    return _returnValue;
 }
-//____________________________________________________________________________
+
+// --------------------------------------------------------------------------
+// Function _deallocateStorage()
+// --------------------------------------------------------------------------
 
 ///.Internal._deallocateStorage.param.object.type:Spec.CStyle String
 
 template <typename TValue>
-inline void 
+inline void
 _deallocateStorage(
-	String <TValue, CStyle > & me, 
-	TValue * ptr, 
-	size_t capacity)
+    String <TValue, CStyle > & me,
+    TValue * ptr,
+    size_t capacity)
 {
-SEQAN_CHECKPOINT
-	size_t size = capacity + 1;
-	deallocate(me, ptr, size, TagAllocateStorage());
+    SEQAN_CHECKPOINT;
+    size_t size = capacity + 1;
+    deallocate(me, ptr, size, TagAllocateStorage());
 }
 
-//____________________________________________________________________________
+// --------------------------------------------------------------------------
+// Function dependent()
+// --------------------------------------------------------------------------
 
 /**
 .Function.dependent:
@@ -372,122 +432,94 @@ template <typename TValue>
 inline bool
 dependent(String <TValue, CStyle > & me)
 {
-SEQAN_CHECKPOINT
-	return (me.data_size == 0);
+    SEQAN_CHECKPOINT;
+    return (me.data_size == 0);
 }
-//____________________________________________________________________________
+
+// --------------------------------------------------------------------------
+// Function assign()
+// --------------------------------------------------------------------------
 
 //special implementation for char array sources
 template <typename TValue>
 inline void
 assign(String <TValue, CStyle > & target,
-	TValue * source)
+    TValue * source)
 {
-SEQAN_CHECKPOINT
-	clear(target);
-	target.data_begin = source;
-	target.data_end = end(source);
+    SEQAN_CHECKPOINT;
+    clear(target);
+    target.data_begin = source;
+    target.data_end = end(source);
 }
 
-//____________________________________________________________________________
-
-//////////////////////////////////////////////////////////////////////////////
-// Define the static member
-
-template <typename TValue>
-TValue String<TValue, CStyle >::EMPTY_STRING = TValue();
-
-//////////////////////////////////////////////////////////////////////////////
-// Metafunctions
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue>
-struct DefaultOverflowImplicit<String<TValue, CStyle> >
-{
-	typedef Exact Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue>
-struct IsContiguous< String<TValue, CStyle > >
-{
-    typedef True Type;
-	enum { VALUE = true };
-};
-
-//////////////////////////////////////////////////////////////////////////////
-// assign
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function assign()
+// --------------------------------------------------------------------------
 
 template <typename TTargetValue, typename TSource, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
-	   TSource & source,
-	   Tag<TExpand> const tag)
+       TSource & source,
+       Tag<TExpand> const tag)
 {
-SEQAN_CHECKPOINT
-	create(target, source, tag);
+    SEQAN_CHECKPOINT;
+    create(target, source, tag);
 }
 
 template <typename TTargetValue, typename TSource, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
-	   TSource const & source,
-	   Tag<TExpand> const tag)
+       TSource const & source,
+       Tag<TExpand> const tag)
 {
-SEQAN_CHECKPOINT
-	create(target, source, tag);
+    SEQAN_CHECKPOINT;
+    create(target, source, tag);
 }
 
 template <typename TTargetValue, typename TSource, typename TSize, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
-	   TSource & source,
-	   TSize /*limit*/,
-	   Tag<TExpand> const tag)
+       TSource & source,
+       TSize /*limit*/,
+       Tag<TExpand> const tag)
 {
-SEQAN_CHECKPOINT
-	create(target, source, tag);
+    SEQAN_CHECKPOINT;
+    create(target, source, tag);
 }
 
 template <typename TTargetValue, typename TSource, typename TSize, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
-	   TSource const & source,
-	   TSize limit,
-	   Tag<TExpand> const tag)
+       TSource const & source,
+       TSize limit,
+       Tag<TExpand> const tag)
 {
-SEQAN_CHECKPOINT
-	create(target, source, limit, tag);
+    SEQAN_CHECKPOINT;
+    create(target, source, limit, tag);
 }
 
-
-//____________________________________________________________________________
 //this variant is a workaround for the "const array"-bug of VC++
 
 template <typename TTargetValue, typename TSourceValue, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
-	   TSourceValue const * source, 
-	   Tag<TExpand> const tag)
+       TSourceValue const * source,
+       Tag<TExpand> const tag)
 {
-SEQAN_CHECKPOINT
-	create(target, source, tag);
+    SEQAN_CHECKPOINT;
+    create(target, source, tag);
 }
 
 template <typename TTargetValue, typename TSourceValue, typename TSize, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
-	   TSourceValue const * source,
-	   TSize limit,
-	   Tag<TExpand> const tag)
+       TSourceValue const * source,
+       TSize limit,
+       Tag<TExpand> const tag)
 {
-SEQAN_CHECKPOINT
-	create(target, source, limit, tag);
+    SEQAN_CHECKPOINT;
+    create(target, source, limit, tag);
 }
-
-//////////////////////////////////////////////////////////////////////////////
 
 //If source is non-const String, then there could be the possibility
 //to use the source buffer
@@ -495,95 +527,89 @@ SEQAN_CHECKPOINT
 template <typename TExpand, bool IS_CONTIGUOUS>
 struct AssignStringToStringArray_;
 
-//____________________________________________________________________________
-
 template <typename TExpand>
 struct AssignStringToStringArray_<TExpand, true>
 {
-	template <typename TValue, typename TSourceSpec>
-	static inline void
-	assign_(String<TValue, CStyle> & target,
-		String<TValue, TSourceSpec> & source)
-	{
-		if (capacity(source) > length(source))
-		{//use source's buffer
-SEQAN_CHECKPOINT
-			clear(target);
-			_setBegin(target, begin(source));
-			_setEnd(target, end(source));
-		}
-		else
-		{
-			create(target, source, TExpand());
-		}
-	}
+    template <typename TValue, typename TSourceSpec>
+    static inline void
+    assign_(String<TValue, CStyle> & target,
+        String<TValue, TSourceSpec> & source)
+    {
+        if (capacity(source) > length(source))
+        {//use source's buffer
+    SEQAN_CHECKPOINT;
+            clear(target);
+            _setBegin(target, begin(source));
+            _setEnd(target, end(source));
+        }
+        else
+        {
+            create(target, source, TExpand());
+        }
+    }
 
 //special treatment of char:
 //_computeSizeForCapacity is specialized for char such that there
 //is enough place for the zero termination
 
-	template <typename TSourceSpec>
-	static inline void
-	assign_(String<char, CStyle> & target,
-		String<char, TSourceSpec> & source)
-	{
-SEQAN_CHECKPOINT
-		clear(target);
-		typedef String<char, CStyle> TTarget;
-		typedef typename Iterator<TTarget>::Type TIterator;
-		_setBegin(target, TIterator(begin(source)));
-		_setEnd(target, TIterator(end(source)));
-	}
+    template <typename TSourceSpec>
+    static inline void
+    assign_(String<char, CStyle> & target,
+        String<char, TSourceSpec> & source)
+    {
+    SEQAN_CHECKPOINT;
+        clear(target);
+        typedef String<char, CStyle> TTarget;
+        typedef typename Iterator<TTarget>::Type TIterator;
+        _setBegin(target, TIterator(begin(source)));
+        _setEnd(target, TIterator(end(source)));
+    }
 };
-
-//____________________________________________________________________________
 
 template <typename TExpand>
 struct AssignStringToStringArray_<TExpand, false>
 {
-	template <typename TValue, typename TSourceSpec>
-	static inline void
-	assign_(String<TValue, CStyle> & target,
-		String<TValue, TSourceSpec> & source)
-	{
-SEQAN_CHECKPOINT
-		create(target, source, TExpand());
-	}
+    template <typename TValue, typename TSourceSpec>
+    static inline void
+    assign_(String<TValue, CStyle> & target,
+        String<TValue, TSourceSpec> & source)
+    {
+    SEQAN_CHECKPOINT;
+        create(target, source, TExpand());
+    }
 };
-
-//____________________________________________________________________________
 
 template <typename TValue, typename TSourceSpec, typename TExpand>
 inline void
 assign(String<TValue, CStyle> & target,
-	String<TValue, TSourceSpec> & source,
-	Tag<TExpand> const)
+    String<TValue, TSourceSpec> & source,
+    Tag<TExpand> const)
 {
-	typedef String<TValue, TSourceSpec> TSource;
-	AssignStringToStringArray_<Tag<TExpand> const, IsContiguous<TSource>::VALUE>::assign_(target, source);
+    typedef String<TValue, TSourceSpec> TSource;
+    AssignStringToStringArray_<Tag<TExpand> const, IsContiguous<TSource>::VALUE>::assign_(target, source);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// clear
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function clear()
+// --------------------------------------------------------------------------
 
 template <typename TValue>
 inline void
 clear(String<TValue, CStyle> & me)
 {
-	if (me.data_size)
-	{
-		SEQAN_CHECKPOINT
-		//			arrayDestruct(me, length(me)); 
-		deallocate(me, me.data_begin, me.data_size);
-		me.data_size = 0;
-	}
-	me.data_begin = me.data_end = &me.EMPTY_STRING;
+    if (me.data_size)
+    {
+        SEQAN_CHECKPOINT
+        //          arrayDestruct(me, length(me));
+        deallocate(me, me.data_begin, me.data_size);
+        me.data_size = 0;
+    }
+    me.data_begin = me.data_end = &me.EMPTY_STRING;
 }
-	
-//////////////////////////////////////////////////////////////////////////////
-// create
-//////////////////////////////////////////////////////////////////////////////
+
+// --------------------------------------------------------------------------
+// Function create()
+// --------------------------------------------------------------------------
 
 //see basic_holder
 /**
@@ -604,239 +630,228 @@ clear(String<TValue, CStyle> & me)
 template <typename TExpand>
 struct CreateArrayStringExpand_
 {
-	template <typename TTarget, typename TSource>
-	static inline void
-	create_(TTarget & target, 
-		TSource & source)
-	{
-		typename Size<TTarget>::Type source_length = length(source);
-		if (dependent(target) || (capacity(target) < source_length))
-		{
-SEQAN_CHECKPOINT
-			typename Size<TTarget>::Type old_target_capacity = capacity(target);
-			typename Value<TTarget>::Type * buf = _reallocateStorage(target, source_length, TExpand());
-			if (buf)
-			{
-				_deallocateStorage(target, buf, old_target_capacity);
-			}
-		}
-		if (length(source) > 0)
-		{
-			assignValue(begin(target, Standard()), 0); //set target length to 0
-			assign(begin(target, Standard()), source, Insist());
-			typedef typename Iterator<TTarget>::Type TTargetIterator;
-			_setEnd(target, TTargetIterator( begin(target) + source_length));
-		}
-	}
+    template <typename TTarget, typename TSource>
+    static inline void
+    create_(TTarget & target,
+        TSource & source)
+    {
+        typename Size<TTarget>::Type source_length = length(source);
+        if (dependent(target) || (capacity(target) < source_length))
+        {
+    SEQAN_CHECKPOINT;
+            typename Size<TTarget>::Type old_target_capacity = capacity(target);
+            typename Value<TTarget>::Type * buf = _reallocateStorage(target, source_length, TExpand());
+            if (buf)
+            {
+                _deallocateStorage(target, buf, old_target_capacity);
+            }
+        }
+        if (length(source) > 0)
+        {
+            assignValue(begin(target, Standard()), 0); //set target length to 0
+            assign(begin(target, Standard()), source, Insist());
+            typedef typename Iterator<TTarget>::Type TTargetIterator;
+            _setEnd(target, TTargetIterator( begin(target) + source_length));
+        }
+    }
 
-	template <typename TTarget, typename TSource, typename TLimit>
-	static inline void
-	create_(TTarget & target, 
-		TSource & source,
-		TLimit limit)
-	{
-		typename Size<TTarget>::Type copy_length = length(source);
-		if (limit < copy_length)
-		{
-			copy_length = limit;
-		}
-		if (dependent(target) || (capacity(target) < copy_length))
-		{
-SEQAN_CHECKPOINT
-			typename Size<TTarget>::Type old_target_capacity = capacity(target);
-			TTarget * buf = _reallocateStorage(target, copy_length, TExpand());
-			if (buf)
-			{
-				_deallocateStorage(target, buf, old_target_capacity);
-			}
-		}
-		assign(begin(target, Standard()), source, copy_length, Insist());
-		_setEnd(target, begin(target, Standard()) + copy_length);
-	}
+    template <typename TTarget, typename TSource, typename TLimit>
+    static inline void
+    create_(TTarget & target,
+        TSource & source,
+        TLimit limit)
+    {
+        typename Size<TTarget>::Type copy_length = length(source);
+        if (limit < copy_length)
+        {
+            copy_length = limit;
+        }
+        if (dependent(target) || (capacity(target) < copy_length))
+        {
+    SEQAN_CHECKPOINT;
+            typename Size<TTarget>::Type old_target_capacity = capacity(target);
+            TTarget * buf = _reallocateStorage(target, copy_length, TExpand());
+            if (buf)
+            {
+                _deallocateStorage(target, buf, old_target_capacity);
+            }
+        }
+        assign(begin(target, Standard()), source, copy_length, Insist());
+        _setEnd(target, begin(target, Standard()) + copy_length);
+    }
 };
-//____________________________________________________________________________
 
 template <typename TExpand>
 struct CreateArrayString_;
-//____________________________________________________________________________
 
 template <>
 struct CreateArrayString_<Insist>
 {
-	template <typename TTarget, typename TSource>
-	static inline void
-	create_(TTarget & target, 
-		TSource & source)
-	{
-SEQAN_CHECKPOINT
-		typename Size<TTarget>::Type source_length = length(source);
-		if (dependent(target))
-		{
-			TTarget * buf = _reallocateStorage(target, source_length, Exact());
-		}
-		assign(begin(target, Standard()), source, source_length, Insist());
-		_setEnd(target, begin(target, Standard()) + source_length);
-	}
+    template <typename TTarget, typename TSource>
+    static inline void
+    create_(TTarget & target,
+        TSource & source)
+    {
+    SEQAN_CHECKPOINT;
+        typename Size<TTarget>::Type source_length = length(source);
+        if (dependent(target))
+        {
+            TTarget * buf = _reallocateStorage(target, source_length, Exact());
+        }
+        assign(begin(target, Standard()), source, source_length, Insist());
+        _setEnd(target, begin(target, Standard()) + source_length);
+    }
 
-	template <typename TTarget, typename TSource, typename TSize>
-	static inline void
-	create_(TTarget & target, 
-		TSource & source,
-		TSize limit)
-	{
-SEQAN_CHECKPOINT
-		typename Size<TTarget>::Type copy_size = length(source);
-		if (limit < copy_size)
-		{
-			copy_size = limit;
-		}
-		if (dependent(target))
-		{
-			TTarget * buf = _reallocateStorage(target, copy_size, Exact());
-		}
-		assign(begin(target, Standard()), source, copy_size, Insist());
-		_setEnd(target, begin(target, Standard()) + copy_size);
-	}
+    template <typename TTarget, typename TSource, typename TSize>
+    static inline void
+    create_(TTarget & target,
+        TSource & source,
+        TSize limit)
+    {
+    SEQAN_CHECKPOINT;
+        typename Size<TTarget>::Type copy_size = length(source);
+        if (limit < copy_size)
+        {
+            copy_size = limit;
+        }
+        if (dependent(target))
+        {
+            TTarget * buf = _reallocateStorage(target, copy_size, Exact());
+        }
+        assign(begin(target, Standard()), source, copy_size, Insist());
+        _setEnd(target, begin(target, Standard()) + copy_size);
+    }
 };
-
-//____________________________________________________________________________
 
 template <>
 struct CreateArrayString_<Limit>
 {
-	template <typename TTarget, typename TSource>
-	static inline void
-	create_(TTarget & target, 
-		TSource & source)
-	{
-SEQAN_CHECKPOINT
-		CreateArrayString_<Insist>::create_(target, source, capacity(target));
-	}
+    template <typename TTarget, typename TSource>
+    static inline void
+    create_(TTarget & target,
+        TSource & source)
+    {
+    SEQAN_CHECKPOINT;
+        CreateArrayString_<Insist>::create_(target, source, capacity(target));
+    }
 
-	template <typename TTarget, typename TSource, typename TSize>
-	static inline void
-	create_(TTarget & target, 
-		TSource & source,
-		TSize & limit)
-	{
-SEQAN_CHECKPOINT
-		typename Size<TTarget>::Type copy_size = capacity(target);
-		if (copy_size > limit)
-		{
-			copy_size = limit;
-		}
-		CreateArrayString_<Insist>::create_(target, source, copy_size);
-	}
+    template <typename TTarget, typename TSource, typename TSize>
+    static inline void
+    create_(TTarget & target,
+        TSource & source,
+        TSize & limit)
+    {
+    SEQAN_CHECKPOINT;
+        typename Size<TTarget>::Type copy_size = capacity(target);
+        if (copy_size > limit)
+        {
+            copy_size = limit;
+        }
+        CreateArrayString_<Insist>::create_(target, source, copy_size);
+    }
 };
-//____________________________________________________________________________
 
 template <>
 struct CreateArrayString_<Exact>:
-	CreateArrayStringExpand_<Exact>
+    CreateArrayStringExpand_<Exact>
 {
 };
-
-//____________________________________________________________________________
 
 template <>
 struct CreateArrayString_<Generous>:
-	CreateArrayStringExpand_<Generous>
+    CreateArrayStringExpand_<Generous>
 {
 };
-
-//____________________________________________________________________________
 
 template <typename TTargetValue, typename TSource>
 inline void
 create(String<TTargetValue, CStyle> & target,
-	   TSource & source)
+       TSource & source)
 {
-SEQAN_CHECKPOINT
-	typedef String<TTargetValue, CStyle> TTarget;
-	create(target, source, typename DefaultOverflowImplicit<TTarget>::Type()); 
+    SEQAN_CHECKPOINT;
+    typedef String<TTargetValue, CStyle> TTarget;
+    create(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
 template <typename TTargetValue, typename TSource, typename TSize>
 inline void
 create(String<TTargetValue, CStyle> & target,
-	   TSource & source,
-	   TSize limit)
+       TSource & source,
+       TSize limit)
 {
-SEQAN_CHECKPOINT
-	typedef String<TTargetValue, CStyle> TTarget;
-	create(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type()); 
-}
-
-//____________________________________________________________________________
-
-template <typename TTargetValue, typename TSource, typename TExpand>
-inline void
-create(String<TTargetValue, CStyle> & target,
-	   TSource & source, 
-	   Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	CreateArrayString_<Tag<TExpand> const>::create_(target, source);
-}
-
-template <typename TTargetValue, typename TSource, typename TSize, typename TExpand>
-inline void
-create(String<TTargetValue, CStyle> & target,
-	   TSource & source,
-	   TSize limit,
-	   Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
+    SEQAN_CHECKPOINT;
+    typedef String<TTargetValue, CStyle> TTarget;
+    create(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
 template <typename TTargetValue, typename TSource, typename TExpand>
 inline void
 create(String<TTargetValue, CStyle> & target,
-	   TSource const & source, 
-	   Tag<TExpand> const)
+       TSource & source,
+       Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
-	CreateArrayString_<Tag<TExpand> const>::create_(target, source);
+    SEQAN_CHECKPOINT;
+    CreateArrayString_<Tag<TExpand> const>::create_(target, source);
 }
 
 template <typename TTargetValue, typename TSource, typename TSize, typename TExpand>
 inline void
 create(String<TTargetValue, CStyle> & target,
-	   TSource const & source,
-	   TSize limit,
-	   Tag<TExpand> const)
+       TSource & source,
+       TSize limit,
+       Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
-	CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
+    SEQAN_CHECKPOINT;
+    CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
 }
 
-//____________________________________________________________________________
+template <typename TTargetValue, typename TSource, typename TExpand>
+inline void
+create(String<TTargetValue, CStyle> & target,
+       TSource const & source,
+       Tag<TExpand> const)
+{
+    SEQAN_CHECKPOINT;
+    CreateArrayString_<Tag<TExpand> const>::create_(target, source);
+}
+
+template <typename TTargetValue, typename TSource, typename TSize, typename TExpand>
+inline void
+create(String<TTargetValue, CStyle> & target,
+       TSource const & source,
+       TSize limit,
+       Tag<TExpand> const)
+{
+    SEQAN_CHECKPOINT;
+    CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
+}
+
 //this variant is a workaround for the "const array"-bug of VC++
 
 template <typename TTargetValue, typename TSourceValue, typename TExpand>
 inline void
 create(String<TTargetValue, CStyle> & target,
-	   TSourceValue const * source, 
-	   Tag<TExpand> const)
+       TSourceValue const * source,
+       Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
-	CreateArrayString_<Tag<TExpand> const>::create_(target, source);
+    SEQAN_CHECKPOINT;
+    CreateArrayString_<Tag<TExpand> const>::create_(target, source);
 }
 
 template <typename TTargetValue, typename TSourceValue, typename TSize, typename TExpand>
 inline void
 create(String<TTargetValue, CStyle> & target,
-	   TSourceValue const * source,
-	   TSize limit,
-	   Tag<TExpand> const)
+       TSourceValue const * source,
+       TSize limit,
+       Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
-	CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
+    SEQAN_CHECKPOINT;
+    CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Shotcut
+// --------------------------------------------------------------------------
+// Function toCString()
+// --------------------------------------------------------------------------
 
 /**
 .Function.toCString:
@@ -859,45 +874,45 @@ template <typename TValue>
 inline TValue *
 toCString(TValue * me)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
 
 template <typename TValue>
 inline TValue const *
 toCString(TValue const * me)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
 
 template <typename TValue>
 inline TValue *
 toCString(String<TValue, CStyle> & me)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
 
 template <typename TValue>
 inline TValue const *
 toCString(String<TValue, CStyle> const & me)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
 
 template <typename TValue, typename TSpec>
 inline TValue *
 _toCStringImpl(String<TValue, TSpec> & me, True)
 {
-SEQAN_CHECKPOINT
-	typename Size< String<TValue, TSpec> >::Type len = length(me);
-	if (len >= capacity(me))
-		reserve(me, len + 1);
-	if (end(me) != NULL)
-		*end(me) = TValue();
-	return begin(me);
+    SEQAN_CHECKPOINT;
+    typename Size< String<TValue, TSpec> >::Type len = length(me);
+    if (len >= capacity(me))
+        reserve(me, len + 1);
+    if (end(me) != NULL)
+        *end(me) = TValue();
+    return begin(me);
 }
 
 // You called toCString with non-contiguous strings.
@@ -911,22 +926,18 @@ template <typename TValue, typename TSpec>
 inline TValue *
 toCString(String<TValue, TSpec> & me)
 {
-SEQAN_CHECKPOINT
-	return _toCStringImpl(me, typename IsContiguous<String<TValue, TSpec> >::Type());
+    SEQAN_CHECKPOINT;
+    return _toCStringImpl(me, typename IsContiguous<String<TValue, TSpec> >::Type());
 }
 
 template <typename TValue, typename TSpec>
 inline TValue *
 toCString(String<TValue, TSpec> const & me)
 {
-SEQAN_CHECKPOINT
-	return toCString(const_cast<String<TValue, TSpec> &>(me));
+    SEQAN_CHECKPOINT;
+    return toCString(const_cast<String<TValue, TSpec> &>(me));
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-} //namespace SEQAN_NAMESPACE_MAIN
-
-//____________________________________________________________________________
+} // namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_...

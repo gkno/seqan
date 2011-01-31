@@ -40,33 +40,36 @@
 #ifndef SEQAN_HEADER_SEQUENCE_INTERFACE_H
 #define SEQAN_HEADER_SEQUENCE_INTERFACE_H
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
-// Expand
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
 /**
 .Tag.Overflow Strategy:
 ..summary:The strategy for resizing containers.
-..tag.Insist:No capacity check. 
-...remarks:The user has to ensure that the container's capacity is large enough. 
-..tag.Limit:Limit the contents to current capacity. 
-...remarks: All entries that exceed the capacity are lost. 
+..tag.Insist:No capacity check.
+...remarks:The user has to ensure that the container's capacity is large enough.
+..tag.Limit:Limit the contents to current capacity.
+...remarks: All entries that exceed the capacity are lost.
 ..tag.Exact:Expand as far as needed.
 ...remarks: The capacity is only changed if the current capacity is not large enough.
  If the capacity can only be expanded up to a certain ammount, it will be increased as far as possible
  and the contents are limited to the new capacity.
-...remarks:Note that the capacity will never be shrinked. 
+...remarks:Note that the capacity will never be shrinked.
  Use @Function.shrinkToFit@ to resize the capacity down to the current length.
-..tag.Generous:Expand if needed, get precautionary extra space. 
+..tag.Generous:Expand if needed, get precautionary extra space.
 ...remarks:Whenever the capacity has to be increased, the new capacity is choosen somewhat large than actually needed.
  This strategy limits the number of capacity changes, so that resizing takes armotized constant time.
- Use this strategy if the total amount of storage is unkown at first.  
+ Use this strategy if the total amount of storage is unkown at first.
 ...remarks:The new capacity is computed by @Function.computeGenerousCapacity@.
-By default, it is guaranteed not to exceed about 
- tree halfs of the space that is used to store the data. 
+By default, it is guaranteed not to exceed about
+ tree halfs of the space that is used to store the data.
  The user can overload @Function.computeGenerousCapacity@ in order to change this behavior.
 ..remarks:Changing the capacity of a container can invalidate the iterators of this container.
 ..remarks:If no overflow tag is specified, most operations use the default overflow strategy given by @Metafunction.DefaultOverflowImplicit@
@@ -76,21 +79,23 @@ or @Metafunction.DefaultOverflowExplicit@, depending on the kind of operation.
 struct TagInsist_;
 typedef Tag<TagInsist_> const Insist;
 typedef Tag<TagInsist_> const Tight;
-//Insist INSIST;
 
 struct TagLimit_;
 typedef Tag<TagLimit_> const Limit;
-//Limit LIMIT;
 
 struct TagGenerous_;
 typedef Tag<TagGenerous_> const Generous;
-//Generous GENEROUS;
 
 struct TagExact_;
 typedef Tag<TagExact_> const Exact;
-//Exact EXACT;
 
-//____________________________________________________________________________
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// --------------------------------------------------------------------------
+// Metafunction DefaultOverflowImplicit
+// --------------------------------------------------------------------------
 
 /**
 .Metafunction.DefaultOverflowImplicit:
@@ -108,10 +113,12 @@ e.g. @Function.assign@, @Function.append@, and @Function.replace@.
 template <typename T>
 struct DefaultOverflowImplicit
 {
-	typedef Generous Type;
+    typedef Generous Type;
 };
 
-//____________________________________________________________________________
+// --------------------------------------------------------------------------
+// Metafunction DefaultOverflowExplicit
+// --------------------------------------------------------------------------
 
 /**
 .Metafunction.DefaultOverflowExplicit:
@@ -129,12 +136,13 @@ struct DefaultOverflowImplicit
 template <typename T>
 struct DefaultOverflowExplicit
 {
-	typedef Generous Type;
+    typedef Generous Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// IsContiguous
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Metafunction IsContiguous
+// --------------------------------------------------------------------------
+
 /**
 .Metafunction.IsContiguous:
 ..summary:Determines whether a container stores its elements in a contiguous array.
@@ -142,25 +150,27 @@ struct DefaultOverflowExplicit
 ..param.T:Type that is tested for being a string.
 ..returns.param.VALUE:$true$ if $T$ is a string, $false$ otherwise.
 ..remarks:Definition: A sequence container is "contiguous", if its elements
-	are stored in a single contiguous array.
-	Examples for contiguous sequences are @Spec.Alloc String@ or @Adaption.char array@.
+    are stored in a single contiguous array.
+    Examples for contiguous sequences are @Spec.Alloc String@ or @Adaption.char array@.
 ..remarks:If an object $obj$ is a contiguous sequence, then $begin(obj)$ can be
-	converted to a pointer to the first element of the content array.
+    converted to a pointer to the first element of the content array.
 ..include:seqan/sequence.h
 */
 template <typename T>
 struct IsContiguous
 {
     typedef False Type;
-	enum { VALUE = false };
+    enum { VALUE = false };
 };
-template <typename T>
-struct IsContiguous<T const>:
-	public IsContiguous<T> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// IsSequence
-//////////////////////////////////////////////////////////////////////////////
+template <typename T>
+struct IsContiguous<T const>
+    : public IsContiguous<T> {};
+
+// --------------------------------------------------------------------------
+// Metafunction IsSequence
+// --------------------------------------------------------------------------
+
 /**
 .Metafunction.IsSequence:
 ..summary:Determines whether a container stores its elements in sequential order.
@@ -174,15 +184,17 @@ template <typename T>
 struct IsSequence
 {
     typedef False Type;
-	enum { VALUE = false };
+    enum { VALUE = false };
 };
-template <typename T>
-struct IsSequence<T const>:
-	public IsSequence<T> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// AllowsFastRandomAccess
-//////////////////////////////////////////////////////////////////////////////
+template <typename T>
+struct IsSequence<T const>
+    : public IsSequence<T> {};
+
+// --------------------------------------------------------------------------
+// Metafunction AllowsFastRandomAccess
+// --------------------------------------------------------------------------
+
 /**
 .Metafunction.AllowsFastRandomAccess:
 ..summary:Determines whether a sequence efficiently supports random access.
@@ -196,22 +208,28 @@ template <typename T>
 struct AllowsFastRandomAccess
 {
     typedef True Type;
-	enum { VALUE = true };
+    enum { VALUE = true };
 };
-template <typename T>
-struct AllowsFastRandomAccess<T const>:
-	public AllowsFastRandomAccess<T> {};
 
-//////////////////////////////////////////////////////////////////////////////
-// identification
-//////////////////////////////////////////////////////////////////////////////
+template <typename T>
+struct AllowsFastRandomAccess<T const>
+    : public AllowsFastRandomAccess<T> {};
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// --------------------------------------------------------------------------
+// Function id()
+// --------------------------------------------------------------------------
+
 /**
 .Function.id:
 ..cat:Miscellaneous
-..summary:A value that identifies the underlying sequence. 
+..summary:A value that identifies the underlying sequence.
 ..signature:void const * id(object)
 ..param.object:The object for which the id will be determined.
-..returns:The id of $sequence$. 
+..returns:The id of $sequence$.
 ..remarks.text:Two sequences should have the same id, if they share the same resource, e.g. the same memory buffer.
 ..remarks.text:The exact semantic of the returned id can vary for different classes.
 Typically, the id of a string is a $void const *$ to the end of the string.
@@ -219,7 +237,7 @@ Typically, the id of a string is a $void const *$ to the end of the string.
 ..example.code:String<char> str = "hallo seqan";
 bool b1 = (id(str) == id(infix(str, 3, 7));   //true
 bool b2 = (id(str) == id(String<char>(str))); //false
-bool b3 = (id(str) == id(toCString(str))); 
+bool b3 = (id(str) == id(toCString(str)));
 ..example.text:In this example, $b1$ is $true$, since the segment object returned by $infix()$
 is just a filter and uses the buffer of it's host object $str$.
 ..example.text:$String<char>(str)$ constructs a temporary copy of $str$, so these two
@@ -229,14 +247,16 @@ and cannot be predicted at compile time.
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline void const * 
+inline void const *
 id(T const & me)
 {
-SEQAN_CHECKPOINT
-	return end(me, Standard());
+    SEQAN_CHECKPOINT;
+    return end(me, Standard());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function shareResources()
+// --------------------------------------------------------------------------
 
 /**
 .Function.shareResources:
@@ -245,36 +265,80 @@ SEQAN_CHECKPOINT
 ..signature:bool shareResources(sequence1, sequence2)
 ..param.sequence1, sequence2:Two sequences.
 ..returns:$false$ if it can be guaranteed that $sequence1$ and $sequence2$ can be modified without changing each other, $true$ otherwise.
-..remarks:Non-sequences are interpreted as sequences of size 1. 
+..remarks:Non-sequences are interpreted as sequences of size 1.
 ..remarks:Note that this function may not work properly for argument types that are not listed here.
 ..include:seqan/sequence.h
 */
 
 template <typename T1, typename T2>
-inline bool 
+inline bool
 shareResources(T1 const & obj1,
-			   T2 const & obj2)
+               T2 const & obj2)
 {
-SEQAN_CHECKPOINT
-	return id(obj1) == id(obj2);
+    SEQAN_CHECKPOINT;
+    return id(obj1) == id(obj2);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// begin
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function _beginDefault()
+// --------------------------------------------------------------------------
+
+//* ???Anti Default Sequences
+// TODO(holtgrew): Evil -- each value is a container of length 1.
+template <typename T>
+inline typename Iterator<T, Standard>::Type
+_beginDefault(T & me,
+               Standard)
+{
+    SEQAN_CHECKPOINT;
+    return & me;
+}
+// TODO(holtgrew): Evil -- each value is a container of length 1.
+template <typename T>
+inline typename Iterator<T const, Standard>::Type
+_beginDefault(T const & me,
+               Standard)
+{
+    SEQAN_CHECKPOINT;
+    return & me;
+}
+//*/
+
+template <typename T>
+inline typename Iterator<T, Rooted>::Type
+_beginDefault(T & me,
+               Rooted)
+{
+    SEQAN_CHECKPOINT;
+    typedef typename Iterator<T, Rooted>::Type TIterator;
+    return TIterator(me, begin(me, Standard()));
+}
+template <typename T>
+inline typename Iterator<T const, Rooted>::Type
+_beginDefault(T const & me,
+               Rooted)
+{
+    SEQAN_CHECKPOINT;
+    typedef typename Iterator<T const, Rooted>::Type TIterator;
+    return TIterator(me, begin(me, Standard()));
+}
+
+// --------------------------------------------------------------------------
+// Function begin()
+// --------------------------------------------------------------------------
 
 /**
 .Function.begin:
 ..cat:Iteration
 ..cat:Containers
-..summary:The begin of a container. 
+..summary:The begin of a container.
 ..signature:Iterator begin(object [, tag])
 ..param.object:A container.
 ...type:Class.String
 ...concept:Concept.Container
 ..param.tag:An @Tag.Iterator Spec.iterator spec@ tag that specifies the kind of the iterator returned. (optional)
 ...default:Given by @Metafunction.DefaultGetIteratorSpec@.
-..returns:An iterator to the first item in $object$. 
+..returns:An iterator to the first item in $object$.
 ...metafunction:Metafunction.Iterator
 ..remarks.text:If the container does not contain any items at all, the function may return 0.
 ..see:Function.end
@@ -282,140 +346,91 @@ SEQAN_CHECKPOINT
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type 
+inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
 begin(T & me)
 {
-SEQAN_CHECKPOINT
-	return begin(me, typename DefaultGetIteratorSpec<T>::Type()) ;
+    SEQAN_CHECKPOINT;
+    return begin(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
+
 template <typename T>
 inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
 begin(T const & me)
 {
-SEQAN_CHECKPOINT
-	return begin(me, typename DefaultGetIteratorSpec<T>::Type()) ;
+    SEQAN_CHECKPOINT;
+    return begin(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
-
-//____________________________________________________________________________
-
-//* ???Anti Default Sequences
-// TODO(holtgrew): Evil -- each value is a container of length 1.
-template <typename T>
-inline typename Iterator<T, Standard>::Type 
-_beginDefault(T & me,
-			   Standard)
-{
-SEQAN_CHECKPOINT
-	return & me;
-}
-// TODO(holtgrew): Evil -- each value is a container of length 1.
-template <typename T>
-inline typename Iterator<T const, Standard>::Type 
-_beginDefault(T const & me,
-			   Standard)
-{
-SEQAN_CHECKPOINT
-	return & me;
-}
-//*/
-
-//____________________________________________________________________________
-
-template <typename T>
-inline typename Iterator<T, Rooted>::Type 
-_beginDefault(T & me,
-			   Rooted)
-{
-SEQAN_CHECKPOINT
-	typedef typename Iterator<T, Rooted>::Type TIterator;
-	return TIterator(me, begin(me, Standard()));
-}
-template <typename T>
-inline typename Iterator<T const, Rooted>::Type 
-_beginDefault(T const & me,
-			   Rooted)
-{
-SEQAN_CHECKPOINT
-	typedef typename Iterator<T const, Rooted>::Type TIterator;
-	return TIterator(me, begin(me, Standard()));
-}
-//____________________________________________________________________________
 
 //folgende forward Deklaration wurde wegen Phaenomene bei VC++ 2003 hinzugenommen
 //implemented in string_pointer.h
 template <typename TValue>
-inline typename Iterator<TValue const *, Standard>::Type  
-begin(TValue const * me, 
-	  Standard);
-
-//____________________________________________________________________________
+inline typename Iterator<TValue const *, Standard>::Type
+begin(TValue const * me,
+      Standard);
 
 template <typename T, typename TSpec>
-inline typename Iterator<T, Tag<TSpec> const>::Type 
+inline typename Iterator<T, Tag<TSpec> const>::Type
 begin(T & me,
-	  Tag<TSpec> const tag_)
+      Tag<TSpec> const tag_)
 {
-SEQAN_CHECKPOINT
-	return _beginDefault(me, tag_);
+    SEQAN_CHECKPOINT;
+    return _beginDefault(me, tag_);
 }
 template <typename T, typename TSpec>
-inline typename Iterator<T const, Tag<TSpec> const>::Type 
+inline typename Iterator<T const, Tag<TSpec> const>::Type
 begin(T const & me,
-	  Tag<TSpec> const tag_)
+      Tag<TSpec> const tag_)
 {
-SEQAN_CHECKPOINT
-	return _beginDefault(me, tag_);
+    SEQAN_CHECKPOINT;
+    return _beginDefault(me, tag_);
 }
-
 
 /*
 template <typename TValue>
-inline typename Iterator<TValue *, Standard>::Type  
-begin(TValue * me, 
-	  Standard)
+inline typename Iterator<TValue *, Standard>::Type
+begin(TValue * me,
+      Standard)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
 
 //folgende Version wurde wegen eines seltsamen Phaenomens bei VC++ hinzugenommen
 template <typename TValue>
-inline typename Iterator<TValue const *, Standard>::Type  
-begin(TValue const * me, 
-	  Standard)
+inline typename Iterator<TValue const *, Standard>::Type
+begin(TValue const * me,
+      Standard)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
 
 template <typename TValue, typename TSpec>
-inline typename Iterator<TValue *, Standard>::Type  
-begin(TValue * me, 
-	  Tag<TSpec> const tag_)
-//	  Standard)
+inline typename Iterator<TValue *, Standard>::Type
+begin(TValue * me,
+      Tag<TSpec> const tag_)
+//    Standard)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
 
 //folgende Version wurde wegen eines seltsamen Phaenomens bei VC++ hinzugenommen
 template <typename TValue, typename TSpec>
-inline typename Iterator<TValue const *, Standard>::Type  
-begin(TValue const * me, 
-	  Tag<TSpec> const tag_)
-//	  Standard)
+inline typename Iterator<TValue const *, Standard>::Type
+begin(TValue const * me,
+      Tag<TSpec> const tag_)
+//    Standard)
 {
-SEQAN_CHECKPOINT
-	return me;
+    SEQAN_CHECKPOINT;
+    return me;
 }
-
 */
 
+// --------------------------------------------------------------------------
+// Function beginPosition()
+// --------------------------------------------------------------------------
 
-
-//////////////////////////////////////////////////////////////////////////////
-// beginPosition
-//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.beginPosition:
 ..cat:Containers
@@ -432,29 +447,72 @@ SEQAN_CHECKPOINT
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline typename Position<T>::Type 
+inline typename Position<T>::Type
 beginPosition(T &)
 {
-SEQAN_CHECKPOINT
-	return 0;
-}
-template <typename T>
-inline typename Position<T>::Type 
-beginPosition(T const &)
-{
-SEQAN_CHECKPOINT
-	return 0;
+    SEQAN_CHECKPOINT;
+    return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// end
-//////////////////////////////////////////////////////////////////////////////
+template <typename T>
+inline typename Position<T>::Type
+beginPosition(T const &)
+{
+    SEQAN_CHECKPOINT;
+    return 0;
+}
+
+// --------------------------------------------------------------------------
+// Function _endDefault()
+// --------------------------------------------------------------------------
+
+//* ???Anti Default Sequences
+template <typename T>
+inline typename Iterator<T, Standard>::Type
+_endDefault(T & me,
+             Standard)
+{
+    SEQAN_CHECKPOINT;
+    return (& me) + 1;
+}
+template <typename T>
+inline typename Iterator<T const, Standard>::Type
+_endDefault(T const & me,
+             Standard)
+{
+    SEQAN_CHECKPOINT;
+    return (& me) + 1;
+}
+//*/
+
+template <typename T>
+inline typename Iterator<T, Rooted>::Type
+_endDefault(T & me,
+             Rooted)
+{
+    SEQAN_CHECKPOINT;
+    typedef typename Iterator<T, Rooted>::Type TIterator;
+    return TIterator(me, end(me, Standard()));
+}
+template <typename T>
+inline typename Iterator<T const, Rooted>::Type
+_endDefault(T const & me,
+             Rooted)
+{
+    SEQAN_CHECKPOINT;
+    typedef typename Iterator<T const, Rooted>::Type TIterator;
+    return TIterator(me, end(me, Standard()));
+}
+
+// --------------------------------------------------------------------------
+// Function end()
+// --------------------------------------------------------------------------
 
 /**
 .Function.end:
 ..cat:Iteration
 ..cat:Containers
-..summary:The end of a container. 
+..summary:The end of a container.
 ..signature:Iterator end(object [, tag])
 ..param.object:A container.
 ...type:Class.String
@@ -469,84 +527,42 @@ SEQAN_CHECKPOINT
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type 
+inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
 end(T & me)
 {
-SEQAN_CHECKPOINT
-	return end(me, typename DefaultGetIteratorSpec<T>::Type()) ;
+    SEQAN_CHECKPOINT;
+    return end(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
+
 template <typename T>
-inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type 
+inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
 end(T const & me)
 {
-SEQAN_CHECKPOINT
-	return end(me, typename DefaultGetIteratorSpec<T>::Type()) ;
+    SEQAN_CHECKPOINT;
+    return end(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
-
-//____________________________________________________________________________
-
-//* ???Anti Default Sequences
-template <typename T>
-inline typename Iterator<T, Standard>::Type 
-_endDefault(T & me,
-			 Standard)
-{
-SEQAN_CHECKPOINT
-	return (& me) + 1;
-}
-template <typename T>
-inline typename Iterator<T const, Standard>::Type 
-_endDefault(T const & me,
-			 Standard)
-{
-SEQAN_CHECKPOINT
-	return (& me) + 1;
-}
-//*/
-
-//____________________________________________________________________________
-
-template <typename T>
-inline typename Iterator<T, Rooted>::Type 
-_endDefault(T & me,
-			 Rooted)
-{
-SEQAN_CHECKPOINT
-	typedef typename Iterator<T, Rooted>::Type TIterator;
-	return TIterator(me, end(me, Standard()));
-}
-template <typename T>
-inline typename Iterator<T const, Rooted>::Type 
-_endDefault(T const & me,
-			 Rooted)
-{
-SEQAN_CHECKPOINT
-	typedef typename Iterator<T const, Rooted>::Type TIterator;
-	return TIterator(me, end(me, Standard()));
-}
-
-//____________________________________________________________________________
 
 template <typename T, typename TSpec>
-inline typename Iterator<T, Tag<TSpec> const>::Type 
+inline typename Iterator<T, Tag<TSpec> const>::Type
 end(T & me,
-	Tag<TSpec> const tag_)
+    Tag<TSpec> const tag_)
 {
-SEQAN_CHECKPOINT
-	return _endDefault(me, tag_);
-}
-template <typename T, typename TSpec>
-inline typename Iterator<T const, Tag<TSpec> const>::Type 
-end(T const & me,
-	Tag<TSpec> const tag_)
-{
-SEQAN_CHECKPOINT
-	return _endDefault(me, tag_);
+    SEQAN_CHECKPOINT;
+    return _endDefault(me, tag_);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// endPosition
-//////////////////////////////////////////////////////////////////////////////
+template <typename T, typename TSpec>
+inline typename Iterator<T const, Tag<TSpec> const>::Type
+end(T const & me,
+    Tag<TSpec> const tag_)
+{
+    SEQAN_CHECKPOINT;
+    return _endDefault(me, tag_);
+}
+
+// --------------------------------------------------------------------------
+// Function endPosition()
+// --------------------------------------------------------------------------
 
 /**
 .Function.endPosition:
@@ -563,23 +579,24 @@ SEQAN_CHECKPOINT
 ..include:seqan/sequence.h
 */
 template <typename T>
-inline typename Position<T>::Type 
+inline typename Position<T>::Type
 endPosition(T & me)
 {
-SEQAN_CHECKPOINT
-	return length(me);
-}
-template <typename T>
-inline typename Position<T>::Type 
-endPosition(T const & me)
-{
-SEQAN_CHECKPOINT
-	return length(me);
+    SEQAN_CHECKPOINT;
+    return length(me);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// value
-//////////////////////////////////////////////////////////////////////////////
+template <typename T>
+inline typename Position<T>::Type
+endPosition(T const & me)
+{
+    SEQAN_CHECKPOINT;
+    return length(me);
+}
+
+// --------------------------------------------------------------------------
+// Function value()
+// --------------------------------------------------------------------------
 
 /**
 .Function.value:
@@ -593,30 +610,29 @@ SEQAN_CHECKPOINT
 ...metafunction:Metafunction.Reference
 ..include:seqan/sequence.h
 */
-
 //* ???Anti Default Sequences
-	
 template <typename T, typename TPos>
 inline typename Reference<T>::Type
-value(T & me, 
-	  TPos /*pos*/)
+value(T & me,
+      TPos /*pos*/)
 {
-SEQAN_CHECKPOINT
-	return me;
-} 
+    SEQAN_CHECKPOINT;
+    return me;
+}
+
 template <typename T, typename TPos>
 inline typename Reference<T const>::Type
-value(T const & me, 
-	  TPos /*pos*/)
+value(T const & me,
+      TPos /*pos*/)
 {
-SEQAN_CHECKPOINT
-	return me;
-} 
+    SEQAN_CHECKPOINT;
+    return me;
+}
 //*/
 
-//////////////////////////////////////////////////////////////////////////////
-// getValue
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function getValue()
+// --------------------------------------------------------------------------
 
 /**
 .Function.getValue:
@@ -638,32 +654,32 @@ This can either be a reference to the item or a temporary copy of the item.
 ..see:Function.value
 ..include:seqan/sequence.h
 */
-
 template <typename T, typename TPos>
 inline typename GetValue<T>::Type
-getValue(T & me, 
-		 TPos pos)
+getValue(T & me,
+         TPos pos)
 {
-SEQAN_CHECKPOINT
-	return (typename GetValue<T>::Type) value(me, pos);
-} 
+    SEQAN_CHECKPOINT;
+    return (typename GetValue<T>::Type) value(me, pos);
+}
+
 template <typename T, typename TPos>
 inline typename GetValue<T const>::Type
-getValue(T const & me, 
-		 TPos pos)
+getValue(T const & me,
+         TPos pos)
 {
-SEQAN_CHECKPOINT
-	return value(me, pos);
-} 
+    SEQAN_CHECKPOINT;
+    return value(me, pos);
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// front
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function front()
+// --------------------------------------------------------------------------
 
 /**
-.Function.Container#front:
+.Function.front:
 ..cat:Containers
-..summary:The first item in container. 
+..summary:The first item in container.
 ..signature:Iterator front(container)
 ..param.container:A container.
 ...concept:Concept.Container
@@ -675,30 +691,29 @@ SEQAN_CHECKPOINT
 ..include:seqan/sequence.h
 */
 
-
 template <typename T>
 inline typename Reference<T>::Type
 front(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return value(me, 0);
 }
 template <typename T>
 inline typename Reference<T const>::Type
 front(T const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return value(me, 0);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// back
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function back()
+// --------------------------------------------------------------------------
 
 /**
 .Function.back:
 ..cat:Containers
-..summary:The last item in container. 
+..summary:The last item in container.
 ..signature:Iterator back(container)
 ..param.container:A container.
 ...concept:Concept.Container
@@ -715,26 +730,26 @@ template <typename T>
 inline typename Reference<T const>::Type
 back(T const & me)
 {
-SEQAN_CHECKPOINT
-    return value(me, length(me) - 1); 
+    SEQAN_CHECKPOINT;
+    return value(me, length(me) - 1);
 }
 
 template <typename T>
 inline typename Reference<T>::Type
 back(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return value(me, length(me) - 1);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// iter
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function iter()
+// --------------------------------------------------------------------------
 
 /**
 .Function.iter:
 ..cat:Containers
-..summary:Iterator to item at given position. 
+..summary:Iterator to item at given position.
 ..signature:Iterator iter(object, pos [, tag])
 ..param.object:A container.
 ...type:Class.String
@@ -750,50 +765,51 @@ SEQAN_CHECKPOINT
 ..see:Metafunction.Iterator
 ..see:Metafunction.Position
 ..include:seqan/sequence.h
-*/
-
+ */
 template <typename T, typename TPos>
 inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type
-iter(T & me, 
-	 TPos pos)
+iter(T & me,
+     TPos pos)
 {
     SEQAN_CHECKPOINT;
-	return iter(me, pos, typename DefaultGetIteratorSpec<T>::Type());
-} 
+    return iter(me, pos, typename DefaultGetIteratorSpec<T>::Type());
+}
+
 template <typename T, typename TPos>
 inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type
-iter(T const & me, 
-	 TPos pos)
+iter(T const & me,
+     TPos pos)
 {
     SEQAN_CHECKPOINT;
-	return iter(me, pos, typename DefaultGetIteratorSpec<T>::Type());
-} 
-
+    return iter(me, pos, typename DefaultGetIteratorSpec<T>::Type());
+}
 
 template <typename T, typename TPos, typename TTag>
 inline typename Iterator<T, Tag<TTag> const>::Type
-iter(T & me, 
-	 TPos pos,
-	 Tag<TTag> const tag_)
+iter(T & me,
+     TPos pos,
+     Tag<TTag> const tag_)
 {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_LEQ_MSG(pos, static_cast<TPos>(length(me)), "Trying to get an iterator behind a container through iter().");
-	return begin(me, tag_) + pos;
-} 
+    return begin(me, tag_) + pos;
+}
+
 template <typename T, typename TPos, typename TTag>
 inline typename Iterator<T const, Tag<TTag> const>::Type
-iter(T const & me, 
-	 TPos pos,
-	 Tag<TTag> const tag_)
+iter(T const & me,
+     TPos pos,
+     Tag<TTag> const tag_)
 {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_LEQ_MSG(pos, static_cast<TPos>(length(me)), "Trying to get an iterator behind a container through iter().");
-	return begin(me, tag_) + pos;
-} 
+    return begin(me, tag_) + pos;
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// assignValue (3)
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function assignValue()
+// --------------------------------------------------------------------------
+
 /**
 .Function.assignValue:
 ..cat:Content Manipulation
@@ -801,27 +817,28 @@ iter(T const & me,
 ..param.container:A container.
 ...concept:Concept.Container
 ..param.pos:Position of the item in $container$ to that $value$ is assigned.
-..remarks:If $object$ is a container (that is $pos$ is not specified), 
-	the whole content of $object$ is replaced by $value$.
+..remarks:If $object$ is a container (that is $pos$ is not specified),
+    the whole content of $object$ is replaced by $value$.
 ..remarks.text:
-	If $value$ is not used again after calling this function, 
-	then consider to use @Function.moveValue@ that could be faster in some cases instead.
+    If $value$ is not used again after calling this function,
+    then consider to use @Function.moveValue@ that could be faster in some cases instead.
 ..include:seqan/sequence.h
 */
 
 template <typename T, typename TValue, typename TPos>
 inline void
 assignValue(T & me,
-			TPos pos, 
-			TValue const & _value)
+            TPos pos,
+            TValue const & _value)
 {
-SEQAN_CHECKPOINT
-	assign(value(me, pos), _value);
-} 
+    SEQAN_CHECKPOINT;
+    assign(value(me, pos), _value);
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// moveValue (3)
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function moveValue()
+// --------------------------------------------------------------------------
+
 /**
 .Function.moveValue:
 ..cat:Content Manipulation
@@ -831,41 +848,42 @@ SEQAN_CHECKPOINT
 ..param.container:A container.
 ...concept:Concept.Container
 ..param.pos:Position of the item in $container$ to that $value$ is moved to.
-..remarks:If $object$ is a container (that is $pos$ is not specified), 
+..remarks:If $object$ is a container (that is $pos$ is not specified),
 the whole content of $object$ is replaced by $value$.
 ..remarks.text:
-	This function possibly clears $value$.
-	If $value$ should be used further, consider to use @Function.assignValue@ instead.
+    This function possibly clears $value$.
+    If $value$ should be used further, consider to use @Function.assignValue@ instead.
 ..include:seqan/sequence.h
 */
 
 template <typename T, typename TValue, typename TPos>
 inline void
 moveValue(T & me,
-		  TPos pos, 
-		  TValue const & _value)
+          TPos pos,
+          TValue const & _value)
 {
-SEQAN_CHECKPOINT
-	move(value(me, pos), _value);
-} 
+    SEQAN_CHECKPOINT;
+    move(value(me, pos), _value);
+}
 
 template <typename T, typename TValue, typename TPos>
 inline void
 moveValue(T const & me,
-		  TPos pos, 
-		  TValue const & _value)
+          TPos pos,
+          TValue const & _value)
 {
-SEQAN_CHECKPOINT
-	move(value(me, pos), _value);
-} 
+    SEQAN_CHECKPOINT;
+    move(value(me, pos), _value);
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// length
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function length()
+// --------------------------------------------------------------------------
+
 /**
 .Function.length:
 ..cat:Containers
-..summary:The number of items/characters. 
+..summary:The number of items/characters.
 ..signature:Size length(object)
 ..param.object:A container.
 ...concept:Concept.Container
@@ -877,18 +895,18 @@ SEQAN_CHECKPOINT
 */
 
 //* ???Anti Default Sequences
-template <typename T> 
+template <typename T>
 inline typename Size<T>::Type
 length(T const & /*me*/)
 {
-SEQAN_CHECKPOINT
-	return 1;
+    SEQAN_CHECKPOINT;
+    return 1;
 }
 //*/
 
-//////////////////////////////////////////////////////////////////////////////
-// capacity
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function capacity()
+// --------------------------------------------------------------------------
 
 /**
 .Function.capacity:
@@ -899,23 +917,23 @@ SEQAN_CHECKPOINT
 ...remarks: If $object$ cannot be converted to one of these types, the function returns 1.
 ..returns:The maximal number of items/characters that can be stored in $object$.
 ...metafunction:Metafunction.Size
-..remarks.text:The size of a sequence can never exceed it's capacity, but some containers support 
-resizing of the capacity. 
+..remarks.text:The size of a sequence can never exceed it's capacity, but some containers support
+resizing of the capacity.
 Some functions do that implicitely if they are called with a suitable @Tag.Overflow Strategy.overflow strategy@.
 The function @Function.reserve@ can be used to change the capacity explicitely.
 ..include:seqan/sequence.h
 */
-template <typename T> 
+template <typename T>
 inline typename Size<T const>::Type
 capacity(T const & me)
 {
-SEQAN_CHECKPOINT
-	return length(me);
+    SEQAN_CHECKPOINT;
+    return length(me);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// empty
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function empty()
+// --------------------------------------------------------------------------
 
 /**
 .Function.empty:
@@ -924,7 +942,7 @@ SEQAN_CHECKPOINT
 ..signature:bool empty(object)
 ..param.object:A container.
 ..returns:$true$ if $object$ contains no elements, otherwise $false$.
-..remarks.text:$empty(x)$ is guaranteed to be at least as fast as $length(me) == 0$, 
+..remarks.text:$empty(x)$ is guaranteed to be at least as fast as $length(me) == 0$,
 but can be significantly faster in some cases.
 ..see:Function.length
 ..include:seqan/sequence.h
@@ -933,13 +951,13 @@ template <typename T>
 inline bool
 empty(T const & me)
 {
-SEQAN_CHECKPOINT
-	return (length(me) == 0);
+    SEQAN_CHECKPOINT;
+    return (length(me) == 0);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// _computeSizeForCapacity
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function _computeSizeForCapacity()
+// --------------------------------------------------------------------------
 
 // note: for value types of size 1 or 2,
 // an extra position for the termination character is allocated.
@@ -950,20 +968,20 @@ SEQAN_CHECKPOINT
 
 
 template <typename T, typename TSize>
-inline TSize 
-_computeSizeForCapacity(T const & /*me*/, 
-					  TSize capacity)
+inline TSize
+_computeSizeForCapacity(T const & /*me*/,
+                      TSize capacity)
 {
-SEQAN_CHECKPOINT
-	typedef typename Value<T>::Type TValue;
-	if (sizeof(TValue) <= 2) return capacity + 1;
-	else return capacity;
+    SEQAN_CHECKPOINT;
+    typedef typename Value<T>::Type TValue;
+    if (sizeof(TValue) <= 2) return capacity + 1;
+    else return capacity;
 }
 
+// --------------------------------------------------------------------------
+// Function computeGenerousCapacity()
+// --------------------------------------------------------------------------
 
-//////////////////////////////////////////////////////////////////////////////
-// computeGenerousCapacity
-//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.computeGenerousCapacity:
 ..hidefromindex
@@ -979,87 +997,89 @@ when it is expanded using the @Tag.Overflow Strategy."Generous" overflow strateg
 ..include:seqan/sequence.h
 */
 template <typename T, typename TSize>
-inline TSize 
-computeGenerousCapacity(T const & /*me*/, 
-						 TSize capacity)
+inline TSize
+computeGenerousCapacity(T const & /*me*/,
+                         TSize capacity)
 {
-SEQAN_CHECKPOINT
-	if (capacity < 32) return 32;		// returned value is implicitly >= capacity + 1
-	return capacity + (capacity >> 1);
+    SEQAN_CHECKPOINT;
+    if (capacity < 32) return 32;       // returned value is implicitly >= capacity + 1
+    return capacity + (capacity >> 1);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// _storageUpdated
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function _storageUpdated()
+// --------------------------------------------------------------------------
 
 /*
 template <typename T>
-inline void 
+inline void
 _storageUpdated(T & me,
-				void const *)
+                void const *)
 {
 }
 
 template <typename T>
-inline void 
+inline void
 _storageUpdated(T & me)
 {
-	_storageUpdated_(me, (T *) 0);
+    _storageUpdated_(me, (T *) 0);
 }
 
 template <typename T>
-inline void 
+inline void
 _storageUpdated(T const & me)
 {
-	_storageUpdated_(me, (T const *) 0);
+    _storageUpdated_(me, (T const *) 0);
 }
 */
 
+// --------------------------------------------------------------------------
+// Function assign()
+// --------------------------------------------------------------------------
 
-//////////////////////////////////////////////////////////////////////////////
-// assign
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TTarget, typename TSource>
-inline void 
-assign(TTarget & target, 
-	   TSource & source,
-	   typename Size<TTarget>::Type limit)
+inline void
+assign(TTarget & target,
+       TSource & source,
+       typename Size<TTarget>::Type limit)
 {
-SEQAN_CHECKPOINT
-	assign(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-assign(TTarget const & target, 
-	   TSource & source,
-	   typename Size<TTarget>::Type limit)
-{
-SEQAN_CHECKPOINT
-	assign(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-assign(TTarget & target, 
-	   TSource const & source,
-	   typename Size<TTarget>::Type limit)
-{
-SEQAN_CHECKPOINT
-	assign(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-assign(TTarget const & target, 
-	   TSource const & source,
-	   typename Size<TTarget>::Type limit)
-{
-SEQAN_CHECKPOINT
-	assign(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+    SEQAN_CHECKPOINT;
+    assign(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// append
-//////////////////////////////////////////////////////////////////////////////
+template<typename TTarget, typename TSource>
+inline void
+assign(TTarget const & target,
+       TSource & source,
+       typename Size<TTarget>::Type limit)
+{
+    SEQAN_CHECKPOINT;
+    assign(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
+
+template<typename TTarget, typename TSource>
+inline void
+assign(TTarget & target,
+       TSource const & source,
+       typename Size<TTarget>::Type limit)
+{
+    SEQAN_CHECKPOINT;
+    assign(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
+}
+
+template<typename TTarget, typename TSource>
+inline void
+assign(TTarget const & target,
+       TSource const & source,
+       typename Size<TTarget>::Type limit)
+{
+    SEQAN_CHECKPOINT;
+    assign(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
+
+// --------------------------------------------------------------------------
+// Function append()
+// --------------------------------------------------------------------------
 
 /**
 .Function.append:
@@ -1077,82 +1097,87 @@ SEQAN_CHECKPOINT
 ..see:Function.assign
 ..include:seqan/sequence.h
 */
-template<typename TTarget, typename TSource>
-inline void 
-append(TTarget & target, 
-	   TSource & source)
-{
-SEQAN_CHECKPOINT
-	append(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-append(TTarget const & target, 
-	   TSource & source)
-{
-SEQAN_CHECKPOINT
-	append(target, source, typename DefaultOverflowImplicit<TTarget const>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-append(TTarget & target, 
-	   TSource const & source)
-{
-SEQAN_CHECKPOINT
-	append(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-append(TTarget const & target, 
-	   TSource const & source)
-{
-SEQAN_CHECKPOINT
-	append(target, source, typename DefaultOverflowImplicit<TTarget const>::Type());
-}
-
-//____________________________________________________________________________
 
 template<typename TTarget, typename TSource>
-inline void 
-append(TTarget & target, 
-	   TSource & source,
-	   typename Size<TTarget>::Type limit)
+inline void
+append(TTarget & target,
+       TSource & source)
 {
-SEQAN_CHECKPOINT
-	append(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-append(TTarget const & target, 
-	   TSource & source,
-	   typename Size<TTarget>::Type limit)
-{
-SEQAN_CHECKPOINT
-	append(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-append(TTarget & target, 
-	   TSource const & source,
-	   typename Size<TTarget>::Type limit)
-{
-SEQAN_CHECKPOINT
-	append(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TSource>
-inline void 
-append(TTarget const & target, 
-	   TSource const & source,
-	   typename Size<TTarget>::Type limit)
-{
-SEQAN_CHECKPOINT
-	append(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+    SEQAN_CHECKPOINT;
+    append(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
+template<typename TTarget, typename TSource>
+inline void
+append(TTarget const & target,
+       TSource & source)
+{
+    SEQAN_CHECKPOINT;
+    append(target, source, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// appendValue
-//////////////////////////////////////////////////////////////////////////////
+template<typename TTarget, typename TSource>
+inline void
+append(TTarget & target,
+       TSource const & source)
+{
+    SEQAN_CHECKPOINT;
+    append(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+}
+
+template<typename TTarget, typename TSource>
+inline void
+append(TTarget const & target,
+       TSource const & source)
+{
+    SEQAN_CHECKPOINT;
+    append(target, source, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
+
+template<typename TTarget, typename TSource>
+inline void
+append(TTarget & target,
+       TSource & source,
+       typename Size<TTarget>::Type limit)
+{
+    SEQAN_CHECKPOINT;
+    append(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
+}
+
+template<typename TTarget, typename TSource>
+inline void
+append(TTarget const & target,
+       TSource & source,
+       typename Size<TTarget>::Type limit)
+{
+    SEQAN_CHECKPOINT;
+    append(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
+
+template<typename TTarget, typename TSource>
+inline void
+append(TTarget & target,
+       TSource const & source,
+       typename Size<TTarget>::Type limit)
+{
+    SEQAN_CHECKPOINT;
+    append(target, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
+}
+
+template<typename TTarget, typename TSource>
+inline void
+append(TTarget const & target,
+       TSource const & source,
+       typename Size<TTarget>::Type limit)
+{
+    SEQAN_CHECKPOINT;
+    append(target, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
+
+// --------------------------------------------------------------------------
+// Function appendValue()
+// --------------------------------------------------------------------------
+
 /**
 .Function.appendValue:
 ..signature:appendValue(target, value [, resize_tag])
@@ -1169,24 +1194,26 @@ SEQAN_CHECKPOINT
 
 template <typename T, typename TValue>
 inline void
-appendValue(T & me, 
-			TValue const & _value)
+appendValue(T & me,
+            TValue const & _value)
 {
-SEQAN_CHECKPOINT
-	appendValue(me, _value, typename DefaultOverflowImplicit<T>::Type());
-} 
+    SEQAN_CHECKPOINT;
+    appendValue(me, _value, typename DefaultOverflowImplicit<T>::Type());
+}
+
 template <typename T, typename TValue>
 inline void
-appendValue(T const & me, 
-			TValue const & _value)
+appendValue(T const & me,
+            TValue const & _value)
 {
-SEQAN_CHECKPOINT
-	appendValue(me, _value, typename DefaultOverflowImplicit<T const>::Type());
-} 
+    SEQAN_CHECKPOINT;
+    appendValue(me, _value, typename DefaultOverflowImplicit<T const>::Type());
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// insert
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function insert()
+// --------------------------------------------------------------------------
+
 /**
 .Function.insert:
 ..cat:Content Manipulation
@@ -1204,49 +1231,50 @@ SEQAN_CHECKPOINT
 
 template <typename T, typename TPosition, typename TSeq, typename TExpand>
 inline void
-insert(T & me, 
-       TPosition pos, 
+insert(T & me,
+       TPosition pos,
        TSeq const & insertSeq,
        Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
-	replace(me, pos, pos, insertSeq, Tag<TExpand>());
+    SEQAN_CHECKPOINT;
+    replace(me, pos, pos, insertSeq, Tag<TExpand>());
 }
 
 template <typename T, typename TPosition, typename TSeq, typename TExpand>
 inline void
-insert(T const & me, 
-       TPosition pos, 
+insert(T const & me,
+       TPosition pos,
        TSeq const & insertSeq,
        Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
-	replace(me, pos, pos, insertSeq, Tag<TExpand>());
+    SEQAN_CHECKPOINT;
+    replace(me, pos, pos, insertSeq, Tag<TExpand>());
 }
 
 template <typename T, typename TPosition, typename TSeq>
 inline void
-insert(T & me, 
-       TPosition pos, 
+insert(T & me,
+       TPosition pos,
        TSeq const & insertSeq)
 {
-SEQAN_CHECKPOINT
-	replace(me, pos, pos, insertSeq, typename DefaultOverflowImplicit<T>::Type());
+    SEQAN_CHECKPOINT;
+    replace(me, pos, pos, insertSeq, typename DefaultOverflowImplicit<T>::Type());
 }
 
 template <typename T, typename TPosition, typename TSeq>
 inline void
-insert(T const & me, 
-       TPosition pos, 
+insert(T const & me,
+       TPosition pos,
        TSeq const & insertSeq)
 {
-SEQAN_CHECKPOINT
-	replace(me, pos, pos, insertSeq, typename DefaultOverflowImplicit<T const>::Type());
+    SEQAN_CHECKPOINT;
+    replace(me, pos, pos, insertSeq, typename DefaultOverflowImplicit<T const>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// insertValue
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function insertValue()
+// --------------------------------------------------------------------------
+
 /**
 .Function.insertValue:
 ..cat:Content Manipulation
@@ -1264,26 +1292,27 @@ SEQAN_CHECKPOINT
 
 template <typename T, typename TPosition, typename TValue>
 inline void
-insertValue(T & me, 
-			TPosition pos, 
-			TValue const & _value)
+insertValue(T & me,
+            TPosition pos,
+            TValue const & _value)
 {
-SEQAN_CHECKPOINT
-	insertValue(me, pos, _value, typename DefaultOverflowImplicit<T>::Type());
-} 
+    SEQAN_CHECKPOINT;
+    insertValue(me, pos, _value, typename DefaultOverflowImplicit<T>::Type());
+}
+
 template <typename T, typename TPosition, typename TValue>
 inline void
-insertValue(T const & me, 
-			TPosition pos, 
-			TValue const & _value)
+insertValue(T const & me,
+            TPosition pos,
+            TValue const & _value)
 {
-SEQAN_CHECKPOINT
-	insertValue(me, pos, _value, typename DefaultOverflowImplicit<T const>::Type());
-} 
+    SEQAN_CHECKPOINT;
+    insertValue(me, pos, _value, typename DefaultOverflowImplicit<T const>::Type());
+}
 
-//////////////////////////////////////////////////////////////////////////////
-// replace
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function replace()
+// --------------------------------------------------------------------------
 
 /**
 .Function.replace:
@@ -1309,89 +1338,117 @@ explicite to the position or to the interator type.
 ..include:seqan/sequence.h
 */
 template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
+inline void
 replace(TTarget & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource & source)
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource & source)
 {
-	replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
-replace(TTarget const & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource & source)
-{
-	replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget const>::Type());
-}
-template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
-replace(TTarget & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource const & source)
-{
-	replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
-replace(TTarget const & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource const & source)
-{
-	replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget const>::Type());
+    replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
-//____________________________________________________________________________
-
 template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
-replace(TTarget & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource & source,
-		typename Size<TTarget>::Type limit)
-{
-	replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
+inline void
 replace(TTarget const & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource & source,
-		typename Size<TTarget>::Type limit)
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource & source)
 {
-	replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+    replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget const>::Type());
 }
+
 template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
+inline void
 replace(TTarget & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource const & source,
-		typename Size<TTarget>::Type limit)
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource const & source)
 {
-	replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
+    replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
+
 template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
-inline void 
+inline void
 replace(TTarget const & target,
-		TPositionBegin pos_begin, 
-		TPositionEnd pos_end,
-		TSource const & source,
-		typename Size<TTarget>::Type limit)
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource const & source)
 {
-	replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+    replace(target, pos_begin, pos_end, source, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
+
+template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
+inline void
+replace(TTarget & target,
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource & source,
+        typename Size<TTarget>::Type limit)
+{
+    replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
+}
+
+template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
+inline void
+replace(TTarget const & target,
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource & source,
+        typename Size<TTarget>::Type limit)
+{
+    replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
+}
+
+template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
+inline void
+replace(TTarget & target,
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource const & source,
+        typename Size<TTarget>::Type limit)
+{
+    replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget>::Type());
+}
+
+template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
+inline void
+replace(TTarget const & target,
+        TPositionBegin pos_begin,
+        TPositionEnd pos_end,
+        TSource const & source,
+        typename Size<TTarget>::Type limit)
+{
+    replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// reserve
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function _capacityReturned()
+// --------------------------------------------------------------------------
+
+template <typename T, typename TSize, typename TExpand>
+inline typename Size<T>::Type
+_capacityReturned(
+    T & me,
+    TSize,
+    Tag<TExpand> const)
+{
+    return capacity(me);
+}
+
+template <typename T, typename TSize>
+inline typename Size<T>::Type
+_capacityReturned(
+    T &,
+    TSize new_capacity,
+    Insist)
+{
+    return new_capacity;
+}
+
+// --------------------------------------------------------------------------
+// Function reserve()
+// --------------------------------------------------------------------------
 
 /**
 .Function.reserve:
@@ -1407,57 +1464,38 @@ replace(TTarget const & target,
 That is the function returns the minimum of $new_capacity$ and $capacity(me)$.
 ...metafunction:Metafunction.Size
 ..remarks:At the end of the operation, $capacity(me)$ can be larger than $new_capacity$.
-If $new_capacity$ is smaller than $capacity(me)$ at the beginning of the operation, 
+If $new_capacity$ is smaller than $capacity(me)$ at the beginning of the operation,
 the operation need not to change the capacity at all.
 ..remarks:This operation does not changes the content of $object$.
 ...note:This operation may invalidate iterators of $object$.
 ..see:Function.capacity
 ..include:seqan/sequence.h
 */
+
 template <typename T, typename TSize, typename TExpand>
 inline typename Size<T>::Type
-_capacityReturned(
-	T & me,
-	TSize,
-	Tag<TExpand> const)
+reserve(
+    T & me,
+    TSize new_capacity,
+    Tag<TExpand> const tag)
 {
-	return capacity(me);
+    SEQAN_CHECKPOINT;
+    return _capacityReturned(me, new_capacity, tag);
 }
 
 template <typename T, typename TSize>
 inline typename Size<T>::Type
-_capacityReturned(
-	T &,
-	TSize new_capacity,
-	Insist)
-{
-	return new_capacity;
-}
-
-template <typename T, typename TSize, typename TExpand>
-inline typename Size<T>::Type 
 reserve(
-	T & me,
-	TSize new_capacity,
-	Tag<TExpand> const tag)
+    T & me,
+    TSize new_capacity)
 {
-SEQAN_CHECKPOINT
-	return _capacityReturned(me, new_capacity, tag);
+    SEQAN_CHECKPOINT;
+    return reserve(me, new_capacity, typename DefaultOverflowExplicit<T>::Type());
 }
 
-template <typename T, typename TSize>
-inline typename Size<T>::Type 
-reserve(
-	T & me, 
-	TSize new_capacity)
-{
-SEQAN_CHECKPOINT
-	return reserve(me, new_capacity, typename DefaultOverflowExplicit<T>::Type());
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// resize
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function resize()
+// --------------------------------------------------------------------------
 
 /**
 .Function.resize:
@@ -1480,33 +1518,29 @@ SEQAN_CHECKPOINT
 ..include:seqan/sequence.h
 */
 template <typename T, typename TSize>
-inline typename Size<T>::Type  
+inline typename Size<T>::Type
 resize(
-	T & me, 
-	TSize new_length)
+    T & me,
+    TSize new_length)
 {
-SEQAN_CHECKPOINT
-	return resize(me, new_length, typename DefaultOverflowExplicit<T>::Type());
+    SEQAN_CHECKPOINT;
+    return resize(me, new_length, typename DefaultOverflowExplicit<T>::Type());
 }
-
-//////////////////////////////////////////////////////////////////////////////
-// resize with copy-constructed values (former fill)
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename TSize, typename TValue>
-inline typename Size<T>::Type  
+inline typename Size<T>::Type
 resize(
-	T & me, 
-	TSize new_length,
-	TValue const & val)
+    T & me,
+    TSize new_length,
+    TValue const & val)
 {
-SEQAN_CHECKPOINT
-	return resize(me, new_length, val, typename DefaultOverflowExplicit<T>::Type());
+    SEQAN_CHECKPOINT;
+    return resize(me, new_length, val, typename DefaultOverflowExplicit<T>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// resizeSpace
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function resizeSpace()
+// --------------------------------------------------------------------------
 
 /**
 .Function.resizeSpace:
@@ -1530,31 +1564,31 @@ this could be $size$ or less than $size$ if $object$ has not enough @Function.ca
 */
 
 template<typename T, typename TSize, typename TBeginPosition, typename TEndPosition>
-inline TSize 
-resizeSpace(T & me, 
-			TSize size, 
-			TBeginPosition pos_begin, 
-			TEndPosition pos_end)
+inline TSize
+resizeSpace(T & me,
+            TSize size,
+            TBeginPosition pos_begin,
+            TEndPosition pos_end)
 {
-SEQAN_CHECKPOINT
-	return resizeSpace(me, size, pos_begin, pos_end, typename DefaultOverflowExplicit<T>::Type());
+    SEQAN_CHECKPOINT;
+    return resizeSpace(me, size, pos_begin, pos_end, typename DefaultOverflowExplicit<T>::Type());
 }
 
 template<typename T, typename TSize, typename TBeginPosition, typename TEndPosition, typename TLimit>
-inline TSize 
-resizeSpace(T & me, 
-			TSize size, 
-			TBeginPosition pos_begin, 
-			TEndPosition pos_end,
-			TLimit limit)
+inline TSize
+resizeSpace(T & me,
+            TSize size,
+            TBeginPosition pos_begin,
+            TEndPosition pos_end,
+            TLimit limit)
 {
-SEQAN_CHECKPOINT
-	return resizeSpace(me, size, pos_begin, pos_end, limit, typename DefaultOverflowExplicit<T>::Type());
+    SEQAN_CHECKPOINT;
+    return resizeSpace(me, size, pos_begin, pos_end, limit, typename DefaultOverflowExplicit<T>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// erase
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function erase()
+// --------------------------------------------------------------------------
 
 /**
 .Function.erase:
@@ -1573,43 +1607,47 @@ SEQAN_CHECKPOINT
 */
 
 template<typename T, typename TBeginPosition, typename TEndPosition>
-inline void 
-erase(T & me, 
-	  TBeginPosition pos, 
-	  TEndPosition pos_end)
+inline void
+erase(T & me,
+      TBeginPosition pos,
+      TEndPosition pos_end)
 {
-SEQAN_CHECKPOINT
-	resizeSpace(me, 0, pos, pos_end);
+    SEQAN_CHECKPOINT;
+    resizeSpace(me, 0, pos, pos_end);
 }
 
 // for segments
 template<typename T, typename TBeginPosition, typename TEndPosition>
-inline void 
-erase(T const & me, 
-	  TBeginPosition pos, 
-	  TEndPosition pos_end)
+inline void
+erase(T const & me,
+      TBeginPosition pos,
+      TEndPosition pos_end)
 {
-SEQAN_CHECKPOINT
-	resizeSpace(me, 0, pos, pos_end);
+    SEQAN_CHECKPOINT;
+    resizeSpace(me, 0, pos, pos_end);
 }
 
 template<typename T, typename TPosition>
-inline void 
-erase(T & me, 
-	  TPosition pos)
+inline void
+erase(T & me,
+      TPosition pos)
 {
-SEQAN_CHECKPOINT
-	resizeSpace(me, 0, pos, pos + 1);
+    SEQAN_CHECKPOINT;
+    resizeSpace(me, 0, pos, pos + 1);
 }
 
 template<typename T, typename TPosition>
-inline void 
-erase(T const & me, 
-	  TPosition pos)
+inline void
+erase(T const & me,
+      TPosition pos)
 {
-SEQAN_CHECKPOINT
-	resizeSpace(me, 0, pos, pos + 1);
+    SEQAN_CHECKPOINT;
+    resizeSpace(me, 0, pos, pos + 1);
 }
+
+// --------------------------------------------------------------------------
+// Function eraseBack()
+// --------------------------------------------------------------------------
 
 /**
 .Function.eraseBack:
@@ -1631,15 +1669,15 @@ inline void eraseBack(T & me)
     erase(me, length(me) - 1);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// shrinkToFit
-//////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------
+// Function shrinkToFit()
+// --------------------------------------------------------------------------
 
 /**
 .Function.shrinkToFit:
 ..cat:Containers
 ..summary:Resizes container to minimum capacity
-..signature:shrinkToFit(object) 
+..signature:shrinkToFit(object)
 ..param.object: A container.
 ..remarks
 ...text:$shrinkToFit(object)$ is equivalent to $reserve(object, length(object), Exact())$.
@@ -1650,14 +1688,13 @@ inline void eraseBack(T & me)
 */
 
 template <typename T, typename TSize, typename TValue>
-inline void  
+inline void
 shrinkToFit(T & me)
 {
-SEQAN_CHECKPOINT
-	reserve(me, length(me), Exact());
+    SEQAN_CHECKPOINT;
+    reserve(me, length(me), Exact());
 }
-//////////////////////////////////////////////////////////////////////////////
 
-} //namespace SEQAN_NAMESPACE_MAIN
+} // namespace seqan
 
 #endif //#ifndef SEQAN_HEADER_...

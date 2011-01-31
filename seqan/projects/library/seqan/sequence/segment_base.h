@@ -72,13 +72,13 @@ class Segment
 template <typename THost, typename TSpec>
 struct Host<Segment<THost, TSpec> >
 {
-	typedef THost Type;
+    typedef THost Type;
 };
 
 template <typename THost, typename TSpec>
 struct Host<Segment<THost, TSpec> const >
 {
-	typedef THost Type;
+    typedef THost Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -88,12 +88,12 @@ struct Host<Segment<THost, TSpec> const >
 template <typename THost, typename TSpec>
 struct Spec<Segment<THost, TSpec> >
 {
-	typedef TSpec Type;
+    typedef TSpec Type;
 };
 template <typename THost, typename TSpec>
 struct Spec<Segment<THost, TSpec> const>
 {
-	typedef TSpec Type;
+    typedef TSpec Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -103,13 +103,13 @@ struct Spec<Segment<THost, TSpec> const>
 template <typename THost, typename TSpec>
 struct Value<Segment<THost, TSpec> >
 {
-	typedef typename Value<THost>::Type Type;
+    typedef typename Value<THost>::Type Type;
 };
 
 template <typename THost, typename TSpec>
 struct Value<Segment<THost, TSpec> const >
 {
-	typedef typename Value<THost const>::Type Type;
+    typedef typename Value<THost const>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -119,13 +119,13 @@ struct Value<Segment<THost, TSpec> const >
 template <typename THost, typename TSpec>
 struct GetValue<Segment<THost, TSpec> >
 {
-	typedef typename GetValue<THost>::Type Type;
+    typedef typename GetValue<THost>::Type Type;
 };
 
 template <typename THost, typename TSpec>
 struct GetValue<Segment<THost, TSpec> const >
 {
-	typedef typename GetValue<THost const>::Type Type;
+    typedef typename GetValue<THost const>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -135,26 +135,26 @@ struct GetValue<Segment<THost, TSpec> const >
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec>, Rooted>
 {
-	typedef Segment<THost, TSpec> TSequence_;
-	typedef typename Iterator<THost, Standard>::Type TIterator_;
-	typedef Iter<TSequence_, AdaptorIterator<TIterator_> > Type;
+    typedef Segment<THost, TSpec> TSequence_;
+    typedef typename Iterator<THost, Standard>::Type TIterator_;
+    typedef Iter<TSequence_, AdaptorIterator<TIterator_> > Type;
 };
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec> const, Rooted>
 {
-	typedef Segment<THost, TSpec> const TSequence_;
-	typedef typename Iterator<THost const, Standard>::Type TIterator_;
-	typedef Iter<TSequence_, AdaptorIterator<TIterator_> > Type;
+    typedef Segment<THost, TSpec> const TSequence_;
+    typedef typename Iterator<THost const, Standard>::Type TIterator_;
+    typedef Iter<TSequence_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec>, Standard>:
-	Iterator<THost, Standard>
+    Iterator<THost, Standard>
 {
 };
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec> const, Standard>:
-	Iterator<THost, Standard>
+    Iterator<THost, Standard>
 {
 };
 
@@ -167,25 +167,25 @@ struct Iterator<Segment<THost, TSpec> const, Standard>:
 template <typename THost, typename TSpec>
 struct Size<Segment<THost, TSpec> >
 {
-	typedef typename Size<THost>::Type Type;
+    typedef typename Size<THost>::Type Type;
 };
 
 template <typename THost, typename TSpec>
 struct Size<Segment<THost, TSpec> const >
 {
-	typedef typename Size<THost>::Type Type;
+    typedef typename Size<THost>::Type Type;
 };
 
 template <typename THost, typename TSpec>
 struct Position<Segment<THost, TSpec> >
 {
-	typedef typename Position<THost>::Type Type;
+    typedef typename Position<THost>::Type Type;
 };
 
 template <typename THost, typename TSpec>
 struct Position<Segment<THost, TSpec> const >
 {
-	typedef typename Position<THost>::Type Type;
+    typedef typename Position<THost>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -194,13 +194,13 @@ struct Position<Segment<THost, TSpec> const >
 
 template <typename THost, typename TSpec>
 struct DefaultOverflowImplicit<Segment<THost, TSpec > >:
-	DefaultOverflowImplicit<THost>
+    DefaultOverflowImplicit<THost>
 {
 };
 
 template <typename THost, typename TSpec>
 struct DefaultOverflowImplicit<Segment<THost, TSpec > const >:
-	DefaultOverflowImplicit<THost>
+    DefaultOverflowImplicit<THost>
 {
 };
 
@@ -210,13 +210,13 @@ struct DefaultOverflowImplicit<Segment<THost, TSpec > const >:
 
 template <typename THost, typename TSpec>
 struct DefaultOverflowExplicit<Segment<THost, TSpec > >:
-	DefaultOverflowExplicit<THost>
+    DefaultOverflowExplicit<THost>
 {
 };
 
 template <typename THost, typename TSpec>
 struct DefaultOverflowExplicit<Segment<THost, TSpec > const >:
-	DefaultOverflowExplicit<THost>
+    DefaultOverflowExplicit<THost>
 {
 };
 
@@ -226,7 +226,7 @@ struct DefaultOverflowExplicit<Segment<THost, TSpec > const >:
 
 template <typename THost, typename TSpec>
 struct IsContiguous< Segment<THost, TSpec> >:
-	public IsContiguous<THost> {};
+    public IsContiguous<THost> {};
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -235,7 +235,7 @@ struct IsContiguous< Segment<THost, TSpec> >:
 template <typename THost, typename TSpec>
 struct IsSequence< Segment<THost, TSpec> > {
     typedef True Type;
-	enum { VALUE = true };
+    enum { VALUE = true };
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -257,11 +257,11 @@ struct IsSequence< Segment<THost, TSpec> > {
 ///.Function.id.param.object.type:Class.Segment
 
 template <typename THost, typename TSpec>
-inline void const * 
+inline void const *
 id(Segment<THost, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return id(host(me));
+    return id(host(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -269,11 +269,11 @@ SEQAN_CHECKPOINT
 ///.Function.length.param.object.type:Class.Segment
 
 template <typename THost, typename TSpec>
-inline typename Size<Segment<THost, TSpec> const>::Type 
+inline typename Size<Segment<THost, TSpec> const>::Type
 length(Segment<THost, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return endPosition(me) - beginPosition(me);
+    return endPosition(me) - beginPosition(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -281,180 +281,180 @@ SEQAN_CHECKPOINT
 ///.Function.capacity.param.object.type:Class.Segment
 
 template <typename THost, typename TSpec>
-inline typename Size< Segment<THost, TSpec> const>::Type 
+inline typename Size< Segment<THost, TSpec> const>::Type
 capacity(Segment<THost, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return capacity(host(me)) + length(me) - length(host(me));
+    return capacity(host(me)) + length(me) - length(host(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost, typename TSpec>
-inline bool 
+inline bool
 hasNoHost(Segment<THost, TSpec> const & target)
 {
-	return !_toPointer(host(target));
+    return !_toPointer(host(target));
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-// operationToSet testet, ob statt einer assign/append-Funktion 
+// operationToSet testet, ob statt einer assign/append-Funktion
 // eine set Funktion aufgerufen werden soll. Das ist nur dann der Fall,
 // wenn target keinen Host hat und source einen kompatiblen Host
 // anbietet.
-// returns true:  set Funktion verwendet, 
+// returns true:  set Funktion verwendet,
 //                wurde bereits von test_operation_2_set gemacht
-// returns false: keine set Funktion verwenden 
+// returns false: keine set Funktion verwenden
 //                muss noch assign/append gemacht werden.
 
 template <typename TSameSpec, typename TTargetInfix>
 struct SegmentSetImpl_
 {
-	template <typename TTarget, typename TSource>
-	static inline bool operationToSet(TTarget &, TSource &)
-	{
-		return false;
-	}
+    template <typename TTarget, typename TSource>
+    static inline bool operationToSet(TTarget &, TSource &)
+    {
+        return false;
+    }
 };
 
 template <typename TTargetInfix>
 struct SegmentSetImpl_<True, TTargetInfix>
 {
-	template <typename TTarget, typename TSource>
-	static inline bool operationToSet(TTarget &target, TSource &source)
-	{
-		set(target, source);
-		return true;
-	}
+    template <typename TTarget, typename TSource>
+    static inline bool operationToSet(TTarget & target, TSource & source)
+    {
+        set(target, source);
+        return true;
+    }
 };
 
 template <>
 struct SegmentSetImpl_<False, True>
 {
-	template <typename TTarget, typename TSource>
-	static inline bool operationToSet(TTarget &target, TSource &source)
-	{
-		set(target, host(source), beginPosition(source), endPosition(source));
-		return true;
-	}
+    template <typename TTarget, typename TSource>
+    static inline bool operationToSet(TTarget & target, TSource & source)
+    {
+        set(target, host(source), beginPosition(source), endPosition(source));
+        return true;
+    }
 };
 
 template <typename THost, typename TSpec, typename TSource>
-inline bool 
-operationToSet(Segment<THost, TSpec> &, 
-				TSource &)
+inline bool
+operationToSet(Segment<THost, TSpec> &,
+                TSource &)
 {
-	return false;
+    return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
-inline bool 
-operationToSet(Segment<THost, TSpec> & target, 
-				Segment<THost, TSpec2> & source)
+inline bool
+operationToSet(Segment<THost, TSpec> & target,
+                Segment<THost, TSpec2> & source)
 {
-	if (hasNoHost(target))
-		return SegmentSetImpl_<
-			typename IsSameType<TSpec, TSpec2>::Type, 
-			typename IsSameType<TSpec, InfixSegment>::Type
-		>::operationToSet(target, source);
-	return false;
+    if (hasNoHost(target))
+        return SegmentSetImpl_<
+            typename IsSameType<TSpec, TSpec2>::Type,
+            typename IsSameType<TSpec, InfixSegment>::Type
+        >::operationToSet(target, source);
+    return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
-inline bool 
-operationToSet(Segment<THost const, TSpec> & target, 
-				Segment<THost, TSpec2> & source)
+inline bool
+operationToSet(Segment<THost const, TSpec> & target,
+                Segment<THost, TSpec2> & source)
 {
-	if (hasNoHost(target))
-		return SegmentSetImpl_<
-			typename IsSameType<TSpec, TSpec2>::Type, 
-			typename IsSameType<TSpec, InfixSegment>::Type
-		>::operationToSet(target, source);
-	return false;
+    if (hasNoHost(target))
+        return SegmentSetImpl_<
+            typename IsSameType<TSpec, TSpec2>::Type,
+            typename IsSameType<TSpec, InfixSegment>::Type
+        >::operationToSet(target, source);
+    return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
-inline bool 
-operationToSet(Segment<THost const, TSpec> & target, 
-				Segment<THost, TSpec2> const & source)
+inline bool
+operationToSet(Segment<THost const, TSpec> & target,
+                Segment<THost, TSpec2> const & source)
 {
-	if (hasNoHost(target))
-		return SegmentSetImpl_<
-			typename IsSameType<TSpec, TSpec2>::Type, 
-			typename IsSameType<TSpec, InfixSegment>::Type
-		>::operationToSet(target, source);
-	return false;
+    if (hasNoHost(target))
+        return SegmentSetImpl_<
+            typename IsSameType<TSpec, TSpec2>::Type,
+            typename IsSameType<TSpec, InfixSegment>::Type
+        >::operationToSet(target, source);
+    return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
-inline bool 
-operationToSet(Segment<THost, TSpec> & target, 
-				Segment<THost, TSpec2> const & source)
+inline bool
+operationToSet(Segment<THost, TSpec> & target,
+                Segment<THost, TSpec2> const & source)
 {
-	if (hasNoHost(target))
-		return SegmentSetImpl_<
-			typename IsSameType<TSpec, TSpec2>::Type, 
-			typename IsSameType<TSpec, InfixSegment>::Type
-		>::operationToSet(target, source);
-	return false;
+    if (hasNoHost(target))
+        return SegmentSetImpl_<
+            typename IsSameType<TSpec, TSpec2>::Type,
+            typename IsSameType<TSpec, InfixSegment>::Type
+        >::operationToSet(target, source);
+    return false;
 }
 template <typename THost, typename TSpec>
-inline bool 
-operationToSet(Segment<THost, TSpec> & target, 
-				THost & source)
+inline bool
+operationToSet(Segment<THost, TSpec> & target,
+                THost & source)
 {
-	if (hasNoHost(target))
-	{
-		set(target, source);
-		return true;
-	}
-	return false;
+    if (hasNoHost(target))
+    {
+        set(target, source);
+        return true;
+    }
+    return false;
 }
 
 
 template <typename THost, typename TSpec, typename TSource, typename TSize>
-inline bool 
-operationToSet(Segment<THost, TSpec> & /*target*/, 
-				TSource & /*source*/,
-				TSize)
+inline bool
+operationToSet(Segment<THost, TSpec> & /*target*/,
+                TSource & /*source*/,
+                TSize)
 {
-	return false;
+    return false;
 }
 template <typename THost, typename TSpec, typename TSpec2, typename TSize>
-inline bool 
-operationToSet(Segment<THost, TSpec> & target, 
-				Segment<THost, TSpec2> & source,
-				TSize limit)
+inline bool
+operationToSet(Segment<THost, TSpec> & target,
+                Segment<THost, TSpec2> & source,
+                TSize limit)
 {
-	if (hasNoHost(target))
-	{
-		TSize beginpos = beginPosition(source);
-		TSize endpos = endPosition(source);
-		if (endpos - beginpos > limit)
-		{
-			endpos = beginpos + limit;
-		}
-		set(target, host(source), beginpos, endpos);
-		return true;
-	}
-	return false;
+    if (hasNoHost(target))
+    {
+        TSize beginpos = beginPosition(source);
+        TSize endpos = endPosition(source);
+        if (endpos - beginpos > limit)
+        {
+            endpos = beginpos + limit;
+        }
+        set(target, host(source), beginpos, endpos);
+        return true;
+    }
+    return false;
 }
 template <typename THost, typename TSpec, typename TSize>
-inline bool 
-operationToSet(Segment<THost, TSpec> & target, 
-				THost & source,
-				TSize limit)
+inline bool
+operationToSet(Segment<THost, TSpec> & target,
+                THost & source,
+                TSize limit)
 {
-	if (hasNoHost(target))
-	{
-		TSize size = length(source);
-		if (size > limit)
-		{
-			size = limit;
-		}
-		set(target, source, 0, size);
-		return true;
-	}
-	return false;
+    if (hasNoHost(target))
+    {
+        TSize size = length(source);
+        if (size > limit)
+        {
+            size = limit;
+        }
+        set(target, source, 0, size);
+        return true;
+    }
+    return false;
 }
 
 
@@ -470,46 +470,46 @@ $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the o
 ..param.source.type:Class.Segment
 */
 
-//overload of binary version for strings: 
+//overload of binary version for strings:
 
 template<typename THost, typename TSpec, typename TSource>
-inline void 
-assign(Segment<THost, TSpec> & target, 
-	  TSource & source)
+inline void
+assign(Segment<THost, TSpec> & target,
+      TSource & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> TTarget;
-	assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> TTarget;
+    assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 template<typename THost, typename TSpec, typename TSource>
-inline void 
-assign(Segment<THost, TSpec> & target, 
-	  TSource const & source)
+inline void
+assign(Segment<THost, TSpec> & target,
+      TSource const & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> TTarget;
-	assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> TTarget;
+    assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
 //(for temporary targets)
 
 template<typename THost, typename TSpec, typename TSource>
-inline void 
-assign(Segment<THost, TSpec> const & target, 
-	  TSource & source)
+inline void
+assign(Segment<THost, TSpec> const & target,
+      TSource & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> const TTarget;
-	assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> const TTarget;
+    assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 template<typename THost, typename TSpec, typename TSource>
-inline void 
-assign(Segment<THost, TSpec> const & target, 
-	  TSource const & source)
+inline void
+assign(Segment<THost, TSpec> const & target,
+      TSource const & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> const TTarget;
-	assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> const TTarget;
+    assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -517,225 +517,225 @@ SEQAN_CHECKPOINT
 template <typename TExpand>
 struct AssignSegment_
 {
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	assign_(
-		Segment<THost const, TSpec> & target, 
-		TSource & source)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    assign_(
+        Segment<THost const, TSpec> & target,
+        TSource & source)
+    {
 SEQAN_CHECKPOINT
-		set(target, source);
-	}
+        set(target, source);
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	assign_(
-		Segment<THost const, TSpec> & target, 
-		TSource & source, 
-		typename Size< Segment<THost const, TSpec> >::Type /*limit*/)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    assign_(
+        Segment<THost const, TSpec> & target,
+        TSource & source,
+        typename Size< Segment<THost const, TSpec> >::Type /*limit*/)
+    {
 SEQAN_CHECKPOINT
-		set(target, source);
-	}
+        set(target, source);
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	assign_(
-		Segment<THost, TSpec> & target, 
-		TSource & source)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    assign_(
+        Segment<THost, TSpec> & target,
+        TSource & source)
+    {
 SEQAN_CHECKPOINT
-		if ((void *) &target == (void *) &source) return;
+        if ((void *) &target == (void *) &source) return;
 
-		if (!operationToSet(target, source))
-		{
-			typedef Segment<THost, TSpec> Target;
+        if (!operationToSet(target, source))
+        {
+            typedef Segment<THost, TSpec> Target;
 
-			replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
+            replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
 
-			typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
-			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-			if (new_end > host_end) new_end = host_end;
-			setEnd(target, new_end);
-		}
-	}
+            typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
+            typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+            if (new_end > host_end) new_end = host_end;
+            setEnd(target, new_end);
+        }
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	assign_(
-		Segment<THost, TSpec> & target, 
-		TSource & source, 
-		typename Size< Segment<THost, TSpec> >::Type limit)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    assign_(
+        Segment<THost, TSpec> & target,
+        TSource & source,
+        typename Size< Segment<THost, TSpec> >::Type limit)
+    {
 SEQAN_CHECKPOINT
-		if ((void *) &target == (void *) &source) return;
+        if ((void *) &target == (void *) &source) return;
 
-		if (!operationToSet(target, source))
-		{
-			typedef Segment<THost, TSpec> Target;
+        if (!operationToSet(target, source))
+        {
+            typedef Segment<THost, TSpec> Target;
 
-			replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
+            replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
 
-			typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
-			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-			if (begin(target, Standard()) > host_end) setBegin(target, host_end);
-			if (new_end > host_end) new_end = host_end;
-			setEnd(target, new_end);
-		}
-	}
+            typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(source);
+            typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+            if (begin(target, Standard()) > host_end) setBegin(target, host_end);
+            if (new_end > host_end) new_end = host_end;
+            setEnd(target, new_end);
+        }
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	assign_(
-		Segment<THost, TSpec> const & target, 
-		TSource & source)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    assign_(
+        Segment<THost, TSpec> const & target,
+        TSource & source)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
-		replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
-	}
+        SEQAN_ASSERT(!hasNoHost(target))
+        replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	assign_(
-		Segment<THost, TSpec> const & target, 
-		TSource & source, 
-		typename Size< Segment<THost, TSpec> >::Type limit)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    assign_(
+        Segment<THost, TSpec> const & target,
+        TSource & source,
+        typename Size< Segment<THost, TSpec> >::Type limit)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
-		replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
-	}
+        SEQAN_ASSERT(!hasNoHost(target))
+        replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
+    }
 };
 
 //____________________________________________________________________________
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> & target, 
-	   TSource & source, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> & target,
+       TSource & source,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source);
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> & target, 
-	   TSource const & source, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> & target,
+       TSource const & source,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source);
 }
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> & target, 
-	   TSource & source, 
-	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> & target,
+       TSource & source,
+       typename Size< Segment<THost, TSpec> >::Type limit,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> & target, 
-	   TSource const & source, 
-	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> & target,
+       TSource const & source,
+       typename Size< Segment<THost, TSpec> >::Type limit,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
 //(for temporary targets)
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> const & target, 
-	   TSource & source, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> const & target,
+       TSource & source,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source);
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> const & target, 
-	   TSource const & source, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> const & target,
+       TSource const & source,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source);
 }
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> const & target, 
-	   TSource & source, 
-	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> const & target,
+       TSource & source,
+       typename Size< Segment<THost, TSpec> >::Type limit,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-assign(Segment<THost, TSpec> const & target, 
-	   TSource const & source, 
-	   typename Size< Segment<THost, TSpec> >::Type limit, 
-	   Tag<TExpand> const)
+inline void
+assign(Segment<THost, TSpec> const & target,
+       TSource const & source,
+       typename Size< Segment<THost, TSpec> >::Type limit,
+       Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
+    AssignSegment_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // move
 //////////////////////////////////////////////////////////////////////////////
 
-//overload of binary version: 
+//overload of binary version:
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-move(Segment<THost, TSpec> & target, 
-	 TSource & source)
+inline void
+move(Segment<THost, TSpec> & target,
+     TSource & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> TTarget;
-	move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> TTarget;
+    move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-move(Segment<THost, TSpec> & target, 
-	 TSource const & source)
+inline void
+move(Segment<THost, TSpec> & target,
+     TSource const & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> TTarget;
-	move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> TTarget;
+    move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
 //(for temporary targets)
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-move(Segment<THost, TSpec> const & target, 
-	 TSource & source)
+inline void
+move(Segment<THost, TSpec> const & target,
+     TSource & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> const TTarget;
-	move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> const TTarget;
+    move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-move(Segment<THost, TSpec> const & target, 
-	 TSource const & source)
+inline void
+move(Segment<THost, TSpec> const & target,
+     TSource const & source)
 {
 SEQAN_CHECKPOINT
-	typedef Segment<THost, TSpec> const TTarget;
-	move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+    typedef Segment<THost, TSpec> const TTarget;
+    move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
 
@@ -756,159 +756,159 @@ $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the o
 template <typename TExpand>
 struct AppendSequenceToSegment_
 {
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	append_(
-		Segment<THost, TSpec> & target, 
-		TSource & source)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    append_(
+        Segment<THost, TSpec> & target,
+        TSource & source)
+    {
 SEQAN_CHECKPOINT
-		typedef Segment<THost, TSpec> Target;
+        typedef Segment<THost, TSpec> Target;
 
-		if (!operationToSet(target, source))
-		{
-			replace(host(target), endPosition(target), endPosition(target), source, TExpand());
+        if (!operationToSet(target, source))
+        {
+            replace(host(target), endPosition(target), endPosition(target), source, TExpand());
 
-			typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
-			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-			if (new_end > host_end) new_end = host_end;
-			setEnd(target, new_end);
-		}
-	}
+            typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
+            typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+            if (new_end > host_end) new_end = host_end;
+            setEnd(target, new_end);
+        }
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	append_(
-		Segment<THost, TSpec> & target, 
-		TSource const & source, 
-		typename Size< Segment<THost, TSpec> >::Type limit)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    append_(
+        Segment<THost, TSpec> & target,
+        TSource const & source,
+        typename Size< Segment<THost, TSpec> >::Type limit)
+    {
 SEQAN_CHECKPOINT
-		typedef Segment<THost, TSpec> Target;
+        typedef Segment<THost, TSpec> Target;
 
-		if (!operationToSet(target, source))
-		{
-			replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand());
-			typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
-			typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-			if (begin(target) > host_end) setBegin(target, host_end);
-			if (new_end > host_end) new_end = host_end;
-			setEnd(target, new_end);
-		}
-	}
+        if (!operationToSet(target, source))
+        {
+            replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand());
+            typename Iterator<Target, Standard>::Type new_end = end(target, Standard()) + length(source);
+            typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+            if (begin(target) > host_end) setBegin(target, host_end);
+            if (new_end > host_end) new_end = host_end;
+            setEnd(target, new_end);
+        }
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	append_(
-		Segment<THost, TSpec> const & target, 
-		TSource & source)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    append_(
+        Segment<THost, TSpec> const & target,
+        TSource & source)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
-		replace(host(target), endPosition(target), endPosition(target), source, TExpand());
-	}
+        SEQAN_ASSERT(!hasNoHost(target))
+        replace(host(target), endPosition(target), endPosition(target), source, TExpand());
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	append_(
-		Segment<THost, TSpec> const & target, 
-		TSource const & source, 
-		typename Size< Segment<THost, TSpec> >::Type limit)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    append_(
+        Segment<THost, TSpec> const & target,
+        TSource const & source,
+        typename Size< Segment<THost, TSpec> >::Type limit)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
-		replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand()); //??? INSERT
-	}
+        SEQAN_ASSERT(!hasNoHost(target))
+        replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand()); //??? INSERT
+    }
 };
 //____________________________________________________________________________
 
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
+inline void
 append(
-	Segment<THost, TSpec> & target, 
-	TSource & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TSource & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
+inline void
 append(
-	Segment<THost, TSpec> & target, 
-	TSource const & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TSource const & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
-}
-
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-append(
-	Segment<THost, TSpec> & target, 
-	TSource & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
-}
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-append(
-	Segment<THost, TSpec> & target, 
-	TSource const & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
 }
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
+inline void
 append(
-	Segment<THost, TSpec> const & target, 
-	TSource & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TSource & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
+inline void
 append(
-	Segment<THost, TSpec> const & target, 
-	TSource const & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TSource const & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
+inline void
 append(
-	Segment<THost, TSpec> const & target, 
-	TSource & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> const & target,
+    TSource & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
 }
 template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
+inline void
 append(
-	Segment<THost, TSpec> const & target, 
-	TSource const & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> const & target,
+    TSource const & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source);
+}
+
+template <typename THost, typename TSpec, typename TSource, typename TExpand>
+inline void
+append(
+    Segment<THost, TSpec> const & target,
+    TSource & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
+}
+template <typename THost, typename TSpec, typename TSource, typename TExpand>
+inline void
+append(
+    Segment<THost, TSpec> const & target,
+    TSource const & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+    AppendSequenceToSegment_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -918,39 +918,39 @@ SEQAN_CHECKPOINT
 template <typename TExpand>
 struct AppendValueToSegment_
 {
-	template <typename T, typename TValue>
-	static inline void 
-	appendValue_(T & me,
-				TValue & /*_value*/)
-	{
+    template <typename T, typename TValue>
+    static inline void
+    appendValue_(T & me,
+                TValue & /*_value*/)
+    {
 SEQAN_CHECKPOINT
-		insertValue(host(me), endPosition(me), TExpand());
-		if (endPosition(me) < length(host(me)) ) //this could be false for some TExpand
-		{
-			setEndPosition(me, endPosition(me) + 1);
-		}
-	}
+        insertValue(host(me), endPosition(me), TExpand());
+        if (endPosition(me) < length(host(me)) ) //this could be false for some TExpand
+        {
+            setEndPosition(me, endPosition(me) + 1);
+        }
+    }
 };
 
 //____________________________________________________________________________
 
 template <typename THost, typename TSpec, typename TValue, typename TExpand>
 inline void
-appendValue(Segment<THost, TSpec> & me, 
-			TValue const & _value,
-			Tag<TExpand> const)
+appendValue(Segment<THost, TSpec> & me,
+            TValue const & _value,
+            Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendValueToSegment_<Tag<TExpand> const>::appendValue_(me, _value);
+    AppendValueToSegment_<Tag<TExpand> const>::appendValue_(me, _value);
 }
 template <typename THost, typename TSpec, typename TValue, typename TExpand>
 inline void
-appendValue(Segment<THost, TSpec> const & me, 
-			TValue const & _value,
-			Tag<TExpand> const)
+appendValue(Segment<THost, TSpec> const & me,
+            TValue const & _value,
+            Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	AppendValueToSegment_<Tag<TExpand> const>::appendValue_(me, _value);
+    AppendValueToSegment_<Tag<TExpand> const>::appendValue_(me, _value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -960,42 +960,42 @@ SEQAN_CHECKPOINT
 template <typename TExpand>
 struct InsertValueToSegment_
 {
-	template <typename T, typename TPosition, typename TValue>
-	static inline void 
-	insertValue_(T & me,
-				TPosition pos,
-				TValue & /*_value*/)
-	{
+    template <typename T, typename TPosition, typename TValue>
+    static inline void
+    insertValue_(T & me,
+                TPosition pos,
+                TValue & /*_value*/)
+    {
 SEQAN_CHECKPOINT
-		insertValue(host(me), beginPosition(me) + pos, TExpand());
-		if (endPosition(me) < length(host(me)) ) //this could be false for some TExpand
-		{
-			setEndPosition(me, endPosition(me) + 1);
-		}
-	}
+        insertValue(host(me), beginPosition(me) + pos, TExpand());
+        if (endPosition(me) < length(host(me)) ) //this could be false for some TExpand
+        {
+            setEndPosition(me, endPosition(me) + 1);
+        }
+    }
 };
 
 //____________________________________________________________________________
 
 template <typename THost, typename TSpec, typename TPosition, typename TValue, typename TExpand>
 inline void
-insertValue(Segment<THost, TSpec> & me, 
-			TPosition pos,
-			TValue const & _value,
-			Tag<TExpand> const)
+insertValue(Segment<THost, TSpec> & me,
+            TPosition pos,
+            TValue const & _value,
+            Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	InsertValueToSegment_<Tag<TExpand> const>::insertValue_(me, pos, _value);
+    InsertValueToSegment_<Tag<TExpand> const>::insertValue_(me, pos, _value);
 }
 template <typename THost, typename TSpec, typename TPosition, typename TValue, typename TExpand>
 inline void
-insertValue(Segment<THost, TSpec> const & me, 
-			TPosition pos,
-			TValue const & _value,
-			Tag<TExpand> const)
+insertValue(Segment<THost, TSpec> const & me,
+            TPosition pos,
+            TValue const & _value,
+            Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	InsertValueToSegment_<Tag<TExpand> const>::insertValue_(me, pos, _value);
+    InsertValueToSegment_<Tag<TExpand> const>::insertValue_(me, pos, _value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1013,184 +1013,184 @@ $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the o
 template <typename TExpand>
 struct ReplaceSequenceToSegment_
 {
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	replace_(
-		Segment<THost, TSpec> & target, 
-		typename Position< Segment<THost, TSpec> >::Type pos_begin,
-		typename Position< Segment<THost, TSpec> >::Type pos_end,
-		TSource & source)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    replace_(
+        Segment<THost, TSpec> & target,
+        typename Position< Segment<THost, TSpec> >::Type pos_begin,
+        typename Position< Segment<THost, TSpec> >::Type pos_end,
+        TSource & source)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT(!hasNoHost(target))
 
-		typedef Segment<THost, TSpec> Target;
+        typedef Segment<THost, TSpec> Target;
 
-		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, TExpand());
+        replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, TExpand());
 
-		typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(target) - pos_end + pos_begin + length(source);
-		typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-		if (new_end > host_end) new_end = host_end;
-		setEnd(target, new_end);
-	}
+        typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(target) - pos_end + pos_begin + length(source);
+        typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+        if (new_end > host_end) new_end = host_end;
+        setEnd(target, new_end);
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	replace_(
-		Segment<THost, TSpec> & target, 
-		typename Position< Segment<THost, TSpec> >::Type pos_begin,
-		typename Position< Segment<THost, TSpec> >::Type pos_end,
-		TSource & source, 
-		typename Size< Segment<THost, TSpec> >::Type limit)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    replace_(
+        Segment<THost, TSpec> & target,
+        typename Position< Segment<THost, TSpec> >::Type pos_begin,
+        typename Position< Segment<THost, TSpec> >::Type pos_end,
+        TSource & source,
+        typename Size< Segment<THost, TSpec> >::Type limit)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT(!hasNoHost(target))
 
-		typedef Segment<THost, TSpec> Target;
+        typedef Segment<THost, TSpec> Target;
 
-		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, limit, TExpand());
+        replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, limit, TExpand());
 
-		typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(target) - pos_end + pos_begin + length(source);
-		typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
-		if (begin(target, Standard()) > host_end) setBegin(target, host_end);
-		if (new_end > host_end) new_end = host_end;
-		setEnd(target, new_end);
-	}
+        typename Iterator<Target, Standard>::Type new_end = begin(target, Standard()) + length(target) - pos_end + pos_begin + length(source);
+        typename Iterator<THost, Standard>::Type host_end = end(host(target), Standard());
+        if (begin(target, Standard()) > host_end) setBegin(target, host_end);
+        if (new_end > host_end) new_end = host_end;
+        setEnd(target, new_end);
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	replace_(
-		Segment<THost, TSpec> const & target, 
-		typename Position< Segment<THost, TSpec> const>::Type pos_begin,
-		typename Position< Segment<THost, TSpec> const>::Type pos_end,
-		TSource & source)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    replace_(
+        Segment<THost, TSpec> const & target,
+        typename Position< Segment<THost, TSpec> const>::Type pos_begin,
+        typename Position< Segment<THost, TSpec> const>::Type pos_end,
+        TSource & source)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT(!hasNoHost(target))
 
-		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, TExpand());
-	}
+        replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, TExpand());
+    }
 
-	template <typename THost, typename TSpec, typename TSource>
-	static inline void 
-	replace_(
-		Segment<THost, TSpec> const & target, 
-		typename Position< Segment<THost, TSpec> const>::Type pos_begin,
-		typename Position< Segment<THost, TSpec> const>::Type pos_end,
-		TSource & source, 
-		typename Size< Segment<THost, TSpec> >::Type limit)
-	{
+    template <typename THost, typename TSpec, typename TSource>
+    static inline void
+    replace_(
+        Segment<THost, TSpec> const & target,
+        typename Position< Segment<THost, TSpec> const>::Type pos_begin,
+        typename Position< Segment<THost, TSpec> const>::Type pos_end,
+        TSource & source,
+        typename Size< Segment<THost, TSpec> >::Type limit)
+    {
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT(!hasNoHost(target))
 
-		replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, limit, TExpand()); //??? INSERT
-	}
+        replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, limit, TExpand()); //??? INSERT
+    }
 };
 //____________________________________________________________________________
 
 
 template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(
-	Segment<THost, TSpec> & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(
-	Segment<THost, TSpec> & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource const & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource const & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
-}
-
-template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
-replace(
-	Segment<THost, TSpec> & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
-}
-template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
-replace(
-	Segment<THost, TSpec> & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource const & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
 template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(
-	Segment<THost, TSpec> const & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(
-	Segment<THost, TSpec> const & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource const & source, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource const & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
 template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(
-	Segment<THost, TSpec> const & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> const & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
-inline void 
+inline void
 replace(
-	Segment<THost, TSpec> const & target, 
-	TPositionBegin pos_begin,
-	TPositionEnd pos_end,
-	TSource const & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
+    Segment<THost, TSpec> const & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource const & source,
+    Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+}
+
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
+inline void
+replace(
+    Segment<THost, TSpec> const & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+}
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
+inline void
+replace(
+    Segment<THost, TSpec> const & target,
+    TPositionBegin pos_begin,
+    TPositionEnd pos_end,
+    TSource const & source,
+    typename Size< Segment<THost, TSpec> >::Type limit,
+    Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+    ReplaceSequenceToSegment_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
 
@@ -1198,26 +1198,26 @@ SEQAN_CHECKPOINT
 ///.Function.resize.param.object.type:Class.Segment
 
 template <typename THost, typename TSpec, typename TExpand>
-inline typename Size< Segment<THost, TSpec> >::Type 
+inline typename Size< Segment<THost, TSpec> >::Type
 resize(
-	Segment<THost, TSpec> & me,
-	typename Size< Segment<THost, TSpec> >::Type new_length,
-	Tag<TExpand> const tag)
+    Segment<THost, TSpec> & me,
+    typename Size< Segment<THost, TSpec> >::Type new_length,
+    Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
 
-	typename Size<Segment<THost, TSpec> >::Type me_length = length(me);
-	typename Position<THost>::Type me_end_pos = endPosition(me);
-	if (new_length > me_length)
-	{
-		new_length = me_length + resizeSpace(host(me), new_length - me_length, me_end_pos, me_end_pos, tag);
-	}
-	else if (new_length < me_length)
-	{
-		new_length = resizeSpace(host(me), 0, me_end_pos - (me_length - new_length), me_end_pos, tag);
-	}
-	_setLength(me, new_length);
-	return new_length;
+    typename Size<Segment<THost, TSpec> >::Type me_length = length(me);
+    typename Position<THost>::Type me_end_pos = endPosition(me);
+    if (new_length > me_length)
+    {
+        new_length = me_length + resizeSpace(host(me), new_length - me_length, me_end_pos, me_end_pos, tag);
+    }
+    else if (new_length < me_length)
+    {
+        new_length = resizeSpace(host(me), 0, me_end_pos - (me_length - new_length), me_end_pos, tag);
+    }
+    _setLength(me, new_length);
+    return new_length;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1227,23 +1227,23 @@ SEQAN_CHECKPOINT
 ///.Function.clear.param.object.type:Class.Segment
 
 template <typename THost, typename TSpec>
-inline void 
+inline void
 clear(Segment<THost, TSpec> & target)
 {
 SEQAN_CHECKPOINT
-	assign(target, "");
+    assign(target, "");
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight>
-Segment<TLeftValue, TLeftSpec> const & 
+Segment<TLeftValue, TLeftSpec> const &
 operator += (Segment<TLeftValue, TLeftSpec> & left,
-			 TRight const & right)
+             TRight const & right)
 {
 SEQAN_CHECKPOINT
-	append(left, right);
-	return left;
+    append(left, right);
+    return left;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1251,11 +1251,11 @@ SEQAN_CHECKPOINT
 
 template <typename TLeftHost, typename TLeftSpec, typename TRight >
 inline bool
-operator == (Segment<TLeftHost, TLeftSpec> const & left, 
-			TRight const & right)
+operator == (Segment<TLeftHost, TLeftSpec> const & left,
+            TRight const & right)
 {
 SEQAN_CHECKPOINT
-	typename Comparator<Segment<TLeftHost, TLeftSpec> >::Type _lex(left, right);
+    typename Comparator<Segment<TLeftHost, TLeftSpec> >::Type _lex(left, right);
     return isEqual(_lex);
 }
 
@@ -1263,11 +1263,11 @@ SEQAN_CHECKPOINT
 
 template <typename TLeftHost, typename TLeftSpec, typename TRight >
 inline bool
-operator != (Segment<TLeftHost, TLeftSpec> const & left, 
-			TRight const & right)
+operator != (Segment<TLeftHost, TLeftSpec> const & left,
+            TRight const & right)
 {
 SEQAN_CHECKPOINT
-	typename Comparator<Segment<TLeftHost, TLeftSpec> >::Type _lex(left, right);
+    typename Comparator<Segment<TLeftHost, TLeftSpec> >::Type _lex(left, right);
     return isNotEqual(_lex);
 }
 
@@ -1275,43 +1275,43 @@ SEQAN_CHECKPOINT
 
 template <typename TLeftHost, typename TLeftSpec, typename TRight>
 inline bool
-operator < (Segment<TLeftHost, TLeftSpec> const & left, 
-			TRight const & right)
+operator < (Segment<TLeftHost, TLeftSpec> const & left,
+            TRight const & right)
 {
 SEQAN_CHECKPOINT
-	return isLess(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
+    return isLess(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftHost, typename TLeftSpec, typename TRight>
 inline bool
-operator <= (Segment<TLeftHost, TLeftSpec> const & left, 
-			 TRight const & right)
+operator <= (Segment<TLeftHost, TLeftSpec> const & left,
+             TRight const & right)
 {
 SEQAN_CHECKPOINT
-	return isLessOrEqual(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
+    return isLessOrEqual(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
 }
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftHost, typename TLeftSpec, typename TRight>
 inline bool
-operator > (Segment<TLeftHost, TLeftSpec> const & left, 
-			TRight const & right)
+operator > (Segment<TLeftHost, TLeftSpec> const & left,
+            TRight const & right)
 {
 SEQAN_CHECKPOINT
-	return isGreater(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
+    return isGreater(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TLeftHost, typename TLeftSpec, typename TRight>
 inline bool
-operator >= (Segment<TLeftHost, TLeftSpec> const & left, 
-		TRight const & right)
+operator >= (Segment<TLeftHost, TLeftSpec> const & left,
+        TRight const & right)
 {
 SEQAN_CHECKPOINT
-	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
+    return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<Segment<TLeftHost, TLeftSpec> >::Type());
 }
 
 
@@ -1321,33 +1321,33 @@ SEQAN_CHECKPOINT
 
 template <typename TStream, typename THost, typename TSpec>
 inline TStream &
-operator << (TStream & target, 
-			 Segment<THost, TSpec> const & source)
+operator << (TStream & target,
+             Segment<THost, TSpec> const & source)
 {
 SEQAN_CHECKPOINT
-	write(target, source);
-	return target;
+    write(target, source);
+    return target;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TStream, typename THost, typename TSpec>
 inline TStream &
-operator >> (TStream & source, 
-			 Segment<THost, TSpec> & target)
+operator >> (TStream & source,
+             Segment<THost, TSpec> & target)
 {
 SEQAN_CHECKPOINT
-	read(source, target);
-	return source;
+    read(source, target);
+    return source;
 }
 template <typename TStream, typename THost, typename TSpec>
 inline TStream &
-operator >> (TStream & source, 
-			 Segment<THost, TSpec> const & target)
+operator >> (TStream & source,
+             Segment<THost, TSpec> const & target)
 {
 SEQAN_CHECKPOINT
-	read(source, target);
-	return source;
+    read(source, target);
+    return source;
 }
 
 //////////////////////////////////////////////////////////////////////////////
