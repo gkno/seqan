@@ -18,8 +18,8 @@ int main() {
 	//TInfix infix_1 = infix(seq_1, 949, 1166);
 	
 	// read sequences
-	TSequence seq_0 = String<Dna, FileReader<Fasta> >("../../demos/sequence_1b.fa");
-	TSequence seq_1 = String<Dna, FileReader<Fasta> >("../../demos/sequence_2b.fa");
+	TSequence seq_0 = String<Dna, FileReader<Fasta> >("../../demos/sequence_1.fa");
+	TSequence seq_1 = String<Dna, FileReader<Fasta> >("../../demos/sequence_2.fa");
 
 	// set input infixes
 	TInfix infix_0 = infix(seq_0, 1033, 1147);
