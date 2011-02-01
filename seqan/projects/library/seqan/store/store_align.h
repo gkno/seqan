@@ -1437,7 +1437,7 @@ positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 {
 	typedef typename Position<typename Value<TGapAnchors>::Type >::Type TAnchorPos;	
 
-	GapAnchor<__int64>	prevAnchor, nextAnchor;
+	GapAnchor<TAnchorPos> prevAnchor, nextAnchor;
 	TPosition			seqPos;
 	int					anchorIdx;
 
