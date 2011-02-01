@@ -83,6 +83,7 @@ class StringSet;
 ..include:seqan/sequence.h
 */
 
+// TODO(holtgrew): Why is this specialized for all types?
 template <typename TObject>
 struct Concatenator
 {
@@ -595,20 +596,6 @@ prefix(StringSet< TString, TSpec > const & me, TPosition pos)
     return prefix(me[getSeqNo(lPos)], getSeqOffset(lPos));
 }
 
-template < typename TString, typename TDelimiter, typename TPosition >
-inline typename Infix<TString>::Type
-prefix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosition pos)
-{
-    return infix(me.concat, stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me))], posGlobalize(pos, stringSetLimits(me)));
-}
-
-template < typename TString, typename TDelimiter, typename TPosition >
-inline typename Infix<TString const>::Type
-prefix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosition pos)
-{
-    return infix(me.concat, stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me))], posGlobalize(pos, stringSetLimits(me)));
-}
-
 // --------------------------------------------------------------------------
 // Function suffix()
 // --------------------------------------------------------------------------
@@ -641,20 +628,6 @@ suffix(StringSet< TString, TSpec > const & me, TPosition pos)
     TPair lPos;
     posLocalize(lPos, pos, stringSetLimits(me));
     return suffix(me[getSeqNo(lPos)], getSeqOffset(lPos));
-}
-
-template < typename TString, typename TDelimiter, typename TPosition >
-inline typename Infix<TString>::Type
-suffix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosition pos)
-{
-    return infix(me.concat, posGlobalize(pos, stringSetLimits(me)), stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me)) + 1]);
-}
-
-template < typename TString, typename TDelimiter, typename TPosition >
-inline typename Infix<TString const>::Type
-suffix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosition pos)
-{
-    return infix(me.concat, posGlobalize(pos, stringSetLimits(me)), stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me)) + 1]);
 }
 
 // --------------------------------------------------------------------------
@@ -691,20 +664,6 @@ infixWithLength(StringSet< TString, TSpec > const & me, TPosition pos, TSize len
     return infixWithLength(me[getSeqNo(lPos)], getSeqOffset(lPos), length);
 }
 
-template < typename TString, typename TDelimiter, typename TPosition, typename TSize >
-inline typename Infix<TString>::Type
-infixWithLength(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosition pos, TSize length)
-{
-    return infixWithLength(me.concat, posGlobalize(pos, stringSetLimits(me)), length);
-}
-
-template < typename TString, typename TDelimiter, typename TPosition, typename TSize >
-inline typename Infix<TString const>::Type
-infixWithLength(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosition pos, TSize length)
-{
-    return infixWithLength(me.concat, posGlobalize(pos, stringSetLimits(me)), length);
-}
-
 // --------------------------------------------------------------------------
 // Function infix()
 // --------------------------------------------------------------------------
@@ -739,20 +698,6 @@ infix(StringSet< TString, TSpec > const & me, TPosBegin posBegin, TPosEnd posEnd
     posLocalize(localPosBegin, posBegin, stringSetLimits(me));
     posLocalize(localPosEnd, posEnd, stringSetLimits(me));
     return infix(me[getSeqNo(localPosBegin)], getSeqOffset(localPosBegin), getSeqOffset(localPosEnd));
-}
-
-template < typename TString, typename TDelimiter, typename TPosBegin, typename TPosEnd >
-inline typename Infix<TString>::Type
-infix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosBegin posBegin, TPosEnd posEnd)
-{
-    return infix(me.concat, posGlobalize(posBegin, stringSetLimits(me)), posGlobalize(posEnd, stringSetLimits(me)));
-}
-
-template < typename TString, typename TDelimiter, typename TPosBegin, typename TPosEnd >
-inline typename Infix<TString const>::Type
-infix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosBegin posBegin, TPosEnd posEnd)
-{
-    return infix(me.concat, posGlobalize(posBegin, stringSetLimits(me)), posGlobalize(posEnd, stringSetLimits(me)));
 }
 
 // --------------------------------------------------------------------------

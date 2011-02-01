@@ -46,6 +46,10 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+// The Metafunction Concatenator is actually defined in string_set_base.h.
+template <typename T>
+struct Concatenator;
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -402,7 +406,7 @@ operator<(
 
 template <typename TSSetL, typename TSpecL, typename TSSetR, typename TSpecR>
 inline bool
-operator>(
+operator > (
     Iter<TSSetL, ConcatVirtual<TSpecL> > const & L,
     Iter<TSSetR, ConcatVirtual<TSpecR> > const & R)
 {

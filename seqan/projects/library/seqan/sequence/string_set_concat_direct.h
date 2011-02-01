@@ -357,6 +357,78 @@ resize(StringSet<TString, Owner<ConcatDirect<TSpec> > > & me, TSize new_size, Ta
 }
 
 // --------------------------------------------------------------------------
+// Function prefix()
+// --------------------------------------------------------------------------
+
+template < typename TString, typename TDelimiter, typename TPosition >
+inline typename Infix<TString>::Type
+prefix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosition pos)
+{
+    return infix(me.concat, stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me))], posGlobalize(pos, stringSetLimits(me)));
+}
+
+template < typename TString, typename TDelimiter, typename TPosition >
+inline typename Infix<TString const>::Type
+prefix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosition pos)
+{
+    return infix(me.concat, stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me))], posGlobalize(pos, stringSetLimits(me)));
+}
+
+// --------------------------------------------------------------------------
+// Function suffix()
+// --------------------------------------------------------------------------
+
+template < typename TString, typename TDelimiter, typename TPosition >
+inline typename Infix<TString>::Type
+suffix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosition pos)
+{
+    return infix(me.concat, posGlobalize(pos, stringSetLimits(me)), stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me)) + 1]);
+}
+
+template < typename TString, typename TDelimiter, typename TPosition >
+inline typename Infix<TString const>::Type
+suffix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosition pos)
+{
+    return infix(me.concat, posGlobalize(pos, stringSetLimits(me)), stringSetLimits(me)[getSeqNo(pos, stringSetLimits(me)) + 1]);
+}
+
+// --------------------------------------------------------------------------
+// Function infix()
+// --------------------------------------------------------------------------
+
+template < typename TString, typename TDelimiter, typename TPosBegin, typename TPosEnd >
+inline typename Infix<TString>::Type
+infix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosBegin posBegin, TPosEnd posEnd)
+{
+    return infix(me.concat, posGlobalize(posBegin, stringSetLimits(me)), posGlobalize(posEnd, stringSetLimits(me)));
+}
+
+template < typename TString, typename TDelimiter, typename TPosBegin, typename TPosEnd >
+inline typename Infix<TString const>::Type
+infix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosBegin posBegin, TPosEnd posEnd)
+{
+    return infix(me.concat, posGlobalize(posBegin, stringSetLimits(me)), posGlobalize(posEnd, stringSetLimits(me)));
+}
+
+// --------------------------------------------------------------------------
+// Function infixWithLength()
+// --------------------------------------------------------------------------
+
+template < typename TString, typename TDelimiter, typename TPosition, typename TSize >
+inline typename Infix<TString>::Type
+infixWithLength(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosition pos, TSize length)
+{
+    return infixWithLength(me.concat, posGlobalize(pos, stringSetLimits(me)), length);
+}
+
+template < typename TString, typename TDelimiter, typename TPosition, typename TSize >
+inline typename Infix<TString const>::Type
+infixWithLength(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosition pos, TSize length)
+{
+    return infixWithLength(me.concat, posGlobalize(pos, stringSetLimits(me)), length);
+}
+
+// --------------------------------------------------------------------------
 // Function value()
 // --------------------------------------------------------------------------
 
