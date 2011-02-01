@@ -82,7 +82,7 @@
 #include <seqan/sequence/segment_prefix.h>
 
 //____________________________________________________________________________
-// strings
+// Strings
 
 #include <seqan/sequence/string_base.h>
 #include <seqan/sequence/string_array.h>
@@ -91,8 +91,17 @@
 #include <seqan/sequence/string_block.h>
 #include <seqan/sequence/string_packed.h>
 
-#include <seqan/sequence/sequence_multiple.h>
 #include <seqan/sequence/sequence_shortcuts.h>
+
+//____________________________________________________________________________
+// StringSets
+#include <seqan/sequence/iter_concat_virtual.h>
+#include <seqan/sequence/sequence_concatenator.h>
+#include <seqan/sequence/string_set_base.h>
+#include <seqan/sequence/string_set_concat_direct.h>
+#include <seqan/sequence/string_set_dependent_tight.h>
+#include <seqan/sequence/string_set_dependent_generous.h>
+#include <seqan/sequence/string_set_owner.h>
 
 //____________________________________________________________________________
 // Adaptions
