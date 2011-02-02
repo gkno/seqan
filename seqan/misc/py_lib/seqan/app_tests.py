@@ -35,7 +35,7 @@ import tempfile
 # Valgrind flags, taken from CMake output, ideally given to test script by CMake?
 SUPPRESSIONS = '--suppressions=' + os.path.join(os.path.dirname(__file__), '..', '..', 'seqan.supp')
 VALGRIND_FLAGS = [SUPPRESSIONS] + '--error-exitcode=1 -q --tool=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=50 --'.split()
-VALGRIND_PATH = '/usr/bin/valgrind'
+VALGRIND_PATH = '/group/agabi/software/bin/valgrind'
 
 class TestConf(object):
     """Configuration for one tests.
@@ -179,6 +179,18 @@ def runTest(test_conf):
                                    stderr=subprocess.PIPE)
         retcode = process.wait()
         logging.debug('  return code is %d', retcode)
+        if retcode != 0:
+            fmt = 'Return code of command "%s" was %d.'
+            print >>sys.stderr, '--- stdout begin --'
+            print >>sys.stderr, fmt % (' '.join(args), retcode)
+            print >>sys.stderr, stdout_file.read()
+            print >>sys.stderr, '--- stdout end --'
+            stdout_file.close()
+            stderr_contents = process.stderr.read()
+            print >>sys.stderr, '-- stderr begin --'
+            print >>sys.stderr, stderr_contents
+            print >>sys.stderr, '-- stderr end --'
+            return False
     except Exception, e:
         fmt = 'ERROR (when executing "%s"): %s'
         if stdout_file is not subprocess.PIPE:

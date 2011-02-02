@@ -7,7 +7,7 @@
    fun:_ZSt10__pop_heapIN9__gnu_cxx17__normal_iteratorIPSt4pairImjESt6vectorIS3_SaIS3_EEEESt4lessIS3_EEvT_SB_SB_T0_
    fun:_ZSt8pop_heapIN9__gnu_cxx17__normal_iteratorIPSt4pairImjESt6vectorIS3_SaIS3_EEEESt4lessIS3_EEvT_SB_T0_
    fun:_ZNSt14priority_queueISt4pairImjESt6vectorIS1_SaIS1_EESt4lessIS1_EE3popEv
-   fun:_ZN5seqan16topological_sort*
+   fun:_ZN5seqan15topologicalSort*
    ...
    fun:main
 }
