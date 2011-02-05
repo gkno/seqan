@@ -218,7 +218,6 @@ bool loadReads(
 		seqCount = 0;
 	}
 
-
 	if (options._debugLevel > 1 && kickoutcount > 0) 
 		::std::cerr << "Ignoring " << kickoutcount << " low quality mate-pairs.\n";
 	return (seqCount > 0);
