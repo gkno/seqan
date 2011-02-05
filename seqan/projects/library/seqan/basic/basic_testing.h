@@ -1057,6 +1057,9 @@ const char *tempFileName() {
         else ++file_name;
 
         CheckPoint cp = {file_name, line};
+        #ifdef _OMP
+        #pragma omp critical
+        #endif  // #ifdef _OMP
         CheckPointStore::data().insert(cp);
         return true;
     }
