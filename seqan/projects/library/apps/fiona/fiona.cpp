@@ -393,7 +393,7 @@ void applyReadErrorCorrections(
 	for (int readId = 0; readId < readCount; ++readId)
 	{
 		TCorrection const &corr = corrections[readId];
-		if (corr.overlap > 0 && corr.indelLength <= 0)
+		if (corr.overlap != 0 && corr.indelLength <= 0)
 			originalReads[corr.correctReadId] = store.readSeqStore[corr.correctReadId];
 	}
 
@@ -408,6 +408,7 @@ void applyReadErrorCorrections(
 
         if (readId == options.debugRead)
         {
+            std::cout << "BEFORE:" << std::endl;
             _dumpCorrection(store, corr, readId);
         }
 
@@ -426,10 +427,15 @@ void applyReadErrorCorrections(
 			store.readSeqStore[readId][corr.errorPos] = originalReads[corr.correctReadId][corr.correctPos];
 #ifdef FIONA_ALLOWINDELS
 		else if (corr.indelLength > 0)
-			erase(store.readSeqStore[readId], corr.errorPos, corr.errorPos + corr.indelLength);
+            erase(store.readSeqStore[readId], corr.errorPos, corr.errorPos + corr.indelLength);
 		else
 			insert(store.readSeqStore[readId], corr.errorPos, infix(originalReads[corr.correctReadId], corr.correctPos, corr.correctPos + -corr.indelLength));
 #endif
+        if (readId == options.debugRead)
+        {
+            std::cout << "AFTER:" << std::endl;
+            _dumpCorrection(store, corr, readId);
+        }
 #ifdef SEQAN_VERBOSE
 		std::cout << "corrected:";
 		for (unsigned i = 0; i < corr.correctPos; ++i)
@@ -750,17 +756,20 @@ void traverseAndSearchCorrections(
 							acceptedMismatches = acceptedMismatchesLeft;
 						}
 						else if (indel > 0)
-						{
-							// insert in erroneous read
-							itE += indel;
-							acceptedMismatches = 0;
-						}
-						else
-						{
-							// deletion in erroneous read
-							itC += -indel;
-							acceptedMismatches = 0;
-						}
+                        {
+                            // gap in correct read (must be deleted in err. read)
+                            itE += indel;
+                            if (itE + indel >= itEEnd) continue;
+                            acceptedMismatches = 0;
+                        }
+                        else
+                        {
+                            // gap in erroneous read (must be filled with an insertion in err. read)
+                            itC += -indel;
+                            if (itC + -indel >= itCEnd) continue;
+                            acceptedMismatches = 0;
+                        }
+                        
 
 						TReadIterator itEFirst = itE;
 						for (; itE < itEEnd && itC < itCEnd; ++itE, ++itC)
@@ -774,7 +783,7 @@ void traverseAndSearchCorrections(
 
 
                         // correction candidate
-                        Overlap &overlap = bestCorrection[(indel >= 0)? indel * 2: -indel * 2 - 1];
+                        Overlap &overlap = bestCorrection[((indel >= 0)? indel * 2: -indel * 2 - 1)];
                         overlap.overlapSumLeft += overlapLeft;
                         overlap.overlapSumRight += itE - itEFirst;
                         overlap.readId = (*corrRead).i1;
@@ -812,7 +821,11 @@ void traverseAndSearchCorrections(
 				std::cerr << "error_pos      \t" << positionError << std::endl;
 				std::cerr << "correct_pos    \t" << (*corBest).correctPos << std::endl;
 				std::cerr << "overlapSum     \t" << maxOverlapSum << std::endl;
+				std::cerr << "indel_len_alt  \t" << i << std::endl;
 				std::cerr << "indel_len      \t" << bestIndelLength << std::endl;
+                for (int i = 0; i < (int)length(bestCorrection); ++i)
+                    std::cerr << (((i & 1) == 0)? i / 2: -((i + 1) / 2)) << '=' << bestCorrection[i].overlapSumRight << "  ";
+                std::cerr << std::endl;
 			}
 
             if (errorReadId >= readCount)
@@ -824,13 +837,17 @@ void traverseAndSearchCorrections(
                     (*corBest).readId -= readCount;
 
                 // mirror positions
-                positionError = length(store.readSeqStore[errorReadId]) - positionError - 1;
-                (*corBest).correctPos = length(store.readSeqStore[(*corBest).readId]) - (*corBest).correctPos - 1;
+                positionError = length(store.readSeqStore[errorReadId]) - positionError;
+                (*corBest).correctPos = length(store.readSeqStore[(*corBest).readId]) - (*corBest).correctPos;
 
-                if (bestIndelLength > 0)
+                if (bestIndelLength == 0)
+                {
+                    --positionError;
+                    --(*corBest).correctPos;
+                } else if (bestIndelLength > 0)
                     positionError -= bestIndelLength;
                 else
-                    (*corBest).correctPos -= -bestIndelLength;
+                    (*corBest).correctPos += bestIndelLength;
             }
 
             /*This is maybe not necessary, because we search to maximisate*/
