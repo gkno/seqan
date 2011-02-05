@@ -1818,7 +1818,7 @@ The resulting tables must have appropriate size before calling this function.
 		qcomp_t	qcomp;
 		qhash_t qhash;
 
-		typename Value<TSortTuples>::Type	old_qgram;
+		typename Value<TSortTuples>::Type	old_qgram = *sorter;
 		typename Size<TDir>::Type			hash, old_hash = 0;
         typename Size<TSortTuples>::Type	leftToRead;
 		bool first = true;
