@@ -659,9 +659,9 @@ void traverseAndSearchCorrections(
 
 			if (debug)
 			{
-                std::cout<<"err: "<<length(errorCandidates)<<"   corr:";
-                for(int i=0;i<length(correctCandidates);++i)
-                    std::cout<<length(correctCandidates[i])<<'\t';
+                std::cout << "ErrorBranch: " << length(errorCandidates) << "   CorrectBranches: ";
+                for(unsigned i=0;i<length(correctCandidates);++i)
+                    std::cout<<length(correctCandidates[i]) << ", ";
                 std::cout<<std::endl;
             }
 			// is already identify as erroneus
