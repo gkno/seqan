@@ -394,6 +394,12 @@ const Ty_& _max(const Ty_& _Left, const Ty_& Right_)
 		return _Left;
 }
 
+template<typename Tx_, typename Ty_> inline
+Tx_ _max(const Tx_& _Left, const Ty_& Right_)
+{	// return smaller of _Left and Right_
+    return (Right_ < _Left ? _Left : Right_);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
