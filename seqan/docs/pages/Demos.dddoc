@@ -268,7 +268,7 @@ weese@tanne:~/seqan/demos$
 
 .Demo.Maximal Unique Matches:
 ..cat:Index
-..summary:Example for using the @Spec.MUMs Iterator@.
+..summary:Example for using the @Spec.Mums Iterator@.
 ..description
 ...text:Given a set of sequences, a unique match is a match that occurs exactly once in each sequence.
 A maximal unique match (MUM) is a unique match that is not part of any longer unique match. The following
@@ -286,7 +286,7 @@ weese@tanne:~/seqan/demos$ ./index_mums
 weese@tanne:~/seqan/demos$
 ..demofor:Class.Index
 ..demofor:Class.StringSet
-..demofor:Spec.MUMs Iterator
+..demofor:Spec.Mums Iterator
 ..demofor:Function.representative
 ..demofor:Function.repLength
 ..demofor:Function.getOccurrences
@@ -398,7 +398,7 @@ weese@tanne:~/seqan/demos$
 ..seealso:Demo.Maximal Unique Matches
 ..demofor:Class.Index
 ..demofor:Class.StringSet
-..demofor:Spec.MUMs Iterator
+..demofor:Spec.Mums Iterator
 ..demofor:Function.representative
 ..demofor:Function.repLength
 ..demofor:Function.getOccurrences
