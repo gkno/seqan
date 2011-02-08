@@ -722,7 +722,7 @@ front(T const & me)
 ..remarks:This function is equivalent to $value(me, length(me) - 1)$.
 ..see:Function.value
 ..see:Function.end
-..see:Function.Container#front
+..see:Function.front
 ..include:seqan/sequence.h
 */
 

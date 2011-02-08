@@ -205,7 +205,9 @@ end(std::list<TValue> const & list,
     return list.end();
 }
 
-///.Function.Container#front.param.container.type:Adaption.std::list
+/**
+.Function.front.param.container.type:Adaption.std::list
+*/
 template <typename TValue>
 inline typename Reference<std::list<TValue> >::Type
 front(std::list<TValue> & list)
