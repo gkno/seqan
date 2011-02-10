@@ -897,7 +897,7 @@ SEQAN_CHECKPOINT
 	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
 	typedef SimpleType<TRightValue, TRightSpec> TRight;
 	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	retrn convert<TCompareType>(left_) > convert<TCompareType>(right_);
+	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
 }
 
 template <typename TValue, typename TSpec>
