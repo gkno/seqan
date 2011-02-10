@@ -897,7 +897,7 @@ SEQAN_CHECKPOINT
 	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
 	typedef SimpleType<TRightValue, TRightSpec> TRight;
 	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
+	retrn convert<TCompareType>(left_) > convert<TCompareType>(right_);
 }
 
 template <typename TValue, typename TSpec>
@@ -2233,6 +2233,20 @@ SEQAN_CHECKPOINT
 	c_target = Dna5(source);
 }
 
+/**
+.Function.getQualityValue
+..cat:Alphabets
+..signature:getQualityValue(c)
+..summary:Returns the quality of a character from an alphabet with integrated quality.
+..param.c:Character to retrieve the quality from.
+...type:Spec.DnaQ
+...type:Spec.Dna5Q
+..returns:Quality value of $c$.
+...type:nolink:int
+...remarks:The quality value is an integral value between 0 and 62 (inclusive).
+..see:Function.assignQualityValue
+ */
+
 inline int getQualityValue(DnaQ const &c) 
 {
 	return c.value >> 2;
@@ -2279,13 +2293,15 @@ void convertQuality(Ascii & c, int q)
 ..summary:Assign quality to a character from an alphabet with integrated quality.
 ..param.c:Target character to assign quality to.
 ...type:Spec.DnaQ
-..param.q:Quality to assign to the quality.
+...type:Spec.Dna5Q
+..param.q:Quality to assign to the character.
 ...type:nolink:int
 ...type:nolink:char
+...remarks:The quality value is an integral value between 0 and 62 (inclusive).
 ..remarks:If $q$ is a $char$ then $'!'$ is subtracted from $q$. This is useful for ASCII encoded PHRED scores.
  */
 //set quality value
-inline 
+inline
 void assignQualityValue(DnaQ &c, int q)
 {
 	if (q < 0) q = 0;
@@ -2294,9 +2310,8 @@ void assignQualityValue(DnaQ &c, int q)
 	c.value = (c.value & 3) | (q << 2);
 }
 
-///.Function.assignQualityValue.param.c.type:Spec.Dna5Q
-inline 
-void assignQualityValue(Dna5Q &c, int q) 
+inline
+void assignQualityValue(Dna5Q &c, int q)
 {
 	if (q < 0) q = 0;
     if (q >= QualityValueSize<Dna5Q>::VALUE)
@@ -2305,7 +2320,7 @@ void assignQualityValue(Dna5Q &c, int q)
 		c.value = (c.value & 3) | (q << 2);
 }
 
-inline 
+inline
 void assignQualityValue(DnaQ &c, Ascii q)
 {
     int q1 = static_cast<int>(q - '!');
@@ -2328,7 +2343,7 @@ void assignQualityValue(Dna5Q &c, Ascii q)
 /**
 .Function.assignQualities
 ..cat:Alphabets
-..summary:Assign quality value between strings.
+..summary:Assign quality values between strings.
 ..signature:assignQualities(target, source)
 ..param.target:Target string
 ...type:nolink:@Class.String@ of any alphabet with qualities, e.g. @Spec.DnaQ@, @Spec.Dna5Q@
