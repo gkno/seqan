@@ -6,6 +6,10 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Documented `getQuality`.
+
+== Release 1.2 ==
+
  * Splitting file ''sequence_multiple.h'' into ''string_set*.h'', ''iter_concat_virtual.h'', and ''sequence_concatenator.h''.
  * Bound check in `iter()`.
  * Adding `SEQAN_IS_64_BIT` and `SEQAN_IS_64_BIT` macros, defined to either `0` or `1`, depending on the platform.
