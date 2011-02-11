@@ -746,9 +746,9 @@ void traverseAndSearchCorrections(
 						}
 					} while (goRight(iterSibling));					
 				}
-#endif // FIONA_DEBUG
 			}
-		
+#endif // FIONA_DEBUG
+
 			// don't descent edges beginning with N
 			if (firstEdgeChar == unknownChar)
 				goNextRight(iter);
