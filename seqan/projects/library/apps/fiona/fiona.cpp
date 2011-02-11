@@ -99,7 +99,7 @@ struct FionaOptions
 	int toLevel;
 	unsigned cycles;
 	double errorrate;
-    int debugRead;
+    int debugRead, corrRead;
 
 	FionaOptions()
 	{
@@ -107,11 +107,12 @@ struct FionaOptions
 		strictness = 0.0001;
 		acceptedMismatches = 1;
 		maxIndelLength = 0;
-		cycles = 3;
+		cycles = 0;
 		fromLevel = 0;
 		toLevel = 0;
 		errorrate = 0;
         debugRead = -1;
+        corrRead = -1;
 	}
 };
 
@@ -186,17 +187,18 @@ namespace seqan  {
 	template <typename TSpec>
 	inline bool nodeHullPredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
 	{
-		return parentRepLength(it) < cargo(container(it)).replen_max;
+		return parentRepLength(it) <= cargo(container(it)).replen_max;
 	}
 
 	template <typename TSpec>
 	inline bool nodePredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
 	{
+		return true;
 		FionaNodeConstraints &cons = cargo(container(it));
 		unsigned repLen = parentRepLength(it);
 
 		/*TODO may utilise >=*/
-		return cons.replen_min < repLen && repLen < cons.replen_max;
+		return cons.replen_min <= repLen && repLen <= cons.replen_max;
 	}
 
 }
@@ -580,6 +582,45 @@ void traverseAndSearchCorrections(
 	{
 		unsigned commonPrefix = parentRepLength(iter);			// length of parent label
 
+#ifdef FIONA_DEBUG
+		{
+			TTreeIterator iterSibling(iter);
+			goUp(iterSibling);
+			if (representative(iterSibling) == "AGGCGCCTCCTCAA")
+			{
+				std::cout << "GOTIT!!!!" << std::endl;
+				std::cout << "GOTIT!!!!" << std::endl;
+				std::cout << "GOTIT!!!!" << std::endl;
+
+				{
+					std::cerr << std::endl << "ERROR CANDIDATES ARE:" << std::endl;
+
+					std::cerr << "support         \t" << countOccurrences(iter) << std::endl;
+					std::cerr << "occurrences     \t";
+					for (unsigned i = 0; i < countOccurrences(iter); ++i)
+						std::cerr << '\t' << getOccurrences(iter)[i] << '\t' << suffix(indexText(container(iter)), getOccurrences(iter)[i]) << std::endl;
+					std::cerr << std::endl;
+
+					std::cerr << std::endl << "SIBLINGS ARE:" << std::endl;
+
+					goDown(iterSibling);
+					do
+					{
+						if (value(iter).range != value(iterSibling).range)
+						{
+							std::cerr << "support         \t" << countOccurrences(iterSibling) << std::endl;
+							std::cerr << "occurrences     \t";
+							for (unsigned i = 0; i < countOccurrences(iterSibling); ++i)
+								std::cerr << '\t' << getOccurrences(iterSibling)[i] << '\t' << suffix(indexText(container(iterSibling)), getOccurrences(iterSibling)[i]) << std::endl;
+							std::cerr << std::endl;
+						}
+					} while (goRight(iterSibling));					
+				}
+
+			}
+		}
+#endif //FIONA_DEBUG
+
 		SEQAN_ASSERT_LT(commonPrefix + 1, length(expectedTheoretical));
 		TValue firstEdgeChar = parentEdgeFirstChar(iter);
 		if (firstEdgeChar != unknownChar &&
@@ -594,6 +635,34 @@ void traverseAndSearchCorrections(
 		//	for which we can find a more optimal correction
 		//
 		TOccs errorCandidates = getOccurrences(iter);
+
+#ifdef FIONA_DEBUG		
+		bool debugReadFound = false;
+		for (unsigned i=0; i<length(errorCandidates); ++i)
+			if (((errorCandidates[i].i1 < readCount)? errorCandidates[i].i1: errorCandidates[i].i1 - readCount) == (unsigned)options.debugRead)
+				debugReadFound = true;
+
+		bool corrReadFound = false;
+		if (debugReadFound)
+		{
+			TTreeIterator iterSibling(iter);
+			goUp(iterSibling); goDown(iterSibling);
+            do
+            {
+                if (value(iter).range != value(iterSibling).range &&
+                    parentEdgeFirstChar(iterSibling) != unknownChar)
+                {
+					TOccs corrCandidates = getOccurrences(iter);
+					for (unsigned i=0; i<length(corrCandidates); ++i)
+						if (((corrCandidates[i].i1 < readCount)? corrCandidates[i].i1: corrCandidates[i].i1 - readCount) == (unsigned)options.corrRead)
+							corrReadFound = true;
+                }
+            } while (goRight(iterSibling));
+		}
+		if (debugReadFound || corrReadFound)
+			std::cerr << std::endl << "I FOUND " << debugReadFound << " " << corrReadFound << std::endl;
+#endif //FIONA_DEBUG
+
 
 		/*copy the iterator for iterate over the siblings*/
 //		typename Iterator<TFionaIndex, TopDown<> >::Type iterSibling(container(iter), nodeUp(iter));
@@ -646,6 +715,40 @@ void traverseAndSearchCorrections(
 		// continue if we haven't found any correct read
 		if (empty(correctCandidates))
 		{
+#ifdef FIONA_DEBUG
+			TOccsIterator errorRead = begin(errorCandidates, Standard());
+			TOccsIterator errorReadEnd = end(errorCandidates, Standard());
+			for (; errorRead != errorReadEnd; ++errorRead)
+			{
+				unsigned errorReadId = (*errorRead).i1;
+				unsigned errorReadIdFwd = (errorReadId < readCount)? errorReadId: errorReadId - readCount;
+				debug = (errorReadIdFwd == (unsigned)options.debugRead);
+
+				unsigned positionError = (*errorRead).i2 + commonPrefix;
+				if (debug)
+				{
+					std::cerr << "NO CORRECTING SIBLING FOUND !!!" << std::endl;
+					std::cerr << "prefix_length   \t" << commonPrefix << std::endl;
+					std::cerr << "error___read_id \t" << errorReadId << std::endl;
+					std::cerr << "error_pos       \t" << positionError << std::endl;
+					std::cerr << std::endl << "SIBLINGS ARE:" << std::endl;
+
+					goUp(iterSibling); goDown(iterSibling);
+					do
+					{
+						if (value(iter).range != value(iterSibling).range)
+						{
+							std::cerr << "support         \t" << countOccurrences(iterSibling) << std::endl;
+							std::cerr << "occurrences     \t";
+							for (unsigned i = 0; i < countOccurrences(iterSibling); ++i)
+								std::cerr << getOccurrences(iterSibling)[i];
+							std::cerr << std::endl;
+						}
+					} while (goRight(iterSibling));					
+				}
+#endif // FIONA_DEBUG
+			}
+		
 			// don't descent edges beginning with N
 			if (firstEdgeChar == unknownChar)
 				goNextRight(iter);
@@ -663,13 +766,19 @@ void traverseAndSearchCorrections(
             unsigned errorReadIdFwd = (errorReadId < readCount)? errorReadId: errorReadId - readCount;
 			debug = (errorReadIdFwd == (unsigned)options.debugRead);
 
+#ifdef FIONA_DEBUG
 			if (debug)
 			{
                 std::cout << "ErrorBranch: " << length(errorCandidates) << "   CorrectBranches: ";
                 for(unsigned i=0;i<length(correctCandidates);++i)
+				{
                     std::cout<<length(correctCandidates[i]) << ", ";
+//					for(unsigned j=0;j<length(correctCandidates[i]);++j)
+//						if ()
+				}
                 std::cout<<std::endl;
             }
+#endif //FIONA_DEBUG
 			// is already identify as erroneus
 			TCorrection &corr = corrections[errorReadIdFwd];
 
@@ -724,10 +833,10 @@ void traverseAndSearchCorrections(
 
 					for (; itE < itEPrefixBegin; ++itE, ++itCLeft)
 						if (*itE != *itCLeft)
-							if (--acceptedMismatchesLeft == maxValue(acceptedMismatchesLeft)) break;
+							if (--acceptedMismatchesLeft == MaxValue<unsigned>::VALUE) break;
 
 					// too many mismatches left of the common prefix?
-					if (acceptedMismatchesLeft == maxValue(acceptedMismatchesLeft))
+					if (acceptedMismatchesLeft == MaxValue<unsigned>::VALUE)
 						continue;
 
                     unsigned overlapLeft = positionError;
@@ -760,25 +869,25 @@ void traverseAndSearchCorrections(
                             // gap in correct read (must be deleted in err. read)
                             itE += indel;
                             if (itE + indel >= itEEnd) continue;
-                            acceptedMismatches = 0;
+                            acceptedMismatches = acceptedMismatchesLeft;
                         }
                         else
                         {
                             // gap in erroneous read (must be filled with an insertion in err. read)
                             itC += -indel;
                             if (itC + -indel >= itCEnd) continue;
-                            acceptedMismatches = 0;
+                            acceptedMismatches = acceptedMismatchesLeft;
                         }
                         
 
 						TReadIterator itEFirst = itE;
 						for (; itE < itEEnd && itC < itCEnd; ++itE, ++itC)
 							if (*itE != *itC)
-								if (--acceptedMismatches == maxValue(acceptedMismatches))
+								if (--acceptedMismatches == MaxValue<unsigned>::VALUE)
 									break;
                         
                         // too many mismatches right of the common prefix?
-                        if (acceptedMismatches == maxValue(acceptedMismatches))
+                        if (acceptedMismatches == MaxValue<unsigned>::VALUE)
                             continue;
 
 
@@ -911,7 +1020,7 @@ determineFrequency(Iter< TFionaIndex, VSTree<TSpec> > iter)
 
 /*construction Suffix Array */
 template <typename TFragmentStore, typename TAlgorithm>
-void correctReads(
+unsigned correctReads(
 	TFragmentStore & store,
 	FionaOptions & options,
 	Tag<TAlgorithm> const alg)
@@ -1186,6 +1295,7 @@ void correctReads(
 
 	// remove reverse complements
 	resize(store.readSeqStore, readCount);
+	return totalCorrections;
 }
 
 int main(int argc, const char* argv[]) 
@@ -1211,7 +1321,7 @@ int main(int argc, const char* argv[])
 	addOption(parser, CommandLineOption("l",  "levels", 2,         "set lower and upper bound for suffix tree DFS", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("g",  "genome-length",     "set the length of the underlying genome", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("m",  "mismatches",        "set the number of accepted mismatches per read", OptionType::Int | OptionType::Label, options.acceptedMismatches));
-	addOption(parser, CommandLineOption("i",  "iterations",        "set the number of error correction iterations", OptionType::Int | OptionType::Label, options.cycles));
+	addOption(parser, CommandLineOption("i",  "iterations",        "set the number of error correction iterations (0 = auto mode)", OptionType::Int | OptionType::Label, options.cycles));
 #ifdef FIONA_ALLOWINDELS
 	addOption(parser, CommandLineOption("id", "indel-length",      "set the maximum length of an indel", OptionType::Int | OptionType::Label, options.maxIndelLength));
 #endif
@@ -1219,6 +1329,7 @@ int main(int argc, const char* argv[])
 	addOption(parser, CommandLineOption("nt", "num-threads",       "set the number of threads used", OptionType::Int | OptionType::Label));
 #endif
 	addOption(parser, CommandLineOption("dr", "debug-read",        "dump information for a read given its id", OptionType::Int | OptionType::Label));
+	addOption(parser, CommandLineOption("cr", "corr-read",         "dump information for a correcting read", OptionType::Int | OptionType::Label));
 	requiredArguments(parser, 2);
 
 	bool stop = !parse(parser, argc, argv, std::cerr);
@@ -1282,6 +1393,10 @@ int main(int argc, const char* argv[])
 	{
 		getOptionValueLong(parser, "debug-read", options.debugRead);
 	}
+	if (isSetLong(parser, "corr-read"))
+	{
+		getOptionValueLong(parser, "corr-read", options.corrRead);
+	}
 
 
 	// something went wrong
@@ -1312,27 +1427,45 @@ int main(int argc, const char* argv[])
 		std::cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << std::endl;
 	}
 
-	for (unsigned cycle = 1; cycle <= options.cycles; ++cycle)
+	unsigned firstCycleCorrections = 0;
+	bool autoCycles = (options.cycles == 0);
+	if (autoCycles) options.cycles = 20;
+	
+	unsigned cycle;
+	for (cycle = 1; cycle <= options.cycles; ++cycle)
 	{
-		std::cout << std::endl << "Cycle "<< cycle << " of " << options.cycles << std::endl;
+		std::cout << std::endl << "Cycle "<< cycle;
+		if (!autoCycles) std::cout << " of " << options.cycles;
+		std::cout << std::endl;
+		unsigned numCorrected;
 		if (method == Poisson)
 			/*use of p-value like a limit*/
-			correctReads(store, options, FionaPoisson());
+			numCorrected = correctReads(store, options, FionaPoisson());
 		else if (method == Count)
-			correctReads(store, options, FionaCount()) ;
+			numCorrected = correctReads(store, options, FionaCount()) ;
 		else if (method == PoissonSens)
-			correctReads(store, options, FionaPoissonSens()) ;
+			numCorrected = correctReads(store, options, FionaPoissonSens()) ;
 		else {
 			/*use an expected value for a certain level*/
-			correctReads(store, options, FionaExpected());
+			numCorrected = correctReads(store, options, FionaExpected());
 		}
 
 
-		if (options.acceptedMismatches > 0) --options.acceptedMismatches;
+//		if (options.acceptedMismatches > 0) --options.acceptedMismatches;
 
 		// TODO maybe to stop if there is not reads corrected in the cycle before
 		// if so after each iteration must save the ID for the reads which are corrected
 		// thus we can also show the total number of reads that are corrected at the final stage
+		if (cycle == 1)
+			firstCycleCorrections = numCorrected;
+		else
+		{
+			if (autoCycles && numCorrected <= firstCycleCorrections / 5)
+			{
+				++cycle;
+				break;
+			}
+		}
 	}
 
 	// write in file all input reads with the corrected one
@@ -1349,7 +1482,7 @@ int main(int argc, const char* argv[])
 	}
 
 	if (options.cycles > 1)
-		std::cout << "Total number reads corrected for " << options.cycles << " cycles is " << numCorrected << std::endl;
+		std::cout << "Total number reads corrected for " << cycle-1 << " cycles is " << numCorrected << std::endl;
 
 //	struct rusage usage;
 //	getrusage(RUSAGE_SELF, &usage);
