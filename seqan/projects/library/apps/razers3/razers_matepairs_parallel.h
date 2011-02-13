@@ -890,7 +890,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 
 template <typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
 void
-writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TFragmentStore *> & verificationHits)
+writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TFragmentStore *> & verificationHits, bool dontCompact)
 {
     // TODO(holtgrew): The same as single read writeback! Really? Combine?
 #ifdef RAZERS_PROFILE
@@ -930,7 +930,7 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL
       SEQAN_ASSERT_EQ(length(tls.store.alignedReadStore), back(tls.store.alignedReadStore).id + 1);
 
     // Possibly compact matches.
-    if (length(tls.store.alignedReadStore) > tls.options.compactThresh)
+    if (!dontCompact && length(tls.store.alignedReadStore) > tls.options.compactThresh)
     {
 #ifdef RAZERS_PROFILE
         timelineBeginTask(TASK_COMPACT);
@@ -948,7 +948,7 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL
 
         if (length(tls.store.alignedReadStore) * 4 > oldSize) {     // the threshold should not be raised if too many matches were removed
             while (tls.options.compactThresh < oldSize)
-                tls.options.compactThresh *= 2;  // Using * 2 in parallel version for scalability reasons.
+							  tls.options.compactThresh *= tls.options.compactMult;
                 // tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
             if (tls.threadId == 0u && tls.options._debugLevel >= 3)
                 fprintf(stderr, "[raising threshold to %u]", unsigned(tls.options.compactThresh));
@@ -1248,8 +1248,13 @@ void _mapMatePairReadsParallel(
             String<TFragmentStore *> localStores;
             std::swap(localStores, tls.verificationResults.localStores);
             omp_unset_lock(&tls.verificationResults.lock->lock_);
+            // Don't compact matches if in configured 'block fraction' of genome.
+            size_t hstckLen = swiftFinderR.endPos - swiftFinderR.startPos;
+            size_t hstckLeft = swiftFinderR.endPos - swiftFinderR.curPos;
+            double fracTodo = 1.0  * hstckLeft / hstckLen;
+            bool dontCompact = tls.options.noCompactFrac >= fracTodo;
             // Write back the contents of these stores to the thread-local store.
-            writeBackToLocal(tls, localStores);
+            writeBackToLocal(tls, localStores, dontCompact);
             clearLocalStores(localStores);
         } while (hasMore);
 
@@ -1269,7 +1274,7 @@ void _mapMatePairReadsParallel(
 
         // After every thread is done with everything, write back once more.
         #pragma omp barrier
-        writeBackToLocal(tls, tls.verificationResults.localStores);
+        writeBackToLocal(tls, tls.verificationResults.localStores, true);
         clearLocalStores(tls.verificationResults.localStores);
     }
 

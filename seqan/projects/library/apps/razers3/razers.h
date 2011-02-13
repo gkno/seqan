@@ -185,6 +185,8 @@ enum {
 		bool		fastaIdQual;		// hidden option for special fasta+quality format we use
 
 	// misc
+	    double      noCompactFrac;      // If in last noCompactFrac of genome, don't compact.
+        double      compactMult;        // Multiplicator for compaction threshold.
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
 
 	// multi-threading
@@ -241,7 +243,8 @@ enum {
 				compMask[i] = 1 << i;
 			compMask[4] = 0;
 
-
+            noCompactFrac = 0.05;
+            compactMult = 2.2;
 			compactThresh = 1024;
 			// compactThresh = 40;
 
@@ -480,6 +483,7 @@ struct MicroRNA{};
 					m.id = length(store->alignedReadStore);
 					appendValue(store->alignedReadStore, m, Generous());
 					appendValue(store->alignQualityStore, q, Generous());
+
 					if (length(store->alignedReadStore) > options->compactThresh)
 					{
                         double beginTime = sysTime();
@@ -493,7 +497,7 @@ struct MicroRNA{};
 						if (length(store->alignedReadStore) * 4 > oldSize) {			// the threshold should not be raised
                             // fprintf(stderr, "[raising threshold]");
 							// options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
-							options->compactThresh *= 2;  // TODO(holtgrew): Increasing threshold by 2 for performance reasons at the cost of memory, for the sake of comparison with parallel.
+							options->compactThresh *= options->compactMult;
                         }
 						
 //						if (options._debugLevel >= 2)

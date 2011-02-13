@@ -806,7 +806,8 @@ void _mapMatePairReads(
 							compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
 							
 							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
-								options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
+							  options.compactThresh *= options.compactMult;
+								//options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 							
 							if (options._debugLevel >= 2)
 								::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";

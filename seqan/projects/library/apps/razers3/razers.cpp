@@ -28,7 +28,7 @@
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
-#define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
+//#define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
 //#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)
 //#define RAZERS_DEBUG_MATEPAIRS
 
@@ -380,6 +380,9 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = gap space");
 	addHelpLine(parser, "1 = position space");
 	addOption(parser, CommandLineOption("ga", "global-alignment",   "compute global alignment (in SAM output)", OptionType::Bool, options.computeGlobal));
+	addSection(parser, "Misc Options:");
+	addOption(parser, CommandLineOption("cm", "compact-mult", "multiply compaction treshold by this value after reaching and compacting", OptionType::Double | OptionType::Label, options.compactMult));
+	addOption(parser, CommandLineOption("ncf", "no-compact-frac", "don't compact if in this last fraction of genome", OptionType::Double | OptionType::Label, options.noCompactFrac));
 	addSection(parser, "Filtration Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s",  "shape",             "set k-mer shape", OptionType::String | OptionType::Label, options.shape), "BITSTRING"));
 	addOption(parser, CommandLineOption("t",  "threshold",         "set minimum k-mer threshold", OptionType::Int | OptionType::Label, options.threshold));
@@ -433,6 +436,8 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "genome-naming", options.genomeNaming);
 	getOptionValueLong(parser, "read-naming", options.readNaming);
 	getOptionValueLong(parser, "position-format", options.positionFormat);
+	getOptionValueLong(parser, "compact-mult", options.compactMult);
+	getOptionValueLong(parser, "no-compact-frac", options.noCompactFrac);
 	if (isSetLong(parser, "global-alignment")) options.computeGlobal = true;
 	getOptionValueLong(parser, "shape", options.shape);
 	getOptionValueLong(parser, "threshold", options.threshold);
