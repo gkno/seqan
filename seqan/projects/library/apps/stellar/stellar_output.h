@@ -206,19 +206,19 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////
 // Calls _writeMatchGff for each match in StringSet of String of matches.
 //   = Writes matches in gff format to a file.
-template<typename TInfix, typename TQueryId, typename TId, typename TIds, typename TMode, typename TFile,
+template<typename TInfix, typename TQueryId, typename TIds, typename TDatabases, typename TMode, typename TFile,
          typename TString>
-int
+bool
 _outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > const & matches,
-			   TId const & databaseID,
-			   bool const databaseStrand,
 			   TIds const & ids,
+			   TDatabases & databases,
 			   TMode verbose,
 			   TFile & fileName,
 			   TString & format) {
 SEQAN_CHECKPOINT
 	typedef StellarMatch<TInfix, TQueryId> TMatch;
 	typedef typename Size<typename TMatch::TAlign>::Type TSize;
+	typedef typename Iterator<String<TMatch> >::Type TIterator;
 
 	TSize numMatches = 0;
 	TSize totalLength = 0;
@@ -231,49 +231,74 @@ SEQAN_CHECKPOINT
 		return 1;
 	}
 
+	// output matches on positive database strand
 	for (TSize i = 0; i < length(matches); i++) {
 		QueryMatches<TMatch> queryMatches = value(matches, i);
-		if (length(queryMatches.matches) == 0) continue;
 
-		for (TSize j = 0; j < length(queryMatches.matches); j++) {
-			TMatch m = value(queryMatches.matches, j);
-			if (format == "gff")
-				_writeMatchGff(databaseID, ids[i], databaseStrand, m.row1, m.row2, file);
-			else 
-				_writeMatch(databaseID, ids[i], databaseStrand, m.row1, m.row2, file);
+		TIterator it = begin(queryMatches.matches);
+		TIterator itEnd = end(queryMatches.matches);
 
-			TSize len = _max(length(m.row1), length(m.row2));
+		while (it < itEnd) {
+			TSize len = _max(length((*it).row1), length((*it).row2));
 			totalLength += len;
 			if(len > maxLength) maxLength = len;
+
+			if ((*it).orientation) {
+				if (format == "gff")
+					_writeMatchGff((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+				else 
+					_writeMatch((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+			}
+
+			++it;
+		}
+	}
+		
+	reverseComplement(databases);
+
+	// output matches on negative database strand
+	for (TSize i = 0; i < length(matches); i++) {
+		QueryMatches<TMatch> queryMatches = value(matches, i);
+
+		TIterator it = begin(queryMatches.matches);
+		TIterator itEnd = end(queryMatches.matches);
+
+		while (it < itEnd) {
+			if (!(*it).orientation) {
+				if (format == "gff")
+					_writeMatchGff((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+				else 
+					_writeMatch((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+			}
+			++it;
 		}
 		numMatches += length(queryMatches.matches);
 	}
 
 	file.close();
 
+	std::cout << "# Eps-matches     : " << numMatches << std::endl;
 	if (verbose > 0) {
 		if (numMatches > 0) {
-			std::cout << "    Longest eps-match : " << maxLength << std::endl;
-			std::cout << "    Avg match length  : " << totalLength / numMatches << std::endl;
+			std::cout << "Longest eps-match : " << maxLength << std::endl;
+			std::cout << "Avg match length  : " << totalLength / numMatches << std::endl;
 		}
-		std::cout << "    # Eps-matches     : " << numMatches << std::endl;
 	}
 
-	return numMatches;
+	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calls _writeMatchGff for each match in StringSet of String of matches.
 //   = Writes matches in gff format to a file.
 // Writes disabled query sequences to disabledFile.
-template<typename TInfix, typename TQueryId, typename TId, typename TQueries, typename TIds,
+template<typename TInfix, typename TQueryId, typename TQueries, typename TDatabases, typename TIds,
          typename TMode, typename TFile, typename TString>
-int
+bool 
 _outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > const & matches, 
-			   TId const & databaseID,
-			   bool const databaseStrand,
 			   TQueries & queries,
 			   TIds const & ids,
+			   TDatabases & databases,
 			   TMode verbose,
 			   TFile & fileName,
 			   TString & format,
@@ -281,6 +306,7 @@ _outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > const &
 SEQAN_CHECKPOINT
 	typedef StellarMatch<TInfix, TQueryId> TMatch;
 	typedef typename Size<typename TMatch::TAlign>::Type TSize;
+	typedef typename Iterator<String<TMatch> >::Type TIterator;
 
     TSize maxLength = 0;
     TSize totalLength = 0;
@@ -300,46 +326,65 @@ SEQAN_CHECKPOINT
 		return 1;
 	}
 
+	// output matches on positive database strand
     for (TSize i = 0; i < length(matches); i++) {
 		QueryMatches<TMatch> queryMatches = value(matches, i);
 		if (queryMatches.disabled) {
-			if (numDisabled == 0) {
-				daFile << "Database sequence " << databaseID << ":\n\n";
-			}
 			daFile << ">" << ids[i] << "\n";
 			daFile << queries[i] << "\n\n";
 			++numDisabled;
 		}
-        if (length(queryMatches.matches) == 0) continue;
-        //std::cout << "Pattern sequence: " << ids[i] << "\n";
-        for (TSize j = 0; j < length(queryMatches.matches); j++) {
-            TMatch m = value(queryMatches.matches, j);
 
-            TSize len = _max(length(m.row1), length(m.row2));
+		TIterator it = begin(queryMatches.matches);
+		TIterator itEnd = end(queryMatches.matches);
+
+		while (it < itEnd) {
+            TSize len = _max(length((*it).row1), length((*it).row2));
             totalLength += len;
             if(len > maxLength) maxLength = len;
 
-			if (format == "gff")
-	            _writeMatchGff(databaseID, ids[i], databaseStrand, m.row1, m.row2, file);
-			else 
-				_writeMatch(databaseID, ids[i], databaseStrand, m.row1, m.row2, file);
+			if ((*it).orientation) {
+				if (format == "gff")
+					_writeMatchGff((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+				else 
+					_writeMatch((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+			}
+			++it;
+        }
+	}
+
+	reverseComplement(databases);
+	
+	// output matches on positive database strand
+	for (TSize i = 0; i < length(matches); i++) {
+		QueryMatches<TMatch> queryMatches = value(matches, i);
+		TIterator it = begin(queryMatches.matches);
+		TIterator itEnd = end(queryMatches.matches);
+
+		while (it < itEnd) {
+			if ((*it).orientation) {
+				if (format == "gff")
+					_writeMatchGff((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+				else 
+					_writeMatch((*it).id, ids[i], (*it).orientation, (*it).row1, (*it).row2, file);
+			}
+			++it;
         }
         numMatches += length(queryMatches.matches);
-        //std::cout << "  # Eps-matches: " << length(queryMatches.matches) << std::endl;
     }
 	daFile.close();
 	file.close();
 
+	std::cout << "# Eps-matches     : " << numMatches << std::endl;
 	if (verbose > 0 ) {
 		if (numMatches > 0) {
-			std::cout << "    Longest eps-match : " << maxLength << std::endl;
-			std::cout << "    Avg match length  : " << totalLength / numMatches << std::endl;
+			std::cout << "Longest eps-match : " << maxLength << std::endl;
+			std::cout << "Avg match length  : " << totalLength / numMatches << std::endl;
 		}
-		std::cout << "    # Eps-matches     : " << numMatches << std::endl;
-		std::cout << "    # Disabled queries: " << numDisabled << std::endl;
+		std::cout << "# Disabled queries: " << numDisabled << std::endl;
 	}
 
-	return numMatches;
+	return 0;
 }
 
 #endif

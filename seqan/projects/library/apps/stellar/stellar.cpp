@@ -30,54 +30,45 @@ using namespace seqan;
 ///////////////////////////////////////////////////////////////////////////////
 // Initializes a Finder object for a database sequence,
 //  calls stellar, and writes matches to file
-template<typename TSequence, typename TId, typename TPattern, typename TQueries>
-inline int
+template<typename TSequence, typename TId, typename TPattern, typename TMatches>
+inline bool
 _stellarOnOne(TSequence & database,
-				TId & databaseID,
-				TPattern & pattern_swift,
-				TQueries & queries,
-				StringSet<TId> & queryIDs,
-				bool databaseStrand,
-				StellarOptions & options) {
-	std::cout << "  " << databaseID << std::endl;
-    int numSwiftHits;
+			  TId & databaseID,
+			  TPattern & swiftPattern,
+			  bool databaseStrand,
+			  TMatches & matches,
+			  StellarOptions & options) {
+	std::cout << "  " << databaseID;
+	if (!databaseStrand) std::cout << ", complement";
 
 	// finder
     typedef Finder<TSequence, Swift<SwiftLocal> > TFinder;
-	TFinder finder_swift(database, options.minRepeatLength, options.maxRepeatPeriod);
-
-    // container for eps-matches
-	StringSet<QueryMatches<StellarMatch<TSequence, TId> > > matches;
+	TFinder swiftFinder(database, options.minRepeatLength, options.maxRepeatPeriod);
 
 	// stellar
 	if (options.fastOption == CharString("exact"))
-		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-								  queryIDs, matches, AllLocal());
+		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
+							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+							   databaseID, databaseStrand, matches, AllLocal());
 	else if (options.fastOption == "bestLocal")
-		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-								  queryIDs, matches, BestLocal());
+		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
+							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+							   databaseID, databaseStrand, matches, BestLocal());
 	else if (options.fastOption == "bandedGlobal")
-		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-								  queryIDs, matches, BandedGlobal());
+		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
+							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+							   databaseID, databaseStrand, matches, BandedGlobal());
 	else if (options.fastOption == "bandedGlobalExtend")
-		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-								  queryIDs, matches, BandedGlobalExtend());
+		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
+							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+							   databaseID, databaseStrand, matches, BandedGlobalExtend());
 	else {
-		std::cerr << "Unknown verification strategy: " << options.fastOption << std::endl;
-		return 0;
+		std::cerr << "\nUnknown verification strategy: " << options.fastOption << std::endl;
+		return false;
 	}
 
-	// file output
-	if (options.disableThresh != (unsigned)-1)
-		return _outputMatches(matches, databaseID, databaseStrand, queries, queryIDs, options.verbose,
-		                      options.outputFile, options.outputFormat, options.disabledQueriesFile);
-	else
-		return _outputMatches(matches, databaseID, databaseStrand, queryIDs, options.verbose,
-		                      options.outputFile, options.outputFormat);
+	std::cout << std::endl;
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -129,52 +120,58 @@ inline bool _qgramDisableBuckets(Index<TStringSet, IndexQGram<TShape, TSpec> > &
 // Initializes a Pattern object with the query sequences, 
 //  and calls _stellarOnOne for each database sequence
 template<typename TSequence, typename TId>
-inline int
+inline bool
 _stellarOnAll(StringSet<TSequence> & databases,
-				StringSet<TId> & databaseIDs,
-				StringSet<TSequence> & queries,
-				StringSet<TId> & queryIDs,
-				StellarOptions & options) {
+			  StringSet<TId> & databaseIDs,
+			  StringSet<TSequence> & queries,
+			  StringSet<TId> & queryIDs,
+			  StellarOptions & options) {
     // pattern
     typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
-    TQGramIndex index_qgram(queries);
-    resize(indexShape(index_qgram), options.qGram);
-	cargo(index_qgram).abundanceCut = options.qgramAbundanceCut;
-	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
+    TQGramIndex qgramIndex(queries);
+    resize(indexShape(qgramIndex), options.qGram);
+	cargo(qgramIndex).abundanceCut = options.qgramAbundanceCut;
+	Pattern<TQGramIndex, Swift<SwiftLocal> > swiftPattern(qgramIndex);
+	
+	if (options.verbose) swiftPattern.params.printDots = true;
 
 	// Construct index
 	std::cout << "Constructing index..." << std::endl;
-	indexRequire(index_qgram, QGramSADir());
+	indexRequire(qgramIndex, QGramSADir());
 	std::cout << std::endl;
 
-	int numMatches = 0;
-	// positive database strand
-    if (options.forward) {
-		std::cout << "Aligning all query sequences to forward database sequence";
-		std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
+    // container for eps-matches
+	StringSet<QueryMatches<StellarMatch<TSequence, TId> > > matches;
+    resize(matches, length(queries));
 
-		for(unsigned i = 0; i < length(databases); ++i) {
-			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs,
-				                        true, options);
+	std::cout << "Aligning all query sequences to database sequence..." << std::endl;
+	for(unsigned i = 0; i < length(databases); ++i) {
+		// positive database strand
+		if (options.forward) {
+			if (!_stellarOnOne(databases[i], databaseIDs[i], swiftPattern, true, matches, options))
+				return 1;
 		}
-		std::cout << std::endl;
+		// negative (reverse complemented) database strand
+		if (options.reverse) {
+			reverseComplement(databases[i]);
+			if (!_stellarOnOne(databases[i], databaseIDs[i], swiftPattern, false, matches, options))
+				return 1;
+			reverseComplement(databases[i]);
+		}
 	}
-
-	// negative (reverse complemented) database strand
-    if (options.reverse) {
-        std::cout << "Aligning all query sequences to reverse complemented database sequence";
-		std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
-
-        reverseComplement(databases);
-
-        for(unsigned i = 0; i < length(databases); ++i) {
-			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs,
-				                        false, options);
-        }
-		std::cout << std::endl;
-    }
-
-    return numMatches;
+	std::cout << std::endl;
+	
+	// file output
+	if (options.disableThresh != (unsigned)-1) {
+		if (!_outputMatches(matches, queries, queryIDs, databases, options.verbose,
+		                      options.outputFile, options.outputFormat, options.disabledQueriesFile)) return 1;
+	}
+	else {
+		if (!_outputMatches(matches, queryIDs, databases, options.verbose,
+		                      options.outputFile, options.outputFormat)) return 1;
+	}
+	
+	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -313,7 +310,7 @@ _writeFileNames(TOptions & options) {
 inline void
 _addVersion(CommandLineParser& parser) {
 	::std::string rev = "$Revision: 8300 $";
-	addVersionLine(parser, "Version 1.0 (December 5th 2010) SeqAn Revision: " + rev.substr(11, 4) + "");
+	addVersionLine(parser, "Version 1.1 (February 5th 2011) SeqAn Revision: " + rev.substr(11, 4) + "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -528,9 +525,8 @@ int main(int argc, const char *argv[]) {
 
 	// stellar on all databases and queries writing results to file
     SEQAN_PROTIMESTART(timeStellar);
-	int numMatches = _stellarOnAll(databases, databaseIDs, queries, queryIDs, options);
+	if (!_stellarOnAll(databases, databaseIDs, queries, queryIDs, options)) return 1;
 
-	std::cout << "Eps-matches: " << numMatches << std::endl;
     if (options.verbose > 0) 
 		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
 	

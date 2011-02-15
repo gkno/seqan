@@ -103,11 +103,12 @@ struct StellarMatch {
 
 	static const TId INVALID_ID;
 
+	TId id;			// database ID
+	bool orientation;
 	TPos begin1;
 	TPos end1;
 	TRow row1;
 
-	TId id;
 	TPos begin2;
 	TPos end2;
 	TRow row2;
@@ -115,8 +116,9 @@ struct StellarMatch {
 	StellarMatch() {}
 
 	template<typename TAlign, typename TId>
-	StellarMatch(TAlign & _align, TId _id) {
+	StellarMatch(TAlign & _align, TId _id, bool _orientation) {
 		id = _id;
+		orientation = _orientation;
 		row1 = row(_align, 0);
 		row2 = row(_align, 1);
 
@@ -171,6 +173,10 @@ struct LessPos : public ::std::binary_function <TMatch, TMatch, bool> {
 		if (aEnd2 < bEnd2) return -1;
 		if (aEnd2 > bEnd2) return 1;
 
+		// orientation
+		if (a.orientation > b.orientation) return -1;
+		if (a.orientation < b.orientation) return 1;
+
 		//// orientation
 		//bool oa = a.begin1 < a.end1;
 		//bool ob = b.begin1 < b.end1;
@@ -191,11 +197,11 @@ struct LessLength : public ::std::binary_function <TMatch, TMatch, bool> {
 	LessLength() {}
 
 	inline int compare(TMatch const & a, TMatch const & b) const {
-		typename TMatch::TPos aLength = abs((int)a.end1 - (int)a.begin1);
-		typename TMatch::TPos bLength = abs((int)b.end1 - (int)b.begin1);
-
 		if (a.id == TMatch::INVALID_ID) return 1;
 		if (b.id == TMatch::INVALID_ID) return -1;
+
+		typename TMatch::TPos aLength = abs((int)a.end1 - (int)a.begin1);
+		typename TMatch::TPos bLength = abs((int)b.end1 - (int)b.begin1);
 
 		if (aLength < bLength) return 1;
 		if (aLength > bLength) return -1;
