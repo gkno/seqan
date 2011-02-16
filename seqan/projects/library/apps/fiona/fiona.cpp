@@ -416,23 +416,30 @@ void applyReadErrorCorrections(
 
     std::ostringstream m;
 		if (strContains(toCString(store.readNameStore[readId]), "corrected"))
-			m << "," << corr.errorPos;
+			m << "\t";
 		else
-			m << " corrected: " << corr.errorPos;
+			m << " corrected:\t";
 
 #ifdef SEQAN_VERBOSE
 		_dumpCorrection(store, corr, readId);
 #endif
-		append(store.readNameStore[readId], m.str());
 
 		if (corr.indelLength == 0)
+		{
+			m << corr.errorPos << ':' << store.readSeqStore[readId][corr.errorPos] << "->" << originalReads[corr.correctReadId][corr.correctPos];
 			store.readSeqStore[readId][corr.errorPos] = originalReads[corr.correctReadId][corr.correctPos];
+		}
 #ifdef FIONA_ALLOWINDELS
 		else if (corr.indelLength > 0)
+		{
+			m << corr.errorPos << ":-" << infix(store.readSeqStore[readId], corr.errorPos, corr.errorPos + corr.indelLength);
             erase(store.readSeqStore[readId], corr.errorPos, corr.errorPos + corr.indelLength);
-		else
+		} else {
+			m << corr.errorPos << ":+" << infix(originalReads[corr.correctReadId], corr.correctPos, corr.correctPos + -corr.indelLength);
 			insert(store.readSeqStore[readId], corr.errorPos, infix(originalReads[corr.correctReadId], corr.correctPos, corr.correctPos + -corr.indelLength));
+		}
 #endif
+		append(store.readNameStore[readId], m.str());
         if (readId == options.debugRead)
         {
             std::cout << "AFTER:" << std::endl;
@@ -1279,17 +1286,13 @@ unsigned correctReads(
 
 #endif
 
-  std::ofstream out("id");
 	unsigned totalCorrections = 0;
 	for (unsigned i = 0; i < length(corrections); ++i)
 	{
 		if (corrections[i].overlap == 0) continue;
-		unsigned readId = i;
-		if (readId >= readCount)
-			readId -= readCount;
-		out << readId << " 0" << std::endl;
 		++totalCorrections;
 	}
+
 	applyReadErrorCorrections(store, corrections, options);
 	std::cout << "Total corrected reads number is "<< totalCorrections << std::endl;
 
@@ -1428,6 +1431,7 @@ int main(int argc, const char* argv[])
 	}
 
 	unsigned firstCycleCorrections = 0;
+    unsigned prevCycleCorrections = 0;
 	bool autoCycles = (options.cycles == 0);
 	if (autoCycles) options.cycles = 20;
 	
@@ -1460,12 +1464,23 @@ int main(int argc, const char* argv[])
 			firstCycleCorrections = numCorrected;
 		else
 		{
-			if (autoCycles && numCorrected <= firstCycleCorrections / 5)
-			{
-				++cycle;
-				break;
-			}
+			if (autoCycles)
+            {
+                // we stop if we correct less than 20% of the first cycle
+                if (numCorrected <= firstCycleCorrections / 5)
+                {
+                    ++cycle;
+                    break;
+                }
+                // we expect the number of corrected reads to decrease by at least 20%
+                if (prevCycleCorrections * 0.8 < numCorrected)
+                {
+                    ++cycle;
+                    break;
+                }
+            }
 		}
+        prevCycleCorrections = numCorrected;
 	}
 
 	// write in file all input reads with the corrected one
