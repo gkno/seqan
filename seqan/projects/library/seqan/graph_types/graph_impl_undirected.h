@@ -389,7 +389,7 @@ removeVertex(Graph<Undirected<TCargo, TSpec> >& g,
 			 TVertexDescriptor const v) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
 
 	removeOutEdges(g,v); // Remove all outgoing edges
 	releaseId(g.data_id_managerV, v); // Release id

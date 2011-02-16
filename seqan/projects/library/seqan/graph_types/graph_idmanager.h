@@ -191,7 +191,7 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 		  TId const id) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(idm,id) == true)
+	SEQAN_ASSERT_TRUE(idInUse(idm,id));
 	if (id == (TId) length(idm.data_in_use) - 1) {
 		resize(idm.data_in_use, length(idm.data_in_use) - 1, Generous());
 	} else {
@@ -318,7 +318,7 @@ idInUse(IdManager<TIdType, TSpec> const& idm,
 		TId const id)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(id < (TId) length(idm.data_in_use))
+	SEQAN_ASSERT_LT(id, (TId) length(idm.data_in_use));
 	return idm.data_in_use[id];
 }
 
