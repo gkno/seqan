@@ -86,6 +86,14 @@ public:
     }
 };
 
+// Specialization for bools do not need min/max.
+template <>
+class Pdf<Uniform<bool> >
+{
+public:
+	Pdf() {}
+};
+	
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
@@ -119,6 +127,17 @@ _pickRandomNumber(TRNG & rng, Pdf<Uniform<T> > const & pdf, True const &)
     return y + pdf._min;
 }
 
+// Specialization for picking a random bool.
+template <typename TRNG>
+inline
+typename Value<Pdf<Uniform<bool> > >::Type
+_pickRandomNumber(TRNG & rng, Pdf<Uniform<bool> > const & pdf, True const &)
+{
+	SEQAN_CHECKPOINT;
+	typename Value<TRNG>::Type x = pickRandomNumber(rng);
+	return x % 2;
+}
+	
 // Pick a continuous random number uniformly distributed.
 template <typename TRNG, typename T>
 inline

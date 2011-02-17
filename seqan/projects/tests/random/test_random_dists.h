@@ -191,6 +191,30 @@ SEQAN_DEFINE_TEST(test_random_uniform_int_pick)
     SEQAN_ASSERT_LEQ(fabs(sum / 100000.0), 0.03);
 }
 
+SEQAN_DEFINE_TEST(test_random_uniform_bool_pick)
+{
+    using namespace seqan;
+	
+    Rng<MersenneTwister> mt(42);
+    Pdf<Uniform<bool> > pdf;
+	
+    unsigned gt = 0;  // Greater than 0.
+	
+    int sum = 0;
+    for (unsigned i = 0; i < 100000; ++i) {
+        int x = pickRandomNumber(mt, pdf);
+        sum += x;
+        gt += x > 0;
+        SEQAN_ASSERT_GEQ(x, 0);
+        SEQAN_ASSERT_LEQ(x, 1);
+    }
+	
+    SEQAN_ASSERT_GT(gt, 0u);
+    SEQAN_ASSERT_LT(gt, 100000u);
+	
+	SEQAN_ASSERT_IN_DELTA(sum / 100000.0, 0.5, 0.01);
+}
+
 SEQAN_DEFINE_TEST(test_random_uniform_double_constructors)
 {
     using namespace seqan;

@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adding specialization of Uniform probability density function for bools and tests.
  * Documented `getQuality`.
 
 == Release 1.2 ==
