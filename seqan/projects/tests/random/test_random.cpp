@@ -45,6 +45,8 @@
 
 SEQAN_BEGIN_TESTSUITE(test_random) {
     // Call Tests.
+    SEQAN_CALL_TEST(test_default_rng);
+
     SEQAN_CALL_TEST(test_random_mt19937_constructors);
     SEQAN_CALL_TEST(test_random_mt19937_pick);
     SEQAN_CALL_TEST(test_random_mt19937_metafunctions);
@@ -63,6 +65,7 @@ SEQAN_BEGIN_TESTSUITE(test_random) {
 
     SEQAN_CALL_TEST(test_random_uniform_int_constructors);
     SEQAN_CALL_TEST(test_random_uniform_int_pick);
+    SEQAN_CALL_TEST(test_random_uniform_bool_pick);
 
     SEQAN_CALL_TEST(test_random_uniform_double_constructors);
     SEQAN_CALL_TEST(test_random_uniform_double_pick);

@@ -37,6 +37,26 @@
 #ifndef TEST_RANDOM_TEST_RANDOM_RNG_H_
 #define TEST_RANDOM_TEST_RANDOM_RNG_H_
 
+// Test GetDefaultRang and defaultRng().
+SEQAN_DEFINE_TEST(test_default_rng)
+{
+    using namespace seqan;
+
+    // Test that calling the function works.
+    typedef String<Dna> TTag;
+    typedef typename GetDefaultRng<TTag>::Type TRng;
+    TRng & rng = defaultRng(TTag());
+    (void)rng;
+
+    // Test that a reference is returned and the global state changes.
+    typedef typename Value<TRng>::Type TValue;
+    TValue x1 = pickRandomNumber(defaultRng(TTag()));
+    TValue x2 = pickRandomNumber(defaultRng(TTag()));
+    TValue x3 = pickRandomNumber(defaultRng(TTag()));
+    SEQAN_ASSERT_TRUE(x1 != x2 || x2 != x3);  // 3 times the same value is not probable!
+}
+
+
 // Construct MersenneTwister in all possible ways.
 SEQAN_DEFINE_TEST(test_random_mt19937_constructors)
 {

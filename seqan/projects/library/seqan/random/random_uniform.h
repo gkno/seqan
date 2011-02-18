@@ -127,17 +127,6 @@ _pickRandomNumber(TRNG & rng, Pdf<Uniform<T> > const & pdf, True const &)
     return y + pdf._min;
 }
 
-// Specialization for picking a random bool.
-template <typename TRNG>
-inline
-typename Value<Pdf<Uniform<bool> > >::Type
-_pickRandomNumber(TRNG & rng, Pdf<Uniform<bool> > const & pdf, True const &)
-{
-	SEQAN_CHECKPOINT;
-	typename Value<TRNG>::Type x = pickRandomNumber(rng);
-	return x % 2;
-}
-	
 // Pick a continuous random number uniformly distributed.
 template <typename TRNG, typename T>
 inline
@@ -159,6 +148,17 @@ pickRandomNumber(TRNG & rng, Pdf<Uniform<T> > const & pdf)
     if (pdf._min == pdf._max)
         return pdf._min;
     return _pickRandomNumber(rng, pdf, typename IsIntegral<T>::Type());
+}
+
+// Specialization for picking a random bool.
+template <typename TRNG>
+inline
+typename Value<Pdf<Uniform<bool> > >::Type
+pickRandomNumber(TRNG & rng, Pdf<Uniform<bool> > const &)
+{
+    SEQAN_CHECKPOINT;
+	typename Value<TRNG>::Type x = pickRandomNumber(rng);
+	return x % 2;
 }
 
 }  // namespace seqan

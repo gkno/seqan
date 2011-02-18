@@ -6,7 +6,8 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
- * Adding specialization of Uniform probability density function for bools and tests.
+ * Adding metafunction `GetDefaultRng<T>::Type` and function `defaultRng()` for construction of global random number generators to be used by default in randomized data structures and algorithms.
+ * Adding specialization of Uniform probability density function for `bool`s and tests.
  * Documented `getQuality`.
 
 == Release 1.2 ==

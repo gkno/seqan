@@ -80,7 +80,7 @@ class Pdf;
 ..summary:Function call operator.
 ..signature:operator()
 */
-        
+
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
@@ -91,14 +91,14 @@ class Pdf;
 ///.Metafunction.Value.param.T.type:Class.Rng
 ///.Metafunction.MinValue.param.T.type:Class.Rng
 ///.Metafunction.MaxValue.param.T.type:Class.Rng
-	
+
 template <typename TSpec>
 struct MaxValue<Rng<TSpec> >
 {
     typedef typename Value<Rng<TSpec> >::Type TValue_;
     static const TValue_ VALUE;
 };
-	
+
 template <typename TSpec>
 const typename Value<Rng<TSpec> >::Type MaxValue<Rng<TSpec> >::VALUE = MaxValue<typename Value<Rng<TSpec> >::Type>::VALUE;
 
@@ -131,7 +131,23 @@ struct MinValue<Rng<TSpec> const>
 
 template <typename TSpec>
 const typename Value<Rng<TSpec> const>::Type MinValue<Rng<TSpec> const>::VALUE = MinValue<typename Value<Rng<TSpec> const>::Type>::VALUE;
-	
+
+/**
+.Metafunction.GetDefaultRng
+..cat:Random
+..summary:Return the default @Class.Rng|Random Number Generator@ to use in a given class, spezialiation or algorithm.
+..signature:GetDefaultRng<T>::Type
+..param.T:The class or algorithm tag to get the default @Class.Rng@ for.
+..returns:The type of Rng specialization to use.
+..remarks:Currently, the default value is @Spec.Mersenne Twister Rng@.
+..see:Function.defaultRng
+ */
+template <typename T>
+struct GetDefaultRng
+{
+    typedef Rng<MersenneTwister> Type;
+};
+
 // ===========================================================================
 // Functions
 // ===========================================================================
@@ -147,8 +163,31 @@ const typename Value<Rng<TSpec> const>::Type MinValue<Rng<TSpec> const>::VALUE =
 ..param.pdf:Probability density function to use, if any.
 ...type:Class.Pdf
 ..returns:Random number as specified in pdf, if any, or rng. For more details refer to the SeqAn Tutorial.
-*/
+ */
 // specification only
+
+/**
+.Function.defaultRng
+..summary:Default default random number generator object of a given type.
+..cat:Random
+..signature:defaultRng([tag])
+..param.tag:Tag to select the @Class.Rng@ specialization from.
+...default:$MersenneTwister$
+...type:nolink:$MersenneTwister$
+..returns:Default default random number generator object of the type given by $tag$.
+...type:nolink:The type as returned @Metafunction.GetDefaultRng@.
+..remarks:The random number generator will be default constructed, i.e. with the default seed.
+..remarks:This function is NOT thread-safe! Also, data structures using such global state are not thread-safe! Data structures using global random number generator state should use pointers or @Class.Holder|Holder instances@. This way, the random number generator state to be used can be set to be thread-local.
+..see:Metafunction.GetDefaultRng
+ */
+template <typename T>
+inline typename GetDefaultRng<T>::Type &
+defaultRng(T const &)
+{
+    typedef typename GetDefaultRng<T>::Type TRng;
+    static TRng x;
+    return x;
+}
 
 }  // namespace seqan
 
