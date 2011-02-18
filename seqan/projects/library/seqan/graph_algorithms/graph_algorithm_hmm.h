@@ -536,9 +536,14 @@ generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename Value<TSequenceSet>::Type TSequence;
 	typedef typename Value<TStateSeqSet>::Type TStateSeq;
+
+    // TODO(holtgrew): It should be possible to use a per-call RNG.
+	typedef typename GetDefaultRng<TGraph>::Type TRng;
+	typedef Pdf<Uniform<double> > TPdf;
+	TPdf pdf(0.0, 1.0);
+	TRng & rng = defaultRng(TGraph());
 	
 	// Initialization
-	mtRandInit();
 	clear(sequences);
 	clear(states);
 	TSize alphSize = ValueSize<TAlphabet>::VALUE;
@@ -554,7 +559,7 @@ generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 		bool stop = false;
 		TSize pos = 0; 
 		while (pos < maxLength) {
-			TProbability prob = (double) (mtRand() % 100000) / (double) (100000);
+			TProbability prob = pickRandomNumber(rng, pdf);
 			TProbability compareProb = 0.0;
 			TOutEdgeIterator itState(hmm, currentState);
 			// Determine the next state
@@ -571,7 +576,7 @@ generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 					appendValue(stat, nextState);
 					if (!isSilent(hmm, nextState)) {
 						compareProb =0.0;
-						prob = (double) (mtRand() % 100000) / (double) (100000);
+						prob = pickRandomNumber(rng, pdf);
 						for (TSize c=0;c<alphSize;++c){
 							compareProb += getEmissionProbability(hmm,targetVertex(hmm, value(itState)), TAlphabet(c));
 							if (prob <= compareProb) {
@@ -796,6 +801,7 @@ inline void
 randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
              TRNG & /*rng*/)
 {
+	// TODO(holtgrew): Why uniform and not random?
 	//_fillHmmRandom(hmm, rng);
 	_fillHmmUniform(hmm);
 }
