@@ -1535,7 +1535,7 @@ int main(int argc, const char* argv[])
 	if (autoCycles) options.cycles = 20;
 	String<double> logCorrections;
 	String<double> roundsDone;
-
+	double lastAdjRSquare = 0;
 	unsigned cycle;
 	for (cycle = 1; cycle <= options.cycles; ++cycle)
 	{
@@ -1569,18 +1569,21 @@ int main(int argc, const char* argv[])
 		logCorrections[cycle-1] = (double)log(numCorrected);
 		roundsDone[cycle-1]     = (double)cycle;
             
-		if(cycle >= 4){
+		if(cycle >= 3){
 			//compute adjusted R-Square after fitting model
 			LinearModel linearModel;
 			linearRegression(linearModel,roundsDone,logCorrections);			
 		        double adjRSquare =  adjustedRSquare(linearModel,roundsDone,logCorrections);	
 			//do another round if adjusted R square value is better than 0.95	
-			if(adjRSquare <= 0.95)
+			if(adjRSquare < lastAdjRSquare)
                 	{
-		    		std::cout <<std::endl<<"Stopped at cycle: "<< cycle <<" with adjustedRSquare: "<< adjRSquare <<std::endl;
+		    		std::cout <<std::endl<<"Stopped at cycle: "<< cycle <<" with adjustedRSquare (previous): "<< adjRSquare <<" ("<<lastAdjRSquare <<")"<<std::endl;
                     		++cycle;
                     		break;
-                	}
+                	}else
+			{
+				lastAdjRSquare=adjRSquare;
+			}
 		}
 		}
 	}
