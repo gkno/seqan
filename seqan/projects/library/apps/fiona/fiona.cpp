@@ -352,6 +352,107 @@ inline double probabilityOneError(TPercentage percentageErr, TSize repLen)
 	return 1.0 - pow(1.0 - percentageErr, repLen);
 }
 
+/*
+* Linear Model fitting used for determination of number of Rounds by fitting
+* log data to capture deviation from a exponential distribution
+*/
+struct LinearModel
+{
+	double		intercept;
+	double 		slope;
+	unsigned int	numberObservations;
+	unsigned int	numberPredictors;
+};
+
+
+	/* compute a fitted value under a linear regression model */
+template <typename LinearModel, typename TValue>
+inline TValue fittedValue(
+        LinearModel const &linearModel,
+	TValue  x) 
+{
+	return((TValue)(linearModel.intercept + (linearModel.slope * (double)x)));
+}
+
+	/* use the standard maximum likelihood estimator for linear regression 
+	 * for datapoints x=(x_1, ..., x_n) and y=(y_1, .., y_n)  */
+template <typename LinearModel, typename TValue>
+inline void linearRegression(
+        LinearModel &linearModel,
+        String<TValue> const  &x,
+        String<TValue> const &y)
+{
+	/* get the means first  */
+	TValue meanX=0;
+	TValue meanY=0;
+	for(unsigned int i=0;i<length(x);i++)
+	{
+		meanX += x[i];
+		meanY += y[i];
+	}
+	meanX = meanX/(TValue)length(x);
+	meanY = meanY/(TValue)length(y);
+
+	/* use the standard maximum likelihood estimator for linear regression  
+	 * and compute first the slope than the intercept of the linear function */
+	TValue covarianceXY = 0;
+	TValue varianceX = 0;
+	 for(unsigned int i=0;i<length(x);i++)
+        {
+                covarianceXY += (x[i] - meanX)*( y[i] - meanY);
+                varianceX   += pow( (x[i] - meanX) ,(unsigned int)2);
+        }
+	
+	/* save the parameters in the model */
+	linearModel.slope     = (double) covarianceXY/varianceX;
+	linearModel.intercept = (double) (meanY - ((TValue)linearModel.slope * meanX) );
+	linearModel.numberObservations = (unsigned int) length(x);
+        linearModel.numberPredictors  = (unsigned int) 1;	 
+}
+
+       /* compute R-Square (or Coefficient of Determination) for a set of values that
+	* have been fit using a linear regression model */ 
+template <typename LinearModel, typename TValue>
+inline TValue RSquare(
+        LinearModel const &linearModel,
+        String<TValue> const &x,
+        String<TValue> const &y)
+{
+        /* get the mean of y  */
+        TValue meanY=0;
+        for(unsigned int i=0;i<length(y);i++)
+        {
+                meanY += y[i];
+        }
+        meanY = meanY/(TValue)length(y);
+	/* R-Square is defined as  1 - SSerror/SStotal, where SSerror is the sum of residual errors
+	 * and SStotal is the variance of the y values	*/
+	TValue SSerror = 0;
+	TValue SStotal =0;
+         for(unsigned int i=0;i<length(x);i++)
+        {
+                SStotal  += pow( (y[i] - meanY) ,(unsigned int)2 );
+		SSerror  += pow( (y[i] - fittedValue(linearModel,x[i])) , (unsigned int)2 );
+        }
+	return((TValue) ( 1- (SSerror/SStotal)));
+}
+
+       /* compute the adjusted R-Square for a set of values that
+	* have been fit using a linear regression model */ 
+template <typename LinearModel, typename TValue>
+inline TValue adjustedRSquare(
+        LinearModel const &linearModel,
+        String<TValue> const &x,
+        String<TValue> const &y)
+{
+	/* The adjusted R-Square value is nothing but the R-Square value corrected by the number
+	 * of observed variables n and the number of predictors k
+	 * AdjRSquare = 1 - (1-RSquare)*(n-1)/(n-k-1) */
+
+	TValue R_2 = RSquare(linearModel,x,y);
+	return( (TValue) (1 - (TValue)(1-R_2) * (TValue)(linearModel.numberObservations -1)/(TValue)(linearModel.numberObservations - linearModel.numberPredictors -1)));
+}
+
 template <typename TFragmentStore, typename TCorrection>
 inline void _dumpCorrection(
 	TFragmentStore &store,
@@ -1430,11 +1531,11 @@ int main(int argc, const char* argv[])
 		std::cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << std::endl;
 	}
 
-	unsigned firstCycleCorrections = 0;
-    unsigned prevCycleCorrections = 0;
 	bool autoCycles = (options.cycles == 0);
 	if (autoCycles) options.cycles = 20;
-	
+	String<double> logCorrections;
+	String<double> roundsDone;
+
 	unsigned cycle;
 	for (cycle = 1; cycle <= options.cycles; ++cycle)
 	{
@@ -1460,29 +1561,29 @@ int main(int argc, const char* argv[])
 		// TODO maybe to stop if there is not reads corrected in the cycle before
 		// if so after each iteration must save the ID for the reads which are corrected
 		// thus we can also show the total number of reads that are corrected at the final stage
-		if (cycle == 1)
-			firstCycleCorrections = numCorrected;
-		else
+		if (autoCycles)
 		{
-			if (autoCycles)
-            {
-                // we stop if we correct less than 20% of the first cycle
-                if (numCorrected <= firstCycleCorrections / 5)
-                {
-                    ++cycle;
-                    break;
-                }
-                // we expect the number of corrected reads to decrease by at least 20%
-                if (prevCycleCorrections * 0.8 < numCorrected)
-                {
-                    ++cycle;
-                    break;
-                }
-            }
-		}
-        prevCycleCorrections = numCorrected;
-	}
 
+		resize(logCorrections,cycle);
+		resize(roundsDone,cycle);
+		logCorrections[cycle-1] = (double)log(numCorrected);
+		roundsDone[cycle-1]     = (double)cycle;
+            
+		if(cycle >= 4){
+			//compute adjusted R-Square after fitting model
+			LinearModel linearModel;
+			linearRegression(linearModel,roundsDone,logCorrections);			
+		        double adjRSquare =  adjustedRSquare(linearModel,roundsDone,logCorrections);	
+			//do another round if adjusted R square value is better than 0.95	
+			if(adjRSquare <= 0.95)
+                	{
+		    		std::cout <<std::endl<<"Stopped at cycle: "<< cycle <<" with adjustedRSquare: "<< adjRSquare <<std::endl;
+                    		++cycle;
+                    		break;
+                	}
+		}
+		}
+	}
 	// write in file all input reads with the corrected one
 	std::ofstream out(toCString(getArgumentValue(parser, 1)));
 	int numCorrected = 0;
