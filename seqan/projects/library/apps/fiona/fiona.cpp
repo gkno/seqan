@@ -1531,12 +1531,14 @@ int main(int argc, const char* argv[])
 		std::cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << std::endl;
 	}
 
-	bool autoCycles = (options.cycles == 0);
-	if (autoCycles) options.cycles = 20;
+	bool autoCycles = (options.cycles == 0 || options.cycles == 1000);
+	if(options.cycles == 0) options.cycles = 20;
+	//if (autoCycles) options.cycles = 20;
 	String<double> logCorrections;
 	String<double> roundsDone;
 	double lastAdjRSquare = 0;
 	unsigned cycle;
+	std::cout << "number iters: " << options.cycles << std::endl;
 	for (cycle = 1; cycle <= options.cycles; ++cycle)
 	{
 		std::cout << std::endl << "Cycle "<< cycle;
@@ -1575,6 +1577,14 @@ int main(int argc, const char* argv[])
 			linearRegression(linearModel,roundsDone,logCorrections);			
 		        double adjRSquare =  adjustedRSquare(linearModel,roundsDone,logCorrections);	
 			//do another round if adjusted R square value is better than 0.95	
+			if(options.cycles == 1000 && cycle > 3) {
+				if(adjRSquare <= 0.95){
+					std::cout <<std::endl<<"Stopped at cycle: "<< cycle <<" with adjustedRSquare : "<< adjRSquare <<std::endl;
+                                	++cycle;
+                                	break;  
+				}
+			}else{
+
 			if(adjRSquare < lastAdjRSquare)
                 	{
 		    		std::cout <<std::endl<<"Stopped at cycle: "<< cycle <<" with adjustedRSquare (previous): "<< adjRSquare <<" ("<<lastAdjRSquare <<")"<<std::endl;
@@ -1583,6 +1593,7 @@ int main(int argc, const char* argv[])
                 	}else
 			{
 				lastAdjRSquare=adjRSquare;
+			}
 			}
 		}
 		}
