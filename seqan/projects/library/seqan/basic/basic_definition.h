@@ -232,6 +232,24 @@ struct RemoveConst_<T const [I]>
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+.Internal.IsConst_:
+..signature:IsConst_<T>
+..returns:$True$ if $T$ is $t const$, otherwise $False$.
+*/
+template <typename T>
+struct IsConst_
+{
+	typedef False Type;
+};
+
+template <typename T>
+struct IsConst_<T const>
+{
+    typedef True Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
 .Internal.MakeUnsigned_:
 ..signature:MakeUnsigned_<T>
 ..returns:$unsigned t$ if $T$ is not $unsigned t$, otherwise $T$.
