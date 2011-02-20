@@ -38,6 +38,7 @@
 #include <seqan/file.h>
 
 #include "test_sequence_journaled.h"
+#include "test_sequence_journaled_iterator.h"
 
 
 SEQAN_BEGIN_TESTSUITE(test_sequence_journaled) {
@@ -58,7 +59,10 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_journaled) {
     SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_subscript_operator);
     SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_fuzzying);
 
-    // Call tests of the sequence journal with sorted array_ journals.
+    SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_iterator_sum);
+    SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_iterator_difference);
+
+    // Call tests of the sequence journal with sorted array journals.
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_host);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_clear);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_erase_position);
@@ -74,6 +78,9 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_journaled) {
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_begin_end_const_iterator);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_subscript_operator);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_fuzzying);
+
+    SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_iterator_sum);
+    SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_iterator_difference);
 
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence_journaled/journal_entry.h");

@@ -237,11 +237,6 @@ _updateSegmentIterators(Iter<TJournaledString, JournaledStringIterSpec<TJournalS
         return;
     switch (value(iterator._journalEntriesIterator).segmentSource) {
         case SOURCE_ORIGINAL:
-//             static_cast<int>(begin(host(*iterator._journalStringPtr), Standard()));
-//             static_cast<int>(host(*iterator._journalStringPtr));
-//             static_cast<int>(*iterator._journalStringPtr);
-//             static_cast<int>(iterator._journalStringPtr);
-//             static_cast<int>(iterator._hostSegmentBegin);
             iterator._hostSegmentBegin = begin(host(*iterator._journalStringPtr), Standard()) + value(iterator._journalEntriesIterator).physicalPosition;
             iterator._hostSegmentEnd = iterator._hostSegmentBegin + value(iterator._journalEntriesIterator).length;
             iterator._currentHostIt = iterator._hostSegmentBegin;
@@ -368,13 +363,16 @@ operator*(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const &
     return value(iterator);
 }
 
-template <typename TJournaledString, typename TJournalSpec>
+template <typename TJournaledString, typename TJournalSpec, typename TLen>
 inline
 Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > &
 operator+=(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & iterator,
-          typename Size<TJournaledString>::Type len)
+           TLen len_)
 {
     SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Handle case where len_ < 0?!
+    SEQAN_ASSERT_GEQ(len_, static_cast<TLen>(0));
+    size_t len = len_;
     typedef typename Size<TJournaledString>::Type TSize;
     while (len > 0) {
         TSize remaining;
@@ -420,6 +418,80 @@ operator+(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const &
     Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > temp(iterator);
     temp += len;
     return temp;
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+typename MakeSigned_<typename Position<TJournaledString>::Type >::Type
+operator-(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & it1,
+          Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & it2)
+{
+    SEQAN_CHECKPOINT;
+
+    typedef Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > TIter;
+    typedef typename MakeSigned_<typename Position<TJournaledString>::Type>::Type TResult;
+
+    // First, handle the cases where it1 or it2 are at the end.
+    bool it1AtEnd = atEnd(it1._journalEntriesIterator);
+    bool it2AtEnd = atEnd(it2._journalEntriesIterator);
+    if (it1AtEnd && it2AtEnd) {
+        return 0;
+    } else if (it1AtEnd) {
+        TResult len = length(*it1._journalStringPtr);
+        TResult vPos = value(it2._journalEntriesIterator).virtualPosition;
+        switch (value(it2._journalEntriesIterator).segmentSource) {
+            case SOURCE_ORIGINAL:
+                vPos += it2._currentHostIt - it2._hostSegmentBegin;
+                break;
+            case SOURCE_PATCH:
+                vPos += it2._currentInsertionBufferIt - it2._insertionBufferSegmentBegin;
+                break;
+            default:
+                SEQAN_ASSERT_FAIL("Invalid segment source!");
+        }
+        SEQAN_ASSERT_LT(vPos, len);
+        return len - vPos;
+    } else if (it2AtEnd) {
+        TResult len = length(*it1._journalStringPtr);
+        TResult vPos = value(it1._journalEntriesIterator).virtualPosition;
+        switch (value(it1._journalEntriesIterator).segmentSource) {
+            case SOURCE_ORIGINAL:
+                vPos += it1._currentHostIt - it1._hostSegmentBegin;
+                break;
+            case SOURCE_PATCH:
+                vPos += it1._currentInsertionBufferIt - it1._insertionBufferSegmentBegin;
+                break;
+            default:
+                SEQAN_ASSERT_FAIL("Invalid segment source!");
+        }
+        SEQAN_ASSERT_LT(vPos, len);
+        return vPos - len;
+    }
+
+    // Otherwise, we can simply subtract the virtual positions.
+    TResult vPos1 = value(it1._journalEntriesIterator).virtualPosition;
+    switch (value(it1._journalEntriesIterator).segmentSource) {
+        case SOURCE_ORIGINAL:
+            vPos1 += it1._currentHostIt - it1._hostSegmentBegin;
+            break;
+        case SOURCE_PATCH:
+            vPos1 += it1._currentInsertionBufferIt - it1._insertionBufferSegmentBegin;
+            break;
+        default:
+            SEQAN_ASSERT_FAIL("Invalid segment source!");
+    }
+    TResult vPos2 = value(it2._journalEntriesIterator).virtualPosition;
+    switch (value(it2._journalEntriesIterator).segmentSource) {
+        case SOURCE_ORIGINAL:
+            vPos2 += it2._currentHostIt - it2._hostSegmentBegin;
+            break;
+        case SOURCE_PATCH:
+            vPos2 += it2._currentInsertionBufferIt - it2._insertionBufferSegmentBegin;
+            break;
+        default:
+            SEQAN_ASSERT_FAIL("Invalid segment source!");
+    }
+    return vPos1 - vPos2;
 }
 
 template <typename TJournaledString, typename TJournalSpec>

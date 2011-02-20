@@ -542,6 +542,35 @@ void testJournaledStringFuzzying(TStringJournalSpec const &)
                 SEQAN_ASSERT_EQ(*sjIt, *csIt);
             }
         }
+
+        {
+            // Check operator- on sequence journal iterators;
+            typedef typename Iterator<TJournaledString, Standard>::Type TJournaledStringIterator;
+            typedef typename Iterator<String<char>, Standard>::Type TCharStringIterator;
+
+            TJournaledStringIterator sjIt = begin(journaledString);
+            TJournaledStringIterator sjIt2 = sjIt;
+            TCharStringIterator csIt = begin(string);
+            TCharStringIterator csIt2 = csIt;
+            size_t remaining = length(journaledString);
+
+            while (remaining > 1) {
+                SEQAN_ASSERT_TRUE(csIt != end(string) - 1);
+                size_t len = mtRand() % (remaining + 1);
+                remaining -= len;
+                if (remaining == 0)
+                    break;
+                SEQAN_ASSERT_EQ(*(sjIt + len), *(csIt + len));
+                sjIt += len;
+                csIt += len;
+                SEQAN_ASSERT_EQ(*sjIt, *csIt);
+
+                SEQAN_ASSERT_EQ(csIt2 - csIt, sjIt2 - sjIt);
+                SEQAN_ASSERT_EQ(csIt - csIt2, sjIt - sjIt2);
+                csIt2 = csIt;
+                sjIt2 = sjIt;
+            }
+        }
     }
 
 #undef RAND_CHAR
