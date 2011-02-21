@@ -1568,7 +1568,7 @@ int main(int argc, const char* argv[])
 
 		resize(logCorrections,cycle);
 		resize(roundsDone,cycle);
-		logCorrections[cycle-1] = (double)log(numCorrected);
+		logCorrections[cycle-1] = (double)log((double)numCorrected);
 		roundsDone[cycle-1]     = (double)cycle;
             
 		if(cycle >= 3){
