@@ -379,8 +379,9 @@ template <typename THost_, typename TIterator>
 inline void
 setEnd(Segment<THost_, InfixSegment> & me, TIterator new_end)
 {
-SEQAN_CHECKPOINT
-    me.data_end_position = new_end - begin(host(me));//, Standard());
+    SEQAN_CHECKPOINT;
+    // me.data_end_position = new_end - begin(host(me)); //, Standard());
+    me.data_end_position = new_end - TIterator(begin(host(me)));
 }
 
 //____________________________________________________________________________

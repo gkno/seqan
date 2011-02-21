@@ -600,6 +600,122 @@ void testJournaledStringFuzzying(TStringJournalSpec const &)
 }
 
 
+template <typename TStringJournalSpec>
+void testJournaledStringSegmentsReadOnly(TStringJournalSpec const &)
+{
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    typedef typename Prefix<TJournaledString>::Type TPrefix;
+    typedef typename Suffix<TJournaledString>::Type TSuffix;
+    typedef typename Infix<TJournaledString>::Type TInfix;
+
+    CharString charStr = "test";
+    TJournaledString journaledString;
+    setHost(journaledString, charStr);
+    insert(journaledString, 2, "XX");
+
+    // Prefixes.
+    {
+        TPrefix prefix1 = prefix(journaledString, 3);
+        SEQAN_ASSERT_TRUE(prefix1 == CharString("teX"));
+        TPrefix prefix2(journaledString, 3);
+        SEQAN_ASSERT_TRUE(prefix2 == CharString("teX"));
+    }
+    // Suffixes.
+    {   
+        TSuffix suffix1 = suffix(journaledString, 3);
+        SEQAN_ASSERT_TRUE(suffix1 == CharString("Xst"));
+        TSuffix suffix2(journaledString, 3);
+        SEQAN_ASSERT_TRUE(suffix2 == CharString("Xst"));
+
+    }
+    // Infixes.
+    {
+        TInfix infix1 = infix(journaledString, 1, 5);
+        SEQAN_ASSERT_TRUE(infix1 == CharString("eXXs"));
+        TInfix infix2(journaledString, 1, 5);
+        SEQAN_ASSERT_TRUE(infix2 == CharString("eXXs"));
+    }
+}
+
+
+template <typename TStringJournalSpec>
+void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
+{
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    typedef typename Prefix<TJournaledString>::Type TPrefix;
+    typedef typename Suffix<TJournaledString>::Type TSuffix;
+    typedef typename Infix<TJournaledString>::Type TInfix;
+
+    CharString charStr = "test";
+
+    // Prefixes.
+    {
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 2, "XX");
+
+        TPrefix prefix1 = prefix(journaledString, 3);
+        SEQAN_ASSERT_TRUE(prefix1 == CharString("teX"));
+        prefix1 = "ABCD";
+        SEQAN_ASSERT_EQ(journaledString, "ABCDXst");
+        SEQAN_ASSERT_EQ(charStr, "test");
+    }
+    {
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 2, "XX");
+
+        TPrefix prefix2(journaledString, 3);
+        SEQAN_ASSERT_TRUE(prefix2 == CharString("teX"));
+        prefix2 = "ABCD";
+        SEQAN_ASSERT_EQ(journaledString, "ABCDXst");
+        SEQAN_ASSERT_EQ(charStr, "test");
+    }
+
+    // Suffixes.
+    {   
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 2, "XX");
+
+        TSuffix suffix1 = suffix(journaledString, 3);
+        SEQAN_ASSERT_TRUE(suffix1 == CharString("Xst"));
+        suffix1 = "ABCD";
+        SEQAN_ASSERT_EQ(journaledString, "teXABCD");
+        SEQAN_ASSERT_EQ(charStr, "test");
+    }
+    {
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 2, "XX");
+
+        TSuffix suffix2(journaledString, 3);
+        SEQAN_ASSERT_TRUE(suffix2 == CharString("Xst"));
+        suffix2 = "ABCD";
+        SEQAN_ASSERT_EQ(journaledString, "teXABCD");
+        SEQAN_ASSERT_EQ(charStr, "test");
+    }
+
+    // Infixes.
+    {
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 2, "XX");
+
+        TInfix infix1 = infix(journaledString, 1, 5);
+        SEQAN_ASSERT_TRUE(infix1 == CharString("eXXs"));
+        infix1 = "ABCD";
+        SEQAN_ASSERT_EQ(journaledString, "tABCDt");
+        SEQAN_ASSERT_EQ(charStr, "test");
+    }
+    {
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 2, "XX");
+
+        TInfix infix2(journaledString, 1, 5);
+        SEQAN_ASSERT_TRUE(infix2 == CharString("eXXs"));
+        infix2 = "ABCD";
+        SEQAN_ASSERT_EQ(journaledString, "tABCDt");
+        SEQAN_ASSERT_EQ(charStr, "test");
+    }
+}
+
+
 // Tag: UnbalancedTree()
 
 
@@ -680,6 +796,16 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_subscript_operator_ran
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_fuzzying) {
     testJournaledStringFuzzying(UnbalancedTree());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_segments_read_only) {
+    testJournaledStringSegmentsReadOnly(UnbalancedTree());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_segments_read_write) {
+    testJournaledStringSegmentsReadWrite(UnbalancedTree());
 }
 
 
@@ -764,5 +890,14 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_fuzzying) {
     testJournaledStringFuzzying(SortedArray());
 }
 
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_segments_read_only) {
+    testJournaledStringSegmentsReadOnly(SortedArray());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_segments_read_write) {
+    testJournaledStringSegmentsReadWrite(SortedArray());
+}
 
 #endif  // TEST_SEQUENCE_JOURNALED_TEST_SEQUENCE_JOURNALED_H_

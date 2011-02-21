@@ -360,6 +360,10 @@ template <typename TJournaledString, typename TJournalSpec>
 inline typename Position<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const>::Type 
 position(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & iterator)
 {
+    if (atEnd(iterator._journalEntriesIterator)) {
+        return length(*iterator._journalStringPtr);
+    }
+    
     switch (value(iterator._journalEntriesIterator).segmentSource) {
         case SOURCE_ORIGINAL:
             return iterator._currentHostIt - iterator._hostSegmentBegin;
@@ -476,9 +480,20 @@ operator+=(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & iter
            TLen len_)
 {
     SEQAN_CHECKPOINT;
+
+    typedef Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > TIterator;
+    
     // TODO(holtgrew): Handle case where len_ < 0?!
     SEQAN_ASSERT_GEQ(len_, static_cast<TLen>(0));
     size_t len = len_;
+
+    // Handle bad case of len_ pointing at/behind end.
+    if (position(iterator) + len_ >= length(*iterator._journalStringPtr)) {
+        iterator = TIterator(end(*iterator._journalStringPtr));
+        return iterator;
+    }
+
+    // Handle other case.
     typedef typename Size<TJournaledString>::Type TSize;
     while (len > 0) {
         TSize remaining;

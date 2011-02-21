@@ -34,6 +34,8 @@
 // Journaled String implementation.
 // ==========================================================================
 
+// TODO(holtgrew): Journaled strings will probably not work for non-POD alphabets!
+
 #ifndef SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_H_
 #define SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_H_
 
@@ -419,9 +421,6 @@ assignValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & j
 // TODO(holtgrew): flatten
 // TODO(holtgrew): fill
 // TODO(holtgrew): getValue
-// TODO(holtgrew): infix
-// TODO(holtgrew): infixWithLength
-// TODO(holtgrew): iter
 
 // TODO(holtgrew): Unused, remove?
 /*
@@ -526,6 +525,9 @@ getValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const 
     }
 }
 
+// --------------------------------------------------------------------------
+// Function virtualToHostPosition()
+// --------------------------------------------------------------------------
 
 // Note that if pos is in a gap, we return the position of the entry
 // after the gap in the host.
@@ -540,6 +542,9 @@ virtualToHostPosition(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferS
     return virtualToHostPosition(journaledString._journalEntries, pos);
 }
 
+// --------------------------------------------------------------------------
+// Function isGapInHost()
+// --------------------------------------------------------------------------
 
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
 inline
@@ -552,6 +557,99 @@ isGapInHost(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > con
     return isGapInHost(journaledString._journalEntries, pos);
 }
 
+// --------------------------------------------------------------------------
+// Function _setLength()
+// --------------------------------------------------------------------------
+
+template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
+inline
+void
+_setLength(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & journaledString,
+           size_t newLength)
+{
+    SEQAN_CHECKPOINT;
+    journaledString._length = newLength;
+}
+
+// --------------------------------------------------------------------------
+// Function replace()
+// --------------------------------------------------------------------------
+
+template <typename TTargetValue, typename TTargetHostSpec, typename TTargetJournalSpec, typename TTargetBufferSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
+inline void
+replace(String<TTargetValue, Journaled<TTargetHostSpec, TTargetJournalSpec, TTargetBufferSpec> > & target,
+        TPositionBegin posBegin,
+        TPositionEnd posEnd,
+        TSource const & source,
+        Tag<TExpand> const & /*tag*/)
+{
+    SEQAN_CHECKPOINT;
+    assignInfix(target, posBegin, posEnd, source);
+}
+
+template <typename TTargetValue, typename TTargetHostSpec, typename TTargetJournalSpec, typename TTargetBufferSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
+inline void
+replace(String<TTargetValue, Journaled<TTargetHostSpec, TTargetJournalSpec, TTargetBufferSpec> > & target,
+        TPositionBegin posBegin,
+        TPositionEnd posEnd,
+        TSource const & source,
+        typename Size<String<TTargetValue, Journaled<TTargetHostSpec, TTargetJournalSpec, TTargetBufferSpec> > >::Type limit,
+        Tag<TExpand> const & tag)
+{
+    SEQAN_CHECKPOINT;
+    typedef typename Iterator<TSource>::Type TSourceIterator;
+    
+    // Possibly only shorten target if limit is too small.
+    if (posBegin > static_cast<TPositionBegin>(limit)) {
+        assignInfix(target, limit, length(target), infix(source, 0, 0));
+        return;
+    }
+
+    // Replace range in target and afterwards, limit length of target.
+    replace(target, posBegin, posEnd, source, tag);
+    assignInfix(target, limit, length(target), infix(source, 0, 0));
+}
+
+// This variant is a workaround for the "const array"-bug of VC++.
+template <typename TTargetValue, typename TTargetHostSpec, typename TTargetJournalSpec, typename TTargetBufferSpec, typename TPositionBegin, typename TPositionEnd, typename TSourceValue, typename TExpand>
+inline void
+replace(String<TTargetValue, Journaled<TTargetHostSpec, TTargetJournalSpec, TTargetBufferSpec> > & target,
+        TPositionBegin posBegin,
+        TPositionEnd posEnd,
+        TSourceValue const * source,
+        Tag<TExpand> const & /*tag*/)
+{
+    SEQAN_CHECKPOINT;
+    assignInfix(target, posBegin, posEnd, source);
+}
+
+// This variant is a workaround for the "const array"-bug of VC++.
+template <typename TTargetValue, typename TTargetHostSpec, typename TTargetJournalSpec, typename TTargetBufferSpec, typename TPositionBegin, typename TPositionEnd, typename TSourceValue, typename TExpand>
+inline void
+replace(String<TTargetValue, Journaled<TTargetHostSpec, TTargetJournalSpec, TTargetBufferSpec> > & target,
+        TPositionBegin posBegin,
+        TPositionEnd posEnd,
+        TSourceValue const * source,
+        typename Size<String<TTargetValue, Journaled<TTargetHostSpec, TTargetJournalSpec, TTargetBufferSpec> > >::Type limit,
+        Tag<TExpand> const & tag)
+{
+    SEQAN_CHECKPOINT;
+    typedef TSourceValue const * TSourceIterator;
+    
+    // Possibly only shorten target if limit is too small.
+    if (posBegin > static_cast<TPositionBegin>(limit)) {
+        assignInfix(target, limit, length(target), infix(source, 0, 0));
+        return;
+    }
+
+    // Replace range in target and afterwards, limit length of target.
+    replace(target, posBegin, posEnd, source, tag);
+    assignInfix(target, limit, length(target), infix(source, 0, 0));
+}
+
+// --------------------------------------------------------------------------
+// Function id()
+// --------------------------------------------------------------------------
 
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 inline

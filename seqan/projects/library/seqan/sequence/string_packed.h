@@ -364,7 +364,9 @@ _setLength(
 }
 
 // --------------------------------------------------------------------------
-// Function _assignCopyPackedString()
+// Function assign()
+//
+// Helpers: _assignCopyPackedString()
 // --------------------------------------------------------------------------
 
 // optimized variant for copy assignment. The host sequence is copied instead of
@@ -410,10 +412,6 @@ _assignCopyPackedString(TTarget & target,
     }
     _setLength(target, new_length);
 }
-
-// --------------------------------------------------------------------------
-// Function assign()
-// --------------------------------------------------------------------------
 
 template <typename TValue, typename THostspec, typename TTag>
 inline void 
@@ -586,6 +584,8 @@ clear(String<TValue, Packed<THostspec> > & me)
 
 // --------------------------------------------------------------------------
 // Function _clearSpace()
+//
+// Helper struct ClearSpaceStringPacked_.
 // --------------------------------------------------------------------------
 
 //implementation for all expand tags other than "limit"
@@ -732,8 +732,6 @@ FINISH:
     }
 */
 };
-
-//////////////////////////////////////////////////////////////////////////////
 
 template<typename TValue, typename THostspec, typename TExpand>
 inline typename Size< String<TValue, Packed<THostspec> > >::Type 
