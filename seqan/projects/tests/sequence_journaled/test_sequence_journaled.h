@@ -157,6 +157,29 @@ void testJournaledStringAssignValue(TStringJournalSpec const &)
 }
 
 
+// Test operator[]().
+template <typename TStringJournalSpec>
+void testJournaledStringSubscriptOperator(TStringJournalSpec const &)
+{
+    CharString charStr = "test";
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
+
+    SEQAN_ASSERT_EQ(journaledString[0], 't');
+    SEQAN_ASSERT_EQ(journaledString[3], 't');
+
+    // static_cast<Nothing>(journaledString[2]);
+    journaledString[2] = 'X';
+
+    SEQAN_ASSERT_EQ(journaledString[0], 't');
+    SEQAN_ASSERT_EQ(journaledString[2], 'X');
+    SEQAN_ASSERT_EQ(journaledString[3], 't');
+
+    std::stringstream tmp;
+    tmp << journaledString;
+    SEQAN_ASSERT_EQ("teXt", tmp.str());
+}
+
+
 // Test assignInfix().
 template <typename TStringJournalSpec>
 void testJournaledStringAssignInfix(TStringJournalSpec const &)
@@ -305,7 +328,7 @@ void testJournaledStringBeginEndConstIterator(TStringJournalSpec const &)
 
 
 template <typename TStringJournalSpec>
-void testJournaledStringSubscriptOperator(TStringJournalSpec const &)
+void testJournaledStringSubscriptOperatorRandomized(TStringJournalSpec const &)
 {
     using namespace seqan;
 
@@ -615,6 +638,11 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_assign_value) {
 }
 
 
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_subscript_operator) {
+    testJournaledStringSubscriptOperator(UnbalancedTree());
+}
+
+
 SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_assign_infix) {
     testJournaledStringAssignInfix(UnbalancedTree());
 }
@@ -645,8 +673,8 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_begin_end_const_iterat
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_subscript_operator) {
-    testJournaledStringSubscriptOperator(UnbalancedTree());
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_subscript_operator_randomized) {
+    testJournaledStringSubscriptOperatorRandomized(UnbalancedTree());
 }
 
 
@@ -692,6 +720,11 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_assign_value) {
 }
 
 
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_subscript_operator) {
+    testJournaledStringSubscriptOperator(SortedArray());
+}
+
+
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_assign_infix) {
     testJournaledStringAssignInfix(SortedArray());
 }
@@ -722,8 +755,8 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_begin_end_const_iterator)
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_subscript_operator) {
-    testJournaledStringSubscriptOperator(SortedArray());
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_subscript_operator_randomized) {
+    testJournaledStringSubscriptOperatorRandomized(SortedArray());
 }
 
 

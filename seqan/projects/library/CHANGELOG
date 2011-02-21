@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adding `position()`, `operator-()`, `operator[]` with proxy functionality and relation operators to journaled string iterator.
  * Adding metafunction `GetDefaultRng<T>::Type` and function `defaultRng()` for construction of global random number generators to be used by default in randomized data structures and algorithms.
  * Adding specialization of Uniform probability density function for `bool`s and tests.
  * Documented `getQuality`.
@@ -49,5 +50,3 @@ You can use Trac wiki syntax.
  * Fixing documentation about include for ''misc/misc_cmdparser.h'', was ''seqan/misc.h'', corrected to ''seqan/misc/misc_cmdparser.h''.
  * Assertion in semiglobal SWIFT finder that hits begin <= end.
  * Initializing state.errors in Myers Ukkonen banded pattern initialization.
-
-== Release 1.3 ==

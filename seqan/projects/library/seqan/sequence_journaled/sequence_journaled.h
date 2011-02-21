@@ -93,11 +93,20 @@ public:
         setHost(*this, host);
     }
 
-    // TODO(holtgrew): Actually, we want to have a proxy for non-const.
-    TValue operator[](TPosition const & pos) const
+    inline
+    typename Reference<String>::Type
+    operator[](TPosition const & pos)
     {
         SEQAN_CHECKPOINT;
-        return getValue(*this, pos);
+        return value(*this, pos);
+    }
+
+    inline
+    typename Reference<String const>::Type
+    operator[](TPosition const & pos) const
+    {
+        SEQAN_CHECKPOINT;
+        return value(*this, pos);
     }
 };
 
@@ -161,17 +170,23 @@ template <typename TValue, typename THostSpec, typename TJournalSpec, typename T
 struct Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>
     : Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > > {};
 
-///.Metafunction.Value.param.T:Spec.Journaled String
+///.Metafunction.Reference.param.T:Spec.Journaled String
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
-struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
+struct Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
 {
-  typedef TValue Type;
+    typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > TJournaledString;
+    typedef typename Iterator<TJournaledString>::Type TIterator_;
+    typedef Proxy<IteratorProxy<TIterator_> > TProxy_;
+    typedef TProxy_ Type;
 };
 
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
-struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>
+struct Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>
 {
-  typedef TValue Type;
+    typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const TJournaledString;
+    typedef typename Iterator<TJournaledString>::Type TIterator_;
+    typedef Proxy<IteratorProxy<TIterator_> > TProxy_;
+    typedef TProxy_ Type;
 };
 
 ///.Metafunction.GetValue.param.T:Spec.Journaled String
@@ -187,18 +202,19 @@ struct GetValue<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
   typedef TValue Type;
 };
 
-///.Metafunction.Reference.param.T:Spec.Journaled String
-template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
-struct Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
-{
-  typedef TValue & Type;
-};
+// TODO(holtgrew): Does Value have to be overwritten? Is not for packed strings!
+// ///.Metafunction.Value.param.T:Spec.Journaled String
+// template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
+// struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
+// {
+//   typedef TValue & Type;
+// };
 
-template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
-struct Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>
-{
-  typedef TValue const & Type;
-};
+// template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
+// struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>
+// {
+//   typedef TValue const & Type;
+// };
 
 /**
 .Metafunction.JournalType
@@ -456,8 +472,31 @@ length(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & 
 
 
 // TODO(holtgrew): toCString
-// TODO(holtgrew): value
 
+template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
+inline
+typename Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type
+value(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & me, 
+      TPos pos)
+{
+    SEQAN_CHECKPOINT;
+    
+    return *iter(me, pos, Standard());
+} 
+
+template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
+inline
+typename Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>::Type
+value(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & me, 
+      TPos pos)
+{
+    SEQAN_CHECKPOINT;
+    
+    return *iter(me, pos, Standard());
+} 
+
+
+// TODO(holtgrew): Maybe better use template parameter TPos?
 // TOOD(holtgrew): operator<
 // TOOD(holtgrew): operator>
 // TOOD(holtgrew): operator<=
@@ -465,6 +504,7 @@ length(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & 
 // TOOD(holtgrew): operator==
 // TOOD(holtgrew): operator!=
 
+// TODO(holtgrew): Maybe better use template parameter TPos?
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 inline
 typename GetValue<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>::Type

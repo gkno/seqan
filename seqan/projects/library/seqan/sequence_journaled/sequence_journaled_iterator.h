@@ -142,14 +142,16 @@ struct GetValue<Iter<TJournaledString, JournaledStringIterSpec<TJournaledStringI
         : GetValue<Iter<TJournaledString, JournaledStringIterSpec<TJournaledStringIterSpec> > > {};
 
 template <typename TJournaledString, typename TJournaledStringIterSpec>
-struct Value<Iter<TJournaledString, JournaledStringIterSpec<TJournaledStringIterSpec> > >
+struct Reference<Iter<TJournaledString, JournaledStringIterSpec<TJournaledStringIterSpec> > >
 {
-    typedef typename Value<TJournaledString>::Type Type;
+    typedef typename Reference<TJournaledString>::Type Type;
 };
 
 template <typename TJournaledString, typename TJournaledStringIterSpec>
-struct Value<Iter<TJournaledString, JournaledStringIterSpec<TJournaledStringIterSpec> > const>
-        : Value<Iter<TJournaledString, JournaledStringIterSpec<TJournaledStringIterSpec> > > {};
+struct Reference<Iter<TJournaledString, JournaledStringIterSpec<TJournaledStringIterSpec> > const>
+{
+    typedef typename Reference<TJournaledString>::Type Type;
+};
 
 // ============================================================================
 // Functions
@@ -251,34 +253,138 @@ _updateSegmentIterators(Iter<TJournaledString, JournaledStringIterSpec<TJournalS
     }
 }
 
+// value
+
 template <typename TJournaledString, typename TJournalSpec>
-inline
-typename Value<TJournaledString>::Type
-value(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & iterator)
+inline typename Reference<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > >::Type 
+value(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & me)
 {
     SEQAN_CHECKPOINT;
-    if (value(iterator._journalEntriesIterator).segmentSource == SOURCE_ORIGINAL) {
-        return value(iterator._currentHostIt);
-    } else {
-        SEQAN_ASSERT_EQ(value(iterator._journalEntriesIterator).segmentSource, SOURCE_PATCH);
-        return value(iterator._currentInsertionBufferIt);
-    }
+    typedef typename Reference<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > >::Type TReference;
+    TReference res(me);
+    return res;
 }
 
 template <typename TJournaledString, typename TJournalSpec>
-inline
-typename Value<TJournaledString>::Type
-value(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & iterator)
+inline typename Reference<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const>::Type 
+value(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & me)
 {
     SEQAN_CHECKPOINT;
-    if (value(iterator._journalEntriesIterator).segmentSource == SOURCE_ORIGINAL) {
-        return value(iterator._currentHostIt);
-    } else {
-        SEQAN_ASSERT_EQ(value(iterator._journalEntriesIterator).segmentSource, SOURCE_PATCH);
-        return value(iterator._currentInsertionBufferIt);
+    typedef typename Reference<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const>::Type TReference;
+    TReference res(me);
+    return res;
+}
+
+// assignValue
+
+template <typename TJournaledString, typename TJournalSpec, typename TValue>
+inline void
+assignValue(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & me,
+            TValue const & _value)
+{
+    SEQAN_CHECKPOINT;
+    typedef Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > TIterator;
+    assignValue(static_cast<TIterator const>(me), _value);
+}
+
+template <typename TJournaledString, typename TJournalSpec, typename TValue>
+inline void
+assignValue(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & iterator,
+            TValue const & _value)
+{
+    SEQAN_CHECKPOINT;
+    typedef Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > TIterator;
+    typename Value<TIterator>::Type _temp_value = _value; //conversion
+    assignValue(*iterator._journalStringPtr, position(iterator), _temp_value);
+}
+
+// moveValue
+
+template <typename TJournaledString, typename TJournalSpec, typename TValue>
+inline void
+moveValue(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & me,
+          TValue const & _value)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Copied from packed string. Actually, why no real move?
+    assignValue(me, _value);
+}
+
+template <typename TJournaledString, typename TJournalSpec, typename TValue>
+inline void
+moveValue(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & me,
+          TValue const & _value)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Copied from packed string. Actually, why no real move?
+    assignValue(me, _value);
+}
+
+// valueConstruct
+
+template <typename TJournaledString, typename TJournalSpec>
+inline void
+valueConstruct(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & /*it*/)
+{
+    // TODO(holtgrew): Intentionally left blank? Alphabet elements must be default-constructable.
+}
+
+template <typename TJournaledString, typename TJournalSpec, typename TParam>
+inline void
+valueConstruct(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & it,
+               TParam const & param_)
+{
+    assignValue(it, param_);
+}
+
+template <typename TJournaledString, typename TJournalSpec, typename TParam>
+inline void
+valueConstruct(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & it,
+               TParam & param_,
+               Move const & /*tag*/)
+{
+    moveValue(it, param_);
+}
+
+// valueDestruct
+
+template <typename TJournaledString, typename TJournalSpec>
+inline void
+valueDestruct(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & /*it*/)
+{
+    // TODO(holtgrew): Intentionally left blank? Copied from packed string, leads to problems with non-POD contents!
+}
+
+// position
+template <typename TJournaledString, typename TJournalSpec>
+inline typename Position<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const>::Type 
+position(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & iterator)
+{
+    switch (value(iterator._journalEntriesIterator).segmentSource) {
+        case SOURCE_ORIGINAL:
+            return iterator._currentHostIt - iterator._hostSegmentBegin;
+            break;
+        case SOURCE_PATCH:
+            return iterator._currentInsertionBufferIt - iterator._insertionBufferSegmentBegin;
+            break;
+        default:
+            SEQAN_ASSERT_FAIL("Invalid segment source!");
+            return 0;
     }
 }
 
+// setPosition
+template <typename TJournaledString, typename TJournalSpec, typename TPosition>
+inline void 
+setPosition(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & me,
+            TPosition pos_)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Implement me!
+    SEQAN_ASSERT_FAIL("Set position...");
+}
+
+// getValue
 template <typename TJournaledString, typename TJournalSpec>
 inline
 typename GetValue<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > >::Type
@@ -347,7 +453,7 @@ operator++(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & iter
 
 template <typename TJournaledString, typename TJournalSpec>
 inline
-typename Value<TJournaledString>::Type
+typename Reference<TJournaledString>::Type
 operator*(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & iterator)
 {
     SEQAN_CHECKPOINT;
@@ -356,7 +462,7 @@ operator*(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & itera
 
 template <typename TJournaledString, typename TJournalSpec>
 inline
-typename Value<TJournaledString>::Type
+typename Reference<TJournaledString>::Type
 operator*(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & iterator)
 {
     SEQAN_CHECKPOINT;
@@ -422,14 +528,14 @@ operator+(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const &
 
 template <typename TJournaledString, typename TJournalSpec>
 inline
-typename MakeSigned_<typename Position<TJournaledString>::Type >::Type
+typename Difference<TJournaledString>::Type
 operator-(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & it1,
           Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & it2)
 {
     SEQAN_CHECKPOINT;
 
     typedef Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > TIter;
-    typedef typename MakeSigned_<typename Position<TJournaledString>::Type>::Type TResult;
+    typedef typename Difference<TJournaledString>::Type TResult;
 
     // First, handle the cases where it1 or it2 are at the end.
     bool it1AtEnd = atEnd(it1._journalEntriesIterator);
@@ -545,6 +651,86 @@ operator!=(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const 
 {
     SEQAN_CHECKPOINT;
     return !(a == b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator<(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) < position(b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator<(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           typename IterComplementConst<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > >::Type const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) < position(b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator<=(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) <= position(b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator<=(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           typename IterComplementConst<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > >::Type const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) <= position(b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator>(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) > position(b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator>(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           typename IterComplementConst<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > >::Type const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) > position(b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator>=(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) >= position(b);
+}
+
+template <typename TJournaledString, typename TJournalSpec>
+inline
+bool
+operator>=(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & a,
+           typename IterComplementConst<Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > >::Type const & b)
+{
+    SEQAN_CHECKPOINT;
+    return position(a) >= position(b);
 }
 
 }  // namespace seqan

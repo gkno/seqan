@@ -112,6 +112,7 @@ template <typename TStringJournalSpec>
 void testJournaledStringIteratorSum(TStringJournalSpec const &)
 {
     typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    typedef typename Iterator<TJournaledString, Standard>::Type TIterator;
     
     CharString charStr = "test";
     TJournaledString journaledString;
@@ -120,7 +121,6 @@ void testJournaledStringIteratorSum(TStringJournalSpec const &)
 
     // Case 1: Go from beginning to end.
     {
-        typedef typename Iterator<TJournaledString, Standard>::Type TIterator;
         TIterator it = begin(journaledString, Standard());
         it += 4;
         TIterator itEnd = end(journaledString, Standard());
@@ -129,13 +129,47 @@ void testJournaledStringIteratorSum(TStringJournalSpec const &)
 
     // Case 2: Go in between beginning and end.
     {
-        typedef typename Iterator<TJournaledString, Standard>::Type TIterator;
         TIterator it = begin(journaledString, Standard());
         ++it; ++it;
         TIterator it2 = begin(journaledString, Standard());
         it2 += 2;
         SEQAN_ASSERT_TRUE(it == it2);
     }
+}
+
+// Test relation operators on iterators.
+template <typename TStringJournalSpec>
+void testJournaledStringIteratorRelations(TStringJournalSpec const &)
+{
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    typedef typename Iterator<TJournaledString, Standard>::Type TIterator;
+    
+    CharString charStr = "test";
+    TJournaledString journaledString;
+    setHost(journaledString, charStr);
+
+    TIterator it1 = begin(journaledString, Standard());
+    TIterator it2 = begin(journaledString, Standard());
+    ++it2; ++it2;
+    TIterator it3 = end(journaledString, Standard());
+
+    SEQAN_ASSERT_TRUE(it1 < it2);
+    SEQAN_ASSERT_TRUE(it1 <= it2);
+    SEQAN_ASSERT_TRUE(it2 < it3);
+    SEQAN_ASSERT_TRUE(it2 <= it3);
+
+    SEQAN_ASSERT_TRUE(it1 <= it1);
+    SEQAN_ASSERT_TRUE(it2 <= it2);
+    SEQAN_ASSERT_TRUE(it3 <= it3);
+
+    SEQAN_ASSERT_TRUE(it2 > it1);
+    SEQAN_ASSERT_TRUE(it2 >= it1);
+    SEQAN_ASSERT_TRUE(it3 > it2);
+    SEQAN_ASSERT_TRUE(it3 >= it2);
+
+    SEQAN_ASSERT_TRUE(it1 >= it1);
+    SEQAN_ASSERT_TRUE(it2 >= it2);
+    SEQAN_ASSERT_TRUE(it3 >= it3);
 }
 
 // Tag: UnbalancedTree()
@@ -150,6 +184,11 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_iterator_sum)
     testJournaledStringIteratorSum(UnbalancedTree());
 }
 
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_iterator_relations)
+{
+    testJournaledStringIteratorRelations(UnbalancedTree());
+}
+
 // Tag: SortedArray()
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_iterator_difference)
@@ -160,6 +199,11 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_iterator_difference)
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_iterator_sum)
 {
     testJournaledStringIteratorSum(SortedArray());
+}
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_iterator_relations)
+{
+    testJournaledStringIteratorRelations(SortedArray());
 }
 
 #endif  // TEST_SEQUENCE_JOURNALED_TEST_SEQUENCE_JOURNALED_ITERATOR_H_
