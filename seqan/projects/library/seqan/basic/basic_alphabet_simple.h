@@ -562,7 +562,6 @@ two types is defined.
 comparisons that involve @Class.SimpleType@.
 ..include:seqan/basic.h
 */
-// TODO(holtgrew): Really necessary? A bit too much automatic behaviour?
 //???TODO: muss geprueft werden, ob diese Metafunktion noch ausgeweitet oder aber versteckt wird.
 
 template <typename TLeft, typename TRight>
@@ -582,6 +581,10 @@ struct CompareType<SimpleType<TValue, TSpec>, TRight>
 	typedef TRight Type;
 };
 
+// TODO(holtgrew): CompareType is not symmetric because of class instantiation conflicts. Evaluate these problems and possibly fix them.
+
+// TODO(holtgrew): Why are comparisons with Proxies defined here?
+	
 //////////////////////////////////////////////////////////////////////////////
 // operator ==
 
