@@ -82,6 +82,18 @@ struct Iterator<JournalEntries<TCargo, SortedArray> const, Standard>
 };
 
 template <typename TCargo>
+struct Value<JournalEntries<TCargo, SortedArray> >
+{
+    typedef TCargo Type;
+};
+
+template <typename TCargo>
+struct Value<JournalEntries<TCargo, SortedArray> const>
+{
+    typedef TCargo const Type;
+};
+
+template <typename TCargo>
 struct Reference<JournalEntries<TCargo, SortedArray> >
 {
     typedef TCargo & Type;
