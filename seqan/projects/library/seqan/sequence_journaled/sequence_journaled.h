@@ -206,18 +206,18 @@ struct GetValue<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 };
 
 // TODO(holtgrew): Does Value have to be overwritten? Is not for packed strings!
-// ///.Metafunction.Value.param.T:Spec.Journaled String
-// template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
-// struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
-// {
-//   typedef TValue & Type;
-// };
+ ///.Metafunction.Value.param.T:Spec.Journaled String
+ template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
+ struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
+ {
+   typedef TValue Type;
+ };
 
-// template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
-// struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>
-// {
-//   typedef TValue const & Type;
-// };
+ template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
+ struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>
+ {
+   typedef TValue const Type;
+ };
 
 /**
 .Metafunction.JournalType
@@ -259,7 +259,7 @@ operator<<(TStream & stream, String<TValue, Journaled<THostSpec, TJournalSpec, T
     typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > TString;
     typedef typename TString::TJournalEntries TJournalEntries;
     typedef typename Iterator<TJournalEntries const, Standard>::Type TIterator;
-
+    
     for (TIterator it = begin(s._journalEntries), itend = end(s._journalEntries); it != itend; ++it) {
         if (value(it).segmentSource == SOURCE_ORIGINAL) {
             stream << infix(value(s._holder), value(it).physicalPosition, value(it).physicalPosition + value(it).length);
@@ -567,7 +567,7 @@ isGapInHost(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > con
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 inline
 void
-_setLength(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & journaledString,
+_setLength(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString,
            size_t newLength)
 {
     SEQAN_CHECKPOINT;
@@ -670,6 +670,46 @@ id(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & jour
 {
     SEQAN_CHECKPOINT;
     return id(value(journaledString._holder));
+}
+
+template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBuffSpec>
+inline bool
+isFlat(String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > & journaledString)
+{
+	SEQAN_CHECKPOINT;
+	typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > TJournalString;
+	typedef typename JournalType<TJournalString>::Type TJournalEntries;
+	typedef typename Iterator<TJournalEntries const, Standard>::Type TIteraror;
+
+	TIteraror it = begin(journaledString._journalEntries);
+	if ((*it).segmentSource == SOURCE_ORIGINAL)
+	{
+		if (((*it).physicalPosition == (*it).virtualPosition) && ((*it).length == length(host(journaledString))))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBuffSpec>
+inline bool
+isFlat(String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > const & journaledString)
+{
+	SEQAN_CHECKPOINT;
+	typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > TJournalString;
+	typedef typename JournalType<TJournalString>::Type TJournalEntries;
+	typedef typename Iterator<TJournalEntries const, Standard>::Type TIteraror;
+
+	TIteraror it = begin(journaledString._journalEntries);
+	if ((*it).segmentSource == SOURCE_ORIGINAL)
+	{
+		if (((*it).physicalPosition == (*it).virtualPosition) && ((*it).length == length(host(journaledString))))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 }  // namespace seqan
