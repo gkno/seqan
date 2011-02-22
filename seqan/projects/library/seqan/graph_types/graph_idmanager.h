@@ -318,8 +318,7 @@ idInUse(IdManager<TIdType, TSpec> const& idm,
 		TId const id)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_LT(id, (TId) length(idm.data_in_use));
-	return idm.data_in_use[id];
+	return (id < length(idm.data_in_use)) ? idm.data_in_use[id] : false;
 }
 
 
