@@ -129,7 +129,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void findRepeats(TRepeatStore &repString, TString const &text, TRepeatSize minRepeatLen) 
 	{
 		typedef typename Value<TRepeatStore>::Type	TRepeat;
-		typedef typename Iterator<TString>::Type	TIterator;
+		typedef typename Iterator<TString const>::Type	TIterator;
 		typedef typename Value<TString>::Type		TValue;
 		typedef typename Size<TString>::Type		TSize;
 
