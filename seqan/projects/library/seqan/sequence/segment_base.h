@@ -141,7 +141,7 @@ struct Reference<Segment<THost, TSpec> >
 template <typename THost, typename TSpec>
 struct Reference<Segment<THost, TSpec> const >
 {
-	typedef typename Reference<THost const>::Type Type;
+	typedef typename Reference<THost>::Type Type;
 };
 	
 //////////////////////////////////////////////////////////////////////////////
