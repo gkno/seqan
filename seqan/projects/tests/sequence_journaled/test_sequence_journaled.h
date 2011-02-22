@@ -51,6 +51,112 @@
 
 using namespace seqan;
 
+// Test assign(), operator=()
+template <typename TStringJournalSpec>
+void testJournaledStringAssign(TStringJournalSpec const &)
+{
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    
+    CharString charStr = "test";
+    TJournaledString journaledString(charStr);
+
+    CharString charStr2 = "not a test!";
+
+    // Test assignment operator with other string type.
+    {
+        journaledString = charStr2;
+        journaledString = charStr2;
+
+        std::stringstream tmp1;
+        tmp1 << journaledString;
+        SEQAN_ASSERT_EQ("not a test!", tmp1.str());
+
+        std::stringstream tmp2;
+        tmp2 << host(journaledString);
+        SEQAN_ASSERT_EQ("test", tmp2.str());
+    }
+
+    // Test assign() with other string.
+    {
+        assign(journaledString, charStr2);
+
+        std::stringstream tmp1;
+        tmp1 << journaledString;
+        SEQAN_ASSERT_EQ("not a test!", tmp1.str());
+
+        std::stringstream tmp2;
+        tmp2 << host(journaledString);
+        SEQAN_ASSERT_EQ("test", tmp2.str());
+    }
+
+    TJournaledString journaledString2(charStr2);
+    
+    // Test assignment operator with same journaled string type.
+    {
+        journaledString = journaledString2;
+
+        std::stringstream tmp1;
+        tmp1 << journaledString;
+        SEQAN_ASSERT_EQ("not a test!", tmp1.str());
+
+        std::stringstream tmp2;
+        tmp2 << host(journaledString);
+        SEQAN_ASSERT_EQ("test", tmp2.str());
+    }
+
+    // Test assign() with same journaled string type.
+    {
+        assign(journaledString, journaledString2);
+
+        std::stringstream tmp1;
+        tmp1 << journaledString;
+        SEQAN_ASSERT_EQ("not a test!", tmp1.str());
+
+        std::stringstream tmp2;
+        tmp2 << host(journaledString);
+        SEQAN_ASSERT_EQ("test", tmp2.str());
+    }
+}
+
+// Test set()
+template <typename TStringJournalSpec>
+void testJournaledStringSet(TStringJournalSpec const &)
+{
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    
+    CharString charStr = "test";
+    TJournaledString journaledString(charStr);
+
+    CharString charStr2 = "not a test!";
+    TJournaledString journaledString2(charStr2);
+
+    // Test set() with other string.
+    {
+        set(journaledString, charStr2);
+
+        std::stringstream tmp1;
+        tmp1 << journaledString;
+        SEQAN_ASSERT_EQ("not a test!", tmp1.str());
+
+        std::stringstream tmp2;
+        tmp2 << host(journaledString);
+        SEQAN_ASSERT_EQ("test", tmp2.str());
+    }
+    
+    // Test set() with same journaled string type.
+    {
+        set(journaledString, journaledString2);
+
+        std::stringstream tmp1;
+        tmp1 << journaledString;
+        SEQAN_ASSERT_EQ("not a test!", tmp1.str());
+
+        std::stringstream tmp2;
+        tmp2 << host(journaledString);
+        SEQAN_ASSERT_EQ("not a test!", tmp2.str());
+    }
+}
+
 // Test setHost(), host().
 template <typename TStringJournalSpec>
 void testJournaledStringHost(TStringJournalSpec const &)
@@ -68,8 +174,11 @@ void testJournaledStringHost(TStringJournalSpec const &)
 template <typename TStringJournalSpec>
 void testJournaledStringClear(TStringJournalSpec const &)
 {
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    typedef typename Size<TJournaledString>::Type TSize;
+    
     CharString charStr = "test";
-    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
+    TJournaledString journaledString(charStr);
 
     insert(journaledString, 4, "!");
     {
@@ -83,6 +192,7 @@ void testJournaledStringClear(TStringJournalSpec const &)
         std::stringstream tmp;
         tmp << journaledString;
         SEQAN_ASSERT_EQ("test", tmp.str());
+        SEQAN_ASSERT_EQ(static_cast<TSize>(4), length(journaledString));
     }
 }
 
@@ -718,6 +828,15 @@ void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
 
 // Tag: UnbalancedTree()
 
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_assign) {
+    testJournaledStringAssign(UnbalancedTree());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_set) {
+    testJournaledStringSet(UnbalancedTree());
+}
+
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_host) {
     testJournaledStringHost(UnbalancedTree());
@@ -810,6 +929,16 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_segments_read_write) {
 
 
 // Tag: SortedArray()
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_assign) {
+    testJournaledStringAssign(SortedArray());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_set) {
+    testJournaledStringSet(SortedArray());
+}
+
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_host) {
     testJournaledStringHost(SortedArray());

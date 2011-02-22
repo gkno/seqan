@@ -43,6 +43,8 @@
 
 SEQAN_BEGIN_TESTSUITE(test_sequence_journaled) {
     // Call tests of the sequence journal with unbalanced tree journal.
+    SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_assign);
+    SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_set);
     SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_host);
     SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_clear);
     SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_erase_position);
@@ -67,6 +69,8 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_journaled) {
     SEQAN_CALL_TEST(test_sequence_journaled_unbalanced_tree_iterator_relations);
 
     // Call tests of the sequence journal with sorted array journals.
+    SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_assign);
+    SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_set);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_host);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_clear);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_erase_position);

@@ -362,16 +362,16 @@ void recordErase(JournalEntries<TCargo, UnbalancedTree> & tree,
 
 //     std::cout << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
-    // Handle special case of removing all of the root node.
-    if (tree._root->left == 0 && tree._root->right == 0 && pos == 0 && posEnd == cargo(*tree._root).length) {
-        tree._root = 0;
-        clear(tree._nodeAllocator);
-        return;
-    }
     // Handle case of an empty journal tree.
     if (tree._root == 0) {
         SEQAN_ASSERT_EQ(pos, 0u);
         SEQAN_ASSERT_EQ(posEnd, 0u);
+        return;
+    }
+    // Handle special case of removing all of the root node.
+    if (tree._root->left == 0 && tree._root->right == 0 && pos == 0 && posEnd == cargo(*tree._root).length) {
+        tree._root = 0;
+        clear(tree._nodeAllocator);
         return;
     }
 

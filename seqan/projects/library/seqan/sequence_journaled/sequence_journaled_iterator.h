@@ -103,12 +103,13 @@ public:
         SEQAN_CHECKPOINT;
     }
 
-    explicit
-    Iter(TJournaledString & journalString)
-    {
-        SEQAN_CHECKPOINT;
-        _initJournaledStringIterator(*this, journalString);
-    }
+    // TODO(holtgrew): Commented out because of weird ambiguities with other constructor.
+    // explicit
+    // Iter(TJournaledString & journalString)
+    // {
+    //     SEQAN_CHECKPOINT;
+    //     _initJournaledStringIterator(*this, journalString);
+    // }
 };
 
 // ============================================================================
@@ -166,7 +167,9 @@ begin(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & j
 {
     SEQAN_CHECKPOINT;
     typedef typename Iterator<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const, Standard>::Type TResult;
-    return TResult(journalString);
+    TResult result;
+    _initJournaledStringIterator(result, journalString);
+    return result;
 }
 
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
@@ -176,7 +179,9 @@ begin(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 {
     SEQAN_CHECKPOINT;
     typedef typename Iterator<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >, Standard>::Type TResult;
-    return TResult(journalString);
+    TResult result;
+    _initJournaledStringIterator(result, journalString);
+    return result;
 }
 
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
