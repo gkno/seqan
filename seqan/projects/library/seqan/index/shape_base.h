@@ -517,7 +517,7 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 		typedef typename Size< Shape<TValue, TSpec> >::Type		TSize;
 		me.hValue = 
 			(me.hValue - ordValue(me.leftChar) * (THValue)me.leftFactor) * ValueSize<TValue>::VALUE
-			+ ordValue((TValue)*(it + (TSize)me.span - 1));
+			+ ordValue((TValue)*(it + ((TSize)me.span - 1)));
 		me.leftChar = *it;
 		return me.hValue;
 	}
