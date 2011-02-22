@@ -48,6 +48,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Metafunction.Convert:
+..cat:Alphabets
 ..summary:Return type of a conversion. 
 ..signature:Convert<Target, Source>::Type
 ..param.Target:Type the object should be converted to.

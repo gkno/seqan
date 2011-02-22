@@ -63,6 +63,7 @@ struct FindBeginPatternSpec< Pattern<TNeedle, Pex<TVerification , TMultiFinder >
 
 /**
 .Metafunction.PexMultiFinder:
+..cat:Searching
 ..summary:Determines the multiple exact string matching algorithm used by the Pex algorithm.
 ..signature:PexMultiFinder< Pattern<TNeedle,Pex<TVerification,TMultiFinder> > >::Type
 ..param.TMultiFinder:The specification for the multiple exact string matching algorithm that should be used with the Pex algorithm.

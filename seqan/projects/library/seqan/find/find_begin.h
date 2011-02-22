@@ -58,6 +58,7 @@ struct Myers;
 // TODO(holtgrew): Difference to DefaultPattern?
 /**
 .Metafunction.DefaultFindBeginPatternSpec:
+..cat:Searching
 ..summary:Type of the default findBegin pattern specialization, given a score.
 ..signature:DefaultBeginPatternSpec<TScore>
 ..param.TScore:A score type.

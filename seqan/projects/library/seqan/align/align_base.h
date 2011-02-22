@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Metafunction.Cols:
+..cat:Alignments
 ..summary:Type of column container of an alignment.
 ..signature:Cols<T>::Type
 ..param.T:An alignment type.
@@ -55,6 +56,7 @@ template <typename T> struct Cols;
 
 /**
 .Metafunction.Col:
+..cat:Alignments
 ..summary:Type of a column in an alignment.
 ..signature:Col<T>::Type
 ..param.T:An alignment type.
@@ -75,6 +77,7 @@ struct Col:
 
 /**
 .Metafunction.Rows:
+..cat:Alignments
 ..summary:Type of row container of an alignment.
 ..signature:Rows<T>::Type
 ..param.T:An alignment type.
@@ -89,6 +92,7 @@ template <typename T> struct Rows;
 
 /**
 .Metafunction.Row:
+..cat:Alignments
 ..summary:Type of a row in an alignment.
 ..signature:Row<T>::Type
 ..param.T:An alignment type.
@@ -274,6 +278,7 @@ struct Source<Align<TSource, TSpec> const >
 
 /**
 .Metafunction.StringSetType:
+..cat:Alignments
 ..summary:Return type of @Function.stringSet@ function. 
 ..signature:StringSetType<T>::Type
 ..param.T:Alignment data structure.

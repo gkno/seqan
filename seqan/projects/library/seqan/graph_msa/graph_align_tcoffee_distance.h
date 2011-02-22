@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Distance Calculation:
+..cat:Alignments
 ..summary:A tag to specify how to calculate distance matrices.
 ..include:seqan/graph_msa.h
 */

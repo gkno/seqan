@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Tag.Logical Values:
+..cat:Basic
 ..summary:Tag that represents true and false.
 ..tag.True:The logical value "true".
 ..tag.False:The logical value "false".

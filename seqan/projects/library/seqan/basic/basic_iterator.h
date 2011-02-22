@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Iterator Spec:
+..cat:Iteration
 ..summary:Specifies the kind of an iterator.
 ..tag.Rooted:Rooted iterator. 
 ...remarks
@@ -114,6 +115,7 @@ struct DefaultGetIteratorSpec
 
 /**
 .Metafunction.Iterator:
+..cat:Iteration
 ..summary:Type of iterator objects that are used to traverse the container.
 ..signature:Iterator<T, TSpec>::Type
 ..param.T:Type for which the iterator type is determined.
@@ -150,6 +152,7 @@ struct Iterator:
 
 /**
 .Metafunction.Container:
+..cat:Iteration
 ..summary:Type of the container given an iterator.
 ..signature:Container<T>::Type
 ..param.T:Iterator type.

@@ -462,6 +462,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Metafunction.Infix:
+..cat:Segments
 ..summary:Infix sequence type.
 ..signature:Infix<T>::Type
 ..remarks:Note that an infix of a @Class.Segment@ object is an @Spec.InfixSegment@ object having the same host type.

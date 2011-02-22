@@ -1372,6 +1372,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.findIntervals
+..cat:Miscellaneous
 ..summary:Find all intervals that contain the query point or overlap with the query interval.
 ..signature:findIntervals(graph, propertyMap, query, result)
 ..param.query:A query point.

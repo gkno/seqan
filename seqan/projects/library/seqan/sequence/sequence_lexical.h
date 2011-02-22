@@ -46,6 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Prefix Order:
+..cat:Sequences
 ..summary:Specify whether less-than or greather-than comparison is meant.
 ..tag.TagPrefixLess:A prefix is smaller.
 ...text:For example: $"abc" < "abcde"$.
@@ -187,6 +188,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Metafunction.Comparator:
+..cat:Basic
 ..summary:Type of comparator object
 ..signature:Comparator<T>::Type
 ..param.T:Type for which the comparator type is to be determined.

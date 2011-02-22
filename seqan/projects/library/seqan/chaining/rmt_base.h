@@ -90,6 +90,7 @@ namespace seqan{
 
 /**
 .Metafunction.Weight:
+..cat:Chaining
 ..summary:Type of the weight of an item. 
 ..signature:Weight<T>::Type
 ..param.T:Type for which the weight type is determined.

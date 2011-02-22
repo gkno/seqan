@@ -52,6 +52,7 @@ namespace seqan {
 
 /**
 .Tag.Overflow Strategy:
+..cat:Sequences
 ..summary:The strategy for resizing containers.
 ..tag.Insist:No capacity check.
 ...remarks:The user has to ensure that the container's capacity is large enough.
@@ -145,6 +146,7 @@ struct DefaultOverflowExplicit
 
 /**
 .Metafunction.IsContiguous:
+..cat:Sequences
 ..summary:Determines whether a container stores its elements in a contiguous array.
 ..signature:IsContiguous<T>::VALUE
 ..param.T:Type that is tested for being a string.
@@ -173,6 +175,7 @@ struct IsContiguous<T const>
 
 /**
 .Metafunction.IsSequence:
+..cat:Sequences
 ..summary:Determines whether a container stores its elements in sequential order.
 ..signature:IsSequence<T>::VALUE
 ..param.T:Type that is tested for being a sequence.
@@ -197,6 +200,7 @@ struct IsSequence<T const>
 
 /**
 .Metafunction.AllowsFastRandomAccess:
+..cat:Sequences
 ..summary:Determines whether a sequence efficiently supports random access.
 ..signature:AllowsFastRandomAccess<T>::VALUE
 ..param.T:Type that is tested for fast random access.

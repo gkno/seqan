@@ -181,6 +181,7 @@ mtRand()
 
 /**
 .Function.mtRandDouble:
+..cat:Miscellaneous
 ..status:deprecated, use @Class.Rng@ and @Class.Pdf@ from $<seqan/random.h>$ instead
 ..summary:Return a random number between 0 and 1 using mtRand.
 ..see:Function.mtRand

@@ -113,7 +113,7 @@ namespace seqan {
 
 /**
 .Function.printDebugLevel:
-..cat:Miscellaneous:
+..cat:Miscellaneous
 ..summary:Print the current SeqAn debug level and the compiler flags to the given stream.
 ..signature:printDebugLevel(stream)
 ..param.stream:The stream to print to, e.g. $std::cout$.

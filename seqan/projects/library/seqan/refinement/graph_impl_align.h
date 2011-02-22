@@ -53,6 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Alignment Graph Format:
+..cat:Input/Output
 ..summary:A file format to write an alignment graph.
 ..include:seqan/refinement.h
 */

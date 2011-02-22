@@ -46,6 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Metafunction.IsSimple:
+..cat:Basic
 ..summary:Tests type to be simple.
 ..signature:IsSimple<T>::Type
 ..param.T:Type that is tested.
@@ -865,6 +866,7 @@ void arrayClearSpace(TIterator array_begin,
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.BitsPerValue:
+..cat:Basic
 ..summary:Number of bits needed to store a value.
 ..signature:BitsPerValue<T>::VALUE
 ..param.T:A class.
@@ -889,6 +891,7 @@ struct BitsPerValue<TValue const>:
 
 /**
 .Metafunction.BytesPerValue:
+..cat:Basic
 ..summary:Number of bytes needed to store a value.
 ..signature:BytesPerValue<T>::VALUE
 ..param.T:A class.
@@ -911,6 +914,7 @@ struct BytesPerValue
 
 /**
 .Metafunction.IntegralForValue:
+..cat:Basic
 ..summary:Returns an itegral type that provides sufficient space to store a value.
 ..signature:IntegralForValue<T>::Type
 ..param.T:A class.
@@ -968,6 +972,7 @@ struct IntegralForValue:
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.ValueSize:
+..cat:Basic
 ..summary:Number of different values a value type object can have.
 ..signature:ValueSize<T>::VALUE
 ..param.T:A class.

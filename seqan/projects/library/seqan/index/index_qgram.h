@@ -2271,6 +2271,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.countOccurrences:
+ ..cat:Index
 ..signature:countOccurrences(index, shape)
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
@@ -2307,6 +2308,7 @@ If the type of $index$ is $TIndex$ the return type is $Size<TIndex>::Type$.
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.countOccurrencesMultiple:
+..cat:Index
 ..summary:Returns the number of occurences of a q-gram for every sequence of a @Class.StringSet@ .
 ..signature:countOccurrencesMultiple(index, shape)
 ..param.index:A q-gram index of a @Class.StringSet@.

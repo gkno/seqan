@@ -97,6 +97,7 @@ struct StreamReport;
 
 /**
 .Metafunction.Hit:
+..cat:Blast
 ..summary:Blast Hit type of a Blast object.
 ..signature:Hsp<T>::Type
 ..param.T:A Blast report object.
@@ -109,6 +110,7 @@ struct Hit;
 
 /**
 .Metafunction.Hsp:
+..cat:Blast
 ..summary:Blast HSP type of a Blast object.
 ..signature:Hsp<T>::Type
 ..param.T:A Blast object.
@@ -168,19 +170,11 @@ struct TagBlastX_;
 struct TagTBlastN_;
 struct TagTBlastX_;
 
-template<typename TSpec = TagBlastN_>
-class NucleotideBlast{
-public:
-	NucleotideBlast(){}
-	~NucleotideBlast(){}
-};
+template <typename TSpec = TagBlastN_>
+class NucleotideBlast {};
 
-template<typename TSpec = TagBlastP_>
-class ProteinBlast{
-public:
-	ProteinBlast(){}
-	~ProteinBlast(){}
-};
+template <typename TSpec = TagBlastP_>
+class ProteinBlast {};
 
 typedef NucleotideBlast<TagBlastN_> BlastN;
 typedef NucleotideBlast<TagMegaBlast_> MegaBlast;

@@ -60,6 +60,7 @@ typedef Tag<OverlapLibrary_> const OverlapLibrary;
 
 /**
 .Tag.Consensus Calling:
+..cat:Consensus
 ..summary:A tag that specifies how to call the consensus.
 ..include:seqan/consensus.h
 */

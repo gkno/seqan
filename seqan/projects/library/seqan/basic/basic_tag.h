@@ -39,8 +39,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): Is this used at all?
 /**
 .Tag.DotDrawing
+..cat:Input/Output
 ..summary:Switch to trigger drawing in dot format.
 ..value.DotDrawing:Graphs in dot format.
 ..include:seqan/basic.h
@@ -50,14 +52,17 @@ struct DotDrawing_;
 typedef Tag<DotDrawing_> const DotDrawing;
 
 
+// TODO(holtgrew): Are these used at all?
 /**
 .Tag.HammingDistance
+..cat:Basic
 ..summary:Switch to trigger Hamming distance, which is a measure of character substitutions.
 ..include:seqan/basic.h
 */
 
 /**
 .Tag.LevenshteinDistance
+..cat:Basic
 ..summary:Switch to trigger Levenshtein distance, which is a measure of edit operations (character substitutions, deletions or insertions).
 ..remarks:$EditDistance$ is a synonym for $LevenshteinDistance$.
 ..see:Spec.EditDistance
@@ -83,6 +88,7 @@ typedef Tag<LevenshteinDistance_>	EditDistance;
 
 /**
 .Tag.Global Alignment Algorithms:
+..cat:Alignments
 ..summary:Global alignment algorithm used by globalAlignment.
 ..see:Function.globalAlignment
 ..see:Tag.Local Alignment Algorithms
@@ -177,6 +183,7 @@ typedef Tag<Lcs_> const Lcs;
 
 /**
 .Tag.Local Alignment Algorithms:
+..cat:Alignments
 ..summary:Local alignment algorithm used by localAlignment.
 ..see:Function.localAlignment
 ..include:seqan/basic.h

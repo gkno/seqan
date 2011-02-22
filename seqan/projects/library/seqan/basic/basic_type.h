@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Metafunction.Value:
+..cat:Basic
 ..summary:Type of the items in the container. 
 ..signature:Value<T>::Type
 ..param.T:Type for which the value type is determined.
@@ -67,6 +68,7 @@ struct Value<T const>
 
 /**
 .Metafunction.GetValue:
+..cat:Basic
 ..summary:Type for reading values. 
 ..signature:GetValue<T>::Type
 ..param.T:Type of container that holds a value.
@@ -93,6 +95,7 @@ struct GetValue<T const>:
 
 /**
 .Metafunction.Reference:
+..cat:Basic
 ..summary:Reference type. 
 ..signature:Reference<T>::Type
 ..param.T:A Type.
@@ -117,6 +120,7 @@ struct Reference<T const>
 
 /**
 .Metafunction.Size:
+..cat:Basic
 ..summary:Type of an object that is suitable to hold size information.
 ..signature:Size<T>::Type
 ..param.T:Type for which the size type is determined.
@@ -140,6 +144,7 @@ struct Size<T const>:
 
 /**
 .Metafunction.Difference:
+..cat:Basic
 ..summary:Type of an object that stores the difference between two iterators.
 ..signature:Difference<T>::Type
 ..param.T:Type for which the difference type is determined.
@@ -165,6 +170,7 @@ struct Difference<T const>:
 
 /**
 .Metafunction.Position:
+..cat:Basic
 ..summary:Type of an object that represents a position in a container.
 ..signature:Position<T>::Type
 ..param.T:Type for which the position type is determined.
@@ -189,6 +195,7 @@ struct Position<T const>:
 
 /**
 .Metafunction.Host:
+..cat:Basic
 ..summary:Type of the object a given object depends on.
 ..signature:Host<T>::Type
 ..param.T:Type for which the host type is determined.
@@ -205,6 +212,7 @@ struct Host
 
 /**
 .Metafunction.Spec:
+..cat:Basic
 ..summary:The spec of a class. 
 ..signature:Spec<T>::Type
 ..param.T:Type for which the spec is determined.
@@ -236,6 +244,7 @@ struct Spec<T const>:
 
 /**
 .Metafunction.DeepestSpec:
+..cat:Basic
 ..summary:The deepest spec of a class with nested template arguments.
 ..signature:DeepestSpec<T>::Type
 ..param.T:Type for which the deepest spec is determined.
@@ -300,6 +309,7 @@ struct DeepestSpec<T const>:
 
 /**
 .Metafunction.Cargo:
+..cat:Basic
 ..summary:Type of additional data stored in an object. 
 ..signature:Cargo<T>::Type
 ..param.T:Type for which the cargo tyoe is determined.
@@ -321,6 +331,7 @@ struct Cargo<T const> {
 
 /**
 .Metafunction.VertexDescriptor:
+..cat:Graph
 ..summary:Type of an object that represents a vertex descriptor.
 ..signature:VertexDescriptor<T>::Type
 ..param.T:Type T must be a graph. All graphs currently use ids as vertex descriptors.
@@ -346,6 +357,7 @@ struct VertexDescriptor<T const>:
 	
 /**
 .Metafunction.Id:
+..cat:Graph
 ..summary:Type of an object that represents an id.
 ..signature:Id<T>::Type
 ..param.T:Type for which a suitable id type is determined.
@@ -371,6 +383,7 @@ struct Id<T const> {
 
 /**
 .Metafunction.Key:
+..cat:Graph
 ..summary:Key type of a key to cargo mapping.
 ..signature:Key<T>::Type
 ..param.T:Type for which a key type is determined.
@@ -409,9 +422,10 @@ struct Object<T const>:
 
 //____________________________________________________________________________
 
+// TODO(holtgrew): Move to alignments?
 /**
 .Metafunction.Source
-..include:seqan/basic.h
+..cat:Alignments
 */
 
 template < typename TSpec = void >
@@ -615,6 +629,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Metafunction.LENGTH:
+..cat:Basic
 ..summary:Number of elements in a fixed-size container.
 ..signature:LENGTH<T>::VALUE
 ..param.T:Type for which the number of elements is determined.
@@ -635,6 +650,7 @@ struct LENGTH<T const>:
 
 /**
 .Metafunction.WEIGHT:
+..cat:Index
 ..summary:Number of relevant positions in a shape.
 ..signature:WEIGHT<T>::Type
 ..param.T:Shape type for which the number of relevant positions is determined.
@@ -663,6 +679,7 @@ struct WEIGHT<T const>:
 
 /**
 .Metafunction.IsIntegral:
+..cat:Basic
 ..summary:Tests for a type to be of integral value.
 ..signature:IsIntegral<T>::Type
 ..param.T:Type that is tested.

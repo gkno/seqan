@@ -57,6 +57,7 @@ struct Length<void>
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Tag.TagList:
+..cat:Basic
 ..summary:A structure to represent a list of tags.
 ..signature:TagList<TTag1>
 ..signature:TagList<TTag1, TagList<TTag2> >
@@ -101,6 +102,7 @@ struct TagSelector
 
 /**
 .Class.TagSelector:
+..cat:Basic
 ..summary:A structure to select a tag from a @Tag.TagList@.
 ..signature:TagSelector<TTagList>
 ..param.TTagList:A tag list.
@@ -126,6 +128,7 @@ struct TagSelector< TagList<TTag, TSubList> >:
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Tag.Default:
+..cat:Basic
 ..summary:Tag that specifies default behavior.
 ..tag.Default:Use default behavior. 
 ..include:seqan/basic.h
@@ -136,6 +139,7 @@ typedef Tag<Default_> const Default;
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Tag.Move Switch:
+..cat:Basic
 ..summary:Switch to force move.
 ..tag.Move:Move instead of assign. 
 ..remarks.text:The difference between move constructor and copy constructor
@@ -175,6 +179,7 @@ typedef Tag<NonMinimalCtor_> const NonMinimalCtor;
 
 /**
 .Tag.Nothing:
+..cat:Basic
 ..summary:Tag that represents an absent parameter or an absent type.
 ..tag.Nothing:Omit parameter.
 ..include:seqan/basic.h

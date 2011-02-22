@@ -52,6 +52,7 @@ static const int SEQAN_DISTANCE_UNITY = 1;
 
 /**
 .Tag.Alignment Graph Combination:
+..cat:Alignments
 ..summary:A tag to specify how to combine alignment graphs.
 ..include:seqan/graph_msa.h
 */

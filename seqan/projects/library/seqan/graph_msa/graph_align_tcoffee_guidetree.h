@@ -277,6 +277,7 @@ njTree(String<TValue, TStringSpec>& mat,
 
 /**
 .Tag.Upgma Configurator:
+..cat:Alignments
 ..summary:A tag to configure the guide tree construction.
 ..include:seqan/graph_msa.h
 */

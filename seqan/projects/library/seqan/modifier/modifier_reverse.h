@@ -545,7 +545,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Function.reverse
 ..summary:Reverse an object/container in-place.
-..cat:Modifiers
+..cat:Modifier
 ..signature:reverse(object)
 ..param.object:The object/container whose elements to reverse.
 ...type:Concept.Container

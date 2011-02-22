@@ -546,7 +546,9 @@ SEQAN_CHECKPOINT
 // CompareType
 //////////////////////////////////////////////////////////////////////////////
 
-/**.Metafunction.CompareType:
+/**
+.Metafunction.CompareType:
+..cat:Basic
 ..summary:Type to convert other types for comparisons.
 ..signature:CompareType<TLeft, TRight>::Type
 ..param.TLeft:Type of the left operand of a comparison.
@@ -558,7 +560,9 @@ is the same as $CompareType<T2, T1>::Type$. It is also possible, that only one o
 two types is defined.
 ..remarks.text:This metafunction is used for the implementation of
 comparisons that involve @Class.SimpleType@.
+..include:seqan/basic.h
 */
+// TODO(holtgrew): Really necessary? A bit too much automatic behaviour?
 //???TODO: muss geprueft werden, ob diese Metafunktion noch ausgeweitet oder aber versteckt wird.
 
 template <typename TLeft, typename TRight>

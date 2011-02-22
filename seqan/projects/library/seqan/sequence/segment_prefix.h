@@ -358,6 +358,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Metafunction.Prefix:
+..cat:Segments
 ..summary:Prefix sequence type.
 ..signature:Prefix<T>::Type
 ..param.T:A sequence type.

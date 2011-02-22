@@ -472,13 +472,12 @@ atEnd(Iter<TSSet, ConcatVirtual<TSpec> > const & me)
 // Function atEndOfSequence()
 // --------------------------------------------------------------------------
 
-// TODO(holtgrew): Document Function.atEndOfSequence
 // TODO(holtgrew): Specifying a catch-all implementation appears a bit too generous, what about concept checking?
 
 /**
 .Function.atEndOfSequence
 ..summary:Returns true if the iterator is at the end of a sequence.
-..cat:sequences
+..cat:Sequences
 ..signature:atEndOfSequence(iter)
 ..param.iter:Iterator to test.
 ...type:Class.Iter

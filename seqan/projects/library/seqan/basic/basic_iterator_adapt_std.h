@@ -59,6 +59,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //helper Metafunction
 
+// TODO(holtgrew): Still problematic without VC++ 2003 support?
 /* This simple, general implementation cannot be used due to strange VC++ 2003 behavior
 
 template <typename TStdContainer>

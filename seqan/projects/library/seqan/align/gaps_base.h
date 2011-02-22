@@ -40,11 +40,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**.Metafunction.GappedValueType:
+/**
+.Metafunction.GappedValueType:
+..cat:Alignments
 ..summary:Returns a value type that contains a blank value '-'.
 ..signature:GappedValueType<T>::Type
 ..param.T:The value type that should be expanded (if needed) by '-'.
 ..returns.param.Type:A value type that can be used to store store values in $T$ and the value '-'.
+..include:seqan/align.h
 */
 
 template <typename T>
@@ -150,6 +153,7 @@ struct Position<Gaps<TSource, TSpec> const>:
 
 /**
 .Metafunction.Source:
+..cat:Alignments
 ..summary:The underlying sequence for alignments or gaps data structures.
 ..signature:Source<T>::Type
 ..param.T:Type for which the source type is determined.
@@ -169,6 +173,7 @@ struct Source<Gaps<TSource, TSpec> >
 
 /**
 .Metafunction.GetSource:
+..cat:Alignments
 ..summary:The type returned by the @Function.source@ function.
 ..signature:GetSource<T>::Type
 ..param.T:Type for which the source is retrieved by @Function.source@.

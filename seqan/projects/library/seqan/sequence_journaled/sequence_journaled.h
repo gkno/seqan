@@ -51,10 +51,10 @@ namespace seqan {
 
 /**
 .Spec.Journaled String
+..cat:Sequences
 ..summary:Journaled versions of arbitrary underlying string.
 ..signature:String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 ..include:seqan/sequence_journaled.h
-..cat:Sequences
  */
 
 template <typename THostSpec, typename TJournalSpec = SortedArray, typename TBufferSpec = Alloc<void> >
@@ -131,6 +131,7 @@ struct Host<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > con
 
 /**
 .Metafunction.InsertionBuffer
+..cat:Sequences
 ..summary:Return type of insertion buffer string for a journaled string.
 ..param.T:Spec.Journaled String
 ..include:sequan/sequence_journal.h
@@ -220,6 +221,7 @@ struct GetValue<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 
 /**
 .Metafunction.JournalType
+..cat:Sequences
 ..signature:JournalType<T>::Type
 ..summary:Metafunction for returning the type of the journal of a Journaled String.
 ..param.T:Spec.Journaled String
@@ -325,6 +327,7 @@ clear(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 
 /**
 .Function.flatten:
+..cat:Sequences
 ..summary:Apply the journal to the underlying string, destructively on the underlying string.
 ..signature:flatten(journaledString)
 ..param.journaledString:The journaled string to flatten.

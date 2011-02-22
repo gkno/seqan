@@ -50,6 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.Segment Match Generation:
+..cat:Alignments
 ..summary:A tag that specifies how to generate segment matches.
 ..include:seqan/graph_msa.h
 */

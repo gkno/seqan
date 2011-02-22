@@ -47,6 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.FindInfix:
+..cat:Searching
 ..summary:Find needle as a substring of haystack (infix search).
 ..see:Tag.FindPrefix
 ..see:Spec.Myers
@@ -58,6 +59,7 @@ struct FindInfix;
 	
 /**
 .Tag.FindPrefix:
+..cat:Searching
 ..summary:Find needle as a prefix of the haystack (prefix serach)
 ..see:Tag.FindInfix
 ..see:Spec.Myers

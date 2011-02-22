@@ -289,6 +289,7 @@ fragmentLength(Fragment<TSize, TSpec> const& f)
 
 /**
 .Function.getProjectedPosition:
+..cat:Alignments
 ..class:Class.Fragment
 ..signature:getProjectedPosition(f,seqId,pos,seqId2,pos2)
 ..summary:Projects a position of one sequence taking part in a pairwise match onto the other sequence.
@@ -432,6 +433,7 @@ getProjectedPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f,
 
 /**
 .Function.isReversed:
+..cat:Alignments
 ..class:Class.Fragment
 ..signature:isReversed<Fragment<TSize,ExactReversableFragment<TSpec> >(f)
 ..summary:Returns true if the segment match is in reverse orientation.

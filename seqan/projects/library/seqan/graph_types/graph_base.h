@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Metafunction.EdgeDescriptor:
+..cat:Graph
 ..summary:Type of an object that represents an edge descriptor.
 ..signature:EdgeDescriptor<T>::Type
 ..param.T:Type T must be a graph. All graphs use a pointer to an edge stump as an edge descriptor.
@@ -61,6 +62,7 @@ struct EdgeDescriptor;
 
 /**
 .Metafunction.Cargo
+..cat:Graph
 ..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
 ..include:seqan/graph_types.h
 */
@@ -72,6 +74,7 @@ struct Cargo;
 
 /**
 .Metafunction.EdgeType:
+..cat:Graph
 ..summary:Edge type of a graph object.
 ..signature:EdgeType<T>::Type
 ..param.T:Type T must be a graph.
@@ -87,6 +90,7 @@ struct EdgeType;
 
 /**
 .Metafunction.Alphabet:
+..cat:Graph
 ..summary:Access to the Alphabet type.
 ..signature:Alphabet<T>::Type
 ..param.T:Type T must be a type that uses some kind of alphabet internally.
@@ -103,6 +107,7 @@ struct Alphabet;
 
 /**
 .Metafunction.EdgeIdHandler:
+..cat:Graph
 ..summary:Type of an object that represents an Id Manager.
 ..signature:EdgeIdHandler<T>::Type
 ..param.T:A graph.
@@ -121,6 +126,7 @@ struct EdgeIdHandler;
 
 /**
 .Metafunction.VertexIdHandler:
+..cat:Graph
 ..summary:Type of an object that represents an Id Manager.
 ..signature:VertexIdHandler<T>::Type
 ..param.T:A graph.
@@ -154,6 +160,7 @@ typedef Tag<TreeTag_> const TreeTag;
 
 /**
 .Tag.Graph Iterator:
+..cat:Graph
 ..summary:A specification of the iterator to traverse a graph.
 ..include:seqan/graph_types.h
 */

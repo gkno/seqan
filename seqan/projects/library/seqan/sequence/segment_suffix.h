@@ -353,6 +353,7 @@ _setLength(Segment<THost_, SuffixSegment> &, TSize)
 
 /**
 .Metafunction.Suffix:
+..cat:Segments
 ..summary:Suffix sequence type.
 ..signature:Suffix<T>::Type
 ..param.T:A sequence type.

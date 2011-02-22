@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Class.MotifFinder:
+..cat:Motif Search
 ..summary:Holds the algorithm parameter values and the motif instance(s) found by the appropriate
           motif discovery algorithm.
 ..cat:Motif Search
@@ -293,6 +294,7 @@ displayResult(MotifFinder<TValue, TAlgorithm> & finder)
 /////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.Motif:
+..cat:Motif Search
 ..summary:The string type of the finder.
 ..signature:Motif<T>::Type
 ..param.T:Finder for which the string type is determined.

@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.File Format:
+..cat:Input/Output
 ..summary:A file format.
 ..include:seqan/file.h
 */
