@@ -1496,7 +1496,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TValue c = *(itText + sa);
 			for(++itSA; itSA != itSAEnd; ++itSA) {
 				sa = *itSA;
-				if (textLength == sa || c != *(itText + sa))
+				if (textLength == sa || *(itText + sa) != c)
 					return prefixLen;
 			}
 			++prefixLen; --textLength;

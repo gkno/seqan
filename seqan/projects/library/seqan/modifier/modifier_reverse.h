@@ -575,7 +575,7 @@ namespace SEQAN_NAMESPACE_MAIN
 #else
 		typedef typename Iterator<TSequence, Standard>::Type	TIter;
 		TIter it1 = begin(sequence, Standard());
-		TIter it2 = it1 + length(sequence) - 1;
+		TIter it2 = it1 + (length(sequence) - 1);
 		TIter itMid = it1 + length(sequence) / 2;
 
 		for(; it1 != itMid; ++it1, --it2) {

@@ -147,7 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		for (++it; it != itEnd; ++it, ++repRight) 
 		{
-			if (last != *it)
+			if (*it != last)
 			{
 				if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
 				{
