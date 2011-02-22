@@ -130,6 +130,22 @@ struct GetValue<Segment<THost, TSpec> const >
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Metafunction.Reference.param.T.type:Class.Segment
+
+template <typename THost, typename TSpec>
+struct Reference<Segment<THost, TSpec> >
+{
+	typedef typename Reference<THost>::Type Type;
+};
+
+template <typename THost, typename TSpec>
+struct Reference<Segment<THost, TSpec> const >
+{
+	typedef typename Reference<THost const>::Type Type;
+};
+	
+//////////////////////////////////////////////////////////////////////////////
+
 ///.Metafunction.Iterator.param.T.type:Class.Segment
 
 template <typename THost, typename TSpec>
