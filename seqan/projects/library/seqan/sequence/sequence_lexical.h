@@ -807,13 +807,13 @@ You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is
 template <typename TValue>
 inline unsigned ordValue(TValue const & c)
 {
-	return static_cast<typename MakeUnsigned_<TValue>::Type const &>(c);
+	return convert<unsigned>(static_cast<typename MakeUnsigned_<TValue>::Type const &>(c));
 }
 
 template <typename TValue, typename TSpec>
 inline unsigned ordValue(SimpleType<TValue, TSpec> const & c)
 {
-	return c;
+	return convert<unsigned>(c);
 }
 
 template <typename TValue>
