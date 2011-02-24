@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adding documentation of graph iterator constructors.
  * Adding full segment support for journaled strings, including segment assignment, e.g. `infix(journaledString, 0, 10) = DnaString("CGAT")`.
  * Adding `position()`, `operator-()`, `operator[]` with proxy functionality and relation operators to journaled string iterator.
  * Adding metafunction `GetDefaultRng<T>::Type` and function `defaultRng()` for construction of global random number generators to be used by default in randomized data structures and algorithms.

@@ -55,6 +55,19 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.Adjacency Iterator
 ..see:Spec.Bfs Iterator
 ..include:seqan/graph_types.h
+
+.Memfunc.Dfs Preorder Iterator#Iter
+..summary:Constructor
+..class:Spec.Dfs Preorder Iterator
+..signature:Iter()
+..signature:Iter(graph, v)
+..signature:Iter(iter)
+..param.graph:The graph to iterate edges of.
+...type:Class.Graph
+..param.v:Vertex descriptor of vertex to start DFS from.
+...type:Metafunction.VertexDescriptor
+..param.iter:Other iterator to copy-construct from.
+...type:Spec.Dfs Preorder Iterator
 */
 template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > 

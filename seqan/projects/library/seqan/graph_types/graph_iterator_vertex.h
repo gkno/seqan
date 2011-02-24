@@ -56,6 +56,17 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.Bfs Iterator
 ..see:Spec.Dfs Preorder Iterator
 ..include:seqan/graph_types.h
+
+.Memfunc.Vertex Iterator#Iter
+..summary:Constructor
+..class:Spec.Vertex Iterator
+..signature:Iter()
+..signature:Iter(graph)
+..signature:Iter(iter)
+..param.graph:The graph to iterate vertices of.
+...type:Class.Graph
+..param.iter:Other iterator to copy-construct from.
+...type:Spec.Vertex Iterator
 */
 template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > > 
