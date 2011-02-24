@@ -84,9 +84,11 @@ file (GLOB SEQAN_TCOFFEE_HEADERS ${SEQAN_LIBRARY}/apps/seqan_tcoffee/[A-z]*.h)
 list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/paramChooser)
 list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/transrectify)
 list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/transsplice)
+list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/transform)
 list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/chopsuey)
 set  (APP_transrectify_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transrectify.cpp)
 set  (APP_transsplice_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transsplice.cpp)
+set  (APP_transform_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transform.cpp)
 set  (APP_chopsuey_SOURCES ${SEQAN_LIBRARY}/apps/transquant/chopsuey.cpp)
 
 # Manually set predefined sets of source files for some targets
