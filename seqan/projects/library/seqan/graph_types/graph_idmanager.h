@@ -318,7 +318,7 @@ idInUse(IdManager<TIdType, TSpec> const& idm,
 		TId const id)
 {
 	SEQAN_CHECKPOINT
-	return (id < length(idm.data_in_use)) ? idm.data_in_use[id] : false;
+	return (id < static_cast<TId>(length(idm.data_in_use))) ? idm.data_in_use[id] : false;
 }
 
 
