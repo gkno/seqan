@@ -49,7 +49,88 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_digraph_stiege)
 
 SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
 {
-    // TODO(holtgrew): Write me!
+    using namespace seqan;
+
+    typedef Graph<Tree<> > TTree;
+    typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
+    typedef String<UndirectedBuildingBlock> TBlockDescriptors;
+    typedef String<TTreeVertexDescriptor> TBlockMap;
+    typedef Graph<Undirected<> > TGraph;
+
+    // The same graph as in Stiege's example in the 1996 paper, Figure 1.
+    TGraph graph;
+    TTreeVertexDescriptor a = addVertex(graph);
+    TTreeVertexDescriptor b = addVertex(graph);
+    TTreeVertexDescriptor c1 = addVertex(graph);
+    TTreeVertexDescriptor c2 = addVertex(graph);
+    TTreeVertexDescriptor c3 = addVertex(graph);
+    TTreeVertexDescriptor c4 = addVertex(graph);
+    TTreeVertexDescriptor d1 = addVertex(graph);
+    TTreeVertexDescriptor d2 = addVertex(graph);
+    TTreeVertexDescriptor d3 = addVertex(graph);
+    TTreeVertexDescriptor d4 = addVertex(graph);
+    TTreeVertexDescriptor e1 = addVertex(graph);
+    TTreeVertexDescriptor e2 = addVertex(graph);
+    TTreeVertexDescriptor e3 = addVertex(graph);
+    TTreeVertexDescriptor e4 = addVertex(graph);
+    TTreeVertexDescriptor f1 = addVertex(graph);
+    TTreeVertexDescriptor f2 = addVertex(graph);
+    TTreeVertexDescriptor f3 = addVertex(graph);
+    TTreeVertexDescriptor f4 = addVertex(graph);
+    TTreeVertexDescriptor f5 = addVertex(graph);
+    TTreeVertexDescriptor f6 = addVertex(graph);
+    TTreeVertexDescriptor f7 = addVertex(graph);
+    TTreeVertexDescriptor g = addVertex(graph);
+    TTreeVertexDescriptor h1 = addVertex(graph);
+    TTreeVertexDescriptor h2 = addVertex(graph);
+    TTreeVertexDescriptor h3 = addVertex(graph);
+    TTreeVertexDescriptor h4 = addVertex(graph);
+    TTreeVertexDescriptor i = addVertex(graph);
+    TTreeVertexDescriptor j1 = addVertex(graph);
+    TTreeVertexDescriptor j2 = addVertex(graph);
+    TTreeVertexDescriptor j3 = addVertex(graph);
+    TTreeVertexDescriptor j4 = addVertex(graph);
+    addEdge(graph, a, c1);
+    addEdge(graph, b, c1);
+    addEdge(graph, c1, c2);
+    addEdge(graph, c1, c4);
+    addEdge(graph, c2, c3);
+    addEdge(graph, c3, c4);
+    addEdge(graph, c3, d1);
+    addEdge(graph, d1, d2);
+    addEdge(graph, d2, d3);
+    addEdge(graph, d2, d4);
+    addEdge(graph, d2, h1);
+    addEdge(graph, d3, f2);
+    addEdge(graph, d4, e1);
+    addEdge(graph, e1, e2);
+    addEdge(graph, e1, e3);
+    addEdge(graph, e2, e4);
+    addEdge(graph, e3, e4);
+    addEdge(graph, f1, f2);
+    addEdge(graph, f1, f4);
+    addEdge(graph, f1, g);
+    addEdge(graph, f2, f3);
+    addEdge(graph, f3, f4);
+    addEdge(graph, f1, f5);
+    addEdge(graph, f1, f7);
+    addEdge(graph, f5, f6);
+    addEdge(graph, f6, f7);
+    addEdge(graph, h1, h2);
+    addEdge(graph, h1, h3);
+    addEdge(graph, h1, h4);
+    addEdge(graph, j1, j2);
+    addEdge(graph, j2, j3);
+    addEdge(graph, j3, j4);
+
+    (void)i; // no edge
+
+    TTree clusterTree;
+    TBlockDescriptors blockDescriptors;
+    TBlockMap blockMap;
+    std::cerr << "numVertices(graph) == " << numVertices(graph) << std::endl;
+    std::cerr << "numEdges(graph) == " << numEdges(graph) << std::endl;
+    decomposeGraphStiege(clusterTree, blockDescriptors, blockMap, graph);
 }
 
 #endif  // TEST_GRAPH_DECOMPOSITION_DECOMPOSITION_H_
