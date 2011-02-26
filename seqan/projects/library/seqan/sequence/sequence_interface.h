@@ -37,8 +37,8 @@
 // TODO(holtgrew): Each value is a container by itself. This is highly undesirable since it introduces the set-of-sets problem and when users confuse atomic values with containers, bugs are hard to find. This feature should be removed.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_SEQUENCE_INTERFACE_H
-#define SEQAN_HEADER_SEQUENCE_INTERFACE_H
+#ifndef SEQAN_SEQUENCE_SEQUENCE_INTERFACE_H_
+#define SEQAN_SEQUENCE_SEQUENCE_INTERFACE_H_
 
 namespace seqan {
 
@@ -986,6 +986,7 @@ _computeSizeForCapacity(T const & /*me*/,
 // Function computeGenerousCapacity()
 // --------------------------------------------------------------------------
 
+// TODO(holtgrew): This is a helper and should conceptually not be in the "interface" header.
 /**
 .Function.computeGenerousCapacity:
 ..hidefromindex
@@ -1425,27 +1426,26 @@ replace(TTarget const & target,
     replace(target, pos_begin, pos_end, source, limit, typename DefaultOverflowImplicit<TTarget const>::Type());
 }
 
-
 // --------------------------------------------------------------------------
 // Function _capacityReturned()
 // --------------------------------------------------------------------------
 
+// TODO(holtgrew): Is this internal or a helper?
+
 template <typename T, typename TSize, typename TExpand>
 inline typename Size<T>::Type
-_capacityReturned(
-    T & me,
-    TSize,
-    Tag<TExpand> const)
+_capacityReturned(T & me,
+                  TSize,
+                  Tag<TExpand> const &)
 {
     return capacity(me);
 }
 
 template <typename T, typename TSize>
 inline typename Size<T>::Type
-_capacityReturned(
-    T &,
-    TSize new_capacity,
-    Insist)
+_capacityReturned(T &,
+                  TSize new_capacity,
+                  Insist const & )
 {
     return new_capacity;
 }
@@ -1478,10 +1478,9 @@ the operation need not to change the capacity at all.
 
 template <typename T, typename TSize, typename TExpand>
 inline typename Size<T>::Type
-reserve(
-    T & me,
-    TSize new_capacity,
-    Tag<TExpand> const tag)
+reserve(T & me,
+        TSize const & new_capacity,
+        Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     return _capacityReturned(me, new_capacity, tag);
@@ -1489,9 +1488,8 @@ reserve(
 
 template <typename T, typename TSize>
 inline typename Size<T>::Type
-reserve(
-    T & me,
-    TSize new_capacity)
+reserve(T & me,
+        TSize const & new_capacity)
 {
     SEQAN_CHECKPOINT;
     return reserve(me, new_capacity, typename DefaultOverflowExplicit<T>::Type());
@@ -1521,11 +1519,11 @@ reserve(
 ..see:Function.reserve
 ..include:seqan/sequence.h
 */
+
 template <typename T, typename TSize>
 inline typename Size<T>::Type
-resize(
-    T & me,
-    TSize new_length)
+resize(T & me,
+       TSize new_length)
 {
     SEQAN_CHECKPOINT;
     return resize(me, new_length, typename DefaultOverflowExplicit<T>::Type());
@@ -1533,10 +1531,9 @@ resize(
 
 template <typename T, typename TSize, typename TValue>
 inline typename Size<T>::Type
-resize(
-    T & me,
-    TSize new_length,
-    TValue const & val)
+resize(T & me,
+       TSize new_length,
+       TValue const & val)
 {
     SEQAN_CHECKPOINT;
     return resize(me, new_length, val, typename DefaultOverflowExplicit<T>::Type());
@@ -1620,7 +1617,17 @@ erase(T & me,
     resizeSpace(me, 0, pos, pos_end);
 }
 
-// for segments
+template<typename T, typename TPosition>
+inline void
+erase(T & me,
+      TPosition pos)
+{
+    SEQAN_CHECKPOINT;
+    resizeSpace(me, 0, pos, pos + 1);
+}
+
+// For segments, we also have to define the version for const-containers.
+
 template<typename T, typename TBeginPosition, typename TEndPosition>
 inline void
 erase(T const & me,
@@ -1629,15 +1636,6 @@ erase(T const & me,
 {
     SEQAN_CHECKPOINT;
     resizeSpace(me, 0, pos, pos_end);
-}
-
-template<typename T, typename TPosition>
-inline void
-erase(T & me,
-      TPosition pos)
-{
-    SEQAN_CHECKPOINT;
-    resizeSpace(me, 0, pos, pos + 1);
 }
 
 template<typename T, typename TPosition>
@@ -1699,6 +1697,6 @@ shrinkToFit(T & me)
     reserve(me, length(me), Exact());
 }
 
-} // namespace seqan
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_SEQUENCE_SEQUENCE_INTERFACE_H_

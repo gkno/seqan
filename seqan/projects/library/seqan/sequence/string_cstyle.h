@@ -34,8 +34,8 @@
 // Implementation of the CStyle String specialization,
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_SEQUENCE_CSTYLE_H
-#define SEQAN_HEADER_SEQUENCE_CSTYLE_H
+#ifndef SEQAN_SEQUENCE_STRING_CSTYLE_H_
+#define SEQAN_SEQUENCE_STRING_CSTYLE_H_
 
 namespace seqan {
 
@@ -46,9 +46,6 @@ namespace seqan {
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
-
-//////////////////////////////////////////////////////////////////////////////
-//string that exports an interface to cstyle strings.
 
 /**
 .Spec.CStyle String:
@@ -109,85 +106,52 @@ public:
     // If data_size > 0, then the buffer is owned by me and must be deallocated.
     size_t data_size;
 
-public:
     // TODO(holtgrew): Maybe better point to 0?
     static TValue EMPTY_STRING;
-//____________________________________________________________________________
 
-public:
-    String():
-        data_begin(&EMPTY_STRING),
-        data_end(&EMPTY_STRING),
-        data_size(0)
+    String()
+        : data_begin(&EMPTY_STRING),
+          data_end(&EMPTY_STRING),
+          data_size(0)
     {
         SEQAN_CHECKPOINT;
     }
-
-//____________________________________________________________________________
-
-    template <typename TString>
-    String(TString & str):
-        data_size(0)
-    {
-        SEQAN_CHECKPOINT;
-        assign(*this, str);
-    }
-    template <typename TString>
-    String(TString const & str):
-        data_size(0)
-    {
-        SEQAN_CHECKPOINT;
-        assign(*this, str);
-    }
-
-    String(String & str):
-        data_size(0)
-    {
-        SEQAN_CHECKPOINT;
-        assign(*this, str);
-    }
-    String(String const & str):
-        data_size(0)
-    {
-        SEQAN_CHECKPOINT;
-        assign(*this, str);
-    }
-
-    String(TValue * str):
-        data_begin(str),
-        data_end(end(str)),
-        data_size(0)
-    {
-        SEQAN_CHECKPOINT;
-    }
-
-//____________________________________________________________________________
 
     template <typename TString>
-    String & operator = (TString & str)
+    String(TString & str)
+            : data_size(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, str);
-        return *this;
     }
+
     template <typename TString>
-    String & operator = (TString const & str)
+    String(TString const & str)
+            : data_size(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, str);
-        return *this;
     }
-    String & operator = (String & str)
+
+    String(String & str)
+        : data_size(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, str);
-        return *this;
     }
-    String & operator = (String const & str)
+    String(String const & str)
+        : data_size(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, str);
-        return *this;
+    }
+
+    String(TValue * str)
+        : data_begin(str),
+          data_end(end(str)),
+          data_size(0)
+    {
+        SEQAN_CHECKPOINT;
     }
 
     ~String()
@@ -196,14 +160,48 @@ public:
         clear(*this);
     }
 
-//____________________________________________________________________________
+    template <typename TString>
+    inline
+    String & operator=(TString & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
 
+    template <typename TString>
+    inline
+    String & operator=(TString const & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
+
+    inline
+    String & operator=(String & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
+
+    inline
+    String & operator=(String const & str)
+    {
+        SEQAN_CHECKPOINT;
+        assign(*this, str);
+        return *this;
+    }
+
+    inline
     operator TValue * ()
     {
         SEQAN_CHECKPOINT;
         return data_begin;
     }
 
+    inline
     operator TValue const * () const
     {
         SEQAN_CHECKPOINT;
@@ -255,9 +253,8 @@ struct IsContiguous< String<TValue, CStyle > >
 
 template <typename TValue>
 inline void
-move(
-    String <TValue, CStyle > & target,
-    String <TValue, CStyle > & source)
+move(String<TValue, CStyle> & target,
+     String<TValue, CStyle> & source)
 {
     SEQAN_CHECKPOINT;
     clear(target);
@@ -273,9 +270,8 @@ move(
 
 template <typename TValue>
 inline void
-move(
-    String <TValue, CStyle > & target,
-    String <TValue, CStyle > const & source)
+move(String<TValue, CStyle> & target,
+     String<TValue, CStyle> const & source)
 {
     SEQAN_CHECKPOINT;
     move(target, const_cast<String<TValue, CStyle> &>(source));
@@ -288,7 +284,7 @@ move(
 template <typename TValue>
 inline typename Iterator<String<TValue, CStyle >, Standard>::Type
 begin(String <TValue, CStyle > & me,
-    Standard)
+      Standard const &)
 {
     SEQAN_CHECKPOINT;
     return me.data_begin;
@@ -297,14 +293,14 @@ begin(String <TValue, CStyle > & me,
 template <typename TValue>
 inline typename Iterator<String<TValue, CStyle > const, Standard>::Type
 begin(String <TValue, CStyle > const & me,
-    Standard)
+      Standard const &)
 {
     SEQAN_CHECKPOINT;
     return me.data_begin;
 }
 
 // --------------------------------------------------------------------------
-// Function _setBegin()
+// Internal Function _setBegin()
 // --------------------------------------------------------------------------
 
 template <typename TValue, typename TValue2>
@@ -322,7 +318,7 @@ _setBegin(String <TValue, CStyle > & me, TValue2 new_begin)
 template <typename TValue>
 inline typename Iterator<String <TValue, CStyle >, Standard>::Type
 end(String <TValue, CStyle > & me,
-    Standard)
+    Standard const &)
 {
     SEQAN_CHECKPOINT;
     return me.data_end;
@@ -331,14 +327,14 @@ end(String <TValue, CStyle > & me,
 template <typename TValue>
 inline typename Iterator<String <TValue, CStyle > const, Standard>::Type
 end(String <TValue, CStyle > const & me,
-    Standard)
+    Standard const &)
 {
     SEQAN_CHECKPOINT;
     return me.data_end;
 }
 
 // --------------------------------------------------------------------------
-// Function _setEnd()
+// Internal Function _setEnd()
 // --------------------------------------------------------------------------
 
 template <typename TValue, typename TValue2>
@@ -365,7 +361,7 @@ capacity(String <TValue, CStyle > const & me)
 }
 
 // --------------------------------------------------------------------------
-// Function _reallocateStorage()
+// Internal Function _reallocateStorage()
 // --------------------------------------------------------------------------
 
 ///.Internal._reallocateStorage.param.object.type:Spec.CStyle String
@@ -395,7 +391,7 @@ _reallocateStorage(
 }
 
 // --------------------------------------------------------------------------
-// Function _deallocateStorage()
+// Internal Function _deallocateStorage()
 // --------------------------------------------------------------------------
 
 ///.Internal._deallocateStorage.param.object.type:Spec.CStyle String
@@ -444,7 +440,7 @@ dependent(String <TValue, CStyle > & me)
 template <typename TValue>
 inline void
 assign(String <TValue, CStyle > & target,
-    TValue * source)
+       TValue * source)
 {
     SEQAN_CHECKPOINT;
     clear(target);
@@ -460,7 +456,7 @@ template <typename TTargetValue, typename TSource, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
        TSource & source,
-       Tag<TExpand> const tag)
+       Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     create(target, source, tag);
@@ -470,7 +466,7 @@ template <typename TTargetValue, typename TSource, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
        TSource const & source,
-       Tag<TExpand> const tag)
+       Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     create(target, source, tag);
@@ -481,7 +477,7 @@ inline void
 assign(String<TTargetValue, CStyle> & target,
        TSource & source,
        TSize /*limit*/,
-       Tag<TExpand> const tag)
+       Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     create(target, source, tag);
@@ -492,19 +488,20 @@ inline void
 assign(String<TTargetValue, CStyle> & target,
        TSource const & source,
        TSize limit,
-       Tag<TExpand> const tag)
+       Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     create(target, source, limit, tag);
 }
 
+// TODO(holtgrew): Still needed with dropped VC++ 2003 support?
 //this variant is a workaround for the "const array"-bug of VC++
 
 template <typename TTargetValue, typename TSourceValue, typename TExpand>
 inline void
 assign(String<TTargetValue, CStyle> & target,
        TSourceValue const * source,
-       Tag<TExpand> const tag)
+       Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     create(target, source, tag);
@@ -515,7 +512,7 @@ inline void
 assign(String<TTargetValue, CStyle> & target,
        TSourceValue const * source,
        TSize limit,
-       Tag<TExpand> const tag)
+       Tag<TExpand> const & tag)
 {
     SEQAN_CHECKPOINT;
     create(target, source, limit, tag);
@@ -938,6 +935,6 @@ toCString(String<TValue, TSpec> const & me)
     return toCString(const_cast<String<TValue, TSpec> &>(me));
 }
 
-} // namespace seqan
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_SEQUENCE_STRING_CSTYLE_H_

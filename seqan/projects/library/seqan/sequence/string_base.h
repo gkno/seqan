@@ -35,24 +35,22 @@
 // specializations.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_SEQUENCE_ARRAY_BASE_H
-#define SEQAN_HEADER_SEQUENCE_ARRAY_BASE_H
+#ifndef SEQAN_SEQUENCE_STRING_ARRAY_BASE_H_
+#define SEQAN_SEQUENCE_STRING_ARRAY_BASE_H_
 
+namespace seqan {
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+// ============================================================================
+// Forwards
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-// Tags
-//////////////////////////////////////////////////////////////////////////////
-
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
 template <typename TSpec = void>
 struct Alloc {};
 
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
 /**
 .Class.String:
 ..cat:Sequences
@@ -70,29 +68,30 @@ struct Alloc {};
 template <typename TValue, typename TSpec = Alloc<> >
 class String;
 
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-// METAFUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
 
 ///.Metafunction.Iterator.param.T.type:Class.String
-
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TSpec>
 struct Value<String<TValue, TSpec> >
 {
     typedef TValue Type;
 };
-template <typename TValue, typename TSpec>
-struct Value<String<TValue, TSpec> const >:
-    public Value<String<TValue, TSpec> >
-{
-};
 
-//////////////////////////////////////////////////////////////////////////////
+template <typename TValue, typename TSpec>
+struct Value<String<TValue, TSpec> const >
+        : public Value<String<TValue, TSpec> >
+{};
+
+// ----------------------------------------------------------------------------
+// Metafunction Spec
+// ----------------------------------------------------------------------------
 
 ///.Metafunction.Spec.param.T.type:Class.String
 
@@ -107,7 +106,9 @@ struct Spec<String<TValue, TSpec> const>:
 {
 };
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction IsSequence
+// ----------------------------------------------------------------------------
 
 ///.Metafunction.IsSequence.param.T.type:Class.String
 
@@ -117,34 +118,37 @@ struct IsSequence<String<TValue, TSpec> > {
     enum { VALUE = true };
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// Returns a Class that can be used to store a temporary copy of a String
+// ----------------------------------------------------------------------------
+// Internal Metafunction TempCopy_
+// ----------------------------------------------------------------------------
+
+/**
+.Internal.TempCopy_
+..cat:Metafunctions
+..summary:Returns a Class that can be used to store a temporary copy of a String
+ */
 
 template <typename T>
 struct TempCopy_
 {
-    typedef typename Value<T>::Type TValue;
-    typedef typename RemoveConst_<TValue>::Type TValue_NotConst;
-    typedef String<TValue_NotConst, Alloc<> > Type;
+    typedef typename Value<T>::Type TValue_;
+    typedef typename RemoveConst_<TValue_>::Type TValueNotConst_;
+    typedef String<TValueNotConst_, Alloc<> > Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// FUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Functions
+// ============================================================================
+
+// TODO(holtgrew): Where to move this documentation/specification-only stuff?
 
 ///.Function.id.param.object.type:Class.String
 ///.Function.empty.param.object.type:Class.String
 ///.Function.capacity.param.object.type:Class.String
 
-
-//////////////////////////////////////////////////////////////////////////////
-// swap
-//////////////////////////////////////////////////////////////////////////////
-
-// forwards for swap
-
-template<typename TAlphabet, typename TSpec> class String;
-template<typename TString, typename TSpec> class StringSet;
+// ----------------------------------------------------------------------------
+// Function swap()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.swap:
@@ -153,10 +157,8 @@ template<typename TString, typename TSpec> class StringSet;
 ..signature:swap(left, right)
 ..param.left:The first value.
 ...type:Class.String
-...type:Class.StringSet
 ..param.right:The second value.
 ...type:Class.String
-...type:Class.StringSet
 ..remarks:The function swaps the values of variables left and right.
 This is equivalent to using move three times with a temporary variable.
 
@@ -181,59 +183,47 @@ swap(String<TAlphabet, TSpec> & left,
     move(right, tmp);
 }
 
-// TODO(holtgrew): This actually belongs into sequence_multiple.h.
-template <typename TString, typename TSpec>
-inline void
-swap(StringSet<TString, TSpec> & left,
-     StringSet<TString, TSpec> & right)
-{
-    SEQAN_CHECKPOINT;
-    typedef StringSet<TString, TSpec> TStringSet;
-
-    TStringSet tmp(left, Move());
-    move(left, right);
-    move(right, tmp);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-//shareResources
+// ----------------------------------------------------------------------------
+// Function shareResources()
+// ----------------------------------------------------------------------------
 
 ///.Function.shareResources.param.sequence1, sequence2.type:Class.String
 
 template <typename TValue, typename TSpec>
 inline bool
 shareResources(String<TValue, TSpec> const & obj1,
-                    TValue const & obj2)
+               TValue const & obj2)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return (begin(obj1) >= &obj2) && (end(obj1) <= &obj2);
 }
 
 template <typename TValue, typename TSpec>
 inline bool
 shareResources(TValue const & obj1,
-                    String<TValue, TSpec> const & obj2)
+               String<TValue, TSpec> const & obj2)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return (begin(obj2) >= &obj1) && (end(obj2) <= &obj1);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
+// TODO(holtgrew): Where to move this documentation/specification-only stuff?
 ///.Function.begin.param.object.type:Class.String
 ///.Function.end.param.object.type:Class.String
-//////////////////////////////////////////////////////////////////////////////
+
+// ----------------------------------------------------------------------------
+// Function value()
+// ----------------------------------------------------------------------------
 
 ///.Function.value.param.container.type:Class.String
 
 template <typename TValue, typename TSpec, typename TPos>
 inline typename Reference< String<TValue, TSpec> >::Type
 value(String<TValue, TSpec> & me,
-      TPos pos)
+      TPos const & pos)
 {
-    typedef typename Position< String<TValue, TSpec> >::Type TStringPos;
     SEQAN_CHECKPOINT;
+    typedef typename Position< String<TValue, TSpec> >::Type TStringPos;
     SEQAN_ASSERT_LT_MSG(static_cast<TStringPos>(pos), static_cast<TStringPos>(length(me)), "Trying to access an element behind the last one!");
     return *(begin(me, Standard()) + pos);
 }
@@ -241,15 +231,17 @@ value(String<TValue, TSpec> & me,
 template <typename TValue, typename TSpec, typename TPos>
 inline typename Reference< String<TValue, TSpec> const >::Type
 value(String<TValue, TSpec> const & me,
-      TPos pos)
+      TPos const & pos)
 {
-    typedef typename Position< String<TValue, TSpec> const >::Type TStringPos;
     SEQAN_CHECKPOINT;
+    typedef typename Position< String<TValue, TSpec> const >::Type TStringPos;
     SEQAN_ASSERT_LT_MSG(static_cast<TStringPos>(pos), static_cast<TStringPos>(length(me)), "Trying to access an element behind the last one!");
     return *(begin(me, Standard()) + pos);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function length()
+// ----------------------------------------------------------------------------
 
 ///.Function.length.param.object.type:Class.String
 
@@ -257,23 +249,27 @@ template <typename TValue, typename TSpec>
 inline typename Size< String<TValue, TSpec> const>::Type
 length(String<TValue, TSpec> const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return end(me, Standard()) - begin(me, Standard());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function empty()
+// ----------------------------------------------------------------------------
 
-///.Function.length.param.object.type:Class.String
+///.Function.empty.param.object.type:Class.String
 
 template <typename TValue, typename TSpec>
 inline bool
 empty(String<TValue, TSpec> const & me)
 {
-    SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return end(me, Standard()) == begin(me, Standard());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.clear:
@@ -295,19 +291,23 @@ template <typename TValue, typename TSpec>
 inline void
 clear(String<TValue, TSpec> & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     arrayDestruct(begin(me, Standard()), end(me, Standard()));
     _setLength(me, 0);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function length()
+// ----------------------------------------------------------------------------
 
 template <typename TExpand>
 struct ClearSpaceStringBase_
 {
 };
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Internal Function _clearSpace()
+// ----------------------------------------------------------------------------
 
 template <>
 struct ClearSpaceStringBase_<Insist>
@@ -318,7 +318,7 @@ struct ClearSpaceStringBase_<Insist>
         T & seq,
         typename Size<T>::Type size)
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         arrayDestruct(begin(seq, Standard()), end(seq, Standard()));
         _setLength(seq, size);
         return size;
@@ -334,7 +334,7 @@ SEQAN_CHECKPOINT
         arrayDestruct(begin(seq, Standard()), end(seq, Standard()));
         if (limit < size)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             size = limit;
         }
         _setLength(seq, size);
@@ -349,7 +349,7 @@ SEQAN_CHECKPOINT
         typename Size<T>::Type start,
         typename Size<T>::Type end)
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         typename Size<T>::Type new_length = length(seq) + size - (end - start);
         arrayClearSpace(begin(seq, Standard()) + start, length(seq) - start, end - start, size);
         _setLength(seq, new_length);
@@ -370,12 +370,12 @@ SEQAN_CHECKPOINT
 
         if (limit > start + size)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename Size<T>::Type removed_size = end - start;
             typename Size<T>::Type new_length = seq_length - removed_size + size;
             if (limit < new_length)
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 arrayDestruct(seq_buffer + limit, seq_buffer + new_length);
                 seq_length -= new_length - limit;
             }
@@ -385,7 +385,7 @@ SEQAN_CHECKPOINT
         }
         else
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             arrayDestruct(seq_buffer + start, seq_buffer + seq_length);
             _setLength(seq, limit);
             if (limit > start) return limit - start;
@@ -421,9 +421,6 @@ SEQAN_CHECKPOINT
 };
 
 
-//____________________________________________________________________________
-
-
 template <>
 struct ClearSpaceStringBase_<Limit>
 {
@@ -434,7 +431,7 @@ struct ClearSpaceStringBase_<Limit>
         T & seq,
         typename Size<T>::Type size)
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         return _clearSpace(seq, size, capacity(seq), Insist());
     }
 
@@ -448,7 +445,7 @@ SEQAN_CHECKPOINT
         typename Size<T>::Type seq_capacity = capacity(seq);
         if (limit > seq_capacity)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             limit = seq_capacity;
         }
         return _clearSpace(seq, size, limit, Insist());
@@ -462,7 +459,7 @@ SEQAN_CHECKPOINT
         typename Size<T>::Type start,
         typename Size<T>::Type end)
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         return _clearSpace(seq, size, start, end, capacity(seq), Insist());
     }
 
@@ -478,7 +475,7 @@ SEQAN_CHECKPOINT
         typename Size<T>::Type seq_capacity = capacity(seq);
         if (limit > seq_capacity)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             limit = seq_capacity;
         }
         return _clearSpace(seq, size, start, end, limit, Insist());
@@ -512,8 +509,6 @@ SEQAN_CHECKPOINT
 */
 };
 
-//____________________________________________________________________________
-
 template <typename TExpand>
 struct ClearSpaceExpandStringBase_
 {
@@ -528,7 +523,7 @@ struct ClearSpaceExpandStringBase_
         typename Value<T>::Type * old_array = _reallocateStorage(seq, size, TExpand());
         if (old_array)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             _deallocateStorage(seq, old_array, old_capacity);
         }
         _setLength(seq, size);
@@ -545,7 +540,7 @@ SEQAN_CHECKPOINT
         arrayDestruct(begin(seq, Standard()), end(seq, Standard()));
         if (limit < size)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             size = limit;
         }
         typename Size<T>::Type old_capacity = capacity(seq);
@@ -576,14 +571,14 @@ SEQAN_CHECKPOINT
 
         if (old_array)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             arrayConstructMove(old_array, old_array + start, seq_array);
             arrayConstructMove(old_array + end, old_array + old_length, seq_array + start + size);
             _deallocateStorage(seq, old_array, old_capacity);
         }
         else
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             arrayClearSpace(seq_array + start, old_length - start, removed_size, size);
         }
 
@@ -609,7 +604,7 @@ SEQAN_CHECKPOINT
         typename Size<T>::Type length_to_copy = old_length;
         if (limit < need_length)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             new_length = limit;
             length_to_copy = new_length - size + removed_size;
         }
@@ -681,15 +676,11 @@ SEQAN_CHECKPOINT
 */
 };
 
-//____________________________________________________________________________
-
 template <>
 struct ClearSpaceStringBase_<Exact>:
     ClearSpaceExpandStringBase_<Exact>
 {
 };
-
-//____________________________________________________________________________
 
 template <>
 struct ClearSpaceStringBase_<Generous>:
@@ -697,7 +688,6 @@ struct ClearSpaceStringBase_<Generous>:
 {
 };
 
-//____________________________________________________________________________
 /**
 .Internal._clearSpace:
 ..cat:Functions
@@ -716,13 +706,14 @@ this could be $size$ or less than $size$ if $object$ has not enough @Function.ca
 ..remarks:This function is similar to @Function.resizeSpace@ and @Function.fillSpace@.
 The main difference is that $_clearSpace$ does not construct objects in the new created space.
 */
+
 template<typename TValue, typename TSpec, typename TSize, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type
 _clearSpace(String<TValue, TSpec> & me,
         TSize size,
-        Tag<TExpand> const)
+        Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size);
 }
 
@@ -731,9 +722,9 @@ inline typename Size< String<TValue, TSpec> >::Type
 _clearSpace(String<TValue, TSpec> & me,
         TSize size,
         TSize limit,
-        Tag<TExpand> const)
+        Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size, limit);
 }
 
@@ -743,9 +734,9 @@ _clearSpace(String<TValue, TSpec> & me,
             TSize size,
             TPosition pos_begin,
             TPosition pos_end,
-            Tag<TExpand> const)
+            Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end);
 }
 
@@ -756,13 +747,15 @@ _clearSpace(String<TValue, TSpec> & me,
             TPosition pos_begin,
             TPosition pos_end,
             TSize limit,
-            Tag<TExpand> const)
+            Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function resizeSpace()
+// ----------------------------------------------------------------------------
 
 ///.Function.resizeSpace.param.object.type:Class.String
 
@@ -772,9 +765,9 @@ resizeSpace(String<TValue, TSpec> & me,
             TSize size,
             TBeginPosition pos_begin,
             TEndPosition pos_end,
-            Tag<TExpand> const tag)
+            Tag<TExpand> const & tag)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef typename Size< String<TValue, TSpec> >::Type TSize_;
     typedef typename Position<String<TValue, TSpec> >::Type TPos_;
     TSize_ ret_ = _clearSpace(
@@ -794,9 +787,9 @@ resizeSpace(String<TValue, TSpec> & me,
             TBeginPosition pos_begin,
             TEndPosition pos_end,
             TLimit limit,
-            Tag<TExpand> const tag)
+            Tag<TExpand> const & tag)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef typename Size< String<TValue, TSpec> >::Type TSize_;
     typedef typename Position<String<TValue, TSpec> >::Type TPos_;
     TSize_ ret_ = _clearSpace(
@@ -810,49 +803,37 @@ SEQAN_CHECKPOINT
     return ret_;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// assignValue (2)
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec, typename TValue2>
-inline void
-assignValue(String<TValue, TSpec> & /*me*/,
-            TValue2 const & /*_value*/)
-{
-//  assign(me, toString(_value)); ???TODO
-}
-
-//???TODO: moveValue (2)
-
-//////////////////////////////////////////////////////////////////////////////
-// assign
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function assign()
+// ----------------------------------------------------------------------------
 
 ///.Function.assign.param.target.type:Class.String
 ///.Function.assign.param.source.type:Class.String
 
-//overload of binary version for strings:
+// Facade version without overflow tag.  Forwards to version with overflow
+// tag, using Metafunction.DefaultOverflowImplicity.
 
 template<typename TTargetValue, typename TTargetSpec, typename TSource>
 inline void
 assign(String<TTargetValue, TTargetSpec> & target,
-      TSource & source)
+       TSource & source)
 {
-SEQAN_CHECKPOINT
-    typedef String<TTargetValue, TTargetSpec> TTarget;
-    assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
-}
-template<typename TTargetValue, typename TTargetSpec, typename TSource>
-inline void
-assign(String<TTargetValue, TTargetSpec> & target,
-      TSource const & source)
-{
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+template<typename TTargetValue, typename TTargetSpec, typename TSource>
+inline void
+assign(String<TTargetValue, TTargetSpec> & target,
+       TSource const & source)
+{
+    SEQAN_CHECKPOINT;
+    typedef String<TTargetValue, TTargetSpec> TTarget;
+    assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
+}
+
+// Helper struct for assigning strings.
 
 template <typename TExpand>
 struct AssignString_
@@ -867,13 +848,13 @@ struct AssignString_
             return;  // Do nothing if both source and target are empty.
         if (!id(source) || !shareResources(target, source))
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), TExpand());
             arrayConstructCopy(begin(source, Standard()), begin(source, Standard()) + part_length, begin(target, Standard()));
         }
         else
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             if ((void *) &target == (void *) &source) return;
 
             typename TempCopy_<TSource>::Type temp(source, length(source));
@@ -890,13 +871,13 @@ SEQAN_CHECKPOINT
     {
         if (!id(source) || !shareResources(target, source))
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, typename Size<TTarget>::Type(length(source)), limit, TExpand());
             arrayConstructCopy(begin(source, Standard()), begin(source, Standard()) + part_length, begin(target, Standard()));
         }
         else
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             if ((void *) &target == (void *) &source) return;
 
             typename Size<TTarget>::Type source_length = length(source);
@@ -908,13 +889,14 @@ SEQAN_CHECKPOINT
     }
 };
 
-//////////////////////////////////////////////////////////////////////////////
+// Interface for assign with overflow strategy tag.  Forwards to static
+// functions of helper struct.
 
 template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TExpand>
 inline void
 assign(String<TTargetValue, TTargetSpec> & target,
        TSource const & source,
-       Tag<TExpand> const)
+       Tag<TExpand> const &)
 {
     typedef String<TTargetValue, TTargetSpec> TTarget;
     AssignString_<Tag<TExpand> const>::assign_(target, source);
@@ -924,13 +906,13 @@ inline void
 assign(String<TTargetValue, TTargetSpec> & target,
        TSource const & source,
        TSize limit,
-       Tag<TExpand> const)
+       Tag<TExpand> const &)
 {
     typedef String<TTargetValue, TTargetSpec> TTarget;
     AssignString_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
-//____________________________________________________________________________
+// TODO(holtgrew): Still required with dropped VC++ 2003 support?
 //this variant is a workaround for the "const array"-bug of VC++
 
 template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TExpand>
@@ -953,11 +935,10 @@ assign(String<TTargetValue, TTargetSpec> & target,
     AssignString_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// move
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function move()
+// ----------------------------------------------------------------------------
 
-//____________________________________________________________________________
 //implementation of move for contiguous sequences
 //note: there is a problem, if sizeof(TSourceValue) and sizeof(TTargetValue) are not a multiple
 //  of each other, since in this case the correct size cannot be determined afterwards
@@ -977,9 +958,9 @@ _moveContiguous(TTarget & target,
     typename Iterator<TTarget, Standard>::Type target_begin = (typename Iterator<TTarget, Standard>::Type) begin(source, Standard());
 
     typename Size<TTarget>::Type size = sizeof(TSourceValue) * capacity(source);
-    if (size >=  sizeof(TTargetValue))
+    if (size >= sizeof(TTargetValue))
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         if (sizeof(TSourceValue) <= 2) ++size; //regard the "end of string termination" case
         typename Size<TTarget>::Type target_capacity = size / sizeof(TTargetValue);
         if (sizeof(TTargetValue) <= 2) --target_capacity; //regard the "end of string termination" case
@@ -1012,38 +993,34 @@ SEQAN_CHECKPOINT
         clear(source);
     }
 }
-//____________________________________________________________________________
-
-//overload of binary version for strings:
 
 template<typename TTargetValue, typename TTargetSpec, typename TSource>
 inline void
 move(String<TTargetValue, TTargetSpec> & target,
      TSource & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
+
 template<typename TTargetValue, typename TTargetSpec, typename TSource>
 inline void
 move(String<TTargetValue, TTargetSpec> & target,
      TSource const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     move(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
-
-//____________________________________________________________________________
 
 template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TTag>
 inline void
 move(String<TTargetValue, TTargetSpec> & target,
      TSource & source,
-     Tag<TTag> const tag)
+     Tag<TTag> const & tag)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     assign(target, source, tag);
 }
 
@@ -1051,11 +1028,13 @@ template<typename TTargetValue, typename TTargetSpec, typename TSource, typename
 inline void
 move(String<TTargetValue, TTargetSpec> & target,
      TSource const & source,
-     Tag<TTag> const tag)
+     Tag<TTag> const & tag)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     assign(target, source, tag);
 }
+
+// TODO(holtgrew): Garbage?
 
 //////////////////////////////////////////////////////////////////////////////
 // valueConstructMove:
@@ -1073,9 +1052,9 @@ valueConstructMove(TIterator it,
 }
 */
 
-//////////////////////////////////////////////////////////////////////////////
-// append
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function append()
+// ----------------------------------------------------------------------------
 
 ///.Function.append.param.target.type:Class.String
 ///.Function.append.param.source.type:Class.String
@@ -1090,14 +1069,14 @@ struct AppendString_
     {
         if (!id(source) || !shareResources(target, source))
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type target_length = length(target);
             typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), target_length, target_length, TExpand());
             arrayConstructCopy(begin(source, Standard()), begin(source, Standard()) + part_length, begin(target, Standard()) + target_length);
         }
         else
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename TempCopy_<TSource>::Type temp(source, length(source));
             append(target, temp, TExpand());
         }
@@ -1122,13 +1101,13 @@ SEQAN_CHECKPOINT
             typename Size<TTarget>::Type target_length = length(target);
             if (target_length >= limit)
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 arrayDestruct(target_begin + limit, target_begin + target_length);
                 _setLength(target, limit);
             }
             else
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 limit -= target_length;
                 typename Size<TTarget>::Type source_length = length(source) ;
                 if (source_length > limit) source_length = limit;
@@ -1140,15 +1119,13 @@ SEQAN_CHECKPOINT
     }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TExpand>
 inline void
 append(String<TTargetValue, TTargetSpec> & target,
        TSource const & source,
-       Tag<TExpand> const)
+       Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     AppendString_<Tag<TExpand> const>::append_(target, source);
 }
@@ -1158,14 +1135,14 @@ inline void
 append(String<TTargetValue, TTargetSpec> & target,
        TSource const & source,
        typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-       Tag<TExpand> const)
+       Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     AppendString_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
-//____________________________________________________________________________
+// TODO(holtgrew): Still required with dropped VC++ 2003 support?
 //this variant is a workaround for the "const array"-bug of VC++
 
 template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TExpand>
@@ -1174,7 +1151,7 @@ append(String<TTargetValue, TTargetSpec> & target,
        TSourceValue * source,
        Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     AppendString_<Tag<TExpand> const>::append_(target, source);
 }
@@ -1186,16 +1163,14 @@ append(String<TTargetValue, TTargetSpec> & target,
        typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
        Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     AppendString_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-// appendValue
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function appendValue()
+// ----------------------------------------------------------------------------
 
 template <typename TExpand>
 struct AppendValueToString_
@@ -1205,7 +1180,7 @@ struct AppendValueToString_
     appendValue_(T & me,
                 TValue & _value)
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         typename Position<T>::Type me_length = length(me);
         if (capacity(me) <= me_length)
         {
@@ -1224,21 +1199,20 @@ SEQAN_CHECKPOINT
     }
 };
 
-//____________________________________________________________________________
-
 template <typename TTargetValue, typename TTargetSpec, typename TValue, typename TExpand>
 inline void
 appendValue(String<TTargetValue, TTargetSpec> & me,
             TValue const & _value,
             Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     AppendValueToString_<Tag<TExpand> const>::appendValue_(me, _value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // insertValue
 //////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.insertValue:
 ..include:seqan/sequence.h
@@ -1253,17 +1227,13 @@ struct InsertValueToString_
                 TPosition pos,
                 TValue & _value)
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         typename Value<T>::Type temp_copy = _value; //temp copy because resizeSpace could invalidate _value
         resizeSpace(me, 1, pos, pos, TExpand());
         if ((typename Size<T>::Type) pos < length(me))
-        {
             moveValue(me, pos, temp_copy);
-        }
     }
 };
-
-//____________________________________________________________________________
 
 template <typename TTargetValue, typename TTargetSpec, typename TPosition, typename TValue, typename TExpand>
 inline void
@@ -1272,13 +1242,13 @@ insertValue(String<TTargetValue, TTargetSpec> & me,
             TValue const & _value,
             Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     InsertValueToString_<Tag<TExpand> const>::insertValue_(me, pos, _value);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// replace
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function replace()
+// ----------------------------------------------------------------------------
 
 ///.Function.replace.param.target.type:Class.String
 ///.Function.replace.param.source.type:Class.String
@@ -1295,13 +1265,13 @@ struct ReplaceString_
     {
         if (!id(source) || !shareResources(target, source))
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), pos_begin, pos_end, TExpand());
             arrayConstructCopy(begin(source, Standard()), begin(source, Standard()) + part_length, begin(target, Standard()) + pos_begin);
         }
         else
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename TempCopy_<TSource>::Type temp(source, length(source));
             replace(target, pos_begin, pos_end, temp, TExpand());
         }
@@ -1317,7 +1287,7 @@ SEQAN_CHECKPOINT
     {
         if (!id(source) || !shareResources(target, source))
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), pos_begin, pos_end, limit, TExpand());
             arrayConstructCopy(begin(source, Standard()), begin(source, Standard()) + part_length, begin(target, Standard()) + pos_begin);
         }
@@ -1325,13 +1295,13 @@ SEQAN_CHECKPOINT
         {
             if (pos_begin >= limit)
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 arrayDestruct(begin(target) + limit, end(target));
                 _setLength(target, limit);
             }
             else
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 limit -= pos_begin;
                 typename Size<TTarget>::Type source_length = length(source) ;
                 if (source_length > limit) source_length = limit;
@@ -1344,17 +1314,15 @@ SEQAN_CHECKPOINT
 
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void
 replace(String<TTargetValue, TTargetSpec> & target,
         TPositionBegin pos_begin,
         TPositionEnd pos_end,
         TSource const & source,
-        Tag<TExpand> const)
+        Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     ReplaceString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
@@ -1366,14 +1334,14 @@ replace(String<TTargetValue, TTargetSpec> & target,
         TPositionEnd pos_end,
         TSource const & source,
         typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-        Tag<TExpand> const)
+        Tag<TExpand> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typedef String<TTargetValue, TTargetSpec> TTarget;
     ReplaceString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
-//____________________________________________________________________________
+// TODO(holtgrew): Still required with dropped VC++ 2003 support?
 //this variant is a workaround for the "const array"-bug of VC++
 
 template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSourceValue, typename TExpand>
@@ -1382,7 +1350,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
         TPositionBegin pos_begin,
         TPositionEnd pos_end,
         TSourceValue const * source,
-        Tag<TExpand> const)
+        Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
     typedef String<TTargetValue, TTargetSpec> TTarget;
@@ -1396,14 +1364,17 @@ replace(String<TTargetValue, TTargetSpec> & target,
         TPositionEnd pos_end,
         TSourceValue const * source,
         typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-        Tag<TExpand> const)
+        Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
     typedef String<TTargetValue, TTargetSpec> TTarget;
     ReplaceString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Internal Function _reallocateStorage()
+// ----------------------------------------------------------------------------
+
 /**
 .Internal._reallocateStorage:
 ..cat:Functions
@@ -1426,7 +1397,7 @@ _reallocateStorage(
     String<TValue, TSpec> & me,
     TSize new_capacity)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return _allocateStorage(me, new_capacity);
 }
 
@@ -1438,10 +1409,13 @@ _reallocateStorage(
     Exact)
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
-    if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
+    if (static_cast<TStringSize>(new_capacity) <= capacity(me))
+    {
+        return 0;
+    }
     else
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         return _reallocateStorage(me, new_capacity);
     }
 }
@@ -1455,10 +1429,13 @@ _reallocateStorage(
     Exact)
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
-    if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
+    if (static_cast<TStringSize>(new_capacity) <= capacity(me))
+    {
+        return 0;
+    }
     else
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         if (new_capacity > limit) new_capacity = limit;
         return _reallocateStorage(me, new_capacity);
     }
@@ -1478,7 +1455,7 @@ _reallocateStorage(
     }
     else
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         new_capacity = computeGenerousCapacity(me, new_capacity);
         return _reallocateStorage(me, new_capacity);
     }
@@ -1493,10 +1470,13 @@ _reallocateStorage(
     Generous)
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
-    if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
+    if (static_cast<TStringSize>(new_capacity) <= capacity(me))
+    {
+        return 0;
+    }
     else
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         new_capacity = computeGenerousCapacity(me, new_capacity);
         if (new_capacity > limit) new_capacity = limit;
         return _reallocateStorage(me, new_capacity);
@@ -1545,7 +1525,10 @@ _reallocateStorage(
     return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function reserve()
+// ----------------------------------------------------------------------------
+
 ///.Function.reserve.param.object.type:Class.String
 
 template <typename TValue, typename TSpec, typename TSize_>
@@ -1612,7 +1595,10 @@ SEQAN_CHECKPOINT
     return _capacityReturned(seq, new_capacity, tag);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function resize()
+// ----------------------------------------------------------------------------
+
 ///.Function.resize.param.object.type:Class.String
 
 template <typename TExpand>
@@ -1628,7 +1614,7 @@ struct _Resize_String
         TSize me_length = length(me);
         if (new_length < me_length)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             arrayDestruct(begin(me, Standard()) + new_length, begin(me, Standard()) + me_length);
         }
         else
@@ -1636,7 +1622,7 @@ SEQAN_CHECKPOINT
             typename Size<T>::Type me_capacity = capacity(me);
             if (new_length > me_capacity)
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 TSize new_capacity = reserve(me, new_length, TExpand());
                 if (new_capacity < new_length)
                 {
@@ -1645,7 +1631,7 @@ SEQAN_CHECKPOINT
             }
             if (new_length > me_length)
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 arrayConstruct(begin(me, Standard()) + me_length, begin(me, Standard()) + new_length);
             }
         }
@@ -1665,7 +1651,7 @@ SEQAN_CHECKPOINT
         TSize me_length = length(me);
         if (new_length < me_length)
         {
-SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
             arrayDestruct(begin(me, Standard()) + new_length, begin(me, Standard()) + me_length);
         }
         else
@@ -1673,7 +1659,7 @@ SEQAN_CHECKPOINT
             TSize me_capacity = capacity(me);
             if (new_length > me_capacity)
             {
-SEQAN_CHECKPOINT
+                SEQAN_CHECKPOINT;
                 TValue tempCopy = val;  // reserve could invalidate val
                 TSize new_capacity = reserve(me, new_length, TExpand());
                 if (new_capacity < new_length)
@@ -1684,7 +1670,7 @@ SEQAN_CHECKPOINT
             } else
                 if (new_length > me_length)
                 {
-SEQAN_CHECKPOINT
+                    SEQAN_CHECKPOINT;
                     arrayConstruct(begin(me, Standard()) + me_length, begin(me, Standard()) + new_length, val);
                 }
         }
@@ -1701,7 +1687,7 @@ resize(
     TSize new_length,
     Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return _Resize_String<Tag<TExpand> const>::resize_(me, new_length);
 }
 
@@ -1712,237 +1698,191 @@ resize(String<TValue, TSpec> & me,
      TValue2 const & val,
      Tag<TExpand> const)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return _Resize_String<Tag<TExpand> const>::resize_(me, new_length, val);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator+=(), shortcut to append()
+// ----------------------------------------------------------------------------
 
-/*
-template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-String<TLeftValue, TLeftSpec> const &
-operator += (String<TLeftValue, TLeftSpec> & left,
-             String<TRightValue, TRightSpec> const & right)
-{
-    append(left, right);
-    return left;
-}
-
-template <typename TLeftValue, typename TLeftSpec, typename TRight>
-String<TLeftValue, TLeftSpec> const &
-operator += (String<TLeftValue, TLeftSpec> & left,
-             TRight const & right)
-{
-    append(left, right);
-    return left;
-}
-
-template <typename TLeft, typename TRightValue, typename TRightSpec>
-TLeft const &
-operator += (TLeft & left,
-             String<TRightValue, TRightSpec> const & right)
-{
-    append(left, right);
-    return left;
-}
-*/
+// TODO(holtgrew): Maybe move to a string_shortcuts.h?
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight >
-String<TLeftValue, TLeftSpec> const &
-operator += (String<TLeftValue, TLeftSpec> & left,
-             TRight const & right)
+inline
+String<TLeftValue, TLeftSpec> &
+operator+=(String<TLeftValue, TLeftSpec> & left,
+           TRight const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     append(left, right);
     return left;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// The comparator functions forward to the code in sequence_lexical.h.
+
+// ----------------------------------------------------------------------------
+// Function operator==()
+// ----------------------------------------------------------------------------
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight >
 inline bool
-operator == (String<TLeftValue, TLeftSpec> const & left,
-            TRight const & right)
+operator==(String<TLeftValue, TLeftSpec> const & left,
+           TRight const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typename Comparator<String<TLeftValue, TLeftSpec> >::Type _lex(left, right);
     return isEqual(_lex);
 }
+
 template <typename TLeftValue, typename TRightValue, typename TRightSpec >
 inline bool
-operator == (TLeftValue * left,
-             String<TRightValue, TRightSpec> const & right)
+operator==(TLeftValue * left,
+           String<TRightValue, TRightSpec> const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typename Comparator<String<TRightValue, TRightSpec> >::Type _lex(left, right);
     return isEqual(_lex);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator!=()
+// ----------------------------------------------------------------------------
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight >
 inline bool
-operator !=(String<TLeftValue, TLeftSpec> const & left,
-            TRight const & right)
+operator!=(String<TLeftValue, TLeftSpec> const & left,
+           TRight const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typename Comparator<String<TLeftValue, TLeftSpec> >::Type _lex(left, right);
     return isNotEqual(_lex);
 }
+
 template <typename TLeftValue, typename TRightValue, typename TRightSpec >
 inline bool
-operator != (TLeftValue * left,
-             String<TRightValue, TRightSpec> const & right)
+operator!=(TLeftValue * left,
+           String<TRightValue, TRightSpec> const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     typename Comparator<String<TRightValue, TRightSpec> >::Type _lex(left, right);
     return isNotEqual(_lex);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator<()
+// ----------------------------------------------------------------------------
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight>
 inline bool
-operator < (String<TLeftValue, TLeftSpec> const & left,
-            TRight const & right)
+operator<(String<TLeftValue, TLeftSpec> const & left,
+          TRight const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return isLess(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
 }
+
 template <typename TLeftValue, typename TRightValue, typename TRightSpec >
 inline bool
-operator < (TLeftValue * left,
-             String<TRightValue, TRightSpec> const & right)
+operator<(TLeftValue * left,
+          String<TRightValue, TRightSpec> const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return isLess(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator<=()
+// ----------------------------------------------------------------------------
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight>
 inline bool
-operator <= (String<TLeftValue, TLeftSpec> const & left,
-             TRight const & right)
+operator<=(String<TLeftValue, TLeftSpec> const & left,
+           TRight const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return isLessOrEqual(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
 }
+
 template <typename TLeftValue, typename TRightValue, typename TRightSpec >
 inline bool
-operator <= (TLeftValue * left,
-             String<TRightValue, TRightSpec> const & right)
+operator<=(TLeftValue * left,
+           String<TRightValue, TRightSpec> const & right)
 {
 SEQAN_CHECKPOINT
     return isLessOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator>()
+// ----------------------------------------------------------------------------
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight>
 inline bool
-operator > (String<TLeftValue, TLeftSpec> const & left,
-        TRight const & right)
+operator>(String<TLeftValue, TLeftSpec> const & left,
+          TRight const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return isGreater(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
 }
 template <typename TLeftValue, typename TRightValue, typename TRightSpec >
 inline bool
-operator > (TLeftValue * left,
-             String<TRightValue, TRightSpec> const & right)
+operator>(TLeftValue * left,
+          String<TRightValue, TRightSpec> const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return isGreater(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator>=()
+// ----------------------------------------------------------------------------
 
 template <typename TLeftValue, typename TLeftSpec, typename TRight>
 inline bool
-operator >= (String<TLeftValue, TLeftSpec> const & left,
-        TRight const & right)
+operator>=(String<TLeftValue, TLeftSpec> const & left,
+           TRight const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<String<TLeftValue, TLeftSpec> >::Type());
 }
-template <typename TLeftValue, typename TRightValue, typename TRightSpec >
+template <typename TLeftValue, typename TRightValue, typename TRightSpec>
 inline bool
-operator >= (TLeftValue * left,
+operator>=(TLeftValue * left,
              String<TRightValue, TRightSpec> const & right)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// stream operators
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator<<() for streams.
+// ----------------------------------------------------------------------------
 
 template <typename TStream, typename TValue, typename TSpec>
 inline TStream &
-operator << (TStream & target,
-             String<TValue, TSpec> const & source)
+operator<<(TStream & target,
+           String<TValue, TSpec> const & source)
 {
 SEQAN_CHECKPOINT
     write(target, source);
     return target;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator>>() for streams.
+// ----------------------------------------------------------------------------
 
 template <typename TStream, typename TValue, typename TSpec>
 inline TStream &
-operator >> (TStream & source,
-             String<TValue, TSpec> & target)
+operator>>(TStream & source,
+           String<TValue, TSpec> & target)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     read(source, target);
     return source;
 }
 
+}  // namespace seqan
 
-//////////////////////////////////////////////////////////////////////////////
-
-/*
-//////////////////////////////////////////////////////////////////////////////
-// Converter
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TTarget, typename TSource, typename TSpec>
-struct Value<String<Convert<TTarget, TSource>, TSpec> >:
-    Value< String<TSource, TSpec> >
-{
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename T, typename TAccessor, typename TConverter>
-struct AccessorConverter_
-{
-    typedef T Type;
-};
-template <typename T, typename TAccessor, typename TConverter>
-struct AccessorConverter_<T, TAccessor &, typename TConverter &>
-{
-    typedef T & Type;
-};
-
-template <typename TTarget, typename TSource, typename TSpec>
-struct GetValue<String<Converter<TTarget, TSource>, TSpec> >:
-    AccessorConverter_<
-        TTarget,
-        typename GetValue<String<TSource, TSpec> >::Type,
-        typename Converter<TTarget, TSource>::Type
-    >
-{
-};
-*/
-
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-
-} //namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_SEQUENCE_STRING_ARRAY_BASE_H_

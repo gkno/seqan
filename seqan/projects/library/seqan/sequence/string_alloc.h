@@ -34,8 +34,8 @@
 // Implementation of the Alloc string class.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_SEQUENCE_STRING_ALLOC_H
-#define SEQAN_HEADER_SEQUENCE_STRING_ALLOC_H
+#ifndef SEQAN_SEQUENCE_STRING_ALLOC_H_
+#define SEQAN_SEQUENCE_STRING_ALLOC_H_
 
 namespace seqan {
 
@@ -69,20 +69,20 @@ public:
     typename Value<String>::Type * data_end;
     size_t data_capacity;
 
-    String():
-        data_begin(0),
-        data_end(0),
-        data_capacity(0)
+    String()
+            : data_begin(0),
+              data_end(0),
+              data_capacity(0)
     {
         SEQAN_CHECKPOINT;
         SEQAN_ASSERT_LEQ_MSG(data_begin, data_end, "String end is before begin!");
     }
 
     template <typename TSource>
-    String(TSource & source):
-        data_begin(0),
-        data_end(0),
-        data_capacity(0)
+    String(TSource & source)
+        : data_begin(0),
+          data_end(0),
+          data_capacity(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, source);
@@ -90,30 +90,30 @@ public:
     }
     
     template <typename TSource>
-    String(TSource const & source):
-        data_begin(0),
-        data_end(0),
-        data_capacity(0)
+    String(TSource const & source)
+        : data_begin(0),
+          data_end(0),
+          data_capacity(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, source);
         SEQAN_ASSERT_LEQ_MSG(data_begin, data_end, "String end is before begin!");
     }
     
-    String(String const & source):
-        data_begin(0),
-        data_end(0),
-        data_capacity(0)
+    String(String const & source)
+        : data_begin(0),
+          data_end(0),
+          data_capacity(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, source);
         SEQAN_ASSERT_LEQ_MSG(data_begin, data_end, "String end is before begin!");
     }
     
-    String(String & source, Move const &):
-        data_begin(0),
-        data_end(0),
-        data_capacity(0)
+    String(String & source, Move const &)
+        : data_begin(0),
+          data_end(0),
+          data_capacity(0)
     {
         SEQAN_CHECKPOINT;
         move(*this, source);
@@ -121,10 +121,10 @@ public:
     }
     
     template <typename TSource, typename TSize>
-    String(TSource & source, TSize limit):
-        data_begin(0),
-        data_end(0),
-        data_capacity(0)
+    String(TSource & source, TSize limit)
+            : data_begin(0),
+              data_end(0),
+              data_capacity(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, source, limit);
@@ -132,10 +132,10 @@ public:
     }
     
     template <typename TSource, typename TSize>
-    String(TSource const & source, TSize limit):
-        data_begin(0),
-        data_end(0),
-        data_capacity(0)
+    String(TSource const & source, TSize limit)
+            : data_begin(0),
+              data_end(0),
+              data_capacity(0)
     {
         SEQAN_CHECKPOINT;
         assign(*this, source, limit);
@@ -144,15 +144,17 @@ public:
 
 
     template <typename TSource>
-    String & operator =(TSource const & source)
+    inline
+    String & operator=(TSource const & source)
     {
         SEQAN_CHECKPOINT;
         assign(*this, source);
         SEQAN_ASSERT_LEQ_MSG(data_begin, data_end, "String end is before begin!");
         return *this;
     }
-    
-    String & operator =(String const & source)
+
+    inline
+    String & operator=(String const & source)
     {
         SEQAN_CHECKPOINT;
         assign(*this, source);
@@ -173,68 +175,107 @@ public:
 
     template <typename TPos>
     inline typename Reference<String>::Type
-    operator [] (TPos pos)
+    operator[] (TPos pos)
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         return value(*this, pos);
     }
 
     template <typename TPos>
     inline typename Reference<String const>::Type
-    operator [] (TPos pos) const
+    operator[] (TPos pos) const
     {
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
         return value(*this, pos);
     }
+};
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction DefaultOverflowImplicit
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+struct DefaultOverflowImplicit<String<TValue, Alloc<TSpec> > >
+{
+    typedef Generous Type;
+};
+
+template <typename TValue, typename TSpec>
+struct DefaultOverflowImplicit<String<TValue, Alloc<TSpec> > const>
+{
+    typedef Generous Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsContiguous
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+struct IsContiguous<String<TValue, Alloc<TSpec> > >
+{
+    typedef True Type;
+    enum { VALUE = true };
 };
 
 // ============================================================================
 // Functions
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Function begin()
+// ----------------------------------------------------------------------------
+
 template <typename TValue, typename TSpec>
 inline typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
 begin(String<TValue, Alloc<TSpec> > & me,
-    Standard)
+      Standard)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_begin;
 }
 template <typename TValue, typename TSpec>
 inline typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
 begin(String<TValue, Alloc<TSpec> > const & me,
-    Standard)
+      Standard)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_begin;
 }
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Function end()
+// ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
 inline typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
 end(String<TValue, Alloc<TSpec> > & me,
-    Standard)
+    Standard const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_end;
 }
 template <typename TValue, typename TSpec>
 inline typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
 end(String<TValue, Alloc<TSpec> > const & me,
-    Standard)
+    Standard const & )
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_end;
 }
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Function capacity()
+// ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
 inline size_t
 capacity(String<TValue, Alloc<TSpec> > & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_capacity;
 }
 
@@ -242,45 +283,34 @@ template <typename TValue, typename TSpec>
 inline size_t
 capacity(String<TValue, Alloc<TSpec> > const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_capacity;
 }
 
-//____________________________________________________________________________
-/* Entwicklungsschrott?
-inline void
-move(String & target,
-     String & source)
-{
-    clear(target);
-    target.data_begin = source.data_begin;
-    target.data_end = source.data_end;
-    target.data_capacity = source.data_capacity;
-
-    source.data_begin = 0;
-    source.data_end = 0;
-    source.data_capacity = 0;
-}
-*/
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Internal Function _setBegin()
+// ----------------------------------------------------------------------------
 
 /**
 .Internal._setBegin:
+..remarks:Called by Function.move in string_base.h
 */
 template <typename TValue, typename TSpec, typename TPtr>
 inline void
-_setBegin(
-    String<TValue, Alloc<TSpec> > & me,
-    TPtr * new_begin)
+_setBegin(String<TValue, Alloc<TSpec> > & me,
+          TPtr * new_begin)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     me.data_begin = new_begin;
 }
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Internal Function _setBegin()
+// ----------------------------------------------------------------------------
 
 /**
 .Internal._setLength:
+..remarks:Called in string_base.h
 ..cat:Functions
 ..summary:Set the length of container.
 ..signature:_setLength(object, new_length)
@@ -290,34 +320,38 @@ SEQAN_CHECKPOINT
 */
 template <typename TValue, typename TSpec>
 inline void
-_setLength(
-    String<TValue, Alloc<TSpec> > & me,
-    size_t new_length)
+_setLength(String<TValue, Alloc<TSpec> > & me,
+           size_t new_length)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     me.data_end = me.data_begin + new_length;
 }
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Internal Function _setCapacity()
+// ----------------------------------------------------------------------------
 
 /**
 .Internal._setCapacity:
+..remarks:Called in string_base.h
 */
 template <typename TValue, typename TSpec>
 inline void
-_setCapacity(
-    String<TValue, Alloc<TSpec> > & me,
-    size_t new_capacity)
+_setCapacity(String<TValue, Alloc<TSpec> > & me,
+             size_t new_capacity)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     me.data_capacity = new_capacity;
 }
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Internal Function _allocateStorage()
+// ----------------------------------------------------------------------------
 
 /**
 .Internal._allocateStorage:
 ..cat:Functions
+..remarks:Called in string_base.h
 ..summary:Allocates a new buffer for a container.
 ..signature:_allocateStorage(object, new_capacity)
 ..param.object:A container.
@@ -330,11 +364,10 @@ SEQAN_CHECKPOINT
 */
 template <typename TValue, typename TSpec>
 inline typename Value<String<TValue, Alloc<TSpec> > >::Type *
-_allocateStorage(
-    String<TValue, Alloc<TSpec> > & me,
-    size_t new_capacity)
+_allocateStorage(String<TValue, Alloc<TSpec> > & me,
+                 size_t new_capacity)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     size_t size = _computeSizeForCapacity(me, new_capacity);
     typename Value<String<TValue, Alloc<TSpec> > >::Type * _returnValue = me.data_begin;
     allocate(me, me.data_begin, size, TagAllocateStorage());
@@ -342,7 +375,9 @@ SEQAN_CHECKPOINT
     return _returnValue;
 }
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Internal Function _deallocateStorage()
+// ----------------------------------------------------------------------------
 
 /**
 .Internal._deallocateStorage:
@@ -359,41 +394,36 @@ SEQAN_CHECKPOINT
 */
 template <typename TValue, typename TSpec, typename TPtr>
 inline void
-_deallocateStorage(
-    String<TValue, Alloc<TSpec> > & me,
-    TPtr * ptr,
-    size_t capacity)
+_deallocateStorage(String<TValue, Alloc<TSpec> > & me,
+                   TPtr * ptr,
+                   size_t capacity)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     size_t size = _computeSizeForCapacity(me, capacity);
     deallocate(me, ptr, size, TagAllocateStorage());
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function move()
+// ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec>
-struct DefaultOverflowImplicit<String<TValue, Alloc<TSpec> > >
+// TODO(holtgrew): This moves the contents of the string not the data itself! Semantic is different in string_cstyle and intuition.
+
+/* Entwicklungsschrott?
+inline void
+move(String & target,
+     String & source)
 {
-    typedef Generous Type;
-};
+    clear(target);
+    target.data_begin = source.data_begin;
+    target.data_end = source.data_end;
+    target.data_capacity = source.data_capacity;
 
-template <typename TValue, typename TSpec>
-struct DefaultOverflowImplicit<String<TValue, Alloc<TSpec> > const >
-{
-    typedef Generous Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-struct IsContiguous< String<TValue, Alloc<TSpec> > >
-{
-    typedef True Type;
-    enum { VALUE = true };
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
+    source.data_begin = 0;
+    source.data_end = 0;
+    source.data_capacity = 0;
+}
+*/
 
 template <typename TTargetValue, typename TSourceValue, typename TSpec>
 inline void
@@ -402,6 +432,7 @@ move(String<TTargetValue, Alloc<TSpec> > & target,
 {
     _moveContiguous(target, source);
 }
+
 template <typename TTargetValue, typename TSourceValue, typename TSpec>
 inline void
 move(String<TTargetValue, Alloc<TSpec> > & target,
@@ -433,6 +464,6 @@ move(String<TValue, Alloc<TSpec> > & target,
     move(target, const_cast<String<TValue, Alloc<TSpec> > &>(source));
 }
 
-} // namespace seqan
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_SEQUENCE_STRING_ALLOC_H_
