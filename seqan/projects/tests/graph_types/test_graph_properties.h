@@ -84,7 +84,7 @@ void Test_ExternalProperty() {
 
 	char names[] = {'r', 's','t'};
 	String<char> nameMap;
-	resizeVertexMap(g,nameMap, names);
+	assignVertexMap(g,nameMap, names);
 	SEQAN_ASSERT_TRUE(getProperty(nameMap, v0) == 'r');
 	SEQAN_ASSERT_TRUE(getProperty(nameMap, v1) == 's');
 }
@@ -194,7 +194,7 @@ void Test_Property() {
 	addVertex(g10);addVertex(g10);addVertex(g10);
 	addEdge(g10,0,1);addEdge(g10,0,2);
 	String<int> weightMap;
-	resizeEdgeMap(g10, weightMap, weights);
+	assignEdgeMap(g10, weightMap, weights);
 	SEQAN_ASSERT_TRUE(getProperty(weightMap, findEdge(g10, 0, 1)) == 4);
 	SEQAN_ASSERT_TRUE(getProperty(weightMap, findEdge(g10, 0, 2)) == 8);
 }
