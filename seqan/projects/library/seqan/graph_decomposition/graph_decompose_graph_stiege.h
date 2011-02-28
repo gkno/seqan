@@ -66,6 +66,7 @@ enum StiegeUndirectedBlockType
 enum StiegeVertexType
 {
     VERTEX_TOKEN,
+    VERTEX_MARK,
     VERTEX_ISOLATED,
     VERTEX_PERIPHERAL_TREE,         // non-root of peripheral tree
     VERTEX_PERIPHERAL_TREE_ROOT,    // root of "isolated peripheral tree"
@@ -79,7 +80,8 @@ enum StiegeEdgeType
     EDGE_SUBCOMPONENT,  // not in biblock!
     // Two b-markers, so we can also store processed/unprocessed state.
     EDGE_BIBLOCK,
-    EDGE_PROCESSED
+    EDGE_PROCESSED,
+    EDGE_LABEL_B
 };
 
 /**
@@ -119,6 +121,7 @@ public:
 // Function decomposeGraphStiege()
 // ----------------------------------------------------------------------------
 
+// TODO(holtgrew): Move these functions into misc_bitmasks.h?
 template <typename TWord>
 inline
 void
@@ -163,9 +166,9 @@ isBitSet(TWord const & word, unsigned index)
 template <typename TGraphCargo, typename TGraphSpec>
 void
 _decomposeGraphStiegeFindPeripheralTrees(
-        String<unsigned> & vertexTypes, // TODO(holtgrew): s/vertexTypes/vertexFlags/g, s/edgeTypes/edgeFlags/g
-        String<unsigned> & edgeTypes,
-        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Remove const after fixing iterator for const-graphs
+        String<__uint32> & vertexFlags,
+        String<__uint32> & edgeFlags,
+        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
 {
     typedef Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ TGraph;
     typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -192,7 +195,7 @@ _decomposeGraphStiegeFindPeripheralTrees(
         // Easy case: v is isolated
         unsigned deg = degree(g, v);
         if (deg == 0u) {
-            setBit(property(vertexTypes, v), VERTEX_ISOLATED);
+            setBit(property(vertexFlags, v), VERTEX_ISOLATED);
             std::cerr << "ISOLATED " << v << std::endl;
             continue;
         }
@@ -200,12 +203,12 @@ _decomposeGraphStiegeFindPeripheralTrees(
         // Ignore v if it has more than one edge or already has a token.
         if (deg > 1u)
             continue;
-        if (isBitSet(getProperty(vertexTypes, v), VERTEX_TOKEN))
+        if (isBitSet(getProperty(vertexFlags, v), VERTEX_TOKEN))
             continue;
 
         // Otherwise, it has degree 1 and no token.  It is the leaf of an
         // external tree, an end vertex.  Mark it so.
-        setBit(property(vertexTypes, v), VERTEX_PERIPHERAL_TREE);
+        setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE);
         std::cerr << "PERIPHERAL TREE " << v << std::endl;
         // Follow along this edge as long as the next vertex and continue as
         // long as the vertex is incident with only one unmarked edges,
@@ -217,9 +220,8 @@ _decomposeGraphStiegeFindPeripheralTrees(
             bool assignedE = false;
 #endif  // #if SEQAN_ENABLE_DEBUG
             TEdgeDescriptor e;
-            TOutEdgeIterator itE(g, w);
-            for (; !atEnd(itE); goNext(itE)) {
-                if (getProperty(edgeTypes, value(itE)) == 0) {
+            for (TOutEdgeIterator itE(g, w); !atEnd(itE); goNext(itE)) {
+                if (getProperty(edgeFlags, value(itE)) == 0) {
 #if SEQAN_ENABLE_DEBUG
                     assignedE = true;
 #endif  // #if SEQAN_ENABLE_DEBUG
@@ -233,12 +235,12 @@ _decomposeGraphStiegeFindPeripheralTrees(
                 x = sourceVertex(g, e);
 
             // Move token to x, joining any two conceptional tokens.
-            setBit(property(vertexTypes, x), VERTEX_TOKEN);
-            clearBit(property(vertexTypes, w), VERTEX_TOKEN);
+            setBit(property(vertexFlags, x), VERTEX_TOKEN);
+            clearBit(property(vertexFlags, w), VERTEX_TOKEN);
 
             // Label e as peripheral tree edge.
             std::cerr << "PERIPHERAL TREE {" << w << ", " << x << "}" << std::endl;
-            setBit(property(edgeTypes, e), EDGE_PERIPHERAL_TREE);
+            setBit(property(edgeFlags, e), EDGE_PERIPHERAL_TREE);
             SEQAN_ASSERT_GT(unmarkedEdgeCounts[w], 0u);
             property(unmarkedEdgeCounts, w)  -= 1;
             SEQAN_ASSERT_GT(unmarkedEdgeCounts[x], 0u);
@@ -249,7 +251,7 @@ _decomposeGraphStiegeFindPeripheralTrees(
 
             // Characterize w as peripheral tree vertex.
             std::cerr << "PERIPHERAL TREE " << w << std::endl;
-            setBit(property(vertexTypes, w), VERTEX_PERIPHERAL_TREE);
+            setBit(property(vertexFlags, w), VERTEX_PERIPHERAL_TREE);
         }
     }
 
@@ -259,16 +261,140 @@ _decomposeGraphStiegeFindPeripheralTrees(
     {
         TVertexDescriptor v = *it;
 
-        if (!isBitSet(getProperty(vertexTypes, v), VERTEX_TOKEN))
+        if (!isBitSet(getProperty(vertexFlags, v), VERTEX_TOKEN))
             continue;
-        clearBit(property(vertexTypes, v), VERTEX_TOKEN);
+        clearBit(property(vertexFlags, v), VERTEX_TOKEN);
 
         if (getProperty(unmarkedEdgeCounts, v) == 0) {
             std::cerr << "PERIPHERAL ROOT " << v << std::endl;
-            setBit(property(vertexTypes, v), VERTEX_PERIPHERAL_TREE_ROOT);
+            setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE_ROOT);
         } else {
             std::cerr << "PERIPHERAL BORDER " << v << std::endl;
-            setBit(property(vertexTypes, v), VERTEX_PERIPHERAL_TREE_BORDER);
+            setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE_BORDER);
+        }
+    }
+}
+
+template <typename TEdgeDescriptor, typename TVertexDescriptor, typename TGraphCargo, typename TGraphSpec>
+void
+_decomposeGraphStiegeInternalStructure(
+        int & counter,
+        String<__uint32> & vertexFlags,
+        String<__uint32> & edgeFlags,
+        TEdgeDescriptor const & entryEdge,
+        TVertexDescriptor const & vertex,
+        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+{
+    typedef Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ TGraph;
+    // typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+    // typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+    typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+    typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+    setBit(property(vertexFlags, vertex), VERTEX_MARK);  // mark vertex
+    int oldCounter = counter;
+
+    // For each non-labeled exit edge e of vertex.
+    for (TOutEdgeIterator itE(g, vertex); !atEnd(itE); goNext(itE)) {
+        TEdgeDescriptor e = *itE;
+        if (isBitSet(getProperty(edgeFlags, e), EDGE_LABEL_B) || entryEdge == e)
+            continue;
+
+        // v is the other end vertex of e.
+        TVertexDescriptor v = getTarget(e);
+        if (vertex == v)
+            v = getSource(e);
+
+        // if the other end vertex v of e is unmarked...
+        if (!isBitSet(getProperty(vertexFlags, v), VERTEX_MARK)) {
+            _decomposeGraphStiegeInternalStructure(counter, vertexFlags, edgeFlags, e, v, g);
+            if (counter > oldCounter) {
+                // for each b-labeled exit edge f not yet processed
+                // TODO(holtgrew): b-labeled edge incident to vertex?
+                for (TOutEdgeIterator itF(g, v); !atEnd(itF); goNext(itF)) {
+                    TEdgeDescriptor f = *itF;
+                    // Skip b-labeled edges, processed edges and entry edge.
+                    if (!isBitSet(property(edgeFlags, f), EDGE_LABEL_B) ||
+                        !isBitSet(property(edgeFlags, f), EDGE_PROCESSED) ||
+                        entryEdge != f)
+                        continue;
+
+                    counter -= 1;
+                    setBit(property(edgeFlags, f), EDGE_PROCESSED);
+                }
+            }
+        } else {
+            setBit(property(edgeFlags, e), EDGE_LABEL_B);
+            counter += 1;
+        }
+    }
+
+    // TODO(holtgrew): Classify edges and vertex and integrate into new data structure.
+}
+
+template <typename TGraphCargo, typename TGraphSpec>
+void
+_decomposeGraphStiegeFindStopfreeKernels(
+        String<__uint32> & vertexFlags,
+        String<__uint32> & edgeFlags,
+        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+{
+    typedef Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ TGraph;
+    typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+    typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+    typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+    typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+    // Fo reach node v which is not a border point or not a vertex of a
+    // peripheral tree.
+    for (TVertexIterator it(g); !atEnd(it); ++it)
+    {
+        TVertexDescriptor v = *it;
+
+        // Skip vertices which are on the peripheral tree and not border points.
+        if (isBitSet(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE) &&
+            !isBitSet(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE_BORDER))
+            continue;
+        // Skip marked vertices.
+        if (isBitSet(property(vertexFlags, v), VERTEX_MARK))
+            continue;
+
+        // Mark v.
+        setBit(property(vertexFlags, v), VERTEX_MARK);
+
+        // For each unlabeled edge e incident with v.
+        for (TOutEdgeIterator itE(g, v); !atEnd(itE); goNext(itE)) {
+            TEdgeDescriptor e = *itE;
+            if (isBitSet(getProperty(edgeFlags, e), EDGE_LABEL_B))
+                continue;
+
+            int counter = 0;  // TODO(holtgrew): __int64 would be safer but is probably unnecessary.
+            // w = other end vertex of e
+            TVertexDescriptor w = getTarget(e);
+            if (w == v)
+                w = getSource(e);
+
+            // Call DFS recursion.
+            _decomposeGraphStiegeInternalStructure(counter, vertexFlags, edgeFlags, e, w, g);
+
+            if (counter > 0) {
+                // for each b-labeled edge f not yet processed
+                // TODO(holtgrew): b-labeled edge incident to w?
+                for (TOutEdgeIterator itF(g, v); !atEnd(itF); goNext(itF)) {
+                    TEdgeDescriptor f = *itF;
+                    // The inversion of "is b-labeled and not processed" is
+                    // "is not b-labeled or processed."
+                    if (!isBitSet(getProperty(edgeFlags, f), EDGE_LABEL_B) ||
+                        isBitSet(getProperty(edgeFlags, f), EDGE_PROCESSED))
+                        continue;
+
+                    counter -= 1;
+                    // Mark edge as processed.
+                    setBit(property(edgeFlags, f), EDGE_PROCESSED);
+                }
+            }
+
+            // TODO(holtgrew): Classify edges and node v and integrate into new data structure.
         }
     }
 }
@@ -320,6 +446,7 @@ decomposeGraphStiege(Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
     _decomposeGraphStiegeFindPeripheralTrees(vertexTypes, edgeTypes, g);
 
     // Find stopfree kernels and their internal structure.
+    _decomposeGraphStiegeFindStopfreeKernels(vertexTypes, edgeTypes, g);
 
     // Build clusterTree.
     // for all vertices
