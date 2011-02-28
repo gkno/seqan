@@ -85,7 +85,7 @@ resizeVertexMap(Graph<TSpec> const & g,
 {
 	SEQAN_CHECKPOINT;
     typedef typename Value<TPropertyMap>::Type TValue;
-	resize(pm, getIdUpperBound(_getVertexIdManager(g)), static_cast<TValue>(0), Generous());
+	resize(pm, getIdUpperBound(_getVertexIdManager(g)), TValue(), Generous());
 }
 
 template<typename TSpec, typename TPropertyMap, typename TPrototype>
@@ -125,7 +125,7 @@ resizeEdgeMap(Graph<TSpec> const & g,
 {
 	SEQAN_CHECKPOINT;
     typedef typename Value<TPropertyMap>::Type TValue;
-	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), static_cast<TValue>(0), Generous());
+	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), TValue(), Generous());
 }
 
 template<typename TSpec, typename TPropertyMap, typename TPrototype>
