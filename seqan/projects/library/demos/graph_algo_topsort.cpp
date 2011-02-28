@@ -20,7 +20,7 @@ int main() {
 ///One external property map: Vertex names	
 	String<std::string> nameMap;
 	std::string names[] = {"shirt", "tie", "jacket", "belt", "watch", "undershorts", "pants", "shoes", "socks"};
-	resizeVertexMap(g,nameMap, names);
+	assignVertexMap(g,nameMap, names);
 ///Out-parameter: Order of vertices
 	String<TVertexDescriptor> order;
 ///Topological sort

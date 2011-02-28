@@ -17,7 +17,7 @@ int main() {
 ///One external property map: Weight map	
 	unsigned int weights[] =    {10,  5,   1,   2,   4,   3,   9,   2,   7,   6};
 	String<unsigned int> weightMap;
-	resizeEdgeMap(g,weightMap, weights);
+	assignEdgeMap(g,weightMap, weights);
 ///Out-parameters: Predecessor and distance map
 	String<unsigned int> predMap;
 	String<unsigned int> distMap;
@@ -42,7 +42,7 @@ int main() {
 	addEdges(cargo_g, edges, numEdges);
 ///One internal property map: Weight map	
 	InternalMap<TEdgeCargo> intMap;
-	resizeEdgeMap(cargo_g,intMap, weights);
+	assignEdgeMap(cargo_g,intMap, weights);
 ///Out parameters of Dijkstra: Predecessor map and distance map
 	clear(predMap);
 	clear(distMap);

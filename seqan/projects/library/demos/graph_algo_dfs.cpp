@@ -20,7 +20,7 @@ int main()
 ///One external property map: Vertex names
 	char names[] = {'u', 'v', 'w', 'x', 'y', 'z'};
 	String<char> nameMap;
-	resizeVertexMap(g,nameMap, names);
+	assignVertexMap(g,nameMap, names);
 ///Out-parameters: Predecessor and discovery maps
 	String<unsigned int> predMap;
 	String<unsigned int> discoveryTimeMap;

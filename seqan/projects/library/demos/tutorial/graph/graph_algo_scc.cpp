@@ -20,7 +20,7 @@ int main() {
 // FRAGMENT(vertex-map)
 	String<char> nameMap;
 	char names[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-	resizeVertexMap(g,nameMap, names);
+	assignVertexMap(g,nameMap, names);
 
 // FRAGMENT(iterate-dfs)
     TVertexDescriptor start = 0;

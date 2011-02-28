@@ -18,7 +18,7 @@ int main() {
 ///One external property map: Weight map
 	int weights[] =    {3,   8,   -4,  1,   7,   4,   2,   -5,  6};
 	String<int> weightMap;
-	resizeEdgeMap(g,weightMap, weights);
+	assignEdgeMap(g,weightMap, weights);
 ///Out-parameters: Predecessor and distance matrices
 	String<int> distMat;
 	String<TVertexDescriptor> predMat;

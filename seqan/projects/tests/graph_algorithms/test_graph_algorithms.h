@@ -435,7 +435,7 @@ void Test_PrimsAlgorithm() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> weightMap;
-	resizeEdgeMap(g, weightMap, weights);
+	assignEdgeMap(g, weightMap, weights);
 
 	// Tree and predecessor map 
 	String<TVertexDescriptor> predMap;
@@ -474,7 +474,7 @@ void Test_KruskalsAlgorithm() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> weightMap;
-	resizeEdgeMap(g, weightMap, weights);
+	assignEdgeMap(g, weightMap, weights);
 
 	// Tree edges
 	String<TVertexDescriptor> treeEdges;
@@ -507,7 +507,7 @@ void Test_MST_All() {
 		String<unsigned int> initialWeights;
 		for(unsigned int i = 0; i<numEdges(myGraph); ++i) appendValue(initialWeights, (mtRand() % 1000));
 		String<unsigned int> weightMapInput;
-		resizeEdgeMap(myGraph, weightMapInput, initialWeights);
+		assignEdgeMap(myGraph, weightMapInput, initialWeights);
 		clear(initialWeights);
 	
 		// Prim1
@@ -568,7 +568,7 @@ void Test_DagShortestPath() {
 	addEdges(g,edges, numEdges);
 
 	String<int> weightMap;
-	resizeEdgeMap(g, weightMap, weights);
+	assignEdgeMap(g, weightMap, weights);
 
 	// Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -611,7 +611,7 @@ void Test_BellmanFord() {
 	addEdges(g,edges, numEdges);
 	
 	String<unsigned int> weightMap;
-	resizeEdgeMap(g,weightMap, weights);
+	assignEdgeMap(g,weightMap, weights);
 
 	// Out parameters of Bellman-Ford: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -654,7 +654,7 @@ void Test_Dijkstra() {
 	addEdges(g,edges, numEdges);
 
 	String<unsigned int> weightMap;
-	resizeEdgeMap(g , weightMap, weights);
+	assignEdgeMap(g , weightMap, weights);
 
 	// Out parameters of Dijkstra: Predecessor map and distance map
 	String<unsigned int> predMap;
@@ -696,7 +696,7 @@ void Test_AllPairsShortestPath() {
 	addEdges(g,edges, numEdges);
 	
 	String<int> weightMap;	
-	resizeEdgeMap(g,weightMap, weights);
+	assignEdgeMap(g,weightMap, weights);
 
 	// Out parameter
 	String<int> distMat;
@@ -779,7 +779,7 @@ void Test_FloydWarshall() {
 	addEdges(g,edges, numEdges);
 	
 	String<int> weightMap;	
-	resizeEdgeMap(g,weightMap, weights);
+	assignEdgeMap(g,weightMap, weights);
 
 	// Out parameter
 	String<int> distMat;
@@ -905,7 +905,7 @@ void Test_FordFulkerson() {
 	Graph<> g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> capMap;	
-	resizeEdgeMap(g,capMap, capacity);
+	assignEdgeMap(g,capMap, capacity);
 
 	// Out-parameter
 	String<unsigned int> flow;	
@@ -939,7 +939,7 @@ void Test_PathGrowingAlgorithm() {
 	TGraph g;
 	addEdges(g,edges, numEdges);
 	String<unsigned int> weightMap;
-	resizeEdgeMap(g, weightMap, weights);
+	assignEdgeMap(g, weightMap, weights);
 
 	// Path growing algorithm
 	String<bool> edgeMap;	

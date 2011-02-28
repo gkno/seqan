@@ -67,13 +67,12 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 .Function.resizeVertexMap:
 ..cat:Graph
 ..summary:Initializes a vertex map. 
-..signature:resizeVertexMap(g, pm [, prop])
+..signature:resizeVertexMap(g, pm [, prototype])
 ..param.g:A Graph.
 ...type:Class.Graph
 ..param.pm:An External Property Map.
 ...type:Class.External Property Map
-..param.prop:An optional array with properties that are to be assigned to the items in the property map.
-...remarks:For every vertex descriptor there must be an entry in the array.
+..param.prototype:An optional prototype that is used for initializing the property map.
 ..returns:void
 ..see:Function.resizeEdgeMap
 ..include:seqan/graph_types.h
@@ -81,11 +80,21 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 
 template<typename TSpec, typename TPropertyMap>
 inline void
-resizeVertexMap(Graph<TSpec> const& g,
-			  TPropertyMap& pm)
+resizeVertexMap(Graph<TSpec> const & g,
+                TPropertyMap & pm)
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 	resize(pm, getIdUpperBound(_getVertexIdManager(g)), Generous());
+}
+
+template<typename TSpec, typename TPropertyMap, typename TPrototype>
+inline void
+resizeVertexMap(Graph<TSpec> const & g,
+                TPropertyMap & pm,
+                TPrototype const & prototype)
+{
+	SEQAN_CHECKPOINT;
+	resize(pm, getIdUpperBound(_getVertexIdManager(g)), prototype, Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -94,7 +103,7 @@ resizeVertexMap(Graph<TSpec> const& g,
 .Function.resizeEdgeMap:
 ..cat:Graph
 ..summary:Initializes an edge map
-..signature:resizeEdgeMap(g, pm [, prop])
+..signature:resizeEdgeMap(g, pm [, prototype])
 ..param.g:A Graph.
 ...type:Class.Graph
 ..param.pm:An External or Internal Property Map.
@@ -102,8 +111,7 @@ resizeVertexMap(Graph<TSpec> const& g,
 ...type:Class.InternalMap
 ...type:Class.InternalPointerMap
 ...type:Class.InternalRawMap
-..param.prop:An optional array with properties that are to be assigned to the items in the property map.
-...remarks:For every edge id there must be an entry in the array.
+..param.prototype:An optional prototype that is used for initializing the property map.
 ..returns:void
 ..see:Function.resizeVertexMap
 ..include:seqan/graph_types.h
@@ -111,11 +119,21 @@ resizeVertexMap(Graph<TSpec> const& g,
 
 template<typename TSpec, typename TPropertyMap>
 inline void
-resizeEdgeMap(Graph<TSpec> const& g,
-			  TPropertyMap& pm)
+resizeEdgeMap(Graph<TSpec> const & g,
+			  TPropertyMap & pm)
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), Generous());
+}
+
+template<typename TSpec, typename TPropertyMap, typename TPrototype>
+inline void
+resizeEdgeMap(Graph<TSpec> const & g,
+              TPropertyMap & pm,
+              TPrototype const & prototype)
+{
+	SEQAN_CHECKPOINT;
+	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), prototype, Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -720,38 +738,71 @@ getProperty(TValue TClass:: * const ptr_to_member,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.assignVertexMap:
+..cat:Graph
+..summary:Initializes a vertex map with values of an array.
+..signature:assignVertexMap(g, pm, prop)
+..param.g:A Graph.
+...type:Class.Graph
+..param.pm:An External Property Map.
+...type:Class.External Property Map
+..param.prop:An array with properties that are to be assigned to the items in the property map.
+...remarks:For every vertex descriptor there must be an entry in the array.
+..returns:void
+..see:Function.assignEdgeMap
+..include:seqan/graph_types.h
+*/
+
 template<typename TSpec, typename TPropertyMap, typename TProperties>
 inline void
-resizeVertexMap(Graph<TSpec> const& g,
-			  TPropertyMap& pm,
-			  TProperties const& prop)
+assignVertexMap(Graph<TSpec> const & g,
+                TPropertyMap & pm,
+                TProperties const & prop)
 {
 	SEQAN_CHECKPOINT
 	resizeVertexMap(g,pm);
 	typedef Graph<TSpec> TGraph;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
-	for(;!atEnd(it);goNext(it)) {
+	for (; !atEnd(it); goNext(it))
 		assignProperty(pm,getValue(it), getValue(prop, _getId(value(it))));
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.assignEdgeMap:
+..cat:Graph
+..summary:Initializes a vertex map with values of an array.
+..signature:assignEdgeMap(g, pm, prop)
+..param.g:A Graph.
+...type:Class.Graph
+..param.pm:An External or Internal Property Map.
+...type:Class.External Property Map
+...type:Class.InternalMap
+...type:Class.InternalPointerMap
+...type:Class.InternalRawMap
+..param.prop:An array with properties that are to be assigned to the items in the property map.
+...remarks:For every edge id there must be an entry in the array.
+..returns:void
+..see:Function.assignVertexMap
+..include:seqan/graph_types.h
+*/
+
 template<typename TSpec, typename TPropertyMap, typename TProperties>
 inline void
-resizeEdgeMap(Graph<TSpec> const& g,
-			  TPropertyMap& pm,
-			  TProperties const& prop)
+assignEdgeMap(Graph<TSpec> const & g,
+              TPropertyMap & pm,
+              TProperties const & prop)
 {
 	SEQAN_CHECKPOINT
 	resizeEdgeMap(g,pm);
 	typedef Graph<TSpec> TGraph;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator it(g);
-	for(;!atEnd(it);goNext(it)) {
+	for (; !atEnd(it); goNext(it))
 		assignProperty(pm,*it,prop[_getId(*it)]);
-	}
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

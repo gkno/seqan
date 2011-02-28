@@ -19,7 +19,7 @@ int main()
 ///One external property map: Vertex names
 	String<char> nameMap;
 	char names[] = {'r', 's', 't', 'u', 'v', 'w', 'x', 'y'};
-	resizeVertexMap(g,nameMap, names);
+	assignVertexMap(g,nameMap, names);
 ///Out-parameters: Predecessor and distance map
 	String<unsigned int> predMap;
 	String<unsigned int> distMap;

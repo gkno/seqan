@@ -20,7 +20,7 @@ int main() {
 ///One external property map: Edge capacities
 	String<unsigned int> capMap;	
 	unsigned int capacity[] =    {16,  13,  12,  10,  20,  9,   4,   14,  7,   4};
-	resizeEdgeMap(g,capMap, capacity);
+	assignEdgeMap(g,capMap, capacity);
 ///Out-parameters: Edge flows
 	String<unsigned int> flow;
 ///Ford-Fulkerson flow from source = 0 to sink = 3. valF is the value of the flow.

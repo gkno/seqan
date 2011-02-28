@@ -19,7 +19,7 @@ int main() {
 ///One external property map: Vertex names
 	String<char> nameMap;
 	char names[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-	resizeVertexMap(g,nameMap, names);
+	assignVertexMap(g,nameMap, names);
 ///Out-parameter: Map of vertex descriptors to component
 	String<unsigned int> component;
 ///Strongly Connected Components

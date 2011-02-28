@@ -19,9 +19,9 @@ int main() {
 	unsigned int weights[] =    {4,   8,   8,   11,  7,   2,   4,   9,   14,  7,   6,   10,  1,   2  };
 	char names[] = {'a', 'b', 'c', 'd', 'i', 'e', 'h', 'g', 'f'};
 	String<int> weightMap;
-	resizeEdgeMap(g, weightMap, weights);
+	assignEdgeMap(g, weightMap, weights);
 	String<char> nameMap;
-	resizeVertexMap(g,nameMap, names);
+	assignVertexMap(g,nameMap, names);
 ///Out-parameter: Predecessor map to recover the tree
 	String<TVertexDescriptor> predMap;
 ///Prim's algorithm
