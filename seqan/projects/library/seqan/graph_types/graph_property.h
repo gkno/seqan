@@ -84,7 +84,8 @@ resizeVertexMap(Graph<TSpec> const & g,
                 TPropertyMap & pm)
 {
 	SEQAN_CHECKPOINT;
-	resize(pm, getIdUpperBound(_getVertexIdManager(g)), Generous());
+    typedef typename Value<TPropertyMap>::Type TValue;
+	resize(pm, getIdUpperBound(_getVertexIdManager(g)), static_cast<TValue>(0), Generous());
 }
 
 template<typename TSpec, typename TPropertyMap, typename TPrototype>
@@ -123,7 +124,8 @@ resizeEdgeMap(Graph<TSpec> const & g,
 			  TPropertyMap & pm)
 {
 	SEQAN_CHECKPOINT;
-	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), Generous());
+    typedef typename Value<TPropertyMap>::Type TValue;
+	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), static_cast<TValue>(0), Generous());
 }
 
 template<typename TSpec, typename TPropertyMap, typename TPrototype>
@@ -761,7 +763,7 @@ assignVertexMap(Graph<TSpec> const & g,
                 TProperties const & prop)
 {
 	SEQAN_CHECKPOINT
-	resizeVertexMap(g,pm);
+	resize(pm, getIdUpperBound(_getVertexIdManager(g)), Generous());
 	typedef Graph<TSpec> TGraph;
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
@@ -797,7 +799,7 @@ assignEdgeMap(Graph<TSpec> const & g,
               TProperties const & prop)
 {
 	SEQAN_CHECKPOINT
-	resizeEdgeMap(g,pm);
+	resize(pm, getIdUpperBound(_getEdgeIdManager(g)), Generous());
 	typedef Graph<TSpec> TGraph;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator it(g);

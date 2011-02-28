@@ -480,22 +480,23 @@ void Test_KruskalsAlgorithm() {
 	String<TVertexDescriptor> treeEdges;
 	kruskalsAlgorithm(g, 0, weightMap, treeEdges);
 
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 0) == 6);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 1) == 7);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 2) == 2);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 3) == 4);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 4) == 7);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 5) == 8);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 6) == 0);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 7) == 1);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 8) == 2);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 9) == 8);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 10) == 2);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 11) == 3);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 12) == 0);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 13) == 6);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 14) == 3);
-	SEQAN_ASSERT_TRUE(getValue(treeEdges, 15) == 5);
+	SEQAN_ASSERT_EQ(length(treeEdges), 16u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 0), 6u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 1), 7u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 2), 2u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 3), 4u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 4), 7u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 5), 8u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 6), 0u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 7), 1u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 8), 2u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 9), 8u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 10), 2u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 11), 3u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 12), 0u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 13), 6u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 14), 3u);
+	SEQAN_ASSERT_EQ(getValue(treeEdges, 15), 5u);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1117,6 +1118,36 @@ void Test_HmmAlgorithms() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+SEQAN_DEFINE_TEST(test_union_find)
+{
+    {
+        String<int> uf;
+
+        _unionFindInit(uf, 3);
+        SEQAN_ASSERT_EQ(uf[0], -1);
+        SEQAN_ASSERT_EQ(uf[1], -1);
+        SEQAN_ASSERT_EQ(uf[2], -1);
+
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 1);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 2);
+
+        _unionFindUnion(uf, 0, 1);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 0);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 2);
+
+        _unionFindUnion(uf, 0, 1);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 0);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 2);
+
+        _unionFindUnion(uf, 0, 2);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 0);
+        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 0);
+    }
+}
 
 SEQAN_DEFINE_TEST(test_heap_tree)
 {

@@ -639,12 +639,61 @@ struct LessPairI1_ :
 ..see:Function.primsAlgorithm
 ..include:seqan/graph_algorithms.h
 */
+
+// TODO(holtgrew): Move somewhere central, make public and document UF properly.
+template <typename TValue, typename TSize>
+inline
+void
+_unionFindInit(String<TValue> & unionFind,
+               TSize newLength)
+{
+    clear(unionFind);
+    resize(unionFind, newLength, static_cast<TValue>(-1));
+}
+
+template <typename TValue, typename TQuery>
+inline
+TValue
+_unionFindFind(String<TValue> & unionFind,
+               TQuery const & query)
+{
+    TValue j = query;
+    while (unionFind[j] >= 0)
+        j = unionFind[j];
+
+    TValue i = query;
+    while (unionFind[i] >= 0) {
+        TValue tmp = i;
+        i = unionFind[i];
+        unionFind[tmp] = j;
+    }
+
+    return j;
+}
+
+template <typename TValue, typename TLeft, typename TRight>
+inline
+void
+_unionFindUnion(String<TValue> & unionFind,
+                TLeft const & left,
+                TRight const & right)
+{
+    TValue sum = unionFind[left] + unionFind[right];
+    if (_abs(unionFind[left]) < _abs(unionFind[right])) {
+        unionFind[left] = right;
+        unionFind[right] = sum;
+    } else {
+        unionFind[right] = left;
+        unionFind[left] = sum;
+    }
+}
+
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TEdges>
 void
-kruskalsAlgorithm(Graph<TSpec> const& g,
+kruskalsAlgorithm(Graph<TSpec> const & g,
 				   TVertexDescriptor const,
-				   TWeightMap const& weight,
-				   TEdges& edges)
+				   TWeightMap const & weight,
+				   TEdges & edges)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
@@ -660,52 +709,30 @@ kruskalsAlgorithm(Graph<TSpec> const& g,
 	TEdgeList edgeList;
 
 	// Initialization
-	resize(edges, 2 * (numVertices(g) - 1));
-	String<String<TVertexDescriptor> > set;
-	String<TVertexDescriptor> id;
-	resizeVertexMap(g, set);
-	resizeVertexMap(g, id);
+	reserve(edges, 2 * (numVertices(g) - 1));
+    String<int> unionFind;
+    _unionFindInit(unionFind, numVertices(g));
 	
-	// Make the sets
-	TVertexIterator it(g);
-	while(!atEnd(it)) {
-		TVertexDescriptor v = getValue(it);
-		appendValue(property(set, v), v);
-		assignProperty(id, v, v);
-		goNext(it);
-	}
-
 	// Sort the edges
 	TEdgeIterator itE(g);
 	for(;!atEnd(itE);goNext(itE)) appendValue(edgeList, TWeightEdgePair(getProperty(weight, getValue(itE)), TVertexPair(sourceVertex(itE),targetVertex(itE))));
 	std::sort(begin(edgeList, Standard() ), end(edgeList, Standard() ), LessPairI1_<TWeight, TVertexPair>() );
 
 	// Process each edge
-	TSize index = 0;
 	TEdgeListIter itEdgeList = begin(edgeList, Standard());
 	TEdgeListIter itEdgeListEnd = end(edgeList, Standard());
-	for(;itEdgeList!=itEdgeListEnd; goNext(itEdgeList)) {
+	for (; itEdgeList != itEdgeListEnd; goNext(itEdgeList)) {
 		TVertexDescriptor x = value(itEdgeList).i2.i1;
 		TVertexDescriptor y = value(itEdgeList).i2.i2;
-		if (getProperty(id, x) != getProperty(id,y)) {
-			TVertexDescriptor owner = getProperty(id, x);
-			assignValue(edges, index++, x);
-			assignValue(edges, index++, y);
-			typedef typename Iterator<String<TVertexDescriptor> >::Type TStrIterator;
-			TStrIterator strIt = begin(property(set,getProperty(id, y)));
-			TStrIterator strItEnd = end(property(set,getProperty(id, y)));
-			for(;strIt != strItEnd;goNext(strIt)) {				
-				TVertexDescriptor setMember = getValue(strIt);
-				appendValue(property(set, owner), setMember);
-				assignProperty(id, setMember, owner);
-			}		
-		}
+
+        if (_unionFindFind(unionFind, x) == _unionFindFind(unionFind, y))
+            continue;
+
+        appendValue(edges, x);
+        appendValue(edges, y);
+        _unionFindUnion(unionFind, _unionFindFind(unionFind, x), _unionFindFind(unionFind, y));
 	}
 }
-
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
