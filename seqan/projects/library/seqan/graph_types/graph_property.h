@@ -349,6 +349,26 @@ resizeEdgeMap(Graph<TSpec>&,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TSpec, typename TContainer, unsigned int const MemberId, typename TSource>
+inline void
+assignEdgeMap(Graph<TSpec> const &,
+			  InternalMap<TContainer, MemberId> &,
+              TSource const &)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TContainer, unsigned int const MemberId, typename TSource>
+inline void
+assignEdgeMap(Graph<TSpec> &,
+			  InternalMap<TContainer, MemberId> &,
+              TSource const &)
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename T1, typename T2, typename TEdgeDescriptor, typename TValue>
 inline void
 assignProperty(InternalMap<Pair<T1, T2>, 1>&,
