@@ -46,6 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagGenbank_;
+//IOREV _todo_
 typedef Tag<TagGenbank_> const Genbank; //IOREV _todo_
 
 
@@ -136,6 +137,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
     SEQAN_CHECKPOINT;
     goBegin(it, true);
 }
@@ -145,6 +147,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	do
 	{
@@ -191,6 +194,7 @@ read(TFile & file,
 	 TData & data,
 	 Genbank)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	Iter<TFile, FileReader<Genbank> > it(file);
 
@@ -209,6 +213,7 @@ read(TFile & file,
 	 TSize limit,
 	 Genbank)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typename Size<TData>::Type siz = length(data);
 	Iter<TFile, FileReader<Genbank> > it(file);
@@ -233,6 +238,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 Genbank)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef typename Value<TMeta>::Type TValue;
 	String<char> line;
@@ -275,6 +281,7 @@ inline void
 goNext(TFile & file,
 	   Genbank)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef typename Value<TFile>::Type TValue;
 
@@ -313,6 +320,7 @@ write(TFile & file,
 	  TData & data,
 	  Genbank)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	enum
 	{
@@ -369,6 +377,7 @@ write(TFile & file,
 	  TMeta & meta,
 	  Genbank)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	write(file, meta);
 	write(file, data, Genbank());

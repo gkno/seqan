@@ -49,6 +49,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TConfig = MMapConfig<> >
     struct MMap;
+//IOREV _todo_
 	
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -80,7 +81,6 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 #ifdef PLATFORM_WINDOWS
 
 		enum MMapAdviseScheme {
-//IOREV _todo_
 			MMAP_NORMAL = 0,
 			MMAP_RANDOM = 0,
 			MMAP_SEQUENTIAL = 0,

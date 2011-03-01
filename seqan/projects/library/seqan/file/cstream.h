@@ -73,11 +73,11 @@ struct Position<FILE *>
 
 template <typename T>
 struct IsTellAndSeekStream_;
+//IOREV _todo_
 
 template <>
 struct IsTellAndSeekStream_<FILE *>
 {
-//IOREV _todo_
 	typedef True Type;
 };
 

@@ -82,13 +82,13 @@ _mismatchScore(Score<TValue, Simple>& sc,
 
 template<typename T>
 struct ProfileProfileScore;
+//IOREV _todo_
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, typename TScoreMember>
 class Score<TValue, ProfileProfileScore<TScoreMember> >
 {
-//IOREV _todo_
 public:
 	TScoreMember sc;
 

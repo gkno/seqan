@@ -465,6 +465,7 @@ this function can be used to extract the quality value id of every fragment in t
 ..include:seqan/file.h
 */
 struct TagFastq_;
+//IOREV _todo_
 typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 
 	// test for Fastq format
@@ -484,6 +485,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TFilename const & fname,
 		Fastq)
 	{
+//IOREV _todo_
 		typedef typename Value<TFilename>::Type									TValue;
 		typedef ModifiedString<TFilename, ModView<FunctorLowcase<TValue> > >	TLowcase;
 		
@@ -508,6 +510,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
 		Fastq)
 	{
+//IOREV _todo_
 		typedef String<TValue, MMap<TConfig> >						TString;
 		typedef StringSet<TString, ConcatDirect<TDelimiter> >		TStringSet;
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
@@ -543,6 +546,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TFastaSeq const & fasta,
 		Fastq)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 		typedef typename Iterator<TSeq, Standard>::Type				TDstIterator;
 
@@ -582,6 +586,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TFastaSeq const & fasta,
 		Fastq)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 
 		TIterator itBeg = begin(fasta, Standard());
@@ -605,6 +610,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TFastaSeq const & fasta,
 		Fastq)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 
 		TIterator itBeg = begin(fasta, Standard());
@@ -627,6 +633,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TFastaSeq const & fasta,
 		Fastq)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 		typedef typename Iterator<TSeq, Standard>::Type				TDstIterator;
 
@@ -668,6 +675,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TFastaSeq const & fasta,
 		Fastq)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 
 		TIterator itBeg = begin(fasta, Standard());
@@ -698,6 +706,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 ..include:seqan/file.h
 */
 	struct QSeq_;
+//IOREV _todo_
 	typedef Tag<QSeq_> const QSeq; //IOREV _todo_
 
 	// FIXME The following enum is more or less arbitrary since the information
@@ -708,6 +717,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 	// Also, this enum is quite convoluted but I don't feel like spilling a lot
 	// of common symbols (e.g. 'X', 'Y') into the SeqAn namespace.
 	struct QSeqEntry {
+//IOREV _todo_
 		enum {
 			MachineName,
 			Run,
@@ -726,6 +736,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 	template < typename TString >
 	inline bool _isQSeqFile(TString const& filename)
 	{
+//IOREV _todo_
         unsigned int const namelen = 19;
         unsigned int const pathlen = length(filename);
         if (pathlen < namelen) return false;
@@ -777,6 +788,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TSeq const & seq,
 		QSeq)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TSeq const>::Type TIter;
 		TIter front = begin(seq);
 		TIter const back = end(seq);
@@ -798,6 +810,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TFilename const & fname,
 		QSeq)
 	{
+//IOREV _todo_
 		// QSeq files come in a variety of ways throughout the Gerald pipeline.
 		// In this simplest case, "sorted.txt" is a file in a fragment genome
 		// directory, each corresponding to 10MB worth of DNA.
@@ -815,6 +828,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
 		QSeq)
 	{
+//IOREV _todo_
 		typedef String<TValue, MMap<TConfig> >						TString;
 		typedef StringSet<TString, ConcatDirect<TDelimiter> >		TStringSet;
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
@@ -839,6 +853,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TSource const& source,
 		unsigned int entry
 	) {
+//IOREV _todo_
 		typedef typename Iterator<TSource const>::Type TIterator;
 
 		TIterator const front = begin(source, Standard());
@@ -866,6 +881,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TQSeqSeq const & fasta,
 		QSeq)
 	{
+//IOREV _todo_
 		assignQSeqEntry(dst, fasta, QSeqEntry::Sequence);
 	}
 
@@ -876,6 +892,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TQSeqSeq const & fasta,
 		QSeq)
 	{
+//IOREV _todo_
 		// For now: just return the whole line.
 		typename Position<TQSeqSeq const>::Type front = 0;
 		while (_isLineBreak(fasta[front]))
@@ -891,6 +908,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TQSeqSeq const & fasta,
 		QSeq)
 	{
+//IOREV _todo_
 		// For now: just return the whole line.
 		typename Position<TQSeqSeq const>::Type front = 0;
 		while (_isWhiteSpace(fasta[front]))
@@ -905,6 +923,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TQSeqSeq const & fasta,
 		QSeq)
 	{
+//IOREV _todo_
 		assignQSeqEntry(dst, fasta, QSeqEntry::Quality);
 	}
 
@@ -915,6 +934,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 		TQSeqSeq const & fasta,
 		QSeq)
 	{
+//IOREV _todo_
 		assignSeqId(dst, fasta, QSeq());
 	}
 
@@ -928,6 +948,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 ..include:seqan/file.h
 */
 struct TagRaw_;
+//IOREV _todo_
 typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 
 	// test for Fastq format
@@ -937,6 +958,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TSeq const &,
 		Raw)
 	{
+//IOREV _todo_
 		return true;
 	}
 	
@@ -946,6 +968,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFilename const & fname,
 		Raw)
 	{
+//IOREV _todo_
 		typedef typename Value<TFilename>::Type									TValue;
 		typedef ModifiedString<TFilename, ModView<FunctorLowcase<TValue> > >	TLowcase;
 		
@@ -970,6 +993,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
 		Raw)
 	{
+//IOREV _todo_
 		typedef String<TValue, MMap<TConfig> >						TString;
 		typedef StringSet<TString, ConcatDirect<TDelimiter> >		TStringSet;
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
@@ -995,6 +1019,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TRawSeq const & fasta,
 		Raw)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TRawSeq const, Standard>::Type	TIterator;
 		typedef typename Iterator<TSeq, Standard>::Type				TDstIterator;
 
@@ -1023,6 +1048,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TRawSeq const &,
 		Raw)
 	{
+//IOREV _todo_
 		clear(dst);
 	}
 	
@@ -1033,6 +1059,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TRawSeq const &,
 		Raw)
 	{
+//IOREV _todo_
 		clear(dst);
 	}
 	
@@ -1043,6 +1070,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TRawSeq const &,
 		Raw)
 	{
+//IOREV _todo_
 		clear(dst);
 	}
 	
@@ -1053,6 +1081,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TRawSeq const &,
 		Raw)
 	{
+//IOREV _todo_
 		clear(dst);
 	}
 	
@@ -1093,6 +1122,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const &,
 		TagSelector<> &format)
 	{
+//IOREV _todo_
 		format.tagId = 0;
 		return false;
 	}
@@ -1103,6 +1133,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const & seq,
 		TagSelector<TTagList> &format)
 	{
+//IOREV _todo_
 		if (guessFormat(seq, typename TTagList::Type()))
 		{
 			if (format.tagId == 0)
@@ -1124,6 +1155,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFilename const &,
 		TagSelector<> &format)
 	{
+//IOREV _todo_
 		format.tagId = 0;
 		return false;
 	}
@@ -1134,6 +1166,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFilename const & fname,
 		TagSelector<TTagList> &format)
 	{
+//IOREV _todo_
 		if (guessFormatFromFilename(fname, typename TTagList::Type()))
 		{
 			if (format.tagId == 0)
@@ -1155,6 +1188,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &, 
 		TagSelector<void> const &)
 	{
+//IOREV _todo_
 	}
 	
 	template < typename TValue, typename TConfig, typename TDelimiter, typename TTagList >
@@ -1163,6 +1197,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
 		TagSelector<TTagList> const &format)
 	{
+//IOREV _todo_
 		if (format.tagId == Length<TTagList>::VALUE)
 			split(me, typename TTagList::Type());
 		else
@@ -1179,6 +1214,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const &,
 		TagSelector<> const &)
 	{
+//IOREV _todo_
 	}
 
 	template <typename TSeq, typename TFileSeq, typename TTagList>
@@ -1188,6 +1224,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const & seq,
 		TagSelector<TTagList> const &format)
 	{
+//IOREV _todo_
 		if (format.tagId == Length<TTagList>::VALUE)
 			assignSeq(dst, seq, typename TTagList::Type());
 		else
@@ -1204,6 +1241,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const &,
 		TagSelector<> const &)
 	{
+//IOREV _todo_
 	}
 
 	template <typename TSeqId, typename TFileSeq, typename TTagList>
@@ -1213,6 +1251,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const & seq,
 		TagSelector<TTagList> const &format)
 	{
+//IOREV _todo_
 		if (format.tagId == Length<TTagList>::VALUE)
 			assignSeqId(dst, seq, typename TTagList::Type());
 		else
@@ -1229,6 +1268,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const &,
 		TagSelector<> const &)
 	{
+//IOREV _todo_
 	}
 
 	template <typename TSeqId, typename TFileSeq, typename TTagList>
@@ -1238,6 +1278,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const & seq,
 		TagSelector<TTagList> const &format)
 	{
+//IOREV _todo_
 		if (format.tagId == Length<TTagList>::VALUE)
 			assignCroppedSeqId(dst, seq, typename TTagList::Type());
 		else
@@ -1254,6 +1295,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const &,
 		TagSelector<> const &)
 	{
+//IOREV _todo_
 	}
 	
 	template <typename TSeq, typename TFileSeq, typename TTagList>
@@ -1263,6 +1305,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const & seq,
 		TagSelector<TTagList> const &format)
 	{
+//IOREV _todo_
 		if (format.tagId == Length<TTagList>::VALUE)
 			assignQual(dst, seq, typename TTagList::Type());
 		else
@@ -1279,6 +1322,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const &,
 		TagSelector<> const &)
 	{
+//IOREV _todo_
 	}
 	
 	template <typename TSeq, typename TFileSeq, typename TTagList>
@@ -1288,6 +1332,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TFileSeq const & seq,
 		TagSelector<TTagList> const &format)
 	{
+//IOREV _todo_
 		if (format.tagId == Length<TTagList>::VALUE)
 			assignQualId(dst, seq, typename TTagList::Type());
 		else
@@ -1324,6 +1369,7 @@ If $formatTag$ is a @Class.AutoSeqFormat@ object, the file format is set to the 
 		TFilename &dirname,
 		TSeqFormat format)
 	{
+//IOREV _todo_
 		typedef typename Value<TSeqSet>::Type TSeq;
 		
 		Directory		dir(dirname);

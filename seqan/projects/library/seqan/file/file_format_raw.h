@@ -48,6 +48,7 @@ that is the file cannot store multiple records.
 */
 
 struct TagRaw_;
+//IOREV _todo_
 typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 
 
@@ -58,13 +59,13 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 
 template <typename TFile, typename TData, typename TTag>
 struct ReadRaw_;
+//IOREV _todo_
 
 //____________________________________________________________________________
 
 template <typename TFile, typename TData>
 struct ReadRaw_<TFile, TData, True>
 {
-//IOREV _todo_
 	template <typename TSize>
 	inline static void
 	read_(TFile & file,
@@ -163,6 +164,7 @@ read(TFile & file,
 	 TData & data,
 	 Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	ReadRaw_<TFile, TData, typename IsTellAndSeekStream_<TFile>::Type>::read_(file, data);
 }
@@ -176,6 +178,7 @@ read(TFile & file,
 	 TSize limit,
 	 Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	ReadRaw_<TFile, TData, typename IsTellAndSeekStream_<TFile>::Type>::read_(file, data, limit);
 }
@@ -191,6 +194,7 @@ readID(TFile & /*file*/,
 	   TString & id,
 	   Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	clear(id);
 }
@@ -205,6 +209,7 @@ readMeta(TFile & /*file*/,
 		 TMeta & meta,
 		 Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	clear(meta);
 }
@@ -219,6 +224,7 @@ void
 goNext(TFile & file,
 	   Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
   (void) file;  // When compiled without assertions.
 	SEQAN_ASSERT_TRUE(!_streamEOF(file));
@@ -239,6 +245,7 @@ write(TFile & file,
 	  TData const & data,
 	  Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_streamWrite(file, data);
 }
@@ -252,6 +259,7 @@ write(TFile & file,
 	  TString const &,
 	  Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_streamWrite(file, data);
 }
@@ -266,6 +274,7 @@ write(TFile & file,
 	  TMeta const &,
 	  Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_streamWrite(file, data);
 }
@@ -280,6 +289,7 @@ void
 read(TFile & file,
 	 TData & data)
 {
+//IOREV _todo_
 	read(file, data, Raw());
 }
 
@@ -289,6 +299,7 @@ read(TFile & file,
 	 TData & data,
 	 TSize limit)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	read(file, data, limit, Raw());
 }
@@ -300,6 +311,7 @@ void
 write(TFile & file,
 	  TData & data)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	write(file, data, "", Raw());
 }
@@ -308,6 +320,7 @@ void
 write(TFile & file,
 	  TData const & data)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	write(file, data, "", Raw());
 }

@@ -220,12 +220,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue, typename TFile, typename TSpec >
     struct PageFrame;    
+//IOREV _todo_
 
 	//////////////////////////////////////////////////////////////////////////////
 
 	template < typename TValue, typename TFile, typename TSpec >
     struct Value< PageFrame< TValue, TFile, TSpec > > {
-//IOREV _todo_
         typedef TValue Type;
     };
 
@@ -250,11 +250,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec = void >
     struct Dynamic;
+//IOREV _todo_
 
     template < typename TValue, typename TFile >
 	struct PageFrame< TValue, TFile, Dynamic<> >: public SimpleBuffer< TValue >
 	{
-//IOREV _todo_
 		typedef TFile							File;
 		typedef SimpleBuffer<TValue>	        TBase;
         typedef typename AsyncRequest<TFile>::Type  AsyncRequest;
@@ -281,6 +281,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < unsigned PageSize_ >
     struct Fixed;
+//IOREV _todo_
 
     typedef ::std::list<Position<String<void*> >::Type>		PageLRUList;    // least recently usage list
 	typedef PageLRUList::iterator	PageLRUEntry;
@@ -290,7 +291,6 @@ namespace SEQAN_NAMESPACE_MAIN
                unsigned PageSize_ >
 	struct PageFrame<TValue, TFile, Fixed<PageSize_> >
 	{
-//IOREV _todo_
 		typedef TFile								File;
         typedef typename AsyncRequest<TFile>::Type		AsyncRequest;
 		typedef	typename Size<PageFrame>::Type		TSize;

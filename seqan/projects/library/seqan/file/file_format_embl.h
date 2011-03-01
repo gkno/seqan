@@ -45,6 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagEmbl_;
+//IOREV _todo_
 typedef Tag<TagEmbl_> const Embl; //IOREV _todo_
 
 
@@ -119,6 +120,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
     SEQAN_CHECKPOINT;
     goBegin(it, true);
 }
@@ -128,6 +130,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	do
 	{
@@ -173,6 +176,7 @@ read(TFile & file,
 	 TData & data,
 	 Embl)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	Iter<TFile, FileReader<Embl> > it(file);
 
@@ -191,6 +195,7 @@ read(TFile & file,
 	 TSize limit,
 	 Embl)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typename Size<TData>::Type siz = length(data);
 	Iter<TFile, FileReader<Embl> > it(file);
@@ -214,6 +219,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 Embl)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef typename Value<TMeta>::Type TValue;
 
@@ -269,6 +275,7 @@ readLineType(TFile & file,
 			 Embl)
 
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 
 	//this function is meant to be used for two letter codes only 
@@ -326,6 +333,7 @@ readLineType(String<TValue,TSpec> & meta,
 			 Embl)
 
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 
 	//this function is meant to be used for two letter codes only 
@@ -394,6 +402,7 @@ readFeature(TString & str,
 			Embl)
 
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 
 	typedef typename Iterator<TString,Standard>::Type TIterator;
@@ -449,6 +458,7 @@ inline void
 goNext(TFile & file,
 	   Embl)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef typename Value<TFile>::Type TValue;
 
@@ -487,6 +497,7 @@ write(TFile & file,
 	  TData & data,
 	  Embl)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	enum
 	{
@@ -553,6 +564,7 @@ write(TFile & file,
 	  TMeta & meta,
 	  Embl)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	write(file, meta);
 	write(file, data, Embl());

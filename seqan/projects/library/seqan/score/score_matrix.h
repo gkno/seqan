@@ -57,6 +57,7 @@ struct ScoreMatrix;
 ..include:seqan/score.h
 */
 struct TagScoreMatrixFile_;
+//IOREV _todo_
 typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile; //IOREV _todo_
 
 
@@ -74,7 +75,6 @@ typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile; //IOREV _todo_
  */
 template <typename TValue, typename TSequenceValue, typename TSpec>
 class Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > {
-//IOREV _todo_
 public:
     // Static computation of the required array size.
     enum {

@@ -46,6 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagFasta_;
+//IOREV _todo_
 typedef Tag<TagFasta_> const Fasta; //IOREV _todo_
 
 //////////////////////////////////////////////////////////////////////////////
@@ -94,6 +95,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 	goBegin(it, true);
 }
 
@@ -102,6 +104,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 /*
 	if (_streamEOF(host(it)))
 	{
@@ -157,6 +160,7 @@ _fastaScanLine(TFile & file,
 				 TSize & count_valid,
 				 TSize & count_all)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!_streamEOF(file))
 
@@ -192,6 +196,7 @@ template <typename TFile, typename TSize>
 inline void
 _readNCharsFromFile(TFile & file, TSize count)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	for (TSize i = 0; i < count; ++i)
 	{
@@ -212,6 +217,7 @@ read(TFile & file,
 	 TSize limit,
 	 Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 
 	SEQAN_ASSERT(!_streamEOF(file))
@@ -309,6 +315,7 @@ read(TFile & file,
 	 TData & data,
 	 Fasta tag)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef typename Size<TData>::Type TSize;
 	read(file, data, maxValue<TSize>(), tag);
@@ -327,6 +334,7 @@ readID(TFile & file,
 	   TString & id,
 	   Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!_streamEOF(file))
 
@@ -374,6 +382,7 @@ readShortID(TFile & file,
 	   TString & id,
 	   Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!_streamEOF(file))
 
@@ -432,6 +441,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	readID(file, meta, Fasta());
 }
@@ -446,6 +456,7 @@ void
 goNext(TFile & file,
 	   Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!_streamEOF(file))
 
@@ -500,6 +511,7 @@ _writeImpl(TFile & file,
 			TString & id,
 			Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_streamPut(file, '>');
 	_streamWrite(file, id);
@@ -534,6 +546,7 @@ write(TFile & file,
 	  TData & data,
 	  Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, "", Fasta());
 }
@@ -547,6 +560,7 @@ write(TFile & file,
 	  TString & id,
 	  Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, id, Fasta());
 }
@@ -560,6 +574,7 @@ write(TFile & file,
 	  TString & id,
 	  Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, id, Fasta());
 
@@ -575,6 +590,7 @@ write(TFile & file,
 	  TMeta &,
 	  Fasta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, id, Fasta());
 }

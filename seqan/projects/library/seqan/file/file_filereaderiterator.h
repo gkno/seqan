@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TFormat, typename TFile = FILE*, typename TSpec = Default>
 struct FileReader;
+//IOREV _todo_
 
 // Manual forward for the skipMeta goBegin() overload.
 //template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
@@ -56,7 +57,6 @@ struct FileReader;
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 class Iter<TFile, FileReader<TFormat, TFile2, TSpec> >
 {
-//IOREV _todo_
 public:
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Position<TFile>::Type TPosition;

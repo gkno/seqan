@@ -44,11 +44,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TValue, typename TCount = unsigned int, typename TSpec = Default>
 class ProfileType;
+//IOREV _todo_
 
 template<typename TValue, typename TCount, typename TSpec>
 struct ValueSize<ProfileType<TValue, TCount, TSpec> >
 {
-//IOREV _todo_
 	enum { VALUE = ValueSize<TValue>::VALUE + 1};
 };
 

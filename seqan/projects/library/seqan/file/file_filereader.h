@@ -38,6 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TFormat, typename TFile, typename TSpec>
 struct FileReader;
+//IOREV _todo_
 
 //////////////////////////////////////////////////////////////////////////////
 // FileReader String
@@ -64,7 +65,6 @@ struct FileReader;
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 class String<TValue, FileReader<TFormat, TFile, TSpec> >
 {
-//IOREV _todo_
 public:
 	enum
 	{
@@ -439,6 +439,7 @@ iter(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
 //////////////////////////////////////////////////////////////////////////////
 
 struct FileReaderIterator;
+//IOREV _todo_
 
 //helper meta function for storing types associated with file reader string.
 //Due to a bug in VC++, FileReaderTypes_ is instantiated for arbitrary TContainer types
@@ -571,6 +572,7 @@ template <typename TContainer>
 inline typename GetValue<Iter<TContainer, FileReaderIterator> >::Type
 getValue(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	TContainer & cont = *(it.data_container);
 	if (cont.data_active_block != it.data_abl_pos)
 	{
@@ -582,6 +584,7 @@ template <typename TContainer>
 inline typename GetValue<Iter<TContainer, FileReaderIterator> >::Type
 getValue(Iter<TContainer, FileReaderIterator> const & it)
 {
+//IOREV _todo_
 	TContainer & cont = *(it.data_container);
 	if (cont.data_active_block != it.data_abl_pos)
 	{
@@ -596,12 +599,14 @@ template <typename TContainer>
 inline typename Reference<Iter<TContainer, FileReaderIterator> >::Type
 value(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	return getValue(it);
 }
 template <typename TContainer>
 inline typename Reference<Iter<TContainer, FileReaderIterator> >::Type
 value(Iter<TContainer, FileReaderIterator> const & it)
 {
+//IOREV _todo_
 	return getValue(it);
 }
 
@@ -611,12 +616,14 @@ template <typename TContainer>
 inline TContainer &
 container(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	return *(it.data_container);
 }
 template <typename TContainer>
 inline TContainer &
 container(Iter<TContainer, FileReaderIterator> const & it)
 {
+//IOREV _todo_
 	return *(it.data_container);
 }
 
@@ -626,6 +633,7 @@ template <typename TContainer>
 inline typename Position<Iter<TContainer, FileReaderIterator> >::Type
 position(Iter<TContainer, FileReaderIterator> const & it)
 {
+//IOREV _todo_
 	TContainer & cont = *(it.data_container);
 	if (it.data_atEnd)
 	{
@@ -651,6 +659,7 @@ inline void
 setPosition(Iter<TContainer, FileReaderIterator> & it,
 			TPos pos)
 {
+//IOREV _todo_
     typedef typename Size<TContainer>::Type TSize;
 	TContainer & cont = *(it.data_container);
 	it.data_abl_pos = _findBlockFileReaderString(cont, pos);
@@ -684,6 +693,7 @@ template <typename TContainer>
 inline void
 goNext(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	++it.data_buf_pos;
 	if (it.data_buf_pos >= it.data_buf_len)
 	{
@@ -716,6 +726,7 @@ template <typename TContainer>
 inline void
 goPrevious(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	if (it.data_buf_pos > 0)
 	{
 		--it.data_buf_pos;
@@ -750,6 +761,7 @@ template <typename TContainer>
 inline void
 goBegin(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	it.data_abl_pos = 0;
 	it.data_buf_pos = 0;
 
@@ -772,6 +784,7 @@ template <typename TContainer>
 inline void
 goEnd(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	it.data_abl_pos = 0;
 	it.data_buf_pos = 0;
 	it.data_buf_len = 0;
@@ -784,12 +797,14 @@ template <typename TContainer>
 inline bool
 atEnd(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	return it.data_atEnd;
 }
 template <typename TContainer>
 inline bool
 atEnd(Iter<TContainer, FileReaderIterator> const & it)
 {
+//IOREV _todo_
 	return it.data_atEnd;
 }
 
@@ -799,12 +814,14 @@ template <typename TContainer>
 inline bool
 atBegin(Iter<TContainer, FileReaderIterator> & it)
 {
+//IOREV _todo_
 	return (it.data_abl_pos == 0) && (it.data_buf_pos == 0);
 }
 template <typename TContainer>
 inline bool
 atBegin(Iter<TContainer, FileReaderIterator> const & it)
 {
+//IOREV _todo_
 	return (it.data_abl_pos == 0) && (it.data_buf_pos == 0);
 }
 
@@ -817,6 +834,7 @@ inline bool
 operator == (Iter<TContainer, FileReaderIterator> const & left,
 			 Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return (atEnd(left) == atEnd(right)) && ((atEnd(left) && atEnd(right)) || position(left) == position(right));
 }
@@ -830,6 +848,7 @@ inline bool
 operator != (Iter<TContainer, FileReaderIterator> const & left,
 			 Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return (atEnd(left) != atEnd(right)) || (position(left) != position(right));
 }
@@ -843,6 +862,7 @@ inline bool
 operator < (Iter<TContainer, FileReaderIterator> const & left,
 			Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return (atEnd(right) && !atEnd(left)) || (position(left) < position(right));
 }
@@ -852,6 +872,7 @@ inline bool
 operator > (Iter<TContainer, FileReaderIterator> const & left,
 			Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return (atEnd(left) && !atEnd(right)) || (position(left) > position(right));
 }
@@ -865,6 +886,7 @@ inline bool
 operator <= (Iter<TContainer, FileReaderIterator> const & left,
 			 Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return atEnd(right) || (position(left) <= position(right));
 }
@@ -874,6 +896,7 @@ inline bool
 operator >= (Iter<TContainer, FileReaderIterator> const & left,
 			 Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return atEnd(left) || (position(left) >= position(right));
 }
@@ -887,6 +910,7 @@ inline Iter<TContainer, FileReaderIterator>
 operator + (Iter<TContainer, FileReaderIterator> const & left,
 			TIntegral right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return Iter<TContainer, FileReaderIterator>(container(left), position(left) + right);
 }
@@ -895,6 +919,7 @@ inline Iter<TContainer, FileReaderIterator>
 operator + (TIntegral left,
 			Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return Iter<TContainer, FileReaderIterator>(container(right), position(right) + left);
 }
@@ -908,6 +933,7 @@ inline Iter<TContainer, FileReaderIterator> &
 operator += (Iter<TContainer, FileReaderIterator> & left,
 			 TIntegral right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	left.data_buf_pos += right;
 	if (left.data_buf_pos >= left.data_buf_len)
@@ -926,6 +952,7 @@ inline Iter<TContainer, FileReaderIterator>
 operator - (Iter<TContainer, FileReaderIterator> const & left,
 			TIntegral right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return Iter<TContainer, FileReaderIterator>(container(left), position(left) - right);
 }
@@ -937,6 +964,7 @@ inline typename Difference<Iter<TContainer, FileReaderIterator> >::Type
 operator - (Iter<TContainer, FileReaderIterator> const & left,
 			Iter<TContainer, FileReaderIterator> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return position(left) - position(right);
 }
@@ -950,6 +978,7 @@ inline Iter<TContainer, FileReaderIterator> &
 operator -= (Iter<TContainer, FileReaderIterator> & left,
 			TIntegral right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	if (left.data_buf_pos < right)
 	{

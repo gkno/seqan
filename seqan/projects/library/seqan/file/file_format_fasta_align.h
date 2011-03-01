@@ -46,9 +46,11 @@ namespace seqan {
 //forward declarations
 template <typename T>
 struct Row;
+//IOREV _todo_
 
 template <typename T>
 struct Rows;
+//IOREV _todo_
 
 // ===========================================================================
 // Tags, Enums, Classes, Specializations
@@ -60,6 +62,7 @@ struct Rows;
 ..include:seqan/file.h
 */
 struct FastaAlign_;
+//IOREV _todo_
 typedef Tag<FastaAlign_> FastaAlign; //IOREV _todo_
 
 // ===========================================================================
@@ -93,6 +96,7 @@ void _fastaAlignScanLine(TFile & file, TSize & count) {
 //////////////////////////////////////////////////////////////////////////////
 template <typename TFile, typename TSource, typename TSpec>
 void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
+//IOREV _todo_
     SEQAN_CHECKPOINT;
 
 	SEQAN_ASSERT_NOT(_streamEOF(file));
@@ -199,6 +203,7 @@ void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
  
 template <typename TFile, typename TStringContainer>
 void readIDs(TFile& file, TStringContainer& ids, FastaAlign) {
+//IOREV _todo_
 	
 	SEQAN_CHECKPOINT;
 	
@@ -244,6 +249,7 @@ void readIDs(TFile& file, TStringContainer& ids, FastaAlign) {
 
 template <typename TFile, typename TMeta>
 void readMeta(TFile & /*file*/, TMeta & meta, FastaAlign) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	clear(meta);
 }
@@ -254,6 +260,7 @@ void readMeta(TFile & /*file*/, TMeta & meta, FastaAlign) {
 //////////////////////////////////////////////////////////////////////////////
 template <typename TFile>
 void goNext(TFile & file, FastaAlign) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT;
 	(void) file; // When compiled without assertions.
 	SEQAN_ASSERT_NOT(_streamEOF(file));
@@ -268,6 +275,7 @@ void goNext(TFile & file, FastaAlign) {
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void _writeImpl(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, FastaAlign const &) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 
 	typedef Align<TSource, TSpec> const TAlign;
@@ -306,6 +314,7 @@ void _writeImpl(TFile & file, Align<TSource, TSpec> const & align, TStringContai
 
 template <typename TFile, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> const & align, FastaAlign const & ) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_writeImpl(file, align, String<String<char> >(), FastaAlign());
 }
@@ -314,6 +323,7 @@ void write(TFile & file, Align<TSource, TSpec> const & align, FastaAlign const &
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, FastaAlign const & ) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_writeImpl(file, align, ids, FastaAlign());
 }
@@ -323,6 +333,7 @@ void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer c
 // TODO(holtgrew): Superflous?!
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> const * align, TStringContainer const & ids, FastaAlign const & ) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_writeImpl(file, align, ids, FastaAlign());
 }
@@ -331,6 +342,7 @@ void write(TFile & file, Align<TSource, TSpec> const * align, TStringContainer c
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec, typename TMeta>
 void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, TMeta &, FastaAlign const & ) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT;
 	_writeImpl(file, align, ids, FastaAlign());
 }

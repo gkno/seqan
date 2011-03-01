@@ -62,6 +62,7 @@ struct Semaphore;       	// "projects/library/seqan/system/system_sema.h"(16)
 // Thread
 
 template <typename Worker> struct Thread;       	// "projects/library/seqan/system/system_thread.h"(18)
+//IOREV _todo_
 
 
 //////////////////////////////////////////////////////////////////////////////

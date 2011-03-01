@@ -295,6 +295,7 @@ VALIDATE:
 
 template <typename TFormat, typename TFile, typename TSpec>
 struct FileReader;
+//IOREV _todo_
 
 template <typename TValue, typename TFormat, typename TFile, typename FileReaderTSpec, typename TFinderSpec, typename TNeedle2>
 bool
@@ -302,7 +303,6 @@ _findHorspool(Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> 
 			  Pattern<TNeedle2, Horspool> & me,
 			  bool find_first)
 {
-//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> >, TFinderSpec > TFinder;
 	typedef typename Haystack<TFinder>::Type THaystack;

@@ -47,6 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagCGViz_;
+//IOREV _todo_
 typedef Tag<TagCGViz_> const CGViz; //IOREV _todo_
 
 /////////////////////////////////////////////////////////////////////////
@@ -75,6 +76,7 @@ void goNext(TFile & file, CGViz) {
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void _writeImpl(TFile& target, Align<TSource, TSpec>& align, TStringContainer& ids, CGViz) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 
 	typedef Align<TSource, TSpec> const TAlign;
@@ -203,6 +205,7 @@ void _writeImpl(TFile& target, Align<TSource, TSpec>& align, TStringContainer& i
 
 template <typename TFile, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec>& align, CGViz) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_writeImpl(file, align, String<String<char> >(), CGViz());
 }
@@ -211,6 +214,7 @@ void write(TFile & file, Align<TSource, TSpec>& align, CGViz) {
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, CGViz) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_writeImpl(file, align, ids, CGViz());
 }
@@ -219,6 +223,7 @@ void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, C
 //VisualC++ const array bug workaround
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec>* align, TStringContainer & ids, CGViz) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_writeImpl(file, align, ids, CGViz());
 }
@@ -227,6 +232,7 @@ void write(TFile & file, Align<TSource, TSpec>* align, TStringContainer & ids, C
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec, typename TMeta>
 void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, TMeta &, CGViz) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_writeImpl(file, align, ids, CGViz());
 }
