@@ -488,28 +488,40 @@ def addTags():
     lines_func_class = ""
     lines_typedef = ""
     for i in sorted(FILTERED_SIGS, key=lambda x:(x[0],x[1])):
-            if i[0] != lastfilename:
-                if (lastfilename != ""):
-                    cmd = 'awk -f ' + sys.path[0] + '/iorev_tagger_level2.awk'
-                    if (lines_func_class != ""):
-                        cmd += " -v lines_fc=" + lines_func_class
-                    if (lines_typedef != ""):
-                        cmd += " -v lines_t=" + lines_typedef
-                    cmd += " " + lastfilename + " > " + lastfilename + ".new"
-                    print cmd
-                    if (lastfilename.find("file") >= 0):
-                        os.system(cmd)
-                        shutil.move(lastfilename, lastfilename + ".old")
-                        shutil.move(lastfilename+".new", lastfilename)
-                    
-                lastfilename = i[0]
-                lines_func_class = ""
-                lines_typedef = ""
-            if i[2] != "t":
-                lines_func_class = lines_func_class + "_" + str(i[1])
-            else:
-                lines_typedef = lines_typedef + "_" + str(i[1])
-            
+        if i[0] != lastfilename:
+            if (lastfilename != ""):
+                cmd = 'awk -f ' + sys.path[0] + '/iorev_tagger_level2.awk'
+                if (lines_func_class != ""):
+                    cmd += " -v lines_fc=" + lines_func_class
+                if (lines_typedef != ""):
+                    cmd += " -v lines_t=" + lines_typedef
+                cmd += " " + lastfilename + " > " + lastfilename + ".new"
+                print cmd
+                #if (lastfilename.find("file") >= 0):
+                os.system(cmd)
+                shutil.move(lastfilename, lastfilename + ".old")
+                shutil.move(lastfilename+".new", lastfilename)
+            lastfilename = i[0]
+            lines_func_class = ""
+            lines_typedef = ""
+        if i[2] != "t":
+            lines_func_class = lines_func_class + "_" + str(i[1])
+        else:
+            lines_typedef = lines_typedef + "_" + str(i[1])
+
+    ## run for the last file aswell
+    cmd = 'awk -f ' + sys.path[0] + '/iorev_tagger_level2.awk'
+    if (lines_func_class != ""):
+        cmd += " -v lines_fc=" + lines_func_class
+    if (lines_typedef != ""):
+        cmd += " -v lines_t=" + lines_typedef
+    cmd += " " + lastfilename + " > " + lastfilename + ".new"
+    print cmd
+    #if (lastfilename.find("file") >= 0):
+    os.system(cmd)
+    shutil.move(lastfilename, lastfilename + ".old")
+    shutil.move(lastfilename+".new", lastfilename)
+
 
 def display(order="ntfl"):
     #TODO implement proper parsing of display and sort order
@@ -590,6 +602,7 @@ def main():
 
   buildAllForwards(sys.argv[1], force_rebuild)
 
+  #display("fl")
   #display()
   addTags()
 

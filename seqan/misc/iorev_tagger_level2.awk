@@ -27,17 +27,26 @@ NR == LINES_T_LIST[LINE_T_INDEX] {
 
 {
     if (NEWT == 1) {
-        print $0 " //IOREV _todo_"
+        if ($0 ~ "//IOREV")
+            print $0
+        else
+            print $0 " //IOREV _todo_"
         LINE_T_INDEX = LINE_T_INDEX + 1
         NEWT = 0
-    }
-    else
+    } else if ($0 == "//IOREV _todo_") {
+        # REMOVE FC TAGS FROM INPUT
+    } else if ($0 ~ "//IOREV _todo_") {
+        # REMOVE TEMPLATE TAGS FROM INPUT
+        print substr($0, 1, index($0, "//IOREV _todo_")-1)
+    } else
+    {
         print $0
+    }
 }
 
 
 
-$0 ~ "{" {
+($0 ~ "{") || ($0 ~ ";") {
 #     print "reached braces"
     if (NEWFC == 1) {
         NEWFC = 0
