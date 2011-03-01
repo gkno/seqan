@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 struct SVGFile
 {
+//IOREV _todo_
 	std::fstream file;
 
 	Pair<int> cursor;
@@ -181,6 +182,7 @@ template <typename TChar>
 inline void
 _streamPut(SVGFile & svg, TChar character)
 {
+//IOREV _todo_
 	if (convert<char>(character) == '\n')
 	{
 		++svg.cursor.i2;

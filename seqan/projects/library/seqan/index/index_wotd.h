@@ -403,11 +403,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSize >
 	inline bool _isRoot(VertexWotdOriginal_<TSize> const &value) {
+//IOREV _todo_
 		return value.node == 0;
 	}
 
 	template < typename TSize >
 	inline bool _isRoot(VertexWotdModified_<TSize> const &value) {
+//IOREV _todo_
 		return value.node == 0; 
 	}
 
@@ -417,6 +419,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
+//IOREV _todo_
 		typedef Index<TText, IndexWotd<TIndexSpec> > TIndex;
 		TIndex const &index = container(it);
 		return (dirAt(value(it).node, index) & index.LEAF) != 0;
@@ -428,6 +431,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
+//IOREV _todo_
 		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 

@@ -362,6 +362,7 @@ _writeGraphFooter(TFile & file,
 				  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				  DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
@@ -404,6 +405,7 @@ _writeGraphType(TFile & file,
 				Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 				DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, "graph");
 }
@@ -416,6 +418,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, " -- ");
 }

@@ -53,6 +53,7 @@ _loadSequences(TPath const& in_path,
 			   TStringSet& origStrSet,
 			   TNames& names)
 {
+//IOREV _todo_
 	typedef typename Size<TStringSet>::Type TSize;
 	
 	// Count sequences and read names

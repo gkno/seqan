@@ -295,6 +295,7 @@ bool buildAlignment(Finder<THaystack, Default> &finder,
 
 // TODO(holtgrew): Should probably to into some utility header.
 inline bool _isUnsigned(CharString const & number) {
+//IOREV _todo_
     SEQAN_CHECKPOINT;
     if (length(number) == 0u)
         return false;

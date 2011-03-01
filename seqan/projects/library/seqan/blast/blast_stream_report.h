@@ -102,6 +102,7 @@ read(TFile & file,
 	 BlastReport<TBlastHsp, StreamReport<TFile> >& blastObj,	 
 	 Tag<TagBlast_>) 
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
  
 

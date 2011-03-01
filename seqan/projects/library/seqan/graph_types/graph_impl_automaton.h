@@ -650,6 +650,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;

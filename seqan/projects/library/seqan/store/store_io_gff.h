@@ -61,6 +61,7 @@ typedef Tag<TagGtf_> const Gtf;
     inline void
     _parseReadGffIdentifier(TFile & file, TString & str, TChar& c)
     {
+//IOREV _todo_
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
         while (!_streamEOF(file)) 
@@ -79,6 +80,7 @@ typedef Tag<TagGtf_> const Gtf;
 	inline bool
 	_parseSkipEntryUntilWhitespace(TFile& file, TChar& c)
 	{
+//IOREV _todo_
 		if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) return false;
 		
 		while (!_streamEOF(file)) {
@@ -92,6 +94,7 @@ typedef Tag<TagGtf_> const Gtf;
     inline bool
     _parseReadGffKeyValue(TFile & file, TKeyString & key, TValueString & value, TChar& c)
     {
+//IOREV _todo_
 		if (c == ' ' || c == '\t' || c == '\n' || c == '=') return false;
         appendValue(key, c);
         while (!_streamEOF(file)) 
@@ -207,6 +210,7 @@ _readOneAnnotation (
 	TChar & c,
 	IOContextGff_<TFragmentStore, TSpec> & ctx)
 {
+//IOREV _todo_
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -430,6 +434,7 @@ read (
 	FragmentStore<TSpec, TConfig> & fragStore,
 	Gff)
 {
+//IOREV _todo_
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	
 	if (_streamEOF(file)) return;
@@ -459,6 +464,7 @@ read (
 	FragmentStore<TSpec, TConfig> & fragStore,
 	Gtf)
 {
+//IOREV _todo_
 	read (file, fragStore, Gff());
 }
 
@@ -475,6 +481,7 @@ _writeOneAnnotation (
 	TId id,
 	Gff)
 {
+//IOREV _todo_
 	typedef FragmentStore<TSpec, TConfig>       TFragmentStore;
 	typedef typename TFragmentStore::TContigPos TContigPos;
 	
@@ -579,6 +586,7 @@ _writeOneAnnotation (
 	TId id,
 	Gtf)
 {
+//IOREV _todo_
 	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TContigPos			TContigPos;
 	
@@ -696,6 +704,7 @@ _writeGffGtf (
 	FragmentStore<TSpec, TConfig> & store,
 	TFormat format)
 {
+//IOREV _todo_
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 	typedef typename TFragmentStore::TAnnotationStore				TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type					TAnnotation;
@@ -716,6 +725,7 @@ write (
 	FragmentStore<TSpec, TConfig> & store,
 	Gff format)
 {
+//IOREV _todo_
 	_writeGffGtf(target, store, format);
 }
 
@@ -726,6 +736,7 @@ write (
 	FragmentStore<TSpec, TConfig> & store,
 	Gtf format)
 {
+//IOREV _todo_
 	_writeGffGtf(target, store, format);
 }
 

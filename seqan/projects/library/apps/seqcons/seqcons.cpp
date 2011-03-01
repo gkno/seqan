@@ -147,6 +147,7 @@ int parseCommandLine(ConsensusOptions & consOpt, CommandLineParser & parser, int
 template <typename TFragmentStore, typename TSize>
 int loadFiles(TFragmentStore & fragStore, TSize & numberOfContigs, ConsensusOptions const & consOpt)
 {
+//IOREV _todo_
     std::cerr << "Reading input..." << std::endl;
 	if (!empty(consOpt.readsfile)) {
 		// Load simple read file
@@ -185,6 +186,7 @@ int loadFiles(TFragmentStore & fragStore, TSize & numberOfContigs, ConsensusOpti
 template <typename TFragmentStore>
 int writeOutput(TFragmentStore /*const*/ & fragStore, ConsensusOptions const & consOpt)
 {
+//IOREV _todo_
     std::cerr << "Writing output..." << std::endl;
 	if (consOpt.output == 0) {
 		// Write old SeqAn multi-read alignment format

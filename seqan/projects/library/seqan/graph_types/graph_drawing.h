@@ -330,6 +330,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Directed<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 }
 
@@ -341,6 +342,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Undirected<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 }
 
@@ -352,6 +354,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Tree<TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 }
 
@@ -364,6 +367,7 @@ _writeGraphFooter(TFile &,
 				  Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 				  DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 }
 
@@ -375,6 +379,7 @@ _writeGraphType(TFile & file,
 				Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 				DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, "digraph");
 }
@@ -387,6 +392,7 @@ _writeGraphType(TFile & file,
 				Graph<Directed<TCargo, TSpec> > const&,
 				DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, "digraph");
 }
@@ -399,6 +405,7 @@ _writeGraphType(TFile & file,
 				Graph<Undirected<TCargo, TSpec> > const&,
 				DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, "graph");
 }
@@ -411,6 +418,7 @@ _writeGraphType(TFile & file,
 				Graph<Tree<TCargo, TSpec> > const&,
 				DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, "digraph");
 }
@@ -423,6 +431,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Automaton<TAlphabet, TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, " -> ");
 }
@@ -435,6 +444,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Directed<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, " -> ");
 }
@@ -447,6 +457,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Undirected<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, " -- ");
 }
@@ -459,6 +470,7 @@ _writeEdgeType(TFile & file,
 			   Graph<Tree<TCargo, TSpec> > const&,
 			   DotDrawing)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	_streamWrite(file, " -> ");
 }
@@ -489,6 +501,7 @@ write(TFile & file,
 	  TEdgeAttributes const& edgeMap,
 	  DotDrawing) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -552,6 +565,7 @@ write(TFile & file,
 	  TNodeAttributes const& nodeMap,
 	  DotDrawing) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	String<String<char> > edgeMap;
 	_createEdgeAttributes(g,edgeMap);
@@ -572,6 +586,7 @@ write(TFile & file,
 	  Graph<TSpec> const& g, 
 	  DotDrawing) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	String<String<char> > nodeMap;
 	_createNodeAttributes(g,nodeMap);
@@ -898,6 +913,7 @@ void read(TFile & file,
 		  TEdgeAttributes& edgeMap,
 		  DotDrawing) 
 {
+//IOREV _todo_
 	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Position<TFile>::Type TPosition;
@@ -926,6 +942,7 @@ void read(TFile & file,
 		  Graph<TSpec>& g,
 		  DotDrawing) 
 {
+//IOREV _todo_
 	String<String<char> > nodeMap;
 	String<String<char> > edgeMap;
 	read(file,g,nodeMap,edgeMap,DotDrawing());

@@ -410,6 +410,7 @@ int parseCommandLineAndCheck(TOptions & options,
 template <typename TRNG, typename TOptions>
 int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName, TOptions const & options)
 {
+//IOREV _todo_
     DnaString randomSequence;
     reserve(randomSequence, length);
 

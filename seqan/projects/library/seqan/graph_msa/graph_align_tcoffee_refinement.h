@@ -88,6 +88,7 @@ struct ProfileProfileScore;
 template <typename TValue, typename TScoreMember>
 class Score<TValue, ProfileProfileScore<TScoreMember> >
 {
+//IOREV _todo_
 public:
 	TScoreMember sc;
 

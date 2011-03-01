@@ -185,6 +185,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+//IOREV _todo_
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;

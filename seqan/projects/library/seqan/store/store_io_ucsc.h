@@ -65,6 +65,7 @@ typedef Tag<Ucsc_<UcscKnownIsoforms_> > const UcscIsoforms;
     inline void
     _parseReadUcscIdentifier(TFile & file, TString & str, TChar& c)
     {
+//IOREV _todo_
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
         while (!_streamEOF(file)) 
@@ -79,6 +80,7 @@ typedef Tag<Ucsc_<UcscKnownIsoforms_> > const UcscIsoforms;
 	inline void 
 	_parseSkipWhiteComma(TFile& file, TChar& c)
 	{
+//IOREV _todo_
 		if (c != ',' && c != ' ') return;
 		while (!_streamEOF(file)) {
 			c = _streamGet(file);
@@ -135,6 +137,7 @@ _readOneAnnotation (
 	TChar & c,
 	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
+//IOREV _todo_
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -390,6 +393,7 @@ read (
 	FragmentStore<TSpec, TConfig> & fragStore,
 	Tag<Ucsc_<TFormatSpec> > const)
 {
+//IOREV _todo_
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	
 	if (_streamEOF(file)) return;
@@ -484,6 +488,7 @@ _writeOneAnnotation (
 	TTargetStream & file,
 	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
+//IOREV _todo_
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	
 	unsigned suf = 0;
@@ -578,6 +583,7 @@ write (
 	FragmentStore<TSpec, TConfig> & store,
 	Tag<Ucsc_<TFormatSpec> > const format)
 {
+//IOREV _todo_
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 	typedef typename TFragmentStore::TAnnotationStore				TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type					TAnnotation;

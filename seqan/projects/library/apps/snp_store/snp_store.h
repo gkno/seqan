@@ -1462,6 +1462,7 @@ _write(TFile &file,
 	   unsigned realCoverage,
 	   TOptions &options)
 {
+//IOREV _todo_
 	if (!file.is_open()) 
 	{
 		::std::cerr << "SNP output file is not open" << ::std::endl;

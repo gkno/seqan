@@ -43,6 +43,7 @@ void write(TFile & file,
 	   Index<TText, IndexEsa<TESASpec> > & stree,
 	   DotDrawing) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Index<TText, IndexEsa<TESASpec> > TIndex;
 	

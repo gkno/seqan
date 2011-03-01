@@ -239,6 +239,7 @@ int openTempFile() {
 // function.  This is not thread safe!
 inline
 const char *tempFileName() {
+//IOREV _todo_
     static char fileNameBuffer[100];
 #ifdef PLATFORM_WINDOWS_VS
     char * fileName = tempnam(NULL, "SEQAN.");

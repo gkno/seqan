@@ -807,6 +807,7 @@ template <typename TAlphabet, typename TFloat, typename TSpec>
 void write(FILE *file,
 		   MarkovModel<TAlphabet, TFloat, TSpec> & mm )
 {
+//IOREV _todo_
 	mm.write(file);
 }
 
@@ -816,6 +817,7 @@ template <typename TAlphabet, typename TFloat, typename TSpec>
 void read(FILE *file,
 		  MarkovModel<TAlphabet, TFloat, TSpec> & mm )
 {
+//IOREV _todo_
 	mm.read(file);
 }
 //////////////////////////////////////////////////////////////////////////////

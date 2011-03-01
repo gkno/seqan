@@ -132,6 +132,7 @@ inline void _printMask(String <unsigned> const &  mask,unsigned line,String <cha
 
 inline bool _isUnsigned(String<char> const & number)
 {
+//IOREV _todo_
 	unsigned int len = length(number);
 	for(unsigned int i = 0;i < len;++i){
 		if(!(convert<unsigned int>(getValue(number,i)) <= 57 && convert<unsigned int>(getValue(number,i)) >= 47))

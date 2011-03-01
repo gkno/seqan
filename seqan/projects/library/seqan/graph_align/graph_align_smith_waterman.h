@@ -74,6 +74,7 @@ _isClumping(String<bool, TSpec> const& forbidden,
 			TSize col,
 			TSize len2)
 {
+//IOREV _todo_
 	return forbidden[(col-1) * len2 + (row-1)];
 }
 
@@ -86,6 +87,7 @@ _isClumping(Nothing&,
 			TSize,
 			TSize)
 {
+//IOREV _todo_
 	return false;
 }
 

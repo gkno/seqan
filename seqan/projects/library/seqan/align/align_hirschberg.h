@@ -47,6 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template<typename TSource>
 	void _writeDebugMatrix(TSource s1,TSource s2)
 	{
+//IOREV _todo_
 		int l1 = length(s1);
 		int l2 = length(s2);
 	    

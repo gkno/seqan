@@ -49,6 +49,7 @@ template <typename TContainer, typename TSpec>
 inline bool
 _streamEOF(Iter<TContainer, TSpec> const & iter)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     return atEnd(iter);
 }
@@ -61,6 +62,7 @@ _streamRead(TValue * target,
             Iter<TContainer, TSpec> & source,
             ::std::streamsize limit)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     if (position(target) + limit > length(container(target)))
         limit = length(container(target)) - position(target);
@@ -76,6 +78,7 @@ template <typename TContainer, typename TSpec>
 inline typename Value<Iter<TContainer, TSpec> >::Type
 _streamGet(Iter<TContainer, TSpec> & source)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     typename Value<Iter<TContainer, TSpec> >::Type _val = getValue(source);
     goNext(source);
@@ -88,6 +91,7 @@ template <typename TContainer, typename TSpec>
 inline typename Value<Iter<TContainer, TSpec> >::Type
 _streamPeek(Iter<TContainer, TSpec> & source)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     return getValue(source);
 }
@@ -99,6 +103,7 @@ inline void
 _streamPut(Iter<TContainer, TSpec> & target,
            TChar character)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     if (atEnd(target))
     {
@@ -115,6 +120,7 @@ template <typename TContainer, typename TSpec>
 inline typename Position<Iter<TContainer, TSpec> >::Type
 _streamTellG(Iter<TContainer, TSpec> & me)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     return position(me);
 }
@@ -125,6 +131,7 @@ template <typename TContainer, typename TSpec>
 inline typename Position<Iter<TContainer, TSpec> >::Type
 _streamTellP(Iter<TContainer, TSpec> & me)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     return position(me);
 }
@@ -136,6 +143,7 @@ inline void
 _streamSeekG(Iter<TContainer, TSpec> & me,
      typename Position<Iter<TContainer, TSpec> >::Type pos)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     me = begin(container(me)) + pos;
 }
@@ -147,6 +155,7 @@ inline void
 _streamSeekP(Iter<TContainer, TSpec> & me,
      typename Position<Iter<TContainer, TSpec> >::Type pos)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     me = begin(container(me)) + pos;
 }
@@ -158,6 +167,7 @@ inline void
 _streamSeek2G(Iter<TContainer, TSpec> & me,
      int off)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
     me = begin(container(me)) + (position(me) + off);
 }

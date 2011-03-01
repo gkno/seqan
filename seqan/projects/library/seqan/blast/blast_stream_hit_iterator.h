@@ -422,6 +422,7 @@ inline void
 _getNextHitFilePos(TFile & file,
 				  Iter<BlastReport<TBlastHsp, StreamReport<TFile> >, StreamBlastIterator<HitIterator> >& it)
 {
+//IOREV _todo_
 	typedef typename Position<TFile>::Type TPosition;
 
 	_streamSeekG(file,it.data_pos);

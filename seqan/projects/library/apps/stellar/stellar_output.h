@@ -114,6 +114,7 @@ _writeMatchGff(TId const & databaseID,
               TRow const & row0,
               TRow const & row1,
               TFile & file) {
+//IOREV _todo_
 SEQAN_CHECKPOINT    
     for (typename Position<TId>::Type i = 0; i < length(databaseID) && value(databaseID, i) > 32; ++i) {
         file << value(databaseID, i);
@@ -167,6 +168,7 @@ _writeMatch(TId const & databaseID,
             TRow const & row0,
             TRow const & row1,
             TFile & file) {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	// write database ID
 	file << "Database sequence: " << databaseID;

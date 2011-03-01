@@ -71,6 +71,7 @@ read(samfile_t * file,
      FragmentStore<TSpec, TConfig> & fragStore,
      Bam const &)
 {
+//IOREV _todo_
     typedef Value<FILE>::Type TValue;
     typedef FragmentStore<TSpec, TConfig> TFragmentStore;
     typedef typename TFragmentStore::TContigPos TContigPos;
@@ -106,6 +107,7 @@ _readAlignments(
         TMatchMateInfos & matchMateInfos,
         Bam const &)
 {
+//IOREV _todo_
     // create dummy entries in Sam specific aligned read quality store and aligned read tag store
     // is needed so the ID in the aligned store can be use to access the other stores
     // even if there exists previous entries without
@@ -151,6 +153,7 @@ _readOneAlignment (
 		Bam const &,
 		TContextBAM & contextBam)
 {
+//IOREV _todo_
     // Basic types
     typedef FragmentStore<TSpec, TConfig>										TFragmentStore;
     typedef typename Id<TFragmentStore>::Type									TId;
@@ -368,6 +371,7 @@ write(char const * fileName,
      FragmentStore<TSpec, TConfig> & fragStore,
      Bam const &)
 {
+//IOREV _todo_
     // -----------------------------------------------------------------------
     // Initialize Header.
     // -----------------------------------------------------------------------
@@ -409,6 +413,7 @@ inline void _writeAlignments(samfile_t * /*samfile*/,
                              FragmentStore<TSpec, TConfig> & store,
                              Bam const &)
 {
+//IOREV _todo_
     typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
     typedef typename TFragmentStore::TReadStore						TReadStore;

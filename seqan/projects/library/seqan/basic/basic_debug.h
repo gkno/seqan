@@ -129,6 +129,7 @@
 inline bool 
 _compareBinaryFiles(const char * file1, const char * file2)
 {
+//IOREV _todo_
 	bool ret = false;
 
 	FILE * fl1 = fopen(file1, "rb");
@@ -163,6 +164,7 @@ End:
 inline void 
 _compareTextFilesReadChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
 {
+//IOREV _todo_
 	num_lb = 0;
 	is_eof = false;
 
@@ -195,6 +197,7 @@ _compareTextFilesReadChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
 inline bool 
 _compareTextFiles(const char * file1, const char * file2)
 {
+//IOREV _todo_
 	FILE * fl1 = fopen(file1, "rb");
 	if (!fl1) return false;
 

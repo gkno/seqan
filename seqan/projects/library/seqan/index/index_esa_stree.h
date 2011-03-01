@@ -1907,6 +1907,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	template < typename TSize >
 	inline bool _isRoot(VertexEsa<TSize> const &value) 
 	{
+//IOREV _todo_
 		return _isSizeInval(value.range.i2);
 	}
 
@@ -2163,6 +2164,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	template < typename TSize >
 	inline bool _isLeaf(VertexEsa<TSize> const &vDesc)
 	{
+//IOREV _todo_
 		// is this a leaf?
 		return vDesc.range.i1 + 1 >= vDesc.range.i2;
 	}
@@ -2173,6 +2175,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		Iter<TIndex, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
+//IOREV _todo_
 		return _isLeaf(value(it));
 	}
 
@@ -2182,6 +2185,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		Iter<TIndex, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
+//IOREV _todo_
 		typedef typename Infix< typename Fibre<TIndex, EsaSA>::Type const >::Type TOccs;
 		typedef typename Iterator<TOccs, Standard>::Type TIter;
 
@@ -2218,6 +2222,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	template < typename TSize, typename TIndex >
 	inline bool _isNextl(TSize i, TIndex const &index) 
 	{
+//IOREV _todo_
 		if (i >= length(index)) return false;
 		TSize j = childAt(i, index);
 		return (j > i) && lcpAt(j - 1, index) == lcpAt(i - 1, index);
@@ -2226,6 +2231,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	template < typename TSize, typename TIndex >
 	inline bool _isUp(TSize i, TIndex const &index) 
 	{
+//IOREV _todo_
 		if (i >= length(index)) return false;
 		TSize j = childAt(i, index);
 		return (j <= i) && lcpAt(j - 1, index) > lcpAt(i - 1, index);

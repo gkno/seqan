@@ -707,6 +707,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
@@ -836,6 +837,7 @@ write(TFile & file,
 	  TNames const& names,
 	  FastaFormat) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename Size<TGraph>::Type TSize;
@@ -872,6 +874,7 @@ write(TFile & file,
 	  TNames const& names,
 	  MsfFormat) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename Size<TGraph>::Type TSize;
@@ -936,6 +939,7 @@ _writeCargo(TFile & file,
 			 Graph<Alignment<TStringSet, void, TSpec> > const&,
 			 TEdge const&)
 {
+//IOREV _todo_
 	_streamPutInt(file, 0);
 }
 
@@ -946,6 +950,7 @@ _writeCargo(TFile & file,
 			 Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 			 TEdge const& edge)
 {
+//IOREV _todo_
 	_streamPutInt(file, getCargo(edge));
 }
 
@@ -959,6 +964,7 @@ write(TFile & file,
 	  TNames const& names,
 	  CgVizFormat) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;

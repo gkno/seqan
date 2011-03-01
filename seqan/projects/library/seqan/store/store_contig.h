@@ -176,6 +176,7 @@ ContigStoreElement<TContigSeq_, TGapAnchor_, TSpec_>::INVALID_ID = MaxValue<type
 template <typename TSpec_ = void>
 struct ContigFile
 {
+//IOREV _todo_
 	typedef typename Id<ContigFile>::Type	TId;
 
 	static const TId INVALID_ID;

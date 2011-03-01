@@ -302,6 +302,7 @@ _findHorspool(Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> 
 			  Pattern<TNeedle2, Horspool> & me,
 			  bool find_first)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> >, TFinderSpec > TFinder;
 	typedef typename Haystack<TFinder>::Type THaystack;

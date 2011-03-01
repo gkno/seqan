@@ -226,11 +226,12 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 	// generic block based asynchronous read handler
     struct ReadFileSpec_;
-	typedef Tag<ReadFileSpec_> ReadFileSpec;
+	typedef Tag<ReadFileSpec_> ReadFileSpec; //IOREV _todo_
 
     template < typename TPool >
     struct BufferHandler< TPool, ReadFileSpec >
     {
+//IOREV _todo_
 		typedef TPool								Pool;
         typedef typename TPool::Type                Type;
         typedef typename TPool::File                File;
@@ -344,11 +345,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// generic block based asynchronous write handler
     struct WriteFileSpec_;
-	typedef Tag<WriteFileSpec_> WriteFileSpec;
+	typedef Tag<WriteFileSpec_> WriteFileSpec; //IOREV _todo_
 
     template < typename TPool >
     struct BufferHandler< TPool, WriteFileSpec >
     {
+//IOREV _todo_
 		typedef TPool								Pool;
         typedef typename TPool::Type                Type;
         typedef typename TPool::File                File;

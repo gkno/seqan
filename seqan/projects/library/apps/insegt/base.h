@@ -32,6 +32,7 @@ template<typename TFile, typename TChar>
 inline bool
 _parse_skipWord(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if (!_parseIsLetter(c)) return false;
 	
 	while (!_streamEOF(file)) {
@@ -51,6 +52,7 @@ inline void
 _streamPutDouble(TStream & target,
 			  double number)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	char str[BitsPerValue<double>::VALUE];
 	sprintf(str, "%f", number);

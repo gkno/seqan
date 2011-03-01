@@ -330,6 +330,7 @@ getCigarString(
     inline void
     _parseReadCigar(TFile & file, TCigarString & cigar, TChar & c)
     {
+//IOREV _todo_
 		typedef typename Value<TCigarString>::Type	TCigarElement;
 		typedef typename TCigarElement::TOperation	TOperation;
 		typedef typename TCigarElement::TCount		TCount;
@@ -362,6 +363,7 @@ getCigarString(
     inline void
     _parseReadSamIdentifier(TFile & file, TString & str, TChar& c)
     {
+//IOREV _todo_
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
         while (!_streamEOF(file)) 
@@ -379,6 +381,7 @@ getCigarString(
     inline bool
     _parseIsDna(TChar const & c)
     {
+//IOREV _todo_
         char x = TChar(Dna5(c));
         return (c == x) || (c + 'A' - 'a' == x);
     }
@@ -390,6 +393,7 @@ getCigarString(
     inline void
     _parseReadDnaSeq(TFile & file, TString & str, TChar & c)
     {
+//IOREV _todo_
 		TChar first = c;
 		if (!_streamEOF(file)) 
 			c = _streamGet(file);
@@ -409,6 +413,7 @@ getCigarString(
     inline bool
     _parseIsPhredQual(TChar c)
     {
+//IOREV _todo_
         return c >= '!' && c <= '~';
     }
     
@@ -420,6 +425,7 @@ getCigarString(
     inline void
     _parseReadSeqQual(TFile & file, TQualString & str, TChar & c)
     {
+//IOREV _todo_
         typedef typename Size<TQualString>::Type				TSize;
         typedef typename Iterator<TQualString, Standard>::Type	TIter;
         
@@ -453,6 +459,7 @@ getCigarString(
     inline void
     _parseReadCharsUntilEndOfLine(TFile & file, String<char> & str, TChar& c)
     {
+//IOREV _todo_
         // read all chars till '\n'
         while (c != '\n')
         {
@@ -594,6 +601,7 @@ getCigarString(
 		FragmentStore<TSpec, TConfig> & fragStore,
 		Sam)
     {
+//IOREV _todo_
         typedef Value<FILE>::Type TValue;
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 		typedef typename TFragmentStore::TContigPos TContigPos;
@@ -636,6 +644,7 @@ getCigarString(
 		TChar & c,
 		Sam)
     {
+//IOREV _todo_
         // skip header for now
         while (c == '@')
             _parseSkipLine(file, c);
@@ -656,6 +665,7 @@ getCigarString(
         TChar & c,
         Sam)
     {
+//IOREV _todo_
         // create dummy entries in Sam specific aligned read quality store and aligned read tag store
         // is needed so the ID in the aligned store can be use to access the other stores
         // even if there exists previous entries without
@@ -700,6 +710,7 @@ getCigarString(
 		Sam,
 		TContextSAM & contextSAM)
     {
+//IOREV _todo_
         // Basic types
         typedef FragmentStore<TSpec, TConfig>										TFragmentStore;
         typedef typename Id<TFragmentStore>::Type									TId;
@@ -870,6 +881,7 @@ getCigarString(
                                  FragmentStore<TSpec, TConfig> & store,
                                  Sam)
     {
+//IOREV _todo_
 		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 		typedef typename TFragmentStore::TLibraryStore					TLibraryStore;
 		typedef typename TFragmentStore::TContigStore					TContigStore;
@@ -925,6 +937,7 @@ getCigarString(
                                  FragmentStore<TSpec, TConfig> & store,
                                  Sam)
     {
+//IOREV _todo_
 		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
 		typedef typename TFragmentStore::TReadStore						TReadStore;
@@ -1121,6 +1134,7 @@ getCigarString(
                       FragmentStore<TSpec, TConfig> & store,
                       Sam)
     {
+//IOREV _todo_
         // write header
 		_writeHeader(target, store, Sam());
         

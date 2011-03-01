@@ -48,11 +48,13 @@ class ProfileType;
 template<typename TValue, typename TCount, typename TSpec>
 struct ValueSize<ProfileType<TValue, TCount, TSpec> >
 {
+//IOREV _todo_
 	enum { VALUE = ValueSize<TValue>::VALUE + 1};
 };
 
 template<typename TValue, typename TCount, typename TSpec>
 class ProfileType {
+//IOREV _todo_
 	public:
 		typedef typename Size<ProfileType>::Type TSize;
 

@@ -128,6 +128,7 @@ read(TFile & file,
 	 FragmentStore<TSpec, TConfig>& fragStore,
 	 Amos) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	// Basic types
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -547,6 +548,7 @@ write(TFile & target,
 	  FragmentStore<TSpec, TConfig>& fragStore,
 	  Amos) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	// Basic types
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -821,6 +823,7 @@ write(TFile & target,
 template <typename TStream, typename TFSSpec, typename TFSConfig, typename TFormat>
 bool writeContigs(TStream & file, FragmentStore<TFSSpec, TFSConfig> & store, TFormat const &)
 {
+//IOREV _todo_
 	for (unsigned i = 0; i < length(store.contigNameStore); ++i)
 		write(file, store.contigStore[i].seq, store.contigNameStore[i], TFormat());
 	return true;

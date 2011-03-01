@@ -56,6 +56,7 @@ template<typename TFile, typename TChar>
 inline void 
 _parseSkipLine(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if (c == '\n') {
 		c = _streamGet(file);
 		return;
@@ -73,6 +74,7 @@ template<typename TFile, typename TChar>
 inline void 
 _parseSkipWhitespace(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if ((unsigned) c > 32) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -84,6 +86,7 @@ template<typename TFile, typename TChar>
 inline void 
 _parseSkipSpace(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if (c != '\t' && c != ' ') return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -105,6 +108,7 @@ template<typename TFile, typename TChar>
 inline void 
 _parseSkipUntilChar(TFile& file, const TChar &x, TChar& c)
 {
+//IOREV _todo_
 	if (c == x) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -118,6 +122,7 @@ template<typename TChar>
 inline bool
 _parseIsDigit(TChar const c)
 {
+//IOREV _todo_
 	return (((unsigned) c >  47) && ((unsigned) c <  58));
 }
 
@@ -127,6 +132,7 @@ template<typename TChar>
 inline bool
 _parseIsLetter(TChar const c)
 {
+//IOREV _todo_
 	return ( (((unsigned) c > 64) && ((unsigned) c < 91)) || (((unsigned) c > 96) && ((unsigned) c < 123)) );
 }
 
@@ -137,6 +143,7 @@ template<typename TChar>
 inline bool
 _parseIsAlphanumericChar(TChar const c)
 {
+//IOREV _todo_
 	return ((_parseIsDigit(c)) || (_parseIsLetter(c)) || (c == '_') || (c == '.') || (c == '-') || (c == '|') || (c == '/') || (c == ':'));
 }
 
@@ -146,6 +153,7 @@ template<typename TFile, typename TChar>
 inline int
 _parseReadNumber(TFile & file, TChar& c)
 {
+//IOREV _todo_
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -162,6 +170,7 @@ template<typename TFile, typename TChar>
 inline double
 _parseReadDouble(TFile & file, TChar& c)
 {
+//IOREV _todo_
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -178,6 +187,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _parseReadIdentifier(TFile & file, TChar& c)
 {
+//IOREV _todo_
 	// Read identifier
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -194,6 +204,7 @@ template<typename TFile, typename TChar>
 inline char
 _parseReadChar(TFile & file, TChar& c)
 {
+//IOREV _todo_
     char result = c;
     if (!_streamEOF(file))
         c = _streamGet(file);
@@ -206,6 +217,7 @@ template<typename TFile, typename TString, typename TChar>
 inline void
 _parseReadIdentifier(TFile & file, TString& str, TChar& c)
 {
+//IOREV _todo_
 	// Read identifier
 	append(str, c, Generous());
 	while (!_streamEOF(file)) {
@@ -221,6 +233,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _parseReadWord(TFile & file, TChar& c)
 {
+//IOREV _todo_
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -237,6 +250,7 @@ template<typename TFile, typename TChar, typename TSize>
 inline String<char>
 _parseReadWord(TFile & file, TChar& c, TSize max_len)
 {
+//IOREV _todo_
 	// Read word
 	String<char> str(c);
 	--max_len;
@@ -258,6 +272,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _parseReadFilepath(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	String<char> str(c);
 	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
 		c = _streamGet(file);
@@ -286,6 +301,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _parseReadWordUntilWhitespace(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	String<char> str(c);
 	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
 		c = _streamGet(file);
@@ -308,6 +324,7 @@ _parseReadSequenceData(TFile & file,
 						TChar & c,
 						TString& str)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 
 	append(str, c);
@@ -326,6 +343,7 @@ template<typename TFile, typename TChar>
 inline void 
 _parseSkipBlanks(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if ((c != ' ') && (c != '\t')) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -337,6 +355,7 @@ template<typename TFile, typename TChar>
 inline void 
 _parseSkipLine2(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if (c != '\n' && c != '\r')
 		while (!_streamEOF(file)) {
 			c = _streamGet(file);
@@ -353,6 +372,7 @@ template<typename TFile, typename TChar>
 inline double
 _parseReadEValue(TFile & file, TChar& c)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 
 	// Read number
@@ -388,6 +408,7 @@ template<typename TFile, typename TChar>
 inline float
 _parseReadFloat(TFile & file, TChar& c)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	// Read number
 	String<char> str(c);
@@ -409,6 +430,7 @@ template<typename TFile, typename TChar>
 inline bool
 _parseUntilBeginLine(TFile & file, TChar& c, TChar x)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
@@ -431,6 +453,7 @@ template<typename TFile, typename TChar, typename TSize>
 inline bool
 _parseUntilBeginLine(TFile & file, TChar& c, String<TChar> & word, TSize len)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
@@ -456,6 +479,7 @@ template<typename TFile, typename TChar, typename TSize>
 inline bool
 _parseUntilBeginLine(TFile & file, TChar& c, String<TChar> & word, TSize len, TSize num_lines)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
@@ -489,6 +513,7 @@ template<typename TFile, typename TChar, typename TSize>
 inline bool
 _parseUntilBeginLineOneOf(TFile & file, TChar& c, String<TChar> & x, TSize len)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
@@ -519,6 +544,7 @@ template<typename TFile, typename TChar>
 inline bool
 _parseUntil(TFile & file, TChar& c, TChar x)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
@@ -540,6 +566,7 @@ template<typename TFile, typename TChar, typename TSize>
 inline bool
 _parseUntil(TFile & file, TChar& c, String<TChar> & word, TSize len)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
@@ -563,6 +590,7 @@ template<typename TFile, typename TChar>
 inline bool
 _parseLineUntil(TFile & file, TChar& c, TChar x)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
@@ -589,6 +617,7 @@ template<typename TFile, typename TChar, typename TSize>
 inline bool
 _parseLineUntil(TFile & file, TChar& c, String<TChar> & word, TSize len)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;

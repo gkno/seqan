@@ -1006,6 +1006,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 	template <typename TValue>
 	inline bool _isSizeInval(TValue const &v) {
+//IOREV _todo_
 		return v == MaxValue<TValue>::VALUE;
 	}
 

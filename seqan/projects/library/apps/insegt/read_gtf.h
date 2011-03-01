@@ -33,6 +33,7 @@ inline void
 readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 		       char const * fileName)
 {
+//IOREV _todo_
 	typedef typename FragmentStore<TSpec, TConfig>::TContigPos 		TContigPos;	
 	typedef typename FragmentStore<TSpec, TConfig>::TAnnotationStore 	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type 				TAnnotationStoreElement;

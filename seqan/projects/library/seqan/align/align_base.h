@@ -466,6 +466,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> const TAlign;
 	typedef typename Row<TAlign>::Type TRow;

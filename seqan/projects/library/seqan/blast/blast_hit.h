@@ -163,6 +163,7 @@ _parseBlastHit(TFile & file,
 			TChar & c, 
 			TBlastHit & hit)
 {
+//IOREV _todo_
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Hsp<TBlastHit>::Type TBlastHsp;
 

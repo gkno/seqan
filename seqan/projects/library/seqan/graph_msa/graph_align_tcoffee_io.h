@@ -111,6 +111,7 @@ read(TFile & file,
 	 TNames const& names,
 	 TCoffeeLib) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef typename Size<TFragment>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
@@ -233,6 +234,7 @@ read(TFile & file,
 	 TNames& names,
 	 TCoffeeLib) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Position<TFile>::Type TPosition;
@@ -269,6 +271,7 @@ void write(TFile & file,
 		   TNames& names,
 		   TCoffeeLib) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -353,6 +356,7 @@ read(TFile & file,
 	 TNames& names,
 	 FastaAlign) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef TSize TWord;
@@ -457,6 +461,7 @@ read(TFile & file,
 	 TNames const& origNames,
 	 FastaAlign) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
@@ -555,6 +560,7 @@ read(TFile & file,
 	 TNames& names,
 	 BlastLib) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
@@ -630,6 +636,7 @@ void write(TFile & file,
 		   TEdgeMap& edgeMap,
 		   BlastLib) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -697,6 +704,7 @@ void write(TFile & file,
 		   TNames& names,
 		   BlastLib) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	String<bool> edgeMap;
 	resize(edgeMap, getIdUpperBound(_getEdgeIdManager(g)), false);
@@ -759,6 +767,7 @@ read(TFile & file,
 	 TNames const& names,
 	 MummerLib) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
@@ -824,6 +833,7 @@ read(TFile & file,
 	 TNames& names,
 	 NewickFormat) 
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGuideTree;
 	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
@@ -1014,6 +1024,7 @@ write(TFile & file,
 	  bool collapseRoot,
 	  NewickFormat) 
 {
+//IOREV _todo_
 	typedef Graph<Tree<TCargo, TSpec> > TGuideTree;
 	typedef typename Size<TGuideTree>::Type TSize;
 	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
@@ -1034,6 +1045,7 @@ write(TFile & file,
 	  TNames& names,
 	  NewickFormat) 
 {
+//IOREV _todo_
 	write(file,guideTree, names, false, NewickFormat());
 }
 

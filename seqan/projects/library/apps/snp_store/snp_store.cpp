@@ -56,6 +56,7 @@ using namespace seqan;
 template<typename TOptions>
 int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, TOptions &options)
 {
+//IOREV _todo_
 	::std::ifstream file;
 	file.open(filename,::std::ios_base::in | ::std::ios_base::binary);
 	if(!file.is_open())
@@ -186,6 +187,7 @@ template<typename TFile, typename TChar, typename TString>
 void
 _parseReadWordUntilWhitespace(TFile& file, TString& str, TChar& c)
 {
+//IOREV _todo_
 	append(str,c);
 	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
 		c = _streamGet(file);
@@ -206,6 +208,7 @@ template<typename TFile, typename TChar>
 void
 _parse_skipUntilWhitespace(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
 		c = _streamGet(file);
 		return;
@@ -672,6 +675,7 @@ int readMatchesFromGFF_Batch(
 							 TValue					&highestChrId,
 							 TOptions				&options)
 {
+//IOREV _todo_
 	
 	
 	typedef typename TFragmentStore::TAlignedReadStore 	TMatches;
@@ -1516,6 +1520,7 @@ int writeLogFile(
 				 String<CharString> & ,
 				 SNPCallingOptions<TSpec> &options)
 {
+//IOREV _todo_
 	
 	::std::ofstream logfile;
 	logfile.open(options.outputLog, ::std::ios_base::out | ::std::ios_base::trunc);

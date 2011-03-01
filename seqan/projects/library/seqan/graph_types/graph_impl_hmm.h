@@ -522,6 +522,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
+//IOREV _todo_
 	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;

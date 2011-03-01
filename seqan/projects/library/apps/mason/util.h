@@ -34,6 +34,7 @@ void write(TStream & stream,
            TIdStringSet & seqIds,
            TSeqStringSet & sequences,
            Fastq const &) {
+//IOREV _todo_
     typedef TSeqStringSet TStringSet;
     typedef typename Position<TStringSet>::Type TPosition;
 
@@ -54,6 +55,7 @@ void write(TStream & stream,
            StringSet<TIdString, TIdStringSpec> & seqIds,
            StringSet<TSeqString, TSeqStringSpec> & sequences,
            Fasta const &) {
+//IOREV _todo_
     typedef StringSet<TSeqString, TSeqStringSpec> TStringSet;
     typedef typename Position<TStringSet>::Type TPosition;
 
