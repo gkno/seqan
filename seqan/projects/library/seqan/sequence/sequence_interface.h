@@ -1667,8 +1667,8 @@ template <typename T>
 inline void eraseBack(T & me)
 {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GT_MSG(length(me), 0u, "Must erase more than 0 characters in eraseBack()!");
-    erase(me, length(me) - 1);
+    SEQAN_ASSERT_GT_MSG(length(me), 0u, "String must have more than 0 characters in eraseBack()!");
+	resize(me, length(me) - 1);
 }
 
 // --------------------------------------------------------------------------
