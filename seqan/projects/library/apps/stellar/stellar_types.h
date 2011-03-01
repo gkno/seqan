@@ -82,8 +82,11 @@ struct StellarOptions {
 // Container for storing local alignment matches of one query sequence
 template<typename TMatch_>
 struct QueryMatches {
+	typedef typename Size<typename Source<TMatch_>::Type>::Type TSize;
+
 	String<TMatch_> matches;
 	bool disabled;
+	TSize lengthAdjustment;
 
 	QueryMatches() {
 		disabled = false;
@@ -98,7 +101,7 @@ struct StellarMatch {
 	typedef TId_								TId;
 	typedef typename Position<TSequence>::Type	TPos;
 
-	typedef Align<TSequence>					TAlign;
+	typedef Align<TSequence, ArrayGaps>			TAlign;
 	typedef typename Row<TAlign>::Type			TRow;
 
 	static const TId INVALID_ID;
