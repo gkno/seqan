@@ -105,6 +105,10 @@ public:
 		store(&_store),
 		id(0) {}
 
+	Iter(TFragmentStore &_store, TId startInNode):
+		store(&_store),
+		id(startInNode) {}
+
 	Iter(TFragmentStore &_store, MinimalCtor):
 		store(&_store),
 		id(TAnnotation::INVALID_ID) {}
@@ -285,6 +289,13 @@ goEnd(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 
 	it.id = TAnnotation::INVALID_ID;
+}
+
+template <typename TFragmentStore, typename TSpec, typename TId>
+inline void
+goTo(Iter<TFragmentStore, AnnotationTree<TSpec> > & it, TId id)
+{
+	it.id = id;
 }
 
 template <typename TFragmentStore, typename TSpec>
