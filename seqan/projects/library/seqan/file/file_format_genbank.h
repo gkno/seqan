@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagGenbank_;
-typedef Tag<TagGenbank_> const Genbank;
+typedef Tag<TagGenbank_> const Genbank; //IOREV _todo_
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -57,6 +57,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it, bool skip_meta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	String<char> line;
 

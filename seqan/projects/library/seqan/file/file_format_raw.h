@@ -48,7 +48,7 @@ that is the file cannot store multiple records.
 */
 
 struct TagRaw_;
-typedef Tag<TagRaw_> const Raw;
+typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 
 
 
@@ -64,6 +64,7 @@ struct ReadRaw_;
 template <typename TFile, typename TData>
 struct ReadRaw_<TFile, TData, True>
 {
+//IOREV _todo_
 	template <typename TSize>
 	inline static void
 	read_(TFile & file,

@@ -60,7 +60,7 @@ struct Rows;
 ..include:seqan/file.h
 */
 struct FastaAlign_;
-typedef Tag<FastaAlign_> FastaAlign;
+typedef Tag<FastaAlign_> FastaAlign; //IOREV _todo_
 
 // ===========================================================================
 // Metafunctions
@@ -72,6 +72,7 @@ typedef Tag<FastaAlign_> FastaAlign;
 
 template <typename TFile, typename TSize>
 void _fastaAlignScanLine(TFile & file, TSize & count) {
+//IOREV _todo_
 
 	SEQAN_CHECKPOINT;
 	SEQAN_ASSERT(!_streamEOF(file))

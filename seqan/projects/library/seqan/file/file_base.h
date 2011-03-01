@@ -124,6 +124,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	struct Striped;
 
     enum FileOpenMode {
+//IOREV _todo_
         OPEN_RDONLY     = 1,
         OPEN_WRONLY     = 2,
         OPEN_RDWR       = 3,

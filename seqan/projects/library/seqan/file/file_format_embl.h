@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagEmbl_;
-typedef Tag<TagEmbl_> const Embl;
+typedef Tag<TagEmbl_> const Embl; //IOREV _todo_
 
 
 
@@ -57,6 +57,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it, bool skip_meta)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	if (skip_meta)
 	{

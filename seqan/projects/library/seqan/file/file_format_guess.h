@@ -63,6 +63,7 @@ inline FileFormat<TFile, TData, TMeta, void>
 guessFileFormat(TFile & file,
 				TData & data)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type old_pos = _streamTellG(file);
 	typename Value<TFile>::Type c;

@@ -50,6 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		PageFrame<TValue, File< Striped<FILE_COUNT, TFile> >, TSpec> &pf, 
 		File< Striped<FILE_COUNT, TFile> > &file)
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
@@ -72,6 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		int pageNo, 
 		File< Striped<FILE_COUNT, TFile> > &file)
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
@@ -94,6 +96,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		File< Striped<FILE_COUNT, TFile> > &file,
 		TSize size)
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
@@ -116,6 +119,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		File< Striped<FILE_COUNT, TFile> > &file,
 		TSize size)
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
@@ -144,6 +148,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned dataSize, 
 		File< Striped<FILE_COUNT, TFile> > &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
         unsigned readSize = _min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
@@ -168,6 +173,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned pageSize, 
 		File< Striped<FILE_COUNT, TFile> > &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << b.begin;
@@ -189,6 +195,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned &pageOfs, 
 		File< Striped<FILE_COUNT, TFile> > &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << pf.begin;

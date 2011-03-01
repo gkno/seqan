@@ -60,14 +60,15 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// define memory mapped stringset
-	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiFasta;	//deprecated (use MultiSeqFile instead)
-	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiSeqFile;
+	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiFasta;	//deprecated (use MultiSeqFile instead) //IOREV _todo_
+	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiSeqFile; //IOREV _todo_
 
 
 	template <typename TValue>
 	inline bool
 	_isLineBreak(TValue value)
 	{
+//IOREV _todo_
 		return (value == '\n' || value == '\r');
 	}
 
@@ -75,6 +76,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	_seekLineBreak(TIterator &it, TIterator itEnd)
 	{
+//IOREV _todo_
 		while (!_isLineBreak(*it))
 			if (++it == itEnd) return false;
 		return true;
@@ -84,6 +86,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	_seekNonLineBreak(TIterator &it, TIterator itEnd)
 	{
+//IOREV _todo_
 		if (*it == '\n')
 		{
 			if (++it == itEnd) return false;
@@ -104,6 +107,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	_isWhiteSpace(TValue value)
 	{
+//IOREV _todo_
 		return (value == ' ' || value == '\t' || value == '\r' || value == '\n');
 	}
 
@@ -112,6 +116,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	_seekWhiteSpace(TIterator &it, TIterator itEnd)
 	{
+//IOREV _todo_
 		while (!_isWhiteSpace(*it))
 			if (++it == itEnd) return false;
 		return true;
@@ -121,6 +126,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	_seekTab(TIterator& it, TIterator itEnd)
 	{
+//IOREV _todo_
 		for (; it != itEnd; ++it)
 			if (*it == '\t') return true;
 		return false;
@@ -153,6 +159,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSeq const & seq,
 		Fasta)
 	{
+//IOREV _todo_
 		return seq[0] == '>';
 	}
 	
@@ -177,6 +184,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TFilename const & fname,
 		Fasta)
 	{
+//IOREV _todo_
 		typedef typename Value<TFilename>::Type									TValue;
 		typedef ModifiedString<TFilename, ModView<FunctorLowcase<TValue> > >	TLowcase;
 		
@@ -228,6 +236,7 @@ After calling this function, the StringSet length is the number of sequence frag
 		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
 		Fasta)
 	{
+//IOREV _todo_
 		typedef String<TValue, MMap<TConfig> >						TString;
 		typedef StringSet<TString, ConcatDirect<TDelimiter> >		TStringSet;
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
@@ -274,6 +283,7 @@ this function can be used to extract the sequence of every fragment in the Strin
 		TFastaSeq const & fasta,
 		Fasta)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 		typedef typename Iterator<TSeq, Standard>::Type				TDstIterator;
 
@@ -327,6 +337,7 @@ this function can be used to extract the sequence id of every fragment in the St
 		TFastaSeq const & fasta,
 		Fasta)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 
 		TIterator itBeg = begin(fasta, Standard());
@@ -369,6 +380,7 @@ this function can be used to extract the sequence id up to the first whitespace 
 		TFastaSeq const & fasta,
 		Fasta)
 	{
+//IOREV _todo_
 		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
 
 		TIterator itBeg = begin(fasta, Standard());
@@ -410,6 +422,7 @@ this function can be used to extract the sequence quality values of every fragme
 		TFastaSeq const &,
 		Fasta)
 	{
+//IOREV _todo_
 		clear(dst);
 	}
 	
@@ -438,6 +451,7 @@ this function can be used to extract the quality value id of every fragment in t
 		TFastaSeq const &,
 		Fasta)
 	{
+//IOREV _todo_
 		clear(dst);
 	}
 
@@ -451,7 +465,7 @@ this function can be used to extract the quality value id of every fragment in t
 ..include:seqan/file.h
 */
 struct TagFastq_;
-typedef Tag<TagFastq_> const Fastq;
+typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 
 	// test for Fastq format
 	template < typename TSeq >
@@ -460,6 +474,7 @@ typedef Tag<TagFastq_> const Fastq;
 		TSeq const & seq,
 		Fastq)
 	{
+//IOREV _todo_
 		return seq[0] == '@';
 	}
 	
@@ -683,7 +698,7 @@ typedef Tag<TagFastq_> const Fastq;
 ..include:seqan/file.h
 */
 	struct QSeq_;
-	typedef Tag<QSeq_> const QSeq;
+	typedef Tag<QSeq_> const QSeq; //IOREV _todo_
 
 	// FIXME The following enum is more or less arbitrary since the information
 	// in a QSeq file may differ depending on where they come from. Not sure if
@@ -913,7 +928,7 @@ typedef Tag<TagFastq_> const Fastq;
 ..include:seqan/file.h
 */
 struct TagRaw_;
-typedef Tag<TagRaw_> const Raw;
+typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 
 	// test for Fastq format
 	template < typename TSeq >
@@ -1066,8 +1081,8 @@ typedef Tag<TagRaw_> const Raw;
 		TagList<Fastq,
 		TagList<Fasta,
 		TagList<QSeq,
-		TagList<Raw> > > > 						SeqFormats;
-	typedef TagSelector<SeqFormats>				AutoSeqFormat;
+		TagList<Raw> > > > 						SeqFormats; //IOREV _todo_
+	typedef TagSelector<SeqFormats>				AutoSeqFormat; //IOREV _todo_
 
 //____________________________________________________________________________
 // guess file format

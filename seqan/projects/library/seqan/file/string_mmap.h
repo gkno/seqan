@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TFile_ = File<>,				// default file type
                typename TSize_ = size_t >				// size type
     struct MMapConfig {
+//IOREV _todo_
         typedef TFile_ TFile;
         typedef TSize_ TSize;
     };
@@ -79,6 +80,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 #ifdef PLATFORM_WINDOWS
 
 		enum MMapAdviseScheme {
+//IOREV _todo_
 			MMAP_NORMAL = 0,
 			MMAP_RANDOM = 0,
 			MMAP_SEQUENTIAL = 0,
@@ -206,6 +208,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 	begin(String<TValue, MMap<TConfig> > & me,
 		Standard)
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		return me.data_begin;
 	}
@@ -214,6 +217,7 @@ SEQAN_CHECKPOINT
 	begin(String<TValue, MMap<TConfig> > const & me,
 		Standard)
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		return me.data_begin;
 	}
@@ -225,6 +229,7 @@ SEQAN_CHECKPOINT
 	end(String<TValue, MMap<TConfig> > & me,
 		Standard)
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		return me.data_end;
 	}
@@ -233,6 +238,7 @@ SEQAN_CHECKPOINT
 	end(String<TValue, MMap<TConfig> > const & me,
 		Standard)
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		return me.data_end;
 	}
@@ -243,6 +249,7 @@ SEQAN_CHECKPOINT
 	inline typename Size<String<TValue, MMap<TConfig> > >::Type
 	capacity(String<TValue, MMap<TConfig> > & me) 
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		return me.data_capacity;
 	}
@@ -251,6 +258,7 @@ SEQAN_CHECKPOINT
 	inline typename Size<String<TValue, MMap<TConfig> > >::Type
 	capacity(String<TValue, MMap<TConfig> > const & me) 
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		return me.data_capacity;
 	}
@@ -263,6 +271,7 @@ SEQAN_CHECKPOINT
 		String<TValue, MMap<TConfig> > & me, 
 		size_t new_length)
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		me.data_end = me.data_begin + new_length;
 	}
@@ -275,6 +284,7 @@ SEQAN_CHECKPOINT
 		String<TValue, MMap<TConfig> > & me, 
 		size_t new_capacity)
 	{
+//IOREV _todo_
 SEQAN_CHECKPOINT
 		me.data_capacity = new_capacity;
 	}
@@ -333,6 +343,7 @@ SEQAN_CHECKPOINT
 	inline void 
 	waitForAll(String<TValue, MMap<TConfig> > &)
 	{
+//IOREV _todo_
 	}
 	
 #ifdef PLATFORM_WINDOWS
@@ -347,6 +358,7 @@ SEQAN_CHECKPOINT
 	inline int
 	mmapAdvise(String<TValue, MMap<TConfig> > &/*me*/, TScheme const & /*scheme*/, TBeginPos const &, TEndPos const &)
 	{
+//IOREV _todo_
 		return 0;
 	}
 		
@@ -354,6 +366,7 @@ SEQAN_CHECKPOINT
     inline void 
 	flush(String<TValue, MMap<TConfig> > &) 
 	{
+//IOREV _todo_
     }
 
 	// cancel all transactions
@@ -361,6 +374,7 @@ SEQAN_CHECKPOINT
 	inline void 
 	cancel(String<TValue, MMap<TConfig> > &)
 	{
+//IOREV _todo_
 	}
 
 	// flush and free all allocated pages
@@ -368,6 +382,7 @@ SEQAN_CHECKPOINT
 	inline int
 	flushAndFree(String<TValue, MMap<TConfig> > &)
 	{
+//IOREV _todo_
 		return 0;
 	}
 //____________________________________________________________________________
@@ -376,6 +391,7 @@ SEQAN_CHECKPOINT
     inline bool 
     _map(String<TValue, MMap<TConfig> > &me, size_t new_capacity) 
 	{
+//IOREV _todo_
 		if (new_capacity > 0) 
 		{
 			resize(me.file, new_capacity * sizeof(TValue));
@@ -422,6 +438,7 @@ SEQAN_CHECKPOINT
     inline bool 
     _unmap(String<TValue, MMap<TConfig> > &me) 
 	{
+//IOREV _todo_
 		bool result = true;
 		if (me.data_begin) 
 		{
@@ -453,6 +470,7 @@ SEQAN_CHECKPOINT
     inline bool 
     _remap(String<TValue, MMap<TConfig> > &me, TCapSize new_capacity) 
 	{
+//IOREV _todo_
 		typedef typename Size< String<TValue, MMap<TConfig> > >::Type TSize;
 
 		if (me.data_begin) 
@@ -519,6 +537,7 @@ SEQAN_CHECKPOINT
 	inline int
 	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme const & scheme, TBeginPos const & beginPos, TEndPos const & endPos)
 	{
+//IOREV _todo_
 		me.scheme = scheme;
 //		posix_fadvise(me.file.handle, beginPos * sizeof(TValue), (endPos - beginPos) * sizeof(TValue), scheme);
 		if (scheme == MMAP_DONTNEED)
@@ -530,6 +549,7 @@ SEQAN_CHECKPOINT
     inline void 
 	flush(String<TValue, MMap<TConfig> > &me) 
 	{
+//IOREV _todo_
 		msync(me.data_begin, length(me) * sizeof(TValue), MS_SYNC);
     }
 
@@ -538,6 +558,7 @@ SEQAN_CHECKPOINT
 	inline void 
 	cancel(String<TValue, MMap<TConfig> > &me)
 	{
+//IOREV _todo_
 		msync(me.data_begin, capacity(me) * sizeof(TValue), MS_INVALIDATE);
 	}
 
@@ -546,6 +567,7 @@ SEQAN_CHECKPOINT
 	inline int
 	flushAndFree(String<TValue, MMap<TConfig> > &me)
 	{
+//IOREV _todo_
 		return posix_madvise(me.data_begin, capacity(me) * sizeof(TValue), MADV_DONTNEED);
 	}
 	
@@ -555,6 +577,7 @@ SEQAN_CHECKPOINT
     inline bool 
     _map(String<TValue, MMap<TConfig> > &me, size_t new_capacity) 
 	{
+//IOREV _todo_
 		if (new_capacity > 0) 
 		{
 			_ensureFileIsOpen(me);
@@ -584,6 +607,7 @@ SEQAN_CHECKPOINT
     inline bool 
     _unmap(String<TValue, MMap<TConfig> > &me) 
 	{
+//IOREV _todo_
 		if (me.data_begin) 
 		{
 			int error = munmap(me.data_begin, capacity(me) * sizeof(TValue));
@@ -607,6 +631,7 @@ SEQAN_CHECKPOINT
     inline bool 
     _remap(String<TValue, MMap<TConfig> > &me, TCapSize new_capacity) 
 	{
+//IOREV _todo_
 		typedef typename Size< String<TValue, MMap<TConfig> > >::Type TSize;
 
 		if (me.data_begin)
@@ -660,6 +685,7 @@ SEQAN_CHECKPOINT
     inline void 
     clear(String<TValue, MMap<TConfig> > &me) 
 	{
+//IOREV _todo_
 		cancel(me);
 		_unmap(me);
 		resize(me.file, 0);
@@ -670,6 +696,7 @@ SEQAN_CHECKPOINT
 	inline int
 	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme scheme)
 	{
+//IOREV _todo_
 		return mmapAdvise(me, scheme, 0, capacity(me));
 	}
 		
@@ -679,6 +706,7 @@ SEQAN_CHECKPOINT
     inline typename Value<String<TValue, MMap<TConfig> > >::Type * 
     _allocateStorage(String<TValue, MMap<TConfig> > &me, TSize new_capacity) 
 	{
+//IOREV _todo_
 		TSize size = _computeSizeForCapacity(me, new_capacity);
 		_map(me, size);
 		return NULL;
@@ -690,6 +718,7 @@ SEQAN_CHECKPOINT
 		String<TValue, MMap<TConfig> > &me,
 		TSize new_capacity) 
 	{
+//IOREV _todo_
 		TSize size = _computeSizeForCapacity(me, new_capacity);
 		_remap(me, size);
 		return NULL;
@@ -699,6 +728,7 @@ SEQAN_CHECKPOINT
     inline void
     _deallocateStorage(String<TValue, MMap<TConfig> > &/*me*/, TValue * /*ptr*/, TSize /*capacity*/)
 	{
+//IOREV _todo_
 	}
 //____________________________________________________________________________
 ///.Function.open.param.string.type:Spec.MMap String
@@ -707,6 +737,7 @@ SEQAN_CHECKPOINT
     inline bool 
     open(String<TValue, MMap<TConfig> > &me, const char *fileName, int openMode) 
 	{
+//IOREV _todo_
 		close(me);
 		me._temporary = false;
 				
@@ -723,6 +754,7 @@ SEQAN_CHECKPOINT
     inline bool 
     open(String<TValue, MMap<TConfig> > &me, const char *fileName) 
 	{
+//IOREV _todo_
 		typedef typename String<TValue, MMap<TConfig> >::TFile	TFile;
 		return open(me, fileName, DefaultOpenMode<TFile>::VALUE);
     }
@@ -731,6 +763,7 @@ SEQAN_CHECKPOINT
     inline bool 
     open(String<TValue, MMap<TConfig> > &me, typename TConfig::TFile file) 
 	{
+//IOREV _todo_
 		close(me);
 		me.file = file;
         me._temporary = false;
@@ -751,6 +784,7 @@ SEQAN_CHECKPOINT
     inline bool 
     openTemp(String<TValue, MMap<TConfig> > &me) 
 	{
+//IOREV _todo_
 		close(me);
         me._temporary = true;
 		me._openMode = OPEN_RDWR;
@@ -762,6 +796,7 @@ SEQAN_CHECKPOINT
 	template < typename TValue, typename TConfig >
 	inline void _ensureFileIsOpen(String<TValue, MMap<TConfig> > &me) 
 	{
+//IOREV _todo_
 		if (!me.file)
 		{
 			me._temporary = true;
@@ -776,6 +811,7 @@ SEQAN_CHECKPOINT
 	template < typename TValue, typename TConfig >
     inline bool 
     save(String<TValue, MMap<TConfig> > const &/*me*/, const char * /*fileName*/, int /*openMode*/) {
+//IOREV _todo_
 		// Memory Mapped Strings are persistent, thus there is no need to save them
 		//MMapStringsDontNeedToBeSaved error;
 		return true;
@@ -784,6 +820,7 @@ SEQAN_CHECKPOINT
 	template < typename TValue, typename TConfig >
     inline bool 
     save(String<TValue, MMap<TConfig> > const &/*me*/, const char * /*fileName*/) {
+//IOREV _todo_
 		// Memory Mapped Strings are persistent, thus there is no need to save them
 		//MMapStringsDontNeedToBeSaved error;
 		return true;
@@ -792,6 +829,7 @@ SEQAN_CHECKPOINT
 	template < typename TValue, typename TConfig >
     inline bool 
     save(String<TValue, MMap<TConfig> > const &/*me*/, typename TConfig::TFile /*file*/) {
+//IOREV _todo_
 		// Memory Mapped Strings are persistent, thus there is no need to save them
 		//MMapStringsDontNeedToBeSaved error;
 		return true;
@@ -803,6 +841,7 @@ SEQAN_CHECKPOINT
     inline bool 
     close(String<TValue, MMap<TConfig> > &me) 
 	{
+//IOREV _todo_
 		if (me.file) 
 		{
 			// close associated file

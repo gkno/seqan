@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagFasta_;
-typedef Tag<TagFasta_> const Fasta;
+typedef Tag<TagFasta_> const Fasta; //IOREV _todo_
 
 //////////////////////////////////////////////////////////////////////////////
 // Filereader
@@ -56,6 +56,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it, bool skip_meta)
 {
+//IOREV _todo_
 	if (_streamEOF(host(it)))
 	{
 		it.data_eof = true;

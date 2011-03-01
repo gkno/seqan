@@ -97,6 +97,7 @@ For a larger size type, use @Tag.ExternalConfigLarge@.
                unsigned PAGE_SIZE_ = 4 * 1024 * 1024,	// 1MTypes per default
 			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfig {
+//IOREV _todo_
         typedef TFile_ TFile;
         typedef unsigned TSize;
         enum { PAGE_SIZE = PAGE_SIZE_ };
@@ -133,6 +134,7 @@ you should think of using @Tag.ExternalConfig@.
                unsigned PAGE_SIZE_ = 1 * 1024 * 1024,	// 1MTypes per default
 			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfigLarge {
+//IOREV _todo_
         typedef TFile_ TFile;
         typedef typename Size<TFile_>::Type TSize;
         enum { PAGE_SIZE = PAGE_SIZE_ };
@@ -166,6 +168,7 @@ you should think of using @Tag.ExternalConfig@.
                unsigned PAGE_SIZE_ = 1 * 1024 * 1024,	// 1MTypes per default
 			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfigSize {
+//IOREV _todo_
 		typedef TSize_ TSize;
         typedef TFile_ TFile;
         enum { PAGE_SIZE = PAGE_SIZE_ };
@@ -181,6 +184,7 @@ you should think of using @Tag.ExternalConfig@.
 	template < typename TExtString >
 	struct ExtStringIterator
 	{
+//IOREV _todo_
 		typedef ExtStringIterator						TIterator;
         typedef ExtStringIterator						TStdIterator;
 

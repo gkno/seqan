@@ -56,6 +56,7 @@ struct FileReader;
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 class Iter<TFile, FileReader<TFormat, TFile2, TSpec> >
 {
+//IOREV _todo_
 public:
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Position<TFile>::Type TPosition;
@@ -122,6 +123,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline TFile &
 host(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 	return *(it.data_host);
 }
 
@@ -130,6 +132,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline typename Reference<Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type
 value(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 	return it.data_char;
 }
 
@@ -137,6 +140,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline typename GetValue<Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type
 getValue(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 	return it.data_char;
 }
 
@@ -144,6 +148,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline bool
 atEnd(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
+//IOREV _todo_
 	return it.data_eof;
 }
 

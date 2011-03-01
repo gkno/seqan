@@ -181,12 +181,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	inline bool fileExists(const char *fileName) 
 	{
+//IOREV _todo_
 		struct _stat buf;
 		return _stat(fileName, &buf) == 0;
 	}
 
 	inline bool fileUnlink(const char *fileName) 
 	{
+//IOREV _todo_
 		return _unlink(fileName) == 0;
 	}
 
@@ -368,12 +370,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	inline bool fileExists(const char *fileName)
 	{
+//IOREV _todo_
 		struct stat buf;
 		return stat(fileName, &buf) != -1;
 	}
 
 	inline bool fileUnlink(const char *fileName)
 	{
+//IOREV _todo_
 		return unlink(fileName) == 0;
 	}
 
@@ -408,11 +412,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec, typename TValue, typename TSize >
     inline bool read(File<Sync<TSpec> > & me, TValue *memPtr, TSize const count) {
+//IOREV _todo_
 		return (int) me.read(memPtr, count * sizeof(TValue)) == (int) (count * sizeof(TValue));
     }
     
     template < typename TSpec, typename TValue, typename TSize >
     inline bool write(File<Sync<TSpec> > & me, TValue const *memPtr, TSize const count) {
+//IOREV _todo_
 		return (int) me.write(memPtr, count * sizeof(TValue)) == (int) (count * sizeof(TValue));
     }
 

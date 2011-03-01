@@ -46,6 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue >
 	struct SimpleBuffer 
 	{
+//IOREV _todo_
 		typedef	typename Size<SimpleBuffer>::Type		TSize;
 		typedef	typename Iterator<SimpleBuffer>::Type	TIterator;
 
@@ -97,33 +98,39 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TValue >
     inline typename Size<SimpleBuffer<TValue> >::Type
     pageSize(SimpleBuffer<TValue> &me) {
+//IOREV _todo_
         return me.pageSize;
     }
 
     template < typename TValue, typename TSize >
     inline void setPageSize(SimpleBuffer<TValue> &me, TSize size) {
+//IOREV _todo_
         me.pageSize = size;
     }
 
     template < typename TValue >
     inline typename Size<SimpleBuffer<TValue> >::Type
     size(SimpleBuffer<TValue> const &me) {
+//IOREV _todo_
         return me.end - me.begin;
     }
 
     template < typename TValue >
     inline typename Size<SimpleBuffer<TValue> >::Type
     length(SimpleBuffer<TValue> const &me) {
+//IOREV _todo_
         return me.end - me.begin;
     }
 
     template < typename TValue, typename TSize >
     inline void resize(SimpleBuffer<TValue> &me, TSize size) {
+//IOREV _todo_
         me.end = me.begin + size;
     }
 
     template < typename TValue, typename TSize, typename T >
 	inline void allocPage(SimpleBuffer<TValue> &pf, TSize size, T const & me) {
+//IOREV _todo_
         setPageSize(pf, size);
         allocate(me, pf.begin, pageSize(pf));
         resize(pf, size);
@@ -131,6 +138,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue, typename T > inline
 	void freePage(SimpleBuffer<TValue> &pf, T const & me) {
+//IOREV _todo_
 		deallocate(me, pf.begin, pageSize(pf));
 		pf.begin = NULL;
         resize(pf, 0);
@@ -139,21 +147,25 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue >
 	inline TValue* begin(SimpleBuffer<TValue> &pf, Standard) {
+//IOREV _todo_
 		return pf.begin;
 	}
 
 	template < typename TValue >
 	inline TValue const * begin(SimpleBuffer<TValue> const &pf, Standard) {
+//IOREV _todo_
 		return pf.begin;
 	}
 
 	template < typename TValue >
 	inline TValue * end(SimpleBuffer<TValue> &pf, Standard) {
+//IOREV _todo_
 		return pf.end;
 	}
 
 	template < typename TValue >
 	inline TValue const * end(SimpleBuffer<TValue> const &pf, Standard) {
+//IOREV _todo_
 		return pf.end;
 	}
 
@@ -166,6 +178,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue >
     struct PageBucket
 	{
+//IOREV _todo_
 		typedef	typename Iterator<PageBucket>::Type TIterator;
 
         unsigned    pageOfs;                // begin of bucket window with relation to page begin
@@ -174,11 +187,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue >
     struct PageBucketExtended : public PageBucket< TValue > {
+//IOREV _todo_
 		int     	pageNo;		            // related page (needed by merger sort)
     };
 
 	template < typename TValue >
     ::std::ostream& operator<<(::std::ostream &out, const PageBucketExtended<TValue> &pb) {
+//IOREV _todo_
         for(TValue *cur = pb.begin; cur != pb.end; cur++)
             out << *cur << " ";
         return out;
@@ -210,6 +225,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue, typename TFile, typename TSpec >
     struct Value< PageFrame< TValue, TFile, TSpec > > {
+//IOREV _todo_
         typedef TValue Type;
     };
 
@@ -238,6 +254,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TValue, typename TFile >
 	struct PageFrame< TValue, TFile, Dynamic<> >: public SimpleBuffer< TValue >
 	{
+//IOREV _todo_
 		typedef TFile							File;
 		typedef SimpleBuffer<TValue>	        TBase;
         typedef typename AsyncRequest<TFile>::Type  AsyncRequest;
@@ -273,6 +290,7 @@ namespace SEQAN_NAMESPACE_MAIN
                unsigned PageSize_ >
 	struct PageFrame<TValue, TFile, Fixed<PageSize_> >
 	{
+//IOREV _todo_
 		typedef TFile								File;
         typedef typename AsyncRequest<TFile>::Type		AsyncRequest;
 		typedef	typename Size<PageFrame>::Type		TSize;
@@ -325,29 +343,34 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue, typename TFile, typename TSpec, typename TSize >
     inline void resize(PageFrame<TValue, TFile, Dynamic<TSpec> > &me, TSize size) {
+//IOREV _todo_
         me.end = me.begin + size;
     }
 
     template < typename TValue, typename TFile, unsigned PageSize_ >
     inline typename Size<PageFrame<TValue, TFile, Fixed<PageSize_> > >::Type
     size(PageFrame<TValue, TFile, Fixed<PageSize_> > &/*me*/) {
+//IOREV _todo_
         return PageSize_;
     }
 
     template < typename TValue, typename TFile, unsigned PageSize_ >
     inline typename Size<PageFrame<TValue, TFile, Fixed<PageSize_> > >::Type
     length(PageFrame<TValue, TFile, Fixed<PageSize_> > const &/*me*/) {
+//IOREV _todo_
         return PageSize_;
     }
 
     template < typename TValue, typename TFile, unsigned PageSize_ >
     inline typename Size<PageFrame<TValue, TFile, Fixed<PageSize_> > >::Type
     pageSize(PageFrame<TValue, TFile, Fixed<PageSize_> > &/*me*/) {
+//IOREV _todo_
         return PageSize_;
     }
 
     template < typename TValue, typename TFile, unsigned PageSize_, typename TSize >
     inline void resize(PageFrame<TValue, TFile, Fixed<PageSize_> > &/*me*/, TSize /*size*/) {}
+//IOREV _todo_
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -356,6 +379,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec >
     ::std::ostream& operator<<(::std::ostream &out, const PageFrame<TValue, TFile, TSpec > &pf) 
 	{
+//IOREV _todo_
         out << "PageFrame @ " << pf.pageNo;
         if (pf.dirty)
             out << " DIRTY";
@@ -387,6 +411,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec, typename T > inline
 	void allocPage(PageFrame<TValue, TFile, TSpec> &pf, T const & me) 
 	{
+//IOREV _todo_
 		TValue* tmp = NULL;
 		allocate(me, tmp, pageSize(pf));
 		pf.begin = tmp;
@@ -398,6 +423,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec, typename T > inline
 	void freePage(PageFrame<TValue, TFile, TSpec> &pf, T const & me) 
 	{
+//IOREV _todo_
 		#ifdef SEQAN_VVERBOSE
 			if ((TValue*)pf.begin)
 				::std::cerr << "freePage:  " << ::std::hex << (TValue*)pf.begin << ::std::dec << ::std::endl;
@@ -411,6 +437,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec > inline
 	bool readPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
@@ -425,6 +452,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec > inline
 	bool writePage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
@@ -438,6 +466,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec, typename TSize> inline
     bool readLastPage(int pageNo, PageFrame<TValue, TFile, TSpec> &pf, TFile &file, TSize size) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "readPage:  " << ::std::hex << (TValue*)pf.begin;
@@ -452,6 +481,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec, typename TSize > inline
 	bool writeLastPage(PageFrame<TValue, TFile, TSpec> &pf, int pageNo, TFile &file, TSize size) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writePage: " << ::std::hex << (TValue*)pf.begin;
@@ -466,6 +496,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec > inline
 	bool waitFor(PageFrame<TValue, TFile, TSpec> &pf) 
 	{
+//IOREV _todo_
 		if ((pf.status != pf.READY) && waitFor(pf.request)) 
 		{
 			pf.status = pf.READY;
@@ -478,6 +509,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec, typename TTime > inline
 	bool waitFor(PageFrame<TValue, TFile, TSpec> &pf, TTime timeOut) 
 	{
+//IOREV _todo_
 		if ((pf.status != pf.READY) && waitFor(pf.request, timeOut)) {
 			pf.status = pf.READY;
 			pf.dirty = false;
@@ -489,6 +521,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec > inline
 	bool cancel(PageFrame<TValue, TFile, TSpec> &pf, TFile &file) 
 	{
+//IOREV _todo_
         waitFor(pf, 0);
 		if (pf.status != pf.READY) 
 		{
@@ -504,6 +537,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TValue, typename TFile, typename TSpec > inline
 	bool readPage(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, TFile &file) 
 	{
+//IOREV _todo_
         if (size(pf) == pageSize(pf))
             return readPage(pf.pageNo, pf, file);
         else
@@ -513,6 +547,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec > inline
 	bool writePage(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, TFile &file) 
 	{
+//IOREV _todo_
         if (size(pf) == pageSize(pf))
             return writePage(pf, pf.pageNo, file);
         else
@@ -522,6 +557,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile > inline
 	unsigned readBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, unsigned dataSize, TFile &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
         unsigned readSize = _min(dataSize - b.pageOfs, (unsigned)(b.end - b.begin));
 		#ifdef SEQAN_VVERBOSE
@@ -541,6 +577,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile > inline
 	bool writeBucket(PageBucket<TValue> &b, int pageNo, unsigned pageSize, TFile &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << b.begin;
@@ -558,6 +595,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, typename TSpec > inline
 	bool writeBucket(PageFrame<TValue, TFile, Dynamic<TSpec> > &pf, unsigned &pageOfs, TFile &file) 
 	{
+//IOREV _todo_
 		typedef typename Position<TFile>::Type pos_t;
 		#ifdef SEQAN_VVERBOSE
 			::std::cerr << "writeBucket: " << ::std::hex << pf.begin;
@@ -579,6 +617,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TPageFrame >
     struct PageChain 
 	{
+//IOREV _todo_
         TPageFrame          *first, *last;
         unsigned            frames, maxFrames;
         
@@ -718,6 +757,7 @@ namespace SEQAN_NAMESPACE_MAIN
                unsigned PRIORITY_LEVELS = TPageFrame::PERMANENT_LEVEL + 1 >
 	struct PageContainer
 	{
+//IOREV _todo_
 		typedef String<TPageFrame>					TPages;
 		typedef typename Position<TPages>::Type		TPos;
 
@@ -897,6 +937,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned Count_,
 		Tag<TExpand> const expand)
 	{
+//IOREV _todo_
 		reserve(pageCont.pages, Count_, expand);
 	}
 
@@ -905,6 +946,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont, 
 		unsigned Count_) 
 	{
+//IOREV _todo_
 		unsigned Size_ = length(pageCont.pages);
 		if (Size_ < Count_) {
 			reserve(pageCont.pages, Count_);
@@ -920,6 +962,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Size< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type
 	length(PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const &pageCont) 
 	{
+//IOREV _todo_
 		return length(pageCont.pages);
 	}
 
@@ -929,6 +972,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont,
 		Standard const) 
 	{
+//IOREV _todo_
 		return begin(pageCont.pages, Standard());
 	}
 
@@ -938,6 +982,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const &pageCont,
 		Standard const) 
 	{
+//IOREV _todo_
 		return begin(pageCont.pages, Standard());
 	}
 
@@ -947,6 +992,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont,
 		Standard const) 
 	{
+//IOREV _todo_
 		return end(pageCont.pages, Standard());
 	}
 
@@ -956,6 +1002,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const &pageCont,
 		Standard const) 
 	{
+//IOREV _todo_
 		return end(pageCont.pages, Standard());
 	}
 
@@ -970,6 +1017,7 @@ namespace SEQAN_NAMESPACE_MAIN
         TSize _size, unsigned _pageSize,
         Function const &Func_)
     {
+//IOREV _todo_
         unsigned _pages         = enclosingBlocks(_size, (unsigned)_pageSize);
         if (!_pages) {
 			::std::cerr << "equiDistantDistribution: _pages is null!" << ::std::endl;
@@ -1032,6 +1080,7 @@ namespace SEQAN_NAMESPACE_MAIN
         TSize _size, unsigned _pageSize,
         Function const &Func_)
     {
+//IOREV _todo_
         unsigned _pages         = enclosingBlocks(_size, (unsigned)_pageSize);
         if (!_pages) {
 			::std::cerr << "equiDistantDistribution: _pages is null!" << ::std::endl;

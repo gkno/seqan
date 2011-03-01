@@ -47,7 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagCGViz_;
-typedef Tag<TagCGViz_> const CGViz;
+typedef Tag<TagCGViz_> const CGViz; //IOREV _todo_
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +59,7 @@ typedef Tag<TagCGViz_> const CGViz;
 
 template <typename TFile>
 void goNext(TFile & file, CGViz) {
+//IOREV _todo_
 	SEQAN_CHECKPOINT;
     (void) file; // When compiled without assertions.
 	SEQAN_ASSERT(!_streamEOF(file))

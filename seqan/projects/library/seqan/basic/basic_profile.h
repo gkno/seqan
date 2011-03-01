@@ -76,15 +76,15 @@
 #endif
 
 #ifdef PLATFORM_WINDOWS
-    typedef __int64   ProfileInt_;
+    typedef __int64   ProfileInt_; //IOREV _todo_
 #else
-    typedef int64_t ProfileInt_;
+    typedef int64_t ProfileInt_; //IOREV _todo_
 #endif
 
     typedef double    _proFloat;
 
 
-    typedef _proFloat ProfileTimeValue_;
+    typedef _proFloat ProfileTimeValue_; //IOREV _todo_
 
     enum ProfileConstants_ {
         SEQAN_PROPAGESIZE         = 4096, // B in byte
@@ -129,8 +129,8 @@
         SEQAN_PROFLOAT + SEQAN_PROSTATE
     };
 
-    typedef ProfileTimeValue_ ProfileTStates_[SEQAN_PROINDEXCOUNT];
-    typedef _proFloat  ProfileTTimes[SEQAN_PROINDEXCOUNT];
+    typedef ProfileTimeValue_ ProfileTStates_[SEQAN_PROINDEXCOUNT]; //IOREV _todo_
+    typedef _proFloat  ProfileTTimes[SEQAN_PROINDEXCOUNT]; //IOREV _todo_
 
 
 
@@ -139,6 +139,7 @@
 	template <typename T = void>
 	struct ProfileData_
 	{
+//IOREV _todo_
 		static ProfileTStates_	_proValue;
 		static ProfileTTimes	_proLastUpdate;
 		static int			_proExtraCount;

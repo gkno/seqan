@@ -189,6 +189,7 @@ struct Value< ::std::basic_fstream<TValue, TTraits> >
 template <typename T>
 struct IsTellAndSeekStream_
 {
+//IOREV _todo_
 	typedef False Type;
 };
 
@@ -219,6 +220,7 @@ template <typename TValue, typename TTraits>
 inline bool 
 _streamEOF(::std::basic_istream<TValue, TTraits> const & me)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	// Andreas missed the fact that eof() of a stream is true after reading the eof character
 	// So reading the last character eof() is false, reading beyond eof() is true
@@ -246,6 +248,7 @@ _streamRead(TValue * target,
 			::std::basic_istream<TValue, TTraits> & source,
 			::std::streamsize limit)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	source.read(target, limit);
 	return source.gcount();
@@ -267,6 +270,7 @@ template <typename TValue, typename TTraits>
 inline TValue 
 _streamGet(::std::basic_istream<TValue, TTraits> & source)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return source.get();
 }
@@ -287,6 +291,7 @@ template <typename TValue, typename TTraits>
 inline TValue 
 _streamPeek(::std::basic_istream<TValue, TTraits> & source)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return source.peek();
 }
@@ -306,6 +311,7 @@ template <typename TValue, typename TTraits>
 inline void
 _streamUnget(::std::basic_istream<TValue, TTraits> & source)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	source.unget();
 }
@@ -327,6 +333,7 @@ inline void
 _streamPut(::std::basic_ostream<TValue, TTraits> & target,
 		   TChar character)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	target.put(convert<TValue>(character));
 }
@@ -346,6 +353,7 @@ template <typename TValue, typename TTraits>
 inline typename Position< ::std::basic_istream<TValue, TTraits> >::Type
 _streamTellG(::std::basic_istream<TValue, TTraits> & me)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return me.tellg();
 }
@@ -365,6 +373,7 @@ template <typename TValue, typename TTraits>
 inline typename Position< ::std::basic_ostream<TValue, TTraits> >::Type
 _streamTellP(::std::basic_ostream<TValue, TTraits> & me)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return me.tellp();
 }
@@ -387,6 +396,7 @@ inline void
 _streamSeekG(::std::basic_istream<TValue, TTraits> & me,
 	 typename Position< ::std::basic_istream<TValue, TTraits> >::Type pos)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	me.clear();
 	me.seekg(pos);
@@ -411,6 +421,7 @@ inline void
 _streamSeekP(::std::basic_ostream<TValue, TTraits> & me,
 	 typename Position< ::std::basic_ostream<TValue, TTraits> >::Type pos)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	me.clear();
 	me.seekp(pos);
@@ -434,6 +445,7 @@ inline void
 _streamSeek2G(::std::basic_istream<TValue, TTraits> & me,
 	 int off)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	me.seekg(off, ::std::ios_base::cur);
 }

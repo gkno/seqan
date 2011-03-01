@@ -64,6 +64,7 @@ struct FileReader;
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 class String<TValue, FileReader<TFormat, TFile, TSpec> >
 {
+//IOREV _todo_
 public:
 	enum
 	{
@@ -176,6 +177,7 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline TFile &
 _dataFile(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
+//IOREV _todo_
 	return value(me.data_file);
 }
 
@@ -187,6 +189,7 @@ inline void
 _loadBlockFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 							TPosition blocknum)
 {
+//IOREV _todo_
 	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
 
 	typedef typename Size<TFile>::Type TFileSize;
@@ -254,6 +257,7 @@ inline unsigned int
 _findBlockFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 							TPosition pos)
 {
+//IOREV _todo_
 	typedef typename Size<TFile>::Type TFileSize;
 
 	while (!me.data_scanned && (me.data_abl[length(me.data_abl) - 1] <= static_cast<TFileSize>(pos)))
@@ -275,6 +279,7 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline void
 _constructFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
+//IOREV _todo_
 	//find begin of data in file
 	typedef Iter<TFile, FileReader<TFormat> > TFileReaderIt;
 	TFileReaderIt fit(_dataFile(me));
@@ -292,6 +297,7 @@ inline bool
 _isValidBlockFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 							   TUint block_number)
 {
+//IOREV _todo_
 	typedef typename Size<TFile>::Type TFileSize;
 	TFileSize block_number2 = block_number;
 
@@ -309,6 +315,7 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline void
 _loadCompleteFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
+//IOREV _todo_
 	if (!me.data_scanned)
 	{//scan the whole sequence
 		typedef typename Position<TFile>::Type TPosition;
@@ -322,6 +329,7 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline void const * 
 id(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return &me;
 }
@@ -333,6 +341,7 @@ inline TValue
 value(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 	  TPos pos)
 {
+//IOREV _todo_
 	typedef typename Size<TFile>::Type TFileSize;
 	TFileSize pos2 = pos;
 
@@ -349,6 +358,7 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline typename Size< String<TValue, FileReader<TFormat, TFile, TSpec> > >::Type
 length(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
+//IOREV _todo_
 	_loadCompleteFileReaderString(me);
 
 	return me.data_abl[length(me.data_abl) - 1];
@@ -361,6 +371,7 @@ inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TI
 begin(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 	  Tag<TIteratorSpec> const)
 {
+//IOREV _todo_
 	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
 	return TIterator(me);
 }
@@ -369,6 +380,7 @@ inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> > con
 begin(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
 	  Tag<TIteratorSpec> const)
 {
+//IOREV _todo_
 	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
 	typedef typename Iterator< TString const, TIteratorSpec >::Type TIterator;
 	return TIterator(const_cast<TString &>(me));
@@ -381,6 +393,7 @@ inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TI
 end(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 	Tag<TIteratorSpec> const)
 {
+//IOREV _todo_
 	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
 	return TIterator(me, GoEnd());
 }
@@ -389,6 +402,7 @@ inline typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> > con
 end(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
 	Tag<TIteratorSpec> const)
 {
+//IOREV _todo_
 	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
 	typedef typename Iterator< TString const, TIteratorSpec >::Type TIterator;
 	return TIterator(const_cast<TString &>(me), GoEnd());
@@ -402,6 +416,7 @@ iter(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 	 TPosition pos,
 	 Tag<TIteratorSpec> const)
 {
+//IOREV _todo_
 	typedef typename Iterator< String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec >::Type TIterator;
 	return TIterator(me, pos);
 }
@@ -411,6 +426,7 @@ iter(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
 	 TPosition pos,
 	 Tag<TIteratorSpec> const)
 {
+//IOREV _todo_
 	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
 	typedef typename Iterator< TString const, TIteratorSpec >::Type TIterator;
 	return TIterator(const_cast<TString &>(me), pos);
@@ -431,6 +447,7 @@ struct FileReaderIterator;
 template <typename T>
 struct FileReaderTypes_
 {// dummy implementation to make VC++ happy
+//IOREV _todo_
 	typedef int TABLPosition;
 	typedef int TBuf;
 };

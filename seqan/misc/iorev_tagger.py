@@ -24,6 +24,7 @@ import string
 import sys
 import re
 from collections import defaultdict
+import shutil
 #from functools import cmp_to_key
 
 
@@ -34,13 +35,16 @@ from collections import defaultdict
 
 FILES_COMPLETELY_IORELATED = [ r'.*/seqan/file/.*\.h', \
                                ".*parsing.h" ] # todo finish
+#FILES_COMPLETELY_IORELATED = [ ] # todo finish
 
 FUNCTION_KEYWORDS = [ ".*read.*", \
-                      ".*read.*", \
                       ".*write.*", \
                       "_stream.*", \
                       "_parse.*", \
+                      ".*file.*", \
+                      ".*File.*", \
                       "_is.*"] # todo finish
+#FUNCTION_KEYWORDS = [ ".*parse.*" ] # todo finish
 
 #FILES_LINES = {}
 
@@ -93,7 +97,7 @@ def buildProject(project_path):
             path = os.path.join(root, file)
             if testFileType(path):
                 parseFile(path)
-                
+
 #    if FUNCS != {}:        
     #outAll(project_path, project)
         
@@ -487,14 +491,16 @@ def addTags():
             if i[0] != lastfilename:
                 if (lastfilename != ""):
                     cmd = 'awk -f ' + sys.path[0] + '/iorev_tagger_level2.awk'
-                    if (lines_fc != ""):
+                    if (lines_func_class != ""):
                         cmd += " -v lines_fc=" + lines_func_class
-                    if (lines_t != ""):
+                    if (lines_typedef != ""):
                         cmd += " -v lines_t=" + lines_typedef
                     cmd += " " + lastfilename + " > " + lastfilename + ".new"
                     print cmd
                     if (lastfilename.find("file") >= 0):
                         os.system(cmd)
+                        shutil.move(lastfilename, lastfilename + ".old")
+                        shutil.move(lastfilename+".new", lastfilename)
                     
                 lastfilename = i[0]
                 lines_func_class = ""

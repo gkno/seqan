@@ -73,6 +73,7 @@ template <
 struct FileFormat:
 	public FileFormat<TFile, TData, TMeta, void>
 {
+//IOREV _todo_
 public:
 	typedef typename Size<TData>::Type TSize;
 
@@ -184,6 +185,7 @@ template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void *
 formatID(FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return file_format.formatID_();
 }
@@ -214,6 +216,7 @@ read(TFile & file,
 	 TData & data,
 	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	file_format.read_(file, data);
 }
@@ -225,6 +228,7 @@ read(TFile & file,
 	 TSize limit,
 	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	file_format.read_(file, data, limit);
 }
@@ -250,6 +254,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	file_format.readMeta_(file, meta);
 }
@@ -267,6 +272,7 @@ inline void
 goNext(TFile & file,
 	   FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	file_format.goNext_(file);
 }
@@ -284,6 +290,7 @@ inline void
 length(TFile & file,
 	   FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	file_format.length_(file);
 }
@@ -311,6 +318,7 @@ write(TFile & file,
 	  TData & data,
 	  FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	file_format.write_(file, data);
 }
@@ -321,6 +329,7 @@ write(TFile & file,
 	  TMeta & meta,
 	  FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	file_format.write_(file, data, meta);
 }
@@ -337,6 +346,7 @@ inline bool
 operator == (FileFormat<TFileLeft, TDataLeft, TMetaLeft, TFormatLeft> const & left, 
 			 FileFormat<TFileRight, TDataRight, TMetaRight, TFormatRight> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return formatID(left) == formatID(right);
 }
@@ -346,6 +356,7 @@ inline bool
 operator == (FileFormat<TFile, TData, TMeta, TFormat> const & left, 
 			 Tag<TFormat2> const)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return formatID(left) == ClassIdentifier_<Tag<TFormat2> const>::getID();
 }
@@ -355,6 +366,7 @@ inline bool
 operator == (Tag<TFormat2> const,
 			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return ClassIdentifier_<Tag<TFormat2> const>::getID() == formatID(right);
 }
@@ -366,6 +378,7 @@ inline bool
 operator != (FileFormat<TFileLeft, TDataLeft, TMetaLeft, TFormatLeft> const & left, 
 			 FileFormat<TFileRight, TDataRight, TMetaRight, TFormatRight> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return formatID(left) != formatID(right);
 }
@@ -375,6 +388,7 @@ inline bool
 operator != (FileFormat<TFile, TData, TMeta, TFormat> const & left, 
 			 Tag<TFormat2> const)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return formatID(left) != ClassIdentifier_<Tag<TFormat2> const>::getID();
 }
@@ -384,6 +398,7 @@ inline bool
 operator != (Tag<TFormat2> const,
 			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
+//IOREV _todo_
 SEQAN_CHECKPOINT
 	return ClassIdentifier_<Tag<TFormat2> const>::getID() != formatID(right);
 }
@@ -450,6 +465,7 @@ _streamAppendLine(TFile & file,
 				   TString & str,
 				   TChar & c)
 {
+//IOREV _todo_
 	while (true)
 	{
 		if (_streamEOF(file)) break;
@@ -482,6 +498,7 @@ _streamCountLine(TFile & file,
 				  TChar & c)
 
 {
+//IOREV _todo_
 	while (true)
 	{
 		if (_streamEOF(file)) break;
@@ -513,6 +530,7 @@ _streamSkipLine(TFile & file,
 				 TChar & c)
 
 {
+//IOREV _todo_
 	typename Size<TFile>::Type count = 0;
 	while (true)
 	{
@@ -552,6 +570,7 @@ template<typename TFile, typename TChar>
 inline void 
 _streamSkipWhitespace(TFile& file, TChar& c)
 {
+//IOREV _todo_
 	if ((c!=' ') && (c != '\t')) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -566,6 +585,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _streamReadWord(TFile & file, TChar& c)
 {
+//IOREV _todo_
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -582,6 +602,7 @@ template<typename TChar>
 inline bool
 _streamIsLetter(TChar const c)
 {
+//IOREV _todo_
 	return ((c == 'a') || (c == 'b') || (c == 'c') || (c == 'd') || (c == 'e') || 
 			(c == 'f') || (c == 'g') || (c == 'h') || (c == 'i') || (c == 'j') ||
 			(c == 'k') || (c == 'l') || (c == 'm') || (c == 'n') || (c == 'o') || 
@@ -606,6 +627,7 @@ _stringSkipLine(TString & str,
 				 TIter & it)
 
 {
+//IOREV _todo_
 	typename Size<TString>::Type count = 0;
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard());
 	while (true)
@@ -642,6 +664,7 @@ _stringAppendLine(TString1 & str,
 				   TString2 & a_str,
 				   TIter & it)
 {
+//IOREV _todo_
 	typename Iterator<TString1,Standard>::Type end_it = end(str,Standard());
 	while (true)
 	{
@@ -673,6 +696,7 @@ template<typename TString, typename TIter>
 inline void 
 _stringSkipWhitespace(TString& str, TIter& it)
 {
+//IOREV _todo_
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
 	while (it != end_it) {
 		if ((*it!=' ') && (*it != '\t')) break;
@@ -686,6 +710,7 @@ template<typename TString, typename TIter>
 inline int
 _stringReadNumber(TString & str, TIter& it)
 {
+//IOREV _todo_
 	// Read number
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
 	String<char> numstr(getValue(it));
