@@ -56,7 +56,7 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     typedef String<UndirectedBuildingBlock> TBlockDescriptors;
     typedef Graph<Undirected<> > TGraph;
 
-    // The same graph as in Stiege's example in the 1996 paper, Figure 1.
+    // Build the same graph as in Stiege's example in the 1996 paper, Figure 1.
     TGraph graph;
     TTreeVertexDescriptor a = addVertex(graph);
     TTreeVertexDescriptor b = addVertex(graph);
@@ -100,7 +100,7 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     addEdge(graph, d2, d3);
     addEdge(graph, d2, d4);
     addEdge(graph, d2, h1);
-    addEdge(graph, d3, f2);
+    addEdge(graph, d3, f1);
     addEdge(graph, d4, e1);
     addEdge(graph, e1, e2);
     addEdge(graph, e1, e3);
@@ -122,16 +122,50 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     addEdge(graph, j2, j3);
     addEdge(graph, j3, j4);
 
-    (void)i; // no edge
+    (void)i;  // has no edge, suppress unused variable warning
 
-    typedef String<String<TTreeVertexDescriptor> > TVertexBlockMap;
+    // write(std::cout, graph, DotDrawing());
+
+    // Perform standard graph decomposition.
+    typedef String<String<TTreeVertexDescriptor> > TVertexBlocksMap;
     typedef String<TTreeVertexDescriptor> TEdgeBlockMap;
 
     TTree clusterTree;
     TBlockDescriptors blockDescriptors;
-    TVertexBlockMap vertexBlock;
+    TVertexBlocksMap vertexBlocks;
     TEdgeBlockMap edgeBlock;
-    decomposeGraphStiege(clusterTree, blockDescriptors, vertexBlock, edgeBlock, graph);
+    decomposeGraphStiege(clusterTree, blockDescriptors, vertexBlocks, edgeBlock, graph);
+
+
+    char const * blockTypeNames[] = {
+        "BLOCK_NULL",
+        "BLOCK_GRAPH",
+        "BLOCK_IMPROPER_COMPONENT",
+        "BLOCK_PROPER_COMPONENT",
+        "BLOCK_PERIPHERAL_TREE",
+        "BLOCK_STOPFREE_KERNEL",
+        "BLOCK_INTERNAL_TREE",
+        "BLOCK_SUBCOMPONENT",
+        "BLOCK_BIBLOCK"
+    };
+
+    // Check result.
+    SEQAN_ASSERT_EQ(length(blockDescriptors) - 2, numVertices(clusterTree));  // Two components without stopfree kernel.
+    // std::cout << "The tree" << std::endl;
+    // write(std::cout, clusterTree, DotDrawing());
+    // std::cout << "The block types" << std::endl;
+    // for (unsigned i = 0; i < length(blockDescriptors); ++i)
+    //     std::cout << i << ":" << blockTypeNames[blockDescriptors[i].blockType] << std::endl;
+    // std::cout << "vertex -> block assignment" << std::endl;
+    // for (unsigned i = 0; i < length(vertexBlocks); ++i) {
+    //     std::cout << i << ": ";
+    //     for (unsigned j = 0; j < length(vertexBlocks[i]); ++j)
+    //         std::cout << vertexBlocks[i][j] << ", ";
+    //     std::cout << std::endl;
+    // }
+    // std::cout << "edge -> block assignment" << std::endl;
+    // for (unsigned i = 0; i < length(edgeBlock); ++i)
+    //     std::cout << i << ": " << edgeBlock[i] << std::endl;
 }
 
 #endif  // TEST_GRAPH_DECOMPOSITION_DECOMPOSITION_H_
