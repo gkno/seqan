@@ -32,6 +32,11 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 // Implementation of the graph decomposition by Stiege.
+//
+// Relevant literature:
+//
+// Tarjan, R E. Depth-First Search and Linear Graph Algorithms. SIAM Journal
+// on Computing 1, no. 2 (July 1972): 146.
 // ==========================================================================
 
 #ifndef SEQAN_HEADER_GRAPH_DECOMPOSITON_GRAPH_DECOMPOSE_GRAPH_STIEGE_H_
@@ -70,18 +75,16 @@ enum StiegeVertexType
     VERTEX_ISOLATED,
     VERTEX_PERIPHERAL_TREE,         // non-root of peripheral tree
     VERTEX_PERIPHERAL_TREE_ROOT,    // root of "isolated peripheral tree"
-    VERTEX_PERIPHERAL_TREE_BORDER   // border point/root of non-isolated ptree
+    VERTEX_PERIPHERAL_TREE_BORDER,  // border point/root of non-isolated ptree
+    VERTEX_BIBLOCK,                 // in a biblock
+    VERTEX_INTERNAL_TREE            // in internal tree
 };
 
 enum StiegeEdgeType
 {
     EDGE_PERIPHERAL_TREE,
     EDGE_INTERNAL_TREE,
-    EDGE_SUBCOMPONENT,  // not in biblock!
-    // Two b-markers, so we can also store processed/unprocessed state.
-    EDGE_BIBLOCK,
-    EDGE_PROCESSED,
-    EDGE_LABEL_B
+    EDGE_BIBLOCK
 };
 
 /**
@@ -105,7 +108,7 @@ public:
     UndirectedBuildingBlock(StiegeUndirectedBlockType const & blockType_ )
             : blockType(blockType_)
     {}
-    
+
     StiegeUndirectedBlockType blockType;
 };
 
@@ -163,19 +166,91 @@ isBitSet(TWord const & word, unsigned index)
     return (word & (1 << index)) != 0;
 }
 
-template <typename TGraphCargo, typename TGraphSpec>
+template <typename TTreeCargo, typename TTreeSpec, typename TBlockDescriptorsMap, typename TTreeVertexDescriptor, typename TVertexDescriptor, typename TComponents, typename TComponentToBlock>
+void
+_classifyAsIsolated(
+        Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
+        TBlockDescriptorsMap & blockDescriptor,
+        String<String<TTreeVertexDescriptor> > & vertexBlocks,
+        TVertexDescriptor const & v,
+        TComponents const & components,
+        TComponentToBlock const & componentToBlock)
+{
+    // Create new building block vertex in cluster tree.  The vertex
+    // is part of this new building block.
+    TTreeVertexDescriptor x = componentToBlock[getProperty(components, v)];
+    assignProperty(blockDescriptor, x, BLOCK_IMPROPER_COMPONENT);
+    appendValue(property(vertexBlocks, v), x);
+}
+
+template <typename TTreeCargo, typename TTreeSpec, typename TTreeVertexDescriptor, typename TVertexFlags, typename TEdgeFlags, typename TVertexDescriptor, typename TGraph, typename TComponents, typename TComponentToBlock>
+void
+_collectPeripheralTreeAndClassify(
+        Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
+        String<String<TTreeVertexDescriptor> > & vertexBlocks,
+        String<TTreeVertexDescriptor> & edgeBlock, 
+        TVertexFlags /*const*/ & vertexFlags,  // we use the token flag for DFS, TODO(holtgrew): Better use external map?
+        TEdgeFlags const & edgeFlags,
+        TVertexDescriptor const & v,
+        TGraph /*const*/ & g,
+        TComponents const & components,
+        TComponentToBlock const & componentToBlock)
+{
+    typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+    typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+    typedef String<TVertexDescriptor> TStack;
+
+    TStack stack;
+
+    TTreeVertexDescriptor blockNode = componentToBlock[getProperty(components, v)];
+
+    // Perform a DFS using only peripheral tree vertices.
+    appendValue(stack, v);
+    while (!empty(stack)) {
+        TVertexDescriptor x = back(stack);
+        SEQAN_ASSERT_TRUE(isBitSet(getProperty(vertexFlags, x), VERTEX_PERIPHERAL_TREE));
+        setBit(property(vertexFlags, x), VERTEX_TOKEN);
+        appendValue(property(vertexBlocks, x), blockNode);
+        eraseBack(stack);
+
+        for (TOutEdgeIterator itE(g, x); !atEnd(itE); goNext(itE)) {
+            TEdgeDescriptor e = *itE;
+            TVertexDescriptor y = getTarget(e);
+            if (y == x)
+                y = getSource(e);
+            if (isBitSet(getProperty(vertexFlags, y), VERTEX_TOKEN))
+                continue;
+            if (isBitSet(getProperty(vertexFlags, y), VERTEX_PERIPHERAL_TREE)) {
+                SEQAN_ASSERT_TRUE(isBitSet(getProperty(edgeFlags, e), EDGE_PERIPHERAL_TREE));
+                assignProperty(edgeBlock, e, blockNode);
+                appendValue(stack, y);
+            }
+        }
+    }
+
+    // Release token on root again so we can use the flag again later on.
+    clearBit(property(vertexFlags, v), VERTEX_TOKEN);
+}
+
+template <typename TTreeCargo, typename TTreeSpec, typename TBlockDescriptorsMap, typename TTreeVertexDescriptor, typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
 void
 _decomposeGraphStiegeFindPeripheralTrees(
         String<__uint32> & vertexFlags,
         String<__uint32> & edgeFlags,
-        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+        Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
+        TBlockDescriptorsMap & blockDescriptor,
+        String<String<TTreeVertexDescriptor> > & vertexBlocks,
+        String<TTreeVertexDescriptor> & edgeBlock, 
+        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g, // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+        TComponents const & components,
+        TComponentToBlock const & componentToBlock)
 {
     typedef Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ TGraph;
     typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
     typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
     typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
     typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-    
+
     // We need a vertex map with unmarked edge counts for the algorithm to be
     // O(m).  In star graphs, the complexity is O(n^2) = O(m^2) otherwise.
     //
@@ -184,19 +259,18 @@ _decomposeGraphStiegeFindPeripheralTrees(
     resizeVertexMap(g, unmarkedEdgeCounts);
     for (TVertexIterator it(g); !atEnd(it); ++it) {
         assignProperty(unmarkedEdgeCounts, *it, degree(g, *it));
-        std::cerr << "unmarkedEdgeCounts[" << *it << "] = " << degree(g, *it) << std::endl;
+        // std::cerr << "unmarkedEdgeCounts[" << *it << "] = " << degree(g, *it) << std::endl;
     }
 
     // Perform token-propagation algorithm.
-    for (TVertexIterator it(g); !atEnd(it); ++it)
-    {
+    for (TVertexIterator it(g); !atEnd(it); ++it) {
         TVertexDescriptor v = value(it);
 
         // Easy case: v is isolated
         unsigned deg = degree(g, v);
         if (deg == 0u) {
             setBit(property(vertexFlags, v), VERTEX_ISOLATED);
-            std::cerr << "ISOLATED " << v << std::endl;
+            _classifyAsIsolated(clusterTree, blockDescriptor, vertexBlocks, v, components, componentToBlock);
             continue;
         }
 
@@ -209,12 +283,12 @@ _decomposeGraphStiegeFindPeripheralTrees(
         // Otherwise, it has degree 1 and no token.  It is the leaf of an
         // external tree, an end vertex.  Mark it so.
         setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE);
-        std::cerr << "PERIPHERAL TREE " << v << std::endl;
+        // std::cerr << "PERIPHERAL TREE " << v << std::endl;
         // Follow along this edge as long as the next vertex and continue as
         // long as the vertex is incident with only one unmarked edges,
         // marking the edges as peripheral tree edges.
         TVertexDescriptor w = v;
-        std::cerr << "w = " << w << std::endl;
+        // std::cerr << "w = " << w << std::endl;
         while (getProperty(unmarkedEdgeCounts, w) == 1u) {
 #if SEQAN_ENABLE_DEBUG
             bool assignedE = false;
@@ -239,7 +313,7 @@ _decomposeGraphStiegeFindPeripheralTrees(
             clearBit(property(vertexFlags, w), VERTEX_TOKEN);
 
             // Label e as peripheral tree edge.
-            std::cerr << "PERIPHERAL TREE {" << w << ", " << x << "}" << std::endl;
+            // std::cerr << "PERIPHERAL TREE {" << w << ", " << x << "}" << std::endl;
             setBit(property(edgeFlags, e), EDGE_PERIPHERAL_TREE);
             SEQAN_ASSERT_GT(unmarkedEdgeCounts[w], 0u);
             property(unmarkedEdgeCounts, w)  -= 1;
@@ -250,7 +324,7 @@ _decomposeGraphStiegeFindPeripheralTrees(
             w = x;
 
             // Characterize w as peripheral tree vertex.
-            std::cerr << "PERIPHERAL TREE " << w << std::endl;
+            // std::cerr << "PERIPHERAL TREE " << w << std::endl;
             setBit(property(vertexFlags, w), VERTEX_PERIPHERAL_TREE);
         }
     }
@@ -266,89 +340,200 @@ _decomposeGraphStiegeFindPeripheralTrees(
         clearBit(property(vertexFlags, v), VERTEX_TOKEN);
 
         if (getProperty(unmarkedEdgeCounts, v) == 0) {
-            std::cerr << "PERIPHERAL ROOT " << v << std::endl;
+            // std::cerr << "PERIPHERAL ROOT " << v << std::endl;
+            setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE);
             setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE_ROOT);
         } else {
-            std::cerr << "PERIPHERAL BORDER " << v << std::endl;
+            // std::cerr << "PERIPHERAL BORDER " << v << std::endl;
+            setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE);
             setBit(property(vertexFlags, v), VERTEX_PERIPHERAL_TREE_BORDER);
         }
+
+        // Collect peripheral tree.
+        _collectPeripheralTreeAndClassify(clusterTree, vertexBlocks, edgeBlock, vertexFlags, edgeFlags, v, g, components, componentToBlock);
     }
 }
 
-template <typename TEdgeDescriptor, typename TVertexDescriptor, typename TGraphCargo, typename TGraphSpec>
+template <typename TClusterTree, typename TBlockDescriptorsMap, typename TVertexBlocksMap, typename TEdgeBlockMap, typename TVertexDescriptor, typename TStack, typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
 void
-_decomposeGraphStiegeInternalStructure(
-        int & counter,
+_decomposeGraphStiegeBiconnect(
         String<__uint32> & vertexFlags,
         String<__uint32> & edgeFlags,
-        TEdgeDescriptor const & entryEdge,
-        TVertexDescriptor const & vertex,
-        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+        TClusterTree & clusterTree,
+        TBlockDescriptorsMap & blockDescriptor,
+        TVertexBlocksMap & vertexBlocks,
+        TEdgeBlockMap & edgeBlock, 
+        String<unsigned> & lowPt,
+        String<unsigned> & number,
+        String<unsigned> const & componentIds,
+        unsigned & i,
+        unsigned & j,  // component id
+        TStack & stack,
+        TVertexDescriptor const & v,
+        TVertexDescriptor const & u,
+        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g, // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+        TComponents const & components,
+        TComponentToBlock const & componentToBlock)
 {
-    typedef Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ TGraph;
-    // typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-    // typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-    typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+    // CONTINUE HERE with structure extraction:
+    // --> put external tree into component
+    // --> create one node in tree for stopfree kernel
+    //     --> add one node per internal tree
+    //     --> add one node per subcomponent
+    //         --> add one per biconnected block
+
+    typedef typename VertexDescriptor<TClusterTree>::Type TTreeVertexDescriptor;
+    typedef typename Iterator<TClusterTree, OutEdgeIterator>::Type TTreeOutEdgeIterator;
+    typedef Graph<Undirected<TGraphCargo, TGraphSpec> > TGraph;
+    typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
     typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+    typedef typename Value<TStack>::Type TTriple;
 
-    setBit(property(vertexFlags, vertex), VERTEX_MARK);  // mark vertex
-    int oldCounter = counter;
+    i += 1;
+    assignProperty(number, v, i);
+    assignProperty(lowPt, v, i);
 
-    // For each non-labeled exit edge e of vertex.
-    for (TOutEdgeIterator itE(g, vertex); !atEnd(itE); goNext(itE)) {
+    // For w in the adjacency list of v...
+    for (TOutEdgeIterator itE(g, v); !atEnd(itE); goNext(itE)) {
         TEdgeDescriptor e = *itE;
-        if (isBitSet(getProperty(edgeFlags, e), EDGE_LABEL_B) || entryEdge == e)
-            continue;
+        TVertexDescriptor w = getTarget(e);
+        if (w == v)
+            w = getSource(e);
+            
+        // If w is not yet numbered then...
+        if (getProperty(number, w) == 0u) {
+            // Skip vertices which are on the peripheral tree and not border points.
+            if (isBitSet(property(vertexFlags, w), VERTEX_PERIPHERAL_TREE) &&
+                !isBitSet(property(vertexFlags, w), VERTEX_PERIPHERAL_TREE_BORDER))
+                continue;
 
-        // v is the other end vertex of e.
-        TVertexDescriptor v = getTarget(e);
-        if (vertex == v)
-            v = getSource(e);
+            // std::cerr << "PUSH(" << v << ", " << w << ")" << std::endl;
+            appendValue(stack, TTriple(v, w, e));
 
-        // if the other end vertex v of e is unmarked...
-        if (!isBitSet(getProperty(vertexFlags, v), VERTEX_MARK)) {
-            _decomposeGraphStiegeInternalStructure(counter, vertexFlags, edgeFlags, e, v, g);
-            if (counter > oldCounter) {
-                // for each b-labeled exit edge f not yet processed
-                // TODO(holtgrew): b-labeled edge incident to vertex?
-                for (TOutEdgeIterator itF(g, v); !atEnd(itF); goNext(itF)) {
-                    TEdgeDescriptor f = *itF;
-                    // Skip b-labeled edges, processed edges and entry edge.
-                    if (!isBitSet(property(edgeFlags, f), EDGE_LABEL_B) ||
-                        !isBitSet(property(edgeFlags, f), EDGE_PROCESSED) ||
-                        entryEdge != f)
-                        continue;
+            _decomposeGraphStiegeBiconnect(vertexFlags, edgeFlags, clusterTree, blockDescriptor, vertexBlocks, edgeBlock, lowPt, number, componentIds, i, j, stack, w, v, g, components, componentToBlock);
+            assignProperty(lowPt, v, _min(getProperty(lowPt, v), getProperty(lowPt, w)));
+            if (getProperty(lowPt, w) >= getProperty(number, v)) {
+                // Unroll stack [(u1, u2, e)] until NUMBER[u1] <= NUMBER[v].
+                SEQAN_ASSERT_NOT(empty(stack));
+                // std::cerr << "stop condition: " << getProperty(number, back(stack).i1) << " > " << getProperty(number, v) << std::endl;
+                bool wasComponent = false;  // True top edges are biblock edges.
+                TTreeVertexDescriptor biblockKernelVertex;
+                while (!empty(stack) && getProperty(number, back(stack).i1) > getProperty(number, v)) {
+                    TTreeVertexDescriptor componentVertex = componentToBlock[getProperty(components, v)];
+                    // The first child of the component vertex is the stopfree
+                    // kernel vertex.  It is added after identifying the
+                    // connected components. Search for it.
+#if SEQAN_ENABLE_DEBUG
+                    bool found = false;
+#endif  // #if SEQAN_ENABLE_DEBUG
+                    TTreeVertexDescriptor stopfreeKernelVertex;
+                    for (TTreeOutEdgeIterator itF(clusterTree, componentVertex); !atEnd(itF); goNext(itF)) {
+                        if (childVertex(clusterTree, *itF) == componentVertex)
+                            continue;
+                        stopfreeKernelVertex = childVertex(clusterTree, *itF);
+#if SEQAN_ENABLE_DEBUG
+                        found = true;
+#endif  // #if SEQAN_ENABLE_DEBUG
+                        break;
+                    }
+                    SEQAN_ASSERT_TRUE(found);
+                    // Add a new vertex to the tree for the biblock we are about to add.
+                    biblockKernelVertex = addChild(clusterTree, stopfreeKernelVertex);
+                    resizeVertexMap(clusterTree, blockDescriptor);
+                    assignProperty(blockDescriptor, biblockKernelVertex, BLOCK_BIBLOCK);
 
-                    counter -= 1;
-                    setBit(property(edgeFlags, f), EDGE_PROCESSED);
+                    // if (!wasComponent) {
+                    //     std::cerr << "Starting BIBLOCK " << j << std::endl;
+                    // }
+                    wasComponent = true;
+                    // std::cerr << "BIBLOCK " << back(stack).i1 << std::endl;
+                    // std::cerr << "BIBLOCK " << back(stack).i2 << std::endl;
+                    // std::cerr << "BIBLOCK {" << getSource(back(stack).i3) << ", " << getTarget(back(stack).i3) << "}" << std::endl;
+                    // Update flags for edges and vertices.
+                    setBit(property(edgeFlags, back(stack).i3), EDGE_BIBLOCK);
+                    setBit(property(vertexFlags, back(stack).i1), VERTEX_BIBLOCK);
+                    setBit(property(vertexFlags, back(stack).i2), VERTEX_BIBLOCK);
+                    // Assign edge to biblock and add biblock to the blocks for the vertices.
+                    assignProperty(edgeBlock, back(stack).i3, biblockKernelVertex);
+                    appendValue(property(edgeBlock, back(stack).i1), biblockKernelVertex);
+                    appendValue(property(edgeBlock, back(stack).i2), biblockKernelVertex);
+                    // std::cerr << "POP() == (" << back(stack).i1 << ", " << back(stack).i2 << ") " << __LINE__ << std::endl;
+                    eraseBack(stack);
+                    // if (!empty(stack))
+                    //     std::cerr << "stop condition: " << getProperty(number, back(stack).i1) << " > " << getProperty(number, v) << std::endl;
                 }
+                // delete (v, w) from stack
+                SEQAN_ASSERT_NOT(empty(stack));
+                SEQAN_ASSERT_EQ(back(stack).i1, v);
+                SEQAN_ASSERT_EQ(back(stack).i2, w);
+                if (wasComponent) {
+                    // std::cerr << "BIBLOCK " << back(stack).i1 << std::endl;
+                    // std::cerr << "BIBLOCK " << back(stack).i2 << std::endl;
+                    // std::cerr << "BIBLOCK {" << getSource(back(stack).i3) << ", " << getTarget(back(stack).i3) << "}" << std::endl;
+                    // Update flags for edges and vertices.
+                    setBit(property(edgeFlags, back(stack).i3), EDGE_BIBLOCK);
+                    setBit(property(vertexFlags, back(stack).i1), VERTEX_BIBLOCK);
+                    setBit(property(vertexFlags, back(stack).i2), VERTEX_BIBLOCK);
+                    // Assign edge to biblock and add biblock to the blocks for the vertices.
+                    assignProperty(edgeBlock, back(stack).i3, biblockKernelVertex);
+                    appendValue(property(edgeBlock, back(stack).i1), biblockKernelVertex);
+                    appendValue(property(edgeBlock, back(stack).i2), biblockKernelVertex);
+                    // std::cerr << "POP() == (" << back(stack).i1 << ", " << back(stack).i2 << ") " << __LINE__ << std::endl;
+                    j += 1; // id of next component
+                } else {
+                    setBit(property(edgeFlags, back(stack).i3), EDGE_INTERNAL_TREE);
+                }
+                eraseBack(stack);
             }
-        } else {
-            setBit(property(edgeFlags, e), EDGE_LABEL_B);
-            counter += 1;
+        } else if (getProperty(number, w) < getProperty(number, v) && w != u) {
+            // std::cerr << "PUSH(" << v << ", " << w << ")" << std::endl;
+            appendValue(stack, TTriple(v, w, e));
+            assignProperty(lowPt, v, _min(getProperty(lowPt, v), getProperty(number, w)));
         }
     }
-
-    // TODO(holtgrew): Classify edges and vertex and integrate into new data structure.
 }
 
-template <typename TGraphCargo, typename TGraphSpec>
+// This is a slightly extended version of Tarjan's classic biconnected
+// component search.  The function _decomposeGraphStiegeBiconnect corresponds
+// to the routine BICONNECT in (Tarjan, 1973).
+template <typename TClusterTree, typename TBlockDescriptorsMap, typename TVertexBlocksMap, typename TEdgeBlockMap, typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
 void
 _decomposeGraphStiegeFindStopfreeKernels(
         String<__uint32> & vertexFlags,
         String<__uint32> & edgeFlags,
-        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+        TClusterTree & clusterTree,
+        TBlockDescriptorsMap & blockDescriptor,
+        TVertexBlocksMap & vertexBlocks,
+        TEdgeBlockMap & edgeBlock, 
+        Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g, // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
+        TComponents const & components,
+        TComponentToBlock const & componentToBlock)
 {
     typedef Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ TGraph;
     typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
     typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
     typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
     typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+    typedef String<Triple<TVertexDescriptor, TVertexDescriptor, TEdgeDescriptor>, Block<> > TStack;
 
-    // Fo reach node v which is not a border point or not a vertex of a
+    unsigned i = 0;
+    // lowPt[v] is the number of the smallest vertex in the DFS palmtree
+    // reachable from v.
+    String<unsigned> lowPt;
+    resizeVertexMap(g, lowPt);
+    // number[v] is the rank of v when visited in the DFS.
+    String<unsigned> number;
+    resizeVertexMap(g, number, 0);
+    // The stack of vertex-pairs.
+    TStack stack;
+    // Edge map of component ids.
+    unsigned j = 1;
+    String<unsigned> componentIds;
+    resizeEdgeMap(g, componentIds, maxValue<unsigned>());
+
+    // For each node v which is not a border point or not a vertex of a
     // peripheral tree.
-    for (TVertexIterator it(g); !atEnd(it); ++it)
-    {
+    for (TVertexIterator it(g); !atEnd(it); ++it) {
         TVertexDescriptor v = *it;
 
         // Skip vertices which are on the peripheral tree and not border points.
@@ -359,43 +544,9 @@ _decomposeGraphStiegeFindStopfreeKernels(
         if (isBitSet(property(vertexFlags, v), VERTEX_MARK))
             continue;
 
-        // Mark v.
-        setBit(property(vertexFlags, v), VERTEX_MARK);
-
-        // For each unlabeled edge e incident with v.
-        for (TOutEdgeIterator itE(g, v); !atEnd(itE); goNext(itE)) {
-            TEdgeDescriptor e = *itE;
-            if (isBitSet(getProperty(edgeFlags, e), EDGE_LABEL_B))
-                continue;
-
-            int counter = 0;  // TODO(holtgrew): __int64 would be safer but is probably unnecessary.
-            // w = other end vertex of e
-            TVertexDescriptor w = getTarget(e);
-            if (w == v)
-                w = getSource(e);
-
-            // Call DFS recursion.
-            _decomposeGraphStiegeInternalStructure(counter, vertexFlags, edgeFlags, e, w, g);
-
-            if (counter > 0) {
-                // for each b-labeled edge f not yet processed
-                // TODO(holtgrew): b-labeled edge incident to w?
-                for (TOutEdgeIterator itF(g, v); !atEnd(itF); goNext(itF)) {
-                    TEdgeDescriptor f = *itF;
-                    // The inversion of "is b-labeled and not processed" is
-                    // "is not b-labeled or processed."
-                    if (!isBitSet(getProperty(edgeFlags, f), EDGE_LABEL_B) ||
-                        isBitSet(getProperty(edgeFlags, f), EDGE_PROCESSED))
-                        continue;
-
-                    counter -= 1;
-                    // Mark edge as processed.
-                    setBit(property(edgeFlags, f), EDGE_PROCESSED);
-                }
-            }
-
-            // TODO(holtgrew): Classify edges and node v and integrate into new data structure.
-        }
+        // Start biconnected components DFS.
+        clear(stack);
+        _decomposeGraphStiegeBiconnect(vertexFlags, edgeFlags, clusterTree, blockDescriptor, vertexBlocks, edgeBlock, lowPt, number, componentIds, i, j, stack, v, maxValue<TVertexDescriptor>(), g, components, componentToBlock);
     }
 }
 
@@ -418,40 +569,61 @@ template <typename TTreeCargo, typename TTreeSpec, typename TBlockDescriptorMapV
 void
 decomposeGraphStiege(Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
                      String<TBlockDescriptorMapValue, TBlockDescriptorMapSpec> & blockDescriptors,
-                     String<TBlockMapValue, TBlockMapSpec> & blockMap,
+                     String<String<TBlockMapValue>, TBlockMapSpec> & vertexBlocks,
+                     String<TBlockMapValue, TBlockMapSpec> & edgeBlock,
                      Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Remove const after fixing iterator for const-graphs
 {
+    typedef Graph<Undirected<TGraphCargo, TGraphSpec> > TGraph;
+    typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+    typedef typename VertexDescriptor<TGraph>::Type TGraphVertexDescriptor;
     typedef Graph<Tree<TTreeCargo, TTreeSpec> > TTree;
     typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
-    
-    // Initialization.
-    //
-    // The root vertex corresponds to the graph.
-    clear(clusterTree);
-    TTreeVertexDescriptor root = addVertex(clusterTree);
-    assignRoot(clusterTree, root);
-    resizeVertexMap(clusterTree, blockMap);
-    resizeVertexMap(clusterTree, blockDescriptors);
-    assignProperty(blockDescriptors, root, UndirectedBuildingBlock(BLOCK_GRAPH));
-    // Edge and vertex type markers.
-    // TODO(holtgrew): resizeVertexMap and resizeEdgeMap should accept an optional prototype!
-    String<unsigned> vertexTypes;
-    resizeVertexMap(g, vertexTypes);
-    String<unsigned> edgeTypes;
-    resizeEdgeMap(g, edgeTypes);
 
-    write(std::cout, g, DotDrawing());
+    // Perform the standard decomposition of the given graph.  We build the
+    // cluster tree at the same time.
+    
+    // Edge and vertex type markers.
+    String<unsigned> vertexFlags;
+    resizeVertexMap(g, vertexFlags, 0u);
+    String<unsigned> edgeFlags;
+    resizeEdgeMap(g, edgeFlags, 0u);
+
+    // Initialize decomposition tree.
+    //
+    // Add root vertex which corresponds to the graph.
+    clear(clusterTree);
+    TTreeVertexDescriptor r = addVertex(clusterTree);
+    assignRoot(clusterTree, r);
+    resizeVertexMap(clusterTree, blockDescriptors);
+    assignProperty(blockDescriptors, r, BLOCK_GRAPH);
+    // Initialize maps from vertices and edges into the decomposition tree.
+    resizeVertexMap(g, vertexBlocks);
+    resizeEdgeMap(g, edgeBlock);
+
+    // Find connected components.
+    String<unsigned> componentIds;
+    unsigned componentCount = connectedComponents(g, componentIds);
+    String<TTreeVertexDescriptor> componentToBlock;
+    resize(componentToBlock, componentCount);
+    for (unsigned i = 0; i < componentCount; ++i) {
+        TTreeVertexDescriptor x = addChild(clusterTree, r);
+        resizeVertexMap(clusterTree, blockDescriptors);
+        assignProperty(blockDescriptors, x, BLOCK_PROPER_COMPONENT);  // <-- will update later to improper if isolated
+        componentToBlock[i] = x;
+
+        // Each connected component contains exactly one stopfree kernel.
+        // This will always be the first child of that building block's tree
+        // node.
+        TTreeVertexDescriptor y = addChild(clusterTree, x);
+        resizeVertexMap(clusterTree, blockDescriptors);
+        assignProperty(blockDescriptors, y, BLOCK_STOPFREE_KERNEL);
+    }
 
     // Find isolated vertices and peripheral trees.
-    _decomposeGraphStiegeFindPeripheralTrees(vertexTypes, edgeTypes, g);
+    _decomposeGraphStiegeFindPeripheralTrees(vertexFlags, edgeFlags, clusterTree, blockDescriptors, vertexBlocks, edgeBlock, g, componentIds, componentToBlock);
 
     // Find stopfree kernels and their internal structure.
-    _decomposeGraphStiegeFindStopfreeKernels(vertexTypes, edgeTypes, g);
-
-    // Build clusterTree.
-    // for all vertices
-    //   if isolated: add as isolated component
-    //   if peripheral tree root or border point: add tree component, traverse tree and map vertices to component
+    _decomposeGraphStiegeFindStopfreeKernels(vertexFlags, edgeFlags, clusterTree, blockDescriptors, vertexBlocks, edgeBlock, g, componentIds, componentToBlock);
 }
 
 } // namespace seqan

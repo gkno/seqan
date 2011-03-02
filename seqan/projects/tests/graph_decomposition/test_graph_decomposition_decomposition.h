@@ -54,7 +54,6 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     typedef Graph<Tree<> > TTree;
     typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
     typedef String<UndirectedBuildingBlock> TBlockDescriptors;
-    typedef String<TTreeVertexDescriptor> TBlockMap;
     typedef Graph<Undirected<> > TGraph;
 
     // The same graph as in Stiege's example in the 1996 paper, Figure 1.
@@ -125,12 +124,16 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
 
     (void)i; // no edge
 
+    typedef String<String<TTreeVertexDescriptor> > TVertexBlockMap;
+    typedef String<TTreeVertexDescriptor> TEdgeBlockMap;
+
     TTree clusterTree;
     TBlockDescriptors blockDescriptors;
-    TBlockMap blockMap;
+    TVertexBlockMap vertexBlock;
+    TEdgeBlockMap edgeBlock;
     std::cerr << "numVertices(graph) == " << numVertices(graph) << std::endl;
     std::cerr << "numEdges(graph) == " << numEdges(graph) << std::endl;
-    decomposeGraphStiege(clusterTree, blockDescriptors, blockMap, graph);
+    decomposeGraphStiege(clusterTree, blockDescriptors, vertexBlock, edgeBlock, graph);
 }
 
 #endif  // TEST_GRAPH_DECOMPOSITION_DECOMPOSITION_H_
