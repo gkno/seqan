@@ -131,8 +131,6 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     TBlockDescriptors blockDescriptors;
     TVertexBlockMap vertexBlock;
     TEdgeBlockMap edgeBlock;
-    std::cerr << "numVertices(graph) == " << numVertices(graph) << std::endl;
-    std::cerr << "numEdges(graph) == " << numEdges(graph) << std::endl;
     decomposeGraphStiege(clusterTree, blockDescriptors, vertexBlock, edgeBlock, graph);
 }
 
