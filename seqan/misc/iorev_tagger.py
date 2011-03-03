@@ -415,6 +415,7 @@ def createEntries(sigs):
                     t="f"
                 else:
                     continue
+                    #print sig
 
         if matchesAny(filename, re1) or matchesAny(name, re2):
             FILTERED_SIGS.append((filename, lineNumber, t, name, namespaces))
@@ -454,17 +455,36 @@ def getStructName(sig):
     """Get the class name from a signature or '', if signature is not a class."""
     sig = sig.strip()
 
-    pos1 = sig.rfind(' ')
-    if pos1 < 0: return ""
+    #pos1 = sig.rfind(' ')
+    #if pos1 < 0: return ""
     
-    while (pos1 > 0) and (sig[pos1] == ' '): pos1 -= 1
+    #while (pos1 > 0) and (sig[pos1] == ' '): pos1 -= 1
     
-    if ((pos1 >= 5) and (sig[pos1-5:pos1+1] == 'struct')) or ((pos1 >= 4) and (sig[pos1-4:pos1+1] == 'class')):
-        name = sig[pos1 + 1:].strip()
-        if (name.find('<') >= 0): return ""
-        else: return name
-       
-    return ""
+    #if ((pos1 >= 5) and (sig[pos1-5:pos1+1] == 'struct')) or ((pos1 >= 4) and (sig[pos1-4:pos1+1] == 'class')):
+        #name = sig[pos1 + 1:].strip()
+        #if (name.find('<') >= 0): return ""
+        #else: return name
+        
+        
+    pos1 = sig.find("struct ")
+    while pos1 > 0 and sig[pos1-1] != ' ' and pos1 + len("struct ") < len(sig):
+        pos1 = sig[pos1:].find("struct ")
+    if pos1 < 0:
+        pos1 = sig.find("class ")
+        while pos1 > 0 and sig[pos1-1] != ' ' and pos1 + len("class ") < len(sig):
+            pos1 = sig[pos1:].find("class ")
+        if pos1 < 0:
+            return ""
+        pos1 = pos1 + len("class ")
+    else:
+        pos1 = pos1 + len("struct ")
+
+    r = ""
+    for c in sig[pos1:]:
+        if c == ' ' or c == '<' or c == ';':
+            break
+        r += c
+    return r
 
 
 def getTypedefName(sig):
