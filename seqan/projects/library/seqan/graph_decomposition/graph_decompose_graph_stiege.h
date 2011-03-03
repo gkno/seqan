@@ -522,9 +522,10 @@ _decomposeGraphStiegeBiconnect(
                     // Mark edge and incident vertices as belonging to the
                     // internal tree.  The node in clusterTree will be added
                     // when collecting internal trees.
-                    setBit(property(edgeFlags, back(stack).i1), VERTEX_INTERNAL_TREE);
-                    setBit(property(edgeFlags, back(stack).i2), VERTEX_INTERNAL_TREE);
+                    setBit(property(vertexFlags, back(stack).i1), VERTEX_INTERNAL_TREE);
+                    setBit(property(vertexFlags, back(stack).i2), VERTEX_INTERNAL_TREE);
                     setBit(property(edgeFlags, back(stack).i3), EDGE_INTERNAL_TREE);
+                    // std::cerr << "INTERNAL TREE {" << back(stack).i1 << ", " << back(stack).i2 << "}" << std::endl;
                 }
                 eraseBack(stack);
             }
@@ -554,10 +555,15 @@ _decomposeGraphStiegeCollectInternalTrees(
     typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
     typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
+    // std::cout << "COLLECT-INTERNAL-TREE(" << v << ")" << std::endl;
+
     // Skip vertex if not part of the internal tree.
     if (!isBitSet(getProperty(vertexFlags, v), VERTEX_INTERNAL_TREE))
         return;
-    setBit(property(vertexFlags, v), VERTEX_TOKEN);
+    // std::cout << "  internal tree" << std::endl;
+    if (isBitSet(property(vertexFlags, v), VERTEX_TOKEN))
+        return;
+    // std::cout << "  no token" << std::endl;
 
     // If we reach here, v is the root of an internal tree which we have not
     // yet collect.
@@ -600,6 +606,8 @@ _decomposeGraphStiegeCollectInternalTrees(
     // with a token yet.
     while (!empty(stack)) {
         v = back(stack);
+        setBit(property(vertexFlags, v), VERTEX_TOKEN);
+        // std::cout << "putting token on " << v << std::endl;
         eraseBack(stack);
         
         for (TOutEdgeIterator itE(g, v); !atEnd(itE); goNext(itE)) {
@@ -611,7 +619,7 @@ _decomposeGraphStiegeCollectInternalTrees(
             if (u == v)
                 u = getSource(e);
             SEQAN_ASSERT_TRUE(isBitSet(getProperty(vertexFlags, u), VERTEX_INTERNAL_TREE));
-            if (isBitSet(getProperty(vertexFlags, v), VERTEX_TOKEN))
+            if (isBitSet(getProperty(vertexFlags, u), VERTEX_TOKEN))
                 continue;  // Skip already marked vertices.
 
             // Add this edge and other end vertex to the internal tree.
@@ -777,6 +785,78 @@ decomposeGraphStiege(Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
             continue;
         removeVertex(clusterTree, *it);
     }
+}
+
+template <typename TStream, typename TTree, typename TGraph, typename TBlockDescriptorMap, typename TVertexBlocks>
+void writeDecompositionTree(TStream & stream, TTree /*const*/ & tree, TGraph /*const*/ & g, TBlockDescriptorMap /*const*/ & blockDescriptor, TVertexBlocks /*const*/ vertexBlocks)
+{
+    typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
+
+    // Collect vertices in elementary building blocks.
+    String<String<TTreeVertexDescriptor> > blocksForVertex;
+    resizeVertexMap(tree, blocksForVertex);
+
+    typedef typename Iterator<TGraph, VertexIterator>::Type TGraphVertexIterator;
+    for (TGraphVertexIterator itV(g); !atEnd(itV); goNext(itV)) {
+        typedef typename Iterator<String<TTreeVertexDescriptor>, Rooted>::Type TIter;
+        for (TIter it(begin(property(vertexBlocks, *itV))); !atEnd(it); goNext(it)) {
+            appendValue(property(blocksForVertex, *it), *itV);
+        }
+    }
+
+    // DOT output.
+    stream << "digraph G {" << std::endl;
+
+    stream << std::endl;
+    stream << "/* Nodes */" << std::endl;
+    stream << std::endl;
+
+    static char const * blockTypeNames[] = {
+        "(null)", "graph", "improper component", "proper component",
+        "peripheral tree", "stopfree kernel", "internal tree",
+        "subcomponent", "biblock"
+    };
+
+    typedef typename Iterator<TTree, VertexIterator>::Type TTreeVertexIterator;
+    for (TTreeVertexIterator itV(tree); !atEnd(itV); goNext(itV)) {
+        CharString label = blockTypeNames[getProperty(blockDescriptor, *itV).blockType];
+        if (getProperty(blockDescriptor, *itV).blockType == BLOCK_BIBLOCK ||
+            getProperty(blockDescriptor, *itV).blockType == BLOCK_PERIPHERAL_TREE ||
+            getProperty(blockDescriptor, *itV).blockType == BLOCK_INTERNAL_TREE ||
+            getProperty(blockDescriptor, *itV).blockType == BLOCK_IMPROPER_COMPONENT ) {
+            append(label, "\\n(");
+            typedef typename Iterator<String<TTreeVertexDescriptor>, Standard>::Type TIter;
+            TIter itBegin = begin(property(blocksForVertex, *itV));
+            TIter itEnd = end(property(blocksForVertex, *itV));
+            for (TIter it = itBegin; it != itEnd; ++it) {
+                if (it != itBegin)
+                    append(label, ", ");
+                std::stringstream ss;
+                ss << *it;
+                append(label, ss.str());
+            }
+            stream << *itV << " [label = \"" << label << ")\", shape = box];" << std::endl;
+        } else {
+            stream << *itV << " [label = \"" << label << "\"];" << std::endl;
+        }
+    }
+
+    stream << std::endl;
+    stream << "/* Edges */" << std::endl;
+    stream << std::endl;
+
+    typedef typename Iterator<TTree, DfsPreorder>::Type TTreeDfsIterator;
+    typedef typename Iterator<TTree, OutEdgeIterator>::Type TOutEdgeIterator;
+    for (TTreeDfsIterator itV(tree, root(tree)); !atEnd(itV); goNext(itV)) {
+        for (TOutEdgeIterator itE(tree, *itV); !atEnd(itE); goNext(itE)) {
+            if (childVertex(tree, *itE) == *itV)
+                continue;
+            stream << parentVertex(tree, *itE) << " -> " << childVertex(tree, *itE) << std::endl;
+        }
+    }
+
+    stream << std::endl;
+    stream << "}" << std::endl;
 }
 
 } // namespace seqan
