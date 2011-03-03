@@ -213,15 +213,15 @@ _importSequences(CharString const & fileName,
 ///////////////////////////////////////////////////////////////////////////////
 // Calculates parameters from parameters in options object and from sequences and writes them to std::cout
 template<typename TStringSet>
-void _writeMoreCalculatedParams(StellarOptions & options, TStringSet &, TStringSet & queries) {
+void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases, TStringSet & queries) {
 //IOREV _todo_
+	typedef typename Size<TStringSet>::Type TSize;
+
 	if (options.qgramAbundanceCut != 1) {
 		std::cout << "Calculated parameters:" << std::endl;
 	}
 
-	typedef typename Size<TStringSet>::Type TSize;
 	TSize queryLength = length(concat(queries));
-
 	if (options.qgramAbundanceCut != 1) {
 		std::cout << "  q-gram expected abundance : ";
 		std::cout << queryLength/(double)((long)1<<(options.qGram<<1)) << std::endl;
@@ -229,6 +229,38 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet &, TStringS
 		std::cout << _max(100,(int)(queryLength*options.qgramAbundanceCut)) << std::endl;
 		std::cout << std::endl;
 	}
+
+	// Computation of maximal E-value for this search
+
+	TSize maxLengthQueries = MaxValue<TSize>::VALUE;
+	TSize maxLengthDatabases = MaxValue<TSize>::VALUE;
+
+	typename Iterator<TStringSet>::Type dbIt = begin(databases);
+	typename Iterator<TStringSet>::Type dbEnd = end(databases);
+	while (dbIt != dbEnd) {
+		if (length(*dbIt) > maxLengthDatabases) {
+			maxLengthDatabases = length(*dbIt);
+		}
+		++dbIt;
+	}
+
+	typename Iterator<TStringSet>::Type queriesIt = begin(queries);
+	typename Iterator<TStringSet>::Type queriesEnd = end(queries);
+	while (queriesIt != queriesEnd) {
+		if (length(*queriesIt) > maxLengthDatabases) {
+			maxLengthDatabases = length(*queriesIt);
+		}
+		++queriesIt;
+	}
+
+	TSize errors = options.minLength * options.epsilon;
+	TSize minScore = options.minLength - 3*errors; // #matches - 2*#errors // #matches = minLenght - errors, 
+
+	std::cout << "All matches matches resulting from your search have an E-value of: " << std::endl;
+	std::cout << "        " << _computeEValue(minScore, maxLengthQueries, maxLengthDatabases) << " or smaller";
+	std::cout << "  (match score = 1, error penalty = -2)" << std::endl;
+
+	std::cout << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

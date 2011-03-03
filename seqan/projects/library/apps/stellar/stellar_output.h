@@ -29,11 +29,10 @@ using namespace seqan;
 ///////////////////////////////////////////////////////////////////////////////
 // Computes the length adjustment for E-value computation
 // Based on the NCBI BLAST code by Tom Madden.
-template<typename TQueryMatches, typename TSize>
-void
-_computeLengthAdjustment(TQueryMatches & queryMatches, TSize dbLength, TSize queryLength) {
+template<typename TSize>
+TSize
+_computeLengthAdjustment(TSize dbLength, TSize queryLength) {
 SEQAN_CHECKPOINT
-	TSize adjustment;
 
 	const double K = 0.34;
 	const double logK = log(K);
@@ -57,8 +56,7 @@ SEQAN_CHECKPOINT
         double c  = n * m - _max(m, n) / K;
 
         if(c < 0) {
-            queryMatches.lengthAdjustment = 0;
-			return;
+            return 0;
         } else {
             val_max = 2 * c / (mb + sqrt(mb * mb - 4 * c));
         }
@@ -89,7 +87,7 @@ SEQAN_CHECKPOINT
 	if(converged) { // the iteration converged
         // If val_fixed is the (unknown) true fixed point, then we wish to set lengthAdjustment to floor(val_fixed).
 		// We assume that floor(val_min) = floor(val_fixed)
-        queryMatches.lengthAdjustment = (TSize) val_min;
+        return (TSize) val_min;
 
         // But verify that ceil(val_min) != floor(val_fixed)
         val = ceil(val_min);
@@ -97,12 +95,12 @@ SEQAN_CHECKPOINT
           totalLen = (m - val) * (n - val);
           if(alphaByLambda * (logK + log(totalLen)) + beta >= val) {
             // ceil(val_min) == floor(val_fixed)
-            queryMatches.lengthAdjustment = (TSize) val;
+            return (TSize) val;
           }
         }
     } else { // the iteration did not converge
         // Use the best value seen so far.
-        queryMatches.lengthAdjustment = (TSize) val_min;
+        return (TSize) val_min;
     }
 }
 
@@ -194,7 +192,7 @@ SEQAN_CHECKPOINT
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Calculates the E-value
+// Calculates the E-value from two alignment rows and a specified length adjustment
 template<typename TRow, typename TSize>
 double
 _computeEValue(TRow & row0, TRow & row1, TSize lengthAdjustment) {
@@ -209,6 +207,23 @@ SEQAN_CHECKPOINT
 	// score = 1 * matches - 2 * errors (mismatches or gaps)
 	//       = matches - 2 * (aliLen - matches)
 	TSize score = matches - 2 * (aliLen - matches);
+
+	return K * (double)m * (double)n * exp(minusLambda * (double)score);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Calculates the E-value for an alignment with the specified score and number
+//  of matches, and the specified length of query and database sequence
+template<typename TSize>
+double
+_computeEValue(TSize score, TSize len0, TSize len1) {
+SEQAN_CHECKPOINT
+	double minusLambda = -1.19; // -lambda
+	double K = 0.34;
+
+	TSize lengthAdjustment = _computeLengthAdjustment(len0, len1);
+	TSize m = len0 - lengthAdjustment;
+	TSize n = len1 - lengthAdjustment;
 
 	return K * (double)m * (double)n * exp(minusLambda * (double)score);
 }
@@ -357,7 +372,7 @@ SEQAN_CHECKPOINT
 		TIterator itEnd = end(queryMatches.matches);
 
 		if (it != itEnd) {
-			_computeLengthAdjustment(queryMatches, length(source((*it).row1)), length(source((*it).row2)));
+			queryMatches.lengthAdjustment = _computeLengthAdjustment(length(source((*it).row1)), length(source((*it).row2)));
 		}
 
 		while (it < itEnd) {
@@ -461,7 +476,7 @@ SEQAN_CHECKPOINT
 		TIterator itEnd = end(queryMatches.matches);
 
 		if (it != itEnd) {
-			_computeLengthAdjustment(queryMatches, length(source((*it).row1)), length(source((*it).row2)));
+			queryMatches.lengthAdjustment = _computeLengthAdjustment(length(source((*it).row1)), length(source((*it).row2)));
 		}
 
 		while (it < itEnd) {
