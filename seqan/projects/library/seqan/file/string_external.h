@@ -875,56 +875,78 @@ you should think of using @Tag.ExternalConfig@.
 
 	template < typename TString >
     struct Container< ExtStringIterator<TString> >			{ typedef TString Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Container< ExtStringConstIterator<TString> >		{ typedef TString Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Container< ExtStringFwdIterator<TString> >		{ typedef TString Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Container< ExtStringFwdConstIterator<TString> >	{ typedef TString Type; };
+//IOREV _todo_
 
 	template < typename TString >
     struct Value< ExtStringIterator<TString> >				{ typedef typename Value<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Value< ExtStringConstIterator<TString> >			{ typedef typename Value<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Value< ExtStringFwdIterator<TString> >			{ typedef typename Value<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Value< ExtStringFwdConstIterator<TString> >		{ typedef typename Value<TString>::Type Type; };
+//IOREV _todo_
 
 	template < typename TString >
 	struct Reference< ExtStringConstIterator<TString> >:
 		public Reference<TString const> {};
+//IOREV _todo_
 
 	template < typename TString >
 	struct Reference< ExtStringFwdConstIterator<TString> >:
 		public Reference<TString const> {};
+//IOREV _todo_
 
 	template < typename TString >
     struct Size< ExtStringIterator<TString> >				{ typedef typename Size<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Size< ExtStringConstIterator<TString> >			{ typedef typename Size<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Size< ExtStringFwdIterator<TString> >			{ typedef typename Size<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Size< ExtStringFwdConstIterator<TString> >		{ typedef typename Size<TString>::Type Type; };
+//IOREV _todo_
 
 	template < typename TString >
     struct Position< ExtStringIterator<TString> >			{ typedef typename Position<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Position< ExtStringConstIterator<TString> >		{ typedef typename Position<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Position< ExtStringFwdIterator<TString> >		{ typedef typename Position<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Position< ExtStringFwdConstIterator<TString> >	{ typedef typename Position<TString>::Type Type; };
+//IOREV _todo_
 
 	template < typename TString >
     struct Difference< ExtStringIterator<TString> >			{ typedef typename Difference<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Difference< ExtStringConstIterator<TString> >	{ typedef typename Difference<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Difference< ExtStringFwdIterator<TString> >		{ typedef typename Difference<TString>::Type Type; };
+//IOREV _todo_
 	template < typename TString >
     struct Difference< ExtStringFwdConstIterator<TString> > { typedef typename Difference<TString>::Type Type; };
+//IOREV _todo_
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -1045,6 +1067,7 @@ you should think of using @Tag.ExternalConfig@.
                typename TConfig >
 	class String<TValue, External<TConfig> >
 	{
+//IOREV _todo_
 	public:
         enum { FRAMES    = TConfig::FRAMES,
                PAGE_SIZE = TConfig::PAGE_SIZE };
@@ -1494,24 +1517,28 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     template < typename TValue, typename TConfig >
     struct Size< String<TValue, External<TConfig> > >
     {
+//IOREV _todo_
         typedef typename String<TValue, External<TConfig> >::TSize Type;
     };
 
     template < typename TValue, typename TConfig >
     struct Difference< String<TValue, External<TConfig> > >
     {
+//IOREV _todo_
 		typedef typename MakeSigned_<typename String<TValue, External<TConfig> >::TSize>::Type Type;
     };
 
     template < typename TValue, typename TConfig, typename TSpec >
     struct Iterator< String<TValue, External<TConfig> > const, Tag<TSpec> const >
     {
+//IOREV _todo_
         typedef ExtStringFwdConstIterator< String<TValue, External<TConfig> > > Type;
     };
 
     template < typename TValue, typename TConfig, typename TSpec >
     struct Iterator< String<TValue, External<TConfig> >, Tag<TSpec> const > 
     {
+//IOREV _todo_
         typedef ExtStringFwdIterator< String<TValue, External<TConfig> > > Type;
     };
 //____________________________________________________________________________
@@ -1519,12 +1546,14 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     template < typename TValue, typename TConfig >
 	struct DefaultOverflowExplicit<String<TValue, External<TConfig> > >
 	{
+//IOREV _todo_
 		typedef Generous Type;
 	};
 
     template < typename TValue, typename TConfig >
 	struct DefaultOverflowImplicit<String<TValue, External<TConfig> > >
 	{
+//IOREV _todo_
 		typedef Generous Type;
 	};
 //____________________________________________________________________________
@@ -1544,6 +1573,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     template < typename TValue, typename TConfig >
 	struct AllowsFastRandomAccess< String<TValue, External<TConfig> > >
 	{
+//IOREV _todo_
 		typedef False Type;
 		enum { VALUE = false };
 	};

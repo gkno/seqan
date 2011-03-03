@@ -81,15 +81,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue >
     struct Value< SimpleBuffer<TValue> >	{ typedef TValue Type; };
+//IOREV _todo_
 
     template < typename TValue >
 	struct Size< SimpleBuffer<TValue> >		{ typedef size_t Type; };
+//IOREV _todo_
 
     template < typename TValue >
     struct Iterator< SimpleBuffer<TValue>, Standard >		{ typedef TValue *Type; };
+//IOREV _todo_
 
     template < typename TValue >
     struct Iterator< SimpleBuffer<TValue> const, Standard >	{ typedef TValue const *Type; };
+//IOREV _todo_
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -205,15 +209,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue >
     struct Value< PageBucket<TValue> >		{ typedef TValue Type; };
+//IOREV _todo_
 
     template < typename TValue >
     struct Size< PageBucket<TValue> >		{ typedef size_t Type; };
+//IOREV _todo_
 
     template < typename TValue >
     struct Iterator< PageBucket<TValue>, Standard >			{ typedef TValue *Type; };
+//IOREV _todo_
 
     template < typename TValue >
     struct Iterator< PageBucket<TValue> const, Standard >	{ typedef TValue const *Type; };
+//IOREV _todo_
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -226,21 +234,25 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TValue, typename TFile, typename TSpec >
     struct Value< PageFrame< TValue, TFile, TSpec > > {
+//IOREV _todo_
         typedef TValue Type;
     };
 
 	template < typename TValue, typename TFile, typename TSpec >
     struct Size< PageFrame< TValue, TFile, TSpec > > {
+//IOREV _todo_
         typedef size_t Type;
     };
 
 	template < typename TValue, typename TFile, typename TSpec >
     struct Iterator< PageFrame< TValue, TFile, TSpec >, Standard > {
+//IOREV _todo_
         typedef TValue *Type;
     };
 
 	template < typename TValue, typename TFile, typename TSpec >
     struct Iterator< PageFrame< TValue, TFile, TSpec > const, Standard> {
+//IOREV _todo_
         typedef TValue const *Type;
     };
 
@@ -255,6 +267,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TValue, typename TFile >
 	struct PageFrame< TValue, TFile, Dynamic<> >: public SimpleBuffer< TValue >
 	{
+//IOREV _todo_
 		typedef TFile							File;
 		typedef SimpleBuffer<TValue>	        TBase;
         typedef typename AsyncRequest<TFile>::Type  AsyncRequest;
@@ -291,6 +304,7 @@ namespace SEQAN_NAMESPACE_MAIN
                unsigned PageSize_ >
 	struct PageFrame<TValue, TFile, Fixed<PageSize_> >
 	{
+//IOREV _todo_
 		typedef TFile								File;
         typedef typename AsyncRequest<TFile>::Type		AsyncRequest;
 		typedef	typename Size<PageFrame>::Type		TSize;
@@ -328,12 +342,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue, typename TFile, unsigned PageSize_ >
     struct Iterator< PageFrame< TValue, TFile, Fixed<PageSize_> >, Standard >
     {
+//IOREV _todo_
         typedef VolatilePtr<TValue> Type;
     };
 
 	template < typename TValue, typename TFile, unsigned PageSize_ >
     struct Iterator< PageFrame< TValue, TFile, Fixed<PageSize_> > const, Standard>
     {
+//IOREV _todo_
         typedef VolatilePtr<TValue> const Type;
     };
 
@@ -722,24 +738,28 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TPageFrame >    
 	struct Value< PageChain<TPageFrame> > 
 	{
+//IOREV _todo_
 		typedef TPageFrame Type;
 	};
 
     template < typename TPageFrame >    
 	struct Size< PageChain<TPageFrame> > 
 	{
+//IOREV _todo_
 		typedef unsigned Type;
 	};
 
     template < typename TPageFrame >    
 	struct Iterator< PageChain<TPageFrame> > 
 	{
+//IOREV _todo_
 		typedef TPageFrame *Type;
 	};
 
     template < typename TPageFrame >    
 	struct Iterator< PageChain<TPageFrame> const > 
 	{
+//IOREV _todo_
 		typedef TPageFrame const *Type;
 	};
 
@@ -896,36 +916,43 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	struct Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> > 
 	{
+//IOREV _todo_
 		typedef String<TPageFrame> Type;
 	};
 
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	struct Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const > 
 	{
+//IOREV _todo_
 		typedef String<TPageFrame> const Type;
 	};
 
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	struct Value< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> > 
 	{
+//IOREV _todo_
 		typedef TPageFrame Type;
 	};
 
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	struct Size< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >:
 		public Size< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type> {};
+//IOREV _todo_
 
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	struct Position< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >:
 		public Position< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type> {};
+//IOREV _todo_
 
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	struct Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >:
 		public Iterator< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> >::Type> {};
+//IOREV _todo_
 
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	struct Iterator< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const >:
 		public Iterator< typename Host< PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> const>::Type> {};
+//IOREV _todo_
 
 
 	//////////////////////////////////////////////////////////////////////////////

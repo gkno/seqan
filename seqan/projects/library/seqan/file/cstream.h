@@ -57,6 +57,7 @@ struct Position<FILE *>
 template <>
 struct Value<FILE *>
 {
+//IOREV _todo_
 	typedef char Type;
 };
 
@@ -78,6 +79,7 @@ struct IsTellAndSeekStream_;
 template <>
 struct IsTellAndSeekStream_<FILE *>
 {
+//IOREV _todo_
 	typedef True Type;
 };
 

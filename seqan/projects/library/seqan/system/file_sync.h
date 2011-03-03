@@ -67,6 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
 	class File<Sync<TSpec> >
     {
+//IOREV _todo_
     public:
 
 		typedef __int64			FilePtr;
@@ -199,6 +200,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
 	class File<Sync<TSpec> >
     {
+//IOREV _todo_
     public:
 
 		typedef off_t			FilePtr;

@@ -104,6 +104,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
                typename TConfig >
 	class String<TValue, MMap<TConfig> >
 	{
+//IOREV _todo_
 	public:
 
         typedef typename TConfig::TFile		TFile;
@@ -296,12 +297,14 @@ SEQAN_CHECKPOINT
     template < typename TValue, typename TConfig >
     struct Size< String<TValue, MMap<TConfig> > >
     {
+//IOREV _todo_
         typedef size_t Type;
     };
 
     template < typename TValue, typename TConfig >
     struct Difference< String<TValue, MMap<TConfig> > >
     {
+//IOREV _todo_
 		typedef typename MakeSigned_<size_t>::Type Type;
     };
 //____________________________________________________________________________
@@ -309,12 +312,14 @@ SEQAN_CHECKPOINT
     template < typename TValue, typename TConfig >
 	struct DefaultOverflowExplicit<String<TValue, MMap<TConfig> > >
 	{
+//IOREV _todo_
 		typedef Generous Type;
 	};
 
     template < typename TValue, typename TConfig >
 	struct DefaultOverflowImplicit<String<TValue, MMap<TConfig> > >
 	{
+//IOREV _todo_
 		typedef Generous Type;
 	};
 //____________________________________________________________________________
@@ -322,6 +327,7 @@ SEQAN_CHECKPOINT
     template < typename TValue, typename TConfig >
 	struct IsContiguous< String<TValue, MMap<TConfig> > >
 	{
+//IOREV _todo_
 		typedef True Type;
 		enum { VALUE = true };
 	};
@@ -329,6 +335,7 @@ SEQAN_CHECKPOINT
     template < typename TValue, typename TConfig >
 	struct AllowsFastRandomAccess< String<TValue, MMap<TConfig> > >
 	{
+//IOREV _todo_
 		typedef False Type;
 		enum { VALUE = false };
 	};

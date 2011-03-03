@@ -144,6 +144,7 @@ SEQAN_CHECKPOINT
 template <typename TFile, typename TData, typename TMeta>
 struct FileFormat<TFile, TData, TMeta, void>
 {
+//IOREV _todo_
 public:
 	typedef typename Size<TData>::Type TSize;
 

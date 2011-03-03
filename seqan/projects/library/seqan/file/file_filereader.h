@@ -65,6 +65,7 @@ struct FileReader;
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 class String<TValue, FileReader<TFormat, TFile, TSpec> >
 {
+//IOREV _todo_
 public:
 	enum
 	{
@@ -141,17 +142,20 @@ public:
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct Value<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 {
+//IOREV _todo_
 	typedef TValue Type;
 };
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct GetValue<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 {
+//IOREV _todo_
 	typedef TValue Type;
 };
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct Reference<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 {
+//IOREV _todo_
 	typedef TValue Type;
 };
 
@@ -159,16 +163,19 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct Size<String<TValue, FileReader<TFormat, TFile, TSpec> > >:
 	Size<TFile>
 {
+//IOREV _todo_
 };
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct Difference<String<TValue, FileReader<TFormat, TFile, TSpec> > >:
 	Difference<TFile>
 {
+//IOREV _todo_
 };
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct Position<String<TValue, FileReader<TFormat, TFile, TSpec> > >:
 	Position<TFile>
 {
+//IOREV _todo_
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -455,6 +462,7 @@ struct FileReaderTypes_
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct FileReaderTypes_<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 {
+//IOREV _todo_
 	typedef typename Size<TFile>::Type TFileSize;
 	typedef String<TFileSize> TABL;
 	typedef typename Position<TABL>::Type TABLPosition;
@@ -465,6 +473,7 @@ struct FileReaderTypes_<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 template <typename TContainer>
 class Iter<TContainer, FileReaderIterator>
 {
+//IOREV _todo_
 public:
 	typedef typename FileReaderTypes_<TContainer>::TABLPosition TABLPosition;
 	typedef typename FileReaderTypes_<TContainer>::TBuf TBuf;
@@ -524,11 +533,13 @@ public:
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
 struct Iterator<String<TValue, FileReader<TFormat, TFile, TSpec> >, TIteratorSpec>
 {
+//IOREV _todo_
 	typedef Iter<String<TValue, FileReader<TFormat, TFile, TSpec> >, FileReaderIterator> Type;
 };
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TIteratorSpec>
 struct Iterator<String<TValue, FileReader<TFormat, TFile, TSpec> > const, TIteratorSpec>
 {
+//IOREV _todo_
 	typedef Iter<String<TValue, FileReader<TFormat, TFile, TSpec> >, FileReaderIterator> Type;
 };
 
@@ -538,32 +549,38 @@ template <typename TContainer>
 struct Value<Iter<TContainer, FileReaderIterator> >:
 	Value<TContainer>
 {
+//IOREV _todo_
 };
 template <typename TContainer>
 struct GetValue<Iter<TContainer, FileReaderIterator> >:
 	Value<TContainer>
 {
+//IOREV _todo_
 };
 template <typename TContainer>
 struct Reference<Iter<TContainer, FileReaderIterator> >:
 	Value<TContainer>
 {
+//IOREV _todo_
 };
 
 template <typename TContainer>
 struct Size<Iter<TContainer, FileReaderIterator> >:
 	Size<TContainer>
 {
+//IOREV _todo_
 };
 template <typename TContainer>
 struct Difference<Iter<TContainer, FileReaderIterator> >:
 	Difference<TContainer>
 {
+//IOREV _todo_
 };
 template <typename TContainer>
 struct Position<Iter<TContainer, FileReaderIterator> >:
 	Position<TContainer>
 {
+//IOREV _todo_
 };
 
 //////////////////////////////////////////////////////////////////////////////

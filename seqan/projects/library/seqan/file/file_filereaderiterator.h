@@ -57,6 +57,7 @@ struct FileReader;
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 class Iter<TFile, FileReader<TFormat, TFile2, TSpec> >
 {
+//IOREV _todo_
 public:
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Position<TFile>::Type TPosition;
@@ -103,17 +104,20 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 struct Value< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >:
 	Value<TFile>
 {
+//IOREV _todo_
 };
 
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 struct GetValue< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >
 {
+//IOREV _todo_
 	typedef typename Value< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type Type;
 };
 
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 struct Reference< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >
 {
+//IOREV _todo_
 	typedef typename Value< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type & Type;
 };
 

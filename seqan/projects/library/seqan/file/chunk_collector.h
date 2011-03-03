@@ -157,12 +157,14 @@ createChunk(ChunkCollector_<THost> & me)
 template <typename THost>
 struct Host<ChunkCollector_<THost> >
 {
+//IOREV _todo_
 	typedef THost Type;
 };
 
 template <typename THost>
 struct Host<ChunkCollector_<THost> const >
 {
+//IOREV _todo_
 	typedef THost Type;
 };
 
@@ -171,12 +173,14 @@ struct Host<ChunkCollector_<THost> const >
 template <typename THost>
 struct Value<ChunkCollector_<THost> >
 {
+//IOREV _todo_
 	typedef typename Value<THost>::Type Type;
 };
 
 template <typename THost>
 struct Value<ChunkCollector_<THost> const >
 {
+//IOREV _todo_
 	typedef typename Value<THost>::Type Type;
 };
 
@@ -185,12 +189,14 @@ struct Value<ChunkCollector_<THost> const >
 template <typename THost>
 struct GetValue<ChunkCollector_<THost> >
 {
+//IOREV _todo_
 	typedef typename GetValue<THost>::Type Type;
 };
 
 template <typename THost>
 struct GetValue<ChunkCollector_<THost> const >
 {
+//IOREV _todo_
 	typedef typename GetValue<THost>::Type Type;
 };
 
@@ -199,12 +205,14 @@ struct GetValue<ChunkCollector_<THost> const >
 template <typename THost>
 struct Size<ChunkCollector_<THost> >
 {
+//IOREV _todo_
 	typedef typename Size<THost>::Type Type;
 };
 
 template <typename THost>
 struct Size<ChunkCollector_<THost> const >
 {
+//IOREV _todo_
 	typedef typename Size<THost>::Type Type;
 };
 

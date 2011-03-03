@@ -71,6 +71,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template <>
     struct Difference< FILE* >
     {
+//IOREV _todo_
 	    typedef long Type;
     };
 

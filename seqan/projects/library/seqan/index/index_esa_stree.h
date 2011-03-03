@@ -2175,7 +2175,6 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		Iter<TIndex, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDfsOrder, False> const)
 	{
-//IOREV _todo_
 		return _isLeaf(value(it));
 	}
 
@@ -2185,7 +2184,6 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		Iter<TIndex, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDfsOrder, True> const)
 	{
-//IOREV _todo_
 		typedef typename Infix< typename Fibre<TIndex, EsaSA>::Type const >::Type TOccs;
 		typedef typename Iterator<TOccs, Standard>::Type TIter;
 

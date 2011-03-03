@@ -52,24 +52,28 @@ namespace SEQAN_NAMESPACE_MAIN
     template < __int64 FILE_SIZE, typename TFile >
     struct Size< File< Chained<FILE_SIZE, TFile> > >
     {
+//IOREV _todo_
         typedef __int64 Type;
     };
 
     template < __int64 FILE_SIZE, typename TFile >
     struct Position< File< Chained<FILE_SIZE, TFile> > >
     {
+//IOREV _todo_
         typedef __int64 Type;
     };
 
     template < __int64 FILE_SIZE, typename TFile >
     struct Difference< File< Chained<FILE_SIZE, TFile> > >
     {
+//IOREV _todo_
         typedef __int64 Type;
     };
 
     template < __int64 FILE_SIZE, typename TFile >
     struct AsyncRequest< File< Chained<FILE_SIZE, TFile> > >
     {
+//IOREV _todo_
 		typedef typename AsyncRequest<TFile>::Type Type;
     };
 
@@ -77,36 +81,42 @@ namespace SEQAN_NAMESPACE_MAIN
     template < unsigned FileCount_, typename TFile >
     struct Size< File< Striped<FileCount_, TFile> > >
     {
+//IOREV _todo_
         typedef __int64 Type;
     };
 
     template < unsigned FileCount_, typename TFile >
     struct Position< File< Striped<FileCount_, TFile> > >
     {
+//IOREV _todo_
         typedef __int64 Type;
     };
 
     template < unsigned FileCount_, typename TFile >
     struct Difference< File< Striped<FileCount_, TFile> > >
     {
+//IOREV _todo_
         typedef __int64 Type;
     };
 
     template < unsigned FileCount_, typename TFile >
     struct AsyncRequest< File< Striped<FileCount_, TFile> > >
     {
+//IOREV _todo_
 		typedef typename AsyncRequest<TFile>::Type Type;
     };
 
 
 	template < unsigned FileCount_, typename TFile >
 	class File< Striped<FileCount_, TFile> >: public Tuple< TFile, FileCount_ > {
+//IOREV _todo_
 		File(void * /*dummy = NULL*/) {}	// to be compatible with the FILE*(NULL) constructor
 		operator bool() const { return (*this)[0]; }
 	};
 
     template < __int64 FILE_SIZE, typename TFile >
 	class File< Chained<FILE_SIZE, TFile> >: public String< TFile > {
+//IOREV _todo_
 		typedef String< TFile > Base;
 
 		::std::string	baseName;

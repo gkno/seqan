@@ -66,6 +66,7 @@ struct ReadRaw_;
 template <typename TFile, typename TData>
 struct ReadRaw_<TFile, TData, True>
 {
+//IOREV _todo_
 	template <typename TSize>
 	inline static void
 	read_(TFile & file,
@@ -118,6 +119,7 @@ SEQAN_CHECKPOINT
 template <typename TFile, typename TData>
 struct ReadRaw_<TFile, TData, False>
 {
+//IOREV _todo_
 	static void
 	read_(TFile & file,
 		TData & data)

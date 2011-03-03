@@ -53,6 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
 	class File<Async<TSpec> >
     {
+//IOREV _todo_
     public:
 
         typedef LONGLONG    FilePtr;
@@ -622,6 +623,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
     class File<Async<TSpec> > : public File<Sync<TSpec> >
     {
+//IOREV _todo_
     public:
 
         typedef File<Sync<TSpec> >  Base;

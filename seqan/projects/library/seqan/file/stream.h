@@ -48,66 +48,79 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_ios<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ios<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_streambuf<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_streambuf<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_istream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_istream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_ostream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ostream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_iostream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_iostream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_stringbuf<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_stringbuf<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_istringstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_istringstream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_ostringstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ostringstream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_stringstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_stringstream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_filebuf<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_filebuf<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_ifstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ifstream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_ofstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ofstream<TValue, TTraits>::pos_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Position< ::std::basic_fstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_fstream<TValue, TTraits>::pos_type Type;
 };
 
@@ -116,66 +129,79 @@ struct Position< ::std::basic_fstream<TValue, TTraits> >
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_ios<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ios<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_streambuf<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_streambuf<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_istream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_istream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_ostream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ostream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_iostream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_iostream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_stringbuf<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_stringbuf<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_istringstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_istringstream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_ostringstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ostringstream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_stringstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_stringstream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_filebuf<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_filebuf<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_ifstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ifstream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_ofstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_ofstream<TValue, TTraits>::char_type Type;
 };
 template <typename TValue, typename TTraits>
 struct Value< ::std::basic_fstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef typename ::std::basic_fstream<TValue, TTraits>::char_type Type;
 };
 
@@ -197,11 +223,13 @@ struct IsTellAndSeekStream_
 template <typename TValue, typename TTraits>
 struct IsTellAndSeekStream_< ::std::basic_ifstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef True Type;
 };
 template <typename TValue, typename TTraits>
 struct IsTellAndSeekStream_< ::std::basic_fstream<TValue, TTraits> >
 {
+//IOREV _todo_
 	typedef True Type;
 };
 
