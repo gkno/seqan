@@ -33,6 +33,16 @@
 #ifndef SEQAN_HEADER_FILE_CSTYLE_H
 #define SEQAN_HEADER_FILE_CSTYLE_H
 
+/* IOREV
+ * _tested_
+ * _nodoc_
+ * 
+ * 
+ * Tested by tests/file
+ * documentation non-existent
+ * relation to cstream.h not clear
+ * Metafunctions supposedly moved hereto from file_cstyle.h are commented here awell
+ */
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -71,7 +81,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template <>
     struct Difference< FILE* >
     {
-//IOREV _todo_
+//IOREV shouldnt this be ulong, as the file can be ulong bytes big?
 	    typedef long Type;
     };
 
@@ -79,7 +89,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline const char * 
 	_getCStyleOpenMode(int openMode) 
 	{
-//IOREV _todo_
+//IOREV
 		switch (openMode & OPEN_MASK) {
             case OPEN_WRONLY:
                 if (!(openMode & OPEN_APPEND))
@@ -105,7 +115,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
 	open(FILE* &me, const char *fileName, int openMode) 
 	{
-//IOREV _todo_
+//IOREV _duplicate_ of cstream.h's  "open"
 		SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
         return (me = fopen(fileName, _getCStyleOpenMode(openMode))) != NULL;
     }
@@ -113,14 +123,14 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
 	open(FILE* &me, const char *fileName) 
 	{
-//IOREV _todo_
+//IOREV _duplicate_ of cstream.h's  "open"
 		return open(me, fileName, DefaultOpenMode<FILE*>::VALUE);
 	}
 
     inline bool 
 	openTemp(FILE* &me) 
 	{
-//IOREV _todo_
+//IOREV
 		SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
         return (me = tmpfile()) != NULL;
     }
@@ -128,7 +138,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
 	close(FILE* me) 
 	{
-//IOREV _todo_
+//IOREV _duplicate_ of cstream.h's  "close"
 		SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
         return fclose(me) == 0;
     }
@@ -136,7 +146,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline unsigned 
 	sectorSize(FILE* const &) 
 	{
-//IOREV _todo_
+//IOREV shouldn't this be variable? Doc?
         return 4096;
     }
 
@@ -144,7 +154,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline Size<FILE*>::Type 
 	seek(FILE* me, TPos const fileOfs, int origin) 
 	{
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with multiple function in cstream.h
         fseek(me, fileOfs, origin);
 		return ftell(me);
     }
@@ -152,14 +162,14 @@ namespace SEQAN_NAMESPACE_MAIN
     inline Size<FILE*>::Type 
 	seek(FILE* me, TPos const fileOfs) 
 	{
-//IOREV _todo_
+//IOREV shouldnt it be SEEK_SET instead of SEEK_BEGIN?
 		return seek(me, fileOfs, SEEK_BEGIN);
     }
 
     inline Size<FILE*>::Type 
 	tell(FILE* me) 
 	{
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with multiple functions in cstream.h
 		return ftell(me);
     }
 
@@ -167,7 +177,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
 	read(FILE* me, TValue *memPtr, TSize const count) 
 	{
-//IOREV _todo_
+//IOREV _duplicate_ of cstream.h's  "read"
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
         bool result = fread(memPtr, sizeof(TValue), count, me) == (size_t)count;
@@ -179,7 +189,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
 	write(FILE* me, TValue const *memPtr, TSize const count) 
 	{
-//IOREV _todo_
+//IOREV
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
         SEQAN_PROTIMESTART(tw);
         bool result = fwrite(memPtr, sizeof(TValue), count, me) == (size_t)count;
@@ -191,7 +201,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
 	readAt(FILE* me, TValue *memPtr, TSize const count, TPos const fileOfs) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef typename Position<FILE*>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
@@ -205,7 +215,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
 	writeAt(FILE* me, TValue const *memPtr, TSize const count, TPos const fileOfs) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef typename Position<FILE*>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
         SEQAN_PROADD(SEQAN_PROIO, (sizeof(TValue) * count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
@@ -218,7 +228,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline Size<FILE*>::Type 
 	size(FILE* me) 
 	{
-//IOREV _todo_
+//IOREV
         Size<FILE*>::Type old_pos = tell(me);
         Size<FILE*>::Type result = 0;
         if (seek(me, 0, SEEK_END) == 0)
@@ -231,7 +241,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline void 
 	resize(FILE* me, TSize new_length) 
 	{
-//IOREV _todo_
+//IOREV I think this is not c-standard and only works on POSIX-compliant systems
         Size<FILE*>::Type old_pos = tell(me);
         seek(me, new_length, SEEK_BEGIN);
         seek(me, old_pos, SEEK_BEGIN);
@@ -240,7 +250,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool 
 	flush(FILE*) 
 	{
-//IOREV _todo_
+//IOREV _notimplemented_
 		return true; 
 	}
 
@@ -248,14 +258,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void 
 	release(FILE*, AsyncRequest &) 
 	{
-//IOREV _todo_
+//IOREV _notimplemented_
 	}
 
     template < typename AsyncRequest >
     inline bool 
 	cancel(FILE*, AsyncRequest &) 
 	{
-//IOREV _todo_
+//IOREV _notimplemented_
 		return true; 
 	}
 

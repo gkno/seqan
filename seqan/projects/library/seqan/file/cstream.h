@@ -35,6 +35,19 @@
  
 #include <cstdio>
 
+/* IOREV
+ * _tested_
+ * _nodoc_
+ * 
+ * 
+ * Tested by tests/file
+ * documentation non-existent
+ * relation to file_cstyle.h not clear
+ * Metafunctions supposedly moved to file_cstyle.h are commented there too
+ */
+
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
@@ -57,7 +70,7 @@ struct Position<FILE *>
 template <>
 struct Value<FILE *>
 {
-//IOREV _todo_
+//IOREV
 	typedef char Type;
 };
 
@@ -74,12 +87,12 @@ struct Position<FILE *>
 
 template <typename T>
 struct IsTellAndSeekStream_;
-//IOREV _todo_
+//IOREV
 
 template <>
 struct IsTellAndSeekStream_<FILE *>
 {
-//IOREV _todo_
+//IOREV
 	typedef True Type;
 };
 
@@ -88,7 +101,7 @@ struct IsTellAndSeekStream_<FILE *>
 inline bool 
 _streamOpen(::std::FILE * & me, String<char> path, bool for_read = true)
 {
-//IOREV _todo_
+//IOREV _duplicate_ of file_cstyle's  "open"
 SEQAN_CHECKPOINT
 	if (for_read)
 	{
@@ -107,7 +120,7 @@ SEQAN_CHECKPOINT
 inline void 
 _streamClose(::std::FILE * & me)
 {
-//IOREV _todo_
+//IOREV _duplicate_ of file_cstyle's  "close"
 SEQAN_CHECKPOINT
 	if (me)
 	{
@@ -123,7 +136,7 @@ SEQAN_CHECKPOINT
 inline bool 
 _streamEOF(::std::FILE * me)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	int c = fgetc(me);
     ungetc(c, me);
@@ -140,7 +153,7 @@ _streamRead(TValue * target,
 			::std::FILE * source,
 			size_t limit)
 {
-//IOREV _todo_
+//IOREV _duplicate_ of file_cstyle.h's  "read"
 SEQAN_CHECKPOINT
 	return ::std::fread(target, sizeof(TValue), limit, source);
 }
@@ -152,7 +165,7 @@ SEQAN_CHECKPOINT
 inline char 
 _streamGet(::std::FILE * source)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return getc(source);
 }
@@ -165,7 +178,7 @@ inline void
 _streamPut(::std::FILE * target,
 		   char character)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	putc(character, target);
 }
@@ -182,7 +195,7 @@ SEQAN_CHECKPOINT
 inline Position<FILE *>::Type
 _streamTellG(FILE * me)
 {
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with file_cstyle.h's  "tell"
 SEQAN_CHECKPOINT
 	return ::std::ftell(me);
 }
@@ -194,7 +207,7 @@ SEQAN_CHECKPOINT
 inline Position<FILE *>::Type
 _streamTellP(FILE * me)
 {
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with file_cstyle.h's  "tell"
 SEQAN_CHECKPOINT
 	return ::std::ftell(me);
 }
@@ -207,7 +220,7 @@ inline void
 _streamSeekG(FILE * me,
 			 Position<FILE *>::Type pos)
 {
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with file_cstyle.h's  "seek"
 SEQAN_CHECKPOINT
 	::std::fseek(me, pos, SEEK_SET);
 }
@@ -220,7 +233,7 @@ inline void
 _streamSeekP(FILE * me,
 			 Position<FILE *>::Type pos)
 {
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with file_cstyle.h's  "seek"
 SEQAN_CHECKPOINT
 	::std::fseek(me, pos, SEEK_SET);
 }
@@ -233,7 +246,7 @@ inline void
 _streamSeek2G(FILE * me,
 	 int off)
 {
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with file_cstyle.h's  "seek"
 SEQAN_CHECKPOINT
 	::std::fseek(me, off, SEEK_CUR);
 }
@@ -245,7 +258,7 @@ SEQAN_CHECKPOINT
 inline void
 _streamUnget(::std::FILE * stream)
 {
-//IOREV _todo_
+//IOREV _duplicate_ overlaps in function with file_cstyle.h's  "seek"
 SEQAN_CHECKPOINT
 	_streamSeek2G(stream, -1);
 }
@@ -258,13 +271,13 @@ template <typename THolder>
 inline void
 _holderDeallocate(THolder &, FILE *)
 {
-//IOREV _todo_
+//IOREV _todo_ whats this good for?
 }
 template <typename THolder>
 inline FILE *
 _holderAllocatePointer(THolder &, FILE * data)
 {
-//IOREV _todo_
+//IOREV _todo_ whats this good for?
 	return data;
 }
 

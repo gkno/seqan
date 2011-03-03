@@ -33,6 +33,18 @@
 #ifndef SEQAN_HEADER_CHUNK_COLLECTOR_H
 #define SEQAN_HEADER_CHUNK_COLLECTOR_H
 
+/* IOREV
+ * _tested_
+ * _nodoc_
+ * 
+ * this class is only used file_format_raw
+ * it is tested by test_file which tests file_format_raw
+ * it is sparsely documented, but marked as Internal anyway (does it need doku
+ * then?)
+ * TODO not fully understood implications of assign and replace
+ */
+
+
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -51,7 +63,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename T>
 struct ChunkLength
 {
-//IOREV _todo_
+//IOREV
 	enum { VALUE = 1024 };
 };
 
@@ -62,7 +74,7 @@ struct ChunkLength
 template <typename THost>
 class ChunkCollector_
 {
-//IOREV _todo_
+//IOREV
 public:
 	THost * data_host;
 	typename Size<THost>::Type data_length;
@@ -92,7 +104,7 @@ template <typename THost>
 inline void
 clear(ChunkCollector_<THost> & me)
 {
-//IOREV _todo_
+//IOREV
    typedef ChunkCollector_<THost> TChunkCollector;
    typedef typename TChunkCollector::Chunk_Holder Chunk_Holder;
       
@@ -112,7 +124,7 @@ template <typename THost>
 inline typename Size<THost>::Type
 length(ChunkCollector_<THost> const & me)
 {
-//IOREV _todo_
+//IOREV 
 	return me.data_length;
 }
 
@@ -120,7 +132,7 @@ template <typename THost>
 inline void
 _setLength(ChunkCollector_<THost> & me, typename Size<THost>::Type new_length)
 {
-//IOREV _todo_
+//IOREV
 	me.data_length = new_length;
 }
 
@@ -128,7 +140,7 @@ template <typename THost>
 inline int
 chunkCount(ChunkCollector_<THost> const & me)
 {
-//IOREV _todo_
+//IOREV
 	return me.data_chunks.size();
 }
 
@@ -136,7 +148,7 @@ template <typename THost>
 inline typename Value<THost>::Type *
 getChunk(ChunkCollector_<THost> const & me, int chunk_number)
 {
-//IOREV _todo_
+//IOREV
 	return me.data_chunks[chunk_number];
 }
 
@@ -144,7 +156,7 @@ template <typename THost>
 inline typename Value<THost>::Type *
 createChunk(ChunkCollector_<THost> & me)
 {
-//IOREV _todo_
+//IOREV
    typedef ChunkCollector_<THost> TChunkCollector;
 	typename Value<THost>::Type * new_chunk;
 	allocate(me.data_host, new_chunk, TChunkCollector::CHUNK_LENGTH);
@@ -157,14 +169,14 @@ createChunk(ChunkCollector_<THost> & me)
 template <typename THost>
 struct Host<ChunkCollector_<THost> >
 {
-//IOREV _todo_
+//IOREV
 	typedef THost Type;
 };
 
 template <typename THost>
 struct Host<ChunkCollector_<THost> const >
 {
-//IOREV _todo_
+//IOREV
 	typedef THost Type;
 };
 
@@ -173,14 +185,14 @@ struct Host<ChunkCollector_<THost> const >
 template <typename THost>
 struct Value<ChunkCollector_<THost> >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename Value<THost>::Type Type;
 };
 
 template <typename THost>
 struct Value<ChunkCollector_<THost> const >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename Value<THost>::Type Type;
 };
 
@@ -189,14 +201,14 @@ struct Value<ChunkCollector_<THost> const >
 template <typename THost>
 struct GetValue<ChunkCollector_<THost> >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename GetValue<THost>::Type Type;
 };
 
 template <typename THost>
 struct GetValue<ChunkCollector_<THost> const >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename GetValue<THost>::Type Type;
 };
 
@@ -205,14 +217,14 @@ struct GetValue<ChunkCollector_<THost> const >
 template <typename THost>
 struct Size<ChunkCollector_<THost> >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename Size<THost>::Type Type;
 };
 
 template <typename THost>
 struct Size<ChunkCollector_<THost> const >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename Size<THost>::Type Type;
 };
 
@@ -220,7 +232,7 @@ struct Size<ChunkCollector_<THost> const >
 
 struct AssignStreamToChunkCollector_
 {
-//IOREV _todo_
+//IOREV
 	template <typename THost, typename TSource>
 	static inline void 
 	assign_(ChunkCollector_<THost> & target,
@@ -266,7 +278,7 @@ inline void
 assign(ChunkCollector_<THost> & target,
 	   TSource & source)
 {
-//IOREV _todo_
+//IOREV
 	AssignStreamToChunkCollector_::assign_(target, source);
 }
 template <typename THost, typename TSource>
@@ -274,7 +286,7 @@ inline void
 assign(ChunkCollector_<THost> & target,
 	   TSource const & source)
 {
-//IOREV _todo_
+//IOREV
 	AssignStreamToChunkCollector_::assign_(target, source);
 }
 
@@ -284,7 +296,7 @@ assign(ChunkCollector_<THost> & target,
 	   TSource & source,
 	   TSize limit)
 {
-//IOREV _todo_
+//IOREV
 	AssignStreamToChunkCollector_::assign_(target, source, limit);
 }
 template <typename THost, typename TSource, typename TSize>
@@ -293,7 +305,7 @@ assign(ChunkCollector_<THost> & target,
 	   TSource const & source,
 	   TSize limit)
 {
-//IOREV _todo_
+//IOREV
 	AssignStreamToChunkCollector_::assign_(target, source, limit);
 }
 
@@ -303,7 +315,7 @@ assign(ChunkCollector_<THost> & target,
 template <typename TExpand>
 struct AssignChunkCollectorToString_
 {
-//IOREV _todo_
+//IOREV
 	template <typename TTarget, typename TSource>
 	static void assign_(
 		TTarget & target, 
@@ -356,7 +368,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const /*tag*/)
 {
-//IOREV _todo_
+//IOREV
 	AssignChunkCollectorToString_<Tag<TExpand> const>::assign_(target, source);
 }
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
@@ -366,7 +378,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const /*tag*/)
 {
-//IOREV _todo_
+//IOREV
 	AssignChunkCollectorToString_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
@@ -376,7 +388,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 template <typename TExpand>
 struct AppendChunkCollectorToString_
 {
-//IOREV _todo_
+//IOREV
 	template <typename TTarget, typename TSource>
 	static void append_(
 		TTarget & target, 
@@ -433,7 +445,7 @@ append(String<TTargetValue, TTargetSpec> & target,
 	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const )
 {
-//IOREV _todo_
+//IOREV
 	AppendChunkCollectorToString_<Tag<TExpand> const>::append_(target, source);
 }
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
@@ -443,7 +455,7 @@ append(String<TTargetValue, TTargetSpec> & target,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const )
 {
-//IOREV _todo_
+//IOREV
 	AppendChunkCollectorToString_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
@@ -452,7 +464,7 @@ append(String<TTargetValue, TTargetSpec> & target,
 template <typename TExpand>
 struct ReplaceChunkCollectorToString_
 {
-//IOREV _todo_
+//IOREV
 	template <typename TTarget, typename TSource>
 	static void replace_(
 		TTarget & target,
@@ -511,7 +523,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const /*tag*/)
 {
-//IOREV _todo_
+//IOREV
 	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
@@ -524,7 +536,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const /*tag*/)
 {
-//IOREV _todo_
+//IOREV
 	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
@@ -538,7 +550,7 @@ replace(TTargetValue * target,
 		ChunkCollector_<TSourceHost> const & source,
 		Tag<TExpand> const /*tag*/)
 {
-//IOREV _todo_
+//IOREV
 	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
@@ -551,7 +563,7 @@ replace(TTargetValue * target,
 		size_t limit,
 		Tag<TExpand> const /*tag*/)
 {
-//IOREV _todo_
+//IOREV
 	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 //____________________________________________________________________________
