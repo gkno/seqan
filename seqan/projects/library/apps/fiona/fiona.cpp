@@ -400,7 +400,7 @@ inline void linearRegression(
 	 for(unsigned int i=0;i<length(x);i++)
         {
                 covarianceXY += (x[i] - meanX)*( y[i] - meanY);
-                varianceX   += pow( (x[i] - meanX) ,(unsigned int)2);
+                varianceX   += pow((x[i] - meanX), 2);
         }
 	
 	/* save the parameters in the model */
@@ -431,8 +431,8 @@ inline TValue RSquare(
 	TValue SStotal =0;
          for(unsigned int i=0;i<length(x);i++)
         {
-                SStotal  += pow( (y[i] - meanY) ,(unsigned int)2 );
-		SSerror  += pow( (y[i] - fittedValue(linearModel,x[i])) , (unsigned int)2 );
+                SStotal  += pow((y[i] - meanY), 2);
+				SSerror  += pow( (y[i] - fittedValue(linearModel,x[i])), 2);
         }
 	return((TValue) ( 1- (SSerror/SStotal)));
 }
