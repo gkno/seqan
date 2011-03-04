@@ -33,6 +33,8 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_ALGORITHMS_H
 #define SEQAN_HEADER_TEST_GRAPH_ALGORITHMS_H
 
+#include <seqan/misc/misc_union_find.h>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -1122,31 +1124,31 @@ void Test_HmmAlgorithms() {
 SEQAN_DEFINE_TEST(test_union_find)
 {
     {
-        String<int> uf;
+        UnionFind<int> uf;
 
-        _unionFindInit(uf, 3);
-        SEQAN_ASSERT_EQ(uf[0], -1);
-        SEQAN_ASSERT_EQ(uf[1], -1);
-        SEQAN_ASSERT_EQ(uf[2], -1);
+        resize(uf, 3);
+        SEQAN_ASSERT_EQ(uf._values[0], -1);
+        SEQAN_ASSERT_EQ(uf._values[1], -1);
+        SEQAN_ASSERT_EQ(uf._values[2], -1);
 
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 1);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 2);
+        SEQAN_ASSERT_EQ(find(uf, 0), 0);
+        SEQAN_ASSERT_EQ(find(uf, 1), 1);
+        SEQAN_ASSERT_EQ(find(uf, 2), 2);
 
-        _unionFindUnion(uf, 0, 1);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 0);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 2);
+        joinSets(uf, 0, 1);
+        SEQAN_ASSERT_EQ(find(uf, 0), 0);
+        SEQAN_ASSERT_EQ(find(uf, 1), 0);
+        SEQAN_ASSERT_EQ(find(uf, 2), 2);
 
-        _unionFindUnion(uf, 0, 1);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 0);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 2);
+        joinSets(uf, 0, 1);
+        SEQAN_ASSERT_EQ(find(uf, 0), 0);
+        SEQAN_ASSERT_EQ(find(uf, 1), 0);
+        SEQAN_ASSERT_EQ(find(uf, 2), 2);
 
-        _unionFindUnion(uf, 0, 2);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 0), 0);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 1), 0);
-        SEQAN_ASSERT_EQ(_unionFindFind(uf, 2), 0);
+        joinSets(uf, 0, 2);
+        SEQAN_ASSERT_EQ(find(uf, 0), 0);
+        SEQAN_ASSERT_EQ(find(uf, 1), 0);
+        SEQAN_ASSERT_EQ(find(uf, 2), 0);
     }
 }
 

@@ -641,54 +641,6 @@ struct LessPairI1_ :
 ..include:seqan/graph_algorithms.h
 */
 
-// TODO(holtgrew): Move somewhere central, make public and document UF properly.
-template <typename TValue, typename TSize>
-inline
-void
-_unionFindInit(String<TValue> & unionFind,
-               TSize newLength)
-{
-    clear(unionFind);
-    resize(unionFind, newLength, static_cast<TValue>(-1));
-}
-
-template <typename TValue, typename TQuery>
-inline
-TValue
-_unionFindFind(String<TValue> & unionFind,
-               TQuery const & query)
-{
-    TValue j = query;
-    while (unionFind[j] >= 0)
-        j = unionFind[j];
-
-    TValue i = query;
-    while (unionFind[i] >= 0) {
-        TValue tmp = i;
-        i = unionFind[i];
-        unionFind[tmp] = j;
-    }
-
-    return j;
-}
-
-template <typename TValue, typename TLeft, typename TRight>
-inline
-void
-_unionFindUnion(String<TValue> & unionFind,
-                TLeft const & left,
-                TRight const & right)
-{
-    TValue sum = unionFind[left] + unionFind[right];
-    if (_abs(unionFind[left]) < _abs(unionFind[right])) {
-        unionFind[left] = right;
-        unionFind[right] = sum;
-    } else {
-        unionFind[right] = left;
-        unionFind[left] = sum;
-    }
-}
-
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TEdges>
 void
 kruskalsAlgorithm(Graph<TSpec> const & g,
@@ -711,8 +663,8 @@ kruskalsAlgorithm(Graph<TSpec> const & g,
 
 	// Initialization
 	reserve(edges, 2 * (numVertices(g) - 1));
-    String<int> unionFind;
-    _unionFindInit(unionFind, numVertices(g));
+    UnionFind<TVertexDescriptor> unionFind;
+    resizeVertexMapX(g, unionFind);
 	
 	// Sort the edges
 	TEdgeIterator itE(g);
@@ -726,12 +678,12 @@ kruskalsAlgorithm(Graph<TSpec> const & g,
 		TVertexDescriptor x = value(itEdgeList).i2.i1;
 		TVertexDescriptor y = value(itEdgeList).i2.i2;
 
-        if (_unionFindFind(unionFind, x) == _unionFindFind(unionFind, y))
+        if (findSet(unionFind, x) == findSet(unionFind, y))
             continue;
 
         appendValue(edges, x);
         appendValue(edges, y);
-        _unionFindUnion(unionFind, _unionFindFind(unionFind, x), _unionFindFind(unionFind, y));
+        joinSets(unionFind, find(unionFind, x), find(unionFind, y));
 	}
 }
 

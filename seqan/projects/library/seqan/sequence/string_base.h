@@ -76,7 +76,7 @@ class String;
 // Metafunction Value
 // ----------------------------------------------------------------------------
 
-///.Metafunction.Iterator.param.T.type:Class.String
+///.Metafunction.Value.param.T.type:Class.String
 
 template <typename TValue, typename TSpec>
 struct Value<String<TValue, TSpec> >

@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adding Union-Find data structure in `misc/misc_union_find.d`.
  * fixing `eraseBack()` with block strings.
  * Using Union-Find data structure in Kruskal's algorithm to improve the running time to `O(m log m)`.
  * Changed `resizeVertexMap` and `resizeEdgeMap`. The two-parameter versions have similar semantics as before and initialize the map with 0. The three-parameter versions expect an additional "prototype version" that is copied/assigned into the map. The old copy-from-arrayy versions are now called `assignVertexMap` and `assignEdgeMap`. Also updated the tutorial.
