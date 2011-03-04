@@ -728,9 +728,9 @@ decomposeGraphStiege(Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
     // cluster tree at the same time.
     
     // Edge and vertex type markers.
-    String<unsigned> vertexFlags;
+    String<__uint32> vertexFlags;
     resizeVertexMap(g, vertexFlags, 0u);
-    String<unsigned> edgeFlags;
+    String<__uint32> edgeFlags;
     resizeEdgeMap(g, edgeFlags, 0u);
 
     // Initialize decomposition tree.
