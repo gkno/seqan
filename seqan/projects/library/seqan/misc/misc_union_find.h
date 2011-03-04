@@ -34,8 +34,8 @@
 // Implementation of the Union-Find data structure.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_GRAPH_DECOMPOSITON_GRAPH_DECOMPOSE_GRAPH_STIEGE_H_
-#define SEQAN_HEADER_GRAPH_DECOMPOSITON_GRAPH_DECOMPOSE_GRAPH_STIEGE_H_
+#ifndef SEQAN_MISC_MISC_UNION_FIND_H_
+#define SEQAN_MISC_MISC_UNION_FIND_H_
 
 // TODO(holtgrew): Comprehensive tests. Currently, there are *some* tests in the tests for graph_algorithm.
 
@@ -281,4 +281,4 @@ joinSets(UnionFind<TValue> & unionFind,
 
 }  // namespace seqan
 
-#endif // #ifndef SEQAN_HEADER_GRAPH_DECOMPOSITON_GRAPH_DECOMPOSE_GRAPH_STIEGE_H_
+#endif // #ifndef SEQAN_MISC_MISC_UNION_FIND_H_
