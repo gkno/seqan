@@ -1131,24 +1131,24 @@ SEQAN_DEFINE_TEST(test_union_find)
         SEQAN_ASSERT_EQ(uf._values[1], -1);
         SEQAN_ASSERT_EQ(uf._values[2], -1);
 
-        SEQAN_ASSERT_EQ(find(uf, 0), 0);
-        SEQAN_ASSERT_EQ(find(uf, 1), 1);
-        SEQAN_ASSERT_EQ(find(uf, 2), 2);
+        SEQAN_ASSERT_EQ(findSet(uf, 0), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 1), 1);
+        SEQAN_ASSERT_EQ(findSet(uf, 2), 2);
 
         joinSets(uf, 0, 1);
-        SEQAN_ASSERT_EQ(find(uf, 0), 0);
-        SEQAN_ASSERT_EQ(find(uf, 1), 0);
-        SEQAN_ASSERT_EQ(find(uf, 2), 2);
+        SEQAN_ASSERT_EQ(findSet(uf, 0), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 1), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 2), 2);
 
         joinSets(uf, 0, 1);
-        SEQAN_ASSERT_EQ(find(uf, 0), 0);
-        SEQAN_ASSERT_EQ(find(uf, 1), 0);
-        SEQAN_ASSERT_EQ(find(uf, 2), 2);
+        SEQAN_ASSERT_EQ(findSet(uf, 0), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 1), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 2), 2);
 
         joinSets(uf, 0, 2);
-        SEQAN_ASSERT_EQ(find(uf, 0), 0);
-        SEQAN_ASSERT_EQ(find(uf, 1), 0);
-        SEQAN_ASSERT_EQ(find(uf, 2), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 0), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 1), 0);
+        SEQAN_ASSERT_EQ(findSet(uf, 2), 0);
     }
 }
 

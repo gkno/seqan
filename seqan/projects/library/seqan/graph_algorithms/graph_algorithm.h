@@ -683,7 +683,7 @@ kruskalsAlgorithm(Graph<TSpec> const & g,
 
         appendValue(edges, x);
         appendValue(edges, y);
-        joinSets(unionFind, find(unionFind, x), find(unionFind, y));
+        joinSets(unionFind, findSet(unionFind, x), findSet(unionFind, y));
 	}
 }
 
