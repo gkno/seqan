@@ -47,6 +47,7 @@
 
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
+#include <seqan/misc/misc_bit_twiddling.h>
 
 // ==========================================================================
 // Generated Forwards

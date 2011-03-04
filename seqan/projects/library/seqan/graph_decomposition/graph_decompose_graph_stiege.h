@@ -123,55 +123,6 @@ public:
 // Function decomposeGraphStiege()
 // ----------------------------------------------------------------------------
 
-// TODO(holtgrew): Move these functions into misc_bitmasks.h?
-template <typename TWord>
-inline
-void
-setBitTo(TWord & word, unsigned index, bool value)
-{
-    // See http://www-graphics.stanford.edu/~seander/bithacks.html#ConditionalSetOrClearBitsWithoutBranching
-    word = (word & ~(1u << index)) | (-value & (1u << index));
-}
-
-template <typename TWord>
-inline
-void
-setBit(TWord & word, unsigned index)
-{
-    // std::cerr << "set " << index << " in " << word << std::endl;
-    // std::cerr << word << " |= ~" << (1u << index) << std::endl;
-    word |= (1u << index);
-    // std::cerr << "word == " << word << std::endl;
-}
-
-template <typename TWord>
-inline
-void
-clearBit(TWord & word, unsigned index)
-{
-    // std::cerr << "clear " << index << " from " << word << std::endl;
-    // std::cerr << word << " &= ~" << (1u << index) << std::endl;
-    word &= ~(1u << index);
-    // std::cerr << "word == " << word << std::endl;
-}
-
-template <typename TWord>
-inline
-void
-clearBits(TWord & word)
-{
-    word = 0;
-}
-
-template <typename TWord>
-inline
-bool
-isBitSet(TWord const & word, unsigned index)
-{
-    // std::cerr << "is bit " << index << " set in word " << word << "? " << (word & (1u << index)) << std::endl;
-    return (word & (1u << index)) != 0;
-}
-
 template <typename TBlockDescriptorsMap, typename TTreeVertexDescriptor, typename TVertexDescriptor, typename TComponents, typename TComponentToBlock>
 void
 _classifyAsIsolated(

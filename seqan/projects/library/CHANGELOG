@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Adding functions `isBitSet()`, `clearBit()`, `clearAllBits()`, `setBitTo()`, `setBit()` to misc header ''misc_bit_twiddling.h''.
  * Adding Union-Find data structure in `misc/misc_union_find.d`.
  * fixing `eraseBack()` with block strings.
  * Using Union-Find data structure in Kruskal's algorithm to improve the running time to `O(m log m)`.
