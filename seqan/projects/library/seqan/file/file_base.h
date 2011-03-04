@@ -33,6 +33,17 @@
 #ifndef SEQAN_HEADER_FILE_BASE_H
 #define SEQAN_HEADER_FILE_BASE_H
 
+/* IOREV
+ * _doc_
+ * 
+ * base class with SPecs and Tags
+ * also contains standard calls for IO as wrappers around members
+ * in system/file_sync.h and system/file_ssync.h
+ * (hese files are built around c++ fstream IO)
+ * well documented (in comparison to other files)
+ * 
+ * SEQAN_DIRECTIO Macro mentioned here but not documented or tested
+ */
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +69,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec = void>
     struct Sync;
-//IOREV _todo_
+//IOREV
 
 /**
 .Spec.Async:
@@ -86,7 +97,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec = Async<> >
     class File;
-//IOREV _todo_
+//IOREV
 
 /**
 .Spec.Chained:
@@ -107,7 +118,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	// chained file's default filesize is 2gb-1byte (fat16 filesize limitation)
 	template < __int64 FileSize_ = ~(((__int64)1) << 63), typename TFile = File<> >
 	struct Chained;
-//IOREV _todo_
+//IOREV
 
 /**
 .Spec.Striped:
@@ -126,7 +137,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 	template < unsigned FileCount_ = 2, typename TFile = File<> >
 	struct Striped;
-//IOREV _todo_
+//IOREV not known if working, see file_array.h
 
     enum FileOpenMode {
         OPEN_RDONLY     = 1,
@@ -138,17 +149,17 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
         OPEN_ASYNC      = 16,
 		OPEN_TEMPORARY	= 32,
 		OPEN_QUIET		= 128
-    };
+    }; //IOREV is it intended that two labels share the same value? What is OPEN_MASK anyway?
 
 	template <typename T>
 	struct DefaultOpenMode {
-//IOREV _todo_
+//IOREV
 		enum { VALUE = OPEN_RDWR | OPEN_CREATE | OPEN_APPEND };
 	};
 
 	template <typename T>
 	struct DefaultOpenTempMode {
-//IOREV _todo_
+//IOREV
 		enum { VALUE = OPEN_RDWR | OPEN_CREATE };
 	};
 
@@ -158,14 +169,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 #ifndef SEEK_END
       , SEEK_END     = 2
 #endif
-    };
+    }; //IOREV why not use constants SEEK_SET, SEEK_CUR, SEEK_END from cstdio
 
 
     //////////////////////////////////////////////////////////////////////////////
     // result type of asynch. functions
     // you have to call release(AsyncRequest<T>) after a finished *event based* transfer
 	struct AsyncDummyRequest {};
-//IOREV _todo_
+//IOREV
 
 /**
 .Class.AsyncRequest:
@@ -180,7 +191,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename T >
     struct AsyncRequest
     {
-//IOREV _todo_
+//IOREV _stub_ this seems not to be implemented at all, most functions are commented
         typedef AsyncDummyRequest Type;
     };
 /*
@@ -243,14 +254,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline bool open(File<TSpec> &me, const char *fileName, int openMode) 
 	{
-//IOREV _todo_
+//IOREV
         return me.open(fileName, openMode);
     }
 
     template < typename TSpec >
     inline bool open(File<TSpec> &me, const char *fileName) 
 	{
-//IOREV _todo_
+//IOREV
 		return open(me, fileName, DefaultOpenMode<File<TSpec> >::VALUE);
     }
 
@@ -270,21 +281,21 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline bool openTemp(File<TSpec> &me) 
 	{
-//IOREV _todo_
+//IOREV
         return me.openTemp();
     }
 
     template < typename TSpec >
     inline bool openTemp(File<TSpec> &me, int openMode) 
 	{
-//IOREV _todo_
+//IOREV
         return me.openTemp(openMode);
     }
 
     template < typename File >
     inline void reopen(File &, int) 
 	{
-//IOREV _todo_
+//IOREV _stub_ _nodoc_ This is currently a no-op. Is that intended?
 	}
     
 /**
@@ -301,14 +312,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline bool close(File<TSpec> & me) 
 	{
-//IOREV _todo_
+//IOREV
         return me.close();
     }
 
     template < typename TSpec >
     inline unsigned sectorSize(File<TSpec> const & /*me*/) 
 	{
-//IOREV _todo_
+//IOREV _duplicate_ _nodoc_ duplicate or identical spec. in file_cstyle.h should'nt this be variable
         return 4096;
     }
 
@@ -333,7 +344,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	template < typename TSpec, typename TValue, typename TSize >
     inline bool read(File<TSpec> & me, TValue *memPtr, TSize const count) 
 	{
-//IOREV _todo_
+//IOREV
 		return me.read(memPtr, count * sizeof(TValue));
     }
     
@@ -354,7 +365,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	template < typename TSpec, typename TValue, typename TSize >
     inline bool write(File<TSpec> & me, TValue const *memPtr, TSize const count) 
 	{
-//IOREV _todo_
+//IOREV
 		return me.write(memPtr, count * sizeof(TValue));
     }
 
@@ -375,7 +386,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TFile, typename TValue, typename TSize, typename TPos >
     inline bool readAt(TFile & me, TValue *memPtr, TSize const count, TPos const fileOfs) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef typename Position<TFile>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
 		return read(me, memPtr, count);
@@ -398,7 +409,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TFile, typename TValue, typename TSize, typename TPos >
     inline bool writeAt(TFile & me, TValue const *memPtr, TSize const count, TPos const fileOfs) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef typename Position<TFile>::Type pos_t;
 		seek(me, (pos_t)fileOfs * (pos_t)sizeof(TValue));
 		return write(me, memPtr, count);
@@ -427,7 +438,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	template < typename TSpec, typename TPos >
     inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs, int origin) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef typename Position< File<TSpec> >::Type TFilePos;
 		TFilePos newOfs = me.seek(fileOfs, origin);
         #ifdef SEQAN_DEBUG_OR_TEST_
@@ -441,7 +452,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	template < typename TSpec, typename TPos >
     inline typename Position< File<TSpec> >::Type seek(File<TSpec> &me, TPos const fileOfs) 
 	{
-//IOREV _todo_
+//IOREV
 		return seek(me, fileOfs, SEEK_BEGIN);
 	}
 /**
@@ -458,7 +469,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline typename Position< File<TSpec> >::Type tell(File<TSpec> &me) 
 	{
-//IOREV _todo_
+//IOREV
         return me.tell();
     }
 
@@ -476,7 +487,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename File >
     inline void rewind(File &me) 
 	{
-//IOREV _todo_
+//IOREV
 		seek(me, 0);
     }
     
@@ -494,7 +505,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline typename Size<File<TSpec> >::Type size(File<TSpec> &me) 
 	{
-//IOREV _todo_
+//IOREV
         typename Size<File<TSpec> >::Type old_pos = tell(me);
         typename Size<File<TSpec> >::Type result = seek(me, 0, SEEK_END);
         seek(me, old_pos, SEEK_BEGIN);
@@ -514,7 +525,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec, typename TSize >
     inline void resize(File<TSpec> &me, TSize new_length) 
 	{
-//IOREV _todo_
+//IOREV possibly not standard-conformant, see resize() in file_cstyle.h
         typename Size<File<TSpec> >::Type old_pos = tell(me);
         seek(me, new_length, SEEK_BEGIN);
         setEof(me);
@@ -534,7 +545,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline bool setEof(File<TSpec> &/*me*/) 
 	{ 
-//IOREV _todo_
+//IOREV _noop_ specialized for async file access but not for sync
 		return true; 
 	}
 
@@ -664,7 +675,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	asyncReadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         AsyncRequest &)
     {
-//IOREV _todo_
+//IOREV _stub_ see general discussion about AsynRequest
         return readAt(me, memPtr, count, fileOfs);
     }
     
@@ -690,7 +701,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	asyncWriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         AsyncRequest &)
     {
-//IOREV _todo_
+//IOREV _stub_ see general discussion about AsynRequest
         return writeAt(me, memPtr, count, fileOfs);
     }
 
@@ -712,7 +723,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline void flush(File<TSpec> &) 
 	{
-//IOREV _todo_
+//IOREV _noop_ specialized for async file access but not for sync
 	}
 
 /**
@@ -732,14 +743,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
     inline bool waitFor(AsyncDummyRequest &) 
 	{ 
-//IOREV _todo_
+//IOREV _noop_ see general discussion about AsynRequest
 		return true; 
 	}
 
 	template < typename TTime >
     inline bool waitFor(AsyncDummyRequest &, TTime) 
 	{ 
-//IOREV _todo_
+//IOREV _noop_ see general discussion about AsynRequest
 		return true; 
 	}
 
@@ -747,7 +758,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	template < typename TSpec, typename AsyncRequest >
     inline void release(File<TSpec> &, AsyncRequest &) 
 	{
-//IOREV _todo_
+//IOREV _noop_ see general discussion about AsynRequest
 	}
 
 /**
@@ -766,7 +777,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec, typename AsyncRequest >
     inline bool cancel(File<TSpec> &, AsyncRequest &) 
 	{
-//IOREV _todo_
+//IOREV _noop_ see general discussion about AsynRequest
 		return true; 
 	}
 
@@ -776,14 +787,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	template <typename T1, typename T2> inline
 	T1 enclosingBlocks(T1 _size, T2 _blockSize) 
 	{
-//IOREV _todo_
+//IOREV not sure what this does, but is used in several places
 		return (_size + _blockSize - 1) / _blockSize;
 	}
 
 	template <typename T1, typename T2> inline
 	T1 alignSize(T1 _size, T2 _aligning) 
 	{
-//IOREV _todo_
+//IOREV not sure what this does, but is used in several places
         if (_size < _aligning)
             return _aligning;
         else

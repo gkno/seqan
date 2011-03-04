@@ -36,6 +36,22 @@
 #include <sstream>
 #include <iomanip>
 
+/* IOREV
+ * _nottested_
+ * _doc_
+ * 
+ * 
+ * Basically contains stuff fro striped and Chained file access
+ * (a little) documentation for both is in file_base
+ * Chained-tag has no test-case but is used in different demos
+ * Striped-tag has no test-case and AFAICT is not used in any app
+ * functions used are those of file_cstyle.h not cstream.h
+ * not clear why certain things are here and other in file_base
+ * 
+ * I am unsure whether Striped works at all, there seems to be no open
+ * functions or other functions for acutally assigning multiple files
+ * to the Striped virtual file
+ */
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -52,28 +68,28 @@ namespace SEQAN_NAMESPACE_MAIN
     template < __int64 FILE_SIZE, typename TFile >
     struct Size< File< Chained<FILE_SIZE, TFile> > >
     {
-//IOREV _todo_
+//IOREV 
         typedef __int64 Type;
     };
 
     template < __int64 FILE_SIZE, typename TFile >
     struct Position< File< Chained<FILE_SIZE, TFile> > >
     {
-//IOREV _todo_
+//IOREV 
         typedef __int64 Type;
     };
 
     template < __int64 FILE_SIZE, typename TFile >
     struct Difference< File< Chained<FILE_SIZE, TFile> > >
     {
-//IOREV _todo_
+//IOREV 
         typedef __int64 Type;
     };
 
     template < __int64 FILE_SIZE, typename TFile >
     struct AsyncRequest< File< Chained<FILE_SIZE, TFile> > >
     {
-//IOREV _todo_
+//IOREV 
 		typedef typename AsyncRequest<TFile>::Type Type;
     };
 
@@ -81,42 +97,42 @@ namespace SEQAN_NAMESPACE_MAIN
     template < unsigned FileCount_, typename TFile >
     struct Size< File< Striped<FileCount_, TFile> > >
     {
-//IOREV _todo_
+//IOREV
         typedef __int64 Type;
     };
 
     template < unsigned FileCount_, typename TFile >
     struct Position< File< Striped<FileCount_, TFile> > >
     {
-//IOREV _todo_
+//IOREV
         typedef __int64 Type;
     };
 
     template < unsigned FileCount_, typename TFile >
     struct Difference< File< Striped<FileCount_, TFile> > >
     {
-//IOREV _todo_
+//IOREV
         typedef __int64 Type;
     };
 
     template < unsigned FileCount_, typename TFile >
     struct AsyncRequest< File< Striped<FileCount_, TFile> > >
     {
-//IOREV _todo_
+//IOREV
 		typedef typename AsyncRequest<TFile>::Type Type;
     };
 
 
 	template < unsigned FileCount_, typename TFile >
 	class File< Striped<FileCount_, TFile> >: public Tuple< TFile, FileCount_ > {
-//IOREV _todo_
+//IOREV _stub_ Is this a stub? see header of file_array.h
 		File(void * /*dummy = NULL*/) {}	// to be compatible with the FILE*(NULL) constructor
 		operator bool() const { return (*this)[0]; }
 	};
 
     template < __int64 FILE_SIZE, typename TFile >
 	class File< Chained<FILE_SIZE, TFile> >: public String< TFile > {
-//IOREV _todo_
+//IOREV
 		typedef String< TFile > Base;
 
 		::std::string	baseName;
@@ -241,7 +257,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // generic open/close interface
     template < typename TFileArray >
     inline bool _openTempFArray(TFileArray &me, int openMode) {
-//IOREV _todo_
+//IOREV
 		bool result = true;
 		for(int i = 0; i < length(me); ++i)
 			result &= openTemp(me[i], openMode);
@@ -250,13 +266,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TFileArray >
     inline bool _openTempFArray(TFileArray &me) {
-//IOREV _todo_
+//IOREV
 		return _openTempFArray(me, DefaultOpenTempMode<TFileArray>::VALUE);
 	}
 
     template < typename TFileArray >
     inline bool _reopenFArray(TFileArray &me, int openMode) {
-//IOREV _todo_
+//IOREV
 		bool result = true;
 		for(int i = 0; i < length(me); ++i)
 			result &= reopen(me[i], openMode);
@@ -265,7 +281,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TFileArray >
     inline bool _closeFArray(TFileArray &me) {
-//IOREV _todo_
+//IOREV
 		bool result = true;
 		for(int i = 0; i < length(me); ++i)
 			if (me[i]) result &= close(me[i]);
@@ -274,14 +290,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TFileArray >
     inline unsigned _sectorSizeFArray(TFileArray &me, int /*openMode*/) {
-//IOREV _todo_
+//IOREV
 		return sectorSize(me[0]);
     }
 
     template < typename TFileArray >
     inline typename Size<TFileArray>::Type
 	_sizeFArray(TFileArray &me) {
-//IOREV _todo_
+//IOREV
         typename Size<TFileArray>::Type sum = 0;
 		for(int i = 0; i < length(me); ++i)
 			sum += size(me[i]);
@@ -290,7 +306,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TFileArray >
     inline bool _flushFArray(TFileArray &me) {
-//IOREV _todo_
+//IOREV
 		bool result = true;
 		for(int i = 0; i < length(me); ++i)
 			result &= flush(me[i]);
@@ -299,7 +315,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TFileArray, typename TRequest >
     inline bool _cancelFArray(TFileArray &me, TRequest &request) {
-//IOREV _todo_
+//IOREV
 		bool result = true;
 		for(int i = 0; i < length(me); ++i)
 			result &= cancel(me[i], &request);
@@ -312,19 +328,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < __int64 FILE_SIZE, typename TFile >
 	inline unsigned length(File< Chained<FILE_SIZE, TFile> > const &me) {
-//IOREV _todo_
+//IOREV
 		return me.fileCount();
 	}
 
     template < unsigned FileCount_, typename TFile >
 	inline unsigned length(File< Striped<FileCount_, TFile> > const &/*me*/) {
-//IOREV _todo_
+//IOREV
 		return FileCount_;
 	}
 
     template < __int64 FILE_SIZE, typename TFile >
 	inline bool open(File< Chained<FILE_SIZE, TFile> > &me, const char *fileName, int openMode) {
-//IOREV _todo_
+//IOREV
 		me.baseName = fileName;
 		me.openMode = openMode;
 		me.temporary = false;
@@ -334,7 +350,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < __int64 FILE_SIZE, typename TFile >
 	inline bool openTemp(File< Chained<FILE_SIZE, TFile> > &me, int openMode) {
-//IOREV _todo_
+//IOREV
 		me.openMode = openMode;
 		me.temporary = true;
 		return true;
@@ -342,13 +358,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < unsigned FileCount_, typename TFile >
 	inline bool openTemp(File< Striped<FileCount_, TFile> > &me, int openMode) {
-//IOREV _todo_
+//IOREV I dont think this does what intended
 		return _openTempFArray(me, openMode);
 	}
 
     template < __int64 FILE_SIZE, typename TFile >
 	inline bool close(File< Chained<FILE_SIZE, TFile> > &me) {
-//IOREV _todo_
+//IOREV
         _closeFArray(me);
         me.clearInternals();
         return true;
@@ -356,47 +372,47 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < unsigned FileCount_, typename TFile >
 	inline bool close(File< Striped<FileCount_, TFile> > &me) {	return _closeFArray(me); }
-//IOREV _todo_
+//IOREV
 
     template < __int64 FILE_SIZE, typename TFile >
 	__int64 size(File< Chained<FILE_SIZE, TFile> > &me) {
-//IOREV _todo_
+//IOREV
 		return _sizeFArray(me);
 	}
 
     template < unsigned FileCount_, typename TFile >
 	__int64 size(File< Striped<FileCount_, TFile> > &me) {
-//IOREV _todo_
+//IOREV
 		return _sizeFArray(me);
 	}
 
     template < __int64 FILE_SIZE, typename TFile, typename TSize >
     inline void resize(File< Chained<FILE_SIZE, TFile> > &me, TSize new_length) {
-//IOREV _todo_
+//IOREV
 		me.resizeArray(new_length);
     }
 
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize >
 	inline void allocate(File< Chained<FILE_SIZE, TFile> > const &me, TValue* &data, TSize count) {
-//IOREV _todo_
+//IOREV
 		allocate(me[0], data, count);
 	}
 
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize >
 	inline void deallocate(File< Chained<FILE_SIZE, TFile> > const &me, TValue* &data, TSize count) {
-//IOREV _todo_
+//IOREV
 		deallocate(me[0], data, count);
 	}
 
     template < unsigned FileCount_, typename TFile, typename TValue, typename TSize >
 	inline void allocate(File< Striped<FileCount_, TFile> > const &me, TValue* &data, TSize count) {
-//IOREV _todo_
+//IOREV
 		allocate(me[0], data, count);
 	}
 
     template < unsigned FileCount_, typename TFile, typename TValue, typename TSize >
 	inline void deallocate(File< Striped<FileCount_, TFile> > const &me, TValue* &data, TSize count) {
-//IOREV _todo_
+//IOREV
 		deallocate(me[0], data, count);
 	}
 
@@ -406,7 +422,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset >
     inline bool readAt(File< Chained<FILE_SIZE, TFile> > &me, TValue *memPtr, TSize count, TOffset offset) {
-//IOREV _todo_
+//IOREV
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -421,7 +437,7 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset >
     inline bool writeAt(File< Chained<FILE_SIZE, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset) {
-//IOREV _todo_
+//IOREV
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -436,7 +452,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest >
     inline bool asyncReadAt(File< Chained<FILE_SIZE, TFile> > &me, TValue *memPtr, TSize count, TOffset offset, TRequest &req) {
-//IOREV _todo_
+//IOREV
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);
@@ -454,7 +470,7 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template < __int64 FILE_SIZE, typename TFile, typename TValue, typename TSize, typename TOffset, typename TRequest  >
     inline bool asyncWriteAt(File< Chained<FILE_SIZE, TFile> > &me, TValue const *memPtr, TSize count, TOffset offset, TRequest &req) {
-//IOREV _todo_
+//IOREV
 		TOffset fileOfs = 0;
 		while (count) {
 			TFile &file = me.getFileAndOffset(offset, fileOfs, memPtr);

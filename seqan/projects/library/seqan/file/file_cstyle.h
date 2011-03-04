@@ -89,7 +89,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline const char * 
 	_getCStyleOpenMode(int openMode) 
 	{
-//IOREV
+//IOREV double check whether this translates FileOpenMode correctly (doesnt look like it)
 		switch (openMode & OPEN_MASK) {
             case OPEN_WRONLY:
                 if (!(openMode & OPEN_APPEND))
@@ -146,7 +146,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline unsigned 
 	sectorSize(FILE* const &) 
 	{
-//IOREV shouldn't this be variable? Doc?
+//IOREV _duplicate_ _nodoc_ duplicate or identical spec. in file_base.h should'nt this be variable
         return 4096;
     }
 
