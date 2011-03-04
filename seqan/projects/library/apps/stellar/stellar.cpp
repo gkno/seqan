@@ -253,7 +253,7 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases
 		++queriesIt;
 	}
 
-	TSize errors = options.minLength * options.epsilon;
+	TSize errors = (TSize)(options.minLength * options.epsilon);
 	TSize minScore = options.minLength - 3*errors; // #matches - 2*#errors // #matches = minLenght - errors, 
 
 	std::cout << "All matches matches resulting from your search have an E-value of: " << std::endl;
