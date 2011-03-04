@@ -618,6 +618,10 @@ inline bool potentiallyErroneousNode(
 	// Poisson based threshold, given a fixed percentage of missed errors (1 - min sensitivity)
 	// consider only the cases with one and two errors
 	// the average error rate and the expected value allow to compute the expected count for an error.
+	
+	//special case when current node count ==1, we always consider that as an error
+	if(observed == (TObserved) 1) return true;
+
 	double sensitivity = 1 - falsenegrate ;
 	double noerrlm2 = pow(1-errorrate, prefixlen - 2.0);
 	double noerrlm1 = noerrlm2 * (1-errorrate) ;
