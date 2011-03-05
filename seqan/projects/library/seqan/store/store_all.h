@@ -945,7 +945,7 @@ appendRead(
 	TRead const &read, 
 	TId matePairId)
 {
-	SEQAN_ASSERT(length(me.readStore) == length(me.readSeqStore))
+	SEQAN_ASSERT_EQ(length(me.readStore), length(me.readSeqStore));
 
 	typedef typename FragmentStore<TSpec, TConfig>::TReadStore TReadStore;
 	typename Value<TReadStore>::Type r;
@@ -964,7 +964,7 @@ appendRead(
 	CharString const &name,
 	TId matePairId)
 {
-	SEQAN_ASSERT(length(me.readStore) == length(me.readSeqStore))
+	SEQAN_ASSERT_EQ(length(me.readStore), length(me.readSeqStore));
 
 	typedef typename FragmentStore<TSpec, TConfig>::TReadStore TReadStore;
 	typename Value<TReadStore>::Type r;
@@ -1136,7 +1136,7 @@ appendMatePair(
 	CharString const &name1,
 	CharString const &name2)
 {
-	SEQAN_ASSERT(length(me.readStore) == length(me.readSeqStore))
+	SEQAN_ASSERT_EQ(length(me.readStore), length(me.readSeqStore));
 
 	typedef FragmentStore<TSpec, TConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadStore		TReadStore;

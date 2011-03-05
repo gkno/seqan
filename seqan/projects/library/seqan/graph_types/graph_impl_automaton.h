@@ -318,7 +318,7 @@ outDegree(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 		  TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
@@ -337,7 +337,7 @@ inDegree(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 		 TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdge;
@@ -393,7 +393,7 @@ removeVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			 TVertexDescriptor const v) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
 
 	removeOutEdges(g,v); // Remove all outgoing edges
 	removeInEdges(g,v); // Remove all incoming edges
@@ -410,8 +410,8 @@ addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 		TLabel const label) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, source));
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, target));
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
@@ -455,8 +455,8 @@ removeEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT;
     (void) source;  // If compiled without assertions.
     (void) target;  // If compiled without assertions.
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, source));
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, target));
 	removeEdge(g, &g.data_vertex[source].data_edge[ordValue((TAlphabet) label)]);
 }
 
@@ -468,7 +468,7 @@ removeEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 		   TEdgeDescriptor const edge)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, _getId(edge)) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, _getId(edge)));
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
@@ -484,7 +484,7 @@ removeOutEdges(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			   TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -507,7 +507,7 @@ removeInEdges(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			  TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdge;
@@ -572,8 +572,7 @@ sourceVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 			}
 		}
 	}
-	// We should never reach this point
-	SEQAN_ASSERT(false)
+    SEQAN_ASSERT_FAIL("We should never reach this point.");
 	return 0;
 }
 
@@ -621,7 +620,7 @@ findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 		 TLabel const c)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	return &g.data_vertex[v].data_edge[ordValue((TAlphabet) c)];
 }
@@ -635,7 +634,7 @@ findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 		 TLabel const c)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	TGraph* graph = const_cast<TGraph*>(&g);
 	return findEdge(*graph, v, c);
@@ -848,7 +847,7 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 			 TChar const c) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 	return getTarget(findEdge(g, vertex, c));
 }
 
@@ -889,7 +888,7 @@ parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 			TIterator const & endIt)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TVertexDescriptor succ = vertex;
 	while (beginIt!=endIt) {

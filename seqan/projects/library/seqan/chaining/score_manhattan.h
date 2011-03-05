@@ -169,7 +169,7 @@ scoreChainGap(Score<TValue, Manhattan> const & me,
 			  TFragment & f1,
 			  TFragment & f2)
 {
-	SEQAN_ASSERT(dimension(f1) == dimension(f2))
+	SEQAN_ASSERT_EQ(dimension(f1), dimension(f2));
 
 	unsigned int dim = dimension(f1);
 	TValue score = 0;

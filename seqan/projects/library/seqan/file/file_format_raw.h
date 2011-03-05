@@ -74,7 +74,7 @@ struct ReadRaw_<TFile, TData, True>
 		TSize _limit)
 	{
 SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!_streamEOF(file))
+		SEQAN_ASSERT_NOT(_streamEOF(file));
 
 		typename Size<TData>::Type limit = _limit;
 

@@ -215,7 +215,7 @@ assignValueById(StringSet<TString, Dependent<Tight> >& me,
 {
     SEQAN_CHECKPOINT;
     appendValue(me, obj);
-    SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+    SEQAN_ASSERT_EQ(length(me.limits), length(me) + 1);
     return positionToId(me, length(me.strings) - 1);
 }
 
@@ -260,7 +260,7 @@ removeValueById(StringSet<TString, Dependent<Tight> >& me, TId const id)
     typedef typename Size<TStringSet>::Type TSize;
     typedef typename TStringSet::TIdPosMap::iterator TIter;
 
-    SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+    SEQAN_ASSERT_EQ(length(me.limits), length(me) + 1);
     TIter pos = me.id_pos_map.find(id);
     if (pos != me.id_pos_map.end()) {
         TSize remPos = pos->second;
@@ -273,7 +273,7 @@ removeValueById(StringSet<TString, Dependent<Tight> >& me, TId const id)
             if (itChange->second > remPos) --(itChange->second);
         }
     }
-    SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+    SEQAN_ASSERT_EQ(length(me.limits), length(me) + 1);
 }
 
 // --------------------------------------------------------------------------

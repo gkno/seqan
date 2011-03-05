@@ -69,7 +69,7 @@ namespace seqan{
 	rangeMaxQuery( RangeTree< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & tree,
 					TBorder & border_obj )
 	{
-		SEQAN_CHECK( dimension( border_obj ) >= dimension( tree ) )
+		SEQAN_ASSERT_GEQ(dimension(border_obj), dimension(tree));
 		TObject * maxObject = _getLBorderObj( tree );
 		_processRMQ( _getList( tree ), dimension( tree ) - 1, border_obj, maxObject );
 		return maxObject;
@@ -118,7 +118,7 @@ namespace seqan{
 			   TObject & obj,
 			   TWeight prio )
 	{
-		SEQAN_CHECK( prio >= priority( obj ) )
+		SEQAN_ASSERT_GEQ(prio, priority( obj ) );
 		setPriority( obj, prio );
 		_activate( _getList( tree ), &obj, dimension( tree ) - 1 );
 	}
@@ -244,7 +244,7 @@ namespace seqan{
 		typename Size< TObject >::Type max_height = _getMaximalSLTowerHeight( list );
 		while( height < max_height )
 		{
-			SEQAN_CHECK( max_obj != NULL )
+			SEQAN_ASSERT_TRUE(max_obj != NULL);
 			if( priority( *search_path ) < score )
 				_setMaxObject( *search_path, max_obj );
 			else break;
@@ -312,7 +312,7 @@ namespace seqan{
 				SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** /*search_path*/ )
 	{			
 			// adding additional layers, if necessary 
-		SEQAN_CHECK2( &_getUp( *base ) == NULL, "tried to build tower on bas element with tower" )
+		SEQAN_ASSERT_TRUE_MSG( &_getUp( *base ) == NULL, "tried to build tower on bas element with tower" );
 		if( height > _getCurrentLayer( list ) ){
 			_setCurrentLayer( list, height );
 		}

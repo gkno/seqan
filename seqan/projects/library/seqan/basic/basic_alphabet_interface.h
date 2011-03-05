@@ -819,7 +819,7 @@ void _arrayClearSpaceDefault(TIterator array_begin,
 		return;
 	}
 
-	SEQAN_ASSERT(keep_from < array_length)
+	SEQAN_ASSERT_LT(keep_from, array_length);
 
 	if (keep_from == move_to)
 	{

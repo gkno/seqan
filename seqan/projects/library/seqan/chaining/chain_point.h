@@ -63,8 +63,8 @@ namespace seqan
 	key( ChainPoint_< TFragType, TSpec > & me,
 			TSize dim )
 	{
-SEQAN_CHECK2( me._coords != NULL, "point not initialized" )
-SEQAN_CHECK2( dim <= me._dim, "dim corrupted" )
+        SEQAN_ASSERT_TRUE_MSG(me._coords != NULL, "point not initialized");
+        //SEQAN_ASSERT_LEQ_MSG(dim, me._dim, "dim corrupted");
 		return me._coords[ dim ];
 	}
 
@@ -73,8 +73,8 @@ SEQAN_CHECK2( dim <= me._dim, "dim corrupted" )
 	key( const ChainPoint_< TFragType, TSpec > & me,
 			TSize dim )
 	{
-SEQAN_CHECK2( me._coords != NULL, "point not initialized" )
-SEQAN_ASSERT( dim <= me._dim )
+        SEQAN_ASSERT_NEQ_MSG(me._coords, NULL, "point not initialized");
+        //SEQAN_ASSERT_LEQ(dim, me._dim);
 		return me._coords[ dim ];
 	}
 
@@ -84,7 +84,7 @@ SEQAN_ASSERT( dim <= me._dim )
 			TSize dim,
 			TKey val )
 	{
-SEQAN_ASSERT( dim <= me._dim )
+        //SEQAN_ASSERT_LEQ(dim, me._dim);
 		me._coords[ dim ] = val;
 	}
 
@@ -94,7 +94,7 @@ SEQAN_ASSERT( dim <= me._dim )
 				TSize dim,
 				TKey val )
 	{
-SEQAN_ASSERT( dim <= me._dim )
+        //SEQAN_ASSERT_LEQ(dim, me._dim);
 		me._coords[ dim ] = val;
 	}
 
@@ -103,7 +103,7 @@ SEQAN_ASSERT( dim <= me._dim )
 	_incKey(  ChainPoint_< TFragType, TSpec > & me,
 				TSize dim )
 	{
-SEQAN_ASSERT( dim <= me._dim )
+        //SEQAN_ASSERT_LEQ(dim, me._dim);
 		++me._coords[ dim ];
 	}
 
@@ -112,7 +112,7 @@ SEQAN_ASSERT( dim <= me._dim )
 	TFragType & 
 	_getFrag( ChainPoint_< TFragType, TSpec > & me )
 	{
-SEQAN_ASSERT( me._meta != NULL )
+        SEQAN_ASSERT_NEQ(me._meta, NULL);
 		return _getFrag( *me._meta );
 	}
 
@@ -120,7 +120,7 @@ SEQAN_ASSERT( me._meta != NULL )
 	TFragType & 
 	_getFrag( const ChainPoint_< TFragType, TSpec > & me )
 	{
-SEQAN_ASSERT( me._meta != NULL )
+        SEQAN_ASSERT_NEQ(me._meta, NULL);
 		return _getFrag( *me._meta );
 	}
 

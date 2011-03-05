@@ -437,7 +437,7 @@ namespace SEQAN_NAMESPACE_MAIN
         CT i;
 /*
 		inline Tuple() {
-			SEQAN_ASSERT(bitSize * size <= sizeof(CT) * 8);
+			SEQAN_ASSERT_LEQ(bitSize * size, sizeof(CT) * 8);
 		}
 */
 		template <typename TPos>

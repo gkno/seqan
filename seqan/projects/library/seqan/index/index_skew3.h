@@ -246,7 +246,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 {
                     String<typename Value<TFilter>::Type, Alloc<> > _text;
                     _text << filter;
-                    SEQAN_DO(isSuffixArray(recurse, _text));
+                    SEQAN_ASSERT_TRUE(isSuffixArray(recurse, _text));
                 }
                 #endif
 
@@ -428,7 +428,7 @@ namespace SEQAN_NAMESPACE_MAIN
             {
 			    createSuffixArray(SA12, s12, Skew3(), name, maxdepth, depth + 1);
                 #ifdef SEQAN_TEST_SKEW3
-                    SEQAN_DO(isSuffixArray(SA12, s12));
+                    SEQAN_ASSERT_TRUE(isSuffixArray(SA12, s12));
                 #endif
             }
 			// store unique names in s12 using the suffix array

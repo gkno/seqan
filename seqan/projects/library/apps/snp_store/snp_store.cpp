@@ -268,7 +268,7 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
 	typedef typename Id<TFragmentStore>::Type					TId;
 	typedef typename Value<TReadClips>::Type 					TPair;
 	
-	SEQAN_ASSERT(length(fragmentStore.readSeqStore) == length(fragmentStore.alignQualityStore))
+	SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.alignQualityStore));
 	
 	::std::sort(begin(fragmentStore.alignedReadStore, Standard()), end(fragmentStore.alignedReadStore, Standard()), LessGPos<TMatch>());	
 	
@@ -398,8 +398,8 @@ applyPileupCorrection(TFragmentStore	&fragmentStore,
 	resize(fragmentStore.alignedReadStore,matchItKeep - begin(fragmentStore.alignedReadStore,Standard()));
 	
 	//	::std::cout << "numMatches = " << length(fragmentStore.alignedReadStore) << ::std::endl;
-	SEQAN_ASSERT(length(fragmentStore.alignedReadStore) <= length(fragmentStore.alignQualityStore))
-	SEQAN_ASSERT(length(fragmentStore.readSeqStore) == length(fragmentStore.alignQualityStore))
+	SEQAN_ASSERT_LEQ(length(fragmentStore.alignedReadStore), length(fragmentStore.alignQualityStore));
+	SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.alignQualityStore));
 	
 	//	str="pileAft";
 	//	_dumpMatches(fragmentStore,str);

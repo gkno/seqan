@@ -115,8 +115,8 @@ namespace SEQAN_NAMESPACE_MAIN
                 #ifdef SEQAN_TEST_SKEW3
                     else {
                         InType12 b = *in.in2;
-                        SEQAN_ASSERT((a.i3[0] < b.i3[0]) || (a.i3[0] == b.i3[0] && a.i3[1] <= b.i3[1]));
-                        SEQAN_ASSERT(a.i2[0] < b.i2[0]);
+                        SEQAN_ASSERT_TRUE((a.i3[0] < b.i3[0]) || (a.i3[0] == b.i3[0] && a.i3[1] <= b.i3[1]));
+                        SEQAN_ASSERT_LT(a.i2[0], b.i2[0]);
                     }
                 #endif
             } else {
@@ -131,8 +131,8 @@ namespace SEQAN_NAMESPACE_MAIN
                 #ifdef SEQAN_TEST_SKEW3
                     else {
                         InType0 b = *in.in1;
-                        SEQAN_ASSERT((a.i3[0] < b.i3[0]) || (a.i3[0] == b.i3[0] && a.i3[1] <= b.i3[1]));
-                        SEQAN_ASSERT((a.i3[0] < b.i3[0]) || (a.i3[0] == b.i3[0] && a.i2[0] < b.i2[0]));
+                        SEQAN_ASSERT_TRUE((a.i3[0] < b.i3[0]) || (a.i3[0] == b.i3[0] && a.i3[1] <= b.i3[1]));
+                        SEQAN_ASSERT_TRUE((a.i3[0] < b.i3[0]) || (a.i3[0] == b.i3[0] && a.i2[0] < b.i2[0]));
                     }
                 #endif
             }

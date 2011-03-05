@@ -1245,7 +1245,9 @@ The resulting tables must have appropriate size before calling this function.
 		_qgramCountQGrams(dir, bucketMap, text, shape, stepSize);
 
 		// 3. cumulative sum
-		SEQAN_DO(_qgramCummulativeSum(dir, False()) == length(sa));
+        __int64 res = _qgramCummulativeSum(dir, False());
+        (void)res;  // In case we run without assertions.
+        SEQAN_ASSERT_EQ(res, static_cast<__int64>(length(sa)));
 		
 		// 4. fill suffix array
 		_qgramFillSuffixArray(sa, text, shape, dir, bucketMap, stepSize, False());
@@ -1738,7 +1740,7 @@ The resulting tables must have appropriate size before calling this function.
 				old_qgram = *sorter;
 				hash = qhash(old_qgram);
 
-				SEQAN_ASSERT(old_hash < hash);
+				SEQAN_ASSERT_LT(old_hash, hash);
 
 				// copy bucket begin
 				typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;

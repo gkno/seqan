@@ -78,7 +78,7 @@ void _fastaAlignScanLine(TFile & file, TSize & count) {
 //IOREV _todo_
 
 	SEQAN_CHECKPOINT;
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 
 	while (true) {
 		typename Value<TFile>::Type c = _streamGet(file);

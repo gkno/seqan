@@ -78,9 +78,9 @@ namespace seqan{
 	TFragType & 
 	_getFrag( WrapperPoint_< TFragType > & me )
 	{
-		SEQAN_CHECK( me._frag != NULL )
-		SEQAN_CHECK( me._meta != NULL )
-		SEQAN_CHECK( &_getFrag( *me._meta ) == me._frag )
+		SEQAN_ASSERT_TRUE( me._frag != NULL );
+		SEQAN_ASSERT_TRUE( me._meta != NULL );
+		SEQAN_ASSERT_TRUE( &_getFrag( *me._meta ) == me._frag );
 		return *me._frag;
 	}
 
@@ -88,9 +88,9 @@ namespace seqan{
 	TFragType & 
 	_getFrag( const WrapperPoint_< TFragType > & me )
 	{
-		SEQAN_CHECK( me._frag != NULL )
-		SEQAN_CHECK( me._meta != NULL )
-		SEQAN_CHECK( _getFrag( *me._meta ) == me._frag )
+		SEQAN_ASSERT_TRUE( me._frag != NULL );
+		SEQAN_ASSERT_TRUE( me._meta != NULL );
+		SEQAN_ASSERT_TRUE( _getFrag( *me._meta ) == me._frag );
 		return *me._frag;
 	}
 
@@ -98,8 +98,8 @@ namespace seqan{
 	MetaFragment_< TFragType > & 
 	_meta( WrapperPoint_< TFragType > & me )
 	{
-		SEQAN_CHECK( me._frag != NULL )
-		SEQAN_CHECK( me._meta != NULL )
+		SEQAN_ASSERT_TRUE( me._frag != NULL );
+		SEQAN_ASSERT_TRUE( me._meta != NULL );
 		return *me._meta;
 	}
 

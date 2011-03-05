@@ -48,7 +48,7 @@ using namespace seqan;
 
 SEQAN_DEFINE_TEST(Test_Definition) {
 	SEQAN_ASSERT_EQ(ClassIdentifier_<int>::getID(), ClassIdentifier_<int>::getID());
-	SEQAN_ASSERT(ClassIdentifier_<char>::getID() != ClassIdentifier_<int>::getID());
+	SEQAN_ASSERT_NEQ(ClassIdentifier_<char>::getID(), ClassIdentifier_<int>::getID());
 }
 
 //////////////////////////////////////////////////////////////////////////////

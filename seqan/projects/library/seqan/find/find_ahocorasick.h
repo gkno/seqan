@@ -201,8 +201,8 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, AhoCorasick> & me, TNeedle2 const & needle) {
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!empty(needle));
+	SEQAN_CHECKPOINT;
+	SEQAN_ASSERT_NOT(empty(needle));
 	setValue(me.data_host, needle);
 	clear(me.data_graph);
 	clear(me.data_supplyMap);

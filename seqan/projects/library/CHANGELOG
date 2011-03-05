@@ -6,6 +6,11 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Did some renaming of debugging/testing assertion macros.
+  * `SEQAN_ASSERT_TRUE` is now called `SEQAN_ASSERT` (`SEQAN_ASSERT_TRUE_MSG` is now `SEQAN_ASSERT_MSG`).
+  * The old `SEQAN_ASSERT` macro from old testing/debugging system has been removed, along with the `SEQAN_CHECK*`, `SEQAN_REPORT`, `SEQAN_DO*` macros.
+  * The only remaining part from the old test system are the internal functions `_compareBinaryFiles()`, `_compareTextFilesReadChar()`, `_compareTextFiles()`.
+  * The assertion macros have been replaced in the library and SeqAn applications.
  * Adding functions `isBitSet()`, `clearBit()`, `clearAllBits()`, `setBitTo()`, `setBit()` to misc header ''misc_bit_twiddling.h''.
  * Adding Union-Find data structure in `misc/misc_union_find.d`.
  * fixing `eraseBack()` with block strings.

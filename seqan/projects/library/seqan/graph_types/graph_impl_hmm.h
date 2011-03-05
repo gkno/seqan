@@ -641,8 +641,8 @@ inline void
 assignBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 				 TVertexDescriptor const vertex)
 {
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
+	SEQAN_CHECKPOINT;
+	SEQAN_ASSERT_TRUE(idInUse(_getVertexIdManager(g), vertex));
 
 	g.data_begin = vertex;
 	g.data_silent[vertex] = true;
@@ -668,7 +668,7 @@ assignEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 			   TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(_getVertexIdManager(g), vertex));
 
 	g.data_end = vertex;
 	g.data_silent[vertex] = true;
@@ -995,7 +995,7 @@ assignSilentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 				   bool const silent)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
+	SEQAN_ASSERT_TRUE(idInUse(_getVertexIdManager(g), vertex));
 	g.data_silent[vertex] = silent;
 }
 

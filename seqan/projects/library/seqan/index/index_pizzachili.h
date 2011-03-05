@@ -277,8 +277,9 @@ namespace impl {
             TCodeProvider::build_index(textstart, textlength, options, &me.index_handle);
 
         if (e != 0) {
-            SEQAN_REPORT(TCodeProvider::error_index(e));
-            SEQAN_REPORT(options);
+            // TODO(holtgrew): Do we need a logging interface?
+            //SEQAN_REPORT(TCodeProvider::error_index(e));
+            //SEQAN_REPORT(options);
             me.index_handle = 0;
             return false;
         }
@@ -299,8 +300,8 @@ SEQAN_CHECKPOINT
             typename Index<TText, PizzaChili<TSpec> >::TValue
         >::Type alph_t;
 
-    SEQAN_ASSERT(sizeof (alph_t) == 1);
-    SEQAN_ASSERT((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
+    SEQAN_ASSERT_EQ(sizeof(alph_t), 1);
+    SEQAN_ASSERT_TRUE((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
 
     impl::clearIndex(me);
 
@@ -326,9 +327,9 @@ SEQAN_CHECKPOINT
     clear(me);
 
     /*
-    SEQAN_ASSERT(IsContiguous<TOtherText>::VALUE)
-    SEQAN_ASSERT(BitsPerValue<alph_t>::VALUE == 8)
-    SEQAN_ASSERT((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
+    SEQAN_ASSERT_TRUE(IsContiguous<TOtherText>::VALUE)
+    SEQAN_ASSERT_EQ(BitsPerValue<alph_t>::VALUE, 8)
+    SEQAN_ASSERT_TRUE((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
 
     String<alph_t, CStyle> cstr = text;
     impl::uchar_t* textstart =

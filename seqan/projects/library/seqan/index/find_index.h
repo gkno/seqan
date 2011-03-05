@@ -231,8 +231,8 @@ SEQAN_CHECKPOINT
 	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
 	beginPosition(Finder< Index<TText, TSpec>, TSpecFinder > & me)
 	{
-SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!empty(me))
+        SEQAN_CHECKPOINT;
+		SEQAN_ASSERT_NOT(empty(me));
 		return *me.data_iterator;
 	}
 
@@ -240,8 +240,8 @@ SEQAN_CHECKPOINT
 	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
 	beginPosition(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
 	{
-SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!empty(me))
+        SEQAN_CHECKPOINT;
+		SEQAN_ASSERT_NOT(empty(me));
 		return *me.data_iterator;
 	}
 

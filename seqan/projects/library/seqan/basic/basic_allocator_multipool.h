@@ -154,7 +154,7 @@ _allocatorBlockNumber(Allocator<MultiPool<TParentAllocator, BLOCKING_LIMIT> > &,
 SEQAN_CHECKPOINT
 	typedef Allocator<MultiPool<TParentAllocator, BLOCKING_LIMIT> > TAllocator;
 
-	SEQAN_ASSERT(size_)
+	SEQAN_ASSERT_GT(size_, 0u);
 
 	if (size_ < BLOCKING_LIMIT)
 	{//blocks

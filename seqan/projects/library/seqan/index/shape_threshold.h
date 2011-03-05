@@ -410,7 +410,7 @@ typename Value<TLogErrorDistr>::Type
 _getProb(TLogErrorDistr const &logError, int errorType, int readPos)
 {
 	int maxN = length(logError) / 4;
-	SEQAN_ASSERT(readPos >= 0 && readPos < maxN);
+	SEQAN_ASSERT_TRUE(readPos >= 0 && readPos < maxN);
 	return logError[maxN * (int)errorType + readPos];
 }
 
@@ -463,8 +463,8 @@ void initPatterns(
 	
 	ErrorType lastErrorType = (IsSameType<TDistance, HammingDistance>::VALUE)? SEQAN_MISMATCH: SEQAN_DELETE;
 
-	SEQAN_ASSERT(SEQAN_MATCH == 0);
-	SEQAN_ASSERT((length(logError) % 4) == 0);
+	SEQAN_ASSERT_EQ(SEQAN_MATCH, 0);
+	SEQAN_ASSERT_EQ((length(logError) % 4), 0u);
 
 #ifndef DEBUG_RECOG_DP
 	String<TPattern> patternStore;
@@ -677,7 +677,7 @@ void initPatterns(
 			{
 				case SEQAN_MATCH:
 					if (readPos == 0) {
-						// assert(bitShape[0] == '1')
+						// SEQAN_ASSERT_EQ(bitShape[0], '1')
 						delta = genomePos;
 						state.qgramHit = true;
 					} else
@@ -915,7 +915,7 @@ void computeQGramFilteringSensitivity(
 	typedef String<TFloat>							TMatrixCol;
 	typedef String<int>								TIntCol;
 
-	SEQAN_ASSERT((length(logError) % 4) == 0);
+	SEQAN_ASSERT_EQ((length(logError) % 4), 0u);
 
 	int maxN = length(logError) / 4;
 	int statesCount = length(states);

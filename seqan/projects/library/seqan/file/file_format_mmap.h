@@ -866,7 +866,7 @@ typedef Tag<TagFastq_> const Fastq; //IOREV _todo_
 			++infixStart;
 		}
 
-		SEQAN_ASSERT(infixStart != back);
+		SEQAN_ASSERT_TRUE(infixStart != back);
 
 		TIterator infixEnd = infixStart + 1;
 		_seekTab(infixEnd, back);

@@ -920,7 +920,7 @@ namespace SEQAN_NAMESPACE_MAIN
     static struct sigaction AsyncIOOldSig_;
 
     inline void AsyncIOHandler_(int sigNo, siginfo_t *info, void *hint) {
-        SEQAN_ASSERT(sigNo == AsyncIOSignal_);
+        SEQAN_ASSERT_EQ(sigNo, AsyncIOSignal_);
         // TODO: signal respective event
         // currently we don't need async IO handlers because
         // we only wait for single events

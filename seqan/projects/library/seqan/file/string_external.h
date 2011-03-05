@@ -267,17 +267,17 @@ you should think of using @Tag.ExternalConfig@.
 		}
 
 		inline bool operator== (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return offset == I.offset;
 		}
 
 		inline bool operator!= (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return offset != I.offset;
 		}
 
 		inline bool operator< (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return offset < I.offset;
 		}
 	};
@@ -371,17 +371,17 @@ you should think of using @Tag.ExternalConfig@.
 		}
 
 		inline bool operator== (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return offset == I.offset;
 		}
 
 		inline bool operator!= (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return offset != I.offset;
 		}
 
 		inline bool operator< (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return offset < I.offset;
 		}		
 	};
@@ -603,17 +603,17 @@ you should think of using @Tag.ExternalConfig@.
 		}
 
 		inline bool operator== (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return pageNo == I.pageNo && pageOfs == I.pageOfs;
 		}
 
 		inline bool operator!= (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return pageNo != I.pageNo || pageOfs != I.pageOfs;
 		}
 
 		inline bool operator< (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return pageNo < I.pageNo || (pageNo == I.pageNo && pageOfs < I.pageOfs);
 		}
     };
@@ -852,17 +852,17 @@ you should think of using @Tag.ExternalConfig@.
 		}
 
 		inline bool operator== (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return pageNo == I.pageNo && pageOfs == I.pageOfs;
 		}
 
 		inline bool operator!= (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return pageNo != I.pageNo || pageOfs != I.pageOfs;
 		}
 
 		inline bool operator< (const TIterator &I) const {
-			SEQAN_ASSERT(extString == I.extString);
+			SEQAN_ASSERT_EQ(extString, I.extString);
 			return pageNo < I.pageNo || (pageNo == I.pageNo && pageOfs < I.pageOfs);
 		}
 
@@ -1107,8 +1107,8 @@ you should think of using @Tag.ExternalConfig@.
 
 	public:
 */
-		String(String &) { SEQAN_ABORT("Aborted attempt to copy a String<..,External<..> >") }
-		String(String const &) { SEQAN_ABORT("Aborted attempt to copy a String<..,External<..> >") }
+		String(String &) { SEQAN_ASSERT_FAIL("Aborted attempt to copy a String<..,External<..> >"); }  // TODO(holtgrew): Actually, this should be an ABORT
+		String(String const &) { SEQAN_ASSERT_FAIL("Aborted attempt to copy a String<..,External<..> >"); }  // TODO(holtgrew): Actually, this should be an ABORT
 
 /**
 .Memfunc.ExtString#String:

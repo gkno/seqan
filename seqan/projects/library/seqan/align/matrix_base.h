@@ -390,7 +390,7 @@ setDimension(Matrix<TValue, DIMENSION> & me,
 			 unsigned int dim_)
 {
 
-	SEQAN_ASSERT(dim_ > 0)
+	SEQAN_ASSERT_GT(dim_, 0u);
 //std::cout<<"\npress enter1\n";
 //std::cin.get();
 	resize(_dataLengths(me), dim_, 0);
@@ -430,8 +430,8 @@ setLength(Matrix<TValue, DIMENSION> & me,
 		  unsigned int dim_,
 		  TSize length_)
 {
-	SEQAN_ASSERT(length_ > 0);
-	SEQAN_ASSERT(dim_ < dimension(me));
+	SEQAN_ASSERT_GT(length_, static_cast<TSize>(0));
+	SEQAN_ASSERT_LT(dim_, dimension(me));
 
 	_dataLengths(me)[dim_] = length_;
 }
@@ -447,7 +447,7 @@ resize(Matrix<TValue, DIMENSION> & me)
 
 	unsigned int dimension_ = dimension(me);
 
-	SEQAN_ASSERT(dimension_ > 0);
+	SEQAN_ASSERT_GT(dimension_, 0u);
 
 	TSize factor_ = _dataFactors(me)[0] * length(me, 0);
 	for (unsigned int i = 1; (factor_ > 0) && (i < dimension_); ++i)
@@ -473,7 +473,7 @@ resize(Matrix<TValue, DIMENSION> & me, TFillValue myValue)	//resize the matrix a
 
 	unsigned int dimension_ = dimension(me);
 
-	SEQAN_ASSERT(dimension_ > 0);
+	SEQAN_ASSERT_GT(dimension_, 0u);
 
 	TSize factor_ = _dataFactors(me)[0] * length(me, 0);
 	for (unsigned int i = 1; (factor_ > 0) && (i < dimension_); ++i)
@@ -533,7 +533,7 @@ coordinate(Matrix<TValue, DIMENSION> & me,
 		   TPosition position_,
 		   unsigned int dimension_)
 {
-	SEQAN_ASSERT(dimension_ < dimension(me));
+	SEQAN_ASSERT_LT(dimension_, dimension(me));
 
 	if (dimension_ < dimension(me) - 1)
 	{
@@ -770,7 +770,7 @@ Matrix<TValue,DIMENSION>
 operator + (Matrix<TValue,DIMENSION> const & matrix1,Matrix<TValue,DIMENSION> const & matrix2)
 {
 	//the two matrices must have same dimension
-	SEQAN_ASSERT(_dataLengths(matrix1)==_dataLengths(matrix2));
+	SEQAN_ASSERT_TRUE(_dataLengths(matrix1) == _dataLengths(matrix2));
 
 	Matrix<TValue,DIMENSION> result;
 	//copy the first matrix
@@ -792,7 +792,7 @@ Matrix<TValue,DIMENSION>
 operator - (Matrix<TValue,DIMENSION> const & matrix1,Matrix<TValue,DIMENSION> const & matrix2)
 {
 	//the two matrices must have same dimension
-	SEQAN_ASSERT(_dataLengths(matrix1)==_dataLengths(matrix2))
+	SEQAN_ASSERT_TRUE(_dataLengths(matrix1) == _dataLengths(matrix2));
 
 	Matrix<TValue,DIMENSION> result;
 	//resize the matrix
@@ -813,7 +813,7 @@ template <typename TValue>
 Matrix<TValue, 2>
 operator * (Matrix<TValue, 2> const & matrix1, Matrix<TValue, 2> const & matrix2)
 {
-	SEQAN_ASSERT(length(matrix1,1) == length(matrix2,0))
+	SEQAN_ASSERT_EQ(length(matrix1,1), length(matrix2,0));
 
 	unsigned int nrow1=length(matrix1,0);
 	unsigned int ncol2=length(matrix2,1);
@@ -989,7 +989,7 @@ inline Matrix<TValue, 2>
 matricialProduct(Matrix<TValue, 2> &matrix1,
 		Matrix<TValue, 2> &matrix2)
 {
-	//SEQAN_ASSERT(dimension_ < dimension(me));
+	//SEQAN_ASSERT_LT(dimension_, dimension(me));
 	if(length(matrix1,1) != length(matrix2,0))
 	{
 		fprintf(stderr,"Error: Number of columns of matrix1 is unequal to number of rows of matrix2");

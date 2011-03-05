@@ -597,7 +597,7 @@ inline void
 setClippedBeginPosition(Gaps<TSource, ArrayGaps> & me,
 					   TPosition source_position)
 {
-	SEQAN_ASSERT(length(_dataArr(me)))
+	SEQAN_ASSERT_GT(length(_dataArr(me)), 0u);
 
 	typedef Gaps<TSource, ArrayGaps> TGaps;
 	typedef typename Position<TGaps>::Type TViewPosition;
@@ -669,7 +669,7 @@ setClippedEndPosition(Gaps<TSource, ArrayGaps> & me,
 	typedef typename TGaps::TArr TArr;
 
 	TArr arr = _dataArr(me);
-	SEQAN_ASSERT(length(arr));
+	SEQAN_ASSERT_GT(length(arr), 0u);
 
 	TPosition old_end_begin_pos = clippedEndPosition(me);
 	if (old_end_begin_pos == source_position) return;

@@ -185,8 +185,8 @@ struct Allocator< ClassPool< TClass, Unlimited, TParentAllocator > >
 					TClass *& dest, 
 					TSize number )
 	{
-		SEQAN_CHECK2( number <= me._blockSize, "tried to allocate more elements than available in block");
-		SEQAN_CHECK2( number > 0, "tried to allocate 0 elements");
+		SEQAN_ASSERT_LEQ_MSG(number, static_cast<TSize>(me._blockSize), "tried to allocate more elements than available in block");
+		SEQAN_ASSERT_GT_MSG(number, static_cast<TSize>(0), "tried to allocate 0 elements");
 		if( number == 1 )
 		{
 			if( me._end < me._terminal_end )
@@ -237,7 +237,7 @@ struct Allocator< ClassPool< TClass, Unlimited, TParentAllocator > >
 					 TClass * location,
 					 TSize /*count*/ )
 	{
-		SEQAN_CHECK2( location != NULL, "Tried to free NULL-pointer" )
+		SEQAN_ASSERT_TRUE_MSG(location != NULL, "Tried to free NULL-pointer");
 		_setNext( *location, me._freeBlock );
 		me._freeBlock = location;
 	}
@@ -314,8 +314,8 @@ public:
 					TClass *& dest, 
 					TSize number )
 	{
-		SEQAN_CHECK2( number <= me._blockSize, "tried to allocate more elements than available in block")
-		SEQAN_CHECK( number != 0 )		
+		SEQAN_ASSERT_LEQ_MSG(number, static_cast<TSize>(me._blockSize), "tried to allocate more elements than available in block");
+		SEQAN_ASSERT_NEQ(number, static_cast<TSize>(0));
 			// recycle old memory block
 		if( me._freeBlocks[ number-1 ] != NULL )
 		{
@@ -352,7 +352,7 @@ public:
 				TClass * location,
 				TSize count )
 	{
-		SEQAN_CHECK( count != 0 )
+		SEQAN_ASSERT_NEQ(count, static_cast<TSize>(0));
 		_setNextBlock( me, *location, me._freeBlocks[ count - 1 ] );
 		me._freeBlocks[ count - 1 ] = location;
 	}

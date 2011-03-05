@@ -323,10 +323,10 @@ inline void _patternInit (Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPat
 	//allocate enough memory for one column of DP matrix
 
 	TSize need_length = length(needle(me));
-	SEQAN_ASSERT(need_length);
+	SEQAN_ASSERT_GT(need_length, 0u);
 
 	resize(string_tab, need_length);
-	SEQAN_ASSERT(length(string_tab) >= need_length);
+	SEQAN_ASSERT_GEQ(length(string_tab), need_length);
 
 //	if (length(_dataNeedle(me)) < got_length) throw(0); //???TODO: Throw "not enough memory" exception
 
@@ -477,7 +477,7 @@ inline bool
 find(TFinder & finder, 
 	 Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
-	SEQAN_ASSERT(scoreGapOpen(scoringScheme(me)) == scoreGapExtend(scoringScheme(me))) //this finder is only defined for linear gap costs
+	SEQAN_ASSERT_EQ(scoreGapOpen(scoringScheme(me)), scoreGapExtend(scoringScheme(me))); //this finder is only defined for linear gap costs
 	return _findScoreSimpleProportional(finder, me);
 }
 
@@ -487,7 +487,7 @@ find(TFinder & finder,
 	 Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me,
 	 int const limit_)
 {
-	SEQAN_ASSERT(scoreGapOpen(scoringScheme(me)) == scoreGapExtend(scoringScheme(me))) //this finder is only defined for linear gap costs
+	SEQAN_ASSERT_EQ(scoreGapOpen(scoringScheme(me)), scoreGapExtend(scoringScheme(me))); //this finder is only defined for linear gap costs
 	setScoreLimit(me, limit_);
 	return _findScoreSimpleProportional(finder, me);
 }

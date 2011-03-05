@@ -159,7 +159,7 @@ destroy(VoidHolder & me)
 	if (empty(me)) return;
 	me._empty = true;
 
-	SEQAN_ASSERT(me._length >= sizeof(TValue))
+	SEQAN_ASSERT_GEQ(me._length, sizeof(TValue));
 	valueDestruct(reinterpret_cast<TValue *>(me._data));
 }
 

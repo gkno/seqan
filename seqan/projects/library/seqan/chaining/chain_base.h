@@ -186,11 +186,11 @@ namespace seqan
 	computeChain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TStructuring structuring )
 	{
 
-//		SEQAN_CHECK2( scoreGapOpen( score_ ) == scoreGapExtend( score_ ), "Chaining only supports linear gap costs" )
-//		SEQAN_CHECK2( scoreGapOpen( score_ ) >= 0 && scoreGapExtend( score_ ) >= 0 && scoreMismatch( score_ ) >= 0, "Scores should be positive" )
+//		SEQAN_ASSERT_TRUE_MSG( scoreGapOpen( score_ ) == scoreGapExtend( score_ ), "Chaining only supports linear gap costs" );
+//		SEQAN_ASSERT_TRUE_MSG( scoreGapOpen( score_ ) >= 0 && scoreGapExtend( score_ ) >= 0 && scoreMismatch( score_ ) >= 0, "Scores should be positive" );
 		switch( dimension( value( begin( source ) ) ) )
 		{
-			case 1: SEQAN_REPORT("One dimensional chaining not supported")
+			case 1: SEQAN_ASSERT_FAIL("One dimensional chaining not supported");
 					return 0;
 			case 2: if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					{
@@ -203,7 +203,7 @@ namespace seqan
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 2 > >() );
 					}
-					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
+					SEQAN_ASSERT_FAIL("Gap/mismatch model not supported");
 					break;
 			case 3: if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Array< 2 > >() );
@@ -214,7 +214,7 @@ namespace seqan
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 3 > >() );
 					}
-					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
+					SEQAN_ASSERT_FAIL("Gap/mismatch model not supported");
 					break;
 			case 4:	if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Array< 3 > >() );
@@ -225,7 +225,7 @@ namespace seqan
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 4 > >() );
 					}
-					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
+					SEQAN_ASSERT_FAIL("Gap/mismatch model not supported");
 					break;
 			case 5:	if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Array< 4 > >() );
@@ -236,7 +236,7 @@ namespace seqan
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 5 > >() );
 					}
-					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
+					SEQAN_ASSERT_FAIL("Gap/mismatch model not supported");
 					break;
 			default:if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Default >() );
@@ -247,7 +247,7 @@ namespace seqan
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
 							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring, ChainSpecType_< Default >() );
 					}
-					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
+					SEQAN_ASSERT_FAIL("Gap/mismatch model not supported");
 
 		}
 		return minValue< TScoreValue >();
@@ -265,7 +265,7 @@ globalChaining(TSource & source,
 	typedef typename Iterator<TSource, Standard>::Type TSourceIterator;
 	typedef typename Iterator<TDest, Standard>::Type TDestIterator;
 
-	SEQAN_ASSERT(length(source))
+	SEQAN_ASSERT_GT(length(source), 0u);
 
 	//transform coordinates to old style ("end is last item")
 	unsigned int dim = dimension(source[0]);

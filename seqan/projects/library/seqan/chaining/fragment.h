@@ -280,7 +280,7 @@ TBorder
 rightPosition( const Seed< TBorder, MultiSeed >  & me,
 				TSize dim )
 {
-SEQAN_ASSERT( me._left->size() == me._right->size() )
+    SEQAN_ASSERT_EQ( me._left->size(), me._right->size());
 	return me._right[dim];
 }
 
@@ -315,7 +315,7 @@ _setLeftPosition( Seed< TBorder, TSpec > & me,
 					TSize dim,
 					TPosition value )
 {
-	SEQAN_CHECK2( dim >= 0 && dim < me._dim, "Dimension index out of bounds" );
+	SEQAN_ASSERT_LT_MSG(dim, static_cast<TSize>(me._dim), "Dimension index out of bounds");
 	me._left[ dim ] = value;
 }
 template< typename TPosition, typename TSize, typename TPosition2> 
@@ -333,7 +333,7 @@ _setRightPosition( Seed< TBorder, TSpec > & me,
 					TSize dim, 
 					TPosition value )
 {
-	SEQAN_CHECK2( dim >= 0 && dim < me._dim, "Dimension index out of bounds" );
+	SEQAN_ASSERT_LT_MSG(dim, static_cast<TSize>(me._dim), "Dimension index out of bounds");
 	me._right[ dim ] = value;
 }
 template< typename TPosition, typename TSize, typename TPosition2> 

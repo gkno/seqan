@@ -49,7 +49,7 @@ namespace seqan
 					TStructuring,
 					TSpec spec )
 	{
-		SEQAN_CHECK( !empty( source ) )
+		SEQAN_ASSERT_NOT(empty(source));
 			// define some basic types
 		typedef typename Value< TSource >::Type FragType;
 		typedef typename Weight< FragType >::Type WeightType;

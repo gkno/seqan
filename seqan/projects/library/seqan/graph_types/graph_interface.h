@@ -442,8 +442,8 @@ addEdges(Graph<TSpec>& dest,
 		if (source>target) _createVertices(dest,source);
 		else _createVertices(dest,target);
 		// Add edge
-		SEQAN_ASSERT(idInUse(dest.data_id_managerV, source) == true)
-		SEQAN_ASSERT(idInUse(dest.data_id_managerV, target) == true)
+		SEQAN_ASSERT_TRUE(idInUse(dest.data_id_managerV, source));
+		SEQAN_ASSERT_TRUE(idInUse(dest.data_id_managerV, target));
 		addEdge(dest, source, target);
 	}
 }

@@ -606,8 +606,8 @@ SEQAN_CHECKPOINT
         Segment<THost, TSpec> const & target,
         TSource & source)
     {
-SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_CHECKPOINT;
+        SEQAN_ASSERT_NOT(hasNoHost(target));
         replace(host(target), beginPosition(target), endPosition(target), source, TExpand());
     }
 
@@ -618,8 +618,8 @@ SEQAN_CHECKPOINT
         TSource & source,
         typename Size< Segment<THost, TSpec> >::Type limit)
     {
-SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_CHECKPOINT;
+        SEQAN_ASSERT_NOT(hasNoHost(target));
         replace(host(target), beginPosition(target), endPosition(target), source, limit, TExpand());
     }
 };
@@ -820,7 +820,7 @@ SEQAN_CHECKPOINT
         TSource & source)
     {
 SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT_NOT(hasNoHost(target));
         replace(host(target), endPosition(target), endPosition(target), source, TExpand());
     }
 
@@ -832,7 +832,7 @@ SEQAN_CHECKPOINT
         typename Size< Segment<THost, TSpec> >::Type limit)
     {
 SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT_NOT(hasNoHost(target));
         replace(host(target), endPosition(target), endPosition(target), source, limit, TExpand()); //??? INSERT
     }
 };
@@ -1038,7 +1038,7 @@ struct ReplaceSequenceToSegment_
         TSource & source)
     {
 SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT_NOT(hasNoHost(target));
 
         typedef Segment<THost, TSpec> Target;
 
@@ -1060,7 +1060,7 @@ SEQAN_CHECKPOINT
         typename Size< Segment<THost, TSpec> >::Type limit)
     {
 SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT_NOT(hasNoHost(target));
 
         typedef Segment<THost, TSpec> Target;
 
@@ -1082,7 +1082,7 @@ SEQAN_CHECKPOINT
         TSource & source)
     {
 SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT_NOT(hasNoHost(target));
 
         replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, TExpand());
     }
@@ -1097,7 +1097,7 @@ SEQAN_CHECKPOINT
         typename Size< Segment<THost, TSpec> >::Type limit)
     {
 SEQAN_CHECKPOINT
-        SEQAN_ASSERT(!hasNoHost(target))
+        SEQAN_ASSERT_NOT(hasNoHost(target));
 
         replace(host(target), beginPosition(target) + pos_begin, beginPosition(target) + pos_end, source, limit, TExpand()); //??? INSERT
     }

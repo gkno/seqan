@@ -78,7 +78,7 @@ namespace seqan{
 
 		while( buffer != end )
 		{
-			SEQAN_CHECK( buffer_theKey <= key( *buffer, dim ) )
+			SEQAN_ASSERT_LEQ(buffer_theKey, key(*buffer, dim));
 			if( key( *buffer, dim ) != buffer_theKey )
 			{
 				height = _throwCoin< TObject, TModus, RT< TSpec >, TStructuring  >( list, max_height );

@@ -276,7 +276,7 @@ SEQAN_CHECKPOINT
     if (new_capacity <= capacity(me))
         return 0;
 
-    SEQAN_ASSERT(me.data_begin != 0);
+    SEQAN_ASSERT_NEQ(me.data_begin, 0);
     //if (me.data_begin == 0)
     //    return _pizzaChiliAllocate(me, new_capacity);
 

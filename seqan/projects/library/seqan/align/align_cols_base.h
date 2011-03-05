@@ -229,7 +229,7 @@ inline typename Host<AlignCols<TAlign> >::Type &
 host(AlignCols<TAlign> & me)
 {
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(me.data_align)
+	SEQAN_ASSERT_TRUE(me.data_align);
 	return *me.data_align; 
 }
 template <typename TAlign>
@@ -237,7 +237,7 @@ inline typename Host<AlignCols<TAlign> const>::Type &
 host(AlignCols<TAlign> const & me)
 {
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(me.data_align)
+	SEQAN_ASSERT_TRUE(me.data_align);
 	return *me.data_align; 
 }
 

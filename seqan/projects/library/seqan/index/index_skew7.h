@@ -348,7 +348,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					{
 						String<typename Value<TFilter>::Type, Alloc<> > _text;
 						_text << filter;
-						SEQAN_DO(isSuffixArray(recurse, _text));
+						SEQAN_ASSERT_TRUE(isSuffixArray(recurse, _text));
 					}
 					#endif
 
@@ -494,8 +494,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSA, Standard>::Type TSAIter;
 		typedef typename Iterator<TText const, Standard>::Type TValueIter;
 
-		SEQAN_ASSERT(IsContiguous<TText>::VALUE);
-		SEQAN_ASSERT(IsContiguous<TSA>::VALUE);
+		SEQAN_ASSERT_TRUE(IsContiguous<TText>::VALUE == true);
+		SEQAN_ASSERT_TRUE(IsContiguous<TSA>::VALUE == true);
 
         #ifdef SEQAN_DEBUG_INDEX
             std::cerr << "--- CREATE SUFFIX ARRAY ---" << std::endl;
@@ -590,7 +590,7 @@ namespace SEQAN_NAMESPACE_MAIN
             {
 			    createSuffixArray(SA124, s124, Skew7(), name, maxdepth, depth + 1);
 			    #ifdef SEQAN_TEST_SKEW7
-				    SEQAN_DO(isSuffixArray(SA124, s124));
+				    SEQAN_ASSERT_TRUE(isSuffixArray(SA124, s124));
 			    #endif
             }
 			// store unique names in s124 using the suffix array

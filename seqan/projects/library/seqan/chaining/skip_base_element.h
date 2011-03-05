@@ -429,7 +429,7 @@ namespace seqan
 	_setSucc( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*me*/, 
 				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*succ*/ )
 	{
-		SEQAN_ASSERT2( false, "No dynamic related members in default mode" )
+		SEQAN_ASSERT_FAIL("No dynamic related members in default mode");
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
@@ -506,7 +506,7 @@ namespace seqan
 	_setPred(	SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*me*/, 
 				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*goPrevious*/ )
 	{
-		SEQAN_ASSERT2( false, "No dynamic related members in default mode" )
+		SEQAN_ASSERT_FAIL("No dynamic related members in default mode");
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
@@ -560,7 +560,7 @@ namespace seqan
 	_setLeft( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*me*/,
 							SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*left*/ )
 	{
-		SEQAN_ASSERT2( false, "No deferred related members in default mode" )
+		SEQAN_ASSERT_FAIL("No deferred related members in default mode");
 	}
 
 	template< typename TObject, typename TModus, typename TSpec > inline 

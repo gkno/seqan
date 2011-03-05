@@ -349,8 +349,8 @@ template <typename TNeedle, typename TNeedle2>
 void _setHostWuManber(Pattern<TNeedle, WuManber> & me, 
 					   TNeedle2 const & needle_)
 {
-SEQAN_CHECKPOINT
-SEQAN_ASSERT(!empty(needle_));
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_NOT(empty(needle_));
 
 	typedef typename Iterator<TNeedle, Standard>::Type TNeedleIterator;
 	typedef typename Value<TNeedle>::Type TKeyword;

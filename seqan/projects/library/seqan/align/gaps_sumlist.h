@@ -318,7 +318,7 @@ SEQAN_CHECKPOINT
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
 	TGaps & gaps = const_cast<TGaps &>(gaps_);
 
-	SEQAN_ASSERT(pos >= clippedBeginPosition(gaps))
+	SEQAN_ASSERT_GEQ(pos, clippedBeginPosition(gaps));
 	pos -= clippedBeginPosition(gaps);
 
 	if (pos >= getSum(gaps.data_sumlist, 1))

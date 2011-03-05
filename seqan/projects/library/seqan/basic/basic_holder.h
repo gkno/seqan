@@ -1003,8 +1003,8 @@ template <typename TValue>
 inline typename Reference<Holder<TValue, Tristate> const>::Type
 value(Holder<TValue, Tristate> const & me)
 {
-SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!empty(me));
+    SEQAN_CHECKPOINT;
+	SEQAN_ASSERT_NOT(empty(me));
 
 	return _dataValue(me);
 }
@@ -1550,7 +1550,7 @@ inline typename Reference<Holder<TValue, Tristate2> const>::Type
 value(Holder<TValue, Tristate2> const & me)
 {
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!empty(me));
+	SEQAN_ASSERT_NOT(empty(me));
 
 	return *(me.data_value);
 }

@@ -163,7 +163,7 @@ struct FindBeginImpl_
 		else
 		{//resume finding
 			_finderSetNonEmpty(begin_finder);
-			SEQAN_ASSERT(length(finder) > 0)
+			SEQAN_ASSERT_GT(length(finder), 0u);
 			begin_finder_position = endPosition(finder) - length(finder);
 		}
 		setPosition(host(hostIterator(begin_finder)), begin_finder_position);
@@ -239,7 +239,7 @@ struct FindBeginImpl_<Myers<FindPrefix, THasState, void> >
 		else
 		{//resume finding
 			_finderSetNonEmpty(begin_finder);
-			SEQAN_ASSERT(length(finder) > 0)
+			SEQAN_ASSERT_GT(length(finder), 0u);
 			begin_finder_position = endPosition(finder) - length(finder);
 		}
 		setPosition(host(hostIterator(begin_finder)), begin_finder_position);

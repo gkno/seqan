@@ -87,7 +87,7 @@ _chainGenericInitFrags(TSource & source,
 						 TFrags & frags,
 						 TScoring scoring)
 {
-	SEQAN_ASSERT(length(source))
+	SEQAN_ASSERT_GT(length(source), 0u);
 
 	typedef typename Position<TSource>::Type TPos;
 	typedef typename Value<TSource>::Type TFragment;
@@ -117,7 +117,7 @@ inline bool
 _chainGenericChainable(TFrag & f1,
 						 TFrag & f2)
 {
-	SEQAN_ASSERT(dimension(f1) == dimension(f2))
+	SEQAN_ASSERT_EQ(dimension(f1), dimension(f2));
 
 	unsigned int dim = dimension(f1); 
 	while (dim > 0)

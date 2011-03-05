@@ -184,8 +184,8 @@ allocate(Allocator<ChunkPool<SIZE, MAX_COUNT, TParentAllocator> > & me,
 		 TSize count,
 		 Tag<TUsage> const tag_)
 {
-SEQAN_CHECKPOINT
-SEQAN_ASSERT(count > 0)
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_GT(count, 0);
 
 	typedef Allocator<ChunkPool<SIZE, MAX_COUNT, TParentAllocator> > TAllocator;
 
@@ -233,8 +233,8 @@ deallocate(Allocator<ChunkPool<SIZE, MAX_COUNT, TParentAllocator> > & me,
 		   TSize count,
 		   Tag<TUsage> const tag_)
 {
-SEQAN_CHECKPOINT
-SEQAN_ASSERT(count > 0)
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_GT(count, 0);
 
 	typedef Allocator<ChunkPool<SIZE, MAX_COUNT, TParentAllocator> > TAllocator;
 

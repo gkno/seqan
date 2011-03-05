@@ -63,7 +63,7 @@ void goNext(TFile & file, CGViz) {
 //IOREV _todo_
 	SEQAN_CHECKPOINT;
     (void) file; // When compiled without assertions.
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 	
 	return;
 }

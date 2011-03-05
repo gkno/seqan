@@ -352,7 +352,7 @@ SEQAN_CHECKPOINT
 //VERIFY
 				me.position = begin(property(me.terminals, current), Standard());
 				me.position_end = end(property(me.terminals, current), Standard());
-				SEQAN_ASSERT(me.position != me.position_end)
+				SEQAN_ASSERT_NEQ(me.position, me.position_end);
 
 				if (_startVerifyMultiBfam(me, it1)) //this returns true if the lmin-length prefixe matches
 				{

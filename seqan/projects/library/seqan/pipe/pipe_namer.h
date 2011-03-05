@@ -104,7 +104,7 @@ namespace SEQAN_NAMESPACE_MAIN
             ++in;
             if (!eof(in) && C(last, *in) != 0) {
                 #ifdef SEQAN_TEST
-                    SEQAN_ASSERT(C(last, *in) < 0);
+                    SEQAN_ASSERT_LT(C(last, *in), 0);
                 #endif
                 last = *in;
                 ++tmp.i2;

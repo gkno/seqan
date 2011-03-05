@@ -155,7 +155,7 @@ addEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& /*g*
 {
 	// No additional cargo allowed. Cargo is used for the words in the graph.
 	// Use external property map.
-	SEQAN_ASSERT(false)
+    SEQAN_ASSERT_FAIL("No additional cargo allowed. Cargo is used for the words in the graph. Use external property map.");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -169,8 +169,8 @@ removeEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g
 {
 	SEQAN_CHECKPOINT;
 	(void)target;  // In case it is compiled without assertions.
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, source));
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, target));
 
 	TAlphabet firstChar = getValue(label, 0);
 	removeEdge(g, findEdge(g,source, firstChar));
@@ -223,8 +223,8 @@ getSuccessor(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > 
 			 TVertexDescriptor vertex,
 			 TCharacters const& chars)
 {
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_CHECKPOINT;
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TAlphabet>::Type TSize;
@@ -257,8 +257,8 @@ parseString(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > c
 			TIterator beginIt,
 			TIterator endIt)
 {
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
+	SEQAN_CHECKPOINT;
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();

@@ -981,7 +981,7 @@ inline void _refreshStringSetLimits(StringSet< TString, TSpec > & me)
     typename Size<TStringSet>::Type len = length(me);
     typename Size<TStringSet>::Type i = 0;
 
-//      SEQAN_ASSERT(length(me.limits) == len + 1);
+//      SEQAN_ASSERT_EQ(length(me.limits), len + 1);
     resize(me.limits, len + 1, Generous());
     for(; i < len; ++i) {
         me.limits[i] = sum;
@@ -1222,7 +1222,7 @@ assignValueById(StringSet<TString, TSpec>& me,
 {
     SEQAN_CHECKPOINT;
     appendValue(me, obj);
-    SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+    SEQAN_ASSERT_EQ(length(me.limits), length(me) + 1);
     return length(me.strings) - 1;
 }
 

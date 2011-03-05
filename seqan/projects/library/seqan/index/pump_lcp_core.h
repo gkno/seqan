@@ -144,7 +144,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						if (k != windowSize || rest == 0) {
 							out.i1 = (*invertedSAIn).i1 - 1;
 							push(dest, out);
-							//SEQAN_ASSERT(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
+							//SEQAN_ASSERT_TRUE(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
 							//seen[out.i1] = true;
 							++_pushes;
 
@@ -186,7 +186,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		push(dest, Pair<TSize>(length(textIn) - 1, 0));
 
 		//::std::cerr << "pushes:" << _pushes << " length:" << length(textIn) << ::std::endl;
-        //SEQAN_ASSERT(_pushes == length(textIn));
+        //SEQAN_ASSERT_EQ(_pushes, length(textIn));
         //for (unsigned i = 0; i < n; ++i)
         //    if (!seen[i])
         //        ::std::cerr << "___" << i << "______HUH?" << ::std::endl;
@@ -310,7 +310,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						if (k != windowSize || rest == 0) {
 							out.i1 = (*invertedSAIn).i1 - 1;
 							push(dest, out);
-							//SEQAN_ASSERT(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
+							//SEQAN_ASSERT_TRUE(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
 							//seen[out.i1] = true;
 							++_pushes;
 
@@ -354,7 +354,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		push(dest, Pair<TSize>(length(textIn) - 1, 0));
 
 		//::std::cerr << "pushes:" << _pushes << " length:" << length(textIn) << ::std::endl;
-        //SEQAN_ASSERT(_pushes == length(textIn));
+        //SEQAN_ASSERT_EQ(_pushes, length(textIn));
         //for (unsigned i = 0; i < n; ++i)
         //    if (!seen[i])
         //        ::std::cerr << "___" << i << "______HUH?" << ::std::endl;

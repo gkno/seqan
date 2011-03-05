@@ -162,7 +162,7 @@ _fastaScanLine(TFile & file,
 {
 //IOREV _todo_
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 
 	TSize count = 0;
 	typename Value<TFile>::Type c;
@@ -220,12 +220,12 @@ read(TFile & file,
 //IOREV _todo_
 SEQAN_CHECKPOINT
 
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 	clear(data);
 
 	//determine begin position
 	typename Value<TFile>::Type c_first = _streamGet(file);
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 
 	typename Position<TFile>::Type begin_pos = _streamTellG(file);
 	typename Size<TData>::Type count_valid = 1; //"valid" characters read (without line breaks)
@@ -336,7 +336,7 @@ readID(TFile & file,
 {
 //IOREV _todo_
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 
 	typename Position<TFile>::Type start_pos = _streamTellG(file);
 
@@ -384,7 +384,7 @@ readShortID(TFile & file,
 {
 //IOREV _todo_
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 
 	typename Position<TFile>::Type start_pos = _streamTellG(file);
 
@@ -458,7 +458,7 @@ goNext(TFile & file,
 {
 //IOREV _todo_
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 
 //	bool found_data = false;
 	while (true)

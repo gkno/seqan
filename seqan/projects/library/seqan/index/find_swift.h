@@ -737,7 +737,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 					bucketsPerCol2 = 2;
 				}
 
-	//			SEQAN_ASSERT(distanceCut <= bucketsPerCol * (TSize) delta);
+	//			SEQAN_ASSERT_LEQ(distanceCut, bucketsPerCol * (TSize) delta);
 
 				bucketParams.firstBucket = count;
 				bucketParams.reuseMask = bucketsPerCol2 - 1;

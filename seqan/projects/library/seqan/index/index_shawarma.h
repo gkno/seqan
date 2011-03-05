@@ -73,13 +73,13 @@ namespace SEQAN_NAMESPACE_MAIN {
 		typedef typename Value<TText>::Type	TValue;
 		typedef typename Value<TSA>::Type	TSAValue;
 
-		SEQAN_ASSERT(sizeof(TValue) == sizeof(unsigned char));
-		SEQAN_ASSERT(sizeof(TSAValue) == sizeof(int));
-		SEQAN_ASSERT(IsContiguous<TSA>::VALUE);
+		SEQAN_ASSERT_EQ(sizeof(TValue), sizeof(unsigned char));
+		SEQAN_ASSERT_EQ(sizeof(TSAValue), sizeof(int));
+		SEQAN_ASSERT_TRUE(IsContiguous<TSA>::VALUE);
 
 		int overshoot = shawarma::init_ds_ssort(500, 2000);
 
-		SEQAN_ASSERT(overshoot > 0);
+		SEQAN_ASSERT_GT(overshoot, 0);
 		reserve(s, length(s) + overshoot);
 		shawarma::ds_ssort(
 			(unsigned char*)toCString(s),		// text

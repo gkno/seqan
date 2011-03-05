@@ -522,8 +522,8 @@ operator -(Iter<TAlign, AlignColIterator<TSpec> > const & left,
 		   Iter<TAlign, AlignColIterator<TSpec> > const & right)
 {
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(length(left.data_iterators))
-	SEQAN_ASSERT(length(right.data_iterators))
+	SEQAN_ASSERT_GT(length(left.data_iterators), 0u);
+	SEQAN_ASSERT_GT(length(right.data_iterators), 0u);
 
 	return (left.data_iterators[0] - right.data_iterators[0]);
 }

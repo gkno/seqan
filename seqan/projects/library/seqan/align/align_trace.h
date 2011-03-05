@@ -121,7 +121,7 @@ template <typename TSize, typename TSpec>
 inline void
 _initMembers(AlignTrace<TSize, TSpec> & me)
 {
-	SEQAN_ASSERT(dimension(me) >= 1);
+	SEQAN_ASSERT_GEQ(dimension(me), 1);
 
 	unsigned int bits_per_word = BitsPerValue<unsigned int>::VALUE;
 

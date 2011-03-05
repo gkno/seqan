@@ -70,7 +70,7 @@ void allocate(TestAllocator & me,
 			  TSize count, 
 			  Tag<TUsage> const)
 {
-	SEQAN_ASSERT(count)
+	SEQAN_ASSERT_GT(count, static_cast<TSize>(0));
 	allocate(int(), data_, count);
 	me.data_allocated[(char *) data_] = count;
 }

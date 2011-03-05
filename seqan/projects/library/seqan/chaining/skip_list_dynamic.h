@@ -145,7 +145,7 @@ namespace seqan
 	insert( SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/, 
 			TObject & /*obj*/ )
 	{
-		SEQAN_ASSERT2( false, "SkipListStatic Skip Lists don't provide insertion operations" )
+		SEQAN_ASSERT_FAIL("SkipListStatic Skip Lists don't provide insertion operations");
 	}
 
 
@@ -268,8 +268,8 @@ namespace seqan
 						TParam & param )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK2( theKey != maxValue< typename Key< TObject >::Type >( ), "search key is supremum" ) 
-		SEQAN_CHECK2( theKey != minValue< typename Key< TObject >::Type >( ), "search key is infimum" ) 
+		SEQAN_CHECK_ASSERT_TRUE_MSG( theKey != maxValue< typename Key< TObject >::Type >( ), "search key is supremum" );
+		SEQAN_CHECK_ASSERT_TRUE_MSG( theKey != minValue< typename Key< TObject >::Type >( ), "search key is infimum" );
 		
 		if( _getInitialState( list ) )
 		{
@@ -329,7 +329,7 @@ namespace seqan
 					typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type height )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK( &_getUp( *base ) != NULL )
+		SEQAN_ASSERT_TRUE(&_getUp( *base ) != NULL);
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > * buffer = &_getUp( *base );
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > * top = buffer + height;
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > ** sp = search_path;
@@ -353,7 +353,7 @@ namespace seqan
 					SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *& base )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT2( base != list._rightBorder, "Can't delete right border" )
+		SEQAN_ASSERT_TRUE_MSG(base != list._rightBorder, "Can't delete right border");
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * base_buffer1 = _getPred( *base );
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * base_buffer2 = _getSucc( *base );
 		_setSucc( *base_buffer1, base_buffer2 );
@@ -374,7 +374,7 @@ namespace seqan
 	erase(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/, 
 			TKey /*theKey*/)
 	{
-		SEQAN_ASSERT2( false, "No deletion in static lists")
+		SEQAN_ASSERT_FAIL("No deletion in static lists");
 		return false;
 	}
 
@@ -405,7 +405,7 @@ namespace seqan
 	erase(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/, 
 			TObject & /*obj*/ )
 	{
-		SEQAN_ASSERT2( false, "No deletion in static lists")
+		SEQAN_ASSERT_FAIL("No deletion in static lists");
 		return false;
 	}
 

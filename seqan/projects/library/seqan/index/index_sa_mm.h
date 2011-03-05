@@ -118,15 +118,15 @@ namespace SEQAN_NAMESPACE_MAIN
 					ISA[SA[i]] = l;
 				}
 
-				SEQAN_ASSERT(n >= h);
+				SEQAN_ASSERT_GEQ(n, h);
 				Ti = n - h;
 				TIter p = begin(ISA, Standard()) + Ti;
 
-				SEQAN_ASSERT(*p < n);
+				SEQAN_ASSERT_LT(*p, n);
 				j = count[*p]++;
 				*p += j;
 
-				SEQAN_ASSERT(*p < n);
+				SEQAN_ASSERT_LT(*p, n);
 				B2h[*p] = true;
 
 				l = 0;
@@ -136,11 +136,11 @@ namespace SEQAN_NAMESPACE_MAIN
 						Ti -= h;
 						p = begin(ISA) + Ti;
 
-						SEQAN_ASSERT(*p < n);
+						SEQAN_ASSERT_LT(*p, n);
 						j = count[*p]++;
 						*p += j;
 
-						SEQAN_ASSERT(*p < n);
+						SEQAN_ASSERT_LT(*p, n);
 						B2h[*p] = true;
 					}
 

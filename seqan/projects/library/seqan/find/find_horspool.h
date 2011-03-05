@@ -92,7 +92,7 @@ setHost(Pattern<TNeedle, Horspool> & me, TNeedle2 const & ndl)
 	typedef typename Value<TNeedle>::Type TValue;
 	typedef typename Size<TNeedle>::Type TSize;
 
-	SEQAN_ASSERT(!empty(ndl));
+	SEQAN_ASSERT_NOT(empty(ndl));
 
 	TSize value_size = ValueSize<TValue>::VALUE;
 
@@ -448,7 +448,7 @@ SEQAN_CHECKPOINT
 		_finderSetNonEmpty(finder);
 	}
 
-	SEQAN_ASSERT(length(needle(me)) > 0)
+	SEQAN_ASSERT_GT(length(needle(me)), 0u);
 
 	return _findHorspool(finder, me, find_first);
 }

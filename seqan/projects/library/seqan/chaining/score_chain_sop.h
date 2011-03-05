@@ -215,7 +215,7 @@ scoreChainGap(Score<TValue, ChainSoP> const & me,
 			  TFragment & f1,
 			  TFragment & f2)
 {
-	SEQAN_ASSERT(dimension(f1) == dimension(f2))
+	SEQAN_ASSERT_EQ(dimension(f1), dimension(f2));
 
 	TValue score_gap = scoreGap(me);
 	TValue score_miss = scoreMismatch(me);
