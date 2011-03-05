@@ -137,8 +137,10 @@ int mapReads(
 		
 		cerr << "___SETTINGS____________" << endl;
 		cerr << "Genome file:                     \t" << genomeFileNames[0] << endl;
-		if (empty(readFileNames[1]))
+		if (length(readFileNames) == 1u)
+    {
 			cerr << "Read file:                       \t" << readFileNames[0] << endl;
+    }
 		else
 		{
 			cerr << "Read files:                      \t" << readFileNames[0] << endl;
