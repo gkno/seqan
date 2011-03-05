@@ -326,7 +326,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 	_getElementAlloc( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG(&me._elementAlloc != NULL, "Allocator for layer elements not initialized");
+		SEQAN_ASSERT_MSG(&me._elementAlloc != NULL, "Allocator for layer elements not initialized");
 		return me._elementAlloc;
 	}
 
@@ -336,7 +336,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 	_getBaseAlloc( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG(&me._baseAlloc != NULL, "Allocator for base elements not initialized");
+		SEQAN_ASSERT_MSG(&me._baseAlloc != NULL, "Allocator for base elements not initialized");
 		return me._baseAlloc;
 	}
 
@@ -358,7 +358,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 	_getRightBorder( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG(me._rightBorder != NULL, "Right border not created");
+		SEQAN_ASSERT_MSG(me._rightBorder != NULL, "Right border not created");
 		return me._rightBorder;
 	}
 
@@ -368,7 +368,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 	_getLeftSideStore( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG(me._leftSideStore != NULL, "_leftSideStore not initialized");
+		SEQAN_ASSERT_MSG(me._leftSideStore != NULL, "_leftSideStore not initialized");
 		return me._leftSideStore;
 	}
 
@@ -378,7 +378,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 	_getBaseStore( SkipList< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG(me._baseStore != NULL, "_baseStore not initialized");
+		SEQAN_ASSERT_MSG(me._baseStore != NULL, "_baseStore not initialized");
 		return me._baseStore;
 	}
 

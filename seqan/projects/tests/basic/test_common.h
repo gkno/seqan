@@ -87,5 +87,5 @@ SEQAN_DEFINE_TEST(Test_Iterator_Adapt_Std) {
 
 	typedef ::std::iterator_traits<Iterator<char *, Rooted>::Type>::value_type T1;
 	bool b1 = _isSameType<T1, char>();
-	SEQAN_ASSERT_TRUE(b1);
+	SEQAN_ASSERT(b1);
 }

@@ -178,7 +178,7 @@ void testCSPImpl(TText &text, TNeedle &needle, int errors)
 {
 	PatternState_<TNeedle, Myers<AlignTextBanded<FindInfix, TFinderCSP,TPatternCSP>, True, void> > state;
 	Finder<TText> finder(text);
-    SEQAN_ASSERT_TRUE(find(finder, needle, state, -1000));
+    SEQAN_ASSERT(find(finder, needle, state, -1000));
     SEQAN_ASSERT_EQ(position(finder), length(text) - 1) ;
     SEQAN_ASSERT_EQ(getScore(state), -errors);
 }

@@ -356,9 +356,9 @@ void recordErase(JournalEntries<TCargo, UnbalancedTree> & tree,
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
 
-    SEQAN_ASSERT_TRUE(checkStructure(tree._root));
-    SEQAN_ASSERT_TRUE(checkOrder(tree._root));
-    SEQAN_ASSERT_TRUE(checkVirtualPositions(tree._root));
+    SEQAN_ASSERT(checkStructure(tree._root));
+    SEQAN_ASSERT(checkOrder(tree._root));
+    SEQAN_ASSERT(checkVirtualPositions(tree._root));
 
 //     std::cout << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
@@ -523,9 +523,9 @@ void recordErase(JournalEntries<TCargo, UnbalancedTree> & tree,
 //     unsigned nextId = mtRand();
 //     journalTreeToDot(std::cerr, nextId, tree);
 //     std::cout << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
-    SEQAN_ASSERT_TRUE(checkStructure(tree._root));
-    SEQAN_ASSERT_TRUE(checkOrder(tree._root));
-    SEQAN_ASSERT_TRUE(checkVirtualPositions(tree._root));
+    SEQAN_ASSERT(checkStructure(tree._root));
+    SEQAN_ASSERT(checkOrder(tree._root));
+    SEQAN_ASSERT(checkVirtualPositions(tree._root));
 }
 
 
@@ -543,9 +543,9 @@ void recordInsertion(JournalEntries<TCargo, UnbalancedTree> & tree,
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
 
-    SEQAN_ASSERT_TRUE(checkStructure(tree._root));
-    SEQAN_ASSERT_TRUE(checkOrder(tree._root));
-    SEQAN_ASSERT_TRUE(checkVirtualPositions(tree._root));
+    SEQAN_ASSERT(checkStructure(tree._root));
+    SEQAN_ASSERT(checkOrder(tree._root));
+    SEQAN_ASSERT(checkVirtualPositions(tree._root));
 
     // Handle special case of empty tree.
     if (tree._root == 0) {
@@ -628,9 +628,9 @@ void recordInsertion(JournalEntries<TCargo, UnbalancedTree> & tree,
 //     journalTreeToDot(std::cerr, nextId, tree);
 //     std::cout << tree << std::endl;
 //     std::cout << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
-    SEQAN_ASSERT_TRUE(checkStructure(tree._root));
-    SEQAN_ASSERT_TRUE(checkOrder(tree._root));
-    SEQAN_ASSERT_TRUE(checkVirtualPositions(tree._root));
+    SEQAN_ASSERT(checkStructure(tree._root));
+    SEQAN_ASSERT(checkOrder(tree._root));
+    SEQAN_ASSERT(checkVirtualPositions(tree._root));
 }
 
 

@@ -102,7 +102,7 @@ template <typename TNeedle, typename TStringSetSpec>
 typename Position<StringSet<TNeedle, TStringSetSpec> >::Type needleIndex(Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     return pattern._needleIndex;
 }
@@ -112,7 +112,7 @@ template <typename TNeedle, typename TStringSetSpec>
 typename Position<StringSet<TNeedle, TStringSetSpec> >::Type length(Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     return length(needles(pattern)[pattern._needleIndex]);
 }
@@ -160,7 +160,7 @@ template <typename TNeedle, typename TStringSetSpec, typename TTag>
 typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     typedef Pattern<StringSet<TNeedle, TStringSetSpec>, Simple> TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     return end(needles(pattern)[needleIndex(pattern)], spec);
 }
@@ -197,7 +197,7 @@ template <typename TNeedle, typename TStringSetSpec>
 typename Position<TNeedle>::Type endPosition(Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     return length(needles(pattern)[needleIndex(pattern)]);
 }
@@ -306,7 +306,7 @@ bool findBegin(Finder<THaystack, Default> & finder,
     // State of finder and pattern should be in sync and either
     // "found" or "found begin".
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     if (pattern._state == TPattern::STATE_FOUND) {
         pattern._state = TPattern::STATE_BEGIN_FOUND;

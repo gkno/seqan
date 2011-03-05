@@ -411,7 +411,7 @@ void simulateReads(
 			
 			} 
 			if(revComp) reverseComplement(read);
-			SEQAN_ASSERT_TRUE(maxScore >= -(int)countErrors);
+			SEQAN_ASSERT(maxScore >= -(int)countErrors);
 			if(maxScore != -(int)countErrors)
 				kickOut = true;*/
 			if(!kickOut)

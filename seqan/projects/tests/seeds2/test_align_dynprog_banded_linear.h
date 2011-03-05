@@ -243,18 +243,18 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
 
         // std::cout << alignment;
         SEQAN_ASSERT_EQ(score, 1);
-        SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
+        SEQAN_ASSERT(seq0It == begin(sequence0));
         // std::cout << (begin(sequence1, Standard()) - seq1It) << std::endl;
-        SEQAN_ASSERT_TRUE(seq1It + 1 == begin(sequence1));
+        SEQAN_ASSERT(seq1It + 1 == begin(sequence1));
         // TODO(holtgrew): Why does this not work?
-        // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
-        // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
+        // SEQAN_ASSERT(align0It == begin(row(alignment, 0)));
+        // SEQAN_ASSERT(align1It == begin(row(alignment, 1)));
         SEQAN_ASSERT_EQ(finalPos0, 1u);
         SEQAN_ASSERT_EQ(finalPos1, 0u);
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
+        SEQAN_ASSERT(row(alignment, 0) == "CCAAA");
         // Note that leading and trailing gaps are not saved.  The
         // following is postfixed with a gap on visual inspection.
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == "C-AA");
+        SEQAN_ASSERT(row(alignment, 1) == "C-AA");
     }
     // TODO(holtgrew): Case with free begin and end gaps.
 }

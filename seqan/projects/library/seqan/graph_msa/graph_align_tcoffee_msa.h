@@ -436,12 +436,12 @@ _debugMatches(TStringSet& str,
 		}
 		std::cout << std::endl;
 
-		SEQAN_ASSERT_TRUE(sequenceId(matches[i],0) != sequenceId(matches[i],1));
-		SEQAN_ASSERT_TRUE(fragmentBegin(matches[i],tmp_id1) < length(str[idToPosition(str, tmp_id1)]));
-		SEQAN_ASSERT_TRUE(fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1) <= length(str[idToPosition(str, tmp_id1)]));
-		SEQAN_ASSERT_TRUE(fragmentBegin(matches[i],tmp_id2) < length(str[idToPosition(str, tmp_id2)]));
-		SEQAN_ASSERT_TRUE(fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2) <= length(str[idToPosition(str, tmp_id2)]));
-		SEQAN_ASSERT_TRUE(fragmentLength(matches[i],tmp_id2) == fragmentLength(matches[i],tmp_id1));
+		SEQAN_ASSERT(sequenceId(matches[i],0) != sequenceId(matches[i],1));
+		SEQAN_ASSERT(fragmentBegin(matches[i],tmp_id1) < length(str[idToPosition(str, tmp_id1)]));
+		SEQAN_ASSERT(fragmentBegin(matches[i],tmp_id1) + fragmentLength(matches[i],tmp_id1) <= length(str[idToPosition(str, tmp_id1)]));
+		SEQAN_ASSERT(fragmentBegin(matches[i],tmp_id2) < length(str[idToPosition(str, tmp_id2)]));
+		SEQAN_ASSERT(fragmentBegin(matches[i],tmp_id2) + fragmentLength(matches[i],tmp_id2) <= length(str[idToPosition(str, tmp_id2)]));
+		SEQAN_ASSERT(fragmentLength(matches[i],tmp_id2) == fragmentLength(matches[i],tmp_id1));
 	}
 }
 
@@ -467,12 +467,12 @@ _debugRefinedMatches(TGraph& g)
 		std::cout << " (" << cargo(*it_tmp) << ")";
 		std::cout << std::endl;	
 
-		SEQAN_ASSERT_TRUE(sequenceId(g,sourceVertex(it_tmp)) != sequenceId(g,targetVertex(it_tmp)));
-		SEQAN_ASSERT_TRUE(fragmentBegin(g,sourceVertex(it_tmp)) < length((stringSet(g))[idToPosition((stringSet(g)), id1)]));
-		SEQAN_ASSERT_TRUE(fragmentBegin(g,sourceVertex(it_tmp)) + fragmentLength(g,sourceVertex(it_tmp)) <= length((stringSet(g))[idToPosition((stringSet(g)), id1)]));
-		SEQAN_ASSERT_TRUE(fragmentBegin(g,targetVertex(it_tmp)) < length((stringSet(g))[idToPosition((stringSet(g)), id2)]));
-		SEQAN_ASSERT_TRUE(fragmentBegin(g,targetVertex(it_tmp)) + fragmentLength(g,targetVertex(it_tmp)) <= length((stringSet(g))[idToPosition((stringSet(g)), id2)]));
-		SEQAN_ASSERT_TRUE(fragmentLength(g,sourceVertex(it_tmp)) == fragmentLength(g,targetVertex(it_tmp)));
+		SEQAN_ASSERT(sequenceId(g,sourceVertex(it_tmp)) != sequenceId(g,targetVertex(it_tmp)));
+		SEQAN_ASSERT(fragmentBegin(g,sourceVertex(it_tmp)) < length((stringSet(g))[idToPosition((stringSet(g)), id1)]));
+		SEQAN_ASSERT(fragmentBegin(g,sourceVertex(it_tmp)) + fragmentLength(g,sourceVertex(it_tmp)) <= length((stringSet(g))[idToPosition((stringSet(g)), id1)]));
+		SEQAN_ASSERT(fragmentBegin(g,targetVertex(it_tmp)) < length((stringSet(g))[idToPosition((stringSet(g)), id2)]));
+		SEQAN_ASSERT(fragmentBegin(g,targetVertex(it_tmp)) + fragmentLength(g,targetVertex(it_tmp)) <= length((stringSet(g))[idToPosition((stringSet(g)), id2)]));
+		SEQAN_ASSERT(fragmentLength(g,sourceVertex(it_tmp)) == fragmentLength(g,targetVertex(it_tmp)));
 
 	}
 }

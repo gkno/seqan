@@ -456,7 +456,7 @@ inline bool _findWildShiftAndIsValid(CharString const & needle) {
 // must be a valid pattern.
 inline Position<CharString>::Type _findWildShiftAndLengthWithoutWildcards(CharString const & needle) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(needle));
+    SEQAN_ASSERT(_findWildShiftAndIsValid(needle));
 
     typedef Position<CharString>::Type TPosition;
     TPosition result = 0u;
@@ -563,7 +563,7 @@ void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
     
     TNeedle const & needle = value(me.data_host);
 
-	SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(needle));
+	SEQAN_ASSERT(_findWildShiftAndIsValid(needle));
 
 	typedef unsigned TWord;
     // TODO(holtgrew): TValue will always be char?!?!

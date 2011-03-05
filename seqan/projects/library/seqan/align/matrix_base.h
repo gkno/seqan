@@ -770,7 +770,7 @@ Matrix<TValue,DIMENSION>
 operator + (Matrix<TValue,DIMENSION> const & matrix1,Matrix<TValue,DIMENSION> const & matrix2)
 {
 	//the two matrices must have same dimension
-	SEQAN_ASSERT_TRUE(_dataLengths(matrix1) == _dataLengths(matrix2));
+	SEQAN_ASSERT(_dataLengths(matrix1) == _dataLengths(matrix2));
 
 	Matrix<TValue,DIMENSION> result;
 	//copy the first matrix
@@ -792,7 +792,7 @@ Matrix<TValue,DIMENSION>
 operator - (Matrix<TValue,DIMENSION> const & matrix1,Matrix<TValue,DIMENSION> const & matrix2)
 {
 	//the two matrices must have same dimension
-	SEQAN_ASSERT_TRUE(_dataLengths(matrix1) == _dataLengths(matrix2));
+	SEQAN_ASSERT(_dataLengths(matrix1) == _dataLengths(matrix2));
 
 	Matrix<TValue,DIMENSION> result;
 	//resize the matrix

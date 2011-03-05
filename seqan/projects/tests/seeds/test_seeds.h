@@ -407,8 +407,8 @@ void Test_MultiSeeds(){
 // Alignment Calculation
 	Align<String<Dna>, ArrayGaps> aligned;
 	getAlignment(seed8, aligned, query, database, matrix);
-	SEQAN_ASSERT_TRUE(row(aligned, 0) == "AAACCCTTTGG");
-	SEQAN_ASSERT_TRUE(row(aligned, 1) == "AACCCCTTTGG");
+	SEQAN_ASSERT(row(aligned, 0) == "AAACCCTTTGG");
+	SEQAN_ASSERT(row(aligned, 1) == "AACCCCTTTGG");
 	
 	
 	

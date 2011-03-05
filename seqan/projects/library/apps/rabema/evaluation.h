@@ -188,7 +188,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
     _patternMatchNOfPattern(pattern, options.matchN);
     _patternMatchNOfFinder(pattern, options.matchN);
     bool ret = setEndPosition(finder, pattern, endPos);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(endPos, endPosition(finder));
     
     // No explicit alignment is required if distances are not to be weighted.
@@ -197,7 +197,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
 
     // Otherwise, we need to build an alignment and compute the score from it.
     ret = findBegin(finder, pattern, getScore(pattern));
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     // Prepare alignment datastructures.
     Align<String<Dna5>, ArrayGaps> align;

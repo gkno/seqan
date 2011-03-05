@@ -57,7 +57,7 @@ struct TestAllocator
 		map<char *, size_t>::iterator it = data_allocated.begin();
 		while (it != data_allocated.end())
 		{
-			SEQAN_ASSERT_TRUE_MSG(data_deallocated.count(it->first), "memory block not deallocated");
+			SEQAN_ASSERT_MSG(data_deallocated.count(it->first), "memory block not deallocated");
             deallocate(int(), it->first, it->second);
 			++it;
 		}
@@ -81,9 +81,9 @@ void deallocate(TestAllocator & me,
 				TSize count, 
 				Tag<TUsage> const)
 {
-	SEQAN_ASSERT_TRUE_MSG(me.data_allocated.count((char *) data_), "memory block was not allocated");
-	SEQAN_ASSERT_TRUE_MSG(me.data_allocated[(char *) data_] == count, "memory block was allocated with different size");
-	SEQAN_ASSERT_TRUE_MSG(!me.data_deallocated.count((char *) data_), "memory block already deallocated");
+	SEQAN_ASSERT_MSG(me.data_allocated.count((char *) data_), "memory block was not allocated");
+	SEQAN_ASSERT_MSG(me.data_allocated[(char *) data_] == count, "memory block was allocated with different size");
+	SEQAN_ASSERT_MSG(!me.data_deallocated.count((char *) data_), "memory block already deallocated");
 
 	me.data_deallocated[(char *) data_] = count;
 }
@@ -109,12 +109,12 @@ SEQAN_DEFINE_TEST(testSimpleAllocator) {
 	deallocate(allo1, dat1, 100);
 	allocate(allo1, dat2, 201);
 
-	SEQAN_ASSERT_TRUE(countAllocs(parentAllocator(allo1)) == 3);
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(allo1)) == 1);
+	SEQAN_ASSERT(countAllocs(parentAllocator(allo1)) == 3);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(allo1)) == 1);
 
 	clear(allo1);
 
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(allo1)) == 3);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(allo1)) == 3);
 }
 //____________________________________________________________________________
 
@@ -129,20 +129,20 @@ SEQAN_DEFINE_TEST(testPoolAllocator) {
 	deallocate(allo1, dat1, 20);
 	allocate(allo1, dat2, 20);
 
-	SEQAN_ASSERT_TRUE(dat1 == dat2);
+	SEQAN_ASSERT(dat1 == dat2);
 
-	SEQAN_ASSERT_TRUE(countAllocs(parentAllocator(parentAllocator(allo1))) == 1);
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
+	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 1);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
 
 	allocate(allo1, dat1, 100);
 	deallocate(allo1, dat1, 100);
 
-	SEQAN_ASSERT_TRUE(countAllocs(parentAllocator(parentAllocator(allo1))) == 2);
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(parentAllocator(allo1))) == 1);
+	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 2);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 1);
 
 	clear(allo1);
 
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(parentAllocator(allo1))) == 2);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 2);
 }
 
 //____________________________________________________________________________
@@ -158,20 +158,20 @@ SEQAN_DEFINE_TEST(testMultiPoolAllocator) {
 	deallocate(allo1, dat1, 20);
 	allocate(allo1, dat2, 20);
 
-	SEQAN_ASSERT_TRUE(dat1 == dat2);
+	SEQAN_ASSERT(dat1 == dat2);
 
-	SEQAN_ASSERT_TRUE(countAllocs(parentAllocator(parentAllocator(allo1))) == 1);
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
+	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 1);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
 
 	allocate(allo1, dat1, 30);
 	deallocate(allo1, dat1, 30);
 
-	SEQAN_ASSERT_TRUE(countAllocs(parentAllocator(parentAllocator(allo1))) == 2);
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
+	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 2);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
 
 	clear(allo1);
 
-	SEQAN_ASSERT_TRUE(countDeallocs(parentAllocator(parentAllocator(allo1))) == 2);
+	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 2);
 }
 
 //____________________________________________________________________________

@@ -70,7 +70,7 @@ void mapReadOnline(TWeightedMatches & matches,
             Pattern<TString, Myers<FindInfix> > pattern(readCopy, minScore);
             while (find(finder, pattern)) {
                 bool ret = findBegin(finder, pattern);
-                SEQAN_ASSERT_TRUE(ret);
+                SEQAN_ASSERT(ret);
                 int theScore = getScore(pattern);
                 appendValue(matches, WeightedMatch(contigId, true, endPosition(finder), theScore, beginPosition(finder)));
             }
@@ -82,7 +82,7 @@ void mapReadOnline(TWeightedMatches & matches,
             Pattern<TString, Myers<FindInfix> > pattern(readCopy, minScore);
             while (find(finder, pattern)) {
                 bool ret = findBegin(finder, pattern);
-                SEQAN_ASSERT_TRUE(ret);
+                SEQAN_ASSERT(ret);
                 int theScore = getScore(pattern);
                 appendValue(matches, WeightedMatch(contigId, false, endPosition(finder), theScore, beginPosition(finder)));
             }

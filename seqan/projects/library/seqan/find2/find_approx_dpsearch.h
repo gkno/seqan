@@ -140,7 +140,7 @@ typename Value<TScore>::Type const & score(Pattern<TNeedle, DPSearch<TScore, TDP
     typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
     // State of pattern should be in "found", "found begin" or "found
     // no begin" state.
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return pattern._currentScore;
@@ -174,7 +174,7 @@ template <typename TNeedle, typename TScore, typename TDPSearchSpec, typename TS
 typename Position<TNeedle>::Type length(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
     return length(needle(pattern));
 }
 
@@ -201,7 +201,7 @@ template <typename TNeedle, typename TScore, typename TDPSearchSpec, typename TS
 typename Iterator<TNeedle const, Tag<TTag> const>::Type begin(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
     return begin(needle(pattern), spec);
 }
 
@@ -219,7 +219,7 @@ template <typename TNeedle, typename TScore, typename TDPSearchSpec, typename TS
 typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
     return end(needle(pattern), spec);
 }
 
@@ -237,7 +237,7 @@ template <typename TNeedle, typename TScore, typename TDPSearchSpec, typename TS
 typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
     return 0u;
 }
 
@@ -255,7 +255,7 @@ template <typename TNeedle, typename TScore, typename TDPSearchSpec, typename TS
 typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_BEGIN_FOUND || pattern._state == TPattern::STATE_FOUND);
     return length(needle(pattern));
 }
 
@@ -366,7 +366,7 @@ typename Value<typename ScoringScheme<Pattern<TNeedle, DPSearch<TScore, FindInfi
 findBeginScore(Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND);
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_BEGIN_FOUND);
     return pattern._findBeginCurrentScore;
 }
 
@@ -378,7 +378,7 @@ typename Value<typename ScoringScheme<Pattern<TNeedle, DPSearch<TScore, FindPref
 findBeginScore(Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > TPattern;
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND);
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_BEGIN_FOUND);
     return score(pattern);
 }
 
@@ -395,7 +395,7 @@ bool findBegin(Finder<THaystack, Default> & finder,
     // State of finder and pattern should be in sync and in "found" or
     // "found begin" state.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     // Initialize findBegin() data if necessary.
     if (pattern._state == TPattern::STATE_FOUND)
@@ -423,7 +423,7 @@ bool findBegin(Finder<THaystack, Default> & finder,
     // State of finder and pattern should be in sync and in "found" or
     // "found begin" state.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     finder._beginPosition = 0;
     if (pattern._state == TPattern::STATE_FOUND) {

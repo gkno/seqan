@@ -209,10 +209,10 @@ findInJournalEntries(JournalEntries<TCargo, SortedArray> const & journalEntries,
                                       end(journalEntries._journalNodes, Standard()),
                                       refCargo,
                                       TCmp());
-    SEQAN_ASSERT_TRUE(iter != begin(journalEntries._journalNodes, Standard()));
+    SEQAN_ASSERT(iter != begin(journalEntries._journalNodes, Standard()));
     iter -= 1;
 
-    SEQAN_ASSERT_TRUE(iter != end(journalEntries._journalNodes, Standard()));
+    SEQAN_ASSERT(iter != end(journalEntries._journalNodes, Standard()));
 
     return iter;
 }
@@ -262,7 +262,7 @@ void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
     // TODO(holtgrew): Maybe move and update entries right of pos at the same time?
     
 	// MUST NOT find begin.
-	SEQAN_ASSERT_TRUE(iter != begin(tree._journalNodes, Standard()));
+	SEQAN_ASSERT(iter != begin(tree._journalNodes, Standard()));
 	--iter;
 	
     // Create new journal entries.
@@ -297,7 +297,7 @@ void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
     }
     //std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
-    SEQAN_ASSERT_TRUE(_checkSortedArrayTree(tree));
+    SEQAN_ASSERT(_checkSortedArrayTree(tree));
 }
 
 template <typename TCargo>
@@ -341,7 +341,7 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
     TPos beginShiftPos = 0;
 
 	// MUST NOT find begin.
-	SEQAN_ASSERT_TRUE(it != begin(tree._journalNodes, Standard()));
+	SEQAN_ASSERT(it != begin(tree._journalNodes, Standard()));
 	--it;
 	
 	TPos itPos = it - begin(tree._journalNodes, Standard());
@@ -423,7 +423,7 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
     }
 //	std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
-    SEQAN_ASSERT_TRUE(_checkSortedArrayTree(tree));
+    SEQAN_ASSERT(_checkSortedArrayTree(tree));
 }
 
 

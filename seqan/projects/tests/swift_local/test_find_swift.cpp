@@ -217,20 +217,20 @@ SEQAN_DEFINE_TEST(test_longest_epsMatch) {
     DnaString seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
     DnaString seq2 = "ACGTTTACCCCCCCCCCGAAAAAAAAGAAAA";
     Align<DnaString> alignment = testLongestEpsMatch(seq1, seq2);
-    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
-    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTTACCCCCCCCCCGAAAAAAAA");
+    SEQAN_ASSERT(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
+    SEQAN_ASSERT(row(alignment, 1) == "ACGTTTACCCCCCCCCCGAAAAAAAA");
 
     seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
     seq2 = "ACGTTTCCCCCCCCCCGAAAAAAAAGAAAA";
     alignment = testLongestEpsMatch(seq1, seq2);
-    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
-    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTT-CCCCCCCCCCGAAAAAAAA");
+    SEQAN_ASSERT(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
+    SEQAN_ASSERT(row(alignment, 1) == "ACGTTT-CCCCCCCCCCGAAAAAAAA");
     
     seq1 = "AAAATTAAAAAAAATCCCCCCCCCCGTTTCCA";
     seq2 = "AAAAGAAAAAAAAGCCCCCCCCCCTTTGCA";
     alignment = testLongestEpsMatch(seq1, seq2);
-    SEQAN_ASSERT_TRUE(row(alignment, 0) == "AAAAAAAATCCCCCCCCCCGTTTCCA");
-    SEQAN_ASSERT_TRUE(row(alignment, 1) == "AAAAAAAAGCCCCCCCCCC-TTTGCA");
+    SEQAN_ASSERT(row(alignment, 0) == "AAAAAAAATCCCCCCCCCCGTTTCCA");
+    SEQAN_ASSERT(row(alignment, 1) == "AAAAAAAAGCCCCCCCCCC-TTTGCA");
 }
 
 template<typename TString, typename TScore, typename TAliString, typename TScoreValue>
@@ -254,54 +254,54 @@ SEQAN_DEFINE_TEST(test_split_xDrop_align) {
     String<Align<DnaString> > aliString;
     testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 10/*minScore*/, aliString);
     SEQAN_ASSERT_EQ(length(aliString), 2u);
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "cgataa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "cgataa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 0) == "tggacta");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 1) == "tggacta");
+    SEQAN_ASSERT(row(value(aliString, 0), 0) == "cgataa");
+    SEQAN_ASSERT(row(value(aliString, 0), 1) == "cgataa");
+    SEQAN_ASSERT(row(value(aliString, 1), 0) == "tggacta");
+    SEQAN_ASSERT(row(value(aliString, 1), 1) == "tggacta");
 
     seq1 = "cgataagctcttggacta";
     seq2 = "cgataatatggactagggg";
     clear(aliString);
     testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 14/*minScore*/, aliString);
     SEQAN_ASSERT_EQ(length(aliString), 1u);
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "tggacta");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "tggacta");
+    SEQAN_ASSERT(row(value(aliString, 0), 0) == "tggacta");
+    SEQAN_ASSERT(row(value(aliString, 0), 1) == "tggacta");
 
     seq1 = "cgataagctcagttggacta";
     seq2 = "cgataatcactggactagggg";
     clear(aliString);
     testXDropAlign(seq1, seq2, scoring, 2/*scoreDropOff*/, 6/*minScore*/, aliString);
     SEQAN_ASSERT_EQ(length(aliString), 3u);
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "cgataa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "cgataa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 0) == "tca");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 1) == "tca");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 2), 0) == "tggacta");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 2), 1) == "tggacta");
+    SEQAN_ASSERT(row(value(aliString, 0), 0) == "cgataa");
+    SEQAN_ASSERT(row(value(aliString, 0), 1) == "cgataa");
+    SEQAN_ASSERT(row(value(aliString, 1), 0) == "tca");
+    SEQAN_ASSERT(row(value(aliString, 1), 1) == "tca");
+    SEQAN_ASSERT(row(value(aliString, 2), 0) == "tggacta");
+    SEQAN_ASSERT(row(value(aliString, 2), 1) == "tggacta");
 
     clear(aliString);
     testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 6/*minScore*/, aliString);
     SEQAN_ASSERT_EQ(length(aliString), 2u);
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "cgataa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "cgataa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 0) == "tcagttggacta");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 1) == "tca-ctggacta");
+    SEQAN_ASSERT(row(value(aliString, 0), 0) == "cgataa");
+    SEQAN_ASSERT(row(value(aliString, 0), 1) == "cgataa");
+    SEQAN_ASSERT(row(value(aliString, 1), 0) == "tcagttggacta");
+    SEQAN_ASSERT(row(value(aliString, 1), 1) == "tca-ctggacta");
     
     seq1 = "aaaaaa";
     seq2 = "ccaaaaaa";
     clear(aliString);
     testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 12/*minScore*/, aliString);
     SEQAN_ASSERT_EQ(length(aliString), 1u);
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "aaaaaa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "aaaaaa"); 
+    SEQAN_ASSERT(row(value(aliString, 0), 0) == "aaaaaa");
+    SEQAN_ASSERT(row(value(aliString, 0), 1) == "aaaaaa"); 
 
     seq1 = "aaaaaa";
     seq2 = "aaaaaa";
     clear(aliString);
     testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 12/*minScore*/, aliString);
     SEQAN_ASSERT_EQ(length(aliString), 1u);
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "aaaaaa");
-    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "aaaaaa");
+    SEQAN_ASSERT(row(value(aliString, 0), 0) == "aaaaaa");
+    SEQAN_ASSERT(row(value(aliString, 0), 1) == "aaaaaa");
     
     seq1 = "CCCCAGGGGGGACAAAAAAGAAACCCAGGGGGGACCCAGGG";
     seq2 = "CCCCTGGGGGGTCTTTTTGTCCCTGGGGGGTCCCTGGG";

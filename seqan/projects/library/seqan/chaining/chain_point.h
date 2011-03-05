@@ -63,7 +63,7 @@ namespace seqan
 	key( ChainPoint_< TFragType, TSpec > & me,
 			TSize dim )
 	{
-        SEQAN_ASSERT_TRUE_MSG(me._coords != NULL, "point not initialized");
+        SEQAN_ASSERT_MSG(me._coords != NULL, "point not initialized");
         //SEQAN_ASSERT_LEQ_MSG(dim, me._dim, "dim corrupted");
 		return me._coords[ dim ];
 	}

@@ -106,7 +106,7 @@ namespace seqan
 						TSize dim )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( _getAssocStruct( me ) == NULL, "List overwritten" );
+		SEQAN_ASSERT_MSG( _getAssocStruct( me ) == NULL, "List overwritten" );
 		if( _getDown( *me ) != _getBaseStore( *list ) )
 		{
 			SkipList< TObject, TModus, RT< TSpec >, TStructuring > * new_list;

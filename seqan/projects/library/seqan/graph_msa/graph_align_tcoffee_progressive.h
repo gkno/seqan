@@ -62,7 +62,7 @@ _buildLeafString(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TSize i = 0;
 	while(i<lenRoot) {
 		TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, i);
-		//SEQAN_ASSERT_TRUE(nextVertex != nilVertex);
+		//SEQAN_ASSERT(nextVertex != nilVertex);
 		//if (nextVertex == nilVertex) {
 		//	std::cout << "Warning: Nil Vertex" << std::endl;
 		//	TSize j = i + 1;
@@ -95,14 +95,14 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		TSize len_i = length(alignSeq_i);
 		for(TSize j=0; j<len_i; ++j) {
 			TVertexDescriptor v = alignSeq_i[j];
-			SEQAN_ASSERT_TRUE(fragmentBegin(g,v) < length(getValueById(stringSet(g), sequenceId(g,v))));
-			SEQAN_ASSERT_TRUE(fragmentLength(g,v) > 0);
-			SEQAN_ASSERT_TRUE(fragmentBegin(g,v) + fragmentLength(g,v) <= length(getValueById(stringSet(g), sequenceId(g,v))));
+			SEQAN_ASSERT(fragmentBegin(g,v) < length(getValueById(stringSet(g), sequenceId(g,v))));
+			SEQAN_ASSERT(fragmentLength(g,v) > 0);
+			SEQAN_ASSERT(fragmentBegin(g,v) + fragmentLength(g,v) <= length(getValueById(stringSet(g), sequenceId(g,v))));
 			TVertexDescriptor l = addVertex(gOut, sequenceId(g, v), fragmentBegin(g,v), fragmentLength(g,v));
 			//std::cout << l << label(gOut, l) << ',';
 			TSize count = 1;
 			for(TSize k = j; k>0; --k) {
-				SEQAN_ASSERT_TRUE(fragmentLength(gOut,l) == fragmentLength(gOut,l - count));
+				SEQAN_ASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count));
 				addEdge(gOut, (TVertexDescriptor) (l - count), (TVertexDescriptor) l);
 				++count;
 			}

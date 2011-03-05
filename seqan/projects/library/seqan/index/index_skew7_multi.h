@@ -348,7 +348,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					{
 						String<typename Value<TFilter>::Type, Alloc<> > _text;
 						_text << filter;
-						SEQAN_ASSERT_TRUE(isSuffixArray(recurse, _text));
+						SEQAN_ASSERT(isSuffixArray(recurse, _text));
 					}
 					#endif
 

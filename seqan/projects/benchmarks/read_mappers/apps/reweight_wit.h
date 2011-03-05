@@ -207,16 +207,16 @@ void reweightInterval(WitStore & store,
         setScore(matrixScore, Dna5('N'), Dna5(x), 0);
 
     bool ret = setEndPosition(finder, pattern, interval.firstPos);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     ret = findBegin(finder, pattern, getScore(pattern));
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     String<WeightedMatch> weightedMatches;
 
     while (find(finder, pattern) && endPosition(finder) <= interval.lastPos + 1) {
         bool ret = findBegin(finder, pattern, getScore(pattern));
         (void)ret;  // Supress warnings in Release mode.
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         SEQAN_ASSERT_GEQ(static_cast<int>(1.0 * getScore(pattern) / length(read)), -static_cast<int>(interval.distance));
 
         // Prepare alignment datastructures.

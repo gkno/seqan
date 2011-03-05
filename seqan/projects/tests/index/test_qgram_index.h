@@ -48,11 +48,11 @@ SEQAN_DEFINE_TEST(testGappedShapes)
 	stringToShape(shape1, shape_string);
 	Shape<Dna,GenericShape> shape2 = Shape<Dna,GenericShape>(shape1);
 
-	SEQAN_ASSERT_TRUE(shape1.weight == shape2.weight);
-	SEQAN_ASSERT_TRUE(shape1.span == shape2.span);
-	SEQAN_ASSERT_TRUE(shape1.diffs == shape2.diffs);
-	SEQAN_ASSERT_TRUE(length(shape1) == length(shape2));
-	SEQAN_ASSERT_TRUE(weight(shape1) == weight(shape2));
+	SEQAN_ASSERT(shape1.weight == shape2.weight);
+	SEQAN_ASSERT(shape1.span == shape2.span);
+	SEQAN_ASSERT(shape1.diffs == shape2.diffs);
+	SEQAN_ASSERT(length(shape1) == length(shape2));
+	SEQAN_ASSERT(weight(shape1) == weight(shape2));
 /*
 	Shape<Dna,GenericShape> shape3 = Shape<Dna,GenericShape>(5, 13);
 	shape3[0]=2;
@@ -64,7 +64,7 @@ SEQAN_DEFINE_TEST(testGappedShapes)
 	shape3[6]=1;
 	shape3[7]=2;
 	for(int i = 0; i < 8; ++i)
-        SEQAN_ASSERT_TRUE(shape1[i] == shape3[i]);
+        SEQAN_ASSERT(shape1[i] == shape3[i]);
 */
 }
 
@@ -75,15 +75,15 @@ SEQAN_DEFINE_TEST(testUngappedShapes)
 	resize(shape1, 4);
 	Shape<Dna,SimpleShape> shape2 = Shape<Dna,SimpleShape>(shape1);
 
-	SEQAN_ASSERT_TRUE(shape1.span == shape2.span);
-	SEQAN_ASSERT_TRUE(shape1.leftFactor == shape2.leftFactor);
-	SEQAN_ASSERT_TRUE(length(shape1) == length(shape2));
-	SEQAN_ASSERT_TRUE(weight(shape1) == weight(shape2));
+	SEQAN_ASSERT(shape1.span == shape2.span);
+	SEQAN_ASSERT(shape1.leftFactor == shape2.leftFactor);
+	SEQAN_ASSERT(length(shape1) == length(shape2));
+	SEQAN_ASSERT(weight(shape1) == weight(shape2));
 	
 
 	Shape<Dna,SimpleShape> shape3 = Shape<Dna,SimpleShape>(4);
-	SEQAN_ASSERT_TRUE(shape3.leftFactor == 64);
-	SEQAN_ASSERT_TRUE(shape1.leftFactor == shape3.leftFactor);
+	SEQAN_ASSERT(shape3.leftFactor == 64);
+	SEQAN_ASSERT(shape1.leftFactor == shape3.leftFactor);
 
 
 }
@@ -152,38 +152,38 @@ void testGappedQGramIndex()
 	Nothing nothing;
 	createQGramIndex(index, pos, nothing, text, shape, 1);
 	
-	SEQAN_ASSERT_TRUE(pos[0] == 0);
-	SEQAN_ASSERT_TRUE(pos[1] == 1);
-	SEQAN_ASSERT_TRUE(pos[2] == 5);
-	SEQAN_ASSERT_TRUE(pos[3] == 5);
-	SEQAN_ASSERT_TRUE(pos[4] == 5);
-	SEQAN_ASSERT_TRUE(pos[5] == 6);
-	SEQAN_ASSERT_TRUE(pos[6] == 8);
-	SEQAN_ASSERT_TRUE(pos[7] == 9);
-	SEQAN_ASSERT_TRUE(pos[8] == 11);
-	SEQAN_ASSERT_TRUE(pos[9] == 12);
-	SEQAN_ASSERT_TRUE(pos[10] == 12);
-	SEQAN_ASSERT_TRUE(pos[11] == 12);
-	SEQAN_ASSERT_TRUE(pos[12] == 12);
-	SEQAN_ASSERT_TRUE(pos[13] == 14);
-	SEQAN_ASSERT_TRUE(pos[14] == 14);
-	SEQAN_ASSERT_TRUE(pos[15] == 14);
-	SEQAN_ASSERT_TRUE(pos[16] == 14);
+	SEQAN_ASSERT(pos[0] == 0);
+	SEQAN_ASSERT(pos[1] == 1);
+	SEQAN_ASSERT(pos[2] == 5);
+	SEQAN_ASSERT(pos[3] == 5);
+	SEQAN_ASSERT(pos[4] == 5);
+	SEQAN_ASSERT(pos[5] == 6);
+	SEQAN_ASSERT(pos[6] == 8);
+	SEQAN_ASSERT(pos[7] == 9);
+	SEQAN_ASSERT(pos[8] == 11);
+	SEQAN_ASSERT(pos[9] == 12);
+	SEQAN_ASSERT(pos[10] == 12);
+	SEQAN_ASSERT(pos[11] == 12);
+	SEQAN_ASSERT(pos[12] == 12);
+	SEQAN_ASSERT(pos[13] == 14);
+	SEQAN_ASSERT(pos[14] == 14);
+	SEQAN_ASSERT(pos[15] == 14);
+	SEQAN_ASSERT(pos[16] == 14);
 
-	SEQAN_ASSERT_TRUE(index[0] == 9);
-	SEQAN_ASSERT_TRUE(index[1] == 11);
-	SEQAN_ASSERT_TRUE(index[2] == 10);
-	SEQAN_ASSERT_TRUE(index[3] == 4);
-	SEQAN_ASSERT_TRUE(index[4] == 3);
-	SEQAN_ASSERT_TRUE(index[5] == 7);
-	SEQAN_ASSERT_TRUE(index[6] == 12);
-	SEQAN_ASSERT_TRUE(index[7] == 5);
-	SEQAN_ASSERT_TRUE(index[8] == 0);
-	SEQAN_ASSERT_TRUE(index[9] == 13);
-	SEQAN_ASSERT_TRUE(index[10] == 6);
-	SEQAN_ASSERT_TRUE(index[11] == 2);
-	SEQAN_ASSERT_TRUE(index[12] == 8);
-	SEQAN_ASSERT_TRUE(index[13] == 1);
+	SEQAN_ASSERT(index[0] == 9);
+	SEQAN_ASSERT(index[1] == 11);
+	SEQAN_ASSERT(index[2] == 10);
+	SEQAN_ASSERT(index[3] == 4);
+	SEQAN_ASSERT(index[4] == 3);
+	SEQAN_ASSERT(index[5] == 7);
+	SEQAN_ASSERT(index[6] == 12);
+	SEQAN_ASSERT(index[7] == 5);
+	SEQAN_ASSERT(index[8] == 0);
+	SEQAN_ASSERT(index[9] == 13);
+	SEQAN_ASSERT(index[10] == 6);
+	SEQAN_ASSERT(index[11] == 2);
+	SEQAN_ASSERT(index[12] == 8);
+	SEQAN_ASSERT(index[13] == 1);
 	
 }
 */
@@ -207,38 +207,38 @@ SEQAN_DEFINE_TEST(testUngappedQGramIndex)
 	createQGramIndex(index, pos, nothing, text, shape, 1);
 	
 	
-	SEQAN_ASSERT_TRUE(pos[0] == 0);
-	SEQAN_ASSERT_TRUE(pos[1] == 3);
-	SEQAN_ASSERT_TRUE(pos[2] == 5);
-	SEQAN_ASSERT_TRUE(pos[3] == 5);
-	SEQAN_ASSERT_TRUE(pos[4] == 5);
-	SEQAN_ASSERT_TRUE(pos[5] == 5);
-	SEQAN_ASSERT_TRUE(pos[6] == 9);
-	SEQAN_ASSERT_TRUE(pos[7] == 9);
-	SEQAN_ASSERT_TRUE(pos[8] == 12);
-	SEQAN_ASSERT_TRUE(pos[9] == 13);
-	SEQAN_ASSERT_TRUE(pos[10] == 13);
-	SEQAN_ASSERT_TRUE(pos[11] == 13);
-	SEQAN_ASSERT_TRUE(pos[12] == 13);
-	SEQAN_ASSERT_TRUE(pos[13] == 14);
-	SEQAN_ASSERT_TRUE(pos[14] == 14);
-	SEQAN_ASSERT_TRUE(pos[15] == 15);
+	SEQAN_ASSERT(pos[0] == 0);
+	SEQAN_ASSERT(pos[1] == 3);
+	SEQAN_ASSERT(pos[2] == 5);
+	SEQAN_ASSERT(pos[3] == 5);
+	SEQAN_ASSERT(pos[4] == 5);
+	SEQAN_ASSERT(pos[5] == 5);
+	SEQAN_ASSERT(pos[6] == 9);
+	SEQAN_ASSERT(pos[7] == 9);
+	SEQAN_ASSERT(pos[8] == 12);
+	SEQAN_ASSERT(pos[9] == 13);
+	SEQAN_ASSERT(pos[10] == 13);
+	SEQAN_ASSERT(pos[11] == 13);
+	SEQAN_ASSERT(pos[12] == 13);
+	SEQAN_ASSERT(pos[13] == 14);
+	SEQAN_ASSERT(pos[14] == 14);
+	SEQAN_ASSERT(pos[15] == 15);
 
-	SEQAN_ASSERT_TRUE(index[0] == 3);
-	SEQAN_ASSERT_TRUE(index[1] == 9);
-	SEQAN_ASSERT_TRUE(index[2] == 10);
-	SEQAN_ASSERT_TRUE(index[3] == 4);
-	SEQAN_ASSERT_TRUE(index[4] == 11);
-	SEQAN_ASSERT_TRUE(index[5] == 5);
-	SEQAN_ASSERT_TRUE(index[6] == 6);
-	SEQAN_ASSERT_TRUE(index[7] == 12);
-	SEQAN_ASSERT_TRUE(index[8] == 13);
-	SEQAN_ASSERT_TRUE(index[9] == 0);
-	SEQAN_ASSERT_TRUE(index[10] == 7);
-	SEQAN_ASSERT_TRUE(index[11] == 14);
-	SEQAN_ASSERT_TRUE(index[12] == 2);
-	SEQAN_ASSERT_TRUE(index[13] == 8);
-	SEQAN_ASSERT_TRUE(index[14] == 1);
+	SEQAN_ASSERT(index[0] == 3);
+	SEQAN_ASSERT(index[1] == 9);
+	SEQAN_ASSERT(index[2] == 10);
+	SEQAN_ASSERT(index[3] == 4);
+	SEQAN_ASSERT(index[4] == 11);
+	SEQAN_ASSERT(index[5] == 5);
+	SEQAN_ASSERT(index[6] == 6);
+	SEQAN_ASSERT(index[7] == 12);
+	SEQAN_ASSERT(index[8] == 13);
+	SEQAN_ASSERT(index[9] == 0);
+	SEQAN_ASSERT(index[10] == 7);
+	SEQAN_ASSERT(index[11] == 14);
+	SEQAN_ASSERT(index[12] == 2);
+	SEQAN_ASSERT(index[13] == 8);
+	SEQAN_ASSERT(index[14] == 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -249,11 +249,11 @@ SEQAN_DEFINE_TEST(testQGramFind)
 	TQGramIndex idx("to be or not to be");
 	Finder<TQGramIndex> finder(idx);
 
-	SEQAN_ASSERT_TRUE(find(finder, "be"));
-	SEQAN_ASSERT_TRUE(position(finder) == 3);
-	SEQAN_ASSERT_TRUE(find(finder, "be"));
-	SEQAN_ASSERT_TRUE(position(finder) == 16);
-	SEQAN_ASSERT_TRUE(!find(finder, "be"));
+	SEQAN_ASSERT(find(finder, "be"));
+	SEQAN_ASSERT(position(finder) == 3);
+	SEQAN_ASSERT(find(finder, "be"));
+	SEQAN_ASSERT(position(finder) == 16);
+	SEQAN_ASSERT(!find(finder, "be"));
 /*
 	while (find(finder, "be"))
 	{

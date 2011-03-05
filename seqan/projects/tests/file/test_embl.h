@@ -88,7 +88,7 @@ SEQAN_DEFINE_TEST(test_file_embl_meta)
 
 	readLineType(meta, line, "RX", Embl());
 	SEQAN_ASSERT_EQ(infix(line,0,28), "DOI; 10.1073/pnas.101532998.");
-	SEQAN_ASSERT_TRUE(length(line) == 46u || length(line) == 47u);
+	SEQAN_ASSERT(length(line) == 46u || length(line) == 47u);
 
 	clear(line);
 	readLineType(meta, feature_line, "FT", Embl());

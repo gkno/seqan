@@ -113,8 +113,8 @@ addEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g,
 		String<TAlphabet> const & label) 
 {
 	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, source));
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, target));
+    SEQAN_ASSERT(idInUse(g.data_id_managerV, source));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, target));
 	
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -169,8 +169,8 @@ removeEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g
 {
 	SEQAN_CHECKPOINT;
 	(void)target;  // In case it is compiled without assertions.
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, source));
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, target));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, source));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, target));
 
 	TAlphabet firstChar = getValue(label, 0);
 	removeEdge(g, findEdge(g,source, firstChar));
@@ -224,7 +224,7 @@ getSuccessor(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > 
 			 TCharacters const& chars)
 {
 	SEQAN_CHECKPOINT;
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex));
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TAlphabet>::Type TSize;
@@ -258,7 +258,7 @@ parseString(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > c
 			TIterator endIt)
 {
 	SEQAN_CHECKPOINT;
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex));
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();

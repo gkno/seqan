@@ -91,7 +91,7 @@ int score(Pattern<TNeedle, HammingSimple> const & pattern) {
     typedef Pattern<TNeedle, HammingSimple> TPattern;
     // State of pattern should be in "found", "found begin" or "found
     // no begin" state.
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return pattern._score;
@@ -172,7 +172,7 @@ typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, Ham
     typedef Pattern<TNeedle, HammingSimple> TPattern;
     // State of pattern should be in "found", "found begin" or "found
     // no begin" state.
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return end(needle(pattern), spec);
@@ -212,7 +212,7 @@ typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, HammingSimple> con
     typedef Pattern<TNeedle, HammingSimple> TPattern;
     // State of pattern should be in "found", "found begin" or "found
     // no begin" state.
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return length(needle(pattern));
@@ -292,7 +292,7 @@ bool findBegin(Finder<THaystack, Default> & finder,
     // State of finder and pattern should be in sync and in "found" or
     // "found begin" state.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
-    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+    SEQAN_ASSERT(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     if (pattern._state == TPattern::STATE_FOUND) {
         finder._state = TFinder::STATE_BEGIN_FOUND;

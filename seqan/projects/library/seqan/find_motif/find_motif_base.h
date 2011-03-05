@@ -157,7 +157,7 @@ TType binomialCoefficient(TType n, TType k)
 {
     SEQAN_CHECKPOINT;
 
-	//SEQAN_ASSERT_TRUE(!(n<0) & !(k<0));
+	//SEQAN_ASSERT(!(n<0) & !(k<0));
 	TType result = 1;
 	for(TType i=(n-k+1); i<=n; ++i)
 	{

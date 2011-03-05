@@ -361,7 +361,7 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename Iterator<String<TEmission>, Standard>::Type TInputIter;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
-	SEQAN_ASSERT_TRUE(alph_size == length(emis));
+	SEQAN_ASSERT(alph_size == length(emis));
 
 	TVertexDescriptor vd = addVertex(g);
 	TEmisIter it = begin(g.data_emission, Standard());
@@ -642,7 +642,7 @@ assignBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 				 TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT;
-	SEQAN_ASSERT_TRUE(idInUse(_getVertexIdManager(g), vertex));
+	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex));
 
 	g.data_begin = vertex;
 	g.data_silent[vertex] = true;
@@ -668,7 +668,7 @@ assignEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 			   TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(_getVertexIdManager(g), vertex));
+	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex));
 
 	g.data_end = vertex;
 	g.data_silent[vertex] = true;
@@ -995,7 +995,7 @@ assignSilentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 				   bool const silent)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(_getVertexIdManager(g), vertex));
+	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex));
 	g.data_silent[vertex] = silent;
 }
 

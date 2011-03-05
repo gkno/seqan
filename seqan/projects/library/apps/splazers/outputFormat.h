@@ -1364,7 +1364,7 @@ void dumpMatches(
 				if(ambiStates[jj] == 2) file << ";suboptimal";
 				++jj;
 					
-				SEQAN_ASSERT_TRUE(mL.pairId == mR.pairId); 
+				SEQAN_ASSERT(mL.pairId == mR.pairId); 
 		
 				int indelLen = mR.mScore + mL.mScore - readLen;
 				if(mL.gEnd != mR.gBegin) indelLen = mR.gBegin - mL.gEnd;

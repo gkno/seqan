@@ -141,7 +141,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     ::std::cerr << " element is " << ::std::dec << *cur << ::std::endl;
                 }
             #endif
-            SEQAN_ASSERT_TRUE(M(*cur) >= offset && M(*cur) < offset + pageSize(buf));
+            SEQAN_ASSERT(M(*cur) >= offset && M(*cur) < offset + pageSize(buf));
             me->mapBuffer[M(*cur) - offset] = *cur;
         }
 		resize(me->mapBuffer, size(buf));
@@ -183,7 +183,7 @@ namespace SEQAN_NAMESPACE_MAIN
                     ::std::cerr << " element is " << ::std::dec << *cur << ::std::endl;
                 }
 			#endif
-            SEQAN_ASSERT_TRUE(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf));
+            SEQAN_ASSERT(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf));
 
             TValue *I = buf.begin + (dstPos - offset);
             if (I != cur) {
@@ -208,7 +208,7 @@ namespace SEQAN_NAMESPACE_MAIN
 							}
 							TValue *oldI = I;
 						#endif
-						SEQAN_ASSERT_TRUE(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf));
+						SEQAN_ASSERT(dstPos >= offset && dstPos < offset + (TSize)pageSize(buf));
 
 						I = buf.begin + (dstPos - offset);
 

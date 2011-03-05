@@ -388,24 +388,24 @@ void Test_MiniSumList_Entry()
 	TEntry & entr = * (reinterpret_cast<TEntry *>(buf));
 
 	entr.assignValue(0x12);
-	SEQAN_ASSERT_TRUE(entr.getValue() == 0x12);
-	SEQAN_ASSERT_TRUE(entr.size() == 1);
-	SEQAN_ASSERT_TRUE(buf2char == 0x12 << 2);
+	SEQAN_ASSERT(entr.getValue() == 0x12);
+	SEQAN_ASSERT(entr.size() == 1);
+	SEQAN_ASSERT(buf2char == 0x12 << 2);
 
 	entr.assignValue(0x1234);
-	SEQAN_ASSERT_TRUE(entr.getValue() == 0x1234);
-	SEQAN_ASSERT_TRUE(entr.size() == 2);
-	SEQAN_ASSERT_TRUE((buf2short & 0xfffc) == (0x1234 << 2));
+	SEQAN_ASSERT(entr.getValue() == 0x1234);
+	SEQAN_ASSERT(entr.size() == 2);
+	SEQAN_ASSERT((buf2short & 0xfffc) == (0x1234 << 2));
 
 	entr.assignValue(0x1234567);
-	SEQAN_ASSERT_TRUE(entr.getValue() == 0x1234567);
-	SEQAN_ASSERT_TRUE(entr.size() == 4);
-	SEQAN_ASSERT_TRUE((buf2int & 0xfffffffc) == (0x1234567 << 2));
+	SEQAN_ASSERT(entr.getValue() == 0x1234567);
+	SEQAN_ASSERT(entr.size() == 4);
+	SEQAN_ASSERT((buf2int & 0xfffffffc) == (0x1234567 << 2));
 
 	entr.assignValue(0xfedcba98);
-	SEQAN_ASSERT_TRUE(entr.getValue() == 0xfedcba98);
-	SEQAN_ASSERT_TRUE(entr.size() == 1 + sizeof(size_t));
-	SEQAN_ASSERT_TRUE(buf2full == 0xfedcba98);
+	SEQAN_ASSERT(entr.getValue() == 0xfedcba98);
+	SEQAN_ASSERT(entr.size() == 1 + sizeof(size_t));
+	SEQAN_ASSERT(buf2full == 0xfedcba98);
 
 }
 
@@ -433,13 +433,13 @@ void Test_MiniSumList()
 		vals_sum += vals;
 	}
 
-	SEQAN_ASSERT_TRUE(sumlist1.data_sum == vals_sum);
+	SEQAN_ASSERT(sumlist1.data_sum == vals_sum);
 
 	TSumList sumlist2;
 	splitSumList(sumlist1, sumlist2);
 	TValues vals_sum2 = sumlist1.data_sum;
 	vals_sum2 += sumlist2.data_sum;
-	SEQAN_ASSERT_TRUE(vals_sum2 == vals_sum);
+	SEQAN_ASSERT(vals_sum2 == vals_sum);
 
 }
 
@@ -466,79 +466,79 @@ void Test_MiniSumList2()
 	{
 		appendValues(sl, VALUES[i]);
 	}
-	SEQAN_ASSERT_TRUE(length(sl) == 5);
+	SEQAN_ASSERT(length(sl) == 5);
 
-	SEQAN_ASSERT_TRUE(getSum(sl, 0) == 7);
-	SEQAN_ASSERT_TRUE(getSum(sl, 1) == 9);
-	SEQAN_ASSERT_TRUE(getSum(sl, 2) == 8);
+	SEQAN_ASSERT(getSum(sl, 0) == 7);
+	SEQAN_ASSERT(getSum(sl, 1) == 9);
+	SEQAN_ASSERT(getSum(sl, 2) == 8);
 
 	TValues vals;
 
 	TIterator it(sl);
 
 	searchSumList(it, 2, 0); // SEARCH SEMANTICS
-	SEQAN_ASSERT_TRUE(getValue(it, 0) == 2);
-	SEQAN_ASSERT_TRUE(getValue(it, 1) == 3);
-	SEQAN_ASSERT_TRUE(getValue(it, 2) == 1);
-	SEQAN_ASSERT_TRUE(getSum(it, 0) == 1);
-	SEQAN_ASSERT_TRUE(getSum(it, 1) == 2);
-	SEQAN_ASSERT_TRUE(getSum(it, 2) == 3);
+	SEQAN_ASSERT(getValue(it, 0) == 2);
+	SEQAN_ASSERT(getValue(it, 1) == 3);
+	SEQAN_ASSERT(getValue(it, 2) == 1);
+	SEQAN_ASSERT(getSum(it, 0) == 1);
+	SEQAN_ASSERT(getSum(it, 1) == 2);
+	SEQAN_ASSERT(getSum(it, 2) == 3);
 
 	searchSumList(it, 10, 0);
-	SEQAN_ASSERT_TRUE(getSum(it, 0) == 7);
-	SEQAN_ASSERT_TRUE(getSum(it, 1) == 9);
-	SEQAN_ASSERT_TRUE(getSum(it, 2) == 8);
+	SEQAN_ASSERT(getSum(it, 0) == 7);
+	SEQAN_ASSERT(getSum(it, 1) == 9);
+	SEQAN_ASSERT(getSum(it, 2) == 8);
 
-	SEQAN_ASSERT_TRUE(it == end(sl));
-	SEQAN_ASSERT_TRUE(it != begin(sl));
+	SEQAN_ASSERT(it == end(sl));
+	SEQAN_ASSERT(it != begin(sl));
 
 
 	searchSumList(it, 3, 0);// SEARCH SEMANTICS
-	SEQAN_ASSERT_TRUE(getValue(it, 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(it, 1) == 1);
-	SEQAN_ASSERT_TRUE(getValue(it, 2) == 1);
-	SEQAN_ASSERT_TRUE(getSum(it, 0) == 3);
-	SEQAN_ASSERT_TRUE(getSum(it, 1) == 6);
-	SEQAN_ASSERT_TRUE(getSum(it, 2) == 6);
+	SEQAN_ASSERT(getValue(it, 0) == 3);
+	SEQAN_ASSERT(getValue(it, 1) == 1);
+	SEQAN_ASSERT(getValue(it, 2) == 1);
+	SEQAN_ASSERT(getSum(it, 0) == 3);
+	SEQAN_ASSERT(getSum(it, 1) == 6);
+	SEQAN_ASSERT(getSum(it, 2) == 6);
 
 	assignValue(it, 0, 80000);
-	SEQAN_ASSERT_TRUE(getValue(it, 0) == 80000);
-	SEQAN_ASSERT_TRUE(getSum(sl, 0) == 80004);
+	SEQAN_ASSERT(getValue(it, 0) == 80000);
+	SEQAN_ASSERT(getSum(sl, 0) == 80004);
 
 	//removeValues
 	removeValues(it);
-	SEQAN_ASSERT_TRUE(length(sl) == 4);
-	SEQAN_ASSERT_TRUE(!atEnd(it));
-	SEQAN_ASSERT_TRUE(getValue(it, 0) == 1);
-	SEQAN_ASSERT_TRUE(getValue(it, 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(it, 2) == 1);
-	SEQAN_ASSERT_TRUE(getSum(sl, 0) == 4);
-	SEQAN_ASSERT_TRUE(getSum(sl, 1) == 8);
-	SEQAN_ASSERT_TRUE(getSum(sl, 2) == 7);
+	SEQAN_ASSERT(length(sl) == 4);
+	SEQAN_ASSERT(!atEnd(it));
+	SEQAN_ASSERT(getValue(it, 0) == 1);
+	SEQAN_ASSERT(getValue(it, 1) == 2);
+	SEQAN_ASSERT(getValue(it, 2) == 1);
+	SEQAN_ASSERT(getSum(sl, 0) == 4);
+	SEQAN_ASSERT(getSum(sl, 1) == 8);
+	SEQAN_ASSERT(getSum(sl, 2) == 7);
 
 	removeValues(it);
-	SEQAN_ASSERT_TRUE(length(sl) == 3);
-	SEQAN_ASSERT_TRUE(atEnd(it));
+	SEQAN_ASSERT(length(sl) == 3);
+	SEQAN_ASSERT(atEnd(it));
 
 	//insertValues
 	searchSumList(it, 2, 0);
-	SEQAN_ASSERT_TRUE(getValue(it, 0) == 2);
-	SEQAN_ASSERT_TRUE(getValue(it, 1) == 3);
-	SEQAN_ASSERT_TRUE(getValue(it, 2) == 1);
+	SEQAN_ASSERT(getValue(it, 0) == 2);
+	SEQAN_ASSERT(getValue(it, 1) == 3);
+	SEQAN_ASSERT(getValue(it, 2) == 1);
 
 	insertValues(it, VALUES[3]);
-	SEQAN_ASSERT_TRUE(length(sl) == 4);
-	SEQAN_ASSERT_TRUE(getValue(it, 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(it, 1) == 1);
-	SEQAN_ASSERT_TRUE(getValue(it, 2) == 1);
-	SEQAN_ASSERT_TRUE(getSum(sl, 0) == 6);
-	SEQAN_ASSERT_TRUE(getSum(sl, 1) == 7);
-	SEQAN_ASSERT_TRUE(getSum(sl, 2) == 7);
+	SEQAN_ASSERT(length(sl) == 4);
+	SEQAN_ASSERT(getValue(it, 0) == 3);
+	SEQAN_ASSERT(getValue(it, 1) == 1);
+	SEQAN_ASSERT(getValue(it, 2) == 1);
+	SEQAN_ASSERT(getSum(sl, 0) == 6);
+	SEQAN_ASSERT(getSum(sl, 1) == 7);
+	SEQAN_ASSERT(getSum(sl, 2) == 7);
 
 	goNext(it);
-	SEQAN_ASSERT_TRUE(getValue(it, 0) == 2);
-	SEQAN_ASSERT_TRUE(getValue(it, 1) == 3);
-	SEQAN_ASSERT_TRUE(getValue(it, 2) == 1);
+	SEQAN_ASSERT(getValue(it, 0) == 2);
+	SEQAN_ASSERT(getValue(it, 1) == 3);
+	SEQAN_ASSERT(getValue(it, 2) == 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -571,22 +571,22 @@ void compareSumLists(TSumList1 & s1,
 
 	int DIM = DIMENSION<TSumList1>::VALUE;
 
-	SEQAN_ASSERT_TRUE(length(s1) == length(s2));
+	SEQAN_ASSERT(length(s1) == length(s2));
 
 	for (int i = 0; ; ++i)
 	{
 		if (atEnd(it1)) break;
-		SEQAN_ASSERT_TRUE(!atEnd(it2));
-		SEQAN_ASSERT_TRUE(getValues(it1) == getValues(it2));
+		SEQAN_ASSERT(!atEnd(it2));
+		SEQAN_ASSERT(getValues(it1) == getValues(it2));
 
 		goNext(it1);
 		goNext(it2);
 	}
-	SEQAN_ASSERT_TRUE(atEnd(it2));
+	SEQAN_ASSERT(atEnd(it2));
 
 	for (int i = 0; i < DIM; ++i)
 	{
-		SEQAN_ASSERT_TRUE(getSum(s1, i) == getSum(s2, i));
+		SEQAN_ASSERT(getSum(s1, i) == getSum(s2, i));
 	}
 }
 
@@ -598,8 +598,8 @@ void compareIterators(TIter1 & it1,
 {
 	for (int i = 0; i < DIM; ++i)
 	{
-		SEQAN_ASSERT_TRUE(getSum(it1, i) == getSum(it2, i));
-		SEQAN_ASSERT_TRUE(getValue(it1, i) == getValue(it2, i));
+		SEQAN_ASSERT(getSum(it1, i) == getSum(it2, i));
+		SEQAN_ASSERT(getValue(it1, i) == getValue(it2, i));
 	}
 }
 
@@ -619,13 +619,13 @@ void testSkipSumListIntegrity(SumList<DIM, TValue, SkipSumList< > > & ssl)
 	for (int counter = 0; !atEnd(path); ++counter)
 	{
 		//is the bottom line edges correct?
-		SEQAN_ASSERT_TRUE(path.data_elements[0]->data_next[0].values == path.data_elements[0]->minilist.data_sum);
+		SEQAN_ASSERT(path.data_elements[0]->data_next[0].values == path.data_elements[0]->minilist.data_sum);
 
 		//are the other edges correct?
 		for (int i = 1; i <= ssl.map.data_height; ++i)
 		{
 			if (path.data_elements[i] != path.data_elements[0]) break;
-			SEQAN_ASSERT_TRUE(path.sums[i] == path.sums[0]);
+			SEQAN_ASSERT(path.sums[i] == path.sums[0]);
 		}
 
 		goNext(path, ssl.map);
@@ -667,14 +667,14 @@ void Test_SkipSumListStress()
 
 	for (int i = 0; !atEnd(sit); ++i)
 	{
-		SEQAN_ASSERT_TRUE(!atEnd(dit));
+		SEQAN_ASSERT(!atEnd(dit));
 
 		compareIterators<DIM>(sit, dit);
 
 		goNext(sit);
 		goNext(dit);
 	}
-	SEQAN_ASSERT_TRUE(atEnd(dit));
+	SEQAN_ASSERT(atEnd(dit));
 
 
 /*

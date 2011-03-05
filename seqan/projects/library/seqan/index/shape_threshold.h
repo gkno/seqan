@@ -410,7 +410,7 @@ typename Value<TLogErrorDistr>::Type
 _getProb(TLogErrorDistr const &logError, int errorType, int readPos)
 {
 	int maxN = length(logError) / 4;
-	SEQAN_ASSERT_TRUE(readPos >= 0 && readPos < maxN);
+	SEQAN_ASSERT(readPos >= 0 && readPos < maxN);
 	return logError[maxN * (int)errorType + readPos];
 }
 

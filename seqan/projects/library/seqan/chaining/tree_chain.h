@@ -104,7 +104,7 @@ namespace seqan{
 				ChainPoint_< FragType, SpecType > buffer( meta, dim - 1, true );
 				ChainPoint_< FragType, SpecType > * result = rangeMaxQuery( tree, buffer );
 
-				SEQAN_ASSERT_TRUE(result != NULL);
+				SEQAN_ASSERT(result != NULL);
 
 				_setPred( meta, _meta( *result ) );
 				setScore( meta, _maxPriority( value( lastMeta ), meta, *result, cost, score_, dim ) );

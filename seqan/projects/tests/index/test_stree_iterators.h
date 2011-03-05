@@ -577,8 +577,8 @@ void testFind()
 			appendValue(pos,position(finder));
 
 		SEQAN_ASSERT_EQ(length(pos), 2u);
-		SEQAN_ASSERT_TRUE(pos[0] == 5u);
-		SEQAN_ASSERT_TRUE(pos[1] == 31u);
+		SEQAN_ASSERT(pos[0] == 5u);
+		SEQAN_ASSERT(pos[1] == 31u);
 
 	//____________________________________________________________________________
 	// Test2 - large needle
@@ -595,8 +595,8 @@ void testFind()
 			appendValue(pos,position(finder));
 
 		SEQAN_ASSERT_EQ(length(pos), 2u);
-		SEQAN_ASSERT_TRUE(pos[1] == 0u);
-		SEQAN_ASSERT_TRUE(pos[0] == 26u);
+		SEQAN_ASSERT(pos[1] == 0u);
+		SEQAN_ASSERT(pos[0] == 26u);
 }
 
 SEQAN_DEFINE_TEST(testFind_Esa_Mlr)

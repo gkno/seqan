@@ -72,13 +72,13 @@ SEQAN_DEFINE_TEST(Infix)
 	Infix<String<char> >::Type infix_5(str_1, begin(str_1), end(str_1));
 	SEQAN_ASSERT_EQ(infix_5, str_1);
 
-	SEQAN_ASSERT_TRUE(begin(infix_5) == begin(str_1));
+	SEQAN_ASSERT(begin(infix_5) == begin(str_1));
 	SEQAN_ASSERT_EQ(beginPosition(infix_5), 0u);
-	SEQAN_ASSERT_TRUE(end(infix_5) == end(str_1));
+	SEQAN_ASSERT(end(infix_5) == end(str_1));
 	SEQAN_ASSERT_EQ(endPosition(infix_5), length(str_1));
 
-	SEQAN_ASSERT_TRUE(begin(infix(str_1, 0, length(str_1))) == begin(str_1));
-	SEQAN_ASSERT_TRUE(end(infix(str_1, 0, length(str_1))) == end(str_1));
+	SEQAN_ASSERT(begin(infix(str_1, 0, length(str_1))) == begin(str_1));
+	SEQAN_ASSERT(end(infix(str_1, 0, length(str_1))) == end(str_1));
 	SEQAN_ASSERT_EQ(length(infix(str_1, 0, length(str_1))), length(str_1));
 
 	str_1 = "begin middle end";
@@ -89,7 +89,7 @@ SEQAN_DEFINE_TEST(Infix)
 	SEQAN_ASSERT_EQ(str_1, "begin the test");
 
 //	setEnd(infix_1);
-//	SEQAN_ASSERT_TRUE(infix_1 == "");
+//	SEQAN_ASSERT(infix_1 == "");
 
 //____________________________________________________________________________
 // test infix iteration
@@ -102,7 +102,7 @@ SEQAN_DEFINE_TEST(Infix)
 	SEQAN_ASSERT_EQ(infix_1, "b");
 
 	goPrevious(infix_1);
-	SEQAN_ASSERT_TRUE(atBegin(infix_1));
+	SEQAN_ASSERT(atBegin(infix_1));
 
 	goEnd(infix_1);
 	SEQAN_ASSERT_EQ(infix_1, str_1);
@@ -111,7 +111,7 @@ SEQAN_DEFINE_TEST(Infix)
 	SEQAN_ASSERT_EQ(infix_1, str_1);
 
 	goNext(infix_1);
-	SEQAN_ASSERT_TRUE(atEnd(infix_1));
+	SEQAN_ASSERT(atEnd(infix_1));
 //____________________________________________________________________________
 // compare operators 
 
@@ -121,7 +121,7 @@ SEQAN_DEFINE_TEST(Infix)
 	SEQAN_ASSERT_EQ(infix_6, str_1);
 
 	infix_6 += str_1;
-	SEQAN_ASSERT_TRUE(isEqual(infix_6, "hellohello"));
+	SEQAN_ASSERT(isEqual(infix_6, "hellohello"));
 
 	SEQAN_ASSERT_NEQ(infix_6, "bla");
 	SEQAN_ASSERT_NOT(isNotEqual(infix_6, "hellohello"));
@@ -133,10 +133,10 @@ SEQAN_DEFINE_TEST(Infix)
 	SEQAN_ASSERT_NOT(isLessOrEqual(infix_6, "hello"));
 
 	SEQAN_ASSERT_GT(infix_6, "hello");
-	SEQAN_ASSERT_TRUE(isGreater(infix_6, "hello"));
+	SEQAN_ASSERT(isGreater(infix_6, "hello"));
 
 	SEQAN_ASSERT_GEQ(infix_6, "hello");
-	SEQAN_ASSERT_TRUE(isGreaterOrEqual(infix_6, "hello"));
+	SEQAN_ASSERT(isGreaterOrEqual(infix_6, "hello"));
 //____________________________________________________________________________
 
 	clear(infix_6);
@@ -181,13 +181,13 @@ SEQAN_DEFINE_TEST(Suffix)
 	Suffix<String<char> >::Type suffix_5(str_1, begin(str_1));
 	SEQAN_ASSERT_EQ(suffix_5, str_1);
 
-	SEQAN_ASSERT_TRUE(begin(suffix_5) == begin(str_1));
+	SEQAN_ASSERT(begin(suffix_5) == begin(str_1));
 	SEQAN_ASSERT_EQ(beginPosition(suffix_5), 0u);
-	SEQAN_ASSERT_TRUE(end(suffix_5) == end(str_1));
+	SEQAN_ASSERT(end(suffix_5) == end(str_1));
 	SEQAN_ASSERT_EQ(endPosition(suffix_5), length(str_1));
 
-	SEQAN_ASSERT_TRUE(begin(suffix(str_1, 0)) == begin(str_1));
-	SEQAN_ASSERT_TRUE(end(suffix(str_1, 3)) == end(str_1));
+	SEQAN_ASSERT(begin(suffix(str_1, 0)) == begin(str_1));
+	SEQAN_ASSERT(end(suffix(str_1, 3)) == end(str_1));
 	SEQAN_ASSERT_EQ(length(suffix(str_1, 0)), length(str_1));
 
 	str_1 = "begin middle end";
@@ -199,33 +199,33 @@ SEQAN_DEFINE_TEST(Suffix)
 
 	char str_2[200] = "begin middle end";
 	assign(suffix(str_2, 6), "to panic");
-	SEQAN_ASSERT_TRUE(isEqual(str_2, "begin to panic"));
+	SEQAN_ASSERT(isEqual(str_2, "begin to panic"));
 
 	assign(suffix(str_2, 6), "the test", 9);
-	SEQAN_ASSERT_TRUE(isEqual(str_2, "begin the"));
+	SEQAN_ASSERT(isEqual(str_2, "begin the"));
 
 //____________________________________________________________________________
 // test suffix iteration
 /*
 	str_1 = "begin middle end";
 	goBegin(suffix_1);
-	SEQAN_ASSERT_TRUE(suffix_1 == str_1);
+	SEQAN_ASSERT(suffix_1 == str_1);
 
 	goBegin(suffix_1, str_1);
-	SEQAN_ASSERT_TRUE(suffix_1 == str_1);
-	SEQAN_ASSERT_TRUE(atBegin(suffix_1));
+	SEQAN_ASSERT(suffix_1 == str_1);
+	SEQAN_ASSERT(atBegin(suffix_1));
 
 	goEnd(suffix_1);
-	SEQAN_ASSERT_TRUE(suffix_1 == "d");
+	SEQAN_ASSERT(suffix_1 == "d");
 
 	goEnd(suffix_1, str_1);
-	SEQAN_ASSERT_TRUE(suffix_1 == "d");
+	SEQAN_ASSERT(suffix_1 == "d");
 
 	goNext(suffix_1);
-	SEQAN_ASSERT_TRUE(atEnd(suffix_1));
+	SEQAN_ASSERT(atEnd(suffix_1));
 
 	goPrevious(suffix_1);
-	SEQAN_ASSERT_TRUE(atEnd(suffix_1));
+	SEQAN_ASSERT(atEnd(suffix_1));
 */
 
 }

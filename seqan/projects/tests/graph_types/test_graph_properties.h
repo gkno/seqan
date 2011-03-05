@@ -65,19 +65,19 @@ void Test_ExternalProperty() {
 	assignProperty(dMap, v1, 1);
 	assignProperty(eMap, e1, 'a');
 	assignProperty(eMap, e2, 'b');
-	SEQAN_ASSERT_TRUE(getProperty(dMap, v0) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(dMap, v1) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(eMap, e2) == 'b');
-	SEQAN_ASSERT_TRUE(getProperty(eMap, e1) == 'a');
+	SEQAN_ASSERT(getProperty(dMap, v0) == 3);
+	SEQAN_ASSERT(getProperty(dMap, v1) == 1);
+	SEQAN_ASSERT(getProperty(eMap, e2) == 'b');
+	SEQAN_ASSERT(getProperty(eMap, e1) == 'a');
 	property(dMap, v1) = 2;
 	property(eMap, e2) = 'c';
-	SEQAN_ASSERT_TRUE(getProperty(dMap, v1) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(eMap, e2) == 'c');
+	SEQAN_ASSERT(getProperty(dMap, v1) == 2);
+	SEQAN_ASSERT(getProperty(eMap, e2) == 'c');
 
 	String<int> const dMap2(dMap);
-	SEQAN_ASSERT_TRUE(getProperty(dMap2, v0) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(dMap2, v1) == 2);
-	SEQAN_ASSERT_TRUE(property(dMap2, v1) == 2);
+	SEQAN_ASSERT(getProperty(dMap2, v0) == 3);
+	SEQAN_ASSERT(getProperty(dMap2, v1) == 2);
+	SEQAN_ASSERT(property(dMap2, v1) == 2);
 
 	clear(g);
 	addVertex(g);addVertex(g);addVertex(g);
@@ -85,8 +85,8 @@ void Test_ExternalProperty() {
 	char names[] = {'r', 's','t'};
 	String<char> nameMap;
 	assignVertexMap(g,nameMap, names);
-	SEQAN_ASSERT_TRUE(getProperty(nameMap, v0) == 'r');
-	SEQAN_ASSERT_TRUE(getProperty(nameMap, v1) == 's');
+	SEQAN_ASSERT(getProperty(nameMap, v0) == 'r');
+	SEQAN_ASSERT(getProperty(nameMap, v1) == 's');
 }
 
 
@@ -118,28 +118,28 @@ void Test_Property() {
 	assignProperty(eMap2, e1, 20);
 	assignProperty(eMap1, e2, 'b');
 	assignProperty(eMap2, e2, 50);
-	SEQAN_ASSERT_TRUE(getProperty(eMap1, e1) == 'a');
-	SEQAN_ASSERT_TRUE(getProperty(eMap2, e1) == 20);
-	SEQAN_ASSERT_TRUE(getProperty(eMap1, e2) == 'b');
-	SEQAN_ASSERT_TRUE(getProperty(eMap2, e2) == 50);
+	SEQAN_ASSERT(getProperty(eMap1, e1) == 'a');
+	SEQAN_ASSERT(getProperty(eMap2, e1) == 20);
+	SEQAN_ASSERT(getProperty(eMap1, e2) == 'b');
+	SEQAN_ASSERT(getProperty(eMap2, e2) == 50);
 	// Note: That these properties are stored inside the cargo of each edge
-	SEQAN_ASSERT_TRUE(getCargo(e1).i1 == 'a');
-	SEQAN_ASSERT_TRUE(getCargo(e1).i2 == 20);
-	SEQAN_ASSERT_TRUE(getCargo(e2).i1 == 'b');
-	SEQAN_ASSERT_TRUE(getCargo(e2).i2 == 50);
+	SEQAN_ASSERT(getCargo(e1).i1 == 'a');
+	SEQAN_ASSERT(getCargo(e1).i2 == 20);
+	SEQAN_ASSERT(getCargo(e2).i1 == 'b');
+	SEQAN_ASSERT(getCargo(e2).i2 == 50);
 	assignProperty(eMap1, e1, 'c');
 	assignProperty(eMap2, e1, 10);
-	SEQAN_ASSERT_TRUE(getProperty(eMap1, e1) == 'c');
-	SEQAN_ASSERT_TRUE(getProperty(eMap2, e1) == 10);
-	SEQAN_ASSERT_TRUE(property(eMap1, e1) == 'c');
-	SEQAN_ASSERT_TRUE(property(eMap2, e1) == 10);
+	SEQAN_ASSERT(getProperty(eMap1, e1) == 'c');
+	SEQAN_ASSERT(getProperty(eMap2, e1) == 10);
+	SEQAN_ASSERT(property(eMap1, e1) == 'c');
+	SEQAN_ASSERT(property(eMap2, e1) == 10);
 	InternalMap<TPair, 1> const eMap3(eMap1);
 	InternalMap<TPair, 2> const eMap31(eMap2);
-	SEQAN_ASSERT_TRUE(getProperty(eMap3, e1) == 'c');
-	SEQAN_ASSERT_TRUE(getProperty(eMap3, e2) == 'b');
-	SEQAN_ASSERT_TRUE(getProperty(eMap31, e1) == 10);
-	SEQAN_ASSERT_TRUE(property(eMap31, e1) == 10);
-	SEQAN_ASSERT_TRUE(property(eMap3, e2) == 'b');
+	SEQAN_ASSERT(getProperty(eMap3, e1) == 'c');
+	SEQAN_ASSERT(getProperty(eMap3, e2) == 'b');
+	SEQAN_ASSERT(getProperty(eMap31, e1) == 10);
+	SEQAN_ASSERT(property(eMap31, e1) == 10);
+	SEQAN_ASSERT(property(eMap3, e2) == 'b');
 	// Create a simple graph with unsigned int cargo
 	typedef EdgeDescriptor<Graph<Directed<unsigned int> > >::Type TEdgeDescriptor2;
 	Graph<Directed<unsigned int> > g2;
@@ -150,11 +150,11 @@ void Test_Property() {
 	InternalMap<unsigned int> edgeMap;
 	resizeEdgeMap(g2,edgeMap);
 	assignProperty(edgeMap, edge1 ,3);
-	SEQAN_ASSERT_TRUE(getProperty(edgeMap, edge1) == 3);
-	SEQAN_ASSERT_TRUE(property(edgeMap, edge1) == 3);
+	SEQAN_ASSERT(getProperty(edgeMap, edge1) == 3);
+	SEQAN_ASSERT(property(edgeMap, edge1) == 3);
 	InternalMap<unsigned int> const edgeMap2(edgeMap);
-	SEQAN_ASSERT_TRUE(getProperty(edgeMap2, edge1) == 3);
-	SEQAN_ASSERT_TRUE(property(edgeMap2, edge1) == 3);
+	SEQAN_ASSERT(getProperty(edgeMap2, edge1) == 3);
+	SEQAN_ASSERT(property(edgeMap2, edge1) == 3);
 
 	// Second Variant: Pointer to member using a class
 	InternalPointerMap<char TPair:: *, &TPair::i1> eMap4;
@@ -165,27 +165,27 @@ void Test_Property() {
 	assignProperty(eMap5, e1, 10);
 	assignProperty(eMap4, e2, 'd');
 	assignProperty(eMap5, e2, 30);
-	SEQAN_ASSERT_TRUE(getProperty(eMap4, e1) == 'c');
-	SEQAN_ASSERT_TRUE(getProperty(eMap5, e1) == 10);
-	SEQAN_ASSERT_TRUE(getProperty(eMap4, e2) == 'd');
-	SEQAN_ASSERT_TRUE(getProperty(eMap5, e2) == 30);
+	SEQAN_ASSERT(getProperty(eMap4, e1) == 'c');
+	SEQAN_ASSERT(getProperty(eMap5, e1) == 10);
+	SEQAN_ASSERT(getProperty(eMap4, e2) == 'd');
+	SEQAN_ASSERT(getProperty(eMap5, e2) == 30);
 	property(eMap4,e1)='z';
 	property(eMap5,e1)=100;
-	SEQAN_ASSERT_TRUE(getProperty(eMap4, e1) == 'z');
-	SEQAN_ASSERT_TRUE(getProperty(eMap5, e1) == 100);
+	SEQAN_ASSERT(getProperty(eMap4, e1) == 'z');
+	SEQAN_ASSERT(getProperty(eMap5, e1) == 100);
 	InternalPointerMap<char TPair:: *, &TPair::i1> const eMap6(eMap4);
-	SEQAN_ASSERT_TRUE(getProperty(eMap6, e1) == 'z');
-	SEQAN_ASSERT_TRUE(getProperty(eMap6, e2) == 'd');
-	SEQAN_ASSERT_TRUE(property(eMap6, e2) == 'd');
+	SEQAN_ASSERT(getProperty(eMap6, e1) == 'z');
+	SEQAN_ASSERT(getProperty(eMap6, e2) == 'd');
+	SEQAN_ASSERT(property(eMap6, e2) == 'd');
 	
 	// Third Variant: Raw pointer to member
 	char TPair:: * pseudo_map = &TPair::i1;
 	assignProperty(pseudo_map, e1, 'z');
 	assignProperty(pseudo_map, e2, 'w');
-	SEQAN_ASSERT_TRUE(getProperty(pseudo_map, e1) == 'z');
-	SEQAN_ASSERT_TRUE(getProperty(pseudo_map, e2) == 'w');
+	SEQAN_ASSERT(getProperty(pseudo_map, e1) == 'z');
+	SEQAN_ASSERT(getProperty(pseudo_map, e2) == 'w');
 	property(pseudo_map,e1)='k';
-	SEQAN_ASSERT_TRUE(getProperty(pseudo_map, e1) == 'k');
+	SEQAN_ASSERT(getProperty(pseudo_map, e1) == 'k');
 
 
 	// Test shortcuts
@@ -195,8 +195,8 @@ void Test_Property() {
 	addEdge(g10,0,1);addEdge(g10,0,2);
 	String<int> weightMap;
 	assignEdgeMap(g10, weightMap, weights);
-	SEQAN_ASSERT_TRUE(getProperty(weightMap, findEdge(g10, 0, 1)) == 4);
-	SEQAN_ASSERT_TRUE(getProperty(weightMap, findEdge(g10, 0, 2)) == 8);
+	SEQAN_ASSERT(getProperty(weightMap, findEdge(g10, 0, 1)) == 4);
+	SEQAN_ASSERT(getProperty(weightMap, findEdge(g10, 0, 2)) == 8);
 }
 
 //////////////////////////////////////////////////////////////////////////////

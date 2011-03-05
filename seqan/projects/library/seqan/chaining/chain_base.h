@@ -186,8 +186,8 @@ namespace seqan
 	computeChain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TStructuring structuring )
 	{
 
-//		SEQAN_ASSERT_TRUE_MSG( scoreGapOpen( score_ ) == scoreGapExtend( score_ ), "Chaining only supports linear gap costs" );
-//		SEQAN_ASSERT_TRUE_MSG( scoreGapOpen( score_ ) >= 0 && scoreGapExtend( score_ ) >= 0 && scoreMismatch( score_ ) >= 0, "Scores should be positive" );
+//		SEQAN_ASSERT_MSG( scoreGapOpen( score_ ) == scoreGapExtend( score_ ), "Chaining only supports linear gap costs" );
+//		SEQAN_ASSERT_MSG( scoreGapOpen( score_ ) >= 0 && scoreGapExtend( score_ ) >= 0 && scoreMismatch( score_ ) >= 0, "Scores should be positive" );
 		switch( dimension( value( begin( source ) ) ) )
 		{
 			case 1: SEQAN_ASSERT_FAIL("One dimensional chaining not supported");

@@ -301,7 +301,7 @@ SEQAN_CHECKPOINT
         >::Type alph_t;
 
     SEQAN_ASSERT_EQ(sizeof(alph_t), 1);
-    SEQAN_ASSERT_TRUE((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
+    SEQAN_ASSERT((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
 
     impl::clearIndex(me);
 
@@ -327,9 +327,9 @@ SEQAN_CHECKPOINT
     clear(me);
 
     /*
-    SEQAN_ASSERT_TRUE(IsContiguous<TOtherText>::VALUE)
+    SEQAN_ASSERT(IsContiguous<TOtherText>::VALUE)
     SEQAN_ASSERT_EQ(BitsPerValue<alph_t>::VALUE, 8)
-    SEQAN_ASSERT_TRUE((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
+    SEQAN_ASSERT((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
 
     String<alph_t, CStyle> cstr = text;
     impl::uchar_t* textstart =

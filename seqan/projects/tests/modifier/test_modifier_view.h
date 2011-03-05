@@ -52,26 +52,26 @@ SEQAN_DEFINE_TEST(test_modifier_view_iterator_metafunctions) {
         typedef ModViewCargo<TFunctor> TExpected;
         typedef Cargo<TModifiedIterator>::Type TResult;
         bool res = IsSameType<TExpected, TResult>::VALUE;
-        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT(res);
     }
     // TODO(holtgrew): Should the modified iterator actually have a value function?
     {
         typedef char TExpected;
         typedef Value<TModifiedIterator>::Type TResult;
         bool res = IsSameType<TExpected, TResult>::VALUE;
-        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT(res);
     }
     {
         typedef char TExpected;
         typedef GetValue<TModifiedIterator>::Type TResult;
         bool res = IsSameType<TExpected, TResult>::VALUE;
-        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT(res);
     }
     {
         typedef char & TExpected;
         typedef Reference<TModifiedIterator>::Type TResult;
         bool res = IsSameType<TExpected, TResult>::VALUE;
-        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT(res);
     }
 }
 

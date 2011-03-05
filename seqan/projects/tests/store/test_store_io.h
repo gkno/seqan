@@ -52,7 +52,7 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 	{
 		// read reference Sam from file
 		std::ifstream samFile(buffer);
-		SEQAN_ASSERT_TRUE(samFile);
+		SEQAN_ASSERT(samFile);
 		read(samFile, store, Sam());
 	}
 	
@@ -65,7 +65,7 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 	{
 		// write Sam to temp file
 		std::ofstream samFileOut(buffer);
-		SEQAN_ASSERT_TRUE(samFileOut);
+		SEQAN_ASSERT(samFileOut);
 		write(samFileOut, store, Sam());
 	}
 	
@@ -73,8 +73,8 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 	open(sam2.concat, buffer);
 	split(sam2, Raw());
 	
-	SEQAN_ASSERT_TRUE(!empty(sam1));
-	SEQAN_ASSERT_TRUE(!empty(sam2));
+	SEQAN_ASSERT(!empty(sam1));
+	SEQAN_ASSERT(!empty(sam2));
 	for (unsigned i = 0; i < length(sam1); ++i)
 	{
 		if (sam1[i] != sam2[i])

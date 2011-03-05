@@ -678,7 +678,7 @@ graphBasedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& 
 		if (e == 0) addEdge(g, *itV, *itVNext, *itC);
 		else cargo(e) += *itC;
 	}
-	SEQAN_ASSERT_TRUE(itC == end(edges_cargo));
+	SEQAN_ASSERT(itC == end(edges_cargo));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

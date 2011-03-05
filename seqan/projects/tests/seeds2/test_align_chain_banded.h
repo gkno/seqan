@@ -221,8 +221,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGATNNNCAT--GGCACA"/*--*/);
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == /*--*/"CGA-ATCCATCCCACACA");
+        SEQAN_ASSERT(row(alignment, 0) == "GGCGATNNNCAT--GGCACA"/*--*/);
+        SEQAN_ASSERT(row(alignment, 1) == /*--*/"CGA-ATCCATCCCACACA");
     }
     // Test on infixes.
     {
@@ -253,8 +253,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGATNNNCAT--GGCACA"/*--*/);
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == /*--*/"CGA-ATCCATCCCACACA");
+        SEQAN_ASSERT(row(alignment, 0) == "GGCGATNNNCAT--GGCACA"/*--*/);
+        SEQAN_ASSERT(row(alignment, 1) == /*--*/"CGA-ATCCATCCCACACA");
     }
 }
 
@@ -289,8 +289,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        // SEQAN_ASSERT_TRUE_MSG(row(alignment, 0) == "NNNAAANNN", "k == %u", k);
-        // SEQAN_ASSERT_TRUE_MSG(row(alignment, 1) == /*-*/"NCAAACNN", "k == %u", k);
+        // SEQAN_ASSERT_MSG(row(alignment, 0) == "NNNAAANNN", "k == %u", k);
+        // SEQAN_ASSERT_MSG(row(alignment, 1) == /*-*/"NCAAACNN", "k == %u", k);
     }
 
     // Test on whole strings.
@@ -315,8 +315,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACG-TCCTCGTACACCG--TCTTAA");
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == "TACGATCC----ACACCGCGTCT");
+        SEQAN_ASSERT(row(alignment, 0) == "ACG-TCCTCGTACACCG--TCTTAA");
+        SEQAN_ASSERT(row(alignment, 1) == "TACGATCC----ACACCGCGTCT");
     }
     // Test on infixes.
     {
@@ -344,8 +344,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACG-TCCTCGTACACCG--TCTTAA");
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == "TACGATCC----ACACCGCGTCT");
+        SEQAN_ASSERT(row(alignment, 0) == "ACG-TCCTCGTACACCG--TCTTAA");
+        SEQAN_ASSERT(row(alignment, 1) == "TACGATCC----ACACCGCGTCT");
     }
     // Test on whole strings -- linear gap costs.
     {
@@ -376,8 +376,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGA-TNNNCATGGCACA"/*--*/);
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == /*--*/"CGAATC--CATCCCACACA");
+        SEQAN_ASSERT(row(alignment, 0) == "GGCGA-TNNNCATGGCACA"/*--*/);
+        SEQAN_ASSERT(row(alignment, 1) == /*--*/"CGAATC--CATCCCACACA");
     }
     // Test on infixes -- linear gap costs.
     {
@@ -408,8 +408,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGA-TNNNCATGGCACA"/*--*/);
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == /*--*/"CGAATC--CATCCCACACA");
+        SEQAN_ASSERT(row(alignment, 0) == "GGCGA-TNNNCATGGCACA"/*--*/);
+        SEQAN_ASSERT(row(alignment, 1) == /*--*/"CGAATC--CATCCCACACA");
     }
 }
 

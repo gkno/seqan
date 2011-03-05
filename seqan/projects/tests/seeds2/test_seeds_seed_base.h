@@ -96,13 +96,13 @@ void testSeedsSeedBaseBasicFunctions(TSeedSpec const &)
     {  // test assign
         TSeed x;
         assign(x, s);
-        SEQAN_ASSERT_TRUE(x == s);
+        SEQAN_ASSERT(x == s);
     }
     {  // test move
         TSeed s2(s);
         TSeed x;
         move(x, s);
-        SEQAN_ASSERT_TRUE(x == s2);
+        SEQAN_ASSERT(x == s2);
     }
 }
 
@@ -120,21 +120,21 @@ void testSeedsSeedBaseAssign(TSeedSpec const &)
         // Via copy constructor.
         {
             TSeed seed2(seed);
-            SEQAN_ASSERT_TRUE(seed2 == seed);
+            SEQAN_ASSERT(seed2 == seed);
             SEQAN_ASSERT_EQ(getScore(seed2), getScore(seed));
         }
         // Via operator=.
         {
             TSeed seed2;
             seed2 = seed;
-            SEQAN_ASSERT_TRUE(seed2 == seed);
+            SEQAN_ASSERT(seed2 == seed);
             SEQAN_ASSERT_EQ(getScore(seed2), getScore(seed));
         }
         // Via assign().
         {
             TSeed seed2;
             assign(seed2, seed);
-            SEQAN_ASSERT_TRUE(seed2 == seed);
+            SEQAN_ASSERT(seed2 == seed);
             SEQAN_ASSERT_EQ(getScore(seed2), getScore(seed));
         }
     }
@@ -146,19 +146,19 @@ void testSeedsSeedBaseAssign(TSeedSpec const &)
         // Via copy constructor.
         {
             TSeed seed2(seed);
-            SEQAN_ASSERT_TRUE(seed2 == seed);
+            SEQAN_ASSERT(seed2 == seed);
         }
         // Via operator=.
         {
             TSeed seed2;
             seed2 = seed;
-            SEQAN_ASSERT_TRUE(seed2 == seed);
+            SEQAN_ASSERT(seed2 == seed);
         }
         // Via assign().
         {
             TSeed seed2;
             assign(seed2, seed);
-            SEQAN_ASSERT_TRUE(seed2 == seed);
+            SEQAN_ASSERT(seed2 == seed);
         }
     }
 }

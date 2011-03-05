@@ -386,7 +386,7 @@ operator!=(
     Iter<TSSetL, ConcatVirtual<TSpecL> > const & L,
     Iter<TSSetR, ConcatVirtual<TSpecR> > const & R)
 {
-    SEQAN_ASSERT_TRUE(L.host == R.host);
+    SEQAN_ASSERT(L.host == R.host);
     return L.objNo != R.objNo || L._cur != R._cur;
 }
 
@@ -400,7 +400,7 @@ operator<(
     Iter<TSSetL, ConcatVirtual<TSpecL> > const & L,
     Iter<TSSetR, ConcatVirtual<TSpecR> > const & R)
 {
-    SEQAN_ASSERT_TRUE(L.host == R.host);
+    SEQAN_ASSERT(L.host == R.host);
     return L.objNo < R.objNo || (L.objNo == R.objNo && L._cur < R._cur);
 }
 
@@ -410,7 +410,7 @@ operator > (
     Iter<TSSetL, ConcatVirtual<TSpecL> > const & L,
     Iter<TSSetR, ConcatVirtual<TSpecR> > const & R)
 {
-    SEQAN_ASSERT_TRUE(L.host == R.host);
+    SEQAN_ASSERT(L.host == R.host);
     return L.objNo > R.objNo || (L.objNo == R.objNo && L._cur > R._cur);
 }
 

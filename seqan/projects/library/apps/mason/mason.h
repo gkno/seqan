@@ -646,7 +646,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                 if (c == contig[j])
                     c = Dna5(ordValue(c) + 1);
                 if (options.haplotypeNoN)
-                    SEQAN_ASSERT_TRUE(c != Dna5('N'));
+                    SEQAN_ASSERT(c != Dna5('N'));
                 assignValue(haplotypeContig, k, c);
                 j += 1;
                 k += 1;

@@ -64,11 +64,11 @@ SEQAN_DEFINE_TEST(test_find2_find_finder_default_interface) {
 
     // Function find().
     bool ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     // Function findBegin().
     ret = findBegin(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     // Function begin() for haystack.
     {

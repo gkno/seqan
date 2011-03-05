@@ -244,7 +244,7 @@ namespace seqan{
 		typename Size< TObject >::Type max_height = _getMaximalSLTowerHeight( list );
 		while( height < max_height )
 		{
-			SEQAN_ASSERT_TRUE(max_obj != NULL);
+			SEQAN_ASSERT(max_obj != NULL);
 			if( priority( *search_path ) < score )
 				_setMaxObject( *search_path, max_obj );
 			else break;
@@ -312,7 +312,7 @@ namespace seqan{
 				SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** /*search_path*/ )
 	{			
 			// adding additional layers, if necessary 
-		SEQAN_ASSERT_TRUE_MSG( &_getUp( *base ) == NULL, "tried to build tower on bas element with tower" );
+		SEQAN_ASSERT_MSG( &_getUp( *base ) == NULL, "tried to build tower on bas element with tower" );
 		if( height > _getCurrentLayer( list ) ){
 			_setCurrentLayer( list, height );
 		}

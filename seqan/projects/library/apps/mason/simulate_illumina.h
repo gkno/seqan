@@ -494,7 +494,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 if (ordValue(c) >= ordValue(read[j]))
                     c = TAlphabet(ordValue(c) + 1);
                 if (options.illuminaNoN)
-                    SEQAN_ASSERT_TRUE(c != TAlphabet('N'));
+                    SEQAN_ASSERT(c != TAlphabet('N'));
                 //x = ordValue(c);
                 appendValue(tmp, c);
                 if (options.simulateQualities) {

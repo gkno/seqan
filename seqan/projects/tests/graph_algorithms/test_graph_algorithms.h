@@ -71,44 +71,44 @@ void Test_HeapTree() {
 	appendValue(test, 8);appendValue(test, 7);
 
 	HeapTree<int, std::greater<int> > firstHeap;
-	SEQAN_ASSERT_TRUE(empty(firstHeap) == true);
-	SEQAN_ASSERT_TRUE(length(firstHeap) == 0);
+	SEQAN_ASSERT(empty(firstHeap) == true);
+	SEQAN_ASSERT(length(firstHeap) == 0);
 	buildHeap(firstHeap, begin(test), end(test));
 	HeapTree<int, std::greater<int> > firstHeapTest(firstHeap);
-	SEQAN_ASSERT_TRUE(length(firstHeapTest) == length(firstHeap));
+	SEQAN_ASSERT(length(firstHeapTest) == length(firstHeap));
 	clear(firstHeapTest);
 	firstHeapTest = firstHeap;
-	SEQAN_ASSERT_TRUE(length(firstHeapTest) == length(firstHeap));
-	SEQAN_ASSERT_TRUE(empty(firstHeap) == false);
-	SEQAN_ASSERT_TRUE(length(firstHeap) == 10);
+	SEQAN_ASSERT(length(firstHeapTest) == length(firstHeap));
+	SEQAN_ASSERT(empty(firstHeap) == false);
+	SEQAN_ASSERT(length(firstHeap) == 10);
 	clear(firstHeap);
-	SEQAN_ASSERT_TRUE(empty(firstHeap) == true);
-	SEQAN_ASSERT_TRUE(length(firstHeap) == 0);
+	SEQAN_ASSERT(empty(firstHeap) == true);
+	SEQAN_ASSERT(length(firstHeap) == 0);
 	buildHeap(firstHeap, begin(test), end(test));
-	SEQAN_ASSERT_TRUE(empty(firstHeap) == false);
-	SEQAN_ASSERT_TRUE(length(firstHeap) == 10);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 16);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 16);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 14);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 14);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 10);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 10);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 9);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 9);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 8);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 8);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 7);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 7);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 4);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 4);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 3);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 3);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 2);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 2);
-	SEQAN_ASSERT_TRUE(heapRoot(firstHeap) == 1);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstHeap) == 1);
-	SEQAN_ASSERT_TRUE(empty(firstHeap) == true);
-	SEQAN_ASSERT_TRUE(length(firstHeap) == 0);
+	SEQAN_ASSERT(empty(firstHeap) == false);
+	SEQAN_ASSERT(length(firstHeap) == 10);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 16);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 16);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 14);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 14);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 10);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 10);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 9);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 9);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 8);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 8);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 7);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 7);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 4);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 4);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 3);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 3);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 2);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 2);
+	SEQAN_ASSERT(heapRoot(firstHeap) == 1);
+	SEQAN_ASSERT(heapExtractRoot(firstHeap) == 1);
+	SEQAN_ASSERT(empty(firstHeap) == true);
+	SEQAN_ASSERT(length(firstHeap) == 0);
 
 
 	// Keyed Heap
@@ -123,63 +123,63 @@ void Test_HeapTree() {
 	appendValue(keyedTest, TKeyValue('h', 8));appendValue(keyedTest, TKeyValue('z', 7));
 
 	TKeyedHeap firstKeyedHeap;
-	SEQAN_ASSERT_TRUE(empty(firstKeyedHeap) == true);
-	SEQAN_ASSERT_TRUE(length(firstKeyedHeap) == 0);
+	SEQAN_ASSERT(empty(firstKeyedHeap) == true);
+	SEQAN_ASSERT(length(firstKeyedHeap) == 0);
 	buildHeap(firstKeyedHeap, begin(keyedTest), end(keyedTest));
 	TKeyedHeap firstKeyedHeapTest(firstKeyedHeap);
-	SEQAN_ASSERT_TRUE(length(firstKeyedHeapTest) == length(firstKeyedHeap));
+	SEQAN_ASSERT(length(firstKeyedHeapTest) == length(firstKeyedHeap));
 	clear(firstKeyedHeapTest);
 	firstKeyedHeapTest = firstKeyedHeap;
-	SEQAN_ASSERT_TRUE(length(firstKeyedHeapTest) == length(firstKeyedHeap));
+	SEQAN_ASSERT(length(firstKeyedHeapTest) == length(firstKeyedHeap));
 
-	SEQAN_ASSERT_TRUE(empty(firstKeyedHeap) == false);
-	SEQAN_ASSERT_TRUE(length(firstKeyedHeap) == 10);
+	SEQAN_ASSERT(empty(firstKeyedHeap) == false);
+	SEQAN_ASSERT(length(firstKeyedHeap) == 10);
 	clear(firstKeyedHeap);
-	SEQAN_ASSERT_TRUE(empty(firstKeyedHeap) == true);
-	SEQAN_ASSERT_TRUE(length(firstKeyedHeap) == 0);
+	SEQAN_ASSERT(empty(firstKeyedHeap) == true);
+	SEQAN_ASSERT(length(firstKeyedHeap) == 0);
 	buildHeap(firstKeyedHeap, begin(keyedTest), end(keyedTest));
-	SEQAN_ASSERT_TRUE(empty(firstKeyedHeap) == false);
-	SEQAN_ASSERT_TRUE(length(firstKeyedHeap) == 10);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i1 == 'j');
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 16);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 16);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i1 == 'p');
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 14);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 14);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i1 == 'o');
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 10);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 10);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 9);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 9);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 8);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 8);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 7);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 7);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 4);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 4);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 3);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 3);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 2);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 2);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 1);
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 1);
-	SEQAN_ASSERT_TRUE(empty(firstKeyedHeap) == true);
-	SEQAN_ASSERT_TRUE(length(firstKeyedHeap) == 0);
+	SEQAN_ASSERT(empty(firstKeyedHeap) == false);
+	SEQAN_ASSERT(length(firstKeyedHeap) == 10);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i1 == 'j');
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 16);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 16);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i1 == 'p');
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 14);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 14);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i1 == 'o');
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 10);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 10);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 9);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 9);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 8);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 8);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 7);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 7);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 4);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 4);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 3);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 3);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 2);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 2);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 1);
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 1);
+	SEQAN_ASSERT(empty(firstKeyedHeap) == true);
+	SEQAN_ASSERT(length(firstKeyedHeap) == 0);
 	
 	// Change value only for keyed heaps
 	buildHeap(firstKeyedHeap, begin(keyedTest), end(keyedTest));
 	heapChangeValue(firstKeyedHeap, 'c', 20);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i1 == 'c');
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 20);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i1 == 'c');
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 20);
 	heapChangeValue(firstKeyedHeap, 'c', 2);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i1 == 'j');
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 16);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i1 == 'j');
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 16);
 	heapInsert(firstKeyedHeap, TKeyValue('x', 100));
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i1 == 'x');
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i2 == 100);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i1 == 'x');
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i2 == 100);
 	heapChangeValue(firstKeyedHeap, 'c', 200);
-	SEQAN_ASSERT_TRUE(heapRoot(firstKeyedHeap).i1 == 'c');
-	SEQAN_ASSERT_TRUE(heapExtractRoot(firstKeyedHeap).i2 == 200);
+	SEQAN_ASSERT(heapRoot(firstKeyedHeap).i1 == 'c');
+	SEQAN_ASSERT(heapExtractRoot(firstKeyedHeap).i2 == 200);
 
 	// Test Heap Sort
 	typedef int TValue;
@@ -250,22 +250,22 @@ void Test_BreadthFirstSearch() {
 	// Bfs
 	breadthFirstSearch(g, 1, predMap, distMap);
 	
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 0) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 1) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 2) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 3) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 4) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 5) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 6) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 7) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 0) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 1) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 2) == 5);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 3) == 6);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 4) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 5) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 6) == 5);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 7) == 6);
+	SEQAN_ASSERT(getProperty(distMap, 0) == 1);
+	SEQAN_ASSERT(getProperty(distMap, 1) == 0);
+	SEQAN_ASSERT(getProperty(distMap, 2) == 2);
+	SEQAN_ASSERT(getProperty(distMap, 3) == 3);
+	SEQAN_ASSERT(getProperty(distMap, 4) == 2);
+	SEQAN_ASSERT(getProperty(distMap, 5) == 1);
+	SEQAN_ASSERT(getProperty(distMap, 6) == 2);
+	SEQAN_ASSERT(getProperty(distMap, 7) == 3);
+	SEQAN_ASSERT(getProperty(predMap, 0) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 1) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 2) == 5);
+	SEQAN_ASSERT(getProperty(predMap, 3) == 6);
+	SEQAN_ASSERT(getProperty(predMap, 4) == 0);
+	SEQAN_ASSERT(getProperty(predMap, 5) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 6) == 5);
+	SEQAN_ASSERT(getProperty(predMap, 7) == 6);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -294,24 +294,24 @@ void Test_DepthFirstSearch() {
 	// Dfs
 	depthFirstSearch(g, predMap, discoveryTimeMap, finishingTimeMap);
 
-	SEQAN_ASSERT_TRUE(getProperty(discoveryTimeMap, 0) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(discoveryTimeMap, 1) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(discoveryTimeMap, 2) == 9);
-	SEQAN_ASSERT_TRUE(getProperty(discoveryTimeMap, 3) == 4);
-	SEQAN_ASSERT_TRUE(getProperty(discoveryTimeMap, 4) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(discoveryTimeMap, 5) == 10);
-	SEQAN_ASSERT_TRUE(getProperty(finishingTimeMap, 0) == 8);
-	SEQAN_ASSERT_TRUE(getProperty(finishingTimeMap, 1) == 7);
-	SEQAN_ASSERT_TRUE(getProperty(finishingTimeMap, 2) == 12);
-	SEQAN_ASSERT_TRUE(getProperty(finishingTimeMap, 3) == 5);
-	SEQAN_ASSERT_TRUE(getProperty(finishingTimeMap, 4) == 6);
-	SEQAN_ASSERT_TRUE(getProperty(finishingTimeMap, 5) == 11);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 1) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 2) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 3) == 4);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 4) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 5) == 2);
+	SEQAN_ASSERT(getProperty(discoveryTimeMap, 0) == 1);
+	SEQAN_ASSERT(getProperty(discoveryTimeMap, 1) == 2);
+	SEQAN_ASSERT(getProperty(discoveryTimeMap, 2) == 9);
+	SEQAN_ASSERT(getProperty(discoveryTimeMap, 3) == 4);
+	SEQAN_ASSERT(getProperty(discoveryTimeMap, 4) == 3);
+	SEQAN_ASSERT(getProperty(discoveryTimeMap, 5) == 10);
+	SEQAN_ASSERT(getProperty(finishingTimeMap, 0) == 8);
+	SEQAN_ASSERT(getProperty(finishingTimeMap, 1) == 7);
+	SEQAN_ASSERT(getProperty(finishingTimeMap, 2) == 12);
+	SEQAN_ASSERT(getProperty(finishingTimeMap, 3) == 5);
+	SEQAN_ASSERT(getProperty(finishingTimeMap, 4) == 6);
+	SEQAN_ASSERT(getProperty(finishingTimeMap, 5) == 11);
+	SEQAN_ASSERT(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 1) == 0);
+	SEQAN_ASSERT(getProperty(predMap, 2) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 3) == 4);
+	SEQAN_ASSERT(getProperty(predMap, 4) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 5) == 2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -338,15 +338,15 @@ void Test_TopologicalSort() {
 	// Topological sort
 	topologicalSort(g, order);
 
-	SEQAN_ASSERT_TRUE(getValue(order, 0) == 8);
-	SEQAN_ASSERT_TRUE(getValue(order, 1) == 5);
-	SEQAN_ASSERT_TRUE(getValue(order, 2) == 6);
-	SEQAN_ASSERT_TRUE(getValue(order, 3) == 7);
-	SEQAN_ASSERT_TRUE(getValue(order, 4) == 4);
-	SEQAN_ASSERT_TRUE(getValue(order, 5) == 0);
-	SEQAN_ASSERT_TRUE(getValue(order, 6) == 3);
-	SEQAN_ASSERT_TRUE(getValue(order, 7) == 1);
-	SEQAN_ASSERT_TRUE(getValue(order, 8) == 2);
+	SEQAN_ASSERT(getValue(order, 0) == 8);
+	SEQAN_ASSERT(getValue(order, 1) == 5);
+	SEQAN_ASSERT(getValue(order, 2) == 6);
+	SEQAN_ASSERT(getValue(order, 3) == 7);
+	SEQAN_ASSERT(getValue(order, 4) == 4);
+	SEQAN_ASSERT(getValue(order, 5) == 0);
+	SEQAN_ASSERT(getValue(order, 6) == 3);
+	SEQAN_ASSERT(getValue(order, 7) == 1);
+	SEQAN_ASSERT(getValue(order, 8) == 2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -374,14 +374,14 @@ void Test_StronglyConnectedComponents() {
 	// Strongly Connected Components
 	stronglyConnectedComponents(g, component);
 
-	SEQAN_ASSERT_TRUE(getValue(component, 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(component, 1) == 3);
-	SEQAN_ASSERT_TRUE(getValue(component, 2) == 2);
-	SEQAN_ASSERT_TRUE(getValue(component, 3) == 2);
-	SEQAN_ASSERT_TRUE(getValue(component, 4) == 3);
-	SEQAN_ASSERT_TRUE(getValue(component, 5) == 1);
-	SEQAN_ASSERT_TRUE(getValue(component, 6) == 1);
-	SEQAN_ASSERT_TRUE(getValue(component, 7) == 0);
+	SEQAN_ASSERT(getValue(component, 0) == 3);
+	SEQAN_ASSERT(getValue(component, 1) == 3);
+	SEQAN_ASSERT(getValue(component, 2) == 2);
+	SEQAN_ASSERT(getValue(component, 3) == 2);
+	SEQAN_ASSERT(getValue(component, 4) == 3);
+	SEQAN_ASSERT(getValue(component, 5) == 1);
+	SEQAN_ASSERT(getValue(component, 6) == 1);
+	SEQAN_ASSERT(getValue(component, 7) == 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -410,11 +410,11 @@ void Test_ConnectedComponents() {
 	//Connected Components
 	connectedComponents(g, component);
 
-	SEQAN_ASSERT_TRUE(getValue(component, 0) == 0);
-	SEQAN_ASSERT_TRUE(getValue(component, 1) == 0);
-	SEQAN_ASSERT_TRUE(getValue(component, 2) == 1);
-	SEQAN_ASSERT_TRUE(getValue(component, 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(component, 4) == 1);
+	SEQAN_ASSERT(getValue(component, 0) == 0);
+	SEQAN_ASSERT(getValue(component, 1) == 0);
+	SEQAN_ASSERT(getValue(component, 2) == 1);
+	SEQAN_ASSERT(getValue(component, 3) == 1);
+	SEQAN_ASSERT(getValue(component, 4) == 1);
 }
 
 
@@ -445,15 +445,15 @@ void Test_PrimsAlgorithm() {
 
 	primsAlgorithm(g, 0, weightMap, predMap);
 
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 1) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 2) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 3) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 4) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 5) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 6) == 7);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 7) == 8);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 8) == 2);
+	SEQAN_ASSERT(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 1) == 0);
+	SEQAN_ASSERT(getProperty(predMap, 2) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 3) == 2);
+	SEQAN_ASSERT(getProperty(predMap, 4) == 2);
+	SEQAN_ASSERT(getProperty(predMap, 5) == 3);
+	SEQAN_ASSERT(getProperty(predMap, 6) == 7);
+	SEQAN_ASSERT(getProperty(predMap, 7) == 8);
+	SEQAN_ASSERT(getProperty(predMap, 8) == 2);
 }
 
 
@@ -546,8 +546,8 @@ void Test_MST_All() {
 		}
 
 		//std::cout << sum1 << ',';
-	SEQAN_ASSERT_TRUE(sum1 == sum2);
-	SEQAN_ASSERT_TRUE(sum2 == sum3);
+	SEQAN_ASSERT(sum1 == sum2);
+	SEQAN_ASSERT(sum2 == sum3);
 	//}
 
 }
@@ -581,17 +581,17 @@ void Test_DagShortestPath() {
 	// DAG-Shortest path(Graph, sourceVertex_vertex, weightMap, predMap, distMap)
 	dagShortestPath(g,1,weightMap,predMap,distMap);
 	
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 1) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 2) == 2);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 3) == 6);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 4) == 5);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 5) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 1) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 2) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 3) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 4) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 5) == 4);
+	SEQAN_ASSERT(getProperty(distMap, 1) == 0);
+	SEQAN_ASSERT(getProperty(distMap, 2) == 2);
+	SEQAN_ASSERT(getProperty(distMap, 3) == 6);
+	SEQAN_ASSERT(getProperty(distMap, 4) == 5);
+	SEQAN_ASSERT(getProperty(distMap, 5) == 3);
+	SEQAN_ASSERT(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 1) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 2) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 3) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 4) == 3);
+	SEQAN_ASSERT(getProperty(predMap, 5) == 4);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -624,17 +624,17 @@ void Test_BellmanFord() {
 	// Bellman-Ford
 	bool noNegativeCycle = bellmanFordAlgorithm(g,0,weightMap,predMap,distMap);
 
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 0) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 1) == 8);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 2) == 9);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 3) == 5);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 4) == 7);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 1) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 2) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 3) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 4) == 3);
-	SEQAN_ASSERT_TRUE(noNegativeCycle == true);
+	SEQAN_ASSERT(getProperty(distMap, 0) == 0);
+	SEQAN_ASSERT(getProperty(distMap, 1) == 8);
+	SEQAN_ASSERT(getProperty(distMap, 2) == 9);
+	SEQAN_ASSERT(getProperty(distMap, 3) == 5);
+	SEQAN_ASSERT(getProperty(distMap, 4) == 7);
+	SEQAN_ASSERT(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 1) == 3);
+	SEQAN_ASSERT(getProperty(predMap, 2) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 3) == 0);
+	SEQAN_ASSERT(getProperty(predMap, 4) == 3);
+	SEQAN_ASSERT(noNegativeCycle == true);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -667,16 +667,16 @@ void Test_Dijkstra() {
 	// Dijkstra
 	dijkstra(g,0,weightMap,predMap,distMap);
 
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 0) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 1) == 8);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 2) == 9);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 3) == 5);
-	SEQAN_ASSERT_TRUE(getProperty(distMap, 4) == 7);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 1) == 3);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 2) == 1);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 3) == 0);
-	SEQAN_ASSERT_TRUE(getProperty(predMap, 4) == 3);
+	SEQAN_ASSERT(getProperty(distMap, 0) == 0);
+	SEQAN_ASSERT(getProperty(distMap, 1) == 8);
+	SEQAN_ASSERT(getProperty(distMap, 2) == 9);
+	SEQAN_ASSERT(getProperty(distMap, 3) == 5);
+	SEQAN_ASSERT(getProperty(distMap, 4) == 7);
+	SEQAN_ASSERT(getProperty(predMap, 0) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getProperty(predMap, 1) == 3);
+	SEQAN_ASSERT(getProperty(predMap, 2) == 1);
+	SEQAN_ASSERT(getProperty(predMap, 3) == 0);
+	SEQAN_ASSERT(getProperty(predMap, 4) == 3);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -710,56 +710,56 @@ void Test_AllPairsShortestPath() {
 	allPairsShortestPath(g,weightMap, distMat, predMat);
 
 	unsigned int len = (unsigned int) sqrt((double) length(distMat));
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 0) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 1) == 1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 2) == -3);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 3) == 2);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 4) == -4);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 1) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 2) == -4);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 4) == -1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 0) == 7);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 1) == 4);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 2) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 3) == 5);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 4) == 3);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 0) == 2);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 1) == -1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 2) == -5);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 3) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 4) == -2);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 0) == 8);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 1) == 5);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 2) == 1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 3) == 6);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 0) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 3) == 4);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 1) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 2) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 3) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 3) == 4);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 4) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(distMat, 0*len + 0) == 0);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 1) == 1);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 2) == -3);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 3) == 2);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 4) == -4);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 0) == 3);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 1) == 0);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 2) == -4);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 3) == 1);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 4) == -1);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 0) == 7);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 1) == 4);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 2) == 0);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 3) == 5);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 4) == 3);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 0) == 2);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 1) == -1);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 2) == -5);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 3) == 0);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 4) == -2);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 0) == 8);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 1) == 5);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 2) == 1);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 3) == 6);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 0) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 0*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 3) == 4);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 1) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 1*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 3) == 1);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 2) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 2*len + 3) == 1);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 3) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 3*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 3) == 4);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 4) == getNil<TVertexDescriptor>());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -793,56 +793,56 @@ void Test_FloydWarshall() {
 	floydWarshallAlgorithm(g,weightMap, distMat, predMat);
 
 	unsigned int len = (unsigned int) sqrt((double) length(distMat));
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 0) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 1) == 1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 2) == -3);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 3) == 2);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 0*len + 4) == -4);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 1) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 2) == -4);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 1*len + 4) == -1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 0) == 7);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 1) == 4);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 2) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 3) == 5);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 2*len + 4) == 3);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 0) == 2);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 1) == -1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 2) == -5);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 3) == 0);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 3*len + 4) == -2);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 0) == 8);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 1) == 5);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 2) == 1);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 3) == 6);
-	SEQAN_ASSERT_TRUE(getValue(distMat, 4*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 0) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 3) == 4);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 0*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 1) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 1*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 2) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 2*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 3) == getNil<TVertexDescriptor>());
-	SEQAN_ASSERT_TRUE(getValue(predMat, 3*len + 4) == 0);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 0) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 1) == 2);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 2) == 3);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 3) == 4);
-	SEQAN_ASSERT_TRUE(getValue(predMat, 4*len + 4) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(distMat, 0*len + 0) == 0);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 1) == 1);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 2) == -3);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 3) == 2);
+	SEQAN_ASSERT(getValue(distMat, 0*len + 4) == -4);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 0) == 3);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 1) == 0);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 2) == -4);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 3) == 1);
+	SEQAN_ASSERT(getValue(distMat, 1*len + 4) == -1);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 0) == 7);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 1) == 4);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 2) == 0);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 3) == 5);
+	SEQAN_ASSERT(getValue(distMat, 2*len + 4) == 3);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 0) == 2);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 1) == -1);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 2) == -5);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 3) == 0);
+	SEQAN_ASSERT(getValue(distMat, 3*len + 4) == -2);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 0) == 8);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 1) == 5);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 2) == 1);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 3) == 6);
+	SEQAN_ASSERT(getValue(distMat, 4*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 0) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 0*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 3) == 4);
+	SEQAN_ASSERT(getValue(predMat, 0*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 1) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 1*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 3) == 1);
+	SEQAN_ASSERT(getValue(predMat, 1*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 2) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 2*len + 3) == 1);
+	SEQAN_ASSERT(getValue(predMat, 2*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 3*len + 3) == getNil<TVertexDescriptor>());
+	SEQAN_ASSERT(getValue(predMat, 3*len + 4) == 0);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 0) == 3);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 1) == 2);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 2) == 3);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 3) == 4);
+	SEQAN_ASSERT(getValue(predMat, 4*len + 4) == getNil<TVertexDescriptor>());
 }
 
 
@@ -870,22 +870,22 @@ void Test_TransitiveClosure() {
 	transitiveClosure(g,closure);
 	
 	unsigned int len = (unsigned int) sqrt((double) length(closure));
-	SEQAN_ASSERT_TRUE(getValue(closure, 0*len + 0) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 0*len + 1) == 0);
-	SEQAN_ASSERT_TRUE(getValue(closure, 0*len + 2) == 0);
-	SEQAN_ASSERT_TRUE(getValue(closure, 0*len + 3) == 0);
-	SEQAN_ASSERT_TRUE(getValue(closure, 1*len + 0) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 1*len + 1) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 1*len + 2) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 1*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 2*len + 0) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 2*len + 1) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 2*len + 2) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 2*len + 3) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 3*len + 0) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 3*len + 1) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 3*len + 2) == 1);
-	SEQAN_ASSERT_TRUE(getValue(closure, 3*len + 3) == 1);
+	SEQAN_ASSERT(getValue(closure, 0*len + 0) == 1);
+	SEQAN_ASSERT(getValue(closure, 0*len + 1) == 0);
+	SEQAN_ASSERT(getValue(closure, 0*len + 2) == 0);
+	SEQAN_ASSERT(getValue(closure, 0*len + 3) == 0);
+	SEQAN_ASSERT(getValue(closure, 1*len + 0) == 1);
+	SEQAN_ASSERT(getValue(closure, 1*len + 1) == 1);
+	SEQAN_ASSERT(getValue(closure, 1*len + 2) == 1);
+	SEQAN_ASSERT(getValue(closure, 1*len + 3) == 1);
+	SEQAN_ASSERT(getValue(closure, 2*len + 0) == 1);
+	SEQAN_ASSERT(getValue(closure, 2*len + 1) == 1);
+	SEQAN_ASSERT(getValue(closure, 2*len + 2) == 1);
+	SEQAN_ASSERT(getValue(closure, 2*len + 3) == 1);
+	SEQAN_ASSERT(getValue(closure, 3*len + 0) == 1);
+	SEQAN_ASSERT(getValue(closure, 3*len + 1) == 1);
+	SEQAN_ASSERT(getValue(closure, 3*len + 2) == 1);
+	SEQAN_ASSERT(getValue(closure, 3*len + 3) == 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -915,10 +915,10 @@ void Test_FordFulkerson() {
 	String<unsigned int> flow;	
 	unsigned int valF = fordFulkersonAlgorithm(g, 0, 3, capMap, flow);
 	
-	SEQAN_ASSERT_TRUE(valF == 23);
+	SEQAN_ASSERT(valF == 23);
 	TEdgeIterator itEdge(g);
 	for(;!atEnd(itEdge);goNext(itEdge)) {
-		SEQAN_ASSERT_TRUE(getProperty(flow, getValue(itEdge)) <= getProperty(capMap, getValue(itEdge)));
+		SEQAN_ASSERT(getProperty(flow, getValue(itEdge)) <= getProperty(capMap, getValue(itEdge)));
 	}
 }
 
@@ -951,11 +951,11 @@ void Test_PathGrowingAlgorithm() {
 	// EdgeMap indicates whether an edge is selected or not
 	unsigned int weight = pathGrowingAlgorithm(g, weightMap, edgeMap);
 
-	SEQAN_ASSERT_TRUE(weight == 49);
-	SEQAN_ASSERT_TRUE(getProperty(edgeMap, findEdge(g, 0, 7)) == true);
-	SEQAN_ASSERT_TRUE(getProperty(edgeMap, findEdge(g, 1, 6)) == true);
-	SEQAN_ASSERT_TRUE(getProperty(edgeMap, findEdge(g, 2, 8)) == true);
-	SEQAN_ASSERT_TRUE(getProperty(edgeMap, findEdge(g, 4, 5)) == true);
+	SEQAN_ASSERT(weight == 49);
+	SEQAN_ASSERT(getProperty(edgeMap, findEdge(g, 0, 7)) == true);
+	SEQAN_ASSERT(getProperty(edgeMap, findEdge(g, 1, 6)) == true);
+	SEQAN_ASSERT(getProperty(edgeMap, findEdge(g, 2, 8)) == true);
+	SEQAN_ASSERT(getProperty(edgeMap, findEdge(g, 4, 5)) == true);
 }
 
 
@@ -968,11 +968,11 @@ void Test_LongestIncreasingSubsequence() {
 	String<TPosition, Block<> > pos1;
 	longestIncreasingSubsequence(seq1,pos1);
 	// Trace is backwards
-	SEQAN_ASSERT_TRUE(seq1[pos1[4]] == 'e');
-	SEQAN_ASSERT_TRUE(seq1[pos1[3]] == 'g');
-	SEQAN_ASSERT_TRUE(seq1[pos1[2]] == 'i');
-	SEQAN_ASSERT_TRUE(seq1[pos1[1]] == 's');
-	SEQAN_ASSERT_TRUE(seq1[pos1[0]] == 't');
+	SEQAN_ASSERT(seq1[pos1[4]] == 'e');
+	SEQAN_ASSERT(seq1[pos1[3]] == 'g');
+	SEQAN_ASSERT(seq1[pos1[2]] == 'i');
+	SEQAN_ASSERT(seq1[pos1[1]] == 's');
+	SEQAN_ASSERT(seq1[pos1[0]] == 't');
 
 	String<TPosition> seq;
 	appendValue(seq, 5); appendValue(seq, 3); appendValue(seq, 4);
@@ -981,11 +981,11 @@ void Test_LongestIncreasingSubsequence() {
 	appendValue(seq, 10);
 	String<TPosition, Block<> > pos;
 	longestIncreasingSubsequence(seq,pos);
-	SEQAN_ASSERT_TRUE(seq[pos[4]] == 3);
-	SEQAN_ASSERT_TRUE(seq[pos[3]] == 4);
-	SEQAN_ASSERT_TRUE(seq[pos[2]] == 6);
-	SEQAN_ASSERT_TRUE(seq[pos[1]] == 7);
-	SEQAN_ASSERT_TRUE(seq[pos[0]] == 10);
+	SEQAN_ASSERT(seq[pos[4]] == 3);
+	SEQAN_ASSERT(seq[pos[3]] == 4);
+	SEQAN_ASSERT(seq[pos[2]] == 6);
+	SEQAN_ASSERT(seq[pos[1]] == 7);
+	SEQAN_ASSERT(seq[pos[0]] == 10);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -997,12 +997,12 @@ void Test_LongestCommonSubsequence() {
 	String<char> seq2("baabca");
 	String<std::pair<TPosition, TPosition> > pos;
 	longestCommonSubsequence(seq1, seq2, 100, pos);
-	SEQAN_ASSERT_TRUE(seq1[pos[2].first] == 'b');
-	SEQAN_ASSERT_TRUE(seq2[pos[2].second] == 'b');
-	SEQAN_ASSERT_TRUE(seq1[pos[1].first] == 'a');
-	SEQAN_ASSERT_TRUE(seq2[pos[1].second] == 'a');
-	SEQAN_ASSERT_TRUE(seq1[pos[0].first] == 'c');
-	SEQAN_ASSERT_TRUE(seq2[pos[0].second] == 'c');
+	SEQAN_ASSERT(seq1[pos[2].first] == 'b');
+	SEQAN_ASSERT(seq2[pos[2].second] == 'b');
+	SEQAN_ASSERT(seq1[pos[1].first] == 'a');
+	SEQAN_ASSERT(seq2[pos[1].second] == 'a');
+	SEQAN_ASSERT(seq1[pos[0].first] == 'c');
+	SEQAN_ASSERT(seq2[pos[0].second] == 'c');
 }
 
 
@@ -1017,12 +1017,12 @@ void Test_HeaviestIncreasingSubsequence() {
 	resize(weights1, length(seq1), 1);
 	unsigned int w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
 	// Trace is backwards
-	SEQAN_ASSERT_TRUE(w == 5);
-	SEQAN_ASSERT_TRUE(seq1[pos1[4]] == 'e');
-	SEQAN_ASSERT_TRUE(seq1[pos1[3]] == 'g');
-	SEQAN_ASSERT_TRUE(seq1[pos1[2]] == 'i');
-	SEQAN_ASSERT_TRUE(seq1[pos1[1]] == 's');
-	SEQAN_ASSERT_TRUE(seq1[pos1[0]] == 't');
+	SEQAN_ASSERT(w == 5);
+	SEQAN_ASSERT(seq1[pos1[4]] == 'e');
+	SEQAN_ASSERT(seq1[pos1[3]] == 'g');
+	SEQAN_ASSERT(seq1[pos1[2]] == 'i');
+	SEQAN_ASSERT(seq1[pos1[1]] == 's');
+	SEQAN_ASSERT(seq1[pos1[0]] == 't');
 	//// Output
 	//for(int i = length(pos1)-1; i>=0; --i) {
 	//	std::cout << seq1[pos1[i]] <<  ',';
@@ -1033,11 +1033,11 @@ void Test_HeaviestIncreasingSubsequence() {
 	clear(pos1);
 	assignProperty(weights1, 2, 10);
 	w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
-	SEQAN_ASSERT_TRUE(w == 13);
-	SEQAN_ASSERT_TRUE(seq1[pos1[3]] == 'e');
-	SEQAN_ASSERT_TRUE(seq1[pos1[2]] == 'i');
-	SEQAN_ASSERT_TRUE(seq1[pos1[1]] == 's');
-	SEQAN_ASSERT_TRUE(seq1[pos1[0]] == 't');
+	SEQAN_ASSERT(w == 13);
+	SEQAN_ASSERT(seq1[pos1[3]] == 'e');
+	SEQAN_ASSERT(seq1[pos1[2]] == 'i');
+	SEQAN_ASSERT(seq1[pos1[1]] == 's');
+	SEQAN_ASSERT(seq1[pos1[0]] == 't');
 	//// Output
 	//for(int i = length(pos1)-1; i>=0; --i) {
 	//	std::cout << seq1[pos1[i]] <<  ',';
@@ -1054,9 +1054,9 @@ void Test_HeaviestIncreasingSubsequence() {
 	appendValue(weights, 10); appendValue(weights, 15);
 	String<TPosition> pos;
 	w = heaviestIncreasingSubsequence(seq, weights, pos);
-	SEQAN_ASSERT_TRUE(w == 20);
-	SEQAN_ASSERT_TRUE(seq[pos[1]] == 0);
-	SEQAN_ASSERT_TRUE(seq[pos[0]] == 1);
+	SEQAN_ASSERT(w == 20);
+	SEQAN_ASSERT(seq[pos[1]] == 0);
+	SEQAN_ASSERT(seq[pos[0]] == 1);
 	//// Output
 	//for(int i = length(pos)-1; i>=0; --i) {
 	//	std::cout << seq[pos[i]] <<  ',';

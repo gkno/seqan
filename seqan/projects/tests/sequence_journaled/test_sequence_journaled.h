@@ -432,7 +432,7 @@ void testJournaledStringBeginEndConstIterator(TStringJournalSpec const &)
 //         typedef typename Iterator<String<char, Journaled<Alloc<void>, TStringJournalSpec> const, Standard>::Type TIterator;
 //         String<char, Journaled<Alloc<void>, TStringJournalSpec> const & constSJ = journaledString;
 
-//         SEQAN_ASSERT_TRUE(begin(journaledString, Standard()) == begin(constSJ, Standard()));
+//         SEQAN_ASSERT(begin(journaledString, Standard()) == begin(constSJ, Standard()));
 //     }
 }
 
@@ -664,7 +664,7 @@ void testJournaledStringFuzzying(TStringJournalSpec const &)
             size_t remaining = length(journaledString);
 
             while (remaining > 1) {
-                SEQAN_ASSERT_TRUE(csIt != end(string) - 1);
+                SEQAN_ASSERT(csIt != end(string) - 1);
                 size_t len = mtRand() % (remaining + 1);
                 remaining -= len;
                 if (remaining == 0)
@@ -688,7 +688,7 @@ void testJournaledStringFuzzying(TStringJournalSpec const &)
             size_t remaining = length(journaledString);
 
             while (remaining > 1) {
-                SEQAN_ASSERT_TRUE(csIt != end(string) - 1);
+                SEQAN_ASSERT(csIt != end(string) - 1);
                 size_t len = mtRand() % (remaining + 1);
                 remaining -= len;
                 if (remaining == 0)
@@ -726,24 +726,24 @@ void testJournaledStringSegmentsReadOnly(TStringJournalSpec const &)
     // Prefixes.
     {
         TPrefix prefix1 = prefix(journaledString, 3);
-        SEQAN_ASSERT_TRUE(prefix1 == CharString("teX"));
+        SEQAN_ASSERT(prefix1 == CharString("teX"));
         TPrefix prefix2(journaledString, 3);
-        SEQAN_ASSERT_TRUE(prefix2 == CharString("teX"));
+        SEQAN_ASSERT(prefix2 == CharString("teX"));
     }
     // Suffixes.
     {   
         TSuffix suffix1 = suffix(journaledString, 3);
-        SEQAN_ASSERT_TRUE(suffix1 == CharString("Xst"));
+        SEQAN_ASSERT(suffix1 == CharString("Xst"));
         TSuffix suffix2(journaledString, 3);
-        SEQAN_ASSERT_TRUE(suffix2 == CharString("Xst"));
+        SEQAN_ASSERT(suffix2 == CharString("Xst"));
 
     }
     // Infixes.
     {
         TInfix infix1 = infix(journaledString, 1, 5);
-        SEQAN_ASSERT_TRUE(infix1 == CharString("eXXs"));
+        SEQAN_ASSERT(infix1 == CharString("eXXs"));
         TInfix infix2(journaledString, 1, 5);
-        SEQAN_ASSERT_TRUE(infix2 == CharString("eXXs"));
+        SEQAN_ASSERT(infix2 == CharString("eXXs"));
     }
 }
 
@@ -764,7 +764,7 @@ void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
         insert(journaledString, 2, "XX");
 
         TPrefix prefix1 = prefix(journaledString, 3);
-        SEQAN_ASSERT_TRUE(prefix1 == CharString("teX"));
+        SEQAN_ASSERT(prefix1 == CharString("teX"));
         prefix1 = "ABCD";
         SEQAN_ASSERT_EQ(journaledString, "ABCDXst");
         SEQAN_ASSERT_EQ(charStr, "test");
@@ -774,7 +774,7 @@ void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
         insert(journaledString, 2, "XX");
 
         TPrefix prefix2(journaledString, 3);
-        SEQAN_ASSERT_TRUE(prefix2 == CharString("teX"));
+        SEQAN_ASSERT(prefix2 == CharString("teX"));
         prefix2 = "ABCD";
         SEQAN_ASSERT_EQ(journaledString, "ABCDXst");
         SEQAN_ASSERT_EQ(charStr, "test");
@@ -786,7 +786,7 @@ void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
         insert(journaledString, 2, "XX");
 
         TSuffix suffix1 = suffix(journaledString, 3);
-        SEQAN_ASSERT_TRUE(suffix1 == CharString("Xst"));
+        SEQAN_ASSERT(suffix1 == CharString("Xst"));
         suffix1 = "ABCD";
         SEQAN_ASSERT_EQ(journaledString, "teXABCD");
         SEQAN_ASSERT_EQ(charStr, "test");
@@ -796,7 +796,7 @@ void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
         insert(journaledString, 2, "XX");
 
         TSuffix suffix2(journaledString, 3);
-        SEQAN_ASSERT_TRUE(suffix2 == CharString("Xst"));
+        SEQAN_ASSERT(suffix2 == CharString("Xst"));
         suffix2 = "ABCD";
         SEQAN_ASSERT_EQ(journaledString, "teXABCD");
         SEQAN_ASSERT_EQ(charStr, "test");
@@ -808,7 +808,7 @@ void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
         insert(journaledString, 2, "XX");
 
         TInfix infix1 = infix(journaledString, 1, 5);
-        SEQAN_ASSERT_TRUE(infix1 == CharString("eXXs"));
+        SEQAN_ASSERT(infix1 == CharString("eXXs"));
         infix1 = "ABCD";
         SEQAN_ASSERT_EQ(journaledString, "tABCDt");
         SEQAN_ASSERT_EQ(charStr, "test");
@@ -818,7 +818,7 @@ void testJournaledStringSegmentsReadWrite(TStringJournalSpec const &)
         insert(journaledString, 2, "XX");
 
         TInfix infix2(journaledString, 1, 5);
-        SEQAN_ASSERT_TRUE(infix2 == CharString("eXXs"));
+        SEQAN_ASSERT(infix2 == CharString("eXXs"));
         infix2 = "ABCD";
         SEQAN_ASSERT_EQ(journaledString, "tABCDt");
         SEQAN_ASSERT_EQ(charStr, "test");

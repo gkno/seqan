@@ -60,24 +60,24 @@ void Test_GuideTree_NeighbourJoining()
     njTree(mat, guideTreeOut);
     //std::cout << guideTreeOut << std::endl;
 
-    SEQAN_ASSERT_TRUE(numVertices(guideTreeOut) == 15);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 8, 1) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 8, 0) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 9, 5) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 9, 4) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 2) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 8) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 2) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 8) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 11, 3) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 11, 10) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 12, 9) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 12, 11) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 13, 12) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 13, 6) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 14, 13) != 0);
-    SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 14, 7) != 0);
-    SEQAN_ASSERT_TRUE(getRoot(guideTreeOut) == 14);
+    SEQAN_ASSERT(numVertices(guideTreeOut) == 15);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 8, 1) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 8, 0) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 9, 5) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 9, 4) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 10, 2) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 10, 8) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 10, 2) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 10, 8) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 11, 3) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 11, 10) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 12, 9) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 12, 11) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 13, 12) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 13, 6) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 14, 13) != 0);
+    SEQAN_ASSERT(findEdge(guideTreeOut, 14, 7) != 0);
+    SEQAN_ASSERT(getRoot(guideTreeOut) == 14);
 }
 
 template<typename TTag>
@@ -154,7 +154,7 @@ Test_UpgmaGuideTree(int seed) {
 		String<TSize> set2;
 		TBfsIterator itBfs2(guideTreeMat, getRoot(guideTreeMat));
 		for(;!atEnd(itBfs2);goNext(itBfs2)) appendValue(set2, value(itBfs2));
-        SEQAN_ASSERT_TRUE(set1 == set1);
+        SEQAN_ASSERT(set1 == set1);
         /*
 		if (set1 != set2) {
 			std::cout << "Randomized test failed:" << std::endl;

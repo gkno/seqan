@@ -364,16 +364,16 @@ void TestConversion()
 
 	SEQAN_ASSERT_EQ(target, source);
 	SEQAN_ASSERT_EQ(source, target);
-	SEQAN_ASSERT_TRUE(!(target != source));
-	SEQAN_ASSERT_TRUE(!(source != target));
-	SEQAN_ASSERT_TRUE(!(target < source));
-	SEQAN_ASSERT_TRUE(!(source < target));
-	SEQAN_ASSERT_TRUE(target <= source);
-	SEQAN_ASSERT_TRUE(source <= target);
-	SEQAN_ASSERT_TRUE(!(target > source));
-	SEQAN_ASSERT_TRUE(!(source > target));
-	SEQAN_ASSERT_TRUE(target >= source);
-	SEQAN_ASSERT_TRUE(source >= target);
+	SEQAN_ASSERT(!(target != source));
+	SEQAN_ASSERT(!(source != target));
+	SEQAN_ASSERT(!(target < source));
+	SEQAN_ASSERT(!(source < target));
+	SEQAN_ASSERT(target <= source);
+	SEQAN_ASSERT(source <= target);
+	SEQAN_ASSERT(!(target > source));
+	SEQAN_ASSERT(!(source > target));
+	SEQAN_ASSERT(target >= source);
+	SEQAN_ASSERT(source >= target);
 
 	TSource const c_source = TSource();
 	target = c_source;
@@ -466,17 +466,17 @@ void TestExtremeValuesSigned()
 */
 
 	bool isSigned = IsSameType< typename MakeSigned_<T>::Type, T >::VALUE;
-	SEQAN_ASSERT_TRUE(isSigned);
+	SEQAN_ASSERT(isSigned);
 
 	SEQAN_ASSERT_EQ(maxValue<T>(), MaxValue<T>::VALUE);
 	SEQAN_ASSERT_EQ(minValue<T>(), MinValue<T>::VALUE);
 
 	long double maxDelta = maxVal - MaxValue<T>::VALUE;
 	long double minDelta = minVal - (long double)MinValue<T>::VALUE;
-	SEQAN_ASSERT_TRUE(maxDelta <= maxVal/1000);
-	SEQAN_ASSERT_TRUE(-maxVal/1000 <= maxDelta);
-	SEQAN_ASSERT_TRUE(minDelta <= maxVal/1000);
-	SEQAN_ASSERT_TRUE(-maxVal/1000 <= minDelta);
+	SEQAN_ASSERT(maxDelta <= maxVal/1000);
+	SEQAN_ASSERT(-maxVal/1000 <= maxDelta);
+	SEQAN_ASSERT(minDelta <= maxVal/1000);
+	SEQAN_ASSERT(-maxVal/1000 <= minDelta);
 }
 
 template <typename T>
@@ -494,7 +494,7 @@ void TestExtremeValuesUnsigned()
 */
 
 	bool isUnsigned = IsSameType< typename MakeUnsigned_<T>::Type, T >::VALUE;
-	SEQAN_ASSERT_TRUE(isUnsigned);
+	SEQAN_ASSERT(isUnsigned);
 
 	SEQAN_ASSERT_EQ(maxValue<T>(), MaxValue<T>::VALUE);
 	SEQAN_ASSERT_EQ(minValue<T>(), MinValue<T>::VALUE);

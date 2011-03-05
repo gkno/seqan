@@ -124,7 +124,7 @@ void testJournaledStringIteratorSum(TStringJournalSpec const &)
         TIterator it = begin(journaledString, Standard());
         it += 4;
         TIterator itEnd = end(journaledString, Standard());
-        SEQAN_ASSERT_TRUE(it == itEnd);
+        SEQAN_ASSERT(it == itEnd);
     }
 
     // Case 2: Go in between beginning and end.
@@ -133,7 +133,7 @@ void testJournaledStringIteratorSum(TStringJournalSpec const &)
         ++it; ++it;
         TIterator it2 = begin(journaledString, Standard());
         it2 += 2;
-        SEQAN_ASSERT_TRUE(it == it2);
+        SEQAN_ASSERT(it == it2);
     }
 }
 
@@ -153,23 +153,23 @@ void testJournaledStringIteratorRelations(TStringJournalSpec const &)
     ++it2; ++it2;
     TIterator it3 = end(journaledString, Standard());
 
-    SEQAN_ASSERT_TRUE(it1 < it2);
-    SEQAN_ASSERT_TRUE(it1 <= it2);
-    SEQAN_ASSERT_TRUE(it2 < it3);
-    SEQAN_ASSERT_TRUE(it2 <= it3);
+    SEQAN_ASSERT(it1 < it2);
+    SEQAN_ASSERT(it1 <= it2);
+    SEQAN_ASSERT(it2 < it3);
+    SEQAN_ASSERT(it2 <= it3);
 
-    SEQAN_ASSERT_TRUE(it1 <= it1);
-    SEQAN_ASSERT_TRUE(it2 <= it2);
-    SEQAN_ASSERT_TRUE(it3 <= it3);
+    SEQAN_ASSERT(it1 <= it1);
+    SEQAN_ASSERT(it2 <= it2);
+    SEQAN_ASSERT(it3 <= it3);
 
-    SEQAN_ASSERT_TRUE(it2 > it1);
-    SEQAN_ASSERT_TRUE(it2 >= it1);
-    SEQAN_ASSERT_TRUE(it3 > it2);
-    SEQAN_ASSERT_TRUE(it3 >= it2);
+    SEQAN_ASSERT(it2 > it1);
+    SEQAN_ASSERT(it2 >= it1);
+    SEQAN_ASSERT(it3 > it2);
+    SEQAN_ASSERT(it3 >= it2);
 
-    SEQAN_ASSERT_TRUE(it1 >= it1);
-    SEQAN_ASSERT_TRUE(it2 >= it2);
-    SEQAN_ASSERT_TRUE(it3 >= it3);
+    SEQAN_ASSERT(it1 >= it1);
+    SEQAN_ASSERT(it2 >= it2);
+    SEQAN_ASSERT(it3 >= it3);
 }
 
 // Tag: UnbalancedTree()

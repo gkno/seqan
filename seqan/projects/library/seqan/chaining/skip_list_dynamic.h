@@ -329,7 +329,7 @@ namespace seqan
 					typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type height )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE(&_getUp( *base ) != NULL);
+		SEQAN_ASSERT(&_getUp( *base ) != NULL);
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > * buffer = &_getUp( *base );
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > * top = buffer + height;
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > ** sp = search_path;
@@ -353,7 +353,7 @@ namespace seqan
 					SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > *& base )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG(base != list._rightBorder, "Can't delete right border");
+		SEQAN_ASSERT_MSG(base != list._rightBorder, "Can't delete right border");
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * base_buffer1 = _getPred( *base );
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * base_buffer2 = _getSucc( *base );
 		_setSucc( *base_buffer1, base_buffer2 );

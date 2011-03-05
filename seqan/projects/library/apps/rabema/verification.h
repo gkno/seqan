@@ -106,7 +106,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         // std::cout << "append value(expected, WeightedMatch(" << contigId << ", " << endPosition(finder) + 1 << ", " << relativeScore << ") delta = " << (back(reversedAndComplementedRead) != contig[endPosition(finder) - 1]) << ", score " << score << std::endl;
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
         (void)ret;  // Supress warning in non-debug mode.
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder), relativeScore, beginPosition(finder)));
     }
 }
@@ -137,7 +137,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         (void)options;  // Supress warnings in non-debug mode.
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
         (void)ret;  // Supress warning in non-debug mode.
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
     }
 }
@@ -166,7 +166,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         int relativeScore = ceilAwayFromZero(100.0 * score / length(read));
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
     }
 }
@@ -196,7 +196,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         (void)options;  // Supress warnings in non-debug mode.
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
         (void)ret;  // Supress warning in non-debug mode.
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
     }
 }
@@ -224,7 +224,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         int relativeScore = ceilAwayFromZero(100.0 * score / length(read));
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
     }
 }
@@ -295,7 +295,7 @@ bool verifyMatchesToErrorFunctionResults(TFragmentStore /*const*/ & fragments,
 
             // Get a string of "result" matches, i.e. the error curve
             // points for the current read on the current contig.
-            SEQAN_ASSERT_TRUE(errorCurves.find(readId) != errorCurves.end());
+            SEQAN_ASSERT(errorCurves.find(readId) != errorCurves.end());
             String<WeightedMatch> const & allResults = errorCurves.find(readId)->second;
             String<WeightedMatch> result;
             for (size_t i = 0; i < length(allResults); ++i) {

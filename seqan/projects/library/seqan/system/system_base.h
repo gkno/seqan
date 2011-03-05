@@ -40,9 +40,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #if SEQAN_ENABLE_DEBUG  // Note the new-style for macros, is always defined and 0/1
 
-#define SEQAN_DO_SYS(_cond) SEQAN_ASSERT_TRUE(_cond)
+#define SEQAN_DO_SYS(_cond) SEQAN_ASSERT(_cond)
 #define SEQAN_DO_SYS1(_cond) SEQAN_DO_SYS(_cond)
-#define SEQAN_DO_SYS2(_cond, _comment) SEQAN_ASSERT_TRUE_MSG(_cond, _comment)
+#define SEQAN_DO_SYS2(_cond, _comment) SEQAN_ASSERT_MSG(_cond, _comment)
 
 #else  // #ifdef SEQAN_ENABLE_DEBUG
 

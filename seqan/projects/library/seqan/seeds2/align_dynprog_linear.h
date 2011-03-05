@@ -330,7 +330,7 @@ _alignTraceback(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmen
     //
     // TODO(holtgrew): We could have 3 cases here but I guess it will not matter performance wise in the big picture.
     if (END0_FREE || END1_FREE) {
-        SEQAN_ASSERT_TRUE(pos0 == origPos0 || pos1 == origPos1);
+        SEQAN_ASSERT(pos0 == origPos0 || pos1 == origPos1);
         // std::cout << __FILE__ << ":" << __LINE__ << "-- Inserting " << (origPos0 - pos0) << " end gaps into sequence 1" << std::endl;
         insertGaps(alignmentIt1, origPos0 - pos0);
         // std::cout << __FILE__ << ":" << __LINE__ << "-- Inserting " << (origPos1 - pos1) << " end gaps into sequence 0" << std::endl;

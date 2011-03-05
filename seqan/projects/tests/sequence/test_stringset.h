@@ -46,16 +46,16 @@ void Test_StringSet()
 
 	SEQAN_ASSERT_EQ(length(set), 3u);
 
-	SEQAN_ASSERT_TRUE(isEqual(set[0], "Hallo "));
-	SEQAN_ASSERT_TRUE(isEqual(set[1], "schlauer "));
-	SEQAN_ASSERT_TRUE(isEqual(set[2], "Hamster!"));
+	SEQAN_ASSERT(isEqual(set[0], "Hallo "));
+	SEQAN_ASSERT(isEqual(set[1], "schlauer "));
+	SEQAN_ASSERT(isEqual(set[2], "Hamster!"));
 /*
 	// currently, this won't work for Owner<ConcatDirect<..> > StringSets
 	// to fix it, we need to introduce Modifiers for Segments
 	// which propagate their resize events to their StringSets
 	resize(set[0], 9);
 	infix(set[0], 6, 9) = "du ";
-	SEQAN_ASSERT_TRUE(isEqual(set[0], "Hallo du "));
+	SEQAN_ASSERT(isEqual(set[0], "Hallo du "));
 */
 
 	//StringSet iterators
@@ -68,11 +68,11 @@ void Test_StringSet()
 	}
 
 	TIterator itBegin = begin(set);
-	SEQAN_ASSERT_TRUE(atBegin(itBegin));
+	SEQAN_ASSERT(atBegin(itBegin));
 	SEQAN_ASSERT_NOT(atEnd(itBegin));
 	TIterator itEnd = end(set);
 	SEQAN_ASSERT_NOT(atBegin(itEnd));
-	SEQAN_ASSERT_TRUE(atEnd(itEnd));
+	SEQAN_ASSERT(atEnd(itEnd));
 	SEQAN_ASSERT_EQ(i, 3);
 }
 
@@ -95,10 +95,10 @@ void Test_StringSet_Concat()
 	CharString all = concat(set);
 
 	SEQAN_ASSERT_EQ(concat(set)[10], 'a');
-	SEQAN_ASSERT_TRUE(isEqual(set[0], "Hallo "));
-	SEQAN_ASSERT_TRUE(isEqual(set[1], "schlauer "));
-	SEQAN_ASSERT_TRUE(isEqual(set[2], "Hamster!"));
-	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
+	SEQAN_ASSERT(isEqual(set[0], "Hallo "));
+	SEQAN_ASSERT(isEqual(set[1], "schlauer "));
+	SEQAN_ASSERT(isEqual(set[2], "Hamster!"));
+	SEQAN_ASSERT(isEqual(all, "Hallo schlauer Hamster!"));
 
 	SEQAN_ASSERT_EQ(stringSetLimits(set)[0], 0u);
 	SEQAN_ASSERT_EQ(stringSetLimits(set)[1], 6u);
@@ -109,7 +109,7 @@ void Test_StringSet_Concat()
 	
 	all = concat(cset);
 	SEQAN_ASSERT_EQ(concat(cset)[10], 'a');
-	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
+	SEQAN_ASSERT(isEqual(all, "Hallo schlauer Hamster!"));
 }
 
 
@@ -251,10 +251,10 @@ void Test_StringSet_Id()
 	CharString all = concat(set);
 
 	SEQAN_ASSERT_EQ(concat(set)[10], 'a');
-	SEQAN_ASSERT_TRUE(isEqual(set[0], "Hallo "));
-	SEQAN_ASSERT_TRUE(isEqual(set[1], "schlauer "));
-	SEQAN_ASSERT_TRUE(isEqual(set[2], "Hamster!"));
-	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
+	SEQAN_ASSERT(isEqual(set[0], "Hallo "));
+	SEQAN_ASSERT(isEqual(set[1], "schlauer "));
+	SEQAN_ASSERT(isEqual(set[2], "Hamster!"));
+	SEQAN_ASSERT(isEqual(all, "Hallo schlauer Hamster!"));
 
 	SEQAN_ASSERT_EQ(stringSetLimits(set)[0], 0u);
 	SEQAN_ASSERT_EQ(stringSetLimits(set)[1], 6u);
@@ -265,7 +265,7 @@ void Test_StringSet_Id()
 	
 	all = concat(cset);
 	SEQAN_ASSERT_EQ(concat(cset)[10], 'a');
-	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
+	SEQAN_ASSERT(isEqual(all, "Hallo schlauer Hamster!"));
 }
 
 SEQAN_DEFINE_TEST(StringSet_Owner_Default) {

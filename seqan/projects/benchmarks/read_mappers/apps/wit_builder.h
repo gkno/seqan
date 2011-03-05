@@ -178,7 +178,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         Pattern<TReadSeq, TPatternSpec> pattern(read, -(int)length(read) * 40);
         bool ret = setEndPosition(finder, pattern, endPos);
         (void) ret; // If compiled without assertions.
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         maxError = -getScore(pattern);
     }
     
@@ -235,7 +235,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     {
         // Skip to original hit.
         ret = setEndPosition(finder, pattern, endPos);
-        SEQAN_ASSERT_TRUE(ret);
+        SEQAN_ASSERT(ret);
         SEQAN_ASSERT_EQ(endPos, endPosition(finder));
         SEQAN_ASSERT_GEQ(getScore(pattern), -maxError);
         while (findBegin(finder, pattern, getScore(pattern)))
@@ -290,7 +290,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 for (unsigned i = 0; find(finder, pattern) && i < length(read); ++i) {
 			        while (findBegin(finder, pattern, getScore(pattern)))
 			            continue;  // Find leftmost begin position.
-                    SEQAN_ASSERT_TRUE(ret);
+                    SEQAN_ASSERT(ret);
                     if (beginPosition(finder) != currentBeginPosition)
                         break;
                     relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
@@ -348,7 +348,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 }
                 // Search from tentative left position to the previous tentative left position.
                 ret = setEndPosition(finder, pattern, tentativeLeft);
-                SEQAN_ASSERT_TRUE(ret);
+                SEQAN_ASSERT(ret);
                 if (ENABLE && (ALL || readId == READID)) {
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- endPosition(finder) = " << endPosition(finder) << std::endl;
                 }
@@ -366,7 +366,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 while (find(finder, pattern) && endPosition(finder) != oldTentativeLeft) {
 			        while (findBegin(finder, pattern, getScore(pattern)))
             			continue;  // Find leftmost begin position.
-                    SEQAN_ASSERT_TRUE(ret);
+                    SEQAN_ASSERT(ret);
                     relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                     appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                     if (ENABLE && (ALL || readId == READID)) {

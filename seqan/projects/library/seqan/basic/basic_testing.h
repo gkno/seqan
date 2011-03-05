@@ -1363,11 +1363,11 @@ const char *tempFileName() {
     } while (false)
 
 
-// TODO(holtgrew): Rename to SEQAN_ASSERT_TRUE once that name is free.;
+// TODO(holtgrew): Rename to SEQAN_ASSERT once that name is free.;
 // Trueness assertion with a comment.
 //
-// Usage:  SEQAN_ASSERT_TRUE(false);
-#define SEQAN_ASSERT_TRUE(_arg1)                                        \
+// Usage:  SEQAN_ASSERT(false);
+#define SEQAN_ASSERT(_arg1)                                        \
     do {                                                                \
         if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,           \
                                           (_arg1), #_arg1)) {           \
@@ -1376,9 +1376,9 @@ const char *tempFileName() {
     } while (false)
 
 
-// TODO(holtgrew): Rename to SEQAN_ASSERT_TRUE once that name is free.;
+// TODO(holtgrew): Rename to SEQAN_ASSERT once that name is free.;
 // Trueness assertion with a comment.
-#define SEQAN_ASSERT_TRUE_MSG(_arg1, ...)                               \
+#define SEQAN_ASSERT_MSG(_arg1, ...)                               \
     do {                                                                \
         if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,           \
                                           (_arg1), #_arg1,              \
@@ -1425,8 +1425,8 @@ const char *tempFileName() {
 #define SEQAN_ASSERT_GEQ_MSG(_arg1, _arg2, ...) do {} while (false)
 #define SEQAN_ASSERT_GT(_arg1, _arg2) do {} while (false)
 #define SEQAN_ASSERT_GT_MSG(_arg1, _arg2, ...) do {} while (false)
-#define SEQAN_ASSERT_TRUE(_arg1) do {} while (false)
-#define SEQAN_ASSERT_TRUE_MSG(_arg1, ...) do {} while (false)
+#define SEQAN_ASSERT(_arg1) do {} while (false)
+#define SEQAN_ASSERT_MSG(_arg1, ...) do {} while (false)
 #define SEQAN_ASSERT_NOT(_arg1) do {} while (false)
 #define SEQAN_ASSERT_NOT_MSG(_arg1, ...) do {} while (false)
 #define SEQAN_ASSERT_FAIL(...) do {} while (false)
@@ -1565,14 +1565,14 @@ void SEQAN_ASSERT_GT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 }
 
 template <typename T1>
-void SEQAN_ASSERT_TRUE(T1 const &_arg1)
+void SEQAN_ASSERT(T1 const &_arg1)
 {
 	if (!::seqan::ClassTest::testTrue("", 0, _arg1, ""))
 		::seqan::ClassTest::fail();
 }
 
 template <typename T1>
-void SEQAN_ASSERT_TRUE_MSG(T1 const &_arg1, const char *comment, ...)
+void SEQAN_ASSERT_MSG(T1 const &_arg1, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -1615,8 +1615,8 @@ template <typename T1, typename T2> void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 co
 template <typename T1, typename T2> void SEQAN_ASSERT_GEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_GT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
-template <typename T1> void SEQAN_ASSERT_TRUE(T1 const &_arg1) {}
-template <typename T1> void SEQAN_ASSERT_TRUE_MSG(T1 const &_arg1, const char *comment, ...) {}
+template <typename T1> void SEQAN_ASSERT(T1 const &_arg1) {}
+template <typename T1> void SEQAN_ASSERT_MSG(T1 const &_arg1, const char *comment, ...) {}
 template <typename T1> void SEQAN_ASSERT_NOT(T1 const &_arg1) {}
 template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *comment, ...) {}
 

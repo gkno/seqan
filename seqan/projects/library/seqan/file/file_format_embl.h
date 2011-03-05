@@ -279,7 +279,7 @@ readLineType(TFile & file,
 SEQAN_CHECKPOINT
 
 	//this function is meant to be used for two letter codes only 
-	SEQAN_ASSERT_TRUE(length(key)==2); ;
+	SEQAN_ASSERT(length(key)==2); ;
 
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Position<TFile>::Type TPosition;
@@ -337,7 +337,7 @@ readLineType(String<TValue,TSpec> & meta,
 SEQAN_CHECKPOINT
 
 	//this function is meant to be used for two letter codes only 
-	SEQAN_ASSERT_TRUE(length(key)==2); ;
+	SEQAN_ASSERT(length(key)==2); ;
 
 	typedef typename Iterator<String<TValue,TSpec>,Standard>::Type TIterator;
 	typedef typename Position<String<TValue,TSpec> >::Type TPosition;

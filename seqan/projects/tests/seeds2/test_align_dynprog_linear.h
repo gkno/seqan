@@ -179,23 +179,23 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         // }
 
         SEQAN_ASSERT_EQ(score, 1);
-        SEQAN_ASSERT_TRUE(seq0It + 1 == begin(sequence0));
-        SEQAN_ASSERT_TRUE(seq1It + 1 == begin(sequence1));
+        SEQAN_ASSERT(seq0It + 1 == begin(sequence0));
+        SEQAN_ASSERT(seq1It + 1 == begin(sequence1));
         // TODO(holtgrew): Why does this not work?
-        // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
-        // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
+        // SEQAN_ASSERT(align0It == begin(row(alignment, 0)));
+        // SEQAN_ASSERT(align1It == begin(row(alignment, 1)));
         SEQAN_ASSERT_EQ(finalPos0, 0u);
         SEQAN_ASSERT_EQ(finalPos1, 0u);
         // Expected alignment:
         //
         //  CCAAA
         //  C-AA-
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == "C-AA"/*-*/);
+        SEQAN_ASSERT(row(alignment, 0) == "CCAAA");
+        SEQAN_ASSERT(row(alignment, 1) == "C-AA"/*-*/);
         // Leading gaps are not shown, we test through the iterators.
-        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 0)));
+        SEQAN_ASSERT(isGap(iter(row(alignment, 1), 0)));
         SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 1)));
-        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 2)));
+        SEQAN_ASSERT(isGap(iter(row(alignment, 1), 2)));
         SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 3)));
         SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 4)));
     }

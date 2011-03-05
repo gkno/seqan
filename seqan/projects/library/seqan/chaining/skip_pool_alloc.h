@@ -237,7 +237,7 @@ struct Allocator< ClassPool< TClass, Unlimited, TParentAllocator > >
 					 TClass * location,
 					 TSize /*count*/ )
 	{
-		SEQAN_ASSERT_TRUE_MSG(location != NULL, "Tried to free NULL-pointer");
+		SEQAN_ASSERT_MSG(location != NULL, "Tried to free NULL-pointer");
 		_setNext( *location, me._freeBlock );
 		me._freeBlock = location;
 	}

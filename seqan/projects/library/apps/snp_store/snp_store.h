@@ -1781,7 +1781,7 @@ void dumpVariantsRealignBatch(
 		else ++matchIt;
 	}
 	*matchItKeep = tempRef;
-	SEQAN_ASSERT_TRUE(refFound);
+	SEQAN_ASSERT(refFound);
 		
 #ifdef SNPSTORE_DEBUG
 	if(!refFound) ::std::cout << "ref not Found!\n";
@@ -2033,7 +2033,7 @@ void dumpVariantsRealignBatch(
 #ifdef SNPSTORE_DEBUG
 				if(extraVVVV) std::cout << "potential insertion" << std::endl;
 #endif
-				SEQAN_ASSERT_TRUE(!observedAtLeastOneMut);
+				SEQAN_ASSERT(!observedAtLeastOneMut);
 				mostCommonBase = 0;
 				unsigned maxCount = countF[0] + countR[0];
 				for(unsigned j = 0; j < length(countF); ++j)

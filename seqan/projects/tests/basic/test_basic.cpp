@@ -133,17 +133,17 @@ SEQAN_DEFINE_TEST(Test_Holder) {
 	{
 //ctors
 		Holder<CtorDtorCounter> ho1;
-		SEQAN_ASSERT_TRUE(empty(ho1));
-		SEQAN_ASSERT_TRUE(!dependent(ho1));
+		SEQAN_ASSERT(empty(ho1));
+		SEQAN_ASSERT(!dependent(ho1));
 
 		create(ho1);
-		SEQAN_ASSERT_TRUE(!empty(ho1));
-		SEQAN_ASSERT_TRUE(!dependent(ho1));
+		SEQAN_ASSERT(!empty(ho1));
+		SEQAN_ASSERT(!dependent(ho1));
 
 		Holder<CtorDtorCounter> ho2(ho1);
 
 		Holder<CtorDtorCounter> ho3(value(ho1));
-		SEQAN_ASSERT_TRUE(!dependent(ho1));
+		SEQAN_ASSERT(!dependent(ho1));
 
 
 //create
@@ -152,7 +152,7 @@ SEQAN_DEFINE_TEST(Test_Holder) {
 
 //setValue
 		setValue(ho3, rco1);
-		SEQAN_ASSERT_TRUE(dependent(ho3));
+		SEQAN_ASSERT(dependent(ho3));
 
 		rco1.data_value = 10;
 		create(ho3);
@@ -164,7 +164,7 @@ SEQAN_DEFINE_TEST(Test_Holder) {
 //operator = (value) => assignValue
 		ho2 = rco2;
 		SEQAN_ASSERT_EQ(value(ho2).data_value, 20);
-		SEQAN_ASSERT_TRUE(!dependent(ho2));
+		SEQAN_ASSERT(!dependent(ho2));
 
 		rco2.data_value = 30;
 		SEQAN_ASSERT_EQ(value(ho2).data_value, 20);
@@ -176,10 +176,10 @@ SEQAN_DEFINE_TEST(Test_Holder) {
 
 //clear
 		clear(ho3);
-		SEQAN_ASSERT_TRUE(empty(ho3));
+		SEQAN_ASSERT(empty(ho3));
 
 		assign(ho2, ho3);
-		SEQAN_ASSERT_TRUE(empty(ho2));
+		SEQAN_ASSERT(empty(ho2));
 
 //conversion operator
 		rco1 = ho1;
@@ -325,8 +325,8 @@ void Test_Iter()
 
 	it3--;
 	SEQAN_ASSERT_EQ(*it3, 'a');
-	SEQAN_ASSERT_TRUE(it3 == it2);
-	SEQAN_ASSERT_TRUE(!(it3 != it2));
+	SEQAN_ASSERT(it3 == it2);
+	SEQAN_ASSERT(!(it3 != it2));
 
 	++it3;
 	assignValue(it3, 'z');

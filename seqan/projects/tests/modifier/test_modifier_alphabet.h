@@ -185,14 +185,14 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_eq) {
     // TODO(holtgrew): Does not compile with Dna instead of Dna5 here.
 
     // Tests with character existing in both alphabets -- true.
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('A') == Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') == TDnaWithGap('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('A') == Dna5('A'));
-    SEQAN_ASSERT_TRUE(Dna5('A') == TDnaWithGap('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('A') == Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') == TDnaWithX('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('A') == Dna5('A'));
-    SEQAN_ASSERT_TRUE(Dna5('A') == TDnaWithX('A'));
+//     SEQAN_ASSERT(TDnaWithGap('A') == Dna('A'));
+//     SEQAN_ASSERT(Dna('A') == TDnaWithGap('A'));
+    SEQAN_ASSERT(TDnaWithGap('A') == Dna5('A'));
+    SEQAN_ASSERT(Dna5('A') == TDnaWithGap('A'));
+//     SEQAN_ASSERT(TDnaWithX('A') == Dna('A'));
+//     SEQAN_ASSERT(Dna('A') == TDnaWithX('A'));
+    SEQAN_ASSERT(TDnaWithX('A') == Dna5('A'));
+    SEQAN_ASSERT(Dna5('A') == TDnaWithX('A'));
     // Tests with character existing in both alphabets -- false
 //     SEQAN_ASSERT_NOT(TDnaWithGap('A') == Dna('C'));
 //     SEQAN_ASSERT_NOT(Dna('C') == TDnaWithGap('A'));
@@ -204,14 +204,14 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_eq) {
     SEQAN_ASSERT_NOT(Dna5('C') == TDnaWithX('A'));
 
     // Tests with new character -- true.
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('-') == Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') == TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('-') == Dna5('N'));
-    SEQAN_ASSERT_TRUE(Dna5('N') == TDnaWithGap('-'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('X') == Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') == TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('X') == Dna5('N'));
-    SEQAN_ASSERT_TRUE(Dna5('N') == TDnaWithX('X'));
+//     SEQAN_ASSERT(TDnaWithGap('-') == Dna('A'));
+//     SEQAN_ASSERT(Dna('A') == TDnaWithGap('-'));
+    SEQAN_ASSERT(TDnaWithGap('-') == Dna5('N'));
+    SEQAN_ASSERT(Dna5('N') == TDnaWithGap('-'));
+//     SEQAN_ASSERT(TDnaWithX('X') == Dna('A'));
+//     SEQAN_ASSERT(Dna('A') == TDnaWithX('X'));
+    SEQAN_ASSERT(TDnaWithX('X') == Dna5('N'));
+    SEQAN_ASSERT(Dna5('N') == TDnaWithX('X'));
     // Tests with new character -- false.
 //     SEQAN_ASSERT_NOT(TDnaWithGap('-') == Dna('G'));
 //     SEQAN_ASSERT_NOT(Dna('G') == TDnaWithGap('-'));
@@ -225,8 +225,8 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_eq) {
     // Test with new character only -- true
     SEQAN_ASSERT_FAIL("The following does not compile.");
     /*
-    SEQAN_ASSERT_TRUE(TDnaWithX('X') == TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('-') == TDnaWithX('X'));
+    SEQAN_ASSERT(TDnaWithX('X') == TDnaWithGap('-'));
+    SEQAN_ASSERT(TDnaWithGap('-') == TDnaWithX('X'));
     */
     // Test with new character only -- false
     /*
@@ -256,14 +256,14 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_neq) {
     SEQAN_ASSERT_NOT(TDnaWithX('A') != Dna5('A'));
     SEQAN_ASSERT_NOT(Dna5('A') != TDnaWithX('A'));
     // Tests with character existing in both alphabets -- false
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('A') != Dna('C'));
-//     SEQAN_ASSERT_TRUE(Dna('C') != TDnaWithGap('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('A') != Dna5('C'));
-    SEQAN_ASSERT_TRUE(Dna5('C') != TDnaWithGap('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('A') != Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') != TDnaWithX('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('A') != Dna5('C'));
-    SEQAN_ASSERT_TRUE(Dna5('C') != TDnaWithX('A'));
+//     SEQAN_ASSERT(TDnaWithGap('A') != Dna('C'));
+//     SEQAN_ASSERT(Dna('C') != TDnaWithGap('A'));
+    SEQAN_ASSERT(TDnaWithGap('A') != Dna5('C'));
+    SEQAN_ASSERT(Dna5('C') != TDnaWithGap('A'));
+//     SEQAN_ASSERT(TDnaWithX('A') != Dna('A'));
+//     SEQAN_ASSERT(Dna('A') != TDnaWithX('A'));
+    SEQAN_ASSERT(TDnaWithX('A') != Dna5('C'));
+    SEQAN_ASSERT(Dna5('C') != TDnaWithX('A'));
 
     // Tests with new character -- true.
 //     SEQAN_ASSERT_NOT(TDnaWithGap('-') != Dna('A'));
@@ -275,14 +275,14 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_neq) {
     SEQAN_ASSERT_NOT(TDnaWithX('X') != Dna5('N'));
     SEQAN_ASSERT_NOT(Dna5('N') != TDnaWithX('X'));
     // Tests with new character -- false.
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('-') != Dna('G'));
-//     SEQAN_ASSERT_TRUE(Dna('G') != TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('-') != Dna5('G'));
-    SEQAN_ASSERT_TRUE(Dna5('G') != TDnaWithGap('-'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('X') != Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') != TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('X') != Dna5('G'));
-    SEQAN_ASSERT_TRUE(Dna5('G') != TDnaWithX('X'));
+//     SEQAN_ASSERT(TDnaWithGap('-') != Dna('G'));
+//     SEQAN_ASSERT(Dna('G') != TDnaWithGap('-'));
+    SEQAN_ASSERT(TDnaWithGap('-') != Dna5('G'));
+    SEQAN_ASSERT(Dna5('G') != TDnaWithGap('-'));
+//     SEQAN_ASSERT(TDnaWithX('X') != Dna('A'));
+//     SEQAN_ASSERT(Dna('A') != TDnaWithX('X'));
+    SEQAN_ASSERT(TDnaWithX('X') != Dna5('G'));
+    SEQAN_ASSERT(Dna5('G') != TDnaWithX('X'));
 
     // Test with new character only -- true
     SEQAN_ASSERT_FAIL("The following does not compile.");
@@ -292,8 +292,8 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_neq) {
     */
     // Test with new character only -- false
     /*
-    SEQAN_ASSERT_TRUE(TDnaWithXY('Y') != TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('-') != TDnaWithXY('Y'));
+    SEQAN_ASSERT(TDnaWithXY('Y') != TDnaWithGap('-'));
+    SEQAN_ASSERT(TDnaWithGap('-') != TDnaWithXY('Y'));
     */
 }
 
@@ -309,14 +309,14 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_lt) {
     // TODO(holtgrew): Does not compile with Dna instead of Dna5 here.
 
     // Tests with character existing in both alphabets -- true.
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('A') < Dna('C'));
-//     SEQAN_ASSERT_TRUE(Dna('A') < TDnaWithGap('C'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('A') < Dna5('C'));
-    SEQAN_ASSERT_TRUE(Dna5('A') < TDnaWithGap('C'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('A') < Dna('C'));
-//     SEQAN_ASSERT_TRUE(Dna('A') < TDnaWithX('C'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('A') < Dna5('C'));
-    SEQAN_ASSERT_TRUE(Dna5('A') < TDnaWithX('C'));
+//     SEQAN_ASSERT(TDnaWithGap('A') < Dna('C'));
+//     SEQAN_ASSERT(Dna('A') < TDnaWithGap('C'));
+    SEQAN_ASSERT(TDnaWithGap('A') < Dna5('C'));
+    SEQAN_ASSERT(Dna5('A') < TDnaWithGap('C'));
+//     SEQAN_ASSERT(TDnaWithX('A') < Dna('C'));
+//     SEQAN_ASSERT(Dna('A') < TDnaWithX('C'));
+    SEQAN_ASSERT(TDnaWithX('A') < Dna5('C'));
+    SEQAN_ASSERT(Dna5('A') < TDnaWithX('C'));
     // Tests with character existing in both alphabets -- false
 //     SEQAN_ASSERT_NOT(TDnaWithGap('C') < Dna('A'));
 //     SEQAN_ASSERT_NOT(Dna('C') < TDnaWithGap('A'));
@@ -328,10 +328,10 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_lt) {
     SEQAN_ASSERT_NOT(Dna5('C') < TDnaWithX('A'));
 
     // Tests with new character -- true.
-//     SEQAN_ASSERT_TRUE(Dna('T') < TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(Dna5('T') < TDnaWithGap('-'));
-//     SEQAN_ASSERT_TRUE(Dna('T') < TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(Dna5('T') < TDnaWithX('X'));
+//     SEQAN_ASSERT(Dna('T') < TDnaWithGap('-'));
+    SEQAN_ASSERT(Dna5('T') < TDnaWithGap('-'));
+//     SEQAN_ASSERT(Dna('T') < TDnaWithX('X'));
+    SEQAN_ASSERT(Dna5('T') < TDnaWithX('X'));
     // Tests with new character -- false.
 //     SEQAN_ASSERT_NOT(Dna('T') < TDnaWithGap('-'));
     SEQAN_ASSERT_NOT(Dna5('T') < TDnaWithGap('-'));
@@ -341,7 +341,7 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_lt) {
     // Test with new character only -- false.
     SEQAN_ASSERT_FAIL("The following does not compile.");
     /*
-    SEQAN_ASSERT_TRUE(TDnaWithX('X') < TDnaWithXY('Y'));
+    SEQAN_ASSERT(TDnaWithX('X') < TDnaWithXY('Y'));
     */
     // Test with new character only -- false
     /*
@@ -361,14 +361,14 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_gt) {
     // TODO(holtgrew): Does not compile with Dna instead of Dna5 here.
 
     // Tests with character existing in both alphabets -- true.
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('C') > Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('C') > TDnaWithGap('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('C') > Dna5('A'));
-    SEQAN_ASSERT_TRUE(Dna5('C') > TDnaWithGap('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('C') > Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('C') > TDnaWithX('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('C') > Dna5('A'));
-    SEQAN_ASSERT_TRUE(Dna5('C') > TDnaWithX('A'));
+//     SEQAN_ASSERT(TDnaWithGap('C') > Dna('A'));
+//     SEQAN_ASSERT(Dna('C') > TDnaWithGap('A'));
+    SEQAN_ASSERT(TDnaWithGap('C') > Dna5('A'));
+    SEQAN_ASSERT(Dna5('C') > TDnaWithGap('A'));
+//     SEQAN_ASSERT(TDnaWithX('C') > Dna('A'));
+//     SEQAN_ASSERT(Dna('C') > TDnaWithX('A'));
+    SEQAN_ASSERT(TDnaWithX('C') > Dna5('A'));
+    SEQAN_ASSERT(Dna5('C') > TDnaWithX('A'));
     // Tests with character existing in both alphabets -- false.
 //     SEQAN_ASSERT_NOT(TDnaWithGap('A') > Dna('C'));
 //     SEQAN_ASSERT_NOT(Dna('A') > TDnaWithGap('C'));
@@ -386,7 +386,7 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_gt) {
     */
     // Test with new character only -- false
     /*
-    SEQAN_ASSERT_TRUE(TDnaWithXY('Y') > TDnaWithX('X'));
+    SEQAN_ASSERT(TDnaWithXY('Y') > TDnaWithX('X'));
     */
 
     // Tests with new character only -- false.
@@ -395,10 +395,10 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_gt) {
 //     SEQAN_ASSERT_NOT(Dna('T') > TDnaWithX('X'));
     SEQAN_ASSERT_NOT(Dna5('T') > TDnaWithX('X'));
     // Tests with new character -- false.
-//     SEQAN_ASSERT_TRUE(Dna('T') > TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(Dna5('T') > TDnaWithGap('-'));
-//     SEQAN_ASSERT_TRUE(Dna('T') > TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(Dna5('T') > TDnaWithX('X'));
+//     SEQAN_ASSERT(Dna('T') > TDnaWithGap('-'));
+    SEQAN_ASSERT(Dna5('T') > TDnaWithGap('-'));
+//     SEQAN_ASSERT(Dna('T') > TDnaWithX('X'));
+    SEQAN_ASSERT(Dna5('T') > TDnaWithX('X'));
 }
 
 
@@ -413,22 +413,22 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_leq) {
     // TODO(holtgrew): Does not compile with Dna instead of Dna5 here.
 
     // Tests with character existing in both alphabets -- true.
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('A') <= Dna('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('A') <= Dna('C'));
-//     SEQAN_ASSERT_TRUE(Dna('A') <= TDnaWithGap('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') <= TDnaWithGap('C'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('A') <= Dna5('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('A') <= Dna5('C'));
-    SEQAN_ASSERT_TRUE(Dna5('A') <= TDnaWithGap('A'));
-    SEQAN_ASSERT_TRUE(Dna5('A') <= TDnaWithGap('C'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('A') <= Dna('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('A') <= Dna('C'));
-//     SEQAN_ASSERT_TRUE(Dna('A') <= TDnaWithX('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') <= TDnaWithX('C'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('A') <= Dna5('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('A') < Dna5('C'));
-    SEQAN_ASSERT_TRUE(Dna5('A') <= TDnaWithX('A'));
-    SEQAN_ASSERT_TRUE(Dna5('A') < TDnaWithX('C'));
+//     SEQAN_ASSERT(TDnaWithGap('A') <= Dna('A'));
+//     SEQAN_ASSERT(TDnaWithGap('A') <= Dna('C'));
+//     SEQAN_ASSERT(Dna('A') <= TDnaWithGap('A'));
+//     SEQAN_ASSERT(Dna('A') <= TDnaWithGap('C'));
+    SEQAN_ASSERT(TDnaWithGap('A') <= Dna5('A'));
+    SEQAN_ASSERT(TDnaWithGap('A') <= Dna5('C'));
+    SEQAN_ASSERT(Dna5('A') <= TDnaWithGap('A'));
+    SEQAN_ASSERT(Dna5('A') <= TDnaWithGap('C'));
+//     SEQAN_ASSERT(TDnaWithX('A') <= Dna('A'));
+//     SEQAN_ASSERT(TDnaWithX('A') <= Dna('C'));
+//     SEQAN_ASSERT(Dna('A') <= TDnaWithX('A'));
+//     SEQAN_ASSERT(Dna('A') <= TDnaWithX('C'));
+    SEQAN_ASSERT(TDnaWithX('A') <= Dna5('A'));
+    SEQAN_ASSERT(TDnaWithX('A') < Dna5('C'));
+    SEQAN_ASSERT(Dna5('A') <= TDnaWithX('A'));
+    SEQAN_ASSERT(Dna5('A') < TDnaWithX('C'));
     // Tests with character existing in both alphabets -- false
 //     SEQAN_ASSERT_NOT(TDnaWithGap('C') <= Dna('A'));
 //     SEQAN_ASSERT_NOT(Dna('C') <= TDnaWithGap('A'));
@@ -440,14 +440,14 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_leq) {
     SEQAN_ASSERT_NOT(Dna5('C') <= TDnaWithX('A'));
 
     // Tests with new character -- true.
-    SEQAN_ASSERT_TRUE(TDnaWithGap('-') <= TDnaWithGap('-'));
-//     SEQAN_ASSERT_TRUE(Dna('T') <= TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(Dna5('N') <= TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(Dna5('T') <= TDnaWithGap('-'));
-//     SEQAN_ASSERT_TRUE(Dna('T') <= TDnaWithX('X'));
-//     SEQAN_ASSERT_TRUE(Dna('T') <= TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(Dna5('N') <= TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(Dna5('T') <= TDnaWithX('X'));
+    SEQAN_ASSERT(TDnaWithGap('-') <= TDnaWithGap('-'));
+//     SEQAN_ASSERT(Dna('T') <= TDnaWithGap('-'));
+    SEQAN_ASSERT(Dna5('N') <= TDnaWithGap('-'));
+    SEQAN_ASSERT(Dna5('T') <= TDnaWithGap('-'));
+//     SEQAN_ASSERT(Dna('T') <= TDnaWithX('X'));
+//     SEQAN_ASSERT(Dna('T') <= TDnaWithX('X'));
+    SEQAN_ASSERT(Dna5('N') <= TDnaWithX('X'));
+    SEQAN_ASSERT(Dna5('T') <= TDnaWithX('X'));
     // Tests with new character -- false.
 //     SEQAN_ASSERT_NOT(Dna('T') <= TDnaWithGap('-'));
     SEQAN_ASSERT_NOT(Dna5('T') <= TDnaWithGap('-'));
@@ -457,7 +457,7 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_leq) {
     // Test with new character only -- false.
     SEQAN_ASSERT_FAIL("The following does not compile.");
     /*
-    SEQAN_ASSERT_TRUE(TDnaWithX('X') <= TDnaWithXY('Y'));
+    SEQAN_ASSERT(TDnaWithX('X') <= TDnaWithXY('Y'));
     */
     // Test with new character only -- false
     /*
@@ -476,22 +476,22 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_geq) {
     // TODO(holtgrew): Does not compile with Dna instead of Dna5 here.
 
     // Tests with character existing in both alphabets -- true.
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('A') >= Dna('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithGap('C') >= Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') >= TDnaWithGap('A'));
-//     SEQAN_ASSERT_TRUE(Dna('C') >= TDnaWithGap('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('A') >= Dna5('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('C') >= Dna5('A'));
-    SEQAN_ASSERT_TRUE(Dna5('A') >= TDnaWithGap('A'));
-    SEQAN_ASSERT_TRUE(Dna5('C') >= TDnaWithGap('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('A') >= Dna('A'));
-//     SEQAN_ASSERT_TRUE(TDnaWithX('C') >= Dna('A'));
-//     SEQAN_ASSERT_TRUE(Dna('A') >= TDnaWithX('A'));
-//     SEQAN_ASSERT_TRUE(Dna('C') >= TDnaWithX('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('A') >= Dna5('A'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('C') >= Dna5('A'));
-    SEQAN_ASSERT_TRUE(Dna5('A') >= TDnaWithX('A'));
-    SEQAN_ASSERT_TRUE(Dna5('C') > TDnaWithX('A'));
+//     SEQAN_ASSERT(TDnaWithGap('A') >= Dna('A'));
+//     SEQAN_ASSERT(TDnaWithGap('C') >= Dna('A'));
+//     SEQAN_ASSERT(Dna('A') >= TDnaWithGap('A'));
+//     SEQAN_ASSERT(Dna('C') >= TDnaWithGap('A'));
+    SEQAN_ASSERT(TDnaWithGap('A') >= Dna5('A'));
+    SEQAN_ASSERT(TDnaWithGap('C') >= Dna5('A'));
+    SEQAN_ASSERT(Dna5('A') >= TDnaWithGap('A'));
+    SEQAN_ASSERT(Dna5('C') >= TDnaWithGap('A'));
+//     SEQAN_ASSERT(TDnaWithX('A') >= Dna('A'));
+//     SEQAN_ASSERT(TDnaWithX('C') >= Dna('A'));
+//     SEQAN_ASSERT(Dna('A') >= TDnaWithX('A'));
+//     SEQAN_ASSERT(Dna('C') >= TDnaWithX('A'));
+    SEQAN_ASSERT(TDnaWithX('A') >= Dna5('A'));
+    SEQAN_ASSERT(TDnaWithX('C') >= Dna5('A'));
+    SEQAN_ASSERT(Dna5('A') >= TDnaWithX('A'));
+    SEQAN_ASSERT(Dna5('C') > TDnaWithX('A'));
     // Tests with character existing in both alphabets -- false.
 //     SEQAN_ASSERT_NOT(TDnaWithGap('A') >= Dna('C'));
 //     SEQAN_ASSERT_NOT(Dna('A') >= TDnaWithGap('C'));
@@ -509,16 +509,16 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_operator_geq) {
     */
     // Test with new character only -- false
     /*
-    SEQAN_ASSERT_TRUE(TDnaWithXY('Y') >= TDnaWithX('X'));
+    SEQAN_ASSERT(TDnaWithXY('Y') >= TDnaWithX('X'));
     */
 
     // Tests with new character -- true.
-//     SEQAN_ASSERT_TRUE(Dna('T') >= TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(TDnaWithGap('-') >= TDnaWithGap('-'));
-    SEQAN_ASSERT_TRUE(Dna5('T') > TDnaWithGap('-'));
-//     SEQAN_ASSERT_TRUE(Dna('T') >= TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(TDnaWithX('X') > TDnaWithX('X'));
-    SEQAN_ASSERT_TRUE(Dna5('T') > TDnaWithX('X'));
+//     SEQAN_ASSERT(Dna('T') >= TDnaWithGap('-'));
+    SEQAN_ASSERT(TDnaWithGap('-') >= TDnaWithGap('-'));
+    SEQAN_ASSERT(Dna5('T') > TDnaWithGap('-'));
+//     SEQAN_ASSERT(Dna('T') >= TDnaWithX('X'));
+    SEQAN_ASSERT(TDnaWithX('X') > TDnaWithX('X'));
+    SEQAN_ASSERT(Dna5('T') > TDnaWithX('X'));
     // Tests with new character only -- false.
 //     SEQAN_ASSERT_NOT(Dna('T') > TDnaWithGap('-'));
     SEQAN_ASSERT_NOT(Dna5('T') > TDnaWithGap('-'));

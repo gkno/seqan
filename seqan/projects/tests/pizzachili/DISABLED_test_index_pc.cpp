@@ -163,18 +163,18 @@ struct TestHelper {
         try {
             {
                 ifstream ifs("../example.txt");
-                SEQAN_ASSERT_TRUE(ifs);
+                SEQAN_ASSERT(ifs);
 
                 string text((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
                 index_t idx = test_index_create(text);
 
                 cout << "---------- Searching with arbitrary needle ..." << endl;
                 string_t needle = "est";
-                SEQAN_ASSERT_TRUE(test_index_find(idx, needle) == 14);
+                SEQAN_ASSERT(test_index_find(idx, needle) == 14);
 
                 cout << "---------- Searching with char* needle ..." << endl;
                 char const* pc_needle = "Ishmael";
-                SEQAN_ASSERT_TRUE(test_index_find(idx, pc_needle) == 2);
+                SEQAN_ASSERT(test_index_find(idx, pc_needle) == 2);
 
                 cout << "---------- Saving:" << endl;
                 test_index_save(idx, "indexdata");

@@ -144,7 +144,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						if (k != windowSize || rest == 0) {
 							out.i1 = (*invertedSAIn).i1 - 1;
 							push(dest, out);
-							//SEQAN_ASSERT_TRUE(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
+							//SEQAN_ASSERT(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
 							//seen[out.i1] = true;
 							++_pushes;
 
@@ -310,7 +310,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						if (k != windowSize || rest == 0) {
 							out.i1 = (*invertedSAIn).i1 - 1;
 							push(dest, out);
-							//SEQAN_ASSERT_TRUE(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
+							//SEQAN_ASSERT(!seenISA[out.i1] && 0 <= out.i1 && out.i1 < n);
 							//seen[out.i1] = true;
 							++_pushes;
 

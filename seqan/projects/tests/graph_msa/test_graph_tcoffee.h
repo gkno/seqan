@@ -59,9 +59,9 @@ void Test_Distances() {
 
 	String<double> distanceMatrix;
 	getDistanceMatrix(g,distanceMatrix);
-	SEQAN_ASSERT_TRUE(distanceMatrix[3] ==  1.0 - 5.0 / 7.0);
-	SEQAN_ASSERT_TRUE(distanceMatrix[1 * length(strSet) + 3] == 1.0 - 5.0 / 7.0);
-	SEQAN_ASSERT_TRUE(distanceMatrix[2 * length(strSet) + 3] == 1.0 - 3.0 / 7.0);
+	SEQAN_ASSERT(distanceMatrix[3] ==  1.0 - 5.0 / 7.0);
+	SEQAN_ASSERT(distanceMatrix[1 * length(strSet) + 3] == 1.0 - 5.0 / 7.0);
+	SEQAN_ASSERT(distanceMatrix[2 * length(strSet) + 3] == 1.0 - 3.0 / 7.0);
 	clear(distanceMatrix);
 	String<unsigned int> pList;
 	selectPairs(strSet, pList);
@@ -72,8 +72,8 @@ void Test_Distances() {
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, dist, GlobalPairwiseLibrary() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	getDistanceMatrix(g,distanceMatrix,LibraryDistance());
-	SEQAN_ASSERT_TRUE(getValue(distanceMatrix, 0 * length(strSet) + 1) < getValue(distanceMatrix, 2 * length(strSet) + 3));
-	SEQAN_ASSERT_TRUE(getValue(distanceMatrix, 1 * length(strSet) + 2) < getValue(distanceMatrix, 2 * length(strSet) + 3));
+	SEQAN_ASSERT(getValue(distanceMatrix, 0 * length(strSet) + 1) < getValue(distanceMatrix, 2 * length(strSet) + 3));
+	SEQAN_ASSERT(getValue(distanceMatrix, 1 * length(strSet) + 2) < getValue(distanceMatrix, 2 * length(strSet) + 3));
 }
 
 
@@ -93,10 +93,10 @@ testquickAlign__(Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, uns
 	String<char> alignMat;	
 	convertAlignment(gOut,alignMat);
 	unsigned int len = length(alignMat) / 4;
-	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 0, 8)) == "GARFIELD");
-	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 1*len + 0, 1*len+8)) == "GARFIELD");
-	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 2*len + 0, 2*len+8)) == "GARFIELD");
-	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 3*len + 0, 3*len+8)) == "--------");
+	SEQAN_ASSERT(String<char>(infix(alignMat, 0, 8)) == "GARFIELD");
+	SEQAN_ASSERT(String<char>(infix(alignMat, 1*len + 0, 1*len+8)) == "GARFIELD");
+	SEQAN_ASSERT(String<char>(infix(alignMat, 2*len + 0, 2*len+8)) == "GARFIELD");
+	SEQAN_ASSERT(String<char>(infix(alignMat, 3*len + 0, 3*len+8)) == "--------");
 
 	//std::cout << gOut << std::endl;
 }
@@ -286,10 +286,10 @@ void Test_TripletExtension() {
 	addEdge(g, findVertex(g, 1, 8), addVertex(g, 3, 0, 3), 20);
 	addEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0), 40);
 	tripletLibraryExtension(g);
-	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
-	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0))) == 20);
-	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 2, 8))) == 30);
-	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
+	SEQAN_ASSERT(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
+	SEQAN_ASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0))) == 20);
+	SEQAN_ASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 2, 8))) == 30);
+	SEQAN_ASSERT(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
 }
 
 void Test_SumOfPairsScore()
@@ -324,8 +324,8 @@ void Test_SumOfPairsScore()
 	njTree(distanceMatrix, guideTree);
 	TGraph gOut(seqSet);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, score_type) == -8);
-	SEQAN_ASSERT_TRUE(sumOfPairsScoreInd(gOut, score_type) == 16);
+	SEQAN_ASSERT(sumOfPairsScore(gOut, score_type) == -8);
+	SEQAN_ASSERT(sumOfPairsScoreInd(gOut, score_type) == 16);
 
 	seqSet[1] = "AAG";
 	Score<int> scType = Score<int>(5,-4,-1,-2);
@@ -340,7 +340,7 @@ void Test_SumOfPairsScore()
 	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == 20);
+	SEQAN_ASSERT(sumOfPairsScore(gOut, scType) == 20);
 
 	resize(seqSet, 2);
 	seqSet[0] = "TTT";
@@ -359,7 +359,7 @@ void Test_SumOfPairsScore()
 	clear(gOut);
 	assignStringSet(gOut, seqSet);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == -8);
+	SEQAN_ASSERT(sumOfPairsScore(gOut, scType) == -8);
 
 	seqSet[0] = "TTTAAATTT";
 	seqSet[1] = "AAA";
@@ -375,7 +375,7 @@ void Test_SumOfPairsScore()
 	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == 7);
+	SEQAN_ASSERT(sumOfPairsScore(gOut, scType) == 7);
 
 	seqSet[0] = "AAAAAA";
 	seqSet[1] = "TTTAAATTTAAATTT";
@@ -391,7 +391,7 @@ void Test_SumOfPairsScore()
 	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == 18);
+	SEQAN_ASSERT(sumOfPairsScore(gOut, scType) == 18);
 }
 
 
@@ -458,13 +458,13 @@ void Test_ReversableFragments() {
 	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
 	TGraph g(strSet);
 	matchRefinement(matches,strSet,g);
-	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 2)) == 0);
-	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 4)) != 0);
-	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 3)) != 0);
-	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 2)) != 0);
-	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 4)) == 0);
-	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0)) != 0);
-	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 1)) != 0);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 2)) == 0);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 4)) != 0);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 3)) != 0);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 2)) != 0);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 4)) == 0);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0)) != 0);
+	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 1)) != 0);
 }
 
 SEQAN_DEFINE_TEST(test_distances)

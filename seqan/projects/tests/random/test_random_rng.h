@@ -53,7 +53,7 @@ SEQAN_DEFINE_TEST(test_default_rng)
     TValue x1 = pickRandomNumber(defaultRng(TTag()));
     TValue x2 = pickRandomNumber(defaultRng(TTag()));
     TValue x3 = pickRandomNumber(defaultRng(TTag()));
-    SEQAN_ASSERT_TRUE(x1 != x2 || x2 != x3);  // 3 times the same value is not probable!
+    SEQAN_ASSERT(x1 != x2 || x2 != x3);  // 3 times the same value is not probable!
 }
 
 

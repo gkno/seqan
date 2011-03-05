@@ -73,10 +73,10 @@ SEQAN_DEFINE_TEST(test_misc_long_word_native_interface) {
     {
         TLongWord word1 = 1u;
         TLongWord word2 = 2u;
-        SEQAN_ASSERT_TRUE(word1 != word2);
+        SEQAN_ASSERT(word1 != word2);
         SEQAN_ASSERT_NOT(word1 == word2);
-        SEQAN_ASSERT_TRUE(word1 < word2);
-        SEQAN_ASSERT_TRUE(word1 <= word2);
+        SEQAN_ASSERT(word1 < word2);
+        SEQAN_ASSERT(word1 <= word2);
         SEQAN_ASSERT_NOT(word1 > word2);
         SEQAN_ASSERT_NOT(word1 >= word2);
     }
@@ -197,10 +197,10 @@ SEQAN_DEFINE_TEST(test_misc_long_word_static_interface) {
         word1[0] = 1u;
         TLongWord word2;
         word2[1] = 1u;
-        SEQAN_ASSERT_TRUE(word1 != word2);
+        SEQAN_ASSERT(word1 != word2);
         SEQAN_ASSERT_NOT(word1 == word2);
-        SEQAN_ASSERT_TRUE(word1 < word2);
-        SEQAN_ASSERT_TRUE(word1 <= word2);
+        SEQAN_ASSERT(word1 < word2);
+        SEQAN_ASSERT(word1 <= word2);
         SEQAN_ASSERT_NOT(word1 > word2);
         SEQAN_ASSERT_NOT(word1 >= word2);
     }
@@ -387,10 +387,10 @@ SEQAN_DEFINE_TEST(test_misc_long_word_dynamic_interface) {
         word1[0] = 1u;
         TLongWord word2(bitCount);
         word2[1] = 1u;
-        SEQAN_ASSERT_TRUE(word1 != word2);
+        SEQAN_ASSERT(word1 != word2);
         SEQAN_ASSERT_NOT(word1 == word2);
-        SEQAN_ASSERT_TRUE(word1 < word2);
-        SEQAN_ASSERT_TRUE(word1 <= word2);
+        SEQAN_ASSERT(word1 < word2);
+        SEQAN_ASSERT(word1 <= word2);
         SEQAN_ASSERT_NOT(word1 > word2);
         SEQAN_ASSERT_NOT(word1 >= word2);
     }

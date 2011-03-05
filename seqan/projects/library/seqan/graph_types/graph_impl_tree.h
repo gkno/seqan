@@ -361,7 +361,7 @@ outDegree(Graph<Tree<TCargo, TSpec> > const& g,
 		  TVertexDescriptor const vertex) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex));
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -383,7 +383,7 @@ inDegree(Graph<Tree<TCargo, TSpec> > const& g,
 		 TVertexDescriptor const vertex) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex));
 	
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -445,7 +445,7 @@ removeVertex(Graph<Tree<TCargo, TSpec> >& g,
 			 TVertexDescriptor const v) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v));
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -470,9 +470,9 @@ addEdge(Graph<Tree<TCargo, TSpec> >& g,
 		TVertexDescriptor const child) 
 {
 	SEQAN_CHECKPOINT;
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, parent));
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, child));
-	SEQAN_ASSERT_TRUE(findEdge(g, parent, child) == 0); // No multi-graphs as trees!!!
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, child));
+	SEQAN_ASSERT(findEdge(g, parent, child) == 0); // No multi-graphs as trees!!!
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -515,8 +515,8 @@ removeEdge(Graph<Tree<TCargo, TSpec> >& g,
 		   TVertexDescriptor const child) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, parent));
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, child));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, child));
 	
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -562,7 +562,7 @@ removeOutEdges(Graph<Tree<TCargo, TSpec> >& g,
 			   TVertexDescriptor const v) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v));
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -580,7 +580,7 @@ removeInEdges(Graph<Tree<TCargo, TSpec> >& g,
 			  TVertexDescriptor const v) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v));
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -678,8 +678,8 @@ findEdge(Graph<Tree<TCargo, TSpec> >& g,
 		 TVertexDescriptor const w)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, w));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, w));
 	
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -760,7 +760,7 @@ assignRoot(Graph<Tree<TCargo, TSpec> >& g,
 		   TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, vertex));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex));
 
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	
@@ -830,7 +830,7 @@ isLeaf(Graph<Tree<TCargo, TSpec> > const& g,
 	   TVertexDescriptor v)
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, v));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, v));
 	
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
@@ -911,7 +911,7 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 		 TVertexDescriptor parent) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, parent));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent));
 	TVertexDescriptor child = addVertex(g);
 	addEdge(g,parent,child);
 	return child;
@@ -926,7 +926,7 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 		 TCargo const cargo) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, parent));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent));
 	TVertexDescriptor child = addVertex(g);
 	addEdge(g,parent,child,cargo);
 	return child;
@@ -986,7 +986,7 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 				  TVertexDescriptor const parent) 
 {
 	SEQAN_CHECKPOINT
-	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, parent));
+	SEQAN_ASSERT(idInUse(g.data_id_managerV, parent));
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 

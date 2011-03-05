@@ -297,7 +297,7 @@ void loadWitFile(WitStore & store,
             appendValue(fragments.matePairStore, mateElem);
             // set the new mate pair ID in the read element
             appendRead(fragments, "", matePairId);
-            SEQAN_ASSERT_TRUE(getIdByName(value(store.readNames), readName, record.readId, readNameCache));
+            SEQAN_ASSERT(getIdByName(value(store.readNames), readName, record.readId, readNameCache));
           }
         } else if (mateNo != -1) {
           // Handle case if we know this read's mate but not the read itself.

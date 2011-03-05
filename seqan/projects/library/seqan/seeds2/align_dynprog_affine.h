@@ -438,7 +438,7 @@ _alignTraceback(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmen
                     horizontal = true;
             }
         } else {
-            SEQAN_ASSERT_TRUE(horizontal);
+            SEQAN_ASSERT(horizontal);
             std::cout << "HORIZONTAL" << std::endl;
             // Insert gap.
             insertGap(alignmentIt0);

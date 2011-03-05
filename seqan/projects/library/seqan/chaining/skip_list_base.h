@@ -105,7 +105,7 @@ namespace seqan
 		~SearchPath_( void )
 		{
 		SEQAN_CHECKPOINT
-			SEQAN_ASSERT_TRUE(_searchPath == NULL);
+			SEQAN_ASSERT(_searchPath == NULL);
 		}
 
 
@@ -234,7 +234,7 @@ namespace seqan
 				SkipBaseElement< TObject, TModus, TSpec, TStructuring > & second )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( &first != NULL && &second != NULL, "An SkipBaseElements's object is corrupted");
+		SEQAN_ASSERT_MSG( &first != NULL && &second != NULL, "An SkipBaseElements's object is corrupted");
 		typename Key< TObject >::Type buffer_key= key( first );
 		setKey( first, key( second ) );
 		setKey( second, buffer_key );
@@ -254,12 +254,12 @@ namespace seqan
 	_calcPivot(	SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > & base )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE( &base != NULL );
+		SEQAN_ASSERT( &base != NULL );
 		typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type offset = mtRand() % _getCount( base ) + 1;
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * pivot = &base;
 		while( offset > 0 )
 		{
-			SEQAN_ASSERT_TRUE( _getSucc( *pivot ) != NULL );
+			SEQAN_ASSERT( _getSucc( *pivot ) != NULL );
 			goNext( pivot );
 			--offset;
 		}
@@ -272,8 +272,8 @@ namespace seqan
 	_calcPivot(	SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > & base )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE( &base != NULL );
-		SEQAN_ASSERT_TRUE_MSG( _getCount( base ) != 0, "Tried to sort element that is already sorted" );
+		SEQAN_ASSERT( &base != NULL );
+		SEQAN_ASSERT_MSG( _getCount( base ) != 0, "Tried to sort element that is already sorted" );
 		return  ( &base + ( mtRand() % _getCount( base ) + 1 ) );
 	}
 
@@ -309,7 +309,7 @@ namespace seqan
 	{
 			// security checking
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( elem != NULL, "Tried to sort element that is NULL" );
+		SEQAN_ASSERT_MSG( elem != NULL, "Tried to sort element that is NULL" );
 			// helper variables
 		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * pivot = _calcPivot( *elem );
 		typename Key< TObject >::Type pivot_key= key( *pivot, param );
@@ -364,7 +364,7 @@ namespace seqan
 	{
 			// security checking
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( elem != NULL, "Tried to sort element that is NULL" );
+		SEQAN_ASSERT_MSG( elem != NULL, "Tried to sort element that is NULL" );
 			
 		while( key( *_getSucc( *elem ) ) == theKey&& _getCount( *elem ) == 0 )
 			goNext( elem );
@@ -546,8 +546,8 @@ namespace seqan
 					TParam & param )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( theKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
-		SEQAN_ASSERT_TRUE_MSG( theKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
+		SEQAN_ASSERT_MSG( theKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
+		SEQAN_ASSERT_MSG( theKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
 	
 		typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type height = layer_element - &_getUp( *_getDown( *layer_element ) ) + 1;
 		SkipElement< TObject, TModus, TSpec, TStructuring > * temp_right = _getRight( *layer_element );
@@ -599,8 +599,8 @@ namespace seqan
 						TParam & param )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( theKey!= maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
-		SEQAN_ASSERT_TRUE_MSG( theKey!= minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
+		SEQAN_ASSERT_MSG( theKey!= maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
+		SEQAN_ASSERT_MSG( theKey!= minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
 	
 		typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type height = layer_element - &_getUp( *_getDown( *layer_element ) ) + 1;
 
@@ -673,7 +673,7 @@ namespace seqan
 	searchElement(	SkipList< TObject, TModus, TSpec, TStructuring > & list, 
 					TKey theKey )
 	{
-		SEQAN_ASSERT_TRUE( theKey < maxValue< typename Key< TObject >::Type >() );
+		SEQAN_ASSERT( theKey < maxValue< typename Key< TObject >::Type >() );
 		SEQAN_CHECKPOINT
 		if( _getInitialState( list ) )
 		{
@@ -740,7 +740,7 @@ namespace seqan
 	{	 
 		SEQAN_CHECKPOINT
 		SkipBaseElement< TObject, TModus, TSpec, Deferred > * elem = base;
-		SEQAN_ASSERT_TRUE_MSG( _getCount( *elem ) > 0, "count is < 0" );
+		SEQAN_ASSERT_MSG( _getCount( *elem ) > 0, "count is < 0" );
 		SkipBaseElement< TObject, TModus, TSpec, Deferred > * pivot ;
 		typename Key< SkipList< TObject, TModus, TSpec, Deferred > >::Type pivot_key;
 		typename Size< SkipList< TObject, TModus, TSpec, Deferred > >::Type height = 0;

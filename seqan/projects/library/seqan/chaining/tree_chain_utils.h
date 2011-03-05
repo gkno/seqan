@@ -344,7 +344,7 @@ namespace seqan{
 		//pMeta = &_getPred( *pMeta );
 		while( pMeta != &value( begin( metas ) ) )
 		{
-			SEQAN_ASSERT_TRUE(&_getFrag( *pMeta ) != 0);
+			SEQAN_ASSERT(&_getFrag( *pMeta ) != 0);
 			appendValue( dest, _getFrag( *pMeta ) );
 			pMeta = &_getPred( *pMeta );
 		}

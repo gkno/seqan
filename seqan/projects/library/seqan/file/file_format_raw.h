@@ -229,7 +229,7 @@ goNext(TFile & file,
 //IOREV _todo_
 SEQAN_CHECKPOINT
   (void) file;  // When compiled without assertions.
-	SEQAN_ASSERT_TRUE(!_streamEOF(file));
+	SEQAN_ASSERT(!_streamEOF(file));
 
 //??? TODO: set file to eof
 }

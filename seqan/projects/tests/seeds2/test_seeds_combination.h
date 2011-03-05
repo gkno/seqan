@@ -58,25 +58,25 @@ SEQAN_DEFINE_TEST(test_seeds_combination_seeds_combineable_merge_chained)
     {
         TSeed left(0, 0, 3);
         TSeed right(2, 2, 3);
-        SEQAN_ASSERT_TRUE(_seedsCombineable(left, right, 1, Nothing(), Merge()));
+        SEQAN_ASSERT(_seedsCombineable(left, right, 1, Nothing(), Merge()));
     }
     // Case: Is Mergeable, complete overlap.
     {
         TSeed left(0, 0, 3);
         TSeed right(0, 0, 3);
-        SEQAN_ASSERT_TRUE(_seedsCombineable(left, right, 1, Nothing(), Merge()));
+        SEQAN_ASSERT(_seedsCombineable(left, right, 1, Nothing(), Merge()));
     }
     // Case: Is Mergeable, prefix overlap.
     {
         TSeed left(0, 0, 3);
         TSeed right(0, 0, 4);
-        SEQAN_ASSERT_TRUE(_seedsCombineable(left, right, 1, Nothing(), Merge()));
+        SEQAN_ASSERT(_seedsCombineable(left, right, 1, Nothing(), Merge()));
     }
     // Case: Is Mergeable, suffix overlap.
     {
         TSeed left(0, 0, 4);
         TSeed right(1, 1, 3);
-        SEQAN_ASSERT_TRUE(_seedsCombineable(left, right, 1, Nothing(), Merge()));
+        SEQAN_ASSERT(_seedsCombineable(left, right, 1, Nothing(), Merge()));
     }
     // Case: Not Mergeable, too large diagonal distance.
     {
@@ -110,7 +110,7 @@ SEQAN_DEFINE_TEST(test_seeds_combination_seeds_combineable_simple_chaining_chain
     {
         TSeed left(0, 0, 3);
         TSeed right(4, 5, 3);
-        SEQAN_ASSERT_TRUE(_seedsCombineable(left, right, 3, Nothing(), SimpleChain()));
+        SEQAN_ASSERT(_seedsCombineable(left, right, 3, Nothing(), SimpleChain()));
     }
     // Case: Not Chaineable, overlap.
     {
@@ -137,7 +137,7 @@ SEQAN_DEFINE_TEST(test_seeds_combination_seeds_combineable_simple_chaos_chaining
     {
         TSeed left(0, 0, 3);
         TSeed right(4, 5, 3);
-        SEQAN_ASSERT_TRUE(_seedsCombineable(left, right, 3, Nothing(), SimpleChain()));
+        SEQAN_ASSERT(_seedsCombineable(left, right, 3, Nothing(), SimpleChain()));
     }
     // Case: Not Chaineable, overlap.
     {

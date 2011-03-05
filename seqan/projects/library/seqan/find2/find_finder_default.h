@@ -73,7 +73,7 @@ typename Iterator<THaystack const>::Type begin(Finder<THaystack, Default> const 
                                                Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
-    SEQAN_ASSERT_TRUE(finder._state == TFinder::STATE_BEGIN_FOUND);
+    SEQAN_ASSERT(finder._state == TFinder::STATE_BEGIN_FOUND);
     return begin(haystack(finder), spec) + finder._beginPosition;
 }
 
@@ -93,7 +93,7 @@ typename Iterator<THaystack const>::Type end(Finder<THaystack, Default> const & 
                                              Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
-    SEQAN_ASSERT_TRUE(finder._state == TFinder::STATE_BEGIN_FOUND || finder._state == TFinder::STATE_FOUND);
+    SEQAN_ASSERT(finder._state == TFinder::STATE_BEGIN_FOUND || finder._state == TFinder::STATE_FOUND);
     return begin(haystack(finder), spec) + finder._endPosition;
 }
 
@@ -112,7 +112,7 @@ template <typename THaystack>
 typename Position<THaystack const>::Type beginPosition(Finder<THaystack, Default> const & finder) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
-    SEQAN_ASSERT_TRUE(finder._state == TFinder::STATE_BEGIN_FOUND);
+    SEQAN_ASSERT(finder._state == TFinder::STATE_BEGIN_FOUND);
     return finder._beginPosition;
 }
 
@@ -130,7 +130,7 @@ template <typename THaystack>
 typename Position<THaystack>::Type endPosition(Finder<THaystack, Default> const & finder) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
-    SEQAN_ASSERT_TRUE(finder._state == TFinder::STATE_BEGIN_FOUND || finder._state == TFinder::STATE_FOUND);
+    SEQAN_ASSERT(finder._state == TFinder::STATE_BEGIN_FOUND || finder._state == TFinder::STATE_FOUND);
     return finder._endPosition;
 }
 
@@ -148,7 +148,7 @@ template <typename THaystack>
 Segment<THaystack const, InfixSegment> infix(Finder<THaystack, Default> & finder) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
-    SEQAN_ASSERT_TRUE(finder._state == TFinder::STATE_BEGIN_FOUND);
+    SEQAN_ASSERT(finder._state == TFinder::STATE_BEGIN_FOUND);
     return infix(haystack(finder), beginPosition(finder), endPosition(finder));
 }
 

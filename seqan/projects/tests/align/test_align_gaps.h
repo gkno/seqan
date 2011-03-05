@@ -58,96 +58,96 @@ void TestGapsBase()
 	TGaps gaps1;					//default ctor
 	TSource src1 = "hello";
 	setSource(gaps1, src1);			//setSource
-    SEQAN_ASSERT_TRUE(source(gaps1) == src1);
-    SEQAN_ASSERT_TRUE(id(source(gaps1)) == id(src1));
+    SEQAN_ASSERT(source(gaps1) == src1);
+    SEQAN_ASSERT(id(source(gaps1)) == id(src1));
 
-    SEQAN_ASSERT_TRUE(id(source(gaps1)) == id(gaps1));   //id;
+    SEQAN_ASSERT(id(source(gaps1)) == id(gaps1));   //id;
 
 	assignSource(gaps1, "blabla");	//assignSource
-    SEQAN_ASSERT_TRUE(source(gaps1) == "blabla");
-    SEQAN_ASSERT_TRUE(src1 == "blabla");
+    SEQAN_ASSERT(source(gaps1) == "blabla");
+    SEQAN_ASSERT(src1 == "blabla");
 
 	assignSource(gaps1, "abcdef");	//assignSource
 	setClippedBeginPosition(gaps1, 1);
 	setBeginPosition(gaps1, 0);
 	setClippedEndPosition(gaps1, 5);
-    SEQAN_ASSERT_TRUE(source(gaps1) == "abcdef");
-	SEQAN_ASSERT_TRUE(sourceSegment(gaps1) == "bcde"); //sourceSegment
+    SEQAN_ASSERT(source(gaps1) == "abcdef");
+	SEQAN_ASSERT(sourceSegment(gaps1) == "bcde"); //sourceSegment
 
 	moveSource(gaps1, "hullahulla");	//moveSource
-    SEQAN_ASSERT_TRUE(source(gaps1) == "hullahulla");
+    SEQAN_ASSERT(source(gaps1) == "hullahulla");
 
 	moveSource(gaps1, "abcdef", 1, 5);	//moveSource
-	SEQAN_ASSERT_TRUE(source(gaps1) == "abcdef"); //???Sollte das anders sein?
-    SEQAN_ASSERT_TRUE(sourceSegment(gaps1) == "bcde");
+	SEQAN_ASSERT(source(gaps1) == "abcdef"); //???Sollte das anders sein?
+    SEQAN_ASSERT(sourceSegment(gaps1) == "bcde");
 
 	detach(gaps1);			//detach, createSource
-    SEQAN_ASSERT_TRUE(source(gaps1) == src1);
-    SEQAN_ASSERT_TRUE(id(gaps1) != id(src1));
+    SEQAN_ASSERT(source(gaps1) == src1);
+    SEQAN_ASSERT(id(gaps1) != id(src1));
 
 	TGaps gaps2(gaps1);				//copy ctor
 
 //  it is a real copy
-//	SEQAN_ASSERT_TRUE(id(gaps1) == id(gaps2)) //(its not a real copy)
+//	SEQAN_ASSERT(id(gaps1) == id(gaps2)) //(its not a real copy)
 
 //____________________________________________________________________________
 
 	setSource(gaps1, src1);
 	src1 = "hello";
-    SEQAN_ASSERT_TRUE(id(gaps1) != id(gaps2));
+    SEQAN_ASSERT(id(gaps1) != id(gaps2));
 	gaps2 = gaps1;					//operator =
-    SEQAN_ASSERT_TRUE(id(gaps1) == id(gaps2));
-    SEQAN_ASSERT_TRUE(id(gaps2) == id(src1));
+    SEQAN_ASSERT(id(gaps1) == id(gaps2));
+    SEQAN_ASSERT(id(gaps2) == id(src1));
 
 	TGaps gaps3(src1);				//ctor with source
 	TGaps const & c_gaps3 = gaps3;	//const version
 
-    SEQAN_ASSERT_TRUE(id(gaps3) == id(src1));
-    SEQAN_ASSERT_TRUE(id(c_gaps3) == id(src1));
+    SEQAN_ASSERT(id(gaps3) == id(src1));
+    SEQAN_ASSERT(id(c_gaps3) == id(src1));
 
-	SEQAN_ASSERT_TRUE(dependentSource(gaps3));	//dependentSource
-    SEQAN_ASSERT_TRUE(dependentSource(c_gaps3));
+	SEQAN_ASSERT(dependentSource(gaps3));	//dependentSource
+    SEQAN_ASSERT(dependentSource(c_gaps3));
 
-	SEQAN_ASSERT_TRUE(length(gaps3) == length(src1));		//length
-	SEQAN_ASSERT_TRUE(sourceLength(gaps3) == length(src1));	//sourceLength
+	SEQAN_ASSERT(length(gaps3) == length(src1));		//length
+	SEQAN_ASSERT(sourceLength(gaps3) == length(src1));	//sourceLength
 
-	SEQAN_ASSERT_TRUE(clippedBeginPosition(gaps3) == 0);		//clippedBeginPosition
-	SEQAN_ASSERT_TRUE(sourceBegin(gaps3) == begin(source(gaps3)));		//sourceBegin
-	SEQAN_ASSERT_TRUE(sourceBegin(gaps3, Rooted()) == begin(source(gaps3), Rooted()));
+	SEQAN_ASSERT(clippedBeginPosition(gaps3) == 0);		//clippedBeginPosition
+	SEQAN_ASSERT(sourceBegin(gaps3) == begin(source(gaps3)));		//sourceBegin
+	SEQAN_ASSERT(sourceBegin(gaps3, Rooted()) == begin(source(gaps3), Rooted()));
 
-	SEQAN_ASSERT_TRUE(clippedEndPosition(gaps3) == length(src1));	//clippedEndPosition
-	SEQAN_ASSERT_TRUE(sourceEnd(gaps3) == end(source(gaps3)));		//sourceEnd
-	SEQAN_ASSERT_TRUE(sourceEnd(gaps3, Rooted()) == end(source(gaps3), Rooted()));
+	SEQAN_ASSERT(clippedEndPosition(gaps3) == length(src1));	//clippedEndPosition
+	SEQAN_ASSERT(sourceEnd(gaps3) == end(source(gaps3)));		//sourceEnd
+	SEQAN_ASSERT(sourceEnd(gaps3, Rooted()) == end(source(gaps3), Rooted()));
 
-	SEQAN_ASSERT_TRUE(*(--end(gaps3)) == 'o'); //end
-	SEQAN_ASSERT_TRUE(*(--end(c_gaps3)) == 'o'); //end
+	SEQAN_ASSERT(*(--end(gaps3)) == 'o'); //end
+	SEQAN_ASSERT(*(--end(c_gaps3)) == 'o'); //end
 
 	setClippedBeginPosition(gaps3, 3); //"---lo"			//setClippedBeginPosition
-	SEQAN_ASSERT_TRUE(gaps3 == "lo");
+	SEQAN_ASSERT(gaps3 == "lo");
 	SEQAN_ASSERT_EQ(clippedBeginPosition(gaps3), 3u);		//clippedBeginPosition
 	SEQAN_ASSERT_EQ(beginPosition(gaps3), 3u);			//beginPosition
 	SEQAN_ASSERT_EQ(length(gaps3), 2u);					//length
 	
 	setClippedBeginPosition(gaps3, 1); //"-ello"			//setClippedBeginPosition
-	SEQAN_ASSERT_TRUE(gaps3 == "ello");
+	SEQAN_ASSERT(gaps3 == "ello");
 	SEQAN_ASSERT_EQ(clippedBeginPosition(gaps3), 1u);		//clippedBeginPosition
 	SEQAN_ASSERT_EQ(beginPosition(gaps3), 1u);			//beginPosition
 	SEQAN_ASSERT_EQ(length(gaps3),  4u);					//length
-	SEQAN_ASSERT_TRUE(isGap(gaps3, 0u));						//isGap
-    SEQAN_ASSERT_TRUE(gaps3[1] == 'e');
-    SEQAN_ASSERT_TRUE(c_gaps3[1] == 'e');
+	SEQAN_ASSERT(isGap(gaps3, 0u));						//isGap
+    SEQAN_ASSERT(gaps3[1] == 'e');
+    SEQAN_ASSERT(c_gaps3[1] == 'e');
 
-	SEQAN_ASSERT_TRUE(getValue(gaps3, 1) == 'e');			//getValue
-	SEQAN_ASSERT_TRUE(getValue(c_gaps3, 1) == 'e');
+	SEQAN_ASSERT(getValue(gaps3, 1) == 'e');			//getValue
+	SEQAN_ASSERT(getValue(c_gaps3, 1) == 'e');
 
 	setClippedEndPosition(gaps3, 3); //"-el"				//setClippedEndPosition
-    SEQAN_ASSERT_TRUE(gaps3 == "el");
+    SEQAN_ASSERT(gaps3 == "el");
 	SEQAN_ASSERT_EQ(clippedEndPosition(gaps3), 3u);		//clippedEndPosition
 	SEQAN_ASSERT_EQ(endPosition(gaps3), 3u);				//endPosition
     SEQAN_ASSERT_EQ(length(gaps3), 2u);
 
 	setBeginPosition(gaps3, 0);	//"el"					//setBeginPosition
-    SEQAN_ASSERT_TRUE(gaps3[0] == 'e');
+    SEQAN_ASSERT(gaps3[0] == 'e');
     SEQAN_ASSERT_EQ(beginPosition(gaps3), 0u);
     SEQAN_ASSERT_EQ(clippedBeginPosition(gaps3), 1u);
     SEQAN_ASSERT_EQ(endPosition(gaps3), 2u);
@@ -162,11 +162,11 @@ void TestGapsBase()
     SEQAN_ASSERT_EQ(clippedEndPosition(gaps3), 0u);
 
 	setClippedEndPosition(gaps3, length(source(gaps3))); //reactivate after clear
-    SEQAN_ASSERT_TRUE(gaps3 == "hello");
+    SEQAN_ASSERT(gaps3 == "hello");
 
 	insertGaps(gaps3, 2, 3);
 	setBeginPosition(gaps3, 2);
-	SEQAN_ASSERT_TRUE(gaps3 == "he---llo"); //"--he---llo"
+	SEQAN_ASSERT(gaps3 == "he---llo"); //"--he---llo"
     SEQAN_ASSERT_EQ(beginPosition(gaps3), 2u);
 
 	//toSourcePosition
@@ -193,41 +193,41 @@ void TestGapsBase()
 
 //____________________________________________________________________________
 
-	SEQAN_ASSERT_TRUE(gaps3 == "he---llo"); //"--he---llo"
+	SEQAN_ASSERT(gaps3 == "he---llo"); //"--he---llo"
     SEQAN_ASSERT_EQ(beginPosition(gaps3), 2u);
 
 	clearGaps(gaps3, 1, 5);
-	SEQAN_ASSERT_TRUE(gaps3 == "he--llo"); //"-he--llo"
+	SEQAN_ASSERT(gaps3 == "he--llo"); //"-he--llo"
     SEQAN_ASSERT_EQ(beginPosition(gaps3), 1u);
 
 	clearGaps(gaps3, 1, 5);
-	SEQAN_ASSERT_TRUE(gaps3 == "hello"); //"-hello"
+	SEQAN_ASSERT(gaps3 == "hello"); //"-hello"
     SEQAN_ASSERT_EQ(beginPosition(gaps3), 1u);
 
 	clearGaps(gaps3);
-	SEQAN_ASSERT_TRUE(gaps3 == "hello"); //"hello"
+	SEQAN_ASSERT(gaps3 == "hello"); //"hello"
     SEQAN_ASSERT_EQ(beginPosition(gaps3), 0u);
 
 //____________________________________________________________________________
 
-	SEQAN_ASSERT_TRUE(gaps3 == "hello"); //"hello"
+	SEQAN_ASSERT(gaps3 == "hello"); //"hello"
 
 	setClippedBeginPosition(gaps3, 1);
 	setClippedEndPosition(gaps3, 3); //"el"
-    SEQAN_ASSERT_TRUE(gaps3 == "el");
-	SEQAN_ASSERT_TRUE(sourceSegment(gaps3) == "el"); //sourceSegment
-    SEQAN_ASSERT_TRUE(sourceSegment(c_gaps3) == "el");
+    SEQAN_ASSERT(gaps3 == "el");
+	SEQAN_ASSERT(sourceSegment(gaps3) == "el"); //sourceSegment
+    SEQAN_ASSERT(sourceSegment(c_gaps3) == "el");
 
 
 //____________________________________________________________________________
 // Comparison Functions
 
-	SEQAN_ASSERT_TRUE(gaps3 == "el"); //"hello"
-    SEQAN_ASSERT_TRUE(gaps3 != "ello");
-    SEQAN_ASSERT_TRUE(gaps3 <= "el");
-    SEQAN_ASSERT_TRUE(gaps3 < "ello");
-    SEQAN_ASSERT_TRUE(gaps3 > "a");
-    SEQAN_ASSERT_TRUE(gaps3 >= "el");
+	SEQAN_ASSERT(gaps3 == "el"); //"hello"
+    SEQAN_ASSERT(gaps3 != "ello");
+    SEQAN_ASSERT(gaps3 <= "el");
+    SEQAN_ASSERT(gaps3 < "ello");
+    SEQAN_ASSERT(gaps3 > "a");
+    SEQAN_ASSERT(gaps3 >= "el");
 
 
 //____________________________________________________________________________
@@ -250,22 +250,22 @@ void TestGapsIterator()
 
 	TIterator it1 = begin(gaps4);						//begin
 	TIterator const & c_it1 = it1; //const version
-	SEQAN_ASSERT_TRUE(*it1 == 'h');							//operator *
-	SEQAN_ASSERT_TRUE(source(it1) == begin(src1));			//source
-    SEQAN_ASSERT_TRUE(source(c_it1) == begin(src1)) ;
-	SEQAN_ASSERT_TRUE(atBegin(c_it1));						//atBegin
+	SEQAN_ASSERT(*it1 == 'h');							//operator *
+	SEQAN_ASSERT(source(it1) == begin(src1));			//source
+    SEQAN_ASSERT(source(c_it1) == begin(src1)) ;
+	SEQAN_ASSERT(atBegin(c_it1));						//atBegin
 
 	++it1;												//operator ++
-    SEQAN_ASSERT_TRUE(*it1 == 'e'); ;
+    SEQAN_ASSERT(*it1 == 'e'); ;
 
 	--it1;												//operator --
-    SEQAN_ASSERT_TRUE(*it1 == 'h'); ;
+    SEQAN_ASSERT(*it1 == 'h'); ;
 
 	TIterator it2 = end(gaps4);							//end
-	SEQAN_ASSERT_TRUE(atEnd(it2));							//atEnd
+	SEQAN_ASSERT(atEnd(it2));							//atEnd
 
 	--it2;
-	SEQAN_ASSERT_TRUE(*it2 == 'o');
+	SEQAN_ASSERT(*it2 == 'o');
 //____________________________________________________________________________
 
 
@@ -273,23 +273,23 @@ void TestGapsIterator()
 	TIterator it4 = it1;								//copy ctor
 	TIterator const & c_it4 = it4;	
 
-    SEQAN_ASSERT_TRUE(container(it4) == container(it1));
-    SEQAN_ASSERT_TRUE(*it4 == *it1);
+    SEQAN_ASSERT(container(it4) == container(it1));
+    SEQAN_ASSERT(*it4 == *it1);
 
-	SEQAN_ASSERT_TRUE(it4 == it1);							//operator ==
-    SEQAN_ASSERT_TRUE(it4 == c_it1);
-    SEQAN_ASSERT_TRUE(c_it4 == it1);
-    SEQAN_ASSERT_TRUE(c_it4 == c_it1);
+	SEQAN_ASSERT(it4 == it1);							//operator ==
+    SEQAN_ASSERT(it4 == c_it1);
+    SEQAN_ASSERT(c_it4 == it1);
+    SEQAN_ASSERT(c_it4 == c_it1);
 
 	++it1;
 
-	SEQAN_ASSERT_TRUE(it4 != it1);							//operator !=
-    SEQAN_ASSERT_TRUE(it4 != c_it1);
-    SEQAN_ASSERT_TRUE(c_it4 != it1);
-    SEQAN_ASSERT_TRUE(c_it4 != c_it1);
+	SEQAN_ASSERT(it4 != it1);							//operator !=
+    SEQAN_ASSERT(it4 != c_it1);
+    SEQAN_ASSERT(c_it4 != it1);
+    SEQAN_ASSERT(c_it4 != c_it1);
 
 	it4 = it2;											//operator =
-    SEQAN_ASSERT_TRUE(*it4 == *it2);
+    SEQAN_ASSERT(*it4 == *it2);
 
 	TIterator it5(gaps4, 1, 1);							//special ctor
 //____________________________________________________________________________
@@ -313,32 +313,32 @@ void TestGapManipulation()
 	TGaps gaps5(src1);
 
 	insertGaps(gaps5, 1, 2); //insert gap somewhere
-	SEQAN_ASSERT_TRUE(gaps5 != "hello");
-	SEQAN_ASSERT_TRUE(gaps5 == "h--ello");
+	SEQAN_ASSERT(gaps5 != "hello");
+	SEQAN_ASSERT(gaps5 == "h--ello");
 
 	insertGaps(gaps5, 1, 1); //insert blank at the beginning of a gap
-	SEQAN_ASSERT_TRUE(gaps5 == "h---ello");
+	SEQAN_ASSERT(gaps5 == "h---ello");
 
 	insertGaps(gaps5, 4, 1); //insert blank at the end of a gap
-	SEQAN_ASSERT_TRUE(gaps5 == "h----ello");
+	SEQAN_ASSERT(gaps5 == "h----ello");
 
 	insertGap(gaps5, 8); //insert second gap
-	SEQAN_ASSERT_TRUE(gaps5 == "h----ell-o");
+	SEQAN_ASSERT(gaps5 == "h----ell-o");
 
 	insertGaps(gaps5, 0, 2); //insert at position 0
-	SEQAN_ASSERT_TRUE(gaps5 == "h----ell-o"); //note: leading and trailing gaps are not displayed
+	SEQAN_ASSERT(gaps5 == "h----ell-o"); //note: leading and trailing gaps are not displayed
 	SEQAN_ASSERT_EQ(beginPosition(gaps5), 2u);
 
 	insertGaps(gaps5, 8, 2); //insert gap with beginPosition == 2
-	SEQAN_ASSERT_TRUE(gaps5 == "h----e--ll-o");
+	SEQAN_ASSERT(gaps5 == "h----e--ll-o");
 	SEQAN_ASSERT_EQ(length(gaps5), 12u);
 
 	insertGaps(gaps5, 14, 1); //insert gap behind end. Nothing happens
-	SEQAN_ASSERT_TRUE(gaps5 == "h----e--ll-o");
+	SEQAN_ASSERT(gaps5 == "h----e--ll-o");
 	SEQAN_ASSERT_EQ(length(gaps5), 12u);
 
 //counting gaps
-	SEQAN_ASSERT_TRUE(gaps5 == "h----e--ll-o"); // "--h----e--ll-o"
+	SEQAN_ASSERT(gaps5 == "h----e--ll-o"); // "--h----e--ll-o"
 	SEQAN_ASSERT_EQ(beginPosition(gaps5), 2u);
 
 	SEQAN_ASSERT_EQ(countGaps(gaps5, 0), 2u);
@@ -350,20 +350,20 @@ void TestGapManipulation()
 	SEQAN_ASSERT_EQ(countGaps(gaps5, 20), 0u);
 
 //removing gaps
-	SEQAN_ASSERT_TRUE(gaps5 == "h----e--ll-o"); // "--h----e--ll-o"
+	SEQAN_ASSERT(gaps5 == "h----e--ll-o"); // "--h----e--ll-o"
 	SEQAN_ASSERT_EQ(beginPosition(gaps5), 2u);
 
 	removeGap(gaps5, 4); //remove gap somewhere in gap area
-	SEQAN_ASSERT_TRUE(gaps5 == "h---e--ll-o");
+	SEQAN_ASSERT(gaps5 == "h---e--ll-o");
 
 	removeGaps(gaps5, 6, 1); //try to remove gap in non-gap area. Nothing happens
-	SEQAN_ASSERT_TRUE("h---e--ll-o" == gaps5);
+	SEQAN_ASSERT("h---e--ll-o" == gaps5);
 
 	removeGaps(gaps5, 7, 2); //remove gap region completely
-	SEQAN_ASSERT_TRUE(gaps5 == "h---ell-o");
+	SEQAN_ASSERT(gaps5 == "h---ell-o");
 
 	removeGaps(gaps5, 4, 10); //remove rest of gap region
-	SEQAN_ASSERT_TRUE(gaps5 == "h-ell-o");
+	SEQAN_ASSERT(gaps5 == "h-ell-o");
 //____________________________________________________________________________
 
 }
@@ -377,20 +377,20 @@ void TestTrailingGaps()
 	//inserting gaps
 	TSource src1 = "hello";
 	TGaps gaps6(src1);
-	SEQAN_ASSERT_TRUE(gaps6 == "hello");
+	SEQAN_ASSERT(gaps6 == "hello");
 
 	insertGaps(gaps6, 10, 2);//somewhere behind the last char
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); //nothing changes
+	SEQAN_ASSERT(gaps6 == "hello"); //nothing changes
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 5), 0u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 10), 0u);
 
 	insertGaps(gaps6, 5, 3); //directly behind the last char: append intended trailing gap
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); //"hello---"
+	SEQAN_ASSERT(gaps6 == "hello"); //"hello---"
 	SEQAN_ASSERT_EQ(countGaps(gaps6,5), 3u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6,6), 2u);
 
 	insertGap(gaps6, 8);//expand trailing gaps
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); //"hello----"
+	SEQAN_ASSERT(gaps6 == "hello"); //"hello----"
 	SEQAN_ASSERT_EQ(countGaps(gaps6,5), 4u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6,6), 3u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6,7), 2u);
@@ -400,54 +400,54 @@ void TestTrailingGaps()
 	SEQAN_ASSERT_EQ(countGaps(gaps6,20), 0u);
 
 	insertGaps(gaps6, 9, 2);//expand trailing gaps on last position
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); //"hello------"
+	SEQAN_ASSERT(gaps6 == "hello"); //"hello------"
 	SEQAN_ASSERT_EQ(countGaps(gaps6,5), 6u);
 
 //removing gaps
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); // "hello------"
+	SEQAN_ASSERT(gaps6 == "hello"); // "hello------"
 	SEQAN_ASSERT_EQ(beginPosition(gaps6), 0u);
 
 	removeGap(gaps6, 7); //remove gap somewhere in gap area
-	SEQAN_ASSERT_TRUE(gaps6 == "hello");//"hello-----"
+	SEQAN_ASSERT(gaps6 == "hello");//"hello-----"
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 5), 5u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 7), 3u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 9), 1u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 10), 0u);
 
 	removeGaps(gaps6, 8, 15); //remove rest of gap region
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); //"hello---"
+	SEQAN_ASSERT(gaps6 == "hello"); //"hello---"
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 5), 3u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 7), 1u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 8), 0u);
 
 	removeGaps(gaps6, 5, 3); //remove gap region completely
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); //"hello"
+	SEQAN_ASSERT(gaps6 == "hello"); //"hello"
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 5), 0u);
 
 	insertGaps(gaps6, 5, 6);
 	SEQAN_ASSERT_EQ(countGaps(gaps6,5), 6u);
 
 	assignSource(gaps6, "new");		//clear trailing gaps when assign new source
-	SEQAN_ASSERT_TRUE(gaps6 == "new");   //"new"
+	SEQAN_ASSERT(gaps6 == "new");   //"new"
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 3), 0u);
 	insertGaps(gaps6, 3, 10);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 3), 10u);
 
 	TSource src2 = "hello";
 	setSource(gaps6, src2);			//clear trailing gaps when set new source
-	SEQAN_ASSERT_TRUE(gaps6 == "hello"); //"re"
+	SEQAN_ASSERT(gaps6 == "hello"); //"re"
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 5), 0u);
 
 	insertGaps(gaps6, 5, 10);
 	SEQAN_ASSERT_EQ(countGaps(gaps6, 5), 10u);
 
 	TGaps gaps6a(gaps6); 		//copy all trailing gaps
-	SEQAN_ASSERT_TRUE(gaps6a == "hello");
+	SEQAN_ASSERT(gaps6a == "hello");
 	SEQAN_ASSERT_EQ(countGaps(gaps6a, 5), 10u);
 
 	TGaps gaps6b = gaps6a;		//assign the trailing gaps
 	insertGaps(gaps6b, 10, 5);
-	SEQAN_ASSERT_TRUE(gaps6b == "hello");
+	SEQAN_ASSERT(gaps6b == "hello");
 	SEQAN_ASSERT_EQ(countGaps(gaps6a, 5), 10u);
 	SEQAN_ASSERT_EQ(countGaps(gaps6b, 5), 15u);
 
@@ -465,7 +465,7 @@ TestCountCharacters() {
 	TSource seq = "hello";
 	TGap gap7(seq);
 
-	SEQAN_ASSERT_TRUE(gap7 == "hello");
+	SEQAN_ASSERT(gap7 == "hello");
 	SEQAN_ASSERT_EQ(length(gap7), 5u);
 
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 0), 5u);
@@ -475,14 +475,14 @@ TestCountCharacters() {
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 5), 0u);
 
 	insertGaps(gap7, 0, 2);
-	SEQAN_ASSERT_TRUE(gap7 == "hello"); //"--hello"
+	SEQAN_ASSERT(gap7 == "hello"); //"--hello"
 	SEQAN_ASSERT_EQ(length(gap7), 5u);
 
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 0), 0u);
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 2), 5u);
 
 	insertGap(gap7, 4);
-	SEQAN_ASSERT_TRUE(gap7 == "he-llo"); //"--he-llo"
+	SEQAN_ASSERT(gap7 == "he-llo"); //"--he-llo"
 	SEQAN_ASSERT_EQ(length(gap7), 6u);
 
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 0), 0u);
@@ -495,7 +495,7 @@ TestCountCharacters() {
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 8), 0u);
 
 	insertGaps(gap7, 6, 3);
-	SEQAN_ASSERT_TRUE(gap7 == "he-l---lo"); //"--he-l---lo"
+	SEQAN_ASSERT(gap7 == "he-l---lo"); //"--he-l---lo"
 	SEQAN_ASSERT_EQ(length(gap7), 9u);
 
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 0), 0u);
@@ -510,7 +510,7 @@ TestCountCharacters() {
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 10), 1u);
 
 	insertGaps(gap7, 11, 5);
-	SEQAN_ASSERT_TRUE(gap7 == "he-l---lo"); //"--he-l---lo-----"
+	SEQAN_ASSERT(gap7 == "he-l---lo"); //"--he-l---lo-----"
 	SEQAN_ASSERT_EQ(length(gap7), 9u);
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 11), 0u);
 	SEQAN_ASSERT_EQ(countCharacters(gap7, 12), 0u);

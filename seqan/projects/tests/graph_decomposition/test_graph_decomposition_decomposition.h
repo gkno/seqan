@@ -157,7 +157,7 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     SEQAN_ASSERT_EQ(property(blockDescriptors, pt).blockType, BLOCK_PERIPHERAL_TREE);
     SEQAN_ASSERT_EQ(numChildren(clusterTree, pt), 0u);
     goNext(itPc1);
-    SEQAN_ASSERT_TRUE(atEnd(itPc1));
+    SEQAN_ASSERT(atEnd(itPc1));
     // } pc1
     goNext(itR);
     SEQAN_ASSERT_NOT(atEnd(itR));
@@ -202,7 +202,7 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     SEQAN_ASSERT_EQ(property(blockDescriptors, bb1).blockType, BLOCK_BIBLOCK);
     SEQAN_ASSERT_EQ(numChildren(clusterTree, bb1), 0u);
     goNext(itSc1);
-    SEQAN_ASSERT_TRUE(atEnd(itSc1));
+    SEQAN_ASSERT(atEnd(itSc1));
     // } pc2 -> sk -> sc1
     goNext(itSk);
     SEQAN_ASSERT_NOT(atEnd(itSk));
@@ -220,7 +220,7 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     SEQAN_ASSERT_EQ(property(blockDescriptors, bb3).blockType, BLOCK_BIBLOCK);
     SEQAN_ASSERT_EQ(numChildren(clusterTree, bb3), 0u);
     goNext(itSc2);
-    SEQAN_ASSERT_TRUE(atEnd(itSc2));
+    SEQAN_ASSERT(atEnd(itSc2));
     // } pc2 -> sk -> sc2
     goNext(itSk);
     SEQAN_ASSERT_NOT(atEnd(itSk));
@@ -233,16 +233,16 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     SEQAN_ASSERT_EQ(property(blockDescriptors, bb4).blockType, BLOCK_BIBLOCK);
     SEQAN_ASSERT_EQ(numChildren(clusterTree, bb4), 0u);
     goNext(itSc3);
-    SEQAN_ASSERT_TRUE(atEnd(itSc3));
+    SEQAN_ASSERT(atEnd(itSc3));
     // } pc2 -> sk -> sc3
     goNext(itSk);
-    SEQAN_ASSERT_TRUE(atEnd(itSk));
+    SEQAN_ASSERT(atEnd(itSk));
     // } pc2 -> sk
     goNext(itPc2);
-    SEQAN_ASSERT_TRUE(atEnd(itPc2));
+    SEQAN_ASSERT(atEnd(itPc2));
     // } pc2
     goNext(itR);
-    SEQAN_ASSERT_TRUE(atEnd(itR));
+    SEQAN_ASSERT(atEnd(itR));
 
     // Check vertex-to-building block assignment.
     SEQAN_ASSERT_EQ(length(property(vertexBlocks, a)), 1u);

@@ -77,20 +77,20 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_metafunctions)
         typedef Value<TSeed>::Type TSeedDiagonal;
         bool b;
         b = IsSameType<size_t, Position<TSeedDiagonal>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<size_t, Size<TSeedDiagonal>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
 
         b = IsSameType<size_t, Position<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<size_t, Size<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<MakeSigned_<size_t>::Type, Diagonal<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<False, HasScore<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<Nothing, SeedScore<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
     }
     // Test with other specialization.
     {
@@ -98,20 +98,20 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_metafunctions)
         typedef Value<TSeed>::Type TSeedDiagonal;
         bool b;
         b = IsSameType<unsigned, Position<TSeedDiagonal>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<unsigned, Size<TSeedDiagonal>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
 
         b = IsSameType<unsigned, Position<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<unsigned, Size<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<int, Diagonal<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<True, HasScore<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
         b = IsSameType<int, SeedScore<TSeed>::Type>::VALUE;
-        SEQAN_ASSERT_TRUE(b);
+        SEQAN_ASSERT(b);
     }
 }
 
@@ -182,7 +182,7 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_truncate_diagonals)
     truncateDiagonals(s, it);
     SEQAN_ASSERT_EQ(1u, length(s));
     TSeedDiagonal const diag = *begin(s, Standard());
-    SEQAN_ASSERT_TRUE(diag == TSeedDiagonal(1, 3, 4));
+    SEQAN_ASSERT(diag == TSeedDiagonal(1, 3, 4));
 }
 
 // Test the begin/end functions for chained seeds.
@@ -207,7 +207,7 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_iterators)
         SEQAN_ASSERT_EQ(5u, it->beginDim1);
         SEQAN_ASSERT_EQ(3u, it->length);
         ++it;
-        SEQAN_ASSERT_TRUE(it == end(s));
+        SEQAN_ASSERT(it == end(s));
     }
     {  // const seed
         TSeed const & cs = s;
@@ -221,7 +221,7 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_iterators)
         SEQAN_ASSERT_EQ(5u, it->beginDim1);
         SEQAN_ASSERT_EQ(3u, it->length);
         ++it;
-        SEQAN_ASSERT_TRUE(it == end(cs));
+        SEQAN_ASSERT(it == end(cs));
     }
 }
 

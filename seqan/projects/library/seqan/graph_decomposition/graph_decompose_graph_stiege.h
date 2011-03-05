@@ -167,7 +167,7 @@ _collectPeripheralTreeAndClassify(
     appendValue(stack, v);
     while (!empty(stack)) {
         TVertexDescriptor x = back(stack);
-        SEQAN_ASSERT_TRUE(isBitSet(getProperty(vertexFlags, x), VERTEX_PERIPHERAL_TREE));
+        SEQAN_ASSERT(isBitSet(getProperty(vertexFlags, x), VERTEX_PERIPHERAL_TREE));
         setBit(property(vertexFlags, x), VERTEX_MARK);
         appendValue(property(vertexBlocks, x), peripheralTreeNode);
         eraseBack(stack);
@@ -180,7 +180,7 @@ _collectPeripheralTreeAndClassify(
             if (isBitSet(getProperty(vertexFlags, y), VERTEX_MARK))
                 continue;
             if (isBitSet(getProperty(vertexFlags, y), VERTEX_PERIPHERAL_TREE)) {
-                SEQAN_ASSERT_TRUE(isBitSet(getProperty(edgeFlags, e), EDGE_PERIPHERAL_TREE));
+                SEQAN_ASSERT(isBitSet(getProperty(edgeFlags, e), EDGE_PERIPHERAL_TREE));
                 assignProperty(edgeBlock, e, peripheralTreeNode);
                 appendValue(stack, y);
             }
@@ -263,7 +263,7 @@ _decomposeGraphStiegeFindPeripheralTrees(
                     break;
                 }
             }
-            SEQAN_ASSERT_TRUE(assignedE);
+            SEQAN_ASSERT(assignedE);
             TVertexDescriptor x = targetVertex(g, e);
             if (x == w)  // TODO(holtgrew): Necessary?
                 x = sourceVertex(g, e);
@@ -416,7 +416,7 @@ _decomposeGraphStiegeBiconnect(
 #endif  // #if SEQAN_ENABLE_DEBUG
                             break;
                         }
-                        SEQAN_ASSERT_TRUE(found);
+                        SEQAN_ASSERT(found);
                         // Add a new vertex for the subcomponent.
                         // std::cerr << "STARTING SUBCOMPONENT FROM " << v << " stopfreeKernelVertex == " << stopfreeKernelVertex << std::endl;
                         subComponentVertex = addChild(clusterTree, stopfreeKernelVertex);
@@ -539,7 +539,7 @@ _decomposeGraphStiegeCollectInternalTrees(
         found = true;
 #endif  // #if SEQAN_ENABLE_DEBUG
     }
-    SEQAN_ASSERT_TRUE(found);
+    SEQAN_ASSERT(found);
     // Create new internal tree vertex below stopfree kernel vertex.
     TVertexDescriptor internalTreeVertex = addChild(clusterTree, stopfreeKernelVertex);
     resizeVertexMap(clusterTree, blockDescriptor);
@@ -569,7 +569,7 @@ _decomposeGraphStiegeCollectInternalTrees(
             TVertexDescriptor u = getTarget(e);
             if (u == v)
                 u = getSource(e);
-            SEQAN_ASSERT_TRUE(isBitSet(getProperty(vertexFlags, u), VERTEX_INTERNAL_TREE));
+            SEQAN_ASSERT(isBitSet(getProperty(vertexFlags, u), VERTEX_INTERNAL_TREE));
             if (isBitSet(getProperty(vertexFlags, u), VERTEX_TOKEN))
                 continue;  // Skip already marked vertices.
 

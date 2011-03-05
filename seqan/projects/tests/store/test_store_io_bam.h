@@ -70,43 +70,43 @@ SEQAN_DEFINE_TEST(test_store_io_bam_read)
     // Check that the stores are the same.
     SEQAN_ASSERT_EQ(length(samStore.alignedReadStore), length(bamStore.alignedReadStore));
     for (unsigned i = 0; i < length(samStore.alignedReadStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.alignedReadStore[i] == bamStore.alignedReadStore[i]);
+        SEQAN_ASSERT(samStore.alignedReadStore[i] == bamStore.alignedReadStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.alignedReadTagStore), length(bamStore.alignedReadTagStore));
     for (unsigned i = 0; i < length(samStore.alignedReadTagStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.alignedReadTagStore[i] == bamStore.alignedReadTagStore[i]);
+        SEQAN_ASSERT(samStore.alignedReadTagStore[i] == bamStore.alignedReadTagStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.alignQualityStore), length(bamStore.alignQualityStore));
     for (unsigned i = 0; i < length(samStore.alignQualityStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.alignQualityStore[i] == bamStore.alignQualityStore[i]);
+        SEQAN_ASSERT(samStore.alignQualityStore[i] == bamStore.alignQualityStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.contigFileStore), length(bamStore.contigFileStore));
     for (unsigned i = 0; i < length(samStore.contigFileStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.contigFileStore[i] == bamStore.contigFileStore[i]);
+        SEQAN_ASSERT(samStore.contigFileStore[i] == bamStore.contigFileStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.contigNameStore), length(bamStore.contigNameStore));
     for (unsigned i = 0; i < length(samStore.contigNameStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.contigNameStore[i] == bamStore.contigNameStore[i]);
+        SEQAN_ASSERT(samStore.contigNameStore[i] == bamStore.contigNameStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.contigStore), length(bamStore.contigStore));
     for (unsigned i = 0; i < length(samStore.contigStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.contigStore[i] == bamStore.contigStore[i]);
+        SEQAN_ASSERT(samStore.contigStore[i] == bamStore.contigStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.libraryNameStore), length(bamStore.libraryNameStore));
     for (unsigned i = 0; i < length(samStore.libraryNameStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.libraryNameStore[i] == bamStore.libraryNameStore[i]);
+        SEQAN_ASSERT(samStore.libraryNameStore[i] == bamStore.libraryNameStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.libraryStore), length(bamStore.libraryStore));
     for (unsigned i = 0; i < length(samStore.libraryStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.libraryStore[i] == bamStore.libraryStore[i]);
+        SEQAN_ASSERT(samStore.libraryStore[i] == bamStore.libraryStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.matePairNameStore), length(bamStore.matePairNameStore));
     for (unsigned i = 0; i < length(samStore.matePairNameStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.matePairNameStore[i] == bamStore.matePairNameStore[i]);
+        SEQAN_ASSERT(samStore.matePairNameStore[i] == bamStore.matePairNameStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.matePairStore), length(bamStore.matePairStore));
     for (unsigned i = 0; i < length(samStore.matePairStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.matePairStore[i] == bamStore.matePairStore[i]);
+        SEQAN_ASSERT(samStore.matePairStore[i] == bamStore.matePairStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.readNameStore), length(bamStore.readNameStore));
     for (unsigned i = 0; i < length(samStore.readNameStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.readNameStore[i] == bamStore.readNameStore[i]);
+        SEQAN_ASSERT(samStore.readNameStore[i] == bamStore.readNameStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.readSeqStore), length(bamStore.readSeqStore));
     for (unsigned i = 0; i < length(samStore.readSeqStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.readSeqStore[i] == bamStore.readSeqStore[i]);
+        SEQAN_ASSERT(samStore.readSeqStore[i] == bamStore.readSeqStore[i]);
     SEQAN_ASSERT_EQ(length(samStore.readStore), length(bamStore.readStore));
     for (unsigned i = 0; i < length(samStore.readStore); ++i)
-        SEQAN_ASSERT_TRUE(samStore.readStore[i] ==  bamStore.readStore[i]);
+        SEQAN_ASSERT(samStore.readStore[i] ==  bamStore.readStore[i]);
 
     // TODO(holtgrew): Actually check contents.
 }

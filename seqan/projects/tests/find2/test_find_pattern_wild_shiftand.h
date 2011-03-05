@@ -50,7 +50,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_is_unsigned) {
     CharString const kInvalidString2 = "A123456";
     CharString const kInvalidString3 = "_A123456";
 
-    SEQAN_ASSERT_TRUE(_isUnsigned(kUnsignedString));
+    SEQAN_ASSERT(_isUnsigned(kUnsignedString));
     SEQAN_ASSERT_NOT(_isUnsigned(kEmptyString));
     SEQAN_ASSERT_NOT(_isUnsigned(kInvalidString1));
     SEQAN_ASSERT_NOT(_isUnsigned(kInvalidString2));
@@ -73,10 +73,10 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_is_valid) {
     CharString const kInvalidString6 = "a\\";      // Wrong usage of escape character.
     CharString const kInvalidString7 = "[A-]+";    // Required chara after dash.
 
-    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString1));
-    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString2));
-    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString3));
-    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString4));
+    SEQAN_ASSERT(_findWildShiftAndIsValid(kValidString1));
+    SEQAN_ASSERT(_findWildShiftAndIsValid(kValidString2));
+    SEQAN_ASSERT(_findWildShiftAndIsValid(kValidString3));
+    SEQAN_ASSERT(_findWildShiftAndIsValid(kValidString4));
 
     SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString1));
     SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString2));
@@ -147,11 +147,11 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_interface) {
 
     // Function find().
     bool ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     // Function findBegin().
 //     ret = findBegin(finder, pattern);
-//     SEQAN_ASSERT_TRUE(ret);
+//     SEQAN_ASSERT(ret);
 
     // Test found position.
     SEQAN_ASSERT_EQ(11u, endPosition(finder));
@@ -160,7 +160,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_interface) {
 //     // Function buildAlignment().
 //     Align<CharString, ArrayGaps> align;
 //     ret = buildAlignment(finder, pattern, align);
-//     SEQAN_ASSERT_TRUE(ret);
+//     SEQAN_ASSERT(ret);
 //     // Test the alignment by testing the view-to-source conversion.
 //     // First row.
 //     SEQAN_ASSERT_EQ(0u, toViewPosition(row(align, 0), 0));
@@ -235,7 +235,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_easy) {
     // he is her hero
     // he
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
     SEQAN_ASSERT_EQ(2u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(0u, beginPosition(finder));
@@ -244,7 +244,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_easy) {
     // he is her hero
     //       he
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(8u, endPosition(finder));
     SEQAN_ASSERT_EQ(2u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(6u, beginPosition(finder));
@@ -253,7 +253,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_easy) {
     // he is her hero
     //           he
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(12u, endPosition(finder));
     SEQAN_ASSERT_EQ(2u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(10u, beginPosition(finder));
@@ -284,7 +284,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_harder) {
     // AGAAGAAGAGGAAGAAGA
     //  GAA
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
@@ -293,7 +293,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_harder) {
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(7u, endPosition(finder));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(4u, beginPosition(finder));
@@ -302,7 +302,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_harder) {
     // AGAAGAAGAGGAAGAAGA
     //           GAA
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(13u, endPosition(finder));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(10u, beginPosition(finder));
@@ -311,7 +311,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_harder) {
     // AGAAGAAGAGGAAGAAGA
     //              GAA
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(16u, endPosition(finder));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(13u, beginPosition(finder));
@@ -359,7 +359,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_set_end_position
     // AGAAGAAGAGGAAGAAGA
     //  GAA
     ret = setEndPosition(finder, pattern, 4);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
 //     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
@@ -369,7 +369,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_set_end_position
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(7u, endPosition(finder));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(4u, beginPosition(finder));
@@ -385,7 +385,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_set_end_position
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(7u, endPosition(finder));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 //     SEQAN_ASSERT_EQ(4u, beginPosition(finder));

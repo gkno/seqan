@@ -1192,7 +1192,7 @@ void _mapMatePairReadsParallel(
             hasMore = windowFindNext(tls.swiftFinderR, tls.swiftPatternR, tls.options.windowSize - delta);
             bool ret = windowFindNext(tls.swiftFinderL, tls.swiftPatternL, tls.options.windowSize);
             (void) ret;
-            SEQAN_ASSERT_TRUE(ret == hasMore);
+            SEQAN_ASSERT(ret == hasMore);
             windowsDone += 1;  // Local windows done count.
             atomicMax(leaderWindowsDone, windowsDone);
 

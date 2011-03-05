@@ -241,7 +241,7 @@ SEQAN_CHECKPOINT
 			String<TLabel> property = getProperty(pm, act_knot);
 			appendValue(property,label_);
 			assignProperty(pm, act_knot, property);
-			SEQAN_ASSERT_TRUE(fragmentBegin(ali_g,act_knot)==act_pos);
+			SEQAN_ASSERT(fragmentBegin(ali_g,act_knot)==act_pos);
 
 			//prepare for next interval
 			act_pos += fragmentLength(ali_g,act_knot);

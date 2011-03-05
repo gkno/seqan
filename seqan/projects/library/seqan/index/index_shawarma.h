@@ -75,7 +75,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 
 		SEQAN_ASSERT_EQ(sizeof(TValue), sizeof(unsigned char));
 		SEQAN_ASSERT_EQ(sizeof(TSAValue), sizeof(int));
-		SEQAN_ASSERT_TRUE(IsContiguous<TSA>::VALUE);
+		SEQAN_ASSERT(IsContiguous<TSA>::VALUE);
 
 		int overshoot = shawarma::init_ds_ssort(500, 2000);
 

@@ -134,8 +134,8 @@ namespace seqan{
 					TObject *& maxObject )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
-		SEQAN_ASSERT_TRUE_MSG( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
+		SEQAN_ASSERT_MSG( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
+		SEQAN_ASSERT_MSG( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
 	
 		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
 		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );
@@ -179,8 +179,8 @@ namespace seqan{
 					TObject *& maxObject )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
-		SEQAN_ASSERT_TRUE_MSG( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
+		SEQAN_ASSERT_MSG( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
+		SEQAN_ASSERT_MSG( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
 	
 		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Complete > * layer_element = _getRoot( *list );
 		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Complete > >::Type height = _getCurrentLayer( *list );
@@ -221,8 +221,8 @@ namespace seqan{
 					TObject *& maxObject )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_ASSERT_TRUE_MSG( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
-		SEQAN_ASSERT_TRUE_MSG( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
+		SEQAN_ASSERT_MSG( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" );
+		SEQAN_ASSERT_MSG( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" );
 	
 		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
 		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );

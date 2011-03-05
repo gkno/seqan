@@ -54,11 +54,11 @@ void testSeedsSeedSetContainerFunctions(TSeedSpec const &, TSeedSetSpec const &)
     TSeedSet s;
 
     // Test length/begin/end with empty set.
-    SEQAN_ASSERT_TRUE(begin(s) == end(s));
+    SEQAN_ASSERT(begin(s) == end(s));
     SEQAN_ASSERT_EQ(0u, length(s));
     {  // Test with const empty set.
         TSeedSet const & cs = s;
-        SEQAN_ASSERT_TRUE(begin(cs) == end(cs));
+        SEQAN_ASSERT(begin(cs) == end(cs));
         SEQAN_ASSERT_EQ(0u, length(cs));
     }
 
@@ -72,22 +72,22 @@ void testSeedsSeedSetContainerFunctions(TSeedSpec const &, TSeedSetSpec const &)
         typedef typename Iterator<TSeedSet, Rooted>::Type TIterator; // TODO(holtgrew): Why explicit rooted necessary?
         TIterator it(begin(s));
         ++it;
-        SEQAN_ASSERT_TRUE(it == end(s));
+        SEQAN_ASSERT(it == end(s));
     }
-    SEQAN_ASSERT_TRUE(TSeed(1, 2, 3) == value(begin(s)));
-    SEQAN_ASSERT_TRUE(TSeed(1, 2, 3) == front(s));
-    SEQAN_ASSERT_TRUE(TSeed(1, 2, 3) == back(s));
+    SEQAN_ASSERT(TSeed(1, 2, 3) == value(begin(s)));
+    SEQAN_ASSERT(TSeed(1, 2, 3) == front(s));
+    SEQAN_ASSERT(TSeed(1, 2, 3) == back(s));
     {  // Same tests with const seed set.
         TSeedSet const & cs = s;
         {
             typedef typename Iterator<TSeedSet const, Rooted>::Type TIterator; // TODO(holtgrew): Why explicit rooted necessary?
             TIterator it(begin(cs));
             ++it;
-            SEQAN_ASSERT_TRUE(it == end(cs));
+            SEQAN_ASSERT(it == end(cs));
         }
-        SEQAN_ASSERT_TRUE(TSeed(1, 2, 3) == value(begin(cs)));
-        SEQAN_ASSERT_TRUE(TSeed(1, 2, 3) == front(cs));
-        SEQAN_ASSERT_TRUE(TSeed(1, 2, 3) == back(cs));
+        SEQAN_ASSERT(TSeed(1, 2, 3) == value(begin(cs)));
+        SEQAN_ASSERT(TSeed(1, 2, 3) == front(cs));
+        SEQAN_ASSERT(TSeed(1, 2, 3) == back(cs));
     }
 }
 
@@ -221,7 +221,7 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(TSeedSpec const 
     addSeed(set, TSeed(3, 3, 3), Single());
     // Add seed with maximal diagonal distance 1, the two seeds are within this distance.
     bool ret = addSeed(set, TSeed(2, 2, 3), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     // std::cout << front(set) << std::endl;
     SEQAN_ASSERT_EQ(1u, length(set));
@@ -247,7 +247,7 @@ void testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(TSeedSpec const
     addSeed(set, TSeed(2, 2, 3), Single());
     // Add seed with maximal diagonal distance 1, the two seeds are within this distance.
     bool ret = addSeed(set, TSeed(3, 3, 3), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     SEQAN_ASSERT_EQ(1u, length(set));
     SEQAN_ASSERT_EQ(2u, getBeginDim0(front(set)));
@@ -315,7 +315,7 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedLength(TS
 
     // Add a seed to merge into a low-quality seed.
     bool ret = addSeed(set, TSeed(0, 0, 2), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is merged into the first one but the first one does
     // not exceed the quality threshold yet.
     SEQAN_ASSERT_EQ(0u, length(set));
@@ -344,7 +344,7 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(TSeed
 
     // Add a seed to merge into a high-quality seed.
     bool ret = addSeed(set, TSeed(0, 0, 2), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is merged into the first one and exceeds the quality
     // threshold.
     SEQAN_ASSERT_EQ(1u, length(set));
@@ -379,7 +379,7 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(TS
     TSeed s2(0, 0, 2);
     setScore(s2, -1);
     bool ret = addSeed(set, s2, 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is merged with the existing low-quality seed into one
     // of low quality.
     SEQAN_ASSERT_EQ(0u, length(set));
@@ -410,7 +410,7 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeed
     TSeed s2(0, 0, 2);
     setScore(s2, 1);
     bool ret = addSeed(set, s2, 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is merged with the existing low-quality seed into one
     // of sufficiently high quality.
     SEQAN_ASSERT_EQ(1u, length(set));
@@ -437,7 +437,7 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleNoThreshold(TSeedSpec
     addSeed(set, TSeed(4, 5, 3), Single());
     // Add seed with maximal distance 2, the two seeds are within this distance.
     bool ret = addSeed(set, TSeed(1, 1, 3), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), SimpleChain());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     SEQAN_ASSERT_EQ(1u, length(set));
     SEQAN_ASSERT_EQ(1u, getBeginDim0(front(set)));
@@ -462,7 +462,7 @@ void testSeedsSeedSetAddSeedSimpleChainRightChainingPossibleNoThreshold(TSeedSpe
     addSeed(set, TSeed(1, 1, 3), Single());
     // Add seed with maximal distance 2, the two seeds are within this distance.
     bool ret = addSeed(set, TSeed(4, 5, 3), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), SimpleChain());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     SEQAN_ASSERT_EQ(1u, length(set));
     SEQAN_ASSERT_EQ(1u, getBeginDim0(front(set)));
@@ -530,7 +530,7 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedLe
 
     // Add a seed to chain into a low-quality seed.
     bool ret = addSeed(set, TSeed(0, 0, 2), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary*/, Nothing(), Nothing(), SimpleChain());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained into the first one but the result does not
     // exceed the quality threshold yet.
     SEQAN_ASSERT_EQ(0u, length(set));
@@ -559,7 +559,7 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLengt
 
     // Add a seed to chain into a low-quality seed.
     bool ret = addSeed(set, TSeed(0, 0, 2), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary */, Nothing(), Nothing(), SimpleChain());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained into the first one and exceeds the quality
     // threshold.
     SEQAN_ASSERT_EQ(1u, length(set));
@@ -595,7 +595,7 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedSc
     TSeed s2(4, 4, 2);
     setScore(s2, 1);
     bool ret = addSeed(set, s2, 1, Nothing(), scoringScheme, Nothing(), Nothing(), SimpleChain());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained with the existing low-quality seed into one
     // of low quality.
     SEQAN_ASSERT_EQ(0u, length(set));
@@ -627,7 +627,7 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScore
     TSeed s2(4, 4, 2);
     setScore(s2, 2);
     bool ret = addSeed(set, s2, 1, Nothing(), scoringScheme, Nothing(), Nothing(), SimpleChain());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained with the existing low-quality seed into one
     // of sufficiently high quality.
     SEQAN_ASSERT_EQ(1u, length(set));
@@ -657,7 +657,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleNoThreshold(TSeedSpec const
     addSeed(set, TSeed(4, 5, 3), Single());
     // Add seed with maximal distance 1, bandwidth 2, the two seeds are within this distance.
     bool ret = addSeed(set, TSeed(1, 1, 3), 1, 2, Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, sequence0, sequence1, Chaos());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     SEQAN_ASSERT_EQ(1u, length(set));
     SEQAN_ASSERT_EQ(1u, getBeginDim0(front(set)));
@@ -685,7 +685,7 @@ void testSeedsSeedSetAddSeedChaosRightChainingPossibleNoThreshold(TSeedSpec cons
     addSeed(set, TSeed(1, 1, 3), Single());
     // Add seed with maximal distance 1, bandwidth 2, the two seeds are within this distance.
     bool ret = addSeed(set, TSeed(4, 5, 3), 1, 2, Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, sequence0, sequence1, Chaos());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
 
     SEQAN_ASSERT_EQ(1u, length(set));
     SEQAN_ASSERT_EQ(1u, getBeginDim0(front(set)));
@@ -762,7 +762,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedLength(T
 
     // Add a seed to chain into a low-quality seed.
     bool ret = addSeed(set, TSeed(0, 0, 2), 1, 2, Score<int, Simple>()/*TODO(holtgrew): unnecessary*/, sequence0, sequence1, Chaos());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained into the first one but the result does not
     // exceed the quality threshold yet.
     SEQAN_ASSERT_EQ(0u, length(set));
@@ -794,7 +794,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(TSee
 
     // Add a seed to chain into a low-quality seed.
     bool ret = addSeed(set, TSeed(0, 0, 2), 1, 2, Score<int, Simple>()/*TODO(holtgrew): unnecessary */, sequence0, sequence1, Chaos());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained into the first one and exceeds the quality
     // threshold.
     SEQAN_ASSERT_EQ(1u, length(set));
@@ -833,7 +833,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(T
     TSeed s2(4, 4, 2);
     setScore(s2, 1);
     bool ret = addSeed(set, s2, 1, 2, scoringScheme, sequence0, sequence1, Chaos());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained with the existing low-quality seed into one
     // of low quality.
     SEQAN_ASSERT_EQ(0u, length(set));
@@ -868,7 +868,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSee
     TSeed s2(4, 4, 2);
     setScore(s2, 2);
     bool ret = addSeed(set, s2, 1, 2, scoringScheme, sequence0, sequence1, Chaos());
-    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT(ret);
     // The seed is chained with the existing low-quality seed into one
     // of sufficiently high quality.
     SEQAN_ASSERT_EQ(1u, length(set));
