@@ -1499,7 +1499,7 @@ matchVerify(
 			{
 				// for RazerSErrors bestErrors == -maxScore
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
-				verifier.q.pairScore = verifier.q.score = maxScore;
+				verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
 				if (!verifier.oneMatchPerBucket)
 					verifier.push();
 				maxScore = minScore - 1;
@@ -1510,7 +1510,7 @@ matchVerify(
 	if (maxScore >= minScore)
 	{
 		verifier.m.endPos = verifier.m.beginPos + ndlLength;
-		verifier.q.pairScore = verifier.q.score = maxScore;
+		verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
 		return true;
@@ -1589,7 +1589,7 @@ matchVerify(
 				verifier.m.endPos = beginPosition(inf) + maxPos + 1;
 				verifier.q.errors = -maxScore;
 
-				if ((verifier.q.pairScore = verifier.q.score = maxScore) == 0)
+				if ((verifier.q.pairScore = verifier.q.score = 254 + maxScore) == 254)	// add 254 in order to avoid negative scores in SAM format
 					verifier.m.beginPos = verifier.m.endPos - ndlLength;
 				else
 				{
@@ -1656,7 +1656,7 @@ matchVerify(
 		verifier.m.endPos = beginPosition(inf) + maxPos + 1;
 		verifier.q.errors = -maxScore;
 
-		if ((verifier.q.pairScore = verifier.q.score = maxScore) == 0)
+		if ((verifier.q.pairScore = verifier.q.score = 254 + maxScore) == 254)	// add 254 in order to avoid negative scores in SAM format
 			verifier.m.beginPos = verifier.m.endPos - ndlLength;
 		else
 		{
@@ -1790,7 +1790,7 @@ matchVerify(
 			if (minQualSum <= verifier.options->absMaxQualSumErrors)
 			{
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
-				verifier.q.pairScore = verifier.q.score = -(int)minQualSum;
+				verifier.q.pairScore = verifier.q.score = 254 - (int)minQualSum;	// add 254 in order to avoid negative scores in SAM format
 				verifier.q.errors = minErrors;
 				verifier.push();
 				minQualSum = verifier.options->absMaxQualSumErrors + 1;
@@ -1801,7 +1801,7 @@ matchVerify(
 	if (minErrors <= maxErrors)
 	{
 		verifier.m.endPos = verifier.m.beginPos + ndlLength;
-		verifier.q.pairScore = verifier.q.score = -(int)minQualSum;
+		verifier.q.pairScore = verifier.q.score = 254 - (int)minQualSum;	// add 254 in order to avoid negative scores in SAM format
 		verifier.q.errors = minErrors;
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
