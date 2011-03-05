@@ -190,6 +190,11 @@ def drawBox(cr, jobTypes, section, offset, threadId, level):
   cr.set_source_rgb(*jobTypes[section.jobType].color)
   cr.rectangle(x, y, width, height)
   cr.fill()
+  cr.set_line_width(0.2)
+  cr.set_source_rgb(0, 0, 0)
+  cr.move_to(x + width, y)
+  cr.line_to(x + width, y + height)
+  cr.stroke()
 
 def drawBoxesForSection(cr, jobTypes, section, offset, threadId, level=0):
   drawBox(cr, jobTypes, section, offset, threadId, level)
