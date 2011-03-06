@@ -29,12 +29,15 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Code supporting metaprogramming.
+// ==========================================================================
 
-#ifndef SEQAN_BASIC_METAPROGRAMMING_H
-#define SEQAN_BASIC_METAPROGRAMMING_H
+#ifndef SEQAN_BASIC_BASIC_METAPROGRAMMING_H_
+#define SEQAN_BASIC_BASIC_METAPROGRAMMING_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -264,6 +267,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < __int64 base > struct Power<base, 0> { static const __uint64 VALUE = 1; };
 
 
+    // TODO(holtgrew): Does memset() really belong here? Used in find_myers_ukknonen.h, pump_lcp_core.h, pipe_sample.h, file_async
+
 	//////////////////////////////////////////////////////////////////////////////
 	// memset with fill size (using meta-programming)
 	//////////////////////////////////////////////////////////////////////////////
@@ -357,6 +362,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		MemsetConstValueWorker<SIZE, SIZE <= 32, c>::run((unsigned char*)ptr);
 	}
 
-}
+}  // namespace seqan
 
-#endif
+#endif  // #ifndef SEQAN_BASIC_BASIC_METAPROGRAMMING_H_

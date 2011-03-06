@@ -29,18 +29,29 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Definition of the Proxy class and the default specialization
+// IteratorProxy.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_PROXY_H
-#define SEQAN_HEADER_BASIC_PROXY_H
+#ifndef SEQAN_BASIC_BASIC_PROX_H_
+#define SEQAN_BASIC_BASIC_PROX_H_
 
+namespace seqan {
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+// ============================================================================
+// Forwards
+// ============================================================================
 
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-// Proxy
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Class Proxy
+// ----------------------------------------------------------------------------
+
 /**
 .Class.Proxy:
 ..cat:Basic
@@ -51,129 +62,19 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks.text:Use @Metafunction.Value@ to get the emulated type.
 An instance of $Proxy$ behaves like an object of its value type.
 $Proxy$ can be used as reference type (see @Metafunction.Reference@).
-..remarks.text:Note that functions that are both general and specialized for 
-the value type should be specialized for $Proxy<TSpec>$ too, 
+..remarks.text:Note that functions that are both general and specialized for
+the value type should be specialized for $Proxy<TSpec>$ too,
 since otherwise the general version will be called.
 ..include:seqan/basic.h
 */
 
 template <typename TSpec>
-struct Proxy;
+class Proxy;
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Specialization Iterator Proxy
+// ----------------------------------------------------------------------------
 
-///.Metafunction.Spec.param.T.type:Class.Proxy
-
-template <typename TSpec>
-struct Spec< Proxy<TSpec> >
-{
-	typedef TSpec Type;
-};
-template <typename TSpec>
-struct Spec< Proxy<TSpec> const>
-{
-	typedef TSpec Type;
-};
-
-template <typename TIterator>
-struct IteratorProxy;
-
-//////////////////////////////////////////////////////////////////////////////
-// Metafunctions
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Value.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Value< Proxy<IteratorProxy<TIterator> > >:
-	Value<TIterator>
-{
-};
-template <typename TIterator>
-struct Value< Proxy<IteratorProxy<TIterator> > const>
-{
-	typedef typename Value<TIterator>::Type const Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.GetValue.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct GetValue< Proxy<IteratorProxy<TIterator> > >:
-	GetValue<TIterator>
-{
-};
-template <typename TIterator>
-struct GetValue< Proxy<IteratorProxy<TIterator> > const>
-{
-	typedef typename GetValue<TIterator const>::Type Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Reference.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Reference< Proxy<IteratorProxy<TIterator> > >
-{
-	typedef Proxy<IteratorProxy<TIterator> > Type;
-};
-template <typename TIterator>
-struct Reference< Proxy<IteratorProxy<TIterator> > const >
-{
-	typedef Proxy<IteratorProxy<TIterator> > const Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Size.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Size< Proxy<IteratorProxy<TIterator> > >:
-	Size<TIterator>
-{
-};
-template <typename TIterator>
-struct Size< Proxy<IteratorProxy<TIterator> > const>:
-	Size<TIterator>
-{
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Difference.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Difference< Proxy<IteratorProxy<TIterator> > >:
-	Difference<TIterator>
-{
-};
-template <typename TIterator>
-struct Difference< Proxy<IteratorProxy<TIterator> > const>:
-	Difference<TIterator>
-{
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TSpec>
-typename GetValue<Proxy<TSpec> >::Type
-getValue(Proxy<TSpec> & me)
-{
-	return getValue(iter(me));
-}
-template <typename TSpec>
-typename GetValue<Proxy<TSpec> const>::Type
-getValue(Proxy<TSpec> const & me)
-{
-	return getValue(iter(me));
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Iterator Proxy
-//////////////////////////////////////////////////////////////////////////////
 /**
 .Spec.Iterator Proxy:
 ..cat:Proxies
@@ -189,444 +90,597 @@ iterator $TIterator$.
 template <typename TIterator>
 struct IteratorProxy;
 
-//____________________________________________________________________________
-
 template <typename TIterator>
-struct Proxy<IteratorProxy<TIterator> >
+class Proxy<IteratorProxy<TIterator> >
 {
 public:
-	typedef typename Value<Proxy>::Type TValue;
-	typedef typename GetValue<Proxy>::Type TAccessor;
+    typedef typename Value<Proxy>::Type TValue;
+    typedef typename GetValue<Proxy>::Type TAccessor;
 
-	typedef typename RemoveConst_<TAccessor>::Type TAccessor_NotConst;
+    typedef typename RemoveConst_<TAccessor>::Type TAccessor_NotConst;
 
-public:
-	TIterator data_iterator;
+    TIterator data_iterator;
 
-public:
-	Proxy(TIterator const _it):
-		data_iterator(_it)
-	{
-SEQAN_CHECKPOINT
-	}
-	Proxy(Proxy const & _other):
-		data_iterator(_other.data_iterator)
-	{
-SEQAN_CHECKPOINT
-	}
+    // ------------------------------------------------------------------------
+    // Constructors
+    // ------------------------------------------------------------------------
 
-	~Proxy()
-	{
-SEQAN_CHECKPOINT
-	}
+    Proxy(TIterator const _it)
+            : data_iterator(_it)
+    {
+        SEQAN_CHECKPOINT;
+    }
 
-	Proxy const &
-	operator = (Proxy const & _other) const
-	{
-SEQAN_CHECKPOINT
-		assignValue(data_iterator, getValue(_other.data_iterator));
-		return *this;
-	}
+    Proxy(Proxy const & _other)
+            : data_iterator(_other.data_iterator)
+    {
+        SEQAN_CHECKPOINT;
+    }
 
-	Proxy const &
-	operator = (TValue const & _value) const
-	{
-SEQAN_CHECKPOINT
-		assignValue(data_iterator, _value);
-		return *this;
-	}
+    // ------------------------------------------------------------------------
+    // Assignment operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
 
-	operator TAccessor_NotConst()
-	{
-SEQAN_CHECKPOINT
-		return getValue(data_iterator);
-	}
+    Proxy const &
+    operator=(Proxy const & _other)
+    {
+        SEQAN_CHECKPOINT;
+        assignValue(data_iterator, getValue(_other.data_iterator));
+        return *this;
+    }
 
-	operator TAccessor_NotConst() const
-	{
-SEQAN_CHECKPOINT
-		return getValue(data_iterator);
-	}
+    Proxy const &
+    operator=(TValue const & _value)
+    {
+        SEQAN_CHECKPOINT;
+        assignValue(data_iterator, _value);
+        return *this;
+    }
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Type conversion operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
 
-	//not documented
-//____________________________________________________________________________
+    // TODO(holtgrew): Is this necessary?
+    operator TAccessor_NotConst()
+    {
+        SEQAN_CHECKPOINT;
+        return getValue(data_iterator);
+    }
+
+    operator TAccessor_NotConst() const
+    {
+        SEQAN_CHECKPOINT;
+        return getValue(data_iterator);
+    }
 };
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Spec
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Spec.param.T.type:Class.Proxy
+
+template <typename TSpec>
+struct Spec<Proxy<TSpec> >
+{
+    typedef TSpec Type;
+};
+
+template <typename TSpec>
+struct Spec<Proxy<TSpec> const>
+{
+    typedef TSpec Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Value.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Value< Proxy<IteratorProxy<TIterator> > >
+        : Value<TIterator>
+{
+};
+
+template <typename TIterator>
+struct Value<Proxy<IteratorProxy<TIterator> > const>
+{
+    typedef typename Value<TIterator>::Type const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction GetValue
+// ----------------------------------------------------------------------------
+
+///.Metafunction.GetValue.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct GetValue< Proxy<IteratorProxy<TIterator> > >
+        : GetValue<TIterator>
+{
+};
+
+template <typename TIterator>
+struct GetValue< Proxy<IteratorProxy<TIterator> > const>
+{
+    typedef typename GetValue<TIterator const>::Type Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Reference
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Reference.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Reference<Proxy<IteratorProxy<TIterator> > >
+{
+    typedef Proxy<IteratorProxy<TIterator> > Type;
+};
+
+template <typename TIterator>
+struct Reference<Proxy<IteratorProxy<TIterator> > const>
+{
+    typedef Proxy<IteratorProxy<TIterator> > const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Size
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Size.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Size<Proxy<IteratorProxy<TIterator> > >
+        : Size<TIterator>
+{
+};
+
+template <typename TIterator>
+struct Size<Proxy<IteratorProxy<TIterator> > const>
+        : Size<TIterator>
+{
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Difference
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Difference.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Difference< Proxy<IteratorProxy<TIterator> > >
+        : Difference<TIterator>
+{
+};
+
+template <typename TIterator>
+struct Difference< Proxy<IteratorProxy<TIterator> > const>
+        : Difference<TIterator>
+{
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction CompareType
+// ----------------------------------------------------------------------------
+
+template <typename TSpec, typename T>
+struct CompareType<Proxy<TSpec>, T>
+{
+    typedef typename Value<Proxy<TSpec> >::Type TValue;
+    typedef typename RemoveConst_<TValue>::Type TValue_NoConst;
+    typedef typename CompareType<TValue_NoConst, T>::Type Type;
+};
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction getValue()
+// ----------------------------------------------------------------------------
+
+template <typename TSpec>
+typename GetValue<Proxy<TSpec> >::Type
+getValue(Proxy<TSpec> & me)
+{
+    return getValue(iter(me));
+}
+
+template <typename TSpec>
+typename GetValue<Proxy<TSpec> const>::Type
+getValue(Proxy<TSpec> const & me)
+{
+    return getValue(iter(me));
+}
+
+// ----------------------------------------------------------------------------
+// Metafunction iter()
+// ----------------------------------------------------------------------------
 
 template <typename TIterator>
 inline TIterator &
 iter(Proxy<IteratorProxy<TIterator> > & me)
 {
-	return me.data_iterator;
+    return me.data_iterator;
 }
+
 template <typename TIterator>
 inline TIterator const &
 iter(Proxy<IteratorProxy<TIterator> > const & me)
 {
-	return me.data_iterator;
+    return me.data_iterator;
 }
 
+// ----------------------------------------------------------------------------
+// Function convertImpl()
+// ----------------------------------------------------------------------------
 
-//////////////////////////////////////////////////////////////////////////////
-// Comparison
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TSpec, typename T>
-struct CompareType <Proxy<TSpec>, T>
-{
-	typedef typename Value<Proxy<TSpec> >::Type TValue;
-	typedef typename RemoveConst_<TValue>::Type TValue_NoConst;
-	typedef typename CompareType<TValue_NoConst, T>::Type Type;
-};
-
-//???TODO: Symmetrie von CompareType herstellen
-//____________________________________________________________________________
+// TODO(holtgrew): First variant even necessary?
 
 template <typename TTarget, typename T, typename TSpec>
 inline typename Convert<TTarget, Proxy<TSpec> >::Type
 convertImpl(Convert<TTarget, T> const,
-			Proxy<TSpec> & source)
+            Proxy<TSpec> & source)
 {
-	return convert<TTarget>(getValue(source));
+    return convert<TTarget>(getValue(source));
 }
+
 template <typename TTarget, typename T, typename TSpec>
 inline typename Convert<TTarget, Proxy<TSpec> const>::Type
 convertImpl(Convert<TTarget, T> const,
-			Proxy<TSpec> const & source)
+            Proxy<TSpec> const & source)
 {
-	return convert<TTarget>(getValue(source));
+    return convert<TTarget>(getValue(source));
 }
-//////////////////////////////////////////////////////////////////////////////
-// operator ==
+
+// ----------------------------------------------------------------------------
+// Function operator==()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TRight>
 inline bool
-operator == (Proxy<TSpec> const & left_, 
-			 TRight const & right_)
+operator==(Proxy<TSpec> const & left_,
+           TRight const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TLeft;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) == convert<TCompareType>(right_);
 }
 
 template <typename TLeft, typename TSpec>
 inline bool
-operator == (TLeft const & left_, 
-			 Proxy<TSpec> const & right_)
+operator==(TLeft const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TRight;
+    typedef typename CompareType<TRight, TLeft>::Type TCompareType;
+    return convert<TCompareType>(left_) == convert<TCompareType>(right_);
 }
 
 template <typename TLeftSpec, typename TRightSpec>
 inline bool
-operator == (Proxy<TLeftSpec> const & left_, 
-			 Proxy<TRightSpec> const & right_)
+operator==(Proxy<TLeftSpec> const & left_,
+           Proxy<TRightSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TLeftSpec> TLeft;
-	typedef Proxy<TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TLeftSpec> TLeft;
+    typedef Proxy<TRightSpec> TRight;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) == convert<TCompareType>(right_);
 }
 
 template <typename TSpec>
 inline bool
-operator == (Proxy<TSpec> const & left_, 
-			 Proxy<TSpec> const & right_)
+operator==(Proxy<TSpec> const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
-	return convert<TAccessor>(left_) == convert<TAccessor>(right_);
+    SEQAN_CHECKPOINT;
+    typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
+    return convert<TAccessor>(left_) == convert<TAccessor>(right_);
 }
 
-//____________________________________________________________________________
-// operator !=
+// ----------------------------------------------------------------------------
+// Function operator!=()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TRight>
 inline bool
-operator != (Proxy<TSpec> const & left_, 
-			 TRight const & right_)
+operator!=(Proxy<TSpec> const & left_,
+           TRight const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TLeft;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) != convert<TCompareType>(right_);
 }
 
 template <typename TLeft, typename TSpec>
 inline bool
-operator != (TLeft const & left_, 
-			 Proxy<TSpec> const & right_)
+operator!=(TLeft const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TRight;
+    typedef typename CompareType<TRight, TLeft>::Type TCompareType;
+    return convert<TCompareType>(left_) != convert<TCompareType>(right_);
 }
 
 template <typename TLeftSpec, typename TRightSpec>
 inline bool
-operator != (Proxy<TLeftSpec> const & left_, 
-			 Proxy<TRightSpec> const & right_)
+operator!=(Proxy<TLeftSpec> const & left_,
+           Proxy<TRightSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TLeftSpec> TLeft;
-	typedef Proxy<TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TLeftSpec> TLeft;
+    typedef Proxy<TRightSpec> TRight;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) != convert<TCompareType>(right_);
 }
 
 template <typename TSpec>
 inline bool
-operator != (Proxy<TSpec> const & left_, 
-			 Proxy<TSpec> const & right_)
+operator!=(Proxy<TSpec> const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
-	return convert<TAccessor>(left_) != convert<TAccessor>(right_);
+    SEQAN_CHECKPOINT;
+    typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
+    return convert<TAccessor>(left_) != convert<TAccessor>(right_);
 }
 
-
-//____________________________________________________________________________
-// operator <
+// ----------------------------------------------------------------------------
+// Function operator<()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TRight>
 inline bool
-operator < (Proxy<TSpec> const & left_, 
-			TRight const & right_)
+operator<(Proxy<TSpec> const & left_,
+          TRight const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TLeft;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) < convert<TCompareType>(right_);
 }
 
 template <typename TLeft, typename TSpec>
 inline bool
-operator < (TLeft const & left_, 
-			Proxy<TSpec> const & right_)
+operator<(TLeft const & left_,
+          Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TRight;
+    typedef typename CompareType<TRight, TLeft>::Type TCompareType;
+    return convert<TCompareType>(left_) < convert<TCompareType>(right_);
 }
 
 template <typename TLeftSpec, typename TRightSpec>
 inline bool
-operator < (Proxy<TLeftSpec> const & left_, 
-			Proxy<TRightSpec> const & right_)
+operator<(Proxy<TLeftSpec> const & left_,
+          Proxy<TRightSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TLeftSpec> TLeft;
-	typedef Proxy<TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TLeftSpec> TLeft;
+    typedef Proxy<TRightSpec> TRight;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) < convert<TCompareType>(right_);
 }
 
 template <typename TSpec>
 inline bool
-operator < (Proxy<TSpec> const & left_, 
-			Proxy<TSpec> const & right_)
+operator<(Proxy<TSpec> const & left_,
+          Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
-	return convert<TAccessor>(left_) < convert<TAccessor>(right_);
+    SEQAN_CHECKPOINT;
+    typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
+    return convert<TAccessor>(left_) < convert<TAccessor>(right_);
 }
 
-//____________________________________________________________________________
-// operator <=
+// ----------------------------------------------------------------------------
+// Function operator<=()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TRight>
 inline bool
-operator <= (Proxy<TSpec> const & left_, 
-			 TRight const & right_)
+operator<=(Proxy<TSpec> const & left_,
+           TRight const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TLeft;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
 }
 
 template <typename TLeft, typename TSpec>
 inline bool
-operator <= (TLeft const & left_, 
-			 Proxy<TSpec> const & right_)
+operator<=(TLeft const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TRight;
+    typedef typename CompareType<TRight, TLeft>::Type TCompareType;
+    return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
 }
 
 template <typename TLeftSpec, typename TRightSpec>
 inline bool
-operator <= (Proxy<TLeftSpec> const & left_, 
-			 Proxy<TRightSpec> const & right_)
+operator<=(Proxy<TLeftSpec> const & left_,
+           Proxy<TRightSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TLeftSpec> TLeft;
-	typedef Proxy<TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TLeftSpec> TLeft;
+    typedef Proxy<TRightSpec> TRight;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
 }
 
 template <typename TSpec>
 inline bool
-operator <= (Proxy<TSpec> const & left_, 
-			 Proxy<TSpec> const & right_)
+operator<=(Proxy<TSpec> const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
-	return convert<TAccessor>(left_) <= convert<TAccessor>(right_);
+    SEQAN_CHECKPOINT
+            typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
+    return convert<TAccessor>(left_) <= convert<TAccessor>(right_);
 }
 
 
-//____________________________________________________________________________
-// operator >
+// ----------------------------------------------------------------------------
+// Function operator>()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TRight>
 inline bool
-operator > (Proxy<TSpec> const & left_, 
-			TRight const & right_)
+operator>(Proxy<TSpec> const & left_,
+          TRight const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TLeft;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) > convert<TCompareType>(right_);
 }
 
 template <typename TLeft, typename TSpec>
 inline bool
-operator > (TLeft const & left_, 
-			Proxy<TSpec> const & right_)
+operator>(TLeft const & left_,
+          Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TRight;
+    typedef typename CompareType<TRight, TLeft>::Type TCompareType;
+    return convert<TCompareType>(left_) > convert<TCompareType>(right_);
 }
 
 template <typename TLeftSpec, typename TRightSpec>
 inline bool
-operator > (Proxy<TLeftSpec> const & left_, 
-			Proxy<TRightSpec> const & right_)
+operator>(Proxy<TLeftSpec> const & left_,
+          Proxy<TRightSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TLeftSpec> TLeft;
-	typedef Proxy<TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TLeftSpec> TLeft;
+    typedef Proxy<TRightSpec> TRight;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) > convert<TCompareType>(right_);
 }
 
 template <typename TSpec>
 inline bool
-operator > (Proxy<TSpec> const & left_, 
-			Proxy<TSpec> const & right_)
+operator>(Proxy<TSpec> const & left_,
+          Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
-	return convert<TAccessor>(left_) > convert<TAccessor>(right_);
+    SEQAN_CHECKPOINT;
+    typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
+    return convert<TAccessor>(left_) > convert<TAccessor>(right_);
 }
 
-
-//____________________________________________________________________________
-// operator >=
+// ----------------------------------------------------------------------------
+// Function operator>=()
+// ----------------------------------------------------------------------------
 
 template <typename TSpec, typename TRight>
 inline bool
-operator >= (Proxy<TSpec> const & left_, 
-			 TRight const & right_)
+operator>=(Proxy<TSpec> const & left_,
+           TRight const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TLeft;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
 }
 
 template <typename TLeft, typename TSpec>
 inline bool
-operator >= (TLeft const & left_, 
-			 Proxy<TSpec> const & right_)
+operator>=(TLeft const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TSpec> TRight;
+    typedef typename CompareType<TRight, TLeft>::Type TCompareType;
+    return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
 }
 
 template <typename TLeftSpec, typename TRightSpec>
 inline bool
-operator >= (Proxy<TLeftSpec> const & left_, 
-			 Proxy<TRightSpec> const & right_)
+operator>=(Proxy<TLeftSpec> const & left_,
+           Proxy<TRightSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef Proxy<TLeftSpec> TLeft;
-	typedef Proxy<TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
+    SEQAN_CHECKPOINT;
+    typedef Proxy<TLeftSpec> TLeft;
+    typedef Proxy<TRightSpec> TRight;
+    typedef typename CompareType<TLeft, TRight>::Type TCompareType;
+    return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
 }
 
 template <typename TSpec>
 inline bool
-operator >= (Proxy<TSpec> const & left_, 
-			 Proxy<TSpec> const & right_)
+operator>=(Proxy<TSpec> const & left_,
+           Proxy<TSpec> const & right_)
 {
-SEQAN_CHECKPOINT
-	typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
-	return convert<TAccessor>(left_) >= convert<TAccessor>(right_);
+    SEQAN_CHECKPOINT;
+    typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
+    return convert<TAccessor>(left_) >= convert<TAccessor>(right_);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function operator>>();  Reading from streams.
+// ----------------------------------------------------------------------------
 
 template <typename TStream, typename TSpec>
 inline TStream &
-operator >> (TStream & strm,
-			 Proxy<TSpec> & proxy)
+operator>>(TStream & strm,
+           Proxy<TSpec> & proxy)
 {
-	typedef Proxy<TSpec> TProxy;
-	typedef typename Value<TProxy>::Type TValue;
-	TValue temp;
-	strm >> temp;
-	assignValue(iter(proxy), temp);
-	return strm;
+    typedef Proxy<TSpec> TProxy;
+    typedef typename Value<TProxy>::Type TValue;
+    TValue temp;
+    strm >> temp;
+    assignValue(iter(proxy), temp);
+    return strm;
 }
-template <typename TStream, typename TSpec>
-inline TStream &
-operator >> (TStream & strm,
-			 Proxy<TSpec> const& proxy)
-{
-	typedef Proxy<TSpec> TProxy;
-	typedef typename Value<TProxy>::Type TValue;
-	TValue temp;
-	strm >> temp;
-	assignValue(iter(proxy), temp);
-	return strm;
-}
-
 
 template <typename TStream, typename TSpec>
 inline TStream &
-operator << (TStream & strm,
-			 Proxy<TSpec> & proxy)
+operator>>(TStream & strm,
+           Proxy<TSpec> const& proxy)
+{
+    typedef Proxy<TSpec> TProxy;
+    typedef typename Value<TProxy>::Type TValue;
+    TValue temp;
+    strm >> temp;
+    assignValue(iter(proxy), temp);
+    return strm;
+}
+
+// ----------------------------------------------------------------------------
+// Function operator<<();  Writing to streams.
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Is the first variant even necessary?
+
+template <typename TStream, typename TSpec>
+inline TStream &
+operator<<(TStream & strm,
+           Proxy<TSpec> & proxy)
+{
+    return strm << getValue(proxy);
+}
+template <typename TStream, typename TSpec>
+inline TStream &
+operator<<(TStream & strm,
+           Proxy<TSpec> const & proxy)
 {
 	return strm << getValue(proxy);
 }
-template <typename TStream, typename TSpec>
-inline TStream &
-operator << (TStream & strm,
-			 Proxy<TSpec> const & proxy)
-{
-	return strm << getValue(proxy);
-}
 
+}  // namespace seqan
 
-//////////////////////////////////////////////////////////////////////////////
-} //namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_PROX_H_

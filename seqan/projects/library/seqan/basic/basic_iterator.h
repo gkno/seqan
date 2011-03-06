@@ -29,15 +29,23 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Iterator interface with default implementations.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_ITERATOR_H
-#define SEQAN_HEADER_BASIC_ITERATOR_H
+#ifndef SEQAN_BASIC_BASIC_ITERATOR_H_
+#define SEQAN_BASIC_BASIC_ITERATOR_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-//////////////////////////////////////////////////////////////////////////////
-// TAGS
-//////////////////////////////////////////////////////////////////////////////
+namespace seqan {
+    
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
 /**
 .Tag.Iterator Spec:
@@ -65,10 +73,13 @@ typedef Tag<Rooted_> const Rooted;
 struct Standard_;
 typedef Tag<Standard_> const Standard;
 
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-// METAFUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction DefaultIteratorSpec
+// ----------------------------------------------------------------------------
 
 /**
 .Metafunction.DefaultIteratorSpec:
@@ -88,7 +99,9 @@ struct DefaultIteratorSpec
 	typedef Standard Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction DefaultGetIteratorSpec
+// ----------------------------------------------------------------------------
 
 /**
 .Metafunction.DefaultGetIteratorSpec:
@@ -111,7 +124,9 @@ struct DefaultGetIteratorSpec
 	typedef Rooted Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction Iterator
+// ----------------------------------------------------------------------------
 
 /**
 .Metafunction.Iterator:
@@ -131,24 +146,20 @@ struct DefaultGetIteratorSpec
 ..include:seqan/basic.h
 */
 
-//____________________________________________________________________________
-
 template <typename T, typename TSpec>
 struct Iterator_Default_Imp;
 
 //Iterator_Default_Imp<T, Standard> is implemented in basic_iterator_simple.h
 //Iterator_Default_Imp<T, Rooted> is implemented in basic_iterator_adaptor.h 
 
-//____________________________________________________________________________
-
 template <typename T, typename TSpec = typename DefaultIteratorSpec<T>::Type>
-struct Iterator:
-	Iterator_Default_Imp<T, TSpec>
+struct Iterator : Iterator_Default_Imp<T, TSpec>
 {
 };
 
-
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction Container
+// ----------------------------------------------------------------------------
 
 /**
 .Metafunction.Container:
@@ -168,14 +179,13 @@ struct Container
 	typedef T Type;
 };
 
+// ============================================================================
+// Functions
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-// GENERAL FUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-// value
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function value()
+// ---------------------------------------------------------------------------
 
 /**
 .Function.value:
@@ -190,31 +200,30 @@ template <typename T>
 inline typename Reference<T>::Type
 value(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return *me;
 } 
+
 template <typename T>
 inline typename Reference<T const>::Type
 value(T const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return *me;
 } 
-
 
 template <typename T>
 inline T &
 value(T * me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return *me;
 } 
 
-//////////////////////////////////////////////////////////////////////////////
-// getValue
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function getValue()
+// ---------------------------------------------------------------------------
 
-//unary getValue
 /**
 .Function.getValue:
 ..cat:Iteration
@@ -230,14 +239,15 @@ template <typename T>
 inline typename GetValue<T>::Type
 getValue(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return value(me);
-} 
+}
+
 template <typename T>
 inline typename GetValue<T const>::Type
 getValue(T const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return value(me);
 } 
 
@@ -245,19 +255,21 @@ template <typename T>
 inline T &
 getValue(T * me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return value(me);
 } 
 
-//////////////////////////////////////////////////////////////////////////////
-//toGetValue
-//////////////////////////////////////////////////////////////////////////////
-//Nimmt eine Reference und macht daraus einen GetValue
-//???TODO toGetValue()
+// ---------------------------------------------------------------------------
+// Function toGetValue()
+// ---------------------------------------------------------------------------
 
-//////////////////////////////////////////////////////////////////////////////
-// assignValue
-//////////////////////////////////////////////////////////////////////////////
+//Nimmt eine Reference und macht daraus einen GetValue
+// TODO(doering):toGetValue()
+
+// ---------------------------------------------------------------------------
+// Function assignValue()
+// ---------------------------------------------------------------------------
+
 /**
 .Function.assignValue:
 ..cat:Iteration
@@ -279,7 +291,7 @@ inline void
 assignValue(T & me,
 			TValue const & _value)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(value(me), _value);
 } 
 
@@ -289,13 +301,13 @@ inline void
 assignValue(T const & me,
 			TValue const & _value)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(value(me), _value);
 } 
 
-//////////////////////////////////////////////////////////////////////////////
-// moveValue
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function moveValue()
+// ---------------------------------------------------------------------------
 
 /**
 .Function.moveValue:
@@ -319,20 +331,23 @@ inline void
 moveValue(T & me,
 		  TValue const & _value)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	move(value(me), _value);
 }
+
 //const version for iterators as targets
 template <typename T, typename TValue>
 inline void
 moveValue(T const & me,
 		  TValue const & _value)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	move(value(me), _value);
 } 
 
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function container()
+// ---------------------------------------------------------------------------
 
 /**
 .Function.container:
@@ -348,14 +363,17 @@ SEQAN_CHECKPOINT
 */
 
 template <typename T>
-inline typename Container<T>::Type &
+inline
+typename Container<T>::Type &
 container(T me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return me;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function position()
+// ---------------------------------------------------------------------------
 
 /**
 .Function.position:
@@ -378,7 +396,7 @@ template <typename T>
 inline typename Position<T>::Type 
 position(T * /*me*/)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return 0;
 }
 
@@ -387,16 +405,13 @@ inline typename Position<TContainer>::Type
 position(TIterator const & it,
 		 TContainer const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it - begin(me, Standard());
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////
-// atBegin
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function atBegin()
+// ---------------------------------------------------------------------------
 
 /**
 .Function.atBegin:
@@ -413,13 +428,13 @@ SEQAN_CHECKPOINT
 ..include:seqan/basic.h
 */
 
-//TODO???: Was, wenn der Container leer ist?
+// TODO(doering): Was, wenn der Container leer ist?
 
 template <typename T, typename TContainer>
 inline bool
 atBegin(T const & it, TContainer const & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == begin(cont, Standard());	
 }
 
@@ -427,7 +442,7 @@ template <typename T, typename TContainer>
 inline bool
 atBegin(T const & it, TContainer & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == begin(cont, Standard());
 }
 
@@ -435,7 +450,7 @@ template <typename T, typename TContainer>
 inline bool
 atBegin(T & it, TContainer & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == begin(cont, Standard());
 }
 
@@ -443,24 +458,22 @@ template <typename T, typename TContainer>
 inline bool
 atBegin(T & it, TContainer const & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == begin(cont, Standard());
 }
-//____________________________________________________________________________
 
 template <typename T>
 inline bool
 atBegin(T const & it)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return atBegin(it, container(it));	
 }
 
+// ---------------------------------------------------------------------------
+// Function atEnd()
+// ---------------------------------------------------------------------------
 
-
-//////////////////////////////////////////////////////////////////////////////
-// atEnd
-//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.atEnd:
 ..cat:Iteration
@@ -484,15 +497,16 @@ inline bool
 atEnd(T & it, 
 	  TContainer const & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == end(cont, Standard());	
 }
+
 template <typename T, typename TContainer>
 inline bool
 atEnd(T const & it, 
 	  TContainer const & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == end(cont, Standard());	
 }
 
@@ -501,37 +515,39 @@ inline bool
 atEnd(T & it,
 	  TContainer & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == end(cont, Standard());
 }
+
 template <typename T, typename TContainer>
 inline bool
 atEnd(T const & it,
 	  TContainer & cont)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return it == end(cont, Standard());
 }
-//____________________________________________________________________________
 
 template <typename T>
 inline bool
 atEnd(T & it)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return atEnd(it, container(it));	
 }
+
 template <typename T>
 inline bool
 atEnd(T const & it)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return atEnd(it, container(it));	
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// goBegin
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function goBegin()
+// ---------------------------------------------------------------------------
+
 /**
 .Function.goBegin:
 ..cat:Iteration
@@ -550,14 +566,16 @@ otherwise $container$ is required.
 ..see:Function.goEnd
 ..include:seqan/basic.h
 */
+
 template <typename TIterator, typename TContainer>
 inline void
 goBegin(TIterator & it,
 		TContainer & container)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	it = begin(container);
 }
+
 /*
 template <typename TIterator, typename TContainer>
 inline void
@@ -573,13 +591,14 @@ template <typename TIterator>
 inline void
 goBegin(TIterator & it)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	goBegin(it, container(it));
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// goEnd
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function goEnd()
+// ---------------------------------------------------------------------------
+
 /**
 .Function.goEnd:
 ..cat:Iteration
@@ -599,20 +618,22 @@ otherwise $container$ is required.
 ..see:Function.goEnd
 ..include:seqan/basic.h
 */
+
 template <typename TIterator, typename TContainer>
 inline void
 goEnd(TIterator & it,
 	  TContainer & container)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	it = end(container);
 }
+
 template <typename TIterator, typename TContainer>
 inline void
 goEnd(TIterator & it,
 	  TContainer const & container)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	it = end(container);
 }
 
@@ -620,13 +641,14 @@ template <typename TIterator>
 inline void
 goEnd(TIterator & it)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	goEnd(it, container(it));
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// goNext
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function goNext()
+// ---------------------------------------------------------------------------
+
 /**
 .Function.goNext:
 ..cat:Iteration
@@ -645,13 +667,14 @@ template <typename TIterator>
 inline void
 goNext(TIterator & it)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	++it;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// goFurther
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function goFurther()
+// ---------------------------------------------------------------------------
+
 /**
 .Function.goFurther:
 ..cat:Iteration
@@ -669,15 +692,18 @@ SEQAN_CHECKPOINT
 ..include:seqan/basic.h
 */
 
-template <typename TIterator, typename TDiff> inline
-void goFurther(TIterator & it, TDiff steps)
+template <typename TIterator, typename TDiff>
+inline void
+goFurther(TIterator & it,
+          TDiff steps)
 {	// return distance type from arbitrary argument
     it += steps;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// goPrevious
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function goPrevious()
+// ---------------------------------------------------------------------------
+
 /**
 .Function.goPrevious:
 ..cat:Iteration
@@ -697,13 +723,14 @@ template <typename TIterator>
 inline void
 goPrevious(TIterator & it)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	--it;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// difference
-//////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------
+// Function difference()
+// ---------------------------------------------------------------------------
+
 /**
 .Function.difference:
 ..cat:Iteration
@@ -724,19 +751,19 @@ SEQAN_CHECKPOINT
 ..include:seqan/basic.h
 */
 
-template <typename TIterator> inline
-typename Difference<TIterator>::Type difference(
-	TIterator const & begin, 
-	TIterator const & end)
-{	// return distance type from arbitrary argument
-SEQAN_CHECKPOINT
+template <typename TIterator>
+inline
+typename Difference<TIterator>::Type
+difference(TIterator const & begin, 
+           TIterator const & end)
+{
+    SEQAN_CHECKPOINT;
     return end - begin;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// goNil
-//////////////////////////////////////////////////////////////////////////////
-
+// ---------------------------------------------------------------------------
+// Function goNil()
+// ---------------------------------------------------------------------------
 
 /**
 .Function.goNil:
@@ -754,7 +781,7 @@ template <typename TIterator>
 inline void
 goNil(TIterator & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	me = TIterator();
 }
 
@@ -762,15 +789,14 @@ template <typename TIterator>
 inline void
 goNil(TIterator * & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	me = 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// atNil
-//////////////////////////////////////////////////////////////////////////////
-
-
+// ---------------------------------------------------------------------------
+// Function atNil()
+// ---------------------------------------------------------------------------
+    
 /**
 .Function.atNil:
 ..cat:Iteration
@@ -788,21 +814,18 @@ template <typename TIterator>
 inline bool
 atNil(TIterator & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return me == TIterator();
 }
-
 
 template <typename TIterator>
 inline bool
 atNil(TIterator * me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return me == 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+}  // namespace seqan
 
-} //namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_ITERATOR_H_

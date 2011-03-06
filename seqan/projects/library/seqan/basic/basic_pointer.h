@@ -29,87 +29,111 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Metafunctions for arrays/pointers.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_POINTER_H
-#define SEQAN_HEADER_BASIC_POINTER_H
+// TODO(holtgrew): Should this not go into module sequence into header adapt_array_pointer.h?
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#ifndef SEQAN_BASIC_BASIC_POINTER_H_
+#define SEQAN_BASIC_BASIC_POINTER_H_
 
-//////////////////////////////////////////////////////////////////////////////
+namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Adaption.char array
 
 template <typename TValue>
-struct Value< TValue * >
+struct Value<TValue *>
 {
 	typedef TValue Type;
 };
+
 template <typename TValue>
-struct Value< TValue * const>
+struct Value<TValue * const>
 {
 	typedef TValue Type;
 };
+
+// TODO(holtgrew): Is this still a problem with dropped 2003 support of VC++?
 
 //The next two metafunctions dont work in VC++ due to a compiler bug.
 //(the default implementation in common_type.h is called instead)
 //work-around: convert arrays to pointers.
 template <typename TValue, size_t SIZE>
-struct Value< TValue [SIZE] >
-{
-	typedef TValue Type;
-};
-template <typename TValue, size_t SIZE>
-struct Value< TValue const [SIZE] >
+struct Value<TValue [SIZE]>
 {
 	typedef TValue Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
+template <typename TValue, size_t SIZE>
+struct Value<TValue const [SIZE]>
+{
+	typedef TValue Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Iterator
+// ----------------------------------------------------------------------------
 
 ///.Metafunction.Iterator.param.T.type:Adaption.char array
 
 template <typename TValue>
-struct Iterator< TValue *, Standard>
+struct Iterator<TValue *, Standard>
 {
 	typedef TValue * Type;
 };
+
 template <typename TValue>
-struct Iterator< TValue * const, Standard>
+struct Iterator<TValue * const, Standard>
 {
 	typedef TValue * Type;
 };
 
-//____________________________________________________________________________
-
 template <typename TValue, size_t SIZE>
-struct Iterator< TValue [SIZE], Standard>:
-	Iterator<TValue *, Standard>
-{
-};
-template <typename TValue, size_t SIZE>
-struct Iterator< TValue const [SIZE], Standard>:
-	Iterator<TValue const *, Standard>
+struct Iterator<TValue [SIZE], Standard>
+        : Iterator<TValue *, Standard>
 {
 };
 
 template <typename TValue, size_t SIZE>
-struct Iterator< TValue [SIZE], Rooted>:
-	Iterator<TValue *, Rooted>
+struct Iterator<TValue const [SIZE], Standard>
+        : Iterator<TValue const *, Standard>
 {
 };
+
 template <typename TValue, size_t SIZE>
-struct Iterator< TValue const [SIZE], Rooted>:
-	Iterator<TValue const *, Rooted>
+struct Iterator<TValue [SIZE], Rooted>
+        : Iterator<TValue *, Rooted>
 {
 };
 
+template <typename TValue, size_t SIZE>
+struct Iterator<TValue const [SIZE], Rooted>
+        : Iterator<TValue const *, Rooted>
+{
+};
 
+// ============================================================================
+// Functions
+// ============================================================================
 
+}  // namespace seqan
 
-//////////////////////////////////////////////////////////////////////////////
-}// namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_POINTER_H_

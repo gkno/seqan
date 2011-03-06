@@ -6,6 +6,13 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Cleaned up various headers in basic module, added documentation for `ProfileType` class.
+ * Cleanup of ''basic_proxy.h'' header, making `Proxy` a `class` instead of a `struct`.
+ * Removing empty ''basic_operator.h''.
+ * Removing `VoidHolder<>`, in ''basic_holder_dynamic.h''.
+ * Documentation and cleanup of `LogValue<>`.
+ * Documentation for `VolatilePtr<>`.
+ * Removing ''basic_counted_ptr.h'' that contained only unused code.
  * Did some renaming of debugging/testing assertion macros.
   * `SEQAN_ASSERT_TRUE` is now called `SEQAN_ASSERT` (`SEQAN_ASSERT_TRUE_MSG` is now `SEQAN_ASSERT_MSG`).
   * The old `SEQAN_ASSERT` macro from old testing/debugging system has been removed, along with the `SEQAN_CHECK*`, `SEQAN_REPORT`, `SEQAN_DO*` macros.

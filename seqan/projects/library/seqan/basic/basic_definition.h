@@ -29,6 +29,12 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Basic definitions and metaprogramming stuff.
+// ==========================================================================
+
+// TODO(holtgrew): Move metaprogramming stuff into basic_metaprogramming.h, the basic tag definitions into basic_tags.h, the log2, _min, _max, _isSameType stuff into basic_math.h.
 
 #ifndef SEQAN_HEADER_BASIC_DEFINITION_H
 #define SEQAN_HEADER_BASIC_DEFINITION_H

@@ -36,6 +36,8 @@
 // SEQAN_PRAGMA_IF_PARALLEL.
 // ==========================================================================
 
+// TODO(holtgrew): Add support for documenting macros in DDDoc and document.
+
 #ifndef SEQAN_BASIC_BASIC_PARALLELISM_H_
 #define SEQAN_BASIC_BASIC_PARALLELISM_H_
 

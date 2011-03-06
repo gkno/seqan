@@ -29,17 +29,20 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Global tag definitions.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_TAG_H
-#define SEQAN_HEADER_BASIC_TAG_H
+// TODO(holtgrew): This should probably be minimalized, tags should be moved to single modules whenever possible.
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#ifndef SEQAN_BASIC_BASIC_TAG_H_
+#define SEQAN_BASIC_BASIC_TAG_H_
 
+namespace seqan {
 
 //////////////////////////////////////////////////////////////////////////////
 
-// TODO(holtgrew): Is this used at all?
 /**
 .Tag.DotDrawing
 ..cat:Input/Output
@@ -253,6 +256,6 @@ typedef Tag<Blat_> const Blat;
 
 //////////////////////////////////////////////////////////////////////////////
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_TAG_H_

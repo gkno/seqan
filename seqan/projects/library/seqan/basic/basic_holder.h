@@ -29,15 +29,18 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Implementation of the Holder class and specializations.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_HOLDER_H
-#define SEQAN_HEADER_BASIC_HOLDER_H
+#ifndef SEQAN_BASIC_BASIC_HOLDER_H_
+#define SEQAN_BASIC_BASIC_HOLDER_H_
 
 // TODO(holtgrew): Are holders on pointers used anywhere?
 // TODO(holtgrew): What about Simple holders? What about Tristate2?
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
 
 //////////////////////////////////////////////////////////////////////////////
 // Tags
@@ -1631,8 +1634,8 @@ SEQAN_CHECKPOINT
 }
 //////////////////////////////////////////////////////////////////////////////
 
-} //namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_HOLDER_H_
 
 

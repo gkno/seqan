@@ -29,9 +29,15 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Interface specification functions for types that have a host.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_HOST_H
-#define SEQAN_HEADER_BASIC_HOST_H
+// TODO(holtgrew): This looks a bit unused.
+
+#ifndef SEQAN_BASIC_BASIC_HOST_H_
+#define SEQAN_BASIC_BASIC_HOST_H_
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -176,8 +182,6 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-} //namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
-
-
+#endif  // #ifndef SEQAN_BASIC_BASIC_HOST_H_

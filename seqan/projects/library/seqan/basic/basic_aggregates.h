@@ -29,12 +29,15 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Pairs, triples and tuple types, also bit-compressed versions.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_AGGREGATES_H
-#define SEQAN_HEADER_BASIC_AGGREGATES_H
+#ifndef SEQAN_BASIC_BASIC_AGGREGATES_H_
+#define SEQAN_BASIC_BASIC_AGGREGATES_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
 
 //____________________________________________________________________________
 
@@ -727,6 +730,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		return _left.i1 != _right.i1 || _left.i2 != _right.i2 || _left.i3 != _right.i3;
 	}
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_AGGREGATES_H_

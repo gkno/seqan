@@ -91,7 +91,6 @@
 
 #include <seqan/basic/basic_converter.h>
 #include <seqan/basic/basic_compare.h>
-#include <seqan/basic/basic_operator.h>
 
 #include <seqan/basic/basic_host.h>
 
@@ -130,11 +129,8 @@
 
 //____________________________________________________________________________
 
-#include <seqan/basic/basic_holder_dynamic.h>
-
 //____________________________________________________________________________
 
-//#include <seqan/basic/basic_counted_ptr>
 #include <seqan/basic/basic_volatile_ptr.h>
 
 #include <seqan/basic/basic_aggregates.h>

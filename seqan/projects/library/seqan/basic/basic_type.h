@@ -29,13 +29,17 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Definition of basic Metafunctions.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_TYPE_H
-#define SEQAN_HEADER_BASIC_TYPE_H
+// TODO(holtgrew): Rename to "shared metafunctions.h"?
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#ifndef SEQAN_BASIC_BASIC_TYPE_H_
+#define SEQAN_BASIC_BASIC_TYPE_H_
 
+namespace seqan {
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -722,6 +726,6 @@ struct IsIntegral<T const> {
 	typedef typename IsIntegral<T>::Type Type;
 };
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_TYPE_H_
