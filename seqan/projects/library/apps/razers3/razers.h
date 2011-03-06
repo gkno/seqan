@@ -1589,7 +1589,8 @@ matchVerify(
 				verifier.m.endPos = beginPosition(inf) + maxPos + 1;
 				verifier.q.errors = -maxScore;
 
-				if ((verifier.q.pairScore = verifier.q.score = 254 + maxScore) == 254)	// add 254 in order to avoid negative scores in SAM format
+				verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
+				if (maxScore == 0)
 					verifier.m.beginPos = verifier.m.endPos - ndlLength;
 				else
 				{
@@ -1656,7 +1657,9 @@ matchVerify(
 		verifier.m.endPos = beginPosition(inf) + maxPos + 1;
 		verifier.q.errors = -maxScore;
 
-		if ((verifier.q.pairScore = verifier.q.score = 254 + maxScore) == 254)	// add 254 in order to avoid negative scores in SAM format
+
+		verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
+		if (maxScore == 0)
 			verifier.m.beginPos = verifier.m.endPos - ndlLength;
 		else
 		{
