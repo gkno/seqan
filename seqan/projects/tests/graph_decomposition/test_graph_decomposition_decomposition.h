@@ -51,12 +51,13 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
 {
     using namespace seqan;
 
-    typedef Graph<Tree<> > TTree;
-    typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
-    typedef String<UndirectedBuildingBlock> TBlockDescriptors;
     typedef Graph<Undirected<> > TGraph;
     typedef typename VertexDescriptor<TGraph>::Type TGraphVertexDescriptor;
     typedef typename EdgeDescriptor<TGraph>::Type TGraphEdgeDescriptor;
+
+    // ------------------------------------------------------------------------
+    // Build Test Data
+    // ------------------------------------------------------------------------
 
     // Build the same graph as in Stiege's example in the 1996 paper, Figure 1.
     TGraph graph;
@@ -125,113 +126,115 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     TGraphEdgeDescriptor j2_j3 = addEdge(graph, j2, j3);
     TGraphEdgeDescriptor j3_j4 = addEdge(graph, j3, j4);
 
+    // ------------------------------------------------------------------------
+    // Call Function To Test
+    // ------------------------------------------------------------------------
+
+    typedef GraphDecomposition<TGraph, StandardDecomposition> TGraphDecomposition;
+
+    TGraphDecomposition gd(graph);
+    decomposeGraph(gd, graph);
+    
     // write(std::cout, graph, DotDrawing());
 
-    // Perform standard graph decomposition.
-    typedef String<String<TTreeVertexDescriptor> > TVertexBlocksMap;
-    typedef String<TTreeVertexDescriptor> TEdgeBlockMap;
+    // ------------------------------------------------------------------------
+    // Check Result
+    // ------------------------------------------------------------------------
 
-    TTree clusterTree;
-    TBlockDescriptors blockDescriptors;
-    TVertexBlocksMap vertexBlocks;
-    TEdgeBlockMap edgeBlock;
-    decomposeGraphStiege(clusterTree, blockDescriptors, vertexBlocks, edgeBlock, graph);
+    // Check clusterTree(gd) and clusterNodeCargoMap(gd) first.
+    SEQAN_ASSERT_EQ(length(clusterNodeCargoMap(gd)) - 2, numVertices(clusterTree(gd)));  // Two components without stopfree kernel.
 
-    // Check result.
-    //
-    // Check clusterTree and blockDescriptors first.
-    SEQAN_ASSERT_EQ(length(blockDescriptors) - 2, numVertices(clusterTree));  // Two components without stopfree kernel.
+    typedef typename ClusterTree<TGraphDecomposition>::Type TClusterTree;
+    typedef typename Iterator<TClusterTree, AdjacencyIterator>::Type TAdjacencyIterator;
+    typedef typename VertexDescriptor<TClusterTree>::Type TVertexDescriptor;
 
-    typedef typename Iterator<TTree, AdjacencyIterator>::Type TAdjacencyIterator;
-    typedef typename VertexDescriptor<TTree>::Type TVertexDescriptor;
-
-    TVertexDescriptor r = root(clusterTree);
-    TAdjacencyIterator itR(clusterTree, r);
+    TVertexDescriptor r = root(clusterTree(gd));
+    TAdjacencyIterator itR(clusterTree(gd), r);
     SEQAN_ASSERT_NOT(atEnd(itR));
     TVertexDescriptor pc1 = *itR;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, pc1).blockType, BLOCK_PROPER_COMPONENT);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), pc1), BLOCK_PROPER_COMPONENT);
     // { pc1
-    TAdjacencyIterator itPc1(clusterTree, pc1);
+    TAdjacencyIterator itPc1(clusterTree(gd), pc1);
     SEQAN_ASSERT_NOT(atEnd(itPc1));
     TVertexDescriptor pt = *itPc1;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, pt).blockType, BLOCK_PERIPHERAL_TREE);
-    SEQAN_ASSERT_EQ(numChildren(clusterTree, pt), 0u);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), pt), BLOCK_PERIPHERAL_TREE);
+    SEQAN_ASSERT_EQ(numChildren(clusterTree(gd), pt), 0u);
     goNext(itPc1);
     SEQAN_ASSERT(atEnd(itPc1));
     // } pc1
     goNext(itR);
     SEQAN_ASSERT_NOT(atEnd(itR));
     TVertexDescriptor ip1 = *itR;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, ip1).blockType, BLOCK_IMPROPER_COMPONENT);
-    SEQAN_ASSERT_EQ(numChildren(clusterTree, ip1), 0u);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), ip1), BLOCK_IMPROPER_COMPONENT);
+    SEQAN_ASSERT_EQ(numChildren(clusterTree(gd), ip1), 0u);
     goNext(itR);
     SEQAN_ASSERT_NOT(atEnd(itR));
     TVertexDescriptor pc2 = *itR;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, pc2).blockType, BLOCK_PROPER_COMPONENT);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), pc2), BLOCK_PROPER_COMPONENT);
     // { pc2
-    TAdjacencyIterator itPc2(clusterTree, pc2);
+    TAdjacencyIterator itPc2(clusterTree(gd), pc2);
     SEQAN_ASSERT_NOT(atEnd(itPc2));
     TVertexDescriptor pt1 = *itPc2;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, pt1).blockType, BLOCK_PERIPHERAL_TREE);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), pt1), BLOCK_PERIPHERAL_TREE);
     goNext(itPc2);
     SEQAN_ASSERT_NOT(atEnd(itPc2));
     TVertexDescriptor pt2 = *itPc2;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, pt2).blockType, BLOCK_PERIPHERAL_TREE);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), pt2), BLOCK_PERIPHERAL_TREE);
     goNext(itPc2);
     SEQAN_ASSERT_NOT(atEnd(itPc2));
     TVertexDescriptor pt3 = *itPc2;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, pt3).blockType, BLOCK_PERIPHERAL_TREE);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), pt3), BLOCK_PERIPHERAL_TREE);
     goNext(itPc2);
     SEQAN_ASSERT_NOT(atEnd(itPc2));
     TVertexDescriptor sk = *itPc2;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, sk).blockType, BLOCK_STOPFREE_KERNEL);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), sk), BLOCK_STOPFREE_KERNEL);
     // { pc2 -> sk
-    TAdjacencyIterator itSk(clusterTree, sk);
+    TAdjacencyIterator itSk(clusterTree(gd), sk);
     SEQAN_ASSERT_NOT(atEnd(itSk));
     TVertexDescriptor it = *itSk;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, it).blockType, BLOCK_INTERNAL_TREE);
-    SEQAN_ASSERT_EQ(numChildren(clusterTree, it), 0u);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), it), BLOCK_INTERNAL_TREE);
+    SEQAN_ASSERT_EQ(numChildren(clusterTree(gd), it), 0u);
     goNext(itSk);
     SEQAN_ASSERT_NOT(atEnd(itSk));
     TVertexDescriptor sc1 = *itSk;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, sc1).blockType, BLOCK_SUBCOMPONENT);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), sc1), BLOCK_SUBCOMPONENT);
     // { pc2 -> sk -> sc1
-    TAdjacencyIterator itSc1(clusterTree, sc1);
+    TAdjacencyIterator itSc1(clusterTree(gd), sc1);
     SEQAN_ASSERT_NOT(atEnd(itSc1));
     TVertexDescriptor bb1 = *itSc1;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, bb1).blockType, BLOCK_BIBLOCK);
-    SEQAN_ASSERT_EQ(numChildren(clusterTree, bb1), 0u);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), bb1), BLOCK_BIBLOCK);
+    SEQAN_ASSERT_EQ(numChildren(clusterTree(gd), bb1), 0u);
     goNext(itSc1);
     SEQAN_ASSERT(atEnd(itSc1));
     // } pc2 -> sk -> sc1
     goNext(itSk);
     SEQAN_ASSERT_NOT(atEnd(itSk));
     TVertexDescriptor sc2 = *itSk;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, sc2).blockType, BLOCK_SUBCOMPONENT);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), sc2), BLOCK_SUBCOMPONENT);
     // { pc2 -> sk -> sc2
-    TAdjacencyIterator itSc2(clusterTree, sc2);
+    TAdjacencyIterator itSc2(clusterTree(gd), sc2);
     SEQAN_ASSERT_NOT(atEnd(itSc2));
     TVertexDescriptor bb2 = *itSc2;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, bb2).blockType, BLOCK_BIBLOCK);
-    SEQAN_ASSERT_EQ(numChildren(clusterTree, bb2), 0u);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), bb2), BLOCK_BIBLOCK);
+    SEQAN_ASSERT_EQ(numChildren(clusterTree(gd), bb2), 0u);
     goNext(itSc2);
     SEQAN_ASSERT_NOT(atEnd(itSc2));
     TVertexDescriptor bb3 = *itSc2;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, bb3).blockType, BLOCK_BIBLOCK);
-    SEQAN_ASSERT_EQ(numChildren(clusterTree, bb3), 0u);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), bb3), BLOCK_BIBLOCK);
+    SEQAN_ASSERT_EQ(numChildren(clusterTree(gd), bb3), 0u);
     goNext(itSc2);
     SEQAN_ASSERT(atEnd(itSc2));
     // } pc2 -> sk -> sc2
     goNext(itSk);
     SEQAN_ASSERT_NOT(atEnd(itSk));
     TVertexDescriptor sc3 = *itSk;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, sc3).blockType, BLOCK_SUBCOMPONENT);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), sc3), BLOCK_SUBCOMPONENT);
     // { pc2 -> sk -> sc3
-    TAdjacencyIterator itSc3(clusterTree, sc3);
+    TAdjacencyIterator itSc3(clusterTree(gd), sc3);
     SEQAN_ASSERT_NOT(atEnd(itSc3));
     TVertexDescriptor bb4 = *itSc3;
-    SEQAN_ASSERT_EQ(property(blockDescriptors, bb4).blockType, BLOCK_BIBLOCK);
-    SEQAN_ASSERT_EQ(numChildren(clusterTree, bb4), 0u);
+    SEQAN_ASSERT_EQ(property(clusterNodeCargoMap(gd), bb4), BLOCK_BIBLOCK);
+    SEQAN_ASSERT_EQ(numChildren(clusterTree(gd), bb4), 0u);
     goNext(itSc3);
     SEQAN_ASSERT(atEnd(itSc3));
     // } pc2 -> sk -> sc3
@@ -245,109 +248,109 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     SEQAN_ASSERT(atEnd(itR));
 
     // Check vertex-to-building block assignment.
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, a)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, a)[0], pt3);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, b)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, b)[0], pt3);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, c1)), 2u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, c1)[0], pt3);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, c1)[1], bb1);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, c2)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, c2)[0], bb1);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, c3)), 2u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, c3)[0], bb1);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, c3)[1], it);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, c4)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, c4)[0], bb1);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, d1)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, d1)[0], it);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, d2)), 2u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, d2)[0], pt2);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, d2)[1], it);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, d3)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, d3)[0], it);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, d4)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, d4)[0], it);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, e1)), 2u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, e1)[0], bb4);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, e1)[1], it);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, e2)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, e2)[0], bb4);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, e3)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, e3)[0], bb4);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, e4)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, e3)[0], bb4);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, f1)), 4u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f1)[0], pt1);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f1)[1], bb3);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f1)[2], bb2);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f1)[3], it);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, f2)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f2)[0], bb2);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, f3)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f3)[0], bb2);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, f4)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f4)[0], bb2);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, f5)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f5)[0], bb3);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, f6)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f6)[0], bb3);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, f7)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, f7)[0], bb3);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, g)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, g)[0], pt1);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, h1)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, h1)[0], pt2);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, h2)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, h2)[0], pt2);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, h3)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, h3)[0], pt2);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, h4)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, h4)[0], pt2);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, i)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, i)[0], ip1);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, j1)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, j1)[0], pt);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, j2)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, j2)[0], pt);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, j3)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, j3)[0], pt);
-    SEQAN_ASSERT_EQ(length(property(vertexBlocks, j4)), 1u);
-    SEQAN_ASSERT_EQ(property(vertexBlocks, j4)[0], pt);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), a)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), a)[0], pt3);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), b)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), b)[0], pt3);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), c1)), 2u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), c1)[0], pt3);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), c1)[1], bb1);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), c2)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), c2)[0], bb1);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), c3)), 2u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), c3)[0], bb1);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), c3)[1], it);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), c4)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), c4)[0], bb1);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), d1)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), d1)[0], it);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), d2)), 2u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), d2)[0], pt2);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), d2)[1], it);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), d3)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), d3)[0], it);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), d4)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), d4)[0], it);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), e1)), 2u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), e1)[0], bb4);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), e1)[1], it);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), e2)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), e2)[0], bb4);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), e3)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), e3)[0], bb4);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), e4)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), e3)[0], bb4);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), f1)), 4u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f1)[0], pt1);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f1)[1], bb3);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f1)[2], bb2);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f1)[3], it);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), f2)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f2)[0], bb2);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), f3)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f3)[0], bb2);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), f4)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f4)[0], bb2);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), f5)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f5)[0], bb3);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), f6)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f6)[0], bb3);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), f7)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), f7)[0], bb3);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), g)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), g)[0], pt1);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), h1)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), h1)[0], pt2);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), h2)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), h2)[0], pt2);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), h3)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), h3)[0], pt2);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), h4)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), h4)[0], pt2);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), i)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), i)[0], ip1);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), j1)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), j1)[0], pt);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), j2)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), j2)[0], pt);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), j3)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), j3)[0], pt);
+    SEQAN_ASSERT_EQ(length(property(vertexToClusterMap(gd), j4)), 1u);
+    SEQAN_ASSERT_EQ(property(vertexToClusterMap(gd), j4)[0], pt);
 
     // Check edge-to-building-block assignment.
-    SEQAN_ASSERT_EQ(property(edgeBlock, a_c1), pt3);
-    SEQAN_ASSERT_EQ(property(edgeBlock, b_c1), pt3);
-    SEQAN_ASSERT_EQ(property(edgeBlock, c1_c2), bb1);
-    SEQAN_ASSERT_EQ(property(edgeBlock, c1_c4), bb1);
-    SEQAN_ASSERT_EQ(property(edgeBlock, c2_c3), bb1);
-    SEQAN_ASSERT_EQ(property(edgeBlock, c3_c4), bb1);
-    SEQAN_ASSERT_EQ(property(edgeBlock, c3_d1), it);
-    SEQAN_ASSERT_EQ(property(edgeBlock, d1_d2), it);
-    SEQAN_ASSERT_EQ(property(edgeBlock, d2_d3), it);
-    SEQAN_ASSERT_EQ(property(edgeBlock, d2_d4), it);
-    SEQAN_ASSERT_EQ(property(edgeBlock, d2_h1), pt2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, d3_f1), it);
-    SEQAN_ASSERT_EQ(property(edgeBlock, d4_e1), it);
-    SEQAN_ASSERT_EQ(property(edgeBlock, e1_e2), bb4);
-    SEQAN_ASSERT_EQ(property(edgeBlock, e1_e3), bb4);
-    SEQAN_ASSERT_EQ(property(edgeBlock, e2_e4), bb4);
-    SEQAN_ASSERT_EQ(property(edgeBlock, e3_e4), bb4);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f1_f2), bb2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f1_f4), bb2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f1_g), pt1);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f2_f3), bb2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f3_f4), bb2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f1_f5), bb3);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f1_f7), bb3);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f5_f6), bb3);
-    SEQAN_ASSERT_EQ(property(edgeBlock, f6_f7), bb3);
-    SEQAN_ASSERT_EQ(property(edgeBlock, h1_h2), pt2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, h1_h3), pt2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, h1_h4), pt2);
-    SEQAN_ASSERT_EQ(property(edgeBlock, j1_j2), pt);
-    SEQAN_ASSERT_EQ(property(edgeBlock, j2_j3), pt);
-    SEQAN_ASSERT_EQ(property(edgeBlock, j3_j4), pt);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), a_c1), pt3);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), b_c1), pt3);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), c1_c2), bb1);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), c1_c4), bb1);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), c2_c3), bb1);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), c3_c4), bb1);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), c3_d1), it);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), d1_d2), it);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), d2_d3), it);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), d2_d4), it);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), d2_h1), pt2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), d3_f1), it);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), d4_e1), it);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), e1_e2), bb4);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), e1_e3), bb4);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), e2_e4), bb4);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), e3_e4), bb4);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f1_f2), bb2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f1_f4), bb2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f1_g), pt1);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f2_f3), bb2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f3_f4), bb2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f1_f5), bb3);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f1_f7), bb3);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f5_f6), bb3);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), f6_f7), bb3);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), h1_h2), pt2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), h1_h3), pt2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), h1_h4), pt2);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), j1_j2), pt);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), j2_j3), pt);
+    SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), j3_j4), pt);
 
     // TODO(holtgrew): Check flags on graph.
 }

@@ -52,8 +52,23 @@ namespace seqan {
 // Classes, Structs, Enums, Tags
 // ============================================================================
 
-// TODO(holtgrew): How to document Enums?
-enum StiegeUndirectedBlockType
+/**
+.Enum.StandardDecompositionBlockType
+..summary:Types of building blocks in standard graph decomposition.
+..signature:StandardDecompositionBlockType
+..include:seqan/graph_decomposition.h
+..value:BLOCK_NULL
+..value:BLOCK_GRAPH
+..value:BLOCK_IMPROPER_COMPONENT
+..value:BLOCK_PROPER_COMPONENT
+..value:BLOCK_PERIPHERAL_TREE
+..value:BLOCK_STOPFREE_KERNEL
+..value:BLOCK_INTERNAL_TREE
+..value:BLOCK_SUBCOMPONENT
+..value:BLOCK_BIBLOCK
+ */
+
+enum StandardDecompositionBlockType
 {
     BLOCK_NULL,
     BLOCK_GRAPH,
@@ -66,7 +81,23 @@ enum StiegeUndirectedBlockType
     BLOCK_BIBLOCK
 };
 
-enum StiegeVertexType
+/**
+.Enum.StandardDecompositionVertexType
+..summary:Types of vertices in standard graph decompositon.
+..signature:StandardDecompositionVertexType
+..include:seqan/graph_decomposition.h
+..value:VERTEX_TOKEN
+..value:VERTEX_MARK
+..value:VERTEX_ISOLATED
+..value:VERTEX_PERIPHERAL_TREE
+..value:VERTEX_PERIPHERAL_TREE_ROOT
+..value:VERTEX_PERIPHERAL_TREE_BORDER
+..value:VERTEX_BIBLOCK
+..value:VERTEX_INTERNAL_TREE
+..value:VERTEX_INTERNAL_TREE_ROOT
+ */
+
+enum StandardDecompositionVertexType
 {
     VERTEX_TOKEN,
     VERTEX_MARK,
@@ -79,7 +110,17 @@ enum StiegeVertexType
     VERTEX_INTERNAL_TREE_ROOT       // root of internal tree
 };
 
-enum StiegeEdgeType
+/**
+.Enum.StandardDecompositionEdgeType
+..summary:Types of edges in standard graph decompositon.
+..signature:StandardDecompositionEdgeType
+..include:seqan/graph_decomposition.h
+..value:EDGE_PERIPHERAL_TREE
+..value:EDGE_INTERNAL_TREE
+..value:EDGE_BIBLOCK
+ */
+
+enum StandardDecompositionEdgeType
 {
     EDGE_PERIPHERAL_TREE,
     EDGE_INTERNAL_TREE,
@@ -87,66 +128,169 @@ enum StiegeEdgeType
 };
 
 /**
-.Class.UndirectedBuildingBlock
+.Spec.Standard Graph Decomposition
+..summary:Decomposition of a graph following Stiege's standard decomposition.
+..general:Class.GraphDecomposition
 ..cat:Graph Decomposition
-..summary:Building block of an undirected graph after Stiege.
-..signature:UndirectedBuildingBlock
+..signature:GraphDecomposition<TGraph, StandardDecomposition>
+..param.TGraph:The type of the graph to decompose.
+...type:Spec.Undirected Graph
+..include:seqan/graph_decomposition.h
 
-.Memvar.UndirectedBuildingBlock#blockType
-..summary:Type of an building block in the decomposition of undirected graphs.
-..class:Class.UndirectedBuildingBlock
-..remarks:The type is a value from the set {$BLOCK_NULL$, $BLOCK_GRAPH$, $BLOCK_IMPROPER_COMPONENT$, $BLOCK_PROPER_COMPONENT$, $BLOCK_ACYCLIC_COMPONENT$, $BLOCK_CYCLIC_COMPONENT$, $BLOCK_PERIPHERAL_TREE$, $BLOCK_STOPFREE_KERNEL$, $BLOCK_INTERNAL_TREE$, $BLOCK_SUBCOMPONENT$, $BLOCK_BIBLOCK$}.
+.Memfunc.Standard Graph Decomposition#GraphDecomposition
+..class:Spec.Standard Graph Decomposition
+..summary:Constructor
+..signature:GraphDecomposition()
+..signature:GraphDecomposition(g)
+..param.g:The graph this decomposition is for.
+...type:Spec.Undirected Graph
  */
-class UndirectedBuildingBlock
+
+struct StandardDecomposition_;
+typedef Tag<StandardDecomposition_> StandardDecomposition;
+
+template <typename TCargo, typename TSpec>
+class GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition>
 {
 public:
-    UndirectedBuildingBlock()
-            : blockType(BLOCK_NULL)
-    {}
+    typedef Graph<Undirected<TCargo, TSpec> > TGraph_;
+    typedef Graph<Tree<> > TDecompositionTree_;
+    typedef String<StandardDecompositionBlockType> TClusterNodeCargo_;
+    typedef typename VertexDescriptor<TDecompositionTree_>::Type TTreeVertexDescriptor_;
+    typedef String<String<TTreeVertexDescriptor_> > TVertexToClusterMap_;
+    typedef String<TTreeVertexDescriptor_> TEdgeToClusterMap_;
 
-    UndirectedBuildingBlock(StiegeUndirectedBlockType const & blockType_ )
-            : blockType(blockType_)
-    {}
+    // ------------------------------------------------------------------------
+    // Member Variables
+    // ------------------------------------------------------------------------
 
-    StiegeUndirectedBlockType blockType;
+    // The Holder for the host, adhering to "Hosted Type" concept.
+    Holder<TGraph_> data_host;
+
+    TDecompositionTree_ _clusterTree;
+    TClusterNodeCargo_ _clusterNodeCargoMap;
+    TVertexToClusterMap_ _vertexToClusterMap;
+    TEdgeToClusterMap_ _edgeToClusterMap;
+
+    // ------------------------------------------------------------------------
+    // Constructors
+    // ------------------------------------------------------------------------
+
+    GraphDecomposition() {}
+    
+    GraphDecomposition(TGraph_ /*const*/ & graph)  // TODO(holtgrew): make const when holder is fixed
+            : data_host(graph)
+    {}
 };
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Metafunction ClusterTree
+// ----------------------------------------------------------------------------
+
+template <typename TCargo, typename TSpec>
+struct ClusterTree<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> >
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> TDecomposition_;
+    typedef typename TDecomposition_::TDecompositionTree_ Type;
+};
+
+template <typename TCargo, typename TSpec>
+struct ClusterTree<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const>
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const TDecomposition_;
+    typedef typename TDecomposition_::TDecompositionTree_ const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction ClusterNodeCargo
+// ----------------------------------------------------------------------------
+
+template <typename TCargo, typename TSpec>
+struct ClusterNodeCargo<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> >
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> TDecomposition_;
+    typedef typename TDecomposition_::TClusterNodeCargo_ Type;
+};
+
+template <typename TCargo, typename TSpec>
+struct ClusterNodeCargo<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const>
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const TDecomposition_;
+    typedef typename TDecomposition_::TClusterNodeCargo_ const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction VertexToClusterMap
+// ----------------------------------------------------------------------------
+
+template <typename TCargo, typename TSpec>
+struct VertexToClusterMap<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> >
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> TDecomposition_;
+    typedef typename TDecomposition_::TVertexToClusterMap_ Type;
+};
+
+template <typename TCargo, typename TSpec>
+struct VertexToClusterMap<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const>
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const TDecomposition_;
+    typedef typename TDecomposition_::TVertexToClusterMap_ const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction EdgeToClusterMap
+// ----------------------------------------------------------------------------
+
+template <typename TCargo, typename TSpec>
+struct EdgeToClusterMap<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> >
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> TDecomposition_;
+    typedef typename TDecomposition_::TEdgeToClusterMap_ Type;
+};
+
+template <typename TCargo, typename TSpec>
+struct EdgeToClusterMap<GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const>
+{
+    typedef GraphDecomposition<Graph<Undirected<TCargo, TSpec> >, StandardDecomposition> const TDecomposition_;
+    typedef typename TDecomposition_::TEdgeToClusterMap_ const Type;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function decomposeGraphStiege()
+// Function decomposeGraph()
 // ----------------------------------------------------------------------------
 
-template <typename TBlockDescriptorsMap, typename TTreeVertexDescriptor, typename TVertexDescriptor, typename TComponents, typename TComponentToBlock>
+template <typename TGraphCargo, typename TGraphSpec, typename TVertexDescriptor, typename TComponents, typename TComponentToBlock>
 void
 _classifyAsIsolated(
-        TBlockDescriptorsMap & blockDescriptor,
-        String<String<TTreeVertexDescriptor> > & vertexBlocks,
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
         TVertexDescriptor const & v,
         TComponents const & components,
         TComponentToBlock const & componentToBlock)
 {
+    typedef GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> TGraphDecomposition;
+    typedef typename ClusterTree<TGraphDecomposition>::Type TClusterTree;
+    typedef typename VertexDescriptor<TClusterTree>::Type TTreeVertexDescriptor;
+
     // Mark the connected component node in tree as improper component.
     TTreeVertexDescriptor x = componentToBlock[getProperty(components, v)];
-    assignProperty(blockDescriptor, x, BLOCK_IMPROPER_COMPONENT);
-    appendValue(property(vertexBlocks, v), x);
+    assignProperty(clusterNodeCargoMap(gd), x, BLOCK_IMPROPER_COMPONENT);
+    appendValue(property(vertexToClusterMap(gd), v), x);
 }
 
-template <typename TTreeCargo, typename TTreeSpec, typename TBlockDescriptors, typename TTreeVertexDescriptor, typename TVertexFlags, typename TEdgeFlags, typename TVertexDescriptor, typename TGraph, typename TComponents, typename TComponentToBlock>
+template <typename TVertexFlags, typename TEdgeFlags, typename TGraphCargo, typename TGraphSpec, typename TVertexDescriptor, typename TGraph, typename TComponents, typename TComponentToBlock>
 void
 _collectPeripheralTreeAndClassify(
-        Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
-        TBlockDescriptors & blockDescriptor,
-        String<String<TTreeVertexDescriptor> > & vertexBlocks,
-        String<TTreeVertexDescriptor> & edgeBlock, 
         TVertexFlags /*const*/ & vertexFlags,  // we use the token flag for DFS, TODO(holtgrew): Better use external map?
         TEdgeFlags const & edgeFlags,
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
         TVertexDescriptor const & v,
         TGraph /*const*/ & g,
         TComponents const & components,
@@ -155,13 +299,16 @@ _collectPeripheralTreeAndClassify(
     typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
     typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
     typedef String<TVertexDescriptor> TStack;
+    typedef GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> TGraphDecomposition;
+    typedef typename ClusterTree<TGraphDecomposition>::Type TTree;
+    typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
 
     TStack stack;
 
     TTreeVertexDescriptor blockNode = componentToBlock[getProperty(components, v)];
-    TTreeVertexDescriptor peripheralTreeNode = addChild(clusterTree, blockNode);
-    resizeVertexMap(clusterTree, blockDescriptor);
-    assignProperty(blockDescriptor, peripheralTreeNode, BLOCK_PERIPHERAL_TREE);
+    TTreeVertexDescriptor peripheralTreeNode = addChild(clusterTree(gd), blockNode);
+    resizeVertexMap(clusterTree(gd), clusterNodeCargoMap(gd));
+    assignProperty(clusterNodeCargoMap(gd), peripheralTreeNode, BLOCK_PERIPHERAL_TREE);
 
     // Perform a DFS using only peripheral tree vertices.
     appendValue(stack, v);
@@ -169,7 +316,7 @@ _collectPeripheralTreeAndClassify(
         TVertexDescriptor x = back(stack);
         SEQAN_ASSERT(isBitSet(getProperty(vertexFlags, x), VERTEX_PERIPHERAL_TREE));
         setBit(property(vertexFlags, x), VERTEX_MARK);
-        appendValue(property(vertexBlocks, x), peripheralTreeNode);
+        appendValue(property(vertexToClusterMap(gd), x), peripheralTreeNode);
         eraseBack(stack);
 
         for (TOutEdgeIterator itE(g, x); !atEnd(itE); goNext(itE)) {
@@ -181,7 +328,7 @@ _collectPeripheralTreeAndClassify(
                 continue;
             if (isBitSet(getProperty(vertexFlags, y), VERTEX_PERIPHERAL_TREE)) {
                 SEQAN_ASSERT(isBitSet(getProperty(edgeFlags, e), EDGE_PERIPHERAL_TREE));
-                assignProperty(edgeBlock, e, peripheralTreeNode);
+                assignProperty(edgeToClusterMap(gd), e, peripheralTreeNode);
                 appendValue(stack, y);
             }
         }
@@ -192,19 +339,18 @@ _collectPeripheralTreeAndClassify(
     clearBit(property(vertexFlags, v), VERTEX_MARK);
 }
 
-template <typename TTreeCargo, typename TTreeSpec, typename TBlockDescriptorsMap, typename TTreeVertexDescriptor, typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
+template <typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
 void
 _decomposeGraphStiegeFindPeripheralTrees(
         String<__uint32> & vertexFlags,
         String<__uint32> & edgeFlags,
-        Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
-        TBlockDescriptorsMap & blockDescriptor,
-        String<String<TTreeVertexDescriptor> > & vertexBlocks,
-        String<TTreeVertexDescriptor> & edgeBlock, 
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
         Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g, // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
         TComponents const & components,
         TComponentToBlock const & componentToBlock)
 {
+    // typename TTreeCargo, typename TTreeSpec, typename TBlockDescriptorsMap, typename TTreeVertexDescriptor, 
+
     typedef Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ TGraph;
     typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
     typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
@@ -230,7 +376,7 @@ _decomposeGraphStiegeFindPeripheralTrees(
         unsigned deg = degree(g, v);
         if (deg == 0u) {
             setBit(property(vertexFlags, v), VERTEX_ISOLATED);
-            _classifyAsIsolated(blockDescriptor, vertexBlocks, v, components, componentToBlock);
+            _classifyAsIsolated(gd, v, components, componentToBlock);
             continue;
         }
 
@@ -312,19 +458,16 @@ _decomposeGraphStiegeFindPeripheralTrees(
         }
 
         // Collect peripheral tree.
-        _collectPeripheralTreeAndClassify(clusterTree, blockDescriptor, vertexBlocks, edgeBlock, vertexFlags, edgeFlags, v, g, components, componentToBlock);
+        _collectPeripheralTreeAndClassify(vertexFlags, edgeFlags, gd, v, g, components, componentToBlock);
     }
 }
 
-template <typename TClusterTree, typename TBlockDescriptorsMap, typename TVertexBlocksMap, typename TEdgeBlockMap, typename TVertexDescriptor, typename TStack, typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
+template <typename TGraphCargo, typename TGraphSpec, typename TStack, typename TVertexDescriptor, typename TComponents, typename TComponentToBlock>
 void
 _decomposeGraphStiegeBiconnect(
         String<__uint32> & vertexFlags,
         String<__uint32> & edgeFlags,
-        TClusterTree & clusterTree,
-        TBlockDescriptorsMap & blockDescriptor,
-        TVertexBlocksMap & vertexBlocks,
-        TEdgeBlockMap & edgeBlock, 
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
         String<unsigned> & lowPt,
         String<unsigned> & number,
         String<unsigned> & edgeComponentIds,
@@ -339,6 +482,8 @@ _decomposeGraphStiegeBiconnect(
 {
     // std::cerr << "BIBLOCK(" << v << ", " << u << ")" << std::endl;
 
+    typedef GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> TGraphDecomposition;
+    typedef typename ClusterTree<TGraphDecomposition>::Type TClusterTree;
     typedef typename VertexDescriptor<TClusterTree>::Type TTreeVertexDescriptor;
     typedef typename Iterator<TClusterTree, OutEdgeIterator>::Type TTreeOutEdgeIterator;
     typedef Graph<Undirected<TGraphCargo, TGraphSpec> > TGraph;
@@ -356,7 +501,7 @@ _decomposeGraphStiegeBiconnect(
     // The subcomponent vertex.  It is initialized with the tree root
     // since the tree root can never be a subcomponent vertex.  It is
     // really created assigned on the creation of the first biblock.
-    TTreeVertexDescriptor subComponentVertex = root(clusterTree);
+    TTreeVertexDescriptor subComponentVertex = root(clusterTree(gd));
             
     // For w in the adjacency list of v...
     for (TOutEdgeIterator itE(g, v); !atEnd(itE); goNext(itE)) {
@@ -380,7 +525,7 @@ _decomposeGraphStiegeBiconnect(
             appendValue(stack, TTriple(v, w, e));
 
             // Recursive call.
-            _decomposeGraphStiegeBiconnect(vertexFlags, edgeFlags, clusterTree, blockDescriptor, vertexBlocks, edgeBlock, lowPt, number, edgeComponentIds, i, j, stack, w, v, g, components, componentToBlock);
+            _decomposeGraphStiegeBiconnect(vertexFlags, edgeFlags, gd, lowPt, number, edgeComponentIds, i, j, stack, w, v, g, components, componentToBlock);
 
             assignProperty(lowPt, v, _min(getProperty(lowPt, v), getProperty(lowPt, w)));
 
@@ -396,7 +541,7 @@ _decomposeGraphStiegeBiconnect(
                     // Start new biblock (and subcomponent if necessary).
                     wasComponent = true;
                     // Create biblock vertex and subcomponent vertex if necessary.
-                    if (subComponentVertex == root(clusterTree)) {
+                    if (subComponentVertex == root(clusterTree(gd))) {
                         TTreeVertexDescriptor componentVertex = componentToBlock[getProperty(components, v)];
                         // The first child of the component vertex is the stopfree
                         // kernel vertex.  It is added after identifying the
@@ -405,12 +550,12 @@ _decomposeGraphStiegeBiconnect(
                         bool found = false;
 #endif  // #if SEQAN_ENABLE_DEBUG
                         TTreeVertexDescriptor stopfreeKernelVertex;
-                        for (TTreeOutEdgeIterator itF(clusterTree, componentVertex); !atEnd(itF); goNext(itF)) {
-                            if (childVertex(clusterTree, *itF) == componentVertex)
+                        for (TTreeOutEdgeIterator itF(clusterTree(gd), componentVertex); !atEnd(itF); goNext(itF)) {
+                            if (childVertex(clusterTree(gd), *itF) == componentVertex)
                                 continue;
-                            if (getProperty(blockDescriptor, childVertex(clusterTree, *itF)).blockType != BLOCK_STOPFREE_KERNEL)
+                            if (getProperty(clusterNodeCargoMap(gd), childVertex(clusterTree(gd), *itF)) != BLOCK_STOPFREE_KERNEL)
                                 continue;
-                            stopfreeKernelVertex = childVertex(clusterTree, *itF);
+                            stopfreeKernelVertex = childVertex(clusterTree(gd), *itF);
 #if SEQAN_ENABLE_DEBUG
                             found = true;
 #endif  // #if SEQAN_ENABLE_DEBUG
@@ -419,17 +564,17 @@ _decomposeGraphStiegeBiconnect(
                         SEQAN_ASSERT(found);
                         // Add a new vertex for the subcomponent.
                         // std::cerr << "STARTING SUBCOMPONENT FROM " << v << " stopfreeKernelVertex == " << stopfreeKernelVertex << std::endl;
-                        subComponentVertex = addChild(clusterTree, stopfreeKernelVertex);
+                        subComponentVertex = addChild(clusterTree(gd), stopfreeKernelVertex);
                         // std::cerr << "ADD CHILD " << stopfreeKernelVertex << " == " << subComponentVertex << std::endl;
-                        resizeVertexMap(clusterTree, blockDescriptor);
-                        assignProperty(blockDescriptor, subComponentVertex, BLOCK_SUBCOMPONENT);
+                        resizeVertexMap(clusterTree(gd), clusterNodeCargoMap(gd));
+                        assignProperty(clusterNodeCargoMap(gd), subComponentVertex, BLOCK_SUBCOMPONENT);
                     }
                     // std::cerr << "STARTING BIBLOCK FROM " << v << std::endl;
                     // Add a new vertex to the tree for the biblock we are about to add.
                     // std::cerr << "ADD CHILD " << subComponentVertex << std::endl;
-                    biblockKernelVertex = addChild(clusterTree, subComponentVertex);
-                    resizeVertexMap(clusterTree, blockDescriptor);
-                    assignProperty(blockDescriptor, biblockKernelVertex, BLOCK_BIBLOCK);
+                    biblockKernelVertex = addChild(clusterTree(gd), subComponentVertex);
+                    resizeVertexMap(clusterTree(gd), clusterNodeCargoMap(gd));
+                    assignProperty(clusterNodeCargoMap(gd), biblockKernelVertex, BLOCK_BIBLOCK);
                 }
                 while (!empty(stack) && getProperty(number, back(stack).i1) > getProperty(number, v)) {
                     // if (!wasComponent) {
@@ -443,8 +588,8 @@ _decomposeGraphStiegeBiconnect(
                     setBit(property(vertexFlags, back(stack).i1), VERTEX_BIBLOCK);
                     setBit(property(vertexFlags, back(stack).i2), VERTEX_BIBLOCK);
                     // Assign edge to biblock and add biblock to the blocks for the vertices.
-                    assignProperty(edgeBlock, back(stack).i3, biblockKernelVertex);
-                    appendValue(property(vertexBlocks, back(stack).i1), biblockKernelVertex);
+                    assignProperty(edgeToClusterMap(gd), back(stack).i3, biblockKernelVertex);
+                    appendValue(property(vertexToClusterMap(gd), back(stack).i1), biblockKernelVertex);
                     // Only adding vertex for the i1-end of the edge to avoid duplicates.
                     // std::cerr << "POP() == (" << back(stack).i1 << ", " << back(stack).i2 << ") " << __LINE__ << std::endl;
                     eraseBack(stack);
@@ -464,8 +609,8 @@ _decomposeGraphStiegeBiconnect(
                     setBit(property(vertexFlags, back(stack).i1), VERTEX_BIBLOCK);
                     setBit(property(vertexFlags, back(stack).i2), VERTEX_BIBLOCK);
                     // Assign edge to biblock and add biblock to the blocks for the vertices.
-                    assignProperty(edgeBlock, back(stack).i3, biblockKernelVertex);
-                    appendValue(property(vertexBlocks, back(stack).i1), biblockKernelVertex);
+                    assignProperty(edgeToClusterMap(gd), back(stack).i3, biblockKernelVertex);
+                    appendValue(property(vertexToClusterMap(gd), back(stack).i1), biblockKernelVertex);
                     // Only adding vertex for the i1-end of the edge to avoid duplicates.
                     // std::cerr << "POP() == (" << back(stack).i1 << ", " << back(stack).i2 << ") " << __LINE__ << std::endl;
                     j += 1; // id of next component
@@ -488,15 +633,12 @@ _decomposeGraphStiegeBiconnect(
     }
 }
 
-template <typename TClusterTree, typename TBlockDescriptorsMap, typename TVertexBlocksMap, typename TEdgeBlockMap, typename TVertexDescriptor, typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
+template <typename TGraphCargo, typename TGraphSpec, typename TVertexDescriptor, typename TComponents, typename TComponentToBlock>
 void
 _decomposeGraphStiegeCollectInternalTrees(
         String<__uint32> & vertexFlags,
         String<__uint32> & edgeFlags,
-        TClusterTree & clusterTree,
-        TBlockDescriptorsMap & blockDescriptor,
-        TVertexBlocksMap & vertexBlocks,
-        TEdgeBlockMap & edgeBlock,
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
         TVertexDescriptor v,
         Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g, // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
         TComponents const & components,
@@ -523,6 +665,8 @@ _decomposeGraphStiegeCollectInternalTrees(
     // Create new node in cluster tree for internal tree.
     //
     // Start by getting the node vertex of the component.
+    typedef GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> TGraphDecomposition;
+    typedef typename ClusterTree<TGraphDecomposition>::Type TClusterTree;
     typedef typename VertexDescriptor<TClusterTree>::Type TTreeVertexDescriptor;
     typedef typename Iterator<TClusterTree, OutEdgeIterator>::Type TTreeOutEdgeIterator;
     TTreeVertexDescriptor componentVertex = componentToBlock[getProperty(components, v)];
@@ -531,22 +675,22 @@ _decomposeGraphStiegeCollectInternalTrees(
     bool found = false;
 #endif  // #if SEQAN_ENABLE_DEBUG
     TTreeVertexDescriptor stopfreeKernelVertex;
-    for (TTreeOutEdgeIterator itF(clusterTree, componentVertex); !atEnd(itF); goNext(itF)) {
-        if (childVertex(clusterTree, *itF) == componentVertex)
+    for (TTreeOutEdgeIterator itF(clusterTree(gd), componentVertex); !atEnd(itF); goNext(itF)) {
+        if (childVertex(clusterTree(gd), *itF) == componentVertex)
             continue;
-        stopfreeKernelVertex = childVertex(clusterTree, *itF);
+        stopfreeKernelVertex = childVertex(clusterTree(gd), *itF);
 #if SEQAN_ENABLE_DEBUG
         found = true;
 #endif  // #if SEQAN_ENABLE_DEBUG
     }
     SEQAN_ASSERT(found);
     // Create new internal tree vertex below stopfree kernel vertex.
-    TVertexDescriptor internalTreeVertex = addChild(clusterTree, stopfreeKernelVertex);
-    resizeVertexMap(clusterTree, blockDescriptor);
-    assignProperty(blockDescriptor, internalTreeVertex, BLOCK_INTERNAL_TREE);
+    TVertexDescriptor internalTreeVertex = addChild(clusterTree(gd), stopfreeKernelVertex);
+    resizeVertexMap(clusterTree(gd), clusterNodeCargoMap(gd));
+    assignProperty(clusterNodeCargoMap(gd), internalTreeVertex, BLOCK_INTERNAL_TREE);
 
     // Assign root vertex to internal tree vertex.
-    appendValue(property(vertexBlocks, v), internalTreeVertex);
+    appendValue(property(vertexToClusterMap(gd), v), internalTreeVertex);
 
     // Stack for DFS search.
     typedef String<TVertexDescriptor> TStack;
@@ -574,8 +718,8 @@ _decomposeGraphStiegeCollectInternalTrees(
                 continue;  // Skip already marked vertices.
 
             // Add this edge and other end vertex to the internal tree.
-            assignProperty(edgeBlock, e, internalTreeVertex);
-            appendValue(property(vertexBlocks, u), internalTreeVertex);
+            assignProperty(edgeToClusterMap(gd), e, internalTreeVertex);
+            appendValue(property(vertexToClusterMap(gd), u), internalTreeVertex);
             
             appendValue(stack, u);
         }
@@ -585,15 +729,12 @@ _decomposeGraphStiegeCollectInternalTrees(
 // This is a slightly extended version of Tarjan's classic biconnected
 // component search.  The function _decomposeGraphStiegeBiconnect corresponds
 // to the routine BICONNECT in (Tarjan, 1973).
-template <typename TClusterTree, typename TBlockDescriptorsMap, typename TVertexBlocksMap, typename TEdgeBlockMap, typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
+template <typename TGraphCargo, typename TGraphSpec, typename TComponents, typename TComponentToBlock>
 void
 _decomposeGraphStiegeFindStopfreeKernels(
         String<__uint32> & vertexFlags,
         String<__uint32> & edgeFlags,
-        TClusterTree & clusterTree,
-        TBlockDescriptorsMap & blockDescriptor,
-        TVertexBlocksMap & vertexBlocks,
-        TEdgeBlockMap & edgeBlock, 
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
         Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g, // TODO(holtgrew): Uncomment const after fixing iterator for const-graphs
         TComponents const & components,
         TComponentToBlock const & componentToBlock)
@@ -635,50 +776,34 @@ _decomposeGraphStiegeFindStopfreeKernels(
 
         // Start biconnected components DFS.
         clear(stack);
-        _decomposeGraphStiegeBiconnect(vertexFlags, edgeFlags, clusterTree, blockDescriptor, vertexBlocks, edgeBlock, lowPt, number, edgeComponentIds, i, j, stack, v, maxValue<TVertexDescriptor>(), g, components, componentToBlock);
+        _decomposeGraphStiegeBiconnect(vertexFlags, edgeFlags, gd, lowPt, number, edgeComponentIds, i, j, stack, v, maxValue<TVertexDescriptor>(), g, components, componentToBlock);
     }
 
     // Finally, collect internal trees.  The edges have already been marked
     // appropriately.
     for (TVertexIterator it(g); !atEnd(it); ++it) {
         TVertexDescriptor v = *it;
-        _decomposeGraphStiegeCollectInternalTrees(vertexFlags, edgeFlags, clusterTree, blockDescriptor, vertexBlocks, edgeBlock, v, g, components, componentToBlock);
+        _decomposeGraphStiegeCollectInternalTrees(vertexFlags, edgeFlags, gd, v, g, components, componentToBlock);
     }
 }
 
-/**
-.Function.decomposeGraphStiege
-..cat:Graph Decomposition
-..summary:Decompose a graph using Stiege's standard graph decomposition.
-..signature:decomposeGraphStiege(clusterTree, blockDescriptors, blockMap, g)
-..param.clusterTree:The resulting hierarchy stored in the tree.
-...type:Spec.Tree
-..param.blockDescriptors: An external property map assigning each vertex of the tree its @Class.UndirectedBuildingBlock@ description.
-..param.blockMap:An edge property map assigning each edge to a vertex in $clusterTree$.
-...remarks:Each vertex corresponds to a building block.
-..param.g:The graph to decompose.
-...type:Spec.Undirected Graph
-..remarks:The graph will be decomposed into 1 improper connected components, 2 proper connected components, 2.1 acyclic component, 2.2 cyclic components, 2.2.1 peripheral trees, 2.2.2 stopfree kernels, 2.2.2.1 internal trees, 2.2.2.2 subcomponents, 2.2.2.2.1 biblocks (biconnected blocks)
-..remarks:This algorithm follows "Günther Stiege. An Algorithm for Finding the Connectivity Structure of Undirected Graphs. Hildesheimer Informatik-Berichte, 13/97, May 1997."
- */
-template <typename TTreeCargo, typename TTreeSpec, typename TBlockDescriptorMapValue, typename TBlockDescriptorMapSpec, typename TBlockMapValue, typename TBlockMapSpec, typename TGraphCargo, typename TGraphSpec>
+template <typename TGraphCargo, typename TGraphSpec>
 void
-decomposeGraphStiege(Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
-                     String<TBlockDescriptorMapValue, TBlockDescriptorMapSpec> & blockDescriptors,
-                     String<String<TBlockMapValue>, TBlockMapSpec> & vertexBlocks,
-                     String<TBlockMapValue, TBlockMapSpec> & edgeBlock,
-                     Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Remove const after fixing iterator for const-graphs
+decomposeGraph(GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
+               Graph<Undirected<TGraphCargo, TGraphSpec> > /*const*/ & g) // TODO(holtgrew): Remove const after fixing iterator for const-graphs
 {
     typedef Graph<Undirected<TGraphCargo, TGraphSpec> > TGraph;
     typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
     typedef typename VertexDescriptor<TGraph>::Type TGraphVertexDescriptor;
-    typedef Graph<Tree<TTreeCargo, TTreeSpec> > TTree;
+    typedef GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> TGraphDecomposition;
+    typedef typename ClusterTree<TGraphDecomposition>::Type TTree;
     typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
 
     // Perform the standard decomposition of the given graph.  We build the
     // cluster tree at the same time.
     
     // Edge and vertex type markers.
+    // TODO(holtgrew): These are written out nowhere!
     String<__uint32> vertexFlags;
     resizeVertexMap(g, vertexFlags, 0u);
     String<__uint32> edgeFlags;
@@ -687,14 +812,14 @@ decomposeGraphStiege(Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
     // Initialize decomposition tree.
     //
     // Add root vertex which corresponds to the graph.
-    clear(clusterTree);
-    TTreeVertexDescriptor r = addVertex(clusterTree);
-    assignRoot(clusterTree, r);
-    resizeVertexMap(clusterTree, blockDescriptors);
-    assignProperty(blockDescriptors, r, BLOCK_GRAPH);
+    clear(clusterTree(gd));
+    TTreeVertexDescriptor r = addVertex(clusterTree(gd));
+    assignRoot(clusterTree(gd), r);
+    resizeVertexMap(clusterTree(gd), clusterNodeCargoMap(gd));
+    assignProperty(clusterNodeCargoMap(gd), r, BLOCK_GRAPH);
     // Initialize maps from vertices and edges into the decomposition tree.
-    resizeVertexMap(g, vertexBlocks);
-    resizeEdgeMap(g, edgeBlock);
+    resizeVertexMap(g, vertexToClusterMap(gd));
+    resizeEdgeMap(g, edgeToClusterMap(gd));
 
     // Collect preliminary stopfree kernels from cluster tree.
     String<TTreeVertexDescriptor> tentativeStopfreeKernels;
@@ -709,34 +834,38 @@ decomposeGraphStiege(Graph<Tree<TTreeCargo, TTreeSpec> > & clusterTree,
     String<TTreeVertexDescriptor> componentToBlock;
     resize(componentToBlock, componentCount);
     for (unsigned i = 0; i < componentCount; ++i) {
-        TTreeVertexDescriptor x = addChild(clusterTree, r);
-        resizeVertexMap(clusterTree, blockDescriptors);
-        assignProperty(blockDescriptors, x, BLOCK_PROPER_COMPONENT);  // <-- will update later to improper if isolated
+        TTreeVertexDescriptor x = addChild(clusterTree(gd), r);
+        resizeVertexMap(clusterTree(gd), clusterNodeCargoMap(gd));
+        assignProperty(clusterNodeCargoMap(gd), x, BLOCK_PROPER_COMPONENT);  // <-- will update later to improper if isolated
         componentToBlock[i] = x;
 
         // Each connected component contains at most one stopfree kernel.
         // This will always be the first child of that building block's tree
         // node.  If there is no stopfree kernel, it will be removed later on.
-        TTreeVertexDescriptor y = addChild(clusterTree, x);
-        resizeVertexMap(clusterTree, blockDescriptors);
-        assignProperty(blockDescriptors, y, BLOCK_STOPFREE_KERNEL);
+        TTreeVertexDescriptor y = addChild(clusterTree(gd), x);
+        resizeVertexMap(clusterTree(gd), clusterNodeCargoMap(gd));
+        assignProperty(clusterNodeCargoMap(gd), y, BLOCK_STOPFREE_KERNEL);
         // std::cerr << "cc node y == " << y << " -> " << i << std::endl;
         appendValue(tentativeStopfreeKernels, y);
     }
 
     // Find isolated vertices and peripheral trees.
-    _decomposeGraphStiegeFindPeripheralTrees(vertexFlags, edgeFlags, clusterTree, blockDescriptors, vertexBlocks, edgeBlock, g, componentIds, componentToBlock);
+    _decomposeGraphStiegeFindPeripheralTrees(vertexFlags, edgeFlags, gd, g, componentIds, componentToBlock);
 
     // Find stopfree kernels and their internal structure.
-    _decomposeGraphStiegeFindStopfreeKernels(vertexFlags, edgeFlags, clusterTree, blockDescriptors, vertexBlocks, edgeBlock, g, componentIds, componentToBlock);
+    _decomposeGraphStiegeFindStopfreeKernels(vertexFlags, edgeFlags, gd, g, componentIds, componentToBlock);
 
     typedef typename Iterator<String<TTreeVertexDescriptor> >::Type TTentativeIterator;
     for (TTentativeIterator it = begin(tentativeStopfreeKernels); it != end(tentativeStopfreeKernels); ++it) {
-        if (numChildren(clusterTree, *it) > 0u)
+        if (numChildren(clusterTree(gd), *it) > 0u)
             continue;
-        removeVertex(clusterTree, *it);
+        removeVertex(clusterTree(gd), *it);
     }
 }
+
+// ----------------------------------------------------------------------------
+// Function operator<<();  For stream output.
+// ----------------------------------------------------------------------------
 
 template <typename TStream, typename TTree, typename TGraph, typename TBlockDescriptorMap, typename TVertexBlocks>
 void writeDecompositionTree(TStream & stream, TTree /*const*/ & tree, TGraph /*const*/ & g, TBlockDescriptorMap /*const*/ & blockDescriptor, TVertexBlocks /*const*/ vertexBlocks)
@@ -770,11 +899,11 @@ void writeDecompositionTree(TStream & stream, TTree /*const*/ & tree, TGraph /*c
 
     typedef typename Iterator<TTree, VertexIterator>::Type TTreeVertexIterator;
     for (TTreeVertexIterator itV(tree); !atEnd(itV); goNext(itV)) {
-        CharString label = blockTypeNames[getProperty(blockDescriptor, *itV).blockType];
-        if (getProperty(blockDescriptor, *itV).blockType == BLOCK_BIBLOCK ||
-            getProperty(blockDescriptor, *itV).blockType == BLOCK_PERIPHERAL_TREE ||
-            getProperty(blockDescriptor, *itV).blockType == BLOCK_INTERNAL_TREE ||
-            getProperty(blockDescriptor, *itV).blockType == BLOCK_IMPROPER_COMPONENT ) {
+        CharString label = blockTypeNames[getProperty(blockDescriptor, *itV)];
+        if (getProperty(blockDescriptor, *itV) == BLOCK_BIBLOCK ||
+            getProperty(blockDescriptor, *itV) == BLOCK_PERIPHERAL_TREE ||
+            getProperty(blockDescriptor, *itV) == BLOCK_INTERNAL_TREE ||
+            getProperty(blockDescriptor, *itV) == BLOCK_IMPROPER_COMPONENT ) {
             append(label, "\\n(");
             typedef typename Iterator<String<TTreeVertexDescriptor>, Standard>::Type TIter;
             TIter itBegin = begin(property(blocksForVertex, *itV));
