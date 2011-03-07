@@ -29,16 +29,48 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Allocator class definition and generic interface.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_ALLOCATOR_INTERFACE_H
-#define SEQAN_HEADER_BASIC_ALLOCATOR_INTERFACE_H
+// TODO(holtgrew): Perform some benchmarks and use a better malloc, e.g. tcmalloc and see whether our allocator infrastructure is worth keeping around.
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-//////////////////////////////////////////////////////////////////////////////
-//Allocator
-//////////////////////////////////////////////////////////////////////////////
+#ifndef SEQAN_BASIC_BASIC_ALLOCATOR_INTERFACE_H_
+#define SEQAN_BASIC_BASIC_ALLOCATOR_INTERFACE_H_
 
+namespace seqan {
+
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
+/**
+.Tag.Allocator Usage:
+..cat:Memory
+..summary:The purpose of an allocated memory block.
+..tag.TagAllocateUnspecified:Not specified.
+..tag.TagAllocateTemp:Temporary memory. 
+..tag.TagAllocateStorage:Memory for storing container content. 
+..see:Function.allocate
+..see:Function.deallocate
+..include:seqan/basic.h
+*/
+
+// TODO(holtgrew): ANY use/difference?
+
+struct AllocateUnspecified_;
+typedef Tag<AllocateUnspecified_> TagAllocateUnspecified;
+
+struct AllocateTemp_;
+typedef Tag<AllocateTemp_> TagAllocateTemp;
+
+struct AllocateStorage_;
+typedef Tag<AllocateStorage_> TagAllocateStorage;
 
 /**
 .Class.Allocator:
@@ -56,6 +88,7 @@ allocated memory blocks.
 Pool allocators like e.g. @Spec.Single Pool Allocator@ or @Spec.Multi Pool Allocator@
 speed up @Function.allocate@, @Function.deallocate@, and @Function.Allocator#clear@ for
 pooled memory blocks.
+..include:seqan/basic.h
 */
 
 template <typename TSpec>
@@ -64,10 +97,9 @@ struct Allocator;
 ///.Function.allocate.param.object.type:Class.Allocator
 ///.Function.deallocate.param.object.type:Class.Allocator
 
-
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
 // Metafunctions
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
 
 //.Metafunction.Spec.param.T.type:Class.Allocator
 
@@ -77,31 +109,13 @@ struct Spec<Allocator<TSpec> >
 	typedef TSpec Type;
 };
 
+// ============================================================================
+// Functions
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-/**
-.Tag.Allocator Usage:
-..cat:Memory
-..summary:The purpose of an allocated memory block.
-..tag.TagAllocateTemp:Temporary memory. 
-..tag.TagAllocateStorage:Memory for storing container content. 
-..see:Function.allocate
-..see:Function.deallocate
-..include:seqan/basic.h
-*/
-struct AllocateUnspecified_; //< usage not specified
-typedef Tag<AllocateUnspecified_> const TagAllocateUnspecified;
-
-struct AllocateTemp_; //< allocate temporary memory
-typedef Tag<AllocateTemp_> const TagAllocateTemp;
-
-struct AllocateStorage_; //< allocate memory for storing member data
-typedef Tag<AllocateStorage_> const TagAllocateStorage;
-
-
-//////////////////////////////////////////////////////////////////////////////
-//allocates memory on heap. No c'tors are called.
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function allocate()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.allocate:
@@ -136,6 +150,7 @@ A $new$ operator which is part of the C++ standard (defined in $<new>$)
 ..see:Function.arrayConstructCopy
 ..include:seqan/basic.h
 */
+
 template <typename T, typename TValue, typename TSize>
 inline void
 allocate(T const & me,
@@ -144,6 +159,7 @@ allocate(T const & me,
 {
 	allocate(me, data, count, TagAllocateUnspecified());
 }
+
 template <typename T, typename TValue, typename TSize>
 inline void
 allocate(T & me,
@@ -158,7 +174,7 @@ inline void
 allocate(T const &, 
 		 TValue * & data,
 		 TSize count,
-		 Tag<TUsage> const)
+		 Tag<TUsage> const &)
 {
 //	data = (TValue *) operator new(count * sizeof(TValue));
 #ifdef PLATFORM_WINDOWS_VS
@@ -179,12 +195,13 @@ allocate(T const &,
 	    SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
 #endif
 }
+
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void
 allocate(T &, 
 		 TValue * & data,
 		 TSize count,
-		 Tag<TUsage> const)
+		 Tag<TUsage> const &)
 {
 //	data = (TValue *) operator new(count * sizeof(TValue));
 #ifdef PLATFORM_WINDOWS_VS
@@ -206,9 +223,9 @@ allocate(T &,
 #endif
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-//deallocates memory that was allocates using allocate(.)
+// ----------------------------------------------------------------------------
+// Function deallocate()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.deallocate:
@@ -236,6 +253,7 @@ $delete$ and $delete []$ operators which are part of the C++ standard (defined i
 ..see:Function.arrayDestruct
 ..include:seqan/basic.h
 */
+
 template <typename T, typename TValue, typename TSize>
 inline void 
 deallocate(T const & me, 
@@ -244,6 +262,7 @@ deallocate(T const & me,
 {
 	deallocate(me, data, count, TagAllocateUnspecified());
 }
+
 template <typename T, typename TValue, typename TSize>
 inline void 
 deallocate(T & me, 
@@ -277,6 +296,7 @@ deallocate(
 	operator delete ((void *) data);
 #endif
 }
+
 template <typename T, typename TValue, typename TSize, typename TUsage>
 inline void 
 deallocate(
@@ -301,8 +321,7 @@ deallocate(
 	operator delete ((void *) data);
 #endif
 }
-//////////////////////////////////////////////////////////////////////////////
 
-} //namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_ALLOCATOR_INTERFACE_H_

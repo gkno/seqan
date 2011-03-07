@@ -29,18 +29,23 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// General purpose allocator.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_ALLOCATOR_SIMPLE_H
-#define SEQAN_HEADER_BASIC_ALLOCATOR_SIMPLE_H
+#ifndef SEQAN_BASIC_BASIC_ALLOCATOR_SIMPLE_H_
+#define SEQAN_BASIC_BASIC_ALLOCATOR_SIMPLE_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-//////////////////////////////////////////////////////////////////////////////
+namespace seqan {
 
+// ============================================================================
+// Forwards
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-// SimpleAlloc Allocator
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
 /**
 .Spec.Simple Allocator:
@@ -58,9 +63,6 @@ of @Function.allocate@ and @Function.deallocate@ are used.
 template <typename TParentAllocator = Default>
 struct SimpleAlloc;
 
-//////////////////////////////////////////////////////////////////////////////
-
-
 typedef Allocator<SimpleAlloc<Default> > SimpleAllocator;
 
 template <typename TParentAllocator>
@@ -76,24 +78,25 @@ struct Allocator<SimpleAlloc<TParentAllocator> >
 	Header * data_storages;
 	Holder<TParentAllocator> data_parent_allocator;
 
-	Allocator():
-		data_storages(0)
+	Allocator()
+        : data_storages(0)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 	}
 
-	Allocator(TParentAllocator & parent_alloc):
-		data_storages(0)
+	Allocator(TParentAllocator & parent_alloc)
+        : data_storages(0)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(data_parent_allocator, parent_alloc);
 	}
 
 	//Dummy copy
-	Allocator(Allocator const &):
-		data_storages(0)
+	Allocator(Allocator const &)
+        : data_storages(0)
 	{
 	}
+
 	inline Allocator &
 	operator = (Allocator const &)
 	{
@@ -103,22 +106,36 @@ SEQAN_CHECKPOINT
 
 	~Allocator()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		clear(*this);
 	}
 };
 
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function parentAllocator()
+// ----------------------------------------------------------------------------
 
 template <typename TParentAllocator>
 inline TParentAllocator &
 parentAllocator(Allocator<SimpleAlloc<TParentAllocator> > & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return value(me.data_parent_allocator);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Using #-functions messes up search results.
 /**
 .Function.Allocator#clear:
 ..cat:Memory
@@ -138,7 +155,7 @@ template <typename TParentAllocator>
 void
 clear(Allocator<SimpleAlloc<TParentAllocator> > & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef Allocator<SimpleAlloc<TParentAllocator> > TAllocator;
 
 	while (me.data_storages)
@@ -149,16 +166,18 @@ SEQAN_CHECKPOINT
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function allocate()
+// ----------------------------------------------------------------------------
 
 template <typename TParentAllocator, typename TValue, typename TSize, typename TUsage>
 inline void
 allocate(Allocator<SimpleAlloc<TParentAllocator> > & me, 
 		 TValue * & data,
 		 TSize count,
-		 Tag<TUsage> const)
+		 Tag<TUsage> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef Allocator<SimpleAlloc<TParentAllocator> > TAllocator;
 	typedef typename TAllocator::Header THeader;
 
@@ -184,16 +203,18 @@ SEQAN_CHECKPOINT
 	data = reinterpret_cast<TValue *>(ptr + sizeof(THeader));
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function deallocate()
+// ----------------------------------------------------------------------------
 
 template <typename TParentAllocator, typename TValue, typename TSize, typename TUsage>
 inline void 
 deallocate(Allocator<SimpleAlloc<TParentAllocator> > & me,
 		   TValue * data, 
 		   TSize,
-		   Tag<TUsage> const)
+		   Tag<TUsage> const &)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef Allocator<SimpleAlloc<TParentAllocator> > TAllocator;
 	typedef typename TAllocator::Header THeader;
 
@@ -217,8 +238,6 @@ SEQAN_CHECKPOINT
 	deallocate(parentAllocator(me), ptr, header.size);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+}  // namespace seqan
 
-} //namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_ALLOCATOR_SIMPLE_H_

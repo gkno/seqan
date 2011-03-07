@@ -29,16 +29,26 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Wrapper that adapts SeqAn allocators to STL allocators.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_ALLOCATOR_TO_STD_H
-#define SEQAN_HEADER_BASIC_ALLOCATOR_TO_STD_H
+// TODO(holtgrew): Rename STD to STL?
 
+#ifndef SEQAN_BASIC_BASIC_ALLOCATOR_TO_STD_H_
+#define SEQAN_BASIC_BASIC_ALLOCATOR_TO_STD_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
-//Filter that adapts seqan allocator zu std allocator
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
 /**
 .Class.ToStdAllocator:
 ..summary:Emulates standard conform allocator.
@@ -49,51 +59,126 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The member functions $allocate$ and $deallocate$ of $ToStdAllocator$ call
 the (globale) functions @Function.allocate@ and @Function.deallocate@, respectively. The globale functions
 get an allocator object as their first arguments. This allocator object is not the $ToStdAllocator$ object itself,
-but the host object that was given to the constructor. 
+but the host object that was given to the constructor.
 ..cat:Basic
 ..remarks:
 ..see:Function.allocate
 ..see:Function.deallocate
 ..include:seqan/basic.h
-*/
-template <typename THost, typename TValue>
-struct ToStdAllocator
-{
-	typedef TValue value_type;
-	typedef value_type * pointer;
-	typedef value_type & reference;
-	typedef value_type const * const_pointer;
-	typedef value_type const & const_reference;
 
-//	typedef typename THost::Size size_type;
-//	typedef typename THost::Difference difference_type;
-	typedef size_t size_type;
-	typedef ptrdiff_t difference_type;
-
-/**
 .Memfunc.ToStdAllocator:
 ..summary:Constructor
 ..signature:ToStdAllocator(host)
 ..class:Class.ToStdAllocator
 ..param.host:The host object that is used as allocator for @Function.allocate@ and @Function.deallocate@.
 */
-	ToStdAllocator(THost & host): m_host(& host)
-	{
-	}
-	template <typename TValue2>
-	ToStdAllocator(ToStdAllocator<THost, TValue2> const & alloc): m_host(alloc.m_host)
-	{
-	}
-	ToStdAllocator & operator= (ToStdAllocator const & alloc)
-	{
-		m_host = alloc.m_host;
-		return *this;
-	}
-	~ToStdAllocator()
-	{
-	}
 
-// TODO(holtgrew): Move to basic_host.h?
+template <typename THost, typename TValue>
+struct ToStdAllocator
+{
+    typedef TValue value_type;
+    typedef value_type * pointer;
+    typedef value_type & reference;
+    typedef value_type const * const_pointer;
+    typedef value_type const & const_reference;
+
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+
+    ToStdAllocator(THost & host): m_host(& host)
+    {}
+
+    template <typename TValue2>
+    ToStdAllocator(ToStdAllocator<THost, TValue2> const & alloc)
+            : m_host(alloc.m_host)
+    {}
+
+    ToStdAllocator & operator= (ToStdAllocator const & alloc)
+    {
+        m_host = alloc.m_host;
+        return *this;
+    }
+
+    pointer allocate(size_type count)
+    {
+        value_type * ptr;
+        seqan::allocate(*m_host, ptr, count);
+        return pointer(ptr);
+    }
+
+    pointer allocate(size_type count, const void *)
+    {
+        value_type * ptr;
+        seqan::allocate(*m_host, ptr, count);
+        return pointer(ptr);
+    }
+
+    void deallocate(pointer data, size_type count)
+    {
+        seqan::deallocate(*m_host, data, count);
+    }
+
+    void construct(pointer ptr, const_reference data)
+    {
+        new(ptr) TValue(data);
+    }
+
+    void destroy(pointer ptr)
+    {
+        ptr->~TValue();
+    }
+
+    pointer address(reference value) const
+    {
+        return (&value);
+    }
+
+    const_pointer address(const_reference value) const
+    {
+        return (&value);
+    }
+
+    size_type max_size() const
+    {
+        return ~0UL / sizeof(value_type);
+    }
+
+    template <class TValue2>
+    struct rebind
+    {
+        typedef ToStdAllocator<THost, TValue2> other;
+    };
+
+    template <typename THost2, typename TValue2>
+    friend
+    struct ToStdAllocator;
+
+private:
+    THost * m_host;
+};
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction ToStdAllocator()
+// ----------------------------------------------------------------------------
+
+template <typename T, typename TData>
+struct StdAllocator
+{
+	typedef ToStdAllocator<T, TData> Type;
+};
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function host()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.host:
 ..summary:The object a given object depends on.
@@ -104,87 +189,14 @@ struct ToStdAllocator
 ..returns:The host object.
 ..include:seqan/basic.h
 */
-	pointer allocate(size_type count)
-	{
-		value_type * ptr;
-		seqan::allocate(*m_host, ptr, count);
-		return pointer(ptr);
-	}
-	pointer allocate(size_type count, const void *)
-	{
-		value_type * ptr;
-		seqan::allocate(*m_host, ptr, count);
-		return pointer(ptr);
-	}
-
-	void deallocate(pointer data, size_type count)
-	{
-		seqan::deallocate(*m_host, data, count);
-	}
-
-	void construct(pointer ptr, const_reference data)
-	{
-		new(ptr) TValue(data);
-	}
-
-	void destroy(pointer ptr)
-	{
-		ptr->~TValue();
-	}
-
-	pointer address(reference value) const
-	{
-		return (&value);
-	}
-	const_pointer address(const_reference value) const
-	{
-		return (&value);
-	}
-
-	size_type max_size() const
-	{
-		return ~0UL / sizeof(value_type);
-	}
-
-	template<class TValue2>
-	struct rebind
-	{
-		typedef ToStdAllocator<THost, TValue2> other;
-	};
-
-	template <typename THost2, typename TValue2>
-	friend
-	struct ToStdAllocator;
-
-	private:
-		THost * m_host;
-};
 
 template <typename THost, typename TValue>
-THost & 
+THost &
 host(ToStdAllocator<THost, TValue> & me)
 {
    return *me.m_host;
 }
 
+}  // namespace seqan
 
-//////////////////////////////////////////////////////////////////////////////
-
-
-
-//returns std-allocator type (for allocators)
-template <typename T, typename TData>
-struct StdAllocator
-{
-	typedef ToStdAllocator<T, TData> Type;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-} //namespace SEQAN_NAMESPACE_MAIN
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_ALLOCATOR_TO_STD_H_

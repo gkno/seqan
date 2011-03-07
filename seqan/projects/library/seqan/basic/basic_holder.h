@@ -37,6 +37,7 @@
 #ifndef SEQAN_BASIC_BASIC_HOLDER_H_
 #define SEQAN_BASIC_BASIC_HOLDER_H_
 
+// TODO(holtgrew): What about const holders?
 // TODO(holtgrew): Are holders on pointers used anywhere?
 // TODO(holtgrew): What about Simple holders? What about Tristate2?
 

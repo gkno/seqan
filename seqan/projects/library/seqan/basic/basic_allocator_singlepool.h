@@ -29,15 +29,24 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Allocator that pools blocks of a given size;  Different-sized blocks are
+// not pooled.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_ALLOCATOR_SINGLE_POOL_H
-#define SEQAN_HEADER_BASIC_ALLOCATOR_SINGLE_POOL_H
+#ifndef SEQAN_BASIC_BASIC_ALLOCATOR_SINGLE_POOL_H_
+#define SEQAN_BASIC_BASIC_ALLOCATOR_SINGLE_POOL_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-//////////////////////////////////////////////////////////////////////////////
-// SinglePool Allocator
-//////////////////////////////////////////////////////////////////////////////
+namespace seqan {
+
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
 /**
 .Spec.Single Pool Allocator:
@@ -62,8 +71,6 @@ Blocks of other sizes are allocated and deallocated using an allocator of type $
 template <size_t SIZE, typename TParentAllocator = SimpleAllocator>
 struct SinglePool;
 
-//////////////////////////////////////////////////////////////////////////////
-
 template <size_t SIZE, typename TParentAllocator>
 struct Allocator<SinglePool<SIZE, TParentAllocator> >
 {
@@ -84,14 +91,14 @@ struct Allocator<SinglePool<SIZE, TParentAllocator> >
 
 	Allocator()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		data_recycled_blocks = data_current_end = data_current_free = 0;
 		//dont need to initialize data_current_begin
 	}
 
 	Allocator(size_t reserve_item_count)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		data_recycled_blocks = 0;
 
 		size_t storage_size = (reserve_item_count * SIZE > STORAGE_SIZE_MIN) ? reserve_item_count * SIZE : STORAGE_SIZE_MIN;
@@ -102,7 +109,7 @@ SEQAN_CHECKPOINT
 
 	Allocator(TParentAllocator & parent_alloc)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(data_parent_allocator, parent_alloc);
 
 		data_recycled_blocks = data_current_end = data_current_free = 0;
@@ -111,7 +118,7 @@ SEQAN_CHECKPOINT
 
 	Allocator(size_t reserve_item_count, TParentAllocator & parent_alloc)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		data_recycled_blocks = 0;
 
 		setValue(data_parent_allocator, parent_alloc);
@@ -128,8 +135,9 @@ SEQAN_CHECKPOINT
 		data_recycled_blocks = data_current_end = data_current_free = 0;
 		//dont need to initialize data_current_begin
 	}
+
 	inline Allocator &
-	operator = (Allocator const &)
+	operator=(Allocator const &)
 	{
 		clear(*this);
 		return *this;
@@ -137,34 +145,49 @@ SEQAN_CHECKPOINT
 
 	~Allocator()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		clear(*this);
 	}
 };
-//////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function parentAllocator()
+// ----------------------------------------------------------------------------
 
 template <size_t SIZE, typename TParentAllocator>
 inline TParentAllocator &
 parentAllocator(Allocator<SinglePool<SIZE, TParentAllocator> > & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return value(me.data_parent_allocator);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
 
 template <size_t SIZE, typename TParentAllocator>
 void
 clear(Allocator<SinglePool<SIZE, TParentAllocator> > & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 
 	me.data_recycled_blocks = me.data_current_end = me.data_current_free = 0;
 
 	clear(parentAllocator(me));
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function allocate()
+// ----------------------------------------------------------------------------
 
 template <size_t SIZE, typename TParentAllocator, typename TValue, typename TSize, typename TUsage>
 inline void
@@ -173,7 +196,7 @@ allocate(Allocator<SinglePool<SIZE, TParentAllocator> > & me,
 		 TSize count,
 		 Tag<TUsage> const tag_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef Allocator<SinglePool<SIZE, TParentAllocator> > TAllocator;
 	size_t bytes_needed = count * sizeof(TValue);
 
@@ -204,7 +227,9 @@ SEQAN_CHECKPOINT
 	data = reinterpret_cast<TValue *>(ptr);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function deallocate()
+// ----------------------------------------------------------------------------
 
 template <size_t SIZE, typename TParentAllocator, typename TValue, typename TSize, typename TUsage>
 inline void 
@@ -213,7 +238,7 @@ deallocate(Allocator<SinglePool<SIZE, TParentAllocator> > & me,
 		   TSize count,
 		   Tag<TUsage> const tag_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef Allocator<SinglePool<SIZE, TParentAllocator> > TAllocator;
 
 	size_t bytes_needed = count * sizeof(TValue);
@@ -229,84 +254,6 @@ SEQAN_CHECKPOINT
 	me.data_recycled_blocks = reinterpret_cast<char *>(data);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-// alternative Interface that takes a Type instead of a SIZE
-//////////////////////////////////////////////////////////////////////////////
+}  // namespace seqan
 
-
-template <typename TValue, typename TParentAllocator = SimpleAllocator>
-struct SinglePool2;
-
-template <typename TValue, typename TParentAllocator>
-struct Allocator<SinglePool2<TValue, TParentAllocator> >
-{
-	Allocator<SinglePool<sizeof(TValue), TParentAllocator> > data_alloc;
-
-
-	Allocator(size_t reserve_item_count)
-		: data_alloc(reserve_item_count)
-	{
-	}
-
-	Allocator(TParentAllocator & parent_alloc)
-		: data_alloc(parent_alloc)
-	{
-	}
-
-	Allocator(size_t reserve_item_count, TParentAllocator & parent_alloc)
-		: data_alloc(reserve_item_count, parent_alloc)
-
-	{
-	}
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TParentAllocator>
-inline TParentAllocator &
-parentAllocator(Allocator<SinglePool2<TValue, TParentAllocator> > & me)
-{
-SEQAN_CHECKPOINT
-	return parentAllocator(me.data_alloc);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TParentAllocator>
-void
-clear(Allocator<SinglePool2<TValue, TParentAllocator> > & me)
-{
-SEQAN_CHECKPOINT
-	clear(me.data_alloc);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TParentAllocator, typename TValue2, typename TSize, typename TUsage>
-inline void
-allocate(Allocator<SinglePool2<TValue, TParentAllocator> > & me, 
-		 TValue2 * & data,
-		 TSize count,
-		 Tag<TUsage> const tag_)
-{
-SEQAN_CHECKPOINT
-	allocate(me.data_alloc, data, count, tag_);
-}
-
-template <typename TValue, typename TParentAllocator, typename TValue2, typename TSize, typename TUsage>
-inline void 
-deallocate(Allocator<SinglePool2<TValue, TParentAllocator> > & me,
-		   TValue2 * data, 
-		   TSize count,
-		   Tag<TUsage> const tag_)
-{
-SEQAN_CHECKPOINT
-	deallocate(me.data_alloc, data, count, tag_);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-} //namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_ALLOCATOR_SINGLE_POOL_H_
