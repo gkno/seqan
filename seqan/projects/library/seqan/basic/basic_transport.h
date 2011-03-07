@@ -98,7 +98,7 @@ assign(TTarget & target,
 
 // TODO(holtgrew): assign() for proxies should be defined in basic_proxy.h.
 
-template <typename TSpec> struct Proxy;
+template <typename TSpec> class Proxy;
 
 template<typename TTargetSpec, typename TSource>
 inline void
