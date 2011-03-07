@@ -193,8 +193,8 @@ LogProb<TValue, TSpec>
 operator*(LogProb<TValue, TSpec> const & lhs,
           LogProb<TValue2, TSpec2> const & rhs)
 {
-    LogProb<TValue, TSpec> result = *this;
-    result *= other;
+    LogProb<TValue, TSpec> result = lhs;
+    result *= rhs;
     return result;
 }
 
@@ -209,7 +209,7 @@ operator/=(LogProb<TValue, TSpec> & lhs,
            TRhs const & rhs)
 {
     lhs.data_value -= ::std::log(rhs);
-    return *this;
+    return lhs;
 }
 
 template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
@@ -219,7 +219,7 @@ operator/=(LogProb<TValue, TSpec> & lhs,
            LogProb<TValue2, TSpec2> const & rhs)
 {
     lhs.data_value -= rhs.data_value;
-    return *this;
+    return lhs;
 }
 
 // ----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ LogProb<TValue, TSpec> &
 operator+=(LogProb<TValue, TSpec> & lhs,
            TRhs const & rhs) {
     lhs.data_value = ::std::log(::std::exp(lhs.data_value) + rhs);
-    return *this;
+    return lhs;
 }
 
 template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
@@ -268,16 +268,17 @@ operator+=(LogProb<TValue, TSpec> & lhs,
            LogProb<TValue2, TSpec2> const & rhs)
 {
     if (lhs.data_value > rhs.data_value) {
-        if ((rhs.data_value == ::std::log(0.0)) || (lhs.data_value - rhs.data_value > 100)) return *this;
+        if ((rhs.data_value == ::std::log(0.0)) || (lhs.data_value - rhs.data_value > 100))
+            return lhs;
         lhs.data_value = lhs.data_value + ::std::log(1 + ::std::exp(rhs.data_value - lhs.data_value));
     } else {
         if ((lhs.data_value == ::std::log(0.0)) || (rhs.data_value - lhs.data_value > 100)) {
             lhs.data_value = rhs.data_value;
-            return *this;
+            return lhs;
         }
         lhs.data_value = rhs.data_value + ::std::log(1 + ::std::exp(lhs.data_value - rhs.data_value));
     }
-    return *this;
+    return lhs;
 }
 
 // ----------------------------------------------------------------------------
@@ -316,7 +317,7 @@ operator-=(LogProb<TValue, TSpec> & lhs,
            TRhs const & rhs)
 {
     lhs.data_value = ::std::log(::std::exp(lhs.data_value) - rhs);
-    return *this;
+    return lhs;
 }
 
 template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
@@ -326,16 +327,17 @@ operator-=(LogProb<TValue, TSpec> & lhs,
            LogProb<TValue2, TSpec2> const & rhs)
 {
     if (lhs.data_value > rhs.data_value) {
-        if ((rhs.data_value == ::std::log(0.0)) || (lhs.data_value - rhs.data_value > 100)) return *this;
+        if ((rhs.data_value == ::std::log(0.0)) || (lhs.data_value - rhs.data_value > 100))
+            return lhs;
         lhs.data_value = lhs.data_value + ::std::log(1 - ::std::exp(rhs.data_value - lhs.data_value));
     } else {
         if ((lhs.data_value == ::std::log(0.0)) || (rhs.data_value - lhs.data_value > 100)) {
             lhs.data_value = rhs.data_value;
-            return *this;
+            return lhs;
         }
         lhs.data_value = rhs.data_value + ::std::log(1 - ::std::exp(lhs.data_value - rhs.data_value));
     }
-    return *this;
+    return lhs;
 }
 
 // ----------------------------------------------------------------------------
