@@ -2,6 +2,7 @@
 ..Page:&nbsp;
 ..Concept:Concept
 ..Class:Class
+..Enum:Enum
 ..Spec:Class Specialization
 ..Shortcut:Shortcut
 ..Function:Function
@@ -17,6 +18,7 @@
 ..Page:Overview
 ..Concept:Concepts
 ..Class:Classes
+..Enum:Enums
 ..Spec:Specializations
 ..Shortcut:Shortcuts
 ..Function:Functions
@@ -31,9 +33,9 @@
 ..general:Specialization of
 ..spec:Specializations
 ..param:Parameters
+..value:Values
 ..returns:Return Values
 ..type:Metafunctions
-..value:Values
 ..tag:Tags
 ..memvar:Data Members
 ..memfunc:Member Functions
@@ -67,7 +69,6 @@
 ..metafunction:Metafunctions:
 ..type:Types:
 ..concept:Types:
-..value:Values:
 ..default:Default:
 ..remarks:Remarks:
 ..note:Note:
@@ -81,6 +82,7 @@
 .
 .globals.namingconventions:
 ..Class:bigsmall
+..Enum:bigsmall
 ..Spec:bigsmall
 ..Function:smallbig
 ..Metafunction:bigsmall
