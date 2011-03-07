@@ -147,7 +147,7 @@ decomposeGraph(gd, g);
 
 template <typename TGraph, typename TSpec>
 inline
-typename Host<GraphDecomposition<TGraph, TSpec> >::Type &
+Holder<typename Host<GraphDecomposition<TGraph, TSpec> >::Type> &
 _dataHost(GraphDecomposition<TGraph, TSpec> & graphDecomposition)
 {
     return graphDecomposition.data_host;
@@ -155,7 +155,7 @@ _dataHost(GraphDecomposition<TGraph, TSpec> & graphDecomposition)
 
 template <typename TGraph, typename TSpec>
 inline
-typename Host<GraphDecomposition<TGraph, TSpec> const>::Type &
+Holder<typename Host<GraphDecomposition<TGraph, TSpec> const>::Type> &
 _dataHost(GraphDecomposition<TGraph, TSpec> const & graphDecomposition)
 {
     return graphDecomposition.data_host;
@@ -167,6 +167,7 @@ _dataHost(GraphDecomposition<TGraph, TSpec> const & graphDecomposition)
 
 /**
 .Function.clusterTree
+..cat:Graph Decomposition
 ..summary:Return @Spec.Tree@ object used for the graph decomposition structure.
 ..signature:clusterTree(graphDecomposition)
 ..param.graphDecomposition:The @Class.GraphDecomposition@ object to query.
@@ -197,6 +198,7 @@ clusterTree(GraphDecomposition<TGraph, TSpec> const & graphDecomposition)
 
 /**
 .Function.clusterNodeCargoMap
+..cat:Graph Decomposition
 ..summary:Returns the external vertex map used for labeling the decomposition tree's nodes.
 ..signature:clusterNodeCargoMap(graphDecomposition)
 ..param.graphDecomposition:The @Class.GraphDecomposition@ object to query.
@@ -227,6 +229,7 @@ clusterNodeCargoMap(GraphDecomposition<TGraph, TSpec> const & graphDecomposition
 
 /**
 .Function.vertexToClusterMap
+..cat:Graph Decomposition
 ..summary:Returns the external vertex map used for assigning graph vertices to cluster tree node(s).
 ..signature:clusterNodeCargoMap(graphDecomposition)
 ..param.graphDecomposition:The @Class.GraphDecomposition@ object to query.
@@ -257,6 +260,7 @@ vertexToClusterMap(GraphDecomposition<TGraph, TSpec> const & graphDecomposition)
 
 /**
 .Function.edgeToClusterMap
+..cat:Graph Decomposition
 ..summary:Returns the external vertex map used for assigning graph edges to cluster tree node(s).
 ..signature:edgeToClusterMap(graphDecomposition)
 ..param.graphDecomposition:The @Class.GraphDecomposition@ object to query.

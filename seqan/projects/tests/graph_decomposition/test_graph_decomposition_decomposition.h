@@ -352,7 +352,12 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), j2_j3), pt);
     SEQAN_ASSERT_EQ(property(edgeToClusterMap(gd), j3_j4), pt);
 
-    // TODO(holtgrew): Check flags on graph.
+    // TODO(holtgrew): Check flags on graph. Are not exported right now!
+
+    // Check output.  We only test that it works at all.
+    std::stringstream ss;
+    writeDecompositionTree(ss, gd);
 }
+
 
 #endif  // TEST_GRAPH_DECOMPOSITION_DECOMPOSITION_H_

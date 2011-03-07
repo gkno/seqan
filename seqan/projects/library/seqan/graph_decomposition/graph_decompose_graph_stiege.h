@@ -54,6 +54,7 @@ namespace seqan {
 
 /**
 .Enum.StandardDecompositionBlockType
+..cat:Graph Decomposition
 ..summary:Types of building blocks in standard graph decomposition.
 ..signature:StandardDecompositionBlockType
 ..include:seqan/graph_decomposition.h
@@ -83,6 +84,7 @@ enum StandardDecompositionBlockType
 
 /**
 .Enum.StandardDecompositionVertexType
+..cat:Graph Decomposition
 ..summary:Types of vertices in standard graph decompositon.
 ..signature:StandardDecompositionVertexType
 ..include:seqan/graph_decomposition.h
@@ -112,6 +114,7 @@ enum StandardDecompositionVertexType
 
 /**
 .Enum.StandardDecompositionEdgeType
+..cat:Graph Decomposition
 ..summary:Types of edges in standard graph decompositon.
 ..signature:StandardDecompositionEdgeType
 ..include:seqan/graph_decomposition.h
@@ -867,19 +870,25 @@ decomposeGraph(GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, S
 // Function operator<<();  For stream output.
 // ----------------------------------------------------------------------------
 
-template <typename TStream, typename TTree, typename TGraph, typename TBlockDescriptorMap, typename TVertexBlocks>
-void writeDecompositionTree(TStream & stream, TTree /*const*/ & tree, TGraph /*const*/ & g, TBlockDescriptorMap /*const*/ & blockDescriptor, TVertexBlocks /*const*/ vertexBlocks)
+template <typename TStream, typename TGraphCargo, typename TGraphSpec>
+void writeDecompositionTree(
+        TStream & stream,
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd)
 {
+    typedef GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> TGraphDecomposition;
+    typedef Graph<Undirected<TGraphCargo, TGraphSpec> > TGraph;
+    typedef typename ClusterTree<TGraphDecomposition>::Type TTree;
     typedef typename VertexDescriptor<TTree>::Type TTreeVertexDescriptor;
 
     // Collect vertices in elementary building blocks.
     String<String<TTreeVertexDescriptor> > blocksForVertex;
-    resizeVertexMap(tree, blocksForVertex);
+    resizeVertexMap(clusterTree(gd), blocksForVertex);
 
     typedef typename Iterator<TGraph, VertexIterator>::Type TGraphVertexIterator;
-    for (TGraphVertexIterator itV(g); !atEnd(itV); goNext(itV)) {
+    TGraphVertexIterator itV(host(gd));
+    for (; !atEnd(itV); goNext(itV)) {
         typedef typename Iterator<String<TTreeVertexDescriptor>, Rooted>::Type TIter;
-        for (TIter it(begin(property(vertexBlocks, *itV))); !atEnd(it); goNext(it)) {
+        for (TIter it(begin(property(vertexToClusterMap(gd), *itV))); !atEnd(it); goNext(it)) {
             appendValue(property(blocksForVertex, *it), *itV);
         }
     }
@@ -898,12 +907,12 @@ void writeDecompositionTree(TStream & stream, TTree /*const*/ & tree, TGraph /*c
     };
 
     typedef typename Iterator<TTree, VertexIterator>::Type TTreeVertexIterator;
-    for (TTreeVertexIterator itV(tree); !atEnd(itV); goNext(itV)) {
-        CharString label = blockTypeNames[getProperty(blockDescriptor, *itV)];
-        if (getProperty(blockDescriptor, *itV) == BLOCK_BIBLOCK ||
-            getProperty(blockDescriptor, *itV) == BLOCK_PERIPHERAL_TREE ||
-            getProperty(blockDescriptor, *itV) == BLOCK_INTERNAL_TREE ||
-            getProperty(blockDescriptor, *itV) == BLOCK_IMPROPER_COMPONENT ) {
+    for (TTreeVertexIterator itV(clusterTree(gd)); !atEnd(itV); goNext(itV)) {
+        CharString label = blockTypeNames[getProperty(clusterNodeCargoMap(gd), *itV)];
+        if (getProperty(clusterNodeCargoMap(gd), *itV) == BLOCK_BIBLOCK ||
+            getProperty(clusterNodeCargoMap(gd), *itV) == BLOCK_PERIPHERAL_TREE ||
+            getProperty(clusterNodeCargoMap(gd), *itV) == BLOCK_INTERNAL_TREE ||
+            getProperty(clusterNodeCargoMap(gd), *itV) == BLOCK_IMPROPER_COMPONENT ) {
             append(label, "\\n(");
             typedef typename Iterator<String<TTreeVertexDescriptor>, Standard>::Type TIter;
             TIter itBegin = begin(property(blocksForVertex, *itV));
@@ -927,11 +936,11 @@ void writeDecompositionTree(TStream & stream, TTree /*const*/ & tree, TGraph /*c
 
     typedef typename Iterator<TTree, DfsPreorder>::Type TTreeDfsIterator;
     typedef typename Iterator<TTree, OutEdgeIterator>::Type TOutEdgeIterator;
-    for (TTreeDfsIterator itV(tree, root(tree)); !atEnd(itV); goNext(itV)) {
-        for (TOutEdgeIterator itE(tree, *itV); !atEnd(itE); goNext(itE)) {
-            if (childVertex(tree, *itE) == *itV)
+    for (TTreeDfsIterator itV(clusterTree(gd), root(clusterTree(gd))); !atEnd(itV); goNext(itV)) {
+        for (TOutEdgeIterator itE(clusterTree(gd), *itV); !atEnd(itE); goNext(itE)) {
+            if (childVertex(clusterTree(gd), *itE) == *itV)
                 continue;
-            stream << parentVertex(tree, *itE) << " -> " << childVertex(tree, *itE) << std::endl;
+            stream << parentVertex(clusterTree(gd), *itE) << " -> " << childVertex(clusterTree(gd), *itE) << std::endl;
         }
     }
 
