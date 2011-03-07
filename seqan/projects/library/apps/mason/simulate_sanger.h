@@ -142,6 +142,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
                             SangerReads const &)
 {
     setUpCommandLineParser(parser);
+    addUsageLine(parser, "sanger [OPTIONS] SEQUENCE");
 
     addSection(parser, "Sanger Read Length Parameters");
 

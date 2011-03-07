@@ -122,6 +122,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
                             LS454Reads const &)
 {
     setUpCommandLineParser(parser);
+    addUsageLine(parser, "454 [OPTIONS] SEQUENCE");
 
     addSection(parser, "454 Read Length Parameters");
 

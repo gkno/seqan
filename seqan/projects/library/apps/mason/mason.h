@@ -284,7 +284,6 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addVersionLine(parser, "0.1");
 
     addTitleLine(parser, "Mason - A Read Simulator");
-    addUsageLine(parser, "illumina [OPTIONS] SEQUENCE");
     addLine(parser, "");
     addLine(parser, "Use 'random' for the SEQUENCE file name to generate it randomly.");
 

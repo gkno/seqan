@@ -180,6 +180,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
                             IlluminaReads const &)
 {
     setUpCommandLineParser(parser);
+    addUsageLine(parser, "illumina [OPTIONS] SEQUENCE");
 
     addSection(parser, "Illumina Read Lengths");
 
