@@ -38,7 +38,7 @@
 #define SEQAN_BASIC_BASIC_ITERATOR_H_
 
 namespace seqan {
-    
+
 // ============================================================================
 // Forwards
 // ============================================================================
@@ -51,12 +51,12 @@ namespace seqan {
 .Tag.Iterator Spec:
 ..cat:Iteration
 ..summary:Specifies the kind of an iterator.
-..tag.Rooted:Rooted iterator. 
+..tag.Rooted:Rooted iterator.
 ...remarks
 ....text:This iterator implements some more advanced functions like
 @Function.container@ and @Function.position@.
 ....concept:Concept.Rooted Iterator
-..tag.Standard:Standard conform iterator. 
+..tag.Standard:Standard conform iterator.
 ...remarks
 ....text:Note that standard iterators need not to implement all functions
 that are available for rooted iterators.
@@ -96,7 +96,7 @@ typedef Tag<Standard_> const Standard;
 template <typename T>
 struct DefaultIteratorSpec
 {
-	typedef Standard Type;
+    typedef Standard Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -111,7 +111,7 @@ struct DefaultIteratorSpec
 ..param.T:Container type for which the spec is determined.
 ...concept:Concept.Container
 ..returns.param.Type:Iterator spec of $T$.
-..remarks:This metafunction returns the iterator spec of iterators that are returned by functions like 
+..remarks:This metafunction returns the iterator spec of iterators that are returned by functions like
 @Function.begin@, @Function.end@, or @Function.iter@.
 ..see:Metafunction.Iterator
 ..see:Metafunction.DefaultIteratorSpec
@@ -121,7 +121,7 @@ struct DefaultIteratorSpec
 template <typename T>
 struct DefaultGetIteratorSpec
 {
-	typedef Rooted Type;
+    typedef Rooted Type;
 };
 
 // ----------------------------------------------------------------------------
@@ -139,18 +139,25 @@ struct DefaultGetIteratorSpec
 ..param.TSpec:Specifies an @Tag.Iterator Spec.iterator spec@.
 ...default:The default iterator spec is given by @Metafunction.DefaultIteratorSpec@.
 ..returns.param.Type:Iterator type of $T$.
-..remarks.text:Iterators behave like pointers in some respects. 
+..remarks.text:Iterators behave like pointers in some respects.
  For example, you can use $*it$ to access the value object the iterator $it$ points to.
  But note that $Iterator<T>::Type$ can differ from $T *$, depending on $T$.
 ..see:Metafunction.Position
 ..include:seqan/basic.h
 */
 
+// TODO(holtgrew): Rename this Metafunction to IteratorDefaultImp_?
 template <typename T, typename TSpec>
 struct Iterator_Default_Imp;
 
-//Iterator_Default_Imp<T, Standard> is implemented in basic_iterator_simple.h
-//Iterator_Default_Imp<T, Rooted> is implemented in basic_iterator_adaptor.h 
+// We use plain pointers as standard iterators.
+template <typename T>
+struct Iterator_Default_Imp<T, Standard>
+{
+    typedef typename Value<T>::Type * Type;
+};
+
+//Iterator_Default_Imp<T, Rooted> is implemented in basic_iterator_adaptor.h
 
 template <typename T, typename TSpec = typename DefaultIteratorSpec<T>::Type>
 struct Iterator : Iterator_Default_Imp<T, TSpec>
@@ -202,7 +209,7 @@ value(T & me)
 {
     SEQAN_CHECKPOINT;
 	return *me;
-} 
+}
 
 template <typename T>
 inline typename Reference<T const>::Type
@@ -210,7 +217,7 @@ value(T const & me)
 {
     SEQAN_CHECKPOINT;
 	return *me;
-} 
+}
 
 template <typename T>
 inline T &
@@ -218,7 +225,7 @@ value(T * me)
 {
     SEQAN_CHECKPOINT;
 	return *me;
-} 
+}
 
 // ---------------------------------------------------------------------------
 // Function getValue()
@@ -249,7 +256,7 @@ getValue(T const & me)
 {
     SEQAN_CHECKPOINT;
 	return value(me);
-} 
+}
 
 template <typename T>
 inline T &
@@ -257,7 +264,7 @@ getValue(T * me)
 {
     SEQAN_CHECKPOINT;
 	return value(me);
-} 
+}
 
 // ---------------------------------------------------------------------------
 // Function toGetValue()
@@ -280,7 +287,7 @@ getValue(T * me)
 ...concept:Concept.Iterator
 ..param.value:A value that is assigned to the item $object$ holds or points to.
 ..remarks.text:This function is similar to @Function.assign@.
-The difference is, that $assignValue$ just changes a value stored in $object$ or the value $object$ points to, 
+The difference is, that $assignValue$ just changes a value stored in $object$ or the value $object$ points to,
 while @Function.assign@ changes the whole object.
 ..see:Function.assign
 ..include:seqan/basic.h
@@ -293,7 +300,7 @@ assignValue(T & me,
 {
     SEQAN_CHECKPOINT;
 	assign(value(me), _value);
-} 
+}
 
 //const version for iterators as targets
 template <typename T, typename TValue>
@@ -303,7 +310,7 @@ assignValue(T const & me,
 {
     SEQAN_CHECKPOINT;
 	assign(value(me), _value);
-} 
+}
 
 // ---------------------------------------------------------------------------
 // Function moveValue()
@@ -319,7 +326,7 @@ assignValue(T const & me,
 ...concept:Concept.Iterator
 ..param.value:A value that is handed over to the item $object$ holds or points to.
 ..remarks.text:This function is similar to @Function.move@.
-The difference is, that $moveValue$ just changes a value stored in $object$ or the value $object$ points to, 
+The difference is, that $moveValue$ just changes a value stored in $object$ or the value $object$ points to,
 while @Function.move@ changes the whole object.
 ..see:Function.move
 ..see:Function.assignValue
@@ -343,7 +350,7 @@ moveValue(T const & me,
 {
     SEQAN_CHECKPOINT;
 	move(value(me), _value);
-} 
+}
 
 // ---------------------------------------------------------------------------
 // Function container()
@@ -367,6 +374,7 @@ inline
 typename Container<T>::Type &
 container(T me)
 {
+    // TODO(holtgrew): Default implementation with auto-sequences, remove?
     SEQAN_CHECKPOINT;
 	return me;
 }
@@ -393,15 +401,16 @@ container(T me)
 */
 
 template <typename T>
-inline typename Position<T>::Type 
+inline typename Position<T>::Type
 position(T * /*me*/)
 {
+    // TODO(holtgrew): Default implementation with auto-sequences, remove?
     SEQAN_CHECKPOINT;
 	return 0;
 }
 
 template <typename TContainer, typename TIterator>
-inline typename Position<TContainer>::Type 
+inline typename Position<TContainer>::Type
 position(TIterator const & it,
 		 TContainer const & me)
 {
@@ -435,7 +444,7 @@ inline bool
 atBegin(T const & it, TContainer const & cont)
 {
     SEQAN_CHECKPOINT;
-	return it == begin(cont, Standard());	
+	return it == begin(cont, Standard());
 }
 
 template <typename T, typename TContainer>
@@ -467,7 +476,7 @@ inline bool
 atBegin(T const & it)
 {
     SEQAN_CHECKPOINT;
-	return atBegin(it, container(it));	
+	return atBegin(it, container(it));
 }
 
 // ---------------------------------------------------------------------------
@@ -477,7 +486,7 @@ atBegin(T const & it)
 /**
 .Function.atEnd:
 ..cat:Iteration
-..summary:Determines whether an iterator is at the end position. 
+..summary:Determines whether an iterator is at the end position.
 ..signature:bool atEnd(iterator [, container])
 ..param.iterator:An iterator.
 ...type:Class.Iter
@@ -494,20 +503,20 @@ atBegin(T const & it)
 
 template <typename T, typename TContainer>
 inline bool
-atEnd(T & it, 
+atEnd(T & it,
 	  TContainer const & cont)
 {
     SEQAN_CHECKPOINT;
-	return it == end(cont, Standard());	
+	return it == end(cont, Standard());
 }
 
 template <typename T, typename TContainer>
 inline bool
-atEnd(T const & it, 
+atEnd(T const & it,
 	  TContainer const & cont)
 {
     SEQAN_CHECKPOINT;
-	return it == end(cont, Standard());	
+	return it == end(cont, Standard());
 }
 
 template <typename T, typename TContainer>
@@ -533,7 +542,7 @@ inline bool
 atEnd(T & it)
 {
     SEQAN_CHECKPOINT;
-	return atEnd(it, container(it));	
+	return atEnd(it, container(it));
 }
 
 template <typename T>
@@ -541,7 +550,7 @@ inline bool
 atEnd(T const & it)
 {
     SEQAN_CHECKPOINT;
-	return atEnd(it, container(it));	
+	return atEnd(it, container(it));
 }
 
 // ---------------------------------------------------------------------------
@@ -551,7 +560,7 @@ atEnd(T const & it)
 /**
 .Function.goBegin:
 ..cat:Iteration
-..summary:Iterates to the first position of a container. 
+..summary:Iterates to the first position of a container.
 ..signature:goBegin(iterator [, container])
 ..param.iterator:Object that iterates through $container$.
 ...type:Class.Iter
@@ -602,7 +611,7 @@ goBegin(TIterator & it)
 /**
 .Function.goEnd:
 ..cat:Iteration
-..summary:Iterates to the last position of a container. 
+..summary:Iterates to the last position of a container.
 ..signature:goEnd(iterator [, container])
 ..param.iterator:Object that iterates through $container$.
 ...type:Class.Iter
@@ -652,7 +661,7 @@ goEnd(TIterator & it)
 /**
 .Function.goNext:
 ..cat:Iteration
-..summary:Iterates to next position. 
+..summary:Iterates to next position.
 ..signature:goNext(iterator)
 ..param.iterator:An iterator.
 ...type:Class.Iter
@@ -678,7 +687,7 @@ goNext(TIterator & it)
 /**
 .Function.goFurther:
 ..cat:Iteration
-..summary:Iterates some steps further. 
+..summary:Iterates some steps further.
 ..signature:goFurther(iterator, steps)
 ..param.iterator:An iterator.
 ...type:Class.Iter
@@ -707,7 +716,7 @@ goFurther(TIterator & it,
 /**
 .Function.goPrevious:
 ..cat:Iteration
-..summary:Iterates to pevious position. 
+..summary:Iterates to pevious position.
 ..signature:goPrevious(iterator)
 ..param.iterator:An iterator.
 ...type:Class.Iter
@@ -734,7 +743,7 @@ goPrevious(TIterator & it)
 /**
 .Function.difference:
 ..cat:Iteration
-..summary:The difference between two iterators. 
+..summary:The difference between two iterators.
 ..signature:difference(begin, end)
 ..param.begin:Iterator to the first position of a range.
 ...type:Class.Iter
@@ -754,7 +763,7 @@ goPrevious(TIterator & it)
 template <typename TIterator>
 inline
 typename Difference<TIterator>::Type
-difference(TIterator const & begin, 
+difference(TIterator const & begin,
            TIterator const & end)
 {
     SEQAN_CHECKPOINT;
@@ -796,7 +805,7 @@ goNil(TIterator * & me)
 // ---------------------------------------------------------------------------
 // Function atNil()
 // ---------------------------------------------------------------------------
-    
+
 /**
 .Function.atNil:
 ..cat:Iteration

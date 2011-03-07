@@ -40,19 +40,19 @@
 
 //#include <cstring>
 #ifdef PLATFORM_WINDOWS
-#include <limits>	// limits include file exists only for g++ >= 3.0
+#include <limits>   // limits include file exists only for g++ >= 3.0
 #endif
 
-#include <cstddef>	// size_t
-#include <cstdio>	// FILE, basic_debug
-#include <cstdlib>	// posix_memalign
+#include <cstddef>  // size_t
+#include <cstdio>   // FILE, basic_debug
+#include <cstdlib>  // posix_memalign
 #include <ctime>
 #include <iterator>
 #include <algorithm>
 #include <cstring>  // memset, memcpy
-#include <string>	// basic_profile
+#include <string>   // basic_profile
 #ifdef PLATFORM_WINDOWS
-#include <malloc.h>	// _aligned_malloc
+#include <malloc.h> // _aligned_malloc
 #endif  // PLATFORM_WINDOWS
 
 #define SEQAN_NAMESPACE_MAIN seqan
@@ -102,11 +102,9 @@
 
 #include <seqan/basic/basic_transport.h>
 
-#include <seqan/basic/basic_iterator_simple.h>
 #include <seqan/basic/basic_iterator_adaptor.h>
 #include <seqan/basic/basic_iterator_position.h>
 #include <seqan/basic/basic_iterator_adapt_std.h>
-//#include <seqan/basic_identifier.h>
 
 #include <seqan/basic/basic_proxy.h>
 

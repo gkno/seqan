@@ -53,6 +53,21 @@ namespace seqan {
 // Metafunctions
 // ===========================================================================
 
+///.Metafunction.StdContainerIterator.param.T.type:Adaption."std::basic_string"
+
+template <typename TChar, typename TCharTraits, typename TAlloc>
+struct StdContainerIterator< ::std::basic_string<TChar, TCharTraits, TAlloc> >
+{
+    typedef ::std::basic_string<TChar, TCharTraits, TAlloc> TContainer;
+    typedef typename TContainer::iterator Type;
+};
+    
+template <typename TChar, typename TCharTraits, typename TAlloc>
+struct StdContainerIterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
+{
+    typedef ::std::basic_string<TChar, TCharTraits, TAlloc> TContainer;
+    typedef typename TContainer::const_iterator Type;
+};
 
 ///.Metafunction.IsContiguous.param.T.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>

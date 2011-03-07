@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Cleaned up iterator infrastructure a bit.
  * Cleaned up various headers in basic module, added documentation for `ProfileType` class.
  * Cleanup of ''basic_proxy.h'' header, making `Proxy` a `class` instead of a `struct`.
  * Removing empty ''basic_operator.h''.

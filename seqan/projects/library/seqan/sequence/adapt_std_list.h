@@ -138,15 +138,7 @@ template <typename TValue, typename TAlloc>
 struct Size< ::std::list<TValue, TAlloc> const>
         : Size< ::std::list<TValue, TAlloc> > {};
 
-// TODO(holtgrew): Documentation should go to generic place?
-/**
-.Metafunction.StdContainerIterator
-..cat:Sequences
-..summary:Returns type of the STL container iterator.
-..signature:StdContainerIterator<T>::Type
-..param.T.type:Adaption.std::list
-..include:seqan/sequence.h
-*/
+///.Metafunction.StdContainerIterator.param.T.type:Adaption.std::list
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> >
 {
