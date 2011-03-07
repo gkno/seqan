@@ -185,7 +185,7 @@ setContainer(Iter<TContainer, PositionIterator> & me, typename Parameter_<TConta
 // Function position()
 // ----------------------------------------------------------------------------
 
-///.Function.position.param.object.type:Spec.Position Iterator
+///.Function.position.param.iterator.type:Spec.Position Iterator
 
 template <typename TContainer>
 inline typename Position<TContainer>::Type &

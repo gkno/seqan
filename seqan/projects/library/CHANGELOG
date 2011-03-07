@@ -6,6 +6,9 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Documentation for `SEQAN_ENABLE_PARALLELISM`.
+ * Adding support for documenting enums and macros to dddocs.
+ * Fixing wrong usage line displayed in Mason read simulator.
  * Removing unused, undocumented `SinglePool2` and `ChunkPool2` allocators.
  * Cleaning up allocator headers.
  * Cleaned up iterator infrastructure a bit.

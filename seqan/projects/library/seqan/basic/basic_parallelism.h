@@ -32,17 +32,32 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 // This module contains simple, generic support code for parallelism in
-// SeqAn. It mainly defines the macros SEQAN_ENABLE_PARALLELISM and
-// SEQAN_PRAGMA_IF_PARALLEL.
+// SeqAn. It mainly defines the macro SEQAN_ENABLE_PARALLELISM.
 // ==========================================================================
 
-// TODO(holtgrew): Add support for documenting macros in DDDoc and document.
+// TODO(holtgrew): Move this somewhere else maybe?
 
 #ifndef SEQAN_BASIC_BASIC_PARALLELISM_H_
 #define SEQAN_BASIC_BASIC_PARALLELISM_H_
 
-/* By default, parallelism is enabled if OpenMP is activated.
+/**
+.Macro.SEQAN_ENABLE_PARALLELISM
+..summary:Indicates whether parallelism is enabled with value 0/1.
+..cat:Parallelism
+..signature:SEQAN_ENABLE_PARALLELISM
+..remarks:By default, set to 1 if $_OPENMP$ is defined and set to 0 otherwise.
+..example:If you want to change this value, you have to define this value before including any SeqAn header.
+...code:#define SEQAN_ENABLE_PARALLELIS  // ALWAYS switch off parallelism!
+
+#include <seqan/basic.h>
+
+int main(int argc, char ** argv)
+{
+  return 0;
+}
+..include:seqan/basic.h
  */
+
 #if !defined(SEQAN_ENABLE_PARALLELISM)
 #if defined(_OPENMP)
 #define SEQAN_ENABLE_PARALLELISM 1
@@ -50,17 +65,5 @@
 #define SEQAN_ENABLE_PARALLELISM 0
 #endif  // defined(_OPENMP)
 #endif  // !defined(SEQAN_ENABLE_PARALLELISM)
-
-
-/* The SEQAN_PRAGMA_IF_PARALLEL macro expands to a pragma as in the argument
- * if SEQAN_ENABLE_PARALLELISM is 1.
- */
-#if SEQAN_ENABLE_PARALLELISM
-// SEQAN_MKSTRING_() comes from basic_testing.h, so include before this header.
-#define SEQAN_PRAGMA_IF_PARALLEL(arg) \
-  Pragma_(SEQAN_MKSTRING_(arg))
-#else  // SEQAN_ENABLE_PARALLELISM
-#define SEQAN_PRAGMA_IF_PARALLEL
-#endif  // SEQAN_ENABLE_PARALLELISM
 
 #endif  // SEQAN_BASIC_BASIC_PARALLELISM_H_

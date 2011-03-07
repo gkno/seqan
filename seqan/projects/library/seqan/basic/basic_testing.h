@@ -76,10 +76,34 @@
 //
 // You can print the current level using the function seqan::printDebugLevel().
 
+/**
+.Macro.SEQAN_ENABLE_TESTING
+..cat:Testing & Debugging
+..summary:Indicates whether testing is enabled.
+..signature:SEQAN_ENABLE_TESTING
+..remarks:When enabled (set to 1), testing is enabled. In this case, the code expects to be called from within a test defined by @Macro.SEQAN_DEFINE_TEST@ and called through @Macro.SEQAN_CALL_TEST@. This makes failing assertions raise exceptions instead of call $abort()$ and enables checkpoints.
+..remarks:By default, this is set to 0.
+..remarks:If you want to change this value, you have to define this value before including any SeqAn header.
+..remarks:If set to 1 then @Macro.SEQAN_ENABLE_TESTING@ is force-set to 1 as well.
+..see:Macro.SEQAN_ENABLE_TESTING
+ */
+
 // Set default for SEQAN_ENABLE_TESTING.
 #ifndef SEQAN_ENABLE_TESTING
 #define SEQAN_ENABLE_TESTING 0
 #endif  // #ifndef SEQAN_ENABLE_TESTING
+
+/**
+.Macro.SEQAN_ENABLE_DEBUG
+..cat:Testing & Debugging
+..summary:Indicates whether debugging is enabled.
+..signature:SEQAN_ENABLE_DEBUG
+..remarks:When enabled (set to 1), debugging is enabled. This means the assertion macros are expanded to actual code and not to nothing.
+..remarks:By default, this is set to 0.
+..remarks:If you want to change this value, you have to define this value before including any SeqAn header.
+..remarks:Force-enabled if @Macro.SEQAN_ENABLE_TESTING@ is set to 1.
+..see:Macro.SEQAN_ENABLE_DEBUG
+ */
 
 // Set default for SEQAN_ENABLE_DEBUG.
 #ifndef SEQAN_ENABLE_DEBUG
@@ -1131,6 +1155,21 @@ const char *tempFileName() {
 
 }  // namespace ClassTest
 
+/**
+.Macro.SEQAN_DEFINE_TEST
+..summary:Expand to test definition.
+..cat:Testing & Debugging
+..signature:SEQAN_DEFINE_TEST(test_name)
+..param.test_name:The name of the test.
+..remarks:This macro expands to 
+..example.code:
+SEQAN_DEFINE_TEST(test_name)
+{
+   SEQAN_ASSERT_LT(0, 3);
+}
+..see:Macro.SEQAN_CALL_TEST
+ */
+
 // This macro expands to function header for one test.
 #define SEQAN_DEFINE_TEST(test_name)                    \
     template <bool speed_up_dummy_to_prevent_compilation_of_unused_tests_> void SEQAN_TEST_ ## test_name ()
@@ -1148,6 +1187,17 @@ const char *tempFileName() {
     return ::seqan::ClassTest::endTestSuite();  \
 }
 
+/**
+.Macro.SEQAN_CALL_TEST
+..summary:Expand to calling a test.
+..cat:Testing & Debugging
+..signature:SEQAN_CALL_TEST(test_name)
+..param.test_name:The name of the test.
+..remarks:This expects the test to be defined with @Macro.SEQAN_DEFINE_TEST@. This macro will expand to code that calls the code inside a try/catch block.
+..example.code:
+SEQAN_CALL_TEST(test_name);
+..see:Macro.SEQAN_DEFINE_TEST
+ */
 
 // This macro expands to code to call a given test.
 #define SEQAN_CALL_TEST(test_name)                                      \

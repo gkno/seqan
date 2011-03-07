@@ -34,17 +34,22 @@
 // Basic conversion code.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_CONVERTER_H
-#define SEQAN_HEADER_BASIC_CONVERTER_H
+#ifndef SEQAN_BASIC_BASIC_CONVERTER_H_
+#define SEQAN_BASIC_BASIC_CONVERTER_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
-//Convert
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Forwards
+// ============================================================================
 
-//gibt den Typ an, in den TSource konvertiert werden kann (TTarget oder TTarget &)
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
 /**
 .Metafunction.Convert:
@@ -67,9 +72,14 @@ struct Convert
 	typedef TTarget Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-//convertImpl
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function convertImpl()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.convertImpl:
 ..hidefromindex
@@ -86,9 +96,12 @@ struct Convert
 It is recommended to use @Function.convert@ rather than $convertImpl$.
 ..include:seqan/basic.h
 */
-//??? Spezialisiere convertImpl, verwende convert
-//??? Konversion eines einzelnen Zeichens in ein einzelnes Zeichen. Konversion von Sequenzen in Sequenzen finden wo anders statt.
-//??? Kann entweder kopieren oder re-interpretieren, je nach Convert::Type
+
+// NOTE(doering): Specialize convertImpl, use convert.
+// NOTE(doering): Conversion of one char into another char happes at another place.
+// NOTE(doering): Conversion of sequences happens at another place.
+// NOTE(doering): Can copy or reinterpret, depending on Convert::Type
+
 template <typename TTarget, typename T, typename TSource>
 inline typename Convert<TTarget, TSource>::Type
 convertImpl(Convert<TTarget, T> const,
@@ -97,9 +110,10 @@ convertImpl(Convert<TTarget, T> const,
 	return source;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//convert
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function convert()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.convert:
 ..cat:Alphabets
@@ -116,6 +130,7 @@ Do not specialize $convert$, specialize @Function.convertImpl@ instead.
 ..see:Function.convertImpl
 ..include:seqan/basic.h
 */
+
 template <typename TTarget, typename TSource>
 inline typename Convert<TTarget, TSource>::Type
 convert(TSource const & source)
@@ -123,7 +138,6 @@ convert(TSource const & source)
 	return convertImpl(Convert<TTarget, TSource>(), source);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_CONVERTER_H_

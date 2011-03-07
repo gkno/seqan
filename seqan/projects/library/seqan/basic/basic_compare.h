@@ -29,46 +29,64 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Basic comparison code.
+// ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_COMPARE_H
-#define SEQAN_HEADER_BASIC_COMPARE_H
+// TODO(holtgrew): Necessary? Documentation is somewhere else..
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#ifndef SEQAN_BASIC_BASIC_COMPARE_H_
+#define SEQAN_BASIC_BASIC_COMPARE_H_
 
-//////////////////////////////////////////////////////////////////////////////
+namespace seqan {
+
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
 template <typename TLeft, typename TRight>
 struct CompareType;
-
 
 template <typename TLeft, typename TRight>
 struct CompareType<TLeft const, TRight>
 {
 	typedef typename CompareType<TLeft, TRight>::Type const Type;
 };
+
 template <typename TLeft, typename TRight>
 struct CompareType<TLeft, TRight const>
 {
 	typedef typename CompareType<TLeft, TRight>::Type const Type;
 };
+
 template <typename TLeft, typename TRight>
 struct CompareType<TLeft const, TRight const>
 {
 	typedef typename CompareType<TLeft, TRight>::Type const Type;
 };
 
+// ============================================================================
+// Functions
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
+// TODO(holtgrew): What does this do / extend / complement?
 
 template<typename T_> inline
 bool lexLess(const T_& _Left, const T_& Right_)
-{	// return lexicographical _Left < Right_
+{
 	typedef typename MakeUnsigned_<T_>::Type TUnsigned;
     return (TUnsigned)_Left < (TUnsigned)Right_;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace seqan
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_BASIC_BASIC_COMPARE_H_
