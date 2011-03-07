@@ -489,12 +489,10 @@ SEQAN_BEGIN_TESTSUITE(test_basic) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_alphabet_trait_basic.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_compare.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_converter.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_counted_ptr.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_debug.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_definition.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_forwards.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_holder.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_holder_dynamic.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_host.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_adapt_std.h");
@@ -504,7 +502,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_logvalue.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_metaprogramming.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_operator.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_pointer.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_profchar.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_profile.h");
