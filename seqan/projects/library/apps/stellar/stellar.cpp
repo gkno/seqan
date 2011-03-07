@@ -232,8 +232,8 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases
 
 	// Computation of maximal E-value for this search
 
-	TSize maxLengthQueries = MaxValue<TSize>::VALUE;
-	TSize maxLengthDatabases = MaxValue<TSize>::VALUE;
+	TSize maxLengthQueries = 0;
+	TSize maxLengthDatabases = 0;
 
 	typename Iterator<TStringSet>::Type dbIt = begin(databases);
 	typename Iterator<TStringSet>::Type dbEnd = end(databases);
@@ -247,8 +247,8 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases
 	typename Iterator<TStringSet>::Type queriesIt = begin(queries);
 	typename Iterator<TStringSet>::Type queriesEnd = end(queries);
 	while (queriesIt != queriesEnd) {
-		if (length(*queriesIt) > maxLengthDatabases) {
-			maxLengthDatabases = length(*queriesIt);
+		if (length(*queriesIt) > maxLengthQueries) {
+			maxLengthQueries = length(*queriesIt);
 		}
 		++queriesIt;
 	}
