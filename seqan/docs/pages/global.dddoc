@@ -3,6 +3,7 @@
 ..Concept:Concept
 ..Class:Class
 ..Enum:Enum
+..Macro:Macro
 ..Spec:Class Specialization
 ..Shortcut:Shortcut
 ..Function:Function
@@ -19,6 +20,7 @@
 ..Concept:Concepts
 ..Class:Classes
 ..Enum:Enums
+..Macro:Macros
 ..Spec:Specializations
 ..Shortcut:Shortcuts
 ..Function:Functions
@@ -83,6 +85,7 @@
 .globals.namingconventions:
 ..Class:bigsmall
 ..Enum:bigsmall
+..Macro:big
 ..Spec:bigsmall
 ..Function:smallbig
 ..Metafunction:bigsmall
