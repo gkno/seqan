@@ -722,7 +722,7 @@ weaklyConnectedComponents(Graph<TSpec> const & g,
     resizeVertexMap(g, unionFind);
 
     // Iterate over all edges, joining weakly connected components.
-    for (EdgeIterator itE(g); !atEnd(itE); goNext(itE))
+    for (TEdgeIterator itE(g); !atEnd(itE); goNext(itE))
         joinSets(unionFind, findSet(sourceVertex(*itE)), findSet(targetVertex(*itE)));
 
     // Count number of sets.
