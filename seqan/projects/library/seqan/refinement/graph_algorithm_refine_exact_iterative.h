@@ -331,21 +331,31 @@ SEQAN_CHECKPOINT
 			_getOtherSequenceAndProject(*ali_it,(TValue)0,seq_map,seq_id,act_pos,seq_j_id,pos_j);
 			//find node that contains the projected position (pos_j)
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
-		
-			SEQAN_ASSERT(fragmentBegin(ali_g,vd)==pos_j);
-			typename Value<TScore>::Type score = _getRefinedMatchScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
-	//		typename Value<TScore>::Type score = fragmentLength(ali_g,vd);
-			score *= _getRefinedAnnoScore(ali_g,pm,vd,act_knot,score_type);
-		//this needs to be generalized (makes sense for positive scores only)
-			if(score <= 0) score = 1;
-			if(score > 0)
+			bool doAddEdge = true;
+			if(fragmentBegin(ali_g,vd)!=pos_j) // check if edge makes sense
+			{ 
+				TValue temp_seq_i_id,temp_act_pos;
+				_getOtherSequenceAndProject(*ali_it,(TValue)1,seq_map,seq_j_id,fragmentBegin(ali_g,vd),temp_seq_i_id,temp_act_pos);
+				TVertexDescriptor temp_act_knot = findVertex(ali_g, temp_seq_i_id, temp_act_pos);
+				if(act_knot!=temp_act_knot)
+					doAddEdge = false;
+			}
+			if(doAddEdge)
 			{
-				if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,(TCargo)score);
-				else {
-					TEdgeDescriptor ed = findEdge(ali_g, act_knot, vd);
-					//if((TCargo)score > getCargo(ed))
-						//assignCargo(ed, score);
-					assignCargo(ed, getCargo(ed)+score);
+				typename Value<TScore>::Type score = _getRefinedMatchScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
+		//		typename Value<TScore>::Type score = fragmentLength(ali_g,vd);
+				score *= _getRefinedAnnoScore(ali_g,pm,vd,act_knot,score_type);
+			//this needs to be generalized (makes sense for positive scores only)
+				if(score <= 0) score = 1;
+				if(score > 0)
+				{
+					if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,(TCargo)score);
+					else {
+						TEdgeDescriptor ed = findEdge(ali_g, act_knot, vd);
+						//if((TCargo)score > getCargo(ed))
+							//assignCargo(ed, score);
+						assignCargo(ed, getCargo(ed)+score);
+					}
 				}
 			}
 			//prepare for next interval
