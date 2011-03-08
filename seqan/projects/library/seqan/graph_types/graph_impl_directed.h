@@ -33,6 +33,8 @@
 #ifndef SEQAN_HEADER_GRAPH_IMPL_DIRECTED_H
 #define SEQAN_HEADER_GRAPH_IMPL_DIRECTED_H
 
+// TODO(holtgrew): The graph uses linked lists for storing edges. Thus, the graphs are not guaranteed to have good cache locality. We should also have a forward star/adjacency array implementation.
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////

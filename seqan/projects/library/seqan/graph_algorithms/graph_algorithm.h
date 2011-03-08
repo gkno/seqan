@@ -664,7 +664,7 @@ kruskalsAlgorithm(Graph<TSpec> const & g,
 	// Initialization
 	reserve(edges, 2 * (numVertices(g) - 1));
     UnionFind<TVertexDescriptor> unionFind;
-    resizeVertexMapX(g, unionFind);
+    resizeVertexMap(g, unionFind);
 	
 	// Sort the edges
 	TEdgeIterator itE(g);
@@ -685,6 +685,62 @@ kruskalsAlgorithm(Graph<TSpec> const & g,
         appendValue(edges, y);
         joinSets(unionFind, findSet(unionFind, x), findSet(unionFind, y));
 	}
+}
+
+// ----------------------------------------------------------------------------
+// Weakly Connected Components
+// ----------------------------------------------------------------------------
+
+/**
+.Function.weaklyConnectedComponents:
+..cat:Graph
+..summary:Compute weakly connected components of a directed graph.
+..signature:stronglyConnectedComponents(g, components)
+..param.g:In-parameter:A directed graph.
+...type:Spec.Directed Graph
+..param.components:Out-parameter:A property map.
+...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
+..returns:$Size<TGraph>::Type$, number of weakly connected components.
+..remarks:The running time is $O(n a(n, n))$ where $a$ is the inverse Ackermann function and thus almost linear. The union find data structure is used since the graph implementations do not allow the efficient iteration of in-edges.
+..include:seqan/graph_algorithms.h
+ */
+
+template<typename TSpec, typename TComponents>
+typename Size<Graph<TSpec> >::Type
+weaklyConnectedComponents(Graph<TSpec> const & g,
+                          TComponents & components)
+{
+	SEQAN_CHECKPOINT;
+	typedef Graph<TSpec> TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
+	// Initialization.
+    UnionFind<TVertexDescriptor> unionFind;
+    resizeVertexMap(g, unionFind);
+
+    // Iterate over all edges, joining weakly connected components.
+    for (EdgeIterator itE(g); !atEnd(itE); goNext(itE))
+        joinSets(unionFind, findSet(sourceVertex(*itE)), findSet(targetVertex(*itE)));
+
+    // Count number of sets.
+    TSize setCount = 0;
+    for (TVertexIterator itV(g); !atEnd(itV); goNext(itV))
+        setCount += (findSet(*itV) == *itV);
+
+    // Build a map from graph vertex descriptor to component id.
+    TSize nextId = 0;
+    clear(components);
+    resize(components, setCount, setCount);  // setCount is sentinel value
+    for (TVertexIterator itV(g); !atEnd(itV); goNext(itV)) {
+        if (getProperty(components, findSet(*itV)) == setCount)
+            setProperty(components, findSet(*itV), nextId++);
+        setProperty(components, findSet(*itV), getProperty(components, findSet(*itV)));
+    }
+
+    return setCount;
 }
 
 //////////////////////////////////////////////////////////////////////////////
