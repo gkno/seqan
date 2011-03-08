@@ -43,7 +43,7 @@
 #include "test_allocator.h"
 #include "test_common.h"
 #include "test_alphabet.h"
-
+#include "test_metaprogramming.h"
 
 using namespace std;
 using namespace seqan;
@@ -473,6 +473,8 @@ SEQAN_BEGIN_TESTSUITE(test_basic) {
     SEQAN_CALL_TEST(testSimpleAllocator);
     SEQAN_CALL_TEST(testPoolAllocator);
     SEQAN_CALL_TEST(testMultiPoolAllocator);
+
+    SEQAN_CALL_TEST(test_metaprogramming_switch);
 
     // Verify all check points.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_aggregates.h");

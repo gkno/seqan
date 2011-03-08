@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Documentation for metafunctions.
  * Documentation for `SEQAN_ENABLE_PARALLELISM`.
  * Adding support for documenting enums and macros to dddocs.
  * Fixing wrong usage line displayed in Mason read simulator.

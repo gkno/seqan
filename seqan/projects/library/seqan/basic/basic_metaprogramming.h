@@ -39,328 +39,661 @@
 
 namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Forwards
+// ============================================================================
+
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
 /**
 .Tag.Logical Values:
-..cat:Basic
+..cat:Metaprogramming
 ..summary:Tag that represents true and false.
 ..tag.True:The logical value "true".
 ..tag.False:The logical value "false".
+..remarks:These tags also function as Metafunctions.
+..example.text:Print the values of these tags/metafunctions.
+..example.code:
+printf("%d %d\n", True::VALUE, False::VALUE);
+// => "1 0\n"
 ..include:seqan/basic.h
 */
 
-	struct True { enum { VALUE = true }; };
-	struct False { enum { VALUE = false }; };
+struct True
+{
+    enum { VALUE = true };
+};
 
-	template <bool b>
-	struct Eval
-	{
-		typedef False Type;
-	};
+struct False
+{
+    enum { VALUE = false };
+};
 
-	template <>
-	struct Eval<true>
-	{
-		typedef True Type;
-	};
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-	//////////////////////////////////////////////////////////////////////////////
-	// generic "or" (using meta-programming)
-	//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction Eval
+// ----------------------------------------------------------------------------
 
-	template <typename TBool1, typename TBool2>
-	struct Or
-	{
-		typedef True Type;
-	};
+/**
+.Metafunction.Eval
+..cat:Metaprogramming
+..summary:Convert from $bool$ values to types ($True$ and $False$).
+..signature:Eval<b>::Type
+..param.b:The boolean to evaluate.
+...type:nolink:$bool$
+..returns:Either @Tag.Logical Values.tag.True@ or @Tag.Logical Values.tag.False@, depending on $b$.
+..include:seqan/basic.h
+..example.text:Demonstrate the usage of $Eval$ to bridge between $bool$ values and the logical tags.
+..example.code:
+void printBoolType(True const &)
+{
+    std::cout << "true" << std::endl;
+}
 
-	template <>
-	struct Or<False, False>
-	{
-		typedef False Type;
-	};
+void printBoolType(False const &)
+{
+    std::cout << "false" << std::endl;
+}
 
+int main(int argc, char ** argv)
+{
+    using namespace seqan;
 
-	//////////////////////////////////////////////////////////////////////////////
-	// generic "and" (using meta-programming)
-	//////////////////////////////////////////////////////////////////////////////
+    printBoolType(Eval<true>::Type());   // => "true\n"
+    printBoolType(Eval<false>::Type());  // => "false\n"
+    return 0;
+}
+*/
 
-	template <typename TBool1, typename TBool2>
-	struct And
-	{
-		typedef False Type;
-	};
+template <bool b>
+struct Eval
+{
+    typedef False Type;
+};
 
-	template <>
-	struct And<True, True>
-	{
-		typedef True Type;
-	};
+template <>
+struct Eval<true>
+{
+    typedef True Type;
+};
 
+// ----------------------------------------------------------------------------
+// Metafunction Or
+// ----------------------------------------------------------------------------
 
-	//////////////////////////////////////////////////////////////////////////////
-	// generic "if" (using meta-programming)
-	// if Flag is true,  the resulting type is Type1
-	// if Flag is false, the resulting type is Type2
-	//////////////////////////////////////////////////////////////////////////////
+/**
+.Metafunction.Or
+..cat:Metaprogramming
+..summary:Metaprogramming boolean "or" operator.
+..signature:Or<B1, B2>::Type
+..param.B1:Left-hand argument.
+...type:Tag.Logical Values.tag.True
+...type:Tag.Logical Values.tag.False
+..param.B2:Right-hand argument.
+...type:Tag.Logical Values.tag.True
+...type:Tag.Logical Values.tag.False
+..returns:One of @Tag.Logical Values.tag.True@ and @Tag.Logical Values.tag.False@, the result of logical or.
+..include:seqan/basic.h
+*/
 
-	template <bool Flag,class Type1, class Type2>
-	struct If
-	{
-		typedef Type1 Type;
-	};
+template <typename TBool1, typename TBool2>
+struct Or
+{
+    typedef True Type;
+};
 
-	template <class Type1, class Type2>
-	struct If<false,Type1,Type2>
-	{
-		typedef Type2 Type;
-	};
+template <>
+struct Or<False, False>
+{
+    typedef False Type;
+};
 
+// ----------------------------------------------------------------------------
+// Metafunction And
+// ----------------------------------------------------------------------------
 
-	//////////////////////////////////////////////////////////////////////////////
-	// generic type comparison (using meta-programming)
-	// if Type1 equals Type2,		VALUE is true
-	// if Type1 differs from Type2, VALUE is false
-	//////////////////////////////////////////////////////////////////////////////
+/**
+.Metafunction.And
+..cat:Metaprogramming
+..summary:Metaprogramming boolean "And" operator.
+..signature:Or<B1, B2>::Type
+..param.B1:Left-hand argument.
+...type:Tag.Logical Values.tag.True
+...type:Tag.Logical Values.tag.False
+..param.B2:Right-hand argument.
+...type:Tag.Logical Values.tag.True
+...type:Tag.Logical Values.tag.False
+..returns:One of @Tag.Logical Values.tag.True@ and @Tag.Logical Values.tag.False@, the result of logical and.
+..include:seqan/basic.h
+*/
 
-	template <class Type1, class Type2>
-	struct IsSameType
-	{
-		typedef False Type;
-		enum { VALUE = false };
-	};
+template <typename T1, typename T2>
+struct And
+{
+    typedef False Type;
+};
 
-	template <class Type1>
-	struct IsSameType<Type1, Type1>
-	{
-		typedef True Type;
-		enum { VALUE = true };
-	};
+template <>
+struct And<True, True>
+{
+    typedef True Type;
+};
 
-	//////////////////////////////////////////////////////////////////////////////
-	// generic "switch" (using meta-programming)
-	//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction If
+// ----------------------------------------------------------------------------
 
-	const int DEFAULT = ~(~0u >> 1); // initialize with the smallest int
+/**
+.Metafunction.If
+..cat:Metaprogramming
+..summary:Metaprogramming "if".
+..signature:Or<b, T1, T2>::Type
+..param.b:The condition to evaluate.
+...type:nolink:$bool$
+..param.T1:Left-hand argument.
+..param.T2:Right-hand argument.
+..returns:If $b$ is $true$ then $T1$, otherwise $T2$.
+..include:seqan/basic.h
+*/
 
-	struct NilCase {};
-	  
-	template <int tag_,class Type_,class Next_ = NilCase>
-	struct Case
-	{
-		enum { tag = tag_ };
-		typedef Type_ Type;
-		typedef Next_ Next;
-	};
+template <bool Flag, class T1, class T2>
+struct If
+{
+    typedef T1 Type;
+};
 
-	template <int tag,class Case>
-	class Switch
-	{
-		typedef typename Case::Next NextCase;
-		enum
-		{
-			caseTag = Case::tag,
-			found   = (caseTag == tag || caseTag == DEFAULT)
-		};
-	public:
-		typedef typename 
-			If<
-				found,
-				typename Case::Type,
-				typename Switch<tag,NextCase>::Type
-			>::Type Type;
-	};
+template <class T1, class T2>
+struct If<false, T1, T2>
+{
+    typedef T2 Type;
+};
 
-	template <int tag>
-	class Switch<tag,NilCase>
-	{
-	public:
-		typedef NilCase Type;
-	};
+// ----------------------------------------------------------------------------
+// Metafunction IsSameType
+// ----------------------------------------------------------------------------
 
+/**
+.Metafunction.IsSameType
+..cat:Metaprogramming
+..summary:Metaprogramming type comparison.
+..signature:Or<T1, T2>::Type
+..signature:Or<T1, T2>::VALUE
+..param.T1:Left-hand argument.
+..param.T2:Right-hand argument.
+..returns:$true$ if @Tag.Logical Values.tag.True@/$T1$ is the same as $T2$, otherwise @Tag.Logical Values.tag.False@/$false$.
+..include:seqan/basic.h
+*/
 
-	//////////////////////////////////////////////////////////////////////////////
-	// generic loops (using meta-programming)
-	// corresponds to for(i=1; i<=I; ++i) ...
-	//////////////////////////////////////////////////////////////////////////////
+template <class Type1, class Type2>
+struct IsSameType
+{
+    typedef False Type;
+    enum { VALUE = false };
+};
 
-	// example of a loop Worker class
-	struct WorkerNothing
-	{
-		template <typename Arg>
-		static inline void body(Arg &/*arg*/, int /*I*/) {}
-	};
+template <class Type1>
+struct IsSameType<Type1, Type1>
+{
+    typedef True Type;
+    enum { VALUE = true };
+};
 
-	template <typename Worker, int I>
-	class Loop {
-	public:
-		template <typename Arg>
-		static inline void run(Arg &arg) {
-			Loop<Worker, I - 1>::run(arg);
-			Worker::body(arg, I);
-		}
-	};
+// ----------------------------------------------------------------------------
+// Metafunction Switch;  Supporting Tags Case, NilCase.
+// ----------------------------------------------------------------------------
 
-	template <typename Worker>
-	class Loop<Worker, 0> {
-	public:
-		// end of loop
-		template <typename Arg>
-		static inline void run(Arg &) {}
-	};
+/**
+.Tag.NilCase
+..cat:Metaprogramming
+..summary:Metaprogramming $default:$ case expression.
+..signature:NilCase
+..remarks:$NilCase$ is returned by metafunction @Metafunction.Switch@ if no case matched.
+..include:seqan/basic.h
+..remarks:The documentation of @Metafunction.Switch@ gives an example.
+..see:Tag.Case
+..see:Metafunction.Switch
 
-	//////////////////////////////////////////////////////////////////////////////
-	// generic reverse loops (using meta-programming)
-	// corresponds to for(i=I; i>0; --i) ...
-	//////////////////////////////////////////////////////////////////////////////
+.Tag.Case
+..cat:Metaprogramming
+..summary:Metaprogramming $case$ expression.
+..signature:Case<TAG[, NextCase]>
+..param.TAG:
+..param.NextCase:Optional next case of type @Tag.Case@, defaults to @Tag.NilCase@.
+...type:Tag.NilCase
+...type:Tag.Case
+..include:seqan/basic.h
+..remarks:The documentation of @Metafunction.Switch@ gives an example.
+..see:Tag.NilCase
+..see:Metafunction.Switch
 
-	template <typename Worker, int I>
-	class LoopReverse {
-	public:
-		template <typename Arg>
-		static inline void run(Arg &arg) {
-			Worker::body(arg, I);
-			LoopReverse<Worker, I - 1>::run(arg);
-		}
-	};
+.Metafunction.Switch
+..cat:Metaprogramming
+..summary:Metaprogramming $switch$ expression.
+..signature:Switch<TAG, Case>::Type
+..param.TAG:The case label.
+...type:nolink:$int$
+..param.Case:Cascade of $Case$ tags.
+...type:Tag.Case
+...type:Tag.NilCase
+..returns:The selected type from the @Tag.Case@ cascade or @Tag.NilCase@.
+..include:seqan/basic.h
+..see:Tag.NilCase
+..see:Tag.Case
+..examples.code:
+int switchTest(Nothing const &) { return -1; }
+int switchTest(False const &) { return 0; }
+int switchTest(True const &) { return 1; }
+int switchTest(NilCase const &) { return 2; }
 
-	template <typename Worker>
-	class LoopReverse<Worker, 0> {
-	public:
-		// end of loop
-		template <typename Arg>
-		static inline void run(Arg &) {}
-	};
+template <int X>
+struct SwitchTest
+{
+    typedef typename Switch<
+        X,
+        Case<-1, Nothing,
+        Case<0, False,
+        Case<1, True
+        > > > >::Type Type;
+};
 
-	//////////////////////////////////////////////////////////////////////////////
-	// logarithmus dualis (using meta-programming)
-	//////////////////////////////////////////////////////////////////////////////
+SEQAN_DEFINE_TEST(test_metaprogramming_switch)
+{
+    typedef typename SwitchTest<-1>::Type T1;
+    typedef typename SwitchTest< 0>::Type T2;
+    typedef typename SwitchTest< 1>::Type T3;
+    typedef typename SwitchTest< 2>::Type T4;
 
-	template < __int64 numerus >
-	struct Log2 {
-		static const __uint64 VALUE = Log2<(numerus + 1) / 2>::VALUE + 1;		// ceil(log_2(n))
-	};
+    std::cout << switchTest(T1()) << std::endl;  // => -1
+    std::cout << switchTest(T2()) << std::endl;  // =>  0
+    std::cout << switchTest(T3()) << std::endl;  // =>  1
+    std::cout << switchTest(T4()) << std::endl;  // =>  2
+ }
+ */
 
-	template < __int64 numerus >
-	struct Log2Floor {
-		static const __uint64 VALUE = Log2Floor<numerus / 2>::VALUE + 1;		// floor(log_2(n))
-	};
+const int DEFAULT_ = ~(~0u >> 1); // initialize with the smallest int
 
-	template <> struct Log2<1> { static const __uint64 VALUE = 0; };
-	template <> struct Log2<0> { static const __uint64 VALUE = 0; };
-	template <> struct Log2Floor<1> { static const __uint64 VALUE = 0; };
-	template <> struct Log2Floor<0> { static const __uint64 VALUE = 0; };
+struct NilCase {};
 
+template <int TAG, typename Type_, typename Next_ = NilCase>
+struct Case
+{
+    enum { TAG_ = TAG };
+    typedef Type_ Type;
+    typedef Next_ Next;
+};
 
-	//////////////////////////////////////////////////////////////////////////////
-	// exponentiation (using meta-programming)
-	//////////////////////////////////////////////////////////////////////////////
+template <int TAG, typename Case_>
+struct Switch
+{
+    typedef typename Case_::Next NextCase_;
+    enum
+    {
+        CASE_TAG_ = Case_::TAG_,
+        FOUND_    = (CASE_TAG_ == TAG || CASE_TAG_ == DEFAULT_)
+    };
 
-	template < __int64 base, __int64 exponent >
-	struct Power {
-		static const __uint64 VALUE =
-				Power<base, exponent / 2>::VALUE * 
-				Power<base, exponent - (exponent / 2)>::VALUE;
-	};
+    typedef typename If<FOUND_,
+                        typename Case_::Type,
+                        typename Switch<TAG, NextCase_>::Type
+                        >::Type Type;
+};
 
-	template < __int64 base > struct Power<base, 1> { static const __uint64 VALUE = base; };
-	template < __int64 base > struct Power<base, 0> { static const __uint64 VALUE = 1; };
+template <int TAG>
+struct Switch<TAG, NilCase>
+{
+    typedef NilCase Type;
+};
 
+// ----------------------------------------------------------------------------
+// Metafunction Loop
+// ----------------------------------------------------------------------------
 
-    // TODO(holtgrew): Does memset() really belong here? Used in find_myers_ukknonen.h, pump_lcp_core.h, pipe_sample.h, file_async
+/**
+.Metafunction.Loop:
+..cat:Metaprogramming
+..summary:Metafunction returning a function that iterates over a static integer range.
+..signature:Loop<Worker, I>::run(Arg & arg)
+..param.Worker:A worker $struct$. It has to implement the static (and preferably finline/inline) function $body$ that accepts two parameters. The first one will be a reference to $arg$, as given to $run()$.  The second will be the current value of the iterating variable.
+..param.I:The upper limit for the iteration.
+..param.arg:The argument to be passed into the workers' $body()$ function.
+..remarks:The loop will go from 1 up to and including $I$.
+..see:Metafunction.LoopReverse
+..include:seqan/basic.h
+..example.text:Print the values 1, 2, ..., $I-1$, $I$.
+..example.code:
+struct PrintWorker
+{
+    static inline body(Nothing & arg, int I)
+    {
+        (void)arg;  // ignored
+        printf("%d\n", I);
+    }
+};
 
-	//////////////////////////////////////////////////////////////////////////////
-	// memset with fill size (using meta-programming)
-	//////////////////////////////////////////////////////////////////////////////
+Loop<PrintWorker, 10>::run(Nothing());
+// This will print the numbers 1, 2, ..., 9, 10.
+ */
 
-	using ::std::memset;
+// Example of a loop Worker class.  Could be removed, serves no
+// purpose.
+struct WorkerNothing
+{
+    template <typename Arg>
+    static inline void body(Arg & /*arg*/, int /*I*/)
+    {}
+};
 
-	template <unsigned SIZE, bool direct>
-	struct MemsetWorker {
-		finline static void run(unsigned char* ptr, unsigned char c) { ::std::memset(ptr, c, SIZE); }
-	};
+template <typename Worker, int I>
+class Loop {
+public:
+    template <typename Arg>
+    static inline void run(Arg & arg)
+    {
+        Loop<Worker, I - 1>::run(arg);
+        Worker::body(arg, I);
+    }
+};
 
-	template <unsigned  SIZE>
-	struct MemsetWorker<SIZE, true> {
-		finline static void run(unsigned char* ptr, unsigned char c) {
-			*((unsigned*)ptr) = ((unsigned)c << 24) + ((unsigned)c << 16) + ((unsigned)c << 8) + (unsigned)c;
-			MemsetWorker<SIZE - 4, true>::run(ptr + 4, c);
-		}
-	};
+template <typename Worker>
+class Loop<Worker, 0>
+{
+public:
+    // end of loop
+    template <typename Arg>
+    static inline void run(Arg &)
+    {}
+};
 
-	template <>
-	struct MemsetWorker<0, true> {
-		finline static void run(unsigned char*, unsigned char) {}
-	};
+// ----------------------------------------------------------------------------
+// Metafunction LoopReverse
+// ----------------------------------------------------------------------------
 
-	template <>
-	struct MemsetWorker<1, true> {
-		finline static void run(unsigned char* ptr, unsigned char c) { *ptr = c; }
-	};
+/**
+.Metafunction.LoopReverse:
+..cat:Metaprogramming
+..summary:Metafunction returning a function that iterates over a static integer range in reverse order.
+..signature:LoopReverse<Worker, I>::run(Arg & arg)
+..param.Worker:A worker $struct$. It has to implement the static (and preferably finline/inline) function $body$ that accepts two parameters. The first one will be a reference to $arg$, as given to $run()$.  The second will be the current value of the iterating variable.
+..param.I:The upper limit for the iteration.
+..param.arg:The argument to be passed into the workers' $body()$ function.
+..remarks:The loop will go from $I$ down to and including 1.
+..include:seqan/basic.h
+..see:Metafunction.Loop
+..example.text:Print the values $I$, $I - 1$, ..., 2, 1.
+..example.code:
 
-	template <>
-	struct MemsetWorker<2, true> {
-		finline static void run(unsigned char* ptr, unsigned char c) { *(unsigned short *)ptr = ((unsigned short)c << 8) + (unsigned short)c; }
-	};
+struct PrintWorker
+{
+    static inline body(Nothing & arg, int I)
+    {
+        (void)arg;  // ignored
+        printf("%d\n", I);
+    }
+};
 
-	template <>
-	struct MemsetWorker<3, true> {
-		finline static void run(unsigned char* ptr, unsigned char c) {
-			MemsetWorker<2, true>::run(ptr, c);
-			MemsetWorker<1, true>::run(ptr + 2, c);
-		}
-	};
+Loop<PrintWorker, 10>::run(Nothing());
+// This will print the numbers 1, 2, ..., 9, 10.
+ */
 
-	template <unsigned SIZE>
-	finline void memset(void* ptr, unsigned char c) {
-		MemsetWorker<SIZE, SIZE <= 32>::run((unsigned char*)ptr, c);
-	}
+template <typename Worker, int I>
+class LoopReverse {
+public:
+    template <typename Arg>
+    static inline void run(Arg & arg)
+    {
+        Worker::body(arg, I);
+        LoopReverse<Worker, I - 1>::run(arg);
+    }
+};
 
+template <typename Worker>
+class LoopReverse<Worker, 0> {
+  public:
+    // end of loop
+    template <typename Arg>
+    static inline void run(Arg &) {}
+};
 
-	//////////////////////////////////////////////////////////////////////////////
-	// memset with fill value (using meta-programming)
-	//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Metafunction Log2
+// ----------------------------------------------------------------------------
 
-	template <unsigned SIZE, bool direct, unsigned char c>
-	struct MemsetConstValueWorker {
-		finline static void run(unsigned char* ptr) { ::std::memset(ptr, c, SIZE); }
-	};
+/**
+.Metafunction.Log2
+..cat:Metaprogramming
+..summary:Compute ceiled logarithm to base 2 using metaprogramming.
+..signature:Log2<x>::VALUE
+..param.x:The value to take the logarithm of.
+...type:nolink:$__int64$
+..returns:$ceil(log2(x))$.
+..include:seqan/basic.h
+ */
 
-	template <unsigned  SIZE, unsigned char c>
-	struct MemsetConstValueWorker<SIZE, true, c> {
-		finline static void run(unsigned char* ptr) {
-			*((unsigned*)ptr) = ((unsigned)c << 24) + ((unsigned)c << 16) + ((unsigned)c << 8) + (unsigned)c;
-			MemsetConstValueWorker<SIZE - 4, true, c>::run(ptr + 4);
-		}
-	};
+template <__int64 numerus>
+struct Log2
+{
+    static const __uint64 VALUE = Log2<(numerus + 1) / 2>::VALUE + 1;		// ceil(log_2(n))
+};
 
-	template <unsigned char c>
-	struct MemsetConstValueWorker<0, true, c> {
-		finline static void run(unsigned char*) {}
-	};
+// Base cases.
+template <> struct Log2<1> { static const __uint64 VALUE = 0; };
+template <> struct Log2<0> { static const __uint64 VALUE = 0; };
 
-	template <unsigned char c>
-	struct MemsetConstValueWorker<1, true, c> {
-		finline static void run(unsigned char* ptr) { *ptr = c; }
-	};
+// ----------------------------------------------------------------------------
+// Metafunction Log2Floor
+// ----------------------------------------------------------------------------
 
-	template <unsigned char c>
-	struct MemsetConstValueWorker<2, true, c> {
-		finline static void run(unsigned char* ptr) { *(unsigned short *)ptr = ((unsigned short)c << 8) + (unsigned short)c; }
-	};
+/**
+.Metafunction.Log2Floor
+..cat:Metaprogramming
+..summary:Compute floored logarithm to base 2 using metaprogramming.
+..signature:Log2<x>::VALUE
+..param.x:The value to take the logarithm of.
+...type:nolink:$__int64$
+..returns:$floor(log2(x))$.
+..include:seqan/basic.h
+ */
 
-	template <unsigned char c>
-	struct MemsetConstValueWorker<3, true, c> {
-		finline static void run(unsigned char* ptr) {
-			MemsetConstValueWorker<2, true, c>::run(ptr);
-			MemsetConstValueWorker<1, true, c>::run(ptr + 2);
-		}
-	};
+template <__int64 numerus>
+struct Log2Floor
+{
+    static const __uint64 VALUE = Log2Floor<numerus / 2>::VALUE + 1;		// floor(log_2(n))
+};
 
-	template <unsigned SIZE, unsigned char c>
-	finline void memset(void* ptr) {
-		MemsetConstValueWorker<SIZE, SIZE <= 32, c>::run((unsigned char*)ptr);
-	}
+// Base cases.
+template <> struct Log2Floor<1> { static const __uint64 VALUE = 0; };
+template <> struct Log2Floor<0> { static const __uint64 VALUE = 0; };
+
+// ----------------------------------------------------------------------------
+// Metafunction Power
+// ----------------------------------------------------------------------------
+
+/**
+.Metafunction.Power
+..cat:Metaprogramming
+..summary:Compute power of a number.
+..signature:Power<b, e>::VALUE
+..param.b:The base.
+...type:nolink:$__int64$
+..param.e:The exponent.
+...type:nolink:$__int64$
+..returns:$b^e$
+..include:seqan/basic.h
+ */
+
+template <__int64 base, __int64 exponent>
+struct Power {
+    static const __uint64 VALUE =
+            Power<base, exponent / 2>::VALUE *
+            Power<base, exponent - (exponent / 2)>::VALUE;
+};
+
+// Base cases.
+template <__int64 base> struct Power<base, 1> { static const __uint64 VALUE = base; };
+template <__int64 base> struct Power<base, 0> { static const __uint64 VALUE = 1; };
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function memset()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.memset
+..cat:Memory
+..summary:An implementation of $memset$ with fixed number of bytes using Metaprogramming.
+..signature:memset<SIZE>(ptr, c)
+..signature:memset<SIZE, c>(ptr)
+..param.SIZE:The number of bytes to set.
+...type:nolink:$unsigned$
+..param.ptr:Pointer to the data to set.
+...type:nolink:$unsigned char *$
+..param.c:The character to fill the memory with.
+....type:nolink:$unsigned char$
+..remarks:These functions can be completely unrolled and inlined by the compiler.
+..include:seqan/basic.h
+ */
+
+// TODO(holtgrew): Does memset() really belong in this header? Used in find_myers_ukknonen.h, pump_lcp_core.h, pipe_sample.h, file_async
+
+using ::std::memset;
+
+// Implementation of memset() with fill size.
+
+template <unsigned SIZE, bool direct>
+struct MemsetWorker
+{
+    finline static
+    void run(unsigned char * ptr, unsigned char c)
+    {
+        ::std::memset(ptr, c, SIZE);
+    }
+};
+
+template <unsigned  SIZE>
+struct MemsetWorker<SIZE, true>
+{
+    finline static
+    void run(unsigned char* ptr, unsigned char c)
+    {
+        *((unsigned*)ptr) = ((unsigned)c << 24) + ((unsigned)c << 16) + ((unsigned)c << 8) + (unsigned)c;
+        MemsetWorker<SIZE - 4, true>::run(ptr + 4, c);
+    }
+};
+
+template <>
+struct MemsetWorker<0, true>
+{
+    finline static void
+    run(unsigned char*, unsigned char)
+    {}
+};
+
+template <>
+struct MemsetWorker<1, true>
+{
+    finline static
+    void run(unsigned char* ptr, unsigned char c)
+    {
+        *ptr = c;
+    }
+};
+
+template <>
+struct MemsetWorker<2, true>
+{
+    finline static
+    void run(unsigned char* ptr, unsigned char c)
+    {
+        *(unsigned short *)ptr = ((unsigned short)c << 8) + (unsigned short)c;
+    }
+};
+
+template <>
+struct MemsetWorker<3, true> {
+    finline static
+    void run(unsigned char* ptr, unsigned char c)
+    {
+        MemsetWorker<2, true>::run(ptr, c);
+        MemsetWorker<1, true>::run(ptr + 2, c);
+    }
+};
+
+template <unsigned SIZE>
+finline void memset(void* ptr, unsigned char c)
+{
+    MemsetWorker<SIZE, SIZE <= 32>::run((unsigned char*)ptr, c);
+}
+
+// Implementation of memset() with fill value.
+
+template <unsigned SIZE, bool direct, unsigned char c>
+struct MemsetConstValueWorker
+{
+    finline static void run(unsigned char* ptr) { ::std::memset(ptr, c, SIZE); }
+};
+
+template <unsigned  SIZE, unsigned char c>
+struct MemsetConstValueWorker<SIZE, true, c>
+{
+    finline static
+    void run(unsigned char* ptr)
+    {
+        *((unsigned*)ptr) = ((unsigned)c << 24) + ((unsigned)c << 16) + ((unsigned)c << 8) + (unsigned)c;
+        MemsetConstValueWorker<SIZE - 4, true, c>::run(ptr + 4);
+    }
+};
+
+template <unsigned char c>
+struct MemsetConstValueWorker<0, true, c>
+{
+    finline static
+    void run(unsigned char*) {}
+};
+
+template <unsigned char c>
+struct MemsetConstValueWorker<1, true, c>
+{
+    finline static
+    void run(unsigned char* ptr) {
+        *ptr = c;
+    }
+};
+
+template <unsigned char c>
+struct MemsetConstValueWorker<2, true, c>
+{
+    finline static
+    void run(unsigned char* ptr)
+    {
+        *(unsigned short *)ptr = ((unsigned short)c << 8) + (unsigned short)c;
+    }
+};
+
+template <unsigned char c>
+struct MemsetConstValueWorker<3, true, c>
+{
+    finline static
+    void run(unsigned char* ptr)
+    {
+        MemsetConstValueWorker<2, true, c>::run(ptr);
+        MemsetConstValueWorker<1, true, c>::run(ptr + 2);
+    }
+};
+
+template <unsigned SIZE, unsigned char c>
+finline void
+memset(void* ptr)
+{
+    MemsetConstValueWorker<SIZE, SIZE <= 32, c>::run((unsigned char*)ptr);
+}
 
 }  // namespace seqan
 

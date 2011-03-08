@@ -221,6 +221,7 @@ setContainer(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,
 
 /**
 .Function.hostIterator
+..cat:Dependent Objects
 ..summary:Return host iterator.
 ..signature:hostIterator(object)
 ..param.object:Object to return host iterator for.
