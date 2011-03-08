@@ -723,21 +723,21 @@ weaklyConnectedComponents(Graph<TSpec> const & g,
 
     // Iterate over all edges, joining weakly connected components.
     for (TEdgeIterator itE(g); !atEnd(itE); goNext(itE))
-        joinSets(unionFind, findSet(sourceVertex(*itE)), findSet(targetVertex(*itE)));
+        joinSets(unionFind, findSet(unionFind, sourceVertex(itE)), findSet(unionFind, targetVertex(itE)));
 
     // Count number of sets.
     TSize setCount = 0;
     for (TVertexIterator itV(g); !atEnd(itV); goNext(itV))
-        setCount += (findSet(*itV) == *itV);
+        setCount += (findSet(unionFind, *itV) == *itV);
 
     // Build a map from graph vertex descriptor to component id.
     TSize nextId = 0;
     clear(components);
     resize(components, setCount, setCount);  // setCount is sentinel value
     for (TVertexIterator itV(g); !atEnd(itV); goNext(itV)) {
-        if (getProperty(components, findSet(*itV)) == setCount)
-            setProperty(components, findSet(*itV), nextId++);
-        setProperty(components, findSet(*itV), getProperty(components, findSet(*itV)));
+        if (getProperty(components, findSet(unionFind, *itV)) == setCount)
+            assignProperty(components, findSet(unionFind, *itV), nextId++);
+        assignProperty(components, findSet(unionFind, *itV), getProperty(components, findSet(unionFind, *itV)));
     }
 
     return setCount;
