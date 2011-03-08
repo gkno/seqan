@@ -199,7 +199,7 @@ resize(UnionFind<TValue> & unionFind,
 template <typename TSpec, typename TValue>
 inline
 typename Size<UnionFind<TValue> >::Type
-resizeVertexMapX(Graph<TSpec> const & g,
+resizeVertexMap(Graph<TSpec> const & g,
                  UnionFind<TValue> & unionFind)
 {
     clear(unionFind);
