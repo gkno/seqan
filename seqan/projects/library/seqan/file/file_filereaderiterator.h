@@ -35,6 +35,17 @@
 #ifndef SEQAN_HEADER_FILE_FILEREADEITERATOR_H
 #define SEQAN_HEADER_FILE_FILEREADEITERATOR_H
 
+/* IOREV
+ * _nodoc_
+ * 
+ * 
+ * see file_filereader.h function not clear
+ * could probably merged with file_filereader.h
+ * 
+ */
+
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -42,7 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TFormat, typename TFile = FILE*, typename TSpec = Default>
 struct FileReader;
-//IOREV _todo_
+//IOREV
 
 // Manual forward for the skipMeta goBegin() overload.
 //template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
@@ -57,7 +68,7 @@ struct FileReader;
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 class Iter<TFile, FileReader<TFormat, TFile2, TSpec> >
 {
-//IOREV _todo_
+//IOREV
 public:
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Position<TFile>::Type TPosition;
@@ -104,20 +115,20 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 struct Value< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >:
 	Value<TFile>
 {
-//IOREV _todo_
+//IOREV
 };
 
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 struct GetValue< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename Value< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type Type;
 };
 
 template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 struct Reference< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >
 {
-//IOREV _todo_
+//IOREV
 	typedef typename Value< Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type & Type;
 };
 
@@ -127,7 +138,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline TFile &
 host(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
 	return *(it.data_host);
 }
 
@@ -136,7 +147,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline typename Reference<Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type
 value(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
 	return it.data_char;
 }
 
@@ -144,7 +155,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline typename GetValue<Iter<TFile, FileReader<TFormat, TFile2, TSpec> > >::Type
 getValue(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
 	return it.data_char;
 }
 
@@ -152,7 +163,7 @@ template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
 inline bool
 atEnd(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
 	return it.data_eof;
 }
 

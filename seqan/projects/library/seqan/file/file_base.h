@@ -169,7 +169,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 #ifndef SEEK_END
       , SEEK_END     = 2
 #endif
-    }; //IOREV why not use constants SEEK_SET, SEEK_CUR, SEEK_END from cstdio
+    }; //IOREV why not use constants SEEK_SET, SEEK_CUR, SEEK_END from cstdio?
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     template < typename TSpec >
     inline bool open(File<TSpec> &me, const char *fileName, int openMode) 
 	{
-//IOREV
+//IOREV resolves to member in file_(a)sync.h which resolves to fstream
         return me.open(fileName, openMode);
     }
 

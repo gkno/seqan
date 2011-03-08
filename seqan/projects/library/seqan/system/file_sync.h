@@ -106,6 +106,7 @@ namespace SEQAN_NAMESPACE_MAIN
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) 
 		{
             handle = _open(fileName, _getOFlag(openMode), _S_IREAD | _S_IWRITE);
+            //IOREV AFAICT _open is defined nowhere :S
 			if (handle == -1) {
 				if (!(openMode & OPEN_QUIET))
 					::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
