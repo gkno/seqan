@@ -499,7 +499,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_adaptor.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_position.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_logvalue.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_metaprogramming.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_pointer.h");
