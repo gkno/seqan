@@ -44,15 +44,15 @@ namespace SEQAN_NAMESPACE_MAIN
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functios for Align Graphs
 //project onto other sequence for Graph<Alignment>
-template<typename TAlignment,typename TValue, typename TMap>
+template<typename TAlignment,typename TId1, typename TPos1, typename TId2, typename TPos2, typename TValue,typename TMap>
 void
 _getOtherSequenceAndProject(Graph<TAlignment> & segment, 
 			    TValue seg_num,
                             TMap &, 
- 							TValue seq_i_id, 
-							TValue pos_i, 
-							TValue & seq_j_id, 
-							TValue & pos_j)
+ 							TId1 seq_i_id, 
+							TPos1 pos_i, 
+							TId2 & seq_j_id, 
+							TPos2 & pos_j)
 {
 	getProjectedPosition(segment,seg_num,seq_i_id, pos_i,seq_j_id,pos_j);
 

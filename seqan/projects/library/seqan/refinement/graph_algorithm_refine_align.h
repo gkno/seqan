@@ -42,15 +42,15 @@ namespace SEQAN_NAMESPACE_MAIN
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functions for Align<TSource,TSpec>
 //project onto other sequence 
-template<typename TSource,typename TSpec,typename TValue,typename TMap>
+template<typename TSource,typename TSpec,typename TValue, typename TId1, typename TPos1, typename TId2, typename TPos2,typename TMap>
 void
 _getOtherSequenceAndProject(Align<TSource,TSpec> & segment, 
 				TValue seg_num,
 							TMap & seq_map, 
-						   TValue , 
-						   TValue node_i, 
-						   TValue & seq_j_id, 
-						   TValue & node_j)
+						   TId1 , 
+						   TPos1 node_i, 
+						   TId2 & seq_j_id, 
+						   TPos2 & node_j)
 {
 SEQAN_CHECKPOINT
 
@@ -81,11 +81,11 @@ SEQAN_CHECKPOINT
 //given seq and segment, get the sequenceId (seq_i) and its begin and end
 //if seq = 0 get first sequence (that takes part in the segment match)
 //if seq = 1 get second sequence
-template<typename TAliSource,typename TAliSpec, typename TValue>
+template<typename TAliSource,typename TAliSpec, typename TId, typename TValue>
 void
 _getSeqBeginAndEnd(Align<TAliSource,TAliSpec> & segment,
 				  std::map<const void * ,int> & seq_map, 
-				  TValue & seq_i_id, 
+				  TId & seq_i_id, 
 				  TValue & begin_i, 
 				  TValue & end_i,
 				  TValue seq)

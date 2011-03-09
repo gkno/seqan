@@ -44,15 +44,15 @@ namespace SEQAN_NAMESPACE_MAIN
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Functions for Fragments
 //project onto other sequence for Graph<Alignment>
-template<typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
+template<typename TFragSize, typename TFragSpec,typename TValue,typename TId1, typename TPos1, typename TId2, typename TPos2, typename TMap>
 void
 _getOtherSequenceAndProject(Fragment<TFragSize,TFragSpec> & segment,
 						TValue seg_num,
 						   TMap &,
-						   TValue seq_i_id,
-						   TValue pos_i,
-						   TValue & seq_j_id,
-						   TValue & pos_j)
+						   TId1 seq_i_id,
+						   TPos1 pos_i,
+						   TId2 & seq_j_id,
+						   TPos2 & pos_j)
 {
 SEQAN_CHECKPOINT
 	getProjectedPosition(segment,seg_num, seq_i_id, pos_i,seq_j_id,pos_j);
@@ -67,11 +67,11 @@ SEQAN_CHECKPOINT
 //given seq and segment, get the sequenceId (seq_i) and its begin and end
 //if seq = 0 get first sequence (that takes part in the segment match)
 //if seq = 1 get second sequence
-template<typename TFragSize, typename TFragSpec, typename TValue>
+template<typename TFragSize, typename TFragSpec, typename TId, typename TValue>
 void
 _getSeqBeginAndEnd(Fragment<TFragSize,TFragSpec> & segment,
 				  std::map<const void * ,int> &, 
-				  TValue & seq_i_id, 
+				  TId & seq_i_id, 
 				  TValue & begin_i, 
 				  TValue & end_i,
 				  TValue seq)
