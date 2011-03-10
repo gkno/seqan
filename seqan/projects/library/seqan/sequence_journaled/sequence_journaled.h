@@ -108,6 +108,7 @@ public:
     String(String const & other)
     {
         SEQAN_CHECKPOINT;
+        assign(_holder, other._holder);
         assign(*this, other);
     }
 
@@ -123,6 +124,7 @@ public:
     operator=(String const & other)
     {
         SEQAN_CHECKPOINT;
+        //TODO (10.03.2011) - rmaerker: should copy the holder, too. What is intended with the assignment - copy or set?
         assign(*this, other);
         return *this;
     }
