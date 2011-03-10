@@ -39,22 +39,28 @@
 
 // TODO(holtgrew): What about const holders?
 // TODO(holtgrew): Are holders on pointers used anywhere?
-// TODO(holtgrew): What about Simple holders? What about Tristate2?
+// TODO(holtgrew): What about Tristate2? It was originally here and documented as "also works on pointers." Do other holders not work for pointers?
 
 namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
-// Tags
+// ============================================================================
+// Forwards
+// ============================================================================
 
-struct Simple;
-struct Tristate;
+template <typename T> struct IsSimple;
 
-template <typename T>
-struct IsSimple;
+// Used in functions section.
+// TODO(holtgrew): This will go away, right?
+template <typename TValue> inline size_t length(TValue const * me);
+template <typename TValue> inline size_t length(TValue * me);
 
-//////////////////////////////////////////////////////////////////////////////
-// Holder
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Class Holder
+// ----------------------------------------------------------------------------
 
 /**
 .Class.Holder:
@@ -71,74 +77,31 @@ member objects. If we want class $A$ to be dependent on or the owner of another 
 then we add a data member of type $Holder<B>$ to $A$. 
 $Holder$ offers some useful access functions and stores the kind of relationship between $A$ and $B$.
 ..include:seqan/basic.h
-*/
+
+.Memfunc.Holder:
+..class:Class.Holder
+..summary:Constructor
+..signature:Holder<TValue, TSpec>()
+..signature:Holder<TValue, TSpec>(holder)
+..signature:Holder<TValue, TSpec>(value)
+..param.holder:Another holder object.
+..param.value:An object of type $TValue$.
+..remarks.text:
+The default constructor creates a holder that is in state 'empty'.
+If a $value$ is passed to the constructor, the holder will be in state 'dependent'.
+ */
+
+// Default for class holder.
+struct Tristate_;
+typedef Tag<Tristate_> Tristate;
 
 template <typename TValue, typename TSpec = Tristate>
 struct Holder;
 
+// ----------------------------------------------------------------------------
+// Specialization Tristate Holder
+// ----------------------------------------------------------------------------
 
-//////////////////////////////////////////////////////////////////////////////
-// METAFUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Value.param.T.type:Class.Holder
-
-template <typename TValue, typename TSpec>
-struct Value< Holder<TValue, TSpec> >
-{
-	typedef TValue Type;
-};
-template <typename TValue, typename TSpec>
-struct Value< Holder<TValue * const, TSpec> >
-{
-	typedef TValue * Type;
-};
-template <typename TValue, typename TSpec>
-struct Value< Holder<TValue, TSpec> const>
-{
-	typedef TValue Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Spec.param.T.type:Class.Holder
-
-template <typename TValue, typename TSpec>
-struct Spec< Holder<TValue, TSpec> >
-{
-	typedef TSpec Type;
-};
-template <typename TValue, typename TSpec>
-struct Spec< Holder<TValue, TSpec> const>
-{
-	typedef TSpec Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Reference.param.T.type:Class.Holder
-
-template <typename TValue, typename TSpec>
-struct Reference< Holder<TValue, TSpec> >
-{
-	typedef typename Value< Holder<TValue, TSpec> >::Type & Type;
-};
-template <typename TValue, typename TSpec>
-struct Reference< Holder<TValue, TSpec> const>
-{
-	typedef typename Value< Holder<TValue, TSpec> const>::Type & Type;
-};
-template <typename TValue, typename TSpec>
-struct Reference< Holder<TValue *, TSpec> const>
-{
-	typedef typename Value< Holder<TValue *, TSpec> const>::Type const & Type;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-// Tristate Holder
-//////////////////////////////////////////////////////////////////////////////
 /**
 .Spec.Tristate Holder
 ..cat:Holders
@@ -151,35 +114,13 @@ struct Reference< Holder<TValue *, TSpec> const>
 ..remarks.text:- dependent: $A$ depends on $B$. $B$ should not be destroyed as long as $A$ is used.
 ..remarks.text:- empty: there is currently no object reference stored in the holder $A$.
 ..remarks.text:The state of the holder can be determined by @Function.empty@ and @Function.dependent@.
+..remarks.text:If a holder object is in owner state when destructed, the owned object is destructed as well.
 ..include:seqan/basic.h
-*/
-
-/**
-.Memfunc.Holder:
-..class:Class.Holder
-..summary:Constructor
-..signature:Holder<TValue, TInfix> ()
-..signature:Holder<TValue, TInfix> (holder)
-..signature:Holder<TValue, TInfix> (value)
-..param.holder:Another holder object.
-..param.value:An object of type $TValue$.
-..remarks.text:
-The default constructor creates a holder that is in state 'empty'.
-If a $value$ is passed to the constructor, the holder will be in state 'dependent'.
-*/
-/**
-.Memfunc.~Holder:
-..class:Class.Holder
-..summary:Destructor
-..signature:~Holder()
-..remarks.text:
-If the holder is in state 'owner', the holded object will be destoyed too.
-*/
+ */
 
 template <typename TValue>
 struct Holder<TValue, Tristate>
 {
-public:
 	enum EHolderState
 	{
 		EMPTY = 0,
@@ -189,75 +130,81 @@ public:
 
 	typedef typename Value<Holder>::Type THostValue;
 
+    // ------------------------------------------------------------------------
+    // Members
+    // ------------------------------------------------------------------------
+
 	THostValue * data_value;
 	EHolderState data_state;
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Constructors; Destructor
+    // ------------------------------------------------------------------------
 
-	Holder():
-		data_state(EMPTY)
+	Holder() : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 	}
-	Holder(Holder const & source_):
-		data_state(EMPTY)
+
+	Holder(Holder const & source_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 	}
-	Holder(THostValue & value_):
-		data_state(EMPTY)
+
+	Holder(THostValue & value_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 	}
-	Holder(THostValue const & value_):
-		data_state(EMPTY)
+
+	Holder(THostValue const & value_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assignValue(*this, value_);
 	}
 
 	~Holder()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		clear(*this);
 	}
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Assignment Operators;  Must be defined in class.
+    // ------------------------------------------------------------------------
 
 	inline Holder const &
-	operator = (Holder const & source_)
+	operator=(Holder const & source_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 		return *this;
 	}
 
 	inline Holder const &
-	operator = (THostValue const & value_)
+	operator=(THostValue const & value_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assignValue(*this, value_);
 		return *this;
 	}
 
+    // ------------------------------------------------------------------------
+    // Conversion Operators;  Must be defined in class.
+    // ------------------------------------------------------------------------
+
 	inline operator THostValue()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return _dataValue(*this);
 	}
-//____________________________________________________________________________
-
 };
 
-
-//////////////////////////////////////////////////////////////////////////////
-
+// TODO(holtgrew): Why does this not reliably work without copying where it can?
 template <typename TValue>
 struct Holder<TValue const, Tristate>
 {
-public:
 	enum EHolderState
 	{
 		EMPTY = 0,
@@ -267,75 +214,81 @@ public:
 
 	typedef typename Value<Holder>::Type THostValue;
 
+    // ------------------------------------------------------------------------
+    // Members
+    // ------------------------------------------------------------------------
+
 	THostValue * data_value;
 	EHolderState data_state;
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Constructors; Destructor
+    // ------------------------------------------------------------------------
 
-	Holder():
-		data_state(EMPTY)
+	Holder() : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 	}
-	Holder(Holder const & source_):
-		data_state(EMPTY)
+
+	Holder(Holder const & source_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 	}
-	Holder(TValue & value_):
-		data_state(EMPTY)
+
+	Holder(TValue & value_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 	}
-	Holder(TValue const & value_):
-		data_state(EMPTY)
+
+	Holder(TValue const & value_): data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 	}
 
 	~Holder()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		clear(*this);
 	}
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Assignment Operators;  Has to be defined in class.
+    // ------------------------------------------------------------------------
 
-	inline Holder const &
-	operator = (Holder const & source_)
+	inline Holder &
+	operator=(Holder const & source_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 		return *this;
 	}
 
-	inline Holder const &
-	operator = (THostValue const & value_)
+	inline Holder &
+	operator=(THostValue const & value_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assignValue(*this, value_);
 		return *this;
 	}
 
+    // ------------------------------------------------------------------------
+    // Conversion Operators;  Has to be defined in class.
+    // ------------------------------------------------------------------------
+
 	inline operator THostValue()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return _dataValue(*this);
 	}
-//____________________________________________________________________________
-
 };
-
-
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue>
 struct Holder<TValue *, Tristate>
 {
-public:
+
 	enum EHolderState
 	{
 		EMPTY = 0,
@@ -345,41 +298,48 @@ public:
 
 	typedef typename Value<Holder>::Type THostValue;
 
+    // ------------------------------------------------------------------------
+    // Members
+    // ------------------------------------------------------------------------
+
 	THostValue data_value;
 	EHolderState data_state;
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Constructor; Destructors
+    // ------------------------------------------------------------------------
 
-	Holder():
-		data_state(EMPTY)
+	Holder() : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 	}
-	Holder(Holder const & source_):
-		data_state(EMPTY)
+
+	Holder(Holder const & source_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 	}
-	Holder(TValue * value_):
-		data_state(EMPTY)
+
+	Holder(TValue * value_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 	}
 
 	~Holder()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		clear(*this);
 	}
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Assignment Operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
 
 	inline Holder const &
 	operator = (Holder const & source_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 		return *this;
 	}
@@ -387,27 +347,25 @@ SEQAN_CHECKPOINT
 	inline Holder const &
 	operator = (THostValue value_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 		return *this;
 	}
 
+    // ------------------------------------------------------------------------
+    // Conversion Operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
+
 	inline operator THostValue()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return _dataValue(*this);
 	}
-//____________________________________________________________________________
-
 };
-
-
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue>
 struct Holder<TValue * const, Tristate>
 {
-public:
 	enum EHolderState
 	{
 		EMPTY = 0,
@@ -417,65 +375,253 @@ public:
 
 	typedef typename Value<Holder>::Type THostValue;
 
+    // ------------------------------------------------------------------------
+    // Members
+    // ------------------------------------------------------------------------
+
 	THostValue data_value;
 	EHolderState data_state;
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Constructors; Destructor
+    // ------------------------------------------------------------------------
 
-	Holder():
-		data_state(EMPTY)
+	Holder() : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 	}
-	Holder(Holder const & source_):
-		data_state(EMPTY)
+
+	Holder(Holder const & source_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 	}
-	Holder(TValue * value_):
-		data_state(EMPTY)
+
+	Holder(TValue * value_) : data_state(EMPTY)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 	}
 
 	~Holder()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		clear(*this);
 	}
 
-//____________________________________________________________________________
+    // ------------------------------------------------------------------------
+    // Assignment Operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
 
-	inline Holder const &
-	operator = (Holder const & source_)
+	inline Holder &
+	operator=(Holder const & source_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		assign(*this, source_);
 		return *this;
 	}
 
-	inline Holder const &
-	operator = (THostValue value_)
+	inline Holder &
+	operator=(THostValue value_)
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 		return *this;
 	}
 
+    // ------------------------------------------------------------------------
+    // Conversion Operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
+
 	inline operator THostValue()
 	{
-SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return _dataValue(*this);
 	}
-//____________________________________________________________________________
-
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// FUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Specialization Simple Holder
+// ----------------------------------------------------------------------------
+
+#ifdef PLATFORM_WINDOWS_VS
+// Disable warning C4521 locally (multiple copy constructors).
+#pragma warning( push )
+#pragma warning( disable: 4521 )
+#endif  // PLATFORM_WINDOWS_VS
+
+// TODO(holtgrew): Use struct Simple_; typedef Tag<Simple_> Simple?
+struct Simple;
+
+/**
+.Spec.Simple Holder
+..cat:Holders
+..summary:Simple copying wrapper without any additional state.
+..signature:Holder<TValue, Simle>
+..param.TValue:Type of the managed object.
+..general:Class.Holder
+..remarks.text:This holder stores a copy of the value.
+..include:seqan/basic.h
+ */
+
+template <typename TValue>
+struct Holder<TValue, Simple>
+{
+	typedef typename Value<Holder>::Type THolderValue;
+	typedef typename Parameter_<THolderValue>::Type THolderParameter;
+
+    // ------------------------------------------------------------------------
+    // Members
+    // ------------------------------------------------------------------------
+
+	mutable typename RemoveConst_<THolderValue>::Type data_value;
+
+    // ------------------------------------------------------------------------
+    // Constructors
+    // ------------------------------------------------------------------------
+
+	Holder() {}
+
+	Holder(Holder & source_) : data_value(source_.data_value)
+	{
+        SEQAN_CHECKPOINT;
+	}
+
+	Holder(Holder const & source_) : data_value(source_.data_value)
+	{
+        SEQAN_CHECKPOINT;
+	}
+
+	template <typename TSource>
+	Holder(TSource & value_) : data_value(value_)
+	{
+        SEQAN_CHECKPOINT;
+	}
+
+	template <typename TSource>
+	Holder(TSource const & value_) : data_value(value_)
+	{
+        SEQAN_CHECKPOINT;
+	}
+
+    // ------------------------------------------------------------------------
+    // Assignment Operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
+
+	Holder &
+	operator=(Holder const & source_)
+	{
+        SEQAN_CHECKPOINT;
+		data_value = source_.data_value;
+		return *this;
+	}
+
+	Holder &
+	operator=(THolderValue const & value_)
+	{
+        SEQAN_CHECKPOINT;
+		data_value = value_;
+		return *this;
+	}
+
+    // ------------------------------------------------------------------------
+    // Conversion Operators;  Have to be defined in class.
+    // ------------------------------------------------------------------------
+
+	operator THolderParameter()
+	{
+        SEQAN_CHECKPOINT;
+		return *data_value;
+	}
+};
+
+#ifdef PLATFORM_WINDOWS_VS
+// Set old warning C4521 state again (multiple copy constructors).
+#pragma warning( pop )
+#endif  // PLATFORM_WINDOWS_VS
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Value.param.T.type:Class.Holder
+
+template <typename TValue, typename TSpec>
+struct Value<Holder<TValue, TSpec> >
+{
+	typedef TValue Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Value<Holder<TValue, TSpec> const>
+{
+	typedef TValue Type;
+};
+
+// TODO(holtgrew): What about holders on pointers?
+template <typename TValue, typename TSpec>
+struct Value<Holder<TValue * const, TSpec> >
+{
+	typedef TValue * Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Spec
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Spec.param.T.type:Class.Holder
+
+template <typename TValue, typename TSpec>
+struct Spec<Holder<TValue, TSpec> >
+{
+	typedef TSpec Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Spec<Holder<TValue, TSpec> const>
+{
+	typedef TSpec Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Reference
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Reference.param.T.type:Class.Holder
+
+template <typename TValue, typename TSpec>
+struct Reference<Holder<TValue, TSpec> >
+{
+	typedef typename Value<Holder<TValue, TSpec> >::Type & Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Reference< Holder<TValue, TSpec> const>
+{
+	typedef typename Value<Holder<TValue, TSpec> const>::Type & Type;
+};
+
+template <typename TValue, typename TSpec>
+struct Reference<Holder<TValue *, TSpec> const>
+{
+	typedef typename Value<Holder<TValue *, TSpec> const>::Type const & Type;
+};
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ****************************************************************************
+// Specialization Tristate Holder
+// ****************************************************************************
+
+// ----------------------------------------------------------------------------
+// Function _dataValue()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline typename Reference<Holder<TValue, Tristate> >::Type
@@ -483,6 +629,7 @@ _dataValue(Holder<TValue, Tristate> & me)
 {
 	return * me.data_value;
 }
+
 template <typename TValue>
 inline typename Reference<Holder<TValue, Tristate> const>::Type
 _dataValue(Holder<TValue, Tristate> const & me)
@@ -496,6 +643,7 @@ _dataValue(Holder<TValue *, Tristate> & me)
 {
 	return me.data_value;
 }
+
 template <typename TValue>
 inline typename Reference<Holder<TValue *, Tristate> const>::Type
 _dataValue(Holder<TValue *, Tristate> const & me)
@@ -509,6 +657,7 @@ _dataValue(Holder<TValue * const, Tristate> & me)
 {
 	return me.data_value;
 }
+
 template <typename TValue>
 inline typename Reference<Holder<TValue * const, Tristate> const>::Type
 _dataValue(Holder<TValue * const, Tristate> const & me)
@@ -516,7 +665,9 @@ _dataValue(Holder<TValue * const, Tristate> const & me)
 	return me.data_value;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function empty()
+// ----------------------------------------------------------------------------
 
 ///.Function.empty.param.object.type:Class.Holder
 
@@ -528,7 +679,9 @@ SEQAN_CHECKPOINT
 	return (me.data_state == Holder<TValue, Tristate>::EMPTY);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function dependent()
+// ----------------------------------------------------------------------------
 
 ///.Function.dependent.param.object.type:Class.Holder
 
@@ -536,16 +689,70 @@ template <typename TValue>
 inline bool
 dependent(Holder<TValue, Tristate> const & me)
 {
-SEQAN_CHECKPOINT
-	return (me.data_state == Holder<TValue, Tristate>::DEPENDENT);
+    SEQAN_CHECKPOINT;
+	return me.data_state == Holder<TValue, Tristate>::DEPENDENT;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+/// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
 
-template <typename TValue> inline size_t length(TValue const * me);
-template <typename TValue> inline size_t length(TValue * me);
+template <typename THolder, typename TValue>
+inline void
+_holderDeallocate(THolder & me, TValue const & data)
+{	
+	valueDestruct(& data);
+	deallocate(me, & data, 1);
+}
 
-//////////////////////////////////////////////////////////////////////////////
+template <typename THolder, typename TValue>
+inline void
+_holderDeallocate(THolder & me, TValue * data, True)				// is a pointer to an *array* of objects
+{
+	size_t len = length(data)+1;
+	arrayDestruct(data, data+len);
+	deallocate(me, data, len);
+}
+
+template <typename THolder, typename TValue>
+inline void
+_holderDeallocate(THolder & /*me*/, TValue * /*data*/, False)				// is a pointer to *one* object
+{
+}
+
+template <typename THolder, typename TValue>
+inline void
+_holderDeallocate(THolder & me, TValue * data)
+{
+	return _holderDeallocate(me, data, IsSimple<TValue>());			// try to distinguish between a pointer to one/array of object(s)
+}
+
+///.Function.clear.param.object.type:Class.Holder
+///.Function.clear.remarks.text:If $clear$ is applied on a @Class.Holder@ object,
+///the state of this object is set to 'empty'.
+
+template <typename TValue>
+inline void
+clear(Holder<TValue, Tristate> & me)
+{
+	switch (me.data_state) {
+        case Holder<TValue, Tristate>::EMPTY:
+            break;
+        case Holder<TValue, Tristate>::DEPENDENT:
+            SEQAN_CHECKPOINT;
+            me.data_state = Holder<TValue, Tristate>::EMPTY;
+            break;
+        default:  // case Holder<TValue, TSpec>::OWNER
+            SEQAN_CHECKPOINT;
+            _holderDeallocate(me, _dataValue(me));
+            me.data_state = Holder<TValue, Tristate>::EMPTY;
+            break;
+	}
+}
+
+// ----------------------------------------------------------------------------
+// Function create()
+// ----------------------------------------------------------------------------
 
 template <typename THolder, typename TValue>
 inline typename Value<THolder, 0>::Type *
@@ -582,74 +789,6 @@ _holderAllocatePointer(THolder & me, TValue * data)
 	return _holderAllocatePointer(me, data, IsSimple<TValue>());	// try to distinguish between a pointer to one/array of object(s)
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename THolder, typename TValue>
-inline void
-_holderDeallocate(THolder & me, TValue const & data)
-{	
-	valueDestruct(& data);
-	deallocate(me, & data, 1);
-}
-
-template <typename THolder, typename TValue>
-inline void
-_holderDeallocate(THolder & me, TValue * data, True)				// is a pointer to an *array* of objects
-{
-	size_t len = length(data)+1;
-	arrayDestruct(data, data+len);
-	deallocate(me, data, len);
-}
-
-template <typename THolder, typename TValue>
-inline void
-_holderDeallocate(THolder & /*me*/, TValue * /*data*/, False)				// is a pointer to *one* object
-{
-}
-
-template <typename THolder, typename TValue>
-inline void
-_holderDeallocate(THolder & me, TValue * data)
-{
-	return _holderDeallocate(me, data, IsSimple<TValue>());			// try to distinguish between a pointer to one/array of object(s)
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.clear.param.object.type:Class.Holder
-///.Function.clear.remarks.text:If $clear$ is applied on a @Class.Holder@ object,
-///the state of this object is set to 'empty'.
-
-template <typename TValue>
-inline void
-clear(Holder<TValue, Tristate> & me)
-{
-	switch (me.data_state)
-	{
-	case Holder<TValue, Tristate>::EMPTY:
-		break;
-
-	case Holder<TValue, Tristate>::DEPENDENT:
-		{
-SEQAN_CHECKPOINT
-		me.data_state = Holder<TValue, Tristate>::EMPTY;
-		}
-		break;
-
-	default: /*Holder<TValue, TSpec>::OWNER*/
-		{
-SEQAN_CHECKPOINT
-		_holderDeallocate(me, _dataValue(me));
-		me.data_state = Holder<TValue, Tristate>::EMPTY;
-		}
-		break;
-	}
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.create:
 ..summary:Makes an object to owner of its content.
@@ -677,22 +816,18 @@ create(Holder<TValue, Tristate> & me)
 
 	switch (me.data_state)
 	{
-	case Holder<TValue, Tristate>::EMPTY:
-		{
-SEQAN_CHECKPOINT
-		allocate(me, me.data_value, 1);
-		valueConstruct(me.data_value);
-		me.data_state = THolder::OWNER;
-		}
-		break;
-
-	case THolder::DEPENDENT:
-		{
-SEQAN_CHECKPOINT
-		create(me, _dataValue(me));
-		}
-		break;
-	default:;
+        case Holder<TValue, Tristate>::EMPTY:
+            SEQAN_CHECKPOINT;
+            allocate(me, me.data_value, 1);
+            valueConstruct(me.data_value);
+            me.data_state = THolder::OWNER;
+            break;
+            
+        case THolder::DEPENDENT:
+            SEQAN_CHECKPOINT;
+            create(me, _dataValue(me));
+            break;
+        default:;
 	}
 }
 
@@ -703,23 +838,17 @@ create(Holder<TValue *, Tristate> & me)
 {
 	typedef Holder<TValue *, Tristate> THolder;
 
-	switch (me.data_state)
-	{
-	case Holder<TValue *, Tristate>::EMPTY:
-		{
-SEQAN_CHECKPOINT
-		valueConstruct(& me.data_value);
-		me.data_state = THolder::OWNER;
-		}
-		break;
-
-	case THolder::DEPENDENT:
-		{
-SEQAN_CHECKPOINT
-		create(me, _dataValue(me));
-		}
-		break;
-	default:;
+	switch (me.data_state) {
+        case Holder<TValue *, Tristate>::EMPTY:
+            SEQAN_CHECKPOINT;
+            valueConstruct(& me.data_value);
+            me.data_state = THolder::OWNER;
+            break;
+        case THolder::DEPENDENT:
+            SEQAN_CHECKPOINT;
+            create(me, _dataValue(me));
+            break;
+        default:;
 	}
 }
 
@@ -729,37 +858,28 @@ create(Holder<TValue * const, Tristate> & me)
 {
 	typedef Holder<TValue *, Tristate> THolder;
 
-	switch (me.data_state)
-	{
-	case Holder<TValue *, Tristate>::EMPTY:
-		{
-SEQAN_CHECKPOINT
-		valueConstruct(& me.data_value);
-		me.data_state = THolder::OWNER;
-		}
-		break;
-
-	case THolder::DEPENDENT:
-		{
-SEQAN_CHECKPOINT
-		create(me, _dataValue(me));
-		}
-		break;
-	default:;
+	switch (me.data_state) {
+        case Holder<TValue *, Tristate>::EMPTY:
+            SEQAN_CHECKPOINT;
+            valueConstruct(& me.data_value);
+            me.data_state = THolder::OWNER;
+            break;
+        case THolder::DEPENDENT:
+            SEQAN_CHECKPOINT;
+            create(me, _dataValue(me));
+            break;
+        default:;
 	}
 }
-
-//____________________________________________________________________________
 
 template <typename TValue, typename TValue2>
 inline void
 create(Holder<TValue, Tristate> & me,
 	   TValue2 & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 
-	if (me.data_state == Holder<TValue, Tristate>::OWNER)
-	{
+	if (me.data_state == Holder<TValue, Tristate>::OWNER) {
 		assign(_dataValue(me), value_);
 		return;
 	}
@@ -774,7 +894,7 @@ inline void
 create(Holder<TValue const, Tristate> & me,
 	   TValue2 & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 
 	clear(me);
 	me.data_value = _holderAllocateObject(me, value_);
@@ -828,11 +948,14 @@ template <typename TValue>
 inline void
 detach(Holder<TValue, Tristate> & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	create(me);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function setValue()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.setValue:
 ..cat:Content Manipulation
@@ -852,33 +975,33 @@ inline void
 setValue(Holder<TValue, Tristate> & me,
 		 TValue & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = & value_;
 	me.data_state = Holder<TValue, Tristate>::DEPENDENT;
 }
-
-//____________________________________________________________________________
 
 template <typename TValue>
 inline void
 setValue(Holder<TValue const, Tristate> & me,
 		 TValue & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = & value_;
 	me.data_state = Holder<TValue const, Tristate>::DEPENDENT;
 }
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------------
+// Function setValue()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline void
 setValue(Holder<TValue *, Tristate> & me,
 		 TValue * & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
@@ -889,7 +1012,7 @@ inline void
 setValue(Holder<TValue *, Tristate> & me,
 		 TValue * const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
@@ -900,7 +1023,7 @@ inline void
 setValue(Holder<TValue * const, Tristate> & me,
 		 TValue * & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
@@ -911,20 +1034,18 @@ inline void
 setValue(Holder<TValue * const, Tristate> & me,
 		 TValue * const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
 }
-
-//____________________________________________________________________________
 
 template <typename TValue, size_t I>
 inline void
 setValue(Holder<TValue *, Tristate> & me,
 		 TValue (& value_)[I])
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
@@ -935,7 +1056,7 @@ inline void
 setValue(Holder<TValue *, Tristate> & me,
 		 TValue const (& value_)[I])
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
@@ -946,7 +1067,7 @@ inline void
 setValue(Holder<TValue * const, Tristate> & me,
 		 TValue (& value_)[I])
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
@@ -957,20 +1078,18 @@ inline void
 setValue(Holder<TValue * const, Tristate> & me,
 		 TValue const (& value_)[I])
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
 }
-
-//____________________________________________________________________________
 
 template <typename TValue, typename TValue2>
 inline void
 setValue(Holder<TValue, Tristate> & me,
 		 TValue2 & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	set(value(me), value_);
 }
 
@@ -979,12 +1098,13 @@ inline void
 setValue(Holder<TValue, Tristate> & me,
 		 TValue2 const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	set(value(me), value_);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function value()
+// ----------------------------------------------------------------------------
 
 ///.Function.value.param.object.type:Class.Holder
 
@@ -992,7 +1112,7 @@ template <typename TValue>
 inline typename Reference<Holder<TValue, Tristate> >::Type
 value(Holder<TValue, Tristate> & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef Holder<TValue, Tristate> THolder;
 
 	if (empty(me))
@@ -1013,7 +1133,9 @@ value(Holder<TValue, Tristate> const & me)
 	return _dataValue(me);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function assignValue()
+// ----------------------------------------------------------------------------
 
 ///.Function.assignValue.param.object.type:Class.Holder
 
@@ -1022,19 +1144,18 @@ inline void
 assignValue(Holder<TValue, Tristate> & me,
 			TSource const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef typename Value<Holder<TValue, Tristate> >::Type THostValue;
-	if (empty(me))
-	{
+	if (empty(me)) {
 		create(me, value_);
-	}
-	else
-	{
+	} else {
 		assign(_dataValue(me), value_);
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function moveValue()
+// ----------------------------------------------------------------------------
 
 ///.Function.moveValue.param.object.type:Class.Holder
 
@@ -1043,18 +1164,17 @@ inline void
 moveValue(Holder<TValue, Tristate> & me,
 		  TSource const & value_)
 {
-SEQAN_CHECKPOINT
-	if (empty(me))
-	{
+    SEQAN_CHECKPOINT;
+	if (empty(me)) {
 		create(me, value_);
-	}
-	else
-	{
+	} else {
 		move(_dataValue(me), value_);
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function assign()
+// ----------------------------------------------------------------------------
 
 ///.Function.assign.param.target.type:Class.Holder
 ///.Function.assign.param.source.type:Class.Holder
@@ -1064,579 +1184,165 @@ inline void
 assign(Holder<TValue, Tristate> & target_,
 	   Holder<TValue, Tristate> const & source_)
 {
-SEQAN_CHECKPOINT
-	switch(source_.data_state)
-	{
-	case Holder<TValue, Tristate>::EMPTY:
-		{
-		clear(target_);
-		}
-		break;
-
-	case Holder<TValue, Tristate>::OWNER:
-		{
-		assignValue(target_, value(source_));
-		}
-		break;
-
-	default: /*case Holder<TValue, Tristate>::DEPENDENT*/
-		{
-		setValue(target_, value(source_));
-		}
-		break;
+    SEQAN_CHECKPOINT;
+	switch(source_.data_state) {
+        case Holder<TValue, Tristate>::EMPTY:
+            clear(target_);
+            break;
+            
+        case Holder<TValue, Tristate>::OWNER:
+            assignValue(target_, value(source_));
+            break;
+            
+        default:  // case Holder<TValue, Tristate>::DEPENDENT
+            setValue(target_, value(source_));
+            break;
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-// Simple Holder
-//////////////////////////////////////////////////////////////////////////////
-//??? TODO: Documentation of Simple Holder
+// ****************************************************************************
+// Specialization Simple Holder
+// ****************************************************************************
 
-#ifdef PLATFORM_WINDOWS_VS
-// Disable warning C4521 locally (multiple copy constructors).
-#pragma warning( push )
-#pragma warning( disable: 4521 )
-#endif  // PLATFORM_WINDOWS_VS
-
-template <typename TValue>
-struct Holder<TValue, Simple>
-{
-	typedef typename Value<Holder>::Type THolderValue;
-	typedef typename Parameter_<THolderValue>::Type THolderParameter;
-
-	mutable typename RemoveConst_<THolderValue>::Type data_value;
-//____________________________________________________________________________
-
-	Holder()
-	{
-SEQAN_CHECKPOINT
-	}
-	Holder(Holder & source_):
-		data_value(source_.data_value)
-	{
-SEQAN_CHECKPOINT
-	}
-	Holder(Holder const & source_):
-		data_value(source_.data_value)
-	{
-SEQAN_CHECKPOINT
-	}
-	template <typename TSource>
-	Holder(TSource & value_):
-		data_value(value_)
-	{
-SEQAN_CHECKPOINT
-	}
-	template <typename TSource>
-	Holder(TSource const & value_):
-		data_value(value_)
-	{
-SEQAN_CHECKPOINT
-	}
-/*
-	Holder(TValue const & value_):
-		data_value(value_)
-	{
-SEQAN_CHECKPOINT
-	}
-*/
-	~Holder()
-	{
-SEQAN_CHECKPOINT
-	}
-
-//____________________________________________________________________________
-
-	Holder const &
-	operator = (Holder const & source_)
-	{
-SEQAN_CHECKPOINT
-		data_value = source_.data_value;
-		return *this;
-	}
-
-	Holder const &
-	operator = (THolderValue const & value_)
-	{
-SEQAN_CHECKPOINT
-		data_value = value_;
-		return *this;
-	}
-
-	operator THolderParameter()
-	{
-SEQAN_CHECKPOINT
-		return *data_value;
-	}
-//____________________________________________________________________________
-};
-
-#ifdef PLATFORM_WINDOWS_VS
-// Set old warning C4521 state again (multiple copy constructors).
-#pragma warning( pop )
-#endif  // PLATFORM_WINDOWS_VS
-
-
-//////////////////////////////////////////////////////////////////////////////
-// FUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function empty()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline bool
 empty(Holder<TValue, Simple> const & /*me*/)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return false;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function dependent()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline bool
 dependent(Holder<TValue, Simple> const & /*me*/)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return false;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline void
 clear(Holder<TValue, Simple> & /*me*/)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function create()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline void
 create(Holder<TValue, Simple> & /*me*/)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Should be create(me.data_value), right?
 }
-
-//____________________________________________________________________________
 
 template <typename TValue>
 inline void
 create(Holder<TValue, Simple> & me,
 	   TValue const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	me.data_value = value_;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function detach()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline void
 detach(Holder<TValue, Simple> & /*me*/)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function setValue()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline void
 setValue(Holder<TValue, Simple> & me,
 		 TValue const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	me.data_value = value_;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function value()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline typename Reference<Holder<TValue, Simple> >::Type
 value(Holder<TValue, Simple> & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return me.data_value;
 }
+
 template <typename TValue>
 inline typename Reference<Holder<TValue, Simple> const>::Type
 value(Holder<TValue, Simple> const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return me.data_value;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function assignValue()
+// ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSource>
 inline void
 assignValue(Holder<TValue, Simple> & me,
 			TSource const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assignValue(me.data_value, value_);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function moveValue()
+// ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSource>
 inline void
 moveValue(Holder<TValue, Simple> & me,
 		  TSource const & value_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	move(me.data_value, value_);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function assign()
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 inline void
 assign(Holder<TValue, Simple> & target_,
 	   Holder<TValue, Simple> const & source_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assignValue(target_, source_);
 }
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-// New Tristate Holder that works also on pointers
-//////////////////////////////////////////////////////////////////////////////
-
-struct Tristate2;
-
-template <typename TValue>
-struct Holder<TValue, Tristate2>
-{
-public:
-	enum EHolderState
-	{
-		EMPTY = 0,
-		OWNER = 1,
-		DEPENDENT = ~0
-	};
-
-	typedef typename Value<Holder>::Type THostValue;
-
-	TValue * data_value;
-	EHolderState data_state;
-
-//____________________________________________________________________________
-
-	Holder():
-		data_state(EMPTY)
-	{
-SEQAN_CHECKPOINT
-	}
-	Holder(Holder const & source_):
-		data_state(EMPTY)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, source_);
-	}
-	Holder(typename Parameter_<THostValue>::Type value_):
-		data_state(EMPTY)
-	{
-SEQAN_CHECKPOINT
-		setValue(*this, value_);
-	}
-	/*
-	Holder(typename ConstParameter_<THostValue>::Type value_):
-		data_state(EMPTY)
-	{
-SEQAN_CHECKPOINT
-		assignValue(*this, value_);
-	}
-	*/
-	~Holder()
-	{
-SEQAN_CHECKPOINT
-		clear(*this);
-	}
-
-//____________________________________________________________________________
-
-	Holder const &
-	operator = (Holder const & source_)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, source_);
-		return *this;
-	}
-
-	Holder const &
-	operator = (TValue const & value_)
-	{
-SEQAN_CHECKPOINT
-		assignValue(*this, value_);
-		return *this;
-	}
-
-	operator TValue &()
-	{
-SEQAN_CHECKPOINT
-		return *data_value;
-	}
-//____________________________________________________________________________
-
-};
-
-//////////////////////////////////////////////////////////////////////////////
-// FUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.empty.param.object.type:Class.Holder
-
-template <typename TValue>
-inline bool
-empty(Holder<TValue, Tristate2> const & me)
-{
-SEQAN_CHECKPOINT
-	return (me.data_state == Holder<TValue, Tristate2>::EMPTY);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.dependent.param.object.type:Class.Holder
-
-template <typename TValue>
-inline bool
-dependent(Holder<TValue, Tristate2> const & me)
-{
-SEQAN_CHECKPOINT
-	return (me.data_state == Holder<TValue, Tristate2>::DEPENDENT);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.clear.param.object.type:Class.Holder
-///.Function.clear.remarks.text:If $clear$ is applied on a @Class.Holder@ object,
-///the state of this object is set to 'empty'.
-
-template <typename TValue>
-inline void
-clear(Holder<TValue, Tristate2> & me)
-{
-	switch (me.data_state)
-	{
-	case Holder<TValue, Tristate2>::EMPTY:
-		break;
-
-	case Holder<TValue, Tristate2>::DEPENDENT:
-		{
-SEQAN_CHECKPOINT
-		me.data_state = Holder<TValue, Tristate2>::EMPTY;
-		}
-		break;
-
-	default: /*Holder<TValue, TSpec>::OWNER*/
-		{
-SEQAN_CHECKPOINT
-		valueDestruct(me.data_value);
-		deallocate(me, me.data_value, 1);
-		me.data_state = Holder<TValue, Tristate2>::EMPTY;
-		}
-		break;
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-template <typename TValue>
-inline void
-create(Holder<TValue, Tristate2> & me)
-{
-	typedef Holder<TValue, Tristate2> THolder;
-
-	switch (me.data_state)
-	{
-	case Holder<TValue, Tristate2>::EMPTY:
-		{
-SEQAN_CHECKPOINT
-		allocate(me, me.data_value, 1);
-		valueConstruct(me.data_value);
-		me.data_state = THolder::OWNER;
-		}
-		break;
-
-	case THolder::DEPENDENT:
-		{
-SEQAN_CHECKPOINT
-		TValue & old_value = value(me);
-		allocate(me, me.data_value, 1);
-		valueConstruct(me.data_value, old_value);
-		me.data_state = THolder::OWNER;
-		}
-		break;
-	default:;
-	}
-}
-
-//____________________________________________________________________________
-
-template <typename TValue>
-inline void
-create(Holder<TValue, Tristate2> & me,
-	   TValue const & value_)
-{
-SEQAN_CHECKPOINT
-
-	if (me.data_state == Holder<TValue, Tristate2>::OWNER)
-	{
-		assign(*(me.data_value), value_);
-		return;
-	}
-
-	clear(me);
-	allocate(me, me.data_value, 1);
-	valueConstruct(me.data_value, value_);
-	me.data_state = Holder<TValue, Tristate2>::OWNER;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-template <typename TValue>
-inline void
-detach(Holder<TValue, Tristate2> & me)
-{
-SEQAN_CHECKPOINT
-	create(me);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-template <typename TValue>
-inline void
-setValue(Holder<TValue, Tristate2> & me,
-		 TValue & value_)
-{
-SEQAN_CHECKPOINT
-	typedef typename Value<Holder<TValue, Tristate2> >::Type THolderType;
-
-	clear(me);
-	me.data_value = & value_;
-	me.data_state = Holder<TValue, Tristate2>::DEPENDENT;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.value.param.object.type:Class.Holder
-
-template <typename TValue>
-inline typename Reference<Holder<TValue, Tristate2> >::Type
-value(Holder<TValue, Tristate2> & me)
-{
-SEQAN_CHECKPOINT
-	typedef Holder<TValue, Tristate2> THolder;
-
-	if (empty(me))
-	{
-		allocate(me, me.data_value, 1);
-		valueConstruct(me.data_value);
-		me.data_state = THolder::OWNER;
-	}
-
-	typedef typename Value<Holder<TValue, Tristate2> >::Type THolderType;
-	return *(me.data_value);
-}
-template <typename TValue>
-inline typename Reference<Holder<TValue, Tristate2> const>::Type
-value(Holder<TValue, Tristate2> const & me)
-{
-SEQAN_CHECKPOINT
-	SEQAN_ASSERT_NOT(empty(me));
-
-	return *(me.data_value);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.assignValue.param.object.type:Class.Holder
-
-template <typename TValue, typename TSource>
-inline void
-assignValue(Holder<TValue, Tristate2> & me,
-			TSource const & value_)
-{
-SEQAN_CHECKPOINT
-	typedef typename Value<Holder<TValue, Tristate2> >::Type THostValue;
-	if (empty(me))
-	{
-		create(me, value_);
-	}
-	else
-	{
-		assign(*(me.data_value), value_);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.moveValue.param.object.type:Class.Holder
-
-template <typename TValue, typename TSource>
-inline void
-moveValue(Holder<TValue, Tristate2> & me,
-		  TSource const & value_)
-{
-SEQAN_CHECKPOINT
-	if (empty(me))
-	{
-		create(me, value_);
-	}
-	else
-	{
-		move(value(me), value_);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.assign.param.target.type:Class.Holder
-///.Function.assign.param.source.type:Class.Holder
-
-template <typename TValue>
-inline void
-assign(Holder<TValue, Tristate2> & target_,
-	   Holder<TValue, Tristate2> const & source_)
-{
-SEQAN_CHECKPOINT
-	switch(source_.data_state)
-	{
-	case Holder<TValue, Tristate2>::EMPTY:
-		{
-		clear(target_);
-		}
-		break;
-
-	case Holder<TValue, Tristate2>::OWNER:
-		{
-		assignValue(target_, value(source_));
-		}
-		break;
-
-	default: /*case Holder<TValue, Tristate2>::DEPENDENT*/
-		{
-		setValue(target_, value(source_));
-		}
-		break;
-	}
-}
-//////////////////////////////////////////////////////////////////////////////
 
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_BASIC_BASIC_HOLDER_H_
-
-

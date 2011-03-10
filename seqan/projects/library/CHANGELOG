@@ -6,6 +6,9 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Documentation of Simple Holder.
+ * Cleanup of Holder header, removing unused, undocumented, untested Tristate2 holder.
+ * Documentation for Hosted Object Concept.
  * Documentation for metafunctions.
  * Documentation for `SEQAN_ENABLE_PARALLELISM`.
  * Adding support for documenting enums and macros to dddocs.
