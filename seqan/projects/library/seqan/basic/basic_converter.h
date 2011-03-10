@@ -34,6 +34,8 @@
 // Basic conversion code.
 // ==========================================================================
 
+// TODO(holtgrew): Rename to basic_conversion.h.
+
 #ifndef SEQAN_BASIC_BASIC_CONVERTER_H_
 #define SEQAN_BASIC_BASIC_CONVERTER_H_
 

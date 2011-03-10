@@ -35,6 +35,9 @@
 // "ClassTest.h".
 // ==========================================================================
 
+// TODO(holtgrew): This could use some cleanup.
+// TODO(holtgrew): Document SEQAN_BEGIN_TESTSUITE, SEQAN_END_TESTSUITE and the assertions with DDDoc.
+
 // SEQAN_NO_GENERATED_FORWARDS
 
 #ifndef SEQAN_BASIC_BASIC_TESTING_H_

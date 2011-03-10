@@ -537,6 +537,177 @@ struct Power {
 template <__int64 base> struct Power<base, 1> { static const __uint64 VALUE = base; };
 template <__int64 base> struct Power<base, 0> { static const __uint64 VALUE = 1; };
 
+// ----------------------------------------------------------------------------
+// Metafunction MakeUnsigned
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Make public, complete documentation.
+
+/**
+.Internal.MakeUnsigned_:
+..signature:MakeUnsigned_<T>
+..returns:$unsigned t$ if $T$ is not $unsigned t$, otherwise $T$.
+*/
+
+template <typename T>
+struct MakeUnsigned_
+{
+	typedef
+		typename If< IsSameType<T, char>::VALUE,         unsigned char,
+		typename If< IsSameType<T, signed char>::VALUE,  unsigned char,
+		typename If< IsSameType<T, signed short>::VALUE, unsigned short,
+		typename If< IsSameType<T, signed int>::VALUE,   unsigned int,
+		typename If< IsSameType<T, signed long>::VALUE,  unsigned long,
+		typename If< IsSameType<T, __int64>::VALUE,      __uint64, T
+		>::Type>::Type>::Type>::Type>::Type>::Type Type;
+};
+
+template <typename T>
+struct MakeUnsigned_<T const>
+{
+	typedef typename MakeUnsigned_<T>::Type const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction MakeSigned
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Make public, complete documentation.
+
+/**
+.Internal.MakeSigned_:
+..signature:MakeSigned_<T>
+..returns:$signed t$ if $T$ is not $signed t$, otherwise $T$.
+*/
+template <typename T>
+struct MakeSigned_
+{
+	typedef
+		typename If< IsSameType<T, char>::VALUE,           signed char,
+		typename If< IsSameType<T, unsigned char>::VALUE,  signed char,
+		typename If< IsSameType<T, unsigned short>::VALUE, signed short,
+		typename If< IsSameType<T, unsigned int>::VALUE,   signed int,
+		typename If< IsSameType<T, unsigned long>::VALUE,  signed long,
+		typename If< IsSameType<T, __uint64>::VALUE,       __int64, T
+		>::Type>::Type>::Type>::Type>::Type>::Type Type;
+};
+
+template <typename T>
+struct MakeSigned_<T const>
+{
+	typedef typename MakeSigned_<T>::Type const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction RemoveConst_
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Make public, complete documentation.
+
+/**
+.Internal.RemoveConst_:
+..signature:RemoveConst_<T>
+..returns:$t$ if $T$ is $t const$, otherwise $T$.
+*/
+
+template <typename T>
+struct RemoveConst_
+{
+	typedef T Type;
+};
+
+template <typename T>
+struct RemoveConst_<T const>
+        : public RemoveConst_<T> {};
+
+template <typename T>
+struct RemoveConst_<T &>
+{
+	typedef typename RemoveConst_<T>::Type & Type;
+};
+
+template <typename T>
+struct RemoveConst_<T *>
+{
+	typedef typename RemoveConst_<T>::Type * Type;
+};
+
+template <typename T, size_t I>
+struct RemoveConst_<T const [I]>
+{
+	typedef T * Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction CopyConst
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Make public, document.
+
+// returns TTo const, if TFrom is const, TTo otherwise
+
+template <typename TFrom, typename TTo>
+struct CopyConst_
+{
+	typedef TTo Type;
+};
+
+template <typename TFrom, typename TTo>
+struct CopyConst_<TFrom const, TTo>
+{
+	typedef TTo const Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction IsConst_
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Make public, complete documentation.
+
+/**
+.Internal.IsConst_:
+..signature:IsConst_<T>
+..returns:$True$ if $T$ is $t const$, otherwise $False$.
+*/
+
+template <typename T>
+struct IsConst_
+{
+	typedef False Type;
+};
+
+template <typename T>
+struct IsConst_<T const>
+{
+    typedef True Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction ClassIdentifier_
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Make public, complete documentation.
+
+/**
+.Internal.ClassIdentifier_:
+..signature:void * ClassIdentifier_<T>::getID()
+..returns:A void * that identifies $T$.
+...text:The returned values of two calls of $getID$ are equal if and only if
+the used type $T$ was the same.
+ */
+
+template <typename T>
+struct ClassIdentifier_
+{
+	static inline void *
+	getID()
+	{
+        SEQAN_CHECKPOINT;
+		static bool _id_dummy;
+		return &_id_dummy;
+	}
+};
+
 // ============================================================================
 // Functions
 // ============================================================================

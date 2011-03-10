@@ -35,6 +35,7 @@
 // ==========================================================================
 
 // TODO(holtgrew): This looks a bit unused/underused.
+// TODO(holtgrew): Rename to hosted_interface.h?
 
 #ifndef SEQAN_BASIC_BASIC_HOST_H_
 #define SEQAN_BASIC_BASIC_HOST_H_

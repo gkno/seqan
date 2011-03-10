@@ -30,6 +30,8 @@
 //
 // ==========================================================================
 
+// TODO(holtgrew): What's the state of this file? I remember David saying that it brought no real performance improvements.
+
 #ifndef SEQAN_HEADER_BASIC_SSE2_H
 #define SEQAN_HEADER_BASIC_SSE2_H
 

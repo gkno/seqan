@@ -39,7 +39,7 @@
 
 // TODO(holtgrew): What about const holders?
 // TODO(holtgrew): Are holders on pointers used anywhere?
-// TODO(holtgrew): What about Tristate2? It was originally here and documented as "also works on pointers." Do other holders not work for pointers?
+// TODO(holtgrew): Split into holder_base.h, holder_simple.h, and holder_tristate.h?
 
 namespace seqan {
 

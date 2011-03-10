@@ -6,6 +6,7 @@ You can use Trac wiki syntax.
 
 == Trunk ==
 
+ * Removing basic_definition.h, moving contents into basic_metaprogramming, basic_tag and new basic_math.h.
  * Documentation of Simple Holder.
  * Cleanup of Holder header, removing unused, undocumented, untested Tristate2 holder.
  * Documentation for Hosted Object Concept.

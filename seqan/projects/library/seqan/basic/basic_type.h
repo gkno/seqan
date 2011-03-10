@@ -35,6 +35,7 @@
 // ==========================================================================
 
 // TODO(holtgrew): Rename to "shared metafunctions.h"?
+// TODO(holtgrew): This could use some cleanup.
 
 #ifndef SEQAN_BASIC_BASIC_TYPE_H_
 #define SEQAN_BASIC_BASIC_TYPE_H_

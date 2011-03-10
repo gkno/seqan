@@ -34,6 +34,8 @@
 // Iterator interface with default implementations.
 // ==========================================================================
 
+// TODO(holtgrew): Rename to iterator_interface.h, remove 'basic_' prefix from other file names.
+
 #ifndef SEQAN_BASIC_BASIC_ITERATOR_H_
 #define SEQAN_BASIC_BASIC_ITERATOR_H_
 

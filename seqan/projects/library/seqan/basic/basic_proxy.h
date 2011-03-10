@@ -35,6 +35,8 @@
 // IteratorProxy.
 // ==========================================================================
 
+// TODO(holtgrew): Could be separated into proxy_base.h and proxy_iterator.h.
+
 #ifndef SEQAN_BASIC_BASIC_PROX_H_
 #define SEQAN_BASIC_BASIC_PROX_H_
 

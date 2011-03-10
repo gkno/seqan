@@ -35,6 +35,7 @@
 // ==========================================================================
 
 // TODO(holtgrew): Rename STD to STL?
+// TODO(holtgrew): Rename to allocator_to_stl.h, remove basic_ prefix of all other allocator headers.
 
 #ifndef SEQAN_BASIC_BASIC_ALLOCATOR_TO_STD_H_
 #define SEQAN_BASIC_BASIC_ALLOCATOR_TO_STD_H_

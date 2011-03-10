@@ -43,6 +43,13 @@
 using namespace std;
 using namespace seqan;
 
+template <typename T1, typename T2>
+inline bool
+_isSameType()
+{
+  return IsSameType<T1, T2>::VALUE;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 

@@ -33,6 +33,8 @@
 #ifndef SEQAN_HEADER_BASIC_DEBUG_H
 #define SEQAN_HEADER_BASIC_DEBUG_H
 
+// TODO(holtgrew): Move to basic_testing.h
+
 // compare two files, do not translate linebreaks
 inline bool 
 _compareBinaryFiles(const char * file1, const char * file2)

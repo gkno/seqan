@@ -34,6 +34,7 @@
 // Basic comparison code.
 // ==========================================================================
 
+// TODO(holtgrew): Rename to basic_comparison.h?
 // TODO(holtgrew): Necessary? Documentation is somewhere else..
 
 #ifndef SEQAN_BASIC_BASIC_COMPARE_H_

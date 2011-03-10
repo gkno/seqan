@@ -1138,10 +1138,10 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		{
 			if (format.tagId == 0)
 			{
-				format.tagId = Length<TTagList>::VALUE;			// if tagId == 0 then store detected format
+				format.tagId = LENGTH<TTagList>::VALUE;			// if tagId == 0 then store detected format
 				return true;
 			} else
-				return format.tagId == Length<TTagList>::VALUE;	// if tagId != 0 then compare detected format with tagId
+				return format.tagId == LENGTH<TTagList>::VALUE;	// if tagId != 0 then compare detected format with tagId
 		}
 		return guessFormat(seq, static_cast<typename TagSelector<TTagList>::Base &>(format));
 	}
@@ -1171,10 +1171,10 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		{
 			if (format.tagId == 0)
 			{
-				format.tagId = Length<TTagList>::VALUE;			// if tagId == 0 then store detected format
+				format.tagId = LENGTH<TTagList>::VALUE;			// if tagId == 0 then store detected format
 				return true;
 			} else
-				return format.tagId == Length<TTagList>::VALUE;	// if tagId != 0 then compare detected format with tagId
+				return format.tagId == LENGTH<TTagList>::VALUE;	// if tagId != 0 then compare detected format with tagId
 		}
 		return guessFormatFromFilename(fname, static_cast<typename TagSelector<TTagList>::Base &>(format));
 	}
@@ -1198,7 +1198,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TagSelector<TTagList> const &format)
 	{
 //IOREV _todo_
-		if (format.tagId == Length<TTagList>::VALUE)
+		if (format.tagId == LENGTH<TTagList>::VALUE)
 			split(me, typename TTagList::Type());
 		else
 			split(me, static_cast<typename TagSelector<TTagList>::Base const &>(format));
@@ -1225,7 +1225,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TagSelector<TTagList> const &format)
 	{
 //IOREV _todo_
-		if (format.tagId == Length<TTagList>::VALUE)
+		if (format.tagId == LENGTH<TTagList>::VALUE)
 			assignSeq(dst, seq, typename TTagList::Type());
 		else
 			assignSeq(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
@@ -1252,7 +1252,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TagSelector<TTagList> const &format)
 	{
 //IOREV _todo_
-		if (format.tagId == Length<TTagList>::VALUE)
+		if (format.tagId == LENGTH<TTagList>::VALUE)
 			assignSeqId(dst, seq, typename TTagList::Type());
 		else
 			assignSeqId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
@@ -1279,7 +1279,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TagSelector<TTagList> const &format)
 	{
 //IOREV _todo_
-		if (format.tagId == Length<TTagList>::VALUE)
+		if (format.tagId == LENGTH<TTagList>::VALUE)
 			assignCroppedSeqId(dst, seq, typename TTagList::Type());
 		else
 			assignCroppedSeqId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
@@ -1306,7 +1306,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TagSelector<TTagList> const &format)
 	{
 //IOREV _todo_
-		if (format.tagId == Length<TTagList>::VALUE)
+		if (format.tagId == LENGTH<TTagList>::VALUE)
 			assignQual(dst, seq, typename TTagList::Type());
 		else
 			assignQual(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
@@ -1333,7 +1333,7 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 		TagSelector<TTagList> const &format)
 	{
 //IOREV _todo_
-		if (format.tagId == Length<TTagList>::VALUE)
+		if (format.tagId == LENGTH<TTagList>::VALUE)
 			assignQualId(dst, seq, typename TTagList::Type());
 		else
 			assignQualId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
