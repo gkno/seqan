@@ -375,7 +375,7 @@ int parseCommandLineAndCheck(TOptions & options,
 
     if (isSetLong(parser, "library-length-mean"))
         getOptionValueLong(parser, "library-length-mean", options.libraryLengthMean);
-    if (isSetLong(parser, "library-error"))
+    if (isSetLong(parser, "library-length-error"))
         getOptionValueLong(parser, "library-length-error", options.libraryLengthError);
     if (isSetLong(parser, "mate-pairs"))
         options.generateMatePairs = true;
