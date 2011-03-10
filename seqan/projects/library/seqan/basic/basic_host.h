@@ -34,154 +34,241 @@
 // Interface specification functions for types that have a host.
 // ==========================================================================
 
-// TODO(holtgrew): This looks a bit unused.
+// TODO(holtgrew): This looks a bit unused/underused.
 
 #ifndef SEQAN_BASIC_BASIC_HOST_H_
 #define SEQAN_BASIC_BASIC_HOST_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-//////////////////////////////////////////////////////////////////////////////
+namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
-// Host Functions
-//////////////////////////////////////////////////////////////////////////////
-//these functions assume that the hosted object exports a function "_dataHost"
-//that returns a reference to a holder type of Host<T>::Type & 
+// ============================================================================
+// Forwards
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
+
+/**
+.Concept.Hosted Type
+..summary:Concept for types that have a host.
+..remarks:The functions of this concept assume that the hosted object exports a function $_dataHost$ that returns a reference to a holder type of $Host<T>::Type &$.
+*/
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+///.Metafunction.Host.concept:Concept.Hosted Type
+
+// TODO(holtgrew): Define metafunction Host here?
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function emptyHost()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.emptyHost
+..cat:Dependent Object
+..summary:Query emptiness state of a hosted object.
+..signature:emptyHost(object)
+..param.object:The object query state of host of.
+..returns:$bool$, $true$ if the host is empty, $false$ otherwise.
+..see:Function.empty
+..concept:Concept.Hosted Type
+..include:seqan/basic.h
+ */
 
 template <typename T>
 inline bool
 emptyHost(T const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return empty(_dataHost(me));
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function dependentHost()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.dependentHost
+..cat:Dependent Object
+..summary:Query dependent state of a hosted object.
+..signature:clearHost(object)
+..param.object:The object query state of host of.
+..returns:$bool$, $true$ if the host is dependent, $false$ otherwise.
+..see:Function.dependent
+..concept:Concept.Hosted Type
+..include:seqan/basic.h
+ */
 
 template <typename T>
 inline bool
 dependentHost(T const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return dependent(_dataHost(me));
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function clearHost()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.clearHost
+..cat:Dependent Object
+..summary:Clear the host of the given object.
+..signature:clearHost(object)
+..param.object:The object to clear the host of.
+..see:Function.clear
+..concept:Concept.Hosted Type
+..include:seqan/basic.h
+ */
 
 template <typename T>
 inline void
 clearHost(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	clear(_dataHost(me));
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function createHost()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.createHost
+..cat:Dependent Object
+..summary:Construct the host of the given object.
+..signature:assignHost(object[, host])
+..param.object:The object to copy construct the host of.
+..param.host:The object to copy in host creation.
+...type:nolink:$Host<T>::Type const &$
+..remarks:If $host$ is given then it is used for copy creation.  Otherwise, the default constructor is used.
+..see:Function.create
+..concept:Concept.Hosted Type
+..include:seqan/basic.h
+ */
 
 template <typename T>
 inline void
 createHost(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	create(_dataHost(me));
 }
 
-//____________________________________________________________________________
-
-template <typename T, typename THost>
-inline void
-createHost(T & me,
-		   THost & host_)
-{
-SEQAN_CHECKPOINT
-	create(_dataHost(me), host_);
-}
 template <typename T, typename THost>
 inline void
 createHost(T & me,
 		   THost const & host_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	create(_dataHost(me), host_);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function host()
+// ----------------------------------------------------------------------------
 
-template <typename T, typename THost>
-inline void
-setHost(T & me,
-		THost & host_)
-{
-SEQAN_CHECKPOINT
-	setValue(_dataHost(me), host_);
-}
-template <typename T, typename THost>
-inline void
-setHost(T & me,
-		THost const & host_)
-{
-SEQAN_CHECKPOINT
-	setValue(_dataHost(me), host_);
-}
+/// TODO(holtgrew): Move documentation here?
 
-//////////////////////////////////////////////////////////////////////////////
+///.Function.host.concept:Concept.Hosted Type
 
 template <typename T>
 inline typename Host<T>::Type &
 host(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return value(_dataHost(me));
 }
+
+// TODO(holtgrew): Is this function unnecessary? Should be since the above one is catch-all.
 template <typename T>
 inline typename Host<T const>::Type &
 host(T const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return value(_dataHost(me));
 }
 
-//////////////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------
+// Function setHost()
+// ----------------------------------------------------------------------------
+
+/// TODO(holtgrew): Move documentation here?
+
+///.Function.setHost.param.object.type:nolink:$Host<T>::Type const &$
+///.Function.setHost.concept:Concept.Hosted Type
 
 template <typename T, typename THost>
 inline void
-assignHost(T & me,
-		   THost & host_)
+setHost(T & me,
+		THost const & host_)
 {
-SEQAN_CHECKPOINT
-	assignValue(_dataHost(me), host_);
+    SEQAN_CHECKPOINT;
+	setValue(_dataHost(me), host_);
 }
+
+// ----------------------------------------------------------------------------
+// Function assignHost()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.assignHost
+..cat:Dependent Object
+..summary:Assign to the host of a given value.
+..signature:assignHost(object, host)
+..param.object:The object to assign the host of.
+..param.host:The object to assign as host.
+...type:nolink:$Host<T>::Type const &$
+..see:Function.assign
+..concept:Concept.Hosted Type
+..include:seqan/basic.h
+ */
+
 template <typename T, typename THost>
 inline void
 assignHost(T & me,
 		   THost const & host_)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assignValue(_dataHost(me), host_);
 }
-//////////////////////////////////////////////////////////////////////////////
+
+// ----------------------------------------------------------------------------
+// Function moveHost()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.moveHost
+..cat:Dependent Object
+..summary:Assign to the host of a given value.
+..signature:assignHost(object, host)
+..param.object:The object to move-assign the host of.
+..param.host:The object to move-assign as host.
+...type:nolink:$Host<T>::Type &$
+..see:Function.move
+..concept:Concept.Hosted Type
+..include:seqan/basic.h
+ */
 
 template <typename T, typename THost>
 inline void
 moveHost(T & me,
 		 THost & host_)
 {
-SEQAN_CHECKPOINT
-	moveValue(_dataHost(me), host_);
-}
-template <typename T, typename THost>
-inline void
-moveHost(T & me,
-		 THost const & host_)
-{
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	moveValue(_dataHost(me), host_);
 }
 
-//////////////////////////////////////////////////////////////////////////////
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_BASIC_BASIC_HOST_H_
