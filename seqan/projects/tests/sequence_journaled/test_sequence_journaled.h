@@ -370,10 +370,14 @@ void testJournaledStringCopyConstructor(TStringJournalSpec const &)
     insert(journaledString, 1, "XX");
 
     std::stringstream ss;
-    ss << journaledString;
-    SEQAN_ASSERT_EQ("tXXest", ss.str());
-}
+    std::stringstream hss;
 
+    ss << journaledString;
+    hss << host(journaledString);
+
+    SEQAN_ASSERT_EQ("tXXest", ss.str());
+    SEQAN_ASSERT_EQ("test", hss.str());
+}
 
 template <typename TStringJournalSpec>
 void testJournaledStringBeginEndIterator(TStringJournalSpec const &)
