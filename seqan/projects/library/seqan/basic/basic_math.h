@@ -34,8 +34,8 @@
 // Math-related utility routines.
 // ==========================================================================
 
-#ifndef SEQAN_BASIC_BASIC_METAPROGRAMMING_H_
-#define SEQAN_BASIC_BASIC_METAPROGRAMMING_H_
+#ifndef SEQAN_BASIC_BASIC_MATH_H_
+#define SEQAN_BASIC_BASIC_MATH_H_
 
 namespace seqan {
 
@@ -198,4 +198,5 @@ T _abs(T const & x)
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_BASIC_METAPROGRAMMING_H_
+#endif  // #ifndef SEQAN_BASIC_BASIC_MATH_H_
+
