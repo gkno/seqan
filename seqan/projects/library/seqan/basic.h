@@ -71,8 +71,8 @@
 #include <seqan/basic/basic_parallelism.h>  // include after basic_testing.h!
 #include <seqan/basic/basic_metaprogramming.h>
 #include <seqan/basic/basic_math.h>
-#include <seqan/basic/basic_type.h>
 #include <seqan/basic/basic_tag.h>
+#include <seqan/basic/basic_type.h>
 
 //____________________________________________________________________________
 // allocators
