@@ -113,13 +113,17 @@
 //____________________________________________________________________________
 // alphabets
 
-#include <seqan/basic/basic_alphabet_interface.h>
-#include <seqan/basic/basic_alphabet_trait_basic.h>
-
-#include <seqan/basic/basic_alphabet_interface2.h>
+#include <seqan/basic/alphabet_storage.h>
+#include <seqan/basic/alphabet_bio.h>
+#include <seqan/basic/alphabet_math.h>
+#include <seqan/basic/alphabet_simple.h>
+#include <seqan/basic/alphabet_qualities.h>
+#include <seqan/basic/alphabet_adapt_builtins.h>
 
 #include <seqan/basic/basic_alphabet_simple_tabs.h>
 #include <seqan/basic/basic_alphabet_simple.h>
+
+#include <seqan/basic/basic_construct_destruct.h>
 
 #include <seqan/basic/basic_sse2.h>
 

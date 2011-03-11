@@ -41,1028 +41,6 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-//////////////////////////////////////////////////////////////////////////////
-//Class that is used for various simple value types
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Class.SimpleType:
-..cat:Basic
-..summary:Implementation for "simple" types.
-..signature:SimpleType<TValue, TSpec>
-..param.TValue:Type that stores the values of an instance.
-...remarks:TValue must be a simple type.
-...metafunction:Metafunction.Value
-..param.TSpec:Specialization tag.
-...metafunction:Metafunction.Spec
-..remarks:
-...text:A "simple type" is a C++ type that can be constructed without constructor,
-destructed without destructor and copied without copy constructor or assignment operator.
-All basic types (like $char$, $int$ or $float$) are simple. Pointers, references and arrays of
-simple types are simple.
-POD types ("plain old data types"), that are - simplified spoken - C++-types that already existed in C,
-are simple too. 
-...text:Arrays of simple types can be copied very fast by memory manipulation routines, 
-but the default implementation of functions like @Function.arrayCopyForward@ and @Function.arrayCopy@
-are not optimized for simple types this way.
-But for classes derived from $SimpleType$, optimized variants of array manipulation functions are applied. 
-...text:Note that simple types need not to be derived or specialized from $SimpleType$, but
-it could be convenient to do so.
-..implements:Concept.Simple Type
-..include:seqan/basic.h
-*/
-// TODO(holtgrew): This should actually be a class.
-template <typename TValue, typename TSpec>
-struct SimpleType
-{
-//____________________________________________________________________________
-
-	TValue value;
-
-//____________________________________________________________________________
-
-	SimpleType() 
-	{
-SEQAN_CHECKPOINT
-	}
-
-//____________________________________________________________________________
-
-	SimpleType(SimpleType const & other)
-	{
-SEQAN_CHECKPOINT
-		assign(*this, other);
-	}
-
-	template <typename T> 
-	SimpleType(T const & other) 
-	{
-SEQAN_CHECKPOINT
-		assign(*this, other);
-	}
-
-
-//____________________________________________________________________________
-
-	SimpleType & operator=(SimpleType const & other) 
-	{ 
-SEQAN_CHECKPOINT
-		assign(*this, other);
-		return *this;
-	}
-
-	template <typename T>
-	SimpleType & operator=(T const & other) 
-	{ 
-SEQAN_CHECKPOINT
-		assign(*this, other);
-		return *this;
-	}
-//____________________________________________________________________________
-
-	~SimpleType()
-	{
-SEQAN_CHECKPOINT
-	}
-//____________________________________________________________________________
-
-
-    // Class.SimpleType specifies type conversion operators for all built-in
-    // integer types since there is no way to extend the build-in types with
-    // copy and assignment constructors in C++.
-    //
-    // This cannot be a template since it would conflict to the template
-    // constructor.
-
-    // TODO(holtgrew): These are candidates for breaking the style convention and simply write each function in one line.
-
-	operator __int64() const
-	{
-SEQAN_CHECKPOINT
-		__int64 c;
-		assign(c, *this);
-		return c;
-	}
-
-	operator __uint64() const
-	{
-SEQAN_CHECKPOINT
-		__uint64 c;
-		assign(c, *this);
-		return c;
-	}
-
-
-	operator int() const
-	{
-SEQAN_CHECKPOINT
-		int c;
-		assign(c, *this);
-		return c;
-	}
-	operator unsigned int() const
-	{
-SEQAN_CHECKPOINT
-		unsigned int c;
-		assign(c, *this);
-		return c;
-	}
-	operator short() const
-	{
-SEQAN_CHECKPOINT
-		short c;
-		assign(c, *this);
-		return c;
-	}
-	operator unsigned short() const
-	{
-SEQAN_CHECKPOINT
-		unsigned short c;
-		assign(c, *this);
-		return c;
-	}
-	operator char() const
-	{
-SEQAN_CHECKPOINT
-		char c;
-		assign(c, *this);
-		return c;
-	}
-	operator signed char() const
-	{
-SEQAN_CHECKPOINT
-		signed char c;
-		assign(c, *this);
-		return c;
-	}
-	operator unsigned char() const
-	{
-SEQAN_CHECKPOINT
-		unsigned char c;
-		assign(c, *this);
-		return c;
-	}
-
-//____________________________________________________________________________
-};
-
-//////////////////////////////////////////////////////////////////////////////
-// METAFUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.IsSimple.param.T.type:Class.SimpleType
-
-template <typename TValue, typename TSpec>
-struct IsSimple<SimpleType<TValue, TSpec> >
-{
-	typedef True Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Value.param.T.type:Class.SimpleType
-template <typename TValue, typename TSpec>
-struct Value<SimpleType<TValue, TSpec> >
-{
-	typedef TValue Type;
-};
-
-template <typename TValue, typename TSpec>
-struct Value<SimpleType<TValue, TSpec> const >
-{
-	typedef TValue const Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Spec.param.T.type:Class.SimpleType
-template <typename TValue, typename TSpec>
-struct Spec<SimpleType<TValue, TSpec> >
-{
-	typedef TSpec Type;
-};
-
-template <typename TValue, typename TSpec>
-struct Spec<SimpleType<TValue, TSpec> const >
-{
-	typedef TSpec Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-struct Iterator<SimpleType<TValue, TSpec>, Standard>
-{
-	typedef SimpleType<TValue, TSpec> * Type;
-//	typedef Iter<SimpleType<TValue, TSpec>, SimpleIterator> * Type;
-};
-
-template <typename TValue, typename TSpec>
-struct Iterator<SimpleType<TValue, TSpec> const, Standard>
-{
-	typedef SimpleType<TValue, TSpec> const * Type;
-//	typedef Iter<SimpleType<TValue, TSpec> const, SimpleIterator> * Type;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
-// FUNCTIONS
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TTarget, typename T, typename TSourceValue, typename TSourceSpec>
-inline typename RemoveConst_<TTarget>::Type
-convertImpl(Convert<TTarget, T> const,
-			SimpleType<TSourceValue, TSourceSpec> const & source_)
-{
-SEQAN_CHECKPOINT
-	typename RemoveConst_<TTarget>::Type target_;
-	assign(target_, source_);
-	return target_;
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TStream, typename TValue, typename TSpec>
-inline TStream &
-operator << (TStream & stream, 
-			 SimpleType<TValue, TSpec> const & data)
-{
-SEQAN_CHECKPOINT
-	stream << convert<char>(data);
-	return stream;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TStream, typename TValue, typename TSpec>
-inline TStream &
-operator >> (TStream & stream, 
-			 SimpleType<TValue, TSpec> & data)
-{
-SEQAN_CHECKPOINT
-	char c;
-	stream >> c;
-	assign(data, c);
-	return stream;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// assign
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.assign.param.target.type:Class.SimpleType
-///.Function.assign.param.source.type:Class.SimpleType
-
-
-template <typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TSourceSpec>
-inline void 
-assign(SimpleType<TTargetValue, TTargetSpec> & target, 
-	   SimpleType<TSourceValue, TSourceSpec> & source)
-{
-SEQAN_CHECKPOINT
-	target.value = source.value;
-}
-template <typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TSourceSpec>
-inline void 
-assign(SimpleType<TTargetValue, TTargetSpec> & target, 
-	   SimpleType<TSourceValue, TSourceSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	target.value = source.value;
-}
-
-//____________________________________________________________________________
-
-template <typename TTargetValue, typename TTargetSpec, typename TSource>
-inline void 
-assign(SimpleType<TTargetValue, TTargetSpec> & target, 
-	   TSource & source)
-{
-SEQAN_CHECKPOINT
-	target.value = source;
-}
-template <typename TTargetValue, typename TTargetSpec, typename TSource>
-inline void 
-assign(SimpleType<TTargetValue, TTargetSpec> & target, 
-	   TSource const & source)
-{
-SEQAN_CHECKPOINT
-	target.value = source;
-}
-
-//____________________________________________________________________________
-// Assign Proxy to SimpleType 
-//??? Diese Funktionen wurden noetig wegen eines seltsamen VC++-Verhaltens
-
-template <typename TTargetValue, typename TTargetSpec, typename TSourceSpec>
-inline void 
-assign(SimpleType<TTargetValue, TTargetSpec> & target, 
-	   Proxy<TSourceSpec> & source)
-{
-SEQAN_CHECKPOINT
-	target.value = getValue(source);
-}
-
-template <typename TTargetValue, typename TTargetSpec, typename TSourceSpec>
-inline void 
-assign(SimpleType<TTargetValue, TTargetSpec> & target, 
-	   Proxy<TSourceSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	target.value = getValue(source);
-}
-
-//____________________________________________________________________________
-//INTEGRAL TYPES
-//note: it is not possible to write a single function here since "assign"
-//must be specialized for the first argument at the first place
-
-//__int64
-template <typename TValue, typename TSpec>
-inline void 
-assign(__int64 & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(__int64 & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//__uint64
-template <typename TValue, typename TSpec>
-inline void 
-assign(__uint64 & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(__uint64 & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//int
-template <typename TValue, typename TSpec>
-inline void 
-assign(int & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(int & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//unsigned int
-template <typename TValue, typename TSpec>
-inline void 
-assign(unsigned int & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(unsigned int & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//short
-template <typename TValue, typename TSpec>
-inline void 
-assign(short & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(short & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//unsigned short
-template <typename TValue, typename TSpec>
-inline void 
-assign(unsigned short & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(unsigned short & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//char
-template <typename TValue, typename TSpec>
-inline void 
-assign(char & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(char & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//signed char
-template <typename TValue, typename TSpec>
-inline void 
-assign(signed char & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(signed char & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//unsigned char
-template <typename TValue, typename TSpec>
-inline void 
-assign(unsigned char & c_target, 
-	   SimpleType<TValue, TSpec> & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-template <typename TValue, typename TSpec>
-inline void 
-assign(unsigned char & c_target, 
-	   SimpleType<TValue, TSpec> const & source)
-{
-SEQAN_CHECKPOINT
-	c_target = source.value;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-// CompareType
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Metafunction.CompareType:
-..cat:Basic
-..summary:Type to convert other types for comparisons.
-..signature:CompareType<TLeft, TRight>::Type
-..param.TLeft:Type of the left operand of a comparison.
-..param.TRight:Type of the right operand of a comparison.
-..return.Type:The Type in which the arguments are converted in order to compare them.
-..remarks:Comparisons are for example operators like $==$ or $<$.
-..remarks.text:Note that there is no rule that guarantees that $CompareType<T1, T2>::Type$
-is the same as $CompareType<T2, T1>::Type$. It is also possible, that only one of these
-two types is defined.
-..remarks.text:This metafunction is used for the implementation of
-comparisons that involve @Class.SimpleType@.
-..include:seqan/basic.h
-*/
-//???TODO: muss geprueft werden, ob diese Metafunktion noch ausgeweitet oder aber versteckt wird.
-
-template <typename TLeft, typename TRight>
-struct CompareType;
-
-template <typename T>
-struct CompareType<T, T>
-{
-	typedef T Type;
-};
-
-//____________________________________________________________________________
-
-template <typename TValue, typename TSpec, typename TRight>
-struct CompareType<SimpleType<TValue, TSpec>, TRight>
-{
-	typedef TRight Type;
-};
-
-// TODO(holtgrew): CompareType is not symmetric because of class instantiation conflicts. Evaluate these problems and possibly fix them.
-
-// TODO(holtgrew): Why are comparisons with Proxies defined here?
-	
-//////////////////////////////////////////////////////////////////////////////
-// operator ==
-
-template <typename TValue, typename TSpec, typename TRight>
-inline bool
-operator == (SimpleType<TValue, TSpec> const & left_, 
-			 TRight const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
-}
-
-template <typename TLeft, typename TValue, typename TSpec>
-inline bool
-operator == (TLeft const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
-}
-
-template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
-operator == (SimpleType<TLeftValue, TLeftSpec> const & left_, 
-			 SimpleType<TRightValue, TRightSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
-	typedef SimpleType<TRightValue, TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
-}
-
-template <typename TValue, typename TSpec>
-inline bool
-operator == (SimpleType<TValue, TSpec> const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	return convert<TValue>(left_) == convert<TValue>(right_);
-}
-
-
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator == (Proxy<TSpec> const & left_, 
-			 SimpleType<TValue, TSpec2> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
-}
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator == (SimpleType<TValue, TSpec2> const & left_,
-			 Proxy<TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) == convert<TCompareType>(right_);
-}
-
-
-//____________________________________________________________________________
-// operator !=
-
-template <typename TValue, typename TSpec, typename TRight>
-inline bool
-operator != (SimpleType<TValue, TSpec> const & left_, 
-			 TRight const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
-}
-
-template <typename TLeft, typename TValue, typename TSpec>
-inline bool
-operator != (TLeft const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
-}
-
-template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
-operator != (SimpleType<TLeftValue, TLeftSpec> const & left_, 
-			 SimpleType<TRightValue, TRightSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
-	typedef SimpleType<TRightValue, TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
-}
-
-template <typename TValue, typename TSpec>
-inline bool
-operator != (SimpleType<TValue, TSpec> const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	return convert<TValue>(left_) != convert<TValue>(right_);
-}
-
-
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator != (Proxy<TSpec> const & left_, 
-			 SimpleType<TValue, TSpec2> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
-}
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator != (SimpleType<TValue, TSpec2> const & left_,
-			 Proxy<TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) != convert<TCompareType>(right_);
-}
-
-
-//____________________________________________________________________________
-// operator <
-
-template <typename TValue, typename TSpec, typename TRight>
-inline bool
-operator < (SimpleType<TValue, TSpec> const & left_, 
-			TRight const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
-}
-
-template <typename TLeft, typename TValue, typename TSpec>
-inline bool
-operator < (TLeft const & left_, 
-			SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
-}
-
-template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
-operator < (SimpleType<TLeftValue, TLeftSpec> const & left_, 
-			SimpleType<TRightValue, TRightSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
-	typedef SimpleType<TRightValue, TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
-}
-
-template <typename TValue, typename TSpec>
-inline bool
-operator < (SimpleType<TValue, TSpec> const & left_, 
-			SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	return convert<TValue>(left_) < convert<TValue>(right_);
-}
-
-
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator < (Proxy<TSpec> const & left_, 
-			 SimpleType<TValue, TSpec2> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
-}
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator < (SimpleType<TValue, TSpec2> const & left_,
-			 Proxy<TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) < convert<TCompareType>(right_);
-}
-
-
-//____________________________________________________________________________
-// operator <=
-
-template <typename TValue, typename TSpec, typename TRight>
-inline bool
-operator <= (SimpleType<TValue, TSpec> const & left_, 
-			 TRight const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
-}
-
-template <typename TLeft, typename TValue, typename TSpec>
-inline bool
-operator <= (TLeft const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
-}
-
-template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
-operator <= (SimpleType<TLeftValue, TLeftSpec> const & left_, 
-			 SimpleType<TRightValue, TRightSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
-	typedef SimpleType<TRightValue, TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
-}
-
-template <typename TValue, typename TSpec>
-inline bool
-operator <= (SimpleType<TValue, TSpec> const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	return convert<TValue>(left_) <= convert<TValue>(right_);
-}
-
-
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator <= (Proxy<TSpec> const & left_, 
-			 SimpleType<TValue, TSpec2> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
-}
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator <= (SimpleType<TValue, TSpec2> const & left_,
-			 Proxy<TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) <= convert<TCompareType>(right_);
-}
-
-
-
-//____________________________________________________________________________
-// operator >
-
-template <typename TValue, typename TSpec, typename TRight>
-inline bool
-operator > (SimpleType<TValue, TSpec> const & left_, 
-			TRight const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
-}
-
-template <typename TLeft, typename TValue, typename TSpec>
-inline bool
-operator > (TLeft const & left_, 
-			SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
-}
-
-template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
-operator > (SimpleType<TLeftValue, TLeftSpec> const & left_, 
-			SimpleType<TRightValue, TRightSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
-	typedef SimpleType<TRightValue, TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
-}
-
-template <typename TValue, typename TSpec>
-inline bool
-operator > (SimpleType<TValue, TSpec> const & left_, 
-			SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	return convert<TValue>(left_) > convert<TValue>(right_);
-}
-
-
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator > (Proxy<TSpec> const & left_, 
-			 SimpleType<TValue, TSpec2> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
-}
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator > (SimpleType<TValue, TSpec2> const & left_,
-			 Proxy<TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) > convert<TCompareType>(right_);
-}
-
-
-//____________________________________________________________________________
-// operator >=
-
-template <typename TValue, typename TSpec, typename TRight>
-inline bool
-operator >= (SimpleType<TValue, TSpec> const & left_, 
-			 TRight const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
-}
-
-template <typename TLeft, typename TValue, typename TSpec>
-inline bool
-operator >= (TLeft const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TRight, TLeft>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
-}
-
-template <typename TLeftValue, typename TLeftSpec, typename TRightValue, typename TRightSpec>
-inline bool
-operator >= (SimpleType<TLeftValue, TLeftSpec> const & left_, 
-			 SimpleType<TRightValue, TRightSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TLeftValue, TLeftSpec> TLeft;
-	typedef SimpleType<TRightValue, TRightSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
-}
-
-template <typename TValue, typename TSpec>
-inline bool
-operator >= (SimpleType<TValue, TSpec> const & left_, 
-			 SimpleType<TValue, TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	return convert<TValue>(left_) >= convert<TValue>(right_);
-}
-
-
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator >= (Proxy<TSpec> const & left_, 
-			 SimpleType<TValue, TSpec2> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef Proxy<TSpec> TLeft;
-	typedef SimpleType<TValue, TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
-}
-template <typename TSpec, typename TValue, typename TSpec2>
-inline bool
-operator >= (SimpleType<TValue, TSpec2> const & left_,
-			 Proxy<TSpec> const & right_)
-{
-SEQAN_CHECKPOINT
-	typedef SimpleType<TValue, TSpec> TLeft;
-	typedef Proxy<TSpec> TRight;
-	typedef typename CompareType<TLeft, TRight>::Type TCompareType;
-	return convert<TCompareType>(left_) >= convert<TCompareType>(right_);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename T_, typename TSpec> 
-inline
-bool lexLess(SimpleType<T_, TSpec> const &_Left, SimpleType<T_, TSpec> const &Right_)
-{	// return lexicographical _Left < Right_
-	typedef typename MakeUnsigned_<T_>::Type TUnsigned;
-    return (TUnsigned)(_Left.value) < (TUnsigned)(Right_.value);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> &
-operator ++ (SimpleType<TValue, TSpec> & me)
-{
-	++me.value;
-	return me;
-}
-template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec>
-operator ++ (SimpleType<TValue, TSpec> & me,
-			 int)
-{
-	SimpleType<TValue, TSpec> dummy = me;
-	++me.value;
-	return dummy;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec> &
-operator -- (SimpleType<TValue, TSpec> & me)
-{
-	--me.value;
-	return me;
-}
-template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec>
-operator -- (SimpleType<TValue, TSpec> & me,
-			 int)
-{
-	SimpleType<TValue, TSpec> dummy = me;
-	--me.value;
-	return dummy;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
 /**
 .Spec.Dna:
 ..cat:Alphabets
@@ -1243,7 +221,7 @@ struct BitsPerValue< SimpleType<TValue, Finite<SIZE> > >: Log2<SIZE> {};
 inline void assign(Ascii & c_target, 
 				   Dna const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = TranslateTableDna5ToAscii_<>::VALUE[source.value];
 }
 //____________________________________________________________________________
@@ -1251,7 +229,7 @@ SEQAN_CHECKPOINT
 inline void assign(Ascii & c_target, 
 				   Dna5 const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = TranslateTableDna5ToAscii_<>::VALUE[source.value];
 }
 //____________________________________________________________________________
@@ -1259,7 +237,7 @@ SEQAN_CHECKPOINT
 inline void assign(Ascii& target,
 				   Rna const & source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target = TranslateTableRna5ToAscii_<>::VALUE[source.value];
 }
 //____________________________________________________________________________
@@ -1267,21 +245,21 @@ inline void assign(Ascii& target,
 inline void assign(Ascii& target,
 				   Rna5 const & source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target = TranslateTableRna5ToAscii_<>::VALUE[source.value];
 }
 //____________________________________________________________________________
 
 inline void assign(Ascii & c_target, Iupac const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = TranslateTableIupacToAscii_<>::VALUE[source.value];
 }
 //____________________________________________________________________________
 
 inline void assign(Ascii & c_target, AminoAcid const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = TranslateTableAAToAscii_<>::VALUE[source.value];
 }
 
@@ -1292,7 +270,7 @@ template <>
 struct CompareType<Dna, __uint8> { typedef Dna Type; };
 inline void assign(Dna & target, __uint8 c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableByteToDna_<>::VALUE[c_source];
 }
 //____________________________________________________________________________
@@ -1301,7 +279,7 @@ template <>
 struct CompareType<Dna, Ascii> { typedef Dna Type; };
 inline void assign(Dna & target, Ascii c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToDna_<>::VALUE[(unsigned char)c_source];
 }
 //____________________________________________________________________________
@@ -1310,7 +288,7 @@ template <>
 struct CompareType<Dna, Unicode> { typedef Dna Type; };
 inline void assign(Dna & target, Unicode c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToDna_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
@@ -1319,7 +297,7 @@ template <>
 struct CompareType<Dna, Dna5> { typedef Dna Type; };
 inline void assign(Dna & target, Dna5 const & c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = c_source.value & 0x03;
 }
 //____________________________________________________________________________
@@ -1328,7 +306,7 @@ template <>
 struct CompareType<Dna, Iupac> { typedef Dna Type; };
 inline void assign(Dna & target, Iupac const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableIupacToDna_<>::VALUE[source.value];
 }
 
@@ -1339,7 +317,7 @@ template <>
 struct CompareType<Dna5, __uint8> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, __uint8 c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableByteToDna5_<>::VALUE[c_source];
 }
 //____________________________________________________________________________
@@ -1348,7 +326,7 @@ template <>
 struct CompareType<Dna5, Ascii> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, Ascii c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToDna5_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
@@ -1357,7 +335,7 @@ template <>
 struct CompareType<Dna5, Unicode> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, Unicode c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToDna5_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
@@ -1366,7 +344,7 @@ template <>
 struct CompareType<Dna5, Iupac> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, Iupac const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableIupacToDna5_<>::VALUE[source.value];
 }
 //____________________________________________________________________________
@@ -1375,7 +353,7 @@ template <>
 struct CompareType<Dna5, Dna> { typedef Dna Type; };
 inline void assign(Dna5 & target, Dna const & c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = c_source.value;
 }
 
@@ -1386,7 +364,7 @@ template <>
 struct CompareType<Rna, __uint8> { typedef Rna Type; };
 inline void assign(Rna & target, __uint8 c_source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target.value = TranslateTableByteToRna_<>::VALUE[c_source];
 }
 //____________________________________________________________________________
@@ -1395,7 +373,7 @@ template <>
 struct CompareType<Rna, Ascii> { typedef Rna Type; };
 inline void assign(Rna & target, Ascii c_source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToRna_<>::VALUE[(unsigned char)c_source];
 }
 //____________________________________________________________________________
@@ -1404,7 +382,7 @@ template <>
 struct CompareType<Rna, Unicode> { typedef Rna Type; };
 inline void assign(Rna & target, Unicode c_source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToRna_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
@@ -1413,7 +391,7 @@ template <>
 struct CompareType<Rna, Rna5> { typedef Rna Type; };
 inline void assign(Rna & target, Rna5 const & c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = c_source.value & 0x03;
 }
 
@@ -1424,7 +402,7 @@ template <>
 struct CompareType<Rna5, __uint8> { typedef Rna5 Type; };
 inline void assign(Rna5 & target, __uint8 c_source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target.value = TranslateTableByteToRna5_<>::VALUE[c_source];
 }
 //____________________________________________________________________________
@@ -1433,7 +411,7 @@ template <>
 struct CompareType<Rna5, Ascii> { typedef Rna5 Type; };
 inline void assign(Rna5 & target, Ascii c_source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToRna5_<>::VALUE[(unsigned char)c_source];
 }
 //____________________________________________________________________________
@@ -1442,7 +420,7 @@ template <>
 struct CompareType<Rna5, Unicode> { typedef Rna5 Type; };
 inline void assign(Rna5 & target, Unicode c_source)
 {
-	SEQAN_CHECKPOINT
+	    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToRna5_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
@@ -1451,7 +429,7 @@ template <>
 struct CompareType<Rna5, Rna> { typedef Dna Type; };
 inline void assign(Rna5 & target, Rna const & c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = c_source.value;
 }
 
@@ -1462,7 +440,7 @@ template <>
 struct CompareType<Iupac, __uint8> { typedef Iupac Type; };
 inline void assign(Iupac & target, __uint8 c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableByteToIupac_<>::VALUE[c_source];
 }
 //____________________________________________________________________________
@@ -1471,7 +449,7 @@ template <>
 struct CompareType<Iupac, Ascii> { typedef Iupac Type; };
 inline void assign(Iupac & target, Ascii c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToIupac_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
@@ -1480,21 +458,21 @@ template <>
 struct CompareType<Iupac, Unicode> { typedef Iupac Type; };
 inline void assign(Iupac & target, Unicode c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToIupac_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
 
 inline void assign(Iupac & target, Dna const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableDna5ToIupac_<>::VALUE[source.value];
 }
 //____________________________________________________________________________
 
 inline void assign(Iupac & target, Dna5 const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableDna5ToIupac_<>::VALUE[source.value];
 }
 
@@ -1505,7 +483,7 @@ template <>
 struct CompareType<AminoAcid, __uint8> { typedef AminoAcid Type; };
 inline void assign(AminoAcid & target, __uint8 c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableByteToAA_<>::VALUE[c_source];
 }
 //____________________________________________________________________________
@@ -1514,7 +492,7 @@ template <>
 struct CompareType<AminoAcid, Ascii> { typedef AminoAcid Type; };
 inline void assign(AminoAcid & target, Ascii c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToAA_<>::VALUE[(unsigned char) c_source];
 }
 //____________________________________________________________________________
@@ -1523,7 +501,7 @@ template <>
 struct CompareType<AminoAcid, Unicode> { typedef AminoAcid Type; };
 inline void assign(AminoAcid & target, Unicode c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = TranslateTableAsciiToAA_<>::VALUE[(unsigned char) c_source];
 }
 
@@ -1599,17 +577,12 @@ struct BaseAlphabet<Dna5Q>
 	typedef Dna5 Type;
 };
 
-template <typename TValue>
-struct QualityValueSize {
-	enum { VALUE = ValueSize<TValue>::VALUE };
-};
-template <typename TValue>
-struct QualityValueSize<TValue const>:
-	public QualityValueSize<TValue> {};
 
 template <> struct QualityValueSize< DnaQ >  { enum { VALUE = 63 }; };		// 64 - 1 (N)
 template <> struct QualityValueSize< Dna5Q > { enum { VALUE = 63 }; };
 
+
+// TODO(holtgrew): RnaQ, Rna5Q.
 
 // template <typename TValue, typename TValue2>
 // struct CompareType<SimpleType<TValue,DnaQ_>, SimpleType<TValue2,Dna_> >
@@ -1651,7 +624,7 @@ template <>
 struct CompareType<DnaQ, Dna5Q> { typedef Dna Type; };
 inline void assign(DnaQ & target, Dna5Q const & source)
 {
-    SEQAN_CHECKPOINT;
+        SEQAN_CHECKPOINT;;
 
     // We perform the converstion from DNA5 to DNA5 with qualities by a simple
     // table lookup.  The lookup below is equivalent to the following line:
@@ -1685,7 +658,7 @@ template <>
 struct CompareType<DnaQ, Dna> { typedef Dna Type; };
 inline void assign(DnaQ & target, Dna const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = source.value | (60 << 2);
 }
 
@@ -1696,7 +669,7 @@ template <>
 struct CompareType<Dna5Q, DnaQ> { typedef Dna Type; };
 inline void assign(Dna5Q & target, DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = source.value;
 }
 
@@ -1706,7 +679,7 @@ template <>
 struct CompareType<Dna5, Dna5Q> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, Dna5Q const & source)
 {
-    SEQAN_CHECKPOINT;
+        SEQAN_CHECKPOINT;;
 
     // We perform the conversion from DNA5 to DNA5 with qualities by a simple
     // table lookup.  The lookup below is equivalent to the following line:
@@ -1758,7 +731,7 @@ template <>
 struct CompareType<Dna, DnaQ> { typedef Dna Type; };
 inline void assign(Dna & target, DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = source.value & 3;
 }
 
@@ -1769,7 +742,7 @@ template <>
 struct CompareType<DnaQ, Iupac> { typedef Dna Type; };
 inline void assign(DnaQ & target, Iupac const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna) source);
 }
 
@@ -1780,7 +753,7 @@ template <>
 struct CompareType<DnaQ, Dna5> { typedef Dna Type; };
 inline void assign(DnaQ & target, Dna5 const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna) source);
 }
 
@@ -1788,7 +761,7 @@ template <>
 struct CompareType<DnaQ, __uint8> { typedef Dna Type; };
 inline void assign(DnaQ & target, __uint8 c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna) c_source);
 }
 //____________________________________________________________________________
@@ -1797,7 +770,7 @@ template <>
 struct CompareType<DnaQ, Ascii> { typedef Dna Type; };
 inline void assign(DnaQ & target, Ascii c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna) c_source);
 }
 //____________________________________________________________________________
@@ -1806,7 +779,7 @@ template <>
 struct CompareType<DnaQ, Unicode> { typedef Dna Type; };
 inline void assign(DnaQ & target, Unicode c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna) c_source);
 }
 //____________________________________________________________________________
@@ -1814,7 +787,7 @@ SEQAN_CHECKPOINT
 inline void 
 assign(DnaQ & target, DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = source.value;
 }
 
@@ -1822,7 +795,7 @@ template <typename TSource>
 inline void 
 assign(DnaQ & target, TSource const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = (Dna)source;
 }
 //____________________________________________________________________________
@@ -1832,7 +805,7 @@ template <>
 struct CompareType<Dna5Q, Dna> { typedef Dna Type; };
 inline void assign(Dna5Q & target, Dna const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (DnaQ) source);
 }
 
@@ -1843,7 +816,7 @@ template <>
 struct CompareType<Dna, Dna5Q> { typedef Dna Type; };
 inline void assign(Dna & target, Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna5)source);
 }
 
@@ -1852,7 +825,7 @@ template <>
 struct CompareType<Dna5, DnaQ> { typedef Dna5 Type; };
 inline void assign(Dna5 & target, DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna5Q)source);
 }
 //____________________________________________________________________________
@@ -1863,7 +836,7 @@ template <>
 struct CompareType<Dna5Q, __uint8> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, __uint8 c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna5)c_source);
 }
 //____________________________________________________________________________
@@ -1872,7 +845,7 @@ template <>
 struct CompareType<Dna5Q, Ascii> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Ascii c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna5)c_source);
 }
 //____________________________________________________________________________
@@ -1881,7 +854,7 @@ template <>
 struct CompareType<Dna5Q, Unicode> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Unicode c_source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna5)c_source);
 }
 //____________________________________________________________________________
@@ -1890,21 +863,21 @@ template <>
 struct CompareType<Dna5Q, Iupac> { typedef Dna5 Type; };
 inline void assign(Dna5Q & target, Iupac const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna5)source);
 }
 
 inline void 
 assign(Dna5Q & target, Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	target.value = source.value;
 }
 template <typename TSource>
 inline void 
 assign(Dna5Q & target, TSource const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	assign(target, (Dna5)source);
 }
 
@@ -1919,7 +892,7 @@ inline void
 assign(__int64 & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1927,7 +900,7 @@ inline void
 assign(__int64 & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1937,7 +910,7 @@ inline void
 assign(__uint64 & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1945,7 +918,7 @@ inline void
 assign(__uint64 & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1955,7 +928,7 @@ inline void
 assign(int & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1963,7 +936,7 @@ inline void
 assign(int & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1973,7 +946,7 @@ inline void
 assign(unsigned int & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1981,7 +954,7 @@ inline void
 assign(unsigned int & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -1992,7 +965,7 @@ inline void
 assign(short & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2000,7 +973,7 @@ inline void
 assign(short & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2010,7 +983,7 @@ inline void
 assign(unsigned short & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2018,7 +991,7 @@ inline void
 assign(unsigned short & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2028,7 +1001,7 @@ inline void
 assign(char & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2036,7 +1009,7 @@ inline void
 assign(char & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2046,7 +1019,7 @@ inline void
 assign(signed char & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2054,7 +1027,7 @@ inline void
 assign(signed char & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2064,7 +1037,7 @@ inline void
 assign(unsigned char & c_target, 
 	   DnaQ & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2072,7 +1045,7 @@ inline void
 assign(unsigned char & c_target, 
 	   DnaQ const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna(source);
 }
 
@@ -2083,7 +1056,7 @@ inline void
 assign(__int64 & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2091,7 +1064,7 @@ inline void
 assign(__int64 & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2101,7 +1074,7 @@ inline void
 assign(__uint64 & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2109,7 +1082,7 @@ inline void
 assign(__uint64 & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2119,7 +1092,7 @@ inline void
 assign(int & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2127,7 +1100,7 @@ inline void
 assign(int & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2137,7 +1110,7 @@ inline void
 assign(unsigned int & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2145,7 +1118,7 @@ inline void
 assign(unsigned int & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2156,7 +1129,7 @@ inline void
 assign(short & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2164,7 +1137,7 @@ inline void
 assign(short & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2174,7 +1147,7 @@ inline void
 assign(unsigned short & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2182,7 +1155,7 @@ inline void
 assign(unsigned short & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2192,7 +1165,7 @@ inline void
 assign(char & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2200,7 +1173,7 @@ inline void
 assign(char & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2210,7 +1183,7 @@ inline void
 assign(signed char & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2218,7 +1191,7 @@ inline void
 assign(signed char & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2228,7 +1201,7 @@ inline void
 assign(unsigned char & c_target, 
 	   Dna5Q & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
@@ -2236,23 +1209,16 @@ inline void
 assign(unsigned char & c_target, 
 	   Dna5Q const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	c_target = Dna5(source);
 }
 
-/**
-.Function.getQualityValue
-..cat:Alphabets
-..signature:getQualityValue(c)
-..summary:Returns the quality of a character from an alphabet with integrated quality.
-..param.c:Character to retrieve the quality from.
-...type:Spec.DnaQ
-...type:Spec.Dna5Q
-..returns:Quality value of $c$.
-...type:nolink:int
-...remarks:The quality value is an integral value between 0 and 62 (inclusive).
-..see:Function.assignQualityValue
- */
+// ----------------------------------------------------------------------------
+// Function getQualityValue()
+// ----------------------------------------------------------------------------
+
+///.Function.getQualityValue.param.c.type:Spec.DnaQ
+///.Function.getQualityValue.param.c.type:Spec.Dna5Q
 
 inline int getQualityValue(DnaQ const &c) 
 {
@@ -2285,29 +1251,15 @@ inline int getQualityValue(Dna5Q const &c)
     return table[c.value];
 }
 
-inline 
-void convertQuality(Ascii & c, int q) 
-{
-	c = '!' + Ascii(q);
-}
+// ----------------------------------------------------------------------------
+// Function assignQualityValue()
+// ----------------------------------------------------------------------------
 
-
-// TODO(holtgrew): What about different quality types? Guess scaling? Look at how other packages do this.
-/**
-.Function.assignQualityValue
-..cat:Alphabets
-..signature:assignQualityValue(c, q)
-..summary:Assign quality to a character from an alphabet with integrated quality.
-..param.c:Target character to assign quality to.
-...type:Spec.DnaQ
-...type:Spec.Dna5Q
-..param.q:Quality to assign to the character.
-...type:nolink:int
-...type:nolink:char
-...remarks:The quality value is an integral value between 0 and 62 (inclusive).
-..remarks:If $q$ is a $char$ then $'!'$ is subtracted from $q$. This is useful for ASCII encoded PHRED scores.
- */
 //set quality value
+
+///.Function.assignQualityValue.c.type:Spec.DnaQ
+///.Function.assignQualityValue.c.type:Spec.Dna5Q
+
 inline
 void assignQualityValue(DnaQ &c, int q)
 {
@@ -2345,32 +1297,6 @@ void assignQualityValue(Dna5Q &c, Ascii q)
 	if (q1 >= QualityValueSize<Dna5Q>::VALUE)
         q1 = QualityValueSize<Dna5Q>::VALUE - 1;
 	assignQualityValue(c, q1);
-}
-
-/**
-.Function.assignQualities
-..cat:Alphabets
-..summary:Assign quality values between strings.
-..signature:assignQualities(target, source)
-..param.target:Target string
-...type:nolink:@Class.String@ of any alphabet with qualities, e.g. @Spec.DnaQ@, @Spec.Dna5Q@
-..param.source:Source string.
-...type:nolink:@Class.String@ of $int$ or $char$.
-..remarks:This funciton calls @Function.assignQualityValue@ for all entries of $target$ and $source$, look at the documentation of @Function.assignQualityValue@ on how the values of $source$ are interpreted.
-..see:Function.assignQualityValue
- */
-template <typename TDest, typename TSource>
-void assignQualities(TDest &dst, TSource const &src)
-{
-	typedef typename Iterator<TDest>::Type TDestIter;
-	typedef typename Iterator<TSource>::Type TSourceIter;
-
-	TDestIter itDst = begin(dst, Standard());
-	TDestIter itDstEnd = end(dst, Standard());
-	TSourceIter itSrcEnd = end(src, Standard());
-	
-	for (TSourceIter itSrc = begin(src, Standard()); itDst != itDstEnd && itSrc != itSrcEnd; ++itDst, ++itSrc)
-		assignQualityValue(*itDst, *itSrc);
 }
 
 //////////////////////////////////////////////////////////////////////////////

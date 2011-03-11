@@ -1,13 +1,3 @@
-// ==========================================================================
-//                 SeqAn - The Library for Sequence Analysis
-// ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-//     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
 //     * Redistributions in binary form must reproduce the above copyright
 //       notice, this list of conditions and the following disclaimer in the
@@ -29,57 +19,34 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+// Functions for destructing and several ways of constructing (e.g. copy,
+// move) values or arrays of values.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_BASIC_ALPHABET_INTERFACE_H
-#define SEQAN_HEADER_BASIC_ALPHABET_INTERFACE_H
-
 #include <new>
-#include <float.h>
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-//////////////////////////////////////////////////////////////////////////////
-//IsSimple
-//////////////////////////////////////////////////////////////////////////////
+#ifndef SEQAN_BASIC_CONSTRUCT_DESTRUCT_H_
+#define SEQAN_BASIC_CONSTRUCT_DESTRUCT_H_
 
-/**
-.Metafunction.IsSimple:
-..cat:Basic
-..summary:Tests type to be simple.
-..signature:IsSimple<T>::Type
-..param.T:Type that is tested.
-..returns.param.Type:@Tag.Logical Values.True@, if $T$ is a simple type, @Tag.Logical Values.False@ otherwise.
-...default:@Tag.Logical Values.False@
-..remarks:A simple type is a type that does not need constructors to be created,
-a destructor to be destroyed, and copy assignment operators or copy constructors
-to be copied. All POD ("plain old data") types are simple, but some
-non-POD types could be simple too, e.g. some specializations of @Class.SimpleType@.
-..see:Class.SimpleType
-..include:seqan/basic.h
-*/
+namespace seqan {
 
-template <typename T>
-struct IsSimple_ {
-	typedef False Type;
-};
+// ============================================================================
+// Forwards
+// ============================================================================
 
-template <typename T>
-struct IsSimple:
-	public IsSimple_<T> {};
-template <typename T>
-struct IsSimple<T const>:
-	public IsSimple<T> {};
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
-//////////////////////////////////////////////////////////////////////////////
-//very basic Alphabets
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-typedef char Ascii;
-//typedef unsigned char Byte;  // TODO(holtgrew): Disabling, remove together with Ascii and Unicode with #849
-typedef wchar_t Unicode;
-
-//////////////////////////////////////////////////////////////////////////////
+// ============================================================================
+// Functions
+// ============================================================================
 
 /**
 .Function.valueConstruct:
@@ -860,250 +827,359 @@ void arrayClearSpace(TIterator array_begin,
 	_arrayClearSpaceDefault(array_begin, array_length, keep_from, move_to);
 }
 
+// NOTE(holtgrew): The functions below are from basic_algorithm_traits_basic.h and probably have to appear after the ones above.
 
 //////////////////////////////////////////////////////////////////////////////
-//BitsPerValue
+//arrayConstruct
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Metafunction.BitsPerValue:
-..cat:Basic
-..summary:Number of bits needed to store a value.
-..signature:BitsPerValue<T>::VALUE
-..param.T:A class.
-..returns.param.VALUE:Number of bits needed to store $T$.
-...default:$sizeof<T> * 8$
-..see:Metafunction.ValueSize
-..include:seqan/basic.h
-*/
+
+template<typename TIterator>
+inline void 
+_arrayConstructPointer(TIterator, 
+						TIterator,
+						True)
+{
+SEQAN_CHECKPOINT
+	//nothing to do
+}
+template<typename TIterator>
+inline void 
+_arrayConstructPointer(TIterator begin_, 
+						TIterator end_,
+						False)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructDefault(begin_, end_);
+}
+template<typename TValue>
+inline void 
+arrayConstruct(TValue * begin_, 
+			   TValue * end_)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructPointer(begin_, end_, typename IsSimple<TValue>::Type() );
+}
+
+//____________________________________________________________________________
+
+template<typename TIterator, typename TParam>
+inline void 
+_arrayConstructPointer(TIterator begin_, 
+						TIterator end_, 
+						TParam const & param_,
+						True)
+{
+SEQAN_CHECKPOINT
+	arrayFill(begin_, end_, param_);
+}
+template<typename TIterator, typename TParam>
+inline void 
+_arrayConstructPointer(TIterator begin_, 
+						TIterator end_, 
+						TParam const & param_,
+						False)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructDefault(begin_, end_, param_);
+}
+template<typename TValue, typename TParam>
+inline void 
+arrayConstruct(TValue * begin_, 
+			   TValue * end_, 
+			   TParam const & param_)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructPointer(begin_, end_, param_, typename IsSimple<TValue>::Type() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//arrayConstructCopy
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValueSource, typename TValueTarget>
+inline void 
+_arrayConstructCopyPointer(TValueSource * source_begin, 
+							TValueSource * source_end, 
+							TValueTarget * target_begin,
+							True)
+{
+SEQAN_CHECKPOINT
+	arrayCopyForward(source_begin, source_end, target_begin);
+}
+template<typename TValueSource, typename TValueTarget>
+inline void 
+_arrayConstructCopyPointer(TValueSource * source_begin, 
+							TValueSource * source_end, 
+							TValueTarget const* target_begin,
+							True)
+{
+SEQAN_CHECKPOINT
+	arrayCopyForward(source_begin, source_end, const_cast<TValueTarget *>(target_begin));
+}
+
+template<typename TValueSource, typename TValueTarget>
+inline void 
+_arrayConstructCopyPointer(TValueSource * source_begin, 
+							TValueSource * source_end, 
+							TValueTarget * target_begin,
+							False)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructCopyDefault(source_begin, source_end, target_begin);
+}
+template<typename TValueSource, typename TValueTarget>
+inline void 
+arrayConstructCopy(TValueSource * source_begin, 
+				   TValueSource * source_end, 
+				   TValueTarget * target_begin)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructCopyPointer(source_begin, source_end, target_begin, typename IsSimple<TValueTarget>::Type() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//arrayConstructMove
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue>
+inline void 
+_arrayConstructMovePointer(TValue * source_begin, 
+							TValue * source_end, 
+							TValue * target_begin,
+							True)
+{
+SEQAN_CHECKPOINT
+	arrayMoveForward(source_begin, source_end, target_begin);
+}
+template<typename TValue>
+inline void 
+_arrayConstructMovePointer(TValue * source_begin, 
+							TValue * source_end, 
+							TValue * target_begin,
+							False)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructMoveDefault(source_begin, source_end, target_begin);
+}
+template<typename TValue>
+inline void 
+arrayConstructMove(TValue * source_begin, 
+				   TValue * source_end, 
+				   TValue * target_begin)
+{
+SEQAN_CHECKPOINT
+	_arrayConstructMovePointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//arrayDestruct
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue>
+inline void 
+_arrayDestructPointer(TValue * /*begin_*/, 
+					   TValue * /*end_*/,
+					   True)
+{
+SEQAN_CHECKPOINT
+	//do nothing
+}
+template<typename TValue>
+inline void 
+_arrayDestructPointer(TValue * begin_, 
+					   TValue * end_,
+					   False)
+{
+SEQAN_CHECKPOINT
+	_arrayDestructDefault(begin_, end_);
+}
+template<typename TValue>
+inline void 
+arrayDestruct(TValue * begin_, 
+			  TValue * end_)
+{
+SEQAN_CHECKPOINT
+	_arrayDestructPointer(begin_, end_, typename IsSimple<TValue>::Type() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//arrayFill
+//////////////////////////////////////////////////////////////////////////////
+
+//no specializiation for pointer to simple
+
+//////////////////////////////////////////////////////////////////////////////
+//arrayCopyForward
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue>
+inline void 
+_arrayCopyForwardPointer(TValue * source_begin, 
+						  TValue * source_end, 
+						  TValue * target_begin,
+						  True)
+{
+SEQAN_CHECKPOINT
+	::std::memmove(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
+}
+template<typename TValue>
+inline void 
+_arrayCopyForwardPointer(TValue * source_begin, 
+						  TValue * source_end, 
+						  TValue * target_begin,
+						  False)
+{
+SEQAN_CHECKPOINT
+	_arrayCopyForwardDefault(source_begin, source_end, target_begin);
+}
+template<typename TValue>
+inline void 
+arrayCopyForward(TValue * source_begin, 
+				 TValue * source_end, 
+				 TValue * target_begin)
+{
+SEQAN_CHECKPOINT
+	_arrayCopyForwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//arrayCopyBackward
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TValue>
-struct BitsPerValue
+inline void 
+_arrayCopyBackwardPointer(TValue * source_begin, 
+						   TValue * source_end, 
+						   TValue * target_begin,
+						   True)
 {
-	enum { VALUE = sizeof(TValue) * 8 };
-};
+SEQAN_CHECKPOINT
+	::std::memmove(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
+}
 template <typename TValue>
-struct BitsPerValue<TValue const>:
-	public BitsPerValue<TValue> {};
-
+inline void 
+_arrayCopyBackwardPointer(TValue * source_begin, 
+						   TValue * source_end, 
+						   TValue * target_begin,
+						   False)
+{
+SEQAN_CHECKPOINT
+	_arrayCopyBackwardDefault(source_begin, source_end, target_begin); 
+}
+template<typename TValue>
+inline void 
+arrayCopyBackward(TValue * source_begin, 
+				  TValue * source_end, 
+				  TValue * target_begin)
+{
+SEQAN_CHECKPOINT
+	_arrayCopyBackwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+}
 
 //////////////////////////////////////////////////////////////////////////////
-//BytesPerValue
+//arrayMoveForward
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Metafunction.BytesPerValue:
-..cat:Basic
-..summary:Number of bytes needed to store a value.
-..signature:BytesPerValue<T>::VALUE
-..param.T:A class.
-..returns.param.VALUE:Number of bytes needed to store $T$.
-...default:$BitsPerValue / 8$, rounded up. For built-in types, this is the same as $sizeof(T)$.
-..see:Metafunction.ValueSize
-..see:Metafunction.BitsPerValue
-..include:seqan/basic.h
-*/
-
-template <typename TValue>
-struct BytesPerValue
+template<typename TValue>
+inline void 
+_arrayMoveForwardPointer(TValue * source_begin, 
+						  TValue * source_end, 
+						  TValue * target_begin,
+						  True)
 {
-	enum { VALUE = (BitsPerValue<TValue>::VALUE + 7) / 8 };
-};
+SEQAN_CHECKPOINT
+	::std::memmove(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
+}
+template<typename TValue>
+inline void 
+_arrayMoveForwardPointer(TValue * source_begin, 
+						  TValue * source_end, 
+						  TValue * target_begin,
+						  False)
+{
+SEQAN_CHECKPOINT
+	_arrayMoveForwardDefault(source_begin, source_end, target_begin);
+}
+template<typename TValue>
+inline void 
+arrayMoveForward(TValue * source_begin, 
+				 TValue * source_end, 
+				 TValue * target_begin)
+{
+SEQAN_CHECKPOINT
+	_arrayMoveForwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+}
 
 //////////////////////////////////////////////////////////////////////////////
-// IntegralPerValue
+//arrayMoveBackward
 //////////////////////////////////////////////////////////////////////////////
-
-/**
-.Metafunction.IntegralForValue:
-..cat:Basic
-..summary:Returns an itegral type that provides sufficient space to store a value.
-..signature:IntegralForValue<T>::Type
-..param.T:A class.
-..returns.param.Type:An integral type that can store $T$ values.
-..remarks:The type is the smallest unsigned integral type that has a size of at least @Metafunction.BytesPerValue@ bytes.
-...tableheader:bytes|integral type
-...table:1|$unsigned char$
-...table:2|$unsigned short$
-...table:3|$unsigned int$
-...table:4|$unsigned int$
-...table:5 and above|$__int64$
-..remarks:Note that the returned integral type cannot store $T$ values, if $T$ takes more than 8 bytes, 
-	since there exists no integral type that provides sufficient space to store types of this size.
-..see:Metafunction.ValueSize
-..see:Metafunction.BitsPerValue
-..see:Metafunction.BytesPerValue
-..include:seqan/basic.h
-*/
-
-
-template <int SIZE>
-struct IntegralForValueImpl_
-{
-	typedef __int64 Type;
-};
-template <>
-struct IntegralForValueImpl_<1>
-{
-	typedef unsigned char Type;
-};
-template <>
-struct IntegralForValueImpl_<2>
-{
-	typedef unsigned short Type;
-};
-template <>
-struct IntegralForValueImpl_<3>
-{
-	typedef unsigned int Type;
-};
-template <>
-struct IntegralForValueImpl_<4>
-{
-	typedef unsigned int Type;
-};
 
 template <typename TValue>
-struct IntegralForValue:
-	IntegralForValueImpl_<BytesPerValue<TValue>::VALUE>
+inline void 
+_arrayMoveBackwardPointer(TValue * source_begin, 
+						   TValue * source_end, 
+						   TValue * target_begin,
+						   True)
 {
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//ValueSize
-//////////////////////////////////////////////////////////////////////////////
-/**
-.Metafunction.ValueSize:
-..cat:Basic
-..summary:Number of different values a value type object can have.
-..signature:ValueSize<T>::VALUE
-..param.T:A class.
-..returns.param.VALUE:Value size of $T$.
-..remarks
-...text:This function is only defined for integral types like $unsigned int$, $double$ or @Spec.Dna@.
-..see:Metafunction.Value
-..include:seqan/basic.h
-*/
-template <typename T>
-struct ValueSize
-{
-	enum { VALUE = 1 << BitsPerValue<T>::VALUE };
-};
+SEQAN_CHECKPOINT
+	::std::memmove(target_begin, source_begin, (source_end - source_begin) * sizeof(TValue));
+}
 template <typename TValue>
-struct ValueSize<TValue const>:
-	public ValueSize<TValue> {};
-
-template <typename TValue> 
-struct InternalValueSize_:
-	public ValueSize<TValue> {};
-
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-template < typename T >
-struct MaximumValueUnsigned_ {	static const T VALUE; };
-template < typename T >
-struct MaximumValueSigned_ {	static const T VALUE; };
-
-template < typename T = void >
-struct MaximumValueFloat_ {	static const float VALUE; };
-template < typename T = void >
-struct MaximumValueDouble_ {	static const double VALUE; };
-
-template < typename T >
-struct MinimumValueUnsigned_ {	static const T VALUE; };
-template < typename T >
-struct MinimumValueSigned_ {	static const T VALUE; };
-
-template < typename T = void >
-struct MinimumValueFloat_ {	static const float VALUE; };
-template < typename T = void >
-struct MinimumValueDouble_ {	static const double VALUE; };
-
-
-template < typename T >
-const T MaximumValueUnsigned_<T>::VALUE = ~(T)0;
-template < typename T >
-const T MaximumValueSigned_<T>::VALUE = ( (((T)1 << (BitsPerValue<T>::VALUE - 2)) - 1) << 1) + 1;
-template < typename T >
-const float MaximumValueFloat_<T>::VALUE = FLT_MAX;
-template < typename T >
-const double MaximumValueDouble_<T>::VALUE = DBL_MAX;
-
-template < typename T >
-const T MinimumValueUnsigned_<T>::VALUE = 0;
-template < typename T >
-const T MinimumValueSigned_<T>::VALUE = ~(T)MaximumValueSigned_<T>::VALUE;
-template < typename T >
-const float MinimumValueFloat_<T>::VALUE = -FLT_MAX;
-template < typename T >
-const double MinimumValueDouble_<T>::VALUE = -DBL_MAX;
-
-
-/**
-.Metafunction.MaxValue:
-..cat:Miscellaneous
-..summary:Supremum for a given type.
-..signature:MaxValue<T>::VALUE
-..param.T:An ordered type.
-..returns.param.VALUE:A value $sup$ for which holds: $sup >= i$ for all values $i$ of type $T$.
-..remarks:Note tat
-..see:Function.maxValue
-..include:seqan/basic.h
- */
-template <
-	typename T,
-	typename TParent = typename If<
-	  IsSameType<double, T>::VALUE,
-	  MaximumValueDouble_<>,
-	  typename If<
-      IsSameType<float, T>::VALUE,
-      MaximumValueFloat_<>,
-      typename If<
-        IsSameType< typename MakeSigned_<T>::Type, T >::VALUE,
-        MaximumValueSigned_<T>,
-        MaximumValueUnsigned_<T>
-        >::Type
-      >::Type
-    >::Type
-  >
-struct MaxValue:
-	public TParent 
+inline void 
+_arrayMoveBackwardPointer(TValue * source_begin, 
+						   TValue * source_end, 
+						   TValue * target_begin,
+						   False)
 {
-};
-
-/**
-.Metafunction.MinValue:
-..cat:Miscellaneous
-..summary:Infimum for a given type.
-..signature:Infimum<T>::VALUE
-..param.T:An ordered type.
-..returns.param.VALUE:A value $inf$ for which holds: $inf <= i$ for all values $i$ of type $T$.
-..remarks:Note tat
-..see:Function.minValue
-..include:seqan/basic.h
- */
-template <
-	typename T,
-	typename TParent = typename If<
-	  IsSameType<double, T>::VALUE,
-	  MinimumValueDouble_<>,
-	  typename If<
-      IsSameType<float, T>::VALUE,
-      MinimumValueFloat_<>,
-      typename If<
-        IsSameType< typename MakeSigned_<T>::Type, T >::VALUE,
-        MinimumValueSigned_<T>,
-        MinimumValueUnsigned_<T>
-        >::Type
-      >::Type
-    >::Type
-  >
-struct MinValue:
-	public TParent
+SEQAN_CHECKPOINT
+	_arrayMoveBackwardDefault(source_begin, source_end, target_begin); 
+}
+template<typename TValue>
+inline void 
+arrayMoveBackward(TValue * source_begin, 
+				  TValue * source_end, 
+				  TValue * target_begin)
 {
-};
+SEQAN_CHECKPOINT
+	_arrayMoveBackwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+}
 
 //////////////////////////////////////////////////////////////////////////////
-}// namespace SEQAN_NAMESPACE_MAIN
+//arrayClearSpace
+//////////////////////////////////////////////////////////////////////////////
 
-#endif //#ifndef SEQAN_HEADER_...
+template <typename TValue>
+inline void 
+_arrayClearSpacePointer(TValue * array_begin, 
+						size_t array_length, 
+						size_t keep_from, 
+						size_t move_to,
+						True)
+{
+	if (keep_from == move_to) return;
+SEQAN_CHECKPOINT
+	arrayMove(array_begin + keep_from, array_begin + array_length, array_begin + move_to);
+}
+template <typename TValue>
+inline void 
+_arrayClearSpacePointer(TValue * array_begin, 
+						size_t array_length, 
+						size_t keep_from, 
+						size_t move_to,
+						False)
+{
+	_arrayClearSpaceDefault(array_begin, array_length, keep_from, move_to);
+}
+template <typename TValue>
+void arrayClearSpace(TValue * array_begin, 
+					 size_t array_length, 
+					 size_t keep_from, 
+					 size_t move_to)
+{
+	_arrayClearSpacePointer(array_begin, array_length, keep_from, move_to, typename IsSimple<TValue>::Type() );
+}
+
+
+}  // namespace seqan
+
+#endif  // #ifndef SEQAN_BASIC_CONSTRUCT_DESTRUCT_H_
