@@ -732,7 +732,9 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	}
 
 //////////////////////////////////////////////////////////////////////////////
+
 ///.Function.length.param.object.type:Class.Index
+///.Function.length.remarks:If $object$ is of type @Class.Index@, the number of characters in the raw underlying text of the index is returned.
 
 	template <typename TText, typename TSpec>
 	inline typename Size<Index<TText, TSpec> >::Type 
@@ -741,6 +743,18 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	}
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.countSequences
+..cat:Index
+..summary:Return the number of sequences in an index' underlying text.
+..signature:countSequences(index)
+..param.index:The index to return the number of sequences of.
+...type:Class.Index
+..returns:The number of sequences in the index' underlying text.
+..metafunction:Size
+..include:seqan/index.h
+ */
 
 	template <typename TText, typename TSpec>
 	inline typename Size<TText>::Type 
