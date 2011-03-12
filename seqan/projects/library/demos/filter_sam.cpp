@@ -65,13 +65,20 @@ void sortAlignedReads(TAlignedReadStore & alignedReadStore,
 void performWork(Options const & options)
 {
     typedef FragmentStore<>::TContigSeq TContigSeq;
-
     FragmentStore<> fragmentStore;
-    loadReads(fragmentStore, options.samFilename);
-    if (!empty(options.referenceFilename))
-        loadContigs(fragmentStore, options.samFilename);
+
+    if (!empty(options.referenceFilename)) {
+        std::cerr << "Loading contigs..." << std::endl;
+        loadContigs(fragmentStore, options.referenceFilename);
+        std::cerr << "  loaded " << length(fragmentStore.contigStore) << " contigs" << std::endl;
+    }
+    std::cerr << "Loading alignments..." << std::endl;
+    std::ifstream ins(toCString(options.samFilename));
+    read(ins, fragmentStore, Sam());
+    std::cerr << "  loaded " << length(fragmentStore.alignedReadStore) << " alignments" << std::endl;
 
     // Compute distances with reference.
+    std::cerr << "Computing distances..." << std::endl;
     String<int> distances;
     resize(distances, length(fragmentStore.alignedReadStore), Exact());
     typedef Iterator<FragmentStore<>::TAlignedReadStore, Standard>::Type TIterator;
@@ -82,13 +89,16 @@ void performWork(Options const & options)
         size_t endPos = it->endPos;
         if (beginPos > endPos)
             std::swap(beginPos, endPos);
-        assignSource(row(align, 0), infix(fragmentStore.contigStore[it->contigId].seq, beginPos, endPos));
+        typedef Infix<TContigSeq>::Type TInfix;
+        TInfix infixCopy(fragmentStore.contigStore[it->contigId].seq, beginPos, endPos);
+        assignSource(row(align, 0), infixCopy);
         assignSource(row(align, 1), fragmentStore.readSeqStore[it->readId]);
         int s = globalAlignment(align, Score<int, EditDistance>(), NeedlemanWunsch());
         distances[it->id] = -s;
     }
 
     // Sort reads, ties are broken randomly.
+    std::cerr << "Sorting alignments..." << std::endl;
     Rng<> rng;
     if (options.randomTieBreak)
         shuffle(fragmentStore.alignedReadStore, rng);
@@ -96,15 +106,18 @@ void performWork(Options const & options)
         sortAlignedReads(fragmentStore.alignedReadStore, distances, SortAlignmentDistance());
     sortAlignedReads(fragmentStore.alignedReadStore, SortReadId());
 
-    // Copy over at most 100 alignments per read.
+    // Copy over at most options.limit alignments per read.
+    std::cerr << "Filtering reads..." << std::endl;
     FragmentStore<>::TAlignedReadStore rsCopy;
     size_t readId = MaxValue<size_t>::VALUE;
     size_t alignmentCount = 0;
     for (TIterator it = begin(fragmentStore.alignedReadStore), itEnd = end(fragmentStore.alignedReadStore); it != itEnd; ++it) {
-        if (readId != it->readId)
+        if (readId != it->readId) {
             alignmentCount = 1;
-        else
+            readId = it->readId;
+        } else {
             alignmentCount += 1;
+        }
         if (alignmentCount <= options.limit)
             appendValue(rsCopy, *it);
     }
@@ -113,6 +126,7 @@ void performWork(Options const & options)
     std::swap(fragmentStore.alignedReadStore, rsCopy);
 
     // Write out the fragment store.
+    std::cerr << "Writing alignments..." << std::endl;
     std::ostream * outStream;
     if (empty(options.outputFilename))
         outStream = &std::cout;
@@ -135,7 +149,7 @@ int main(int argc, char const ** argv)
     CommandLineParser parser;
     addUsageLine(parser, "filter_sam [OPTIONS] INPUT.sam");
     addOption(parser, CommandLineOption("r", "reference", "Reference sequence in FASTA file.", OptionType::String, options.referenceFilename));
-    addOption(parser, CommandLineOption("o", "output-file", "Filename of the output.", OptionType::String, options.outputFilename));
+    addOption(parser, CommandLineOption("o", "output-filename", "Filename of the output.", OptionType::String, options.outputFilename));
     addOption(parser, CommandLineOption("sd", "sort-distance", "Sort alignments by distance.", OptionType::Bool, options.sortDistance));
     addOption(parser, CommandLineOption("l", "limit", "Number of alignments to output per read.", OptionType::Int, options.limit));
     requiredArguments(parser, 1);
