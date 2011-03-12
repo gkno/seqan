@@ -55,7 +55,7 @@ namespace seqan {
 .Metafunction.QualityValueSize.concept:Concept.Alphabet With Qualities
 .Function.getQualityValue.concept:Concept.Alphabet With Qualities
 .Function.convertQuality.concept:Concept.Alphabet With Qualities
-.Function.assignQualityValues.concept:Concept.Alphabet With Qualities
+.Function.assignQualityValue.concept:Concept.Alphabet With Qualities
 .Function.assignQualities.concept:Concept.Alphabet With Qualities
  */
 
@@ -105,6 +105,7 @@ struct QualityValueSize<TValue const> : QualityValueSize<TValue> {};
 ...type:nolink:int
 ...remarks:The quality value is an integral value between 0 and 62 (inclusive).
 ..see:Function.assignQualityValue
+..see:Function.convertQuality
 ..include:seqan/basic.h
  */
 
@@ -113,6 +114,20 @@ struct QualityValueSize<TValue const> : QualityValueSize<TValue> {};
 // ----------------------------------------------------------------------------
 
 // TODO(holtgrew): This could use some thought, what about other scales?
+
+/**
+.Function.convertQuality
+..cat:Alphabets
+..signature:convertQuality(c, q)
+..summary:Convert an integer quality value into its ASCII representation for FASTQ (Phred scale).
+..param.c:Character to store the quality in.
+...type:nolink:$char$
+..param.q:Value of the quality to convert.
+...remarks:The quality value is an integral value between 0 and 62 (inclusive).
+...type:nolink:$int$
+..see:Function.getQualityValue
+..include:seqan/basic.h
+ */
 
 inline 
 void convertQuality(Ascii & c, int q) 
@@ -136,6 +151,8 @@ void convertQuality(Ascii & c, int q)
 ...type:nolink:char
 ...remarks:The quality value is an integral value between 0 and 62 (inclusive).
 ..remarks:If $q$ is a $char$ then $'!'$ is subtracted from $q$. This is useful for ASCII encoded PHRED scores.
+..see:Function.getQualityValue
+..see:Function.convertQuality
 ..include:seqan/basic.h
  */
 
