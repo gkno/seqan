@@ -1452,10 +1452,10 @@ int _mapMatePairReadsParallel(
         options.countFiltration += threadLocalStorages[i].options.countFiltration;
         options.countVerification += threadLocalStorages[i].options.countVerification;
     }
-	
+
 	// restore original orientation (R-reads are infixes of ConcatDirect StringSet)
 	#pragma omp parallel for schedule(static, 1)
-	for (int i = 0; i < length(threadLocalStorages); ++i)
+	for (int i = 0; i < (int)length(threadLocalStorages); ++i)
 		reverseComplement(threadLocalStorages[i].readSetR);
 
 	options.timeMapReads = SEQAN_PROTIMEDIFF(findTime);
