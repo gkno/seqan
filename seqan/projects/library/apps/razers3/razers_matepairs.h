@@ -953,6 +953,9 @@ int _mapMatePairReads(
 		unlockAndFreeContig(store, contigId);
 	}
 
+	// restore original orientation (R-reads are infixes of ConcatDirect StringSet)
+	reverseComplement(readSetR);
+
 	options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
