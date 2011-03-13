@@ -102,6 +102,12 @@ if (NOT _TBB_INSTALL_DIR)
     if (NOT "$ENV{TBB21_INSTALL_DIR}" STREQUAL "")
         set (_TBB_INSTALL_DIR $ENV{TBB21_INSTALL_DIR})
     endif (NOT "$ENV{TBB21_INSTALL_DIR}" STREQUAL "")
+    if (NOT "$ENV{TBB22_INSTALL_DIR}" STREQUAL "")
+        set (_TBB_INSTALL_DIR $ENV{TBB22_INSTALL_DIR})
+    endif (NOT "$ENV{TBB22_INSTALL_DIR}" STREQUAL "")
+    if (NOT "$ENV{TBB30_INSTALL_DIR}" STREQUAL "")
+        set (_TBB_INSTALL_DIR $ENV{TBB30_INSTALL_DIR})
+    endif (NOT "$ENV{TBB30_INSTALL_DIR}" STREQUAL "")
 endif (NOT _TBB_INSTALL_DIR)
 # third: try to find path automatically
 if (NOT _TBB_INSTALL_DIR)
@@ -138,6 +144,7 @@ set (TBB_INC_SEARCH_DIR ${_TBB_INSTALL_DIR}/include)
 find_path(TBB_INCLUDE_DIR
     tbb/task_scheduler_init.h
     PATHS ${TBB_INC_SEARCH_DIR}
+    NO_DEFAULT_PATH
 )
 mark_as_advanced(TBB_INCLUDE_DIR)
 
@@ -145,23 +152,33 @@ mark_as_advanced(TBB_INCLUDE_DIR)
 #-- Look for libraries
 # GvdB: $ENV{TBB_ARCH_PLATFORM} is set by the build script tbbvars[.bat|.sh|.csh]
 if (NOT $ENV{TBB_ARCH_PLATFORM} STREQUAL "")
-    set (TBB_LIBRARY_DIR "${_TBB_INSTALL_DIR}/$ENV{TBB_ARCH_PLATFORM}/lib")
+    set (_TBB_LIBRARY_DIR 
+         ${_TBB_INSTALL_DIR}/lib/$ENV{TBB_ARCH_PLATFORM}
+         ${_TBB_INSTALL_DIR}/$ENV{TBB_ARCH_PLATFORM}/lib
+        )
 else (NOT $ENV{TBB_ARCH_PLATFORM} STREQUAL "")
     # HH: deprecated
     message(STATUS "[Warning] FindTBB.cmake: The use of TBB_ARCHITECTURE and TBB_COMPILER is deprecated and may not be supported in future versions. Please set $ENV{TBB_ARCH_PLATFORM} (using tbbvars.[bat|csh|sh]).")
-    set (TBB_LIBRARY_DIR "${_TBB_INSTALL_DIR}/${_TBB_ARCHITECTURE}/${_TBB_COMPILER}/lib")
+    set (_TBB_LIBRARY_DIR "${_TBB_INSTALL_DIR}/${_TBB_ARCHITECTURE}/${_TBB_COMPILER}/lib")
 endif (NOT $ENV{TBB_ARCH_PLATFORM} STREQUAL "")
 
+# GvdB: Mac OS X distribution places libraries directly in lib directory.
+list(APPEND _TBB_LIBRARY_DIR ${_TBB_INSTALL_DIR}/lib)
 
-find_library(TBB_LIBRARY        ${_TBB_LIB_NAME}        ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
-find_library(TBB_MALLOC_LIBRARY ${_TBB_LIB_MALLOC_NAME} ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
+
+find_library(TBB_LIBRARY        ${_TBB_LIB_NAME}        ${_TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
+find_library(TBB_MALLOC_LIBRARY ${_TBB_LIB_MALLOC_NAME} ${_TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
+
+#Extract path from TBB_LIBRARY name
+get_filename_component(TBB_LIBRARY_DIR ${TBB_LIBRARY} PATH)
+
 #TBB_CORRECT_LIB_DIR(TBB_LIBRARY)
 #TBB_CORRECT_LIB_DIR(TBB_MALLOC_LIBRARY)
 mark_as_advanced(TBB_LIBRARY TBB_MALLOC_LIBRARY)
 
 #-- Look for debug libraries
-find_library(TBB_LIBRARY_DEBUG        ${_TBB_LIB_DEBUG_NAME}        ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
-find_library(TBB_MALLOC_LIBRARY_DEBUG ${_TBB_LIB_MALLOC_DEBUG_NAME} ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
+find_library(TBB_LIBRARY_DEBUG        ${_TBB_LIB_DEBUG_NAME}        ${_TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
+find_library(TBB_MALLOC_LIBRARY_DEBUG ${_TBB_LIB_MALLOC_DEBUG_NAME} ${_TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
 #TBB_CORRECT_LIB_DIR(TBB_LIBRARY_DEBUG)
 #TBB_CORRECT_LIB_DIR(TBB_MALLOC_LIBRARY_DEBUG)
 mark_as_advanced(TBB_LIBRARY_DEBUG TBB_MALLOC_LIBRARY_DEBUG)
