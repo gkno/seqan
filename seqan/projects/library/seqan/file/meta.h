@@ -33,7 +33,9 @@
 #ifndef SEQAN_HEADER_FILE_META_H
 #define SEQAN_HEADER_FILE_META_H
 
-
+/* IOREV
+ * Whats this good for?
+ */
 
 namespace SEQAN_NAMESPACE_MAIN
 {

@@ -33,6 +33,18 @@
 #ifndef SEQAN_HEADER_STREAM_ALGORITHMS_H
 #define SEQAN_HEADER_STREAM_ALGORITHMS_H
 
+/* IOREV
+ * _tested_
+ * _doc_
+ *
+ *
+ * mostly documented (doc for some functions missing)
+ * used ubiquiously, but possibly not all specializations
+ * 
+ * functions seem to be agnostic of FileType (stream.h or cstream.)
+ * it is not clear if both are actually tested (but shouldn't matter
+ * if underlying routines work correctly)
+ */
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -54,7 +66,7 @@ _streamPutInt(TStream & target,
 			  int number, 
 			  char const * format_string)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	char str[BitsPerValue<int>::VALUE];
 	sprintf(str, format_string, number);
@@ -65,7 +77,7 @@ inline void
 _streamPutInt(TStream & target,
 			  int number)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	_streamPutInt(target, number, "%d");
 }
@@ -85,7 +97,7 @@ _streamPutFloat(TStream & target,
 			  double number, 
 			  char const * format_string)
 {
-//IOREV _todo_
+//IOREV
     SEQAN_CHECKPOINT;
 	char str[BitsPerValue<float>::VALUE];
 	sprintf(str, format_string, number);
@@ -96,7 +108,7 @@ inline void
 _streamPutFloat(TStream & target,
 				double number)
 {
-//IOREV _todo_
+//IOREV
     SEQAN_CHECKPOINT;
 	_streamPutFloat(target, number, "%f");
 }
@@ -109,7 +121,7 @@ inline void
 _streamWrite(TTarget & target,
 			 Pair<T1, T2, TCompression> const & source)
 {
-//IOREV _todo_
+//IOREV _nodoc_
 SEQAN_CHECKPOINT
 	_streamWrite(target, getValueI1(source));
 	_streamWrite(target, getValueI2(source));
@@ -120,7 +132,7 @@ inline void
 _streamWrite(TTarget & target,
 			 Triple<T1, T2, T3, TCompression> const & source)
 {
-//IOREV _todo_
+//IOREV _nodoc_
 SEQAN_CHECKPOINT
 	_streamWrite(target, getValueI1(source));
 	_streamWrite(target, getValueI2(source));
@@ -145,7 +157,7 @@ inline void
 _streamWrite(TTarget & target,
 			 TSource const & source)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	_streamWriteSeq(target, source, typename IsSequence<TSource const>::Type());
 }
@@ -158,7 +170,7 @@ _streamWriteSeq(TTarget & target,
 				TSource const & source,
 				False const)
 {
-//IOREV _todo_
+//IOREV
 	_streamPut(target, source);
 }
 
@@ -170,7 +182,7 @@ _streamWriteSeq(TTarget & target,
 				TSource const & source,
 				True const)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	typename Iterator<TSource const, Standard>::Type it = begin(source, Standard());
 	typename Iterator<TSource const, Standard>::Type it_end = end(source, Standard());
@@ -188,7 +200,7 @@ _streamWriteSeq(TTarget & target,
 			    TSourceValue const * source,
 				True const)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 
 	for (; !atEnd(source); ++source)
@@ -214,7 +226,7 @@ _streamWriteRange(TTarget & target,
 				  TIterator begin_,
 				  TIterator end_)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	for (; begin_ != end_; ++begin_)
 	{

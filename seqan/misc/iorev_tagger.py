@@ -44,7 +44,7 @@ FUNCTION_KEYWORDS = [ ".*read.*", \
                       ".*file.*", \
                       ".*File.*", \
                       "_is.*"] # todo finish
-#FUNCTION_KEYWORDS = [ ".*parse.*" ] # todo finish
+#FUNCTION_KEYWORDS = [ ".*open\(.*" ] # todo finish
 
 #FILES_LINES = {}
 
@@ -623,8 +623,8 @@ def main():
   buildAllForwards(sys.argv[1], force_rebuild)
 
   #display("fl")
-  #display()
-  addTags()
+  display()
+  #addTags()
 
   return 0
 

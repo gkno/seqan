@@ -33,6 +33,17 @@
 #ifndef SEQAN_HEADER_STRING_EXTERNAL_H
 #define SEQAN_HEADER_STRING_EXTERNAL_H
 
+/* IOREV
+ * _nottested_
+ * _doc_
+ *
+ *
+ * mostly documented (doc for some functions missing)
+ * not tested in any test case nor used in any app right now
+ * -> needs testing
+ */
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -97,7 +108,7 @@ For a larger size type, use @Tag.ExternalConfigLarge@.
                unsigned PAGE_SIZE_ = 4 * 1024 * 1024,	// 1MTypes per default
 			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfig {
-//IOREV _todo_
+//IOREV _bug_ doc says default page size is 2^20, but it is 2^22
         typedef TFile_ TFile;
         typedef unsigned TSize;
         enum { PAGE_SIZE = PAGE_SIZE_ };
@@ -134,7 +145,7 @@ you should think of using @Tag.ExternalConfig@.
                unsigned PAGE_SIZE_ = 1 * 1024 * 1024,	// 1MTypes per default
 			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfigLarge {
-//IOREV _todo_
+//IOREV contains warning in code comments, need to investigate
         typedef TFile_ TFile;
         typedef typename Size<TFile_>::Type TSize;
         enum { PAGE_SIZE = PAGE_SIZE_ };
@@ -168,7 +179,7 @@ you should think of using @Tag.ExternalConfig@.
                unsigned PAGE_SIZE_ = 1 * 1024 * 1024,	// 1MTypes per default
 			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfigSize {
-//IOREV _todo_
+//IOREV
 		typedef TSize_ TSize;
         typedef TFile_ TFile;
         enum { PAGE_SIZE = PAGE_SIZE_ };
@@ -177,7 +188,7 @@ you should think of using @Tag.ExternalConfig@.
 
     template < typename TConfig = ExternalConfig<> >
     struct External;
-//IOREV _todo_
+//IOREV
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -624,7 +635,7 @@ you should think of using @Tag.ExternalConfig@.
 	template < typename TExtString >
     struct ExtStringFwdConstIterator
 	{
-//IOREV _todo_
+//IOREV _nottested_ 
 		typedef ExtStringFwdConstIterator				TIterator;
         typedef ExtStringIterator<TExtString>			TStdIterator;
         typedef ExtStringConstIterator<TExtString>		TStdConstIterator;
@@ -875,78 +886,78 @@ you should think of using @Tag.ExternalConfig@.
 
 	template < typename TString >
     struct Container< ExtStringIterator<TString> >			{ typedef TString Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Container< ExtStringConstIterator<TString> >		{ typedef TString Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Container< ExtStringFwdIterator<TString> >		{ typedef TString Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Container< ExtStringFwdConstIterator<TString> >	{ typedef TString Type; };
-//IOREV _todo_
+//IOREV
 
 	template < typename TString >
     struct Value< ExtStringIterator<TString> >				{ typedef typename Value<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Value< ExtStringConstIterator<TString> >			{ typedef typename Value<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Value< ExtStringFwdIterator<TString> >			{ typedef typename Value<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Value< ExtStringFwdConstIterator<TString> >		{ typedef typename Value<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 
 	template < typename TString >
 	struct Reference< ExtStringConstIterator<TString> >:
 		public Reference<TString const> {};
-//IOREV _todo_
+//IOREV
 
 	template < typename TString >
 	struct Reference< ExtStringFwdConstIterator<TString> >:
 		public Reference<TString const> {};
-//IOREV _todo_
+//IOREV
 
 	template < typename TString >
     struct Size< ExtStringIterator<TString> >				{ typedef typename Size<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Size< ExtStringConstIterator<TString> >			{ typedef typename Size<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Size< ExtStringFwdIterator<TString> >			{ typedef typename Size<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Size< ExtStringFwdConstIterator<TString> >		{ typedef typename Size<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 
 	template < typename TString >
     struct Position< ExtStringIterator<TString> >			{ typedef typename Position<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Position< ExtStringConstIterator<TString> >		{ typedef typename Position<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Position< ExtStringFwdIterator<TString> >		{ typedef typename Position<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Position< ExtStringFwdConstIterator<TString> >	{ typedef typename Position<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 
 	template < typename TString >
     struct Difference< ExtStringIterator<TString> >			{ typedef typename Difference<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Difference< ExtStringConstIterator<TString> >	{ typedef typename Difference<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Difference< ExtStringFwdIterator<TString> >		{ typedef typename Difference<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 	template < typename TString >
     struct Difference< ExtStringFwdConstIterator<TString> > { typedef typename Difference<TString>::Type Type; };
-//IOREV _todo_
+//IOREV
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -954,103 +965,103 @@ you should think of using @Tag.ExternalConfig@.
 
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringIterator<TExtString> &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringIterator<TExtString> const &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringConstIterator<TExtString> &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringConstIterator<TExtString> const &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringFwdIterator<TExtString> &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringFwdIterator<TExtString> const &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringFwdConstIterator<TExtString> &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline TExtString &	container(ExtStringFwdConstIterator<TExtString> const &it) { return *(it.extString); }
-//IOREV _todo_
+//IOREV
 //____________________________________________________________________________
 
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringIterator<TExtString> &it) { return it.offset == 0; }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringIterator<TExtString> const &it) { return it.offset == 0; }
-//IOREV _todo_
+//IOREV
 
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringConstIterator<TExtString> &it) { return it.offset == 0; }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringConstIterator<TExtString> const &it) { return it.offset == 0; }
-//IOREV _todo_
+//IOREV
 
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringFwdIterator<TExtString> &it) { 
-//IOREV _todo_
+//IOREV
 		return it.pageNo == 0 && it.pageOfs == 0;
 	}
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringFwdIterator<TExtString> const &it) {
-//IOREV _todo_
+//IOREV
 		return it.pageNo == 0 && it.pageOfs == 0;
 	}
 
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringFwdConstIterator<TExtString> &it) { 
-//IOREV _todo_
+//IOREV
 		return it.pageNo == 0 && it.pageOfs == 0;
 	}
 	template <typename TExtString>
 	inline bool	atBegin(ExtStringFwdConstIterator<TExtString> const &it) {
-//IOREV _todo_
+//IOREV
 		return it.pageNo == 0 && it.pageOfs == 0;
 	}
 //____________________________________________________________________________
 
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringIterator<TExtString> &it) { return it.offset == it.extString->data_size; }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringIterator<TExtString> const &it) { return it.offset == it.extString->data_size; }
-//IOREV _todo_
+//IOREV
 
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringConstIterator<TExtString> &it) { return it.offset == it.extString->data_size; }
-//IOREV _todo_
+//IOREV
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringConstIterator<TExtString> const &it) { return it.offset == it.extString->data_size; }
-//IOREV _todo_
+//IOREV
 
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringFwdIterator<TExtString> &it) { 
-//IOREV _todo_
+//IOREV
 		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
 	}
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringFwdIterator<TExtString> const &it) {
-//IOREV _todo_
+//IOREV
 		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
 	}
 
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringFwdConstIterator<TExtString> &it) { 
-//IOREV _todo_
+//IOREV
 		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
 	}
 	template <typename TExtString>
 	inline bool	atEnd(ExtStringFwdConstIterator<TExtString> const &it) {
-//IOREV _todo_
+//IOREV
 		return TExtString::PAGE_SIZE * it.pageNo + it.pageOfs == it.extString->data_size;
 	}
 
