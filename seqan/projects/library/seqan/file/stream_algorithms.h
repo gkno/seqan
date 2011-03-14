@@ -39,7 +39,7 @@
  *
  *
  * mostly documented (doc for some functions missing)
- * used ubiquiously, but possibly not all specializations
+ * used ubiquitously, but possibly not all specializations
  * 
  * functions seem to be agnostic of FileType (stream.h or cstream.)
  * it is not clear if both are actually tested (but shouldn't matter
@@ -66,7 +66,7 @@ _streamPutInt(TStream & target,
 			  int number, 
 			  char const * format_string)
 {
-//IOREV
+//IOREV _doc_
 SEQAN_CHECKPOINT
 	char str[BitsPerValue<int>::VALUE];
 	sprintf(str, format_string, number);
@@ -77,7 +77,7 @@ inline void
 _streamPutInt(TStream & target,
 			  int number)
 {
-//IOREV
+//IOREV _doc_
 SEQAN_CHECKPOINT
 	_streamPutInt(target, number, "%d");
 }
@@ -97,7 +97,7 @@ _streamPutFloat(TStream & target,
 			  double number, 
 			  char const * format_string)
 {
-//IOREV
+//IOREV _doc_
     SEQAN_CHECKPOINT;
 	char str[BitsPerValue<float>::VALUE];
 	sprintf(str, format_string, number);
@@ -108,7 +108,7 @@ inline void
 _streamPutFloat(TStream & target,
 				double number)
 {
-//IOREV
+//IOREV _doc_
     SEQAN_CHECKPOINT;
 	_streamPutFloat(target, number, "%f");
 }
@@ -157,7 +157,7 @@ inline void
 _streamWrite(TTarget & target,
 			 TSource const & source)
 {
-//IOREV
+//IOREV _doc_
 SEQAN_CHECKPOINT
 	_streamWriteSeq(target, source, typename IsSequence<TSource const>::Type());
 }
@@ -170,7 +170,7 @@ _streamWriteSeq(TTarget & target,
 				TSource const & source,
 				False const)
 {
-//IOREV
+//IOREV  _nodoc_
 	_streamPut(target, source);
 }
 
@@ -182,7 +182,7 @@ _streamWriteSeq(TTarget & target,
 				TSource const & source,
 				True const)
 {
-//IOREV
+//IOREV _nodoc_
 SEQAN_CHECKPOINT
 	typename Iterator<TSource const, Standard>::Type it = begin(source, Standard());
 	typename Iterator<TSource const, Standard>::Type it_end = end(source, Standard());
@@ -200,7 +200,7 @@ _streamWriteSeq(TTarget & target,
 			    TSourceValue const * source,
 				True const)
 {
-//IOREV
+//IOREV _nodoc_
 SEQAN_CHECKPOINT
 
 	for (; !atEnd(source); ++source)
@@ -226,7 +226,7 @@ _streamWriteRange(TTarget & target,
 				  TIterator begin_,
 				  TIterator end_)
 {
-//IOREV
+//IOREV _doc_
 SEQAN_CHECKPOINT
 	for (; begin_ != end_; ++begin_)
 	{

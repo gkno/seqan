@@ -40,7 +40,7 @@
  *
  * mostly documented (doc for some functions missing)
  * not tested in any test case nor used in any app right now
- * -> needs testing
+ * -> needs testing, especially different iterators
  */
 
 
@@ -196,7 +196,7 @@ you should think of using @Tag.ExternalConfig@.
 	template < typename TExtString >
 	struct ExtStringIterator
 	{
-//IOREV _todo_
+//IOREV
 		typedef ExtStringIterator						TIterator;
         typedef ExtStringIterator						TStdIterator;
 
@@ -299,7 +299,7 @@ you should think of using @Tag.ExternalConfig@.
 	template < typename TExtString >
 	struct ExtStringConstIterator
 	{
-//IOREV _todo_
+//IOREV
 		typedef ExtStringConstIterator					TIterator;
         typedef ExtStringIterator<TExtString>			TStdIterator;
         typedef ExtStringConstIterator					TStdConstIterator;
@@ -403,7 +403,7 @@ you should think of using @Tag.ExternalConfig@.
 	template < typename TExtString >
     struct ExtStringFwdIterator
 	{
-//IOREV _todo_
+//IOREV
 		typedef ExtStringFwdIterator					TIterator;
         typedef ExtStringIterator<TExtString>			TStdIterator;
         typedef ExtStringConstIterator<TExtString>		TStdConstIterator;
@@ -1078,7 +1078,7 @@ you should think of using @Tag.ExternalConfig@.
                typename TConfig >
 	class String<TValue, External<TConfig> >
 	{
-//IOREV _todo_
+//IOREV _doc_ contains TODOs by holtgrew
 	public:
         enum { FRAMES    = TConfig::FRAMES,
                PAGE_SIZE = TConfig::PAGE_SIZE };
@@ -1528,28 +1528,28 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     template < typename TValue, typename TConfig >
     struct Size< String<TValue, External<TConfig> > >
     {
-//IOREV _todo_
+//IOREV
         typedef typename String<TValue, External<TConfig> >::TSize Type;
     };
 
     template < typename TValue, typename TConfig >
     struct Difference< String<TValue, External<TConfig> > >
     {
-//IOREV _todo_
+//IOREV
 		typedef typename MakeSigned_<typename String<TValue, External<TConfig> >::TSize>::Type Type;
     };
 
     template < typename TValue, typename TConfig, typename TSpec >
     struct Iterator< String<TValue, External<TConfig> > const, Tag<TSpec> const >
     {
-//IOREV _todo_
+//IOREV
         typedef ExtStringFwdConstIterator< String<TValue, External<TConfig> > > Type;
     };
 
     template < typename TValue, typename TConfig, typename TSpec >
     struct Iterator< String<TValue, External<TConfig> >, Tag<TSpec> const > 
     {
-//IOREV _todo_
+//IOREV
         typedef ExtStringFwdIterator< String<TValue, External<TConfig> > > Type;
     };
 //____________________________________________________________________________
@@ -1557,14 +1557,14 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     template < typename TValue, typename TConfig >
 	struct DefaultOverflowExplicit<String<TValue, External<TConfig> > >
 	{
-//IOREV _todo_
+//IOREV
 		typedef Generous Type;
 	};
 
     template < typename TValue, typename TConfig >
 	struct DefaultOverflowImplicit<String<TValue, External<TConfig> > >
 	{
-//IOREV _todo_
+//IOREV
 		typedef Generous Type;
 	};
 //____________________________________________________________________________
@@ -1584,7 +1584,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     template < typename TValue, typename TConfig >
 	struct AllowsFastRandomAccess< String<TValue, External<TConfig> > >
 	{
-//IOREV _todo_
+//IOREV
 		typedef False Type;
 		enum { VALUE = false };
 	};
@@ -1599,7 +1599,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline void 
     clear(String<TValue, External<TConfig> > &me) 
 	{
-//IOREV _todo_
+//IOREV
 		clear(me.pager);
         resize(me, 0);
     }
@@ -1610,7 +1610,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline void 
 	waitForAll(String<TValue, External<TConfig> > &me)
 	{
-//IOREV _todo_
+//IOREV _nodoc_
 		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
 		typedef typename Iterator<TCache, Standard>::Type			TIter;
 
@@ -1632,7 +1632,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline void 
 	flush(String<TValue, External<TConfig> > &me) 
 	{
-//IOREV _todo_
+//IOREV _doc_
 		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
 		typedef typename Iterator<TCache, Standard>::Type			TIter;
 
@@ -1653,7 +1653,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline void 
 	cancel(String<TValue, External<TConfig> > &me)
 	{
-//IOREV _todo_
+//IOREV _nodoc_
 		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
 		typedef typename Iterator<TCache, Standard>::Type			TIter;
 
@@ -1672,7 +1672,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline void 
 	cancelAndFree(String<TValue, External<TConfig> > &me)
 	{
-//IOREV _todo_
+//IOREV _nodoc_
 		typedef String<TValue, External<TConfig> >					TExtString;
 		typedef typename TExtString::TPageFrame						TPageFrame;
 		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
@@ -1702,7 +1702,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline void 
 	flushAndFree(String<TValue, External<TConfig> > &me)
 	{
-//IOREV _todo_
+//IOREV _nodoc_
 		typedef String<TValue, External<TConfig> >			TExtString;
 		typedef typename TExtString::TPageFrame				TPageFrame;
 		typedef typename TExtString::TCache					TCache;
@@ -1740,7 +1740,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline bool 
     open(String<TValue, External<TConfig> > &me, const char *fileName, int openMode) 
 	{
-//IOREV _todo_
+//IOREV _doc_
 		typedef String<TValue, External<TConfig> >			TExtString;
 		typedef typename TExtString::TPageFrame				TPageFrame;
 
@@ -1764,7 +1764,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline bool 
     open(String<TValue, External<TConfig> > &me, const char *fileName) 
 	{
-//IOREV _todo_
+//IOREV _doc_
 		typedef String<TValue, External<TConfig> >	TExtString;
 		typedef typename TExtString::TFile			TFile;
 
@@ -1775,7 +1775,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline bool 
     open(String<TValue, External<TConfig> > &me, typename TConfig::TFile file) 
 	{
-//IOREV _todo_
+//IOREV _doc_
 		typedef String<TValue, External<TConfig> >	TExtString;
 		typedef typename TExtString::TPageFrame		TPageFrame;
 
@@ -1808,7 +1808,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline bool 
     openTemp(String<TValue, External<TConfig> > &me) 
 	{
-//IOREV _todo_
+//IOREV _doc_
         me._temporary = true;
         me.lastDiskPage = 0;
         me.lastDiskPageSize = 0;
@@ -1820,7 +1820,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	template < typename TValue, typename TConfig >
     inline bool 
     save(String<TValue, External<TConfig> > const &/*me*/, const char * /*fileName*/, int /*openMode*/) {
-//IOREV _todo_
+//IOREV _nodoc_ shouldn't we flush here? in case of abnormal termination...
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;
@@ -1829,7 +1829,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	template < typename TValue, typename TConfig >
     inline bool 
     save(String<TValue, External<TConfig> > const &/*me*/, const char * /*fileName*/) {
-//IOREV _todo_
+//IOREV _nodoc_ shouldn't we flush here? in case of abnormal termination...
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;
@@ -1838,7 +1838,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	template < typename TValue, typename TConfig >
     inline bool 
     save(String<TValue, External<TConfig> > const &/*me*/, typename TConfig::TFile /*file*/) {
-//IOREV _todo_
+//IOREV _nodoc_ shouldn't we flush here? in case of abnormal termination...
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;
@@ -1855,7 +1855,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline bool 
     close(String<TValue, External<TConfig> > &me) 
 	{
-//IOREV _todo_
+//IOREV _doc_
 		// close associated file
 		if (me._temporary)
 			cancelAndFree(me);
@@ -1878,7 +1878,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Size< String<TValue, External<TConfig> > >::Type
     length(String<TValue, External<TConfig> > const &me)
     {
-//IOREV _todo_
+//IOREV
         return me.data_size;
     }
 
@@ -1886,7 +1886,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Size< String<TValue, External<TConfig> > >::Type
     capacity(String<TValue, External<TConfig> > const &me)
     {
-//IOREV _todo_
+//IOREV
 		typedef typename Size< String<TValue, External<TConfig> > >::Type TSize;
         return (TSize)capacity(me.pager) * (TSize)me.PAGE_SIZE;
     }
@@ -1899,7 +1899,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		TNewSize new_length,
 		Tag<TExpand> const expand)
 	{
-//IOREV _todo_
+//IOREV
 		typedef String<TValue, External<TConfig> >	TString;
 		typedef typename TString::TPageFrame		TPageFrame;
 		typedef typename Size<TString>::Type		TSize;
@@ -1927,7 +1927,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		TSize new_capacity,
 		Tag<TExpand> const expand)
 	{
-//IOREV _todo_
+//IOREV
 		reserve(me.pager, enclosingBlocks(new_capacity, (unsigned)me.PAGE_SIZE), expand);
 		return capacity(me);
 	}
@@ -1937,7 +1937,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Iterator<String<TValue, External<TConfig> >, Tag<TSpec> const>::Type
     begin(String<TValue, External<TConfig> > &me, Tag<TSpec> const) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef String<TValue, External<TConfig> > TString;
 		return typename Iterator<TString, Tag<TSpec> const>::Type (&me, 0);
     }
@@ -1946,7 +1946,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Iterator<String<TValue, External<TConfig> > const, Tag<TSpec> const>::Type
     begin(String<TValue, External<TConfig> > const &me, Tag<TSpec> const) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef String<TValue, External<TConfig> > TString;
 		return typename Iterator<TString const, Tag<TSpec> const>::Type (const_cast<TString*>(&me), 0);
     }
@@ -1955,7 +1955,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Iterator<String<TValue, External<TConfig> >, Tag<TSpec> const>::Type
     end(String<TValue, External<TConfig> > &me, Tag<TSpec> const) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef String<TValue, External<TConfig> > TString;
 		return typename Iterator<TString, Tag<TSpec> const>::Type (&me, length(me));
     }
@@ -1964,7 +1964,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Iterator<String<TValue, External<TConfig> > const, Tag<TSpec> const>::Type
     end(String<TValue, External<TConfig> > const &me, Tag<TSpec> const) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef String<TValue, External<TConfig> > TString;
 		return typename Iterator<TString const, Tag<TSpec> const>::Type (const_cast<TString*>(&me), length(me));
     }
@@ -1974,7 +1974,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Reference<String<TValue, External<TConfig> > >::Type 
     value(String<TValue, External<TConfig> > &me, TPos pos)
     {
-//IOREV _todo_
+//IOREV
 	    return me[pos];
     }
 
@@ -1982,7 +1982,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline typename Reference<String<TValue, External<TConfig> > const>::Type 
     value(String<TValue, External<TConfig> > const &me, TPos pos)
     {
-//IOREV _todo_
+//IOREV
 	    return me[pos];
     }
 //____________________________________________________________________________
@@ -1993,7 +1993,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 				TValue const &Val_,
 				Tag<TExpand> const expand)
 	{
-//IOREV _todo_
+//IOREV
 		resize(me, me.data_size + 1, expand);
 		back(me) = Val_;
 	}
@@ -2005,7 +2005,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline void
     push(String<TValue, External<TConfig> > &me, TValue const &Val_)
     {
-//IOREV _todo_
+//IOREV
 		appendValue(me, Val_);
     }
 
@@ -2013,14 +2013,14 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline void
     push_back(String<TValue, External<TConfig> > &me, TValue const &Val_)
     {
-//IOREV _todo_
+//IOREV _nodoc_
 		appendValue(me, Val_);
     }
 
     template < typename TValue, typename TConfig >
 	inline void pop_back(String<TValue, External<TConfig> > &me)
     {
-//IOREV _todo_
+//IOREV _nodoc_
 		resize(me, me.data_size - 1);
 	}
 
@@ -2028,7 +2028,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline TValue &
 	front(String<TValue, External<TConfig> > &me)
     {
-//IOREV _todo_
+//IOREV
 		return me[0];
 	}
 
@@ -2036,7 +2036,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline TValue const &
 	front(String<TValue, External<TConfig> > const &me)
     {
-//IOREV _todo_
+//IOREV
 		return me[0];
 	}
 
@@ -2044,7 +2044,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline TValue &
 	back(String<TValue, External<TConfig> > &me)
     {
-//IOREV _todo_
+//IOREV
 		return me[me.data_size - 1];
 	}
 
@@ -2052,7 +2052,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	inline TValue const &
 	back(String<TValue, External<TConfig> > const &me)
     {
-//IOREV _todo_
+//IOREV
 		return me[me.data_size - 1];
 	}
 //____________________________________________________________________________
@@ -2063,7 +2063,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 				TSource const &source,
 				Tag<TExpand> const expand)
 	{
-//IOREV _todo_
+//IOREV doc says, resize() my invalidate iterators, therefore it_target might be bogus
 		typedef String<TValue, External<TConfig> >					TTarget;
         typedef typename Iterator<TSource const, Standard>::Type	ISource;
         typedef typename Iterator<TTarget, Standard>::Type			ITarget;
@@ -2085,7 +2085,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 				TSourceValue * source,
 				Tag<TExpand> const expand)
 	{
-//IOREV _todo_
+//IOREV doc says, resize() my invalidate iterators, therefore it_target might be bogus
 		typedef String<TValue, External<TConfig> >					TTarget;
         typedef typename Iterator<TSourceValue *, Standard>::Type	ISource;
         typedef typename Iterator<TTarget, Standard>::Type			ITarget;
@@ -2137,7 +2137,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		TSource const &source, 
 		Tag<TExpand> const) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef String<TValue, External<TConfig> >					TTarget;
         typedef typename Iterator<TSource const, Standard>::Type	ISource;
         typedef typename Iterator<TTarget, Standard>::Type			ITarget;
@@ -2161,7 +2161,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		TSourceValue * source,
 		Tag<TExpand> const) 
 	{
-//IOREV _todo_
+//IOREV
 		typedef String<TValue, External<TConfig> >					TTarget;
         typedef typename Iterator<TSourceValue *, Standard>::Type	ISource;
         typedef typename Iterator<TTarget, Standard>::Type			ITarget;
@@ -2182,7 +2182,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     inline void const * 
     id(String<TValue, External<TConfig> > const &me)
     {
-//IOREV _todo_
+//IOREV
         return &(*begin(me.pager));
     }
 
