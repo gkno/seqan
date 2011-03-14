@@ -44,6 +44,8 @@
  * Metafunctions supposedly moved hereto from file_cstyle.h are commented here awell
  * 
  * not fully understood how this works and what relation of the iterators is
+ *
+ * possibly broken according to holtgrew
  * 
  */
 

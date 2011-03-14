@@ -41,6 +41,8 @@
  * 
  * see file_filereader.h function not clear
  * could probably merged with file_filereader.h
+ *
+ * broken according to holtgrew
  * 
  */
 
