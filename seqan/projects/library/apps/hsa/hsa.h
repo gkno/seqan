@@ -7,28 +7,31 @@
 
 using namespace seqan;
 
-template<typename TSegmentSet, typename TAlignmentGraph, typename TMatch>
+template<typename TId, typename TInfix, typename TAlignmentGraph, typename TMatch>
 void
-_addParentMatches(TSegmentSet & segments, TAlignmentGraph & parentGraph, String<TMatch> & matches) {
-	typedef typename Size<TSegmentSet>::Type TSize;
-	typedef typename Position<typename Value<TSegmentSet>::Type>::Type TPosition;
+_addParentMatches(std::map<TId, TInfix> & segments, TAlignmentGraph & parentGraph, String<TMatch> & matches) {
+	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
+	typedef typename Position<TInfix>::Type TPosition;
+	typedef typename Id<TAlignmentGraph>::Type TGraphId;
 	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 
 	// iterate over sequences
-	for (TSize id = 0; id < length(segments)-1; ++id) {
+	TMapIterator itEnd = segments.end();
+	for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
 		//iterate over vertices of segment
-		TPosition pos = beginPosition(value(segments, id));
-		while (pos < endPosition(value(segments, id))) {
-			TVertexDescriptor source = findVertex(parentGraph, id, pos);
-			SEQAN_ASSERT_LEQ(pos+fragmentLength(parentGraph, source), endPosition(segments[id]));
+		TPosition pos = beginPosition(it->second);
+		while (pos < endPosition(it->second)) {
+			TGraphId i = stringIdToPosition(stringSet(parentGraph), it->first);
+			TVertexDescriptor source = findVertex(parentGraph, i, pos);
+			SEQAN_ASSERT_LEQ(pos+fragmentLength(parentGraph, source), endPosition(it->second));
 
 			// iterate over neighbors of vertex
 			TOutEdgeIterator edgeIt(parentGraph, source);
 			while (!atEnd(edgeIt)) {
 				TVertexDescriptor target = targetVertex(edgeIt);
-				TSize targetId = sequenceId(parentGraph, target);
-				if (targetId <= id) { // corresponding match was already appended
+				TGraphId targetId = sequenceId(parentGraph, target);
+				if (targetId <= i) { // corresponding match was already appended
 					++edgeIt;
 					continue;
 				}
@@ -36,7 +39,7 @@ _addParentMatches(TSegmentSet & segments, TAlignmentGraph & parentGraph, String<
 				// initialize a match
 				TMatch m;
 				resize(rows(m), 2);
-				setSource(row(m, 0), value(stringSet(parentGraph), id));
+				setSource(row(m, 0), value(stringSet(parentGraph), i));
 				setSource(row(m, 1), value(stringSet(parentGraph), targetId));
 
 				// determine begin and end position of source and target segments
@@ -53,7 +56,7 @@ _addParentMatches(TSegmentSet & segments, TAlignmentGraph & parentGraph, String<
 				setClippedEndPosition(row(m, 0), sourceEnd);
 				setClippedEndPosition(row(m, 1), targetEnd);
 				
-				std::cout << sourceBegin << ".." << sourceEnd << " , " << targetBegin << ".." << targetEnd << std::endl;
+				//std::cout << sourceBegin << ".." << sourceEnd << " , " << targetBegin << ".." << targetEnd << std::endl;
 				//std::cout << m;
 				
 				// append match
@@ -65,42 +68,51 @@ _addParentMatches(TSegmentSet & segments, TAlignmentGraph & parentGraph, String<
 	}
 }
 
-template<typename TSegmentSet, typename TAlignmentGraph>
+template<typename TId, typename TInfix, typename TAlignmentGraph>
 void
-_fixHigherLevelMatches(TSegmentSet & segments, TAlignmentGraph & parentGraph, TAlignmentGraph & g) {
-	typedef typename Size<TSegmentSet>::Type TSize;
-	typedef typename Position<typename Value<TSegmentSet>::Type>::Type TPosition;
+_fixHigherLevelMatches(std::map<TId, TInfix> & segments, TAlignmentGraph & parentGraph, TAlignmentGraph & g) {
+	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
+	typedef typename Size<TInfix>::Type TSize;
+	typedef typename Position<TInfix>::Type TPosition;
+	typedef typename Id<TAlignmentGraph>::Type TGraphId;
 	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TAlignmentGraph>::Type TEdgeDescriptor;
 
+	if (segments.size() == 0) return;
+
 	// determine the weight for edges to be fixed: the length of the longest sequence segment
 	TSize maxWeight = 0;
-	for (TSize id = 0; id < length(segments); ++id) {
-		if (maxWeight < length(value(segments, id))) {
-			maxWeight = length(value(segments, id));
+	TMapIterator itEnd = segments.end();
+	for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
+		if (maxWeight < length(it->second)) {
+			maxWeight = length(it->second);
 		}
 	}
 
 	// iterate over sequences
-	for (TSize id = 0; id < length(segments)-1; ++id) {
+	--itEnd;
+	for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
 		//iterate over vertices of segment in parentGraph
-		TPosition pos = beginPosition(value(segments, id));
-		while (pos < endPosition(value(segments, id))) {
-			TVertexDescriptor source = findVertex(parentGraph, id, pos);
-			SEQAN_ASSERT_LEQ(pos+fragmentLength(parentGraph, source), endPosition(segments[id]));
+		TPosition pos = beginPosition(it->second);
+		while (pos < endPosition(it->second)) {
+			TGraphId idParent = stringIdToStringSetId(stringSet(parentGraph), it->first);
+			TVertexDescriptor source = findVertex(parentGraph, idParent, pos);
+			SEQAN_ASSERT_LEQ(pos+fragmentLength(parentGraph, source), endPosition(it->second));
 
 			// iterate over neighbors of vertex
 			TOutEdgeIterator edgeIt(parentGraph, source);
 			while (!atEnd(edgeIt)) {
-				TSize targetId = sequenceId(parentGraph, targetVertex(edgeIt));
+				TGraphId targetIdParent = sequenceId(parentGraph, targetVertex(edgeIt));
+				TId targetId = id(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), targetIdParent)));
 				TPosition targetPos = fragmentBegin(parentGraph, targetVertex(edgeIt));
 				
 				// find corresponding edges in g
 				TSize len = 0;
 				do {
-					TVertexDescriptor newSource = findVertex(g, id, pos + len);
-					TVertexDescriptor newTarget = findVertex(g, targetId, targetPos + len);
+					TVertexDescriptor newSource = findVertex(g, stringIdToStringSetId(stringSet(g), it->first), pos + len);
+					TVertexDescriptor newTarget = findVertex(g, stringIdToStringSetId(stringSet(g), targetId), targetPos + len);
+
 					len += fragmentLength(g, newSource);
 
 					// find edge and assign maximal weight
@@ -116,22 +128,58 @@ _fixHigherLevelMatches(TSegmentSet & segments, TAlignmentGraph & parentGraph, TA
 	}
 }
 
-template<typename TSegmentSet, typename TOptions, typename TLevel, typename TTree>
+template<typename TSequenceSet, typename TId, typename TInfix, typename TOptions, typename TLevel, typename TTree>
 void
-_computeGuideTree(TSegmentSet & segments, TOptions & options, TLevel recursionLevel, TTree & guideTree) {
+_computeGuideTree(Graph<Alignment<TSequenceSet> > & g,
+				  std::map<TId, TInfix> & segments,
+				  TOptions & options,
+				  TLevel recursionLevel,
+				  TTree & guideTree) {
 	typedef String<double> TDistanceMatrix;
-	typedef typename Iterator<TDistanceMatrix, Standard>::Type TMatrixIterator;
-	typedef typename Value<typename Value<TSegmentSet>::Type>::Type TAlphabet;
+	typedef typename Iterator<TDistanceMatrix>::Type TMatrixIterator;
+	typedef typename Size<TSequenceSet>::Type TSize;
+
+	typedef typename VertexDescriptor<TTree>::Type TVertexDescriptor;
+	typedef typename Iterator<TTree, VertexIterator>::Type TVertexIterator;
+	
+	typedef typename Value<TInfix>::Type TAlphabet;
 	
 	if (options.globalGuideTree && recursionLevel > 0) {
 		guideTree = options.guideTree;
+
+		// reduce global tree to tree on stringSet(g)
+		for (TVertexIterator it(guideTree); !atEnd(it); ++it) {
+			if (!isLeaf(guideTree, *it) || segments.count(options.idMap[*it]) == 1) continue;
+			
+			// remove vertex from guideTree
+			TVertexDescriptor v = *it;
+			TVertexDescriptor parent_v = parentVertex(guideTree, v);
+			removeVertex(guideTree, v);
+
+			// connect sibling and grandparent of v by an edge or assign new root
+			SEQAN_ASSERT_EQ(outDegree(guideTree, parent_v), 1u);
+			typename Iterator<TTree, OutEdgeIterator>::Type edge(guideTree, parent_v);
+			TVertexDescriptor sibling_v = childVertex(guideTree, *edge);
+			if (!isRoot(guideTree, parent_v)) {
+				TVertexDescriptor grandparent_v = parentVertex(guideTree, parent_v);
+				addEdge(guideTree, sibling_v, grandparent_v);
+			} else {
+				assignRoot(guideTree, sibling_v);
+			}
+			removeVertex(guideTree, parent_v);
+		}
 	} else {
 		// compute distance matrix
 		TDistanceMatrix distanceMatrix;		
 		/*getDistanceMatrix(g, distanceMatrix, KmerDistance());*/
-		getKmerSimilarityMatrix(segments, distanceMatrix, 3, TAlphabet());
-	
-		// similarity to distance conversion
+		StringSet<TInfix> segs;
+		resize(segs, segments.size());
+		for (TSize i = 0; i < length(stringSet(g)); ++i) {
+			value(segs, positionToId(stringSet(g), i)) = segments[id(value(stringSet(g), i))];
+		}
+		getKmerSimilarityMatrix(segs, distanceMatrix, 3, TAlphabet());
+		
+		// Similarity to distance conversion
 		TMatrixIterator matIt = begin(distanceMatrix, Standard());
 		TMatrixIterator endMatIt = end(distanceMatrix, Standard());
 		for(;matIt != endMatIt;++matIt) 
@@ -139,8 +187,12 @@ _computeGuideTree(TSegmentSet & segments, TOptions & options, TLevel recursionLe
 
 		// compute tree from distance matrix
 		upgmaTree(distanceMatrix, guideTree);
-		std::cout << guideTree;
+
 		if (options.globalGuideTree) {
+			// compute map seqId -> graphSeqIds
+			for (TSize i = 0; i < length(stringSet(g)); ++i) {
+				options.idMap[positionToId(stringSet(g), i)] = id(value(stringSet(g), i));
+			}
 			options.guideTree = guideTree;
 		}
 	}
@@ -155,20 +207,22 @@ flushNodes(TAlignmentGraph & g) {
 	typedef typename Iterator<TAlignmentGraph,OutEdgeIterator>::Type TOutEdgeIterator;
 
 	typedef typename StringSetType<TAlignmentGraph>::Type TStringSet;
+	typedef typename Id<TAlignmentGraph>::Type TId;
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename Position<typename Value<TStringSet>::Type>::Type TPosition;
 
 	typedef Pair<TVertexDescriptor, TVertexDescriptor> TVertexPair;
-	typedef Pair<TSize, TPosition> TVertexInfo; // seqId, beginPos
-	typedef Triple<TVertexInfo, TVertexInfo, TCargo> TEdgeInfo; // seqId, seqId, cargo
+	typedef Pair<TId, TPosition> TVertexInfo; // seqId, beginPos
+	typedef Pair<TVertexInfo> TEdgeInfo; // source, target
 
 	for (TSize i = 0; i < length(stringSet(g)); ++i) {
+		TId id_i = positionToId(stringSet(g), i);
 		TPosition pos = beginPosition(value(stringSet(g), i));
-		TVertexDescriptor nextVertex = findVertex(g, i, pos);
+		TVertexDescriptor nextVertex = findVertex(g, id_i, pos);
 		pos += fragmentLength(g, nextVertex);
 		while (pos < endPosition(value(stringSet(g), i))) {
 			TVertexDescriptor vertex = nextVertex;
-			nextVertex = findVertex(g, i, pos);
+			nextVertex = findVertex(g, id_i, pos);
 			pos += fragmentLength(g, nextVertex);
 
 			if (outDegree(g, vertex) != outDegree(g, nextVertex)) continue;
@@ -192,9 +246,8 @@ flushNodes(TAlignmentGraph & g) {
 
 				// append vertex and edge information to lists
 				appendValue(vertices, TVertexPair(target, targetNext));
-				appendValue(edges, TEdgeInfo(TVertexInfo(i, fragmentBegin(g, vertex)),
-					                         TVertexInfo(sequenceId(g, target), fragmentBegin(g,target)),
-											 getCargo(*outEdgeIt) + getCargo(e)));
+				appendValue(edges, TEdgeInfo(TVertexInfo(id_i, fragmentBegin(g, vertex)),
+					                         TVertexInfo(sequenceId(g, target), fragmentBegin(g,target))));
 				++outEdgeIt;
 			}
 			if (!sameTargets) continue;
@@ -203,20 +256,17 @@ flushNodes(TAlignmentGraph & g) {
 			TSize numVertices = length(vertices);
 			for (TSize j = 1; j < numVertices; ++j) {
 				for (TSize k = j+1; k < numVertices; k++) {
-					TEdgeDescriptor edge = findEdge(g, vertices[j].i1, vertices[k].i1);
-					TEdgeDescriptor nextEdge = findEdge(g, vertices[j].i2, vertices[k].i2);
-					SEQAN_ASSERT(edge != 0);
-					SEQAN_ASSERT(nextEdge != 0);
+					SEQAN_ASSERT(findEdge(g, vertices[j].i1, vertices[k].i1) != 0);
+					SEQAN_ASSERT(findEdge(g, vertices[j].i2, vertices[k].i2) != 0);
 					appendValue(edges,
-						       TEdgeInfo(TVertexInfo(sequenceId(g, vertices[j].i1), fragmentBegin(g, vertices[j].i1)),
-						                 TVertexInfo(sequenceId(g, vertices[k].i1), fragmentBegin(g, vertices[k].i1)),
-										 getCargo(edge) + getCargo(nextEdge)));
+						        TEdgeInfo(TVertexInfo(sequenceId(g, vertices[j].i1), fragmentBegin(g, vertices[j].i1)),
+						                  TVertexInfo(sequenceId(g, vertices[k].i1), fragmentBegin(g, vertices[k].i1))));
 				}				
 			}
 
 			// remove two old vertices per sequence and add one new vertex
-			for (TSize j = 1; j < numVertices; ++j) {
-				TSize seqId = sequenceId(g, vertices[j].i1);
+			for (TSize j = 0; j < numVertices; ++j) {
+				TId seqId = sequenceId(g, vertices[j].i1);
 				TPosition beginPos = fragmentBegin(g, vertices[j].i1);
 				TPosition fragLen = fragmentLength(g, vertices[j].i1) + fragmentLength(g, vertices[j].i2);
 				removeVertex(g, vertices[j].i1);
@@ -225,91 +275,27 @@ flushNodes(TAlignmentGraph & g) {
 				if (i == j) nextVertex = v;
 			}
 
-			// add new edges with cargo
+			// add new edges
 			for (TSize j = 0; j < length(edges); ++j) {
 				TVertexDescriptor v = findVertex(g, edges[j].i1.i1, edges[j].i1.i2);
 				TVertexDescriptor w = findVertex(g, edges[j].i2.i1, edges[j].i2.i2);
-				addEdge(g, v, w, edges[j].i3);
+				addEdge(g, v, w);
 			}
 		}
 	}
 }
 
-//template<typename TAlignmentGraph>
-//void
-//flushNodes(TAlignmentGraph & g) {
-//	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
-//	typedef typename Iterator<TAlignmentGraph,OutEdgeIterator>::Type TOutEdgeIter;
-//    typedef typename StringSetType<TAlignmentGraph>::Type TStringSet;
-//    typedef typename Infix<typename Value<TStringSet>::Type>::Type TSegment;
-//	typedef typename Size<TSegment>::Type TSize;
-//	typedef String<TVertexDescriptor> TVertices;
-//
-//	for (TSize i = 0; i < length(stringSet(g)); i++) {
-//		TSegment seg = value(stringSet(g), i);
-//		
-//		TVertexDescriptor prev = findVertex(g, i, 0);
-//		TSize pos = fragmentLength(g, prev);
-//		while (pos < length(seg)) {
-//			TVertexDescriptor next = findVertex(g, i, pos);
-//			pos += fragmentLength(g, next);
-//			
-//			if (outDegree(g,prev) != outDegree(g, next)) {
-//			} else {
-//				TVertices targets;
-//
-//				TOutEdgeIter prevEdgeIt(g, prev);
-//				while (!atEnd(prevEdgeIt)) {
-//					TVertexDescriptor target = targetVertex(prevEdgeIt);
-//					appendValue(targets, target);
-//					TVertexDescriptor targetNext = findVertex(g, sequenceId(g, target),
-//						fragmentBegin(g, target) + fragmentLength(g, target));
-//					if (findEdge(g, next, targetNext) == 0) break;
-//					goNext(prevEdgeIt);
-//				}
-//				if (atEnd(prevEdgeIt)) {
-//					TVertices newTargets;
-//					for (TSize t = 0; t < length(targets); t++) {
-//						TVertexDescriptor target = value(targets, t);
-//						TVertexDescriptor targetNext = findVertex(g, sequenceId(g, target),
-//							fragmentBegin(g, target) + fragmentLength(g, target));
-//
-//						removeVertex(g, target);
-//						removeVertex(g, targetNext);
-//
-//						TVertexDescriptor newTarget = addVertex(g, sequenceId(g, target), fragmentBegin(g, target),
-//							fragmentLength(g,target) + fragmentLength(g, targetNext));
-//						appendValue(newTargets, newTarget);
-//					}
-//					removeVertex(g, prev);
-//					removeVertex(g, next);
-//
-//					TVertexDescriptor newVertex = addVertex(g, i, fragmentBegin(g, prev), 
-//						fragmentLength(g, prev) + fragmentLength(g, next));
-//
-//					for (TSize t = 0; t < length(newTargets); t++) {
-//						addEdge(g, newVertex, value(newTargets, t));
-//						for (TSize t2 = t + 1; t2 < length(newTargets); t2++) {
-//							addEdge(g, value(newTargets, t), value(newTargets ,t2));
-//						}
-//					}
-//
-//					next = newVertex;
-//				}
-//			}
-//			prev = next;
-//		}
-//	}
-//}
-
-template<typename TSegmentSet, typename TAlignmentGraph>
+template<typename TId, typename TInfix, typename TAlignmentGraph>
 void
-_segmentGraph(TSegmentSet & segments, TAlignmentGraph & g) {
-	typedef typename Size<TSegmentSet>::Type TSize;
+_segmentGraph(std::map<TId, TInfix> & segments, TAlignmentGraph & g) {
+	typedef typename Size<TInfix>::Type TSize;
+	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 
-	for (TSize i = 0; i < length(segments); ++i) {
-		typename Value<TSegmentSet>::Type seg = value(segments, i);
+	TMapIterator itEnd = segments.end();
+	for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
+		typename Id<TAlignmentGraph>::Type i = stringIdToPosition(stringSet(g), it->first);
+		TInfix seg = it->second;
 		TSize len = length(host(seg));
 
 		// additional vertex for unconsidered leading sequence part
@@ -340,14 +326,13 @@ _segmentGraph(TSegmentSet & segments, TAlignmentGraph & g) {
 }
 
 // segment alignment on gOut given a string of matches as segment input
-template<typename TSegmentSet, typename TOptions, typename TLevel, typename TAlignmentGraph>
-void segmentAlignment(TSegmentSet & segments,
+template<typename TId, typename TInfix, typename TOptions, typename TLevel, typename TAlignmentGraph>
+void segmentAlignment(std::map<TId, TInfix> & segments,
 					  TAlignmentGraph & parentGraph,
 					  TOptions & options,
 					  TLevel & recursionLevel,
 					  TAlignmentGraph & gOut) {
-	typedef typename Value<TSegmentSet>::Type TSegment;
-	typedef Align<typename Host<TSegment>::Type> TMatch;
+	typedef Align<typename Host<TInfix>::Type> TMatch;
 
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TAlignmentGraph>::Type TEdgeDescriptor;
@@ -357,9 +342,7 @@ void segmentAlignment(TSegmentSet & segments,
 	clearEdges(gOut);
 	clearVertices(gOut);
 
-	//for( unsigned i = 0; i < length(segments); ++i) {
-		std::cout << beginPosition(segments[0]) << " - " << endPosition(segments[0]) << std::endl;
-	//}
+	std::cout << beginPosition(segments.begin()->second) << " - " << endPosition(segments.begin()->second) << std::endl;
 
 	// generate local alignments
 	String<TMatch> matches;
@@ -383,13 +366,13 @@ void segmentAlignment(TSegmentSet & segments,
 	tripletLibraryExtension(g);
 
 	if (options.fixedHigherLevelMatches && recursionLevel != 0) {
-		// set the weight of matches from parentGraph to infinity
+		// set high weight on matches from parentGraph
 		_fixHigherLevelMatches(segments, parentGraph, g);
 	}
 
     // guide tree computation
 	typename TOptions::TTree guideTree;
-	_computeGuideTree(segments, options, recursionLevel, guideTree);
+	_computeGuideTree(g, segments, options, recursionLevel, guideTree);
 	
     // progressive alignment
 	progressiveAlignment(g, guideTree, gOut);
@@ -401,50 +384,62 @@ void segmentAlignment(TSegmentSet & segments,
 	_segmentGraph(segments, gOut);
 }
 
-template<typename TAlignmentGraph, typename TInfixSet, typename TPosition>
-String<TPosition>
-findUnalignedSegment(TAlignmentGraph & g, TInfixSet const & segments, String<TPosition> startPos, TInfixSet & unalignedSegments) {
-	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIter;
+template<typename TSequenceSet, typename TId, typename TInfix, typename TLength, typename TPosition>
+std::map<TId, TPosition>
+findUnalignedSegment(Graph<Alignment<TSequenceSet> > & g,
+					 std::map<TId, TInfix> & segments,
+					 TLength & minLength,
+					 std::map<TId, TPosition> & startPos,
+					 std::map<TId, TInfix> & unalignedSegments) {
+	typedef typename Id<Graph<Alignment<TSequenceSet> > >::Type TGraphId;
+	typedef typename VertexDescriptor<Graph<Alignment<TSequenceSet> > >::Type TVertexDescriptor;
+	typedef typename Iterator<Graph<Alignment<TSequenceSet> >, OutEdgeIterator>::Type TOutEdgeIter;
+	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
 
 	// find the next cut (in first sequence: seqId = 0)
-	TPosition seqId = 0;
-	TVertexDescriptor v = findVertex(g, seqId, value(startPos, seqId));
+	TId seqId = segments.begin()->first;
+	TGraphId i = stringIdToPosition(stringSet(g), seqId);
+	TVertexDescriptor v = findVertex(g, i, startPos[seqId]);
 	SEQAN_ASSERT_EQ(startPos[seqId], fragmentBegin(g, v));
-	TPosition endPos = value(startPos, seqId) + fragmentLength(g, v);
-	while (outDegree(g, v) < length(segments)-1 && endPos < endPosition(value(segments, seqId))) {
-		v = findVertex(g, seqId, endPos);
+	TPosition endPos = startPos[seqId] + fragmentLength(g, v);
+	while (outDegree(g, v) < length(segments)-1 && endPos < endPosition(segments[seqId])) {
+		v = findVertex(g, i, endPos);
 		SEQAN_ASSERT_EQ(endPos, fragmentBegin(g, v));
 		endPos += fragmentLength(g, v);
 	}
 
-	String<TPosition> nextStartPos;
-	resize(nextStartPos, length(startPos));
-	resize(unalignedSegments, length(startPos));
+	std::map<TId, TPosition> nextStartPos;
 
 	// ends of segments reached
 	if (outDegree(g, v) < length(segments)-1) {
-		for (TPosition i = 0; i < length(segments); ++i) {
-			value(unalignedSegments, i) = infix(host(segments[i]), startPos[i], endPosition(segments[i]));
-			value(nextStartPos, i) = endPosition(segments[i]);
+		TMapIterator itEnd = segments.end();
+		for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
+			if (startPos[it->first] + minLength < endPosition(it->second)) {
+				unalignedSegments[it->first] = infix(host(it->second), startPos[it->first], endPosition(it->second));
+			}
+			nextStartPos[it->first] = endPosition(it->second);
 		}
 		return nextStartPos;
 	}
 
 	// determine start and end position of unaligned segment in all sequences
 	TOutEdgeIter it(g, v);
-	value(unalignedSegments, seqId) = infix(host(segments[seqId]), startPos[seqId], endPos - fragmentLength(g, v));
-	value(nextStartPos, seqId) = endPos;
+	if (startPos[seqId] + minLength < endPos - fragmentLength(g, v)) {
+		unalignedSegments[seqId] = infix(host(segments[seqId]), startPos[seqId], endPos - fragmentLength(g, v));
+	}
+	nextStartPos[seqId] = endPos;
 	while (!atEnd(it)) {
 		TVertexDescriptor u = targetVertex(it);
 		SEQAN_ASSERT_NEQ(u, v);
 
-		TPosition id = sequenceId(g, u);
-		TPosition start = value(startPos, id);
+		TId seq2Id = id(value(stringSet(g), idToPosition(stringSet(g), sequenceId(g, u))));
+		TPosition start = startPos[seq2Id];
 		TPosition end = fragmentBegin(g, u);
 		
-		value(unalignedSegments, id) = infix(host(segments[id]), start, end);
-		value(nextStartPos, id) = end + fragmentLength(g, u);
+		if (start + minLength < end) {
+			unalignedSegments[seq2Id] = infix(host(segments[seq2Id]), start, end);
+		}
+		nextStartPos[seq2Id] = end + fragmentLength(g, u);
 
 		goNext(it);
 	}
@@ -452,23 +447,27 @@ findUnalignedSegment(TAlignmentGraph & g, TInfixSet const & segments, String<TPo
 	return nextStartPos;
 }
 
-template<typename TDepSeqSet, typename TSegmentSet>
+template<typename TDepSeqSet, typename TId, typename TInfix>
 void
 integrateAlignmentGraph(Graph<Alignment<TDepSeqSet> > & parentGraph,
 						Graph<Alignment<TDepSeqSet> > & graph,
-						TSegmentSet & segments) {
+						std::map<TId, TInfix> & segments) {
 	typedef Graph<Alignment<TDepSeqSet> > TAlignmentGraph;
+	typedef typename Id<TAlignmentGraph>::Type TGraphId;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TAlignmentGraph, VertexIterator>::Type TVertexIterator;
 	typedef typename Iterator<TAlignmentGraph, EdgeIterator>::Type TEdgeIterator;
 
-	typedef typename Size<TDepSeqSet>::Type TSize;
+	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
+	typedef typename Size<TInfix>::Type TSize;
 	typedef typename Position<TDepSeqSet>::Type TPosition;
 
 	// remove vertices on segments from parentGraph
-	for (TSize i = 0; i < length(segments); ++i) {
-		TPosition pos = beginPosition(segments[i]);
-		while (pos < endPosition(segments[i])) {
+	TMapIterator itEnd = segments.end();
+	for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
+		TPosition pos = beginPosition(it->second);
+		while (pos < endPosition(it->second)) {
+			TGraphId i = stringIdToPosition(stringSet(parentGraph), it->first);
 			TVertexDescriptor v = findVertex(parentGraph, i, pos);
 			pos += fragmentLength(parentGraph, v);
 			removeVertex(parentGraph, v);
@@ -478,7 +477,8 @@ integrateAlignmentGraph(Graph<Alignment<TDepSeqSet> > & parentGraph,
 	// copy vertices from graph to parentGraph
 	TVertexIterator vertexIt(graph);
 	while (!atEnd(vertexIt)) {
-		TPosition seqId = sequenceId(graph, *vertexIt);
+		TGraphId i = sequenceId(graph, *vertexIt);
+		TId seqId = id(value(stringSet(graph), idToPosition(stringSet(graph), i)));
 		TPosition pos = fragmentBegin(graph, *vertexIt);
 		TSize len = fragmentLength(graph, *vertexIt);
 
@@ -489,7 +489,7 @@ integrateAlignmentGraph(Graph<Alignment<TDepSeqSet> > & parentGraph,
 			SEQAN_ASSERT_EQ(pos, 0u);
 			SEQAN_ASSERT_EQ(pos+len, beginPosition(segments[seqId]));
 		} else {
-			addVertex(parentGraph, seqId, pos, len);
+			addVertex(parentGraph, stringIdToStringSetId(stringSet(parentGraph), seqId), pos, len);
 		}
 		++vertexIt;
 	}
@@ -500,51 +500,62 @@ integrateAlignmentGraph(Graph<Alignment<TDepSeqSet> > & parentGraph,
 		TVertexDescriptor source = sourceVertex(graph, *edgeIt);
 		TVertexDescriptor target = targetVertex(graph, *edgeIt);
 
-		TPosition sourceSeqId = sequenceId(graph, source);
-		TPosition targetSeqId = sequenceId(graph, target);
+		TGraphId sourceSeqId = sequenceId(graph, source);
+		TId sourceId = id(value(stringSet(graph), idToPosition(stringSet(graph), sourceSeqId)));
+		TGraphId targetSeqId = sequenceId(graph, target);
+		TId targetId = id(value(stringSet(graph), idToPosition(stringSet(graph), targetSeqId)));
 
 		TPosition sourcePos = fragmentBegin(graph, source);
 		TPosition targetPos = fragmentBegin(graph, target);
 
-		source = findVertex(parentGraph, sourceSeqId, sourcePos);
-		target = findVertex(parentGraph, targetSeqId, targetPos);
+		source = findVertex(parentGraph, stringIdToStringSetId(stringSet(parentGraph), sourceId), sourcePos);
+		target = findVertex(parentGraph, stringIdToStringSetId(stringSet(parentGraph), targetId), targetPos);
 
-		addEdge(parentGraph, source, target, getCargo(*edgeIt));
+		addEdge(parentGraph, source, target);
 		++edgeIt;
 	}
 }
 
 // computes segmentalignment and recurses for decreasing matchMinLengths on unaligned subgraphs
-template<typename TSegmentSet, typename TOptions, typename TLevel, typename TAlignmentGraph>
+template<typename TId, typename TInfix, typename TSequenceSet, typename TOptions, typename TLevel>
 void
-recurseSegmentAlignment(TSegmentSet segments,
-						TAlignmentGraph & parentGraph,
+recurseSegmentAlignment(std::map<TId, TInfix> & segments,
+						Graph<Alignment<TSequenceSet> > & parentGraph,
 						TOptions & options,
 						TLevel recursionLevel,
-						TAlignmentGraph & g) {
-    typedef typename Value<TSegmentSet>::Type TInfix;
+						Graph<Alignment<TSequenceSet> > & g) {
+	typedef typename Size<TInfix>::Type TSize;
     typedef typename Position<TInfix>::Type TPosition;
+	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
 
 	segmentAlignment(segments, parentGraph, options, recursionLevel, g);
-	//if (recursionLevel == 0) std::cout << g;
 
 	if(options.recursions <= recursionLevel + 1) {
 		return;
 	}
 
-	String<TPosition> pos;
-	for (TPosition i = 0; i < length(segments); ++i) {
-		appendValue(pos, beginPosition(value(segments, i)));
+	std::map<TId, TPosition> pos;
+	TMapIterator itEnd = segments.end();
+	for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
+		pos[it->first] = beginPosition(it->second);
 	}
 
-	while (pos[0] < endPosition(value(segments, 0))) {
-		TSegmentSet unalignedSegments;
-		pos = findUnalignedSegment(g, segments, pos, unalignedSegments);
+	while(pos.begin()->second < endPosition(segments.begin()->second)) {
+		std::map<TId, TInfix> unalignedSegments;
+		TSize minLength = options.initialMinLength - options.deltaMinLength * recursionLevel;
+		pos = findUnalignedSegment(g, segments, minLength, pos, unalignedSegments);
+		if (unalignedSegments.size() < 2) continue;
 
+		TSequenceSet seqs;
+		TMapIterator uEnd = unalignedSegments.end();
+		for (TMapIterator uIt = unalignedSegments.begin(); uIt != uEnd; ++uIt) {
+			appendValue(seqs, host(uIt->second));
+		}
+		Graph<Alignment<TSequenceSet> > subgraph(seqs);
+		
 		//for( int space = 0; space < recursionLevel; ++space) std::cout << ".";
 		//std::cout << beginPosition(unalignedSegments[0]) << " - " << endPosition(unalignedSegments[0]) << std::endl;
 
-		TAlignmentGraph subgraph(stringSet(g));
 		recurseSegmentAlignment(unalignedSegments, g, options, recursionLevel+1, subgraph);
 		integrateAlignmentGraph(g, subgraph, unalignedSegments);
 	}

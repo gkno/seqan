@@ -333,6 +333,17 @@ _setParser(TParser & parser) {
 int main (int argc, const char *argv[]) {
 	// arguments: "Z:\GenomeData\NC_001405_short.fa" "Z:\GenomeData\NC_001460_short.fa" or
 	//            "Z:\GenomeData\testSeq1.fa" "Z:\GenomeData\testSeq2.fa"
+	typedef String<Dna5> TSequence;
+	typedef StringSet<TSequence> TSequenceSet;
+
+	typedef const void * TId;
+    typedef Infix<TSequence>::Type TInfix;
+	typedef std::map<TId, TInfix> TInfixMap;
+
+	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
+	typedef Graph<Alignment<TDepSequenceSet> > TAlignmentGraph;
+
+	typedef Size<TSequence>::Type TSize;
 
 	// command line parsing
 	CommandLineParser parser("stellar");
@@ -344,7 +355,7 @@ int main (int argc, const char *argv[]) {
 		return 1;
 	}
 
-	MyOptions options = MyOptions();
+	MyOptions<TSequence> options = MyOptions<TSequence>();
 	if (!_parseOptions(parser, options)) {
 		return 1;
 	}
@@ -353,43 +364,30 @@ int main (int argc, const char *argv[]) {
 	_title(parser, std::cout);
 	std::cout << std::endl;
 
-	typedef String<Dna5> TSequence;
-    typedef Infix<TSequence>::Type TInfix;
-	typedef StringSet<TSequence> TSequenceSet;
-	typedef StringSet<TSequence, Dependent<> > TDepSequenceSet;
-	typedef StringSet<TInfix> TInfixSet;
-
-	typedef Size<TSequence>::Type TSize;
-
-	TInfixSet segments;
+	TInfixMap segments;
 	TSequenceSet seqs;
+	resize(seqs, length(options.fileNames));
 	TSize totalSeqLength = 0;
 
+	// read sequences
 	for (unsigned i = 0; i < length(options.fileNames); ++i) {
 		std::fstream fstream;
 		fstream.open(toCString(options.fileNames[i]), std::ios_base::in | std::ios_base::binary);
-		TSequence seq;
-		if (fstream.is_open()) read(fstream, seq, Fasta());
+		if (fstream.is_open()) read(fstream, seqs[i], Fasta());
 		else return 1;
 		fstream.close();
 
-		appendValue(seqs, seq);
-		appendValue(segments, infix(seqs[length(seqs)-1], 0, length(seq)));
-		totalSeqLength += length(seq);
-		//cout << "length of sequence " << length(segments)-1 << ": " << length( seq ) << endl;
+		SEQAN_ASSERT_EQ(segments.count(id(seqs[i])), 0u);
+		segments[id(seqs[i])] = infix(seqs[i], 0, length(seqs[i]));
+		totalSeqLength += length(seqs[i]);
 	}
-	//cout << endl;
 
-	typedef Graph<Alignment<TDepSequenceSet> > TAlignmentGraph;
-	TAlignmentGraph g(seqs);
-
-    
     SEQAN_PROTIMESTART(timeRecSegmAlign);
 	unsigned iterations = 1;
-
+	
+	TAlignmentGraph g(seqs);
 	for (unsigned t = 0; t < iterations; t++) {
-		clearVertices(g);
-		clearEdges(g);
+		clearEdges(g); clearVertices(g);
 		recurseSegmentAlignment(segments, g, options, 0u, g);
 	}
 

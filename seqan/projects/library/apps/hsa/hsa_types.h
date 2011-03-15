@@ -6,8 +6,10 @@
 
 using namespace seqan;
 
+template<typename TSequence>
 struct MyOptions {
 	typedef Graph<Tree<double> > TTree;
+	typedef std::map<typename Id<Graph<Alignment<TSequence> > >::Type, void const *> TIdMap;
 
 	CharString sequenceFiles;
 	String<CharString> fileNames;
@@ -24,7 +26,8 @@ struct MyOptions {
 	// If set to false, a separate guide tree will be computed in
 	//   each recursion step.
 	bool globalGuideTree;
-	TTree guideTree;
+	TTree guideTree; // guide tree from level 0  (on full sequences)
+	TIdMap idMap; // map from string ids to stringset ids of level 0 guide tree
 	
 	// Matches from higher recursion levels will be carried to lower
 	//   levels. Should be set to true if these matches shall obtain
