@@ -33,6 +33,22 @@
 #ifndef SEQAN_HEADER_FILE_RAW_H
 #define SEQAN_HEADER_FILE_RAW_H
 
+
+/* IOREV
+ * _tested_
+ * _doc_
+ *
+ *
+ * has some documentation, but could be better
+ * apperently tested by tests/file/test_file.h, used in some other places
+ *
+ * unclear why static members are used and functions not overloaded directly
+ *
+ * raw is defined as default behaviour for read and write, is this desired
+ * or should read and write maybe auto-detect fileformat?
+ * 
+ */
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -48,8 +64,8 @@ that is the file cannot store multiple records.
 */
 
 struct TagRaw_;
-//IOREV _todo_
-typedef Tag<TagRaw_> const Raw; //IOREV _todo_
+//IOREV
+typedef Tag<TagRaw_> const Raw; //IOREV
 
 
 
@@ -59,14 +75,14 @@ typedef Tag<TagRaw_> const Raw; //IOREV _todo_
 
 template <typename TFile, typename TData, typename TTag>
 struct ReadRaw_;
-//IOREV _todo_
+//IOREV
 
 //____________________________________________________________________________
 
 template <typename TFile, typename TData>
 struct ReadRaw_<TFile, TData, True>
 {
-//IOREV _todo_
+//IOREV
 	template <typename TSize>
 	inline static void
 	read_(TFile & file,
@@ -119,7 +135,7 @@ SEQAN_CHECKPOINT
 template <typename TFile, typename TData>
 struct ReadRaw_<TFile, TData, False>
 {
-//IOREV _todo_
+//IOREV _notinlined_
 	static void
 	read_(TFile & file,
 		TData & data)
@@ -166,7 +182,7 @@ read(TFile & file,
 	 TData & data,
 	 Raw)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	ReadRaw_<TFile, TData, typename IsTellAndSeekStream_<TFile>::Type>::read_(file, data);
 }
@@ -180,7 +196,7 @@ read(TFile & file,
 	 TSize limit,
 	 Raw)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	ReadRaw_<TFile, TData, typename IsTellAndSeekStream_<TFile>::Type>::read_(file, data, limit);
 }
@@ -196,7 +212,7 @@ readID(TFile & /*file*/,
 	   TString & id,
 	   Raw)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	clear(id);
 }
@@ -211,7 +227,7 @@ readMeta(TFile & /*file*/,
 		 TMeta & meta,
 		 Raw)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	clear(meta);
 }
@@ -226,7 +242,7 @@ void
 goNext(TFile & file,
 	   Raw)
 {
-//IOREV _todo_
+//IOREV  _notinlined_ _nodoc_ needs some documented defined behaviour
 SEQAN_CHECKPOINT
   (void) file;  // When compiled without assertions.
 	SEQAN_ASSERT(!_streamEOF(file));
@@ -247,7 +263,7 @@ write(TFile & file,
 	  TData const & data,
 	  Raw)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_streamWrite(file, data);
 }
@@ -261,7 +277,7 @@ write(TFile & file,
 	  TString const &,
 	  Raw)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_streamWrite(file, data);
 }
@@ -276,7 +292,7 @@ write(TFile & file,
 	  TMeta const &,
 	  Raw)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_streamWrite(file, data);
 }
@@ -291,7 +307,7 @@ void
 read(TFile & file,
 	 TData & data)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 	read(file, data, Raw());
 }
 
@@ -301,7 +317,7 @@ read(TFile & file,
 	 TData & data,
 	 TSize limit)
 {
-//IOREV _todo_
+//IOREV  _notinlined_
 SEQAN_CHECKPOINT
 	read(file, data, limit, Raw());
 }
@@ -313,7 +329,7 @@ void
 write(TFile & file,
 	  TData & data)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	write(file, data, "", Raw());
 }
@@ -322,7 +338,7 @@ void
 write(TFile & file,
 	  TData const & data)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	write(file, data, "", Raw());
 }

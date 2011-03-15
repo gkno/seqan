@@ -46,9 +46,9 @@
  * tags are used diretly e.g.
  *      read(TFile, TData, TMeta, Fasta)
  * and not
- *      read(TFile, TData, TMeta, FileFormat<TFile, TData, TMeta, fasta>)
+ *      read(TFile, TData, TMeta, FileFormat<TFile, TData, TMeta, Fasta>)
  *
- * the global wrappers in this file also break down this behaviours
+ * the global wrappers in this file also break down to this behaviours
  *
  * however it is not evident what the purpose of the FileFormat class is
  * altogether and especially the virtual members

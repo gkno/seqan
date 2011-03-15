@@ -33,6 +33,24 @@
 #ifndef SEQAN_HEADER_FILE_EMBL_H
 #define SEQAN_HEADER_FILE_EMBL_H
 
+/* IOREV
+ * _tested_
+ * _nodoc_
+ *
+ * tested in tests/file/test_file.h
+ * tag mentionen in doc, but no further documentation, no link to spec
+ *
+ * should be broken, because based on filereaderiterator which is broken
+ * according to holtgrew.
+ *
+ * need more documentation on spec to decide whether functions are correct
+ * -> can an emble file actually contain multiple records?
+ * 
+ * although filereaderiterator is used, read collects all records
+ * -> batchreading
+ *
+ */
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -45,8 +63,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagEmbl_;
-//IOREV _todo_
-typedef Tag<TagEmbl_> const Embl; //IOREV _todo_
+//IOREV
+typedef Tag<TagEmbl_> const Embl; //IOREV
 
 
 
@@ -58,7 +76,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it, bool skip_meta)
 {
-//IOREV _todo_
+//IOREV _bug_ i am not convinced this works. current position is never reset
 SEQAN_CHECKPOINT
 	if (skip_meta)
 	{
@@ -120,7 +138,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
     SEQAN_CHECKPOINT;
     goBegin(it, true);
 }
@@ -130,7 +148,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	do
 	{
@@ -176,7 +194,7 @@ read(TFile & file,
 	 TData & data,
 	 Embl)
 {
-//IOREV _todo_
+//IOREV _batchreading_
 SEQAN_CHECKPOINT
 	Iter<TFile, FileReader<Embl> > it(file);
 
@@ -195,7 +213,7 @@ read(TFile & file,
 	 TSize limit,
 	 Embl)
 {
-//IOREV _todo_
+//IOREV _batchreading_
 SEQAN_CHECKPOINT
 	typename Size<TData>::Type siz = length(data);
 	Iter<TFile, FileReader<Embl> > it(file);
@@ -219,7 +237,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 Embl)
 {
-//IOREV _todo_
+//IOREV _recordreading_ weird! why does read() get all records, but readMeta only the meta of the first?
 SEQAN_CHECKPOINT
 	typedef typename Value<TMeta>::Type TValue;
 
@@ -275,7 +293,7 @@ readLineType(TFile & file,
 			 Embl)
 
 {
-//IOREV _todo_
+//IOREV _recordreading_ weird! why does read() get all records, but readLineType only the current/upcoming key-description?
 SEQAN_CHECKPOINT
 
 	//this function is meant to be used for two letter codes only 
@@ -333,7 +351,7 @@ readLineType(String<TValue,TSpec> & meta,
 			 Embl)
 
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 
 	//this function is meant to be used for two letter codes only 
@@ -402,7 +420,7 @@ readFeature(TString & str,
 			Embl)
 
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 
 	typedef typename Iterator<TString,Standard>::Type TIterator;
@@ -458,7 +476,7 @@ inline void
 goNext(TFile & file,
 	   Embl)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	typedef typename Value<TFile>::Type TValue;
 
@@ -497,7 +515,7 @@ write(TFile & file,
 	  TData & data,
 	  Embl)
 {
-//IOREV _todo_
+//IOREV _recordreading_ weird. see above; for-loops would make code more readable
 SEQAN_CHECKPOINT
 	enum
 	{
@@ -564,7 +582,7 @@ write(TFile & file,
 	  TMeta & meta,
 	  Embl)
 {
-//IOREV _todo_
+//IOREV _recordreading_
 SEQAN_CHECKPOINT
 	write(file, meta);
 	write(file, data, Embl());
