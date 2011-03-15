@@ -33,6 +33,58 @@
 #ifndef SEQAN_HEADER_FILE_FORMAT_H
 #define SEQAN_HEADER_FILE_FORMAT_H
 
+/* IOREV
+ * _tested_
+ * _doc_
+ *
+ *
+ * well documented
+ * apperently tested by tests/file/test_file.h
+ *
+ * 
+ * AFAICT this not really used widely, as the FileFormat specialization
+ * tags are used diretly e.g.
+ *      read(TFile, TData, TMeta, Fasta)
+ * and not
+ *      read(TFile, TData, TMeta, FileFormat<TFile, TData, TMeta, fasta>)
+ *
+ * the global wrappers in this file also break down this behaviours
+ *
+ * however it is not evident what the purpose of the FileFormat class is
+ * altogether and especially the virtual members
+ * (except being return value for guessFileFormat, which could aswell return
+ * the tag)
+ *
+ *------------------
+ *
+ * contains all sorts of stream-IO helper functions that should go someplace
+ * else.
+ *
+ * For all of these: Should we really look at c passed as argument, how do
+ * we know, c is actually current character?
+ *
+ * For the iterators the current mechanism is error-prone:
+ *
+ * foobar (TInput & input, TIterator it)
+ * {
+ *     Iterator<TInput, Standard()> it_end = end(input);
+ *     while (it != it_end)
+ *          ...
+ *
+ * }
+ *
+ * this does not guarantee, that it and it_end are the same type, since
+ * it maybe non-standard
+ *
+ * also some functions set it_end = end(input) - 1; which seems to be related
+ * to change of atEnd behaviour http://trac.mi.fu-berlin.de/seqan/wiki/IoRevision
+ *
+ * IMO all these functions should be changed to not construct a 2nd iterator
+ * but use atEnd() directly
+ *      
+ */
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -73,7 +125,7 @@ template <
 struct FileFormat:
 	public FileFormat<TFile, TData, TMeta, void>
 {
-//IOREV _todo_
+//IOREV
 public:
 	typedef typename Size<TData>::Type TSize;
 
@@ -144,7 +196,7 @@ SEQAN_CHECKPOINT
 template <typename TFile, typename TData, typename TMeta>
 struct FileFormat<TFile, TData, TMeta, void>
 {
-//IOREV _todo_
+//IOREV
 public:
 	typedef typename Size<TData>::Type TSize;
 
@@ -186,7 +238,7 @@ template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void *
 formatID(FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return file_format.formatID_();
 }
@@ -217,7 +269,7 @@ read(TFile & file,
 	 TData & data,
 	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	file_format.read_(file, data);
 }
@@ -229,7 +281,7 @@ read(TFile & file,
 	 TSize limit,
 	 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	file_format.read_(file, data, limit);
 }
@@ -255,7 +307,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	file_format.readMeta_(file, meta);
 }
@@ -273,7 +325,7 @@ inline void
 goNext(TFile & file,
 	   FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	file_format.goNext_(file);
 }
@@ -291,7 +343,7 @@ inline void
 length(TFile & file,
 	   FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	file_format.length_(file);
 }
@@ -319,7 +371,7 @@ write(TFile & file,
 	  TData & data,
 	  FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	file_format.write_(file, data);
 }
@@ -330,7 +382,7 @@ write(TFile & file,
 	  TMeta & meta,
 	  FileFormat<TFile, TData, TMeta, TFormat> const & file_format)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	file_format.write_(file, data, meta);
 }
@@ -347,7 +399,7 @@ inline bool
 operator == (FileFormat<TFileLeft, TDataLeft, TMetaLeft, TFormatLeft> const & left, 
 			 FileFormat<TFileRight, TDataRight, TMetaRight, TFormatRight> const & right)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return formatID(left) == formatID(right);
 }
@@ -357,7 +409,7 @@ inline bool
 operator == (FileFormat<TFile, TData, TMeta, TFormat> const & left, 
 			 Tag<TFormat2> const)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return formatID(left) == ClassIdentifier_<Tag<TFormat2> const>::getID();
 }
@@ -367,7 +419,7 @@ inline bool
 operator == (Tag<TFormat2> const,
 			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return ClassIdentifier_<Tag<TFormat2> const>::getID() == formatID(right);
 }
@@ -379,7 +431,7 @@ inline bool
 operator != (FileFormat<TFileLeft, TDataLeft, TMetaLeft, TFormatLeft> const & left, 
 			 FileFormat<TFileRight, TDataRight, TMetaRight, TFormatRight> const & right)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return formatID(left) != formatID(right);
 }
@@ -389,7 +441,7 @@ inline bool
 operator != (FileFormat<TFile, TData, TMeta, TFormat> const & left, 
 			 Tag<TFormat2> const)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return formatID(left) != ClassIdentifier_<Tag<TFormat2> const>::getID();
 }
@@ -399,7 +451,7 @@ inline bool
 operator != (Tag<TFormat2> const,
 			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	return ClassIdentifier_<Tag<TFormat2> const>::getID() != formatID(right);
 }
@@ -466,7 +518,7 @@ _streamAppendLine(TFile & file,
 				   TString & str,
 				   TChar & c)
 {
-//IOREV _todo_
+//IOREV _nodoc_ wrong place
 	while (true)
 	{
 		if (_streamEOF(file)) break;
@@ -499,7 +551,7 @@ _streamCountLine(TFile & file,
 				  TChar & c)
 
 {
-//IOREV _todo_
+//IOREV _nodoc_ _notused_ wrong place
 	while (true)
 	{
 		if (_streamEOF(file)) break;
@@ -531,7 +583,7 @@ _streamSkipLine(TFile & file,
 				 TChar & c)
 
 {
-//IOREV _todo_
+//IOREV _nodoc_ wrong place
 	typename Size<TFile>::Type count = 0;
 	while (true)
 	{
@@ -571,7 +623,7 @@ template<typename TFile, typename TChar>
 inline void 
 _streamSkipWhitespace(TFile& file, TChar& c)
 {
-//IOREV _todo_
+//IOREV _nodoc_ wrong place; according to POSIX \v\f\r\n are also whitespace
 	if ((c!=' ') && (c != '\t')) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -586,7 +638,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _streamReadWord(TFile & file, TChar& c)
 {
-//IOREV _todo_
+//IOREV _nodoc_ wrong place
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -603,7 +655,7 @@ template<typename TChar>
 inline bool
 _streamIsLetter(TChar const c)
 {
-//IOREV _todo_
+//IOREV _nodoc_ wrong place; what about return ( ((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')) [better performance] replace with _parseIsLetter()
 	return ((c == 'a') || (c == 'b') || (c == 'c') || (c == 'd') || (c == 'e') || 
 			(c == 'f') || (c == 'g') || (c == 'h') || (c == 'i') || (c == 'j') ||
 			(c == 'k') || (c == 'l') || (c == 'm') || (c == 'n') || (c == 'o') || 
@@ -628,7 +680,7 @@ _stringSkipLine(TString & str,
 				 TIter & it)
 
 {
-//IOREV _todo_
+//IOREV _nodoc_ _bug_ wrong place; possible request for *it but it could be it_end in l 672; iterator akwardness, see head of file
 	typename Size<TString>::Type count = 0;
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard());
 	while (true)
@@ -665,7 +717,7 @@ _stringAppendLine(TString1 & str,
 				   TString2 & a_str,
 				   TIter & it)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _bug_ wrong place; possible request for *it but it could be it_end in l 708; iterator akwardness, see head of file
 	typename Iterator<TString1,Standard>::Type end_it = end(str,Standard());
 	while (true)
 	{
@@ -697,7 +749,7 @@ template<typename TString, typename TIter>
 inline void 
 _stringSkipWhitespace(TString& str, TIter& it)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _bug_ wrong place; according to POSIX \v\f\r\n are also whitespace; iterator akwardness, see head of file
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
 	while (it != end_it) {
 		if ((*it!=' ') && (*it != '\t')) break;
@@ -711,7 +763,7 @@ template<typename TString, typename TIter>
 inline int
 _stringReadNumber(TString & str, TIter& it)
 {
-//IOREV _todo_
+//IOREV _nodoc_ wrong place; iterator akwardness, see head of file
 	// Read number
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
 	String<char> numstr(getValue(it));

@@ -862,7 +862,7 @@ SEQAN_CHECKPOINT
     inline bool 
     close(String<TValue, MMap<TConfig> > &me) 
 	{
-//IOREV shouldn't we cancel in any case, even if not temp?
+//IOREV shouldn't we cancel/flush in any case, even if not temp?
 		if (me.file) 
 		{
 			// close associated file
