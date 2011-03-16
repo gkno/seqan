@@ -39,10 +39,13 @@
  * _nodoc_
  * 
  * 
- * see file_filereader.h function not clear
- * could probably merged with file_filereader.h
+ * relation to file_filereader.h not totally clear
  *
- * broken according to holtgrew
+ * broken according to holtgrew, but used by many file_format implementations
+ * that supposedly work
+ *
+ * not yet fully understood how this works or is supposed to
+ *
  * 
  */
 

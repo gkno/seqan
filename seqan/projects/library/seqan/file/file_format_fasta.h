@@ -33,6 +33,17 @@
 #ifndef SEQAN_HEADER_FILE_FASTA_H
 #define SEQAN_HEADER_FILE_FASTA_H
 
+/* IOREV
+ * _tested_
+ * _nodoc_
+ *
+ * tested in tests/file/test_file.h
+ * tag mentionen in doc, but no further documentation, no link to spec
+ *
+ */
+
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -46,8 +57,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagFasta_;
-//IOREV _todo_
-typedef Tag<TagFasta_> const Fasta; //IOREV _todo_
+//IOREV
+typedef Tag<TagFasta_> const Fasta; //IOREV
 
 //////////////////////////////////////////////////////////////////////////////
 // Filereader
@@ -57,7 +68,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it, bool skip_meta)
 {
-//IOREV _todo_
+//IOREV _postponed_ due to unclear state of filereaderiterator
 	if (_streamEOF(host(it)))
 	{
 		it.data_eof = true;
@@ -95,7 +106,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
 	goBegin(it, true);
 }
 
@@ -104,7 +115,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV _postponed_ due to unclear state of filereaderiterator
 /*
 	if (_streamEOF(host(it)))
 	{
@@ -160,7 +171,7 @@ _fastaScanLine(TFile & file,
 				 TSize & count_valid,
 				 TSize & count_all)
 {
-//IOREV _todo_
+//IOREV _nodoc_ has doc but in wrong format
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT_NOT(_streamEOF(file));
 
@@ -196,7 +207,7 @@ template <typename TFile, typename TSize>
 inline void
 _readNCharsFromFile(TFile & file, TSize count)
 {
-//IOREV _todo_
+//IOREV shouldn't this check for EOF? Shouldn't it be renamed to sth like skipNChars, since it doesn't save them anywhere?
 SEQAN_CHECKPOINT
 	for (TSize i = 0; i < count; ++i)
 	{
@@ -217,7 +228,7 @@ read(TFile & file,
 	 TSize limit,
 	 Fasta)
 {
-//IOREV _todo_
+//IOREV _recordreading_ _notinlined_ see comment by holtgrew, signature is wrong for most file formats specializations
 SEQAN_CHECKPOINT
 
 	SEQAN_ASSERT_NOT(_streamEOF(file));
@@ -315,7 +326,7 @@ read(TFile & file,
 	 TData & data,
 	 Fasta tag)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	typedef typename Size<TData>::Type TSize;
 	read(file, data, maxValue<TSize>(), tag);
@@ -334,7 +345,7 @@ readID(TFile & file,
 	   TString & id,
 	   Fasta)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _notinlined_ name ambiguous with readId-memfunc
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT_NOT(_streamEOF(file));
 
@@ -382,7 +393,7 @@ readShortID(TFile & file,
 	   TString & id,
 	   Fasta)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _notinlined_ better to use _stream* or _parse* calls to get first word
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT_NOT(_streamEOF(file));
 
@@ -441,7 +452,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 Fasta)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _notinlined_ code documentation wrong
 SEQAN_CHECKPOINT
 	readID(file, meta, Fasta());
 }
@@ -456,7 +467,7 @@ void
 goNext(TFile & file,
 	   Fasta)
 {
-//IOREV _todo_
+//IOREV _postponed_ _notinlined_ due to unclear state of filereaderiterator
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT_NOT(_streamEOF(file));
 
@@ -511,7 +522,7 @@ _writeImpl(TFile & file,
 			TString & id,
 			Fasta)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_streamPut(file, '>');
 	_streamWrite(file, id);
@@ -546,7 +557,7 @@ write(TFile & file,
 	  TData & data,
 	  Fasta)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, "", Fasta());
 }
@@ -560,7 +571,7 @@ write(TFile & file,
 	  TString & id,
 	  Fasta)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, id, Fasta());
 }
@@ -574,7 +585,7 @@ write(TFile & file,
 	  TString & id,
 	  Fasta)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, id, Fasta());
 
@@ -590,7 +601,7 @@ write(TFile & file,
 	  TMeta &,
 	  Fasta)
 {
-//IOREV _todo_
+//IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_writeImpl(file, data, id, Fasta());
 }

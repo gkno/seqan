@@ -38,7 +38,7 @@
  * _nodoc_
  *
  * tested in tests/file/test_file.h
- * tag mentionen in doc, but no further documentation, no link to spec
+ * tag mentioned in doc, but no further documentation, no link to spec
  *
  * should be broken, because based on filereaderiterator which is broken
  * according to holtgrew.

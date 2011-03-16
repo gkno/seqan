@@ -518,7 +518,7 @@ _streamAppendLine(TFile & file,
 				   TString & str,
 				   TChar & c)
 {
-//IOREV _nodoc_ wrong place
+//IOREV _nodoc_ _hasCRef_ wrong place
 	while (true)
 	{
 		if (_streamEOF(file)) break;
@@ -551,7 +551,7 @@ _streamCountLine(TFile & file,
 				  TChar & c)
 
 {
-//IOREV _nodoc_ _notused_ wrong place
+//IOREV _nodoc_ _notused_ _hasCRef_ wrong place
 	while (true)
 	{
 		if (_streamEOF(file)) break;
@@ -583,7 +583,7 @@ _streamSkipLine(TFile & file,
 				 TChar & c)
 
 {
-//IOREV _nodoc_ wrong place
+//IOREV _nodoc_ _hasCRef_ wrong place
 	typename Size<TFile>::Type count = 0;
 	while (true)
 	{
@@ -623,7 +623,7 @@ template<typename TFile, typename TChar>
 inline void 
 _streamSkipWhitespace(TFile& file, TChar& c)
 {
-//IOREV _nodoc_ wrong place; according to POSIX \v\f\r\n are also whitespace
+//IOREV _nodoc_ _hasCRef_ wrong place; according to POSIX \v\f\r\n are also whitespace
 	if ((c!=' ') && (c != '\t')) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -638,7 +638,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _streamReadWord(TFile & file, TChar& c)
 {
-//IOREV _nodoc_ wrong place
+//IOREV _nodoc_ _hasCRef_ wrong place
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {
