@@ -83,13 +83,16 @@
 .Macro.SEQAN_ENABLE_TESTING
 ..cat:Testing & Debugging
 ..summary:Indicates whether testing is enabled.
-..signature:SEQAN_ENABLE_TESTING
-..remarks:When enabled (set to 1), testing is enabled. In this case, the code expects to be called from within a test defined by @Macro.SEQAN_DEFINE_TEST@ and called through @Macro.SEQAN_CALL_TEST@. This makes failing assertions raise exceptions instead of call $abort()$ and enables checkpoints.
+..signature:SEQAN_ENABLE_DEBUG
+..remarks:When enabled (set to 1), testing is enabled. This means the macros for the tests (@Macro.SEQAN_BEGIN_TESTSUITE@, @Macro.SEQAN_DEFINE_TEST@, @Macro.SEQAN_CALL_TEST@, and @Macro.SEQAN_END_TESTSUITE@) will be enabled. This makes failing assertions raise exceptions instead of call $abort()$ and enables checkpoints.
 ..remarks:By default, this is set to 0.
+..remarks:If @Macro.SEQAN_ENABLE_CHECKPOINTS@ is not defined before including $<seqan/basic.h>$, then @Macro.SEQAN_ENABLE_CHECKPOINTS@ will be set to the value of @Macro.SEQAN_ENABLE_TESTING@ (after the default initialization to 0).
 ..remarks:If you want to change this value, you have to define this value before including any SeqAn header.
-..remarks:If set to 1 then @Macro.SEQAN_ENABLE_TESTING@ is force-set to 1 as well.
-..see:Macro.SEQAN_ENABLE_TESTING
+..remarks:If set to 1 then @Macro.SEQAN_ENABLE_TESTING@ is force-set to 0 as well.
+..see:Macro.SEQAN_ENABLE_DEBUG
+..see:Macro.SEQAN_ENABLE_CHECKPOINTS
  */
+
 
 // Set default for SEQAN_ENABLE_TESTING.
 #ifndef SEQAN_ENABLE_TESTING
@@ -105,7 +108,8 @@
 ..remarks:By default, this is set to 0.
 ..remarks:If you want to change this value, you have to define this value before including any SeqAn header.
 ..remarks:Force-enabled if @Macro.SEQAN_ENABLE_TESTING@ is set to 1.
-..see:Macro.SEQAN_ENABLE_DEBUG
+..see:Macro.SEQAN_ENABLE_TESTING
+..see:Macro.SEQAN_ENABLE_CHECKPOINTS
  */
 
 // Set default for SEQAN_ENABLE_DEBUG.
@@ -118,6 +122,33 @@
 #undef SEQAN_ENABLE_DEBUG
 #define SEQAN_ENABLE_DEBUG 1
 #endif  // #if SEQAN_ENABLE_TESTING
+
+/**
+.Macro.SEQAN_ENABLE_CHECKPOINTS
+..cat:Testing & Debugging
+..summary:Indicates whether checkpoints are enabled.
+..signature:SEQAN_ENABLE_CHECKPOINTS
+..remarks:When enabled (set to 1), checkpoints are enabled. This means the $SEQAN_CHECKPOINT$ macros are expanded to actual code and not to nothing.
+..remarks:By default, this is set to $SEQAN_ENABLE_TESTING$.
+..remarks:Checkpoints can come at large increases of running time in your tests. Disable them when your test run too slow.
+..remarks:If you want to change this value, you have to define this value before including any SeqAn header.
+..example.text:Disable checkpoints in a program.
+..example.code:
+// Disable SeqAn checkpoints in this program.
+#define SEQAN_ENABLE_CHECKPOINTS 0
+
+// Any SeqAn headers or headers including SeqAn headers have to come AFTER the
+// definition of SEQAN_ENABLE_CHECKPOINT above.
+#include <seqan/base.h>
+
+int main(int argc, char const ** argv)
+{
+    // Any call to SeqAn functions will NOT log any checkpoints.
+    return 0;
+}
+..see:Macro.SEQAN_ENABLE_DEBUG
+..see:Macro.SEQAN_ENABLE_TESTING
+ */
 
 // Allow disabling checkpoints independent of testing.
 #ifndef SEQAN_ENABLE_CHECKPOINTS
@@ -1164,18 +1195,40 @@ const char *tempFileName() {
 ..cat:Testing & Debugging
 ..signature:SEQAN_DEFINE_TEST(test_name)
 ..param.test_name:The name of the test.
-..remarks:This macro expands to 
+..remarks:This macro expands to the definition of a $void$ function with $SEQAN_TEST_ + test_name$ as its name.
 ..example.code:
 SEQAN_DEFINE_TEST(test_name)
 {
    SEQAN_ASSERT_LT(0, 3);
 }
 ..see:Macro.SEQAN_CALL_TEST
+..see:Macro.SEQAN_BEGIN_TESTSUITE
+..see:Macro.SEQAN_END_TESTSUITE
  */
 
 // This macro expands to function header for one test.
 #define SEQAN_DEFINE_TEST(test_name)                    \
     template <bool speed_up_dummy_to_prevent_compilation_of_unused_tests_> void SEQAN_TEST_ ## test_name ()
+
+/**
+.Macro.SEQAN_BEGIN_TESTSUITE
+..summary:Expand to a test suite beginning.
+..cat:Testing & Debugging
+..signature:SEQAN_BEGIN_TESTSUITE(name)
+..param.name:The name of the test suite.
+..remarks:This macro expands to a $main()$ function and some initialization code that sets up the test system.
+..example.code:
+#include <seqan/basic.h>
+
+SEQAN_BEGIN_TESTSUITE(test_foo)
+{
+    SEQAN_CALL_TEST(test_foo_my_test);
+}
+SEQAN_END_TESTSUITE
+..see:Macro.SEQAN_DEFINE_TEST
+..see:Macro.SEQAN_CALL_TEST
+..see:Macro.SEQAN_END_TESTSUITE
+ */
 
 #if SEQAN_ENABLE_TESTING
 // This macro expands to startup code for a test file.
@@ -1184,6 +1237,24 @@ SEQAN_DEFINE_TEST(test_name)
     (void) argc;                                                \
     ::seqan::ClassTest::beginTestSuite(#suite_name, argv[0]);
 
+/**
+.Macro.SEQAN_END_TESTSUITE
+..summary:Expand to a test suite ending.
+..cat:Testing & Debugging
+..signature:SEQAN_END_TESTSUITE
+..remarks:This macro expands to finalization code for a test suite.
+..example.code:
+#include <seqan/basic.h>
+
+SEQAN_BEGIN_TESTSUITE(test_foo)
+{
+    SEQAN_CALL_TEST(test_foo_my_test);
+}
+SEQAN_END_TESTSUITE
+..see:Macro.SEQAN_DEFINE_TEST
+..see:Macro.SEQAN_CALL_TEST
+..see:Macro.SEQAN_BEGIN_TESTSUITE
+ */
 
 // This macro expands to shutdown code for a test file.
 #define SEQAN_END_TESTSUITE                     \
@@ -1196,10 +1267,13 @@ SEQAN_DEFINE_TEST(test_name)
 ..cat:Testing & Debugging
 ..signature:SEQAN_CALL_TEST(test_name)
 ..param.test_name:The name of the test.
-..remarks:This expects the test to be defined with @Macro.SEQAN_DEFINE_TEST@. This macro will expand to code that calls the code inside a try/catch block.
+..remarks:This expects the test to be defined with @Macro.SEQAN_DEFINE_TEST@. This macro will expand to code that calls the code inside a try/catch block. Use this macro within a test suite, only.
 ..example.code:
+// Within a test suite.
 SEQAN_CALL_TEST(test_name);
 ..see:Macro.SEQAN_DEFINE_TEST
+..see:Macro.SEQAN_BEGIN_TESTSUITE
+..see:Macro.SEQAN_END_TESTSUITE
  */
 
 // This macro expands to code to call a given test.
