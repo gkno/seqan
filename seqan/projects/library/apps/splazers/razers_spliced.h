@@ -18,12 +18,14 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
+
 #ifndef SEQAN_HEADER_RAZERS_SPLICED_H
 #define SEQAN_HEADER_RAZERS_SPLICED_H
 
 //#define RAZERS_DEBUG
 //#define RAZERS_DEBUG_LIGHT
 
+#include <seqan/store.h>
 #include <seqan/align.h>
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
@@ -145,6 +147,7 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 	TSize d_m2 = (int) options.maxSuffixErrors;
 	TSize numReads = length(readSet);
 	genomeLen = options.specifiedGenomeLen;
+	if(options.anchored) genomeLen = options.maxGap;
 	TSize readLen = (numReads > 0) ? length(readSet[0]) : 0;
 	TSize numErrors = static_cast<int>(readLen * options.errorRate);
 	
@@ -177,6 +180,164 @@ struct LongestSuffix{};
 struct OrientationReverse{};
 struct OrientationForward{};
 
+
+//////////////////////////////////////////////////////////////////////////////
+// Load anchored reads from SAM file
+template <typename TReadSet, typename TNameSet,typename TReadRegions, typename TRazerSOptions>
+bool loadReadsSam(
+	TReadSet &reads, 
+	TNameSet &fastaIDs, 
+	TReadRegions &readRegions,
+	const char *fileName, 
+	TRazerSOptions &options)
+{
+	typedef typename Value<TReadRegions>::Type	TRegion;
+	typedef typename Value<TReadSet>::Type		TRead;
+	typedef typename Value<TNameSet>::Type		TReadName;
+	typedef typename Value<TRegion,2>::Type		TContigPos;
+
+	bool countN = !(options.matchN || options.outputFormat == 1 );
+	if (!empty(CharString(options.outputUnmapped))) countN = false;
+
+	::std::ifstream file;
+	file.open(fileName, ::std::ios_base::in | ::std::ios_base::binary);
+	if (!file.is_open()) return false;
+
+	options.maxReadRegionsEnd = 0;
+	options.minReadRegionsStart = MaxValue<unsigned>::VALUE;
+	int i = 0;
+	int kickoutcount = 0;
+	char c = _streamGet(file);
+	while ( !_streamEOF(file))
+	{
+        
+        // read fields of alignments line        
+        _parseSkipWhitespace(file, c);
+
+		// Read the query name.  The letters until the first
+		// whitespace will be read into qname.  Then, we skip until we
+		// hit the first tab character.
+        TReadName qname;
+        _parseReadSamIdentifier(file, qname, c);
+        _parseSkipUntilChar(file, '\t', c);
+
+		// read the flag
+        int flag;
+        flag = _parseReadNumber(file, c);
+		if(flag != 85 && flag != 101 && flag != 149 && flag != 165)
+		{
+			_parseSkipLine(file,c); 
+			continue;
+		}
+        _parseSkipWhitespace(file, c);
+		bool reverse = (flag & (1 << 4)) == (1 << 4); // if reverse this read is expected to match downstream of its mate
+
+		// Read reference name.  Same behaviour as for query name:  Read up to
+        // the first whitespace character and skip to next tab char.
+        String<char> chrname;
+		_parseReadSamIdentifier(file, chrname, c);
+        //need gnameToIdMap !!
+		_parseSkipUntilChar(file, '\t', c);
+
+		// read begin position
+        TContigPos beginPos;
+        beginPos = _parseReadNumber(file, c);
+        --beginPos; // Sam stores positions starting at 1 the fragment store starting at 0
+		_parseSkipWhitespace(file, c);
+
+        // read map quality
+        _parseReadNumber(file, c);
+        _parseSkipWhitespace(file, c);
+
+		// read CIGAR
+        String<CigarElement<> > cigar;
+        _parseReadCigar(file, cigar, c);
+        _parseSkipWhitespace(file, c);
+        
+        // read mate reference name
+		CharString tmp;
+        _parseReadSamIdentifier(file, tmp, c);
+        _parseSkipWhitespace(file, c);
+
+		// read mate position
+        _parseReadNumber(file, c);
+        _parseSkipWhitespace(file, c);
+
+		// read iSize
+        _parseReadNumber(file, c);
+        _parseSkipWhitespace(file, c);
+
+		// read in sequence
+        String<Dna5Q> readSeq;
+        _parseReadDnaSeq(file, readSeq, c);
+        SEQAN_ASSERT_GT(length(readSeq), 0u);
+		int readLength = (int)length(readSeq);
+        _parseSkipWhitespace(file, c);
+		if (countN)
+		{
+			int count = 0;
+			int cutoffCount = (int)(options.errorRate * readLength);
+			int j = 0;
+			for (; j < readLength; ++j)
+				if (getValue(readSeq, j) == 'N')
+					if (++count > cutoffCount)
+					{
+						++kickoutcount;
+						break;
+					}
+			if(j<readLength) continue; // read is skipped because of low quality
+		}
+
+		// and associated qualities
+        _parseReadSeqQual(file, readSeq, c);
+
+	
+		// now store the information
+		if (options.readNaming == 0
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+			|| options.fastaIdQual
+#endif
+			)  //15578976
+			appendValue(fastaIDs, qname);	// append read name Fasta id
+		
+		
+		// read in Sam tags
+       	_parseSkipLine(file,c); 
+		
+//		if (options.trimLength > 0 && readLength > (unsigned)options.trimLength)
+//			resize(readSeq, options.trimLength);
+		if((int)length(readSeq) > options.maxReadLength) 
+ 			options.maxReadLength = length(readSeq);
+
+		appendValue(reads, readSeq, Generous());
+
+		appendValue(readRegions,TRegion(0,0,0));
+        if (reverse)
+		{
+//			readRegions[i].i2 = _max((int)beginPos + readLength,(int)beginPos+readLength+options.libraryLength-options.libraryError-options.maxGap);
+//			readRegions[i].i3 = (signed)beginPos+options.libraryLength+options.libraryError+options.maxGap+2*readLength;
+			// library
+//			readRegions[i].i2 = (signed)beginPos+options.libraryLength - readLength; +options.libraryError+options.maxGap+2*readLength;
+			readRegions[i].i2 = _max((int)beginPos + readLength,(int)beginPos+readLength+options.libraryLength-options.libraryError);//-options.maxGap);
+			readRegions[i].i3 = (signed)beginPos+options.libraryLength+2*readLength+options.libraryError+options.maxGap;
+		}
+		else  // read should map upstream of mapped mate
+		{
+//			readRegions[i].i3 = _min((int)beginPos,(int)beginPos-options.libraryLength+options.libraryError+options.maxGap);
+//			readRegions[i].i2 = _max((int)0,(int)beginPos-options.libraryLength-options.libraryError-options.maxGap-readLength);
+			readRegions[i].i3 = _min((int)beginPos,(int)beginPos-options.libraryLength+options.libraryError);//+options.maxGap);
+			readRegions[i].i2 = _max((int)0,(int)beginPos-options.libraryLength-readLength-options.libraryError-options.maxGap);
+		}
+//		readRegions[i].i1 = 0; //currently just ment for one chr at a time...
+		if(readRegions[i].i3 > options.maxReadRegionsEnd) options.maxReadRegionsEnd = readRegions[i].i3;
+		if(readRegions[i].i2 < options.minReadRegionsStart) options.minReadRegionsStart = readRegions[i].i2;
+		++i;
+    }
+	if (options._debugLevel > 1 && kickoutcount > 0) 
+		::std::cerr << "Ignoring " << kickoutcount << " low quality reads.\n";
+	return (i > 0);
+
+}
 
 
 
@@ -1613,6 +1774,7 @@ int mapSplicedReads(
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet_ & 		readSet,
+	TReadRegions &		readRegions,
 	TCounts &		cnts,
 	RazerSOptions<TSpec> &	options,
 	TShapeL const &		shapeL,
@@ -1748,12 +1910,12 @@ int mapSplicedReads(
 			gnoToFileMap.insert(::std::make_pair<unsigned,::std::pair< ::std::string,unsigned> >(gseqNo,::std::make_pair< ::std::string,unsigned>(genomeName,gseqNoWithinFile)));
 			
 			if (options.forward)
-				mapSplicedReads(matches, genome, gseqNo, readSet, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
+				mapSplicedReads(matches, genome, gseqNo, readSet, readRegions, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
 	
 			if (options.reverse)
 			{
 				reverseComplement(genome);
-				mapSplicedReads(matches, genome, gseqNo, readSet, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
+				mapSplicedReads(matches, genome, gseqNo, readSet, readRegions, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;
 
@@ -1794,6 +1956,7 @@ void mapSplicedReads(
 	TGenome &genome,				// genome ...
 	unsigned gseqNo,				// ... and its sequence number
 	TOriReadSet &readSet,			// reads
+	TReadRegions & readRegions,
 	Pattern<TReadIndexL, Swift<TSwiftSpec> > &swiftPatternL,	// left index
 	Pattern<TReadIndexR, Swift<TSwiftSpec> > &swiftPatternR,	// right index
 	TVerifier &forwardPatternsL,
@@ -1812,7 +1975,8 @@ void mapSplicedReads(
 	typedef typename Infix<TGenome>::Type			TGenomeInf;
 	
 	// Prefix-Suffix filtration
-	typedef Finder<TGenome, Swift<TSwiftSpec> >		TSwiftFinderL;
+	//typedef Finder<TGenome, Swift<TSwiftSpec> >		TSwiftFinderL;
+	typedef Finder<TGenomeInf, Swift<TSwiftSpec> >		TSwiftFinderL;
 	typedef Finder<TGenomeInf, Swift<TSwiftSpec> >	TSwiftFinderR;
 	typedef Pattern<TReadIndexL, Swift<TSwiftSpec> >	TSwiftPatternL;
 	typedef Pattern<TReadIndexR, Swift<TSwiftSpec> >	TSwiftPatternR;
@@ -1840,15 +2004,32 @@ void mapSplicedReads(
 		return;
 	
 	
-	TSignedGPos maxDistance = options.maxGap + (int)options.maxReadLength;
-	TSignedGPos minDistance = options.minGap;// + 2*options.minMatchLen ;
+	TSignedGPos maxDistance = options.maxGap;
+//	raus:TSignedGPos maxDistance = options.maxGap + (int)options.maxReadLength;
+	//TSignedGPos minDistance = options.minGap;// + 2*options.minMatchLen ;
+	TSignedGPos minDistance = 2*options.minMatchLen ;
+	if(!options.hammingOnly) 
+		minDistance -= (options.maxPrefixErrors + options.maxSuffixErrors);
 
 	// exit if contig is shorter than minDistance
 	if (length(genome) <= (unsigned)2*options.minMatchLen)
 		return;
 	
-	TGenomeInf genomeInf = infix(genome, 0, length(genome));
-	TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
+	TGPos scanBegin = 0;
+	TGPos scanEnd = length(genome);
+	if(!empty(readRegions))
+	{
+		if(options._debugLevel > 1) 
+		{
+			std::cout << "MaxRegionEndPos=" << options.maxReadRegionsEnd << std::endl;
+			std::cout << "MinRegionStartPos=" << options.minReadRegionsStart << std::endl;
+		}
+		scanBegin = options.minReadRegionsStart;
+		scanEnd = options.maxReadRegionsEnd;
+	}
+	TGenomeInf genomeInf = infix(genome, scanBegin, scanEnd);
+	//TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
+	TSwiftFinderL swiftFinderL(genomeInf, options.repeatLength, 1);
 	TSwiftFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
 	
 	TDequeue fifo;						// stores potential prefix matches
@@ -1863,6 +2044,7 @@ void mapSplicedReads(
 	resize(lastRightMatch, length(host(swiftPatternL)), Pair<TGPos>(0,0), Exact());
 	
 	TSize gLength = length(genome);
+	if(orientation == 'R') scanBegin = gLength - scanEnd;
 	TMatch mR = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	TDequeueValue fL(-1, mR);	
 	fL.i2.gseqNo = gseqNo;
@@ -1873,18 +2055,36 @@ void mapSplicedReads(
 	double maxErrorRateL = (double)options.maxPrefixErrors/options.minMatchLen;
 	double maxErrorRateR = (double)options.maxSuffixErrors/options.minMatchLen;
 
+	double totalTime = sysTime();
+	double totalTimeCombine = 0.0;
+	double totalTimeLeftVerify = 0.0;
+	double totalTimeLeftFilter = 0.0;
+	double totalTimeRightVerify = 0.0;
+
 	Pair<TGPos,TGPos> lastLeftMatch(0,0);
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, maxErrorRateR)) 
 	{
 		unsigned rseqNo = swiftPatternR.curSeqNo;
-		TGPos rEndPos = endPosition(swiftFinderR);	
-		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
-	
+		TGPos rEndPos = endPosition(swiftFinderR) + scanBegin;	
+		TGPos rBeginPos = beginPosition(swiftFinderR) + scanBegin;
+	//	std::cout << "rEnd=" << rEndPos << "\t";	
+		//TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
+		TRead const &read = readSet[rseqNo];
+		TSignedGPos extensionOffset = length(read)-2*options.minMatchLen;
+		if(!options.hammingOnly)
+			extensionOffset += static_cast<TGPos>(floor(options.errorRate*length(read)));
+		// passed all valid regions
+		if(!empty(readRegions) && (TSignedGPos)rBeginPos > options.maxReadRegionsEnd)
+			break;
+		if(!empty(readRegions) &&
+			((TSignedGPos)rEndPos < (TSignedGPos)readRegions[rseqNo].i2 || (TSignedGPos)rBeginPos > (TSignedGPos)readRegions[rseqNo].i3)) //parallelogram must lie within possible mapping region
+			continue;
+				
 		// Check this again... 
 		// remove out-of-window prefixes from fifo
-		while (!empty(fifo) && front(fifo).i2.gBegin + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
-		//while (!empty(fifo) && front(fifo).i2.gEnd + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
+		while(!empty(fifo) &&  front(fifo).i2.gEnd + extensionOffset + maxDistance < (TSignedGPos) rBeginPos)
+		//raus:while (!empty(fifo) && front(fifo).i2.gBegin + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
 			popFront(fifo);
 			++firstNo;
@@ -1892,12 +2092,22 @@ void mapSplicedReads(
 		
 		// Check this again... 
 		// add within-window prefixes to fifo
-		while (empty(fifo) || back(fifo).i2.gBegin + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
+		double vTimeBegin1 = sysTime();
+		while (empty(fifo) || back(fifo).i2.gBegin + minDistance <= (TSignedGPos)rEndPos )
 		{
 			if (find(swiftFinderL, swiftPatternL, maxErrorRateL)) 
 			{
 				gPair = positionRange(swiftFinderL);
-				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
+				gPair.i1 += scanBegin;
+				gPair.i2 += scanBegin;
+			//	std::cout << "lBegin=" << gPair.i1 << "\t";	
+				if(!empty(readRegions) && (TSignedGPos)gPair.i1 > options.maxReadRegionsEnd)
+					break;
+				if ((TSignedGPos)gPair.i2 + maxDistance + extensionOffset >= (TSignedGPos)rEndPos
+					&& (empty(readRegions) ||
+					((TSignedGPos)gPair.i2 > (TSignedGPos)readRegions[swiftPatternL.curSeqNo].i2 
+					&& (TSignedGPos)gPair.i1 < (TSignedGPos)readRegions[swiftPatternL.curSeqNo].i3))) //parallelogram must lie within possible mapping region
+				//raus:if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
 				{
 					// link in
 					fL.i1 = lastPotMatchNo[swiftPatternL.curSeqNo]; //link to last previous potential match
@@ -1915,28 +2125,78 @@ void mapSplicedReads(
 			else
 				break;
 		}
+		double vTimeEnd1 = sysTime();
+		totalTimeLeftFilter += (vTimeEnd1 - vTimeBegin1);
+		
 		
 		TDequeueIterator it;
 		__int64 lastPositive = (__int64)-1;
 
-		TRead const &read = readSet[rseqNo];
 		TSize counter = 0;
 		bool noMatchRight = false;
 		bool notYetVerifiedRight = true;
 		lastLeftMatch.i1 = 0;
 		lastLeftMatch.i2 = 0;
 		
-		// walk through all potential prefix matches, verify if not verfied already, mark as positive or negative
+		// walk through all potential prefix matches
+		// if suffix is positive, verify prefixes (if not verfied already), mark as positive or negative
 		for (__int64 i = lastPotMatchNo[rseqNo]; firstNo <= i; i = (*it).i1)
 		{
+			//CHECK HIER raus do suffix match verification only once 
+			if(notYetVerifiedRight)
+			{
+				notYetVerifiedRight = false;
+				TGPos minBeginPos = beginPosition(infix(swiftFinderR, genomeInf));
+				if((int)minBeginPos - extensionOffset > 0)
+					minBeginPos = minBeginPos - extensionOffset;
+				else minBeginPos = 0;
+				double vTimeBegin = sysTime();
+				if (!matchVerify(mR, 
+					infix(genome,minBeginPos,endPosition(infix(swiftFinderR, genomeInf))),
+					rseqNo, 
+					readSet,//readSetR, 
+					forwardPatternsR,
+					options, 
+					TSwiftSpec(),
+					LongestSuffix()))
+				{	
+					double vTimeEnd = sysTime();
+					totalTimeRightVerify += (vTimeEnd - vTimeBegin);
+					noMatchRight = true;
+//					continue;
+				}
+				else 
+				{
+					double vTimeEnd = sysTime();
+					totalTimeRightVerify += (vTimeEnd - vTimeBegin);
+					if (lastRightMatch[rseqNo].i1 == (TGPos)mR.gBegin && lastRightMatch[rseqNo].i2 == (TGPos)mR.gEnd)
+						noMatchRight = true;
+					lastRightMatch[rseqNo].i1 = mR.gBegin;
+					lastRightMatch[rseqNo].i2 = mR.gEnd;
+				}
+			}
+
+
+
+		//	std::cout << "i=" <<i << "\t";
 			it = &value(fifo, i - firstNo);
-//			if ((*it).i2.gBegin + minDistance > (TSignedGPos)(rEndPos + doubleParWidth + 2*options.minMatchLen))
-//				continue;
+			//CHECK HIER raus noMatchRight --> überspringen korrekt?
+			if (noMatchRight || (*it).i2.gBegin + minDistance > (TSignedGPos)rEndPos) 
+			{ 	
+				if (lastPositive == (__int64)-1)
+					lastPotMatchNo[rseqNo] = i;
+				else
+					value(fifo, lastPositive - firstNo).i1 = i;
+				lastPositive = i;
+				continue;
+			}
+
 			// verify left mate (equal seqNo), if not done already
 			if ((*it).i2.rseqNo & NOT_VERIFIED)
 			{
-				TGPos maxEndPos = (*it).i2.gEnd + length(read)-2*options.minMatchLen + static_cast<TGPos>(floor(options.errorRate*length(read)));
+				TGPos maxEndPos = (*it).i2.gEnd + extensionOffset;
 				if(maxEndPos > length(genome)) maxEndPos = length(genome);
+				double vTimeBegin = sysTime();
 				if (matchVerify( (*it).i2,
 						infix(genome, (*it).i2.gBegin, maxEndPos),
 						rseqNo, 
@@ -1947,6 +2207,8 @@ void mapSplicedReads(
 						LongestPrefix()) && 
 						!(lastLeftMatch.i1 == (TGPos)(*it).i2.gBegin && lastLeftMatch.i2 == (TGPos)(*it).i2.gEnd ))
 				{
+					double vTimeEnd = sysTime();
+					totalTimeLeftVerify += (vTimeEnd - vTimeBegin);
 					(*it).i2.rseqNo &= ~NOT_VERIFIED; // has been verified positively // unset first bit
 					lastLeftMatch.i1 = (*it).i2.gBegin;
 					lastLeftMatch.i2 = (*it).i2.gEnd;
@@ -1959,11 +2221,14 @@ void mapSplicedReads(
 				} 
 				else
 				{
+					double vTimeEnd = sysTime();
+					totalTimeLeftVerify += (vTimeEnd - vTimeBegin);
 					(*it).i2.rseqNo = ~NOT_VERIFIED;		// has been verified negatively
 				}
+				
 			}
 			
-			// verify suffix, if prefix match was found
+			// prefix match was found
 			if ((*it).i2.rseqNo == rseqNo)
 			{
 				lastLeftMatch.i1 = (*it).i2.gBegin;
@@ -1973,14 +2238,16 @@ void mapSplicedReads(
 				if (lastPositive == (__int64)-1 || i < lastPositive)
 					lastPositive = i;
 
-				// first prefix match --> do suffix match verification
+/*				// CHECK HIER rein
+				// do suffix match verification 
 				if(notYetVerifiedRight)
 				{
 					notYetVerifiedRight = false;
 					TGPos minBeginPos = beginPosition(infix(swiftFinderR, genomeInf));
-					if((int)minBeginPos - length(read)+2*options.minMatchLen - floor(options.errorRate*length(read)) > 0)
-						minBeginPos = minBeginPos - length(read)+2*options.minMatchLen - static_cast<int>(floor(options.errorRate*length(read)));
+					if((int)minBeginPos - extensionOffset > 0)
+						minBeginPos = minBeginPos - extensionOffset;
 					else minBeginPos = 0;
+					double vTimeBegin = sysTime();
 					if (!matchVerify(mR, 
 						infix(genome,minBeginPos,endPosition(infix(swiftFinderR, genomeInf))),
 						rseqNo, 
@@ -1989,19 +2256,23 @@ void mapSplicedReads(
 						options, 
 						TSwiftSpec(),
 						LongestSuffix()))
-					{
+					{	
+						double vTimeEnd = sysTime();
+						totalTimeRightVerify += (vTimeEnd - vTimeBegin);
 						noMatchRight = true;
 						continue;
 					}
 					else 
 					{
+						double vTimeEnd = sysTime();
+						totalTimeRightVerify += (vTimeEnd - vTimeBegin);
 						if (lastRightMatch[rseqNo].i1 == (TGPos)mR.gBegin && lastRightMatch[rseqNo].i2 == (TGPos)mR.gEnd)
 							noMatchRight = true;
 						lastRightMatch[rseqNo].i1 = mR.gBegin;
 						lastRightMatch[rseqNo].i2 = mR.gEnd;
 					}
 				}
-
+*/
 				//else check if prefix and suffix match fit together
 				if(!noMatchRight)
 				{
@@ -2021,21 +2292,32 @@ void mapSplicedReads(
 					if (outerDistance < (int)(2 * options.minMatchLen)) //subtract suffix/prefix-errors in case of edit distance
 						continue;
 //					::std::cout << "outerDistance->" << outerDistance << std::endl;
-					int outerDistanceError = length(readSet[rseqNo]) - (int)(outerDistance);
+					int outerDistanceError = length(readSet[rseqNo]) -(int)(outerDistance);
 					if (outerDistanceError < 0) outerDistanceError = -outerDistanceError;
-					if ((outerDistanceError > (int) options.maxGap) ||
-						(outerDistanceError < (int) options.minGap))
+					if ((outerDistanceError > (int) options.maxGap) || // für edit + static_cast<TGPos>(floor(options.errorRate*length(read))
+						(outerDistanceError < (int) options.minGap))   // für edit - static_cast<TGPos>(floor(options.errorRate*length(read))
 						continue;
 
 					TMatch mRtmp = mR;
 					TMatch mLtmp = (*it).i2;
-					if(options.spec.DONT_VERIFY || !combineLeftRight(mRtmp,mLtmp,read,genome,options,orientation,TSwiftSpec()))
+					if(!empty(readRegions) &&
+						((TSignedGPos)mLtmp.gBegin < (TSignedGPos)readRegions[rseqNo].i2 ||
+					 	(TSignedGPos)mRtmp.gEnd > (TSignedGPos)readRegions[rseqNo].i3)) //match must lie within possible mapping region
+						continue; 
+					double t1 = sysTime();
+					if(options.spec.DONT_VERIFY || 
+					  !combineLeftRight(mRtmp,mLtmp,read,genome,options,orientation,TSwiftSpec()))
 					{
 						++options.FP;
+						double t2 = sysTime();
+						totalTimeCombine += (t2 - t1) ;
 						continue;
 					}
-					else ++options.TP;
-
+					else {
+						double t2 = sysTime();
+						totalTimeCombine += (t2 - t1) ;
+						++options.TP;
+					}
 					++counter;
 
 					//assign an alignment score
@@ -2072,7 +2354,11 @@ void mapSplicedReads(
 					//mLtmp.pairScore = mRtmp.pairScore = 0 - mLtmp.editDist - mRtmp.editDist;
 					// score the whole match pair by # of matches bases - # mismatched bases (not entirely correct for edit distance)
 					mLtmp.pairScore = mRtmp.pairScore = mRtmp.mScore + mLtmp.mScore - 2* mLtmp.editDist - 2* mRtmp.editDist;
-	
+					if(mLtmp.mScore + mRtmp.mScore != (int) length(readSet[rseqNo])) 
+					{ //subtract one if there is an indel in the middle (such that perfect matches are better than indel matches..)
+						mLtmp.pairScore -= 1; 
+						mRtmp.pairScore -= 1; 
+					}
 #ifdef RAZERS_DEBUG_LIGHT
 					bool falsch = false;
 					if((unsigned)(mRtmp.mScore + mLtmp.mScore) > length(readSet[rseqNo])) falsch = true;
@@ -2185,7 +2471,15 @@ void mapSplicedReads(
 
 		
 	}//swiftFinderR
-
+	double totalTimeEnd = sysTime();
+	if(options._debugLevel > 1)
+	{
+		std::cout << "TotalTime:"<< totalTimeEnd - totalTime << std::endl;
+		std::cout << "TotalTimeLeftFilter:" <<totalTimeLeftFilter << std::endl;
+		std::cout << "TotalTimeLeftVerify:"<< totalTimeLeftVerify << std::endl;
+		std::cout << "TotalTimeRightVerify:"<< totalTimeRightVerify << std::endl;
+		std::cout << "TotalTimeCombine:"<< totalTimeCombine << std::endl;
+	}
 
 
 }//function
@@ -2208,6 +2502,7 @@ int mapSplicedReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
 	TReadSet const &		readSet,
+	TReadRegions &			readRegions,
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options,
 	TShapeL const &			shapeL,
@@ -2273,12 +2568,12 @@ int mapSplicedReads(
 	for(unsigned gseqNo = 0; gseqNo < length(genomeSet); ++gseqNo)
 	{
 		if (options.forward)
-			mapSplicedReads(matches, genomeSet[gseqNo], gseqNo, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
+			mapSplicedReads(matches, genomeSet[gseqNo], gseqNo, readSet, readRegions, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
 
 		if (options.reverse)
 		{
 			reverseComplement(genomeSet[gseqNo]);
-			mapSplicedReads(matches, genomeSet[gseqNo], gseqNo, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
+			mapSplicedReads(matches, genomeSet[gseqNo], gseqNo, readSet, readRegions, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
 			reverseComplement(genomeSet[gseqNo]);
 		}
 
@@ -2306,6 +2601,7 @@ int mapSplicedReads(
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
 	TReadSet &		readSet, 
+	TReadRegions &			readRegions,
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
@@ -2326,31 +2622,31 @@ int mapSplicedReads(
 		if (stringToShape(ungappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
 		}
 
 		if (stringToShape(onegappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
 		}
 
 		if (stringToShape(gappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
 		}
 	} 
 	else 
@@ -2359,31 +2655,31 @@ int mapSplicedReads(
 		if (stringToShape(ungappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobal>());
 		}
 
 		if (stringToShape(onegappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobal>());
 		}
 
 		if (stringToShape(gappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobal>());
 		}
 	}
 
@@ -2396,6 +2692,7 @@ int mapSplicedReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
 	TReadSet &				readSet, 
+	TReadRegions &			readRegions,
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
@@ -2418,31 +2715,31 @@ int mapSplicedReads(
 		if (stringToShape(ungappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
 		}
 
 		if (stringToShape(onegappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
 		}
 
 		if (stringToShape(gappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobalHamming>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobalHamming>());
 		}
 	} 
 	else 
@@ -2451,31 +2748,31 @@ int mapSplicedReads(
 		if (stringToShape(ungappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, ungappedL, ungappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, ungappedL, onegappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, ungappedL, gappedR, Swift<SwiftSemiGlobal>());
 		}
 
 		if (stringToShape(onegappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, onegappedL, ungappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, onegappedL, onegappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, onegappedL, gappedR, Swift<SwiftSemiGlobal>());
 		}
 
 		if (stringToShape(gappedL, options.shape))
 		{
 			if (stringToShape(ungappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, gappedL, ungappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(onegappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, gappedL, onegappedR, Swift<SwiftSemiGlobal>());
 			if (stringToShape(gappedR, options.shapeR))
-				return mapSplicedReads(matches, genomeSet, readSet, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobal>());
+				return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options, gappedL, gappedR, Swift<SwiftSemiGlobal>());
 		}
 	}
 

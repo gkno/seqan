@@ -67,6 +67,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool		printVersion;		// print version number
 		bool		hammingOnly;		// no indels
 		int			trimLength;			// if >0, cut reads to #trimLength characters
+		CharString	outputUnmapped;		// name of file storing unmapped reads
+
 		
 	// output format options
 		unsigned	outputFormat;		// 0..Razer format
@@ -115,6 +117,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	artSeedLength;
 		bool		noBelowIdentity;
 #endif
+		bool	readsWithQualities;
 
 #ifdef RAZERS_MICRO_RNA
 		bool		microRNA;
@@ -138,6 +141,9 @@ namespace SEQAN_NAMESPACE_MAIN
  		::std::string 	shapeR;			// shape (e.g. 11111111111)
  		int		thresholdR;			// threshold
  		unsigned int	specifiedGenomeLen;
+		bool		anchored;
+		unsigned int	maxReadRegionsEnd;
+		unsigned int	minReadRegionsStart;
 
 		
 	// multi-threading
@@ -162,6 +168,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			_debugLevel = 0;
 			printVersion = false;
 			hammingOnly = false;
+			outputUnmapped = "";
 			trimLength = 0;
 			
 			outputFormat = 0;
@@ -198,6 +205,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			absMaxQualSumErrors = 100; // maximum for sum of mism qualities in total readlength
 			noBelowIdentity = false;
 #endif
+			readsWithQualities = false;
 
 #ifdef RAZERS_MICRO_RNA
 			microRNA = false;
@@ -212,6 +220,9 @@ namespace SEQAN_NAMESPACE_MAIN
  			maxPrefixErrors = -1;
  			maxSuffixErrors = -1;
  			specifiedGenomeLen = 3000000000U; //whole human genome default
+			anchored = false;
+			maxReadRegionsEnd = 0;
+			minReadRegionsStart = 0; // 
 
  			maxReadLength = 0;
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
@@ -250,8 +261,8 @@ struct MicroRNA{};
 		TGPos			gEnd;			// end position of the match in the genome
 #ifdef RAZERS_MATEPAIRS
 		unsigned		pairId;			// unique id for the two mate-pair matches (0 if unpaired)
-		int				mateDelta:24;	// outer coordinate delta to the other mate 
-		int				pairScore:8;	// combined score of both mates
+		int				mateDelta:23;	// outer coordinate delta to the other mate 
+		unsigned		pairScore:9;	// combined score of both mates max 256
 #endif
 		unsigned short	editDist;		// Levenshtein distance
 #ifdef RAZERS_EXTENDED_MATCH
@@ -288,6 +299,8 @@ struct MicroRNA{};
 
 	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
 	typedef String<TMatch/*, MMap<>*/ >					TMatches;	// array of matches
+	//chrNo, startPos, endPos
+	typedef String<Triple<unsigned,Difference<TGenome>::Type,Difference<TGenome>::Type> >	TReadRegions;
 
 
 	template <typename TSpec>
@@ -471,7 +484,8 @@ bool loadReads(
 	const char *fileName, 
 	TRazerSOptions &options)
 {
-	bool countN = !(options.matchN || options.outputFormat == 1);
+	bool countN = !(options.matchN || options.outputFormat == 1 );
+	if (!empty(CharString(options.outputUnmapped))) countN = false;
 #ifdef RAZERS_MICRO_RNA
 	if(options.microRNA) countN = false;
 #endif
@@ -503,7 +517,8 @@ bool loadReads(
 			)
 			assignSeqId(fastaIDs[i], multiFasta[i], format);	// read Fasta id
 		assignSeq(seq, multiFasta[i], format);					// read Read sequence
-		assignQual(qual, multiFasta[i], format);				// read ascii quality values  
+		assignQual(qual, multiFasta[i], format);				// read ascii quality values 
+		if(!empty(qual)) options.readsWithQualities = true;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		//check if sequence has a clip tag
 		if(options.minClippedLen > 0)
@@ -770,6 +785,9 @@ struct LessSplicedScore : public ::std::binary_function < TReadMatch, TReadMatch
 		// quality
 		if (a.pairScore > b.pairScore) return true;
 		if (a.pairScore < b.pairScore) return false;
+//CHECK:		if (abs(a.mateDelta) < abs(b.mateDelta)) return true;
+//CHECK:		if (abs(a.mateDelta) > abs(b.mateDelta)) return falsee;
+		
 		return a.pairId < b.pairId;
 	}
 };
@@ -2178,14 +2196,15 @@ int mapReads(
 	StringSet<CharString> &	genomeFileNameList,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
-	TReadSet &		readSet, 
+	TReadSet &				readSet, 
+	TReadRegions	&		readRegions,
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
         // first check whether split mapping (--> two shapes) or normal mapping
 #ifdef RAZERS_SPLICED
         if (options.minMatchLen > 0)
-                return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options);
+                return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options);
 #endif
 
 	Shape<Dna, SimpleShape>		ungapped;
@@ -2225,7 +2244,8 @@ template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TC
 int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
-	TReadSet &		readSet, 
+	TReadSet &				readSet, 
+	TReadRegions &			readRegions,
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
@@ -2234,7 +2254,7 @@ int mapReads(
         // first check whether split mapping (--> two shapes) or normal mapping
 #ifdef RAZERS_SPLICED
         if (options.minMatchLen > 0)
-                return mapSplicedReads(matches, genomeSet, readSet, cnts, options);
+                return mapSplicedReads(matches, genomeSet, readSet, readRegions, cnts, options);
 #endif
 
 

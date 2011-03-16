@@ -602,6 +602,79 @@ dumpAlignment(TFile & target, Align<TSource, TSpec> const & source)
 	}
 }
 
+template<typename TMatches, typename TReads, typename TReadNames, typename TSpec>
+void
+dumpUnmappedReads(TMatches				&matches, 
+					TReads const		&reads, 
+					TReadNames const	&readIDs,
+					RazerSOptions<TSpec> &options)
+{
+	typedef typename Iterator<TMatches>::Type TIterator;
+
+	::std::ofstream file;
+	CharString fileName = options.outputUnmapped;
+	if (empty(fileName))
+		return;
+
+	file.open(toCString(fileName), ::std::ios_base::out | ::std::ios_base::trunc);
+	if (!file.is_open()) {
+		::std::cerr << "Failed to open output file" << ::std::endl;
+		return;
+	}
+
+	char headerChar = '>';
+	if(options.readsWithQualities || options.fastaIdQual) 
+		headerChar = '@';
+
+	// sort according to read number
+	::std::sort(begin(matches, Standard()), end(matches, Standard()), LessRNoGPos<TMatch>());
+
+	TIterator mIt = begin(matches,Standard());
+	TIterator mEnd = end(matches,Standard());
+
+	unsigned readNo = 0;
+	// output reads without any matches
+	while(mIt != mEnd && readNo < length(reads))
+	{
+		while((*mIt).rseqNo > readNo)
+		{
+//			std::cout << "readNo=" << readNo << " + ";
+			file << headerChar << readIDs[readNo] << std::endl << reads[readNo] << std::endl;
+			if(options.readsWithQualities || options.fastaIdQual) 
+			{
+				file << '+' << std::endl;
+				for(unsigned j=0;j<length(reads[readNo]);++j)
+					file << (char)(getQualityValue(reads[readNo][j])+ 33);
+				file << std::endl;
+			}
+			++readNo;
+		}
+		while((*mIt).rseqNo == readNo && mIt != mEnd)
+		{
+			++mIt;
+		}
+		++readNo;
+	}
+//	std::cout << std::endl << "readNoInBetween=" << readNo << " + " << std::endl;
+
+	while(readNo < length(reads))
+	{
+//		std::cout << "readNo=" << readNo << " + ";
+		file << headerChar << readIDs[readNo] << std::endl << reads[readNo] << std::endl;
+		if(options.readsWithQualities || options.fastaIdQual) 
+		{
+			file << '+' << std::endl;
+			for(unsigned j=0;j<length(reads[readNo]);++j)
+				file << (char)(getQualityValue(reads[readNo][j])+ 33);
+			file << std::endl;
+		}
+		++readNo;
+	}
+	return;
+
+
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Output matches
@@ -629,6 +702,9 @@ void dumpMatches(
 	typedef typename Value<TReads>::Type		TRead;
 	typedef typename Value<TGenomeSet>::Type	TGenome;
 	typedef typename TMatch::TGPos				TGPos;
+
+	//dump umapped reads in a separate file if filename was specified
+	dumpUnmappedReads(matches, reads, readIDs, options);
 
 	if (options.minMatchLen > 0) options.outputFormat = 33;
 
@@ -1238,12 +1314,11 @@ void dumpMatches(
 							}
 						}
 						
-						
 						if(
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 						options.maqMapping || 
 #endif
-						options.fastaIdQual)
+						options.fastaIdQual || options.readsWithQualities)
 						{
 		//					file << ";read=";
 		//					for(unsigned j=0;j<length(reads[currReadNo]);++j)
@@ -1339,7 +1414,8 @@ void dumpMatches(
 				//file <<  options.runID << "_razers\tread";
 				file << "razers\tread";
 				file << '\t' << (mL.gBegin + options.positionFormat) << '\t' << mR.gEnd << '\t';
-				double percId = 100.0 * (1.0 + (double)(mL.pairScore-mL.mScore-mR.mScore) / (double)readLen);
+//?//			double percId = 100.0 * (1.0 + (double)(mL.pairScore-mL.mScore-mR.mScore) / (double)readLen);
+				double percId = 100.0 * (1.0 - (double)(mL.editDist + mR.editDist) /(double)(mL.mScore+mR.mScore));
 				file << percId << "\t";
 
 				if (mL.orientation == 'F')
