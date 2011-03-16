@@ -52,7 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 /**
-.Function.slowNjTree:
+.Function.njTree:
 ..summary:Computes a guide tree from a distance matrix.
 ..cat:Graph
 ..signature:

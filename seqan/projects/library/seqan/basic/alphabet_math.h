@@ -56,7 +56,7 @@ namespace seqan {
 
 .Function.minValue.concept:Concept.Finite Total Ordered
 .Function.infimumValueImpl.concept:Concept.Finite Total Ordered
-.Function.maxValue.concept:Concept.Alphabet With GapsConcept.Finite Total Ordered
+.Function.maxValue.concept:Concept.Finite Total Ordered
 .Function.supremumValueImpl.concept:Concept.Finite Total Ordered
  */
 
