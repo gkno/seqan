@@ -36,7 +36,8 @@
 // ==========================================================================
 
 // TODO(holtgrew): This could use some cleanup.
-// TODO(holtgrew): Document SEQAN_BEGIN_TESTSUITE, SEQAN_END_TESTSUITE and the assertions with DDDoc.
+// TODO(holtgrew): Rename macro dddoc names as not to include the SEQAN_ prefix to make the left column in the doc page smaller?
+// TODO(holtgrew): Some functions from http://trac.mi.fu-berlin.de/seqan/wiki/HowTo/WriteTests are still missing.
 
 // SEQAN_NO_GENERATED_FORWARDS
 
@@ -92,7 +93,6 @@
 ..see:Macro.SEQAN_ENABLE_DEBUG
 ..see:Macro.SEQAN_ENABLE_CHECKPOINTS
  */
-
 
 // Set default for SEQAN_ENABLE_TESTING.
 #ifndef SEQAN_ENABLE_TESTING
@@ -171,7 +171,7 @@ namespace seqan {
 
 /**
 .Function.printDebugLevel:
-..cat:Miscellaneous
+..cat:Testing & Debugging
 ..summary:Print the current SeqAn debug level and the compiler flags to the given stream.
 ..signature:printDebugLevel(stream)
 ..param.stream:The stream to print to, e.g. $std::cout$.
@@ -1201,6 +1201,7 @@ SEQAN_DEFINE_TEST(test_name)
 {
    SEQAN_ASSERT_LT(0, 3);
 }
+..see:Macro.SEQAN_SKIP_TEST
 ..see:Macro.SEQAN_CALL_TEST
 ..see:Macro.SEQAN_BEGIN_TESTSUITE
 ..see:Macro.SEQAN_END_TESTSUITE
@@ -1225,6 +1226,7 @@ SEQAN_BEGIN_TESTSUITE(test_foo)
     SEQAN_CALL_TEST(test_foo_my_test);
 }
 SEQAN_END_TESTSUITE
+..see:Macro.SEQAN_SKIP_TEST
 ..see:Macro.SEQAN_DEFINE_TEST
 ..see:Macro.SEQAN_CALL_TEST
 ..see:Macro.SEQAN_END_TESTSUITE
@@ -1251,6 +1253,7 @@ SEQAN_BEGIN_TESTSUITE(test_foo)
     SEQAN_CALL_TEST(test_foo_my_test);
 }
 SEQAN_END_TESTSUITE
+..see:Macro.SEQAN_SKIP_TEST
 ..see:Macro.SEQAN_DEFINE_TEST
 ..see:Macro.SEQAN_CALL_TEST
 ..see:Macro.SEQAN_BEGIN_TESTSUITE
@@ -1271,6 +1274,7 @@ SEQAN_END_TESTSUITE
 ..example.code:
 // Within a test suite.
 SEQAN_CALL_TEST(test_name);
+..see:Macro.SEQAN_SKIP_TEST
 ..see:Macro.SEQAN_DEFINE_TEST
 ..see:Macro.SEQAN_BEGIN_TESTSUITE
 ..see:Macro.SEQAN_END_TESTSUITE
@@ -1289,6 +1293,21 @@ SEQAN_CALL_TEST(test_name);
         ::seqan::ClassTest::endTest();                                  \
     } while (false)
 
+/*
+.Macro.SKIP_TEST
+..cat:Testing & Debugging
+..summary:Force the test to return without failing and mark it as skipped.
+..signature:SEQAN_SKIP_TEST
+..example.code:
+SEQAN_DEFINE_TEST(test_skipped)
+{
+    SEQAN_SKIP_TEST;
+}
+..see:Macro.SEQAN_DEFINE_TEST
+..see:Macro.SEQAN_CALL_TEST
+..see:Macro.SEQAN_BEGIN_TESTSUITE
+..see:Macro.SEQAN_END_TESTSUITE
+ */
 
 // This macro returns from the current function and logs a "skipped"
 // event for the current test.
@@ -1303,6 +1322,101 @@ SEQAN_CALL_TEST(test_name);
 #if !defined(_MSC_VER) || (_MSC_VER >= 1400)
 
 #if SEQAN_ENABLE_DEBUG
+
+/**
+.Macro.SEQAN_ASSERT
+..cat:Assertions
+..summary:Test that the given expression can be coerced to $true$.
+..signature:SEQAN_ASSERT(expression)
+..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..example.code:
+SEQAN_ASSERT(0);  // will fail
+SEQAN_ASSERT(1);  // will run through 
+SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+
+.Macro.SEQAN_ASSERT_NOT
+..cat:Assertions
+..summary:Test that the given expression can be coerced to $false$.
+..signature:SEQAN_ASSERT_EQ(expression1, expression2)
+..signature:SEQAN_ASSERT_EQ_MSG(expression1, expression2, comment[, parameters])
+..example.code:
+SEQAN_ASSERT_NOT(0);  // will run through
+SEQAN_ASSERT_NOT(1);  // will fail
+SEQAN_ASSERT_NOT_MSG(0, "msg %s", "test");  // will fail with message
+
+.Macro.SEQAN_ASSERT_EQ
+..cat:Assertions
+..summary:Test that two given expressions are equal, as defined by the matching call to the $operator=(,)$.
+..signature:SEQAN_ASSERT(expression)
+..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..example.code:
+SEQAN_ASSERT_EQ(0, false);  // will run through
+SEQAN_ASSERT_EQ(1, false);  // will fail
+SEQAN_ASSERT_EQ(1, "foo");  // will not compile
+SEQAN_ASSERT_EQ_MSG(1, false, "msg");  // will fail with message
+
+.Macro.SEQAN_ASSERT_NEQ
+..cat:Assertions
+..summary:Test that two given expressions are not equal, as defined by the matching call to the $operator!=(,)$.
+..signature:SEQAN_ASSERT_NEQ(expression)
+..signature:SEQAN_ASSERT_NEQ_MSG(expression, message[, parameters])
+..example.code:
+SEQAN_ASSERT_NEQ(0, false);  // will fail
+SEQAN_ASSERT_NEQ(1, false);  // will run through
+SEQAN_ASSERT_NEQ(1, "foo");  // will not compile
+SEQAN_ASSERT_NEQ_MSG(1, false, "msg");  // will fail with message
+
+.Macro.SEQAN_ASSERT_LT
+..cat:Assertions
+..summary:Test that the two given expressions are in the less-than relation as defined by the matching call to operator<(,).
+..signature:SEQAN_ASSERT_LT(expression1, expression2)
+..signature:SEQAN_ASSERT_LT(expression1, expression2, comment[, parameters])
+..example.code:
+SEQAN_ASSERT_LT(0, 1);  // will run through
+SEQAN_ASSERT_LT(1, 1);  // will not run through
+SEQAN_ASSERT_LT_MSG(1, 1, "msg");  // will fail with message
+
+.Macro.SEQAN_ASSERT_LEQ
+..cat:Assertions
+..summary:Test that two given expressions are equal, as defined by the matching call to the $operator=(,)$.
+..signature:SEQAN_ASSERT_LEQ(expression1, expression2)
+..signature:SEQAN_ASSERT_LEQ_MSG(expression1, expression2, comment[, parameters])
+..example.code:
+SEQAN_ASSERT_LEQ(1, 1);  // will run through
+SEQAN_ASSERT_LEQ(1, 2);  // will not run through
+SEQAN_ASSERT_LEQ_MSG(1, 2, "msg");  // will fail with message
+
+.Macro.SEQAN_ASSERT_GT
+..cat:Assertions
+..summary:Test that the given expression can be coerced to $true$.
+..signature:SEQAN_ASSERT(expression)
+..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..example.code:
+SEQAN_ASSERT(0);  // will fail
+SEQAN_ASSERT(1);  // will run through 
+SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+
+.Macro.SEQAN_ASSERT_GEQ
+..cat:Assertions
+..summary:Test that the given expression can be coerced to $true$.
+..signature:SEQAN_ASSERT(expression)
+..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..example.code:
+SEQAN_ASSERT(0);  // will fail
+SEQAN_ASSERT(1);  // will run through 
+SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+
+.Macro.SEQAN_ASSERT_IN_DELTA
+..cat:Assertions
+..summary:Test that the given expression can be coerced to $true$.
+..signature:SEQAN_ASSERT_IN_DELTA(x, y, delta)
+..signature:SEQAN_ASSERT_IN_DELTA_MSG(x, y, delta, comment[, parameters])
+..example.code:
+SEQAN_ASSERT(0);  // will fail
+SEQAN_ASSERT(1);  // will run through 
+SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+
+ */
 
 // Force a test failure.
 //
