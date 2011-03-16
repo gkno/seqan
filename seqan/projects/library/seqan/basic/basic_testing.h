@@ -1293,8 +1293,8 @@ SEQAN_CALL_TEST(test_name);
         ::seqan::ClassTest::endTest();                                  \
     } while (false)
 
-/*
-.Macro.SKIP_TEST
+/**
+.Macro.SEQAN_SKIP_TEST
 ..cat:Testing & Debugging
 ..summary:Force the test to return without failing and mark it as skipped.
 ..signature:SEQAN_SKIP_TEST
@@ -1329,6 +1329,7 @@ SEQAN_DEFINE_TEST(test_skipped)
 ..summary:Test that the given expression can be coerced to $true$.
 ..signature:SEQAN_ASSERT(expression)
 ..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
 SEQAN_ASSERT(0);  // will fail
 SEQAN_ASSERT(1);  // will run through 
@@ -1337,8 +1338,9 @@ SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
 .Macro.SEQAN_ASSERT_NOT
 ..cat:Assertions
 ..summary:Test that the given expression can be coerced to $false$.
-..signature:SEQAN_ASSERT_EQ(expression1, expression2)
-..signature:SEQAN_ASSERT_EQ_MSG(expression1, expression2, comment[, parameters])
+..signature:SEQAN_ASSERT(expression)
+..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
 SEQAN_ASSERT_NOT(0);  // will run through
 SEQAN_ASSERT_NOT(1);  // will fail
@@ -1347,8 +1349,9 @@ SEQAN_ASSERT_NOT_MSG(0, "msg %s", "test");  // will fail with message
 .Macro.SEQAN_ASSERT_EQ
 ..cat:Assertions
 ..summary:Test that two given expressions are equal, as defined by the matching call to the $operator=(,)$.
-..signature:SEQAN_ASSERT(expression)
-..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..signature:SEQAN_ASSERT_EQ(expression1, expression2)
+..signature:SEQAN_ASSERT_EQ_MSG(expression1, expression2, comment[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
 SEQAN_ASSERT_EQ(0, false);  // will run through
 SEQAN_ASSERT_EQ(1, false);  // will fail
@@ -1360,6 +1363,7 @@ SEQAN_ASSERT_EQ_MSG(1, false, "msg");  // will fail with message
 ..summary:Test that two given expressions are not equal, as defined by the matching call to the $operator!=(,)$.
 ..signature:SEQAN_ASSERT_NEQ(expression)
 ..signature:SEQAN_ASSERT_NEQ_MSG(expression, message[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
 SEQAN_ASSERT_NEQ(0, false);  // will fail
 SEQAN_ASSERT_NEQ(1, false);  // will run through
@@ -1371,6 +1375,7 @@ SEQAN_ASSERT_NEQ_MSG(1, false, "msg");  // will fail with message
 ..summary:Test that the two given expressions are in the less-than relation as defined by the matching call to operator<(,).
 ..signature:SEQAN_ASSERT_LT(expression1, expression2)
 ..signature:SEQAN_ASSERT_LT(expression1, expression2, comment[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
 SEQAN_ASSERT_LT(0, 1);  // will run through
 SEQAN_ASSERT_LT(1, 1);  // will not run through
@@ -1378,9 +1383,10 @@ SEQAN_ASSERT_LT_MSG(1, 1, "msg");  // will fail with message
 
 .Macro.SEQAN_ASSERT_LEQ
 ..cat:Assertions
-..summary:Test that two given expressions are equal, as defined by the matching call to the $operator=(,)$.
+..summary:Test that the two given expressions are in the less-than-or-equal relation as defined by the matching call to operator<=(,).
 ..signature:SEQAN_ASSERT_LEQ(expression1, expression2)
 ..signature:SEQAN_ASSERT_LEQ_MSG(expression1, expression2, comment[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
 SEQAN_ASSERT_LEQ(1, 1);  // will run through
 SEQAN_ASSERT_LEQ(1, 2);  // will not run through
@@ -1388,33 +1394,37 @@ SEQAN_ASSERT_LEQ_MSG(1, 2, "msg");  // will fail with message
 
 .Macro.SEQAN_ASSERT_GT
 ..cat:Assertions
-..summary:Test that the given expression can be coerced to $true$.
-..signature:SEQAN_ASSERT(expression)
-..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..summary:Test that the two given expressions are in the greather-than relation as defined by the matching call to operator>(,).
+..signature:SEQAN_ASSERT_GT(expression1, expression2)
+..signature:SEQAN_ASSERT_GT_MSG(expression1, expression2, comment[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
-SEQAN_ASSERT(0);  // will fail
-SEQAN_ASSERT(1);  // will run through 
-SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+SEQAN_ASSERT_GT(2, 1);  // will run through
+SEQAN_ASSERT_GT(1, 1);  // will not run through
+SEQAN_ASSERT_GT_MSG(1, 1, "msg");  // will fail with message
 
 .Macro.SEQAN_ASSERT_GEQ
 ..cat:Assertions
-..summary:Test that the given expression can be coerced to $true$.
-..signature:SEQAN_ASSERT(expression)
-..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
+..summary:Test that the two given expressions are in the greater-than-or-equal relation as defined by the matching call to operator>=(,).
+..signature:SEQAN_ASSERT_GEQ(expression1, expression2)
+..signature:SEQAN_ASSERT_GEQ_MSG(expression1, expression2, comment[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
-SEQAN_ASSERT(0);  // will fail
-SEQAN_ASSERT(1);  // will run through 
-SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+SEQAN_ASSERT_GEQ(1, 1);  // will run through
+SEQAN_ASSERT_GEQ(0, 1);  // will not run through
+SEQAN_ASSERT_GEQ_MSG(0, 1, "msg");  // will fail with message
 
 .Macro.SEQAN_ASSERT_IN_DELTA
 ..cat:Assertions
 ..summary:Test that the given expression can be coerced to $true$.
 ..signature:SEQAN_ASSERT_IN_DELTA(x, y, delta)
 ..signature:SEQAN_ASSERT_IN_DELTA_MSG(x, y, delta, comment[, parameters])
+..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
 ..example.code:
-SEQAN_ASSERT(0);  // will fail
-SEQAN_ASSERT(1);  // will run through 
-SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+SEQAN_ASSERT_IN_DELTA(0, 0, 0.1);  // will run through
+SEQAN_ASSERT_IN_DELTA(1, -2, 1);  // will fail
+SEQAN_ASSERT_IN_DELTA(1, "foo");  // will not compile
+SEQAN_ASSERT_IN_DELTA_MSG(1, 0, 0.1, "msg");  // will fail with message
 
  */
 
@@ -1871,6 +1881,25 @@ template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *co
 #define SEQAN_PROGRAM_PATH                      \
     ::seqan::ClassTest::StaticData::basePath()
 
+// TODO(holtgrew): Subject to change wiht restructuring.
+/**
+.Macro.SEQAN_PATH_TO_PROJECTS
+..cat:Testing & Debugging
+..summary:Return path to the parent directory of "tests".
+..returns:$char const *$, string with the path to the parent directory of the tests directory.
+..signature:SEQAN_PATH_TO_PROJECTS()
+..remarks:The pointed to string is initialized on program startup by the code generated by @Macro.SEQAN_BEGIN_TESTSUITE@.
+..example.code:
+const char *p = SEQAN_PATH_TO_PROJECTS();
+char buffer[1000];
+strcpy(buffer, p);
+strcat(buffer, "/tests/files/example.txt");
+FILE *f = fopen(buffer, "w");
+fprintf(f, "Test Data");
+fclose(f);
+..see:Macro.SEQAN_TEMP_FILENAME
+ */
+
 // Returns a const char * string with the path to the projects directory.
 #define SEQAN_PATH_TO_PROJECTS()                        \
     ::seqan::ClassTest::StaticData::pathToProjects()
@@ -1880,6 +1909,22 @@ template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *co
 // TODO(holtgrewe): Uncomment if openTempFile has been implemented.
 // #define SEQAN_OPEN_TEMP_FILE() (::seqan::ClassTest::openTempFile())
 
+/**
+.Macro.SEQAN_TEMP_FILENAME
+..cat:Testing & Debugging
+..summary:Generates the name to a temporary file.
+..returns:$char const *$, string with the path to a temporary file.
+..signature:SEQAN_TEMP_FILENAME()
+..remarks:The pointed to string is stored in a buffer and is overwritten by the next call to this macro. Copy it out if you need it.
+..example.code:
+const char *p = SEQAN_TEMP_FILENAME();
+buffer char tempFilename[1000];
+strcpy(tempFilename, p);
+FILE *f = fopen(tempFilename, "w");
+fprintf(f, "Test Data");
+fclose(f);
+..see:Macro.SEQAN_PATH_TO_PROJECTS
+ */
 
 // Returns a temporary filename.
 #define SEQAN_TEMP_FILENAME() (::seqan::ClassTest::tempFileName())
