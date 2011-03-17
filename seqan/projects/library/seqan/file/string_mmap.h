@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TFile_ = File<>,				// default file type
                typename TSize_ = size_t >				// size type
     struct MMapConfig {
-//IOREV
+//IOREV _nodoc_ doc says using MMap<ExternalConfig> is correct, whats this for?
         typedef TFile_ TFile;
         typedef TSize_ TSize;
     };
