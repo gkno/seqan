@@ -36,6 +36,7 @@
 
 /* IOREV
  * _tested_
+ * _windows_
  *
  *
  * tested in library/demos/howto/efficiently_import_sequences.cpp and stellar
