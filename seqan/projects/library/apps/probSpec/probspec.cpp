@@ -1,9 +1,9 @@
  /*==========================================================================
-                     STELLAR - Fast Local Alignment
+                     ProbSpec - Computing special local matches for probe design
 
  ============================================================================
-  Copyright (C) 2010 by Birte Kehr
-
+  Copyright (C) 2011 by Knut Reinert
+  
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -37,7 +37,7 @@ _stellarOnOne(TSequence & database,
 			  TPattern & swiftPattern,
 			  bool databaseStrand,
 			  TMatches & matches,
-			  StellarOptions & options) {
+			  ProbSpecOptions & options) {
 	std::cout << "  " << databaseID;
 	if (!databaseStrand) std::cout << ", complement";
 
@@ -125,7 +125,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
 			  StringSet<TId> & databaseIDs,
 			  StringSet<TSequence> & queries,
 			  StringSet<TId> & queryIDs,
-			  StellarOptions & options) {
+			  ProbSpecOptions & options) {
     // pattern
     typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
     TQGramIndex qgramIndex(queries);
@@ -215,7 +215,7 @@ _importSequences(CharString const & fileName,
 ///////////////////////////////////////////////////////////////////////////////
 // Calculates parameters from parameters in options object and from sequences and writes them to std::cout
 template<typename TStringSet>
-void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases, TStringSet & queries) {
+void _writeMoreCalculatedParams(ProbSpecOptions & options, TStringSet & databases, TStringSet & queries) {
 //IOREV _todo_
 	typedef typename Size<TStringSet>::Type TSize;
 
@@ -267,7 +267,7 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calculates parameters from parameters in options object and writes them to std::cout
-void _writeCalculatedParams(StellarOptions & options) {
+void _writeCalculatedParams(ProbSpecOptions & options) {
 //IOREV _todo_
 	int errMinLen = (int) floor(options.epsilon * options.minLength);
 	int n = (int) ceil((errMinLen + 1) / options.epsilon);
@@ -366,6 +366,9 @@ _parseOptions(TParser & parser, TOptions & options) {
 
 	// main options
 	if (isSetLong(parser, "kmer")) getOptionValueLong(parser, "kmer", options.qGram);
+	if (isSetLong(parser, "lengthExact")) getOptionValueLong(parser, "lengthExact", options.lengthExact);
+	if (isSetShort(parser, "le")) getOptionValueLong(parser, "le", options.lengthExact);
+
     if (isSetLong(parser, "minLength")) getOptionValueLong(parser, "minLength", options.minLength);
 	if (isSetShort(parser, 'e')) getOptionValueShort(parser, 'e', options.epsilon);
     if (isSetShort(parser, 'x')) getOptionValueShort(parser, 'x', options.xDrop);
@@ -437,18 +440,16 @@ void
 _setParser(TParser & parser) {
 	_addVersion(parser);
 
-    addTitleLine(parser, "*******************************************");
-	addTitleLine(parser, "* STELLAR - the SwifT Exact LocaL AligneR *");
-	addTitleLine(parser, "* (c) Copyright 2010 by Birte Kehr        *");
-	addTitleLine(parser, "*******************************************");
+    addTitleLine(parser, "************************************************");
+	addTitleLine(parser, "*  ProbSeq - Computing special local alignmens *");
+	addTitleLine(parser, "* (c) Copyright 2011 by Knut Reinert           *");
+	addTitleLine(parser, "************************************************");
 
 	addUsageLine(parser, "-d <FASTA sequence file> -q <FASTA sequence file> [Options]");
 
 	addLine(parser, "");
-    addLine(parser, "An implementation of the SWIFT filter algorithm (Rasmussen et al., 2006)");
-    addLine(parser, "and subsequent verification of the SWIFT hits using local alignment,");
-    addLine(parser, "gapped X-drop extension, and extraction of the longest epsilon-match.");
-
+    addLine(parser, "An implementation a two pass filter based on a q-gram index and STELLAR");
+ 
 	addSection(parser, "Non-optional Arguments:");
     addOption(parser, CommandLineOption('d', "database", "Fasta file containing the database sequences",
               (OptionType::String | OptionType::Mandatory)));
@@ -472,6 +473,9 @@ _setParser(TParser & parser) {
 		"Minimal length of low complexity reapeats to be filtered", OptionType::Int, 1000));
     addOption(parser, CommandLineOption('a', "abundanceCut",
 		"k-mer overabundance cut ratio", OptionType::Double, "1"));
+	addOption(parser, CommandLineOption("le", "lengthExact",
+										"length of required exact submatch", OptionType::Int, "12"));
+
 
 	addSection(parser, "Verification Options:");
     addOption(parser, CommandLineOption('x', "xDrop", "Maximal x-drop for extension", OptionType::Double, 5));
@@ -503,7 +507,7 @@ _setParser(TParser & parser) {
 int main(int argc, const char *argv[]) {
 
     // command line parsing
-    CommandLineParser parser("stellar");
+    CommandLineParser parser("probspec");
 
     _setParser(parser);
     if (!parse(parser, argc, argv)) {
@@ -512,13 +516,14 @@ int main(int argc, const char *argv[]) {
         return 1;
     }
 
-	StellarOptions options = StellarOptions();
+	ProbSpecOptions options = ProbSpecOptions();
 	if (!_parseOptions(parser, options)) {
 		return 1;
 	}
 
 	typedef String<Dna5> TSequence;
-
+	typedef Iterator<TSequence>::Type TSequenceIt;
+	
 	// output header
 	_title(parser, std::cout);
 	std::cout << std::endl;
@@ -540,6 +545,64 @@ int main(int argc, const char *argv[]) {
     StringSet<CharString> databaseIDs;
 	if (!_importSequences(options.databaseFile, "database", databases, databaseIDs)) return 1;
 
+	// built qGram index on database and queries
+	typedef Index<TSequence, IndexQGram<SimpleShape> > TQGramIndex;
+	//typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
+
+	// build index on queries and database
+
+	
+    TQGramIndex qgramIndex(databases[0]);
+
+	resize(indexShape(qgramIndex), options.lengthExact);
+
+	indexRequire(qgramIndex, QGramSADir());
+	indexRequire(qgramIndex, QGramDir());
+//	indexRequire(qgramIndex, QGramCounts());
+	
+
+	// go over the buckets	
+	typedef Fibre<TQGramIndex, QGramSA>::Type	TSA;
+	typedef Iterator<TSA, Standard>::Type	TIterSA;
+	typedef Fibre<TQGramIndex, QGramDir>::Type	TDir;
+	typedef Iterator<TDir, Standard>::Type	TIterDir;
+	
+	//TIterDir itDir,itDirb = begin(indexDir(qgramIndex), Standard());
+	//TIterDir itDirend = end(indexDir(qgramIndex), Standard());
+	//	TSA& sa = getFibre(qgramIndex,QGramSA());
+	//	TDir& dir = getFibre(qgramIndex,QGramDir());
+	
+//	Finder<TQGramIndex> finder(qgramIndex);
+	
+	for (unsigned int s=0; s < length(queries); s++) {
+		::std::cout << "Inspecting query " << s << " " << queries[s] << std::endl;
+		
+		TSequenceIt sit = begin(queries[s]);
+
+		unsigned hv = hash(indexShape(qgramIndex),sit);
+		Infix<Fibre<TQGramIndex, QGramSA>::Type const>::Type occs;
+			
+		for (sit; sit < end(queries[s])-options.lengthExact; sit++) { 
+	//		occs = getOccurrences(qgramIndex,indexShape(qgramIndex));
+
+			TSequence result;
+			unhash(result, hv, options.lengthExact);	
+			::std::cout << result <<  ::std::endl;
+			for(unsigned i = 0; i < length(occs); ++i)
+				::std::cout << occs[i] << ", ";
+			::std::cout << ::std::endl;
+	
+			hv = hashNext(indexShape(qgramIndex),sit);
+
+		}
+	}
+	
+	
+	
+	
+	
+	/*
+	
     std::cout << std::endl;
 	_writeMoreCalculatedParams(options, databases, queries);
 
@@ -568,6 +631,8 @@ int main(int argc, const char *argv[]) {
 
     if (options.verbose > 0) 
 		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
+	
+	 */
 	
 	return 0;
 }
