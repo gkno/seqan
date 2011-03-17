@@ -118,7 +118,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
                typename TConfig >
 	class String<TValue, MMap<TConfig> >
 	{
-//IOREV _todo_
+//IOREV
 	public:
 
         typedef typename TConfig::TFile		TFile;

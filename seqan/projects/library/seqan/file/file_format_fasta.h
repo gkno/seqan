@@ -39,7 +39,13 @@
  *
  * tested in tests/file/test_file.h
  * tag mentionen in doc, but no further documentation, no link to spec
+ * 
+ * IMPORTANT: from what I understand: fileReaderIterator does not iterate
+ * through records, but through lines of the sequence of one record.
+ * goNext() on the iterator goes to beginning of next line and sets
+ * data boundaries for next iteration
  *
+ * goNext() on the file itself goes to the beginning of the next record.
  */
 
 
@@ -115,7 +121,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 {
-//IOREV _postponed_ due to unclear state of filereaderiterator
+//IOREV goto next line of sequence in current record, set boundaries for
 /*
 	if (_streamEOF(host(it)))
 	{
@@ -467,7 +473,7 @@ void
 goNext(TFile & file,
 	   Fasta)
 {
-//IOREV _postponed_ _notinlined_ due to unclear state of filereaderiterator
+//IOREV _notinlined_ goto next record
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT_NOT(_streamEOF(file));
 

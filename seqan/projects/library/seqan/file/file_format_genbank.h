@@ -33,6 +33,27 @@
 #ifndef SEQAN_HEADER_FILE_GENBANK_H
 #define SEQAN_HEADER_FILE_GENBANK_H
 
+/* IOREV
+ * _tested_
+ * _nodoc_
+ *
+ * tested in tests/file/test_file.h
+ * tag mentionen in doc, but no further documentation, no link to spec
+ *
+ * current spec:
+ * ftp://ftp.ncbi.nih.gov/genbank/gbrel.txt
+ *
+ * IMPORTANT: from what I understand: fileReaderIterator does not iterate
+ * through records, but through lines of the sequence of one record.
+ * goNext() on the iterator goes to beginning of next line and sets
+ * data boundaries for next iteration
+ *
+ * goNext() on the file itself goes to the beginning of the next record.
+ *
+ * THIS is not intuitive AT ALL.
+ */
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -46,8 +67,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/file.h
 */
 struct TagGenbank_;
-//IOREV _todo_
-typedef Tag<TagGenbank_> const Genbank; //IOREV _todo_
+//IOREV
+typedef Tag<TagGenbank_> const Genbank; //IOREV
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,7 +79,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it, bool skip_meta)
 {
-//IOREV _todo_
+//IOREV not sure whether begin_pos is absolute; parsing could be done simpler; no error handling
 SEQAN_CHECKPOINT
 	String<char> line;
 
@@ -137,7 +158,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goBegin(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV
     SEQAN_CHECKPOINT;
     goBegin(it, true);
 }
@@ -147,7 +168,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Genbank, TFile2, TSpec> > & it)
 {
-//IOREV _todo_
+//IOREV this iterates through the characters of a line in one record
 SEQAN_CHECKPOINT
 	do
 	{
@@ -194,7 +215,7 @@ read(TFile & file,
 	 TData & data,
 	 Genbank)
 {
-//IOREV _todo_
+//IOREV _recordreading_ see above
 SEQAN_CHECKPOINT
 	Iter<TFile, FileReader<Genbank> > it(file);
 
@@ -213,7 +234,7 @@ read(TFile & file,
 	 TSize limit,
 	 Genbank)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _recordreading_ see above
 SEQAN_CHECKPOINT
 	typename Size<TData>::Type siz = length(data);
 	Iter<TFile, FileReader<Genbank> > it(file);
@@ -238,7 +259,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 Genbank)
 {
-//IOREV _todo_
+//IOREV _ndoc_ _recordreading_ see above
 SEQAN_CHECKPOINT
 	typedef typename Value<TMeta>::Type TValue;
 	String<char> line;
@@ -281,7 +302,7 @@ inline void
 goNext(TFile & file,
 	   Genbank)
 {
-//IOREV _todo_
+//IOREV this seems to iterate to the enxt record
 SEQAN_CHECKPOINT
 	typedef typename Value<TFile>::Type TValue;
 
@@ -320,7 +341,7 @@ write(TFile & file,
 	  TData & data,
 	  Genbank)
 {
-//IOREV _todo_
+//IOREV _recordreading_
 SEQAN_CHECKPOINT
 	enum
 	{
@@ -377,7 +398,7 @@ write(TFile & file,
 	  TMeta & meta,
 	  Genbank)
 {
-//IOREV _todo_
+//IOREV _recordreading_
 SEQAN_CHECKPOINT
 	write(file, meta);
 	write(file, data, Genbank());

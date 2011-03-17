@@ -34,6 +34,18 @@
 #define SEQAN_HEADER_FILE_PAGE_H
 
 
+/* IOREV
+ * _nottested_
+ * _nodoc_
+ *
+ * not tested by any test or app
+ * no documentation for the functions
+ *
+ * hard to say how/if this works, since there is no doc
+ *
+ */
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -46,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue >
 	struct SimpleBuffer 
 	{
-//IOREV _todo_
+//IOREV _nodoc_
 		typedef	typename Size<SimpleBuffer>::Type		TSize;
 		typedef	typename Iterator<SimpleBuffer>::Type	TIterator;
 
@@ -182,7 +194,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TValue >
     struct PageBucket
 	{
-//IOREV _todo_
+//IOREV _nodoc_ has some unformatted comments in code, but not enough doc
 		typedef	typename Iterator<PageBucket>::Type TIterator;
 
         unsigned    pageOfs;                // begin of bucket window with relation to page begin
@@ -191,13 +203,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue >
     struct PageBucketExtended : public PageBucket< TValue > {
-//IOREV _todo_
+//IOREV _nodoc_
 		int     	pageNo;		            // related page (needed by merger sort)
     };
 
 	template < typename TValue >
     ::std::ostream& operator<<(::std::ostream &out, const PageBucketExtended<TValue> &pb) {
-//IOREV _todo_
+//IOREV _ _nodoc_
         for(TValue *cur = pb.begin; cur != pb.end; cur++)
             out << *cur << " ";
         return out;
@@ -262,12 +274,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec = void >
     struct Dynamic;
-//IOREV _todo_
+//IOREV
 
     template < typename TValue, typename TFile >
 	struct PageFrame< TValue, TFile, Dynamic<> >: public SimpleBuffer< TValue >
 	{
-//IOREV _todo_
+//IOREV _nodoc_
 		typedef TFile							File;
 		typedef SimpleBuffer<TValue>	        TBase;
         typedef typename AsyncRequest<TFile>::Type  AsyncRequest;

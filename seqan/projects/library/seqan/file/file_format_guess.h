@@ -33,6 +33,18 @@
 #ifndef SEQAN_HEADER_FILE_GUESS_H
 #define SEQAN_HEADER_FILE_GUESS_H
 
+/* IOREV
+ * _tested_
+ * _doc_
+ *
+ * only works if seeking is possible
+ * 
+ * the whole FileFormat class seems useless, see file_format.h
+ * this could aswell return the specific tag
+ *
+ * description in code comments not plausible
+ */
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -63,7 +75,7 @@ inline FileFormat<TFile, TData, TMeta, void>
 guessFileFormat(TFile & file,
 				TData & data)
 {
-//IOREV _todo_
+//IOREV _doc_ see head of file_format_guess.h
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type old_pos = _streamTellG(file);
 	typename Value<TFile>::Type c;

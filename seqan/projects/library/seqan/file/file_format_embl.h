@@ -43,11 +43,12 @@
  * should be broken, because based on filereaderiterator which is broken
  * according to holtgrew.
  *
- * need more documentation on spec to decide whether functions are correct
- * -> can an emble file actually contain multiple records?
- * 
- * although filereaderiterator is used, read collects all records
- * -> batchreading
+ * IMPORTANT: from what I understand: fileReaderIterator does not iterate
+ * through records, but through lines of the sequence of one record.
+ * goNext() on the iterator goes to beginning of next line and sets
+ * data boundaries for next iteration
+ *
+ * goNext() on the file itself goes to the beginning of the next record.
  *
  */
 
@@ -148,7 +149,7 @@ template <typename TFile, typename TFile2, typename TSpec>
 inline void
 goNext(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it)
 {
-//IOREV
+//IOREV this iterates through the characters of a line in one record
 SEQAN_CHECKPOINT
 	do
 	{
@@ -194,7 +195,7 @@ read(TFile & file,
 	 TData & data,
 	 Embl)
 {
-//IOREV _batchreading_
+//IOREV _recordreading_
 SEQAN_CHECKPOINT
 	Iter<TFile, FileReader<Embl> > it(file);
 
@@ -213,7 +214,7 @@ read(TFile & file,
 	 TSize limit,
 	 Embl)
 {
-//IOREV _batchreading_
+//IOREV _recordreading_
 SEQAN_CHECKPOINT
 	typename Size<TData>::Type siz = length(data);
 	Iter<TFile, FileReader<Embl> > it(file);
@@ -237,7 +238,7 @@ readMeta(TFile & file,
 		 TMeta & meta,
 		 Embl)
 {
-//IOREV _recordreading_ weird! why does read() get all records, but readMeta only the meta of the first?
+//IOREV _recordreading_ weird! 
 SEQAN_CHECKPOINT
 	typedef typename Value<TMeta>::Type TValue;
 
@@ -293,7 +294,7 @@ readLineType(TFile & file,
 			 Embl)
 
 {
-//IOREV _recordreading_ weird! why does read() get all records, but readLineType only the current/upcoming key-description?
+//IOREV _recordreading_ weird! 
 SEQAN_CHECKPOINT
 
 	//this function is meant to be used for two letter codes only 
@@ -476,7 +477,7 @@ inline void
 goNext(TFile & file,
 	   Embl)
 {
-//IOREV
+//IOREV this iterates to the next record
 SEQAN_CHECKPOINT
 	typedef typename Value<TFile>::Type TValue;
 
