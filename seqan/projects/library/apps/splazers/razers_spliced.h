@@ -205,6 +205,9 @@ bool loadReadsSam(
 
 	options.maxReadRegionsEnd = 0;
 	options.minReadRegionsStart = MaxValue<unsigned>::VALUE;
+	TContigPos regionBegin = options.minReadRegionsStart;
+	TContigPos regionEnd = options.maxReadRegionsEnd;
+
 	int i = 0;
 	int kickoutcount = 0;
 	char c = _streamGet(file);
@@ -311,26 +314,25 @@ bool loadReadsSam(
 
 		appendValue(reads, readSeq, Generous());
 
-		appendValue(readRegions,TRegion(0,0,0));
+		appendValue(readRegions,TRegion(0,0));
         if (reverse)
 		{
-//			readRegions[i].i2 = _max((int)beginPos + readLength,(int)beginPos+readLength+options.libraryLength-options.libraryError-options.maxGap);
-//			readRegions[i].i3 = (signed)beginPos+options.libraryLength+options.libraryError+options.maxGap+2*readLength;
-			// library
-//			readRegions[i].i2 = (signed)beginPos+options.libraryLength - readLength; +options.libraryError+options.maxGap+2*readLength;
-			readRegions[i].i2 = _max((int)beginPos + readLength,(int)beginPos+readLength+options.libraryLength-options.libraryError);//-options.maxGap);
-			readRegions[i].i3 = (signed)beginPos+options.libraryLength+2*readLength+options.libraryError+options.maxGap;
+			// libraryLength is outer fragment distance 
+			regionBegin = _max((int)beginPos + readLength,(int)beginPos+options.libraryLength-readLength-options.libraryError);
+			regionEnd = (signed)beginPos+options.libraryLength+options.libraryError+options.maxGap;
+			// expected begin position of read
+			readRegions[i].i2 = (signed)beginPos + options.libraryLength - readLength; 
 		}
-		else  // read should map upstream of mapped mate
+		else  // read should map upstream of mapped mate --> set the vorzeichen bit
 		{
-//			readRegions[i].i3 = _min((int)beginPos,(int)beginPos-options.libraryLength+options.libraryError+options.maxGap);
-//			readRegions[i].i2 = _max((int)0,(int)beginPos-options.libraryLength-options.libraryError-options.maxGap-readLength);
-			readRegions[i].i3 = _min((int)beginPos,(int)beginPos-options.libraryLength+options.libraryError);//+options.maxGap);
-			readRegions[i].i2 = _max((int)0,(int)beginPos-options.libraryLength-readLength-options.libraryError-options.maxGap);
+			regionBegin = _max((int)0,(int)beginPos-options.libraryLength+readLength-options.libraryError-options.maxGap);
+			regionEnd = _min((int)beginPos,(int)beginPos-options.libraryLength+2*readLength+options.libraryError);
+			// expected end position of read
+			readRegions[i].i2 = - _min((int)beginPos,(int)beginPos-options.libraryLength+2*readLength);//+options.maxGap);
 		}
-//		readRegions[i].i1 = 0; //currently just ment for one chr at a time...
-		if(readRegions[i].i3 > options.maxReadRegionsEnd) options.maxReadRegionsEnd = readRegions[i].i3;
-		if(readRegions[i].i2 < options.minReadRegionsStart) options.minReadRegionsStart = readRegions[i].i2;
+//		readRegions[i].i1 = 0; //currently just ment for one chr at a time... need to add genomeId map
+		if(regionEnd > options.maxReadRegionsEnd) options.maxReadRegionsEnd = regionEnd;
+		if(regionBegin < options.minReadRegionsStart) options.minReadRegionsStart = regionBegin;
 		++i;
     }
 	if (options._debugLevel > 1 && kickoutcount > 0) 
@@ -1939,6 +1941,60 @@ int mapSplicedReads(
 }
 
 
+template<typename TValue, typename TRegion, typename TOptions>
+inline typename Value<TRegion,2>::Type
+regionStartPos(TRegion & readRegion,
+			   TValue readLength,
+			   TOptions & options)
+{
+	typedef typename Value<TRegion,2>::Type TSignedPos;
+
+	if(readRegion.i2 < 0)	// i2 stores expected end pos of match
+		return _max((TSignedPos)0, (TSignedPos)- readRegion.i2 - readLength - options.libraryError - options.maxGap);
+	else					// i2 stores expected start pos
+		return readRegion.i2 - options.libraryError;
+	
+}
+
+template<typename TValue, typename TRegion, typename TOptions>
+inline typename Value<TRegion,2>::Type
+regionEndPos(TRegion & readRegion,
+			   TValue readLength,
+			   TOptions & options)
+{
+	typedef typename Value<TRegion,2>::Type TSignedPos;
+
+	if(readRegion.i2 < 0)	// i2 stores expected end pos of match
+		return (TSignedPos)- readRegion.i2 + options.libraryError;
+	else					// i2 stores expected start pos
+		return readRegion.i2 +readLength + options.libraryError + options.maxGap;
+	
+}
+
+
+
+template<typename TMatch, typename TRegion, typename TOptions>
+inline bool
+isValidRegion(TMatch & mL,
+			   TMatch & mR,
+			   TRegion & readRegion,
+			   TOptions & options)
+{ 
+	if(readRegion.i2 < 0)	// mR.gEnd needs to lie within a specific region
+	{
+		if (mR.gEnd < -readRegion.i2 - options.libraryError ||
+			mR.gEnd > -readRegion.i2 + options.libraryError )
+			return false;
+	}
+	else					// mL.gBegin needs to lie within a specific region
+	{
+		if (mL.gBegin < readRegion.i2 - options.libraryError ||
+			mL.gBegin > readRegion.i2 + options.libraryError )
+			return false;
+	}
+	return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Find read matches in one genome sequence
 template <
@@ -2071,6 +2127,7 @@ void mapSplicedReads(
 	//	std::cout << "rEnd=" << rEndPos << "\t";	
 		//TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 		TRead const &read = readSet[rseqNo];
+		unsigned readLength = length(readSet[rseqNo]);
 		TSignedGPos extensionOffset = length(read)-2*options.minMatchLen;
 		if(!options.hammingOnly)
 			extensionOffset += static_cast<TGPos>(floor(options.errorRate*length(read)));
@@ -2078,7 +2135,7 @@ void mapSplicedReads(
 		if(!empty(readRegions) && (TSignedGPos)rBeginPos > options.maxReadRegionsEnd)
 			break;
 		if(!empty(readRegions) &&
-			((TSignedGPos)rEndPos < (TSignedGPos)readRegions[rseqNo].i2 || (TSignedGPos)rBeginPos > (TSignedGPos)readRegions[rseqNo].i3)) //parallelogram must lie within possible mapping region
+			((TSignedGPos)rEndPos < (TSignedGPos)regionStartPos(readRegions[rseqNo],readLength,options) || (TSignedGPos)rBeginPos > (TSignedGPos)regionEndPos(readRegions[rseqNo],readLength,options))) //parallelogram must lie within possible mapping region
 			continue;
 				
 		// Check this again... 
@@ -2105,8 +2162,8 @@ void mapSplicedReads(
 					break;
 				if ((TSignedGPos)gPair.i2 + maxDistance + extensionOffset >= (TSignedGPos)rEndPos
 					&& (empty(readRegions) ||
-					((TSignedGPos)gPair.i2 > (TSignedGPos)readRegions[swiftPatternL.curSeqNo].i2 
-					&& (TSignedGPos)gPair.i1 < (TSignedGPos)readRegions[swiftPatternL.curSeqNo].i3))) //parallelogram must lie within possible mapping region
+					((TSignedGPos)gPair.i2 > (TSignedGPos)regionStartPos(readRegions[swiftPatternL.curSeqNo],readLength,options)
+					&& (TSignedGPos)gPair.i1 < (TSignedGPos)regionEndPos(readRegions[swiftPatternL.curSeqNo],readLength,options)))) //parallelogram must lie within possible mapping region
 				//raus:if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
 				{
 					// link in
@@ -2173,6 +2230,8 @@ void mapSplicedReads(
 						noMatchRight = true;
 					lastRightMatch[rseqNo].i1 = mR.gBegin;
 					lastRightMatch[rseqNo].i2 = mR.gEnd;
+
+					// check here if the match lies within the candidate region!!!
 				}
 			}
 
@@ -2301,8 +2360,9 @@ void mapSplicedReads(
 					TMatch mRtmp = mR;
 					TMatch mLtmp = (*it).i2;
 					if(!empty(readRegions) &&
-						((TSignedGPos)mLtmp.gBegin < (TSignedGPos)readRegions[rseqNo].i2 ||
-					 	(TSignedGPos)mRtmp.gEnd > (TSignedGPos)readRegions[rseqNo].i3)) //match must lie within possible mapping region
+						isValidRegion(mLtmp,mRtmp,readRegions[rseqNo],options))
+//						((TSignedGPos)mLtmp.gBegin < (TSignedGPos)readRegions[rseqNo].i2 ||
+//					 	(TSignedGPos)mRtmp.gEnd > (TSignedGPos)readRegions[rseqNo].i3)) //match must lie within possible mapping region
 						continue; 
 					double t1 = sysTime();
 					if(options.spec.DONT_VERIFY || 

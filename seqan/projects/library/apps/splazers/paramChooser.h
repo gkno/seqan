@@ -777,7 +777,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 				razersOptions.hammingOnly = pm_options.optionHammingOnly;
 				int dummy=0;
 				assign(razersOptions.shape, shapeStrings[i]);
-				mapReads(matches, testGenome, testReads, dummy, razersOptions);
+				mapReads(matches, testGenome, testReads,dummy, dummy, razersOptions);
 #endif
 
 				// write shape with its properties into file

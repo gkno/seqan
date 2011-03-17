@@ -300,7 +300,7 @@ struct MicroRNA{};
 	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
 	typedef String<TMatch/*, MMap<>*/ >					TMatches;	// array of matches
 	//chrNo, startPos, endPos
-	typedef String<Triple<unsigned,Difference<TGenome>::Type,Difference<TGenome>::Type> >	TReadRegions;
+	typedef String<Pair<unsigned,MakeSigned_<Difference<TGenome>::Type>::Type > >	TReadRegions;
 
 
 	template <typename TSpec>
@@ -2240,7 +2240,7 @@ int mapReads(
 	return RAZERS_INVALID_SHAPE;
 }
 
-template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TCounts, typename TSpec>
+template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TReadRegions, typename TCounts, typename TSpec>
 int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
