@@ -129,9 +129,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
     // pattern
     typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
     TQGramIndex qgramIndex(queries);
- 
-	resize(indexShape(qgramIndex), options.qGram);
-
+    resize(indexShape(qgramIndex), options.qGram);
 	cargo(qgramIndex).abundanceCut = options.qgramAbundanceCut;
 	Pattern<TQGramIndex, Swift<SwiftLocal> > swiftPattern(qgramIndex);
 	

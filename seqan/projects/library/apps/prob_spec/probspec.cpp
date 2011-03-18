@@ -545,17 +545,16 @@ int main(int argc, const char *argv[]) {
     StringSet<CharString> databaseIDs;
 	if (!_importSequences(options.databaseFile, "database", databases, databaseIDs)) return 1;
 
-	// built qGram index on database and queries
+	// built qGram index on databases
 	typedef Index<TSequence, IndexQGram<SimpleShape> > TQGramIndex;
-	//typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
+	//	typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
+	//	typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape> > TQGramIndex;
 
-	// build index on queries and database
-
-	
     TQGramIndex qgramIndex(databases[0]);
-
 	resize(indexShape(qgramIndex), options.lengthExact);
 
+	::std::cout	<< "Exact match length " <<  options.lengthExact << ::std::endl;
+	
 	indexRequire(qgramIndex, QGramSADir());
 	indexRequire(qgramIndex, QGramDir());
 //	indexRequire(qgramIndex, QGramCounts());
@@ -571,28 +570,27 @@ int main(int argc, const char *argv[]) {
 	//TIterDir itDirend = end(indexDir(qgramIndex), Standard());
 	//	TSA& sa = getFibre(qgramIndex,QGramSA());
 	//	TDir& dir = getFibre(qgramIndex,QGramDir());
-	
-//	Finder<TQGramIndex> finder(qgramIndex);
-	
+		
 	for (unsigned int s=0; s < length(queries); s++) {
 		::std::cout << "Inspecting query " << s << " " << queries[s] << std::endl;
 		
-		TSequenceIt sit = begin(queries[s]);
-
+		TSequenceIt sit  = begin(queries[s]);
+		TSequenceIt send = end(queries[s])-options.lengthExact;
+		
 		unsigned hv = hash(indexShape(qgramIndex),sit);
 		Infix<Fibre<TQGramIndex, QGramSA>::Type const>::Type occs;
-			
-		for (sit; sit < end(queries[s])-options.lengthExact; sit++) { 
-	//		occs = getOccurrences(qgramIndex,indexShape(qgramIndex));
+
+		for (; sit != send; ) { 
+			occs = getOccurrences(qgramIndex, indexShape(qgramIndex));
+	//		orderOccurrences(occs);
+			for (unsigned i = 0; i < length(occs); ++i)
+				std::cout << occs[i] << std::endl;
+			sit++;
+			hv = hashNext(indexShape(qgramIndex),sit);
 
 			TSequence result;
 			unhash(result, hv, options.lengthExact);	
 			::std::cout << result <<  ::std::endl;
-			for(unsigned i = 0; i < length(occs); ++i)
-				::std::cout << occs[i] << ", ";
-			::std::cout << ::std::endl;
-	
-			hv = hashNext(indexShape(qgramIndex),sit);
 
 		}
 	}
