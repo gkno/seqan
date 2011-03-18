@@ -259,7 +259,7 @@ int mapReads(
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeNames, genomeFileNames, gnoToFileMap, readSet, stats, readNames, readFileNames[0], errorPrbFileName, options);
+		dumpMatches(matches, genomeNames, genomeFileNames, gnoToFileMap, readSet, readRegions, stats, readNames, readFileNames[0], errorPrbFileName, options);
 
 	return 0;
 }	

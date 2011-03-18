@@ -569,7 +569,7 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 		if ((*it).orientation == '-') continue;
 		if (readNo == ((*it).rseqNo >> 1))
 		{ 
-			if ((*it).pairScore <= scoreDistCutOff) continue;
+			if ((int)(*it).pairScore <= scoreDistCutOff) continue;
 			if (++hitCount >= hitCountCutOff)
 			{
 #ifdef RAZERS_MASK_READS

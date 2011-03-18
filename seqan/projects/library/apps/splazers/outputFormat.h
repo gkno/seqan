@@ -682,6 +682,7 @@ template <
 	typename TMatches,
 	typename TGenomeNames,
 	typename TReads,
+	typename TReadRegions,
 	typename TReadNames,
 	typename TCounts,
 	typename TSpec
@@ -692,6 +693,7 @@ void dumpMatches(
 	StringSet<CharString> &genomeFileNameList,	// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > &gnoToFileMap, //map to retrieve genome filename and sequence number within that file
 	TReads const &reads,
+	TReadRegions const &readRegions,
 	TCounts & stats,							// Match statistics (possibly empty)
 	TReadNames const &readIDs,					// Read names (read from Fasta file, currently unused)
 	CharString readFName,					// read name (e.g. "reads.fa"), used for file/read naming
@@ -1446,6 +1448,11 @@ void dumpMatches(
 				if(mL.gEnd != mR.gBegin) indelLen = mR.gBegin - mL.gEnd;
 				
 				file << ";pairScore=" << (unsigned int) mR.pairScore;
+				if(!empty(readRegions) && options.anchored)
+				{
+					if(readRegions[currReadNo].i2 < 0) file << ";libraryError=" << (int) mR.gEnd +readRegions[currReadNo].i2 ;
+					else file << ";libraryError=" << (int) mL.gBegin - readRegions[currReadNo].i2 ;
+				}
 
 //				if(mR.traceExtension >= abs(indelLen))
 //					file << ";traceExt=" << (unsigned int) mR.traceExtension;

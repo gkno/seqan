@@ -2245,7 +2245,10 @@ int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
 	TReadSet &				readSet, 
-	TReadRegions &			readRegions,
+	TReadRegions &	
+#ifdef RAZERS_SPLICED
+	readRegions,
+#endif
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {

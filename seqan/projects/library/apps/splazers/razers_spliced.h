@@ -331,8 +331,8 @@ bool loadReadsSam(
 			readRegions[i].i2 = - _min((int)beginPos,(int)beginPos-options.libraryLength+2*readLength);//+options.maxGap);
 		}
 //		readRegions[i].i1 = 0; //currently just ment for one chr at a time... need to add genomeId map
-		if(regionEnd > options.maxReadRegionsEnd) options.maxReadRegionsEnd = regionEnd;
-		if(regionBegin < options.minReadRegionsStart) options.minReadRegionsStart = regionBegin;
+		if(regionEnd > (TContigPos) options.maxReadRegionsEnd) options.maxReadRegionsEnd = (unsigned) regionEnd;
+		if(regionBegin < (TContigPos)options.minReadRegionsStart) options.minReadRegionsStart = (unsigned) regionBegin;
 		++i;
     }
 	if (options._debugLevel > 1 && kickoutcount > 0) 
@@ -378,7 +378,7 @@ void compactSplicedMatches(TMatches &matches,
 		if ((*it).orientation == '-') { ++it; continue; }
 		if (readNo == (*it).rseqNo)
 		{ 
-			if ((*it).pairScore <= scoreDistCutOff)
+			if ((int)(*it).pairScore <= scoreDistCutOff)
 			{
 				++it;
 				continue;
@@ -474,7 +474,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 		if ((*it).orientation == '-') { ++it; continue; }
 		if (readNo == (*it).rseqNo) // current match is either multi or suboptimal
 		{ 
-			if ((*it).pairScore <= scoreDistCutOff)
+			if ((int)(*it).pairScore <= scoreDistCutOff)
 			{
 				++it;
 				continue;
@@ -483,7 +483,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 			{
 				if (hitCount == hitCountCutOff)
 				{
-					if ((*it).pairScore == bestScore)
+					if ((int)(*it).pairScore == bestScore)
 					{
 						if(state == 0)
 							state = 1; // the match before is multi
@@ -500,7 +500,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 				++it;
 				continue;
 			}
-			if ((*it).pairScore == bestScore)
+			if ((int)(*it).pairScore == bestScore)
 			{
 				if(state == 0)
 				{
@@ -511,7 +511,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 					appendValue(states, state); // either current match is multi or suboptimal, same state
 				//std::cout << "state = "<< state << " for PairId = " << lastPairId << std::endl;
 			}
-			if ((*it).pairScore < bestScore)
+			if ((int)(*it).pairScore < bestScore)
 			{
 				appendValue(states, state); // either current match is suboptimal, state before is what it was
 				//std::cout << "state = "<< state << " for PairId = " << lastPairId << std::endl;
@@ -2132,7 +2132,7 @@ void mapSplicedReads(
 		if(!options.hammingOnly)
 			extensionOffset += static_cast<TGPos>(floor(options.errorRate*length(read)));
 		// passed all valid regions
-		if(!empty(readRegions) && (TSignedGPos)rBeginPos > options.maxReadRegionsEnd)
+		if(!empty(readRegions) && (TSignedGPos)rBeginPos > (TSignedGPos)options.maxReadRegionsEnd)
 			break;
 		if(!empty(readRegions) &&
 			((TSignedGPos)rEndPos < (TSignedGPos)regionStartPos(readRegions[rseqNo],readLength,options) || (TSignedGPos)rBeginPos > (TSignedGPos)regionEndPos(readRegions[rseqNo],readLength,options))) //parallelogram must lie within possible mapping region
@@ -2158,7 +2158,7 @@ void mapSplicedReads(
 				gPair.i1 += scanBegin;
 				gPair.i2 += scanBegin;
 			//	std::cout << "lBegin=" << gPair.i1 << "\t";	
-				if(!empty(readRegions) && (TSignedGPos)gPair.i1 > options.maxReadRegionsEnd)
+				if(!empty(readRegions) && (TSignedGPos)gPair.i1 > (TSignedGPos) options.maxReadRegionsEnd)
 					break;
 				if ((TSignedGPos)gPair.i2 + maxDistance + extensionOffset >= (TSignedGPos)rEndPos
 					&& (empty(readRegions) ||
@@ -2360,7 +2360,7 @@ void mapSplicedReads(
 					TMatch mRtmp = mR;
 					TMatch mLtmp = (*it).i2;
 					if(!empty(readRegions) &&
-						isValidRegion(mLtmp,mRtmp,readRegions[rseqNo],options))
+						!isValidRegion(mLtmp,mRtmp,readRegions[rseqNo],options))
 //						((TSignedGPos)mLtmp.gBegin < (TSignedGPos)readRegions[rseqNo].i2 ||
 //					 	(TSignedGPos)mRtmp.gEnd > (TSignedGPos)readRegions[rseqNo].i3)) //match must lie within possible mapping region
 						continue; 
