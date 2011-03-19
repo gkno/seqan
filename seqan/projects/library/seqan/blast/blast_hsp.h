@@ -182,7 +182,7 @@ _parseBlastHsp(TFile & file,
 			TChar & c, 
 			BlastHsp<NucleotideBlast<TSpec>,FullInfo > & hsp)
 {
-//IOREV _todo_
+//IOREV _hasCRef_
 SEQAN_CHECKPOINT
 	typedef typename Position<TFile>::Type TPosition;
 	

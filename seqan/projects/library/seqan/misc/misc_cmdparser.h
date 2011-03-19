@@ -51,7 +51,7 @@ template<typename TChar>
 inline bool
 _isDigit(TChar const c)
 {
-//IOREV _todo_
+//IOREV _nodoc_ use ctype's isdigit instead
     return (c >= '0') && (c <= '9');
 }
 
@@ -59,7 +59,7 @@ template<typename TString>
 inline bool
 _isDouble(TString const s)
 {
-//IOREV _todo_
+//IOREV _nodoc_ maybe better to stream to double and back and see if its the same
     bool _dot = true;
     unsigned l = length(s);
     unsigned i = 0;
@@ -81,7 +81,7 @@ template<typename TString>
 inline bool
 _isInt(TString const s)
 {
-//IOREV _todo_
+//IOREV _nodoc_ somebody doesn't like for-loops
     unsigned l = length(s);
     unsigned i = 0;
     // skip leading sign
@@ -595,7 +595,7 @@ template <typename TStream>
 inline void
 _writeOptName(TStream & target, CommandLineOption const & me)
 {
-//IOREV _todo_
+//IOREV _notio_ irrelevant for iorev
     _streamWrite(target, empty(shortName(me)) ? "" : "-");
     _streamWrite(target, shortName(me));
     _streamWrite(target, (empty(shortName(me)) || empty(longName(me))) ? "" : ", ");
@@ -612,7 +612,7 @@ template <typename TStream>
 inline void
 write(TStream & target, CommandLineOption const & me)
 {
-//IOREV _todo_
+//IOREV _nodoc_ this specialization is not documented
     _streamPut(target,'\t');
     _writeOptName(target, me);
     _streamPut(target,'\t');
@@ -624,6 +624,7 @@ template <typename TStream>
 inline TStream &
 operator << (TStream & target, CommandLineOption const & source)
 {
+//IOREV _nodoc_ this specialization is not documented
     write(target, source);
     return target;
 }
@@ -1182,7 +1183,7 @@ _allMandatorySet(CommandLineParser const & me)
 inline CharString
 _parseAppName(CharString const & candidate)
 {
-//IOREV _todo_
+//IOREV _notio_ irrelevant for io-revision
     int i = length(candidate) - 1;
 	
     for(; i >= 0; --i)

@@ -44,6 +44,20 @@
 #endif
 
 
+/* IOREV
+ *
+ * _nodoc_
+ * _tested_
+ * _windows_
+ *
+ * 
+ * used by file/file_format_mmap.h and some apps
+ * no documentation at all
+ * 
+ */
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -53,6 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     class Directory
     {
+//IOREV _nodoc_ _windows_
 	protected:
 	
 		intptr_t			handle;
@@ -106,6 +121,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	open(Directory &dir, char const *dirName)
 	{
+//IOREV _nodoc_
 		CharString selection = dirName;
 		append(selection, "\\*");
 		dir._atEnd = ((dir.handle = _findfirst(toCString(selection), &dir.entry)) == -1L);
@@ -115,7 +131,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	close(Directory &dir)
 	{
-		int result = 0;
+//IOREV _nodoc_
+        int result = 0;
 		if (dir.handle)
 			result = _findclose(dir.handle);
 
@@ -127,31 +144,36 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline char const *
 	value(Directory &dir)
 	{
+//IOREV _nodoc_
 		return dir.entry.name;
 	}
 
 	inline char const *
 	value(Directory const &dir)
 	{
-		return dir.entry.name;
+//IOREV _nodoc_
+        return dir.entry.name;
 	}
 
 	inline Directory &
 	goNext(Directory &dir)
 	{
-		dir._atEnd = (_findnext(dir.handle, &dir.entry) != 0);
+//IOREV _nodoc_
+        dir._atEnd = (_findnext(dir.handle, &dir.entry) != 0);
 		return dir;
 	}
 
 	inline bool
 	atEnd(Directory &dir)
 	{
+//IOREV _nodoc_
 		return dir._atEnd;
 	}
 	
 	inline bool
 	atEnd(Directory const &dir)
 	{
+//IOREV _nodoc_
 		return dir._atEnd;
 	}
 	
@@ -165,6 +187,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     class Directory
     {
+//IOREV _nodoc_
 	protected:
 	
 		DIR		*handle;
@@ -218,6 +241,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	open(Directory &dir, char const *dirName)
 	{
+//IOREV _nodoc_
 		if ((dir.handle = opendir(dirName)) != NULL)
 		{
 			goNext(dir);
@@ -230,7 +254,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	close(Directory &dir)
 	{
-		int result = 0;
+//IOREV _nodoc_
+        int result = 0;
 		if (dir.handle != NULL)
 			result = closedir(dir.handle);
 
@@ -242,39 +267,45 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline char const *
 	value(Directory &dir)
 	{
-		return dir.it->d_name;
+//IOREV _nodoc_
+        return dir.it->d_name;
 	}
 
 	inline char const *
 	value(Directory const &dir)
 	{
-		return dir.it->d_name;
+//IOREV _nodoc_
+        return dir.it->d_name;
 	}
 
 	inline Directory &
 	goBegin(Directory &dir)
 	{
-		rewinddir(dir.handle);
+//IOREV _nodoc_
+        rewinddir(dir.handle);
 		return goNext(dir);
 	}
 
 	inline Directory &
 	goNext(Directory &dir)
 	{
-		dir.it = readdir(dir.handle);
+//IOREV _nodoc_
+        dir.it = readdir(dir.handle);
 		return dir;
 	}
 
 	inline bool
 	atEnd(Directory &dir)
 	{
-		return dir.it == NULL;
+//IOREV _nodoc_
+        return dir.it == NULL;
 	}
 	
 	inline bool
 	atEnd(Directory const &dir)
 	{
-		return dir.it == NULL;
+//IOREV _nodoc_
+        return dir.it == NULL;
 	}
 	
 #endif

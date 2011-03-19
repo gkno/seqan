@@ -466,7 +466,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-//IOREV _todo_
+//IOREV _nodoc_ specialization not documented
 SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> const TAlign;
 	typedef typename Row<TAlign>::Type TRow;

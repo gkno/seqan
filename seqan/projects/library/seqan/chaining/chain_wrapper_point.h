@@ -117,7 +117,7 @@ namespace seqan{
 	bool 
 	_isEnd( WrapperPoint_< TFragType > & me )
 	{
-//IOREV _todo_
+//IOREV _notio_
 		return me._end;
 	}
 
@@ -125,7 +125,7 @@ namespace seqan{
 	bool 
 	_isEnd( const WrapperPoint_< TFragType > & me )
 	{
-//IOREV _todo_
+//IOREV _notio_
 		return me._end;
 	}
 	
@@ -133,7 +133,7 @@ namespace seqan{
 	bool
 	_isBegin( WrapperPoint_< TFragType > & me )
 	{
-//IOREV _todo_
+//IOREV _notio_
 		return !me._end;
 	}
 
@@ -141,7 +141,7 @@ namespace seqan{
 	bool
 	_isBegin( const WrapperPoint_< TFragType > & me )
 	{
-//IOREV _todo_
+//IOREV _notio_
 		return !me._end;
 	}
 

@@ -37,6 +37,25 @@
 #ifndef SEQAN_HEADER_FILE_ASYNC_H
 #define SEQAN_HEADER_FILE_ASYNC_H
 
+/* IOREV
+ *
+ * _tested_
+ * _nodoc_
+ *
+ * contains third way of file-io, low level platform specific, i.e. fd for
+ * POSIX and handles for WINDOWS
+ *
+ * not clear in which places this is used exactly
+ *
+ * SEQAN_DIRECTIO used on UNIX, not sure exactly what it does
+ * use of other macros unclear aswell
+ *
+ * not sure about all the AsyncRequest stuff, as most related calls are
+ * deactivated in code, see also file/file_base.h
+ *
+ */
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -53,7 +72,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
 	class File<Async<TSpec> >
     {
-//IOREV _todo_
+//IOREV _windows_
     public:
 
         typedef LONGLONG    FilePtr;
@@ -374,6 +393,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // queue specific functions
 
     inline bool waitFor(aiocb_win32 &request) {
+//IOREV _doc_ 
         SEQAN_PROTIMESTART(tw);
 		if (!waitFor(request.xmitDone, 60000))
             ::std::cerr << "waitFor timeout" << ::std::endl;
@@ -383,6 +403,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TTime >
     inline bool waitFor(aiocb_win32 &request, TTime timeout_millis) {
+//IOREV _doc_ 
         SEQAN_PROTIMESTART(tw);
 		bool result = waitFor(request.xmitDone, timeout_millis);
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
@@ -391,6 +412,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSize >
 	inline TSize waitForAny(aiocb_win32 const * const contexts[], TSize count, DWORD timeout_millis = Event::Infinite) {
+//IOREV _nodoc_ 
         Event::Handle *handles = new Event::Handle[count];
         for(TSize i = 0; i < count; ++i)
             handles[i] = contexts[i]->xmitDone.hEvent;
@@ -406,11 +428,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec>
     inline bool cancel(File<Async<TSpec> > & me, aiocb_win32 const &request) {
+//IOREV _doc_ 
         return CancelIo(me.handleAsync);
     }
 
 	template <typename TSpec>
     inline bool flush(File<Async<TSpec> > & me) {
+//IOREV _doc_ 
 		if (me.handle != me.handleAsync)	// in case of equality no direct access was done -> no flush needed
         	return FlushFileBuffers(me.handle) != 0;
         else
@@ -418,7 +442,9 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TSpec, typename AsyncRequest >
-    inline void release(File<Async<TSpec> > & me, AsyncRequest & request) { }
+    inline void release(File<Async<TSpec> > & me, AsyncRequest & request) {
+//IOREV _nodoc_ 
+    }
 
 
 /*        
@@ -593,6 +619,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			 TSize count,
 			 TagAllocateAligned const)
 	{
+//IOREV _doc_ 
 		data = (TValue *) VirtualAlloc(NULL, count * sizeof(TValue), MEM_COMMIT, PAGE_READWRITE);
         if (data)
             SEQAN_PROADD(SEQAN_PROMEMORY, count * sizeof(TValue));
@@ -610,6 +637,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TSize count,
 				TagAllocateAligned const)
 	{
+//IOREV _doc_ 
 		if (data) {
 			VirtualFree(data, 0, MEM_RELEASE);
 			if (count)	// .. to use count if SEQAN_PROFILE is not defined
@@ -623,7 +651,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
     class File<Async<TSpec> > : public File<Sync<TSpec> >
     {
-//IOREV _todo_
+//IOREV _nodoc_ members are not well documented
     public:
 
         typedef File<Sync<TSpec> >  Base;
@@ -708,6 +736,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
     struct AsyncRequest<File<Async<TSpec> > >
     {
+//IOREV _doc_ 
 		typedef aiocb Type;
     };
 /*
@@ -724,6 +753,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //    enum { AsyncIOSignal_ = SIGIO };
 
 	inline void printRequest(aiocb &request, const char *_hint = NULL) {
+//IOREV _nodoc_ _notinlined_
 		::std::cerr << ::std::hex;
 		if (_hint)
 			::std::cerr << _hint << ::std::endl;
@@ -740,6 +770,7 @@ namespace SEQAN_NAMESPACE_MAIN
     bool asyncReadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb &request)
     {
+//IOREV _doc_ _notinlined_
         SEQAN_PROTIMESTART(tw);
         memset(&request, 0, sizeof(aiocb));
         request.aio_fildes = me.handleAsync;
@@ -779,6 +810,7 @@ namespace SEQAN_NAMESPACE_MAIN
     bool asyncWriteAt(File<Async<TSpec> > & me, const TValue *memPtr, TSize const count, TPos const fileOfs,
         aiocb &request)
     {
+//IOREV _doc_ _notinlined_
         SEQAN_PROTIMESTART(tw);
         memset(&request, 0, sizeof(aiocb));
         request.aio_fildes = me.handleAsync;
@@ -816,6 +848,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec>
     inline bool flush(File<Async<TSpec> > & me) {
+//IOREV _doc_ 
 		#if _POSIX_SYNCHRONIZED_IO > 0
 			return me.handle == me.handleAsync || fdatasync(me.handle) == 0;
 		#else
@@ -827,6 +860,7 @@ namespace SEQAN_NAMESPACE_MAIN
     // queue specific functions
 
 	inline bool waitFor(aiocb &request) {
+//IOREV _doc_ 
 /*		#ifdef SEQAN_VVERBOSE
 			printRequest(request, "aio_suspend():");
 		#endif
@@ -847,6 +881,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	inline bool waitFor(aiocb &request, long timeout_millis) {
+//IOREV _doc_ 
 /*		#ifdef SEQAN_VVERBOSE
 			printRequest(request, "aio_suspend_timeout():");
 		#endif
@@ -878,6 +913,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSize >
 	inline TSize waitForAny(aiocb const * const contexts[], TSize count) {
+//IOREV _nodoc_ 
         SEQAN_PROTIMESTART(tw);
 		bool result = aio_suspend(contexts, count, NULL);
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
@@ -886,6 +922,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSize >
 	inline TSize waitForAny(aiocb const * const contexts[], TSize count, long timeout_millis) {
+//IOREV _nodoc_ 
         timespec ts;
         ts.tv_sec = timeout_millis / 1000;
         ts.tv_nsec = (timeout_millis % 1000) * 1000;
@@ -897,6 +934,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec>
     inline bool cancel(File<Async<TSpec> > & me, aiocb &request) {
+//IOREV _doc_ 
 /*		#ifdef SEQAN_VVERBOSE
 			printRequest(request, "aio_cancel():");
 		#endif
@@ -904,15 +942,19 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     inline int error(aiocb const & request) {
+//IOREV _nodoc_ 
         return aio_error(&request);
     }
 
     inline int _returnValue(aiocb & request) {
+//IOREV _nodoc_ 
         return aio_return(&request);
     }
 
 	template <typename TSpec>
-    inline void release(File<Async<TSpec> > & /*me*/, aiocb const & /*request*/) {}
+    inline void release(File<Async<TSpec> > & /*me*/, aiocb const & /*request*/) {
+//IOREV _nodoc_ 
+    }
 
 /*
     typedef void (*sighandler_t)(int);
@@ -950,6 +992,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			 TSize count,
 			 TagAllocateAligned const)
 	{
+//IOREV _doc_ 
 		data = (TValue *) ::valloc(count * sizeof(TValue));
 #ifdef SEQAN_PROFILE 
         if (data)
@@ -975,6 +1018,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					,
 				TagAllocateAligned const)
 	{
+//IOREV _doc_ 
 #ifdef SEQAN_PROFILE 
         if (data && count)	// .. to use count if SEQAN_PROFILE is not defined
 			SEQAN_PROSUB(SEQAN_PROMEMORY, count * sizeof(TValue));
@@ -984,6 +1028,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec, typename TSize >
     inline void resize(File<Async<TSpec> > &me, TSize new_length) {
+//IOREV _doc_ 
 		me.resize(new_length);
     }
 	
@@ -996,18 +1041,21 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
     struct Size< File<Async<TSpec> > >
     {
+//IOREV
         typedef typename File<Async<TSpec> >::SizeType Type;
     };
 
 	template <typename TSpec>
     struct Position< File<Async<TSpec> > >
     {
+//IOREV
         typedef typename File<Async<TSpec> >::FilePtr Type;
     };
 
 	template <typename TSpec>
     struct Difference< File<Async<TSpec> > >
     {
+//IOREV
         typedef typename File<Async<TSpec> >::FilePtr Type;
     };
 
@@ -1019,6 +1067,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			  TValue * & data, 
 			  TSize count)
 	{
+//IOREV _doc_ 
 		allocate(me, data, count, TagAllocateAligned());
 	}
 
@@ -1028,6 +1077,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				TValue * data, 
 				TSize count)
 	{
+//IOREV _doc_ 
 		deallocate(me, data, count, TagAllocateAligned());
 	}
 

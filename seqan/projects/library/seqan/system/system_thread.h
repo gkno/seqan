@@ -51,7 +51,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename Worker>
     struct Thread
     {
-//IOREV _todo_
+//IOREV _notio_
         typedef HANDLE Handle;
 
         Handle hThread;
@@ -117,7 +117,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename Worker>
     struct Thread
     {
-//IOREV _todo_
+//IOREV _notio_
         typedef pthread_t* Handle;
 
         pthread_t data, *hThread;

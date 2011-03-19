@@ -51,7 +51,7 @@ template<typename TFile, typename TChar>
 inline String<char>
 _parseReadAlignmentString(TFile & file, TChar& c)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_ 
 SEQAN_CHECKPOINT
 	// Read word
 	String<char> str(c);
@@ -76,7 +76,7 @@ _parseReadQueryAndDBName(TFile & file,
 						  String<char> & query_name,
 						  String<char> & db_name)
 {
-//IOREV _todo_
+//IOREV
 SEQAN_CHECKPOINT
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;

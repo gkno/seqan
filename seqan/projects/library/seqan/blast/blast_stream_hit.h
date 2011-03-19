@@ -76,7 +76,7 @@ _parseBlastHit(TFile & file,
 			TChar & c, 
 			BlastHit<TBlastSpec,StreamReport<TFile> > & hit)
 {
-//IOREV _todo_
+//IOREV
 	typedef typename Position<TFile>::Type TPosition;
 	typedef BlastHit<TBlastSpec,StreamReport<TFile> > TBlastHit;
 	typedef typename Hsp<TBlastHit>::Type TBlastHsp;

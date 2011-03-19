@@ -1117,7 +1117,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-//IOREV _todo_
+//IOREV _nodoc_ specialization not documented
 SEQAN_CHECKPOINT
 //	_streamWriteRange(target, begin(source), end(source));
 
@@ -1142,6 +1142,7 @@ inline TStream &
 operator << (TStream & target, 
 			 Gaps<TSource, TSpec> const & source)
 {
+//IOREV _nodoc_ specialization not documented
 SEQAN_CHECKPOINT
 	write(target, source);
 	return target;

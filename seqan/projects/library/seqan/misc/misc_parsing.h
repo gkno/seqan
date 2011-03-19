@@ -52,6 +52,10 @@
  * version to make sure
  *
  * Also in general atof should be replaced with strod, atoi with strtol etc
+ *
+ * it should also be noted that there are standard C functions in ctype.h
+ * for the _is* cases, e.g. isspace(), isdigit() isprint(), isalnum() etc
+ * why don't we use these?
  * 
  */
 

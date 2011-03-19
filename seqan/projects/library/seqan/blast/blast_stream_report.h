@@ -43,6 +43,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template<typename TBlastHsp, typename TFile>
 class BlastReport<TBlastHsp, StreamReport<TFile> > 
 {
+//IOREV maybe think about making this a proper file format specialization
 	public:
 		typedef BlastHit<TBlastHsp,StreamReport<TFile> > TBlastHit_;
 		typedef typename Position<TFile>::Type TPosition_;
@@ -102,7 +103,7 @@ read(TFile & file,
 	 BlastReport<TBlastHsp, StreamReport<TFile> >& blastObj,	 
 	 Tag<TagBlast_>) 
 {
-//IOREV _todo_
+//IOREV _nodoc_ specialization not documented
 SEQAN_CHECKPOINT
  
 

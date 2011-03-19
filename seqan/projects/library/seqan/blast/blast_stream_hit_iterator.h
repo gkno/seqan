@@ -422,7 +422,7 @@ inline void
 _getNextHitFilePos(TFile & file,
 				  Iter<BlastReport<TBlastHsp, StreamReport<TFile> >, StreamBlastIterator<HitIterator> >& it)
 {
-//IOREV _todo_
+//IOREV maybe think about extra blast file format in file/
 	typedef typename Position<TFile>::Type TPosition;
 
 	_streamSeekG(file,it.data_pos);

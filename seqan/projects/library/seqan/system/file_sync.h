@@ -50,6 +50,23 @@
 #endif
 
 
+/* IOREV
+ *
+ * _tested_
+ * _nodoc_
+ *
+ * contains third way of file-io, low level platform specific, i.e. fd for
+ * POSIX and handles for WINDOWS
+ *
+ * not clear in which places this is used exactly
+ *
+ * SEQAN_DIRECTIO used on UNIX, not sure exactly what it does
+ * use of other macros unclear aswell
+ *
+ */
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -67,7 +84,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
 	class File<Sync<TSpec> >
     {
-//IOREV _todo_
+//IOREV _windows_ _nodoc_
     public:
 
 		typedef __int64			FilePtr;
@@ -183,14 +200,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	inline bool fileExists(const char *fileName) 
 	{
-//IOREV _todo_
+//IOREV _windows_ _nodoc_
 		struct _stat buf;
 		return _stat(fileName, &buf) == 0;
 	}
 
 	inline bool fileUnlink(const char *fileName) 
 	{
-//IOREV _todo_
+//IOREV _windows_ _nodoc_
 		return _unlink(fileName) == 0;
 	}
 
@@ -201,7 +218,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
 	class File<Sync<TSpec> >
     {
-//IOREV _todo_
+//IOREV __nodoc_
     public:
 
 		typedef off_t			FilePtr;
@@ -373,20 +390,21 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	inline bool fileExists(const char *fileName)
 	{
-//IOREV _todo_
+//IOREV _nodoc_
 		struct stat buf;
 		return stat(fileName, &buf) != -1;
 	}
 
 	inline bool fileUnlink(const char *fileName)
 	{
-//IOREV _todo_
+//IOREV _noddoc_
 		return unlink(fileName) == 0;
 	}
 
     template < typename TSpec, typename TSize >
     inline void resize(File<Sync<TSpec> > &me, TSize new_length)
 	{
+//IOREV _doc_ 
 		me.resize(new_length);
     }
 
@@ -398,30 +416,33 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
     struct Size< File<Sync<TSpec> > >
     {
+//IOREV
         typedef typename File<Sync<TSpec> >::SizeType Type;
     };
 
 	template <typename TSpec>
     struct Position< File<Sync<TSpec> > >
     {
+//IOREV
         typedef typename File<Sync<TSpec> >::FilePtr Type;
     };
 
 	template <typename TSpec>
     struct Difference< File<Sync<TSpec> > >
     {
+//IOREV
         typedef typename File<Sync<TSpec> >::FilePtr Type;
     };
 
     template < typename TSpec, typename TValue, typename TSize >
     inline bool read(File<Sync<TSpec> > & me, TValue *memPtr, TSize const count) {
-//IOREV _todo_
+//IOREV
 		return (int) me.read(memPtr, count * sizeof(TValue)) == (int) (count * sizeof(TValue));
     }
     
     template < typename TSpec, typename TValue, typename TSize >
     inline bool write(File<Sync<TSpec> > & me, TValue const *memPtr, TSize const count) {
-//IOREV _todo_
+//IOREV
 		return (int) me.write(memPtr, count * sizeof(TValue)) == (int) (count * sizeof(TValue));
     }
 
