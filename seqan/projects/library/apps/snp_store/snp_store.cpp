@@ -52,54 +52,6 @@
 using namespace std;
 using namespace seqan;
 
-// get reference file names
-template<typename TOptions>
-int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, TOptions &options)
-{
-//IOREV _todo_
-	::std::ifstream file;
-	file.open(filename,::std::ios_base::in | ::std::ios_base::binary);
-	if(!file.is_open())
-		return CALLSNPS_GENOME_FAILED;
-	
-	CharString nameStr;
-	char c = _streamGet(file);
-	if (c != '>' && c != '@')	//if file does not start with a fasta header --> list of multiple reference genome files
-	{
-		if(options._debugLevel >=1)
-			::std::cout << ::std::endl << "Reading multiple genome files:" <<::std::endl;
-		/*		//locations of genome files are relative to list file's location
-		 ::std::string tempGenomeFile(filename);
-		 size_t lastPos = tempGenomeFile.find_last_of('/') + 1;
-		 if (lastPos == tempGenomeFile.npos) lastPos = tempGenomeFile.find_last_of('\\') + 1;
-		 if (lastPos == tempGenomeFile.npos) lastPos = 0;
-		 ::std::string filePrefix = tempGenomeFile.substr(0,lastPos);*/
-		unsigned i = 1;
-		while(!_streamEOF(file))
-		{
-			clear(nameStr);
-			_parseSkipWhitespace(file, c);
-			while ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r'))
-			{
-				appendValue(nameStr,c,Generous());
-				c = _streamGet(file);
-			}
-			appendValue(genomeFileNames,nameStr,Generous());
-			if(options._debugLevel >=2)
-				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
-			++i;
-			_parseSkipWhitespace(file, c);
-		}
-		if(options._debugLevel >=1)
-			::std::cout << i-1 << " genome files total." <<::std::endl;
-	}
-	else		//if file starts with a fasta header --> regular one-genome-file input
-		appendValue(genomeFileNames,filename,Generous());
-	file.close();
-	return 0;
-	
-}
-
 template<typename TFragmentStore, typename TStr>
 void
 _dumpMatches(TFragmentStore &fragmentStore, TStr str)
@@ -182,46 +134,6 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList, ::std
 
 
 
-//read filename (read line and trim trailing whitespaces)
-template<typename TFile, typename TChar, typename TString>
-void
-_parseReadWordUntilWhitespace(TFile& file, TString& str, TChar& c)
-{
-//IOREV _todo_
-	append(str,c);
-	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
-		c = _streamGet(file);
-		return;
-	}
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
-		append(str, c);
-	}
-	return;
-}
-
-
-
-//read filename (read line and trim trailing whitespaces)
-template<typename TFile, typename TChar>
-void
-_parse_skipUntilWhitespace(TFile& file, TChar& c)
-{
-//IOREV _todo_
-	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
-		c = _streamGet(file);
-		return;
-	}
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
-	}
-	return;
-}
-
-
-
 
 // transform global cooridnates to coordinates relative to chromosomal segment
 template<typename TFragmentStore, typename TContigPos, typename TOptions>
@@ -268,7 +180,7 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
 	typedef typename Id<TFragmentStore>::Type					TId;
 	typedef typename Value<TReadClips>::Type 					TPair;
 	
-	SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.alignQualityStore));
+	SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore),length(fragmentStore.alignQualityStore));
 	
 	::std::sort(begin(fragmentStore.alignedReadStore, Standard()), end(fragmentStore.alignedReadStore, Standard()), LessGPos<TMatch>());	
 	
@@ -646,527 +558,6 @@ clipReads(TFragmentStore 	&fragmentStore,
 
 
 
-
-/////////////////////////////////////////////////////////////
-// read sorted(!) Gff input file containing mapped reads
-template <
-typename TFile,
-typename TFragmentStore,
-typename TReadCounts,
-typename TCigarStr,
-typename TGenome,
-typename TGenomeIdMap,
-typename TContigPos,
-typename TSize,
-typename TValue,
-typename TOptions
->
-int readMatchesFromGFF_Batch(
-							 TFile			 		&file,
-							 TFragmentStore 				&fragmentStore,				// forward/reverse fragmentStore.alignedReadStore
-							 TReadCounts				&readCounts,
-							 String<Pair<int,int> >			&readClips,
-							 StringSet<TCigarStr>			&readCigars,
-							 TGenome					&genome,
-							 TGenomeIdMap				&gIdStringToIdNumMap,
-							 TSize					currSeqNo,
-							 TContigPos				currentBegin,
-							 TContigPos				currentEnd,
-							 TValue					&highestChrId,
-							 TOptions				&options)
-{
-//IOREV _todo_
-	
-	
-	typedef typename TFragmentStore::TAlignedReadStore 	TMatches;
-	typedef typename Value<TMatches>::Type 			TMatch;
-	typedef typename TFragmentStore::TAlignQualityStore 	TMatchQualities;
-	typedef typename Value<TMatchQualities>::Type 		TMatchQuality;
-	typedef typename TFragmentStore::TReadSeqStore		TReads;
-	typedef typename Value<TReads>::Type 			TRead;
-	typedef typename TFragmentStore::TReadStore		TReadStore;
-	typedef typename Value<TReadStore>::Type		TReadStoreElement;
-	typedef typename Value<TCigarStr>::Type			TCigar;
-	typedef typename Value<TReads>::Type 			TRead;
-	typedef typename TFragmentStore::TContigStore	 	TGenomeSet;
-	typedef typename Id<TFragmentStore>::Type 		TId;
-	typedef typename Iterator<TMatches,Standard>::Type 	TMatchIterator;
-	
-	
-	if(length(fragmentStore.readSeqStore)!=length(fragmentStore.alignQualityStore))
-	{
-		::std::cerr << "Lengths need to be equal!!\n";
-		return 10;
-	}
-	int readCount = length(fragmentStore.readSeqStore);
-	TContigPos genomeLen = length(genome);
-	
-	// general stuff that is needed
-	typename TGenomeIdMap::const_iterator it;
-	unsigned rSeq = readCount;
-	Dna5String gInf;
-	String<Dna5Q> curr_read;
-	TCigarStr tmpCigarStr;
-	CharString readTemplate, temp_read;
-	CharString readName, temp_str;
-	String<int> gAliPos;
-	
-	//	bool test = true;
-	
-	char c = _streamGet(*file);
-	while (!_streamEOF(*file))
-	{
-		// our razers gff output looks like this:
-		//X       razers      read            100919085       100919120       2       +       .       ID=s_3_1_3;unique;mutations=34A;quality=I)IEIIII-7IA>IIIIII07,-%I>)&#029.2-.
-		
-		typename std::ifstream::pos_type lineStart = (*file).tellg();
-		lineStart = lineStart - (std::ifstream::pos_type) 1;
-		
-		TId contigId;
-		
-		// clear temporary variables
-		clear(temp_str);
-		clear(temp_read);
-		
-		unsigned pos= 0;
-		unsigned pos2 = 0;
-		int clipLeft = 0;
-		int clipRight = 0;
-		unsigned readCount = 0;
-		bool qualityFound = false;
-		bool readFound = false;
-		char orientation = 'F';
-		bool hasIndel = false;
-		int editDist = 0;
-		int mScore = 100;
-		_parseSkipWhitespace(*file, c);
-		
-		// skip whitespaces just in case (actually there shouldnt be a whitespace at the beginning of a line)
-		// and read entry in column 1  --> genomeID
-		_parseReadWordUntilWhitespace(*file,temp_str,c); 
-		
-		//check if the genomeID is in our map of relevant genomeIDs, otherwise skip match
-		it = gIdStringToIdNumMap.find(temp_str);
-		if(options._debugLevel > 1) 
-			::std::cout << temp_str << "\t";
-		if(it != gIdStringToIdNumMap.end()) contigId = it->second;
-		else
-		{
-			_parseSkipLine(*file,c);
-			continue;
-		}
-		if((int)contigId < (int)highestChrId)
-		{
-			std::cerr << "Read files need to be sorted according to chromosomes in genome file.\n";
-			return CALLSNPS_GFF_FAILED;
-		}
-		
-		highestChrId = contigId;
-		if(contigId < currSeqNo)	// havent reached the sequence of interest yet
-		{
-			_parseSkipLine(*file,c);
-			continue;
-		}
-		
-		if(contigId > currSeqNo)	// have passed the seq of interest
-		{
-			(*file).seekp(lineStart);
-			break;
-		}
-		contigId = 0; // we only store one chromosome at a time
-		
-		
-		// skip whitespaces and read entry in column 2
-		_parseSkipWhitespace(*file, c);
-		clear(temp_str);
-		_parseReadWordUntilWhitespace(*file,temp_str,c); 
-		
-		if(options._debugLevel > 1) 
-			::std::cout << temp_str << "\t";
-		
-		// skip whitespaces and read entry in column 3
-		_parseSkipWhitespace(*file, c);
-		clear(temp_str);
-		_parseReadWordUntilWhitespace(*file,temp_str,c); 
-		if(options._debugLevel > 1) 
-			::std::cout << temp_str << "\t";
-		
-		// skip whitespaces and read entry in column 4  --> genomic begin position
-		_parseSkipWhitespace(*file, c);
-		TContigPos beginPos = _parseReadNumber(*file,c) - options.positionFormat;
-		if(beginPos > currentEnd + (TContigPos)options.windowBuff)	// we have passed the relevant match positions
-		{
-			if(options._debugLevel > 1)
-				std::cout  << "gBegin "<< beginPos<<"  of match is too large, seeking "<<lineStart<<"\n";
-			(*file).seekp(lineStart);
-			break;
-		}
-		if(options._debugLevel > 1) 
-			::std::cout << beginPos << "\t";
-		
-		// skip whitespaces and read entry in column 5  --> genomic end position
-		_parseSkipWhitespace(*file, c);
-		TContigPos endPos = _parseReadNumber(*file,c);
-		
-		if(options._debugLevel > 1) 
-			::std::cout << endPos << "\t";
-		if(endPos + (TContigPos)options.windowBuff < currentBegin)	//we havent reached a relevant read yet
-		{
-			_parseSkipLine(*file,c);
-			continue;
-		}
-		
-		int gMatchLen = endPos - beginPos;	
-		int rLen = gMatchLen;
-		if(endPos > genomeLen)
-		{
-			(*file).seekp(lineStart);
-			break;	
-		}
-		
-		// skip whitespaces and read entry in column 6  --> score (percent identity or mapping quality) or a '.'
-		_parseSkipWhitespace(*file, c);
-		if(c=='.')
-		{
-			mScore = 100;  //not used, but needs to be >= options.minMapQual (default 1)
-			c = _streamGet(*file);
-		}
-		else mScore = (int)_parseReadDouble(*file,c); 
-		if(options._debugLevel > 1) 
-			::std::cout << mScore << "\t";
-		
-		// skip whitespaces and read entry in column 7  --> strand information: '+' or '-' 
-		_parseSkipWhitespace(*file, c);
-		if (c=='+')
-			orientation = 'F';
-		else
-			orientation = 'R';
-		c = _streamGet(*file);
-		
-		// skip whitespaces and read entry in column 8  --> in razers output this is always a '.' 
-		_parseSkipWhitespace(*file, c);
-		c = _streamGet(*file);
-		
-		// skip whitespaces and read entry in column 9  --> tags, extra information. in razers output first tag is always "ID"
-		_parseSkipWhitespace(*file, c);
-		clear(temp_str);
-		_parseReadIdentifier(*file,temp_str,c);
-		if(options._debugLevel > 1) 
-			::std::cout << temp_str << "\n";
-		if(temp_str!="ID") ::std::cout << "first feature field should be 'ID'"<<::std::endl;
-		
-		// skip the "="
-		c = _streamGet(*file);
-		
-		// read the readID
-		clear(temp_str);
-		CharString readName;
-		_parseReadIdentifier(*file,readName,c);
-		if(options._debugLevel > 1) 
-			::std::cout << "myID = "<<readName << "\n";
-#ifdef SNPSTORE_DEBUG
-		bool extraV = false;
-#endif
-		// cut out the read template from the genomic coordinates
-		gInf = infix(genome, beginPos, endPos);
-		if (orientation == 'R')
-			reverseComplement(gInf);
-		readTemplate = gInf;
-		if(options._debugLevel > 1) cout << readTemplate << "\n";
-		
-		// process tags in a loop
-		CharString current_tag;
-		_parseSkipWhitespace(*file,c); 
-		bool multi = false, suboptimal = false, unique = true, splitRead = false;
-		clipLeft = 0; clipRight = 0; 
-		clear(gAliPos);
-		clear(tmpCigarStr);
-		while(!_streamEOF(*file) && !(c == '\n' || (c == '\r' && _streamPeek(*file) != '\n'))) // while in same line
-		{
-			// different tags are separated by ';'  ATTENTION: ascii qualities can contain ';', therefore the tag "quality"
-			while(c != ';') 						// MUST be the last tag in a line!!!!!!!!
-			{
-				if(c == '\n' || (c == '\r' && _streamPeek(*file) != '\n')) // end of line
-					break;
-				c = _streamGet(*file);
-			}
-			if(c == '\n' || (c == '\r' && _streamPeek(*file) != '\n')) // end of line
-				break;
-			// get the current tag
-			clear(current_tag);
-			c = _streamGet(*file);
-			_parseReadIdentifier(*file,current_tag,c);
-#ifdef SNPSTORE_DEBUG
-			if(options._debugLevel > 1) 
-				::std::cout << current_tag << " in features\n";
-#endif
-			if(!options.qualityFile && current_tag=="quality")
-			{
-				// add the quality to the read
-				qualityFound = true;
-				if(!readFound)	//read fragmentStore.alignedReadStore with 0 errors --> read == genomeInfix
-				{
-					temp_read = infix(readTemplate,0,gMatchLen);  // without quality values
-					curr_read = temp_read;				// initialized with q40
-					readFound = true;
-				}
-				for(int i = 0; i < rLen ; ++i) //vorsicht! rLen muss hier schon bekannt sein! (i.e. quality tag is last tag!)
-				{
-					c = _streamGet(*file);
-					if (!(c == '\n' || (c == '\r' && _streamPeek(*file) != '\n')))
-					{
-						assignQualityValue(curr_read[i],(int)ordValue(c)-33);
-#ifdef SNPSTORE_DEBUG
-						if(extraV) ::std::cout << (char)(getQualityValue(curr_read[i])+33);
-#endif
-					}
-					else
-					{
-						// shouldnt happen
-						if(i != rLen-1 && options._debugLevel > 1) std::cout << curr_read << "macht probleme\n";
-						break;
-					}
-				}
-			}
-			else
-			{
-				// parse other tags
-				pos = 0;
-				pos2 = 0;
-				if (current_tag == "unique") {unique = true;}
-				else if (current_tag == "multi") {multi = true;}
-				else if (current_tag == "suboptimal") {suboptimal = true;}
-				else if (current_tag == "split") {splitRead = true;}
-				else if (current_tag == "clip")
-				{
-					options.clipTagsInFile = true;
-					if(c=='=') c = _streamGet(*file);
-					clipLeft = _parseReadNumber(*file,c);
-					c = _streamGet(*file);
-					clipRight = _parseReadNumber(*file,c);
-				}
-				else if (current_tag == "count")
-				{
-					if(c=='=') c = _streamGet(*file);
-					readCount = _parseReadNumber(*file,c);
-				}
-				else if (current_tag == "read")
-				{
-					clear(curr_read);
-					readFound = true;
-					if(c=='=') c = _streamGet(*file);
-					while(c != ';' && !(c == '\n' || (c == '\r' && _streamPeek(*file) != '\n')))
-					{
-						appendValue(curr_read,c);
-						c = _streamGet(*file);
-					}
-					if(mScore != 100)
-					{
-						editDist = (int)floor((length(curr_read) * ((100.0 - mScore + 0.001)/100.0)));
-					}
-				}
-				else if (current_tag == "mutations")
-				{
-					if(!readFound)
-					{
-						temp_read = infix(readTemplate,0,gMatchLen);
-						curr_read = temp_read;
-						readFound = true;
-					}
-					while(c==',' || c=='=') // and add the mutated positions (misfragmentStore.alignedReadStore and insertions in read)
-					{
-						c = _streamGet(*file);
-						pos = _parseReadNumber(*file,c);
-						curr_read[pos-1]=(Dna5)c;
-						c = _streamGet(*file);
-						++editDist;
-					}
-				}
-				else if (current_tag == "cigar")
-				{
-					pos = 0; pos2 = 0;
-					int gPos = 0;
-					readFound = true;
-					while(c!=';'  && !(c == '\n' || (c == '\r' && _streamPeek(*file) != '\n')))
-					{
-						if(c=='=') c = _streamGet(*file);
-						pos2 = _parseReadNumber(*file,c);
-						if(c=='M')
-						{
-							unsigned k= 0;
-							while(k<pos2)
-							{
-								appendValue(gAliPos,gPos,Generous());
-								++gPos;
-								++k;
-							}
-							appendValue(tmpCigarStr,TCigar('M',pos2));
-							pos2 += pos;
-							append(temp_read,infix(readTemplate,pos,pos2));
-							pos = pos2;
-							c = _streamGet(*file);
-							continue;
-						}
-						if(c=='I')
-						{ //insertion in the read
-							//(*mIt).editDist += pos2; will be increased in mutations loop
-							unsigned k= 0;
-							while(k<pos2)
-							{
-								appendValue(gAliPos,-gPos,Generous());//no genome positions are used up
-								++k;
-							}
-							appendValue(tmpCigarStr,TCigar('I',pos2));
-							for(unsigned f = 0; f < pos2; ++f)
-								append(temp_read,'A');  // will be replaced with correct base in "mutations" loop
-							c = _streamGet(*file);
-							rLen += pos2;
-							options.hammingOnly = false;
-							hasIndel = true;
-							continue;
-						}
-						if(c=='D')
-						{ //there is a deletion in the read
-							unsigned k= 0;
-							while(k<pos2)
-							{
-								++gPos;
-								++k;
-							}
-							editDist += pos2;
-							appendValue(tmpCigarStr,TCigar('D',pos2));
-							pos += pos2;
-							rLen -= pos2;
-							options.hammingOnly = false;
-							c = _streamGet(*file);
-							hasIndel = true;
-							continue;
-						}
-					}
-					curr_read = temp_read;
-				}
-			}
-			if(qualityFound ) {_parseSkipLine(*file,c); break;}
-			
-		}
-		if (options._debugLevel>0&&(rSeq%1000000)==0)cout <<rSeq<<".."<<std::flush;
-		if(mScore >= options.minMapQual && (!multi || options.keepMultiReads) && (!suboptimal || options.keepSuboptimalReads))// && (!((*mIt).hasIndel==1 && options.hammingOnly)))
-		{
-			if(!readFound)
-			{	//neither quality nor read sequence found
-				if(options._debugLevel>1)::std::cout << "neither quality nor read sequence found editDist = " << editDist <<"\n";			
-				temp_read = infix(readTemplate,0,gMatchLen);
-				curr_read = temp_read;
-			}
-			if(clipLeft + clipRight > (int)length(curr_read) - (int)options.minClippedLength)
-			{
-				if (options._debugLevel>1)cout <<"Discarding read "<<readName<<", too short after clipping.."<<std::endl;
-				_parseSkipWhitespace(*file, c); continue;
-			}
-			if(options.realign && splitRead)
-			{
-				if(endPos-beginPos > (int)((float)length(curr_read)*1.5))
-				{
-					
-					if (options._debugLevel>1)cout <<"Discarding split read "<<readName<<", deletion too large.."<<std::endl;
-					_parseSkipWhitespace(*file, c); continue;
-				}
-			}
-			TId readId = length(fragmentStore.readSeqStore);
-			appendValue(fragmentStore.readSeqStore,curr_read,Generous());
-			
-#ifdef SNPSTORE_DEBUG
-			if(clipLeft + clipRight > 76 )
-				::std::cerr << "clipLeft = " << clipLeft << " clipRight = "<<clipRight << "\n";
-#endif
-			
-			if(options._debugLevel > 1) 
-				::std::cout<<fragmentStore.readSeqStore[rSeq]<<" with edit="<<editDist<<" at position "<< beginPos <<"\n";
-			
-			if(endPos - beginPos > (TContigPos)options.maxHitLength)
-				options.maxHitLength = endPos - beginPos;
-			
-			// remember min and max positions seen
-			if(beginPos < (TContigPos)options.minCoord) options.minCoord = (unsigned)beginPos;
-			if(endPos > (TContigPos)options.maxCoord) options.maxCoord =  (unsigned)endPos;
-			
-			// create match m
-			TMatch m;
-			m.id = readId; //length(fragmentStore.alignedReadStore);
-			if(orientation == 'F')
-			{
-				m.beginPos = beginPos;
-				m.endPos = endPos;
-			}
-			else
-			{
-				m.beginPos = endPos;
-				m.endPos = beginPos;
-			}
-			m.contigId = contigId;
-			m.readId = m.id;
-			//			std::cout << "readId=" << readId << ::std::endl;
-			//			if(readId == 100) 
-			//				std::cout << "wahnsinnnnn!!!!" << readId << ::std::endl;
-			// corresponding match quality attributes are stored in q
-			TMatchQuality q;
-			q.errors = (char)editDist;
-			q.score = (char) 0;
-			if(options._debugLevel > 1)
-			{
-				if(splitRead && hasIndel)
-					std::cout << "has indel!\n"; //TODO: how should split reads be treated in realignment?
-			}
-			if(!options.realign && splitRead && length(tmpCigarStr)<=3) hasIndel = false;
-			if(splitRead) clipLeft = clipRight = 0;
-			if(hasIndel)
-				q.pairScore = 1;
-			else
-				q.pairScore = 0;
-			
-			typename Value<TReadStore>::Type r;
-			r.matePairId = TReadStoreElement::INVALID_ID;
-			if(readCount > 0) appendValue(readCounts, readCount, Generous());
-			
-			appendValue(fragmentStore.readStore, r, Generous());
-			appendValue(fragmentStore.alignedReadStore, m, Generous());
-			appendValue(fragmentStore.readNameStore, readName, Generous());
-			appendValue(fragmentStore.alignQualityStore, q, Generous());
-			appendValue(readClips,Pair<int,int>(clipLeft,clipRight));
-			
-			if(!splitRead)
-				clear(tmpCigarStr); // split reads store their cigar string explicitly
-			
-			appendValue(readCigars,tmpCigarStr);
-			++rSeq;
-			if(options._debugLevel > 1)
-			{
-				::std::cout<<"Parsed: id= " <<m.readId<<" name="<<readName<<"="<<curr_read<<" with edit="<<editDist<<" at position "<< beginPos<<"\n";
-				::std::cout << "mScore=" << mScore << " m.beginPos=" << m.beginPos << "m.endPos="<<m.endPos<<std::endl;
-				if(q.pairScore==1) ::std::cout << "indel! pairScore=" << q.pairScore <<std::endl;
-				if(q.pairScore==0) ::std::cout << "no indel! pairScore=" << q.pairScore <<std::endl;
-				
-			}
-		}
-		else 
-		{
-			if(options._debugLevel > 1 )
-			{
-				::std::cout<<"Discarded: "<<curr_read<<" with edit="<<editDist<<" at position "<< beginPos<<"\n";
-				::std::cout << "mScore = " << mScore << std::endl;
-			}
-		}
-		
-		_parseSkipWhitespace(*file, c);
-	}
-	if(options._debugLevel > 0) 
-		::std::cout << ::std::endl << "Parsed "<<length(fragmentStore.alignedReadStore)<<" matches of "<<length(fragmentStore.readSeqStore)<<" reads." << ::std::endl;
-	
-	
-	return 0;
-}
-
-
 //////////////////////////////////////////////////////////////////////////////
 // Main read mapper function
 template <typename TSpec>
@@ -1520,7 +911,6 @@ int writeLogFile(
 				 String<CharString> & ,
 				 SNPCallingOptions<TSpec> &options)
 {
-//IOREV _todo_
 	
 	::std::ofstream logfile;
 	logfile.open(options.outputLog, ::std::ios_base::out | ::std::ios_base::trunc);
@@ -1772,6 +1162,17 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv, options, true);
 				return 0;
 			}
+			if (strcmp(argv[arg], "-ebi") == 0 || strcmp(argv[arg], "--exclude-border-indel") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.indelDepthMinOverlap;
+					if (!istr.fail())
+						continue;
+				}
+				printHelp(argc, argv, options, true);
+				return 0;
+			}
 			if (strcmp(argv[arg], "-mc") == 0 || strcmp(argv[arg], "--min-coverage") == 0) {
 				if (arg + 1 < argc) {
 					++arg;
@@ -1857,6 +1258,17 @@ int main(int argc, const char *argv[])
 					istringstream istr(argv[arg]);
 					istr >> options.windowSize;
 					if (!istr.fail() && options.windowSize > 0)
+						continue;
+				}
+				printHelp(argc, argv, options, true);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-reb") == 0 || strcmp(argv[arg], "--realign-border") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					istringstream istr(argv[arg]);
+					istr >> options.realignAddBorder;
+					if (!istr.fail() && options.realignAddBorder >= 0 && options.realignAddBorder <= 100)
 						continue;
 				}
 				printHelp(argc, argv, options, true);
@@ -2028,7 +1440,7 @@ int main(int argc, const char *argv[])
 		return 0;
 	}
 	
-	if(options.realign || options.windowSize > 50000) 
+	if(options.realign || options.windowSize > 5000000) 
 		options.windowSize = 10000;
 	
 	if (*options.outputLog != 0)

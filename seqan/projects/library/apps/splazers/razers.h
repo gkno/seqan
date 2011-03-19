@@ -2247,8 +2247,9 @@ int mapReads(
 	TReadSet &				readSet, 
 	TReadRegions &	
 #ifdef RAZERS_SPLICED
-	readRegions,
+	readRegions
 #endif
+	,
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
