@@ -1,4 +1,4 @@
-// ==========================================================================
+r// ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2010, Knut Reinert, FU Berlin
@@ -163,7 +163,7 @@ _parseBlastHit(TFile & file,
 			TChar & c, 
 			TBlastHit & hit)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Hsp<TBlastHit>::Type TBlastHsp;
 

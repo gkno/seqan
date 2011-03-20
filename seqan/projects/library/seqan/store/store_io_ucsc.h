@@ -35,6 +35,16 @@
 #ifndef SEQAN_HEADER_STORE_IO_UCSC_H
 #define SEQAN_HEADER_STORE_IO_UCSC_H
 
+/* IOREV
+ *
+ * _doc_
+ *
+ *
+ * maybe move this to file/ because its a file format
+ *
+ */
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -65,7 +75,7 @@ typedef Tag<Ucsc_<UcscKnownIsoforms_> > const UcscIsoforms;
     inline void
     _parseReadUcscIdentifier(TFile & file, TString & str, TChar& c)
     {
-//IOREV _todo_
+//IOREV
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
         while (!_streamEOF(file)) 
@@ -80,7 +90,7 @@ typedef Tag<Ucsc_<UcscKnownIsoforms_> > const UcscIsoforms;
 	inline void 
 	_parseSkipWhiteComma(TFile& file, TChar& c)
 	{
-//IOREV _todo_
+//IOREV
 		if (c != ',' && c != ' ') return;
 		while (!_streamEOF(file)) {
 			c = _streamGet(file);
@@ -137,7 +147,7 @@ _readOneAnnotation (
 	TChar & c,
 	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
-//IOREV _todo_
+//IOREV
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -393,7 +403,7 @@ read (
 	FragmentStore<TSpec, TConfig> & fragStore,
 	Tag<Ucsc_<TFormatSpec> > const)
 {
-//IOREV _todo_
+//IOREV _nodoc_
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	
 	if (_streamEOF(file)) return;
@@ -488,7 +498,7 @@ _writeOneAnnotation (
 	TTargetStream & file,
 	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
-//IOREV _todo_
+//IOREV
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	
 	unsigned suf = 0;
@@ -583,7 +593,7 @@ write (
 	FragmentStore<TSpec, TConfig> & store,
 	Tag<Ucsc_<TFormatSpec> > const format)
 {
-//IOREV _todo_
+//IOREV _nodoc_
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 	typedef typename TFragmentStore::TAnnotationStore				TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type					TAnnotation;

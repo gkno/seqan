@@ -57,8 +57,8 @@ struct ScoreMatrix;
 ..include:seqan/score.h
 */
 struct TagScoreMatrixFile_;
-//IOREV _todo_
-typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile; //IOREV _todo_
+//IOREV _notio_ not relevant to revision
+typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile; //IOREV _notio_ not relevant to revision
 
 
 /**
@@ -276,7 +276,7 @@ _sscanfValue(const char * buf, double & val) {
 template <typename TFile, typename TMeta>
 void
 readMeta(TFile & fl, TMeta & meta, ScoreMatrixFile) {
-//IOREV _todo_
+//IOREV _nodoc_ what format is this actually?
     SEQAN_CHECKPOINT;
     clear(meta);
     if (_streamEOF(fl)) return;
@@ -296,7 +296,7 @@ readMeta(TFile & fl, TMeta & meta, ScoreMatrixFile) {
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 void
 read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, ScoreMatrixFile) {
-//IOREV _todo_
+//IOREV _nodoc_ contains todo by holtgrew that indicates this is broken
     // TODO(holtgrew): The following is not very stable, does not interpret lines as whitespace separated numbers but infers column widths from the labels.  Should be fixed.
     SEQAN_CHECKPOINT;
     typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
@@ -384,7 +384,7 @@ read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, ScoreM
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 inline void
 read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc) {
-//IOREV _todo_
+//IOREV _nodoc_ 
     SEQAN_CHECKPOINT;
     read(fl, sc, ScoreMatrixFile());
 }
@@ -499,7 +499,7 @@ _sprintfValue(char * buf, double val) {
 template <typename TSequenceValue, typename TFile, typename TValue, typename TMeta>
 void
 _writeScoringMatrix(TFile & fl, TValue * tab, TMeta & meta) {
-//IOREV _todo_
+//IOREV _nodoc_ documentation incomplete
     SEQAN_CHECKPOINT;
     typedef typename Value<TFile>::Type TFileValue;
 
@@ -582,7 +582,7 @@ _writeScoringMatrix(TFile & fl, TValue * tab, TMeta & meta) {
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec, typename TMeta>
 inline void
 write(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc, TMeta & meta) {
-//IOREV _todo_
+//IOREV _nodoc_ some doc but incomplete
     SEQAN_CHECKPOINT;
     _writeScoringMatrix<TSequenceValue>(fl, sc.data_tab, meta);
 }
@@ -599,7 +599,7 @@ write(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc,
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 inline void
 write(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc) {
-//IOREV _todo_
+//IOREV _nodoc_ some doc but incomplete
     SEQAN_CHECKPOINT;
     write(fl, sc, "");
 }

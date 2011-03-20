@@ -474,7 +474,7 @@ _parseBlastHsp(TFile & file,
 			TChar & c, 
 			BlastHsp<ProteinBlast<TSpec>,FullInfo> & hsp)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_
 SEQAN_CHECKPOINT
 	typedef typename Position<TFile>::Type TPosition;
 	
@@ -756,7 +756,7 @@ _parseBlastHsp(TFile & file,
 			TChar & c, 
 			BlastHsp<TBlastSpec,TInfoSpec> & hsp)
 {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_
 SEQAN_CHECKPOINT
 	typedef typename Position<TFile>::Type TPosition;
 	

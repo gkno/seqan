@@ -611,7 +611,7 @@ template <typename TStream, typename TAlignment, typename TAlignmentChain, typen
 void
 write(TStream & stream, TAlignment const & alignment, TAlignmentChain const & alignmentChain, TSeedChain const & seedChain, Tikz_ const &)
 {
-//IOREV _todo_
+//IOREV _nodoc_ specialization not documented
     typedef typename Row<TAlignment const>::Type TRow;
     typedef typename Position<TAlignment>::Type TPosition;
     typedef typename Iterator<TRow, Standard>::Type TRowIterator;

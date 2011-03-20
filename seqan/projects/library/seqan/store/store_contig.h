@@ -176,7 +176,7 @@ ContigStoreElement<TContigSeq_, TGapAnchor_, TSpec_>::INVALID_ID = MaxValue<type
 template <typename TSpec_ = void>
 struct ContigFile
 {
-//IOREV _todo_
+//IOREV instead of storing filename and format store TFile ?
 	typedef typename Id<ContigFile>::Type	TId;
 
 	static const TId INVALID_ID;

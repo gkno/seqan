@@ -82,7 +82,7 @@ _mismatchScore(Score<TValue, Simple>& sc,
 
 template<typename T>
 struct ProfileProfileScore;
-//IOREV _todo_
+//IOREV _notio_
 
 //////////////////////////////////////////////////////////////////////////////
 

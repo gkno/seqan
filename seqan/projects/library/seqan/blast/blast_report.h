@@ -397,7 +397,7 @@ _readParameters(TFile & file,
 				TChar & c,
                 BlastReport<TBlastHsp, StoreReport<FullInfo> >& blastObj) 
 {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_
 SEQAN_CHECKPOINT
 	float pfloat;
 
@@ -490,7 +490,7 @@ _readParameters(TFile & ,
 				TChar & ,
                 BlastReport<TBlastHsp, StoreReport<BasicInfo> >& ) 
 {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_
 SEQAN_CHECKPOINT
 	return;
 }
@@ -508,7 +508,7 @@ read(TFile & file,
 	 BlastReport<TBlastHsp, StoreReport<TInfoSpec> >& blastObj,
 	 Tag<TagBlast_>) 
 {
-//IOREV _todo_
+//IOREV _nodoc_ 
 SEQAN_CHECKPOINT
 	typedef BlastReport<TBlastHsp, StoreReport<TInfoSpec> > TBlastReport;
 //	typedef BlastReport<TBlastHsp, StoreReport<FullInfo> > TBlastReport;
