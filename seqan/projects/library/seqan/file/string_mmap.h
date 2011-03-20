@@ -93,6 +93,20 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 ..include:seqan/file.h
 */
 
+/**
+.Enum.MMapAdviseScheme
+..cat:Sequences
+..cat:Input / Output
+..summary:Enum with mmap advise values.
+..value.MMAP_NORMAL:There is no advise on the given address range.
+..value.MMAP_RANDOM:The address range will be accessed with a random access memory pattern.
+..value.MMAP_SEQUENTIAL:The address range will be accessed sequentially.
+..value.MMAP_WILLNEED:The address range in the advise will be needed in the future.
+..value.MMAP_DONTNEED:The address range in the advise will not be needed any more.
+..see:Function.mmapAdvise
+..include:seqan/file.h
+ */
+
 #ifdef PLATFORM_WINDOWS
 
 		enum MMapAdviseScheme {
@@ -555,6 +569,21 @@ SEQAN_CHECKPOINT
 
 ///.Function.flush.param.string.type:Spec.MMap String
 
+/**
+.Function.mmapAdvise
+..cat:Sequences
+..summary:Call advise function for memory mapped files.
+..signature:mmapAdvise(mmapString, scheme, beginPos, endPos)
+..param.mmapString:The @Spec.MMap String@ that contains the location in the advise call.
+...type:Spec.MMap String
+..param.scheme:The memory access scheme to use.
+...type:Enum.MMapAdviseScheme
+..param.beginPos:Begin position in the string for the advise call.
+..param.endPos:End position in the string for the advise call.
+..returns:$int$, return code 0 on success.
+..see:Enum.MMapAdviseScheme
+..include:seqan/file.h
+ */
     template < typename TValue, typename TConfig, typename TScheme, typename TBeginPos, typename TEndPos >
 	inline int
 	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme const & scheme, TBeginPos const & beginPos, TEndPos const & endPos)
