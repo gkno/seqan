@@ -1935,7 +1935,7 @@ fclose(f);
 ..cat:Testing & Debugging
 ..summary:Verify check points for the given file name.
 ..signature:SEQAN_VERIFY_CHECKPOINTS(path)
-..param.param:Path to the file to verify check points for. Relative to parent directory of tests.
+..param.path:Path to the file to verify check points for. Relative to parent directory of tests.
 ..example.code:
 SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic_alphabet.h");
 ..see:Macro.SEQAN_CHECKPOINT
