@@ -56,6 +56,10 @@
  * it should also be noted that there are standard C functions in ctype.h
  * for the _is* cases, e.g. isspace(), isdigit() isprint(), isalnum() etc
  * why don't we use these?
+ *
+ * when returning a string we should remember to always use Generous() as
+ * resize policy to avoid some reallocation efforts (some parsing functions
+ * do this already, others don't)
  * 
  */
 

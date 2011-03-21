@@ -71,7 +71,7 @@ read(samfile_t * file,
      FragmentStore<TSpec, TConfig> & fragStore,
      Bam const &)
 {
-//IOREV _todo_
+//IOREV contains lots of TODOs by holtgrew, state of implementation unclear, looks like batchreading, not sure though
     typedef Value<FILE>::Type TValue;
     typedef FragmentStore<TSpec, TConfig> TFragmentStore;
     typedef typename TFragmentStore::TContigPos TContigPos;
@@ -107,7 +107,7 @@ _readAlignments(
         TMatchMateInfos & matchMateInfos,
         Bam const &)
 {
-//IOREV _todo_
+//IOREV
     // create dummy entries in Sam specific aligned read quality store and aligned read tag store
     // is needed so the ID in the aligned store can be use to access the other stores
     // even if there exists previous entries without
@@ -153,7 +153,7 @@ _readOneAlignment (
 		Bam const &,
 		TContextBAM & contextBam)
 {
-//IOREV _todo_
+//IOREV
     // Basic types
     typedef FragmentStore<TSpec, TConfig>										TFragmentStore;
     typedef typename Id<TFragmentStore>::Type									TId;
@@ -371,7 +371,7 @@ write(char const * fileName,
      FragmentStore<TSpec, TConfig> & fragStore,
      Bam const &)
 {
-//IOREV _todo_
+//IOREV see above, BAM support apperently needs to be rewritten
     // -----------------------------------------------------------------------
     // Initialize Header.
     // -----------------------------------------------------------------------
@@ -413,7 +413,7 @@ inline void _writeAlignments(samfile_t * /*samfile*/,
                              FragmentStore<TSpec, TConfig> & store,
                              Bam const &)
 {
-//IOREV _todo_
+//IOREV _stub_ doesn't actually write anything
     typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
     typedef typename TFragmentStore::TReadStore						TReadStore;

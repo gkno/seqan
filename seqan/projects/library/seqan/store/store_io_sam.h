@@ -330,7 +330,7 @@ getCigarString(
     inline void
     _parseReadCigar(TFile & file, TCigarString & cigar, TChar & c)
     {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_ could be simplified by using other _is or _parse calls
 		typedef typename Value<TCigarString>::Type	TCigarElement;
 		typedef typename TCigarElement::TOperation	TOperation;
 		typedef typename TCigarElement::TCount		TCount;
@@ -363,7 +363,7 @@ getCigarString(
     inline void
     _parseReadSamIdentifier(TFile & file, TString & str, TChar& c)
     {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_ _duplicate_ same as generic _parseUntilWhitespace?
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
         while (!_streamEOF(file)) 
@@ -381,7 +381,7 @@ getCigarString(
     inline bool
     _parseIsDna(TChar const & c)
     {
-//IOREV _todo_
+//IOREV _bug_ according to Dna5 doc c is already uppercase, so it should be (c == x) || (c - 'A' + 'a' == x) OR JUST: return tolower(c) == tolower(x);
         char x = TChar(Dna5(c));
         return (c == x) || (c + 'A' - 'a' == x);
     }
@@ -393,7 +393,7 @@ getCigarString(
     inline void
     _parseReadDnaSeq(TFile & file, TString & str, TChar & c)
     {
-//IOREV _todo_
+//IOREV _nodoc_ _hasCRef_ _duplicate_ same as generic _parseUntilWhitespace?
 		TChar first = c;
 		if (!_streamEOF(file)) 
 			c = _streamGet(file);
@@ -413,7 +413,7 @@ getCigarString(
     inline bool
     _parseIsPhredQual(TChar c)
     {
-//IOREV _todo_
+//IOREV _nodoc_ what does the title mean? same as return isprint(c) && c != ' '
         return c >= '!' && c <= '~';
     }
     
@@ -425,7 +425,7 @@ getCigarString(
     inline void
     _parseReadSeqQual(TFile & file, TQualString & str, TChar & c)
     {
-//IOREV _todo_
+//IOREV _nodoc_ unclearn what this actually does
         typedef typename Size<TQualString>::Type				TSize;
         typedef typename Iterator<TQualString, Standard>::Type	TIter;
         
@@ -459,7 +459,7 @@ getCigarString(
     inline void
     _parseReadCharsUntilEndOfLine(TFile & file, String<char> & str, TChar& c)
     {
-//IOREV _todo_
+//IOREV replace with generic _parseLine() function that ignores '\r' (this calls adds a lonely '\r' to the end of str if file is windows-formatted)
         // read all chars till '\n'
         while (c != '\n')
         {
@@ -601,7 +601,7 @@ getCigarString(
 		FragmentStore<TSpec, TConfig> & fragStore,
 		Sam)
     {
-//IOREV _todo_
+//IOREV not sure if recordreading or batchreading
         typedef Value<FILE>::Type TValue;
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 		typedef typename TFragmentStore::TContigPos TContigPos;
@@ -644,7 +644,7 @@ getCigarString(
 		TChar & c,
 		Sam)
     {
-//IOREV _todo_
+//IOREV _stub_ this isn't implemented yet
         // skip header for now
         while (c == '@')
             _parseSkipLine(file, c);
@@ -665,7 +665,7 @@ getCigarString(
         TChar & c,
         Sam)
     {
-//IOREV _todo_
+//IOREV _nodoc_ documentation in code, but unclear
         // create dummy entries in Sam specific aligned read quality store and aligned read tag store
         // is needed so the ID in the aligned store can be use to access the other stores
         // even if there exists previous entries without
@@ -710,7 +710,7 @@ getCigarString(
 		Sam,
 		TContextSAM & contextSAM)
     {
-//IOREV _todo_
+//IOREV _nodoc_
         // Basic types
         typedef FragmentStore<TSpec, TConfig>										TFragmentStore;
         typedef typename Id<TFragmentStore>::Type									TId;
@@ -881,7 +881,7 @@ getCigarString(
                                  FragmentStore<TSpec, TConfig> & store,
                                  Sam)
     {
-//IOREV _todo_
+//IOREV
 		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 		typedef typename TFragmentStore::TLibraryStore					TLibraryStore;
 		typedef typename TFragmentStore::TContigStore					TContigStore;
@@ -937,7 +937,7 @@ getCigarString(
                                  FragmentStore<TSpec, TConfig> & store,
                                  Sam)
     {
-//IOREV _todo_
+//IOREV
 		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
 		typedef typename TFragmentStore::TReadStore						TReadStore;
@@ -1134,7 +1134,7 @@ getCigarString(
                       FragmentStore<TSpec, TConfig> & store,
                       Sam)
     {
-//IOREV _todo_
+//IOREV not sure if recordreading or batchreading
         // write header
 		_writeHeader(target, store, Sam());
         

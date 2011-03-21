@@ -37,6 +37,20 @@
 
 #include <seqan/misc/misc_parsing.h>
 
+/* IOREV
+ *
+ * _doc_
+ *
+ *
+ * if this file is about the amos file format why isn't it named accordingly?
+ *
+ * altogether it is unclear why sequence io is in file/ but store io is in
+ * store/
+ *
+ */
+
+
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -128,7 +142,7 @@ read(TFile & file,
 	 FragmentStore<TSpec, TConfig>& fragStore,
 	 Amos) 
 {
-//IOREV _todo_
+//IOREV
 	SEQAN_CHECKPOINT
 	// Basic types
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -548,7 +562,7 @@ write(TFile & target,
 	  FragmentStore<TSpec, TConfig>& fragStore,
 	  Amos) 
 {
-//IOREV _todo_
+//IOREV
 	SEQAN_CHECKPOINT
 	// Basic types
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -823,7 +837,7 @@ write(TFile & target,
 template <typename TStream, typename TFSSpec, typename TFSConfig, typename TFormat>
 bool writeContigs(TStream & file, FragmentStore<TFSSpec, TFSConfig> & store, TFormat const &)
 {
-//IOREV _todo_
+//IOREV _doc_
 	for (unsigned i = 0; i < length(store.contigNameStore); ++i)
 		write(file, store.contigStore[i].seq, store.contigNameStore[i], TFormat());
 	return true;
@@ -854,6 +868,7 @@ If $false$, an empty contig with a reference to the file is created. Its sequenc
 template <typename TFSSpec, typename TFSConfig>
 bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString> const &fileNameList, bool loadSeqs)
 {
+//IOREV _nodoc_ although there is dddoc, there is no entry in html-doc
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TContigFileStore	TContigFileStore;
 	typedef typename Value<TContigFileStore>::Type		TContigFile;
