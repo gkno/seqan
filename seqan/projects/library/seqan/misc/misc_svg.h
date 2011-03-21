@@ -266,26 +266,35 @@ inline void _printRead(
 	typedef typename Iterator<TContigGaps, Standard>::Type TContigIterator;
 	typedef typename Iterator<TReadGaps, Standard>::Type TIterator;
 
+	__int64 xEnd = svg.cursor.i1 * 20;
 	__int64 x;
-	__int64 xEnd;
-	int style, arrow;
+
+	int style, arrow = 0;
 	const char *first;
 	const char *second;
+	__int64 ofs;
+	
 	if (alignedRead.beginPos < alignedRead.endPos)
 	{
-		xEnd = alignedRead.beginPos * 20;
-		x = xEnd + 5;
+		ofs = alignedRead.beginPos - svg.cursor.i1 + beginPosition(readGaps);
 		first = "<line x1=\"";
 		second = "\" x2=\"";
 		style = svg.readForward;
-		arrow = 0;
 	} else {
-		xEnd = alignedRead.endPos * 20;
-		x = xEnd + 10;
+		ofs = alignedRead.endPos - svg.cursor.i1 + beginPosition(readGaps);
 		first = "<line x2=\"";
 		second = "\" x1=\"";
 		style = svg.readReverse;
-		arrow = 2;
+	}
+
+	if (beginPosition(readGaps) == 0)
+	{
+		if (alignedRead.beginPos < alignedRead.endPos)
+			x = xEnd + 5;
+		else {
+			x = xEnd + 10;
+			arrow = 2;
+		}
 	}
 	line = svg.cursor.i2 * 20 + 10;
 	
@@ -295,7 +304,7 @@ inline void _printRead(
 	{
 		if (layout.mateCoords[alignedRead.pairMatchId].i2 != -1)
 		{
-			Pair<__int64> a(alignedRead.beginPos * 20, line);
+			Pair<__int64> a((alignedRead.beginPos - ofs) * 20, line);
 			Pair<__int64> b(layout.mateCoords[alignedRead.pairMatchId]);
 			if (a.i1 < b.i1)
 			{
@@ -313,17 +322,17 @@ inline void _printRead(
 			svg.file << "\" stroke-width=\"2\" stroke=\"black\" stroke-opacity=\"0.2\" fill=\"none\"/>";
 		}
 		else
-			layout.mateCoords[alignedRead.pairMatchId] = Pair<int>(alignedRead.beginPos * 20, line);
+			layout.mateCoords[alignedRead.pairMatchId] = Pair<int>((alignedRead.beginPos - ofs) * 20, line);
 	}
 	
 
-	TContigIterator cit = begin(contigGaps, Standard()) + _min(alignedRead.beginPos, alignedRead.endPos);
+	TContigIterator cit = begin(contigGaps, Standard()) + (_min(alignedRead.beginPos, alignedRead.endPos) + beginPosition(readGaps));
 	TIterator it = begin(readGaps, Standard());
 	TIterator itEnd = end(readGaps, Standard());
 	int lastWasGap = -1;
 	int inGap;
 	
-	for (; it != itEnd; ++it, ++cit, xEnd += 20)
+	for (; it != itEnd; ++it, ++cit, xEnd += 20, ++svg.cursor.i1)
 	{
 		inGap = isGap(it);
 		if (lastWasGap != inGap || inGap != static_cast<int>(isGap(cit)) || (!inGap && convert<Dna5>(*cit) != convert<Dna5>(*it)))
@@ -348,12 +357,15 @@ inline void _printRead(
 	}
 	if (x < xEnd && lastWasGap != -1)
 	{
-		if (alignedRead.beginPos < alignedRead.endPos)
+		if (_unclippedLength(readGaps) == endPosition(readGaps))
 		{
-			arrow = 2;
-			xEnd -= 10;
-		} else
-			xEnd -= 5;
+			if (alignedRead.beginPos < alignedRead.endPos)
+			{
+				arrow = 2;
+				xEnd -= 10;
+			} else
+				xEnd -= 5;
+		}
 		svg.file << first << x << "\" y1=\"" << line << second << xEnd;
 		svg.file << "\" y2=\"" << line << "\" " << svg.style[style + arrow + lastWasGap] << " />" << std::endl;
 	}
