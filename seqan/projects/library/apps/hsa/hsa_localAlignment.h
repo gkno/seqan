@@ -38,63 +38,73 @@ stringIdToStringSetId(TStringSet & stringSet, TId & stringId) {
 }
 
 
-template<typename TAlignmentGraph, typename TId, typename TPosition, typename TSize>
+template<typename TAlignmentGraph, typename TId, typename TPosition>
 void
 _findBeginPositions(TAlignmentGraph & parentGraph, 
 					std::map<TId, TPosition> & segmentBegins,
-					TSize i,
+					typename Id<TAlignmentGraph>::Type i,
 					std::map<TId, TPosition> & beginPos) {
+	typedef typename Id<TAlignmentGraph>::Type TGraphId;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	
-	TId id_i = id(value(stringSet(parentGraph), i));
+	TId id_i = id(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), i)));
 	if (beginPos[id_i] == segmentBegins[id_i]) return;
 
-	// TODO: Schleife über alle davor liegenden Segmente???
+	// iterate over all vertices before beginPos[id_i]
+	TPosition pos = beginPos[id_i];
+	while (pos > segmentBegins[id_i]) {
 
-	TVertexDescriptor v = findVertex(parentGraph, i, beginPos[id_i]-1);
-	SEQAN_ASSERT_GT(outDegree(parentGraph, v), 0u);
-	TOutEdgeIterator outEdgeIt(parentGraph, v);
+		TVertexDescriptor v = findVertex(parentGraph, i, pos-1);
+		TOutEdgeIterator outEdgeIt(parentGraph, v);
 
-	while (!atEnd(outEdgeIt)) {
-		TVertexDescriptor w = targetVertex(outEdgeIt);
-		TSize j = sequenceId(parentGraph, w);
-		TId id_j = id(value(stringSet(parentGraph), j));
-		if (fragmentBegin(parentGraph, w) + fragmentLength(parentGraph, w) > beginPos[id_j]) {
-			beginPos[id_j] = fragmentBegin(parentGraph, w) + fragmentLength(parentGraph, w);
-			_findBeginPositions(parentGraph, segmentBegins, j, beginPos);
+		// iterate over all neighbors of v and recurse if updated beginPos
+		while (!atEnd(outEdgeIt)) {
+			TVertexDescriptor w = targetVertex(outEdgeIt);
+			TGraphId j = sequenceId(parentGraph, w);
+			TId id_j = id(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), j)));
+			if (fragmentBegin(parentGraph, w) + fragmentLength(parentGraph, w) > beginPos[id_j]) {
+				beginPos[id_j] = fragmentBegin(parentGraph, w) + fragmentLength(parentGraph, w);
+				_findBeginPositions(parentGraph, segmentBegins, j, beginPos);
+			}
+			++outEdgeIt;
 		}
-		++outEdgeIt;
+		pos -= fragmentLength(parentGraph, v);
 	}
 }
 
-template<typename TAlignmentGraph, typename TId, typename TPosition, typename TSize>
+template<typename TAlignmentGraph, typename TId, typename TPosition>
 void
 _findEndPositions(TAlignmentGraph & parentGraph,
 				  std::map<TId, TPosition> & segmentEnds,
-				  TSize i,
+				  typename Id<TAlignmentGraph>::Type i,
 				  std::map<TId, TPosition> & endPos) {
+	typedef typename Id<TAlignmentGraph>::Type TGraphId;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 
-	TId id_i = id(value(stringSet(parentGraph), i));
+	TId id_i = id(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), i)));
 	if (endPos[id_i] == segmentEnds[id_i]) return;
 
-	// TODO: Schleife über alle dahinter liegenden Segmente???
+	// iterate over all vertices behind endPos[id_i]
+	TPosition pos = endPos[id_i];
+	while (pos < segmentEnds[id_i]) {
 
-	TVertexDescriptor v = findVertex(parentGraph, i, endPos[id_i]);
-	SEQAN_ASSERT_GT(outDegree(parentGraph, v), 0u);
-	TOutEdgeIterator outEdgeIt(parentGraph, v);
+		TVertexDescriptor v = findVertex(parentGraph, i, pos);
+		TOutEdgeIterator outEdgeIt(parentGraph, v);
 
-	while (!atEnd(outEdgeIt)) {
-		TVertexDescriptor w = targetVertex(outEdgeIt);
-		TSize j = sequenceId(parentGraph, w);
-		TId id_j = id(value(stringSet(parentGraph), j));
-		if (fragmentBegin(parentGraph, w) < endPos[id_j]) {
-			endPos[id_j] = fragmentBegin(parentGraph, w);
-			_findEndPositions(parentGraph, segmentEnds, j, endPos);
+		// iterate over all neighbors of v and recurse if updated endPos
+		while (!atEnd(outEdgeIt)) {
+			TVertexDescriptor w = targetVertex(outEdgeIt);
+			TGraphId j = sequenceId(parentGraph, w);
+			TId id_j = id(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), j)));
+			if (fragmentBegin(parentGraph, w) < endPos[id_j]) {
+				endPos[id_j] = fragmentBegin(parentGraph, w);
+				_findEndPositions(parentGraph, segmentEnds, j, endPos);
+			}
+			++outEdgeIt;
 		}
-		++outEdgeIt;
+		pos += fragmentLength(parentGraph, v);
 	}
 }
 
@@ -224,25 +234,35 @@ findStellarMatches(std::map<TId, TInfix> & segs,
 	StellarParams params(options.initialEpsilon + options.deltaEpsilon * recursionLevel,
 						 options.initialMinLength - options.deltaMinLength * recursionLevel);
 
+	// TODO implement an alternative version on connected components?
+
 	// begin and end position for all sequence segments
 	std::map<TId, TPosition> segmentBegins, segmentEnds;
-	TMapIterator mapIt = segs.begin();
 	TMapIterator mapEnd = segs.end();
-	while (mapIt != mapEnd) {
+	for (TMapIterator mapIt = segs.begin(); mapIt != mapEnd; ++mapIt) {
 		TId id = mapIt->first;
 		TInfix segment = mapIt->second;
 		segmentBegins[id] = beginPosition(segment);
 		segmentEnds[id] = endPosition(segment);
-		++mapIt;
 	}
 
 	// for each sequence segment
-	for (mapIt = segs.begin(); mapIt != mapEnd; ++mapIt) {
+	for (TMapIterator mapIt = segs.begin(); mapIt != mapEnd; ++mapIt) {
+		TId id = mapIt->first;
 		TPosition pos = beginPosition(mapIt->second);
+
+		std::map<TId, Pair<TPosition> > previousBeginPos;
+		std::map<TId, Pair<TPosition> > previousEndPos;
+		TMapIterator mapIt2 = mapIt;
+		for (mapIt2++; mapIt2 != mapEnd; ++mapIt2) {
+			TId id2 = mapIt2->first;
+ 			previousBeginPos[id2] = Pair<TPosition>(beginPosition(mapIt2->second), beginPosition(mapIt->second));
+			previousEndPos[id2] = Pair<TPosition>(beginPosition(mapIt2->second), beginPosition(mapIt->second));
+		}
 		// for each unaligned vertex on sequence segment
 		while (pos < endPosition(mapIt->second)) {
-			typename Id<TAlignmentGraph>::Type idPosition = stringIdToPosition(stringSet(parentGraph), mapIt->first);
-			TVertexDescriptor v = findVertex(parentGraph, idPosition, pos);
+			typename Id<TAlignmentGraph>::Type graphId = stringIdToStringSetId(stringSet(parentGraph), id);
+			TVertexDescriptor v = findVertex(parentGraph, graphId, pos);
 			pos += fragmentLength(parentGraph, v);
 			if (outDegree(parentGraph, v) != 0) continue;
 
@@ -251,21 +271,40 @@ findStellarMatches(std::map<TId, TInfix> & segs,
 			std::map<TId, TPosition> endPos(segmentEnds);
 
 			// set begin and end position for current sequence to vertex begin and end
-			beginPos[mapIt->first] = fragmentBegin(parentGraph, v);
-			endPos[mapIt->first] = pos; // same as: fragmentBegin(parentGraph, v) + fragmentLength(parentGraph, v);
+			beginPos[id] = fragmentBegin(parentGraph, v);
+			endPos[id] = pos;
+			SEQAN_ASSERT_EQ(pos, fragmentBegin(parentGraph, v) + fragmentLength(parentGraph, v));
 
 			// walk through alignment graph to find other sequence segments for pairwise comparison to this segment
-			_findBeginPositions(parentGraph, segmentBegins, idPosition, beginPos);
-			_findEndPositions(parentGraph, segmentEnds, idPosition, endPos);
+			_findBeginPositions(parentGraph, segmentBegins, graphId, beginPos);
+			_findEndPositions(parentGraph, segmentEnds, graphId, endPos);
 
 			// stellar on each pair of sequence segments
-			TMapIterator mapIt2 = mapIt;
+			mapIt2 = mapIt;
 			for (mapIt2++; mapIt2 != mapEnd; ++mapIt2) {
-				Pair<TInfix> segmentPair = Pair<TInfix>();
-				segmentPair.i1 = infix(host(mapIt->second), beginPos[mapIt->first], endPos[mapIt->first]); // TODO: aus Schleife herausziehen
-				segmentPair.i2 = infix(host(mapIt2->second), beginPos[mapIt2->first], endPos[mapIt2->first]);
-				generateLocalMatches(segmentPair, params, matches);
+				TId id2 = mapIt2->first;
+				// generate "closed" matches from previous segment
+				if (previousBeginPos[id2].i1 != beginPos[id2]) {
+					Pair<TInfix> segmentPair = Pair<TInfix>();
+					segmentPair.i1 = infix(host(mapIt->second), previousBeginPos[id2].i2, previousEndPos[id2].i2);
+					segmentPair.i2 = infix(host(mapIt2->second), previousBeginPos[id2].i1, previousEndPos[id2].i1);
+					generateLocalMatches(segmentPair, params, matches);
+					previousBeginPos[id2] = Pair<TPosition>(beginPos[id2], beginPos[id]);
+					previousEndPos[id2] = Pair<TPosition>(endPos[id2], endPos[id]);
+				} else {
+					previousBeginPos[id2] = Pair<TPosition>(beginPos[id2], previousBeginPos[id2].i2);
+					previousEndPos[id2] = Pair<TPosition>(endPos[id2], endPos[id]);
+				}
 			}
+		}
+		// generate remaining matches
+		mapIt2 = mapIt;
+		for (mapIt2++; mapIt2 != mapEnd; ++mapIt2) {
+			TId id2 = mapIt2->first;
+			Pair<TInfix> segmentPair = Pair<TInfix>();
+			segmentPair.i1 = infix(host(mapIt->second), previousBeginPos[id2].i2, previousEndPos[id2].i2);
+			segmentPair.i2 = infix(host(mapIt2->second), previousBeginPos[id2].i1, previousEndPos[id2].i1);
+			generateLocalMatches(segmentPair, params, matches);
 		}
 	}
 }

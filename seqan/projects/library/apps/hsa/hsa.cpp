@@ -270,6 +270,27 @@ void parseSequenceFileNames(TCharString1 & files, String<TCharString2> & str) {
 	}
 }
 
+template<typename TOptions>
+void
+_writeParams(TOptions & options) {
+	typedef typename Size<CharString>::Type TSize;
+	std::cout << "Sequence files: " << options.fileNames[0] << std::endl;
+	for (TSize i = 1; i < length(options.fileNames); ++i) {
+		std::cout << "                " << options.fileNames[i] << std::endl;
+	}
+	std::cout << std::endl;
+	std::cout << "Guide tree    : " << (options.globalGuideTree?"global":"local") << std::endl;
+	std::cout << "Fixed matches : " << (options.fixedHigherLevelMatches?"true":"false") << std::endl;
+	std::cout << "Comparison    : " << (options.anchoredPairwiseComparison?"reduced":"full") << std::endl;
+	std::cout << std::endl;
+	std::cout << "Hier. levels  : " << options.recursions << std::endl;
+	std::cout << "Initial minLen: " << options.initialMinLength << std::endl;
+	std::cout << "Delta minLen  : " << options.deltaMinLength << std::endl;
+	std::cout << "Initial eps   : " << options.initialEpsilon << std::endl;
+	std::cout << "Delta eps     : " << options.deltaEpsilon << std::endl;
+	std::cout << std::endl;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Parses options from command line parser and writes them into options object
@@ -364,6 +385,9 @@ int main (int argc, const char *argv[]) {
 	_title(parser, std::cout);
 	std::cout << std::endl;
 
+	// output parameters
+	_writeParams(options);
+
 	TInfixMap segments;
 	TSequenceSet seqs;
 	resize(seqs, length(options.fileNames));
@@ -379,6 +403,7 @@ int main (int argc, const char *argv[]) {
 
 		SEQAN_ASSERT_EQ(segments.count(id(seqs[i])), 0u);
 		segments[id(seqs[i])] = infix(seqs[i], 0, length(seqs[i]));
+		std::cerr << options.fileNames[i] << ": " << id(seqs[i]) << std::endl;
 		totalSeqLength += length(seqs[i]);
 	}
 
@@ -408,33 +433,99 @@ int main (int argc, const char *argv[]) {
 	std::cout << "# edges: " << numEdges(g) << std::endl;
 	std::cout << "# segments: " << numVertices(g) << std::endl;
 	std::cout << "average segment length: " << totalSeqLength/(double)numVertices(g) << std::endl;
-
-	Iterator<TAlignmentGraph, VertexIterator>::Type itV(g);
-
-	unsigned int matchedChars = 0, matchedVertices = 0;
-	for (; !atEnd(itV); goNext(itV)) {
-		if (outDegree(g, *itV) > 0) {
-			matchedVertices++;
-			matchedChars += fragmentLength(g, *itV);
-		}
-	}
-	std::cout << "matched characters: " << matchedChars * 100 / (double)totalSeqLength << "%" << std::endl;
-	std::cout << "average length of matched segments: " << matchedChars / (double)matchedVertices << std::endl;
-	std::cout << "average length of unmatched segments: ";
-	std::cout << (totalSeqLength-matchedChars) / (double)(numVertices(g)-matchedVertices) << std::endl;
-
-	std::cout << length(segments);
-	std::cout << " " << totalSeqLength / (double)length(segments);
-	std::cout << " " << options.initialMinLength;
-	std::cout << " " << options.initialMinLength - options.deltaMinLength * (options.recursions-1);
-	std::cout << " " << options.deltaMinLength;
-	std::cout << " " << matchedChars * 100 / (double)totalSeqLength;
-	std::cout << " " << totalSeqLength / (double)numVertices(g);
-	std::cout << " " << matchedChars / (double)matchedVertices;
-	std::cout << " " << (totalSeqLength-matchedChars) / (double)(numVertices(g)-matchedVertices);
-	std::cout << " " << runningTime;
-	std::cout << " " << options.recursions;
 	std::cout << std::endl;
+
+	String<unsigned int> matchedChars, matchedVertices;
+	resize(matchedChars, length(options.fileNames), 0);
+	resize(matchedVertices, length(options.fileNames), 0);
+	for (Iterator<TAlignmentGraph, VertexIterator>::Type itV(g); !atEnd(itV); goNext(itV)) {
+		unsigned int deg = outDegree(g, *itV);
+		matchedVertices[deg]++;
+		matchedChars[deg] += fragmentLength(g, *itV);
+	}
+
+	for (unsigned int i = 0; i < length(matchedChars); ++i) {
+		std::cout << "Aligned with " << i << " other sequences:" << std::endl;
+
+		std::cout << "  #chars: ";
+		std::cout << matchedChars[i]*100/(double)totalSeqLength << "% (" << matchedChars[i] << ")" << std::endl;
+
+		std::cout << "  #vertices: ";
+		std::cout << matchedVertices[i]*100/(double)numVertices(g) << "% (" << matchedVertices[i] << ")" << std::endl;
+
+		std::cout << "  avg segment length: ";
+		std::cout << matchedChars[i]/(double)matchedVertices[i] << std::endl;
+
+		std::cout << std::endl;
+	}
+
+	std::cout << "matched characters: ";
+	std::cout << (totalSeqLength-matchedChars[0]) * 100 / (double)totalSeqLength << "%" << std::endl;
+	std::cout << "average length of matched segments: ";
+	std::cout << (totalSeqLength-matchedChars[0]) / (double)(numVertices(g)-matchedVertices[0]) << std::endl;
+	std::cout << "average length of unmatched segments: ";
+	std::cout << matchedChars[0] / (double)matchedVertices[0] << std::endl;
+	std::cout << std::endl;
+
+	String<String<unsigned int> > matchedCharsPW, numEdgesPW;
+	resize(matchedCharsPW, length(options.fileNames));
+	resize(numEdgesPW, length(options.fileNames));
+	for (unsigned int i = 0; i < length(matchedCharsPW); ++i) {
+		resize(matchedCharsPW[i], length(options.fileNames), 0);
+		resize(numEdgesPW[i], length(options.fileNames), 0);
+	}
+	for (Iterator<TAlignmentGraph, EdgeIterator>::Type itE(g); !atEnd(itE); goNext(itE)) {
+		matchedCharsPW[sequenceId(g, sourceVertex(itE))][sequenceId(g, targetVertex(itE))] += 
+			fragmentLength(g, sourceVertex(itE)) + fragmentLength(g, sourceVertex(itE));
+		matchedCharsPW[sequenceId(g, targetVertex(itE))][sequenceId(g, sourceVertex(itE))] += 
+			fragmentLength(g, sourceVertex(itE)) + fragmentLength(g, sourceVertex(itE));
+		numEdgesPW[sequenceId(g, sourceVertex(itE))][sequenceId(g, targetVertex(itE))]++;
+		numEdgesPW[sequenceId(g, targetVertex(itE))][sequenceId(g, sourceVertex(itE))]++;
+	}
+
+	String<double> myDistanceMatrix;
+	unsigned int len = length(matchedCharsPW);
+	resize(myDistanceMatrix, len*len);
+
+	std::cout << "Number of pairwisely mapped characters:" << std::endl;;
+	std::cout << "    |\t";
+	for (unsigned int j = 0; j < length(matchedCharsPW[0]); ++j) {
+		std::cout << j << "\t";
+	} std::cout << std::endl;
+	for (unsigned int j = 0; j <= length(matchedCharsPW[0]); ++j) std::cout << "--------";
+	std::cout << std::endl;
+	for (unsigned int i = 0; i < length(matchedCharsPW); ++i) {
+		std::cout << i << "   |\t";
+		for (unsigned int j = 0; j < length(matchedCharsPW[i]); ++j) {
+			std::cout << matchedCharsPW[i][j] << "\t";
+		}
+		
+		std::cout << "   |\t";
+		for (unsigned int j = 0; j < length(matchedCharsPW[i]); ++j) {
+			myDistanceMatrix[len*i+j] = 100.0 - matchedCharsPW[i][j]/(double)(length(stringSet(g)[i])+length(stringSet(g)[j]));
+			myDistanceMatrix[len*j+i] = 100.0 - matchedCharsPW[i][j]/(double)(length(stringSet(g)[i])+length(stringSet(g)[j]));
+			std::cout << (matchedCharsPW[i][j])*100/
+				(double)(length(stringSet(g)[i])+length(stringSet(g)[j])) << "%\t";
+		} std::cout << std::endl;
+	}
+	std::cout << std::endl;
+
+	Graph<Tree<double> > tree;
+	upgmaTree(myDistanceMatrix, tree);
+	std::cout << tree;
+
+	//std::cout << length(segments);
+	//std::cout << " " << totalSeqLength / (double)length(segments);
+	//std::cout << " " << options.initialMinLength;
+	//std::cout << " " << options.initialMinLength - options.deltaMinLength * (options.recursions-1);
+	//std::cout << " " << options.deltaMinLength;
+	//std::cout << " " << (totalSeqLength-matchedChars[0]) * 100 / (double)totalSeqLength;
+	//std::cout << " " << totalSeqLength / (double)numVertices(g);
+	//std::cout << " " << (totalSeqLength-matchedChars[0]) / (double)(numVertices(g)-matchedVertices[0]);
+	//std::cout << " " << matchedChars[0] / (double)matchedVertices[0];
+	//std::cout << " " << runningTime;
+	//std::cout << " " << options.recursions;
+	//std::cout << std::endl;
 
 	return 0;
 }

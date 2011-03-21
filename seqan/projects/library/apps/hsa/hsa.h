@@ -7,10 +7,55 @@
 
 using namespace seqan;
 
+//////////////////////////////////////////////////////////////////////////////
+// _pumpTraceToAlign: build alignment accoring to the traceback stored in trace
+// note that the traceback in trace is "reverse" (from back to front)
+template <typename TSource, typename TSpec, typename TSize> 
+void
+_pumpTraceToAlign(Align<TSource, TSpec> & align_,
+					AlignTraceback<TSize> trace,
+					TSize offset0,
+					TSize offset1)
+{
+SEQAN_CHECKPOINT
+	typedef Align<TSource, TSpec> TAlign;
+
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Iterator<TRow>::Type TRowIterator;
+
+	//pump trace into align_ (note: this is relatively slow code here. it could be improved if specialized to the Align Specs)
+	clearGaps(align_);
+	clearClipping(align_);
+
+	TSize i = length(trace.sizes); //scan trace backwards
+	TRowIterator it0 = begin(row(align_, 0));
+	goFurther(it0, offset0);
+	TRowIterator it1 = begin(row(align_, 1));
+	goFurther(it1, offset1);
+	while (i > 0)
+	{
+		--i;
+		TSize siz = trace.sizes[i];
+		switch ((int) trace.tvs[i])
+		{
+		case 1: //horizontal:
+			insertGaps(it1, siz);
+			break;
+
+		case 2: //vertical:
+			insertGaps(it0, siz);
+			break;
+		}
+		goFurther(it0, siz);
+		goFurther(it1, siz);
+	}
+}
+
 template<typename TId, typename TInfix, typename TAlignmentGraph, typename TMatch>
 void
 _addParentMatches(std::map<TId, TInfix> & segments, TAlignmentGraph & parentGraph, String<TMatch> & matches) {
 	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
+	typedef typename Size<TInfix>::Type TSize;
 	typedef typename Position<TInfix>::Type TPosition;
 	typedef typename Id<TAlignmentGraph>::Type TGraphId;
 	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIterator;
@@ -22,7 +67,7 @@ _addParentMatches(std::map<TId, TInfix> & segments, TAlignmentGraph & parentGrap
 		//iterate over vertices of segment
 		TPosition pos = beginPosition(it->second);
 		while (pos < endPosition(it->second)) {
-			TGraphId i = stringIdToPosition(stringSet(parentGraph), it->first);
+			TGraphId i = stringIdToStringSetId(stringSet(parentGraph), it->first);
 			TVertexDescriptor source = findVertex(parentGraph, i, pos);
 			SEQAN_ASSERT_LEQ(pos+fragmentLength(parentGraph, source), endPosition(it->second));
 
@@ -39,14 +84,22 @@ _addParentMatches(std::map<TId, TInfix> & segments, TAlignmentGraph & parentGrap
 				// initialize a match
 				TMatch m;
 				resize(rows(m), 2);
-				setSource(row(m, 0), value(stringSet(parentGraph), i));
-				setSource(row(m, 1), value(stringSet(parentGraph), targetId));
+				setSource(row(m, 0), value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), i)));
+				setSource(row(m, 1), value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), targetId)));
 
 				// determine begin and end position of source and target segments
 				TPosition sourceBegin = fragmentBegin(parentGraph, source);
 				TPosition sourceEnd = sourceBegin + fragmentLength(parentGraph, source);
 				TPosition targetBegin = fragmentBegin(parentGraph, target);
 				TPosition targetEnd = targetBegin + fragmentLength(parentGraph, target);
+
+				// recompute alignment
+				AlignTraceback<TSize> trace;
+				StringSet<TInfix> infixes;
+				appendValue(infixes, infix(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), i)), sourceBegin, sourceEnd));
+				appendValue(infixes, infix(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), targetId)), targetBegin, targetEnd));
+				_globalAlignment(trace, infixes, Score<int>(1, -2, -2), AlignConfig<>(), NeedlemanWunsch());
+				_pumpTraceToAlign(m, trace, sourceBegin, targetBegin);
 
 				// set the match begin and end positions
 				setClippedBeginPosition(row(m, 0), sourceBegin);
@@ -294,7 +347,7 @@ _segmentGraph(std::map<TId, TInfix> & segments, TAlignmentGraph & g) {
 
 	TMapIterator itEnd = segments.end();
 	for (TMapIterator it = segments.begin(); it != itEnd; ++it) {
-		typename Id<TAlignmentGraph>::Type i = stringIdToPosition(stringSet(g), it->first);
+		typename Id<TAlignmentGraph>::Type i = stringIdToStringSetId(stringSet(g), it->first);
 		TInfix seg = it->second;
 		TSize len = length(host(seg));
 
@@ -342,7 +395,11 @@ void segmentAlignment(std::map<TId, TInfix> & segments,
 	clearEdges(gOut);
 	clearVertices(gOut);
 
-	std::cout << beginPosition(segments.begin()->second) << " - " << endPosition(segments.begin()->second) << std::endl;
+	for(TLevel l = 0; l < recursionLevel; ++l) std::cerr << ".";
+	typename std::map<TId, TInfix>::const_iterator itEnd = segments.end();
+	for(typename std::map<TId, TInfix>::const_iterator it = segments.begin(); it != itEnd; ++it) {
+		std::cerr << it->first << ": " << beginPosition(it->second) << " - " << endPosition(it->second) << ", ";
+	} std::cerr << std::endl;
 
 	// generate local alignments
 	String<TMatch> matches;
@@ -359,9 +416,10 @@ void segmentAlignment(std::map<TId, TInfix> & segments,
 
     // match refinement
 	TAlignmentGraph g(stringSet(gOut));
-	matchRefinement(matches, stringSet(gOut), g);
+	Score<int> score(1, -1, -1);
+	matchRefinement(matches, stringSet(gOut), score, g);
 	clear(matches);
-	
+
     // triplet extension
 	tripletLibraryExtension(g);
 
@@ -428,6 +486,7 @@ findUnalignedSegment(Graph<Alignment<TSequenceSet> > & g,
 		unalignedSegments[seqId] = infix(host(segments[seqId]), startPos[seqId], endPos - fragmentLength(g, v));
 	}
 	nextStartPos[seqId] = endPos;
+
 	while (!atEnd(it)) {
 		TVertexDescriptor u = targetVertex(it);
 		SEQAN_ASSERT_NEQ(u, v);
