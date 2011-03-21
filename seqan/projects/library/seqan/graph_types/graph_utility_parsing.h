@@ -53,7 +53,7 @@ _loadSequences(TPath const& in_path,
 			   TStringSet& origStrSet,
 			   TNames& names)
 {
-//IOREV _todo_
+//IOREV _nodoc_ uses custom IO, with ifstream, should be adapted to File()
 	typedef typename Size<TStringSet>::Type TSize;
 	
 	// Count sequences and read names

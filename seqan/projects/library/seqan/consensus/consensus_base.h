@@ -1111,7 +1111,7 @@ write(TFile & file,
 	  FragmentStore<TSpec, TConfig>& fragStore,
 	  FastaReadFormat) 
 {
-//IOREV _todo_
+//IOREV _nodoc_ what has this got to do with consensus? why is it here?
 	SEQAN_CHECKPOINT
 	// Basic types
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -1290,7 +1290,7 @@ _convertSimpleReadFile(TFile& file,
 					   TFilePath& filePath, 
 					   bool moveToFront)
 {
-//IOREV _todo_
+//IOREV _nodoc_ huge undocumented function, uses custom IO based on iostream and FILE* :S
 	SEQAN_CHECKPOINT
 	// Basic types
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -1668,7 +1668,7 @@ inline void
 _writeCeleraFrg(TFile& target,
 				FragmentStore<TSpec, TConfig>& fragStore) 
 {
-//IOREV _todo_
+//IOREV _nodoc_ 
 
 	SEQAN_CHECKPOINT
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -1751,7 +1751,7 @@ inline void
 _writeCeleraCgb(TFile& target,
 				FragmentStore<TSpec, TConfig>& fragStore) 
 {
-//IOREV _todo_
+//IOREV _nodoc_
 	SEQAN_CHECKPOINT
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;

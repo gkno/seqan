@@ -226,7 +226,7 @@ void Test_HeapTree() {
 
 //////////////////////////////////////////////////////////////////////////////
 void Test_BreadthFirstSearch() {
-//IOREV _todo_
+//IOREV _notio_
 //____________________________________________________________________________
 // Breadth-First Search
 	typedef Graph<Undirected<> > TGraph;

@@ -100,7 +100,7 @@ TAlphabet _sequenceCharacter(Triple<TAlphabet, TId, TReadPos> arc)
 template<typename TAlphabet, typename TId, typename TReadPos>
 TId _readId(Triple<TAlphabet, TId, TReadPos> arc) 
 {
-//IOREV _todo_
+//IOREV _notio_
     return arc.i2;
 }
 
@@ -166,7 +166,7 @@ void _setPositionInRead(Pair<TAlphabet, TReadPos> & arc, TReadPos pos)
 template<typename TReadId>
 Pair<TReadId,TReadId>
 _parseIds(String<char> & fastaTag){
-//IOREV _todo_
+//IOREV _delcandidate_ marked for removal in code comment
     // format is >257,288[id=1,mateId=431]
     Pair<TReadId,TReadId> ret;
 
@@ -202,7 +202,7 @@ _parseIds(String<char> & fastaTag){
 template <typename TString>
 int _parseGroupId(TString & tag)
 {
-//IOREV _todo_
+//IOREV _notio_
     String<char> groupId;
 
     for (unsigned i = 0; i < length(tag); ++i)

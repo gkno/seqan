@@ -62,12 +62,12 @@ namespace seqan {
 
 template <typename TValue, typename TCount = unsigned int, typename TSpec = Default>
 class ProfileType;
-//IOREV _todo_
+//IOREV _notio_
 
 template <typename TValue, typename TCount, typename TSpec>
 class ProfileType
 {
-//IOREV _todo_
+//IOREV _notio_
 public:
     typedef typename Size<ProfileType>::Type TSize;
 

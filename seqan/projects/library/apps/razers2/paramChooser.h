@@ -180,7 +180,7 @@ template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOptions & pm_options)
 {
-//IOREV _todo_
+//IOREV do other things deal with Prb-Files, should this be moved to statistics?
 	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<TFloat> qualitySum;
@@ -256,7 +256,7 @@ template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromFastQFile(TFile & file, TDistribution & avg, ParamChooserOptions & pm_options)
 {
-//IOREV _todo_
+//IOREV _duplicate_ this should use the existing fastq implementation
 	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<int> qualitySum, count;
@@ -300,7 +300,7 @@ template<typename TFile, typename TDistribution>
 void
 qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg, ParamChooserOptions & pm_options)
 {
-//IOREV _todo_
+//IOREV not sure what FastQIntFile is, but should maybe go with fastq module
 	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<int> qualitySum, count;
@@ -453,7 +453,7 @@ parseShapesFromFile(TShapes & shapeStrings,
 			TFile & file,
 			ParamChooserOptions &)
 {
-//IOREV _todo_
+//IOREV shape file format is seqan specific right? is there doc? will other things need this?
 	if (_streamEOF(file)) return 0;
 	
 	signed char c = _streamGet(file);
@@ -504,7 +504,7 @@ template<typename TError>
 void
 makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 {
-//IOREV _todo_
+//IOREV
 
 	typedef typename Value<TError>::Type TFloat;
 	
@@ -805,7 +805,7 @@ template<typename TSStr>
 void
 getParamsFilename(TSStr & paramsfile, ParamChooserOptions & pm_options)
 {
-//IOREV _todo_
+//IOREV
 	int N = pm_options.totalN;
 	if(pm_options.extrapolate)
 		N = pm_options.extrapolN;
@@ -828,7 +828,7 @@ template<typename TFile, typename TChar>
 inline void
 _parse_readShape(TFile & file, TChar& c, CharString & str)
 {
-//IOREV _todo_
+//IOREV if shapes are relevant and format standardized move to io module
 	// Read word
 	append(str, c);
 	while (!_streamEOF(file)) {

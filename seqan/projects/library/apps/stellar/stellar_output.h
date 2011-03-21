@@ -239,7 +239,7 @@ _writeMatchGff(TId const & databaseID,
               TRow const & row0,
               TRow const & row1,
               TFile & file) {
-//IOREV _todo_
+//IOREV _recordreading_ unclear how this is related to GFF support from store_io
 SEQAN_CHECKPOINT    
     for (typename Position<TId>::Type i = 0; i < length(databaseID) && value(databaseID, i) > 32; ++i) {
         file << value(databaseID, i);
@@ -296,7 +296,7 @@ _writeMatch(TId const & databaseID,
             TRow const & row0,
             TRow const & row1,
             TFile & file) {
-//IOREV _todo_
+//IOREV _recordreading_ _stub_ 
 SEQAN_CHECKPOINT
 	
 	file << databaseID << " " << patternID << " " << _computeEValue(row0, row1, lengthAdjustment) << " " << _computeIdentity(row0, row1) << std::endl;

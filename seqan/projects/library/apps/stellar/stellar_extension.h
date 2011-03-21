@@ -105,7 +105,7 @@ inline bool
 _isEpsMatch(Triple<TPos, TPos, TPos> const & left,
            Triple<TPos, TPos, TPos> const & right,
            TFloat eps) {
-//IOREV _todo_
+//IOREV _notio_
 SEQAN_CHECKPOINT
     // compute mismatches/indels and length
     TPos errors = right.i3 - left.i3 - (right.i2 - right.i1);

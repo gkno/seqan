@@ -1102,7 +1102,7 @@ SEQAN_DEFINE_TEST(test_file_reader_string)
 
 void Create_Long_Testfile(char * filename, Fasta const &)
 {
-//IOREV _todo_
+//IOREV uses custom io, switch to File() for tests in future
     strcpy(filename, SEQAN_TEMP_FILENAME());
     
 	FILE * fl = fopen(filename, "wb");
@@ -1125,7 +1125,7 @@ void Create_Long_Testfile(char * filename, Fasta const &)
 
 void Create_Long_Testfile(char * filename, Embl const &)
 {
-//IOREV _todo_
+//IOREV uses custom io, switch to File() for tests in future
     strcpy(filename, SEQAN_TEMP_FILENAME());
     
 	FILE * fl = fopen(filename, "wb");
@@ -1148,7 +1148,7 @@ void Create_Long_Testfile(char * filename, Embl const &)
 
 void Create_Long_Testfile(char * filename, Genbank const &)
 {
-//IOREV _todo_
+//IOREV uses custom io, switch to File() for tests in future
     strcpy(filename, SEQAN_TEMP_FILENAME());
     
 	FILE * fl = fopen(filename, "wb");
@@ -1174,7 +1174,7 @@ void Create_Long_Testfile(char * filename, Genbank const &)
 template <typename TFormat>
 void Test_FileReader_String2(TFormat const &)
 {
-//IOREV _todo_
+//IOREV uses custom io, switch to File() for tests in future
     char buffer[1024];
 	Create_Long_Testfile(buffer, TFormat());
     

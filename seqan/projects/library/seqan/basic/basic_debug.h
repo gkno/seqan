@@ -35,11 +35,29 @@
 
 // TODO(holtgrew): Move to basic_testing.h
 
+/* IOREV
+ *
+ * contains a TODO by holtgrew indicating that this should be merged into
+ * basic_testing.h
+ *
+ * these functions use custom IO, i.e. FILE* fopen etc
+ * might be ok for binary comparison
+ *
+ * not sure what the text-comparison is all about. If you want to compare
+ * text, ignoring differences in EOL-style, you should not use binary
+ * file reading at all, but text-mode reading which converts line-endings
+ * on the fly anyhow, rendering this code useless (IMHO)
+ *
+ * code contains goto statements which could easily be replaced by clean code
+ * (I didn't even know this is possible in c++
+ */
+
+
 // compare two files, do not translate linebreaks
 inline bool 
 _compareBinaryFiles(const char * file1, const char * file2)
 {
-//IOREV _todo_
+//IOREV see above
 	bool ret = false;
 
 	FILE * fl1 = fopen(file1, "rb");
@@ -74,7 +92,7 @@ End:
 inline void 
 _compareTextFilesReadChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
 {
-//IOREV _todo_
+//IOREV see above
 	num_lb = 0;
 	is_eof = false;
 
@@ -107,7 +125,7 @@ _compareTextFilesReadChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
 inline bool 
 _compareTextFiles(const char * file1, const char * file2)
 {
-//IOREV _todo_
+//IOREV see above
 	FILE * fl1 = fopen(file1, "rb");
 	if (!fl1) return false;
 

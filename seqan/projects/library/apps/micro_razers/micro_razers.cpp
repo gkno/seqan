@@ -50,7 +50,7 @@ using namespace seqan;
 template<typename TSpec>
 int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
 {
-//IOREV _todo_
+//IOREV could possibly be moved to fasta module
 	::std::ifstream file;
 	file.open(filename,::std::ios_base::in | ::std::ios_base::binary);
 	if(!file.is_open())

@@ -295,7 +295,7 @@ VALIDATE:
 
 template <typename TFormat, typename TFile, typename TSpec>
 struct FileReader;
-//IOREV _todo_
+//IOREV
 
 template <typename TValue, typename TFormat, typename TFile, typename FileReaderTSpec, typename TFinderSpec, typename TNeedle2>
 bool

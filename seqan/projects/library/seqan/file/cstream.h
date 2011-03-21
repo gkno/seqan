@@ -271,13 +271,13 @@ template <typename THolder>
 inline void
 _holderDeallocate(THolder &, FILE *)
 {
-//IOREV _todo_ whats this good for?
+//IOREV whats this good for?
 }
 template <typename THolder>
 inline FILE *
 _holderAllocatePointer(THolder &, FILE * data)
 {
-//IOREV _todo_ whats this good for?
+//IOREV whats this good for?
 	return data;
 }
 

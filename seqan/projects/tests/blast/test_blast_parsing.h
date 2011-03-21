@@ -36,11 +36,19 @@
 using namespace std;
 using namespace seqan;
 
+
+/* IOREV
+ *
+ * uses some custom IO, test will have to be adapted anyways
+ *
+ */
+
+
 			
 //////////////////////////////////////////////////////////////////////////////
 template<typename T>
 void Test_BlastStoreReport() {
-//IOREV _todo_
+//IOREV
 
 
 	typedef BlastHsp<BlastP,BasicInfo> TBlastHsp;
@@ -179,7 +187,7 @@ void Test_BlastStoreReport() {
 //////////////////////////////////////////////////////////////////////////////
 template<typename T>
 void Test_BlastStoreReportBasic() {
-//IOREV _todo_
+//IOREV
 
 
 	typedef BlastHsp<BlastP,BasicInfo> TBlastHsp;
@@ -266,7 +274,7 @@ void Test_BlastStoreReportBasic() {
 template<typename T>
 void Test_BlastParsing(BlastN) 
 {
-//IOREV _todo_
+//IOREV
 
 	typedef BlastHsp<BlastN, FullInfo> TBlastHsp;
 	typedef ::std::fstream TFile;
@@ -362,7 +370,7 @@ void Test_BlastParsing(BlastN)
 //////////////////////////////////////////////////////////////////////////////
 template<typename T>
 void Test_BlastParsing(BlastP) {
-//IOREV _todo_
+//IOREV
 
 
 	typedef BlastHsp<BlastP, FullInfo> TBlastHsp;
@@ -483,7 +491,7 @@ void Test_BlastParsing(BlastP) {
 template<typename T>
 void Test_BlastParsingBasic(BlastN) 
 {
-//IOREV _todo_
+//IOREV
 
 	typedef BlastHsp<BlastN, BasicInfo> TBlastHsp;
 	typedef ::std::fstream TFile;
@@ -580,7 +588,7 @@ void Test_BlastParsingBasic(BlastN)
 //////////////////////////////////////////////////////////////////////////////
 template<typename T>
 void Test_BlastParsingBasic(BlastP) {
-//IOREV _todo_
+//IOREV
 
 
 	typedef BlastHsp<BlastP, BasicInfo> TBlastHsp;
@@ -724,38 +732,38 @@ void Test_BlastParsingBasic(BlastP) {
 	
 SEQAN_DEFINE_TEST(test_blast_store_report_int)
 {
-//IOREV _todo_
+//IOREV
 	Test_BlastStoreReport<int>();
 }
 	
 SEQAN_DEFINE_TEST(test_blast_store_report_basic_int)
 {
-//IOREV _todo_
+//IOREV
 	Test_BlastStoreReportBasic<int>();
 }
 
 SEQAN_DEFINE_TEST(test_blast_parsing_int_blastn)
 {
-//IOREV _todo_
+//IOREV
 	Test_BlastParsing<int>(BlastN());
 }
 
 SEQAN_DEFINE_TEST(test_blast_parsing_int_blastp)
 {
-//IOREV _todo_
+//IOREV
 	Test_BlastParsing<int>(BlastP());
 }
 
 
 SEQAN_DEFINE_TEST(test_blast_parsing_basic_int_blastn)
 {
-//IOREV _todo_
+//IOREV
 	Test_BlastParsingBasic<int>(BlastN());
 }
 
 SEQAN_DEFINE_TEST(test_blast_parsing_basic_int_blastp)
 {
-//IOREV _todo_
+//IOREV
 	Test_BlastParsingBasic<int>(BlastP());
 }
 

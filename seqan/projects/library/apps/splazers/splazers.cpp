@@ -74,7 +74,7 @@ using namespace seqan;
 template<typename TSpec>
 int getGenomeFileNameList(CharString filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
 {
-//IOREV _todo_
+//IOREV
 	ifstream file;
 	file.open(toCString(filename),ios_base::in | ios_base::binary);
 	if(!file.is_open())

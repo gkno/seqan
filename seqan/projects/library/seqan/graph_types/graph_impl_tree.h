@@ -709,7 +709,7 @@ write(TFile & target,
 	  TIDString const &,
 	  Raw)
 {
-//IOREV _todo_
+//IOREV _nodoc_
 	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;

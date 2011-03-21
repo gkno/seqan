@@ -42,7 +42,7 @@ _readPhylipMatrix(TFile& file,
 				  TMat& matrix,
 				  TNames& names)
 {
-//IOREV _todo_
+//IOREV can probably stay here since its too unimportant for the rest of seqan
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TMat>::Type TDistance;
 	typedef typename Size<TMat>::Type TSize;

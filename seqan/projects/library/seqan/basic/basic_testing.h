@@ -427,7 +427,7 @@ int openTempFile() {
 // function.  This is not thread safe!
 inline
 const char *tempFileName() {
-//IOREV _todo_
+//IOREV _duplicate_ overlaps with some stuff in system/file_sync.h, should be moved to io-module
     static char fileNameBuffer[100];
 #ifdef PLATFORM_WINDOWS_VS
     char * fileName = tempnam(NULL, "SEQAN.");

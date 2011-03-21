@@ -73,7 +73,7 @@ convertPatternToProfile(TProfile & profile,
 						TIterStr str_begin,
 						TIterStr str_end)
 {
-//IOREV _todo_
+//IOREV _notio_
 	typedef typename Position<TProfile>::Type TPos;
 	unsigned int str_size = str_end-str_begin;
 	resize(profile, str_size);
@@ -110,7 +110,7 @@ convertSetOfPatternsToProfile(TProfile & profile,
 					 TStrings & l_mers, 
 					 TPseudocountMode & pseudocount)
 {
-//IOREV _todo_
+//IOREV _notio_
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TProfile>::Type TFrequencyDistribution;
 
@@ -188,7 +188,7 @@ void
 completeProfile(TProfile & profile,
 				typename Value<TProfile>::Type & background_distribution)
 {
-//IOREV _todo_
+//IOREV _notio_
 	TProfile copy(profile);
 	resize(profile, length(copy)+1);
 	profile[0] = background_distribution;

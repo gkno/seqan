@@ -157,7 +157,7 @@ TStream & operator<<(TStream & stream, WitRecord const & record) {
 // stream -- Stream to write to.
 template <typename TStream>
 TStream &writeWitHeader(TStream & stream) {
-//IOREV _todo_
+//IOREV why does this return a stream reference? is wit more widely used?
     stream << "@WIT\tVN:1.0" << std::endl;
     stream << "@MATES\tSEP:/\tTYPE:01" << std::endl;
     return stream;
@@ -173,7 +173,7 @@ TStream &writeWitHeader(TStream & stream) {
 // str    -- string to write to stream.
 template <typename TStream, typename TString>
 TStream &writeWitComment(TStream &stream, TString const & str) {
-//IOREV _todo_
+//IOREV why does this return a stream reference? is wit more widely used?
     stream << "# " << str << std::endl;
     return stream;
 }
@@ -187,7 +187,7 @@ TStream &writeWitComment(TStream &stream, TString const & str) {
 // record -- the WitRecord to write out.
 template <typename TStream, typename TString, typename TScore, typename TPos>
 TStream &writeWitRecord(TStream & stream, WitRecord const & record) {
-//IOREV _todo_
+//IOREV why does this return a stream reference? is wit more widely used?
     return stream << record << std::endl;
 }
 
@@ -201,7 +201,7 @@ TStream &writeWitRecord(TStream & stream, WitRecord const & record) {
 // c -- Lookahead character.
 template <typename TStream, typename TChar>
 void readWitHeader(TStream &stream, TChar &c) {
-//IOREV _todo_
+//IOREV _hasCRef_ _nodoc_
     CharString tmp;
     // Read "@WIT".
     c = _streamGet(stream);
@@ -237,7 +237,7 @@ void readWitHeader(TStream &stream, TChar &c) {
 // Returns true iff the record could be successfully read from the file.
 template <typename TStream, typename TChar>
 bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
-//IOREV _todo_
+//IOREV _hasCRef_
     String<char> tmp;
 
     // Maybe skip comments.

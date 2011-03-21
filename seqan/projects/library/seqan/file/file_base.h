@@ -82,7 +82,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSpec = void>
     struct Async;
-//IOREV _todo_
+//IOREV
 
 
 /**

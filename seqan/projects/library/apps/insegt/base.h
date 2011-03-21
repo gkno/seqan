@@ -32,7 +32,7 @@ template<typename TFile, typename TChar>
 inline bool
 _parse_skipWord(TFile& file, TChar& c)
 {
-//IOREV _todo_
+//IOREV _duplicate_ and ambigous, since Word usually refers to a string of anything printable and non-whitespace (not just letters)
 	if (!_parseIsLetter(c)) return false;
 	
 	while (!_streamEOF(file)) {
@@ -52,7 +52,7 @@ inline void
 _streamPutDouble(TStream & target,
 			  double number)
 {
-//IOREV _todo_
+//IOREV _duplicate_ of another function (if not it should be moved to io-module)
 SEQAN_CHECKPOINT
 	char str[BitsPerValue<double>::VALUE];
 	sprintf(str, "%f", number);

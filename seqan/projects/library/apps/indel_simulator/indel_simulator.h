@@ -88,7 +88,7 @@ template<typename TChar>
 inline bool
 parse_isDigit(TChar const c)
 {
-//IOREV _todo_
+//IOREV _duplicate_ use ctype.h's isdigit() instead
 	//return (((int ) c >=  48) && ((int) c <=  57));
 	return ((c == '0') || (c == '1') || (c == '2') || (c == '3') || (c == '4') || 
 		    (c == '5') || (c == '6') || (c == '7') || (c == '8') || (c == '9'));
@@ -99,7 +99,7 @@ template<typename TFile, typename TChar>
 inline long double
 parse_readDouble(TFile & file, TChar& c)
 {
-//IOREV _todo_
+//IOREV _duplicate_ _hasCRef_ see _parseReadDouble in misc_parsing.h
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
@@ -114,6 +114,7 @@ template<typename TFile, typename TChar>
 inline void 
 parse_skipWhitespace(TFile& file, TChar& c)
 {
+//IOREV _hasCRef_ _duplicate_ see _parseSkipWhitespace() in misc_parsing.h
 	if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) return;
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
@@ -126,7 +127,7 @@ template<typename TFile, typename TChar, typename TString>
 void
 _parseReadWordUntilWhitespace(TFile& file, TString& str, TChar& c)
 {
-//IOREV _todo_
+//IOREV _hasCRef_ _duplicate_ see equally named function in misc_parsing.h
         append(str,c);
         if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
                 c = _streamGet(file);
@@ -321,7 +322,7 @@ int readGFF(
 	TGenomeMap				&gIdStringToIdNumMap,
 	TOptions				&options)
 {
-//IOREV _todo_
+//IOREV _nodoc_ what is this doing here? isn't there GFF file format support in store/store_io_gff.h ?
 	typedef typename Value<TIndelSet>::Type	TIndel;
 	typedef int				TId;
 	typedef int				TContigPos;

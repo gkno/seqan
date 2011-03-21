@@ -214,7 +214,7 @@ _importSequences(CharString const & fileName,
 // Calculates parameters from parameters in options object and from sequences and writes them to std::cout
 template<typename TStringSet>
 void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases, TStringSet & queries) {
-//IOREV _todo_
+//IOREV _notio_
 	typedef typename Size<TStringSet>::Type TSize;
 
 	if (options.qgramAbundanceCut != 1) {
@@ -266,7 +266,7 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases
 ///////////////////////////////////////////////////////////////////////////////
 // Calculates parameters from parameters in options object and writes them to std::cout
 void _writeCalculatedParams(StellarOptions & options) {
-//IOREV _todo_
+//IOREV _notio_
 	int errMinLen = (int) floor(options.epsilon * options.minLength);
 	int n = (int) ceil((errMinLen + 1) / options.epsilon);
 	int errN = (int) floor(options.epsilon * n);
@@ -299,7 +299,7 @@ void _writeCalculatedParams(StellarOptions & options) {
 template<typename TOptions>
 void
 _writeSpecifiedParams(TOptions & options) {
-//IOREV _todo_
+//IOREV _notio_
 	// Output user specified parameters
 	std::cout << "User specified parameters:" << std::endl;
 	std::cout << "  minimal match length             : " << options.minLength << std::endl;
@@ -332,7 +332,7 @@ _writeSpecifiedParams(TOptions & options) {
 template<typename TOptions>
 void
 _writeFileNames(TOptions & options) {
-//IOREV _todo_
+//IOREV _notio_
 	std::cout << "Database file   : " << options.databaseFile << std::endl;
 	std::cout << "Query file      : " << options.queryFile << std::endl;
 	std::cout << "Output file     : " << options.outputFile << std::endl;
@@ -354,7 +354,7 @@ _addVersion(CommandLineParser& parser) {
 template<typename TParser, typename TOptions>
 bool
 _parseOptions(TParser & parser, TOptions & options) {
-//IOREV _todo_
+//IOREV _notio_
     // i/o options
 	getOptionValueShort(parser, 'd', options.databaseFile);
     getOptionValueShort(parser, 'q', options.queryFile);

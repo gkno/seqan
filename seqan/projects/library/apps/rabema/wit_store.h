@@ -234,7 +234,7 @@ template <typename TFragmentStore>
 void loadWitFile(WitStore & store,
                  TFragmentStore /*const*/ & fragments,
                  CharString const & fileName) {
-//IOREV _todo_
+//IOREV uses custom io, maybe the whole wit-store should be moved to stor_io module?
     typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
 
     // Assign read and contig names into wit store members.
@@ -480,7 +480,7 @@ performIntervalScoreLowering(WitStore & witStore, unsigned const maxError)
 
 template <typename TStream>
 void writeWitFile(TStream & stream, WitStore const & witStore) {
-//IOREV _todo_
+//IOREV see above
     writeWitHeader(stream);
     writeWitComment(stream , WIT_COLUMN_NAMES);
     typedef typename WitStore::TIntervalStore TIntervalStore;

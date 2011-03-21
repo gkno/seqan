@@ -807,7 +807,7 @@ template <typename TAlphabet, typename TFloat, typename TSpec>
 void write(FILE *file,
 		   MarkovModel<TAlphabet, TFloat, TSpec> & mm )
 {
-//IOREV _todo_
+//IOREV only defined for FILE* not for File(), uses custom io with fprintf
 	mm.write(file);
 }
 
@@ -817,7 +817,7 @@ template <typename TAlphabet, typename TFloat, typename TSpec>
 void read(FILE *file,
 		  MarkovModel<TAlphabet, TFloat, TSpec> & mm )
 {
-//IOREV _todo_
+//IOREV only defined for FILE* not for File(), uses custom io with fscanf
 	mm.read(file);
 }
 //////////////////////////////////////////////////////////////////////////////

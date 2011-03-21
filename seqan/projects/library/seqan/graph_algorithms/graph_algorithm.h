@@ -101,7 +101,7 @@ breadthFirstSearch(Graph<TSpec> const& g,
 					 TPredecessorMap& predecessor, 
 					 TDistanceMap& distance)
 {
-//IOREV _todo_
+//IOREV _notio_
 	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;

@@ -97,7 +97,7 @@ inline void
 assignProfile(Score<TValue, ConsensusScore>& me,
 			  TString const& profile)
 {
-//IOREV _todo_
+//IOREV _notio_
 	typedef typename Size<TString>::Type TSize;
 	TSize alphSize = ValueSize<typename Value<TString>::Type>::VALUE;
 	resize(me.consensus_set, alphSize * length(profile));
@@ -210,7 +210,7 @@ inline void
 assignProfile(Score<TValue, FractionalScore>& me,
 			  TString const& profile)
 {
-//IOREV _todo_
+//IOREV _notio_
 	typedef typename Size<TString>::Type TSize;
 	resize(me.sum, length(profile));
 	typedef typename Iterator<TString, Standard>::Type TIter;
@@ -317,7 +317,7 @@ inline void
 assignProfile(Score<TValue, WeightedConsensusScore<TScore1, TScore2> >& me,
 			  TString const& profile)
 {
-//IOREV _todo_
+//IOREV _notio_
 	assignProfile(me.sc1, profile);
 	assignProfile(me.sc2, profile);
 }

@@ -78,15 +78,15 @@
 #endif
 
 #ifdef PLATFORM_WINDOWS
-    typedef __int64   ProfileInt_; //IOREV _todo_
+    typedef __int64   ProfileInt_; //IOREV _notio_
 #else
-    typedef int64_t ProfileInt_; //IOREV _todo_
+    typedef int64_t ProfileInt_; //IOREV _notio_
 #endif
 
     typedef double    _proFloat;
 
 
-    typedef _proFloat ProfileTimeValue_; //IOREV _todo_
+    typedef _proFloat ProfileTimeValue_; //IOREV _notio_
 
     enum ProfileConstants_ {
         SEQAN_PROPAGESIZE         = 4096, // B in byte
@@ -131,18 +131,18 @@
         SEQAN_PROFLOAT + SEQAN_PROSTATE
     };
 
-    typedef ProfileTimeValue_ ProfileTStates_[SEQAN_PROINDEXCOUNT]; //IOREV _todo_
-    typedef _proFloat  ProfileTTimes[SEQAN_PROINDEXCOUNT]; //IOREV _todo_
+    typedef ProfileTimeValue_ ProfileTStates_[SEQAN_PROINDEXCOUNT]; //IOREV _notio_
+    typedef _proFloat  ProfileTTimes[SEQAN_PROINDEXCOUNT]; //IOREV _notio_
 
 
 
     struct ProfileFile_;
-//IOREV _todo_
+//IOREV
 
 	template <typename T = void>
 	struct ProfileData_
 	{
-//IOREV _todo_
+//IOREV _notio_
 		static ProfileTStates_	_proValue;
 		static ProfileTTimes	_proLastUpdate;
 		static int			_proExtraCount;
@@ -164,9 +164,9 @@
 
 
 	inline ProfileFile_* & _proPFile()			{ return ProfileData_<>::_proPFile; }
-//IOREV _todo_
+//IOREV
 	inline ProfileFile_* & _proPFileStream()	{ return ProfileData_<>::_proPFileStream; }
-//IOREV _todo_
+//IOREV
 
 /**
 .Function.cpuTime:
@@ -245,7 +245,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 
     
     struct ProfileFile_ {
-//IOREV _todo_
+//IOREV not generic, uses FILE* instead of File() and custom IO
 
         FILE   *out;
         bool   running;
@@ -471,12 +471,12 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 */
 
     inline void _profileSignalDumpTest(_proFloat now) {
-//IOREV _todo_
+//IOREV _notio_
         if (ProfileData_<>::_proPFileStream) ProfileData_<>::_proPFileStream->signalDumpTest(now);
     }
 
     inline void _profileSignalNewMax(int valNum) {
-//IOREV _todo_
+//IOREV _notio_
         if (((ProfileValueType_[valNum] & SEQAN_PROSTATE) != 0)) {
             if (ProfileData_<>::_proPFileStream) ProfileData_<>::_proPFileStream->signalNewMax(valNum);
             if (ProfileData_<>::_proPFile)       ProfileData_<>::_proPFile->signalNewMax(valNum);
@@ -484,19 +484,19 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
     }
 
     inline void _profileMark(const char *text) {
-//IOREV _todo_
+//IOREV _notio_
         if (ProfileData_<>::_proPFileStream) ProfileData_<>::_proPFileStream->setMark(text);
         if (ProfileData_<>::_proPFile)       ProfileData_<>::_proPFile->setMark(text);
     }
 
     inline void _profileEndMark(const char *text) {
-//IOREV _todo_
+//IOREV _notio_
         if (ProfileData_<>::_proPFileStream) { ProfileData_<>::_proPFileStream->setEndMark(text); }
         if (ProfileData_<>::_proPFile)       { ProfileData_<>::_proPFile->setEndMark(text); }
     }
 
     inline void _profileReset() {
-//IOREV _todo_
+//IOREV _notio_
         if (ProfileData_<>::_proPFileStream) { ProfileData_<>::_proPFileStream->reset(); }
         if (ProfileData_<>::_proPFile)       { ProfileData_<>::_proPFile->reset(); }
     }
@@ -506,7 +506,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 
 	template <typename TValue>
     inline void _profileSet(ProfileValueIndex_ valNum, TValue value) {
-//IOREV _todo_
+//IOREV _notio_
         _proFloat now = sysTime();
         ProfileData_<>::_proLastUpdate[valNum] = now;
         if (ProfileData_<>::_proValue[valNum] < value) {
@@ -519,7 +519,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 
 	template <typename TValue>
     inline void _profileAdd(ProfileValueIndex_ valNum, TValue value) {
-//IOREV _todo_
+//IOREV _notio_
         _proFloat now = sysTime();
         ProfileData_<>::_proValue[valNum] += value;
         ProfileData_<>::_proLastUpdate[valNum] = now;
@@ -530,7 +530,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 
 	template <typename TValue>
     inline void _profileSub(ProfileValueIndex_ valNum, TValue value) {
-//IOREV _todo_
+//IOREV _notio_
         _proFloat now = sysTime();
         ProfileData_<>::_proValue[valNum] -= value;
         ProfileData_<>::_proLastUpdate[valNum] = now;
@@ -539,7 +539,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
     
     // simple interface for external programs
     inline void *_profileMalloc(size_t size) {
-//IOREV _todo_
+//IOREV _notio_
     	size_t *ptr = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
     	if (ptr) {
     		_profileAdd(SEQAN_PROMEMORY, (_proFloat)(*ptr = size));
@@ -550,7 +550,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
     }
 
     inline void _profileFree(void *_ptr) {
-//IOREV _todo_
+//IOREV _notio_
     	size_t *ptr = reinterpret_cast<size_t*>(_ptr);
     	if (ptr) {
     		--ptr;
@@ -561,7 +561,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
     }
 
 	inline _proFloat _profileUpdate(_proFloat& a) {
-//IOREV _todo_
+//IOREV _notio_
 		_proFloat x = sysTime() - a;
 		a += x;
 		return x;
