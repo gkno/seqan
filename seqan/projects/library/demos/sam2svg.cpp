@@ -12,7 +12,10 @@ using namespace seqan;
 int main(int argc, const char *argv[])
 {
 	typedef FragmentStore<> TFragStore;
-	typedef TFragStore::TContigPos TContigPos;
+
+		typedef  TFragStore::TContigStore					TContigStore;
+        typedef  Value<TContigStore>::Type						TContig;
+		typedef TFragStore::TContigPos TContigPos;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
@@ -24,6 +27,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("p",  "pos",    2, "set begin and end position (default: show whole strands)", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("l",  "lines",  2, "set first and last line of the alignment (default: show whole alignment)", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("a",  "ascii",     "output alignment in ASCII format instead of SVG", OptionType::Bool | OptionType::Label));
+	addOption(parser, CommandLineOption("gs", "gap-space", "begin and end position (-p) are given in gap space", OptionType::Bool | OptionType::Label));
 	requiredArguments(parser, 2);
 
 	bool stop = !parse(parser, argc, argv, std::cerr);
@@ -127,24 +131,37 @@ int main(int argc, const char *argv[])
 		if (i < length(store.contigStore))
 		{
 			std::cout << "Writing contig " << contigs[i] << " ... " << std::flush;
-			TContigPos right_ = right;
-			if (right_ == MaxValue<TContigPos>::VALUE)
+
+			__int64 l = left;
+			__int64 r = right;
+
+			if (!isSetLong(parser, "gap-space"))
 			{
-				right_ = 0;
+				typedef Gaps<Nothing, AnchorGaps< TContig::TGapAnchors> >	TContigGaps;
+				TContigGaps	contigGaps(store.contigStore[i].gaps);
+				l = positionSeqToGap(contigGaps, l);
+				if (r != MaxValue<TContigPos>::VALUE)
+					r = positionSeqToGap(contigGaps, r);
+			}
+
+			if (r == MaxValue<TContigPos>::VALUE)
+			{
+				r = 0;
 				for (unsigned j = 0; j < length(layout.contigRows[i]); ++j)
 				{
 					unsigned id = back(layout.contigRows[i][j]);
-					if (right_ < store.alignedReadStore[id].beginPos)
-						right_ = store.alignedReadStore[id].beginPos;
-					if (right_ < store.alignedReadStore[id].endPos)
-						right_ = store.alignedReadStore[id].endPos;
+					if (r < store.alignedReadStore[id].beginPos)
+						r = store.alignedReadStore[id].beginPos;
+					if (r < store.alignedReadStore[id].endPos)
+						r = store.alignedReadStore[id].endPos;
 				}
 			}
-			std::cout << left<<'\t'<<right_<<'\t'<<firstLine<<'\t'<<lastLine<<std::endl;
+
+			std::cout <<l<<'\t'<<r<<'\t'<<firstLine<<'\t'<<lastLine<<std::endl;
 			if (inASCII)
-				printAlignment(ascii, Raw(), layout, store, contigs[i], left, right_, firstLine, lastLine);
+				printAlignment(ascii, Raw(), layout, store, contigs[i], l, r, firstLine, lastLine);
 			else
-				printAlignment(svg, Raw(), layout, store, contigs[i], left, right_, firstLine, lastLine);
+				printAlignment(svg, Raw(), layout, store, contigs[i], l, r, firstLine, lastLine);
 
 			std::cout << "done" << std::endl;
 		}
