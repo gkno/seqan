@@ -61,6 +61,32 @@ typedef wchar_t Unicode;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Metafunction BitsPerValue
+// ----------------------------------------------------------------------------
+
+/**
+.Metafunction.BitsPerValue:
+..cat:Basic
+..summary:Number of bits needed to store a value.
+..signature:BitsPerValue<T>::VALUE
+..param.T:A class.
+..returns.param.VALUE:Number of bits needed to store $T$.
+...default:$sizeof<T> * 8$
+..see:Metafunction.ValueSize
+..include:seqan/basic.h
+*/
+
+template <typename TValue>
+struct BitsPerValue
+{
+	enum { VALUE = sizeof(TValue) * 8 };
+};
+
+template <typename TValue>
+struct BitsPerValue<TValue const> : public BitsPerValue<TValue>
+{};
+
+// ----------------------------------------------------------------------------
 // Metafunction IsSimple
 // ----------------------------------------------------------------------------
 
@@ -123,32 +149,6 @@ struct ValueSize<TValue const>
 template <typename TValue> 
 struct InternalValueSize_
         : public ValueSize<TValue>
-{};
-
-// ----------------------------------------------------------------------------
-// Metafunction BitsPerValue
-// ----------------------------------------------------------------------------
-
-/**
-.Metafunction.BitsPerValue:
-..cat:Basic
-..summary:Number of bits needed to store a value.
-..signature:BitsPerValue<T>::VALUE
-..param.T:A class.
-..returns.param.VALUE:Number of bits needed to store $T$.
-...default:$sizeof<T> * 8$
-..see:Metafunction.ValueSize
-..include:seqan/basic.h
-*/
-
-template <typename TValue>
-struct BitsPerValue
-{
-	enum { VALUE = sizeof(TValue) * 8 };
-};
-
-template <typename TValue>
-struct BitsPerValue<TValue const> : public BitsPerValue<TValue>
 {};
 
 // ----------------------------------------------------------------------------

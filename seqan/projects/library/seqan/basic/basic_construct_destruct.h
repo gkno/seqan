@@ -410,7 +410,7 @@ arrayConstructMove(TSource1 source_begin,
 				   TTarget target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayMoveConstruct_Default(source_begin, source_end, target_begin);
+	_arrayConstructMoveDefault(source_begin, source_end, target_begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////
