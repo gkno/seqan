@@ -1382,6 +1382,42 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TSource, typename TGapAnchors>
+inline typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type
+end(Gaps<TSource, AnchorGaps<TGapAnchors> > & me, Standard)
+{
+	SEQAN_CHECKPOINT
+	return typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type(me, length(me));
+}
+
+template <typename TSource, typename TGapAnchors>
+inline typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > const>::Type
+end(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, Standard)
+{
+	SEQAN_CHECKPOINT
+	return typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > const>::Type(me, length(me));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource, typename TGapAnchors>
+inline typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type
+end(Gaps<TSource, AnchorGaps<TGapAnchors> > & me, Rooted)
+{
+	SEQAN_CHECKPOINT
+	return typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type(me, length(me));
+}
+
+template <typename TSource, typename TGapAnchors>
+inline typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > const>::Type
+end(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, Rooted)
+{
+	SEQAN_CHECKPOINT
+	return typename Iterator<Gaps<TSource, AnchorGaps<TGapAnchors> > const>::Type(me, length(me));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource, typename TGapAnchors>
 inline typename Position< Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type
 beginPosition(Gaps<TSource, AnchorGaps<TGapAnchors> > & me)
 {
