@@ -45,6 +45,7 @@
 #define SEQAN_BASIC_BASIC_TESTING_H_
 
 #include <iostream>  // stdout, stderr
+#include <iomanip>
 #include <cstring>   // strrpos
 #include <cstdlib>   // exit()
 #include <cstdarg>   // va_start, va_list, va_end
@@ -53,9 +54,12 @@
 #include <string>
 
 #ifdef PLATFORM_WINDOWS
-#include <Windows.h>  // DeleteFile()
+#include <Windows.h>	// DeleteFile()
 #else  // #ifdef PLATFORM_WINDOWS
-#include <unistd.h>  // unlink()
+#include <unistd.h>		// unlink()
+#include <execinfo.h>	// backtrace(), backtrace_symbols()
+#include <cxxabi.h>		// __cxa_demangle()
+#include <signal.h>
 #endif  // #ifdef PLATFORM_WINDOWS
 
 // SeqAn's has three global debug/testing levels: testing, debug and
@@ -184,6 +188,132 @@ void printDebugLevel(TStream &stream) {
     stream << "SEQAN_ENABLE_CHECKPOINTS == " << SEQAN_ENABLE_CHECKPOINTS << std::endl;
     stream << "SEQAN_CXX_FLAGS == \"" << SEQAN_CXX_FLAGS << "\"" << std::endl;
 }
+
+#ifdef PLATFORM_WINDOWS
+	
+	template <typename TSize>
+	void printStackTrace(TSize maxFrames)
+	{
+	}
+	
+#else
+	
+	// print a demangled stack backtrace of the caller function
+	template <typename TSize>
+	void printStackTrace(TSize maxFrames)
+	{
+		void *addrlist[256];
+		char temp[4096];
+		char addr[20];
+		char offset[20];
+		
+		size_t size;
+		int status;
+		char *symname;
+		char *demangled;
+		
+		std::cerr << std::endl << "stack trace:" << std::endl;
+
+		int addrlist_len = backtrace(addrlist, maxFrames);
+		char** symbollist = backtrace_symbols(addrlist, addrlist_len);
+		for (int i = 1; i < addrlist_len; ++i)
+		{
+			offset[0] = 0;
+			addr[0] = 0;
+			demangled = NULL;
+
+			// LINUX FORMAT:
+			//			./sam2svg [0x473b8c]
+			//			/lib/libc.so.6 [0x7f40d2526f60]
+			//			./sam2svg(_Z2f3v+0x10) [0x47200c]
+			//			./sam2svg(_Z2f2v+0xd) [0x472021]
+			//			./sam2svg(main+0x1367) [0x4735fc]
+			//			/lib/libc.so.6(__libc_start_main+0xe6) [0x7f40d25131a6]
+			//
+			
+			if (3 == sscanf(symbollist[i], "%*[^(](%4095[^+]+%[^)]) %s", temp, offset, addr))
+			{
+				symname = temp;
+				if (NULL != (demangled = abi::__cxa_demangle(temp, NULL, &size, &status))) 
+				{
+					symname = demangled;
+				}
+			}
+
+			// MAC OS X FORMAT:
+			//			1   sam2svg                             0x0000000100003a39 _ZN5seqanL28signalHandlerPrintStackTraceEi + 21
+			//			2   libSystem.B.dylib                   0x00007fff87a6d67a _sigtramp + 26
+			//			3   libSystem.B.dylib                   0x00007fff87a76df7 tiny_free_do_recirc_to_depot + 980
+			//			4   sam2svg                             0x00000001000021b9 _Z2f2v + 9
+			//			5   sam2svg                             0x00000001000034b1 main + 4546
+			//			6   sam2svg                             0x0000000100002190 start + 52
+			
+			else if (3 == sscanf(symbollist[i], "%*d %*s %s %s %*s %s", addr, temp, offset))
+			{
+				symname = temp;
+				if (NULL != (demangled = abi::__cxa_demangle(temp, NULL, &size, &status))) 
+				{
+					symname = demangled;
+				}
+			}
+			
+			// LINUX FORMAT:
+			//			./sam2svg [0x473b8c]
+			//			/lib/libc.so.6 [0x7f40d2526f60]
+
+			else if (2 == sscanf(symbollist[i], "%s %s", temp, addr))
+			{
+				symname = temp;
+			} 
+			
+			// DEFAULT:
+			else
+			{
+				symname = symbollist[i];
+			}
+			
+			std::cerr << std::setw(3) << i - 1;
+			std::cerr << std::setw(20) << addr;
+			std::cerr << "  " << symname;
+			if (offset[0] != 0) std::cerr << " + " << offset;
+			std::cerr << std::endl;
+
+			free(demangled);
+		}
+		std::cerr << std::endl;
+	}
+	
+	static void signalHandlerPrintStackTrace(int signum)
+	{
+		std::cerr << std::endl;
+		printStackTrace(20);
+		signal(signum, SIG_DFL);
+		kill(getpid(), signum);
+	}	
+	
+	inline int _deploySignalHandlers()
+	{
+		signal(SIGSEGV, signalHandlerPrintStackTrace);	// segfault
+		signal(SIGFPE, signalHandlerPrintStackTrace);	// divide by zero
+		// ...
+		return 0;
+	}
+
+#if SEQAN_ENABLE_DEBUG
+
+	// automatically deploy signal handlers that output the stack trace on a trap (in debug mode)
+	
+	template <typename T>
+	struct SignalHandlersDummy_
+	{
+		static const int i;
+	};
+	
+	template <>
+	const int SignalHandlersDummy_<void>::i = _deploySignalHandlers();
+
+#endif // #if SEQAN_ENABLE_DEBUG
+#endif // #ifdef PLATFORM_WINDOWS
 
 
 // Namespace for the testing infrastructure.
@@ -1183,6 +1313,7 @@ const char *tempFileName() {
 #else
     // If not in testing mode then quit with an abort.
     inline void fail() {
+		printStackTrace(20);
         abort();
     }
 #endif  // #if SEQAN_ENABLE_TESTING
