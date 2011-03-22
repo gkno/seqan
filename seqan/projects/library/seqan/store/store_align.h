@@ -1154,6 +1154,7 @@ upperBoundAlignedReads(TReadAlignElement * const & alignedReadsItBegin,
 ..include:seqan/store.h
 
 .Memfunc.Gaps#Gaps
+..class:Class.Gaps
 ..summary:Constructor
 ..signature:Gaps<TSource, AnchorGaps<TGapAnchors> > ()
 ..signature:Gaps<TSource, AnchorGaps<TGapAnchors> > (source[, anchors])
@@ -1467,6 +1468,53 @@ _helperIsNegative(T t, True)
 	return t < 0;
 }
 
+/**
+.Function.positionGapToSeq
+..cat:Fragment Store
+..signature:positionGapToSeq(gaps, pos)
+..summary:Convert from gap-space in the global alignment to the sequence-space on the reference.
+..param.gaps:Contig gaps from fragment store.
+...type:Spec.AnchorGaps
+..param.pos:Position in gap space.
+..returns:Position in sequence space.
+..remarks:See the example below to construct the gaps object. Note that this construction is fast since it is only a thin wrapper around underlying objects.
+..include:seqan/store.h
+..example.text:Convert from gap space to position space when the contigs required to be loaded.
+..example.text:Converts position aligned read with index $idx$ in the aligned read store.
+..example.code:
+typedef typename TFragmentStore::TContigStore                        TContigStore;
+typedef typename Value<TContigStore>::Type                           TContig;
+typedef typename TFragmentStore::TContigSeq                          TContigSeq;
+typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
+
+typedef typename TFragmentStore::TAlignedReadStore                   TAlignedReadStore;
+typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
+typedef typename TAlignedRead::TPos                                  TAlignedReadPos;
+
+unsigned contigId = alignedReadStore[idx].contigId;
+TContigGaps contigGaps(contigStore[contigId].seq, contigStore[contigId].gaps);
+TAlignedRead const & alignedRead = alignedReadStore[idx];
+// Translate end position from aligned read record to sequence space in reference.
+TAlignedReadPos endPos = positionGapToSeq(contigGaps, alignedRead.endPos);
+..example.text:Convert from gap space to position space when the contigs are not required.
+..example.text:Converts position aligned read with index $idx$ in the aligned read store.
+..example.code:
+typedef typename TFragmentStore::TContigStore                        TContigStore;
+typedef typename Value<TContigStore>::Type                           TContig;
+typedef Gaps<Nothing, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
+
+typedef typename TFragmentStore::TAlignedReadStore                   TAlignedReadStore;
+typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
+typedef typename TAlignedRead::TPos                                  TAlignedReadPos;
+
+unsigned contigId = alignedReadStore[idx].contigId;
+TContigGaps contigGaps(Nothing(), contigStore[contigId].gaps);
+TAlignedRead const & alignedRead = alignedReadStore[idx];
+// Translate end position from aligned read record to sequence space in reference.
+TAlignedReadPos endPos = positionGapToSeq(contigGaps, alignedRead.endPos);
+..see:Function.positionSeqToGap
+ */
+
 template <typename TSource, typename TGapAnchors, typename TPosition>
 inline TPosition
 positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition pos)
@@ -1503,6 +1551,37 @@ positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 		seqPos = nextAnchor.seqPos;
 	return seqPos;
 }
+
+/**
+.Function.positionSeqToGap
+..cat:Fragment Store
+..signature:positionGapToSeq(gaps, pos)
+..summary:Convert from sequence space on the reference to gap space in the global alignment.
+..param.gaps:Contig gaps from fragment store.
+...type:Spec.AnchorGaps
+..param.pos:Position in the reference.
+..returns:Position in the gap space of the global alignment space.
+..remarks:See the example below to construct the gaps object. Note that this construction is fast since it is only a thin wrapper around underlying objects.
+..include:seqan/store.h
+..example.text:Convert from gap space to position space on contig $contigId$ when the contigs required to be loaded.
+..example.code:
+typedef typename TFragmentStore::TContigStore                        TContigStore;
+typedef typename Value<TContigStore>::Type                           TContig;
+typedef typename TFragmentStore::TContigSeq                          TContigSeq;
+typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
+
+TContigGaps contigGaps(contigStore[contigId].seq, contigStore[contigId].gaps);
+TAlignedReadPos pos = positionGapToSeq(contigGaps, 33);
+..example.text:Convert from gap space to position space on contig $contigId$ when the contigs are not required.
+..example.code:
+typedef typename TFragmentStore::TContigStore                        TContigStore;
+typedef typename Value<TContigStore>::Type                           TContig;
+typedef Gaps<Nothing, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
+
+TContigGaps contigGaps(Nothing(), contigStore[contigId].gaps);
+TAlignedReadPos endPos = positionGapToSeq(contigGaps, 33);
+..see:Function.positionSeqToGap
+ */
 
 template <typename TSource, typename TGapAnchors, typename TPosition>
 inline TPosition
