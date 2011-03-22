@@ -361,11 +361,9 @@ int read(StringSet<TIdString> & sequenceIds,
     // Second Pass: Actually read data.
     // ------------------------------------------------------------------------
     startSecondPass(reader);
+    Pair<TIdString, TSeqString> record;
     while (hasMore(reader)) {
-        appendValue(sequenceIds, TIdString());
-        appendValue(sequences, TSeqString());
-        Pair<TIdString &, TSeqString &> record(back(sequenceIds), back(sequences));
-        FastaReaderLambdaContextSinglePass_<TIdString &, TSeqString &> lambdaContextSecond(record);
+        FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContextSecond(record);
         res = _readRecordFastAQMeta(lambdaContextSecond, reader, Fasta());
         // std::cerr << "SECOND PASS DONE 1/2 res == " << res << std::endl;
         if (res)
@@ -373,6 +371,8 @@ int read(StringSet<TIdString> & sequenceIds,
         // Compute sequence field length.
         res = _readRecordFastAQSequence(lambdaContextSecond, reader, Fasta());
         // std::cerr << "SECOND PASS DONE 2/2" << std::endl;
+        appendValue(sequenceIds, record.i1); // TODO(holtgrew): Move-construction/appending?
+        appendValue(sequences, record.i2);
     }
     return res;
 }
