@@ -232,7 +232,8 @@ SEQAN_CHECKPOINT
 // Writes rows of a StellarMatch in gff format to a file.
 template<typename TId, typename TSize, typename TRow, typename TFile>
 void
-_writeMatchGff(TId const & databaseID,
+_writeMatchGff(unsigned offset,
+			   TId const & databaseID,
               TId const & patternID,
               bool const databaseStrand,
 			  TSize lengthAdjustment,
@@ -250,14 +251,14 @@ SEQAN_CHECKPOINT
 
     if (databaseStrand) {
         file << "\t" << 
-			toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)) + 1;
+			toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)) + 1 + offset;
         file << "\t" << 
-			toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+			toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0)) + offset;
     } else {
         file << "\t" << length(source(row0)) - 
-            (toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0))) + 1;
+            (toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0))) + 1 + offset;
         file << "\t" << length(source(row0)) - 
-            (toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)));
+            (toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0))) + offset;
     }
 
     file << "\t" << _computeIdentity(row0, row1);
@@ -289,7 +290,8 @@ SEQAN_CHECKPOINT
 // Writes rows of a StellarMatch in human readable format to file.
 template<typename TId, typename TSize, typename TRow, typename TFile>
 void
-_writeMatch(TId const & databaseID,
+_writeMatch(unsigned offset,
+			TId const & databaseID,
             TId const & patternID,
             bool const databaseStrand,
 			TSize lengthAdjustment,
@@ -299,21 +301,25 @@ _writeMatch(TId const & databaseID,
 //IOREV stub?
 SEQAN_CHECKPOINT
 	
-	file << databaseID << " " << patternID << " " << _computeEValue(row0, row1, lengthAdjustment) << " " << _computeIdentity(row0, row1) << std::endl;
-	/*
+//	file << databaseID << " " << patternID << " " << _computeEValue(row0, row1, lengthAdjustment) << " " << _computeIdentity(row0, row1) << std::endl;
 	// write database ID
 	file << "Database sequence: " << databaseID;
 	if (!databaseStrand) file << " (complement)" << std::endl;
 	else file << std::endl;
-
+	
+	::std::cout << "Offset " << offset << ::std::endl;
+	
 	// write database positions
 	file << "Database positions: ";
 	if (databaseStrand) {
-		file << toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0));
-		file << ".." << toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+		std::cout << toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0))+offset;
+		std::cout  << ".." << toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0))+offset << std::endl;
+
+		file << toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0))+offset;
+		file << ".." << toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0))+offset;
 	} else {
-		file << length(source(row0)) - toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0));
-		file << ".." << length(source(row0)) - toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+		file << length(source(row0)) - toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0))+offset;
+		file << ".." << length(source(row0)) - toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0))+offset;
 	}
 	file << std::endl;
 
@@ -337,20 +343,21 @@ SEQAN_CHECKPOINT
 	appendValue(align.data_rows, row1);
 	file << align;
 	file << "----------------------------------------------------------------------\n" << std::endl;
-	*/
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calls _writeMatchGff for each match in StringSet of String of matches.
 //   = Writes matches in gff format to a file.
-template<typename TInfix, typename TQueryId, typename TIds, typename TDatabases, typename TMode, typename TFile,
+template<typename TInfix, typename TQueryId, typename TIds, typename TDatabases, typename TMode, 
          typename TString>
 bool
-_outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > & matches,
+_outputMatches(StringSet<String<unsigned> >& offsets,
+			   StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > & matches,
 			   TIds const & ids,
 			   TDatabases & databases,
 			   TMode verbose,
-			   TFile & fileName,
+			   std::ofstream& file,
 			   TString & format) {
 SEQAN_CHECKPOINT
 	typedef StellarMatch<TInfix, TQueryId> TMatch;
@@ -361,18 +368,14 @@ SEQAN_CHECKPOINT
 	TSize totalLength = 0;
     TSize maxLength = 0;
 
-	std::ofstream file;
-	file.open(toCString(fileName), ::std::ios_base::out | ::std::ios_base::app);
-	if (!file.is_open()) {
-		std::cerr << "Could not open output file." << std::endl;
-		return 1;
-	}
+
 
 	// output matches on positive database strand
 	for (TSize i = 0; i < length(matches); i++) {
 		QueryMatches<TMatch> &queryMatches = value(matches, i);
 
 		TIterator it = begin(queryMatches.matches);
+		TIterator bit = it;
 		TIterator itEnd = end(queryMatches.matches);
 
 		if (it != itEnd) {
@@ -386,9 +389,9 @@ SEQAN_CHECKPOINT
 
 			if ((*it).orientation && ((*it).id != ids[i]) ) {
 				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatchGff(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 				else {
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatch(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 				}
 				}
 
@@ -403,14 +406,15 @@ SEQAN_CHECKPOINT
 		QueryMatches<TMatch> &queryMatches = value(matches, i);
 
 		TIterator it = begin(queryMatches.matches);
+		TIterator bit = it;
 		TIterator itEnd = end(queryMatches.matches);
 
 		while (it < itEnd) {
 			if (!(*it).orientation && ((*it).id != ids[i])) {
 				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatchGff(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 				else 
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatch(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 			}
 			++it;
 		}
@@ -434,15 +438,16 @@ SEQAN_CHECKPOINT
 // Calls _writeMatchGff for each match in StringSet of String of matches.
 //   = Writes matches in gff format to a file.
 // Writes disabled query sequences to disabledFile.
-template<typename TInfix, typename TQueryId, typename TQueries, typename TDatabases, typename TIds,
-         typename TMode, typename TFile, typename TString>
+template<typename TInfix, typename TQueryId, typename TQueries, typename TDatabases, typename TIds, 
+         typename TMode, typename TString>
 bool 
-_outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > & matches, 
+_outputMatches(StringSet<String<unsigned> > offsets,
+			   StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > & matches, 
 			   TQueries & queries,
 			   TIds const & ids,
 			   TDatabases & databases,
 			   TMode verbose,
-			   TFile & fileName,
+			   std::ofstream&  file,
 			   TString & format,
 			   TString & disabledFile) {
 SEQAN_CHECKPOINT
@@ -454,14 +459,15 @@ SEQAN_CHECKPOINT
     TSize totalLength = 0;
     TSize numMatches = 0;
     TSize numDisabled = 0;
-
+/*
     std::ofstream daFile, file;
 	file.open(toCString(fileName), ::std::ios_base::out | ::std::ios_base::app);
 	if (!file.is_open()) {
 		std::cerr << "Could not open output file." << std::endl;
 		return 1;
 	}
-
+*/
+	std::ofstream daFile;
 	daFile.open(toCString(disabledFile), ::std::ios_base::out | ::std::ios_base::app);
 	if (!daFile.is_open()) {
 		std::cerr << "Could not open file for disabled queries." << std::endl;
@@ -478,6 +484,7 @@ SEQAN_CHECKPOINT
 		}
 
 		TIterator it = begin(queryMatches.matches);
+		TIterator bit = it;
 		TIterator itEnd = end(queryMatches.matches);
 
 		if (it != itEnd) {
@@ -491,9 +498,9 @@ SEQAN_CHECKPOINT
 
 			if ((*it).orientation) {
 				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatchGff(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 				else 
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatch(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 			}
 			++it;
         }
@@ -505,14 +512,15 @@ SEQAN_CHECKPOINT
 	for (TSize i = 0; i < length(matches); i++) {
 		QueryMatches<TMatch> &queryMatches = value(matches, i);
 		TIterator it = begin(queryMatches.matches);
+		TIterator bit = it;
 		TIterator itEnd = end(queryMatches.matches);
 
 		while (it < itEnd) {
 			if ((*it).orientation) {
 				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatchGff(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 				else 
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatch(offsets[i][it-bit],(*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 			}
 			++it;
         }

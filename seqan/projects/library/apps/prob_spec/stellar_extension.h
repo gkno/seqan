@@ -616,7 +616,7 @@ SEQAN_CHECKPOINT
 		_fillMatrixBestEndsRight(matrixRight, possibleEndsRight, a, b, seed, seedOld, scoreMatrix);
 	} else appendValue(possibleEndsRight, TEndInfo());
 
-	// longest eps match on poss ends string
+	// longest eps match on pos ends string
 	Pair<TEndIterator> endPair = longestEpsMatch(possibleEndsLeft, possibleEndsRight, alignLen, alignErr, minLength, eps);
 
 	if (endPair == Pair<TEndIterator>(0, 0)) { // no eps-match found

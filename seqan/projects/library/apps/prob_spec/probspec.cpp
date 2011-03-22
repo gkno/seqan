@@ -23,14 +23,17 @@
 #include <seqan/index.h>
 #include <seqan/misc/misc_cmdparser.h>
 #include "stellar.h"
-#include "stellar_output.h"
+
 
 using namespace seqan;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initializes a Finder object for a database sequence,
 //  calls stellar, and writes matches to file
-template<typename TSequence, typename TId, typename TPattern, typename TMatches>
+
+/*
+ 
+ template<typename TSequence, typename TId, typename TPattern, typename TMatches>
 inline bool
 _stellarOnOne(TSequence & database,
 			  TId & databaseID,
@@ -70,17 +73,19 @@ _stellarOnOne(TSequence & database,
 	std::cout << std::endl;
 	return true;
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+	/*
 template <typename TStringSet, typename TShape, typename TSpec>
 struct Cargo<Index<TStringSet, IndexQGram<TShape, TSpec> > > {
 	typedef struct {
 		double		abundanceCut;
 	} Type;
 };
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Repeat masker
@@ -113,9 +118,10 @@ inline bool _qgramDisableBuckets(Index<TStringSet, IndexQGram<TShape, TSpec> > &
 
 	return result;
 }
-
+*/
 }
-
+	 
+	 /*
 ///////////////////////////////////////////////////////////////////////////////
 // Initializes a Pattern object with the query sequences, 
 //  and calls _stellarOnOne for each database sequence
@@ -125,7 +131,8 @@ _stellarOnAll(StringSet<TSequence> & databases,
 			  StringSet<TId> & databaseIDs,
 			  StringSet<TSequence> & queries,
 			  StringSet<TId> & queryIDs,
-			  ProbSpecOptions & options) {
+			  StringSet<QueryMatches<StellarMatch<TSequence, TId> > >& matches,
+			   ProbSpecOptions & options) {
     // pattern
     typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
     TQGramIndex qgramIndex(queries);
@@ -142,11 +149,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
 	indexRequire(qgramIndex, QGramSADir());
 	std::cout << std::endl;
 
-    // container for eps-matches
-	StringSet<QueryMatches<StellarMatch<TSequence, TId> > > matches;
-    resize(matches, length(queries));
-
-	std::cout << "Aligning all query sequences to database sequence..." << std::endl;
+	std::cout << "Aligning query sequence to database sequences..." << std::endl;
 	for(unsigned i = 0; i < length(databases); ++i) {
 		// positive database strand
 		if (options.forward) {
@@ -163,18 +166,11 @@ _stellarOnAll(StringSet<TSequence> & databases,
 	}
 	std::cout << std::endl;
 	
-	// file output
-	if (options.disableThresh != (unsigned)-1) {
-		if (!_outputMatches(matches, queries, queryIDs, databases, options.verbose,
-		                      options.outputFile, options.outputFormat, options.disabledQueriesFile)) return 1;
-	}
-	else {
-		if (!_outputMatches(matches, queryIDs, databases, options.verbose,
-		                      options.outputFile, options.outputFormat)) return 1;
-	}
 	
 	return 0;
 }
+*/
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Imports sequences from a file, 
@@ -212,8 +208,11 @@ _importSequences(CharString const & fileName,
     return true;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // Calculates parameters from parameters in options object and from sequences and writes them to std::cout
+
+/*
 template<typename TStringSet>
 void _writeMoreCalculatedParams(ProbSpecOptions & options, TStringSet & databases, TStringSet & queries) {
 //IOREV _notio_
@@ -295,6 +294,7 @@ void _writeCalculatedParams(ProbSpecOptions & options) {
 	std::cout << "  overlap     : " << overlap << std::endl;
 	std::cout << std::endl;
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // Writes user specified parameters from options object to std::cout
@@ -304,29 +304,30 @@ _writeSpecifiedParams(TOptions & options) {
 //IOREV _notio_
 	// Output user specified parameters
 	std::cout << "User specified parameters:" << std::endl;
+	std::cout << "  minimal exact match length       : " << options.lengthExact << std::endl;
 	std::cout << "  minimal match length             : " << options.minLength << std::endl;
 	std::cout << "  maximal error rate (epsilon)     : " << options.epsilon << std::endl;
 	std::cout << "  maximal x-drop                   : " << options.xDrop << std::endl;
 	if (options.qGram != (unsigned)-1)
 		std::cout << "  k-mer (q-gram) length            : " << options.qGram << std::endl;
-	std::cout << "  search forward strand            : " << ((options.forward)?"yes":"no") << std::endl;
-	std::cout << "  search reverse complement        : " << ((options.reverse)?"yes":"no") << std::endl;
+//	std::cout << "  search forward strand            : " << ((options.forward)?"yes":"no") << std::endl;
+//	std::cout << "  search reverse complement        : " << ((options.reverse)?"yes":"no") << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  verification strategy            : " << options.fastOption << std::endl;
-	if (options.disableThresh != (unsigned)-1) {
-		std::cout << "  disable queries with more than   : " << options.disableThresh << " matches" << std::endl;
-	}
-	std::cout << "  maximal number of matches        : " << options.numMatches << std::endl;
-	std::cout << "  duplicate removal every          : " << options.compactThresh << std::endl;
-	if (options.maxRepeatPeriod != 1 || options.minRepeatLength != 1000) {
-		std::cout << "  max low complexity repeat period : " << options.maxRepeatPeriod << std::endl;
-		std::cout << "  min low complexity repeat length : " << options.minRepeatLength << std::endl;
-	}
-	if (options.qgramAbundanceCut != 1) {
-		std::cout << "  q-gram abundance cut ratio       : " << options.qgramAbundanceCut << std::endl;
-	}
-	std::cout << std::endl;
+//	std::cout << "  verification strategy            : " << options.fastOption << std::endl;
+//	if (options.disableThresh != (unsigned)-1) {
+//		std::cout << "  disable queries with more than   : " << options.disableThresh << " matches" << std::endl;
+//	}
+//	std::cout << "  maximal number of matches        : " << options.numMatches << std::endl;
+//	std::cout << "  duplicate removal every          : " << options.compactThresh << std::endl;
+//	if (options.maxRepeatPeriod != 1 || options.minRepeatLength != 1000) {
+//		std::cout << "  max low complexity repeat period : " << options.maxRepeatPeriod << std::endl;
+//		std::cout << "  min low complexity repeat length : " << options.minRepeatLength << std::endl;
+//	}
+//	if (options.qgramAbundanceCut != 1) {
+//		std::cout << "  q-gram abundance cut ratio       : " << options.qgramAbundanceCut << std::endl;
+//	}
+//	std::cout << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -338,10 +339,10 @@ _writeFileNames(TOptions & options) {
 	std::cout << "Database file   : " << options.databaseFile << std::endl;
 	std::cout << "Query file      : " << options.queryFile << std::endl;
 	std::cout << "Output file     : " << options.outputFile << std::endl;
-	std::cout << "Output format   : " << options.outputFormat << std::endl;
-	if (options.disableThresh != (unsigned)-1) {
-		std::cout << "Disabled queries: " << options.disabledQueriesFile << std::endl;
-	}
+//	std::cout << "Output format   : " << options.outputFormat << std::endl;
+//	if (options.disableThresh != (unsigned)-1) {
+//		std::cout << "Disabled queries: " << options.disabledQueriesFile << std::endl;
+//	}
 	std::cout << std::endl;
 }
 
@@ -361,43 +362,42 @@ _parseOptions(TParser & parser, TOptions & options) {
 	getOptionValueShort(parser, 'd', options.databaseFile);
     getOptionValueShort(parser, 'q', options.queryFile);
     if (isSetShort(parser, 'o')) getOptionValueShort(parser, 'o', options.outputFile);
-    if (isSetShort(parser, "od")) getOptionValueShort(parser, "od", options.disabledQueriesFile);
-	if (isSetShort(parser, "of")) getOptionValueShort(parser, "of", options.outputFormat);
+  //  if (isSetShort(parser, "od")) getOptionValueShort(parser, "od", options.disabledQueriesFile);
+  //	if (isSetShort(parser, "of")) getOptionValueShort(parser, "of", options.outputFormat);
 
 	// main options
 	if (isSetLong(parser, "kmer")) getOptionValueLong(parser, "kmer", options.qGram);
 	if (isSetLong(parser, "lengthExact")) getOptionValueLong(parser, "lengthExact", options.lengthExact);
-	if (isSetShort(parser, "le")) getOptionValueLong(parser, "le", options.lengthExact);
+	if (isSetShort(parser, "le")) getOptionValueShort(parser, "le", options.lengthExact);
 
     if (isSetLong(parser, "minLength")) getOptionValueLong(parser, "minLength", options.minLength);
 	if (isSetShort(parser, 'e')) getOptionValueShort(parser, 'e', options.epsilon);
     if (isSetShort(parser, 'x')) getOptionValueShort(parser, 'x', options.xDrop);
 
-	if (isSetShort(parser, 'f')) if (!isSetShort(parser, 'r')) options.reverse = false;
-	if (isSetShort(parser, 'r')) if (!isSetShort(parser, 'f')) options.forward = false;
+//	if (isSetShort(parser, 'f')) if (!isSetShort(parser, 'r')) options.reverse = false;
+// if (isSetShort(parser, 'r')) if (!isSetShort(parser, 'f')) options.forward = false;
 
-	if (isSetShort(parser, "vs")) getOptionValueShort(parser, "vs", options.fastOption);
-	if (isSetShort(parser, "dt")) getOptionValueShort(parser, "dt", options.disableThresh);
-	if (isSetShort(parser, 'n')) getOptionValueShort(parser, 'n', options.numMatches);
-	if (isSetShort(parser, 's')) getOptionValueShort(parser, 's', options.compactThresh);
-	if (isSetShort(parser, "rp")) getOptionValueShort(parser, "rp", options.maxRepeatPeriod);
-	if (isSetShort(parser, "rl")) getOptionValueShort(parser, "rl", options.minRepeatLength);
-	if (isSetShort(parser, 'a')) getOptionValueShort(parser, 'a', options.qgramAbundanceCut);
+//	if (isSetShort(parser, "vs")) getOptionValueShort(parser, "vs", options.fastOption);
+//	if (isSetShort(parser, "dt")) getOptionValueShort(parser, "dt", options.disableThresh);
+//	if (isSetShort(parser, 'n')) getOptionValueShort(parser, 'n', options.numMatches);
+//	if (isSetShort(parser, 's')) getOptionValueShort(parser, 's', options.compactThresh);
+//	if (isSetShort(parser, "rp")) getOptionValueShort(parser, "rp", options.maxRepeatPeriod);
+//	if (isSetShort(parser, "rl")) getOptionValueShort(parser, "rl", options.minRepeatLength);
+//	if (isSetShort(parser, 'a')) getOptionValueShort(parser, 'a', options.qgramAbundanceCut);
 
 	if (isSetShort(parser, 'v')) options.verbose = 1;
 
-	if (options.outputFormat != "gff" && options.outputFormat != "text") {
-		std::cerr << "Invalid parameter value: Unknown output format." << std::endl;
-		return 0;
-	}
-
+//	if (options.outputFormat != "gff" && options.outputFormat != "text") {
+//		std::cerr << "Invalid parameter value: Unknown output format." << std::endl;
+//		return 0;
+//	}
+/*
 	if (options.fastOption != "exact" && options.fastOption != "bestLocal"
 		 && options.fastOption != "bandedGlobal") {
 		std::cerr << "Invalid parameter value: Unknown verification strategy." << std::endl;
 		return 0;
 	}
-
-	if (isSetShort(parser, 'k') && options.qGram < 1) {
+*/	if (isSetShort(parser, 'k') && options.qGram < 1) {
 		std::cerr << "Invalid parameter value: Please choose a greater k-mer length." << std::endl;
 		return 0;
 	}
@@ -420,7 +420,7 @@ _parseOptions(TParser & parser, TOptions & options) {
 		std::cerr << "Invalid parameter value: Please choose q-gram length lower than 1/epsilon." << std::endl; 
 		return 0;
 	}
-
+/*
 	if (options.qgramAbundanceCut > 1 || options.qgramAbundanceCut < 0) {
 		std::cerr << "Invalid parameter value: Please choose a k-mer overabundance cut ration between 0 and 1.\n";
 		return 0;
@@ -430,8 +430,180 @@ _parseOptions(TParser & parser, TOptions & options) {
 		std::cerr << "Invalid parameter values: Please choose numMatches <= sortThresh." << std::endl;
 		return 0;
 	}
+ */
 	return 1;
 }
+
+
+
+
+
+template<typename TInfix, typename TSize, typename TEps, typename TAlign>
+bool
+_extendKmer(TInfix & a, TInfix & b, TSize minLength, TEps eps, TAlign & align) {
+	typedef Seed<Simple> TSeed;
+	typedef int TScore;
+	
+	TSeed seed(beginPosition(a), beginPosition(b), endPosition(a), endPosition(b));
+	TSeed seedOld(seed);
+	
+	TScore penalty = static_cast<TScore>(ceil(-1/eps) + 1);
+	Score<TScore> scoreMatrix(1, penalty, penalty);
+	TScore scoreDropOff = -penalty * static_cast<TScore>(minLength * eps);
+
+	
+	ExtensionDirection direction = EXTEND_BOTH;
+	extendSeed(seed, host(a), host(b), direction, scoreMatrix, scoreDropOff, GappedXDrop());
+	
+	return _bestExtension(a, b, seed, seedOld, unsigned(length(a)), 0u, scoreMatrix, direction, minLength, eps, align);
+}
+
+
+
+
+template<typename TSequence>
+inline bool
+_extendExactMatches(TSequence & database,
+			  StringSet<TSequence> & queries,
+			  StringSet<String<Align<TSequence > > >& result,
+			ProbSpecOptions & options) {
+	
+	StringSet<String<Triple<unsigned,unsigned,unsigned> > > ematches;
+	resize(ematches, length(queries));
+	
+	// built qGram index on database
+	typedef Index<TSequence, IndexQGram<SimpleShape> > TQGramIndex;
+    TQGramIndex qgramIndex(database);
+	resize(indexShape(qgramIndex), options.lengthExact);
+	
+	indexRequire(qgramIndex, QGramSADir());
+	indexRequire(qgramIndex, QGramDir());
+ 
+	typedef typename Iterator<TSequence>::Type TSequenceIt;
+
+	for (unsigned int s=0; s < length(queries); s++) {
+	//::std::cout << "Inspecting query " << s << " " << queries[s] << std::endl;
+		
+		TSequenceIt sit  = begin(queries[s]);
+		TSequenceIt send = end(queries[s])-options.lengthExact;
+		
+		unsigned hv = hash(indexShape(qgramIndex),sit);
+		typedef typename Infix<typename Fibre<TQGramIndex, QGramSA>::Type const>::Type TInfix;
+		TInfix occs;
+		
+		int qp=0;
+		for (; sit != send; ) { 
+			occs = getOccurrences(qgramIndex, indexShape(qgramIndex));
+			for (unsigned i = 0; i < length(occs); i++){
+		//		::std::cout << s << " " << occs[i] << ::std::endl;
+				Triple<unsigned, unsigned, unsigned> p(occs[i],s,qp);
+		//		::std::cout << p << ::std::endl;
+				appendValue(ematches[s], p);
+			}
+			sit++;
+			qp++;
+			hv = hashNext(indexShape(qgramIndex),sit);
+/*			
+			TSequence result;
+			unhash(result, hv, options.lengthExact);	
+			::std::cout << result <<  ::std::endl;
+*/			
+		}
+	}
+	
+	// remove adjacent q-gram hits
+	StringSet< String<Triple<unsigned,unsigned,unsigned> > > cematches;
+	resize(cematches,length(ematches));
+	
+	
+	for (unsigned s=0; s<length(ematches); s++) {
+		unsigned cind = 0;		
+		if( length(ematches[s]) > 0 ){
+			std::sort(begin(ematches[s]), end(ematches[s]));
+			resize(cematches[s],1);
+			cematches[s][cind++] = ematches[s][0];
+		//	::std::cout << "CMATCH "<< ematches[s][0] << ::std::endl;
+			
+		}
+		if( length(ematches[s]) > 1 ){
+			for (unsigned i=1; i<length(ematches[s]); ++i) {
+				if( ematches[s][i].i2 != ematches[s][i-1].i2 || ematches[s][i].i1 != ematches[s][i-1].i1+1 ){
+					appendValue(cematches[s],ematches[s][i]);
+					::std::cout << "CMATCH "<< ematches[s][i] << ::std::endl;
+				}
+			}
+		}
+		//		::std::cout << "size of cematches " << cind <<  " " << length(cematches[s]) << std::endl;
+	}
+	
+	
+	typedef typename Infix<TSequence>::Type TInfix;	
+	TSequenceIt dbbegin = begin(database);
+
+	Align<TSequence>  oldalign;
+	resize(rows(oldalign), 2);
+
+	
+	for (unsigned s=0; s<length(cematches); s++) {
+		TSequenceIt qbegin = begin(queries[s]);
+
+		// there are extensions to be made
+		for (unsigned i=0; i<length(cematches[s]); i++) {
+			unsigned dbpos = cematches[s][i].i1;
+			unsigned qpos = cematches[s][i].i3;
+
+			TInfix dbinfix = infix(database,dbbegin + dbpos,dbbegin + dbpos + options.lengthExact);
+			TInfix qinfix = infix(queries[s],qbegin + qpos,qbegin + qpos + options.lengthExact);
+	
+			::std::cout << "positions " << dbpos << " " << qpos << ::std::endl;	
+			::std::cout << dbinfix << ::std::endl;
+			::std::cout << qinfix << ::std::endl;
+	
+			Align<TSequence> align;
+			resize(rows(align), 2);
+			setSource(row(align, 0), host(dbinfix));
+			setSource(row(align, 1), host(qinfix));
+				
+	
+			_extendKmer(dbinfix, qinfix, options.lengthExact, options.epsilon, align);
+			
+		
+			if(length(row(align,0))  > options.minLength){
+				unsigned db1 = clippedBeginPosition(row(align,0));
+				unsigned db2 = clippedEndPosition(row(align,0))-1;
+				unsigned q1  = clippedBeginPosition(row(align,1));
+				unsigned q2  = clippedEndPosition(row(align,1))-1;
+				unsigned odb1 = clippedBeginPosition(row(oldalign,0));
+				unsigned odb2 = clippedEndPosition(row(oldalign,0))-1;
+				unsigned oq1  = clippedBeginPosition(row(oldalign,1));
+				unsigned oq2  = clippedEndPosition(row(oldalign,1))-1;
+		
+		//		::std::cout << "Old Aligns Seq1[" << odb1 << ":" << odb2<< "]" << " and Seq2[" << oq1 << ":" <<  oq2 << "]";
+		//			::std::cout << ::std::endl; 
+				
+			//	::std::cout << oldalign << ::std::endl;
+				
+		//		::std::cout << "Aligns Seq1[" << db1 << ":" << db2<< "]" << " and Seq2[" << q1 << ":" <<  q2 << "]";
+		//		::std::cout << ::std::endl; 
+		
+		//		::std::cout << align << ::std::endl;
+	
+				if (odb1 != db1 || odb2 != db2 || oq1 != q1 || oq2 != q2 ) {
+					appendValue(result[s],align);
+					oldalign = align;
+				}
+		//		else	
+		//			::std::cout << "double match " << ::std::endl;
+				
+			}
+		}
+	}
+
+			
+	
+	return true;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Set-Up of Command Line Parser
@@ -440,10 +612,10 @@ void
 _setParser(TParser & parser) {
 	_addVersion(parser);
 
-    addTitleLine(parser, "************************************************");
-	addTitleLine(parser, "*  ProbSeq - Computing special local alignmens *");
-	addTitleLine(parser, "* (c) Copyright 2011 by Knut Reinert           *");
-	addTitleLine(parser, "************************************************");
+    addTitleLine(parser, "***************************************************");
+	addTitleLine(parser, "*  prob_spec - Computing special local alignments *");
+	addTitleLine(parser, "* (c) Copyright 2011 by Knut Reinert              *");
+	addTitleLine(parser, "***************************************************");
 
 	addUsageLine(parser, "-d <FASTA sequence file> -q <FASTA sequence file> [Options]");
 
@@ -459,55 +631,58 @@ _setParser(TParser & parser) {
 	addSection(parser, "Main Options:");
     addOption(parser, CommandLineOption('e', "epsilon", "Maximal error rate (max 0.25)", OptionType::Double, "0.05"));
     addOption(parser, CommandLineOption('l', "minLength", "Minimal length of epsilon-matches", OptionType::Int, 100));
-	addOption(parser, CommandLineOption('f', "forward", "Search only in forward strand of database",
-		OptionType::Boolean, "both"));
-	addOption(parser, CommandLineOption('r', "reverse", "Search only in reverse complement of database",
-		OptionType::Boolean, "both"));
+//	addOption(parser, CommandLineOption('f', "forward", "Search only in forward strand of database",
+//		OptionType::Boolean, "both"));
+//	addOption(parser, CommandLineOption('r', "reverse", "Search only in reverse complement of database",
+//		OptionType::Boolean, "both"));
     addOption(parser, CommandLineOption('v', "verbose", "Verbosity mode.", OptionType::Bool, "false"));
     
 	addSection(parser, "Filtering Options:");
     addOption(parser, CommandLineOption('k', "kmer", "Length of the q-grams (max 32)", OptionType::Int, 10));
-    addOption(parser, CommandLineOption("rp", "repeatPeriod",
-		"Maximal period of low complexity reapeats to be filtered", OptionType::Int, 1));
-    addOption(parser, CommandLineOption("rl", "repeatLength",
-		"Minimal length of low complexity reapeats to be filtered", OptionType::Int, 1000));
-    addOption(parser, CommandLineOption('a', "abundanceCut",
-		"k-mer overabundance cut ratio", OptionType::Double, "1"));
-	addOption(parser, CommandLineOption("le", "lengthExact",
+  //  addOption(parser, CommandLineOption("rp", "repeatPeriod",
+  //	"Maximal period of low complexity reapeats to be filtered", OptionType::Int, 1));
+  //  addOption(parser, CommandLineOption("rl", "repeatLength",
+  //		"Minimal length of low complexity reapeats to be filtered", OptionType::Int, 1000));
+  //  addOption(parser, CommandLineOption('a', "abundanceCut",
+  //		"k-mer overabundance cut ratio", OptionType::Double, "1"));
+  	addOption(parser, CommandLineOption("le", "lengthExact",
 										"length of required exact submatch", OptionType::Int, "12"));
 
 
 	addSection(parser, "Verification Options:");
     addOption(parser, CommandLineOption('x', "xDrop", "Maximal x-drop for extension", OptionType::Double, 5));
-	addOption(parser, CommandLineOption("vs", "verification", "Verification strategy", OptionType::String, "exact"));
-	addHelpLine(parser, "exact        = compute and extend all local alignments in SWIFT hits");
-	addHelpLine(parser, "bestLocal    = compute and extend only best local alignment in SWIFT hits");
-	addHelpLine(parser, "bandedGlobal = banded global alignment on SWIFT hits");
-	addOption(parser, CommandLineOption("dt", "disableThresh",
-		"Maximal number of verified matches before disabling verification", OptionType::Int));
-	addHelpLine(parser, "for one query sequence (default infinity)");
-	addOption(parser, CommandLineOption('n', "numMatches",
-		"Maximal number of kept matches per query and database", OptionType::Int, 50));
-	addHelpLine(parser, "If there are more matches, only the longest ones are kept.");
-	addOption(parser, CommandLineOption('s', "sortThresh",
-		"Number of matches triggering removal of duplicates", OptionType::Int, 500));
-	addHelpLine(parser, "Choose a smaller value for saving space.");
+//	addOption(parser, CommandLineOption("vs", "verification", "Verification strategy", OptionType::String, "exact"));
+//	addHelpLine(parser, "exact        = compute and extend all local alignments in SWIFT hits");
+//	addHelpLine(parser, "bestLocal    = compute and extend only best local alignment in SWIFT hits");
+//	addHelpLine(parser, "bandedGlobal = banded global alignment on SWIFT hits");
+//	addOption(parser, CommandLineOption("dt", "disableThresh",
+//		"Maximal number of verified matches before disabling verification", OptionType::Int));
+//	addHelpLine(parser, "for one query sequence (default infinity)");
+//	addOption(parser, CommandLineOption('n', "numMatches",
+//		"Maximal number of kept matches per query and database", OptionType::Int, 50));
+//	addHelpLine(parser, "If there are more matches, only the longest ones are kept.");
+//	addOption(parser, CommandLineOption('s', "sortThresh",
+//		"Number of matches triggering removal of duplicates", OptionType::Int, 500));
+//	addHelpLine(parser, "Choose a smaller value for saving space.");
 
 	addSection(parser, "Output Options:");
     addOption(parser, CommandLineOption('o', "out", "Name of output file", OptionType::String, "stellar.gff"));
-	addOption(parser, CommandLineOption("of", "outFormat", "Output format", OptionType::String, "gff"));
-	addHelpLine(parser, "Possible formats: gff, text");
-	addOption(parser, CommandLineOption("od", "outDisabled",
-		"Name of output file containing disabled query sequences", OptionType::String));
-	addHelpLine(parser, "(default stellar.disabled.fasta)");
+//	addOption(parser, CommandLineOption("of", "outFormat", "Output format", OptionType::String, "gff"));
+//	addHelpLine(parser, "Possible formats: gff, text");
+//	addOption(parser, CommandLineOption("od", "outDisabled",
+//		"Name of output file containing disabled query sequences", OptionType::String));
+//	addHelpLine(parser, "(default stellar.disabled.fasta)");
 }
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Parses and outputs parameters, calls _stellarOnAll
 int main(int argc, const char *argv[]) {
 
     // command line parsing
-    CommandLineParser parser("probspec");
+    CommandLineParser parser("prob_spec");
 
     _setParser(parser);
     if (!parse(parser, argc, argv)) {
@@ -533,7 +708,7 @@ int main(int argc, const char *argv[]) {
 
 	// output parameters
 	_writeSpecifiedParams(options);
-	_writeCalculatedParams(options);
+//	_writeCalculatedParams(options);
 
     // import query sequences
     StringSet<TSequence> queries;
@@ -544,93 +719,25 @@ int main(int argc, const char *argv[]) {
     StringSet<TSequence > databases;
     StringSet<CharString> databaseIDs;
 	if (!_importSequences(options.databaseFile, "database", databases, databaseIDs)) return 1;
-
-	// built qGram index on databases
-	typedef Index<TSequence, IndexQGram<SimpleShape> > TQGramIndex;
-	//	typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
-	//	typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape> > TQGramIndex;
-
-    TQGramIndex qgramIndex(databases[0]);
-	resize(indexShape(qgramIndex), options.lengthExact);
-
-	::std::cout	<< "Exact match length " <<  options.lengthExact << ::std::endl;
 	
-	indexRequire(qgramIndex, QGramSADir());
-	indexRequire(qgramIndex, QGramDir());
-//	indexRequire(qgramIndex, QGramCounts());
+	// allocate result Stringset. it contains the alignments for each query
+	StringSet< String<Align<TSequence> > > result;
+	resize(result,length(queries));
+
+	if( ! _extendExactMatches(databases[0],queries,result,options)) return 1;
 	
-
-	// go over the buckets	
-	typedef Fibre<TQGramIndex, QGramSA>::Type	TSA;
-	typedef Iterator<TSA, Standard>::Type	TIterSA;
-	typedef Fibre<TQGramIndex, QGramDir>::Type	TDir;
-	typedef Iterator<TDir, Standard>::Type	TIterDir;
-	
-	//TIterDir itDir,itDirb = begin(indexDir(qgramIndex), Standard());
-	//TIterDir itDirend = end(indexDir(qgramIndex), Standard());
-	//	TSA& sa = getFibre(qgramIndex,QGramSA());
-	//	TDir& dir = getFibre(qgramIndex,QGramDir());
-		
-	for (unsigned int s=0; s < length(queries); s++) {
-		::std::cout << "Inspecting query " << s << " " << queries[s] << std::endl;
-		
-		TSequenceIt sit  = begin(queries[s]);
-		TSequenceIt send = end(queries[s])-options.lengthExact;
-		
-		unsigned hv = hash(indexShape(qgramIndex),sit);
-		Infix<Fibre<TQGramIndex, QGramSA>::Type const>::Type occs;
-
-		for (; sit != send; ) { 
-			occs = getOccurrences(qgramIndex, indexShape(qgramIndex));
-	//		orderOccurrences(occs);
-			for (unsigned i = 0; i < length(occs); ++i)
-				std::cout << occs[i] << std::endl;
-			sit++;
-			hv = hashNext(indexShape(qgramIndex),sit);
-
-			TSequence result;
-			unhash(result, hv, options.lengthExact);	
-			::std::cout << result <<  ::std::endl;
-
+	for (unsigned i=0; i<length(result); ++i)
+		for (unsigned j=0; j<length(result[i]); j++) {
+			::std::cout << "hits for query " << i << ::std::endl;
+			unsigned db1 = clippedBeginPosition(row(result[i][j],0));
+			unsigned db2 = clippedEndPosition(row(result[i][j],0))-1;
+			unsigned q1  = clippedBeginPosition(row(result[i][j],1));
+			unsigned q2  = clippedEndPosition(row(result[i][j],1))-1;
+			::std::cout << "Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
+			::std::cout << result[i][j] << ::std::endl;
 		}
-	}
-	
-	
-	
-	
-	
-	/*
-	
-    std::cout << std::endl;
-	_writeMoreCalculatedParams(options, databases, queries);
-
-    // open output files
-    std::ofstream file;
-    file.open(toCString(options.outputFile));
-	if (!file.is_open()) {
-		std::cerr << "Could not open output file." << std::endl;
-		return 1;
-	}
-    file.close();
-
-	if(options.disableThresh != (unsigned)-1) {
-		std::ofstream daFile;
-		daFile.open(toCString(options.disabledQueriesFile));
-		if (!daFile.is_open()) {
-			std::cerr << "Could not open file for disabled queries." << std::endl;
-			return 1;
-		}
-		daFile.close();
-	}
-
-	// stellar on all databases and queries writing results to file
-    SEQAN_PROTIMESTART(timeStellar);
-	if (!_stellarOnAll(databases, databaseIDs, queries, queryIDs, options)) return 1;
-
-    if (options.verbose > 0) 
-		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
-	
-	 */
+		for (unsigned i=0; i<length(result); ++i)	
+			::std::cout << "query " << i << " has " << length(result[i]) << " hits in database " <<  ::std::endl;
 	
 	return 0;
 }
