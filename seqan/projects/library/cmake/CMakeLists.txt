@@ -13,10 +13,18 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH})
 find_package (PythonInterp)
 
+# Locate BZIP2.
+find_package(BZip2)
+if (BZIP2_FOUND)
+  include_directories(${BZIP_INCLUDE_DIRS})
+  add_definitions(-DSEQAN_HAS_BZIP2=1)
+endif (BZIP2_FOUND)
+
 # Hacky conditional inclusion of samtools.
 find_package(ZLIB QUIET)
 if (ZLIB_FOUND)
-  set(SAMTOOLS_FOUND "1")
+  add_definitions(-DSEQAN_HAS_ZLIB=1)
+  set(C_CXX_FLAGS "-DSEQAN_HAS_SAMTOOLS=1")
   set(SAMTOOLS_CXX_FLAGS "-DSEQAN_HAS_SAMTOOLS=1")
   set(SAMTOOLS_LIBRARIES "bam")
   include_directories(${ZLIB_INCLUDE_DIRS})

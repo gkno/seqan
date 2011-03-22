@@ -47,7 +47,7 @@ namespace seqan {
 // ============================================================================
 
 template <typename TSpec = Default>
-struct Owner;
+struct Owner {};
 
 /**
 .Class.StringSet:

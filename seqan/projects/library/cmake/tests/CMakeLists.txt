@@ -72,16 +72,19 @@ get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
 			add_executable (test_${TEST_DIR_REL} ${TEST_SOURCES})
 			add_dependencies (test_${TEST_DIR_REL} ${SEQAN_TARGET})
 	    add_dependencies (tests test_${TEST_DIR_REL})
-        
+
+        if (ZLIB_FOUND)
+          target_link_libraries(test_${TEST_DIR_REL} ${ZLIB_LIBRARIES})
+        endif (ZLIB_FOUND)
+        if (BZIP2_FOUND)
+          target_link_libraries(test_${TEST_DIR_REL} ${BZIP2_LIBRARIES})
+        endif (BZIP2_FOUND)
+
     # Conditionally link against libbam.
     if (SAMTOOLS_FOUND)
       LIST_CONTAINS(contains test_${TEST_DIR_REL} ${SEQAN_LINK_LIBBAM})
       if (contains)
-        if (ZLIB_FOUND)
-          target_link_libraries(test_${TEST_DIR_REL} ${SAMTOOLS_LIBRARIES} ${ZLIB_LIBRARIES})
-        else (ZLIB_FOUND)
-          target_link_libraries(test_${TEST_DIR_REL} ${SAMTOOLS_LIBRARIES})
-        endif (ZLIB_FOUND)
+        target_link_libraries(test_${TEST_DIR_REL} ${SAMTOOLS_LIBRARIES})
       endif (contains)
     endif (SAMTOOLS_FOUND)
     

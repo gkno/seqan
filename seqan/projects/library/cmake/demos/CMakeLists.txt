@@ -26,6 +26,12 @@ file(GLOB SEQAN_DEMOS ${SEQAN_LIBRARY}/demos/[A-z]*.cpp)
 foreach (DEMOFILE ${SEQAN_DEMOS})
 	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
 	seqan_add_executable (${DEMO} ${DEMOFILE})
+    if (ZLIB_FOUND)
+      target_link_libraries(${DEMO} ${ZLIB_LIBRARIES})
+    endif (ZLIB_FOUND)
+    if (BZIP2_FOUND)
+      target_link_libraries(${DEMO} ${BZIP2_LIBRARIES})
+    endif (BZIP2_FOUND)
 	add_dependencies (demos ${DEMO})
 endforeach (DEMOFILE)
 
@@ -41,5 +47,19 @@ foreach (DEMOFILE ${SEQAN_DEMOS})
 	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
 	seqan_add_executable (tutorial_${DEMO} ${DEMOFILE})
 	add_dependencies (tutorials tutorial_${DEMO})
+endforeach (DEMOFILE)
+
+################################################################################
+# HowTos
+################################################################################
+
+add_custom_target(howtos)
+
+file(GLOB SEQAN_DEMOS ${SEQAN_LIBRARY}/demos/howto/[A-z]*.cpp
+                      ${SEQAN_LIBRARY}/demos/howto/*/[A-z]*.cpp)
+foreach (DEMOFILE ${SEQAN_DEMOS})
+	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
+	seqan_add_executable (howto_${DEMO} ${DEMOFILE})
+	add_dependencies (howtos howto_{DEMO})
 endforeach (DEMOFILE)
 
