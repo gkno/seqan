@@ -192,7 +192,7 @@ void printDebugLevel(TStream &stream) {
 #ifdef PLATFORM_WINDOWS
 	
 	template <typename TSize>
-	void printStackTrace(TSize maxFrames)
+	void printStackTrace(TSize /*maxFrames*/)
 	{
 	}
 	
