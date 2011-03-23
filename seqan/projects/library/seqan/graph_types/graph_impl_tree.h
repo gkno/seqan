@@ -1028,12 +1028,15 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 /**
 .Function.parentVertex:
 ..cat:Graph
-..summary:Returns the parent vertex of an edge.
+..summary:Returns the parent vertex of an edge or vertex.
 ..signature:parentVertex(g, e)
+..signature:parentVertex(g, v)
 ..param.g:A tree.
 ...type:Spec.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
+..param.e:A vertex descriptor.
+...type:Metafunction.VertexDescriptor
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.parentVertex
