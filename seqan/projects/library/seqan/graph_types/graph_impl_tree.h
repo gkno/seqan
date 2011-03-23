@@ -1035,7 +1035,7 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 ...type:Spec.Tree
 ..param.e:An edge descriptor.
 ...type:Metafunction.EdgeDescriptor
-..param.e:A vertex descriptor.
+..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
