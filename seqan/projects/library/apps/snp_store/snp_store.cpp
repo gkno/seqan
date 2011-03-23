@@ -19,7 +19,7 @@
 #define TRACE_PIPELINE
 //#define READS_454
 
-//#define SNPSTORE_DEBUG
+#define SNPSTORE_DEBUG
 //#define SNPSTORE_DEBUG_CANDPOS
 
 #ifdef SNPSTORE_DEBUG
@@ -1186,6 +1186,10 @@ int main(int argc, const char *argv[])
 			}
 			if (strcmp(argv[arg], "-dc") == 0 || strcmp(argv[arg], "--dont-clip") == 0) {
 				options.dontClip = true;
+				continue;
+			}
+			if (strcmp(argv[arg], "-su") == 0 || strcmp(argv[arg], "--suboptimal") == 0) {
+				options.keepSuboptimalReads = true;
 				continue;
 			}
 			if (strcmp(argv[arg], "-mu") == 0 || strcmp(argv[arg], "--multi") == 0) {

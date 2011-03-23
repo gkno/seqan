@@ -2102,6 +2102,7 @@ void mapSplicedReads(
 	TSize gLength = length(genome);
 	if(orientation == 'R') scanBegin = gLength - scanEnd;
 	TMatch mR = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	TMatch temp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	TDequeueValue fL(-1, mR);	
 	fL.i2.gseqNo = gseqNo;
 	mR.gseqNo = gseqNo;
@@ -2413,8 +2414,19 @@ void mapSplicedReads(
 					// score the whole match pair
 					//mLtmp.pairScore = mRtmp.pairScore = 0 - mLtmp.editDist - mRtmp.editDist;
 					// score the whole match pair by # of matches bases - # mismatched bases (not entirely correct for edit distance)
+#ifdef TRY_SCORES
+					double identityScore = ( (100.00 - (100.00* (double)(mLtmp.editDist + mRtmp.editDist)/(mRtmp.mScore + mLtmp.mScore))) - 80.0 ) * 5.0;
+					if(options._debugLevel > 1 )std::cout << "identityScore: " << identityScore << std::endl;
+					
+					double aliScore = mRtmp.mScore + mLtmp.mScore - 2* mLtmp.editDist - 2* mRtmp.editDist;
+					aliScore = (double)(aliScore*100)/readLength;
+					mLtmp.pairScore = mRtmp.pairScore = (int)(identityScore+aliScore)/2.0;
+#else
 					mLtmp.pairScore = mRtmp.pairScore = mRtmp.mScore + mLtmp.mScore - 2* mLtmp.editDist - 2* mRtmp.editDist;
-					if(mLtmp.mScore + mRtmp.mScore != (int) length(readSet[rseqNo])) 
+#endif
+
+
+					if(outerDistanceError != 0) 
 					{ //subtract one if there is an indel in the middle (such that perfect matches are better than indel matches..)
 						mLtmp.pairScore -= 1; 
 						mRtmp.pairScore -= 1; 
@@ -2504,6 +2516,17 @@ void mapSplicedReads(
 					mRtmp.mateDelta = -outerDistance;
 					
 					mLtmp.rseqNo = mRtmp.rseqNo = rseqNo;
+
+					if (!empty(readRegions) && options.anchored)
+					{
+						if(readRegions[rseqNo].i2 < 0) // match actually is on reverse strand
+						{
+							temp = mLtmp;
+							mLtmp = mRtmp;
+							mLtmp = temp;
+							mLtmp.orientation = mRtmp.orientation = 'R';
+						}
+					}
 					
 					if (!options.spec.DONT_DUMP_RESULTS)
 					{

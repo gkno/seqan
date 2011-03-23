@@ -1419,11 +1419,20 @@ void dumpMatches(
 //?//			double percId = 100.0 * (1.0 + (double)(mL.pairScore-mL.mScore-mR.mScore) / (double)readLen);
 				double percId = 100.0 * (1.0 - (double)(mL.editDist + mR.editDist) /(double)(mL.mScore+mR.mScore));
 				file << percId << "\t";
-
-				if (mL.orientation == 'F')
-					file << '+' << '\t' << '.' <<'\t';
-				else
-					file << '-' << '\t' << '.' <<'\t';
+//				if(!empty(readRegions) && options.anchored)
+//				{
+//					if(readRegions[currReadNo].i2 < 0) 
+//						file << '-' << '\t' << '.' <<'\t';
+//					else
+//						file << '+' << '\t' << '.' <<'\t';
+//				}			
+//				else
+				{
+					if (mL.orientation == 'F')
+						file << '+' << '\t' << '.' <<'\t';
+					else
+						file << '-' << '\t' << '.' <<'\t';
+				}
 		
 				switch (options.readNaming)
 				{
@@ -1450,7 +1459,7 @@ void dumpMatches(
 				file << ";pairScore=" << (unsigned int) mR.pairScore;
 				if(!empty(readRegions) && options.anchored)
 				{
-					if(readRegions[currReadNo].i2 < 0) file << ";libraryError=" << (int) mR.gEnd +readRegions[currReadNo].i2 ;
+					if(readRegions[currReadNo].i2 < 0) file << ";libraryError=" << (int) mR.gEnd +readRegions[currReadNo].i2;
 					else file << ";libraryError=" << (int) mL.gBegin - readRegions[currReadNo].i2 ;
 				}
 

@@ -33,6 +33,7 @@
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 //#define RAZERS_OPENADDRESSING
 #define RAZERS_SPLICED
+//#define TRY_SCORES
 
 #ifdef RAZERS_SPLICED
   #define RAZERS_MATEPAIRS				
@@ -250,6 +251,14 @@ int mapReads(
 				break;
 		}
 		return error;
+	}
+
+	// anchored reads were all mapped onto forward strand, undo reverse complementing
+	if(!empty(readRegions) && options.anchored)
+	{
+		for(unsigned i = 0; i < length(readSet); ++i)
+			if(readRegions[i].i2 < 0)
+				reverseComplement(readSet[i]);
 	}
 
 #ifdef RAZERS_PARALLEL

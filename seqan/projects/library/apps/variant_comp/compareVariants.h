@@ -110,7 +110,7 @@ template <typename TIndel, typename TOptions>
 bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TOptions &options)
 {
 	
-	int sizeTol = abs(refIndel.indelSize) * options.sizeTolerance;
+	int sizeTol = int((double)abs(refIndel.indelSize) *  options.sizeTolerance);
 	
 	if(refIndel.indelSize - sizeTol <= predIndel.indelSize && predIndel.indelSize <= refIndel.indelSize + sizeTol ) 
 		return true;
@@ -279,7 +279,7 @@ int compareIndels(
 					if(options.annotateRepeats>0)
 					{
 						int countN = 0;
-						for(TValue k = (TValue)_max((int)0,(int)refIndel.originalPos - (int)options.annotateRepeats); k < (TValue)refIndel.originalPos && k < length(genomes[i]); k++) // count 'N's in upstream flanking sequence
+						for(TValue k = (TValue)_max((int)0,(int)refIndel.originalPos - (int)options.annotateRepeats); k < (TValue)refIndel.originalPos && k < (TValue)length(genomes[i]); k++) // count 'N's in upstream flanking sequence
 							if(genomes[i][k] == 'N') ++countN;
 						for(TValue k = refIndel.originalPos; k < _min((TValue)length(genomes[i]),(TValue)refIndel.originalPos+options.annotateRepeats); k++) // count 'N's in upstream flanking sequence
 							if(genomes[i][k] == 'N') ++countN;

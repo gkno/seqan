@@ -3386,6 +3386,7 @@ void dumpShortIndelPolymorphismsBatch(
 #endif
 
 			//TODO: make use of i2
+			//TODO: remember strand of indel-supporting read
 			indelIt = indels.find(TPosLen((unsigned)indelCandPos,-(int)(readInserts[i].i2).i2));
 			if(indelIt == indels.end())
 			{
@@ -3622,7 +3623,7 @@ void dumpShortIndelPolymorphismsBatch(
 			int depth = covF + covR;
 			if(options.indelDepthMinOverlap != 0)
 				depth = minOverlapDepth;
-			if(depth < options.minCoverage)
+			if(depth < (int)options.minCoverage)
 			{
 				if(options._debugLevel > 1)
 					::std::cout << "Coverage " << covF+covR << " after applying max pile filter and discarding Ns" << ::std::endl;
@@ -3641,17 +3642,17 @@ void dumpShortIndelPolymorphismsBatch(
 				
 			if(options.outputFormat < 2) //
 			{
-				if(indelSize > 0 )indelfile << chrPrefix << genomeID << '\t' << runID << "\tdeletion\t";
+				if(indelSize > 0 ) indelfile << chrPrefix << genomeID << '\t' << runID << "\tdeletion\t";
 				else indelfile << chrPrefix <<genomeID << '\t' << runID << "\tinsertion\t";
-				if(indelSize > 0 )indelfile << candidatePos + startCoord + options.positionFormat << '\t';
+				if(indelSize > 0 ) indelfile << candidatePos + startCoord + options.positionFormat << '\t';
 				else indelfile << candidatePos + startCoord + options.positionFormat - 1 << '\t';
-				if(indelSize > 0 )indelfile << candidatePos + startCoord + options.positionFormat  + indelSize - 1;
+				if(indelSize > 0 ) indelfile << candidatePos + startCoord + options.positionFormat  + indelSize - 1;
 				else indelfile << candidatePos + startCoord;// + options.positionFormat; //VORSICHT!!!
 				indelfile << "\t" << (float)indelIt->second.i1/depth;
 				indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat;
 				indelfile << ";size=" << indelSize;
 				if(indelSize < 0)indelfile << ";seq="<<indelIt->second.i2;
-				indelfile << ";ebiDepth=" << depth << "depth=" << covF+covR;
+				indelfile << ";ebiDepth=" << depth << ";depth=" << covF+covR;
 				if(splitSupport>0) indelfile << ";splitSupport=" << splitSupport;
 				indelfile << std::endl;
 			}
