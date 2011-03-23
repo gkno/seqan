@@ -60,6 +60,6 @@ file(GLOB SEQAN_DEMOS ${SEQAN_LIBRARY}/demos/howto/[A-z]*.cpp
 foreach (DEMOFILE ${SEQAN_DEMOS})
 	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
 	seqan_add_executable (howto_${DEMO} ${DEMOFILE})
-	add_dependencies (howtos howto_{DEMO})
+	add_dependencies (howtos howto_${DEMO})
 endforeach (DEMOFILE)
 
