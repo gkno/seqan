@@ -805,6 +805,19 @@ inline void assignValueI2(Pair<T1, T2, TSpec> & pair, T const & _i)
 }
 
 // -----------------------------------------------------------------------
+// Function operator<()
+// -----------------------------------------------------------------------
+
+// Optimized version for compressed tuple using just one word.
+template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+inline bool
+operator<(Pair<L1, L2, LCompression> const & _left,
+          Pair<R1, R2, RCompression> const & _right)
+{
+    return (_left.i1 < _right.i1) || (_left.i1 == _right.i1 && _left.i2 < _right.i2);
+}
+
+// -----------------------------------------------------------------------
 // Function operator==()
 // -----------------------------------------------------------------------
 
