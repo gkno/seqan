@@ -62,6 +62,45 @@
 #include <signal.h>
 #endif  // #ifdef PLATFORM_WINDOWS
 
+/**
+.Macro.SEQAN_FAIL
+..cat:Miscellaneous
+..summary:Force abortion of program, regardless of debugging settings.
+..signature:SEQAN_FAIL(msg[, args])
+..param.msg:A foramt string.
+..param.args:An optional list of arguments.
+..remarks:Use this if something really unexpected happens inside your functions and there is no way to report this through the API. A good example would be logic errors, e.g. invalid values.
+..example.text:In the following example, the $SEQAN_FAIL$ is there if a possible value is added to $MyEnum$ but the function $foo$ is not updated accordingly.
+..example.code:
+enum MyEnum {
+  VALUE_ONE,
+  VALUE_TWO
+};
+
+bool foo(MyEnum x) {
+    switch (x) {
+    case VALUE_ONE:
+        // do something
+        return true;
+    case VALUE_TWO:
+        // do something
+        return true;
+    }
+
+    SEQAN_FAIL("Logic error. Should never reach here. x == %d.", x);
+    return false;
+}
+..include:seqan/basic.h
+ */
+
+#define SEQAN_FAIL(...)                                                 \
+    do {                                                                \
+        ::seqan::ClassTest::forceFail(__FILE__, __LINE__,               \
+                                      __VA_ARGS__);                     \
+        ::seqan::ClassTest::fail();                                     \
+    } while (false)
+
+
 // SeqAn's has three global debug/testing levels: testing, debug and
 // release.  Depending on the level, the SEQAN_ASSERT_* and
 // SEQAN_CHECKPOINT macros will be enabled.
