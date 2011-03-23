@@ -611,7 +611,7 @@ SEQAN_CHECKPOINT
 			longestExtensionRow = antiDiagNo - 1 - longestExtensionCol;
 			longestExtensionScore = antiDiag2[longestExtensionCol - offset2];
 		}
-		else if (antiDiag2[length(antiDiag2)-3] != undefined) {
+		else if (length(antiDiag2) > 2 && antiDiag2[length(antiDiag2)-3] != undefined) {
 			// reached end of database segment
 			longestExtensionCol = length(antiDiag2) + offset2 - 3;
 			longestExtensionRow = antiDiagNo - 1 - longestExtensionCol;
