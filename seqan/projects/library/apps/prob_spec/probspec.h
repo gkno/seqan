@@ -30,7 +30,6 @@
 using namespace seqan;
 
 
-
 template<typename TInfix, typename TSize, typename TEps, typename TAlign>
 bool
 _extendKmer(TInfix & a, TInfix & b, TSize minLength, TEps eps, TAlign & align) {
