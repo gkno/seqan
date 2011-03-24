@@ -158,7 +158,10 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 	//expected number of random deletion matches:
 	double insMatches = 0;
 	for(TSize insLen = 1; insLen <=readLen-M1-M2; ++insLen)
+	{
+		numErrors = static_cast<int>((readLen-insLen) * options.errorRate);
 		insMatches += _expMatchesIns(readLen,M1,M2,numErrors,insLen,d_m1, d_m2, genomeLen, numReads);
+	}
 	if (options.reverse) insMatches *= 2;
 
 	::std::cout << "Expected number of random deletion-indicating matches: " << delMatches << std::endl;
