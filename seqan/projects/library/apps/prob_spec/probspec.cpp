@@ -293,7 +293,7 @@ int main(int argc, const char *argv[]) {
 				unsigned db2 = clippedEndPosition(row(resultf[i][j],0))-1;
 				unsigned q1  = clippedBeginPosition(row(resultf[i][j],1));
 				unsigned q2  = clippedEndPosition(row(resultf[i][j],1))-1;
-				file << "Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
+				file << "+ Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
 				file << resultf[i][j] << ::std::endl;
 			}
 	
@@ -311,7 +311,7 @@ int main(int argc, const char *argv[]) {
 				unsigned db2 = clippedEndPosition(row(resultr[i][j],0))-1;
 				unsigned q1  = clippedBeginPosition(row(resultr[i][j],1));
 				unsigned q2  = clippedEndPosition(row(resultr[i][j],1))-1;
-				file << "Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
+				file << "- Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
 				file << resultr[i][j] << ::std::endl;
 			}
 		for (unsigned i=0; i<length(resultr); ++i)	
