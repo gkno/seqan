@@ -1183,9 +1183,8 @@ inline bool _swiftMultiFlushBuckets(
 
 			// create a new hit and append it to the finders hit list
 	    	_createHit(finder, pattern, *bkt, bucketParams, diag, ndlSeqNo);
-
-			_resetBucket(*bkt, (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength);
 		}
+		_resetBucket(*bkt, (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength);
 	}
 
 	clear(pattern.verifyList);
