@@ -341,15 +341,20 @@ void printDebugLevel(TStream &stream) {
 #if SEQAN_ENABLE_DEBUG
 
 	// automatically deploy signal handlers that output the stack trace on a trap (in debug mode)
-	
+
 	template <typename T>
 	struct SignalHandlersDummy_
 	{
 		static const int i;
 	};
-	
-	template <>
-	const int SignalHandlersDummy_<void>::i = _deploySignalHandlers();
+
+	template <typename T>
+	const int SignalHandlersDummy_<T>::i = _deploySignalHandlers();
+
+	namespace
+	{
+		int signalHandlersDummy_ = SignalHandlersDummy_<void>::i;
+	}
 
 #endif // #if SEQAN_ENABLE_DEBUG
 #endif // #ifdef PLATFORM_WINDOWS
