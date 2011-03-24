@@ -41,6 +41,7 @@ struct ProbSpecOptions {
 	int minLength;				// minimal length of an epsilon-match
 	double xDrop;				// maximal x-drop
 	int lengthExact;			// minimum lenght of exact submatch
+	int maxCount;				// maximal number of verifications
 	
 	// more options
 	bool forward;				// compute matches to forward strand of database
@@ -65,6 +66,7 @@ struct ProbSpecOptions {
 		minLength = 100;
 		xDrop = 5;
 		lengthExact =12;
+		maxCount = 100;
 
 		forward = true;
 		reverse = true;

@@ -30,6 +30,7 @@
 using namespace seqan;
 
 
+
 template<typename TInfix, typename TSize, typename TEps, typename TAlign>
 bool
 _extendKmer(TInfix & a, TInfix & b, TSize minLength, TEps eps, TAlign & align) {
@@ -112,6 +113,7 @@ _extendExactMatches(TSequence & database,
 	StringSet< String<Triple<unsigned,unsigned,unsigned> > > cematches;
 	resize(cematches,length(ematches));
 	
+	unsigned extcount=0;
 	
 	for (unsigned s=0; s<length(ematches); s++) {
 		unsigned cind = 0;		
@@ -119,6 +121,7 @@ _extendExactMatches(TSequence & database,
 			std::sort(begin(ematches[s]), end(ematches[s]));
 			resize(cematches[s],1);
 			cematches[s][cind++] = ematches[s][0];
+			extcount++;
 			//	::std::cout << "CMATCH "<< ematches[s][0] << ::std::endl;
 			
 		}
@@ -126,6 +129,7 @@ _extendExactMatches(TSequence & database,
 			for (unsigned i=1; i<length(ematches[s]); ++i) {
 				if( ematches[s][i].i2 != ematches[s][i-1].i2 || ematches[s][i].i1 != ematches[s][i-1].i1+1 ){
 					appendValue(cematches[s],ematches[s][i]);
+					extcount++;
 					//::std::cout << "CMATCH "<< ematches[s][i] << ::std::endl;
 				}
 			}
@@ -141,10 +145,14 @@ _extendExactMatches(TSequence & database,
 	Align<TSequence>  oldalign;
 	resize(rows(oldalign), 2);
 	
-	std::cout << "Compute alignment extension and remove duplicate alignments" << ::std::endl;
+	std::cout << "Compute alignment extension and remove duplicate alignments for " << extcount << " hits" << ::std::endl;
 	
 	for (unsigned s=0; s<length(cematches); s++) {
 		TSequenceIt qbegin = begin(queries[s]);
+		std::cout << "Processing query "  << s <<::std::endl;
+		
+		// count succesful extensions
+		int mcount=0;
 		
 		// there are extensions to be made
 		for (unsigned i=0; i<length(cematches[s]); i++) {
@@ -163,18 +171,17 @@ _extendExactMatches(TSequence & database,
 			setSource(row(align, 0), host(dbinfix));
 			setSource(row(align, 1), host(qinfix));
 			
-			
-			if(_extendKmer(dbinfix, qinfix, options.minLength, options.epsilon, align)){			
-				
-				if(length(row(align,0))  > unsigned(options.minLength)){
-					unsigned db1 = clippedBeginPosition(row(align,0));
-					unsigned db2 = clippedEndPosition(row(align,0))-1;
-					unsigned q1  = clippedBeginPosition(row(align,1));
-					unsigned q2  = clippedEndPosition(row(align,1))-1;
-					unsigned odb1 = clippedBeginPosition(row(oldalign,0));
-					unsigned odb2 = clippedEndPosition(row(oldalign,0))-1;
-					unsigned oq1  = clippedBeginPosition(row(oldalign,1));
-					unsigned oq2  = clippedEndPosition(row(oldalign,1))-1;
+			if( mcount < options.maxCount ){
+				if(_extendKmer(dbinfix, qinfix, options.minLength, options.epsilon, align)){			
+					if(length(row(align,0))  > unsigned(options.minLength)){
+						unsigned db1 = clippedBeginPosition(row(align,0));
+						unsigned db2 = clippedEndPosition(row(align,0))-1;
+						unsigned q1  = clippedBeginPosition(row(align,1));
+						unsigned q2  = clippedEndPosition(row(align,1))-1;
+						unsigned odb1 = clippedBeginPosition(row(oldalign,0));
+						unsigned odb2 = clippedEndPosition(row(oldalign,0))-1;
+						unsigned oq1  = clippedBeginPosition(row(oldalign,1));
+						unsigned oq2  = clippedEndPosition(row(oldalign,1))-1;
 					
 					//		::std::cout << "Old Aligns Seq1[" << odb1 << ":" << odb2<< "]" << " and Seq2[" << oq1 << ":" <<  oq2 << "]";
 					//			::std::cout << ::std::endl; 
@@ -186,15 +193,21 @@ _extendExactMatches(TSequence & database,
 					
 					//		::std::cout << align << ::std::endl;
 					
-					if (odb1 != db1 || odb2 != db2 || oq1 != q1 || oq2 != q2 ) {
-						appendValue(result[s],align);
-						oldalign = align;
-					}
+						if (odb1 != db1 || odb2 != db2 || oq1 != q1 || oq2 != q2 ) {
+							appendValue(result[s],align);
+							mcount++;
+							oldalign = align;
+						}
 					//		else	
 					//			::std::cout << "double match " << ::std::endl;
 					
+					}
 				}
 			}
+			else{	
+				std::cout << "Reached maxcount "  << s <<::std::endl;
+			}
+
 		}
 	}
 	

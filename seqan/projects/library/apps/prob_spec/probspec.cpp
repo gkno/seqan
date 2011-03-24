@@ -76,6 +76,7 @@ _writeSpecifiedParams(TOptions & options) {
 	std::cout << "  minimal exact match length       : " << options.lengthExact << std::endl;
 	std::cout << "  minimal match length             : " << options.minLength << std::endl;
 	std::cout << "  maximal error rate (epsilon)     : " << options.epsilon << std::endl;
+	std::cout << "  maximal verification count       : " << options.maxCount << std::endl;
 	std::cout << "  maximal x-drop                   : " << options.xDrop << std::endl;
 	if (options.qGram != (unsigned)-1)
 		std::cout << "  k-mer (q-gram) length            : " << options.qGram << std::endl;
@@ -130,6 +131,7 @@ _parseOptions(TParser & parser, TOptions & options) {
     if (isSetShort(parser, 'o')) getOptionValueShort(parser, 'o', options.outputFile);
  	if (isSetLong(parser, "lengthExact")) getOptionValueLong(parser, "lengthExact", options.lengthExact);
 	if (isSetShort(parser, "le")) getOptionValueShort(parser, "le", options.lengthExact);
+	if (isSetShort(parser, "mc")) getOptionValueShort(parser, "mc", options.maxCount);
 
     if (isSetLong(parser, "minLength")) getOptionValueLong(parser, "minLength", options.minLength);
 	if (isSetShort(parser, 'e')) getOptionValueShort(parser, 'e', options.epsilon);
@@ -201,6 +203,9 @@ _setParser(TParser & parser) {
 
   	addOption(parser, CommandLineOption("le", "lengthExact",
 										"length of required exact submatch", OptionType::Int, "12"));
+	addOption(parser, CommandLineOption("mc", "maxCounts",
+										"maximal number of verifications per query", OptionType::Int, "100"));
+
 
 
 	addSection(parser, "Verification Options:");
@@ -249,9 +254,11 @@ int main(int argc, const char *argv[]) {
 
     // import query sequences
     StringSet<TSequence> queries;
+
     StringSet<CharString> queryIDs;
 	if (!_importSequences(options.queryFile, "query", queries, queryIDs)) return 1;
 
+		
     // import database sequence
     StringSet<TSequence > databases;
     StringSet<CharString> databaseIDs;
@@ -267,6 +274,7 @@ int main(int argc, const char *argv[]) {
 		if( ! _extendExactMatches(databases[0],queries,resultf,options)) return 1;
 	}
 	
+	
 	if (options.reverse){ 
 		std::cout << "Reverse strand" << ::std::endl;
 		reverseComplement(databases[0]);
@@ -277,7 +285,7 @@ int main(int argc, const char *argv[]) {
 	std::ofstream file(toCString(options.outputFile));	
 
 	if (options.forward){		
-		file << ::std::endl << "Reverse strand" << ::std::endl;
+		file << ::std::endl << "Forward strand" << ::std::endl;
 		for (unsigned i=0; i<length(resultf); ++i)
 			for (unsigned j=0; j<length(resultf[i]); j++) {	
 				file << "hits for query " << i << ::std::endl;
