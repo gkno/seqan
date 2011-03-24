@@ -384,13 +384,12 @@ SEQAN_CHECKPOINT
 			totalLength += len;
 			if(len > maxLength) maxLength = len;
 
-			if ((*it).orientation && ((*it).id != ids[i]) ) {
+			if ((*it).orientation) {
 				if (format == "gff")
 					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
-				else {
+				else
 					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
-				}
-				}
+			}
 
 			++it;
 		}
@@ -406,7 +405,7 @@ SEQAN_CHECKPOINT
 		TIterator itEnd = end(queryMatches.matches);
 
 		while (it < itEnd) {
-			if (!(*it).orientation && ((*it).id != ids[i])) {
+			if (!(*it).orientation) {
 				if (format == "gff")
 					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 				else 
@@ -508,7 +507,7 @@ SEQAN_CHECKPOINT
 		TIterator itEnd = end(queryMatches.matches);
 
 		while (it < itEnd) {
-			if ((*it).orientation) {
+			if (!(*it).orientation) {
 				if (format == "gff")
 					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
 				else 
@@ -522,7 +521,7 @@ SEQAN_CHECKPOINT
 	file.close();
 
 	std::cout << "# Eps-matches     : " << numMatches << std::endl;
-	if (verbose > 0 ) {
+	if (verbose > 0) {
 		if (numMatches > 0) {
 			std::cout << "Longest eps-match : " << maxLength << std::endl;
 			std::cout << "Avg match length  : " << totalLength / numMatches << std::endl;
