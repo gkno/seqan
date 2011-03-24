@@ -212,7 +212,7 @@ _setParser(TParser & parser) {
     addOption(parser, CommandLineOption('x', "xDrop", "Maximal x-drop for extension", OptionType::Double, 5));
 
 	addSection(parser, "Output Options:");
-    addOption(parser, CommandLineOption('o', "out", "Name of output file", OptionType::String, "stellar.gff"));
+    addOption(parser, CommandLineOption('o', "out", "Name of output file", OptionType::String, "probspec.txt"));
 
 }
 

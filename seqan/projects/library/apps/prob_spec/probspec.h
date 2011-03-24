@@ -204,9 +204,7 @@ _extendExactMatches(TSequence & database,
 					}
 				}
 			}
-			else{	
-				std::cout << "Reached maxcount "  << s <<::std::endl;
-			}
+			
 
 		}
 	}
