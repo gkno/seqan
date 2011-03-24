@@ -2161,6 +2161,44 @@ _write(TFile &file,
 }
 
 
+template<typename TFragmentStore, typename TStr>
+void
+_dumpMatches(TFragmentStore &fragmentStore, TStr str)
+{
+	typedef typename TFragmentStore::TAlignedReadStore 			TMatches;
+	typedef typename Value<TMatches>::Type 						TMatch;
+	typedef typename TFragmentStore::TAlignQualityStore 		TMatchQualities;
+	typedef typename Value<TMatchQualities>::Type 				TMatchQuality;
+	typedef typename TFragmentStore::TReadSeqStore	 			TReads;
+	typedef typename Value<TReads>::Type 						TRead;
+	typedef typename Iterator<TReads,Standard>::Type			TReadIt;
+	typedef typename Iterator<TMatchQualities,Standard>::Type	TMatchQIt;
+	typedef typename Iterator<TMatches,Standard>::Type			TMatchIt;
+	
+	std::cout << "Length of matches = " << length(fragmentStore.alignedReadStore)  << "\n";
+	std::cout << "Length of reads   = " << length(fragmentStore.readSeqStore)  << "\n";
+	std::cout << "Length of matchqs = " << length(fragmentStore.alignQualityStore)  << "\n";
+	
+	for(unsigned i = 0 ; i < length(fragmentStore.alignedReadStore); ++i)
+	{
+		char ori = (fragmentStore.alignedReadStore[i].beginPos < fragmentStore.alignedReadStore[i].endPos) ? 'F' : 'R';
+		std::cout << "--"<<str<<"Match number " << i << ":\n";
+		std::cout << "--"<<str<<"MatchId  = " << fragmentStore.alignedReadStore[i].id << "\n";
+		std::cout << "--"<<str<<"ReadId   = " << fragmentStore.alignedReadStore[i].readId << "\n";
+		std::cout << "--"<<str<<"ContigId = " << fragmentStore.alignedReadStore[i].contigId << std::flush << "\n";
+		std::cout << "--"<<str<<"gBegin   = " << _min(fragmentStore.alignedReadStore[i].beginPos, fragmentStore.alignedReadStore[i].endPos) << "\n";
+		std::cout << "--"<<str<<"gEnd     = " << _max(fragmentStore.alignedReadStore[i].beginPos, fragmentStore.alignedReadStore[i].endPos) << "\n";
+		std::cout << "--"<<str<<"orient   = " << ori << std::flush << std::endl;
+		if(length(fragmentStore.alignQualityStore) > fragmentStore.alignedReadStore[i].id)
+		{
+			std::cout << "--"<<str<<"EditDist = " << (int) fragmentStore.alignQualityStore[fragmentStore.alignedReadStore[i].id].errors << "\n";
+			std::cout << "--"<<str<<"AvgQ     = " << (int)fragmentStore.alignQualityStore[fragmentStore.alignedReadStore[i].id].score << "\n";
+		}
+		std::cout << "--"<<str<<"Readseq  = " << fragmentStore.readSeqStore[fragmentStore.alignedReadStore[i].readId] << std::flush << "\n";
+		
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Output SNPs
