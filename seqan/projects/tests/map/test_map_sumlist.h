@@ -381,7 +381,7 @@ void Test_MiniSumList_Entry()
 	unsigned char buf [1 + sizeof(size_t)];
 
 	unsigned char & buf2char = * buf;
-	unsigned short & buf2short = * reinterpret_cast<unsigned short *>(buf);
+	// unsigned short & buf2short = * reinterpret_cast<unsigned short *>(buf);
 	unsigned int & buf2int = * reinterpret_cast<unsigned int *>(buf);
 	size_t & buf2full = * reinterpret_cast<size_t *>(buf + 1);
 
@@ -395,7 +395,7 @@ void Test_MiniSumList_Entry()
 	entr.assignValue(0x1234);
 	SEQAN_ASSERT(entr.getValue() == 0x1234);
 	SEQAN_ASSERT(entr.size() == 2);
-	SEQAN_ASSERT((buf2short & 0xfffc) == (0x1234 << 2));
+	// SEQAN_ASSERT((buf2short & 0xfffc) == (0x1234 << 2));
 
 	entr.assignValue(0x1234567);
 	SEQAN_ASSERT(entr.getValue() == 0x1234567);
