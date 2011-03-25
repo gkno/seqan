@@ -1,3 +1,22 @@
+ /*==========================================================================
+                  HSA - Hierarchical Segment-based Alignment
+
+ ============================================================================
+  Copyright (C) 2011 by Birte Kehr
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your options) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ==========================================================================*/
 
 #ifndef SEQAN_HEADER_HSA_H
 #define SEQAN_HEADER_HSA_H
@@ -395,11 +414,15 @@ void segmentAlignment(std::map<TId, TInfix> & segments,
 	clearEdges(gOut);
 	clearVertices(gOut);
 
-	for(TLevel l = 0; l < recursionLevel; ++l) std::cerr << ".";
-	typename std::map<TId, TInfix>::const_iterator itEnd = segments.end();
-	for(typename std::map<TId, TInfix>::const_iterator it = segments.begin(); it != itEnd; ++it) {
-		std::cerr << it->first << ": " << beginPosition(it->second) << " - " << endPosition(it->second) << ", ";
-	} std::cerr << std::endl;
+	if (options.verbose) {
+		// output position information
+		for(TLevel l = 0; l < recursionLevel; ++l) std::cout << ".";
+		typename std::map<TId, TInfix>::const_iterator itEnd = segments.end();
+		for(typename std::map<TId, TInfix>::const_iterator it = segments.begin(); it != itEnd; ++it) {
+			std::cout << it->first << ": " << beginPosition(it->second) << " - " << endPosition(it->second) << ", ";
+		}
+		std::cout << std::endl;
+	}
 
 	// generate local alignments
 	String<TMatch> matches;
@@ -409,8 +432,8 @@ void segmentAlignment(std::map<TId, TInfix> & segments,
 		findStellarMatches(segments, options, recursionLevel, matches);
 	}
 
-	// copy matches from segments of parent graph to the new set of matches
 	if (recursionLevel != 0) {
+		// copy matches from segments of parent graph to the new set of matches
 		_addParentMatches(segments, parentGraph, matches);
 	}
 

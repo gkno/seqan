@@ -1,3 +1,23 @@
+ /*==========================================================================
+                  HSA - Hierarchical Segment-based Alignment
+
+ ============================================================================
+  Copyright (C) 2011 by Birte Kehr
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your options) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ==========================================================================*/
+
 #define SEQAN_PROFILE
 
 #include <iostream>
@@ -8,244 +28,9 @@
 
 using namespace seqan;
 
-//template<typename TAlignmentGraph, typename TSegmentSet, typename TSegment, typename TSize, typename TPositions>
-//void determineFirst(TAlignmentGraph & g,
-//					TSegmentSet & segs,
-//					TSegment & segment,
-//					TSize seqId,
-//					TPositions & first)
-//{
-//	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
-//	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-//
-//	int first_i = value( first, seqId );
-//	if( first_i < (int)beginPosition( segment ) )
-//	{
-//		value( first, seqId ) = beginPosition( segment );
-//
-//		TVertexDescriptor source = findVertex( g, seqId, first_i +1 );
-//		while( source != getNil<TVertexDescriptor>() && fragmentBegin(g,source) < beginPosition(segment) )
-//		{
-//			if( outDegree(g,source) > 0 )
-//			{
-//				TOutEdgeIterator eIt(g,source);
-//				for( ; !atEnd(eIt); goNext(eIt) )
-//				{
-//					// find next unmatched segment on target sequence of the edge
-//					TVertexDescriptor target = targetVertex( eIt );
-//					TSegment newSegment;
-//					if( fragmentBegin( g, target ) + fragmentLength( g, target ) <
-//						length( value( stringSet(g), sequenceId( g, target ) ) ) )
-//					{
-//						target = findVertex( g, sequenceId( g, target ), 
-//							fragmentBegin( g, target ) + fragmentLength( g, target ) );
-//						newSegment = infix( value( stringSet(g), sequenceId(g,target) ),
-//							fragmentBegin(g,target),
-//							fragmentBegin(g,target) + fragmentLength( g, target ));
-//					}
-//					else
-//					{
-//						newSegment = infix( value( stringSet(g), sequenceId(g,target) ),
-//							fragmentBegin(g,target) + fragmentLength( g, target ),
-//							fragmentBegin(g,target) + fragmentLength( g, target ));
-//					}
-//					TSize newSeqId = sequenceId(g,target);
-//					determineFirst( g, segs, newSegment, newSeqId, first );
-//				}
-//			}
-//			source = findVertex( g, seqId, fragmentBegin(g,source) + fragmentLength(g,source) );
-//		}
-//	}
-//}
-//
-//template<typename TAlignmentGraph, typename TSegmentSet, typename TSegment, typename TSize, typename TPositions>
-//void determineLast(TAlignmentGraph & g,
-//					TSegmentSet & segs,
-//					TSegment & segment,
-//					TSize seqId,
-//					TPositions & last)
-//{
-//	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
-//	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-//
-//	TSize last_i = value( last, seqId );
-//	if( last_i > endPosition( segment ) )
-//	{
-//		value( last, seqId ) = endPosition( segment );
-//
-//		TVertexDescriptor source = findVertex( g, seqId, endPosition(segment) );
-//		while( source != getNil<TVertexDescriptor>() && fragmentBegin(g,source) < last_i ) 
-//		{
-//			if( outDegree(g,source) > 0 )
-//			{
-//				TOutEdgeIterator eIt(g,source);
-//				for( ; !atEnd(eIt); goNext(eIt) )
-//				{
-//					// find closest leading and unmatched segment on target sequence of the edge
-//					TVertexDescriptor target = targetVertex( eIt );
-//					TSegment newSegment;
-//					if( fragmentBegin( g, target ) > 0 )
-//					{
-//						target = findVertex( g, sequenceId( g, target ), 
-//							fragmentBegin( g, target ) -1 );
-//						newSegment = infix( value( stringSet(g), sequenceId(g,target) ), 
-//							fragmentBegin(g,target), 
-//							fragmentBegin(g,target) + fragmentLength( g, target ) );
-//					}
-//					else
-//					{
-//						newSegment = infix( value( stringSet(g), sequenceId(g,target) ), 
-//							fragmentBegin(g,target), 
-//							fragmentBegin(g,target) );
-//					}
-//					TSize newSeqId = sequenceId(g,target);
-//					determineLast( g, segs, newSegment, newSeqId, last );
-//				}
-//			}
-//			source = findVertex( g, seqId, fragmentBegin( g, source ) + fragmentLength( g, source ) );
-//		}
-//	}
-//}
-//
-//template<typename TAlignmentGraph, typename TSegmentSet, typename TSize>
-//TSize segSetId(TAlignmentGraph & g,
-//			   TSegmentSet & segs,
-//			   TSize hostId,
-//			   TSize segBegin,
-//			   TSize segEnd)
-//{
-//	typedef typename Iterator<TSegmentSet,Rooted>::Type TIter;
-//	TIter iter = begin(segs);
-//	TIter itEnd = end(segs);
-//	
-//	for( ; iter != itEnd; iter++ )
-//	{
-//		if( id(host( *iter )) == id( value(stringSet(g),hostId) ) &&
-//			(TSize)beginPosition( *iter ) == segBegin &&
-//			(TSize)endPosition( *iter ) == segEnd)
-//		{
-//			return position( iter );
-//		}
-//	}
-//	//cout << "schlecht" << endl;
-//	return 0;
-//}
-//
-//template<typename TSegmentSet, typename TSegPairList, typename TAlignmentGraph, typename TSize>
-//void findUnalignedRegions(TSegmentSet & segs,
-//						  TSegPairList & segPairList,
-//						  TAlignmentGraph & g,
-//						  TSegmentSet & segInfixes,
-//						  TSegPairList & newPairList,
-//						  TSize minLength )
-//{
-//	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
-//	typedef typename Iterator<TAlignmentGraph, VertexIterator>::Type TVertexIterator;
-//	typedef typename Value<TSegPairList>::Type TSegPair;
-//
-//	// determine the unmatched segments and append them to segInfixes
-//	TVertexIterator vertexIter(g);
-//	for( ; !atEnd(vertexIter); goNext(vertexIter) )
-//	{
-//		if( outDegree( g, *vertexIter ) == 0 )
-//		{
-//			TSize seqId = sequenceId( g, *vertexIter );
-//			TSize segBeg = fragmentBegin( g, *vertexIter );
-//			TSize segLength = fragmentLength( g, *vertexIter );
-//
-//			if( segLength >= minLength ) 
-//			{
-//				appendValue( segInfixes, infix( value( stringSet(g), seqId ), segBeg, segBeg+segLength ) );
-//				//cout << length(segInfixes)-1 << ": " << infix( value( stringSet(g), seqId ), segBeg, segBeg+segLength ) << endl;
-//			}
-//		}
-//	}
-//
-//	// determine pairs of segments from segInfixes that shall be compared
-//	for( TSize pair = 0; pair < length( segPairList ); pair++ )
-//	{
-//		typedef typename Value<TSegmentSet>::Type TSegment;
-//		TSize segmentId1 = value( segPairList, pair ).first;
-//		TSize segmentId2 = value( segPairList, pair ).second;
-//		TSize seqId1;
-//		for( TSize s = 0; s < length( stringSet(g) ); s++ )
-//		{
-//			if( id( value( stringSet(g), s ) ) == id( segs[ segmentId1 ] ) )
-//			{
-//				seqId1 = s;
-//			}
-//		}
-//		TSize seqId2;
-//		for( TSize s = 0; s < length( stringSet(g) ); s++ )
-//		{
-//			if( id( value( stringSet(g), s ) ) == id( segs[ segmentId2 ] ) )
-//			{
-//				seqId2 = s;
-//			}
-//		}
-//		TSegment seg1 = value( segs, segmentId1 );
-//		TSegment seg2 = value( segs, segmentId2 );
-//
-//		// iterate over unmatched segments (s1) in seg1
-//		TSize pos1 = beginPosition(seg1);
-//		while(pos1 < endPosition(seg1))
-//		{
-//			TVertexDescriptor v = findVertex(g,seqId1,pos1);
-//			pos1 += fragmentLength(g,v);
-//			
-//			TSize begin = fragmentBegin( g, v );
-//			TSize len = fragmentLength( g, v );
-//
-//			if( outDegree( g, v ) == 0 && len >= minLength ) 
-//			{
-//				TSegment s1 = infix( host(seg1), begin, begin+len );
-//				TSize s1Id = segSetId( g, segInfixes, seqId1, begin, begin+len );
-//			
-//				// positions in the string that mark the current relevant regions
-//				typedef String<TSize> TPositions;
-//				TPositions first, last;
-//
-//				// initialize first and last
-//				resize( first, length(segs) );
-//				resize( last, length(segs) );
-//				for( int i = 0; i < length( stringSet(g) ); i++ )
-//				{
-//					value( first, i ) = -1;
-//					value( last, i ) = length( value(stringSet(g),i) );
-//				}
-//
-//				determineFirst( g, segs, s1, seqId1, first );
-//				determineLast( g, segs, s1, seqId1, last ); // bis hierher unabhaengig von zweiter Sequenz, koennte man also schon frueher machen...
-//					
-//				//cout << "s1=" << s1 << "  begin(s1)=" << beginPosition(s1) << "  end(s1)=" << endPosition(s1) << endl;
-//				//cout << "first(2)=" << value( first, seqId2 ) << " last(2)=" << value( last, seqId2 ) << endl;
-//
-//				// find all unmatched segments between first and last
-//				TSize pos2 = value( first, seqId2 );
-//				if(pos2 < 0) pos2 = 0;
-//				while( pos2 < value( last, seqId2 ))
-//				{
-//					TVertexDescriptor v2 = findVertex(g,seqId2,pos2);
-//					pos2 += fragmentLength(g,v2);
-//
-//					TSize begin2 = fragmentBegin(g,v2);// + beginPosition(seg2);
-//					TSize len2 =  fragmentLength(g,v2);
-//
-//					if( outDegree( g, v2 ) == 0 && len2 >= minLength )
-//					{
-//						TSize s2Id = segSetId( g, segInfixes, seqId2, begin2, begin2+len2 );
-//	
-//						appendValue( newPairList, TSegPair(s1Id,s2Id) );
-//						//cout << "appended to pair comparison list: " << s1Id << "," << s2Id << endl;
-//					}
-//				}
-//				clear(last);
-//				clear(first);
-//			}
-//		}
-//	}
-//}
 
+///////////////////////////////////////////////////////////////////////////////
+// Parses a string of comma separated file names and appends them to options.fileNames
 template<typename TCharString1, typename TCharString2>
 void parseSequenceFileNames(TCharString1 & files, String<TCharString2> & str) {
 	typedef typename Iterator<TCharString1>::Type TIterator;
@@ -270,6 +55,114 @@ void parseSequenceFileNames(TCharString1 & files, String<TCharString2> & str) {
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// Computes and outputs some statistics of the multiple alignment
+template<typename TSequence, typename TSize>
+void _printAlignmentStatistics(Graph<Alignment<TSequence> > & g, TSize totalSeqLength) {
+	typedef typename Iterator<Graph<Alignment<TSequence> >, VertexIterator>::Type TIterator;
+
+	// compute number of characters per vertex degree
+	String<TSize> matchedChars, matchedVertices;
+	resize(matchedChars, length(stringSet(g)), 0);
+	resize(matchedVertices, length(stringSet(g)), 0);
+	for (TIterator itV(g); !atEnd(itV); goNext(itV)) {
+		TSize deg = outDegree(g, *itV);
+		matchedVertices[deg]++;
+		matchedChars[deg] += fragmentLength(g, *itV);
+	}
+
+	std::cout << "# edges: " << numEdges(g) << std::endl;
+	std::cout << "# segments: " << numVertices(g) << std::endl;
+	std::cout << "Average segment length: " << totalSeqLength/(double)numVertices(g) << std::endl;
+	std::cout << "Aligned with at least one other sequence: ";
+	std::cout << (totalSeqLength-matchedChars[0]) * 100 / (double)totalSeqLength << "% of characters" << std::endl;
+	std::cout << "Average length of aligned segments: ";
+	std::cout << (totalSeqLength-matchedChars[0]) / (double)(numVertices(g)-matchedVertices[0]) << std::endl;
+	std::cout << std::endl;
+
+	for (TSize i = 0; i < length(matchedChars); ++i) {
+		std::cout << "Aligned with " << i << " other sequences:" << std::endl;
+
+		std::cout << "  #chars: ";
+		std::cout << matchedChars[i]*100/(double)totalSeqLength << "% (" << matchedChars[i] << ")" << std::endl;
+
+		std::cout << "  #vertices: ";
+		std::cout << matchedVertices[i]*100/(double)numVertices(g) << "% (" << matchedVertices[i] << ")" << std::endl;
+
+		std::cout << "  avg segment length: ";
+		std::cout << matchedChars[i]/(double)matchedVertices[i] << std::endl;
+
+		std::cout << std::endl;
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Computes and outputs a pairwise distance matrix of a multiple alignment g
+//   based on the sequence fraction in matched alignment graph vertices.
+template<typename TSequence, typename TDistance>
+void _computeDistanceMatrix(Graph<Alignment<TSequence> > & g,
+							String<TDistance> & matrix) {
+	typedef typename Size<String<TDistance> >::Type TSize;
+	typedef Graph<Alignment<TSequence> > TAlignmentGraph;
+	typedef typename Iterator<TAlignmentGraph, EdgeIterator>::Type TEdgeIt;
+	typedef typename Id<TAlignmentGraph>::Type TId;
+
+	TSize numSeq = length(stringSet(g));
+	resize(matrix, numSeq*numSeq);
+
+	// init counters for pairwisely matched characters
+	String<String<TSize> > chars, edges;
+	resize(chars, numSeq);
+	resize(edges, numSeq);
+
+	for (TSize i = 0; i < numSeq; ++i) {
+		resize(chars[i], numSeq, 0);
+		resize(edges[i], numSeq, 0);
+	}
+
+	// count pairwisely matched characters
+	for (TEdgeIt itE(g); !atEnd(itE); goNext(itE)) {
+		TId sourceId = sequenceId(g, sourceVertex(itE));
+		TId targetId = sequenceId(g, targetVertex(itE));
+		chars[sourceId][targetId] += fragmentLength(g, sourceVertex(itE)) + fragmentLength(g, targetVertex(itE));
+		chars[targetId][sourceId] += fragmentLength(g, targetVertex(itE)) + fragmentLength(g, sourceVertex(itE));
+		edges[sourceId][targetId]++;
+		edges[targetId][sourceId]++;
+	}
+
+	// Output heading
+	std::cout << "Number of pairwisely mapped characters:" << std::endl;
+	std::cout << "    |\t";
+	for (TSize j = 0; j < numSeq; ++j) {
+		std::cout << j << "\t";
+	}
+	std::cout << std::endl;
+	for (TSize j = 0; j <= numSeq; ++j) std::cout << "--------";
+	std::cout << std::endl;
+
+	// fill and output distance matrix
+	for (TSize i = 0; i < numSeq; ++i) {
+		std::cout << i << "   |\t";
+		for (TSize j = 0; j < numSeq; ++j) {
+			std::cout << chars[i][j] << "\t";
+		}
+		
+		std::cout << "   |\t";
+		for (TSize j = 0; j < numSeq; ++j) {
+			TDistance totalSeqLen = length(stringSet(g)[i]) + length(stringSet(g)[j]);
+			matrix[numSeq*i+j] = 100.0 - chars[i][j] / totalSeqLen;
+			matrix[numSeq*j+i] = 100.0 - chars[i][j] / totalSeqLen;
+
+			std::cout << chars[i][j] * 100.0 / totalSeqLen << "%\t";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Writes parsed command line options to screen
 template<typename TOptions>
 void
 _writeParams(TOptions & options) {
@@ -291,7 +184,6 @@ _writeParams(TOptions & options) {
 	std::cout << std::endl;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Parses options from command line parser and writes them into options object
 template<typename TParser, typename TOptions>
@@ -303,6 +195,8 @@ _parseOptions(TParser & parser, TOptions & options) {
 	parseSequenceFileNames(sequenceFiles, options.fileNames);
 
     if (isSetShort(parser, 'o')) getOptionValueShort(parser, 'o', options.outputFile);
+    if (isSetShort(parser, 'p')) getOptionValueShort(parser, 'p', options.phylogeny);
+    if (isSetShort(parser, 'v')) getOptionValueShort(parser, 'v', options.verbose);
 
     if (isSetShort(parser, 'r')) getOptionValueShort(parser, 'r', options.recursions);
 	if (isSetShort(parser, 'l')) getOptionValueShort(parser, 'l', options.initialMinLength);
@@ -337,6 +231,8 @@ _setParser(TParser & parser) {
               (OptionType::String | OptionType::Mandatory)));
 	addHelpLine(parser, "File names separated by comma.");
 	addOption(parser, CommandLineOption('o', "outFile", "Output filename", OptionType::String, "ReSeAl.dot"));
+	addOption(parser, CommandLineOption('p', "phylo", "Compute and output distance matrix and UPGMA tree from final alignment", OptionType::Bool, "false"));
+	addOption(parser, CommandLineOption('v', "verbose", "Verbosity mode", OptionType::Bool, "false"));
 
 	addSection(parser, "Parameter Options:");
 	addOption(parser, CommandLineOption('r', "recursions", "Number of recursion steps", OptionType::Int, 3));
@@ -347,7 +243,7 @@ _setParser(TParser & parser) {
 
 	addSection(parser, "Algorithm Options:");
 	addOption(parser, CommandLineOption("gt", "globalTree", "Use guide tree of full sequences in all recursions", OptionType::Bool, "false"));
-	addOption(parser, CommandLineOption("f", "fixed", "Guarantee that higher level matches are contained in final alignment", OptionType::Bool, "false"));
+	addOption(parser, CommandLineOption("f", "fixed", "Guarantee that previous level matches are contained in final alignment", OptionType::Bool, "false"));
 	addOption(parser, CommandLineOption("a", "anchored", "Anchored pairwise comparison", OptionType::Bool, "false"));
 }
 
@@ -403,13 +299,17 @@ int main (int argc, const char *argv[]) {
 
 		SEQAN_ASSERT_EQ(segments.count(id(seqs[i])), 0u);
 		segments[id(seqs[i])] = infix(seqs[i], 0, length(seqs[i]));
-		std::cerr << options.fileNames[i] << ": " << id(seqs[i]) << std::endl;
+		if (options.verbose) {
+			std::cout << id(seqs[i]) << ": " << options.fileNames[i] << std::endl;
+		}
 		totalSeqLength += length(seqs[i]);
 	}
+	if (options.verbose) std::cout << std::endl << std::cout << std::endl;
 
     SEQAN_PROTIMESTART(timeRecSegmAlign);
 	unsigned iterations = 1;
 	
+	// ----------- main algorithm call --------------
 	TAlignmentGraph g(seqs);
 	for (unsigned t = 0; t < iterations; t++) {
 		clearEdges(g); clearVertices(g);
@@ -420,6 +320,7 @@ int main (int argc, const char *argv[]) {
 
 	//std::cout << g << std::endl;
 
+	// output alignment graph to file in dot-format
 	std::fstream fstream;
 	fstream.open(toCString(options.outputFile), std::ios_base::out);
 	if (!fstream.is_open()) {
@@ -429,103 +330,20 @@ int main (int argc, const char *argv[]) {
 	}
 	fstream.close();
 
-	std::cout << "running time: " << runningTime << "s" << std::endl;
-	std::cout << "# edges: " << numEdges(g) << std::endl;
-	std::cout << "# segments: " << numVertices(g) << std::endl;
-	std::cout << "average segment length: " << totalSeqLength/(double)numVertices(g) << std::endl;
-	std::cout << std::endl;
+	// screen output
+	std::cout << "Running time: " << runningTime << "s" << std::endl;
+	_printAlignmentStatistics(g, totalSeqLength);
 
-	String<unsigned int> matchedChars, matchedVertices;
-	resize(matchedChars, length(options.fileNames), 0);
-	resize(matchedVertices, length(options.fileNames), 0);
-	for (Iterator<TAlignmentGraph, VertexIterator>::Type itV(g); !atEnd(itV); goNext(itV)) {
-		unsigned int deg = outDegree(g, *itV);
-		matchedVertices[deg]++;
-		matchedChars[deg] += fragmentLength(g, *itV);
+	if (options.phylogeny) {
+		String<double> matrix;
+		_computeDistanceMatrix(g, matrix);
+
+		Graph<Tree<double> > tree;
+		upgmaTree(matrix, tree);
+
+		std::cout << "Phylogeny: " << std::endl;
+		std::cout << tree << std::endl;
 	}
-
-	for (unsigned int i = 0; i < length(matchedChars); ++i) {
-		std::cout << "Aligned with " << i << " other sequences:" << std::endl;
-
-		std::cout << "  #chars: ";
-		std::cout << matchedChars[i]*100/(double)totalSeqLength << "% (" << matchedChars[i] << ")" << std::endl;
-
-		std::cout << "  #vertices: ";
-		std::cout << matchedVertices[i]*100/(double)numVertices(g) << "% (" << matchedVertices[i] << ")" << std::endl;
-
-		std::cout << "  avg segment length: ";
-		std::cout << matchedChars[i]/(double)matchedVertices[i] << std::endl;
-
-		std::cout << std::endl;
-	}
-
-	std::cout << "matched characters: ";
-	std::cout << (totalSeqLength-matchedChars[0]) * 100 / (double)totalSeqLength << "%" << std::endl;
-	std::cout << "average length of matched segments: ";
-	std::cout << (totalSeqLength-matchedChars[0]) / (double)(numVertices(g)-matchedVertices[0]) << std::endl;
-	std::cout << "average length of unmatched segments: ";
-	std::cout << matchedChars[0] / (double)matchedVertices[0] << std::endl;
-	std::cout << std::endl;
-
-	String<String<unsigned int> > matchedCharsPW, numEdgesPW;
-	resize(matchedCharsPW, length(options.fileNames));
-	resize(numEdgesPW, length(options.fileNames));
-	for (unsigned int i = 0; i < length(matchedCharsPW); ++i) {
-		resize(matchedCharsPW[i], length(options.fileNames), 0);
-		resize(numEdgesPW[i], length(options.fileNames), 0);
-	}
-	for (Iterator<TAlignmentGraph, EdgeIterator>::Type itE(g); !atEnd(itE); goNext(itE)) {
-		matchedCharsPW[sequenceId(g, sourceVertex(itE))][sequenceId(g, targetVertex(itE))] += 
-			fragmentLength(g, sourceVertex(itE)) + fragmentLength(g, sourceVertex(itE));
-		matchedCharsPW[sequenceId(g, targetVertex(itE))][sequenceId(g, sourceVertex(itE))] += 
-			fragmentLength(g, sourceVertex(itE)) + fragmentLength(g, sourceVertex(itE));
-		numEdgesPW[sequenceId(g, sourceVertex(itE))][sequenceId(g, targetVertex(itE))]++;
-		numEdgesPW[sequenceId(g, targetVertex(itE))][sequenceId(g, sourceVertex(itE))]++;
-	}
-
-	String<double> myDistanceMatrix;
-	unsigned int len = length(matchedCharsPW);
-	resize(myDistanceMatrix, len*len);
-
-	std::cout << "Number of pairwisely mapped characters:" << std::endl;;
-	std::cout << "    |\t";
-	for (unsigned int j = 0; j < length(matchedCharsPW[0]); ++j) {
-		std::cout << j << "\t";
-	} std::cout << std::endl;
-	for (unsigned int j = 0; j <= length(matchedCharsPW[0]); ++j) std::cout << "--------";
-	std::cout << std::endl;
-	for (unsigned int i = 0; i < length(matchedCharsPW); ++i) {
-		std::cout << i << "   |\t";
-		for (unsigned int j = 0; j < length(matchedCharsPW[i]); ++j) {
-			std::cout << matchedCharsPW[i][j] << "\t";
-		}
-		
-		std::cout << "   |\t";
-		for (unsigned int j = 0; j < length(matchedCharsPW[i]); ++j) {
-			myDistanceMatrix[len*i+j] = 100.0 - matchedCharsPW[i][j]/(double)(length(stringSet(g)[i])+length(stringSet(g)[j]));
-			myDistanceMatrix[len*j+i] = 100.0 - matchedCharsPW[i][j]/(double)(length(stringSet(g)[i])+length(stringSet(g)[j]));
-			std::cout << (matchedCharsPW[i][j])*100/
-				(double)(length(stringSet(g)[i])+length(stringSet(g)[j])) << "%\t";
-		} std::cout << std::endl;
-	}
-	std::cout << std::endl;
-
-	Graph<Tree<double> > tree;
-	upgmaTree(myDistanceMatrix, tree);
-	std::cout << tree;
-
-	//std::cout << length(segments);
-	//std::cout << " " << totalSeqLength / (double)length(segments);
-	//std::cout << " " << options.initialMinLength;
-	//std::cout << " " << options.initialMinLength - options.deltaMinLength * (options.recursions-1);
-	//std::cout << " " << options.deltaMinLength;
-	//std::cout << " " << (totalSeqLength-matchedChars[0]) * 100 / (double)totalSeqLength;
-	//std::cout << " " << totalSeqLength / (double)numVertices(g);
-	//std::cout << " " << (totalSeqLength-matchedChars[0]) / (double)(numVertices(g)-matchedVertices[0]);
-	//std::cout << " " << matchedChars[0] / (double)matchedVertices[0];
-	//std::cout << " " << runningTime;
-	//std::cout << " " << options.recursions;
-	//std::cout << std::endl;
 
 	return 0;
 }

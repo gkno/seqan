@@ -1,3 +1,22 @@
+ /*==========================================================================
+                  HSA - Hierarchical Segment-based Alignment
+
+ ============================================================================
+  Copyright (C) 2011 by Birte Kehr
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your options) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ==========================================================================*/
 
 #ifndef SEQAN_HEADER_HSA_LOCALALIGN_H
 #define SEQAN_HEADER_HSA_LOCALALIGN_H
@@ -220,16 +239,19 @@ findStellarMatches(std::map<TId, TInfix> & segs,
     }
 }
 
-template<typename TId, typename TInfix, typename TAlignmentGraph, typename TOptions, typename TLevel, typename TMatch>
+template<typename TId, typename TInfix, typename TSequence, typename TOptions, typename TLevel, typename TMatch>
 inline void
 findStellarMatches(std::map<TId, TInfix> & segs,
-				   TAlignmentGraph & parentGraph,
+				   Graph<Alignment<TSequence> > & parentGraph,
                    TOptions const & options,
 				   TLevel recursionLevel,
                    String<TMatch> & matches) {
 	typedef typename std::map<TId, TInfix>::const_iterator TMapIterator;
 	typedef typename Position<TInfix>::Type TPosition;
+	typedef Graph<Alignment<TSequence> > TAlignmentGraph;
+	typedef typename Id<TAlignmentGraph>::Type TGraphId;
 	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
+	typedef typename Iterator<TAlignmentGraph, OutEdgeIterator>::Type TOutEdgeIt;
 
 	StellarParams params(options.initialEpsilon + options.deltaEpsilon * recursionLevel,
 						 options.initialMinLength - options.deltaMinLength * recursionLevel);
@@ -248,7 +270,7 @@ findStellarMatches(std::map<TId, TInfix> & segs,
 
 	// for each sequence segment
 	for (TMapIterator mapIt = segs.begin(); mapIt != mapEnd; ++mapIt) {
-		TId id = mapIt->first;
+		TId id1 = mapIt->first;
 		TPosition pos = beginPosition(mapIt->second);
 
 		std::map<TId, Pair<TPosition> > previousBeginPos;
@@ -261,19 +283,26 @@ findStellarMatches(std::map<TId, TInfix> & segs,
 		}
 		// for each unaligned vertex on sequence segment
 		while (pos < endPosition(mapIt->second)) {
-			typename Id<TAlignmentGraph>::Type graphId = stringIdToStringSetId(stringSet(parentGraph), id);
+			TGraphId graphId = stringIdToStringSetId(stringSet(parentGraph), id1);
 			TVertexDescriptor v = findVertex(parentGraph, graphId, pos);
 			pos += fragmentLength(parentGraph, v);
-			if (outDegree(parentGraph, v) != 0) continue;
+			if (outDegree(parentGraph, v) == segs.size()) continue;
 
 			// initialize begin and end position for all sequence segments
 			std::map<TId, TPosition> beginPos(segmentBegins);
 			std::map<TId, TPosition> endPos(segmentEnds);
 
 			// set begin and end position for current sequence to vertex begin and end
-			beginPos[id] = fragmentBegin(parentGraph, v);
-			endPos[id] = pos;
+			beginPos[id1] = fragmentBegin(parentGraph, v);
+			endPos[id1] = pos;
 			SEQAN_ASSERT_EQ(pos, fragmentBegin(parentGraph, v) + fragmentLength(parentGraph, v));
+
+			// set equal begin and end position for sequences that are connected by vertex to v
+			for (TOutEdgeIt outEdgeIt(parentGraph, v);!atEnd(outEdgeIt); ++outEdgeIt) {
+				TGraphId tGraphId = sequenceId(parentGraph, targetVertex(outEdgeIt));
+				TId tId = id(value(stringSet(parentGraph), idToPosition(stringSet(parentGraph), tGraphId)));
+				endPos[tId] = fragmentBegin(parentGraph, targetVertex(outEdgeIt));
+			}
 
 			// walk through alignment graph to find other sequence segments for pairwise comparison to this segment
 			_findBeginPositions(parentGraph, segmentBegins, graphId, beginPos);
@@ -289,11 +318,11 @@ findStellarMatches(std::map<TId, TInfix> & segs,
 					segmentPair.i1 = infix(host(mapIt->second), previousBeginPos[id2].i2, previousEndPos[id2].i2);
 					segmentPair.i2 = infix(host(mapIt2->second), previousBeginPos[id2].i1, previousEndPos[id2].i1);
 					generateLocalMatches(segmentPair, params, matches);
-					previousBeginPos[id2] = Pair<TPosition>(beginPos[id2], beginPos[id]);
-					previousEndPos[id2] = Pair<TPosition>(endPos[id2], endPos[id]);
+					previousBeginPos[id2] = Pair<TPosition>(beginPos[id2], beginPos[id1]);
+					previousEndPos[id2] = Pair<TPosition>(endPos[id2], endPos[id1]);
 				} else {
 					previousBeginPos[id2] = Pair<TPosition>(beginPos[id2], previousBeginPos[id2].i2);
-					previousEndPos[id2] = Pair<TPosition>(endPos[id2], endPos[id]);
+					previousEndPos[id2] = Pair<TPosition>(endPos[id2], endPos[id1]);
 				}
 			}
 		}
