@@ -51,7 +51,7 @@ namespace seqan {
 // ============================================================================
 
 /**
-.Concept.Finite Total Ordered
+.Concept.Alphabet Finite Total Ordered
 ..summary:An type that is of finite domain and totally ordered and thus has a minimum and maximum value.
 
 .Function.minValue.concept:Concept.Finite Total Ordered
