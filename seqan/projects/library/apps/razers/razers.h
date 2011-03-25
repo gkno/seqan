@@ -103,9 +103,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	// statistics
 		__int64		FP;					// false positives (threshold reached, no match)
 		__int64		TP;					// true positives (threshold reached, match)
+        double      timeCompactMatches;     // time for compacting reads
+        double      timeMaskDuplicates; // time spent masking duplicates
 		double		timeLoadFiles;		// time for loading input files
 		double		timeMapReads;		// time for mapping reads
 		double		timeDumpResults;	// time for dumping the results
+        double      timeBuildQGramIndex;  // time for q-gram index building.
 		
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		bool		maqMapping;
@@ -811,12 +814,14 @@ struct LessSplicedErrors : public ::std::binary_function < TReadMatch, TReadMatc
 //////////////////////////////////////////////////////////////////////////////
 // Remove duplicate matches and leave at most maxHits many distanceRange
 // best matches per read
-template < typename TMatches >
-void maskDuplicates(TMatches &matches)
+template < typename TMatches, typename TOptions >
+void maskDuplicates(TMatches &matches, TOptions & options)
 {
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
-	
+
+    double beginTime = sysTime();
+    
 	//////////////////////////////////////////////////////////////////////////////
 	// remove matches with equal ends
 
@@ -887,6 +892,8 @@ void maskDuplicates(TMatches &matches)
 		begin(matches, Standard()),
 		end(matches, Standard()), 
 		LessErrors<TMatch>());
+
+    options.timeMaskDuplicates = sysTime() - beginTime;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -963,6 +970,8 @@ void compactMatches(TMatches &matches, TCounts &
 #endif
 	)
 {
+    double beginTime = sysTime();
+    
     // Get rid of "unused variable" warnings.  This is hard to read
     // and should not be done anywhere else. Better not use ifdefs.
     (void)compactFinal;
@@ -1061,6 +1070,8 @@ void compactMatches(TMatches &matches, TCounts &
 	}
 	
 	resize(matches, dit - begin(matches, Standard()));
+
+    options.timeCompactMatches += sysTime() - beginTime;
 }
 
 
@@ -1072,6 +1083,8 @@ void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bo
 {
 	typedef typename Value<TMatches>::Type				TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+
+    double beginTime = sysTime();
 	
 	::std::sort(
 		begin(matches, Standard()),
@@ -1135,6 +1148,7 @@ void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bo
 	}
 
 	resize(matches, dit - begin(matches, Standard()));
+    options.timeCompactMatches += sysTime() - beginTime;
 }
 #endif
 
@@ -1635,6 +1649,11 @@ void mapSingleReads(
 	__int64 localTP = 0;
 	__int64 localFP = 0;
 
+    double beginTime = sysTime();
+    // Build q-gram index separately, so we can better compute the time for it.
+    indexRequire(host(swiftPattern), QGramSADir());
+    options.timeBuildQGramIndex += sysTime() - beginTime;
+
 #ifdef RAZERS_MICRO_RNA
 	while (find(swiftFinder, swiftPattern, 0.2)) 
 #else
@@ -1668,7 +1687,7 @@ void mapSingleReads(
 #ifndef RAZERS_MICRO_RNA
 					typename Size<TMatches>::Type oldSize = length(matches);
 #endif
-					maskDuplicates(matches);	// overlapping parallelograms cause duplicates
+					maskDuplicates(matches, options);	// overlapping parallelograms cause duplicates
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 					if(options.maqMapping)
 						compactMatches(matches, cnts, options, false, swiftPattern, true);
@@ -1933,6 +1952,8 @@ int mapSingleReads(
 	options.TP = 0;
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
+    options.timeCompactMatches = 0;
+	options.timeMaskDuplicates = 0;
 
 	unsigned filecount = 0;
 	unsigned numFiles = length(genomeFileNameList);
@@ -1991,6 +2012,9 @@ int mapSingleReads(
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
+		::std::cerr << "Masking duplicates took          \t" << options.timeMaskDuplicates << " seconds" << ::std::endl;
+		::std::cerr << "Compacting matches took          \t" << options.timeCompactMatches << " seconds" << ::std::endl;
+		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
 		::std::cerr << "Swift FP: " << options.FP << ::std::endl;
@@ -2054,6 +2078,8 @@ int mapSingleReads(
 	options.TP = 0;
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
+    options.timeMaskDuplicates = 0;
+	options.timeCompactMatches = 0;
 
 	CharString	id;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -2087,6 +2113,9 @@ int mapSingleReads(
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
+		::std::cerr << "Masking duplicates took          \t" << options.timeMaskDuplicates << " seconds" << ::std::endl;
+		::std::cerr << "Compacting matches took          \t" << options.timeCompactMatches << " seconds" << ::std::endl;
+		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
 		::std::cerr << "Swift FP: " << options.FP << ::std::endl;

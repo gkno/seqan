@@ -612,7 +612,7 @@ void dumpMatches(
 #ifdef RAZERS_SPLICED
 	//maskPairDuplicates(matches);
 #else
-	maskDuplicates(matches);
+	maskDuplicates(matches, options);
 #endif
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
