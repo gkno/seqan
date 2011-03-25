@@ -97,14 +97,14 @@
 //____________________________________________________________________________
 // iterators
 
-#include <seqan/basic/basic_iterator.h>
-#include <seqan/basic/basic_iterator_base.h>
+#include <seqan/basic/iterator_interface.h>
+#include <seqan/basic/iterator_base.h>
 
 #include <seqan/basic/basic_transport.h>
 
-#include <seqan/basic/basic_iterator_adaptor.h>
-#include <seqan/basic/basic_iterator_position.h>
-#include <seqan/basic/basic_iterator_adapt_std.h>
+#include <seqan/basic/iterator_adaptor.h>
+#include <seqan/basic/iterator_position.h>
+#include <seqan/basic/iterator_adapt_std.h>
 
 #include <seqan/basic/basic_proxy.h>
 

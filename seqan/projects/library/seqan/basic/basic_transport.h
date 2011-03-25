@@ -65,7 +65,7 @@ template <typename T>
 struct HasMoveConstructor
 {
     typedef False Type;
-    enum { VALUE = False::VALUE; }
+    enum { VALUE = 0 };
 };
 
 // ============================================================================
