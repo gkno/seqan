@@ -168,7 +168,10 @@ enum {
 		double		timeLoadFiles;		// time for loading input files
 		double		timeMapReads;		// time for mapping reads
 		double		timeDumpResults;	// time for dumping the results
-		
+        double      timeBuildQGramIndex;  // time for q-gram index building.
+        double      timeCompactMatches;     // time for compacting reads
+        double      timeMaskDuplicates; // time spent masking duplicates
+
 		bool		maqMapping;
 		int			absMaxQualSumErrors;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -490,7 +493,7 @@ struct MicroRNA{};
 						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
 
 						if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-							maskDuplicates(*store, TRazerSMode());	// overlapping parallelograms cause duplicates
+							maskDuplicates(*store, *options, TRazerSMode());	// overlapping parallelograms cause duplicates
 		
 						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
 						
@@ -869,8 +872,8 @@ inline int estimateReadLength(char const *fileName)
 
 //////////////////////////////////////////////////////////////////////////////
 // Mark duplicate matches for deletion
-template <typename TFragmentStore, typename TRazerSMode>
-void maskDuplicates(TFragmentStore &store, TRazerSMode)
+template <typename TFragmentStore, typename TOptions, typename TRazerSMode>
+void maskDuplicates(TFragmentStore &store, TOptions & options, TRazerSMode)
 {
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
@@ -885,6 +888,8 @@ void maskDuplicates(TFragmentStore &store, TRazerSMode)
 	typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>	TLessScore;
 	typedef LessRNoGPos<TAlignedReadStore, TLessScore>						TLessBeginPos;
 	typedef LessRNoGEndPos<TAlignedReadStore, TLessScore>					TLessEndPos;
+
+    double beginTime = sysTime();
 	
 #ifdef RAZERS_PROFILE
   timelineBeginTask(TASK_SORT);
@@ -950,6 +955,7 @@ void maskDuplicates(TFragmentStore &store, TRazerSMode)
 		beginPos = itBeginPos;
 		orientation = (*it).beginPos < (*it).endPos;
 	}
+    options.timeMaskDuplicates += sysTime() - beginTime;
 }
 /*
 //////////////////////////////////////////////////////////////////////////////
@@ -1097,7 +1103,7 @@ void compactMatches(
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
-    fprintf(stderr, "[compact]");
+    // fprintf(stderr, "[compact]");
     double beginTime = sysTime();
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
@@ -1182,13 +1188,13 @@ void compactMatches(
 		*dit = *it;
 		++dit;
 	}
-	unsigned origSize = length(store.alignedReadStore);
+	// unsigned origSize = length(store.alignedReadStore);
 	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
 	compactAlignedReads(store);
-    double endTime = sysTime();
-    fprintf(stderr, "[compacted in %f s]", endTime - beginTime);
-	unsigned newSize = length(store.alignedReadStore);
-	fprintf(stderr, "[compacted from %u to %u]", origSize, newSize);
+    options.timeCompactMatches += sysTime() - beginTime;
+    // fprintf(stderr, "[compacted in %f s]", endTime - beginTime);
+	// unsigned newSize = length(store.alignedReadStore);
+	// fprintf(stderr, "[compacted from %u to %u]", origSize, newSize);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1899,6 +1905,11 @@ void _mapSingleReadsToContig(
 	verifier.genomeLength = length(contigSeq);
 	verifier.m.contigId = contigId;
 
+    double beginTime = sysTime();
+    // Build q-gram index separately, so we can better compute the time for it.
+    indexRequire(host(swiftPattern), QGramSADir());
+    options.timeBuildQGramIndex += sysTime() - beginTime;
+
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate))
 	{
@@ -1989,6 +2000,9 @@ int _mapSingleReads(
 	options.countVerification = 0;
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
+    options.timeBuildQGramIndex = 0;
+    options.timeCompactMatches = 0;
+    options.timeMaskDuplicates = 0;
 	SEQAN_PROTIMESTART(find_time);
 	
 	// iterate over genome sequences
@@ -2015,6 +2029,9 @@ int _mapSingleReads(
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
+		::std::cerr << "Masking duplicates took          \t" << options.timeMaskDuplicates << " seconds" << ::std::endl;
+		::std::cerr << "Compacting matches took          \t" << options.timeCompactMatches << " seconds" << ::std::endl;
+		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
 		::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
@@ -2195,41 +2212,41 @@ int _mapReads(
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options)
 {
-    if (options.matchN) {
-    //     if (options.gapMode == RAZERS_GAPPED)
-    //     {
-    //         if (options.alignMode == RAZERS_LOCAL)
-    //             return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
-    //         if (options.alignMode == RAZERS_PREFIX)
-    //             return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
-             if (options.alignMode == RAZERS_GLOBAL)
-                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
-    //     } else {
-    //         if (options.alignMode == RAZERS_LOCAL)
-    //             return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
-    //         if (options.alignMode == RAZERS_PREFIX)
-    //             return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesAll_>());
-    //         if (options.alignMode == RAZERS_GLOBAL)
-    //             return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
-    //     }
-    } else {
-        // if (options.gapMode == RAZERS_GAPPED)
-        // {
-            // if (options.alignMode == RAZERS_LOCAL)
-            //     return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
-            // if (options.alignMode == RAZERS_PREFIX)
-            //     return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
+   if (options.matchN) {
+       if (options.gapMode == RAZERS_GAPPED)
+        {
+            if (options.alignMode == RAZERS_LOCAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
+            if (options.alignMode == RAZERS_PREFIX)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
             if (options.alignMode == RAZERS_GLOBAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesNone_>());
-        // } else {
-        //     if (options.alignMode == RAZERS_LOCAL)
-        //         return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
-        //     if (options.alignMode == RAZERS_PREFIX)
-        //         return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
-        //     if (options.alignMode == RAZERS_GLOBAL)
-        //         return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
-        // }
-    }
+                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
+        } else {
+            if (options.alignMode == RAZERS_LOCAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
+            if (options.alignMode == RAZERS_PREFIX)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesAll_>());
+            if (options.alignMode == RAZERS_GLOBAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
+        }
+   } else {
+        if (options.gapMode == RAZERS_GAPPED)
+        {
+            if (options.alignMode == RAZERS_LOCAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_PREFIX)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
+           if (options.alignMode == RAZERS_GLOBAL)
+               return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesNone_>());
+        } else {
+             if (options.alignMode == RAZERS_LOCAL)
+                 return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
+             if (options.alignMode == RAZERS_PREFIX)
+                 return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
+             if (options.alignMode == RAZERS_GLOBAL)
+                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
+        }
+   }
 	return RAZERS_INVALID_OPTIONS;
 }
 

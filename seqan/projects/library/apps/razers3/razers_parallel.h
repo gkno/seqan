@@ -281,7 +281,7 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TFragmentStore, TSwiftFinder,
         // if (tls.threadId == 0u && tls.options._debugLevel >= 3)
         //     fprintf(stderr, "[compact]");
         if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-          maskDuplicates(tls.store, TRazerSMode());  // overlapping parallelograms cause duplicates
+            maskDuplicates(tls.store, tls.options, TRazerSMode());  // overlapping parallelograms cause duplicates
 
         compactMatches(tls.store, tls.counts, tls.options, TRazerSMode(), tls, COMPACT);
 

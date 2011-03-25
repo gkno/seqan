@@ -652,7 +652,7 @@ int dumpMatches(
 	}
 
 	TBinFunctor binFunctor(store.alignQualityStore);
-	maskDuplicates(store, mode);
+	maskDuplicates(store, options, mode);
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	 && !options.maqMapping
