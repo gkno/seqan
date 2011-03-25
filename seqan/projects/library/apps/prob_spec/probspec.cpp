@@ -82,22 +82,10 @@ _writeSpecifiedParams(TOptions & options) {
 		std::cout << "  k-mer (q-gram) length            : " << options.qGram << std::endl;
 	std::cout << "  search forward strand            : " << ((options.forward)?"yes":"no") << std::endl;
 	std::cout << "  search reverse complement        : " << ((options.reverse)?"yes":"no") << std::endl;
+	std::cout << "  output alignments                : " << ((options.outputAlignments)?"yes":"no") << std::endl;
 	std::cout << std::endl;
 
-//	std::cout << "  verification strategy            : " << options.fastOption << std::endl;
-//	if (options.disableThresh != (unsigned)-1) {
-//		std::cout << "  disable queries with more than   : " << options.disableThresh << " matches" << std::endl;
-//	}
-//	std::cout << "  maximal number of matches        : " << options.numMatches << std::endl;
-//	std::cout << "  duplicate removal every          : " << options.compactThresh << std::endl;
-//	if (options.maxRepeatPeriod != 1 || options.minRepeatLength != 1000) {
-//		std::cout << "  max low complexity repeat period : " << options.maxRepeatPeriod << std::endl;
-//		std::cout << "  min low complexity repeat length : " << options.minRepeatLength << std::endl;
-//	}
-//	if (options.qgramAbundanceCut != 1) {
-//		std::cout << "  q-gram abundance cut ratio       : " << options.qgramAbundanceCut << std::endl;
-//	}
-//	std::cout << std::endl;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,7 +127,8 @@ _parseOptions(TParser & parser, TOptions & options) {
 	if (isSetShort(parser, 'v')) options.verbose = 1;
 	if (isSetShort(parser, 'f')) if (!isSetShort(parser, 'r')) options.reverse = false;
 	if (isSetShort(parser, 'r')) if (!isSetShort(parser, 'f')) options.forward = false;
-
+	if (isSetShort(parser, "oa")) if (isSetShort(parser, "oa")) options.outputAlignments = true;
+	
 	if (isSetShort(parser, "le") && options.lengthExact > 32) {
 		std::cerr << "Invalid parameter value: Please choose a smaller k-mer length." << std::endl;
 		return 0;
@@ -198,6 +187,9 @@ _setParser(TParser & parser) {
 										OptionType::Boolean, "both"));
 	addOption(parser, CommandLineOption('r', "reverse", "Search only in reverse complement of database",
 										OptionType::Boolean, "both"));
+	addOption(parser, CommandLineOption("oa", "outputAlignments", "Output the alignments of the hits (uses more memory)",
+										OptionType::Boolean, "true"));
+
 	
 	addSection(parser, "Filtering Options:");
 
@@ -266,19 +258,23 @@ int main(int argc, const char *argv[]) {
 	
 	// allocate result Stringset. it contains the alignments for each query
 	StringSet< String<Align<TSequence> > > resultf, resultr;
+	StringSet< String<Tuple<unsigned, 4> > > resultfpos;
+	StringSet< String<Tuple<unsigned, 4> > > resultrpos;
 	resize(resultf,length(queries));
 	resize(resultr,length(queries));
-
+	resize(resultfpos,length(queries));
+	resize(resultrpos,length(queries));
+	
 	if (options.forward){	
 		std::cout << "Forward strand" << ::std::endl;
-		if( ! _extendExactMatches(databases[0],queries,resultf,options)) return 1;
+		if( ! _extendExactMatches(databases[0],queries,resultf,resultfpos,options)) return 1;
 	}
 	
 	
 	if (options.reverse){ 
 		std::cout << "Reverse strand" << ::std::endl;
 		reverseComplement(databases[0]);
-		if( ! _extendExactMatches(databases[0],queries,resultr,options)) return 1;
+		if( ! _extendExactMatches(databases[0],queries,resultr,resultrpos,options)) return 1;
 		reverseComplement(databases[0]);
 	}
 	
@@ -286,36 +282,39 @@ int main(int argc, const char *argv[]) {
 
 	if (options.forward){		
 		file << ::std::endl << "Forward strand" << ::std::endl;
-		for (unsigned i=0; i<length(resultf); ++i)
-			for (unsigned j=0; j<length(resultf[i]); j++) {	
+		for (unsigned i=0; i<length(resultfpos); ++i)
+			for (unsigned j=0; j<length(resultfpos[i]); j++) {	
 				file << "hits for query " << i << ::std::endl;
-				unsigned db1 = clippedBeginPosition(row(resultf[i][j],0));
+			/*	unsigned db1 = clippedBeginPosition(row(resultf[i][j],0));
 				unsigned db2 = clippedEndPosition(row(resultf[i][j],0))-1;
 				unsigned q1  = clippedBeginPosition(row(resultf[i][j],1));
-				unsigned q2  = clippedEndPosition(row(resultf[i][j],1))-1;
-				file << "+ Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
-				file << resultf[i][j] << ::std::endl;
+				unsigned q2  = clippedEndPosition(row(resultf[i][j],1))-1;*/
+				file << "+ Aligns database [" << resultfpos[i][j][0] << ":" << resultfpos[i][j][1] << "]" << " and query " << i << " [" << resultfpos[i][j][2] << ":" <<  resultfpos[i][j][3]<< "]" << ::std::endl; 
+				if(options.outputAlignments)
+					file << resultf[i][j] << ::std::endl;
 			}
 	
-		for (unsigned i=0; i<length(resultf); ++i)	
-			file << "query " << i << " has " << length(resultf[i]) << " hits in database " <<  ::std::endl;
+		for (unsigned i=0; i<length(resultfpos); ++i)	
+			file << "query " << i << " has " << length(resultfpos[i]) << " hits in database " <<  ::std::endl;
 	}
 	
 	if (options.reverse){ 
 		file << ::std::endl << "Reverse strand" << ::std::endl;
 		reverseComplement(databases[0]);
-		for (unsigned i=0; i<length(resultr); ++i)
-			for (unsigned j=0; j<length(resultr[i]); j++) {
+		for (unsigned i=0; i<length(resultrpos); ++i)
+			for (unsigned j=0; j<length(resultrpos[i]); j++) {
 				file << "hits for query " << i << ::std::endl;
-				unsigned db1 = clippedBeginPosition(row(resultr[i][j],0));
+			/*	unsigned db1 = clippedBeginPosition(row(resultr[i][j],0));
 				unsigned db2 = clippedEndPosition(row(resultr[i][j],0))-1;
 				unsigned q1  = clippedBeginPosition(row(resultr[i][j],1));
-				unsigned q2  = clippedEndPosition(row(resultr[i][j],1))-1;
-				file << "- Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
-				file << resultr[i][j] << ::std::endl;
+				unsigned q2  = clippedEndPosition(row(resultr[i][j],1))-1;*/
+				file << "+ Aligns database [" << resultrpos[i][j][0] << ":" << resultrpos[i][j][1] << "]" << " and query " << i << " [" << resultrpos[i][j][2] << ":" <<  resultrpos[i][j][3]<< "]" << ::std::endl;
+				//file << "- Aligns database [" << db1 << ":" << db2<< "]" << " and query " << i << "[" << q1 << ":" <<  q2 << "]" << ::std::endl; 
+				if(options.outputAlignments)
+					file << resultr[i][j] << ::std::endl;
 			}
-		for (unsigned i=0; i<length(resultr); ++i)	
-			file << "query " << i << " has " << length(resultr[i]) << " hits in database " <<  ::std::endl;
+		for (unsigned i=0; i<length(resultrpos); ++i)	
+			file << "query " << i << " has " << length(resultrpos[i]) << " hits in database " <<  ::std::endl;
 		reverseComplement(databases[0]);
 	}
 	file.close();

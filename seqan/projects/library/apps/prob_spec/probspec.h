@@ -59,6 +59,7 @@ inline bool
 _extendExactMatches(TSequence & database,
 					StringSet<TSequence> & queries,
 					StringSet<String<Align<TSequence > > >& result,
+					StringSet<String<Tuple<unsigned,4> > >& resultpos,
 					ProbSpecOptions & options) {
 	
 	StringSet<String<Triple<unsigned,unsigned,unsigned> > > ematches;
@@ -194,7 +195,11 @@ _extendExactMatches(TSequence & database,
 					//		::std::cout << align << ::std::endl;
 					
 						if (odb1 != db1 || odb2 != db2 || oq1 != q1 || oq2 != q2 ) {
-							appendValue(result[s],align);
+							Tuple<unsigned,4> t;
+							t[0] = db1; t[1]=db2; t[2]=q1; t[3]=q2;
+							appendValue(resultpos[s],t);
+							if(options.outputAlignments)
+								appendValue(result[s],align);
 							mcount++;
 							oldalign = align;
 						}

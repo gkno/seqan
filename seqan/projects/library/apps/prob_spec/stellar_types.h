@@ -32,8 +32,6 @@ struct ProbSpecOptions {
 	CharString databaseFile;		// name of database file
 	CharString queryFile;			// name of query file
 	CharString outputFile;			// name of result file
-	CharString disabledQueriesFile;	// name of result file containing disabled queries
-	CharString outputFormat;		// Possible formats: gff, text
 
 	// main options
 	unsigned qGram;				// length of the q-grams
@@ -46,6 +44,7 @@ struct ProbSpecOptions {
 	// more options
 	bool forward;				// compute matches to forward strand of database
 	bool reverse;				// compute matches to reverse complemented database
+	bool outputAlignments;				// output alignments not only positions
 	CharString fastOption;		// verification strategy: exact, bestLocal, bandedGlobal
 	unsigned disableThresh;		// maximal number of matches allowed per query before disabling verification of hits for that query
 	unsigned compactThresh;		// number of matches after which removal of overlaps and duplicates is started
@@ -57,10 +56,8 @@ struct ProbSpecOptions {
 
 
 	ProbSpecOptions() {
-		outputFile = "stellar.gff";
-		disabledQueriesFile = "stellar.disabled.fasta";
-		outputFormat = "gff";
-
+		outputFile = "probspec.txt";
+	
 		qGram = (unsigned)-1;
 		epsilon = 0.05;
 		minLength = 100;
@@ -70,6 +67,7 @@ struct ProbSpecOptions {
 
 		forward = true;
 		reverse = true;
+		outputAlignments=false;
 		fastOption = "exact";		// exact verification
 		disableThresh = (unsigned)-1;
 		compactThresh = 500;
