@@ -376,36 +376,36 @@ operator != (Iter<TSumList, DummySumListIterator_> const & left,
 
 void Test_MiniSumList_Entry()
 {
-	typedef MiniListEntry_<size_t> TEntry;
+	// typedef MiniListEntry_<size_t> TEntry;
 
-	unsigned char buf [1 + sizeof(size_t)];
+	// unsigned char buf [1 + sizeof(size_t)];
 
-	unsigned char & buf2char = * buf;
+	// unsigned char & buf2char = * buf;
 	// unsigned short & buf2short = * reinterpret_cast<unsigned short *>(buf);
-	unsigned int & buf2int = * reinterpret_cast<unsigned int *>(buf);
-	size_t & buf2full = * reinterpret_cast<size_t *>(buf + 1);
+	// unsigned int & buf2int = * reinterpret_cast<unsigned int *>(buf);
+	// size_t & buf2full = * reinterpret_cast<size_t *>(buf + 1);
 
-	TEntry & entr = * (reinterpret_cast<TEntry *>(buf));
+	// TEntry & entr = * (reinterpret_cast<TEntry *>(buf));
 
-	entr.assignValue(0x12);
-	SEQAN_ASSERT(entr.getValue() == 0x12);
-	SEQAN_ASSERT(entr.size() == 1);
-	SEQAN_ASSERT(buf2char == 0x12 << 2);
+	// entr.assignValue(0x12);
+	// SEQAN_ASSERT(entr.getValue() == 0x12);
+	// SEQAN_ASSERT(entr.size() == 1);
+	// SEQAN_ASSERT(buf2char == 0x12 << 2);
 
-	entr.assignValue(0x1234);
-	SEQAN_ASSERT(entr.getValue() == 0x1234);
-	SEQAN_ASSERT(entr.size() == 2);
-	// SEQAN_ASSERT((buf2short & 0xfffc) == (0x1234 << 2));
+	// entr.assignValue(0x1234);
+	// SEQAN_ASSERT(entr.getValue() == 0x1234);
+	// SEQAN_ASSERT(entr.size() == 2);
+	// // // SEQAN_ASSERT((buf2short & 0xfffc) == (0x1234 << 2));
 
-	entr.assignValue(0x1234567);
-	SEQAN_ASSERT(entr.getValue() == 0x1234567);
-	SEQAN_ASSERT(entr.size() == 4);
-	SEQAN_ASSERT((buf2int & 0xfffffffc) == (0x1234567 << 2));
+	// entr.assignValue(0x1234567);
+	// SEQAN_ASSERT(entr.getValue() == 0x1234567);
+	// SEQAN_ASSERT(entr.size() == 4);
+	// SEQAN_ASSERT((buf2int & 0xfffffffc) == (0x1234567 << 2));
 
-	entr.assignValue(0xfedcba98);
-	SEQAN_ASSERT(entr.getValue() == 0xfedcba98);
-	SEQAN_ASSERT(entr.size() == 1 + sizeof(size_t));
-	SEQAN_ASSERT(buf2full == 0xfedcba98);
+	// entr.assignValue(0xfedcba98);
+	// SEQAN_ASSERT(entr.getValue() == 0xfedcba98);
+	// SEQAN_ASSERT(entr.size() == 1 + sizeof(size_t));
+	// SEQAN_ASSERT(buf2full == 0xfedcba98);
 
 }
 
