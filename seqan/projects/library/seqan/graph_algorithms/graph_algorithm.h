@@ -317,12 +317,12 @@ topologicalSort(Graph<TSpec> const& g,
 ...type:Spec.Directed Graph
 ..param.components:Out-parameter:A property map.
 ...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
-..returns:void.
+..returns:$Size<TGraph>::Type$, number of strongly connected components.
 ..include:seqan/graph_algorithms.h
 */
 
 template<typename TSpec, typename TComponents>
-void
+typename Size<Graph<TSpec> >::Type
 stronglyConnectedComponents(Graph<TSpec> const& g_source,
 							  TComponents& components)
 {
@@ -388,6 +388,8 @@ stronglyConnectedComponents(Graph<TSpec> const& g_source,
 			++label;
 		}
 	}
+
+    return label;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -733,11 +735,11 @@ weaklyConnectedComponents(Graph<TSpec> const & g,
     // Build a map from graph vertex descriptor to component id.
     TSize nextId = 0;
     clear(components);
-    resize(components, setCount, setCount);  // setCount is sentinel value
+    resizeVertexMap(g, components, setCount);  // setCount is sentinel value
     for (TVertexIterator itV(g); !atEnd(itV); goNext(itV)) {
         if (getProperty(components, findSet(unionFind, *itV)) == setCount)
             assignProperty(components, findSet(unionFind, *itV), nextId++);
-        assignProperty(components, findSet(unionFind, *itV), getProperty(components, findSet(unionFind, *itV)));
+        assignProperty(components, *itV, getProperty(components, findSet(unionFind, *itV)));
     }
 
     return setCount;
