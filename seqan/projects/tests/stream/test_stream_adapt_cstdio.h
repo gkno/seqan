@@ -87,7 +87,8 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_read_simple_usage)
 
     char const * STR = "This is a string!\nWith two lines.";
     FILE * stream = tmpfile();
-    fprintf(stream, STR);
+    // LLVM warns about possible insecurities if we use STR as fmt string here.
+    fprintf(stream, "%s", STR);
     rewind(stream);
     testStreamReadSimpleUsage(stream);
     fclose(stream);
@@ -100,7 +101,8 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_read_complex_usage)
 
     char const * STR = "This is a string!\nWith two lines.";
     FILE * stream = tmpfile();
-    fprintf(stream, STR);
+    // LLVM warns about possible insecurities if we use STR as fmt string here.
+    fprintf(stream, "%s", STR);
     rewind(stream);
     testStreamReadComplexUsage(stream);
     fclose(stream);
