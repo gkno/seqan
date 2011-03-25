@@ -52,6 +52,22 @@ namespace seqan {
 // Metafunctions
 // ============================================================================
 
+/**
+.Metafunction.HasMoveConstructor
+..cat:Content Manipulation
+..signature:HasMoveConstructor<T>::Type
+..signature:HasMoveConstructor<T>::VALUE
+..param.T:Type to query for availability of move constructor.
+..rem
+..include:seqan/basic.h
+ */
+template <typename T>
+struct HasMoveConstructor
+{
+    typedef False Type;
+    enum { VALUE = False::VALUE; }
+};
+
 // ============================================================================
 // Functions
 // ============================================================================

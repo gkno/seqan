@@ -88,6 +88,8 @@ struct Nothing {};
 // Tag Move
 // ----------------------------------------------------------------------------
 
+// TODO(holtgrew): This should probably go into basic_transport.h.
+
 /**
 .Tag.Move Switch:
 ..cat:Basic
@@ -103,6 +105,19 @@ String target(source, Move()); // source is moved to target
 std::cout << source; //nothing printed since source lost content
 std::cout << target; //"hello"
 ..see:Function.move
+.example.text:Move constructors are like copy-constructors. However, their argument is not const.
+.example.code:
+class Klass
+{
+public:
+    seqan::String m;
+
+    // Copy constructor, other is left untouched.
+    Klass(Klass const & other) { ... }
+
+    // Move constructor, leaves other and its members in an "empty" state.
+    Klass(Klass & other, seqan::Move const &) { ... }
+};
 ..include:seqan/basic.h
 */
 
