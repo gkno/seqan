@@ -46,10 +46,12 @@
 
 #include "test_allocator.h"
 #include "test_common.h"
+
 #include "test_alphabet.h"
 #include "test_metaprogramming.h"
 #include "test_basic_math.h"
 #include "test_basic_tag.h"
+#include "test_basic_type.h"
 
 using namespace std;
 using namespace seqan;
@@ -497,6 +499,27 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_tag_tag_list_selector);
     SEQAN_CALL_TEST(test_basic_tag_misc_tags3);
     SEQAN_CALL_TEST(test_basic_tag_misc_tags4);
+
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_value);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_get_value);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_reference);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_size);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_difference);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_position);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_host);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_spec);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_deepest_spec);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_cargo);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_vertex_descriptor);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_id);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_key);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_object);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_source);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_parameter);
+    SEQAN_CALL_TEST(seqan_basic_type_to_parameter);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_const_parameter);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_length);
+    SEQAN_CALL_TEST(seqan_basic_type_metafunction_is_integral);
 
     // =======================================================================
     // Tests for Aggregates

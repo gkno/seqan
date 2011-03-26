@@ -265,9 +265,9 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_make_is_const)
 
 SEQAN_DEFINE_TEST(test_basic_metaprogramming_class_identifier)
 {
-    unsigned id1 = reinterpret_cast<unsigned>(ClassIdentifier_<int>::getID());
-    unsigned id2 = reinterpret_cast<unsigned>(ClassIdentifier_<signed int>::getID());
-    unsigned id3 = reinterpret_cast<unsigned>(ClassIdentifier_<double>::getID());
+    void * id1 = ClassIdentifier_<int>::getID();
+    void * id2 = ClassIdentifier_<signed int>::getID();
+    void * id3 = ClassIdentifier_<double>::getID();
     SEQAN_ASSERT_EQ(id1, id2);
     SEQAN_ASSERT_NEQ(id1, id3);
 }

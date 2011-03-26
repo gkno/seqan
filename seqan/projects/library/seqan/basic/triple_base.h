@@ -240,13 +240,13 @@ inline void assignValueI1(Triple<T1, T2, T3, TSpec> & triple, T const & _i)
 }
 
 template <typename T1, typename T2, typename T3, typename TSpec, typename T>
-inline void const assignValueI2(Triple<T1, T2, T3, TSpec> & triple, T const & _i)
+inline void assignValueI2(Triple<T1, T2, T3, TSpec> & triple, T const & _i)
 {
     triple.i2 = _i;
 }
 
 template <typename T1, typename T2, typename T3, typename TSpec, typename T>
-inline void const assignValueI3(Triple<T1, T2, T3, TSpec> & triple, T const & _i)
+inline void assignValueI3(Triple<T1, T2, T3, TSpec> & triple, T const & _i)
 {
     triple.i3 = _i;
 }

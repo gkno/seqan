@@ -57,18 +57,20 @@ namespace seqan {
 ..include:seqan/basic.h
 */
 
+// SEQREV: elements-are-containers should not have a default implementation
+
 template <typename T, const int i = 0>
 struct Value
 {
 	typedef T Type;
 };
-/*
+
 template <typename T>
 struct Value<T const>
 {
-	typedef T Type;
+	typedef T const Type;
 };
-*/
+
 //____________________________________________________________________________
 
 /**
@@ -85,11 +87,13 @@ Do not confuse it with @Function.value@ that returns a @Metafunction.Reference.r
 ..see:Function.getValue
 ..include:seqan/basic.h
 */
+
 template <typename T>
 struct GetValue
 {
 	typedef typename Value<T>::Type const & Type;
 };
+
 template <typename T>
 struct GetValue<T const>:
 	public GetValue<T>
@@ -109,11 +113,13 @@ struct GetValue<T const>:
 ..see:Metafunction.GetValue
 ..include:seqan/basic.h
 */
+
 template <typename T>
 struct Reference
 {
 	typedef typename Value<T>::Type & Type;
 };
+
 template <typename T>
 struct Reference<T const>
 {
@@ -133,11 +139,13 @@ struct Reference<T const>
 ..remarks.text:In most cases this type is $size_t$.
 ..include:seqan/basic.h
 */
+
 template <typename T>
 struct Size
 {
 	typedef size_t Type;
 };
+
 template <typename T>
 struct Size<T const>:
 	Size<T>
@@ -159,11 +167,13 @@ struct Size<T const>:
 ..see:Metafunction.Size
 ..include:seqan/basic.h
 */
+
 template <typename T>
 struct Difference
 {
 	typedef ptrdiff_t Type;
 };
+
 template <typename T>
 struct Difference<T const>:
 	Difference<T>
@@ -185,11 +195,13 @@ struct Difference<T const>:
 ..see:Metafunction.Iterator
 ..include:seqan/basic.h
 */
+
 template <typename T>
 struct Position
 {
 	typedef typename Size<T>::Type Type;
 };
+
 template <typename T>
 struct Position<T const>:
 	Position<T>
@@ -207,6 +219,9 @@ struct Position<T const>:
 ..returns.param.Type:Host type of $T$.
 ..include:seqan/basic.h
 */
+
+// SEQREV: elements-are-containers should not have a default implementation, if a type has no host, do not return self
+
 template <typename T>
 struct Host
 {
@@ -323,6 +338,8 @@ struct DeepestSpec<T const>:
 ..include:seqan/basic.h
 */
 
+// TODO(holtgrew): Should this have a default implementation?
+
 template <typename T>
 struct Cargo {
 	typedef Nothing Type;
@@ -348,6 +365,8 @@ It is also used to attach properties to vertices.
 ..include:seqan/basic.h
 */
 
+// TODO(holtgrew): Should this have a default implementation? For all graphs -- OK but for all types?
+
 template <typename T>
 struct VertexDescriptor {
 	typedef void* Type;
@@ -372,17 +391,16 @@ In most cases this type is unsigned int.
 ..example.code:Id<Graph<> >::Type id; //id has type unsigned int
 ..include:seqan/basic.h
 */
+
+// TODO(holtgrew): Should this have a default implementation?
+
 template<typename T>
 struct Id {
 	typedef unsigned int Type;
 };
 
-//____________________________________________________________________________
-
 template<typename T>
-struct Id<T const> {
-	typedef unsigned int Type;
-};
+struct Id<T const> : Id<T> {};
 
 //____________________________________________________________________________
 
@@ -396,6 +414,9 @@ struct Id<T const> {
 ...default:The type $T$ itself.
 ..include:seqan/basic.h
 */
+
+// TODO(holtgrew): Should this have a default implementation?
+
 template< typename T >
 struct Key
 {
@@ -428,6 +449,8 @@ struct Object<T const>:
 //____________________________________________________________________________
 
 // TODO(holtgrew): Move to alignments?
+// TODO(holtgrew): Is this default implementation what we want?
+
 /**
 .Metafunction.Source
 ..cat:Alignments
@@ -457,6 +480,9 @@ struct Source<T const>:
 ...text:If $T$ is a pointer or array type, then $Parameter_<T>::Type$ is $T$, 
 otherwise $Parameter_<T>::Type$ is $T &$.
 */
+
+// TODO(holtgrew): Really required?
+
 template <typename T>
 struct Parameter_
 {
@@ -468,12 +494,12 @@ struct Parameter_<T *>
 {
 	typedef T * Type;
 };
+
 template <typename T, size_t I>
 struct Parameter_<T [I]>
 {
 	typedef T * Type;
 };
-
 
 /**
 .Internal._toParameter:
@@ -487,18 +513,23 @@ struct Parameter_<T [I]>
 ..returns:To $TParameter$ transformed $object$.
 ..see:Internal.Parameter_
 */
+
+// TODO(holtgrew): Really required?
+
 template <typename T>
 typename Parameter_<T>::Type
 _toParameter(T * _object)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return * _object;
 }
+
 template <typename T>
 typename Parameter_<T>::Type
 _toParameter(T _object)
 {
-SEQAN_CHECKPOINT
+    // TODO(holtgrew): This cannot really work, cannot return references to temporaries.
+    SEQAN_CHECKPOINT;
 	return _object;
 }
 
@@ -515,11 +546,15 @@ SEQAN_CHECKPOINT
 otherwise $Parameter_<T>::Type$ is $T const &$.
 ..see:Internal.Parameter_
 */
+
+// TODO(holtgrew): Really required?
+
 template <typename T>
 struct ConstParameter_
 {
 	typedef T const & Type;
 };
+
 template <typename T>
 struct ConstParameter_<T const>:
 	public ConstParameter_<T> {};
@@ -529,6 +564,7 @@ struct ConstParameter_<T *>
 {
 	typedef T const * Type;
 };
+
 template <typename T>
 struct ConstParameter_<T const *>
 {
@@ -540,6 +576,7 @@ struct ConstParameter_<T [I]>
 {
 	typedef T const * Type;
 };
+
 template <typename T, size_t I>
 struct ConstParameter_<T const [I]>
 {
@@ -560,6 +597,9 @@ otherwise $Pointer_<T>::Type$ is $T *$.
 ..see:Internal.Parameter_
 ..see:Internal._toParameter
 */
+
+// TODO(holtgrew): Really required?
+
 template <typename T>
 struct Pointer_
 {
@@ -606,6 +646,9 @@ struct NonConstPointer_<T * const>
 ...text:The type of the returned pointer is given by @Internal.Pointer_@.
 ..see:Internal.Pointer_
 */
+
+// TODO(holtgrew): Really required?
+
 template <typename T>
 typename NonConstPointer_<T>::Type
 _toPointer(T & _object)
@@ -642,11 +685,16 @@ SEQAN_CHECKPOINT
 ..remarks.text:The default return value is 1 for dynamic-size containers.
 ..include:seqan/basic.h
 */
+
+// SEQREV: elements-are-containers should probably not have a default implementation
+// TODO(holtgrew): Rather switch to static const unsigned VALUE = ?
+
 template <typename T>
 struct LENGTH
 {
 	enum { VALUE = 1 };
 };
+
 template <typename T>
 struct LENGTH<T const>:
 	LENGTH<T>
@@ -665,6 +713,9 @@ struct LENGTH<T const>:
 For gapped shapes this is the number of '1's.
 ..include:seqan/basic.h
 */
+
+// TODO(holtgrew): Should probably go to wherever shapes are defined.
+
 template <typename T>
 struct WEIGHT:
 	LENGTH<T>
@@ -682,6 +733,8 @@ struct WEIGHT<T const>:
 
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): This should probably to into the metafunctions header?
+
 /**
 .Metafunction.IsIntegral:
 ..cat:Basic
@@ -692,6 +745,7 @@ struct WEIGHT<T const>:
 ...default:@Tag.Logical Values.False@
 ..include:seqan/basic.h
  */
+
 template <typename T>
 struct IsIntegral
 {
@@ -723,9 +777,7 @@ struct IsIntegral
 };
 
 template <typename T>
-struct IsIntegral<T const> {
-	typedef typename IsIntegral<T>::Type Type;
-};
+struct IsIntegral<T const> : IsIntegral<T> {};
 
 }  // namespace seqan
 
