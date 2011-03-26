@@ -457,6 +457,31 @@ SEQAN_DEFINE_TEST(test_basic_suprema_infima)
 SEQAN_BEGIN_TESTSUITE(test_basic)
 {
     // =======================================================================
+    // Tests for Miscalleneous Code
+    // =======================================================================
+
+    SEQAN_CALL_TEST(test_basic_metaprogramming_true);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_false);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_eval);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_or);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_and);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_if);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_is_same_type);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_switch);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_loop);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_loop_reverse);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_log2);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_log2_floor);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_power);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_make_unsigned);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_make_signed);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_make_remove_const);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_make_copy_const);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_make_is_const);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_class_identifier);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_memset);
+
+    // =======================================================================
     // Tests for Aggregates
     // =======================================================================
 
@@ -597,8 +622,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(testSimpleAllocator);
     SEQAN_CALL_TEST(testPoolAllocator);
     SEQAN_CALL_TEST(testMultiPoolAllocator);
-
-    SEQAN_CALL_TEST(test_metaprogramming_switch);
 
     // Verify all check points.
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_aggregates.h");

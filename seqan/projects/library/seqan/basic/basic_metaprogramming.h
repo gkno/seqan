@@ -368,7 +368,7 @@ struct Switch<TAG, NilCase>
 ..example.code:
 struct PrintWorker
 {
-    static inline body(Nothing & arg, int I)
+    static inline void body(Nothing & arg, int I)
     {
         (void)arg;  // ignored
         printf("%d\n", I);
