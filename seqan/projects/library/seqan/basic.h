@@ -135,6 +135,17 @@
 
 #include <seqan/basic/basic_volatile_ptr.h>
 
-#include <seqan/basic/basic_aggregates.h>
+// --------------------------------------------------------------------------
+// Aggregate Types: Pairs, Triples, Tuples.
+// --------------------------------------------------------------------------
+
+#include <seqan/basic/aggregate_concept.h>
+#include <seqan/basic/pair_base.h>
+#include <seqan/basic/pair_packed.h>
+#include <seqan/basic/pair_bit_compressed.h>
+#include <seqan/basic/triple_base.h>
+#include <seqan/basic/triple_packed.h>
+#include <seqan/basic/tuple_base.h>
+#include <seqan/basic/tuple_bit_compressed.h>
 
 #endif //#ifndef SEQAN_HEADER_...

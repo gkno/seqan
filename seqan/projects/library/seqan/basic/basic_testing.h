@@ -67,7 +67,7 @@
 ..cat:Miscellaneous
 ..summary:Force abortion of program, regardless of debugging settings.
 ..signature:SEQAN_FAIL(msg[, args])
-..param.msg:A foramt string.
+..param.msg:A format string.
 ..param.args:An optional list of arguments.
 ..remarks:Use this if something really unexpected happens inside your functions and there is no way to report this through the API. A good example would be logic errors, e.g. invalid values.
 ..example.text:In the following example, the $SEQAN_FAIL$ is there if a possible value is added to $MyEnum$ but the function $foo$ is not updated accordingly.
@@ -91,6 +91,7 @@ bool foo(MyEnum x) {
     return false;
 }
 ..include:seqan/basic.h
+..see:Macro.SEQAN_CHECK
  */
 
 #define SEQAN_FAIL(...)                                                 \
@@ -100,6 +101,47 @@ bool foo(MyEnum x) {
         ::seqan::ClassTest::fail();                                     \
     } while (false)
 
+/**
+.Macro.SEQAN_CHECK
+..cat:Miscellaneous
+..summary:Force abortion of program if a condition is not met, regardless of debugging settings.
+..signature:SEQAN_FAIL(condition, msg[, args])
+..param.msg:A format string.
+..param.args:An optional list of arguments.
+..remarks:Use this if something really unexpected happens inside your functions and there is no way to report this through the API. A good example would be logic errors, e.g. invalid values.
+..example.text:In the following example, the $SEQAN_CHECK$ stops program execution if a value is added to $MyEnum$ but the function $foo$ is not updated accordingly.
+..example.code:
+enum MyEnum {
+  VALUE_ONE,
+  VALUE_TWO
+};
+
+bool foo(MyEnum x) {
+    SEQAN_CHECK((x == VALUE_ONE || x == VALUE_TWO), "Invalid value for x == %d.", x);
+
+    switch (x) {
+    case VALUE_ONE:
+        // do something
+        return true;
+    case VALUE_TWO:
+        // do something
+        return true;
+    }
+
+    return false;  // Should never reach here, checked above with SEQAN_CHECK.
+}
+..include:seqan/basic.h
+..see:Macro.SEQAN_FAIL
+ */
+
+#define SEQAN_CHECK(_arg1, ...)                                         \
+    do {                                                                \
+        if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,           \
+                                          (_arg1), #_arg1,              \
+                                          __VA_ARGS__)) {               \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
 
 // SeqAn's has three global debug/testing levels: testing, debug and
 // release.  Depending on the level, the SEQAN_ASSERT_* and

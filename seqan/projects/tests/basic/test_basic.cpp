@@ -29,6 +29,8 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+// ==========================================================================
 
 #include <iostream>
 #include <cstdio>
@@ -39,6 +41,8 @@
 
 #include "seqan/basic.h"
 #include "seqan/sequence.h"
+
+#include "test_basic_aggregates.h"
 
 #include "test_allocator.h"
 #include "test_common.h"
@@ -450,7 +454,128 @@ SEQAN_DEFINE_TEST(test_basic_suprema_infima)
 
 //////////////////////////////////////////////////////////////////////////////
 
-SEQAN_BEGIN_TESTSUITE(test_basic) {
+SEQAN_BEGIN_TESTSUITE(test_basic)
+{
+    // =======================================================================
+    // Tests for Aggregates
+    // =======================================================================
+
+    // -----------------------------------------------------------------------
+    // Tests for Pairs
+    // -----------------------------------------------------------------------
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_pair_base_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_comparison_same_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_comparison_different_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_base_stream_output);
+
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_comparison_same_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_comparison_different_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_stream_output);
+
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_value);  // TODO(holtgrew): Need proxy for this.
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_comparison_same_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_comparison_different_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_stream_output);
+
+    // -----------------------------------------------------------------------
+    // Tests for Triples
+    // -----------------------------------------------------------------------
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_triple_base_value);  // TODO(holtgrew): Need proxy for this.
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_comparison_same_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_comparison_different_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_base_stream_output);
+
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_value);  // TODO(holtgrew): Need proxy for this.
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_comparison_same_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_comparison_different_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_triple_packed_stream_output);
+
+    // -----------------------------------------------------------------------
+    // Tests for Tuples
+    // -----------------------------------------------------------------------
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_value);  // TODO(holtgrew): Need proxy for this.
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_shift_left);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_shift_right);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_clear);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_length);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_comparison_same_spec);
+    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_stream_output);
+
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_value);  // TODO(holtgrew): Need proxy for this.
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_shift_left);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_shift_right);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_clear);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_length);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_same_spec);
+    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_stream_output);
+
+    /*
 	SEQAN_CALL_TEST(test_basic_suprema_infima);
 	SEQAN_CALL_TEST(Test_Proxy_Iterator);
 	SEQAN_CALL_TEST(Test_Holder);
@@ -475,6 +600,7 @@ SEQAN_BEGIN_TESTSUITE(test_basic) {
     SEQAN_CALL_TEST(testMultiPoolAllocator);
 
     SEQAN_CALL_TEST(test_metaprogramming_switch);
+    */
 
     // Verify all check points.
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_aggregates.h");
