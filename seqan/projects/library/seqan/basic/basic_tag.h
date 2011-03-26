@@ -479,6 +479,8 @@ typedef Tag<Blat_> Blat;
 // Metafunction LENGTH;  For TagList.
 // ----------------------------------------------------------------------------
 
+// TODO(holtgrew): Is this defined here or is it just a forward?
+
 ///.Metafunction.LENGTH.param.T.type:Tag.TagList
 
 template <typename T>

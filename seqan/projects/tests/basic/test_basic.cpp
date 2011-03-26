@@ -49,6 +49,7 @@
 #include "test_alphabet.h"
 #include "test_metaprogramming.h"
 #include "test_basic_math.h"
+#include "test_basic_tag.h"
 
 using namespace std;
 using namespace seqan;
@@ -487,6 +488,15 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_math_min);
     SEQAN_CALL_TEST(test_basic_math_max);
     SEQAN_CALL_TEST(test_basic_math_abs);
+
+    SEQAN_CALL_TEST(test_basic_tag_tag_struct);
+    SEQAN_CALL_TEST(test_basic_tag_tag_basic_tags);
+    SEQAN_CALL_TEST(test_basic_tag_move);
+    SEQAN_CALL_TEST(test_basic_tag_misc_tags1);
+    SEQAN_CALL_TEST(test_basic_tag_misc_tags2);
+    SEQAN_CALL_TEST(test_basic_tag_tag_list_selector);
+    SEQAN_CALL_TEST(test_basic_tag_misc_tags3);
+    SEQAN_CALL_TEST(test_basic_tag_misc_tags4);
 
     // =======================================================================
     // Tests for Aggregates
