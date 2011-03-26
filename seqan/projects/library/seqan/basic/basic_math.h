@@ -81,13 +81,15 @@ inline TValue _intPow(TValue a, TExponent b)
 /**
 .Function.log2:
 ..cat:Miscellaneous
-..summary:Computes logarithm of base 2 for integer types
+..summary:Computes floored logarithm of base 2 for integer types
 ..signature:unsigned int log2(i)
 ..param.i:An integer type.
 ..returns:The largest integer smaller or equal than
 the logarithm of $i$.
 ..include:seqan/basic.h
 */
+
+// TODO(holtgrew): Should this maybe called log2floor for consistency with Log2Floor<>::VALUE?
 
 template <int BITS_MAX>
 struct Log2Impl_
@@ -181,7 +183,7 @@ _max(const Tx_& _Left, const Ty_& Right_)
 }
 
 // ----------------------------------------------------------------------------
-// Function _max()
+// Function _abs()
 // ----------------------------------------------------------------------------
 
 // TODO(holtgrew): Make public, document.  This is here since cmath's abs is only defined for floats/doubles.

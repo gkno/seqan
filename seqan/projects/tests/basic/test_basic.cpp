@@ -48,6 +48,7 @@
 #include "test_common.h"
 #include "test_alphabet.h"
 #include "test_metaprogramming.h"
+#include "test_basic_math.h"
 
 using namespace std;
 using namespace seqan;
@@ -480,6 +481,12 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_metaprogramming_make_is_const);
     SEQAN_CALL_TEST(test_basic_metaprogramming_class_identifier);
     SEQAN_CALL_TEST(test_basic_metaprogramming_memset);
+
+    SEQAN_CALL_TEST(test_basic_math_int_pow);
+    SEQAN_CALL_TEST(test_basic_math_log2);
+    SEQAN_CALL_TEST(test_basic_math_min);
+    SEQAN_CALL_TEST(test_basic_math_max);
+    SEQAN_CALL_TEST(test_basic_math_abs);
 
     // =======================================================================
     // Tests for Aggregates
