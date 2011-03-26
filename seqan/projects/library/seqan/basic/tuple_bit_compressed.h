@@ -365,16 +365,16 @@ inline void clear(Tuple<T_, _size, Compressed> & me)
 // -----------------------------------------------------------------------
 
 // Optimized version for compressed tuple using just one word.
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator<(Tuple<T_, _sizeL, Compressed> const &_left,
-                      Tuple<T_, _sizeR, Compressed> const & _right)
+template <typename T_, unsigned _size>
+inline bool operator<(Tuple<T_, _size, Compressed> const &_left,
+                      Tuple<T_, _size, Compressed> const & _right)
 {
     return _left.i < _right.i;
 }
 
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator<(Tuple<T_, _sizeL, Compressed> &_left,
-                      Tuple<T_, _sizeR, Compressed> & _right)
+template <typename T_, unsigned _size>
+inline bool operator<(Tuple<T_, _size, Compressed> &_left,
+                      Tuple<T_, _size, Compressed> & _right)
 {
     return _left.i < _right.i;
 }
@@ -384,16 +384,16 @@ inline bool operator<(Tuple<T_, _sizeL, Compressed> &_left,
 // -----------------------------------------------------------------------
 
 // Optimized version for compressed tuple using just one word.
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator>(Tuple<T_, _sizeL, Compressed> const &_left,
-                      Tuple<T_, _sizeR, Compressed> const & _right)
+template <typename T_, unsigned _size>
+inline bool operator>(Tuple<T_, _size, Compressed> const &_left,
+                      Tuple<T_, _size, Compressed> const & _right)
 {
     return _left.i > _right.i;
 }
 
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator>(Tuple<T_, _sizeL, Compressed> &_left,
-                      Tuple<T_, _sizeR, Compressed> & _right)
+template <typename T_, unsigned _size>
+inline bool operator>(Tuple<T_, _size, Compressed> &_left,
+                      Tuple<T_, _size, Compressed> & _right)
 {
     return _left.i > _right.i;
 }
@@ -403,16 +403,16 @@ inline bool operator>(Tuple<T_, _sizeL, Compressed> &_left,
 // -----------------------------------------------------------------------
 
 // Optimized version for compressed tuple using just one word.
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator<=(Tuple<T_, _sizeL, Compressed> const &_left,
-                       Tuple<T_, _sizeR, Compressed> const & _right)
+template <typename T_, unsigned _size>
+inline bool operator<=(Tuple<T_, _size, Compressed> const &_left,
+                       Tuple<T_, _size, Compressed> const & _right)
 {
     return !operator>(_left, _right);
 }
 
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator<=(Tuple<T_, _sizeL, Compressed> &_left,
-                       Tuple<T_, _sizeR, Compressed> & _right)
+template <typename T_, unsigned _size>
+inline bool operator<=(Tuple<T_, _size, Compressed> &_left,
+                       Tuple<T_, _size, Compressed> & _right)
 {
     return !operator>(_left, _right);
 }
@@ -422,16 +422,16 @@ inline bool operator<=(Tuple<T_, _sizeL, Compressed> &_left,
 // -----------------------------------------------------------------------
 
 // Optimized version for compressed tuple using just one word.
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator>=(Tuple<T_, _sizeL, Compressed> const &_left,
-                       Tuple<T_, _sizeR, Compressed> const & _right)
+template <typename T_, unsigned _size>
+inline bool operator>=(Tuple<T_, _size, Compressed> const &_left,
+                       Tuple<T_, _size, Compressed> const & _right)
 {
     return !operator<(_left, _right);
 }
 
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator>=(Tuple<T_, _sizeL, Compressed> &_left,
-                       Tuple<T_, _sizeR, Compressed> & _right)
+template <typename T_, unsigned _size>
+inline bool operator>=(Tuple<T_, _size, Compressed> &_left,
+                       Tuple<T_, _size, Compressed> & _right)
 {
     return !operator<(_left, _right);
 }
@@ -441,16 +441,16 @@ inline bool operator>=(Tuple<T_, _sizeL, Compressed> &_left,
 // -----------------------------------------------------------------------
 
 // Optimized version for compressed tuple using just one word.
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator==(Tuple<T_, _sizeL, Compressed> const & _left,
-                       Tuple<T_, _sizeR, Compressed> const & _right)
+template <typename T_, unsigned _size>
+inline bool operator==(Tuple<T_, _size, Compressed> const & _left,
+                       Tuple<T_, _size, Compressed> const & _right)
 {
     return _left.i == _right.i;
 }
 
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator==(Tuple<T_, _sizeL, Compressed> & _left,
-                       Tuple<T_, _sizeR, Compressed> & _right)
+template <typename T_, unsigned _size>
+inline bool operator==(Tuple<T_, _size, Compressed> & _left,
+                       Tuple<T_, _size, Compressed> & _right)
 {
     return _left.i == _right.i;
 }
@@ -460,16 +460,16 @@ inline bool operator==(Tuple<T_, _sizeL, Compressed> & _left,
 // -----------------------------------------------------------------------
 
 // Optimized version for compressed tuple using just one word.
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator!=(Tuple<T_, _sizeL, Compressed> const & _left,
-                       Tuple<T_, _sizeR, Compressed> const & _right)
+template <typename T_, unsigned _size>
+inline bool operator!=(Tuple<T_, _size, Compressed> const & _left,
+                       Tuple<T_, _size, Compressed> const & _right)
 {
     return !operator==(_left, _right);
 }
 
-template <typename T_, unsigned _sizeL, unsigned _sizeR>
-inline bool operator!=(Tuple<T_, _sizeL, Compressed> & _left,
-                       Tuple<T_, _sizeR, Compressed> & _right)
+template <typename T_, unsigned _size>
+inline bool operator!=(Tuple<T_, _size, Compressed> & _left,
+                       Tuple<T_, _size, Compressed> & _right)
 {
     return !operator==(_left, _right);
 }

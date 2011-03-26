@@ -575,7 +575,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
     SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_stream_output);
 
-    /*
 	SEQAN_CALL_TEST(test_basic_suprema_infima);
 	SEQAN_CALL_TEST(Test_Proxy_Iterator);
 	SEQAN_CALL_TEST(Test_Holder);
@@ -600,7 +599,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(testMultiPoolAllocator);
 
     SEQAN_CALL_TEST(test_metaprogramming_switch);
-    */
 
     // Verify all check points.
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_aggregates.h");
