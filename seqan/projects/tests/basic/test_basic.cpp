@@ -39,19 +39,19 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
-#include "seqan/basic.h"
-#include "seqan/sequence.h"
-
-#include "test_basic_aggregates.h"
-
-#include "test_allocator.h"
-#include "test_common.h"
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
 
 #include "test_alphabet.h"
 #include "test_metaprogramming.h"
 #include "test_basic_math.h"
 #include "test_basic_tag.h"
 #include "test_basic_type.h"
+
+#include "test_basic_aggregates.h"
+
+#include "test_allocator.h"
+#include "test_common.h"
 
 using namespace std;
 using namespace seqan;
