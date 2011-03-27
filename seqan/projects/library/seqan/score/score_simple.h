@@ -40,15 +40,6 @@
 namespace SEQAN_NAMESPACE_MAIN {
 
 /**
-.Tag.Simple:
-..cat:Scoring
-..summary:Tag for the @Class.Score@ to mark it as a simple score.
-..include:seqan/score.h
- */
-struct Simple;
-
-
-/**
 .Spec.Simple Score
 ..cat:Scoring
 ..signature:Score<TValue, Simple>

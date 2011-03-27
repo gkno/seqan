@@ -43,11 +43,6 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
-// Already defined in module score.
-// struct Simple_ {};
-// typedef Tag<Simple_> Simple;  // Already defined in module base.
-struct Simple {}; // .. but type is not complete yet
-
 /**
 .Spec.SimpleSeed:
 ..summary:Describes a seed with start and end position and diagonal upper and lower bounds.
