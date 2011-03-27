@@ -20,9 +20,9 @@ struct Match {
 	bool			transForward;	// true..forward strand, false..reverse complement strand
     bool            genomeForward;
 	std::string		line;
-    std::string     readSeq;
     std::string     readId;
     String<int>     cigar;
+    Dna5String      readSeq;
 };
 
 bool disablePairedEnds;
@@ -30,7 +30,7 @@ bool disablePairedEnds;
 // Get Exon Boundaries
 
 template <typename TExonBoundString, typename TFragmentStore, typename TId>
-void getExonBoundaries(TExonBoundString &exonBounds, TFragmentStore &store, TId transId)
+unsigned getExonBoundaries(TExonBoundString &exonBounds, TFragmentStore &store, TId transId)
 {
 	typedef typename TFragmentStore::TAnnotationStore TAnnotationStore;
 	typedef typename Iterator<TFragmentStore, AnnotationTree<> >::Type TAnnoTreeIter;
@@ -40,19 +40,24 @@ void getExonBoundaries(TExonBoundString &exonBounds, TFragmentStore &store, TId 
 	TAnnoTreeIter exonIter = begin(store, AnnotationTree<>());
     goTo(exonIter, transId);
     if (!goDown(exonIter))
-        return;
+        return 0;
     
-	while (!atEnd(exonIter))
+    unsigned transLen = 0;
+	do 
 	{
 		TAnnotation &anno = getAnnotation(exonIter);
 		if (anno.typeId == TFragmentStore::ANNO_EXON)
 		{
 			appendValue(exonBounds, anno.beginPos);
 			appendValue(exonBounds, anno.endPos);
+            if (anno.beginPos < anno.endPos)
+                transLen += anno.endPos - anno.beginPos;
+            else
+                transLen += anno.beginPos - anno.endPos;
 		} 
-		goNextRight(exonIter);
-	}
+	} while (goRight(exonIter));
     std::sort(begin(exonBounds, Standard()), end(exonBounds, Standard()));
+    return transLen;
 }
 
 template<typename TSpec, typename TConfig, typename TOutFile, typename TMatch>
@@ -63,9 +68,9 @@ outputMatch(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMatch cons
     if (mateNo != -1)
     {
         if (mateNo == 0)
-            bitfield = 0x40 + 0x02 + 0x01;
+            bitfield |= 0x40 + 0x02 + 0x01;
         else
-            bitfield = 0x80 + 0x02 + 0x01;
+            bitfield |= 0x80 + 0x02 + 0x01;
         bitfield |= match.genomeForward? 0x20: 0x00;
     }
     
@@ -106,7 +111,11 @@ outputMatch(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMatch cons
         outFile << match.mateDelta << '\t';
     }
 
-    outFile << match.readSeq << "\t*\n";
+    bool transOnForward = store.annotationStore[match.transId].beginPos < store.annotationStore[match.transId].endPos;
+
+    outFile << match.readSeq << "\t*";
+    outFile << "\tXS:A:" << ((transOnForward)? '+': '-');
+    outFile << '\n';
 }
 
 template<typename TSpec, typename TConfig, typename TOutFile, typename TMatches>
@@ -121,13 +130,49 @@ outputMatches(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMatches 
         outputMatch(store, outFile, *m, -1);
 }
 
-template<typename TSpec, typename TConfig, typename TOutFile, typename TMatches>
+template <typename TMatches>
+struct DoublePairs
+{
+    TMatches matches;
+    DoublePairs(TMatches _matches): matches(_matches)
+    {
+    }
+    
+    template <typename TMatch>
+    int _compMatch(TMatch &a, TMatch &b)
+    {
+        if (a.genomeBegin < b.genomeBegin) return -1;
+        if (a.genomeBegin > b.genomeBegin) return 1;
+        if (a.genomeEnd   < b.genomeEnd) return -1;
+        if (a.genomeEnd   > b.genomeEnd) return 1;
+        if (a.genomeForward == b.genomeForward) return 0;
+        if (a.genomeForward) return -1;
+        return 1;
+    }
+    
+    template <typename TPair>
+    int compare(TPair &a, TPair &b)
+    {
+        int r = _compMatch(matches[0][a.i1], matches[0][b.i1]);
+        if (r != 0) return r;
+        r = _compMatch(matches[1][a.i2], matches[1][b.i2]);
+        return r;
+    }
+    
+    template <typename TPair>
+    bool operator() (TPair &a, TPair &b)
+    {
+        return (compare(a, b) <= 0);
+    }
+};
+
+template<typename TSpec, typename TConfig, typename TOutFile, typename TMatches, typename TPairs>
 inline void
-outputPairedMatches(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMatches const matches[2])
+outputPairedMatches(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMatches *matches, TPairs &pairs)
 {
 	typedef typename FragmentStore<TSpec, TConfig>::TAnnotationStore	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type						TAnnotation;
-	typedef typename Iterator<TMatches>::Type							TMIter;
+	typedef typename Iterator<TMatches, Standard>::Type					TMIter;
 	typedef typename Iterator<TAnnotationStore>::Type					TIter;
 	
 	if (disablePairedEnds)
@@ -141,6 +186,7 @@ outputPairedMatches(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMa
 	TMIter m1;
 	TMIter m0End = end(matches[0], Standard());
 	TMIter m1End = end(matches[1], Standard());
+    clear(pairs);
 
 	for (m0 = begin(matches[0], Standard()); m0 != m0End; ++m0)
 		for (m1 = begin(matches[1], Standard()); m1 != m1End; ++m1)
@@ -163,9 +209,29 @@ outputPairedMatches(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMa
                     (*m0).mateDelta = (*m1).genomeBegin - (*m0).genomeEnd;
                     (*m1).mateDelta = (*m0).genomeEnd - (*m1).genomeBegin;
                 }
-                outputMatch(store, outFile, (*m0), 0);
-                outputMatch(store, outFile, (*m1), 1);
+                appendValue(pairs, Pair<int>(m0 - begin(matches[0], Standard()), m1 - begin(matches[1], Standard())));
 			}
+
+    if (empty(pairs)) return;
+
+    // remove identical pair matches
+    DoublePairs<TMatches*> pairLess(matches);
+    unsigned d = 1;
+    std::sort(begin(pairs, Standard()), end(pairs, Standard()), pairLess);
+    for (unsigned i = 1; i < length(pairs); ++i)
+    {
+        if (pairLess.compare(pairs[i-1], pairs[i]) == 0)
+            continue;
+        pairs[d] = pairs[i];
+        ++d;
+    }
+    
+    // output unique pair matches
+    for (unsigned i = 0; i < d; ++i)
+    {
+        outputMatch(store, outFile, matches[0][pairs[i].i1], 0);
+        outputMatch(store, outFile, matches[1][pairs[i].i2], 1);
+    }
 }
 
 template<typename TSpec, typename TConfig, typename TMatches>
@@ -182,16 +248,44 @@ transformMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches)
     String<int> exonBounds;
 	for (; m != mEnd; ++m)
 	{
+//        if ((*m).readId == "normal10_50_40mio.exp_new.fasta.000009276_2")
+//        {
+//            std::cout<<"HERE"<<std::endl;
+//        }
+        
         clear(exonBounds);
-        getExonBoundaries(exonBounds, store, (*m).transId);
+        unsigned transLen = getExonBoundaries(exonBounds, store, (*m).transId);
+        if (transLen == 0)
+        {
+            std::cerr << "Exons missing:" << std::endl << '\t' << (*m).line << std::endl;
+            return;
+        }
 		
+        bool transOnForward = store.annotationStore[(*m).transId].beginPos < store.annotationStore[(*m).transId].endPos;
+
+        if (!transOnForward)
+        {
+            (*m).posBegin = transLen - (*m).posBegin;
+            (*m).posEnd = transLen - (*m).posEnd;
+        }
+        
+        if ((*m).posBegin > (*m).posEnd)
+        {
+            int temp = (*m).posBegin;
+            (*m).posBegin = (*m).posEnd;
+            (*m).posEnd = temp;
+        }
+        
 		int transBegin = 0;
 		int transEnd = 0;
         (*m).genomeBegin = -1;
         (*m).genomeEnd = -1;
         clear((*m).cigar);
-        bool transOnForward = store.annotationStore[(*m).transId].beginPos < store.annotationStore[(*m).transId].endPos;
         (*m).genomeForward = ((*m).transForward == transOnForward);
+
+        if (!(*m).genomeForward)
+            reverseComplement((*m).readSeq);
+        
 		for (unsigned e=0; e<length(exonBounds); e+=2)
 		{
             int transPosBegin = 0;
@@ -277,6 +371,7 @@ void transformAlignments(TRNAStream &rnaAlignFile, TDNAStream &dnaAlignFile, TFr
 	String<Match> matches[2];
 	Match m;
     Match *lastMatch = NULL;
+    String<Pair<int> > pairs;
 	
 	while (!_streamEOF(rnaAlignFile))
 	{
@@ -356,14 +451,7 @@ void transformAlignments(TRNAStream &rnaAlignFile, TDNAStream &dnaAlignFile, TFr
         iss4 >> errors;
         
         m.errors = errors;
-        if (m.posBegin > m.posEnd)
-        {
-            int temp = m.posBegin;
-            m.posBegin = m.posEnd;
-            m.posEnd = temp;
-            m.transForward = false;
-        } else
-            m.transForward = true;
+        m.transForward = (m.posBegin < m.posEnd);
         
         if (!getTransId(m.contigId, m.transId, transName, store))
         {
@@ -386,7 +474,7 @@ void transformAlignments(TRNAStream &rnaAlignFile, TDNAStream &dnaAlignFile, TFr
                 outputMatches(store, dnaAlignFile, matches[1]);
             }
             else
-                outputPairedMatches(store, dnaAlignFile, matches);
+                outputPairedMatches(store, dnaAlignFile, matches, pairs);
 
             clear(matches[0]);
             clear(matches[1]);
@@ -403,7 +491,7 @@ void transformAlignments(TRNAStream &rnaAlignFile, TDNAStream &dnaAlignFile, TFr
         outputMatches(store, dnaAlignFile, matches[1]);
     }
     else
-        outputPairedMatches(store, dnaAlignFile, matches);
+        outputPairedMatches(store, dnaAlignFile, matches, pairs);
 }
 
 int main(int argc, char const * argv[])
