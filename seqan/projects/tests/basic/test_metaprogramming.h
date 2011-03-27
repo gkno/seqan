@@ -39,6 +39,8 @@
 
 #include <seqan/basic.h>
 
+using namespace seqan;
+
 SEQAN_DEFINE_TEST(test_basic_metaprogramming_true)
 {
     bool b = True::VALUE;

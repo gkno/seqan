@@ -261,7 +261,7 @@ deallocate(Allocator<ChunkPool<SIZE, MAX_COUNT, TParentAllocator> > & me,
 
 	typedef Allocator<ChunkPool<SIZE, MAX_COUNT, TParentAllocator> > TAllocator;
 
-	if ((sizeof(TValue) != SIZE) || (count > MAX_COUNT))
+	if ((sizeof(TValue) != SIZE) || (static_cast<size_t>(count) > MAX_COUNT))
 	{//no blocking
 		return deallocate(parentAllocator(me), data, count, tag_);
 	}

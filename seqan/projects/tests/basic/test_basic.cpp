@@ -42,15 +42,15 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 
-#include "test_alphabet.h"
+// TODO(holtgrew): Rename so all have the scheme test_basic_X.cpp.
 #include "test_metaprogramming.h"
 #include "test_basic_math.h"
 #include "test_basic_tag.h"
 #include "test_basic_type.h"
-
 #include "test_basic_aggregates.h"
-
 #include "test_allocator.h"
+
+#include "test_alphabet.h"
 #include "test_common.h"
 
 using namespace std;
@@ -640,6 +640,14 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
     SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_stream_output);
 
+    // -----------------------------------------------------------------------
+    // Tests for Allocators
+    // -----------------------------------------------------------------------
+    SEQAN_CALL_TEST(test_basic_allocator_simple);
+    SEQAN_CALL_TEST(test_basic_allocator_pool);
+    SEQAN_CALL_TEST(test_basic_allocator_multi_pool);
+    SEQAN_CALL_TEST(test_basic_allocator_chunk_pool);
+
 	SEQAN_CALL_TEST(test_basic_suprema_infima);
 	SEQAN_CALL_TEST(Test_Proxy_Iterator);
 	SEQAN_CALL_TEST(Test_Holder);
@@ -659,9 +667,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(Test_Simple_Types);
     SEQAN_CALL_TEST(Test_Array_Functions);
     // Tests from test_allocator.cpp.
-    SEQAN_CALL_TEST(testSimpleAllocator);
-    SEQAN_CALL_TEST(testPoolAllocator);
-    SEQAN_CALL_TEST(testMultiPoolAllocator);
 
     // Verify all check points.
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_aggregates.h");

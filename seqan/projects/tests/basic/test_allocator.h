@@ -29,35 +29,44 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+// Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+// ==========================================================================
+
+#ifndef TESTS_BASIC_TEST_ALLOCATOR_H_
+#define TESTS_BASIC_TEST_ALLOCATOR_H_
 
 #include <iostream>
-
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-
-#include "seqan/basic.h"
-
 #include <memory>
 #include <vector>
 #include <map>
 
-using namespace std;
+#include <seqan/basic.h>
+
 using namespace seqan;
 
-//____________________________________________________________________________
+// ==========================================================================
+// Helper Code
+// ==========================================================================
+
+// The following helper class is passed as the parent allocator to all tested
+// allocators.  It allows to count the number of allocations and deallocations
+// and checks whether all allocated memory blocks are correctly deallocated
+// when it is destructed.
 
 struct TestAllocator
 {
-	mutable map<char *, size_t> data_allocated;
-	mutable map<char *, size_t> data_deallocated;
+	mutable std::map<char *, size_t> data_allocated;
+	mutable std::map<char *, size_t> data_deallocated;
 
 	TestAllocator() {}
+
 	~TestAllocator() 
 	{
-		map<char *, size_t>::iterator it = data_allocated.begin();
+		std::map<char *, size_t>::iterator it = data_allocated.begin();
 		while (it != data_allocated.end())
 		{
-			SEQAN_ASSERT_MSG(data_deallocated.count(it->first), "memory block not deallocated");
+			SEQAN_ASSERT_MSG(data_deallocated.count(it->first), "Memory block not deallocated.");
             deallocate(int(), it->first, it->second);
 			++it;
 		}
@@ -92,14 +101,18 @@ int countAllocs(TestAllocator & me)
 {
 	return me.data_allocated.size();
 }
+
 int countDeallocs(TestAllocator & me)
 {
 	return me.data_deallocated.size();
-} 
- 
+}
 
+// ==========================================================================
+// Tests
+// ==========================================================================
 
-SEQAN_DEFINE_TEST(testSimpleAllocator) {
+SEQAN_DEFINE_TEST(test_basic_allocator_simple)
+{
 	int * dat1;
 	int * dat2;
 
@@ -109,16 +122,16 @@ SEQAN_DEFINE_TEST(testSimpleAllocator) {
 	deallocate(allo1, dat1, 100);
 	allocate(allo1, dat2, 201);
 
-	SEQAN_ASSERT(countAllocs(parentAllocator(allo1)) == 3);
-	SEQAN_ASSERT(countDeallocs(parentAllocator(allo1)) == 1);
+	SEQAN_ASSERT_EQ(countAllocs(parentAllocator(allo1)), 3);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(allo1)), 1);
 
 	clear(allo1);
 
-	SEQAN_ASSERT(countDeallocs(parentAllocator(allo1)) == 3);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(allo1)), 3);
 }
-//____________________________________________________________________________
 
-SEQAN_DEFINE_TEST(testPoolAllocator) {
+SEQAN_DEFINE_TEST(test_basic_allocator_pool)
+{
 	int * dat1;
 	int * dat2;
 
@@ -129,25 +142,24 @@ SEQAN_DEFINE_TEST(testPoolAllocator) {
 	deallocate(allo1, dat1, 20);
 	allocate(allo1, dat2, 20);
 
-	SEQAN_ASSERT(dat1 == dat2);
+	SEQAN_ASSERT_EQ(dat1, dat2);
 
-	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 1);
-	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
+	SEQAN_ASSERT_EQ(countAllocs(parentAllocator(parentAllocator(allo1))), 1);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 0);
 
 	allocate(allo1, dat1, 100);
 	deallocate(allo1, dat1, 100);
 
-	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 2);
-	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 1);
+	SEQAN_ASSERT_EQ(countAllocs(parentAllocator(parentAllocator(allo1))), 2);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 1);
 
 	clear(allo1);
 
-	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 2);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 2);
 }
 
-//____________________________________________________________________________
-
-SEQAN_DEFINE_TEST(testMultiPoolAllocator) {
+SEQAN_DEFINE_TEST(test_basic_allocator_multi_pool)
+{
 	int * dat1;
 	int * dat2;
 
@@ -158,20 +170,48 @@ SEQAN_DEFINE_TEST(testMultiPoolAllocator) {
 	deallocate(allo1, dat1, 20);
 	allocate(allo1, dat2, 20);
 
-	SEQAN_ASSERT(dat1 == dat2);
+	SEQAN_ASSERT_EQ(dat1, dat2);
 
-	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 1);
-	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
+	SEQAN_ASSERT_EQ(countAllocs(parentAllocator(parentAllocator(allo1))), 1);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 0);
 
 	allocate(allo1, dat1, 30);
 	deallocate(allo1, dat1, 30);
 
-	SEQAN_ASSERT(countAllocs(parentAllocator(parentAllocator(allo1))) == 2);
-	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 0);
+	SEQAN_ASSERT_EQ(countAllocs(parentAllocator(parentAllocator(allo1))), 2);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 0);
 
 	clear(allo1);
 
-	SEQAN_ASSERT(countDeallocs(parentAllocator(parentAllocator(allo1))) == 2);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 2);
 }
 
-//____________________________________________________________________________
+SEQAN_DEFINE_TEST(test_basic_allocator_chunk_pool)
+{
+	int * dat1;
+	int * dat2;
+
+	typedef Allocator<SimpleAlloc<TestAllocator> > TParentAlloc;
+	Allocator<ChunkPool<4, 20, TParentAlloc> > allo1;
+	allocate(allo1, dat1, 20);
+	allocate(allo1, dat2, 20);
+	deallocate(allo1, dat1, 20);
+	allocate(allo1, dat2, 20);
+
+	SEQAN_ASSERT_EQ(dat1, dat2);
+
+	SEQAN_ASSERT_EQ(countAllocs(parentAllocator(parentAllocator(allo1))), 1);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 0);
+
+	allocate(allo1, dat1, 30);
+	deallocate(allo1, dat1, 30);
+
+	SEQAN_ASSERT_EQ(countAllocs(parentAllocator(parentAllocator(allo1))), 2);
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 1);
+
+	clear(allo1);
+
+	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 2);
+}
+
+#endif  // #ifndef TESTS_BASIC_TEST_ALLOCATOR_H_
