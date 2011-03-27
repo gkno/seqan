@@ -37,6 +37,11 @@
 #ifndef SEQAN_BASIC_HOLDER_BASE_H_
 #define SEQAN_BASIC_HOLDER_BASE_H_
 
+// By default, disable holders to pointers, this is used/tested nowhere and does probably not work.
+#ifndef SEQAN_ENABLE_POINTER_HOLDER
+#define SEQAN_ENABLE_POINTER_HOLDER 0
+#endif  //#ifndef SEQAN_ENABLE_POINTER_HOLDER
+
 namespace seqan {
 
 // ============================================================================
@@ -113,12 +118,14 @@ struct Value<Holder<TValue, TSpec> const>
 	typedef TValue Type;
 };
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 // TODO(holtgrew): What about holders on pointers?
 template <typename TValue, typename TSpec>
 struct Value<Holder<TValue * const, TSpec> >
 {
 	typedef TValue * Type;
 };
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 // ----------------------------------------------------------------------------
 // Metafunction Spec
@@ -156,11 +163,13 @@ struct Reference< Holder<TValue, TSpec> const>
 	typedef typename Value<Holder<TValue, TSpec> const>::Type & Type;
 };
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue, typename TSpec>
 struct Reference<Holder<TValue *, TSpec> const>
 {
 	typedef typename Value<Holder<TValue *, TSpec> const>::Type const & Type;
 };
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 // ============================================================================
 // Functions

@@ -46,12 +46,14 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename T> struct IsSimple;
 
 // Used in functions section.
 // TODO(holtgrew): This will go away, right?
 template <typename TValue> inline size_t length(TValue const * me);
 template <typename TValue> inline size_t length(TValue * me);
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 // ============================================================================
 // Tags, Classes, Enums
@@ -240,6 +242,7 @@ struct Holder<TValue const, Tristate>
 	}
 };
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue>
 struct Holder<TValue *, Tristate>
 {
@@ -394,6 +397,7 @@ struct Holder<TValue * const, Tristate>
 		return _dataValue(*this);
 	}
 };
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 // ============================================================================
 // Metafunctions
@@ -421,6 +425,7 @@ _dataValue(Holder<TValue, Tristate> const & me)
 	return * me.data_value;
 }
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue>
 inline typename Reference<Holder<TValue *, Tristate> >::Type
 _dataValue(Holder<TValue *, Tristate> & me)
@@ -448,6 +453,7 @@ _dataValue(Holder<TValue * const, Tristate> const & me)
 {
 	return me.data_value;
 }
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 // ----------------------------------------------------------------------------
 // Function empty()
@@ -548,6 +554,7 @@ _holderAllocateObject(THolder & me, TValue const & data)
 	return ret;
 }
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename THolder, typename TValue>
 inline typename Value<THolder, 0>::Type
 _holderAllocatePointer(THolder & me, TValue * data, True)			// is a pointer to an *array* of objects
@@ -572,6 +579,7 @@ _holderAllocatePointer(THolder & me, TValue * data)
 {
 	return _holderAllocatePointer(me, data, IsSimple<TValue>());	// try to distinguish between a pointer to one/array of object(s)
 }
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 /**
 .Function.create:
@@ -615,7 +623,7 @@ create(Holder<TValue, Tristate> & me)
 	}
 }
 
-
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue>
 inline void
 create(Holder<TValue *, Tristate> & me)
@@ -655,6 +663,7 @@ create(Holder<TValue * const, Tristate> & me)
         default:;
 	}
 }
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 template <typename TValue, typename TValue2>
 inline void
@@ -685,6 +694,7 @@ create(Holder<TValue const, Tristate> & me,
 	me.data_state = Holder<TValue const, Tristate>::OWNER;
 }
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue, typename TValue2>
 inline void
 create(Holder<TValue *, Tristate> & me,
@@ -708,7 +718,7 @@ SEQAN_CHECKPOINT
 	me.data_value = _holderAllocatePointer(me, value_);
 	me.data_state = Holder<TValue *, Tristate>::OWNER;
 }
-
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -780,6 +790,7 @@ setValue(Holder<TValue const, Tristate> & me,
 // Function setValue()
 // ----------------------------------------------------------------------------
 
+#if SEQAN_ENABLE_POINTER_HOLDER
 template <typename TValue>
 inline void
 setValue(Holder<TValue *, Tristate> & me,
@@ -867,6 +878,7 @@ setValue(Holder<TValue * const, Tristate> & me,
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
 }
+#endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 template <typename TValue, typename TValue2>
 inline void
