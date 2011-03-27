@@ -30,6 +30,9 @@
 //
 // ==========================================================================
 
+#ifndef TESTS_BASIC_TEST_BASIC_COMMON_H_
+#define TESTS_BASIC_TEST_BASIC_COMMON_H_
+
 #include <iostream>
 #include <cstdio>
 #include <vector>
@@ -53,14 +56,16 @@ _isSameType()
 //////////////////////////////////////////////////////////////////////////////
 
 
-SEQAN_DEFINE_TEST(Test_Definition) {
+SEQAN_DEFINE_TEST(test_basic_common_definition)
+{
 	SEQAN_ASSERT_EQ(ClassIdentifier_<int>::getID(), ClassIdentifier_<int>::getID());
 	SEQAN_ASSERT_NEQ(ClassIdentifier_<char>::getID(), ClassIdentifier_<int>::getID());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-SEQAN_DEFINE_TEST(Test_Type) {
+SEQAN_DEFINE_TEST(test_basic_common_type)
+{
 	int i;
 	int const ci = 99;
 	int a[10];
@@ -89,10 +94,14 @@ SEQAN_DEFINE_TEST(Test_Type) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-SEQAN_DEFINE_TEST(Test_Iterator_Adapt_Std) {
+SEQAN_DEFINE_TEST(test_basic_common_iterator_adapt_std)
+{
 //test SeqAn iterator to fulfill std iterator 
 
 	typedef ::std::iterator_traits<Iterator<char *, Rooted>::Type>::value_type T1;
 	bool b1 = _isSameType<T1, char>();
 	SEQAN_ASSERT(b1);
 }
+
+#endif  // #ifndef TESTS_BASIC_TEST_BASIC_COMMON_H_
+

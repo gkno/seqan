@@ -80,7 +80,9 @@
 #include <seqan/basic/basic_allocator_interface.h>
 #include <seqan/basic/basic_allocator_to_std.h>
 
-#include <seqan/basic/basic_holder.h>
+#include <seqan/basic/holder_base.h>
+#include <seqan/basic/holder_tristate.h>
+#include <seqan/basic/holder_simple.h>
 
 #include <seqan/basic/basic_allocator_simple.h>
 #include <seqan/basic/basic_allocator_singlepool.h>

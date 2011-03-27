@@ -302,3 +302,44 @@ SEQAN_DEFINE_TEST(StringSetIdHolder_Char_Dependent_Generous) {
     SEQAN_CHECKPOINT;
 	Test_StringSetIdHolder<StringSet<String<char>, Dependent<Generous> > >();
 }
+
+struct TestContainer
+{
+    String<int> string;
+
+    TestContainer()
+    {
+        resize(string, 10, 0);
+        std::cerr << "DEFAULT CONSTRUCTING TestContainer " << (void*)(this);
+        std::cerr << "  string.data_begin " << (void*)(string.data_begin) << std::endl;
+    }
+    
+    TestContainer(TestContainer const & other)
+        : string(other.string)
+    {
+        std::cerr << "COPY CONSTRUCTING TestContainer " << (void*)(this);
+        std::cerr << "  string.data_begin " << (void*)(string.data_begin) << std::endl;
+    }
+    
+    ~TestContainer()
+    {
+        std::cerr << "DECONSTRUCTING TestContainer " << (void*)(this);
+        std::cerr << "  string.data_begin " << (void*)(string.data_begin) << std::endl;
+    }
+};
+
+SEQAN_DEFINE_TEST(test_find_motif_memory_leak_ticket_364)
+{
+    // This shows the bug described in #364, also occurs with String
+    // instead of StringSet.
+    {
+        StringSet<String<TestContainer> > x;
+        TestContainer c;
+        appendValue(x, c);
+    }    
+    {
+        String<TestContainer> x;
+        TestContainer c;
+        appendValue(x, c);
+    }
+}

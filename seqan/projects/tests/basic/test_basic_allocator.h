@@ -33,8 +33,8 @@
 // Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
 // ==========================================================================
 
-#ifndef TESTS_BASIC_TEST_ALLOCATOR_H_
-#define TESTS_BASIC_TEST_ALLOCATOR_H_
+#ifndef TESTS_BASIC_TEST_BASIC_ALLOCATOR_H_
+#define TESTS_BASIC_TEST_BASIC_ALLOCATOR_H_
 
 #include <iostream>
 #include <memory>
@@ -214,4 +214,4 @@ SEQAN_DEFINE_TEST(test_basic_allocator_chunk_pool)
 	SEQAN_ASSERT_EQ(countDeallocs(parentAllocator(parentAllocator(allo1))), 2);
 }
 
-#endif  // #ifndef TESTS_BASIC_TEST_ALLOCATOR_H_
+#endif  // #ifndef TESTS_BASIC_TEST_BASIC_ALLOCATOR_H_

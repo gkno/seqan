@@ -52,6 +52,7 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
     // -----------------------------------------------------------------------
     //
     // Test adaptions for std::string.
+    /*
     SEQAN_CALL_TEST(test_sequence_adaptions_metafunctions_std_string);
     SEQAN_CALL_TEST(test_sequence_adaptions_iterators_std_string);
     SEQAN_CALL_TEST(test_sequence_adaptions_sequence_interface_std_string);
@@ -100,6 +101,8 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
     SEQAN_CALL_TEST(Suffix);
     SEQAN_CALL_TEST(Ticket317);
     SEQAN_CALL_TEST(ticket848);
+    */
+    SEQAN_CALL_TEST(test_find_motif_memory_leak_ticket_364);
 
     // -----------------------------------------------------------------------
     // Checkpoint Verification

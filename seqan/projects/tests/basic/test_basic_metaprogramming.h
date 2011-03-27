@@ -34,8 +34,8 @@
 // Tests for the SeqAn metaprogramming header.
 // ==========================================================================
 
-#ifndef TEST_BASIC_TEST_METAPROGRAMMING_H_
-#define TEST_BASIC_TEST_METAPROGRAMMING_H_
+#ifndef TEST_BASIC_TEST_BASIC_METAPROGRAMMING_H_
+#define TEST_BASIC_TEST_BASIC_METAPROGRAMMING_H_
 
 #include <seqan/basic.h>
 
@@ -285,4 +285,4 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_memset)
     SEQAN_ASSERT_EQ(i[2], 0);
 }
 
-#endif  // TEST_BASIC_TEST_METAPROGRAMMING_H_
+#endif  // TEST_BASIC_TEST_BASIC_METAPROGRAMMING_H_
