@@ -162,7 +162,7 @@ struct DoublePairs
     template <typename TPair>
     bool operator() (TPair &a, TPair &b)
     {
-        return (compare(a, b) <= 0);
+        return compare(a, b) < 0;
     }
 };
 
@@ -501,6 +501,7 @@ int main(int argc, char const * argv[])
 	typedef String<TContigExonBounds> TExonBounds;
 	typedef Id<TFragmentStore>::Type TId;
 
+	_deploySignalHandlers();
 	CommandLineParser parser;
 	std::string rev = "$Revision: 8423 $";
 	addVersionLine(parser, "TransSplice version 1.0 20100901 [" + rev.substr(11, 4) + "]");
