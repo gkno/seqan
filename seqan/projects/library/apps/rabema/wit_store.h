@@ -270,7 +270,6 @@ void loadWitFile(WitStore & store,
     bool isForward;
     size_t firstPos;
     size_t lastPos;
-    bool wasInSam = true;
 
     // Read WIT file.
     while (!_streamEOF(fstrm)) {
@@ -309,7 +308,6 @@ void loadWitFile(WitStore & store,
         // exist there yet.
         IntervalOfReadOnContig record;
         if (!getIdByName(value(store.readNames), readName, record.readId, readNameCache)) {
-          wasInSam = false;
           record.readId = length(value(store.readNames));
           appendName(value(store.readNames), readName, readNameCache);
 
