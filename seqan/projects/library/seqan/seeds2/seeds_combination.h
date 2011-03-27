@@ -267,7 +267,7 @@ _combineSeeds(Seed<Simple, TSeedConfig> & seed,
     // with the highest score.  If there are two such positions, the
     // first one found is returned which is the one that is furthest
     // away from seed.
-    TPosition bestGapPos = 0;  // delta to lowermost position
+    // TPosition bestGapPos = 0;  // delta to lowermost position  // TODO(holtgrew): Set but not used;  Remove?
     TScoreValue bestScore = tmpScore;
     for (TPosition i = 1; i < minGap; ++i) {
         tmpScore -= score(scoringScheme, sequence0[posLeft0 + minGap - i], sequence1[posLeft1 + minGap - i]);
@@ -275,7 +275,7 @@ _combineSeeds(Seed<Simple, TSeedConfig> & seed,
         if (tmpScore > bestScore) {
             // Found a better score.
             bestScore = tmpScore;
-            bestGapPos = i;
+            // bestGapPos = i;  // TODO(holtgrew): Set but not used;  Remove?
         }
     }
 
