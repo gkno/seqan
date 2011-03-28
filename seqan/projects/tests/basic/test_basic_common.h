@@ -43,7 +43,6 @@
 #include "seqan/basic.h"
 #include "seqan/sequence.h"
 
-using namespace std;
 using namespace seqan;
 
 template <typename T1, typename T2>
