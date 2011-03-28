@@ -395,7 +395,7 @@ void printDebugLevel(TStream &stream) {
 
 	namespace
 	{
-		int signalHandlersDummy_ = SignalHandlersDummy_<void>::i;
+		volatile int signalHandlersDummy_ = SignalHandlersDummy_<void>::i;
 	}
 
 #endif // #if SEQAN_ENABLE_DEBUG
