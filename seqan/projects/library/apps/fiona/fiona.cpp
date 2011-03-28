@@ -627,8 +627,8 @@ inline bool potentiallyErroneousNode(
 	double noerrlm1 = noerrlm2 * (1-errorrate) ;
 	double errexp1err = expected * noerrlm1 * errorrate ;
 	double errexp2err = expected * noerrlm2 * errorrate *errorrate ;
-	double perr1 = prefixlen * noerrlm1* errorrate  ;
-	double perr2 = (prefixlen * (prefixlen -1) / 2 ) * noerrlm2 * errorrate *errorrate ;
+	double perr1 = prefixlen * noerrlm1* (errorrate/3)  ;
+	double perr2 = (prefixlen * (prefixlen -1) / 2 ) * noerrlm2 * (errorrate/3) *(errorrate/3) ;
 	double sc = perr1 + perr2 ;
 	perr1 /= (sc) ; 
 	perr2 /= (sc) ; 
