@@ -33,6 +33,7 @@
 #ifndef SEQAN_HEADER_FILE_H
 #define SEQAN_HEADER_FILE_H
 
+
 //____________________________________________________________________________
 // prerequisites
 
@@ -56,27 +57,14 @@
 #include <seqan/file/file_generated_forwards.h>
 #endif
 
-#include <seqan/file/cstream.h>
-#include <seqan/file/stream.h>
-
-#include <seqan/file/chunk_collector.h>
-#include <seqan/file/meta.h>
-
-//____________________________________________________________________________
-// files
+// ================ OLD IO, TO BE REPLACED =================================
+#ifndef SEQAN_NEW_IO
 
 #include <seqan/file/file_base.h>
 #include <seqan/file/file_cstyle.h>
-#include <seqan/system.h>	// async file (default file type of File<>)
 
-#include <seqan/file/file_array.h>
-/*#include <seqan/system/file_sync.h>
-#include <seqan/system/system_event.h>
-#include <seqan/system/file_async.h>
-*/
-
-//____________________________________________________________________________
-// file formats
+#include <seqan/file/cstream.h>
+#include <seqan/file/stream.h>
 
 #include <seqan/file/file_filereaderiterator.h>
 #include <seqan/file/file_filereader.h>
@@ -97,17 +85,45 @@
 //others
 #include <seqan/file/file_format_cgviz.h>
 
-//____________________________________________________________________________
+#include <seqan/file/file_format_mmap.h>
 
-//#include <seqan/file/file_format_guess.h>
+#endif
 
-//____________________________________________________________________________
-// external strings
+
+
+// ================ OLD IO, TO BE KEPT =================================
+
+#include <seqan/file/chunk_collector.h>
+
+//#include <seqan/file/meta.h>
+
+
+#include <seqan/system.h>	// async file (default file type of File<>)
+
+#include <seqan/file/file_array.h>
 
 #include <seqan/file/file_page.h>
 #include <seqan/file/file_page_raid0.h>
 #include <seqan/file/string_external.h>
 #include <seqan/file/string_mmap.h>
-#include <seqan/file/file_format_mmap.h>
+
+
+// ================ NEW IO =================================
+#ifdef SEQAN_NEW_IO
+
+
+
+#endif
+
+// ================ IO THAT IS COMMENTED ANYWAY =============================
+
+/*#include <seqan/system/file_sync.h>
+#include <seqan/system/system_event.h>
+#include <seqan/system/file_async.h>
+*/
+
+//#include <seqan/file/file_format_guess.h>
+
+
 
 #endif //#ifndef SEQAN_HEADER_...
