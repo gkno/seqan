@@ -108,7 +108,8 @@ outputMatch(FragmentStore<TSpec, TConfig> &store, TOutFile &outFile, TMatch cons
     {
         outFile << "=\t";
         outFile << match.matePos + 1 << '\t';
-        outFile << match.mateDelta << '\t';
+//        outFile << match.mateDelta << '\t';
+        outFile << 0 << '\t';
     }
 
     bool transOnForward = store.annotationStore[match.transId].beginPos < store.annotationStore[match.transId].endPos;
@@ -419,8 +420,9 @@ void transformAlignments(TRNAStream &rnaAlignFile, TDNAStream &dnaAlignFile, TFr
         readName = line.substr(posId + 3, posFragId - (posId + 3));	// skip "id=" and stop before ",contigId="
         if (readName.length() > 2 && readName[readName.length() - 2] == '_')
         readName.resize(readName.length() - 2);
-        
-        m.readId = readName;
+
+//        // read with /1 or /2 suffix
+//        m.readId = readName;
 
         int mateNum = 0;
         if (readName.length() > 2 && (readName[readName.length() - 2] == '/' || readName[readName.length() - 2] == '_'))
@@ -430,6 +432,9 @@ void transformAlignments(TRNAStream &rnaAlignFile, TDNAStream &dnaAlignFile, TFr
             readName.resize(readName.length() - 2);
         }
         
+        // read without /1 or /2 suffix
+        m.readId = readName;
+
         refName = line.substr(posContigId + 9, posErrors - (posContigId + 9));	// skip "contigId="
         
         size_t posLocusEnd = refName.find("_Transcript_");
