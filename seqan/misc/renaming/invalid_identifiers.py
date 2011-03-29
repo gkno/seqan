@@ -33,6 +33,8 @@ VALID_IDENTIFIERS = map(
           '__gnu_cxx',
           '_Resize_String', # will be done manually
           '_Fill_String',   #
+          '_Transcript_',
+          '_Confidence_99',
           '_PARSER_H',
 	  '_POSIX_TIMERS',
           '__GNUC_MINOR__',
