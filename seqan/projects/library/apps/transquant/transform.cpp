@@ -331,18 +331,24 @@ transformMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches)
 			}
             if (!empty((*m).cigar))
             {
+                if (exonBounds[e-1] == exonBounds[e])
+                {
+                    // no intron -> extend last exon
+                    back((*m).cigar) += transPosEnd - transPosBegin;
+                    continue;
+                }
+                
                 // append intron length
                 appendValue((*m).cigar, exonBounds[e] - exonBounds[e-1]);
             }
                         
             // append exon overlap length
             appendValue((*m).cigar, transPosEnd - transPosBegin);
-            if (empty((*m).cigar))
-            {
-				std::cerr << "ERROR: No exons overlap with read: " << (*m).line << std::endl;
-            }
-            
-            (*m).mateDelta = 0;
+        }
+        (*m).mateDelta = 0;
+        if (empty((*m).cigar))
+        {
+            std::cerr << "ERROR: No exons overlap with read: " << (*m).line << std::endl;
         }
 	}
 }
