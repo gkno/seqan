@@ -87,38 +87,6 @@ struct BitsPerValue<TValue const> : public BitsPerValue<TValue>
 {};
 
 // ----------------------------------------------------------------------------
-// Metafunction IsSimple
-// ----------------------------------------------------------------------------
-
-/**
-.Metafunction.IsSimple
-..cat:Basic
-..summary:Tests type to be simple.
-..signature:IsSimple<T>::Type
-..param.T:Type that is tested.
-..returns.param.Type:@Tag.Logical Values.True@, if $T$ is a simple type, @Tag.Logical Values.False@ otherwise.
-...default:@Tag.Logical Values.False@
-..remarks:A simple type is a type that does not need constructors to be created,
-a destructor to be destroyed, and copy assignment operators or copy constructors
-to be copied. All POD ("plain old data") types are simple, but some
-non-POD types could be simple too, e.g. some specializations of @Class.SimpleType@.
-..see:Class.SimpleType
-..include:seqan/basic.h
-*/
-
-template <typename T>
-struct IsSimple_
-{
-	typedef False Type;
-};
-
-template <typename T>
-struct IsSimple : public IsSimple_<T> {};
-
-template <typename T>
-struct IsSimple<T const> : public IsSimple<T> {};
-
-// ----------------------------------------------------------------------------
 // Metafunction ValueSize
 // ----------------------------------------------------------------------------
 

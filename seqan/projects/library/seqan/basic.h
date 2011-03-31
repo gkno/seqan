@@ -64,46 +64,72 @@
 #include <seqan/basic/basic_generated_forwards.h>
 #endif
 
+// --------------------------------------------------------------------------
+// Support Code
+// --------------------------------------------------------------------------
+//
+// This code is accessed through macros.  No classes, tags, or functions are
+// defined that are to be used directly outside these files.
+
 #include <seqan/basic/basic_testing.h>
 #include <seqan/basic/basic_debug.h>
 #include <seqan/basic/basic_testing.h>  // new, better debug
 #include <seqan/basic/basic_profile.h>
 #include <seqan/basic/basic_parallelism.h>  // include after basic_testing.h!
+
+// --------------------------------------------------------------------------
+// Metaprogramming Support Code
+// --------------------------------------------------------------------------
+//
+// This code lies the foundation for metaprogramming in SeqAn.
+
 #include <seqan/basic/basic_metaprogramming.h>
-#include <seqan/basic/basic_math.h>
 #include <seqan/basic/basic_tag.h>
 #include <seqan/basic/basic_type.h>
 
-//____________________________________________________________________________
-// allocators
+// ... and some utility code for computing logarithms and such.
+#include <seqan/basic/basic_math.h>
 
-#include <seqan/basic/basic_allocator_interface.h>
-#include <seqan/basic/basic_allocator_to_std.h>
+// --------------------------------------------------------------------------
+// SeqAn Foundation Code
+// --------------------------------------------------------------------------
+//
+// This code contains the "language extension" code in SeqAn: Construction,
+// conversion, comparison and the transport (assign/set/move) functions.
+
+#include <seqan/basic/basic_construct_destruct.h>
+#include <seqan/basic/basic_converter.h>
+#include <seqan/basic/basic_compare.h>
+#include <seqan/basic/basic_transport.h>
+
+// --------------------------------------------------------------------------
+// Holders
+// --------------------------------------------------------------------------
 
 #include <seqan/basic/holder_base.h>
 #include <seqan/basic/holder_tristate.h>
 #include <seqan/basic/holder_simple.h>
 
+#include <seqan/basic/basic_host.h>
+
+// --------------------------------------------------------------------------
+// Allocators
+// --------------------------------------------------------------------------
+
+#include <seqan/basic/basic_allocator_interface.h>
 #include <seqan/basic/basic_allocator_simple.h>
 #include <seqan/basic/basic_allocator_singlepool.h>
 #include <seqan/basic/basic_allocator_multipool.h>
 #include <seqan/basic/basic_allocator_chunkpool.h>
 
-//____________________________________________________________________________
+#include <seqan/basic/basic_allocator_to_std.h>
 
-#include <seqan/basic/basic_converter.h>
-#include <seqan/basic/basic_compare.h>
-
-#include <seqan/basic/basic_host.h>
-
-//____________________________________________________________________________
-// iterators
+// --------------------------------------------------------------------------
+// Iterators and Proxies
+// --------------------------------------------------------------------------
 
 #include <seqan/basic/iterator_interface.h>
 #include <seqan/basic/iterator_base.h>
-
-#include <seqan/basic/basic_transport.h>
-
 #include <seqan/basic/iterator_adaptor.h>
 #include <seqan/basic/iterator_position.h>
 #include <seqan/basic/iterator_adapt_std.h>
@@ -112,8 +138,9 @@
 
 #include <seqan/basic/basic_pointer.h>
 
-//____________________________________________________________________________
-// alphabets
+// --------------------------------------------------------------------------
+// Alphabets
+// --------------------------------------------------------------------------
 
 #include <seqan/basic/alphabet_storage.h>
 #include <seqan/basic/alphabet_bio.h>
@@ -122,20 +149,12 @@
 #include <seqan/basic/alphabet_qualities.h>
 #include <seqan/basic/alphabet_adapt_builtins.h>
 
-#include <seqan/basic/basic_alphabet_simple_tabs.h>
-#include <seqan/basic/basic_alphabet_simple.h>
-
-#include <seqan/basic/basic_construct_destruct.h>
+#include <seqan/basic/basic_profchar.h>
 
 #include <seqan/basic/basic_sse2.h>
 
-#include <seqan/basic/basic_profchar.h>
-
-//____________________________________________________________________________
-
-//____________________________________________________________________________
-
-#include <seqan/basic/basic_volatile_ptr.h>
+#include <seqan/basic/basic_alphabet_simple_tabs.h>
+#include <seqan/basic/basic_alphabet_simple.h>
 
 // --------------------------------------------------------------------------
 // Aggregate Types: Pairs, Triples, Tuples.
@@ -149,5 +168,12 @@
 #include <seqan/basic/triple_packed.h>
 #include <seqan/basic/tuple_base.h>
 #include <seqan/basic/tuple_bit_compressed.h>
+
+// --------------------------------------------------------------------------
+// Misc Code
+// --------------------------------------------------------------------------
+
+// TODO(holtgrew): Does this actually belong here?
+#include <seqan/basic/basic_volatile_ptr.h>
 
 #endif //#ifndef SEQAN_HEADER_...

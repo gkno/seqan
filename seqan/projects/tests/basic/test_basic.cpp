@@ -47,6 +47,7 @@
 #include "test_basic_allocator.h"
 #include "test_basic_alphabet.h"
 #include "test_basic_common.h"
+#include "test_basic_construct_destruct.h"
 #include "test_basic_holder.h"
 #include "test_basic_iterator.h"
 #include "test_basic_math.h"
@@ -248,15 +249,35 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_allocator_chunk_pool);
 
     // -----------------------------------------------------------------------
+    // Tests for Construction / Destruction
+    // -----------------------------------------------------------------------
+
+    // TODO(holtgrew): Test on non-pointers.
+    SEQAN_CALL_TEST(test_basic_construct_destruct_construct_value_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_destruct_value_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_construct_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_construct_copy_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_construct_move_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_destruct_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_fill_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_copy_forward_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_copy_backward_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_copy_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_move_forward_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_move_backward_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_move_pointer);
+    SEQAN_CALL_TEST(test_basic_construct_destruct_array_clear_space_pointer);
+
+    // -----------------------------------------------------------------------
     // Tests for Holders
     // -----------------------------------------------------------------------
 
     SEQAN_CALL_TEST(test_basic_holder);
 
     SEQAN_CALL_TEST(test_basic_alphabet_interface);
-    SEQAN_CALL_TEST(test_basic_conversions);
+    // SEQAN_CALL_TEST(test_basic_conversions);
     SEQAN_CALL_TEST(test_basic_alphabet_extreme_values);
-    SEQAN_CALL_TEST(test_basic_simple_types);
+    // SEQAN_CALL_TEST(test_basic_simple_types);
     SEQAN_CALL_TEST(test_basic_array_functions);
     SEQAN_CALL_TEST(test_basic_suprema_infima);
     SEQAN_CALL_TEST(test_basic_common_definition);
