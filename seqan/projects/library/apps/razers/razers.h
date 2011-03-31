@@ -1660,6 +1660,8 @@ void mapSingleReads(
 	while (find(swiftFinder, swiftPattern, options.errorRate)) 
 #endif
 	{
+        // std::cout << "read id = " << (*swiftFinder.curHit).ndlSeqNo << ", " << beginPosition(swiftFinder) << std::endl;
+
 		unsigned rseqNo = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY && 
 			matchVerify(m, infix(swiftFinder), rseqNo, readSet, forwardPatterns, options, TSwiftSpec()))
@@ -1687,8 +1689,7 @@ void mapSingleReads(
 #ifndef RAZERS_MICRO_RNA
 					typename Size<TMatches>::Type oldSize = length(matches);
 #endif
-                    if (!options.hammingOnly)
-                        maskDuplicates(matches, options);	// overlapping parallelograms cause duplicates
+                    maskDuplicates(matches, options);	// overlapping parallelograms cause duplicates
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 					if(options.maqMapping)
 						compactMatches(matches, cnts, options, false, swiftPattern, true);
@@ -2018,8 +2019,8 @@ int mapSingleReads(
 		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
-		::std::cerr << "Swift FP: " << options.FP << ::std::endl;
-		::std::cerr << "Swift TP: " << options.TP << ::std::endl;
+		::std::cerr << "Filtration counter:              \t" << options.FP + options.TP << ::std::endl;
+		::std::cerr << "Verification counter:            \t" << options.TP << ::std::endl;
 	}
 	return 0;
 }
@@ -2119,8 +2120,8 @@ int mapSingleReads(
 		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
-		::std::cerr << "Swift FP: " << options.FP << ::std::endl;
-		::std::cerr << "Swift TP: " << options.TP << ::std::endl;
+		::std::cerr << "Filtration counter:              \t" << options.FP + options.TP << ::std::endl;
+		::std::cerr << "Verification counter:            \t" << options.TP << ::std::endl;
 	}
 	return 0;
 }
