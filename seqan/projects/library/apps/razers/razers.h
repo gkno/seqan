@@ -1687,7 +1687,8 @@ void mapSingleReads(
 #ifndef RAZERS_MICRO_RNA
 					typename Size<TMatches>::Type oldSize = length(matches);
 #endif
-					maskDuplicates(matches, options);	// overlapping parallelograms cause duplicates
+                    if (!options.hammingOnly)
+                        maskDuplicates(matches, options);	// overlapping parallelograms cause duplicates
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 					if(options.maqMapping)
 						compactMatches(matches, cnts, options, false, swiftPattern, true);
