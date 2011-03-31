@@ -140,7 +140,7 @@ struct DoublePairs
     }
     
     template <typename TMatch>
-    int _compMatch(TMatch &a, TMatch &b)
+    int _compMatch(TMatch const &a, TMatch const &b)
     {
         if (a.genomeBegin < b.genomeBegin) return -1;
         if (a.genomeBegin > b.genomeBegin) return 1;
@@ -152,7 +152,7 @@ struct DoublePairs
     }
     
     template <typename TPair>
-    int compare(TPair &a, TPair &b)
+    int compare(TPair const &a, TPair const &b)
     {
         int r = _compMatch(matches[0][a.i1], matches[0][b.i1]);
         if (r != 0) return r;
@@ -161,7 +161,7 @@ struct DoublePairs
     }
     
     template <typename TPair>
-    bool operator() (TPair &a, TPair &b)
+    bool operator() (TPair const &a, TPair const &b)
     {
         return compare(a, b) < 0;
     }
