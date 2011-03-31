@@ -298,9 +298,6 @@ _writeMatch(TId const & databaseID,
             TFile & file) {
 //IOREV _recordreading_ _stub_ 
 SEQAN_CHECKPOINT
-	
-	file << databaseID << " " << patternID << " " << _computeEValue(row0, row1, lengthAdjustment) << " " << _computeIdentity(row0, row1) << std::endl;
-	/*
 	// write database ID
 	file << "Database sequence: " << databaseID;
 	if (!databaseStrand) file << " (complement)" << std::endl;
@@ -337,7 +334,6 @@ SEQAN_CHECKPOINT
 	appendValue(align.data_rows, row1);
 	file << align;
 	file << "----------------------------------------------------------------------\n" << std::endl;
-	*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////
