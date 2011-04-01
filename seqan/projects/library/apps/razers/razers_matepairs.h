@@ -1082,8 +1082,8 @@ int mapMatePairReads(
 	if (options._debugLevel >= 2) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
-		::std::cerr << "Swift FP: " << options.FP << ::std::endl;
-		::std::cerr << "Swift TP: " << options.TP << ::std::endl;
+		::std::cerr << "Filtration counter:      " << options.FP + options.TP << ::std::endl;
+		::std::cerr << "Successful verfications: " << options.TP << ::std::endl;
 	}
 	return 0;
 }

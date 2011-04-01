@@ -835,6 +835,7 @@ void maskDuplicates(TMatches &matches, TOptions & options)
 	unsigned	gseqNo = -1;
 	unsigned	readNo = -1;
 	char		orientation = '-';
+    unsigned    masked = 0;
 
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -848,6 +849,7 @@ void maskDuplicates(TMatches &matches, TOptions & options)
 			gseqNo == (*it).gseqNo && readNo == (*it).rseqNo) 
 		{
 			(*it).orientation = '-';
+            masked += 1;
 			continue;
 		}
 		readNo = (*it).rseqNo;
@@ -880,6 +882,7 @@ void maskDuplicates(TMatches &matches, TOptions & options)
 			gseqNo == (*it).gseqNo && orientation == (*it).orientation) 
 		{
 			(*it).orientation = '-';
+            masked += 1;
 			continue;
 		}
 		readNo = (*it).rseqNo;
@@ -894,6 +897,8 @@ void maskDuplicates(TMatches &matches, TOptions & options)
 		LessErrors<TMatch>());
 
     options.timeMaskDuplicates = sysTime() - beginTime;
+    if (options._debugLevel >= 2)
+        fprintf(stderr, " [%u matches masked]", masked);
 }
 
 //////////////////////////////////////////////////////////////////////////////
