@@ -135,29 +135,29 @@ _refillBuffer(RecordReader<TFile, SinglePass<void> > & recordReader)
 }
 
 // ----------------------------------------------------------------------------
-// Function hasMore()
+// Function atEnd()
 // ----------------------------------------------------------------------------
 
 template <typename TFile>
 inline bool
-hasMore(RecordReader<TFile, SinglePass<void> > & recordReader)
+atEnd(RecordReader<TFile, SinglePass<void> > & recordReader)
 {
     // There is more data if the buffer is not exhausted.
     if (recordReader._current != recordReader._end)
-        return true;
+        return false;
     // There is no more data if the buffer is exhausted and there the stream
     // is at the end of the file or there previously was an error reading the
     // file.
     
     if (streamEof(recordReader._file) || recordReader._resultCode != 0)
-        return false;
+        return true;
 
     // std::cerr << "refilling in hasMore()" << std::endl;
 
     // Otherwise, we can try to load some data.  This case only happens if
     // hasMore is called at the beginning of the file; Otherwise, goNext()
     // will load data.
-    return _refillBuffer(recordReader);
+    return !_refillBuffer(recordReader);
 }
 
 // ----------------------------------------------------------------------------

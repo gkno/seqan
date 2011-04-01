@@ -135,15 +135,15 @@ startSecondPass(RecordReader<TMMapString, DoublePass<Mapped> > & recordReader)
 }
 
 // ----------------------------------------------------------------------------
-// Function hasMore()
+// Function atEnd()
 // ----------------------------------------------------------------------------
 
 template <typename TMMapString>
 inline bool
-hasMore(RecordReader<TMMapString, DoublePass<Mapped> > & recordReader)
+atEnd(RecordReader<TMMapString, DoublePass<Mapped> > & recordReader)
 {
     // There is more data if the current buffer is not exhausted.
-    return recordReader._current != recordReader._end;
+    return recordReader._current == recordReader._end;
 }
 
 // ----------------------------------------------------------------------------

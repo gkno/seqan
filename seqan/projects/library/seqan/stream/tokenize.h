@@ -47,99 +47,90 @@ namespace seqan {
 
     
 // ----------------------- Helper structs ------------------------------------
-struct Whitespace_;
-struct Blank_;
-struct Char_;
-struct Digit_;
-struct Alpha_;
-struct AlphaNum_;
-struct UnixEOL_;
-struct BackslashR_;
-struct Graph_;
+struct Whitespace__;
+struct Blank__;
+struct Char__;
+struct Digit__;
+struct Alpha__;
+struct AlphaNum__;
+struct UnixEOL__;
+struct BackslashR__;
+struct Graph__;
+
+typedef Tag<Whitespace__> Whitespace_;
+typedef Tag<Blank__> Blank_;
+typedef Tag<Char__> Char_;
+typedef Tag<Digit__> Digit_;
+typedef Tag<Alpha__> Alpha_;
+typedef Tag<AlphaNum__> AlphaNum_;
+typedef Tag<UnixEOL__> UnixEOL_;
+typedef Tag<BackslashR__> BackslashR_;
+typedef Tag<Graph__> Graph_;
 
 
 // template <typename TSpec>
 // struct CharCompare_;
 
 
-template <>
-struct CharCompare_<Whitespace_>
+inline int
+_charCompare(int const c, Whitespace_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
-        return isspace(c);
-    }
+    return isspace(c);
 }
 
-template <>
-struct CharCompare_<Blank_>
+
+inline int
+_charCompare(int const c, Blank_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         return isblank(c);
     }
 }
 
-template <>
-struct CharCompare_<Alpha_>
+inline int
+_charCompare(int const c, Alpha_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         return isalpha(c);
     }
 }
 
-template <>
-struct CharCompare_<AlphaNum_>
+inline int
+_charCompare(int const c, AlphaNum_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         return isalnum(c);
     }
 }
 
-
-template <>
-struct CharCompare_<Digit_>
+inline int
+_charCompare(int const c, Digit_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         return isdigit(c);
     }
 }
 
-template <>
-struct CharCompare_<Graph_>
+inline int
+_charCompare(int const c, Graph_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         return isgraph(c);
     }
 }
 
-template <>
-struct CharCompare_<UnixEOL_>
+inline int
+_charCompare(int const c, UnixEOL_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         return (c == '\n');
     }
 }
 
-template <>
-struct CharCompare_<BackslashR_>
+inline int
+_charCompare(int const c, BackslashR_ const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         return (c == '\r');
     }
 }
 
-template <>
-struct CharCompare_<Dna_>
+inline int
+_charCompare(int const c, Dna const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         switch (c)
         {
             case 'a':
@@ -155,11 +146,9 @@ struct CharCompare_<Dna_>
     }
 }
 
-template <>
-struct CharCompare_<Dna5_>
+inline int
+_charCompare(int const c, Dna5 const & /* tag*/)
 {
-    static inline int _compare(const int c)
-    {
         switch (c)
         {
             case 'a':
@@ -181,7 +170,7 @@ struct CharCompare_<Dna5_>
 // template <>
 // struct CharCompare_<Char_, int c2>
 // {
-//     static inline int compare(const int c)
+//     static inline int compare(int const c)
 //     {
 //         return c == c2;
 //     }
@@ -190,83 +179,137 @@ struct CharCompare_<Dna5_>
 // ----------------------- Helper functions-----------------------------------
 
 // read chars from record reader depending on condition
-template <typename TCompare, // specialization of character comparison
+template <typename TTagSpec, // specialization of character comparison
           typename TRecordReader, // record reader
           typename TBuffer> // usually charstring, but maybe DnaString or so
-inline int _readHelper(TRecordReader & reader,
-                       TBuffer & buffer,
-                       bool desiredOutcomeOfComparison = true) 
+inline int
+_readHelper(TBuffer & buffer,
+            TRecordReader & reader,
+            Tag<TTagSpec> const & tag,
+            bool const desiredOutcomeOfComparison) 
 /*   desired behaviour of loop -> "readUntil()" or "readwhile()"  */
 {
     clear(buffer);
     typedef Value<TRecordReader::_buffer>::Type TChar;
-    for (TChar c = value(reader); hasMore(reader); goNext(reader))
+//     for (TChar c = value(reader); hasMore(reader); goNext(reader))
+//     {
+    while (!atEnd(reader))
     {
-        if (resultCode(reader) != 0)
-            return resultCode(reader);
-        if (TCompare::_compare(c) == desiredOutcomeOfComparison)
+        TChar c = value(reader);
+        if (_charCompare(c, tag) == desiredOutcomeOfComparison)
             return 0;
         append(buffer, c, Generous()); // TODO Generous() is right?
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
     }
-    returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+}
+
+template <typename TSpec, // specialization of character comparison
+          typename TRecordReader, // record reader
+          typename TBuffer> // usually charstring, but maybe DnaString or so
+inline int
+_readHelper(TBuffer & buffer,
+            TRecordReader & reader,
+            Tag<TSpec> const & tag)
+/*   default behaviour of loop is "readUntil()" */
+{
+    _readHelper(buffer, reader, tag, true);
 }
 
 // same as above, just don't save characters read
-template <typename TCompare, typename TRecordReader>
-inline int _skipHelper(TRecordReader & reader,
-                       bool desiredOutcomeOfComparison = true)
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_skipHelper(TRecordReader & reader,
+            Tag<TSpec> const & tag,
+            bool const desiredOutcomeOfComparison)
 {
-    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
-    for (TChar c = value(reader); hasMore(reader); goNext(reader))
+    typedef Value<TRecordReader::_buffer>::Type TChar;
+//     for (TChar c = value(reader); hasMore(reader); goNext(reader))
+//     {
+    while (!atEnd(reader))
     {
+        TChar c = value(reader);
+        if (_charCompare(c, tag) == desiredOutcomeOfComparison)
+            return 0;
+        goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
-        if (TCompare::_compare(c) == desiredOutcomeOfComparison)
-            return 0;
     }
-    returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
 }
 
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_skipHelper(TRecordReader & reader,
+            Tag<TSpec> const & tag)
+{
+    _skipHelper(reader, tag, true)
+}
 
 // same as above but allows for a second character type to be ignored
-template <typename TCompare, 
-          typename TCompare2, // specialization of character class to be ignored
+template <typename TTagSpec, 
+          typename TTagSpec2, // specialization of character class to be ignored
           typename TRecordReader, 
           typename TBuffer> 
-inline int _readHelper(TRecordReader & reader,
-                       TBuffer & buffer,
-                       bool desiredOutcomeOfComparison = true) 
-
+inline int
+_readHelper(TBuffer & buffer,
+            TRecordReader & reader,
+            Tag<TTagSpec> const & compTag,
+            Tag<TTagSpec2> const & skipTag,
+            bool const desiredOutcomeOfComparison)
 {
     clear(buffer);
     typedef Value<TRecordReader::_buffer>::Type TChar;
-    for (TChar c = value(reader); hasMore(reader); goNext(reader))
+//     for (TChar c = value(reader); hasMore(reader); goNext(reader))
+//     {
+    while (!atEnd(reader))
     {
+        TChar c = value(reader);
+        if (!_charCompare(c, skipTag))
+        {
+            if (_charCompare(c, tag) == desiredOutcomeOfComparison)
+                return 0;
+            append(buffer, c, Generous()); // TODO Generous() is right?
+        }
+        goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
-        if (TCompare2::_compare(c))
-            continue;
-        if (TCompare::_compare(c) == desiredOutcomeOfComparison)
-            return 0;
-        append(buffer, c, Generous()); // TODO Generous() is right?
     }
-    returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
 }
 
 
+template <typename TTagSpec,
+          typename TTagSpec2, // specialization of character class to be ignored
+          typename TRecordReader,
+          typename TBuffer>
+inline int
+_readHelper(TBuffer & buffer,
+            TRecordReader & reader,
+            Tag<TTagSpec> const & compTag,
+            Tag<TTagSpec> const & skipTag,
+            bool const desiredOutcomeOfComparison)
+
+{
+    _readHelper(buffer, reader, compTag, skipTag, true);
+}
+
 template <typename TCompare, typename TRecordReader>
-inline int _readAndCompareWithStr(TRecordReader & reader,
-                                  const TString & str)
+inline int
+_readAndCompareWithStr(TRecordReader & reader,
+                       TString const & str)
 {
     bool win = false;
     for (int i = 0; i < length(str); ++i)
     {
+        if (atEnd(reader))
+            return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
         if (value(reader) != str[i]) //mismatch
             break;
         if (i == length(str)) // win
-            win = true
-        else if (!hasMore(reader))
-            returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+            win = true;
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -327,15 +370,17 @@ inline int readUntilX(RecordReader<TStream, TPass> & reader,
 {
     clear(buffer);
     typedef Value<TRecordReader::_buffer>::Type TChar;
-    for (TChar c = value(reader); hasMore(reader); goNext(reader))
+    while (!atEnd(reader))
     {
-        if (resultCode(reader) != 0)
-            return resultCode(reader);
+        TChar c = value(reader);
         if (c == x)
             return 0;
         append(buffer, c, Generous()); // TODO Generous() is right?
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
     }
-    returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
 }
 
 //TODO document
@@ -350,9 +395,10 @@ inline int readNChars(RecordReader<TStream, TPass> & reader,
     typedef Value<TRecordReader::_buffer>::Type TChar;
     for (int i = 0; i < n; ++i)
     {
+        if (atEnd(reader))
+            return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
         assignValue(buffer, i, value(reader));
-        if (!hasMore(reader))
-            returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -405,15 +451,17 @@ _parseSkipWhitespace(TFile& file, TChar& c)
 template <typename TStream, typename TPass>
 inline int skipUntilX(RecordReader<TStream, TPass> & reader, const char x)
 {
-    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
-    for (TChar c = value(reader); hasMore(reader); goNext(reader))
+    typedef Value<TRecordReader::_buffer>::Type TChar;
+    while (!atEnd(reader))
     {
-        if (resultCode(reader) != 0)
-            return resultCode(reader);
+        TChar c = value(reader);
         if (c == x)
             return 0;
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
     }
-    returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
 }
 
 /* OLD FUNCTION
@@ -614,7 +662,7 @@ inline int readLine(RecordReader<TStream, TPass> & reader,
 //         resize(buffer, length(buffer)-1); 
 //         // TODO no realloc happens here, right?
 
-    if (hasMore(reader))
+    if (!atEnd(reader))
         goNext(reader); // go to beginning of next line
 
     return resultCode(reader);
@@ -678,7 +726,7 @@ inline int skipLine(RecordReader<TStream, TPass> & reader)
     if (r != 0)
         return r;
 
-    if (hasMore(reader))
+    if (!atEnd(reader))
         goNext(reader); // go to beginning of next line
 
     return resultCode(reader);

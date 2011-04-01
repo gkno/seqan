@@ -243,21 +243,21 @@ startSecondPass(RecordReader<TFile, DoublePass<> > & recordReader)
 }
 
 // ----------------------------------------------------------------------------
-// Function hasMore()
+// Function atEnd()
 // ----------------------------------------------------------------------------
 
 template <typename TFile>
 inline bool
-hasMore(RecordReader<TFile, DoublePass<> > & recordReader)
+atEnd(RecordReader<TFile, DoublePass<> > & recordReader)
 {
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
     // There is more data if the current buffer is not exhausted.
     if (recordReader._current != recordReader._end)
-        return true;
+        return false;
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
     // There is more data if the current buffer is not the last one.
     if (recordReader._currentBuffNo + 1 < length(recordReader._usedBuffers))
-        return true;
+        return false;
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
 
     // There is no more data if the buffer is exhausted and there the stream
@@ -265,7 +265,7 @@ hasMore(RecordReader<TFile, DoublePass<> > & recordReader)
     // file.
 
     if (streamEof(recordReader._file) || recordReader._resultCode != 0)
-        return false;
+        return true;
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
 
     // std::cerr << "refilling in hasMore()" << std::endl;
@@ -275,14 +275,14 @@ hasMore(RecordReader<TFile, DoublePass<> > & recordReader)
     // will load data.
     switch (recordReader._passNo) {
         case 0:
-            return true;
+            return false;
         case 1:
-            return _fillNextBuffer(recordReader);
+            return !_fillNextBuffer(recordReader);
         case 2:
-            return _jumpToNextBuffer(recordReader);
+            return !_jumpToNextBuffer(recordReader);
         default:
             SEQAN_ASSERT_FAIL("Invalid pass no: %d", recordReader._passNo);
-            return false;
+            return true;
     }
 }
 

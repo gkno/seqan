@@ -109,14 +109,14 @@ private:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function hasMore()
+// Function atEnd()
 // ----------------------------------------------------------------------------
 
 template <typename TMMapString>
 inline bool
-hasMore(RecordReader<TMMapString, SinglePass<Mapped> > & recordReader)
+atEnd(RecordReader<TMMapString, SinglePass<Mapped> > & recordReader)
 {
-    return recordReader._current != recordReader._end;
+    return recordReader._current == recordReader._end;
 }
 
 // ----------------------------------------------------------------------------
