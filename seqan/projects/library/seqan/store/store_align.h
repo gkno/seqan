@@ -222,6 +222,11 @@ struct AlignQualityStoreElement
 		score(0),
 		errors(0) {}
 
+	AlignQualityStoreElement(TScore _pairScore, TScore _score, unsigned char _errors):
+		pairScore(_pairScore),
+		score(_score),
+		errors(_errors) {}
+
     inline bool operator==(AlignQualityStoreElement const & other)
     {
         return pairScore == other.pairScore &&

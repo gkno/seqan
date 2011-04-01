@@ -1302,12 +1302,15 @@ calculateInsertSizes(TLibSizeString &insertSizes, FragmentStore<TSpec, TConfig> 
 	{
 		TId id = (*it).pairMatchId;
 		if (id == TAlignedRead::INVALID_ID) break;	// we assume that invalid ids are at the end of the AlignedReadStore
-		if (id != lastId)
-		{
+		if (id != lastId) {
 			leftMatePos = (*it).beginPos;
 			lastId = id;
-		} else
-			insertSizes[id] = (*it).beginPos - leftMatePos;
+		} else {
+            if ((*it).beginPos < leftMatePos)
+                insertSizes[id] = leftMatePos - (*it).beginPos;
+            else
+                insertSizes[id] = (*it).beginPos - leftMatePos;
+        }
 	}
 }
 
