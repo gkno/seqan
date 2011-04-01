@@ -21,6 +21,8 @@
 // We require mate-pairs to be stored together in one read string.
 // Pair i has mates at positions 2*i and 2*i+1 in the read string.
 
+// TODO(holtgrew): aligned read id can probably go away...
+
 #ifndef SEQAN_HEADER_RAZERS_MATEPAIRS_PARALLEL_H
 #define SEQAN_HEADER_RAZERS_MATEPAIRS_PARALLEL_H
 
@@ -41,17 +43,17 @@ namespace seqan {
 //
 // Put into its own class so it can be locked independently of other class
 // members.
-template <typename TFragmentStore>
+template <typename TMatches>
 class PairedVerificationResults
 {
 public:
-    String<TFragmentStore *> localStores;
+    String<TMatches *> localMatches;
     Lock<Omp> * lock;
 
     PairedVerificationResults() : lock(new Lock<Omp>()) {}
 
     PairedVerificationResults(PairedVerificationResults const & other)
-            : localStores(other.localStores), lock(new Lock<Omp>())
+            : localMatches(other.localMatches), lock(new Lock<Omp>())
     {
         // Not thread-safe copying since this is only used at the beginning when resizing block local storages string.
     }
@@ -60,7 +62,7 @@ public:
     {
         if (this == &other)
             return *this;
-        localStores = other.localStores;
+        localMatches = other.localMatches;
     }
 
     ~PairedVerificationResults()
@@ -69,18 +71,19 @@ public:
     }
 };
 
-template <typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+template <typename TMatches, typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
 struct MapPairedReads {};
 
 // ThreadLocalStorage specialization for single-end read mapping in RazerS.
-template <typename TFragmentStore, typename TSwiftFinderL_, typename TSwiftFinderR_, typename TSwiftPattern_, typename TShape_/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
-class ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL_, TSwiftFinderR_, TSwiftPattern_, TShape_, TOptions, TCounts, TRazerSMode, TPreprocessing> >
+template <typename TMatches_, typename TFragmentStore, typename TSwiftFinderL_, typename TSwiftFinderR_, typename TSwiftPattern_, typename TShape_/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+class ThreadLocalStorage<MapPairedReads<TMatches_, TFragmentStore, TSwiftFinderL_, TSwiftFinderR_, TSwiftPattern_, TShape_, TOptions, TCounts, TRazerSMode, TPreprocessing> >
 {
 public:
 	typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
 	typedef typename Value<TReadSeqStore>::Type						TRead;
 	typedef StringSet<TRead>										TReadSet;
     typedef TShape_ TShape;
+    typedef TMatches_ TMatches;
 
     typedef TSwiftPattern_ TSwiftPattern;
     typedef TSwiftFinderL_ TSwiftFinderL;
@@ -88,6 +91,8 @@ public:
     
 	typedef typename TFragmentStore::TContigSeq				TGenome;
     typedef typename Infix<TGenome>::Type TGenomeInfix;
+
+    typedef typename Value<TMatches>::Type TMatch;
 
     // The id of this thread.
     unsigned threadId;
@@ -107,21 +112,21 @@ public:
 
     TCounts counts;  // TODO(holtgrew): Artifact?
 
-    TFragmentStore store;
+    TMatches matches;
     TFragmentStore /*const*/ * globalStore;
 
     TShape shape;
 
     #ifdef RAZERS_BANDED_MYERS
-    typedef MatchVerifier<TFragmentStore, TOptions, TRazerSMode, TSwiftPattern, TCounts, TPreprocessing> TMatchVerifier;
+    typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TSwiftPattern, TCounts, TPreprocessing> TMatchVerifier;
     #else  // #ifdef RAZERS_BANDED_MYERS
-    typedef MatchVerifier<TFragmentStore, TOptions, TRazerSMode, TSwiftPattern, TCounts, typename Infix<TPreprocessing>::Type> TMatchVerifier;
+    typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TSwiftPattern, TCounts, typename Infix<TPreprocessing>::Type> TMatchVerifier;
     typename Infix<TPreprocessing>::Type preprocessingInfixL, preprocessingInfixR;
     #endif  // #ifdef RAZERS_BANDED_MYERS
     TMatchVerifier verifierL, verifierR;
 
     // Mailbox for the verification results.
-    PairedVerificationResults<TFragmentStore> verificationResults;
+    PairedVerificationResults<TMatches> verificationResults;
 
     String<unsigned> splitters;
 
@@ -135,7 +140,7 @@ public:
 	typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
 	typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 	typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
-	typedef Triple<__int64, TAlignedRead, TAlignQuality>	TDequeueValue;
+	typedef Pair<__int64, TMatch>	TDequeueValue;
 	typedef Dequeue<TDequeueValue>							TDequeue;
 	typedef typename TDequeue::TIter						TDequeueIterator;
     TDequeue fifo;                      // stores left-mate potential matches
@@ -162,7 +167,7 @@ public:
     SwiftPatternRSetMaxErrorsWrapper(TThreadLocalStorage & tls_) : tls(tls_) {}
 };
 
-template <typename TFragmentStore, typename THitString, typename TOptions, typename TSwiftPattern>
+template <typename TMatches, typename TFragmentStore, typename THitString, typename TOptions, typename TSwiftPattern>
 struct PairedVerification;
 
 template <typename THitString>
@@ -217,11 +222,11 @@ buildHitSplittersAndPartitionHits(String<size_t> & splitters, THitString & hitSt
 }
 
 
-template <typename TFragmentStore, typename THitString_, typename TOptions, typename TSwiftPattern>
-class Job<PairedVerification<TFragmentStore, THitString_, TOptions, TSwiftPattern> >
+template <typename TMatches, typename TFragmentStore, typename THitString_, typename TOptions, typename TSwiftPattern>
+class Job<PairedVerification<TMatches, TFragmentStore, THitString_, TOptions, TSwiftPattern> >
 {
 public:
-    typedef PairedVerificationResults<TFragmentStore> TVerificationResults;
+    typedef PairedVerificationResults<TMatches> TVerificationResults;
     typedef THitString_ THitString;
     typedef std::tr1::shared_ptr<THitString> THitStringPtr;
 
@@ -278,8 +283,8 @@ setMaxErrors(SwiftPatternLSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
              TMaxErrors maxErrors)
 {
     // std::cerr << std::endl << "SET MAX ERRORS LEFT" << std::endl;
-    SEQAN_ASSERT_LEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1] - 1);
-    SEQAN_ASSERT_GEQ(wrapper.tls.splitters[wrapper.tls.threadId], readNo);
+    SEQAN_ASSERT_LT(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
+    SEQAN_ASSERT_GEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId]);
 	int localReadNo = readNo - wrapper.tls.splitters[wrapper.tls.threadId];
 
 	int minT = _qgramLemma(wrapper.tls.swiftPatternL, localReadNo, maxErrors);
@@ -300,8 +305,8 @@ setMaxErrors(SwiftPatternRSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
              TMaxErrors maxErrors)
 {
     // std::cerr << std::endl << "SET MAX ERRORS LEFT" << std::endl;
-    SEQAN_ASSERT_LEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1] - 1);
-    SEQAN_ASSERT_GEQ(wrapper.tls.splitters[wrapper.tls.threadId], readNo);
+    SEQAN_ASSERT_LT(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
+    SEQAN_ASSERT_GEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId]);
 	int localReadNo = readNo - wrapper.tls.splitters[wrapper.tls.threadId];
 
 	int minT = _qgramLemma(wrapper.tls.swiftPatternR, localReadNo, maxErrors);
@@ -318,7 +323,7 @@ void
 appendToVerificationResults(PairedVerificationResults<TFragmentStore> & verificationResults, TFragmentStore * storePtr)
 {
     omp_set_lock(&verificationResults.lock->lock_);
-    appendValue(verificationResults.localStores, storePtr);
+    appendValue(verificationResults.localMatches, storePtr);
     omp_unset_lock(&verificationResults.lock->lock_);
 }
 
@@ -409,26 +414,26 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
     }
 }
 
-template <typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename THitString, typename TPreprocessing>
-void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls,
-                      Job<PairedVerification<TFragmentStore, THitString, TOptions, TSwiftPattern> > & job,
+template <typename TMatches, typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename THitString, typename TPreprocessing>
+void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls,
+                      Job<PairedVerification<TMatches, TFragmentStore, THitString, TOptions, TSwiftPattern> > & job,
                       String<unsigned> const & splitters)
 {
-    typedef ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
+    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
 
     typedef typename TThreadLocalStorage::TReadSet TReadSet;
 
 	typedef typename TFragmentStore::TContigSeq				TGenome;
 
 	typedef typename TFragmentStore::TMatePairStore			TMatePairStore;
-	typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
+	// typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
+	// typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
 	typedef typename Value<TMatePairStore>::Type			TMatePair;
-	typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
-	typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
+	// typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
+	// typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
     typedef typename TThreadLocalStorage::TReadSet TReadSet;
 	typedef Index<TReadSet, IndexQGram<TShape>	>	TReadIndex;
-	typedef typename Id<TAlignedRead>::Type					TId;
+	// typedef typename Id<TAlignedRead>::Type					TId;
 
 	typedef typename TFragmentStore::TContigSeq				TGenome;
 	typedef typename Size<TGenome>::Type					TSize;
@@ -438,8 +443,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 
     typedef typename Iterator<THitString, Standard>::Type THitStringIter;
 
+    typedef typename Value<TMatches>::Type TMatch;
+
 	typedef MatchVerifier <
 		TFragmentStore, 
+        TMatches,
 		TOptions, 
 		TRazerSMode, 
 		TSwiftPattern,
@@ -451,7 +459,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 #endif  // #ifdef RAZERS_BANDED_MYERS
 
 	// MATE-PAIR FILTRATION
-	typedef Triple<__int64, TAlignedRead, TAlignQuality>	TDequeueValue;
+	typedef Pair<__int64, TMatch>	TDequeueValue;
 	typedef Dequeue<TDequeueValue>							TDequeue;
 	typedef typename TDequeue::TIter						TDequeueIterator;
 
@@ -464,13 +472,13 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 #endif  // #ifdef RAZERS_PROFILE
 
     // Allocate fragmentstore for job's results.
-    TFragmentStore * localStore = new TFragmentStore();
+    TMatches * localMatches = new TMatches();
 
     // Thread-wide offset for reads.
     unsigned threadIdOffset = splitters[job.threadId];
 
     // Initialize verifiers.
-    tls.verifierL.store = localStore;
+    tls.verifierL.matches = localMatches;
     tls.verifierL.options = job.options;
     tls.verifierL.swiftPattern = job.swiftPatternL;
     tls.verifierL.cnts = 0;
@@ -479,7 +487,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
     setEndPosition(*tls.verifierL.preprocessing, splitters[job.threadId + 1]);
 #endif  // #ifdef RAZERS_BANDED_MYERS
 
-    tls.verifierR.store = localStore;
+    tls.verifierR.matches = localMatches;
     tls.verifierR.options = job.options;
     tls.verifierR.swiftPattern = job.swiftPatternR;
     tls.verifierR.cnts = 0;
@@ -525,9 +533,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 
     TSize gLength = length(genome);
     
-    TAlignedRead mR;
-    TAlignQuality qR;
-    TDequeueValue fL(-2, mR, qR);	// to supress uninitialized warnings
+    TMatch mR;
+    TDequeueValue fL(-2, mR);	// to supress uninitialized warnings
 
     //	unsigned const preFetchMatches = 2048;
 
@@ -687,7 +694,6 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
-							(*it).i3 = verifierL.q;
 						} else {
 							(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
 #ifdef RAZERS_DEBUG_MATEPAIRS
@@ -751,7 +757,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                 */
                 if ((*it).i2.readId == leftReadId)
                 {
-                    int score = (*it).i3.score;
+                    int score = (*it).i2.score;
                     if (bestLeftScore <= score)
                     {
                         // distance between left mate beginning and right mate end
@@ -811,11 +817,10 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                 // if (dist <= options.libraryLength + options.libraryError &&
                 //     options.libraryLength <= dist + options.libraryError)
                 // {
-                    //mR = verifierR.m;
-                    qR = verifierR.q;
+                    mR = verifierR.m;
+                    // qR = verifierR.q;
 					
                     fL.i2 = (*bestLeft).i2;
-                    fL.i3 = (*bestLeft).i3;
 					
                     // transform mate readNo to global readNo
                     TMatePair &mp = tls.globalStore->matePairStore[(threadIdOffset + matePairId)];
@@ -840,11 +845,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
 					
                     // set a unique pair id
                     fL.i2.pairMatchId = mR.pairMatchId = options.nextPairMatchId * options.threadCount + tls.threadId;
-                    if (++options.nextPairMatchId == TAlignedRead::INVALID_ID)
+                    if (++options.nextPairMatchId == TMatch::INVALID_ID)
                         options.nextPairMatchId = 0;
 
                     // score the whole match pair
-                    fL.i3.pairScore = qR.pairScore = fL.i3.score + qR.score;
+                    fL.i2.pairScore = mR.pairScore = fL.i2.score + mR.score;
 
                     // both mates match with correct library size
                     /*								std::cout << "found " << matePairId << " on " << orientation << contigId;
@@ -859,12 +864,10 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
                     */
                     if (!options.spec.DONT_DUMP_RESULTS)
                     {
-                        fL.i2.id = length(localStore->alignedReadStore);
-                        appendValue(localStore->alignedReadStore, fL.i2, Generous());
-                        appendValue(localStore->alignQualityStore, fL.i3, Generous());
-                        mR.id = length(localStore->alignedReadStore);
-                        appendValue(localStore->alignedReadStore, mR, Generous());
-                        appendValue(localStore->alignQualityStore, qR, Generous());
+                        appendValue(*localMatches, fL.i2, Generous());
+                        back(*localMatches).orientation = job.orientation;
+                        appendValue(*localMatches, mR, Generous());
+                        back(*localMatches).orientation = (job.orientation == 'F') ? 'R' : 'F';
                         if (pref == s) {
                             std::cerr << "ADDED" << std::endl;
                             std::cerr << "  (" << mR.beginPos << ", " << mR.endPos << ")" << std::endl;
@@ -881,16 +884,16 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFi
         // }
     }
 
-    appendToVerificationResults(*job.verificationResults, localStore);
+    appendToVerificationResults(*job.verificationResults, localMatches);
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_VERIFY);
 #endif  // #ifdef RAZERS_PROFILE
 }
 
-template <typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+template <typename TMatches, typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
 void
-writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TFragmentStore *> & verificationHits, bool dontCompact)
+writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TMatches *> & verificationHits,bool dontCompact)
 {
     // TODO(holtgrew): The same as single read writeback! Really? Combine?
 #ifdef RAZERS_PROFILE
@@ -899,44 +902,30 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL
     if (tls.threadId == 0u && tls.options._debugLevel >= 3)
         fprintf(stderr, "[writeback]");
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
-    typedef ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
+    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
 
-    // Update IDs and calculate new size so the prefix increment can be used in the loops.
-    TAlignedReadStoreSize oldSize = length(tls.store.alignedReadStore);
-    TAlignedReadStoreSize sizeSum = oldSize;
+    // Compute new length for the matches.
+    TAlignedReadStoreSize oldSize = length(tls.matches);
+    TAlignedReadStoreSize newSize = oldSize;
 
     for (unsigned i = 0; i < length(verificationHits); ++i) {
-        TFragmentStore * bucket = verificationHits[i];
-        for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
-            bucket->alignedReadStore[j].id = sizeSum++;
-        }
+        TMatches * bucket = verificationHits[i];
+        newSize += length(*bucket);
     }
-
-    // Resize the local read stores appropriately.
-	resize(tls.store.alignedReadStore, sizeSum, Generous());
-	resize(tls.store.alignQualityStore, sizeSum, Generous());
 
     // Write back all matches from verification to the block local store.
-    for (unsigned i = 0; i < length(verificationHits); ++i) {
-        TFragmentStore * bucket = verificationHits[i];
-        for (unsigned j = 0; j < length(bucket->alignedReadStore); ++j) {
-            move(tls.store.alignedReadStore[oldSize], bucket->alignedReadStore[j]);
-            move(tls.store.alignQualityStore[oldSize++], bucket->alignQualityStore[j]);
-        }
-    }
-
-    SEQAN_ASSERT_EQ(length(tls.store.alignedReadStore), length(tls.store.alignQualityStore));
-    if (!empty(tls.store.alignedReadStore))
-      SEQAN_ASSERT_EQ(length(tls.store.alignedReadStore), back(tls.store.alignedReadStore).id + 1);
+	reserve(tls.matches, newSize, Generous());
+    for (unsigned i = 0; i < length(verificationHits); ++i)
+        append(tls.matches, *verificationHits[i]);
 
     // Possibly compact matches.
-    if (!dontCompact && length(tls.store.alignedReadStore) > tls.options.compactThresh)
+    if (!dontCompact && length(tls.matches) > tls.options.compactThresh)
     {
 #ifdef RAZERS_PROFILE
         timelineBeginTask(TASK_COMPACT);
 #endif  // #ifdef RAZERS_PROFILE
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
-        typename Size<TAlignedReadStore>::Type oldSize = length(tls.store.alignedReadStore);
+        typename Size<TAlignedReadStore>::Type oldSize = length(tls.matches);
 
         // TODO(weese): Duplicates are hard to mask in paired-end mode.
         // if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
@@ -944,12 +933,12 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL
 
         SwiftPatternLSetMaxErrorsWrapper<TThreadLocalStorage> wrapperL(tls);
         SwiftPatternRSetMaxErrorsWrapper<TThreadLocalStorage> wrapperR(tls);
-        compactPairMatches(*tls.globalStore, tls.store, tls.counts, tls.options, wrapperL, wrapperR);
+        compactPairMatches(*tls.globalStore, tls.matches, tls.counts, tls.options, wrapperL, wrapperR);
 
-        if (length(tls.store.alignedReadStore) * 4 > oldSize) {     // the threshold should not be raised if too many matches were removed
+        if (length(tls.matches) * 4 > oldSize) {     // the threshold should not be raised if too many matches were removed
             while (tls.options.compactThresh < oldSize)
-							  tls.options.compactThresh *= tls.options.compactMult;
-                // tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
+                tls.options.compactThresh *= tls.options.compactMult;
+            // tls.options.compactThresh += (tls.options.compactThresh >> 1);  // if too many matches were removed
             if (tls.threadId == 0u && tls.options._debugLevel >= 3)
                 fprintf(stderr, "[raising threshold to %u]", unsigned(tls.options.compactThresh));
         }
@@ -957,10 +946,6 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL
         timelineEndTask(TASK_COMPACT);
 #endif  // #ifdef RAZERS_PROFILE
     }
-
-    SEQAN_ASSERT_EQ(length(tls.store.alignedReadStore), length(tls.store.alignQualityStore));
-    if (!empty(tls.store.alignedReadStore))
-      SEQAN_ASSERT_EQ(length(tls.store.alignedReadStore), back(tls.store.alignedReadStore).id + 1);
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_WRITEBACK);
@@ -1017,19 +1002,24 @@ void _mapMatePairReadsParallel(
 
     typedef TRazerSOptions TOptions;
 
+    typedef typename Value<TThreadLocalStorages>::Type TThreadLocalStorage;
+    typedef typename TThreadLocalStorage::TMatches TMatches;
+    typedef typename Value<TMatches>::Type TMatch;
+
 	// FILTRATION
 	typedef typename TThreadLocalStorage::TSwiftFinderL	TSwiftFinderL;
 	typedef typename TThreadLocalStorage::TSwiftFinderR	TSwiftFinderR;
 	typedef typename TThreadLocalStorage::TSwiftPattern	TSwiftPattern;
 
 	// MATE-PAIR FILTRATION
-	typedef Triple<__int64, TAlignedRead, TAlignQuality>	TDequeueValue;
+	typedef Pair<__int64, TMatch>	TDequeueValue;
 	typedef Dequeue<TDequeueValue>							TDequeue;
 	typedef typename TDequeue::TIter						TDequeueIterator;
 
 	// VERIFICATION
 	typedef MatchVerifier <
 		TFragmentStore, 
+        TMatches,
 		TRazerSOptions, 
 		TRazerSMode, 
 		TSwiftPattern,
@@ -1041,7 +1031,7 @@ void _mapMatePairReadsParallel(
 #endif  // #ifdef RAZERS_BANDED_MYERS
 
 	typedef typename TSwiftFinderL::THitString THitString;
-    typedef Job<PairedVerification<TFragmentStore, THitString, TOptions, TSwiftPattern> > TVerificationJob;
+    typedef Job<PairedVerification<TMatches, TFragmentStore, THitString, TOptions, TSwiftPattern> > TVerificationJob;
 
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_ON_CONTIG);
@@ -1245,8 +1235,8 @@ void _mapMatePairReadsParallel(
             //
             // First, swap out the current set of local stores from the verification results.
             omp_set_lock(&tls.verificationResults.lock->lock_);
-            String<TFragmentStore *> localStores;
-            std::swap(localStores, tls.verificationResults.localStores);
+            String<TMatches *> localMatches;
+            std::swap(localMatches, tls.verificationResults.localMatches);
             omp_unset_lock(&tls.verificationResults.lock->lock_);
             // Don't compact matches if in configured 'block fraction' of genome.
             size_t hstckLen = swiftFinderR.endPos - swiftFinderR.startPos;
@@ -1254,8 +1244,8 @@ void _mapMatePairReadsParallel(
             double fracTodo = 1.0  * hstckLeft / hstckLen;
             bool dontCompact = tls.options.noCompactFrac >= fracTodo;
             // Write back the contents of these stores to the thread-local store.
-            writeBackToLocal(tls, localStores, dontCompact);
-            clearLocalStores(localStores);
+            writeBackToLocal(tls, localMatches, dontCompact);
+            clearLocalMatches(localMatches);
         } while (hasMore);
 
         // Finalization
@@ -1274,8 +1264,8 @@ void _mapMatePairReadsParallel(
 
         // After every thread is done with everything, write back once more.
         #pragma omp barrier
-        writeBackToLocal(tls, tls.verificationResults.localStores, true);
-        clearLocalStores(tls.verificationResults.localStores);
+        writeBackToLocal(tls, tls.verificationResults.localMatches, true);
+        clearLocalMatches(tls.verificationResults.localMatches);
     }
 
     // NOTE: We never re-reverse complement since this function is only called
@@ -1333,6 +1323,11 @@ int _mapMatePairReadsParallel(
 	typedef Finder<TContigSeq, Swift<TSwiftSpec> >					TSwiftFinderL;
 	typedef typename Infix<TContigSeq>::Type					    TContigInf;
 	typedef Finder<TContigInf, Swift<TSwiftSpec> >					TSwiftFinderR;
+
+    typedef typename TFragmentStore::TContigSeq TContigSeq;
+    typedef typename Position<TContigSeq>::Type TContigPos;
+    typedef MatchRecord<TContigPos> TMatchRecord;
+    typedef String<TMatchRecord> TMatches;
 
     // -----------------------------------------------------------------------
     // Initialize global information.
@@ -1394,7 +1389,7 @@ int _mapMatePairReadsParallel(
 	SEQAN_PROTIMESTART(initTime);
     String<unsigned> splitters;
     computeSplittersBySlotCount(splitters, length(store.matePairStore), options.threadCount);
-    typedef ThreadLocalStorage<MapPairedReads<TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
+    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
     String<TThreadLocalStorage> threadLocalStorages;
     initializeThreadLocalStoragesPaired(threadLocalStorages, store, splitters, shape, options);
 
@@ -1433,8 +1428,13 @@ int _mapMatePairReadsParallel(
 
     // Write back local stores to global stores.
     for (unsigned i = 0; i < length(threadLocalStorages); ++i)
-        std::cerr << "thread " << i << " has " << length(threadLocalStorages[i].store.alignedReadStore) << " aligned reads." << std::endl;
-    writeBackToGlobalStore(store, threadLocalStorages);
+        std::cerr << "thread " << i << " has " << length(threadLocalStorages[i].matches) << " aligned reads." << std::endl;
+    #pragma omp parallel
+    {
+        Nothing nothing;
+        compactPairMatches(store, threadLocalStorages[omp_get_thread_num()].matches, cnts, options, nothing, nothing);
+    }
+    writeBackToGlobalStore(store, threadLocalStorages, false);
 #ifdef RAZERS_PROFILE
     double endWriteback = sysTime();
     std::cerr << "TIME back to global: " << (endWriteback - endMapping) << " s" << std::endl;

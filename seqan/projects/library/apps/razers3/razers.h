@@ -22,6 +22,9 @@
 #ifndef SEQAN_HEADER_RAZERS_H
 #define SEQAN_HEADER_RAZERS_H
 
+// TODO(holtgrew): I probably broke maq mapping.
+// TODO(holtgrew): What about longest prefix mapping stuff?
+
 #include <iostream>
 #include <fstream>
 
@@ -40,6 +43,42 @@ const unsigned MIN_PARALLEL_WORK = 1;//100/*0*/; // TODO(holtgrew): Set to some 
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+
+// Compact representation of a match.
+template <typename TContigPos_>
+struct MatchRecord 
+{
+    typedef typename MakeSigned_<TContigPos_>::Type TContigPos;
+
+    unsigned        contigId;       // genome seqNo
+    unsigned        readId;         // read seqNo
+    TContigPos      beginPos;       // begin position of the match in the genome
+    TContigPos      endPos;         // end position of the match in the genome
+    char            orientation;    // 'F', 'R', '-'
+    short int       score;          // Levenshtein distance / score.
+    unsigned		pairMatchId;			// unique id for the two mate-pair matches (0 if unpaired)
+    int				mateDelta:24;	// outer coordinate delta to the other mate 
+    int				pairScore:8;	// combined score of both mates
+
+	static const unsigned INVALID_ID;
+
+    MatchRecord()
+            : contigId(MaxValue<unsigned>::VALUE), readId(MaxValue<unsigned>::VALUE),
+              beginPos(0), endPos(0), orientation('-'), score(0),
+              pairMatchId(MaxValue<unsigned>::VALUE), mateDelta(0), pairScore(0)
+    {}
+};
+
+template <typename TStream, typename TPos>
+TStream & 
+operator<<(TStream & stream, MatchRecord<TPos> & record)
+{
+    stream << "(contigId=" << record.contigId << ", readId=" << record.readId << ", beginPos=" << record.beginPos << ", endPos = " << record.endPos << ", orientation=" << record.orientation << ", score=" << record.score << ", pairMatchId=" << record.pairMatchId << ", mateDelta=" << record.mateDelta << ", pairScore=" << record.pairScore << ")";
+    return stream;
+}
+
+template <typename TGPos_>
+const unsigned MatchRecord<TGPos_>::INVALID_ID = MaxValue<unsigned>::VALUE;
 
 #ifdef RAZERS_PROFILE
 enum {
@@ -171,6 +210,7 @@ enum {
         double      timeBuildQGramIndex;  // time for q-gram index building.
         double      timeCompactMatches;     // time for compacting reads
         double      timeMaskDuplicates; // time spent masking duplicates
+        double      timeFsCopy; // time spent copying alignments back into the fragment store
 
 		bool		maqMapping;
 		int			absMaxQualSumErrors;
@@ -401,7 +441,8 @@ struct MicroRNA{};
 
 
 	template <
-		typename TFragmentStore_, 
+        typename TFragmentStore_,
+		typename TMatches_, 
 		typename TRazerSOptions_,
 		typename TRazerSMode_,
 		typename TSwiftPattern_,
@@ -411,6 +452,7 @@ struct MicroRNA{};
 	struct MatchVerifier
 	{
 		typedef TFragmentStore_									TFragmentStore;
+		typedef TMatches_									    TMatches;
 		typedef TRazerSOptions_									TOptions;
 		typedef TRazerSMode_									TRazerSMode;
 		typedef TSwiftPattern_									TSwiftPattern;
@@ -428,6 +470,8 @@ struct MicroRNA{};
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TContigSeq>::Type					TSize;
 		typedef ModifiedString<TRead, ModReverse>				TRevRead;
+
+        typedef typename Value<TMatches>::Type TMatchRecord;
 		
 #ifdef RAZERS_BANDED_MYERS
 		typedef PatternState_<TRead,	Myers<AlignTextBanded<FindInfix, TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
@@ -439,14 +483,13 @@ struct MicroRNA{};
 		typedef typename PatternState<TRevMyersPattern>::Type		TRPatternState;
 #endif  // #ifdef RAZERS_BANDED_MYERS
 
-		TFragmentStore	*store;
+		TMatches	    *matches;
 		TOptions		*options;			// RazerS options
 		TSwiftPattern	*swiftPattern;
 		TCounts			*cnts;
 		TPreprocessing  *preprocessing;
 
-		TAlignedRead	m;
-		TAlignQuality	q;
+		TMatchRecord	m;
 		bool			onReverseComplement;
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
@@ -457,8 +500,8 @@ struct MicroRNA{};
 		
 		MatchVerifier() : onReverseComplement(false), genomeLength(0), oneMatchPerBucket(false), compactionTime(0) {}
                
-		MatchVerifier(TFragmentStore_ &_store, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
-			store(&_store),
+		MatchVerifier(TMatches_ &_matches, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
+			matches(&_matches),
 			options(&_options),
 			swiftPattern(&_swiftPattern),
 			cnts(&_cnts),
@@ -476,28 +519,32 @@ struct MicroRNA{};
 				// transform coordinates to the forward strand
 				m.beginPos = genomeLength - m.beginPos;
 				m.endPos = genomeLength - m.endPos;
-			}
+                std::swap(m.beginPos, m.endPos);
+                m.orientation = 'R';
+			} else {
+                m.orientation = 'F';
+            }
 						
 //#pragma omp critical
 // begin of critical section
 			{
 				if (!options->spec.DONT_DUMP_RESULTS)
 				{
-					m.id = length(store->alignedReadStore);
-					appendValue(store->alignedReadStore, m, Generous());
-					appendValue(store->alignQualityStore, q, Generous());
+					appendValue(*matches, m, Generous());
 
-					if (length(store->alignedReadStore) > options->compactThresh)
+					if (length(*matches) > options->compactThresh)
 					{
                         double beginTime = sysTime();
-						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
+						typename Size<TMatches>::Type oldSize = length(*matches);
 
 						if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-							maskDuplicates(*store, *options, TRazerSMode());	// overlapping parallelograms cause duplicates
+							maskDuplicates(*matches, *options, TRazerSMode());	// overlapping parallelograms cause duplicates
+                        // SEQAN_ASSERT_MSG((back(*matches).endPos - back(*matches).beginPos == 100), "len == %d", int(m.endPos - m.beginPos));
 		
-						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
+						compactMatches(*matches, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
+                        // SEQAN_ASSERT_MSG((back(*matches).endPos - back(*matches).beginPos == 100), "len == %d", int(m.endPos - m.beginPos));
 						
-						if (length(store->alignedReadStore) * 4 > oldSize) {			// the threshold should not be raised
+						if (length(*matches) * 4 > oldSize) {			// the threshold should not be raised
                             // fprintf(stderr, "[raising threshold]");
 							// options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
 							options->compactThresh *= options->compactMult;
@@ -685,6 +732,132 @@ inline int estimateReadLength(char const *fileName)
 	return length(firstRead);
 }
 
+// Comparators for RazerS1-style matches.
+
+// TODO(holtgrew): Slightly different comparators than in previous RazerS 3 version, add back the additional checks?
+
+	template <typename TReadMatch>
+	struct LessRNoBeginPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.readId < b.readId) return true;
+			if (a.readId > b.readId) return false;
+
+			// genome position and orientation
+			if (a.contigId < b.contigId) return true;
+			if (a.contigId > b.contigId) return false;
+			if (a.beginPos < b.beginPos) return true;
+			if (a.beginPos > b.beginPos) return false;
+            if (a.orientation == '-') return false;
+            if (b.orientation == '-') return true;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+
+			// quality
+            if (a.pairScore > b.pairScore) return true;
+            if (a.pairScore < b.pairScore) return false;
+            if (a.score > b.score) return true;
+            if (b.score > a.score) return false;
+
+            if (a.endPos > b.endPos) return true;
+            return false;
+		}
+	};
+
+	// ... to sort matches and remove duplicates with equal gEnd
+	template <typename TReadMatch>
+	struct LessRNoEndPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.readId < b.readId) return true;
+			if (a.readId > b.readId) return false;
+
+			// genome position and orientation
+			if (a.contigId < b.contigId) return true;
+			if (a.contigId > b.contigId) return false;
+			if (a.endPos   < b.endPos) return true;
+			if (a.endPos   > b.endPos) return false;
+            if (a.orientation == '-') return false;
+            if (b.orientation == '-') return true;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+
+			// quality
+            if (a.pairScore > b.pairScore) return true;
+            if (a.pairScore < b.pairScore) return false;
+            if (a.score > b.score) return true;
+            if (b.score > a.score) return false;
+
+            if (a.beginPos < b.beginPos) return true;
+            return false;
+		}
+	};
+
+	template <typename TReadMatch>
+	struct LessScoreBackport : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.readId < b.readId) return true;
+			if (a.readId > b.readId) return false;
+
+            // quality
+            if (a.orientation == '-') return false;
+            if (b.orientation == '-') return true;
+
+            if (a.pairScore > b.pairScore) return true;
+            if (a.pairScore < b.pairScore) return false;
+            if (a.score > b.score) return true;
+            if (b.score > a.score) return false;
+
+            // Sort by leftmost begin pos, longest end pos on ties.
+            if (a.contigId < b.contigId) return true;
+            if (a.contigId > b.contigId) return false;
+            if (a.orientation < b.orientation) return true;
+            if (a.orientation > b.orientation) return false;
+            if (a.beginPos < b.beginPos) return true;
+            if (a.beginPos > b.beginPos) return false;
+            if (a.endPos < b.endPos) return false;
+            if (a.endPos > b.endPos) return true;
+            
+            return false;
+		}
+	};
+
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+
+	template <typename TReadMatch>
+	struct LessRNoMQ : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.readId < b.readId) return true;
+			if (a.readId > b.readId) return false;
+			
+			// quality
+			if (a.score < b.score) return true; // sum of quality values of mismatches (the smaller the better)
+			if (a.score > b.score) return false;
+			
+			return (a.pairScore < b.pairScore); // seedEditDist?
+			// genome position and orientation
+	/*		if (a.gseqNo < b.gseqNo) return true;
+			if (a.gseqNo > b.gseqNo) return false;
+			if (a.gBegin < b.gBegin) return true;
+			if (a.gBegin > b.gBegin) return false;
+			if (a.orientation < b.orientation) return true;
+			if (a.orientation > b.orientation) return false;
+	*/		
+		}
+	};
+#endif
+
+// Comparators for Fragment Store
 
 	template <typename TAlignedReadStore, typename TLessScore>
 	struct LessRNoGPos : 
@@ -872,82 +1045,86 @@ inline int estimateReadLength(char const *fileName)
 
 //////////////////////////////////////////////////////////////////////////////
 // Mark duplicate matches for deletion
-template <typename TFragmentStore, typename TOptions, typename TRazerSMode>
-void maskDuplicates(TFragmentStore &store, TOptions & options, TRazerSMode)
+template <typename TMatches, typename TOptions, typename TRazerSMode>
+void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode)
 {
-	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
-	
-	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
-	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
-	typedef typename TFragmentStore::TContigPos						TContigPos;
+	typedef typename Iterator<TMatches, Standard>::Type	TIterator;
+	typedef typename Value<TMatches>::Type				TMatch;
+	typedef typename TMatch::TContigPos			TContigPos;
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// remove matches with equal ends
 
-	typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>	TLessScore;
-	typedef LessRNoGPos<TAlignedReadStore, TLessScore>						TLessBeginPos;
-	typedef LessRNoGEndPos<TAlignedReadStore, TLessScore>					TLessEndPos;
-
     double beginTime = sysTime();
-	
 #ifdef RAZERS_PROFILE
-  timelineBeginTask(TASK_SORT);
+    timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	sortAlignedReads(store.alignedReadStore, TLessEndPos(TLessScore(store.alignQualityStore)));
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessRNoEndPos<TMatch>());
+	// sortAlignedReads(matches, TLessEndPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
-  timelineEndTask(TASK_SORT);
+    timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
 
 	TContigPos	beginPos = -1;
 	TContigPos	endPos = -1;
-	unsigned	contigId = TAlignedRead::INVALID_ID;
-	unsigned	readId = TAlignedRead::INVALID_ID;
-	bool		orientation = false;
+	unsigned	contigId = TMatch::INVALID_ID;
+	unsigned	readId = TMatch::INVALID_ID;
+	char        orientation = '-';
+    unsigned    masked = 0;
 
-	TIterator it = begin(store.alignedReadStore, Standard());
-	TIterator itEnd = end(store.alignedReadStore, Standard());
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
 
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).pairMatchId != TAlignedRead::INVALID_ID) continue;
+		if ((*it).pairMatchId != TMatch::INVALID_ID) continue;
 		TContigPos itEndPos = _max((*it).beginPos, (*it).endPos);
-		if (endPos == itEndPos && orientation == ((*it).beginPos < (*it).endPos) &&
+		if (endPos == itEndPos && orientation == (*it).orientation &&
 			contigId == (*it).contigId && readId == (*it).readId) 
 		{
-			(*it).id = TAlignedRead::INVALID_ID;	// mark this alignment for deletion
+			(*it).orientation = '-';
+            masked += 1;
 			continue;
 		}
 		readId = (*it).readId;
 		contigId = (*it).contigId;
 		endPos = itEndPos;
-		orientation = (*it).beginPos < (*it).endPos;
+		orientation = (*it).orientation;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// remove matches with equal begins
 
 #ifdef RAZERS_PROFILE
-  timelineBeginTask(TASK_SORT);
+    timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessRNoBeginPos<TMatch>());
+	// sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
-  timelineEndTask(TASK_SORT);
+    timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
 
-	contigId = TAlignedRead::INVALID_ID;
-	it = begin(store.alignedReadStore, Standard());
-	itEnd = end(store.alignedReadStore, Standard());
+    orientation = '-';
+	contigId = TMatch::INVALID_ID;
+	it = begin(matches, Standard());
+	itEnd = end(matches, Standard());
 
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).id == TAlignedRead::INVALID_ID || (*it).pairMatchId != TAlignedRead::INVALID_ID) continue;
+		if ((*it).orientation == '-' || (*it).pairMatchId != TMatch::INVALID_ID) continue;
 
 		TContigPos itBeginPos = _min((*it).beginPos, (*it).endPos);
 		if (beginPos == itBeginPos && readId == (*it).readId &&
 			contigId == (*it).contigId && orientation == ((*it).beginPos < (*it).endPos))
 		{
-			(*it).id = TAlignedRead::INVALID_ID;	// mark this alignment for deletion
+			(*it).orientation = '-';
+            masked += 1;
 			continue;
 		}
 		readId = (*it).readId;
@@ -956,6 +1133,8 @@ void maskDuplicates(TFragmentStore &store, TOptions & options, TRazerSMode)
 		orientation = (*it).beginPos < (*it).endPos;
 	}
     options.timeMaskDuplicates += sysTime() - beginTime;
+    if (options._debugLevel >= 2)
+        fprintf(stderr, " [%u matches masked]", masked);
 }
 /*
 //////////////////////////////////////////////////////////////////////////////
@@ -1086,7 +1265,7 @@ setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template <
-	typename TFragmentStore,
+	typename TMatches,
 	typename TCounts,
 	typename TSpec,
 	typename TAlignMode,
@@ -1096,7 +1275,7 @@ template <
     typename TMatchNPolicy
 >
 void compactMatches(
-	TFragmentStore &store,
+	TMatches & matches,
 	TCounts &, 
 	RazerSOptions<TSpec> &options, 
 	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const &,
@@ -1105,10 +1284,8 @@ void compactMatches(
 {
     // fprintf(stderr, "[compact]");
     double beginTime = sysTime();
-	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
-	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
-	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
+	typedef typename Value<TMatches>::Type				TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type	TIterator;
 	typedef RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> TRazerSMode;
 
 	unsigned readNo = -1;
@@ -1120,26 +1297,32 @@ void compactMatches(
 	int scoreRangeBest = (IsSameType<TAlignMode, RazerSGlobal>::VALUE && !IsSameType<TScoreMode, RazerSScore>::VALUE)? -(int)options.scoreDistanceRange : MaxValue<int>::VALUE;
 
 #ifdef RAZERS_PROFILE
-  timelineBeginTask(TASK_SORT);
+    timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessScoreBackport<TMatch>());
+    // sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_PROFILE
-  timelineEndTask(TASK_SORT);
+    timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
 
-	TIterator it = begin(store.alignedReadStore, Standard());
-	TIterator itEnd = end(store.alignedReadStore, Standard());
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
 	TIterator dit = it;
 	TIterator ditBeg = it;
+    // fprintf(stderr, "[%u matches to compact]", unsigned(itEnd - it));
+    unsigned disabled = 0;
 	
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).id == TAlignedRead::INVALID_ID) continue;
-		int score = store.alignQualityStore[(*it).id].score;
-		int errors = store.alignQualityStore[(*it).id].errors;
-										//if (readNo == 643) std::cerr <<"["<<score<<","<<errors<<"] "<<::std::flush;
-		if (readNo == (*it).readId && (*it).pairMatchId == TAlignedRead::INVALID_ID)
-		{ 
+		if ((*it).orientation == '-') continue;
+		int score = (*it).score;
+		int errors = -(*it).score;
+        //if (readNo == 643) std::cerr <<"["<<score<<","<<errors<<"] "<<::std::flush;
+		if (readNo == (*it).readId && (*it).pairMatchId == TMatch::INVALID_ID)  // Only compact unpaired matches.
+		{
 			if (score <= scoreCutOff || errors >= errorCutOff) continue;
 			if (++hitCount >= hitCountCutOff)
 			{
@@ -1150,16 +1333,18 @@ void compactMatches(
 					if (options.purgeAmbiguous && (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest))
 					{
 						setMaxErrors(swift, readNo, -1);
-						if (options._debugLevel >= 2)
-							::std::cerr << "(read #" << readNo << " disabled)";
+                        disabled += 1;
+						// if (options._debugLevel >= 2)
+						// 	::std::cerr << "(read #" << readNo << " disabled)";
 					}
 					else
 						// we only need better matches
 						if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 						{
 							setMaxErrors(swift, readNo, errors - 1);
-							if (errors == 0 && options._debugLevel >= 2)
-								::std::cerr << "(read #" << readNo << " disabled)";
+                            disabled += 1;
+							// if (errors == 0 && options._debugLevel >= 2)
+							// 	::std::cerr << "(read #" << readNo << " disabled)";
 						}
 
 					if (options.purgeAmbiguous && compactMode == COMPACT_FINAL)
@@ -1188,19 +1373,22 @@ void compactMatches(
 		*dit = *it;
 		++dit;
 	}
-	// unsigned origSize = length(store.alignedReadStore);
-	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
-	compactAlignedReads(store);
+	unsigned origSize = length(matches);
+	resize(matches, dit - begin(matches, Standard()));
+	// compactAlignedReads(store);
     options.timeCompactMatches += sysTime() - beginTime;
     // fprintf(stderr, "[compacted in %f s]", endTime - beginTime);
-	// unsigned newSize = length(store.alignedReadStore);
-	// fprintf(stderr, "[compacted from %u to %u]", origSize, newSize);
+	unsigned newSize = length(matches);
+    if (options._debugLevel >= 2) {
+        fprintf(stderr, " [%u matches removed]", unsigned(origSize - newSize));
+        fprintf(stderr, " [%u reads disabled]", disabled);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template <
-	typename TFragmentStore,
+	typename TMatches,
 	typename TCounts,
 	typename TSpec,
 	typename TGapMode,
@@ -1208,31 +1396,33 @@ template <
     typename TMatchNPolicy
 >
 void compactMatches(
-	TFragmentStore &store,
+	TMatches & matches,
 	TCounts & cnts, 
 	RazerSOptions<TSpec> &options, 
 	RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ>, TMatchNPolicy> const &,
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
-	typedef typename TFragmentStore::TAlignedReadStore						TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore						TAlignQualityStore;
-	typedef typename Value<TAlignedReadStore>::Type							TAlignedRead;
-	typedef typename Iterator<TAlignedReadStore, Standard>::Type			TIterator;
+	typedef typename Value<TMatches>::Type						TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type			TIterator;
 	typedef RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ>, TMatchNPolicy> TRazerSMode;
 	
 	unsigned readNo = -1;
 
 #ifdef RAZERS_PROFILE
-  timelineBeginTask(TASK_SORT);
+    timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+	::std::sort(
+		begin(matches, Standard()),
+		end(matches, Standard()), 
+		LessScoreBackport<TMatch>());
+	// sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_PROFILE
-  timelineEndTask(TASK_SORT);
+    timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
 		
-	TIterator it = begin(store.alignedReadStore, Standard());
-	TIterator itEnd = end(store.alignedReadStore, Standard());
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
 	TIterator dit = it;
 
 	//number of errors may not exceed 31!
@@ -1285,8 +1475,7 @@ void compactMatches(
 		++dit;
 	}
 
-	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
-	resize(store.alignQualityStore, length(store.alignedReadStore));
+	resize(matches, dit - begin(matches, Standard()));
 }
 
 /* // fallback
@@ -1485,7 +1674,7 @@ matchVerify(
 						// C. Count mismatches and alignment score
 						score -= mismatchDelta;
 					else
-						std::cerr << "Unsupported score mode" << std::endl;
+						SEQAN_FAIL("Unsupported score mode!");
 				}
 				if (score < minScore)	// doesn't work for islands with errorThresh > maxErrors
 					break;
@@ -1495,28 +1684,33 @@ matchVerify(
 		{
 			maxScore = score;
 			if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
-				verifier.q.errors = -score;
+				verifier.m.score = score;
 			else
-				verifier.q.errors = errors;
+				verifier.m.score = errors;
 			verifier.m.beginPos = git - begin(host(inf), Standard());
-		} else if (scoreThresh > score)
+		}
+#ifdef RAZERS_ISLAND_CRITERION
+        else if (scoreThresh > score)
 		{
 			if (maxScore >= minScore)
 			{
 				// for RazerSErrors bestErrors == -maxScore
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
-				verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
+				verifier.m.pairScore = verifier.m.score = maxScore;
 				if (!verifier.oneMatchPerBucket)
 					verifier.push();
 				maxScore = minScore - 1;
 			}
 		}
+#else
+        (void)scoreThresh;
+#endif
 	}
 
 	if (maxScore >= minScore)
 	{
 		verifier.m.endPos = verifier.m.beginPos + ndlLength;
-		verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
+		verifier.m.pairScore = verifier.m.score = maxScore;
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
 		return true;
@@ -1577,7 +1771,12 @@ matchVerify(
 	int minScore = -(int)(ndlLength * verifier.options->errorRate);
 	TPosition maxPos = 0;
 	TPosition lastPos = length(inf);
+#ifdef RAZERS_ISLAND_CRITERION
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
+#else  // #ifdef RAZERS_ISLAND_CRITERION
+	unsigned minDistance = lastPos;
+    (void)minDistance;
+#endif  // #ifdef RAZERS_ISLAND_CRITERION
 
 	// find end of best semi-global alignment
 #ifdef RAZERS_BANDED_MYERS
@@ -1588,14 +1787,15 @@ matchVerify(
 #endif  // #ifdef RAZERS_BANDED_MYERS
 	{
 		TPosition const pos = position(hostIterator(myersFinder));
+#ifdef RAZERS_ISLAND_CRITERION
 		if (lastPos + minDistance < pos)
 		{
 			if (minScore <= maxScore)
 			{
 				verifier.m.endPos = beginPosition(inf) + maxPos + 1;
-				verifier.q.errors = -maxScore;
+				verifier.m.score = -maxScore;
 
-				verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
+				verifier.m.pairScore = verifier.m.score =  maxScore;
 				if (maxScore == 0)
 					verifier.m.beginPos = verifier.m.endPos - ndlLength;
 				else
@@ -1648,6 +1848,7 @@ matchVerify(
 				maxScore = minScore - 1;
 			}
 		}
+#endif  // #ifdef RAZERS_ISLAND_CRITERION
 		// if (getScore(myersPattern) >= maxScore)
 		if (getScore(state) >= maxScore)
 		{
@@ -1661,10 +1862,9 @@ matchVerify(
 	if (minScore <= maxScore)
 	{
 		verifier.m.endPos = beginPosition(inf) + maxPos + 1;
-		verifier.q.errors = -maxScore;
+		verifier.m.score = maxScore;
 
-
-		verifier.q.pairScore = verifier.q.score = 254 + maxScore;	// add 254 in order to avoid negative scores in SAM format
+		verifier.m.pairScore = verifier.m.score = maxScore;
 		if (maxScore == 0)
 			verifier.m.beginPos = verifier.m.endPos - ndlLength;
 		else
@@ -1799,8 +1999,8 @@ matchVerify(
 			if (minQualSum <= verifier.options->absMaxQualSumErrors)
 			{
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
-				verifier.q.pairScore = verifier.q.score = 254 - (int)minQualSum;	// add 254 in order to avoid negative scores in SAM format
-				verifier.q.errors = minErrors;
+				verifier.m.pairScore = verifier.m.score = - (int)minQualSum;
+				verifier.m.errors = minErrors;
 				verifier.push();
 				minQualSum = verifier.options->absMaxQualSumErrors + 1;
 			}
@@ -1810,8 +2010,8 @@ matchVerify(
 	if (minErrors <= maxErrors)
 	{
 		verifier.m.endPos = verifier.m.beginPos + ndlLength;
-		verifier.q.pairScore = verifier.q.score = 254 - (int)minQualSum;	// add 254 in order to avoid negative scores in SAM format
-		verifier.q.errors = minErrors;
+		verifier.m.pairScore = verifier.m.score = -(int)minQualSum;
+		verifier.m.errors = minErrors;
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
 		return true;
@@ -1837,7 +2037,7 @@ matchVerify(
 	TReadSet &,													// reads
 	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const &)
 {
-	std::cerr << "Verification not implemented!" << std::endl;
+    SEQAN_FAIL("Verification not implemented!");
 	return false;
 }
 
@@ -1845,6 +2045,7 @@ matchVerify(
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in a single genome sequence
 template <
+    typename TMatches,
 	typename TFragmentStore, 
 	typename TReadIndex, 
 	typename TSwiftSpec, 
@@ -1853,6 +2054,7 @@ template <
 	typename TRazerSMode,
 	typename TPreprocessing>
 void _mapSingleReadsToContig(
+    TMatches                                & matches,
 	TFragmentStore							& store,
 	unsigned								  contigId,				// ... and its sequence number
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPattern,
@@ -1873,7 +2075,8 @@ void _mapSingleReadsToContig(
 	
 	// VERIFICATION
 	typedef MatchVerifier <
-		TFragmentStore, 
+        TFragmentStore,
+		TMatches, 
 		TRazerSOptions, 
 		TRazerSMode,
 		TSwiftPattern,
@@ -1894,7 +2097,7 @@ void _mapSingleReadsToContig(
 
 	TReadSet		&readSet = host(host(swiftPattern));
 	TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
-	TVerifier		verifier(store, options, swiftPattern, cnts);
+	TVerifier		verifier(matches, options, swiftPattern, cnts);
 
 #ifndef RAZERS_BANDED_MYERS
 	verifier.preprocessing = &preprocessing;
@@ -1913,6 +2116,8 @@ void _mapSingleReadsToContig(
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate))
 	{
+        // std::cout << "read id = " << (*swiftFinder.curHit).ndlSeqNo << ", " << beginPosition(swiftFinder) << std::endl;
+        
 //        if (length(infix(swiftFinder)) < length(readSet[(*swiftFinder.curHit).ndlSeqNo]))
 //            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
 #ifdef RAZERS_BANDED_MYERS
@@ -1925,7 +2130,6 @@ void _mapSingleReadsToContig(
 	}
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
 		if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
-    std::cerr << "Compaction time: " << verifier.compactionTime << " s" << std::endl;
 }
 
 
@@ -1959,6 +2163,10 @@ int _mapSingleReads(
 	typedef typename Value<TReadSeqStore>::Type	const	TRead;
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 	// typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern;	// verifier
+
+    typedef typename TFragmentStore::TContigSeq TContigSeq;
+    typedef typename Position<TContigSeq>::Type TContigPos;
+    typedef MatchRecord<TContigPos> TMatchRecord;
 	
 	// configure Swift pattern
 	TSwiftPattern swiftPattern(readIndex);
@@ -2003,7 +2211,12 @@ int _mapSingleReads(
     options.timeBuildQGramIndex = 0;
     options.timeCompactMatches = 0;
     options.timeMaskDuplicates = 0;
+    options.timeFsCopy = 0;
 	SEQAN_PROTIMESTART(find_time);
+
+    // We collect the matches in a more compact data structure than the
+    // AlignedReadStoreElement from FragmentStore.
+    String<TMatchRecord> matches;
 	
 	// iterate over genome sequences
     for (unsigned contigId = 0; contigId < length(store.contigStore); ++contigId)
@@ -2013,9 +2226,9 @@ int _mapSingleReads(
 		lockContig(store, contigId);
 #ifndef RAZERS_WINDOW
 		if (options.forward)
-			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'F', options, mode, preprocessing);
+			_mapSingleReadsToContig(matches, store, contigId, swiftPattern, cnts, 'F', options, mode, preprocessing);
 		if (options.reverse)
-			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'R', options, mode, preprocessing);
+			_mapSingleReadsToContig(matches, store, contigId, swiftPattern, cnts, 'R', options, mode, preprocessing);
 #else
 		if (options.forward)
 			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'F', options, mode, preprocessing);
@@ -2024,14 +2237,38 @@ int _mapSingleReads(
 #endif
 		unlockAndFreeContig(store, contigId);
 	}
-	
+
 	options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
+    
+    double beginCopyTime = sysTime();
+    // Final mask duplicates and compact matches.
+    Nothing nothing;
+    if (IsSameType<TGapMode, RazerSGapped>::VALUE)
+        maskDuplicates(matches, options, mode);
+    compactMatches(matches, cnts, options, mode, nothing, COMPACT_FINAL);
+    // Write back to store.
+    reserve(store.alignedReadStore, length(matches));
+    reserve(store.alignQualityStore, length(matches));
+    typedef typename Iterator<String<TMatchRecord>, Standard>::Type TIterator;
+	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
+	typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
+    for (TIterator it = begin(matches), itEnd = end(matches); it != itEnd; ++it) {
+        SEQAN_ASSERT_NEQ(it->orientation, '-');
+        SEQAN_ASSERT_LEQ(it->beginPos, it->endPos);
+        if (it->orientation == 'R')
+            ::std::swap(it->beginPos, it->endPos);
+        appendValue(store.alignedReadStore, TAlignedReadStoreElem(length(store.alignQualityStore), it->readId, it->contigId, it->beginPos, it->endPos));
+        appendValue(store.alignQualityStore, TAlignedQualStoreElem(it->pairScore, it->score, -it->score));
+    }
+    options.timeFsCopy = sysTime() - beginCopyTime;
+
 	if (options._debugLevel >= 2) {
 		::std::cerr << "Masking duplicates took          \t" << options.timeMaskDuplicates << " seconds" << ::std::endl;
 		::std::cerr << "Compacting matches took          \t" << options.timeCompactMatches << " seconds" << ::std::endl;
 		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
+		::std::cerr << "Time for copying back            \t" << options.timeFsCopy << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
 		::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
@@ -2212,41 +2449,41 @@ int _mapReads(
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options)
 {
-   if (options.matchN) {
-       if (options.gapMode == RAZERS_GAPPED)
-        {
-            if (options.alignMode == RAZERS_LOCAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
-            if (options.alignMode == RAZERS_PREFIX)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
-            if (options.alignMode == RAZERS_GLOBAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
-        } else {
-            if (options.alignMode == RAZERS_LOCAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
-            if (options.alignMode == RAZERS_PREFIX)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesAll_>());
-            if (options.alignMode == RAZERS_GLOBAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
-        }
-   } else {
+//    if (options.matchN) {
+//        if (options.gapMode == RAZERS_GAPPED)
+//         {
+//             if (options.alignMode == RAZERS_LOCAL)
+//                 return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
+//             if (options.alignMode == RAZERS_PREFIX)
+//                 return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
+//             if (options.alignMode == RAZERS_GLOBAL)
+//                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
+//         } else {
+//             if (options.alignMode == RAZERS_LOCAL)
+//                 return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
+//             if (options.alignMode == RAZERS_PREFIX)
+//                 return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesAll_>());
+//             if (options.alignMode == RAZERS_GLOBAL)
+//                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
+//         }
+//    } else {
         if (options.gapMode == RAZERS_GAPPED)
         {
-            if (options.alignMode == RAZERS_LOCAL)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
-            if (options.alignMode == RAZERS_PREFIX)
-                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
+        //     if (options.alignMode == RAZERS_LOCAL)
+        //         return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
+        //     if (options.alignMode == RAZERS_PREFIX)
+        //         return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
            if (options.alignMode == RAZERS_GLOBAL)
                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesNone_>());
         } else {
-             if (options.alignMode == RAZERS_LOCAL)
-                 return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
-             if (options.alignMode == RAZERS_PREFIX)
-                 return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
+             // if (options.alignMode == RAZERS_LOCAL)
+             //     return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
+             // if (options.alignMode == RAZERS_PREFIX)
+             //     return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
              if (options.alignMode == RAZERS_GLOBAL)
                  return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
         }
-   }
+//    }
 	return RAZERS_INVALID_OPTIONS;
 }
 

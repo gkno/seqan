@@ -652,7 +652,7 @@ int dumpMatches(
 	}
 
 	TBinFunctor binFunctor(store.alignQualityStore);
-	maskDuplicates(store, options, mode);
+	// maskDuplicates(store, options, mode);
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	 && !options.maqMapping
@@ -663,11 +663,13 @@ int dumpMatches(
 		countMatches(store, stats, mode);
 	}
 
+    /*
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_COMPACT);
 #endif  // #ifdef RAZERS_PROFILE
 	Nothing nothing;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
+// TODO(holtgrew): Can this really be commented out?
 	if(options.maqMapping)
 	{
 		String<int> cooc;
@@ -677,10 +679,11 @@ int dumpMatches(
 	}
 	else	 
 #endif
-	compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
+        compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_COMPACT);
 #endif  // #ifdef RAZERS_PROFILE
+    */
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
 	calculateInsertSizes(libSize, store);
@@ -790,9 +793,10 @@ int dumpMatches(
 				if ((*it).pairMatchId != TAlignedRead::INVALID_ID)
 				{
 					file << _sep_ << (*it).pairMatchId << _sep_ << (int)store.alignQualityStore[(*it).id].pairScore << _sep_;
-					unsigned char no = getMateNo(store, (*it).readId);
-					if (no == 0) file << libSize[(*it).pairMatchId];
-					if (no == 1) file << -libSize[(*it).pairMatchId];
+                    if ((*it).beginPos < (*it).endPos)
+                        file << libSize[(*it).pairMatchId];
+                    else
+                        file << -libSize[(*it).pairMatchId];
 				}
 				file << '\n';
 
