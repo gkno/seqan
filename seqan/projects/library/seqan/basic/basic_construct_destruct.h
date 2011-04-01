@@ -437,7 +437,9 @@ _arrayConstructMoveDefault(TSource1 source_begin,
 	{
         // NOTE(holtgrew): Using value() here, used to be getValue() but
         // cannot move from const reference or proxy.
-		valueConstruct(target_begin, value(source_begin), Move());
+		// valueConstruct(target_begin, value(source_begin), Move());
+        // TODO(holtgrew): We need a "has move constructor" metafunction to switch between move/copy constructing before we can use the line here.
+		valueConstruct(target_begin, value(source_begin));
 		++source_begin;
 		++target_begin;
 	}
