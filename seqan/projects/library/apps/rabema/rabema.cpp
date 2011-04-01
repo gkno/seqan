@@ -101,7 +101,7 @@ int main(int argc, char const ** argv)
             return ret;
         return evaluateReadMapperResult(options);
     } else {
-        SEQAN_ASSERT_FAIL("Invalid reads type!");
+        SEQAN_ASSERT_FAIL("Invalid command!");
     }
 
     return 0;

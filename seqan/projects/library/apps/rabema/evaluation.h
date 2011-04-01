@@ -288,7 +288,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options<EvaluateResults> const 
         // Skip intervals with too high distance, ignore distance in oracle wit mode.
         //std::cerr << "it->distance == " << it->distance << std::endl;
         if (!options.oracleWitMode && static_cast<int>(it->distance) > options.maxError) continue;
-        //std::cerr << "insert(intervals, TInterval(" << value(it).firstPos << ", " << value(it).lastPos + 1 << ", " << value(it).id << "))" << std::endl;
+        // std::cerr << "insert(intervals, TInterval(" << value(it).firstPos << ", " << value(it).lastPos + 1 << ", " << value(it).id << "))" << std::endl;
 
         SEQAN_ASSERT_LEQ(value(it).firstPos, value(it).lastPos);
         appendValue(intervals, TInterval(value(it).firstPos, value(it).lastPos + 1, value(it).id));
@@ -374,8 +374,10 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options<EvaluateResults> const 
         //  std::cout << "stop here" << std::endl;
         //  std::cout << "readId == " << readId << ", getMateNo() == " << getMateNo(fragments, readId) << std::endl;
         //}
-        if (length(intervals) > 0u)
-          findIntervals(intervalTree, lastPos, foundIntervalIds);
+        if (length(intervals) > 0u) {
+            // std::cerr << "findIntervals(intervalTree, " << lastPos << ", foundIntervalIds);" << std::endl;
+            findIntervals(intervalTree, lastPos, foundIntervalIds);
+        }
 
         // Handle alignment out of target intervals.
         if (length(foundIntervalIds) == 0) {
