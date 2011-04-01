@@ -102,6 +102,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TValue>
 	inline bool _repeatMaskValue(TValue) 
 	{
+        // TODO(holtgrew): Maybe use unknownValue<TValue>() instead of specializing for all alphabets, especially since we have Rna5 now and might want Rna5Q later.
 		return false;
 	}
 
@@ -109,6 +110,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool _repeatMaskValue(Dna5 val) 
 	{
 		return val.value == 4; // 'N'
+	}
+
+	template <>
+	inline bool _repeatMaskValue(Dna5Q val) 
+	{
+        static const Dna5Q n = 'N';
+		return val.value == n.value; // 'N'
 	}
 
 	template <>
