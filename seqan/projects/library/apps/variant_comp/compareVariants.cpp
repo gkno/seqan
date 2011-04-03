@@ -108,6 +108,111 @@ bool loadGenomes(const char* fileName,
 	return (seqCount > 0);
 }
 
+inline int
+_parseReadNumber(CharString & file, unsigned & c)
+{
+	// Read number
+	String<char> str(file[c]);
+	while (c < length(file)-1) {
+		++c;
+		if (!_parseIsDigit(file[c])) break;
+		append(str, file[c]);
+	}
+	return atoi(toCString(str));
+}
+
+
+
+inline void
+_parseSkipWhitespace(CharString & file, unsigned & c)
+{
+	if ((unsigned) file[c] > 32) return;
+	while (c < length(file)-1) {
+		++c;
+		if ((unsigned) file[c] > 32) break;
+	}
+}
+
+
+
+inline void
+_parseReadIdentifier(CharString & file, CharString & str, unsigned & c)
+{
+	// Read identifier
+	append(str, file[c], Generous());
+	while (c < length(file)-1) {
+		++c;
+		if (!_parseIsAlphanumericChar(file[c])) break;
+		append(str, file[c], Generous());
+	}
+}
+
+
+template <typename TIndel, typename TOptions>
+void
+getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TOptions &options )
+{
+	unsigned c = 0;
+	CharString temp_str;
+	_parseReadIdentifier(ninethCol,temp_str,c);
+	if(options._debugLevel > 1)
+		::std::cout << temp_str << "\t";
+//      if(!(temp_str == "ID")) ::std::cout << "first feature field should be 'ID' but is " << temp_str<<::std::endl;
+
+	// skip the "="
+	++c;
+	// read the ID
+	clear(temp_str);
+	clear(indel.idStr);
+	CharString indelID;
+	_parseReadIdentifier(ninethCol,indel.idStr,c);
+	if(options._debugLevel > 1)
+		::std::cout << "myID = "<< indel.idStr << "\n";
+
+	// process tags in a loop
+	CharString current_tag;
+	clear(indel.insertionSeq);
+	_parseSkipWhitespace(ninethCol,c);
+	while(c < length(ninethCol))
+	{
+		// different tags are separated by ';'  
+		while(ninethCol[c] != ';')
+		{
+			if(c == length(ninethCol)-1) // end of line
+				break;
+			++c;
+		}
+		if(c == length(ninethCol)-1) // end of line
+			break;
+
+		// get the current tag
+		clear(current_tag);
+		++c;
+		_parseReadIdentifier(ninethCol,current_tag,c);
+		if(options._debugLevel > 1)
+			::std::cout << current_tag << " in features\n";
+		if(current_tag=="size")
+		{
+			++c;
+			indel.indelSize = _parseReadNumber(ninethCol,c);
+			if(options._debugLevel > 1)
+				::std::cout << indel.indelSize << " indel size\n";
+		}
+		else
+		{
+			if(current_tag=="duplication")indel.duplication = true;
+			else if(current_tag=="seq")
+			{
+				++c;
+				while(c < length(ninethCol) && ninethCol[c] != ';')
+				{
+					appendValue(indel.insertionSeq,(Dna5)ninethCol[c]);
+					++c;
+				}
+			}
+		}
+	}
+}
 
 
 /////////////////////////////////////////////////////////////
@@ -132,7 +237,7 @@ int readGFF(
 	file.open(filename, ::std::ios_base::in | ::std::ios_base::binary);
 	if (!file.is_open()) return 1;
 		
-	TIndel indel = {0,0,0,0,0,0};
+	TIndel indel = {0,0,0,0,0,0,0,0,0,0};
 	
 	clear(indelSet);
 	char c = _streamGet(file);
@@ -150,6 +255,8 @@ int readGFF(
 		// and read entry in column 1  --> genomeID
 		CharString temp_str;
 		_parseReadWordUntilWhitespace(file,temp_str,c); 
+		if(prefix(temp_str,3)=="chr")
+			temp_str = suffix(temp_str,3);
 		
 		TId contigId;
 		//check if the genomeID is in our map of relevant genomeIDs, otherwise skip match
@@ -163,21 +270,24 @@ int readGFF(
 			_parseSkipLine(file,c);
 			continue;
 		}
-		
+		indel.genomeId = contigId;
+
 		// skip whitespaces and read entry in column 2
 		_parseSkipWhitespace(file, c);
 		clear(temp_str);
 		_parseReadWordUntilWhitespace(file,temp_str,c); 
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
-		
+		indel.field2 = temp_str;
+
 		// skip whitespaces and read entry in column 3
 		_parseSkipWhitespace(file, c);
 		clear(temp_str);
 		_parseReadWordUntilWhitespace(file,temp_str,c); 
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
-		
+		indel.field3 = temp_str;
+
 		// skip whitespaces and read entry in column 4  --> genomic begin position
 		_parseSkipWhitespace(file, c);
 		indel.originalPos = (TContigPos) _parseReadNumber(file,c) - 1;
@@ -186,7 +296,7 @@ int readGFF(
 		
 		// skip whitespaces and read entry in column 5  --> genomic end position // not needed here
 		_parseSkipWhitespace(file, c);
-		_parseReadNumber(file,c);
+		indel.indelSize = _parseReadNumber(file,c) - indel.originalPos;
 		
 		// skip whitespaces and read entry in column 6  --> score (percent identity or mapping quality) or a '.'
 		int readSupport = 1000; //  --> no information about read support (reference indel)
@@ -210,7 +320,23 @@ int readGFF(
 		// skip whitespaces and read entry in column 9  --> tags, extra information. first tag is always "ID"
 		_parseSkipWhitespace(file, c);
 		clear(temp_str);
-		_parseReadIdentifier(file,temp_str,c);
+		
+		//remember this position and store the whole 9th column
+		//typename std::fstream::pos_type idtagstart = file.tellg();
+		clear(indel.ninethCol);
+		while(!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n'))) // while in same line
+		{
+			append(indel.ninethCol,c);
+			c = _streamGet(file);
+		}
+		if(options._debugLevel > 1) std::cout << "9thcol=" <<  indel.ninethCol << "\n\n";
+		
+		getInfoFromNinethCol(indel.ninethCol,indel,options);
+		
+		appendValue(indelSet,indel);
+		_parseSkipWhitespace(file, c);
+
+/*		_parseReadIdentifier(file,temp_str,c);
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\n";
 		if(temp_str!="ID") ::std::cout << "first feature field should be 'ID'"<<::std::endl;
@@ -258,11 +384,20 @@ int readGFF(
 			else
 			{
 				if(current_tag=="duplication") indel.duplication = true;
+				if(current_tag=="seq")
+				{
+					c = _streamGet(file);
+					while(!_streamEOF(file) && c != ';' && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n')))
+					{
+						 appendValue(indel.insertionSeq,(Dna5)c);
+						c = _streamGet(file);
+					}
+				}
 		//		else _parseSkipLine(file,c);
 			}
 		}
 		appendValue(indelSet,indel);
-		_parseSkipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);*/
 		
 	}
 
@@ -292,6 +427,7 @@ void printHelp(int, const char *[],TOptions &, bool longHelp = false)
 		cerr << "  -pt,  --position-tolerance NUM   \t" << "position tolerance in bp" << endl;
 		cerr << "  -st,  --size-tolerance NUM       \t" << "size tolerance in percent" << endl;
 		cerr << "  -sc,  --sequence-context         \t" << "switch on sequence-context mode" << endl;
+		cerr << "  -at,  --attach-tag STR           \t" << "string to attach as tag to overlapped indels" << endl;
 		cerr << "  -v,   --verbose                  \t" << "verbose mode" << endl;
 //		cerr << "  -vv,  --very-verbose             \t" << "very verbose mode" << endl;
 		cerr << "  -h,   --help                     \t" << "print this help" << endl;
@@ -367,6 +503,36 @@ int main(int argc, const char *argv[])
 				}
 				printHelp(argc, argv, options);
 				return 0;
+			}
+			if (strcmp(argv[arg], "-r") == 0 || strcmp(argv[arg], "--ranges") == 0) {
+				if (arg + 1 < argc) {
+					++arg;
+					fstream file;
+					clear(options.ranges);
+					file.open(argv[arg],ios_base::in | ios_base::binary);
+					char c = _streamGet(file);
+					while (!_streamEOF(file))
+					{
+						parseSkipWhitespace(file,c);
+						int rangeBegin = parseReadDouble(file,c);
+						parseSkipWhitespace(file,c);
+						int rangeEnd = parseReadDouble(file,c);
+						appendValue(options.ranges,Pair<int,int>(rangeBegin,rangeEnd));
+					}
+					file.close();
+					continue;
+				}
+				printHelp(argc, argv, options);
+				return 0;
+			}
+			if (strcmp(argv[arg], "-at") == 0 || strcmp(argv[arg], "--attach-tag") == 0) {
+				if (arg + 1 == argc) {
+					printHelp(argc, argv, options);
+					return 0;
+				}
+				++arg;
+				options.attachTag = argv[arg];
+				continue;
 			}
 			if (strcmp(argv[arg], "-o") == 0 || strcmp(argv[arg], "--output") == 0) {
 				if (arg + 1 == argc) {
