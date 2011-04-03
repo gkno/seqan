@@ -3,6 +3,8 @@ project (Seqan_Tests)
 
 # Some tests need OpenMP.
 find_package (OpenMP QUIET)
+find_package (Boost 1.35.0)  # >= 1.35 for math/distributions, however broken?
+find_package (TR1)
 
 ################################################################################
 # For the tests, we switch SeqAn into testing mode.
@@ -65,6 +67,11 @@ get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
 #if (EXISTS SEQAN_TESTS_ABS)
 	file(GLOB SEQAN_TESTS ${SEQAN_TESTS_ABS}/[A-z]*)
 	foreach (TEST_DIR ${SEQAN_TESTS})
+      if (EXISTS ${TEST_DIR}/config.h.in)
+        configure_file (${TEST_DIR}/config.h.in
+          ${TEST_DIR}/config.h)
+      endif (EXISTS ${TEST_DIR}/config.h.in)
+
 		file (RELATIVE_PATH TEST_DIR_REL ${SEQAN_TESTS_ABS} ${TEST_DIR})
 		file (GLOB TEST_SOURCES ${TEST_DIR}/[A-z]*.h ${TEST_DIR}/test_[A-z]*.cpp)
 		list (SORT TEST_SOURCES)
