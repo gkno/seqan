@@ -1124,7 +1124,7 @@ template <typename TContainer, typename THostspec>
 inline void
 valueConstruct(Iter<TContainer, Packed<THostspec> > const & /*it*/)
 {
-    // TODO(holtgrew): Why not assign 0?
+    // TODO(holtgrew): Why not assign default-constructed?
 }
 
 template <typename TContainer, typename THostspec, typename TParam>
