@@ -10,7 +10,7 @@
 #include <seqan/misc/misc_parsing.h>
 #include <seqan/refinement.h>
 
-#include "compareVariants.h"
+#include "variant_comp.h"
 
 using namespace std;
 using namespace seqan;
