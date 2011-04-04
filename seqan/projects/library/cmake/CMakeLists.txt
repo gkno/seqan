@@ -59,6 +59,16 @@ set (SEQAN_TARGET "Seqan")
 INCLUDE_DIRECTORIES(${SEQAN_LIBRARY}/lib/samtools)
 
 ################################################################################
+# Try to find execinfo.h
+################################################################################
+
+include(CheckIncludeFiles)
+check_include_files(execinfo.h HAVE_EXECINFO)
+if (HAVE_EXECINFO)
+  add_definitions(-DSEQAN_HAS_EXECINFO=1)
+endif (HAVE_EXECINFO)
+
+################################################################################
 # Define SeqAn Library Related Variables
 #
 # We define some variables that contain the base path of the library,

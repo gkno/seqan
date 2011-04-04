@@ -57,7 +57,9 @@
 #include <Windows.h>	// DeleteFile()
 #else  // #ifdef PLATFORM_WINDOWS
 #include <unistd.h>		// unlink()
+#if SEQAN_HAS_EXECINFO
 #include <execinfo.h>	// backtrace(), backtrace_symbols()
+#endif  // #if SEQAN_HAS_EXECINFO
 #include <cxxabi.h>		// __cxa_demangle()
 #include <signal.h>
 #endif  // #ifdef PLATFORM_WINDOWS
@@ -270,7 +272,7 @@ void printDebugLevel(TStream &stream) {
     stream << "SEQAN_CXX_FLAGS == \"" << SEQAN_CXX_FLAGS << "\"" << std::endl;
 }
 
-#ifdef PLATFORM_WINDOWS
+#if defined(PLATFORM_WINDOWS) || !SEQAN_HAS_EXECINFO
 	
 	template <typename TSize>
 	void printStackTrace(TSize /*maxFrames*/)
@@ -398,8 +400,8 @@ void printDebugLevel(TStream &stream) {
 		volatile int signalHandlersDummy_ = SignalHandlersDummy_<void>::i;
 	}
 
-#endif // #if SEQAN_ENABLE_DEBUG
-#endif // #ifdef PLATFORM_WINDOWS
+#endif  // #if SEQAN_ENABLE_DEBUG
+#endif  // defined(PLATFORM_WINDOWS) || !SEQAN_HAS_EXECINFO
 
 
 // Namespace for the testing infrastructure.
