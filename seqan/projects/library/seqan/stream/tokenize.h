@@ -40,10 +40,31 @@
 // NOTHING HERE IS TESTED YET
 
 
-#define IO_TOKENIZE_EOF_BEFORE_SUCCESS 1024
-#define IO_TOKONIZE_NO_SUCCESS 1025
 
 namespace seqan {
+
+// ----------------------- enum ------------------------------------
+
+/**
+.Enum.Tokenize::Result
+..cat:Input / Output
+..summary:Enum with return values for Tokenizing operations.
+..value.SUCCESS:Reading the specified data succeeded.
+..value.EOF_BEFORE_SUCCESS:End of file was reached before the pattern was found.
+..value.NO_SUCCESS:The pattern was not found.
+..see:Function.mmapAdvise
+..include:seqan/stream.h
+ */
+struct Tokenize
+{
+    enum Result {
+        SUCCESS = 0,
+        EOF_BEFORE_SUCCESS = 1024,
+        NO_SUCCESS = 1025
+    };
+};
+
+
 
     
 // ----------------------- Helper structs ------------------------------------
@@ -194,7 +215,7 @@ _readHelper(TBuffer & buffer,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return Tokenize::EOF_BEFORE_SUCCESS;
 }
 
 template <typename TSpec, // specialization of character comparison
@@ -227,7 +248,7 @@ _skipHelper(TRecordReader & reader,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return Tokenize::EOF_BEFORE_SUCCESS;
 }
 
 template <typename TTagSpec, typename TRecordReader>
@@ -266,7 +287,7 @@ _readHelper(TBuffer & buffer,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return Tokenize::EOF_BEFORE_SUCCESS;
 }
 
 
@@ -293,7 +314,7 @@ _readAndCompareWithStr(TRecordReader & reader,
     for (int i = 0; i < length(str); ++i)
     {
         if (atEnd(reader))
-            return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+            return Tokenize::EOF_BEFORE_SUCCESS;
         if (value(reader) != str[i]) //mismatch
             break;
         if (i == length(str)) // win
@@ -302,17 +323,36 @@ _readAndCompareWithStr(TRecordReader & reader,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return win ? 0 : IO_TOKENIZE_NO_SUCCESS;
+    return win ? 0 : Tokenize::NO_SUCCESS;
 }
 
 
 
 // ----------------------- the real deal ------------------------------------
 
-//TODO document
+/**
+.Function.readUntilWhitespace
+..cat:Input/Output
+..summary:Read characters from stream into buffer until Whitespace is encountered
+..signature:readUntilWhitespace(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString, Shortcut.DnaString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
+..remarks:This function stops *on* the whitespace character. The whitespace is not written to buffer.
+..include:seqan/stream.h
+..see:Function.isspace
+..see:Function.skipUntilWhitespace
+..see:Enum.Tokenize::Result
+ */
+
 template <typename TBuffer, typename TStream, typename TPass>
-inline int readUntilWhitespace(TBuffer & buffer,
-                               RecordReader<TStream, TPass> & reader)
+inline int
+readUntilWhitespace(TBuffer & buffer,
+                    RecordReader<TStream, TPass> & reader)
 {
     return _readHelper(buffer,
                        reader,
@@ -338,24 +378,62 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
 }*/
 
 
-//TODO document
+/**
+.Function.readUntilBlank
+..cat:Input/Output
+..summary:Read characters from stream into buffer until Blank is encountered
+..signature:readUntilBlank(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString, Shortcut.DnaString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:Blank is '' and '\t', see @Function.isblank@
+..remarks:This function stops *on* the blank character. The blank is not written to buffer.
+..include:seqan/stream.h
+..see:Function.isblank
+..see:Function.skipUntilBlank
+..see:Enum.Tokenize::Result
+ */
 template <typename TBuffer, typename TStream, typename TPass>
-inline int readUntilBlank(TBuffer & buffer.
-                          RecordReader<TStream, TPass> & reader)
+inline int
+readUntilBlank(TBuffer & buffer.
+               RecordReader<TStream, TPass> & reader)
 {
     return _readHelper(buffer,
                        reader,
                        Blank_());
 }
 
-//TODO document
-template <typename TStream, typename TPass, typename TChar>
-inline int readUntilChar(TBuffer & buffer,
-                      RecordReader<TStream, TPass> & reader,
-                      TChar const x)
+/**
+.Function.readUntilChar
+..cat:Input/Output
+..summary:Read characters from stream into buffer until Char is encountered
+..signature:readUntilChar(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, TChar const & x)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString, Shortcut.DnaString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.x:The character to stop on
+...type:$char$ or similar
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops *on* the character x. It is not written to buffer.
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+..see:skipUntilChar
+ */
+template <typename TBuffer, typename TStream, typename TPass, typename TChar>
+inline int
+readUntilChar(TBuffer & buffer,
+              RecordReader<TStream, TPass> & reader,
+              TChar const & x)
 {
+    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
+
     clear(buffer);
-    typedef Value<TRecordReader::_buffer>::Type TChar;
+
     while (!atEnd(reader))
     {
         TChar c = value(reader);
@@ -366,23 +444,41 @@ inline int readUntilChar(TBuffer & buffer,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return Tokenize::EOF_BEFORE_SUCCESS;
 }
 
-//TODO document
-template <typename TStream, typename TPass, typename TChar>
-inline int readNChars(RecordReader<TStream, TPass> & reader,
-                      TBuffer & buffer,
-                      uint n)
+/**
+.Function.readNChars
+..cat:Input/Output
+..summary:Read exactly n characters from stream into buffer
+..signature:readNChars(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, uint const n)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString, Shortcut.DnaString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.n:The number of characters to read
+...type:$uint$
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..include:seqan/stream.h
+..see:Function.isblank
+..see:Enum.Tokenize::Result
+ */
+template <typename TBuffer, typename TStream, typename TPass, typename TChar>
+inline int
+readNChars(TBuffer & buffer,
+           RecordReader<TStream, TPass> & reader,
+           uint const n)
 {
+    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
+
     clear(buffer);
     resize(buffer, n);
-    int i = 0;
-    typedef Value<TRecordReader::_buffer>::Type TChar;
+
     for (int i = 0; i < n; ++i)
     {
         if (atEnd(reader))
-            return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+            return Tokenize::EOF_BEFORE_SUCCESS;
         assignValue(buffer, i, value(reader));
 
         goNext(reader);
@@ -393,32 +489,82 @@ inline int readNChars(RecordReader<TStream, TPass> & reader,
 }
 
 // ---
-
-//TODO document
+/**
+.Function.skipUntilWhitespace
+..cat:Input/Output
+..summary:Skip (i.e. read without saving) characters from stream until Whitespace is encountered
+..signature:skipUntilWhitespace(RecordReader<TStream, TPass> & recordReader)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error skiping
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
+..remarks:This function stops *on* the whitespace character. The whitespace is not skipped.
+..include:seqan/stream.h
+..see:Function.isspace
+..see:Function.skipWhitespaces
+..see:Function.readUntilWhitespace
+..see:Enum.Tokenize::Result
+ */
 template <typename TStream, typename TPass>
-inline int skipUntilWhitespace(RecordReader<TStream, TPass> & reader)
+inline int
+skipUntilWhitespace(RecordReader<TStream, TPass> & reader)
 {
-    return _skipHelper< CharCompare_<Whitespace_>,
-                        RecordReader<TStream, TPass> >
-                        (reader);
+    return _skipHelper(reader, Whitespace_());
 }
 
-//TODO document
+/**
+.Function.skipUntilBlank
+..cat:Input/Output
+..summary:Skip (i.e. read without saving) characters from stream until Blank is encountered
+..signature:skipUntilBlank(RecordReader<TStream, TPass> & recordReader)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error skiping
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops *on* the blank character. The blank is not skipped.
+..include:seqan/stream.h
+..see:Function.isblank
+..see:Enum.Tokenize::Result
+..see:Function.readUntilBlank
+ */
 template <typename TStream, typename TPass>
-inline int skipUntilBlank(RecordReader<TStream, TPass> & reader)
+inline int
+skipUntilBlank(RecordReader<TStream, TPass> & reader)
 {
-    return _skipHelper< CharCompare_<Blank_>,
-                        RecordReader<TStream, TPass> >
-                        (reader);
+    return _skipHelper(reader, Blank_());
 }
-
-//TODO document
-template <typename TStream, typename TPass>
-inline int skipUntilGraph(RecordReader<TStream, TPass> & reader)
+/* OLD FUNCTION
+template <typename TIterator>
+inline bool
+_seekWhiteSpace(TIterator &it, TIterator itEnd)
 {
-    return _skipHelper< CharCompare_<Graph_>,
-                        RecordReader<TStream, TPass> >
-                        (reader);
+    while (!_isWhiteSpace(*it))
+        if (++it == itEnd) return false;
+    return true;
+}*/
+
+
+/**
+.Function.skipUntilGraph
+..cat:Input/Output
+..summary:Skip (i.e. read without saving) characters from stream until printable, non-' ' character is encountered
+..signature:skipUntilGraph(RecordReader<TStream, TPass> & recordReader)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error skiping
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops *on* the graph character. The graph is not skipped.
+..remarks:See @Function.isgraph@ for details on the "graph"-group of characters
+..include:seqan/stream.h
+..see:Function.isgraph
+..see:Enum.Tokenize::Result
+ */
+template <typename TStream, typename TPass>
+inline int
+skipUntilGraph(RecordReader<TStream, TPass> & reader)
+{
+    return _skipHelper(reader, Graph_());
 }
 /* OLD FUNCTION, note that old function has wrong name -> see isgraph()
 template<typename TFile, typename TChar>
@@ -433,11 +579,29 @@ _parseSkipWhitespace(TFile& file, TChar& c)
 }*/
 
 
-//TODO document
-template <typename TStream, typename TPass>
-inline int skipUntilX(RecordReader<TStream, TPass> & reader, const char x)
+/**
+.Function.skipUntilChar
+..cat:Input/Output
+..summary:Skip (i.e. read without saving) characters from stream until Char is encountered
+..signature:skipUntilChar(RecordReader<TStream, TPass> & recordReader, TChar const & x)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.x:The character to stop on
+...type:$char$ or similar
+..returns:$int$, 0 if there was no error skiping
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops *on* the character x. x is not skipped.
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+..see:Function.readUntilChar
+ */
+template <typename TStream, typename TPass, typename TChar>
+inline int
+skipUntilChar(RecordReader<TStream, TPass> & reader,
+              TChar const & x)
 {
-    typedef Value<TRecordReader::_buffer>::Type TChar;
+    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
+
     while (!atEnd(reader))
     {
         TChar c = value(reader);
@@ -447,7 +611,7 @@ inline int skipUntilX(RecordReader<TStream, TPass> & reader, const char x)
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return IO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return Tokenize::EOF_BEFORE_SUCCESS;
 }
 
 /* OLD FUNCTION
@@ -480,28 +644,54 @@ SEQAN_CHECKPOINT
     return false;
 }
 
+can also replace things like:
+template <typename TIterator>
+inline bool
+_seekTab(TIterator& it, TIterator itEnd)
+{
+    for (; it != itEnd; ++it)
+        if (*it == '\t') return true;
+    return false;
+}
+
 */
 
 
-//TODO document
+/**
+.Function.skipUntilString
+..cat:Input/Output
+..summary:Skip (i.e. read without saving) characters from stream until String is encountered
+..signature:skipUntilString(RecordReader<TStream, TPass> & recordReader, TString const & str)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.str:The string to stop on
+...type:$char$ or similar
+..returns:$int$, 0 if there was no error skiping
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops *behind* the character string
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+..see:Function.skipUntilChar
+ */
 // I think this function is stupid, but it is implemented in misc_parsing.h
 // so I offer replacement; with proper buffering shiftOr would be faster
 template <typename TStream, typename TPass, typename TString>
-inline int skipUntilString(RecordReader<TStream, TPass> & reader,
-                           const TString & str)
+inline int
+skipUntilString(RecordReader<TStream, TPass> & reader,
+                           TString const & str)
 {
     if (length(str) < 1)
         return -1; //TODO some better error code
-    while(skipUntilX(reader, str[0])==0)
+    while(skipUntilChar(reader, str[0])==0)
     {
         switch(int r = _readAndCompareWithStr(reader, str))
         {
             case 0: return 0;
-            case IO_TOKONIZE_NO_SUCCESS: break;
+            case Tokenize::NO_SUCCESS: break;
             default: return r;
         }
     }
-    returnIO_TOKENIZE_EOF_BEFORE_SUCCESS;
+    return Tokenize::EOF_BEFORE_SUCCESS;
     /* NOTE I am not 100% sure this will get every pattern with repitions in it.
      * it should be much better than the original, since it escapes on mismatch
      * directly and doesnt read (and possibly discard) N charecters in a row,
@@ -531,15 +721,31 @@ SEQAN_CHECKPOINT
 
 // ---
 
-//TODO document
+/**
+.Function.readLetters
+..cat:Input/Output
+..summary:Read characters from stream as long as characters are letters
+..signature:skipLetters(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString, Shortcut.DnaString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops *behind* the last letter read.
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+..see:Function.isalpha
+ */
 template <typename TStream, typename TPass, typename TBuffer>
-inline int readLetters(RecordReader<TStream, TPass> & reader,
-                      TBuffer & buffer)
+inline int
+readLetters(TBuffer & buffer,
+                       RecordReader<TStream, TPass> & reader)
 {
-    return _readHelper< CharCompare_<Alpha_>,
-                        RecordReader<TStream, TPass>,
-                        TBuffer >
-                        (reader, buffer, false);
+    return _readHelper(buffer,
+                       reader,
+                       Alpha_(),
+                       false);
 }
 /* OLD FUNCTION, note that it has a wrong name (word is usually alphanum)
 template<typename TFile, typename TChar>
@@ -557,15 +763,31 @@ _parseReadWord(TFile & file, TChar& c)
 }*/
 
 
-//TODO document
+/**
+.Function.readAlphaNums
+..cat:Input/Output
+..summary:Read characters from stream as long as characters are letters
+..signature:skipAlphaNums(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops *behind* the last letter read.
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+..see:Function.isalnum
+ */
 template <typename TStream, typename TPass, typename TBuffer>
-inline int readAlphaNums(RecordReader<TStream, TPass> & reader,
-                         TBuffer & buffer)
+inline int
+readAlphaNums(TBuffer & buffer,
+                         RecordReader<TStream, TPass> & reader)
 {
-    return _readHelper< CharCompare_<AlphaNum_>,
-                        RecordReader<TStream, TPass>,
-                        TBuffer >
-                        (reader, buffer, false);
+    return _readHelper(buffer,
+                       reader,
+                       AlphaNum_(),
+                       false);
 }
 /* OLD FUNCTION 
 template<typename TFile, typename TString, typename TChar>
@@ -582,22 +804,52 @@ _parseReadIdentifier(TFile & file, TString& str, TChar& c)
 }*/
 
 
-//TODO document
+/**
+.Function.skipWhitespaces
+..cat:Input/Output
+..summary:Skip (i.e. read without saving) characters from stream until non-Whitespace is encountered
+..signature:skipWhitespaces(RecordReader<TStream, TPass> & recordReader)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error skiping
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
+..remarks:This function stops *behind* the last whitespace character.
+..include:seqan/stream.h
+..see:Function.isspace
+..see:Function.readUntilWhitespace
+..see:Function.skipUntilWhitespace
+..see:Enum.Tokenize::Result
+ */
 template <typename TStream, typename TPass>
-inline int skipWhitespaces(RecordReader<TStream, TPass> & reader)
+inline int
+skipWhitespaces(RecordReader<TStream, TPass> & reader)
 {
-    return _skipHelper< CharCompare_<Whitespace_>,
-                        RecordReader<TStream, TPass> >
-                        (reader, false);
+    return _skipHelper(reader, Whitespace_(), false);
 }
 
-//TODO document
+/**
+.Function.skipBlanks
+..cat:Input/Output
+..summary:Skip (i.e. read without saving) characters from stream until non-Blank is encountered
+..signature:skipBlanks(RecordReader<TStream, TPass> & recordReader)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error skiping
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:Blank is more than '' and '\t', see @Function.isspace@
+..remarks:This function stops *behind* the last whitespace character.
+..include:seqan/stream.h
+..see:Function.isspace
+..see:Function.readUntilBlank
+..see:Function.skipUntilBlank
+..see:Enum.Tokenize::Result
+ */
 template <typename TStream, typename TPass>
-inline int skipBlanks(RecordReader<TStream, TPass> & reader)
+inline int
+skipBlanks(RecordReader<TStream, TPass> & reader)
 {
-    return _skipHelper< CharCompare_<Blank_>,
-                        RecordReader<TStream, TPass> >
-                        (reader, false);
+    return _skipHelper(reader, Blank_(), false);
 }
 
 /* OLD FUNCTION, note that it has a wrong name
@@ -628,25 +880,33 @@ _parseSkipBlanks(TFile& file, TChar& c)
 */
 
 
-
-//TODO document
+/**
+.Function.readLine
+..cat:Input/Output
+..summary:Read a line from stream and save it to buffer
+..signature:readLine(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops on the beginning of the next line, if there is a next line
+..remarks:End-line characters are not written to buffer.
+..remarks:Works on ANSI EOL and on Unix EOL.
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+ */
 template <typename TStream, typename TPass, typename TBuffer>
-inline int readLine(RecordReader<TStream, TPass> & reader,
-                          TBuffer & buffer)
+inline int
+readLine(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 {
-    int r = _readHelper< CharCompare_<UnixEOL_>,
-                         CharCompare_<BackslashR_>, // just ignore carriage return
-                         RecordReader<TStream, TPass>,
-                         TBuffer >
-                         (reader, buffer);
+    int r = _readHelper(buffer,
+                        reader,
+                        UnixEOL_(), // abort on Newline
+                        BackslashR_()); // just ignore carriage return
     if (r != 0)
         return r;
-
-//      replaced by ignoring BackslashR directly
-//     // if file is in windows format we have \r in our buffer that has to go
-//     if (value(buffer, length(buffer)-1) == '\r')
-//         resize(buffer, length(buffer)-1); 
-//         // TODO no realloc happens here, right?
 
     if (!atEnd(reader))
         goNext(reader); // go to beginning of next line
@@ -654,22 +914,43 @@ inline int readLine(RecordReader<TStream, TPass> & reader,
     return resultCode(reader);
 }
 
-//TODO document
+/**
+.Function.readLineStripTrailingBlanks
+..cat:Input/Output
+..summary:Read a line from stream and save it to buffer, remove trailing blanks
+..signature:readLineStripTrailingBlanks(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops on the beginning of the next line, if there is a next line
+..remarks:End-line characters and all trailing blanks are not written to buffer.
+..remarks:Works on ANSI EOL and on Unix EOL.
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+..see:Function.isblank
+ */
 template <typename TStream, typename TPass, typename TBuffer>
-inline int readLineStripTrailingBlanks(RecordReader<TStream, TPass> & reader,
-                                       TBuffer & buffer)
+inline int
+readLineStripTrailingBlanks(TBuffer & buffer,
+                            RecordReader<TStream, TPass> & reader)
 {
     int r = readLine(reader, buffer);
 
     if (r != 0)
-        return r;
+        return r;   // 1234567890
 
     LENGTH<buffer> pos = length(buffer) -1;
 
-    while (isblank(value(buffer, pos)) == 0) --pos;
+    if (pos < 0)
+        return 0;
+
+    while ((isblank(value(buffer, pos)) == 0) && (pos >= 0)) --pos;
 
     if (pos + 1 != length(buffer))
-        resize(buffer, pos+1);
+        resize(buffer, pos+1, Exact());
     return 0;
 }
 /* OLD FUNCTION
@@ -701,14 +982,27 @@ _parseReadFilepath(TFile& file, TChar& c)
 }*/
 
 
-
-//TODO document
+/**
+.Function.skipLine
+..cat:Input/Output
+..summary:Skip a line in stream and go to beginning of next
+..signature:readLine(RecordReader<TStream, TPass> & recordReader)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:$int$, 0 if there was no error reading
+..returns:non-zero value on errors, especially Tokenize::EOF_BEFORE_SUCCESS
+..remarks:This function stops on the beginning of the next line, if there is a next line
+..remarks:Works on ANSI EOL and on Unix EOL.
+..include:seqan/stream.h
+..see:Enum.Tokenize::Result
+..see:Function.readLine
+ */
 template <typename TStream, typename TPass>
-inline int skipLine(RecordReader<TStream, TPass> & reader)
+inline int
+skipLine(RecordReader<TStream, TPass> & reader)
 {
-    int r = _skipHelper< CharCompare_<UnixEOL_>,
-                         RecordReader<TStream, TPass> >
-                         (reader);
+    int r = _skipHelper(reader, UnixEOL_());
+
     if (r != 0)
         return r;
 
@@ -739,30 +1033,30 @@ _parseSkipLine(TFile& file, TChar& c)
 
 //TODO document
 template <typename TStream, typename TPass, typename TBuffer>
-inline int readDna5IgnoreWhitespaces(RecordReader<TStream, TPass> & reader,
-                                     TBuffer & buffer)
+inline int
+readDna5IgnoringWhitespaces(TBuffer & buffer,
+                          RecordReader<TStream, TPass> & reader)
 {
-    return _readHelper< CharCompare_<Dna5_>,
-                        CharCompare_<Whitespace_>,
-                        RecordReader<TStream, TPass>,
-                        TBuffer >
-                        (reader, buffer);
+    return _readHelper(buffer, reader, Dna5_(), Whitespace_(), false);
 } 
 // this would read a fasta or fastq sequence, since meta and qualities begin 
 // with special chars
 
 
 //TODO document
-// also skips non-graph characters at linestart, c must not be with non-graph
+// also skips non-graph characters at linestart, c must not be non-graph
 // NOTE that position is on c, like in old function
 // NOTE also, that we DO NOT reset in case of search failure as that would
 // require seek
-template <typename TStream, typename TPass>
-inline int skipUntilLineBeginsWithC(RecordReader<TStream, TPass> & reader,
-                                    const TChar & c )
+template <typename TStream, typename TPass, typename TChar>
+inline int
+skipUntilLineBeginsWithChar(RecordReader<TStream, TPass> & reader,
+                            TChar const & c )
 {
+    if (!isgraph(c))
+        return 
     int r = 0;
-    while ((r = skipLine(reader)) == 0 )
+    while (!atEnd(reader) && (r = skipLine(reader)) == 0 )
     {
         r = skipUntilGraph(reader);
         if (r != 0)
@@ -770,6 +1064,8 @@ inline int skipUntilLineBeginsWithC(RecordReader<TStream, TPass> & reader,
         if (value(reader) == c)
             return 0;
     }
+    if (atEnd(reader))
+        return Tokenize::EOF_BEFORE_SUCCESS;
     return r;
 }
 
@@ -802,11 +1098,12 @@ SEQAN_CHECKPOINT
 // string exists. NOTE also, that we DO NOT reset in case of search failure
 // as that would require seek
 template <typename TStream, typename TPass, typename TString>
-inline int skipUntilLineBeginsWithStr(RecordReader<TStream, TPass> & reader,
-                                      const TString & str )
+inline int
+skipUntilLineBeginsWithStr(RecordReader<TStream, TPass> & reader,
+                           const TString & str )
 {
     int r = 0;
-    while ((r = skipLine(reader)) == 0 )
+    while (!atEnd(reader) && (r = skipLine(reader)) == 0 )
     {
         r = skipUntilGraph(reader);
         if (r != 0)
@@ -814,10 +1111,12 @@ inline int skipUntilLineBeginsWithStr(RecordReader<TStream, TPass> & reader,
         switch(r = _readAndCompareWithStr(reader, str))
         {
             case 0: return 0;
-            case IO_TOKONIZE_NO_SUCCESS: break;
+            case Tokenize::NO_SUCCESS: break;
             default: return r;
         }
     }
+    if (atEnd(reader))
+        return Tokenize::EOF_BEFORE_SUCCESS;
     return r;
 }
 /* OLD FUNCTION 
@@ -845,6 +1144,67 @@ SEQAN_CHECKPOINT
     c = c_before;
     return false;
 }*/
+
+//TODO document
+// also skips non-graph characters at linestart, c must not be non-graph
+// NOTE that position is on c, like in old function
+// NOTE also, that we DO NOT reset in case of search failure as that would
+// require seek
+template <typename TStream, typename TPass, typename TString>
+inline int
+skipUntilLineBeginsWithOneCharOfStr(RecordReader<TStream, TPass> & reader,
+                                    TString const & str )
+{
+    if (!isgraph(c))
+        return
+    int r = 0;
+    while (!atEnd(reader) && (r = skipLine(reader)) == 0 )
+    {
+        r = skipUntilGraph(reader);
+        if (r != 0)
+            return r;
+        for (int i = 0; i < length(str); ++i)
+        {
+            if (value(reader) == value(str,i))
+                return 0;
+        }
+
+    }
+    if (atEnd(reader))
+        return Tokenize::EOF_BEFORE_SUCCESS;
+    return r;
+}
+/* OLD FUNCTION:
+/////////////////////////////////////////////////////////////////////////////////
+//parse until line begins with one of the characters in string x (skip whitespaces)
+//zeigt am ende darauf!
+template<typename TFile, typename TChar, typename TSize>
+inline bool
+_parseUntilBeginLineOneOf(TFile & file, TChar& c, String<TChar> & x, TSize len)
+{
+//IOREV _nodoc_ _hasCRef_ _requiresSeek_ rename to something more understandable; does a "reset", if seek fails; unify behaviour and doc with similar functions
+SEQAN_CHECKPOINT
+    _parseSkipWhitespace(file,c);
+    typename Position<TFile>::Type pos = _streamTellG(file);
+    TChar c_before = c;
+    bool found = false;
+    while (!_streamEOF(file)){
+        for(int i = 0; i < len; ++i)
+            if(c == x[i])
+            {
+                found = true;
+                break;
+            }
+        if(found) break;
+        _parseSkipLine(file, c);
+        _parseSkipWhitespace(file,c);
+    }
+    if(!_streamEOF(file)) return true;
+    _streamSeekG(file,pos);
+    c = c_before;
+    return false;
+}*/
+
 
 
 // TODO missing functions from misc_parsing.h:

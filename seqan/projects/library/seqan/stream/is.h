@@ -47,7 +47,7 @@
 ..signature:isalnum(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isalnum/
 ..see:http://www.cppreference.com/wiki/string/character_classes
@@ -61,7 +61,7 @@
 ..signature:isalpha(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isalpha/
 ..see:http://www.cppreference.com/wiki/string/character_classes
@@ -75,7 +75,7 @@
 ..signature:isdigit(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isdigit/
 ..see:http://www.cppreference.com/wiki/string/character_classes
@@ -89,7 +89,7 @@
 ..signature:iscntrl(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/iscntrl/
 ..see:http://www.cppreference.com/wiki/string/character_classes
@@ -103,7 +103,7 @@
 ..signature:isprint(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isprint/
 ..see:http://www.cppreference.com/wiki/string/character_classes
@@ -118,7 +118,7 @@
 ..signature:isgraph(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isgraph/
 ..see:http://www.cppreference.com/wiki/string/character_classes
@@ -135,7 +135,7 @@
 ..signature:isspace(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..remarks: NOTE: White-Space contains more than space and tab characters, if you want to check for that, use Function.isblank instead!
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isspace/
@@ -151,7 +151,7 @@
 ..signature:isblank(int c)
 ..param.c:the character to be checked
 ...type:int
-..returns:$true$(non-zero) if the check is successful and false (zero) otherwise
+..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isblank/
 ..see:http://www.cppreference.com/wiki/string/character_classes
