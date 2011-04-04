@@ -120,21 +120,22 @@ _delCuts(TSize R, TSize M1, TSize M2)
 
 
 //#Del describes the possible number of configurations
-//#for a string of length R 
+//#for a string of length R in a sequence of length S
 template<typename TSize>
 TSize
-_del(TSize R, TSize S)
+_del(TSize R, TSize S, TSize maxD, TSize minD)
 {
-	return((S-R)*(S-R+1)/2);
+	//return((S-R)*(S-R+1)/2);
+	return (maxD-minD+1)*(S-R+1) - ((maxD+1)*maxD)/2 + ((minD-1)*minD)/2;
 }
 
 
 //#function for calculating expected matches with deletion of size D
 template<typename TSize, typename TValue>
 double
-_expMatchesDel(TSize R, TSize M1, TSize M2, TValue d, TValue d_m1, TValue d_m2, TSize S, TSize T)
+_expMatchesDel(TSize R, TSize M1, TSize M2, TValue d, TValue d_m1, TValue d_m2, TSize S, TSize T, TSize maxD, TSize minD )
 {
-	return ((double)T*(_probability(R,M1,M2,d,d_m1,d_m2))*_delCuts(R,M1,M2)*_del(R,S));
+	return ((double)T*(_probability(R,M1,M2,d,d_m1,d_m2))*_delCuts(R,M1,M2)*_del(R,S,maxD,minD));
 }
 
 template<typename TReadSet, typename TSize, typename TOptions>
@@ -147,12 +148,14 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 	TSize d_m2 = (int) options.maxSuffixErrors;
 	TSize numReads = length(readSet);
 	genomeLen = options.specifiedGenomeLen;
-	if(options.anchored) genomeLen = options.maxGap;
+	if(options.anchored) genomeLen = options.maxGap + 2*options.libraryError;
 	TSize readLen = (numReads > 0) ? length(readSet[0]) : 0;
 	TSize numErrors = static_cast<int>(readLen * options.errorRate);
-	
+	TSize maxD = options.maxGap;
+	TSize minD = options.minGap;
+
 	//expected number of random deletion matches:
-	double delMatches = _expMatchesDel(readLen,M1,M2,numErrors,d_m1, d_m2, genomeLen, numReads);
+	double delMatches = _expMatchesDel(readLen,M1,M2,numErrors,d_m1, d_m2, genomeLen, numReads, maxD, minD);
 	if (options.reverse) delMatches *= 2;
 	
 	//expected number of random deletion matches:
@@ -160,7 +163,7 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 	for(TSize insLen = 1; insLen <=readLen-M1-M2; ++insLen)
 	{
 		numErrors = static_cast<int>((readLen-insLen) * options.errorRate);
-		insMatches += _expMatchesIns(readLen,M1,M2,numErrors,insLen,d_m1, d_m2, genomeLen, numReads);
+		insMatches += _expMatchesIns(readLen,M1,M2,insLen,numErrors,d_m1, d_m2, genomeLen, numReads);
 	}
 	if (options.reverse) insMatches *= 2;
 
