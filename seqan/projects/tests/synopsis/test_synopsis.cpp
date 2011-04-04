@@ -42,6 +42,7 @@
 
 #include "test_synopsis_counter_buckets.h"
 #include "test_synopsis_hot_list.h"
+#include "test_synopsis_histogram_set.h"
 
 SEQAN_BEGIN_TESTSUITE(test_template)
 {
@@ -61,5 +62,15 @@ SEQAN_BEGIN_TESTSUITE(test_template)
     SEQAN_CALL_TEST(test_synopsis_frequency_hot_list_lossy_counting_large);
 
     SEQAN_CALL_TEST(test_synopsis_frequency_hot_list_space_saving_large);
+
+    // ----------------------------------------------------------------------
+    // Tests for HistogramSet.
+    // ----------------------------------------------------------------------
+
+    SEQAN_CALL_TEST(test_synopsis_histogram_set_construct);
+    SEQAN_CALL_TEST(test_synopsis_histogram_set_clear);
+    SEQAN_CALL_TEST(test_synopsis_histogram_set_value);
+    SEQAN_CALL_TEST(test_synopsis_histogram_set_set_value);
+    SEQAN_CALL_TEST(test_synopsis_histogram_set_increment_value);
 }
 SEQAN_END_TESTSUITE

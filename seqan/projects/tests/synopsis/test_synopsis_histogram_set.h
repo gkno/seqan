@@ -31,39 +31,73 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// This is the facade header for the synopsis module.
+// Tests for the HistogramSet data structure.
 // ==========================================================================
 
-#ifndef SEQAN_SYNOPSIS_H_
-#define SEQAN_SYNOPSIS_H_
+#ifndef TEST_SYNOPSIS_TEST_SYNOPSIS_HISTOGRAM_SET_H_
+#define TEST_SYNOPSIS_TEST_SYNOPSIS_HISTOGRAM_SET_H_
 
-// ==========================================================================
-// Prerequisites
-// ==========================================================================
+SEQAN_DEFINE_TEST(test_synopsis_histogram_set_construct)
+{
+    using namespace seqan;
 
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
+    HistogramSet<unsigned> hSet(10, 2);
+}
 
-// ==========================================================================
-// Support Code
-// ==========================================================================
+SEQAN_DEFINE_TEST(test_synopsis_histogram_set_clear)
+{
+    using namespace seqan;
 
-// Data structure that allows fast access to the buckets with smallest label.
-#include <seqan/synopsis/counter_buckets.h>
+    // Clear all histograms.
+    {
+        HistogramSet<unsigned> hSet(10, 2);
+        setValue(hSet, 1, 1, 1);
+        SEQAN_ASSERT_EQ(getValue(hSet, 1, 1), 1u);
+        clear(hSet);
+        SEQAN_ASSERT_EQ(getValue(hSet, 0, 0), 0u);
+    }
 
-// ==========================================================================
-// Hot List Data Structures
-// ==========================================================================
+    // Clear one histogram.
+    {
+        HistogramSet<unsigned> hSet(10, 2);
+        setValue(hSet, 1, 1, 1);
+        setValue(hSet, 2, 1, 1);
+        clear(hSet, 2);
+        SEQAN_ASSERT_EQ(getValue(hSet, 1, 1), 1u);
+        SEQAN_ASSERT_EQ(getValue(hSet, 2, 1), 0u);
+    }
+}
 
-#include <seqan/synopsis/hot_list_base.h>
-#include <seqan/synopsis/hot_list_frequent.h>
-#include <seqan/synopsis/hot_list_lossy_counting.h>
-#include <seqan/synopsis/hot_list_space_saving.h>
+SEQAN_DEFINE_TEST(test_synopsis_histogram_set_value)
+{
+    using namespace seqan;
 
-// ==========================================================================
-// Histogram Data Structures
-// ==========================================================================
+    HistogramSet<unsigned> hSet(10, 2);
+    SEQAN_ASSERT_EQ(getValue(hSet, 0, 0), 0u);
+    value(hSet, 1, 1) = 1;
+    SEQAN_ASSERT_EQ(getValue(hSet, 1, 1), 1u);
+}
 
-#include <seqan/synopsis/histogram_set.h>
+SEQAN_DEFINE_TEST(test_synopsis_histogram_set_set_value)
+{
+    using namespace seqan;
 
-#endif  // SEQAN_SCORE_H_
+    HistogramSet<unsigned> hSet(10, 2);
+    SEQAN_ASSERT_EQ(getValue(hSet, 0, 0), 0u);
+    setValue(hSet, 1, 1, 1);
+    SEQAN_ASSERT_EQ(getValue(hSet, 1, 1), 1u);
+}
+
+SEQAN_DEFINE_TEST(test_synopsis_histogram_set_increment_value)
+{
+    using namespace seqan;
+
+    HistogramSet<unsigned> hSet(10, 2);
+    SEQAN_ASSERT_EQ(getValue(hSet, 0, 0), 0u);
+    incrementValue(hSet, 1, 1, 1);
+    SEQAN_ASSERT_EQ(getValue(hSet, 1, 1), 1u);
+    incrementValue(hSet, 1, 1, 3);
+    SEQAN_ASSERT_EQ(getValue(hSet, 1, 1), 4u);
+}
+
+#endif  // TEST_SYNOPSIS_TEST_SYNOPSIS_HISTOGRAM_SET_H_
