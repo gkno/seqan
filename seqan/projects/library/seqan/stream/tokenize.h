@@ -82,89 +82,81 @@ _charCompare(int const c, Whitespace_ const & /* tag*/)
 inline int
 _charCompare(int const c, Blank_ const & /* tag*/)
 {
-        return isblank(c);
-    }
+    return isblank(c);
 }
 
 inline int
 _charCompare(int const c, Alpha_ const & /* tag*/)
 {
-        return isalpha(c);
-    }
+    return isalpha(c);
 }
 
 inline int
 _charCompare(int const c, AlphaNum_ const & /* tag*/)
 {
-        return isalnum(c);
-    }
+    return isalnum(c);
 }
 
 inline int
 _charCompare(int const c, Digit_ const & /* tag*/)
 {
-        return isdigit(c);
-    }
+    return isdigit(c);
 }
 
 inline int
 _charCompare(int const c, Graph_ const & /* tag*/)
 {
-        return isgraph(c);
-    }
+    return isgraph(c);
 }
 
 inline int
 _charCompare(int const c, UnixEOL_ const & /* tag*/)
 {
-        return (c == '\n');
-    }
+    return (c == '\n');
 }
 
 inline int
 _charCompare(int const c, BackslashR_ const & /* tag*/)
 {
-        return (c == '\r');
-    }
+    return (c == '\r');
 }
 
 inline int
 _charCompare(int const c, Dna const & /* tag*/)
 {
-        switch (c)
-        {
-            case 'a':
-            case 'c':
-            case 'g':
-            case 't':
-            case 'A':
-            case 'C':
-            case 'G':
-            case 'T': return true;
-        }
-        return false;
+    switch (c)
+    {
+        case 'a':
+        case 'c':
+        case 'g':
+        case 't':
+        case 'A':
+        case 'C':
+        case 'G':
+        case 'T': return true;
     }
+    return false;
 }
 
 inline int
 _charCompare(int const c, Dna5 const & /* tag*/)
 {
-        switch (c)
-        {
-            case 'a':
-            case 'c':
-            case 'g':
-            case 't':
-            case 'A':
-            case 'C':
-            case 'G':
-            case 'T':
-            case 'n':
-            case 'N':
-                return true;
-        }
-        return false;
+    switch (c)
+    {
+        case 'a':
+        case 'c':
+        case 'g':
+        case 't':
+        case 'A':
+        case 'C':
+        case 'G':
+        case 'T':
+        case 'n':
+        case 'N':
+            return true;
     }
+    return false;
+    
 }
 
 // template <>
@@ -191,8 +183,7 @@ _readHelper(TBuffer & buffer,
 {
     clear(buffer);
     typedef Value<TRecordReader::_buffer>::Type TChar;
-//     for (TChar c = value(reader); hasMore(reader); goNext(reader))
-//     {
+
     while (!atEnd(reader))
     {
         TChar c = value(reader);
@@ -226,8 +217,7 @@ _skipHelper(TRecordReader & reader,
             bool const desiredOutcomeOfComparison)
 {
     typedef Value<TRecordReader::_buffer>::Type TChar;
-//     for (TChar c = value(reader); hasMore(reader); goNext(reader))
-//     {
+
     while (!atEnd(reader))
     {
         TChar c = value(reader);
@@ -262,14 +252,13 @@ _readHelper(TBuffer & buffer,
 {
     clear(buffer);
     typedef Value<TRecordReader::_buffer>::Type TChar;
-//     for (TChar c = value(reader); hasMore(reader); goNext(reader))
-//     {
+
     while (!atEnd(reader))
     {
         TChar c = value(reader);
         if (!_charCompare(c, skipTag))
         {
-            if (_charCompare(c, tag) == desiredOutcomeOfComparison)
+            if (_charCompare(c, compTag) == desiredOutcomeOfComparison)
                 return 0;
             append(buffer, c, Generous()); // TODO Generous() is right?
         }
@@ -289,14 +278,13 @@ inline int
 _readHelper(TBuffer & buffer,
             TRecordReader & reader,
             Tag<TTagSpec> const & compTag,
-            Tag<TTagSpec> const & skipTag,
-            bool const desiredOutcomeOfComparison)
+            Tag<TTagSpec> const & skipTag)
 
 {
     _readHelper(buffer, reader, compTag, skipTag, true);
 }
 
-template <typename TCompare, typename TRecordReader>
+template <typename TCompare, typename TRecordReader, typename TString>
 inline int
 _readAndCompareWithStr(TRecordReader & reader,
                        TString const & str)
@@ -314,7 +302,7 @@ _readAndCompareWithStr(TRecordReader & reader,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return win ? 0 : IO_TOKONIZE_NO_SUCCESS;
+    return win ? 0 : IO_TOKENIZE_NO_SUCCESS;
 }
 
 
@@ -322,14 +310,13 @@ _readAndCompareWithStr(TRecordReader & reader,
 // ----------------------- the real deal ------------------------------------
 
 //TODO document
-template <typename TStream, typename TPass>
-inline int readUntilWhitespace(RecordReader<TStream, TPass> & reader,
-                               TBuffer & buffer)
+template <typename TBuffer, typename TStream, typename TPass>
+inline int readUntilWhitespace(TBuffer & buffer,
+                               RecordReader<TStream, TPass> & reader)
 {
-    return _readHelper< CharCompare_<Whitespace_>,
-                        RecordReader<TStream, TPass>,
-                        TBuffer >
-                        (reader, buffer);
+    return _readHelper(buffer,
+                       reader,
+                       Whitespace_());
 }
 
 /* OLD FUNCTION
@@ -352,21 +339,20 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
 
 
 //TODO document
-template <typename TStream, typename TPass>
-inline int readUntilBlank(RecordReader<TStream, TPass> & reader,
-                          TBuffer & buffer)
+template <typename TBuffer, typename TStream, typename TPass>
+inline int readUntilBlank(TBuffer & buffer.
+                          RecordReader<TStream, TPass> & reader)
 {
-    return _readHelper< CharCompare_<Blank_>,
-                        RecordReader<TStream, TPass>,
-                        TBuffer >
-                        (reader, buffer);
+    return _readHelper(buffer,
+                       reader,
+                       Blank_());
 }
 
 //TODO document
 template <typename TStream, typename TPass, typename TChar>
-inline int readUntilX(RecordReader<TStream, TPass> & reader,
-                      TBuffer & buffer,
-                      TChar x)
+inline int readUntilChar(TBuffer & buffer,
+                      RecordReader<TStream, TPass> & reader,
+                      TChar const x)
 {
     clear(buffer);
     typedef Value<TRecordReader::_buffer>::Type TChar;
@@ -774,7 +760,6 @@ inline int readDna5IgnoreWhitespaces(RecordReader<TStream, TPass> & reader,
 template <typename TStream, typename TPass>
 inline int skipUntilLineBeginsWithC(RecordReader<TStream, TPass> & reader,
                                     const TChar & c )
-)
 {
     int r = 0;
     while ((r = skipLine(reader)) == 0 )
@@ -819,7 +804,6 @@ SEQAN_CHECKPOINT
 template <typename TStream, typename TPass, typename TString>
 inline int skipUntilLineBeginsWithStr(RecordReader<TStream, TPass> & reader,
                                       const TString & str )
-)
 {
     int r = 0;
     while ((r = skipLine(reader)) == 0 )
@@ -869,8 +853,5 @@ SEQAN_CHECKPOINT
 // all functions that require lexical_cast<>() which isnt there yet
 
 // TODO stuff from other files (shouldnt be that much and much is duplicate)
-
-
-}
 
 #endif // def SEQAN_STREAM_RECORD_READER_SINGLE_H_
