@@ -123,13 +123,16 @@ _addParentMatches(std::map<TId, TInfix> & segments, TAlignmentGraph & parentGrap
 				// set the match begin and end positions
 				setClippedBeginPosition(row(m, 0), sourceBegin);
 				setClippedBeginPosition(row(m, 1), targetBegin);
-				setBeginPosition(row(m, 0), 0);
-				setBeginPosition(row(m, 1), 0);
+				TSize traceLast = length(trace.tvs)-1;
+				if (trace.tvs[traceLast] == 2) setBeginPosition(row(m, 0), trace.sizes[traceLast]);
+				else setBeginPosition(row(m, 0), 0);
+				if (trace.tvs[traceLast] == 1) setBeginPosition(row(m, 1), trace.sizes[traceLast]);
+				else setBeginPosition(row(m, 1), 0);
 				setClippedEndPosition(row(m, 0), sourceEnd);
 				setClippedEndPosition(row(m, 1), targetEnd);
 				
-				//std::cout << sourceBegin << ".." << sourceEnd << " , " << targetBegin << ".." << targetEnd << std::endl;
-				//std::cout << m;
+				//std::cerr << sourceBegin << ".." << sourceEnd << " , " << targetBegin << ".." << targetEnd << std::endl;
+				//std::cerr << m;
 				
 				// append match
 				appendValue(matches, m);
