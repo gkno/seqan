@@ -322,6 +322,8 @@ SEQAN_CHECKPOINT
 		//get the node represents the current interval (begin_pos until next_cut_pos or end_pos)
 		TVertexDescriptor act_knot = findVertex(ali_g,seq_id,begin_pos);
 		TValue act_pos = begin_pos;
+		TValue seq_j_id_temp,pos_j_begin;
+		_getOtherSequenceAndProject(*ali_it,(TValue)0,seq_map,seq_id,act_pos,seq_j_id_temp,pos_j_begin);
 	
 		//for each interval that lies within the current segment/fragement/alignment
 		while(act_pos < end_pos)
@@ -329,16 +331,23 @@ SEQAN_CHECKPOINT
 			//get other sequence and projected position
 			TValue seq_j_id,pos_j;
 			_getOtherSequenceAndProject(*ali_it,(TValue)0,seq_map,seq_id,act_pos,seq_j_id,pos_j);
+			SEQAN_ASSERT_NEQ(pos_j,-1);
 			//find node that contains the projected position (pos_j)
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
 			bool doAddEdge = true;
-			if(fragmentBegin(ali_g,vd)!=pos_j) // check if edge makes sense
+
+//			if(doAddEdge && fragmentBegin(ali_g,vd)!=pos_j) // check if edge makes sense
 			{ 
 				TValue temp_seq_i_id,temp_act_pos;
-				_getOtherSequenceAndProject(*ali_it,(TValue)1,seq_map,seq_j_id,fragmentBegin(ali_g,vd),temp_seq_i_id,temp_act_pos);
-				TVertexDescriptor temp_act_knot = findVertex(ali_g, temp_seq_i_id, temp_act_pos);
-				if(act_knot!=temp_act_knot)
+				_getOtherSequenceAndProject(*ali_it,(TValue)1,seq_map,seq_j_id,static_cast<TValue>(fragmentBegin(ali_g,vd)),temp_seq_i_id,temp_act_pos);
+				if(temp_act_pos == static_cast<TValue>(-1))
 					doAddEdge = false;
+				else 
+				{
+					TVertexDescriptor temp_act_knot = findVertex(ali_g, temp_seq_i_id, temp_act_pos);
+					if(act_knot!=temp_act_knot)
+						doAddEdge = false;
+				}
 			}
 			if(doAddEdge)
 			{
@@ -349,7 +358,15 @@ SEQAN_CHECKPOINT
 				if(score <= 0) score = 1;
 				if(score > 0)
 				{
-					if (findEdge(ali_g, act_knot, vd) == 0) addEdge(ali_g,act_knot,vd,(TCargo)score);
+					if (findEdge(ali_g, act_knot, vd) == 0) {
+						//if(abs((double)fragmentLength(ali_g, act_knot) - (double)fragmentLength(ali_g, vd)) > 20) {
+						//	std::cerr << "added edge: " << fragmentLength(ali_g, act_knot) << "  " <<  fragmentLength(ali_g, vd) << std::endl;
+						//	std::cerr << *ali_it;
+						//	std::cerr << "act_pos=" << act_pos-begin_pos << " pos_j=" << pos_j-pos_j_begin << std::endl; 
+						//} else {
+							addEdge(ali_g,act_knot,vd,(TCargo)score);
+						//}
+					}
 					else {
 						TEdgeDescriptor ed = findEdge(ali_g, act_knot, vd);
 						//if((TCargo)score > getCargo(ed))
