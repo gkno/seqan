@@ -102,7 +102,7 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			//std::cout << l << label(gOut, l) << ',';
 			TSize count = 1;
 			for(TSize k = j; k>0; --k) {
-				SEQAN_ASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count));
+				//SEQAN_ASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count));
 				addEdge(gOut, (TVertexDescriptor) (l - count), (TVertexDescriptor) l);
 				++count;
 			}
