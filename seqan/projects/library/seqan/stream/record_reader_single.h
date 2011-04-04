@@ -152,10 +152,10 @@ atEnd(RecordReader<TFile, SinglePass<void> > & recordReader)
     if (streamEof(recordReader._file) || recordReader._resultCode != 0)
         return true;
 
-    // std::cerr << "refilling in hasMore()" << std::endl;
+    // std::cerr << "refilling in atEnd()" << std::endl;
 
     // Otherwise, we can try to load some data.  This case only happens if
-    // hasMore is called at the beginning of the file; Otherwise, goNext()
+    // atEnd is called at the beginning of the file; Otherwise, goNext()
     // will load data.
     return !_refillBuffer(recordReader);
 }

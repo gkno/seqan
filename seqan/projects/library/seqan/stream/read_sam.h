@@ -43,7 +43,7 @@
 // // Read all headers.
 // SamHeader header;
 // String<SamHeader> headers;
-// while (hasMore(reader) && value(reader) == '@') {
+// while (!atEnd(reader) && value(reader) == '@') {
 //     readRecord(header, reader, Sam());
 //     appendValue(headers, header);
 // }
@@ -51,7 +51,7 @@
 // // Read all alignments.
 // SamAlignment alignment;
 // String<SamAlignment> alignments;
-// while (hasMore(reader)) {
+// while (!atEnd(reader)) {
 //     readRecord(alignment, reader, Sam());
 //     appendValue(alignments, alignment);
 // }
@@ -130,18 +130,19 @@ int readRecord(SamHeader & header,
                Sam const & /*tag*/)
 {
     // Read record type.
+    SEQAN_ASSERT_NOT(atEnd(reader));
     SEQAN_ASSERT_EQ(value(reader), '@');
     goNext(reader);
-    SEQAN_ASSERT(hasMore(reader));
+    SEQAN_ASSERT_NOT(atEnd(reader));
     header.queryName[0] = value(reader);
     goNext(reader);
-    SEQAN_ASSERT(hasMore(reader));
+    SEQAN_ASSERT_NOT(atEnd(reader));
     header.queryName[1] = value(reader);
     goNext(reader);
-    SEQAN_ASSERT(hasMore(reader));
+    SEQAN_ASSERT_NOT(atEnd(reader));
 
     // Read all fields.
-    while (hasMore(reader) && !isLineBreak(value(reader))) {
+    while (!atEnd(reader) && !isLineBreak(value(reader))) {
         SEQAN_ASSERT_EQ(value(reader), '\t');
         goNext(reader);
 
@@ -156,7 +157,7 @@ int readRecord(SamHeader & header,
             appendValue(back(header.dataFields).i2, value(reader));
     }
     // Skip line break.
-    if (hasMore(reader) && isLineBreak(value(reader))) {
+    if (!atEnd(reader) && isLineBreak(value(reader))) {
         goNext(reader);
         if (value(reader) == '\n')
             goNext(reader);

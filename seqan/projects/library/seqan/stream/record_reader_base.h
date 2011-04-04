@@ -98,13 +98,13 @@ class RecordReader;
 ...type:Class.RecordReader
 ..include:seqan/stream.h
 
-.Function.hasMore
+.Function.atEnd
 ..cat:Input/Output
-..summary:Returns $true$ if there is more data to read.
-..signature:hasMore(recordReader)
+..summary:Returns $true$ if there is no more data to be read.
+..signature:atEnd(recordReader)
 ..param.recordReader:The @Class.RecordReader@ to query the state of.
 ...type:Class.RecordReader
-..returns:This function returns $true$ if there is more data to rad. It returns $false$ if the file is at end or there was an error reading. In parsing functions, you can use @Function.resultCode@ to get the result to return from your parsing function.
+..returns:This function returns $false$ if the file is at end or there was an error reading. It returns $false$ if there is more data to read. In parsing functions, you can use @Function.resultCode@ to get the result to return from your parsing function.
 ..see:Function.value
 ..see:Function.resultCode
 ..include:seqan/stream.h

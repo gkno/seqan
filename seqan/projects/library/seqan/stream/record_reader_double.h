@@ -260,7 +260,7 @@ atEnd(RecordReader<TFile, DoublePass<> > & recordReader)
         return false;
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
 
-    // There is no more data if the buffer is exhausted and there the stream
+    // There is no more data if the buffer is exhausted and the stream
     // is at the end of the file or there previously was an error reading the
     // file.
 
@@ -268,10 +268,10 @@ atEnd(RecordReader<TFile, DoublePass<> > & recordReader)
         return true;
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
 
-    // std::cerr << "refilling in hasMore()" << std::endl;
+    // std::cerr << "refilling in atEnd()" << std::endl;
 
     // Otherwise, we can try to load some data.  This case only happens if
-    // hasMore is called at the beginning of the file; Otherwise, goNext()
+    // atEnd() is called at the beginning of the file; Otherwise, goNext()
     // will load data.
     switch (recordReader._passNo) {
         case 0:

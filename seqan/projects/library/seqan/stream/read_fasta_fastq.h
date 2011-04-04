@@ -119,7 +119,7 @@ int _readRecordFastAQMeta(TLambdaContext & lambdaContext,
     if (value(reader) != MetaFirstChar_<TTag>::VALUE)
         return TRecordReader::INVALID_FORMAT;  // Did not start with '>'.
     goNext(reader);
-    if (!hasMore(reader))
+    if (atEnd(reader))
         return TRecordReader::INVALID_FORMAT;  // Input stopped after '>'.
 
     // Read meta field, goes up to the first line break.
@@ -127,7 +127,7 @@ int _readRecordFastAQMeta(TLambdaContext & lambdaContext,
     while (value(reader) != '\n' && value(reader) != '\r') {
         _lambdaFastAQMetaChar(lambdaContext, reader);
         goNext(reader);
-        if (!hasMore(reader))
+        if (atEnd(reader))
             return TRecordReader::INVALID_FORMAT;  // Input stopped in meta.
     }
     // Go beyond line break.
@@ -135,7 +135,7 @@ int _readRecordFastAQMeta(TLambdaContext & lambdaContext,
     if (value(reader) == '\r') {
         // Skip '\n' in DOS line endings.
         goNext(reader);
-        if (!hasMore(reader))
+        if (atEnd(reader))
             return TRecordReader::INVALID_FORMAT;  // Stopped in meta break.
         // std::cerr << __LINE__ << " value(reader) == " << value(reader) << std::endl;
         if (value(reader) == '\n')
@@ -162,19 +162,19 @@ int _readRecordFastAQSequence(TLambdaContext & lambdaContext,
     // The sequence can be empty.
     while (true) {
         // The file is allowed to end within the sequence.
-        if (!hasMore(reader))
+        if (atEnd(reader))
             return resultCode(reader);
         // Skip line break ('\r', '\n', "\r\n" but also "\n\n" since
         // the code gets simpler this way). The file is allowed to end
         // after the line break.
         if (value(reader) == '\r' || value(reader) == '\n') {
             goNext(reader);
-            if (!hasMore(reader))
+            if (atEnd(reader))
                 return resultCode(reader);
             // Skip '\n' after '\r' or first '\n'.
             if (value(reader) == '\n') {
                 goNext(reader);
-                if (!hasMore(reader))
+                if (atEnd(reader))
                     return resultCode(reader);
             }
             // '>' after '\r', '\n', '\n\n', or '\r\n'.
@@ -334,7 +334,7 @@ int read(StringSet<TIdString> & sequenceIds,
     startFirstPass(reader);
     FastaReaderLambdaContextFirstPass_<TIdString, TSeqString> lambdaContextFirst;
     size_t sequenceCount = 0;
-    while (hasMore(reader)) {
+    while (!atEnd(reader)) {
         sequenceCount += 1;
         // Compute meta field length.
         res = _readRecordFastAQMeta(lambdaContextFirst, reader, Fasta());
@@ -362,7 +362,7 @@ int read(StringSet<TIdString> & sequenceIds,
     // ------------------------------------------------------------------------
     startSecondPass(reader);
     Pair<TIdString, TSeqString> record;
-    while (hasMore(reader)) {
+    while (!atEnd(reader)) {
         FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContextSecond(record);
         res = _readRecordFastAQMeta(lambdaContextSecond, reader, Fasta());
         // std::cerr << "SECOND PASS DONE 1/2 res == " << res << std::endl;
@@ -396,7 +396,7 @@ int read(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
     startFirstPass(reader);
     FastaReaderLambdaContextFirstPass_<TIdString, TSeqString> lambdaContextFirst;
     size_t sequenceCount = 0;
-    while (hasMore(reader)) {
+    while (!atEnd(reader)) {
         sequenceCount += 1;
         // Compute meta field length.
         res = _readRecordFastAQMeta(lambdaContextFirst, reader, Fasta());
@@ -426,7 +426,7 @@ int read(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
     // ------------------------------------------------------------------------
     startSecondPass(reader);
     Pair<TIdStringConcat, TSeqStringConcat> record;
-    while (hasMore(reader)) {
+    while (!atEnd(reader)) {
         FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContextSecond(record);
         res = _readRecordFastAQMeta(lambdaContextSecond, reader, Fasta());
         if (res)
