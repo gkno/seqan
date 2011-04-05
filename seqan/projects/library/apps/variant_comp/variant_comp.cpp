@@ -514,9 +514,9 @@ int main(int argc, const char *argv[])
 					while (!_streamEOF(file))
 					{
 						parseSkipWhitespace(file,c);
-						int rangeBegin = parseReadDouble(file,c);
+						int rangeBegin = static_cast<int>(parseReadDouble(file,c));
 						parseSkipWhitespace(file,c);
-						int rangeEnd = parseReadDouble(file,c);
+						int rangeEnd = static_cast<int>(parseReadDouble(file,c));
 						appendValue(options.ranges,Pair<int,int>(rangeBegin,rangeEnd));
 					}
 					file.close();

@@ -211,7 +211,7 @@ void
 computeEir(TIndel &indel, TGenome & genome, TPos & beginPoint,TPos & endPoint)
 {
 
-	SEQAN_ASSERT(indel.indelSize > 0 || length(indel.insertionSeq) == -indel.indelSize );
+	SEQAN_ASSERT(indel.indelSize > 0 || (int)length(indel.insertionSeq) == -indel.indelSize );
 
 	if(indel.indelSize > 0)	// deletion
 	{
@@ -232,6 +232,7 @@ computeEir(TIndel &indel, TGenome & genome, TPos & beginPoint,TPos & endPoint)
 	}
 	else
 	{
+		SEQAN_ASSERT_EQ((int)length(indel.insertionSeq),-indel.indelSize);
 		unsigned iIns = 0; // relative to insertion sequence
 		unsigned iRef = indel.originalPos;
 //		std::cout << "right: iRef=" << iRef << " ->" << genome[iRef] <<"   iIns=" <<iIns << " ->" << indel.insertionSeq[iIns] << std::endl;
