@@ -50,7 +50,7 @@ namespace seqan {
 ..cat:Input / Output
 ..summary:Enum with return values for Tokenizing operations.
 ..value.SUCCESS:Reading the specified data succeeded.
-..value.0-1023:File Error passed through
+..value.1-1023:File Error passed through
 ..value.EOF_BEFORE_SUCCESS:End of file was reached before the pattern was found.
 ..value.NO_SUCCESS:The pattern was not found, but we are not at EOF (may be returned when tokenizing on limited scope)
 ..include:seqan/stream.h
@@ -202,7 +202,7 @@ _readHelper(TBuffer & buffer,
 /*   desired behaviour of loop -> "readUntil()" or "readwhile()"  */
 {
     clear(buffer);
-    typedef Value<TRecordReader::_buffer>::Type TChar;
+    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
 
     while (!atEnd(reader))
     {
@@ -214,7 +214,7 @@ _readHelper(TBuffer & buffer,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return TokenizeResult::EOF_BEFORE_SUCCESS;
+    return EOF_BEFORE_SUCCESS;
 }
 
 template <typename TSpec, // specialization of character comparison
@@ -226,17 +226,17 @@ _readHelper(TBuffer & buffer,
             Tag<TSpec> const & tag)
 /*   default behaviour of loop is "readUntil()" */
 {
-    _readHelper(buffer, reader, tag, true);
+    return _readHelper(buffer, reader, tag, true);
 }
 
 // same as above, just don't save characters read
 template <typename TTagSpec, typename TRecordReader>
 inline int
 _skipHelper(TRecordReader & reader,
-            Tag<TSpec> const & tag,
+            Tag<TTagSpec> const & tag,
             bool const desiredOutcomeOfComparison)
 {
-    typedef Value<TRecordReader::_buffer>::Type TChar;
+    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
 
     while (!atEnd(reader))
     {
@@ -247,16 +247,16 @@ _skipHelper(TRecordReader & reader,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return TokenizeResult::EOF_BEFORE_SUCCESS;
+    return EOF_BEFORE_SUCCESS;
 }
 
 
 template <typename TTagSpec, typename TRecordReader>
 inline int
 _skipHelper(TRecordReader & reader,
-            Tag<TSpec> const & tag)
+            Tag<TTagSpec> const & tag)
 {
-    _skipHelper(reader, tag, true)
+    return _skipHelper(reader, tag, true);
 }
 
 // same as skip, but count the characters read (for doublepass-io)
@@ -264,10 +264,10 @@ template <typename TTagSpec, typename TRecordReader>
 inline int
 _countHelper(uint & count,
             TRecordReader & reader,
-            Tag<TSpec> const & tag,
+            Tag<TTagSpec> const & tag,
             bool const desiredOutcomeOfComparison)
 {
-    typedef Value<TRecordReader::_buffer>::Type TChar;
+    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
     count = 0;
 
     while (!atEnd(reader))
@@ -280,16 +280,16 @@ _countHelper(uint & count,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return TokenizeResult::EOF_BEFORE_SUCCESS;
+    return EOF_BEFORE_SUCCESS;
 }
 
 template <typename TTagSpec, typename TRecordReader>
 inline int
 _countHelper(uint & count,
             TRecordReader & reader,
-            Tag<TSpec> const & tag,
-            bool const desiredOutcomeOfComparison)
+            Tag<TTagSpec> const & tag)
 {
+    return _countHelper(count, reader, Tag<TTagSpec>());
 }
 
 
@@ -306,7 +306,7 @@ _readHelper(TBuffer & buffer,
             bool const desiredOutcomeOfComparison)
 {
     clear(buffer);
-    typedef Value<TRecordReader::_buffer>::Type TChar;
+    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
 
     while (!atEnd(reader))
     {
@@ -321,7 +321,7 @@ _readHelper(TBuffer & buffer,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return TokenizeResult::EOF_BEFORE_SUCCESS;
+    return EOF_BEFORE_SUCCESS;
 }
 
 
@@ -336,7 +336,7 @@ _readHelper(TBuffer & buffer,
             Tag<TTagSpec> const & skipTag)
 
 {
-    _readHelper(buffer, reader, compTag, skipTag, true);
+    return _readHelper(buffer, reader, compTag, skipTag, true);
 }
 
 template <typename TCompare, typename TRecordReader, typename TString>
@@ -348,7 +348,7 @@ _readAndCompareWithStr(TRecordReader & reader,
     for (int i = 0; i < length(str); ++i)
     {
         if (atEnd(reader))
-            return TokenizeResult::EOF_BEFORE_SUCCESS;
+            return EOF_BEFORE_SUCCESS;
         if (value(reader) != str[i]) //mismatch
             break;
         if (i == length(str)) // win
@@ -357,7 +357,7 @@ _readAndCompareWithStr(TRecordReader & reader,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return win ? 0 : TokenizeResult::NO_SUCCESS;
+    return win ? 0 : NO_SUCCESS;
 }
 
 
@@ -374,7 +374,7 @@ _readAndCompareWithStr(TRecordReader & reader,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
@@ -425,7 +425,7 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:Blank is '' and '\t', see @Function.isblank@
@@ -437,7 +437,7 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
  */
 template <typename TBuffer, typename TStream, typename TPass>
 inline int
-readUntilBlank(TBuffer & buffer.
+readUntilBlank(TBuffer & buffer,
                RecordReader<TStream, TPass> & reader)
 {
     return _readHelper(buffer,
@@ -457,7 +457,7 @@ readUntilBlank(TBuffer & buffer.
 ..param.x:The character to stop on
 ...type:$char$ or similar
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *on* the character x. It is not written to buffer.
@@ -465,13 +465,14 @@ readUntilBlank(TBuffer & buffer.
 ..see:Enum.TokenizeResult
 ..see:skipUntilChar
  */
-template <typename TBuffer, typename TStream, typename TPass, typename TChar>
+template <typename TBuffer, typename TStream, typename TPass, typename TCharX>
 inline int
 readUntilChar(TBuffer & buffer,
               RecordReader<TStream, TPass> & reader,
-              TChar const & x)
+              TCharX const & x)
 {
-    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
+    typedef typename Value< typename RecordReader<TStream,
+                                                  TPass>::_buffer>::Type TChar;
 
     clear(buffer);
 
@@ -485,7 +486,7 @@ readUntilChar(TBuffer & buffer,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return TokenizeResult::EOF_BEFORE_SUCCESS;
+    return EOF_BEFORE_SUCCESS;
 }
 
 /**
@@ -500,20 +501,21 @@ readUntilChar(TBuffer & buffer,
 ..param.n:The number of characters to read
 ...type:$uint$
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..include:seqan/stream.h
 ..see:Function.isblank
 ..see:Enum.TokenizeResult
  */
-template <typename TBuffer, typename TStream, typename TPass, typename TChar>
+template <typename TBuffer, typename TStream, typename TPass>
 inline int
 readNChars(TBuffer & buffer,
            RecordReader<TStream, TPass> & reader,
            uint const n)
 {
-    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
+    typedef typename Value< typename RecordReader<TStream,
+                                                  TPass>::_buffer>::Type TChar;
 
     clear(buffer);
     resize(buffer, n);
@@ -521,7 +523,7 @@ readNChars(TBuffer & buffer,
     for (int i = 0; i < n; ++i)
     {
         if (atEnd(reader))
-            return TokenizeResult::EOF_BEFORE_SUCCESS;
+            return EOF_BEFORE_SUCCESS;
         assignValue(buffer, i, value(reader));
 
         goNext(reader);
@@ -540,7 +542,7 @@ readNChars(TBuffer & buffer,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
@@ -566,7 +568,7 @@ skipUntilWhitespace(RecordReader<TStream, TPass> & reader)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *on* the blank character. The blank is not skipped.
@@ -600,7 +602,7 @@ _seekWhiteSpace(TIterator &it, TIterator itEnd)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *on* the graph character. The graph is not skipped.
@@ -638,7 +640,7 @@ _parseSkipWhitespace(TFile& file, TChar& c)
 ..param.x:The character to stop on
 ...type:$char$ or similar
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *on* the character x. x is not skipped.
@@ -646,12 +648,13 @@ _parseSkipWhitespace(TFile& file, TChar& c)
 ..see:Enum.TokenizeResult
 ..see:Function.readUntilChar
  */
-template <typename TStream, typename TPass, typename TChar>
+template <typename TStream, typename TPass, typename TCharX>
 inline int
 skipUntilChar(RecordReader<TStream, TPass> & reader,
-              TChar const & x)
+              TCharX const & x)
 {
-    typedef Value<RecordReader<TStream, TPass>::_buffer>::Type TChar;
+    typedef typename Value< typename RecordReader<TStream,
+                                                  TPass>::_buffer>::Type TChar;
 
     while (!atEnd(reader))
     {
@@ -662,7 +665,7 @@ skipUntilChar(RecordReader<TStream, TPass> & reader,
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
-    return TokenizeResult::EOF_BEFORE_SUCCESS;
+    return EOF_BEFORE_SUCCESS;
 }
 
 /* OLD FUNCTION
@@ -718,7 +721,7 @@ _seekTab(TIterator& it, TIterator itEnd)
 ..param.str:The string to stop on
 ...type:$char$ or similar
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *behind* the character string
@@ -731,7 +734,7 @@ _seekTab(TIterator& it, TIterator itEnd)
 template <typename TStream, typename TPass, typename TString>
 inline int
 skipUntilString(RecordReader<TStream, TPass> & reader,
-                           TString const & str)
+                             TString const & str)
 {
     if (length(str) < 1)
         return -1; //TODO some better error code
@@ -740,11 +743,11 @@ skipUntilString(RecordReader<TStream, TPass> & reader,
         switch(int r = _readAndCompareWithStr(reader, str))
         {
             case 0: return 0;
-            case TokenizeResult::NO_SUCCESS: break;
+            case NO_SUCCESS: break;
             default: return r;
         }
     }
-    return TokenizeResult::EOF_BEFORE_SUCCESS;
+    return EOF_BEFORE_SUCCESS;
     /* NOTE I am not 100% sure this will get every pattern with repitions in it.
      * it should be much better than the original, since it escapes on mismatch
      * directly and doesnt read (and possibly discard) N charecters in a row,
@@ -784,7 +787,7 @@ SEQAN_CHECKPOINT
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *behind* the last letter read.
@@ -794,8 +797,7 @@ SEQAN_CHECKPOINT
  */
 template <typename TStream, typename TPass, typename TBuffer>
 inline int
-readLetters(TBuffer & buffer,
-                       RecordReader<TStream, TPass> & reader)
+readLetters(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 {
     return _readHelper(buffer,
                        reader,
@@ -828,7 +830,7 @@ _parseReadWord(TFile & file, TChar& c)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *behind* the last letter read.
@@ -838,8 +840,7 @@ _parseReadWord(TFile & file, TChar& c)
  */
 template <typename TStream, typename TPass, typename TBuffer>
 inline int
-readAlphaNums(TBuffer & buffer,
-                         RecordReader<TStream, TPass> & reader)
+readAlphaNums(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 {
     return _readHelper(buffer,
                        reader,
@@ -869,7 +870,7 @@ _parseReadIdentifier(TFile & file, TString& str, TChar& c)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
@@ -895,7 +896,7 @@ skipWhitespaces(RecordReader<TStream, TPass> & reader)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops *behind* the last whitespace character.
@@ -950,7 +951,7 @@ _parseSkipBlanks(TFile& file, TChar& c)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops on the beginning of the next line, if there is a next line
@@ -986,7 +987,7 @@ readLine(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops on the beginning of the next line, if there is a next line
@@ -1006,7 +1007,7 @@ readLineStripTrailingBlanks(TBuffer & buffer,
     if (r != 0)
         return r;   // 1234567890
 
-    LENGTH<buffer> pos = length(buffer) -1;
+    typename Size<TBuffer>::Type pos = length(buffer) -1;
 
     if (pos < 0)
         return 0;
@@ -1054,7 +1055,7 @@ _parseReadFilepath(TFile& file, TChar& c)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function stops on the beginning of the next line, if there is a next line
@@ -1107,7 +1108,7 @@ _parseSkipLine(TFile& file, TChar& c)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function read Dna5-Characters and simply discards whitespaces, including newlines.
@@ -1120,7 +1121,7 @@ _parseSkipLine(TFile& file, TChar& c)
 template <typename TStream, typename TPass, typename TBuffer>
 inline int
 readDna5IgnoringWhitespaces(TBuffer & buffer,
-                          RecordReader<TStream, TPass> & reader)
+                            RecordReader<TStream, TPass> & reader)
 {
     return _readHelper(buffer, reader, Dna5_(), Whitespace_(), false);
 } 
@@ -1137,7 +1138,7 @@ readDna5IgnoringWhitespaces(TBuffer & buffer,
 ...type:Class.RecordReader
 ..param.c:The character to look for, must be in @Function.isgraph@
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function skips lines, and then non-graphical chars at the line beginnings,
@@ -1155,8 +1156,6 @@ inline int
 skipUntilLineBeginsWithChar(RecordReader<TStream, TPass> & reader,
                             TChar const & c )
 {
-    if (!isgraph(c))
-        return 
     int r = 0;
     while (!atEnd(reader) && (r = skipLine(reader)) == 0 )
     {
@@ -1167,7 +1166,7 @@ skipUntilLineBeginsWithChar(RecordReader<TStream, TPass> & reader,
             return 0;
     }
     if (atEnd(reader))
-        return TokenizeResult::EOF_BEFORE_SUCCESS;
+        return EOF_BEFORE_SUCCESS;
     return r;
 }
 
@@ -1203,7 +1202,7 @@ SEQAN_CHECKPOINT
 ...type:Class.RecordReader
 ..param.str:The string to look for, must begin with a char in @Function.isgraph@
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function skips lines, and then non-graphical chars (see @Function.isgraph@) at the line beginnings,
@@ -1231,12 +1230,12 @@ skipUntilLineBeginsWithStr(RecordReader<TStream, TPass> & reader,
         switch(r = _readAndCompareWithStr(reader, str))
         {
             case 0: return 0;
-            case TokenizeResult::NO_SUCCESS: break;
+            case NO_SUCCESS: break;
             default: return r;
         }
     }
     if (atEnd(reader))
-        return TokenizeResult::EOF_BEFORE_SUCCESS;
+        return EOF_BEFORE_SUCCESS;
     return r;
 }
 /* OLD FUNCTION 
@@ -1274,7 +1273,7 @@ SEQAN_CHECKPOINT
 ...type:Class.RecordReader
 ..param.str:The set of characters to look for, must be in @Function.isgraph@
 ..returns:0 if there was no error reading
-..returns:non-zero value on errors, especially TokenizeResult::EOF_BEFORE_SUCCESS
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..remarks:This function skips lines, and then non-graphical chars (see @Function.isgraph@) at the line beginnings,
@@ -1293,8 +1292,7 @@ inline int
 skipUntilLineBeginsWithOneCharOfStr(RecordReader<TStream, TPass> & reader,
                                     TString const & str )
 {
-    if (!isgraph(c))
-        return
+
     int r = 0;
     while (!atEnd(reader) && (r = skipLine(reader)) == 0 )
     {
@@ -1309,7 +1307,7 @@ skipUntilLineBeginsWithOneCharOfStr(RecordReader<TStream, TPass> & reader,
 
     }
     if (atEnd(reader))
-        return TokenizeResult::EOF_BEFORE_SUCCESS;
+        return EOF_BEFORE_SUCCESS;
     return r;
 }
 /* OLD FUNCTION:
@@ -1351,5 +1349,7 @@ SEQAN_CHECKPOINT
 // all functions that require lexical_cast<>() which isnt there yet
 
 // TODO stuff from other files (shouldnt be that much and much is duplicate)
+
+} // NAMESPACE
 
 #endif // def SEQAN_STREAM_RECORD_READER_SINGLE_H_
