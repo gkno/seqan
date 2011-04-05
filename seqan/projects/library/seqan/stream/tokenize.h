@@ -142,7 +142,7 @@ _charCompare(int const c, BackslashR_ const & /* tag*/)
 }
 
 inline int
-_charCompare(int const c, Dna const & /* tag*/)
+_charCompare(int const c, Tag<Dna_> const & /* tag*/)
 {
     switch (c)
     {
@@ -159,7 +159,7 @@ _charCompare(int const c, Dna const & /* tag*/)
 }
 
 inline int
-_charCompare(int const c, Dna5 const & /* tag*/)
+_charCompare(int const c, Tag<Dna5_> const & /* tag*/)
 {
     switch (c)
     {
@@ -202,7 +202,8 @@ _readHelper(TBuffer & buffer,
 /*   desired behaviour of loop -> "readUntil()" or "readwhile()"  */
 {
     clear(buffer);
-    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+    typedef char TChar; //TODO fix this
 
     while (!atEnd(reader))
     {
@@ -236,7 +237,8 @@ _skipHelper(TRecordReader & reader,
             Tag<TTagSpec> const & tag,
             bool const desiredOutcomeOfComparison)
 {
-    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+    typedef char TChar; //TODO fix this
 
     while (!atEnd(reader))
     {
@@ -267,7 +269,8 @@ _countHelper(uint & count,
             Tag<TTagSpec> const & tag,
             bool const desiredOutcomeOfComparison)
 {
-    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+    typedef char TChar; //TODO fix this
     count = 0;
 
     while (!atEnd(reader))
@@ -306,7 +309,8 @@ _readHelper(TBuffer & buffer,
             bool const desiredOutcomeOfComparison)
 {
     clear(buffer);
-    typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+    typedef char TChar; //TODO fix this
 
     while (!atEnd(reader))
     {
@@ -333,13 +337,13 @@ inline int
 _readHelper(TBuffer & buffer,
             TRecordReader & reader,
             Tag<TTagSpec> const & compTag,
-            Tag<TTagSpec> const & skipTag)
+            Tag<TTagSpec2> const & skipTag)
 
 {
     return _readHelper(buffer, reader, compTag, skipTag, true);
 }
 
-template <typename TCompare, typename TRecordReader, typename TString>
+template <typename TRecordReader, typename TString>
 inline int
 _readAndCompareWithStr(TRecordReader & reader,
                        TString const & str)
@@ -370,7 +374,9 @@ _readAndCompareWithStr(TRecordReader & reader,
 ..summary:Read characters from stream into buffer until Whitespace is encountered
 ..signature:readUntilWhitespace(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
 ..param.buffer:The buffer to write to
-...type:Shortcut.CharString, Shortcut.DnaString or similar
+...type:Shortcut.CharString
+...type:Shortcut.DnaString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
@@ -422,6 +428,7 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
 ..param.buffer:The buffer to write to
 ...type:Shortcut.CharString
 ...type:Shortcut.DnaString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
@@ -451,7 +458,9 @@ readUntilBlank(TBuffer & buffer,
 ..summary:Read characters from stream into buffer until Char is encountered
 ..signature:readUntilChar(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, TChar const & x)
 ..param.buffer:The buffer to write to
-...type:Shortcut.CharString, Shortcut.DnaString or similar
+...type:Shortcut.CharString
+...type:Shortcut.DnaString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.x:The character to stop on
@@ -471,9 +480,9 @@ readUntilChar(TBuffer & buffer,
               RecordReader<TStream, TPass> & reader,
               TCharX const & x)
 {
-    typedef typename Value< typename RecordReader<TStream,
-                                                  TPass>::_buffer>::Type TChar;
-
+//     typedef typename Value< typename RecordReader<TStream,
+//                                                   TPass>::_buffer>::Type TChar;
+    typedef char TChar; //TODO fix this
     clear(buffer);
 
     while (!atEnd(reader))
@@ -495,7 +504,9 @@ readUntilChar(TBuffer & buffer,
 ..summary:Read exactly n characters from stream into buffer
 ..signature:readNChars(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, uint const n)
 ..param.buffer:The buffer to write to
-...type:Shortcut.CharString, Shortcut.DnaString or similar
+...type:Shortcut.CharString
+...type:Shortcut.DnaString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.n:The number of characters to read
@@ -514,8 +525,9 @@ readNChars(TBuffer & buffer,
            RecordReader<TStream, TPass> & reader,
            uint const n)
 {
-    typedef typename Value< typename RecordReader<TStream,
-                                                  TPass>::_buffer>::Type TChar;
+//     typedef typename Value< typename RecordReader<TStream,
+//                                                   TPass>::_buffer>::Type TChar;
+    typedef char TChar; //TODO fix this
 
     clear(buffer);
     resize(buffer, n);
@@ -653,8 +665,9 @@ inline int
 skipUntilChar(RecordReader<TStream, TPass> & reader,
               TCharX const & x)
 {
-    typedef typename Value< typename RecordReader<TStream,
-                                                  TPass>::_buffer>::Type TChar;
+//     typedef typename Value< typename RecordReader<TStream,
+//                                                   TPass>::_buffer>::Type TChar;
+    typedef char TChar; //TODO fix this
 
     while (!atEnd(reader))
     {
@@ -783,7 +796,9 @@ SEQAN_CHECKPOINT
 ..summary:Read characters from stream as long as characters are letters
 ..signature:skipLetters(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
 ..param.buffer:The buffer to write to
-...type:Shortcut.CharString, Shortcut.DnaString or similar
+...type:Shortcut.CharString
+...type:Shortcut.DnaString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
@@ -827,6 +842,7 @@ _parseReadWord(TFile & file, TChar& c)
 ..signature:readAlphaNums(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
 ..param.buffer:The buffer to write to
 ...type:Shortcut.CharString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
@@ -947,7 +963,8 @@ _parseSkipBlanks(TFile& file, TChar& c)
 ..summary:Read a line from stream and save it to buffer
 ..signature:readLine(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
 ..param.buffer:The buffer to write to
-...type:Shortcut.CharString or similar
+...type:Shortcut.CharString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
@@ -983,7 +1000,8 @@ readLine(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 ..summary:Read a line from stream and save it to buffer, remove trailing blanks
 ..signature:readLineStripTrailingBlanks(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
 ..param.buffer:The buffer to write to
-...type:Shortcut.CharString or similar
+...type:Shortcut.CharString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
@@ -1104,7 +1122,9 @@ _parseSkipLine(TFile& file, TChar& c)
 ..summary:Read characters from stream, as long as they are DNA5 characters. Skip over whitespaces.
 ..signature:readDna5IgnoringWhitespaces(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
 ..param.buffer:The buffer to write to
-...type:Shortcut.CharString or similar
+...type:Shortcut.Dna5String
+...type:Shortcut.CharString
+...type:nolink:or similar
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
@@ -1123,7 +1143,7 @@ inline int
 readDna5IgnoringWhitespaces(TBuffer & buffer,
                             RecordReader<TStream, TPass> & reader)
 {
-    return _readHelper(buffer, reader, Dna5_(), Whitespace_(), false);
+    return _readHelper(buffer, reader, Tag<Dna5_>(), Whitespace_(), false);
 } 
 // this would read a fasta or fastq sequence, since meta and qualities begin 
 // with special chars
