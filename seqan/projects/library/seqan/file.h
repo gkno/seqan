@@ -47,6 +47,10 @@
 #include <seqan/sequence.h>
 #include <seqan/modifier.h>
 
+#ifdef SEQAN_NEW_IO
+#include <ctype>
+#endif
+
 
 //____________________________________________________________________________
 
@@ -56,17 +60,22 @@
 #include <seqan/file/file_generated_forwards.h>
 #endif
 
+#ifndef SEQAN_NEW_IO
 #include <seqan/file/cstream.h>
 #include <seqan/file/stream.h>
+#endif
 
 #include <seqan/file/chunk_collector.h>
-#include <seqan/file/meta.h>
+// #include <seqan/file/meta.h>
 
 //____________________________________________________________________________
 // files
 
+#ifndef SEQAN_NEW_IO
 #include <seqan/file/file_base.h>
 #include <seqan/file/file_cstyle.h>
+#endif
+
 #include <seqan/system.h>	// async file (default file type of File<>)
 
 #include <seqan/file/file_array.h>
@@ -77,7 +86,7 @@
 
 //____________________________________________________________________________
 // file formats
-
+#ifndef SEQAN_NEW_IO
 #include <seqan/file/file_filereaderiterator.h>
 #include <seqan/file/file_filereader.h>
 
@@ -96,6 +105,7 @@
 
 //others
 #include <seqan/file/file_format_cgviz.h>
+#endif
 
 //____________________________________________________________________________
 
@@ -108,6 +118,9 @@
 #include <seqan/file/file_page_raid0.h>
 #include <seqan/file/string_external.h>
 #include <seqan/file/string_mmap.h>
+
+#ifndef SEQAN_NEW_IO
 #include <seqan/file/file_format_mmap.h>
+#endif
 
 #endif //#ifndef SEQAN_HEADER_...
