@@ -137,7 +137,7 @@ int readFastaFile(StringSet<CharString> & sequenceIds,
     RecordReader<TFile, TPass> reader(file, BUFFER_SIZE);
     Pair<CharString, Dna5String> record;
     // std::cerr << "READING FILE" << std::endl;
-    while (hasMore(reader)) {
+    while (!atEnd(reader)) {
         int res = readRecord(record, reader, Fasta());
         if (res != 0) {
             std::cerr << std::endl << "Error reading a record" << std::endl;

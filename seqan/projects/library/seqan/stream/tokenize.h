@@ -250,6 +250,7 @@ _skipHelper(TRecordReader & reader,
     return Tokenize::EOF_BEFORE_SUCCESS;
 }
 
+
 template <typename TTagSpec, typename TRecordReader>
 inline int
 _skipHelper(TRecordReader & reader,
@@ -257,6 +258,40 @@ _skipHelper(TRecordReader & reader,
 {
     _skipHelper(reader, tag, true)
 }
+
+// same as skip, but count the characters read (for doublepass-io)
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_countHelper(uint & count,
+            TRecordReader & reader,
+            Tag<TSpec> const & tag,
+            bool const desiredOutcomeOfComparison)
+{
+    typedef Value<TRecordReader::_buffer>::Type TChar;
+    count = 0;
+
+    while (!atEnd(reader))
+    {
+        TChar c = value(reader);
+        count++;
+        if (_charCompare(c, tag) == desiredOutcomeOfComparison)
+            return 0;
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return Tokenize::EOF_BEFORE_SUCCESS;
+}
+
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_countHelper(uint & count,
+            TRecordReader & reader,
+            Tag<TSpec> const & tag,
+            bool const desiredOutcomeOfComparison)
+{
+}
+
 
 // same as above but allows for a second character type to be ignored
 template <typename TTagSpec, 
