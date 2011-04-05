@@ -71,11 +71,13 @@ struct FionaPoisson_;
 struct FionaExpected_;
 struct FionaCount_ ;
 struct FionaPoissonSens_ ;
+struct FionaPoissonClassif_ ;
 
 typedef Tag<FionaPoisson_> const FionaPoisson;
 typedef Tag<FionaPoissonSens_> const FionaPoissonSens;
 typedef Tag<FionaExpected_> const FionaExpected;
 typedef Tag<FionaCount_> const FionaCount;
+typedef Tag<FionaPoissonClassif_> const FionaPoissonClassif;
 
 
 struct FionaCorrectedError
@@ -652,6 +654,58 @@ inline bool potentiallyErroneousNode(
 	return probaerror <= sensitivity;
 }
 
+template <typename TObserved, typename TExpected, typename TStrictness, typename TErrorRate, typename TPrefixLen>
+inline bool potentiallyErroneousNode(
+	TObserved observed,
+	TExpected expected,
+	TStrictness priorerror,//the a priori odds of errors pi_err/(1-pi_err) (default should be 1)
+	TErrorRate errorrate,
+	TPrefixLen prefixlen,
+	FionaPoissonClassif const)
+{
+	// Poisson based threshold, we compute the logodds of being an error vs a genuine read
+	// consider only the cases with one and two errors
+	// the average error rate and the expected value allow to compute the expected count for an error.
+	
+	//special case when current node count ==1, we always consider that as an error
+	if(observed == (TObserved) 1) return true;
+	
+	double noerr = pow(1-errorrate, prefixlen) ;
+	double noerrlm2 = pow(1-errorrate, prefixlen - 2.0);
+	double noerrlm1 = noerrlm2 * (1-errorrate) ;
+	double errexpnoerr = expected * noerr ;
+	double errexp1err = expected * noerrlm1 * errorrate ;
+	double errexp2err = expected * noerrlm2 * errorrate *errorrate ;
+	double perr1 = prefixlen * noerrlm1* (errorrate/3)  ;
+	double perr2 = (prefixlen * (prefixlen -1) / 2 ) * noerrlm2 * (errorrate/3) *(errorrate/3) ;
+	double sc = perr1 + perr2 ;
+	perr1 /= (sc) ; 
+	perr2 /= (sc) ; 
+	double negExpnoerr = exp(-errexpnoerr) ;
+	double negExp1err = exp(-errexp1err); //
+	double negExp2err = exp(-errexp2err) ;
+    double probaerror = 0.0;
+	double probanoerror = 0.0;
+	double pow1err = 1.0;
+	double pow2err = 1.0;
+	double pownoerr = 1.0 ;
+	double fact = 1.0;
+	//std::cout << "Level " << prefixlen << " and params for correc\n" ;
+	//std::cout << "Expected and comp: " << errexpnoerr << " - " << errexp1err << " - " << errexp2err << "\n" ;
+	//std::cout << "the basic observed count: " << observed << ", perr is " << perr1 << " - " << perr2  << "\n";
+	TObserved i = 0 ;
+    for (i = 0; i <= observed ; ++i, fact *= i){
+        probaerror += perr1 * pow1err * negExp1err / fact;
+		probaerror += perr2 * pow2err * negExp2err / fact;
+		pow1err *= errexp1err ; 
+		pow2err *= errexp2err ;
+		probanoerror += pownoerr * negExpnoerr / fact ;
+	}
+	//std::cout << "Stopped at observed value **" << i-1 << "with proba of err " << probaerror << "and probanoerr " << probanoerr << "\n" ;
+	return (log((1-probaerror)/ probanoerror) > log(priorerror)) ;
+}
+
+
 struct Overlap
 {
     unsigned overlapSumLeft;
@@ -1194,7 +1248,8 @@ unsigned correctReads(
 		std::cout << std::endl << "Method with sensitivity and Poisson distribution" << std::endl;
 	if (IsSameType<TAlgorithm, FionaCount_>::VALUE)
 		std::cout << std::endl << "Method with fixed count for each level" << std::endl;
-
+	if (IsSameType<TAlgorithm, FionaPoissonClassif_>::VALUE)
+		std::cout << std::endl << "Method with log-odds and Poisson distribution" << std::endl ;
 	
 	std::cout << "Searching..." << std::endl;
 	SEQAN_PROTIMESTART(search);
@@ -1413,7 +1468,7 @@ int main(int argc, const char* argv[])
 	addVersionLine(parser, "Fiona version 1.1 2010912 [" + rev.substr(11, 4) + "]");
 
 	FionaOptions options;
-	enum { Poisson = 0, Expected = 1, PoissonSens = 2, Count = 3} method = Poisson;
+	enum { Poisson = 0, Expected = 1, PoissonSens = 2, Count = 3, PoissonClassif = 4} method = Poisson;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
@@ -1425,6 +1480,7 @@ int main(int argc, const char* argv[])
 	addOption(parser, CommandLineOption("f",  "expected",          "use expected value correction with given strictness cutoff", OptionType::Double | OptionType::Label));
 	addOption(parser, CommandLineOption("c",  "count",			   "use fixed count correction cutoff", OptionType::Double | OptionType::Label)) ;
 	addOption(parser, CommandLineOption("e",  "error-rate" ,       "Give expected error-rate of reads, activate sensitivity mode", OptionType::Double | OptionType::Label ));
+	addOption(parser, CommandLineOption("or", "odds-ratio",        "use odds ratio correction method - needs error rate parameter. Use 1.0 for default", OptionType::Double)) ;
 	addOption(parser, CommandLineOption("p",  "pvalue",            "set p-value for error detection, (default is false discovery rate,\n\t switch to false negative rate in sensitivity mode)", OptionType::Double | OptionType::Label));
 	addOption(parser, CommandLineOption("l",  "levels", 2,         "set lower and upper bound for suffix tree DFS", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("g",  "genome-length",     "set the length of the underlying genome", OptionType::Int | OptionType::Label));
@@ -1470,7 +1526,11 @@ int main(int argc, const char* argv[])
 		method = PoissonSens ;
 		getOptionValueLong(parser, "error-rate", options.errorrate) ;
 	}
-	
+	if (isSetLong(parser, "odds-ratio")){
+		method = PoissonClassif ;
+		//should test here the parameter
+		getOptionValueLong(parser, "odds-ratio", options.strictness); 
+	}
 	if (isSetLong(parser, "levels"))
 	{
 		getOptionValueLong(parser, "levels", 0, options.fromLevel);
@@ -1556,6 +1616,8 @@ int main(int argc, const char* argv[])
 			numCorrected = correctReads(store, options, FionaCount()) ;
 		else if (method == PoissonSens)
 			numCorrected = correctReads(store, options, FionaPoissonSens()) ;
+		else if (method == PoissonClassif)
+			numCorrected = correctReads(store, options, FionaPoissonClassif()) ;
 		else {
 			/*use an expected value for a certain level*/
 			numCorrected = correctReads(store, options, FionaExpected());
