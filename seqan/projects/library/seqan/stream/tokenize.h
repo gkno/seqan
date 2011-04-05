@@ -50,6 +50,7 @@ namespace seqan {
 ..cat:Input / Output
 ..summary:Enum with return values for Tokenizing operations.
 ..value.SUCCESS:Reading the specified data succeeded.
+..value.0-1023:File Error passed through
 ..value.EOF_BEFORE_SUCCESS:End of file was reached before the pattern was found.
 ..value.NO_SUCCESS:The pattern was not found, but we are not at EOF (may be returned when tokenizing on limited scope)
 ..include:seqan/stream.h
