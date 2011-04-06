@@ -1003,7 +1003,7 @@ void computeQGramFilteringSensitivity(
 						(*colPrev)[(e+state.transition[SEQAN_MATCH])*maxT+_t]);
 
 					// MISMATCH, INSERT, DELETE
-					for (int m = SEQAN_MISMATCH; m < 4; ++m)
+					for (int m = SEQAN_MISMATCH; m < (int)state.TRANSITIONS; ++m)
 						if (e > 0)
 						{
 							int prevState = state.transition[m];
