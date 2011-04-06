@@ -1010,7 +1010,7 @@ _patternInitSmallStateBanded(
 	//
 	//  0  1  2  3  4   -2 -2 -2 -2 -2   (row -2)
 	//  0  1  2  3  4   -1 -1 -1 -1 -1   (row -1)
-	//	0  1  2  3  4    0  0  0  0  0   (row  0)
+	//  0  1  2  3  4    0  0  0  0  0   (row  0)
 	//  1                1
 	//	    global           local
 	//
@@ -1110,11 +1110,11 @@ _patternInitSmallStateBanded(
 		//
 		//  0  1  2  3  4   -2 -2 -2 -2 -2
 		//  0  1  2  3  4   -1 -1 -1 -1 -1
-		//	0  1  2  3  4    0  0  0  0  0
-		//	1                1
-		//	2   global       2   local
-		//	3                3
-		//	4                4
+		//  0  1  2  3  4    0  0  0  0  0
+		//  1                1
+		//  2   global       2   local
+		//  3                3
+		//  4                4
 		//
 		//  VP = 111100...   VP = 111111...
 		if (errors < (unsigned)BitsPerValue<TWord>::VALUE-1)

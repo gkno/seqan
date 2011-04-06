@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //template <typename TScore, typename TSpec = FindInfix, typename TFindBeginPatternSpec = DPSearch<TScore, FindPrefix, void> >
 template <typename TScore, typename TSpec = FindInfix, typename TFindBeginPatternSpec = typename DefaultFindBeginPatternSpec<TScore>::Type>
-struct DPSearch;
+struct DPSearch {};
 
 /**
 .Spec.DPSearch:

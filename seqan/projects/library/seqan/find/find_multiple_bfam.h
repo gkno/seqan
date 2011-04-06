@@ -310,7 +310,7 @@ SEQAN_CHECKPOINT
 	THaystackIterator it2;
 	TGraph & automaton = me.automaton;
 	TVertexDescriptor root = getRoot(automaton);
-	TVertexDescriptor nil = getNil<TVertexDescriptor>();
+	TVertexDescriptor nil_ = getNil<TVertexDescriptor>();
 	TVertexDescriptor current;
 	TKeywordIterator kit;
 	TKeywordIterator kit_end;
@@ -341,7 +341,7 @@ SEQAN_CHECKPOINT
 		{
 			--it2;
 			current = getSuccessor(automaton, current, *it2);
-			if (current == nil)
+			if (current == nil_)
 			{
 //SKIP
 				it1 = it2 + 1;
