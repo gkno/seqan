@@ -36,45 +36,203 @@
 #ifndef TESTS_BASIC_TEST_BASIC_TRANSPORT_H_
 #define TESTS_BASIC_TEST_BASIC_TRANSPORT_H_
 
-struct MoveObj
-{
-	mutable int data_dat;
+// ==========================================================================
+// Helper Code
+// ==========================================================================
 
-	MoveObj(int dat = 0): data_dat(dat) {}
-	MoveObj(MoveObj const & other_): data_dat(other_.data_dat) 
-	{ 
-		other_.data_dat = 0; 
-	}
-	MoveObj const & operator = (MoveObj const & other_) const
-	{ 
-		data_dat = other_.data_dat; 
-		other_.data_dat = 0; 
-		return *this;
-	}
-	~MoveObj() {}
+struct MoveYes {};
+struct MoveNo {};
+
+template <typename TSpec>
+struct TransportObj_
+{
+    static int assignments;
+    static int sets;
+    static int moves;
+    static int nextId;
+
+    int id;
+    int assignedFrom;
+    int setFrom;
+    int movedFrom;
+
+    TransportObj_()
+            : id(nextId++), assignedFrom(-1), setFrom(-1), movedFrom(-1)
+    {}
+
+    TransportObj_(TransportObj_ & other)
+            : id(nextId++), assignedFrom(other.id), setFrom(-1), movedFrom(-1)
+    {
+    }
+
+    TransportObj_(TransportObj_ & other, seqan::Move())
+            : id(nextId++), assignedFrom(-1), setFrom(-1), movedFrom(other.id)
+    {
+        bool b = IsSameType<TSpec, MoveYes>::Type::VALUE;
+        SEQAN_ASSERT(b);
+    }
+
+    TransportObj_ &
+    operator=(TransportObj_ const & other)
+    {
+        assignments += 1;
+        assignedFrom = other.id;
+        return *this;
+    }
 };
 
-SEQAN_DEFINE_TEST(test_basic_transport)
+void set(TransportObj_<MoveYes> & target, TransportObj_<MoveYes> const & other)
 {
-	MoveObj o1(10);
-	MoveObj o2;
-	move(o2, o1);
-	SEQAN_ASSERT_EQ(o1.data_dat, 0);
-	SEQAN_ASSERT_EQ(o2.data_dat, 10);
+    target.setFrom = other.id;
+    TransportObj_<MoveYes>::sets += 1;
+}
 
-	MoveObj const o3;
-	move(o3, o2);
-	SEQAN_ASSERT_EQ(o2.data_dat, 0);
-	SEQAN_ASSERT_EQ(o3.data_dat, 10);
+void set(TransportObj_<MoveYes> & target, TransportObj_<MoveYes> & other)
+{
+    set(target, static_cast<TransportObj_<MoveYes> const &>(other));
+}
 
-	MoveObj const o4;
-	move(o4, o3);
-	SEQAN_ASSERT_EQ(o3.data_dat, 0);
-	SEQAN_ASSERT_EQ(o4.data_dat, 10);
+void move(TransportObj_<MoveYes> & target, TransportObj_<MoveYes> const & other)
+{
+    target.movedFrom = other.id;
+    TransportObj_<MoveYes>::moves += 1;
+}
 
-	move(o1, o4);
-	SEQAN_ASSERT_EQ(o4.data_dat, 0);
-	SEQAN_ASSERT_EQ(o1.data_dat, 10);
+void move(TransportObj_<MoveYes> & target, TransportObj_<MoveYes> & other)
+{
+    move(target, static_cast<TransportObj_<MoveYes> const &>(other));
+}
+
+template <typename TSpec>
+int TransportObj_<TSpec>::assignments = 0;
+template <typename TSpec>
+int TransportObj_<TSpec>::sets = 0;
+template <typename TSpec>
+int TransportObj_<TSpec>::moves = 0;
+template <typename TSpec>
+int TransportObj_<TSpec>::nextId = 0;
+
+template <typename TSpec>
+void resetTransportObjStatics(TSpec const &)
+{
+    TransportObj_<TSpec>::assignments = 0;
+    TransportObj_<TSpec>::sets = 0;
+    TransportObj_<TSpec>::moves = 0;
+}
+
+namespace seqan {
+
+template <>
+struct HasMoveConstructor<TransportObj_<MoveYes> >
+{
+    typedef True Type;
+};
+
+template <>
+struct HasMoveConstructor<TransportObj_<MoveYes> const>
+{
+    typedef True Type;
+};
+
+}  // namespace seqan
+
+// ==========================================================================
+// Actual Tests
+// ==========================================================================
+
+SEQAN_DEFINE_TEST(test_basic_transport_has_move_constructor)
+{
+    // Test HasMoveConstructor metafunction, default and specialization from above.
+    bool b = HasMoveConstructor<int>::Type::VALUE;
+    SEQAN_ASSERT_NOT(b);
+    b = HasMoveConstructor<TransportObj_<MoveNo> >::Type::VALUE;
+    SEQAN_ASSERT_NOT(b);
+
+    b = HasMoveConstructor<TransportObj_<MoveYes> >::Type::VALUE;
+    SEQAN_ASSERT(b);
+    b = HasMoveConstructor<TransportObj_<MoveYes> const>::Type::VALUE;
+    SEQAN_ASSERT(b);
+}
+
+// Test default overloads of set/assign/set
+SEQAN_DEFINE_TEST(test_basic_transport_default_overloads)
+{
+    // assign()
+    {
+        resetTransportObjStatics(MoveNo());
+        TransportObj_<MoveNo> obj1, obj2;
+        assign(obj1, obj2);
+        SEQAN_ASSERT_EQ(obj1.assignedFrom, obj2.id);
+        SEQAN_ASSERT_EQ(obj1.setFrom, -1);
+        SEQAN_ASSERT_EQ(obj1.movedFrom, -1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::assignments, 1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::sets, 0);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::moves, 0);
+    }
+    // set()
+    {
+        resetTransportObjStatics(MoveNo());
+        TransportObj_<MoveNo> obj1, obj2;
+        set(obj1, obj2);
+        SEQAN_ASSERT_EQ(obj1.assignedFrom, obj2.id);
+        SEQAN_ASSERT_EQ(obj1.setFrom, -1);
+        SEQAN_ASSERT_EQ(obj1.movedFrom, -1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::assignments, 1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::sets, 0);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::moves, 0);
+    }
+    // move()
+    {
+        resetTransportObjStatics(MoveNo());
+        TransportObj_<MoveNo> obj1, obj2;
+        move(obj1, obj2);
+        SEQAN_ASSERT_EQ(obj1.assignedFrom, obj2.id);
+        SEQAN_ASSERT_EQ(obj1.setFrom, -1);
+        SEQAN_ASSERT_EQ(obj1.movedFrom, -1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::assignments, 1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::sets, 0);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveNo>::moves, 0);
+    }
+}
+
+SEQAN_DEFINE_TEST(test_basic_transport_assign_move_set)
+{
+    // assign()
+    {
+        resetTransportObjStatics(MoveYes());
+        TransportObj_<MoveYes> obj1, obj2;
+        assign(obj1, obj2);
+        SEQAN_ASSERT_EQ(obj1.assignedFrom, obj2.id);
+        SEQAN_ASSERT_EQ(obj1.setFrom, -1);
+        SEQAN_ASSERT_EQ(obj1.movedFrom, -1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::assignments, 1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::sets, 0);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::moves, 0);
+    }
+    // set()
+    {
+        resetTransportObjStatics(MoveYes());
+        TransportObj_<MoveYes> obj1, obj2;
+        set(obj1, obj2);
+        SEQAN_ASSERT_EQ(obj1.assignedFrom, -1);
+        SEQAN_ASSERT_EQ(obj1.setFrom, obj2.id);
+        SEQAN_ASSERT_EQ(obj1.movedFrom, -1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::assignments, 0);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::sets, 1);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::moves, 0);
+    }
+    // move()
+    {
+        resetTransportObjStatics(MoveYes());
+        TransportObj_<MoveYes> obj1, obj2;
+        move(obj1, obj2);
+        SEQAN_ASSERT_EQ(obj1.assignedFrom, -1);
+        SEQAN_ASSERT_EQ(obj1.setFrom, -1);
+        SEQAN_ASSERT_EQ(obj1.movedFrom, obj2.id);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::assignments, 0);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::sets, 0);
+        SEQAN_ASSERT_EQ(TransportObj_<MoveYes>::moves, 1);
+    }
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_TRANSPORT_H_

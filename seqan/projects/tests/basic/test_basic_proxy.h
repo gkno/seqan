@@ -36,6 +36,7 @@
 #ifndef TESTS_BASIC_TEST_BASIC_PROXY_H_
 #define TESTS_BASIC_TEST_BASIC_PROXY_H_
 
+// TODO(holtgrew): Use the helper struct from test construct/destruct.
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator)
 {
@@ -75,6 +76,47 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator)
 	assign(px4, c1);
 	SEQAN_ASSERT_EQ(px4, 'a');
 
+   SEQAN_ASSERT_FAIL("Move me to other tests in this header!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_constructors)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_assign)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_set)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_move)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_getValue)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_comparators)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_stream_read)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_proxy_iterator_stream_write)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_PROXY_H_

@@ -31,14 +31,11 @@
 // ==========================================================================
 // Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
 // ==========================================================================
-// Definition of the Proxy class and the default specialization
-// IteratorProxy.
+// Proxy base class definition.
 // ==========================================================================
 
-// TODO(holtgrew): Could be separated into proxy_base.h and proxy_iterator.h.
-
-#ifndef SEQAN_BASIC_BASIC_PROX_H_
-#define SEQAN_BASIC_BASIC_PROX_H_
+#ifndef SEQAN_BASIC_PROXY_BASE_H_
+#define SEQAN_BASIC_PROXY_BASE_H_
 
 namespace seqan {
 
@@ -49,10 +46,6 @@ namespace seqan {
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// Class Proxy
-// ----------------------------------------------------------------------------
 
 /**
 .Class.Proxy:
@@ -72,90 +65,6 @@ since otherwise the general version will be called.
 
 template <typename TSpec>
 class Proxy;
-
-// ----------------------------------------------------------------------------
-// Specialization Iterator Proxy
-// ----------------------------------------------------------------------------
-
-/**
-.Spec.Iterator Proxy:
-..cat:Proxies
-..general:Class.Proxy
-..summary:Proxy that is implemented by an iterator.
-..signature:Proxy<IteratorProxy<TIterator> >
-..param.TIterator:Iterator type.
-..remarks.text:The value type of an iterator proxy is the value type of the
-iterator $TIterator$.
-..include:seqan/basic.h
-*/
-
-template <typename TIterator>
-struct IteratorProxy;
-
-template <typename TIterator>
-class Proxy<IteratorProxy<TIterator> >
-{
-public:
-    typedef typename Value<Proxy>::Type TValue;
-    typedef typename GetValue<Proxy>::Type TAccessor;
-
-    typedef typename RemoveConst_<TAccessor>::Type TAccessor_NotConst;
-
-    TIterator data_iterator;
-
-    // ------------------------------------------------------------------------
-    // Constructors
-    // ------------------------------------------------------------------------
-
-    Proxy(TIterator const _it)
-            : data_iterator(_it)
-    {
-        SEQAN_CHECKPOINT;
-    }
-
-    Proxy(Proxy const & _other)
-            : data_iterator(_other.data_iterator)
-    {
-        SEQAN_CHECKPOINT;
-    }
-
-    // ------------------------------------------------------------------------
-    // Assignment operators;  Have to be defined in class.
-    // ------------------------------------------------------------------------
-
-    Proxy const &
-    operator=(Proxy const & _other)
-    {
-        SEQAN_CHECKPOINT;
-        assignValue(data_iterator, getValue(_other.data_iterator));
-        return *this;
-    }
-
-    Proxy const &
-    operator=(TValue const & _value)
-    {
-        SEQAN_CHECKPOINT;
-        assignValue(data_iterator, _value);
-        return *this;
-    }
-
-    // ------------------------------------------------------------------------
-    // Type conversion operators;  Have to be defined in class.
-    // ------------------------------------------------------------------------
-
-    // TODO(holtgrew): Is this necessary?
-    operator TAccessor_NotConst()
-    {
-        SEQAN_CHECKPOINT;
-        return getValue(data_iterator);
-    }
-
-    operator TAccessor_NotConst() const
-    {
-        SEQAN_CHECKPOINT;
-        return getValue(data_iterator);
-    }
-};
 
 // ============================================================================
 // Metafunctions
@@ -180,96 +89,6 @@ struct Spec<Proxy<TSpec> const>
 };
 
 // ----------------------------------------------------------------------------
-// Metafunction Value
-// ----------------------------------------------------------------------------
-
-///.Metafunction.Value.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Value< Proxy<IteratorProxy<TIterator> > >
-        : Value<TIterator>
-{
-};
-
-template <typename TIterator>
-struct Value<Proxy<IteratorProxy<TIterator> > const>
-{
-    typedef typename Value<TIterator>::Type const Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction GetValue
-// ----------------------------------------------------------------------------
-
-///.Metafunction.GetValue.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct GetValue< Proxy<IteratorProxy<TIterator> > >
-        : GetValue<TIterator>
-{
-};
-
-template <typename TIterator>
-struct GetValue< Proxy<IteratorProxy<TIterator> > const>
-{
-    typedef typename GetValue<TIterator const>::Type Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction Reference
-// ----------------------------------------------------------------------------
-
-///.Metafunction.Reference.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Reference<Proxy<IteratorProxy<TIterator> > >
-{
-    typedef Proxy<IteratorProxy<TIterator> > Type;
-};
-
-template <typename TIterator>
-struct Reference<Proxy<IteratorProxy<TIterator> > const>
-{
-    typedef Proxy<IteratorProxy<TIterator> > const Type;
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction Size
-// ----------------------------------------------------------------------------
-
-///.Metafunction.Size.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Size<Proxy<IteratorProxy<TIterator> > >
-        : Size<TIterator>
-{
-};
-
-template <typename TIterator>
-struct Size<Proxy<IteratorProxy<TIterator> > const>
-        : Size<TIterator>
-{
-};
-
-// ----------------------------------------------------------------------------
-// Metafunction Difference
-// ----------------------------------------------------------------------------
-
-///.Metafunction.Difference.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Difference< Proxy<IteratorProxy<TIterator> > >
-        : Difference<TIterator>
-{
-};
-
-template <typename TIterator>
-struct Difference< Proxy<IteratorProxy<TIterator> > const>
-        : Difference<TIterator>
-{
-};
-
-// ----------------------------------------------------------------------------
 // Metafunction CompareType
 // ----------------------------------------------------------------------------
 
@@ -284,42 +103,6 @@ struct CompareType<Proxy<TSpec>, T>
 // ============================================================================
 // Functions
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// Metafunction getValue()
-// ----------------------------------------------------------------------------
-
-template <typename TSpec>
-typename GetValue<Proxy<TSpec> >::Type
-getValue(Proxy<TSpec> & me)
-{
-    return getValue(iter(me));
-}
-
-template <typename TSpec>
-typename GetValue<Proxy<TSpec> const>::Type
-getValue(Proxy<TSpec> const & me)
-{
-    return getValue(iter(me));
-}
-
-// ----------------------------------------------------------------------------
-// Metafunction iter()
-// ----------------------------------------------------------------------------
-
-template <typename TIterator>
-inline TIterator &
-iter(Proxy<IteratorProxy<TIterator> > & me)
-{
-    return me.data_iterator;
-}
-
-template <typename TIterator>
-inline TIterator const &
-iter(Proxy<IteratorProxy<TIterator> > const & me)
-{
-    return me.data_iterator;
-}
 
 // ----------------------------------------------------------------------------
 // Function convertImpl()
@@ -675,6 +458,7 @@ operator<<(TStream & strm,
 {
     return strm << getValue(proxy);
 }
+
 template <typename TStream, typename TSpec>
 inline TStream &
 operator<<(TStream & strm,
@@ -685,4 +469,4 @@ operator<<(TStream & strm,
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_BASIC_PROX_H_
+#endif  // #ifndef SEQAN_BASIC_PROXY_BASE_H_

@@ -59,6 +59,7 @@ SEQAN_DEFINE_TEST(test_basic_common_definition)
 {
 	SEQAN_ASSERT_EQ(ClassIdentifier_<int>::getID(), ClassIdentifier_<int>::getID());
 	SEQAN_ASSERT_NEQ(ClassIdentifier_<char>::getID(), ClassIdentifier_<int>::getID());
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -89,6 +90,7 @@ SEQAN_DEFINE_TEST(test_basic_common_type)
 
 	Pointer_<int const *>::Type p4 = _toPointer(ci);
 	SEQAN_ASSERT_EQ(*p4, 99);
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -100,6 +102,7 @@ SEQAN_DEFINE_TEST(test_basic_common_iterator_adapt_std)
 	typedef ::std::iterator_traits<Iterator<char *, Rooted>::Type>::value_type T1;
 	bool b1 = _isSameType<T1, char>();
 	SEQAN_ASSERT(b1);
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_COMMON_H_

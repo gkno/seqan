@@ -111,6 +111,7 @@ SEQAN_DEFINE_TEST(test_basic_iterator_basic) {
 	SEQAN_ASSERT_EQ(position(it1), 0);
 	SEQAN_ASSERT_EQ(container(it1), *it1);
 */
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -186,7 +187,7 @@ void Test_Iter()
 	SEQAN_ASSERT_EQ(*it3, 'c');
 
 	SEQAN_ASSERT_EQ(it3 - it4, 1);
-
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 SEQAN_DEFINE_TEST(test_basic_iterator_adaptor)
@@ -200,11 +201,13 @@ SEQAN_DEFINE_TEST(test_basic_iterator_adaptor)
 	TIterator it1 = seqan::begin(arr1);
 	char * ptr1 = it1;
 	SEQAN_ASSERT_EQ(*ptr1, 'a');
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 SEQAN_DEFINE_TEST(test_basic_iterator_position)
 {
 	Test_Iter<PositionIterator>();
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_ITERATOR_H_

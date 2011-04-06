@@ -97,10 +97,10 @@
 // This code contains the "language extension" code in SeqAn: Construction,
 // conversion, comparison and the transport (assign/set/move) functions.
 
+#include <seqan/basic/basic_transport.h>
 #include <seqan/basic/basic_construct_destruct.h>
 #include <seqan/basic/basic_converter.h>
 #include <seqan/basic/basic_compare.h>
-#include <seqan/basic/basic_transport.h>
 
 // --------------------------------------------------------------------------
 // Holders
@@ -134,7 +134,8 @@
 #include <seqan/basic/iterator_position.h>
 #include <seqan/basic/iterator_adapt_std.h>
 
-#include <seqan/basic/basic_proxy.h>
+#include <seqan/basic/proxy_base.h>
+#include <seqan/basic/proxy_iterator.h>
 
 #include <seqan/basic/basic_pointer.h>
 

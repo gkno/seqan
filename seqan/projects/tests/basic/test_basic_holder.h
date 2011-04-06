@@ -67,6 +67,16 @@ int CtorDtorCounter::static_dtors = 0;
 //____________________________________________________________________________
 // test for holder class
 
+SEQAN_DEFINE_TEST(test_basic_holder_simple)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+SEQAN_DEFINE_TEST(test_basic_holder_tristate)
+{
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
 SEQAN_DEFINE_TEST(test_basic_holder)
 {
 	{
@@ -138,6 +148,7 @@ SEQAN_DEFINE_TEST(test_basic_holder)
 /*
 	typedef char Bla[100];
 	Holder<Bla const> cho1 = "test";*/
+    SEQAN_ASSERT_FAIL("Refurbish me!");
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_HOLDER_H_

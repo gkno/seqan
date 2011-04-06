@@ -40,21 +40,19 @@
 #define SEQAN_TEST
 
 #include <seqan/basic.h>
-#include <seqan/sequence.h>
 
-#include "test_basic_alphabet.h"
+#include "test_basic_alphabet.h" // TODO(holtgrew): Refurbish.
 #include "test_basic_aggregates.h"
 #include "test_basic_allocator.h"
-#include "test_basic_alphabet.h"
 #include "test_basic_common.h"
 #include "test_basic_construct_destruct.h"
 #include "test_basic_holder.h"
 #include "test_basic_iterator.h"
 #include "test_basic_math.h"
 #include "test_basic_metaprogramming.h"
+#include "test_basic_transport.h"
 #include "test_basic_proxy.h"
 #include "test_basic_tag.h"
-#include "test_basic_transport.h"
 #include "test_basic_type.h"
 
 SEQAN_BEGIN_TESTSUITE(test_basic)
@@ -269,26 +267,53 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_construct_destruct_array_clear_space_pointer);
 
     // -----------------------------------------------------------------------
+    // Tests for transport module.
+    // -----------------------------------------------------------------------
+
+    SEQAN_CALL_TEST(test_basic_transport_has_move_constructor);
+    SEQAN_CALL_TEST(test_basic_transport_default_overloads);
+    SEQAN_CALL_TEST(test_basic_transport_assign_move_set);
+
+    // -----------------------------------------------------------------------
+    // Tests for proxy classes, iterator proxy.
+    // -----------------------------------------------------------------------
+
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_constructors);
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_assign);
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_set);
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_move);
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_getValue);
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_comparators);
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_stream_read);
+    SEQAN_CALL_TEST(test_basic_proxy_iterator_stream_write);
+
+    // -----------------------------------------------------------------------
     // Tests for Holders
     // -----------------------------------------------------------------------
 
-    SEQAN_CALL_TEST(test_basic_holder);
+    SEQAN_CALL_TEST(test_basic_holder_simple);
+    SEQAN_CALL_TEST(test_basic_holder_tristate);
+
+    // -----------------------------------------------------------------------
+    // Tests for Iterators
+    // -----------------------------------------------------------------------
+
+    SEQAN_CALL_TEST(test_basic_common_iterator_adapt_std);
+    SEQAN_CALL_TEST(test_basic_iterator_basic);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor);
+    SEQAN_CALL_TEST(test_basic_iterator_position);
+
+    // -----------------------------------------------------------------------
+    // Tests for Alphabets
+    // -----------------------------------------------------------------------
+    // Remaining, Unported Tests
 
     SEQAN_CALL_TEST(test_basic_alphabet_interface);
     // SEQAN_CALL_TEST(test_basic_conversions);
     SEQAN_CALL_TEST(test_basic_alphabet_extreme_values);
     // SEQAN_CALL_TEST(test_basic_simple_types);
-    SEQAN_CALL_TEST(test_basic_array_functions);
     SEQAN_CALL_TEST(test_basic_suprema_infima);
-    SEQAN_CALL_TEST(test_basic_common_definition);
     SEQAN_CALL_TEST(test_basic_common_type);
-    SEQAN_CALL_TEST(test_basic_common_iterator_adapt_std);
-    SEQAN_CALL_TEST(test_basic_iterator_basic);
-    SEQAN_CALL_TEST(test_basic_iterator_adaptor);
-    SEQAN_CALL_TEST(test_basic_iterator_position);
-    SEQAN_CALL_TEST(test_basic_proxy_iterator);
-    SEQAN_CALL_TEST(test_basic_transport);
-
 }
 SEQAN_END_TESTSUITE
 
