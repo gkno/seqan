@@ -59,9 +59,9 @@ void TestGapsBase()
 	TSource src1 = "hello";
 	setSource(gaps1, src1);			//setSource
     SEQAN_ASSERT(source(gaps1) == src1);
-    SEQAN_ASSERT(id(source(gaps1)) == id(src1));
+    SEQAN_ASSERT(_getObjectId(source(gaps1)) == _getObjectId(src1));
 
-    SEQAN_ASSERT(id(source(gaps1)) == id(gaps1));   //id;
+    SEQAN_ASSERT(_getObjectId(source(gaps1)) == _getObjectId(gaps1));   //id;
 
 	assignSource(gaps1, "blabla");	//assignSource
     SEQAN_ASSERT(source(gaps1) == "blabla");
@@ -83,27 +83,27 @@ void TestGapsBase()
 
 	detach(gaps1);			//detach, createSource
     SEQAN_ASSERT(source(gaps1) == src1);
-    SEQAN_ASSERT(id(gaps1) != id(src1));
+    SEQAN_ASSERT(_getObjectId(gaps1) != _getObjectId(src1));
 
 	TGaps gaps2(gaps1);				//copy ctor
 
 //  it is a real copy
-//	SEQAN_ASSERT(id(gaps1) == id(gaps2)) //(its not a real copy)
+//	SEQAN_ASSERT(_getObjectId(gaps1) == _getObjectId(gaps2)) //(its not a real copy)
 
 //____________________________________________________________________________
 
 	setSource(gaps1, src1);
 	src1 = "hello";
-    SEQAN_ASSERT(id(gaps1) != id(gaps2));
+    SEQAN_ASSERT(_getObjectId(gaps1) != _getObjectId(gaps2));
 	gaps2 = gaps1;					//operator =
-    SEQAN_ASSERT(id(gaps1) == id(gaps2));
-    SEQAN_ASSERT(id(gaps2) == id(src1));
+    SEQAN_ASSERT(_getObjectId(gaps1) == _getObjectId(gaps2));
+    SEQAN_ASSERT(_getObjectId(gaps2) == _getObjectId(src1));
 
 	TGaps gaps3(src1);				//ctor with source
 	TGaps const & c_gaps3 = gaps3;	//const version
 
-    SEQAN_ASSERT(id(gaps3) == id(src1));
-    SEQAN_ASSERT(id(c_gaps3) == id(src1));
+    SEQAN_ASSERT(_getObjectId(gaps3) == _getObjectId(src1));
+    SEQAN_ASSERT(_getObjectId(c_gaps3) == _getObjectId(src1));
 
 	SEQAN_ASSERT(dependentSource(gaps3));	//dependentSource
     SEQAN_ASSERT(dependentSource(c_gaps3));
