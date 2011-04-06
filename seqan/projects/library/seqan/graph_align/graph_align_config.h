@@ -62,8 +62,11 @@ It indicates at what ends gaps are free, the so-called free ends-space alignment
 ..include:seqan/graph_align.h
 */
 template<bool TTop = false, bool TLeft = false, bool TRight = false, bool TBottom = false, typename TSpec = Default>
-class AlignConfig;
+class AlignConfig
+{
+};
 
+/*
 // 1 config
 template<typename TSpec>
 class AlignConfig<false, false, false, false, TSpec> 
@@ -159,7 +162,7 @@ template<typename TSpec>
 class AlignConfig<true, true, true, true, TSpec> 
 {
 };
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 //	FUNCTIONS
