@@ -1,0 +1,1 @@
+seqan_project_just_include_all_subdirs(seqan_%(CMAKE_PROJECT_NAME)s)
