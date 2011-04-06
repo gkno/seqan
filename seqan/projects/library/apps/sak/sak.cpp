@@ -68,6 +68,7 @@ using namespace seqan;
     bool        optionSeqNameSet = false;
     CharString  optionSeqName = "";
     int         optionMaxLength = -1;
+    int         optionLineLength = 200;
 
 	typedef Dna5 TAlphabet;
 	typedef String<TAlphabet> TSeqString;
@@ -153,15 +154,15 @@ template <
 	typename TSeq >
 void dumpFastaSeq(
 	TStream &out,
-    int &n,
-	TSeq &seq)
+    int n,
+	TSeq const &seq)
 {
     if (n == -1) {
         out << seq << endl;
     } else {
         SEQAN_ASSERT_GEQ(n, 0);
         unsigned size = _min(length(seq), static_cast<unsigned>(n));
-        n -= size;
+        //n -= size;
         out << infix(seq, 0, size) << endl;
     }
 }
@@ -194,7 +195,11 @@ void saveFasta(
 	{
 		(*out) << '>';
 		dumpFastaId(*out, readIDs[i]);
-		dumpFastaSeq(*out, optionMaxLength, readSet[i]);
+		unsigned len = length(readSet[i]);
+		if (optionMaxLength != -1 && len > (unsigned)optionMaxLength)
+			len = optionMaxLength;
+		for(unsigned j = 0; j < len; j += optionLineLength)
+			dumpFastaSeq(*out, optionLineLength, suffix(readSet[i],j));
 	}
 	
 	file.close();
@@ -386,6 +391,15 @@ int main(int argc, const char *argv[])
 				continue;
 			}
 
+			if (strcmp(argv[arg], "-ll") == 0 || strcmp(argv[arg], "--line-length") == 0) {
+                if (arg + 1 < argc) {
+                    ++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionLineLength;
+                    continue;
+                }
+			}
+ 
             if (strcmp(argv[arg], "-l") == 0 || strcmp(argv[arg], "--max-length") == 0) {
                 if (arg + 1 < argc) {
                     ++arg;
