@@ -44,12 +44,22 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Default	TQGramIndexSpec;
 #endif
 
-	template < bool DONT_VERIFY_ = false, bool DONT_DUMP_RESULTS_ = false >
+	template < bool DONT_VERIFY_ = true, bool DONT_DUMP_RESULTS_ = false >
 	struct RazerSSpec 
 	{
 		enum { DONT_VERIFY = DONT_VERIFY_ };				// omit verifying potential matches
 		enum { DONT_DUMP_RESULTS = DONT_DUMP_RESULTS_ };	// omit dumping results
+		enum { DUMP_VERIFICATION_TASKS = true };
 	};
+
+    struct VerificationTask_
+    {
+        unsigned genomeBegin;
+        unsigned genomeEnd;
+        unsigned genomeId;
+        unsigned readId;
+        unsigned leftClip;
+    };
 
 	template < typename TSpec = RazerSSpec<> >
 	struct RazerSOptions
@@ -148,6 +158,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TMutex		matchMutex;
 #endif
 
+		String<VerificationTask_, MMap<> > verifications;
+
 		RazerSOptions() 
 		{
 			forward = true;
@@ -212,6 +224,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			fastaIdQual = false;
 			minClippedLen = 0;
 
+            if (TSpec::DUMP_VERIFICATION_TASKS)
+            {
+                open(verifications, "verfication_tasks.bin", OPEN_WRONLY|OPEN_CREATE);
+            }
 		}
 	};
 
@@ -1668,6 +1684,17 @@ void mapSingleReads(
         // std::cout << "read id = " << (*swiftFinder.curHit).ndlSeqNo << ", " << beginPosition(swiftFinder) << std::endl;
 
 		unsigned rseqNo = (*swiftFinder.curHit).ndlSeqNo;
+        if (options.spec.DUMP_VERIFICATION_TASKS)
+        {
+            VerificationTask_ vt;
+            vt.genomeBegin = beginPosition(infix(swiftFinder));
+            vt.genomeEnd = beginPosition(infix(swiftFinder));
+            vt.readId = rseqNo;
+            vt.genomeId = gseqNo*2;
+            if (orientation == 'R') ++vt.genomeId;
+			vt.leftClip = (beginPosition(swiftFinder) >= 0)? 0: -beginPosition(swiftFinder);	// left clip if match begins left of the genome
+            appendValue(options.verifications, vt);
+        }
 		if (!options.spec.DONT_VERIFY && 
 			matchVerify(m, infix(swiftFinder), rseqNo, readSet, forwardPatterns, options, TSwiftSpec()))
 		{
