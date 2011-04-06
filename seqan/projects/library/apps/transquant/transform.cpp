@@ -418,8 +418,9 @@ void transformAlignments(TRNAStream &rnaAlignFile, TDNAStream &dnaAlignFile, TFr
         }
 			
         readName = line.substr(posId + 3, posFragId - (posId + 3));	// skip "id=" and stop before ",contigId="
-        if (readName.length() > 2 && readName[readName.length() - 2] == '_')
-        readName.resize(readName.length() - 2);
+		int k = readName.length() - 2;
+		while (k != 0 && readName[k] != '_') --k;
+        if (k != 0) readName.resize(k);
 
 //        // read with /1 or /2 suffix
 //        m.readId = readName;

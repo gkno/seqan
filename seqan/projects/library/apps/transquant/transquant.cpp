@@ -687,11 +687,12 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		}
 		
 		readName = line.substr(posId + 3, posFragId - (posId + 3));	// skip "id=" and stop before ",contigId="
-		if (readName.length() > 2 && readName[readName.length() - 2] == '_')
-			readName.resize(readName.length() - 2);
-		
+        int k = readName.length() - 2;
+        while (k != 0 && readName[k] != '_') --k;
+        if (k != 0) readName.resize(k);
+
 		int mateNum = 0;
-		if (readName.length() > 2 && readName[readName.length() - 2] == '/')
+		if (readName.length() > 2 && (readName[readName.length() - 2] == '/' || readName[readName.length() - 2] == '_'))
 		{
 			if (readName[readName.length() - 1] == '2')
 				mateNum = 1;

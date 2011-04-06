@@ -269,9 +269,9 @@ void writeTranscripts(TStream &target, TContigOrderings &orderings, TFragmentSto
 			std::stringstream sstream; 
 			_streamWrite(sstream, "Locus_");
 			_streamWrite(sstream, store.annotationNameStore[store.annotationStore[i].parentId]);
-			_streamWrite(sstream, "Transcript__");
+			_streamWrite(sstream, "_Transcript_");
 			_streamWrite(sstream, store.annotationNameStore[i]);
-			_streamWrite(sstream, "Confidence99_.99");
+			_streamWrite(sstream, "_Confidence_99.99");
 			id = sstream.str();
 
 			clear(transcript);
@@ -319,9 +319,9 @@ void writeOrderings(TStream &target, TOrderings &orderings, TFragmentStore &stor
 		{
 			_streamWrite(target, ">Locus_");
 			_streamWrite(target, store.annotationNameStore[store.annotationStore[i].parentId]);
-			_streamWrite(target, "Transcript__");
+			_streamWrite(target, "_Transcript_");
 			_streamWrite(target, store.annotationNameStore[i]);
-			_streamWrite(target, "Confidence99_.99\n");
+			_streamWrite(target, "_Confidence_99.99\n");
 			int endPos = 0;
 			int lastId = -1;
 			__int64 lastPos = -1;
@@ -348,8 +348,8 @@ void writeOrderings(TStream &target, TOrderings &orderings, TFragmentStore &stor
 				{
 					std::cerr << "nodeId is not increasing in "
 						<< "Locus_" << store.annotationNameStore[store.annotationStore[i].parentId] 
-						<< "Transcript__" << store.annotationNameStore[i]
-						<< "Confidence99_.99" << std::endl;
+						<< "_Transcript_" << store.annotationNameStore[i]
+						<< "_Confidence_99.99" << std::endl;
 					for (unsigned k = 0; k < length(orderings[i]); ++k)
 						std::cerr << '\t' << orderings[i][k];
 					std::cerr << std::endl;
@@ -361,8 +361,8 @@ void writeOrderings(TStream &target, TOrderings &orderings, TFragmentStore &stor
 				{
 					std::cerr << "beginPos is not monotonic in "
 						<< "Locus_" << store.annotationNameStore[store.annotationStore[i].parentId] 
-						<< "Transcript__" << store.annotationNameStore[i]
-						<< "Confidence99_.99" << std::endl;
+						<< "_Transcript_" << store.annotationNameStore[i]
+						<< "_Confidence_99.99" << std::endl;
 					for (unsigned k = 0; k < length(orderings[i]); ++k)
 						std::cerr << '\t' << store.annotationStore[orderings[i][k]].beginPos << '-' << store.annotationStore[orderings[i][k]].endPos;
 					std::cerr << std::endl;
