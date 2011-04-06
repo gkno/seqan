@@ -618,10 +618,10 @@ _addNode(Graph<TSpec>& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
 	if (nodeIdMap.find(node_id) == nodeIdMap.end()) {
-		TVertexDescriptor id = addVertex(g);
-		nodeIdMap.insert(std::make_pair(node_id, id));
+		TVertexDescriptor _id = addVertex(g);
+		nodeIdMap.insert(std::make_pair(node_id, _id));
 		resizeVertexMap(g, nodeMap);
-		assignProperty(nodeMap, id, attr_list);
+		assignProperty(nodeMap, _id, attr_list);
 	}
 }
 
@@ -869,13 +869,13 @@ _processStatement(Graph<TSpec>& g,
 
 	// Exclude header and empty lines
 	TIter it = begin(stmt);
-	String<TValue> id;
+	String<TValue> _id;
 	for(;!atEnd(it);goNext(it)) {
 	  if ((*it != '\t') && (*it != ' ') && (*it != '\n') && (*it != '\r')) {
-	    append(id, *it);
+	    append(_id, *it);
 	  } else {
 	    // Exclude any graph, subgraph, node and edge processing attributes
-	    if ((id == "graph") || (id == "node") || (id == "edge") || (id == "subgraph") || (length(id)<1)) {
+	    if ((_id == "graph") || (_id == "node") || (_id == "edge") || (_id == "subgraph") || (length(_id)<1)) {
 	      clear(stmt);
 	      return;
 	    } else break; 
@@ -884,12 +884,12 @@ _processStatement(Graph<TSpec>& g,
 
 	// Process Edges
 	it = begin(stmt);
-	clear(id);
-	id = "00";
+	clear(_id);
+	_id = "00";
 	unsigned int pos = 0;
 	for(;!atEnd(it);goNext(it), ++pos) {
-	  id[pos % 2] = *it;
-	  if ((id == "--") || (id == "->")) {
+	  _id[pos % 2] = *it;
+	  if ((_id == "--") || (_id == "->")) {
 	    //std::cout << stmt << std::endl;
 	    _processEdgeStatement(g, stmt, nodeMap, edgeMap, pos - 1, nodeIdMap);
 	    clear(stmt);

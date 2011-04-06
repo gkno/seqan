@@ -156,18 +156,18 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 {
 	SEQAN_CHECKPOINT
 
-	TIdType id;
+	TIdType _id;
 	if (!empty(idm.data_freeIds)) {
-		id = getValue(idm.data_freeIds, length(idm.data_freeIds) - 1);
+		_id = getValue(idm.data_freeIds, length(idm.data_freeIds) - 1);
 		resize(idm.data_freeIds, length(idm.data_freeIds) - 1, Generous());
-		assignValue(idm.data_in_use, id, true);
+		assignValue(idm.data_in_use, _id, true);
 	} else {
-		if (empty(idm.data_in_use)) id = 0;
-		else id = (TIdType) length(idm.data_in_use);
-		resize(idm.data_in_use, id + 1, Generous());
-		assignValue(idm.data_in_use, id, true);
+		if (empty(idm.data_in_use)) _id = 0;
+		else _id = (TIdType) length(idm.data_in_use);
+		resize(idm.data_in_use, _id + 1, Generous());
+		assignValue(idm.data_in_use, _id, true);
 	}
-	return id;
+	return _id;
 }
 
 //////////////////////////////////////////////////////////////////////////////

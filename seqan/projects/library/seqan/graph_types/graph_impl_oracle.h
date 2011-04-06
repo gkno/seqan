@@ -200,8 +200,8 @@ SEQAN_CHECKPOINT
 	resizeVertexMap(g, visited);
 	arrayFill(begin(visited), end(visited), false);
 
-	TVertexDescriptor nil = getNil<TVertexDescriptor>();
-	assignProperty(supplyState, root(g), nil);
+	TVertexDescriptor nil_ = getNil<TVertexDescriptor>();
+	assignProperty(supplyState, root(g), nil_);
 
 	TVertexDescriptor _root = getRoot(g);
 
@@ -233,10 +233,10 @@ SEQAN_CHECKPOINT
 
 					TVertexDescriptor _down = getProperty(supplyState, _parent);
 					TVertexDescriptor _supply = _root;
-					while (_down != nil)
+					while (_down != nil_)
 					{
 						TVertexDescriptor _next = getSuccessor(g, _down, *it);
-						if (_next != nil)
+						if (_next != nil_)
 						{
 							_supply = _next;
 							break;
