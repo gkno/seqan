@@ -71,6 +71,7 @@ class Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> >:
 {
 public:
 	typedef typename Value<TScore>::Type TScoreValue;
+	typedef FindBegin_<Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > > TBase;
 
 	Holder<TNeedle>		data_host;
 	TScore				data_score;
@@ -110,7 +111,8 @@ SEQAN_CHECKPOINT
 		create(data_score);
 	}
 
-	Pattern(Pattern const & other): 
+	Pattern(Pattern const & other):
+		TBase(other),	
 		data_host( other.data_host ),
 		data_score( other.data_score ), 
 		data_limit( other.data_limit ),
