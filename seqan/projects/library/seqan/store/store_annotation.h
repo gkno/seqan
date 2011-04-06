@@ -95,29 +95,29 @@ public:
 	typedef typename TAnnotation::TId					TId;
 
 	TFragmentStore *store;
-	TId id;
+	TId _id;
 	
 	Iter():
 		store(NULL),
-		id(TAnnotation::INVALID_ID) {}
+		_id(TAnnotation::INVALID_ID) {}
 
 	Iter(TFragmentStore &_store):
 		store(&_store),
-		id(0) {}
+		_id(0) {}
 
 	Iter(TFragmentStore &_store, TId startInNode):
 		store(&_store),
-		id(startInNode) {}
+		_id(startInNode) {}
 
 	Iter(TFragmentStore &_store, MinimalCtor):
 		store(&_store),
-		id(TAnnotation::INVALID_ID) {}
+		_id(TAnnotation::INVALID_ID) {}
 
 	inline Iter const &
 	operator = (Iter const &_origin)
 	{
 		store = &container(_origin);
-		id = _origin.id;
+		_id = _origin._id;
 		return *this;
 	}
 };
@@ -148,13 +148,13 @@ struct Position< Iter< TFragmentStore, AnnotationTree<TSpec> > > :
 template <typename TFragmentStore, typename TSpec>
 inline typename VertexDescriptor<TFragmentStore>::Type & 
 value(Iter< TFragmentStore, AnnotationTree<TSpec> > &it) { 
-	return it.id;
+	return it._id;
 }
 
 template <typename TFragmentStore, typename TSpec>
 inline typename VertexDescriptor<TFragmentStore>::Type const & 
 value(Iter< TFragmentStore, AnnotationTree<TSpec> > const &it) { 
-	return it.id;
+	return it._id;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -177,23 +177,23 @@ template <typename TFragmentStore, typename TSpec>
 inline typename Reference<typename TFragmentStore::TAnnotationStore>::Type
 getAnnotation(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 {
-	return it.store->annotationStore[it.id];
+	return it.store->annotationStore[it._id];
 }
 
 template <typename TFragmentStore, typename TSpec>
 inline typename GetValue<typename TFragmentStore::TAnnotationNameStore>::Type
 getName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 {
-	return getAnnoName(*it.store, it.id);
+	return getAnnoName(*it.store, it._id);
 }
 
 template <typename TFragmentStore, typename TSpec, typename TName>
 inline typename GetValue<typename TFragmentStore::TAnnotationNameStore>::Type
 setName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it, TName & name)
 {
-	if (length(it.store->annotationNameStore) <= it.id)
-		resize(it.store->annotationNameStore, it.id + 1);
-	it.store->annotationNameStore[it.id] = name;
+	if (length(it.store->annotationNameStore) <= it._id)
+		resize(it.store->annotationNameStore, it._id + 1);
+	it.store->annotationNameStore[it._id] = name;
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -204,8 +204,8 @@ getParentName(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 	typedef typename TAnnotation::TId					TId;
 
-	TId parentId = it.store->annotationStore[it.id].parentId;
-	if (parentId == TAnnotation::INVALID_ID) parentId = it.id;
+	TId parentId = it.store->annotationStore[it._id].parentId;
+	if (parentId == TAnnotation::INVALID_ID) parentId = it._id;
 	return getAnnoName(*it.store, parentId);
 }
 
@@ -215,7 +215,7 @@ template <typename TFragmentStore, typename TSpec>
 inline typename GetValue<typename TFragmentStore::TAnnotationTypeStore>::Type
 getType(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 {
-	return getAnnoType(*it.store, it.id);
+	return getAnnoType(*it.store, it._id);
 }
 
 template <typename TFragmentStore, typename TSpec, typename TTypeName>
@@ -231,7 +231,7 @@ template <typename TFragmentStore, typename TSpec>
 inline CharString
 getUniqueName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 {
-	return getAnnoUniqueName(*it.store, it.id);
+	return getAnnoUniqueName(*it.store, it._id);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -278,7 +278,7 @@ template <typename TFragmentStore, typename TSpec>
 inline void
 goBegin(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 {
-	it.id = 0;
+	it._id = 0;
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -288,14 +288,14 @@ goEnd(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	typedef typename TFragmentStore::TAnnotationStore	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 
-	it.id = TAnnotation::INVALID_ID;
+	it._id = TAnnotation::INVALID_ID;
 }
 
 template <typename TFragmentStore, typename TSpec, typename TId>
 inline void
-goTo(Iter<TFragmentStore, AnnotationTree<TSpec> > & it, TId id)
+goTo(Iter<TFragmentStore, AnnotationTree<TSpec> > & it, TId _id)
 {
-	it.id = id;
+	it._id = _id;
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -305,7 +305,7 @@ clear(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	typedef typename TFragmentStore::TAnnotationStore	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 
-	it.id = TAnnotation::INVALID_ID;
+	it._id = TAnnotation::INVALID_ID;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -314,7 +314,7 @@ template <typename TFragmentStore, typename TSpec>
 inline bool
 atBegin(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 {
-	return it.id == 0;
+	return it._id == 0;
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -324,7 +324,7 @@ atEnd(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	typedef typename TFragmentStore::TAnnotationStore	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 
-	return it.id == TAnnotation::INVALID_ID;
+	return it._id == TAnnotation::INVALID_ID;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -373,7 +373,7 @@ template <typename TFragmentStore, typename TSpec>
 inline void
 goRoot(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 {
-	it.id = 0;
+	it._id = 0;
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -387,7 +387,7 @@ goUp(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	TId parentId = getAnnotation(it).parentId;
 	if (parentId != TAnnotation::INVALID_ID)
 	{
-		it.id = parentId;
+		it._id = parentId;
 		return true;
 	}
 	return false;
@@ -404,7 +404,7 @@ goDown(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	TId lastChildId = getAnnotation(it).lastChildId;
 	if (lastChildId != TAnnotation::INVALID_ID)
 	{
-		it.id = it.store->annotationStore[lastChildId].nextSiblingId;
+		it._id = it.store->annotationStore[lastChildId].nextSiblingId;
 		return true;
 	}
 	return false;
@@ -423,9 +423,9 @@ goRight(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	if (nextSiblingId != TAnnotation::INVALID_ID)
 	{
 		TId lastChildId = it.store->annotationStore[anno.parentId].lastChildId;
-		if (it.id != lastChildId)
+		if (it._id != lastChildId)
 		{
-			it.id = nextSiblingId;
+			it._id = nextSiblingId;
 			return true;
 		}
 	}
@@ -463,7 +463,7 @@ nodeRight(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 
 //////////////////////////////////////////////////////////////////////////////
 
-// insert a new id into a cyclic list and returns new last child id
+// insert a new _id into a cyclic list and returns new last child _id
 template <typename TAnnotationStore, typename TId>
 inline TId
 _cyclicListFrontInsert(TAnnotationStore & annotationStore, TId newId, TId lastChildId)
@@ -491,10 +491,10 @@ _cyclicListFrontInsert(TAnnotationStore & annotationStore, TId newId, TId lastCh
 	return newLastId;
 }
 
-// delete an id from a cyclic list and returns new last child id
+// delete an _id from a cyclic list and returns new last child _id
 template <typename TAnnotationStore, typename TId>
 inline TId
-_cyclicListSearchPrev(TAnnotationStore & annotationStore, TId id, TId lastChildId)
+_cyclicListSearchPrev(TAnnotationStore & annotationStore, TId _id, TId lastChildId)
 {
 	typedef typename Value<TAnnotationStore>::Type TAnnotation;
 
@@ -505,31 +505,31 @@ _cyclicListSearchPrev(TAnnotationStore & annotationStore, TId id, TId lastChildI
 	do {
 		prevId = i;
 		i = annotationStore[i].nextSiblingId;
-		if (i == id) break;
+		if (i == _id) break;
 	} while (i != lastChildId);
 
-	if (i == id)
+	if (i == _id)
 		return prevId;
 	else
 		return TAnnotation::INVALID_ID;
 }
 
-// delete an id from a cyclic list and returns new last child id
+// delete an _id from a cyclic list and returns new last child _id
 template <typename TAnnotationStore, typename TId>
 inline TId
-_cyclicListRemove(TAnnotationStore & annotationStore, TId id, TId lastChildId)
+_cyclicListRemove(TAnnotationStore & annotationStore, TId _id, TId lastChildId)
 {
 	typedef typename Value<TAnnotationStore>::Type TAnnotation;
 
-	TId prevId = _cyclicListSearchPrev(annotationStore, id, lastChildId);
+	TId prevId = _cyclicListSearchPrev(annotationStore, _id, lastChildId);
 	
 	if (prevId != TAnnotation::INVALID_ID)
 	{
-		annotationStore[prevId].nextSiblingId = annotationStore[id].nextSiblingId;
+		annotationStore[prevId].nextSiblingId = annotationStore[_id].nextSiblingId;
 		
-		if (id == lastChildId)
+		if (_id == lastChildId)
 		{
-			if (prevId != id)
+			if (prevId != _id)
 				return prevId;
 			else
 				return TAnnotation::INVALID_ID;
@@ -554,11 +554,11 @@ createLeftChild(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	TAnnotation &childAnno = it.store->annotationStore[childId];
 	
 	parentAnno.lastChildId = _cyclicListFrontInsert(it.store->annotationStore, childId, parentAnno.lastChildId);
-	childAnno.parentId = it.id;
+	childAnno.parentId = it._id;
 	childAnno.lastChildId = TAnnotation::INVALID_ID;
 	
 	Iter<TFragmentStore, AnnotationTree<TSpec> > childIter(it);
-	childIter.id = childId;
+	childIter._id = childId;
 	return childIter;
 }
 
@@ -578,11 +578,11 @@ createRightChild(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	
 	_cyclicListFrontInsert(it.store->annotationStore, childId, parentAnno.lastChildId);
 	parentAnno.lastChildId = childId;
-	childAnno.parentId = it.id;
+	childAnno.parentId = it._id;
 	childAnno.lastChildId = TAnnotation::INVALID_ID;
 	
 	Iter<TFragmentStore, AnnotationTree<TSpec> > childIter(it);
-	childIter.id = childId;
+	childIter._id = childId;
 	return childIter;
 }
 
@@ -600,7 +600,7 @@ createSibling(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	TId siblingId = length(it.store->annotationStore) - 1;
 
 	TAnnotation &parentAnno = it.store->annotationStore[anno.parentId];
-	if (parentAnno.lastChildId == it.id)
+	if (parentAnno.lastChildId == it._id)
 		parentAnno.lastChildId = siblingId;
 
 	TAnnotation &siblingAnno = it.store->annotationStore[siblingId];
@@ -610,7 +610,7 @@ createSibling(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	anno.nextSiblingId = siblingId;
 	
 	Iter<TFragmentStore, AnnotationTree<TSpec> > siblingIter(it);
-	siblingIter.id = siblingId;
+	siblingIter._id = siblingId;
 	return siblingIter;
 }
 
@@ -623,8 +623,8 @@ isRoot(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 	typedef typename TFragmentStore::TAnnotationStore	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 
-//	if (it.id >= length(it.store->annotationStore)) return false;
-	return it.store->annotationStore[it.id].parentId == TAnnotation::INVALID_ID;
+//	if (it._id >= length(it.store->annotationStore)) return false;
+	return it.store->annotationStore[it._id].parentId == TAnnotation::INVALID_ID;
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -634,8 +634,8 @@ isLeaf(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 	typedef typename TFragmentStore::TAnnotationStore	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 
-//	if (it.id >= length(it.store->annotationStore)) return false;
-	return it.store->annotationStore[it.id].lastChildId == TAnnotation::INVALID_ID;
+//	if (it._id >= length(it.store->annotationStore)) return false;
+	return it.store->annotationStore[it._id].lastChildId == TAnnotation::INVALID_ID;
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -651,7 +651,7 @@ isLastChild(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 	if (nextSiblingId != TAnnotation::INVALID_ID)
 	{
 		TId lastChildId = it.store->annotationStore[anno.parentId].lastChildId;
-		return it.id == lastChildId;
+		return it._id == lastChildId;
 	}
 	return true;
 }
@@ -685,25 +685,25 @@ _storeCreateAnnoBackLinks(TAnnotationStore & me)
 	
 	TAnnoIter itBegin = begin(me, Standard());
 	TAnnoIter itEnd = end(me, Standard());
-	TId id = (itEnd - itBegin) - 1;
-	TAnnoIter it = itBegin + id;
+	TId _id = (itEnd - itBegin) - 1;
+	TAnnoIter it = itBegin + _id;
 	
-	for (; itBegin <= it; --it, --id)
+	for (; itBegin <= it; --it, --_id)
 	{
 		if ((*it).parentId != TAnnotation::INVALID_ID)
 		{
 			TAnnoIter parent = itBegin + (*it).parentId;
 			if ((*parent).lastChildId == TAnnotation::INVALID_ID)
 			{
-				(*parent).lastChildId = id;
-				(*it).nextSiblingId = id;
+				(*parent).lastChildId = _id;
+				(*it).nextSiblingId = _id;
 			}
 
 			if ((*it).nextSiblingId == TAnnotation::INVALID_ID)
 			{
 				TAnnoIter lastChild = itBegin + (*parent).lastChildId;
 				(*it).nextSiblingId = (*lastChild).nextSiblingId;
-				(*lastChild).nextSiblingId = id;
+				(*lastChild).nextSiblingId = _id;
 			}
 		}
 		else 

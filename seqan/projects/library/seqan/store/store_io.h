@@ -181,7 +181,7 @@ read(TFile & file,
 			// Library block
 			if (blockIdentifier == "LIB") {
 				TLibraryStoreElement libEl;
-				TId id = 0;
+				TId _id = 0;
 				String<char> fieldIdentifier;
 				String<char> eid;
 				while (c != '}') {
@@ -189,7 +189,7 @@ read(TFile & file,
 					_parseReadIdentifier(file, fieldIdentifier, c);
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
-						id = _parseReadNumber(file, c);
+						_id = _parseReadNumber(file, c);
 						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
@@ -210,12 +210,12 @@ read(TFile & file,
 						_parseSkipLine(file, c);
 					}
 				}
-				libIdMap.insert(std::make_pair(id, length(fragStore.libraryStore)));
+				libIdMap.insert(std::make_pair(_id, length(fragStore.libraryStore)));
 				appendValue(fragStore.libraryStore, libEl, Generous() );
 				appendValue(fragStore.libraryNameStore, eid, Generous() );
 			} else if (blockIdentifier == "FRG") {  // Fragment block
 				TMatePairElement matePairEl;
-				TId id = 0;
+				TId _id = 0;
 				String<char> fieldIdentifier;
 				String<char> eid;
 				bool foundRds = false;
@@ -224,7 +224,7 @@ read(TFile & file,
 					_parseReadIdentifier(file, fieldIdentifier, c);
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
-						id = _parseReadNumber(file, c);
+						_id = _parseReadNumber(file, c);
 						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
@@ -250,12 +250,12 @@ read(TFile & file,
 				}
 				// Only insert valid mate pairs
 				if (foundRds) {
-					frgIdMap.insert(std::make_pair(id, length(fragStore.matePairStore)));
+					frgIdMap.insert(std::make_pair(_id, length(fragStore.matePairStore)));
 					appendValue(fragStore.matePairStore, matePairEl, Generous() );
 					appendValue(fragStore.matePairNameStore, eid, Generous() );
 				}
 			} else if (blockIdentifier == "RED") {   // Read block
-				TId id = 0;
+				TId _id = 0;
 				String<char> fieldIdentifier;
 				String<char> eid;
 				String<char> qual;
@@ -266,7 +266,7 @@ read(TFile & file,
 					_parseReadIdentifier(file, fieldIdentifier, c);
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
-						id = _parseReadNumber(file, c);
+						_id = _parseReadNumber(file, c);
 						_parseSkipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
@@ -302,13 +302,13 @@ read(TFile & file,
 				assignQualities(seq, qual);
 
 				// Insert the read
-				readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
+				readIdMap.insert(std::make_pair(_id, length(fragStore.readStore)));
 				appendRead(fragStore, seq, matePairId);
 				appendValue(fragStore.readNameStore, eid, Generous() );
 			} else if (blockIdentifier == "CTG") {   // Contig block
 				TContigElement contigEl;
 				TSize fromAligned = length(fragStore.alignedReadStore);
-				TId id = 0;
+				TId _id = 0;
 				String<char> fieldIdentifier;
 				String<char> eid;
 				String<char> contigSeq;
@@ -420,7 +420,7 @@ read(TFile & file,
 						_parseReadIdentifier(file, fieldIdentifier, c);
 						if (fieldIdentifier == "iid") {
 							c = _streamGet(file);
-							id = _parseReadNumber(file, c);
+							_id = _parseReadNumber(file, c);
 							_parseSkipLine(file, c);
 						} else if (fieldIdentifier == "eid") {
 							c = _streamGet(file);
@@ -942,7 +942,7 @@ bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, TFileNames const &fil
 */
 
 template <typename TSpec, typename TConfig, typename TId>
-bool loadContig(FragmentStore<TSpec, TConfig> &store, TId id)
+bool loadContig(FragmentStore<TSpec, TConfig> &store, TId _id)
 {
 	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TContigStore		TContigStore;
@@ -950,8 +950,8 @@ bool loadContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	typedef typename Value<TContigStore>::Type			TContig;
 	typedef typename Value<TContigFileStore>::Type		TContigFile;
 
-	if ((TId)length(store.contigStore) <= id) return false;
-	TContig &contig = store.contigStore[id];
+	if ((TId)length(store.contigStore) <= _id) return false;
+	TContig &contig = store.contigStore[_id];
 
 	if (contig.fileId >= length(store.contigFileStore)) return false;
 	
@@ -978,7 +978,7 @@ bool loadContig(FragmentStore<TSpec, TConfig> &store, TId id)
 */
 
 template <typename TSpec, typename TConfig, typename TId>
-bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
+bool lockContig(FragmentStore<TSpec, TConfig> &store, TId _id)
 {
 	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TContigStore		TContigStore;
@@ -986,11 +986,11 @@ bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	typedef typename Value<TContigStore>::Type			TContig;
 	typedef typename Value<TContigFileStore>::Type		TContigFile;
 	
-	if ((TId)length(store.contigStore) <= id) return false;
-	TContig &contig = store.contigStore[id];
+	if ((TId)length(store.contigStore) <= _id) return false;
+	TContig &contig = store.contigStore[_id];
 	
 	if (contig.usage++ > 0 || !empty(contig.seq)) return true;
-	return loadContig(store, id);
+	return loadContig(store, _id);
 }
 
 /**
@@ -1007,10 +1007,10 @@ bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 */
 
 template <typename TSpec, typename TConfig, typename TId>
-bool unlockContig(FragmentStore<TSpec, TConfig> &store, TId id)
+bool unlockContig(FragmentStore<TSpec, TConfig> &store, TId _id)
 {
-	if ((TId)length(store.contigStore) <= id) return false;
-	--store.contigStore[id].usage;
+	if ((TId)length(store.contigStore) <= _id) return false;
+	--store.contigStore[_id].usage;
 	return true;
 }
 
@@ -1028,14 +1028,14 @@ bool unlockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 */
 
 template <typename TSpec, typename TConfig, typename TId>
-bool unlockAndFreeContig(FragmentStore<TSpec, TConfig> &store, TId id)
+bool unlockAndFreeContig(FragmentStore<TSpec, TConfig> &store, TId _id)
 {
 	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TContigStore		TContigStore;
 	typedef typename Value<TContigStore>::Type			TContig;
 
-	if ((TId)length(store.contigStore) <= id) return false;
-	TContig &contig = store.contigStore[id];
+	if ((TId)length(store.contigStore) <= _id) return false;
+	TContig &contig = store.contigStore[_id];
 
 	if (--contig.usage == 0 && contig.fileId < length(store.contigFileStore))
 	{
@@ -1061,8 +1061,8 @@ template <typename TSpec, typename TConfig>
 bool lockContigs(FragmentStore<TSpec, TConfig> &store)
 {
 	bool result = true;
-	for (unsigned id = 0; id < length(store.contigStore); ++id)
-		result &= lockContig(store, id);
+	for (unsigned _id = 0; _id < length(store.contigStore); ++_id)
+		result &= lockContig(store, _id);
 	return result;
 }
 
@@ -1082,8 +1082,8 @@ template <typename TSpec, typename TConfig>
 bool unlockContigs(FragmentStore<TSpec, TConfig> &store)
 {
 	bool result = true;
-	for (unsigned id = 0; id < length(store.contigStore); ++id)
-		result &= unlockContig(store, id);
+	for (unsigned _id = 0; _id < length(store.contigStore); ++_id)
+		result &= unlockContig(store, _id);
 	return result;
 }
 
@@ -1103,8 +1103,8 @@ template <typename TSpec, typename TConfig>
 bool unlockAndFreeContigs(FragmentStore<TSpec, TConfig> &store)
 {
 	bool result = true;
-	for (unsigned id = 0; id < length(store.contigStore); ++id)
-		result &= unlockAndFreeContig(store, id);
+	for (unsigned _id = 0; _id < length(store.contigStore); ++_id)
+		result &= unlockAndFreeContig(store, _id);
 	return result;
 }
 
@@ -1153,19 +1153,19 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> &store, TFileName &fileName)
 	// read sequences
 	String<Dna5Q> seq;
 	CharString qual;
-	CharString id;
+	CharString _id;
 
 	for (unsigned i = 0; i < seqCount; ++i)
 	{
 		assignSeq(seq, multiSeqFile[i], format);    // read sequence
 		assignQual(qual, multiSeqFile[i], format);  // read ascii quality values
-		assignSeqId(id, multiSeqFile[i], format);   // read sequence id
+		assignSeqId(_id, multiSeqFile[i], format);   // read sequence _id
 
 		// convert ascii to values from 0..62
 		// store dna and quality together in Dna5Q
 		// TODO: support different ASCII represenations of quality values
 		assignQualities(seq, qual);
-		appendRead(store, seq, id);
+		appendRead(store, seq, _id);
 	}
 	return true;
 }
@@ -1205,15 +1205,15 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> & store, TFileName & fileNameL,
 	// Read in sequences
 	String<Dna5Q> seq[2];
 	CharString qual[2];
-	CharString id[2];
+	CharString _id[2];
 
 	for (unsigned i = 0; i < seqCountL; ++i) {
 		assignSeq(seq[0], multiSeqFileL[i], formatL);    // read sequence
 		assignQual(qual[0], multiSeqFileL[i], formatL);  // read ascii quality values
-		assignSeqId(id[0], multiSeqFileL[i], formatL);   // read sequence id
+		assignSeqId(_id[0], multiSeqFileL[i], formatL);   // read sequence _id
 		assignSeq(seq[1], multiSeqFileR[i], formatR);    // read sequence
 		assignQual(qual[1], multiSeqFileR[i], formatR);  // read ascii quality values
-		assignSeqId(id[1], multiSeqFileR[i], formatR);   // read sequence id
+		assignSeqId(_id[1], multiSeqFileR[i], formatR);   // read sequence _id
 
 		// convert ascii to values from 0..62
 		// store dna and quality together in Dna5Q
@@ -1221,7 +1221,7 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> & store, TFileName & fileNameL,
 		for (int j = 0; j < 2; ++j)
 			assignQualities(seq[j], qual[j]);
 		
-		appendMatePair(store, seq[0], seq[1], id[0], id[1]);
+		appendMatePair(store, seq[0], seq[1], _id[0], _id[1]);
 	}
 	return true;
 }
