@@ -1,6 +1,6 @@
 #define SEQAN_PROFILE		// enable time measuring
 #define FIONA_ALLOWINDELS	// allow for indels (chooses a less compact FragmentStore)
-//#define FIONA_MEMOPT		// small suffix array values (<16mio reads of length <256)
+//#define FIONA_MEMOPT		// small suffix array values (<16mio reads of lenfile://localhost/Users/hrichard/Projets%20en%20cours/FIONA%20vs%20SHREC/seqan/projects/library/apps/fiona/fiona_verhug.cpp.bakgth <256)
 #if defined(_OPENMP)        // Only enable parallelism in fiona if OpenMP is enabled.
 #define FIONA_PARALLEL		// divide suffix tree into subtrees for each possible 3-gram
 							// and use process subtrees in parallel
@@ -188,7 +188,9 @@ namespace seqan  {
 	/*hide the node between certain level*/
 	template <typename TSpec>
 	inline bool nodeHullPredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
-	{
+	{	
+		//Hugues: to parse all the node levels, I would use noreDepth, e.g.
+		//return nodeDepth(it) < cargo(container(it)).replen_max ;
 		return parentRepLength(it) <= cargo(container(it)).replen_max;
 	}
 
@@ -198,7 +200,8 @@ namespace seqan  {
 		return true;
 		FionaNodeConstraints &cons = cargo(container(it));
 		unsigned repLen = parentRepLength(it);
-
+		//the same here why isn't it nodeDepth ?
+		//unsigned repLen = nodeDepth(it) ;
 		/*TODO may utilise >=*/
 		return cons.replen_min <= repLen && repLen <= cons.replen_max;
 	}
@@ -1281,43 +1284,106 @@ unsigned correctReads(
 	if (options.genomeLength == 1)
 	{
 		std::cout << "Generating Hugues' stats file." << std::endl;
+		std::cout << "Between levels " << options.fromLevel << " and " << options.toLevel << std::endl ;
         std::ofstream stats("stats.txt");
 		Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type it(myIndex);
-		goBegin(it);
+		//change the iterator definition here
+		cargo(myIndex).replen_min = options.fromLevel;
+		cargo(myIndex).replen_max = options.toLevel; 	
+		//cargo(myIndex).frequency = frequency;
+		TConstrainedIterator myItStat(myIndex) ;
+		goBegin(myItStat);
 		CharString tmp;
-		String<int> freq;
-		stats << "branch\tlength\ttreeDep\tletter\treadPos\tfreq" << std::endl;
-		while (!atEnd(it))
+		//get the length of the reads.
+		unsigned readMaxLength = 0 ;
+		for (unsigned i = 0; i < readCount; ++i)
 		{
-			unsigned ofs = parentRepLength(it);
-			tmp = parentEdgeLabel(it);
-
-			Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type it2(it);
-			bool branch = goDown(it2) && goRight(it2);
-
-			for (unsigned i = 0; i < length(tmp); ++i)
-			{
-				clear(freq);
-				for (unsigned j = 0; j < countOccurrences(it); ++j)
-				{
-					unsigned posInRead = getOccurrences(it)[j].i2 + ofs + i;
-					if (length(freq) <= posInRead)
-						resize(freq, posInRead + 1, 0);
-					++freq[posInRead];
-				}
-				
-				for (unsigned k = 0; k < length(freq); ++k)
-					if (freq[k] != 0)
-					{
-						if ((i + 1 == length(tmp)) && branch)
-							stats << "1\t";
-						else
-							stats << "0\t";
-						stats << ofs + i + 1 << '\t' << nodeDepth(it) << '\t' << tmp[i];
-						stats << '\t' << k << '\t' << freq[k] << '\t';// << representative(it) << '\t' << tmp << std::endl;
-						stats << std::endl;					}
+			unsigned readLength = length(store.readSeqStore[i]);
+			readMaxLength = (readMaxLength < readLength) ? readLength : readMaxLength ;
+		}
+		std::cout << "Max observed read length : " << readMaxLength << std::endl ;
+		//String<int> freq;
+		std::map < unsigned, std::vector <int> > freqpos; //
+		for (unsigned i = 0; i < 6; i++) freqpos[i].assign(readMaxLength, 0) ;
+		std::vector <int> freqmarginal(5, 0 ) ;
+		
+		
+		//stats << "branch\tlength\ttreeDep\tletter\treadPos\tfreq" << std::endl;
+		stats << "prefix\ttreeDepth\treadPos\tna\tnc\tng\tnt\tnn\tntot\tnfather" << std::endl;
+		
+		while (!atEnd(myItStat))
+		{
+			//unsigned ofs = parentRepLength(myItStat);
+			//tmp = parentEdgeLabel(myItStat);
+			CharString tmp2 = representative(myItStat) ;
+			unsigned cfather = countOccurrences(myItStat) ;
+			if (parentRepLength(myItStat) == 0) { 
+				goNext(myItStat) ;
+				continue ;} 
+			//std::cout << "******* Now in prefix : " << toCString(tmp) << " of the string: " << tmp2 << std::endl ; 
+			if (isLeaf(myItStat)){ 
+				//	std::cout << "which is a leaf, next one" << std::endl ;
+				goNext(myItStat) ;
+				continue ;
 			}
-			++it;
+			//copy the iterator to get all siblings
+			Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type it2(myItStat);
+			goDown(it2) ;
+			//goDown(it2) ;
+			unsigned let = 0 ;
+			//count each position and read.
+			do {
+				//Get count per letter per pos
+				/*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3 and 'N'= 4*/
+				//WE NEED TO GET THE VALUE OF LET HERE
+				for (unsigned j = 0; j < countOccurrences(it2); ++j)
+				{
+					//unsigned readID = getOccurrences(it2)[j].i1  ; 
+					//unsigned rl = length(store.readSeqStore[readID]) ;
+					unsigned thei2 = getOccurrences(it2)[j].i2 ; //check i2
+					unsigned posInRead = thei2 ; 
+					//unsigned posInRead =  0;  //  ofs + length(tmp); //changer ici, que vaut i2 ?
+					//std::cout << "Looking at sequence repres: " << representative(it2) << std::endl  ; 
+					//std::cout << "we have length=" << rl << " for read number " << readID << std::endl ;
+					//std::cout << " i2=" << thei2 << " or with dir access " << getOccurrences(it2)[j].i2 << std::endl ;
+					//std::cout <<"letter:" << let << " and with ofs "	<< ofs << " and length(tmp): " << length(tmp) << std::endl ;
+					//if (length(freqpos[let]) <= posInRead)
+					//	freqpos[let][posInRead + 1] = 0;
+					++freqpos[let][posInRead];
+					//cl = cl < posInRead ? posInRead : cl ;
+				}
+				//we should check the letter here  
+				++let ;
+			}  while( goRight(it2)) ;
+			
+			freqmarginal.assign(6,0) ;
+			for (unsigned i= 0; i < readMaxLength; ++i)
+				for (int cl=0; cl < 5; ++cl){
+					freqpos[5][i] += freqpos[cl][i] ; 
+					freqmarginal[cl] += freqpos[cl][i] ;
+				}
+			for (int cl=0; cl < 5; ++cl)
+				freqmarginal[5] += freqmarginal[cl] ; 
+			//also log the marginal, easier
+			stats << tmp2 << '\t' << nodeDepth(myItStat) << '\t' << -1 << '\t' ;
+			stats << freqmarginal[0] << '\t' << freqmarginal[1] << '\t' ; 
+			stats << freqmarginal[2] << '\t' << freqmarginal[3] << '\t' << freqmarginal[4] << '\t'  ;
+			stats << freqmarginal[5] << '\t' << cfather <<  std::endl;	
+			
+			
+			for (unsigned cpos = 0 ; cpos < readMaxLength ; ++cpos){
+				
+				if (freqpos[5][cpos] > 0) {
+					stats << tmp2 << '\t' << nodeDepth(myItStat) << '\t' << cpos << '\t' ;
+					stats << freqpos[0][cpos] << '\t' << freqpos[1][cpos] << '\t' ; 
+					stats << freqpos[2][cpos] << '\t' << freqpos[3][cpos] << '\t' << freqpos[4][cpos] << '\t'  ;
+					stats << freqpos[5][cpos] << '\t' << cfather <<  std::endl;	
+				}
+			}
+			
+			for (unsigned i = 0; i < 6; i++) freqpos[i].assign(readMaxLength, 0) ;
+			
+			goNext(myItStat) ;		
 		}
 		stats.close();
 		std::cout << "Done." << std::endl;
@@ -1546,7 +1612,8 @@ int main(int argc, const char* argv[])
 	getOptionValueLong(parser, "indel-length", options.maxIndelLength);
 #endif
 
-#ifdef _OPENMP
+//#ifdef _OPENMP
+#ifdef FIONA_PARALLEL
 	if ((options.genomeLength < 2) && (stop = true))
 		std::cerr << "A genome length must be given. Length estimation does not work in parallel mode." << std::endl;
 	if (isSetLong(parser, "num-threads"))
