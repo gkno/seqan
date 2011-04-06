@@ -37,8 +37,9 @@
     -ss, --sequences START END      select sequences (default: select all)
     -i,  --infix START END          extract infix
     -rc, --revcomp                  reverse complement
-    -l, --max-length                maximal number of sequence characters to
+    -l,  --max-length               maximal number of sequence characters to
                                     write out
+		-ll, --line-length              maximal characters per output line
   ===========================================================================*/
 
 #include <fstream>
@@ -68,7 +69,7 @@ using namespace seqan;
     bool        optionSeqNameSet = false;
     CharString  optionSeqName = "";
     int         optionMaxLength = -1;
-    int         optionLineLength = 200;
+    unsigned    optionLineLength = 200;
 
 	typedef Dna5 TAlphabet;
 	typedef String<TAlphabet> TSeqString;
@@ -199,7 +200,7 @@ void saveFasta(
 		if (optionMaxLength != -1 && len > (unsigned)optionMaxLength)
 			len = optionMaxLength;
 		for(unsigned j = 0; j < len; j += optionLineLength)
-			dumpFastaSeq(*out, optionLineLength, suffix(readSet[i],j));
+			dumpFastaSeq(*out, min(optionLineLength, len - j), suffix(readSet[i],j));
 	}
 	
 	file.close();
@@ -264,7 +265,8 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -ss, --sequences START END    \t" << "select sequences (default: select all)" << endl;
 		cerr << "  -i,  --infix START END        \t" << "extract infix" << endl;
 		cerr << "  -rc, --revcomp                \t" << "reverse complement" << endl;
-		cerr << "  -l, --max-length              \t" << "maximal number of sequence characters" << endl;
+		cerr << "  -l,  --max-length             \t" << "maximal number of sequence characters" << endl;
+		cerr << "  -ll, --line-length            \t" << "maximal characters per output line" << endl;
 	} else {
 		cerr << "Try 'sak --help' for more information." << endl;
 	}

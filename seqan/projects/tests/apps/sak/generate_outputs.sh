@@ -3,7 +3,7 @@
 # We slice and dice the file "adeno.fasta".
 
 # sak build from 2010-05-25
-SAK=../../../library/cmake/Debug/apps/sak
+SAK=../../../library/cmake/Debug/apps/sak -ll 1000
 
 # ============================================================
 # Run on DNA (Adenoviruses).
