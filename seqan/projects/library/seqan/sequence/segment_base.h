@@ -270,7 +270,7 @@ struct IsSequence< Segment<THost, TSpec> > {
 // functions for all Segment classes
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.id.param.object.type:Class.Segment
+///.Function._getObjectId.param.object.type:Class.Segment
 
 template <typename THost, typename TSpec>
 inline void const *

@@ -280,7 +280,7 @@ struct Reference<Gaps<TSource, TSpec> const>
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.id.param.object.type:Class.Gaps
+///.Function._getObjectId.param.object.type:Class.Gaps
 
 template <typename TSource, typename TSpec>
 inline void const *

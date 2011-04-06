@@ -142,7 +142,7 @@ struct TempCopy_
 
 // TODO(holtgrew): Where to move this documentation/specification-only stuff?
 
-///.Function.id.param.object.type:Class.String
+///.Function._getObjectId.param.object.type:Class.String
 ///.Function.empty.param.object.type:Class.String
 ///.Function.capacity.param.object.type:Class.String
 

@@ -181,7 +181,7 @@ struct DefaultOverflowImplicit< ::std::basic_string<TChar, TCharTraits, TAlloc> 
 // Functions
 // ===========================================================================
 
-///.Function.id.param.object.type:Adaption.std::basic_string
+///.Function._getObjectId.param.object.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
 inline void const *
 _getObjectId(::std::basic_string<TChar, TCharTraits, TAlloc> const & me)

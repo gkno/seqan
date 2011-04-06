@@ -228,7 +228,7 @@ struct AllowsFastRandomAccess<T const>
 // --------------------------------------------------------------------------
 
 /**
-.Function.id:
+.Function._getObjectId:
 ..cat:Miscellaneous
 ..summary:A value that identifies the underlying sequence.
 ..signature:void const * _getObjectId(object)
