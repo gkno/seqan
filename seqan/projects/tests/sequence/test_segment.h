@@ -40,7 +40,7 @@ SEQAN_DEFINE_TEST(Infix)
 	String<char> str_1 = "this is a string";
 	setHost(infix_1, str_1);
 	SEQAN_ASSERT_EQ(length(infix_1), 0u);
-	SEQAN_ASSERT_EQ(id(infix_1), id(str_1));
+	SEQAN_ASSERT_EQ(_getObjectId(infix_1), _getObjectId(str_1));
 
 	setEnd(infix_1, end(str_1));
 	SEQAN_ASSERT_EQ(infix_1, str_1);
@@ -52,7 +52,7 @@ SEQAN_DEFINE_TEST(Infix)
 	Infix<String<char> >::Type infix_2(infix_1);
 	SEQAN_ASSERT_EQ(infix_2, infix(str_1, 0, 9));
 	SEQAN_ASSERT_EQ(infix_2, infix_1);
-	SEQAN_ASSERT_EQ(id(infix_1), id(infix_2));
+	SEQAN_ASSERT_EQ(_getObjectId(infix_1), _getObjectId(infix_2));
 
 	setBeginPosition(infix_2, 5);
 	SEQAN_ASSERT_EQ(infix_2, "is a");
@@ -62,7 +62,7 @@ SEQAN_DEFINE_TEST(Infix)
 
 	Infix<String<char> >::Type infix_3(str_1);
 	SEQAN_ASSERT_EQ(infix_3, str_1);
-	SEQAN_ASSERT_EQ(id(infix_3), id(str_1));
+	SEQAN_ASSERT_EQ(_getObjectId(infix_3), _getObjectId(str_1));
 
 	Infix<String<char> >::Type infix_4(str_1, 5, 9);
 	SEQAN_ASSERT_EQ(infix_4, "is a");
@@ -157,11 +157,11 @@ SEQAN_DEFINE_TEST(Suffix)
 	Suffix<String<char> >::Type suffix_1;
 	setHost(suffix_1, str_1);
 	SEQAN_ASSERT_EQ(length(suffix_1), length(str_1));
-	SEQAN_ASSERT_EQ(id(suffix_1), id(str_1));
+	SEQAN_ASSERT_EQ(_getObjectId(suffix_1), _getObjectId(str_1));
 
 	Suffix<String<char> >::Type suffix_2(suffix_1);
 	SEQAN_ASSERT_EQ(suffix_2, suffix_1);
-	SEQAN_ASSERT_EQ(id(suffix_1), id(suffix_2));
+	SEQAN_ASSERT_EQ(_getObjectId(suffix_1), _getObjectId(suffix_2));
 
 	setBeginPosition(suffix_2, 5);
 	SEQAN_ASSERT_EQ(suffix_2, "is a string");
@@ -171,7 +171,7 @@ SEQAN_DEFINE_TEST(Suffix)
 
 	Suffix<String<char> >::Type suffix_3(str_1);
 	SEQAN_ASSERT_EQ(suffix_3, str_1);
-	SEQAN_ASSERT_EQ(id(suffix_3), id(str_1));
+	SEQAN_ASSERT_EQ(_getObjectId(suffix_3), _getObjectId(str_1));
 
 	Suffix<String<char> >::Type suffix_4(str_1, 5);
 	SEQAN_ASSERT_EQ(suffix_4, "is a string");
