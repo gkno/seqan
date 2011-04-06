@@ -111,7 +111,7 @@ For a larger size type, use @Tag.ExternalConfigLarge@.
 //IOREV _bug_ doc says default page size is 2^20, but it is 2^22
         typedef TFile_ TFile;
         typedef unsigned TSize;
-        enum { i = PAGESIZE_ };
+        enum { PAGESIZE = PAGESIZE_ };
         enum { FRAMES = FRAMES_ };
     };
 
