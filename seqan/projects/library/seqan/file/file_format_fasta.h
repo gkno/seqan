@@ -348,7 +348,7 @@ SEQAN_CHECKPOINT
 template <typename TFile, typename TString>
 void
 readID(TFile & file,
-	   TString & id,
+	   TString & seqId,
 	   Fasta)
 {
 //IOREV _nodoc_ _notinlined_ name ambiguous with readId-memfunc
@@ -360,7 +360,7 @@ SEQAN_CHECKPOINT
 	typename Value<TFile>::Type c = _streamGet(file);
 	if (c != '>')
 	{
-		clear(id);
+		clear(seqId);
 	}
 	else
 	{
@@ -370,21 +370,21 @@ SEQAN_CHECKPOINT
 
 		if (! count_valid)
 		{
-			clear(id);
+			clear(seqId);
 		}
 		else
 		{
-			resize(id, count_valid);
-			if (length(id) < count_valid)
+			resize(seqId, count_valid);
+			if (length(seqId) < count_valid)
 			{
-				count_valid = length(id);
+				count_valid = length(seqId);
 			}
 
 			_streamSeekG(file, start_pos);
 			c = _streamGet(file); //pop the '>' character
 			for (typename Position<TString>::Type pos = 0; count_valid; --count_valid)
 			{
-				id[pos] = _streamGet(file);
+				seqId[pos] = _streamGet(file);
 				++pos;
 			}
 		}
@@ -396,7 +396,7 @@ SEQAN_CHECKPOINT
 template <typename TFile, typename TString>
 void
 readShortID(TFile & file,
-	   TString & id,
+	   TString & seqId,
 	   Fasta)
 {
 //IOREV _nodoc_ _notinlined_ better to use _stream* or _parse* calls to get first word
@@ -408,7 +408,7 @@ SEQAN_CHECKPOINT
 	typename Value<TFile>::Type c = _streamGet(file);
 	if (c != '>')
 	{
-		clear(id);
+		clear(seqId);
 	}
 	else
 	{
@@ -418,24 +418,24 @@ SEQAN_CHECKPOINT
 
 		if (! count_valid)
 		{
-			clear(id);
+			clear(seqId);
 		}
 		else
 		{
-			resize(id, count_valid);
-			if (length(id) < count_valid)
+			resize(seqId, count_valid);
+			if (length(seqId) < count_valid)
 			{
-				count_valid = length(id);
+				count_valid = length(seqId);
 			}
 
 			_streamSeekG(file, start_pos);
 			c = _streamGet(file); //pop the '>' character
 			for (typename Position<TString>::Type pos = 0; count_valid; --count_valid)
 			{
-				id[pos] = _streamGet(file);
-				if(id[pos]=='\t' || id[pos]=='\b' || id[pos]==' ')
+				seqId[pos] = _streamGet(file);
+				if(seqId[pos]=='\t' || seqId[pos]=='\b' || seqId[pos]==' ')
 				{
-					resize(id,pos);
+					resize(seqId,pos);
 					break;
 				}
 				++pos;
@@ -525,13 +525,13 @@ template <typename TFile, typename TString, typename TData>
 void
 _writeImpl(TFile & file,
 			TData & data,
-			TString & id,
+			TString & seqId,
 			Fasta)
 {
 //IOREV _notinlined_
 SEQAN_CHECKPOINT
 	_streamPut(file, '>');
-	_streamWrite(file, id);
+	_streamWrite(file, seqId);
 	_streamPut(file, '\n');
 
 	//typename Iterator<TData, Standard>::Type it = begin(data, Standard());
@@ -574,12 +574,12 @@ template <typename TFile, typename TString, typename TData>
 void
 write(TFile & file,
 	  TData & data,
-	  TString & id,
+	  TString & seqId,
 	  Fasta)
 {
 //IOREV _notinlined_
 SEQAN_CHECKPOINT
-	_writeImpl(file, data, id, Fasta());
+	_writeImpl(file, data, seqId, Fasta());
 }
 
 
@@ -588,12 +588,12 @@ template <typename TFile, typename TString, typename TDataValue>
 void
 write(TFile & file,
 	  TDataValue * data,
-	  TString & id,
+	  TString & seqId,
 	  Fasta)
 {
 //IOREV _notinlined_
 SEQAN_CHECKPOINT
-	_writeImpl(file, data, id, Fasta());
+	_writeImpl(file, data, seqId, Fasta());
 
 }
 
@@ -603,13 +603,13 @@ template <typename TFile, typename TString, typename TData, typename TMeta>
 void
 write(TFile & file,
 	  TData & data,
-	  TString & id,
+	  TString & seqId,
 	  TMeta &,
 	  Fasta)
 {
 //IOREV _notinlined_
 SEQAN_CHECKPOINT
-	_writeImpl(file, data, id, Fasta());
+	_writeImpl(file, data, seqId, Fasta());
 }
 
 

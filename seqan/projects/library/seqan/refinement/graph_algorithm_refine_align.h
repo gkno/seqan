@@ -56,13 +56,13 @@ SEQAN_CHECKPOINT
 
 	if(seg_num == 0)
 	{
-		seq_j_id = seq_map[id(source(row(segment,1)))];
+		seq_j_id = seq_map[_getObjectId(source(row(segment,1)))];
 		if(node_i >= clippedEndPosition(row(segment,0))) node_j = static_cast<TPos2>(-1);
 		else node_j = toSourcePosition(row(segment,1),toViewPosition(row(segment,0),node_i));
 	}
 	else
 	{
-		seq_j_id  = seq_map[id(source(row(segment,0)))];
+		seq_j_id  = seq_map[_getObjectId(source(row(segment,0)))];
 		if(node_i >= clippedEndPosition(row(segment,1))) node_j = static_cast<TPos2>(-1);
 		else node_j = toSourcePosition(row(segment,0),toViewPosition(row(segment,1),node_i));
 	}
@@ -77,7 +77,7 @@ SEQAN_CHECKPOINT
 //			TValue seq_i)
 //{
 //SEQAN_CHECKPOINT
-//	return seq_map[id(source(row(segment,seq_i)))];
+//	return seq_map[_getObjectId(source(row(segment,seq_i)))];
 //}
 //
 //given seq and segment, get the sequenceId (seq_i) and its begin and end
@@ -92,7 +92,7 @@ _getSeqBeginAndEnd(Align<TAliSource,TAliSpec> & segment,
 				  TValue & end_i,
 				  TValue seq)
 {
-	seq_i_id = seq_map[id(source(row(segment,seq)))];
+	seq_i_id = seq_map[_getObjectId(source(row(segment,seq)))];
 	begin_i = clippedBeginPosition(row(segment,seq));
 	end_i = clippedEndPosition(row(segment,seq));
 }

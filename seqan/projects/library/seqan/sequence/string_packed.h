@@ -553,15 +553,15 @@ void assign(String<TValue, Packed<THostspec> > & target,
 }
 
 // --------------------------------------------------------------------------
-// Function id()
+// Function _getObjectId()
 // --------------------------------------------------------------------------
 
 template <typename TValue, typename THostspec>
 inline void const * 
-id(String<TValue, Packed<THostspec> > const & me)
+_getObjectId(String<TValue, Packed<THostspec> > const & me)
 {
     SEQAN_CHECKPOINT;
-    return id(host(me));
+    return _getObjectId(host(me));
 }
 
 // --------------------------------------------------------------------------

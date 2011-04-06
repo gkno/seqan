@@ -506,7 +506,7 @@ SEQAN_CHECKPOINT
 	//weird ID --> good ID map
 	std::map<const void * ,int> seq_map;
 	for(int i = 0; i < (int) numSequences; ++i)
-		seq_map[id(seq[i])] = i;
+		seq_map[_getObjectId(seq[i])] = i;
 	////////////////////////////////////////////////////////////////
 	//build interval trees
 	String<TGraph> gs;

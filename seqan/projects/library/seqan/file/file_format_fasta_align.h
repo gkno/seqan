@@ -229,7 +229,7 @@ void readIDs(TFile& file, TStringContainer& ids, FastaAlign) {
 	typename Value<TFile>::Type c;
 
 
-	TString id;
+	TString seqId;
 	while(true) {
 		c = _streamGet(file);
 		while ((!_streamEOF(file)) && (c != '>')) c = _streamGet(file);
@@ -237,18 +237,18 @@ void readIDs(TFile& file, TStringContainer& ids, FastaAlign) {
 			start_pos = _streamTellG(file);
 			typename Size<TString>::Type count = 0;
 			_fastaAlignScanLine(file, count);
-			if (! count) clear(id);
+			if (! count) clear(seqId);
 			else {
-				resize(id, count);
-				if (length(id) < count)	{
-					count = length(id);
+				resize(seqId, count);
+				if (length(seqId) < count)	{
+					count = length(seqId);
 				}
 				_streamSeekG(file, start_pos);
 				for (typename Position<TString>::Type pos = 0; pos<count; ++pos) {
-					id[pos] = _streamGet(file);
+					seqId[pos] = _streamGet(file);
 				}
 			}
-			appendValue(ids, id);
+			appendValue(ids, seqId);
 		} else {
 			break;
 		}

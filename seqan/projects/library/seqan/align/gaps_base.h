@@ -284,17 +284,17 @@ struct Reference<Gaps<TSource, TSpec> const>
 
 template <typename TSource, typename TSpec>
 inline void const *
-id(Gaps<TSource, TSpec> & me)
+_getObjectId(Gaps<TSource, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return id(source(me));
+	return _getObjectId(source(me));
 }
 template <typename TSource, typename TSpec>
 inline void const *
-id(Gaps<TSource, TSpec> const & me)
+_getObjectId(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return id(source(me));
+	return _getObjectId(source(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////

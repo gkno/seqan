@@ -274,10 +274,10 @@ struct IsSequence< Segment<THost, TSpec> > {
 
 template <typename THost, typename TSpec>
 inline void const *
-id(Segment<THost, TSpec> const & me)
+_getObjectId(Segment<THost, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-    return id(host(me));
+    return _getObjectId(host(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////

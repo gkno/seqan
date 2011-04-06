@@ -1159,7 +1159,7 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> &store, TFileName &fileName)
 	{
 		assignSeq(seq, multiSeqFile[i], format);    // read sequence
 		assignQual(qual, multiSeqFile[i], format);  // read ascii quality values
-		assignSeqId(_id, multiSeqFile[i], format);   // read sequence _id
+		assignSeqId(_id, multiSeqFile[i], format);   // read sequence id
 
 		// convert ascii to values from 0..62
 		// store dna and quality together in Dna5Q
@@ -1210,10 +1210,10 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> & store, TFileName & fileNameL,
 	for (unsigned i = 0; i < seqCountL; ++i) {
 		assignSeq(seq[0], multiSeqFileL[i], formatL);    // read sequence
 		assignQual(qual[0], multiSeqFileL[i], formatL);  // read ascii quality values
-		assignSeqId(_id[0], multiSeqFileL[i], formatL);   // read sequence _id
+		assignSeqId(_id[0], multiSeqFileL[i], formatL);   // read sequence id
 		assignSeq(seq[1], multiSeqFileR[i], formatR);    // read sequence
 		assignQual(qual[1], multiSeqFileR[i], formatR);  // read ascii quality values
-		assignSeqId(_id[1], multiSeqFileR[i], formatR);   // read sequence _id
+		assignSeqId(_id[1], multiSeqFileR[i], formatR);   // read sequence id
 
 		// convert ascii to values from 0..62
 		// store dna and quality together in Dna5Q
