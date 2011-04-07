@@ -138,56 +138,58 @@ def createModule(name, location, options):
     module_path = os.path.join(seqan_path, name)
     header_path = os.path.join(seqan_path, '%s.h' % name)
     print 'Creating module in %s' % module_path
-    if not _checkTargetPaths(module_path):
+    if not options.cmakelists_only and not _checkTargetPaths(module_path):
         return 1
-    if not _checkTargetPaths(header_path):
+    if not options.cmakelists_only and not _checkTargetPaths(header_path):
         return 1
     print '  Module path is: %s' % module_path
     print '  Module header path is: %s' % header_path
     print ''
-    # Create directory.
-    createDirectory(module_path, options.dry_run)
-    # Copy over module header.
-    source_file = paths.pathToTemplate('module_template', 'module.h')
-    target_file = header_path
-    replacements = buildReplacements('module', name, seqan_path, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
-    # Copy over header inside module.
-    source_file = paths.pathToTemplate('module_template', 'header.h')
-    target_file = os.path.join(module_path, '%s_base.h' % name)
-    replacements = buildReplacements('module', name, seqan_path, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
-    # Copy over INFO file for app and perform replacements.
-    source_file = paths.pathToTemplate('app_template', 'INFO')
-    target_file = os.path.join(target_path, 'INFO'
-    replacements = buildReplacements('app', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
+    if not options.cmakelists_only:
+        # Create directory.
+        createDirectory(module_path, options.dry_run)
+        # Copy over module header.
+        source_file = paths.pathToTemplate('module_template', 'module.h')
+        target_file = header_path
+        replacements = buildReplacements('module', name, seqan_path, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
+        # Copy over header inside module.
+        source_file = paths.pathToTemplate('module_template', 'header.h')
+        target_file = os.path.join(module_path, '%s_base.h' % name)
+        replacements = buildReplacements('module', name, seqan_path, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
+        # Copy over INFO file for app and perform replacements.
+        source_file = paths.pathToTemplate('app_template', 'INFO')
+        target_file = os.path.join(target_path, 'INFO')
+        replacements = buildReplacements('app', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
     return 0
 
 def createTest(name, location, options):
     target_path = paths.pathToTest(location, name)
     print 'Creating test in %s' % target_path
-    if not _checkTargetPaths(target_path):
+    if not options.cmakelists_only and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    # Create directory.
-    createDirectory(target_path, options.dry_run)
-    # Copy over .cpp file for test and perform replacements.
-    source_file = paths.pathToTemplate('test_template', 'test.cpp')
-    target_file = os.path.join(target_path, 'test_%s.cpp' % name)
-    replacements = buildReplacements('test', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
-    # Copy over .h file for test and perform replacements.
-    source_file = paths.pathToTemplate('test_template', 'test.h')
-    target_file = os.path.join(target_path, 'test_%s.h' % name)
-    replacements = buildReplacements('test', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
+    if not options.cmakelists_only:
+        # Create directory.
+        createDirectory(target_path, options.dry_run)
+        # Copy over .cpp file for test and perform replacements.
+        source_file = paths.pathToTemplate('test_template', 'test.cpp')
+        target_file = os.path.join(target_path, 'test_%s.cpp' % name)
+        replacements = buildReplacements('test', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
+        # Copy over .h file for test and perform replacements.
+        source_file = paths.pathToTemplate('test_template', 'test.h')
+        target_file = os.path.join(target_path, 'test_%s.h' % name)
+        replacements = buildReplacements('test', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
     # Copy over CMakeLists.txt file for test and perform replacements.
     source_file = paths.pathToTemplate('test_template', 'CMakeLists.txt')
     target_file = os.path.join(target_path, 'CMakeLists.txt')
@@ -199,30 +201,31 @@ def createTest(name, location, options):
 def createApp(name, location, options):
     target_path = paths.pathToApp(location, name)
     print 'Creating app in %s' % target_path
-    if not _checkTargetPaths(target_path):
+    if not options.cmakelists_only and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    # Create directory.
-    createDirectory(target_path, options.dry_run)
-    # Copy over .cpp file for app and perform replacements.
-    source_file = paths.pathToTemplate('app_template', 'app.cpp')
-    target_file = os.path.join(target_path, '%s.cpp' % name)
-    replacements = buildReplacements('app', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
-    # Copy over .h file for app and perform replacements.
-    source_file = paths.pathToTemplate('app_template', 'app.h')
-    target_file = os.path.join(target_path, '%s.h' % name)
-    replacements = buildReplacements('app', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
-    # Copy over INFO file for app and perform replacements.
-    source_file = paths.pathToTemplate('app_template', 'INFO')
-    target_file = os.path.join(target_path, 'INFO'
-    replacements = buildReplacements('app', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
+    if not options.cmakelists_only:
+        # Create directory.
+        createDirectory(target_path, options.dry_run)
+        # Copy over .cpp file for app and perform replacements.
+        source_file = paths.pathToTemplate('app_template', 'app.cpp')
+        target_file = os.path.join(target_path, '%s.cpp' % name)
+        replacements = buildReplacements('app', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
+        # Copy over .h file for app and perform replacements.
+        source_file = paths.pathToTemplate('app_template', 'app.h')
+        target_file = os.path.join(target_path, '%s.h' % name)
+        replacements = buildReplacements('app', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
+        # Copy over INFO file for app and perform replacements.
+        source_file = paths.pathToTemplate('app_template', 'INFO')
+        target_file = os.path.join(target_path, 'INFO')
+        replacements = buildReplacements('app', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
     # Copy over CMakeLists.txt file for app and perform replacements.
     source_file = paths.pathToTemplate('app_template', 'CMakeLists.txt')
     target_file = os.path.join(target_path, 'CMakeLists.txt')
@@ -234,16 +237,17 @@ def createApp(name, location, options):
 def createDemo(name, location, options):
     target_path = paths.pathToDemo(location, name)
     print 'Creating app in %s' % target_path
-    if not _checkTargetPaths(target_path):
+    if not options.cmakelists_only and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    # Copy over .cpp file for app and perform replacements.
-    source_file = paths.pathToTemplate('demo_template', 'demo.cpp')
-    target_file = os.path.join(target_path)
-    replacements = buildReplacements('app', name, location, target_file, options)
-    configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
+    if not options.cmakelists_only:
+        # Copy over .cpp file for app and perform replacements.
+        source_file = paths.pathToTemplate('demo_template', 'demo.cpp')
+        target_file = os.path.join(target_path)
+        replacements = buildReplacements('app', name, location, target_file, options)
+        configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
     return 0
 
 def createRepository(location, options):
@@ -253,13 +257,14 @@ def createRepository(location, options):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    # Create directories.
-    createDirectory(target_path, options.dry_run)
-    createDirectory(os.path.join(target_path, 'apps'), options.dry_run)
-    createDirectory(os.path.join(target_path, 'demos'), options.dry_run)
-    createDirectory(os.path.join(target_path, 'include'), options.dry_run)
-    createDirectory(os.path.join(target_path, 'include', 'seqan'), options.dry_run)
-    createDirectory(os.path.join(target_path, 'tests'), options.dry_run)
+    if not options.cmakelists_only:
+        # Create directories.
+        createDirectory(target_path, options.dry_run)
+        createDirectory(os.path.join(target_path, 'apps'), options.dry_run)
+        createDirectory(os.path.join(target_path, 'demos'), options.dry_run)
+        createDirectory(os.path.join(target_path, 'include'), options.dry_run)
+        createDirectory(os.path.join(target_path, 'include', 'seqan'), options.dry_run)
+        createDirectory(os.path.join(target_path, 'tests'), options.dry_run)
     # Copy over file ${REPOSITORY}/CMakeLists.txt.
     target_file = os.path.join(target_path, 'CMakeLists.txt')
     source_file = paths.pathToTemplate('repository_template', 'CMakeLists.txt')
@@ -298,6 +303,10 @@ def main():
                       default=os.environ.get('SEQAN_AUTHOR', DEFAULT_AUTHOR))
     parser.add_option('-d', '--dry-run', dest='dry_run', action='store_true',
                       help='Do not change anything, just simulate.',
+                      default=False)
+    parser.add_option('-c', '--cmakelists-only', dest='cmakelists_only',
+                      action='store_true',
+                      help='Only create CMakeLists.txt files',
                       default=False)
     options, args = parser.parse_args()
     if not args:
