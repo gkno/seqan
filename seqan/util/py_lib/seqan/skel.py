@@ -263,7 +263,7 @@ def createRepository(location, options):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    if options.create_dirs and not options.create_:
+    if options.create_dirs:
         # Create directories.
         createDirectory(target_path, options.dry_run)
         createDirectory(os.path.join(target_path, 'apps'), options.dry_run)
