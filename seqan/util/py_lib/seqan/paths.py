@@ -23,13 +23,13 @@ def repositoryRoot():
     abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
     return os.path.relpath(abs_path, os.getcwd())
 
-def pathToSkelletons():
+def pathToSkeletons():
     """Return path to '${REPOSITORY}/util/skel'."""
     return os.path.join(repositoryRoot(), 'util/skel')
 
 def pathToTemplate(template, filename):
     """Return path to file with given name in given template."""
-    return os.path.join(pathToSkelletons(), template, filename)
+    return os.path.join(pathToSkeletons(), template, filename)
 
 def pathToApp(location, app):
     """Return path to the app in the given location/repository."""
@@ -55,7 +55,7 @@ def main(args):
     print 'SeqAn paths'
     print
     print 'repositoryRoot()   ==', repositoryRoot()
-    print 'pathToSkelletons() ==', pathToSkelletons()
+    print 'pathToSkeletons() ==', pathToSkeletons()
 
 if __name__ == '__main__':
    sys.exit(main(sys.argv))

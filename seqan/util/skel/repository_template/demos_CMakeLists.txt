@@ -1,4 +1,4 @@
 cmake_minimum_required (VERSION 2.6)
-project (seqan_%(CMAKE_PROJECT_NAME))
+project (seqan_%(CMAKE_PROJECT_NAME)s)
 
-seqan_add_all_executables(%(CMAKE_PROJECT_NAME))
+seqan_add_all_executables(%(CMAKE_PROJECT_NAME)s)

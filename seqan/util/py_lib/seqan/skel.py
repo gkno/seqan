@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""SeqAn code generation from templates / skelletons.
+"""SeqAn code generation from templates / skeletons.
 
 This module contains code to help the creation of modules, tests, apps etc.
 It can be called directly or imported and the main() function can be called.
@@ -48,7 +48,8 @@ DEFAULT_AUTHOR = 'Your Name <your.email@example.net>'
 
 # Program usage string for command line parser.
 USAGE = """
-Usage: %prog [options] create [module|test|app|demo|repository] NAME LOCATION
+Usage: %prog [options] create repository NAME
+       %prog [options] create [module|test|app|demo] NAME LOCATION
        %prog [options] info [module|test|app|demo|repository]
 """.strip()
 
@@ -138,16 +139,17 @@ def createModule(name, location, options):
     module_path = os.path.join(seqan_path, name)
     header_path = os.path.join(seqan_path, '%s.h' % name)
     print 'Creating module in %s' % module_path
-    if not options.cmakelists_only and not _checkTargetPaths(module_path):
+    if options.create_dirs and not _checkTargetPaths(module_path):
         return 1
-    if not options.cmakelists_only and not _checkTargetPaths(header_path):
+    if options.create_dirs and not _checkTargetPaths(header_path):
         return 1
     print '  Module path is: %s' % module_path
     print '  Module header path is: %s' % header_path
     print ''
-    if not options.cmakelists_only:
+    if options.create_dirs:
         # Create directory.
         createDirectory(module_path, options.dry_run)
+    if options.create_programs:
         # Copy over module header.
         source_file = paths.pathToTemplate('module_template', 'module.h')
         target_file = header_path
@@ -160,6 +162,7 @@ def createModule(name, location, options):
         replacements = buildReplacements('module', name, seqan_path, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
+    if options.create_infos:
         # Copy over INFO file for app and perform replacements.
         source_file = paths.pathToTemplate('app_template', 'INFO')
         target_file = os.path.join(target_path, 'INFO')
@@ -171,11 +174,11 @@ def createModule(name, location, options):
 def createTest(name, location, options):
     target_path = paths.pathToTest(location, name)
     print 'Creating test in %s' % target_path
-    if not options.cmakelists_only and not _checkTargetPaths(target_path):
+    if options.create_dirs and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    if not options.cmakelists_only:
+    if not options.cmakelists_only and not options.info_only:
         # Create directory.
         createDirectory(target_path, options.dry_run)
         # Copy over .cpp file for test and perform replacements.
@@ -190,22 +193,23 @@ def createTest(name, location, options):
         replacements = buildReplacements('test', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
-    # Copy over CMakeLists.txt file for test and perform replacements.
-    source_file = paths.pathToTemplate('test_template', 'CMakeLists.txt')
-    target_file = os.path.join(target_path, 'CMakeLists.txt')
-    replacements = buildReplacements('test', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
+    if not options.info_only:
+        # Copy over CMakeLists.txt file for test and perform replacements.
+        source_file = paths.pathToTemplate('test_template', 'CMakeLists.txt')
+        target_file = os.path.join(target_path, 'CMakeLists.txt')
+        replacements = buildReplacements('test', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
     return 0
 
 def createApp(name, location, options):
     target_path = paths.pathToApp(location, name)
     print 'Creating app in %s' % target_path
-    if not options.cmakelists_only and not _checkTargetPaths(target_path):
+    if options.create_dirs and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    if not options.cmakelists_only:
+    if options.create_programs:
         # Create directory.
         createDirectory(target_path, options.dry_run)
         # Copy over .cpp file for app and perform replacements.
@@ -220,28 +224,30 @@ def createApp(name, location, options):
         replacements = buildReplacements('app', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
+    if options.create_infos:
         # Copy over INFO file for app and perform replacements.
         source_file = paths.pathToTemplate('app_template', 'INFO')
         target_file = os.path.join(target_path, 'INFO')
         replacements = buildReplacements('app', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
-    # Copy over CMakeLists.txt file for app and perform replacements.
-    source_file = paths.pathToTemplate('app_template', 'CMakeLists.txt')
-    target_file = os.path.join(target_path, 'CMakeLists.txt')
-    replacements = buildReplacements('app', name, location, target_file, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
-    if res: return res
+    if options.create_cmakelists:
+        # Copy over CMakeLists.txt file for app and perform replacements.
+        source_file = paths.pathToTemplate('app_template', 'CMakeLists.txt')
+        target_file = os.path.join(target_path, 'CMakeLists.txt')
+        replacements = buildReplacements('app', name, location, target_file, options)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
+        if res: return res
     return 0
 
 def createDemo(name, location, options):
     target_path = paths.pathToDemo(location, name)
     print 'Creating app in %s' % target_path
-    if not options.cmakelists_only and not _checkTargetPaths(target_path):
+    if options.create_dirs and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    if not options.cmakelists_only:
+    if options.create_programs:
         # Copy over .cpp file for app and perform replacements.
         source_file = paths.pathToTemplate('demo_template', 'demo.cpp')
         target_file = os.path.join(target_path)
@@ -253,11 +259,11 @@ def createDemo(name, location, options):
 def createRepository(location, options):
     print 'Creating module %s' % location
     target_path = paths.pathToRepository(location)
-    if not _checkTargetPaths(target_path):
+    if options.create_dirs and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    if not options.cmakelists_only:
+    if options.create_dirs and not options.create_:
         # Create directories.
         createDirectory(target_path, options.dry_run)
         createDirectory(os.path.join(target_path, 'apps'), options.dry_run)
@@ -265,37 +271,38 @@ def createRepository(location, options):
         createDirectory(os.path.join(target_path, 'include'), options.dry_run)
         createDirectory(os.path.join(target_path, 'include', 'seqan'), options.dry_run)
         createDirectory(os.path.join(target_path, 'tests'), options.dry_run)
-    # Copy over file ${REPOSITORY}/CMakeLists.txt.
-    target_file = os.path.join(target_path, 'CMakeLists.txt')
-    source_file = paths.pathToTemplate('repository_template', 'CMakeLists.txt')
-    replacements = buildReplacements('repository', location, target_path, target_file, options)
-    configureFile(target_file, source_file, replacements, options.dry_run)
-    # Copy over file ${REPOSITORY}/apps/CMakeLists.txt.
-    target_file = os.path.join(target_path, 'apps', 'apps_CMakeLists.txt')
-    source_file = paths.pathToTemplate('repository_template', 'CMakeLists.txt')
-    replacements = buildReplacements('repository', location, target_path, target_file, options)
-    configureFile(target_file, source_file, replacements, options.dry_run)
-    # Copy over file ${REPOSITORY}/tests/CMakeLists.txt.
-    target_file = os.path.join(target_path, 'tests', 'tests_CMakeLists.txt')
-    source_file = paths.pathToTemplate('repository_template', 'CMakeLists.txt')
-    replacements = buildReplacements('repository', location, target_path, target_file, options)
-    configureFile(target_file, source_file, replacements, options.dry_run)
-    # Copy over file ${REPOSITORY}/demos/CMakeLists.txt.
-    target_file = os.path.join(target_path, 'demos', 'demos_CMakeLists.txt')
-    source_file = paths.pathToTemplate('repository_template', 'CMakeLists.txt')
-    replacements = buildReplacements('repository', location, target_path, target_file, options)
-    configureFile(target_file, source_file, replacements, options.dry_run)
+    if options.create_cmakelists:
+        # Copy over file ${REPOSITORY}/CMakeLists.txt.
+        target_file = os.path.join(target_path, 'CMakeLists.txt')
+        source_file = paths.pathToTemplate('repository_template', 'CMakeLists.txt')
+        replacements = buildReplacements('repository', location, target_path, target_file, options)
+        configureFile(target_file, source_file, replacements, options.dry_run)
+        # Copy over file ${REPOSITORY}/apps/CMakeLists.txt.
+        target_file = os.path.join(target_path, 'apps', 'CMakeLists.txt')
+        source_file = paths.pathToTemplate('repository_template', 'apps_CMakeLists.txt')
+        replacements = buildReplacements('repository', location, target_path, target_file, options)
+        configureFile(target_file, source_file, replacements, options.dry_run)
+        # Copy over file ${REPOSITORY}/tests/CMakeLists.txt.
+        target_file = os.path.join(target_path, 'tests', 'CMakeLists.txt')
+        source_file = paths.pathToTemplate('repository_template', 'tests_CMakeLists.txt')
+        replacements = buildReplacements('repository', location, target_path, target_file, options)
+        configureFile(target_file, source_file, replacements, options.dry_run)
+        # Copy over file ${REPOSITORY}/demos/CMakeLists.txt.
+        target_file = os.path.join(target_path, 'demos', 'CMakeLists.txt')
+        source_file = paths.pathToTemplate('repository_template', 'demos_CMakeLists.txt')
+        replacements = buildReplacements('repository', location, target_path, target_file, options)
+        configureFile(target_file, source_file, replacements, options.dry_run)
     return 0
 
 def main():
     # Parse arguments.
     parser = optparse.OptionParser(usage=USAGE, description=DESCRIPTION)
     parser.add_option('-s', '--skel-root', dest='skel_root',
-                      help=('Set path to the directory where the skelletons '
+                      help=('Set path to the directory where the skeletons '
                             'live in.  Taken from environment variable '
                             'SEQAN_SKELS if available.'),
                       default=os.environ.get('SEQAN_SKELS',
-                                             paths.pathToSkelletons()))
+                                             paths.pathToSkeletons()))
     parser.add_option('-a', '--author', dest='author',
                       help=('Set author to use.  Should have the format USER '
                             '<EMAIL>.  Taken from environment variable '
@@ -308,7 +315,23 @@ def main():
                       action='store_true',
                       help='Only create CMakeLists.txt files',
                       default=False)
+    parser.add_option('-i', '--infos-only', dest='infos_only',
+                      action='store_true',
+                      help='Only create INFO files',
+                      default=False)
     options, args = parser.parse_args()
+    if options.infos_only and options.cmakelists_only:
+        print >>sys.stderr, 'Only one of --info-only and --cmakelists-only can be given.'
+        return 1
+    options.create_cmakelists = True
+    options.create_infos = True
+    options.create_dirs = True
+    options.create_programs = True
+    if options.infos_only or options.cmakelists_only:
+        options.create_cmakelists = not options.infos_only
+        options.create_infos = not options.cmakelists_only
+        options.create_dirs = False
+        options.create_programs = False
     if not args:
         parser.print_help(file=sys.stderr)
         return 1
