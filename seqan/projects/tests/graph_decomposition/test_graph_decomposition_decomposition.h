@@ -44,7 +44,119 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_digraph_condensed)
 
 SEQAN_DEFINE_TEST(test_graph_decomposition_digraph_stiege)
 {
-    // TODO(holtgrew): Write me!
+    using namespace seqan;
+
+    typedef Graph<Directed<> > TGraph;
+    typedef typename VertexDescriptor<TGraph>::Type TGraphVertexDescriptor;
+    typedef typename EdgeDescriptor<TGraph>::Type TGraphEdgeDescriptor;
+
+    // ------------------------------------------------------------------------
+    // Build Test Data
+    // ------------------------------------------------------------------------
+
+    // Build the same graph as in Stiege's example in the 2001 paper, Figure 1.
+    //
+    // We add another vertex, v27 that is isolated, and two vertices
+    // v28, v29 that form an acyclic weak component.
+    TGraph digraph;
+    TGraphVertexDescriptor v01 = addVertex(digraph);
+    TGraphVertexDescriptor v02 = addVertex(digraph);
+    TGraphVertexDescriptor v03 = addVertex(digraph);
+    TGraphVertexDescriptor v04 = addVertex(digraph);
+    TGraphVertexDescriptor v05 = addVertex(digraph);
+    TGraphVertexDescriptor v06 = addVertex(digraph);
+    TGraphVertexDescriptor v07 = addVertex(digraph);
+    TGraphVertexDescriptor v08 = addVertex(digraph);
+    TGraphVertexDescriptor v09 = addVertex(digraph);
+    TGraphVertexDescriptor v10 = addVertex(digraph);
+    TGraphVertexDescriptor v11 = addVertex(digraph);
+    TGraphVertexDescriptor v12 = addVertex(digraph);
+    TGraphVertexDescriptor v13 = addVertex(digraph);
+    TGraphVertexDescriptor v14 = addVertex(digraph);
+    TGraphVertexDescriptor v15 = addVertex(digraph);
+    TGraphVertexDescriptor v16 = addVertex(digraph);
+    TGraphVertexDescriptor v17 = addVertex(digraph);
+    TGraphVertexDescriptor v18 = addVertex(digraph);
+    TGraphVertexDescriptor v19 = addVertex(digraph);
+    TGraphVertexDescriptor v20 = addVertex(digraph);
+    TGraphVertexDescriptor v21 = addVertex(digraph);
+    TGraphVertexDescriptor v22 = addVertex(digraph);
+    TGraphVertexDescriptor v23 = addVertex(digraph);
+    TGraphVertexDescriptor v24 = addVertex(digraph);
+    TGraphVertexDescriptor v25 = addVertex(digraph);
+    TGraphVertexDescriptor v26 = addVertex(digraph);
+
+    TGraphVertexDescriptor v27 = addVertex(digraph);
+    (void)v27;  // Is isolated.
+
+    TGraphVertexDescriptor v28 = addVertex(digraph);
+    TGraphVertexDescriptor v29 = addVertex(digraph);
+
+    TGraphEdgeDescriptor v01_v02 = addEdge(digraph, v01, v02);
+    TGraphEdgeDescriptor v02_v06 = addEdge(digraph, v02, v06);
+    TGraphEdgeDescriptor v02_v26 = addEdge(digraph, v02, v26);
+    TGraphEdgeDescriptor v03_v02 = addEdge(digraph, v03, v02);
+    TGraphEdgeDescriptor v04_v01 = addEdge(digraph, v04, v01);
+    TGraphEdgeDescriptor v04_v03 = addEdge(digraph, v04, v03);
+    TGraphEdgeDescriptor v04_v05 = addEdge(digraph, v04, v05);
+    TGraphEdgeDescriptor v05_v02 = addEdge(digraph, v05, v02);
+    TGraphEdgeDescriptor v06_v08 = addEdge(digraph, v06, v08);
+    TGraphEdgeDescriptor v06_v11 = addEdge(digraph, v06, v11);
+    TGraphEdgeDescriptor v07_v04 = addEdge(digraph, v07, v04);
+    TGraphEdgeDescriptor v08_v07 = addEdge(digraph, v08, v07);
+    TGraphEdgeDescriptor v08_v10 = addEdge(digraph, v08, v10);
+    TGraphEdgeDescriptor v09_v10 = addEdge(digraph, v09, v10);
+    TGraphEdgeDescriptor v09_v13 = addEdge(digraph, v09, v13);
+    TGraphEdgeDescriptor v10_v04 = addEdge(digraph, v10, v04);
+    TGraphEdgeDescriptor v10_v13 = addEdge(digraph, v10, v13);
+    TGraphEdgeDescriptor v11_v07 = addEdge(digraph, v11, v07);
+    TGraphEdgeDescriptor v11_v10 = addEdge(digraph, v11, v10);
+    TGraphEdgeDescriptor v12_v09 = addEdge(digraph, v12, v09);
+    TGraphEdgeDescriptor v12_v17 = addEdge(digraph, v12, v17);
+    TGraphEdgeDescriptor v12_v21 = addEdge(digraph, v12, v21);
+    TGraphEdgeDescriptor v13_v14 = addEdge(digraph, v13, v14);
+    TGraphEdgeDescriptor v13_v17 = addEdge(digraph, v13, v17);
+    TGraphEdgeDescriptor v13_v18 = addEdge(digraph, v13, v18);
+    TGraphEdgeDescriptor v14_v13 = addEdge(digraph, v14, v13);
+    TGraphEdgeDescriptor v14_v15 = addEdge(digraph, v14, v15);
+    TGraphEdgeDescriptor v15_v14 = addEdge(digraph, v15, v14);
+    TGraphEdgeDescriptor v15_v16 = addEdge(digraph, v15, v16);
+    TGraphEdgeDescriptor v16_v20 = addEdge(digraph, v16, v20);
+    TGraphEdgeDescriptor v16_v25 = addEdge(digraph, v16, v25);
+    TGraphEdgeDescriptor v17_v09 = addEdge(digraph, v17, v09);
+    TGraphEdgeDescriptor v17_v18 = addEdge(digraph, v17, v18);
+    TGraphEdgeDescriptor v17_v21 = addEdge(digraph, v17, v21);
+    TGraphEdgeDescriptor v18_v21 = addEdge(digraph, v18, v21);
+    TGraphEdgeDescriptor v18_v22 = addEdge(digraph, v18, v22);
+    TGraphEdgeDescriptor v19_v18 = addEdge(digraph, v19, v18);
+    TGraphEdgeDescriptor v19_v23 = addEdge(digraph, v19, v23);
+    TGraphEdgeDescriptor v20_v15 = addEdge(digraph, v20, v15);
+    TGraphEdgeDescriptor v20_v24 = addEdge(digraph, v20, v24);
+    TGraphEdgeDescriptor v22_v23 = addEdge(digraph, v22, v23);
+    TGraphEdgeDescriptor v23_v19 = addEdge(digraph, v23, v19);
+    TGraphEdgeDescriptor v23_v24 = addEdge(digraph, v23, v24);
+    TGraphEdgeDescriptor v25_v16 = addEdge(digraph, v25, v16);
+    TGraphEdgeDescriptor v25_v26 = addEdge(digraph, v25, v26);
+
+    TGraphEdgeDescriptor v28_v29 = addEdge(digraph, v28, v29);
+
+    // ------------------------------------------------------------------------
+    // Call Function To Test
+    // ------------------------------------------------------------------------
+
+    typedef GraphDecomposition<TGraph, StandardDigraphDecomposition> TGraphDecomposition;
+
+    TGraphDecomposition gd(digraph);
+    decomposeGraph(gd, digraph);
+    
+    write(std::cout, digraph, DotDrawing());
+    // write(std::cout, clusterTree(gd), DotDrawing());
+    writeDecompositionTree(std::cout, gd);
+
+
+    // ------------------------------------------------------------------------
+    // Check Result
+    // ------------------------------------------------------------------------
 }
 
 SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
@@ -136,6 +248,7 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
     decomposeGraph(gd, graph);
     
     // write(std::cout, graph, DotDrawing());
+    // write(std::cout, clusterTree(gd), DotDrawing());
 
     // ------------------------------------------------------------------------
     // Check Result
@@ -354,10 +467,12 @@ SEQAN_DEFINE_TEST(test_graph_decomposition_graph_stiege)
 
     // TODO(holtgrew): Check flags on graph. Are not exported right now!
 
-    // Check output.  We only test that it works at all.
+    // write(std::cout, host(gd), DotDrawing());
+
+    // Check writing to stream.  We only test that it works at all.
     std::stringstream ss;
     writeDecompositionTree(ss, gd);
+    // std::cout << ss.str();
 }
-
 
 #endif  // TEST_GRAPH_DECOMPOSITION_DECOMPOSITION_H_

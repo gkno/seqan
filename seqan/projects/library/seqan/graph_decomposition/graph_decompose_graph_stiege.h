@@ -31,13 +31,22 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Implementation of the graph decomposition by Stiege.
+// Implementation of the graph decomposition by Stiege.  It follows the
+// description of (Stiege, 1997).  However, we use the algorithm from (Tarjan,
+// 1972) for finding the biconnected components.
 //
-// Relevant literature:
+// References
 //
-// Tarjan, R E. Depth-First Search and Linear Graph Algorithms. SIAM Journal
-// on Computing 1, no. 2 (July 1972): 146.
+// * Stiege, G. An algorithm for finding the connectivity structure of
+//   undirected graphs. Hildesheimer Informatikberichte, Institut f\"ur
+//   Betriebssysteme & Rechnerverbund, Universit\"at Hildesheim, 1997.
+// * Tarjan, R E. Depth-First Search and Linear Graph Algorithms. SIAM Journal
+//   on Computing 1, no. 2 (July 1972): 146.
 // ==========================================================================
+
+// TODO(holtgrew): While all algorithms are linear-time, the constant factor could be improved by doing less steps, doing more at the same time, probably more DFS than iterator.
+
+// TODO(holtgrew): Rather call "standard graph decomposition" and replace the word stiege by standard in file name and symbols.
 
 #ifndef SEQAN_HEADER_GRAPH_DECOMPOSITON_GRAPH_DECOMPOSE_GRAPH_STIEGE_H_
 #define SEQAN_HEADER_GRAPH_DECOMPOSITON_GRAPH_DECOMPOSE_GRAPH_STIEGE_H_
@@ -57,21 +66,19 @@ namespace seqan {
 ..cat:Graph Decomposition
 ..summary:Types of building blocks in standard graph decomposition.
 ..signature:StandardDecompositionBlockType
-..include:seqan/graph_decomposition.h
-..value:BLOCK_NULL
-..value:BLOCK_GRAPH
-..value:BLOCK_IMPROPER_COMPONENT
-..value:BLOCK_PROPER_COMPONENT
-..value:BLOCK_PERIPHERAL_TREE
-..value:BLOCK_STOPFREE_KERNEL
-..value:BLOCK_INTERNAL_TREE
-..value:BLOCK_SUBCOMPONENT
-..value:BLOCK_BIBLOCK
+..include.seqan/graph_decomposition.h
+..value.BLOCK_GRAPH:Building block type graph.
+..value.BLOCK_IMPROPER_COMPONENT:Building block type improper component, i.e. singleton vertex.
+..value.BLOCK_PROPER_COMPONENT:Building block type proper component, i.e. non-singleton vertex.
+..value.BLOCK_PERIPHERAL_TREE:Building block type peripheral tree.
+..value.BLOCK_STOPFREE_KERNEL:Building block type stopfree kernel.
+..value.BLOCK_INTERNAL_TREE:Building block type internal tree.
+..value.BLOCK_SUBCOMPONENT:Building block type subcomponent.
+..value.BLOCK_BIBLOCK:Building block type biblock (biconnnected block).
  */
 
 enum StandardDecompositionBlockType
 {
-    BLOCK_NULL,
     BLOCK_GRAPH,
     BLOCK_IMPROPER_COMPONENT,
     BLOCK_PROPER_COMPONENT,
@@ -87,16 +94,16 @@ enum StandardDecompositionBlockType
 ..cat:Graph Decomposition
 ..summary:Types of vertices in standard graph decompositon.
 ..signature:StandardDecompositionVertexType
-..include:seqan/graph_decomposition.h
-..value:VERTEX_TOKEN
-..value:VERTEX_MARK
-..value:VERTEX_ISOLATED
-..value:VERTEX_PERIPHERAL_TREE
-..value:VERTEX_PERIPHERAL_TREE_ROOT
-..value:VERTEX_PERIPHERAL_TREE_BORDER
-..value:VERTEX_BIBLOCK
-..value:VERTEX_INTERNAL_TREE
-..value:VERTEX_INTERNAL_TREE_ROOT
+..include.seqan/graph_decomposition.h
+..value.VERTEX_TOKEN:Special value used for external tree construction.
+..value.VERTEX_MARK:Special value used for marking in DFS.
+..value.VERTEX_ISOLATED:Isolated vertex, singleton.
+..value.VERTEX_PERIPHERAL_TREE:Vertex is in peripheral tree.
+..value.VERTEX_PERIPHERAL_TREE_ROOT:Vertex is the root of a peripheral tree.
+..value.VERTEX_PERIPHERAL_TREE_BORDER:Vertex is in peripheral tree but also on stopfree kernel.
+..value.VERTEX_BIBLOCK:Vertex is in biconnected block.
+..value.VERTEX_INTERNAL_TREE:Vertex is in internal tree.
+..value.VERTEX_INTERNAL_TREE_ROOT:Vertex is the root of an internal tree.
  */
 
 enum StandardDecompositionVertexType
@@ -118,9 +125,9 @@ enum StandardDecompositionVertexType
 ..summary:Types of edges in standard graph decompositon.
 ..signature:StandardDecompositionEdgeType
 ..include:seqan/graph_decomposition.h
-..value:EDGE_PERIPHERAL_TREE
-..value:EDGE_INTERNAL_TREE
-..value:EDGE_BIBLOCK
+..value.EDGE_PERIPHERAL_TREE:Edge is in peripheral tree.
+..value.EDGE_INTERNAL_TREE:Edge is in internal tree.
+..value.EDGE_BIBLOCK:Edge is in biconnected block.
  */
 
 enum StandardDecompositionEdgeType
@@ -729,6 +736,60 @@ _decomposeGraphStiegeCollectInternalTrees(
     }
 }
 
+// Join subcomponents that are connected by hinge points.  We will first
+// search for all hinge points, vertices that have more than one biblock in
+// common.  The corresponding parents of the biblock tree nodes will then be
+// checked for equality or joined.
+template <typename TGraphCargo, typename TGraphSpec, typename TVertexDescriptor>
+void
+_decomposeGraphStiegeJoinSubcomponents(
+        GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> & gd,
+        TVertexDescriptor v)
+{
+    typedef GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, StandardDecomposition> TGraphDecomposition;
+    typedef typename Value<typename VertexToClusterMap<TGraphDecomposition>::Type>::Type TTreeVertexString;
+    typedef typename Iterator<TTreeVertexString, Standard>::Type TIterator;
+    typedef typename ClusterTree<TGraphDecomposition>::Type TClusterTree;
+    typedef typename VertexDescriptor<TClusterTree>::Type TTreeVertexDescriptor;
+    
+    TTreeVertexString & blocks = property(vertexToClusterMap(gd), v);
+    if (length(blocks) < 2u)
+        return;  // No work if less than two cluster entries.
+
+    // Collect subcomponent vertices to be joined.
+    String<TTreeVertexDescriptor> subcomponents;
+    for (TIterator it = begin(blocks); it != end(blocks); ++it) {
+        if (getProperty(clusterNodeCargoMap(gd), *it) == BLOCK_BIBLOCK)
+            appendValue(subcomponents, parentVertex(clusterTree(gd), *it));
+    }
+    if (length(subcomponents) < 2u)
+        return;  // No work if less than two subcomponents.
+
+    // Compute unique subcomponents.
+    std::sort(begin(subcomponents, Standard()), end(subcomponents, Standard()));
+    TIterator newEnd = std::unique(begin(subcomponents, Standard()), end(subcomponents, Standard()));
+    if (newEnd - begin(subcomponents, Standard()) < 2u)
+        return;  // No work if less than two unique subcomponents.
+
+    // Join these subcomponents into the first.  The children of all
+    // will be moved to the first, then the subcomponent vertices will
+    // be removed.
+    typedef typename Iterator<TClusterTree, OutEdgeIterator>::Type TOutEdgeIterator;
+    typedef typename EdgeDescriptor<TClusterTree>::Type TEdgeDescriptor;
+    typedef typename Iterator<String<TEdgeDescriptor>, Standard>::Type TEdgeDescriptorIterator;
+    String<TEdgeDescriptor> edgeDescriptors;
+    for (TIterator it = begin(subcomponents, Standard()) + 1; it != newEnd; ++it) {
+        clear(edgeDescriptors);
+        for (TOutEdgeIterator itE(clusterTree(gd), *it); !atEnd(itE); goNext(itE))
+            appendValue(edgeDescriptors, *itE);
+        for (TEdgeDescriptorIterator itE = begin(edgeDescriptors, Standard()); itE != end(edgeDescriptors, Standard()); ++itE) {
+            TTreeVertexDescriptor v = childVertex(clusterTree(gd), *itE);
+            removeEdge(clusterTree(gd), *itE);
+            addEdge(clusterTree(gd), front(subcomponents), v);
+        }
+    }
+}
+
 // This is a slightly extended version of Tarjan's classic biconnected
 // component search.  The function _decomposeGraphStiegeBiconnect corresponds
 // to the routine BICONNECT in (Tarjan, 1973).
@@ -779,15 +840,20 @@ _decomposeGraphStiegeFindStopfreeKernels(
 
         // Start biconnected components DFS.
         clear(stack);
+        // std::cerr << "-- DECOMPOSE" << std::endl;
         _decomposeGraphStiegeBiconnect(vertexFlags, edgeFlags, gd, lowPt, number, edgeComponentIds, i, j, stack, v, maxValue<TVertexDescriptor>(), g, components, componentToBlock);
     }
 
+    // Join subcomponents that are connected by hinge points.  The biblock
+    // routine cannot do so when beginning within a biblock.  This could
+    // probably be a joined loop with collecting internal trees.
+    for (TVertexIterator it(g); !atEnd(it); ++it)
+        _decomposeGraphStiegeJoinSubcomponents(gd, *it);
+
     // Finally, collect internal trees.  The edges have already been marked
     // appropriately.
-    for (TVertexIterator it(g); !atEnd(it); ++it) {
-        TVertexDescriptor v = *it;
-        _decomposeGraphStiegeCollectInternalTrees(vertexFlags, edgeFlags, gd, v, g, components, componentToBlock);
-    }
+    for (TVertexIterator it(g); !atEnd(it); ++it)
+        _decomposeGraphStiegeCollectInternalTrees(vertexFlags, edgeFlags, gd, *it, g, components, componentToBlock);
 }
 
 template <typename TGraphCargo, typename TGraphSpec>
@@ -858,6 +924,7 @@ decomposeGraph(GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, S
     // Find stopfree kernels and their internal structure.
     _decomposeGraphStiegeFindStopfreeKernels(vertexFlags, edgeFlags, gd, g, componentIds, componentToBlock);
 
+    // Remove empty stopfree kernels from list of tentative stopfree kernels.
     typedef typename Iterator<String<TTreeVertexDescriptor> >::Type TTentativeIterator;
     for (TTentativeIterator it = begin(tentativeStopfreeKernels); it != end(tentativeStopfreeKernels); ++it) {
         if (numChildren(clusterTree(gd), *it) > 0u)
@@ -867,7 +934,7 @@ decomposeGraph(GraphDecomposition<Graph<Undirected<TGraphCargo, TGraphSpec> >, S
 }
 
 // ----------------------------------------------------------------------------
-// Function operator<<();  For stream output.
+// Function writeDecompositionTree();  For stream output.
 // ----------------------------------------------------------------------------
 
 template <typename TStream, typename TGraphCargo, typename TGraphSpec>
@@ -894,6 +961,7 @@ void writeDecompositionTree(
     }
 
     // DOT output.
+    stream << "/* Decomposition tree for graph */" << std::endl << std::endl;
     stream << "digraph G {" << std::endl;
 
     stream << std::endl;
@@ -901,7 +969,7 @@ void writeDecompositionTree(
     stream << std::endl;
 
     static char const * blockTypeNames[] = {
-        "(null)", "graph", "improper component", "proper component",
+        "graph", "improper component", "proper component",
         "peripheral tree", "stopfree kernel", "internal tree",
         "subcomponent", "biblock"
     };
@@ -917,6 +985,8 @@ void writeDecompositionTree(
             typedef typename Iterator<String<TTreeVertexDescriptor>, Standard>::Type TIter;
             TIter itBegin = begin(property(blocksForVertex, *itV));
             TIter itEnd = end(property(blocksForVertex, *itV));
+            std::sort(itBegin, itEnd);
+            itEnd = std::unique(itBegin, itEnd);
             for (TIter it = itBegin; it != itEnd; ++it) {
                 if (it != itBegin)
                     append(label, ", ");

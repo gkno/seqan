@@ -54,7 +54,7 @@
 // ==========================================================================
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/graph_decomposition/graph_decomposition_generated_forwards.h>
+//#include <seqan/graph_decomposition/graph_decomposition_generated_forwards.h>
 #endif
 
 // ==========================================================================
@@ -77,8 +77,8 @@
 // Decomposition Algorithms
 // --------------------------------------------------------------------------
 
+#include <seqan/graph_decomposition/graph_decompose_graph_stiege.h>
 #include <seqan/graph_decomposition/graph_decompose_digraph_condensed.h>
 #include <seqan/graph_decomposition/graph_decompose_digraph_stiege.h>
-#include <seqan/graph_decomposition/graph_decompose_graph_stiege.h>
 
 #endif  // SEQAN_SCORE_H_
