@@ -71,14 +71,14 @@ SEQAN_BEGIN_TESTSUITE(test_graph_msa)
 	SEQAN_CALL_TEST(test_reversable_fragments);	
 	
     // Verify Checkpoints.
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_kmer.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_distance.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_guidetree.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_library.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_io.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_progressive.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_msa/graph_align_tcoffee_msa.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_kmer.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_distance.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_guidetree.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_library.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_io.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_progressive.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_msa/graph_align_tcoffee_msa.h");
 }
 SEQAN_END_TESTSUITE
 

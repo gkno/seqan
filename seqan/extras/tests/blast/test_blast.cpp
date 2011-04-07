@@ -66,19 +66,19 @@ SEQAN_BEGIN_TESTSUITE(test_blast) {
     // Verification of checkpoints means that we will check for each registered
     // checkpoint to be hit.
     // @@
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_parsing.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_report.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_hit.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_hsp.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_stream_report.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_stream_hit.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_hit_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_hsp_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_stream_hit_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/blast/blast_stream_hsp_iterator.h");
+    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_base.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_parsing.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_base.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_report.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hit.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hsp.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_report.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_hit.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_iterator.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hit_iterator.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hsp_iterator.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_hit_iterator.h");
+	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_hsp_iterator.h");
 	
 }
 SEQAN_END_TESTSUITE

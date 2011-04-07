@@ -101,18 +101,18 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
 
 
     // Verify checkpoints.
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/edit_environment.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_cmdparser.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_dequeue.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_map.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_long_word.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_parsing.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_random.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_set.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_heap.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_interval_tree.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/edit_environment.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_cmdparser.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_dequeue.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_map.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_long_word.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_parsing.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_random.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_set.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/priority_type_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/priority_type_heap.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_interval_tree.h");
 }
 SEQAN_END_TESTSUITE
 

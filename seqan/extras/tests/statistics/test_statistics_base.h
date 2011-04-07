@@ -161,7 +161,7 @@ SEQAN_DEFINE_TEST(test_statistics_statistics)
 
 	char buffer[1024];
 	strcpy(buffer, SEQAN_PATH_TO_ROOT());
-	strcat(buffer, "/projects/tests/statistics/zscore_human_mm.3");
+	strcat(buffer, "/extras/tests/statistics/zscore_human_mm.3");
 	FILE *fd = fopen(buffer,"r");
 	read(fd, mm);
 	fclose(fd);

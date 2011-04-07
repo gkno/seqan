@@ -48,8 +48,8 @@ SEQAN_BEGIN_TESTSUITE(test_statistics) {
     SEQAN_CALL_TEST(test_statistics_statistics);
 
     // Verify Checkpoints.
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/statistics.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/statistics/statistics_markov_model.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/statistics/statistics_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/statistics.h");
+    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/statistics/statistics_markov_model.h");
+    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/statistics/statistics_base.h");
 }
 SEQAN_END_TESTSUITE

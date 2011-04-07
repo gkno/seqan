@@ -74,15 +74,15 @@ SEQAN_BEGIN_TESTSUITE(test_file)
 	SEQAN_CALL_TEST(test_file_embl_file);
 	SEQAN_CALL_TEST(test_file_embl_meta);
     
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/stream.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/cstream.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/meta.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/file_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/file_format_raw.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/file_format_fasta.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/file_format_fasta_align.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/file_format_embl.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/file_format_cgviz.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/file/file_format_guess.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/stream.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/cstream.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/meta.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/file_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/file_format_raw.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/file_format_fasta.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/file_format_fasta_align.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/file_format_embl.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/file_format_cgviz.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/file/file_format_guess.h");
 }
 SEQAN_END_TESTSUITE

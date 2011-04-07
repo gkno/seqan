@@ -70,9 +70,9 @@ SEQAN_BEGIN_TESTSUITE(test_graph_algorithms) {
 	SEQAN_CALL_TEST(test_hmm_algorithm);	
 
     // Verify Checkpoints.
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_algorithms/graph_algorithm.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_algorithms/graph_algorithm_hmm.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_algorithms/graph_algorithm_lis_his.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_algorithms/graph_algorithm.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_algorithms/graph_algorithm_hmm.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_algorithms/graph_algorithm_lis_his.h");
 }
 SEQAN_END_TESTSUITE
 

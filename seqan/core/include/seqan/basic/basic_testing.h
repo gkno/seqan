@@ -2158,7 +2158,7 @@ fclose(f);
 ..signature:SEQAN_VERIFY_CHECKPOINTS(path)
 ..param.path:Path to the file to verify check points for. Relative to parent directory of tests.
 ..example.code:
-SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic_alphabet.h");
+SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/basic_alphabet.h");
 ..see:Macro.SEQAN_CHECKPOINT
 
 .Macro.SEQAN_CHECKPOINT

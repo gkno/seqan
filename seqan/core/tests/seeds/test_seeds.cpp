@@ -80,15 +80,15 @@ SEQAN_BEGIN_TESTSUITE(test_seed) {
     SEQAN_CALL_TEST(test_seed_memory_manager);
     SEQAN_CALL_TEST(test_seed_seeds);
     SEQAN_CALL_TEST(test_seed_seed_set);
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/banded_align.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/banded_chain_align.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/banded_chain_align_affine.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seed_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seed_multi.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/global_seed_chain.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/memoryManager_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/memoryManager_int.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seedSet_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seedSet_score.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/banded_align.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/banded_chain_align.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/banded_chain_align_affine.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/seed_base.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/seed_multi.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/global_seed_chain.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/memoryManager_base.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/memoryManager_int.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/seedSet_base.h");
+	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds/seedSet_score.h");
 }
 SEQAN_END_TESTSUITE

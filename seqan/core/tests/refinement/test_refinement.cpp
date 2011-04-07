@@ -41,9 +41,9 @@
 
 // Test path
 #define TEST_PATH "projects/tests/refinement/"
-#define LIB_PATH "projects/library/seqan/refinement/"
+#define LIB_PATH "core/include/seqan/refinement/"
 
-//#define LIB_PATH "/home/bude2/emde/seqan/projects/library/seqan/refinement/"
+//#define LIB_PATH "/home/bude2/emde/seqan/core/include/seqan/refinement/"
 //#define TEST_PATH "/home/bude2/emde/seqan/projects/tests/refinement/"
 
 // External / STL
@@ -89,16 +89,16 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     // Restore std::cout
 //      std::cout.rdbuf(strm_puffer);
 
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_align.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_aligngraph.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_annotation.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_exact.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_exact_iterative.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_fragment.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_inexact.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_scoring.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_align.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_align_adapt.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_align.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_aligngraph.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_annotation.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_exact.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_exact_iterative.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_fragment.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_inexact.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_scoring.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_impl_align.h");
+    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_impl_align_adapt.h");
 
 }
 SEQAN_END_TESTSUITE

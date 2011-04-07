@@ -62,7 +62,7 @@ void Test_BlastStoreReport() {
 	
 	char buffer[1024];
 	strcpy(buffer, SEQAN_PATH_TO_ROOT());
-	strcat(buffer, "/projects/tests/blast/ecolip.out");
+	strcat(buffer, "/extras/tests/blast/ecolip.out");
 
 	std::fstream strm;
 	strm.open(buffer, ios_base::in | ios_base::binary);
@@ -201,7 +201,7 @@ void Test_BlastStoreReportBasic() {
 	
 	char buffer[1024];
 	strcpy(buffer, SEQAN_PATH_TO_ROOT());
-	strcat(buffer, "/projects/tests/blast/ecolip.out");
+	strcat(buffer, "/extras/tests/blast/ecolip.out");
 	
 	std::fstream strm;
 	strm.open(buffer, ios_base::in | ios_base::binary);
@@ -290,7 +290,7 @@ void Test_BlastParsing(BlastN)
 	
 	char buffer[1024];
 	strcpy(buffer, SEQAN_PATH_TO_ROOT());
-	strcat(buffer, "/projects/tests/blast/ecoln.out");
+	strcat(buffer, "/extras/tests/blast/ecoln.out");
 	
 	std::fstream strm2;
 	strm2.open(buffer, ios_base::in | ios_base::binary);
@@ -386,7 +386,7 @@ void Test_BlastParsing(BlastP) {
 
 	char buffer[1024];
 	strcpy(buffer, SEQAN_PATH_TO_ROOT());
-	strcat(buffer, "/projects/tests/blast/ecolip.out");
+	strcat(buffer, "/extras/tests/blast/ecolip.out");
 	
 	std::fstream strm;
 	strm.open(buffer, ios_base::in | ios_base::binary);
@@ -506,7 +506,7 @@ void Test_BlastParsingBasic(BlastN)
 
 	char buffer[1024];
 	strcpy(buffer, SEQAN_PATH_TO_ROOT());
-	strcat(buffer, "/projects/tests/blast/ecoln.out");
+	strcat(buffer, "/extras/tests/blast/ecoln.out");
 	
 	std::fstream strm2;
 	strm2.open(buffer, ios_base::in | ios_base::binary);
@@ -604,7 +604,7 @@ void Test_BlastParsingBasic(BlastP) {
 
 	char buffer[1024];
 	strcpy(buffer, SEQAN_PATH_TO_ROOT());
-	strcat(buffer, "/projects/tests/blast/ecolip.out");
+	strcat(buffer, "/extras/tests/blast/ecolip.out");
 	
 	std::fstream strm;
 	strm.open(buffer, ios_base::in | ios_base::binary);

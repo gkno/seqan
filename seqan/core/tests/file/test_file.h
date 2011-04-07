@@ -600,7 +600,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_crlf)
 {
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_crlf.txt");
+    strcat(buffer, "/core/tests/file/fasta_crlf.txt");
     Test_Fasta_Read(buffer);
 }
 
@@ -608,7 +608,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_cr)
 {
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_cr.txt");
+    strcat(buffer, "/core/tests/file/fasta_cr.txt");
     Test_Fasta_Read(buffer);
 }
 
@@ -616,7 +616,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_lf)
 {
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_lf.txt");
+    strcat(buffer, "/core/tests/file/fasta_lf.txt");
     Test_Fasta_Read(buffer);
 }
 
@@ -720,7 +720,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
     
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_align.txt");
+    strcat(buffer, "/core/tests/file/fasta_align.txt");
     
 	FILE * file_1 = fopen(buffer, "r");
 	SEQAN_ASSERT(file_1);
@@ -739,7 +739,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
 	fclose(file_1);
     
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_align_dna.txt");
+    strcat(buffer, "/core/tests/file/fasta_align_dna.txt");
     
 	FILE * file_11 = fopen(buffer, "r");
 	SEQAN_ASSERT(file_11);
@@ -767,7 +767,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
 	fstream strm_1;
     
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_align.txt");
+    strcat(buffer, "/core/tests/file/fasta_align.txt");
 	strm_1.open(buffer, ios_base::in | ios_base::binary);
 	read(strm_1, align2, FastaAlign());
 	strm_1.close();
@@ -779,7 +779,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
 	fstream strm_12;
 
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_align_dna.txt");
+    strcat(buffer, "/core/tests/file/fasta_align_dna.txt");
 	strm_12.open(buffer, ios_base::in | ios_base::binary);
 	read(strm_12, align22, FastaAlign());
 	strm_12.close();
@@ -868,7 +868,7 @@ SEQAN_DEFINE_TEST(test_file_cgviz)
     
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_align.txt");
+    strcat(buffer, "/core/tests/file/fasta_align.txt");
     
 	FILE * file_1 = fopen(buffer, "r");
 	SEQAN_ASSERT(file_1);
@@ -909,7 +909,7 @@ SEQAN_DEFINE_TEST(test_file_embl)
 {
     char fl_path[1024];
     strcpy(fl_path, SEQAN_PATH_TO_ROOT());
-    strcat(fl_path, "/projects/tests/file/embl_crlf.txt");
+    strcat(fl_path, "/core/tests/file/embl_crlf.txt");
     
     char fl_out_path[1024];
     strcpy(fl_out_path, SEQAN_TEMP_FILENAME());
@@ -962,7 +962,7 @@ SEQAN_DEFINE_TEST(test_file_genbank)
 {
     char fl_path[1024];
     strcpy(fl_path, SEQAN_PATH_TO_ROOT());
-    strcat(fl_path, "/projects/tests/file/genbank_crlf.txt");
+    strcat(fl_path, "/core/tests/file/genbank_crlf.txt");
     
     char fl_out_path[1024];
     strcpy(fl_out_path, SEQAN_TEMP_FILENAME());
@@ -1011,7 +1011,7 @@ SEQAN_DEFINE_TEST(test_file_reader_iterator)
 {
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_crlf.txt");
+    strcat(buffer, "/core/tests/file/fasta_crlf.txt");
 
 	FILE * file_fasta = fopen(buffer, "rb");
 	SEQAN_ASSERT(file_fasta);
@@ -1057,7 +1057,7 @@ SEQAN_DEFINE_TEST(test_file_reader_string)
 {
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_crlf.txt");
+    strcat(buffer, "/core/tests/file/fasta_crlf.txt");
     
 	FILE * file_fasta = fopen(buffer, "rb");
 	SEQAN_ASSERT(file_fasta);
@@ -1246,7 +1246,7 @@ SEQAN_DEFINE_TEST(test_file_reader_string3)
 {
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/projects/tests/file/fasta_crlf.txt");
+    strcat(buffer, "/core/tests/file/fasta_crlf.txt");
     
 	FILE * file_fasta = fopen(buffer, "rb");
 	SEQAN_ASSERT(file_fasta);
