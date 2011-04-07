@@ -77,7 +77,10 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     set (PATH ${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH})
     file (GLOB HEADERS_TMP ${PATH}/seqan/[A-z]*/[A-z]*.h)
     file (GLOB SUPER_HEADERS ${PATH}/seqan/[A-z]*.h)
-    
+
+    set (SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH} CACHE INTERNAL "asdf" FORCE)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH})
+
     set (SEQAN_LIBRARY_TARGETS ${TARGET_NAME} CACHE INTERNAL "asdf" FORCE)
 
     foreach (HEADER ${HEADERS_TMP})
@@ -113,15 +116,19 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
         
             # Build a list of generated forwards headers.  Goes into SEQAN_FORWARDS.
             foreach (MODULE ${MODULES})
-                list (APPEND GENERATED_FORWARDS ${PATH}/seqan/${MODULE}/${MODULE}_generated_forwards.h)
+                list (APPEND FORWARDS ${PATH}/seqan/${MODULE}/${MODULE}_generated_forwards.h)
             endforeach (MODULE ${MODULES})
 
             # Now tell CMake that the forward headers can be generated with
             # build_forwards.py
             add_custom_command (
-                OUTPUT ${GENERATED_FORWARDS}
-                COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/util/misc/build_forwards.py ${PATH}/seqan all
+                OUTPUT ${FORWARDS}
+                COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/util/bin/build_forwards.py ${PATH}/seqan all
                 DEPENDS ${HEADERS})
+            #message(STATUS "add_custom_command (
+            #    OUTPUT ${FORWARDS}
+            #    COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/util/bin/build_forwards.py ${PATH}/seqan all
+            #    DEPENDS ${HEADERS})")
         endif (MODULES)
     endif (CMAKE_COMPILER_IS_GNUCXX)
 
@@ -166,9 +173,10 @@ endfunction (seqan_setup_includes)
 # Register a seqan extension that has been previously defined available.
 # TODO(holtgrew): Is order really important at all?
 
-macro (seqan_make_seqan_available TARGET_NAME)
-    set (SEQAN_LIBRARY_TARGETS "${SEQAN_LIBRARY_TARGETS} ${TARGET_NAME}" CACHE INTERNAL "asdf" FORCE)
-endmacro (seqan_make_seqan_available TARGET_NAME)
+function (seqan_make_seqan_available TARGET_NAME)
+   set (SEQAN_LIBRARY_TARGETS "${SEQAN_LIBRARY_TARGETS} ${TARGET_NAME}" CACHE INTERNAL "asdf" FORCE)
+   include_directories(${SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME}})
+endfunction (seqan_make_seqan_available TARGET_NAME)
 
 # ---------------------------------------------------------------------------
 # Macro seqan_setup_tests ()
@@ -297,6 +305,7 @@ macro (seqan_add_executable TARGET_NAME)
   	
   	# Dependencies on all registered seqan extensions.
   	add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})
+    # message(STATUS "add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})")
 	
   	# Link against zlib and bzlib if found.
   	if (ZLIB_FOUND)
@@ -310,8 +319,8 @@ macro (seqan_add_executable TARGET_NAME)
 endmacro (seqan_add_executable TARGET_NAME)
 
 # ---------------------------------------------------------------------------
-# Macro seqan_add_testexecutable (TARGET_NAME source1.cpp source2.[cpp|h])
-#       seqan_add_testexecutable (TARGET_NAME)
+# Macro seqan_add_test_executable (TARGET_NAME source1.cpp source2.[cpp|h])
+#       seqan_add_test_executable (TARGET_NAME)
 # ---------------------------------------------------------------------------
 
 # Create a SeqAn executable from the given source files.  If no such files
