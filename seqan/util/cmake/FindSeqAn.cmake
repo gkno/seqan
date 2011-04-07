@@ -154,7 +154,7 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
                 ${FORWARDS}
                 ${GUI_SOURCES}
     )
-    # message("add_custom_target(${TARGET_NAME} DEPENDS ${HEADERS} ${FORWARDS} ${GUI_SOURCES})")
+    #message("add_custom_target(${TARGET_NAME} DEPENDS ${HEADERS} ${FORWARDS} ${GUI_SOURCES})")
     
     # Group library headers into modules.  The CMake documentation says this
     # is mostly (only?) used for Visual Studio Projects.
@@ -174,7 +174,7 @@ endfunction (seqan_setup_includes)
 # TODO(holtgrew): Is order really important at all?
 
 function (seqan_make_seqan_available TARGET_NAME)
-   set (SEQAN_LIBRARY_TARGETS "${SEQAN_LIBRARY_TARGETS} ${TARGET_NAME}" CACHE INTERNAL "asdf" FORCE)
+   set (SEQAN_LIBRARY_TARGETS ${SEQAN_LIBRARY_TARGETS} ${TARGET_NAME} CACHE INTERNAL "asdf" FORCE)
    include_directories(${SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME}})
 endfunction (seqan_make_seqan_available TARGET_NAME)
 
@@ -187,6 +187,9 @@ endfunction (seqan_make_seqan_available TARGET_NAME)
 #
 # The following will happen:
 #
+# * A target with the name TEST_TARGET will be created and dependencies
+#   of this target to subsequently targets added by seqan_add_test will
+#   be added.
 # * Setting definitions SEQAN_ENABLE_DEBUG=1 and SEQAN_ENABLE_TESTING=1.
 # * If the ${MODEL} variable is NightlyCoverage or ExperimentalCoverage,
 #   and the compiler is GCC C++ then symbols for test coverate are added.
@@ -218,6 +221,48 @@ macro (seqan_setup_tests TEST_TARGET)
         endif (CMAKE_COMPILER_IS_GNUCXX)
     endif (MODEL STREQUAL "ExperimentalCoverage")
 endmacro (seqan_setup_tests)
+
+# ---------------------------------------------------------------------------
+# Macro seqan_setup_apps ()
+# ---------------------------------------------------------------------------
+
+# Initialize "apps" area.  This function should be called in the
+# CMakeLists.txt in the apps directories before including subdirectories.
+#
+# The following will happen:
+#
+# * A target with the name APP_TARGET will be created and dependencies
+#   of this target to subsequently targets added by seqan_add_test will
+#   be added.
+
+macro (seqan_setup_apps APP_TARGET)
+    # Add a target for the tests.
+    add_custom_target(${APP_TARGET})
+    # Create a CMake variable for storing the current test target.
+    set (SEQAN_CURRENT_APP_TARGET ${APP_TARGET} CACHE INTERNAL
+         "App target, communicated to seqan_add_executable" FORCE)
+endmacro (seqan_setup_apps)
+
+# ---------------------------------------------------------------------------
+# Macro seqan_setup_demos ()
+# ---------------------------------------------------------------------------
+
+# Initialize "demos" area.  This function should be called in the
+# CMakeLists.txt in the demos directories before including subdirectories.
+#
+# The following will happen:
+#
+# * A target with the name DEMO_TARGET will be created and dependencies of
+#   this target to subsequently targets added by seqan_add_executable will be
+#   added.
+
+macro (seqan_setup_demos DEMO_TARGET)
+    # Add a target for the tests.
+    add_custom_target(${DEMO_TARGET})
+    # Create a CMake variable for storing the current test target.
+    set (SEQAN_CURRENT_APP_TARGET ${DEMO_TARGET} CACHE INTERNAL
+         "App target, communicated to seqan_add_executable" FORCE)
+endmacro (seqan_setup_demos)
 
 # ---------------------------------------------------------------------------
 # Macro seqan_find_dependencies ()
@@ -297,6 +342,8 @@ macro (seqan_add_executable TARGET_NAME)
     # TODO(holtgrew): Use all files in directory if ${ARGC} == 0
     # message(STATUS "add_executable (${ARGV})")
     add_executable (${ARGV})
+
+    add_dependencies(${SEQAN_CURRENT_APP_TARGET} ${ARGV0})
     
     # Link against librt on Linux.
   	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
