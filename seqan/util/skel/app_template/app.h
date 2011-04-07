@@ -40,8 +40,6 @@
 
 #include <seqan/misc/misc_cmdparser.h>
 
-#include "other_header.h"
-
 using namespace seqan;
 
 // ============================================================================
@@ -100,17 +98,15 @@ int parseCommandLineAndCheck(Options & options,
                              char const ** argv)
 {
     bool stop = !parse(parser, argc, argv);
-    if (stop) {
-        if (isSetLong(parser, "help")) {
-            options.showHelp = true;
-            return 0;
-        }
-        if (isSetLong(parser, "version")) {
-            options.showVersion = true;
-            return 0;
-        }
-        shortHelp(parser, std::cerr);
+    if (stop)
         return 1;
+    if (isSetLong(parser, "help")) {
+        options.showHelp = true;
+        return 0;
+    }
+    if (isSetLong(parser, "version")) {
+        options.showVersion = true;
+        return 0;
     }
     
     options.texts = getArgumentValues(parser);

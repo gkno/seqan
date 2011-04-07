@@ -39,6 +39,26 @@ import string
 
 import paths
 
+# Add os.path.relpath if it is not already there, so we can use Python 2.5, too.
+# TODO(holtgrew): This could go into a "compatibility" module.
+if not 'relpath' in dir(os.path):
+    import posixpath
+    from posixpath import curdir, sep, pardir, join
+
+    def relpath(path, start=curdir):
+        """Return a relative version of a path"""
+        if not path:
+            raise ValueError("no path specified")
+        start_list = posixpath.abspath(start).split(sep)
+        path_list = posixpath.abspath(path).split(sep)
+        # Work out how much of the filepath is shared by start and path.
+        i = len(posixpath.commonprefix([start_list, path_list]))
+        rel_list = [pardir] * (len(start_list)-i) + path_list[i:]
+        if not rel_list:
+            return curdir
+        return join(*rel_list)
+    os.path.relpath = relpath
+
 # Length of the header comment.
 HEADER_CENTER_WIDTH = 74
 
@@ -48,9 +68,8 @@ DEFAULT_AUTHOR = 'Your Name <your.email@example.net>'
 
 # Program usage string for command line parser.
 USAGE = """
-Usage: %prog [options] create repository NAME
-       %prog [options] create [module|test|app|demo] NAME LOCATION
-       %prog [options] info [module|test|app|demo|repository]
+Usage: %prog [options] repository NAME
+       %prog [options] [module|test|app|demo] NAME LOCATION
 """.strip()
 
 # Program description, used for command line parser.  Will be wrapped by, though.
@@ -58,9 +77,8 @@ DESCRIPTION = """
 SeqAn code generator.
 
 The create command uses the template to code of the given type with the given
-NAME in the given LOCATION.  The info command displays information on the
-template.  The LOCATION is the repository name and could be "core", "extras" or
-"sandbox/fub_students".
+NAME in the given LOCATION.  The LOCATION is the repository name and could
+be "core", "extras", "sandbox/fub_students", ...
 """.strip()
 
 def createDirectory(path, dry_run=False):
@@ -165,7 +183,7 @@ def createModule(name, location, options):
     if options.create_infos:
         # Copy over INFO file for app and perform replacements.
         source_file = paths.pathToTemplate('app_template', 'INFO')
-        target_file = os.path.join(target_path, 'INFO')
+        target_file = os.path.join(module_path, 'INFO')
         replacements = buildReplacements('app', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
@@ -253,7 +271,7 @@ def createDemo(name, location, options):
         source_file = paths.pathToTemplate('demo_template', 'demo.cpp')
         target_file = os.path.join(target_path)
         replacements = buildReplacements('app', name, location, target_file, options)
-        configureFile(target_file, source_file, replacements, options.dry_run)
+        res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
     return 0
 
@@ -333,38 +351,31 @@ def main():
         options.create_infos = not options.cmakelists_only
         options.create_dirs = False
         options.create_programs = False
+
     if not args:
         parser.print_help(file=sys.stderr)
         return 1
-    if args[0] == 'create':
-        if len(args) < 3:
+    if len(args) < 2:
+        print >>sys.stderr, 'Invalid argument count!'
+        return 1
+    if args[0] not in ['module', 'test', 'app', 'demo', 'repository']:
+        print >>sys.stderr, 'Invalid template "%s".' % args[0]
+        return 1
+    if args[0] == 'repository':
+        if len(args) != 2:
             print >>sys.stderr, 'Invalid argument count!'
             return 1
-        if args[1] not in ['module', 'test', 'app', 'demo', 'repository']:
-            print >>sys.stderr, 'Invalid template "%s".' % args[1]
-            return 1
-        if args[1] == 'repository':
-            if len(args) != 3:
-                print >>sys.stderr, 'Invalid argument count!'
-                return 1
-            return createRepository(args[2], options)
-        elif len(args) != 4:
-            print >>sys.stderr, 'Invalid argument count!'
-            return 1
-        create_methods = {
-            'module' : createModule,
-            'test': createTest,
-            'app': createApp,
-            'demo': createDemo,
-            }
-        return create_methods[args[1]](args[2], args[3], options)
-    elif args[0] == 'info':
-        print >>sys.stderr, 'Command "info" is not implemented yet.'
+        return createRepository(args[1], options)
+    elif len(args) != 3:
+        print >>sys.stderr, 'Invalid argument count!'
         return 1
-    else:
-        print >>sys.stderr, 'Unknown command "%s".' % args[0]
-        parser.print_help(file=sys.stderr)
-        return 1
+    create_methods = {
+        'module' : createModule,
+        'test': createTest,
+        'app': createApp,
+        'demo': createDemo,
+        }
+    return create_methods[args[0]](args[1], args[2], options)
 
 if __name__ == '__main__':
    sys.exit(main())

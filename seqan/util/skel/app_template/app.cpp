@@ -54,6 +54,8 @@ int main(int argc, char const ** argv)
     int ret = parseCommandLineAndCheck(options, parser, argc, argv);
     if (ret != 0)
         return ret;
+    if (options.showHelp || options.showVersion)
+        return 0;
     
     // Finally, launch the program.
     ret = mainWithOptions(options);
