@@ -29,25 +29,33 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
-// ==========================================================================
-// Tests for the graph_decomposition module.
+//  This is the musketeer header ("one for all and all for one").
 // ==========================================================================
 
+#ifndef SEQAN_H_
+#define SEQAN_H_
+
+#include <seqan/align.h>
 #include <seqan/basic.h>
+#include <seqan/blast.h>
+#include <seqan/chaining.h>
+#include <seqan/consensus.h>
 #include <seqan/file.h>
-#include <seqan/graph_decomposition.h>
+#include <seqan/find.h>
+#include <seqan/find_motif.h>
+#include <seqan/graph_algorithms.h>
+#include <seqan/graph_align.h>
+#include <seqan/graph_msa.h>
+#include <seqan/graph_types.h>
+#include <seqan/index.h>
+#include <seqan/map.h>
+#include <seqan/modifier.h>
+#include <seqan/pipe.h>
+#include <seqan/refinement.h>
+#include <seqan/score.h>
+#include <seqan/seeds.h>
+#include <seqan/sequence.h>
+#include <seqan/statistics.h>
+#include <seqan/system.h>
 
-#include "test_graph_decomposition_cluster.h"
-#include "test_graph_decomposition_decomposition.h"
-
-SEQAN_BEGIN_TESTSUITE(test_template) {
-    // Tests for clustering.
-    SEQAN_CALL_TEST(test_graph_decomposition_cluster);
-
-    // Tests for decomposition.
-    SEQAN_CALL_TEST(test_graph_decomposition_digraph_condensed);
-    SEQAN_CALL_TEST(test_graph_decomposition_digraph_stiege);
-    SEQAN_CALL_TEST(test_graph_decomposition_graph_stiege);
-}
-SEQAN_END_TESTSUITE
+#endif  // SEQAN_H_
