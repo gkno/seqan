@@ -26,12 +26,13 @@
 //#define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
-#define RAZERS_ISLAND_CRITERION         // island match criterion
+// #define RAZERS_ISLAND_CRITERION         // island match criterion
 
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
-#define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
+// #define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
 //#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)
 //#define RAZERS_DEBUG_MATEPAIRS
+#define RAZERS_DEFER_COMPACTION         // mask duplicates on the fly and defer compaction
 
 #ifdef _OPENMP
 #include <omp.h>

@@ -57,15 +57,25 @@ struct MatchRecord
     char            orientation;    // 'F', 'R', '-'
     short int       score;          // Levenshtein distance / score.
     unsigned		pairMatchId;			// unique id for the two mate-pair matches (0 if unpaired)
+#ifndef RAZERS_DEFER_COMPACTION
     int				mateDelta:24;	// outer coordinate delta to the other mate 
     int				pairScore:8;	// combined score of both mates
+#else
+    bool            isRegistered:1; // registered in masking process.
+    int				mateDelta:23;	// outer coordinate delta to the other mate 
+    int				pairScore:8;	// combined score of both mates
+#endif  // #ifndef RAZERS_DEFER_COMPACTION
 
 	static const unsigned INVALID_ID;
 
     MatchRecord()
             : contigId(MaxValue<unsigned>::VALUE), readId(MaxValue<unsigned>::VALUE),
               beginPos(0), endPos(0), orientation('-'), score(0),
-              pairMatchId(MaxValue<unsigned>::VALUE), mateDelta(0), pairScore(0)
+              pairMatchId(MaxValue<unsigned>::VALUE),
+#ifdef RAZERS_DEFER_COMPACTION
+              isRegistered(false),
+#endif  // #ifndef RAZERS_DEFER_COMPACTION
+              mateDelta(0), pairScore(0)
     {}
 };
 
@@ -1045,10 +1055,9 @@ inline int estimateReadLength(char const *fileName)
 
 //////////////////////////////////////////////////////////////////////////////
 // Mark duplicate matches for deletion
-template <typename TMatches, typename TOptions, typename TRazerSMode>
-void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode)
+template <typename TMatches, typename TIterator, typename TOptions, typename TRazerSMode>
+void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, TOptions & options, TRazerSMode)
 {
-	typedef typename Iterator<TMatches, Standard>::Type	TIterator;
 	typedef typename Value<TMatches>::Type				TMatch;
 	typedef typename TMatch::TContigPos			TContigPos;
 	
@@ -1059,10 +1068,7 @@ void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode)
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	::std::sort(
-		begin(matches, Standard()),
-		end(matches, Standard()), 
-		LessRNoEndPos<TMatch>());
+	::std::sort(itBegin, itEnd, LessRNoEndPos<TMatch>());
 	// sortAlignedReads(matches, TLessEndPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
@@ -1075,8 +1081,7 @@ void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode)
 	char        orientation = '-';
     unsigned    masked = 0;
 
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
+	TIterator it = itBegin;
 
 	for (; it != itEnd; ++it) 
 	{
@@ -1101,10 +1106,7 @@ void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode)
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	::std::sort(
-		begin(matches, Standard()),
-		end(matches, Standard()), 
-		LessRNoBeginPos<TMatch>());
+    ::std::sort(itBegin, itEnd, LessRNoBeginPos<TMatch>());
 	// sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
@@ -1112,8 +1114,7 @@ void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode)
 
     orientation = '-';
 	contigId = TMatch::INVALID_ID;
-	it = begin(matches, Standard());
-	itEnd = end(matches, Standard());
+	it = itBegin;
 
 	for (; it != itEnd; ++it) 
 	{
@@ -1136,6 +1137,13 @@ void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode)
     if (options._debugLevel >= 2)
         fprintf(stderr, " [%u matches masked]", masked);
 }
+
+template <typename TMatches, typename TOptions, typename TRazerSMode>
+void maskDuplicates(TMatches &matches, TOptions & options, TRazerSMode const & mode)
+{
+    maskDuplicates(matches, begin(matches, Standard()), end(matches, Standard()), options, mode);
+}
+
 /*
 //////////////////////////////////////////////////////////////////////////////
 // Count matches for each number of errors
@@ -1332,6 +1340,7 @@ void compactMatches(
 					// we have enough, now look for better matches
 					if (options.purgeAmbiguous && (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest))
 					{
+                        std::cerr << "PURGED " << readNo << std::endl;
 						setMaxErrors(swift, readNo, -1);
                         disabled += 1;
 						// if (options._debugLevel >= 2)
@@ -1341,6 +1350,7 @@ void compactMatches(
 						// we only need better matches
 						if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 						{
+                            std::cerr << "LIMITED " << readNo << std::endl;
 							setMaxErrors(swift, readNo, errors - 1);
                             disabled += 1;
 							// if (errors == 0 && options._debugLevel >= 2)

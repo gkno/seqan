@@ -13,6 +13,7 @@
 
 #include "parallel_misc.h"
 #include "parallel_job_queue.h"
+#include "razers_match_filter.h"
 
 namespace seqan {
 
@@ -37,6 +38,20 @@ public:
     ~Lock() { omp_destroy_lock(&lock_); }
 };
 
+template <typename TMatches>
+struct SingleVerificationResult
+{
+    TMatches * matches;
+    unsigned hitGroupId;
+    unsigned windowNo;
+
+    SingleVerificationResult() : matches(0), windowNo(0) {}
+    
+    SingleVerificationResult(TMatches * matches_, unsigned hitGroupId_, unsigned windowNo_)
+            : matches(matches_), hitGroupId(hitGroupId_), windowNo(windowNo_)
+    {}
+};
+
 // Stores the results of the verification.
 //
 // Put into its own class so it can be locked independently of other class
@@ -45,7 +60,7 @@ template <typename TMatches>
 class SingleVerificationResults
 {
 public:
-    String<TMatches *> localMatches;
+    String<SingleVerificationResult<TMatches> > localMatches;
     Lock<Omp> * lock;
 
     SingleVerificationResults() : lock(new Lock<Omp>()) {}
@@ -61,6 +76,7 @@ public:
         if (this == &other)
             return *this;
         localMatches = other.localMatches;
+        return *this;
     }
 
     ~SingleVerificationResults()
@@ -108,16 +124,35 @@ public:
 
     TShape shape;
 
+    String<String<SingleVerificationResult<TMatches> > > verificationResultBuckets;
+    String<unsigned> missingInBucket;
+    unsigned nextBucketToWriteBack;
+
     typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TSwiftPattern, TCounts, TPreprocessing> TMatchVerifier;
     TMatchVerifier verifier;
 
     // Mailbox for the verification results.
     SingleVerificationResults<TMatches> verificationResults;
 
+    typedef MatchFilter<typename Spec<TOptions>::Type, typename TFragmentStore::TReadSeqStore, ThreadLocalStorage> TMatchFilter;
+    std::tr1::shared_ptr<TMatchFilter> matchFilter;
+
     String<unsigned> splitters;
 
     ThreadLocalStorage() {}
 };
+
+template <typename TMatches_, typename TFragmentStore, typename TSwiftFinder_, typename TSwiftPattern_, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+void limitRead(ThreadLocalStorage<MapSingleReads<TMatches_, TFragmentStore, TSwiftFinder_, TSwiftPattern_, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, unsigned readId, int newLimit)
+{
+    setMaxErrors(tls, readId, -newLimit);
+}
+
+template <typename TMatches_, typename TFragmentStore, typename TSwiftFinder_, typename TSwiftPattern_, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+void disableRead(ThreadLocalStorage<MapSingleReads<TMatches_, TFragmentStore, TSwiftFinder_, TSwiftPattern_, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, unsigned readId)
+{
+    setMaxErrors(tls, readId, -1);
+}
 
 template <typename TMatches, typename TFragmentStore, typename THitString, typename TOptions, typename TSwiftPattern>
 struct SingleVerification;
@@ -133,7 +168,9 @@ public:
     TVerificationResults * verificationResults;
     TFragmentStore * globalStore;
     unsigned contigId;
+    unsigned windowNo;
     std::tr1::shared_ptr<THitString> hitsPtr;
+    unsigned hitGroupId;
     unsigned hitBegin;
     unsigned hitEnd;
     TOptions * options;
@@ -141,8 +178,8 @@ public:
 
     Job() {}
     
-    Job(int threadId_, TVerificationResults & verificationResults_, TFragmentStore & globalStore_, unsigned contigId_, std::tr1::shared_ptr<THitString> & hitsPtr_, unsigned hitBegin_, unsigned hitEnd_, TOptions & options_, TSwiftPattern & swiftPattern_)
-            : threadId(threadId_), verificationResults(&verificationResults_), globalStore(&globalStore_), contigId(contigId_), hitsPtr(hitsPtr_), hitBegin(hitBegin_), hitEnd(hitEnd_), options(&options_), swiftPattern(&swiftPattern_)
+    Job(int threadId_, TVerificationResults & verificationResults_, TFragmentStore & globalStore_, unsigned contigId_, unsigned windowNo_, std::tr1::shared_ptr<THitString> & hitsPtr_, unsigned hitGroupId_, unsigned hitBegin_, unsigned hitEnd_, TOptions & options_, TSwiftPattern & swiftPattern_)
+            : threadId(threadId_), verificationResults(&verificationResults_), globalStore(&globalStore_), contigId(contigId_), windowNo(windowNo_), hitsPtr(hitsPtr_), hitGroupId(hitGroupId_), hitBegin(hitBegin_), hitEnd(hitEnd_), options(&options_), swiftPattern(&swiftPattern_)
     {}
 };
 
@@ -157,10 +194,10 @@ public:
 template <typename TMatches>
 inline
 void
-appendToVerificationResults(SingleVerificationResults<TMatches> & verificationResults, TMatches * matchesPtr)
+appendToVerificationResults(SingleVerificationResults<TMatches> & verificationResults, SingleVerificationResult<TMatches> const & results)
 {
     omp_set_lock(&verificationResults.lock->lock_);
-    appendValue(verificationResults.localMatches, matchesPtr);
+    appendValue(verificationResults.localMatches, results);
     omp_unset_lock(&verificationResults.lock->lock_);
 }
 
@@ -219,12 +256,12 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
         tls.verifier.m.readId = absReadId;
 
 #ifdef RAZERS_BANDED_MYERS
-		tls.verifier.patternState.leftClip = (value(it).hstkPos >= 0)? 0: -value(it).hstkPos;	// left clip if match begins left of the genome
+		tls.verifier.patternState.leftClip = (value(it).hstkPos >= 0) ? 0 : -value(it).hstkPos;	// left clip if match begins left of the genome
 #endif
 		matchVerify(tls.verifier, swiftInfix(value(it), job.globalStore->contigStore[job.contigId].seq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
     }
 
-    appendToVerificationResults(*job.verificationResults, localMatches);
+    appendToVerificationResults(*job.verificationResults, SingleVerificationResult<TMatches>(localMatches, job.hitGroupId, job.windowNo));
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_VERIFY);
@@ -233,7 +270,7 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
 
 template <typename TMatches, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
 void
-writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TMatches *> & verificationHits, bool dontCompact)
+writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<SingleVerificationResult<TMatches> > & verificationHits, bool dontCompact)
 {
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_WRITEBACK);
@@ -245,14 +282,102 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSw
     TAlignedReadStoreSize oldSize = length(tls.matches);
     TAlignedReadStoreSize newSize = oldSize;
 
+#ifdef RAZERS_DEFER_COMPACTION
+    (void) dontCompact;  // unused
+
+    // (1) Write back verification results into bucket.
+    for (unsigned i = 0; i < length(verificationHits); ++i) {
+        verificationHits[i].windowNo;
+        std::cerr << "got (" << verificationHits[i].windowNo << ", " << verificationHits[i].hitGroupId << ")" << std::endl;
+        tls.verificationResultBuckets[verificationHits[i].windowNo][verificationHits[i].hitGroupId] = verificationHits[i];
+        tls.missingInBucket[verificationHits[i].windowNo] -= 1;
+        std::cerr << "{windowNo == " << verificationHits[i].windowNo << "--(" << tls.missingInBucket[verificationHits[i].windowNo] << ")}" << std::endl;
+    }
+    // std::cerr << "[wrote " << length(verificationHits) << " matches to buckets]" << std::flush;
+
+    unsigned const DELTA = 5000;
+    size_t firstBeginPos = MaxValue<size_t>::VALUE;  // Leftmost sort position, required later for masking.
+    size_t firstWindowBegin = MaxValue<size_t>::VALUE;  // Leftmost sort position, required later for masking.
+    unsigned bucketsWrittenBack = 0;
+    // (2) Write back the longest contiguous sequence of full buckets.
+    for (; tls.nextBucketToWriteBack < length(tls.missingInBucket) && tls.missingInBucket[tls.nextBucketToWriteBack] == 0u; ++tls.nextBucketToWriteBack, ++bucketsWrittenBack) {
+        // (2 a) Compute new size, reserve memory, copy data.
+        size_t originalSize = length(tls.matches);
+        unsigned idx = tls.nextBucketToWriteBack;
+        for (unsigned i = 0; i < length(tls.verificationResultBuckets[idx]); ++i) {
+            std::cerr << "accessing (" << idx << ", " << i << ")" << std::endl;
+            // std::cerr << "len=" << length(*tls.verificationResultBuckets[idx][i].matches) << "|";
+            SEQAN_ASSERT_NEQ(tls.verificationResultBuckets[idx][i].matches, static_cast<TMatches*>(0));
+            newSize += length(*tls.verificationResultBuckets[idx][i].matches);
+        }
+        reserve(tls.matches, newSize);
+        for (unsigned i = 0; i < length(tls.verificationResultBuckets[idx]); ++i) {
+            append(tls.matches, *tls.verificationResultBuckets[idx][i].matches);
+            delete tls.verificationResultBuckets[idx][i].matches;
+        }
+
+        // (2 b) Get begin position.
+        size_t beginPos = originalSize;
+        if (beginPos > 0u) beginPos -= 1;
+        size_t dPos = 1;
+        // Exponential search backwards.  After masking, reads are sorted by begin position.
+        size_t windowBegin = tls.options.windowSize * idx;
+        if (firstWindowBegin == MaxValue<size_t>::VALUE)
+            firstWindowBegin = windowBegin;
+        while (beginPos > 0u && static_cast<size_t>(tls.matches[beginPos].beginPos + DELTA) > windowBegin) {
+            if (beginPos > dPos)
+                beginPos -= dPos;
+            else
+                beginPos = 0;
+            dPos *= 2;
+        }
+        // Binary search forwards.
+        // TODO(holtgrew): Gah, too lazy right now.
+        if (firstBeginPos == MaxValue<size_t>::VALUE)
+            firstBeginPos = beginPos;
+
+        std::cerr << "((MASKING FROM " << windowBegin << " TO " << windowBegin + tls.options.windowSize << "))" << std::endl;
+        // Do not mask duplicates if not in edit distance mode.
+        if (!IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+            continue;
+
+        // (2 c) Mask duplicates from beginPos to the end position.
+        maskDuplicates(tls.matches, begin(tls.matches, Standard()) + beginPos, end(tls.matches, Standard()), tls.options, TRazerSMode());
+    }
+
+    std::cerr << "[wrote back " << bucketsWrittenBack << " buckets (" << tls.nextBucketToWriteBack << "/" << length(tls.missingInBucket) << ")]" << std::flush;
+    if (bucketsWrittenBack > 0u) {
+        // (3) Update match filter data structure for disabling reads.
+        size_t nextWindowBegin = tls.options.windowSize * (tls.nextBucketToWriteBack);
+        if (tls.nextBucketToWriteBack == length(tls.missingInBucket)) // is last?
+            nextWindowBegin += DELTA;
+        std::cerr << "((REGISTERING/PROCESSING FROM " << firstWindowBegin << " TO " << nextWindowBegin << "))" << std::endl;
+        typedef typename Iterator<TMatches>::Type TIterator;
+        TIterator itBegin = begin(tls.matches, Standard()) + firstBeginPos;
+        TIterator itEnd = end(tls.matches, Standard());
+        TIterator it = itBegin;
+        for (; it != itEnd && static_cast<size_t>(it->beginPos + DELTA) <= nextWindowBegin; ++it) {
+            if (it->orientation == '-') continue;  // Skip masked reads.
+            if (it->isRegistered) continue;
+            it->isRegistered = true;
+            registerRead(*tls.matchFilter, it->readId, it->score);
+        }
+        itEnd = it;
+        it = itBegin;
+        for (; it != itEnd; ++it) {
+            if (it->orientation == '-') continue;  // Skip masked reads.
+            processRead(*tls.matchFilter, it->readId);
+        }
+    }
+#else  // #ifdef RAZERS_DEFER_COMPACTION
     for (unsigned i = 0; i < length(verificationHits); ++i)
-        newSize += length(*verificationHits[i]);
+        newSize += length(*verificationHits[i].matches);
 
     reserve(tls.matches, newSize);
 
     // Write back all matches from verification to the block local store.
     for (unsigned i = 0; i < length(verificationHits); ++i)
-        append(tls.matches, *verificationHits[i]);
+        append(tls.matches, *verificationHits[i].matches);
 
     // Possibly compact matches.
     if (!dontCompact && length(tls.matches) > tls.options.compactThresh)
@@ -281,6 +406,7 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSw
         timelineEndTask(TASK_COMPACT);
 #endif  // #ifdef RAZERS_PROFILE
     }
+#endif  // #ifdef RAZERS_DEFER_COMPACTION
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_WRITEBACK);
@@ -292,6 +418,14 @@ void clearLocalMatches(String<TMatches *> & localMatches)
 {
   for (unsigned i = 0; i < length(localMatches); ++i)
     delete localMatches[i];
+  clear(localMatches);
+}
+
+template <typename TMatches>
+void clearLocalMatches(String<SingleVerificationResult<TMatches> > & localMatches)
+{
+  for (unsigned i = 0; i < length(localMatches); ++i)
+    delete localMatches[i].matches;
   clear(localMatches);
 }
 
@@ -411,6 +545,12 @@ void _mapSingleReadsParallelToContig(
         timelineEndTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
 
+        // Pre-allocate buckets.
+        tls.nextBucketToWriteBack = 0;
+        resize(tls.verificationResultBuckets, unsigned(ceil(1.0 * length(contigSeq) / options.windowSize)));
+        clear(tls.missingInBucket);
+        resize(tls.missingInBucket, length(tls.verificationResultBuckets), MaxValue<unsigned>::VALUE);
+
         // For each filtration window...
         bool hasMore = false;
         do {
@@ -440,8 +580,12 @@ void _mapSingleReadsParallelToContig(
                 String<TVerificationJob> jobs;
                 reserve(jobs, length(splitters) - 1);
                 for (unsigned i = 1; i < length(splitters); ++i)
-                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, hitsPtr, splitters[i - 1], splitters[i], *tls.globalOptions, tls.swiftPattern));
+                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, windowsDone - 1, hitsPtr, i - 1, splitters[i - 1], splitters[i], *tls.globalOptions, tls.swiftPattern));
                 pushFront(taskQueue, jobs);
+
+                // Preallocate space in bucket and initialize "to do" counter.
+                resize(tls.verificationResultBuckets[windowsDone - 1], length(splitters) - 1);
+                tls.missingInBucket[windowsDone - 1] = length(splitters) - 1;
             }
 #ifdef RAZERS_PROFILE
             timelineEndTask(TASK_FILTER);
@@ -460,7 +604,7 @@ void _mapSingleReadsParallelToContig(
             //
             // First, swap out the current set of local stores from the verification results.
             omp_set_lock(&tls.verificationResults.lock->lock_);
-            String<TMatches *> localMatches;
+            String<SingleVerificationResult<TMatches> > localMatches;
             std::swap(localMatches, tls.verificationResults.localMatches);
             omp_unset_lock(&tls.verificationResults.lock->lock_);
             // Don't compact matches if in configured 'block fraction' of genome.
@@ -470,7 +614,9 @@ void _mapSingleReadsParallelToContig(
             bool dontCompact = tls.options.noCompactFrac >= fracTodo;
             // Write back the contents of these stores to the thread-local store.
             writeBackToLocal(tls, localMatches, dontCompact);
+#ifndef RAZERS_DEFER_COMPACTION
             clearLocalMatches(localMatches);
+#endif  // #ifndef RAZERS_DEFER_COMPACTION
         } while (hasMore);
 
         // Finalization
@@ -489,8 +635,12 @@ void _mapSingleReadsParallelToContig(
         // After every thread is done with everything, write back once more.
         #pragma omp barrier
         writeBackToLocal(tls, tls.verificationResults.localMatches, true);
+#ifndef RAZERS_DEFER_COMPACTION
         clearLocalMatches(tls.verificationResults.localMatches);
+#endif  // #ifndef RAZERS_DEFER_COMPACTION
+        std::cerr << "AT END OF CONTIG #alignments " << length(tls.matches) << std::endl;
     }
+
 
     // NOTE: We never undo the reverse-complementing!
 	// if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
@@ -527,6 +677,14 @@ void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStora
         tls.options = options;  // TODO(holtgrew): Copy for stats and threshold, really good?
         tls.globalOptions = &options;
         tls.splitters = splitters;
+
+#ifdef RAZERS_DEFER_COMPACTION
+        typedef typename TThreadLocalStorage::TMatchFilter TMatchFilter;
+        double READ_FRAC_WITH_HISTO = 0.001;
+        unsigned MATCH_THRESHOLD = 5;
+        tls.matchFilter.reset(new TMatchFilter(tls.splitters[tls.threadId + 1] - tls.splitters[tls.threadId], MATCH_THRESHOLD, READ_FRAC_WITH_HISTO, tls, tls.splitters[tls.threadId], tls.globalStore->readSeqStore, tls.options));
+        tls.options.compactThresh = MaxValue<unsigned>::VALUE;
+#endif RAZERS_DEFER_COMPACTION
 
         // Clear pattern and set parameters.
         TSwiftPattern & swiftPattern = tls.swiftPattern;
@@ -740,10 +898,14 @@ int _mapSingleReadsParallel(
 
     #pragma omp parallel
     {
+// #ifndef RAZERS_DEFER_COMPACTION
         if (IsSameType<TGapMode, RazerSGapped>::VALUE)
             maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
+// #endif  // #ifndef RAZERS_DEFER_COMPACTION
         Nothing nothing;
+        std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
         compactMatches(threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, COMPACT_FINAL);
+        std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
     }
     #pragma omp barrier
 
