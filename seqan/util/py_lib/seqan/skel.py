@@ -178,9 +178,10 @@ def createTest(name, location, options):
         return 1
     print '  Target path is: %s' % target_path
     print ''
-    if not options.cmakelists_only and not options.info_only:
+    if options.create_dirs:
         # Create directory.
         createDirectory(target_path, options.dry_run)
+    if options.create_programs:
         # Copy over .cpp file for test and perform replacements.
         source_file = paths.pathToTemplate('test_template', 'test.cpp')
         target_file = os.path.join(target_path, 'test_%s.cpp' % name)
@@ -193,7 +194,7 @@ def createTest(name, location, options):
         replacements = buildReplacements('test', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
-    if not options.info_only:
+    if options.create_cmakelists:
         # Copy over CMakeLists.txt file for test and perform replacements.
         source_file = paths.pathToTemplate('test_template', 'CMakeLists.txt')
         target_file = os.path.join(target_path, 'CMakeLists.txt')
