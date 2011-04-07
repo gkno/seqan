@@ -1,4 +1,4 @@
 #!/bin/sh
-rm html/*
-./main.py ../projects/library/seqan -d concepts -d pages $@
+rm -f html/*
+./main.py ../core/include ../extras/include -d concepts -d pages $@
 exit $?

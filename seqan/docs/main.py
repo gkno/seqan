@@ -88,13 +88,11 @@ class DDDocRunner(object):
         self.out_dir = out_dir
         self.demos_dir = demos_dir
 
-    def run(self, base_path, modules):
+    def run(self, base_paths):
         """Run dddoc on the modules below the given path.
 
         Args:
-          base_path  Path to build the modules below.
-          modules    List of module names to build.  If empty then all
-                     modules will be built.
+          base_paths Paths to build the documentation for.
 
         Returns:
           Return code of the application.  Is 0 for no problem, and 1 on
@@ -103,15 +101,9 @@ class DDDocRunner(object):
         print 'Scanning modules...'
         app = dddoc.App()
         # Scan some/all modules.
-        if not modules:  # No modules, full build.
-            os.path.normpath(base_path)
-            app.loadFiles(base_path)
-        else:
-            for module in modules:
-                module_path = os.path.join(base_path, 'seqan', module)
-                os.path.normpath(module_path)
-                print 'Scanning %s...' % module_path
-                app.loadFiles(module_path)
+        for path in base_paths:
+            os.path.normpath(path)
+            app.loadFiles(path)
                 
         # Scan doc directories.
         for doc_dir in self.doc_dirs:
@@ -124,13 +116,10 @@ class DDDocRunner(object):
         print 'Creating HTML Documentation...'
         # html_creator = dddoc_html.HtmlDocCreator(app, self.out_dir, not modules, self.index_only)
         # html_creator.run()
-        dddoc_html.createDocs(self.out_dir, not modules, self.index_only)
+        dddoc_html.createDocs(self.out_dir, True, self.index_only)
 
         # Done, print end message.
-        if not modules:
-            print 'Documentation created.'
-        else:
-            print 'Documentation updated.'
+        print 'Documentation created/updated.'
         return dddoc_html.WARNING_COUNT > 0
     
     
@@ -162,7 +151,7 @@ def main(argv):
     app = DDDocRunner(index_only=False, doc_dirs=options.doc_dirs,
                       out_dir=options.out_dir,
                       demos_dir=options.demos_dir)
-    return app.run(args[1], args[2:])
+    return app.run(args)
     
 
 if __name__ == '__main__':
