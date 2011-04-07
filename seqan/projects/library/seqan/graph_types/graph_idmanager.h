@@ -30,6 +30,8 @@
 //
 // ==========================================================================
 
+// TODO(holtgrew): Move to misc?
+
 #ifndef SEQAN_HEADER_GRAPH_IDMANAGER_H
 #define SEQAN_HEADER_GRAPH_IDMANAGER_H
 
