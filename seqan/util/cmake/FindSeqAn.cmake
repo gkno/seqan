@@ -471,11 +471,15 @@ endfunction (seqan_add_cuda_executable TARGET_NAME)
 #
 #   seqan_add_all_executables()
 #   seqan_add_all_executables(depend_on_this)
+#   seqan_add_all_executables(depend_on_this prefix)
 
 macro (seqan_add_all_executables)
     file (GLOB ENTRIES
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
           ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+    if (${ARGC} GREATER 1)
+        set (PREFIX ${ARGV1})
+    endif (${ARGC} GREATER 1)
     if (${ARGC} GREATER 0)
         if (TARGET ${ARGV0})  # Add target only if it does not exist yet.
         else (TARGET ${ARGV0})
@@ -484,9 +488,9 @@ macro (seqan_add_all_executables)
     endif (${ARGC} GREATER 0)
     foreach (ENTRY ${ENTRIES})
         get_filename_component(BIN_NAME ${ENTRY} NAME_WE)
-        seqan_add_executable(${BIN_NAME} ${ENTRY})
+        seqan_add_executable(${PREFIX}${BIN_NAME} ${ENTRY})
         if (${ARGC} GREATER 0)
-            add_dependencies(${ARGV0} ${BIN_NAME})
+            add_dependencies(${ARGV0} ${PREFIX}${BIN_NAME})
         endif (${ARGC} GREATER 0)
     endforeach (ENTRY ${ENTRIES})
 endmacro (seqan_add_all_executables)
