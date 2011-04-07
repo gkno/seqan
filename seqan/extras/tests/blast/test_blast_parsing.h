@@ -61,7 +61,7 @@ void Test_BlastStoreReport() {
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 	
 	char buffer[1024];
-	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcpy(buffer, SEQAN_PATH_TO_ROOT());
 	strcat(buffer, "/projects/tests/blast/ecolip.out");
 
 	std::fstream strm;
@@ -200,7 +200,7 @@ void Test_BlastStoreReportBasic() {
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 	
 	char buffer[1024];
-	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcpy(buffer, SEQAN_PATH_TO_ROOT());
 	strcat(buffer, "/projects/tests/blast/ecolip.out");
 	
 	std::fstream strm;
@@ -289,7 +289,7 @@ void Test_BlastParsing(BlastN)
 
 	
 	char buffer[1024];
-	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcpy(buffer, SEQAN_PATH_TO_ROOT());
 	strcat(buffer, "/projects/tests/blast/ecoln.out");
 	
 	std::fstream strm2;
@@ -385,7 +385,7 @@ void Test_BlastParsing(BlastP) {
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 
 	char buffer[1024];
-	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcpy(buffer, SEQAN_PATH_TO_ROOT());
 	strcat(buffer, "/projects/tests/blast/ecolip.out");
 	
 	std::fstream strm;
@@ -505,7 +505,7 @@ void Test_BlastParsingBasic(BlastN)
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 
 	char buffer[1024];
-	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcpy(buffer, SEQAN_PATH_TO_ROOT());
 	strcat(buffer, "/projects/tests/blast/ecoln.out");
 	
 	std::fstream strm2;
@@ -603,7 +603,7 @@ void Test_BlastParsingBasic(BlastP) {
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 
 	char buffer[1024];
-	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcpy(buffer, SEQAN_PATH_TO_ROOT());
 	strcat(buffer, "/projects/tests/blast/ecolip.out");
 	
 	std::fstream strm;

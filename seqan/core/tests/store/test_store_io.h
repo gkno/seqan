@@ -43,7 +43,7 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 {
 	FragmentStore<> store;
     char buffer[1023];
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+    strcpy(buffer, SEQAN_PATH_TO_ROOT());
     strcat(buffer, "/projects/tests/store/ex1.sam.copy");
 	MultiSeqFile sam1;
 	open(sam1.concat, buffer);
@@ -56,7 +56,7 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 		read(samFile, store, Sam());
 	}
 	
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+    strcpy(buffer, SEQAN_PATH_TO_ROOT());
     strcat(buffer, "/projects/tests/store/ex1.fa");
     
 	loadContigs(store, buffer);

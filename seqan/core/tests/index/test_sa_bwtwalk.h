@@ -116,7 +116,7 @@ SEQAN_DEFINE_TEST(testBWTWalk)
 //#endif
 
     char buffer[1023];
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+    strcpy(buffer, SEQAN_PATH_TO_ROOT());
     strcat(buffer, "/projects/tests/index/m_tuberculosis_h37rv.fa");
     
 	std::fstream inputFile(buffer);

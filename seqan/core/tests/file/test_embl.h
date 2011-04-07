@@ -43,7 +43,7 @@ using namespace seqan;
 SEQAN_DEFINE_TEST(test_file_embl_file)
 {
     char buffer[1023];
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+    strcpy(buffer, SEQAN_PATH_TO_ROOT());
     strcat(buffer, "/projects/tests/file/takifugu_scl_embl.txt");
 
 	std::fstream strm; 
@@ -71,7 +71,7 @@ SEQAN_DEFINE_TEST(test_file_embl_file)
 SEQAN_DEFINE_TEST(test_file_embl_meta)
 {
     char buffer[1023];
-    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+    strcpy(buffer, SEQAN_PATH_TO_ROOT());
     strcat(buffer, "/projects/tests/file/takifugu_scl_embl.txt");
     
 	std::fstream strm; 
