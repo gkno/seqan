@@ -1340,7 +1340,7 @@ void compactMatches(
 					// we have enough, now look for better matches
 					if (options.purgeAmbiguous && (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest))
 					{
-                        std::cerr << "PURGED " << readNo << std::endl;
+                        // std::cerr << "PURGED " << readNo << std::endl;
 						setMaxErrors(swift, readNo, -1);
                         disabled += 1;
 						// if (options._debugLevel >= 2)
@@ -1350,7 +1350,7 @@ void compactMatches(
 						// we only need better matches
 						if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 						{
-                            std::cerr << "LIMITED " << readNo << std::endl;
+                            // std::cerr << "LIMITED " << readNo << std::endl;
 							setMaxErrors(swift, readNo, errors - 1);
                             disabled += 1;
 							// if (errors == 0 && options._debugLevel >= 2)
