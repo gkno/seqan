@@ -284,11 +284,27 @@ endmacro (seqan_setup_demos)
 #  * CUDA
 
 macro (seqan_find_dependencies)
-    find_package (ZLIB QUIET)
-    find_package (BZip2 QUIET)
-    find_package (OpenMP QUIET)
-    find_package (CUDA)
-    find_package (TR1)
+  find_package (ZLIB QUIET)
+  if (ZLIB_FOUND)
+    add_definitions(-DSEQAN_HAS_ZLIB=1)
+    include_directories(${ZLIB_INCLUDE_DIRS})
+  endif (ZLIB_FOUND)
+  
+  find_package (BZip2 QUIET)
+  if (BZIP2_FOUND)
+    include_directories(${BZIP_INCLUDE_DIRS})
+    add_definitions(-DSEQAN_HAS_BZIP2=1)
+  endif (BZIP2_FOUND)
+
+  find_package (OpenMP QUIET)
+  find_package (CUDA)
+  find_package (TR1)
+
+  include(CheckIncludeFiles)
+  check_include_files(execinfo.h HAVE_EXECINFO)
+  if (HAVE_EXECINFO)
+    add_definitions(-DSEQAN_HAS_EXECINFO=1)
+  endif (HAVE_EXECINFO)
 endmacro (seqan_find_dependencies)
 
 # ---------------------------------------------------------------------------
