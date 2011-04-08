@@ -1,21 +1,33 @@
 cmake_minimum_required (VERSION 2.6)
 project (sandbox_emde_apps_razers3)
 
-# Update the list of file names below if you add source files to your application.
-seqan_add_executable(razers3 razers.cpp
-			     razers.h
-			     job_queue.h
-			     outputFormat.h
-			     parallel_atomic.h
-			     parallel_job_queue.h
-			     parallel_misc.h
-			     parallel_store.h
-			     paramChooser.h
-			     profile_timeline.h
-			     razers_match_filter.h
-			     razers_matepairs.h
-			     razers_matepairs_parallel.h
-			     razers_parallel.h
-			     razers_parallel_reads.h
-			     razers_window.h
-			     readSimulator.h)
+if (OPENMP_FOUND)
+  # We need a configuration header file.  First, configure this file, then
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+                  ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+  # Enable OpenMP.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+  # Add executable for RazerS 3.
+  seqan_add_executable (razers3 razers.cpp
+                                razers.h
+                                job_queue.h
+                                outputFormat.h
+                                parallel_atomic.h
+                                parallel_job_queue.h
+                                parallel_misc.h
+                                parallel_store.h
+                                paramChooser.h
+                                profile_timeline.h
+                                razers_match_filter.h
+                                razers_matepairs.h
+                                razers_matepairs_parallel.h
+                                razers_parallel.h
+                                razers_parallel_reads.h
+                                razers_window.h
+                                readSimulator.h)
+elseif (OPENMP_FOUND)
+  message(STATUS "Not building RazerS3, since OpenMP could not be found.")
+endif (OPENMP_FOUND)

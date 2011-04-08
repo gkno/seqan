@@ -278,10 +278,11 @@ endmacro (seqan_setup_demos)
 #  * CUDA
 
 macro (seqan_find_dependencies)
-    find_package(ZLIB QUIET)
-    find_package(BZip2 QUIET)
-    find_package(OpenMP QUIET)
+    find_package (ZLIB QUIET)
+    find_package (BZip2 QUIET)
+    find_package (OpenMP QUIET)
     find_package (CUDA)
+    find_package (TR1)
 endmacro (seqan_find_dependencies)
 
 # ---------------------------------------------------------------------------
