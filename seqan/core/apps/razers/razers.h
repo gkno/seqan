@@ -44,12 +44,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Default	TQGramIndexSpec;
 #endif
 
-	template < bool DONT_VERIFY_ = true, bool DONT_DUMP_RESULTS_ = false >
+	template < bool DONT_VERIFY_ = false, bool DONT_DUMP_RESULTS_ = false >
 	struct RazerSSpec 
 	{
 		enum { DONT_VERIFY = DONT_VERIFY_ };				// omit verifying potential matches
 		enum { DONT_DUMP_RESULTS = DONT_DUMP_RESULTS_ };	// omit dumping results
-		enum { DUMP_VERIFICATION_TASKS = true };
+		enum { DUMP_VERIFICATION_TASKS = false };
 	};
 
     struct VerificationTask_
