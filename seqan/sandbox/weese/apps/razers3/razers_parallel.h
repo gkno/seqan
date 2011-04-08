@@ -288,10 +288,10 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSw
     // (1) Write back verification results into bucket.
     for (unsigned i = 0; i < length(verificationHits); ++i) {
         verificationHits[i].windowNo;
-        std::cerr << "got (" << verificationHits[i].windowNo << ", " << verificationHits[i].hitGroupId << ")" << std::endl;
+        // std::cerr << "got (" << verificationHits[i].windowNo << ", " << verificationHits[i].hitGroupId << ")" << std::endl;
         tls.verificationResultBuckets[verificationHits[i].windowNo][verificationHits[i].hitGroupId] = verificationHits[i];
         tls.missingInBucket[verificationHits[i].windowNo] -= 1;
-        std::cerr << "{windowNo == " << verificationHits[i].windowNo << "--(" << tls.missingInBucket[verificationHits[i].windowNo] << ")}" << std::endl;
+        // std::cerr << "{windowNo == " << verificationHits[i].windowNo << "--(" << tls.missingInBucket[verificationHits[i].windowNo] << ")}" << std::endl;
     }
     // std::cerr << "[wrote " << length(verificationHits) << " matches to buckets]" << std::flush;
 
@@ -305,7 +305,7 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSw
         size_t originalSize = length(tls.matches);
         unsigned idx = tls.nextBucketToWriteBack;
         for (unsigned i = 0; i < length(tls.verificationResultBuckets[idx]); ++i) {
-            std::cerr << "accessing (" << idx << ", " << i << ")" << std::endl;
+            // std::cerr << "accessing (" << idx << ", " << i << ")" << std::endl;
             // std::cerr << "len=" << length(*tls.verificationResultBuckets[idx][i].matches) << "|";
             SEQAN_ASSERT_NEQ(tls.verificationResultBuckets[idx][i].matches, static_cast<TMatches*>(0));
             newSize += length(*tls.verificationResultBuckets[idx][i].matches);
@@ -336,7 +336,7 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSw
         if (firstBeginPos == MaxValue<size_t>::VALUE)
             firstBeginPos = beginPos;
 
-        std::cerr << "((MASKING FROM " << windowBegin << " TO " << windowBegin + tls.options.windowSize << "))" << std::endl;
+        // std::cerr << "((MASKING FROM " << windowBegin << " TO " << windowBegin + tls.options.windowSize << "))" << std::endl;
         // Do not mask duplicates if not in edit distance mode.
         if (!IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
             continue;
@@ -345,13 +345,13 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSw
         maskDuplicates(tls.matches, begin(tls.matches, Standard()) + beginPos, end(tls.matches, Standard()), tls.options, TRazerSMode());
     }
 
-    std::cerr << "[wrote back " << bucketsWrittenBack << " buckets (" << tls.nextBucketToWriteBack << "/" << length(tls.missingInBucket) << ")]" << std::flush;
+    // std::cerr << "[wrote back " << bucketsWrittenBack << " buckets (" << tls.nextBucketToWriteBack << "/" << length(tls.missingInBucket) << ")]" << std::flush;
     if (bucketsWrittenBack > 0u) {
         // (3) Update match filter data structure for disabling reads.
         size_t nextWindowBegin = tls.options.windowSize * (tls.nextBucketToWriteBack);
         if (tls.nextBucketToWriteBack == length(tls.missingInBucket)) // is last?
             nextWindowBegin += DELTA;
-        std::cerr << "((REGISTERING/PROCESSING FROM " << firstWindowBegin << " TO " << nextWindowBegin << "))" << std::endl;
+        // std::cerr << "((REGISTERING/PROCESSING FROM " << firstWindowBegin << " TO " << nextWindowBegin << "))" << std::endl;
         typedef typename Iterator<TMatches>::Type TIterator;
         TIterator itBegin = begin(tls.matches, Standard()) + firstBeginPos;
         TIterator itEnd = end(tls.matches, Standard());
@@ -638,7 +638,7 @@ void _mapSingleReadsParallelToContig(
 #ifndef RAZERS_DEFER_COMPACTION
         clearLocalMatches(tls.verificationResults.localMatches);
 #endif  // #ifndef RAZERS_DEFER_COMPACTION
-        std::cerr << "AT END OF CONTIG #alignments " << length(tls.matches) << std::endl;
+        // std::cerr << "AT END OF CONTIG #alignments " << length(tls.matches) << std::endl;
     }
 
 
@@ -903,9 +903,9 @@ int _mapSingleReadsParallel(
             maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
 // #endif  // #ifndef RAZERS_DEFER_COMPACTION
         Nothing nothing;
-        std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+        // std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
         compactMatches(threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, COMPACT_FINAL);
-        std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+        // std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
     }
     #pragma omp barrier
 

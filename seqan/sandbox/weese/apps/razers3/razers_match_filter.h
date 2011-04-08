@@ -69,7 +69,7 @@ _createHistogram(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, uns
     unsigned result = obtainId(filter.idManager);
     if (result >= length(filter.histograms))
         resize(filter.histograms, length(filter.histograms) + 1);
-    resize(filter.histograms[result], ceil(filter.options.errorRate * length(filter.readSeqs[readId - filter.readOffset])), 0, Exact());
+    resize(filter.histograms[result], ceil(filter.options.errorRate * length(filter.readSeqs[readId])), 0, Exact());
     SEQAN_ASSERT_LT(result, length(filter.histograms));
     return result;
 }
@@ -193,7 +193,7 @@ processRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned
         filter.readIdToHistogramId.erase(readId);
         filter.hitCount[readId - filter.readOffset] = MaxValue<unsigned>::VALUE;
     } else if (_canBeDisabled(filter, histogramId)) {
-        // std::cerr << "DISABLED " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId] << std::endl;
+        // std::cerr << "DISABLED " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId - filter.readOffset] << std::endl;
         disableRead(value(filter.callback), readId);
         _freeHistogram(filter, histogramId);
         filter.readIdToHistogramId.erase(readId);
