@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (sandbox_emde_apps_razers3)
+project (sandbox_weese_apps_razers3)
 
 if (OPENMP_FOUND)
   # We need a configuration header file.  First, configure this file, then
