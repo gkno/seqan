@@ -142,19 +142,19 @@ template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
 void
 registerRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned readId, int score)
 {
-    if (filter.hitCount[readId] == MaxValue<unsigned>::VALUE)
+    if (filter.hitCount[readId - filter.readOffset] == MaxValue<unsigned>::VALUE)
         return;
-    filter.hitCount[readId] += 1;
+    filter.hitCount[readId - filter.readOffset] += 1;
 
     // TODO(holtgrew): Maybe global read to histogram map; faster?
 
     // Get histogram id, insert new histogram if necessary, exit if no histogram yet.
     unsigned histogramId = 0;
-    if (filter.hitCount[readId] == filter.matchThreshold) {
+    if (filter.hitCount[readId - filter.readOffset] == filter.matchThreshold) {
         // std::cerr << "new histogram for read " << readId << std::endl;
         histogramId = _createHistogram(filter, readId);
         filter.readIdToHistogramId[readId] = histogramId;
-    } else if (filter.hitCount[readId] > filter.matchThreshold) {
+    } else if (filter.hitCount[readId - filter.readOffset] > filter.matchThreshold) {
         typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
         TIterator it = filter.readIdToHistogramId.find(readId);
         SEQAN_ASSERT(it != filter.readIdToHistogramId.end());
@@ -173,7 +173,7 @@ processRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned
 {
     typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
 
-    if (filter.hitCount[readId] < filter.matchThreshold)
+    if (filter.hitCount[readId - filter.readOffset] < filter.matchThreshold)
         return;
 
     // std::cerr << "processing read " << readId << std::endl;
@@ -191,13 +191,13 @@ processRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned
         disableRead(value(filter.callback), readId);
         _freeHistogram(filter, histogramId);
         filter.readIdToHistogramId.erase(readId);
-        filter.hitCount[readId] = MaxValue<unsigned>::VALUE;
+        filter.hitCount[readId - filter.readOffset] = MaxValue<unsigned>::VALUE;
     } else if (_canBeDisabled(filter, histogramId)) {
         // std::cerr << "DISABLED " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId] << std::endl;
         disableRead(value(filter.callback), readId);
         _freeHistogram(filter, histogramId);
         filter.readIdToHistogramId.erase(readId);
-        filter.hitCount[readId] = MaxValue<unsigned>::VALUE;
+        filter.hitCount[readId - filter.readOffset] = MaxValue<unsigned>::VALUE;
     } else if ((newLimit = _newLimit(filter, histogramId)) >= 0) {
         limitRead(value(filter.callback), readId, newLimit);
     }
