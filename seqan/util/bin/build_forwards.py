@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.5
 """SeqAn Automatic Forwards Generator.
 
-Usage: build_forwards.py BASE_PATH [all]
+Usage: build_forwards.py BASE_PATH [TARGET_PATH] [all]
 
 The program is given the project base path.  All directories in this
 base path contain one module which consists of all header files
@@ -38,7 +38,7 @@ forces a rebuild.
 """.strip()
 
 
-def buildProject(project_path):
+def buildProject(project_path, target_path):
     if not os.path.exists(project_path):
         return
 
@@ -59,7 +59,6 @@ def buildProject(project_path):
         
     project = project_path[pos1+1:]
     
-    
     for root, dirs, files in os.walk(project_path):
         if 'CVS' in dirs:
             dirs.remove('CVS')
@@ -75,7 +74,7 @@ def buildProject(project_path):
                 parseFile(path)
                 
 #    if FUNCS != {}:        
-    outAll(project_path, project)
+    outAll(target_path, project)
         
     print
 
@@ -519,6 +518,9 @@ def outAll(path, project):
     
     str += "#endif\n"
 
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     filename = os.path.join(path, forwardFilename(project))
     fl = file(filename, "w")
     fl.write(str + "\n")
@@ -586,7 +588,7 @@ def forwardsNeedsRebuild(module_path, forwards_filename):
     return False
 
 
-def buildAllForwards(project_path, force_recreate=False):
+def buildAllForwards(project_path, target_path, force_recreate=False):
     """Build forwards for all modules below project_path.
 
     Searches for projects without generated forward and build forward
@@ -596,11 +598,13 @@ def buildAllForwards(project_path, force_recreate=False):
     # Strip trailing slash from project_path.
     if project_path[-1] == '/':
         project_path = project_path[:-1]
+    if target_path[-1] == '/':
+        target_path = target_path[:-1]
     
     ret = False
     
     for f in os.listdir(project_path):
-        if (f == 'CVS') or (f == '.svn'):
+        if f in ['CVS', '.svn']:
             continue  # Skip CVS and .svn directories.
         if f.startswith('.'):
             continue  # Skip hidden files.
@@ -608,11 +612,11 @@ def buildAllForwards(project_path, force_recreate=False):
         module_name = f
         module_path = project_path + "/" + module_name
         if os.path.isdir(module_path):
-            file = module_path + "/" + forwardFilename(module_name)
+            file = target_path + "/" + module_path + "/" + forwardFilename(module_name)
             if force_recreate or not os.path.exists(file) or \
                     forwardsNeedsRebuild(module_path, file):
                 ret = True
-                buildProject(module_path)
+                buildProject(module_path, target_path + "/" + module_name)
     return ret
 
 
@@ -623,9 +627,13 @@ def main():
     print >>sys.stderr, PROGRAM_USAGE
     return 1
 
-  force_rebuild = len(sys.argv) >= 3 and sys.argv[2].lower() == 'all'
+  force_rebuild = sys.argv[-1] == 'all'
+  if force_rebuild:
+      target_path = sys.argv[-2]
+  else:
+      target_path = sys.argv[-1]
 
-  buildAllForwards(sys.argv[1], force_rebuild)
+  buildAllForwards(sys.argv[1], target_path, force_rebuild)
 
   return 0
 
