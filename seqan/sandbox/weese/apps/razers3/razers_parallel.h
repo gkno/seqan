@@ -684,7 +684,7 @@ void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStora
         unsigned MATCH_THRESHOLD = 5;
         tls.matchFilter.reset(new TMatchFilter(tls.splitters[tls.threadId + 1] - tls.splitters[tls.threadId], MATCH_THRESHOLD, READ_FRAC_WITH_HISTO, tls, tls.splitters[tls.threadId], tls.globalStore->readSeqStore, tls.options));
         tls.options.compactThresh = MaxValue<unsigned>::VALUE;
-#endif RAZERS_DEFER_COMPACTION
+#endif // #ifdef RAZERS_DEFER_COMPACTION
 
         // Clear pattern and set parameters.
         TSwiftPattern & swiftPattern = tls.swiftPattern;
