@@ -74,12 +74,38 @@ Usage: %prog [options] repository NAME
 
 # Program description, used for command line parser.  Will be wrapped by, though.
 DESCRIPTION = """
-SeqAn code generator.
+The SeqAn code generator.
 
-The create command uses the template to code of the given type with the given
-NAME in the given LOCATION.  The LOCATION is the repository name and could
-be "core", "extras", "sandbox/fub_students", ...
+The first version ("repository") is to be be called to create your new entries
+below the directory sandbox.  The second version is to be called to create new
+library modules, tests, apps, and demos inside a sandbox.
 """.strip()
+#"""
+#Example:
+#
+#  %prog repository sandbox/john_doe
+#
+#The second version is to be called to create new library modules, tests, apps,
+#and demos inside a sandbox.  Example:
+#
+#  %prog module my_module sandbox/john_doe
+#
+#This command creates a new library module in sandbox/john_doe/include/seqan.
+#It consists of the directory my_module, the files my_module.h and
+#my_module/my_module_base.h as well as the info file my_module/INFO.
+#
+#  %prog test my_module sandbox/john_doe
+#
+#This command creates the tests for module "my_module" in sandbox/john_doe.
+#
+#  %prog app my_app sandbox/john_doe
+#
+#This command creates a new application named my_app in sandbox/john_doe/apps.
+#
+#  %prog demo my_demo sandbox/john_doe
+#
+#This command creates a new demo in sandbox/john_doe/demos.
+#""".strip()
 
 def createDirectory(path, dry_run=False):
     print 'mkdir(%s)' % path
