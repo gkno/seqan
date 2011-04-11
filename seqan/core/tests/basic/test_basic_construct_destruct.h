@@ -52,6 +52,7 @@ struct CDStruct
     static int moves;
     static int destructions;
     static int assignments;
+    static int sets;
     static CDStruct const * lastOther;
 
     // Note that we use construct this type in char arrays below.  This is no
@@ -62,15 +63,16 @@ struct CDStruct
     int copiedFrom;
     int movedFrom;
     int assignedFrom;
+    int setFrom;
     
-    CDStruct() : copiedFrom(-1), movedFrom(-1), assignedFrom(-1)
+    CDStruct() : copiedFrom(-1), movedFrom(-1), assignedFrom(-1), setFrom(-1)
     {
         id = nextId++;
         defaultConstructions += 1;
     }
 
     CDStruct(CDStruct const & other)
-            : copiedFrom(other.id), movedFrom(-1), assignedFrom(-1)
+            : copiedFrom(other.id), movedFrom(-1), assignedFrom(-1), setFrom(-1)
     {
         id = nextId++;
         lastOther = &other;
@@ -78,7 +80,7 @@ struct CDStruct
     }
 
     CDStruct(CDStruct & other, seqan::Move const & /*tag*/)
-            : copiedFrom(-1), movedFrom(other.id), assignedFrom(-1)
+            : copiedFrom(-1), movedFrom(other.id), assignedFrom(-1), setFrom(-1)
     {
         lastOther = &other;
         moveConstructions += 1;
@@ -91,6 +93,7 @@ struct CDStruct
         copiedFrom = -1;
         movedFrom = -1;
         assignedFrom = other.id;
+        setFrom = -1;
         return *this;
     }
 
@@ -107,11 +110,29 @@ void move(CDStruct & target, CDStruct const & source)
     target.copiedFrom = -1;
     target.assignedFrom = -1;
     target.movedFrom = source.id;
+    target.setFrom = -1;
 }
+
 
 void move(CDStruct & target, CDStruct & source)
 {
     move(target, const_cast<CDStruct const &>(source));
+}
+
+void set(CDStruct & target, CDStruct const & source)
+{
+    CDStruct::lastOther = &source;
+    CDStruct::sets += 1;
+    target.copiedFrom = -1;
+    target.assignedFrom = -1;
+    target.movedFrom = -1;
+    target.setFrom = source.id;
+}
+
+
+void set(CDStruct & target, CDStruct & source)
+{
+    set(target, const_cast<CDStruct const &>(source));
 }
 
 int CDStruct::nextId = 0;
@@ -121,6 +142,7 @@ int CDStruct::moveConstructions = 0;
 int CDStruct::moves = 0;
 int CDStruct::destructions = 0;
 int CDStruct::assignments = 0;
+int CDStruct::sets = 0;
 CDStruct const * CDStruct::lastOther = 0;
 
 void resetCDStructStatics()
@@ -132,6 +154,7 @@ void resetCDStructStatics()
     CDStruct::moves = 0;
     CDStruct::destructions = 0;
     CDStruct::assignments = 0;
+    CDStruct::sets = 0;
 }
 
 // ==========================================================================

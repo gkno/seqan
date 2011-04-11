@@ -93,12 +93,14 @@ struct Holder<TValue, Simple>
 	}
 
 	template <typename TSource>
+    explicit
 	Holder(TSource & value_) : data_value(value_)
 	{
         SEQAN_CHECKPOINT;
 	}
 
 	template <typename TSource>
+    explicit
 	Holder(TSource const & value_) : data_value(value_)
 	{
         SEQAN_CHECKPOINT;
@@ -204,6 +206,17 @@ create(Holder<TValue, Simple> & me,
 	me.data_value = value_;
 }
 
+template <typename TValue>
+inline void
+create(Holder<TValue, Simple> & me,
+	   TValue const & value_,
+       Move const &)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Real implementation once HasMoveConstructor metafunction is in place.
+	me.data_value = value_;
+}
+
 // ----------------------------------------------------------------------------
 // Function detach()
 // ----------------------------------------------------------------------------
@@ -225,7 +238,7 @@ setValue(Holder<TValue, Simple> & me,
 		 TValue const & value_)
 {
     SEQAN_CHECKPOINT;
-	me.data_value = value_;
+	set(me.data_value, value_);
 }
 
 // ----------------------------------------------------------------------------
@@ -249,6 +262,26 @@ value(Holder<TValue, Simple> const & me)
 }
 
 // ----------------------------------------------------------------------------
+// Function getValue()
+// ----------------------------------------------------------------------------
+
+template <typename TValue>
+inline typename GetValue<Holder<TValue, Simple> >::Type
+getValue(Holder<TValue, Simple> & me)
+{
+    SEQAN_CHECKPOINT;
+	return me.data_value;
+}
+
+template <typename TValue>
+inline typename GetValue<Holder<TValue, Simple> const>::Type
+getValue(Holder<TValue, Simple> const & me)
+{
+    SEQAN_CHECKPOINT;
+	return me.data_value;
+}
+
+// ----------------------------------------------------------------------------
 // Function assignValue()
 // ----------------------------------------------------------------------------
 
@@ -258,7 +291,7 @@ assignValue(Holder<TValue, Simple> & me,
 			TSource const & value_)
 {
     SEQAN_CHECKPOINT;
-	assignValue(me.data_value, value_);
+	assign(me.data_value, value_);
 }
 
 // ----------------------------------------------------------------------------

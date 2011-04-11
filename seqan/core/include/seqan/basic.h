@@ -98,9 +98,26 @@
 // conversion, comparison and the transport (assign/set/move) functions.
 
 #include <seqan/basic/basic_transport.h>
-#include <seqan/basic/basic_construct_destruct.h>
 #include <seqan/basic/basic_converter.h>
 #include <seqan/basic/basic_compare.h>
+
+// --------------------------------------------------------------------------
+// Iterators
+// --------------------------------------------------------------------------
+
+#include <seqan/basic/iterator_interface.h>
+#include <seqan/basic/iterator_base.h>
+#include <seqan/basic/iterator_adaptor.h>
+#include <seqan/basic/iterator_position.h>
+#include <seqan/basic/iterator_adapt_std.h>
+
+// --------------------------------------------------------------------------
+// Construction / Destruction Code
+// --------------------------------------------------------------------------
+//
+// Contains functions wrapping construction and destuction of objects.
+
+#include <seqan/basic/basic_construct_destruct.h>
 
 // --------------------------------------------------------------------------
 // Holders
@@ -116,28 +133,22 @@
 // Allocators
 // --------------------------------------------------------------------------
 
-#include <seqan/basic/basic_allocator_interface.h>
-#include <seqan/basic/basic_allocator_simple.h>
-#include <seqan/basic/basic_allocator_singlepool.h>
-#include <seqan/basic/basic_allocator_multipool.h>
-#include <seqan/basic/basic_allocator_chunkpool.h>
-
-#include <seqan/basic/basic_allocator_to_std.h>
+#include <seqan/basic/allocator_interface.h>
+#include <seqan/basic/allocator_simple.h>
+#include <seqan/basic/allocator_singlepool.h>
+#include <seqan/basic/allocator_multipool.h>
+#include <seqan/basic/allocator_chunkpool.h>
+                      
+#include <seqan/basic/allocator_to_std.h>
 
 // --------------------------------------------------------------------------
-// Iterators and Proxies
+// Proxies
 // --------------------------------------------------------------------------
-
-#include <seqan/basic/iterator_interface.h>
-#include <seqan/basic/iterator_base.h>
-#include <seqan/basic/iterator_adaptor.h>
-#include <seqan/basic/iterator_position.h>
-#include <seqan/basic/iterator_adapt_std.h>
 
 #include <seqan/basic/proxy_base.h>
 #include <seqan/basic/proxy_iterator.h>
 
-#include <seqan/basic/basic_pointer.h>
+#include <seqan/basic/basic_pointer.h>  // TODO(holtgrew): Belongs in sequence module.
 
 // --------------------------------------------------------------------------
 // Alphabets

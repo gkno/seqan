@@ -36,178 +36,160 @@
 #ifndef TESTS_BASIC_TEST_BASIC_ITERATOR_H_
 #define TESTS_BASIC_TEST_BASIC_ITERATOR_H_
 
-struct Test_Iterator_1
+// --------------------------------------------------------------------------
+// Tests for Pointer Adaption to Iterator Concept
+// --------------------------------------------------------------------------
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_pointer_metafunctions)
 {
-	int data_dat_1;
-	mutable int data_dat_2;
-
-	Test_Iterator_1(int data_):
-		data_dat_1(data_ + 1),
-		data_dat_2(data_ + 2)
-	{
-	}
-	Test_Iterator_1(Test_Iterator_1 const & other_):
-		data_dat_1(other_.data_dat_1 + 10),
-		data_dat_2(other_.data_dat_2 + 10)
-	{
-	}
-	~Test_Iterator_1() 
-	{
-	}
-
-	Test_Iterator_1 & operator = (Test_Iterator_1 const & other_)
-	{
-		data_dat_1 = other_.data_dat_1 + 20;
-		data_dat_2 = other_.data_dat_2 + 20;
-		return *this;
-	}
-
-	int & operator * ()
-	{
-		return data_dat_1;
-	}
-	int & operator * () const
-	{
-		return data_dat_2;
-	}
-};
-
-namespace seqan {
-
-template <>
-struct Value<Test_Iterator_1>
-{
-	typedef int Type;
-};
-
-}  // namespace seqan
-
-SEQAN_DEFINE_TEST(test_basic_iterator_basic) {
-//test default iterator functions
-
-	//value, getValue, operator *
-	int i1 = 10;
-	int * it1 = & i1;
-	SEQAN_ASSERT_EQ(value(it1), 10);
-	SEQAN_ASSERT_EQ(getValue(it1), 10);
-
-	Test_Iterator_1 it2(10);
-	SEQAN_ASSERT_EQ(value(it2), 11);
-	SEQAN_ASSERT_EQ(getValue(it2), 11);
-/*
-	Test_Iterator_1 const it3(10);
-	SEQAN_ASSERT_EQ(value(it3), 12);
-	SEQAN_ASSERT_EQ(getValue(it3), 12);
-
-	//assign to value reference
-	value(it2) = 15;
-	SEQAN_ASSERT_EQ(getValue(it2), 15);
-
-	//moveValue
-	moveValue(it2, 50);
-	SEQAN_ASSERT_EQ(value(it2), 50);
-
-	//defaults of some advanced functions
-	SEQAN_ASSERT_EQ(position(it1), 0);
-	SEQAN_ASSERT_EQ(container(it1), *it1);
-*/
-    SEQAN_ASSERT_FAIL("Refurbish me!");
+    using namespace seqan;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec>
-void Test_Iter()
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_pointer_constructors)
 {
-	typedef Iter<char *, TSpec> TIterator;
-
-	char arr1[] = "XYZ";
-	char arr2[] = "abcdefg";
-
-	TIterator it1 = seqan::begin(arr1);
-	SEQAN_ASSERT_EQ(container(it1), arr1);
-	SEQAN_ASSERT_EQ(*it1, 'X');
-
-	setContainer(it1, arr2);
-	SEQAN_ASSERT_EQ(*it1, 'a');
-
-	TIterator it2(it1);
-	SEQAN_ASSERT_EQ(*it2, 'a');
-
-	TIterator it3;
-	it3 = it2 + 1;
-	SEQAN_ASSERT_EQ(*it3, 'b');
-
-	++it3;
-	SEQAN_ASSERT_EQ(*it3, 'c');
-
-	it3++;
-	SEQAN_ASSERT_EQ(*it3, 'd');
-
-	SEQAN_ASSERT_EQ((int)position(it3), 3);
-
-	setPosition(it3, 2);
-	SEQAN_ASSERT_EQ(*it3, 'c');
-
-	--it3;
-	SEQAN_ASSERT_EQ(*it3, 'b');
-
-	it3--;
-	SEQAN_ASSERT_EQ(*it3, 'a');
-	SEQAN_ASSERT(it3 == it2);
-	SEQAN_ASSERT(!(it3 != it2));
-
-	++it3;
-	assignValue(it3, 'z');
-	SEQAN_ASSERT_EQ(*it3, 'z');
-
-	moveValue(it3, 'y');
-	SEQAN_ASSERT_EQ(*it3, 'y');
-
-	TIterator const it4 = it3;
-	assignValue(it4, 'x');
-	SEQAN_ASSERT_EQ(*it4, 'x');
-	SEQAN_ASSERT_EQ(*it3, 'x');
-
-	moveValue(it4, 'w');
-	SEQAN_ASSERT_EQ(*it4, 'w');
-	SEQAN_ASSERT_EQ(*it3, 'w');
-
-
-	it3 = 1 + it4;
-	SEQAN_ASSERT_EQ(*it3, 'c');
-
-	it3 = it4 - 1;
-	SEQAN_ASSERT_EQ(*it3, 'a');
-
-	it3 += 4;
-	SEQAN_ASSERT_EQ(*it3, 'e');
-
-	it3 -= 2;
-	SEQAN_ASSERT_EQ(*it3, 'c');
-
-	SEQAN_ASSERT_EQ(it3 - it4, 1);
-    SEQAN_ASSERT_FAIL("Refurbish me!");
+    using namespace seqan;
 }
 
-SEQAN_DEFINE_TEST(test_basic_iterator_adaptor)
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_pointer_transport)
 {
-	typedef AdaptorIterator<char *> TSpec;
-	typedef Iter<char *, TSpec> TIterator;
-
-	Test_Iter<TSpec>();
-
-	char arr1[] = "abc";
-	TIterator it1 = seqan::begin(arr1);
-	char * ptr1 = it1;
-	SEQAN_ASSERT_EQ(*ptr1, 'a');
-    SEQAN_ASSERT_FAIL("Refurbish me!");
+    using namespace seqan;
 }
 
-SEQAN_DEFINE_TEST(test_basic_iterator_position)
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_pointer_transport_value)
 {
-	Test_Iter<PositionIterator>();
-    SEQAN_ASSERT_FAIL("Refurbish me!");
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_pointer_movement)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_pointer_arithmetics)
+{
+    using namespace seqan;
+}
+
+// --------------------------------------------------------------------------
+// Tests for STL Iterator Adaption to Iterator Concept
+// --------------------------------------------------------------------------
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_std_iterator_metafunctions)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_std_iterator_constructors)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_std_iterator_transport)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_std_iterator_transport_value)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_std_iterator_movement)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adapt_std_iterator_arithmetics)
+{
+    using namespace seqan;
+}
+
+// --------------------------------------------------------------------------
+// Tests for Adaptor Iterator
+// --------------------------------------------------------------------------
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_metafunctions)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_constructors)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_transport)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_transport_value)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_movement)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_arithmetics)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_rooted_metafunctions)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_adaptor_rooted_functions)
+{
+    using namespace seqan;
+}
+
+// --------------------------------------------------------------------------
+// Tests for Positional Iterator
+// --------------------------------------------------------------------------
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_metafunctions)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_constructors)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_transport)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_transport_value)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_movement)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_arithmetics)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_rooted_metafunctions)
+{
+    using namespace seqan;
+}
+
+SEQAN_DEFINE_TEST(test_basic_iterator_position_rooted_functions)
+{
+    using namespace seqan;
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_ITERATOR_H_

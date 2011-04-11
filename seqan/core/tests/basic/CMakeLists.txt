@@ -6,7 +6,6 @@ seqan_add_test_executable(test_basic test_basic.cpp
                                      test_basic_aggregates.h
                                      test_basic_allocator.h
                                      test_basic_alphabet.h
-                                     test_basic_common.h
                                      test_basic_construct_destruct.h
                                      test_basic_holder.h
                                      test_basic_iterator.h

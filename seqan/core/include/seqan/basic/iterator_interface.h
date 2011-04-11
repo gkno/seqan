@@ -34,7 +34,7 @@
 // Iterator interface with default implementations.
 // ==========================================================================
 
-// TODO(holtgrew): Rename to iterator_interface.h, remove 'basic_' prefix from other file names.
+// TODO(holtgrew): Split into iterator_interface.h and iterator_adapt_pointer.h.
 
 #ifndef SEQAN_BASIC_BASIC_ITERATOR_H_
 #define SEQAN_BASIC_BASIC_ITERATOR_H_
@@ -70,10 +70,10 @@ that are available for rooted iterators.
 */
 
 struct Rooted_;
-typedef Tag<Rooted_> const Rooted;
+typedef Tag<Rooted_> Rooted;
 
 struct Standard_;
-typedef Tag<Standard_> const Standard;
+typedef Tag<Standard_> Standard;
 
 // ============================================================================
 // Metafunctions
@@ -181,6 +181,8 @@ struct Iterator : Iterator_Default_Imp<T, TSpec>
 ..returns.param.Type:The container type to $T$.
 ..include:seqan/basic.h
 */
+
+// TODO(holtgrew): Remove the default implementation; anti-auto-sequence. Also, using plain pointers for strings does not work any more. Will probably only work for rooted/adaptor/positional iterators.
 
 template <typename T>
 struct Container
@@ -674,6 +676,7 @@ goEnd(TIterator & it)
 ..see:Function.goEnd
 ..include:seqan/basic.h
 */
+
 template <typename TIterator>
 inline void
 goNext(TIterator & it)

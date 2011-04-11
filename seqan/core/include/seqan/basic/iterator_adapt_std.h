@@ -35,8 +35,6 @@
 // iterator traits.
 // ==========================================================================
 
-// TODO(holtgrew): Rename to adapt_std_iter.h?
-
 #ifndef SEQAN_BASIC_BASIC_ITERATOR_ADAPT_STD_H_
 #define SEQAN_BASIC_BASIC_ITERATOR_ADAPT_STD_H_
 

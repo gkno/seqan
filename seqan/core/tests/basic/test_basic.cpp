@@ -44,7 +44,6 @@
 #include "test_basic_alphabet.h" // TODO(holtgrew): Refurbish.
 #include "test_basic_aggregates.h"
 #include "test_basic_allocator.h"
-#include "test_basic_common.h"
 #include "test_basic_construct_destruct.h"
 #include "test_basic_holder.h"
 #include "test_basic_iterator.h"
@@ -237,18 +236,55 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
     SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_stream_output);
 
-    // -----------------------------------------------------------------------
+    // =======================================================================
     // Tests for Allocators
-    // -----------------------------------------------------------------------
+    // =======================================================================
 
     SEQAN_CALL_TEST(test_basic_allocator_simple);
     SEQAN_CALL_TEST(test_basic_allocator_pool);
     SEQAN_CALL_TEST(test_basic_allocator_multi_pool);
     SEQAN_CALL_TEST(test_basic_allocator_chunk_pool);
+    // TODO(holtgrew): Test for std:: adaption!
 
-    // -----------------------------------------------------------------------
+    // =======================================================================
+    // Tests for Iterators
+    // =======================================================================
+
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_metafunctions);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_constructors);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_transport);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_transport_value);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_movement);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_arithmetics);
+
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_std_iterator_metafunctions);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_std_iterator_constructors);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_std_iterator_transport);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_std_iterator_transport_value);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_std_iterator_movement);
+    SEQAN_CALL_TEST(test_basic_iterator_adapt_std_iterator_arithmetics);
+
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_metafunctions);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_constructors);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_transport);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_transport_value);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_movement);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_arithmetics);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_rooted_metafunctions);
+    SEQAN_CALL_TEST(test_basic_iterator_adaptor_rooted_functions);
+
+    SEQAN_CALL_TEST(test_basic_iterator_position_metafunctions);
+    SEQAN_CALL_TEST(test_basic_iterator_position_constructors);
+    SEQAN_CALL_TEST(test_basic_iterator_position_transport);
+    SEQAN_CALL_TEST(test_basic_iterator_position_transport_value);
+    SEQAN_CALL_TEST(test_basic_iterator_position_movement);
+    SEQAN_CALL_TEST(test_basic_iterator_position_arithmetics);
+    SEQAN_CALL_TEST(test_basic_iterator_position_rooted_metafunctions);
+    SEQAN_CALL_TEST(test_basic_iterator_position_rooted_functions);
+
+    // =======================================================================
     // Tests for Construction / Destruction
-    // -----------------------------------------------------------------------
+    // =======================================================================
 
     // TODO(holtgrew): Test on non-pointers.
     SEQAN_CALL_TEST(test_basic_construct_destruct_construct_value_pointer);
@@ -266,17 +302,35 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_construct_destruct_array_move_pointer);
     SEQAN_CALL_TEST(test_basic_construct_destruct_array_clear_space_pointer);
 
-    // -----------------------------------------------------------------------
+    // =======================================================================
     // Tests for transport module.
-    // -----------------------------------------------------------------------
+    // =======================================================================
 
     SEQAN_CALL_TEST(test_basic_transport_has_move_constructor);
     SEQAN_CALL_TEST(test_basic_transport_default_overloads);
     SEQAN_CALL_TEST(test_basic_transport_assign_move_set);
 
-    // -----------------------------------------------------------------------
+    // =======================================================================
+    // Tests for Holders
+    // =======================================================================
+
+    SEQAN_CALL_TEST(test_basic_holder_simple_metafunctions);
+    SEQAN_CALL_TEST(test_basic_holder_simple_constructors);
+    SEQAN_CALL_TEST(test_basic_holder_simple_transport);
+    SEQAN_CALL_TEST(test_basic_holder_simple_transport_value);
+    SEQAN_CALL_TEST(test_basic_holder_simple_dependencies);
+    SEQAN_CALL_TEST(test_basic_holder_simple_accessor);
+
+    SEQAN_CALL_TEST(test_basic_holder_tristate_metafunctions);
+    SEQAN_CALL_TEST(test_basic_holder_tristate_constructors);
+    SEQAN_CALL_TEST(test_basic_holder_tristate_transport);
+    SEQAN_CALL_TEST(test_basic_holder_tristate_transport_value);
+    SEQAN_CALL_TEST(test_basic_holder_tristate_dependencies);
+    SEQAN_CALL_TEST(test_basic_holder_tristate_accessor);
+
+    // =======================================================================
     // Tests for proxy classes, iterator proxy.
-    // -----------------------------------------------------------------------
+    // =======================================================================
 
     SEQAN_CALL_TEST(test_basic_proxy_iterator_constructors);
     SEQAN_CALL_TEST(test_basic_proxy_iterator_assign);
@@ -288,22 +342,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_proxy_iterator_stream_write);
 
     // -----------------------------------------------------------------------
-    // Tests for Holders
-    // -----------------------------------------------------------------------
-
-    SEQAN_CALL_TEST(test_basic_holder_simple);
-    SEQAN_CALL_TEST(test_basic_holder_tristate);
-
-    // -----------------------------------------------------------------------
-    // Tests for Iterators
-    // -----------------------------------------------------------------------
-
-    SEQAN_CALL_TEST(test_basic_common_iterator_adapt_std);
-    SEQAN_CALL_TEST(test_basic_iterator_basic);
-    SEQAN_CALL_TEST(test_basic_iterator_adaptor);
-    SEQAN_CALL_TEST(test_basic_iterator_position);
-
-    // -----------------------------------------------------------------------
     // Tests for Alphabets
     // -----------------------------------------------------------------------
     // Remaining, Unported Tests
@@ -313,7 +351,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_alphabet_extreme_values);
     // SEQAN_CALL_TEST(test_basic_simple_types);
     SEQAN_CALL_TEST(test_basic_suprema_infima);
-    SEQAN_CALL_TEST(test_basic_common_type);
 }
 SEQAN_END_TESTSUITE
 

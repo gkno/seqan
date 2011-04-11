@@ -75,6 +75,8 @@ template <typename TValue> inline size_t length(TValue * me);
 ..include:seqan/basic.h
  */
 
+// TODO(holtgrew): This is broken for const TValue since we use Value<Holder>::Type below.
+
 template <typename TValue>
 struct Holder<TValue, Tristate>
 {
@@ -109,12 +111,14 @@ struct Holder<TValue, Tristate>
 		assign(*this, source_);
 	}
 
+    explicit
 	Holder(THostValue & value_) : data_state(EMPTY)
 	{
         SEQAN_CHECKPOINT;
 		setValue(*this, value_);
 	}
 
+    explicit
 	Holder(THostValue const & value_) : data_state(EMPTY)
 	{
         SEQAN_CHECKPOINT;
@@ -402,6 +406,24 @@ struct Holder<TValue * const, Tristate>
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Spec
+// ----------------------------------------------------------------------------
+
+// Spec has to be given for all default specializations.
+
+template <typename TValue>
+struct Spec<Holder<TValue, Tristate> >
+{
+	typedef Tristate Type;
+};
+
+template <typename TValue>
+struct Spec<Holder<TValue, Tristate> const>
+{
+	typedef Tristate Type;
+};
 
 // ============================================================================
 // Functions
@@ -719,6 +741,28 @@ SEQAN_CHECKPOINT
 	me.data_state = Holder<TValue *, Tristate>::OWNER;
 }
 #endif  // #if SEQAN_ENABLE_POINTER_HOLDER
+
+template <typename TValue, typename TValue2>
+inline void
+create(Holder<TValue const, Tristate> & me,
+	   TValue2 & value_,
+       Move const &)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Real implementation once HasMoveConstructor metafunction is in place.
+	me.data_value = value_;
+}
+
+template <typename TValue, typename TValue2>
+inline void
+create(Holder<TValue, Tristate> & me,
+	   TValue2 & value_,
+       Move const &)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Real implementation once HasMoveConstructor metafunction is in place.
+	me.data_value = value_;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
