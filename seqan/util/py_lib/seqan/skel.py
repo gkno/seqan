@@ -138,6 +138,7 @@ def configureFile(target_file, source_file, replacements, dry_run):
 
 def _pathToIdentifier(relative_path):
     result = relative_path.replace('/', '_')
+    result = result.replace('\\', '_')
     result = result.replace('-', '_')
     result = result.replace('.', '_')
     result = result.replace(' ', '_')
