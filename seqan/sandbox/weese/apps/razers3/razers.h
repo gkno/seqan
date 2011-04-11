@@ -33,6 +33,7 @@
 #include <seqan/find.h>
 #include <seqan/index.h>
 #include <seqan/store.h>
+#include <seqan/pipe.h>
 
 #ifdef RAZERS_PROFILE
 #include "profile_timeline.h"
@@ -138,7 +139,7 @@ enum {
 	enum AlignMode			{ RAZERS_LOCAL, RAZERS_PREFIX, RAZERS_GLOBAL };
 	enum GapMode			{ RAZERS_GAPPED, RAZERS_UNGAPPED };
 	enum ScoreMode			{ RAZERS_ERRORS, RAZERS_SCORE, RAZERS_QUALITY };
-	enum CompactMatchesMode	{ COMPACT, COMPACT_FINAL };
+    enum CompactMatchesMode	{ COMPACT, COMPACT_FINAL, COMPACT_FINAL_EXTERNAL };
 
 //////////////////////////////////////////////////////////////////////////////
 // Default options
@@ -248,6 +249,7 @@ enum {
         unsigned    windowSize;  // Collect SWIFT hits in windows of this length.
         unsigned    verificationPackageSize;  // This number of SWIFT hits per verification.
         unsigned    maxVerificationPackageCount;  // Maximum number of verification packages to create.
+        __int64     availableMatchesMemorySize;  // Memory available for matches.  Used for switching to external memory algorithms. -1 for always external, 0 for never.
 
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -325,6 +327,7 @@ enum {
             windowSize = 500000;
             verificationPackageSize = 100;
             maxVerificationPackageCount = 100;
+            availableMatchesMemorySize = 0;
 
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
@@ -1307,11 +1310,36 @@ void compactMatches(
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	::std::sort(
-		begin(matches, Standard()),
-		end(matches, Standard()), 
-		LessScoreBackport<TMatch>());
-    // sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+#ifdef RAZERS_EXTERNAL_MATCHES
+    if (compactMode == COMPACT_FINAL_EXTERNAL) {
+        typedef Pipe<TMatches, Source<> > TSource;
+        typedef LessScoreBackport<TMatch> TLess;
+        typedef Pool<TMatch, SorterSpec<SorterConfigSize<TLess, typename Size<TSource>::Type> > > TSorterPool;
+
+        TSource source(matches);
+        TSorterPool sorter;
+        sorter << matches;
+        beginRead(sorter);
+        SEQAN_ASSERT_EQ(length(sorter), length(matches));
+        TIterator it = begin(matches, Standard());
+        TIterator itEnd = end(matches, Standard());
+        (void) itEnd;
+        // bool first = true;
+        for (__int64 leftToRead = length(sorter); leftToRead > 0; --leftToRead, ++sorter, ++it) {
+            *it = *sorter;
+            // if (!first)
+            //     SEQAN_ASSERT(!TLess()(*it, *(it - 1)));
+            // first = false;
+        }
+        SEQAN_ASSERT(it == itEnd);
+        endRead(sorter);
+    } else {
+#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
+        ::std::sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());
+        // sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+#ifdef RAZERS_EXTERNAL_MATCHES
+    }
+#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
@@ -1357,9 +1385,9 @@ void compactMatches(
 							// 	::std::cerr << "(read #" << readNo << " disabled)";
 						}
 
-					if (options.purgeAmbiguous && compactMode == COMPACT_FINAL)
+					if (options.purgeAmbiguous && (compactMode == COMPACT_FINAL || compactMode == COMPACT_FINAL_EXTERNAL))
 					{
-						if (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest || compactMode == COMPACT_FINAL){
+						if (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest || compactMode == COMPACT_FINAL || compactMode == COMPACT_FINAL_EXTERNAL){
 							dit = ditBeg;
 						}
 						else {

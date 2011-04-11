@@ -809,7 +809,11 @@ int _mapSingleReadsParallel(
     typedef typename TFragmentStore::TContigSeq TContigSeq;
     typedef typename Position<TContigSeq>::Type TContigPos;
     typedef MatchRecord<TContigPos> TMatchRecord;
+#ifdef RAZERS_EXTERNAL_MATCHES
+    typedef String<TMatchRecord, MMap<ExternalConfigLarge<> > > TMatches;
+#else  // #ifdef RAZERS_EXTERNAL_MATCHES
     typedef String<TMatchRecord> TMatches;
+#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
 
     // -----------------------------------------------------------------------
     // Initialize global information.
@@ -896,19 +900,60 @@ int _mapSingleReadsParallel(
     std::cerr << std::endl << "TIME mapping: " << (endMapping - endInit) << " s" << std::endl;
 #endif  // #ifdef RAZERS_PROFILE
 
-    #pragma omp parallel
-    {
-// #ifndef RAZERS_DEFER_COMPACTION
-        if (IsSameType<TGapMode, RazerSGapped>::VALUE)
-            maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
-// #endif  // #ifndef RAZERS_DEFER_COMPACTION
-        Nothing nothing;
-        // std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
-        compactMatches(threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, COMPACT_FINAL);
-        // std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+#ifdef RAZERS_EXTERNAL_MATCHES
+    // Compute whether to use slow, sequential sorting or parallel in-memory sorting.
+    __uint64 totalMatchCount = 0;
+    __uint64 maxMatchCount = 0;
+    for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
+        totalMatchCount += length(threadLocalStorages[i].matches);
+        maxMatchCount = _max(maxMatchCount, length(threadLocalStorages[i].matches));
     }
-    #pragma omp barrier
+    bool useExternalSort = false;
+    bool useSequentialCompaction = false;
+    if (options.availableMatchesMemorySize == -1) {
+        useExternalSort = true;
+    } else if (options.availableMatchesMemorySize != 0) {
+        typedef typename Value<TMatches>::Type TMatch;
+        __int64 totalMemoryRequired = sizeof(TMatch) * totalMatchCount;
+        __int64 maxMemoryRequired = sizeof(TMatch) * maxMatchCount;
+        if (options.availableMatchesMemorySize < totalMemoryRequired) {
+            if (options.availableMatchesMemorySize < maxMemoryRequired) {
+                useExternalSort = true; 
+            } else {
+                useSequentialCompaction = true;
+            }
+        }
+    }
 
+    // Switch between using parallel compaction, sequential compaction, and
+    // sequential compaction with external sorting.  The actual switch for the
+    // sorting is in function compactMatches().
+    if (useSequentialCompaction || useExternalSort) {
+        for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
+            if (IsSameType<TGapMode, RazerSGapped>::VALUE)
+                maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
+            Nothing nothing;
+            CompactMatchesMode compactMode = useSequentialCompaction ? COMPACT_FINAL : COMPACT_FINAL_EXTERNAL;
+            compactMatches(threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, compactMode);
+        }
+    } else {
+#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
+        #pragma omp parallel
+        {
+#ifndef RAZERS_DEFER_COMPACTION
+            if (IsSameType<TGapMode, RazerSGapped>::VALUE)
+                maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
+#endif  // #ifndef RAZERS_DEFER_COMPACTION
+            Nothing nothing;
+            // std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+            compactMatches(threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, COMPACT_FINAL);
+            // std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+        }
+        #pragma omp barrier
+#ifdef RAZERS_EXTERNAL_MATCHES
+    }
+#endif // #ifdef RAZERS_EXTERNAL_MATCHES
+    
     // Write back local stores to global stores.
     writeBackToGlobalStore(store, threadLocalStorages);
 #ifdef RAZERS_PROFILE

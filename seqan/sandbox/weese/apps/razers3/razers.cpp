@@ -26,13 +26,14 @@
 //#define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
-// #define RAZERS_ISLAND_CRITERION         // island match criterion
+#define RAZERS_ISLAND_CRITERION         // island match criterion
 
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
-// #define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
+#define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
 //#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)
 //#define RAZERS_DEBUG_MATEPAIRS
 #define RAZERS_DEFER_COMPACTION         // mask duplicates on the fly and defer compaction
+//#define RAZERS_EXTERNAL_MATCHES         // use external memory algorithms for managing matches
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -40,7 +41,7 @@
 #define SEQAN_PARALLEL
 #define RAZERS_OPENADDRESSING
 #endif
-#define RAZERS_PROFILE                // Extensive profiling information.
+//#define RAZERS_PROFILE                // Extensive profiling information.
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
@@ -409,6 +410,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("pws", "parallel-window-size",   "Collect SWIFT hits in windows of this length.", OptionType::Int | OptionType::Label, options.windowSize));
 	addOption(parser, CommandLineOption("pvs", "parallel-verification-size",   "Verify SWIFT hits in packages of this size.", OptionType::Int | OptionType::Label, options.verificationPackageSize));
 	addOption(parser, CommandLineOption("pvmpc", "parallel-verification-max-package-count",   "Largest number of packages to create for verification per thread-1, go over package size if this limit is reached..", OptionType::Int | OptionType::Label, options.maxVerificationPackageCount));
+	addOption(parser, CommandLineOption("amms", "available-matches-memory-size",   "Bytes of main memory available for storing matches.  Used to switch to external sorting.  -1 for always external, 0 for never, other value as threshold.", OptionType::Int | OptionType::Label, options.availableMatchesMemorySize));
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -456,6 +458,7 @@ int main(int argc, const char *argv[])
     getOptionValueLong(parser, "parallel-window-size", options.windowSize);
     getOptionValueLong(parser, "parallel-verification-size", options.verificationPackageSize);
     getOptionValueLong(parser, "parallel-verification-max-package-count", options.maxVerificationPackageCount);
+	getOptionValueLong(parser, "available-matches-memory-size", options.availableMatchesMemorySize);
 #ifdef RAZERS_OPENADDRESSING
 	getOptionValueLong(parser, "load-factor", options.loadFactor);
 #endif 
@@ -638,7 +641,8 @@ int main(int argc, const char *argv[])
 			{
 				if (pm_options.verbose) 
 					cerr << "Couldn't find preprocessed parameter files. Please configure manually (options --shape and --threshold)." << endl;
-				cerr << "Using default configurations (shape = " << options.shape << " and q-gram lemma)." << endl;
+                if (options._debugLevel >= 1)
+                    cerr << "Using default configurations (shape = " << options.shape << " and q-gram lemma)." << endl;
 			}
 			if (options._debugLevel >= 1) cerr << endl;
 		} else
