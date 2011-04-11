@@ -51,7 +51,7 @@
 // The module's headers.
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/align/align_generated_forwards.h>
+//#include <seqan/align/align_generated_forwards.h>
 #endif
 
 #include <seqan/align/gaps_base.h>

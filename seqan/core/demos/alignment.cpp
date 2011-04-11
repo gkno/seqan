@@ -14,7 +14,7 @@ int main()
 ///Scoring objects are used to define a scoring scheme.
 ///In this case, affine gap costs with match = 0, mismatch = -1, gapextend = -1 and gapopen = -2.
 	Score<int> score(0, -1, -1, -2);
-///Example 1: We use @Class.Align@ to align the two sequences. 
+///Example 1: We use @Class.Align@ to align the two sequences.   
 ///Since we do not specify an @Tag.Global Alignment Algorithms|algorithm tag@ when we call @Function.globalAlignment@, 
 ///a suitable algorithm (@Tag.Global Alignment Algorithms|Gotoh@) is automatically choosen.
 	Align<TSequence, ArrayGaps> align;
