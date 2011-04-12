@@ -70,10 +70,10 @@ that are available for rooted iterators.
 */
 
 struct Rooted_;
-typedef Tag<Rooted_> Rooted;
+typedef Tag<Rooted_> const Rooted;
 
 struct Standard_;
-typedef Tag<Standard_> Standard;
+typedef Tag<Standard_> const Standard;
 
 // ============================================================================
 // Metafunctions
