@@ -92,6 +92,21 @@ struct MetaFirstChar_<Tag<TagFastq_> >
     static const char VALUE = '@';
 };
 
+template <typename TTag>
+struct SeparatorFirstChar_;
+
+template <>
+struct SeparatorFirstChar_<Tag<TagFasta_> >
+{
+    static const char VALUE = '>';
+};
+
+template <>
+struct SeparatorFirstChar_<Tag<TagFastq_> >
+{
+    static const char VALUE = '+';
+};
+
 // ============================================================================
 // Functions
 // ============================================================================
@@ -177,8 +192,8 @@ int _readRecordFastAQSequence(TLambdaContext & lambdaContext,
                 if (atEnd(reader))
                     return resultCode(reader);
             }
-            // '>' after '\r', '\n', '\n\n', or '\r\n'.
-            if (value(reader) == MetaFirstChar_<TTag>::VALUE)
+            // '>'/'@'/'+' after '\r', '\n', '\n\n', or '\r\n'.
+            if (value(reader) == MetaFirstChar_<TTag>::VALUE || value(reader) == SeparatorFirstChar_<TTag>::VALUE)
                 return resultCode(reader);
         }
         _lambdaFastAQSequenceChar(lambdaContext, reader);
@@ -231,6 +246,34 @@ int readRecord(Pair<TIdString, TSeqString> & record,
     res = _readRecordFastAQSequence(lambdaContext, reader, Fasta());
     if (res)
         return res;
+
+    return 0;
+}
+
+template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
+int readRecord(Pair<TIdString, TSeqString> & record,
+               RecordReader<TFile, SinglePass<TSpec> > & reader,
+               Fastq const & /*tag*/)
+{
+    clear(record.i1);
+    clear(record.i2);
+    FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContext(record);
+
+    typedef RecordReader<TFile, SinglePass<TSpec> > TRecordReader;
+
+    // Read meta field.
+    int res = _readRecordFastAQMeta(lambdaContext, reader, Fastq());
+    if (res)
+        return res;
+    // std::cerr << "READ " << record.i1 << std::endl;
+    // Read sequence field.
+    res = _readRecordFastAQSequence(lambdaContext, reader, Fastq());
+    if (res)
+        return res;
+    // Skip separator and qualities, assume that they are on one line.
+    CharString s;
+    readLine(s, reader);
+    readLine(s, reader);
 
     return 0;
 }
