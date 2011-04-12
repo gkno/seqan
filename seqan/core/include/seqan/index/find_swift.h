@@ -251,6 +251,7 @@ struct SwiftParameters {
 		THitString		hits;
 		THitIterator	curHit, endHit;
 		THstkPos		startPos, curPos, endPos;
+        THstkPos        windowStart;
 		THstkPos		dotPos, dotPos2;
 		TRepeatString	data_repeats;
 		TRepeatIterator	curRepeat, endRepeat;
@@ -1839,6 +1840,7 @@ windowFindBegin(
 	_finderSetNonEmpty(finder);
 	finder.dotPos = 100000;
 	finder.dotPos2 = 10 * finder.dotPos;
+    finder.windowStart = 0;
 
 	if (!_firstNonRepeatRange(finder, pattern)) return false;
     
@@ -1882,7 +1884,7 @@ windowFindNext(
 	// all previous matches reported -> search new ones
 	clear(finder.hits);
     
-	THstkPos windowEnd = finder.curPos + finderWindowLength;
+	THstkPos windowEnd = finder.windowStart + finderWindowLength;
 
 	// iterate over all non-repeat regions within the window
 	for (; finder.curPos < windowEnd; )
@@ -1905,8 +1907,12 @@ windowFindNext(
 
 		if (finder.curPos >= nonRepeatEnd)
 			if (!_nextNonRepeatRange(finder, pattern))
+            {
+                finder.windowStart = windowEnd;
                 return false;
+            }
 	}
+    finder.windowStart = windowEnd;
 	return true;
 }
 
