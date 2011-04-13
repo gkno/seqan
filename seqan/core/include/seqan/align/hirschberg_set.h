@@ -59,13 +59,8 @@ SEQAN_CHECKPOINT
 		: x1(a1),x2(a2),y1(b1),y2(b2),score(sc)
 	{
     SEQAN_CHECKPOINT;
-    // TODO(holtgrew): The assertions were previously not active and failed when activating. I added this code to make sure that a1 <= b1 && a2 <= b2 by swapping. I don't know if this is semantically right.
-    if (a1 > b1 || (a1 == b1 && a2 > b2)) {
-      std::swap(a1, b1);
-      std::swap(a2, b2);
-    }
-		SEQAN_ASSERT_LEQ(a1, b1);
-		SEQAN_ASSERT_LEQ(a2, b2);
+		SEQAN_ASSERT_LEQ(a1, a2);
+		SEQAN_ASSERT_LEQ(b1, b2);
 	}
 
 	_HirschbergSet & 
