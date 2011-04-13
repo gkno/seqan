@@ -295,7 +295,7 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TSw
     }
     // std::cerr << "[wrote " << length(verificationHits) << " matches to buckets]" << std::flush;
 
-    unsigned const DELTA = 5000;
+    unsigned const DELTA = back(tls.swiftPattern.bucketParams).delta + back(tls.swiftPattern.bucketParams).overlap
     size_t firstBeginPos = MaxValue<size_t>::VALUE;  // Leftmost sort position, required later for masking.
     size_t firstWindowBegin = MaxValue<size_t>::VALUE;  // Leftmost sort position, required later for masking.
     unsigned bucketsWrittenBack = 0;
