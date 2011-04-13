@@ -199,8 +199,8 @@ SEQAN_CHECKPOINT
 
     resize(finder.forbidden, (len0 + 1) * (len1 + 1), false);
 
-	finder.bestEndPos = minValue<typename TFinder::TMatrixPosition>();
-	finder.bestBeginPos = minValue<typename TFinder::TMatrixPosition>();
+	finder.bestEndPos = maxValue<typename TFinder::TMatrixPosition>();
+	finder.bestBeginPos = maxValue<typename TFinder::TMatrixPosition>();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -217,7 +217,7 @@ template <typename TScoreValue>
 TScoreValue getScore(LocalAlignmentFinder<TScoreValue> & sw)
 {
 	typedef LocalAlignmentFinder<TScoreValue> TFinder;
-	if(sw.bestEndPos !=  minValue<typename TFinder::TMatrixPosition>())
+	if(sw.bestEndPos !=  maxValue<typename TFinder::TMatrixPosition>())
 		return getValue(sw.matrix,sw.bestEndPos);
 	return 0;
 }
