@@ -152,7 +152,19 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_flush);
 
     // TODO(h4nn3s) finished tests for tokenize.h
-    SEQAN_CALL_TEST(test_stream_tokenizing);
+    SEQAN_CALL_TEST(test_stream_tokenizing_readUntil);
+    SEQAN_CALL_TEST(test_stream_tokenizing_readNChars);
+    SEQAN_CALL_TEST(test_stream_tokenizing_readIgnoring);
+    SEQAN_CALL_TEST(test_stream_tokenizing_readLine);
+    SEQAN_CALL_TEST(test_stream_tokenizing_skipUntil);
+    SEQAN_CALL_TEST(test_stream_tokenizing_skipWhile);
+    SEQAN_CALL_TEST(test_stream_tokenizing_skipLine);
+    SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilString);
+    SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithChar);
+    SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithStr);
+    SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithOneCharOfStr);
+    
+                
 
 
     
@@ -192,3 +204,4 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     */
 }
 SEQAN_END_TESTSUITE
+

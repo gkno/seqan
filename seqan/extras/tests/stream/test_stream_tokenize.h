@@ -55,12 +55,12 @@ std::fstream* createFile()
     SEQAN_ASSERT(file->is_open());
 
     char const * STR = "This is a string ....foobar AAAACCCGGGTTT\n\
-    TCG > foo.. SJAUDOF78456KAPLP345LPL AAAAAAAAAAAAA\n\
-    \a etstststetststetststetsstetetstetststetstdtetsteststetstedetstet\r\n\
-    etstetetstststetststetststetsstetetstetststetstdtetstestst    \r\n\
-    etstetetstststetststetstste           tststetstdtetsteststetstedetstet\r\n\
-    etstetetstststetststetststetsstetetstetststetstdtetsteststetstedetstet\r\n\
-    \n\v\n\r\nACGTACGTACGTACGATACGATCTnn\n\nACGT";
+ TCG > foo.. SJAUDOF78456kapLP345LPL AAAAAAAAAAAAA\n\
+\a 123gogogo \r\n\
+Tetstetetstststetststetststetsstetetstetststetstdtetstestst    \r\n\
+etstetetstststetststetststV           tststetstdtetsteststetstedetstet\r\n\
+etstetetstststetststetststetsstetetstetststetstdtetsteststetstedetst|t\r\n\
+\n\v\n\r\nACGTACGTACGTACGATACGATCTnn\n\nACGT*";
     
 
     file->write(STR, strlen(STR));
@@ -70,7 +70,10 @@ std::fstream* createFile()
 }
 
 
-SEQAN_DEFINE_TEST(test_stream_tokenizing)
+
+
+// _readHelper function ""readUntil""
+SEQAN_DEFINE_TEST(test_stream_tokenizing_readUntil)
 {
     using namespace seqan;
     std::fstream * file = createFile();
@@ -79,32 +82,405 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing)
     
     CharString buf;
     SEQAN_ASSERT_EQ(readUntilWhitespace(buf,reader), 0);
-
+    SEQAN_ASSERT_EQ(buf, "This");
     SEQAN_ASSERT_EQ(value(reader), ' ');
 
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'f'), 0);
-
     SEQAN_ASSERT_EQ(buf, " is a string ....");
+    SEQAN_ASSERT_EQ(value(reader), 'f');
 
-    SEQAN_ASSERT_EQ(readNChars(buf,reader, 3), 0);
+    SEQAN_ASSERT_EQ(readUntilBlank(buf,reader), 0);
+    SEQAN_ASSERT_EQ(buf, "foobar");
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    // check EOF-handling
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '*');
+
+    SEQAN_ASSERT_EQ(readUntilBlank(buf,reader), EOF_BEFORE_SUCCESS);
+    SEQAN_ASSERT_EQ(buf, "*");
     
-    SEQAN_ASSERT_EQ(buf, "foo");
+    file->close();
+    delete file;
 
-    SEQAN_ASSERT_EQ(skipUntilBlank(reader), 0);
-
-    SEQAN_ASSERT_EQ(skipUntilWhitespace(reader), 0); // will stay in same place
     
-    SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf, reader), 0);
-    SEQAN_ASSERT_EQ(buf, "AAAACCCGGGTTTTCG");
+}
+
+// readNChars
+SEQAN_DEFINE_TEST(test_stream_tokenizing_readNChars)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    CharString buf;
+
+    SEQAN_ASSERT_EQ(readNChars(buf,reader, 16), 0);
+    SEQAN_ASSERT_EQ(buf, "This is a string");
+
+    // check EOF-handling
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '*');
+
+    SEQAN_ASSERT_EQ(readNChars(buf,reader, 3), EOF_BEFORE_SUCCESS);
+    SEQAN_ASSERT_EQ(buf, "*");
+
+    file->close();
+    delete file;
+
+}
+
+
+// _readHelper function "readWhile"
+SEQAN_DEFINE_TEST(test_stream_tokenizing_readWhile)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+
+    CharString buf;
+    // skip to where we want to go
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'S'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'S');
+
+    
+    SEQAN_ASSERT_EQ(readLetters(buf,reader), 0);
+    SEQAN_ASSERT_EQ(buf, "SJAUDOF");
+
+    SEQAN_ASSERT_EQ(readAlphaNums(buf,reader), 0);
+    SEQAN_ASSERT_EQ(buf, "78456kapLP345LPL");
+
+
+    // check EOF-handling
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '*');
+    SEQAN_ASSERT_EQ(readNChars(buf,reader, 1), 0);
+    SEQAN_ASSERT_EQ(buf, "*");
+
+    SEQAN_ASSERT_EQ(readLetters(buf,reader), EOF_BEFORE_SUCCESS);
+    SEQAN_ASSERT_EQ(buf, "");
+
+    file->close();
+    delete file;
+
+
+}
+
+// _readHelper function with ignored characters
+SEQAN_DEFINE_TEST(test_stream_tokenizing_readIgnoring)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    CharString buf;
+    Dna5String buf2;
+    // skip to where we want to go
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'A'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf2, reader), 0);
+    SEQAN_ASSERT_EQ(buf2, "AAAACCCGGGTTTTCG");
     SEQAN_ASSERT_EQ(value(reader), '>');
+
+    //double check whitespace implementation 
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '|'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '|');
+    SEQAN_ASSERT_EQ(readNChars(buf,reader, 1), 0);
+    SEQAN_ASSERT_EQ(buf, "|");
+
+    SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf2, reader), 0);
+    SEQAN_ASSERT_EQ(buf2, "TACGTACGTACGTACGATACGATCTNNACGT");
+    SEQAN_ASSERT_EQ(value(reader), '*');
+    
+    // check EOF-handling
+    SEQAN_ASSERT_EQ(readNChars(buf,reader, 1), 0);
+    SEQAN_ASSERT_EQ(buf, "*");
+
+    SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf, reader), EOF_BEFORE_SUCCESS);
+    SEQAN_ASSERT_EQ(buf, "");
+
+    file->close();
+    delete file;
+
+}
+
+// readLine
+SEQAN_DEFINE_TEST(test_stream_tokenizing_readLine)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+
+    CharString buf;
+    // skip to where we want to go
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'A'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(readLine(buf, reader), 0);
+    SEQAN_ASSERT_EQ(buf, "AAAACCCGGGTTT");
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    SEQAN_ASSERT_EQ(readLine(buf, reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\a');
+
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '1'), 0);
+    
+    SEQAN_ASSERT_EQ(readLine(buf, reader), 0);
+    SEQAN_ASSERT_EQ(buf, "123gogogo ");
+    SEQAN_ASSERT_EQ(value(reader), 'T');
+    
+    // check EOF-handling
+    SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
+
+    SEQAN_ASSERT_EQ(readLine(buf, reader), EOF_BEFORE_SUCCESS);
+    SEQAN_ASSERT_EQ(buf, "*");
+
+    file->close();
+    delete file;
+}
+
+// _skipHelper function "skipUntil"
+SEQAN_DEFINE_TEST(test_stream_tokenizing_skipUntil)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
 
     SEQAN_ASSERT_EQ(skipUntilChar(reader, '.'), 0);
     SEQAN_ASSERT_EQ(value(reader), '.');
 
-    SEQAN_ASSERT_EQ(skipUntilChar(reader, 'S'), 0);
+    SEQAN_ASSERT_EQ(skipUntilBlank(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), ' ');
 
-    SEQAN_ASSERT_EQ(readLetters(buf, reader), 0);
-    SEQAN_ASSERT_EQ(buf, "SJAUDOF");
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, 'A'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(skipUntilWhitespace(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\n');
+
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, 'A'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(skipUntilBlank(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, 'A'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(skipUntilWhitespace(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\n');
+
+    SEQAN_ASSERT_EQ(skipUntilGraph(reader), 0); // skip over \a
+    SEQAN_ASSERT_EQ(value(reader), '1');
+
+    // check EOF-handling
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, '*'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '*');
+
+    SEQAN_ASSERT_EQ(skipUntilWhitespace(reader), EOF_BEFORE_SUCCESS);
+
+    file->close();
+    delete file;
+}
+
+
+// _skipHelper function "skipWhile"
+SEQAN_DEFINE_TEST(test_stream_tokenizing_skipWhile)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, '\n'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\n');
+
+    SEQAN_ASSERT_EQ(skipWhitespaces(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'T');
+
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, '\n'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\n');
+
+    SEQAN_ASSERT_EQ(skipWhitespaces(reader), 0); // dont skip over bell char
+    SEQAN_ASSERT_EQ(value(reader), '\a');
+
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, 'V'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'V');
+
+    SEQAN_ASSERT_EQ(skipUntilBlank(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    SEQAN_ASSERT_EQ(skipBlanks(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), 't');
+
+    // check EOF-handling
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, '*'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '*');
+
+    CharString buf;
+    SEQAN_ASSERT_EQ(readNChars(buf,reader, 1), 0);
+    SEQAN_ASSERT_EQ(buf, "*");
+
+    SEQAN_ASSERT_EQ(skipUntilBlank(reader), EOF_BEFORE_SUCCESS);
+
+    file->close();
+    delete file;
+}
+
+// skipLine
+SEQAN_DEFINE_TEST(test_stream_tokenizing_skipLine)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\a');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'T');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'e');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'e');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\n');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\v');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\r');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), '\n');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(skipLine(reader), EOF_BEFORE_SUCCESS);
+
+    file->close();
+    delete file;
+}
+
+// skipUntilString
+SEQAN_DEFINE_TEST(test_stream_tokenizing_skipUntilString)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    SEQAN_ASSERT_EQ(skipUntilString(reader, "foobar"), 0);
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    SEQAN_ASSERT_EQ(skipUntilString(reader, "\r\n"), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'T');
+
+    SEQAN_ASSERT_EQ(skipUntilString(reader, "\r\n"), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'e');
+
+    SEQAN_ASSERT_EQ(skipUntilString(reader, "stV"), 0);
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    SEQAN_ASSERT_EQ(skipUntilString(reader, "\n\nACGT"), 0);
+    SEQAN_ASSERT_EQ(value(reader), '*');
+
+    SEQAN_ASSERT_EQ(skipUntilString(reader, "notinhere"), EOF_BEFORE_SUCCESS);
+
+    file->close();
+    delete file;
+}
+
+
+// skipUntilLineBeginsWithChar
+SEQAN_DEFINE_TEST(test_stream_tokenizing_skipUntilLineBeginsWithChar)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithChar(reader, 'T'), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'T');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithChar(reader, '1'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '1');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithChar(reader, 'Z'),
+                    EOF_BEFORE_SUCCESS);
+
+    file->close();
+    delete file;
+}
+
+// skipUntilLineBeginsWithStr
+SEQAN_DEFINE_TEST(test_stream_tokenizing_skipUntilLineBeginsWithStr)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithStr(reader, "TCG"), 0);
+    SEQAN_ASSERT_EQ(value(reader), ' ');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithStr(reader, "123"), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'g');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithStr(reader, "ACGT"), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'A');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithStr(reader, "ACGT"), 0);
+    SEQAN_ASSERT_EQ(value(reader), '*');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithStr(reader, "ACGT"),
+                    EOF_BEFORE_SUCCESS);
+
+    file->close();
+    delete file;
+}
+
+// skipUntilLineBeginsWithOneOfStr
+SEQAN_DEFINE_TEST(test_stream_tokenizing_skipUntilLineBeginsWithOneCharOfStr)
+{
+    using namespace seqan;
+    std::fstream * file = createFile();
+    RecordReader<std::fstream, SinglePass<void> > reader(*file);
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithOneCharOfStr(reader, "FGT"), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'T');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithOneCharOfStr(reader, "987654321"),
+                    0);
+    SEQAN_ASSERT_EQ(value(reader), '1');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithOneCharOfStr(reader, "abcde"), 0);
+    SEQAN_ASSERT_EQ(value(reader), 'e');
+
+    SEQAN_ASSERT_EQ(skipUntilLineBeginsWithOneCharOfStr(reader, "UVW"),
+                    EOF_BEFORE_SUCCESS);
+
+    file->close();
+    delete file;
+}
+
+
+/*
+    
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, '.'), 0);
+    SEQAN_ASSERT_EQ(value(reader), '.');
+
+    SEQAN_ASSERT_EQ(skipUntilChar(reader, 'S'), 0);
 
     SEQAN_ASSERT_EQ(skipUntilString(reader, "KAP"), 0); // -we fail here-
     SEQAN_ASSERT_EQ(readAlphaNums(buf, reader), 0);
@@ -125,7 +501,7 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing)
 
 
     
-}
+}*/
 
 
 
