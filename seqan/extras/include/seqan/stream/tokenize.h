@@ -349,13 +349,13 @@ _readAndCompareWithStr(TRecordReader & reader,
                        TString const & str)
 {
     bool win = false;
-    for (int i = 0; i < length(str); ++i)
+    for (uint i = 0; i < length(str); ++i)
     {
         if (atEnd(reader))
             return EOF_BEFORE_SUCCESS;
         if (value(reader) != str[i]) //mismatch
             break;
-        if (i == length(str)) // win
+        if (i == length(str)-1) // win
             win = true;
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -530,14 +530,14 @@ readNChars(TBuffer & buffer,
     typedef char TChar; //TODO fix this
 
     clear(buffer);
-    resize(buffer, n);
+    reserve(buffer, n);
 
-    for (int i = 0; i < n; ++i)
+    for (uint i = 0; i < n; ++i)
     {
         if (atEnd(reader))
             return EOF_BEFORE_SUCCESS;
-        assignValue(buffer, i, value(reader));
-
+//         assignValue(buffer, i, value(reader));
+        append(buffer, value(reader));
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -1319,7 +1319,7 @@ skipUntilLineBeginsWithOneCharOfStr(RecordReader<TStream, TPass> & reader,
         r = skipUntilGraph(reader);
         if (r != 0)
             return r;
-        for (int i = 0; i < length(str); ++i)
+        for (uint i = 0; i < length(str); ++i)
         {
             if (value(reader) == value(str,i))
                 return 0;
