@@ -655,6 +655,23 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 		return me.hValue;
 	}
 
+/**
+.Function.unhash:
+..cat:Index
+..summary:Inverse of the @Function.hash@ function; for ungapped shapes.
+..signature:unhash(result, hash, q)
+..param.result:String to write the result to.
+...type:Class.String
+..param.hash:The hash value previously computed with @Function.hash@.
+...type:nolink:A number.
+..param.q:The $q$-gram length.
+...type:nolink:$unsigned$
+..remarks:
+..see:Function.hash
+..see:Function.hash2
+..include:seqan/index.h
+*/
+
 	template <typename TString, typename THash>
 	inline void unhash(TString &result, THash hash, unsigned q)
 	{
