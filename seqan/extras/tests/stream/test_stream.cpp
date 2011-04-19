@@ -167,8 +167,10 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     
 
     // Tests for lexical_cast
-    SEQAN_CALL_TEST(test_stream_lexical_cast_1);
-
+    SEQAN_CALL_TEST(test_stream_lexical_cast_1_stdstring);
+    SEQAN_CALL_TEST(test_stream_lexical_cast_1_chararray);
+    SEQAN_CALL_TEST(test_stream_lexical_cast_1_seqanstring);
+//     SEQAN_CALL_TEST(test_stream_lexical_cast_1_stdstring);
 
     
     // TODO(holtgrew): Tests for record reader class hierarchy. It's enough to test on fstream as a representative of the stream concept and the and memory mapped string specialization. Each test should be run with one and two records, as representatives for one/many case. Note that the buffer sizes could/should be set small enough or data large enough such that the fist buffer actually runs full in the two records variant. We test the FASTA reader as a representative.

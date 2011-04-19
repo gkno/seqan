@@ -34,29 +34,166 @@
 // casts for reading different types from strings
 // ==========================================================================
 
+template <typename TTest>
+void _test1(TTest const & s)
+{
+    using namespace seqan;
+//     TTest s = "12345";
+
+    int i       = lexicalCast<int>(s);
+    short sh    = lexicalCast<short>(s);
+    long l      = lexicalCast<long>(s);
+    unsigned int ui = lexicalCast<unsigned int>(s);
+
+    float f     = lexicalCast<float>(s);
+    double d    = lexicalCast<double>(s);
+
+    SEQAN_ASSERT_EQ(i,  12345);
+    SEQAN_ASSERT_EQ(sh, 12345);
+    SEQAN_ASSERT_EQ(l,  12345l);
+    SEQAN_ASSERT_EQ(ui, 12345u);
+
+    SEQAN_ASSERT_EQ(f,  12345.00f);
+    SEQAN_ASSERT_EQ(d,  12345.00);
+}
+
+template <typename TTest>
+void _test2(TTest const & s)
+{
+    using namespace seqan;
+//     TTest s = "12345";
+
+    int i       = lexicalCast<int>(s);
+    short sh    = lexicalCast<short>(s);
+    long l      = lexicalCast<long>(s);
+    unsigned int ui = lexicalCast<unsigned int>(s);
+
+    float f     = lexicalCast<float>(s);
+    double d    = lexicalCast<double>(s);
+
+    SEQAN_ASSERT_EQ(i,  -12345);
+    SEQAN_ASSERT_EQ(sh, -12345);
+    SEQAN_ASSERT_EQ(l,  -12345l);
+    SEQAN_ASSERT_EQ(ui, UINT_MAX);
+
+    SEQAN_ASSERT_EQ(f,  -12345.00f);
+    SEQAN_ASSERT_EQ(d,  -12345.00);
+}
+
+template <typename TTest>
+void _test3(TTest const & s)
+{
+    using namespace seqan;
+//     TTest s = "-5.4";
+
+    int i       = lexicalCast<int>(s);
+    short sh    = lexicalCast<short>(s);
+    long l      = lexicalCast<long>(s);
+    unsigned int ui = lexicalCast<unsigned int>(s);
+
+    float f     = lexicalCast<float>(s);
+    double d    = lexicalCast<double>(s);
+
+    SEQAN_ASSERT_EQ(i,  -5);
+    SEQAN_ASSERT_EQ(sh, -5);
+    SEQAN_ASSERT_EQ(l,  -5l);
+    SEQAN_ASSERT_EQ(ui,  UINT_MAX);
+
+    SEQAN_ASSERT_EQ(f,  -5.4f);
+    SEQAN_ASSERT_EQ(d,  -5.4);
+}
 
 
 
-SEQAN_DEFINE_TEST(test_stream_lexical_cast_1)
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_stdstring)
+{
+    using namespace seqan;
+
+    std::string s = "12345";
+    _test1(s);
+
+    s = "-12345";
+    _test2(s);
+    
+    s = "-5.4";
+    _test3(s);
+}
+
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_chararray)
+{
+    using namespace seqan;
+
+    char s[] = "12345";
+    _test1(s);
+
+    strcpy(s, "-12345");
+    _test2(s);
+
+    strcpy(s, "-5.4");
+    _test3(s);
+}
+
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_seqanstring)
+{
+    using namespace seqan;
+
+    CharString s = "12345";
+    _test1(s);
+
+    s = "-12345";
+    _test2(s);
+
+    s = "-5.4";
+    _test3(s);
+}
+/*
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_chararray)
 {
 
-//     std::string s = "12345";
-//     
-//     int i = lexical_cast<int>(s);
-//     short sh = lexical_cast<int>(s);
-//     long l = lexical_cast<int>(s);
-//     uint ui = lexical_cast<int>(s);
-// 
-//     float f = lexical_cast<int>(s);
-//     double d = lexical_cast<int>(s);
-// 
-//     SEQAN_ASSERT_EQ(i, 12345);
-//     SEQAN_ASSERT_EQ(sh, 12345);
-//     SEQAN_ASSERT_EQ(l, 12345);
-//     SEQAN_ASSERT_EQ(ui, 12345u);
-// 
-//     SEQAN_ASSERT_EQ(f, 12345.00);
-//     SEQAN_ASSERT_EQ(d, 12345.00);
-    
+    using namespace seqan;
+
+    char s[] = "12345";
+
+    int i = lexicalCast<int>(s);
+    short sh = lexicalCast<short>(s);
+    long l = lexicalCast<long>(s);
+    unsigned int ui = lexicalCast<unsigned int>(s);
+
+    float f = lexicalCast<float>(s);
+    double d = lexicalCast<double>(s);
+
+    SEQAN_ASSERT_EQ(i, 12345);
+    SEQAN_ASSERT_EQ(sh, 12345);
+    SEQAN_ASSERT_EQ(l, 12345l);
+    SEQAN_ASSERT_EQ(ui, 12345u);
+
+    SEQAN_ASSERT_EQ(f, 12345.00);
+    SEQAN_ASSERT_EQ(d, 12345.00);
+
 }
+
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_seqanstring)
+{
+
+    using namespace seqan;
+
+    seqan::CharString s = "12345";
+
+    int i = lexicalCast<int>(s);
+    short sh = lexicalCast<short>(s);
+    long l = lexicalCast<long>(s);
+    unsigned int ui = lexicalCast<unsigned int>(s);
+
+    float f = lexicalCast<float>(s);
+    double d = lexicalCast<double>(s);
+
+    SEQAN_ASSERT_EQ(i, 12345);
+    SEQAN_ASSERT_EQ(sh, 12345);
+    SEQAN_ASSERT_EQ(l, 12345l);
+    SEQAN_ASSERT_EQ(ui, 12345u);
+
+    SEQAN_ASSERT_EQ(f, 12345.00);
+    SEQAN_ASSERT_EQ(d, 12345.00);
+
+}*/
 

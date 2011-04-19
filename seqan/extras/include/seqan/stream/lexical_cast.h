@@ -42,7 +42,7 @@ namespace seqan {
 
 // template < typename TTarget, typename TSource >
 // inline TTarget*
-// lexicalCast< typename TTarget* >(TSource *source)
+// lexicalCast(TSource *source)
 // {
 // 
 //     std::istringstream str(*source);
@@ -61,16 +61,42 @@ namespace seqan {
 
 template < typename TTarget, typename TSource >
 inline TTarget
-lexicalCast< TTarget > (TSource const & source)
+lexicalCast(TSource const & source)
 {
-
     std::istringstream str(source);
-
     TTarget ret;
 
-    bool success = (str >> ret);
-
+    str >> ret;
     return ret;
+}
+
+template < typename TTarget, typename TValue, typename TSpec>
+inline TTarget
+lexicalCast(String<TValue, TSpec> const & source)
+{
+    std::istringstream str(toCString(source));
+    TTarget ret;
+
+    str >> ret;
+    return ret;
+}
+
+
+
+template < typename TTarget, typename TSource >
+inline bool
+lexicalCast2(TTarget & target, TSource const & source)
+{
+    std::istringstream str(source);
+    return (str >> target);
+}
+
+template < typename TTarget, typename TValue, typename TSpec>
+inline bool
+lexicalCast2(TTarget & target, String<TValue, TSpec> const & source)
+{
+    std::istringstream str(toCString(source));
+    return (str >> target);
 }
 
 
