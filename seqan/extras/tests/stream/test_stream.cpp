@@ -48,6 +48,7 @@
 #include "test_stream_adapt_cstdio.h"
 #include "test_stream_adapt_fstream.h"
 #include "test_stream_tokenize.h"
+#include "test_stream_lexical_cast.h"
 
 SEQAN_BEGIN_TESTSUITE(test_stream)
 {
@@ -164,7 +165,9 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithStr);
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithOneCharOfStr);
     
-                
+
+    // Tests for lexical_cast
+    SEQAN_CALL_TEST(test_stream_lexical_cast_1)
 
 
     

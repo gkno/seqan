@@ -112,6 +112,7 @@
 
 #include <seqan/stream/is.h> // currently empty
 #include <seqan/stream/tokenize.h>
+#include <seqan/stream/lexical_cast.h>
 
 // ===========================================================================
 // File Format I/O Code.

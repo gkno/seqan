@@ -37,9 +37,6 @@
 #ifndef SEQAN_STREAM_TOKENIZE_H
 #define SEQAN_STREAM_TOKENIZE_H
 
-// NOTHING HERE IS TESTED YET
-
-
 
 namespace seqan {
 
