@@ -167,7 +167,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     
 
     // Tests for lexical_cast
-    SEQAN_CALL_TEST(test_stream_lexical_cast_1)
+    SEQAN_CALL_TEST(test_stream_lexical_cast_1);
 
 
     
