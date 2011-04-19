@@ -195,6 +195,53 @@ void testStreamWriteChar(TStream & stream)
     SEQAN_ASSERT_EQ(_runStreamTell(stream, 3, typename HasStreamFeature<TStream, Tell>::Type()), 3);
 }
 
+template <typename TStream>
+void testStreamPut(TStream & stream)
+{
+    using namespace seqan;
+
+    int res = streamPut(stream, 'c');
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+    
+    res = streamPut(stream, "sss");
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+    
+    res = streamPut(stream, 12);
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+    
+    res = streamPut(stream, 34u);
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+
+    res = streamPut(stream, 56l);
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+
+    res = streamPut(stream, 78ul);
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+
+    res = streamPut(stream, 5.4f);
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+
+    res = streamPut(stream, 6.5);
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+}
+
+
 // Test of streamReadChar().
 template <typename TStream>
 void testStreamReadChar(TStream & stream)

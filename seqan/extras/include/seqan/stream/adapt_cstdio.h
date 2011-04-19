@@ -235,6 +235,185 @@ streamWriteBlock(FILE * stream, char const * source, size_t count)
 }
 
 // ----------------------------------------------------------------------------
+// Function streamPut()
+// ----------------------------------------------------------------------------
+
+inline int
+streamPut(FILE * stream, char const c)
+{
+    return streamWriteChar(stream, c);
+}
+
+inline char const *
+_streamPutChar(char const*/**/)
+{
+    return "%s";
+}
+
+inline char const *
+_streamPutChar(int const/**/)
+{
+    return "%d";
+}
+
+inline char const *
+_streamPutChar(unsigned int const/**/)
+{
+    return "%u";
+}
+
+inline char const *
+_streamPutChar(long const/**/)
+{
+    return "%D";
+}
+
+inline char const *
+_streamPutChar(unsigned long const/**/)
+{
+    return "%U";
+}
+
+inline char const *
+_streamPutChar(float const/**/)
+{
+    return "%.2f"; 
+}
+
+inline char const *
+_streamPutChar(double const/**/)
+{
+    return "%.2lf";
+}
+
+// TODO(h4nn3s) according to man fprintf's point character is locale dependent,
+// maybe overload for doubles and floats to avoid that?
+template <typename TSource>
+inline int
+streamPut(FILE * stream, TSource const & source)
+{
+    int result = fprintf(stream, _streamPutChar(source), source);
+    if (result == -1)
+        return errno;
+    return 0;
+}
+
+// template <typename T>
+// struct StreamPutString_
+// {
+//     static const char key[] = "%%";
+// }
+// 
+// struct<char*> StreamPutString_
+// {
+//     static const char key[] = "%s";
+// };
+// 
+// struct<int> StreamPutString_
+// {
+//     static const char key[] = "%d";
+// };
+// 
+// struct<unsigned int> StreamPutString_
+// {
+//     static const char key[] = "%u";
+// };
+// 
+// struct<long> StreamPutString_
+// {
+//     static const char key[] = "%D";
+// };
+// 
+// struct<unsigned long> StreamPutString_
+// {
+//     static const char key[] = "%U";
+// };
+// 
+// struct<float> StreamPutString_
+// {
+//     static const char key[] = "%.2f";
+// };
+// 
+// struct<double> StreamPutString_
+// {
+//     static const char key[] = "%.2f";
+// };
+// 
+// template <typename TSource>
+// inline int
+// streamPut(FILE * stream, TSource const & source)
+// {
+//     int result = fprintf(stream, StreamPutString_<TSource>::key, source);
+//     if (result == -1)
+//         return errno;
+//     return 0;
+// }
+
+/*
+inline int
+streamPut(FILE * stream, char const * const source)
+{
+    int result = fprintf(stream, "%s", source);
+    if (result == -1)
+        return errno;
+    return 0;
+}
+
+inline int
+streamPut(FILE * stream, int const source)
+{
+    int result = fprintf(stream, "%d", source);
+    if (result == -1)
+        return errno;
+    return 0;
+}
+
+inline int
+streamPut(FILE * stream, unsigned int const source)
+{
+    int result = fprintf(stream, "%u", source);
+    if (result == -1)
+        return errno;
+    return 0;
+}
+
+inline int
+streamPut(FILE * stream, long const source)
+{
+    int result = fprintf(stream, "%D", source);
+    if (result == -1)
+        return errno;
+    return 0;
+}
+
+inline int
+streamPut(FILE * stream, unsigned long const source)
+{
+    int result = fprintf(stream, "%D", source);
+    if (result == -1)
+        return errno;
+    return 0;
+}
+
+inline int
+streamPut(FILE * stream, float const source)
+{
+    int result = fprintf(stream, "%.2f", source);
+    if (result == -1)
+        return errno;
+    return 0;
+}
+
+inline int
+streamPut(FILE * stream, double const source)
+{
+    int result = fprintf(stream, "%f", source);
+    if (result == -1)
+        return errno;
+    return 0;
+}*/
+
+// ----------------------------------------------------------------------------
 // Function streamFlush()
 // ----------------------------------------------------------------------------
 

@@ -113,6 +113,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_read_block);
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_write_block);
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_write_char);
+    SEQAN_CALL_TEST(test_stream_adapt_cstdio_streamPut);
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_flush);
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_seek);
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_tell);
@@ -129,6 +130,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_adapt_fstream_read_block);
     SEQAN_CALL_TEST(test_stream_adapt_fstream_write_block);
     SEQAN_CALL_TEST(test_stream_adapt_fstream_write_char);
+    SEQAN_CALL_TEST(test_stream_adapt_fstream_streamPut);
     SEQAN_CALL_TEST(test_stream_adapt_fstream_flush);
     SEQAN_CALL_TEST(test_stream_adapt_fstream_seek);
     SEQAN_CALL_TEST(test_stream_adapt_fstream_tell);

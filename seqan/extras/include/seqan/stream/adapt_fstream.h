@@ -449,6 +449,26 @@ streamWriteBlock(::std::ofstream & stream, char const * source, size_t count)
 }
 
 // ----------------------------------------------------------------------------
+// Function streamPut()
+// ----------------------------------------------------------------------------
+
+template <typename TSource>
+inline int
+streamPut(::std::fstream & stream, TSource const & source)
+{
+    stream << source;
+    return stream.fail();
+}
+
+template <typename TSource>
+inline int
+streamPut(::std::ofstream & stream, TSource const & source)
+{
+    stream << source;
+    return stream.fail();
+}
+
+// ----------------------------------------------------------------------------
 // Function streamFlush()
 // ----------------------------------------------------------------------------
 

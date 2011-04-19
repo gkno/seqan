@@ -301,6 +301,35 @@ SEQAN_DEFINE_TEST(test_stream_adapt_fstream_write_block)
     SEQAN_ASSERT_EQ(strcmp(buffer, "ABCDEFGH"), 0);
 }
 
+// Test of streamPut().
+SEQAN_DEFINE_TEST(test_stream_adapt_fstream_streamPut)
+{
+    using namespace seqan;
+
+    const char * tempFilename = SEQAN_TEMP_FILENAME();
+    char filenameBuffer[1000];
+    strcpy(filenameBuffer, tempFilename);
+
+    std::fstream fstream(filenameBuffer, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
+    SEQAN_ASSERT(fstream.is_open());
+
+    testStreamPut(fstream);
+
+    fstream.seekg(0);
+    fstream.seekp(0);
+
+    char buffer[1000];
+    char cmp[] = "c\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+
+    int i = 0;
+
+    while (!fstream.eof() && i <998) buffer[i++] = fstream.get();
+    buffer[i-1] = 0;
+    SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
+    fstream.close();
+}
+
+
 // Test of streamFlush().
 SEQAN_DEFINE_TEST(test_stream_adapt_fstream_flush)
 {

@@ -225,6 +225,27 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_write_block)
     fclose(stream);
 }
 
+// Test of streamPut().
+SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_streamPut)
+{
+    using namespace seqan;
+
+    FILE * stream = tmpfile();
+    testStreamPut(stream);
+
+    rewind(stream);
+    char buffer[1000];
+    char cmp[] = "c\nsss\n12\n34\n56\n78\n5.40\n6.50\n";
+
+    int i = 0;
+
+    while (!feof(stream) && i <998) buffer[i++] = fgetc(stream);
+    buffer[i-1] = 0;
+    SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
+    fclose(stream);
+}
+
+
 // Test of streamFlush().
 SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_flush)
 {
