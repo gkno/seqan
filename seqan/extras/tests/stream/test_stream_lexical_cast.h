@@ -34,8 +34,11 @@
 // casts for reading different types from strings
 // ==========================================================================
 
+
+// ------------- TEST 1
+
 template <typename TTest>
-void _test1(TTest const & s)
+void _test1a(TTest const & s)
 {
     using namespace seqan;
 //     TTest s = "12345";
@@ -58,7 +61,7 @@ void _test1(TTest const & s)
 }
 
 template <typename TTest>
-void _test2(TTest const & s)
+void _test1b(TTest const & s)
 {
     using namespace seqan;
 //     TTest s = "12345";
@@ -81,7 +84,7 @@ void _test2(TTest const & s)
 }
 
 template <typename TTest>
-void _test3(TTest const & s)
+void _test1c(TTest const & s)
 {
     using namespace seqan;
 //     TTest s = "-5.4";
@@ -110,13 +113,13 @@ SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_stdstring)
     using namespace seqan;
 
     std::string s = "12345";
-    _test1(s);
+    _test1a(s);
 
     s = "-12345";
-    _test2(s);
+    _test1b(s);
     
     s = "-5.4";
-    _test3(s);
+    _test1c(s);
 }
 
 SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_chararray)
@@ -124,13 +127,13 @@ SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_chararray)
     using namespace seqan;
 
     char s[] = "12345";
-    _test1(s);
+    _test1a(s);
 
     strcpy(s, "-12345");
-    _test2(s);
+    _test1b(s);
 
     strcpy(s, "-5.4");
-    _test3(s);
+    _test1c(s);
 }
 
 SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_seqanstring)
@@ -138,62 +141,165 @@ SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_seqanstring)
     using namespace seqan;
 
     CharString s = "12345";
-    _test1(s);
+    _test1a(s);
 
     s = "-12345";
-    _test2(s);
+    _test1b(s);
 
     s = "-5.4";
-    _test3(s);
-}
-/*
-SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_chararray)
-{
-
-    using namespace seqan;
-
-    char s[] = "12345";
-
-    int i = lexicalCast<int>(s);
-    short sh = lexicalCast<short>(s);
-    long l = lexicalCast<long>(s);
-    unsigned int ui = lexicalCast<unsigned int>(s);
-
-    float f = lexicalCast<float>(s);
-    double d = lexicalCast<double>(s);
-
-    SEQAN_ASSERT_EQ(i, 12345);
-    SEQAN_ASSERT_EQ(sh, 12345);
-    SEQAN_ASSERT_EQ(l, 12345l);
-    SEQAN_ASSERT_EQ(ui, 12345u);
-
-    SEQAN_ASSERT_EQ(f, 12345.00);
-    SEQAN_ASSERT_EQ(d, 12345.00);
-
+    _test1c(s);
 }
 
-SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_seqanstring)
-{
+// ------------- TEST 2
 
+
+template <typename TTest>
+void _test2a(TTest const & s)
+{
     using namespace seqan;
 
-    seqan::CharString s = "12345";
+    int i       = 0;
+    short sh    = 0;
+    long l      = 0;
+    unsigned int ui = 0;
 
-    int i = lexicalCast<int>(s);
-    short sh = lexicalCast<short>(s);
-    long l = lexicalCast<long>(s);
-    unsigned int ui = lexicalCast<unsigned int>(s);
+    float f     = 0.0;
+    double d    = 0.0;
 
-    float f = lexicalCast<float>(s);
-    double d = lexicalCast<double>(s);
+    SEQAN_ASSERT_EQ(lexicalCast2(i, s), 1);
+    SEQAN_ASSERT_EQ(i,  12345);
 
-    SEQAN_ASSERT_EQ(i, 12345);
+    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), 1);
     SEQAN_ASSERT_EQ(sh, 12345);
-    SEQAN_ASSERT_EQ(l, 12345l);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(l, s), 1);
+    SEQAN_ASSERT_EQ(l,  12345l);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(ui, s), 1);
     SEQAN_ASSERT_EQ(ui, 12345u);
 
-    SEQAN_ASSERT_EQ(f, 12345.00);
-    SEQAN_ASSERT_EQ(d, 12345.00);
+    SEQAN_ASSERT_EQ(lexicalCast2(f, s), 1);
+    SEQAN_ASSERT_EQ(f,  12345.00f);
 
-}*/
+    SEQAN_ASSERT_EQ(lexicalCast2(d, s), 1);
+    SEQAN_ASSERT_EQ(d,  12345.00);
+}
+
+template <typename TTest>
+void _test2b(TTest const & s)
+{
+    using namespace seqan;
+
+    int i       = 0;
+    short sh    = 0;
+    long l      = 0;
+    unsigned int ui = 0;
+
+    float f     = 0;
+    double d    = 0;
+
+    SEQAN_ASSERT_EQ(lexicalCast2(i, s), 1);
+    SEQAN_ASSERT_EQ(i,  -5);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), 1);
+    SEQAN_ASSERT_EQ(sh, -5);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(l, s), 1);
+    SEQAN_ASSERT_EQ(l,  -5l);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(ui, s), 0);
+    SEQAN_ASSERT_EQ(ui, 0u);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(f, s), 1);
+    SEQAN_ASSERT_EQ(f,  -5.4f);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(d, s), 1);
+    SEQAN_ASSERT_EQ(d,  -5.4);
+}
+
+template <typename TTest>
+void _test2c(TTest const & s)
+{
+    using namespace seqan;
+
+    int i       = 0;
+    short sh    = 0;
+    long l      = 0;
+    unsigned int ui = 0;
+
+    float f     = 0;
+    double d    = 0;
+
+    SEQAN_ASSERT_EQ(lexicalCast2(i, s), 0);
+    SEQAN_ASSERT_EQ(i,  0);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), 0);
+    SEQAN_ASSERT_EQ(sh, 0);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(l, s), 0);
+    SEQAN_ASSERT_EQ(l,  0l);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(ui, s), 0);
+    SEQAN_ASSERT_EQ(ui, 0u);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(f, s), 0);
+    SEQAN_ASSERT_EQ(f,  0.0f);
+
+    SEQAN_ASSERT_EQ(lexicalCast2(d, s), 0);
+    SEQAN_ASSERT_EQ(d,  0.0);
+}
+
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_2_stdstring)
+{
+    using namespace seqan;
+
+    std::string s = "12345";
+    _test2a(s);
+
+    s = "-5.4";
+    _test2b(s);
+
+    s = "foobar";
+    _test2c(s);
+
+    s = "-5.4foobar";
+    _test2b(s); //TODO(h4nn3s): this should run through on _test2c, not _test2b
+}
+
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_2_chararray)
+{
+    using namespace seqan;
+
+    char s[30];
+    strcpy(s,"12345");
+
+    _test2a(s);
+
+    strcpy(s, "-5.4");
+    _test2b(s);
+
+    strcpy(s,  "foobar");
+    _test2c(s);
+
+    strcpy(s, "-5.4foobar");
+    _test2b(s); //TODO(h4nn3s): this should run through on _test2c, not _test2b
+}
+
+SEQAN_DEFINE_TEST(test_stream_lexical_cast_2_seqanstring)
+{
+    using namespace seqan;
+
+    CharString s = "12345";
+    _test2a(s);
+
+    s = "-5.4";
+    _test2b(s);
+
+    s = "foobar";
+    _test2c(s);
+
+    s = "-5.4foobar"; 
+    _test2b(s); //TODO(h4nn3s): this should run through on _test2c, not _test2b
+}
+
 

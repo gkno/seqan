@@ -58,7 +58,30 @@ namespace seqan {
 //     return 0;
 // }
 
-
+/**
+.Function.lexicalCast
+..cat:Input/Output
+..summary:Cast from a String-type to a numerical type
+..signature:lexicalCast<TTarget>(TSource const & source)
+..signature:lexicalCast<TTarget>(String<TValue, TSpec> const & source)
+..param.source:The string to be read from
+...type:Shortcut.CharString
+...type:nolink:char[]
+...type:nolink:std::string
+...type:nolink:or similar
+..param.TTarget:Type to be casted to
+...type:nolink:$int$
+...type:nolink:$unsigned int$
+...type:nolink:$double$
+...type:nolink:or similar
+..returns:Value of Type TTarget with casted contents of source
+...type:nolink:TTarget
+..remarks:Return value undefined if casting fails, see @Function.lexicalCast2@
+..remarks:uses istringstream internally, so right now "123foobar" will be
+succesfully cast to an int of 123
+..include:seqan/stream.h
+..see:Function.lexicalCast2
+ */
 template < typename TTarget, typename TSource >
 inline TTarget
 lexicalCast(TSource const & source)
@@ -81,7 +104,29 @@ lexicalCast(String<TValue, TSpec> const & source)
     return ret;
 }
 
-
+/**
+.Function.lexicalCast2
+..cat:Input/Output
+..summary:Cast from a String-type to a numerical type
+..signature:lexicalCast2(TTarget & target, TSource const & source)
+..signature:lexicalCast2(TTarget & target, String<TValue, TSpec> const & source)
+..param.target:Object to hold result of cast
+...type:nolink:$int$
+...type:nolink:$unsigned int$
+...type:nolink:$double$
+...type:nolink:or similar
+..param.source:The string to be read from
+...type:Shortcut.CharString
+...type:nolink:char[]
+...type:nolink:std::string
+...type:nolink:or similar
+..returns:$true$ if cast was successful, $false$ otherwise
+...type:nolink:$bool$
+..remarks:uses istringstream internally, so right now "123foobar" will be
+succesfully cast to an int of 123
+..include:seqan/stream.h
+..see:Function.lexicalCast
+ */
 
 template < typename TTarget, typename TSource >
 inline bool
