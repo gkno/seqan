@@ -635,17 +635,17 @@ operator >> (TStream & source, ModifiedString<THost, TSpec> & target)
 
 template <typename THost, typename TSpec>
 inline void const *
-_getObjectId(ModifiedString<THost, TSpec> & me) 
+getObjectId(ModifiedString<THost, TSpec> & me) 
 {
     SEQAN_CHECKPOINT;
-    return _getObjectId(host(me));
+    return getObjectId(host(me));
 }
 template <typename THost, typename TSpec>
 inline void const *
-_getObjectId(ModifiedString<THost, TSpec> const & me) 
+getObjectId(ModifiedString<THost, TSpec> const & me) 
 {
     SEQAN_CHECKPOINT;
-    return _getObjectId(host(me));
+    return getObjectId(host(me));
 }
 
 }  // namespace seqan

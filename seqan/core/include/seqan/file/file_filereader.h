@@ -351,7 +351,7 @@ _loadCompleteFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> >
  
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline void const * 
-_getObjectId(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me)
+getObjectId(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me)
 {
 //IOREV
 SEQAN_CHECKPOINT

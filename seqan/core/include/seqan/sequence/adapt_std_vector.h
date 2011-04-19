@@ -164,10 +164,10 @@ struct DefaultOverflowImplicit< ::std::vector<TChar, TAlloc> >
 // Functions
 // ===========================================================================
 
-///.Function._getObjectId.param.object.type:Adaption.std::vector
+///.Function.getObjectId.param.object.type:Adaption.std::vector
 template <typename TChar,  typename TAlloc>
 inline void const *
-_getObjectId(::std::vector<TChar, TAlloc> const & me)
+getObjectId(::std::vector<TChar, TAlloc> const & me)
 {
     SEQAN_CHECKPOINT;
     if (me.empty())

@@ -65,8 +65,8 @@ void testAlignBasics()
 	SEQAN_ASSERT(row(ali1, 1) == row(ali2, 1));
 
 //  it is a real copy
-//	SEQAN_ASSERT(_getObjectId(row(ali1, 0)); == _getObjectId(row(ali2, 0));) //(its not a real copy)
-//	SEQAN_ASSERT(_getObjectId(row(ali1, 1)) == _getObjectId(row(ali2, 1));)
+//	SEQAN_ASSERT(getObjectId(row(ali1, 0)); == getObjectId(row(ali2, 0));) //(its not a real copy)
+//	SEQAN_ASSERT(getObjectId(row(ali1, 1)) == getObjectId(row(ali2, 1));)
 
 	TAlign ali3;
 	ali3 = ali1;			//operator =
@@ -74,15 +74,15 @@ void testAlignBasics()
 	SEQAN_ASSERT(row(ali1, 1) == row(ali3, 1));
 
 //  it is a real copy
-//	SEQAN_ASSERT(_getObjectId(row(ali1, 0)) == _getObjectId(row(ali3, 0))) //(its not a real copy)
-//	SEQAN_ASSERT(_getObjectId(row(ali1, 1)) == _getObjectId(row(ali3, 1)))
+//	SEQAN_ASSERT(getObjectId(row(ali1, 0)) == getObjectId(row(ali3, 0))) //(its not a real copy)
+//	SEQAN_ASSERT(getObjectId(row(ali1, 1)) == getObjectId(row(ali3, 1)))
 
 	detach(ali3);			//detach
 	SEQAN_ASSERT(row(ali1, 0) == row(ali3, 0));	//is the same as ali1
 	SEQAN_ASSERT(row(ali1, 1) == row(ali3, 1));
 //  it is a real copy
-//	SEQAN_ASSERT(_getObjectId(row(ali1, 0)) != _getObjectId(row(ali3, 0))) //ali3 is not dependent anymore
-//	SEQAN_ASSERT(_getObjectId(row(ali1, 1)) != _getObjectId(row(ali3, 1)))
+//	SEQAN_ASSERT(getObjectId(row(ali1, 0)) != getObjectId(row(ali3, 0))) //ali3 is not dependent anymore
+//	SEQAN_ASSERT(getObjectId(row(ali1, 1)) != getObjectId(row(ali3, 1)))
 
 	SEQAN_ASSERT_NOT(dependentSource(row(ali3, 0))); //dependent
 	SEQAN_ASSERT_NOT(dependentSource(row(ali3, 1)));
@@ -319,9 +319,9 @@ void testAlignBasics2()
 	TAlign aa(ss);
 	cout << ss[0]; 
     SEQAN_ASSERT(row(aa, 0) == "accagtta");
-    SEQAN_ASSERT(_getObjectId(row(aa, 0)) == _getObjectId(value(ss, 0)));
+    SEQAN_ASSERT(getObjectId(row(aa, 0)) == getObjectId(value(ss, 0)));
     SEQAN_ASSERT(row(aa, 1) == "ccactagggg");
-    SEQAN_ASSERT(_getObjectId(row(aa, 1)) == _getObjectId(value(ss, 1)));
+    SEQAN_ASSERT(getObjectId(row(aa, 1)) == getObjectId(value(ss, 1)));
 }
 
 

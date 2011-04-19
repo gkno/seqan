@@ -2180,7 +2180,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 	template < typename TValue, typename TConfig >
     inline void const * 
-    _getObjectId(String<TValue, External<TConfig> > const &me)
+    getObjectId(String<TValue, External<TConfig> > const &me)
     {
 //IOREV
         return &(*begin(me.pager));

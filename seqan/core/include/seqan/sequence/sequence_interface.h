@@ -224,14 +224,14 @@ struct AllowsFastRandomAccess<T const>
 // ============================================================================
 
 // --------------------------------------------------------------------------
-// Function _getObjectId()
+// Function getObjectId()
 // --------------------------------------------------------------------------
 
 /**
-.Function._getObjectId:
+.Function.getObjectId:
 ..cat:Miscellaneous
 ..summary:A value that identifies the underlying sequence.
-..signature:void const * _getObjectId(object)
+..signature:void const * getObjectId(object)
 ..param.object:The object for which the id will be determined.
 ..returns:The id of $sequence$.
 ..remarks.text:Two sequences should have the same id, if they share the same resource, e.g. the same memory buffer.
@@ -239,9 +239,9 @@ struct AllowsFastRandomAccess<T const>
 Typically, the id of a string is a $void const *$ to the end of the string.
 ..remarks.note:The id of a single character need not to be the id of its container.
 ..example.code:String<char> str = "hallo seqan";
-bool b1 = (_getObjectId(str) == _getObjectId(infix(str, 3, 7));   //true
-bool b2 = (_getObjectId(str) == _getObjectId(String<char>(str))); //false
-bool b3 = (_getObjectId(str) == _getObjectId(toCString(str)));
+bool b1 = (getObjectId(str) == getObjectId(infix(str, 3, 7));   //true
+bool b2 = (getObjectId(str) == getObjectId(String<char>(str))); //false
+bool b3 = (getObjectId(str) == getObjectId(toCString(str)));
 ..example.text:In this example, $b1$ is $true$, since the segment object returned by $infix()$
 is just a filter and uses the buffer of it's host object $str$.
 ..example.text:$String<char>(str)$ constructs a temporary copy of $str$, so these two
@@ -252,7 +252,7 @@ and cannot be predicted at compile time.
 */
 template <typename T>
 inline void const *
-_getObjectId(T const & me)
+getObjectId(T const & me)
 {
     SEQAN_CHECKPOINT;
     return end(me, Standard());
@@ -280,7 +280,7 @@ shareResources(T1 const & obj1,
                T2 const & obj2)
 {
     SEQAN_CHECKPOINT;
-    return _getObjectId(obj1) == _getObjectId(obj2);
+    return getObjectId(obj1) == getObjectId(obj2);
 }
 
 // --------------------------------------------------------------------------

@@ -270,14 +270,14 @@ struct IsSequence< Segment<THost, TSpec> > {
 // functions for all Segment classes
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function._getObjectId.param.object.type:Class.Segment
+///.Function.getObjectId.param.object.type:Class.Segment
 
 template <typename THost, typename TSpec>
 inline void const *
-_getObjectId(Segment<THost, TSpec> const & me)
+getObjectId(Segment<THost, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-    return _getObjectId(host(me));
+    return getObjectId(host(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////

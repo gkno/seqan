@@ -142,7 +142,7 @@ struct TempCopy_
 
 // TODO(holtgrew): Where to move this documentation/specification-only stuff?
 
-///.Function._getObjectId.param.object.type:Class.String
+///.Function.getObjectId.param.object.type:Class.String
 ///.Function.empty.param.object.type:Class.String
 ///.Function.capacity.param.object.type:Class.String
 
@@ -846,7 +846,7 @@ struct AssignString_
     {
         if (empty(source) && empty(target))
             return;  // Do nothing if both source and target are empty.
-        if (!_getObjectId(source) || !shareResources(target, source))
+        if (!getObjectId(source) || !shareResources(target, source))
         {
             SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), TExpand());
@@ -869,7 +869,7 @@ struct AssignString_
         TSource & source,
         typename Size<TTarget>::Type limit)
     {
-        if (!_getObjectId(source) || !shareResources(target, source))
+        if (!getObjectId(source) || !shareResources(target, source))
         {
             SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, typename Size<TTarget>::Type(length(source)), limit, TExpand());
@@ -1067,7 +1067,7 @@ struct AppendString_
     append_(TTarget & target,
             TSource & source)
     {
-        if (!_getObjectId(source) || !shareResources(target, source))
+        if (!getObjectId(source) || !shareResources(target, source))
         {
             SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type target_length = length(target);
@@ -1089,7 +1089,7 @@ struct AppendString_
             typename Size<TTarget>::Type limit)
     {
         typename Iterator<TTarget, Standard>::Type target_begin = begin(target, Standard());
-        if (!_getObjectId(source) || !shareResources(target, source))
+        if (!getObjectId(source) || !shareResources(target, source))
         {
 SEQAN_CHECKPOINT
             typename Size<TTarget>::Type target_length = length(target);
@@ -1263,7 +1263,7 @@ struct ReplaceString_
              typename Size<TTarget>::Type pos_end,
              TSource & source)
     {
-        if (!_getObjectId(source) || !shareResources(target, source))
+        if (!getObjectId(source) || !shareResources(target, source))
         {
             SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), pos_begin, pos_end, TExpand());
@@ -1285,7 +1285,7 @@ struct ReplaceString_
              TSource & source,
              typename Size<TTarget>::Type limit)
     {
-        if (!_getObjectId(source) || !shareResources(target, source))
+        if (!getObjectId(source) || !shareResources(target, source))
         {
             SEQAN_CHECKPOINT;
             typename Size<TTarget>::Type part_length = _clearSpace(target, length(source), pos_begin, pos_end, limit, TExpand());

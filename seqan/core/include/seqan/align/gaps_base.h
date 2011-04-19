@@ -280,21 +280,21 @@ struct Reference<Gaps<TSource, TSpec> const>
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function._getObjectId.param.object.type:Class.Gaps
+///.Function.getObjectId.param.object.type:Class.Gaps
 
 template <typename TSource, typename TSpec>
 inline void const *
-_getObjectId(Gaps<TSource, TSpec> & me)
+getObjectId(Gaps<TSource, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return _getObjectId(source(me));
+	return getObjectId(source(me));
 }
 template <typename TSource, typename TSpec>
 inline void const *
-_getObjectId(Gaps<TSource, TSpec> const & me)
+getObjectId(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return _getObjectId(source(me));
+	return getObjectId(source(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
