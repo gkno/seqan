@@ -65,6 +65,7 @@ is true, the maximum is searched in the last row. All options can be combined in
 ..param.diagHigh: The upmost diagonal that will be computed for banded alignment.
 ..param.tag:A tag indicating the alignment algorithm to use.
 ...type:Tag.Global Alignment Algorithms
+...default:NeedlemanWunsch
 ..returns:The maximum score of an global alignment between two sequences given in $align$ or $strings$.
 ...param.align:An optimal global alignment.
 ....remarks:If there was an alignment stored in $align$ before $globalAlignment$ was called, it will be replaced.
