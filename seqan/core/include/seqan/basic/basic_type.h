@@ -105,10 +105,10 @@ struct GetValue<T const>:
 /**
 .Metafunction.Reference:
 ..cat:Basic
-..summary:Reference type. 
+..summary:Reference type.
 ..signature:Reference<T>::Type
 ..param.T:A Type.
-..returns.param.Type:Either $T &$ or a proxy object @Class.Proxy@ for $T$.
+..returns.param.Type:Either $Value<T>::Type &$ or a proxy object @Class.Proxy@ for $T$.
 ..see:Metafunction.Value
 ..see:Metafunction.GetValue
 ..include:seqan/basic.h
