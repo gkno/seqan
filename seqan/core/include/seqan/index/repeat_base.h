@@ -43,9 +43,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Store information about a repeat.
 ..cat:Index
 ..signature:Repeat<TPos, TPeriod>
-..param.TPos:Integral type to use for storing positions.
+..param.TPos:Type to use for storing positions.
 ...metafunction:Metafunction.Value
-..param.TPeriod:Integral type to use for storing the repeat period.
+..param.TPeriod:Type to use for storing the repeat period.
 ...metafunction:Metafunction.Size
 ..include:seqan/index.h
 ..see:Function.findRepeats
@@ -164,6 +164,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:findRepeats(repeatString, text, minRepeatLength[, maxPeriod])
 ..param.repeatString:A @Class.String@ of @Class.Repeat@ objects.
 ..param.text:The text to search repeats in.
+...type:Class.String
+...type:Class.StringSet
 ..param.minRepeatLength:The minimum length each reported repeat must have.
 ..param.maxPeriod:Optionally, the maximal period that reported repeats can have.
 ..remarks:Subsequences of undefined values/$N$s will always be reported.
