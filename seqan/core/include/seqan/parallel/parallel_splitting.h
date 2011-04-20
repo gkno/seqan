@@ -31,31 +31,51 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Umbrella header for the parallel module.
+// Utility macros for parallelism.
 // ==========================================================================
 
-#ifndef SEQAN_PARALLEL_H_
-#define SEQAN_PARALLEL_H_
+#ifndef SEQAN_PARALLEL_PARALLEL_SPLITTING_H_
+#define SEQAN_PARALLEL_PARALLEL_SPLITTING_H_
 
-//____________________________________________________________________________
-// Prerequisites
+namespace seqan {
 
-#include <seqan/basic.h>
-#include <seqan/platform.h>
+/**
+.Function.computeSplitters
+..cat:Parallelism
+..summary:Compute splitters for a sequence of objects.
+..signature:computeSplitters(splitters, size, count)
+..param.splitters:Resulting splitters, will be resized to contain $count + 1$ elements.
+...type:Spec.Alloc String
+..param.size:The number of objects to split.
+..param.count:The number of chunks.
+..remarks:The first $count - 1$ chunks will have the size $ceil(size / count)$, the last chunk will contain the rest.
+..example.text:Most simple case for splitting.
+..example.code:String<unsigned> splitters;
+computeSplitters(splitters, 10, 5);
+// splitters == {0, 5, 10}
+..example.text:In this case, the last chunks will stay empty.
+..example.code:computeSplitters(splitters, 3, 5);
+// splitters == {0, 1, 2, 3, 3, 3}
+..include:seqan/parallel.h
+ */
 
-//____________________________________________________________________________
-// Module Headers
+template <typename TPos, typename TSize, typename TCount>
+void computeSplitters(String<TPos> & splitters, TSize size, TCount count)
+{
+    resize(splitters, count + 1);
+    splitters[0] = 0;
+    TSize blockLength = size / count;
+    TSize rest = size % count;
+    for (TCount i = 1; i <= count; ++i)
+    {
+        splitters[i] = splitters[i - 1] + blockLength;
+        if (i <= rest)
+            splitters[i] += 1;
+    }
 
-// Misc.
-#include <seqan/parallel/parallel_macros.h>
+    SEQAN_ASSERT_EQ(back(splitters), size);
+}
 
-// Atomic operations.
-#include <seqan/parallel/parallel_atomic_primitives.h>
-#include <seqan/parallel/parallel_atomic_misc.h>
+}  // namespace seqan
 
-// Splitting.
-#include <seqan/parallel/parallel_splitting.h>
-
-//____________________________________________________________________________
-
-#endif  // SEQAN_PARALLEL_H_
+#endif  // SEQAN_PARALLEL_PARALLEL_SPLITTING_H_
