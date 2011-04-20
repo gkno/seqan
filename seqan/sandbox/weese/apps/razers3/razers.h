@@ -1,4 +1,4 @@
- /*==========================================================================
+/*==========================================================================
              RazerS - Fast Read Mapping with Controlled Loss Rate
                    http://www.seqan.de/projects/razers.html
 
@@ -55,27 +55,24 @@ struct MatchRecord
     unsigned        readId;         // read seqNo
     TContigPos      beginPos;       // begin position of the match in the genome
     TContigPos      endPos;         // end position of the match in the genome
+#ifdef RAZERS_DEFER_COMPACTION
+    bool            isRegistered; // registered in masking process.
+#endif  // #ifdef RAZERS_DEFER_COMPACTION
     char            orientation;    // 'F', 'R', '-'
     short int       score;          // Levenshtein distance / score.
     unsigned		pairMatchId;			// unique id for the two mate-pair matches (0 if unpaired)
-#ifndef RAZERS_DEFER_COMPACTION
     int				mateDelta:24;	// outer coordinate delta to the other mate 
     int				pairScore:8;	// combined score of both mates
-#else
-    bool            isRegistered:1; // registered in masking process.
-    int				mateDelta:23;	// outer coordinate delta to the other mate 
-    int				pairScore:8;	// combined score of both mates
-#endif  // #ifndef RAZERS_DEFER_COMPACTION
 
 	static const unsigned INVALID_ID;
 
     MatchRecord()
             : contigId(MaxValue<unsigned>::VALUE), readId(MaxValue<unsigned>::VALUE),
-              beginPos(0), endPos(0), orientation('-'), score(0),
-              pairMatchId(MaxValue<unsigned>::VALUE),
+              beginPos(0), endPos(0),
 #ifdef RAZERS_DEFER_COMPACTION
               isRegistered(false),
 #endif  // #ifndef RAZERS_DEFER_COMPACTION
+              orientation('-'), score(0), pairMatchId(MaxValue<unsigned>::VALUE),
               mateDelta(0), pairScore(0)
     {}
 };
@@ -103,7 +100,8 @@ enum {
     TASK_COMPACT,
     TASK_DUMP_MATCHES,
     TASK_LOAD,
-    TASK_SORT
+    TASK_SORT,
+    TASK_COPY_FINDER
 };
 #endif  // #ifdef RAZERS_PROFILE
 
@@ -250,6 +248,7 @@ enum {
         unsigned    verificationPackageSize;  // This number of SWIFT hits per verification.
         unsigned    maxVerificationPackageCount;  // Maximum number of verification packages to create.
         __int64     availableMatchesMemorySize;  // Memory available for matches.  Used for switching to external memory algorithms. -1 for always external, 0 for never.
+        int         matchHistoStartThreshold;  // Threshold to use for starting histogram. >= 1
 
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -328,6 +327,7 @@ enum {
             verificationPackageSize = 100;
             maxVerificationPackageCount = 100;
             availableMatchesMemorySize = 0;
+            matchHistoStartThreshold = 5;
 
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
@@ -842,6 +842,42 @@ inline int estimateReadLength(char const *fileName)
 		}
 	};
 
+// TODO(holtgrew): Merge with above.
+
+	template <typename TReadMatch>
+	struct LessScoreBackport3Way : public ::std::binary_function < TReadMatch, TReadMatch, int>
+	{
+		inline int operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+			if (a.readId < b.readId) return -1;
+			if (a.readId > b.readId) return 1;
+
+            // quality
+            if (a.orientation != '-' || b.orientation != '-') {
+                if (a.orientation == '-') return -1;
+                if (b.orientation == '-') return 1;
+            }
+
+            if (a.pairScore > b.pairScore) return -1;
+            if (a.pairScore < b.pairScore) return 1;
+            if (a.score > b.score) return -1;
+            if (b.score > a.score) return 1;
+
+            // Sort by leftmost begin pos, longest end pos on ties.
+            if (a.contigId < b.contigId) return -1;
+            if (a.contigId > b.contigId) return 1;
+            if (a.orientation < b.orientation) return -1;
+            if (a.orientation > b.orientation) return 1;
+            if (a.beginPos < b.beginPos) return -1;
+            if (a.beginPos > b.beginPos) return 1;
+            if (a.endPos < b.endPos) return 1;
+            if (a.endPos > b.endPos) return -1;
+            
+            return 0;
+		}
+	};
+
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 
 	template <typename TReadMatch>
@@ -1313,26 +1349,16 @@ void compactMatches(
 #ifdef RAZERS_EXTERNAL_MATCHES
     if (compactMode == COMPACT_FINAL_EXTERNAL) {
         typedef Pipe<TMatches, Source<> > TSource;
-        typedef LessScoreBackport<TMatch> TLess;
+        typedef LessScoreBackport3Way<TMatch> TLess;
         typedef Pool<TMatch, SorterSpec<SorterConfigSize<TLess, typename Size<TSource>::Type> > > TSorterPool;
 
         TSource source(matches);
         TSorterPool sorter;
-        sorter << matches;
-        beginRead(sorter);
-        SEQAN_ASSERT_EQ(length(sorter), length(matches));
-        TIterator it = begin(matches, Standard());
-        TIterator itEnd = end(matches, Standard());
-        (void) itEnd;
-        // bool first = true;
-        for (__int64 leftToRead = length(sorter); leftToRead > 0; --leftToRead, ++sorter, ++it) {
-            *it = *sorter;
-            // if (!first)
-            //     SEQAN_ASSERT(!TLess()(*it, *(it - 1)));
-            // first = false;
-        }
-        SEQAN_ASSERT(it == itEnd);
-        endRead(sorter);
+        sorter << source;
+        matches << sorter;
+
+        for (unsigned i = 1; i < length(matches); ++i)
+            SEQAN_ASSERT_LEQ(TLess()(matches[i - 1], matches[i]), 0);
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
         ::std::sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());

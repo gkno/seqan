@@ -465,7 +465,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
     // buffer variable to extend window in previous left hits string by.
     // TODO(holtgrew): DELTA has to be set to a better value, probably.
-    const unsigned DELTA = 2000;
+    unsigned const DELTA = back(tls.swiftPatternL.bucketParams).delta + back(tls.swiftPatternL.bucketParams).overlap + length(tls.swiftPatternL.bucketParams) - 2;
 
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_VERIFY);

@@ -32,8 +32,8 @@
 #define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
 //#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)
 //#define RAZERS_DEBUG_MATEPAIRS
-#define RAZERS_DEFER_COMPACTION         // mask duplicates on the fly and defer compaction
-//#define RAZERS_EXTERNAL_MATCHES         // use external memory algorithms for managing matches
+//#define RAZERS_DEFER_COMPACTION         // mask duplicates on the fly and defer compaction
+// #define RAZERS_EXTERNAL_MATCHES         // use external memory algorithms for managing matches
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -41,7 +41,7 @@
 #define SEQAN_PARALLEL
 #define RAZERS_OPENADDRESSING
 #endif
-//#define RAZERS_PROFILE                // Extensive profiling information.
+#define RAZERS_PROFILE                // Extensive profiling information.
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
@@ -305,6 +305,7 @@ int main(int argc, const char *argv[])
     timelineAddTaskType("DUMP_MATCHES", "Dump matches.");
     timelineAddTaskType("LOAD", "Load input.");
     timelineAddTaskType("SORT", "Sorting.");
+    timelineAddTaskType("COPY_FINDER", "Copy SWIFT Finder.");
 #endif  // #ifndef RAZERS_PROFILE
 	
 	RazerSOptions<>			options;
@@ -411,6 +412,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("pvs", "parallel-verification-size",   "Verify SWIFT hits in packages of this size.", OptionType::Int | OptionType::Label, options.verificationPackageSize));
 	addOption(parser, CommandLineOption("pvmpc", "parallel-verification-max-package-count",   "Largest number of packages to create for verification per thread-1, go over package size if this limit is reached..", OptionType::Int | OptionType::Label, options.maxVerificationPackageCount));
 	addOption(parser, CommandLineOption("amms", "available-matches-memory-size",   "Bytes of main memory available for storing matches.  Used to switch to external sorting.  -1 for always external, 0 for never, other value as threshold.", OptionType::Int | OptionType::Label, options.availableMatchesMemorySize));
+	addOption(parser, CommandLineOption("mhst", "match-histo-start-threshold",   "When to start histogram.", OptionType::Int | OptionType::Label, options.matchHistoStartThreshold));
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -459,6 +461,7 @@ int main(int argc, const char *argv[])
     getOptionValueLong(parser, "parallel-verification-size", options.verificationPackageSize);
     getOptionValueLong(parser, "parallel-verification-max-package-count", options.maxVerificationPackageCount);
 	getOptionValueLong(parser, "available-matches-memory-size", options.availableMatchesMemorySize);
+    getOptionValueLong(parser, "match-histo-start-threshold", options.matchHistoStartThreshold);
 #ifdef RAZERS_OPENADDRESSING
 	getOptionValueLong(parser, "load-factor", options.loadFactor);
 #endif 

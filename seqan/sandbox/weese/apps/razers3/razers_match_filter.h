@@ -118,6 +118,7 @@ _canBeDisabled(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> const & filter,
 {
     if (filter.options.maxHits == 0)
         return false;
+    // std::cerr << "histo " << histogramId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.options.maxHits << std::endl;
     return filter.histograms[histogramId][0] >= filter.options.maxHits;
 }
 
@@ -142,6 +143,7 @@ template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
 void
 registerRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned readId, int score)
 {
+    // std::cerr << "registering read " << readId << std::endl;
     if (filter.hitCount[readId - filter.readOffset] == MaxValue<unsigned>::VALUE)
         return;
     filter.hitCount[readId - filter.readOffset] += 1;
@@ -155,6 +157,7 @@ registerRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigne
         histogramId = _createHistogram(filter, readId);
         filter.readIdToHistogramId[readId] = histogramId;
     } else if (filter.hitCount[readId - filter.readOffset] > filter.matchThreshold) {
+        // std::cerr << "updating histogram for read " << readId << std::endl;
         typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
         TIterator it = filter.readIdToHistogramId.find(readId);
         SEQAN_ASSERT(it != filter.readIdToHistogramId.end());
@@ -168,19 +171,19 @@ registerRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigne
 }
 
 template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-void
+bool
 processRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned readId)
 {
     typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
 
     if (filter.hitCount[readId - filter.readOffset] < filter.matchThreshold)
-        return;
+        return false;
 
-    // std::cerr << "processing read " << readId << std::endl;
+     // std::cerr << "processing read " << readId << std::endl;
     // Get histogram id, insert new histogram if necessary, exit if no histogram yet.
     TIterator it = filter.readIdToHistogramId.find(readId);
     if (it == filter.readIdToHistogramId.end())
-        return;  // Must have been disabled before.
+        return false;  // Must have been disabled before.
     unsigned histogramId = it->second;
 
     // Perform actions.
@@ -192,15 +195,19 @@ processRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned
         _freeHistogram(filter, histogramId);
         filter.readIdToHistogramId.erase(readId);
         filter.hitCount[readId - filter.readOffset] = MaxValue<unsigned>::VALUE;
+        return true;
     } else if (_canBeDisabled(filter, histogramId)) {
         // std::cerr << "DISABLED " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId - filter.readOffset] << std::endl;
         disableRead(value(filter.callback), readId);
         _freeHistogram(filter, histogramId);
         filter.readIdToHistogramId.erase(readId);
         filter.hitCount[readId - filter.readOffset] = MaxValue<unsigned>::VALUE;
+        return true;
     } else if ((newLimit = _newLimit(filter, histogramId)) >= 0) {
+        // std::cerr << "LIMITING " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId - filter.readOffset] << "\t" << newLimit << std::endl;
         limitRead(value(filter.callback), readId, newLimit);
     }
+    return false;
 }
 
 }  // namespace seqan
