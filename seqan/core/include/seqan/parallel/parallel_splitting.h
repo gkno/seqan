@@ -73,7 +73,7 @@ void computeSplitters(String<TPos> & splitters, TSize size, TCount count)
             splitters[i] += 1;
     }
 
-    SEQAN_ASSERT_EQ(back(splitters), size);
+    SEQAN_ASSERT_EQ(back(splitters), static_cast<TPos>(size));
 }
 
 }  // namespace seqan

@@ -29,49 +29,44 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Manuel Holtgrewe <manuel.holtgrew@fu-berlin.de>
+// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Tests for the module parallel.
+// Tests for splitting.
 // ==========================================================================
 
-#include <seqan/basic.h>     // Testing infrastructure.
-#include <seqan/file.h>      // Required to print strings in tests.
-#include <seqan/parallel.h>  // Header under test.
+#ifndef TEST_PARALLEL_TEST_PARALLEL_SPLITTING_H_
+#define TEST_PARALLEL_TEST_PARALLEL_SPLITTING_H_
 
-#if defined(_OPENMP)
-#include <omp.h>
-#endif  // #if defined(_OPENMP)
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
+#include <seqan/parallel.h>
 
-#include "test_parallel_atomic_primitives.h"
-#include "test_parallel_atomic_misc.h"
-#include "test_parallel_splitting.h"
+SEQAN_DEFINE_TEST(test_parallel_splitting_compute_splitters)
+{
+    using namespace seqan;
 
-SEQAN_BEGIN_TESTSUITE(test_parallel) {
-#if defined(_OPENMP)
-    // Set number of threads to >=2 so there actually is parallelism.
-    if (omp_get_max_threads() < 2)
-        omp_set_num_threads(2);
-#endif  // #if defined(_OPENMP)
+    // Simple case.
+    {
+        String<unsigned> splitters;
+        computeSplitters(splitters, 10, 2);
+        SEQAN_ASSERT_EQ(length(splitters), 3u);
+        SEQAN_ASSERT_EQ(splitters[0], 0u);
+        SEQAN_ASSERT_EQ(splitters[1], 5u);
+        SEQAN_ASSERT_EQ(splitters[2], 10u);
+    }
 
-    // TODO(holtgrew): Re-enable tests on LLVM when bug 9041 is fixed.
-    // LLVM has problems with atomic operation builtins, re-enable when
-    // this problem is fixed. See http://llvm.org/bugs/show_bug.cgi?id=9041
-    //
-    // There is a problem with compare-and-swap on MinGW, too.
-#if !defined(__llvm__) && !defined(PLATFORM_WINDOWS_MINGW)
-    // Tests for atomic primitives.
-    SEQAN_CALL_TEST(test_parallel_atomic_inc);
-    SEQAN_CALL_TEST(test_parallel_atomic_dec);
-    SEQAN_CALL_TEST(test_parallel_atomic_add);
-    SEQAN_CALL_TEST(test_parallel_atomic_or);
-    SEQAN_CALL_TEST(test_parallel_atomic_xor);
-    SEQAN_CALL_TEST(test_parallel_atomic_cas);
-
-    // Tests for misc simpmle atomic operations.
-    SEQAN_CALL_TEST(test_parallel_atomic_min);
-    SEQAN_CALL_TEST(test_parallel_atomic_max);
-#endif  // #if !defined(__llvm__) && !defined(PLATFORM_WINDOWS_MINGW)
-
-    SEQAN_CALL_TEST(test_parallel_splitting_compute_splitters);
+    // Case with empty chunks.
+    {
+        String<unsigned> splitters;
+        computeSplitters(splitters, 3, 5);
+        SEQAN_ASSERT_EQ(length(splitters), 6u);
+        SEQAN_ASSERT_EQ(splitters[0], 0u);
+        SEQAN_ASSERT_EQ(splitters[1], 1u);
+        SEQAN_ASSERT_EQ(splitters[2], 2u);
+        SEQAN_ASSERT_EQ(splitters[3], 3u);
+        SEQAN_ASSERT_EQ(splitters[4], 3u);
+        SEQAN_ASSERT_EQ(splitters[5], 3u);
+    }
 }
-SEQAN_END_TESTSUITE
+
+#endif  // TEST_PARALLEL_TEST_PARALLEL_SPLITTING_H_
