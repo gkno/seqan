@@ -38,6 +38,31 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+/**
+.Class.Repeat
+..summary:Store information about a repeat.
+..cat:Index
+..signature:Repeat<TPos, TPeriod>
+..param.TPos:Integral type to use for storing positions.
+...metafunction:Metafunction.Value
+..param.TPeriod:Integral type to use for storing the repeat period.
+...metafunction:Metafunction.Size
+..include:seqan/index.h
+..see:Function.findRepeats
+
+.Memvar.Repeat#beginPosition
+..summary:The begin position of the repeat of type $TPos$.
+..class:Class.Repeat
+
+.Memvar.Repeat#endPosition
+..summary:The end position of the repeat of type $TPos$.
+..class:Class.Repeat
+
+.Memvar.Repeat#period
+..summary:The period of the repeat of type $TSize$.
+..class:Class.Repeat
+ */
+
 	template <typename TPos, typename TPeriod>
 	struct Repeat {
 		TPos		beginPosition;
@@ -132,6 +157,20 @@ namespace SEQAN_NAMESPACE_MAIN
 		return val == 'X';
 	}
 */
+/**
+.Function.findRepeats
+..summary:Search for repeats in a text.
+..cat:Index
+..signature:findRepeats(repeatString, text, minRepeatLength[, maxPeriod])
+..param.repeatString:A @Class.String@ of @Class.Repeat@ objects.
+..param.text:The text to search repeats in.
+..param.minRepeatLength:The minimum length each reported repeat must have.
+..param.maxPeriod:Optionally, the maximal period that reported repeats can have.
+..remarks:Subsequences of undefined values/$N$s will always be reported.
+..include:seqan/index.h
+..see:Class.Repeat
+ */
+
 	// period-1 optimization
 	template <typename TRepeatStore, typename TString, typename TRepeatSize>
 	inline void findRepeats(TRepeatStore &repString, TString const &text, TRepeatSize minRepeatLen) 
@@ -179,6 +218,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	}
 
+    // TODO(holtgrew): Why for TString const and StringSet<> const?
 	template <typename TRepeatStore, typename TString, typename TSpec, typename TRepeatSize>
 	inline void findRepeats(TRepeatStore &repString, StringSet<TString, TSpec> const &text, TRepeatSize minRepeatLen) 
 	{
