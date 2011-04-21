@@ -55,6 +55,15 @@ SEQAN_DEFINE_TEST(test_parallel_splitting_compute_splitters)
         SEQAN_ASSERT_EQ(splitters[2], 10u);
     }
 
+    // One chunk.
+    {
+        String<unsigned> splitters;
+        computeSplitters(splitters, 10, 1);
+        SEQAN_ASSERT_EQ(length(splitters), 2u);
+        SEQAN_ASSERT_EQ(splitters[0], 0u);
+        SEQAN_ASSERT_EQ(splitters[1], 10u);
+    }
+
     // Case with empty chunks.
     {
         String<unsigned> splitters;

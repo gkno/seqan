@@ -65,7 +65,7 @@ void computeSplitters(String<TPos> & splitters, TSize size, TCount count)
     resize(splitters, count + 1);
     splitters[0] = 0;
     TSize blockLength = size / count;
-    TSize rest = size % count;
+    TCount rest = size % count;
     for (TCount i = 1; i <= count; ++i)
     {
         splitters[i] = splitters[i - 1] + blockLength;
