@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 """Convert SeqAn profiling information into PDF graphic.
 
 USAGE: profile2pdf.py <program.profile.txt> <out.pdf>
