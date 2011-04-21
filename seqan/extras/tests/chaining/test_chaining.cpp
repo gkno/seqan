@@ -205,7 +205,6 @@ SEQAN_BEGIN_TESTSUITE(test_chaining) {
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/chaining/chain_meta_fragment.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/chaining/chain_point.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/chaining/chain_wrapper_point.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/chaining/chaining_generated_forwards.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/chaining/fragment.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/chaining/geom_distribution.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/chaining/range_max_tree.h");

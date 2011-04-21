@@ -312,7 +312,6 @@ SEQAN_BEGIN_TESTSUITE(test_pipe) {
 	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/pipe/pipe_echoer.h");
 	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/pipe/pipe_edit_environment.h");
 	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/pipe/pipe_filter.h");
-	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/pipe/pipe_generated_forwards.h");
 	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/pipe/pipe_iterator.h");
 	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/pipe/pipe_joiner.h");
 	SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/pipe/pipe_namer.h");

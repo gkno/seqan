@@ -463,7 +463,6 @@ SEQAN_BEGIN_TESTSUITE(test_find_motif) {
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/em_algorithm.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_base.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_epatternbranching.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_generated_forwards.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_pms1.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_pmsp.h");
     SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_projection.h");

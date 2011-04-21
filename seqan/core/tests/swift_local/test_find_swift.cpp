@@ -322,7 +322,7 @@ SEQAN_BEGIN_TESTSUITE(test_find_swift) {
     SEQAN_CALL_TEST(test_split_xDrop_align);
 
     //SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/index/find_swift.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/apps/stellar/stellar.h");
+    // SEQAN_VERIFY_CHECKPOINTS("projects/library/apps/stellar/stellar.h");
 }
 SEQAN_END_TESTSUITE
 
