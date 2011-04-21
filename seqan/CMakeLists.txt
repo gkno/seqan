@@ -62,6 +62,8 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/util/cmake
     ${CMAKE_MODULE_PATH})
 
+include(CTest)
+
 find_package (PythonInterp)
 find_package (SeqAn)
 
