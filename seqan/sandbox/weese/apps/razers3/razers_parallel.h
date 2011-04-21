@@ -197,9 +197,9 @@ void
 appendToVerificationResults(SingleVerificationResults<TMatches> & verificationResults, SingleVerificationResult<TMatches> const & results)
 {
     omp_set_lock(&verificationResults.lock->lock_);
-    if (length(verificationResults.localMatches) > 0u)
+//     if (length(verificationResults.localMatches) > 0u)
 // #pragma omp critical
-         // std::cerr << "BEFORE: " << &verificationResults << " length(*front(verificationResults.localMatches).matches) == " << length(*front(verificationResults.localMatches).matches) << ", " << (void*)front(verificationResults.localMatches).matches.get() << std::endl;
+//         std::cerr << "BEFORE: " << &verificationResults << " length(*front(verificationResults.localMatches).matches) == " << length(*front(verificationResults.localMatches).matches) << ", " << (void*)front(verificationResults.localMatches).matches.get() << std::endl;
     appendValue(verificationResults.localMatches, results);
 // #pragma omp critical
 //     std::cerr << "AFTER:  " << &verificationResults << " length(*front(verificationResults.localMatches).matches) == " << length(*front(verificationResults.localMatches).matches) << ", " << (void*)front(verificationResults.localMatches).matches.get() << std::endl;
@@ -265,6 +265,7 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
 //     {
 //         std::cerr << "thread " << omp_get_thread_num() << "; window " << job.windowNo << " hit group id " << job.hitGroupId << " thread id " << job.threadId << std::endl;
 //         std::cerr << "localMatches.data_begin == " << (void*)(localMatches->data_begin) << ", localMatches.data_end == " << (void*)(localMatches->data_end) << std::endl;
+//         std::cerr << "length(*localMatches) == " << length(*localMatches) << std::endl;
 //     }
 
     appendToVerificationResults(*job.verificationResults, SingleVerificationResult<TMatches>(localMatches, job.hitGroupId, job.windowNo));
