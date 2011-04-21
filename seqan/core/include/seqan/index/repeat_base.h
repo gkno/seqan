@@ -182,42 +182,172 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TString>::Type		TValue;
 		typedef typename Size<TString>::Type		TSize;
 
-		TRepeat rep;
-		rep.period = 1;
-		clear(repString);
+#ifdef SEQAN_PARALLEL
+        if (length(text) > (TSize)(omp_get_thread_num() * 2 * minRepeatLen)) {
+            // Parallel case.
 
-		TIterator it = begin(text, Standard());
-		TIterator itEnd = end(text, Standard());
-		if (it == itEnd) return;
+            // NOTE(holtgrew): The minimum text length check above makes it impossible that more than two chunks are
+            // required to form an otherwise too short repeat.
 
-		TValue last = *it;
-		TSize repLeft = 0;
-		TSize repRight = 1;
+            // TODO(holtgrew): Load balancing? Probably not worth it.
+            String<TSize> splitters;
+            String<TRepeatStore> threadLocalStores;
 
-		for (++it; it != itEnd; ++it, ++repRight) 
-		{
-			if (*it != last)
-			{
-				if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
-				{
-					// insert repeat
-					rep.beginPosition = repLeft;
-					rep.endPosition = repRight;
-//					::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
-					appendValue(repString, rep);
-				}
-				repLeft = repRight;
-				last = *it;
-			}
-		}
-		if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
-		{
-			// insert repeat
-			rep.beginPosition = repLeft;
-			rep.endPosition = repRight;
-//			::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
-			appendValue(repString, rep);
-		}
+            // Each threads finds repeats on its chunk in parallel.
+            #pragma omp parallel 
+            {
+                // We have to determine the number of available threads at this point.  We will use the number of thread
+                // local stores to determin the number of available threads later on.
+                #pragma omp master
+                {
+                    computeSplitters(splitters, length(text), omp_get_num_threads());
+                    resize(threadLocalStores, omp_get_num_threads());
+                }
+                #pragma omp barrier
+
+                int const t = omp_get_thread_num();
+                TRepeatStore & store = threadLocalStores[t];
+
+                TRepeat rep;
+                rep.beginPosition = 0;
+                rep.endPosition = 0;
+                rep.period = 1;
+
+                // Flags used for force-adding repeats for the chunks that have a
+                // left/right neighbour.
+                bool forceFirst = t > 0;
+                bool forceLast = (t + 1) < omp_get_num_threads();
+
+                TIterator it = iter(text, splitters[t], Standard());
+                TIterator itEnd = iter(text, splitters[t + 1], Standard());
+                if (it != itEnd)
+                {
+                    TValue last = *it;
+                    TSize repLeft = 0;
+                    TSize repRight = 1;
+
+                    for (++it; it != itEnd; ++it, ++repRight) 
+                    {
+                        if (*it != last)
+                        {
+                            if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen || forceFirst)
+                            {
+                                forceFirst = false;
+                                // insert repeat
+                                rep.beginPosition = repLeft;
+                                rep.endPosition = repRight;
+                                appendValue(store, rep);
+                            }
+                            repLeft = repRight;
+                            last = *it;
+                        }
+                    }
+                    if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen || forceLast)
+                    {
+                        // Insert repeat but only if it is not already in there.
+                        if (rep.beginPosition != repLeft && rep.endPosition != repRight) {
+                            rep.beginPosition = repLeft;
+                            rep.endPosition = repRight;
+                            appendValue(store, rep);
+                        }
+                    }
+                }
+            }
+
+            // Mend the splice points.
+            //
+            String<Pair<TSize, TSize> > fromPositions;
+            resize(fromPositions, length(threadLocalStores));
+            fromPositions[0].i1 = 0;
+            fromPositions[0].i2 = length(threadLocalStores[0]);
+            String<typename Size<TRepeatStore>::Type> outSplitters;
+            appendValue(outSplitters, 0);
+            int lastNonEmpty = 0;
+            for (int i = 0; (unsigned)i < length(threadLocalStores) - 1; ++i) {
+                fromPositions[i + 1].i1 = 0;
+                fromPositions[i + 1].i2 = length(threadLocalStores[i + 1]);
+
+                if (fromPositions[i].i1 != fromPositions[i].i2)
+                    lastNonEmpty = i;
+
+                // We merge the repeats at each split point if they are adjacent and their characters are equal and
+                // their length's sums if greater than minRepeatLen.  Otherwise, we might have to remove left or right
+                // repeat if the length is smaller than minRepeatLen.
+                bool const adjacent = back(threadLocalStores[lastNonEmpty]).endPosition == front(threadLocalStores[i + 1]).beginPosition;
+                bool const charsEqual = text[back(threadLocalStores[lastNonEmpty]).beginPosition] == text[front(threadLocalStores[i + 1]).beginPosition];
+                bool const sumAboveThreshold = ((TRepeatSize)(front(threadLocalStores[i + 1]).endPosition - back(threadLocalStores[lastNonEmpty]).beginPosition) > minRepeatLen);
+                bool const merge = adjacent && charsEqual && sumAboveThreshold;
+                if (merge) {
+                    fromPositions[i + 1].i1 += 1;
+                    back(threadLocalStores[lastNonEmpty]).endPosition = front(threadLocalStores[i + 1]).endPosition;
+                } else {
+                    // Possibly remove left.
+                    if ((TRepeatSize)(back(threadLocalStores[i]).endPosition - back(threadLocalStores[i]).beginPosition) <= minRepeatLen)
+                        fromPositions[i].i2 -= 1;
+                    // Possibly remove right.
+                    if ((TRepeatSize)(front(threadLocalStores[i + 1]).endPosition - front(threadLocalStores[i + 1]).beginPosition) <= minRepeatLen)
+                        fromPositions[i + 1].i1 += 1;
+                }
+
+                appendValue(outSplitters, back(outSplitters) + fromPositions[i].i2 - fromPositions[i].i1);
+            }
+            appendValue(outSplitters, back(outSplitters) + back(fromPositions).i2 - back(fromPositions).i1);
+
+            // Allocate memory.
+            clear(repString);
+            resize(repString, back(outSplitters));
+
+            // Copy back the repeats in parallel.
+            #pragma omp parallel num_threads(length(threadLocalStores))
+            {
+                int const t = omp_get_thread_num();
+                arrayCopy(iter(threadLocalStores[t], fromPositions[t].i1, Standard()),
+                          iter(threadLocalStores[t], fromPositions[t].i2, Standard()),
+                          iter(repString, outSplitters[t], Standard()));
+            }
+        } else {
+#else  // #ifdef SEQAN_PARALLEL
+            // Sequential case.
+            TRepeat rep;
+            rep.period = 1;
+            clear(repString);
+
+            TIterator it = begin(text, Standard());
+            TIterator itEnd = end(text, Standard());
+            if (it == itEnd) return;
+
+            TValue last = *it;
+            TSize repLeft = 0;
+            TSize repRight = 1;
+
+            for (++it; it != itEnd; ++it, ++repRight) 
+            {
+                if (*it != last)
+                {
+                    if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
+                    {
+                        // insert repeat
+                        rep.beginPosition = repLeft;
+                        rep.endPosition = repRight;
+                        //					::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+                        appendValue(repString, rep);
+                    }
+                    repLeft = repRight;
+                    last = *it;
+                }
+            }
+            if (_repeatMaskValue(last) || (TRepeatSize)(repRight - repLeft) > minRepeatLen)
+            {
+                // insert repeat
+                rep.beginPosition = repLeft;
+                rep.endPosition = repRight;
+                //			::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
+                appendValue(repString, rep);
+            }
+#endif  // #ifdef SEQAN_PARALLEL
+#ifdef SEQAN_PARALLEL
+        }
+#endif  // #ifdef SEQAN_PARALLEL
 	}
 
     // TODO(holtgrew): Why for TString const and StringSet<> const?

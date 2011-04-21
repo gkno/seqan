@@ -242,6 +242,7 @@ struct SwiftParameters {
 		typedef typename Iterator<THitString, Standard>::Type		THitIterator;
 		typedef typename SAValue<THaystack>::Type					TSAValue;
 		typedef Repeat<TSAValue, unsigned>							TRepeat;
+        // TODO(holtgrew): Make this a holder so we can share the actual string when copying.
 		typedef String<TRepeat>										TRepeatString;
 		typedef typename Iterator<TRepeatString, Standard>::Type	TRepeatIterator;
 

@@ -54,7 +54,6 @@
 #include <cmath>
 #include <string.h> // memset
 
-
 //////////////////////////////////////////////////////////////////////////////
 // INDEX CONSTRUCTION
 //////////////////////////////////////////////////////////////////////////////
@@ -64,6 +63,10 @@
 #include <seqan/index/index_manual_forwards.h>
 #include <seqan/index/index_generated_forwards.h>
 #endif
+
+#ifdef SEQAN_PARALLEL
+#include <seqan/parallel.h>
+#endif  // #ifdef SEQAN_PARALLEL
 
 #include <seqan/index/index_base.h>
 
