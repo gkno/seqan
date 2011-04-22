@@ -313,8 +313,8 @@ inline bool
 operator<=(Proxy<TSpec> const & left_,
            Proxy<TSpec> const & right_)
 {
-    SEQAN_CHECKPOINT
-            typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
+    SEQAN_CHECKPOINT;
+    typedef typename GetValue<Proxy<TSpec> >::Type TAccessor;
     return convert<TAccessor>(left_) <= convert<TAccessor>(right_);
 }
 
@@ -456,7 +456,8 @@ inline TStream &
 operator<<(TStream & strm,
            Proxy<TSpec> & proxy)
 {
-    return strm << getValue(proxy);
+    strm << getValue(proxy);
+    return strm;
 }
 
 template <typename TStream, typename TSpec>
@@ -464,7 +465,8 @@ inline TStream &
 operator<<(TStream & strm,
            Proxy<TSpec> const & proxy)
 {
-	return strm << getValue(proxy);
+	strm << getValue(proxy);
+    return strm;
 }
 
 }  // namespace seqan

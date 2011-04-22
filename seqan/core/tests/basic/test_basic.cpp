@@ -334,8 +334,8 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
 
     SEQAN_CALL_TEST(test_basic_proxy_iterator_constructors);
     SEQAN_CALL_TEST(test_basic_proxy_iterator_assign);
-    SEQAN_CALL_TEST(test_basic_proxy_iterator_set);
-    SEQAN_CALL_TEST(test_basic_proxy_iterator_move);
+    // SEQAN_CALL_TEST(test_basic_proxy_iterator_set);
+    // SEQAN_CALL_TEST(test_basic_proxy_iterator_move);
     SEQAN_CALL_TEST(test_basic_proxy_iterator_getValue);
     SEQAN_CALL_TEST(test_basic_proxy_iterator_comparators);
     SEQAN_CALL_TEST(test_basic_proxy_iterator_stream_read);

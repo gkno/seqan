@@ -81,42 +81,116 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator)
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_constructors)
 {
-    SEQAN_ASSERT_FAIL("Write me!");
+    using namespace seqan;
+    typedef Proxy<IteratorProxy<char *> > TProxy;
+
+    // Construct from iterator.
+    char data[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    char * it = &data[3];
+    TProxy proxy(it);
+    int x = proxy;
+    SEQAN_ASSERT_EQ(3, x);
+
+    // Copy constructor;
+    TProxy proxy2(proxy);
+    int y = proxy2;
+    SEQAN_ASSERT_EQ(3, y);
 }
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_assign)
 {
-    SEQAN_ASSERT_FAIL("Write me!");
+    using namespace seqan;
+    typedef Proxy<IteratorProxy<int *> > TProxy;
+
+    int data[3] = { 0, 1, 2 };
+    int * it = &data[1];
+
+    TProxy proxy(it);
+    assign(proxy, 4);
+
+    SEQAN_ASSERT_EQ(data[0], 0);
+    SEQAN_ASSERT_EQ(data[1], 4);
+    SEQAN_ASSERT_EQ(data[2], 2);
 }
 
-SEQAN_DEFINE_TEST(test_basic_proxy_iterator_set)
-{
-    SEQAN_ASSERT_FAIL("Write me!");
-}
-
-SEQAN_DEFINE_TEST(test_basic_proxy_iterator_move)
-{
-    SEQAN_ASSERT_FAIL("Write me!");
-}
+// TODO(holtgrew): Test for set() after writing it.
+// TODO(holtgrew): Test for move() after writing it.
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_getValue)
 {
-    SEQAN_ASSERT_FAIL("Write me!");
+    using namespace seqan;
+    typedef Proxy<IteratorProxy<int *> > TProxy;
+
+    int data[3] = { 0, 1, 2 };
+    int * it = &data[1];
+
+    TProxy proxy(it);
+
+    SEQAN_ASSERT_EQ(getValue(proxy), 1);
 }
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_comparators)
 {
-    SEQAN_ASSERT_FAIL("Write me!");
+    using namespace seqan;
+    typedef Proxy<IteratorProxy<int *> > TProxy;
+
+    int data[4] = { 0, 1, 2, 1 };
+    int * it = &data[1];
+    int * it2 = &data[2];
+    int * it3 = &data[3];
+
+    TProxy proxy(it);
+    TProxy proxy2(it2);
+    TProxy proxy3(it3);
+
+    SEQAN_ASSERT(proxy == 1);
+    SEQAN_ASSERT(1 == proxy);
+    SEQAN_ASSERT(proxy != 2);
+    SEQAN_ASSERT(2 != proxy);
+    SEQAN_ASSERT(proxy <= 1);
+    SEQAN_ASSERT(1 <= proxy);
+    SEQAN_ASSERT(proxy >= 1);
+    SEQAN_ASSERT(2 >= proxy);
+    SEQAN_ASSERT(proxy < 2);
+    SEQAN_ASSERT(0 < proxy);
+    SEQAN_ASSERT(proxy > 0);
+    SEQAN_ASSERT(2 > proxy);
+
+    SEQAN_ASSERT(proxy == proxy3);
+    SEQAN_ASSERT(proxy != proxy2);
+    SEQAN_ASSERT(proxy < proxy2);
+    SEQAN_ASSERT(proxy <= proxy2);
+    SEQAN_ASSERT(proxy2 > proxy);
+    SEQAN_ASSERT(proxy2 >= proxy);
 }
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_stream_read)
 {
-    SEQAN_ASSERT_FAIL("Write me!");
+    std::stringstream ss;
+    ss << 33;
+
+    typedef Proxy<IteratorProxy<int *> > TProxy;
+
+    int x = 0;
+    TProxy proxy(&x);
+
+    ss >> proxy;
+
+    int y = proxy;
+    SEQAN_ASSERT_EQ(y, 33);
 }
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_stream_write)
 {
-    SEQAN_ASSERT_FAIL("Write me!");
+    std::stringstream ss;
+    int x = 33;
+
+    typedef Proxy<IteratorProxy<int *> > TProxy;
+    TProxy proxy(&x);
+
+    ss << proxy;
+
+    SEQAN_ASSERT(ss.str() == "33");
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_PROXY_H_

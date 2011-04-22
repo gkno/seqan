@@ -59,6 +59,7 @@ namespace seqan {
 */
 
 // TODO(holtgrew): Assignment works through operator=() but we also need set() and move()!
+// TODO(holtgrew): Proxy cannot work correctly for const containers, but should! RemoveConst_ removes the const of the values inside pointers and references.
 
 template <typename TIterator>
 struct IteratorProxy;
@@ -114,7 +115,6 @@ public:
     // Type conversion operators;  Have to be defined in class.
     // ------------------------------------------------------------------------
 
-    // TODO(holtgrew): Is this necessary?
     operator TAccessorNotConst_()
     {
         SEQAN_CHECKPOINT;
@@ -249,6 +249,8 @@ iter(Proxy<IteratorProxy<TIterator> > const & me)
 // ----------------------------------------------------------------------------
 // Function getValue()
 // ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Deletion candidate, why should a proxy provide the iterator interface?
 
 template <typename TIterator>
 typename GetValue<Proxy<IteratorProxy<TIterator> > >::Type
