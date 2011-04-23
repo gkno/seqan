@@ -182,7 +182,7 @@ struct Iterator : Iterator_Default_Imp<T, TSpec>
 ..include:seqan/basic.h
 */
 
-// TODO(holtgrew): Remove the default implementation; anti-auto-sequence. Also, using plain pointers for strings does not work any more. Will probably only work for rooted/adaptor/positional iterators.
+// TODO(holtgrew): Remove the default implementation; anti-auto-sequence. Also, using plain pointers for strings does not work any more. Will probably only work for rooted/adaptor/positional iterators. Same below.
 
 template <typename T>
 struct Container
@@ -354,6 +354,31 @@ moveValue(T const & me,
 {
     SEQAN_CHECKPOINT;
 	move(value(me), _value);
+}
+
+// ---------------------------------------------------------------------------
+// Function setValue()
+// ---------------------------------------------------------------------------
+
+///.Function.setValue.param.object.holder.type:Concept.Iterator
+
+template <typename T, typename TValue>
+inline void
+setValue(T * & ptr,
+         TValue & _value)
+{
+    SEQAN_CHECKPOINT;
+    ptr = &_value;
+}
+
+//const version for iterators as targets
+template <typename T, typename TValue>
+inline void
+setValue(T const * & ptr,
+         TValue const & _value)
+{
+    SEQAN_CHECKPOINT;
+    ptr = &_value;
 }
 
 // ---------------------------------------------------------------------------

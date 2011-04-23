@@ -251,7 +251,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     // =======================================================================
 
     SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_metafunctions);
-    SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_constructors);
     SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_transport);
     SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_transport_value);
     SEQAN_CALL_TEST(test_basic_iterator_adapt_pointer_movement);

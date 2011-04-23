@@ -7,6 +7,7 @@
 .Metafunction.Reference.concept:Concept.Iterator
 .Metafunction.Size.concept:Concept.Iterator
 .Metafunction.Difference.concept:Concept.Iterator
+.Metafunction.Position.concept:Concept.Iterator
 
 .Function.assign.concept:Concept.Iterator
 
