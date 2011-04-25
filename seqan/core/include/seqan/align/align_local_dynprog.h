@@ -51,7 +51,7 @@ public:
 	TValue value_;
 	TID id_;
 
-	ScoreAndID()
+	ScoreAndID() : value_(MinValue<TValue>::VALUE), id_(MaxValue<TValue>::VALUE)
 	{
 SEQAN_CHECKPOINT
 
