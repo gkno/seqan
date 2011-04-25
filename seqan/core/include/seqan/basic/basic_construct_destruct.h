@@ -70,10 +70,15 @@ template <typename T>
 struct IsSimple_
 {
 	typedef False Type;
+    enum { VALUE = 0 };
 };
 
 template <typename T>
-struct IsSimple : public IsSimple_<T> {};
+struct IsSimple
+{
+    typedef typename IsSimple_<T>::Type Type;
+    enum { VALUE = Type::VALUE };
+};
 
 template <typename T>
 struct IsSimple<T const> : public IsSimple<T> {};
