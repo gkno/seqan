@@ -53,19 +53,19 @@ assign(TTarget & target,
 //////////////////////////////////////////////////////////////////////////////
 // string_pointer.h::assignValue
 
-template <typename TValue, typename TPos>
-inline void
-assignValue(TValue * me,
-			TPos pos, 
-			TValue const & _value);
+//template <typename TValue, typename TPos>
+//inline void
+//assignValue(TValue * me,
+//			TPos pos, 
+//			TValue const & _value);
 
 //////////////////////////////////////////////////////////////////////////////
 // string_pointer.h::value
 
-template <typename TValue, typename TPos>
-inline TValue &
-value(TValue * me,
-	  TPos pos);
+//template <typename TValue, typename TPos>
+//inline TValue &
+//value(TValue * me,
+//	  TPos pos);
 
 //////////////////////////////////////////////////////////////////////////////
 // sequence/lexical.h::ordValue

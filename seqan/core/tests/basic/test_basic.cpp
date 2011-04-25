@@ -269,7 +269,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_iterator_adaptor_transport_value);
     SEQAN_CALL_TEST(test_basic_iterator_adaptor_movement);
     SEQAN_CALL_TEST(test_basic_iterator_adaptor_arithmetics);
-    SEQAN_CALL_TEST(test_basic_iterator_adaptor_rooted_metafunctions);
     SEQAN_CALL_TEST(test_basic_iterator_adaptor_rooted_functions);
 
     SEQAN_CALL_TEST(test_basic_iterator_position_metafunctions);
@@ -278,7 +277,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_iterator_position_transport_value);
     SEQAN_CALL_TEST(test_basic_iterator_position_movement);
     SEQAN_CALL_TEST(test_basic_iterator_position_arithmetics);
-    SEQAN_CALL_TEST(test_basic_iterator_position_rooted_metafunctions);
     SEQAN_CALL_TEST(test_basic_iterator_position_rooted_functions);
 
     // =======================================================================

@@ -130,6 +130,22 @@ public:
     }
 
     // ------------------------------------------------------------------------
+    // Pointer Operators;  Have to be defined within class.
+    // ------------------------------------------------------------------------
+    
+    typename Value<Iter>::Type *
+    operator->()
+    {
+        return &data_container[data_position];
+    }
+
+    typename Value<Iter>::Type const *
+    operator->() const
+    {
+        return &data_container[data_position];
+    }
+
+    // ------------------------------------------------------------------------
     // Conversion Operators;  Have to be defined in class.
     // ------------------------------------------------------------------------
 
@@ -244,7 +260,7 @@ value(Iter<TContainer, PositionIterator> const & me)
 template <typename TContainer, typename TValue>
 inline void
 assignValue(Iter<TContainer, PositionIterator> & me,
-            TValue _value)
+            TValue const & _value)
 {
     SEQAN_CHECKPOINT;
     assignValue(container(me), position(me), _value);
@@ -253,7 +269,7 @@ assignValue(Iter<TContainer, PositionIterator> & me,
 template <typename TContainer, typename TValue>
 inline void
 assignValue(Iter<TContainer, PositionIterator> const & me,
-            TValue _value)
+            TValue const & _value)
 {
     SEQAN_CHECKPOINT;
     assignValue(container(me), position(me), _value);

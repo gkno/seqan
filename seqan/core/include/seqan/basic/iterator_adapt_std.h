@@ -107,6 +107,7 @@ public:
             : data_iterator(iter_)
     {}
 
+    // TODO(holtgrew): Do we want this? Besides being non-essential, this creates a cross dependency on the begin function!
 	Iter(TContainer const & cont_)
             : data_iterator(begin(cont_))
     {}
@@ -130,6 +131,22 @@ public:
 	}
 
     // ------------------------------------------------------------------------
+    // Pointer Operators;  Have to be defined within class.
+    // ------------------------------------------------------------------------
+    
+    typename Value<Iter>::Type *
+    operator->()
+    {
+        return &*data_iterator;
+    }
+
+    typename Value<Iter>::Type const *
+    operator->() const
+    {
+        return &*data_iterator;
+    }
+
+    // ------------------------------------------------------------------------
     // Conversion Operators;  Have to be defined within class.
     // ------------------------------------------------------------------------
 
@@ -142,6 +159,63 @@ public:
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Metafunction Value
+// ----------------------------------------------------------------------------
+
+template <typename TContainer>
+struct Value<Iter<TContainer, StdIteratorAdaptor> >
+{
+    typedef typename TContainer::iterator TIterator_;
+    typedef typename std::iterator_traits<TIterator_>::value_type Type;
+};
+
+template <typename TContainer>
+struct Value<Iter<TContainer const, StdIteratorAdaptor> >
+{
+    typedef TContainer const TContainer_;
+    typedef typename TContainer::const_iterator TIterator_;
+    typedef typename std::iterator_traits<TIterator_>::value_type Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction GetValue
+// ----------------------------------------------------------------------------
+
+template <typename TContainer>
+struct GetValue<Iter<TContainer, StdIteratorAdaptor> >
+{
+    typedef typename TContainer::const_iterator TIterator_;
+    typedef typename std::iterator_traits<TIterator_>::reference Type;
+};
+
+template <typename TContainer>
+struct GetValue<Iter<TContainer const, StdIteratorAdaptor> >
+{
+    typedef TContainer const TContainer_;
+    typedef typename TContainer::const_iterator TIterator_;
+    typedef typename std::iterator_traits<TIterator_>::reference Type;
+};
+
+// ----------------------------------------------------------------------------
+// Metafunction Reference
+// ----------------------------------------------------------------------------
+
+template <typename TContainer>
+struct Reference<Iter<TContainer, StdIteratorAdaptor> >
+{
+    typedef typename TContainer::iterator TIterator_;
+    typedef typename std::iterator_traits<TIterator_>::reference Type;
+};
+
+template <typename TContainer>
+struct Reference<Iter<TContainer const, StdIteratorAdaptor> >
+{
+    typedef TContainer const TContainer_;
+    typedef typename TContainer::const_iterator TIterator_;
+    typedef typename std::iterator_traits<TIterator_>::reference Type;
+};
 
 // ----------------------------------------------------------------------------
 // Metafunction StdContainerIterator
@@ -159,29 +233,19 @@ public:
 ..remarks:This is used in @Spec.STD Adaptor Iterator@.
  */
 
-//helper Metafunction
+template <typename TStdContainer>
+struct StdContainerIterator;
 
-// TODO(holtgrew): Still problematic without VC++ 2003 support?
-/* This simple, general implementation cannot be used due to strange VC++ 2003 behavior
- 
- template <typename TStdContainer>
- struct StdContainerIterator
- {
- typedef typename TStdContainer::iterator Type;
- };
- 
- template <typename TStdContainer>
- struct StdContainerIterator<TStdContainer const>
- {
- typedef typename TStdContainer::const_iterator Type;
- };
- */
-
-//we use this instead: specialize StdContainerIterator for each std-container
 template <typename TStdContainer>
 struct StdContainerIterator
 {
-    typedef void * Type; //dummy, just to make VC++ 2003 happy
+     typedef typename TStdContainer::iterator Type;
+};
+
+template <typename TStdContainer>
+struct StdContainerIterator<TStdContainer const>
+{
+     typedef typename TStdContainer::const_iterator Type;
 };
 
 // ============================================================================

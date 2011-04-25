@@ -135,6 +135,22 @@ public:
 	}
 
     // ------------------------------------------------------------------------
+    // Pointer Operators;  Have to be defined within class.
+    // ------------------------------------------------------------------------
+    
+    typename Value<Iter>::Type *
+    operator->()
+    {
+        return &*data_iterator;
+    }
+
+    typename Value<Iter>::Type const *
+    operator->() const
+    {
+        return &*data_iterator;
+    }
+
+    // ------------------------------------------------------------------------
     // Conversion Operators;  Have to be defined in class.
     // ------------------------------------------------------------------------
 
