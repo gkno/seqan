@@ -1185,10 +1185,12 @@ struct AppendValueToString_
         if (capacity(me) <= me_length)
         {
             typename Value<T>::Type temp_copy(_value); //temp copy because resize could invalidate _value
+            // TODO(holtgrew): The resize() function will default construct the last element. This is slow. Get rid of this.
             typename Size<T>::Type new_length = resize(me, me_length + 1, TExpand());
             if (me_length < new_length)
             {
-                valueConstruct(begin(me) + me_length, temp_copy); //??? this should be valueMoveConstruct
+                *(begin(me, Standard()) + me_length) = temp_copy;
+//                valueConstruct(begin(me) + me_length, temp_copy); //??? this should be valueMoveConstruct
             }
         }
         else

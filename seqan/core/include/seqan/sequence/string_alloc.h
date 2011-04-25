@@ -446,7 +446,9 @@ inline void
 move(String<TValue, Alloc<TSpec> > & target,
      String<TValue, Alloc<TSpec> > & source)
 {
-    clear(target);
+    arrayDestruct(target.data_begin, target.data_end);
+    _deallocateStorage(target, target.data_begin, target.data_capacity);
+//    clear(target);
     target.data_begin = source.data_begin;
     target.data_end = source.data_end;
     target.data_capacity = source.data_capacity;
