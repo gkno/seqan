@@ -161,6 +161,16 @@ void resetCDStructStatics()
 // Tests
 // ==========================================================================
 
+SEQAN_DEFINE_TEST(test_basic_construct_destruct_metafunction_is_simple)
+{
+    bool b = IsSimple<bool>::VALUE;
+    SEQAN_ASSERT(b);
+    b = IsSimple<int>::VALUE;
+    SEQAN_ASSERT(b);
+    b = IsSimple<CDStruct>::VALUE;
+    SEQAN_ASSERT_NOT(b);
+}
+
 SEQAN_DEFINE_TEST(test_basic_construct_destruct_construct_value_pointer)
 {
     // Default construction.

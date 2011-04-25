@@ -283,6 +283,8 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     // Tests for Construction / Destruction
     // =======================================================================
 
+    SEQAN_CALL_TEST(test_basic_construct_destruct_metafunction_is_simple);
+
     // TODO(holtgrew): Test on non-pointers.
     SEQAN_CALL_TEST(test_basic_construct_destruct_construct_value_pointer);
     SEQAN_CALL_TEST(test_basic_construct_destruct_destruct_value_pointer);
