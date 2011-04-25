@@ -253,7 +253,7 @@ struct ValueDestructorProxy_
 ..cat:Content Manipulation
 ..summary:Destoys an object at specified position.
 ..signature:valueDestruct(iterator)
-..param.iterator:Pointer or iterator to position where the object should be constructed.
+..param.iterator:Pointer or iterator to position where the object should be destructed.
 ..remarks:The type of the constructed object is the @Metafunction.Value.value type@ of $iterator$.
 ..see:Function.valueConstruct
 ..include:seqan/basic.h
