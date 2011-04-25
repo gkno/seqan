@@ -306,6 +306,7 @@ clear(String<TValue, Block<SPACE> >& me)
 
     TIter it = begin(me.blocks), itEnd = end(me.blocks);
     while (it != itEnd) {
+        valueDestruct(it);
         deallocate(me.alloc, *it, 1);
         ++it;
     }
@@ -425,16 +426,21 @@ appendValue(
     TVal const& source,
     Tag<TExpand> const tag)
 {
+    // TODO(holtgrew): Why does this operate on raw memory instead of using appendValue(me.blocks[last], X)?
     SEQAN_CHECKPOINT;
     if (me.lastValue == me.blockLast) {
         typename Size< String<TValue, Block<SPACE> > >::Type last = length(me.blocks);
 
         resize(me.blocks, last + 1, tag);
         allocate(me.alloc, me.blocks[last], 1);
+        valueConstruct(me.blocks[last]);
         me.lastValue = me.blockFirst = begin(*me.blocks[last]);
         me.blockLast = (me.blockFirst + (SPACE - 1));
-    } else
+        back(me.blocks)->data_end += 1;
+    } else {
         ++me.lastValue;
+        back(me.blocks)->data_end += 1;
+    }
     valueConstruct(me.lastValue, source);
 }
 
