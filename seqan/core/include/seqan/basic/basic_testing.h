@@ -546,7 +546,8 @@ const char *tempFileName() {
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
     inline
     void beginTestSuite(const char *testSuiteName, const char *argv0) {
-        // First things first: Print the current debug level.
+        // First things first: Print test suite name and current debug level.
+        std::cout << "TEST SUITE " << testSuiteName << std::endl;
         printDebugLevel(std::cout);
         (void)testSuiteName;
         StaticData::testCount() = 0;
