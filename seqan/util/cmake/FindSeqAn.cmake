@@ -22,6 +22,7 @@ macro (seqan_setup_global)
         # For the GCC, enable warnings.
         set (CMAKE_CXX_WARNING_LEVEL 4)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-long-long -fstrict-aliasing -Wstrict-aliasing")
+        add_definitions (-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64)
 
         # Determine GCC version.
         # message("Determining GCC version.")
