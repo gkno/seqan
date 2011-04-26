@@ -75,9 +75,9 @@ template <> struct IsSimple_<double> { typedef True Type; };
 template <> struct IsSimple_<long double> { typedef True Type; };
 
 // user defined types (re-specializations are allowed here)
-template <> struct IsSimple_<wchar_t> { typedef True Type; };
-template <> struct IsSimple_<__int64> { typedef True Type; };
-template <> struct IsSimple_<__uint64> { typedef True Type; };
+template <> struct IsSimple<wchar_t> { typedef True Type; };
+template <> struct IsSimple<__int64> { typedef True Type; };
+template <> struct IsSimple<__uint64> { typedef True Type; };
 
 // ----------------------------------------------------------------------------
 // Metafunction BitsPerValue
