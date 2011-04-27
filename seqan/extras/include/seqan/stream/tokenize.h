@@ -200,6 +200,7 @@ _readHelper(TBuffer & buffer,
             bool const desiredOutcomeOfComparison) 
 /*   desired behaviour of loop -> "readUntil()" or "readwhile()"  */
 {
+    std::cout << "at: " << __LINE__ << "\n";
     clear(buffer);
 //     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
     typedef char TChar; //TODO fix this
@@ -209,6 +210,9 @@ _readHelper(TBuffer & buffer,
         TChar c = value(reader);
         if (_charCompare(c, tag) == desiredOutcomeOfComparison)
             return 0;
+        else
+            std::cout << "\"" << c << "\" is " << (isspace(c) ? "" : " not ")
+                      << "whitespace\n";
         append(buffer, c, Generous()); // TODO Generous() is right?
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -226,6 +230,7 @@ _readHelper(TBuffer & buffer,
             Tag<TSpec> const & tag)
 /*   default behaviour of loop is "readUntil()" */
 {
+    std::cout << "at: " << __LINE__ << "\n";
     return _readHelper(buffer, reader, tag, true);
 }
 
@@ -395,6 +400,7 @@ inline int
 readUntilWhitespace(TBuffer & buffer,
                     RecordReader<TStream, TPass> & reader)
 {
+    std::cout << "at: " << __LINE__ << "\n";
     SEQAN_CHECKPOINT
     return _readHelper(buffer,
                        reader,
