@@ -265,13 +265,13 @@ _streamPutChar(unsigned int const/**/)
 inline char const *
 _streamPutChar(long const/**/)
 {
-    return "%D";
+    return "%ld";
 }
 
 inline char const *
 _streamPutChar(unsigned long const/**/)
 {
-    return "%U";
+    return "%lu";
 }
 
 inline char const *
