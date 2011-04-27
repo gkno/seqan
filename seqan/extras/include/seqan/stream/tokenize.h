@@ -92,8 +92,6 @@ typedef Tag<Graph__> Graph_;
 inline int
 _charCompare(int const c, Whitespace_ const & /* tag*/)
 {
-    std::cout << "\"" << c << "\" is " << (isspace(c) ? "" : " not ")
-              << "whitespace\n";
     return isspace(c);
 }
 
@@ -200,7 +198,6 @@ _readHelper(TBuffer & buffer,
             bool const desiredOutcomeOfComparison) 
 /*   desired behaviour of loop -> "readUntil()" or "readwhile()"  */
 {
-    std::cout << "at: " << __LINE__ << "\n";
     clear(buffer);
 //     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
     typedef char TChar; //TODO fix this
@@ -208,11 +205,8 @@ _readHelper(TBuffer & buffer,
     while (!atEnd(reader))
     {
         TChar c = value(reader);
-        if (bool b= _charCompare(c, tag) == desiredOutcomeOfComparison)
+        if (bool( _charCompare(c, tag)) == desiredOutcomeOfComparison)
             return 0;
-        else
-            std::cout << "c: " << c << " _charCompare: "
-                      << b << " isspace: " << isspace(c) << "\n";
         append(buffer, c, Generous()); // TODO Generous() is right?
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -230,7 +224,6 @@ _readHelper(TBuffer & buffer,
             Tag<TSpec> const & tag)
 /*   default behaviour of loop is "readUntil()" */
 {
-    std::cout << "at: " << __LINE__ << "\n";
     return _readHelper(buffer, reader, tag, true);
 }
 
@@ -247,7 +240,7 @@ _skipHelper(TRecordReader & reader,
     while (!atEnd(reader))
     {
         TChar c = value(reader);
-        if (_charCompare(c, tag) == desiredOutcomeOfComparison)
+        if (bool(_charCompare(c, tag)) == desiredOutcomeOfComparison)
             return 0;
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -281,7 +274,7 @@ _countHelper(uint & count,
     {
         TChar c = value(reader);
         count++;
-        if (_charCompare(c, tag) == desiredOutcomeOfComparison)
+        if (bool(_charCompare(c, tag)) == desiredOutcomeOfComparison)
             return 0;
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -321,7 +314,7 @@ _readHelper(TBuffer & buffer,
         TChar c = value(reader);
         if (!_charCompare(c, skipTag))
         {
-            if (_charCompare(c, compTag) == desiredOutcomeOfComparison)
+            if (bool (_charCompare(c, compTag)) == desiredOutcomeOfComparison)
                 return 0;
             append(buffer, c, Generous()); // TODO Generous() is right?
         }
@@ -400,7 +393,6 @@ inline int
 readUntilWhitespace(TBuffer & buffer,
                     RecordReader<TStream, TPass> & reader)
 {
-    std::cout << "at: " << __LINE__ << "\n";
     SEQAN_CHECKPOINT
     return _readHelper(buffer,
                        reader,
