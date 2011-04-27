@@ -1585,7 +1585,9 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			currentSeq = it->first.first;
 		}
 		TKeyType c = (TKeyType) getProperty(component, it->second);
-		compLength.insert(std::make_pair(c, (TMappedType) fragmentLength(g, it->second)));
+		if(!compLength.insert(std::make_pair(c, (TMappedType) fragmentLength(g, it->second))).second) {
+			compLength[c] = _max(compLength[c], (TMappedType) fragmentLength(g, it->second));
+		}
 		while ((compIndex < compIndexLen) && (order[compIndex] != c)) ++compIndex;
 		// Crossing components -> no alignment
 		if (compIndex >= compIndexLen) return false;
@@ -1666,6 +1668,8 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		TStringSetStrIter itStrEnd = end(str, Standard());
 		for(;itStr != itStrEnd; goNext(itStr), ++col) 
 			mat[row*len + col] = (TValue) (*itStr);
+		for(TSize i = length(str); i < compLength[order[compIndex]]; ++i, ++col)
+			mat[row*len + col] = gapValue<char>();
 		++compIndex;
 	}
 	SEQAN_ASSERT(row + 1 == nseq);
