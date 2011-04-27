@@ -675,11 +675,11 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	while(score < oldScore) {
 //		std::cout << "Score: " << score << std::endl;
 		oldScore = score;
-        double beginTime = sysTime();
+//        double beginTime = sysTime();
         double tBefore = 0, tAlign = 0, tAfter = 0;
 		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference, tBefore, tAlign, tAfter);
 //        fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
-        double endTime = sysTime();
+//        double endTime = sysTime();
 //        std::cerr << "TIME realign " << endTime - beginTime << std::endl;
 		score = scoreConsensus(consensus);
 	}
