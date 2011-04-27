@@ -16,9 +16,17 @@ macro (seqan_setup_global)
          "Used to get the directory to util, for example." FORCE)
 
     # -----------------------------------------------------------------------
+    # Check whether we compile with CLANG.
+    # -----------------------------------------------------------------------
+    set (COMPILER_IS_CLANG FALSE)
+    if (CMAKE_CXX_COMPILER MATCHES "clang\\+\\+")
+      set (COMPILER_IS_CLANG TRUE)
+    endif (CMAKE_CXX_COMPILER MATCHES "clang\\+\\+")
+
+    # -----------------------------------------------------------------------
     # GCC Setup
     # -----------------------------------------------------------------------
-    if (CMAKE_COMPILER_IS_GNUCXX)
+    if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
         # For the GCC, enable warnings.
         set (CMAKE_CXX_WARNING_LEVEL 4)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-long-long -fstrict-aliasing -Wstrict-aliasing")
@@ -51,7 +59,7 @@ macro (seqan_setup_global)
   
         # Pass CXX flags to flags.
         #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_CXX_FLAGS_=\"${CMAKE_CXX_FLAGS}\"")
-    endif (CMAKE_COMPILER_IS_GNUCXX)
+    endif (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
 
     # -----------------------------------------------------------------------
     # Visual Studio Setup
@@ -106,7 +114,7 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     # ---------------------------------------------------------------------------
     # Forwards Generation.
     # ---------------------------------------------------------------------------
-    if (CMAKE_COMPILER_IS_GNUCXX)
+    if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
         file (GLOB BASE_CONTENTS RELATIVE ${PATH}/seqan ${PATH}/seqan/[A-z]*)
         foreach (ENTRY ${BASE_CONTENTS})
             if (IS_DIRECTORY ${PATH}/seqan/${ENTRY})
@@ -134,7 +142,7 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
             #    COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/util/bin/build_forwards.py ${PATH}/seqan all
             #    DEPENDS ${HEADERS})")
         endif (MODULES)
-    endif (CMAKE_COMPILER_IS_GNUCXX)
+    endif (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
 
     # ---------------------------------------------------------------------------
     # GUI Setup Stuff.
@@ -198,7 +206,7 @@ endfunction (seqan_make_seqan_available TARGET_NAME)
 #   of this target to subsequently targets added by seqan_add_test will
 #   be added.
 # * Setting definitions SEQAN_ENABLE_DEBUG=1 and SEQAN_ENABLE_TESTING=1.
-# * If the ${MODEL} variable is NightlyCoverage or ExperimentalCoverage,
+# * If the ${MODEL} variable is NightlyCoverage OR ExperimentalCoverage,
 #   and the compiler is GCC C++ then symbols for test coverate are added.
 
 macro (seqan_setup_tests TEST_TARGET)
@@ -216,16 +224,16 @@ macro (seqan_setup_tests TEST_TARGET)
     
     # Conditionally enable coverage mode.
     if (MODEL STREQUAL "NightlyCoverage")
-        if (CMAKE_COMPILER_IS_GNUCXX)
+        if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
             set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
             set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
-        endif (CMAKE_COMPILER_IS_GNUCXX)
+        endif (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
     endif (MODEL STREQUAL "NightlyCoverage")
     if (MODEL STREQUAL "ExperimentalCoverage")
-        if (CMAKE_COMPILER_IS_GNUCXX)
+        if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
             set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
             set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
-        endif (CMAKE_COMPILER_IS_GNUCXX)
+        endif (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
     endif (MODEL STREQUAL "ExperimentalCoverage")
 endmacro (seqan_setup_tests)
 
