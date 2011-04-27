@@ -239,7 +239,7 @@ int main(int argc, char const ** argv)
 
 // Allow disabling checkpoints independent of testing.
 #ifndef SEQAN_ENABLE_CHECKPOINTS
-#define SEQAN_ENABLE_CHECKPOINTS SEQAN_ENABLE_TESTING
+#define SEQAN_ENABLE_CHECKPOINTS 0 // SEQAN_ENABLE_TESTING
 #endif  // #ifndef SEQAN_ENABLE_CHECKPOINTS
 
 namespace seqan {
