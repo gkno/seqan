@@ -241,6 +241,7 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_streamPut)
 
     while (!feof(stream) && i <998) buffer[i++] = fgetc(stream);
     buffer[i-1] = 0;
+    std::cout << buffer;
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
     fclose(stream);
 }
