@@ -1,5 +1,5 @@
  /*==========================================================================
-                RazerS Spliced - Fast Split Read Mapping 
+                SplitRazerS - Fast Split Read Mapping 
 
  ============================================================================
   Copyright (C) 2008 by Anne-Katrin Emde
@@ -148,7 +148,7 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 	TSize d_m2 = (int) options.maxSuffixErrors;
 	TSize numReads = length(readSet);
 	genomeLen = options.specifiedGenomeLen;
-	if(options.anchored) genomeLen = options.maxGap + 2*options.libraryError;
+	if(options.anchored) genomeLen = options.maxGap + 2*options.libraryError; // upper bound
 	TSize readLen = (numReads > 0) ? length(readSet[0]) : 0;
 	TSize numErrors = static_cast<int>(readLen * options.errorRate);
 	TSize maxD = options.maxGap;
@@ -200,7 +200,9 @@ bool loadReadsSam(
 	typedef typename Value<TReadRegions>::Type	TRegion;
 	typedef typename Value<TReadSet>::Type		TRead;
 	typedef typename Value<TNameSet>::Type		TReadName;
-	typedef typename Value<TRegion,2>::Type		TContigPos;
+	//typedef typename Value<TRegion,2>::Type		TContigPos;
+	typedef typename Value<TRegion,2>::Type		TFlagPos;
+	typedef typename Value<TFlagPos,2>::Type	TContigPos;
 
 	bool countN = !(options.matchN || options.outputFormat == 1 );
 	if (!empty(CharString(options.outputUnmapped))) countN = false;
@@ -240,6 +242,9 @@ bool loadReadsSam(
 		}
         _parseSkipWhitespace(file, c);
 		bool reverse = (flag & (1 << 4)) == (1 << 4); // if reverse this read is expected to match downstream of its mate
+		int bitFlag = 0;	// has two bits
+		if(reverse) bitFlag +=2;	// first bits says whether reversed (or not ->0)
+		if((flag & (1 << 7)) == (1 << 7)) bitFlag +=1; // second bit says whether second mate (or first ->0)
 
 		// Read reference name.  Same behaviour as for query name:  Read up to
         // the first whitespace character and skip to next tab char.
@@ -320,21 +325,24 @@ bool loadReadsSam(
 
 		appendValue(reads, readSeq, Generous());
 
-		appendValue(readRegions,TRegion(0,0));
+		appendValue(readRegions,TRegion(0,TFlagPos(0,0)));
+		readRegions[i].i2.i1 = bitFlag; 
+		readRegions[i].i2.i2 = (signed)beginPos; 
         if (reverse)
 		{
 			// libraryLength is outer fragment distance 
 			regionBegin = _max((int)beginPos + readLength,(int)beginPos+options.libraryLength-readLength-options.libraryError);
 			regionEnd = (signed)beginPos+options.libraryLength+options.libraryError+options.maxGap;
 			// expected begin position of read
-			readRegions[i].i2 = (signed)beginPos + options.libraryLength - readLength; 
+	//		readRegions[i].i2 = (signed)beginPos + options.libraryLength - readLength; 
+
 		}
 		else  // read should map upstream of mapped mate --> set the vorzeichen bit
 		{
 			regionBegin = _max((int)0,(int)beginPos-options.libraryLength+readLength-options.libraryError-options.maxGap);
 			regionEnd = _min((int)beginPos,(int)beginPos-options.libraryLength+2*readLength+options.libraryError);
 			// expected end position of read
-			readRegions[i].i2 = - _min((int)beginPos,(int)beginPos-options.libraryLength+2*readLength);//+options.maxGap);
+			//readRegions[i].i2 = - _min((int)beginPos,(int)beginPos-options.libraryLength+2*readLength);//+options.maxGap);
 		}
 //		readRegions[i].i1 = 0; //currently just ment for one chr at a time... need to add genomeId map
 		if(regionEnd > (TContigPos) options.maxReadRegionsEnd) options.maxReadRegionsEnd = (unsigned) regionEnd;
@@ -1947,55 +1955,62 @@ int mapSplicedReads(
 }
 
 
+// returns start pos furthest to the left
 template<typename TValue, typename TRegion, typename TOptions>
-inline typename Value<TRegion,2>::Type
+inline typename Value<typename Value<TRegion,2>::Type,2>::Type
 regionStartPos(TRegion & readRegion,
 			   TValue readLength,
 			   TOptions & options)
 {
-	typedef typename Value<TRegion,2>::Type TSignedPos;
+	typedef typename Value<typename Value<TRegion,2>::Type,2>::Type TSignedPos;
 
-	if(readRegion.i2 < 0)	// i2 stores expected end pos of match
-		return _max((TSignedPos)0, (TSignedPos)- readRegion.i2 - readLength - options.libraryError - options.maxGap);
-	else					// i2 stores expected start pos
-		return readRegion.i2 - options.libraryError;
+	if(readRegion.i2.i1 < 2)	// i2 stores expected end pos of match
+		return _max(0,(TSignedPos)readRegion.i2.i2 - options.libraryLength + readLength - options.libraryError - options.maxGap);
+	else				 	    // i2 stores expected start pos
+		return (readRegion.i2.i2  + options.libraryLength - readLength - options.libraryError);
 	
 }
 
+// returns end pos furthest to the right
 template<typename TValue, typename TRegion, typename TOptions>
-inline typename Value<TRegion,2>::Type
+inline typename Value<typename Value<TRegion,2>::Type,2>::Type
 regionEndPos(TRegion & readRegion,
 			   TValue readLength,
 			   TOptions & options)
 {
-	typedef typename Value<TRegion,2>::Type TSignedPos;
+	typedef typename Value<typename Value<TRegion,2>::Type,2>::Type TSignedPos;
 
-	if(readRegion.i2 < 0)	// i2 stores expected end pos of match
-		return (TSignedPos)- readRegion.i2 + options.libraryError;
+	if(readRegion.i2.i1 < 2)	// i2 stores expected end pos of match
+		return (TSignedPos)readRegion.i2.i2-options.libraryLength+2*readLength + options.libraryError;
 	else					// i2 stores expected start pos
-		return readRegion.i2 +readLength + options.libraryError + options.maxGap;
+		return readRegion.i2.i2+ options.libraryLength + options.libraryError + options.maxGap;
 	
 }
 
 
 
-template<typename TMatch, typename TRegion, typename TOptions>
+template<typename TMatch, typename TValue, typename TRegion, typename TOptions>
 inline bool
 isValidRegion(TMatch & mL,
 			   TMatch & mR,
+			   TValue readLength,
 			   TRegion & readRegion,
 			   TOptions & options)
 { 
-	if(readRegion.i2 < 0)	// mR.gEnd needs to lie within a specific region
+	typedef typename Value<typename Value<TRegion,2>::Type,2>::Type TSignedPos;
+
+	if(readRegion.i2.i1 < 2)	// mR.gEnd needs to lie within a specific region
 	{
-		if (mR.gEnd < -readRegion.i2 - options.libraryError ||
-			mR.gEnd > -readRegion.i2 + options.libraryError )
+		TSignedPos expEndPos = readRegion.i2.i2 - options.libraryLength + 2*readLength;
+		if (mR.gEnd < expEndPos - options.libraryError ||
+			mR.gEnd > expEndPos + options.libraryError )
 			return false;
 	}
 	else					// mL.gBegin needs to lie within a specific region
 	{
-		if (mL.gBegin < readRegion.i2 - options.libraryError ||
-			mL.gBegin > readRegion.i2 + options.libraryError )
+		TSignedPos expStartPos = readRegion.i2.i2 + options.libraryLength - readLength;
+		if (mL.gBegin < expStartPos - options.libraryError ||
+			mL.gBegin > expStartPos + options.libraryError )
 			return false;
 	}
 	return true;
@@ -2367,7 +2382,7 @@ void mapSplicedReads(
 					TMatch mRtmp = mR;
 					TMatch mLtmp = (*it).i2;
 					if(!empty(readRegions) &&
-						!isValidRegion(mLtmp,mRtmp,readRegions[rseqNo],options))
+						!isValidRegion(mLtmp,mRtmp,readLength,readRegions[rseqNo],options))
 //						((TSignedGPos)mLtmp.gBegin < (TSignedGPos)readRegions[rseqNo].i2 ||
 //					 	(TSignedGPos)mRtmp.gEnd > (TSignedGPos)readRegions[rseqNo].i3)) //match must lie within possible mapping region
 						continue; 
@@ -2434,8 +2449,8 @@ void mapSplicedReads(
 
 					if(outerDistanceError != 0) 
 					{ //subtract one if there is an indel in the middle (such that perfect matches are better than indel matches..)
-						mLtmp.pairScore -= 1; 
-						mRtmp.pairScore -= 1; 
+						mLtmp.pairScore -= options.penaltyC; 
+						mRtmp.pairScore -= options.penaltyC; 
 					}
 #ifdef RAZERS_DEBUG_LIGHT
 					bool falsch = false;
@@ -2523,9 +2538,9 @@ void mapSplicedReads(
 					
 					mLtmp.rseqNo = mRtmp.rseqNo = rseqNo;
 
-					if (!empty(readRegions) && options.anchored)
+					if (!empty(readRegions) && options.anchored && options.outputFormat != 4)
 					{
-						if(readRegions[rseqNo].i2 < 0) // match actually is on reverse strand
+						if(readRegions[rseqNo].i2.i1 > 1) // match actually is on reverse strand
 						{
 							temp = mLtmp;
 							mLtmp = mRtmp;

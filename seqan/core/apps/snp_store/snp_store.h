@@ -2951,7 +2951,7 @@ void dumpSNPsBatch(
 
 	for(TContigPos candidatePos = 0; candidatePos < (TContigPos)length(genome); ++candidatePos)
 	{
-		if(options._debugLevel > 1) ::std::cout << "Next pos\n";
+//		if(options._debugLevel > 1) ::std::cout << "Next pos\n";
 		
 		if(candidatePos + startCoord < currStart) continue;
 
@@ -2971,7 +2971,7 @@ void dumpSNPsBatch(
 		Dna5 candidateBase;
 		int quality;
 		
-		if(options._debugLevel > 1)std::cout << candidatePos+startCoord << "<-candidatePos\n";
+//		if(options._debugLevel > 1)std::cout << candidatePos+startCoord << "<-candidatePos\n";
 		for(unsigned t=0;t<5;++t) 
 		{
 			countF[t] = 0;

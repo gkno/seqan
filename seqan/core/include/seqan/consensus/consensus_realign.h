@@ -557,7 +557,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
     endTime = sysTime();
-    std::cerr << "TIME sorting " << endTime - beginTime << std::endl;
+//    std::cerr << "TIME sorting " << endTime - beginTime << std::endl;
 
     beginTime = sysTime();
 	// Copy all reads belonging to this contig and reverse complement them if necessary.
@@ -603,7 +603,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		appendValue(contigReads, el, Generous());
 	}
     endTime = sysTime();
-    std::cerr << "TIME copying " << endTime - beginTime << std::endl;
+//    std::cerr << "TIME copying " << endTime - beginTime << std::endl;
 
     beginTime = sysTime();
 	// Create the consensus sequence
@@ -662,28 +662,28 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		}
 	}
     endTime = sysTime();
-    std::cerr << "TIME consensus " << endTime - beginTime << std::endl;
+//    std::cerr << "TIME consensus " << endTime - beginTime << std::endl;
 	
     beginTime = sysTime();
     double tBefore = 0, tAlign = 0, tAfter = 0;
 	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference, tBefore, tAlign, tAfter);
-    fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
+//    fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
     endTime = sysTime();
-    std::cerr << "TIME realign " << endTime - beginTime << std::endl;
+//    std::cerr << "TIME realign " << endTime - beginTime << std::endl;
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
-		std::cout << "Score: " << score << std::endl;
+//		std::cout << "Score: " << score << std::endl;
 		oldScore = score;
         double beginTime = sysTime();
         double tBefore = 0, tAlign = 0, tAfter = 0;
 		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference, tBefore, tAlign, tAfter);
-        fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
+//        fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
         double endTime = sysTime();
-        std::cerr << "TIME realign " << endTime - beginTime << std::endl;
+//        std::cerr << "TIME realign " << endTime - beginTime << std::endl;
 		score = scoreConsensus(consensus);
 	}
-	std::cout << "FinalScore: " << score << std::endl;
+//	std::cout << "FinalScore: " << score << std::endl;
 
     beginTime = sysTime();
 	// Update all the aligned reads and the new consensus
@@ -743,7 +743,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	if (includeReference) 
 		appendValue(fragStore.alignedReadStore, contigReads[length(contigReads) - 1], Generous() );
     endTime = sysTime();
-    std::cerr << "TIME finalizing " << endTime - beginTime << std::endl;
+//    std::cerr << "TIME finalizing " << endTime - beginTime << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////////

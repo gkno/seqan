@@ -19,14 +19,18 @@ Table of Contents
 SplazerS (SplitRazerS) is a tool primarily designed for split mapping of 
 sequencing reads. It is a branch of the RazerS algorithm 
 (http://www.seqan.de/projects/razers.html) and therefore also features basic 
-read mapping (split mapping can be switched off via a command line parameter). 
+read mapping functionality (split mapping can be switched off via a command 
+line parameter).. 
 SplazerS searches for split read matches where prefix and suffix match of a
 read may be interrupted by a longer gap. Matches are identified with two 
 q-gram filtering criteria: one for the read prefix and one for the read 
 suffix. Prefix/suffix matches are only verified if both prefix and suffix 
 filter return a potential match region within a certain maximum distance.
 If both are verified positively, the best split position within the read is
-located. 
+located. SplazerS version 1.1 (and higher) also support anchored split mapping
+in paired-end data where the candidate region of a potential split-read is 
+defined by its mapped paired end.
+
 
 
 ---------------------------------------------------------------------------
@@ -76,6 +80,12 @@ Fasta/Fastq file containing the reads to be mapped onto the reference. If
 two read files are given, split mapping is disabled and instead mate-pair 
 mapping is switched on. In that case, the two read files must contain the
 same number of reads, corresponding to left and right mates.
+
+SplazerS version 1.1 (and higher) also support anchored split mapping in
+paired-end data. The anchored mode can be switched on with option -an. The
+input reads then must be given in SAM format. Reads with flag 85, 101, 149,
+or 165 (which are unmapped but are anchored by their mapped mate) are then
+split-mapped within a smaller candidate region (see options -ll and -le).
 
 Currently, in its default mode, SplazerS maps the reads with a minimal 
 prefix/suffix match length of 23bp, an overall identity of at least 95% in

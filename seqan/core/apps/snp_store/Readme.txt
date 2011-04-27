@@ -1,7 +1,7 @@
 /***********************************\
 /***********  SnpStore  ************\
 /****   SNP and InDel Calling   ****\
-/****		    for NGS data        ****\
+/****	   for mapped NGS reads    ****\
 /***********************************\
 
 ---------------------------------------------------------------------------
@@ -11,14 +11,15 @@ Table of Contents
   2.   Installation
   3.   Usage
   4.   File Formats
-  5.   Contact
+  5.   Example
+  6.   Contact
 
 ---------------------------------------------------------------------------
 1. Overview
 ---------------------------------------------------------------------------
 
 SnpStore is a program for SNP and indel calling in mapped next-generation
-sequencing reads. 
+sequencing read data. 
 It features a simple threshold-based model for SNP and indel calling, and
 a MAQ-like Bayesian model for SNP genotype calling. 
 Reads can optionally be realigned, using the ReAligner algorithm by Anson
@@ -39,7 +40,7 @@ http://www.seqan.de). To build SnpStore do the following:
   1)  Download the latest snapshot of SeqAn
   2)  Unzip it to a directory of your choice (e.g. seqan)
   3)  cd seqan/projects/library/cmake
-  4)  cmake . -DCMAKE_BUILD_TYPE=Release
+  4)  cmake .. -DCMAKE_BUILD_TYPE=Release
   5)  make snp_store
   6)  ./apps/snp_store
 
@@ -47,8 +48,8 @@ Alternatively - and this is what I recommend - you can check out the latest
 SVN version of SnpStore and SeqAn with:
 
   1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
-  2)  cd seqan/projects/library/cmake
-  3)  cmake . -DCMAKE_BUILD_TYPE=Release
+  2)  cd seqan/build
+  3)  cmake .. -DCMAKE_BUILD_TYPE=Release
   5)  make snp_store
   7)  ./apps/snp_store
 
@@ -61,12 +62,12 @@ description was dumped.
 
 Usage: snp_store [OPTIONS]... <REFERENCE.fa> <MAPPED_READS.gff> 
 
-SnpStore expects at least two files: the reference sequence in Fasta format
+SnpStore expects at least two files: the reference sequence in (Multi-)Fasta format
 and the mapped reads in GFF format. For a description of this GFF format 
 see section 4.1. 
 Multiple mapped read files can be specified by listing multiple GFF files 
 in quotation marks, i.e. "file1.gff file2.gff", or in square brackets, i.e. 
-[file1.gff file2.gff].
+[file1.gff file2.gff]. 
 
 To produce output files, at least one of the two options "-o" (output file 
 for SNPs) and "-id" (output file for indels) needs to be specified. 
@@ -226,8 +227,8 @@ Other options:
 4. File Formats
 ---------------------------------------------------------------------------
 
-The reference sequence must be given in Fasta format.
-The format for the mapped read files is explained in section 4.1, while the 
+The reference sequence(s) must be given in a single Fasta file.
+The format for the mapped read files is explained in section 4.1, the 
 output file formats are described in section 4.2.
 
 
@@ -235,23 +236,23 @@ output file formats are described in section 4.2.
 4.1 Mapped Reads General Feature Format
 ---------------------------------------------------------------------------
 
-SnpStore expects the reads in General Feature Format (GFF). Read files have
-to be sorted according to 1) chromosome and 2) genomic start and 3) genomic
+SnpStore expects the mapped reads in General Feature Format (GFF). Read files have
+to be sorted according to 1) chromosome (same order as in the reference sequence file) and 2) genomic start and 3) genomic
 end position.
 
 In general, the General Feature Format has at least 8 tab-delimited columns:
 <seqname> <src> <feat> <start> <end> <score> <strand> <frame> [attr] [cmts]
 
 For our input, we also require a 9th column to be present. The input columns
-are (Irrelevant fields are represented as "<>", their content doesn't matter):
+are (irrelevant fields are represented as "<>", their content doesn't matter):
 
-<chromosome> <> <> <start> <end> <score> <strand> <> <ID=STR;OptionalTags> 
+<chromosome> <> <> <start> <end> <score> <strand> <> <ID=STR;AdditionalTags> 
 
 Example:
 chrX	AG	read	3427	3502	97.368	+	.	ID=AG_128_1_36_8556_3014;unique;cigar=76M;mutations=70A,72A;clip=0,3;quality=GGGGGGGGGGGGGGGGGGGGGGFGGGGGGGGGGGGGGGGGGGGGGGGGEGGECEGGGGBGGGG@GDGCGCGCF%%%
 chrX	AG	read	3429	3503	98.684	-	.	ID=AG_128_1_11_16882_16537;multi;cigar=6M1I69M;mutations=9T;quality=FFDDFFB==BBBBBDBBBB@B888DEBBBD@=DDFFBDFEBFFAFBDFEEDFBDDFFDEEFDFDFEDBE5D?BDD:
 
-The score in this case is the percent identity in the read-reference alignment.
+The score in this case is the percent identity in the read-to-reference alignment.
 The 9th column can contain a number of tags. These are:
 
 
@@ -270,7 +271,7 @@ mutations=..; To specify which read positions are different from the reference
 							positions and the bases are the corresponding read bases.
 
 The cigar string and the mutations string contain enough information to reconstruct 
-the read sequence. Alternatively, the read sequence can be given directly 
+the read sequence. Alternatively, the read sequence can be given explicitly 
 by using the tag "read", e.g. "read=ACCAGCACA..T".
 However, either the "read" or the "cigar" and the "mutations" tag need to be
 specified, as this information is necessary for finding differences between reads 
@@ -282,7 +283,7 @@ clip=x,y;			To specify whether and how the read should be clipped. x bases will
               would be clipped, i.e. discarded, leaving the read 73bp long.
 
 quality=..;		To specify the ASCII quality string (quality value = ord(ASCII quality) - 33). 
-							If qualities are given, these	MUST be given as the last tag in the 9th column 
+							If qualities are given, these	 MUST be given as the last tag in the 9th column 
 							(because of special characters contained in the ASCII quality string).
 
 
@@ -330,7 +331,7 @@ instead of the "[EEDCCA??]" representing the 8 quality values associated with th
 position 7401 on the forward strand, you would get "8", simply indicating the read count for A on the forward strand.
 
 Furthermore, if also option -oa is not specified, columns 4 and 8, columns 5 and 9, columns 6 and 10, and
-columns 7 and 11 will be collapsed, i.e. not differentiating between forward or reverse strand anymore.
+columns 7 and 11 will be merged/summed up, i.e. not differentiating between forward or reverse strand anymore.
 Note that the output file then has 4 columns less (columns 12 to 14 become columns 8 to 10).
 
 
@@ -356,9 +357,33 @@ the length of the indel event, with negative numbers indicating insertions. The
 insertion sequence is given with the "seq" tag.
 
 
+---------------------------------------------------------------------------
+5. Example
+---------------------------------------------------------------------------
+
+The folder "example" contains a mapped read file as well as the corresponding 
+reference file.
+If you cd into the example directory, you can run SnpStore in default mode with:
+
+../snp_store exampleGenome.fa exampleReads.gff -o example1.snp.txt -id example.indel1.txt
+
+This will produce two output files which are empty except for a header in the snp.txt file.
+In the little example, coverage is too low to permit any variants to be called in default
+mode. By reducing the minimum coverage and indel threshold parameters to 2, the
+output files should be filled:
+
+../snp_store -mc 2 -it 2 exampleGenome.fa exampleReads.gff -o example.snp.txt -id example.indel.txt
+
+To test the realignment option, you can further specify option -re:
+
+../snp_store -re -mc 2 -it 2 exampleGenome.fa exampleReads.gff -o example.snp.txt -id example.indel.txt
+
+In the resulting indel output file, two 1bp insertions should now have been
+merged into one 2bp insertion.
+
 
 ---------------------------------------------------------------------------
-5. Contact
+6. Contact
 ---------------------------------------------------------------------------
 
 For questions or comments, contact:

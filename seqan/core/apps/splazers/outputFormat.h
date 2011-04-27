@@ -708,7 +708,7 @@ void dumpMatches(
 	//dump umapped reads in a separate file if filename was specified
 	dumpUnmappedReads(matches, reads, readIDs, options);
 
-	if (options.minMatchLen > 0) options.outputFormat = 33;
+	if (options.minMatchLen > 0 && options.outputFormat != 4) options.outputFormat = 33;
 
 	if (options.outputFormat == 2)
 	{
@@ -733,7 +733,7 @@ void dumpMatches(
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
 		//options.dumpAlignment = false;
 	}
-	if (options.outputFormat == 33)
+	if (options.outputFormat == 33 || options.outputFormat == 4)
 	{
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
 		options.dumpAlignment = false;
@@ -748,7 +748,7 @@ void dumpMatches(
 
 	// load Genome sequences for alignment dumps
 	TGenomeSet genomes;
-	if ((options.outputFormat == 0 && !options.hammingOnly) || options.dumpAlignment || !empty(errorPrbFileName) || options.outputFormat == 33)
+	if ((options.outputFormat == 0 && !options.hammingOnly) || options.dumpAlignment || !empty(errorPrbFileName) || options.outputFormat == 33 || options.outputFormat == 4)
 		if (!loadGenomes(genomes, genomeFileNameList)) {
 			::std::cerr << "Failed to load genomes" << ::std::endl;
 			options.dumpAlignment = false;
@@ -1359,6 +1359,235 @@ void dumpMatches(
 				++filecount;
 			}
 			break;
+		case 4: // SAM output for splitMatches
+			while(it != itEnd)// && (*it).gseqNo == currSeqNo)
+			{
+				unsigned currReadNo = (*it).rseqNo;
+				Dna5String &currGenome = genomes[(*it).gseqNo];
+				unsigned readLen = length(reads[currReadNo]);
+				TMatch& mL = *it;
+				++it;
+				TMatch& mR = *it;
+				unsigned readLenL = mL.mScore;
+				unsigned readLenR = mR.mScore;
+				String<Dna5Q> readInfL = infix(reads[currReadNo],0,readLenL);
+				String<Dna5Q> readInfR = infix(reads[currReadNo],length(reads[currReadNo])-readLenR,length(reads[currReadNo]));
+				int offsetL = 0;
+				int offsetR = readLen - readLenR;
+				if(mL.orientation == 'R')
+				{
+					offsetR = 0;
+					offsetL = readLen - readLenL;
+					readInfL = infix(reads[currReadNo],length(reads[currReadNo])-readLenL,length(reads[currReadNo]));
+					readInfR = infix(reads[currReadNo],0,readLenR);
+				}
+				
+				// get alignment to dump and get cigar string
+				if (!options.hammingOnly)
+				{
+					assignSource(row(alignL, 0), readInfL);
+					assignSource(row(alignL, 1), infix(currGenome, mL.gBegin, mL.gEnd));
+					if (mL.orientation == 'R')
+						reverseComplement(source(row(alignL, 1)));
+
+					globalAlignment(alignL, scoreType, AlignConfig<false,false,false,false>(), Gotoh());
+						
+					assignSource(row(alignR, 0), readInfR);
+					assignSource(row(alignR, 1), infix(currGenome, mR.gBegin, mR.gEnd));
+					if (mR.orientation == 'R')
+						reverseComplement(source(row(alignR, 1)));
+
+					globalAlignment(alignR, scoreType, AlignConfig<false,false,false,false>(), Gotoh());
+				}
+						
+				switch (options.readNaming)
+				{
+					// 0..filename is the read's Fasta id
+					case 0:
+						file << "" <<readIDs[currReadNo];
+						break;
+					// 1..filename is the read filename + seqNo
+					case 1:
+						file.fill('0');
+						file << "" << readName << '#' << ::std::setw(pzeros) << currReadNo + 1;
+						break;
+				}
+				int samFlag = 0;
+				if(ambiStates[jj] == 2) samFlag |= 0x100; //suboptimal
+				if (mR.orientation == 'R') samFlag |= 0x10; 
+				if(!empty(readRegions) && options.anchored)
+				{
+					samFlag |= 1;
+					if(readRegions[currReadNo].i2.i1 > 1) samFlag |= 0x10;
+					else samFlag |= 0x20;
+					if((readRegions[currReadNo].i2.i1 & 1) == 1) samFlag |= 0x80;
+					else samFlag |= 0x40;
+				}
+				file << '\t' << samFlag << '\t';
+
+				switch (options.genomeNaming)
+				{
+					// 0..filename is the read's Fasta id
+					case 0:
+						file << genomeIDs[(*it).gseqNo] <<'\t';
+						break;
+					// 1..filename is the read filename + seqNo
+					case 1:
+						file.fill('0');
+						file << gnoToFileMap[(*it).gseqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[(*it).gseqNo].second + 1 << '\t';
+						break;
+				}
+				
+				file << (mL.gBegin + 1) << '\t' ;
+
+				//double percId = 100.0 * (1.0 - (double)(mL.editDist + mR.editDist) /(double)(mL.mScore+mR.mScore));
+
+				if(ambiStates[jj] == 0) file << 255 << '\t'; //unique
+				if(ambiStates[jj] > 0) file << 0 << '\t'; //multi or suboptimal
+				++jj;
+					
+				SEQAN_ASSERT(mL.pairId == mR.pairId); 
+		
+				int indelLen = mR.mScore + mL.mScore - readLen;
+				if(mL.gEnd != mR.gBegin) indelLen = mR.gBegin - mL.gEnd;
+				
+				String<Pair<Dna5,int> > mutationsStr, mutStrMid, mutStrL, mutStrR;
+				String<Pair<char,int> > cigarStr, cigarMid, cigarL, cigarR;
+				if(indelLen < 0) 
+				{
+					int offset = readLenL;
+					if(mL.orientation == 'R') 
+						offset = readLenR;
+					String<Dna5Q> readInfMid = infix(reads[currReadNo],offset,offset - indelLen);
+					for (int i = 0; i < -indelLen; ++i)
+						appendValue(mutStrMid, Pair<Dna5,int>(readInfMid[i],i+offset+1));
+					appendValue(cigarMid, Pair<char,int>('I',-indelLen));
+					
+				}
+				if(indelLen > 0) appendValue(cigarMid, Pair<char,int>('N',indelLen));
+						
+				if (options.hammingOnly)
+				{
+					if(indelLen == 0)
+						appendValue(cigarL, Pair<char,int>('M',readLen));
+					else
+					{
+						appendValue(cigarL, Pair<char,int>('M',readLenL));
+						appendValue(cigarR, Pair<char,int>('M',readLenR));
+					}
+
+					//make left part of mutation string
+					if (mL.editDist > 0)
+					{
+						gInfL = infix(currGenome, mL.gBegin, mL.gEnd);
+						if (mL.orientation == 'R')
+							reverseComplement(gInfL);
+						for (unsigned i = 0; i < length(gInfL); ++i)
+							if ((options.compMask[ordValue(readInfL[i])] & options.compMask[ordValue(gInfL[i])]) == 0)
+								appendValue(mutStrL, Pair<Dna5,int>(readInfL[i],i+offsetL+1));
+					}
+							
+					//make right part of mutation string
+					if (mR.editDist > 0)
+					{
+						gInfR = infix(currGenome, mR.gBegin, mR.gEnd);
+						if (mR.orientation == 'R')
+							reverseComplement(gInfR);
+						for (unsigned i = 0; i < length(gInfR); ++i)
+							if ((options.compMask[ordValue(readInfR[i])] & options.compMask[ordValue(gInfR[i])]) == 0)
+								appendValue(mutStrR, Pair<Dna5,int>(readInfR[i],i+offsetR+1));
+					}
+				}
+				else
+				{
+					typedef typename Row<TAlign>::Type TRow;
+					typedef typename Iterator<TRow, Rooted>::Type TAlignIterator;
+
+					//left business
+					TAlignIterator aliL_it0 = begin(row(alignL,0));
+					TAlignIterator aliL_it1 = begin(row(alignL,1));
+					TAlignIterator aliL_it0stop = end(row(alignL,0));
+					TAlignIterator aliL_it1stop = end(row(alignL,1));
+					getCigarLine(alignL,cigarL,mutStrL,offsetL,aliL_it0,aliL_it0stop,aliL_it1,aliL_it1stop);
+						
+					//right business
+					TAlignIterator aliR_it0 = begin(row(alignR,0));
+					TAlignIterator aliR_it1 = begin(row(alignR,1));
+					TAlignIterator aliR_it0stop = end(row(alignR,0));
+					TAlignIterator aliR_it1stop = end(row(alignR,1));
+					getCigarLine(alignR,cigarR,mutStrR,offsetR,aliR_it0,aliR_it0stop,aliR_it1,aliR_it1stop);
+				}			
+				//now plug together the parts: cigar
+				if(mL.orientation=='F')
+				{
+					append(cigarStr,cigarL);
+					append(cigarStr,cigarMid);
+					append(cigarStr,cigarR);
+					append(mutationsStr,mutStrL);
+					append(mutationsStr,mutStrMid);
+					append(mutationsStr,mutStrR);
+				}
+				else
+				{
+					append(cigarStr,cigarR);
+					append(cigarStr,cigarMid);
+					append(cigarStr,cigarL);
+					append(mutationsStr,mutStrR);
+					append(mutationsStr,mutStrMid);
+					append(mutationsStr,mutStrL);
+				}
+
+				// print cigar string
+				for (unsigned i = 0; i < length(cigarStr); ++i)
+					file << cigarStr[i].i2 << cigarStr[i].i1;
+
+				file << '\t';
+
+				if(!empty(readRegions) && options.anchored)
+				{
+				
+					switch (options.genomeNaming)
+					{
+						// 0..filename is the read's Fasta id
+						case 0:
+							file << genomeIDs[(*it).gseqNo] <<'\t';
+							break;
+						// 1..filename is the read filename + seqNo
+						case 1:
+							file.fill('0');
+							file << gnoToFileMap[(*it).gseqNo].first << '#' << ::std::setw(gzeros) << gnoToFileMap[(*it).gseqNo].second + 1 << '\t';
+							break;
+					}
+				
+					file << readRegions[currReadNo].i2.i2 << '\t' ;
+					//int libraryError;
+					int templateLen = 0;
+					if(readRegions[currReadNo].i2.i1 < 2) 
+						templateLen = readRegions[currReadNo].i2.i2 + readLen -(int) mL.gBegin;
+						//libraryError = (int) mR.gEnd + readRegions[currReadNo].i2.i2 - options.libraryLength + 2*readLen;
+					else 
+						templateLen = (int) mR.gEnd - readRegions[currReadNo].i2.i2;
+						//libraryError = (int) mL.gBegin - readRegions[currReadNo].i2.i2 + options.libraryLength - readLen ;
+					file << templateLen << '\t';
+				}
+				else file << ".\t.\t.\t";
+
+				
+				file << '\t' << reads[currReadNo] << '\t';
+				// quality
+				if(options.fastaIdQual)
+				{
+					for(unsigned j=0;j<length(reads[currReadNo]);++j)
+					{
+						file << (char)(getQualityValue(reads[currReadNo][j])+ 33);
+					}
+				}
+				file << "AS:i:" << mR.pairScore;
+
+				file << ::std::endl;
+				++it;
+			}
+			break;
 		case 33: // special Gff for split reads
 			while(it != itEnd)// && (*it).gseqNo == currSeqNo)
 			{
@@ -1459,8 +1688,11 @@ void dumpMatches(
 				file << ";pairScore=" << (unsigned int) mR.pairScore;
 				if(!empty(readRegions) && options.anchored)
 				{
-					if(readRegions[currReadNo].i2 < 0) file << ";libraryError=" << (int) mR.gEnd +readRegions[currReadNo].i2;
-					else file << ";libraryError=" << (int) mL.gBegin - readRegions[currReadNo].i2 ;
+					if(readRegions[currReadNo].i2.i1 < 2) 
+						file << ";libraryError=" << (int) mR.gEnd + readRegions[currReadNo].i2.i2 - options.libraryLength + 2*readLen;
+					else 
+						file << ";libraryError=" << (int) mL.gBegin - readRegions[currReadNo].i2.i2 + options.libraryLength - readLen ;
+					
 				}
 
 //				if(mR.traceExtension >= abs(indelLen))

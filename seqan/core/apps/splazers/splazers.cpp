@@ -1,4 +1,4 @@
- /*==========================================================================
+/*==========================================================================
              RazerS - Fast Read Mapping with Controlled Loss Rate
                    http://www.seqan.de/projects/razers.html
 
@@ -212,6 +212,12 @@ int mapReads(
 			return RAZERS_READS_FAILED;
 		}
 	} 
+	if(empty(readSet) || empty(readSet[0]))
+	{
+		cerr << "Failed to load reads. File empty? " << endl;
+		cerr << "Note that anchored split read mapping requires a SAM file + option -an needs to switched on.\nUnanchored split read mapping requires a Fasta/Fastq read file. " << endl;
+		return RAZERS_READS_FAILED;
+	}
 
 	if (options._debugLevel >= 1) cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << endl;
 	options.timeLoadFiles = SEQAN_PROTIMEDIFF(load_time);
@@ -254,10 +260,10 @@ int mapReads(
 	}
 
 	// anchored reads were all mapped onto forward strand, undo reverse complementing
-	if(!empty(readRegions) && options.anchored)
+	if(!empty(readRegions) && options.anchored && options.outputFormat != 4) //SAM output
 	{
 		for(unsigned i = 0; i < length(readSet); ++i)
-			if(readRegions[i].i2 < 0)
+			if(readRegions[i].i2.i1 > 1) // should have been > 0 before...
 				reverseComplement(readSet[i]);
 	}
 
@@ -359,7 +365,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("minG", "min-gap",    "min. length of middle gap (for edit distance mapping about 10% of read length is recommended)", OptionType::Int | OptionType::Label, options.minGap));
 	addOption(parser, CommandLineOption("ep", "errors-prefix",    "max. number of errors in prefix match", OptionType::Int | OptionType::Label, options.maxPrefixErrors));
 	addOption(parser, CommandLineOption("es", "errors-suffix",    "max. number of errors in suffix match", OptionType::Int | OptionType::Label, options.maxPrefixErrors));
-	addOption(parser, CommandLineOption("gl", "genome-len",    "genome length, for expected match num computation", OptionType::Int | OptionType::Label, options.specifiedGenomeLen));
+	addOption(parser, CommandLineOption("gl", "genome-len",    "genome length, for computation of expected number of random matches", OptionType::Int | OptionType::Label, options.specifiedGenomeLen));
 	addOption(parser, CommandLineOption("an", "anchored",           "anchored split mapping, only unmapped reads with mapped mates will be considered, requires the reads to be given in SAM format", OptionType::Boolean));
 
 
@@ -465,6 +471,8 @@ int main(int argc, const char *argv[])
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Check options
+	if ((options.outputFormat == 4 && options.minMatchLen == 0) && (stop = true))
+		cerr << "Invalid output format option. Note that SAM output is only available for split mapping." << endl;
 	if ((options.errorRate < 50 || options.errorRate > 100) && (stop = true))
 		cerr << "Percent identity threshold must be a value between 50 and 100" << endl;
 	if ((pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100) && (stop = true))
@@ -475,7 +483,7 @@ int main(int argc, const char *argv[])
 		cerr << "Library error must be a value greater or equal 0" << endl;
 	if ((options.maxHits < 1) && (stop = true))
 		cerr << "Maximum hits threshold must be greater than 0" << endl;
-	if ((options.outputFormat > 3 && options.outputFormat != 33) && (stop = true))
+	if ((options.outputFormat > 4 && options.outputFormat != 33 ) && (stop = true))
 		cerr << "Invalid output format option." << endl;
 	if ((options.sortOrder > 1) && (stop = true))
 		cerr << "Invalid sort order options." << endl;
@@ -514,8 +522,10 @@ int main(int argc, const char *argv[])
 #ifdef RAZERS_OPENADDRESSING
 		maxOnes = 31;
 #endif
-		if ((ones < 7 || ones > maxOnes) && !stop)
+		if ((ones < 7 || ones > maxOnes) && !options.anchored && !stop)
 			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes << " '1's" << endl;
+		else if ((ones < 5 || ones > maxOnes) && options.anchored && !stop)
+			cerr << "Warning: Shape should contain at least 5 and at most " << maxOnes << " '1's" << endl;
 		options.shapeR = options.shape;
 		options.thresholdR = options.threshold;
 

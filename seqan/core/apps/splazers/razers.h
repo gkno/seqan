@@ -133,8 +133,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
  		int 		maxReadLength;
 
-		unsigned        minMatchLen;
- 		int		maxPrefixErrors;
+		int			penaltyC;			// puts penalty on the existence on a middle gap in split mapping mode
+		unsigned        minMatchLen;	// minimum prefix/suffix match length in split mapping mode
+ 		int		maxPrefixErrors;		// 
  		int		maxSuffixErrors;
  		int	        maxGap;
  		int	        minGap;
@@ -144,7 +145,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool		anchored;
 		unsigned int	maxReadRegionsEnd;
 		unsigned int	minReadRegionsStart;
-
+	
 		
 	// multi-threading
 
@@ -212,6 +213,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			rnaSeedLength = 16;
 			exactSeed = true;
 #endif			
+			penaltyC = 1;
 			minMatchLen = 23;
  			shapeR = "11111111111";
  			thresholdR = 1;
@@ -300,8 +302,14 @@ struct MicroRNA{};
 	typedef ReadMatch<Difference<TGenome>::Type>		TMatch;		// a single match
 	typedef String<TMatch/*, MMap<>*/ >					TMatches;	// array of matches
 	//chrNo, startPos, endPos
-	typedef String<Pair<unsigned,MakeSigned_<Difference<TGenome>::Type>::Type > >	TReadRegions;
+//	typedef String<Pair<unsigned,MakeSigned_<Difference<TGenome>::Type>::Type > >	TReadRegions;
 
+	typedef MakeSigned_<Difference<TGenome>::Type>::Type TSignedPos;
+	typedef Pair<unsigned,TSignedPos,BitCompressed<2,BitsPerValue<TSignedPos>::VALUE> > TFlagPos;
+
+	//chrNo, flag to remember flag, startPos of mate
+	typedef String<Pair<unsigned,TFlagPos > >	TReadRegions;
+		
 
 	template <typename TSpec>
 	struct Cargo< Index<TReadSet, TSpec> > {
