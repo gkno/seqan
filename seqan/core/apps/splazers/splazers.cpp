@@ -29,7 +29,7 @@
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 //#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
 #define RAZERS_MATEPAIRS				// enable paired-end matching
-#define RAZERS_DIRECT_MAQ_MAPPING
+//#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 //#define RAZERS_OPENADDRESSING
 #define RAZERS_SPLICED
@@ -339,7 +339,8 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = Razer format");
 	addHelpLine(parser, "1 = enhanced Fasta format");
 	addHelpLine(parser, "2 = Eland format");
-	addHelpLine(parser, "3 = Gff format");
+	addHelpLine(parser, "3 = GFF format");
+	addHelpLine(parser, "4 = SAM format (for split mapping only)");
 	addOption(parser, CommandLineOption("gn", "genome-naming",     "select how genomes are named", OptionType::Int | OptionType::Label, options.genomeNaming));
 	addHelpLine(parser, "0 = use Fasta id");
 	addHelpLine(parser, "1 = enumerate beginning with 1");

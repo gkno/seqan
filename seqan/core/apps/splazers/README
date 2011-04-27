@@ -146,14 +146,14 @@ The default behaviour can be modified by the following command line options:
   
   [ -ll NUM ],  [ --library-length NUM ]
   
-  Set the mean library size, default is 220. The library size is the outer
-  distance of the two reads of a mate-pair. This value is used only for
-  paired-end read mapping.
+  Set the mean library size, default is 220. The library size is the expected
+  outer distance of the two reads of pair. This value is used for paired-end 
+  read mapping and for anchored split-read mapping.
   
   [ -le NUM ],  [ --library-error NUM ]
   
   Set the tolerated absolute deviation of the library size, default value is
-  50. This value is used only for paired-end read mapping.
+  50. 
   
   [ -m NUM ],  [ --max-hits NUM ]
   
@@ -199,6 +199,11 @@ The default behaviour can be modified by the following command line options:
   
   Minimum length for prefix/suffix matches in split read mapping (default 23).
   If set to 0, split mapping is switched off.
+
+  [ -an ],  [ --anchored ]
+  
+  Switch on anchored split mapping mode. Reads will be expected in SAM format.
+  Please make sure that options -ll and -le are set correctly.
 
   [ -maxG NUM], [ --max-gap NUM ]
  
