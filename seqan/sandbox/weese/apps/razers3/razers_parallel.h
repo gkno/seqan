@@ -104,6 +104,12 @@ public:
     typedef TSwiftPattern_ TSwiftPattern;
     typedef TSwiftFinder_ TSwiftFinder;
     typedef TMatches_ TMatches;
+#ifdef RAZERS_EXTERNAL_MATCHES
+    typedef TMatches TLargeMatches;
+#else // #ifdef RAZERS_EXTERNAL_MATCHES
+    typedef typename Value<TMatches>::Type TMatchRecord;
+    typedef String<TMatchRecord, MMap<ExternalConfigLarge<> > > TLargeMatches;
+#endif // #ifdef RAZERS_EXTERNAL_MATCHES
     
     // The id of this thread.
     unsigned threadId;
@@ -119,7 +125,7 @@ public:
 
     TCounts counts;  // TODO(holtgrew): Artifact?
 
-    TMatches matches;
+    TLargeMatches matches;
     TFragmentStore /*const*/ * globalStore;
 
     TShape shape;
@@ -866,11 +872,7 @@ int _mapSingleReadsParallel(
     typedef typename TFragmentStore::TContigSeq TContigSeq;
     typedef typename Position<TContigSeq>::Type TContigPos;
     typedef MatchRecord<TContigPos> TMatchRecord;
-#ifdef RAZERS_EXTERNAL_MATCHES
-    typedef String<TMatchRecord, MMap<ExternalConfigLarge<> > > TMatches;
-#else  // #ifdef RAZERS_EXTERNAL_MATCHES
     typedef String<TMatchRecord> TMatches;
-#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
 
     // -----------------------------------------------------------------------
     // Initialize global information.
