@@ -192,7 +192,8 @@ public:
 	~Map()
 	{
 	}
-	Map const & operator =(Map const & other)
+	Map &
+    operator=(Map const & other)
 	{
 		assign(*this, other);
 		return *this;
