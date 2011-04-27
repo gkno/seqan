@@ -1167,8 +1167,11 @@ void Test_Tree() {
 	TVertexDescriptor childC2C1 = addChild(g,childC2);
 	TVertexDescriptor childC2C1C1 = addChild(g,childC2C1);
 	TVertexDescriptor childC2C1C1C1 = addChild(g,childC2C1C1);
+    (void)childC2C1C1C1;
 	TVertexDescriptor childC2C1C1C2 = addChild(g,childC2C1C1);
+    (void)childC2C1C1C2;
 	TVertexDescriptor childC4 = addChild(g,rootV);
+    (void)childC4;
 	SEQAN_ASSERT(inDegree(g, childC2C1) == 1); 
 	SEQAN_ASSERT(outDegree(g, childC2C1) == 1);
 	SEQAN_ASSERT(degree(g, childC2C1) == 2);

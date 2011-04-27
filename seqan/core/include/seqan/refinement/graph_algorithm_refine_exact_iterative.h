@@ -331,7 +331,7 @@ SEQAN_CHECKPOINT
 			//get other sequence and projected position
 			TValue seq_j_id,pos_j;
 			_getOtherSequenceAndProject(*ali_it,(TValue)0,seq_map,seq_id,act_pos,seq_j_id,pos_j);
-			SEQAN_ASSERT_NEQ(pos_j,-1);
+			SEQAN_ASSERT_NEQ(pos_j, static_cast<TValue>(-1));
 			//find node that contains the projected position (pos_j)
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
 			bool doAddEdge = true;
@@ -516,9 +516,9 @@ SEQAN_CHECKPOINT
 	////////////////////////////////////////////////////////////////
 	//do refinement
 	//std::cout <<"refining..."<<std::flush;
-	clock_t start, finish1;
-	double duration;
-	start = clock();
+	// clock_t start, finish1;
+	// double duration;
+	// start = clock();
 	
 	//all_nodes = set of all cut positions
 	String<std::set<TValue> > all_nodes;
@@ -608,8 +608,8 @@ SEQAN_CHECKPOINT
 	}
 	_addAnnotationCuts(all_nodes,alis,gs,pms,seq,seq_map,annotation,min_fragment_len,tag);
 
-	finish1 = clock();
-	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
+	// finish1 = clock();
+	// duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
 	//std::cout << "\ntook " << duration << " seconds.\n";
 	//for(int seq_i = 0; seq_i < length(seq); ++seq_i)
 	//{
