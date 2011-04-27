@@ -92,6 +92,8 @@ typedef Tag<Graph__> Graph_;
 inline int
 _charCompare(int const c, Whitespace_ const & /* tag*/)
 {
+    std::cout << "\"" << c << "\" is " << (isspace(c) ? "" : " not ")
+              << "whitespace\n";
     return isspace(c);
 }
 
@@ -393,6 +395,7 @@ inline int
 readUntilWhitespace(TBuffer & buffer,
                     RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _readHelper(buffer,
                        reader,
                        Whitespace_());
@@ -444,6 +447,7 @@ inline int
 readUntilBlank(TBuffer & buffer,
                RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _readHelper(buffer,
                        reader,
                        Blank_());
@@ -477,6 +481,7 @@ readUntilChar(TBuffer & buffer,
               RecordReader<TStream, TPass> & reader,
               TCharX const & x)
 {
+    SEQAN_CHECKPOINT
 //     typedef typename Value< typename RecordReader<TStream,
 //                                                   TPass>::_buffer>::Type TChar;
     typedef char TChar; //TODO fix this
@@ -522,6 +527,7 @@ readNChars(TBuffer & buffer,
            RecordReader<TStream, TPass> & reader,
            uint const n)
 {
+    SEQAN_CHECKPOINT
 //     typedef typename Value< typename RecordReader<TStream,
 //                                                   TPass>::_buffer>::Type TChar;
     typedef char TChar; //TODO fix this
@@ -566,6 +572,7 @@ template <typename TStream, typename TPass>
 inline int
 skipUntilWhitespace(RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _skipHelper(reader, Whitespace_());
 }
 
@@ -590,6 +597,7 @@ template <typename TStream, typename TPass>
 inline int
 skipUntilBlank(RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _skipHelper(reader, Blank_());
 }
 /* OLD FUNCTION
@@ -624,6 +632,7 @@ template <typename TStream, typename TPass>
 inline int
 skipUntilGraph(RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _skipHelper(reader, Graph_());
 }
 /* OLD FUNCTION, note that old function has wrong name -> see isgraph()
@@ -662,6 +671,7 @@ inline int
 skipUntilChar(RecordReader<TStream, TPass> & reader,
               TCharX const & x)
 {
+    SEQAN_CHECKPOINT
 //     typedef typename Value< typename RecordReader<TStream,
 //                                                   TPass>::_buffer>::Type TChar;
     typedef char TChar; //TODO fix this
@@ -746,6 +756,7 @@ inline int
 skipUntilString(RecordReader<TStream, TPass> & reader,
                              TString const & str)
 {
+    SEQAN_CHECKPOINT
     if (length(str) < 1)
         return -1; //TODO some better error code
     while(skipUntilChar(reader, str[0])==0)
@@ -811,6 +822,7 @@ template <typename TStream, typename TPass, typename TBuffer>
 inline int
 readLetters(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _readHelper(buffer,
                        reader,
                        Alpha_(),
@@ -855,6 +867,7 @@ template <typename TStream, typename TPass, typename TBuffer>
 inline int
 readAlphaNums(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _readHelper(buffer,
                        reader,
                        AlphaNum_(),
@@ -898,6 +911,7 @@ template <typename TStream, typename TPass>
 inline int
 skipWhitespaces(RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _skipHelper(reader, Whitespace_(), false);
 }
 
@@ -923,6 +937,7 @@ template <typename TStream, typename TPass>
 inline int
 skipBlanks(RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     return _skipHelper(reader, Blank_(), false);
 }
 
@@ -978,6 +993,7 @@ template <typename TStream, typename TPass, typename TBuffer>
 inline int
 readLine(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     int r = _readHelper(buffer,
                         reader,
                         UnixEOL_(), // abort on Newline
@@ -1017,6 +1033,7 @@ inline int
 readLineStripTrailingBlanks(TBuffer & buffer,
                             RecordReader<TStream, TPass> & reader)
 {
+    SEQAN_CHECKPOINT
     int r = readLine(reader, buffer);
 
     if (r != 0)
