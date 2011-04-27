@@ -208,11 +208,11 @@ _readHelper(TBuffer & buffer,
     while (!atEnd(reader))
     {
         TChar c = value(reader);
-        if (_charCompare(c, tag) == desiredOutcomeOfComparison)
+        if (bool b= _charCompare(c, tag) == desiredOutcomeOfComparison)
             return 0;
         else
-            std::cout << "\"" << c << "\" is " << (isspace(c) ? "" : " not ")
-                      << "whitespace\n";
+            std::cout << "c: " << c << " _charCompare: "
+                      << b << " isspace: " << isspace(c) << "\n";
         append(buffer, c, Generous()); // TODO Generous() is right?
         goNext(reader);
         if (resultCode(reader) != 0)
