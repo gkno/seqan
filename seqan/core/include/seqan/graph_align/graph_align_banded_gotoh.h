@@ -262,6 +262,7 @@ _alignBandedGotoh(TTrace& trace,
 				// Usual initialization for first row and column
 				if (actualRow == 0) {
 					if (actualCol != 0) {
+                        *traceIt = Horizontal;
 						_initFirstRow(TAlignConfig(), *matIt, scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (actualCol - 1) * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
 						*vertIt = *matIt + scoreGapOpenVertical(sc, ((int) actualCol - 1), 0, str1, str2) - scoreGapExtendVertical(sc, ((int) actualCol - 1), 0, str1, str2);
 						hori_val = MinValue<TScoreValue>::VALUE;
@@ -271,6 +272,7 @@ _alignBandedGotoh(TTrace& trace,
 						hori_val = MinValue<TScoreValue>::VALUE;
 					}
 				} else {
+                    *traceIt = Vertical;
 					_initFirstColumn(TAlignConfig(), *matIt, scoreGapOpenVertical(sc, -1, 0, str1, str2) + (actualRow - 1) * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));
 					hori_val = *matIt + scoreGapOpenHorizontal(sc, 0, ((int) actualRow - 1), str1, str2) - scoreGapExtendHorizontal(sc, 0, ((int) actualRow - 1), str1, str2);
 					*vertIt = MinValue<TScoreValue>::VALUE;

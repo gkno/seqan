@@ -272,7 +272,7 @@ _lastColumn(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const,
 			TIndex1& maxIndex,
 			TColumn const& column)
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 	typedef typename Size<TColumn>::Type TSize;
 	typedef typename Iterator<TColumn, Standard>::Type TColIter;
 	TSize limit = length(column) - 1;

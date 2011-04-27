@@ -201,6 +201,8 @@ _alignGotoh(TTrace& trace,
 	TColIter matIt = begin(mat, Standard());
 	*matIt = 0;
 	TColIter horiIt = begin(horizontal, Standard());
+    // TODO(holtgrew): Maybe the /2 is even superflous, it's not clear right now whether anything is ever subtracted from horizontal[0].
+    *horiIt = MinValue<TScoreValue>::VALUE / 2;  // Score must never come from here.
 	
 	TScoreValue a = 0;
 	TScoreValue b = 0;
@@ -259,7 +261,7 @@ _alignGotoh(TTrace& trace,
 		if (overallMaxIndex[0] == col) initialDir = tvMat;
 	}
 	_lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, mat);
-	
+
 	// If we got a new index, store direction
 	if ((overallMaxIndex[1] != len2)  && (overallMaxValue[1] > overallMaxValue[0])) 
 		initialDir = (horizontal[overallMaxIndex[1]] == mat[overallMaxIndex[1]]) ? Horizontal : Diagonal;
