@@ -1399,6 +1399,7 @@ const char *tempFileName() {
     // If in testing mode then raise an AssertionFailedException.
     inline void fail() {
         StaticData::thisTestOk() = false;
+		printStackTrace(20);
         throw AssertionFailedException();
     }
 #else
