@@ -469,8 +469,11 @@ push(String<TValue, Block<SPACE> >& me)
         allocate(me.alloc, me.blocks[last], 1);
         me.lastValue = me.blockFirst = begin(*me.blocks[last]);
         me.blockLast = (me.blockFirst + (SPACE - 1));
-    } else
+        back(me.blocks)->data_end += 1;
+    } else {
         ++me.lastValue;
+        back(me.blocks)->data_end += 1;
+    }
     valueConstruct(me.lastValue);
 }
 
@@ -547,8 +550,10 @@ pop(String<TValue, Block<SPACE> >& me)
         typename Size< String<TValue, Block<SPACE> > >::Type last = length(me.blocks);
 
         if (last) {
+            back(me.blocks)->data_end -= 1;
             valueDestruct(me.lastValue);
-            deallocate(me.alloc, me.blocks[--last], 1);
+            valueDestruct(me.blocks[--last]);
+            deallocate(me.alloc, me.blocks[last], 1);
             resize(me.blocks, last);
             if (last) {
                 me.blockFirst = begin(*me.blocks[--last]);
@@ -556,6 +561,7 @@ pop(String<TValue, Block<SPACE> >& me)
             }
         }
     } else {
+        back(me.blocks)->data_end -= 1;
         valueDestruct(me.lastValue);
         --me.lastValue;
     }
