@@ -194,7 +194,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iter(TSetIter _ptr, TObjIter _obj):
 			ptr(_ptr), obj(_obj)
 		{
-			while (!(*ptr) && !atEnd(ptr)) {
+			while (!atEnd(ptr) && !(*ptr)) {
 				++ptr;
 				++obj;
 			}
@@ -205,7 +205,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline iterator operator++() {
 			++ptr;
 			++obj;
-			while (!(*ptr) && !atEnd(ptr)) {
+			while (!atEnd(ptr) && !(*ptr)) {
 				++ptr;
 				++obj;
 			}
