@@ -288,8 +288,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			pool(_pool),
             handler(_pool) { }
 
+        inline void _initializeBuffer() {
+            if (empty(buffer)) return;
+            arrayFill(seqan::begin(buffer, Standard()), seqan::end(buffer, Standard()), pool.undefinedValue);
+        }
+        
         inline bool begin() {
             buffer = handler.first();
+            _initializeBuffer();
             return buffer.begin != NULL;
         }
 
