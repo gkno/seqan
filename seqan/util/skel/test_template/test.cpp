@@ -41,6 +41,6 @@
 SEQAN_BEGIN_TESTSUITE(test_%(NAME)s)
 {
     // Call tests.
-	SEQAN_DEFINE_TEST(test_%(NAME)s_strings_example1);
+	SEQAN_CALL_TEST(test_%(NAME)s_strings_example1);
 }
 SEQAN_END_TESTSUITE
