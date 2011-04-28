@@ -84,7 +84,7 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     addTitleLine(parser, "");
     addTitleLine(parser, "(c) %(YEAR)d by %(AUTHOR)s");
 
-    addUsageLine(parser, "app_template [OPTIONS] TEXT+");
+    addUsageLine(parser, "%(NAME)s [OPTIONS] TEXT+");
     
 	addSection(parser, "Main Options");
 	addOption(parser, CommandLineOption("i",  "integer",  "set an integer option", OptionType::Integer | OptionType::Label, options.i));
