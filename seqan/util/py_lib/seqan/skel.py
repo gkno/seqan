@@ -209,7 +209,7 @@ def createModule(name, location, options):
         if res: return res
     if options.create_infos:
         # Copy over INFO file for app and perform replacements.
-        source_file = paths.pathToTemplate('app_template', 'INFO')
+        source_file = paths.pathToTemplate('module_template', 'INFO')
         target_file = os.path.join(module_path, 'INFO')
         replacements = buildReplacements('app', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
