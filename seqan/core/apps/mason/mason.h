@@ -47,6 +47,14 @@ enum ReadsType
     READS_TYPE_SANGER
 };
 
+// Naming scheme of paired-end reads.
+enum ReadNaming
+{
+    READ_NAMING_NOSUFFIX,
+    READ_NAMING_SLASH_SUFFIX0, // /0, /1
+    READ_NAMING_SLASH_SUFFIX1  // /1, /2
+};
+
 // Tag for global options.
 typedef void Global;
 
@@ -120,6 +128,8 @@ struct Options<Global>
     // distributed library lengths, interval length around mean for uniform
     // distribution.
     double libraryLengthError;
+    // Set how to name the reads in the FASTA/FASTQ files.
+    ReadNaming readNaming;
 
     // Haplotype parameters.
 
@@ -158,6 +168,7 @@ struct Options<Global>
               libraryLengthIsUniform(false),
               libraryLengthMean(1000),
               libraryLengthError(100),
+              readNaming(READ_NAMING_NOSUFFIX),
               numHaplotypes(1),
               haplotypeSnpRate(0.001),
               haplotypeIndelRate(0.001),
@@ -231,6 +242,7 @@ struct ReadSimulationInstruction<Global>
 // Prints the global options to stream.
 template <typename TStream>
 TStream & operator<<(TStream & stream, Options<Global> const & options) {
+    char const * READ_NAMINGS[] = {"no-suffix", "suffix-zero-based", "suffix-one-based"};
     stream << "global-options {" << std::endl
            << "  allowNFromGenome:       " << (options.allowNFromGenome ? "true" : "false") << std::endl
            << "  seed:                   " << options.seed << std::endl
@@ -250,6 +262,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  generateMatePairs:      " << (options.generateMatePairs ? "true" : "false") << std::endl
            << "  libraryLengthMean:      " << options.libraryLengthMean << std::endl
            << "  libraryLengthError:     " << options.libraryLengthError << std::endl
+           << "  readNaming:             " << READ_NAMINGS[(int)options.readNaming] << std::endl
            << "  numHaplotypes:          " << options.numHaplotypes << std::endl
            << "  haplotypeSnpRate:       " << options.haplotypeSnpRate << std::endl
            << "  haplotypeIndelRate:     " << options.haplotypeIndelRate << std::endl
@@ -311,6 +324,12 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("ll", "library-length-mean", "Mate-pair mean library length.  Default: 1000.", OptionType::Double));
     addOption(parser, CommandLineOption("le", "library-length-error", "Mate-pair library tolerance.  Default: 100.", OptionType::Double));
     addOption(parser, CommandLineOption("mp", "mate-pairs", "Enable mate pair simulation.  Default: false.", OptionType::Bool));
+    addOption(parser, CommandLineOption("rn", "read-naming", "Read naming scheme in FASTQ/FASTA files, 0-2  Default: 0.", OptionType::Integer));
+	addHelpLine(parser, "Note that the suffixes will not appear in the SAM file.  In the SAM format,");
+	addHelpLine(parser, "the FLAG field is used to signify the leftmost/rightmost fragment/read.");
+	addHelpLine(parser, "0 = No suffix, left-end and right-end read will be named 'example.fastq.0000', for example.");
+	addHelpLine(parser, "1 = Add zero-based slash-suffix, i.e. names will end on '/0' and '/1'");
+	addHelpLine(parser, "2 = Add one-based slash-suffix, i.e. names will end on '/1' and '/2'");
 
     addSection(parser, "Haplotype Options");
 
@@ -379,6 +398,20 @@ int parseCommandLineAndCheck(TOptions & options,
         getOptionValueLong(parser, "library-length-error", options.libraryLengthError);
     if (isSetLong(parser, "mate-pairs"))
         options.generateMatePairs = true;
+    if (isSetLong(parser, "read-naming")) {
+        int mode = 0;
+        getOptionValueLong(parser, "read-naming", mode);
+        switch (mode) {
+            case 1:
+                options.readNaming = READ_NAMING_SLASH_SUFFIX0;
+                break;
+            case 2:
+                options.readNaming = READ_NAMING_SLASH_SUFFIX1;
+                break;
+            default:
+                options.readNaming = READ_NAMING_NOSUFFIX;
+        }
+    }
 
     if (isSetLong(parser, "num-haplotypes"))
         getOptionValueLong(parser, "num-haplotypes", options.numHaplotypes);
@@ -543,6 +576,12 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
 
     // Write out results.
     if (options.generateMatePairs) {
+        // Find first space in read names.  Is the same for all.
+        unsigned pos = 0;
+        if (options.readNaming != READ_NAMING_NOSUFFIX && !empty(fragmentStore.readNameStore)) {
+            while (pos < length(fragmentStore.readNameStore[0]) && fragmentStore.readNameStore[0][pos] != ' ')
+                pos += 1;
+        }
         // Build filename with '.1.' infix.
         CharString mateFilename = options.outputFile;
         size_t dotPos = 0;
@@ -553,10 +592,16 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         // Write out first mates.
         std::cerr << "Writing resulting reads to \"" << mateFilename << "\" mates/1" << std::endl;
         StringSet<String<Dna5Q>, Dependent<> > reads;
-        StringSet<CharString, Dependent<> > readNames;
+        StringSet<CharString, Owner<> > readNames;
         for (size_t i = 0; i < length(fragmentStore.matePairStore); ++i) {
             size_t readId = fragmentStore.matePairStore[i].readId[0];
             appendValue(readNames, fragmentStore.readNameStore[readId]);
+            if (options.readNaming != READ_NAMING_NOSUFFIX) {
+                if (options.readNaming == READ_NAMING_SLASH_SUFFIX0)
+                    infix(back(readNames), pos, pos) = "/0";
+                else if (options.readNaming == READ_NAMING_SLASH_SUFFIX1)
+                    infix(back(readNames), pos, pos) =  "/1";
+            }
             appendValue(reads, fragmentStore.readSeqStore[readId]);
         }
         {
@@ -579,6 +624,12 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         for (size_t i = 0; i < length(fragmentStore.matePairStore); ++i) {
             size_t readId = fragmentStore.matePairStore[i].readId[1];
             appendValue(readNames, fragmentStore.readNameStore[readId]);
+            if (options.readNaming != READ_NAMING_NOSUFFIX) {
+                if (options.readNaming == READ_NAMING_SLASH_SUFFIX0)
+                    infix(back(readNames), pos, pos) = "/1";
+                else if (options.readNaming == READ_NAMING_SLASH_SUFFIX1)
+                    infix(back(readNames), pos, pos) =  "/2";
+            }
             appendValue(reads, fragmentStore.readSeqStore[readId]);
         }
         {
