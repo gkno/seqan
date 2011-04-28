@@ -87,7 +87,7 @@ inline TTarget
 lexicalCast(TSource const & source)
 {
     std::istringstream str(source);
-    TTarget ret;
+    TTarget ret = 0;
 
     str >> ret;
     return ret;
@@ -98,7 +98,7 @@ inline TTarget
 lexicalCast(String<TValue, TSpec> const & source)
 {
     std::istringstream str(toCString(source));
-    TTarget ret;
+    TTarget ret = 0;
 
     str >> ret;
     return ret;
