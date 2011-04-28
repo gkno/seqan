@@ -542,21 +542,25 @@ you should think of using @Tag.ExternalConfig@.
 			return *this;
 		}
 		
-		inline void validate() const {
+		inline void validate() const 
+        {
 			typename TExtString::TPageFrame &pf = extString->getSharedPage(pageNo, prefetch);
             const_cast<TIterator*>(this)->dirty = pf.dirty;
 			const_cast<TIterator*>(this)->begin = pf.begin;
 		}
 
-        inline void invalidate(int _prefetch = 0) const {
-            if (begin) {
+        inline void invalidate(int _prefetch = 0) const 
+        {
+            if (begin) 
+            {
                 const_cast<TIterator*>(this)->begin = NULL;
 				extString->releasePage(pageNo, (prefetch != 0) || (_prefetch != 0));
                 const_cast<TIterator*>(this)->prefetch = _prefetch;
             }
 		}
 
-		inline TValue & operator* () const {
+		inline TValue & operator* () const 
+        {
 			if (!begin) validate();
             // synchronize PageFrame dirty flag on dirty false->true change
             if (!dirty) {
@@ -1678,23 +1682,20 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		typedef typename String<TValue, External<TConfig> >::TCache	TCache;
 		typedef typename Iterator<TCache, Standard>::Type			TIter;
 
-		if (me.file) 
-		{
-			TIter f = begin(me.cache, Standard());
-			TIter fEnd = end(me.cache, Standard());
+        TIter f = begin(me.cache, Standard());
+        TIter fEnd = end(me.cache, Standard());
 
-			for(; f != fEnd ; ++f) 
-			{
-				if ((*f).begin) cancel(*f, me.file);
-				if ((*f).pageNo >= 0) 
-				{
-					me.pager[(*f).pageNo] = (*f).dataStatus;
-					(*f).pageNo = TPageFrame::UNINITIALIZED;
-				}
-//				::std::cerr << *f << ::std::endl;
-				if ((*f).begin) freePage(*f, me.file);
-			}
-		}
+        for(; f != fEnd ; ++f) 
+        {
+            if ((me.file) && (*f).begin) cancel(*f, me.file);
+            if ((*f).pageNo >= 0) 
+            {
+                me.pager[(*f).pageNo] = (*f).dataStatus;
+                (*f).pageNo = TPageFrame::UNINITIALIZED;
+            }
+//			::std::cerr << *f << ::std::endl;
+            if ((*f).begin) freePage(*f, me.file);
+  		}
 	}
 
 	// flush and free all allocated pages
@@ -1708,24 +1709,21 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		typedef typename TExtString::TCache					TCache;
 		typedef typename Iterator<TCache, Standard>::Type	TIter;
 
-		if (me.file) 
-		{
-			flush(me);
+        flush(me);
 
-			TIter f = begin(me.cache, Standard());
-			TIter fEnd = end(me.cache, Standard());
+        TIter f = begin(me.cache, Standard());
+        TIter fEnd = end(me.cache, Standard());
 
-			for(; f != fEnd ; ++f) 
-			{
-				if ((*f).pageNo >= 0) 
-				{
-					me.pager[(*f).pageNo] = (*f).dataStatus;
-					(*f).pageNo = TPageFrame::UNINITIALIZED;
-				}
-//				::std::cerr << *f << ::std::endl;
-				if ((*f).begin) freePage(*f, me.file);
-			}
-		}
+        for(; f != fEnd ; ++f) 
+        {
+            if ((*f).pageNo >= 0) 
+            {
+                me.pager[(*f).pageNo] = (*f).dataStatus;
+                (*f).pageNo = TPageFrame::UNINITIALIZED;
+            }
+//			::std::cerr << *f << ::std::endl;
+            if ((*f).begin) freePage(*f, me.file);
+        }
 	}
 //____________________________________________________________________________
 /**

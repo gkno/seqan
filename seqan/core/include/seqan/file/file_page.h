@@ -64,8 +64,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct SimpleBuffer 
 	{
 //IOREV _nodoc_
-		typedef	typename Size<SimpleBuffer>::Type		TSize;
-		typedef	typename Iterator<SimpleBuffer>::Type	TIterator;
+		typedef	typename Size<SimpleBuffer>::Type               TSize;
+		typedef	typename Iterator<SimpleBuffer, Standard>::Type	TIterator;
 
 		TIterator	begin;      // the beginning of the buffer
         TIterator	end;        // end of valid data
@@ -200,7 +200,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct PageBucket
 	{
 //IOREV _nodoc_ has some unformatted comments in code, but not enough doc
-		typedef	typename Iterator<PageBucket>::Type TIterator;
+		typedef	typename Iterator<PageBucket, Standard>::Type TIterator;
 
         unsigned    pageOfs;                // begin of bucket window with relation to page begin
         TIterator	begin, cur, end;        // begin/end of buckets memory buffer and a pointer
@@ -322,10 +322,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct PageFrame<TValue, TFile, Fixed<PageSize_> >
 	{
 //IOREV _nodoc_
-		typedef TFile								File;
-        typedef typename AsyncRequest<TFile>::Type		AsyncRequest;
-		typedef	typename Size<PageFrame>::Type		TSize;
-		typedef	typename Iterator<PageFrame>::Type	TIterator;
+		typedef TFile                                           File;
+        typedef typename AsyncRequest<TFile>::Type              AsyncRequest;
+		typedef	typename Size<PageFrame>::Type                  TSize;
+		typedef	typename Iterator<PageFrame, Standard>::Type    TIterator;
 
 		enum            { PageSize = PageSize_ };
 		enum Status		{ READY, READING, WRITING };
