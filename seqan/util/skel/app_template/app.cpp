@@ -49,7 +49,7 @@ int main(int argc, char const ** argv)
     Options options;
     setupCommandLineParser(parser, options);
     
-    // Then, parser the command line and handle the cases where help display
+    // Then, parse the command line and handle the cases where help display
     // is requested or errornoeous parameters were given.
     int ret = parseCommandLineAndCheck(options, parser, argc, argv);
     if (ret != 0)
