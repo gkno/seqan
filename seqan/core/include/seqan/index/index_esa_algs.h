@@ -367,7 +367,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size<TSTree>::Type				TSize;
 
 		typedef FractionCompound_<TValue, TSize>		TFractionCompound;
-		typedef String<TFractionCompound, Block<> >		TSetStack;
+		typedef String<TFractionCompound>               TSetStack;
 		typedef String<TSize>							TPositionList;
 		
 		typedef typename TFractionCompound::TSet		TSet;
@@ -439,14 +439,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline bool hasRepeats() 
 		{
 			if (length(setStack) < 2) return false;
-			return _haveMaximalRepeats(top(setStack), topPrev(setStack)) > 0;
+			return _haveMaximalRepeats(back(setStack), setStack[length(setStack) - 2]) > 0;
 		}
 
 		inline TSize countRepeats() const
 		{
 			if (length(setStack) < 2) return 0;
 
-			TFractionCompound const &child  = top(setStack);
+			TFractionCompound const &child  = back(setStack);
 			TFractionCompound const &parent = topPrev(setStack);
 
 			TConstSetIterator childFraction	= begin(child.set);
@@ -548,7 +548,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		_dfsOnPush((TBase&)it, e);
 
 		if (it.canMerge)
-			push(it.setStack);
+			resize(it.setStack, length(it.setStack) + 1);
 /*
 		::std::cerr << "PUSH ";
 		_dumpHistoryStack(it);
@@ -567,7 +567,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef FractionHeader_<TSize>			TFractionHeader;
 		typedef Pair<TValue, TFractionHeader>	TFraction;
 
-		push(it.setStack);
+		resize(it.setStack, length(it.setStack) + 1);
 
 		TSTree &index = container(it);
 
@@ -580,9 +580,9 @@ namespace SEQAN_NAMESPACE_MAIN
 				TFraction(
 					bwtAt(i, container(it)),
 					TFractionHeader(i, i, 1)), 
-				top(it.setStack).set);
+				back(it.setStack).set);
 		else
-			top(it.setStack).leftmost = TFractionHeader(i, i, 1);
+			back(it.setStack).leftmost = TFractionHeader(i, i, 1);
 
 		_setSizeInval(it.posList[i]);
 /*
@@ -594,11 +594,15 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 	template < typename TSTree, typename TSpec >
-	inline void goNext(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > &it) {
+	inline void goNext(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > &it) 
+    {
+        typedef Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > TIter;
 		do {
-			if (it.canMerge && length(it.setStack) >= 2) {
-				_fractionMerge(it, topPrev(it.setStack), top(it.setStack));
-				pop(it.setStack);
+			if (it.canMerge && length(it.setStack) >= 2) 
+            {
+                typename Size<typename TIter::TSetStack>::Type len = length(it.setStack);
+				_fractionMerge(it, it.setStack[len - 2], back(it.setStack));
+				resize(it.setStack, len - 1);
 			}
 			goNext(it, PostorderEmptyEdges());
 			if (empty(it.history))
@@ -616,7 +620,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (empty(it.history))
 			return it.vDesc;
 		typedef typename VertexDescriptor<TSTree>::Type TDesc;
-		return TDesc(top(it.history).range.i1, it.vDesc.range.i2, 0);
+		return TDesc(back(it.history).range.i1, it.vDesc.range.i2, 0);
 	}
 //____________________________________________________________________________
 
@@ -624,7 +628,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Size<TSTree>::Type 
 	repLength(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > const &it) 
 	{
-		return top(it.history).range.i2;
+		return back(it.history).range.i2;
 	}
 //____________________________________________________________________________
 
@@ -740,10 +744,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			maxIt(&_maxIt),
 			_atEnd(true) {}
 		
-		inline void _reinitParentFraction() {
+		inline void _reinitParentFraction() 
+        {
 			if (leftmostParent)
 			{
-				TFractionCompound const &parent = topPrev(maxIt->setStack);
+				TFractionCompound const &parent = maxIt->setStack[length(maxIt->setStack) - 2];
 				parentPtr = parent.leftmost.begin;
 			} else
 				parentPtr = objectOf(parentFraction).begin;
@@ -762,7 +767,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline void _firstParentFraction() {
-			TFractionCompound const &parent = topPrev(maxIt->setStack);
+			TFractionCompound const &parent = maxIt->setStack[length(maxIt->setStack) - 2];
 
 			parentFraction	= begin(parent.set);
 			parentEnd		= end(parent.set);
@@ -777,7 +782,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline void _firstChildFraction() {
-			TFractionCompound const &child = top(maxIt->setStack);
+			TFractionCompound const &child = back(maxIt->setStack);
 
 			childFraction	= begin(child.set);
 			childEnd		= end(child.set);
@@ -791,14 +796,15 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		}
 
-		inline bool _nextParentFraction() {
+		inline bool _nextParentFraction() 
+        {
 			if (leftmostParent)
 				return false;
 
 			if (++parentFraction == parentEnd) {
-				if (topPrev(maxIt->setStack).leftmost.size > 0) {
+				if (maxIt->setStack[length(maxIt->setStack) - 2].leftmost.size > 0) {
 					leftmostParent = true;
-					parentPtr = topPrev(maxIt->setStack).leftmost.begin;
+					parentPtr = maxIt->setStack[length(maxIt->setStack) - 2].leftmost.begin;
 				} else
 					return false;
 			} else
@@ -812,9 +818,9 @@ namespace SEQAN_NAMESPACE_MAIN
 				return false;
 
 			if (++childFraction == childEnd) {
-				if (top(maxIt->setStack).leftmost.size > 0) {
+				if (back(maxIt->setStack).leftmost.size > 0) {
 					leftmostChild = true;
-					childPtr = top(maxIt->setStack).leftmost.begin;
+					childPtr = back(maxIt->setStack).leftmost.begin;
 				} else
 					return false;
 			} else
