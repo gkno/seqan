@@ -33,3 +33,14 @@
    fun:main
 }
 
+# Suppress warning in zlib.  Also see the zlib FAQ:
+# http://www.zlib.net/zlib_faq.html#faq36
+{
+   supp_zlib_gzclose
+   Memcheck:Cond
+   obj:/usr/lib/libz.so.1.2.3.3
+   fun:deflate
+   fun:gzclose
+   ...
+   fun:main
+}
