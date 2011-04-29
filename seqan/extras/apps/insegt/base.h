@@ -175,7 +175,7 @@ createCombinations(TStringSet &tupleSet, TStringSet &annoIds)
 		}
 		*/
 	
-		TId id;
+		// TId id;
 		unsigned pos;
 		unsigned help = n;
 		for (unsigned i = 0; i < length(annoIds); ++i)
@@ -184,7 +184,7 @@ createCombinations(TStringSet &tupleSet, TStringSet &annoIds)
 			help = help / m;
 			for (unsigned j = 0; j< length(getValue(annoIds, i)); ++j)
 			{
-				id = getValue(getValue(annoIds, i), j);
+				// id = getValue(getValue(annoIds, i), j);
 				for (unsigned k = 0; k < unsigned (n/ (help*m)) ; ++k)
 				{
 					for (unsigned l = 0; l < help; ++l)

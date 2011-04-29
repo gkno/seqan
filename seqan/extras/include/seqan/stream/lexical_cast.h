@@ -82,7 +82,7 @@ succesfully cast to an int of 123
 ..include:seqan/stream.h
 ..see:Function.lexicalCast2
  */
-template < typename TTarget, typename TSource >
+template <typename TTarget, typename TSource>
 inline TTarget
 lexicalCast(TSource const & source)
 {
@@ -99,7 +99,6 @@ lexicalCast(String<TValue, TSpec> const & source)
 {
     std::istringstream str(toCString(source));
     TTarget ret = 0;
-
     str >> ret;
     return ret;
 }

@@ -175,9 +175,9 @@ void simulateReads(
 	TGenome& currentSource = genomeSet[0];
 	int seqLength = length(currentSource);
 
-	int fragmentSize = readLength;
-	if (libSize > 0)
-		fragmentSize = libSize + libError;
+	// int fragmentSize = readLength;
+	// if (libSize > 0)
+	// 	fragmentSize = libSize + libError;
 
 	String<int> sortedStartPos;
 /*				# Pick a library size
@@ -230,7 +230,7 @@ void simulateReads(
 		
 		if(revComp) reverseComplement(readTemplate);
 
-		int lastOp = 0;
+		// int lastOp = 0;
 		int currOp = 0;
 		// Sequence the reads
 		int countErrors = 0;
@@ -239,7 +239,7 @@ void simulateReads(
 		bool successful = false;
 
 		while(pos < maxEnd) {
-			lastOp = currOp;
+			// lastOp = currOp;
 			double prob = (double)rand()/TEMP_RAND_MAX;
 			//	std::cout << "prob = " << prob << "\t";
 			int m;

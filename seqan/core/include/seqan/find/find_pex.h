@@ -434,7 +434,7 @@ SEQAN_CHECKPOINT
 
     // adjust start and end if they point over the edges of host(finder)
     s = (s < 0 ? 0 : s);
-    e = (e > static_cast<int>(length(host(finder))) ? length(host(finder)) : e);
+    e = (e > static_cast<int>(length(host(finder))) ? static_cast<int>(length(host(finder))) : e);
 
     THostSegment i(infix(host(mf),s,e));
     THSFinder f(i);

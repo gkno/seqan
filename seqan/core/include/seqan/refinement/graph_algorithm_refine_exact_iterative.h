@@ -216,9 +216,9 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
 	//std::cout <<"create interval trees...";
-	clock_t start, finish1;
-	double duration;
-	start = clock();
+	// clock_t start, finish1;
+	// double duration;
+	// start = clock();
 	//one tree for each sequence
 	resize(gs,numSequences);
 	resize(pms,numSequences);
@@ -244,8 +244,8 @@ SEQAN_CHECKPOINT
 		clear(intervals[i]);
 		++i;
 	}
-	finish1 = clock();
-	duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
+	// finish1 = clock();
+	// duration = (double)(finish1 - start) / CLOCKS_PER_SEC;
 	//std::cout << "\ntook " << duration << " seconds.\n";
 }
 

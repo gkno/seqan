@@ -896,13 +896,14 @@ _refinementStep(TString & consensus_seq,
 		likelihood_score = em(profile, begin(dataset), t, l, lambda, tcm);
 		--iterations;
 	}
+    (void)likelihood_score;  // TODO(holtgrew): Why is this never read?
 
 	determineConsensusSeq(consensus_seq, profile, l);
 	ds_iter = begin(dataset);
-	typename Position<TStrings>::Type seq_nr;
+	// typename Position<TStrings>::Type seq_nr;
 	do
 	{
-		seq_nr = t-(ds_end-ds_iter);
+		// seq_nr = t-(ds_end-ds_iter);
 		TPos m = (TPos)(length(*ds_iter)-l+1);
 		typename Iterator<TString>::Type seq_iter, seq_end, consensus_begin;
 		seq_iter = begin(*ds_iter);

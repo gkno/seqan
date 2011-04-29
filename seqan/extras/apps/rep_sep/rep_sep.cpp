@@ -108,13 +108,13 @@ int main(int argc, const char *argv[])
     cout << "loading data from " << assembly_filename << " .. " << flush;
 
     TSize numberOfContigs = 0;
-    TSize numberOfReads = 0;
+    // TSize numberOfReads = 0;
 
     FILE* strmReads = fopen(toCString(assembly_filename), "rb");
     read(strmReads, fragStore, Amos());
     fclose(strmReads);
     numberOfContigs = length(fragStore.contigStore);
-    numberOfReads = length(fragStore.readStore);
+    // numberOfReads = length(fragStore.readStore);
 
     cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
     

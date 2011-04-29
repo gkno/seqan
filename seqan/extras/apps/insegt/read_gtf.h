@@ -184,7 +184,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 	resize(me.annotationStore, length(me.annotationNameStore), Generous());
 	
 	TNameStoreIter itName = begin(me.annotationNameStore);
-	TNameStoreIter itNameEnd = end(me.annotationNameStore);
+	// TNameStoreIter itNameEnd = end(me.annotationNameStore);
 	
 	TStoreIter itStore = begin(me.annotationStore);
 	

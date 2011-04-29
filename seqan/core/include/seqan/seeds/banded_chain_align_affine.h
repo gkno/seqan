@@ -155,7 +155,7 @@ _bandedGotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
 	TSize length_left_diag = str2_length - up_height;
 
 
-	TStringIterator x_begin = begin(str1_) - 1;
+	// TStringIterator x_begin = begin(str1_) - 1;
 	TStringIterator x_end = end(str1_) - 1;
 	TStringIterator y_begin = begin(str2_) - 1;
 	TStringIterator y_end = end(str2_) - 1;
@@ -179,15 +179,15 @@ _bandedGotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
 	resize(matrix_hori);
 
 	TSize pos = length(matrix_diag, 0)-1;
-	TMatrixIterator diag_col_ = begin(matrix_diag);
+	// TMatrixIterator diag_col_ = begin(matrix_diag);
 	TMatrixIterator diag_finger1(matrix_diag,pos);
 	TMatrixIterator diag_finger2;
 	TMatrixIterator diag_finger3;
-	TMatrixIterator vert_col_ = begin(matrix_vert);
+	// TMatrixIterator vert_col_ = begin(matrix_vert);
 	TMatrixIterator vert_finger1(matrix_vert,pos);
 	TMatrixIterator vert_finger2;
 	TMatrixIterator vert_finger3;
-	TMatrixIterator hori_col_ = begin(matrix_hori);
+	// TMatrixIterator hori_col_ = begin(matrix_hori);
 	TMatrixIterator hori_finger1(matrix_hori,pos);
 	TMatrixIterator hori_finger2;
 	TMatrixIterator hori_finger3;
@@ -1006,7 +1006,7 @@ SEQAN_CHECKPOINT
 	--x_begin;
 	TStringIterator x_end = end(str1_) -1;
 	setPosition(x_end,width_align-1);
-	TStringIterator y_begin = begin(str2_);
+	// TStringIterator y_begin = begin(str2_);
 	TStringIterator y_end = end(str2_)-1;
 	TStringIterator x,y;
 
@@ -1282,7 +1282,7 @@ _gotoh2(Matrix<TScoreValue, DIMENSION> & matrix_diag,		//edit matrix
 	--x_begin;
 	TStringIterator x_end = end(str1_) -1;
 	
-	TStringIterator y_begin = begin(str2_);
+	// TStringIterator y_begin = begin(str2_);
 	TStringIterator y_end = end(str2_)-1;
 	TStringIterator x,y;
 
@@ -1549,7 +1549,7 @@ SEQAN_CHECKPOINT
 	--x_begin;
 	TStringIterator x_end = end(str1_) -1;
 	setPosition(x_end,width_align-1);
-	TStringIterator y_begin = begin(str2_);
+	// TStringIterator y_begin = begin(str2_);
 	TStringIterator y_end = end(str2_)-1;
 	TStringIterator x,y;
 

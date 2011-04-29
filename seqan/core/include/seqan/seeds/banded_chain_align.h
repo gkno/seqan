@@ -985,7 +985,7 @@ SEQAN_CHECKPOINT
 	--x_begin;
 	TStringIterator x_end = end(str1_) -1;
 	setPosition(x_end,width_align-1);
-	TStringIterator y_begin = begin(str2_);
+	// TStringIterator y_begin = begin(str2_);
 	TStringIterator y_end = end(str2_)-1;
 	TStringIterator x,y;
 
@@ -1093,10 +1093,10 @@ SEQAN_CHECKPOINT
 
 	typedef typename Iterator<TTargetSourceSegment, Rooted>::Type TStringIterator;
 	TStringIterator it_0 = iter(str_0, 0);
-	TStringIterator it_0_end = end(str_0);
+	// TStringIterator it_0_end = end(str_0);
 
 	TStringIterator it_1 = iter(str_1, 0);
-	TStringIterator it_1_end = end(str_1);
+	// TStringIterator it_1_end = end(str_1);
 
 	TScoreValue score_diff = scoreMismatch(score_) - scoreGapExtend(score_);
 	//TScoreValue score_match = scoreMatch(score_);
@@ -1246,7 +1246,7 @@ SEQAN_CHECKPOINT
 	TStringIterator x_end = end(str1_) -1;
 	
 	setPosition(x_end, width_align-1);
-	TStringIterator y_begin = begin(str2_);
+	// TStringIterator y_begin = begin(str2_);
 	TStringIterator y_end = end(str2_)-1;
 	TStringIterator x,y;
 	col_ = finger2;

@@ -326,7 +326,7 @@ SEQAN_CHECKPOINT
 	TValue length_left_diag = str2_length - up_height;
 
 
-	TStringIterator x_begin = begin(str1_) - 1;
+	// TStringIterator x_begin = begin(str1_) - 1;
 	TStringIterator x_end = end(str1_) - 1;
 	TStringIterator y_begin = begin(str2_) - 1;
 	TStringIterator y_end = end(str2_) - 1;
@@ -355,16 +355,16 @@ SEQAN_CHECKPOINT
 	resize(hori_matrix_);
 
 	TSize pos = length(diag_matrix_, 0)-1;
-	TMatrixIterator diag_col_ = begin(diag_matrix_);
+	// TMatrixIterator diag_col_ = begin(diag_matrix_);
 	TMatrixIterator diag_finger1(diag_matrix_,pos);
 	TMatrixIterator diag_finger2;
 	TMatrixIterator diag_finger3;
 
-	TMatrixIterator vert_col_ = begin(vert_matrix_);
+	// TMatrixIterator vert_col_ = begin(vert_matrix_);
 	TMatrixIterator vert_finger1(vert_matrix_,pos);
 	TMatrixIterator vert_finger2;
 	TMatrixIterator vert_finger3;
-	TMatrixIterator hori_col_ = begin(hori_matrix_);
+	// TMatrixIterator hori_col_ = begin(hori_matrix_);
 	TMatrixIterator hori_finger1(hori_matrix_,pos);
 	TMatrixIterator hori_finger2;
 	TMatrixIterator hori_finger3;

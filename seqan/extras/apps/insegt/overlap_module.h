@@ -50,7 +50,7 @@ getIdsForRead(TAnnoIds & ids, FragmentStore<TSpec, TConfig> & me, TIntervalTree 
 	TIntervalIter itI = begin(alignIntervals);
 	TIntervalIter itIEnd = end(alignIntervals);
 	TResultIter itR = begin(ids);
-	TResultIter itREnd = end(ids);
+	// TResultIter itREnd = end(ids);
 
 	// search mapped annotations for each interval of the aligned read and store them in the corresponding list 'ids'
 	for ( ; itI != itIEnd; goNext(itI), goNext(itR))
@@ -64,7 +64,6 @@ getIdsForRead(TAnnoIds & ids, FragmentStore<TSpec, TConfig> & me, TIntervalTree 
 	TId currentId;
 	TContigPos beginPos;
 	TContigPos endPos;
-	TContigPos help;
 	
 	for ( ; itI != itIEnd; goNext(itI), goNext(itR))
 	{
@@ -76,7 +75,6 @@ getIdsForRead(TAnnoIds & ids, FragmentStore<TSpec, TConfig> & me, TIntervalTree 
 			
 			if (beginPos > endPos)
 			{
-				help = beginPos;
 				beginPos = endPos;
 				endPos = beginPos;
 			}

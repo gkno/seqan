@@ -308,7 +308,7 @@ read(TFile & file,
 			} else if (blockIdentifier == "CTG") {   // Contig block
 				TContigElement contigEl;
 				TSize fromAligned = length(fragStore.alignedReadStore);
-				TId _id = 0;
+				// TId _id = 0;
 				String<char> fieldIdentifier;
 				String<char> eid;
 				String<char> contigSeq;
@@ -420,7 +420,7 @@ read(TFile & file,
 						_parseReadIdentifier(file, fieldIdentifier, c);
 						if (fieldIdentifier == "iid") {
 							c = _streamGet(file);
-							_id = _parseReadNumber(file, c);
+							//_id = _parseReadNumber(file, c);
 							_parseSkipLine(file, c);
 						} else if (fieldIdentifier == "eid") {
 							c = _streamGet(file);
