@@ -395,10 +395,16 @@ void printDebugLevel(TStream &stream) {
 	template <typename T>
 	const int SignalHandlersDummy_<T>::i = _deploySignalHandlers();
 
-	namespace
-	{
-		volatile int signalHandlersDummy_ = SignalHandlersDummy_<void>::i;
-	}
+	namespace {
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif  // ifdef __clang__
+    volatile int signalHandlersDummy_ = SignalHandlersDummy_<void>::i;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif  // ifdef __clang__
+  }
 
 #endif  // #if SEQAN_ENABLE_DEBUG
 #endif  // defined(PLATFORM_WINDOWS) || !SEQAN_HAS_EXECINFO
