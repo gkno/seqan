@@ -1965,7 +1965,7 @@ regionStartPos(TRegion & readRegion,
 	typedef typename Value<typename Value<TRegion,2>::Type,2>::Type TSignedPos;
 
 	if(readRegion.i2.i1 < 2)	// i2 stores expected end pos of match
-		return _max(0,(TSignedPos)readRegion.i2.i2 - options.libraryLength + readLength - options.libraryError - options.maxGap);
+		return _max((TSignedPos)0,(TSignedPos)(readRegion.i2.i2 - options.libraryLength + readLength - options.libraryError - options.maxGap));
 	else				 	    // i2 stores expected start pos
 		return (readRegion.i2.i2  + options.libraryLength - readLength - options.libraryError);
 	
