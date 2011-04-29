@@ -364,6 +364,8 @@ void printDebugLevel(TStream &stream) {
 			free(demangled);
 		}
 		std::cerr << std::endl;
+    // Only the array must be freed according to man page, not the contents.
+		free(symbollist);
 	}
 	
 	static void signalHandlerPrintStackTrace(int signum)
