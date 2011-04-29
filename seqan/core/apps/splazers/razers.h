@@ -2209,10 +2209,12 @@ int mapReads(
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
-        // first check whether split mapping (--> two shapes) or normal mapping
+    // first check whether split mapping (--> two shapes) or normal mapping
 #ifdef RAZERS_SPLICED
-        if (options.minMatchLen > 0)
-                return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options);
+    if (options.minMatchLen > 0)
+        return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, readRegions, cnts, options);
+#else
+    (void)readRegions;
 #endif
 
 	Shape<Dna, SimpleShape>		ungapped;
