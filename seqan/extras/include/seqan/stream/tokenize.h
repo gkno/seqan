@@ -289,7 +289,7 @@ _countHelper(uint & count,
             TRecordReader & reader,
             Tag<TTagSpec> const & tag)
 {
-    return _countHelper(count, reader, Tag<TTagSpec>());
+    return _countHelper(count, reader, tag);
 }
 
 
