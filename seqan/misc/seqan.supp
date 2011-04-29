@@ -38,7 +38,7 @@
 {
    supp_zlib_gzclose
    Memcheck:Cond
-   obj:/usr/lib/libz.so.1.2.3.3
+   ...
    fun:deflate
    fun:gzclose
    ...
