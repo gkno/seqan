@@ -175,5 +175,5 @@ int main(int argc, char const ** argv)
     if (!stop)
         performWork(options);
 
-    return 0;
+    return res;
 }
