@@ -77,12 +77,7 @@ void _test1b(TTest const & s)
     SEQAN_ASSERT_EQ(i,  -12345);
     SEQAN_ASSERT_EQ(sh, -12345);
     SEQAN_ASSERT_EQ(l,  -12345l);
-    // who knows why this is necessary:
-    #if defined _LP64
-    SEQAN_ASSERT_EQ(ui, UINT_MAX);
-    #else
-    SEQAN_ASSERT_EQ(ui, UINT_MAX - 12345 + 1);
-    #endif
+    SEQAN_ASSERT_EQ(ui, 0u);  // cannot be casted, returns 0 by default
     SEQAN_ASSERT_EQ(f,  -12345.00f);
     SEQAN_ASSERT_EQ(d,  -12345.00);
 }
@@ -104,12 +99,7 @@ void _test1c(TTest const & s)
     SEQAN_ASSERT_EQ(i,  -5);
     SEQAN_ASSERT_EQ(sh, -5);
     SEQAN_ASSERT_EQ(l,  -5l);
-    // who knows why this is necessary:
-    #if defined _LP64
-    SEQAN_ASSERT_EQ(ui, UINT_MAX);
-    #else
-    SEQAN_ASSERT_EQ(ui, UINT_MAX - 5 +1);
-    #endif
+    SEQAN_ASSERT_EQ(ui, 0u);  // cannot be casted, returns 0 by default
 
     SEQAN_ASSERT_EQ(f,  -5.4f);
     SEQAN_ASSERT_EQ(d,  -5.4);
@@ -135,7 +125,8 @@ SEQAN_DEFINE_TEST(test_stream_lexical_cast_1_chararray)
 {
     using namespace seqan;
 
-    char s[] = "12345";
+    char s[100];
+    strcpy(s, "12345");
     _test1a(s);
 
     strcpy(s, "-12345");
@@ -310,5 +301,3 @@ SEQAN_DEFINE_TEST(test_stream_lexical_cast_2_seqanstring)
     s = "-5.4foobar"; 
     _test2b(s); //TODO(h4nn3s): this should run through on _test2c, not _test2b
 }
-
-
