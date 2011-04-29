@@ -384,9 +384,9 @@ position(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > const & 
 
 // setPosition
 template <typename TJournaledString, typename TJournalSpec, typename TPosition>
-inline void 
-setPosition(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & me,
-            TPosition pos_)
+inline void
+setPosition(Iter<TJournaledString, JournaledStringIterSpec<TJournalSpec> > & /*me*/,
+            TPosition /*pos_*/)
 {
     SEQAN_CHECKPOINT;
     // TODO(holtgrew): Implement me!
