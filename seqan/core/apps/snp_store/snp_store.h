@@ -525,7 +525,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
 
 			// orientation
 			bool oa = a.beginPos < a.endPos;
-			bool ob = b.beginPos < b.endPos;
+			// bool ob = b.beginPos < b.endPos;
 			return oa;
 
 		}
