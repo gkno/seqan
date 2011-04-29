@@ -33,7 +33,7 @@
 //#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)
 //#define RAZERS_DEBUG_MATEPAIRS
 #define RAZERS_DEFER_COMPACTION         // mask duplicates on the fly and defer compaction
-#define RAZERS_EXTERNAL_MATCHES         // use external memory algorithms for managing matches
+//#define RAZERS_EXTERNAL_MATCHES         // use external memory algorithms for managing matches
 
 #ifdef _OPENMP
 #include <omp.h>
