@@ -92,7 +92,8 @@ void _test1c(TTest const & s)
     int i       = lexicalCast<int>(s);
     short sh    = lexicalCast<short>(s);
     long l      = lexicalCast<long>(s);
-    unsigned int ui = lexicalCast<unsigned int>(s);
+    // Casting string representing negative number to unsigned has ambiguous behaviour.  Thus, it is disabled right now.
+    // unsigned int ui = lexicalCast<unsigned int>(s);
 
     float f     = lexicalCast<float>(s);
     double d    = lexicalCast<double>(s);
@@ -100,7 +101,7 @@ void _test1c(TTest const & s)
     SEQAN_ASSERT_EQ(i,  -5);
     SEQAN_ASSERT_EQ(sh, -5);
     SEQAN_ASSERT_EQ(l,  -5l);
-    SEQAN_ASSERT_EQ(ui, 0u);  // cannot be casted, returns 0 by default
+    // SEQAN_ASSERT_EQ(ui, 0u);  // cannot be casted, returns 0 by default
 
     SEQAN_ASSERT_EQ(f,  -5.4f);
     SEQAN_ASSERT_EQ(d,  -5.4);
