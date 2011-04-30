@@ -418,7 +418,7 @@ inline bool _findAbndmLargeNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> 
 
         int end = me.cP + me.needleLength + me.limit;
         // adjust end if it points over the edges of host(finder)
-        end = (end > static_cast<int>(length(host(finder))) ? length(host(finder)) : end);
+        end = (end > static_cast<int>(length(host(finder))) ? static_cast<int>(length(host(finder))) : end);
 
         THostSegment s(infix(host(finder),me.cP, end));
         THSFinder f(s);
@@ -535,7 +535,7 @@ inline bool _findAbndmLargeNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> 
                     // call find 
                     int end = me.cP + me.needleLength + me.limit;
                     // adjust end if it points over the edges of host(finder)
-                    end = (end > static_cast<int>(length(host(finder))) ? length(host(finder)) : end);
+                    end = (end > static_cast<int>(length(host(finder))) ? static_cast<int>(length(host(finder))) : end);
 
                     THostSegment s(infix(host(finder),me.cP, end));
                     THSFinder f(s);
