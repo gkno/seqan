@@ -234,8 +234,8 @@ namespace SEQAN_NAMESPACE_MAIN
                             {
                                 forceFirst = false;
                                 // insert repeat
-                                rep.beginPosition = repLeft;
-                                rep.endPosition = repRight;
+                                rep.beginPosition = splitters[t] + repLeft;
+                                rep.endPosition = splitters[t] + repRight;
                                 appendValue(store, rep);
                             }
                             repLeft = repRight;
@@ -246,8 +246,8 @@ namespace SEQAN_NAMESPACE_MAIN
                     {
                         // Insert repeat but only if it is not already in there.
                         if (rep.beginPosition != repLeft && rep.endPosition != repRight) {
-                            rep.beginPosition = repLeft;
-                            rep.endPosition = repRight;
+                            rep.beginPosition = splitters[t] + repLeft;
+                            rep.endPosition = splitters[t] + repRight;
                             appendValue(store, rep);
                         }
                     }
@@ -348,6 +348,14 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef SEQAN_PARALLEL
         }
 #endif  // #ifdef SEQAN_PARALLEL
+        // #pragma omp critical
+        // {
+        //     std::cerr << "thread #" << omp_get_thread_num() << " REPEATS:";
+        //     for (unsigned i = 0; i < length(repString); ++i) {
+        //         std::cerr << " (" << repString[i].beginPosition << ", " << repString[i].endPosition << ", " << repString[i].period << ")";
+        //     }
+        //     std::cerr << std::endl;
+        // }
 	}
 
     // TODO(holtgrew): Why for TString const and StringSet<> const?

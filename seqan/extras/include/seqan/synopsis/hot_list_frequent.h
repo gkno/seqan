@@ -40,7 +40,6 @@
 #define SEQAN_SYNOPSIS_HOT_LIST_FREQUENT_H_
 
 #include <algorithm>
-#include <tr1/unordered_map>
 
 namespace seqan {
 

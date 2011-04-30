@@ -58,7 +58,7 @@ typedef unsigned __int8 __uint8;
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
 
-#include "platform_generated_forwards.h"
+#include <seqan/platform/platform_generated_forwards.h>
 
 #ifndef SEQAN_HEADER_PLATFORM_GENERATED_FORWARDS_H
 #error To use the SeqAn library you first have to execute 'make forwards' in the root directory

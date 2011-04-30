@@ -168,22 +168,22 @@ void _test2a(TTest const & s)
     float f     = 0.0;
     double d    = 0.0;
 
-    SEQAN_ASSERT_EQ(lexicalCast2(i, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(i, s), true);
     SEQAN_ASSERT_EQ(i,  12345);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), true);
     SEQAN_ASSERT_EQ(sh, 12345);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(l, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(l, s), true);
     SEQAN_ASSERT_EQ(l,  12345l);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(ui, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(ui, s), true);
     SEQAN_ASSERT_EQ(ui, 12345u);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(f, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(f, s), true);
     SEQAN_ASSERT_EQ(f,  12345.00f);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(d, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(d, s), true);
     SEQAN_ASSERT_EQ(d,  12345.00);
 }
 
@@ -200,23 +200,23 @@ void _test2b(TTest const & s)
     float f     = 0;
     double d    = 0;
 
-    SEQAN_ASSERT_EQ(lexicalCast2(i, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(i, s), true);
     SEQAN_ASSERT_EQ(i,  -5);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), true);
     SEQAN_ASSERT_EQ(sh, -5);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(l, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(l, s), true);
     SEQAN_ASSERT_EQ(l,  -5l);
 
     // Casting string representing negative number to unsigned has ambiguous behaviour.  Thus, it is disabled right now.
     // SEQAN_ASSERT_EQ(lexicalCast2(ui, s), 0);
     // SEQAN_ASSERT_EQ(ui, 0u);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(f, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(f, s), true);
     SEQAN_ASSERT_EQ(f,  -5.4f);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(d, s), 1);
+    SEQAN_ASSERT_EQ(lexicalCast2(d, s), true);
     SEQAN_ASSERT_EQ(d,  -5.4);
 }
 
@@ -233,22 +233,22 @@ void _test2c(TTest const & s)
     float f     = 0;
     double d    = 0;
 
-    SEQAN_ASSERT_EQ(lexicalCast2(i, s), 0);
+    SEQAN_ASSERT_EQ(lexicalCast2(i, s), false);
     SEQAN_ASSERT_EQ(i,  0);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), 0);
+    SEQAN_ASSERT_EQ(lexicalCast2(sh, s), false);
     SEQAN_ASSERT_EQ(sh, 0);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(l, s), 0);
+    SEQAN_ASSERT_EQ(lexicalCast2(l, s), false);
     SEQAN_ASSERT_EQ(l,  0l);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(ui, s), 0);
+    SEQAN_ASSERT_EQ(lexicalCast2(ui, s), false);
     SEQAN_ASSERT_EQ(ui, 0u);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(f, s), 0);
+    SEQAN_ASSERT_EQ(lexicalCast2(f, s), false);
     SEQAN_ASSERT_EQ(f,  0.0f);
 
-    SEQAN_ASSERT_EQ(lexicalCast2(d, s), 0);
+    SEQAN_ASSERT_EQ(lexicalCast2(d, s), false);
     SEQAN_ASSERT_EQ(d,  0.0);
 }
 

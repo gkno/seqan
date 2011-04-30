@@ -44,6 +44,25 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 
+// Make the unordered map template available in the std::tr1 namespace.
+#if TR1_UNORDERED_MAP_FOUND
+  #if TR1_UNORDERED_MAP_USE_TR1_UNORDERED_MAP
+    #include <tr1/unordered_map>
+  #elif TR1_UNORDERED_MAP_USE_UNORDERED_MAP && !TR1_UNORDERED_MAP_USE_TR1_UNORDERED_MAP
+    #include <unordered_map>
+    namespace std { namespace tr1 {
+      using std::unordered_map;
+    } }
+  #elif Boost_FOUND
+    #include <boost/unordered_map.hpp>
+    namespace std { namespace tr1 {
+      using boost::UNORDERED_MAP;
+    } }
+  #else  // #if TR1_UNORDERED_MAP_USE_TR1_UNORDERED_MAP
+    #error unordered_map implementation required for using module synopsis!
+  #endif  // #if TR1_UNORDERED_MAP_USE_TR1_UNORDERED_MAP
+#endif  // #if TR1_UNORDERED_MAP_FOUND
+
 // ==========================================================================
 // Support Code
 // ==========================================================================

@@ -152,9 +152,18 @@
 ..param.c:the character to be checked
 ...type:int
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
-..remarks: This is non-seqan, plain c and listed for completeness
-..see:http://www.cplusplus.com/reference/clibrary/cctype/isblank/
+..remarks:This is non-seqan, specified in POSIX and listed for completeness.
+..remarks:For visual studio, we define it ourselves.
+..see:http://pubs.opengroup.org/onlinepubs/009695399/functions/isblank.html
 ..see:http://www.cppreference.com/wiki/string/character_classes
 ..see:Function.isspace
-..include:<cctype>
+..include:seqan/stream.h
 */
+
+#ifdef PLATFORM_WINDOWS_VS
+inline
+int isblank(int c)
+{
+    return (c == ' ') || (c == '\t');
+}
+#endif  // #ifdef PLATFORM_WINDOWS_VS

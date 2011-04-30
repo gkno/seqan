@@ -245,43 +245,43 @@ streamPut(FILE * stream, char const c)
 }
 
 inline char const *
-_streamPutChar(char const*/**/)
+_streamPutChar(char const * /*tag*/)
 {
     return "%s";
 }
 
 inline char const *
-_streamPutChar(int const/**/)
+_streamPutChar(int const /*tag*/)
 {
     return "%d";
 }
 
 inline char const *
-_streamPutChar(unsigned int const/**/)
+_streamPutChar(unsigned int const /*tag*/)
 {
     return "%u";
 }
 
 inline char const *
-_streamPutChar(long const/**/)
+_streamPutChar(long const /*tag*/)
 {
     return "%ld";
 }
 
 inline char const *
-_streamPutChar(unsigned long const/**/)
+_streamPutChar(unsigned long const /*tag*/)
 {
     return "%lu";
 }
 
 inline char const *
-_streamPutChar(float const/**/)
+_streamPutChar(float const /*tag*/)
 {
     return "%.2f"; 
 }
 
 inline char const *
-_streamPutChar(double const/**/)
+_streamPutChar(double const /*tag*/)
 {
     return "%.2lf";
 }

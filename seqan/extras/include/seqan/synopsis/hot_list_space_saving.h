@@ -38,7 +38,6 @@
 #define SEQAN_SYNOPSIS_HOT_LIST_SPACE_SAVING_H_
 
 #include <algorithm>
-#include <tr1/unordered_map>
 
 namespace seqan {
 

@@ -288,6 +288,7 @@ struct SwiftParameters {
             startPos(orig.startPos),
             curPos(orig.curPos),
             endPos(orig.endPos),
+            windowStart(orig.windowStart),
             dotPos(orig.dotPos),
             dotPos2(orig.dotPos2),
 			data_repeats(orig.data_repeats)
@@ -313,6 +314,7 @@ struct SwiftParameters {
             _needReinit = orig._needReinit;
             hits = orig.hits;
             startPos = orig.startPos;
+            windowStart = orig.windowStart;
             curPos = orig.curPos;
             endPos = orig.endPos;
             dotPos = orig.dotPos;

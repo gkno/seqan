@@ -37,6 +37,7 @@
 #ifndef SEQAN_STREAM_TOKENIZE_H
 #define SEQAN_STREAM_TOKENIZE_H
 
+#include <cctype>
 
 namespace seqan {
 
