@@ -403,7 +403,7 @@ SEQAN_CHECKPOINT
     
     // adjust start and end if they point over the edges of host(finder)
     start = (start < 0 ? 0 : start);
-    end = (end > static_cast<int>(length(host(finder))) ? length(host(finder)) : end);
+    end = (end > static_cast<int>(length(host(finder))) ? static_cast<int>(length(host(finder))) : end);
 
     THostSegment s(infix(host(finder),start,end));
     THSFinder f(s);
@@ -639,7 +639,7 @@ SEQAN_CHECKPOINT
 
     // adjust start and end if they point over the edges of host(finder)
     p1 = (p1 < 0 ? 0 : p1);
-    p2 = (p2 > static_cast<int>(length(host(finder))) ? length(host(finder)) : p2);
+    p2 = (p2 > static_cast<int>(length(host(finder))) ? static_cast<int>(length(host(finder))) : p2);
     THostSegment i(infix(host(mf),p1,p2));
     THSFinder f(i);
 
@@ -678,7 +678,7 @@ SEQAN_CHECKPOINT
 
       // adjust start and end if they point over the edges of host(finder)
       p1 = (p1 < 0 ? 0 : p1);
-      p2 = (p2 > static_cast<int>(length(host(finder))) ? length(host(finder)) : p2);
+      p2 = (p2 > static_cast<int>(length(host(finder))) ? static_cast<int>(length(host(finder))) : p2);
       THostSegment i(infix(host(mf),p1,p2));
       THSFinder f(i);
       cand = find(f,me.range_table[node].verifier);
@@ -693,7 +693,7 @@ SEQAN_CHECKPOINT
 
       // adjust start and end if they point over the edges of host(finder)
       p1 = (p1 < 0 ? 0 : p1);
-      p2 = (p2 > static_cast<int>(length(host(finder))) ? length(host(finder)) : p2);
+      p2 = (p2 > static_cast<int>(length(host(finder))) ? static_cast<int>(length(host(finder))) : p2);
       THostSegment i(infix(host(mf),p1,p2));
       THSFinder f(i);
       while(find(f,me.range_table[node].verifier))
