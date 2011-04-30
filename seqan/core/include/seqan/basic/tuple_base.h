@@ -389,11 +389,11 @@ inline void clear(Tuple<T_, _size, TSpec> & me)
 template <typename TTuple>
 struct ComparisonWorkerContext_
 {
-    int result;
+    bool result;
     TTuple const & left;
     TTuple const & right;
 
-    ComparisonWorkerContext_(int b, TTuple const & l, TTuple const & r)
+    ComparisonWorkerContext_(bool b, TTuple const & l, TTuple const & r)
             : result(b), left(l), right(r)
     {}
 };
