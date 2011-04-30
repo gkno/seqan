@@ -261,7 +261,7 @@ _skipHelper(TRecordReader & reader,
 // same as skip, but count the characters read (for doublepass-io)
 template <typename TTagSpec, typename TRecordReader>
 inline int
-_countHelper(uint & count,
+_countHelper(unsigned & count,
             TRecordReader & reader,
             Tag<TTagSpec> const & tag,
             bool const desiredOutcomeOfComparison)
@@ -285,7 +285,7 @@ _countHelper(uint & count,
 
 template <typename TTagSpec, typename TRecordReader>
 inline int
-_countHelper(uint & count,
+_countHelper(unsigned & count,
             TRecordReader & reader,
             Tag<TTagSpec> const & tag)
 {
@@ -346,7 +346,7 @@ _readAndCompareWithStr(TRecordReader & reader,
                        TString const & str)
 {
     bool win = false;
-    for (uint i = 0; i < length(str); ++i)
+    for (unsigned i = 0; i < length(str); ++i)
     {
         if (atEnd(reader))
             return EOF_BEFORE_SUCCESS;
@@ -502,7 +502,7 @@ readUntilChar(TBuffer & buffer,
 .Function.readNChars
 ..cat:Input/Output
 ..summary:Read exactly n characters from stream into buffer
-..signature:readNChars(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, uint const n)
+..signature:readNChars(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, unsigned const n)
 ..param.buffer:The buffer to write to
 ...type:Shortcut.CharString
 ...type:Shortcut.DnaString
@@ -510,7 +510,7 @@ readUntilChar(TBuffer & buffer,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.n:The number of characters to read
-...type:$uint$
+...type:$unsigned$
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
@@ -523,7 +523,7 @@ template <typename TBuffer, typename TStream, typename TPass>
 inline int
 readNChars(TBuffer & buffer,
            RecordReader<TStream, TPass> & reader,
-           uint const n)
+           unsigned const n)
 {
     SEQAN_CHECKPOINT
 //     typedef typename Value< typename RecordReader<TStream,
@@ -533,7 +533,7 @@ readNChars(TBuffer & buffer,
     clear(buffer);
     reserve(buffer, n);
 
-    for (uint i = 0; i < n; ++i)
+    for (unsigned i = 0; i < n; ++i)
     {
         if (atEnd(reader))
             return EOF_BEFORE_SUCCESS;
@@ -1331,7 +1331,7 @@ skipUntilLineBeginsWithOneCharOfStr(RecordReader<TStream, TPass> & reader,
         r = skipUntilGraph(reader);
         if (r != 0)
             return r;
-        for (uint i = 0; i < length(str); ++i)
+        for (unsigned i = 0; i < length(str); ++i)
         {
             if (value(reader) == value(str,i))
                 return 0;
