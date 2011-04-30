@@ -477,7 +477,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 	TIterator itEnd = end(matches, Standard());
 	TIterator dit = it;
 	TIterator ditBeg = it;
-	int lastPairId = 0;
+	// int lastPairId = 0;
 	// sort 
 	::std::sort(it, itEnd, LessSplicedScoreGPos<TMatch>());
 //	::std::sort(it, itEnd, LessSplicedErrorsGPos<TMatch>());
@@ -531,7 +531,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 				//std::cout << "state = "<< state << " for PairId = " << lastPairId << std::endl;
 				state = 2;		// the current one is suboptimal
 			}
-			lastPairId = (*it).pairId;
+			// lastPairId = (*it).pairId;
 		}
 		else
 		{
@@ -548,7 +548,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 			numSuccesful = (dit - begin(matches, Standard()))/2;
 			//std::cout << "numSuccesful=" << numSuccesful << std::endl;
 			bestScore = (*it).pairScore;
-			lastPairId = (*it).pairId;
+			// lastPairId = (*it).pairId;
 			state = 0;
 		}
 		*dit = *it;	++dit; ++it;
@@ -904,7 +904,7 @@ matchVerify(
 	unsigned maxTotalErrors = (unsigned)(length(readSet[rseqNo]) * options.errorRate);	
 	unsigned maxErrorsSeed = options.maxPrefixErrors;	
 	if(maxErrorsSeed > maxTotalErrors) maxErrorsSeed = maxTotalErrors;
-	unsigned minSeedErrors = maxErrorsSeed + 1;
+	// unsigned minSeedErrors = maxErrorsSeed + 1;
 	unsigned minTotalErrors = maxTotalErrors + 1;
 	unsigned bestHitLength = 0;
 
@@ -944,7 +944,7 @@ matchVerify(
 		if (hit) hitLength = count;
 		if (hitLength > bestHitLength ) //simply take the longest hit
 		{
-			minSeedErrors = seedErrors;
+			// minSeedErrors = seedErrors;
 			minTotalErrors = totalErrors;
 			bestHitLength = hitLength;
 			m.gBegin = git - begin(host(genomeInf), Standard());
@@ -1022,7 +1022,7 @@ matchVerify(
 	unsigned maxTotalErrors = (unsigned)(length(readSet[rseqNo]) * options.errorRate);	
 	unsigned maxErrorsSeed = options.maxSuffixErrors;	
 	if(maxErrorsSeed > maxTotalErrors) maxErrorsSeed = maxTotalErrors;
-	unsigned minSeedErrors = maxErrorsSeed + 1;
+	// unsigned minSeedErrors = maxErrorsSeed + 1;
 	unsigned minTotalErrors = maxTotalErrors + 1;
 	unsigned bestHitLength = 0;
 
@@ -1063,7 +1063,7 @@ matchVerify(
 		if (hit) hitLength = count;
 		if (hitLength > bestHitLength ) //simply take the longest hit
 		{
-			minSeedErrors = seedErrors;
+			// minSeedErrors = seedErrors;
 			minTotalErrors = totalErrors;
 			bestHitLength = hitLength;
 			m.gEnd = git - begin(host(genomeInf), Standard()) + 1;
@@ -1675,8 +1675,8 @@ findBestSplitPosition(TLongerSegment &longSeg,
 	TShortSize shortPos = leftLongBegin;
 
 	int bestSumErrors = 0;
-	int bestLErrors = 0;
-	int bestRErrors = 0;
+	// int bestLErrors = 0;
+	// int bestRErrors = 0;
 	int bestPos = shortPos;
 	int errorsL = 0;
 	int errorsR = 0;
@@ -1719,8 +1719,8 @@ findBestSplitPosition(TLongerSegment &longSeg,
 			|| (orientation == 'R' && errorsPosL+errorsPosR == bestSumErrors))
 		{
 			bestSumErrors = errorsPosL+errorsPosR;
-			bestLErrors = errorsPosL;
-			bestRErrors = errorsPosR;
+			// bestLErrors = errorsPosL;
+			// bestRErrors = errorsPosR;
 			bestPos = shortPos + 1;
 			if(errorsPosL+errorsPosR < bestSumErrors) bestTraceExtL = bestPos;
 		}

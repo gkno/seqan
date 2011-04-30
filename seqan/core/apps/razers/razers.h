@@ -1025,7 +1025,9 @@ void compactMatches(TMatches &matches, TCounts &
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
 	TIterator dit = it;
+#ifdef RAZERS_MASK_READS
 	TIterator ditBeg = it;
+#endif
 
 	for (; it != itEnd; ++it) 
 	{
@@ -1079,7 +1081,9 @@ void compactMatches(TMatches &matches, TCounts &
 #ifdef RAZERS_MICRO_RNA
 			bestMScore = (*it).mScore;
 #endif
+#ifdef RAZERS_MASK_READS
 			ditBeg = dit;
+#endif
 		}
 		*dit = *it;
 		++dit;

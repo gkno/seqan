@@ -589,7 +589,7 @@ _refinementStep(TString & consensus_seq,
 				TType const & l,
 				TType const & d,
 				bool const & is_exact,
-				Oops const & oops)
+				Oops const & /*oops*/)
 {
     SEQAN_CHECKPOINT;
 
@@ -612,12 +612,12 @@ _refinementStep(TString & consensus_seq,
 	completeProfile(profile, background);
 
 	// step2: refinement of initial profile with em: 5 trials
-	double likelihood_score = 0;
+	// double likelihood_score = 0;  // TODO(holtgrew): Why is this read nowhere?
 	int iterations = 3; //5
 
 	while(iterations>0)
 	{
-		likelihood_score = em(profile, begin(dataset), t, l, oops);
+		// likelihood_score = em(profile, begin(dataset), t, l, oops);
 		--iterations;
 	}
 
@@ -693,12 +693,12 @@ _refinementStep(TString & consensus_seq,
 	completeProfile(profile, background);
 
 	// step2: refinement of initial profile with em: 5 trials
-	double likelihood_score = 0;
+	// double likelihood_score = 0;  // TODO(holtgrew): Why is this read nowhere?
 	int iterations = 3; //5
 
 	while(iterations>0)
 	{
-		likelihood_score = em(profile, begin(dataset), t, l, Oops());
+		// likelihood_score = em(profile, begin(dataset), t, l, Oops());
 		--iterations;
 	}
 
@@ -774,12 +774,12 @@ _refinementStep(TString & consensus_seq,
 	completeProfile(profile, background);
 
 	// step2: refinement of initial profile with em: 5 trials
-	double likelihood_score = 0;
-	double gamma = static_cast<double>(1)/sqrt(static_cast<double>(t));
+	// double likelihood_score = 0;  // TODO(holtgrew): Why is this read nowhere?
+	// double gamma = static_cast<double>(1)/sqrt(static_cast<double>(t));
 	int iterations = 3; //5
 	while(iterations>0)
 	{
-		likelihood_score = em(profile, begin(dataset), t, l, gamma, zoops);
+		// likelihood_score = em(profile, begin(dataset), t, l, gamma, zoops);
 		--iterations;
 	}
 
@@ -787,10 +787,10 @@ _refinementStep(TString & consensus_seq,
 	typename Iterator<TStrings>::Type ds_iter, ds_end;
 	ds_iter = begin(dataset);
 	ds_end = end(dataset);
-	typename Position<TStrings>::Type seq_nr;
+	// typename Position<TStrings>::Type seq_nr;  // TODO(holtgrew): Why is this read nowhere?
 	do
 	{
-		seq_nr = t-(ds_end-ds_iter);
+		// seq_nr = t-(ds_end-ds_iter);
 		TPos m = (TPos)(length(*ds_iter)-l+1);
 		int * hd_ar = new int[m];
 		typename Iterator<TString>::Type seq_iter, seq_end, consensus_begin;

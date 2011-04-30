@@ -863,7 +863,7 @@ int readMatchesFromGFF_Batch(
 		// process tags in a loop
 		CharString current_tag;
 		_parseSkipWhitespace(*file,c); 
-		bool multi = false, suboptimal = false, unique = true, splitRead = false;
+		bool multi = false, suboptimal = false/*, unique = true*/, splitRead = false;
 		clipLeft = 0; clipRight = 0; 
 		clear(gAliPos);
 		clear(tmpCigarStr);
@@ -919,7 +919,7 @@ int readMatchesFromGFF_Batch(
 				// parse other tags
 				pos = 0;
 				pos2 = 0;
-				if (current_tag == "unique") {unique = true;}
+				if (current_tag == "unique") {/*unique = true;*/}
 				else if (current_tag == "multi") {multi = true;}
 				else if (current_tag == "suboptimal") {suboptimal = true;}
 				else if (current_tag == "split") {splitRead = true;}
@@ -1805,7 +1805,7 @@ _doSnpCall(TCounts & countF,
 		// the diploid reference genotype
 		int genotypeRef = (refAllele<<2) | refAllele; 
 		int genotypeCalled = genotypeRef, qCall1 = 0; 
-		int genotypeCalled2 = genotypeRef, qCall2 = 0; 
+		// int genotypeCalled2 = genotypeRef, qCall2 = 0; 
 		
 
 #ifdef SNPSTORE_DEBUG_CANDPOS
@@ -1884,7 +1884,7 @@ _doSnpCall(TCounts & countF,
 		pHomo1 = (pHomo1 > 0.0) ? pHomo1 : 0.0;
 		pHomo2 = (pHomo2 > 0.0) ? pHomo2 : 0.0;
 			
-		int het,homo1,homo2; //0,1,2
+		int het,/*homo1,*/homo2; //0,1,2
 			
 		//rank them and create the genotype
 		if(pHet < pHomo1)
@@ -1900,18 +1900,18 @@ _doSnpCall(TCounts & countF,
 				if(pHomo1<=pHomo2)    //(1)
 				{
 					qCall1 = (int)(pHomo1 - pHet  + 0.5);
-					homo1 = 1; //second best
-					genotypeCalled2 = (best<<2)| best;
-					qCall2 = (int)(pHomo2 - pHomo1 + 0.5);
+					// homo1 = 1; //second best
+					// genotypeCalled2 = (best<<2)| best;
+					// qCall2 = (int)(pHomo2 - pHomo1 + 0.5);
 					homo2 = 2; // last 
 				}
 				else				//(2)
 				{
 					qCall1 = (int)(pHomo2 - pHet + 0.5);
 					homo2 = 1;
-					genotypeCalled2 = (secondBest<<2)| secondBest;
-					qCall2 = (int)(pHomo1 - pHomo2 + 0.5);
-					homo1 = 2;
+					// genotypeCalled2 = (secondBest<<2)| secondBest;
+					// qCall2 = (int)(pHomo1 - pHomo2 + 0.5);
+					// homo1 = 2;
 				}
 			}
 			else
@@ -1921,12 +1921,12 @@ _doSnpCall(TCounts & countF,
 				qCall1 = (int)(pHet - pHomo2 + 0.5);
 				genotypeCalled = (secondBest<<2)| secondBest;
 				het = 1;
-				qCall2 = (int)(pHomo1 - pHet + 0.5);
-				if(best==refAllele)
-					genotypeCalled2 = (best<<2)| secondBest;
-				else
-					genotypeCalled2 = (secondBest<<2) | best;
-				homo1 = 2;
+				// qCall2 = (int)(pHomo1 - pHet + 0.5);
+				// if(best==refAllele)
+				// 	genotypeCalled2 = (best<<2)| secondBest;
+				// else
+				// 	genotypeCalled2 = (secondBest<<2) | best;
+				// homo1 = 2;
 			}
 		}
 		else
@@ -1938,32 +1938,32 @@ _doSnpCall(TCounts & countF,
 				homo2 = 0;
 				qCall1 = (int)(pHomo1 - pHomo2 + 0.5);
 				genotypeCalled = (secondBest<<2)| secondBest;
-				homo1 = 1;
-				qCall2 = (int)(pHet - pHomo1 + 0.5);
-				genotypeCalled2 = (best<<2)| best;
+				// homo1 = 1;
+				// qCall2 = (int)(pHet - pHomo1 + 0.5);
+				// genotypeCalled2 = (best<<2)| best;
 				het = 2;
 			}
 			else 
 			{
-				homo1 = 0;
+				// homo1 = 0;
 				genotypeCalled = (best<<2)| best;
 				if(pHet<pHomo2)		//(5)
 				{
 					qCall1 = (int)(pHet - pHomo1 + 0.5);
 					het = 1;
-					if(best==refAllele)
-						genotypeCalled2 = (best<<2)| secondBest;
-					else
-						genotypeCalled2 = (secondBest<<2) | best;
-					qCall2 = (int)(pHomo2 - pHet + 0.5);
+					// if(best==refAllele)
+					// 	genotypeCalled2 = (best<<2)| secondBest;
+					// else
+					// 	genotypeCalled2 = (secondBest<<2) | best;
+					// qCall2 = (int)(pHomo2 - pHet + 0.5);
 					homo2 = 2;
 				}
 				else		// (6)
 				{
 					qCall1 = (int)(pHomo2 - pHomo1+ 0.5);
 					homo2 = 1;
-					qCall2 = (int)(pHet - pHomo2 + 0.5);
-					genotypeCalled2 = (secondBest<<2)| secondBest;
+					// qCall2 = (int)(pHet - pHomo2 + 0.5);
+					// genotypeCalled2 = (secondBest<<2)| secondBest;
 					het = 2;
 				}
 			}
@@ -1975,12 +1975,12 @@ _doSnpCall(TCounts & countF,
 			std::cout << "Second best is best homozygote?!" << std::endl;
 #endif
 			//return false;
-			genotypeCalled2 = genotypeCalled;
+			// genotypeCalled2 = genotypeCalled;
 			genotypeCalled = genotypeRef;	// disable call
 			homo2 = 1;
 			het = 2; 
 			qCall1 = 0;
-			qCall2 = 0;
+			// qCall2 = 0;
 		}
 		
 	//}
@@ -3188,7 +3188,7 @@ getIndels(TAlign & align,TString &insertions, TString &deletions, TPosition begi
 	TAlignIterator ali_it1 = iter(row(align,1),begin_);					
 	TAlignIterator ali_it0_stop = iter(row(align,0),end_);
 	TAlignIterator ali_it1_stop = iter(row(align,1),end_);
-	TStringIterator readBase = begin(source(row(align,0))); 
+	// TStringIterator readBase = begin(source(row(align,0))); 
 	//std::cout << "getting cigar line\n";//ali0 len = " <<ali_it0_stop-ali_it0 << " \t ali1 len = "<<ali_it1_stop-ali_it1<<"\n";
 	int readPos = 0;
 	int refPos = 0;

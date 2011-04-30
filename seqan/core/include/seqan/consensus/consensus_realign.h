@@ -541,9 +541,9 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef typename Value<TAlignedReadStore>::Type TAlignedElement;
 	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadElement;
 
-    double beginTime, endTime;
+    // double beginTime, endTime;
     
-    beginTime = sysTime();
+    // beginTime = sysTime();
     // TODO(holtgrew): Unnecessary, only required once.
 	// Sort according to contigId
 	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
@@ -556,10 +556,10 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	sortAlignedReads(infix(fragStore.alignedReadStore, alignIt - begin(fragStore.alignedReadStore, Standard()), alignItEnd - begin(fragStore.alignedReadStore, Standard())), SortBeginPos());
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-    endTime = sysTime();
+    // endTime = sysTime();
 //    std::cerr << "TIME sorting " << endTime - beginTime << std::endl;
 
-    beginTime = sysTime();
+    // beginTime = sysTime();
 	// Copy all reads belonging to this contig and reverse complement them if necessary.
 	TAlignedReadStore contigReads;  // TODO(holtgrew): Rather contigAlignedReads?
 	TReadPos maxPos = 0;
@@ -602,10 +602,10 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		el.gaps = fragStore.contigStore[contigId].gaps;
 		appendValue(contigReads, el, Generous());
 	}
-    endTime = sysTime();
+    // endTime = sysTime();
 //    std::cerr << "TIME copying " << endTime - beginTime << std::endl;
 
-    beginTime = sysTime();
+    // beginTime = sysTime();
 	// Create the consensus sequence
 	TSize gapPos = ValueSize<TAlphabet>::VALUE;
 	typedef ProfileType<TAlphabet> TProfile;
@@ -661,14 +661,14 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 				++(value(itCons++)).count[ordValue(*itRead)];
 		}
 	}
-    endTime = sysTime();
+    // endTime = sysTime();
 //    std::cerr << "TIME consensus " << endTime - beginTime << std::endl;
 	
-    beginTime = sysTime();
+    // beginTime = sysTime();
     double tBefore = 0, tAlign = 0, tAfter = 0;
 	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference, tBefore, tAlign, tAfter);
 //    fprintf(stderr, "TIME before align: %f s\nTIME align: %f s\nTIME after align: %f s\n", tBefore, tAlign, tAfter);
-    endTime = sysTime();
+    // endTime = sysTime();
 //    std::cerr << "TIME realign " << endTime - beginTime << std::endl;
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
@@ -685,7 +685,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	}
 //	std::cout << "FinalScore: " << score << std::endl;
 
-    beginTime = sysTime();
+    // beginTime = sysTime();
 	// Update all the aligned reads and the new consensus
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter contigReadIt = begin(contigReads, Standard());
@@ -742,7 +742,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	}
 	if (includeReference) 
 		appendValue(fragStore.alignedReadStore, contigReads[length(contigReads) - 1], Generous() );
-    endTime = sysTime();
+    // endTime = sysTime();
 //    std::cerr << "TIME finalizing " << endTime - beginTime << std::endl;
 }
 
