@@ -64,27 +64,27 @@ using namespace seqan;
 SEQAN_BEGIN_TESTSUITE(test_index)
 {
 	// test_stree_iterators.h
-//	SEQAN_CALL_TEST(testSTreeIterators_Wotd);
-//	SEQAN_CALL_TEST(testSTreeIterators_WotdOriginal);
-//	SEQAN_CALL_TEST(testSTreeIterators_Esa);
-	// SEQAN_CALL_TEST(testFind_Esa_Mlr);
-	// SEQAN_CALL_TEST(testCompareIndices_Esa_Wotd);
-	// SEQAN_CALL_TEST(testMultiIndex);
-	// SEQAN_CALL_TEST(testMUMs);
-	// SEQAN_CALL_TEST(testMaxRepeats);
-	// SEQAN_CALL_TEST(testSuperMaxRepeats);
-	// SEQAN_CALL_TEST(testSuperMaxRepeatsFast);
+	SEQAN_CALL_TEST(testSTreeIterators_Wotd);
+	SEQAN_CALL_TEST(testSTreeIterators_WotdOriginal);
+	SEQAN_CALL_TEST(testSTreeIterators_Esa);
+	SEQAN_CALL_TEST(testFind_Esa_Mlr);
+	SEQAN_CALL_TEST(testCompareIndices_Esa_Wotd);
+	SEQAN_CALL_TEST(testMultiIndex);
+	SEQAN_CALL_TEST(testMUMs);
+	SEQAN_CALL_TEST(testMaxRepeats);
+	SEQAN_CALL_TEST(testSuperMaxRepeats);
+	SEQAN_CALL_TEST(testSuperMaxRepeatsFast);
 
 	// test_crosscompare.h
-	// SEQAN_CALL_TEST(testIndexCrossCompare);
+	SEQAN_CALL_TEST(testIndexCrossCompare);
 
 	// test_index_creation.h
-//	SEQAN_CALL_TEST(testIndexCreation);
+	SEQAN_CALL_TEST(testIndexCreation);
 
 	// test_qgram_index.h
-	// SEQAN_CALL_TEST(testGappedShapes);
-	// SEQAN_CALL_TEST(testUngappedShapes);
-	// SEQAN_CALL_TEST(testUngappedQGramIndex);
+	SEQAN_CALL_TEST(testGappedShapes);
+	SEQAN_CALL_TEST(testUngappedShapes);
+	SEQAN_CALL_TEST(testUngappedQGramIndex);
 	SEQAN_CALL_TEST(testQGramFind);
 
 	// test_sa_bwtwalk.h

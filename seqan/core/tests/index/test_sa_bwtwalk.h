@@ -122,7 +122,7 @@ SEQAN_DEFINE_TEST(testBWTWalk)
 	std::fstream inputFile(buffer);
 	CharString text;
 	read(inputFile, text, Raw());
-//	resize(text, 10000);
+	resize(text, 10000);
 //	std::cout << "textsize: " << length(text) << std::endl;
 
 	MYASSERT(BwtWalkFast, unsigned, False);
