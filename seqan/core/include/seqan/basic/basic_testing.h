@@ -589,7 +589,7 @@ const char *tempFileName() {
                 pos = i;
             }
         }
-        for (; pos > 0 && *(file + pos - 1) != '/'; --pos)
+        for (; pos > 0 && *(file + pos - 1) != pathSeparator; --pos)
             continue;
         if (pos == -1) {
             std::cerr << "Could not extrapolate path to repository from __FILE__ == \""
