@@ -612,7 +612,7 @@ SEQAN_CHECKPOINT
 			String<TChar> delim = "QS>R";
 			if(_parseUntilBeginLineOneOf(file,c,delim,4))
 			{
-				TPosition pos = _streamTellG(file);
+				// TPosition pos = _streamTellG(file);
 				pword = _parseReadWord(file,c);
 			//	_streamSeekG(file,pos);
 				
