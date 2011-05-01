@@ -562,7 +562,7 @@ void _mapSingleReadsParallelToContig(
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_COPY_FINDER);
 #endif  // #ifdef RAZERS_PROFILE
-    // threadLocalStorages[0].swiftFinder = TSwiftFinder(store.contigStore[contigId].seq, threadLocalStorages[0].options.repeatLength, 1);
+    threadLocalStorages[0].swiftFinder = TSwiftFinder(store.contigStore[contigId].seq, threadLocalStorages[0].options.repeatLength, 1);
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_COPY_FINDER);
 #endif  // #ifdef RAZERS_PROFILE
@@ -576,9 +576,9 @@ void _mapSingleReadsParallelToContig(
 #ifdef RAZERS_PROFILE
         timelineBeginTask(TASK_COPY_FINDER);
 #endif  // #ifdef RAZERS_PROFILE
-        tls.swiftFinder = TSwiftFinder(store.contigStore[contigId].seq, tls.options.repeatLength, 1);
-        // if (omp_get_thread_num() != 0)
-        //     tls.swiftFinder = threadLocalStorages[0].swiftFinder;
+        // tls.swiftFinder = TSwiftFinder(store.contigStore[contigId].seq, tls.options.repeatLength, 1);
+        if (omp_get_thread_num() != 0)
+            tls.swiftFinder = threadLocalStorages[0].swiftFinder;
 #ifdef RAZERS_PROFILE
         timelineEndTask(TASK_COPY_FINDER);
 #endif  // #ifdef RAZERS_PROFILE
