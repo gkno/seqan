@@ -22,6 +22,14 @@ macro (seqan_setup_global)
     if (CMAKE_CXX_COMPILER MATCHES "clang\\+\\+")
       set (COMPILER_IS_CLANG TRUE)
     endif (CMAKE_CXX_COMPILER MATCHES "clang\\+\\+")
+		
+    # -----------------------------------------------------------------------
+    # Fix CMAKE_COMPILER_IS_GNUCXX for MinGW.
+    # -----------------------------------------------------------------------
+		
+    if (CMAKE_CXX_COMPILER MATCHES "g\\+\\+")
+      set (CMAKE_COMPILER_IS_GNUCXX TRUE)
+    endif (CMAKE_CXX_COMPILER MATCHES "g\\+\\+")
 
     # -----------------------------------------------------------------------
     # GCC Setup
