@@ -89,17 +89,17 @@ void Test_MemoryManager_FreeMemoryPointer()
 	
 	releaseID(manager,3);
 	releaseID(manager,14);
-	MemoryManager<int, Block<8>, FreeMemoryPointer> manager2(manager);
+	// MemoryManager<int, Block<8>, FreeMemoryPointer> manager2(manager);
 	
-	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 14u);
-	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 3u);
-	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 35u);
+	// id =obtainID(manager2);
+	// SEQAN_ASSERT_EQ(id, 14u);
+	// id =obtainID(manager2);
+	// SEQAN_ASSERT_EQ(id, 3u);
+	// id =obtainID(manager2);
+	// SEQAN_ASSERT_EQ(id, 35u);
 
-        typedef MemoryManager<int, Block<8>, FreeMemoryPointer > const TMemoryManager2;
-	TMemoryManager2 manager3(manager);
+    //     typedef MemoryManager<int, Block<8>, FreeMemoryPointer > const TMemoryManager2;
+	// TMemoryManager2 manager3(manager);
 	// TMemoryManager2 manager4(manager3);  // TODO(holtgrew): Disabling this test since it triggers a warning and the seeds module is deprecated anyway.
 }
 
