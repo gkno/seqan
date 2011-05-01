@@ -341,24 +341,24 @@ _alignBandedFillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequen
     }
 
     // // TODO(holtgrew): Debug code, remove when working.
-    {
-        for (int k = 0; k < 3; ++k) {
-            std::cerr << ",-- *** filled banded alignment matrix " << k << std::endl;
-            for (unsigned i = 0; i < length(matrix, 0); ++i) {
-                std::cerr << "| ";
-                for (unsigned j = 0; j < i; ++j)
-                    std::cerr << "\t";
-                for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j, k) <= MinValue<int>::VALUE / 4)
-                        std::cerr << "\tinf";
-                    else
-                        std::cerr << "\t" << value(matrix, i, j, k);
-                }
-                std::cerr << std::endl;
-            }
-            std::cerr << "`--" << std::endl;
-        }
-    }
+    // {
+    //     for (int k = 0; k < 3; ++k) {
+    //         std::cerr << ",-- *** filled banded alignment matrix " << k << std::endl;
+    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //             std::cerr << "| ";
+    //             for (unsigned j = 0; j < i; ++j)
+    //                 std::cerr << "\t";
+    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //                 if (value(matrix, i, j, k) <= MinValue<int>::VALUE / 4)
+    //                     std::cerr << "\tinf";
+    //                 else
+    //                     std::cerr << "\t" << value(matrix, i, j, k);
+    //             }
+    //             std::cerr << std::endl;
+    //         }
+    //         std::cerr << "`--" << std::endl;
+    //     }
+    // }
 }
 
 
@@ -438,7 +438,7 @@ _alignBandedTraceback(TAlignmentIterator & alignmentIt0, TAlignmentIterator & al
 
         // Determine
         if (diagonal) {
-            std::cout << "DIAGONAL" << std::endl;
+            // std::cout << "DIAGONAL" << std::endl;
             // Move iterators in sequences, alignment rows and matrices.
             goPrevious(sourceIt0);  // XXX
             goPrevious(sourceIt1);  // XXX
