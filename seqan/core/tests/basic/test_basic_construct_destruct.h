@@ -516,7 +516,11 @@ SEQAN_DEFINE_TEST(test_basic_construct_destruct_array_copy_pointer)
     SEQAN_ASSERT_EQ(targetPtr[1].movedFrom, -1);
     SEQAN_ASSERT_EQ(targetPtr[1].assignedFrom, sourcePtr[1].id);
 
-    SEQAN_ASSERT_EQ(CDStruct::lastOther, &sourcePtr[1]);
+    // Stack order is different between GCC versions.
+    if (sourcePtr >= targetPtr)
+        SEQAN_ASSERT_EQ(CDStruct::lastOther, &sourcePtr[1]);
+    else
+        SEQAN_ASSERT_EQ(CDStruct::lastOther, &sourcePtr[0]);
     SEQAN_ASSERT_EQ(CDStruct::defaultConstructions, 0);
     SEQAN_ASSERT_EQ(CDStruct::copyConstructions, 0);
     SEQAN_ASSERT_EQ(CDStruct::moveConstructions, 0);
@@ -606,7 +610,11 @@ SEQAN_DEFINE_TEST(test_basic_construct_destruct_array_move_pointer)
     SEQAN_ASSERT_EQ(targetPtr[1].movedFrom, sourcePtr[1].id);
     SEQAN_ASSERT_EQ(targetPtr[1].assignedFrom, -1);
 
-    SEQAN_ASSERT_EQ(CDStruct::lastOther, &sourcePtr[1]);
+    // Stack order is different between GCC versions.
+    if (sourcePtr >= targetPtr)
+        SEQAN_ASSERT_EQ(CDStruct::lastOther, &sourcePtr[1]);
+    else
+        SEQAN_ASSERT_EQ(CDStruct::lastOther, &sourcePtr[0]);
     SEQAN_ASSERT_EQ(CDStruct::defaultConstructions, 0);
     SEQAN_ASSERT_EQ(CDStruct::copyConstructions, 0);
     SEQAN_ASSERT_EQ(CDStruct::moveConstructions, 0);
