@@ -63,6 +63,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 		const int runs = 2;					// conduct 10 test runs 
 		const int maxSize = 20 * 1024 * 1024;	// max text size is 20 megabyte
 		bool result = true;
+        (void)result;  // Is never read...
 
 		_proFloat timeDelta[12];
 		_proFloat timeSum[12];
