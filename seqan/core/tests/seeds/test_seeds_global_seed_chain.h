@@ -84,5 +84,5 @@ void test_global_seed_chain()
 
 
 void Main_GlobalSeedChain(){
-	test_global_seed_chain();
+	// test_global_seed_chain();
 }
