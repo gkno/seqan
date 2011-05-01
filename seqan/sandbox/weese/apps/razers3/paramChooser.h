@@ -504,11 +504,11 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	typedef typename Value<TError>::Type TFloat;
 	
 	unsigned totalN = pm_options.totalN;
-	unsigned totalK = pm_options.totalK;
+	// unsigned totalK = pm_options.totalK;
 	if(pm_options.extrapolate == true)
 	{
 		totalN = pm_options.extrapolN;
-		totalK = pm_options.extrapolK;
+		// totalK = pm_options.extrapolK;
 		if(totalN != length(errorDistr)/4)
 			interpolateErrorDistr(errorDistr,pm_options);
 	}
