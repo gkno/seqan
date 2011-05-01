@@ -389,11 +389,11 @@ inline void clear(Tuple<T_, _size, TSpec> & me)
 template <typename TTuple>
 struct ComparisonWorkerContext_
 {
-    bool result;
+    int result;
     TTuple const & left;
     TTuple const & right;
 
-    ComparisonWorkerContext_(bool b, TTuple const & l, TTuple const & r)
+    ComparisonWorkerContext_(int b, TTuple const & l, TTuple const & r)
             : result(b), left(l), right(r)
     {}
 };
@@ -403,10 +403,10 @@ struct TupleComparisonWorkerEq_
     template <typename TArg>
     static inline void body(TArg & arg, unsigned I)
     {
-        if (arg.result != true)
+        if (arg.result != 1)
             return;
         if (arg.left.i[I - 1] != arg.right.i[I - 1])
-            arg.result = false;
+            arg.result = 0;
     }
 };
 
@@ -416,9 +416,9 @@ operator==(Tuple<T_, _size, TSpec> const & _left,
            Tuple<T_, _size, TSpec> const & _right)
 {
     typedef Tuple<T_, _size, TSpec> TTuple;
-    ComparisonWorkerContext_<TTuple> context(true, _left, _right);
+    ComparisonWorkerContext_<TTuple> context(1, _left, _right);
     Loop<TupleComparisonWorkerEq_, _size>::run(context);
-    return context.result;
+    return context.result == 1;
 }
 
 // -----------------------------------------------------------------------
