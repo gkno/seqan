@@ -312,7 +312,9 @@ _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		TIdType id = sequenceId(g, *it);
 		std::ostringstream outs; 
 		outs << "label = \"";
-		outs << label(g, *it);
+        outs << "[" << fragmentBegin(g, *it) << "," << fragmentBegin(g, *it)+fragmentLength(g, *it) << ")";
+        // the lower command outputs the fragemtn of the string it is replaced by the interval
+		//outs << label(g, *it);
 		outs << "\", group = ";
 		outs << id;
 		append(property(nodeMap, *it), outs.str().c_str());		
