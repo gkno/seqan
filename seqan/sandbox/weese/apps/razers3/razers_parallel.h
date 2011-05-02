@@ -241,6 +241,7 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_VERIFY);
 #endif  // #ifdef RAZERS_PROFILE
+    double start = sysTime();
 
     typedef typename Iterator<THitString, Standard>::Type THitStringIterator;
 
@@ -275,6 +276,7 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
 //     }
 
     appendToVerificationResults(*job.verificationResults, SingleVerificationResult<TMatches>(localMatches, job.hitGroupId, job.windowNo));
+    tls.options.timeVerification += sysTime() - start;
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_VERIFY);
@@ -1042,6 +1044,7 @@ int _mapSingleReadsParallel(
             ::std::cerr << "Thread #" << i << std::endl;
             ::std::cerr << "  Masking duplicates took        \t" << threadLocalStorages[i].options.timeMaskDuplicates << " seconds" << ::std::endl;
             ::std::cerr << "  Compacting matches took        \t" << threadLocalStorages[i].options.timeCompactMatches << " seconds" << ::std::endl;
+            ::std::cerr << "  Time for verifications         \t" << threadLocalStorages[i].options.timeVerification << " seconds" << ::std::endl;
         }
         ::std::cerr << "Time for copying back            \t" << options.timeFsCopy << " seconds" << ::std::endl;
     }

@@ -220,6 +220,7 @@ enum {
         double      timeCompactMatches;     // time for compacting reads
         double      timeMaskDuplicates; // time spent masking duplicates
         double      timeFsCopy; // time spent copying alignments back into the fragment store
+        double      timeVerification; // time spent copying alignments back into the fragment store
 
 		bool		maqMapping;
 		int			absMaxQualSumErrors;
@@ -2276,6 +2277,7 @@ int _mapSingleReads(
     options.timeCompactMatches = 0;
     options.timeMaskDuplicates = 0;
     options.timeFsCopy = 0;
+    options.timeVerification = 0;
 	SEQAN_PROTIMESTART(find_time);
 
     // We collect the matches in a more compact data structure than the
@@ -2333,6 +2335,7 @@ int _mapSingleReads(
 		::std::cerr << "Compacting matches took          \t" << options.timeCompactMatches << " seconds" << ::std::endl;
 		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
 		::std::cerr << "Time for copying back            \t" << options.timeFsCopy << " seconds" << ::std::endl;
+		::std::cerr << "Time for verifications           \t" << options.timeVerification << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
 		::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
