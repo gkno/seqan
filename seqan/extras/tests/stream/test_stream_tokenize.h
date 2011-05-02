@@ -474,41 +474,4 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing_skipUntilLineBeginsWithOneCharOfStr)
     delete file;
 }
 
-
-/*
-    
-    SEQAN_ASSERT_EQ(skipUntilChar(reader, '.'), 0);
-    SEQAN_ASSERT_EQ(value(reader), '.');
-
-    SEQAN_ASSERT_EQ(skipUntilChar(reader, 'S'), 0);
-
-    SEQAN_ASSERT_EQ(skipUntilString(reader, "KAP"), 0); // -we fail here-
-    SEQAN_ASSERT_EQ(readAlphaNums(buf, reader), 0);
-    SEQAN_ASSERT_EQ(buf, "LP345LPL");
-
-    SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf, reader), 0);
-    SEQAN_ASSERT_EQ(buf, "AAAAAAAAAAAAA");
-    SEQAN_ASSERT_EQ(value(reader), '\a'); // Bell character is not whitespace
-    
-    SEQAN_ASSERT_EQ(readLine(buf, reader), 0); // do not add \r\n
-    SEQAN_ASSERT_EQ(buf, "etstststetststetststetsstetetstetststetstdtetsteststetstedetstet");
-    SEQAN_ASSERT_EQ(value(reader), ' ');
-    
-
-    //TODO investigate failure
-    //TODO investigate compiler warnings
-    //TODO(h4nn3s) FINISH
-
-
-    
-}*/
-
-
-
-
-
-
-
-
-
 #endif // ndef TEST_STREAM_TEST_STREAM_TOKENIZING_H_

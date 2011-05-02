@@ -41,7 +41,15 @@
 
 namespace seqan {
 
-// ----------------------- enum ------------------------------------
+// ==========================================================================
+// Forwards
+// ==========================================================================
+
+// none
+
+// ==========================================================================
+// Tags, Classes, Enums
+// ==========================================================================
 
 /**
 .Enum.TokenizeResult
@@ -61,10 +69,7 @@ enum TokenizeResult {
 };
 
 
-
-
-    
-// ----------------------- Helper structs ------------------------------------
+// ----------------------- Helper structs / private tags -----------------------
 struct Whitespace__;
 struct Blank__;
 struct Char__;
@@ -86,9 +91,18 @@ typedef Tag<BackslashR__> BackslashR_;
 typedef Tag<Graph__> Graph_;
 
 
-// template <typename TSpec>
-// struct CharCompare_;
+// ==========================================================================
+// Metafunctions
+// ==========================================================================
 
+// none
+
+
+// ==========================================================================
+// Functions
+// ==========================================================================
+
+// ----------------------- Helper functions for tags -------------------------
 
 inline int
 _charCompare(int const c, Whitespace_ const & /* tag*/)
@@ -174,17 +188,7 @@ _charCompare(int const c, Tag<Dna5_> const & /* tag*/)
             return true;
     }
     return false;
-    
 }
-
-// template <>
-// struct CharCompare_<Char_, int c2>
-// {
-//     static inline int compare(int const c)
-//     {
-//         return c == c2;
-//     }
-// }
 
 // ----------------------- Helper functions-----------------------------------
 
