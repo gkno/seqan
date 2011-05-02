@@ -299,6 +299,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
             // Copy back the repeats in parallel.
             unsigned nt = length(threadLocalStores);
+            (void) nt;  // Otherwise, GCC 4.6 warns, does not see it used in pragma clause below.
             #pragma omp parallel num_threads(nt)
             {
                 int const t = omp_get_thread_num();
