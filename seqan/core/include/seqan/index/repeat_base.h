@@ -298,7 +298,8 @@ namespace SEQAN_NAMESPACE_MAIN
             resize(repString, back(outSplitters));
 
             // Copy back the repeats in parallel.
-            #pragma omp parallel num_threads(length(threadLocalStores))
+            unsigned nt = length(threadLocalStores);
+            #pragma omp parallel num_threads(nt)
             {
                 int const t = omp_get_thread_num();
                 arrayCopy(iter(threadLocalStores[t], fromPositions[t].i1, Standard()),
