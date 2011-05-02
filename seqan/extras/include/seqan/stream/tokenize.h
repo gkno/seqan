@@ -102,7 +102,9 @@ typedef Tag<Graph__> Graph_;
 // Functions
 // ==========================================================================
 
-// ----------------------- Helper functions for tags -------------------------
+// ----------------------------------------------------------------------------
+// helper functions for tags
+// ----------------------------------------------------------------------------
 
 inline int
 _charCompare(int const c, Whitespace_ const & /* tag*/)
@@ -190,7 +192,9 @@ _charCompare(int const c, Tag<Dna5_> const & /* tag*/)
     return false;
 }
 
-// ----------------------- Helper functions-----------------------------------
+// ----------------------------------------------------------------------------
+// Function _readHelper() [other read functions use this]
+// ----------------------------------------------------------------------------
 
 // read chars from record reader depending on condition
 template <typename TTagSpec, // specialization of character comparison
@@ -232,77 +236,11 @@ _readHelper(TBuffer & buffer,
     return _readHelper(buffer, reader, tag, true);
 }
 
-// same as above, just don't save characters read
-template <typename TTagSpec, typename TRecordReader>
-inline int
-_skipHelper(TRecordReader & reader,
-            Tag<TTagSpec> const & tag,
-            bool const desiredOutcomeOfComparison)
-{
-//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
-    typedef char TChar; //TODO fix this
-
-    while (!atEnd(reader))
-    {
-        TChar c = value(reader);
-        if (bool(_charCompare(c, tag)) == desiredOutcomeOfComparison)
-            return 0;
-        goNext(reader);
-        if (resultCode(reader) != 0)
-            return resultCode(reader);
-    }
-    return EOF_BEFORE_SUCCESS;
-}
-
-
-template <typename TTagSpec, typename TRecordReader>
-inline int
-_skipHelper(TRecordReader & reader,
-            Tag<TTagSpec> const & tag)
-{
-    return _skipHelper(reader, tag, true);
-}
-
-// same as skip, but count the characters read (for doublepass-io)
-template <typename TTagSpec, typename TRecordReader>
-inline int
-_countHelper(unsigned & count,
-            TRecordReader & reader,
-            Tag<TTagSpec> const & tag,
-            bool const desiredOutcomeOfComparison)
-{
-//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
-    typedef char TChar; //TODO fix this
-    count = 0;
-
-    while (!atEnd(reader))
-    {
-        TChar c = value(reader);
-        count++;
-        if (bool(_charCompare(c, tag)) == desiredOutcomeOfComparison)
-            return 0;
-        goNext(reader);
-        if (resultCode(reader) != 0)
-            return resultCode(reader);
-    }
-    return EOF_BEFORE_SUCCESS;
-}
-
-template <typename TTagSpec, typename TRecordReader>
-inline int
-_countHelper(unsigned & count,
-            TRecordReader & reader,
-            Tag<TTagSpec> const & tag)
-{
-    return _countHelper(count, reader, tag);
-}
-
-
 // same as above but allows for a second character type to be ignored
-template <typename TTagSpec, 
+template <typename TTagSpec,
           typename TTagSpec2, // specialization of character class to be ignored
-          typename TRecordReader, 
-          typename TBuffer> 
+          typename TRecordReader,
+          typename TBuffer>
 inline int
 _readHelper(TBuffer & buffer,
             TRecordReader & reader,
@@ -344,6 +282,87 @@ _readHelper(TBuffer & buffer,
 {
     return _readHelper(buffer, reader, compTag, skipTag, true);
 }
+
+
+// ----------------------------------------------------------------------------
+// Function _skipHelper() [other skip functions use this]
+// ----------------------------------------------------------------------------
+
+
+// same as above, just don't save characters read
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_skipHelper(TRecordReader & reader,
+            Tag<TTagSpec> const & tag,
+            bool const desiredOutcomeOfComparison)
+{
+//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+    typedef char TChar; //TODO fix this
+
+    while (!atEnd(reader))
+    {
+        TChar c = value(reader);
+        if (bool(_charCompare(c, tag)) == desiredOutcomeOfComparison)
+            return 0;
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_skipHelper(TRecordReader & reader,
+            Tag<TTagSpec> const & tag)
+{
+    return _skipHelper(reader, tag, true);
+}
+
+// ----------------------------------------------------------------------------
+// Function _countHelper() [not used yet]
+// ----------------------------------------------------------------------------
+
+// same as skip, but count the characters read (for doublepass-io)
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_countHelper(unsigned & count,
+            TRecordReader & reader,
+            Tag<TTagSpec> const & tag,
+            bool const desiredOutcomeOfComparison)
+{
+//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+    typedef char TChar; //TODO fix this
+    count = 0;
+
+    while (!atEnd(reader))
+    {
+        TChar c = value(reader);
+        count++;
+        if (bool(_charCompare(c, tag)) == desiredOutcomeOfComparison)
+            return 0;
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+template <typename TTagSpec, typename TRecordReader>
+inline int
+_countHelper(unsigned & count,
+            TRecordReader & reader,
+            Tag<TTagSpec> const & tag)
+{
+    return _countHelper(count, reader, tag);
+}
+
+// ----------------------------------------------------------------------------
+// Function _readAndCompareWithStr()
+// ----------------------------------------------------------------------------
+
+
 
 template <typename TRecordReader, typename TString>
 inline int
