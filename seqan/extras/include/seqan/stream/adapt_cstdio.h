@@ -239,16 +239,31 @@ streamWriteBlock(FILE * stream, char const * source, size_t count)
 // ----------------------------------------------------------------------------
 
 inline int
+streamPut(FILE * stream, char const * source)
+{
+    return (streamWriteBlock(stream, source, sizeof(source) - sizeof(char))
+                == sizeof(source) - sizeof(char) )  ?   0 : 1;
+}
+
+template <typename TSpec>
+inline int
+streamPut(FILE * stream, String<char, TSpec> const & source)
+{
+    return (streamWriteBlock(stream, toCString(source), length(source))
+                == length(source))  ?   0 : 1;
+}
+
+inline int
 streamPut(FILE * stream, char const c)
 {
     return streamWriteChar(stream, c);
 }
 
-inline char const *
-_streamPutChar(char const * /*tag*/)
-{
-    return "%s";
-}
+// inline char const *
+// _streamPutChar(char const * /*tag*/)
+// {
+//     return "%s";
+// }
 
 inline char const *
 _streamPutChar(int const /*tag*/)

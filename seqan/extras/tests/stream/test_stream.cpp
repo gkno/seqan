@@ -98,6 +98,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_bz2_file_read_block);
     SEQAN_CALL_TEST(test_stream_bz2_file_write_block);
     SEQAN_CALL_TEST(test_stream_bz2_file_write_char);
+    SEQAN_CALL_TEST(test_stream_bz2_file_streamPut);
     SEQAN_CALL_TEST(test_stream_bz2_file_flush);
 #endif  // #if SEQAN_HAS_BZIP2
 
@@ -152,6 +153,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_write_complex_usage);
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_write_block);
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_write_char);
+    SEQAN_CALL_TEST(test_stream_adapt_ofstream_streamPut);
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_flush);
 
     // TODO(h4nn3s) finished tests for tokenize.h

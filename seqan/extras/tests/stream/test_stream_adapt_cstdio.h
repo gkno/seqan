@@ -235,7 +235,7 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_streamPut)
 
     rewind(stream);
     char buffer[1000];
-    char cmp[] = "c\nsss\n12\n34\n56\n78\n5.40\n6.50\n";
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.40\n6.50\n";
 
     int i = 0;
 

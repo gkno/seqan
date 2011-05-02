@@ -266,6 +266,55 @@ streamWriteBlock(Stream<BZ2File> & stream, char const * source, size_t count)
         return count;
 }
 
+
+// ----------------------------------------------------------------------------
+// Function streamPut()
+// ----------------------------------------------------------------------------
+
+inline int
+streamPut(Stream<BZ2File> & stream, char const c)
+{
+    return streamWriteChar(stream, c);
+}
+
+inline int
+streamPut(Stream<BZ2File> & stream, char const * source)
+{
+    return (streamWriteBlock(stream, source, sizeof(source) - sizeof(char))
+                == sizeof(source) - sizeof(char) )  ?   0 : 1;
+}
+
+template <typename TSpec>
+inline int
+streamPut(Stream<BZ2File> & stream, String<char, TSpec> const & source)
+{
+    return (streamWriteBlock(stream, toCString(source), length(source))
+                == length(source))  ?   0 : 1;
+}
+
+template <typename TSource>
+inline int
+streamPut(Stream<BZ2File> & stream, TSource const & source)
+{
+    char buffer[1024] = "";
+    ::std::stringstream s;
+
+    s << source;
+    if (s.fail())
+        return s.fail();
+
+    s >> buffer;
+    if (s.fail())
+        return s.fail();
+
+    buffer[1023] = 0;
+
+    return (streamWriteBlock(stream, buffer, strlen(buffer))
+                == strlen(buffer) )  ?   0 : 1;
+    //TODO(h4nn3s): might not be the fastest way, eh?
+}
+
+
 // ----------------------------------------------------------------------------
 // Function streamFlush()
 // ----------------------------------------------------------------------------

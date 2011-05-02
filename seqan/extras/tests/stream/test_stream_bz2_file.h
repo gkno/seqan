@@ -471,6 +471,49 @@ SEQAN_DEFINE_TEST(test_stream_bz2_file_write_block)
     }
 }
 
+// Test of streamPut()
+SEQAN_DEFINE_TEST(test_stream_bz2_file_streamPut)
+{
+    using namespace seqan;
+
+    const char * tempFilename = SEQAN_TEMP_FILENAME();
+    char filenameBuffer[1000];
+    strcpy(filenameBuffer, tempFilename);
+
+    // PUT
+    FILE * f = fopen(filenameBuffer, "wb");
+    SEQAN_ASSERT(f != NULL);
+    int err = BZ_OK;
+    BZFILE * f2 = BZ2_bzWriteOpen(&err, f, 9, 0, 0);
+    SEQAN_ASSERT_EQ(err, BZ_OK);
+    Stream<BZ2File> f3(f2);
+
+    testStreamPut(f3);
+
+    BZ2_bzWriteClose(&err, f2, 0, NULL, NULL);
+    SEQAN_ASSERT_EQ(err, BZ_OK);
+    fclose(f);
+
+    // COMPARE
+    FILE * f4 = fopen(filenameBuffer, "rb");
+    SEQAN_ASSERT(f4 != NULL);
+    err = BZ_OK;
+    BZFILE * f5 = BZ2_bzReadOpen(&err, f4, 0, 0, NULL, 0);
+    SEQAN_ASSERT_EQ(err, BZ_OK);
+    
+    char buffer[100];
+    int bytesRead = BZ2_bzRead(&err, f5, buffer, 99);
+    SEQAN_ASSERT_EQ(bytesRead, 30);
+    buffer[bytesRead] = '\0';
+    
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
+    
+    BZ2_bzReadClose(&err, f5);
+    SEQAN_ASSERT_EQ(err, BZ_OK);
+    fclose(f4);
+}
+
 // Test of streamFlush().
 SEQAN_DEFINE_TEST(test_stream_bz2_file_flush)
 {

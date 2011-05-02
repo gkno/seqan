@@ -204,17 +204,22 @@ void testStreamPut(TStream & stream)
     SEQAN_ASSERT_EQ(res, 0);
     res = streamPut(stream, '\n');
     SEQAN_ASSERT_EQ(res, 0);
-    
+
+    res = streamPut(stream, CharString("seq"));
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+
     res = streamPut(stream, "sss");
     SEQAN_ASSERT_EQ(res, 0);
     res = streamPut(stream, '\n');
     SEQAN_ASSERT_EQ(res, 0);
-    
+
     res = streamPut(stream, 12);
     SEQAN_ASSERT_EQ(res, 0);
     res = streamPut(stream, '\n');
     SEQAN_ASSERT_EQ(res, 0);
-    
+
     res = streamPut(stream, 34u);
     SEQAN_ASSERT_EQ(res, 0);
     res = streamPut(stream, '\n');
