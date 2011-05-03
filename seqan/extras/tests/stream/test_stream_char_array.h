@@ -273,6 +273,23 @@ SEQAN_DEFINE_TEST(test_stream_char_array_write_block)
     SEQAN_ASSERT_EQ(strcmp(buffer, "ABCDEFGH"), 0);
 }
 
+
+// Test of streamPut().
+SEQAN_DEFINE_TEST(test_stream_char_array_streamPut)
+{
+    using namespace seqan;
+
+    char buffer[100];
+    char * ptr = &(buffer[0]);
+    Stream<CharArray<char *> > stream(ptr, ptr + 100);
+
+    testStreamPut(stream);
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    buffer[strlen(cmp)] = '\0';
+    SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
+}
+
+
 // Test of streamFlush().
 SEQAN_DEFINE_TEST(test_stream_char_array_flush)
 {

@@ -80,6 +80,58 @@ class Stream;
 // Functions
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Function streamPut()
+// ----------------------------------------------------------------------------
+
+// this is generic for all specializations of Stream<> right now
+
+template <typename TStream>
+inline int
+streamPut(Stream<TStream> & stream, char const c)
+{
+    return streamWriteChar(stream, c);
+}
+
+template <typename TStream>
+inline int
+streamPut(Stream<TStream> & stream, char const * source)
+{
+    return (streamWriteBlock(stream, source, strlen(source))
+                == strlen(source) )  ?   0 : 1;
+}
+
+template <typename TStream, typename TSpec>
+inline int
+streamPut(Stream<TStream> & stream, String<char, TSpec> const & source)
+{
+    return (streamWriteBlock(stream, toCString(source), length(source))
+                == length(source))  ?   0 : 1;
+}
+
+template <typename TStream, typename TSource>
+inline int
+streamPut(Stream<TStream> & stream, TSource const & source)
+{
+    char buffer[1024] = "";
+    ::std::stringstream s;
+
+    s << source;
+    if (s.fail())
+        return s.fail();
+
+    s >> buffer;
+    if (s.fail())
+        return s.fail();
+
+    buffer[1023] = 0;
+
+    return (streamWriteBlock(stream, buffer, strlen(buffer))
+                == strlen(buffer) )  ?   0 : 1;
+    //TODO(h4nn3s): might not be the fastest way, eh?
+}
+
+
 }  // namespace seqean
 
 #endif  // #ifndef SEQAN_STREAM_STREAM_BASE_H_

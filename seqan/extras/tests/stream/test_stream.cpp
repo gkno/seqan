@@ -63,6 +63,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_char_array_read_char);
     SEQAN_CALL_TEST(test_stream_char_array_read_block);
     SEQAN_CALL_TEST(test_stream_char_array_write_block);
+    SEQAN_CALL_TEST(test_stream_char_array_streamPut);
     SEQAN_CALL_TEST(test_stream_char_array_write_char);
     SEQAN_CALL_TEST(test_stream_char_array_flush);
     SEQAN_CALL_TEST(test_stream_char_array_seek);
@@ -80,6 +81,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_gz_file_read_char);
     SEQAN_CALL_TEST(test_stream_gz_file_read_block);
     SEQAN_CALL_TEST(test_stream_gz_file_write_block);
+    SEQAN_CALL_TEST(test_stream_gz_file_streamPut);
     SEQAN_CALL_TEST(test_stream_gz_file_write_char);
     SEQAN_CALL_TEST(test_stream_gz_file_flush);
     SEQAN_CALL_TEST(test_stream_gz_file_seek);

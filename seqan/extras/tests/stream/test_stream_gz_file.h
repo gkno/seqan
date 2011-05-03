@@ -333,6 +333,34 @@ SEQAN_DEFINE_TEST(test_stream_gz_file_write_block)
     gzclose(gzIn);
 }
 
+// Test of streamWrite().
+SEQAN_DEFINE_TEST(test_stream_gz_file_streamPut)
+{
+    using namespace seqan;
+
+    const char * tempFilename = SEQAN_TEMP_FILENAME();
+    char filenameBuffer[1000];
+    strcpy(filenameBuffer, tempFilename);
+
+    gzFile f = gzopen(filenameBuffer, "wb");
+    SEQAN_ASSERT(f != NULL);
+    Stream<GZFile> f2(f);
+    testStreamPut(f2);
+    gzclose(f);
+
+    // Read in data and compare.
+    gzFile gzIn = gzopen(filenameBuffer, "rb");
+    SEQAN_ASSERT(gzIn != NULL);
+    char buffer[100];
+    int bytesRead = gzread(gzIn, buffer, 99);
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    buffer[bytesRead] = '\0';
+    SEQAN_ASSERT_EQ(bytesRead, int(sizeof(cmp) - sizeof(char)));
+    SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
+    gzclose(gzIn);
+}
+
+
 // Test of streamFlush().
 SEQAN_DEFINE_TEST(test_stream_gz_file_flush)
 {
