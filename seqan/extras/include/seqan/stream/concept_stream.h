@@ -195,6 +195,24 @@ struct HasStreamFeature;
 ..see:Function.streamWriteChar
 ..include:seqan/stream.h
 
+.Function.streamPut
+..cat:Input/Output
+..summary:Write different types to stream
+..signature:streamPut(stream, source)
+..param.stream:The stream object to write to.
+...type:Concept.Stream
+..param.source:The data to write to the stream.
+...type:nolink:$char *$ (must be 0-terminated!)
+...type:Shortcut.CharString
+...type:nolink:String<char, *>
+...type:nolink:numerical types ($int$, $double$ ...)
+..returns:$int$ with an error code, 0 on success.
+..remarks:Implementation note: for some specializations of @Concept.Stream certain conversions take place through stringstream and a buffer of size 1023. It follows that the result of the conversion cannot be longer. However this should only effect numericals right now. If you still encounter truncated strings with another type, convert to $const char*$ manually before writing.
+..see:Function.streamWriteChar
+..see:Function.streamWriteBlock
+..include:seqan/stream.h
+
+
 .Function.streamFlush
 ..cat:Input/Output
 ..summary:Flush the underlying stream.
