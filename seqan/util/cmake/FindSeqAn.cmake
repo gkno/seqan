@@ -337,6 +337,10 @@ macro (seqan_find_dependencies)
     include_directories(${BOOST_INCLUDE_DIRS})
   endif (Boost_FOUND)
 
+  if (CUDA_FOUND)
+    add_definitions(-DSEQAN_HAS_CUDA=1)
+  endif (CUDA_FOUND)
+
   include(CheckIncludeFiles)
   check_include_files(execinfo.h HAVE_EXECINFO)
   if (HAVE_EXECINFO)
@@ -465,17 +469,9 @@ macro (seqan_add_test_executable TARGET_NAME)
 endmacro (seqan_add_test_executable TARGET_NAME)
 
 # ---------------------------------------------------------------------------
-# Function seqan_add_cuda_testexecutable (TARGET_NAME source1.cu source2.[cu|cpp|h])
-#          seqan_add_cuda_testexecutable (TARGET_NAME)
+# Function seqan_add_cuda_executable (TARGET_NAME source1.cu source2.[cu|cpp|h])
+#          seqan_add_cuda_executable (TARGET_NAME)
 # ---------------------------------------------------------------------------
-
-# Create a SeqAn CUDA executable from the given source files.  If no such
-# files are given then all files in the current directory will be used.
-#
-# Also the test will be registered with add_test and depend on the current
-# test target, i.e. from closest seqan_setup_tests(TEST_TARGET_NAME) call.
-#
-# Only adds target if CUDA_FOUND is set to true.
 
 function (seqan_add_cuda_executable TARGET_NAME)
     if (CUDA_FOUND)
@@ -517,6 +513,61 @@ function (seqan_add_cuda_executable TARGET_NAME)
       	endif (BZIP2_FOUND)
     endif (CUDA_FOUND)
 endfunction (seqan_add_cuda_executable TARGET_NAME)
+
+# ---------------------------------------------------------------------------
+# Function seqan_add_cuda_test_executable (TARGET_NAME source1.cu source2.[cu|cpp|h])
+#          seqan_add_cuda_test_executable (TARGET_NAME)
+# ---------------------------------------------------------------------------
+
+# Create a SeqAn CUDA executable from the given source files.  If no such
+# files are given then all files in the current directory will be used.
+#
+# Also the test will be registered with add_test and depend on the current
+# test target, i.e. from closest seqan_setup_tests(TEST_TARGET_NAME) call.
+#
+# Only adds target if CUDA_FOUND is set to true.
+
+function (seqan_add_cuda_test_executable TARGET_NAME)
+    if (CUDA_FOUND)
+        # TODO(holtgrew): Use all files in directory if ${ARGC} == 0
+
+        # -------------------------------------------------------------------
+        # Set CUDA variables
+        # -------------------------------------------------------------------
+        set (CUDA_PROPAGATE_HOST_FLAGS OFF)
+        set (CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE OFF)
+        #set (CUDA_NVCC_FLAGS "-pg")
+        list (APPEND CMAKE_CXX_SOURCE_FILE_EXTENSIONS "cu")
+        cuda_include_directories(${CUDA_CUT_INCLUDE_DIR})
+        #string (REGEX REPLACE "\\-(W( |all)|pedantic)" "" CUDA_CXX_FLAGS ${CUDA_NVCC_FLAGS} ${CMAKE_CXX_FLAGS})
+        string (REGEX REPLACE "\\-pedantic" "" CUDA_CXX_FLAGS ${CUDA_NVCC_FLAGS} ${CMAKE_CXX_FLAGS})
+
+        # -------------------------------------------------------------------
+        # Go on normally as in apps.
+        # -------------------------------------------------------------------
+        # message(STATUS "cuda_add_executable (${ARGV})")
+        cuda_add_executable (${ARGV})
+        add_test(test_${ARGV0} ${ARGV0})
+    
+        # Link against librt on Linux.
+      	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        	target_link_libraries (${TARGET_NAME} rt)
+      	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  	
+      	# Dependencies on all registered seqan extensions.
+      	add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})
+	
+      	# Link against zlib and bzlib if found.
+      	if (ZLIB_FOUND)
+      	    include_directories (${ZLIB_INCLUDE_DIR})
+      	    target_link_libraries (${TARGET_NAME} ${ZLIB_LIBRARIES})
+      	endif (ZLIB_FOUND)
+      	if (BZIP2_FOUND)
+      	    include_directories (${BZIP2_INCLUDE_DIR})
+      	    target_link_libraries (${TARGET_NAME} ${BZIP2_LIBRARIES})
+      	endif (BZIP2_FOUND)
+    endif (CUDA_FOUND)
+endfunction (seqan_add_cuda_test_executable TARGET_NAME)
 
 # ---------------------------------------------------------------------------
 # Macro seqan_add_all_executables ([TARGET])
