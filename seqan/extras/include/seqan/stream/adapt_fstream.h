@@ -455,8 +455,8 @@ streamWriteBlock(::std::ofstream & stream, char const * source, size_t count)
 inline int
 streamPut(::std::fstream & stream, char const * source)
 {
-    return (streamWriteBlock(stream, source, sizeof(source) - sizeof(char))
-                == sizeof(source) - sizeof(char) )  ?   0 : 1;
+    return (streamWriteBlock(stream, source, strlen(source))
+                == strlen(source) )  ?   0 : 1;
 }
 
 template <typename TSpec>
@@ -479,8 +479,8 @@ streamPut(::std::fstream & stream, TSource const & source)
 inline int
 streamPut(::std::ofstream & stream, char const * source)
 {
-    return (streamWriteBlock(stream, source, sizeof(source) - sizeof(char))
-                == sizeof(source) - sizeof(char) )  ?   0 : 1;
+    return (streamWriteBlock(stream, source, strlen(source))
+                == strlen(source) )  ?   0 : 1;
 }
 
 template <typename TSpec>

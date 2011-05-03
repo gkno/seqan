@@ -511,8 +511,6 @@ SEQAN_DEFINE_TEST(test_stream_bz2_file_streamPut)
         int bytesRead = BZ2_bzRead(&err, f2, buffer, 99);
         SEQAN_ASSERT_EQ(err, BZ_STREAM_END);
         buffer[bytesRead] = '\0';
-        std::cout << "buffer:\n" << buffer << "END buffer\n"; //DEBUG
-        std::cout << "cmp:\n" << cmp << "END cmp\n"; //DEBUG
         SEQAN_ASSERT_EQ(bytesRead, int(sizeof(cmp) - sizeof(char)));
 
         SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);

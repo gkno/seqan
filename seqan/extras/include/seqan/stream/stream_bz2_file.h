@@ -280,8 +280,8 @@ streamPut(Stream<BZ2File> & stream, char const c)
 inline int
 streamPut(Stream<BZ2File> & stream, char const * source)
 {
-    return (streamWriteBlock(stream, source, sizeof(source) - sizeof(char))
-                == sizeof(source) - sizeof(char) )  ?   0 : 1;
+    return (streamWriteBlock(stream, source, strlen(source))
+                == strlen(source) )  ?   0 : 1;
 }
 
 template <typename TSpec>
