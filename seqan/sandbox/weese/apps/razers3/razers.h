@@ -220,7 +220,8 @@ enum {
         double      timeCompactMatches;     // time for compacting reads
         double      timeMaskDuplicates; // time spent masking duplicates
         double      timeFsCopy; // time spent copying alignments back into the fragment store
-        double      timeVerification; // time spent copying alignments back into the fragment store
+        double      timeFiltration;
+        double      timeVerification;
 
 		bool		maqMapping;
 		int			absMaxQualSumErrors;
@@ -318,11 +319,7 @@ enum {
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 			fastaIdQual = false;
 
-#ifdef _OPENMP
-            threadCount = omp_get_max_threads();
-#else  // #ifdef _OPENMP
             threadCount = 1;
-#endif  // #ifdef _OPENMP
             // TODO(holtgrew): Tune this!
             windowSize = 500000;
             verificationPackageSize = 100;
@@ -2277,6 +2274,7 @@ int _mapSingleReads(
     options.timeCompactMatches = 0;
     options.timeMaskDuplicates = 0;
     options.timeFsCopy = 0;
+    options.timeFiltration = 0;
     options.timeVerification = 0;
 	SEQAN_PROTIMESTART(find_time);
 
@@ -2335,6 +2333,7 @@ int _mapSingleReads(
 		::std::cerr << "Compacting matches took          \t" << options.timeCompactMatches << " seconds" << ::std::endl;
 		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
 		::std::cerr << "Time for copying back            \t" << options.timeFsCopy << " seconds" << ::std::endl;
+		::std::cerr << "Time for filtration              \t" << options.timeFiltration << " seconds" << ::std::endl;
 		::std::cerr << "Time for verifications           \t" << options.timeVerification << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;

@@ -607,6 +607,7 @@ void _mapSingleReadsParallelToContig(
 #ifdef RAZERS_PROFILE
             timelineBeginTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
+            double filterStart = sysTime();
             // fprintf(stderr, "[filter]");
             hasMore = windowFindNext(tls.swiftFinder, tls.swiftPattern, tls.options.windowSize);
             // std::cerr << "FILTERING WINDOW " << windowsDone << std::endl << "\t" << tls.options.windowSize;
@@ -651,6 +652,7 @@ void _mapSingleReadsParallelToContig(
             } else {
                 tls.missingInBucket[windowsDone - 1] = 0;
             }
+            tls.options.timeFiltration += sysTime() - filterStart;
 #ifdef RAZERS_PROFILE
             timelineEndTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
@@ -1044,6 +1046,7 @@ int _mapSingleReadsParallel(
             ::std::cerr << "Thread #" << i << std::endl;
             ::std::cerr << "  Masking duplicates took        \t" << threadLocalStorages[i].options.timeMaskDuplicates << " seconds" << ::std::endl;
             ::std::cerr << "  Compacting matches took        \t" << threadLocalStorages[i].options.timeCompactMatches << " seconds" << ::std::endl;
+            ::std::cerr << "  Time for filtration            \t" << threadLocalStorages[i].options.timeFiltration << " seconds" << ::std::endl;
             ::std::cerr << "  Time for verifications         \t" << threadLocalStorages[i].options.timeVerification << " seconds" << ::std::endl;
         }
         ::std::cerr << "Time for copying back            \t" << options.timeFsCopy << " seconds" << ::std::endl;
