@@ -493,6 +493,8 @@ function (seqan_add_cuda_executable TARGET_NAME)
         # -------------------------------------------------------------------
         # message(STATUS "cuda_add_executable (${ARGV})")
         cuda_add_executable (${ARGV})
+
+        add_dependencies(${SEQAN_CURRENT_APP_TARGET} ${ARGV0})
     
         # Link against librt on Linux.
       	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -548,6 +550,8 @@ function (seqan_add_cuda_test_executable TARGET_NAME)
         # message(STATUS "cuda_add_executable (${ARGV})")
         cuda_add_executable (${ARGV})
         add_test(test_${ARGV0} ${ARGV0})
+
+        add_dependencies(${SEQAN_CURRENT_TEST_TARGET} ${ARGV0})
     
         # Link against librt on Linux.
       	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
