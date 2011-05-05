@@ -318,13 +318,14 @@ SEQAN_DEFINE_TEST(test_stream_adapt_fstream_streamPut)
     fstream.seekg(0);
     fstream.seekp(0);
 
-    char buffer[1000];
-    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    char const cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
 
     int i = 0;
 
-    while (!fstream.eof() && i <998) buffer[i++] = fstream.get();
-    buffer[i-1] = 0;
+    char buffer[100];
+    fstream.read(buffer, 99);
+    SEQAN_ASSERT_EQ(fstream.gcount(), 30);
+    buffer[30] = '\0';
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
     fstream.close();
 }
@@ -760,15 +761,14 @@ SEQAN_DEFINE_TEST(test_stream_adapt_ofstream_streamPut)
     char filenameBuffer[1000];
     strcpy(filenameBuffer, tempFilename);
 
-    std::ofstream ofstream(filenameBuffer);
+		std::ofstream ofstream(filenameBuffer, std::ios_base::out | std::ios_base::binary);
     SEQAN_ASSERT(ofstream.is_open());
 
     testStreamPut(ofstream);
     ofstream.close();
 
     // Check result.
-    std::fstream fstream(filenameBuffer, std::ios_base::in
-                                       | std::ios_base::binary);
+    std::fstream fstream(filenameBuffer, std::ios_base::in | std::ios_base::binary);
     SEQAN_ASSERT(fstream.is_open());
     fstream.seekg(0);
     fstream.seekp(0);
@@ -778,8 +778,9 @@ SEQAN_DEFINE_TEST(test_stream_adapt_ofstream_streamPut)
 
     int i = 0;
 
-    while (!fstream.eof() && i <998) buffer[i++] = fstream.get();
-    buffer[i-1] = 0;
+    fstream.read(buffer, 99);
+    SEQAN_ASSERT_EQ(fstream.gcount(), 30);
+    buffer[30] = '\0';
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
     fstream.close();
 }
