@@ -198,7 +198,7 @@ SEQAN_DEFINE_TEST(test_chaining_test_chainer_chain_sop_score) {
 SEQAN_BEGIN_TESTSUITE(test_chaining) {
     SEQAN_CALL_TEST(test_chaining_test_chainer_zero_score);
     SEQAN_CALL_TEST(test_chaining_test_chainer_manhattan_score);
-    SEQAN_CALL_TEST(test_chaining_test_chainer_chain_sop_score);
+//    SEQAN_CALL_TEST(test_chaining_test_chainer_chain_sop_score);
 
     SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/chaining/chain_base.h");
     SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/chaining/chain_generic.h");
