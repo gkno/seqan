@@ -320,8 +320,6 @@ SEQAN_DEFINE_TEST(test_stream_adapt_fstream_streamPut)
 
     char const cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
 
-    int i = 0;
-
     char buffer[100];
     fstream.read(buffer, 99);
     SEQAN_ASSERT_EQ(fstream.gcount(), 30);
@@ -775,8 +773,6 @@ SEQAN_DEFINE_TEST(test_stream_adapt_ofstream_streamPut)
 
     char buffer[1000];
     char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
-
-    int i = 0;
 
     fstream.read(buffer, 99);
     SEQAN_ASSERT_EQ(fstream.gcount(), 30);
