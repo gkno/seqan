@@ -28,10 +28,6 @@
 #include <seqan/find.h>
 #include <seqan/index.h>
 
-#ifdef RAZERS_PARALLEL
-#include "tbb/spin_mutex.h"
-#endif
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 

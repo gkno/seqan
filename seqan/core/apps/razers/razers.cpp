@@ -27,7 +27,6 @@
 #define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
-//#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
 #define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
@@ -49,10 +48,6 @@
 #include "razers.h"
 #include "outputFormat.h"
 #include "paramChooser.h"
-
-#ifdef RAZERS_PARALLEL
-#include "razers_parallel.h"
-#endif
 
 #ifdef RAZERS_MATEPAIRS
 #include "razers_matepairs.h"

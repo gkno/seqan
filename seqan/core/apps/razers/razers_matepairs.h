@@ -22,323 +22,14 @@
 #ifndef SEQAN_HEADER_RAZERS_MATEPAIRS_H
 #define SEQAN_HEADER_RAZERS_MATEPAIRS_H
 
+#include <seqan/misc/misc_dequeue.h>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
 // We require mate-pairs to be stored together in one read string.
 // Pair i has mates at positions 2*i and 2*i+1 in the read string.
 
-
-
-template <typename TValue, typename TSpec = Alloc<> >
-class Dequeue
-{
-public:
-	typedef String<TValue, TSpec>						TString;
-	typedef typename Iterator<TString, Standard>::Type	TIter;
-
-	String<TValue, TSpec> data_string;
-
-	TIter data_begin;	// string beginning
-	TIter data_end;		// string end
-
-	TIter data_front;	// front fifo character
-	TIter data_back;	// back fifo character
-	bool data_empty;	// fifo is empty
-
-//____________________________________________________________________________
-
-public:
-	inline Dequeue()
-	{
-		clear(*this);
-	}
-};
-
-//////////////////////////////////////////////////////////////////////////////
-// Iterators
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Iterator.param.T.type:Class.Dequeue
-
-template<typename TValue, typename TSpec>
-struct Iterator<Dequeue<TValue, TSpec>, Standard> 
-{
-	typedef Iter<Dequeue<TValue, TSpec>, PositionIterator> Type;
-};
-
-template<typename TValue, typename TSpec>
-struct Iterator<Dequeue<TValue, TSpec> const, Standard> 
-{
-	typedef Iter<Dequeue<TValue, TSpec> const, PositionIterator> Type;
-};
-
-template<typename TValue, typename TSpec>
-struct Iterator<Dequeue<TValue, TSpec>, Rooted> 
-{
-	typedef Iter<Dequeue<TValue, TSpec>, PositionIterator> Type;
-};
-
-template<typename TValue, typename TSpec>
-struct Iterator<Dequeue<TValue, TSpec> const, Rooted> 
-{
-	typedef Iter<Dequeue<TValue, TSpec> const, PositionIterator> Type;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline bool
-empty(Dequeue<TValue, TSpec> const &me)
-{
-	return me.data_empty;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline void
-clear(Dequeue<TValue, TSpec> &me)
-{
-	clear(me.data_string);
-	me.data_begin = begin(me.data_string, Standard());
-	me.data_end = end(me.data_string, Standard());
-
-	me.data_front = me.data_back = me.data_begin;
-	me.data_empty = true;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec, typename TPos>
-inline TValue &
-value(Dequeue<TValue, TSpec> &me, TPos pos)
-{
-	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
-	TSize wrap = length(me.data_string) - (me.data_front - me.data_begin);
-	
-	if ((TSize)pos < wrap)
-		return value(me.data_front + pos);
-	else
-		return value(me.data_begin + (pos - wrap));
-}
-
-template <typename TValue, typename TSpec, typename TPos>
-inline TValue const &
-value(Dequeue<TValue, TSpec> const &me, TPos pos)
-{
-	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
-	TSize wrap = length(me.data_string) - (me.data_front - me.data_begin);
-	
-	if ((TSize)pos < wrap)
-		return value(me.data_front + pos);
-	else
-		return value(me.data_begin + (pos - wrap));
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline TValue &
-front(Dequeue<TValue, TSpec> &me)
-{
-	return *me.data_front;
-}
-
-template <typename TValue, typename TSpec>
-inline TValue const &
-front(Dequeue<TValue, TSpec> const &me)
-{
-	return *me.data_front;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline TValue &
-back(Dequeue<TValue, TSpec> &me)
-{
-	return *me.data_back;
-}
-
-template <typename TValue, typename TSpec>
-inline TValue const &
-back(Dequeue<TValue, TSpec> const &me)
-{
-	return *me.data_back;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline bool
-popFront(Dequeue<TValue, TSpec> &me)
-{
-	if (me.data_empty) return false;
-
-	if (me.data_front == me.data_back)
-		me.data_empty = true;
-	else
-	{
-		if (++me.data_front == me.data_end)
-			me.data_front = me.data_begin;
-	}
-
-	return true;
-}
-
-template <typename TValue, typename TSpec>
-inline bool
-popBack(Dequeue<TValue, TSpec> &me)
-{
-	if (me.data_empty) return false;
-
-	if (me.data_front == me.data_back)
-		me.data_empty = true;
-	else
-	{
-		if (me.data_back == me.data_begin)
-			me.data_back = me.data_end;
-		--me.data_back;
-	}
-
-	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline void
-pushFront(Dequeue<TValue, TSpec> &me, TValue const & _value)
-{
-	typedef typename Dequeue<TValue, TSpec>::TIter TIter;
-
-	if (me.data_empty) 
-	{
-		if (me.data_begin == me.data_end)
-			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
-		me.data_empty = false;
-	}
-	else 
-	{
-		TIter new_front = me.data_front;
-		if (new_front == me.data_begin)
-			new_front = me.data_end;
-		--new_front;
-
-		if (new_front == me.data_back)
-		{
-			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
-
-			if (me.data_front == me.data_begin)
-				me.data_front = me.data_end;
-			--me.data_front;
-		} else
-			me.data_front = new_front;
-	}
-	assign(*me.data_front, _value);
-}
-
-template <typename TValue, typename TSpec>
-inline void
-pushBack(Dequeue<TValue, TSpec> &me, TValue const & _value)
-{
-	typedef typename Dequeue<TValue, TSpec>::TIter TIter;
-
-	if (me.data_empty) 
-	{
-		if (me.data_begin == me.data_end)
-			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
-		me.data_empty = false;
-	}
-	else 
-	{
-		TIter new_back = me.data_back;
-		if (++new_back == me.data_end)
-			new_back = me.data_begin;
-
-		if (new_back == me.data_front)
-		{
-			reserve(me, computeGenerousCapacity(me, length(me.data_string) + 1), Generous());
-			// in this case reserve adds new space behind data_back
-			++me.data_back;
-		} else
-			me.data_back = new_back;
-	}
-	assign(*me.data_back, _value);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec>
-inline typename Size<Dequeue<TValue, TSpec> >::Type
-length(Dequeue<TValue, TSpec> const &me)
-{
-	if (empty(me)) return 0;
-
-	if (me.data_front <= me.data_back)
-		return (me.data_back - me.data_front) + 1;
-	else
-		return (me.data_end - me.data_begin) - (me.data_front - me.data_back) + 1;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TValue, typename TSpec, typename TSize_, typename TExpand>
-inline typename Size<Dequeue<TValue, TSpec> >::Type
-reserve(Dequeue<TValue, TSpec> &me, TSize_ new_capacity, Tag<TExpand> const tag)
-{
-	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
-//	::std::cout << "resize to "<<new_capacity<<::std::endl;
-	TSize len = length(me);
-	if (len < new_capacity && length(me.data_string) != new_capacity)
-	{
-		TSize pos_front = me.data_front - me.data_begin;
-		TSize pos_back  = me.data_back  - me.data_begin;
-		TSize new_freeSpace = new_capacity - len;
-
-		if (pos_front <= pos_back)
-		{
-			// |empty|data|empty|
-			// 0
-			TSize freeSpace = length(me.data_string) - len;
-			if (new_freeSpace > freeSpace)
-				resize(me.data_string, new_capacity, tag);
-			else
-			{
-				freeSpace -= new_freeSpace;	// reduce the free space by <freeSpace>
-				if (pos_front >= freeSpace)
-				{
-					resizeSpace(me.data_string, pos_front - freeSpace, (TSize)0, pos_front, tag);
-					pos_back -= freeSpace;
-					pos_front -= freeSpace;
-				}
-				else
-				{
-					freeSpace -= pos_front;
-					resizeSpace(me.data_string, length(me.data_string) - freeSpace, pos_back + 1, length(me.data_string), tag);
-					resizeSpace(me.data_string, (TSize)0, (TSize)0, pos_front, tag);
-					pos_back -= pos_front;
-					pos_front = 0;
-				}
-			}
-		}
-		else
-		{
-			// |data|empty|data|
-			// 0
-			resizeSpace(me.data_string, new_freeSpace, pos_back + 1, pos_front, tag);
-			pos_front += new_freeSpace;
-		}
-
-		me.data_begin = begin(me.data_string, Standard());
-		me.data_end = end(me.data_string, Standard());
-		me.data_front = me.data_begin + pos_front;
-		me.data_back = me.data_begin + pos_back;
-	}
-	return length(me.data_string);
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // Definitions
@@ -567,7 +258,7 @@ bool loadReads(
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template < typename TMatches, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
-void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> &options, TSwiftL &swiftL, TSwiftR &swiftR)
+void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> &options, TSwiftL &swiftL, TSwiftR &swiftR, bool compactFinal)
 {
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -581,6 +272,8 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 	TIterator itEnd = end(matches, Standard());
 	TIterator dit = it;
 	TIterator ditBeg = it;
+
+    int scoreRangeBest = (options.distanceRange == 0)? MinValue<int>::VALUE: -options.distanceRange;
 
 	// sort 
 	::std::sort(it, itEnd, LessPairErrors<TMatch>());
@@ -598,9 +291,9 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 				{
 					// we have enough, now look for better matches
 					int maxErrors = -1 - (*it).pairScore;
-					if (options.purgeAmbiguous)
+					if (options.purgeAmbiguous && (*it).pairScore > scoreRangeBest)
 						maxErrors = -1;
-
+                    
 					setMaxErrors(swiftL, readNo, maxErrors);
 					setMaxErrors(swiftR, readNo, maxErrors);
 
@@ -608,7 +301,17 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 						::std::cerr << "(read #" << readNo << " disabled)";
 
 					if (options.purgeAmbiguous)
-						dit = ditBeg;
+                    {
+						if ((*it).pairScore > scoreRangeBest || compactFinal)
+                        {
+							dit = ditBeg;
+						} 
+                        else
+                        {
+							*dit = *it;
+							++dit;
+						}
+                    }
 				}
 #endif
 				continue;
@@ -709,7 +412,7 @@ void mapMatePairReads(
 	__int64 firstNo = 0;				// first number over all left-mate pot. match in the queue
 	Pair<TGPos> gPair;
 
-	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
+	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-2, Exact());
 
 	TSize gLength = length(genome);
 	TMatch mR = {	// to supress uninitialized warnings
@@ -726,7 +429,7 @@ void mapMatePairReads(
 #endif
 		0
 	};
-	TDequeueValue fL(-1, mR);	// to supress uninitialized warnings
+	TDequeueValue fL(-2, mR);	// to supress uninitialized warnings
 	fL.i2.gseqNo = gseqNo;
 	mR.gseqNo = gseqNo;
 	fL.i2.orientation = orientation;
@@ -742,7 +445,7 @@ void mapMatePairReads(
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
 		// remove out-of-window left mates from fifo
-		while (!empty(fifo) && front(fifo).i2.gEnd + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
+		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.gEnd + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
 			popFront(fifo);
 			++firstNo;
@@ -756,7 +459,7 @@ void mapMatePairReads(
 					break;
 */
 		// add within-window left mates to fifo
-		while (empty(fifo) || back(fifo).i2.gEnd + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
+		while (empty(fifo) || (TSignedGPos)back(fifo).i2.gEnd + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
 			if (find(swiftFinderL, swiftPatternL, options.errorRate))
 			{
@@ -773,17 +476,21 @@ void mapMatePairReads(
 					
 					pushBack(fifo, fL);
 				}
-			} else
+			} else {
 				break;
+            }
 		}
-
+        
 		int	bestLeftErrors = MaxValue<int>::VALUE;
 		int bestLibSizeError = MaxValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
 
+        bool rightVerified = false;
 		TDequeueIterator it;
-		__int64 lastPositive = (__int64)-1;
-		for (__int64 i = lastPotMatchNo[rseqNo]; firstNo <= i; i = (*it).i1)
+		__int64 last = (__int64)-1;
+		__int64 lastValid = (__int64)-1;
+		__int64 i;
+		for (i = lastPotMatchNo[rseqNo]; firstNo <= i; i = (*it).i1)
 		{
 			it = &value(fifo, i - firstNo);
 			
@@ -793,135 +500,160 @@ void mapMatePairReads(
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.rseqNo & NOT_VERIFIED)
 				{
-					if (matchVerify(
-							(*it).i2, infix(genome, (*it).i2.gBegin, (*it).i2.gEnd), 
-							rseqNo, readSetL, forwardPatternsL, 
-							options, TSwiftSpec()))
+					if ((TSignedGPos)(*it).i2.gEnd + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
-						(*it).i2.rseqNo &= ~NOT_VERIFIED;		// has been verified positively
-						
-						// short-cut negative matches
-						if (lastPositive == (__int64)-1)
-							lastPotMatchNo[rseqNo] = i;
-						else
-							value(fifo, lastPositive - firstNo).i1 = i;
-						lastPositive = i;
-					} else
-						(*it).i2.rseqNo = ~NOT_VERIFIED;		// has been verified negatively
-				}
-/*
-				if ((*it).i2.rseqNo == rseqNo)
+                        if (matchVerify(
+                                (*it).i2, infix(genome, (*it).i2.gBegin, (*it).i2.gEnd), 
+                                rseqNo, readSetL, forwardPatternsL, 
+                                options, TSwiftSpec()))
+                        {
+                            (*it).i2.rseqNo &= ~NOT_VERIFIED;               // has been verified positively
+                        } else {
+                            (*it).i2.rseqNo = ~NOT_VERIFIED;				// has been verified negatively
+                            ++options.FP;
+                            continue;										// we intentionally do not set lastPositive to i
+                        }													// to remove i from linked list
+                    } else {
+                        lastValid = i;
+                        continue;											// left pot. hit is out of tolerance window
+                    }
+				} //else {}													// left match is verified already
+
+				// short-cut negative matches
+				if (last != lastValid)
 				{
-					bestLeft = it;
-					bestLeftErrors = (*it).i2.editDist;
-					break;
+					SEQAN_ASSERT_NEQ(lastValid, i);
+					if (lastValid == (__int64)-1)
+						lastPotMatchNo[rseqNo] = i;
+					else
+						value(fifo, lastValid - firstNo).i1 = i;
 				}
-*/
-				if ((*it).i2.rseqNo == rseqNo)
-					if (bestLeftErrors >= (*it).i2.editDist)
-					{
-						int libSizeError = options.libraryLength - (int)((__int64)mR.gEnd - (__int64)(*it).i2.gBegin);
-						if (libSizeError < 0) libSizeError = -libSizeError;
-						if (bestLeftErrors == (*it).i2.editDist)
-						{
-							if (bestLibSizeError > libSizeError)
-							{
-								bestLibSizeError = libSizeError;
-								bestLeft = it;
-							}
-						}
-						else
-						{
-							bestLeftErrors = (*it).i2.editDist;
-							bestLibSizeError = libSizeError;
-							bestLeft = it;
-							if (bestLeftErrors == 0) break;
-						}
-					}
+				lastValid = i;
+                
+				if (!rightVerified)											// here a verfied left match is available
+                {
+                    if (matchVerify(
+                            mR, infix(swiftFinderR),
+                            rseqNo, readSetR, forwardPatternsR,
+                            options, TSwiftSpec()))
+                    {
+						rightVerified = true;
+                    } 
+                    else
+                    {
+						// Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
+						// be executed since bestLeftScore remains untouched.
+						i = (*it).i1;
+                        ++options.FP;
+						break;
+                    }
+                }
+                                
+                if ((*it).i2.rseqNo == rseqNo)
+                {
+                    if (bestLeftErrors >= (*it).i2.editDist)
+                    {
+                        int libSizeError = options.libraryLength - (int)((__int64)mR.gEnd - (__int64)(*it).i2.gBegin);
+                        if (libSizeError < 0) 
+                            libSizeError = -libSizeError;
+                        if (libSizeError > options.libraryError)
+                            continue;
+                        if (bestLeftErrors == (*it).i2.editDist)
+                        {
+                            if (bestLibSizeError > libSizeError)
+                            {
+                                bestLibSizeError = libSizeError;
+                                bestLeft = it;
+                            }
+                        }
+                        else
+                        {
+                            bestLeftErrors = (*it).i2.editDist;
+                            bestLibSizeError = libSizeError;
+                            bestLeft = it;
+//                          if (bestLeftErrors == 0) break;
+                        }
+                    }
+                }
 			}
-//			else
-//				std::cout << "HUH?" << std::endl;
 		}
 
-		// short-cut negative matches
-		if (lastPositive == (__int64)-1)
-			lastPotMatchNo[rseqNo] = (__int64)-1;
-		else
-			value(fifo, lastPositive - firstNo).i1 = (__int64)-1;
+        // (3) Short-cut negative matches.
+		if (last != lastValid)
+		{
+			SEQAN_ASSERT_NEQ(lastValid, i);
+			if (lastValid == (__int64)-1)
+				lastPotMatchNo[rseqNo] = i;
+			else
+				value(fifo, lastValid - firstNo).i1 = i;
+		}
 		
-		// verify right mate, if left mate matches
+        // verify right mate, if left mate matches
 		if (bestLeftErrors != MaxValue<int>::VALUE)
 		{
-			if (matchVerify(
-					mR, infix(swiftFinderR),
-					rseqNo, readSetR, forwardPatternsR,
-					options, TSwiftSpec()))
-			{
-				// distance between left mate beginning and right mate end
-				__int64 dist = (__int64)mR.gEnd - (__int64)(*bestLeft).i2.gBegin;
-				if (dist <= options.libraryLength + options.libraryError &&
-					options.libraryLength <= dist + options.libraryError)
-				{
-					fL.i2 = (*bestLeft).i2;
-
-					// transform mate readNo to global readNo
-					fL.i2.rseqNo = 2*rseqNo;
-					mR.rseqNo   = 2*rseqNo + 1;
-
-					// transform coordinates to the forward strand
-					if (orientation == 'R') 
-					{
-						TSize temp = fL.i2.gBegin;
-						fL.i2.gBegin = gLength - fL.i2.gEnd;
-						fL.i2.gEnd = gLength - temp;
-						temp = mR.gBegin;
-						mR.gBegin = gLength - mR.gEnd;
-						mR.gEnd = gLength - temp;
-						dist = -dist;
-					}
-
-					// set a unique pair id
-					fL.i2.pairId = mR.pairId = options.nextMatePairId;
-					if (++options.nextMatePairId == 0)
-						options.nextMatePairId = 1;
-
-					// score the whole match pair
-					fL.i2.pairScore = mR.pairScore = 0 - fL.i2.editDist - mR.editDist;
-
-					// relative positions
-					fL.i2.mateDelta = dist;
-					mR.mateDelta = -dist;
-
-					// both mates match with correct library size
-/*								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
-					std::cout << " dist:" << dist;
-					if (orientation=='F')
-						std::cout << " \t_" << fL.i2.gBegin+1 << "_" << mR.gEnd;
-					else
-						std::cout << " \t_" << mR.gBegin+1 << "_" << mL.gEnd;
-//							std::cout << " L_" << (*bestLeft).gBegin << "_" << (*bestLeft).gEnd << "_" << (*bestLeft).editDist;
-//							std::cout << " R_" << mR.gBegin << "_" << mR.gEnd << "_" << mR.editDist;
-					std::cout << std::endl;
-*/
-					if (!options.spec.DONT_DUMP_RESULTS)
-					{
-						appendValue(matches, fL.i2, Generous());
-						appendValue(matches, mR, Generous());
-						if (length(matches) > options.compactThresh)
-						{
-							typename Size<TMatches>::Type oldSize = length(matches);
-//									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
-							compactPairMatches(matches, cnts, options, swiftPatternL, swiftPatternR);
-							options.compactThresh += (options.compactThresh >> 1);
-							if (options._debugLevel >= 2)
-								::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
-						}
-					}
-					++options.TP;
-				}
-				else
-					++options.FP;
-			}
+            
+            // distance between left mate beginning and right mate end
+            __int64 dist = (__int64)mR.gEnd - (__int64)(*bestLeft).i2.gBegin;
+//            if (dist <= options.libraryLength + options.libraryError &&
+//                options.libraryLength <= dist + options.libraryError)
+            {
+                fL.i2 = (*bestLeft).i2;
+                
+                // transform mate readNo to global readNo
+                fL.i2.rseqNo = 2*rseqNo;
+                mR.rseqNo   = 2*rseqNo + 1;
+                
+                // transform coordinates to the forward strand
+                if (orientation == 'R') 
+                {
+                    TSize temp = fL.i2.gBegin;
+                    fL.i2.gBegin = gLength - fL.i2.gEnd;
+                    fL.i2.gEnd = gLength - temp;
+                    temp = mR.gBegin;
+                    mR.gBegin = gLength - mR.gEnd;
+                    mR.gEnd = gLength - temp;
+                    dist = -dist;
+                }
+                
+                // set a unique pair id
+                fL.i2.pairId = mR.pairId = options.nextMatePairId;
+                if (++options.nextMatePairId == 0)
+                    options.nextMatePairId = 1;
+                
+                // score the whole match pair
+                fL.i2.pairScore = mR.pairScore = 0 - fL.i2.editDist - mR.editDist;
+                
+                // relative positions
+                fL.i2.mateDelta = dist;
+                mR.mateDelta = -dist;
+                
+                // both mates match with correct library size
+                /*								std::cout << "found " << rseqNo << " on " << orientation << gseqNo;
+                 std::cout << " dist:" << dist;
+                 if (orientation=='F')
+                 std::cout << " \t_" << fL.i2.gBegin+1 << "_" << mR.gEnd;
+                 else
+                 std::cout << " \t_" << mR.gBegin+1 << "_" << mL.gEnd;
+                 //							std::cout << " L_" << (*bestLeft).gBegin << "_" << (*bestLeft).gEnd << "_" << (*bestLeft).editDist;
+                 //							std::cout << " R_" << mR.gBegin << "_" << mR.gEnd << "_" << mR.editDist;
+                 std::cout << std::endl;
+                 */
+                if (!options.spec.DONT_DUMP_RESULTS)
+                {
+                    appendValue(matches, fL.i2, Generous());
+                    appendValue(matches, mR, Generous());
+                    if (length(matches) > options.compactThresh)
+                    {
+                        typename Size<TMatches>::Type oldSize = length(matches);
+                        //									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
+                        compactPairMatches(matches, cnts, options, swiftPatternL, swiftPatternR, false);
+                        options.compactThresh += (options.compactThresh >> 1);
+                        if (options._debugLevel >= 2)
+                            ::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
+                    }
+                }
+                ++options.TP;
+            }
 		} 
 	}
 }
@@ -1075,7 +807,7 @@ int mapMatePairReads(
 		++filecount;
 	}
 
-	compactPairMatches(matches, cnts, options, swiftPatternL, swiftPatternR);
+	compactPairMatches(matches, cnts, options, swiftPatternL, swiftPatternR, true);
 
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
