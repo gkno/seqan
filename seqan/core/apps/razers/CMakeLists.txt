@@ -7,6 +7,5 @@ seqan_add_executable(razers razers.cpp
 			    outputFormat.h
 			    paramChooser.h
 			    razers_matepairs.h
-			    razers_parallel.h
 			    razers_spliced.h
 			    readSimulator.h)
