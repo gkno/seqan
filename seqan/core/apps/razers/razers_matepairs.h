@@ -41,12 +41,12 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 	template <typename TShape>
 	struct SAValue< Index<TMPReadSet, TShape> > {
 		typedef Pair<
-			unsigned,				
+			unsigned,
 			unsigned,
 			BitCompressed<24, 8>	// max. 16M reads of length < 256
 		> Type;
 	};
-	
+
 #else
 
 	template <typename TShape>
@@ -60,7 +60,7 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 
 #endif
 
-	
+
 template <typename TShape>
 struct Cargo< Index<TMPReadSet, TShape> > {
 	typedef struct {
@@ -273,7 +273,7 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 	TIterator dit = it;
 	TIterator ditBeg = it;
 
-    int scoreRangeBest = (options.distanceRange == 0)? MinValue<int>::VALUE: -options.distanceRange;
+    int scoreRangeBest = (options.distanceRange == 0u)? MinValue<int>::VALUE: -(int)options.distanceRange;
 
 	// sort 
 	::std::sort(it, itEnd, LessPairErrors<TMatch>());
@@ -321,7 +321,7 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 		{
 			readNo = (*it).rseqNo >> 1;
 			hitCount = 0;
-			if (options.distanceRange > 0)
+			if (options.distanceRange > 0u)
 				scoreDistCutOff = (*it).pairScore - options.distanceRange;
 			ditBeg = dit;
 		}
