@@ -312,7 +312,8 @@ void compactPairMatches(
 	TCounts					&, 
 	RazerSOptions<TSpec>	& options, 
 	TSwiftL					& swiftL, 
-	TSwiftR					& swiftR)
+	TSwiftR					& swiftR,
+	CompactMatchesMode        compactMode)
 {
 	typedef typename Value<TMatches>::Type                          TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type             TIterator;
@@ -323,6 +324,7 @@ void compactPairMatches(
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
 	int scoreDistCutOff = MinValue<int>::VALUE;
+    int scoreRangeBest = (options.scoreDistanceRange == 0u)? MinValue<int>::VALUE: -(int)options.scoreDistanceRange;
 
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -356,7 +358,7 @@ void compactPairMatches(
 				{
 					// we have enough, now look for better matches
 					int maxErrors = -1 - (*it).pairScore;
-					if (options.purgeAmbiguous)
+					if (options.purgeAmbiguous && (*it).pairScore > scoreRangeBest)
 						maxErrors = -1;
 
 					setMaxErrors(swiftL, matePairId, maxErrors);
@@ -367,7 +369,17 @@ void compactPairMatches(
 						// ::std::cerr << "(pair #" << matePairId << " disabled)";
 
 					if (options.purgeAmbiguous)
-						dit = ditBeg;
+                    {
+						if ((*it).pairScore > scoreRangeBest || compactMode == COMPACT_FINAL || compactMode == COMPACT_FINAL_EXTERNAL)
+                        {
+							dit = ditBeg;
+						} 
+                        else
+                        {
+							*dit = *it;
+							++dit;
+						}
+                    }
 				}
 #endif
 				continue;
@@ -531,20 +543,12 @@ void _mapMatePairReads(
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{
 		++options.countFiltration;
-
-        CharString pref = prefix(store.readNameStore[2 * swiftPatternR.curSeqNo + 1], length("EAS20_8_6_1_248_1397"));
-        CharString s = "EAS20_8_6_1_248_1397";
-        if (pref == s)
-            std::cerr << "GOTCHA" << std::endl;
-        // #pragma omp critical
-        // {
-        //     std::cerr << tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1] << std::endl;
-        // }
-
-#ifdef RAZERS_DEBUG_MATEPAIRS
-        std::cerr << "\nSWIFT\tR\t" << swiftPatternR.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternR.curSeqNo + 1] << "\t" << scanShift + beginPosition(swiftFinderR) << "\t" << scanShift + endPosition(swiftFinderR) << std::endl;
-#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
         
+#ifdef RAZERS_DEBUG_MATEPAIRS
+        std::cerr << "\nSWIFT\tR\t" << swiftPatternR.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternR.curSeqNo + 1];
+        std::cerr << "\t" << scanShift + beginPosition(swiftFinderR) << "\t" << scanShift + endPosition(swiftFinderR) << std::endl;
+#endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
@@ -553,10 +557,10 @@ void _mapMatePairReads(
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
 #ifdef RAZERS_DEBUG_MATEPAIRS
-            if (front(fifo).i2.readId > length(store.readNameStore))
-                std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
-            else
-                std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
+        if (front(fifo).i2.readId > length(store.readNameStore))
+            std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
+        else
+            std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 			popFront(fifo);
 			++firstNo;
@@ -569,7 +573,8 @@ void _mapMatePairReads(
 			{
 				++options.countFiltration;
 #ifdef RAZERS_DEBUG_MATEPAIRS
-                std::cerr << "\nSWIFT\tL\t" << swiftPatternL.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternL.curSeqNo] << "\t" << beginPosition(swiftFinderL) << "\t" << endPosition(swiftFinderL) << std::endl;
+                std::cerr << "\nSWIFT\tL\t" << swiftPatternL.curSeqNo << "\t" << store.readNameStore[2 * swiftPatternL.curSeqNo];
+                std::cerr << "\t" << beginPosition(swiftFinderL) << "\t" << endPosition(swiftFinderL) << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 				gPair = positionRange(swiftFinderL);
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
@@ -630,7 +635,6 @@ void _mapMatePairReads(
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
-
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 						} else {
@@ -663,16 +667,12 @@ void _mapMatePairReads(
 					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     ++options.countVerification;
-                    if (pref == s)
-                        std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(swiftFinderR) << "\t" << endPosition(swiftFinderR) << std::endl;
 					if (matchVerify(verifierR, infix(swiftFinderR), matePairId, readSetR, mode)) {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						rightVerified = true;
 						mR = verifierR.m;
-                        if (pref == s)
-                            std::cerr << "BREAK HERE" << std::endl;
 					} else {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  NO" << std::endl;
@@ -813,11 +813,6 @@ void _mapMatePairReads(
 						appendValue(matches, mR, Generous());
                         back(matches).orientation = (orientation == 'F') ? 'R' : 'F';
 
-                        if (pref == s) {
-                            std::cerr << "ADDED" << std::endl;
-                            std::cerr << "  (" << mR.beginPos << ", " << mR.endPos << ")" << std::endl;
-                            std::cerr << "  (" << fL.i2.beginPos << ", " << fL.i2.endPos << ")" << std::endl;
-                        }
 #ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << store.readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
                         std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << store.readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
@@ -829,7 +824,7 @@ void _mapMatePairReads(
                             // TODO(weese): Duplicates are hard to mask in paired-end mode.
                             // if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
                             //   maskDuplicates(matches);	// overlapping parallelograms cause duplicates
-							compactPairMatches(store, matches, cnts, options, swiftPatternL, swiftPatternR);
+							compactPairMatches(store, matches, cnts, options, swiftPatternL, swiftPatternR, COMPACT);
 							
 							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
 							  options.compactThresh *= options.compactMult;
@@ -989,7 +984,7 @@ int _mapMatePairReads(
 
     double beginCopyTime = sysTime();
     // Final compact matches.
-    compactPairMatches(store, matches, cnts, options, swiftPatternL, swiftPatternR);
+    compactPairMatches(store, matches, cnts, options, swiftPatternL, swiftPatternR, COMPACT_FINAL);
     // Write back to store.
     reserve(store.alignedReadStore, length(matches));
     reserve(store.alignQualityStore, length(matches));

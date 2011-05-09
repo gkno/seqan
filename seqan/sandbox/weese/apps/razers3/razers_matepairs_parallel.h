@@ -933,7 +933,7 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSw
 
         SwiftPatternLSetMaxErrorsWrapper<TThreadLocalStorage> wrapperL(tls);
         SwiftPatternRSetMaxErrorsWrapper<TThreadLocalStorage> wrapperR(tls);
-        compactPairMatches(*tls.globalStore, tls.matches, tls.counts, tls.options, wrapperL, wrapperR);
+        compactPairMatches(*tls.globalStore, tls.matches, tls.counts, tls.options, wrapperL, wrapperR, COMPACT);
 
         if (length(tls.matches) * 4 > oldSize) {     // the threshold should not be raised if too many matches were removed
             while (tls.options.compactThresh < oldSize)
@@ -1432,7 +1432,7 @@ int _mapMatePairReadsParallel(
     #pragma omp parallel
     {
         Nothing nothing;
-        compactPairMatches(store, threadLocalStorages[omp_get_thread_num()].matches, cnts, options, nothing, nothing);
+        compactPairMatches(store, threadLocalStorages[omp_get_thread_num()].matches, cnts, options, nothing, nothing, COMPACT_FINAL);
     }
     writeBackToGlobalStore(store, threadLocalStorages, false);
 #ifdef RAZERS_PROFILE
