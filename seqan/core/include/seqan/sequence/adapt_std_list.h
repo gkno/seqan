@@ -290,6 +290,31 @@ clear(std::list<T> & list)
     list.clear();
 }
 
+///.Function.reserve.param.object.type:Adaption.std::list
+template <typename T, typename TTag>
+inline void
+reserve(std::list<T> & /*list*/, TTag const & /*tag*/)
+{
+    SEQAN_CHECKPOINT;
+}
+
+///.Function.capacity.param.object.type:Adaption.std::list
+template <typename T>
+inline typename Size<std::list<T> >::Type
+capacity(std::list<T> const & list)
+{
+    SEQAN_CHECKPOINT;
+    return length(list);
+}
+
+template <typename T>
+inline typename Size<std::list<T> >::Type
+capacity(std::list<T> & list)
+{
+    SEQAN_CHECKPOINT;
+    return capacity(const_cast<std::list<T> const &>(list));
+}
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_SEQUENCE_ADAPT_STD_LIST_H_

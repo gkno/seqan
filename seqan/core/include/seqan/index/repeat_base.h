@@ -502,11 +502,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		// copy low-complex regions to result string
-		resize(repString, list.size());
+		reserve(repString, list.size(), Exact());
 		typename TRepeatList::const_iterator lit = list.begin();
 		typename TRepeatList::const_iterator litEnd = list.end();
 		for (TSize i = 0; lit != litEnd; ++lit, ++i)
-			repString[i] = (*lit).second;
+			appendValue(repString, (*lit).second);
 	}
 
 

@@ -736,6 +736,13 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_interface_std_list)
 
         // Test length().
         SEQAN_ASSERT_EQ(3u, length(list));
+
+        // Test reserve().
+        reserve(mutableList, 4);
+        SEQAN_ASSERT_EQ(3u, length(list));
+        SEQAN_ASSERT_EQ(3u, length(mutableList));
+        SEQAN_ASSERT_EQ(3u, capacity(list));
+        SEQAN_ASSERT_EQ(3u, capacity(mutableList));
     }
 }
 
