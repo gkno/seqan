@@ -557,10 +557,10 @@ void _mapMatePairReads(
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
 #ifdef RAZERS_DEBUG_MATEPAIRS
-        if (front(fifo).i2.readId > length(store.readNameStore))
-            std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
-        else
-            std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
+            if (front(fifo).i2.readId > length(store.readNameStore))
+                std::cerr << "\nPOP\tL\t" << "[bad read]" << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
+            else
+                std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 			popFront(fifo);
 			++firstNo;
