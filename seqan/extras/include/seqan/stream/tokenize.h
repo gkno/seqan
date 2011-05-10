@@ -192,6 +192,9 @@ _charCompare(int const c, Tag<Dna5_> const & /* tag*/)
     return false;
 }
 
+//TODO(h4nn3s): add for AminoAcid and Rna-tags
+
+
 // ----------------------------------------------------------------------------
 // Function _readHelper() [other read functions use this]
 // ----------------------------------------------------------------------------
@@ -357,6 +360,54 @@ _countHelper(unsigned & count,
 {
     return _countHelper(count, reader, tag);
 }
+
+// same as above but allows for a second character type to be ignored
+template <typename TTagSpec,
+          typename TTagSpec2, // specialization of character class to be ignored
+          typename TRecordReader>
+inline int
+_countHelper(unsigned & count,
+            TRecordReader & reader,
+            Tag<TTagSpec> const & compTag,
+            Tag<TTagSpec2> const & skipTag,
+            bool const desiredOutcomeOfComparison)
+{
+    count = 0;
+//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
+    typedef char TChar; //TODO fix this
+
+    while (!atEnd(reader))
+    {
+        TChar c = value(reader);
+        if (!_charCompare(c, skipTag))
+        {
+            if (bool (_charCompare(c, compTag)) == desiredOutcomeOfComparison)
+                return 0;
+            ++count;
+        }
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+
+template <typename TTagSpec,
+          typename TTagSpec2, // specialization of character class to be ignored
+          typename TRecordReader>
+inline int
+_countHelper(unsigned & count,
+            TRecordReader & reader,
+            Tag<TTagSpec> const & compTag,
+            Tag<TTagSpec2> const & skipTag)
+
+{
+    return _countHelper(count, reader, compTag, skipTag, true);
+}
+
+
+
 
 // ----------------------------------------------------------------------------
 // Function _readAndCompareWithStr()
@@ -540,7 +591,6 @@ readUntilChar(TBuffer & buffer,
 ...type:nolink:$int$
 ...type:TokenizeResult
 ..include:seqan/stream.h
-..see:Function.isblank
 ..see:Enum.TokenizeResult
  */
 template <typename TBuffer, typename TStream, typename TPass>
@@ -569,6 +619,44 @@ readNChars(TBuffer & buffer,
     }
     return 0;
 }
+
+/**
+.Function.skipNChars
+..cat:Input/Output
+..summary:Skip exactly n characters from stream
+..signature:skipNChars(RecordReader<TStream, TPass> & recordReader, unsigned const n)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.n:The number of characters to skip
+...type:$unsigned$
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:TokenizeResult
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+ */
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+skipNChars(RecordReader<TStream, TPass> & reader,
+           unsigned const n)
+{
+    SEQAN_CHECKPOINT
+//     typedef typename Value< typename RecordReader<TStream,
+//                                                   TPass>::_buffer>::Type TChar;
+    typedef char TChar; //TODO fix this
+
+    for (unsigned i = 0; i < n; ++i)
+    {
+        if (atEnd(reader))
+            return EOF_BEFORE_SUCCESS;
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return 0;
+}
+
 
 // ---
 /**
@@ -1150,7 +1238,41 @@ _parseSkipLine(TFile& file, TChar& c)
     c = _streamGet(file);
 }*/
 
+/**
+.Function.countLine
+..cat:Input/Output
+..summary:count characters in a line not including \r and \n
+..signature:countLine(unsigned & count, RecordReader<TStream, TPass> & recordReader)
+..param.count:The variable to increment
+...type:nolink:unsigned int
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:TokenizeResult
+..remarks:This function stops on the beginning of the next line, if there is a next line (even though newline characters are not counted)
+..remarks:Works on ANSI EOL and on Unix EOL.
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+ */
+template <typename TStream, typename TPass>
+inline int
+countLine(unsigned & count, RecordReader<TStream, TPass> & reader)
+{
+    SEQAN_CHECKPOINT
+    int r = _countHelper(count,
+                        reader,
+                        UnixEOL_(), // abort on Newline
+                        BackslashR_()); // just ignore carriage return
+    if (r != 0)
+        return r;
 
+    if (!atEnd(reader))
+        goNext(reader); // go to beginning of next line
+
+    return resultCode(reader);
+}
 
 /**
 .Function.readDna5IgnoringWhitespaces
@@ -1183,7 +1305,6 @@ readDna5IgnoringWhitespaces(TBuffer & buffer,
 } 
 // this would read a fasta or fastq sequence, since meta and qualities begin 
 // with special chars
-
 
 /**
 .Function.skipUntilLineBeginsWithChar
