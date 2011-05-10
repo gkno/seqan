@@ -335,9 +335,18 @@ _adjustParent (
 		return;
 
 	parent.contigId = child.contigId;	
-	if ((parent.beginPos == TAnnotation::INVALID_POS) != (parent.endPos == TAnnotation::INVALID_POS))
-		return;
 
+    // Has parent an invalid begin and end position?
+	if ((parent.beginPos == TAnnotation::INVALID_POS) && (parent.endPos == TAnnotation::INVALID_POS))
+    {
+        parent.beginPos = child.beginPos;
+        parent.endPos = child.endPos;
+        return;
+    }
+
+	if ((parent.beginPos == TAnnotation::INVALID_POS) || (parent.endPos == TAnnotation::INVALID_POS))
+		return;
+    
 	typename TAnnotation::TPos childBegin, childEnd;
 	if (child.beginPos < child.endPos)
 	{
@@ -348,6 +357,7 @@ _adjustParent (
 		childEnd = child.beginPos;
 	}
 
+    // Keep parent's orientation and maximize begin and end using child's boundaries.
 	if (parent.beginPos < parent.endPos)
 	{
 		if (parent.beginPos == TAnnotation::INVALID_POS || parent.beginPos > childBegin)
