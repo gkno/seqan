@@ -170,23 +170,31 @@ struct GetDefaultRng
 .Function.defaultRng
 ..summary:Default default random number generator object of a given type.
 ..cat:Random
-..signature:defaultRng([tag])
-..param.tag:Tag to select the @Class.Rng@ specialization from.
+..signature:defaultRng<TRng>()
+..param.TRng:Type of the @Class.Rng@ to return the global default object of.
 ...default:$MersenneTwister$
 ...type:nolink:$MersenneTwister$
-..returns:Default default random number generator object of the type given by $tag$.
-...type:nolink:The type as returned @Metafunction.GetDefaultRng@.
+..returns:Default random number generator object of the type given by $tag$.
 ..remarks:The random number generator will be default constructed, i.e. with the default seed.
 ..remarks:This function is NOT thread-safe! Also, data structures using such global state are not thread-safe! Data structures using global random number generator state should use pointers or @Class.Holder|Holder instances@. This way, the random number generator state to be used can be set to be thread-local.
 ..see:Metafunction.GetDefaultRng
  */
+
+template <typename TRng>
+inline TRng &
+defaultRng()
+{
+    static TRng x;
+    return x;
+}
+
+
 template <typename T>
 inline typename GetDefaultRng<T>::Type &
 defaultRng(T const &)
 {
     typedef typename GetDefaultRng<T>::Type TRng;
-    static TRng x;
-    return x;
+    return defaultRng<TRng>();
 }
 
 }  // namespace seqan

@@ -69,7 +69,7 @@ public:
 
 // TODO(holtgrew): Switch to [begin, end) instead of [min, max] style?
 /**
-.MemfuncUniform Pdf #Pdf
+.Memfunc.Uniform Pdf#Pdf
 ..class:Spec.Uniform Pdf
 ..summary:Constructor for uniform Pdf.
 ..signature:Pdf<Uniform<T> >(min, max)

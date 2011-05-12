@@ -115,6 +115,35 @@ pickRandomNumber(Rng<MersenneTwister> & mt)
     return mt._mtRand.randInt();
 }
 
+/**
+.Function.reSeed
+..summary:Reset and re-seed MersenneTwister
+..cat:Random
+..signature:reSeed(mt[, seed])
+..param.mt:The @Spec.Mersenne Twister Rng@ to reset.
+...type:Spec.Mersenne Twister Rng
+..param.seed:Optional seed to initialize the RNG with.
+...default:0
+...type:nolink:$__uint32$
+..include:seqan/random.h
+*/
+
+inline void
+reSeed(Rng<MersenneTwister> & mt, __uint32 const seed)
+{
+    SEQAN_CHECKPOINT;
+
+    mt._mtRand.seed(seed);
+}
+
+inline void
+reSeed(Rng<MersenneTwister> & mt)
+{
+    SEQAN_CHECKPOINT;
+
+    reSeed(mt, 0);
+}
+
 }  // namespace seqan
 
 #endif  // SEQAN_RANDOM_RANDOM_MT19937_H_
