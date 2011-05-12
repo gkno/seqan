@@ -285,4 +285,51 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_memset)
     SEQAN_ASSERT_EQ(i[2], 0);
 }
 
+// Functions to demonstrate EnableIf and related functions.
+template <typename T>
+bool testForEnableIf(
+    T const & /*x*/,
+    typename seqan::EnableIf<IsSameType<T, int>::VALUE>::Type* /*dummy*/ = 0)
+{
+    return true;
+}
+
+template <typename T>
+bool testForEnableIf(
+    T const & /*x*/,
+    typename seqan::DisableIf<IsSameType<T, int>::VALUE>::Type* /*dummy*/ = 0)
+{
+    return false;
+}
+
+template <typename T>
+bool testForEnableIf2(
+    T const & /*x*/,
+    typename seqan::EnableIf2<typename IsSameType<T, int>::Type>::Type* /*dummy*/ = 0)
+{
+    return true;
+}
+
+template <typename T>
+bool testForEnableIf2(
+    T const & /*x*/,
+    typename seqan::DisableIf2<typename IsSameType<T, int>::Type>::Type* /*dummy*/ = 0)
+{
+    return false;
+}
+
+SEQAN_DEFINE_TEST(test_basic_metaprogramming_enable_if_disable_if)
+{
+    SEQAN_ASSERT_EQ(true, testForEnableIf(1));
+    SEQAN_ASSERT_EQ(false, testForEnableIf(1u));
+    SEQAN_ASSERT_EQ(false, testForEnableIf(1.0));
+}
+
+SEQAN_DEFINE_TEST(test_basic_metaprogramming_enable_if2_disable_if2)
+{
+    SEQAN_ASSERT_EQ(false, testForEnableIf2(1));
+    SEQAN_ASSERT_EQ(true, testForEnableIf2(1u));
+    SEQAN_ASSERT_EQ(true, testForEnableIf2(1.0));
+}
+
 #endif  // TEST_BASIC_TEST_BASIC_METAPROGRAMMING_H_

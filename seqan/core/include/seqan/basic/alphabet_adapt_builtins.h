@@ -85,6 +85,48 @@ template <> struct IsSimple<__uint64> { typedef True Type; };
 
 template <> struct BitsPerValue<bool> { enum { VALUE = 1 }; };
 
+/**
+.Metafunction.IsCharType
+..cat:Alphabets
+..summary:Return whether the argument is $char$, $wchar_t$, $char const$, or $wchar_t const$.
+..signature:IsCharType<T>::Type
+..signature:IsCharType<T>::VALUE
+..param.T:Type to check type of.
+..remarks:This metafunction is used to enable and disable templated adaptions of arrays to sequences for builtin character types only.
+..remarks:The return value is $True$/$true$ for $char$, $wchar_t$, $char const$, and $wchar_t const$.
+..include:seqan/sequence.h
+*/
+
+// TODO(holtgrew): Write tests for this.
+
+template <typename T>
+struct IsCharType;
+
+template <typename T>
+struct IsCharType
+{
+    typedef False Type;
+    enum { VALUE = 0 };
+};
+
+template <typename T>
+struct IsCharType<T const>
+    : IsCharType<T> {};
+
+template <>
+struct IsCharType<char>
+{
+    typedef True Type;
+    enum { VALUE = 1 };
+};
+
+template <>
+struct IsCharType<wchar_t>
+{
+    typedef True Type;
+    enum { VALUE = 1 };
+};
+
 // ============================================================================
 // Functions
 // ============================================================================

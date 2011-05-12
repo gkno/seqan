@@ -84,6 +84,7 @@
 // This code lies the foundation for metaprogramming in SeqAn.
 
 #include <seqan/basic/basic_metaprogramming.h>
+#include <seqan/basic/basic_metaprogramming_enable_if.h>
 #include <seqan/basic/basic_tag.h>
 #include <seqan/basic/basic_type.h>
 

@@ -80,6 +80,9 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_metaprogramming_make_is_const);
     SEQAN_CALL_TEST(test_basic_metaprogramming_class_identifier);
     SEQAN_CALL_TEST(test_basic_metaprogramming_memset);
+    
+    SEQAN_CALL_TEST(test_basic_metaprogramming_enable_if_disable_if);
+    SEQAN_CALL_TEST(test_basic_metaprogramming_enable_if2_disable_if2);
 
     SEQAN_CALL_TEST(test_basic_math_int_pow);
     SEQAN_CALL_TEST(test_basic_math_log2);

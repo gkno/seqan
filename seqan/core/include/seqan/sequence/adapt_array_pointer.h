@@ -57,6 +57,10 @@ namespace seqan {
 for all operations on char arrays is @Tag.Overflow Strategy.insist@.
 */
 
+// ===========================================================================
+// Metafunctions
+// ===========================================================================
+
 template <typename TValue>
 struct DefaultOverflowImplicit;
 
@@ -83,10 +87,6 @@ struct DefaultOverflowImplicit<TValue const [SIZE]>
 {
     typedef Insist Type;
 };
-
-// ===========================================================================
-// Metafunctions
-// ===========================================================================
 
 template <typename TValue>
 struct DefaultOverflowExplicit;
@@ -441,7 +441,7 @@ SEQAN_CHECKPOINT
 //overload of binary version for strings:
 
 template<typename TTargetValue, typename TSource>
-inline void
+inline typename EnableIf<IsCharType<TTargetValue>::VALUE>::Type
 assign(TTargetValue * target,
        TSource & source)
 {
@@ -450,7 +450,7 @@ SEQAN_CHECKPOINT
     assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 template<typename TTargetValue, typename TSource>
-inline void
+inline typename EnableIf<IsCharType<TTargetValue>::VALUE>::Type
 assign(TTargetValue * target,
        TSource const & source)
 {
