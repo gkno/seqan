@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary: Represents the Pms1 algorithm developed by Rajasekaran et al.
 ..general:Class.MotifFinder
 ..cat:Motif Search
-..signature:MotifFinder<TValue, Pms1>
+..signature:MotifFinder<TValue, Pms1, TRng>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
@@ -56,6 +56,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		  The neighbor sets for each sequence are then intersected so that at the end of the process
 		  we get a group of l-mers or a single l-mer that occur(s) in each input sequence with $d$
 		  substitutions.
+..param.TRng:The @Class.Rng@ specialization to use for random number generation.
+...default:$GetDefaultRng<MotifFinderClass>::Type$
 ..include:seqan/find_motif.h
 */
 
@@ -73,8 +75,8 @@ typedef Tag<Pms1_> const Pms1;
 // d:=number of substitutions
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue>
-class MotifFinder<TValue, Pms1>
+template <typename TValue, typename TRng>
+class MotifFinder<TValue, Pms1, TRng>
 {
 //_________________________________________________________________________________
 
@@ -134,9 +136,9 @@ public:
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSeqType, typename TStrings, typename TModel>
+template<typename TSeqType, typename TStrings, typename TModel, typename TRng>
 inline void
-findMotif(MotifFinder<TSeqType, Pms1> & finder, 
+findMotif(MotifFinder<TSeqType, Pms1, TRng> & finder, 
 		  TStrings & dataset, 
 		  TModel seq_model)
 {

@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Holds the algorithm parameter values and the motif instance(s) found by the appropriate
           motif discovery algorithm.
 ..cat:Motif Search
-..signature:MotifFinder<TValue, TSpec>
+..signature:MotifFinder<TValue, TSpec, TRng>
 ..param.TValue:The type of sequences to be analyzed.
 ...metafunction:Metafunction.Value
 ...type:Spec.Dna
@@ -54,10 +54,15 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.EPatternBranching
 ...type:Spec.Pms1
 ...type:Spec.Pmsp
+..param.TRng:The @Class.Rng@ specialization to use for random number generation.
+...default:$GetDefaultRng<MotifFinderClass>::Type$
 ..include:seqan/find_motif.h
 */
 
-template <typename TValue, typename TSpec>
+struct MotifFinderClass_;
+typedef Tag<MotifFinderClass_> MotifFinderClass;
+    
+template <typename TValue, typename TSpec, typename TRng = typename GetDefaultRng<MotifFinderClass>::Type>
 class MotifFinder;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -66,13 +71,13 @@ class MotifFinder;
 
 ///.Metafunction.Value.param.T.type:Class.MotifFinder
 
-template<typename TValue, typename TSpec>
-struct Value< MotifFinder<TValue, TSpec> >
+template<typename TValue, typename TSpec, typename TRng>
+struct Value< MotifFinder<TValue, TSpec, TRng> >
 {
 	typedef TValue Type;
 };
-template<typename TValue, typename TSpec>
-struct Value< MotifFinder<TValue, TSpec> const>
+template<typename TValue, typename TSpec, typename TRng>
+struct Value< MotifFinder<TValue, TSpec, TRng> const>
 {
 	typedef TValue const Type;
 };
@@ -265,9 +270,9 @@ inverseHash(TType const & hash_value,
 ..include:seqan/find_motif.h
 */
 
-template<typename TValue, typename TAlgorithm>
+template<typename TValue, typename TAlgorithm, typename TRng>
 void
-displayResult(MotifFinder<TValue, TAlgorithm> & finder)
+displayResult(MotifFinder<TValue, TAlgorithm, TRng> & finder)
 {
     SEQAN_CHECKPOINT;
 
@@ -305,8 +310,8 @@ displayResult(MotifFinder<TValue, TAlgorithm> & finder)
 template <typename T>
 struct Motif;
 
-template <typename TValue, typename TSpec>
-struct Motif< MotifFinder<TValue,TSpec> >
+template <typename TValue, typename TSpec, typename TRng>
+struct Motif< MotifFinder<TValue, TSpec, TRng> >
 {
 	typedef String<TValue> Type;
 };
@@ -323,9 +328,9 @@ struct Motif< MotifFinder<TValue,TSpec> >
 ..include:seqan/find_motif.h
 */
 
-template <typename TValue, typename TSpec, typename TPosition>
-inline typename Motif<MotifFinder<TValue, TSpec> >::Type &
-getMotif(MotifFinder<TValue, TSpec> & me,
+template <typename TValue, typename TSpec, typename TPosition, typename TRng>
+inline typename Motif<MotifFinder<TValue, TSpec, TRng> >::Type &
+getMotif(MotifFinder<TValue, TSpec, TRng> & me,
 		 TPosition pos)
 {
     SEQAN_CHECKPOINT;
@@ -333,9 +338,9 @@ getMotif(MotifFinder<TValue, TSpec> & me,
 }
 
 ///.Function.getMotif.signature:getMotif(motifFinder)
-template <typename TValue, typename TSpec>
-inline typename Motif<MotifFinder<TValue, TSpec> >::Type &
-getMotif(MotifFinder<TValue, TSpec> & me)
+template <typename TValue, typename TSpec, typename TRng>
+inline typename Motif<MotifFinder<TValue, TSpec, TRng> >::Type &
+getMotif(MotifFinder<TValue, TSpec, TRng> & me)
 {
     SEQAN_CHECKPOINT;
 	return me.set_of_motifs[0];
@@ -352,9 +357,9 @@ getMotif(MotifFinder<TValue, TSpec> & me)
 ..include:seqan/find_motif.h
 */
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TRng>
 inline size_t
-motifCount(MotifFinder<TValue, TSpec> const & me)
+motifCount(MotifFinder<TValue, TSpec, TRng> const & me)
 {
     SEQAN_CHECKPOINT;
 	return length(me.set_of_motifs);

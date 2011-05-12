@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary: Represents the ePatternBranching algorithm of Davila and Rajasekaran.
 ..general:Class.MotifFinder
 ..cat:Motif Search
-..signature:MotifFinder<TValue, EPatternBranching>
+..signature:MotifFinder<TValue, EPatternBranching, TRng>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
@@ -77,8 +77,8 @@ typedef Tag<EPatternBranching_> const EPatternBranching;
 // h:=size of the neighborhood considering at first
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue>
-class MotifFinder<TValue, EPatternBranching>
+template <typename TValue, typename TRng>
+class MotifFinder<TValue, EPatternBranching, TRng>
 {
 //_________________________________________________________________________________
 
@@ -239,9 +239,9 @@ computeH(TType const & t, TType const & l, TType const & d, bool const & is_exac
 
 /////////////////////////////////////////////////////////////////////////
 
-template<typename TSeqType, typename TStrings, typename TModel>
+template<typename TSeqType, typename TStrings, typename TModel, typename TRng>
 inline void
-findMotif(MotifFinder<TSeqType ,EPatternBranching> & epb2, 
+findMotif(MotifFinder<TSeqType, EPatternBranching, TRng> & epb2, 
 		  TStrings & dataset, 
 		  TModel seq_model)
 {

@@ -46,6 +46,7 @@
 #include <seqan/file.h>
 #include <seqan/index/shape_base.h>
 #include <seqan/index/shape_gapped.h>
+#include <seqan/random.h>
 
 //____________________________________________________________________________
 

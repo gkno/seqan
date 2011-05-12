@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary: Represents the PROJECTION algorithm of Buhler and Tompa.
 ..general:Class.MotifFinder
 ..cat:Motif Search
-..signature:MotifFinder<TValue, Projection>
+..signature:MotifFinder<TValue, Projection, TRng>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
@@ -55,6 +55,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		  In each trial, @Spec.Projection@ makes a preselection of sets of length-l patterns called l-mers
 		  which are likely to be a collection of motif instances (filtering step) and 
 		  refines them by some local searching techniques, e.g. @Function.em|EM algorithm@, Gibbs Sampling etc (refinement step).
+..param.TRng:The @Class.Rng@ specialization to use for random number generation.
+...default:$GetDefaultRng<MotifFinderClass>::Type$
 ..include:seqan/find_motif.h
 */
 
@@ -73,8 +75,8 @@ typedef Tag<Projection_> const Projection;
 // tr:=number of independent trials
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue>
-class MotifFinder<TValue, Projection>
+template <typename TValue, typename TRng>
+class MotifFinder<TValue, Projection, TRng>
 {
 	enum { ALPHABET_SIZE = ValueSize<TValue>::VALUE };
 //____________________________________________________________________________________________
@@ -92,7 +94,7 @@ public:
 	typedef String<TValue> TString;
 	typedef String<TString> TStrings;
 
-
+    Holder<TRng> _rng;
 	TSize dataset_size;
 	TSize motif_size;
 	TSize total_num_of_l_mers;
@@ -107,6 +109,7 @@ public:
 //____________________________________________________________________________________________
 
 	MotifFinder():
+        _rng(defaultRng<TRng>()),
 		dataset_size(0),
 		motif_size(0),
 		total_num_of_l_mers(0),
@@ -126,6 +129,7 @@ public:
 				TSize const & k_,
 				TSize const & s_,
 				TSize const & tr_):
+        _rng(defaultRng<TRng>()),
 		dataset_size(t_),
 		motif_size(l_),
         total_num_of_l_mers(m_total_),
@@ -142,6 +146,7 @@ public:
 				TSize const & m_total_,
 				TSize const & d_,
 				bool const & is_exact_):
+        _rng(defaultRng<TRng>()),
 		dataset_size(t_),
 		motif_size(l_),
 		total_num_of_l_mers(m_total_),
@@ -175,6 +180,7 @@ public:
 								            prob_q);
 	}
 	MotifFinder(MotifFinder const & other_):
+        _rng(other_.rng),
 		dataset_size(other_.dataset_size),
 		motif_size(other_.motif_size),
 		total_num_of_l_mers(other_.total_num_of_l_mers),
@@ -387,9 +393,9 @@ _computeNumOfTrials(TType const & t,
 ..include:seqan/find_motif.h
 */
 
-template<typename TSeqType, typename TStrings, typename TModel>
+template<typename TSeqType, typename TStrings, typename TModel, typename TRng>
 void
-findMotif(MotifFinder<TSeqType, Projection> & finder, 
+findMotif(MotifFinder<TSeqType, Projection, TRng> & finder, 
 		  TStrings & dataset,
 		  TModel seq_model)
 {
@@ -426,7 +432,7 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 		// ----------------------------------------------------------------------------
 		// choose randomly k different positions
 		std::set<int> positions;
-		choosePositions(positions,finder.motif_size,finder.projection_size);
+		choosePositions(positions,finder.motif_size,finder.projection_size, value(finder._rng));
 
 		// array of collection of l-mers
 		TBuckets bucket_ar;
@@ -945,22 +951,27 @@ _refinementStep(TString & consensus_seq,
 .Function.choosePositions:
 ..summary:Chooses randomly k different positions from {0,1,...,(l-1)}
 ..cat:Motif Search
-..signature:choosePositions(positions,l,k)
+..signature:choosePositions(positions,l,k,rng)
 ..param.positions:The set of k chosen positions.
 ...type:$set<int>$
 ..param.l:The size of the motif.
 ..param.k:The projection size.
+..param.rng:The @Class.Rng@ object to get random numbers from.
 ..include:seqan/find_motif.h
 */
 
-template<typename TAssociativeContainer, typename TType>
+template<typename TAssociativeContainer, typename TType, typename TRng>
 void
-choosePositions(TAssociativeContainer & positions, TType const & l, TType const & k)
+choosePositions(TAssociativeContainer & positions, TType const & l, TType const & k, TRng & rng)
 {
     SEQAN_CHECKPOINT;
-	while(positions.size()<k)
+    
+    SEQAN_ASSERT_GT(l, static_cast<TType>(0));
+    Pdf<Uniform<int> > positionPdf(0, l - 1);  // PDF for picking positions.
+    
+	while (positions.size() < k)
 	{
-		int position = rand() % l;
+		int position = pickRandomNumber(rng, positionPdf);
 		positions.insert(position);
 	}
 }
@@ -1221,9 +1232,9 @@ determineConsensusSeq(TString & consensus_seq,
 ..include:seqan/find_motif.h
 */
 
-template<typename TValue>
+template<typename TValue, typename TRng>
 void
-displayResult(MotifFinder<TValue, Projection> & projection)
+displayResult(MotifFinder<TValue, Projection, TRng> & projection)
 {
     SEQAN_CHECKPOINT;
 
@@ -1241,9 +1252,9 @@ displayResult(MotifFinder<TValue, Projection> & projection)
 // Access Functions
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue>
+template <typename TValue, typename TRng>
 inline int
-getScore(MotifFinder<TValue, Projection> & me)
+getScore(MotifFinder<TValue, Projection, TRng> & me)
 {
     SEQAN_CHECKPOINT;
 	return me.score;

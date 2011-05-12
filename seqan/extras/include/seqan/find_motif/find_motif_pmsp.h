@@ -45,13 +45,15 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary: Represents the Pmsp algorithm of Davila et al.
 ..general:Class.MotifFinder
 ..cat:Motif Search
-..signature:MotifFinder<TValue, Pmsp>
+..signature:MotifFinder<TValue, Pmsp, TRng>
 ..param.TValue:The type of sequences to be analyzed.
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
 ..remarks:The @Spec.Pmsp|Pmsp algorithm@ is an improvement of the @Spec.Pms1|Pms1 algorithm@.
           It examines each possible l-mer of the first input sequence, explores its neighborhood
 		  and finally checks whether an l-mer in the neighborhood is a motif instance.
+..param.TRng:The @Class.Rng@ specialization to use for random number generation.
+...default:$GetDefaultRng<MotifFinderClass>::Type$
 ..include:seqan/find_motif.h
 */
 
@@ -69,8 +71,8 @@ typedef Tag<Pmsp_> const Pmsp;
 // d:=number of substitutions
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue>
-class MotifFinder<TValue, Pmsp>
+template <typename TValue, typename TRng>
+class MotifFinder<TValue, Pmsp, TRng>
 {
 //_________________________________________________________________________________
 
@@ -131,9 +133,9 @@ public:
 // Functions
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSeqType, typename TStrings, typename TModel>
+template<typename TSeqType, typename TStrings, typename TModel, typename TRng>
 inline void
-findMotif(MotifFinder<TSeqType ,Pmsp> & finder, 
+findMotif(MotifFinder<TSeqType, Pmsp, TRng> & finder, 
 		  TStrings & dataset, 
 		  TModel seq_model)
 {

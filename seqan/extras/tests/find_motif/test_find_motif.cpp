@@ -222,6 +222,11 @@ SEQAN_DEFINE_TEST(test_find_motif_exact_algorithms) {
 	bool is_exact = false;	//size of Hamming distance
 	unsigned int i = 0;
 
+    // Initialize random number generator.
+    typedef typename GetDefaultRng<MotifFinderClass>::Type TRng;
+    TRng & rng = defaultRng(MotifFinderClass());
+    reSeed(rng, 0);
+
 //____________________________________________________________________________
 // Test1 - Search for Oops motifs on a small set of nucleotide sequences
 //         given the exact Hamming distance (=d)
@@ -350,7 +355,10 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
 	unsigned int h = 0;		//size of the neighborhood considering at first
 	unsigned int i = 0;
 
-	srand((unsigned) time(NULL));
+    // Initialize random number generator.
+    typedef typename GetDefaultRng<MotifFinderClass>::Type TRng;
+    TRng & rng = defaultRng(MotifFinderClass());
+    reSeed(rng, 0);
 
 //____________________________________________________________________________
 // Test1 - Search for Oops motifs on a small set of nucleotide sequences
