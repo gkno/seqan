@@ -45,6 +45,7 @@
 #include <seqan/file.h>
 #include <seqan/sequence.h>
 #include <seqan/store.h>
+#include <seqan/stream.h>
 
 // ===========================================================================
 // First Header Group.

@@ -43,5 +43,10 @@ SEQAN_BEGIN_TESTSUITE(test_parse_lm)
 	SEQAN_CALL_TEST(test_parse_lm_local_match_constructor);
 	SEQAN_CALL_TEST(test_parse_lm_local_match_store_constructor);
 	SEQAN_CALL_TEST(test_parse_lm_local_match_store_append_local_match);
+
+    // Call tests for parsers.
+    SEQAN_CALL_TEST(test_parse_lm_parse_lastz_general);
+    SEQAN_CALL_TEST(test_parse_lm_parse_blastn_tabular);
+    SEQAN_CALL_TEST(test_parse_lm_parse_stellar_gff);
 }
 SEQAN_END_TESTSUITE

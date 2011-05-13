@@ -34,6 +34,14 @@
 
 // SEQAN_NO_GENERATED_FORWARDS
 
+// TODO(holtgrew): Allow the storage of additional fields.
+/* This could look as follows:
+
+   The values of the additional fields are stored as strings.  Either we store name/value pairs or, more efficiently,
+   store a stringset for each match, with the same number of entries.  An additional String/Map maps from field name to
+   index in this string sets.
+ */
+
 #ifndef SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_
 #define SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_
 
@@ -113,6 +121,13 @@ public:
             queryBeginPos(queryBeginPos_),
             queryEndPos(queryEndPos_)
     {}
+
+    bool operator==(LocalMatch const & other) const
+    {
+        return id == other.id && subjectId == other.subjectId && subjectBeginPos == other.subjectBeginPos &&
+                subjectEndPos == other.subjectEndPos && queryId == other.queryId &&
+                queryBeginPos == other.queryBeginPos && queryEndPos == other.queryEndPos;
+    }
 };
 
 /**

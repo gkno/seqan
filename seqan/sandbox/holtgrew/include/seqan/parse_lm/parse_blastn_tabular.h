@@ -47,106 +47,143 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-/**
-.Concept:MyConcept
-..
-..include:seqan/parse_lm.h
- */
-
-// If your define a lot of very generic functions for our concept, consider
-// putting it into its own directory.
-
-/**
-.Class.MyClass
-..concept:Concept.MyConcept
-..summary:This is my class.
-..cat:My Classes
-..signature:MyClass<TSpec>
-..param.TSpec:Tag to select the specialization.
-...default:MyTag
-..include:seqan/parse_lm.h
- */
-
-// NOTE: Assigning classes to concepts is optional.
-
-// struct Our_;
-// typedef Tag<Our_> Our;
-
-// template <typename TSpec = Our>
-// class MyClass;
-
-/*
-.Spec.Our MyClass
-..cat:My Classes
-..general:Class.MyClass
-..summary:This is the "our" specialization of my class!
-..signature:MyClass<Our>
-..include:seqan/parse_lm.h
- 
-.Memfunc.Our MyClass#MyClass
-..cat:My Classes
-..class:Spec.Our MyClass
-..signature:Class()
-..signature:Class(foo, barBaz)
-..param.foo:A foo parameter.
-...type:Spec.CharString
-..param.barBaz:Another parameter.
-...type:nolink:$int$
- */
-	
-// template <>
-// class MyClass<Our>
-// {
-// public:
-//     // ...
-// };
+struct BlastnTabular_;
+typedef Tag<BlastnTabular_> BlastnTabular;
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// Metafunction Value
-// ----------------------------------------------------------------------------
-
-///.Metafunction.Value.param.T.value:Class.MyClass
-
-// template <typename TSpec>
-// struct Value<MyClass<TSpec> >
-// {
-//     typedef int Type;
-// };
 
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function someFunction()
+// Function readRecord()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.someFunction
-..concept:Concept.MyConcept
-..cat:My Classes
-..signature:someFunction(obj)
-..summary:Executes some functionality on a @Class.MyClass@.
-..param.obj:Object to call function on.
-...type:Class.MyClass
-..returns:$void$
+.Function.readRecord
+..cat:Local Match Store
+..signature:readRecord(store, stream, BlastnTabular())
+..param.store:@Class.LocalMatchStore@ object to read into.
+...type:Class.LocalMatchStore
+..returns:$int$, 0 on success, non-0 on errors and EOF
 ..include:seqan/parse_lm.h
  */
 
-// NOTE: Functions can be long to concepts but do not have to.  You can use
-//       function documentations and link them to concepts in a concept_name.h
-//       header to document your concept.
+template <typename TLocalMatchStore, typename TStream, typename TPassSpec>
+int
+readRecord(TLocalMatchStore & store,
+           RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
+           BlastnTabular const & /*tag*/)
+{
+    typedef typename TLocalMatchStore::TPosition TPosition;
+    typedef typename TLocalMatchStore::TPosition TId;
+    
+    if (atEnd(recordReader))
+        return 1;
+    // Skip any comments.
+    while (value(recordReader) == '#') {
+        int res = skipLine(recordReader);
+        if (res)
+            return res;
+        if (atEnd(recordReader))
+            return 1;
+    }
 
-// template <typename TSpec>
-// inline void
-// someFunction(MyClass<TSpec> const & /*obj*/)
-// {
-//     return;
-// }
+    SEQAN_ASSERT_NEQ(value(recordReader), '#');
+
+    // Read line.
+    CharString buffer;
+    int res = 0;
+
+    CharString subjectName;
+    CharString queryName;
+    TPosition subjectBeginPos = 0;
+    TPosition subjectEndPos = 0;
+    TPosition queryBeginPos = 0;
+    TPosition queryEndPos = 0;
+
+    // Field: query id
+    res = readUntilChar(queryName, recordReader, '\t');
+    if (res) return res;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: subject id
+    res = readUntilChar(subjectName, recordReader, '\t');
+    if (res) return res;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: % identity
+    res = skipUntilChar(recordReader, '\t');
+    if (res) return res;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: alignment length
+    res = skipUntilChar(recordReader, '\t');
+    if (res) return res;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: mismatches
+    res = skipUntilChar(recordReader, '\t');
+    if (res) return res;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: gap opens
+    res = skipUntilChar(recordReader, '\t');
+    if (res) return res;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: q. start
+    res = readDigits(buffer, recordReader);
+    if (res) return res;
+    queryBeginPos = lexicalCast<TPosition>(buffer) - 1;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: q. end
+    res = readDigits(buffer, recordReader);
+    if (res) return res;
+    queryEndPos = lexicalCast<TPosition>(buffer);
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: s. start
+    res = readDigits(buffer, recordReader);
+    if (res) return res;
+    subjectBeginPos = lexicalCast<TPosition>(buffer) - 1;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: s. end
+    res = readDigits(buffer, recordReader);
+    if (res) return res;
+    subjectEndPos = lexicalCast<TPosition>(buffer);
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: evalue
+    res = skipUntilChar(recordReader, '\t');
+    if (res) return res;
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: bit score
+    res = skipUntilWhitespace(recordReader);
+    if (res) return res;
+
+    // Finally, append the local match.
+    appendLocalMatch(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos);
+
+    return 0;
+}
 
 }  // namespace seqan
 
