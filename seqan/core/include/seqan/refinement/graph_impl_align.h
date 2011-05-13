@@ -184,8 +184,8 @@ public:
 ..description:
 ...image:alignmentGraph|An alignment graph with 3 sequences.
 ..signature:Graph<Alignment<TStringSet, TCargo, TSpec> > 
-..param.TStringSet:The type of the string set containing the sequence information.
-...default:$Class.StringSet$
+..param.TStringSet:The type of the string set containing the sequence information, must be a @Spec.Dependent|Dependent StringSet@
+...default:@Spec.Dependent|Dependent StringSet@
 ..param.TCargo:The cargo type that can be attached to the edges.
 ...metafunction:Metafunction.Cargo
 ...remarks:Use @Metafunction.Cargo@ to get the cargo type of an undirected graph.
