@@ -201,6 +201,23 @@ public:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Function registerSequenceName
+// ----------------------------------------------------------------------------
+
+template <typename TLocalMatchStore>
+inline void
+registerSequenceName(TLocalMatchStore & store,
+                     CharString const & sequenceName)
+{
+    unsigned id = 0;
+	if (!getIdByName(store.sequenceNameStore, sequenceName, id, store._sequenceNameStoreCache))
+    {
+        id = length(store.sequenceNameStore);
+        appendName(store.sequenceNameStore, sequenceName, store._sequenceNameStoreCache);
+    }
+}
+
+// ----------------------------------------------------------------------------
 // Function appendLocalMatch
 // ----------------------------------------------------------------------------
 
