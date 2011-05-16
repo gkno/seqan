@@ -600,24 +600,82 @@ readNChars(TBuffer & buffer,
            unsigned const n)
 {
     SEQAN_CHECKPOINT
-//     typedef typename Value< typename RecordReader<TStream,
-//                                                   TPass>::_buffer>::Type TChar;
-    typedef char TChar; //TODO fix this
 
     clear(buffer);
-    reserve(buffer, n);
+    reserve(buffer, n, Exact());
 
     for (unsigned i = 0; i < n; ++i)
     {
         if (atEnd(reader))
             return EOF_BEFORE_SUCCESS;
-//         assignValue(buffer, i, value(reader));
         append(buffer, value(reader));
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
     }
     return 0;
+}
+
+/**
+.Function.readNCharsIgnoringWhitespace
+..cat:Input/Output
+..summary:Read n characters from stream into buffer, but skip certain Chars
+..signature:readNCharsIgnoringWhitespace(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, unsigned const n)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString
+...type:Shortcut.DnaString
+...type:nolink:or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.n:The number of characters to read
+...type:$unsigned$
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:TokenizeResult
+..include:seqan/stream.h
+..remarks:Whitespace characters are not counted
+..see:Enum.TokenizeResult
+ */
+
+
+template <typename TBuffer, typename TStream, typename TPass,
+          typename TIgnoredType>
+inline int
+_readNCharsIgnoringType(TBuffer & buffer,
+                         RecordReader<TStream, TPass> & reader,
+                         unsigned const n,
+                         TIgnoredType /* tag */)
+{
+    SEQAN_CHECKPOINT
+
+    clear(buffer);
+    reserve(buffer, n, Exact());
+
+    for (unsigned i = 0; i < n; ++i)
+    {
+        if (atEnd(reader))
+            return EOF_BEFORE_SUCCESS;
+
+        if (_charCompare(value(reader), TIgnoredType()))
+            --i;
+        else
+            append(buffer, value(reader));
+
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return 0;
+}
+
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+readNCharsIgnoringWhitespace(TBuffer & buffer,
+                             RecordReader<TStream, TPass> & reader,
+                             unsigned const n)
+{
+    return _readNCharsIgnoringType(buffer, reader, n, Whitespace_());
 }
 
 /**
@@ -642,9 +700,6 @@ skipNChars(RecordReader<TStream, TPass> & reader,
            unsigned const n)
 {
     SEQAN_CHECKPOINT
-//     typedef typename Value< typename RecordReader<TStream,
-//                                                   TPass>::_buffer>::Type TChar;
-    typedef char TChar; //TODO fix this
 
     for (unsigned i = 0; i < n; ++i)
     {
@@ -655,6 +710,52 @@ skipNChars(RecordReader<TStream, TPass> & reader,
             return resultCode(reader);
     }
     return 0;
+}
+/**
+.Function.skipNCharsIgnoringWhitespace
+..cat:Input/Output
+..summary:Skip n characters from stream, not counting whitespaces
+..signature:skipNCharsIgnoringWhitespace(RecordReader<TStream, TPass> & recordReader, unsigned const n)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.n:The number of characters to skip
+...type:$unsigned$
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:TokenizeResult
+..include:seqan/stream.h
+..remarks:Whitespace characters are not counted towards n
+..see:Enum.TokenizeResult
+..see:Function.skipNchars
+..see:Function.readNCharsIgnoringWhitespace
+ */
+template <typename TStream, typename TPass,
+          typename TIgnoredType>
+inline int
+_skipNCharsIgnoringType(RecordReader<TStream, TPass> & reader,
+                        unsigned const n,
+                        TIgnoredType const & /* tag */)
+{
+    for (unsigned i = 0; i < n; ++i)
+    {
+        if (atEnd(reader))
+            return EOF_BEFORE_SUCCESS;
+        if (_charCompare(value(reader), TIgnoredType()))
+            --i;
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return 0;
+}
+
+template <typename TStream, typename TPass>
+inline int
+skipNCharsIgnoringWhitespace(RecordReader<TStream, TPass> & reader,
+                             unsigned const n)
+{
+    return _skipNCharsIgnoringType(reader, n, Whitespace_());
 }
 
 

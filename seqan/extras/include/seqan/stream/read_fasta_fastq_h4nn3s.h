@@ -81,23 +81,23 @@ struct MetaFirstChar_<Tag<TagFastq_> >
 // ----------------------------------------------------------------------------
 
 // if target string is CharString, Sequence is any alphabetical
-template <typename TSpec, typename TRecordReader>
+template <typename TRecordReader>
 inline int
-_countSequenceFastAQ(unsigned & count,
+_countSequenceFastAQ(unsigned int & count,
                      TRecordReader & reader,
-                     char)
+                     char const & /* Alphabet type */)
 {
-    return _countHelper(count, reader, Alpha_(), Whitespace_());
+    return _countHelper(count, reader, Alpha_(), Whitespace_(), false);
 }
 
 // allow fine-grained alphabet-checking for DnaString etc
-template <typename TAlph, typename TSpec, typename TRecordReader>
+template <typename TAlph, typename TRecordReader>
 inline int
-_countSequenceFastAQ(unsigned & count,
+_countSequenceFastAQ(unsigned int & count,
                      TRecordReader & reader,
-                     TAlph & /* Alphabet type */)
+                     TAlph const & /* Alphabet type */)
 {
-    return _countHelper(count, reader, Tag<TAlph>(), Whitespace_());
+    return _countHelper(count, reader, Tag<TAlph>(), Whitespace_(), false);
 }
 
 template <typename TSeqAlph,
@@ -105,8 +105,8 @@ template <typename TSeqAlph,
           typename TSpec,
           typename TTag>
 inline int
-_countMetaAndSequence(unsigned int metaLength,
-                      unsigned int seqLength,
+_countMetaAndSequence(unsigned int & metaLength,
+                      unsigned int & seqLength,
                       RecordReader<TFile, DoublePass<TSpec> > & reader,
                       TTag const & /*tag*/,
                       TSeqAlph const & /* tag*/)
@@ -115,12 +115,12 @@ _countMetaAndSequence(unsigned int metaLength,
     seqLength=0;
 
     // COUNT META
-    if (value(reader) != MetaFirstChar_<TTag>::VALUE)
+    if (atEnd(reader) || value(reader) != MetaFirstChar_<TTag>::VALUE)
         return RecordReader<TFile, DoublePass<TSpec> >::INVALID_FORMAT;
     goNext(reader);
     if (resultCode(reader))
         return resultCode(reader);
-    if (atEnd(reader)) // empty ID, no sequence, this is legal
+    if (atEnd(reader)) // empty ID, no sequence, this is legal TODO?
         return 0;
 
     int res = countLine(metaLength, reader);
@@ -180,7 +180,7 @@ _clearAndReserveMemory(TIdString & meta, TSeqString & seq,
                                     seqLength,
                                     reader,
                                     TTag(),
-                                    Value<TSeqString>::Type());
+                                    typename Value<TSeqString>::Type());
     if ((res != 0) && (res != EOF_BEFORE_SUCCESS))
         return res;
 
@@ -204,7 +204,7 @@ inline int
 _readSequenceFastAQ(String<char, TSpec> & string,
                     TRecordReader & reader)
 {
-    return _readHelper(string, reader, Alpha_(), Whitespace_());
+    return _readHelper(string, reader, Alpha_(), Whitespace_(), false);
 }
 
 // allow fine-grained alphabet-checking for DnaString etc
@@ -213,7 +213,7 @@ inline int
 _readSequenceFastAQ(String<TAlph, TSpec> & string,
                     TRecordReader & reader)
 {
-    return _readHelper(string, reader, Tag<TAlph>(), Whitespace_());
+    return _readHelper(string, reader, Tag<TAlph>(), Whitespace_(), false);
 }
 
 // if target string is something else, assume alphabet is any alph()
@@ -222,7 +222,7 @@ inline int
 _readSequenceFastAQ(TString & string,
                     TRecordReader & reader)
 {
-    return _readHelper(string, reader, Alpha_(), Whitespace_());
+    return _readHelper(string, reader, Alpha_(), Whitespace_(), false);
 }
 
 // This reads Meta and Sequence
@@ -237,7 +237,7 @@ _readMetaAndSequence(TIdString & meta, TSeqString & seq,
                      TTag const & /*tag*/)
 {
     // READ META
-    if (value(reader) != MetaFirstChar_<TTag>::VALUE)
+    if (atEnd(reader) || value(reader) != MetaFirstChar_<TTag>::VALUE)
         return RecordReader<TFile, TPass>::INVALID_FORMAT;
     goNext(reader);
     if (resultCode(reader))
@@ -245,7 +245,7 @@ _readMetaAndSequence(TIdString & meta, TSeqString & seq,
     if (atEnd(reader)) // empty ID, no sequence, this is legal
         return 0;
 
-    res = readLine(meta, reader);
+    int res = readLine(meta, reader);
     if (res == EOF_BEFORE_SUCCESS)  // EOF half way in ID is legal
         return 0;
     else if (res)
@@ -293,7 +293,7 @@ _skipQualityBlock(RecordReader<TFile, TPass > & reader,
         return res;
 
     // SKIP QUALITIES
-    res = skipNChars(reader, seqLength); // there have to be n qualities
+    res = skipNCharsIgnoringWhitespace(reader, seqLength); // there have to be n qualities
     if (res)
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
     skipLine(reader); // goto to next line if it exists, result is unimportant
@@ -314,12 +314,12 @@ _readQualityBlock(TQualString & qual,
                   Fastq const & /*tag*/)
 {
     // READ AND CHECK QUALITIES' META
-    if (value(reader) != '+')
+    if (atEnd(reader) || value(reader) != '+')
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
     goNext(reader);
     if (resultCode(reader))
         return resultCode(reader);
-    if (atEnd(reader)) // empty ID, no sequence, this is legal
+    if (atEnd(reader)) // empty ID, no sequence, this is legal? TODO
         return 0;
 
     CharString qualmeta_buffer;
@@ -336,7 +336,7 @@ _readQualityBlock(TQualString & qual,
 
     // READ QUALITIES
     reserve(qual, seqLength, Exact());
-    res = readNChars(qual, reader, seqLength);
+    res = readNCharsIgnoringWhitespace(qual, reader, seqLength);
     // there have to be n qualities
     if (res)
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
@@ -432,7 +432,7 @@ int _readFastAQ(StringSet<TIdString> & sequenceIds,
                                     seqLength,
                                     reader,
                                     TTag(),
-                                    Value<TSeqString>::Type);
+                                    typename Value<TSeqString>::Type());
         if (res)
             return res;
 
@@ -457,7 +457,7 @@ int _readFastAQ(StringSet<TIdString> & sequenceIds,
     if (withQual)
         resize(qualities, sequenceCount + 1, Exact());
 
-    for (int i = 0; i < sequenceCount; ++i)
+    for (unsigned int i = 0; i < sequenceCount; ++i)
     {
         reserve(sequenceIds[i], metaLengths[i], Exact());
         reserve(sequences[i], seqLengths[i], Exact());
@@ -469,7 +469,7 @@ int _readFastAQ(StringSet<TIdString> & sequenceIds,
     // Second Pass: Actually read data.
     // ------------------------------------------------------------------------
     startSecondPass(reader);
-    for (int i = 0; i < sequenceCount; ++i)
+    for (unsigned int i = 0; i < sequenceCount; ++i)
     {
         res = _readMetaAndSequence(sequenceIds[i],
                                    sequences[i],

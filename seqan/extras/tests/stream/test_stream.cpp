@@ -49,6 +49,7 @@
 #include "test_stream_adapt_fstream.h"
 #include "test_stream_tokenize.h"
 #include "test_stream_lexical_cast.h"
+#include "test_stream_record_reader_fastaq.h"
 
 SEQAN_BEGIN_TESTSUITE(test_stream)
 {
@@ -183,9 +184,23 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     
     // TODO(holtgrew): Tests for record reader class hierarchy. It's enough to test on fstream as a representative of the stream concept and the and memory mapped string specialization. Each test should be run with one and two records, as representatives for one/many case. Note that the buffer sizes could/should be set small enough or data large enough such that the fist buffer actually runs full in the two records variant. We test the FASTA reader as a representative.
 
-    /*
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream_one_record);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream_two_records);
+    
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_mmap);
+
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_mmap);
+
+    
+/*    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream_two_records);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream_one_record);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream_two_records);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_mapped_one_record);

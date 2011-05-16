@@ -104,7 +104,7 @@ class RecordReader;
 ..signature:atEnd(recordReader)
 ..param.recordReader:The @Class.RecordReader@ to query the state of.
 ...type:Class.RecordReader
-..returns:This function returns $false$ if the file is at end or there was an error reading. It returns $false$ if there is more data to read. In parsing functions, you can use @Function.resultCode@ to get the result to return from your parsing function.
+..returns:This function returns $true$ if the file is at end or there was an error reading. It returns $false$ if there is more data to read. In parsing functions, you can use @Function.resultCode@ to get the result to return from your parsing function.
 ..see:Function.value
 ..see:Function.resultCode
 ..include:seqan/stream.h
