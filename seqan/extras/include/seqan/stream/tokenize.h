@@ -636,7 +636,7 @@ readNChars(TBuffer & buffer,
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
  */
-template <typename TBuffer, typename TStream, typename TPass>
+template <typename TStream, typename TPass>
 inline int
 skipNChars(RecordReader<TStream, TPass> & reader,
            unsigned const n)
@@ -953,6 +953,35 @@ _parseReadWord(TFile & file, TChar& c)
     return str;
 }*/
 
+/**
+.Function.readDigits
+..cat:Input/Output
+..summary:Read characters from stream as long as characters are digits
+..signature:readDigits(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString
+...type:nolink:or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:TokenizeResult
+..remarks:This function stops *behind* the last letter read.
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+..see:Function.isdigit
+ */
+template <typename TStream, typename TPass, typename TBuffer>
+inline int
+readDigits(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
+{
+    SEQAN_CHECKPOINT
+    return _readHelper(buffer,
+                       reader,
+                       Digit_(),
+                       false);
+}
 
 /**
 .Function.readAlphaNums
@@ -1023,6 +1052,35 @@ skipWhitespaces(RecordReader<TStream, TPass> & reader)
 {
     SEQAN_CHECKPOINT
     return _skipHelper(reader, Whitespace_(), false);
+}
+
+/**
+.Function.skipChar
+..cat:Input/Output
+..summary:Skip one character that must be equal to a given one for this function to succeed.
+..signature:skipChar(RecordReader<TStream, TPass> & recordReader, c)
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..param.c:The character to skip.
+...type:nolink:$char$
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:TokenizeResult
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+ */
+template <typename TStream, typename TPass>
+inline int
+skipChar(RecordReader<TStream, TPass> & reader, char const c)
+{
+    SEQAN_CHECKPOINT;
+    if (atEnd(reader))
+        return EOF_BEFORE_SUCCESS;
+    if (value(reader) != c)
+        return 1;
+    goNext(reader);
+    return 0;
 }
 
 /**
