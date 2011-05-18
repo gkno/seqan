@@ -155,6 +155,45 @@ class Fragment<TSize, ExactFragment<TSpec> > {
 
 };
 
+template<typename TSize, typename TSpec>
+inline bool
+operator==(Fragment<TSize, ExactFragment<TSpec> > const & left,
+           Fragment<TSize, ExactFragment<TSpec> > const & right)
+{
+    return (left.seqId1 == right.seqId1 &&
+            left.begin1 == right.begin1 &&
+            left.seqId2 == right.seqId2 &&
+            left.begin2 == right.begin2 &&
+            left.len == right.len);
+}
+
+template<typename TSize, typename TSpec>
+inline bool
+operator<(Fragment<TSize, ExactFragment<TSpec> > const & left,
+          Fragment<TSize, ExactFragment<TSpec> > const & right)
+{
+    if (left.seqId1 < right.seqId1)
+        return true;
+    if (left.seqId1 > right.seqId1)
+        return false;
+    if (left.begin1 < right.begin1)
+        return true;
+    if (left.begin1 > right.begin1)
+        return false;
+    if (left.seqId2 < right.seqId2)
+        return true;
+    if (left.seqId2 > right.seqId2)
+        return false;
+    if (left.begin2 < right.begin2)
+        return true;
+    if (left.begin2 > right.begin2)
+        return false;
+    if (left.len < right.len)
+        return true;
+    // if (left.len > right.len)
+    //     return false;
+    return false;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Exact Fragment that is a forward or reverse match
@@ -193,6 +232,50 @@ class Fragment<TSize, ExactReversableFragment<TSpec> > {
 	 }
 };
 
+template<typename TSize, typename TSpec>
+inline bool
+operator==(Fragment<TSize, ExactReversableFragment<TSpec> > const & left,
+           Fragment<TSize, ExactReversableFragment<TSpec> > const & right)
+{
+    return (left.seqId1 == right.seqId1 &&
+            left.begin1 == right.begin1 &&
+            left.seqId2 == right.seqId2 &&
+            left.begin2 == right.begin2 &&
+            left.len == right.len &&
+            left.reversed == right.reversed);
+}
+
+template<typename TSize, typename TSpec>
+inline bool
+operator<(Fragment<TSize, ExactReversableFragment<TSpec> > const & left,
+          Fragment<TSize, ExactReversableFragment<TSpec> > const & right)
+{
+    if (left.seqId1 < right.seqId1)
+        return true;
+    if (left.seqId1 > right.seqId1)
+        return false;
+    if (left.begin1 < right.begin1)
+        return true;
+    if (left.begin1 > right.begin1)
+        return false;
+    if (left.seqId2 < right.seqId2)
+        return true;
+    if (left.seqId2 > right.seqId2)
+        return false;
+    if (left.begin2 < right.begin2)
+        return true;
+    if (left.begin2 > right.begin2)
+        return false;
+    if (left.len < right.len)
+        return true;
+    if (left.len > right.len)
+        return false;
+    if (left.reversed < right.reversed)
+        return true;
+    // if (left.reversed > right.reversed)
+    //     return false;
+    return false;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
