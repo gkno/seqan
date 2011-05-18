@@ -83,14 +83,14 @@ SEQAN_CHECKPOINT
 //given seq and segment, get the sequenceId (seq_i) and its begin and end
 //if seq = 0 get first sequence (that takes part in the segment match)
 //if seq = 1 get second sequence
-template<typename TAliSource,typename TAliSpec, typename TId, typename TValue>
+template<typename TAliSource,typename TAliSpec, typename TId, typename TPosition, typename TId2>
 void
 _getSeqBeginAndEnd(Align<TAliSource,TAliSpec> & segment,
 				  std::map<const void * ,int> & seq_map, 
 				  TId & seq_i_id, 
-				  TValue & begin_i, 
-				  TValue & end_i,
-				  TValue seq)
+				  TPosition & begin_i, 
+				  TPosition & end_i,
+				  TId2 seq)
 {
 	seq_i_id = seq_map[getObjectId(source(row(segment,seq)))];
 	begin_i = clippedBeginPosition(row(segment,seq));
