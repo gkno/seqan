@@ -67,14 +67,14 @@ SEQAN_CHECKPOINT
 //given seq and segment, get the sequenceId (seq_i) and its begin and end
 //if seq = 0 get first sequence (that takes part in the segment match)
 //if seq = 1 get second sequence
-template<typename TFragSize, typename TFragSpec, typename TId, typename TValue>
+template<typename TFragSize, typename TFragSpec, typename TId, typename TPosition, typename TId2>
 void
 _getSeqBeginAndEnd(Fragment<TFragSize,TFragSpec> & segment,
 				  std::map<const void * ,int> &, 
 				  TId & seq_i_id, 
-				  TValue & begin_i, 
-				  TValue & end_i,
-				  TValue seq)
+				  TPosition & begin_i, 
+				  TPosition & end_i,
+				  TId2 seq)
 {
 SEQAN_CHECKPOINT
 	seq_i_id = sequenceId(segment,seq);

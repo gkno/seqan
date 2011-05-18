@@ -80,12 +80,12 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////////////////////
 //step 2 of constructing the refined alignment graph: add all edges    
 //version for inexact refinement
-template<typename TAliGraph, typename TVertexDescriptor,typename TValue>
-TValue  
+template<typename TAliGraph, typename TVertexDescriptor, typename TId, typename TPosition>
+TPosition
 _getClosestRefinedNeighbor(TAliGraph & ali_g,
 						   TVertexDescriptor & vd,
-						   TValue /*seq*/,
-						   TValue pos)
+						   TId /*seq*/,
+						   TPosition pos)
 {
 SEQAN_CHECKPOINT
 	if(pos-fragmentBegin(ali_g,vd) < fragmentBegin(ali_g,vd)+fragmentLength(ali_g,vd)-pos)
@@ -96,13 +96,13 @@ SEQAN_CHECKPOINT
 
 
 
-template<typename TAliGraph,typename TValue>
+template<typename TAliGraph, typename TId, typename TPosition>
 void
 _getCutEndPos(TAliGraph & ali_g, 
 			  typename VertexDescriptor<TAliGraph>::Type & end_knot,
-			  TValue seq,
-			  TValue end_pos,
-			  TValue & cut_end_pos)
+			  TId seq,
+			  TPosition end_pos,
+			  TPosition & cut_end_pos)
 {
 SEQAN_CHECKPOINT
 	end_knot = findVertex(ali_g,seq,end_pos-1);//end_pos1 is the first position of the next node
@@ -118,13 +118,13 @@ SEQAN_CHECKPOINT
 }
 
 
-template<typename TAliGraph,typename TValue>
+template<typename TAliGraph, typename TId, typename TPosition>
 void
 _getCutBeginPos(TAliGraph & ali_g, 
 			  typename VertexDescriptor<TAliGraph>::Type & act_knot,
-			  TValue seq,
-			  TValue act_pos,
-			  TValue & cut_act_pos)
+			  TId seq,
+			  TPosition act_pos,
+			  TPosition & cut_act_pos)
 {
 SEQAN_CHECKPOINT
 	
@@ -155,7 +155,8 @@ _makeRefinedGraphEdges(TAlignmentString & alis,
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlign;
-	typedef typename Value<TAlign>::Type TValue;
+	typedef typename Position<TAlign>::Type TPosition;
+	typedef typename Id<TAlign>::Type TId;
 	typedef typename Iterator<TAlignmentString, Rooted>::Type TAliIterator;
 	typedef typename VertexDescriptor<TAliGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TAliGraph>::Type TEdgeDescriptor;
@@ -167,38 +168,40 @@ SEQAN_CHECKPOINT
 	while(ali_it != ali_end)
 	{
 		//get first sequence that takes part in the alignment + boundaries of the ali
-		TValue seq1,begin_pos1,end_pos1;
-		_getSeqBeginAndEnd(*ali_it,seq_map,seq1,begin_pos1,end_pos1,(TValue)0);
+		TId seq1;
+        TPosition begin_pos1,end_pos1;
+		_getSeqBeginAndEnd(*ali_it,seq_map,seq1,begin_pos1,end_pos1,(TId)0);
 		//get the last node that is within the current ali
 		TVertexDescriptor end_knot1;
-		TValue cut_end_pos1;
+		TPosition cut_end_pos1;
 		_getCutEndPos(ali_g,end_knot1,seq1,end_pos1,cut_end_pos1);
 	
 		//get the node that represents the current interval (begin_pos until next_cut_pos or end_pos)
 		TVertexDescriptor act_knot1;
-		TValue cut_act_pos1,act_pos1;
+		TPosition cut_act_pos1,act_pos1;
 		act_pos1 = begin_pos1;
 		_getCutBeginPos(ali_g,act_knot1,seq1,act_pos1,cut_act_pos1);
-		TValue act_end_pos1 = cut_act_pos1 + fragmentLength(ali_g,act_knot1);
+		TPosition act_end_pos1 = cut_act_pos1 + fragmentLength(ali_g,act_knot1);
 		//walk through cuts on the first sequence
 //		while (act_end_pos1 <= cut_end_pos1)
 		while (true)
 		{
 			//get other sequence and projected position
-			TValue seq2,act_pos2;
+			TId seq2;
+            TPosition act_pos2;
 			_getOtherSequenceAndProject(*ali_it,0,seq_map,seq1,act_pos1,seq2,act_pos2);
 		
 			//get node that corresponds to that position
 			TVertexDescriptor act_knot2;
-			TValue cut_act_pos2;
+			TPosition cut_act_pos2;
 			_getCutBeginPos(ali_g,act_knot2,seq2,act_pos2,cut_act_pos2);
 			//corresponding end on seq2 (there might be more than one node on seq2 that corresponds
 			//to the same interval (=node) on seq1)
-			TValue act_end_pos2;
+			TPosition act_end_pos2;
 			_getOtherSequenceAndProject(*ali_it,0,seq_map,seq1,act_end_pos1-1,seq2,act_end_pos2);
 			++act_end_pos2;
 			TVertexDescriptor act_end_knot2;
-			TValue cut_act_end_pos2;
+			TPosition cut_act_end_pos2;
 			_getCutEndPos(ali_g,act_end_knot2,seq2,act_end_pos2,cut_act_end_pos2);
 			
 			if(cut_act_pos2 == cut_act_end_pos2)
