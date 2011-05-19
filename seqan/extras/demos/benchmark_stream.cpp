@@ -36,6 +36,8 @@
 // printed, and thus this demo can be used as a benchmark tool.
 // ==========================================================================
 
+// #define SEQAN_NEW_IO
+
 #include <cstdio>
 #include <fstream>
 #if SEQAN_HAS_ZLIB
@@ -55,7 +57,7 @@ using namespace seqan;
 
 // Setting buffer size to 4MB, such that the overhead for jumping buffers and
 // such only occurs every 4M chars.
-const int BUFFER_SIZE = 1024 * 1024 * 4;
+const unsigned int BUFFER_SIZE = 1024 * 1024 * 4;
 
 struct Options
 {
@@ -94,14 +96,14 @@ int readFileMMapDocument(char const * filename, Options const & /*options*/, TSp
     std::cerr << "\tmmap" << std::flush;
     // fprintf(stderr, "\t%f\n", after - before);
     typedef File<Async<> > TFile;
-    typedef String<char, MMap<ExternalConfig<TFile> > > TMMapString;
-    String<char, MMap<ExternalConfig<TFile> > > myString;
+    typedef String<char, MMap<> > /*ExternalConfig<TFile> > > */TMMapString;
+    TMMapString myString;
     if (!open(myString, filename, OPEN_RDONLY)) {
         std::cerr << std::endl << "Could not open mmap file for reading." << std::endl;
         return 1;
     }
     RecordReader<TMMapString, DoublePass<Mapped> > reader(myString, BUFFER_SIZE);
-    int res = read(sequenceIds, sequences, reader, Fasta());
+    int res = read2(sequenceIds, sequences, reader, Fasta());
     SEQAN_ASSERT_EQ(length(sequenceIds), length(sequences));
 
     TSequenceIdsIter itId = begin(sequenceIds);
@@ -135,10 +137,12 @@ int readFastaFile(StringSet<CharString> & sequenceIds,
     (void)sequences;
 
     RecordReader<TFile, TPass> reader(file, BUFFER_SIZE);
-    Pair<CharString, Dna5String> record;
+//     Pair<CharString, Dna5String> record;
+    CharString meta;
+    Dna5String seq;
     // std::cerr << "READING FILE" << std::endl;
     while (!atEnd(reader)) {
-        int res = readRecord(record, reader, Fasta());
+        int res = readRecord(meta, seq, reader, Fasta());
         if (res != 0) {
             std::cerr << std::endl << "Error reading a record" << std::endl;
             return res;
@@ -154,6 +158,7 @@ int readFileMMap(char const * filename, Options const & /*options*/, TPass const
 {
     StringSet<CharString> sequenceIds;
     StringSet<Dna5String> sequences;
+//     StringSet<CharString> sequences;
 
     double before = sysTime();
     std::cerr << "READING\tRECORD\t" << std::flush;

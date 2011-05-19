@@ -94,7 +94,7 @@ void FASTA_TEST_BATCH(TRecordReader & reader)
     StringSet<CharString> metas;
     StringSet<CharString> seqs;
 
-    int res = read(metas, seqs, reader, Fasta());
+    int res = read2(metas, seqs, reader, Fasta());
     SEQAN_ASSERT_EQ(res, 0);
     SEQAN_ASSERT_EQ(metas[0], " sequenceID_with special chars an irregular linebreaks");
     SEQAN_ASSERT_EQ(seqs[0], "AAAACGTGCGGTTGGGCAAAAAACTTTCTTATATTCTATCTATCTTGTAGCTAGCTGTAGCTAGCTAGCATCGTAGCCCCAGAGTGTCATGCATGTCGAACGTGTTTTTGGGGCGGTTATATATATATATATT");
@@ -275,7 +275,7 @@ void FASTQ_TEST_BATCH(TRecordReader & reader)
     StringSet<CharString> quals;
 
     // qualities are not asked for, but should be skipped internally
-    int res = read(metas, seqs, quals, reader, Fastq());
+    int res = read2(metas, seqs, quals, reader, Fastq());
     SEQAN_ASSERT_EQ(res, 0);
     SEQAN_ASSERT_EQ(metas[0], "SEQ_ID");
     SEQAN_ASSERT_EQ(seqs[0],

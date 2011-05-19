@@ -52,6 +52,22 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/**
+.Tag.File Format.tag.Fasta:
+    FASTA file format for sequences.
+..include:seqan/file.h
+*/
+struct TagFasta_;
+typedef Tag<TagFasta_> const Fasta;
+
+/**
+.Tag.File Format.tag.Fastq:
+    FASTQ file format for sequences.
+..include:seqan/file.h
+*/
+struct TagFastq_;
+typedef Tag<TagFastq_> const Fastq;
+
 
 // ============================================================================
 // Metafunctions
@@ -401,15 +417,15 @@ readRecord(TIdString & meta,
 // ----------------------------------------------------------------------------
 
 // Reads a whole FASTA/FASTQ file into string sets, optimizing memory usage.
-template <typename TIdString,
-          typename TSeqString,
-          typename TQualString,
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec,
           typename TFile,
           typename TSpec,
           typename TTag>
-int _readFastAQ(StringSet<TIdString> & sequenceIds,
-                StringSet<TSeqString> & sequences,
-                StringSet<TQualString> & qualities,
+int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
+                StringSet<TSeqString, TSeqSpec> & sequences,
+                StringSet<TQualString, TQualSpec> & qualities,
                 RecordReader<TFile, DoublePass<TSpec> > & reader,
                 bool withQual,
                 TTag const & /*tag*/)
@@ -500,12 +516,12 @@ int _readFastAQ(StringSet<TIdString> & sequenceIds,
 }
 
 // FASTA
-template <typename TIdString,
-          typename TSeqString,
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
           typename TFile,
           typename TSpec>
-int read(StringSet<TIdString> & sequenceIds,
-         StringSet<TSeqString> & sequences,
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
          RecordReader<TFile, DoublePass<TSpec> > & reader,
          Fasta const & /*tag*/)
 {
@@ -514,12 +530,12 @@ int read(StringSet<TIdString> & sequenceIds,
 }
 
 // FASTQ, if we don't want the qualities
-template <typename TIdString,
-          typename TSeqString,
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
           typename TFile,
           typename TSpec>
-int read(StringSet<TIdString> & sequenceIds,
-         StringSet<TSeqString> & sequences,
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
          RecordReader<TFile, DoublePass<TSpec> > & reader,
          Fastq const & /*tag*/)
 {
@@ -528,14 +544,14 @@ int read(StringSet<TIdString> & sequenceIds,
 }
 
 // FASTQ and we want Qualities
-template <typename TIdString,
-          typename TSeqString,
-          typename TQualString,
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec,
           typename TFile,
           typename TSpec>
-int read(StringSet<TIdString> & sequenceIds,
-         StringSet<TSeqString> & sequences,
-         StringSet<TQualString> & qualities,
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TQualString, TQualSpec> & qualities,
          RecordReader<TFile, DoublePass<TSpec> > & reader,
          Fastq const & /*tag*/)
 {

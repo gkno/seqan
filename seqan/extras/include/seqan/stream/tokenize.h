@@ -192,6 +192,14 @@ _charCompare(int const c, Tag<Dna5_> const & /* tag*/)
     return false;
 }
 
+template <typename TSpec>
+inline int
+_charCompare(int const c,
+             Tag<SimpleType<unsigned char, TSpec> > const & /* tag */ )
+{
+    return _charCompare(c, Tag<TSpec>());
+}
+
 //TODO(h4nn3s): add for AminoAcid and Rna-tags
 
 

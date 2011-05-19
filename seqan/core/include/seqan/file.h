@@ -48,7 +48,7 @@
 #include <seqan/modifier.h>
 
 #ifdef SEQAN_NEW_IO
-#include <ctype>
+#include <cctype>
 #endif
 
 
@@ -71,8 +71,8 @@
 //____________________________________________________________________________
 // files
 
-#ifndef SEQAN_NEW_IO
 #include <seqan/file/file_base.h>
+#ifndef SEQAN_NEW_IO
 #include <seqan/file/file_cstyle.h>
 #endif
 
