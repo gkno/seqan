@@ -84,7 +84,7 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
 
     //SEQAN_CALL_TEST(GraphMatchRefine);
     SEQAN_CALL_TEST(RefineAlign);
-
+    SEQAN_CALL_TEST(RefineInexactFragment);
 
     // Restore std::cout
 //      std::cout.rdbuf(strm_puffer);

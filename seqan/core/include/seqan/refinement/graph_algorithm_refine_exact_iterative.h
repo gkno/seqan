@@ -43,13 +43,13 @@ struct TagExactRefinement_;
 typedef Tag<TagExactRefinement_> const ExactRefinement;
 
 //exact method, every cut is made (unless it already exists)
-template<typename TValue>
+template<typename TValue, typename TValue2, typename TSize>
 inline bool
 _cutIsValid(String<std::set<TValue> > & all_nodes,
-		TValue seq_i_pos,
-		TValue,
+		TValue2 seq_i_pos,
+		TSize,
 		typename std::set<TValue>::iterator iter,
-		TValue,
+		TSize,
 		Tag<TagExactRefinement_> const)
 {
 SEQAN_CHECKPOINT
@@ -292,7 +292,7 @@ SEQAN_CHECKPOINT
 
 //step 2 of constructing the refined alignment graph: add all edges    
 //version for exact refinement
-template<typename TAlignmentString,typename TStringSet,typename TSeqMap, typename TPropertyMap,typename TScore,typename TAliGraph>
+template<typename TAlignmentString,typename TStringSet,typename TSeqMap, typename TPropertyMap,typename TScore,typename TAliGraph > 
 void
 _makeRefinedGraphEdges(TAlignmentString & alis,
 					   TPropertyMap & pm,
@@ -559,7 +559,10 @@ SEQAN_CHECKPOINT
 			{
 				TValue node_i = *queueIt;
 				TSetIterator iter = all_nodes[seq_i_pos].find(node_i);		
-				if(iter == all_nodes[seq_i_pos].end())
+		//		TSetIterator qiter = all_node_queues[seq_i_pos].find(node_i);		
+                if(_cutIsValid(all_nodes,seq_i_pos,node_i,iter,min_fragment_len,tag))
+                   //&& _cutIsValid(all_node_queues,seq_i_pos,node_i,qiter,min_fragment_len,tag))
+//				if(iter == all_nodes[seq_i_pos].end())
 				{
 					TValue seq_i_id = positionToId(seq, seq_i_pos);
 					all_nodes[seq_i_pos].insert(node_i);
@@ -579,11 +582,14 @@ SEQAN_CHECKPOINT
 						TValue seq_j_pos = idToPosition(seq,seq_j_id);
 						_updateCutPosition(alis[match_id],node_j);
 
-						typename std::set<TValue>::iterator iter_j;
+						typename std::set<TValue>::iterator iter_j, qiter_j;
 						iter_j = all_nodes[seq_j_pos].find(node_j);
+						qiter_j = all_node_queues[seq_j_pos].find(node_j);
 						
 						//if node does not exist yet ---> insert and continue cutting
-						if(iter_j == all_nodes[seq_j_pos].end())
+                        if(_cutIsValid(all_nodes,seq_j_pos,node_j,iter_j,min_fragment_len,tag)
+                            && _cutIsValid(all_node_queues,seq_j_pos,node_j,qiter_j,min_fragment_len,tag))
+                        //if(iter_j == all_nodes[seq_j_pos].end())   
 						{
 							all_node_queues[seq_j_pos].insert(node_j);
 						}

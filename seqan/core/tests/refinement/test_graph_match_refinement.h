@@ -33,8 +33,9 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_MATCH_REFINEMENT_H
 #define SEQAN_HEADER_TEST_GRAPH_MATCH_REFINEMENT_H
 
+#include <seqan/sequence.h>
 #include <seqan/align.h>
-#include <seqan/basic.h>
+#include <seqan/refinement.h>
 
 using namespace std;
 using namespace seqan;
@@ -69,8 +70,8 @@ SEQAN_DEFINE_TEST(RefineMatchesSelfEdges)
 	TAliGraph ali_graph(seq_set);
 	matchRefinement(matches,seq_set,ali_graph);
 
-	SEQAN_ASSERT(numVertices(ali_graph) == 12);
-	SEQAN_ASSERT(numEdges(ali_graph) == 7);
+  	SEQAN_ASSERT_EQ(numVertices(ali_graph), (unsigned)12);
+	SEQAN_ASSERT_EQ(numEdges(ali_graph), (unsigned)7);
 
 	// with within-sequence-match: 24 vertices, 20 edges
 	appendValue(matches,TFragment(1,0,1,10,4));
@@ -78,8 +79,8 @@ SEQAN_DEFINE_TEST(RefineMatchesSelfEdges)
 	TAliGraph ali_graph2(seq_set);
 	matchRefinement(matches,seq_set,ali_graph2);
 
-	SEQAN_ASSERT(numVertices(ali_graph2) == 24);
-	SEQAN_ASSERT(numEdges(ali_graph2) == 20);
+    SEQAN_ASSERT_EQ(numVertices(ali_graph2), (unsigned) 24);
+	SEQAN_ASSERT_EQ(numEdges(ali_graph2),  (unsigned)20);
 
 //	std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
 //	std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
@@ -90,6 +91,50 @@ SEQAN_DEFINE_TEST(RefineMatchesSelfEdges)
 //	std::cout << ali_graph2 << "\n\n";
 
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// test the refinement heuristic
+SEQAN_DEFINE_TEST(RefineInexactFragment)
+{
+	typedef String<char> TString;
+	typedef StringSet<TString > TStringSet;
+	typedef StringSet<TString, Dependent<> > TDepStringSet;
+	typedef Graph<Alignment<TDepStringSet> > TAliGraph;
+	typedef Fragment<> TFragment;
+	typedef String<TFragment> TFragString;
+
+
+	TStringSet seq_set;
+	appendValue(seq_set,String<char>("aaaaabbbbbbccccccaaaaaa"));
+	appendValue(seq_set,String<char>("aaaabbbbbbaaaaaa"));
+	
+
+	TFragString matches;
+	appendValue(matches,TFragment(0,0,1,0,4));
+	appendValue(matches,TFragment(0,0,1,11,5));
+	appendValue(matches,TFragment(0,17,1,10,6));
+	appendValue(matches,TFragment(0,5,1,4,6));
+
+	TAliGraph ali_graph(seq_set);
+	matchRefinement(matches,seq_set,ali_graph,2); // min_frag_len = 2
+
+//    std::cout << ali_graph << std::endl;
+
+	SEQAN_ASSERT_EQ(numVertices(ali_graph), (unsigned) 7);
+	SEQAN_ASSERT_EQ(numEdges(ali_graph), (unsigned) 4);
+
+	TAliGraph ali_graph2(seq_set);
+	matchRefinement(matches,seq_set,ali_graph2,5); // min_frag_len = 5
+
+//    std::cout << ali_graph2 << std::endl;
+
+    SEQAN_ASSERT_EQ(numVertices(ali_graph2), (unsigned)6);
+	SEQAN_ASSERT_EQ(numEdges(ali_graph2),  (unsigned)3); // the first fragment (4bp long) disappears
+
+
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////////77
 
@@ -549,7 +594,9 @@ SEQAN_DEFINE_TEST(RefineAlign)
 }
 
 
-//produce pairwise alignments (Graph<Alignment>)
+
+
+////produce pairwise alignments (Graph<Alignment>)
 //template<typename TAlign, typename TStringSet, typename TScore>
 //void 
 //getGraphAlignments(String<TAlign> & alis, TStringSet & seq, TScore & score_type, int & numAlignments, int cutoff)
@@ -566,13 +613,13 @@ SEQAN_DEFINE_TEST(RefineAlign)
 //			assignValueById(str, seq[i],positionToId(seq, i));
 //			assignValueById(str, seq[j],positionToId(seq, j));
 //			TAlign ali_g(str);
-//			Value<TScore>::Type score = localAlignment(ali_g, score_type, SmithWatermanClump());
+//			typename Value<TScore>::Type score = localAlignment(ali_g, score_type, WatermanEggert());
 //			if(score==0)
 //				continue;
 // 			int k = 1;
 //			while(k<numAlignments)
 //			{
-//				score = localAlignment(ali_g, score_type, SmithWatermanClump());
+//				score = localAlignment(ali_g, score_type, WatermanEggert());
 //				if(score==0) k = numAlignments;
 //				else ++k;
 //			}
@@ -587,8 +634,9 @@ SEQAN_DEFINE_TEST(RefineAlign)
 //
 //
 //}
-//
-//
+
+
+
 //
 //
 //void 
