@@ -43,13 +43,13 @@ struct TagExactRefinement_;
 typedef Tag<TagExactRefinement_> const ExactRefinement;
 
 //exact method, every cut is made (unless it already exists)
-template<typename TValue>
+template<typename TValue, typename TValue2, typename TSize>
 inline bool
 _cutIsValid(String<std::set<TValue> > & all_nodes,
-		TValue seq_i_pos,
-		TValue,
+		TValue2 seq_i_pos,
+		TSize,
 		typename std::set<TValue>::iterator iter,
-		TValue,
+		TSize,
 		Tag<TagExactRefinement_> const)
 {
 SEQAN_CHECKPOINT
