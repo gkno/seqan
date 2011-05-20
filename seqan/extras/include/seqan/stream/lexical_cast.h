@@ -103,6 +103,13 @@ lexicalCast(String<TValue, TSpec> const & source)
     return ret;
 }
 
+template < typename TTarget, typename TValue, typename TSpec>
+inline TTarget
+lexicalCast(String<TValue, TSpec> & source)
+{
+    return lexicalCast<TTarget>(const_cast<String<TValue, TSpec> const &>(source));
+}
+
 /**
 .Function.lexicalCast2
 ..cat:Input/Output
