@@ -218,7 +218,7 @@ _readHelper(TBuffer & buffer,
             bool const desiredOutcomeOfComparison) 
 /*   desired behaviour of loop -> "readUntil()" or "readwhile()"  */
 {
-    clear(buffer);
+
 //     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
     typedef char TChar; //TODO fix this
 
@@ -259,7 +259,7 @@ _readHelper(TBuffer & buffer,
             Tag<TTagSpec2> const & skipTag,
             bool const desiredOutcomeOfComparison)
 {
-    clear(buffer);
+
 //     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
     typedef char TChar; //TODO fix this
 
@@ -566,7 +566,7 @@ readUntilChar(TBuffer & buffer,
 //     typedef typename Value< typename RecordReader<TStream,
 //                                                   TPass>::_buffer>::Type TChar;
     typedef char TChar; //TODO fix this
-    clear(buffer);
+
 
     while (!atEnd(reader))
     {
@@ -609,7 +609,7 @@ readNChars(TBuffer & buffer,
 {
     SEQAN_CHECKPOINT
 
-    clear(buffer);
+
     reserve(buffer, n, Exact());
 
     for (unsigned i = 0; i < n; ++i)
@@ -657,7 +657,7 @@ _readNCharsIgnoringType(TBuffer & buffer,
 {
     SEQAN_CHECKPOINT
 
-    clear(buffer);
+
     reserve(buffer, n, Exact());
 
     for (unsigned i = 0; i < n; ++i)

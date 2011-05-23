@@ -61,7 +61,7 @@ Tetstetetstststetststetststetsstetetstetststetstdtetstestst    \r\n\
 etstetetstststetststetststV           tststetstdtetsteststetstedetstet\r\n\
 etstetetstststetststetststetsstetetstetststetstdtetsteststetstedetst|t\r\n\
 \n\v\n\r\nACGTACGTACGTACGATACGATCTnn\n\nACGT*";
-    
+
 
     file->write(STR, strlen(STR));
     file->seekg(0);
@@ -79,31 +79,32 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing_readUntil)
     std::fstream * file = createFile();
     RecordReader<std::fstream, SinglePass<void> > reader(*file);
 
-    
     CharString buf;
     SEQAN_ASSERT_EQ(readUntilWhitespace(buf,reader), 0);
     SEQAN_ASSERT_EQ(buf, "This");
     SEQAN_ASSERT_EQ(value(reader), ' ');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'f'), 0);
     SEQAN_ASSERT_EQ(buf, " is a string ....");
     SEQAN_ASSERT_EQ(value(reader), 'f');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilBlank(buf,reader), 0);
     SEQAN_ASSERT_EQ(buf, "foobar");
     SEQAN_ASSERT_EQ(value(reader), ' ');
 
     // check EOF-handling
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
     SEQAN_ASSERT_EQ(value(reader), '*');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilBlank(buf,reader), EOF_BEFORE_SUCCESS);
     SEQAN_ASSERT_EQ(buf, "*");
-    
+
     file->close();
     delete file;
-
-    
 }
 
 // readNChars
@@ -119,9 +120,11 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing_readNChars)
     SEQAN_ASSERT_EQ(buf, "This is a string");
 
     // check EOF-handling
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
     SEQAN_ASSERT_EQ(value(reader), '*');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readNChars(buf,reader, 3), EOF_BEFORE_SUCCESS);
     SEQAN_ASSERT_EQ(buf, "*");
 
@@ -144,20 +147,24 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing_readWhile)
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'S'), 0);
     SEQAN_ASSERT_EQ(value(reader), 'S');
 
-    
+    clear(buf);
     SEQAN_ASSERT_EQ(readLetters(buf,reader), 0);
     SEQAN_ASSERT_EQ(buf, "SJAUDOF");
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readAlphaNums(buf,reader), 0);
     SEQAN_ASSERT_EQ(buf, "78456kapLP345LPL");
 
 
     // check EOF-handling
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
     SEQAN_ASSERT_EQ(value(reader), '*');
+    clear(buf);
     SEQAN_ASSERT_EQ(readNChars(buf,reader, 1), 0);
     SEQAN_ASSERT_EQ(buf, "*");
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readLetters(buf,reader), EOF_BEFORE_SUCCESS);
     SEQAN_ASSERT_EQ(buf, "");
 
@@ -180,24 +187,30 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing_readIgnoring)
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'A'), 0);
     SEQAN_ASSERT_EQ(value(reader), 'A');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf2, reader), 0);
     SEQAN_ASSERT_EQ(buf2, "AAAACCCGGGTTTTCG");
     SEQAN_ASSERT_EQ(value(reader), '>');
 
-    //double check whitespace implementation 
+    //double check whitespace implementation
+    clear(buf2);
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '|'), 0);
     SEQAN_ASSERT_EQ(value(reader), '|');
+    clear(buf);
     SEQAN_ASSERT_EQ(readNChars(buf,reader, 1), 0);
     SEQAN_ASSERT_EQ(buf, "|");
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf2, reader), 0);
     SEQAN_ASSERT_EQ(buf2, "TACGTACGTACGTACGATACGATCTNNACGT");
     SEQAN_ASSERT_EQ(value(reader), '*');
-    
+
     // check EOF-handling
+    clear(buf2);
     SEQAN_ASSERT_EQ(readNChars(buf,reader, 1), 0);
     SEQAN_ASSERT_EQ(buf, "*");
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readDna5IgnoringWhitespaces(buf, reader), EOF_BEFORE_SUCCESS);
     SEQAN_ASSERT_EQ(buf, "");
 
@@ -219,22 +232,28 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing_readLine)
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, 'A'), 0);
     SEQAN_ASSERT_EQ(value(reader), 'A');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readLine(buf, reader), 0);
     SEQAN_ASSERT_EQ(buf, "AAAACCCGGGTTT");
     SEQAN_ASSERT_EQ(value(reader), ' ');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readLine(buf, reader), 0);
     SEQAN_ASSERT_EQ(value(reader), '\a');
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '1'), 0);
-    
+
+    clear(buf);
     SEQAN_ASSERT_EQ(readLine(buf, reader), 0);
     SEQAN_ASSERT_EQ(buf, "123gogogo ");
     SEQAN_ASSERT_EQ(value(reader), 'T');
-    
+
     // check EOF-handling
+    clear(buf);
     SEQAN_ASSERT_EQ(readUntilChar(buf,reader, '*'), 0);
 
+    clear(buf);
     SEQAN_ASSERT_EQ(readLine(buf, reader), EOF_BEFORE_SUCCESS);
     SEQAN_ASSERT_EQ(buf, "*");
 
