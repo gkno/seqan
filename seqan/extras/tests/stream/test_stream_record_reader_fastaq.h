@@ -71,7 +71,7 @@ void FASTA_TEST(TRecordReader & reader)
     using namespace seqan;
 
     CharString meta;
-    CharString seq;
+    Dna5String seq;
 
     int res = readRecord(meta, seq, reader, Fasta());
     SEQAN_ASSERT_EQ(res, 0);
@@ -92,7 +92,7 @@ void FASTA_TEST_BATCH(TRecordReader & reader)
     using namespace seqan;
 
     StringSet<CharString> metas;
-    StringSet<CharString> seqs;
+    StringSet<Dna5String> seqs;
 
     int res = read2(metas, seqs, reader, Fasta());
     SEQAN_ASSERT_EQ(res, 0);
@@ -244,7 +244,7 @@ void FASTQ_TEST(TRecordReader & reader)
     using namespace seqan;
 
     CharString meta;
-    CharString seq;
+    DnaString seq;
     CharString qual;
 
     // qualities are not asked for, but should be skipped internally
@@ -271,7 +271,7 @@ void FASTQ_TEST_BATCH(TRecordReader & reader)
     using namespace seqan;
 
     StringSet<CharString> metas;
-    StringSet<CharString> seqs;
+    StringSet<DnaString> seqs;
     StringSet<CharString> quals;
 
     // qualities are not asked for, but should be skipped internally

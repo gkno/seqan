@@ -96,7 +96,7 @@ int readFileMMapDocument(char const * filename, Options const & /*options*/, TSp
     std::cerr << "\tmmap" << std::flush;
     // fprintf(stderr, "\t%f\n", after - before);
     typedef File<Async<> > TFile;
-    typedef String<char, MMap<> > /*ExternalConfig<TFile> > > */TMMapString;
+    typedef String<char, MMap< ExternalConfig<TFile> > > TMMapString;
     TMMapString myString;
     if (!open(myString, filename, OPEN_RDONLY)) {
         std::cerr << std::endl << "Could not open mmap file for reading." << std::endl;

@@ -416,6 +416,64 @@ readRecord(TIdString & meta,
 // Function read();  Double-Pass.
 // ----------------------------------------------------------------------------
 
+// generic allocation, e.g. allocator string
+template <typename TIdString,
+          typename TSeqString,
+          typename TQualString>
+void _readFastAQAllocate(
+                StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
+                StringSet<TSeqString, Owner<ConcatDirect<> > > & sequences,
+                StringSet<TQualString, Owner<ConcatDirect<> > > & qualities,
+                String<unsigned> const & metaLengths,
+                String<unsigned> const & seqLengths,
+                bool const withQual)
+{
+    unsigned int len = length(metaLengths);
+    resize(sequenceIds, len + 1, Exact());
+    resize(sequences, len + 1, Exact());
+    if (withQual)
+        resize(qualities.limits, len + 1, Exact());
+
+    unsigned long metaLengthsSum = 0;
+    unsigned long seqLengthsSum = 0;
+
+    for (unsigned int i = 0; i < len; ++i)
+    {
+        metaLengthsSum += metaLengths[i];
+        seqLengthsSum += seqLengths[i];
+    }
+    reserve(sequenceIds.concat, metaLengthsSum + 1, Exact());
+    reserve(sequences.concat, seqLengthsSum + 1, Exact());
+    if (withQual)
+        reserve(qualities.concat, seqLengthsSum + 1, Exact());
+}
+
+// generic allocation, e.g. allocator string
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec>
+void _readFastAQAllocate(StringSet<TIdString, TIdSpec> & sequenceIds,
+                StringSet<TSeqString, TSeqSpec> & sequences,
+                StringSet<TQualString, TQualSpec> & qualities,
+                String<unsigned> const & metaLengths,
+                String<unsigned> const & seqLengths,
+                bool const withQual)
+{
+    unsigned int len = length(metaLengths);
+    resize(sequenceIds, len + 1, Exact());
+    resize(sequences, len + 1, Exact());
+    if (withQual)
+        resize(qualities, len + 1, Exact());
+
+    for (unsigned int i = 0; i < len; ++i)
+    {
+        reserve(sequenceIds[i], metaLengths[i], Exact());
+        reserve(sequences[i], seqLengths[i], Exact());
+        if (withQual)
+            reserve(qualities[i], seqLengths[i], Exact());
+    }
+}
+
 // Reads a whole FASTA/FASTQ file into string sets, optimizing memory usage.
 template <typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec,
@@ -427,7 +485,7 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
                 StringSet<TSeqString, TSeqSpec> & sequences,
                 StringSet<TQualString, TQualSpec> & qualities,
                 RecordReader<TFile, DoublePass<TSpec> > & reader,
-                bool withQual,
+                bool const withQual,
                 TTag const & /*tag*/)
 {
     int res = 0;
@@ -468,18 +526,8 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
     if (withQual)
         clear(qualities);
 
-    resize(sequenceIds, sequenceCount + 1, Exact());
-    resize(sequences, sequenceCount + 1, Exact());
-    if (withQual)
-        resize(qualities, sequenceCount + 1, Exact());
-
-    for (unsigned int i = 0; i < sequenceCount; ++i)
-    {
-        reserve(sequenceIds[i], metaLengths[i], Exact());
-        reserve(sequences[i], seqLengths[i], Exact());
-        if (withQual)
-            reserve(qualities[i], seqLengths[i], Exact());
-    }
+    _readFastAQAllocate(sequences, sequenceIds, qualities,
+                        metaLengths, seqLengths, withQual);
 
     // ------------------------------------------------------------------------
     // Second Pass: Actually read data.
@@ -525,7 +573,7 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
          RecordReader<TFile, DoublePass<TSpec> > & reader,
          Fasta const & /*tag*/)
 {
-    StringSet<CharString> qualities;
+    StringSet<CharString, TSeqSpec> qualities;
     return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fasta());
 }
 
@@ -539,7 +587,7 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
          RecordReader<TFile, DoublePass<TSpec> > & reader,
          Fastq const & /*tag*/)
 {
-    StringSet<CharString> qualities;
+    StringSet<CharString, TSeqSpec> qualities;
     return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fastq());
 }
 
