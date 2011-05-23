@@ -88,22 +88,38 @@ Important Sanger/454 Options
                            --read-length-uniform), this is the standard
                            deviation.
 
-Examples
---------
+Example: Illumina Mate Pair Reads 
+---------------------------------
 
 Simulate 100'000 Illumina mate-pairs with qualities from drosophila
 genome without qualities to file myreads_1.fasta and myreads_2.fasta.
 
-    mason illumina -n 100000 -mp -o myreads.fasta drosophila.genom
+    mason illumina -n 100000 -mp -o myreads.fasta drosophila.genome
+
+Example: 454 Reads 
+------------------
 
 Simulate 1'000 454 reads from diploid data with qualities to
 myreads.fastq:
 
-    mason 454 -n 1000 -sq -hn 2 -o myreads.fastq drosophila.genom
+    mason 454 -n 1000 -sq -hn 2 -o myreads.fastq drosophila.genome
+
+Example: Illumina Reads With Error Profiles
+-------------------------------------------
 
 Simulate 1'000 Illumina reads with qualities and error profile file
-from errors.txt, scaled by 0.5 to myreads.fastq:
+from SRR049254.1.1M.error_dist, scaled by 0.5 to myreads.fastq:
 
-    mason illumina -n 1000 -pmmf errors.txt -pmms 0.5 \
-        -sq -o myreads.fastq drosophila.genom
+    mason illumina -n 1000 -pmmf SRR049254.1.1M.error_dist -pmms 0.5 \
+        --read-length 100 -sq -o myreads.fastq drosophila.genome
 
+The error probablity distribution file is a text file with one entry for each
+base that is to be simulated.  Each entry is a number between 0 and 1.  You
+can find examples of such probability distributions in the folder
+"core/apps/mason/examples".
+
+These distributions have been obtained by aligning reads to the reference
+genome and then counting mismatches.  The read set accession ids are part of
+the name.  For example, the file SRR049254.1.1M.error_dist was obtained
+by aligning the first 1 million left-end reads from read set SRR049254 against
+the drosophila genome.
