@@ -1073,7 +1073,12 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                     }
                 } else {
-                    if (pickRandomNumber(rng, Pdf<Uniform<double> >(0.0, 1.0)) < 0.5) {
+                    bool fromReverse = pickRandomNumber(rng, Pdf<Uniform<double> >(0.0, 1.0)) < 0.5;
+                    if (options.onlyReverse)
+                        fromReverse = true;
+                    else if (options.onlyForward)
+                        fromReverse = false;
+                    if (fromReverse) {
                         reverseComplement(back(fragmentStore.readSeqStore));
                         if (options.includeReadInformation)
                             append(back(fragmentStore.readNameStore), " strand=reverse");
