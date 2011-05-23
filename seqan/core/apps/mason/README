@@ -7,7 +7,9 @@ Homepage:  http://www.seqan.de/projects/mason.html
 
 Mason is a read simulator for second-generation sequencing data.  At
 the moment, the simulation of Illumina, 454 and Sanger reads is
-supported.
+supported.  You can embed detailed information about the sequencing
+process into the FASTA/FASTQ comments and also write out the resulting
+multi-read to reference alginment as a SAM file.
 
 How It Works
 ------------
@@ -72,6 +74,12 @@ Important Global Options
                            the result is a FASTQ file, is FASTA otherwise.
 
   -o --output-file FILE    Path to the resulting FASTA/FASTQ file.
+  
+  -i --include-read-information  Include additional read information in reads
+                                 file.  This is a very useful option that
+                                 causes Mason to embed information about the
+                                 simulation process into the FASTA/FASTQ
+                                 headers.
 
 Important Illumina Options
 --------------------------
@@ -87,6 +95,28 @@ Important Sanger/454 Options
                            distribution is used for read lengths (also see
                            --read-length-uniform), this is the standard
                            deviation.
+
+Sequence Header Fields (when using --include-read-information)
+--------------------------------------------------------------
+
+When using the --include-read-information option, Mason will embed detailed
+information about the simulation process into the FASTA/FASTQ headers.
+
+The meaning of the field names is as follows:
+
+  contig           The identifier of the source contig.
+  haplotype        The number of the haplotype this read was simulated from.
+  orig_begin       The begin position in the source contig from the input.
+  orig_end         The end position in the source contig from the input.
+  edit_string      A string describing the difference to the haplotype:
+                     E  the base was Edited
+                     I  an Insertion occured
+                     D  a Deletion occured
+                     M  the read base Matches the haplotype infix.
+  haplotype_infix  The infix of the haplotype (that possibly differs from
+                   the input reference sequence).
+  strand
+
 
 Example: Illumina Mate Pair Reads 
 ---------------------------------
