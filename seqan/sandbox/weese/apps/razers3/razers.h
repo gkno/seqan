@@ -32,6 +32,7 @@
 
 #include <seqan/find.h>
 #include <seqan/index.h>
+#include <seqan/index/find_pigeonhole.h>
 #include <seqan/store.h>
 #include <seqan/pipe.h>
 
@@ -193,10 +194,11 @@ enum {
 
 	// filtration parameters
 		::std::string shape;			// shape (e.g. 11111111111)
-		int			threshold;			// threshold
+		int			threshold;			// threshold (minimal threshold, 0 activates pigeonhole mode)
 		int			tabooLength;		// taboo length
 		int			repeatLength;		// repeat length threshold
 		double		abundanceCut;		// abundance threshold
+        int         overlap;            // q-gram overlap (in pigeonhole mode)
 
 	// mate-pair parameters
 		int			libraryLength;		// offset between two mates
@@ -456,7 +458,7 @@ struct MicroRNA{};
 		typename TMatches_, 
 		typename TRazerSOptions_,
 		typename TRazerSMode_,
-		typename TSwiftPattern_,
+		typename TFilterPattern_,
 		typename TCounts_,
         typename _TPreprocessing	
 	>
@@ -466,7 +468,7 @@ struct MicroRNA{};
 		typedef TMatches_									    TMatches;
 		typedef TRazerSOptions_									TOptions;
 		typedef TRazerSMode_									TRazerSMode;
-		typedef TSwiftPattern_									TSwiftPattern;
+		typedef TFilterPattern_									TFilterPattern;
 		typedef TCounts_										TCounts;
         typedef _TPreprocessing                                 TPreprocessing;
 		
@@ -496,7 +498,7 @@ struct MicroRNA{};
 
 		TMatches	    *matches;
 		TOptions		*options;			// RazerS options
-		TSwiftPattern	*swiftPattern;
+		TFilterPattern	*filterPattern;
 		TCounts			*cnts;
 		TPreprocessing  *preprocessing;
 
@@ -511,10 +513,10 @@ struct MicroRNA{};
 		
 		MatchVerifier() : onReverseComplement(false), genomeLength(0), oneMatchPerBucket(false), compactionTime(0) {}
                
-		MatchVerifier(TMatches_ &_matches, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
+		MatchVerifier(TMatches_ &_matches, TOptions &_options, TFilterPattern &_filterPattern, TCounts &_cnts):
 			matches(&_matches),
 			options(&_options),
-			swiftPattern(&_swiftPattern),
+			filterPattern(&_filterPattern),
 			cnts(&_cnts),
             compactionTime(0)
 		{
@@ -552,7 +554,7 @@ struct MicroRNA{};
 							maskDuplicates(*matches, *options, TRazerSMode());	// overlapping parallelograms cause duplicates
                         // SEQAN_ASSERT_MSG((back(*matches).endPos - back(*matches).beginPos == 100), "len == %d", int(m.endPos - m.beginPos));
 		
-						compactMatches(*matches, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
+						compactMatches(*matches, *cnts, *options, TRazerSMode(), *filterPattern, COMPACT);
                         // SEQAN_ASSERT_MSG((back(*matches).endPos - back(*matches).beginPos == 100), "len == %d", int(m.endPos - m.beginPos));
 						
 						if (length(*matches) * 4 > oldSize) {			// the threshold should not be raised
@@ -1286,24 +1288,24 @@ void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode const &)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template < typename TReadNo, typename TMaxErrors >
+template <typename TFilterPattern, typename TReadNo, typename TMaxErrors>
 inline void 
-setMaxErrors(Nothing &, TReadNo, TMaxErrors)
+setMaxErrors(TFilterPattern &, TReadNo, TMaxErrors)
 {
 }
 
-template < typename TSwift, typename TReadNo, typename TMaxErrors >
+template < typename TIndex, typename TSwiftSpec, typename TReadNo, typename TMaxErrors >
 inline void 
-setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
+setMaxErrors(Pattern<TIndex, Swift<TSwiftSpec> > &filterPattern, TReadNo readNo, TMaxErrors maxErrors)
 {
 	// if (readNo==643)
 	// 	std::cout<<"dman"<<std::endl;
-	int minT = _qgramLemma(swift, readNo, maxErrors);
+	int minT = _qgramLemma(filterPattern, readNo, maxErrors);
 	if (minT > 1)
 	{
 //		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
 		if (maxErrors < 0) minT = MaxValue<int>::VALUE;
-		setMinThreshold(swift, readNo, (unsigned)minT);
+		setMinThreshold(filterPattern, readNo, (unsigned)minT);
 	}
 }
 
@@ -2103,6 +2105,21 @@ matchVerify(
 	return false;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Customize filter
+template <typename TIndex, typename TPigeonholeSpec, typename TOptions>
+void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPattern, TOptions const &options)
+{
+    filterPattern.params.overlap = options.overlap;
+}
+
+template <typename TIndex, typename TSwiftSpec, typename TOptions>
+void _applyFilterOptions(Pattern<TIndex, Swift<TSwiftSpec> > &filterPattern, TOptions const &options)
+{
+    filterPattern.params.minThreshold = options.threshold;
+    filterPattern.params.tabooLength = options.tabooLength;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in a single genome sequence
@@ -2110,7 +2127,7 @@ template <
     typename TMatches,
 	typename TFragmentStore, 
 	typename TReadIndex, 
-	typename TSwiftSpec, 
+	typename TFilterSpec, 
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode,
@@ -2119,7 +2136,7 @@ void _mapSingleReadsToContig(
     TMatches                                & matches,
 	TFragmentStore							& store,
 	unsigned								  contigId,				// ... and its sequence number
-	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPattern,
+	Pattern<TReadIndex, TFilterSpec>        & filterPattern,
 	TCounts									& cnts,
 	char									  orientation,				// q-gram index of reads
 	TRazerSOptions							& options,
@@ -2132,8 +2149,8 @@ void _mapSingleReadsToContig(
 {
 	// FILTRATION
 	typedef typename TFragmentStore::TContigSeq				TContigSeq;
-	typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
-	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
+	typedef Finder<TContigSeq, TFilterSpec>                 TFilterFinder;
+	typedef Pattern<TReadIndex, TFilterSpec>                TFilterPattern;
 	
 	// VERIFICATION
 	typedef MatchVerifier <
@@ -2141,7 +2158,7 @@ void _mapSingleReadsToContig(
 		TMatches, 
 		TRazerSOptions, 
 		TRazerSMode,
-		TSwiftPattern,
+		TFilterPattern,
 		TCounts,
 		TPreprocessing>											TVerifier;
 	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
@@ -2157,9 +2174,9 @@ void _mapSingleReadsToContig(
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
 	if (orientation == 'R')	reverseComplement(contigSeq);
 
-	TReadSet		&readSet = host(host(swiftPattern));
-	TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
-	TVerifier		verifier(matches, options, swiftPattern, cnts);
+	TReadSet		&readSet = host(host(filterPattern));
+	TFilterFinder	filterFinder(contigSeq, options.repeatLength, 1);
+	TVerifier		verifier(matches, options, filterPattern, cnts);
 
 #ifndef RAZERS_BANDED_MYERS
 	verifier.preprocessing = &preprocessing;
@@ -2172,22 +2189,22 @@ void _mapSingleReadsToContig(
 
     double beginTime = sysTime();
     // Build q-gram index separately, so we can better compute the time for it.
-    indexRequire(host(swiftPattern), QGramSADir());
+    indexRequire(host(filterPattern), QGramSADir());
     options.timeBuildQGramIndex += sysTime() - beginTime;
 
 	// iterate all verification regions returned by SWIFT
-	while (find(swiftFinder, swiftPattern, options.errorRate))
+	while (find(filterFinder, filterPattern, options.errorRate))
 	{
-        // std::cout << "read id = " << (*swiftFinder.curHit).ndlSeqNo << ", " << beginPosition(swiftFinder) << std::endl;
+        // std::cout << "read id = " << (*filterFinder.curHit).ndlSeqNo << ", " << beginPosition(filterFinder) << std::endl;
         
-//        if (length(infix(swiftFinder)) < length(readSet[(*swiftFinder.curHit).ndlSeqNo]))
+//        if (length(infix(filterFinder)) < length(readSet[(*filterFinder.curHit).ndlSeqNo]))
 //            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
 #ifdef RAZERS_BANDED_MYERS
-		verifier.patternState.leftClip = (beginPosition(swiftFinder) >= 0)? 0: -beginPosition(swiftFinder);	// left clip if match begins left of the genome
+		verifier.patternState.leftClip = (beginPosition(filterFinder) >= 0)? 0: -beginPosition(filterFinder);	// left clip if match begins left of the genome
 #endif
-		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
+		verifier.m.readId = (*filterFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
-			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, mode);
+			matchVerify(verifier, infix(filterFinder), verifier.m.readId, readSet, mode);
 		++options.countFiltration;
 	}
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
@@ -2206,21 +2223,19 @@ template <
 	typename TGapMode,
 	typename TScoreMode,
 	typename TReadIndex,
-    typename TMatchNPolicy >
+    typename TMatchNPolicy,
+    typename TFilterSpec>
 int _mapSingleReads(
 	FragmentStore<TFSSpec, TFSConfig>					& store,
 	TCounts												& cnts,
 	RazerSOptions<TSpec>								& options,
 	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy>  const & mode,
-	TReadIndex											& readIndex)
+	TReadIndex											& readIndex,
+    TFilterSpec)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
-	typedef typename If<
-				IsSameType<TGapMode,RazerSGapped>::VALUE,
-				SwiftSemiGlobal,
-				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
-	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >		TSwiftPattern;	// filter
+	typedef Pattern<TReadIndex, TFilterSpec>            TFilterPattern;	// filter
 	
 	typedef typename Value<TReadSeqStore>::Type	const	TRead;
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
@@ -2231,10 +2246,9 @@ int _mapSingleReads(
     typedef MatchRecord<TContigPos> TMatchRecord;
 	
 	// configure Swift pattern
-	TSwiftPattern swiftPattern(readIndex);
-	swiftPattern.params.minThreshold = options.threshold;
-	swiftPattern.params.tabooLength = options.tabooLength;
-	swiftPattern.params.printDots = options._debugLevel > 0; 
+	TFilterPattern filterPattern(readIndex);
+    _applyFilterOptions(filterPattern, options);
+	filterPattern.params.printDots = options._debugLevel > 0; 
 
 	// init edit distance verifiers
 	options.compMask[4] = (options.matchN)? 15: 0;
@@ -2290,14 +2304,14 @@ int _mapSingleReads(
 		lockContig(store, contigId);
 #ifndef RAZERS_WINDOW
 		if (options.forward)
-			_mapSingleReadsToContig(matches, store, contigId, swiftPattern, cnts, 'F', options, mode, preprocessing);
+			_mapSingleReadsToContig(matches, store, contigId, filterPattern, cnts, 'F', options, mode, preprocessing);
 		if (options.reverse)
-			_mapSingleReadsToContig(matches, store, contigId, swiftPattern, cnts, 'R', options, mode, preprocessing);
+			_mapSingleReadsToContig(matches, store, contigId, filterPattern, cnts, 'R', options, mode, preprocessing);
 #else
 		if (options.forward)
-			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'F', options, mode, preprocessing);
+			_mapSingleReadsToContigWindow(store, contigId, filterPattern, cnts, 'F', options, mode, preprocessing);
 		if (options.reverse)
-			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'R', options, mode, preprocessing);
+			_mapSingleReadsToContigWindow(store, contigId, filterPattern, cnts, 'R', options, mode, preprocessing);
 #endif
 		unlockAndFreeContig(store, contigId);
 	}
@@ -2341,6 +2355,36 @@ int _mapSingleReads(
 		::std::cerr << "Successful verfications: " << options.countVerification << ::std::endl;
 	}
 	return 0;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Wrapper for different filters specs
+template <
+	typename TFSSpec, 
+	typename TFSConfig, 
+	typename TCounts,
+	typename TSpec, 
+	typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode,
+	typename TReadIndex,
+    typename TMatchNPolicy >
+int _mapSingleReads(
+	FragmentStore<TFSSpec, TFSConfig>					& store,
+	TCounts												& cnts,
+	RazerSOptions<TSpec>								& options,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy>  const & mode,
+	TReadIndex											& readIndex)    
+{
+    if (options.threshold > 0)
+    {
+        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
+        return _mapSingleReads(store, cnts, options, mode, readIndex, Swift<TSwiftSpec>());
+    } else
+    {
+        return _mapSingleReads(store, cnts, options, mode, readIndex, Pigeonhole<>());
+    }    
 }
 
 
@@ -2475,10 +2519,10 @@ int _mapReads(
 	// 2x3 SPECIALIZATION
 
 	// select best-fitting shape
-	if (stringToShape(ungapped, options.shape))
-		return _mapReads(store, cnts, options, ungapped, mode);
-	if (stringToShape(onegapped, options.shape))
-		return _mapReads(store, cnts, options, onegapped, mode);
+//	if (stringToShape(ungapped, options.shape))
+//		return _mapReads(store, cnts, options, ungapped, mode);
+//	if (stringToShape(onegapped, options.shape))
+//		return _mapReads(store, cnts, options, onegapped, mode);
 	if (stringToShape(gapped, options.shape))
 		return _mapReads(store, cnts, options, gapped, mode);
 	return RAZERS_INVALID_SHAPE;
@@ -2495,7 +2539,7 @@ int _mapReads(
 {
 	if (options.scoreMode == RAZERS_ERRORS)
 		return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSErrors, TMatchNPolicy>());
-	if (options.scoreMode == RAZERS_SCORE)
+/*	if (options.scoreMode == RAZERS_SCORE)
 		return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSScore, TMatchNPolicy>());
 	if (options.scoreMode == RAZERS_QUALITY)
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -2504,7 +2548,7 @@ int _mapReads(
 		else
 #endif
 			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<>, TMatchNPolicy>());
-	return RAZERS_INVALID_OPTIONS;
+*/	return RAZERS_INVALID_OPTIONS;
 }
 
 //////////////////////////////////////////////////////////////////////////////

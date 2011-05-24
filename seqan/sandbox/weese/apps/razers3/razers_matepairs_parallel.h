@@ -480,7 +480,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
     // Initialize verifiers.
     tls.verifierL.matches = localMatches;
     tls.verifierL.options = job.options;
-    tls.verifierL.swiftPattern = job.swiftPatternL;
+    tls.verifierL.filterPattern = job.swiftPatternL;
     tls.verifierL.cnts = 0;
 #ifndef RAZERS_BANDED_MYERS
     setBeginPosition(*tls.verifierL.preprocessing, splitters[job.threadId]);
@@ -489,7 +489,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
     tls.verifierR.matches = localMatches;
     tls.verifierR.options = job.options;
-    tls.verifierR.swiftPattern = job.swiftPatternR;
+    tls.verifierR.filterPattern = job.swiftPatternR;
     tls.verifierR.cnts = 0;
 #ifndef RAZERS_BANDED_MYERS
     setBeginPosition(*tls.verifierR.preprocessing, splitters[job.threadId]);
@@ -1192,7 +1192,7 @@ void _mapMatePairReadsParallel(
             // std::cerr << "\nSWIFT HIT COUNT\t" << length(getSwiftHits(tls.swiftFinderL)) << "\t" << length(getSwiftHits(tls.swiftFinderR)) << std::endl;
             // if (windowsDone > 1)
             //     std::cerr << "\nPOSITION       \t" << tls.swiftFinderL.curPos << "\t" << tls.swiftFinderR.curPos << std::endl;
-            if (length(getSwiftHits(tls.swiftFinderL)) > 0u || length(getSwiftHits(tls.swiftFinderR)) > 0u) {
+            if (length(getWindowFindHits(tls.swiftFinderL)) > 0u || length(getWindowFindHits(tls.swiftFinderR)) > 0u) {
                 String<TVerificationJob> jobs;
 
                 // Update previous left hits and splitters.
@@ -1200,10 +1200,10 @@ void _mapMatePairReadsParallel(
                 swap(previousLeftHitsSplitters, leftHitsSplitters);
                 // Update new left hits and splitters.
                 leftHits.reset(new THitString());
-                std::swap(*leftHits, getSwiftHits(tls.swiftFinderL));
+                std::swap(*leftHits, getWindowFindHits(tls.swiftFinderL));
                 buildHitSplittersAndPartitionHits(leftHitsSplitters, *leftHits, options.maxVerificationPackageCount, length(indexText(host(swiftPatternL))));
                 rightHits.reset(new THitString());
-                std::swap(*rightHits, getSwiftHits(tls.swiftFinderR));
+                std::swap(*rightHits, getWindowFindHits(tls.swiftFinderR));
                 buildHitSplittersAndPartitionHits(rightHitsSplitters, *rightHits, options.maxVerificationPackageCount, length(host(swiftPatternL)));
 
                 for (unsigned i = 0; i < options.maxVerificationPackageCount; ++i) {

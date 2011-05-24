@@ -145,11 +145,15 @@ int mapReads(
 		if (options.reverse)		cerr << "YES" << endl;
 		else				cerr << "NO" << endl;
 		cerr << "Error rate:                      \t" << options.errorRate << endl;
-		cerr << "Minimal threshold:               \t" << options.threshold << endl;
+        if (options.threshold > 0)
+            cerr << "Minimal threshold:               \t" << options.threshold << endl;
+        else
+            cerr << "Pigeonhole mode with overlap:    \t" << options.overlap << endl;
 		cerr << "Shape:                           \t" << bitmap << endl;
 		cerr << "Repeat threshold:                \t" << options.repeatLength << endl;
 		cerr << "Overabundance threshold:         \t" << options.abundanceCut << endl;
-		cerr << "Taboo length:                    \t" << options.tabooLength << endl;
+        if (options.threshold > 0)
+            cerr << "Taboo length:                    \t" << options.tabooLength << endl;
         if (options._debugLevel >= 2) {
 #ifdef PLATFORM_WINDOWS
             int pid = _getpid();
@@ -389,7 +393,8 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("ncf", "no-compact-frac", "don't compact if in this last fraction of genome", OptionType::Double | OptionType::Label, options.noCompactFrac));
 	addSection(parser, "Filtration Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s",  "shape",             "set k-mer shape", OptionType::String | OptionType::Label, options.shape), "BITSTRING"));
-	addOption(parser, CommandLineOption("t",  "threshold",         "set minimum k-mer threshold", OptionType::Int | OptionType::Label, options.threshold));
+	addOption(parser, CommandLineOption("t",  "threshold",         "set minimum k-mer threshold (0=pigeonhole principle)", OptionType::Int | OptionType::Label, options.threshold));
+	addOption(parser, CommandLineOption("ol", "overlap-length",    "set the overlap length of adjacent q-grams (pigeonhole mode)", OptionType::Int | OptionType::Label, options.overlap));
 	addOption(parser, CommandLineOption("oc", "overabundance-cut", "set k-mer overabundance cut ratio", OptionType::Int | OptionType::Label, options.abundanceCut));
 	addOption(parser, CommandLineOption("rl", "repeat-length",     "set simple-repeat length threshold", OptionType::Int | OptionType::Label, options.repeatLength));
 	addOption(parser, CommandLineOption("tl", "taboo-length",      "set taboo length", OptionType::Int | OptionType::Label, options.tabooLength));
@@ -447,6 +452,7 @@ int main(int argc, const char *argv[])
 	if (isSetLong(parser, "global-alignment")) options.computeGlobal = true;
 	getOptionValueLong(parser, "shape", options.shape);
 	getOptionValueLong(parser, "threshold", options.threshold);
+	getOptionValueLong(parser, "overlap-length", options.overlap);
 	getOptionValueLong(parser, "overabundance-cut", options.abundanceCut);
 	getOptionValueLong(parser, "repeat-length", options.repeatLength);
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -511,8 +517,12 @@ int main(int argc, const char *argv[])
 		cerr << "Invalid read naming options." << endl;
 	if ((options.positionFormat > 1) && (stop = true))
 		cerr << "Invalid position format options." << endl;
-	if ((options.threshold < 1) && (stop = true))
-		cerr << "Threshold must be a value greater than 0" << endl;
+	if ((options.threshold < 0) && (stop = true))
+		cerr << "Threshold must be a value greater or equal 0" << endl;
+	if ((options.overlap < 0) && (stop = true))
+		cerr << "Overlap length must be a value greater or equal 0" << endl;
+	if (isSetLong(parser, "threshold") && (options.threshold > 0) && isSetLong(parser, "overlap-length") && (stop = true))
+		cerr << "Overlap length can only be set in pigeonhole mode (threshold == 0)" << endl;
 	if (isSetLong(parser, "shape"))
 	{
 		unsigned ones = 0;
