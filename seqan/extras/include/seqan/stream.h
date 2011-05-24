@@ -118,7 +118,7 @@
 // File Format I/O Code.
 // ===========================================================================
 
-#include <seqan/stream/read_fasta_fastq_h4nn3s.h>
+#include <seqan/stream/read_fasta_fastq.h>
 // #include <seqan/stream/read_sam.h>
 
 #endif  // SEQAN_STREAM_H_

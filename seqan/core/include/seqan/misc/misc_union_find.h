@@ -173,11 +173,27 @@ length(UnionFind<TValue> const & unionFind)
 }
 
 // ----------------------------------------------------------------------------
+// Function reserve()
+// ----------------------------------------------------------------------------
+
+///.Function.reserve.param.object.type:Class.UnionFind
+
+template <typename TValue, typename TSize, typename TTag>
+inline
+typename Size<UnionFind<TValue> >::Type
+reserve(UnionFind<TValue> & unionFind,
+       TSize const & newSize,
+       TTag const & tag)
+{
+    return reserve(unionFind._values, newSize, tag);
+}
+
+// ----------------------------------------------------------------------------
 // Function resize()
 // ----------------------------------------------------------------------------
 
-///.Function.resizeVertexMap.param.pm.type:Class.UnionFind
-///.Function.resizeVertexMap.remarks:If $pm$ is of the @Class.UnionFind@, $value$ will automatically be set to -1.
+///.Function.resize.param.pm.type:Class.UnionFind
+///.Function.resize.remarks:If $pm$ is of the @Class.UnionFind@, $value$ will automatically be set to -1.
 
 template <typename TValue, typename TSize, typename TTag>
 inline

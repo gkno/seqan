@@ -515,7 +515,7 @@ write(TFile & file,
 	_streamWrite(file, "graph [rankdir = LR];\n");
 	_streamPut(file, '\n');
 	_streamWrite(file, "/* Node Attributes */\n");
-	_streamWrite(file, "node [shape = circle, fillcolor = white, style = filled, fontname = \"Times-Italic\"];\n");
+	_streamWrite(file, "node [shape = rectangle, fillcolor = white, style = filled, fontname = \"Times-Italic\"];\n");
 	_streamPut(file, '\n');
 	_streamWrite(file, "/* Edge Attributes */\n");
 	_streamWrite(file, "edge [fontname = \"Times-Italic\", arrowsize = 0.75, fontsize = 16];\n");
