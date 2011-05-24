@@ -114,6 +114,8 @@ void FASTA_TEST_BATCH_CONCAT(TRecordReader & reader)
     StringSet<CharString, Owner<ConcatDirect<> > > metas;
     StringSet<Dna5String, Owner<ConcatDirect<> > > seqs;
 
+    int res = read2(metas, seqs, reader, Fasta());
+
     SEQAN_ASSERT_EQ(res, 0);
     SEQAN_ASSERT_EQ(metas[0], " sequenceID_with special chars an irregular linebreaks");
     SEQAN_ASSERT_EQ(seqs[0], "AAAACGTGCGGTTGGGCAAAAAACTTTCTTATATTCTATCTATCTTGTAGCTAGCTGTAGCTAGCTAGCATCGTAGCCCCAGAGTGTCATGCATGTCGAACGTGTTTTTGGGGCGGTTATATATATATATATT");

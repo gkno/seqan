@@ -260,8 +260,8 @@ _readHelper(TBuffer & buffer,
             bool const desiredOutcomeOfComparison)
 {
 
-//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
-    typedef char TChar; //TODO fix this
+//     typedef typename Value<TRecordReader::_buffer >::Type TChar;
+   typedef char TChar; //TODO fix this
 
     while (!atEnd(reader))
     {
