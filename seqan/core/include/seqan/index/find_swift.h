@@ -136,12 +136,14 @@ struct SwiftParameters {
 	int minLog2Delta;
 	int tabooLength;
 	bool printDots;
+    bool debug;
 
 	SwiftParameters():
 		minThreshold(1),		// set minimal threshold to 1
 		minLog2Delta(4),		// set minimal delta to 16
 		tabooLength(1),			// minimal genomic distance between q-gram hits
-		printDots(false) {}		// print a . for every 100kbps mapped genome
+		printDots(false),		// print a . for every 100kbps mapped genome
+        debug(false) {}
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -150,7 +152,7 @@ struct SwiftParameters {
 	struct SwiftBucket_ 
 	{
 		typedef TSize_			TSize;
-		typedef TShortSize_		TShortSize;
+		typedef TShortSize_	TShortSize;
 
 		TSize					firstIncrement;
 		TSize					lastIncrement;
@@ -210,7 +212,7 @@ struct SwiftParameters {
 //____________________________________________________________________________
 
 
-	template <typename TSpec, typename THstkPos>
+	template <typename THstkPos>
 	struct SwiftHit_ 
 	{
 		THstkPos	hstkPos;			// parallelogram begin in haystack 
@@ -220,13 +222,39 @@ struct SwiftParameters {
 		unsigned	hitLengthNeedle;	// length of the hit in needle
 	};
 
-	template <typename TSpec, typename THstkPos>
-	struct SwiftHit_<Tag<SwiftSemiGlobal_<TSpec> >, THstkPos>
+	template <typename THstkPos>
+	struct SwiftHitSemiGlobal_
 	{
 		THstkPos	hstkPos;			// parallelogram begin in haystack 
 		unsigned	ndlSeqNo;			// needle sequence number
 		unsigned	bucketWidth;		// (non-diagonal) bucket width (bktHeight + delta + overlap (for diagonals))
 	};
+    
+
+    template <typename TFinder, typename TPattern = void>
+    struct FindResult
+    {
+    };
+    template <typename TFinder, typename TPattern = void>
+    struct WindowFindResult
+    {
+        typedef String<typename FindResult<TFinder, TPattern>::Type> Type;
+    };
+
+    
+    
+    template <typename THaystack, typename TPattern, typename TSwiftSpec>
+    struct FindResult<Finder<THaystack, Swift<TSwiftSpec> >, TPattern>
+    {
+        typedef SwiftHit_<__int64> Type;
+    };
+    
+    template <typename THaystack, typename TPattern, typename TSpec>
+    struct FindResult<Finder<THaystack, Swift<Tag<SwiftSemiGlobal_<TSpec> > > >, TPattern>
+    {
+        typedef SwiftHitSemiGlobal_<__int64> Type;
+    };
+    
 
 //____________________________________________________________________________
 
@@ -237,8 +265,8 @@ struct SwiftParameters {
 	public:
 		typedef typename Iterator<THaystack, Rooted>::Type			TIterator;
 		typedef typename Position<THaystack>::Type					THstkPos;
-		typedef SwiftHit_<TSpec, __int64>							TSwiftHit;
-		typedef String<TSwiftHit>									THitString;
+		typedef typename FindResult<Finder>::Type                   TSwiftHit;
+		typedef typename WindowFindResult<Finder>::Type				THitString;
 		typedef typename Iterator<THitString, Standard>::Type		THitIterator;
 		typedef typename SAValue<THaystack>::Type					TSAValue;
 		typedef Repeat<TSAValue, unsigned>							TRepeat;
@@ -341,8 +369,8 @@ struct SwiftParameters {
 	public:
 		typedef Pipe<TTuples, TPipeSpec>						TInput;
 		typedef typename Size<TInput>::Type						THstkPos;
-		typedef SwiftHit_<TSpec, __int64>						TSwiftHit;
-		typedef String<TSwiftHit>								THitString;
+		typedef typename FindResult<Finder>::Type               TSwiftHit;
+		typedef typename WindowFindResult<Finder>::Type         THitString;
 		typedef typename Iterator<THitString, Standard>::Type	THitIterator;
 
 		TInput			&in;
@@ -830,7 +858,7 @@ inline void _createHit(
 	__int64 diag,
 	TSize ndlSeqNo)
 {
-	typedef typename Finder<THaystack, Swift<TSpec> >::TSwiftHit	THit;
+    typedef typename FindResult<Finder<THaystack, Swift<TSpec> >, Pattern<TIndex, Swift<TSpec> > >::Type THit;
 	__int64 lastInc = (__int64)bkt.lastIncrement - pattern.finderPosOffset;
 	__int64 firstInc = (__int64)bkt.firstIncrement - pattern.finderPosOffset;
 
@@ -887,7 +915,7 @@ inline bool _swiftMultiProcessQGram(
 	typedef typename Value<TBucketString>::Type					TBucket;
 	typedef typename TBucket::TShortSize						TShortSize;
 	typedef typename TPattern::TBucketParams					TBucketParams;
-	typedef typename TFinder::TSwiftHit							THit;
+    typedef typename FindResult<TFinder, TPattern>::Type        THit;
 	
 	TIndex const &index = host(pattern);
 	
@@ -907,6 +935,7 @@ inline bool _swiftMultiProcessQGram(
 			std::cerr<<*(hostIterator(hostIterator(finder))+i);
 	}
 */	
+    
 	// iterate over all q-gram occurences and do the processing
 	__int64 curPos = finder.curPos + pattern.finderPosOffset;
 	for(; occ != occEnd; ++occ)
@@ -1020,7 +1049,7 @@ inline bool _swiftMultiProcessQGram(
 	typedef typename Value<TBucketString>::Type					TBucket;
 	typedef typename TBucket::TShortSize						TShortSize;
 	typedef typename TPattern::TBucketParams					TBucketParams;
-	typedef typename TFinder::TSwiftHit							THit;
+    typedef typename FindResult<TFinder, TPattern>::Type        THit;
 	
 	TIndex const &index = host(pattern);	
 	
@@ -1042,6 +1071,7 @@ inline bool _swiftMultiProcessQGram(
 */	
 	// iterate over all q-gram occurences and do the processing
 	__int64 curPos = finder.curPos + pattern.finderPosOffset;
+//    bool dbg=pattern.params.debug && (finder.curPos > 496 && finder.curPos < 591);
 	for(; occ != occEnd; ++occ) 
 	{
 		posLocalize(ndlPos, *occ, stringSetLimits(index));
@@ -1049,7 +1079,7 @@ inline bool _swiftMultiProcessQGram(
 
 		__int64 diag = finder.curPos;
 		if (Swift<Tag<SwiftSemiGlobal_<TSpec_> > >::DIAGONAL == 1) diag -= getSeqOffset(ndlPos);
-		
+
 		unsigned bktNo = (diag >> bucketParams.logDelta) & bucketParams.reuseMask;
 		unsigned bktOfs = diag & (bucketParams.delta - 1);
 		__int64  bktBeginHstk = diag & ~(__int64)(bucketParams.delta - 1);
@@ -1057,6 +1087,9 @@ inline bool _swiftMultiProcessQGram(
 		TBucketIter bkt = bktBegin + (_swiftBucketNo(pattern, bucketParams, getSeqNo(ndlPos)) + bktNo);		
 		TShortSize hitCount;
 
+//        if (dbg && (*occ).i1==15)
+//            std::cout << finder.curPos << '\t' << *occ << '\t' << (*bkt).counter<<std::endl;
+//		
 		do 
 		{
 			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + (__int64)pattern.finderPosOffset)
@@ -1822,8 +1855,8 @@ find(
  Gets the first non-repeat range and sets it in the finder.
  Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
 ..signature:windowFindBegin(finder, pattern, errorRate)
-..param.finder:A SWIFT finder.
-..param.pattern: A SWIFT pattern.
+..param.finder:A finder with window interface.
+..param.pattern: A pattern with window interface.
 ..param.errorRate:Error rate that is allowed between reads and reference.
  Should be the same in as in @Function.windowFindNext@.
 ...type:nolink:double
@@ -1857,8 +1890,8 @@ windowFindBegin(
 ..summary:Searches over the next window with the finder. The found hits can be retrieved with @Function.getSwiftHits@
  Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
 ..signature:windowFindNext(finder, pattern, finderWindowLength)
-..param.finder:A SWIFT finder.
-..param.pattern: A SWIFT pattern.
+..param.finder:A finder with window interface.
+..param.pattern: A pattern with window interface.
 ..param.finderWindowLength:Number of bases that are scanned beginning from the position the finder is at.
  Including bases that are marked as repeats and that are skipped.
 ...type:nolink:unsigned int
@@ -1889,13 +1922,13 @@ windowFindNext(
     
 	THstkPos windowEnd = finder.windowStart + finderWindowLength;
 
-	// iterate over all non-repeat regions within the window
-	for (; finder.curPos < windowEnd; )
-	{
+    // iterate over all non-repeat regions within the window
+    for (; finder.curPos < windowEnd; )
+    {
         THstkPos nonRepeatEnd = finder.endPos - length(pattern.shape) + 1;
-		THstkPos localEnd = _min(windowEnd, nonRepeatEnd);
+        THstkPos localEnd = _min(windowEnd, nonRepeatEnd);
         
-		// filter a non-repeat region within the window
+        // filter a non-repeat region within the window
         if (finder.curPos < localEnd)
         {
             TShape &shape = pattern.shape;
@@ -1905,16 +1938,16 @@ windowFindNext(
                 _swiftMultiProcessQGram(finder, pattern, hashNext(shape, hostIterator(hostIterator(finder))));			
             }
         }
-            
-		if (pattern.params.printDots) _printDots(finder);
-
-		if (finder.curPos >= nonRepeatEnd)
-			if (!_nextNonRepeatRange(finder, pattern))
+        
+        if (pattern.params.printDots) _printDots(finder);
+        
+        if (finder.curPos >= nonRepeatEnd)
+            if (!_nextNonRepeatRange(finder, pattern))
             {
                 finder.windowStart = windowEnd;
                 return false;
             }
-	}
+    }
     finder.windowStart = windowEnd;
 	return true;
 }
@@ -1924,8 +1957,8 @@ windowFindNext(
 ..cat:Searching
 ..summary:Flushes the pattern. Used together with @Function.windowFindBegin@ and @Function.windowFindNext@.
 ..signature:windowFindNext(finder, pattern)
-..param.finder:A SWIFT finder.
-..param.pattern: A SWIFT pattern.
+..param.finder:A finder with window interface.
+..param.pattern: A pattern with window interface.
 ..see:Function.windowFindBegin
 ..include:seqan/index.h
 */
@@ -1936,28 +1969,47 @@ windowFindEnd(
 	Pattern<TIndex, Swift<TSpec> > &pattern)
 {
 	SEQAN_CHECKPOINT
-	
-	_swiftMultiFlushBuckets(finder, pattern);
+    _swiftMultiFlushBuckets(finder, pattern);
 }
 
 
 /**
-.Function.getSwiftHits:
+.Function.getWindowFindHits:
 ..cat:Searching
-..summary:Gets the string of hits from the finder
-..signature:getSwiftHits(finder)
-..param.finder:A SWIFT finder.
+..summary:Returns the string of hits from the finder.
+..signature:getWindowFindHits(finder)
+..param.finder:A finder with window interface.
 ..returns:@Class.String@ of Hits (use Finder<...>::THitString as Type).
 ..include:seqan/index.h
 */
 template <typename THaystack, typename TSpec>
-inline typename Finder<THaystack, Swift<TSpec> >::THitString &
-getSwiftHits(Finder<THaystack, Swift<TSpec> > &finder)
+inline typename WindowFindResult<Finder<THaystack, Swift<TSpec> >, void>::Type &
+getWindowFindHits(Finder<THaystack, Swift<TSpec> > &finder)
 {
 	SEQAN_CHECKPOINT
 	
 	return finder.hits;
 }
+
+/**
+ .Function.getMaxDeviationOfOrder:
+ ..cat:Searching
+ ..summary:Returns the maximal out-of-order distance of adjacent hits.
+ ..signature:getMaxDeviationOfOrder(pattern)
+ ..param.pattern:A pattern with window interface.
+ ...type:Spec.Swift
+ ..returns:Returns the maximal distance two adjacent hits can have which are not in increasing order.
+ ..include:seqan/index.h
+ */
+template <typename TIndex, typename TSpec>
+inline typename Size<TIndex>::Type
+getMaxDeviationOfOrder(Pattern<TIndex, Swift<TSpec> > &pattern)
+{
+	SEQAN_CHECKPOINT
+    
+    return back(pattern.bucketParams).delta + back(pattern.bucketParams).overlap + length(pattern.bucketParams) - 2;
+}
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

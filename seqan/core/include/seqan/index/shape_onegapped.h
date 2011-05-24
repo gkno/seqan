@@ -186,6 +186,28 @@ namespace SEQAN_NAMESPACE_MAIN
 		return me.hValue;
 	}
 
+	template <typename TValue, typename TIter>
+	inline typename Value< Shape<TValue, OneGappedShape> >::Type
+	hashInit(Shape<TValue, OneGappedShape> &me, TIter it)	
+	{
+        SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
+		typedef typename Size< Shape<TValue, OneGappedShape> >::Type	TSize;
+        
+        me.leftChar = 0;
+		me.hValue = ordValue(*it);
+		for(TSize i = 2; i < me.blockLen1; ++i) {
+			goNext(it);
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
+		}
+		goFurther(it, me.gapLen);
+		for(TSize i = 0; i < me.blockLen2; ++i) {
+			goNext(it);
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
+		}
+		return me.hValue;
+	}
+
 	template <typename TValue, typename TIter, typename TSize>
 	inline typename Value< Shape<TValue, OneGappedShape> >::Type
 	hash(Shape<TValue, OneGappedShape> &me, TIter it, TSize charsLeft)

@@ -314,7 +314,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 */
 
 	template <typename TValue, typename TIter>
-	typename Value< Shape<TValue, SimpleShape> >::Type
+	inline typename Value< Shape<TValue, SimpleShape> >::Type
 	hash(Shape<TValue, SimpleShape> &me, TIter it)
 	{
 	SEQAN_CHECKPOINT
@@ -329,6 +329,22 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		return me.hValue;
 	}
 
+	template <typename TValue, typename TIter>
+	inline void
+	hashInit(Shape<TValue, SimpleShape> &me, TIter it)
+	{
+        SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, SimpleShape> >::Type	THValue;
+		typedef typename Size< Shape<TValue, SimpleShape> >::Type	TSize;
+        
+        me.leftChar = 0;
+		me.hValue = ordValue(*it);
+		for(TSize i = 2; i < me.span; ++i) {
+			++it;
+			me.hValue = me.hValue * ValueSize<TValue>::VALUE + ordValue((TValue)*it);
+		}
+	}
+    
 //____________________________________________________________________________
 // fixed ungapped shapes
 
@@ -361,6 +377,22 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		return me.hValue = _hashFixedShape(me.hValue, it, TValue(), UngappedShape<q>());
 	}
 
+	template <typename TValue, unsigned q, typename TIter>
+	inline typename Value< Shape<TValue, UngappedShape<q> > >::Type
+	hashInit(Shape<TValue, UngappedShape<q> > &me, TIter it)
+	{
+        SEQAN_CHECKPOINT
+		typedef typename Value< Shape<TValue, UngappedShape<q> > >::Type	THValue;
+		typedef typename Size< Shape<TValue, UngappedShape<q> > >::Type	TSize;
+        
+        me.leftChar = 0;
+		me.hValue = ordValue(*it);
+
+        if (q > 1)
+            me.hValue = _hashFixedShape(me.hValue, it, TValue(), UngappedShape<q-1>());
+        
+		return me.hValue;
+    }
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
 	inline typename Value< Shape<TValue, TSpec> >::Type

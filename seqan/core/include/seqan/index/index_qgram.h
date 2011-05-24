@@ -1119,7 +1119,7 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 				assignValueI2(localPos, 0);
 
 				TIterator itText = begin(sequence, Standard());
-				for(TSize i = 1; i < num_qgrams; i += stepSize)
+				for(TSize i = 0; i < num_qgrams; i += stepSize)
 				{
 					assignValueI2(localPos, i);
 					if (TWithConstraints::VALUE) {

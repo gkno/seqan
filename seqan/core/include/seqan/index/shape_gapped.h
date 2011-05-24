@@ -562,6 +562,12 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 //____________________________________________________________________________
 
 	template <typename TValue, typename TSpec, typename TIter>
+	inline void
+	hashInit(Shape<TValue, GappedShape<TSpec> > &, TIter &)
+	{
+	}
+    
+	template <typename TValue, typename TSpec, typename TIter>
 	inline typename Value< Shape<TValue, GappedShape<TSpec> > >::Type
 	hashNext(Shape<TValue, GappedShape<TSpec> > &me, TIter &it)
 	{
