@@ -1,0 +1,79 @@
+=================================
+RABEMA - Read Alignment BEnchMArk
+=================================
+
+Rabema is a program that supports a new read mapper benchmark methodology. The
+methodology is based on a strict definition of the read mapping problem and
+allows the evaluation of arbitrary read mapping programs that create SAM
+output.
+
+The paper gives an explanation of the theory behind the benchmark methodology
+with an example evaluatio
+
+For installation instruction and online material, see the project website:
+
+    http://seqan.de/projects/rabema.html
+
+Gold Standard File Format (WIT)
+===============================
+
+Version: 1.0
+
+The gold standard is built for either Hamming or Levenshtein distance, a given
+error rate (in percent), a reference sequence, a read set and the result of a
+fully sensitive read mapper (e.g. RazerS).
+
+The first 5 lines of a WIT file might look like this:
+
+    @WIT	VN:1.0
+    @MATES	SEP:/	TYPE:01
+    # QNAME	SCORE	RNAME	RDIR	SPOS	EPOS
+    SRR026674.2489878	3	2L	F	7344392	7344398	
+    SRR026674.2489878	3	2L	F	10948011	10948047	
+
+The format consists of (1) the header and (2) the intervals section with
+arbitrary comment lines interleaved.
+
+Comments
+--------
+
+Comment lines start with '#' and are ignored.
+
+Header
+------
+
+Header lines start with '@' and are similar to SAM headers. Each header line
+contains one record. Each record starts with '@', followed by the record
+identifier. Then, separated by tabs, record fields follow.
+
+There are the following records/fields.
+
+@WIT
+
+This records starts the header and must be the first record in the header,
+there can be only one such record. The only field is the version (VN) field
+that gives the version of the file format.
+
+@MATES
+
+This record must be present exactly once. It describes how mate pairs are
+stored. Its fields are the separator of mate order identifiers (SEP) and the
+type of mate order identifiers (TYPE). Valid values for the type are '01' and
+'12'.
+
+Read identifiers for mate-pairs generally look like the following:
+
+    <mate identifier> + <separator> + <mate order identifier>
+
+The mate identifier uniquely identifies a mate pair / fragment. The separator
+usually is '.', '_', or '/'. The mate order identifier gives the number of the
+read within the mate pair / fragment. Rabema uses this information to convert
+names of paired-end reads within the WIT file into their mate pair names.
+
+Examples for such mate pairs are:
+
+    SRR026674.2489878/0 and SRR026674.2489878/1
+    SRR026674.2489878_1 and SRR026674.2489878_2
+
+Intervals
+---------
