@@ -59,6 +59,8 @@ using namespace seqan;
 // such only occurs every 4M chars.
 const unsigned int BUFFER_SIZE = 1024 * 1024 * 4;
 
+typedef CharString TSequence;
+
 struct Options
 {
     bool doublePass;
@@ -81,7 +83,7 @@ template <typename TSpec>
 int readFileMMapDocument(char const * filename, Options const & /*options*/, TSpec const & /*tag*/)
 {
     typedef StringSet<CharString, TSpec> TSequenceIds;
-    typedef StringSet<Dna5String, TSpec> TSequences;
+    typedef StringSet<TSequence, TSpec> TSequences;
     typedef typename Iterator<TSequenceIds>::Type TSequenceIdsIter;
     typedef typename Iterator<TSequences>::Type TSequencesIter;
     TSequenceIds sequenceIds;
@@ -129,7 +131,7 @@ int readFileMMapDocument(char const * filename, Options const & options)
 
 template <typename TFile, typename TPass>
 int readFastaFile(StringSet<CharString> & sequenceIds,
-                  StringSet<Dna5String> & sequences,
+                  StringSet<TSequence> & sequences,
                   TFile & file,
                   TPass const & /*tag*/)
 {
@@ -137,9 +139,9 @@ int readFastaFile(StringSet<CharString> & sequenceIds,
     (void)sequences;
 
     RecordReader<TFile, TPass> reader(file, BUFFER_SIZE);
-//     Pair<CharString, Dna5String> record;
+//     Pair<CharString, TSequence> record;
     CharString meta;
-    Dna5String seq;
+    TSequence seq;
     // std::cerr << "READING FILE" << std::endl;
     while (!atEnd(reader)) {
         int res = readRecord(meta, seq, reader, Fasta());
@@ -157,7 +159,7 @@ template <typename TPass>
 int readFileMMap(char const * filename, Options const & /*options*/, TPass const & /*tag*/)
 {
     StringSet<CharString> sequenceIds;
-    StringSet<Dna5String> sequences;
+    StringSet<TSequence> sequences;
 //     StringSet<CharString> sequences;
 
     double before = sysTime();
@@ -185,7 +187,7 @@ template <typename TPass>
 int readFileDefault(char const * filename, Options const & options, TPass const & /*tag*/)
 {
     StringSet<CharString> sequenceIds;
-    StringSet<Dna5String> sequences;
+    StringSet<TSequence> sequences;
 
     std::cerr << "READING\tRECORD\t" << std::flush;
     if (IsSameType<TPass, SinglePass<> >::VALUE)
