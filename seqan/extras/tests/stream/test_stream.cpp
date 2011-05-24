@@ -191,6 +191,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_concat_mmap);
 
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_fstream);
@@ -198,6 +199,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_concat_mmap);
 
     
 /*    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream_two_records);

@@ -471,6 +471,8 @@ int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
 
     resize(sequenceIds.limits, sequenceCount + 1, Exact());
     resize(sequences.limits, sequenceCount + 1, Exact());
+    sequenceIds.limits[0] = 0;
+    sequences.limits[0] = 0;
 
     unsigned long metaLengthsSum = 0;
     unsigned long seqLengthsSum = 0;
@@ -478,9 +480,9 @@ int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
     for (unsigned int i = 0; i < sequenceCount; ++i)
     {
         metaLengthsSum += metaLengths[i];
-        sequenceIds.limits[i] = metaLengthsSum;
+        sequenceIds.limits[i+1] = metaLengthsSum;
         seqLengthsSum += seqLengths[i];
-        sequences.limits[i] = seqLengthsSum;
+        sequences.limits[i+1] = seqLengthsSum;
     }
 
     reserve(sequenceIds.concat, metaLengthsSum + 1, Exact());

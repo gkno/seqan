@@ -38,6 +38,8 @@
 #ifndef TEST_STREAM_TEST_STREAM_READ_FASTAQ_H_
 #define TEST_STREAM_TEST_STREAM_READ_FASTAQ_H_
 
+// ------------ FASTA -------------
+
 std::fstream* createFastAFile(seqan::CharString &tempFilename)
 {
     using namespace seqan;
@@ -104,8 +106,22 @@ void FASTA_TEST_BATCH(TRecordReader & reader)
     SEQAN_ASSERT(atEnd(reader));
 }
 
+template <typename TRecordReader>
+void FASTA_TEST_BATCH_CONCAT(TRecordReader & reader)
+{
+    using namespace seqan;
 
-// ------------ FASTA -------------
+    StringSet<CharString, Owner<ConcatDirect<> > > metas;
+    StringSet<Dna5String, Owner<ConcatDirect<> > > seqs;
+
+    SEQAN_ASSERT_EQ(res, 0);
+    SEQAN_ASSERT_EQ(metas[0], " sequenceID_with special chars an irregular linebreaks");
+    SEQAN_ASSERT_EQ(seqs[0], "AAAACGTGCGGTTGGGCAAAAAACTTTCTTATATTCTATCTATCTTGTAGCTAGCTGTAGCTAGCTAGCATCGTAGCCCCAGAGTGTCATGCATGTCGAACGTGTTTTTGGGGCGGTTATATATATATATATT");
+
+    SEQAN_ASSERT_EQ(metas[1], "sequence2... with no linebreaks and no newline at end");
+    SEQAN_ASSERT_EQ(seqs[1], "ACGTNNNNNNNCGTACTTGCTAGCTAGCTAGCTAGCTAGCATCGTACGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATTTTTTTTTTACTATCATCTACTATCTACTATCATCTACTATCATTCATCGATCGATCGATCGTACGTACGATCGATCGATCGATCGTACGATCGATGCTACGTACGTACG");
+    SEQAN_ASSERT(atEnd(reader));
+}
 
 SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_single_fstream)
 {
@@ -203,6 +219,24 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_mmap)
     close(mmapString);
 }
 
+SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_concat_mmap)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastAFile(filename);
+
+    file->close();
+    String<char, MMap<> > mmapString;
+    open(mmapString, toCString(filename));
+
+    typedef RecordReader<String<char, MMap<> >, DoublePass<Mapped> > TRecordReader;
+    TRecordReader reader(mmapString);
+
+    FASTA_TEST_BATCH_CONCAT(reader);
+
+    close(mmapString);
+}
+
 // -------------- FASTQ
 
 std::fstream* createFastQFile(seqan::CharString &tempFilename)
@@ -274,7 +308,28 @@ void FASTQ_TEST_BATCH(TRecordReader & reader)
     StringSet<DnaString> seqs;
     StringSet<CharString> quals;
 
-    // qualities are not asked for, but should be skipped internally
+    int res = read2(metas, seqs, quals, reader, Fastq());
+    SEQAN_ASSERT_EQ(res, 0);
+    SEQAN_ASSERT_EQ(metas[0], "SEQ_ID");
+    SEQAN_ASSERT_EQ(seqs[0],
+                "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
+    SEQAN_ASSERT_EQ(quals[0], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    SEQAN_ASSERT_EQ(metas[1], " 2ndSequence with formatting obscurities");
+    SEQAN_ASSERT_EQ(seqs[1],
+                "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
+    SEQAN_ASSERT_EQ(quals[1], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    SEQAN_ASSERT(atEnd(reader));
+}
+
+template <typename TRecordReader>
+void FASTQ_TEST_BATCH_CONCAT(TRecordReader & reader)
+{
+    using namespace seqan;
+
+    StringSet<CharString, Owner<ConcatDirect<> > > metas;
+    StringSet<DnaString, Owner<ConcatDirect<> > > seqs;
+    StringSet<CharString, Owner<ConcatDirect<> > > quals;
+
     int res = read2(metas, seqs, quals, reader, Fastq());
     SEQAN_ASSERT_EQ(res, 0);
     SEQAN_ASSERT_EQ(metas[0], "SEQ_ID");
@@ -383,5 +438,24 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_mmap)
 
     close(mmapString);
 }
+
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_concat_mmap)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastQFile(filename);
+
+    file->close();
+    String<char, MMap<> > mmapString;
+    open(mmapString, toCString(filename));
+
+    typedef RecordReader<String<char, MMap<> >, DoublePass<Mapped> > TRecordReader;
+    TRecordReader reader(mmapString);
+
+    FASTQ_TEST_BATCH_CONCAT(reader);
+
+    close(mmapString);
+}
+
 
 #endif // def TEST_STREAM_TEST_STREAM_READ_FASTAQ_H_
