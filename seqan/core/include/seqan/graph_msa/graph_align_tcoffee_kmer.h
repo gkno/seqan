@@ -65,6 +65,7 @@ _getTupelString(TString const& str,
 
 	TWord len = length(str);
 	clear(tupelString);
+	if(len < ktup) return;
 	resize(tupelString, len-(ktup - 1)); 
 	TWord tupelIndex = 0;
 	TWord endTupel = 0;
@@ -138,7 +139,8 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 			// Fractional common kmer count
 			// = Number of common q-grams / Number of possible common q-grams
 			TValue minVal = (mat[col*nseq+col] < mat[row*nseq+row]) ? mat[col*nseq+col] : mat[row*nseq+row];
-			mat[row*nseq+col] = (mat[row*nseq+col] * SEQAN_DISTANCE_UNITY) / minVal;
+			if (minVal == 0) mat[row*nseq+col] = 0;
+			else mat[row*nseq+col] = (mat[row*nseq+col] * SEQAN_DISTANCE_UNITY) / minVal;
 			//std::cout << mat[row*nseq+col] << ",";
 		}
 		//std::cout << std::endl;
