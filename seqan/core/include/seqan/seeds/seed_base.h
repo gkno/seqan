@@ -253,7 +253,7 @@ leftPosition(Seed<TPosition, TSpecSeed>  & me,
 ..see:Function.leftPosition
 */
 template< typename TPosition, typename TSpecSeed, typename TSize, typename TPosition2> 
-inline TPosition 
+inline void
 setLeftPosition(Seed<TPosition, TSpecSeed>  & me, 
 				TSize dim,
 				TPosition2 new_pos)
@@ -297,7 +297,7 @@ rightPosition(Seed<TPosition, TSpecSeed>  & me,
 ..see:Function.setLeftPosition
 */
 template< typename TPosition, typename TSpecSeed, typename TSize, typename TPosition2> 
-inline TPosition 
+inline void 
 setRightPosition(Seed<TPosition, TSpecSeed>  & me, 
 				TSize dim,
 				TPosition2 new_pos)
