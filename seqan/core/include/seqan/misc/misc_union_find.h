@@ -248,14 +248,18 @@ findSet(UnionFind<TValue> & unionFind,
     TValue j = query;
     while (unionFind._values[j] >= 0)
         j = unionFind._values[j];
+    SEQAN_ASSERT_LT(unionFind._values[j], static_cast<int>(length(unionFind._values)));
+    SEQAN_ASSERT_GEQ(j, static_cast<TValue>(0));
+    SEQAN_ASSERT_LT(j, static_cast<TValue>(length(unionFind._values)));
     
     TValue i = query;
-    while (unionFind._values[i] >= 0) {
+    while (unionFind._values[i] >= 0)
+    {
         TValue tmp = i;
         i = unionFind._values[i];
         unionFind._values[tmp] = j;
     }
-
+    
     return j;
 }
 
@@ -285,6 +289,8 @@ joinSets(UnionFind<TValue> & unionFind,
          TLeft const & left,
          TRight const & right)
 {
+    if (left == right)
+        return;
     TValue sum = unionFind._values[left] + unionFind._values[right];
     if (_abs(unionFind._values[left]) < _abs(unionFind._values[right])) {
         unionFind._values[left] = right;
