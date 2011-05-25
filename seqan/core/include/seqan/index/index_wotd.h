@@ -332,7 +332,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size< Index<TText, IndexWotd<WotdOriginal> > >::Type TSize;
 		TSize edgeLen = parentEdgeLength(it);
 		HistoryStackWotdOriginal_<TSize> entry = { value(it).node, edgeLen };
-		push(it.history, entry);
+		appendValue(it.history, entry);
 		value(it).parentRepLen += edgeLen;
 	}
 
@@ -343,7 +343,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type TSize;
 		TSize edgeLen = parentEdgeLength(it);
 		HistoryStackWotdModified_<TSize> entry = { value(it).node, edgeLen, value(it).range };
-		push(it.history, entry);
+		appendValue(it.history, entry);
 		value(it).parentRepLen += edgeLen;
 		value(it).parentRight = value(it).range.i2;
 	}
@@ -800,7 +800,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size< Index<TText, IndexWotd<WotdOriginal> > >::Type TSize;
 
 		if (!empty(it.history)) {
-			HistoryStackWotdOriginal_<TSize> const &entry = top(it.history);
+			HistoryStackWotdOriginal_<TSize> const &entry = back(it.history);
 			value(it).node = entry.node;
 			value(it).parentRepLen -= entry.edgeLen;
 			value(it).edgeLen = entry.edgeLen;
@@ -818,14 +818,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		if (!empty(it.history)) 
 		{
-			HistoryStackWotdModified_<TSize> const &entry = top(it.history);
+			HistoryStackWotdModified_<TSize> const &entry = back(it.history);
 			value(it).node = entry.node;
 			value(it).parentRepLen -= entry.edgeLen;
 			value(it).edgeLen = entry.edgeLen;
 			value(it).range = entry.range;
 			pop(it.history);
 			if (!empty(it.history))
-				value(it).parentRight = top(it.history).range.i2;	// copy right boundary of parent's range
+				value(it).parentRight = back(it.history).range.i2;	// copy right boundary of parent's range
 			return true;
 		}
 		return false;
@@ -841,7 +841,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		if (!empty(it.history))
 		{
-			HistoryStackWotdModified_<TSize> const &entry = top(it.history);
+			HistoryStackWotdModified_<TSize> const &entry = back(it.history);
 			typename VertexDescriptor<TIndex>::Type desc;
 
 			desc.node = entry.node;
@@ -866,7 +866,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		if (!empty(it.history))
 		{
-			HistoryStackWotdModified_<TSize> const &entry = top(it.history);
+			HistoryStackWotdModified_<TSize> const &entry = back(it.history);
 			typename VertexDescriptor<TIndex>::Type desc;
 
 			desc.node = entry.node;

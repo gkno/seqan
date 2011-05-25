@@ -500,14 +500,38 @@ inline TValue &
 top(String<TValue, Block<SPACE> > & me)
 {
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_NOT_MSG(empty(me), "top() called on an empty string.");
+
     return *me.lastValue;
 }
 
 template<typename TValue, unsigned int SPACE>
 inline TValue const &
-top(String<TValue, Block<SPACE> > const& me)
+top(String<TValue, Block<SPACE> > const & me)
 {
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_NOT_MSG(empty(me), "top() called on an empty string.");
+
+    return *me.lastValue;
+}
+
+template<typename TValue, unsigned int SPACE>
+inline TValue &
+back(String<TValue, Block<SPACE> > & me)
+{
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_NOT_MSG(empty(me), "back() called on an empty string.");
+
+    return *me.lastValue;
+}
+
+template<typename TValue, unsigned int SPACE>
+inline TValue const &
+back(String<TValue, Block<SPACE> > const & me)
+{
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_NOT_MSG(empty(me), "back() called on an empty string.");
+
     return *me.lastValue;
 }
 
@@ -520,6 +544,8 @@ inline TValue &
 topPrev(String<TValue, Block<SPACE> > & me)
 {
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_GEQ_MSG(length(me), 2, "topPrev() called on a string with less than 2 elements.");
+
     if (me.lastValue != me.blockFirst)
         return *(me.lastValue - 1);
     else
@@ -531,7 +557,9 @@ inline TValue const &
 topPrev(String<TValue, Block<SPACE> > const& me)
 {
     SEQAN_CHECKPOINT;
-    if (me.lastValue != me.blockFirst)
+    SEQAN_ASSERT_GEQ_MSG(length(me), 2, "topPrev() called on a string with less than 2 elements.");
+
+   if (me.lastValue != me.blockFirst)
         return *(me.lastValue - 1);
     else
         return *(begin(*me.blocks[length(me.blocks) - 1]) + (SPACE - 1));
@@ -541,11 +569,25 @@ topPrev(String<TValue, Block<SPACE> > const& me)
 // Function pop()
 // ----------------------------------------------------------------------------
 
+template <typename TValue, typename TSpec>
+inline void
+pop(String<TValue, TSpec> & me)
+{
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_NOT_MSG(empty(me), "pop() called on an empty string.");
+
+    resize(me, length(me) - 1);
+}
+
 template<typename TValue, unsigned int SPACE>
 inline void
 pop(String<TValue, Block<SPACE> >& me)
 {
+    typedef typename String<TValue, Block<SPACE> >::TBlockIter TBlockIter;
+    
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_NOT_MSG(empty(me), "pop() called on an empty string.");
+    
     if (me.lastValue == me.blockFirst) {
         typename Size< String<TValue, Block<SPACE> > >::Type last = length(me.blocks);
 
@@ -558,6 +600,9 @@ pop(String<TValue, Block<SPACE> >& me)
             if (last) {
                 me.blockFirst = begin(*me.blocks[--last]);
                 me.lastValue = me.blockLast = (me.blockFirst + (SPACE - 1));
+            } else
+            {
+                me.lastValue = me.blockFirst = me.blockLast = TBlockIter();
             }
         }
     } else {

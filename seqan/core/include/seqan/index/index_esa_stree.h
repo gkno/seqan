@@ -369,20 +369,20 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 	template < typename TIndex, typename TSpec >
 	inline bool _dfsReversedOrder(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
-        return lcpAt(_dfsRange(it).i2 - 1, container(it)) > top(it.history).range.i2;
+        return lcpAt(_dfsRange(it).i2 - 1, container(it)) > back(it.history).range.i2;
 	}
 
 	// standard push/pop handlers of lcp-dfs-traversal
 	template < typename TIndex, typename TSpec, typename TSize >
 	inline void _dfsOnPop(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, TSize const) {
-        _dfsRange(it).i1 = top(it.history).range.i1;
-		_dfsLcp(it) = top(it.history).range.i2;
+        _dfsRange(it).i1 = back(it.history).range.i1;
+		_dfsLcp(it) = back(it.history).range.i2;
 		pop(it.history);
 	}
 
 	template < typename TIndex, typename TSpec, typename TElement >
 	inline void _dfsOnPush(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, TElement const &e) {
-		push(it.history, e);
+		appendValue(it.history, e);
 	}
 
 	template < typename TIndex, typename TSpec >
@@ -411,7 +411,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 			{
 				typedef typename Size<TIndex>::Type TSize;
 				typedef typename Iter<TIndex, VSTree< BottomUp<TSpec> > >::TStackEntry TStackEntry;
-				TStackEntry	_top_ = top(it.history);
+				TStackEntry	_top_ = back(it.history);
 				TSize		lcp_i = lcpAt(_dfsRange(it).i2 - 1, index);
 
 				if (lcp_i < _top_.range.i2) {
@@ -604,8 +604,8 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 		// push current intervals
 		hA = value(a).range;
 		hB = value(b).range;
-		push(a.history, hA);
-		push(b.history, hB);
+		appendValue(a.history, hA);
+		appendValue(b.history, hB);
 
 		TSize s = min(length(a.history), length(b.history)), i0 = 0;
 		
@@ -661,8 +661,8 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 		// push current intervals
 		hA = value(a).range;
 		hB = value(b).range;
-		push(a.history, hA);
-		push(b.history, hB);
+		appendValue(a.history, hA);
+		appendValue(b.history, hB);
 
 		TSize s = min(length(a.history), length(b.history)), i0 = 0;
 		
@@ -1365,7 +1365,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		h.range = value(it).range;
 
 		value(it).parentRight = value(it).range.i2;
-		push(it.history, h);
+		appendValue(it.history, h);
 	}
 
 
@@ -1587,10 +1587,10 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	_goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
 		if (!empty(it.history)) {
-			value(it).range = top(it.history).range;
+			value(it).range = back(it.history).range;
 			pop(it.history);
 			if (!empty(it.history))
-				value(it).parentRight = top(it.history).range.i2;	// copy right boundary of parent's range
+				value(it).parentRight = back(it.history).range.i2;	// copy right boundary of parent's range
 			return true;
 		}
 		return false;
@@ -1628,7 +1628,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 			typename Size<TIndex>::Type parentRight = 0;
 			if (length(it.history) > 2)
 				parentRight = topPrev(it.history).range.i2;
-			return typename VertexDescriptor<TIndex>::Type(top(it.history).range, parentRight);
+			return typename VertexDescriptor<TIndex>::Type(back(it.history).range, parentRight);
 		} else
 			return value(it);
 	}
