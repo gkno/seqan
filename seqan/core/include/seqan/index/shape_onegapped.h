@@ -173,6 +173,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
 		typedef typename Size< Shape<TValue, OneGappedShape> >::Type	TSize;
 
+		SEQAN_ASSERT_GT(me.blockLen1, 0u);
+
 		me.hValue = ordValue(me.leftChar = *it);
 		for(TSize i = 1; i < me.blockLen1; ++i) {
 			goNext(it);
@@ -194,6 +196,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
 		typedef typename Size< Shape<TValue, OneGappedShape> >::Type	TSize;
         
+		SEQAN_ASSERT_GT(me.blockLen1, 0u);
+
         me.leftChar = 0;
 		me.hValue = ordValue(*it);
 		for(TSize i = 2; i < me.blockLen1; ++i) {
@@ -216,6 +220,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
 		TSize blockLen1 = me.blockLen1;
 		TSize blockLen2 = me.blockLen2;
+
+		SEQAN_ASSERT_GT(me.blockLen1, 0u);
 
 		if ((TSize)length(me) > charsLeft)
 		{
@@ -257,6 +263,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize blockLen1 = me.blockLen1;
 		TSize blockLen2 = me.blockLen2;
 
+		SEQAN_ASSERT_GT(me.blockLen1, 0u);
+
 		if ((TSize)length(me) > charsLeft)
 		{
 			if (blockLen1 > charsLeft)
@@ -297,6 +305,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;
 		TIter it(_it);
+
+		SEQAN_ASSERT_GT(me.blockLen1, 0u);
 
 		// remove leftmost character
 		me.hValue -= ordValue(me.leftChar) * me.factor1;

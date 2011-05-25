@@ -321,6 +321,8 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		typedef typename Value< Shape<TValue, SimpleShape> >::Type	THValue;
 		typedef typename Size< Shape<TValue, SimpleShape> >::Type	TSize;
 
+		SEQAN_ASSERT_GT(me.span, 0u);
+
 		me.hValue = ordValue(me.leftChar = *it);
 		for(TSize i = 1; i < me.span; ++i) {
 			++it;
@@ -337,6 +339,8 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		typedef typename Value< Shape<TValue, SimpleShape> >::Type	THValue;
 		typedef typename Size< Shape<TValue, SimpleShape> >::Type	TSize;
         
+		SEQAN_ASSERT_GT(me.span, 0u);
+
         me.leftChar = 0;
 		me.hValue = ordValue(*it);
 		for(TSize i = 2; i < me.span; ++i) {
@@ -400,6 +404,8 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		SEQAN_ASSERT_GT(me.span, 0u);
 
 		TSize iEnd = me.span;
 		if (iEnd > charsLeft) iEnd = charsLeft;
@@ -504,6 +510,8 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
 
+		SEQAN_ASSERT_GT(me.span, 0u);
+
 		TSize iEnd = me.span;
 		if (iEnd > charsLeft) iEnd = charsLeft;
 
@@ -547,6 +555,9 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 		// remove first, shift left, and add next character
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
 		typedef typename Size< Shape<TValue, TSpec> >::Type		TSize;
+
+		SEQAN_ASSERT_GT(me.span, 0u);
+
 		me.hValue = 
 			(me.hValue - ordValue(me.leftChar) * (THValue)me.leftFactor) * ValueSize<TValue>::VALUE
 			+ ordValue((TValue)*(it + ((TSize)me.span - 1)));
@@ -575,6 +586,8 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		SEQAN_ASSERT_GT(me.span, 0u);
 
 		TSize iEnd = me.span;
 		if (iEnd > charsLeft) iEnd = charsLeft;
@@ -617,6 +630,8 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		SEQAN_ASSERT_GT(me.span, 0u);
 
 		TSize iEnd = me.span;
 		if (iEnd > charsLeft) iEnd = charsLeft;
@@ -668,6 +683,8 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 	SEQAN_CHECKPOINT
 		// remove first, shift left, and add next character
 		typedef typename Value< Shape<TValue, TSpec> >::Type	THValue;
+
+		SEQAN_ASSERT_GT(me.span, 0u);
 
 		if (charsLeft >= me.span) {
 			// update sum of x_i

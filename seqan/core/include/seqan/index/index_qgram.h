@@ -879,7 +879,7 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type						TSize;
 
-		if (length(text) < length(shape)) return;
+		if (length(text) < length(shape) || empty(shape)) return;
 		TSize num_qgrams = (length(text) - length(shape)) / stepSize + 1;
 
 		TIterator itText = begin(text, Standard());
@@ -906,6 +906,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type							TSize;
 
+		if (empty(shape)) return;
+		
 		if (stepSize == 1)
 			for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 			{
@@ -1023,6 +1025,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type						TSize;
 
+		if (empty(shape)) return;
+
 		TSize num_qgrams = length(text) - length(shape) + 1;
 		TIterator itText = begin(text, Standard());
 
@@ -1077,6 +1081,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type							TSize;
+
+		if (empty(shape)) return;
 
 		if (stepSize == 1)
 			for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
@@ -1536,8 +1542,13 @@ The resulting tables must have appropriate size before calling this function.
 		
 		// 1. clear counters
 		_qgramClearDir(dir, bucketMap);
+		if (empty(shape))
+		{
+			clear(counts);
+			return;
+		}
 		arrayFill(begin(lastSeqSeen, Standard()), end(lastSeqSeen, Standard()), -1);
-
+		
 		// 2. count distinct sequences for each q-gram
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
@@ -1868,6 +1879,8 @@ The resulting tables must have appropriate size before calling this function.
 		typedef typename Size<TIndex>::Type						TSize;
 
 		TShape const &shape = indexShape(index);
+		
+		if (empty(shape)) return 0;
 
 		// count all overlapping q-grams
 		TSize stepSize = getStepSize(index);

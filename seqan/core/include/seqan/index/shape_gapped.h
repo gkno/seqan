@@ -249,9 +249,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			hValue(0)
 		{
 		SEQAN_CHECKPOINT
-			resize(diffs, _span);
-			for(unsigned i = 0; i < _span; ++i)
-				diffs[i] = 1;
+			if (_span > 0)
+			{
+				resize(diffs, _span - 1);
+				for(unsigned i = 0; i < _span - 1; ++i)
+					diffs[i] = 1;
+			}
 		}
 
 		Shape(Shape const &other):
@@ -286,9 +289,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			span = length(other);
 			weight = seqan::weight(other);
-			resize(diffs, weight);
-			for(unsigned i = 1; i < weight; ++i)
-				diffs[i] = 1;
+			if (weight > 0)
+			{
+				resize(diffs, weight - 1);
+				for(unsigned i = 0; i < weight - 1; ++i)
+					diffs[i] = 1;
+			}
+			else
+				clear(diffs);
 			hValue = other.hValue;
 			return *this;
 		}
@@ -394,6 +402,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	SEQAN_CHECKPOINT
 		typedef typename Value< Shape<TValue, GenericShape> >::Type	THValue;
 		typedef typename Size< Shape<TValue, GenericShape> >::Type	TSize;
+		
+		SEQAN_ASSERT_GT(me.weight, 0u);
 
 		me.hValue = ordValue((TValue)*it);
 		TSize iEnd = me.weight - 1;
@@ -413,6 +423,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 		if (charsLeft >= (TSize)me.span) 
 			return hash(me, it);
+
+		SEQAN_ASSERT_GT(me.weight, 0u);
 
 		TSize i = 0;
 		if (charsLeft > 0) {
@@ -445,6 +457,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 			hash(me, it);
 			return ++me.hValue;
 		}
+
+		SEQAN_ASSERT_GT(me.weight, 0u);
 
 		TSize i = 0;
 		if (charsLeft > 0) {
@@ -641,7 +655,9 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	SEQAN_CHECKPOINT
 
 		clear(bitmap);
-		reserve(bitmap, length(me));		
+		if (weight(me) == 0) return;
+		
+		reserve(bitmap, length(me));	
 		appendValue(bitmap, '1');
 		for (unsigned i = 0; i < weight(me) - 1; ++i)
 		{
