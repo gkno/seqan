@@ -403,7 +403,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		typedef typename Value< Shape<TValue, GenericShape> >::Type	THValue;
 		typedef typename Size< Shape<TValue, GenericShape> >::Type	TSize;
 		
-		SEQAN_ASSERT_GT(me.weight, 0u);
+		SEQAN_ASSERT_GT((unsigned)me.weight, 0u);
 
 		me.hValue = ordValue((TValue)*it);
 		TSize iEnd = me.weight - 1;
@@ -424,7 +424,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		if (charsLeft >= (TSize)me.span) 
 			return hash(me, it);
 
-		SEQAN_ASSERT_GT(me.weight, 0u);
+		SEQAN_ASSERT_GT((unsigned)me.weight, 0u);
 
 		TSize i = 0;
 		if (charsLeft > 0) {
@@ -458,7 +458,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 			return ++me.hValue;
 		}
 
-		SEQAN_ASSERT_GT(me.weight, 0u);
+		SEQAN_ASSERT_GT((unsigned)me.weight, 0u);
 
 		TSize i = 0;
 		if (charsLeft > 0) {
