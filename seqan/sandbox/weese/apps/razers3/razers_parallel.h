@@ -1139,7 +1139,7 @@ int _mapSingleReadsParallel(
         return _mapSingleReadsParallel(store, cnts, options, shape, mode, Swift<TSwiftSpec>());
     } else
     {
-        return _mapSingleReadsParallel(store, cnts, options, shape, mode, Pigeonhole<>());
+        return _mapSingleReadsParallel(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<>());
     }
 }
     
