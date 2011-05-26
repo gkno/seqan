@@ -275,9 +275,13 @@ inline bool
 _pigeonholeUpdateShapeLength(Shape<TValue, SimpleShape> &shape, TSize newLength)
 {
     TSize weight = _pigeonholeMaxShapeWeight(shape);
-    if (weight > newLength) weight = newLength;
+
+    if (weight > newLength) 
+		weight = newLength;
+		
     if (weight == length(shape))
         return false;
+
     resize(shape, weight);
     return true;
 }
@@ -291,18 +295,14 @@ _pigeonholeUpdateShapeLength(Shape<TValue, OneGappedShape> &shape, TSize newLeng
     
     TSize weight = _pigeonholeMaxShapeWeight(shape);
 
-    if (weight >= newLength)
-    {
-        resize(shape, newLength);
-    }
-    else
-    {
-        CharString str;
-        resize(str, weight / 2, '1');
-        resize(str, newLength - (weight + 1) / 2, '0');
-        resize(str, newLength, '1');
-        stringToShape(shape, str);
-    }
+    if (weight > newLength)
+		weight = newLength;
+
+	CharString str;
+	resize(str, weight / 2, '1');
+	resize(str, newLength - (weight + 1) / 2, '0');
+	resize(str, newLength, '1');
+	stringToShape(shape, str);
     return true;
 }
 
