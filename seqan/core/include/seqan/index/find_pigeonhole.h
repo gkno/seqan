@@ -260,7 +260,7 @@ inline unsigned
 _pigeonholeMaxShapeWeight(Shape<TValue, TSpec> const &)
 {
     typedef typename Value<Shape<TValue, SimpleShape> >::Type THashValue;
-    return (unsigned)BitsPerValue<THashValue>::VALUE / (unsigned)BitsPerValue<TValue>::VALUE;
+    return (unsigned)(BitsPerValue<THashValue>::VALUE - 1)/ (unsigned)BitsPerValue<TValue>::VALUE;
 }
 
 template <typename TShape, typename TSize>
@@ -389,7 +389,7 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 
         clear(pattern.lastSeedDiag);
         if (Pigeonhole<TSpec>::ONE_PER_DIAGONAL)
-            resize(pattern.lastSeedDiag, -maxSeqLen);
+            resize(pattern.lastSeedDiag, seqCount, -maxSeqLen);
 		pattern.seqDisabled = -maxSeqLen - 1;
     }
 }
