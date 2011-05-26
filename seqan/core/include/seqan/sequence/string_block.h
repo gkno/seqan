@@ -544,7 +544,7 @@ inline TValue &
 topPrev(String<TValue, Block<SPACE> > & me)
 {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ_MSG(length(me), 2, "topPrev() called on a string with less than 2 elements.");
+    SEQAN_ASSERT_GEQ_MSG(length(me), 2u, "topPrev() called on a string with less than 2 elements.");
 
     if (me.lastValue != me.blockFirst)
         return *(me.lastValue - 1);
@@ -557,7 +557,7 @@ inline TValue const &
 topPrev(String<TValue, Block<SPACE> > const& me)
 {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ_MSG(length(me), 2, "topPrev() called on a string with less than 2 elements.");
+    SEQAN_ASSERT_GEQ_MSG(length(me), 2u, "topPrev() called on a string with less than 2 elements.");
 
    if (me.lastValue != me.blockFirst)
         return *(me.lastValue - 1);
