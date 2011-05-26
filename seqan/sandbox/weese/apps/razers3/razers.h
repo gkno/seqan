@@ -1294,6 +1294,13 @@ setMaxErrors(TFilterPattern &, TReadNo, TMaxErrors)
 {
 }
 
+template < typename TIndex, typename TPigeonholeSpec, typename TReadNo, typename TMaxErrors >
+inline void 
+setMaxErrors(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPattern, TReadNo readNo, TMaxErrors maxErrors)
+{
+	maskPatternSequence(filterPattern, readNo, maxErrors >= 0);
+}
+
 template < typename TIndex, typename TSwiftSpec, typename TReadNo, typename TMaxErrors >
 inline void 
 setMaxErrors(Pattern<TIndex, Swift<TSwiftSpec> > &filterPattern, TReadNo readNo, TMaxErrors maxErrors)
