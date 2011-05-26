@@ -154,7 +154,8 @@ int mapReads(
 		cerr << "Overabundance threshold:         \t" << options.abundanceCut << endl;
         if (options.threshold > 0)
             cerr << "Taboo length:                    \t" << options.tabooLength << endl;
-        if (options._debugLevel >= 2) {
+        if (options._debugLevel >= 1)
+        {
 #ifdef PLATFORM_WINDOWS
             int pid = _getpid();
 #else // #ifdef PLATFORM_WINDOWS
