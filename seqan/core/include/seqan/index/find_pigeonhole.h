@@ -227,6 +227,7 @@ namespace seqan
 		TShape					shape;
         __int64                 curBeginPos, curEndPos;
 		__int64					finderLength;
+		__int64					seqDisabled;
 		TSize					finderPosOffset;						// these must be of
 		TSize					finderPosNextOffset;					// type TSize of TBucket
         TSize                   maxSeqLen;
@@ -326,6 +327,17 @@ _pigeonholeUpdateShapeLength(Shape<TValue, GenericShape> &shape, TSize newLength
     return true;
 }
 
+template <typename TIndex, typename TSpec, typename TSeqNo>
+inline void
+maskPatternSequence(Pattern<TIndex, Pigeonhole<TSpec> > & pattern, TSeqNo seqNo, bool enable) 
+{
+    SEQAN_ASSERT_NEQ_MSG((int)Pigeonhole<TSpec>::ONE_PER_DIAGONAL, 0, "Disabling sequences in the pigeonhole filter requires the ONE_PER_DIAGONAL heuristic.");
+	
+	if (enable)
+		pattern.lastSeedDiag[seqNo] = -pattern.maxSeqLen;
+	else
+		pattern.lastSeedDiag[seqNo] = pattern.seqDisabled;
+}
 
 template <typename TIndex, typename TFloat, typename TSpec>
 inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat errorRate) 
@@ -378,6 +390,7 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
         clear(pattern.lastSeedDiag);
         if (Pigeonhole<TSpec>::ONE_PER_DIAGONAL)
             resize(pattern.lastSeedDiag, -maxSeqLen);
+		pattern.seqDisabled = -maxSeqLen - 1;
     }
 }
 
@@ -926,6 +939,7 @@ windowFindNext(
     Pair<unsigned> ndlPos;
     THit hit;
 	double errorRate = pattern._currentErrorRate;
+	__int64 seqDisabled = pattern.seqDisabled;
         
     // iterate over all non-repeat regions within the window
     for (; finder.curPos < windowEnd; )
@@ -952,10 +966,14 @@ windowFindNext(
 					posLocalize(ndlPos, *occ, stringSetLimits(index));
 					hit.hstkPos = finder.curPos - getSeqOffset(ndlPos);	// bucket begin in haystack
 					hit.ndlSeqNo = getSeqNo(ndlPos);						// needle seq. number
+
 					if (Pigeonhole<TSpec>::ONE_PER_DIAGONAL)
 					{
-						__int64 diag = hit.hstkPos + (__int64)pattern.finderPosOffset;
-						if (pattern.lastSeedDiag[hit.ndlSeqNo] == diag)
+						register __int64 lastDiag = pattern.lastSeedDiag[hit.ndlSeqNo];
+						if (lastDiag == seqDisabled) continue;
+						
+						register __int64 diag = hit.hstkPos + (__int64)pattern.finderPosOffset;
+						if (lastDiag == diag)
 						{
 //							std::cout<<"double hit"<<std::endl;
 							continue;
