@@ -2364,37 +2364,6 @@ int _mapSingleReads(
 	return 0;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-// Wrapper for different filters specs
-template <
-	typename TFSSpec, 
-	typename TFSConfig, 
-	typename TCounts,
-	typename TSpec, 
-	typename TAlignMode,
-	typename TGapMode,
-	typename TScoreMode,
-	typename TReadIndex,
-    typename TMatchNPolicy >
-int _mapSingleReads(
-	FragmentStore<TFSSpec, TFSConfig>					& store,
-	TCounts												& cnts,
-	RazerSOptions<TSpec>								& options,
-	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy>  const & mode,
-	TReadIndex											& readIndex)    
-{
-    if (options.threshold > 0)
-    {
-        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
-        return _mapSingleReads(store, cnts, options, mode, readIndex, Swift<TSwiftSpec>());
-    } else
-    {
-        return _mapSingleReads(store, cnts, options, mode, readIndex, Pigeonhole<>());
-    }    
-}
-
-
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for SWIFT (default)
 template <
@@ -2406,13 +2375,15 @@ template <
 	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
-    typename TMatchNPolicy >
+    typename TMatchNPolicy,
+    typename TFilterSpec >
 int _mapSingleReads(
 	FragmentStore<TFSSpec, TFSConfig>					& store,
 	TCounts												& cnts,
 	RazerSOptions<TSpec>								& options,
 	TShape const										& shape,
-	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const & mode)
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const & mode,
+	TFilterSpec)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
@@ -2430,7 +2401,7 @@ int _mapSingleReads(
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
 
-	return _mapSingleReads(store, cnts, options, mode, swiftIndex);
+	return _mapSingleReads(store, cnts, options, mode, swiftIndex, TFilterSpec());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2443,13 +2414,15 @@ template <
 	typename TShape,
 	typename TGapMode,
 	typename TScoreMode,
-    typename TMatchNPolicy >
+    typename TMatchNPolicy,
+    typename TFilterSpec >
 int _mapSingleReads(
 	FragmentStore<TFSSpec, TFSConfig>						& store,
 	TCounts													& cnts,
 	RazerSOptions<TSpec>									& options,
 	TShape const											& shape,
-	RazerSMode<RazerSPrefix, TGapMode, TScoreMode, TMatchNPolicy> const & mode)
+	RazerSMode<RazerSPrefix, TGapMode, TScoreMode, TMatchNPolicy> const & mode,
+	TFilterSpec)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore			TReadSeqStore;
@@ -2471,8 +2444,39 @@ int _mapSingleReads(
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
 	
-	return _mapSingleReads(store, cnts, options, mode, swiftIndex);
+	return _mapSingleReads(store, cnts, options, mode, swiftIndex, TFilterSpec());
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// Wrapper for different filters specs
+template <
+	typename TFSSpec, 
+	typename TFSConfig,
+	typename TCounts,
+	typename TSpec,
+	typename TShape,
+    typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode,
+    typename TMatchNPolicy >
+int _mapSingleReads(
+	FragmentStore<TFSSpec, TFSConfig>		& store,
+	TCounts									& cnts,
+	RazerSOptions<TSpec>					& options,
+	TShape const							& shape,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const & mode)
+{
+    if (options.threshold > 0)
+    {
+        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
+        return _mapSingleReads(store, cnts, options, shape, mode, Swift<TSwiftSpec>());
+    } else
+    {
+        return _mapSingleReads(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<>());
+    }    
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for single/mate-pair mapping
