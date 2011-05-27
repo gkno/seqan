@@ -59,7 +59,7 @@ using namespace seqan;
 // such only occurs every 4M chars.
 const unsigned int BUFFER_SIZE = 1024 * 1024 * 4;
 
-typedef CharString TSequence;
+typedef Dna5String TSequence;
 
 struct Options
 {
@@ -71,13 +71,68 @@ struct Options
     bool bzip2;
     bool documentMMap;
     bool nonConcat;
+    bool multiSeq;
 
     Options()
             : doublePass(false), cstdio(false), fstream(false),
               mmapString(false), gzip(false), bzip2(false), documentMMap(false),
-              nonConcat(false)
+              nonConcat(false), multiSeq(false)
     {}
 };
+
+int readFileMultiSeqFile(char const * filename, Options const & /*options*/)
+{
+    typedef StringSet<CharString> TSequenceIds;
+    typedef StringSet<TSequence> TSequences;
+    typedef Iterator<TSequenceIds>::Type TSequenceIdsIter;
+    typedef Iterator<TSequences>::Type TSequencesIter;
+    TSequenceIds sequenceIds;
+    TSequences sequences;
+
+    double before = sysTime();
+    std::cerr << "READING\tWHOLE\tOWNER";
+    std::cerr << "\tmultiseq" << std::flush;
+
+    MultiSeqFile multiSeqFile;
+    if (!open(multiSeqFile.concat, filename, OPEN_RDONLY))
+    {
+        std::cerr << std::endl << "Could not open mmap file for reading." << std::endl;
+        return 1;
+    }
+
+    AutoSeqFormat format;
+    guessFormat(multiSeqFile.concat, format);
+    split(multiSeqFile, format);
+
+    unsigned seqCount = length(multiSeqFile);
+    StringSet<TSequence> seqs;
+    StringSet<CharString> seqIDs;
+    reserve(seqs, seqCount, Exact());
+    reserve(seqIDs, seqCount, Exact());
+
+    TSequence seq;
+    // CharString qual;
+    CharString id;
+    for (unsigned i = 0; i < seqCount; ++i)
+    {
+        assignSeq(seq, multiSeqFile[i], format);    // read sequence
+        // assignQual(qual, multiSeqFile[i], format);  // read ascii quality values
+        assignSeqId(id, multiSeqFile[i], format);   // read sequence id
+
+        // convert ascii to values from 0..62
+        // store dna and quality together in Dna5Q
+        // for (unsigned j = 0; j < length(qual) && j < length(seq); ++j)
+        //     assignQualityValue(seq[j], (int)(ordValue(qual[j]) - 33));
+        // we use reserve and append, as assign is not supported
+        // by StringSet<..., Owner<ConcatDirect<> > >
+        appendValue(seqs, seq, Generous());
+        appendValue(seqIDs, id, Generous());
+    }
+
+    double after = sysTime();
+    fprintf(stderr, "\t%f\n", after - before);
+    return 0;
+}
 
 template <typename TSpec>
 int readFileMMapDocument(char const * filename, Options const & /*options*/, TSpec const & /*tag*/)
@@ -110,9 +165,9 @@ int readFileMMapDocument(char const * filename, Options const & /*options*/, TSp
 
     TSequenceIdsIter itId = begin(sequenceIds);
     TSequencesIter itSeq = begin(sequences);
-    for (; !atEnd(itId); ++itId, ++itSeq) {
+    // for (; !atEnd(itId); ++itId, ++itSeq) {
         //std::cout << value(itId) << "\t" << value(itSeq) << "\n";
-    }
+    // }
 
     if (res != 0)
         std::cerr << std::endl << "There was an error reading the FASTA file." << std::endl;
@@ -291,6 +346,7 @@ int main(int argc, char const ** argv)
     addOption(parser, CommandLineOption("m", "memory-mapped", "Use memory mapped I/O.", OptionType::Bool));
     addOption(parser, CommandLineOption("w", "document-mmapped", "Read whole document at once with memory mapped I/O.", OptionType::Bool));
     addOption(parser, CommandLineOption("n", "non-concat", "Do not use concat direct string for document-mmapped version.", OptionType::Bool));
+    addOption(parser, CommandLineOption("s", "multi-seq", "Use MultiSeqFile to read input.", OptionType::Bool));
     requiredArguments(parser, 2);
 
     // -----------------------------------------------------------------------
@@ -324,8 +380,11 @@ int main(int argc, char const ** argv)
         options.documentMMap = true;
     if (isSetLong(parser, "non-concat"))
         options.nonConcat = true;
+    if (isSetLong(parser, "multi-seq"))
+        options.multiSeq = true;
 
-    if (options.cstdio + options.fstream + options.gzip + options.bzip2 + options.mmapString + options.documentMMap == 0) {
+    if (options.cstdio + options.fstream + options.gzip + options.bzip2 + options.mmapString +
+        options.documentMMap + options.multiSeq == 0) {
         std::cerr << "You have to select exactly one stream type!" << std::endl;
         return 1;
     } else if (options.cstdio + options.fstream + options.gzip + options.bzip2 + options.mmapString + options.documentMMap > 1) {
@@ -340,7 +399,9 @@ int main(int argc, char const ** argv)
     // -----------------------------------------------------------------------
     // Read And Write FASTA file.
     // -----------------------------------------------------------------------
-    if (options.documentMMap) {
+    if (options.multiSeq) {
+        readFileMultiSeqFile(toCString(getArgumentValue(parser, 0)), options);
+    } else if (options.documentMMap) {
         readFileMMapDocument(toCString(getArgumentValue(parser, 0)), options);
     } else if (options.doublePass) {
         if (options.mmapString)
