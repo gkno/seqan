@@ -163,8 +163,8 @@ int readFileMMapDocument(char const * filename, Options const & /*options*/, TSp
     int res = read2(sequenceIds, sequences, reader, Fasta());
     SEQAN_ASSERT_EQ(length(sequenceIds), length(sequences));
 
-    TSequenceIdsIter itId = begin(sequenceIds);
-    TSequencesIter itSeq = begin(sequences);
+    // TSequenceIdsIter itId = begin(sequenceIds);
+    // TSequencesIter itSeq = begin(sequences);
     // for (; !atEnd(itId); ++itId, ++itSeq) {
         //std::cout << value(itId) << "\t" << value(itSeq) << "\n";
     // }
