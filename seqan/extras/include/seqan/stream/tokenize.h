@@ -227,7 +227,7 @@ _readHelper(TBuffer & buffer,
         TChar c = value(reader);
         if (bool( _charCompare(c, tag)) == desiredOutcomeOfComparison)
             return 0;
-        append(buffer, c, Generous()); // TODO Generous() is right?
+        appendValue(buffer, c, Generous()); // TODO Generous() is right?
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -270,7 +270,7 @@ _readHelper(TBuffer & buffer,
         {
             if (bool (_charCompare(c, compTag)) == desiredOutcomeOfComparison)
                 return 0;
-            append(buffer, c, Generous()); // TODO Generous() is right?
+            appendValue(buffer, c, Generous()); // TODO Generous() is right?
         }
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -495,7 +495,7 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
     while (!_streamEOF(file)) {
         c = _streamGet(file);
         if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
-        append(str, c);
+        appendValues(str, c);
     }
     return str;
 }*/
@@ -573,7 +573,7 @@ readUntilChar(TBuffer & buffer,
         TChar c = value(reader);
         if (c == x)
             return 0;
-        append(buffer, c, Generous()); // TODO Generous() is right?
+        appendValue(buffer, c, Generous()); // TODO Generous() is right?
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -616,7 +616,7 @@ readNChars(TBuffer & buffer,
     {
         if (atEnd(reader))
             return EOF_BEFORE_SUCCESS;
-        append(buffer, value(reader));
+        appendValue(buffer, value(reader));
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -668,7 +668,7 @@ _readNCharsIgnoringType(TBuffer & buffer,
         if (_charCompare(value(reader), TIgnoredType()))
             --i;
         else
-            append(buffer, value(reader));
+            appendValue(buffer, value(reader));
 
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -1057,7 +1057,7 @@ _parseReadWord(TFile & file, TChar& c)
     while (!_streamEOF(file)) {
         c = _streamGet(file);
         if (!_parseIsLetter(c)) break;
-        append(str, c);
+        appendValue(str, c);
     }
     return str;
 }*/
@@ -1127,11 +1127,11 @@ inline void
 _parseReadIdentifier(TFile & file, TString& str, TChar& c)
 {
     // Read identifier
-    append(str, c, Generous());
+    appendValue(str, c, Generous());
     while (!_streamEOF(file)) {
         c = _streamGet(file);
         if (!_parseIsAlphanumericChar(c)) break;
-        append(str, c, Generous());
+        appendValue(str, c, Generous());
     }
 }*/
 
@@ -1341,7 +1341,7 @@ _parseReadFilepath(TFile& file, TChar& c)
     while (!_streamEOF(file)) {
         c = _streamGet(file);
         if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
-        append(str, c);
+        appendValue(str, c);
     }
     typename Iterator<String<char>,Rooted >::Type str_it = end(str);    
     while(str_it != begin(str)) {

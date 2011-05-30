@@ -453,8 +453,8 @@ int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
         if (res)
             return res;
 
-        append(metaLengths, metaLength, Generous());
-        append(seqLengths, seqLength, Generous());
+        appendValue(metaLengths, metaLength, Generous());
+        appendValue(seqLengths, seqLength, Generous());
 
         res = _skipQualityBlock(reader, seqLength, TTag());
         if (res)
@@ -524,6 +524,7 @@ int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
         if (res)
             return res;
     }
+
     return 0;
 }
 
@@ -564,8 +565,8 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
         if (res)
             return res;
 
-        append(metaLengths, metaLength, Generous());
-        append(seqLengths, seqLength, Generous());
+        appendValue(metaLengths, metaLength, Generous());
+        appendValue(seqLengths, seqLength, Generous());
 
         res = _skipQualityBlock(reader, seqLength, TTag());
         if (res)
