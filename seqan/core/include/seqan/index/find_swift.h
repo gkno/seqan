@@ -554,8 +554,19 @@ setMinThreshold(Pattern<TIndex, Swift<TSpec> > & pattern, TSeqNo seqNo, TThresho
 	TBucketIterator itEnd = it + (bucketParams.reuseMask + 1);
 
 	for (; it != itEnd; ++it)
+    {
+        
+        // increase the threshold if it is less than the minimal threshold
 		if ((*it).threshold < thresh)
+        {
+            // increase the counter once it has reached the threshold
+            // otherwise we could output the same hit multiple times
+            if ((*it).counter >= (*it).threshold)
+                (*it).counter = thresh;
+
 			(*it).threshold = thresh;
+        }
+    }
 }
 
 template <typename TSpec, typename TSize, typename TShortSize, typename TPos>
