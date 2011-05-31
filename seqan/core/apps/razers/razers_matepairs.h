@@ -280,7 +280,8 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).orientation == '-') continue;
+		if ((*it).orientation == '-' || (*it).pairId == 0) continue;
+        
 		if (readNo == ((*it).rseqNo >> 1))
 		{ 
 			if ((*it).pairScore <= scoreDistCutOff) continue;
@@ -308,12 +309,14 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 						} 
                         else
                         {
-							*dit = *it;
-							++dit;
+							*dit = *it;	++dit; ++it;
+							*dit = *it;	++dit;
+							continue;
 						}
                     }
 				}
 #endif
+				++it;
 				continue;
 			}
 		}
@@ -591,7 +594,6 @@ void mapMatePairReads(
         // verify right mate, if left mate matches
 		if (bestLeftErrors != MaxValue<int>::VALUE)
 		{
-            
             // distance between left mate beginning and right mate end
             __int64 dist = (__int64)mR.gEnd - (__int64)(*bestLeft).i2.gBegin;
 //            if (dist <= options.libraryLength + options.libraryError &&
