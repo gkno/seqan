@@ -347,7 +347,7 @@ void compactPairMatches(
         // std::cerr << *it << std::endl;
         // std::cerr << *(it + 1) << std::endl;
         // SEQAN_ASSERT(it->pairMatchId == (it + 1)->pairMatchId);
-		if ((*it).orientation == '-' || (*it).readId == TMatch::INVALID_ID) continue;
+		if ((*it).orientation == '-' || (*it).readId == TMatch::INVALID_ID || (*it).pairMatchId == TMatch::INVALID_ID) continue;
 		if (matePairId == store.readStore[(*it).readId].matePairId)
 		{ 
 			if (it->pairScore <= scoreDistCutOff) continue;
@@ -376,12 +376,14 @@ void compactPairMatches(
 						} 
                         else
                         {
-							*dit = *it;
-							++dit;
+							*dit = *it;	++dit; ++it;
+							*dit = *it;	++dit;
+							continue;
 						}
                     }
 				}
 #endif
+				++it;
 				continue;
 			}
 		}
@@ -391,7 +393,6 @@ void compactPairMatches(
 			hitCount = 0;
 			if (options.scoreDistanceRange > 0)
 				scoreDistCutOff = (*it).pairScore - options.scoreDistanceRange;
-			
 			ditBeg = dit;
 		}
 		*dit = *it;	++dit; ++it;
