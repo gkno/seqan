@@ -50,7 +50,7 @@ namespace seqan {
 /**
 .Class.HistogramSet
 ..cat:Synopsis Data Structures
-..remarks:Data structure for keeping a compact set of histograms.
+..summary:Data structure for keeping a compact set of histograms.
 ..signature:HistogramSet<TValue>
 ..param.TValue:Type of the histogram counters.
 ..include:seqan/synopsis.h

@@ -192,7 +192,7 @@ reserve(UnionFind<TValue> & unionFind,
 // Function resize()
 // ----------------------------------------------------------------------------
 
-///.Function.resize.param.pm.type:Class.UnionFind
+///.Function.resize.param.object.type:Class.UnionFind
 ///.Function.resize.remarks:If $pm$ is of the @Class.UnionFind@, $value$ will automatically be set to -1.
 
 template <typename TValue, typename TSize, typename TTag>

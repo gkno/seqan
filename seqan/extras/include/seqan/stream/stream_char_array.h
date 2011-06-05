@@ -52,7 +52,7 @@ namespace seqan {
 /**
 .Spec.Char Array Stream
 ..cat:Input / Output
-..class:Class.Stream
+..general:Class.Stream
 ..summary:Thin wrapper around $char *$ to the @Concept.Stream|Stream@ concept.
 ..signature:Stream<Array<TPointer> >
 ..param.TPointer:Specification of the pointer type to work on.

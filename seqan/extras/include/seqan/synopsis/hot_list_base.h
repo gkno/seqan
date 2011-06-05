@@ -48,7 +48,7 @@ namespace seqan {
 /**
 .Class.HotList
 ..cat:Synopsis Data Structures
-..remarks:Data structure for (approximately) keeping a list of the k most frequent items in a data stream.
+..summary:Data structure for (approximately) keeping a list of the k most frequent items in a data stream.
 ..signature:HotList<TValue, TSpec>
 ..param.TValue:Type of the items to keep in hot list.
 ..param.TSpec:Tag used for the specialization.
@@ -206,7 +206,7 @@ _callbackContext(HotList<TValue, TSpec, TCallback> & hotList)
 ..cat:Synopsis Data Structures
 ..summary:Get the frequent items.
 ..signature:getItems(items, hotList)
-..param.value:List of value/frequency estimation @Class.Triple|Triples@.
+..param.items:List of value/frequency estimation @Class.Triple|Triples@.
 ...type:nolink:$String<Triple<TValue, TSize, TSize> >$
 ..param.hotList:The @Class.HotList@ to remove the value from.
 ...type:Class.HotList

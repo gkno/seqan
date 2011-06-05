@@ -54,6 +54,7 @@ namespace seqan {
 
 /**
 .Metafunction.HasMoveConstructor
+..summary:Query whether a class has a move constructor.
 ..cat:Content Manipulation
 ..signature:HasMoveConstructor<T>::Type
 ..signature:HasMoveConstructor<T>::VALUE

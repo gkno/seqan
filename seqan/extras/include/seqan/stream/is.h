@@ -46,7 +46,7 @@
 ..cat:Input/Output
 ..signature:isalnum(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isalnum/
@@ -60,7 +60,7 @@
 ..cat:Input/Output
 ..signature:isalpha(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isalpha/
@@ -74,7 +74,7 @@
 ..cat:Input/Output
 ..signature:isdigit(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isdigit/
@@ -88,7 +88,7 @@
 ..cat:Input/Output
 ..signature:iscntrl(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/iscntrl/
@@ -102,7 +102,7 @@
 ..cat:Input/Output
 ..signature:isprint(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isprint/
@@ -117,7 +117,7 @@
 ..cat:Input/Output
 ..signature:isgraph(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..see:http://www.cplusplus.com/reference/clibrary/cctype/isgraph/
@@ -134,7 +134,7 @@
 ..cat:Input/Output
 ..signature:isspace(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks: This is non-seqan, plain c and listed for completeness
 ..remarks: NOTE: White-Space contains more than space and tab characters, if you want to check for that, use Function.isblank instead!
@@ -150,7 +150,7 @@
 ..cat:Input/Output
 ..signature:isblank(int c)
 ..param.c:the character to be checked
-...type:int
+...type:nolink:$int$
 ..returns:$true$(non-zero) if the check is successful and $false$ (zero) otherwise
 ..remarks:This is non-seqan, specified in POSIX and listed for completeness.
 ..remarks:For visual studio, we define it ourselves.

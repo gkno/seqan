@@ -52,7 +52,7 @@ namespace seqan {
 /**
 .Class.Tuple:
 ..cat:Aggregates
-..concept:Aggregate
+..concept:Concept.Aggregate
 ..summary:A plain fixed-length string.
 ..signature:Tuple<T, SIZE[, TSpec]>
 ..param.T:The value type, that is the type of characters stored in the tuple.

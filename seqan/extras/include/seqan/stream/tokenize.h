@@ -462,7 +462,7 @@ _readAndCompareWithStr(TRecordReader & reader,
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
 ..remarks:This function stops *on* the whitespace character. The whitespace is not written to buffer.
 ..include:seqan/stream.h
@@ -515,7 +515,7 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:Blank is '' and '\t', see @Function.isblank@
 ..remarks:This function stops *on* the blank character. The blank is not written to buffer.
 ..include:seqan/stream.h
@@ -546,15 +546,15 @@ readUntilBlank(TBuffer & buffer,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.x:The character to stop on
-...type:$char$ or similar
+...type:nolink:$char$ or similar
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *on* the character x. It is not written to buffer.
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
-..see:skipUntilChar
+..see:Function.skipUntilChar
  */
 template <typename TBuffer, typename TStream, typename TPass, typename TCharX>
 inline int
@@ -593,11 +593,11 @@ readUntilChar(TBuffer & buffer,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.n:The number of characters to read
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
  */
@@ -636,11 +636,11 @@ readNChars(TBuffer & buffer,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.n:The number of characters to read
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..include:seqan/stream.h
 ..remarks:Whitespace characters are not counted
 ..see:Enum.TokenizeResult
@@ -694,11 +694,11 @@ readNCharsIgnoringWhitespace(TBuffer & buffer,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.n:The number of characters to skip
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
  */
@@ -727,15 +727,15 @@ skipNChars(RecordReader<TStream, TPass> & reader,
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.n:The number of characters to skip
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..include:seqan/stream.h
 ..remarks:Whitespace characters are not counted towards n
 ..see:Enum.TokenizeResult
-..see:Function.skipNchars
+..see:Function.skipNChars
 ..see:Function.readNCharsIgnoringWhitespace
  */
 template <typename TStream, typename TPass,
@@ -778,7 +778,7 @@ skipNCharsIgnoringWhitespace(RecordReader<TStream, TPass> & reader,
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
 ..remarks:This function stops *on* the whitespace character. The whitespace is not skipped.
 ..include:seqan/stream.h
@@ -805,7 +805,7 @@ skipUntilWhitespace(RecordReader<TStream, TPass> & reader)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *on* the blank character. The blank is not skipped.
 ..include:seqan/stream.h
 ..see:Function.isblank
@@ -840,7 +840,7 @@ _seekWhiteSpace(TIterator &it, TIterator itEnd)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *on* the graph character. The graph is not skipped.
 ..remarks:See @Function.isgraph@ for details on the "graph"-group of characters
 ..include:seqan/stream.h
@@ -875,11 +875,11 @@ _parseSkipWhitespace(TFile& file, TChar& c)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.x:The character to stop on
-...type:$char$ or similar
+...type:nolink:$char$ or similar
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *on* the character x. x is not skipped.
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
@@ -958,11 +958,11 @@ _seekTab(TIterator& it, TIterator itEnd)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..param.str:The string to stop on
-...type:$char$ or similar
+...type:nolink:f$char$ or similar
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *behind* the character string
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
@@ -1031,7 +1031,7 @@ SEQAN_CHECKPOINT
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *behind* the last letter read.
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
@@ -1075,7 +1075,7 @@ _parseReadWord(TFile & file, TChar& c)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *behind* the last letter read.
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
@@ -1105,7 +1105,7 @@ readDigits(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *behind* the last letter read.
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
@@ -1146,7 +1146,7 @@ _parseReadIdentifier(TFile & file, TString& str, TChar& c)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:Whitespace is more than '' and '\t', see @Function.isspace@
 ..remarks:This function stops *behind* the last whitespace character.
 ..include:seqan/stream.h
@@ -1175,7 +1175,7 @@ skipWhitespaces(RecordReader<TStream, TPass> & reader)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
  */
@@ -1202,7 +1202,7 @@ skipChar(RecordReader<TStream, TPass> & reader, char const c)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops *behind* the last whitespace character.
 ..include:seqan/stream.h
 ..see:Function.isblank
@@ -1259,7 +1259,7 @@ _parseSkipBlanks(TFile& file, TChar& c)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops on the beginning of the next line, if there is a next line
 ..remarks:End-line characters are not written to buffer.
 ..remarks:Works on ANSI EOL and on Unix EOL.
@@ -1297,7 +1297,7 @@ readLine(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops on the beginning of the next line, if there is a next line
 ..remarks:End-line characters and all trailing blanks are not written to buffer.
 ..remarks:Works on ANSI EOL and on Unix EOL.
@@ -1366,7 +1366,7 @@ _parseReadFilepath(TFile& file, TChar& c)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops on the beginning of the next line, if there is a next line
 ..remarks:Works on ANSI EOL and on Unix EOL.
 ..include:seqan/stream.h
@@ -1417,7 +1417,7 @@ _parseSkipLine(TFile& file, TChar& c)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function stops on the beginning of the next line, if there is a next line (even though newline characters are not counted)
 ..remarks:Works on ANSI EOL and on Unix EOL.
 ..include:seqan/stream.h
@@ -1455,12 +1455,12 @@ countLine(unsigned & count, RecordReader<TStream, TPass> & reader)
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function read Dna5-Characters and simply discards whitespaces, including newlines.
 ..remarks:It stops on the first character that is not Dna5 and not whitespace.
 ..include:seqan/stream.h
 ..see:Enum.TokenizeResult
-..see:Function.iswhitespace
+..see:Function.isspace
 ..see:Spec.Dna5
  */
 template <typename TStream, typename TPass, typename TBuffer>
@@ -1484,7 +1484,7 @@ readDna5IgnoringWhitespaces(TBuffer & buffer,
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function skips lines, and then non-graphical chars at the line beginnings,
 ..remarks:until it finds a line where the first graph-character is c. It stops on c, not behind.
 ..include:seqan/stream.h
@@ -1548,7 +1548,7 @@ SEQAN_CHECKPOINT
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function skips lines, and then non-graphical chars (see @Function.isgraph@) at the line beginnings,
 ..remarks:until it finds a line where the first string beginning with graph-characters is equal to str.
 ..remarks:It stops behaind the string.
@@ -1619,7 +1619,7 @@ SEQAN_CHECKPOINT
 ..returns:0 if there was no error reading
 ..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
 ...type:nolink:$int$
-...type:TokenizeResult
+...type:Enum.TokenizeResult
 ..remarks:This function skips lines, and then non-graphical chars (see @Function.isgraph@) at the line beginnings,
 ..remarks:until it finds a line where the first graph-char is one of the characters in str.
 ..remarks:It stops on the char.

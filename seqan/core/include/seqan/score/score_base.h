@@ -47,7 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 ..param.TValue:The value type.
 ...default:int
 ..param.TSpec:The specializing type.
-...default:@Tag.Simple@
+...default:nolink:$Tag.Simple$
 ..include:seqan/score.h
 */
 template <typename TValue = int, typename TSpec = Simple>

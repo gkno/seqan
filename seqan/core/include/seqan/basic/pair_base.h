@@ -52,7 +52,7 @@ namespace seqan {
 /**
 .Class.Pair:
 ..cat:Aggregates
-..concept:Aggregate
+..concept:Concept.Aggregate
 ..summary:Stores two arbitrary objects.
 ..signature:Pair<T1[, T2[, TSpec]]>
 ..param.T1:The type of the first object.

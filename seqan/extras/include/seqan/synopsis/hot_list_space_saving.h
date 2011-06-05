@@ -53,16 +53,16 @@ namespace seqan {
 
 /**
 .Spec.Space Saving HotList
+..summary:Approximate hot list using the Space Saving algorithm (list variant).
 ..cat:Synopsis Data Structures
 ..general:Class.HotList
-..summary:Approximate hot list using the Space Saving algorithm (list variant).
 ..signature:HotList<TValue, SpaceSaving>
 ..param.TValue:Type of the items to keep in hot list.
 ..remarks:See Ahmed Metwally,  Divyakant Agrawal, and  Amr El Abbadi. Efficient Computation of SpaceSaving and Top-k Elements in Data Streams. ICDT '05, pp. 555-566.
 ..include:seqan/synopsis.h
 
 .Memfunc.Space Saving HotList#HotList
-..class:Spec.SpaceSaving HotList
+..class:Spec.Space Saving HotList
 ..summary:Constructor
 ..signature:HotList(k)
 ..param.k:The number of most frequent items to keep.

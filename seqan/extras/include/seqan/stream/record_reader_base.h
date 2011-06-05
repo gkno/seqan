@@ -100,7 +100,7 @@ class RecordReader;
 
 .Function.atEnd
 ..cat:Input/Output
-..summary:Returns $true$ if there is no more data to be read.
+..summaryDISABLED:Returns $true$ if there is no more data to be read.
 ..signature:atEnd(recordReader)
 ..param.recordReader:The @Class.RecordReader@ to query the state of.
 ...type:Class.RecordReader
