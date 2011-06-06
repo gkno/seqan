@@ -72,6 +72,8 @@ void FASTA_TEST(TRecordReader & reader)
 {
     using namespace seqan;
 
+    SEQAN_ASSERT(checkStreamFormat(reader, Fasta()));
+
     CharString meta;
     Dna5String seq;
 
@@ -93,6 +95,8 @@ void FASTA_TEST_BATCH(TRecordReader & reader)
 {
     using namespace seqan;
 
+    SEQAN_ASSERT(checkStreamFormat(reader, Fasta()));
+
     StringSet<CharString> metas;
     StringSet<Dna5String> seqs;
 
@@ -110,6 +114,8 @@ template <typename TRecordReader>
 void FASTA_TEST_BATCH_CONCAT(TRecordReader & reader)
 {
     using namespace seqan;
+
+    SEQAN_ASSERT(checkStreamFormat(reader, Fasta()));
 
     StringSet<CharString, Owner<ConcatDirect<> > > metas;
     StringSet<Dna5String, Owner<ConcatDirect<> > > seqs;
@@ -279,6 +285,8 @@ void FASTQ_TEST(TRecordReader & reader)
 {
     using namespace seqan;
 
+    SEQAN_ASSERT(checkStreamFormat(reader, Fastq()));
+
     CharString meta;
     DnaString seq;
     CharString qual;
@@ -306,6 +314,8 @@ void FASTQ_TEST_BATCH(TRecordReader & reader)
 {
     using namespace seqan;
 
+    SEQAN_ASSERT(checkStreamFormat(reader, Fastq()));
+
     StringSet<CharString> metas;
     StringSet<DnaString> seqs;
     StringSet<CharString> quals;
@@ -327,6 +337,8 @@ template <typename TRecordReader>
 void FASTQ_TEST_BATCH_CONCAT(TRecordReader & reader)
 {
     using namespace seqan;
+
+    SEQAN_ASSERT(checkStreamFormat(reader, Fastq()));
 
     StringSet<CharString, Owner<ConcatDirect<> > > metas;
     StringSet<DnaString, Owner<ConcatDirect<> > > seqs;

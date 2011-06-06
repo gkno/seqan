@@ -672,6 +672,48 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
 }
 
 
+// ----------------------------------------------------------------------------
+// Function checkStreamFormat()
+// ----------------------------------------------------------------------------
+
+//TODO(h4nn3s): dddoc
+template <typename TStream, typename TPass>
+inline bool
+checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fasta & /*tag*/)
+{
+    ReduceToOneBuffer_<TStream, TPass> foo(reader);
+    while (!atEnd(reader))
+    {
+        CharString meta;
+        CharString seq;
+        int r = readRecord(meta, seq, reader, Fasta());
+//         std::cout << "Meta: " << toCString(meta) << "\nSeq: " << toCString(seq) << "\n";
+        if (r == RecordReader<TStream, TPass>::INVALID_FORMAT)
+            return false;
+    }
+    return true;
+}
+
+//TODO(h4nn3s): dddoc
+template <typename TStream, typename TPass>
+inline bool
+checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fastq const & /*tag*/)
+{
+    ReduceToOneBuffer_<TStream, TPass> foo(reader);
+    while (!atEnd(reader))
+    {
+        CharString meta;
+        CharString seq;
+        CharString qual;
+        int r = readRecord(meta, seq, qual, reader, Fastq());
+        if (r == RecordReader<TStream, TPass>::INVALID_FORMAT)
+            return false;
+    }
+    return true;
+}
+
+
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_STREAM_READ_FASTA_FASTQ_H_

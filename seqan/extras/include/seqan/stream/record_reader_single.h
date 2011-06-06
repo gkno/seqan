@@ -69,6 +69,7 @@ public:
     typedef typename Iterator<CharString, Standard>::Type TIter;
     TIter _current, _end;
     int _resultCode;
+    bool _stayInOneBuffer;
 
     enum {
         OK = 0,
@@ -77,14 +78,14 @@ public:
 
     RecordReader(TFile & file)
             : _file(file), _bufferSize(BUFSIZ), _current(0), _end(0),
-              _resultCode(0)
+              _resultCode(0), _stayInOneBuffer(false)
     {
         resize(_buffer, _bufferSize);
     }
 
     RecordReader(TFile & file, unsigned bufferSize)
             : _file(file), _bufferSize(bufferSize), _current(0), _end(0),
-              _resultCode(0)
+              _resultCode(0), _stayInOneBuffer(false)
     {
         resize(_buffer, _bufferSize);
     }
@@ -111,6 +112,9 @@ template <typename TFile>
 inline bool
 _refillBuffer(RecordReader<TFile, SinglePass<void> > & recordReader)
 {
+    if (recordReader._stayInOneBuffer && recordReader._end != 0)
+        // e.g. file format detection; if end==0 there hasnt yet been a buffer
+        return false;
     // std::cerr << "REFILLING BUFFER" << std::endl;
     if (streamEof(recordReader._file))
         return false;

@@ -76,6 +76,7 @@ public:
     int _resultCode;
     int _passNo;
     char * _beginInFirst;
+    bool _stayInOneBuffer;
 
     enum {
         OK = 0,
@@ -85,7 +86,7 @@ public:
     RecordReader(TFile & file)
             : _file(file), _bufferSize(BUFSIZ), _current(0), _end(0),
               _currentBuffer(0), _currentBuffNo(0), _resultCode(0),
-              _passNo(0), _beginInFirst(0)
+              _passNo(0), _beginInFirst(0), _stayInOneBuffer(false)
     {
         // resize(_buffer, _bufferSize);
     }
@@ -93,7 +94,7 @@ public:
     RecordReader(TFile & file, unsigned bufferSize)
             : _file(file), _bufferSize(bufferSize), _current(0), _end(0),
               _currentBuffer(0), _currentBuffNo(0), _resultCode(0),
-              _passNo(0), _beginInFirst(0)
+              _passNo(0), _beginInFirst(0), _stayInOneBuffer(false)
     {
         // resize(_buffer, _bufferSize);
     }
@@ -128,6 +129,9 @@ template <typename TFile>
 inline bool
 _fillNextBuffer(RecordReader<TFile, DoublePass<> > & recordReader)
 {
+    if (recordReader._stayInOneBuffer && recordReader._end != 0)
+    // e.g. FileFormat Detection
+        return false;
     // std::cerr << "REFILLING BUFFER" << std::endl;
     if (streamEof(recordReader._file))
         return false;
@@ -202,6 +206,8 @@ template <typename TFile>
 bool
 _jumpToNextBuffer(RecordReader<TFile, DoublePass<> > & recordReader)
 {
+    if (recordReader._stayInOneBuffer) // e.g. file format detection
+        return false;
     SEQAN_ASSERT_EQ(recordReader._passNo, 2);
     SEQAN_ASSERT(recordReader._current ==  recordReader._end);
     if (recordReader._currentBuffNo + 1 >= length(recordReader._usedBuffers))
