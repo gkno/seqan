@@ -361,6 +361,8 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
         for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
         {
             // get pattern length and max. allowed errors
+            if (sequenceLength(seqNo, host(pattern)) == 0u)
+              continue;  // Skip empty sequences.
             TSize length = sequenceLength(seqNo, host(pattern)) - pattern.params.overlap;
             TSize errors = (TSize) floor(errorRate * length);
             TSize q = length / (errors + 1);
@@ -1034,8 +1036,9 @@ template <typename TIndex, typename TSpec>
 inline typename Size<TIndex>::Type
 getMaxDeviationOfOrder(Pattern<TIndex, Pigeonhole<TSpec> > &pattern)
 {
-	SEQAN_CHECKPOINT
-    
+	SEQAN_CHECKPOINT;
+   
+    SEQAN_ASSERT_GEQ(pattern.maxSeqLen, length(indexShape(host(pattern))));
     return pattern.maxSeqLen - length(indexShape(host(pattern)));
 }
 
