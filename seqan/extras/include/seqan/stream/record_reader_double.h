@@ -76,7 +76,7 @@ public:
     int _resultCode;
     int _passNo;
     char * _beginInFirst;
-    bool _stayInOneBuffer;
+    bool _stayInOneBuffer; // needed for stream format detection
 
     enum {
         OK = 0,

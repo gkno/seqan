@@ -48,18 +48,53 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-// TODO(h4nn3s): do we want this here?
-// typedef
-//     TagList<Fastq,
-//     TagList<Fasta,
-//     TagList<QSeq,
-//     TagList<Raw> > > >                      SeqFormats; //IOREV
-// typedef TagSelector<SeqFormats>             AutoSeqFormat; //IOREV _doc_
-// 
+/**
+.ShortCut.SeqStreamFormats
+..cat:Input/Output
+..summary:A Tag list of the currently implemented Sequence-Formats (in RecordReader/Stream-IO)
+..signature:SeqStreamFormats
+..shortcutfor:Tag.TagList
+...signature:TagList<Fastq, TagList<Fasta > >
+..include:seqan/stream.h
+*/
+typedef TagList<Fastq, TagList<Fasta > >    SeqStreamFormats;
 
+/**
+.ShortCut.AutoSeqStreamFormat
+..cat:Input/Output
+..summary:A TagSelector for @ShortCut.SeqStreamFormats@. T list of the currently implemented Sequence-Formats (in RecordReader/Stream-IO)
+..signature:AutoSeqStreamFormat
+..shortcutfor:Class.TagSelector
+..shortcutfor:Tag.TagList
+...signature:TagSelector<TagList<Fastq, TagList<Fasta > >
+..remarks:can be passed to @Function.checkStreamFormat@ and will offer the index of the detected FileFormat in its member tagId
+..see:ShortCut.SeqStreamFormats
+..see:Function.checkStreamFormat
+..include:seqan/stream.h
+*/
+typedef TagSelector<SeqStreamFormats>       AutoSeqStreamFormat;
+
+
+/**
+.Class.LimitRecordReaderInScope
+..cat:Input/Output
+..summary:manipulates a @Class.RecordReader@ -Object so that it operates only on one buffer
+..signature:LimitRecordReaderInScope<TStream, TSpec>
+..param.TStream:The @Concept.Stream@ of the @Class.RecordReader@.
+...type:Concept.Stream
+..param.TSpec:The specialization of the @Class.RecordReader@.
+...type:Class.RecordReader
+..see:Class.RecordReader
+..see:Function.checkStreamFormat
+..include:seqan/stream.h
+..remarks:This class is intended for situations, where you do not wish the RecordReader to rebuffer and where you wish to return to the original reading position after reading, e.g. when detecting the file format of the stream.
+..remarks:It is used by passing the RecordReader-object on construction (thisalready does the necessary changes in the RecordReader). Upon deconstructionof this object, the RecordReader is reset to its original state, including all iterators.
+..remarks:This works on all RecordReader-objects, independent of the underlying stream-object. It also works, if the underlying stream does not support seeking.
+ ..include:seqan/stream.h
+*/
 
 template <typename TStream, typename TPass>
-class ReduceToOneBuffer_
+class LimitRecordReaderInScope
 {
 public:
     RecordReader<TStream, TPass> & _recordreader;
@@ -67,7 +102,7 @@ public:
     // the following is only needed for MMapStrings
     typename RecordReader<TStream, TPass>::TIter _endBeforeSuspend;
 
-    ReduceToOneBuffer_(RecordReader<TStream, TPass> & reader)
+    LimitRecordReaderInScope(RecordReader<TStream, TPass> & reader)
             : _recordreader(reader),
               _currentBeforeSuspend(reader._current),
               _endBeforeSuspend(reader._end)
@@ -75,7 +110,7 @@ public:
         _suspendRefill(TPass());
     }
 
-    ~ReduceToOneBuffer_()
+    ~LimitRecordReaderInScope()
     {
         _resumeRefillAndReset(TPass());
     }
@@ -148,39 +183,56 @@ private:
 
 
 // ----------------------------------------------------------------------------
-// Function guessStreamFormats()
+// Function checkStreamFormat()
 // ----------------------------------------------------------------------------
 
+/**
+.Funtion.checkStreamFormat
+..cat:Input/Output
+..summary:check whether the data provided by reader is (one of) the specified format(s).
+..signature:checkStreamFormat(TRecordReader & reader, TTag const &)
+...param.reader:The @Class.RecordReader@ to read from
+...param.TTag:The tag to check against.
+..signature:checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
+...param.reader:The @Class.RecordReader@ to read from
+...param.formats:A @Tag.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
+..returns: $True$ if (one of) the specified Tags tested positive and $False$ otherwise
+...type:nolink:$bool$
+..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do
+not (permanently) alter the position in the stream.
+..include:seqan/stream.h
+*/
 
-//TODO(h4nn3s): test + dddoc
+
+//TODO(h4nn3s): test
 template < typename TRecordReader >
 inline bool
-checkStreamFormats(TRecordReader & reader, TagSelector<> & format)
+checkStreamFormat(TRecordReader & reader, TagSelector<> & formats)
 {
-    format.tagId = 0;
+    formats.tagId = 0;
     return false;
 }
 
-//TODO(h4nn3s): test + dddoc
+//TODO(h4nn3s): test
 template <typename TRecordReader, typename TFileSeq, typename TTagList >
 inline bool
-checkStreamFormats(TRecordReader & reader, TagSelector<TTagList> & format)
+checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
 {
     if (checkStreamFormat(reader, typename TTagList::Type()))
     {
-        if (format.tagId == 0)
+        if (formats.tagId == 0)
         {
             // if tagId == 0 then store detected format
-            format.tagId = LENGTH<TTagList>::VALUE;
+            formats.tagId = LENGTH<TTagList>::VALUE;
             return true;
         } else
             // if tagId != 0 then compare detected format with tagId
-            return format.tagId == LENGTH<TTagList>::VALUE;
+            return formats.tagId == LENGTH<TTagList>::VALUE;
     }
-    return checkStreamFormats(reader,
+    return checkStreamFormat(reader,
                               static_cast<
                                 typename TagSelector<TTagList>::Base &
-                                         > (format) );
+                                         > (formats) );
 }
 
 }  // namespace seqan

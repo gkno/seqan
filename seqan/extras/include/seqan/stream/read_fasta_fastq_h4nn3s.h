@@ -364,6 +364,34 @@ _readQualityBlock(TQualString & qual,
 // ----------------------------------------------------------------------------
 // Function readRecord()                               [Single and double pass]
 // ----------------------------------------------------------------------------
+/**
+.Function.readRecord
+..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fasta const &)
+..param.meta:The meta-line in a fasta-File
+...type:Shortcut.CharString
+..param.seq:The sequence from a fasta-File
+...type:Shortcut.CharString
+...type:Shortcut.Dna5String
+...type:nolink:or similar
+..param.reader:The reader object to read from
+...type:Class.RecordReader
+..include:seqan/stream.h
+*/
+
+/**
+.Function.readRecord
+..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fastq const &)
+..param.meta:The meta-line in a fastq-File
+...type:Shortcut.CharString
+..param.seq:The sequence from a fastq-File
+...type:Shortcut.CharString
+...type:Shortcut.Dna5String
+...type:nolink:or similar
+..param.reader:The reader object to read from
+...type:Class.RecordReader
+..remarks:This function skips the qualities
+..include:seqan/stream.h
+*/
 
 // FASTA or FASTQ, if we don't want the qualities
 template <typename TIdString,
@@ -387,6 +415,23 @@ readRecord(TIdString & meta,
 
     return _skipQualityBlock(reader, length(seq), TTag());
 }
+
+
+/**
+.Function.readRecord
+..signature:readRecord(TIdString & meta, TSeqString & seq, TQualString & qual, TRecordReader & reader, Fastq const &)
+..param.meta:The meta-line of a record in a fastq-File
+...type:Shortcut.CharString
+..param.seq:The sequence from a record in a fastq-File
+...type:Shortcut.CharString
+...type:Shortcut.Dna5String
+...type:nolink:or similar
+..param.qual:The qualities from a record in a fastq-File
+...type:Shortcut.CharString
+..param.reader:The reader object to read from
+...type:Class.RecordReader
+..include:seqan/stream.h
+*/
 
 // FASTQ and we want the qualities
 template <typename TIdString,
@@ -628,6 +673,8 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
     return 0;
 }
 
+//TODO(h4nn3s):dddoc
+
 // FASTA
 template <typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec,
@@ -679,9 +726,9 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
 //TODO(h4nn3s): dddoc
 template <typename TStream, typename TPass>
 inline bool
-checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fasta & /*tag*/)
+checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fasta const & /*tag*/)
 {
-    ReduceToOneBuffer_<TStream, TPass> foo(reader);
+    LimitRecordReaderInScope<TStream, TPass> limiter(reader);
     while (!atEnd(reader))
     {
         CharString meta;
@@ -699,7 +746,7 @@ template <typename TStream, typename TPass>
 inline bool
 checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fastq const & /*tag*/)
 {
-    ReduceToOneBuffer_<TStream, TPass> foo(reader);
+    LimitRecordReaderInScope<TStream, TPass> limiter(reader);
     while (!atEnd(reader))
     {
         CharString meta;
