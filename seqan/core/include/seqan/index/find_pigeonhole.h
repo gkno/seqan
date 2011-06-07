@@ -356,12 +356,13 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 		pattern.finderPosNextOffset = pattern.finderLength;
 
         TSize minQ = MaxValue<TSize>::VALUE;
-        TSize maxQ = MinValue<TSize>::VALUE;
+        TSize maxQ = 3;
         TSize maxSeqLen = MinValue<TSize>::VALUE;
         for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
         {
             // get pattern length and max. allowed errors
             TSize length = sequenceLength(seqNo, host(pattern));
+            if (maxSeqLen < length) maxSeqLen = length;
 			
 			// sequence must have sufficient length
 			if (length <= pattern.params.overlap) continue;
@@ -371,18 +372,15 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
             TSize errors = (TSize) floor(errorRate * length);
             TSize q = length / (errors + 1);
 			
+			
 			// ignore too short q-grams
 			if (q < 3) continue;
-			
             if (minQ > q) minQ = q;
             if (maxQ < q) maxQ = q;
-            if (maxSeqLen < length) maxSeqLen = length;
         }
         pattern.maxSeqLen = maxSeqLen;
-        
         if (minQ < 3) minQ = maxQ;
-        if (minQ < 3) minQ = 3;
-				
+		
         TIndex &index = host(pattern);
         if (_pigeonholeUpdateShapeLength(pattern.shape, minQ + pattern.params.overlap) || getStepSize(index) != minQ)
         {
@@ -391,7 +389,7 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
             CharString str;
             shapeToString(str, pattern.shape);
 #pragma omp critical
-			{		
+			{
 				std::cout << std::endl << "Pigeonhole settings:" << std::endl;
 				std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
 				std::cout << "  stepsize: " << getStepSize(index) << std::endl;
