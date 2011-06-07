@@ -182,7 +182,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TString>::Type		TValue;
 		typedef typename Size<TString>::Type		TSize;
 
-#ifdef SEQAN_PARALLEL
+#ifdef SEQAN_PARALLEL_FIXME
         if (length(text) > (TSize)(omp_get_thread_num() * 2 * minRepeatLen)) {
             // Parallel case.
 
@@ -347,7 +347,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 appendValue(repString, rep);
             }
 #endif  // #ifdef SEQAN_PARALLEL
-#ifdef SEQAN_PARALLEL
+#ifdef SEQAN_PARALLEL_FIXME
         }
 #endif  // #ifdef SEQAN_PARALLEL
         // #pragma omp critical

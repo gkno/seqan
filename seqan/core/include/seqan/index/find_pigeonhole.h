@@ -361,11 +361,19 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
         for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
         {
             // get pattern length and max. allowed errors
-            if (sequenceLength(seqNo, host(pattern)) == 0u)
-              continue;  // Skip empty sequences.
-            TSize length = sequenceLength(seqNo, host(pattern)) - pattern.params.overlap;
+            TSize length = sequenceLength(seqNo, host(pattern));
+			
+			// sequence must have sufficient length
+			if (length <= pattern.params.overlap) continue;
+			
+			// cut ovelap many characters from the end
+			length -= pattern.params.overlap;
             TSize errors = (TSize) floor(errorRate * length);
             TSize q = length / (errors + 1);
+			
+			// ignore too short q-grams
+			if (q < 3) continue;
+			
             if (minQ > q) minQ = q;
             if (maxQ < q) maxQ = q;
             if (maxSeqLen < length) maxSeqLen = length;
@@ -380,11 +388,14 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
         {
             clear(index);
             setStepSize(index, minQ);
-            std::cout << std::endl << "Pigeonhole settings:" << std::endl;
             CharString str;
             shapeToString(str, pattern.shape);
-            std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
-            std::cout << "  stepsize: " << getStepSize(index) << std::endl;
+#pragma omp critical
+			{		
+				std::cout << std::endl << "Pigeonhole settings:" << std::endl;
+				std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
+				std::cout << "  stepsize: " << getStepSize(index) << std::endl;
+			}
          }
         indexShape(host(pattern)) = pattern.shape;
         indexRequire(host(pattern), QGramSADir());
@@ -1038,8 +1049,7 @@ getMaxDeviationOfOrder(Pattern<TIndex, Pigeonhole<TSpec> > &pattern)
 {
 	SEQAN_CHECKPOINT;
    
-    SEQAN_ASSERT_GEQ(pattern.maxSeqLen, length(indexShape(host(pattern))));
-    return pattern.maxSeqLen - length(indexShape(host(pattern)));
+	return (pattern.maxSeqLen <= length(indexShape(host(pattern))))? 0: pattern.maxSeqLen - length(indexShape(host(pattern)));
 }
 
 }// namespace seqan
