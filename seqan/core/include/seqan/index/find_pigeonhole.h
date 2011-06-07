@@ -357,7 +357,7 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 
         TSize minQ = MaxValue<TSize>::VALUE;
         TSize maxQ = 3;
-        TSize maxSeqLen = MinValue<TSize>::VALUE;
+        TSize maxSeqLen = 0;
         for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
         {
             // get pattern length and max. allowed errors
