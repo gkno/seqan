@@ -337,6 +337,9 @@ SEQAN_CHECKPOINT
 			bool doAddEdge = true;
 
 //			if(doAddEdge && fragmentBegin(ali_g,vd)!=pos_j) // check if edge makes sense
+			if (vd == getNil<TVertexDescriptor>())
+				doAddEdge = false;
+			else
 			{ 
 				TValue temp_seq_i_id,temp_act_pos;
 				_getOtherSequenceAndProject(*ali_it,(TValue)1,seq_map,seq_j_id,static_cast<TValue>(fragmentBegin(ali_g,vd)),temp_seq_i_id,temp_act_pos);
