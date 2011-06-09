@@ -366,31 +366,14 @@ _readQualityBlock(TQualString & qual,
 // ----------------------------------------------------------------------------
 /**
 .Function.readRecord
+..cat:Input/Output
 ..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fasta const &)
-..param.meta:The meta-line in a fasta-File
-...type:Shortcut.CharString
-..param.seq:The sequence from a fasta-File
-...type:Shortcut.CharString
-...type:Shortcut.Dna5String
-...type:nolink:or similar
-..param.reader:The reader object to read from
-...type:Class.RecordReader
-..include:seqan/stream.h
 */
 
 /**
 .Function.readRecord
+..cat:Input/Output
 ..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fastq const &)
-..param.meta:The meta-line in a fastq-File
-...type:Shortcut.CharString
-..param.seq:The sequence from a fastq-File
-...type:Shortcut.CharString
-...type:Shortcut.Dna5String
-...type:nolink:or similar
-..param.reader:The reader object to read from
-...type:Class.RecordReader
-..remarks:This function skips the qualities
-..include:seqan/stream.h
 */
 
 // FASTA or FASTQ, if we don't want the qualities
@@ -419,18 +402,8 @@ readRecord(TIdString & meta,
 
 /**
 .Function.readRecord
+..cat:Input/Output
 ..signature:readRecord(TIdString & meta, TSeqString & seq, TQualString & qual, TRecordReader & reader, Fastq const &)
-..param.meta:The meta-line of a record in a fastq-File
-...type:Shortcut.CharString
-..param.seq:The sequence from a record in a fastq-File
-...type:Shortcut.CharString
-...type:Shortcut.Dna5String
-...type:nolink:or similar
-..param.qual:The qualities from a record in a fastq-File
-...type:Shortcut.CharString
-..param.reader:The reader object to read from
-...type:Class.RecordReader
-..include:seqan/stream.h
 */
 
 // FASTQ and we want the qualities
