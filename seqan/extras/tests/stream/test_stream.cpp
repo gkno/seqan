@@ -49,7 +49,9 @@
 #include "test_stream_adapt_fstream.h"
 #include "test_stream_tokenize.h"
 #include "test_stream_lexical_cast.h"
-#include "test_stream_record_reader_fastaq.h"
+#include "test_stream_record_reader_fasta.h"
+#include "test_stream_record_reader_fastq.h"
+#include "test_stream_guess_stream_format.h"
 
 SEQAN_BEGIN_TESTSUITE(test_stream)
 {
@@ -201,7 +203,11 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_concat_mmap);
 
-    
+
+    SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fasta);
+    SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fastq);
+    SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_bogus);
+
 /*    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream_two_records);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream_one_record);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream_two_records);

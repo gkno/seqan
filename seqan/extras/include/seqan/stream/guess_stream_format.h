@@ -66,8 +66,10 @@ typedef TagList<Fastq, TagList<Fasta > >    SeqStreamFormats;
 ..signature:AutoSeqStreamFormat
 ..shortcutfor:Class.TagSelector
 ..shortcutfor:Tag.TagList
-...signature:TagSelector<TagList<Fastq, TagList<Fasta > >
+...signature:TagSelector<TagList<Fastq, TagList<Fasta > > >
 ..remarks:can be passed to @Function.checkStreamFormat@ and will offer the index of the detected FileFormat in its member tagId
+..remarks:The member tagId gives the index in inside-to-outside order and begins
+counting at one. E.g. The Index of FASTQ in TagList<Fastq, TagList<Fasta > > is 2
 ..see:ShortCut.SeqStreamFormats
 ..see:Function.checkStreamFormat
 ..include:seqan/stream.h
@@ -203,8 +205,6 @@ not (permanently) alter the position in the stream.
 ..include:seqan/stream.h
 */
 
-
-//TODO(h4nn3s): test
 template < typename TRecordReader >
 inline bool
 checkStreamFormat(TRecordReader & reader, TagSelector<> & formats)
@@ -214,7 +214,6 @@ checkStreamFormat(TRecordReader & reader, TagSelector<> & formats)
     return false;
 }
 
-//TODO(h4nn3s): test
 template <typename TRecordReader, typename TTagList >
 inline bool
 checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
