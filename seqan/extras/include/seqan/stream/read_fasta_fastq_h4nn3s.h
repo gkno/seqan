@@ -368,6 +368,7 @@ _readQualityBlock(TQualString & qual,
 .Function.readRecord
 ..cat:Input/Output
 ..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fasta const &)
+..remarks:For FASTA-Files a double-Pass implementation of RecordReader is implemented, which offers better performance. Just pass a Double-Pass reader object (only works with seekable Streams).
 */
 
 /**
@@ -404,6 +405,7 @@ readRecord(TIdString & meta,
 .Function.readRecord
 ..cat:Input/Output
 ..signature:readRecord(TIdString & meta, TSeqString & seq, TQualString & qual, TRecordReader & reader, Fastq const &)
+..remarks:For FASTQ-Files a double-Pass implementation of RecordReader is implemented, which offers better performance. Just pass a Double-Pass reader object (only works with seekable Streams).
 */
 
 // FASTQ and we want the qualities
@@ -646,7 +648,11 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
     return 0;
 }
 
-//TODO(h4nn3s):dddoc
+/**
+.Function.read2
+..cat:Input/Output
+..signature:read2(StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, RecordReader<TFile, DoublePass<TSpec> > & reader, Fasta const &)
+*/
 
 // FASTA
 template <typename TIdString, typename TIdSpec,
@@ -662,6 +668,12 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
     return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fasta());
 }
 
+/**
+.Function.read2
+..cat:Input/Output
+..signature:read2(StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, RecordReader<TFile, DoublePass<TSpec> > & reader, Fastq const &)
+*/
+
 // FASTQ, if we don't want the qualities
 template <typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec,
@@ -675,6 +687,12 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
     StringSet<CharString, TSeqSpec> qualities;
     return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fastq());
 }
+
+/**
+.Function.read2
+..cat:Input/Output
+..signature:read2(StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, StringSet<TQualString, TQualSpec> & qualities, RecordReader<TFile, DoublePass<TSpec> > & reader, Fastq const &)
+*/
 
 // FASTQ and we want Qualities
 template <typename TIdString, typename TIdSpec,

@@ -67,7 +67,27 @@ namespace seqan {
 ..param.reader:The reader object to read from
 ...type:Class.RecordReader
 ..param.TTag:The file format tag
+..remarks: If not noted otherwise, only a Single-Pass implementation is available for a the given format
+..see:Function.read2
 ..include:seqan/stream.h
+*/
+
+
+/**
+.Function.read2
+..cat:Input/Output
+..summary:reads an entire document from a @Concept.Stream@, by the means of @Class.RecordReader@
+..signature:read2(<format specific>, TRecordReader & reader, TTag const &)
+..param.<format specific>: possibly multiple StringSets (e.g. of meta and sequences)
+..param.reader:The reader object to read from
+...type:Class.RecordReader
+..param.TTag:The file format tag
+..status:Should be renamed to "read" once the old IO-Code is removed
+..remarks: This is only supported for Double-Pass IO. If you cannot use Double-Pass IO (e.g. when you cannot seek on the stream), loop over @Function.readRecord@ instead.
+..remarks:If not noted otherwise an especially efficient version of the function is used if all StringSets are specialized as @Spec.ConcatDirect@ -StringSets.
+..include:seqan/stream.h
+..see:Class.RecordReader
+..see:Function.readRecord
 */
 
 

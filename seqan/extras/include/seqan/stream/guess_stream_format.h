@@ -88,9 +88,9 @@ typedef TagSelector<SeqStreamFormats>       AutoSeqStreamFormat;
 ..see:Function.checkStreamFormat
 ..include:seqan/stream.h
 ..remarks:This class is intended for situations, where you do not wish the RecordReader to rebuffer and where you wish to return to the original reading position after reading, e.g. when detecting the file format of the stream.
-..remarks:It is used by passing the RecordReader-object on construction (thisalready does the necessary changes in the RecordReader). Upon deconstructionof this object, the RecordReader is reset to its original state, including all iterators.
+..remarks:It is used by passing the RecordReader-object on construction (this already does the necessary changes in the RecordReader). Upon deconstruction of this object, the RecordReader is reset to its original state, including all iterators.
 ..remarks:This works on all RecordReader-objects, independent of the underlying stream-object. It also works, if the underlying stream does not support seeking.
- ..include:seqan/stream.h
+..include:seqan/stream.h
 */
 
 template <typename TStream, typename TPass>
@@ -196,7 +196,7 @@ private:
 ..signature:checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
 ...param.reader:The @Class.RecordReader@ to read from
 ...param.formats:A @Tag.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
-..returns: $True$ if (one of) the specified Tags tested positive and $False$ otherwise
+..returns: $True$ if (one of) the specified Tag(s) tested positive and $False$ otherwise
 ...type:nolink:$bool$
 ..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do
 not (permanently) alter the position in the stream.
@@ -209,12 +209,13 @@ template < typename TRecordReader >
 inline bool
 checkStreamFormat(TRecordReader & reader, TagSelector<> & formats)
 {
+    (void)reader;
     formats.tagId = 0;
     return false;
 }
 
 //TODO(h4nn3s): test
-template <typename TRecordReader, typename TFileSeq, typename TTagList >
+template <typename TRecordReader, typename TTagList >
 inline bool
 checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
 {
