@@ -122,4 +122,6 @@
 #include <seqan/stream/read_fasta_fastq_h4nn3s.h>
 // #include <seqan/stream/read_sam.h>
 
+#include <seqan/stream/write_fasta_fastq.h>
+
 #endif  // SEQAN_STREAM_H_
