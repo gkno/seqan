@@ -1010,7 +1010,7 @@ int _mapMatePairReads(
 	options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
-	if (options._debugLevel >= 2) {
+	if (options._debugLevel >= 1) {
 		::std::cerr << "Time for copying back            \t" << options.timeFsCopy << " seconds" << ::std::endl;
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;

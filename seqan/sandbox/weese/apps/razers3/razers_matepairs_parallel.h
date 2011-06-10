@@ -1461,7 +1461,7 @@ int _mapMatePairReadsParallel(
 	options.timeMapReads = SEQAN_PROTIMEDIFF(findTime);
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
-	if (options._debugLevel >= 2) {
+	if (options._debugLevel >= 1) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
 		::std::cerr << "Filtration counter:  " << options.countFiltration << ::std::endl;

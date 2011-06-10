@@ -354,6 +354,8 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
 //     std::cerr << "thread " << omp_get_thread_num() << " [wrote " << length(verificationHits) << " matches to buckets]" << std::flush;
 
     unsigned const DELTA = getMaxDeviationOfOrder(tls.filterPattern);
+    // std::cerr << "(DELTA=" << DELTA << ")";
+    //std::cerr << "[DELTA=" << DELTA << std::endl;
     size_t firstBeginPos = MaxValue<size_t>::VALUE;  // Leftmost sort position, required later for masking.
     size_t firstWindowBegin = MaxValue<size_t>::VALUE;  // Leftmost sort position, required later for masking.
     unsigned bucketsWrittenBack = 0;
@@ -386,25 +388,37 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
 
         // (2 b) Get begin position.
         size_t beginPos = originalSize;
+        // std::cerr << "originalSize = " << originalSize << std::endl;
         if (beginPos > 0u) beginPos -= 1;
         size_t dPos = 1;
         // Exponential search backwards.  After masking, reads are sorted by begin position.
         size_t windowBegin = tls.options.windowSize * idx;
         if (firstWindowBegin == MaxValue<size_t>::VALUE)
             firstWindowBegin = windowBegin;
-        while (beginPos > 0u && static_cast<size_t>(tls.matches[beginPos].beginPos + DELTA) > windowBegin) {
+        while (beginPos > 0u && static_cast<size_t>(tls.matches[beginPos].beginPos + DELTA) > windowBegin)
+        {
             if (beginPos > dPos)
                 beginPos -= dPos;
             else
                 beginPos = 0;
             dPos *= 2;
         }
-        // Binary search forwards.
-        // TODO(holtgrew): Gah, too lazy right now.
+        // // Binary search forwards.
+        // typedef typename Iterator<TMatches>::Type TIterator;
+        // typedef typename Value<TMatches>::Type TMatch;
+        // TMatch m;
+        // m.beginPos = windowBegin;
+        // LessBeginPos<TMatch> cmp;
+        // TIterator it = std::lower_bound(begin(tls.matches, Standard()) + beginPos, end(tls.matches, Standard()), m, cmp);
+        // beginPos = it - begin(tls.matches, Standard());
         if (firstBeginPos == MaxValue<size_t>::VALUE)
             firstBeginPos = beginPos;
 
-        // std::cerr << "((MASKING FROM " << windowBegin << " TO " << windowBegin + tls.options.windowSize << "))" << std::endl;
+// #pragma omp critical
+//         if (length(tls.matches) > 0u)
+//             std::cerr << "((MASKING FROM " << tls.matches[beginPos].beginPos << " TO " << windowBegin + tls.options.windowSize << "))" << std::endl;
+// #pragma omp critical
+//         std::cerr << "thread " << omp_get_thread_num() << " (masking from " << beginPos << " to end=" << length(tls.matches) << ")" << std::endl;
         // Do not mask duplicates if not in edit distance mode.
         if (!IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
             continue;
@@ -1101,7 +1115,7 @@ int _mapSingleReadsParallel(
 	options.timeMapReads = SEQAN_PROTIMEDIFF(findTime);
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
-	if (options._debugLevel >= 2) {
+	if (options._debugLevel >= 1) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
 		::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;

@@ -750,6 +750,19 @@ inline int estimateReadLength(char const *fileName)
 // TODO(holtgrew): Slightly different comparators than in previous RazerS 3 version, add back the additional checks?
 
 	template <typename TReadMatch>
+	struct LessBeginPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// genome position and orientation
+			if (a.contigId < b.contigId) return true;
+			if (a.contigId > b.contigId) return false;
+			if (a.beginPos < b.beginPos) return true;
+            return false;
+		}
+	};
+
+	template <typename TReadMatch>
 	struct LessRNoBeginPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
 	{
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
@@ -1146,6 +1159,7 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
     ::std::sort(itBegin, itEnd, LessRNoBeginPos<TMatch>());
+    std::cerr << "(SORTING " << itEnd-itBegin << " MATCHES)";
 	// sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
@@ -1172,6 +1186,13 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
 		beginPos = itBeginPos;
 		orientation = (*it).beginPos < (*it).endPos;
 	}
+
+#ifdef RAZERS_DEFER_COMPACTION
+	//////////////////////////////////////////////////////////////////////////////
+	// sort matches by begin position when using defered compaction
+    ::std::sort(itBegin, itEnd, LessBeginPos<TMatch>());
+#endif  // #ifdef RAZERS_DEFER_COMPACTION
+    
     options.timeMaskDuplicates += sysTime() - beginTime;
     if (options._debugLevel >= 2)
         fprintf(stderr, " [%u matches masked]", masked);
@@ -2349,7 +2370,7 @@ int _mapSingleReads(
     }
     options.timeFsCopy = sysTime() - beginCopyTime;
 
-	if (options._debugLevel >= 2) {
+	if (options._debugLevel >= 1) {
 		::std::cerr << "Masking duplicates took          \t" << options.timeMaskDuplicates << " seconds" << ::std::endl;
 		::std::cerr << "Compacting matches took          \t" << options.timeCompactMatches << " seconds" << ::std::endl;
 		::std::cerr << "Building q-gram index took       \t" << options.timeBuildQGramIndex << " seconds" << ::std::endl;
