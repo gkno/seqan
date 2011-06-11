@@ -60,8 +60,8 @@ prerequisites are installed and you are on Linux or Mac Os X:
   $ cd build/Debug
   $ cmake ../..
   $ make test_basic
-  $ ./core/tests/test_basic/test_basic
-  ... the basic test will run ...
+  $ ./core/tests/basic/test_basic
+  ... the tests for module basic will run ...
 
 ===========================================================================
  6. Documentation Resources
