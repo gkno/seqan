@@ -169,7 +169,7 @@ inline int
 writeRecord(TStream & stream,
             TIdString const & meta,
             TSeqString const & seq,
-            TQualString const & qual,
+            TQualString const & /*qual*/,
             Fastq const & /*tag*/)
 {
     int res = streamPut(stream, '@');
