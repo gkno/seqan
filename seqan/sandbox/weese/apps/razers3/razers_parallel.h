@@ -155,7 +155,7 @@ public:
     
     TCounts counts;  // TODO(holtgrew): Artifact?
 
-    TLargeMatches matches;
+    TLargeMatches matches;  // TODO(holtgrew): However, not used in global store since global reads-to-reference alignment requires everything to be in memory
     TFragmentStore /*const*/ * globalStore;
 
     TShape shape;
