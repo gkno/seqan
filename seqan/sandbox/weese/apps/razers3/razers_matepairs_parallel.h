@@ -32,6 +32,7 @@
 
 #include "razers_parallel.h"
 #include "razers_matepairs.h"
+#include "razers_paired_match_filter.h"
 
 namespace seqan {
 
@@ -135,6 +136,9 @@ public:
 
     // Mailbox for the verification results.
     PairedVerificationResults<TMatches> verificationResults;
+
+    typedef PairedMatchFilter<typename Spec<TOptions>::Type, typename TFragmentStore::TReadSeqStore, ThreadLocalStorage> TMatchFilter;
+    std::tr1::shared_ptr<TMatchFilter> matchFilter;
 
     String<unsigned> splitters;
 
@@ -904,7 +908,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
 template <typename TMatches, typename TFragmentStore, typename TSwiftFinderL, typename TSwiftFinderR, typename TSwiftPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
 void
-writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TMatches *> & verificationHits,bool dontCompact)
+writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSwiftFinderL, TSwiftFinderR, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TMatches *> & verificationHits, bool dontCompact)
 {
     // TODO(holtgrew): The same as single read writeback! Really? Combine?
 #ifdef RAZERS_PROFILE
@@ -929,8 +933,36 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSw
     for (unsigned i = 0; i < length(verificationHits); ++i)
         append(tls.matches, *verificationHits[i]);
 
-// #ifdef RAZERS_DEFER_COMPACTION
-// #else  // #ifdef RAZERS_DEFER_COMPACTION
+#ifdef RAZERS_DEFER_COMPACTION
+    (void) dontCompact;
+    
+    // Register found mate pairs in match filter.
+    typedef typename Iterator<TMatches>::Type TIterator;
+    TIterator itBegin = begin(tls.matches, Standard()) + oldSize;
+    TIterator itEnd = end(tls.matches, Standard());
+    TIterator it = itBegin;
+    for (; it != itEnd; ++it) {
+        // if (it->orientation == '-') continue;  // Skip masked reads.
+        // if (it->isRegistered) continue;
+        // it->isRegistered = true;
+        registerRead(*tls.matchFilter, it->readId / 2, it->pairScore);
+
+#if SEQAN_ENABLE_DEBUG
+        TIterator it2 = it;
+#endif  // #if SEQAN_ENABLE_DEBUG
+        ++it;  // Skip second mate.
+        SEQAN_ASSERT_EQ(it->readId / 2, it2->readId / 2);
+    }
+    // Limit/distable reads.
+    unsigned disabled = 0;
+    for (it = itBegin; it != itEnd; ++it, ++it) {
+        // if (it->orientation == '-') continue;  // Skip masked reads.
+        disabled += processRead(*tls.matchFilter, it->readId / 2);
+    }
+    if (tls.options._debugLevel >= 2)
+        fprintf(stderr, " [%u reads disabled]", disabled);
+    
+#else  // #ifdef RAZERS_DEFER_COMPACTION
     // Possibly compact matches.
     if (!dontCompact && length(tls.matches) > tls.options.compactThresh)
     {
@@ -959,7 +991,7 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSw
         timelineEndTask(TASK_COMPACT);
 #endif  // #ifdef RAZERS_PROFILE
     }
-// #endif  // #ifdef RAZERS_DEFER_COMPACTION
+#endif  // #ifdef RAZERS_DEFER_COMPACTION
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_WRITEBACK);
@@ -1474,14 +1506,58 @@ int _mapMatePairReadsParallel(
     std::cerr << std::endl << "TIME mapping: " << (endMapping - endInit) << " s" << std::endl;
 #endif  // #ifdef RAZERS_PROFILE
 
-    // Write back local stores to global stores.
-    for (unsigned i = 0; i < length(threadLocalStorages); ++i)
-        std::cerr << "thread " << i << " has " << length(threadLocalStorages[i].matches) << " aligned reads." << std::endl;
-    #pragma omp parallel
-    {
-        Nothing nothing;
-        compactPairMatches(store, threadLocalStorages[omp_get_thread_num()].matches, cnts, options, nothing, nothing, COMPACT_FINAL);
+#ifdef RAZERS_EXTERNAL_MATCHES
+    // Compute whether to use slow, sequential sorting or parallel in-memory sorting.
+    __uint64 totalMatchCount = 0;
+    __uint64 maxMatchCount = 0;
+    for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
+        totalMatchCount += length(threadLocalStorages[i].matches);
+        maxMatchCount = _max(maxMatchCount, length(threadLocalStorages[i].matches));
     }
+    bool useExternalSort = false;
+    bool useSequentialCompaction = false;
+    if (options.availableMatchesMemorySize == -1) {
+        useExternalSort = true;
+    } else if (options.availableMatchesMemorySize != 0) {
+        typedef typename Value<TMatches>::Type TMatch;
+        __int64 totalMemoryRequired = sizeof(TMatch) * totalMatchCount;
+        __int64 maxMemoryRequired = sizeof(TMatch) * maxMatchCount;
+        if (options.availableMatchesMemorySize < totalMemoryRequired) {
+            if (options.availableMatchesMemorySize < maxMemoryRequired) {
+                useExternalSort = true; 
+            } else {
+                useSequentialCompaction = true;
+            }
+        }
+    }
+
+    // Switch between using parallel compaction, sequential compaction, and
+    // sequential compaction with external sorting.  The actual switch for the
+    // sorting is in function compactMatches().
+    if (useSequentialCompaction || useExternalSort) {
+        for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
+            if (IsSameType<TGapMode, RazerSGapped>::VALUE)
+                maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
+            Nothing nothing;
+            CompactMatchesMode compactMode = useSequentialCompaction ? COMPACT_FINAL : COMPACT_FINAL_EXTERNAL;
+            // std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+            compactPairMatches(store, threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, compactMode);
+            // std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+        }
+    } else {
+#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
+        // Write back local stores to global stores.
+        for (unsigned i = 0; i < length(threadLocalStorages); ++i)
+            std::cerr << "thread " << i << " has " << length(threadLocalStorages[i].matches) << " aligned reads." << std::endl;
+#pragma omp parallel
+        {
+            Nothing nothing;
+            compactPairMatches(store, threadLocalStorages[omp_get_thread_num()].matches, cnts, options, nothing, nothing, COMPACT_FINAL);
+        }
+#ifdef RAZERS_EXTERNAL_MATCHES
+    }
+#endif // #ifdef RAZERS_EXTERNAL_MATCHES
+    
     writeBackToGlobalStore(store, threadLocalStorages, false);
 #ifdef RAZERS_PROFILE
     double endWriteback = sysTime();

@@ -302,6 +302,40 @@ bool loadReads(
 	};
 	
     
+    template <typename TFragmentStore, typename TReadMatch>
+	struct LessPairErrors3Way : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	{
+        typedef typename TFragmentStore::TReadStore			TReadStore;
+        typedef typename Value<TReadStore>::Type			TRead;
+
+        TFragmentStore const & mainStore;
+
+        LessPairErrors3Way(TFragmentStore const & mainStore_)
+                : mainStore(mainStore_)
+        {}
+
+		inline int operator() (TReadMatch const &a, TReadMatch const &b) const 
+		{
+			// read number
+            if (b.readId == TReadMatch::INVALID_ID) return -1;
+            if (a.readId == TReadMatch::INVALID_ID) return 1;
+			TRead const &ra = mainStore.readStore[a.readId];
+			TRead const &rb = mainStore.readStore[b.readId];
+			if (ra.matePairId < rb.matePairId) return -1;
+			if (ra.matePairId > rb.matePairId) return 1;
+            
+			// quality
+            if (a.orientation == '-') return -1;
+            if (b.orientation == '-') return 1;
+			if (a.pairScore > b.pairScore) return -1;
+			if (a.pairScore < b.pairScore) return 1;
+
+			if (a.pairMatchId < b.pairMatchId) return -1;
+			if (a.pairMatchId > b.pairMatchId) return 1;
+
+            return a.readId < b.readId;
+		}
+	};
 
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
@@ -336,8 +370,28 @@ void compactPairMatches(
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
+#ifdef RAZERS_EXTERNAL_MATCHES
+    if (compactMode == COMPACT_FINAL_EXTERNAL) {
+        typedef Pipe<TMatches, Source<> > TSource;
+        typedef LessPairErrors3Way<TFragmentStore, TMatch> TLess;
+        typedef Pool<TMatch, SorterSpec<SorterConfigSize<TLess, typename Size<TSource>::Type> > > TSorterPool;
+
+        TLess cmp(store);
+
+        TSource source(matches);
+        TSorterPool sorter(cmp);
+        sorter << source;
+        matches << sorter;
+
+        for (unsigned i = 1; i < length(matches); ++i)
+            SEQAN_ASSERT_LEQ(cmp(matches[i - 1], matches[i]), 0);
+    } else {
+#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
+        ::std::sort(it, itEnd, LessPairErrors<TFragmentStore, TMatch>(store));
 //	sortAlignedReads(threadStore, LessPairScore<TFragmentStore>(mainStore, threadStore));
-    ::std::sort(it, itEnd, LessPairErrors<TFragmentStore, TMatch>(store));
+#ifdef RAZERS_EXTERNAL_MATCHES
+    }
+#endif  // #ifdef RAZERS_EXTERNAL_MATCHES
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
