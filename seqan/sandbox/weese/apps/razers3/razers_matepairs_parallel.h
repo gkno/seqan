@@ -63,6 +63,7 @@ public:
         if (this == &other)
             return *this;
         localMatches = other.localMatches;
+        return *this;
     }
 
     ~PairedVerificationResults()
@@ -112,7 +113,14 @@ public:
 
     TCounts counts;  // TODO(holtgrew): Artifact?
 
-    TMatches matches;
+#ifdef RAZERS_EXTERNAL_MATCHES
+    typedef TMatches TLargeMatches;
+#else // #ifdef RAZERS_EXTERNAL_MATCHES
+    typedef typename Value<TMatches>::Type TMatchRecord;
+    typedef String<TMatchRecord, MMap<ExternalConfigLarge<> > > TLargeMatches;
+#endif // #ifdef RAZERS_EXTERNAL_MATCHES
+ 
+    TLargeMatches matches;
     TFragmentStore /*const*/ * globalStore;
 
     TShape shape;
@@ -462,6 +470,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 	typedef Pair<__int64, TMatch>	TDequeueValue;
 	typedef Dequeue<TDequeueValue>							TDequeue;
 	typedef typename TDequeue::TIter						TDequeueIterator;
+
+    double startVerify = sysTime();
 
     // buffer variable to extend window in previous left hits string by.
     // TODO(holtgrew): DELTA has to be set to a better value, probably.
@@ -886,6 +896,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
     appendToVerificationResults(*job.verificationResults, localMatches);
 
+    tls.options.timeVerification += sysTime() - startVerify;
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_VERIFY);
 #endif  // #ifdef RAZERS_PROFILE
@@ -918,6 +929,8 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSw
     for (unsigned i = 0; i < length(verificationHits); ++i)
         append(tls.matches, *verificationHits[i]);
 
+// #ifdef RAZERS_DEFER_COMPACTION
+// #else  // #ifdef RAZERS_DEFER_COMPACTION
     // Possibly compact matches.
     if (!dontCompact && length(tls.matches) > tls.options.compactThresh)
     {
@@ -946,6 +959,7 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSw
         timelineEndTask(TASK_COMPACT);
 #endif  // #ifdef RAZERS_PROFILE
     }
+// #endif  // #ifdef RAZERS_DEFER_COMPACTION
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_WRITEBACK);
@@ -1104,11 +1118,11 @@ void _mapMatePairReadsParallel(
         set(threadLocalStorages[i].preprocessingInfixR, infix(preprocessingR, 0, length(preprocessingR)));
 		threadLocalStorages[i].verifierR.preprocessing = &threadLocalStorages[i].preprocessingInfixR;
 #endif  // #ifdef RAZERS_BANDED_MYERS
-
-        threadLocalStorages[i].swiftFinderL  = TSwiftFinderL(genome, options.repeatLength, 1);
+        
+        // threadLocalStorages[i].swiftFinderL  = TSwiftFinderL(genome, options.repeatLength, 1);
         threadLocalStorages[i].genomeInf = infix(genome, scanShift, length(genome));
-        threadLocalStorages[i].swiftFinderR  = TSwiftFinderR(threadLocalStorages[i].genomeInf, options.repeatLength, 1);
-    }
+        // threadLocalStorages[i].swiftFinderR  = TSwiftFinderR(threadLocalStorages[i].genomeInf, options.repeatLength, 1);
+     }
 
     // -----------------------------------------------------------------------
     // Perform filtration.
@@ -1117,12 +1131,44 @@ void _mapMatePairReadsParallel(
     volatile unsigned leaderWindowsDone = 0;  // Number of windows done in leaders.
     volatile unsigned threadsFiltering = options.threadCount;
 
+    // We will create the swift finders for thread 0 first.  This will trigger parallel repeat finding in the SWIFT
+    // finder construction.  Then, we copy over the finder to all threads.
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_COPY_FINDER);
+#endif  // #ifdef RAZERS_PROFILE
+
+    threadLocalStorages[0].swiftFinderL  = TSwiftFinderL(store.contigStore[contigId].seq, options.repeatLength, 1);
+    threadLocalStorages[0].swiftFinderR  = TSwiftFinderR(threadLocalStorages[0].genomeInf, options.repeatLength, 1);
+
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_COPY_FINDER);
+#endif  // #ifdef RAZERS_PROFILE
+
+ 
     #pragma omp parallel
     {
         unsigned windowsDone = 0;
 
         // Initialization.
         TThreadLocalStorage & tls = threadLocalStorages[omp_get_thread_num()];
+
+#ifdef RAZERS_PROFILE
+        timelineBeginTask(TASK_COPY_FINDER);
+#endif  // #ifdef RAZERS_PROFILE
+        // tls.filterFinder = TFilterFinder(store.contigStore[contigId].seq, tls.options.repeatLength, 1);
+        if (omp_get_thread_num() != 0)
+        {
+            tls.swiftFinderL = threadLocalStorages[0].swiftFinderL;
+            tls.swiftFinderR = threadLocalStorages[0].swiftFinderR;
+        }
+#ifdef RAZERS_PROFILE
+        timelineEndTask(TASK_COPY_FINDER);
+#endif  // #ifdef RAZERS_PROFILE
+#ifdef RAZERS_PROFILE
+        timelineBeginTask(TASK_FILTER);
+#endif  // #ifdef RAZERS_PROFILE
+
+
         TSwiftPattern & swiftPatternL = tls.swiftPatternL;
         TSwiftPattern & swiftPatternR = tls.swiftPatternR;
         TSwiftFinderL & swiftFinderL = tls.swiftFinderL;
@@ -1162,6 +1208,7 @@ void _mapMatePairReadsParallel(
 #ifdef RAZERS_PROFILE
             timelineBeginTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
+            double filterStart = sysTime();
 
             // TDequeue fifo;						// stores left-mate potential matches  // XXX
             // String<__int64> lastPotMatchNo;		// last number of a left-mate potential // XXX
@@ -1219,6 +1266,7 @@ void _mapMatePairReadsParallel(
 
                 pushFront(taskQueue, jobs);
             }
+            tls.options.timeFiltration += sysTime() - filterStart;
 #ifdef RAZERS_PROFILE
             timelineEndTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
@@ -1453,10 +1501,30 @@ int _mapMatePairReadsParallel(
         options.countVerification += threadLocalStorages[i].options.countVerification;
     }
 
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_REVCOMP);
+#endif  // #ifdef RAZERS_PROFILE
+
 	// restore original orientation (R-reads are infixes of ConcatDirect StringSet)
 	#pragma omp parallel for schedule(static, 1)
 	for (int i = 0; i < (int)length(threadLocalStorages); ++i)
 		reverseComplement(threadLocalStorages[i].readSetR);
+
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_REVCOMP);
+#endif  // #ifdef RAZERS_PROFILE
+
+	if (options._debugLevel >= 1) {
+        for (unsigned i = 0; i < length(threadLocalStorages); ++i) {
+            ::std::cerr << "Thread #" << i << std::endl;
+            ::std::cerr << "  Masking duplicates took        \t" << threadLocalStorages[i].options.timeMaskDuplicates << " seconds" << ::std::endl;
+            ::std::cerr << "  Compacting matches took        \t" << threadLocalStorages[i].options.timeCompactMatches << " seconds" << ::std::endl;
+            ::std::cerr << "  Time for filtration            \t" << threadLocalStorages[i].options.timeFiltration << " seconds" << ::std::endl;
+            ::std::cerr << "  Time for verifications         \t" << threadLocalStorages[i].options.timeVerification << " seconds" << ::std::endl;
+        }
+        ::std::cerr << "Time for copying back            \t" << options.timeFsCopy << " seconds" << ::std::endl;
+    }
+
 
 	options.timeMapReads = SEQAN_PROTIMEDIFF(findTime);
 	if (options._debugLevel >= 1)
