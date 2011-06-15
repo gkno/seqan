@@ -93,7 +93,8 @@ writeRecord(TStream & stream,
 
     unsigned long len = length(seq);
     // write sequence blocks of 70 characters width
-    for (unsigned long l = 0; l < len -70; l +=70)
+    unsigned long l = 0;
+    while (l < len)
     {
         res = streamPut(stream, infix(seq, l, (l+70 > len) ? len : l+70));
         if (res)
@@ -101,6 +102,7 @@ writeRecord(TStream & stream,
         res = streamPut(stream, '\n');
         if (res)
             return res;
+        l += 70;
     }
     //TODO(h4nn3s): is it wise performance-wise to pass infixes that may have to be converted (i.e. copied) before writing? One could also write every character individually and insert \n every 70 chars. Than nothing would have to be copied, but it would result in many more write operations. What do others think?
     return 0;

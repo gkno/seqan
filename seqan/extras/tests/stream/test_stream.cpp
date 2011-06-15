@@ -52,6 +52,7 @@
 #include "test_stream_record_reader_fasta.h"
 #include "test_stream_record_reader_fastq.h"
 #include "test_stream_guess_stream_format.h"
+#include "test_stream_write_fasta.h"
 
 SEQAN_BEGIN_TESTSUITE(test_stream)
 {
@@ -161,7 +162,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_streamPut);
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_flush);
 
-    // TODO(h4nn3s) finished tests for tokenize.h
+    // Tests for tokenize.h
     SEQAN_CALL_TEST(test_stream_tokenizing_readUntil);
     SEQAN_CALL_TEST(test_stream_tokenizing_readNChars);
     SEQAN_CALL_TEST(test_stream_tokenizing_readIgnoring);
@@ -173,7 +174,6 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithChar);
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithStr);
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithOneCharOfStr);
-    
 
     // Tests for lexical_cast
     SEQAN_CALL_TEST(test_stream_lexical_cast_1_stdstring);
@@ -183,10 +183,15 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_lexical_cast_2_chararray);
     SEQAN_CALL_TEST(test_stream_lexical_cast_2_seqanstring);
 
-    
-    // TODO(holtgrew): Tests for record reader class hierarchy. It's enough to test on fstream as a representative of the stream concept and the and memory mapped string specialization. Each test should be run with one and two records, as representatives for one/many case. Note that the buffer sizes could/should be set small enough or data large enough such that the fist buffer actually runs full in the two records variant. We test the FASTA reader as a representative.
+    // -------------- File format specific code ------------------
 
-    
+    /* RecordReader is tested for each Format with fstream and mmap-backend.
+     * Every backend is tested with single-pass record-reading, those that have
+     * double-pass implementations are also tested for double-pass
+     * record-reading and batch reading (double-pass whole document). For the
+     * last case an additional test for concat-direct-strings is performed. */
+
+    // Tests for FASTA
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_fstream);
@@ -195,6 +200,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_concat_mmap);
 
+    // Tests for FASTQ
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_fstream);
@@ -203,41 +209,19 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_concat_mmap);
 
+    // TODO Tests for other formats once they are supported
 
+
+    // Tests for file format auto-detection
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fasta);
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fastq);
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_bogus);
 
-/*    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream_two_records);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream_one_record);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream_two_records);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_mapped_one_record);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_mapped_two_records);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_mapped_one_record);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_mapped_two_records);
-    */
-    
-    // TODO(holtgrew): Tests for FASTA and FASTQ record reader. Here, we test the single and double reader on the FASTA (above) and FASTQ (here) variant, both the one and two records case but only data from fstream.
+    /* Tests for writing file formats.
+     * Only fstream used as a representative */
 
-    /*
-    SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_fstream_one_record);
-    SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_fstream_two_records);
-    SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_fstream_one_record);
-    SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_fstream_two_records);
-    */
-
-    // TODO(holtgrew): Tests for the FASTA and FASTQ document reading functions, once they are in place. We test single/double pass for FASTA/FASTQ with one/two records, memory mapped file only, anything else is forbiddingly slow.
-    // TODO(holtgrew): Probably, mapped only is sufficient.
-    /*
-    SEQAN_CALL_TEST(test_stream_read_document_fasta_single_mapped_one_record);
-    SEQAN_CALL_TEST(test_stream_read_document_fasta_single_mapped_two_records);
-    SEQAN_CALL_TEST(test_stream_read_document_fasta_double_mapped_one_record);
-    SEQAN_CALL_TEST(test_stream_read_document_fasta_double_mapped_two_records);
-    SEQAN_CALL_TEST(test_stream_read_document_fastq_single_mapped_one_record);
-    SEQAN_CALL_TEST(test_stream_read_document_fastq_single_mapped_two_records);
-    SEQAN_CALL_TEST(test_stream_read_document_fastq_double_mapped_one_record);
-    SEQAN_CALL_TEST(test_stream_read_document_fastq_double_mapped_two_records);
-    */
+    // Tests for FASTA
+    SEQAN_CALL_TEST(test_stream_write_record_fasta);
 }
 SEQAN_END_TESTSUITE
 

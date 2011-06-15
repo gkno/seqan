@@ -62,7 +62,7 @@ typedef TagList<Fastq, TagList<Fasta > >    SeqStreamFormats;
 /**
 .Shortcut.AutoSeqStreamFormat
 ..cat:Input/Output
-..summary:A TagSelector for @Shortcut.SeqStreamFormats@. T list of the currently implemented Sequence-Formats (in RecordReader/Stream-IO)
+..summary:A TagSelector for @Shortcut.SeqStreamFormats@, the list of the currently implemented Sequence-Formats (in RecordReader/Stream-IO)
 ..signature:AutoSeqStreamFormat
 ..shortcutfor:Class.TagSelector
 ..shortcutfor:Tag.TagList
@@ -191,11 +191,10 @@ private:
 ..cat:Input/Output
 ..summary:check whether the data provided by reader is (one of) the specified format(s).
 ..signature:checkStreamFormat(TRecordReader & reader, TTag const &)
-...param.reader:The @Class.RecordReader@ to read from
-...param.TTag:The tag to check against.
+..param.reader:The @Class.RecordReader@ to read from
+..param.TTag:The tag to check against.
 ..signature:checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
-...param.reader:The @Class.RecordReader@ to read from
-...param.formats:A @Tag.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
+..param.formats:A @Tag.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
 ..returns: $True$ if (one of) the specified Tag(s) tested positive and $False$ otherwise
 ...type:nolink:$bool$
 ..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do not (permanently) alter the position in the stream.
