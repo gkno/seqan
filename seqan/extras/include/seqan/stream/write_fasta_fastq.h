@@ -74,6 +74,38 @@ template <typename TStream,
           typename TIdString,
           typename TSeqString>
 inline int
+writeRecord0(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/)
+{
+    int res = streamPut(stream, '>');
+    if (res)
+        return res;
+
+    res = streamPut(stream, meta);
+    if (res)
+        return res;
+
+    res = streamPut(stream, '\n');
+    if (res)
+        return res;
+
+    res = streamPut(stream, seq);
+    if (res)
+        return res;
+
+    res = streamPut(stream, '\n');
+    if (res)
+        return res;
+    return 0;
+}
+
+// FASTA
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
 writeRecord(TStream & stream,
             TIdString const & meta,
             TSeqString const & seq,
@@ -106,6 +138,212 @@ writeRecord(TStream & stream,
     }
     //TODO(h4nn3s): is it wise performance-wise to pass infixes that may have to be converted (i.e. copied) before writing? One could also write every character individually and insert \n every 70 chars. Than nothing would have to be copied, but it would result in many more write operations. What do others think?
     return 0;
+}
+
+// FASTA
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
+writeRecord2(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/)
+{
+    int res = streamPut(stream, '>');
+    if (res)
+        return res;
+
+    res = streamPut(stream, meta);
+    if (res)
+        return res;
+
+    res = streamPut(stream, '\n');
+    if (res)
+        return res;
+
+    unsigned long len = length(seq);
+    // write sequence blocks of 70 characters width
+    for (unsigned long l = 0; l < len; ++l)
+    {
+        res = streamPut(stream, seq[l]);
+        if (res)
+            return res;
+        if (l % 70 == 0)
+        {
+            res = streamPut(stream, '\n');
+            if (res)
+                return res;
+        }
+    }
+    res = streamPut(stream, '\n');
+    return res;
+}
+
+// FASTA
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
+writeRecord3(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/)
+{
+    int res = 0;
+    _streamPut(stream, '>');
+    if (res)
+        return res;
+
+    _streamWrite(stream, meta);
+    if (res)
+        return res;
+
+    _streamPut(stream, '\n');
+    if (res)
+        return res;
+
+    unsigned long len = length(seq);
+    // write sequence blocks of 70 characters width
+    unsigned long l = 0;
+    while (l < len)
+    {
+        _streamWrite(stream, infix(seq, l, (l+70 > len) ? len : l+70));
+        if (res)
+            return res;
+        _streamPut(stream, '\n');
+        if (res)
+            return res;
+        l += 70;
+    }
+    res = streamPut(stream, '\n');
+    return res;
+}
+
+// FASTA
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
+writeRecord4(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/)
+{
+    int res = 0;
+    _streamPut(stream, '>');
+    if (res)
+        return res;
+
+    _streamWrite(stream, meta);
+    if (res)
+        return res;
+
+    _streamPut(stream, '\n');
+    if (res)
+        return res;
+
+    unsigned long len = length(seq);
+    // write sequence blocks of 70 characters width
+    for (unsigned long l = 0; l < len; ++l)
+    {
+        _streamPut(stream, seq[l]);
+        if (res)
+            return res;
+        if (l % 70 == 0)
+        {
+            _streamPut(stream, '\n');
+            if (res)
+                return res;
+        }
+    }
+    res = streamPut(stream, '\n');
+    return res;
+}
+
+// FASTA
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
+writeRecord5(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/)
+{
+    int res = 0;
+    streamPut(stream, '>');
+    if (res)
+        return res;
+
+    streamPut(stream, meta);
+    if (res)
+        return res;
+
+    streamPut(stream, '\n');
+    if (res)
+        return res;
+
+    // write sequence blocks of 70 characters width
+    typename Iterator<TSeqString>::Type it = begin(seq);
+    typename Iterator<TSeqString>::Type it_end = end(seq);
+    for (unsigned long l = 0; it < it_end; ++it)
+    {
+        res = streamPut(stream, *it);
+        if (res)
+            return res;
+        if (++l == 0)
+        {
+            res = streamPut(stream, '\n');
+            l = 0;
+            if (res)
+                return res;
+        }
+    }
+    res = streamPut(stream, '\n');
+    return res;
+}
+// FASTA
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
+writeRecord6(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/)
+{
+    int res = 0;
+    _streamPut(stream, '>');
+    if (res)
+        return res;
+
+    _streamWrite(stream, meta);
+    if (res)
+        return res;
+
+    _streamPut(stream, '\n');
+    if (res)
+        return res;
+
+    // write sequence blocks of 70 characters width
+    typename Iterator<TSeqString>::Type it = begin(seq);
+    typename Iterator<TSeqString>::Type it_end = end(seq);
+    for (unsigned long l = 0; it < it_end; ++it)
+    {
+        _streamPut(stream, *it);
+        if (res)
+            return res;
+        if (++l == 0)
+        {
+            _streamPut(stream, '\n');
+            l = 0;
+            if (res)
+                return res;
+        }
+    }
+    res = streamPut(stream, '\n');
+    return res;
 }
 
 /**

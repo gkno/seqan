@@ -453,6 +453,12 @@ streamWriteBlock(::std::ofstream & stream, char const * source, size_t count)
 // ----------------------------------------------------------------------------
 
 inline int
+streamPut(::std::fstream & stream, char const c)
+{
+    return streamWriteChar(stream, c);
+}
+
+inline int
 streamPut(::std::fstream & stream, char const * source)
 {
     return (streamWriteBlock(stream, source, strlen(source))
@@ -474,6 +480,13 @@ streamPut(::std::fstream & stream, TSource const & source)
 {
     stream << source;
     return stream.fail();
+}
+
+
+inline int
+streamPut(::std::ofstream & stream, char const c)
+{
+    return streamWriteChar(stream, c);
 }
 
 inline int
