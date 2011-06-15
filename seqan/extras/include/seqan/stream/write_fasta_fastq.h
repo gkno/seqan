@@ -169,7 +169,7 @@ writeRecord2(TStream & stream,
         res = streamPut(stream, seq[l]);
         if (res)
             return res;
-        if (l % 69 == 0)
+        if ((l % 69 == 0) && l)
         {
             res = streamPut(stream, '\n');
             if (res)
@@ -250,7 +250,7 @@ writeRecord4(TStream & stream,
         _streamPut(stream, seq[l]);
         if (res)
             return res;
-        if (l % 69 == 0)
+        if ((l % 69 == 0) && l)
         {
             _streamPut(stream, '\n');
             if (res)
