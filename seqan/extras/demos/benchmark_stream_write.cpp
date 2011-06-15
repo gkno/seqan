@@ -101,6 +101,7 @@ int main(int argc, char const ** argv)
 
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '0');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -117,6 +118,7 @@ int main(int argc, char const ** argv)
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '1');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -133,6 +135,7 @@ int main(int argc, char const ** argv)
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '2');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -149,6 +152,7 @@ int main(int argc, char const ** argv)
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '3');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -165,6 +169,7 @@ int main(int argc, char const ** argv)
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '4');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -181,6 +186,7 @@ int main(int argc, char const ** argv)
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '5');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -197,6 +203,7 @@ int main(int argc, char const ** argv)
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '6');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -213,6 +220,7 @@ int main(int argc, char const ** argv)
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
+        appendValue(tempFilename, '7');
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
