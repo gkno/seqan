@@ -113,6 +113,7 @@ int main(int argc, char const ** argv)
             writeRecord0(file, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        file.close();
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
@@ -128,6 +129,7 @@ int main(int argc, char const ** argv)
             writeRecord(file, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        file.close();
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
@@ -143,6 +145,7 @@ int main(int argc, char const ** argv)
             writeRecord2(file, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        file.close();
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
@@ -158,6 +161,7 @@ int main(int argc, char const ** argv)
             writeRecord3(file, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        file.close();
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
@@ -173,6 +177,7 @@ int main(int argc, char const ** argv)
             writeRecord4(file, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        file.close();
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
@@ -188,6 +193,7 @@ int main(int argc, char const ** argv)
             writeRecord5(file, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        file.close();
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
@@ -203,6 +209,7 @@ int main(int argc, char const ** argv)
             writeRecord6(file, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        file.close();
     }
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
