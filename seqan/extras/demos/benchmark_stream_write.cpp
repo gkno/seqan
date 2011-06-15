@@ -70,17 +70,17 @@ void constructFastaStrings(StringSet<CharString> & metas, StringSet<CharString> 
         appendValue(seqs[0], 'a');
 
     reserve(seqs[1], 1024*1024*32);
-    metas[0] = "32MB of as";
+    metas[1] = "32MB of as";
     for (int i = 0; i< 1024*1024*32; ++i)
         appendValue(seqs[1], 'c');
 
     reserve(seqs[2], 1024*1024*256);
-    metas[0] = "256MB of gs";
+    metas[2] = "256MB of gs";
     for (int i = 0; i< 1024*1024*256; ++i)
         appendValue(seqs[2], 'g');
 
     reserve(seqs[3], 1024*1024*512);
-    metas[0] = "512MB of ts";
+    metas[3] = "512MB of ts";
     for (int i = 0; i< 1024*1024*512; ++i)
         appendValue(seqs[3], 't');
 }
