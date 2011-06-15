@@ -187,7 +187,7 @@ private:
 // ----------------------------------------------------------------------------
 
 /**
-.Funtion.checkStreamFormat
+.Function.checkStreamFormat
 ..cat:Input/Output
 ..summary:check whether the data provided by reader is (one of) the specified format(s).
 ..signature:checkStreamFormat(TRecordReader & reader, TTag const &)
@@ -198,8 +198,7 @@ private:
 ...param.formats:A @Tag.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
 ..returns: $True$ if (one of) the specified Tag(s) tested positive and $False$ otherwise
 ...type:nolink:$bool$
-..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do
-not (permanently) alter the position in the stream.
+..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do not (permanently) alter the position in the stream.
 ..remarks:The tagId-member of the TagSelector holds the index in inside-to-outside order and begins counting at one. E.g. The Index of FASTQ in TagList<Fastq, TagList<Fasta > > would be 2
 ..include:seqan/stream.h
 */
