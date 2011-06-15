@@ -365,7 +365,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("maxG", "max-gap",    "max. length of middle gap", OptionType::Int | OptionType::Label, options.maxGap));
 	addOption(parser, CommandLineOption("minG", "min-gap",    "min. length of middle gap (for edit distance mapping about 10% of read length is recommended)", OptionType::Int | OptionType::Label, options.minGap));
 	addOption(parser, CommandLineOption("ep", "errors-prefix",    "max. number of errors in prefix match", OptionType::Int | OptionType::Label, options.maxPrefixErrors));
-	addOption(parser, CommandLineOption("es", "errors-suffix",    "max. number of errors in suffix match", OptionType::Int | OptionType::Label, options.maxPrefixErrors));
+	addOption(parser, CommandLineOption("es", "errors-suffix",    "max. number of errors in suffix match", OptionType::Int | OptionType::Label, options.maxSuffixErrors));
 	addOption(parser, CommandLineOption("gl", "genome-len",    "genome length, for computation of expected number of random matches", OptionType::Int | OptionType::Label, options.specifiedGenomeLen));
 	addOption(parser, CommandLineOption("an", "anchored",           "anchored split mapping, only unmapped reads with mapped mates will be considered, requires the reads to be given in SAM format", OptionType::Boolean));
 
@@ -377,8 +377,8 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("oc", "overabundance-cut", "set k-mer overabundance cut ratio", OptionType::Int | OptionType::Label, options.abundanceCut));
 	addOption(parser, CommandLineOption("rl", "repeat-length",     "set simple-repeat length threshold", OptionType::Int | OptionType::Label, options.repeatLength));
 	addOption(parser, CommandLineOption("tl", "taboo-length",      "set taboo length", OptionType::Int | OptionType::Label, options.tabooLength));
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
 	addOption(parser, CommandLineOption("lm", "low-memory",        "decrease memory usage at the expense of runtime", OptionType::Boolean));
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
 	addSection(parser, "Mapping Quality Options:");
 	addOption(parser, CommandLineOption("mq", "mapping-quality",   "switch on mapping quality mode", OptionType::Boolean));
 	addOption(parser, CommandLineOption("nbi","no-below-id",       "do not report matches with seed identity < percent id", OptionType::Boolean));
@@ -431,8 +431,8 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "mq-seed-length", options.artSeedLength);
 	getOptionValueLong(parser, "seed-mism-quality", options.maxMismatchQualSum);
 	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
-	getOptionValueLong(parser, "low-memory", options.lowMemory);
 #endif
+	getOptionValueLong(parser, "low-memory", options.lowMemory);
 	getOptionValueLong(parser, "trim-reads", options.trimLength);
 	getOptionValueLong(parser, "taboo-length", options.tabooLength);
 	getOptionValueLong(parser, "match-N", options.matchN);
@@ -582,8 +582,8 @@ int main(int argc, const char *argv[])
 		cerr << "Min. gap length must be a value greater 0" << endl;
 	if(options.maxPrefixErrors == -1)
 		options.maxPrefixErrors = (int)(options.minMatchLen * options.errorRate);
-	if(options.maxSuffixErrors == -1)
-		options.maxSuffixErrors = (int)(options.minMatchLen * options.errorRate);
+//	if(options.maxSuffixErrors == -1)
+//		options.maxSuffixErrors = (int)(options.minMatchLen * options.errorRate);
 
 
 	//////////////////////////////////////////////////////////////////////////////
