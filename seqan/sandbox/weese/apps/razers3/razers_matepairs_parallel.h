@@ -375,6 +375,13 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
         resize(readSetL, pairCount, Exact());
         resize(readSetR, pairCount, Exact());
 
+#ifdef RAZERS_DEFER_COMPACTION
+        typedef typename TThreadLocalStorage::TMatchFilter TMatchFilter;
+        double READ_FRAC_WITH_HISTO = 0.01;
+        tls.matchFilter.reset(new TMatchFilter(tls.splitters[i + 1] - tls.splitters[i], options.matchHistoStartThreshold, READ_FRAC_WITH_HISTO, tls, tls.splitters[i], tls.globalStore->readSeqStore, tls.options));
+        tls.options.compactThresh = MaxValue<unsigned>::VALUE;
+#endif // #ifdef RAZERS_DEFER_COMPACTION
+
         unsigned offset = splitters[i];
         for (unsigned j = 0; j < pairCount; ++j) {
             assign(readSetL[j], store.readSeqStore[store.matePairStore[offset + j].readId[0]]);

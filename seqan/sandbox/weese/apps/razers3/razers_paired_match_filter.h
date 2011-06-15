@@ -74,7 +74,7 @@ _createHistogram(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filte
     unsigned result = obtainId(filter.idManager);
     if (result >= length(filter.histograms))
         resize(filter.histograms, length(filter.histograms) + 1);
-    resize(filter.histograms[result], ceil(filter.options.errorRate * length(filter.readSeqs[pairId])), 0, Exact());
+    resize(filter.histograms[result], ceil(filter.options.errorRate * (length(filter.readSeqs[2 * pairId]) + length(filter.readSeqs[2 * pairId + 1]))), 0, Exact());
     SEQAN_ASSERT_LT(result, length(filter.histograms));
     return result;
 }
