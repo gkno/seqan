@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,13 +29,13 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+// Author: Hannes Hauswedell <hauswedell@mi.fu-berlin.de>
 // ==========================================================================
 // Record and Document Reading for FASTA and FASTQ files.
 // ==========================================================================
 
-// TODO(holtgrew): Fasta specializations Fasta<TSpec = WholeMeta>, Fasta<IdOnly>
-// TODO(holtgrew): FASTQ reading.
+//TODO(h4nn3s): double-check if we really want to allow EOF inside meta-line
+// and also if a fastq file is legal if a record contains no qualities
 
 #ifndef SEQAN_STREAM_READ_FASTA_FASTQ_H_
 #define SEQAN_STREAM_READ_FASTA_FASTQ_H_
@@ -50,28 +50,22 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-template <typename TIdString, typename TSeqString>
-class FastaReaderLambdaContextSinglePass_;
+/**
+.Tag.File Format.tag.Fasta:
+    FASTA file format for sequences.
+..include:seqan/file.h
+*/
+struct TagFasta_;
+typedef Tag<TagFasta_> const Fasta;
 
-// Used for single-pass and second pass in double-pass.
-template <typename TIdString, typename TSeqString>
-class FastaReaderLambdaContextSinglePass_
-{
-public:
-    Pair<TIdString, TSeqString> & record;
-    FastaReaderLambdaContextSinglePass_(Pair<TIdString, TSeqString> & _record) : record(_record) {}
-};
+/**
+.Tag.File Format.tag.Fastq:
+    FASTQ file format for sequences.
+..include:seqan/file.h
+*/
+struct TagFastq_;
+typedef Tag<TagFastq_> const Fastq;
 
-// Used by first pass of double-pass only.
-template <typename TIdString, typename TSeqString>
-class FastaReaderLambdaContextFirstPass_
-{
-public:
-    unsigned metaLength;
-    unsigned sequenceLength;
-    FastaReaderLambdaContextFirstPass_() : metaLength(0), sequenceLength(0)
-    {}
-};
 
 // ============================================================================
 // Metafunctions
@@ -92,302 +86,392 @@ struct MetaFirstChar_<Tag<TagFastq_> >
     static const char VALUE = '@';
 };
 
-template <typename TTag>
-struct SeparatorFirstChar_;
-
-template <>
-struct SeparatorFirstChar_<Tag<TagFasta_> >
-{
-    static const char VALUE = '>';
-};
-
-template <>
-struct SeparatorFirstChar_<Tag<TagFastq_> >
-{
-    static const char VALUE = '+';
-};
-
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Helper Function _readRecordFastAQMeta
+// Function _clearAndReserveMemory() and helpers
 // ----------------------------------------------------------------------------
 
-// Forwards for for _readRecordFastAQMeta and _readRecordFastAQSequence.
-template <typename TLambdaContext, typename TRecordReader>
-inline void _lambdaFastAQMetaChar(TLambdaContext & lambdaContext, TRecordReader & reader);
-template <typename TLambdaContext, typename TRecordReader>
-inline void _lambdaFastAQSequenceChar(TLambdaContext & lambdaContext, TRecordReader & reader);
-
-// Read the meta field from a FASTA or FASTQ file.
-template <typename TLambdaContext, typename TFile, typename TPass, typename TTag>
-int _readRecordFastAQMeta(TLambdaContext & lambdaContext,
-                          RecordReader<TFile, TPass> & reader,
-                          TTag const & /*tag*/)
+// if target string is CharString, Sequence is any alphabetical
+template <typename TRecordReader>
+inline int
+_countSequenceFastAQ(unsigned int & count,
+                     TRecordReader & reader,
+                     char const & /* Alphabet type */)
 {
-    typedef RecordReader<TFile, TPass> TRecordReader;
+    return _countHelper(count, reader, Alpha_(), Whitespace_(), false);
+}
 
-    // Read meta field.
-    // std::cerr << __LINE__ << " value(reader) == " << value(reader) << std::endl;
-    if (value(reader) != MetaFirstChar_<TTag>::VALUE)
-        return TRecordReader::INVALID_FORMAT;  // Did not start with '>'.
+// allow fine-grained alphabet-checking for DnaString etc
+template <typename TAlph, typename TRecordReader>
+inline int
+_countSequenceFastAQ(unsigned int & count,
+                     TRecordReader & reader,
+                     TAlph const & /* Alphabet type */)
+{
+    return _countHelper(count, reader, Tag<TAlph>(), Whitespace_(), false);
+}
+
+template <typename TSeqAlph,
+          typename TFile,
+          typename TSpec,
+          typename TTag>
+inline int
+_countMetaAndSequence(unsigned int & metaLength,
+                      unsigned int & seqLength,
+                      RecordReader<TFile, DoublePass<TSpec> > & reader,
+                      TTag const & /*tag*/,
+                      TSeqAlph const & /* tag*/)
+{
+    metaLength=0;
+    seqLength=0;
+
+    // COUNT META
+    if (atEnd(reader) || value(reader) != MetaFirstChar_<TTag>::VALUE)
+        return RecordReader<TFile, DoublePass<TSpec> >::INVALID_FORMAT;
     goNext(reader);
-    if (atEnd(reader))
-        return TRecordReader::INVALID_FORMAT;  // Input stopped after '>'.
+    if (resultCode(reader))
+        return resultCode(reader);
+    if (atEnd(reader)) // empty ID, no sequence, this is legal TODO?
+        return 0;
 
-    // Read meta field, goes up to the first line break.
-    // std::cerr << __LINE__ << " value(reader) == " << value(reader) << std::endl;
-    while (value(reader) != '\n' && value(reader) != '\r') {
-        _lambdaFastAQMetaChar(lambdaContext, reader);
-        goNext(reader);
-        if (atEnd(reader))
-            return TRecordReader::INVALID_FORMAT;  // Input stopped in meta.
-    }
-    // Go beyond line break.
-    // std::cerr << __LINE__ << " value(reader) == " << value(reader) << std::endl;
-    if (value(reader) == '\r') {
-        // Skip '\n' in DOS line endings.
-        goNext(reader);
-        if (atEnd(reader))
-            return TRecordReader::INVALID_FORMAT;  // Stopped in meta break.
-        // std::cerr << __LINE__ << " value(reader) == " << value(reader) << std::endl;
-        if (value(reader) == '\n')
-            goNext(reader);
-    } else {
-        // Skip '\n'.
-        goNext(reader);
-    }
-    return 0;
-}
-
-// ----------------------------------------------------------------------------
-// Helper Function _readRecordFastAQSequence
-// ----------------------------------------------------------------------------
-
-// Read the sequence field from a FASTA or FASTQ file.
-template <typename TLambdaContext, typename TFile, typename TPass, typename TTag>
-int _readRecordFastAQSequence(TLambdaContext & lambdaContext,
-                              RecordReader<TFile, TPass> & reader,
-                              TTag const & /*tag*/)
-{
-    typedef RecordReader<TFile, TPass> TRecordReader;
-
-    // The sequence can be empty.
-    while (true) {
-        // The file is allowed to end within the sequence.
-        if (atEnd(reader))
-            return resultCode(reader);
-        // Skip line break ('\r', '\n', "\r\n" but also "\n\n" since
-        // the code gets simpler this way). The file is allowed to end
-        // after the line break.
-        if (value(reader) == '\r' || value(reader) == '\n') {
-            goNext(reader);
-            if (atEnd(reader))
-                return resultCode(reader);
-            // Skip '\n' after '\r' or first '\n'.
-            if (value(reader) == '\n') {
-                goNext(reader);
-                if (atEnd(reader))
-                    return resultCode(reader);
-            }
-            // '>'/'@'/'+' after '\r', '\n', '\n\n', or '\r\n'.
-            if (value(reader) == MetaFirstChar_<TTag>::VALUE || value(reader) == SeparatorFirstChar_<TTag>::VALUE)
-                return resultCode(reader);
-        }
-        _lambdaFastAQSequenceChar(lambdaContext, reader);
-        // std::cerr << "i == " << (i++) << " read >>" << value(reader) << "<<" << std::endl;
-        goNext(reader);
-    }
-    return 0;
-}
-
-// ----------------------------------------------------------------------------
-// Function readRecord();  Single-Pass.
-// ----------------------------------------------------------------------------
-
-template <typename TIdString, typename TSeqString, typename TRecordReader>
-inline void
-_lambdaFastAQMetaChar(FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> & lambdaContext,
-                      TRecordReader & reader)
-{
-    appendValue(lambdaContext.record.i1, value(reader));
-}
-
-template <typename TIdString, typename TSeqString, typename TRecordReader>
-inline void
-_lambdaFastAQSequenceChar(FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> & lambdaContext,
-                          TRecordReader & reader)
-{
-    appendValue(lambdaContext.record.i2, value(reader));
-}
-
-template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
-int readRecord(Pair<TIdString, TSeqString> & record,
-               RecordReader<TFile, SinglePass<TSpec> > & reader,
-               Fasta const & /*tag*/)
-{
-    // Nomenclauture: A FASTA file consists of records.  Each record
-    // consists of a meta and a sequence field.
-
-    clear(record.i1);
-    clear(record.i2);
-    FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContext(record);
-
-    typedef RecordReader<TFile, SinglePass<TSpec> > TRecordReader;
-
-    // Read meta field.
-    int res = _readRecordFastAQMeta(lambdaContext, reader, Fasta());
-    if (res)
+    int res = countLine(metaLength, reader);
+    if (res == EOF_BEFORE_SUCCESS)  // EOF half way in ID is legal
+        return 0;
+    else if (res)
         return res;
-    // std::cerr << "READ " << record.i1 << std::endl;
-    // Read sequence field.
-    res = _readRecordFastAQSequence(lambdaContext, reader, Fasta());
-    if (res)
+
+    if (atEnd(reader)) // no sequence
+        return 0;
+
+    // COUNT SEQUENCE
+    res = _countSequenceFastAQ(seqLength, reader, TSeqAlph());
+    if (res == EOF_BEFORE_SUCCESS)  // EOF half way in sequence is legal
+        return 0;
+    else if (res)
         return res;
 
     return 0;
 }
 
-template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
-int readRecord(Pair<TIdString, TSeqString> & record,
-               RecordReader<TFile, SinglePass<TSpec> > & reader,
-               Fastq const & /*tag*/)
+// SINGLE-Pass
+template <typename TIdString,
+          typename TSeqString,
+          typename TFile,
+          typename TSpec,
+          typename TTag>
+inline int
+_clearAndReserveMemory(TIdString & meta, TSeqString & seq,
+                       RecordReader<TFile, SinglePass<TSpec> > & /**/,
+                       TTag const & /*tag*/)
 {
-    clear(record.i1);
-    clear(record.i2);
-    FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContext(record);
-
-    typedef RecordReader<TFile, SinglePass<TSpec> > TRecordReader;
-
-    // Read meta field.
-    int res = _readRecordFastAQMeta(lambdaContext, reader, Fastq());
-    if (res)
-        return res;
-    // std::cerr << "READ " << record.i1 << std::endl;
-    // Read sequence field.
-    res = _readRecordFastAQSequence(lambdaContext, reader, Fastq());
-    if (res)
-        return res;
-    // Skip separator and qualities, assume that they are on one line.
-    CharString s;
-    readLine(s, reader);
-    readLine(s, reader);
-
+    clear(meta);
+    clear(seq);
     return 0;
 }
 
-// ----------------------------------------------------------------------------
-// Function readRecord();  Double-Pass.
-// ----------------------------------------------------------------------------
-// TODO(holtgrew): This code has to be adjusted to also work for Fastq.
-
-template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
-inline void
-_lambdaFastAQMetaChar(FastaReaderLambdaContextFirstPass_<TIdString, TSeqString> & lambdaContext,
-                      RecordReader<TFile, DoublePass<TSpec> > & /*reader*/)
+// DOUBLE-Pass
+template <typename TIdString,
+          typename TSeqString,
+          typename TFile,
+          typename TSpec,
+          typename TTag>
+inline int
+_clearAndReserveMemory(TIdString & meta, TSeqString & seq,
+                       RecordReader<TFile, DoublePass<TSpec> > & reader,
+                       TTag const & /*tag*/)
 {
-    // std::cerr << "lambdaContext.metaLength == " << lambdaContext.metaLength << std::endl;
-    // std::cerr << "lambdaContext.sequenceLength == " << lambdaContext.sequenceLength << std::endl;
-    // std::cerr << "lambdaContext.metaLength += 1;" << std::endl;
-    lambdaContext.metaLength += 1;
-}
-
-template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
-inline void
-_lambdaFastAQSequenceChar(FastaReaderLambdaContextFirstPass_<TIdString, TSeqString> & lambdaContext,
-                          RecordReader<TFile, DoublePass<TSpec> > & /*reader*/)
-{
-    // std::cerr << "lambdaContext.metaLength == " << lambdaContext.metaLength << std::endl;
-    // std::cerr << "lambdaContext.sequenceLength == " << lambdaContext.sequenceLength << std::endl;
-    // std::cerr << "lambdaContext.sequenceLength += 1;" << std::endl;
-    lambdaContext.sequenceLength += 1;
-}
-
-template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
-int readRecord(Pair<TIdString, TSeqString> & record,
-               RecordReader<TFile, DoublePass<TSpec> > & reader,
-               Fasta const & /*tag*/)
-{
-    // Nomenclauture: A FASTA file consists of records.  Each record
-    // consists of a meta and a sequence field.
-
-    // ------------------------------------------------------------------------
-    // First Pass: Compute meta and sequence lengths.
-    // ------------------------------------------------------------------------
+    clear(meta);
+    clear(seq);
     startFirstPass(reader);
-    FastaReaderLambdaContextFirstPass_<TIdString, TSeqString> lambdaContextFirst;
-    // Compute meta field length.
-    int res = _readRecordFastAQMeta(lambdaContextFirst, reader, Fasta());
-    if (res)
-        return res;
-    // std::cerr << "lambdaContextFirst.metaLength == " << lambdaContextFirst.metaLength << std::endl;
-    // std::cerr << "lambdaContextFirst.sequenceLength == " << lambdaContextFirst.sequenceLength << std::endl;
-    // std::cerr << "FIRST PASS DONE 1/2" << std::endl;
-    // Compute sequence field length.
-    res = _readRecordFastAQSequence(lambdaContextFirst, reader, Fasta());
-    if (res)
+
+    unsigned int metaLength=0;
+    unsigned int seqLength=0;
+    // COUNT
+    int res = _countMetaAndSequence(metaLength,
+                                    seqLength,
+                                    reader,
+                                    TTag(),
+                                    typename Value<TSeqString>::Type());
+    if ((res != 0) && (res != EOF_BEFORE_SUCCESS))
         return res;
 
-    // std::cerr << "lambdaContextFirst.metaLength == " << lambdaContextFirst.metaLength << std::endl;
-    // std::cerr << "lambdaContextFirst.sequenceLength == " << lambdaContextFirst.sequenceLength << std::endl;
-    // std::cerr << "FIRST PASS DONE 2/2" << std::endl;
-    // ------------------------------------------------------------------------
-    // Allocate memory.
-    // ------------------------------------------------------------------------
-    clear(record.i1);
-    reserve(record.i1, lambdaContextFirst.metaLength);
-    clear(record.i2);
-    reserve(record.i2, lambdaContextFirst.sequenceLength);
-    // std::cerr << "lambdaContextFirst.metaLength == " << lambdaContextFirst.metaLength << std::endl;
-    // std::cerr << "lambdaContextFirst.sequenceLength == " << lambdaContextFirst.sequenceLength << std::endl;
+    // RESERVE FOR META
+    reserve(meta, metaLength, Exact());
 
-    // ------------------------------------------------------------------------
-    // Second Pass: Actually read data.
-    // ------------------------------------------------------------------------
+    // RESERVE FOR SEQUENCE
+    reserve(seq, seqLength, Exact());
+
     startSecondPass(reader);
-    FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContextSecond(record);
-    res = _readRecordFastAQMeta(lambdaContextSecond, reader, Fasta());
-    // std::cerr << "SECOND PASS DONE 1/2 res == " << res << std::endl;
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+// Function _readMetaAndSequence() and helpers
+// ----------------------------------------------------------------------------
+
+// if target string is CharString, Sequence is any alph()
+template <typename TSpec, typename TRecordReader>
+inline int
+_readSequenceFastAQ(String<char, TSpec> & string,
+                    TRecordReader & reader)
+{
+    return _readHelper(string, reader, Alpha_(), Whitespace_(), false);
+}
+
+// allow fine-grained alphabet-checking for DnaString etc
+template <typename TAlph, typename TSpec, typename TRecordReader>
+inline int
+_readSequenceFastAQ(String<TAlph, TSpec> & string,
+                    TRecordReader & reader)
+{
+    return _readHelper(string, reader, Tag<TAlph>(), Whitespace_(), false);
+}
+
+// if target string is something else, assume alphabet is any alph()
+template <typename TString, typename TRecordReader>
+inline int
+_readSequenceFastAQ(TString & string,
+                    TRecordReader & reader)
+{
+    return _readHelper(string, reader, Alpha_(), Whitespace_(), false);
+}
+
+// This reads Meta and Sequence
+template <typename TIdString,
+          typename TSeqString,
+          typename TFile,
+          typename TPass,
+          typename TTag>
+inline int
+_readMetaAndSequence(TIdString & meta, TSeqString & seq,
+                     RecordReader<TFile, TPass > & reader,
+                     TTag const & /*tag*/)
+{
+    // READ META
+    if (atEnd(reader) || value(reader) != MetaFirstChar_<TTag>::VALUE)
+        return RecordReader<TFile, TPass>::INVALID_FORMAT;
+    goNext(reader);
+    if (resultCode(reader))
+        return resultCode(reader);
+    if (atEnd(reader)) // empty ID, no sequence, this is legal
+        return 0;
+
+    int res = readLine(meta, reader);
+    if (res == EOF_BEFORE_SUCCESS)  // EOF half way in ID is legal
+        return 0;
+    else if (res)
+        return res;
+
+    if (atEnd(reader)) // no sequence
+        return 0;
+
+    // READ SEQUENCE
+    res = _readSequenceFastAQ(seq, reader);
+    if (res == EOF_BEFORE_SUCCESS)  // EOF half way in sequence is legal
+        return 0;
+    else if (res)
+        return res;
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+// Function _skipQualityBlock() and _readQualityBlock()
+// ----------------------------------------------------------------------------
+
+template <typename TFile, typename TPass>
+inline int
+_skipQualityBlock(RecordReader<TFile, TPass > & /**/,
+                  unsigned const /**/,
+                  Fasta const & /*tag*/)
+{
+    // NOOP for Fasta
+    return 0;
+}
+
+template <typename TFile, typename TPass>
+inline int
+_skipQualityBlock(RecordReader<TFile, TPass > & reader,
+                  unsigned const seqLength,
+                  Fastq const & /*tag*/)
+{
+    int res = 0;
+    // SKIP QUALITIES' META
+    skipLine(reader);
+    if (res == EOF_BEFORE_SUCCESS)  // EOF half way in ID is legal
+        return 0;
+    else if (res)
+        return res;
+
+    // SKIP QUALITIES
+    res = skipNCharsIgnoringWhitespace(reader, seqLength); // there have to be n qualities
+    if (res)
+        return RecordReader<TFile, TPass >::INVALID_FORMAT;
+    skipLine(reader); // goto to next line if it exists, result is unimportant
+
+    return 0;
+}
+
+// This reads Meta and Sequence
+template <typename TIdString,
+          typename TQualString,
+          typename TFile,
+          typename TPass>
+inline int
+_readQualityBlock(TQualString & qual,
+                  RecordReader<TFile, TPass > & reader,
+                  unsigned const seqLength,
+                  TIdString const & meta,
+                  Fastq const & /*tag*/)
+{
+    // READ AND CHECK QUALITIES' META
+    if (atEnd(reader) || value(reader) != '+')
+        return RecordReader<TFile, TPass >::INVALID_FORMAT;
+    goNext(reader);
+    if (resultCode(reader))
+        return resultCode(reader);
+    if (atEnd(reader)) // empty ID, no sequence, this is legal? TODO
+        return 0;
+
+    CharString qualmeta_buffer;
+    int res = readLine(qualmeta_buffer, reader);
+    if (res)
+        return RecordReader<TFile, TPass >::INVALID_FORMAT;
+
+    // meta string has to be empty or identical to sequence's meta
+    if ((qualmeta_buffer != "") && (qualmeta_buffer != meta))
+        return RecordReader<TFile, TPass >::INVALID_FORMAT;
+
+    if (atEnd(reader)) // empty qualities, is this legal?
+        return 0;
+
+    // READ QUALITIES
+    reserve(qual, seqLength, Exact());
+    res = readNCharsIgnoringWhitespace(qual, reader, seqLength);
+    // there have to be n qualities
+    if (res)
+        return RecordReader<TFile, TPass >::INVALID_FORMAT;
+    skipLine(reader); // goto to next line if it exists, result is unimportant
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+// Function readRecord()                               [Single and double pass]
+// ----------------------------------------------------------------------------
+/**
+.Function.readRecord
+..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fasta const &)
+..remarks:For FASTA-Files a double-Pass implementation of RecordReader is implemented, which offers better performance. Just pass a Double-Pass reader object (only works with seekable Streams).
+*/
+
+/**
+.Function.readRecord
+..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fastq const &)
+*/
+
+// FASTA or FASTQ, if we don't want the qualities
+template <typename TIdString,
+          typename TSeqString,
+          typename TFile,
+          typename TPass,
+          typename TTag>
+inline int
+readRecord(TIdString & meta,
+           TSeqString & seq,
+           RecordReader<TFile, TPass > & reader,
+           TTag const & /*tag*/)
+{
+    int res = _clearAndReserveMemory(meta, seq, reader, TTag());
     if (res)
         return res;
-    // Compute sequence field length.
-    res = _readRecordFastAQSequence(lambdaContextSecond, reader, Fasta());
-    // std::cerr << "SECOND PASS DONE 2/2" << std::endl;
-    return res;
+
+    res = _readMetaAndSequence(meta, seq, reader, TTag());
+    if (res)
+        return res;
+
+    return _skipQualityBlock(reader, length(seq), TTag());
+}
+
+
+/**
+.Function.readRecord
+..signature:readRecord(TIdString & meta, TSeqString & seq, TQualString & qual, TRecordReader & reader, Fastq const &)
+..remarks:For FASTQ-Files a double-Pass implementation of RecordReader is implemented, which offers better performance. Just pass a Double-Pass reader object (only works with seekable Streams).
+*/
+
+// FASTQ and we want the qualities
+template <typename TIdString,
+          typename TSeqString,
+          typename TQualString,
+          typename TFile,
+          typename TPass>
+inline int
+readRecord(TIdString & meta,
+           TSeqString & seq,
+           TQualString & qual,
+           RecordReader<TFile, TPass > & reader,
+           Fastq const & /*tag*/)
+{
+    int res = _clearAndReserveMemory(meta, seq, reader, Fastq());
+    if (res)
+        return res;
+
+    res = _readMetaAndSequence(meta, seq, reader, Fastq());
+    if (res)
+        return res;
+
+    return _readQualityBlock(qual, reader, length(seq), meta, Fastq());
 }
 
 // ----------------------------------------------------------------------------
 // Function read();  Double-Pass.
 // ----------------------------------------------------------------------------
 
-// Reads a whole FASTA file into string sets, optimizing memory usage.
-template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
-int read(StringSet<TIdString> & sequenceIds,
-         StringSet<TSeqString> & sequences,
-         RecordReader<TFile, DoublePass<TSpec> > & reader,
-         Fasta const & /*tag*/)
+// Reads a whole FASTA/FASTQ file into string sets, optimizing memory usage.
+// optimized for ConcatDirect StringSets
+template <typename TIdString,
+          typename TSeqString,
+          typename TQualString,
+          typename TFile,
+          typename TSpec,
+          typename TTag>
+int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
+                StringSet<TSeqString, Owner<ConcatDirect<> > > & sequences,
+                StringSet<TQualString, Owner<ConcatDirect<> > > & qualities,
+                RecordReader<TFile, DoublePass<TSpec> > & reader,
+                bool const withQual,
+                TTag const & /*tag*/)
 {
     int res = 0;
+    String<unsigned> metaLengths;
+    String<unsigned> seqLengths;
 
     // ------------------------------------------------------------------------
     // First Pass: Compute meta and sequence lengths.
     // ------------------------------------------------------------------------
     startFirstPass(reader);
-    FastaReaderLambdaContextFirstPass_<TIdString, TSeqString> lambdaContextFirst;
     size_t sequenceCount = 0;
-    while (!atEnd(reader)) {
+    while (!atEnd(reader))
+    {
         sequenceCount += 1;
-        // Compute meta field length.
-        res = _readRecordFastAQMeta(lambdaContextFirst, reader, Fasta());
+        unsigned metaLength = 0;
+        unsigned seqLength = 0;
+        res = _countMetaAndSequence(metaLength,
+                                    seqLength,
+                                    reader,
+                                    TTag(),
+                                    typename Value<TSeqString>::Type());
         if (res)
             return res;
-        // std::cerr << "lambdaContextFirst.metaLength == " << lambdaContextFirst.metaLength << std::endl;
-        // std::cerr << "lambdaContextFirst.sequenceLength == " << lambdaContextFirst.sequenceLength << std::endl;
-        // std::cerr << "FIRST PASS DONE 1/2" << std::endl;
-        // Compute sequence field length.
-        res = _readRecordFastAQSequence(lambdaContextFirst, reader, Fasta());
+
+        appendValue(metaLengths, metaLength, Generous());
+        appendValue(seqLengths, seqLength, Generous());
+
+        res = _skipQualityBlock(reader, seqLength, TTag());
         if (res)
             return res;
     }
@@ -397,59 +481,109 @@ int read(StringSet<TIdString> & sequenceIds,
     // ------------------------------------------------------------------------
     clear(sequenceIds);
     clear(sequences);
-    reserve(sequenceIds, sequenceCount + 1, Exact());
-    reserve(sequences, sequenceCount + 1, Exact());
+    if (withQual)
+        clear(qualities);
+
+    resize(sequenceIds.limits, sequenceCount + 1, Exact());
+    resize(sequences.limits, sequenceCount + 1, Exact());
+    sequenceIds.limits[0] = 0;
+    sequences.limits[0] = 0;
+
+    unsigned long metaLengthsSum = 0;
+    unsigned long seqLengthsSum = 0;
+
+    for (unsigned int i = 0; i < sequenceCount; ++i)
+    {
+        metaLengthsSum += metaLengths[i];
+        sequenceIds.limits[i+1] = metaLengthsSum;
+        seqLengthsSum += seqLengths[i];
+        sequences.limits[i+1] = seqLengthsSum;
+    }
+
+    reserve(sequenceIds.concat, metaLengthsSum + 1, Exact());
+    reserve(sequences.concat, seqLengthsSum + 1, Exact());
+    if (withQual)
+    {
+        assign(qualities.limits, sequences.limits);
+        reserve(qualities.concat, seqLengthsSum + 1, Exact());
+    }
 
     // ------------------------------------------------------------------------
     // Second Pass: Actually read data.
     // ------------------------------------------------------------------------
     startSecondPass(reader);
-    Pair<TIdString, TSeqString> record;
-    while (!atEnd(reader)) {
-        FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContextSecond(record);
-        res = _readRecordFastAQMeta(lambdaContextSecond, reader, Fasta());
-        // std::cerr << "SECOND PASS DONE 1/2 res == " << res << std::endl;
+    for (unsigned int i = 0; i < sequenceCount; ++i)
+    {
+        res = _readMetaAndSequence(sequenceIds.concat,
+                                   sequences.concat,
+                                   reader,
+                                   TTag());
+        switch(res)
+        {
+            case 0:
+                break;
+            case EOF_BEFORE_SUCCESS:        // file may end without newline
+                if (i >= sequenceCount -1)
+                    break;
+            default:
+                return res;
+        }
+        if (withQual)
+            res = _readQualityBlock(qualities.concat,
+                                    reader,
+                                    length(sequences[i]),
+                                    sequenceIds[i],
+                                    Fastq());
+        else
+            res = _skipQualityBlock(reader, length(sequences[i]), TTag());
         if (res)
             return res;
-        // Compute sequence field length.
-        res = _readRecordFastAQSequence(lambdaContextSecond, reader, Fasta());
-        // std::cerr << "SECOND PASS DONE 2/2" << std::endl;
-        appendValue(sequenceIds, record.i1); // TODO(holtgrew): Move-construction/appending?
-        appendValue(sequences, record.i2);
     }
-    return res;
+
+    return 0;
 }
 
-// We can give an especially efficient implementation for ConcatDirect string
-// sets.
-template <typename TIdString, typename TSeqString, typename TFile, typename TSpec>
-int read(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
-         StringSet<TSeqString, Owner<ConcatDirect<> > > & sequences,
-         RecordReader<TFile, DoublePass<TSpec> > & reader,
-         Fasta const & /*tag*/)
+// Reads a whole FASTA/FASTQ file into string sets, optimizing memory usage.
+// Generic, non-concat version
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec,
+          typename TFile,
+          typename TSpec,
+          typename TTag>
+int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
+                StringSet<TSeqString, TSeqSpec> & sequences,
+                StringSet<TQualString, TQualSpec> & qualities,
+                RecordReader<TFile, DoublePass<TSpec> > & reader,
+                bool const withQual,
+                TTag const & /*tag*/)
 {
-    typedef typename Concatenator<StringSet<TIdString, Owner<ConcatDirect<> > > >::Type TIdStringConcat;
-    typedef typename Concatenator<StringSet<TSeqString, Owner<ConcatDirect<> > > >::Type TSeqStringConcat;
-    // std::cerr << reader._string << std::endl;
     int res = 0;
+    String<unsigned> metaLengths;
+    String<unsigned> seqLengths;
 
     // ------------------------------------------------------------------------
     // First Pass: Compute meta and sequence lengths.
     // ------------------------------------------------------------------------
     startFirstPass(reader);
-    FastaReaderLambdaContextFirstPass_<TIdString, TSeqString> lambdaContextFirst;
     size_t sequenceCount = 0;
-    while (!atEnd(reader)) {
+    while (!atEnd(reader))
+    {
         sequenceCount += 1;
-        // Compute meta field length.
-        res = _readRecordFastAQMeta(lambdaContextFirst, reader, Fasta());
+        unsigned metaLength = 0;
+        unsigned seqLength = 0;
+        res = _countMetaAndSequence(metaLength,
+                                    seqLength,
+                                    reader,
+                                    TTag(),
+                                    typename Value<TSeqString>::Type());
         if (res)
             return res;
-        // std::cerr << "lambdaContextFirst.metaLength == " << lambdaContextFirst.metaLength << std::endl;
-        // std::cerr << "lambdaContextFirst.sequenceLength == " << lambdaContextFirst.sequenceLength << std::endl;
-        // std::cerr << "FIRST PASS DONE 1/2" << std::endl;
-        // Compute sequence field length.
-        res = _readRecordFastAQSequence(lambdaContextFirst, reader, Fasta());
+
+        appendValue(metaLengths, metaLength, Generous());
+        appendValue(seqLengths, seqLength, Generous());
+
+        res = _skipQualityBlock(reader, seqLength, TTag());
         if (res)
             return res;
     }
@@ -459,27 +593,156 @@ int read(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
     // ------------------------------------------------------------------------
     clear(sequenceIds);
     clear(sequences);
-    reserve(sequenceIds.limits, sequenceCount + 1, Exact());
-    reserve(sequenceIds.concat, lambdaContextFirst.metaLength, Exact());
-    reserve(sequences.limits, sequenceCount + 1, Exact());
-    reserve(sequences.concat, lambdaContextFirst.sequenceLength, Exact());
+    if (withQual)
+        clear(qualities);
+
+    resize(sequenceIds, sequenceCount + 1, Exact());
+    resize(sequences, sequenceCount + 1, Exact());
+    if (withQual)
+        resize(qualities, sequenceCount + 1, Exact());
+
+    for (unsigned int i = 0; i < sequenceCount; ++i)
+    {
+        reserve(sequenceIds[i], metaLengths[i], Exact());
+        reserve(sequences[i], seqLengths[i], Exact());
+        if (withQual)
+            reserve(qualities[i], seqLengths[i], Exact());
+    }
 
     // ------------------------------------------------------------------------
     // Second Pass: Actually read data.
     // ------------------------------------------------------------------------
     startSecondPass(reader);
-    Pair<TIdStringConcat, TSeqStringConcat> record;
-    while (!atEnd(reader)) {
-        FastaReaderLambdaContextSinglePass_<TIdString, TSeqString> lambdaContextSecond(record);
-        res = _readRecordFastAQMeta(lambdaContextSecond, reader, Fasta());
+    for (unsigned int i = 0; i < sequenceCount; ++i)
+    {
+        res = _readMetaAndSequence(sequenceIds[i],
+                                   sequences[i],
+                                   reader,
+                                   TTag());
+        switch(res)
+        {
+            case 0:
+                break;
+            case EOF_BEFORE_SUCCESS:        // file may end without newline
+                if (i >= sequenceCount -1)
+                    break;
+            default:
+                return res;
+        }
+        if (withQual)
+            res = _readQualityBlock(qualities[i],
+                                    reader,
+                                    length(sequences[i]),
+                                    sequenceIds[i],
+                                    Fastq());
+        else
+            res = _skipQualityBlock(reader, length(sequences[i]), TTag());
         if (res)
             return res;
-        res = _readRecordFastAQSequence(lambdaContextSecond, reader, Fasta());
-        appendValue(sequenceIds.limits, length(sequenceIds.concat));
-        appendValue(sequences.limits, length(sequences.concat));
     }
     return 0;
 }
+
+/**
+.Function.read2
+..signature:read2(StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, RecordReader<TFile, DoublePass<TSpec> > & reader, Fasta const &)
+*/
+
+// FASTA
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TFile,
+          typename TSpec>
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
+         RecordReader<TFile, DoublePass<TSpec> > & reader,
+         Fasta const & /*tag*/)
+{
+    StringSet<CharString, TSeqSpec> qualities;
+    return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fasta());
+}
+
+/**
+.Function.read2
+..signature:read2(StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, RecordReader<TFile, DoublePass<TSpec> > & reader, Fastq const &)
+*/
+
+// FASTQ, if we don't want the qualities
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TFile,
+          typename TSpec>
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
+         RecordReader<TFile, DoublePass<TSpec> > & reader,
+         Fastq const & /*tag*/)
+{
+    StringSet<CharString, TSeqSpec> qualities;
+    return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fastq());
+}
+
+/**
+.Function.read2
+..signature:read2(StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, StringSet<TQualString, TQualSpec> & qualities, RecordReader<TFile, DoublePass<TSpec> > & reader, Fastq const &)
+*/
+
+// FASTQ and we want Qualities
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec,
+          typename TFile,
+          typename TSpec>
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TQualString, TQualSpec> & qualities,
+         RecordReader<TFile, DoublePass<TSpec> > & reader,
+         Fastq const & /*tag*/)
+{
+    return _readFastAQ(sequenceIds, sequences, qualities, reader, true, Fastq());
+}
+
+
+// ----------------------------------------------------------------------------
+// Function checkStreamFormat()
+// ----------------------------------------------------------------------------
+
+//TODO(h4nn3s): dddoc
+template <typename TStream, typename TPass>
+inline bool
+checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fasta const & /*tag*/)
+{
+    LimitRecordReaderInScope<TStream, TPass> limiter(reader);
+    while (!atEnd(reader))
+    {
+        CharString meta;
+        CharString seq;
+        int r = readRecord(meta, seq, reader, Fasta());
+//         std::cout << "Meta: " << toCString(meta) << "\nSeq: " << toCString(seq) << "\n";
+        if (r == RecordReader<TStream, TPass>::INVALID_FORMAT)
+            return false;
+    }
+    return true;
+}
+
+//TODO(h4nn3s): dddoc
+template <typename TStream, typename TPass>
+inline bool
+checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fastq const & /*tag*/)
+{
+    LimitRecordReaderInScope<TStream, TPass> limiter(reader);
+    while (!atEnd(reader))
+    {
+        CharString meta;
+        CharString seq;
+        CharString qual;
+        int r = readRecord(meta, seq, qual, reader, Fastq());
+        if (r == RecordReader<TStream, TPass>::INVALID_FORMAT)
+            return false;
+    }
+    return true;
+}
+
+
 
 }  // namespace seqan
 

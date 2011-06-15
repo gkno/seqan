@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 // ==========================================================================
 // Author: Hannes Hauswedell <hauswedell@mi.fu-berlin.de>
 // ==========================================================================
-// Main File for record- and Document-writing. Contains only doc right now.
+// Code for writing FASTA and FASTQ files
 // ==========================================================================
 
 
@@ -66,7 +66,6 @@ namespace seqan {
 
 /**
 .Function.writeRecord
-..cat:Input/Output
 ..signature:writeRecord(TStream & stream, TIdString const & meta, TSeqString const & seq, Fastq const &)
 ..remarks:Writing to FASTQ without specifying qualities currently will result in all qualities being set to "N"
 */
@@ -109,7 +108,6 @@ writeRecord(TStream & stream,
 
 /**
 .Function.writeRecord
-..cat:Input/Output
 ..signature:writeRecord(TStream & stream, TIdString const & meta, TSeqString const & seq, Fastq const &)
 ..remarks:Writing to FASTQ without specifying qualities currently will result in all qualities being set to "N"
 */
@@ -157,7 +155,6 @@ writeRecord(TStream & stream,
 
 /**
 .Function.writeRecord
-..cat:Input/Output
 ..signature:writeRecord(TRecordReader & reader, TIdString const & meta, TSeqString const & seq, TQualString const & qual, Fastq const &)
 */
 // FASTQ and we have the qualities
@@ -169,7 +166,7 @@ inline int
 writeRecord(TStream & stream,
             TIdString const & meta,
             TSeqString const & seq,
-            TQualString const & /*qual*/,
+            TQualString const & qual,
             Fastq const & /*tag*/)
 {
     int res = streamPut(stream, '@');
@@ -192,7 +189,7 @@ writeRecord(TStream & stream,
     if (res)
         return res;
 
-    res = streamPut(stream, meta);
+    res = streamPut(stream, qual);
     if (res)
         return res;
 
@@ -209,7 +206,6 @@ writeRecord(TStream & stream,
 
 /**
 .Function.write2
-..cat:Input/Output
 ..signature:write2(TStream & stream, StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, Fasta const &)
 
 */
@@ -235,7 +231,6 @@ int write2(TStream & stream,
 
 /**
 .Function.write2
-..cat:Input/Output
 ..signature:write2(TStream & stream, StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, Fastq const &)
 
 */
@@ -261,7 +256,6 @@ int write2(TStream & stream,
 
 /**
 .Function.write2
-..cat:Input/Output
 ..signature:write2(TStream & stream, StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, StringSet<TQualString, TQualSpec> & qualities, Fastq const &)
 
 */

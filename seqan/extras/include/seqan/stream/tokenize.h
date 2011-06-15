@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -218,16 +218,14 @@ _readHelper(TBuffer & buffer,
             bool const desiredOutcomeOfComparison) 
 /*   desired behaviour of loop -> "readUntil()" or "readwhile()"  */
 {
-
-//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
-    typedef char TChar; //TODO fix this
+    typedef char TChar;
 
     while (!atEnd(reader))
     {
         TChar c = value(reader);
         if (bool( _charCompare(c, tag)) == desiredOutcomeOfComparison)
             return 0;
-        appendValue(buffer, c, Generous()); // TODO Generous() is right?
+        appendValue(buffer, c, Generous());
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -259,9 +257,7 @@ _readHelper(TBuffer & buffer,
             Tag<TTagSpec2> const & skipTag,
             bool const desiredOutcomeOfComparison)
 {
-
-//     typedef typename Value<TRecordReader::_buffer >::Type TChar;
-   typedef char TChar; //TODO fix this
+    typedef char TChar;
 
     while (!atEnd(reader))
     {
@@ -270,7 +266,7 @@ _readHelper(TBuffer & buffer,
         {
             if (bool (_charCompare(c, compTag)) == desiredOutcomeOfComparison)
                 return 0;
-            appendValue(buffer, c, Generous()); // TODO Generous() is right?
+            appendValue(buffer, c, Generous());
         }
         goNext(reader);
         if (resultCode(reader) != 0)
@@ -307,8 +303,7 @@ _skipHelper(TRecordReader & reader,
             Tag<TTagSpec> const & tag,
             bool const desiredOutcomeOfComparison)
 {
-//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
-    typedef char TChar; //TODO fix this
+    typedef char TChar;
 
     while (!atEnd(reader))
     {
@@ -343,8 +338,7 @@ _countHelper(unsigned & count,
             Tag<TTagSpec> const & tag,
             bool const desiredOutcomeOfComparison)
 {
-//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
-    typedef char TChar; //TODO fix this
+    typedef char TChar;
     count = 0;
 
     while (!atEnd(reader))
@@ -381,8 +375,7 @@ _countHelper(unsigned & count,
             bool const desiredOutcomeOfComparison)
 {
     count = 0;
-//     typedef typename Value<typename TRecordReader::_buffer >::Type TChar;
-    typedef char TChar; //TODO fix this
+    typedef char TChar;
 
     while (!atEnd(reader))
     {
@@ -563,17 +556,14 @@ readUntilChar(TBuffer & buffer,
               TCharX const & x)
 {
     SEQAN_CHECKPOINT
-//     typedef typename Value< typename RecordReader<TStream,
-//                                                   TPass>::_buffer>::Type TChar;
-    typedef char TChar; //TODO fix this
-
+    typedef char TChar;
 
     while (!atEnd(reader))
     {
         TChar c = value(reader);
         if (c == x)
             return 0;
-        appendValue(buffer, c, Generous()); // TODO Generous() is right?
+        appendValue(buffer, c, Generous());
         goNext(reader);
         if (resultCode(reader) != 0)
             return resultCode(reader);
@@ -891,9 +881,7 @@ skipUntilChar(RecordReader<TStream, TPass> & reader,
               TCharX const & x)
 {
     SEQAN_CHECKPOINT
-//     typedef typename Value< typename RecordReader<TStream,
-//                                                   TPass>::_buffer>::Type TChar;
-    typedef char TChar; //TODO fix this
+    typedef char TChar;
 
     while (!atEnd(reader))
     {
