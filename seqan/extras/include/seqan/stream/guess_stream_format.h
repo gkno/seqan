@@ -49,7 +49,7 @@ namespace seqan {
 // ============================================================================
 
 /**
-.ShortCut.SeqStreamFormats
+.Shortcut.SeqStreamFormats
 ..cat:Input/Output
 ..summary:A Tag list of the currently implemented Sequence-Formats (in RecordReader/Stream-IO)
 ..signature:SeqStreamFormats
@@ -60,15 +60,15 @@ namespace seqan {
 typedef TagList<Fastq, TagList<Fasta > >    SeqStreamFormats;
 
 /**
-.ShortCut.AutoSeqStreamFormat
+.Shortcut.AutoSeqStreamFormat
 ..cat:Input/Output
-..summary:A TagSelector for @ShortCut.SeqStreamFormats@. T list of the currently implemented Sequence-Formats (in RecordReader/Stream-IO)
+..summary:A TagSelector for @Shortcut.SeqStreamFormats@. T list of the currently implemented Sequence-Formats (in RecordReader/Stream-IO)
 ..signature:AutoSeqStreamFormat
 ..shortcutfor:Class.TagSelector
 ..shortcutfor:Tag.TagList
 ...signature:TagSelector<TagList<Fastq, TagList<Fasta > > >
 ..remarks:can be passed to @Function.checkStreamFormat@ and will offer the index of the detected FileFormat in its member tagId
-..see:ShortCut.SeqStreamFormats
+..see:Shortcut.SeqStreamFormats
 ..see:Function.checkStreamFormat
 ..include:seqan/stream.h
 */
