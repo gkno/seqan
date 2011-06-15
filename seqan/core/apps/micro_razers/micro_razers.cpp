@@ -35,7 +35,7 @@
 #endif
 
 #include "../razers/razers.h"
-#include "../razers/outputFormat.h"
+#include "outputFormat.h"
 #include "../razers/paramChooser.h"
 
 
@@ -364,7 +364,7 @@ int main(int argc, const char *argv[])
 					istr >> options.outputFormat;
 					if (!istr.fail())
 					{
-						if (options.outputFormat > 2)
+						if (options.outputFormat > 1)
 							cerr << "Invalid output format options." << endl << endl;
 						else
 							continue;
@@ -541,7 +541,7 @@ int main(int argc, const char *argv[])
 		return 0;
 	}
 
-	options.outputFormat = 0;
+	if(options.outputFormat == 1) options.outputFormat = 4; // of 4 is sam in all RazerS tools
 	options.distanceRange = 1; //? 1 actually means 0...
 	if(options.exactSeed) options.errorRate = 0.0001;
 	else options.errorRate = (double)1.2/(options.rnaSeedLength);
@@ -583,7 +583,8 @@ int main(int argc, const char *argv[])
 				paramChoosingError = true;
 				if (pm_options.verbose)
 					cerr << "Couldn't find preprocessed parameter files." << endl;
-				cerr << "Possibly using suboptimal configurations." << endl;
+			    if (options._debugLevel >= 1)
+				    cerr << "Possibly using suboptimal configurations." << endl;
 			}
 			cerr << endl;
 		} else
