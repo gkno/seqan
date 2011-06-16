@@ -449,6 +449,7 @@ int main(int argc, const char *argv[])
 // data processing
 
 	resize(seqsOut, length(seqsIn));
+	resize(qualsOut, length(qualsIn));
 	for (unsigned i = 0; i < length(seqsIn); ++i)
 	{
 		unsigned end = optionInfEnd;
@@ -460,10 +461,12 @@ int main(int argc, const char *argv[])
 			seqsOut[i] = infix(seqsIn[i], optionInfStart, end);
 			if (optionRevComp)
 				reverseComplement(seqsOut[i]);
+            qualsOut[i] = infix(qualsIn[i], optionInfStart, end);
+			if (optionRevComp)
+				reverse(qualsOut[i]);
 		}
 	}
 	seqNamesOut = seqNamesIn;
-	qualsOut = qualsIn;
 
 //____________________________________________________________________________
 // output
