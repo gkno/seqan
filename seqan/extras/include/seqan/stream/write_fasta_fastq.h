@@ -137,6 +137,9 @@ writeRecord(TStream & stream,
         l += 70;
     }
     //TODO(h4nn3s): is it wise performance-wise to pass infixes that may have to be converted (i.e. copied) before writing? One could also write every character individually and insert \n every 70 chars. Than nothing would have to be copied, but it would result in many more write operations. What do others think?
+
+    res = streamPut(stream, '\n');
+    return res;
     return 0;
 }
 
@@ -169,7 +172,7 @@ writeRecord2(TStream & stream,
         res = streamPut(stream, seq[l]);
         if (res)
             return res;
-        if ((l % 69 == 0) && l)
+        if ((l+1 % 70 == 0))
         {
             res = streamPut(stream, '\n');
             if (res)
@@ -250,7 +253,7 @@ writeRecord4(TStream & stream,
         _streamPut(stream, seq[l]);
         if (res)
             return res;
-        if ((l % 69 == 0) && l)
+        if ((l+1 % 70 == 0))
         {
             _streamPut(stream, '\n');
             if (res)
