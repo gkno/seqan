@@ -57,6 +57,8 @@
 // 
 // }
 
+const unsigned int MB = 1024*1024;
+
 using namespace seqan;
 
 void constructFastaStrings(StringSet<CharString> & metas, StringSet<CharString> & seqs)
@@ -64,24 +66,24 @@ void constructFastaStrings(StringSet<CharString> & metas, StringSet<CharString> 
     resize(metas, 4);
     resize(seqs, 4);
 
-    reserve(seqs[0], 1024*1024);
+    reserve(seqs[0], MB);
     metas[0] = "1MB of as";
-    for (int i = 0; i< 1024*1024; ++i)
+    for (int i = 0; i< MB; ++i)
         appendValue(seqs[0], 'a');
 
-    reserve(seqs[1], 1024*1024*32);
+    reserve(seqs[1], 32*MB);
     metas[1] = "32MB of as";
-    for (int i = 0; i< 1024*1024*32; ++i)
+    for (int i = 0; i< 32*MB; ++i)
         appendValue(seqs[1], 'c');
 
-    reserve(seqs[2], 1024*1024*256);
+    reserve(seqs[2], 256*MB);
     metas[2] = "256MB of gs";
-    for (int i = 0; i< 1024*1024*256; ++i)
+    for (int i = 0; i< 256*MB; ++i)
         appendValue(seqs[2], 'g');
 
-    reserve(seqs[3], 1024*1024*512);
+    reserve(seqs[3], 512*MB);
     metas[3] = "512MB of ts";
-    for (int i = 0; i< 1024*1024*512; ++i)
+    for (int i = 0; i< 512*MB; ++i)
         appendValue(seqs[3], 't');
 }
 
@@ -99,10 +101,9 @@ int main(int argc, char const ** argv)
     double after = sysTime();
     std::cerr << "completed in " << after - before << "s\n" << std::flush;
 
+    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
-        appendValue(tempFilename, '0');
-        tempFilename = "0.test";
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -110,29 +111,35 @@ int main(int argc, char const ** argv)
         SEQAN_ASSERT(file.is_open());
 
         before = sysTime();
-        std::cerr << "Writing with new IO (no linebreaks, new streamPut) ...."<< std::flush;
+        std::cerr << "Writing with new IO (no linebreaks, new streamPut) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord0(file, metas[i], seqs[i], Fasta());
+        file.close();
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-        file.close();
+        unlink(filenameBuffer);
     }
+    for (int i = 0; i < 10; ++i)
     {
+        CharString tempFilename = SEQAN_TEMP_FILENAME();
+        char filenameBuffer[1000];
+        strncpy(filenameBuffer, toCString(tempFilename), 999);
+
         String<char, MMap<> > mmapString;
-        open(mmapString, "0_mmap.test");
+        open(mmapString, filenameBuffer);
 
         before = sysTime();
-        std::cerr << "Writing with new IO (no linebreaks, new streamPut, MMAP) ...."<< std::flush;
+        std::cerr << "Writing with new IO (no linebreaks, new streamPut, MMAP) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord0(mmapString, metas[i], seqs[i], Fasta());
+        close(mmapString);
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-        close(mmapString);
+        unlink(filenameBuffer);
     }
+    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
-        appendValue(tempFilename, '1');
-        tempFilename = "1.test";
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -140,29 +147,35 @@ int main(int argc, char const ** argv)
         SEQAN_ASSERT(file.is_open());
 
         before = sysTime();
-        std::cerr << "Writing with new IO (line-by-line, new streamPut) ...."<< std::flush;
+        std::cerr << "Writing with new IO (line-by-line, new streamPut) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord(file, metas[i], seqs[i], Fasta());
+        file.close();
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-        file.close();
+        unlink(filenameBuffer);
     }
+    for (int i = 0; i < 10; ++i)
     {
+        CharString tempFilename = SEQAN_TEMP_FILENAME();
+        char filenameBuffer[1000];
+        strncpy(filenameBuffer, toCString(tempFilename), 999);
+
         String<char, MMap<> > mmapString;
-        open(mmapString, "1_mmap.test");
+        open(mmapString, filenameBuffer);
 
         before = sysTime();
-        std::cerr << "Writing with new IO (line-by-line, new streamPut, MMAP) ...."<< std::flush;
+        std::cerr << "Writing with new IO (line-by-line, new streamPut, MMAP) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord(mmapString, metas[i], seqs[i], Fasta());
+        close(mmapString);
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-        close(mmapString);
+        unlink(filenameBuffer);
     }
+    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
-        appendValue(tempFilename, '5');
-        tempFilename = "5.test";
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -170,29 +183,35 @@ int main(int argc, char const ** argv)
         SEQAN_ASSERT(file.is_open());
 
         before = sysTime();
-        std::cerr << "Writing with new IO (char-by-char, new streamPut, iterators instead of index) ...."<< std::flush;
+        std::cerr << "Writing with new IO (char-by-char, new streamPut, iterators instead of index) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord5(file, metas[i], seqs[i], Fasta());
-        after = sysTime();
-        std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         file.close();
-    }
-    {
-        String<char, MMap<> > mmapString;
-        open(mmapString, "5_mmap.test");
-
-        before = sysTime();
-        std::cerr << "Writing with new IO (char-by-char, new streamPut, iterators instead of index, MMAP) ...."<< std::flush;
-        for (int i = 0; i < 4; ++i)
-            writeRecord5(mmapString, metas[i], seqs[i], Fasta());
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-        close(mmapString);
+        unlink(filenameBuffer);
     }
+    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
-        appendValue(tempFilename, '7');
-        tempFilename = "7.test";
+        char filenameBuffer[1000];
+        strncpy(filenameBuffer, toCString(tempFilename), 999);
+
+        String<char, MMap<> > mmapString;
+        open(mmapString, filenameBuffer);
+
+        before = sysTime();
+        std::cerr << "Writing with new IO (char-by-char, new streamPut, iterators instead of index, MMAP) .... to " << std::flush;
+        for (int i = 0; i < 4; ++i)
+            writeRecord5(mmapString, metas[i], seqs[i], Fasta());
+        close(mmapString);
+        after = sysTime();
+        std::cerr << "completed in " << after - before << "s\n"<< std::flush;
+        unlink(filenameBuffer);
+    }
+    for (int i = 0; i < 10; ++i)
+    {
+        CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
         strncpy(filenameBuffer, toCString(tempFilename), 999);
 
@@ -200,13 +219,13 @@ int main(int argc, char const ** argv)
         SEQAN_ASSERT(file.is_open());
 
         before = sysTime();
-        std::cerr << "Writing with old IO...."<< std::flush;
+        std::cerr << "Writing with old IO.... to " << std::flush;
         for (int i = 0; i < 4; ++i)
             write(file, seqs[i], metas[i], Fasta());
+        file.close();
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-
-        file.close();
+        unlink(filenameBuffer);
     }
 //     {
 //         String<char, MMap<> > mmapString;
