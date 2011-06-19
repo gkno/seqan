@@ -67,7 +67,7 @@ namespace seqan {
 
 template <typename TValue, typename TSpec>
 inline int
-streamPut(String<TValue, MMap<TSpec> > stream, char const c)
+streamPut(String<TValue, MMap<TSpec> > & stream, char const c)
 {
     appendValue(stream, c);
     return 0;
@@ -75,7 +75,7 @@ streamPut(String<TValue, MMap<TSpec> > stream, char const c)
 
 template <typename TValue, typename TSpec, typename TSource>
 inline int
-streamPut(String<TValue, MMap<TSpec> > stream, TSource const & source)
+streamPut(String<TValue, MMap<TSpec> > & stream, TSource const & source)
 {
     append(stream, source);
     return 0;
