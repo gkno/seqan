@@ -48,6 +48,22 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/**
+.Enum.FastAQOutputOptions
+..cat:Input / Output
+..summary:Enum with flags for writing Fasta and Fastq files
+..value.NO_FLAGS:No Flags are set.
+..value.LINEBREAKS:Break lines at column 70
+..include:seqan/stream.h
+ */
+
+enum FastAQOutputOptions {
+    NO_FLAGS = 0,
+    LINEBREAKS = 1,
+    CHARBYCHAR = 2 //TODO(h4nn3s): remove once it is decided betweeen line-by-line and char-by-char
+//  FOOFOO = 4,
+//  BARBAR = 8
+};
 
 // ============================================================================
 // Metafunctions
@@ -66,107 +82,22 @@ namespace seqan {
 
 /**
 .Function.writeRecord
-..signature:writeRecord(TStream & stream, TIdString const & meta, TSeqString const & seq, Fastq const &)
-..remarks:Writing to FASTQ without specifying qualities currently will result in all qualities being set to "N"
+..signature:writeRecord(TStream & stream, TIdString const & meta, TSeqString const & seq, Fasta const &, FastAQOutputOptions const options)
+..param.options:default is LINEBREAKS for FastA and NO_FLAG for FastQ
+...type:Enum.FastAQOutputOptions
 */
-// FASTA
-template <typename TStream,
-          typename TIdString,
-          typename TSeqString>
-inline int
-writeRecord0(TStream & stream,
-            TIdString const & meta,
-            TSeqString const & seq,
-            Fasta const & /*tag*/)
-{
-    int res = streamPut(stream, '>');
-    if (res)
-        return res;
-
-    res = streamPut(stream, meta);
-    if (res)
-        return res;
-
-    res = streamPut(stream, '\n');
-    if (res)
-        return res;
-
-    res = streamPut(stream, seq);
-    if (res)
-        return res;
-
-    res = streamPut(stream, '\n');
-    if (res)
-        return res;
-    return 0;
-}
 
 // FASTA
-template <typename TStream,
-          typename TIdString,
-          typename TSeqString>
+template <typename TSeqString>
 inline int
-writeRecord(TStream & stream,
-            TIdString const & meta,
+_writeRecordImplLineBreaks(FILE * stream,
             TSeqString const & seq,
-            Fasta const & /*tag*/)
+            Fasta const & /*tag*/,
+            unsigned const options)
 {
-    int res = streamPut(stream, '>');
-    if (res)
-        return res;
-
-    res = streamPut(stream, meta);
-    if (res)
-        return res;
-
-    res = streamPut(stream, '\n');
-    if (res)
-        return res;
-
-    unsigned long len = length(seq);
-    // write sequence blocks of 70 characters width
-    unsigned long l = 0;
-    while (l < len)
-    {
-        res = streamPut(stream, infix(seq, l, (l+70 > len) ? len : l+70));
-        if (res)
-            return res;
-        res = streamPut(stream, '\n');
-        if (res)
-            return res;
-        l += 70;
-    }
-    //TODO(h4nn3s): is it wise performance-wise to pass infixes that may have to be converted (i.e. copied) before writing? One could also write every character individually and insert \n every 70 chars. Than nothing would have to be copied, but it would result in many more write operations. What do others think?
-
-    res = streamPut(stream, '\n');
-    return res;
-    return 0;
-}
-
-// FASTA
-template <typename TStream,
-          typename TIdString,
-          typename TSeqString>
-inline int
-writeRecord5(TStream & stream,
-            TIdString const & meta,
-            TSeqString const & seq,
-            Fasta const & /*tag*/)
-{
+    (void)options;
     int res = 0;
-    streamPut(stream, '>');
-    if (res)
-        return res;
-
-    streamPut(stream, meta);
-    if (res)
-        return res;
-
-    streamPut(stream, '\n');
-    if (res)
-        return res;
-
-    // write sequence blocks of 70 characters width
+    // write stream character by character
     typename Iterator<TSeqString>::Type it = begin(seq);
     typename Iterator<TSeqString>::Type it_end = end(seq);
     for (unsigned long l = 0; it < it_end; ++it)
@@ -182,13 +113,132 @@ writeRecord5(TStream & stream,
                 return res;
         }
     }
+    return 0;
+}
+
+template <typename TStream,
+          typename TSeqString>
+inline int
+_writeRecordImplLineBreaks(TStream & stream,
+            TSeqString const & seq,
+            Fasta const & /*tag*/,
+            unsigned const options)
+{
+    int res = 0;
+    if (options & CHARBYCHAR)
+    {
+        // write stream character by character
+        typename Iterator<TSeqString>::Type it = begin(seq);
+        typename Iterator<TSeqString>::Type it_end = end(seq);
+        for (unsigned long l = 0; it < it_end; ++it)
+        {
+            res = streamPut(stream, *it);
+            if (res)
+                return res;
+            if (++l == 69)
+            {
+                res = streamPut(stream, '\n');
+                l = 0;
+                if (res)
+                    return res;
+            }
+        }
+    } else
+    {
+//             unsigned long len = length(seq);
+//             // write sequence blocks of 70 characters width
+//             unsigned long l = 0;
+//             while (l < len)
+//             {
+//                 res = streamPut(stream, infix(seq, l, (l+70 > len) ? len : l+70));
+//                 if (res)
+//                     return res;
+//                 res = streamPut(stream, '\n');
+//                 if (res)
+//                     return res;
+//                 l += 70;
+//             }
+        unsigned long len = length(seq);
+        unsigned long ld = len / 70;
+        // write sequence blocks of 70 characters width
+        for (unsigned long l = 0; l <ld; ++l)
+        {
+            res = streamPut(stream, infix(seq, l*70, (l+1)*70));
+            if (res)
+                return res;
+            res = streamPut(stream, '\n');
+            if (res)
+                return res;
+        }
+        if (len != ld)
+        {
+            res = streamPut(stream, infix(seq, ld, len));
+            if (res)
+                return res;
+            res = streamPut(stream, '\n');
+            if (res)
+                return res;
+        }
+    }
+    return 0;
+}
+
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
+writeRecord(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/,
+            unsigned const options)
+{
+    int res = streamPut(stream, '>');
+    if (res)
+        return res;
+
+    res = streamPut(stream, meta);
+    if (res)
+        return res;
+
+    res = streamPut(stream, '\n');
+    if (res)
+        return res;
+
+    if (options & LINEBREAKS)
+    {
+        // introduce linebreaks
+        res = _writeRecordImplLineBreaks(stream, seq, Fasta(), options);
+        if (res)
+            return res;
+    } else
+    {
+        res = streamPut(stream, seq);
+        if (res)
+            return res;
+    }
+
     res = streamPut(stream, '\n');
     return res;
 }
 
+// FASTA
+template <typename TStream,
+          typename TIdString,
+          typename TSeqString>
+inline int
+writeRecord(TStream & stream,
+            TIdString const & meta,
+            TSeqString const & seq,
+            Fasta const & /*tag*/)
+{
+    return writeRecord(stream, meta, seq, Fasta(), LINEBREAKS);
+}
+
+
 /**
 .Function.writeRecord
-..signature:writeRecord(TStream & stream, TIdString const & meta, TSeqString const & seq, Fastq const &)
+..signature:writeRecord(TStream & stream, TIdString const & meta, TSeqString const & seq, Fastq const &, FastAQOutputOptions const options)
 ..remarks:Writing to FASTQ without specifying qualities currently will result in all qualities being set to "N"
 */
 // FASTQ and we have no qualities
