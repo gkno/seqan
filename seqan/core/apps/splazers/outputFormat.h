@@ -1689,12 +1689,15 @@ void dumpMatches(
 				if(!empty(readRegions) && options.anchored)
 				{
 					if(readRegions[currReadNo].i2.i1 < 2) 
-						file << ";libraryError=" << (int) mR.gEnd + readRegions[currReadNo].i2.i2 - options.libraryLength + 2*readLen;
-					else 
-						file << ";libraryError=" << (int) mL.gBegin - readRegions[currReadNo].i2.i2 + options.libraryLength - readLen ;
+						file << ";libraryError=" << (int) readRegions[currReadNo].i2.i2 - mR.gEnd - (int) options.libraryLength + 2*readLen;
+                    else {
+                        int tmp = (int)mL.gBegin + readLen - (int)options.libraryLength - readRegions[currReadNo].i2.i2;
+						file << ";libraryError=" <<  tmp ;
+                    }
 					
 				}
 
+                if(mL.gBegin > mR.gBegin) std::cout << "falsch\n";
 //				if(mR.traceExtension >= abs(indelLen))
 //					file << ";traceExt=" << (unsigned int) mR.traceExtension;
 

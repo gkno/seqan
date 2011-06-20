@@ -143,8 +143,8 @@ namespace SEQAN_NAMESPACE_MAIN
  		int		thresholdR;			// threshold
  		unsigned int	specifiedGenomeLen;
 		bool		anchored;
-		unsigned int	maxReadRegionsEnd;
-		unsigned int	minReadRegionsStart;
+		int	    maxReadRegionsEnd;
+		int     minReadRegionsStart;
 	
 		
 	// multi-threading
@@ -213,14 +213,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			rnaSeedLength = 16;
 			exactSeed = true;
 #endif			
-			penaltyC = 1;
-			minMatchLen = 23;
+			penaltyC = 2;
+			minMatchLen = 18;
  			shapeR = "11111111111";
  			thresholdR = 1;
  			maxGap = 10000;
  			minGap = 0;
- 			maxPrefixErrors = -1;
- 			maxSuffixErrors = -1;
+ 			maxPrefixErrors = 1;
+ 			maxSuffixErrors = 1;
  			specifiedGenomeLen = 3000000000U; //whole human genome default
 			anchored = false;
 			maxReadRegionsEnd = 0;

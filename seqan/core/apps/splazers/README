@@ -88,10 +88,10 @@ or 165 (which are unmapped but are anchored by their mapped mate) are then
 split-mapped within a smaller candidate region (see options -ll and -le).
 
 Currently, in its default mode, SplazerS maps the reads with a minimal 
-prefix/suffix match length of 23bp, an overall identity of at least 95% in
+prefix/suffix match length of 18bp, an overall identity of at least 95% in
 the matched part of the read (excluding the potentially longer gap in the 
-middle), and at most 1 error in the 23bp prefix and at most 1 error in the
-23bp suffix.
+middle), and at most 1 error in the 18bp prefix and at most 1 error in the
+18bp suffix.
 
 By adding option --split-mapping 0, regular RazerS mapping is switched on. 
 However, note that default parameters are not the same as in RazerS.
@@ -510,6 +510,14 @@ related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
 
 *http://may2005.archive.ensembl.org/Docs/wiki/html/EnsemblDocs/CigarFormat.html
 Note that the cigar string is given with respect to the read sequence.
+
+---------------------------------------------------------------------------
+4.5. SAM Format
+---------------------------------------------------------------------------
+
+SplazerS supports SAM output format for split mapped reads. For a 
+specification of the SAM format see http://samtools.sourceforge.net.
+
 
 ---------------------------------------------------------------------------
 5. Split read mapping example

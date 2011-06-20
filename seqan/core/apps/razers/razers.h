@@ -1176,8 +1176,8 @@ void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bo
 
 #ifdef RAZERS_MICRO_RNA
 
-template < typename TMatches, typename TSpec >
-void purgeAmbiguousRnaMatches(TMatches &matches, RazerSOptions<TSpec> &options)
+template < typename TMatches, typename TStats, typename TSpec >
+void purgeAmbiguousRnaMatches(TMatches &matches, TStats &stats, RazerSOptions<TSpec> &options)
 {
 	typedef typename Value<TMatches>::Type                          TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type             TIterator;
@@ -1200,8 +1200,9 @@ void purgeAmbiguousRnaMatches(TMatches &matches, RazerSOptions<TSpec> &options)
 		if ((*it).orientation == '-') continue;
 		if (readNo == (*it).rseqNo)
 		{
-			if ((*it).editDist >= editDistCutOff) continue;
+            if ((*it).editDist >= editDistCutOff) continue;
 			if ( (*it).mScore < bestMScore) continue;
+            stats[readNo] += 1; 
 			if (++hitCount >= hitCountCutOff)
 			{
 				if (hitCount == hitCountCutOff)
@@ -1212,6 +1213,7 @@ void purgeAmbiguousRnaMatches(TMatches &matches, RazerSOptions<TSpec> &options)
 		else
 		{
 			readNo = (*it).rseqNo;
+            stats[readNo] = 1;
 			hitCount = 0;
 			if (options.distanceRange > 0)
 				editDistCutOff = (*it).editDist + options.distanceRange;

@@ -212,11 +212,19 @@ bool loadReadsSam(
 	if (!file.is_open()) return false;
 
 	options.maxReadRegionsEnd = 0;
-	options.minReadRegionsStart = MaxValue<unsigned>::VALUE;
+	options.minReadRegionsStart = maxValue<int>();
 	TContigPos regionBegin = options.minReadRegionsStart;
 	TContigPos regionEnd = options.maxReadRegionsEnd;
 
+		//typename std::ifstream::pos_type lineStart = (*file).tellg();
+		//lineStart = lineStart - (std::ifstream::pos_type) 1;
+		//	(*file).seekp(lineStart);
+ 
+
 	int i = 0;
+    //int lastFlag = -1;
+    //TReadName lastQname;
+    //bool lastWasAnchored = false;
 	int kickoutcount = 0;
 	char c = _streamGet(file);
 	while ( !_streamEOF(file))
@@ -235,14 +243,17 @@ bool loadReadsSam(
 		// read the flag
         int flag;
         flag = _parseReadNumber(file, c);
-		if(flag != 85 && flag != 101 && flag != 149 && flag != 165)
+        if(!((flag & 1) == 1 && (flag & 4) == 4))
+//		if(flag != 85 && flag != 101 && flag != 149 && flag != 165)
 		{
+            //lastFlag = flag;
+            //lastQname = qname;
 			_parseSkipLine(file,c); 
 			continue;
 		}
         _parseSkipWhitespace(file, c);
 		bool reverse = (flag & (1 << 4)) == (1 << 4); // if reverse this read is expected to match downstream of its mate
-		int bitFlag = 0;	// has two bits
+        int bitFlag = 0;	// has two bits
 		if(reverse) bitFlag +=2;	// first bits says whether reversed (or not ->0)
 		if((flag & (1 << 7)) == (1 << 7)) bitFlag +=1; // second bit says whether second mate (or first ->0)
 
@@ -323,6 +334,7 @@ bool loadReadsSam(
 		if((int)length(readSeq) > options.maxReadLength) 
  			options.maxReadLength = length(readSeq);
 
+      //reverseComplement(readSeq);
 		appendValue(reads, readSeq, Generous());
 
 		appendValue(readRegions,TRegion(0,TFlagPos(0,0)));
@@ -347,6 +359,8 @@ bool loadReadsSam(
 //		readRegions[i].i1 = 0; //currently just ment for one chr at a time... need to add genomeId map
 		if(regionEnd > (TContigPos) options.maxReadRegionsEnd) options.maxReadRegionsEnd = (unsigned) regionEnd;
 		if(regionBegin < (TContigPos)options.minReadRegionsStart) options.minReadRegionsStart = (unsigned) regionBegin;
+        //lastFlag = flag;  
+        //lastQname = qname;
 		++i;
     }
 	if (options._debugLevel > 1 && kickoutcount > 0) 
@@ -2449,8 +2463,8 @@ void mapSplicedReads(
 
 					if(outerDistanceError != 0) 
 					{ //subtract one if there is an indel in the middle (such that perfect matches are better than indel matches..)
-						mLtmp.pairScore -= options.penaltyC; 
-						mRtmp.pairScore -= options.penaltyC; 
+						mLtmp.pairScore -= (int)((double)options.penaltyC * length(readSet[rseqNo])/100) ; 
+						mRtmp.pairScore -= (int)((double)options.penaltyC * length(readSet[rseqNo])/100) ; 
 					}
 #ifdef RAZERS_DEBUG_LIGHT
 					bool falsch = false;
