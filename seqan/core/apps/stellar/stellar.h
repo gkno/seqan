@@ -636,8 +636,8 @@ SEQAN_CHECKPOINT
 		if (value(matches, pattern.curSeqNo).disabled) continue;
 
 
-		
-		TInfix patternInfix = infix(pattern, value(host(needle(pattern)), pattern.curSeqNo));
+		typename GetSequenceByNo<TIndex>::Type patternSeq = getSequenceByNo(pattern.curSeqNo, needle(pattern));
+		TInfix patternInfix = infix(pattern, patternSeq);
 		////Debug output:
 		//std::cout << beginPosition(finderInfix) << ",";
 		//std::cout << endPosition(finderInfix) << "  ";
