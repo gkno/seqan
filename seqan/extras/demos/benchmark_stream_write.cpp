@@ -57,7 +57,7 @@
 // 
 // }
 
-const unsigned int MB = 1024*1024;
+const int MB = 1024*1024;
 
 using namespace seqan;
 
