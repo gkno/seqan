@@ -101,7 +101,8 @@ struct Pair
 
     Pair() {}
 
-    Pair(Pair const & _p) : i1(_p.i1), i2(_p.i2) {}
+    template <typename T3_, typename T4_>
+    Pair(Pair<T3_, T4_> const & _p) : i1(_p.i1), i2(_p.i2) {}
 
     inline
     Pair(T1_ const & _i1, T2_ const & _i2) : i1(_i1), i2(_i2) {}
