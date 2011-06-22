@@ -54,7 +54,7 @@ namespace seqan {
 ..cat:Input / Output
 ..general:Class.Stream
 ..summary:Thin wrapper around $char *$ to the @Concept.Stream|Stream@ concept.
-..signature:Stream<Array<TPointer> >
+..signature:Stream<CharArray<TPointer> >
 ..param.TPointer:Specification of the pointer type to work on.
 ...type:nolink:$char *$, $char const *$.
 ..remarks:This class consists of the $char *$, another $char *$ to the beginning of the array and a flag signifying EOF.
