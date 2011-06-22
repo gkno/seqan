@@ -61,7 +61,7 @@ const int MB = 1024*1024;
 
 using namespace seqan;
 
-void constructFastaStrings(StringSet<CharString> & metas, StringSet<CharString> & seqs)
+void constructFastaStrings(StringSet<CharString> & metas, StringSet<DnaString> & seqs)
 {
     resize(metas, 4);
     resize(seqs, 4);
@@ -93,7 +93,7 @@ int main(int argc, char const ** argv)
     (void)argv;
 
     StringSet<CharString> metas;
-    StringSet<CharString> seqs;
+    StringSet<DnaString> seqs;
 
     double before = sysTime();
     std::cerr << "Constructing Strings ...." << std::flush;

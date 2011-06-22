@@ -238,6 +238,8 @@ streamWriteBlock(FILE * stream, char const * source, size_t count)
 // Function streamPut()
 // ----------------------------------------------------------------------------
 
+// --- strings
+
 inline int
 streamPut(FILE * stream, char const * source)
 {
@@ -253,17 +255,32 @@ streamPut(FILE * stream, String<char, TSpec> const & source)
                 == length(source))  ?   0 : 1;
 }
 
+template <typename TSpec, typename TSpec2>
+inline int
+streamPut(FILE * stream,
+          String<SimpleType<unsigned char, TSpec>, TSpec2> const & source)
+{
+    String<char, CStyle> buf = source;
+    return (streamWriteBlock(stream, toCString(buf), length(buf))
+                == length(buf))  ?   0 : 1;
+}
+
+// --- characters
+
 inline int
 streamPut(FILE * stream, char const c)
 {
     return streamWriteChar(stream, c);
 }
 
-// inline char const *
-// _streamPutChar(char const * /*tag*/)
-// {
-//     return "%s";
-// }
+template <typename TValue, typename TSpec>
+inline int
+streamPut(FILE * stream, SimpleType<TValue, TSpec> const & c)
+{
+    return streamWriteChar(stream, TValue(c));
+}
+
+// --- numbers
 
 inline char const *
 _streamPutChar(int const /*tag*/)
@@ -300,6 +317,14 @@ _streamPutChar(double const /*tag*/)
 {
     return "%.2lf";
 }
+
+// template <typename TValue, typename TSpec>
+// inline char const *
+// _streamPutChar(SimpleType<TValue, TSpec> const & /*tag*/)
+// {
+//     return _streamPutChar(TValue());
+// }
+
 
 // TODO(h4nn3s) according to man fprintf's point character is locale dependent,
 // maybe overload for doubles and floats to avoid that?
