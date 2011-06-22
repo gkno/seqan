@@ -452,11 +452,24 @@ streamWriteBlock(::std::ofstream & stream, char const * source, size_t count)
 // Function streamPut()
 // ----------------------------------------------------------------------------
 
+// fstream
+// --- characters
+
 inline int
 streamPut(::std::fstream & stream, char const c)
 {
     return streamWriteChar(stream, c);
 }
+
+template <typename TValue, typename TSpec>
+inline int
+streamPut(::std::fstream & stream,
+          SimpleType<TValue, TSpec> const & c)
+{
+    return streamPut(stream, TValue(c));
+}
+
+// --- strings
 
 inline int
 streamPut(::std::fstream & stream, char const * source)
@@ -473,6 +486,17 @@ streamPut(::std::fstream & stream, String<char, TSpec> const & source)
                 == length(source))  ?   0 : 1;
 }
 
+template <typename TValue, typename TSpec, typename TSpec2>
+inline int
+streamPut(::std::fstream & stream,
+          String<SimpleType<TValue, TSpec>, TSpec2> const & source)
+{
+    String<char, CStyle> buf = source;
+    return (streamWriteBlock(stream, toCString(buf), length(buf))
+                == length(buf))  ?   0 : 1;
+}
+
+// --- wildcard
 
 template <typename TSource>
 inline int
@@ -482,12 +506,24 @@ streamPut(::std::fstream & stream, TSource const & source)
     return stream.fail();
 }
 
+// ofstream
+// --- characters
 
 inline int
 streamPut(::std::ofstream & stream, char const c)
 {
     return streamWriteChar(stream, c);
 }
+
+template <typename TValue, typename TSpec>
+inline int
+streamPut(::std::ofstream & stream,
+          SimpleType<TValue, TSpec> const & c)
+{
+    return streamPut(stream, TValue(c));
+}
+
+// --- strings
 
 inline int
 streamPut(::std::ofstream & stream, char const * source)
@@ -503,6 +539,8 @@ streamPut(::std::ofstream & stream, String<char, TSpec> const & source)
     return (streamWriteBlock(stream, toCString(source), length(source))
                 == length(source))  ?   0 : 1;
 }
+
+// --- wildcard
 
 template <typename TSource>
 inline int

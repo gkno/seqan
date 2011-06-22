@@ -211,8 +211,20 @@ struct HasStreamFeature;
 ..see:Function.streamWriteChar
 ..see:Function.streamWriteBlock
 ..include:seqan/stream.h
+*/
 
 
+// calls used for all stream formats
+
+// template <typename TStream, typename TValue, typename TSpec>
+// inline int
+// streamPut(TStream & stream,
+//           SimpleType<TValue, TSpec> const & c)
+// {
+//     return streamPut(stream, TValue(c));
+// }
+
+/**
 .Function.streamFlush
 ..cat:Input/Output
 ..summary:Flush the underlying stream.

@@ -277,7 +277,7 @@ template <typename TValue, typename TSpec>
 inline int
 streamPut(FILE * stream, SimpleType<TValue, TSpec> const & c)
 {
-    return streamWriteChar(stream, TValue(c));
+    return streamPut(stream, TValue(c));
 }
 
 // --- numbers
