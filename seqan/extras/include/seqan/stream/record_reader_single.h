@@ -44,6 +44,13 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+template <typename TFile>
+class RecordReader<TFile, SinglePass<void> >;
+
+template <typename TFile>
+inline bool
+_refillBuffer(RecordReader<TFile, SinglePass<void> > & recordReader);
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -81,6 +88,7 @@ public:
               _resultCode(0), _stayInOneBuffer(false)
     {
         resize(_buffer, _bufferSize);
+        _refillBuffer(*this);
     }
 
     RecordReader(TFile & file, unsigned bufferSize)
@@ -88,6 +96,7 @@ public:
               _resultCode(0), _stayInOneBuffer(false)
     {
         resize(_buffer, _bufferSize);
+        _refillBuffer(*this);
     }
 
 private:
