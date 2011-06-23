@@ -83,16 +83,16 @@ streamPut(String<TValue1, MMap<TSpec1> > & stream,
 }
 
 
-template <typename TValue0, typename TSpec0,
-          typename TValue, typename TSpec, typename TSpec2>
-inline int
-streamPut(String<TValue0, MMap<TSpec0> > & stream,
-          String<SimpleType<TValue, TSpec>, TSpec2> const & source)
-{
-    String<char, CStyle> buf = source;
-    append(stream, toCString(buf));
-    return 0;
-}
+// template <typename TValue0, typename TSpec0,
+//           typename TValue, typename TSpec, typename TSpec2>
+// inline int
+// streamPut(String<TValue0, MMap<TSpec0> > & stream,
+//           String<SimpleType<TValue, TSpec>, TSpec2> const & source)
+// {
+//     String<char, CStyle> buf = source;
+//     append(stream, toCString(buf));
+//     return 0;
+// }
 
 
 template <typename TValue, typename TSpec, typename TSource>
