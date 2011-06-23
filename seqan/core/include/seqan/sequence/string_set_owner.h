@@ -204,9 +204,9 @@ erase(StringSet<TString, Owner<Default> > & me, TPos pos)
     return length(me);
 }
 
-template <typename TString, typename TPos>
+template <typename TString, typename TPos, typename TPosEnd>
 inline typename Size<StringSet<TString, Owner<Default> > >::Type
-erase(StringSet<TString, Owner<Default> > & me, TPos pos, TPos posEnd)
+erase(StringSet<TString, Owner<Default> > & me, TPos pos, TPosEnd posEnd)
 {
     erase(me.strings, pos, posEnd);
     me.limitsValid = false;
