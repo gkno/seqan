@@ -243,7 +243,7 @@ getCigarString(
 			if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
 				lastOp = 'N';
 			if (numOps > 0)
-				appendValue(cigar, CigarElement<>(op, numOps));
+				appendValue(cigar, CigarElement<>(lastOp, numOps));
 			numOps = 0;
 			lastOp = op;
 		}
