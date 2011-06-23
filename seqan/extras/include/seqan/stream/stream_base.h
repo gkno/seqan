@@ -126,9 +126,14 @@ streamPut(Stream<TStream> & stream, TSource const & source)
 
     buffer[1023] = 0;
 
+//TODO(h4nn3s): we should be able to use the following and then s.str() directly
+// so we wouldnt need an extra buffer at all. but it doesnt work
+//     s << source << std::ends;
+//     if (s.fail())
+//         return s.fail();
+
     return (streamWriteBlock(stream, buffer, strlen(buffer))
                 == strlen(buffer) )  ?   0 : 1;
-    //TODO(h4nn3s): might not be the fastest way, eh?
 }
 
 

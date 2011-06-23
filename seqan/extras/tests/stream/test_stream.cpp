@@ -47,6 +47,7 @@
 #endif  // #if SEQAN_HAS_BZIP2
 #include "test_stream_adapt_cstdio.h"
 #include "test_stream_adapt_fstream.h"
+#include "test_stream_adapt_mmap.h"
 #include "test_stream_tokenize.h"
 #include "test_stream_lexical_cast.h"
 #include "test_stream_record_reader_fasta.h"
@@ -161,6 +162,9 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_write_char);
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_streamPut);
     SEQAN_CALL_TEST(test_stream_adapt_ofstream_flush);
+
+    // Tests for mmap-stream adaptation
+    SEQAN_CALL_TEST(test_stream_adapt_mmap_streamPut);
 
     // Tests for tokenize.h
     SEQAN_CALL_TEST(test_stream_tokenizing_readUntil);

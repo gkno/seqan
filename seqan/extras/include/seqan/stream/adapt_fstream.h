@@ -466,7 +466,7 @@ inline int
 streamPut(::std::fstream & stream,
           SimpleType<TValue, TSpec> const & c)
 {
-    return streamPut(stream, TValue(c));
+    return streamWriteChar(stream, convert<char>(c));
 }
 
 // --- strings
@@ -520,7 +520,7 @@ inline int
 streamPut(::std::ofstream & stream,
           SimpleType<TValue, TSpec> const & c)
 {
-    return streamPut(stream, TValue(c));
+    return streamWriteChar(stream, convert<char>(c));
 }
 
 // --- strings
