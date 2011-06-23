@@ -35,6 +35,8 @@
 // tables.
 // ==========================================================================
 
+// TODO(holtgrew): Untested header?
+
 #ifndef SEQAN_HEADER_BASIC_ALPHABET_SIMPLE_H
 #define SEQAN_HEADER_BASIC_ALPHABET_SIMPLE_H
 
@@ -1297,6 +1299,20 @@ void assignQualityValue(Dna5Q &c, Ascii q)
 	if (q1 >= QualityValueSize<Dna5Q>::VALUE)
         q1 = QualityValueSize<Dna5Q>::VALUE - 1;
 	assignQualityValue(c, q1);
+}
+
+// quality value back to ASCII
+
+inline
+void assignQualityValue(Ascii & q, DnaQ c)
+{
+    q = '!' + getQualityValue(c);
+}
+
+inline 
+void assignQualityValue(Ascii & q, Dna5Q c)
+{
+    q = '!' + getQualityValue(c);
 }
 
 //////////////////////////////////////////////////////////////////////////////
