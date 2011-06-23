@@ -244,6 +244,21 @@ void testStreamPut(TStream & stream)
     SEQAN_ASSERT_EQ(res, 0);
     res = streamPut(stream, '\n');
     SEQAN_ASSERT_EQ(res, 0);
+
+    res = streamPut(stream, Dna('A'));
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+
+    res = streamPut(stream, DnaString("ACGT"));
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
+
+    res = streamPut(stream, Dna5String("ACGTN"));
+    SEQAN_ASSERT_EQ(res, 0);
+    res = streamPut(stream, '\n');
+    SEQAN_ASSERT_EQ(res, 0);
 }
 
 

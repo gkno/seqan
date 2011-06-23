@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -353,7 +353,7 @@ SEQAN_DEFINE_TEST(test_stream_gz_file_streamPut)
     SEQAN_ASSERT(gzIn != NULL);
     char buffer[100];
     int bytesRead = gzread(gzIn, buffer, 99);
-    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\nA\nACGT\nACGTN\n";
     buffer[bytesRead] = '\0';
     SEQAN_ASSERT_EQ(bytesRead, int(sizeof(cmp) - sizeof(char)));
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);

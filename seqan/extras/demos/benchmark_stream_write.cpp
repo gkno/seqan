@@ -49,19 +49,12 @@
 #include <seqan/sequence.h>
 #include <seqan/misc/misc_cmdparser.h>
 
-// template <typename TMeta, typename TSeq>
-// int writeRecordNewIO(std::fstream & stream, TMeta const & meta, TSeq const & seq, Fasta const & /**/)
-// {
-//     
-// 
-// 
-// }
-
 const int MB = 1024*1024;
 
 using namespace seqan;
 
-void constructFastaStrings(StringSet<CharString> & metas, StringSet<DnaString> & seqs)
+template <typename TMetas, typename TSeqs>
+void constructFastaStrings(TMetas & metas, TSeqs & seqs)
 {
     resize(metas, 4);
     resize(seqs, 4);
@@ -87,21 +80,11 @@ void constructFastaStrings(StringSet<CharString> & metas, StringSet<DnaString> &
         appendValue(seqs[3], 't');
 }
 
-int main(int argc, char const ** argv)
+template <typename TMetas, typename TSeqs>
+void doIt(TMetas const & metas, TSeqs const & seqs)
 {
-    (void)argc;
-    (void)argv;
-
-    StringSet<CharString> metas;
-    StringSet<DnaString> seqs;
-
-    double before = sysTime();
-    std::cerr << "Constructing Strings ...." << std::flush;
-    constructFastaStrings(metas, seqs);
-    double after = sysTime();
-    std::cerr << "completed in " << after - before << "s\n" << std::flush;
-
-    for (int i = 0; i < 10; ++i)
+    double before = 0;
+    double after = 0;
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
@@ -111,7 +94,7 @@ int main(int argc, char const ** argv)
         SEQAN_ASSERT(file.is_open());
 
         before = sysTime();
-        std::cerr << "Writing with new IO (no linebreaks, new streamPut, fstream) .... " << std::flush;
+        std::cerr << "Writing with new IO (no linebreaks, fstream) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord(file, metas[i], seqs[i], Fasta(), 0);
         file.close();
@@ -119,7 +102,6 @@ int main(int argc, char const ** argv)
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         unlink(filenameBuffer);
     }
-    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
@@ -129,7 +111,7 @@ int main(int argc, char const ** argv)
         open(mmapString, filenameBuffer);
 
         before = sysTime();
-        std::cerr << "Writing with new IO (no linebreaks, new streamPut, MMAP) .... " << std::flush;
+        std::cerr << "Writing with new IO (no linebreaks, MMAP) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord(mmapString, metas[i], seqs[i], Fasta(), 0);
         close(mmapString);
@@ -137,7 +119,6 @@ int main(int argc, char const ** argv)
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         unlink(filenameBuffer);
     }
-    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
@@ -145,7 +126,7 @@ int main(int argc, char const ** argv)
         FILE * file = fopen(filenameBuffer, "wb+");
 
         before = sysTime();
-        std::cerr << "Writing with new IO (no linebreaks, new streamPut, cstdio) .... " << std::flush;
+        std::cerr << "Writing with new IO (no linebreaks,  cstdio) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
             writeRecord(file, metas[i], seqs[i], Fasta(), 0);
         fclose(file);
@@ -153,7 +134,6 @@ int main(int argc, char const ** argv)
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         unlink(filenameBuffer);
     }
-    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
@@ -163,15 +143,14 @@ int main(int argc, char const ** argv)
         SEQAN_ASSERT(file.is_open());
 
         before = sysTime();
-        std::cerr << "Writing with new IO (line-by-line, new streamPut) .... " << std::flush;
+        std::cerr << "Writing with new IO (with linebreaks, fstream) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
-            writeRecord(file, metas[i], seqs[i], Fasta());
+            writeRecord(file, metas[i], seqs[i], Fasta(), LINEBREAKS);
         file.close();
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         unlink(filenameBuffer);
     }
-    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
@@ -181,67 +160,14 @@ int main(int argc, char const ** argv)
         open(mmapString, filenameBuffer);
 
         before = sysTime();
-        std::cerr << "Writing with new IO (line-by-line, new streamPut, MMAP) .... " << std::flush;
+        std::cerr << "Writing with new IO (with linebreaks, MMAP) .... to " << std::flush;
         for (int i = 0; i < 4; ++i)
-            writeRecord(mmapString, metas[i], seqs[i], Fasta());
+            writeRecord(mmapString, metas[i], seqs[i], Fasta(), LINEBREAKS);
         close(mmapString);
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         unlink(filenameBuffer);
     }
-//     for (int i = 0; i < 10; ++i)
-//     {
-//         CharString tempFilename = SEQAN_TEMP_FILENAME();
-//         char filenameBuffer[1000];
-//         strncpy(filenameBuffer, toCString(tempFilename), 999);
-//         FILE * file = fopen(filenameBuffer, "wb+");
-// 
-//         before = sysTime();
-//         std::cerr << "Writing with new IO (line-by-line, new streamPut, cstdio) .... " << std::flush;
-//         for (int i = 0; i < 4; ++i)
-//             writeRecord(file, metas[i], seqs[i], Fasta(), LINEBREAKS);
-//         fclose(file);
-//         after = sysTime();
-//         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-//         unlink(filenameBuffer);
-//     }
-    for (int i = 0; i < 10; ++i)
-    {
-        CharString tempFilename = SEQAN_TEMP_FILENAME();
-        char filenameBuffer[1000];
-        strncpy(filenameBuffer, toCString(tempFilename), 999);
-
-        std::fstream file(filenameBuffer, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-        SEQAN_ASSERT(file.is_open());
-
-        before = sysTime();
-        std::cerr << "Writing with new IO (char-by-char, new streamPut, iterators instead of index) .... " << std::flush;
-        for (int i = 0; i < 4; ++i)
-            writeRecord(file, metas[i], seqs[i], Fasta(), LINEBREAKS | CHARBYCHAR);
-        file.close();
-        after = sysTime();
-        std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-        unlink(filenameBuffer);
-    }
-    for (int i = 0; i < 10; ++i)
-    {
-        CharString tempFilename = SEQAN_TEMP_FILENAME();
-        char filenameBuffer[1000];
-        strncpy(filenameBuffer, toCString(tempFilename), 999);
-
-        String<char, MMap<> > mmapString;
-        open(mmapString, filenameBuffer);
-
-        before = sysTime();
-        std::cerr << "Writing with new IO (char-by-char, new streamPut, iterators instead of index, MMAP) .... to " << std::flush;
-        for (int i = 0; i < 4; ++i)
-            writeRecord(mmapString, metas[i], seqs[i], Fasta(), LINEBREAKS | CHARBYCHAR);
-        close(mmapString);
-        after = sysTime();
-        std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-        unlink(filenameBuffer);
-    }
-    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
@@ -249,15 +175,14 @@ int main(int argc, char const ** argv)
         FILE * file = fopen(filenameBuffer, "wb+");
 
         before = sysTime();
-        std::cerr << "Writing with new IO (char-by-char, new streamPut, cstdio) .... " << std::flush;
+        std::cerr << "Writing with new IO (with linebreaks, cstdio) .... " << std::flush;
         for (int i = 0; i < 4; ++i)
-            writeRecord(file, metas[i], seqs[i], Fasta(), LINEBREAKS | CHARBYCHAR);
+            writeRecord(file, metas[i], seqs[i], Fasta(), LINEBREAKS);
         fclose(file);
         after = sysTime();
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         unlink(filenameBuffer);
     }
-    for (int i = 0; i < 10; ++i)
     {
         CharString tempFilename = SEQAN_TEMP_FILENAME();
         char filenameBuffer[1000];
@@ -275,18 +200,45 @@ int main(int argc, char const ** argv)
         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
         unlink(filenameBuffer);
     }
-//     {
-//         String<char, MMap<> > mmapString;
-//         open(mmapString, "7_mmap.test");
-// 
-//         before = sysTime();
-//         std::cerr << "Writing with old IO +MMAP...."<< std::flush;
-//         for (int i = 0; i < 4; ++i)
-//             write(mmapString, seqs[i], metas[i], Fasta());
-//         after = sysTime();
-//         std::cerr << "completed in " << after - before << "s\n"<< std::flush;
-// 
-//         close(mmapString);
-//     }
+}
+int main(int argc, char const ** argv)
+{
+    (void)argc;
+    (void)argv;
+
+    {
+        std::cerr << "START\n -- using CharStrings\n" << std::flush;
+        StringSet<CharString> metas;
+        StringSet<CharString> seqs;
+
+        double before = sysTime();
+        std::cerr << "Constructing Strings ...." << std::flush;
+        constructFastaStrings(metas, seqs);
+        double after = sysTime();
+        std::cerr << "completed in " << after - before << "s\n" << std::flush;
+
+        for (int i= 0; i < 5; ++i)
+        {
+            std::cerr << "RUN No"<< i << "\n" << std::flush;
+            doIt(metas, seqs);
+        }
+    }
+    {
+        std::cerr << "START\n -- using DnaStrings\n" << std::flush;
+        StringSet<CharString> metas;
+        StringSet<DnaString> seqs;
+
+        double before = sysTime();
+        std::cerr << "Constructing Strings ...." << std::flush;
+        constructFastaStrings(metas, seqs);
+        double after = sysTime();
+        std::cerr << "completed in " << after - before << "s\n" << std::flush;
+
+        for (int i= 0; i < 5; ++i)
+        {
+            std::cerr << "RUN No"<< i << "\n" << std::flush;
+            doIt(metas, seqs);
+        }
+    }
     return 0;
 }

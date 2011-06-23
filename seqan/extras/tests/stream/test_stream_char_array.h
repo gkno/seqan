@@ -284,7 +284,7 @@ SEQAN_DEFINE_TEST(test_stream_char_array_streamPut)
     Stream<CharArray<char *> > stream(ptr, ptr + 100);
 
     testStreamPut(stream);
-    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\nA\nACGT\nACGTN\n";
     buffer[strlen(cmp)] = '\0';
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
 }

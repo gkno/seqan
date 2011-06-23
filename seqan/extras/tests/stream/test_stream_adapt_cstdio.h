@@ -235,7 +235,7 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_streamPut)
 
     rewind(stream);
     char buffer[1000];
-    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.40\n6.50\n";
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.40\n6.50\nA\nACGT\nACGTN\n";
 
     int i = 0;
 
@@ -244,7 +244,6 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_streamPut)
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
     fclose(stream);
 }
-
 
 // Test of streamFlush().
 SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_flush)

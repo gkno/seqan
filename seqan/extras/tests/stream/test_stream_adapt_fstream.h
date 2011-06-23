@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -318,12 +318,12 @@ SEQAN_DEFINE_TEST(test_stream_adapt_fstream_streamPut)
     fstream.seekg(0);
     fstream.seekp(0);
 
-    char const cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\nA\nACGT\nACGTN\n";
 
     char buffer[100];
     fstream.read(buffer, 99);
-    SEQAN_ASSERT_EQ(fstream.gcount(), 30);
-    buffer[30] = '\0';
+    SEQAN_ASSERT_EQ(fstream.gcount(), 43);
+    buffer[43] = '\0';
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
     fstream.close();
 }
@@ -759,7 +759,7 @@ SEQAN_DEFINE_TEST(test_stream_adapt_ofstream_streamPut)
     char filenameBuffer[1000];
     strcpy(filenameBuffer, tempFilename);
 
-		std::ofstream ofstream(filenameBuffer, std::ios_base::out | std::ios_base::binary);
+    std::ofstream ofstream(filenameBuffer, std::ios_base::out | std::ios_base::binary);
     SEQAN_ASSERT(ofstream.is_open());
 
     testStreamPut(ofstream);
@@ -772,11 +772,11 @@ SEQAN_DEFINE_TEST(test_stream_adapt_ofstream_streamPut)
     fstream.seekp(0);
 
     char buffer[1000];
-    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+    char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\nA\nACGT\nACGTN\n";
 
     fstream.read(buffer, 99);
-    SEQAN_ASSERT_EQ(fstream.gcount(), 30);
-    buffer[30] = '\0';
+    SEQAN_ASSERT_EQ(fstream.gcount(), 43);
+    buffer[43] = '\0';
     SEQAN_ASSERT_EQ(strcmp(buffer, cmp), 0);
     fstream.close();
 }

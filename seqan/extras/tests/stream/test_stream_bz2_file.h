@@ -506,7 +506,7 @@ SEQAN_DEFINE_TEST(test_stream_bz2_file_streamPut)
         SEQAN_ASSERT_EQ(err, BZ_OK);
 
         char buffer[100];
-        char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\n";
+        char cmp[] = "c\nseq\nsss\n12\n34\n56\n78\n5.4\n6.5\nA\nACGT\nACGTN\n";
 
         int bytesRead = BZ2_bzRead(&err, f2, buffer, 99);
         SEQAN_ASSERT_EQ(err, BZ_STREAM_END);
