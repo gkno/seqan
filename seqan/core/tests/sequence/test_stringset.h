@@ -74,6 +74,27 @@ void Test_StringSet()
 	SEQAN_ASSERT_NOT(atBegin(itEnd));
 	SEQAN_ASSERT(atEnd(itEnd));
 	SEQAN_ASSERT_EQ(i, 3);
+
+    // Test erase().
+    {
+        TStringSet set;
+        appendValue(set, "one");
+        appendValue(set, "two");
+        appendValue(set, "three");
+        appendValue(set, "four");
+        appendValue(set, "five");
+        appendValue(set, "six");
+
+        erase(set, 0);
+        SEQAN_ASSERT_EQ(length(set), 5u);
+        SEQAN_ASSERT_EQ(set[0], CharString("two"));
+
+        erase(set, 2, 4);
+        SEQAN_ASSERT_EQ(length(set), 3u);
+        SEQAN_ASSERT_EQ(set[0], CharString("two"));
+        SEQAN_ASSERT_EQ(set[1], CharString("three"));
+        SEQAN_ASSERT_EQ(set[2], CharString("six"));
+    }
 }
 
 //____________________________________________________________________________

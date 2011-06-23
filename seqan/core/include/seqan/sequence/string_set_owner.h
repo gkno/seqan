@@ -190,6 +190,30 @@ value(StringSet<TString, Owner<Default> > const & me, TPos pos)
 }
 
 // --------------------------------------------------------------------------
+// Function erase()
+// --------------------------------------------------------------------------
+
+///.Function.erase.param.object.type:Spec.Owner
+
+template <typename TString, typename TPos>
+inline typename Size<StringSet<TString, Owner<Default> > >::Type
+erase(StringSet<TString, Owner<Default> > & me, TPos pos)
+{
+    erase(me.strings, pos);
+    me.limitsValid = false;
+    return length(me);
+}
+
+template <typename TString, typename TPos>
+inline typename Size<StringSet<TString, Owner<Default> > >::Type
+erase(StringSet<TString, Owner<Default> > & me, TPos pos, TPos posEnd)
+{
+    erase(me.strings, pos, posEnd);
+    me.limitsValid = false;
+    return length(me);
+}
+
+// --------------------------------------------------------------------------
 // Function getValueById()
 // --------------------------------------------------------------------------
 
