@@ -22,7 +22,7 @@
 ############################################################
 
 # Path variables
-directory = "Z:/matches/reads/"
+directory = "./"
 readFile = "reads.fasta"				# Multi-fasta file with all reads
 fragmentFile = "reads.fastaF"				# All fragments where each fragment is a single read or 2 reads (for mate pairs)
 libraryFile = "reads.fastaL"				# All libraries or a dummy library if no mate pairs were simulated
@@ -67,7 +67,8 @@ simulateMatePairs = 1		# 0 = no mate pairs are simulated, 1 = all reads are in a
 librarySizes = c(10000,20000)	# Mean library sizes for mate pairs
 librarySd = c(10,20)		# Standard deviations for above library sizes
 
-
+# Path for reference file if generated.
+referencePath = "reference.fasta"
 
 ############################################################
 # Optional command line arguments override above settings
@@ -518,6 +519,8 @@ if (nchar(sourceSeq) != 0) {
 	} else {
 		seq = createRandomSequenceWithRepeats(alphabet, seqLength, numOfRepeats, repeatLength, repeatSNPRate, repeatIndelRate, repeatIndelBaseRange)
 	}
+    write(">reference", file=referencePath, append = FALSE)
+    write(paste(seq, sep = "", collapse = ""), file=referencePath, append = TRUE)
 }
 
 
