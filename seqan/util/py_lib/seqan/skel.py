@@ -288,7 +288,7 @@ def createApp(name, location, options):
 
 def createDemo(name, location, options):
     target_path = paths.pathToDemo(location, name)
-    print 'Creating app in %s' % target_path
+    print 'Creating demo in %s' % target_path
     if options.create_dirs and not _checkTargetPaths(target_path):
         return 1
     print '  Target path is: %s' % target_path
@@ -297,7 +297,7 @@ def createDemo(name, location, options):
         # Copy over .cpp file for app and perform replacements.
         source_file = paths.pathToTemplate('demo_template', 'demo.cpp')
         target_file = os.path.join(target_path)
-        replacements = buildReplacements('app', name, location, target_file, options)
+        replacements = buildReplacements('demo', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run)
         if res: return res
     return 0
