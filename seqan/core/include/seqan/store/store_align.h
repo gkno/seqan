@@ -1913,13 +1913,16 @@ insertGaps(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me,
 template <typename TGaps, typename TGapAnchors, typename TCount>
 inline void
 removeGaps(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me,
-		   TCount size)
+		   TCount size_)
 {
 	TGapAnchors & anchors = _dataAnchors(*me.data_container);
 	typedef typename Iterator<TGapAnchors, Standard>::Type TIter;
-	typedef typename Value<TGapAnchors>::Type TGapAnchor;
 
-	if (size <= 0 || !isGap(me)) return;
+	typedef typename Value<TGapAnchors>::Type   TGapAnchor;
+    typedef typename Position<TGapAnchor>::Type TPos;
+
+	if (size_ <= 0 || !isGap(me)) return;
+    TPos size = size_;
 	
 	if (me.current.gapPos + size > me.nextAnchor.gapPos)
 		size = me.nextAnchor.gapPos - me.current.gapPos;
