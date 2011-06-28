@@ -103,11 +103,22 @@ streamPut(String<TValue, MMap<TSpec> > & stream,
     return 0;
 }
 
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
+
+template <typename TValue, typename TSpec, typename TSource>
+inline int
+_appendWithoutTrailing0(String<TValue, MMap<TSpec> > & stream,
+                        TSource const & source)
+{
+    for (int i = 0; source[i] != 0; ++i)
+        appendValue(stream, source[i]);
+    return 0;
+}
+
+template <typename TValue, typename TSpec>
 inline int
 streamPut(String<TValue, MMap<TSpec> > & stream, char const *source)
 {
-    append(stream, source);
+    return _appendWithoutTrailing0(stream, source);
     return 0;
 }
 
@@ -121,9 +132,11 @@ streamPut(String<TValue, MMap<TSpec> > & stream, TSource const & source)
     str << source << std::ends;
     if (str.fail())
         return str.fail();
-    append(stream, str.str());
+    return _appendWithoutTrailing0(stream, str.str());
     return 0;
 }
+
+
 
 }  // namespace seqan
 

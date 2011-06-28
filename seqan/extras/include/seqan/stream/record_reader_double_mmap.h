@@ -36,8 +36,6 @@
 // is automatically loaded by the OS on pagefaults.
 // ==========================================================================
 
-// TODO(holtgrew): Then, compete with David's fast FASTA I/O.
-
 #ifndef SEQAN_STREAM_RECORD_READER_DOUBLE_MMAP_H_
 #define SEQAN_STREAM_RECORD_READER_DOUBLE_MMAP_H_
 
