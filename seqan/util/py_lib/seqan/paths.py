@@ -51,6 +51,10 @@ def pathToRepository(location):
     """Return path to the given location/repository."""
     return os.path.join(repositoryRoot(), location)
 
+def pathToHeader(location, filename):
+    """Return path to the given header - just concatenate."""
+    return os.path.join(repositoryRoot(), location, filename)
+
 def main(args):
     print 'SeqAn paths'
     print

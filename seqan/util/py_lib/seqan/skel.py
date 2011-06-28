@@ -69,7 +69,7 @@ DEFAULT_AUTHOR = 'Your Name <your.email@example.net>'
 # Program usage string for command line parser.
 USAGE = """
 Usage: %prog [options] repository NAME
-       %prog [options] [module|test|app|demo] NAME LOCATION
+       %prog [options] [module|test|app|demo|header|lheader] NAME LOCATION
 """.strip()
 
 # Program description, used for command line parser.  Will be wrapped by, though.
@@ -302,6 +302,38 @@ def createDemo(name, location, options):
         if res: return res
     return 0
 
+def createHeader(name, location, options):
+    target_path = paths.pathToHeader(location, name)
+    print 'Creating (non-library) header in %s' % target_path
+    if not _checkTargetPaths(target_path):
+        return 1
+    print '  Target path is: %s' % target_path
+    print ''
+    # Copy over .h file for app and perform replacements.
+    source_file = paths.pathToTemplate('header_template', 'header.h')
+    target_file = os.path.join(target_path)
+    replacements = buildReplacements('header', name, location, target_file, options)
+    res = configureFile(target_file, source_file, replacements, options.dry_run)
+    if res: return res
+    print 'NOTE: Do not forget to add the header to the CMakeLists.txt file!'
+    return 0
+
+def createLibraryHeader(name, location, options):
+    target_path = paths.pathToHeader(location, name)
+    print 'Creating library header in %s' % target_path
+    if not _checkTargetPaths(target_path):
+        return 1
+    print '  Target path is: %s' % target_path
+    print ''
+    # Copy over .h file for app and perform replacements.
+    source_file = paths.pathToTemplate('header_template', 'library_header.h')
+    target_file = os.path.join(target_path)
+    replacements = buildReplacements('library_header', name, location, target_file, options)
+    res = configureFile(target_file, source_file, replacements, options.dry_run)
+    if res: return res
+    print 'NOTE: Do not forget to add the header to the CMakeLists.txt file!'
+    return 0
+
 def createRepository(location, options):
     print 'Creating module %s' % location
     target_path = paths.pathToRepository(location)
@@ -385,7 +417,8 @@ def main():
     if len(args) < 2:
         print >>sys.stderr, 'Invalid argument count!'
         return 1
-    if args[0] not in ['module', 'test', 'app', 'demo', 'repository']:
+    if args[0] not in ['module', 'test', 'app', 'demo', 'repository',
+                       'header', 'lheader']:
         print >>sys.stderr, 'Invalid template "%s".' % args[0]
         return 1
     if args[0] == 'repository':
@@ -401,6 +434,8 @@ def main():
         'test': createTest,
         'app': createApp,
         'demo': createDemo,
+        'header': createHeader,
+        'lheader': createLibraryHeader,
         }
     return create_methods[args[0]](args[1], args[2], options)
 
