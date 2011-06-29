@@ -53,7 +53,7 @@ namespace seqan {
 
 /**
 .Adaption.IO stream
-..summary:Adaption from $ostream$ and $istream$ to the @Concept.Stream@ concept.
+..remarks:Also, adaption from $ostream$ and $istream$ to the @Concept.Stream@ concept.
  */
 
 // ============================================================================
