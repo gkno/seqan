@@ -21,8 +21,14 @@
    THE SOFTWARE.
 */
 
-#ifndef __BGZF_H
-#define __BGZF_H
+// SEQAN_NO_GENERATED_FORWARDS
+
+// TODO(holtgrew): It might be better to keep this in an "ext" library but that requires more thought on the greater scheme of things.
+
+#ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_H_
+#define SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_H_
+
+namespace seqan { // namespace ext_lh3 {  // TODO(holtgrew): Put into its own namespace?
 
 #include <stdint.h>
 #include <stdio.h>
@@ -67,21 +73,21 @@ extern "C" {
  * A subsequent bgzf_close will not close the file descriptor.
  * Returns null on error.
  */
-BGZF* bgzf_fdopen(int fd, const char* __restrict mode);
+inline BGZF* bgzf_fdopen(int fd, const char* __restrict mode);
 
 /*
  * Open the specified file for reading or writing.
  * Mode must be either "r" or "w".
  * Returns null on error.
  */
-BGZF* bgzf_open(const char* path, const char* __restrict mode);
+inline BGZF* bgzf_open(const char* path, const char* __restrict mode);
 
 /*
  * Close the BGZ file and free all associated resources.
  * Does not close the underlying file descriptor if created with bgzf_fdopen.
  * Returns zero on success, -1 on error.
  */
-int bgzf_close(BGZF* fp);
+inline int bgzf_close(BGZF* fp);
 
 /*
  * Read up to length bytes from the file storing into data.
@@ -89,14 +95,14 @@ int bgzf_close(BGZF* fp);
  * Returns zero on end of file.
  * Returns -1 on error.
  */
-int bgzf_read(BGZF* fp, void* data, int length);
+inline int bgzf_read(BGZF* fp, void* data, int length);
 
 /*
  * Write length bytes from data to the file.
  * Returns the number of bytes written.
  * Returns -1 on error.
  */
-int bgzf_write(BGZF* fp, const void* data, int length);
+inline int bgzf_write(BGZF* fp, const void* data, int length);
 
 /*
  * Return a virtual file pointer to the current location in the file.
@@ -115,20 +121,20 @@ int bgzf_write(BGZF* fp, const void* data, int length);
  * Seeking on a file opened for write is not supported.
  * Returns zero on success, -1 on error.
  */
-int64_t bgzf_seek(BGZF* fp, int64_t pos, int where);
+inline int64_t bgzf_seek(BGZF* fp, int64_t pos, int where);
 
 /*
  * Set the cache size. Zero to disable. By default, caching is
  * disabled. The recommended cache size for frequent random access is
  * about 8M bytes.
  */
-void bgzf_set_cache_size(BGZF *fp, int cache_size);
+inline void bgzf_set_cache_size(BGZF *fp, int cache_size);
 
-int bgzf_check_EOF(BGZF *fp);
-int bgzf_read_block(BGZF* fp);
-int bgzf_flush(BGZF* fp);
-int bgzf_flush_try(BGZF *fp, int size);
-int bgzf_check_bgzf(const char *fn);
+inline int bgzf_check_EOF(BGZF *fp);
+inline int bgzf_read_block(BGZF* fp);
+inline int bgzf_flush(BGZF* fp);
+inline int bgzf_flush_try(BGZF *fp, int size);
+inline int bgzf_check_bgzf(const char *fn);
 
 #ifdef __cplusplus
 }
@@ -154,4 +160,6 @@ static inline int bgzf_getc(BGZF *fp)
 	return c;
 }
 
-#endif
+} // namespace seqan
+
+#endif  // #ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_H_

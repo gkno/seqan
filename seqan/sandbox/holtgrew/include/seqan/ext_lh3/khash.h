@@ -23,6 +23,10 @@
    SOFTWARE.
 */
 
+// SEQAN_NO_GENERATED_FORWARDS
+
+// TODO(holtgrew): It might be better to keep this in an "ext" library but that requires more thought on the greater scheme of things.
+
 /* Contact: Heng Li <lh3@sanger.ac.uk> */
 
 /*
@@ -77,8 +81,10 @@ int main() {
 */
 
 
-#ifndef __AC_KHASH_H
-#define __AC_KHASH_H
+#ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
+#define SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
+
+namespace seqan { // namespace ext_lh3 {  // TODO(holtgrew): Put into its own namespace?
 
 /*!
   @header
@@ -483,4 +489,6 @@ typedef const char *kh_cstr_t;
 #define KHASH_MAP_INIT_STR(name, khval_t)								\
 	KHASH_INIT(name, kh_cstr_t, khval_t, 1, kh_str_hash_func, kh_str_hash_equal)
 
-#endif /* __AC_KHASH_H */
+} // namespace seqan
+
+#endif  // #ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
