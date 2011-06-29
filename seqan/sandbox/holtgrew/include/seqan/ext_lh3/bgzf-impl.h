@@ -68,15 +68,15 @@ static const int MAX_BLOCK_SIZE = 64 * 1024;
 static const int BLOCK_HEADER_LENGTH = 18;
 static const int BLOCK_FOOTER_LENGTH = 8;
 
-static const int GZIP_ID1 = 31;
-static const int GZIP_ID2 = 139;
-static const int CM_DEFLATE = 8;
-static const int FLG_FEXTRA = 4;
-static const int OS_UNKNOWN = 255;
-static const int BGZF_ID1 = 66; // 'B'
-static const int BGZF_ID2 = 67; // 'C'
-static const int BGZF_LEN = 2;
-static const int BGZF_XLEN = 6; // BGZF_LEN+4
+static const bgzf_byte_t GZIP_ID1 = 31;
+static const uint8_t GZIP_ID2 = 139;
+static const bgzf_byte_t CM_DEFLATE = 8;
+static const bgzf_byte_t FLG_FEXTRA = 4;
+static const uint8_t OS_UNKNOWN = 255;
+static const bgzf_byte_t BGZF_ID1 = 66; // 'B'
+static const bgzf_byte_t BGZF_ID2 = 67; // 'C'
+static const bgzf_byte_t BGZF_LEN = 2;
+static const bgzf_byte_t BGZF_XLEN = 6; // BGZF_LEN+4
 
 static const int GZIP_WINDOW_BITS = -15; // no zlib header
 static const int Z_DEFAULT_MEM_LEVEL = 8;
