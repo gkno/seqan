@@ -67,7 +67,7 @@ public:
     BGZF * _bgzf;
     int _error;
 
-    Stream(BGZF * bgzf) : _bgzf(bgzf) {}
+    Stream(BGZF * bgzf) : _bgzf(bgzf), _error(0) {}
 };
 
 // ============================================================================
@@ -276,9 +276,9 @@ streamWriteBlock(Stream<Bgzf> & stream, char const * source, size_t count)
     if (x < 0)
     {
         stream._error = x;
-        return x;
+        return 0;
     }
-    return 0;
+    return count;
 }
 
 // ----------------------------------------------------------------------------
