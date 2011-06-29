@@ -151,7 +151,7 @@ template <> struct BitsPerValue< Rna5 > { enum { VALUE = 3 }; };
 ..signature:Iupac
 ..remarks:
 ...text:The @Metafunction.ValueSize@ of $Iupac$ is 16. 
-The nucleotides are enumerated from 0 to 15 in this order: 
+The nucleotides are enumerated from 0 to 19 in this order: 
 'U'=0, 'T', 'A', 'W', 'C', 'Y', 'M', 'H', 'G', 'K', 'R', 'D', 'S', 'B', 'V', 'N'=15. 
 ...text:Objects of type $Iupac$ can be converted to various other types and vice versa. 
 Unkown values are converted to $'N'$.
