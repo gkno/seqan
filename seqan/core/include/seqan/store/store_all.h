@@ -1028,7 +1028,7 @@ getRead(
 .Function.appendAlignedRead:
 ..summary:Appends an aligned read entry to a fragment store.
 ..cat:Fragment Store
-..signature:appendRead(store, readId, contigId, beginPos, endPos[, pairMatchId])
+..signature:appendAlignedRead(store, readId, contigId, beginPos, endPos[, pairMatchId])
 ..param.store:The fragment store.
 ...type:Class.FragmentStore
 ..param.readId:The id of the read.
