@@ -87,7 +87,7 @@ using namespace seqan;
 
 struct MyFragStoreConfig 
 {
-	typedef String<Dna5>	TReadSeq;
+	typedef String<Dna5Q>	TReadSeq;
 	typedef String<Dna5>	TContigSeq;
 	
 	typedef double			TMean;
@@ -350,6 +350,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("i",  "percent-identity",  "set the percent identity threshold", OptionType::Double | OptionType::Label, 100 - (100.0 * options.errorRate)));
 #ifndef NO_PARAM_CHOOSER
 	addOption(parser, CommandLineOption("rr", "recognition-rate",  "set the percent recognition rate", OptionType::Double | OptionType::Label, 100 - (100.0 * pm_options.optionLossRate)));
+	addOption(parser, CommandLineOption("mr", "mutation-rate",     "set the percent mutation rate", OptionType::Double | OptionType::Label, 100.0 * options.mutationRate));
 	addOption(parser, addArgumentText(CommandLineOption("pd", "param-dir",         "folder containing user-computed parameter files (optional)", OptionType::String | OptionType::Label), "DIR"));
 #endif
 	addOption(parser, CommandLineOption("id", "indels",            "allow indels (default: mismatches only)", OptionType::Boolean));
@@ -426,6 +427,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "forward", options.forward);
 	getOptionValueLong(parser, "reverse", options.reverse);
 	getOptionValueLong(parser, "percent-identity", options.errorRate);
+	getOptionValueLong(parser, "mutation-rate", options.mutationRate);
 #ifndef NO_PARAM_CHOOSER
 	getOptionValueLong(parser, "recognition-rate", pm_options.optionLossRate);
 	getOptionValueLong(parser, "param-dir", pm_options.paramFolder);
@@ -500,6 +502,8 @@ int main(int argc, const char *argv[])
 		cerr << "Percent identity threshold must be a value between 50 and 100" << endl;
 	if ((pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100) && (stop = true))
 		cerr << "Recognition rate must be a value between 80 and 100" << endl;
+	if ((options.mutationRate < 0 || options.mutationRate > 20) && (stop = true))
+		cerr << "Mutation rate must be a value between 0 and 20" << endl;
 #ifdef RAZERS_MATEPAIRS
 	if ((options.libraryLength <= 0) && (stop = true))
 		cerr << "Library length must be a value greater 0" << endl;
@@ -585,7 +589,8 @@ int main(int argc, const char *argv[])
 	}
 
 	options.errorRate = (100.0 - options.errorRate) / 100.0;
-	pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
+	options.mutationRate = options.mutationRate / 100.0;
+	options.lossRate = pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
 	if (stop)
 	{
 		cerr << "Exiting ..." << endl;

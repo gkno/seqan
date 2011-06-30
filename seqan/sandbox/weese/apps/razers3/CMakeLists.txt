@@ -29,6 +29,9 @@ if (OPENMP_FOUND)
                                 razers_parallel_reads.h
                                 razers_window.h
                                 readSimulator.h)
+
+  seqan_add_executable (compPHSens compPHSens.cpp razers.h)
+
 elseif (OPENMP_FOUND)
   message(STATUS "Not building RazerS3, since OpenMP could not be found.")
 endif (OPENMP_FOUND)
