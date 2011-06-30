@@ -71,6 +71,26 @@ int y = x;
 template<typename TValue = double, typename TSpec = Default>
 class LogProb;
 
+
+// ----------------------------------------------------------------------------
+// Function log()
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+inline TValue
+log(LogProb<TValue, TSpec> const & value)
+{
+    return value.data_value;
+}
+
+template <typename TValue>
+inline double
+log(TValue const & value)
+{
+    return ::std::log((double)value);
+}
+
+
 template<typename TValue, typename TSpec>
 class LogProb
 {
@@ -83,28 +103,23 @@ class LogProb
     
 	LogProb() : data_value(::std::log(0.0)) {}
 
-	template <typename TRhs>
-	LogProb(TRhs const& _other)
+	template <typename TValue2>
+	LogProb(TValue2 const & _other)
     {
-		data_value = ::std::log(_other);
-	}
-
-	template <typename TValue2, typename TSpec2>
-	LogProb(LogProb<TValue2, TSpec2> const & _other)
-    {
-		data_value = _other.data_value;
+		data_value = log(_other);
 	}
 
     // ------------------------------------------------------------------------
     // Type conversin operators;  Have to be defined in class.
     // ------------------------------------------------------------------------
 
+    template <typename TValue2>
     inline
-	operator int() const
+	operator TValue2() const
     {
-		return (int) ::std::exp(data_value);
+		return (TValue2) ::std::exp(data_value);
 	}
-
+/*
     inline
 	operator float() const
     {
@@ -116,7 +131,7 @@ class LogProb
     {
 		return (double) ::std::exp(data_value);
 	}
-
+*/
     // ------------------------------------------------------------------------
     // Function operator=();  Has to be defined in class.
     // ------------------------------------------------------------------------
@@ -148,6 +163,7 @@ class LogProb
 // Functions
 // ============================================================================
 
+
 // ----------------------------------------------------------------------------
 // Function operator*=()
 // ----------------------------------------------------------------------------
@@ -158,17 +174,7 @@ LogProb<TValue, TSpec> &
 operator*=(LogProb<TValue, TSpec> & lhs,
            TRhs const & rhs)
 {
-    lhs.data_value += ::std::log(rhs);
-    return lhs;
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-LogProb<TValue, TSpec> &
-operator*=(LogProb<TValue, TSpec> & lhs,
-           LogProb<TValue2, TSpec2> const & rhs)
-{
-    lhs.data_value += rhs.data_value;
+    lhs.data_value += log(rhs);
     return lhs;
 }
 
@@ -208,17 +214,7 @@ LogProb<TValue, TSpec> &
 operator/=(LogProb<TValue, TSpec> & lhs,
            TRhs const & rhs)
 {
-    lhs.data_value -= ::std::log(rhs);
-    return lhs;
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-LogProb<TValue, TSpec> &
-operator/=(LogProb<TValue, TSpec> & lhs,
-           LogProb<TValue2, TSpec2> const & rhs)
-{
-    lhs.data_value -= rhs.data_value;
+    lhs.data_value -= log(rhs);
     return lhs;
 }
 
@@ -375,16 +371,7 @@ bool
 operator==(LogProb<TValue, TSpec> const & lhs,
            TRhs const & rhs)
 {
-    return lhs.data_value == ::std::log(rhs);
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-bool
-operator==(LogProb<TValue, TSpec> const & lhs,
-           LogProb<TValue2, TSpec2> const & rhs)
-{
-    return lhs.data_value == rhs.data_value;
+    return lhs.data_value == log(rhs);
 }
 
 // ----------------------------------------------------------------------------
@@ -397,16 +384,7 @@ bool
 operator!=(LogProb<TValue, TSpec> const & lhs,
            TRhs const & rhs)
 {
-    return lhs.data_value != ::std::log(rhs);
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-bool
-operator!=(LogProb<TValue, TSpec> const & lhs,
-           LogProb<TValue2, TSpec2> const & rhs)
-{
-    return lhs.data_value != rhs.data_value;
+    return lhs.data_value != log(rhs);
 }
 
 // ----------------------------------------------------------------------------
@@ -419,16 +397,7 @@ bool
 operator<(LogProb<TValue, TSpec> const & lhs,
           TRhs const & rhs)
 {
-    return lhs.data_value < ::std::log(rhs);
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-bool
-operator<(LogProb<TValue, TSpec> const & lhs,
-          LogProb<TValue2, TSpec2> const & rhs)
-{
-    return lhs.data_value < rhs.data_value;
+    return lhs.data_value < log(rhs);
 }
 
 // ----------------------------------------------------------------------------
@@ -441,16 +410,7 @@ bool
 operator>(LogProb<TValue, TSpec> const & lhs,
           TRhs const & rhs)
 {
-    return lhs.data_value > ::std::log(rhs);
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-bool
-operator>(LogProb<TValue, TSpec> const & lhs,
-          LogProb<TValue2, TSpec2> const & rhs)
-{
-    return lhs.data_value > rhs.data_value;
+    return lhs.data_value > log(rhs);
 }
 
 // ----------------------------------------------------------------------------
@@ -463,16 +423,7 @@ bool
 operator<=(LogProb<TValue, TSpec> const & lhs,
            TRhs const & rhs)
 {
-    return lhs.data_value <= ::std::log(rhs);
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-bool
-operator<=(LogProb<TValue, TSpec> const & lhs,
-           LogProb<TValue2, TSpec2> const& rhs)
-{
-    return lhs.data_value <= rhs.data_value;
+    return lhs.data_value <= log(rhs);
 }
 
 // ----------------------------------------------------------------------------
@@ -485,16 +436,7 @@ bool
 operator>=(LogProb<TValue, TSpec> const & lhs,
            TRhs const & rhs)
 {
-    return lhs.data_value >= ::std::log(rhs);
-}
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline
-bool
-operator>=(LogProb<TValue, TSpec> const & lhs,
-           LogProb<TValue2, TSpec2> const & rhs)
-{
-    return lhs.data_value >= rhs.data_value;
+    return lhs.data_value >= log(rhs);
 }
 
 // ----------------------------------------------------------------------------

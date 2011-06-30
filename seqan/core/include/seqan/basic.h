@@ -47,6 +47,7 @@
 #include <cstdio>   // FILE, basic_debug
 #include <cstdlib>  // posix_memalign
 #include <ctime>
+#include <cmath>
 #include <iterator>
 #include <algorithm>
 #include <cstring>  // memset, memcpy
@@ -90,6 +91,7 @@
 
 // ... and some utility code for computing logarithms and such.
 #include <seqan/basic/basic_math.h>
+#include <seqan/basic/basic_logvalue.h>
 
 // --------------------------------------------------------------------------
 // SeqAn Foundation Code
