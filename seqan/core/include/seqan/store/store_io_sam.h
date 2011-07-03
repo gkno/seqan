@@ -88,6 +88,27 @@ typedef Tag<Sam_> const Sam;
 	};
 
 template <typename TOperation, typename TCount>
+inline bool operator>(CigarElement<TOperation, TCount> const & lhs,
+                      CigarElement<TOperation, TCount> const & rhs)
+{
+    return lhs.operation > rhs.operation || (lhs.operation == rhs.operation && lhs.count > rhs.count);
+}
+
+template <typename TOperation, typename TCount>
+inline bool operator<(CigarElement<TOperation, TCount> const & lhs,
+                      CigarElement<TOperation, TCount> const & rhs)
+{
+    return lhs.operation < rhs.operation || (lhs.operation == rhs.operation && lhs.count < rhs.count);
+}
+    
+template <typename TOperation, typename TCount>
+inline bool operator==(CigarElement<TOperation, TCount> const & lhs,
+                       CigarElement<TOperation, TCount> const & rhs)
+{
+    return lhs.operation == rhs.operation && lhs.count == rhs.count;
+}
+
+template <typename TOperation, typename TCount>
 __uint32 toBamCigarElement(CigarElement<TOperation, TCount> const & cigarElement)
 {
     char operation = 0;
