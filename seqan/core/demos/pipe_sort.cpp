@@ -39,7 +39,6 @@
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/file.h>      // For printing SeqAn Strings.
 #include <seqan/pipe.h>
 
 struct MyIntLessCmp : std::binary_function<int, int, int>
@@ -54,28 +53,24 @@ int main()
 {
     using namespace seqan;
 
-    typedef String<int>              TString;
-    typedef Pipe<TString, Source<> > TSource;
-    typedef MyIntLessCmp             TLess;
-
+    typedef MyIntLessCmp                     TLess;
     typedef SorterSpec<SorterConfig<TLess> > TSorterSpec;
     typedef Pool<int, TSorterSpec>           TSorterPool;
 
-    TString input;
-    appendValue(input, 3);
-    appendValue(input, 10);
-    appendValue(input, -1);
-    TString output;
-
-    TSource source(input);
-    TSorterPool sorter;
-    sorter << source;
-    output << sorter;
+    TSorterPool sorterPool;
+    resize(sorterPool, 3);
+    beginWrite(sorterPool);
+    push(sorterPool, 3);
+    push(sorterPool, 10);
+    push(sorterPool, -1);
+    endWrite(sorterPool);
 
     std::cout << "Sorted elements:" << std::endl;
 
-    for (unsigned i = 0; i < length(output); ++i)
-        std::cout << output[i] << std::endl;
+    beginRead(sorterPool);
+    for (; !eof(sorterPool); pop(sorterPool))
+        std::cout << front(sorterPool) << std::endl;
+    endRead(sorterPool);
     
     return 0;
 }
