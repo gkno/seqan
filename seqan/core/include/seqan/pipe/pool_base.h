@@ -1156,6 +1156,7 @@ SEQAN_CHECKPOINT
         }
 
 ///.Function.atEnd.param.iterator.type:Class.Pool
+// TODO(holtgrew): Documentation bug!
 
 		template < typename TValue, typename TSpec >
 	    inline bool eof(Pool< TValue, TSpec > &me) {
