@@ -68,6 +68,9 @@ public:
 
     // Name of Sam file with golden reads.
     String<char> perfectMapFilename;
+    
+    // Verbosity level.
+    int verbosity;
 
     Options()
             : showHelp(false),
@@ -76,7 +79,8 @@ public:
               oracleSamMode(false),
               maxError(0),
               distanceFunction("edit"),
-              outFileName("-")
+              outFileName("-"),
+              verbosity(2)
     {}
 };
 

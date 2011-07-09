@@ -483,6 +483,8 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     typedef typename TAlignedRead::TPos                                  TAlignedReadPos;
     typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
 
+    double startTime = 0;
+
     if (length(fragments.alignedReadStore) == 0)
         return;  // Do nothing if the aligned read store is empty.
 
@@ -503,6 +505,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     //     Else:
     //       Build error curve for this read alignment on backward strand.
 
+    startTime = sysTime();
     std::cerr << "Each dot represents roughly 5% of work for the given contig in the given orientation." << std::endl;
     TContigStore /*const*/ & contigStore = fragments.contigStore;
     TAlignedReadStore /*const*/ & alignedReadStore = fragments.alignedReadStore;
@@ -591,6 +594,8 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
             std::cerr << std::endl;
         }
     }
+    if (options.verbosity >= 2)
+        std::cerr << "[timer] sorting/gap filling/smoothing/filtering: " << sysTime() - startTime << " s" << std::endl;
 
     // For all reads:
     //   Sort all error curve points.
@@ -598,6 +603,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     //   Smooth them.
     //   Filter out low scoring ones.
 
+    startTime = sysTime();
     TReadSeqStore const & readSeqs = fragments.readSeqStore;
     for (TReadId i = 0; i < length(readSeqs); ++i) {
         std::sort(begin(errorCurves[i], Standard()), end(errorCurves[i], Standard()));
@@ -630,14 +636,19 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
         }
         move(errorCurves[i], filtered);
     }
+    if (options.verbosity >= 2)
+        std::cerr << "[timer] sorting/gap filling/smoothing/filtering: " << sysTime() - startTime << " s" << std::endl;
 }
 
 // Entry point for the gold standard building subprogram.
 int buildGoldStandard(Options<BuildGoldStandard> const & options)
 {
+    double startTime = 0;  // For measuring time below.
+    
     // =================================================================
     // Load contigs and Sam file.
     // =================================================================
+    startTime = sysTime();
     typedef FragmentStore<> TFragmentStore;
     TFragmentStore fragmentStore;
     // Load contigs.
@@ -645,8 +656,11 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         std::cerr << "Could not read contigs." << std::endl;
         return 1;
     }
+    if (options.verbosity >= 2)
+        std::cerr << "[timer] reading contigs: " << sysTime() - startTime << " s" << std::endl;
     
     // Load Sam file.
+    startTime = sysTime();
     {
         std::fstream fstrm(toCString(options.perfectMapFilename),
                            std::ios_base::in | std::ios_base::binary);
@@ -656,20 +670,26 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         }
         read(fstrm, fragmentStore, Sam());
     }
+    if (options.verbosity >= 2)
+        std::cerr << "[timer] loading SAM: " << sysTime() - startTime << " s" << std::endl;
 
     // =================================================================
     // Build point-wise error curve.
     // =================================================================
+    startTime = sysTime();
     TErrorCurves errorCurves;
     if (options.distanceFunction == "edit")
         matchesToErrorFunction(fragmentStore, errorCurves, options, MyersUkkonenReads());
     else // options.distanceFunction == "hamming"
         matchesToErrorFunction(fragmentStore, errorCurves, options, HammingSimple());
+    if (options.verbosity >= 2)
+        std::cerr << "[timer] building error curve: " << sysTime() - startTime << " s" << std::endl;
 
     // =================================================================
     // Verify result when enabled.
     // =================================================================
     if (options.verify) {
+        startTime = sysTime();
         if (options.oracleSamMode) {
             std::cerr << "WARNING: Not verifying since we run in oracle Sam mode!" << std::endl;
         } else {
@@ -686,16 +706,22 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
             // else...
             std::cerr << "Result DID validate!" << std::endl;
         }
+        if (options.verbosity >= 2)
+            std::cerr << "[timer] verification: " << sysTime() - startTime << " s" << std::endl;
     }
 
     // =================================================================
     // Convert points in error curves to intervals and write them to
     // stdout or a file.
     // =================================================================
+    startTime = sysTime();
     String<WitRecord> witRecords;
     typedef Iterator<String<WitRecord>, Standard>::Type TWitRecordIterator;
     intervalizeErrorCurves(witRecords, errorCurves, fragmentStore, options);
+    if (options.verbosity >= 2)
+        std::cerr << "[timer] error curve points to intervals: " << sysTime() - startTime << " s" << std::endl;
     // The two alternatives are equivalent after opening the file.
+    startTime = sysTime();
     if (options.outFileName == "-") {
         writeWitHeader(std::cout);
         writeWitComment(std::cout, WIT_COLUMN_NAMES);
@@ -715,6 +741,8 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
              it != end(witRecords, Standard()); ++it)
             fstrm << *it << std::endl;
     }
+    if (options.verbosity >= 2)
+        std::cerr << "[timer] writing output: " << sysTime() - startTime << " s" << std::endl;
 
     return 0;
 }
