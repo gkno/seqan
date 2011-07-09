@@ -80,7 +80,7 @@ public:
               maxError(0),
               distanceFunction("edit"),
               outFileName("-"),
-              verbosity(2)
+              verbosity(0)
     {}
 };
 
