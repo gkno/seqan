@@ -205,8 +205,17 @@ host(T const & me)
 
 /// TODO(holtgrew): Move documentation here?
 
-///.Function.setHost.param.object.type:nolink:$Host<T>::Type const &$
+///.Function.setHost.param.object.type:nolink:$Host<T>::Type &$
 ///.Function.setHost.concept:Concept.Hosted Type
+
+template <typename T, typename THost>
+inline void
+setHost(T & me,
+		THost & host_)
+{
+    SEQAN_CHECKPOINT;
+	setValue(_dataHost(me), host_);
+}
 
 template <typename T, typename THost>
 inline void
