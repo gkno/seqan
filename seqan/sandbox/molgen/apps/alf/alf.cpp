@@ -29,12 +29,12 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/alignmentFree.h>	//_beta is not uploaded
+#include <seqan/alignmentFree.h>	
 #include <seqan/file.h>
 #include <seqan/misc/edit_environment.h>
 #include <iostream>
@@ -260,8 +260,7 @@ std::cout<<"\n";
 			    assignSeq(sequenceTMP, multiSeqFile[i], format);    // read sequence
 			    assignSeqId(id, multiSeqFile[i], format);   // read sequence id
 
-			    // we use reserve and append, as assign is not supported
-			    // by StringSet<..., Owner<ConcatDirect<> > >
+
 			    appendValue(mySequenceSet, sequenceTMP, Generous());
 			    appendValue(seqIDs, id, Generous());
 			}
