@@ -1152,9 +1152,9 @@ CursorKind_is_stmt = lib.clang_isStatement
 CursorKind_is_stmt.argtypes = [CursorKind]
 CursorKind_is_stmt.restype = bool
 
-CursorKind_is_attribute = lib.clang_isAttribute
-CursorKind_is_attribute.argtypes = [CursorKind]
-CursorKind_is_attribute.restype = bool
+# CursorKind_is_attribute = lib.clang_isAttribute
+# CursorKind_is_attribute.argtypes = [CursorKind]
+# CursorKind_is_attribute.restype = bool
 
 CursorKind_is_inv = lib.clang_isInvalid
 CursorKind_is_inv.argtypes = [CursorKind]
