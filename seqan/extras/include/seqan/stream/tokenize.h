@@ -1299,7 +1299,7 @@ readLineStripTrailingBlanks(TBuffer & buffer,
                             RecordReader<TStream, TPass> & reader)
 {
     SEQAN_CHECKPOINT
-    int r = readLine(reader, buffer);
+    int r = readLine(buffer,reader);
 
     if (r != 0)
         return r;   // 1234567890
