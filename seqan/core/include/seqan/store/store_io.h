@@ -76,6 +76,20 @@ typedef Tag<TagAmos_> const Amos;
 //////////////////////////////////////////////////////////////////////////////
 
 
+/**
+.Function.getClrRange
+..sec:Fragment Store
+..summary:Get the "clear" range of a read alignment.
+..remarks:The clear range of a read alignment is the range of the part of the alignment that is not clipped.
+..signature:getClrRange(fragStore, alignEl, begClr, endClr)
+..param.fragStore:Fragment Store to work on.
+...type:Class.FragmentStore
+..param.alignEl:Read alignment element.
+...type:Class.AlignedReadStoreElement
+..param.begClr:Start of the clear range.
+..param.endClr:End of the clear range.
+..include:seqan/store.h
+*/
 
 template <typename TSpec, typename TConfig, typename TPos, typename TGapAnchor, typename TSpecAlign, typename TBeginClr, typename TEndClr>
 inline void
