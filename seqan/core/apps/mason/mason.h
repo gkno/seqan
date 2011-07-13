@@ -262,6 +262,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  generateMatePairs:      " << (options.generateMatePairs ? "true" : "false") << std::endl
            << "  libraryLengthMean:      " << options.libraryLengthMean << std::endl
            << "  libraryLengthError:     " << options.libraryLengthError << std::endl
+           << "  libraryLengthIsUniform: " << options.libraryLengthIsUniform << std::endl
            << "  readNaming:             " << READ_NAMINGS[(int)options.readNaming] << std::endl
            << "  numHaplotypes:          " << options.numHaplotypes << std::endl
            << "  haplotypeSnpRate:       " << options.haplotypeSnpRate << std::endl
@@ -323,6 +324,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
 
     addOption(parser, CommandLineOption("ll", "library-length-mean", "Mate-pair mean library length.  Default: 1000.", OptionType::Double));
     addOption(parser, CommandLineOption("le", "library-length-error", "Mate-pair library tolerance.  Default: 100.", OptionType::Double));
+    addOption(parser, CommandLineOption("lu", "library-length-uniform", "Mate-pair library length is uniform.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("mp", "mate-pairs", "Enable mate pair simulation.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("rn", "read-naming", "Read naming scheme in FASTQ/FASTA files, 0-2  Default: 0.", OptionType::Integer));
 	addHelpLine(parser, "Note that the suffixes will not appear in the SAM file.  In the SAM format,");
@@ -396,6 +398,8 @@ int parseCommandLineAndCheck(TOptions & options,
         getOptionValueLong(parser, "library-length-mean", options.libraryLengthMean);
     if (isSetLong(parser, "library-length-error"))
         getOptionValueLong(parser, "library-length-error", options.libraryLengthError);
+    if (isSetLong(parser, "library-length-uniform"))
+        options.libraryLengthIsUniform = true;
     if (isSetLong(parser, "mate-pairs"))
         options.generateMatePairs = true;
     if (isSetLong(parser, "read-naming")) {
