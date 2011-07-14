@@ -73,8 +73,8 @@ int main(int argc, char * argv[])
     std::cout << "***                 ALF                ***" << endl;
     std::cout << "*** Alignment free sequence comparison ***" << endl;
     std::cout << "******************************************" << endl << endl;
-    //std::cout.precision(25);
-    //Declare all parameters
+    // std::cout.precision(25);
+    // Declare all parameters
     string method = "N2";
     int kmerSize = 4;
     int bgModelOrder = 1;
@@ -89,17 +89,17 @@ int main(int argc, char * argv[])
     unsigned mismatches = 0;
     double mismatchWeight = 0.1;
 
-    //Read in comman line arguments
+    // Read in comman line arguments
     for (int arg = 1; arg < argc; arg++)
     {
         if (argv[arg][0] == '-')
         {
-            //parse options
+            // parse options
             if (strcmp(argv[arg], "-m") == 0 || strcmp(argv[arg], "--method") == 0)
             {
                 ++arg;
                 method = argv[arg];
-                std::cout << "\n--method: "; //Display option
+                std::cout << "\n--method: "; // Display option
                 for (unsigned int i = 0; i < length(method); ++i)
                 {
                     std::cout << method[i];
@@ -110,7 +110,7 @@ int main(int argc, char * argv[])
             {
                 ++arg;
                 inFile = argv[arg];
-                std::cout << "\n--inputFile: "; //Display option
+                std::cout << "\n--inputFile: "; // Display option
                 for (unsigned int i = 0; i < length(inFile); ++i)
                 {
                     std::cout << inFile[i];
@@ -217,12 +217,12 @@ int main(int argc, char * argv[])
 
     }
     std::cout << "\n";
-    //Definition of type DNA string sets
+    // Definition of type DNA string sets
     typedef String<Dna5> TText;
     typedef Size<TText>::Type TSize;
     typedef StringSet<TText> TStringSet;
 
-    //Definition of mxn two-dimensional matrix
+    // Definition of mxn two-dimensional matrix
     typedef Matrix<double, 2> TMatrix;
 
     /*
@@ -681,11 +681,11 @@ int main(int argc, char * argv[])
         "ATAGGTAAGGAGGTGAGAAATAGAGGGGGGGAACACAGTTGGAATTTCATATCATGTCTGAATGCTGTTTTA"
         "TGCTTCAGCAGGAATGTGGGTTATCTCCAGTACCCGGCCTGATGATTCTAATTCTTTAATTTTTTTGG";
 
-    TMatrix myMatrix;       //myMatrix stores pairwise kmerScores
+    TMatrix myMatrix;       // myMatrix stores pairwise kmerScores
 
-    TStringSet mySequenceSet;       //mySequenceSet stores all sequences from the multi-fasta file
+    TStringSet mySequenceSet;       // mySequenceSet stores all sequences from the multi-fasta file
 
-    if (inFile.compare(""))     //read in file
+    if (inFile.compare(""))     // read in file
     {
         MultiSeqFile multiSeqFile;
         open(multiSeqFile.concat, inFile.c_str(), OPEN_RDONLY);
@@ -711,12 +711,12 @@ int main(int argc, char * argv[])
             appendValue(seqIDs, id, Generous());
         }
     }
-    else        //if no file is given some standard strings are used
+    else        // if no file is given some standard strings are used
     {
         printHelp();
-        //appendValue(mySequenceSet,seqIID1);
-        //appendValue(mySequenceSet,seqIID2);
-        //appendValue(mySequenceSet,seqIID3);
+        // appendValue(mySequenceSet,seqIID1);
+        // appendValue(mySequenceSet,seqIID2);
+        // appendValue(mySequenceSet,seqIID3);
         cout << "\n Example Run:\n";
         appendValue(mySequenceSet, seqM1_1);
         appendValue(mySequenceSet, seqM1_2);

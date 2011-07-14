@@ -38,28 +38,28 @@
 namespace seqan {
 
 template <typename TStringSet, typename TValue>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AF_Score<D2> const & score) //AF_Score<D2> const & score
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AF_Score<D2> const & score) // AF_Score<D2> const & score
 {
 
     typedef typename Value<TStringSet>::Type TString;
     typedef typename Value<TString>::Type TAlphabet;
     typedef Matrix<TValue, 2> TMatrix;
-    //typedef typename Size<TMatrix>::Type TSize;
+    // typedef typename Size<TMatrix>::Type TSize;
     typedef typename Iterator<TStringSet const>::Type       TIteratorSet;
     typedef typename Iterator<StringSet<String<unsigned int> > >::Type              TIteratorSetInt;
 
     unsigned seqNumber = length(sequenceSet);
 
-    //resize the ScoreMatrix
+    // resize the ScoreMatrix
     setLength(scoreMatrix, 0, seqNumber);
     setLength(scoreMatrix, 1, seqNumber);
     resize(scoreMatrix, (TValue) 0);
 
     StringSet<String<unsigned> > kmerCounts;
-    //StringSet<String<int> > kmerCounts;
+    // StringSet<String<int> > kmerCounts;
     resize(kmerCounts, seqNumber);
 
-    //Count all kmers
+    // Count all kmers
     TIteratorSetInt itKmerCounts = begin(kmerCounts);
     TIteratorSet itSeqSet = begin(sequenceSet);
 
@@ -69,14 +69,14 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         ++itKmerCounts;
     }
     std::cout << "\ncounted words";
-    //calculate all pairwise scores and store them in scoreMatrix
+    // calculate all pairwise scores and store them in scoreMatrix
     for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(remove diagonal: seqNumber-1)
     {
         std::cout << "\nSequence number " << rowIndex;
         for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex) //(remove diagonal: rowIndex+1)
         {
             alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], kmerCounts[colIndex], score);
-            value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  //Copy symmetric entries
+            value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  // Copy symmetric entries
         }
     }
 

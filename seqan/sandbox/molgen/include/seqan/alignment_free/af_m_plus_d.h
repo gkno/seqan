@@ -49,10 +49,10 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
 
     TSize seqNumber = length(sequenceSet);
 
-    //resize the distMatrix
+    // resize the distMatrix
     setLength(scoreMatrix, 0, seqNumber);
     setLength(scoreMatrix, 1, seqNumber);
-    //fill(scoreMatrix,(TValue) 0);
+    // fill(scoreMatrix,(TValue) 0);
     resize(scoreMatrix, (TValue) 0);
 
     StringSet<String<TValue> > weightedCounts;
@@ -67,7 +67,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         ++itWeightedCounts;
     }
     std::cout << "\ncounted words";
-    //calculate all pairwise scores and store them in scoreMatrix
+    // calculate all pairwise scores and store them in scoreMatrix
     for (unsigned int rowIndex = 0; rowIndex < (seqNumber - 1); ++rowIndex)
     {
         std::cout << "\nSequence number " << rowIndex;
@@ -75,8 +75,8 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         {
             alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), weightedCounts[rowIndex], weightedCounts[colIndex], score);
 
-            //alignmentFreeCompareCounts(weightedCounts[rowIndex],weightedCounts[colIndex],value(scoreMatrix,rowIndex,colIndex), AF_kmerMM());
-            value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  //Copy symmetric entries
+            // alignmentFreeCompareCounts(weightedCounts[rowIndex],weightedCounts[colIndex],value(scoreMatrix,rowIndex,colIndex), AF_kmerMM());
+            value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  // Copy symmetric entries
         }
     }
 
@@ -99,7 +99,7 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
     /*
     std::ofstream myfile;
 
-    //Set this to 1 for output of kmer scores for every comparison
+    // Set this to 1 for output of kmer scores for every comparison
     bool singleOutput=1;
     if(singleOutput==1)
     {
@@ -109,11 +109,11 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
     for (; it1 < end(kmerCounts1); ++it1)
     {
         TValue tmp = result;
-        if (value(it1) != 0) //else definition as zero, nothing to add
+        if (value(it1) != 0) // else definition as zero, nothing to add
         {
             result += (value(it1) * ((TValue) log((((TValue) 2.0) * value(it1)) / (value(it1) + value(it2)))));
         }
-        if (value(it2) != 0) //else definition as zero, nothing to add
+        if (value(it2) != 0) // else definition as zero, nothing to add
         {
             result += (value(it2) * ((TValue) log((((TValue) 2.0) * value(it2)) / (value(it2) + value(it1)))));
         }
@@ -134,8 +134,8 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
     }
     */
     result = result / kmerNumber + ((TValue) (2.0 * log(2)));
-    //Correction term? calculated with R based on the mplusd program, error +-10^-14? Original publication is unclear here. Algorithm not reproducable
-    //val=val*0.40959999987592+0.818468190977198;
+    // Correction term? calculated with R based on the mplusd program, error +-10^-14? Original publication is unclear here. Algorithm not reproducable
+    // val=val*0.40959999987592+0.818468190977198;
 }
 
 /*
@@ -156,13 +156,13 @@ void weightedFrequencies(String<TValue> & weightedFrequencies, TString const & s
     {
         String<TValue> backgroundFrequencies;
         countKmers(kmerCounts, backgroundFrequencies, sequence, score.kmerSize);
-        int nvals = length(kmerCounts); //Number of kmers
+        int nvals = length(kmerCounts); // Number of kmers
         int len1 = 0;
         for (int l = 0; l < nvals; l++)
         {
             len1 += kmerCounts[l];
         }
-        //fill(weightedFrequencies,nvals,(TValue) 0.0);
+        // fill(weightedFrequencies,nvals,(TValue) 0.0);
         resize(weightedFrequencies, nvals, (TValue) 0.0);
 
         TIteratorUnsigned itCounts;
@@ -173,7 +173,7 @@ void weightedFrequencies(String<TValue> & weightedFrequencies, TString const & s
 
         for (; itCounts < end(kmerCounts); ++itCounts)
         {
-            TValue p_w = 1;   //Probability of kmer
+            TValue p_w = 1;   // Probability of kmer
 
             String<TUnmaskedAlphabet> w;
             unhash(w, (unsigned)position(itCounts), score.kmerSize);
@@ -190,13 +190,13 @@ void weightedFrequencies(String<TValue> & weightedFrequencies, TString const & s
         MarkovModel<TUnmaskedAlphabet, TValue> backgroundModel(score.bgModelOrder);
         countKmers(kmerCounts, backgroundModel, sequence, score.kmerSize);
 
-        int nvals = length(kmerCounts); //Number of kmers
+        int nvals = length(kmerCounts); // Number of kmers
         int len1 = 0;
         for (int l = 0; l < nvals; l++)
         {
             len1 += kmerCounts[l];
         }
-        //fill(weightedFrequencies,nvals,(TValue) 0.0);
+        // fill(weightedFrequencies,nvals,(TValue) 0.0);
         resize(weightedFrequencies, nvals, (TValue) 0.0);
 
         TIteratorUnsigned itCounts;
@@ -207,7 +207,7 @@ void weightedFrequencies(String<TValue> & weightedFrequencies, TString const & s
 
         for (; itCounts < end(kmerCounts); ++itCounts)
         {
-            TValue p_w = 1; //Probability of kmer
+            TValue p_w = 1; // Probability of kmer
 
             String<TUnmaskedAlphabet> w;
             unhash(w, (unsigned)position(itCounts), score.kmerSize);

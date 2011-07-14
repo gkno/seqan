@@ -43,8 +43,8 @@ void initialiseRevComIndex_star(unsigned k)
     unsigned myLength = (unsigned) pow(4, k);
     resize(revComIndex_star, myLength, 0);
     Shape<Dna, SimpleShape> myShape;
-    //Declare variables
-    //TShape myShape;		//Shape, length can be changed (kmer_length)
+    // Declare variables
+    // TShape myShape;		// Shape, length can be changed (kmer_length)
     resize(myShape, k);
     for (unsigned i = 0; i < myLength; ++i)
     {
@@ -73,11 +73,11 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     typedef typename Iterator<StringSet<String<double> > >::Type        TIteratorSetDouble;
 
 
-    //Initialise reverse complement hash table
+    // Initialise reverse complement hash table
     initialiseRevComIndex_star(score.kmerSize);
     unsigned int seqNumber = length(sequenceSet);
 
-    //resize the distMatrix
+    // resize the distMatrix
     setLength(scoreMatrix, 0, seqNumber);
     setLength(scoreMatrix, 1, seqNumber);
     resize(scoreMatrix, (TValue) 0);
@@ -85,7 +85,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
 
     StringSet<String<double> > standardisedKmerCounts;
     resize(standardisedKmerCounts, seqNumber);
-    //Count all kmers and all background nucleotide frequencies and store them in StringSets
+    // Count all kmers and all background nucleotide frequencies and store them in StringSets
     TIteratorSetDouble itStandardisedKmerCounts = begin(standardisedKmerCounts);
     TIteratorSet itSeqSet = begin(sequenceSet);
     for (; itSeqSet < end(sequenceSet); ++itSeqSet)
@@ -94,7 +94,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         std::cout << "\n" << position(itSeqSet);
         ++itStandardisedKmerCounts;
     }
-    //output of pairwise kmer weight to file
+    // output of pairwise kmer weight to file
     std::ofstream myfile;
     if (score.outputFile != "")
     {
@@ -103,7 +103,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         {
             String<TUnmaskedAlphabet> w;
             unhash(w, i, score.kmerSize);
-            //std::ofstream myfile;
+            // std::ofstream myfile;
 
             myfile << "\t" << w;
         }
@@ -123,14 +123,14 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     std::cout << "\ncounted words";
 
 
-    //calculate all pairwise scores and store them in scoreMatrix
+    // calculate all pairwise scores and store them in scoreMatrix
     for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex)
     {
         std::cout << "\nSequence number " << rowIndex;
         for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex)
         {
             alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), standardisedKmerCounts[rowIndex], standardisedKmerCounts[colIndex], score);
-            value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  //Copy symmetric entries
+            value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  // Copy symmetric entries
         }
     }
 }
@@ -154,11 +154,11 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
     {
 
 
-        //Multiply standardised counts
+        // Multiply standardised counts
         result += (TValue)(value(it1) * value(it2));
 
 
-        //Computation of the reverse complement strand score
+        // Computation of the reverse complement strand score
         if ((score.revCom != ""))  //"min" "max" "mean" ""
         {
             unsigned hashValue = revComIndex_star[position(it1)];
@@ -167,9 +167,9 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
         ++it2;
     }
 
-    //std::cout<<"\nresult"<<result<<"\n"<<"\nresultRC"<<resultRC<<"\n";
+    // std::cout<<"\nresult"<<result<<"\n"<<"\nresultRC"<<resultRC<<"\n";
 
-    //Compute reverse complements scores if revCom!=""
+    // Compute reverse complements scores if revCom!=""
     if (score.revCom == "mean")
         result = (TValue) (resultRC + result) / 2;
     else if (score.revCom == "max")
@@ -203,10 +203,10 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
         String<unsigned int> kmerCounts;
         String<double> backgroundFrequencies;
         countKmers(kmerCounts, backgroundFrequencies, sequence, score.kmerSize);
-//int tmpSum=0;
-//for(int tmp=0;tmp<length(kmerCounts);++tmp){std::cout<<kmerCounts[tmp]<<"\n";tmpSum+=kmerCounts[tmp];}
-//std::cout<<"\ntmpSum: "<<tmpSum<<"\n";
-        int nvals = length(kmerCounts); //Number of kmers
+// int tmpSum=0;
+// for(int tmp=0;tmp<length(kmerCounts);++tmp){std::cout<<kmerCounts[tmp]<<"\n";tmpSum+=kmerCounts[tmp];}
+// std::cout<<"\ntmpSum: "<<tmpSum<<"\n";
+        int nvals = length(kmerCounts); // Number of kmers
         int len1 = 0;
         for (int l = 0; l < nvals; l++)
         {
@@ -215,7 +215,7 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
         resize(standardisedCounts, nvals, (TValue) 0.0);
 
 
-        //string of tvalue to store p_w
+        // string of tvalue to store p_w
         String<TValue> probabilities;
         resize(probabilities, nvals, missing);
 
@@ -227,7 +227,7 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
 
         for (; itCounts < end(kmerCounts); ++itCounts)
         {
-            TValue p_w = 1;   //Probability of kmer
+            TValue p_w = 1;   // Probability of kmer
 
             String<TUnmaskedAlphabet> w;
             unhash(w, (unsigned)position(itCounts), score.kmerSize);
@@ -236,7 +236,7 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
 
             variance = ((TValue) len1) * p_w;
 
-            //test if variance not 0 or inf before dividing
+            // test if variance not 0 or inf before dividing
             if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
             {
                 if (p_w > 0)
@@ -245,7 +245,7 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
 
                 }
             }
-//std::cout<<"\n"<<w<<"; counts:"<<value(itCounts)<<"; stCounts:"<<value(itStandardisedCounts)<<" p_w: "<<p_w<<" var:"<<variance;
+// std::cout<<"\n"<<w<<"; counts:"<<value(itCounts)<<"; stCounts:"<<value(itStandardisedCounts)<<" p_w: "<<p_w<<" var:"<<variance;
             ++itStandardisedCounts;
         }
     }
@@ -258,8 +258,8 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
         MarkovModel<TUnmaskedAlphabet, TValue> backgroundModel(score.bgModelOrder);
         countKmers(kmerCounts, backgroundModel, sequence, score.kmerSize);
 
-        //countKmers(sequence,kmerCounts,backgroundModel,k);
-        int nvals = length(kmerCounts); //Number of kmers
+        // countKmers(sequence,kmerCounts,backgroundModel,k);
+        int nvals = length(kmerCounts); // Number of kmers
         int len1 = 0;
         for (int l = 0; l < nvals; l++)
         {
@@ -276,17 +276,17 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
 
         itCounts = begin(kmerCounts);
         itStandardisedCounts = begin(standardisedCounts);
-        //double sumTMP=0;
+        // double sumTMP=0;
         for (; itCounts < end(kmerCounts); ++itCounts)
         {
-            TValue p_w = 1;   //Probability of kmer
+            TValue p_w = 1;   // Probability of kmer
             TValue variance = 0;
             String<TUnmaskedAlphabet> w;
             unhash(w, (unsigned)position(itCounts), score.kmerSize);
             p_w = emittedProbability(backgroundModel, w);
             variance = ((TValue) pow(((TValue) len1) * p_w, 0.5));
-            //Calculate standardised kmer Count
-            //std::cout<<"\nword:"<<w<<", p_w:"<<p_w<<", var: "<<((TValue) pow(((TValue) len1)*p_w,0.5));
+            // Calculate standardised kmer Count
+            // std::cout<<"\nword:"<<w<<", p_w:"<<p_w<<", var: "<<((TValue) pow(((TValue) len1)*p_w,0.5));
             if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
             {
                 if (p_w > 0)

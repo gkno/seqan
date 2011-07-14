@@ -68,20 +68,20 @@ void countKmers(String<unsigned int> & kmerCounts, TString const & sequence, uns
     typedef typename Position<TIterator>::Type                      TPosition;
     typedef Shape<TUnmaskedAlphabet, SimpleShape>                           TShape;
 
-    //Declare variables
-    TShape myShape;     //Shape, length can be changed (kmer_length)
+    // Declare variables
+    TShape myShape;     // Shape, length can be changed (kmer_length)
 
-    //int kmer_length=5;
+    // int kmer_length=5;
     resize(myShape, k);
 
-    //Calculate number of kmers/ length of count vector, respectively background vector
+    // Calculate number of kmers/ length of count vector, respectively background vector
     int kmerNumber = _intPow((unsigned)ValueSize<TUnmaskedAlphabet>::VALUE, weight(myShape));
-//arrayFill(kmerCounts, kmerNumber, 0);
+// arrayFill(kmerCounts, kmerNumber, 0);
     resize(kmerCounts, kmerNumber, 0);
     TIterator itSequence = begin(sequence);
     int counterN = 0;
 
-    //Check for any N that destroys the first kmers
+    // Check for any N that destroys the first kmers
     unsigned int j = (k - 1);
     for (TPosition i = position(itSequence); i <= j; ++i)
     {
@@ -93,11 +93,11 @@ void countKmers(String<unsigned int> & kmerCounts, TString const & sequence, uns
 
     for (; itSequence <= (end(sequence) - k); ++itSequence)
     {
-        //Check if there is a "N" at the end of the new kmer
+        // Check if there is a "N" at the end of the new kmer
         if (_repeatMaskValue(value(itSequence + (k - 1))))
-            counterN = k; //do not consider any kmer covering this "N"
+            counterN = k; // do not consider any kmer covering this "N"
 
-        //If there is no "N" overlapping with the current kmer, count it
+        // If there is no "N" overlapping with the current kmer, count it
         if (counterN <= 0)
         {
             unsigned hashValue = hash(myShape, itSequence);
@@ -114,13 +114,13 @@ void countKmers(String<unsigned int> & kmerCounts, TString const & sequence, uns
 template <typename TValueBG, typename TString>
 void countKmers(String<unsigned int> & kmerCounts, String<TValueBG> & backgroundFrequencies, TString const & sequence, unsigned int k)
 {
-    //besser TString, dann wird alles abgedeckt, z.b. String<Dna,array>, oder segment<> wie infix,...
+    // besser TString, dann wird alles abgedeckt, z.b. String<Dna,array>, oder segment<> wie infix,...
     typedef typename Value<TString>::Type TAlphabet;
     typedef typename _UnmaskedAlphabet<TAlphabet>::Type     TUnmaskedAlphabet;
-    //typedef typename Value<TStringBG>::Type               TValueBG;
+    // typedef typename Value<TStringBG>::Type               TValueBG;
 
     typedef typename Iterator<TString>::Type                   TIterator;
-    //typedef typename Iterator<TStringBG >::Type		TIteratorTStringBG;
+    // typedef typename Iterator<TStringBG >::Type		TIteratorTStringBG;
     typedef typename Iterator<String<TValueBG> >::Type     TIteratorTStringBG;
 
     typedef typename Position<TIterator>::Type                      TPosition;
@@ -129,28 +129,28 @@ void countKmers(String<unsigned int> & kmerCounts, String<TValueBG> & background
 
     unsigned int alphabetSize = ValueSize<TUnmaskedAlphabet>::VALUE;
 
-    //Declare variables
-    TShape myShape;     //Shape, length can be changed (kmer_length)
-    TShape myShapeBG;       //Shape for background, set to markovlen+1, here zero order only
+    // Declare variables
+    TShape myShape;     // Shape, length can be changed (kmer_length)
+    TShape myShapeBG;       // Shape for background, set to markovlen+1, here zero order only
 
     resize(myShape, k);
-    resize(myShapeBG, 1);    //Markov model of zero order (count background frequencies)
+    resize(myShapeBG, 1);    // Markov model of zero order (count background frequencies)
 
-    //Calculate number of kmers/ length of count vector, respectively background vector
+    // Calculate number of kmers/ length of count vector, respectively background vector
     unsigned int kmerNumber = _intPow(alphabetSize, k);
-    unsigned int kmerNumberBG = alphabetSize; //zero order model for DNA sequences
+    unsigned int kmerNumberBG = alphabetSize; // zero order model for DNA sequences
 
-    //arrayFill(kmerCounts, kmerNumber, 0);
-    //arrayFill(backgroundFrequencies, kmerNumberBG, (TValueBG) 0);
+    // arrayFill(kmerCounts, kmerNumber, 0);
+    // arrayFill(backgroundFrequencies, kmerNumberBG, (TValueBG) 0);
     resize(kmerCounts, kmerNumber, 0);
     resize(backgroundFrequencies, kmerNumberBG, (TValueBG) 0);
 
     TIterator itSequence = begin(sequence);
 
-    int counterN = 0; //counter that counts how many kmers are effected by a N
-    int counterNbg = 0;   //count for bg (different shape size)
+    int counterN = 0; // counter that counts how many kmers are effected by a N
+    int counterNbg = 0;   // count for bg (different shape size)
 
-    //Check for any N that destroys the first kmers
+    // Check for any N that destroys the first kmers
     unsigned int j = (k - 1);
     for (TPosition i = position(itSequence); i <= j; ++i)
     {
@@ -158,22 +158,22 @@ void countKmers(String<unsigned int> & kmerCounts, String<TValueBG> & background
             counterN = i + 1;
     }
 
-    int sumBG = 0;    //count number of nucleotides for frequency calculation (Ns are not considered anymore!)
+    int sumBG = 0;    // count number of nucleotides for frequency calculation (Ns are not considered anymore!)
     for (; itSequence <= (end(sequence) - k); ++itSequence)
     {
-        //Check if there is a "N" at the end of the new kmer
+        // Check if there is a "N" at the end of the new kmer
         if (_repeatMaskValue(value(itSequence + (k - 1))))
         {
-            counterN = k; //do not consider any kmer covering this "N"
+            counterN = k; // do not consider any kmer covering this "N"
         }
-        //If there is no "N" overlapping with the current kmer, count it
+        // If there is no "N" overlapping with the current kmer, count it
         if (counterN <= 0)
         {
             unsigned hashValue = hash(myShape, itSequence);
             ++kmerCounts[hashValue];
         }
 
-        //Check if there is a "N" at the end of the new background word, here single letters only
+        // Check if there is a "N" at the end of the new background word, here single letters only
         if (_repeatMaskValue(value(itSequence)))
         {
             counterNbg = 1;
@@ -187,7 +187,7 @@ void countKmers(String<unsigned int> & kmerCounts, String<TValueBG> & background
         counterN--;
         counterNbg--;
     }
-    //The background counts are updated until the last base is covered
+    // The background counts are updated until the last base is covered
     for (; itSequence < end(sequence); ++itSequence)
     {
         if (_repeatMaskValue(value(itSequence)))
@@ -203,7 +203,7 @@ void countKmers(String<unsigned int> & kmerCounts, String<TValueBG> & background
         counterNbg--;
     }
 
-    //Normalise the background counts to frequencies
+    // Normalise the background counts to frequencies
     TIteratorTStringBG itBackground = begin(backgroundFrequencies);
     for (; itBackground < end(backgroundFrequencies); ++itBackground)
     {
@@ -226,31 +226,31 @@ void countKmers(String<unsigned int> & kmerCounts, MarkovModel<TAlphabetBG, TVal
     typedef typename Position<TIterator>::Type                  TPosition;
     typedef Shape<TAlphabetBG, SimpleShape> TShape;
 
-    //Declare variables
-    TShape myShape;     //Shape, length can be changed (kmer_length)
+    // Declare variables
+    TShape myShape;     // Shape, length can be changed (kmer_length)
 
-    //int length=length(sequence);
+    // int length=length(sequence);
     resize(myShape, k);
 
-    //we only consider kmers without N
+    // we only consider kmers without N
     int kmerNumber = _intPow((unsigned)ValueSize<TAlphabetBG>::VALUE, weight(myShape));
-    //arrayFill(kmerCounts, kmerNumber, 0);
+    // arrayFill(kmerCounts, kmerNumber, 0);
     resize(kmerCounts, kmerNumber, 0);
 
-    //Create sequence set for the markov model, if Ns occur, the sequence is split and Ns are removed
+    // Create sequence set for the markov model, if Ns occur, the sequence is split and Ns are removed
     StringSet<String<TAlphabetBG> > seqSetMM;
 
     TIterator itSeq = begin(sequence);
 
-    //Check for any N that destroys the first kmers
+    // Check for any N that destroys the first kmers
     unsigned int j = (k - 1);
     for (TPosition i = position(itSeq); i <= j; ++i)
     {
-        //if(_repeatMaskValue(sequence[i]))
+        // if(_repeatMaskValue(sequence[i]))
 
         if (_repeatMaskValue(sequence[i]))
         {
-            //std::cout<<"N detected in begin of sequence";
+            // std::cout<<"N detected in begin of sequence";
             if ((i - position(itSeq)) > 0)
             {
                 appendValue(seqSetMM, infix(sequence, position(itSeq), i));
@@ -262,7 +262,7 @@ void countKmers(String<unsigned int> & kmerCounts, MarkovModel<TAlphabetBG, TVal
 
     int counterN = 0;
 
-    TPosition startSplitSequence = position(itSeq); //to split sequences, position of possible start of a sequence after NNs
+    TPosition startSplitSequence = position(itSeq); // to split sequences, position of possible start of a sequence after NNs
 
     for (; itSeq <= (end(sequence) - k); ++itSeq)
     {
@@ -271,9 +271,9 @@ void countKmers(String<unsigned int> & kmerCounts, MarkovModel<TAlphabetBG, TVal
             counterN = k;
 
             if (((position(itSeq) + k - 1) > startSplitSequence))
-                appendValue(seqSetMM, infix(sequence, startSplitSequence, (position(itSeq) + k - 1))); //infix(sequence2,position(itSeq2),i));
+                appendValue(seqSetMM, infix(sequence, startSplitSequence, (position(itSeq) + k - 1))); // infix(sequence2,position(itSeq2),i));
 
-            startSplitSequence = (position(itSeq) + k); //position after n, possible start
+            startSplitSequence = (position(itSeq) + k); // position after n, possible start
         }
         if (counterN <= 0)
         {
@@ -283,13 +283,13 @@ void countKmers(String<unsigned int> & kmerCounts, MarkovModel<TAlphabetBG, TVal
 
         counterN--;
     }
-    //string set for markov model
+    // string set for markov model
     if ((position(itSeq) + k - 1) > startSplitSequence)
     {
-        appendValue(seqSetMM, infix(sequence, startSplitSequence, (position(itSeq) + k - 1))); //infix(sequence2,position(itSeq2),i));
+        appendValue(seqSetMM, infix(sequence, startSplitSequence, (position(itSeq) + k - 1))); // infix(sequence2,position(itSeq2),i));
     }
 
-    //Build background model
+    // Build background model
     buildMarkovModel(backgroundModel, seqSetMM);
 
 
@@ -312,7 +312,7 @@ void calculateVariance(TValue & variance, TString & word, TStringBG & background
     typedef typename Value<TString>::Type TAlphabet;
     typedef typename Value<TStringBG>::Type TValueBG;
 
-    //Probability for word1
+    // Probability for word1
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
 
@@ -334,11 +334,11 @@ void calculateVariance(TValue & variance, TString & word, TStringBG & background
         p_clump *= p_tmp;
         variance += (TValue) 2 * (n - l + 1 - value(i)) * p_clump;
 
-        //std::cout<<"\n"<<p_clump;
+        // std::cout<<"\n"<<p_clump;
     }
-    //std::cout<<"\np_w:"<<p_w;
+    // std::cout<<"\np_w:"<<p_w;
     variance += (TValue) p_w * p_w * (n - 2 * n * l + 3 * l * l - 4 * l + 1);
-    //std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
+    // std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
 }
 
 template <typename TValue, typename TString, typename TStringBG>
@@ -353,7 +353,7 @@ void calculateCovariance(TValue & covariance, TString & word1, TString & word2, 
     typedef typename Value<TString>::Type TAlphabet;
     typedef typename Value<TStringBG>::Type TValueBG;
 
-    //Probability for word1
+    // Probability for word1
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
 
@@ -375,7 +375,7 @@ void calculateCovariance(TValue & covariance, TString & word1, TString & word2, 
         calculateProbability(p_clump, wordPrefix, backgroundFrequencies);
         p_clump *= p_tmp;
         covariance += (TValue) (n - l1 + 1 - value(i)) * p_clump;
-        //std::cout<<"\n"<<p_clump;
+        // std::cout<<"\n"<<p_clump;
     }
 
     int l2 = length(word2);
@@ -394,57 +394,57 @@ void calculateCovariance(TValue & covariance, TString & word1, TString & word2, 
         calculateProbability(p_clump, wordPrefix, backgroundFrequencies);
         p_clump *= p_tmp;
         covariance += (TValue) (n - l2 + 1 - value(i)) * p_clump;
-        //std::cout<<"\n"<<p_clump;
+        // std::cout<<"\n"<<p_clump;
     }
 
-    //std::cout<<"\np_w:"<<p_w;
+    // std::cout<<"\np_w:"<<p_w;
     covariance += (TValue) p_w1 * p_w2 * (n - 2 * n * l1 + 3 * l1 * l1 - 4 * l1 + 1);
-    //std::cout<<word1<<"\np_w:"<<p_w1<<", covar: "<<covariance<<"\n";
+    // std::cout<<word1<<"\np_w:"<<p_w1<<", covar: "<<covariance<<"\n";
 }
 
 template <typename TValue, typename TSpec, typename TAlphabet>
 void calculateVariance(TValue & variance, String<TAlphabet, TSpec> & word, MarkovModel<TAlphabet, TValue> & bgModel, int n)
 {
-    //typedef typename Value<TString>::Type TAlphabet;
-    //typedef typename Value<TStringBG>::Type TValueBG;
+    // typedef typename Value<TString>::Type TAlphabet;
+    // typedef typename Value<TStringBG>::Type TValueBG;
 
-    //Probability for word1
+    // Probability for word1
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
 
     int l = length(word);
     TValue p_w;
     p_w = emittedProbability(bgModel, word);
-//std::cout<<"wordp:"<<p_w;
+// std::cout<<"wordp:"<<p_w;
     String<int> periodicity;
     calculatePeriodicity(periodicity, word, word);
     variance = (TValue) (n - l + 1) * p_w;
     for (TIteratorInt i = begin(periodicity); i < end(periodicity); ++i)
     {
-//std::cout<<"\ni:"<<value(i)<<"\n";
+// std::cout<<"\ni:"<<value(i)<<"\n";
         TValue p_clump;
-        //TValue p_tmp;
+        // TValue p_tmp;
 
-//String<TAlphabet> clump=word;
+// String<TAlphabet> clump=word;
 
-        //calculateProbability(p_clum,word,backgroundFrequencies);
+        // calculateProbability(p_clum,word,backgroundFrequencies);
 //			String<TAlphabet> wordPrefix = prefix(word,value(i));
-//append(wordPrefix,clump);
+// append(wordPrefix,clump);
         String<TAlphabet> clump = prefix(word, value(i));
         append(clump, word);
-//std::cout<<"\nclump:"<<clump<<"\n";
-        //calculateProbability(p_clump,wordPrefix,backgroundFrequencies);
-        //p_clump*=p_tmp;
+// std::cout<<"\nclump:"<<clump<<"\n";
+        // calculateProbability(p_clump,wordPrefix,backgroundFrequencies);
+        // p_clump*=p_tmp;
         p_clump = emittedProbability(bgModel, clump);
         variance += (TValue) 2 * (n - l + 1 - value(i)) * p_clump;
-        //std::cout<<"\n"<<clump<<p_clump;
+        // std::cout<<"\n"<<clump<<p_clump;
     }
-    //std::cout<<"\np_w:"<<p_w;
+    // std::cout<<"\np_w:"<<p_w;
     variance += (TValue) p_w * p_w * (n - 2 * n * l + 3 * l * l - 4 * l + 1);
-    //std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
+    // std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
 }
 
-//like the r code except the third term includes the differences for word occurences when they are so close that the stationary distribution cannot be assumed
+// like the r code except the third term includes the differences for word occurences when they are so close that the stationary distribution cannot be assumed
 template <typename TValue, typename TSpec, typename TAlphabet>
 void calculateVarianceRobinBook(TValue & variance, String<TAlphabet, TSpec> & word, MarkovModel<TAlphabet, TValue> & bgModel, int l)
 {
@@ -472,7 +472,7 @@ void calculateVarianceRobinBook(TValue & variance, String<TAlphabet, TSpec> & wo
         variance += (TValue) 2.0 * p_w * (l - k - d + 1) * (eps[k - d - 1] * p_suffix - p_w);
 
     }
-    //std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
+    // std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
 }
 
 template <typename TValue, typename TSpec, typename TAlphabet>
@@ -484,7 +484,7 @@ void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> & word1, 
         return;
     }
 
-    //Probability for word1
+    // Probability for word1
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
 
@@ -495,7 +495,7 @@ void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> & word1, 
     p_w1 = emittedProbability(bgModel, word1);
 
     String<int> periodicity1;
-    calculatePeriodicity(periodicity1, word1, word2);  //word2 is right
+    calculatePeriodicity(periodicity1, word1, word2);  // word2 is right
     for (TIteratorInt i = begin(periodicity1); i < end(periodicity1); ++i)
     {
         TValue p_clump;
@@ -521,15 +521,15 @@ void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> & word1, 
         p_clump = emittedProbability(bgModel, clump);
 
         covariance += (TValue) (n - l1 + 1 - value(i)) * p_clump;
-        //std::cout<<"\n"<<p_clump;
+        // std::cout<<"\n"<<p_clump;
     }
 
-    //std::cout<<"\np_w:"<<p_w;
+    // std::cout<<"\np_w:"<<p_w;
     covariance += (TValue) p_w1 * p_w2 * (n - 2 * n * l1 + 3 * l1 * l1 - 4 * l1 + 1);
-    //std::cout<<word1<<"\np_w:"<<p_w1<<", covar: "<<covariance<<"\n";
+    // std::cout<<word1<<"\np_w:"<<p_w1<<", covar: "<<covariance<<"\n";
 }
 
-//like the R code without term 3, everything as in robin book
+// like the R code without term 3, everything as in robin book
 template <typename TValue, typename TSpec, typename TAlphabet>
 void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> & word1, String<TAlphabet, TSpec> & word2, MarkovModel<TAlphabet, TValue> & bgModel, int l)
 {
@@ -539,7 +539,7 @@ void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> 
         return;
     }
 
-    //Probability for word1
+    // Probability for word1
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
 
@@ -558,7 +558,7 @@ void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> 
 
     covariance = 0;
 
-    //First term
+    // First term
     for (int d = 1; d <= k - 1; ++d)
     {
         String<TAlphabet> wordSuffix = suffix(word2, k - d);
@@ -573,8 +573,8 @@ void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> 
         covariance += (TValue) p_w1 * (l - k - d + 1) * (eps1_2[k - d - 1] * p_suffix - p_w2);
 
     }
-    //std::cout<<"\nterm1:"<<covariance;
-    //Second term
+    // std::cout<<"\nterm1:"<<covariance;
+    // Second term
     for (int d = 1; d <= k - 1; ++d)
     {
         String<TAlphabet> wordSuffix = suffix(word1, k - d);
@@ -589,17 +589,17 @@ void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> 
         covariance += (TValue) p_w2 * (l - k - d + 1) * (eps2_1[k - d - 1] * p_suffix - p_w1);
 
     }
-    //std::cout<<"\nterm1+term2:"<<covariance;
+    // std::cout<<"\nterm1+term2:"<<covariance;
     covariance -= (l - k + 1) * p_w1 * p_w2;
 }
 
-//calculate word peridicity (indicator for overlaps)
-//P(w1,w2)= all p where w2_j=w1_{j+p} for all j=1...k-p
+// calculate word peridicity (indicator for overlaps)
+// P(w1,w2)= all p where w2_j=w1_{j+p} for all j=1...k-p
 template <typename TString>
 void calculatePeriodicity(String<int> & periodicity, TString & word1, TString & word2)
 {
     typedef typename Value<TString>::Type TAlphabet;
-    //simple case for variance only: word1==word2
+    // simple case for variance only: word1==word2
     typedef typename Iterator<TString, Rooted>::Type        TIterator;
     typedef typename Size<TString>::Type TSize;
     TIterator itWord1 = begin(word1);
@@ -608,35 +608,35 @@ void calculatePeriodicity(String<int> & periodicity, TString & word1, TString & 
 
     for (TSize i = 1; i < length1; ++i)
     {
-        String<TAlphabet> my_suffix = suffix(word1, i);       //overlap of suffix of word1 with prefix of word2
+        String<TAlphabet> my_suffix = suffix(word1, i);       // overlap of suffix of word1 with prefix of word2
         TSize my_min = min(length2, (length1 - i));
         String<TAlphabet> my_prefix = prefix(word2, my_min);
         if (my_suffix == my_prefix)
         {
             appendValue(periodicity, i);
-            //std::cout<<"\nperiodicity: "<<i<<periodicity;
+            // std::cout<<"\nperiodicity: "<<i<<periodicity;
         }
     }
 }
 
-//calculate word overlap indiciator epsilon (robin et al) (indicator for overlaps)
-//eps(w1,w2)= 1 where w2_j=w1_{j+p} for all j=1...k-p
+// calculate word overlap indiciator epsilon (robin et al) (indicator for overlaps)
+// eps(w1,w2)= 1 where w2_j=w1_{j+p} for all j=1...k-p
 template <typename TString>
 void calculateOverlapIndicator(String<int> & epsilon, TString & word1, TString & word2)
 {
 
     typedef typename Value<TString>::Type TAlphabet;
-    //simple case for variance only: word1==word2
+    // simple case for variance only: word1==word2
     typedef typename Iterator<TString, Rooted>::Type        TIterator;
     typedef typename Size<TString>::Type TSize;
     TIterator itWord1 = begin(word1);
     TSize length1 = length(word1);
     TSize length2 = length(word2);
-    //fill(epsilon,length1,0);
+    // fill(epsilon,length1,0);
     resize(epsilon, length1, 0);
     for (TSize i = 0; i < length1; ++i)
     {
-        String<TAlphabet> my_suffix = suffix(word1, length1 - i - 1);     //overlap of suffix of word1 with prefix of word2
+        String<TAlphabet> my_suffix = suffix(word1, length1 - i - 1);     // overlap of suffix of word1 with prefix of word2
         TSize my_min = min(length2, i + 1);
         String<TAlphabet> my_prefix = prefix(word2, my_min);
         if (my_suffix == my_prefix)
@@ -664,15 +664,15 @@ stringToStringSet(StringSet<String<Dna> > & dnaStringSet, String<Dna5> const & s
     length1 = length(sequence);
 
     TIterator itSeq = begin(sequence);
-    //kmer_length=1;
+    // kmer_length=1;
 
-    //Check for any N that destroys the first kmers
+    // Check for any N that destroys the first kmers
     unsigned int j = 0;
     for (TPosition i = position(itSeq); i <= j; ++i)
     {
         if (sequence[i] == 'N')
         {
-            //std::cout<<"N detected in begin of sequence";
+            // std::cout<<"N detected in begin of sequence";
             if ((i - position(itSeq)) > 0)
                 appendValue(dnaStringSet, infix(sequence, position(itSeq), i));
             goFurther(itSeq, i + 1 - position(itSeq));
@@ -682,7 +682,7 @@ stringToStringSet(StringSet<String<Dna> > & dnaStringSet, String<Dna5> const & s
 
     int counterN = 0;
 
-    TPosition startSplitSequence = position(itSeq);     //to split sequences, position of possible start of a sequence after NNs
+    TPosition startSplitSequence = position(itSeq);     // to split sequences, position of possible start of a sequence after NNs
 
     for (; itSeq <= (end(sequence) - 1); ++itSeq)
     {
@@ -692,16 +692,16 @@ stringToStringSet(StringSet<String<Dna> > & dnaStringSet, String<Dna5> const & s
 
             if (((position(itSeq)) > startSplitSequence))
             {
-                appendValue(dnaStringSet, infix(sequence, startSplitSequence, position(itSeq))); //infix(sequence2,position(itSeq2),i));
+                appendValue(dnaStringSet, infix(sequence, startSplitSequence, position(itSeq))); // infix(sequence2,position(itSeq2),i));
             }
-            startSplitSequence = (position(itSeq) + 1); //position after n, possible start
+            startSplitSequence = (position(itSeq) + 1); // position after n, possible start
 
         }
         counterN--;
     }
-    //string set for markov model
+    // string set for markov model
     if (position(itSeq) > startSplitSequence)
-        appendValue(dnaStringSet, infix(sequence, startSplitSequence, position(itSeq))); //infix(sequence2,position(itSeq2),i));
+        appendValue(dnaStringSet, infix(sequence, startSplitSequence, position(itSeq))); // infix(sequence2,position(itSeq2),i));
 }
 
 void
@@ -717,17 +717,17 @@ cutNs(String<Dna5> & sequenceCut, String<Dna5> const & sequence)
     length1 = length(sequence);
 
     TIterator itSeq = begin(sequence);
-    //kmer_length=1;
+    // kmer_length=1;
 
-    //Check for any N that destroys the first kmers
+    // Check for any N that destroys the first kmers
     unsigned int j = 0;
     for (TPosition i = position(itSeq); i <= j; ++i)
     {
         if (sequence[i] == 'N')
         {
-            //std::cout<<"N detected in begin of sequence";
+            // std::cout<<"N detected in begin of sequence";
             if ((i - position(itSeq)) > 0)
-                sequenceCut += infix(sequence, position(itSeq), i); //appendValue(dnaStringSet,infix(sequence,position(itSeq),i));
+                sequenceCut += infix(sequence, position(itSeq), i); // appendValue(dnaStringSet,infix(sequence,position(itSeq),i));
             goFurther(itSeq, i + 1 - position(itSeq));
             j = i;
         }
@@ -735,7 +735,7 @@ cutNs(String<Dna5> & sequenceCut, String<Dna5> const & sequence)
 
     int counterN = 0;
 
-    TPosition startSplitSequence = position(itSeq);     //to split sequences, position of possible start of a sequence after NNs
+    TPosition startSplitSequence = position(itSeq);     // to split sequences, position of possible start of a sequence after NNs
 
     for (; itSeq <= (end(sequence) - 1); ++itSeq)
     {
@@ -743,15 +743,15 @@ cutNs(String<Dna5> & sequenceCut, String<Dna5> const & sequence)
         {
             counterN = 1;
             if (((position(itSeq)) > startSplitSequence))
-                sequenceCut += infix(sequence, startSplitSequence, position(itSeq)); //appendValue(dnaStringSet,infix(sequence,startSplitSequence,position(itSeq)));//infix(sequence2,position(itSeq2),i));
-            startSplitSequence = (position(itSeq) + 1); //position after n, possible start
+                sequenceCut += infix(sequence, startSplitSequence, position(itSeq)); // appendValue(dnaStringSet,infix(sequence,startSplitSequence,position(itSeq)));// infix(sequence2,position(itSeq2),i));
+            startSplitSequence = (position(itSeq) + 1); // position after n, possible start
         }
         counterN--;
     }
-    //string set for markov model
+    // string set for markov model
     if (position(itSeq) > startSplitSequence)
     {
-        sequenceCut += infix(sequence, startSplitSequence, position(itSeq)); //appendValue(dnaStringSet,infix(sequence,startSplitSequence,position(itSeq)));//infix(sequence2,position(itSeq2),i));
+        sequenceCut += infix(sequence, startSplitSequence, position(itSeq)); // appendValue(dnaStringSet,infix(sequence,startSplitSequence,position(itSeq)));// infix(sequence2,position(itSeq2),i));
     }
 }
 

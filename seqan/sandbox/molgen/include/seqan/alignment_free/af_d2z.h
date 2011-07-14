@@ -55,10 +55,10 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
 
     unsigned int seqNumber = length(sequenceSet);
 
-    //resize the scoreMatrix
+    // resize the scoreMatrix
     setLength(scoreMatrix, 0, seqNumber);
     setLength(scoreMatrix, 1, seqNumber);
-    //fill(scoreMatrix,(TValue) 0);
+    // fill(scoreMatrix,(TValue) 0);
     resize(scoreMatrix, (TValue) 0);
 
     StringSet<String<unsigned int> > kmerCounts;
@@ -68,7 +68,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         StringSet<String<double> > backgroundFrequencies;
         resize(backgroundFrequencies, seqNumber);
 
-        //Count all kmers and all background nucleotide frequencies and store them in StringSets
+        // Count all kmers and all background nucleotide frequencies and store them in StringSets
         TIteratorSetUnsigned itKmerCounts = begin(kmerCounts);
         TIteratorSetDouble itBackgroundFrequencies = begin(backgroundFrequencies);
 
@@ -81,14 +81,14 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         }
 
         std::cout << "\ncounted words";
-        //calculate all pairwise scores and store them in scoreMatrix
+        // calculate all pairwise scores and store them in scoreMatrix
         for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(remove diagonal seqNumber-1)
         {
             std::cout << "\nSequence number " << rowIndex;
             for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex) //(remove diagonal rowIndex+1)
             {
                 alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], backgroundFrequencies[rowIndex], kmerCounts[colIndex], backgroundFrequencies[colIndex], score);
-                value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex); //Copy symmetric entries
+                value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex); // Copy symmetric entries
             }
         }
     }
@@ -96,19 +96,19 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     {
         String<MarkovModel<TUnmaskedAlphabet> > backgroundModels;
         resize(backgroundModels, seqNumber, MarkovModel<TUnmaskedAlphabet>(score.bgModelOrder));
-        //Count all kmers and all background nucleotide frequencies and store them in StringSets
+        // Count all kmers and all background nucleotide frequencies and store them in StringSets
 
         TIteratorMarkovModel itMM = begin(backgroundModels);
         TIteratorSet itSeqSet = begin(sequenceSet);
 
-        //Count all kmers and all background nucleotide frequencies and store them in StringSets
+        // Count all kmers and all background nucleotide frequencies and store them in StringSets
         TIteratorSetUnsigned itKmerCounts = begin(kmerCounts);
 
         for (; itSeqSet < end(sequenceSet); ++itSeqSet)
         {
             countKmers(value(itKmerCounts), value(itMM), value(itSeqSet), score.kmerSize);
 
-            //countKmers(value(itSeqSet),value(itKmerCounts),value(itMM),k);
+            // countKmers(value(itSeqSet),value(itKmerCounts),value(itMM),k);
             ++itKmerCounts;
             if (itMM < end(backgroundModels))
             {
@@ -118,14 +118,14 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
 
         }
         std::cout << "\ncounted words";
-        //calculate all pairwise scores and store them in scoreMatrix
+        // calculate all pairwise scores and store them in scoreMatrix
         for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(seqNumber-1)
         {
             std::cout << "\nSequence number " << rowIndex;
             for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex)
             {
                 alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], backgroundModels[rowIndex], kmerCounts[colIndex], backgroundModels[colIndex], score);
-                value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex); //Copy symmetric entries
+                value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex); // Copy symmetric entries
             }
         }
     }
@@ -135,7 +135,7 @@ template <typename TValue, typename TStringBG>
 void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCounts1, TStringBG & backgroundFrequencies1, String<unsigned int> & kmerCounts2, TStringBG & backgroundFrequencies2, AF_Score<D2z> const & score)
 {
     typedef typename Value<TStringBG>::Type TValueBG;
-    //sum : inner product /d2 distance
+    // sum : inner product /d2 distance
     TValueBG sum = 0;
     unsigned int len1 = score.kmerSize - 1;
     unsigned int len2 = score.kmerSize - 1;
@@ -155,13 +155,13 @@ void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCoun
     {
         q1[l] = backgroundFrequencies1[l];
         q2[l] = backgroundFrequencies2[l];
-        //std::cout<<backgroundFrequencies1[l]<<"\n";
+        // std::cout<<backgroundFrequencies1[l]<<"\n";
     }
 
-    //Compute expected value and variance (IID)
+    // Compute expected value and variance (IID)
     TValueBG E = computeExpectationD2(len1, len2, score.kmerSize, q1, q2);
     TValueBG var = computeVarianceD2(len1, len2, score.kmerSize, q1, q2);
-    //std::cout<<"\nlength1:"<<len1<<"length2: "<<len2<<"Expected value: "<<E<<"Variance: "<<var<<"Sum: "<<sum<<"\n";
+    // std::cout<<"\nlength1:"<<len1<<"length2: "<<len2<<"Expected value: "<<E<<"Variance: "<<var<<"Sum: "<<sum<<"\n";
 
     if ((var <= 0))
     {
@@ -171,7 +171,7 @@ void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCoun
         return;
     }
 
-    //Calculate z-score
+    // Calculate z-score
     result = (TValue) (sum - E) / pow(var, 0.5);
 }
 
@@ -189,9 +189,9 @@ void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCoun
     {
         sumCounts1 += kmerCounts1[l];
         sumCounts2 += kmerCounts2[l];
-        sum += value(kmerCounts1, l) * value(kmerCounts2, l);       //Inner product
+        sum += value(kmerCounts1, l) * value(kmerCounts2, l);       // Inner product
     }
-    //std::cout<<"\nSum: "<<sum<<"\n";
+    // std::cout<<"\nSum: "<<sum<<"\n";
 
     TValue D2 = (TValue) sum;
 
@@ -199,9 +199,9 @@ void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCoun
     TValue indicatorexpecation = 0;
 
     TValue E = computeExpectationD2(sumCounts1, sumCounts2, score.kmerSize, bgModel1, bgModel2, indicatorexpecation);
-    //std::cout<<"\nE: "<<E<<"\n"<<"indicatorexpectation: "<<indicatorexpecation<<"\n";
+    // std::cout<<"\nE: "<<E<<"\n"<<"indicatorexpectation: "<<indicatorexpecation<<"\n";
     TValue var = computeVarianceD2(sumCounts1, sumCounts2, score.kmerSize, bgModel1, bgModel2, indicatorexpecation);
-    //std::cout<<"\nvar: "<<var<<"\n"<<indicatorexpecation<<"\n";
+    // std::cout<<"\nvar: "<<var<<"\n"<<indicatorexpecation<<"\n";
 
     if (var <= 0)
     {
@@ -251,9 +251,9 @@ double computeExpectationD2(int slen1, int slen2, unsigned int k, MarkovModel<TA
     {
         // i is w1
         // p^A(w1)*p^B(w1)
-        //double term = bkg1->p[i]*bkg2->p[i];		//p is stationary distribution
+        // double term = bkg1->p[i]*bkg2->p[i];		// p is stationary distribution
         TValue term = value(bkg1.stationaryDistribution, i) * value(bkg2.stationaryDistribution, i);
-        //std::cout<<"\nterm: "<<term<<"\n";
+        // std::cout<<"\nterm: "<<term<<"\n";
         TValue subterm = 0;
 
         for (long j = 0; j < ekmo; j++)
@@ -267,33 +267,33 @@ double computeExpectationD2(int slen1, int slen2, unsigned int k, MarkovModel<TA
     }
 
     indicatorexpectation = mean; // this is E[Y_ij]
-    int nbar1 = slen1 - k + 1;      //Number of kmers in sequence1
-    int nbar2 = slen2 - k + 1;      //Number of kmers in sequence2
+    int nbar1 = slen1 - k + 1;      // Number of kmers in sequence1
+    int nbar2 = slen2 - k + 1;      // Number of kmers in sequence2
     return mean * ((TValue) nbar1 * nbar2);
 }
 
 template <typename TValue>
 double computeVarianceD2(int len1, int len2, unsigned int k, TValue * q1, TValue * q2)
 {
-    int nbar1 = len1 - k + 1; //Number of kmers in sequence 1
-    int nbar2 = len2 - k + 1; //Number of kmers in sequence 2
+    int nbar1 = len1 - k + 1; // Number of kmers in sequence 1
+    int nbar2 = len2 - k + 1; // Number of kmers in sequence 2
 
-    int qbar1 = len1 - 2 * k + 2; //Number of overlapping kmers in sequence 1
+    int qbar1 = len1 - 2 * k + 2; // Number of overlapping kmers in sequence 1
     int qbar2 = len2 - 2 * k + 2;
 
     TValue p2 = 0, p31 = 0, p32 = 0;
     for (int i = 0; i < 4; i++)
     {
-        p2 += q1[i] * q2[i]; //match seq1 und seq2 g_1,1
-        p31 += q1[i] * q2[i] * q1[i]; //match seq 1 und seq2 und overlap in seq 1 g_2,1
-        p32 += q1[i] * q2[i] * q2[i]; //match seq 1 und seq2 und overlap in seq 2 g_1,2
+        p2 += q1[i] * q2[i]; // match seq1 und seq2 g_1,1
+        p31 += q1[i] * q2[i] * q1[i]; // match seq 1 und seq2 und overlap in seq 1 g_2,1
+        p32 += q1[i] * q2[i] * q2[i]; // match seq 1 und seq2 und overlap in seq 2 g_1,2
     }
 
     TValue variance = 0;
     // crabgrass with l=0 (= complete overlap):
-    TValue power1 = pow(p32, k) - pow(p2, 2 * k); //overlap for seq2, l=0
-    power1 *= TValue(nbar1) * TValue(qbar2) * TValue(qbar2 - 1); //sum over all possible (i,j) and (s,t)
-    TValue power2 = pow(p31, k) - pow(p2, 2 * k); //overlap for seq1, l=0
+    TValue power1 = pow(p32, k) - pow(p2, 2 * k); // overlap for seq2, l=0
+    power1 *= TValue(nbar1) * TValue(qbar2) * TValue(qbar2 - 1); // sum over all possible (i,j) and (s,t)
+    TValue power2 = pow(p31, k) - pow(p2, 2 * k); // overlap for seq1, l=0
     power2 *= TValue(nbar2) * TValue(qbar1) * TValue(qbar1 - 1);
     variance += power1 + power2;
 
@@ -352,7 +352,7 @@ double computeVarianceD2(int slen1, int slen2, unsigned int k, MarkovModel<TAlph
     Matrix<TValue, 2> sump; // sump[x][wk] is total word prob of every x-word ending with wk (which is of length mo)
     setLength(sump, 0, k + 1);
     setLength(sump, 1, emo);
-    //resize(sump);
+    // resize(sump);
     resize(sump, 0.0);
 
     Matrix<TValue, 2> sumpstar; // sump[x][wk] is total word prob of every x-word ending with wk (which is of length mo)
@@ -368,8 +368,8 @@ double computeVarianceD2(int slen1, int slen2, unsigned int k, MarkovModel<TAlph
 
             continue;
         }
-        //sump[x] = new double[emo]; // sump[x][wk] is total word prob of every x-word ending with wk (which is of length mo)
-        //sumpstar[x] = new double[emo]; // sumpstar[u1] is star word prob of every x-word beginning with u1 (of length mo)
+        // sump[x] = new double[emo]; // sump[x][wk] is total word prob of every x-word ending with wk (which is of length mo)
+        // sumpstar[x] = new double[emo]; // sumpstar[u1] is star word prob of every x-word beginning with u1 (of length mo)
         for (long wk = 0; wk < emo; wk++)
         {
             TValue sum = 0;
@@ -405,11 +405,11 @@ double computeVarianceD2(int slen1, int slen2, unsigned int k, MarkovModel<TAlph
             covnonoverlap += 4 * term;
         }
     }
-    //std::cout<<"\nnonoverlap: "<<covnonoverlap;
+    // std::cout<<"\nnonoverlap: "<<covnonoverlap;
     TValue subtractFromNonOverlap = (TValue)q1 * (q1 - 1) * q2 * (q2 - 1);
     subtractFromNonOverlap *= pow(indicatorexpectation, 2);
     covnonoverlap -= subtractFromNonOverlap;
-    //std::cout<<" subtract:"<<subtractFromNonOverlap<<"\n";
+    // std::cout<<" subtract:"<<subtractFromNonOverlap<<"\n";
     // compute crabgrass terms
     TValue covcrabgrass = 0;
 
@@ -470,7 +470,7 @@ double computeVarianceD2(int slen1, int slen2, unsigned int k, MarkovModel<TAlph
     }
 
     // case 3: m=0 (complete overlap)
-    //long ek = 1<<(2*k); // pow(4,k); unused
+    // long ek = 1<<(2*k); // pow(4,k); unused
     long moonesflag = (1 << (2 * mo)) - 1;
     for (long wpre = 0; wpre < emo; wpre++)
     {
@@ -547,11 +547,11 @@ double computeVarianceD2(int slen1, int slen2, unsigned int k, MarkovModel<TAlph
   delete [] Sbctilde2;
 */
 // return values
-//fprintf(stderr,"%f\t%f\t%f\n",covnonoverlap,covcrabgrass,covaccordiondiag);
+// fprintf(stderr,"%f\t%f\t%f\n",covnonoverlap,covcrabgrass,covaccordiondiag);
     TValue variance = covnonoverlap + covcrabgrass + covaccordiondiag;
     return variance;
 
-    //return 0;
+    // return 0;
 }
 
 template <typename TAlphabet, typename TValue, typename TSpec>
@@ -562,7 +562,7 @@ double ComputeWordProb(long word, MarkovModel<TAlphabet, TValue, TSpec> & bkg, u
     long prefix = word >> (2 * (k - mo)); // equivalent to word/pow(4,k-mo); gets first mo chars of word
     long suffix = word & ((1 << (2 * (k - mo))) - 1); // bit-and with a number that is all ones in the last 2*(k-mo) bits, gets last (k-mo) chars of word
     return value(bkg.stationaryDistribution, prefix) * ComputeWordProbGivenPrefix(prefix, suffix, bkg, k, mo);
-    //return bkg->p[prefix]*ComputeWordProbGivenPrefix(prefix,suffix,bkg,k,mo);
+    // return bkg->p[prefix]*ComputeWordProbGivenPrefix(prefix,suffix,bkg,k,mo);
 }
 
 template <typename TAlphabet, typename TValue, typename TSpec>
@@ -583,7 +583,7 @@ double ComputeWordProbGivenPrefix(long prefix, long suffix, MarkovModel<TAlphabe
         long jcopyfirst = jcopy >> (2 * (k - mo - 1)); // get first char of jcopy, which is of length k-mo; equivalent to jcopy/pow(4,k-mo-1)
         long suf = ((pre & ((1 << (2 * (mo - 1))) - 1)) << 2) + jcopyfirst; // last (mo-1) chars of pre, cat jcopyfirst; equivalent to (pre%pow(4,mo-1))*4+jcopyfirst;
 
-        //prob *= bkg->P[pre][suf];	//P is transition matrix
+        // prob *= bkg->P[pre][suf];	// P is transition matrix
         prob *= value(bkg.transition, pre, suf);
         // erase first char of jcopy, and preserve its length at k-mo by shifting one char to left; equivalent to (jcopy%pow(4,k-mo-1))*4;
         jcopy = (jcopy & ((1 << (2 * (k - mo - 1))) - 1)) << 2;

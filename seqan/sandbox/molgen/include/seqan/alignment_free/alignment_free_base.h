@@ -71,7 +71,7 @@ struct AF_Score;
 ...text:No remarks
 */
 
-struct D2_;     //Inner product of k-mer counts, d2 score
+struct D2_;     // Inner product of k-mer counts, d2 score
 typedef Tag<D2_> const D2;
 
 template <>
@@ -126,7 +126,7 @@ count variance
 ..remarks:
 ...text:No remarks
 */
-struct D2star_;     //Reinert and Waterman, D2 with centralised and standardised counts
+struct D2star_;     // Reinert and Waterman, D2 with centralised and standardised counts
 typedef Tag<D2star_> const D2star;
 
 template <>
@@ -134,9 +134,9 @@ struct AF_Score<D2star>
 {
     unsigned kmerSize;
     unsigned bgModelOrder;
-    String<char> revCom;    //Count reverse complement words?
-    //revCom="";"mean","max", "min"
-    String<char> outputFile;    //output of all pairwise kmerSores for pairwise visualisation
+    String<char> revCom;    // Count reverse complement words?
+    // revCom="";"mean","max", "min"
+    String<char> outputFile;    // output of all pairwise kmerSores for pairwise visualisation
     AF_Score<D2star>(unsigned k, unsigned m, String<char> kmerWeightsFile = "")
     {
         kmerSize = k;
@@ -193,7 +193,7 @@ count variance
 ...text:No remarks
 */
 
-struct D2star_original_;        //Reinert and Waterman, D2 with centralised and standardised counts
+struct D2star_original_;        // Reinert and Waterman, D2 with centralised and standardised counts
 typedef Tag<D2star_original_> const D2star_original;
 
 template <>
@@ -201,10 +201,10 @@ struct AF_Score<D2star_original>
 {
     unsigned kmerSize;
     unsigned bgModelOrder;
-    bool norm; //shoud be set to false, however for testpurpose
-    //String<char> revCom;	//Count reverse complement words?
-    //revCom="";"mean","max", "min"
-    String<char> outputFile;    //output of all pairwise kmerSores for pairwise visualisation
+    bool norm; // shoud be set to false, however for testpurpose
+    // String<char> revCom;	// Count reverse complement words?
+    // revCom="";"mean","max", "min"
+    String<char> outputFile;    // output of all pairwise kmerSores for pairwise visualisation
     AF_Score<D2star_original>(unsigned k, unsigned m, String<char> kmerWeightsFile = "")
     {
         kmerSize = k;
@@ -257,7 +257,7 @@ struct AF_Score<D2star_original>
 ...text:No remarks
 */
 
-struct N2_;     //Reinert and Waterman, D2 with centralised and standardised counts
+struct N2_;     // Reinert and Waterman, D2 with centralised and standardised counts
 typedef Tag<N2_> const N2;
 
 template <>
@@ -265,19 +265,19 @@ struct AF_Score<N2>
 {
     unsigned kmerSize;
     unsigned bgModelOrder;
-    String<char> revCom;    //Count reverse complement words?
-    //revCom="";"mean","max","bothStrands"
-    unsigned mismatches;    //Currently 0 or 1
-    double mismatchWeight;  //Weight of words in the mismatch neighbourhood (0-1)
-    bool norm;          //Normaize score? needed to provide a proper similarity measure
+    String<char> revCom;    // Count reverse complement words?
+    // revCom="";"mean","max","bothStrands"
+    unsigned mismatches;    // Currently 0 or 1
+    double mismatchWeight;  // Weight of words in the mismatch neighbourhood (0-1)
+    bool norm;          // Normaize score? needed to provide a proper similarity measure
     bool verbose;
-    bool onlyPositiveKmers;     //should all kmers be considered or only positively scored kmers?
-    String<char> outputFile;    //output of all pairwise kmerSores for pairwise visualisation
+    bool onlyPositiveKmers;     // should all kmers be considered or only positively scored kmers?
+    String<char> outputFile;    // output of all pairwise kmerSores for pairwise visualisation
     AF_Score<N2>(unsigned k, unsigned m, String<char> kmerWeightsFile = "")
     {
         kmerSize = k;
         bgModelOrder = m;
-        //exactVariance=exact;
+        // exactVariance=exact;
         outputFile = kmerWeightsFile;
         revCom = "";
         mismatches = 0;
@@ -291,7 +291,7 @@ struct AF_Score<N2>
     {
         kmerSize = k;
         bgModelOrder = m;
-        //exactVariance=exact;
+        // exactVariance=exact;
         outputFile = kmerWeightsFile;
         revCom = revComOption;
         mismatches = mm;
@@ -329,7 +329,7 @@ struct AF_Score<N2>
 ...text:nolink:No remarks
 */
 
-struct D2z_;        //Inner product of k-mer counts, d2 score with z-score
+struct D2z_;        // Inner product of k-mer counts, d2 score with z-score
 typedef Tag<D2z_> const D2z;
 
 template <>
