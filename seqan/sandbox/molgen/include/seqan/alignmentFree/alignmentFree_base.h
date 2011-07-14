@@ -35,7 +35,8 @@
 #ifndef SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_ALIGNMENTFREE_BASE_H_
 #define SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_ALIGNMENTFREE_BASE_H_
 
-namespace seqan {
+namespace seqan
+{
 
 
 /**
@@ -74,18 +75,18 @@ struct AF_Score;
 ...text:No remarks
 */
 
-struct D2_;		//Inner product of k-mer counts, d2 score
+struct D2_;     //Inner product of k-mer counts, d2 score
 typedef Tag<D2_> const D2;
 
 template <>
 struct AF_Score<D2>
 {
-	unsigned kmerSize;
+    unsigned kmerSize;
 
-	AF_Score<D2>(unsigned k)
-	{
-		kmerSize=k;
-	};
+    AF_Score<D2>(unsigned k)
+    {
+        kmerSize = k;
+    };
 
 };
 
@@ -129,31 +130,31 @@ count variance
 ..remarks:
 ...text:No remarks
 */
-struct D2star_;		//Reinert and Waterman, D2 with centralised and standardised counts
+struct D2star_;     //Reinert and Waterman, D2 with centralised and standardised counts
 typedef Tag<D2star_> const D2star;
 
 template <>
 struct AF_Score<D2star>
 {
-	unsigned kmerSize;
-	unsigned bgModelOrder;
-	String<char> revCom;	//Count reverse complement words? 
-	//revCom="";"mean","max", "min"
-	String<char> outputFile;	//output of all pairwise kmerSores for pairwise visualisation
-	AF_Score<D2star>(unsigned k,unsigned m, String<char> kmerWeightsFile="")
-	{
-		kmerSize=k;
-		bgModelOrder=m;
-		outputFile=kmerWeightsFile;
-		revCom="";
-	};
-	AF_Score<D2star>(unsigned k,unsigned m, String<char> revComOption, String<char> kmerWeightsFile="")
-	{
-		kmerSize=k;
-		bgModelOrder=m;
-		outputFile=kmerWeightsFile;
-		revCom=revComOption;
-	};
+    unsigned kmerSize;
+    unsigned bgModelOrder;
+    String<char> revCom;    //Count reverse complement words?
+    //revCom="";"mean","max", "min"
+    String<char> outputFile;    //output of all pairwise kmerSores for pairwise visualisation
+    AF_Score<D2star>(unsigned k, unsigned m, String<char> kmerWeightsFile = "")
+    {
+        kmerSize = k;
+        bgModelOrder = m;
+        outputFile = kmerWeightsFile;
+        revCom = "";
+    };
+    AF_Score<D2star>(unsigned k, unsigned m, String<char> revComOption, String<char> kmerWeightsFile = "")
+    {
+        kmerSize = k;
+        bgModelOrder = m;
+        outputFile = kmerWeightsFile;
+        revCom = revComOption;
+    };
 };
 
 /**
@@ -196,25 +197,25 @@ count variance
 ...text:No remarks
 */
 
-struct D2star_original_;		//Reinert and Waterman, D2 with centralised and standardised counts
+struct D2star_original_;        //Reinert and Waterman, D2 with centralised and standardised counts
 typedef Tag<D2star_original_> const D2star_original;
 
 template <>
 struct AF_Score<D2star_original>
 {
-	unsigned kmerSize;
-	unsigned bgModelOrder;
-	bool norm;//shoud be set to false, however for testpurpose
-	//String<char> revCom;	//Count reverse complement words? 
-	//revCom="";"mean","max", "min"
-	String<char> outputFile;	//output of all pairwise kmerSores for pairwise visualisation
-	AF_Score<D2star_original>(unsigned k,unsigned m, String<char> kmerWeightsFile="")
-	{
-		kmerSize=k;
-		bgModelOrder=m;
-		outputFile=kmerWeightsFile;
-		norm=false;
-	};
+    unsigned kmerSize;
+    unsigned bgModelOrder;
+    bool norm; //shoud be set to false, however for testpurpose
+    //String<char> revCom;	//Count reverse complement words?
+    //revCom="";"mean","max", "min"
+    String<char> outputFile;    //output of all pairwise kmerSores for pairwise visualisation
+    AF_Score<D2star_original>(unsigned k, unsigned m, String<char> kmerWeightsFile = "")
+    {
+        kmerSize = k;
+        bgModelOrder = m;
+        outputFile = kmerWeightsFile;
+        norm = false;
+    };
 };
 
 /**
@@ -259,48 +260,48 @@ struct AF_Score<D2star_original>
 ..remarks:
 ...text:No remarks
 */
-struct N2_;		//Reinert and Waterman, D2 with centralised and standardised counts
+struct N2_;     //Reinert and Waterman, D2 with centralised and standardised counts
 typedef Tag<N2_> const N2;
 
 template <>
 struct AF_Score<N2>
-{   
-	unsigned kmerSize;
-	unsigned bgModelOrder;
-	String<char> revCom;	//Count reverse complement words? 
-	//revCom="";"mean","max","bothStrands"
-	unsigned mismatches;	//Currently 0 or 1
-	double mismatchWeight;	//Weight of words in the mismatch neighbourhood (0-1)
-	bool norm;			//Normaize score? needed to provide a proper similarity measure
-	bool verbose;
-	bool onlyPositiveKmers;		//should all kmers be considered or only positively scored kmers?
-	String<char> outputFile;	//output of all pairwise kmerSores for pairwise visualisation
-	AF_Score<N2>(unsigned k,unsigned m, String<char> kmerWeightsFile="")
-	{
-		kmerSize=k;
-		bgModelOrder=m;
-		//exactVariance=exact;
-		outputFile=kmerWeightsFile;
-		revCom="";
-		mismatches=0;
-		onlyPositiveKmers=false;
-		mismatchWeight=1.0;
-		norm=false;
-		verbose=true;
-	};
-	AF_Score<N2>(unsigned k,unsigned m, String<char> revComOption,unsigned mm, double mmw, bool v, bool n, String<char> kmerWeightsFile="")
-	{
-		kmerSize=k;
-		bgModelOrder=m;
-		//exactVariance=exact;
-		outputFile=kmerWeightsFile;
-		revCom=revComOption;
-		mismatches=mm;
-		onlyPositiveKmers=false;
-		mismatchWeight=mmw;
-		norm=n;
-		verbose=v;
-	};
+{
+    unsigned kmerSize;
+    unsigned bgModelOrder;
+    String<char> revCom;    //Count reverse complement words?
+    //revCom="";"mean","max","bothStrands"
+    unsigned mismatches;    //Currently 0 or 1
+    double mismatchWeight;  //Weight of words in the mismatch neighbourhood (0-1)
+    bool norm;          //Normaize score? needed to provide a proper similarity measure
+    bool verbose;
+    bool onlyPositiveKmers;     //should all kmers be considered or only positively scored kmers?
+    String<char> outputFile;    //output of all pairwise kmerSores for pairwise visualisation
+    AF_Score<N2>(unsigned k, unsigned m, String<char> kmerWeightsFile = "")
+    {
+        kmerSize = k;
+        bgModelOrder = m;
+        //exactVariance=exact;
+        outputFile = kmerWeightsFile;
+        revCom = "";
+        mismatches = 0;
+        onlyPositiveKmers = false;
+        mismatchWeight = 1.0;
+        norm = false;
+        verbose = true;
+    };
+    AF_Score<N2>(unsigned k, unsigned m, String<char> revComOption, unsigned mm, double mmw, bool v, bool n, String<char> kmerWeightsFile = "")
+    {
+        kmerSize = k;
+        bgModelOrder = m;
+        //exactVariance=exact;
+        outputFile = kmerWeightsFile;
+        revCom = revComOption;
+        mismatches = mm;
+        onlyPositiveKmers = false;
+        mismatchWeight = mmw;
+        norm = n;
+        verbose = v;
+    };
 
 };
 
@@ -331,19 +332,19 @@ struct AF_Score<N2>
 ...text:nolink:No remarks
 */
 
-struct D2z_;		//Inner product of k-mer counts, d2 score with z-score
+struct D2z_;        //Inner product of k-mer counts, d2 score with z-score
 typedef Tag<D2z_> const D2z;
 
 template <>
 struct AF_Score<D2z>
 {
-	unsigned kmerSize;
-	unsigned bgModelOrder;
-	AF_Score<D2z>(unsigned k,unsigned m)
-	{
-		kmerSize=k;
-		bgModelOrder=m;
-	};
+    unsigned kmerSize;
+    unsigned bgModelOrder;
+    AF_Score<D2z>(unsigned k, unsigned m)
+    {
+        kmerSize = k;
+        bgModelOrder = m;
+    };
 
 
 
@@ -384,18 +385,18 @@ typedef Tag<MplusD_> const MplusD;
 template <>
 struct AF_Score<MplusD>
 {
-	unsigned kmerSize;
-	unsigned bgModelOrder;
-	AF_Score<MplusD>(unsigned k,unsigned m)
-	{
-		kmerSize=k;
-		bgModelOrder=m;
-	};
+    unsigned kmerSize;
+    unsigned bgModelOrder;
+    AF_Score<MplusD>(unsigned k, unsigned m)
+    {
+        kmerSize = k;
+        bgModelOrder = m;
+    };
 
 
 };
-  
-  
+
+
 
 }  // namespace seqan
 

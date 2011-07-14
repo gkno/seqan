@@ -41,6 +41,6 @@
 SEQAN_BEGIN_TESTSUITE(test_alignmentFree)
 {
     // Call tests.
-	SEQAN_CALL_TEST(test_alignmentFree_strings_example1);
+    SEQAN_CALL_TEST(test_alignmentFree_strings_example1);
 }
 SEQAN_END_TESTSUITE

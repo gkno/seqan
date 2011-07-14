@@ -56,13 +56,14 @@ struct Options
     bool showVersion;
     int i;
     String<CharString> texts;
-    
+
     Options()
     {
         // Set defaults.
         showHelp = true;
         i = 0;
     }
+
 };
 
 // ============================================================================
@@ -77,7 +78,7 @@ void
 setupCommandLineParser(CommandLineParser & parser, Options const & options)
 {
     addVersionLine(parser, "0.1");
-    
+
     addTitleLine(parser, "**********************");
     addTitleLine(parser, "* alf *");
     addTitleLine(parser, "**********************");
@@ -85,10 +86,10 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     addTitleLine(parser, "(c) 2011 by Your Name <your.email@example.net>");
 
     addUsageLine(parser, "alf [OPTIONS] TEXT+");
-    
-	addSection(parser, "Main Options");
-	addOption(parser, CommandLineOption("i",  "integer",  "set an integer option", OptionType::Integer | OptionType::Label, options.i));
-    
+
+    addSection(parser, "Main Options");
+    addOption(parser, CommandLineOption("i", "integer", "set an integer option", OptionType::Integer | OptionType::Label, options.i));
+
     requiredArguments(parser, 1);
 }
 
@@ -100,28 +101,32 @@ int parseCommandLineAndCheck(Options & options,
     bool stop = !parse(parser, argc, argv);
     if (stop)
         return 1;
-    if (isSetLong(parser, "help")) {
+
+    if (isSetLong(parser, "help"))
+    {
         options.showHelp = true;
         return 0;
     }
-    if (isSetLong(parser, "version")) {
+    if (isSetLong(parser, "version"))
+    {
         options.showVersion = true;
         return 0;
     }
-    
+
     options.texts = getArgumentValues(parser);
 
-	return 0;
+    return 0;
 }
 
 int mainWithOptions(Options & options)
 {
     typedef Iterator<String<CharString> >::Type TIterator;
     std::cout << "Non-option Arguments:" << std::endl;
-    for (TIterator it = begin(options.texts); it != end(options.texts); ++it) {
+    for (TIterator it = begin(options.texts); it != end(options.texts); ++it)
+    {
         std::cout << "  " << *it << std::endl;
     }
-    
+
     return 0;
 }
 
