@@ -32,15 +32,31 @@
 // Author: Your Name <your.email@example.net>
 // ==========================================================================
 
+#ifndef SANDBOX_ALIGNMENT_FREE_TESTS_ALIGNMENT_FREE_TEST_ALIGNMENT_FREE_H_
+#define SANDBOX_ALIGNMENT_FREE_TESTS_ALIGNMENT_FREE_TEST_ALIGNMENT_FREE_H_
+
 #include <seqan/basic.h>
-#include <seqan/file.h>
+#include <seqan/sequence.h>
 
-#include "test_alignmentFree.h"
-
-
-SEQAN_BEGIN_TESTSUITE(test_alignmentFree)
+// A test for strings.
+SEQAN_DEFINE_TEST(test_alignment_freestrings_example1)
 {
-    // Call tests.
-    SEQAN_CALL_TEST(test_alignmentFree_strings_example1);
+    using namespace seqan;
+
+    // Define some constant test data for comparison...
+    CharString const STRING1 = "test 1";
+    CharString const STRING2 = "test 2";
+
+    // Append to a string and make equality assertion on the result.
+    CharString myStr = "test ";
+    append(myStr, "1");
+    SEQAN_ASSERT_EQ(STRING1, myStr);
+
+    // Demonstration of other assertions.
+    SEQAN_ASSERT_GT(STRING2, myStr);
+    SEQAN_ASSERT_GEQ(STRING2, myStr);
+    SEQAN_ASSERT_LT(myStr, STRING2);
+    SEQAN_ASSERT_LEQ(STRING2, STRING2);
 }
-SEQAN_END_TESTSUITE
+
+#endif  // SANDBOX_ALIGNMENT_FREE_TESTS_ALIGNMENT_FREE_TEST_ALIGNMENT_FREE_H_

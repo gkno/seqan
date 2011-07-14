@@ -1,5 +1,5 @@
 // ==========================================================================
-//                               alignmentFree
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -29,13 +29,13 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-// Facade header for module alignmentFree.
+// Facade header for module alignment_free.
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_H_
-#define SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_H_
+#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_H_
+#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_H_
 
 // ===========================================================================
 // Prerequisites.
@@ -45,20 +45,21 @@
 #include <seqan/file.h>
 #include <seqan/sequence.h>
 #include <seqan/statistics.h>
+#include <seqan/misc/edit_environment.h>
 
 // ===========================================================================
-// First Header Group.
+// Module's headers.
 // ===========================================================================
 
-#include <seqan/alignmentFree/alignmentFree_base.h>
-#include <seqan/alignmentFree/kmerFunctions.h>
-#include <seqan/alignmentFree/af_d2.h>
-#include <seqan/alignmentFree/af_d2z.h>
-#include <seqan/alignmentFree/af_d2star.h>
-#include <seqan/alignmentFree/af_d2star_original.h>
-#include <seqan/alignmentFree/af_n2.h>
-#include <seqan/alignmentFree/af_MplusD.h>
+#include <seqan/alignment_free/alignment_free_base.h>
+#include <seqan/alignment_free/kmer_functions.h>
+#include <seqan/alignment_free/af_d2.h>
+#include <seqan/alignment_free/af_d2z.h>
+#include <seqan/alignment_free/af_d2star.h>
+#include <seqan/alignment_free/af_d2star_original.h>
+#include <seqan/alignment_free/af_n2.h>
+#include <seqan/alignment_free/af_m_plus_d.h>
 
-#include <seqan/alignmentFree/alignmentFreeComparison.h>
+#include <seqan/alignment_free/alignment_free_comparison.h>
 
-#endif  // SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_H_
+#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_H_

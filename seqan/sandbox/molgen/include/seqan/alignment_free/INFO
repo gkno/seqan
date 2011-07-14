@@ -1,0 +1,7 @@
+Name: seqan-alignment_free
+Author: Jonathan Goeke <goeke@molgen.mpg.de>
+Maintainer: Jonathan Goeke <goeke@molgen.mpg.de>
+License: BSD 3-clause
+Copyright: 2011, FU Berlin
+Status: under development
+Description: Alignment-free comparison of sequences.

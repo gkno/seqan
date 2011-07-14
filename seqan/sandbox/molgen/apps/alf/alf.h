@@ -29,11 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENTFREE_APPS_ALF_ALF_H_
-#define SANDBOX_ALIGNMENTFREE_APPS_ALF_ALF_H_
+#ifndef SANDBOX_ALIGNMENT_FREE_APPS_ALF_ALF_H_
+#define SANDBOX_ALIGNMENT_FREE_APPS_ALF_ALF_H_
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
@@ -130,4 +130,4 @@ int mainWithOptions(Options & options)
     return 0;
 }
 
-#endif  // #ifndef SANDBOX_ALIGNMENTFREE_APPS_ALF_ALF_H_
+#endif  // #ifndef SANDBOX_ALIGNMENT_FREE_APPS_ALF_ALF_H_

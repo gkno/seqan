@@ -1,5 +1,5 @@
 // ==========================================================================
-//                               alignmentFree
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -32,12 +32,10 @@
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_ALIGNMENTFREE_BASE_H_
-#define SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_ALIGNMENTFREE_BASE_H_
+#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
+#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
 
-namespace seqan
-{
-
+namespace seqan {
 
 /**
 .Class.AF_Score:
@@ -400,4 +398,4 @@ struct AF_Score<MplusD>
 
 }  // namespace seqan
 
-#endif  // SANDBOX_ALIGNMENTFREE_INCLUDE_SEQAN_ALIGNMENTFREE_ALIGNMENTFREE_BASE_H_
+#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_

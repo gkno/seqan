@@ -1,5 +1,5 @@
 // ==========================================================================
-//                               alignmentFree
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -29,34 +29,44 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jonathan Goeke <goeke@molgen.mpg.de>
+// ==========================================================================
+// This file contains functions for alignment free sequence comparisons
+// Can be used for pairwise sequence comparison
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENTFREE_TESTS_ALIGNMENTFREE_TEST_ALIGNMENTFREE_H_
-#define SANDBOX_ALIGNMENTFREE_TESTS_ALIGNMENTFREE_TEST_ALIGNMENTFREE_H_
+#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_COMPARISON_H_
+#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_COMPARISON_H_
 
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
+namespace seqan {
 
-// A test for strings.
-SEQAN_DEFINE_TEST(test_alignmentFree_strings_example1)
+/**
+.Function.alignmentFreeComparison:
+..summary:Computes the pairwise similarity scores or distances for a set of sequences
+..cat:AlignmentFree
+..signature:
+alignmentFreeComparison(scoreMatrix, sequenceSet, score)
+..param.scoreMatrix:A two-dimensional Matrix, used to store all pairwise scores
+...type:Class.Matrix
+..param.sequenceSet:StringSet containing all sequences for which pairwise scores will be computed
+...type:Class.StringSet
+..param.score:The score values to be used for computing the alignment.
+...type:Class.AF_Score
+*/
+template <typename TStringSet, typename TValue, typename TComparisonMethod>
+void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, TComparisonMethod const & comparisonMethod)
 {
-    using namespace seqan;
+    _alignmentFreeComparison(scoreMatrix, sequenceSet, comparisonMethod);
 
-    // Define some constant test data for comparison...
-    CharString const STRING1 = "test 1";
-    CharString const STRING2 = "test 2";
-
-    // Append to a string and make equality assertion on the result.
-    CharString myStr = "test ";
-    append(myStr, "1");
-    SEQAN_ASSERT_EQ(STRING1, myStr);
-
-    // Demonstration of other assertions.
-    SEQAN_ASSERT_GT(STRING2, myStr);
-    SEQAN_ASSERT_GEQ(STRING2, myStr);
-    SEQAN_ASSERT_LT(myStr, STRING2);
-    SEQAN_ASSERT_LEQ(STRING2, STRING2);
 }
 
-#endif  // SANDBOX_ALIGNMENTFREE_TESTS_ALIGNMENTFREE_TEST_ALIGNMENTFREE_H_
+template <typename TStringSet, typename TValue, typename TComparisonMethod>
+void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, TComparisonMethod & comparisonMethod)
+{
+    _alignmentFreeComparison(scoreMatrix, sequenceSet, comparisonMethod);
+
+}
+
+}  // namespace seqan
+
+#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_COMPARISON_H_

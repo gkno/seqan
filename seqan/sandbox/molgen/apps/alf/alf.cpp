@@ -32,13 +32,14 @@
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
 
+#include <iostream>
+
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/alignmentFree.h>
 #include <seqan/file.h>
 #include <seqan/misc/edit_environment.h>
-#include <iostream>
 #include <seqan/misc/misc_cmdparser.h>
+#include <seqan/alignment_free.h>
 
 #include "alf.h"
 
