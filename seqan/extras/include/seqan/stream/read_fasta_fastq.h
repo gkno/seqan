@@ -596,10 +596,10 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
     if (withQual)
         clear(qualities);
 
-    resize(sequenceIds, sequenceCount + 1, Exact());
-    resize(sequences, sequenceCount + 1, Exact());
+    resize(sequenceIds, sequenceCount, Exact());
+    resize(sequences, sequenceCount, Exact());
     if (withQual)
-        resize(qualities, sequenceCount + 1, Exact());
+        resize(qualities, sequenceCount, Exact());
 
     for (unsigned int i = 0; i < sequenceCount; ++i)
     {

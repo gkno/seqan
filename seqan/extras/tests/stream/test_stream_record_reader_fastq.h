@@ -89,6 +89,10 @@ void FASTQ_TEST_BATCH(TRecordReader & reader)
                 "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
     SEQAN_ASSERT_EQ(quals[1], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
     SEQAN_ASSERT(atEnd(reader));
+
+    SEQAN_ASSERT_EQ(length(metas), 2);
+    SEQAN_ASSERT_EQ(length(seqs), 2);
+    SEQAN_ASSERT_EQ(length(quals), 2);
 }
 
 template <typename TRecordReader>
@@ -113,6 +117,10 @@ void FASTQ_TEST_BATCH_CONCAT(TRecordReader & reader)
                 "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
     SEQAN_ASSERT_EQ(quals[1], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
     SEQAN_ASSERT(atEnd(reader));
+
+    SEQAN_ASSERT_EQ(length(metas), 2);
+    SEQAN_ASSERT_EQ(length(seqs), 2);
+    SEQAN_ASSERT_EQ(length(quals), 2);
 }
 
 SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_single_fstream)
