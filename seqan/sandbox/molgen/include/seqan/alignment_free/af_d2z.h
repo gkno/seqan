@@ -43,7 +43,6 @@ namespace seqan {
 template <typename TStringSet, typename TValue>
 void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AF_Score<D2z> const & score)
 {
-
     typedef typename Value<TStringSet>::Type TString;
     typedef typename Value<TString>::Type TAlphabet;
     typedef typename _UnmaskedAlphabet<TAlphabet>::Type TUnmaskedAlphabet;
@@ -115,7 +114,6 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
             {
                 value(itMM)._computeAuxiliaryMatrices();
                 ++itMM;
-
             }
 
         }
@@ -221,9 +219,8 @@ double computeExpectationD2(int len1, int len2, unsigned int k, TValue * q1, TVa
 {
     TValue p2 = 0;
     for (int i = 0; i < 4; i++)
-    {
         p2 += q1[i] * q2[i];
-    }
+
     int nbar1 = len1 - k + 1;
     int nbar2 = len2 - k + 1;
 
@@ -302,16 +299,12 @@ double computeVarianceD2(int len1, int len2, unsigned int k, TValue * q1, TValue
 
     // crabgrasses with l>0:
     for (unsigned int l = 1; l <= k - 1; l++)
-    {
         variance += 2 * TValue(nbar1 - l) * TValue(qbar2) * TValue(qbar2 - 1) * (pow(p2, 2 * l) * pow(p32, k - l) - pow(p2, 2 * k)) + 2 * TValue(nbar2 - l) * TValue(qbar1) * TValue(qbar1 - 1) * (pow(p2, 2 * l) * pow(p31, k - l) - pow(p2, 2 * k));
-    }
 
     // accordion main diagonal:
     variance += TValue(nbar1) * TValue(nbar2) * (pow(p2, k) - pow(p2, 2 * k)); // l=0 term
     for (unsigned int l = 1; l <= k - 1; l++)
-    {
         variance += 2 * TValue(nbar1 - l) * TValue(nbar2 - l) * (pow(p2, k + l) - pow(p2, 2 * k)); // l > 0 terms
-    }
 
     return variance;
 }
@@ -348,7 +341,6 @@ double computeVarianceD2(int slen1, int slen2, unsigned int k, MarkovModel<TAlph
 
     for (long i = 0; i < emo; i++)
     {
-
         for (long j = 0; j < emo; j++)
         {
             value(Sbctilde1, i, j) = (q1 * (q1 + 1) / 2) * value(bkg1.stationaryDistribution, j) - (q1 - 1) * value(bkg1._qppp, i, j) - value(bkg1._qppqpp, i, j);
@@ -449,7 +441,6 @@ double computeVarianceD2(int slen1, int slen2, unsigned int k, MarkovModel<TAlph
             covcrabgrass += 4 * q1 * term1 + 4 * q2 * term2;
         }
     }
-
 
     // case 2: overlap < morder
     for (unsigned int m = k - mo + 1; m <= k - 1; m++)

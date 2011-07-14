@@ -53,18 +53,17 @@ alignmentFreeComparison(scoreMatrix, sequenceSet, score)
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.AF_Score
 */
+
 template <typename TStringSet, typename TValue, typename TComparisonMethod>
 void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, TComparisonMethod const & comparisonMethod)
 {
     _alignmentFreeComparison(scoreMatrix, sequenceSet, comparisonMethod);
-
 }
 
 template <typename TStringSet, typename TValue, typename TComparisonMethod>
 void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, TComparisonMethod & comparisonMethod)
 {
     _alignmentFreeComparison(scoreMatrix, sequenceSet, comparisonMethod);
-
 }
 
 }  // namespace seqan

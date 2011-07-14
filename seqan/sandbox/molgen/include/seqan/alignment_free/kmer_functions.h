@@ -95,9 +95,8 @@ void countKmers(String<unsigned int> & kmerCounts, TString const & sequence, uns
     {
         //Check if there is a "N" at the end of the new kmer
         if (_repeatMaskValue(value(itSequence + (k - 1))))
-        {
             counterN = k; //do not consider any kmer covering this "N"
-        }
+
         //If there is no "N" overlapping with the current kmer, count it
         if (counterN <= 0)
         {
@@ -106,7 +105,6 @@ void countKmers(String<unsigned int> & kmerCounts, TString const & sequence, uns
         }
         counterN--;
     }
-
 }
 
 /*
@@ -157,9 +155,7 @@ void countKmers(String<unsigned int> & kmerCounts, String<TValueBG> & background
     for (TPosition i = position(itSequence); i <= j; ++i)
     {
         if (_repeatMaskValue(sequence[i]))
-        {
             counterN = i + 1;
-        }
     }
 
     int sumBG = 0;    //count number of nucleotides for frequency calculation (Ns are not considered anymore!)
@@ -261,7 +257,6 @@ void countKmers(String<unsigned int> & kmerCounts, MarkovModel<TAlphabetBG, TVal
             }
             goFurther(itSeq, i + 1 - position(itSeq));
             j = i + k - 1;
-
         }
     }
 
@@ -276,17 +271,14 @@ void countKmers(String<unsigned int> & kmerCounts, MarkovModel<TAlphabetBG, TVal
             counterN = k;
 
             if (((position(itSeq) + k - 1) > startSplitSequence))
-            {
                 appendValue(seqSetMM, infix(sequence, startSplitSequence, (position(itSeq) + k - 1))); //infix(sequence2,position(itSeq2),i));
-            }
-            startSplitSequence = (position(itSeq) + k); //position after n, possible start
 
+            startSplitSequence = (position(itSeq) + k); //position after n, possible start
         }
         if (counterN <= 0)
         {
             unsigned hashValue = hash(myShape, itSeq);
             ++kmerCounts[hashValue];
-
         }
 
         counterN--;
@@ -311,9 +303,7 @@ void calculateProbability(TValue & probability, TString & sequence, TStringBG & 
     TIteratorTString itSequence = begin(sequence);
     probability = (TValue) 1;
     for (; itSequence < end(sequence); ++itSequence)
-    {
         probability *= backgroundFrequencies[ordValue(*itSequence)];
-    }
 }
 
 template <typename TValue, typename TString, typename TStringBG>
@@ -422,7 +412,6 @@ void calculateVariance(TValue & variance, String<TAlphabet, TSpec> & word, Marko
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
 
-
     int l = length(word);
     TValue p_w;
     p_w = emittedProbability(bgModel, word);
@@ -499,25 +488,21 @@ void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> & word1, 
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
 
-
     covariance = 0;
 
     int l1 = length(word1);
     TValue p_w1;
     p_w1 = emittedProbability(bgModel, word1);
 
-
     String<int> periodicity1;
     calculatePeriodicity(periodicity1, word1, word2);  //word2 is right
     for (TIteratorInt i = begin(periodicity1); i < end(periodicity1); ++i)
     {
-
         TValue p_clump;
         String<TAlphabet> clump = prefix(word1, value(i));
         append(clump, word2);
 
         p_clump = emittedProbability(bgModel, clump);
-
 
         covariance += (TValue) (n - l1 + 1 - value(i)) * p_clump;
     }
@@ -539,7 +524,6 @@ void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> & word1, 
         //std::cout<<"\n"<<p_clump;
     }
 
-
     //std::cout<<"\np_w:"<<p_w;
     covariance += (TValue) p_w1 * p_w2 * (n - 2 * n * l1 + 3 * l1 * l1 - 4 * l1 + 1);
     //std::cout<<word1<<"\np_w:"<<p_w1<<", covar: "<<covariance<<"\n";
@@ -558,7 +542,6 @@ void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> 
     //Probability for word1
     typedef typename Iterator<String<int>, Rooted>::Type        TIteratorInt;
     typedef typename Iterator<String<TAlphabet>, Rooted>::Type      TIterator;
-
 
     covariance = 0;
 
@@ -608,7 +591,6 @@ void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> 
     }
     //std::cout<<"\nterm1+term2:"<<covariance;
     covariance -= (l - k + 1) * p_w1 * p_w2;
-
 }
 
 //calculate word peridicity (indicator for overlaps)
@@ -624,7 +606,6 @@ void calculatePeriodicity(String<int> & periodicity, TString & word1, TString & 
     TSize length1 = length(word1);
     TSize length2 = length(word2);
 
-
     for (TSize i = 1; i < length1; ++i)
     {
         String<TAlphabet> my_suffix = suffix(word1, i);       //overlap of suffix of word1 with prefix of word2
@@ -635,9 +616,7 @@ void calculatePeriodicity(String<int> & periodicity, TString & word1, TString & 
             appendValue(periodicity, i);
             //std::cout<<"\nperiodicity: "<<i<<periodicity;
         }
-
     }
-
 }
 
 //calculate word overlap indiciator epsilon (robin et al) (indicator for overlaps)
@@ -657,18 +636,12 @@ void calculateOverlapIndicator(String<int> & epsilon, TString & word1, TString &
     resize(epsilon, length1, 0);
     for (TSize i = 0; i < length1; ++i)
     {
-
         String<TAlphabet> my_suffix = suffix(word1, length1 - i - 1);     //overlap of suffix of word1 with prefix of word2
         TSize my_min = min(length2, i + 1);
         String<TAlphabet> my_prefix = prefix(word2, my_min);
         if (my_suffix == my_prefix)
-        {
             epsilon[i] = 1;
-
-        }
-
     }
-
 }
 
 template <typename TString>
@@ -677,7 +650,6 @@ stringToStringSet(StringSet<TString> & stringSet, TString const & sequence)
 {
     resize(stringSet, 1);
     stringSet[0] = sequence;
-
 }
 
 void
@@ -688,11 +660,8 @@ stringToStringSet(StringSet<String<Dna> > & dnaStringSet, String<Dna5> const & s
     typedef Position<TIterator>::Type                   TPosition;
     typedef Shape<Dna, SimpleShape> TShape;
 
-
     int length1;
     length1 = length(sequence);
-
-
 
     TIterator itSeq = begin(sequence);
     //kmer_length=1;
@@ -705,12 +674,9 @@ stringToStringSet(StringSet<String<Dna> > & dnaStringSet, String<Dna5> const & s
         {
             //std::cout<<"N detected in begin of sequence";
             if ((i - position(itSeq)) > 0)
-            {
                 appendValue(dnaStringSet, infix(sequence, position(itSeq), i));
-            }
             goFurther(itSeq, i + 1 - position(itSeq));
             j = i;
-
         }
     }
 
@@ -735,12 +701,7 @@ stringToStringSet(StringSet<String<Dna> > & dnaStringSet, String<Dna5> const & s
     }
     //string set for markov model
     if (position(itSeq) > startSplitSequence)
-    {
         appendValue(dnaStringSet, infix(sequence, startSplitSequence, position(itSeq))); //infix(sequence2,position(itSeq2),i));
-    }
-
-
-
 }
 
 void
@@ -755,8 +716,6 @@ cutNs(String<Dna5> & sequenceCut, String<Dna5> const & sequence)
     int length1;
     length1 = length(sequence);
 
-
-
     TIterator itSeq = begin(sequence);
     //kmer_length=1;
 
@@ -768,12 +727,9 @@ cutNs(String<Dna5> & sequenceCut, String<Dna5> const & sequence)
         {
             //std::cout<<"N detected in begin of sequence";
             if ((i - position(itSeq)) > 0)
-            {
                 sequenceCut += infix(sequence, position(itSeq), i); //appendValue(dnaStringSet,infix(sequence,position(itSeq),i));
-            }
             goFurther(itSeq, i + 1 - position(itSeq));
             j = i;
-
         }
     }
 
@@ -786,13 +742,9 @@ cutNs(String<Dna5> & sequenceCut, String<Dna5> const & sequence)
         if (value(itSeq) == 'N')
         {
             counterN = 1;
-
             if (((position(itSeq)) > startSplitSequence))
-            {
                 sequenceCut += infix(sequence, startSplitSequence, position(itSeq)); //appendValue(dnaStringSet,infix(sequence,startSplitSequence,position(itSeq)));//infix(sequence2,position(itSeq2),i));
-            }
             startSplitSequence = (position(itSeq) + 1); //position after n, possible start
-
         }
         counterN--;
     }
@@ -801,9 +753,6 @@ cutNs(String<Dna5> & sequenceCut, String<Dna5> const & sequence)
     {
         sequenceCut += infix(sequence, startSplitSequence, position(itSeq)); //appendValue(dnaStringSet,infix(sequence,startSplitSequence,position(itSeq)));//infix(sequence2,position(itSeq2),i));
     }
-
-
-
 }
 
 }  // namespace seqan

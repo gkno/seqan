@@ -49,8 +49,6 @@ template <typename TSpec>
 struct AF_Score;
 
 
-
-
 /**
 .Spec.D2
 ..cat:Miscellaneous
@@ -258,6 +256,7 @@ struct AF_Score<D2star_original>
 ..remarks:
 ...text:No remarks
 */
+
 struct N2_;     //Reinert and Waterman, D2 with centralised and standardised counts
 typedef Tag<N2_> const N2;
 
@@ -287,6 +286,7 @@ struct AF_Score<N2>
         norm = false;
         verbose = true;
     };
+
     AF_Score<N2>(unsigned k, unsigned m, String<char> revComOption, unsigned mm, double mmw, bool v, bool n, String<char> kmerWeightsFile = "")
     {
         kmerSize = k;
@@ -300,7 +300,6 @@ struct AF_Score<N2>
         norm = n;
         verbose = v;
     };
-
 };
 
 
@@ -343,12 +342,7 @@ struct AF_Score<D2z>
         kmerSize = k;
         bgModelOrder = m;
     };
-
-
-
 };
-
-
 
 /**
 .Spec.MplusD
@@ -393,8 +387,6 @@ struct AF_Score<MplusD>
 
 
 };
-
-
 
 }  // namespace seqan
 

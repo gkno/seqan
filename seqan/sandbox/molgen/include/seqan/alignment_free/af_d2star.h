@@ -171,19 +171,11 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
 
     //Compute reverse complements scores if revCom!=""
     if (score.revCom == "mean")
-    {
         result = (TValue) (resultRC + result) / 2;
-    }
     else if (score.revCom == "max")
-    {
         result = max(resultRC, result);
-    }
     else if (score.revCom == "min")
-    {
         result = min(resultRC, result);
-    }
-
-
 }
 
 /*
@@ -243,7 +235,6 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
             TValue variance = 0;
 
             variance = ((TValue) len1) * p_w;
-
 
             //test if variance not 0 or inf before dividing
             if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
@@ -305,7 +296,6 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
                 ++itStandardisedCounts;
             }
         }
-
     }
 }
 

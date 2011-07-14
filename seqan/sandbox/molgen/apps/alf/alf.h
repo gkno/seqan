@@ -1,5 +1,5 @@
 // ==========================================================================
-//                                    alf
+//                  ALF - Alignment free sequence comparison
 // ==========================================================================
 // Copyright (c) 2006-2010, Knut Reinert, FU Berlin
 // All rights reserved.

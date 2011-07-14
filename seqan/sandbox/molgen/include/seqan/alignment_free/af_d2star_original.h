@@ -59,7 +59,6 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     setLength(scoreMatrix, 1, seqNumber);
     resize(scoreMatrix, (TValue) 0);
 
-
     StringSet<String<double> > standardisedKmerCounts;
     resize(standardisedKmerCounts, seqNumber);
     //Count all kmers and all background nucleotide frequencies and store them in StringSets
@@ -98,14 +97,11 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
 
     for (; it1 < end(kmerCounts1); ++it1)
     {
-
-
         //Multiply standardised counts
         result += (TValue)(value(it1) * value(it2));
 
         ++it2;
     }
-
 }
 
 template <typename TValue, typename TSequence>
@@ -129,7 +125,6 @@ void d2star_original(TValue & result, TSequence const & sequence1, TSequence con
     */
     if (score.bgModelOrder == 0)
     {
-
         //String<unsigned int> kmerCounts;
         String<unsigned int> kmerCounts1;
         String<unsigned int> kmerCounts2;
@@ -163,7 +158,6 @@ void d2star_original(TValue & result, TSequence const & sequence1, TSequence con
         }
         //fill(standardisedCounts,nvals,(TValue) 0.0);
 
-
         //string of tvalue to store p_w
         String<TValue> probabilities;
         resize(probabilities, nvals, missing);
@@ -191,7 +185,6 @@ void d2star_original(TValue & result, TSequence const & sequence1, TSequence con
             //TValue varTMP= pow(((TValue) len1)*((TValue) len1),0.5)*p_w;
 //std::cout<<"\n1: "<<variance1<<"\n2: "<<variance2<<"\n1*2: "<<(variance1*variance2)<<"\nold: "<<varTMP;
 
-
             //test if variance not 0 or inf before dividing
             if ((variance1 > missing) && (variance1 < pow(10, 10)))
             {
@@ -210,8 +203,6 @@ void d2star_original(TValue & result, TSequence const & sequence1, TSequence con
 //std::cout<<"\n1: "<<normValue1;
 //TValue normValue2=((kmerCounts1[i]-p_w*len1)*(kmerCounts2[i]-p_w*len2))/variance;
 //std::cout<<"\n2: "<<(normValue1)<<"="<<(normValue2);
-
-
                 }
             }
 //std::cout<<"\n"<<w<<"; counts:"<<value(itCounts)<<"; stCounts:"<<value(itStandardisedCounts)<<" p_w: "<<p_w<<" var:"<<variance;
@@ -263,7 +254,6 @@ void d2star_original(TValue & result, TSequence const & sequence1, TSequence con
         TValue normValue1 = 0.0;
         TValue normValue2 = 0.0;
 
-
         for (unsigned i = 0; i < nvals; ++i)
         {
             TValue p_w = 1.0; //Probability of kmer
@@ -298,11 +288,9 @@ void d2star_original(TValue & result, TSequence const & sequence1, TSequence con
                 //++itStandardisedCounts;
             }
         }
-        if (score.norm == true)
-        {
-            result = result / pow(normValue1 * normValue2, 0.5);
-        }
 
+        if (score.norm == true)
+            result = result / pow(normValue1 * normValue2, 0.5);
     }
 }
 
@@ -369,10 +357,7 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
             if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
             {
                 if (p_w > 0)
-                {
                     value(itStandardisedCounts) = ((TValue) ((TValue) value(itCounts)) - p_w * ((TValue)len1)) / ((TValue) pow(variance, 0.5));
-
-                }
             }
 //std::cout<<"\n"<<w<<"; counts:"<<value(itCounts)<<"; stCounts:"<<value(itStandardisedCounts)<<" p_w: "<<p_w<<" var:"<<variance;
             ++itStandardisedCounts;
@@ -391,9 +376,7 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
         int nvals = length(kmerCounts); //Number of kmers
         int len1 = 0;
         for (int l = 0; l < nvals; l++)
-        {
             len1 += kmerCounts[l];
-        }
         resize(standardisedCounts, nvals, (TValue) 0.0);
 
         String<TValue> probabilities;
@@ -425,7 +408,6 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
                 ++itStandardisedCounts;
             }
         }
-
     }
 }
 

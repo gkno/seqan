@@ -1,5 +1,5 @@
 // ==========================================================================
-//                                    alf
+//                  ALF - Alignment free sequence comparison
 // ==========================================================================
 // Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -221,7 +221,6 @@ int main(int argc, char * argv[])
     typedef String<Dna5> TText;
     typedef Size<TText>::Type TSize;
     typedef StringSet<TText> TStringSet;
-
 
     //Definition of mxn two-dimensional matrix
     typedef Matrix<double, 2> TMatrix;

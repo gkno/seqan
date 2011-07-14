@@ -154,8 +154,6 @@ void weightedFrequencies(String<TValue> & weightedFrequencies, TString const & s
 
     if (score.bgModelOrder == 0)
     {
-
-
         String<TValue> backgroundFrequencies;
         countKmers(kmerCounts, backgroundFrequencies, sequence, score.kmerSize);
         int nvals = length(kmerCounts); //Number of kmers
@@ -189,7 +187,6 @@ void weightedFrequencies(String<TValue> & weightedFrequencies, TString const & s
     }
     else
     {
-
         MarkovModel<TUnmaskedAlphabet, TValue> backgroundModel(score.bgModelOrder);
         countKmers(kmerCounts, backgroundModel, sequence, score.kmerSize);
 

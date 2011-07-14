@@ -38,6 +38,7 @@
 namespace seqan {
 
 String<unsigned> revComIndex_N;
+
 void initialiseRevComIndex_N(unsigned k)
 {
     unsigned myLength = (unsigned) pow(4, k);
