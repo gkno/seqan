@@ -158,6 +158,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////
 
+// Copy reads for the whole contig out of fragStore and into strSet.  The start and end
+// positions of the alignments go into startEndPos.
+
 template<typename TValue, typename TStrSpec, typename TPosPair, typename TStringSpec, typename TSpec, typename TConfig, typename TId>
 inline void 
 _loadContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
@@ -428,6 +431,44 @@ assignGappedConsensus(FragmentStore<TSpec, TConfig>& fragStore,
 
 //////////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.consensusAligment
+..cat:Consensus
+..summary:Compute consensus alignment.
+..signature:consensusAlignment(alignmentGraph, beginEndPos, [options])
+..param.alignmentGraph:
+...type:Spec.Alignment Graph
+..param.beginEndPos:Interval start and end position for the read's alignment.
+...type:nolink:$StringSet<Pair<TPos, TPos> >$
+..param.options:Optional settings for the consenus alignment
+...type:nolink:$ConsensusOptions$
+..include:seqan/consensus.h
+..example.code:
+#include <seqan/sequence.h>
+#include <seqan/refinement.h>
+#include <seqan/consensus.h>
+
+int main()
+{
+    using namespace seqan;
+
+    typedef StringSet<Dna5String> TStringSet;
+    typedef Graph<Alignment<TStringSet, void, WithoutEdgeId> > TAlignGraph;
+
+    TStringSet readSet;
+    String<Pair<TSize> > begEndPos;
+
+    appendValue(readSet, "CCCAGTGA");
+    appendValue(begEndPos, Pair<TSize>(0, 5));
+    appendValue(readSet, "AGGGACTGT");
+    appendValue(begEndPos, Pair<TSize>(3, 9));
+
+    TAlignGraph alignmentGraph(readSet);
+    consensusAlignment(alignmentGraph, begEndPos);
+
+    return 0;
+}
+*/
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSize, typename TConfigOptions>
 inline void
