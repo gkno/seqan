@@ -30,8 +30,8 @@ from the SAM file as described in the paper.
 Building Rabema
 ===============
 
-We use CMake to build Rabema (and RazerS 2) from the command line (assuming you are on Linux
-or Mac Os X):
+We use CMake to build Rabema (and RazerS 2) from the command line (assuming
+you are on Linux or Mac Os X):
 
   svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan/ seqan-trunk
   cd seqan-trunk/build
@@ -61,7 +61,9 @@ SAM output and allow a virtually unlimited number of alignments per read
      rabema-data/data/saccharomyces/genome.fasta \
      rabema-data/data/saccharomyces/reads_454/SRR000853.10k.fastq
 
-Then, we run Rabema to build the gold standard. We use the same error rate as when generating the gold standard (--max-error-rate 8), also use edit distance (--distance-function edit) and write the reuslts to gold-standard.wit.
+Then, we run Rabema to build the gold standard. We use the same error rate as
+when generating the gold standard (--max-error-rate 8), also use edit distance
+(--distance-function edit) and write the reuslts to gold-standard.wit.
 
   ./core/apps/rabema/rabema build_standard \
     --max-error-rate 8       \
