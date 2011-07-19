@@ -464,7 +464,7 @@ void initPatterns(
 	ErrorType lastErrorType = (IsSameType<TDistance, HammingDistance>::VALUE)? SEQAN_MISMATCH: SEQAN_DELETE;
 
 	SEQAN_ASSERT_EQ(SEQAN_MATCH, 0);
-	SEQAN_ASSERT_EQ((length(logError) % 4), 0u);
+	SEQAN_ASSERT((IsSameType<TLogErrorDistr,Nothing>::VALUE || (length(logError) % 4) == 0u));
 
 #ifndef DEBUG_RECOG_DP
 	String<TPattern> patternStore;
