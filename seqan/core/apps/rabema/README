@@ -49,9 +49,11 @@ with indels (--indels) for an error rate of 8% (--percent-identity 92). We
 make sure to set the sensitivity to 100% (--recognition-rate 100), generate
 SAM output and allow a virtually unlimited number of alignments per read
 (--max-hits 10000000). The output is written to the file "out-gold.sam"
-(--output out-gold.sam).
+(--output out-gold.sam).  Furthermore, we disable the shrinking of alignments
+in SAM output (--dont-shrink-alignments).  Latter is required for full
+sensitivity.
 
-  ./core/apps/razers2/razers2 --vverbose \
+  ./core/apps/razers2/razers2 --dont-shrink-alignments --vverbose \
      --indels         \
      --output-format 4    \
      --recognition-rate 100 \
