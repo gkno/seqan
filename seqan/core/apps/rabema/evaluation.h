@@ -315,8 +315,8 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options<EvaluateResults> const 
         }
 
         // Skip if aligning too far to the left.
-        if (endPos < length(fragments.readSeqStore[it->readId])) 
-            continue;
+//        if (endPos < length(fragments.readSeqStore[it->readId])) 
+//            continue;
 
         // Skip reads that aligned with a too bad score.  Ignore score if in wit-oracle mode, i.e. comparing against simulated data.
         int bestScore = 1;  // Marker for "not computed, oracle wit mode."

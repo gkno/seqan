@@ -18,3 +18,6 @@ seqan_add_executable(rabema rabema.cpp
 			    verification.h
 			    wit_store.h
 			    witio.h)
+
+seqan_add_executable(do_search do_search.cpp witio.h find_myers_ukkonen_ext.h)
+
