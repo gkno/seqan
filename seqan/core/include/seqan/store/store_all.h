@@ -1698,11 +1698,28 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
 	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
 	TAlignedReadIter firstOverlap = begin(store.alignedReadStore, Standard());
-	for (; it != itEnd; ++it)
+
+//    TAlignedReadIter theIt = it;
+//	for (; theIt != itEnd; ++theIt)
+//	{
+//        if (theIt->id == 29971)
+//            break;
+//    }
+//	TReadSeq theReadSeq = store.readSeqStore[theIt->readId];
+//    if (theIt->beginPos > theIt->endPos)
+//        reverseComplement(theReadSeq);
+    
+//    TContigPos	cBeginPrev = 0;
+	for (; it != itEnd;)
 	{
 		TContigPos	left = (*it).beginPos;
 		TContigPos	right = (*it).endPos;
 		TContigPos	cBegin = _min(left, right);
+//    if (cBegin<cBeginPrev)
+//    {
+//        std::cout<<"SORTING ERROR"<<std::endl;
+//    }
+//    cBeginPrev=cBegin;
 		TContigPos	cEnd = _max(left, right);
 		TContigGaps	contigGaps(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
 		TReadGaps	readGaps(readSeq, (*it).gaps);
@@ -1714,18 +1731,102 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 		// 1. Calculate pairwise alignment
 		TAlign align;
 		resize(rows(align), 2);
-		assignSource(row(align, 0), infix(store.contigStore[(*it).contigId].seq, cBegin, cEnd));
+		assignSource(row(align, 0), infix(store.contigStore[it->contigId].seq, cBegin, cEnd));
 		assignSource(row(align, 1), readSeq);
+//        int ud = store.alignQualityStore[it->id].errors;
+//        int ld = -ud;
+//		if (IsSameType<TShrinkMatches, True>::VALUE)
+//		    globalAlignment(align, score, AlignConfig<true, false, false, true>(), ld, ud, Gotoh());
+//        else
+//		    globalAlignment(align, score, ld, ud);
+
 		if (IsSameType<TShrinkMatches, True>::VALUE)
 		    globalAlignment(align, score, AlignConfig<true, false, false, true>(), Gotoh());
         else
 		    globalAlignment(align, score);
+//    if (cBegin > 5349500 && cBegin < 5349700)
+//    {
+//        if (theIt->id != 29971)
+//        {
+//            theIt = begin(store.alignedReadStore, Standard());
+//            for (; theIt != itEnd; ++theIt)
+//            {
+//                if (theIt->id == 29971)
+//                break;
+//            }
+//        }
+//
+//        TReadGaps readGaps(theReadSeq, theIt->gaps);
+//        TContigGaps	contigGaps(store.contigStore[theIt->contigId].seq, store.contigStore[theIt->contigId].gaps);
+//        if ((*theIt).beginPos <= (*theIt).endPos) 
+//        {
+//            setBeginPosition(contigGaps, (*theIt).beginPos);
+//            setEndPosition(contigGaps, (*theIt).endPos);
+//        } else
+//        {
+//            setBeginPosition(contigGaps, (*theIt).endPos);
+//            setEndPosition(contigGaps, (*theIt).beginPos);
+//        }
+////              __int64 pos = positionGapToSeq(contigGaps, _min(theIt->beginPos, theIt->endPos)) + 1;
+////        __int64 mpos = 0;
+////        std::cout << "it->id == " << it->id << std::endl;
+////        std::cout << "cBegin == " << cBegin << std::endl;
+////        std::cout << contigGaps << std::endl;
+////        std::cout << readGaps << std::endl;
+////        std::cout << std::endl;
+////        std::cout << "currentAlignment:" << std::endl;
+////        std::cout << align;
+////        std::cout << std::endl;
+////        std::cout << std::endl;
+////        std::cout << std::endl;
+//    }
+
+//        if (infix(store.readNameStore[it->readId], 0, length("SRR049254.14375884")) == "SRR049254.14375884")
+//        {
+//            std::cerr << "cBegin == " << cBegin << "  id == " << (*it).id << std::endl;
+//            std::cerr << align << std::endl;
+//        }
+
+        // If there is a shorter alignment then there are gaps in the beginning of the read alignment row.  In this
+        // case, we move the current alignment further forward in the alignedReadStore and continue to work with the
+        // next one.
+        if (beginPosition(row(align, 1)) > 0u)
+        {
+//            std::cerr << "cBegin == " << cBegin << " beginPosition(row(align, 1)) == " << beginPosition(row(align, 1)) << std::endl;
+//            std::cerr << "id == " << it->id << ", read id == " << it->readId << std::endl;
+//            std::cerr << align << std::endl;
+            // Update aligned read element.
+            cBegin += beginPosition(row(align, 1));
+            bool reverse = it->beginPos > it->endPos;
+            it->beginPos = cBegin;
+            it->endPos = cEnd;
+            if (reverse)
+                std::swap(it->beginPos, it->endPos);
+            // Move read element.
+            TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
+            TAlignedReadIter itContigEnd = upperBoundAlignedReads(it + 1, itEnd, it->contigId, SortContigId());
+            TAlignedReadIter itTarget = lowerBoundAlignedReads(it + 1, itContigEnd, cBegin, SortBeginPos());
+            if (itTarget != it + 1)  // Do not swap with self.
+            {
+                typename Value<TAlignedRead>::Type tmp = *it;
+                arrayMove(it + 1, itTarget, it);
+                *(itTarget - 1) = tmp;
+//                if (_min((itTarget-1)->beginPos, (itTarget-1)->endPos) > _min((*itTarget).beginPos, (*itTarget).endPos))
+//                {
+//                std::cout << "MOVE ERROR" <<std::endl;
+//                }
+//                if (_min((itTarget-2)->beginPos, (itTarget-2)->endPos) > _min((itTarget-1)->beginPos, (itTarget-1)->endPos))
+//                {
+//                std::cout << "MOVE ERROR2" <<std::endl;
+//                }
+            }
+//            std::cerr << "  Shifting by " << itTarget - it << std::endl;
+            continue;
+        }
+        SEQAN_ASSERT_EQ(beginPosition(row(align, 1)), 0u);
 
 		// 2. Skip non-overlapping matches
 		cBegin = positionSeqToGap(contigGaps, cBegin);
-		// Increment cBegin by the number of gaps in front of the read
-		// row in the global alignment computed above.
-		cBegin += beginPosition(row(align, 1));
 		if (lastContigId != (*it).contigId)
 		{
 			firstOverlap = it;
@@ -1763,6 +1864,13 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 				cBegin += 1;
 			}
 		}
+
+//        std::cerr << "firstOverlap - theIt == " << firstOverlap - theIt << std::endl;
+//        if (firstOverlap - theIt > 0)
+//        {
+//            if (_min(firstOverlap->beginPos, firstOverlap->endPos) < _max(theIt->beginPos, theIt->endPos))
+//                std::cerr << "INVARIANT DOES NOT HOLD" << std::endl;
+//        }
         
 		for (; !atEnd(cIt) && !atEnd(it1); goNext(cIt), goNext(rIt))
 		{
@@ -1788,6 +1896,10 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 						TContigPos rEnd = _max((*j).beginPos, (*j).endPos);
 						if (rBegin < insPos && insPos < rEnd)
 						{
+//                    if (j->id == 29971)
+//                    {
+//                        std::cerr << "OK computer" << std::endl;
+//                    }
 							if (rBegin < insPos)
 							{
 								TReadGaps gaps(store.readSeqStore[(*j).readId], (*j).gaps);
@@ -1836,6 +1948,8 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 			(*it).beginPos = cEnd;
 			(*it).endPos = cBegin;
 		}
+        
+        ++it;  // Go to next alignment.
 /*		
 //		if (interesting)
 		{
