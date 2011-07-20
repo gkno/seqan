@@ -79,6 +79,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	positionFormat;		// 0..gap space
 										// 1..position space
 		const char	*runID;				// runID needed for gff output
+        bool dontShrinkAlignments;
 
 	// filtration parameters
 		::std::string shape;			// shape (e.g. 11111111111)
@@ -156,6 +157,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			sortOrder = 0;
 			positionFormat = 0;
 			runID = "s"; 	//
+            dontShrinkAlignments = false;
 
 			matchN = false;
 
@@ -408,6 +410,8 @@ struct MicroRNA{};
 			{
 				m.id = length(store.alignedReadStore);
 				appendValue(store.alignedReadStore, m, Generous());
+//				if (infix(store.readNameStore[m.readId], 0, length("SRR049254.14375884")) == "SRR049254.14375884")
+//				    std::cerr << "append value " << m.beginPos << ", " << m.endPos << std::endl;
 				appendValue(store.alignQualityStore, q, Generous());
 				if (length(store.alignedReadStore) > options.compactThresh)
 				{
@@ -1333,7 +1337,7 @@ matchVerify(
 
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
-	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
+	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << "; " << length(host(inf)) - beginPosition(inf) << "," << length(host(inf)) - endPosition(inf) << ::std::endl;
 	::std::cout<<"Read:   "<<readSet[readId]<<::std::endl;
 #endif
 
@@ -1355,6 +1359,7 @@ matchVerify(
 	{
 		TPosition pos = position(hostIterator(myersFinder));
 		int score = getScore(myersPattern);
+//        std::cerr << "found " << pos << ", " << length(host(inf)) - pos << ", " << score << std::endl;
 		
 #ifdef RAZERS_NOOUTERREADGAPS
 		// Manually align the last base of the read
@@ -1416,6 +1421,8 @@ matchVerify(
 				++verifier.m.endPos;
 #endif
 				verifier.push();
+//            std::cerr << "push(" << verifier.m.beginPos << ", " << verifier.m.endPos << ")" << std::endl;
+//            std::cerr << "  push(" << length(host(inf)) - verifier.m.beginPos << ", " << length(host(inf)) - verifier.m.endPos << ")" << std::endl;
 				setBeginPosition(inf, infBeginPos);
 				setEndPosition(inf, infEndPos);
 				maxScore = minScore - 1;
@@ -1473,7 +1480,11 @@ matchVerify(
 		++verifier.m.endPos;
 #endif
 		if (!verifier.oneMatchPerBucket)
+//        {
 			verifier.push();
+//            std::cerr << "push(" << verifier.m.beginPos << ", " << verifier.m.endPos << ")" << std::endl;
+//            std::cerr << "  push(" << length(host(inf)) - verifier.m.beginPos << ", " << length(host(inf)) - verifier.m.endPos << ")" << std::endl;
+//        }
 		return true;
 	}
 	return false;

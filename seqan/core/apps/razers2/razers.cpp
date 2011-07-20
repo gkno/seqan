@@ -318,6 +318,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("pf", "position-format",   "select begin/end position numbering", OptionType::Int | OptionType::Label, options.sortOrder));
 	addHelpLine(parser, "0 = gap space");
 	addHelpLine(parser, "1 = position space");
+	addOption(parser, CommandLineOption("ds",  "dont-shrink-alignments",           "Disable alignment shrinking in SAM(required for full sensitivity, otherwise not recommended).", OptionType::Boolean));
 	addSection(parser, "Filtration Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s",  "shape",             "set k-mer shape", OptionType::String | OptionType::Label, options.shape), "BITSTRING"));
 	addOption(parser, CommandLineOption("t",  "threshold",         "set minimum k-mer threshold", OptionType::Int | OptionType::Label, options.threshold));
@@ -363,6 +364,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "genome-naming", options.genomeNaming);
 	getOptionValueLong(parser, "read-naming", options.readNaming);
 	getOptionValueLong(parser, "position-format", options.positionFormat);
+	if (isSetLong(parser, "dont-shrink-alignments")) options.dontShrinkAlignments = true;
 	getOptionValueLong(parser, "shape", options.shape);
 	getOptionValueLong(parser, "threshold", options.threshold);
 	getOptionValueLong(parser, "overabundance-cut", options.abundanceCut);

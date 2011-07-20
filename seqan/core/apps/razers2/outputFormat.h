@@ -1160,13 +1160,22 @@ void dumpMatches(
 			}
 			break;
 		case 4: // Sam
+        if (options.dontShrinkAlignments)
+			convertMatchesToGlobalAlignment(store, scoreType, False());
+        else
 			convertMatchesToGlobalAlignment(store, scoreType, True());
-			/*{
-			String<String<unsigned> > layout;
-			layoutAlignment(layout, store, 0);
-			for (unsigned i=0;i<length(store.contigStore);++i)
-				printAlignment(std::cout, layout, store, i, 0, 2000, 0, 100, -1);
-			}*/
+//            {
+//                std::cerr << "AFTER CONVERSION" << std::endl << std::endl;
+//                AlignedReadLayout layout;
+//                layoutAlignment(layout, store);
+//                typedef typename TFragmentStore::TContigStore                                        TContigStore;
+//                typedef typename Value<TContigStore>::Type                                       TContig;
+//                typedef Gaps<Nothing, AnchorGaps<typename TContig::TGapAnchors> >               TContigGaps;
+//                TContigGaps contigGaps(store.contigStore[0].gaps);
+//                unsigned l = positionSeqToGap(contigGaps, 5349500);
+//                unsigned r = positionSeqToGap(contigGaps, 5349800);
+//                printAlignment(std::cerr, Raw(), layout, store, 0, l, r, 0, 1000);
+//            }
 			write(file, store, Sam());
 			break;
 		case 5: // AFG
