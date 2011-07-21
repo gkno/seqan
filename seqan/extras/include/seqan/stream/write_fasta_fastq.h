@@ -60,6 +60,8 @@ namespace seqan {
 ..include:seqan/stream.h
  */
 
+// TODO(holtgrew): Rename enums?
+
 enum FastAQOutputOptions {
     NO_FLAGS = 0,
     LINEBREAKS = 1,           // introduce linebreaks into sequence at col 70
@@ -123,7 +125,7 @@ writeRecord(TStream & stream,
             res = streamPut(stream, *it);
             if (res)
                 return res;
-            if (++l == 69)
+            if (++l == 70)
             {
                 res = streamPut(stream, '\n');
                 l = 0;
@@ -190,14 +192,14 @@ writeRecord(TStream & stream,
     if (options & LINEBREAKS)
     {
         // write stream character by character
-        typename Iterator<TSeqString>::Type it = begin(seq);
-        typename Iterator<TSeqString>::Type it_end = end(seq);
+        typename Iterator<TSeqString const>::Type it = begin(seq);
+        typename Iterator<TSeqString const>::Type it_end = end(seq);
         for (unsigned long l = 0; it < it_end; ++it)
         {
             res = streamPut(stream, *it);
             if (res)
                 return res;
-            if (++l == 69)
+            if (++l == 70)
             {
                 res = streamPut(stream, '\n');
                 l = 0;
@@ -240,7 +242,7 @@ writeRecord(TStream & stream,
                 res = streamPut(stream, char(126));
                 if (res)
                     return res;
-                if (++l == 69)
+                if (++l == 70)
                 {
                     res = streamPut(stream, '\n');
                     l = 0;
@@ -262,14 +264,14 @@ writeRecord(TStream & stream,
         if (options & LINEBREAKS)
         {
             // write stream character by character
-            typename Iterator<TSeqString>::Type it = begin(qual);
-            typename Iterator<TSeqString>::Type it_end = end(qual);
+            typename Iterator<TQualString const>::Type it = begin(qual);
+            typename Iterator<TQualString const>::Type it_end = end(qual);
             for (unsigned long l = 0; it < it_end; ++it)
             {
                 res = streamPut(stream, *it);
                 if (res)
                     return res;
-                if (++l == 69)
+                if (++l == 70)
                 {
                     res = streamPut(stream, '\n');
                     l = 0;

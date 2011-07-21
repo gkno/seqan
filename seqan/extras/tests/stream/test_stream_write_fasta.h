@@ -38,79 +38,116 @@
 #ifndef TEST_STREAM_TEST_STREAM_WRITE_FASTA_H_
 #define TEST_STREAM_TEST_STREAM_WRITE_FASTA_H_
 
-SEQAN_DEFINE_TEST(test_stream_write_record_fasta)
+SEQAN_DEFINE_TEST(test_stream_write_record_fasta_default)
 {
     using namespace seqan;
 
-    CharString tempFilename = SEQAN_TEMP_FILENAME();
-    char filenameBuffer[1000];
-    strncpy(filenameBuffer, toCString(tempFilename), 999);
+    char buffer[1000];
+    Stream<CharArray<char *> > outStream(&buffer[0], &buffer[0] + 1000);
 
-    std::fstream file(filenameBuffer, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-    SEQAN_ASSERT(file.is_open());
+    CharString meta1 = "meta1";
+    CharString meta2 = "  meta2 ";
+    Dna5String seq1 = "CGATN";
+    Dna5String seq2 = "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN";
+    
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta1, seq1, Fasta()), 0);
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta2, seq2, Fasta()), 0);
+    streamPut(outStream, '\0');
 
-    CharString meta1 = "sequence with a nice name !?)=";
-    CharString seq1 = "ACGTACGTACGTACGATCACGATACGACTAGACTACGACTAGGGGCTACGACGAGCG\
-ACGACGTACGACGACGACGGACGACAGCGATCACGATCTACGAGCTTACTATGGAGCGGGCGATCGAGC";
-    CharString meta2 = "           .oO0Oo. .oO0Oo. .oO0Oo. .oO0Oo. .oO0Oo. ";
-    CharString seq2 = "GGGGGGGGG";
+    char const * EXPECTED =
+            ">meta1\n"
+            "CGATN\n"
+            ">  meta2 \n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN\n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTN\n";
+    SEQAN_ASSERT_EQ(CharString(buffer), CharString(EXPECTED));
+}
 
-    int res = writeRecord(file, meta1, seq1, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
-    res = writeRecord(file, meta2, seq2, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
+SEQAN_DEFINE_TEST(test_stream_write_record_fasta_nolinebreaks)
+{
+    using namespace seqan;
 
-    res = writeRecord(file, meta1, seq1, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
-    res = writeRecord(file, meta2, seq2, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
+    char buffer[1000];
+    Stream<CharArray<char *> > outStream(&buffer[0], &buffer[0] + 1000);
 
-    res = writeRecord(file, meta1, seq1, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
-    res = writeRecord(file, meta2, seq2, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
+    CharString meta1 = "meta1";
+    CharString meta2 = "  meta2 ";
+    Dna5String seq1 = "CGATN";
+    Dna5String seq2 = "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN";
+    
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta1, seq1, Fasta(), 0), 0);
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta2, seq2, Fasta(), 0), 0);
+    streamPut(outStream, '\0');
 
-    res = writeRecord(file, meta1, seq1, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
-    res = writeRecord(file, meta2, seq2, Fasta());
-    SEQAN_ASSERT_EQ(res, 0);
+    char const * EXPECTED =
+            ">meta1\n"
+            "CGATN\n"
+            ">  meta2 \n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTN\n";
+    SEQAN_ASSERT_EQ(CharString(buffer), CharString(EXPECTED));
+}
 
-    file.seekg(0);
-    file.seekp(0);
+SEQAN_DEFINE_TEST(test_stream_write_record_fastq_default)
+{
+    using namespace seqan;
 
-    typedef RecordReader<std::fstream, SinglePass<void> > TRecordReader;
-    TRecordReader reader(file);
-    AutoSeqStreamFormat tagSelect;
+    char buffer[1000];
+    Stream<CharArray<char *> > outStream(&buffer[0], &buffer[0] + 1000);
 
-    SEQAN_ASSERT(checkStreamFormat(reader, tagSelect));
-    SEQAN_ASSERT_EQ(tagSelect.tagId, 1);
+    CharString meta1 = "meta1";
+    CharString meta2 = "  meta2 ";
+    Dna5String seq1 = "CGATN";
+    Dna5String seq2 = "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN";
+    CharString qual1 = "!!!!!";
+    CharString qual2 = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
-    for (unsigned int i = 0; i < 8; ++i)
-    {
-        CharString meta;
-        CharString seq;
-        res = readRecord(meta, seq, reader, Fasta());
-        SEQAN_ASSERT_EQ(res, 0);
-        switch(i)
-        {
-            case 0:
-            case 2:
-            case 4:
-            case 6:
-                SEQAN_ASSERT_EQ(meta, meta1);
-                SEQAN_ASSERT_EQ(seq, seq1);
-                break;
-            case 1:
-            case 3:
-            case 5:
-            case 7:
-                SEQAN_ASSERT_EQ(meta, meta2);
-                SEQAN_ASSERT_EQ(seq, seq2);
-                break;
-        }
-    }
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta1, seq1, qual1, Fastq()), 0);
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta2, seq2, qual2, Fastq()), 0);
+    streamPut(outStream, '\0');
 
-    file.close();
+    char const * EXPECTED =
+            "@meta1\n"
+            "CGATN\n"
+            "+\n"
+            "!!!!!\n"
+            "@  meta2 \n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN\n"
+            "+\n"
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    SEQAN_ASSERT_EQ(CharString(buffer), CharString(EXPECTED));
+}
+
+SEQAN_DEFINE_TEST(test_stream_write_record_fastq_linebreaks_qualmeta)
+{
+    using namespace seqan;
+
+    char buffer[1000];
+    Stream<CharArray<char *> > outStream(&buffer[0], &buffer[0] + 1000);
+
+    CharString meta1 = "meta1";
+    CharString meta2 = "  meta2 ";
+    Dna5String seq1 = "CGATN";
+    Dna5String seq2 = "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN";
+    CharString qual1 = "!!!!!";
+    CharString qual2 = "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta1, seq1, qual1, Fastq(), WRITEQUALITIESMETA | LINEBREAKS), 0);
+    SEQAN_ASSERT_EQ(writeRecord(outStream, meta2, seq2, qual2, Fastq(), WRITEQUALITIESMETA | LINEBREAKS), 0);
+    streamPut(outStream, '\0');
+
+    char const * EXPECTED =
+            "@meta1\n"
+            "CGATN\n"
+            "+meta1\n"
+            "!!!!!\n"
+            "@  meta2 \n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN\n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTN\n"
+            "+  meta2 \n"
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    SEQAN_ASSERT_EQ(CharString(buffer), CharString(EXPECTED));
 }
 
 #endif // def TEST_STREAM_TEST_STREAM_WRITE_FASTA_H_

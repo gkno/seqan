@@ -243,7 +243,10 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
      * Only fstream used as a representative */
 
     // Tests for FASTA
-    SEQAN_CALL_TEST(test_stream_write_record_fasta);
+    SEQAN_CALL_TEST(test_stream_write_record_fasta_default);
+    SEQAN_CALL_TEST(test_stream_write_record_fasta_nolinebreaks);
+    SEQAN_CALL_TEST(test_stream_write_record_fastq_default);
+    SEQAN_CALL_TEST(test_stream_write_record_fastq_linebreaks_qualmeta);
 }
 SEQAN_END_TESTSUITE
 
