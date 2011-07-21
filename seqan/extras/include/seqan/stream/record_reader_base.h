@@ -98,6 +98,18 @@ class RecordReader;
 ...type:Class.RecordReader
 ..include:seqan/stream.h
 
+.Function.nextIs
+..cat:Input/Output
+..signature:nextIs(recordReader, tag)
+..summary:Query whether the next record is of a given type.
+..param.recordReader:The @Class.RecordReader@ to peek into.
+...type:Class.RecordReader
+...remarks:Stays unchanged.
+..param.tag:Tag to select the given record type.
+..returns:$bool$ indicating whether the next record in $recordReader$ is of type given by tag.
+..remarks:The checks are mostly heuristic, mostly looking at one or few characters from recordReader.
+..include:seqan/stream.h
+
 .Function.atEnd
 ..cat:Input/Output
 ..summaryDISABLED:Returns $true$ if there is no more data to be read.

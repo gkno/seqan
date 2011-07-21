@@ -54,6 +54,7 @@
 #include "test_stream_record_reader_fastq.h"
 #include "test_stream_guess_stream_format.h"
 #include "test_stream_write_fasta.h"
+#include "test_stream_read_embl.h"
 
 SEQAN_BEGIN_TESTSUITE(test_stream)
 {
@@ -212,6 +213,14 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_concat_mmap);
+
+    // Tests for EMBL
+    SEQAN_CALL_TEST(test_stream_read_embl_single_char_array_stream);
+    SEQAN_CALL_TEST(test_stream_read_embl_record_char_array_stream);
+    SEQAN_CALL_TEST(test_stream_read_embl_batch_char_array_stream);
+    SEQAN_CALL_TEST(test_stream_read_embl_single_mmap);
+    SEQAN_CALL_TEST(test_stream_read_embl_single_batch_mmap);
+    SEQAN_CALL_TEST(test_stream_read_embl_single_batch_concat_mmap);
 
     // TODO Tests for other formats once they are supported
 

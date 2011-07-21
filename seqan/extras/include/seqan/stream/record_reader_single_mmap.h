@@ -140,7 +140,7 @@ goNext(RecordReader<TMMapString, SinglePass<Mapped> > & recordReader)
 {
     SEQAN_ASSERT(recordReader._current != recordReader._end);
     recordReader._current += 1;
-    return true;
+    return false;
 }
 
 // ----------------------------------------------------------------------------

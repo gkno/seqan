@@ -121,7 +121,7 @@
 
 #include <seqan/stream/guess_stream_format.h>
 #include <seqan/stream/read_fasta_fastq.h>
-// #include <seqan/stream/read_sam.h>
+#include <seqan/stream/read_embl.h>
 
 #include <seqan/stream/write_fasta_fastq.h>
 
