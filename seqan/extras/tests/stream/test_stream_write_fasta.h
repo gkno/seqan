@@ -150,4 +150,62 @@ SEQAN_DEFINE_TEST(test_stream_write_record_fastq_linebreaks_qualmeta)
     SEQAN_ASSERT_EQ(CharString(buffer), CharString(EXPECTED));
 }
 
+SEQAN_DEFINE_TEST(test_stream_write2_fasta_default)
+{
+    using namespace seqan;
+
+    char buffer[1000];
+    Stream<CharArray<char *> > outStream(&buffer[0], &buffer[0] + 1000);
+
+    StringSet<CharString> metas;
+    appendValue(metas, "meta1");
+    appendValue(metas, "  meta2 ");
+    StringSet<Dna5String> seqs;
+    appendValue(seqs, "CGATN");
+    appendValue(seqs, "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN");
+    
+    SEQAN_ASSERT_EQ(write2(outStream, metas, seqs, Fasta()), 0);
+    streamPut(outStream, '\0');
+
+    char const * EXPECTED =
+            ">meta1\n"
+            "CGATN\n"
+            ">  meta2 \n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN\n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTN\n";
+    SEQAN_ASSERT_EQ(CharString(buffer), CharString(EXPECTED));
+}
+
+SEQAN_DEFINE_TEST(test_stream_write2_fastq_default)
+{
+    using namespace seqan;
+
+    char buffer[1000];
+    Stream<CharArray<char *> > outStream(&buffer[0], &buffer[0] + 1000);
+
+    StringSet<CharString> metas;
+    appendValue(metas, "meta1");
+    appendValue(metas, "  meta2 ");
+    StringSet<Dna5String> seqs;
+    appendValue(seqs, "CGATN");
+    appendValue(seqs, "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN");
+    StringSet<CharString> quals;
+    appendValue(quals, "!!!!!");
+    appendValue(quals, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+    SEQAN_ASSERT_EQ(write2(outStream, metas, seqs, quals, Fastq()), 0);
+    streamPut(outStream, '\0');
+
+    char const * EXPECTED =
+            "@meta1\n"
+            "CGATN\n"
+            "+\n"
+            "!!!!!\n"
+            "@  meta2 \n"
+            "CCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTNCCCAAATTTN\n"
+            "+\n"
+            "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    SEQAN_ASSERT_EQ(CharString(buffer), CharString(EXPECTED));
+}
+
 #endif // def TEST_STREAM_TEST_STREAM_WRITE_FASTA_H_
