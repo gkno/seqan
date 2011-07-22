@@ -1496,6 +1496,19 @@ getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 
+/**
+.Function.convertAlignment
+..signature:convertAlignment(g, component, order, compLength)
+..remarks:The variant with $component$ and $order$ computes a topological sorting of connected components.
+..param.g:Alignment graph to convert.
+..param.component:Vertex to component mapping.
+..param.order:The order of the component graph when sorting topologically.
+..param.compLength:Component sizes.
+..include:seqan/refinement.h
+*/
+
+// TODO(holtgrew): According to trausch might have to be touched when vertices can have labels of different length.
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TComponentMap, typename TOrderMap, typename TComponentLength> 
 inline bool
 convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
