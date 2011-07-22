@@ -76,7 +76,7 @@ enum EmblErrorCodes_
 // ----------------------------------------------------------------------------
 
 /**
-.Function
+.Function.startsWith
 ..cat:Input/Output
 ..signature:startsWith(str, prefix)
 ..summary:Check whether a sequence starts with a given prefix.
@@ -95,11 +95,11 @@ bool startsWith(TLhs const & lhs, TRhs const & rhs)
 }
 
 // ----------------------------------------------------------------------------
-// Function splitEmblHeade()
+// Function splitEmblHeader()
 // ----------------------------------------------------------------------------
 
 /**
-.Function
+.Function.splitEmblHeader
 ..cat:Input/Output
 ..signature:startsWith(key, value, line)
 ..summary:Split an EMBL header line.

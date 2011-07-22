@@ -245,10 +245,12 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     // Tests for FASTA
     SEQAN_CALL_TEST(test_stream_write_record_fasta_default);
     SEQAN_CALL_TEST(test_stream_write_record_fasta_nolinebreaks);
-    SEQAN_CALL_TEST(test_stream_write_record_fastq_default);
+    SEQAN_CALL_TEST(test_stream_write_record_fastq_default_separate_qual);
+    SEQAN_CALL_TEST(test_stream_write_record_fastq_default_qual_in_seq);
     SEQAN_CALL_TEST(test_stream_write_record_fastq_linebreaks_qualmeta);
     SEQAN_CALL_TEST(test_stream_write2_fasta_default);
-    SEQAN_CALL_TEST(test_stream_write2_fastq_default);
+    SEQAN_CALL_TEST(test_stream_write2_fastq_default_separate_qual);
+    SEQAN_CALL_TEST(test_stream_write2_fastq_default_qual_in_seq);
 }
 SEQAN_END_TESTSUITE
 

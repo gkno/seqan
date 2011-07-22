@@ -164,6 +164,114 @@ writeRecord(TStream & stream,
 .Function.writeRecord
 ..signature:writeRecord(TStream & stream, TIdString const & meta, TSeqString const & seq, TQualString const & qual, Fastq const &[, FastAQOutputOptions const options])
 */
+
+template <typename TStream, typename TSequence, typename TQualString>
+inline int _writeRecordFastq(TStream & stream, TSequence const & seq, TQualString const &, unsigned const options, True const & /*HasQualities<Value<TSequence>::Type>::VALUE*/)
+{
+    int res = 0;
+
+    if (options & LINEBREAKS)
+    {
+        // write stream character by character
+        typename Iterator<TSequence const>::Type it = begin(seq);
+        typename Iterator<TSequence const>::Type it_end = end(seq);
+        for (unsigned long l = 0; it < it_end; ++it)
+        {
+            res = streamPut(stream, static_cast<char>('!' + getQualityValue(*it)));
+            if (res)
+                return res;
+            if (++l == 70)
+            {
+                res = streamPut(stream, '\n');
+                l = 0;
+                if (res)
+                    return res;
+            }
+        }
+        if (res)
+            return res;
+    }
+    else
+    {
+        typename Iterator<TSequence const>::Type it = begin(seq);
+        typename Iterator<TSequence const>::Type it_end = end(seq);
+        for (; it < it_end; ++it)
+        {
+            res = streamPut(stream, static_cast<char>('!' + getQualityValue(*it)));
+            if (res)
+                return res;
+        }
+    }
+
+    return 0;
+}
+
+
+template <typename TStream, typename TSequence, typename TQualString>
+inline int _writeRecordFastq(TStream & stream, TSequence const & seq, TQualString const & qual, unsigned const options, False const & /*HasQualities<Value<TSequence>::Type>::VALUE*/)
+{
+    int res = 0;
+
+    if (qual == "") // we don't actually have qualities
+    {
+        if (options & LINEBREAKS)
+        {
+            for (unsigned long i = 0, l = 0;
+                 i < length(seq);
+                 ++i)
+            {
+                res = streamPut(stream, char(126));
+                if (res)
+                    return res;
+                if (++l == 70)
+                {
+                    res = streamPut(stream, '\n');
+                    l = 0;
+                    if (res)
+                        return res;
+                }
+            }
+        } else
+        {
+            for (unsigned long i = 0; i < length(seq); ++i)
+            {
+                res = streamPut(stream, char(126));
+                if (res)
+                    return res;
+            }
+        }
+    } else
+    {
+        if (options & LINEBREAKS)
+        {
+            // write stream character by character
+            typename Iterator<TQualString const>::Type it = begin(qual);
+            typename Iterator<TQualString const>::Type it_end = end(qual);
+            for (unsigned long l = 0; it < it_end; ++it)
+            {
+                res = streamPut(stream, *it);
+                if (res)
+                    return res;
+                if (++l == 70)
+                {
+                    res = streamPut(stream, '\n');
+                    l = 0;
+                    if (res)
+                        return res;
+                }
+            }
+            if (res)
+                return res;
+        } else
+        {
+            res = streamPut(stream, qual);
+            if (res)
+                return res;
+        }
+    }
+    return 0;
+}
+
 // FASTQ
 template <typename TStream,
           typename TIdString,
@@ -231,63 +339,9 @@ writeRecord(TStream & stream,
     if (res)
         return res;
 
-    if (qual == "") // we don't actually have qualities
-    {
-        if (options & LINEBREAKS)
-        {
-            for (unsigned long i = 0, l = 0;
-                 i < length(seq);
-                 ++i)
-            {
-                res = streamPut(stream, char(126));
-                if (res)
-                    return res;
-                if (++l == 70)
-                {
-                    res = streamPut(stream, '\n');
-                    l = 0;
-                    if (res)
-                        return res;
-                }
-            }
-        } else
-        {
-            for (unsigned long i = 0; i < length(seq); ++i)
-            {
-                res = streamPut(stream, char(126));
-                if (res)
-                    return res;
-            }
-        }
-    } else
-    {
-        if (options & LINEBREAKS)
-        {
-            // write stream character by character
-            typename Iterator<TQualString const>::Type it = begin(qual);
-            typename Iterator<TQualString const>::Type it_end = end(qual);
-            for (unsigned long l = 0; it < it_end; ++it)
-            {
-                res = streamPut(stream, *it);
-                if (res)
-                    return res;
-                if (++l == 70)
-                {
-                    res = streamPut(stream, '\n');
-                    l = 0;
-                    if (res)
-                        return res;
-                }
-            }
-            if (res)
-                return res;
-        } else
-        {
-            res = streamPut(stream, qual);
-            if (res)
-                return res;
-        }
-    }
+    res = _writeRecordFastq(stream, seq, qual, options, typename HasQualities<typename Value<TSeqString>::Type>::Type());
+    if (res)
+        return res;
     res = streamPut(stream, '\n');
     return res;
 }
@@ -395,7 +449,7 @@ int write2(TStream & stream,
 
 /**
 .Function.write2
-..signature:write2(TStream & stream, StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, StringSet<TQualString, TQualSpec> & qualities, Fastq const &[, FastAQOutputOptions const options])
+..signature:write2(TStream & stream, StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, [StringSet<TQualString, TQualSpec> & qualities, ]Fastq const &[, FastAQOutputOptions const options])
 */
 // FASTQ
 template <typename TStream,
@@ -452,12 +506,6 @@ int write2(TStream & stream,
                   DEFAULT_FASTQ);
 }
 
-/**
-.Function.write2
-..signature:write2(TStream & stream, StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, Fastq const &[, FastAQOutputOptions const options])
-..remarks:Writing to FASTQ without specifying qualities currently will result in all qualities being set to maximum ('\126')
-*/
-// FASTQ and we don't have qualities
 template <typename TStream,
           typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec>
@@ -467,27 +515,18 @@ int write2(TStream & stream,
          Fastq const & /*tag*/,
          FastAQOutputOptions const options)
 {
-    if (length(sequenceIds) != length(sequences))
-        return -1;
-
-    typedef StringSet<TIdString, TIdSpec>   TIdSet;
+    typedef StringSet<TIdString, TIdSpec> TIdSet;
     typedef StringSet<TSeqString, TSeqSpec> TSeqSet;
-    typedef StringSet<CharString>           TQualSet;
-
-    TQualSet qualities;
-    resize(qualities, length(sequences));
 
     typename Iterator<TIdSet>::Type   itMeta      = begin(sequenceIds);
     typename Iterator<TIdSet>::Type   itMeta_end  = end(sequenceIds);
     typename Iterator<TSeqSet>::Type  itSeq       = begin(sequences);
     typename Iterator<TSeqSet>::Type  itSeq_end   = end(sequences);
-    typename Iterator<TQualSet>::Type itQual      = begin(qualities);
-    typename Iterator<TQualSet>::Type itQual_end  = end(qualities);
 
-    for (; itMeta != itMeta_end; ++itMeta, ++itSeq, ++itQual)
+    for (; itMeta != itMeta_end; ++itMeta, ++itSeq)
     {
         int res = writeRecord(stream,
-                              *itMeta, *itSeq, *itQual,
+                              *itMeta, *itSeq,
                               Fastq(),
                               options);
         if (res)
@@ -498,8 +537,7 @@ int write2(TStream & stream,
 
 template <typename TStream,
           typename TIdString, typename TIdSpec,
-          typename TSeqString, typename TSeqSpec,
-          typename TQualString, typename TQualSpec>
+          typename TSeqString, typename TSeqSpec>
 int write2(TStream & stream,
          StringSet<TIdString, TIdSpec> & sequenceIds,
          StringSet<TSeqString, TSeqSpec> & sequences,
@@ -510,7 +548,6 @@ int write2(TStream & stream,
                   Fastq(),
                   DEFAULT_FASTQ);
 }
-
 
 }  // namespace seqan
 

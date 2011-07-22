@@ -82,7 +82,7 @@ enum GenBankErrorCodes_
 // ----------------------------------------------------------------------------
 
 /**
-.Function
+.Function.splitGenBankHeader
 ..cat:Input/Output
 ..signature:splitGenBankHeader(key, value, lines)
 ..summary:Split an GenBank header field/value.
