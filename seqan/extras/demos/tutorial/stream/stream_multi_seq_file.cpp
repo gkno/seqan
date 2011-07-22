@@ -45,6 +45,6 @@ int main (int argc, char const ** argv)
         appendValue(seqs, seq, Generous());
         appendValue(seqIDs, id, Generous());
     }
-
+// FRAGMENT(return)
     return 0;
 }
