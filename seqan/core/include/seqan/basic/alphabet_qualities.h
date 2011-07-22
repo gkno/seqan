@@ -53,6 +53,7 @@ namespace seqan {
 ..summary:An alphabet where qualities can be attached to the characters.
 
 .Metafunction.QualityValueSize.concept:Concept.Alphabet With Qualities
+.Metafunction.HasQualities.concept:Concept.Alphabet With Qualities
 .Function.getQualityValue.concept:Concept.Alphabet With Qualities
 .Function.convertQuality.concept:Concept.Alphabet With Qualities
 .Function.assignQualityValue.concept:Concept.Alphabet With Qualities
@@ -86,6 +87,24 @@ struct QualityValueSize
 
 template <typename TValue>
 struct QualityValueSize<TValue const> : QualityValueSize<TValue> {};
+
+/**
+.Metafunction.HasQualities
+..cat:Alphabets
+..summary:Return whether the given type stores qualities besides the alphabet.
+..signature:HasQualities<TAlphabet>::VALUE
+..signature:HasQualities<TAlphabet>::Type
+..param.TAlphabet:The alphabe to query.
+..returns:$true$, $false$, $True$, or $False$.
+..include:seqan/basic.h
+*/
+
+template <typename TValue>
+struct HasQualities
+{
+    enum { VALUE = false };
+    typedef False Type;
+};
 
 // ============================================================================
 // Functions

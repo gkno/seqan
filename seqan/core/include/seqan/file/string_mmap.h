@@ -152,6 +152,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 #endif
 		MMapAdviseScheme	scheme;
 
+        // TODO(holtgrew): Explicit?
 		String(TSize size = 0):
 			data_begin(0),
 			data_end(0),
@@ -165,6 +166,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 			resize(*this, size);
         }
 
+        // TODO(holtgrew): Explicit?
 		String(TFile &_file):
 			data_begin(0),
 			data_end(0),
@@ -175,7 +177,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 			open(*this, _file);
         }
 
-		String(const char *fileName, int openMode = DefaultOpenMode<TFile>::VALUE):
+		explicit String(const char *fileName, int openMode = DefaultOpenMode<TFile>::VALUE):
 			data_begin(0),
 			data_end(0),
 			data_capacity(0),
