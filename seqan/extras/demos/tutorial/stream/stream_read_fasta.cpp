@@ -19,16 +19,16 @@ int main(int argc, char const ** argv)
     }
     
 // FRAGMENT(read-sequences)
+    // Open file and create RecordReader.
     std::ifstream fasta(argv[1], std::ios_base::in | std::ios_base::binary);
     if (!fasta.good())
-    {
-        std::cerr << "Could not open " << argv[1] << std::endl;
         return 1;
-    }
     RecordReader<std::ifstream, SinglePass<> > reader(fasta);
     
+    // Define variables for storing the sequences and sequence ids.
     CharString id;
     Dna5String seq;
+    // Read FASTA file and output "$id\t$seq".
     while (!atEnd(reader))
     {
         if (readRecord(id, seq, reader, Fasta()) != 0)
