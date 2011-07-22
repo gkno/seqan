@@ -173,6 +173,12 @@ _charCompare(int const c, Tag<Dna_> const & /* tag*/)
 }
 
 inline int
+_charCompare(int const c, Tag<DnaQ_> const & /* tag*/)
+{
+    return _charCompare(c, Tag<Dna_>());
+}
+
+inline int
 _charCompare(int const c, Tag<Dna5_> const & /* tag*/)
 {
     switch (c)
@@ -190,6 +196,12 @@ _charCompare(int const c, Tag<Dna5_> const & /* tag*/)
             return true;
     }
     return false;
+}
+
+inline int
+_charCompare(int const c, Tag<Dna5Q_> const & /* tag*/)
+{
+    return _charCompare(c, Tag<Dna5_>());
 }
 
 template <typename TSpec>

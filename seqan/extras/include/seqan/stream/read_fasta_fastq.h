@@ -208,6 +208,23 @@ _clearAndReserveMemory(TIdString & meta, TSeqString & seq,
     return 0;
 }
 
+template <typename TIdString,
+          typename TSeqString,
+          typename TQualString,
+          typename TFile,
+          typename TSpec,
+          typename TTag>
+inline int
+_clearAndReserveMemory(TIdString & meta, TSeqString & seq, TQualString & qual,
+                       RecordReader<TFile, TSpec> & reader,
+                       TTag const & tag)
+{
+    int res = _clearAndReserveMemory(meta, seq, reader, tag);
+    clear(qual);
+    reserve(qual, capacity(seq), Exact());
+    return res;
+}
+
 // ----------------------------------------------------------------------------
 // Function _readMetaAndSequence() and helpers
 // ----------------------------------------------------------------------------
@@ -315,7 +332,51 @@ _skipQualityBlock(RecordReader<TFile, TPass > & reader,
     return 0;
 }
 
-// This reads Meta and Sequence
+// Reading of the quality block.
+template <typename TSeqString, typename TFile, typename TPass>
+inline int _readQualityBlockHelper(TSeqString & seq,
+                                   RecordReader<TFile, TPass > & reader,
+                                   unsigned const seqLength,
+                                   True const & /*assign qualities to seq*/)
+{
+    // Copy of readNCharsIgnoringWhitespace but we assign to seq instead of appending
+    // to a string.
+    typedef typename Iterator<TSeqString, Rooted>::Type TSeqIter;
+    TSeqIter it = begin(seq, Rooted());
+    
+    for (unsigned i = 0; i < seqLength; ++i)
+    {
+        if (atEnd(reader))
+            return EOF_BEFORE_SUCCESS;
+
+        if (_charCompare(value(reader), Whitespace_()))
+        {
+            --i;
+        }
+        else
+        {
+            SEQAN_ASSERT(!atEnd(it));
+            assignQualityValue(*it, value(reader));
+            goNext(it);
+        }
+
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return 0;
+}
+
+template <typename TQualString, typename TFile, typename TPass>
+inline int _readQualityBlockHelper(TQualString & qual,
+                                   RecordReader<TFile, TPass > & reader,
+                                   unsigned const seqLength,
+                                   False const & /*qual is character sequence*/)
+{
+    reserve(qual, seqLength, Exact());
+    return readNCharsIgnoringWhitespace(qual, reader, seqLength);
+}
+
 template <typename TIdString,
           typename TQualString,
           typename TFile,
@@ -349,8 +410,7 @@ _readQualityBlock(TQualString & qual,
         return 0;
 
     // READ QUALITIES
-    reserve(qual, seqLength, Exact());
-    res = readNCharsIgnoringWhitespace(qual, reader, seqLength);
+    res = _readQualityBlockHelper(qual, reader, seqLength, typename HasQualities<typename Value<TQualString>::Type>::Type());
     // there have to be n qualities
     if (res)
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
@@ -373,27 +433,49 @@ _readQualityBlock(TQualString & qual,
 ..signature:readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, Fastq const &)
 */
 
-// FASTA or FASTQ, if we don't want the qualities
 template <typename TIdString,
           typename TSeqString,
           typename TFile,
-          typename TPass,
-          typename TTag>
+          typename TPass>
 inline int
 readRecord(TIdString & meta,
            TSeqString & seq,
            RecordReader<TFile, TPass > & reader,
-           TTag const & /*tag*/)
+           Fasta const & /*tag*/)
 {
-    int res = _clearAndReserveMemory(meta, seq, reader, TTag());
+    int res = _clearAndReserveMemory(meta, seq, reader, Fasta());
     if (res)
         return res;
 
-    res = _readMetaAndSequence(meta, seq, reader, TTag());
+    res = _readMetaAndSequence(meta, seq, reader, Fasta());
     if (res)
         return res;
 
-    return _skipQualityBlock(reader, length(seq), TTag());
+    return _skipQualityBlock(reader, length(seq), Fasta());
+}
+
+template <typename TIdString,
+          typename TSeqString,
+          typename TFile,
+          typename TPass>
+inline int
+readRecord(TIdString & meta,
+           TSeqString & seq,
+           RecordReader<TFile, TPass > & reader,
+           Fastq const & /*tag*/)
+{
+    int res = _clearAndReserveMemory(meta, seq, reader, Fastq());
+    if (res)
+        return res;
+
+    res = _readMetaAndSequence(meta, seq, reader, Fastq());
+    if (res)
+        return res;
+
+    if (HasQualities<typename Value<TSeqString>::Type>::VALUE)
+        return _readQualityBlock(seq, reader, length(seq), meta, Fastq());
+    else
+        return _skipQualityBlock(reader, length(seq), Fastq());
 }
 
 
@@ -403,7 +485,7 @@ readRecord(TIdString & meta,
 ..remarks:For FASTQ-Files a double-Pass implementation of RecordReader is implemented, which offers better performance. Just pass a Double-Pass reader object (only works with seekable Streams).
 */
 
-// FASTQ and we want the qualities
+// FASTQ and we want explicit qualities
 template <typename TIdString,
           typename TSeqString,
           typename TQualString,
@@ -416,7 +498,7 @@ readRecord(TIdString & meta,
            RecordReader<TFile, TPass > & reader,
            Fastq const & /*tag*/)
 {
-    int res = _clearAndReserveMemory(meta, seq, reader, Fastq());
+    int res = _clearAndReserveMemory(meta, seq, qual, reader, Fastq());
     if (res)
         return res;
 
@@ -433,6 +515,35 @@ readRecord(TIdString & meta,
 
 // Reads a whole FASTA/FASTQ file into string sets, optimizing memory usage.
 // optimized for ConcatDirect StringSets
+
+template <typename TIdString, typename TSeqString, typename TQualString, typename TRecordReader>
+inline int
+_readFastAQQualityReadDispatcher(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
+                                 StringSet<TSeqString, Owner<ConcatDirect<> > > & sequences,
+                                 StringSet<TQualString, Owner<ConcatDirect<> > > & /*qualities*/,
+                                 TRecordReader & reader,
+                                 unsigned i,
+                                 True const & /*seq has qualities*/)
+{
+    typedef StringSet<TSeqString, Owner<ConcatDirect<> > > TSequenceSet;
+    typedef typename Concatenator<TSequenceSet>::Type TConcat;
+    typedef typename Suffix<TConcat>::Type TSuffix;
+    TSuffix s(concat(sequences), sequences.limits[i]);
+    return _readQualityBlock(s, reader, length(sequences[i]), sequenceIds[i], Fastq());
+}
+
+template <typename TIdString, typename TSeqString, typename TQualString, typename TRecordReader>
+inline int
+_readFastAQQualityReadDispatcher(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
+                                 StringSet<TSeqString, Owner<ConcatDirect<> > > & sequences,
+                                 StringSet<TQualString, Owner<ConcatDirect<> > > & qualities,
+                                 TRecordReader & reader,
+                                 unsigned i,
+                                 False const & /*qualities are explicit*/)
+{
+    return _readQualityBlock(qualities.concat, reader, length(sequences[i]), sequenceIds[i], Fastq());
+}
+
 template <typename TIdString,
           typename TSeqString,
           typename TQualString,
@@ -481,7 +592,7 @@ int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
     // ------------------------------------------------------------------------
     clear(sequenceIds);
     clear(sequences);
-    if (withQual)
+    if (withQual && !HasQualities<typename Value<TSeqString>::Type>::VALUE)
         clear(qualities);
 
     resize(sequenceIds.limits, sequenceCount + 1, Exact());
@@ -502,7 +613,7 @@ int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
 
     reserve(sequenceIds.concat, metaLengthsSum + 1, Exact());
     reserve(sequences.concat, seqLengthsSum + 1, Exact());
-    if (withQual)
+    if (withQual && !HasQualities<typename Value<TSeqString>::Type>::VALUE)
     {
         assign(qualities.limits, sequences.limits);
         reserve(qualities.concat, seqLengthsSum + 1, Exact());
@@ -529,13 +640,13 @@ int _readFastAQ(StringSet<TIdString, Owner<ConcatDirect<> > > & sequenceIds,
                 return res;
         }
         if (withQual)
-            res = _readQualityBlock(qualities.concat,
-                                    reader,
-                                    length(sequences[i]),
-                                    sequenceIds[i],
-                                    Fastq());
+        {
+            _readFastAQQualityReadDispatcher(sequenceIds, sequences, qualities, reader, i, typename HasQualities<typename Value<TSeqString>::Type>::Type());
+        }
         else
+        {
             res = _skipQualityBlock(reader, length(sequences[i]), TTag());
+        }
         if (res)
             return res;
     }
@@ -593,19 +704,19 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
     // ------------------------------------------------------------------------
     clear(sequenceIds);
     clear(sequences);
-    if (withQual)
+    if (withQual && !HasQualities<typename Value<TSeqString>::Type>::VALUE)
         clear(qualities);
 
     resize(sequenceIds, sequenceCount, Exact());
     resize(sequences, sequenceCount, Exact());
-    if (withQual)
+    if (withQual && !HasQualities<typename Value<TSeqString>::Type>::VALUE)
         resize(qualities, sequenceCount, Exact());
 
     for (unsigned int i = 0; i < sequenceCount; ++i)
     {
         reserve(sequenceIds[i], metaLengths[i], Exact());
         reserve(sequences[i], seqLengths[i], Exact());
-        if (withQual)
+        if (withQual && !HasQualities<typename Value<TSeqString>::Type>::VALUE)
             reserve(qualities[i], seqLengths[i], Exact());
     }
 
@@ -630,13 +741,16 @@ int _readFastAQ(StringSet<TIdString, TIdSpec> & sequenceIds,
                 return res;
         }
         if (withQual)
-            res = _readQualityBlock(qualities[i],
-                                    reader,
-                                    length(sequences[i]),
-                                    sequenceIds[i],
-                                    Fastq());
+        {
+            if (HasQualities<typename Value<TSeqString>::Type>::VALUE)
+                res = _readQualityBlock(sequences[i], reader, length(sequences[i]), sequenceIds[i], Fastq());
+            else
+                res = _readQualityBlock(qualities[i], reader, length(sequences[i]), sequenceIds[i], Fastq());
+        }
         else
+        {
             res = _skipQualityBlock(reader, length(sequences[i]), TTag());
+        }
         if (res)
             return res;
     }
@@ -667,7 +781,7 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
 ..signature:read2(StringSet<TIdString, TIdSpec> & sequenceIds, StringSet<TSeqString, TSeqSpec> & sequences, RecordReader<TFile, DoublePass<TSpec> > & reader, Fastq const &)
 */
 
-// FASTQ, if we don't want the qualities
+// FASTQ, if we don't have explicit qualities.
 template <typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec,
           typename TFile,
@@ -677,8 +791,9 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
          RecordReader<TFile, DoublePass<TSpec> > & reader,
          Fastq const & /*tag*/)
 {
+    typedef typename Value<TSeqString>::Type TChar;
     StringSet<CharString, TSeqSpec> qualities;
-    return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fastq());
+    return _readFastAQ(sequenceIds, sequences, qualities, reader, HasQualities<TChar>::VALUE, Fastq());
 }
 
 /**
@@ -701,15 +816,79 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
     return _readFastAQ(sequenceIds, sequences, qualities, reader, true, Fastq());
 }
 
+// ----------------------------------------------------------------------------
+// Function read();  Single-Pass
+// ----------------------------------------------------------------------------
+
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TFile,
+          typename TSpec, typename TTag>
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+          StringSet<TSeqString, TSeqSpec> & sequences,
+          RecordReader<TFile, SinglePass<TSpec> > & reader,
+          TTag const & tag)
+{
+    TIdString id;
+    TSeqString seq;
+    while (!atEnd(reader))
+    {
+        int res = readRecord(id, seq, reader, tag);
+        if (res != 0)
+            return res;
+        appendValue(sequenceIds, id);
+        appendValue(sequences, seq);
+    }
+    return 0;
+}
+
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec,
+          typename TFile,
+          typename TSpec>
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TQualString, TQualSpec> & qualities,
+         RecordReader<TFile, SinglePass<TSpec> > & reader,
+         Fastq const & tag)
+{
+    TIdString id;
+    TSeqString seq;
+    TQualString qual;
+    while (!atEnd(reader))
+    {
+        int res = readRecord(id, seq, qual, reader, tag);
+        if (res != 0)
+            return res;
+        appendValue(sequenceIds, id);
+        appendValue(sequences, seq);
+        appendValue(qualities, qual);
+    }
+    return 0;
+}
 
 // ----------------------------------------------------------------------------
 // Function checkStreamFormat()
 // ----------------------------------------------------------------------------
 
-//TODO(h4nn3s): dddoc
+/**
+.Function.checkStreamFormat
+..summary:Check whether a file is of a given format.
+..signature:checkStreamFormat(reader, tag)
+..returns:$bool$, indicating whether the file of $reader$ is of the given format.
+..param.reader:RecordReader to query.
+...type:Class.RecordReader
+..param.tag:Format indicator
+...type:Tag.File Format
+...type:nolink:$Fasta$
+...type:nolink:$Fastq$
+..include:seqan/stream.h
+*/
+
 template <typename TStream, typename TPass>
 inline bool
-checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fasta const & /*tag*/)
+checkStreamFormat(RecordReader<TStream, TPass> & reader, Fasta const & /*tag*/)
 {
     LimitRecordReaderInScope<TStream, TPass> limiter(reader);
     while (!atEnd(reader))
@@ -724,10 +903,9 @@ checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fasta const & /*tag*/)
     return true;
 }
 
-//TODO(h4nn3s): dddoc
 template <typename TStream, typename TPass>
 inline bool
-checkStreamFormat(RecordReader<TStream, TPass> &  reader, Fastq const & /*tag*/)
+checkStreamFormat(RecordReader<TStream, TPass> & reader, Fastq const & /*tag*/)
 {
     LimitRecordReaderInScope<TStream, TPass> limiter(reader);
     while (!atEnd(reader))

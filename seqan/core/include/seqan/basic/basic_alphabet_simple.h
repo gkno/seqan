@@ -542,7 +542,7 @@ template <> struct ValueSize< DnaQ > { enum { VALUE = 4 }; };				// considering 
 template <> struct InternalValueSize_< DnaQ > { enum { VALUE = 252 }; };	// considering nucleotides x Quality 0..62
 template <> struct BitsPerValue< DnaQ > { enum { VALUE = 8 }; };
 
-template <> struct HasQualities< DnaQ >
+template <> struct HasQualities<DnaQ>
 {
     enum { VALUE = true };
     typedef True Type;
@@ -580,7 +580,7 @@ template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };				// considering
 template <> struct InternalValueSize_< Dna5Q > { enum { VALUE = 253 }; };	// considering (nucleotides x Quality 0..62) + N
 template <> struct BitsPerValue< Dna5Q > { enum { VALUE = 8 }; };
 
-template <> struct HasQualities< Dna5Q >
+template <> struct HasQualities<Dna5Q>
 {
     enum { VALUE = true };
     typedef True Type;

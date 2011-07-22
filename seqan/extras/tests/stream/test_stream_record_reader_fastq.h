@@ -75,24 +75,28 @@ void FASTQ_TEST_BATCH(TRecordReader & reader)
     SEQAN_ASSERT(checkStreamFormat(reader, Fastq()));
 
     StringSet<CharString> metas;
-    StringSet<DnaString> seqs;
-    StringSet<CharString> quals;
+    StringSet<String<DnaQ> > seqs;
 
-    int res = read2(metas, seqs, quals, reader, Fastq());
+    int res = read2(metas, seqs, reader, Fastq());
     SEQAN_ASSERT_EQ(res, 0);
+
+    CharString quals;
+
     SEQAN_ASSERT_EQ(metas[0], "SEQ_ID");
-    SEQAN_ASSERT_EQ(seqs[0],
-                "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
-    SEQAN_ASSERT_EQ(quals[0], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    SEQAN_ASSERT_EQ(seqs[0], "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
     SEQAN_ASSERT_EQ(metas[1], " 2ndSequence with formatting obscurities");
-    SEQAN_ASSERT_EQ(seqs[1],
-                "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
-    SEQAN_ASSERT_EQ(quals[1], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    SEQAN_ASSERT_EQ(seqs[1], "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
     SEQAN_ASSERT(atEnd(reader));
+
+    resize(quals, length(seqs[0]));
+    assignQualities(quals, seqs[0]);
+    SEQAN_ASSERT_EQ(quals, "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    resize(quals, length(seqs[1]));
+    assignQualities(quals, seqs[1]);
+    SEQAN_ASSERT_EQ(quals, "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
 
     SEQAN_ASSERT_EQ(length(metas), 2u);
     SEQAN_ASSERT_EQ(length(seqs), 2u);
-    SEQAN_ASSERT_EQ(length(quals), 2u);
 }
 
 template <typename TRecordReader>
@@ -103,24 +107,30 @@ void FASTQ_TEST_BATCH_CONCAT(TRecordReader & reader)
     SEQAN_ASSERT(checkStreamFormat(reader, Fastq()));
 
     StringSet<CharString, Owner<ConcatDirect<> > > metas;
-    StringSet<DnaString, Owner<ConcatDirect<> > > seqs;
-    StringSet<CharString, Owner<ConcatDirect<> > > quals;
+    StringSet<String<Dna5Q>, Owner<ConcatDirect<> > > seqs;
+    // StringSet<CharString, Owner<ConcatDirect<> > > quals;
 
-    int res = read2(metas, seqs, quals, reader, Fastq());
+    
+    int res = read2(metas, seqs, reader, Fastq());
     SEQAN_ASSERT_EQ(res, 0);
+
+    CharString quals;
+
     SEQAN_ASSERT_EQ(metas[0], "SEQ_ID");
-    SEQAN_ASSERT_EQ(seqs[0],
-                "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
-    SEQAN_ASSERT_EQ(quals[0], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    SEQAN_ASSERT_EQ(seqs[0], "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
     SEQAN_ASSERT_EQ(metas[1], " 2ndSequence with formatting obscurities");
-    SEQAN_ASSERT_EQ(seqs[1],
-                "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
-    SEQAN_ASSERT_EQ(quals[1], "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    SEQAN_ASSERT_EQ(seqs[1], "GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT");
     SEQAN_ASSERT(atEnd(reader));
+
+    resize(quals, length(seqs[0]));
+    assignQualities(quals, seqs[0]);
+    SEQAN_ASSERT_EQ(quals, "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
+    resize(quals, length(seqs[1]));
+    assignQualities(quals, seqs[1]);
+    SEQAN_ASSERT_EQ(quals, "!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65");
 
     SEQAN_ASSERT_EQ(length(metas), 2u);
     SEQAN_ASSERT_EQ(length(seqs), 2u);
-    SEQAN_ASSERT_EQ(length(quals), 2u);
 }
 
 SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_single_fstream)
@@ -151,7 +161,21 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_double_fstream)
     file->close();
 }
 
-SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_fstream)
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_single_fstream)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastQFile(filename);
+
+    typedef RecordReader<std::fstream, DoublePass<void> > TRecordReader;
+    TRecordReader reader(*file);
+
+    FASTQ_TEST_BATCH(reader);
+
+    file->close();
+}
+
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_double_fstream)
 {
     using namespace seqan;
     CharString filename;
@@ -201,7 +225,43 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_double_mmap)
     close(mmapString);
 }
 
-SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_mmap)
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_single_mmap)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastQFile(filename);
+
+    file->close();
+    String<char, MMap<> > mmapString;
+    open(mmapString, toCString(filename));
+
+    typedef RecordReader<String<char, MMap<> >, SinglePass<Mapped> > TRecordReader;
+    TRecordReader reader(mmapString);
+
+    FASTQ_TEST_BATCH(reader);
+
+    close(mmapString);
+}
+
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_single_concat_mmap)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastQFile(filename);
+
+    file->close();
+    String<char, MMap<> > mmapString;
+    open(mmapString, toCString(filename));
+
+    typedef RecordReader<String<char, MMap<> >, SinglePass<Mapped> > TRecordReader;
+    TRecordReader reader(mmapString);
+
+    FASTQ_TEST_BATCH_CONCAT(reader);
+
+    close(mmapString);
+}
+
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_double_mmap)
 {
     using namespace seqan;
     CharString filename;
@@ -219,7 +279,7 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_mmap)
     close(mmapString);
 }
 
-SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_concat_mmap)
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_double_concat_mmap)
 {
     using namespace seqan;
     CharString filename;
@@ -236,6 +296,5 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_concat_mmap)
 
     close(mmapString);
 }
-
 
 #endif // def TEST_STREAM_TEST_STREAM_READ_FASTQ_H_

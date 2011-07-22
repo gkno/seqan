@@ -130,7 +130,21 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_double_fstream)
     file->close();
 }
 
-SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_fstream)
+SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_single_fstream)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastAFile(filename);
+
+    typedef RecordReader<std::fstream, SinglePass<void> > TRecordReader;
+    TRecordReader reader(*file);
+
+    FASTA_TEST_BATCH(reader);
+
+    file->close();
+}
+
+SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_double_fstream)
 {
     using namespace seqan;
     CharString filename;
@@ -180,7 +194,43 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_double_mmap)
     close(mmapString);
 }
 
-SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_mmap)
+SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_single_mmap)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastAFile(filename);
+
+    file->close();
+    String<char, MMap<> > mmapString;
+    open(mmapString, toCString(filename));
+
+    typedef RecordReader<String<char, MMap<> >, SinglePass<Mapped> > TRecordReader;
+    TRecordReader reader(mmapString);
+
+    FASTA_TEST_BATCH(reader);
+
+    close(mmapString);
+}
+
+SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_single_concat_mmap)
+{
+    using namespace seqan;
+    CharString filename;
+    std::fstream *file = createFastAFile(filename);
+
+    file->close();
+    String<char, MMap<> > mmapString;
+    open(mmapString, toCString(filename));
+
+    typedef RecordReader<String<char, MMap<> >, SinglePass<Mapped> > TRecordReader;
+    TRecordReader reader(mmapString);
+
+    FASTA_TEST_BATCH_CONCAT(reader);
+
+    close(mmapString);
+}
+
+SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_double_mmap)
 {
     using namespace seqan;
     CharString filename;
@@ -198,7 +248,7 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_mmap)
     close(mmapString);
 }
 
-SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_concat_mmap)
+SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_double_concat_mmap)
 {
     using namespace seqan;
     CharString filename;
@@ -215,6 +265,5 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fasta_batch_concat_mmap)
 
     close(mmapString);
 }
-
 
 #endif // def TEST_STREAM_TEST_STREAM_READ_FASTA_H_

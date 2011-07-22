@@ -200,20 +200,26 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     // Tests for FASTA
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_fstream);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_single_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_double_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_single_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fasta_double_mmap);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_mmap);
-    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_concat_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_single_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_single_concat_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_double_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_batch_double_concat_mmap);
 
     // Tests for FASTQ
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_fstream);
-    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_single_fstream);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_double_fstream);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_single_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_double_mmap);
-    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_mmap);
-    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_concat_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_single_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_single_concat_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_double_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_double_concat_mmap);
 
     // Tests for EMBL
     SEQAN_CALL_TEST(test_stream_read_embl_single_char_array_stream);
