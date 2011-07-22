@@ -485,8 +485,10 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	// Select all overlapping reads and record the diagonals of the band
 	String<Pair<TId, TId> > pList;
 	String<Pair<int, int> > diagList;
-	if (consOpt.window == 0) selectPairs(seqSet, begEndPos, consOpt.bandwidth, pList, diagList);
-	else selectPairsIndel(seqSet, begEndPos, consOpt.window, pList, diagList);
+	if (consOpt.window == 0)
+        selectPairsAssembly(seqSet, begEndPos, consOpt.bandwidth, pList, diagList);
+	else
+        selectPairsAllAgainstAll(seqSet, begEndPos, consOpt.window, pList, diagList);
 
 	// Set-up a sparse distance matrix
 	Graph<Undirected<double> > pairGraph;

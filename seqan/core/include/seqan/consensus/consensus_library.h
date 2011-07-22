@@ -112,11 +112,11 @@ struct _LessTripel :
 
 template<typename TString, typename TSpec, typename TBegEndPos, typename TSize, typename TPairList, typename TPos, typename TSpec2>
 inline void 
-selectPairs(StringSet<TString, TSpec> const& str,
-			TBegEndPos const& begEndPos,
-			TSize bandwidth,							
-			TPairList& pList,
-			String<Pair<TPos, TPos>, TSpec2>& dList)
+selectPairsAssembly(StringSet<TString, TSpec> const& str,
+			       TBegEndPos const& begEndPos,
+			       TSize bandwidth,							
+			       TPairList& pList,
+			       String<Pair<TPos, TPos>, TSpec2>& dList)
 {
 	SEQAN_CHECKPOINT
 	typedef String<Pair<TPos, TPos>, TSpec2>  TDistanceList;
@@ -332,11 +332,11 @@ selectPairs(StringSet<TString, TSpec> const& str,
 
 template<typename TString, typename TSpec, typename TBegEndPos, typename TSize, typename TPairList, typename TPos, typename TSpec2>
 inline void 
-selectPairsIndel(StringSet<TString, TSpec> const& str,
-				 TBegEndPos const& begEndPos,
-				 TSize lookAround,
-				 TPairList& pList,
-				 String<Pair<TPos, TPos>, TSpec2>& dList)
+selectPairsAllAgainstAll(StringSet<TString, TSpec> const& str,
+				         TBegEndPos const& begEndPos,
+				         TSize lookAround,
+				         TPairList& pList,
+				         String<Pair<TPos, TPos>, TSpec2>& dList)
 {	
 	SEQAN_CHECKPOINT	
 	typedef String<Pair<TPos, TPos>, TSpec2>  TDistanceList;
