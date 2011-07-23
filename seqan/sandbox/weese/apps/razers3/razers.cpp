@@ -27,6 +27,7 @@
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 #define RAZERS_ISLAND_CRITERION         // island match criterion
+#define RAZERS_NOOUTERREADGAPS			// enforce the alignment of the first and last base (determines the lakes)
 
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 #define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)

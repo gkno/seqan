@@ -553,6 +553,7 @@ struct MicroRNA{};
 			{
 				if (!options->spec.DONT_DUMP_RESULTS)
 				{
+//                    std::cout << "begin: "<<m.beginPos <<"\tendPos: "<<m.endPos << "\terrors: "<<m.score <<std::endl;
 					appendValue(*matches, m, Generous());
 
 					if (length(*matches) > options->compactThresh)
@@ -1901,6 +1902,7 @@ matchVerify(
 
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
+	typedef typename Prefix<TRead>::Type					TReadPrefix;
 	typedef typename Position<TGenomeInfix>::Type			TPosition;
 
 	// find read match end
@@ -1912,9 +1914,15 @@ matchVerify(
 	// find read match begin
     // TODO(holtgrew): Use reverse-search here, as well!
 	typedef ModifiedString<TGenomeInfix, ModReverse>		TGenomeInfixRev;
-	typedef ModifiedString<TRead, ModReverse>				TReadRev;
 	typedef Finder<TGenomeInfixRev>							TMyersFinderRev;
+
+#ifdef RAZERS_NOOUTERREADGAPS
+	typedef ModifiedString<TReadPrefix, ModReverse>			TReadRev;
+#else
+	typedef ModifiedString<TRead, ModReverse>				TReadRev;
+#endif
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>			TMyersPatternRev;
+
 
 	TMyersFinder myersFinder(inf);
 #ifndef RAZERS_BANDED_MYERS
@@ -1935,87 +1943,118 @@ matchVerify(
 	TPosition lastPos = length(inf);
 #ifdef RAZERS_ISLAND_CRITERION
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
-#else  // #ifdef RAZERS_ISLAND_CRITERION
-	unsigned minDistance = lastPos;
-    (void)minDistance;
-#endif  // #ifdef RAZERS_ISLAND_CRITERION
+#endif
+
+#ifdef RAZERS_NOOUTERREADGAPS
+	TGenomeInfix origInf(inf);
+	setEndPosition(inf, endPosition(inf) - 1);
+	--ndlLength;
+    TReadPrefix readPrefix = prefix(readSet[readId], ndlLength);
+#else
+    TRead readPrefix(readSet[readId]);  // here only infixes (no sequence) is copied
+#endif
 
 	// find end of best semi-global alignment
 #ifdef RAZERS_BANDED_MYERS
-    TRead read(readSet[readId]);  // here only infixes (no sequence) is copied
-	while (find(myersFinder, read, state, minScore))
+	while (find(myersFinder, readPrefix, state, minScore))
 #else  // #ifdef RAZERS_BANDED_MYERS
     while (find(myersFinder, myersPattern, state, minScore)) 
 #endif  // #ifdef RAZERS_BANDED_MYERS
 	{
 		TPosition const pos = position(hostIterator(myersFinder));
+		int score = getScore(state);
+        
+#ifdef RAZERS_NOOUTERREADGAPS
+		// Manually align the last base of the read
+		//
+		// In this case myersPattern contains the whole read without the
+		// last base. We compare the bases and adjust the score.
+		// We also have to adjust inf and remove the last base of the
+		// genomic region that has to be verified.
+		SEQAN_ASSERT_LT(pos + 1, length(origInf));
+		if ((verifier.options->compMask[ordValue(origInf[pos + 1])] & verifier.options->compMask[ordValue(back(readSet[readId]))]) == 0)
+			if (--score < minScore) continue;
+#endif		
+//        std::cerr << "found " << pos << ", " << length(host(inf)) - pos << ", " << score << "\tlastPos + minDistance == " << lastPos << " + " << minDistance << std::endl;
 #ifdef RAZERS_ISLAND_CRITERION
 		if (lastPos + minDistance < pos)
 		{
 			if (minScore <= maxScore)
 			{
 				verifier.m.endPos = beginPosition(inf) + maxPos + 1;
-				verifier.m.score = -maxScore;
+//				verifier.m.errors = -maxScore;
 
-				verifier.m.pairScore = verifier.m.score =  maxScore;
+				verifier.m.pairScore = verifier.m.score = maxScore;
 				if (maxScore == 0)
 					verifier.m.beginPos = verifier.m.endPos - ndlLength;
 				else
 				{
+					// find beginning of best semi-global alignment
 					TPosition infBeginPos = beginPosition(inf);
 					TPosition infEndPos = endPosition(inf);
+					TPosition newInfEndPos = verifier.m.endPos;
 
-					// find beginning of best semi-global alignment
-					TGenomeInfixRev infRev(inf);
-					
-					TPosition newInfEndPos = infBeginPos + maxPos + 1;
 #ifdef RAZERS_BANDED_MYERS
 					verifier.revPatternState.leftClip = infEndPos - newInfEndPos;
 #endif
-					setEndPosition(inf, verifier.m.endPos = newInfEndPos);
+					setEndPosition(inf, newInfEndPos);
 
-					// limit the beginning to needle length plus errors (== -maxScore)
-					if (length(inf) > ndlLength - maxScore)
-						setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+//					// limit the beginning to needle length plus errors (== -maxScore)
+//					if (length(inf) > ndlLength - maxScore)
+//						setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+
+                    // we eventually have to search before the beginning of our parallelogram
+                    // otherwise alignments of an island in the previous parallelogram
+                    // could be cut and prevent that an island in this parallelgram is found
+                    if (endPosition(inf) > (unsigned)(ndlLength - maxScore))
+                        setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+                    else
+                        setBeginPosition(inf, 0);
 					
-					TReadRev			readRev(readSet[readId]);
-					TMyersFinderRev		myersFinderRev(infRev);
+#ifdef RAZERS_NOOUTERREADGAPS
+                    // The best score must be corrected to hold the score of the prefix w/o the last read base
+                    if ((verifier.options->compMask[ordValue(origInf[maxPos + 1])] & verifier.options->compMask[ordValue(back(readSet[readId]))]) == 0)
+                        ++maxScore;
+#endif
 
-#ifdef RAZERS_BANDED_MYERS
+                    TReadRev			readRev(readPrefix);
+                    TGenomeInfixRev		infRev(inf);
+                    TMyersPatternRev	myersPatternRev(readRev);
+                    TMyersFinderRev		myersFinderRev(infRev);
+
 					verifier.m.beginPos = verifier.m.endPos;
+#ifdef RAZERS_BANDED_MYERS
 					while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
 #else
-					TMyersPatternRev	myersPatternRev(readRev);
-
 					_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
 					_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
 					while (find(myersFinderRev, myersPatternRev, maxScore)) {
 #endif
 						verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
                     }
-
 					setBeginPosition(inf, infBeginPos);
 					setEndPosition(inf, infEndPos);
+#ifdef RAZERS_BANDED_MYERS
+                    if (verifier.m.beginPos == verifier.m.endPos)
+                        continue;
+#endif
 				}
 				// minDistance implicitly forbids to get here with verifier.oneMatchPerBucket == true
 				SEQAN_ASSERT_NOT(verifier.oneMatchPerBucket);
-#ifdef RAZERS_BANDED_MYERS
-				if (verifier.m.beginPos != verifier.m.endPos)
-					verifier.push();
-#else  // RAZERS_BANDED_MYERS
 				SEQAN_ASSERT_LT(verifier.m.beginPos, verifier.m.endPos);
-				verifier.push();
-#endif // RAZERS_BANDED_MYERS
 
+#ifdef RAZERS_NOOUTERREADGAPS
+				// The match end position must be increased by the omitted base.
+				++verifier.m.endPos;
+#endif
+				verifier.push();
 				maxScore = minScore - 1;
 			}
 		}
 #endif  // #ifdef RAZERS_ISLAND_CRITERION
-		// if (getScore(myersPattern) >= maxScore)
-		if (getScore(state) >= maxScore)
+		if (score >= maxScore)
 		{
-			maxScore = getScore(state);
-			// maxScore = getScore(myersPattern);
+			maxScore = score;
 			maxPos = pos;
 		}
 		lastPos = pos;
@@ -2024,51 +2063,70 @@ matchVerify(
 	if (minScore <= maxScore)
 	{
 		verifier.m.endPos = beginPosition(inf) + maxPos + 1;
-		verifier.m.score = maxScore;
-
+//		verifier.m.errors = -maxScore;
 		verifier.m.pairScore = verifier.m.score = maxScore;
-		if (maxScore == 0)
-			verifier.m.beginPos = verifier.m.endPos - ndlLength;
-		else
-		{
-            TPosition newInfEndPos = beginPosition(inf) + maxPos + 1;
+        
+        if (maxScore == 0)
+            verifier.m.beginPos = verifier.m.endPos - ndlLength;
+        else
+        {
+            // find beginning of best semi-global alignment
+            TPosition newInfEndPos = verifier.m.endPos;
+
 #ifdef RAZERS_BANDED_MYERS
             verifier.revPatternState.leftClip = endPosition(inf) - newInfEndPos;
 #endif
-            setEndPosition(inf, verifier.m.endPos = newInfEndPos);
+            setEndPosition(inf, newInfEndPos);
+            
+//					// limit the beginning to needle length plus errors (== -maxScore)
+//					if (length(inf) > ndlLength - maxScore)
+//						setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
 
-			// limit the beginning to needle length plus errors (== -maxScore)
-			if (length(inf) > ndlLength - maxScore)
-				setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
-			
-			// find beginning of best semi-global alignment
-			TGenomeInfixRev		infRev(inf);
-			TReadRev			readRev(readSet[readId]);
-			TMyersFinderRev		myersFinderRev(infRev);
-			TMyersPatternRev	myersPatternRev(readRev);
+            // we eventually have to search before the beginning of our parallelogram
+            // otherwise alignments of an island in the previous parallelogram
+            // could be cut and prevent that an island in this parallelgram is found
+            if (endPosition(inf) > (unsigned)(ndlLength - maxScore))
+                setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+            else
+                setBeginPosition(inf, 0);
+            
+#ifdef RAZERS_NOOUTERREADGAPS
+            // The best score must be corrected to hold the score of the prefix w/o the last read base
+            if ((verifier.options->compMask[ordValue(origInf[maxPos + 1])] & verifier.options->compMask[ordValue(back(readSet[readId]))]) == 0)
+                ++maxScore;
+#endif
 
+            TReadRev			readRev(readPrefix);
+            TGenomeInfixRev		infRev(inf);
+            TMyersPatternRev	myersPatternRev(readRev);
+            TMyersFinderRev		myersFinderRev(infRev);
+
+            verifier.m.beginPos = verifier.m.endPos;
 #ifdef RAZERS_BANDED_MYERS
-			verifier.m.beginPos = verifier.m.endPos;
             while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
 #else
             _patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
             _patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
             while (find(myersFinderRev, myersPatternRev, maxScore)) {
 #endif
-				verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+                verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
             }
 #ifdef RAZERS_BANDED_MYERS
-			if (verifier.m.beginPos == verifier.m.endPos)
-			{
+            if (verifier.m.beginPos == verifier.m.endPos)
+            {
 #ifdef RAZERS_DEBUG
-			    std::cout << "FAILED" << std::endl; 
+			    std::cout << "FAILED2" << std::endl; 
 #endif
-				return false;
-			}
-#else  // RAZERS_BANDED_MYERS
-			SEQAN_ASSERT_LT(verifier.m.beginPos, verifier.m.endPos);
+                return false;
+            }
 #endif // RAZERS_BANDED_MYERS
-		}
+        }
+        SEQAN_ASSERT_LT(verifier.m.beginPos, verifier.m.endPos);
+
+#ifdef RAZERS_NOOUTERREADGAPS
+        // The match end position must be increased by the omitted base.
+        ++verifier.m.endPos;
+#endif
 
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
@@ -2079,7 +2137,7 @@ matchVerify(
 		return true;
 	}
 #ifdef RAZERS_DEBUG
-    std::cout << "FAILED" << std::endl; 
+    std::cout << "FAILED3" << std::endl; 
 #endif
 	return false;
 }
@@ -2703,7 +2761,12 @@ int _mapSingleReads(
 		resize(preprocessing, readCount, Exact()); 
 		for(unsigned i = 0; i < readCount; ++i) 
 		{ 
-			setHost(preprocessing[i], indexText(readIndex)[i]); 
+#ifdef RAZERS_NOOUTERREADGAPS
+			if (!empty(indexText(readIndex)[i]))
+				setHost(preprocessing[i], prefix(indexText(readIndex)[i], length(indexText(readIndex)[i]) - 1));
+#else
+			setHost(preprocessing[i], indexText(readIndex)[i]);
+#endif
 			_patternMatchNOfPattern(preprocessing[i], options.matchN); 
 			_patternMatchNOfFinder(preprocessing[i], options.matchN); 
 		} 
