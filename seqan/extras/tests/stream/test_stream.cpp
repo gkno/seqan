@@ -180,6 +180,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithChar);
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithStr);
     SEQAN_CALL_TEST(test_stream_tokenizing_skipUntilLineBeginsWithOneCharOfStr);
+    SEQAN_CALL_TEST(test_stream_tokenizing_read_until_tab_or_line_break);
 
     // Tests for lexical_cast
     SEQAN_CALL_TEST(test_stream_lexical_cast_1_stdstring);

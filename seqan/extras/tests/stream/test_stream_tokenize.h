@@ -69,9 +69,6 @@ etstetetstststetststetststetsstetetstetststetstdtetsteststetstedetst|t\r\n\
     return file;
 }
 
-
-
-
 // _readHelper function ""readUntil""
 SEQAN_DEFINE_TEST(test_stream_tokenizing_readUntil)
 {
@@ -105,6 +102,37 @@ SEQAN_DEFINE_TEST(test_stream_tokenizing_readUntil)
 
     file->close();
     delete file;
+}
+
+SEQAN_DEFINE_TEST(test_stream_tokenizing_read_until_tab_or_line_break)
+{
+    using namespace seqan;
+    typedef Stream<CharArray<char const *> > TStream;
+
+    char const * FILE_CONTENTS = "this\tis\ta\ntest\n";
+    TStream stream(FILE_CONTENTS, FILE_CONTENTS + strlen(FILE_CONTENTS));
+    RecordReader<TStream, SinglePass<> > reader(stream);
+    
+    CharString buf;
+    
+    SEQAN_ASSERT_EQ(readUntilTabOrLineBreak(buf, reader), 0);
+    SEQAN_ASSERT_EQ(buf, "this");
+    SEQAN_ASSERT_EQ(value(reader), '\t');
+    SEQAN_ASSERT_NOT(goNext(reader));
+    clear(buf);
+    SEQAN_ASSERT_EQ(readUntilTabOrLineBreak(buf, reader), 0);
+    SEQAN_ASSERT_EQ(buf, "is");
+    SEQAN_ASSERT_EQ(value(reader), '\t');
+    SEQAN_ASSERT_NOT(goNext(reader));
+    clear(buf);
+    SEQAN_ASSERT_EQ(readUntilTabOrLineBreak(buf, reader), 0);
+    SEQAN_ASSERT_EQ(buf, "a");
+    SEQAN_ASSERT_EQ(value(reader), '\n');
+    SEQAN_ASSERT_NOT(goNext(reader));
+    clear(buf);
+    SEQAN_ASSERT_EQ(readUntilTabOrLineBreak(buf, reader), 0);
+    SEQAN_ASSERT_EQ(buf, "test");
+    SEQAN_ASSERT_EQ(value(reader), '\n');
 }
 
 // readNChars

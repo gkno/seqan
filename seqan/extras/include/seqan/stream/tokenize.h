@@ -79,6 +79,7 @@ struct AlphaNum__;
 struct UnixEOL__;
 struct BackslashR__;
 struct Graph__;
+struct TabOrLineBreak__;
 
 typedef Tag<Whitespace__> Whitespace_;
 typedef Tag<Blank__> Blank_;
@@ -89,7 +90,7 @@ typedef Tag<AlphaNum__> AlphaNum_;
 typedef Tag<UnixEOL__> UnixEOL_;
 typedef Tag<BackslashR__> BackslashR_;
 typedef Tag<Graph__> Graph_;
-
+typedef Tag<TabOrLineBreak__> TabOrLineBreak_;
 
 // ==========================================================================
 // Metafunctions
@@ -111,7 +112,6 @@ _charCompare(int const c, Whitespace_ const & /* tag*/)
 {
     return isspace(c);
 }
-
 
 inline int
 _charCompare(int const c, Blank_ const & /* tag*/)
@@ -210,6 +210,12 @@ _charCompare(int const c,
              Tag<SimpleType<unsigned char, TSpec> > const & /* tag */ )
 {
     return _charCompare(c, Tag<TSpec>());
+}
+
+inline int
+_charCompare(int const c, TabOrLineBreak_ const & /* tag*/)
+{
+    return c == '\t' || c == '\r' || c == '\n';
 }
 
 //TODO(h4nn3s): add for AminoAcid and Rna-tags
@@ -1014,6 +1020,35 @@ SEQAN_CHECKPOINT
     return false;
 }*/
 
+/**
+.Function.readUntilTabOrLineBreak
+..cat:Input/Output
+..summary:Read characters from stream until a tab or line-break occurs.
+..signature:readUntilTabOrLineBreak(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to.
+...type:Shortcut.CharString
+...type:Shortcut.DnaString
+...type:nolink:or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:Enum.TokenizeResult
+..remarks:This function stops *on* the tab or line-break character. This character is not written to buffer.
+..include:seqan/stream.h
+ */
+
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+readUntilTabOrLineBreak(TBuffer & buffer,
+                        RecordReader<TStream, TPass> & reader)
+{
+    SEQAN_CHECKPOINT
+    return _readHelper(buffer,
+                       reader,
+                       TabOrLineBreak_());
+}
 
 // ---
 
