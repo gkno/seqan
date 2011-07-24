@@ -41,6 +41,7 @@ int openGz(char const * filename)
     
     gzclose(f);
 #else  // #if SEQAN_HAS_ZLIB
+    (void) filename;
     std::cerr << "ZLIB not available!" << std::endl;
 #endif  // #if SEQAN_HAS_ZLIB
     return 0;
@@ -89,6 +90,7 @@ int openBz2(char const * filename)
     }
     fclose(f);
 #else  // #if SEQAN_HAS_BZIP2
+    (void) filename;
     std::cerr << "BZLIB not available!" << std::endl;
 #endif  // #if SEQAN_HAS_BZIP2
     return 0;

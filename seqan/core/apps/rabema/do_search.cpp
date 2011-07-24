@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     Dna5String read = argv[2];
 
     Finder<Dna5String> finder(contig);
-    Pattern<Dna5String, MyersUkkonenReads> pattern(read, -length(read));
+    Pattern<Dna5String, MyersUkkonenReads> pattern(read, -static_cast<int>(length(read)));
 
     EditDistanceScore scoring;
 
