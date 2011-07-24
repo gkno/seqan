@@ -176,6 +176,18 @@ _fillNextBuffer(RecordReader<TFile, DoublePass<> > & recordReader)
 // Function startFirstPass()
 // ----------------------------------------------------------------------------
 
+/**
+.Function.startFirstPass
+..cat:Input/Output
+..signature:startFirstPass(recordReader)
+..summary:Start the first reading pass.
+..param.recordReader:RecordReader to start the first pass with.
+...type:Spec.Double-Pass RecordReader
+..remarks:This will memoize the current position in the buffer, to return to in second pass.
+..see:Function.startSecondPass
+..include:seqan/stream.h
+ */
+
 template <typename TFile>
 void
 startFirstPass(RecordReader<TFile, DoublePass<> > & recordReader)
@@ -232,6 +244,7 @@ _jumpToNextBuffer(RecordReader<TFile, DoublePass<> > & recordReader)
 ..param.recordReader:RecordReader to start the second pass with.
 ...type:Spec.Double-Pass RecordReader
 ..remarks:This will reset the position in the buffer
+..see:Function.startFirstPass
 ..include:seqan/stream.h
  */
 
