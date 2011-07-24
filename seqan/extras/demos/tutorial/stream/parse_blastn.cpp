@@ -102,19 +102,7 @@ readRecord(TCharSequence & buffer, RecordReader<TStream, SinglePass<TSpec> > con
     return readLine(buffer, reader);
 }
 
-/*
- // FRAGMENT(record)
- struct BlastnTabAlignmentRecord
- {
- unsigned alignmentLength;
- unsigned mismatches;
- unsigned gapOpens;
- unsigned queryBegin;
- unsigned queryEnd;
- unsigned subjectBegin;
- unsigned subjectEnd;
-*/ 
-
+// FRAGMENT(record)
 template <typename TStream, typename TSpec>
 inline bool
 readRecord(BlastnTabAlignmentRecord & record, RecordReader<TStream, SinglePass<TSpec> > & reader, BlastnTabAlignment const & /*tag*/)
