@@ -22,14 +22,265 @@ struct NewickBranchLabel
     {}
 };
 
-// FRAGMENT(reading)
-template <typename TStream, typename TSpec>
-inline int read2(String<Graph<Tree<> > > & forest,
-                 String<StringSet<CharString> > & vertexLabels,
-                 String<String<NewickBranchLabel> > & branchLabels,
-                 RecordReader<TStream, SinglePass<TSpec> > & reader,
-                 Newick const & /*tag*/)
+// FRAGMENT(read-float)
+template <typename TCharSeq, typename TStream, typename TPass>
+int _readExponentialPart(TCharSeq & buffer,
+                         RecordReader<TStream, TPass> & reader)
 {
+    // Check preconditions.
+    SEQAN_ASSERT_NOT(atEnd(reader));
+    SEQAN_ASSERT(value(reader) == 'e' || value(reader) == 'E');
+    
+    // Read 'e' or 'E';
+    appendValue(buffer, value(reader));
+    if (goNext(reader))
+        return EOF_BEFORE_SUCCESS;
+    // Possibly read '+' or '-'.
+    if (value(reader) == '+' || value(reader) == '-')
+    {
+        appendValue(buffer, value(reader));
+        if (goNext(reader))
+            return EOF_BEFORE_SUCCESS;
+    }
+    // Read digits.
+    if (!isdigit(value(reader)))
+        return 1;  // Should have been a digit!
+    return readDigits(buffer, reader);
+}
+
+template <typename TCharSeq, typename TStream, typename TPass>
+int readFloadLiteral(TCharSeq & buffer,
+                     RecordReader<TStream, TPass> & reader)
+{
+    if (atEnd(reader))
+        return EOF_BEFORE_SUCCESS;  // Empty field.
+        
+    // The EBNF for floating point integers is as follows:
+    //
+    // exponent-indicator     = e | E 
+    // exponent-part          = exponent-indicator [+|-]digits
+    // floating-point-literal = digits exponent-part
+    //                        | digits.[digits][exponent-part]
+    //                        | .digits[exponent-part]
+
+    // Read one leading sign if it is there.
+    if (value(reader) == '-' || value(reader) == '+')
+    {
+        appendValue(buffer, value(reader));
+        if (goNext(reader))
+            return EOF_BEFORE_SUCCESS;  // At end after leading sign.
+    }
+    
+    // Digits or dot?
+    if (value(reader) == '.')
+    {
+        // Dot
+        appendValue(buffer, '.');
+        if (goNext(reader))
+            return EOF_BEFORE_SUCCESS;
+        if (!isdigit(value(reader)))
+            return 1;  // Invalid format, >= 1 digit have to follow.
+        int res = readDigits(buffer, reader);
+        if (res != 0)
+            return res;  // Error reading digits.
+        // Optionally read exponential part.
+        if (atEnd(reader))
+            return 0;
+        if (value(reader) == 'e' || value(reader) == 'E')
+            return _readExponentialPart(buffer, reader);
+    }
+    else
+    {
+        // Digits
+        if (!isdigit(value(reader)))
+            return 1;  // >= 1 digit required!
+        int res = readDigits(buffer, reader);
+        if (res != 0)
+            return res;  // Error reading digits.
+        if (atEnd(reader))  // Stop if no more data.
+            return 0;
+        if (value(reader) == '.')
+        {
+            appendValue(buffer, '.');
+            if (goNext(reader))
+                return 0;  // End of field.
+            if (isdigit(value(reader)))
+            {
+                res = readDigits(buffer, reader);
+                if (res != 0)
+                    return res;  // Error reading digits.
+            }
+            // Optionally read exponential part.
+            if (atEnd(reader))
+                return 0;
+            if (value(reader) == 'e' || value(reader) == 'E')
+                return _readExponentialPart(buffer, reader);
+        }
+        else if (value(reader) == 'e' || value(reader) == 'E')
+        {
+            return _readExponentialPart(buffer, reader);
+        }
+    }
+    
+    return 0;
+}
+
+// FRAGMENT(reading)
+template <typename TTree, typename TRecordReader, typename TVertexDescriptor>
+int _readNewickTree(TTree & tree,
+                    String<CharString> & vertexLabels,
+                    String<NewickBranchLabel> & branchLabels,
+                    TRecordReader & reader,
+                    TVertexDescriptor v)
+{
+    if (atEnd(reader))
+        return EOF_BEFORE_SUCCESS;
+    CharString buffer;
+    int res = 0;
+    
+#define SKIP_WHITESPACE                            \
+    do                                             \
+    {                                              \
+        int res = skipWhitespaces(reader);         \
+        if (res != 0 && res != EOF_BEFORE_SUCCESS) \
+            return res;                            \
+    } while(false)
+    
+    if (value(reader) == '(')  // CHILDREN
+    {
+        if (goNext(reader))
+            return EOF_BEFORE_SUCCESS;
+        // children
+        bool first = true;
+        while (true)
+        {
+            SKIP_WHITESPACE;
+
+            // Skip leading comma.
+            if (!first)
+            {
+                res = skipChar(reader, ',');
+                if (res != 0)
+                    return res;
+            }
+            first = false;
+            
+            SKIP_WHITESPACE;
+            
+            // Read child.
+            TVertexDescriptor x = addChild(tree, v);
+            resizeVertexMap(tree, vertexLabels);
+            resizeVertexMap(tree, branchLabels);
+            res = _readNewickTree(tree, vertexLabels, branchLabels, reader, x);
+            if (res != 0)
+                return res;
+            
+            SKIP_WHITESPACE;
+            
+            // Exit loop.
+            if (value(reader) == ')')
+                break;
+        }
+        res = skipChar(reader, ')');
+        if (res != 0)
+            return res;  // Could not close child list.
+        SKIP_WHITESPACE;
+    }
+    if (value(reader) != ':')  // LABEL
+    {
+        SKIP_WHITESPACE;
+        clear(buffer);
+        if (value(reader) == '\'')
+        {
+            // Read quoted label.
+            if (goNext(reader))
+                return EOF_BEFORE_SUCCESS;
+            while (!atEnd(reader))
+            {
+                char c = value(reader);
+                if (c == '\'')  // Possibly break, if not "''".
+                {
+                    if (goNext(reader))
+                        break;
+                    if (value(reader) != '\'')
+                        break;
+                }
+                appendValue(buffer, value(reader));
+                if (goNext(reader))
+                    return 1;
+            }
+        }
+        else
+        {
+            // Read unquoted label.
+            while (!atEnd(reader))
+            {
+                char c = value(reader);
+                if (isblank(c) || c == '(' || c == ')' || c == '[' ||
+                    c == ']' || c == '\'' || c == '.' || c == ';' ||
+                    c == ',' || c == ':')
+                    break;
+                appendValue(buffer, value(reader));
+                if (goNext(reader))
+                    return 1;
+            }
+        }
+        assignProperty(vertexLabels, v, buffer);
+        SKIP_WHITESPACE;
+    }
+    if (value(reader) == ':')  // DISTANCE
+    {
+        skipChar(reader, ':');
+        SKIP_WHITESPACE;
+        clear(buffer);
+        res = readFloadLiteral(buffer, reader);
+        if (res != 0)
+            return res;  // Invalid distance.
+        property(branchLabels, v).isDistanceSet = true;
+        property(branchLabels, v).distance = lexicalCast<double>(buffer);
+        SKIP_WHITESPACE;
+    }
+    return 0;
+}
+
+template <typename TStream, typename TSpec>
+int read2(String<Graph<Tree<> > > & forest,
+          String<String<CharString> > & vertexLabels,
+          String<String<NewickBranchLabel> > & branchLabels,
+          RecordReader<TStream, SinglePass<TSpec> > & reader,
+          Newick const & /*tag*/)
+{
+    typedef Graph<Tree<> > TTree;
+    typedef typename VertexDescriptor<TTree>::Type TVertexDescriptor;
+    int res = 0;
+
+    SKIP_WHITESPACE;
+    
+    // Read forest.
+    while (!atEnd(reader))
+    {
+        // Allocate graph and maps.
+        resize(forest, length(forest) + 1);
+        resize(vertexLabels, length(vertexLabels) + 1);
+        resize(branchLabels, length(branchLabels) + 1);
+        // Allocate root.
+        createRoot(back(forest));
+        TVertexDescriptor v = root(back(forest));
+        resizeVertexMap(back(forest), back(vertexLabels));
+        resizeVertexMap(back(forest), back(branchLabels));
+        // Read tree.
+        res = _readNewickTree(back(forest), back(vertexLabels), back(branchLabels), reader, v);
+        if (res != 0)
+            return res;
+        // Skip trailing semicolon, must be there.
+        res = skipChar(reader, ';');
+        if (res != 0)
+            return res;
+        SKIP_WHITESPACE;
+    }
+
+#undef SKIP_WHITESPACE
+
     return 0;
 }
 
@@ -129,7 +380,7 @@ int _writeNewickRecurse(TStream & stream, TTree & tree, TVertexDescriptor v,
 template <typename TStream>
 inline int write2(TStream & stream,
                   Graph<Tree<> > & tree,
-                  StringSet<CharString> & vertexLabels,
+                  String<CharString> & vertexLabels,
                   String<NewickBranchLabel> & branchLabels,
                   Newick const & /*tag*/)
 {
@@ -160,7 +411,7 @@ int main(int argc, char const ** argv)
     
     // Load forest.
     String<Graph<Tree<> > > forest;
-    String<StringSet<CharString> > vertexLabels;
+    String<String<CharString> > vertexLabels;
     String<String<NewickBranchLabel> > branchLabels;
     int res = read2(forest, vertexLabels, branchLabels, reader, Newick());
     if (res != 0)
@@ -173,7 +424,7 @@ int main(int argc, char const ** argv)
     for (unsigned i = 0; i < length(forest); ++i)
     {
         res = write2(std::cout, forest[i], vertexLabels[i], branchLabels[i], Newick());
-        std::cout << ";\n";
+        std::cout << "\n";
         if (res != 0)
         {
             std::cerr << "Error writing to stdout!" << std::endl;
