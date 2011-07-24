@@ -102,7 +102,6 @@ readRecord(TCharSequence & buffer, RecordReader<TStream, SinglePass<TSpec> > con
     return readLine(buffer, reader);
 }
 
-// FRAGMENT(record)
 template <typename TStream, typename TSpec>
 inline bool
 readRecord(BlastnTabAlignmentRecord & record, RecordReader<TStream, SinglePass<TSpec> > & reader, BlastnTabAlignment const & /*tag*/)
@@ -233,7 +232,7 @@ skipRecord(RecordReader<TStream, TPass> & reader, BlastnTabAlignment const & /*t
 
 // FRAGMENT(batch-read)
 template <typename TBlastnTabRecords, typename TStream, typename TSpec>
-int read(TBlastnTabRecords & records, RecordReader<TStream, SinglePass<TSpec> > & reader)
+int read(TBlastnTabRecords & records, RecordReader<TStream, SinglePass<TSpec> > & reader, BlastnTab const & /*tag*/)
 {
     BlastnTabAlignmentRecord record;
     while (!atEnd(reader))
@@ -273,7 +272,7 @@ int main(int argc, char const ** argv)
     // Read file.
     RecordReader<std::fstream, SinglePass<> > reader(stream);
     String<BlastnTabAlignmentRecord> records;
-    int res = read(records, reader);
+    int res = read(records, reader, BlastnTab());
     if (res != 0)
     {
         std::cerr << "Could not read BLASTN records." << std::endl;
