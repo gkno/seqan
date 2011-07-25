@@ -176,7 +176,9 @@ struct HasStreamFeature;
 ..summary:Write one character to the stream.
 ..signature:streamWriteChar(stream, c)
 ..param.stream:The stream object to write to.
+...type:Concept.Stream
 ..param.c:The character to write to the stream.
+...type:nolink:$char$
 ..returns:$int$ with error code, 0 on success.
 ..see:Function.streamWriteBlock
 ..include:seqan/stream.h
