@@ -517,6 +517,7 @@ struct MicroRNA{};
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
 		TPatternState	patternState;
+        TSize           rightClip;
 		TRPatternState  revPatternState;
 
         double compactionTime;
@@ -527,12 +528,13 @@ struct MicroRNA{};
 			matches(&_matches),
 			options(&_options),
 			filterPattern(&_filterPattern),
-			cnts(&_cnts),
-            compactionTime(0)
+			cnts(&_cnts)
 		{
 			onReverseComplement = false;
 			genomeLength = 0;
 			oneMatchPerBucket = false;
+            rightClip = 0;
+            compactionTime = 0;
 		}
 
 		inline void push()
@@ -1995,7 +1997,7 @@ matchVerify(
 					TPosition newInfEndPos = verifier.m.endPos;
 
 #ifdef RAZERS_BANDED_MYERS
-					verifier.revPatternState.leftClip = infEndPos - newInfEndPos;
+					verifier.revPatternState.leftClip = infEndPos - newInfEndPos + verifier.rightClip;
 #endif
 					setEndPosition(inf, newInfEndPos);
 
@@ -2074,7 +2076,7 @@ matchVerify(
             TPosition newInfEndPos = verifier.m.endPos;
 
 #ifdef RAZERS_BANDED_MYERS
-            verifier.revPatternState.leftClip = endPosition(inf) - newInfEndPos;
+            verifier.revPatternState.leftClip = endPosition(inf) - newInfEndPos + verifier.rightClip;
 #endif
             setEndPosition(inf, newInfEndPos);
             
@@ -2671,6 +2673,7 @@ void _mapSingleReadsToContig(
 	}
 	lockContig(store, contigId);
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
+	typename Size<TContigSeq>::Type contigLength = length(contigSeq);
 	if (orientation == 'R')	reverseComplement(contigSeq);
 
 	TReadSet		&readSet = host(host(filterPattern));
@@ -2699,7 +2702,8 @@ void _mapSingleReadsToContig(
 //        if (length(infix(filterFinder)) < length(readSet[(*filterFinder.curHit).ndlSeqNo]))
 //            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
 #ifdef RAZERS_BANDED_MYERS
-		verifier.patternState.leftClip = (beginPosition(filterFinder) >= 0)? 0: -beginPosition(filterFinder);	// left clip if match begins left of the genome
+		verifier.patternState.leftClip = (beginPosition(filterFinder) >= 0)? 0: -beginPosition(filterFinder);           // left clip if match begins left of the genome
+		verifier.rightClip = (endPosition(filterFinder) <= contigLength)? 0: endPosition(filterFinder) - contigLength;  // right clip if match end right of the genome
 #endif
 		verifier.m.readId = (*filterFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
