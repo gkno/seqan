@@ -146,19 +146,19 @@ bool loadReads(
 	{
 		if (options.readNaming == 0 || options.readNaming == 3)
 		{
-			assignSeqId(id[0], leftMates[i], formatL);				// read left Fasta id
-			assignSeqId(id[1], rightMates[i], formatR);				// read right Fasta id
-			if (options.readNaming == 0)
+			assignSeqId(id[0], leftMates[i], formatL);                  // read left Fasta id
+			assignSeqId(id[1], rightMates[i], formatR);                 // read right Fasta id
+			if (options.readNaming == 0 && options.outputFormat != 4)   // don't append /L/R in SAM mode
 			{
 				append(id[0], "/L");
 				append(id[1], "/R");
 			}
 		}
 		
-		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence
-		assignSeq(seq[1], rightMates[i], formatR);					// read right Read sequence
-		assignQual(qual[0], leftMates[i], formatL);					// read left ascii quality values  
-		assignQual(qual[1], rightMates[i], formatR);				// read right ascii quality values  
+		assignSeq(seq[0], leftMates[i], formatL);                       // read left Read sequence
+		assignSeq(seq[1], rightMates[i], formatR);                      // read right Read sequence
+		assignQual(qual[0], leftMates[i], formatL);                     // read left ascii quality values  
+		assignQual(qual[1], rightMates[i], formatR);                    // read right ascii quality values  
 		
 		if (countN)
 		{
