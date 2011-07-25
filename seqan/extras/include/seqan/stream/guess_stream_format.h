@@ -194,7 +194,7 @@ private:
 ..param.reader:The @Class.RecordReader@ to read from
 ..param.TTag:The tag to check against.
 ..signature:checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
-..param.formats:A @Tag.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
+..param.formats:A @Class.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
 ..returns: $True$ if (one of) the specified Tag(s) tested positive and $False$ otherwise
 ...type:nolink:$bool$
 ..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do not (permanently) alter the position in the stream.
