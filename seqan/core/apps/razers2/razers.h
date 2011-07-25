@@ -1416,6 +1416,9 @@ matchVerify(
 				while (find(myersFinderRev, myersPatternRev, /*score*/maxScore))
 					verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 
+				setBeginPosition(inf, infBeginPos);
+				setEndPosition(inf, infEndPos);
+
 #ifdef RAZERS_NOOUTERREADGAPS
 				// The match end position must be increased by the omitted base.
 				++verifier.m.endPos;
@@ -1423,8 +1426,6 @@ matchVerify(
 				verifier.push();
 //            std::cerr << "push(" << verifier.m.beginPos << ", " << verifier.m.endPos << ")" << std::endl;
 //            std::cerr << "  push(" << length(host(inf)) - verifier.m.beginPos << ", " << length(host(inf)) - verifier.m.endPos << ")" << std::endl;
-				setBeginPosition(inf, infBeginPos);
-				setEndPosition(inf, infEndPos);
 				maxScore = minScore - 1;
 			}
 		}
