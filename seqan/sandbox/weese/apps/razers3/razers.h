@@ -2673,14 +2673,15 @@ void _mapSingleReadsToContig(
 	}
 	lockContig(store, contigId);
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
-	typename Size<TContigSeq>::Type contigLength = length(contigSeq);
 	if (orientation == 'R')	reverseComplement(contigSeq);
 
 	TReadSet		&readSet = host(host(filterPattern));
 	TFilterFinder	filterFinder(contigSeq, options.repeatLength, 1);
 	TVerifier		verifier(matches, options, filterPattern, cnts);
 
-#ifndef RAZERS_BANDED_MYERS
+#ifdef RAZERS_BANDED_MYERS
+	typename Size<TContigSeq>::Type contigLength = length(contigSeq);
+#else
 	verifier.preprocessing = &preprocessing;
 #endif  // #ifdef RAZERS_BANDED_MYERS
 
@@ -3071,24 +3072,24 @@ int _mapReads(
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options)
 {
-//    if (options.matchN) {
-//        if (options.gapMode == RAZERS_GAPPED)
-//         {
+    if (options.matchN) {
+        if (options.gapMode == RAZERS_GAPPED)
+         {
 //             if (options.alignMode == RAZERS_LOCAL)
 //                 return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
 //             if (options.alignMode == RAZERS_PREFIX)
 //                 return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
-//             if (options.alignMode == RAZERS_GLOBAL)
-//                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
-//         } else {
+             if (options.alignMode == RAZERS_GLOBAL)
+                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
+         } else {
 //             if (options.alignMode == RAZERS_LOCAL)
 //                 return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
 //             if (options.alignMode == RAZERS_PREFIX)
 //                 return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesAll_>());
-//             if (options.alignMode == RAZERS_GLOBAL)
-//                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
-//         }
-//    } else {
+             if (options.alignMode == RAZERS_GLOBAL)
+                 return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
+         }
+    } else {
         if (options.gapMode == RAZERS_GAPPED)
         {
         //     if (options.alignMode == RAZERS_LOCAL)
@@ -3105,7 +3106,7 @@ int _mapReads(
              if (options.alignMode == RAZERS_GLOBAL)
                  return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
         }
-//    }
+    }
 	return RAZERS_INVALID_OPTIONS;
 }
 
