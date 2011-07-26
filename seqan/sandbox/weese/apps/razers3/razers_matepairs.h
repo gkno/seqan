@@ -148,7 +148,7 @@ bool loadReads(
 		{
 			assignSeqId(id[0], leftMates[i], formatL);                  // read left Fasta id
 			assignSeqId(id[1], rightMates[i], formatR);                 // read right Fasta id
-			if (options.readNaming == 0 && options.outputFormat != 4)   // don't append /L/R in SAM mode
+			if (options.readNaming == 0)
 			{
 				append(id[0], "/L");
 				append(id[1], "/R");

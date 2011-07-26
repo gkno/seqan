@@ -493,6 +493,9 @@ int main(int argc, const char *argv[])
 		options.forward = true;
 		options.reverse = true;
 	}
+    // don't append /L/R in SAM mode
+    if (!isSetLong(parser, "read-naming") && options.outputFormat == 4)
+        options.readNaming = 3;
 	appendValue(genomeFileNames, getArgumentValue(parser, 0));
 	for (unsigned i = 1; i < argumentCount(parser) && i < maxFiles; ++i)
 		appendValue(readFileNames, getArgumentValue(parser, i), Generous());

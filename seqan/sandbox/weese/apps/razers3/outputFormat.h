@@ -1206,13 +1206,17 @@ int dumpMatches(
 			}
 			break;
 */		case 4: // Sam
-			convertMatchesToGlobalAlignment(store, scoreType, False());
-//			String<String<unsigned> > layout;
-//			layoutAlignment(layout, store, 0);
-//			printAlignment(std::cout, layout, store, 0, 0, 2000, 0, 100);
-//			printAlignment(std::cout, layout, store, 1, 0, 2000, 0, 100);
-			
-			write(file, store, Sam());
+//			convertMatchesToGlobalAlignment(store, scoreType, False());
+////			String<String<unsigned> > layout;
+////			layoutAlignment(layout, store, 0);
+////			printAlignment(std::cout, layout, store, 0, 0, 2000, 0, 100);
+////			printAlignment(std::cout, layout, store, 1, 0, 2000, 0, 100);
+//			
+//			write(file, store, Sam());
+
+       		_writeHeader(file, store, Sam());
+       		_writeAlignments(file, store, Sam(), True());
+
 			break;
 		case 5: // AFG
 			convertMatchesToGlobalAlignment(store, scoreType, True());
