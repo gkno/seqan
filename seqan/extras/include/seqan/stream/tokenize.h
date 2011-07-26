@@ -460,6 +460,111 @@ _readAndCompareWithStr(TRecordReader & reader,
 // ----------------------- the real deal ------------------------------------
 
 /**
+.Function.readUntilOneOf
+..cat:Input/Output
+..summary:Read characters from stream into buffer until one of the given characters is encountered
+..signature:readUntilWhitespace(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, c1[, c2[, c3[, c4[, c5]]])
+..param.buffer:The buffer to write to.
+...type:Shortcut.CharString
+...type:Shortcut.DnaString
+...type:nolink:or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:Enum.TokenizeResult
+..remarks:This function stops *on* the found character. The character is not written to buffer.
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+ */
+
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+readUntilOneOf(TBuffer & buffer, RecordReader<TStream, TPass> & reader, char c1)
+{
+    while (!atEnd(reader))
+    {
+        char c = value(reader);
+        if (c == c1)
+            return 0;
+        appendValue(buffer, c, Generous());
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+readUntilOneOf(TBuffer & buffer, RecordReader<TStream, TPass> & reader, char c1, char c2)
+{
+    while (!atEnd(reader))
+    {
+        char c = value(reader);
+        if (c == c1 || c == c2)
+            return 0;
+        appendValue(buffer, c, Generous());
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+readUntilOneOf(TBuffer & buffer, RecordReader<TStream, TPass> & reader, char c1, char c2, char c3)
+{
+    while (!atEnd(reader))
+    {
+        char c = value(reader);
+        if (c == c1 || c == c2 || c == c3)
+            return 0;
+        appendValue(buffer, c, Generous());
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+readUntilOneOf(TBuffer & buffer, RecordReader<TStream, TPass> & reader, char c1, char c2, char c3, char c4)
+{
+    while (!atEnd(reader))
+    {
+        char c = value(reader);
+        if (c == c1 || c == c2 || c == c3 || c == c4)
+            return 0;
+        appendValue(buffer, c, Generous());
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+template <typename TBuffer, typename TStream, typename TPass>
+inline int
+readUntilOneOf(TBuffer & buffer, RecordReader<TStream, TPass> & reader, char c1, char c2, char c3, char c4, char c5)
+{
+    while (!atEnd(reader))
+    {
+        char c = value(reader);
+        if (c == c1 || c == c2 || c == c3 || c == c4 || c == c5)
+            return 0;
+        appendValue(buffer, c, Generous());
+        goNext(reader);
+        if (resultCode(reader) != 0)
+            return resultCode(reader);
+    }
+    return EOF_BEFORE_SUCCESS;
+}
+
+/**
 .Function.readUntilWhitespace
 ..cat:Input/Output
 ..summary:Read characters from stream into buffer until Whitespace is encountered
