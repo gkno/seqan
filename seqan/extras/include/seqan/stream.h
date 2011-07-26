@@ -86,7 +86,7 @@
 #include <seqan/stream/adapt_fstream.h>
 #include <seqan/stream/adapt_mmap.h> // TODO(h4nn3s): only streamPut() right now
 #include <seqan/stream/adapt_iostream.h>
-// #include <seqan/stream/adapt_sstream.h>   // TODO(holtgrew): Implement!
+#include <seqan/stream/adapt_sstream.h>
 
 #include <seqan/stream/stream_base.h>
 #include <seqan/stream/stream_char_array.h>

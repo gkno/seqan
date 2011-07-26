@@ -47,6 +47,7 @@
 #endif  // #if SEQAN_HAS_BZIP2
 #include "test_stream_adapt_cstdio.h"
 #include "test_stream_adapt_fstream.h"
+#include "test_stream_adapt_sstream.h"
 #include "test_stream_adapt_mmap.h"
 #include "test_stream_tokenize.h"
 #include "test_stream_lexical_cast.h"
@@ -127,6 +128,45 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_flush);
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_seek);
     SEQAN_CALL_TEST(test_stream_adapt_cstdio_tell);
+
+    // Tests for std::stringstream adaptions.
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_metafunctions);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_read_simple_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_read_complex_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_write_simple_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_write_complex_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_eof);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_peek);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_read_char);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_read_block);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_write_char);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_write_block);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_streamPut);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_flush);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_seek);
+    SEQAN_CALL_TEST(test_stream_adapt_sstream_tell);
+
+    // Tests for std::istringstream adaptions.
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_metafunctions);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_read_simple_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_read_complex_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_eof);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_peek);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_read_char);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_read_block);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_seek);
+    SEQAN_CALL_TEST(test_stream_adapt_istringstream_tell);
+
+    // Tests for std::ostringstream adaptions.
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_metafunctions);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_write_simple_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_write_complex_usage);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_write_char);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_write_block);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_streamPut);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_flush);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_seek);
+    SEQAN_CALL_TEST(test_stream_adapt_ostringstream_tell);
 
     // Tests for std::fstream adaptions.
     SEQAN_CALL_TEST(test_stream_adapt_fstream_metafunctions);
