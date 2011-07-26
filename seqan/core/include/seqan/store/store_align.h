@@ -293,6 +293,19 @@ typedef Tag<SortReadId_> const SortReadId;
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TPos, typename TGapAnchor, typename TSpec>
+inline void swap(
+    AlignedReadStoreElement<TPos, TGapAnchor, TSpec> &a,
+    AlignedReadStoreElement<TPos, TGapAnchor, TSpec> &b)
+{
+    std::swap(a.id, b.id);
+    std::swap(a.readId, b.readId);
+    std::swap(a.contigId, b.contigId);
+    std::swap(a.pairMatchId, b.pairMatchId);
+    std::swap(a.beginPos, b.beginPos);
+    std::swap(a.endPos, b.endPos);
+    swap(a.gaps, b.gaps);
+}
 
 template <typename TAlignedRead, typename TTag>
 struct _LessAlignedRead;

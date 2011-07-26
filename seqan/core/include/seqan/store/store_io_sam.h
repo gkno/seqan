@@ -533,18 +533,90 @@ getCigarString(
 		TId		readId;
 		TId		contigId;
 		TId		pairMatchId;
+		TId		matePairId;//:(sizeof(TId)*8-1);
+        bool    reversed;
 		TPos	beginPos;
 	};
     
+    template <typename TFragStore>
+    struct AlignedMateLess_
+    {
+        TFragStore &fragStore;
+        
+        AlignedMateLess_(TFragStore &fragStore_) :
+            fragStore(fragStore_) {}
+
+        template <typename TAlignedRead>
+        inline bool 
+        operator() (TAlignedRead const& a, TAlignedRead const& b) const 
+        {
+            if (a.contigId < b.contigId) return true;
+            if (a.contigId > b.contigId) return false;
+
+            typename TFragStore::TContigPos posA = _min(a.beginPos, a.endPos);
+            typename TFragStore::TContigPos posB = _min(b.beginPos, b.endPos);            
+            if (posA < posB) return true;
+            if (posA > posB) return false;
+            
+            bool reversedA = (a.beginPos > a.endPos);
+            bool reversedB = (b.beginPos > b.endPos);
+            if (reversedA != reversedB) return reversedB;
+
+            typedef typename TFragStore::TMatePairStore     TMatePairStore;
+            typedef typename Value<TMatePairStore>::Type    TMatePair;
+            typename TMatePair::TId matePairIdB = TMatePair::INVALID_ID;
+
+            if (a.readId >= length(fragStore.readStore))
+                return false;
+                
+            if (b.readId < length(fragStore.readStore))
+                matePairIdB = fragStore.readStore[b.readId].matePairId;
+
+            return (fragStore.readStore[a.readId].matePairId < matePairIdB);
+        }
+    };
+
     struct MatchMateInfoLess_
 	{
         template <typename TMInfo>
         inline bool 
         operator() (TMInfo const &a, TMInfo const &b) const 
 		{
-            return (a.contigId < b.contigId) || (a.contigId == b.contigId && a.beginPos < b.beginPos);
+            if (a.contigId < b.contigId) return true;
+            if (a.contigId > b.contigId) return false;
+            if (a.beginPos < b.beginPos) return true;
+            if (a.beginPos > b.beginPos) return false;
+            if (a.reversed != b.reversed) return b.reversed;
+            return (a.matePairId < b.matePairId);
         }
     };
+    
+    template <typename TAlignedRead, typename TMInfo, typename TFragStore>
+    inline int 
+    _compareAlignedReadAndMateInfo(TAlignedRead const &a, TMInfo const &b, TFragStore const &fragStore)
+    {
+        if (a.contigId < b.contigId) return -1;
+        if (a.contigId > b.contigId) return 1;
+
+        typename TFragStore::TContigPos posA = _min(a.beginPos, a.endPos);
+        if (posA < b.beginPos) return -1;
+        if (posA > b.beginPos) return 1;
+        
+        bool reversedA = (a.beginPos > a.endPos);
+        if (!reversedA && b.reversed) return -1;
+        if (reversedA && !b.reversed) return 1;
+
+        typedef typename TFragStore::TMatePairStore     TMatePairStore;
+        typedef typename Value<TMatePairStore>::Type    TMatePair;
+        typename TMatePair::TId matePairIdA = TMatePair::INVALID_ID;
+
+        if (a.readId < length(fragStore.readStore))
+            matePairIdA = fragStore.readStore[a.readId].matePairId;
+            
+        if (matePairIdA < b.matePairId) return -1;
+        if (matePairIdA > b.matePairId) return 1;
+        return 0;
+    }
 
     template<typename TSpec, typename TConfig, typename TMatchMateInfos>
     inline void 
@@ -552,17 +624,11 @@ getCigarString(
 		FragmentStore<TSpec, TConfig> & fragStore,
 		TMatchMateInfos & matchMateInfos)
     {
-        typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-        
-        typedef typename TFragmentStore::TReadStore			TReadStore;
-        typedef typename TFragmentStore::TAlignedReadStore	TAlignedReadStore;
-        typedef typename TFragmentStore::TContigPos			TContigPos;
-
-        typedef typename Value<TReadStore>::Type						TRead;
-        typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+        typedef FragmentStore<TSpec, TConfig>                           TFragmentStore;        
+        typedef typename TFragmentStore::TAlignedReadStore              TAlignedReadStore;
+        typedef typename Value<TAlignedReadStore>::Type                 TAlignedRead;
         typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIter;    
 		typedef typename Iterator<TMatchMateInfos, Standard>::Type		TMIter;    
-        typedef typename Id<TFragmentStore>::Type						TId;
                 
         TIter it = begin(fragStore.alignedReadStore, Standard());
 		TIter itEnd = end(fragStore.alignedReadStore, Standard());
@@ -572,41 +638,33 @@ getCigarString(
 		if (it == itEnd || mit == mitEnd) return;
 
         // sort the aligned read store by: begin position, contig name
-        sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
-        sortAlignedReads(fragStore.alignedReadStore, SortContigId());
+		std::sort(it,  itEnd,  AlignedMateLess_<TFragmentStore>(fragStore));
 		std::sort(mit, mitEnd, MatchMateInfoLess_());
 
-		TMIter mitNext = mit;
-		while (mitNext != mitEnd && (*mit).beginPos == (*mitNext).beginPos)
-			++mitNext;
-		
-		TContigPos pos = _min((*it).beginPos, (*it).endPos);
-		typename Size<TReadStore>::Type readStoreLength = length(fragStore.readStore);
-
-		while (mit != mitEnd)
+		while (true)
 		{
-			int cmp = 0;
-			if ((*it).contigId < (*mit).contigId) cmp = -1;
-			else if ((*it).contigId > (*mit).contigId) cmp = 1;
-			else if (pos < (*mit).beginPos) cmp = -1;
-			else if (pos > (*mit).beginPos) cmp = 1;
+            // skip already aligned reads
+            while (it->pairMatchId != TAlignedRead::INVALID_ID)
+                if (++it == itEnd) return;
 
-			if (cmp == 1)
-			{
-				mit = mitNext;
-				while (mitNext != mitEnd && (*mit).beginPos == (*mitNext).beginPos)
-					++mitNext;
-				continue;
-			}
-			if (cmp == 0)
-			{
-				for (TMIter m = mit; m != mitNext; ++m)
-					if ((*it).readId != (*m).readId && (*it).readId < readStoreLength && (*m).readId < readStoreLength)		// correct position found
-						if (fragStore.readStore[(*it).readId].matePairId == fragStore.readStore[(*m).readId].matePairId)	// correct mate found
-							(*it).pairMatchId = (*m).pairMatchId;															// link mate
-			}
-			if (++it == itEnd) break;
-			pos = _min((*it).beginPos, (*it).endPos);
+			int cmp = _compareAlignedReadAndMateInfo(*it, *mit, fragStore);
+
+			if (cmp == 0)   // both are equal -> link them
+                (*it).pairMatchId = (*mit).pairMatchId;
+
+			if (cmp >= 0)   // MateInfo is less or equal
+            {
+                if (++mit == mitEnd) return;
+//                if (cmp>0)
+//                    std::cout << "mateInfo:   contigId="<<mit->contigId<<"  beginPos="<<mit->beginPos<<"  reversed="<<mit->reversed<<"  matePairId="<<mit->matePairId<<std::endl;
+            }
+
+			if (cmp <= 0)   // AlignedRead is less or equal
+            {
+                if (++it == itEnd) return;
+//                if (cmp<0)
+//                    std::cout << "alignedR:   contigId="<<it->contigId<<"  beginPos="<<_min(it->beginPos,it->endPos)<<"  reversed="<<(it->beginPos > it->endPos)<<"  matePairId="<<fragStore.readStore[it->readId].matePairId<<std::endl;
+            }
 		}
     }    
 
@@ -880,9 +938,13 @@ getCigarString(
 			if (mrnm != "=")
 				_storeAppendContig(fragStore, mcontigId, mrnm);
 
-			if (flag & 0x40)	// store mate info only for the first read in the pair
+			if (getMateNo(fragStore, readId) == 0)	// store mate info only for one mate
 			{
-				TMatchMateInfo matchMateInfo = {readId, mcontigId, pairMatchId, mPos};
+                typename TMatePairElement::TId matePairId = TMatePairElement::INVALID_ID;
+                if (readId < length(fragStore.readStore))
+                    matePairId = fragStore.readStore[readId].matePairId;
+                
+				TMatchMateInfo matchMateInfo = {readId, mcontigId, pairMatchId, matePairId, (flag & 0x20), mPos};
 				appendValue(matchMateInfos, matchMateInfo);
 				back(fragStore.alignedReadStore).pairMatchId = pairMatchId;
 			}
@@ -919,7 +981,7 @@ getCigarString(
 		TContigNameIter nit = begin(store.contigNameStore, Standard());
 		TContigNameIter nitEnd = end(store.contigNameStore, Standard());
 		
-		_streamWrite(target, "@HD\tVN:1.0\n");
+		_streamWrite(target, "@HD\tVN:1.4\tSO:unsorted\n");
         for(; it != itEnd; ++it)
 		{
 			_streamWrite(target, "@SQ\tSN:");
@@ -974,7 +1036,7 @@ getCigarString(
 
 		typedef typename TContig::TContigSeq							TContigSeq;
         typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignIter;
-        typedef typename Iterator<TReadSeqStored, Standard>::Type		TReadSeqIter;
+        typedef typename Iterator<TReadSeq, Standard>::Type             TReadSeqIter;
         typedef typename Id<TAlignedRead>::Type							TId;
 
 		typedef Gaps<TReadSeq, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
@@ -1066,7 +1128,7 @@ getCigarString(
             _streamPut(target, '\t');
             
 			// <mapq>
-			if (alignedId < length(store.alignQualityStore))
+			if (alignedId < length(store.alignQualityStore) && store.alignQualityStore[alignedId].score > 0) // a value <= 0 equals -errors (forbidden in SAM)
 				_streamPutInt(target, store.alignQualityStore[alignedId].score);
             else
                 _streamPutInt(target, 255);
@@ -1128,12 +1190,23 @@ getCigarString(
             _streamPut(target, '\t');
             
             // <qual>
-			TReadSeqIter it = begin(store.readSeqStore[readId], Standard());
-			TReadSeqIter itEnd = end(store.readSeqStore[readId], Standard());
+			TReadSeqIter it = begin(readSeq, Standard());
+			TReadSeqIter itEnd = end(readSeq, Standard());
 			for (; it != itEnd; ++it)
 				_streamPut(target, (char)(getQualityValue(*it) + 33));
             
 			// <tags>
+            
+// TODO: Output the NM tag
+// This requires to parse the NM tag when reading, as it should
+// not go into the alignedReadTagStore to avoid multiple NM entries.
+//
+//			if (alignedId < length(store.alignQualityStore))
+//            {
+//                _streamWrite(target, "\tNM:i:");
+//				_streamPutInt(target, store.alignQualityStore[alignedId].errors);
+//            }
+//
 			if (alignedId < length(store.alignedReadTagStore) && !empty(store.alignedReadTagStore[alignedId]))
 			{
 				_streamPut(target, '\t');

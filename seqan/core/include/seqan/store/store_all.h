@@ -707,9 +707,11 @@ _storeAppendRead (
 					appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
 					// set the ID in the mate pair store
 					fragStore.matePairStore[matePairId].readId[inPair] = readId;
-					return;
-				}
+				} 
+                // else == I am already in the store
 			}
+            // else == my mate said he has no mate (do nothing)
+            return;
 		} else 
 			return;
 	}

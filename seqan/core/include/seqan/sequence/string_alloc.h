@@ -226,6 +226,20 @@ struct IsContiguous<String<TValue, Alloc<TSpec> > >
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Function std::swap()
+// ----------------------------------------------------------------------------
+
+template <typename TValue, typename TSpec>
+inline void
+swap(String<TValue, Alloc<TSpec> > & a,
+     String<TValue, Alloc<TSpec> > & b)
+{
+    std::swap(a.data_begin, b.data_begin);
+    std::swap(a.data_end, b.data_end);
+    std::swap(a.data_capacity, b.data_capacity);
+}
+
+// ----------------------------------------------------------------------------
 // Function begin()
 // ----------------------------------------------------------------------------
 
