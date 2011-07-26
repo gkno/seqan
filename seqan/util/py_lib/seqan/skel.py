@@ -174,7 +174,7 @@ def _checkTargetPaths(target_path):
     if not os.path.exists(os.path.dirname(target_path)):
         msg = 'The parent of the target path does not exist yet: %s'
         print >>sys.stderr, msg % os.path.dirname(target_path)
-        print >>sys.stderr, 'Please create it can call this script again.'
+        print >>sys.stderr, 'Please create it and call this script again.'
         return False
     return True
 
