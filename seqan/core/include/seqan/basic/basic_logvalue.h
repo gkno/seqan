@@ -110,14 +110,26 @@ class LogProb
 	}
 
     // ------------------------------------------------------------------------
-    // Type conversin operators;  Have to be defined in class.
+    // Type conversion operators;  Have to be defined in class.
     // ------------------------------------------------------------------------
+	
+	template <typename TResult>
+	inline TResult _convert(False) const
+	{
+		return (TResult)::std::exp(data_value);
+	}
+
+	template <typename TResult>
+	inline TResult _convert(True) const
+	{
+		return (TResult)round(::std::exp(data_value));
+	}
 
     template <typename TValue2>
     inline
 	operator TValue2() const
     {
-		return (TValue2) ::std::exp(data_value);
+		return _convert<TValue2>(typename IsIntegral<TValue2>::VALUE());
 	}
 /*
     inline

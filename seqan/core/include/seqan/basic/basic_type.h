@@ -773,7 +773,7 @@ struct IsIntegral
 		False
 		>::Type>::Type>::Type>::Type>::Type>::Type
 		>::Type>::Type>::Type>::Type>::Type
-		>::Type>::Type>::Type>::Type>::Type>::Type Type;
+		>::Type>::Type>::Type>::Type>::Type>::Type VALUE;
 };
 
 template <typename T>
