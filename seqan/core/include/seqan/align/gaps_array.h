@@ -820,6 +820,14 @@ SEQAN_CHECKPOINT
 	return !(me.data_block & 1);
 }
 
+template <typename TGaps>
+inline bool 
+isClipped(Iter<TGaps, GapsIterator<ArrayGaps> > const &)
+{
+	return false;
+}
+
+
 //____________________________________________________________________________
 
 template <typename TGaps>
