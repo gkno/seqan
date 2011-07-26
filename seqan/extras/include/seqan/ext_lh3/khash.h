@@ -81,8 +81,8 @@ int main() {
 */
 
 
-#ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
-#define SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
 
 namespace seqan { // namespace ext_lh3 {  // TODO(holtgrew): Put into its own namespace?
 
@@ -491,4 +491,4 @@ typedef const char *kh_cstr_t;
 
 } // namespace seqan
 
-#endif  // #ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_KHASH_H_
+#endif  // #ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_KHASH_H_

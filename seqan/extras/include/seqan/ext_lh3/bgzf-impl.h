@@ -40,8 +40,8 @@
 #include "bgzf.h"
 #include "khash.h"
 
-#ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_IMPL_H_
-#define SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_IMPL_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_BGZF_IMPL_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_BGZF_IMPL_H_
 
 namespace seqan { // namespace ext_lh3 {  // TODO(holtgrew): Put into its own namespace?
 
@@ -728,4 +728,4 @@ inline int64_t bgzf_seek(BGZF* fp, int64_t pos, int where)
 
 } // namespace seqan
 
-#endif  // #ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_IMPL_H_
+#endif  // #ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_BGZF_IMPL_H_

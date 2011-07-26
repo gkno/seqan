@@ -36,7 +36,7 @@ numOfReads = 1250			# Number of reads to simulate
 fixedReadLength = 0		# 0 = false, avgReadLength applies; 1 otherwise
 
 # Global error rate, fixedReadLength = 0
-avgReadLength = 800		# Average read length
+avgReadLength = 100		# Average read length
 errorPerBaseCall = 0.02		# Sequencing error rate for each base in a read (substitution or indels)
 
 # Or: Error distribution, fixedReadLength = 1
@@ -64,7 +64,7 @@ indelBaseRange = 4:6		# Indel size range
 
 # Mate-pairs parameters
 simulateMatePairs = 1		# 0 = no mate pairs are simulated, 1 = all reads are in a mate pair
-librarySizes = c(10000,20000)	# Mean library sizes for mate pairs
+librarySizes = c(100,200)	# Mean library sizes for mate pairs
 librarySd = c(10,20)		# Standard deviations for above library sizes
 
 # Path for reference file if generated.
@@ -195,7 +195,7 @@ reverseComplement = function(seq, alphabet = c('A','C','G','T','N'), compAlphabe
 ####
 # Simulates a set of reads from a set of haplotypes
 ####
-simulateReads=function(alphabet = c('A','C','G','T'), haplotypes = list(createRandomSequence(), createRandomSequence()), numOfReads = 100, avgReadLength = 35, errorPerBaseCall = 0.01, simulateMatePairs = 1, librarySizes = c(90, 80), librarySd = c(5, 2), readPath, fragmentPath) {
+simulateReads=function(alphabet = c('A','C','G','T'), haplotypes = list(createRandomSequence(), createRandomSequence()), numOfReads = 100, avgReadLength = 100, errorPerBaseCall = 0.01, simulateMatePairs = 1, librarySizes = c(90, 80), librarySd = c(5, 2), readPath, fragmentPath) {
 	tmpPath = paste(c(readPath, "tmp"),sep = "", collapse = "")
 	unlink(readPath)
 	unlink(tmpPath)

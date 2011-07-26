@@ -32,8 +32,8 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_HOLTGREW_TESTS_EXT_LH3_TEST_STREAM_BGZF_H_
-#define SANDBOX_HOLTGREW_TESTS_EXT_LH3_TEST_STREAM_BGZF_H_
+#ifndef EXTRAS_TESTS_EXT_LH3_TEST_STREAM_BGZF_H_
+#define EXTRAS_TESTS_EXT_LH3_TEST_STREAM_BGZF_H_
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
@@ -432,4 +432,4 @@ SEQAN_DEFINE_TEST(test_stream_bgzf_tell)
     gzclose(f);
 }
 
-#endif  // SANDBOX_HOLTGREW_TESTS_EXT_LH3_TEST_STREAM_BGZF_H_
+#endif  // EXTRAS_TESTS_EXT_LH3_TEST_STREAM_BGZF_H_

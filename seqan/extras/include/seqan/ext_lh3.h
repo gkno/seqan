@@ -31,32 +31,38 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
+// Facade header for module ext_lh3.
+// ==========================================================================
+
+#ifndef EXTRAS_INCLUDE_SEQAN_EXT_LH3_H_
+#define EXTRAS_INCLUDE_SEQAN_EXT_LH3_H_
+
+// TODO(holtgrew): It might be better to keep this in an "ext" library but that requires more thought on the greater scheme of things.
+
+// ===========================================================================
+// Prerequisites.
+// ===========================================================================
 
 #include <seqan/basic.h>
 #include <seqan/file.h>
+#include <seqan/sequence.h>
+#include <seqan/stream.h>
 
-#include <seqan/ext_lh3.h>
+// ===========================================================================
+// BGZF Support.
+// ===========================================================================
 
-#include "test_stream_bgzf.h"
+#if SEQAN_HAS_ZLIB
+#include <seqan/ext_lh3/bgzf.h>
+#include <seqan/ext_lh3/bgzf-impl.h>
+#endif  // #if SEQAN_HAS_ZLIB
 
+// ===========================================================================
+// Stream wrapper for BGZF.
+// ===========================================================================
 
-SEQAN_BEGIN_TESTSUITE(test_ext_lh3)
-{
-    // Test Stream<Bgzf>.
-    SEQAN_CALL_TEST(test_stream_bgzf_metafunctions);
-    SEQAN_CALL_TEST(test_stream_bgzf_read_simple_usage);
-    SEQAN_CALL_TEST(test_stream_bgzf_read_complex_usage);
-    SEQAN_CALL_TEST(test_stream_bgzf_write_simple_usage);
-    SEQAN_CALL_TEST(test_stream_bgzf_write_complex_usage);
-    SEQAN_CALL_TEST(test_stream_bgzf_eof);
-    SEQAN_CALL_TEST(test_stream_bgzf_peek);
-    SEQAN_CALL_TEST(test_stream_bgzf_read_char);
-    SEQAN_CALL_TEST(test_stream_bgzf_read_block);
-    SEQAN_CALL_TEST(test_stream_bgzf_write_block);
-    SEQAN_CALL_TEST(test_stream_bgzf_streamPut);
-    SEQAN_CALL_TEST(test_stream_bgzf_write_char);
-    SEQAN_CALL_TEST(test_stream_bgzf_flush);
-    SEQAN_CALL_TEST(test_stream_bgzf_seek);
-    SEQAN_CALL_TEST(test_stream_bgzf_tell);
-}
-SEQAN_END_TESTSUITE
+#if SEQAN_HAS_ZLIB
+#include <seqan/ext_lh3/stream_bgzf.h>
+#endif  // #if SEQAN_HAS_ZLIB
+
+#endif  // EXTRAS_INCLUDE_SEQAN_EXT_LH3_H_

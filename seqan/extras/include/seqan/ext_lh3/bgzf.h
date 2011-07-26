@@ -25,8 +25,8 @@
 
 // TODO(holtgrew): It might be better to keep this in an "ext" library but that requires more thought on the greater scheme of things.
 
-#ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_H_
-#define SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_BGZF_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_BGZF_H_
 
 namespace seqan { // namespace ext_lh3 {  // TODO(holtgrew): Put into its own namespace?
 
@@ -173,4 +173,4 @@ static inline int bgzf_getc(BGZF *fp)
 
 } // namespace seqan
 
-#endif  // #ifndef SEQAN_SANDBOX_HOLTGREW_INCLUDE_SEQAN_EXT_LH3_BGZF_H_
+#endif  // #ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_EXT_LH3_BGZF_H_

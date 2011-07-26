@@ -274,6 +274,10 @@ int main(int argc, const char *argv[]) {
 				typedef Graph<Alignment<TStringSet, void, WithoutEdgeId> > TAlignGraph;
 				TAlignGraph gOut(readSet);
 				consensusAlignment(gOut, begEndPos, consOpt);
+                
+//                CharString mtx;
+//                convertAlignment(gOut, mtx);
+//                std::cerr << mtx << std::endl;
 			
 				// Update the contig in the fragment store
 				if (!empty(gOut)) updateContig(fragStore, gOut, currentContig);
