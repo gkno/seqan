@@ -278,6 +278,61 @@ getCigarString(
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// _alignAndGetCigarString
+
+template <typename TCigar, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
+inline void
+alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors errors, True)
+{
+	typedef Align<TReadSeq, ArrayGaps> TAlign;
+
+    TAlign align;
+    resize(rows(align), 2);
+
+    if (alignedRead.beginPos <= alignedRead.endPos)
+        assignSource(row(align, 0), infix(contig.seq, alignedRead.beginPos, alignedRead.endPos));
+    else
+        assignSource(row(align, 0), infix(contig.seq, alignedRead.endPos, alignedRead.beginPos));
+
+    assignSource(row(align, 1), readSeq);
+    
+    if (!(errors == 0 || (errors == 1 && length(readSeq) == length(source(row(align, 0))))))
+        globalAlignment(align, Score<short, EditDistance>());
+	getCigarString(cigar, row(align, 0), row(align, 1));
+}
+
+template <typename TCigar, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
+inline void
+alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors, False)
+{
+	typedef typename TContig::TContigSeq                                    TContigSeq;
+    typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
+	typedef Gaps<TReadSeq, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
+
+    TContigGaps	contigGaps(contig.seq, contig.gaps);
+    
+    if (alignedRead.beginPos <= alignedRead.endPos) 
+    {
+        setBeginPosition(contigGaps, alignedRead.beginPos);
+        setEndPosition(contigGaps, alignedRead.endPos);
+    } else
+    {
+        setBeginPosition(contigGaps, alignedRead.endPos);
+        setEndPosition(contigGaps, alignedRead.beginPos);
+    }
+
+    TReadGaps readGaps(readSeq, alignedRead.gaps);
+    typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps2;
+    // TContigGaps	contigGaps2(contig.seq, contig.gaps);
+    // if (i == 4)
+    //     printf("It's it!\n");
+    // std::cerr << "read gaps:  " << readGaps << std::endl;
+    // std::cerr << "contig gaps:" << contigGaps2 << std::endl;
+    
+    getCigarString(cigar, contigGaps, readGaps);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // _getClippedLength
     
     template <typename TCigarString, typename TNum>
@@ -1015,10 +1070,11 @@ getCigarString(
 //////////////////////////////////////////////////////////////////////////////
 // _writeAlignments
 
-    template<typename TFile, typename TSpec, typename TConfig>
+    template<typename TFile, typename TSpec, typename TConfig, typename TDoAlign>
 	inline void _writeAlignments(TFile & target,
                                  FragmentStore<TSpec, TConfig> & store,
-                                 Sam)
+                                 Sam,
+                                 TDoAlign doAlign)
     {
 //IOREV
 		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
@@ -1039,7 +1095,6 @@ getCigarString(
         typedef typename Iterator<TReadSeq, Standard>::Type             TReadSeqIter;
         typedef typename Id<TAlignedRead>::Type							TId;
 
-		typedef Gaps<TReadSeq, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
 		typedef Gaps<Nothing, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
 
 		String<int> mateIndex;	// store outer library size for each pair match (indexed by pairMatchId)
@@ -1050,6 +1105,11 @@ getCigarString(
 		TAlignIter mit = it;
 		CharString cigar;
 		TReadSeq readSeq;
+        
+        typedef unsigned long TWord;
+        const unsigned wordLen = BitsPerValue<TWord>::VALUE;
+        String<TWord> readAligned;  // bitset to signal wether a read was aligned at least once
+        resize(readAligned, (length(store.readStore) + wordLen - 1) / wordLen);
 
 //        int i = 0;
         for(; it != itEnd; ++it)
@@ -1087,18 +1147,26 @@ getCigarString(
 				if ((*mit).beginPos > (*mit).endPos)
 					flag |= 0x0020;				
 			}
-			else
-				flag |= 0x0008;					// mate is unmapped (actually we should check if the mate has no match at all)
 			
 			signed char mateNo = getMateNo(store, readId);
 			if (mateNo == 0) flag |= 0x0040;	// this read is the first in the pair
 			if (mateNo == 1) flag |= 0x0080;	// this read is the second in the pair
+            
+            // test for secondary alignment
+            TWord mask = (TWord)1 << (readId % wordLen);
+            bool secondary = (readAligned[readId / wordLen] & mask) != 0;
+            readAligned[readId / wordLen] |= mask;
+            if (secondary) flag |= 0x0100;      // we've already output an alignment for this read (this one is secondary)
 
 			if (readId < length(store.readStore))
 			{
 				TRead &read = store.readStore[readId];
 				if (read.matePairId != TRead::INVALID_ID)
+                {
 					flag |= 0x0001;
+                    if (mateIdx >= length(store.alignedReadStore))
+                        flag |= 0x0008;			// mate is unmapped (actually we should check if the mate has no match at all)
+                }
 			}
 			
 			// <qname>
@@ -1138,29 +1206,13 @@ getCigarString(
 			if (readId < length(store.readSeqStore))
 			{
 				readSeq = store.readSeqStore[readId];
-				if ((*it).beginPos <= (*it).endPos) 
-				{
-					setBeginPosition(contigGaps, (*it).beginPos);
-					setEndPosition(contigGaps, (*it).endPos);
-				} else
-				{
-					setBeginPosition(contigGaps, (*it).endPos);
-					setEndPosition(contigGaps, (*it).beginPos);
+				if ((*it).beginPos > (*it).endPos) 
 					reverseComplement(readSeq);
-				}
 			} else
 				clear(readSeq);
 			
             // <cigar>
-			TReadGaps readGaps(readSeq, (*it).gaps);
-            typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps2;
-			// TContigGaps	contigGaps2(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
-            // if (i == 4)
-            //     printf("It's it!\n");
-            // std::cerr << "read gaps:  " << readGaps << std::endl;
-            // std::cerr << "contig gaps:" << contigGaps2 << std::endl;
-			getCigarString(cigar, contigGaps, readGaps);
-			
+            alignAndGetCigarString(cigar, store.contigStore[(*it).contigId], readSeq, *it, store.alignQualityStore[alignedId].errors, doAlign);
 			_streamWrite(target, cigar);
             _streamPut(target, '\t');
             
@@ -1186,14 +1238,22 @@ getCigarString(
             _streamPut(target, '\t');
 
             // <seq>
-			_streamWrite(target, readSeq);
+            if (!secondary)
+                _streamWrite(target, readSeq);
+            else
+                _streamPut(target, '*');
             _streamPut(target, '\t');
             
             // <qual>
-			TReadSeqIter it = begin(readSeq, Standard());
-			TReadSeqIter itEnd = end(readSeq, Standard());
-			for (; it != itEnd; ++it)
-				_streamPut(target, (char)(getQualityValue(*it) + 33));
+            if (!secondary)
+            {
+                TReadSeqIter it = begin(readSeq, Standard());
+                TReadSeqIter itEnd = end(readSeq, Standard());
+                for (; it != itEnd; ++it)
+                    _streamPut(target, (char)(getQualityValue(*it) + 33));
+            }
+            else
+                _streamPut(target, '*');
             
 			// <tags>
             
@@ -1218,6 +1278,14 @@ getCigarString(
         
     }
     
+    template<typename TFile, typename TSpec, typename TConfig>
+	inline void _writeAlignments(TFile & target,
+                                 FragmentStore<TSpec, TConfig> & store,
+                                 Sam)
+    {
+        _writeAlignments(target, store, Sam(), False());
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 // write
 
