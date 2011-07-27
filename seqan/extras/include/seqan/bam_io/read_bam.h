@@ -35,6 +35,7 @@
 // ==========================================================================
 
 // TODO(holtgrew): Test me!
+// TODO(holtgrew): Indexing.
 
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_READ_BAM_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_READ_BAM_H_
