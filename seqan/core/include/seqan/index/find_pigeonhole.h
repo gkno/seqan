@@ -95,6 +95,27 @@ namespace seqan
 //____________________________________________________________________________
 
 
+/**
+.Spec.Pigeonhole:
+..summary:Provides a fast filter alogrithm that uses the pigeonhole lemma, i.e. if a pattern matches with k errors in the text, every partition into k+1 parts contains one part that matches without error.
+..general:Class.Pattern
+..general:Class.Finder
+..cat:Searching
+..signature:Finder<THaystack, Pigeonhole<TSpec> >
+..signature:Pattern<TIndex, Pigeonhole<TSpec> >
+..param.THaystack:The type of the sequence that should be searched.
+..param.TIndex: A q-gram index of needle(s) that should be searched for.
+...type:Spec.IndexQGram
+..param.TSpec: Specifies the type of Swift filter.
+..include:seqan/index.h
+..remarks:
+ The @Class.Pattern@ must be a q-gram index over multiple patterns. The tolerated error rate must be given when @Function.find@ or @Function.windowFindBegin@ is called.
+ In these functions the length of the index @Class.Shape@ is set automatically thus it must be modifiable at runtime, e.g. @Spec.OneGappedShape@.
+
+*/
+///.Class.Pattern.param.TSpec.type:Spec.Pigeonhole
+///.Class.Finder.param.TSpec.type:Spec.Pigeonhole
+
 	template <typename THaystack, typename TSpec>
 	class Finder<THaystack, Pigeonhole<TSpec> >
 	{

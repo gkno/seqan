@@ -59,8 +59,11 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ...type:Spec.IndexQGram
 ..param.TSpec: Specifies the type of Swift filter.
 ..include:seqan/index.h
+..remarks:
+The @Class.Pattern@ must be a q-gram index over multiple patterns. The allowed error rate must be given when @Function.find@ or @Function.windowFindBegin@ is called.
 */
 ///.Class.Pattern.param.TSpec.type:Spec.Swift
+///.Class.Finder.param.TSpec.type:Spec.Swift
 
 /**
 .Spec.SwiftLocal:
@@ -1430,15 +1433,15 @@ endPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 ..signature:positionRangeNoClip(finder)
 ..signature:positionRangeNoClip(pattern)
 ..param.finder:A @Class.Finder@ object.
+...type:Spec.Swift
 ..param.pattern:A @Class.Pattern@ object.
+...type:Spec.Swift
 ..returns:A pair of the begin and end position in the haystack or needle for the last hit found. These positions could
 be negative or beyond the end of $finder$ or $pattern$ when using filter algorithms.
 ...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
 ..see:Function.positionRange
 ..include:seqan/index.h
 */
-///.Function.positionRangeNoClip.param.finder.type:Spec.Swift
-///.Function.positionRangeNoClip.param.pattern.type:Spec.Swift
 
 template <typename THaystack, typename TSpec>
 inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
@@ -1465,15 +1468,15 @@ positionRangeNoClip(Finder<THaystack, Swift<TSpec> > & finder)
 ..signature:positionRange(finder)
 ..signature:positionRange(pattern)
 ..param.finder:A @Class.Finder@ object.
+...type:Spec.Swift
 ..param.pattern:A @Class.Pattern@ object.
+...type:Spec.Swift
 ..returns:A pair of the begin and end position in the haystack or needle for the last hit found.
 ...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
 ..see:Function.beginPosition
 ..see:Function.endPosition
 ..include:seqan/index.h
 */
-///.Function.positionRange.param.finder.type:Spec.Swift
-///.Function.positionRange.param.pattern.type:Spec.Swift
 
 template <typename THaystack, typename TSpec>
 inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
@@ -1867,7 +1870,9 @@ find(
  Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
 ..signature:windowFindBegin(finder, pattern, errorRate)
 ..param.finder:A finder with window interface.
+...type:Spec.Swift
 ..param.pattern: A pattern with window interface.
+...type:Spec.Swift
 ..param.errorRate:Error rate that is allowed between reads and reference.
  Should be the same in as in @Function.windowFindNext@.
 ...type:nolink:double
@@ -1898,18 +1903,20 @@ windowFindBegin(
 /**
 .Function.windowFindNext:
 ..cat:Searching
-..summary:Searches over the next window with the finder. The found hits can be retrieved with @Function.getSwiftHits@
+..summary:Searches over the next window with the finder. The found hits can be retrieved with @Function.getWindowFindHits@
  Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
 ..signature:windowFindNext(finder, pattern, finderWindowLength)
 ..param.finder:A finder with window interface.
+...type:Spec.Swift
 ..param.pattern: A pattern with window interface.
+...type:Spec.Swift
 ..param.finderWindowLength:Number of bases that are scanned beginning from the position the finder is at.
  Including bases that are marked as repeats and that are skipped.
 ...type:nolink:unsigned int
 ..returns:true, if there are bases that can be scanned. false, otherwise
 ..see:Function.windowFindBegin
 ..see:Function.windowFindEnd
-..see:Function.getSwiftHits
+..see:Function.getWindowFindHits
 ..include:seqan/index.h
 */
 template <typename THaystack, typename TIndex, typename TSpec, typename TSize>
@@ -1969,7 +1976,9 @@ windowFindNext(
 ..summary:Flushes the pattern. Used together with @Function.windowFindBegin@ and @Function.windowFindNext@.
 ..signature:windowFindNext(finder, pattern)
 ..param.finder:A finder with window interface.
+...type:Spec.Swift
 ..param.pattern: A pattern with window interface.
+...type:Spec.Swift
 ..see:Function.windowFindBegin
 ..include:seqan/index.h
 */
@@ -1990,6 +1999,7 @@ windowFindEnd(
 ..summary:Returns the string of hits from the finder.
 ..signature:getWindowFindHits(finder)
 ..param.finder:A finder with window interface.
+...type:Spec.Swift
 ..returns:@Class.String@ of Hits (use Finder<...>::THitString as Type).
 ..include:seqan/index.h
 */
@@ -2003,15 +2013,15 @@ getWindowFindHits(Finder<THaystack, Swift<TSpec> > &finder)
 }
 
 /**
- .Function.getMaxDeviationOfOrder:
- ..cat:Searching
- ..summary:Returns the maximal out-of-order distance of adjacent hits.
- ..signature:getMaxDeviationOfOrder(pattern)
- ..param.pattern:A pattern with window interface.
- ...type:Spec.Swift
- ..returns:Returns the maximal distance two adjacent hits can have which are not in increasing order.
- ..include:seqan/index.h
- */
+.Function.getMaxDeviationOfOrder:
+..cat:Searching
+..summary:Returns the maximal out-of-order distance of adjacent hits.
+..signature:getMaxDeviationOfOrder(pattern)
+..param.pattern:A pattern with window interface.
+...type:Spec.Swift
+..returns:Returns the maximal distance two adjacent hits can have which are not in increasing order.
+..include:seqan/index.h
+*/
 template <typename TIndex, typename TSpec>
 inline typename Size<TIndex>::Type
 getMaxDeviationOfOrder(Pattern<TIndex, Swift<TSpec> > &pattern)
