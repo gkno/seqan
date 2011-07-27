@@ -518,7 +518,7 @@ public:
 		ANNO_THREE_PRIME_UTR,
 		ANNO_PREDEFINED
 	};
-	
+    
 	FragmentStore():
 		readNameStoreCache(readNameStore),
 		contigNameStoreCache(contigNameStore),
@@ -668,16 +668,17 @@ getAnnoUniqueName(FragmentStore<TSpec, TConfig> & store, TId id)
 // 
 // adds a new entry to the read store if neccessary. Otherwise it writes the 
 // correct Id in the variable using to qname to identify it
-// If needed a mate pair entry is created
+// If needed a mate pair entry is created.
+// Returns true, if the read hasn't been in the read store before and was appended.
     
 template <typename TSpec, typename TConfig, typename TId, typename TName, typename TString, typename TFlag, typename TContext>
-inline void 
+inline bool 
 _storeAppendRead (
 	FragmentStore<TSpec, TConfig> & fragStore, 
 	TId & readId, 
-	TName & qname,
-	TString & readSeq,
-	TFlag & flag,
+	TName const & qname,
+	TString const & readSeq,
+	TFlag const flag,
 	TContext &)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
@@ -707,13 +708,13 @@ _storeAppendRead (
 					appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
 					// set the ID in the mate pair store
 					fragStore.matePairStore[matePairId].readId[inPair] = readId;
+                    return true;
 				} 
                 // else == I am already in the store
 			}
             // else == my mate said he has no mate (do nothing)
-            return;
-		} else 
-			return;
+		}
+        return false;
 	}
 
 	// if the read name is not in the store
@@ -737,6 +738,7 @@ _storeAppendRead (
 		appendRead(fragStore, readSeq);
 	
 	appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////

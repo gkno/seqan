@@ -151,6 +151,71 @@ __uint32 toBamCigarElement(CigarElement<TOperation, TCount> const & cigarElement
 //____________________________________________________________________________
 
 template <
+	typename TMDString,
+	typename TGaps1,
+	typename TGaps2>
+inline void
+getMDString(
+	TMDString &md,
+	TGaps1 &gaps1,
+	TGaps2 &gaps2)
+{
+    typedef typename Value<TMDString>::Type TMDChar;
+	typename Iterator<TGaps1>::Type it1 = begin(gaps1);
+	typename Iterator<TGaps2>::Type it2 = begin(gaps2);
+	char op, lastOp = ' ';
+	unsigned numOps = 0;
+
+	clear(md);
+	for (; !atEnd(it1) && !atEnd(it2); goNext(it1), goNext(it2))
+	{
+		if (isGap(it1)) continue;
+        if (isGap(it2))
+        {
+            op = 'D';
+        } 
+        else
+            op = (*it1 == *it2)? 'M': 'R';
+        
+        // append match run
+		if (lastOp != op)
+		{
+            if (lastOp == 'M')
+			{
+				std::stringstream num;
+				num << numOps;
+				append(md, num.str());
+			}
+			numOps = 0;
+			lastOp = op;
+		}
+
+        // append deleted/replaced reference character
+        if (op != 'M')
+        {
+            // add ^ from non-deletion to deletion
+            if (op == 'D' && lastOp != 'D')
+                appendValue(md, '^');
+            // add 0 from deletion to replacement
+            if (op == 'R' && lastOp == 'D')
+                appendValue(md, '0');
+            appendValue(md, convert<TMDChar>(*it1));
+        }
+
+		++numOps;
+	}
+	SEQAN_ASSERT_EQ(atEnd(it1), atEnd(it2));
+    if (lastOp == 'M')
+    {
+        std::stringstream num;
+        num << numOps;
+        append(md, num.str());
+    }
+}
+
+//____________________________________________________________________________
+
+template <
 	typename TCigar,
 	typename TGaps1,
 	typename TGaps2,
@@ -194,6 +259,8 @@ getCigarString(
 			else
 				op = 'M';
 		}
+        
+        // append CIGAR operation
 		if (lastOp != op)
 		{
 			if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
@@ -229,7 +296,7 @@ template <
 inline void
 getCigarString(
 	TCigar &cigar,
-	TGaps1 &gaps1,
+    TGaps1 &gaps1,
 	TGaps2 &gaps2)
 {
 	return getCigarString(cigar, gaps1, gaps2, 20);
@@ -302,9 +369,9 @@ getCigarString(
 //////////////////////////////////////////////////////////////////////////////
 // _alignAndGetCigarString
 
-template <typename TCigar, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
+template <typename TCigar, typename TMDString, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
 inline void
-alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors errors, True)
+alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors errors, True)
 {
 	typedef Align<TReadSeq, ArrayGaps> TAlign;
 
@@ -321,11 +388,12 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
     if (!(errors == 0 || (errors == 1 && length(readSeq) == length(source(row(align, 0))))))
         globalAlignment(align, Score<short, EditDistance>());
 	getCigarString(cigar, row(align, 0), row(align, 1));
+	getMDString(md, row(align, 0), row(align, 1));
 }
 
-template <typename TCigar, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
+template <typename TCigar, typename TMDString, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
 inline void
-alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors, False)
+alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors, False)
 {
 	typedef typename TContig::TContigSeq                                    TContigSeq;
     typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
@@ -352,6 +420,7 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
     // std::cerr << "contig gaps:" << contigGaps2 << std::endl;
     
     getCigarString(cigar, contigGaps, readGaps);
+	getMDString(md, contigGaps, readGaps);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -541,13 +610,14 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
         typedef typename Size<TQualString>::Type				TSize;
         typedef typename Iterator<TQualString, Standard>::Type	TIter;
         
+        if (!_parseIsPhredQual(c)) return;
+
         TIter itBegin = begin(str, Standard());
+        TIter it = itBegin; 
         TSize rest = length(str);
         
-        int q = 0;
-        for (TIter it = itBegin; rest != 0 && _parseIsPhredQual(c); --rest, ++it)
-        {
-            q = c - '!';
+        do {
+            int q = c - '!';
 			if (!_streamEOF(file)) 
 				c = _streamGet(file);
 			else
@@ -557,8 +627,13 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
 			if (q == '*' - '!' && !_parseIsPhredQual(c) && it == itBegin)
 				return;
 			
-            assignQualityValue(*it, q);
-        }
+            if (rest != 0)
+            {
+                assignQualityValue(*it, q);
+                ++it;
+                --rest;
+            }
+        } while (_parseIsPhredQual(c) && !_streamEOF(file));
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -861,6 +936,10 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
 
         while (!_streamEOF(file))
             _readOneAlignment(file, fragStore, contigAnchorGaps, matchMateInfos, c, Sam(), contextSAM);
+            
+        for(unsigned i=0;i<length(fragStore.alignedReadStore);++i)
+            if (empty(fragStore.readSeqStore[fragStore.alignedReadStore[i].readId]))
+                std::cout <<"EMPTY: "<<fragStore.readNameStore[fragStore.alignedReadStore[i].readId]<<std::endl;
     }
     
     
@@ -896,11 +975,12 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
         typedef typename TAlignedElement::TGapAnchors								TReadGapAnchors;
 		
         // Type for sequence in readstore
-        typedef typename TFragmentStore::TReadSeq TReadSeq2;
+        typedef typename Value<typename TFragmentStore::TReadSeqStore>::Type        TReadSeqStoreElement;
+        typedef typename TFragmentStore::TReadSeq                                   TReadSeq;
         
         // Type for gap anchor
         typedef typename TFragmentStore::TContigPos									TContigPos;
-		typedef Gaps<TReadSeq2, AnchorGaps<TReadGapAnchors> >						TReadGaps;
+		typedef Gaps<TReadSeqStoreElement, AnchorGaps<TReadGapAnchors> >			TReadGaps;
 		typedef Gaps<Nothing, AnchorGaps<typename Value<TContigAnchorGaps>::Type> >	TContigGapsPW;
         
         // Type to temporarily store information about match mates
@@ -975,20 +1055,15 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
         _parseSkipWhitespace(file, c);
 
 		// read in sequence
-        TReadSeq2 readSeq;
+        TReadSeq readSeq;
         _parseReadDnaSeq(file, readSeq, c);
-        SEQAN_ASSERT_GT(length(readSeq), 0u);
-		if (reverse)  // TODO(holtgrew): Why not after parsing quality? ib. for BAM...
-			reverseComplement(readSeq);
         _parseSkipWhitespace(file, c);
 
 		// and associated qualities
         _parseReadSeqQual(file, readSeq, c);
+		if (reverse)
+			reverseComplement(readSeq);
 
-		// insert alignment gaps
-		TReadGaps readGaps(readSeq, readGapAnchors);
-        cigarToGapAnchorRead(cigar, readGaps);
-        
         // read in Sam tags
         String<char> tags;
         _parseSkipSpace(file, c);
@@ -1002,21 +1077,59 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
         // read, read name and mate pair store
         
         TId readId = 0;
-        _storeAppendRead(fragStore, readId, qname, readSeq, flag, contextSAM);
+        bool newRead = _storeAppendRead(fragStore, readId, qname, readSeq, flag, contextSAM);
+        (void)newRead;
+            
+        SEQAN_ASSERT_NOT(newRead && empty(readSeq));
         
         // check if the contig is already in the store
         // get its ID or create a new one otherwise
         TId contigId = 0;
         _storeAppendContig(fragStore, contigId, rname);
 
+        // insert alignment gaps
 		if (empty(cigar)) return;
-		
+		TReadGaps readGaps(fragStore.readSeqStore[readId], readGapAnchors);
+        cigarToGapAnchorRead(cigar, readGaps);
+        
         // create a new entry in the aligned read store
         TId pairMatchId = appendAlignment(fragStore, readId, contigId, beginPos, endPos, readGapAnchors);
 		resize(contigAnchorGaps, length(fragStore.alignedReadStore), Generous());
 		TContigGapsPW contigGaps(back(contigAnchorGaps));
         cigarToGapAnchorContig(cigar, contigGaps);
 		
+        // extract and delete some tags
+        if (!empty(tags))
+            for (unsigned pos = length(tags), right = length(tags); pos != 0; )
+            {
+                --pos;
+                if (pos == 0 || tags[pos] == '\t')
+                {
+                    unsigned left = pos;
+                    if (tags[left] == '\t') ++left;                    
+
+                    bool remove = false;
+                    if (infix(tags, left, left + 2) == "MD")
+                        remove = true;
+                    
+                    if (infix(tags, left, left + 2) == "NM")
+                    {
+                        std::string val;
+                        int errors;
+                        assign(val, infix(tags, left + 5, right)); // NM:i:x
+                    	std::istringstream stream(val);
+                        stream >> errors;
+                        mapQ.errors = errors;
+                        remove = true;
+                    }
+                    
+                    if (remove)
+                        erase(tags, left, _min(right + 1, length(tags)));
+
+                    right = pos;
+                }
+            }
+        
 		// create entries in Sam specific stores
         appendValue(fragStore.alignQualityStore, mapQ, Generous());
         appendValue(fragStore.alignedReadTagStore, tags, Generous());
@@ -1139,18 +1252,16 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
         TAlignIter it = begin(store.alignedReadStore, Standard());
         TAlignIter itEnd = end(store.alignedReadStore, Standard());
 		TAlignIter mit = it;
-		CharString cigar;
+		CharString cigar, md;
 		TReadSeq readSeq;
         
         typedef unsigned long TWord;
         const unsigned wordLen = BitsPerValue<TWord>::VALUE;
         String<TWord> readAligned;  // bitset to signal wether a read was aligned at least once
-        resize(readAligned, (length(store.readStore) + wordLen - 1) / wordLen);
+        resize(readAligned, (length(store.readStore) + wordLen - 1) / wordLen, (TWord)0);
 
-//        int i = 0;
         for(; it != itEnd; ++it)
 		{
-//            std::cerr << "alignment " << i++ << std::endl;
             TId alignedId = (*it).id;
 			TId readId = (*it).readId;
 			TId mateIdx = TRead::INVALID_ID;
@@ -1248,7 +1359,7 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
 				clear(readSeq);
 			
             // <cigar>
-            alignAndGetCigarString(cigar, store.contigStore[(*it).contigId], readSeq, *it, store.alignQualityStore[alignedId].errors, doAlign);
+            alignAndGetCigarString(cigar, md, store.contigStore[(*it).contigId], readSeq, *it, store.alignQualityStore[alignedId].errors, doAlign);
 			_streamWrite(target, cigar);
             _streamPut(target, '\t');
             
@@ -1293,16 +1404,18 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
             
 			// <tags>
             
-// TODO: Output the NM tag
-// This requires to parse the NM tag when reading, as it should
-// not go into the alignedReadTagStore to avoid multiple NM entries.
-//
-//			if (alignedId < length(store.alignQualityStore))
-//            {
-//                _streamWrite(target, "\tNM:i:");
-//				_streamPutInt(target, store.alignQualityStore[alignedId].errors);
-//            }
-//
+			if (alignedId < length(store.alignQualityStore))
+            {
+                _streamWrite(target, "\tNM:i:");
+				_streamPutInt(target, store.alignQualityStore[alignedId].errors);
+            }
+
+            if (!empty(md))
+            {
+                _streamWrite(target, "\tMD:Z:");
+                _streamWrite(target, md);
+            }
+
 			if (alignedId < length(store.alignedReadTagStore) && !empty(store.alignedReadTagStore[alignedId]))
 			{
 				_streamPut(target, '\t');
