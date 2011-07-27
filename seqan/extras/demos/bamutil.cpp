@@ -42,6 +42,8 @@
 #include <seqan/bam_io.h>
 #include <seqan/ext_lh3.h>
 
+#if SEQAN_HAS_ZLIB
+
 using namespace seqan;
 
 enum Format
@@ -179,9 +181,11 @@ int performConversion(TInStreamOrRecordReader & in, TOutStream & out, TInTag con
     }
     return 0;
 }
+#endif  // #if SEQAN_HAS_ZLIB
 
 int main(int argc, char const * argv[])
 {
+#if SEQAN_HAS_ZLIB
     using namespace seqan;
 
     // Setup command line parser.
@@ -329,4 +333,7 @@ main_end:
         close(inF);
     
     return ioGood ? 0 : 1;
+#else  // #if SEQAN_HAS_ZLIB
+    return 0;
+#endif  // #if SEQAN_HAS_ZLIB
 }
