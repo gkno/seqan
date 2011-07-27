@@ -293,6 +293,19 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
     }
 }
 
+/**
+.Function.assignTagsSamToBam
+..cat:BAM I/O
+..summary:Assign tags in SAM format to tags in BAM format.
+..signature:assignTagsSamToBam(bamTags, samTags)
+..param.bamTags:Destination BAM tags.
+...type:Shortcut.CharString
+..param.samTags:Source SAM tags.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/bam_io.h
+*/
+
 template <typename TTarget, typename TSource>
 void assignTagsSamToBam(TTarget & target, TSource & source)
 {
@@ -584,6 +597,20 @@ void _assignTagsBamToSamOneTag(TTarget & target, TSourceIter & it, std::stringst
         SEQAN_ASSERT_FAIL("Invalid tag type: %c!", t);
     }
 }
+
+/**
+.Function.assignTagsBamToSam
+..cat:BAM I/O
+..summary:Assign tags in BAM format to tags in SAM format.
+..signature:assignTagsSamToBam(bamTags, samTags)
+..param.samTags:Destination SAM tags.
+...type:Shortcut.CharString
+..param.bamTags:Source BAM tags.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/bam_io.h
+..see:Function.assignTagsSamToBam
+*/
 
 template <typename TTarget, typename TSource>
 void assignTagsBamToSam(TTarget & target, TSource const & source)

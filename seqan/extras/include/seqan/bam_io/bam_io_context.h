@@ -49,9 +49,42 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/**
+.Class.BamIOContext
+..cat:BAM I/O
+..signature:BamIOContext<TNameStore[, TNameStoreCache]>
+..summary:The I/O context to use for BAM I/O.
+..param.TNameStore:The name store class.
+..param.TNameStoreCache:The name store cache class.
+...default:@Class.NameStoreCache@<TNameStore>
+..include:bam_io.h
+..example.text:Creating a @Class.BamIOContext@ for a raw @Shortcut.CharString@.
+..example.code:
+CharString nameStore;
+NameStore<CharString> nameStoreCache(nameStore);
+BamIOContext<CharString> bamIOContext(nameStore, nameStoreCache);
+// ...
+..example.text:Using a @Class.BamIOContext@ with a @Class.FragmentStore@.
+..example.code:
+typedef FragmentStore<>::TNameStore      TNameStore;
+typedef FragmentStore<>::TNameStoreCache TNameStoreCache;
+FragmentStore<> store;
+BamIOContext<TNameStore, TNameStoreCache> bamIOContext(nameStore, nameStoreCache);
+// ...
+
+.Typedef.BamIOContext#TNameStore
+..class:Class.BamIOContext
+..summary:The name store class.
+
+.Typedef.BamIOContext#TNameStoreCache
+..class:Class.BamIOContext
+..summary:The name store cache class.
+*/
+
 template <typename TNameStore_, typename TNameStoreCache_ = NameStoreCache<TNameStore_> >
-struct BamIOContext
+class BamIOContext
 {
+public:
     typedef TNameStore_ TNameStore;
     typedef TNameStoreCache_ TNameStoreCache;
 
@@ -78,6 +111,17 @@ struct BamIOContext
 // Function nameStore()
 // ----------------------------------------------------------------------------
 
+/**
+.Function.nameStore
+..cat:BAM I/O
+..summary:Return reference to name store from @Class.BamIOContext@.
+..signature:nameStore(context)
+..param.context:The @Class.BamIOContext@ to query.
+...type:Class.BamIOContext
+..see:Typedef.BamIOContext#TNameStore
+..include:seqan/bam_io.h
+*/
+
 template <typename TNameStore, typename TNameStoreCache>
 TNameStore &
 nameStore(BamIOContext<TNameStore, TNameStoreCache> & context)
@@ -89,6 +133,18 @@ nameStore(BamIOContext<TNameStore, TNameStoreCache> & context)
 // ----------------------------------------------------------------------------
 // Function nameStoreCache()
 // ----------------------------------------------------------------------------
+
+/**
+.Function.nameStoreCache
+..cat:BAM I/O
+..summary:Return reference to name store cache from @Class.BamIOContext@.
+..signature:nameStoreCache(context)
+..param.context:The @Class.BamIOContext@ to query.
+...type:Class.BamIOContext
+..see:Typedef.BamIOContext#TNameStoreCache
+..include:seqan/bam_io.h
+..see:Function.nameStore
+*/
 
 template <typename TNameStore, typename TNameStoreCache>
 TNameStoreCache &

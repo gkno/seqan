@@ -49,6 +49,14 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/**
+.Tag.Sam
+..cat:Fragment Store
+..signature:Sam
+..summary:Tag for identifying the SAM format.
+..include:seqan/store.h
+*/
+
 enum SamTokenizeErrors_
 {
     SAM_INVALID_RECORD = 2048
@@ -221,6 +229,14 @@ int readRecord(BamHeaderRecord & record,
 // Function readRecord()                                              BamHeader
 // ----------------------------------------------------------------------------
 
+/**
+.Function.readRecord
+..signature:readRecord(headerRecord, context, recordReader, tag)
+..param.recordReader:The RecordReader to read from.
+...type:Class.RecordReader
+...remarks:Use for SAM.
+*/
+
 template <typename TStream, typename TSpec, typename TNameStore, typename TNameStoreCache>
 int readRecord(BamHeader & header,
                BamIOContext<TNameStore, TNameStoreCache> & context,
@@ -264,6 +280,11 @@ int readRecord(BamHeader & header,
 // ----------------------------------------------------------------------------
 // Function readRecord()                                     BamAlignmentRecord
 // ----------------------------------------------------------------------------
+
+/**
+.Function.readRecord
+..signature:readRecord(alignmentRecord, context, recordReader, tag)
+*/
 
 template <typename TStream, typename TSpec, typename TNameStore, typename TNameStoreCache>
 int readRecord(BamAlignmentRecord & record,

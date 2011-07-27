@@ -54,7 +54,7 @@ namespace seqan {
 .Class.BamTagsDict
 ..cat:Fragment Store
 ..signature:BamTagsDict
-..summary:Indexes start positions of BAM tags in a @Class.CharString@ and provides a dict-like API.
+..summary:Indexes start positions of BAM tags in a $Shortcut.CharString@ and provides a dict-like API.
 ..example.code:
 CharString str = "AA:value1\tAB:value2";
 BamTagsDict tags(str);

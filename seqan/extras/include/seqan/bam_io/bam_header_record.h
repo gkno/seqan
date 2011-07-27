@@ -50,6 +50,19 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/**
+.Enum.BamHeaderRecordType
+..cat:BAM I/O
+..summary:Enumeration for the header record type.
+..signature:BamHeaderRecordType
+..value.BAM_HEADER_FIRST:@Class.BamHeaderRecord@ is of type $@HD$
+..value.BAM_HEADER_REFERENCE:@Class.BamHeaderRecord@ is of type $@SQ$
+..value.BAM_HEADER_READ_GROUP:@Class.BamHeaderRecord@ is of type $@RG$
+..value.BAM_HEADER_PROGRAM:@Class.BamHeaderRecord@ is of type $@PG$
+..value.BAM_HEADER_COMMENT:@Class.BamHeaderRecord@ is of type $@CO$
+..include:seqan/bam_io.h
+*/
+
 enum BamHeaderRecordType
 {
     BAM_HEADER_FIRST       = 0,
@@ -59,8 +72,40 @@ enum BamHeaderRecordType
     BAM_HEADER_COMMENT     = 4
 };
 
-struct BamHeaderRecord
+/**
+.Class.BamHeaderRecord
+..cat:BAM I/O
+..summary:Represents a header entry in a SAM file or the header section of the BAM header.
+..signature:BamHeaderRecord
+..remarks:Comment records are stored with one tag where the key is empty and the value is the comment.
+..include:seqan/bam_io.h
+
+.Typedef.BamHeaderRecord#TTagName
+..class:Class.BamHeaderRecord
+..summary:Type of the tag keys.
+
+.Typedef.BamHeaderRecord#TTagValue
+..class:Class.BamHeaderRecord
+..summary:Type of the tag values.
+
+.Typedef.BamHeaderRecord#TTags
+..class:Class.BamHeaderRecord
+..summary:Type of the string of tag @Class.Pair|Pairs@.
+
+.Memvar.BamHeaderRecord#type
+..summary:Type of the record.
+..class:Class.BamHeaderRecord
+..type:Enum.BamHeaderRecordType
+
+.Memvar.BamHeaderRecord#tags
+..summary:The header record's tags.
+..class:Class.BamHeaderRecord
+..type:Typedef.BamHeaderRecord#TTags
+*/
+
+class BamHeaderRecord
 {
+public:
     typedef CharString TTagName;
     typedef CharString TTagValue;
     typedef String<Pair<TTagName, TTagValue> > TTags;
@@ -71,8 +116,28 @@ struct BamHeaderRecord
     BamHeaderRecord() {}
 };
 
-struct BamHeader
+/**
+.Class.BamHeader
+..cat:BAM I/O
+..summary:Stores the information of the BAM header.
+..signature:BamHeader
+..see:Class.BamHeaderRecord
+..include:seqan/bam_io.h
+
+.Memvar.BamHeader#sequenceInfos
+..class:Class.BamHeader
+..summary:String of $(seqid, length)$ with reference name / length information.
+..type:nolink:$String<Pair<CharString, __int32> >$
+
+.Memvar.BamHeader#records
+..class:Class.BamHeader
+..summary:String of @Class.BamHeaderRecord|BamHeaderRecords@.
+..type:nolink:$String<BamHeaderRecord>$
+*/
+
+class BamHeader
 {
+public:
     typedef Pair<CharString, __int32> TSequenceInfo;
     
     String<Pair<CharString, __int32> > sequenceInfos;
@@ -91,6 +156,8 @@ struct BamHeader
 // Function clear()
 // ----------------------------------------------------------------------------
 
+///.Function.clear.param.object.type:Class.BamHeaderRecord
+
 inline void
 clear(BamHeaderRecord & record)
 {
@@ -98,11 +165,29 @@ clear(BamHeaderRecord & record)
 }
 
 // ----------------------------------------------------------------------------
-// Function findKey()
+// Function findTagKey()
 // ----------------------------------------------------------------------------
 
+/**
+.Function.findTagKey
+..cat:BAM I/O
+..summary:Find a tag's key of a @Class.BamHeaderRecord@.
+..signature:findTagKey(idx, key, record)
+..param.idx:The index of the found key is stored here.
+...type:nolink:$unsigned$
+..param.key:The name of the tag key whose position is to be stored in $idx$.
+...type:Shortcut.CharString
+..param.record:The record to query.
+...type:Class.BamHeaderRecord
+..returns:$bool$, indicating whether the key could be found.
+..include:seqan/bam_io.h
+..example.code:
+unsigned myIdx = 0;
+bool keyFound = findTagKey(myIdx, "SN", record);
+*/
+
 inline bool
-findKey(unsigned & idx, CharString const & key, BamHeaderRecord const & record)
+findTagKey(unsigned & idx, CharString const & key, BamHeaderRecord const & record)
 {
     typedef BamHeaderRecord::TTags const TTags;
     typedef Iterator<TTags, Rooted>::Type TIterator;
@@ -119,12 +204,34 @@ findKey(unsigned & idx, CharString const & key, BamHeaderRecord const & record)
 // Function getTagValue()
 // ----------------------------------------------------------------------------
 
+/**
+.Function.getTagValue
+..cat:BAM I/O
+..summary:Return tag value from a @Class.BamHeaderRecord@.
+..signature:getTagValue(tagValue, idx, record)
+..signature:getTagValue(tagValue, key, record)
+..param.tagValue:The tag's value is stored here.
+...type:Shortcut.CharString
+..param.idx:The index of the tag whose value is to be retrieved.
+...type:nolink:$unsigned$
+..param.key:The name of tag whose value is to be retrieved.
+...type:Shortcut.CharString
+..param.record:The record to query.
+...type:Class.BamHeaderRecord
+..returns:$bool$, indicating whether the value could be retrieved, always $true$ if $idx$ is given.
+..include:seqan/bam_io.h
+..example.code:
+CharString tagValue;
+bool keyFound = findTagKey(tagValue, "SN", record);
+..see:Function.findTagKey
+*/
+
 inline bool
-getTagValue(CharString & key, unsigned idx, BamHeaderRecord const & record)
+getTagValue(CharString & value, unsigned idx, BamHeaderRecord const & record)
 {
     if (idx >= length(record.tags))
         return false;
-    key = record.tags[idx].i2;
+    value = record.tags[idx].i2;
     return true;
 }
 
@@ -132,7 +239,7 @@ inline bool
 getTagValue(CharString & value, CharString const & key, BamHeaderRecord const & record)
 {
     unsigned idx = 0;
-    if (!findKey(idx, key, record))
+    if (!findTagKey(idx, key, record))
         return false;
     return getTagValue(value, key, record);
 }

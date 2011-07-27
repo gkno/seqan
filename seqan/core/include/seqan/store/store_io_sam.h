@@ -62,6 +62,28 @@ typedef Tag<Sam_> const Sam;
     typedef Tag<FromBam_> FromBam;
 #endif  // #if SEQAN_HAS_SAMTOOLS
     
+/**
+.Class.CigarElement
+..cat:Fragment Store
+..summary:One entry of a CIGAR string.
+..signature:CigarElement<TOperation, TCount>
+..param.TOperation:Type to use for storing operations.
+...default:nolink:$char$
+..param.TCount:Type to use for storing counts.
+...default:nolink:$unsigned$
+..include:seqan/store.h
+
+.Memvar.CigarElement#operation
+..class:Class.CigarElement
+..summary:The described operation.
+..type:nolink:$TOperation$
+
+.Memvar.CigarElement#count
+..class:Class.CigarElement
+..summary:The number of operations.
+..type:nolink:$TCount$
+*/
+    
     template <typename TOperation_ = char, typename TCount_ = unsigned>
 	struct CigarElement
 	{

@@ -50,13 +50,18 @@ namespace seqan {
 // ============================================================================
 
 /**
-.Spec.BZGF Stream
+.Spec.BGZF Stream
 ..cat:Input / Output
 ..signature:Stream<Bgzf>
 ..general:Class.Stream
 ..summary:Adaption from $BZGf *$ of $bgzf.h$ to streams.
 ..remarks:Not default and copy constructable, not assignable.
 ..include:seqan/stream.h
+..example.code:
+BGZF * bzgf = bgzf_open("myfile.bam", "r");
+Stream<Bgzf> stream(bgzf);
+// ... work
+bgzf_close(bgzf);
  */
 
 struct Bgzf_;
