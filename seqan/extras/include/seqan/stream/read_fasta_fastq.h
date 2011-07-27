@@ -874,7 +874,6 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
 
 /**
 .Function.checkStreamFormat
-..summary:Check whether a file is of a given format.
 ..signature:checkStreamFormat(reader, tag)
 ..returns:$bool$, indicating whether the file of $reader$ is of the given format.
 ..param.reader:RecordReader to query.

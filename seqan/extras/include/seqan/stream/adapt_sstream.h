@@ -50,11 +50,6 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-/**
-.Adaption.IO stream
-..summary:Adaption from $sstream$, $isstream$ and $osstream$ to the @Concept.Stream@ concept.
- */
-
 // ============================================================================
 // Metafunctions
 // ============================================================================
