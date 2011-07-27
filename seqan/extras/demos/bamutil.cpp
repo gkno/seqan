@@ -243,7 +243,7 @@ int main(int argc, char const * argv[])
     {
         if (options.outFile != "-")
         {
-            outF = open(toCString(options.outFile), O_CREAT | O_WRONLY | O_DIRECT);
+            outF = open(toCString(options.outFile), O_CREAT | O_WRONLY | O_DIRECT, 00666);
             if (outF == -1)
             {
                 std::cerr << "Could not open file " << options.outFile << std::endl;
