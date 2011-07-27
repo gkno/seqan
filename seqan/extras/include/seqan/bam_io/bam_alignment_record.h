@@ -140,7 +140,7 @@ enum BamFlags
 .Memvar.BamAlignmentRecord#cigar
 ..class:Class.BamAlignmentRecord
 ..summary:The CIGAR string as string of @Class.CigarElement@ objects (empty for '*').
-..type:Shortcut.CharString
+..type:nolink:$String<CigarElement<> >$
 
 .Memvar.BamAlignmentRecord#rNextId
 ..class:Class.BamAlignmentRecord
