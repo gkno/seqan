@@ -3072,7 +3072,7 @@ int _mapReads(
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options)
 {
-    if (options.matchN) {
+/*    if (options.matchN) {
         if (options.gapMode == RAZERS_GAPPED)
          {
 //             if (options.alignMode == RAZERS_LOCAL)
@@ -3089,7 +3089,9 @@ int _mapReads(
              if (options.alignMode == RAZERS_GLOBAL)
                  return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
          }
-    } else {
+    } 
+    else 
+*/    {
         if (options.gapMode == RAZERS_GAPPED)
         {
         //     if (options.alignMode == RAZERS_LOCAL)
