@@ -120,7 +120,7 @@ SEQAN_CHECKPOINT
     bool first = true;
     TSize readBasePos = pos;
     TSize readPos = 0;
-	while (pos != dbEndPos && pos != queryEndPos) {
+	while (pos < dbEndPos || pos < queryEndPos) {
 		int matched = 0;
 		int inserted = 0;
 		int deleted = 0;
@@ -137,12 +137,12 @@ SEQAN_CHECKPOINT
 			++matched;
 		}
 		if (matched > 0) cigar << matched << "M" ;
-		while (pos != queryEndPos && isGap(row1, pos)) {
+		while (pos < dbEndPos && isGap(row1, pos)) {
 			++pos;
 			++deleted;
 		}
 		if (deleted > 0) cigar << deleted << "D";
-		while (pos != dbEndPos && isGap(row0, pos)) {
+		while (pos < queryEndPos && isGap(row0, pos)) {
 			++pos;
 			++readPos;
 			if (first) first = false;
