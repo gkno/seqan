@@ -207,7 +207,7 @@ findTagKey(unsigned & idx, CharString const & key, BamHeaderRecord const & recor
 /**
 .Function.getTagValue
 ..cat:BAM I/O
-..summary:Return tag value from a @Class.BamHeaderRecord@.
+..summary:Return tag value from a @Class.BamHeaderRecord@ or @Class.BamTagsDict@.
 ..signature:getTagValue(tagValue, idx, record)
 ..signature:getTagValue(tagValue, key, record)
 ..param.tagValue:The tag's value is stored here.

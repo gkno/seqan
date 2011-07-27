@@ -151,6 +151,15 @@ hasIndex(BamTagsDict & bamTags)
 // Return sizeof() of the type identified with the given char.  Returns -1 if not
 // valid, -2 if of variable length.
 
+/**
+.Function.getTypeSize
+..signature:getTypeSize(c)
+..summary:Return size of the type identified by $c$.
+..param.c:The BAM type identifier
+..returns:$int$ with the $sizeof()$ of the type, -1 for variable sized types.
+..include:seqan/bam_io.h
+*/
+
 inline int
 getTypeSize(char c)
 {
@@ -218,12 +227,12 @@ buildIndex(BamTagsDict & bamTags)
             __uint32 len = 0;
             memcpy(&len, &*it, 4);
             it += 4;
-            it += len * getTypeSize(c);
+            it += len * getBamTypeSize(c);
         }
         else
         {
             ++it;
-            it += getTypeSize(c);
+            it += getBamTypeSize(c);
         }
 
         appendValue(bamTags._positions, position(it));
@@ -236,6 +245,8 @@ buildIndex(BamTagsDict & bamTags)
 // Function setHost()
 // ----------------------------------------------------------------------------
 
+///.Function.setHost.param.object.type:Class.BamTagsDict
+
 inline void setHost(BamTagsDict & bamTags, CharString & newHost)
 {
     set(bamTags._host, newHost);
@@ -246,6 +257,8 @@ inline void setHost(BamTagsDict & bamTags, CharString & newHost)
 // Function length()
 // ----------------------------------------------------------------------------
 
+///.Function.length.param.object.type:Class.BamTagsDict
+
 inline unsigned
 length(BamTagsDict const & tags)
 {
@@ -255,12 +268,23 @@ length(BamTagsDict const & tags)
 }
 
 // ----------------------------------------------------------------------------
-// Function getType()
+// Function getTagType()
 // ----------------------------------------------------------------------------
+
+/**
+.Function.getTagType
+..cat:BAM I/O
+..signature:getTagType(tagsDict, idx)
+..summary:Get key of a tag by index.
+..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
+..param.idx:Index of the tag whose key to retrieve.
+..returns:$char$, the SAM/BAM identifier of the type.
+..include:seqan/bam_io.h
+*/
 
 template <typename TPos>
 inline char
-getType(BamTagsDict & tags, TPos idx)
+getTagType(BamTagsDict & tags, TPos idx)
 {
     if (!hasIndex(tags))
         buildIndex(tags);
@@ -268,12 +292,23 @@ getType(BamTagsDict & tags, TPos idx)
 }
 
 // ----------------------------------------------------------------------------
-// Function getKey()
+// Function getTagKey()
 // ----------------------------------------------------------------------------
+
+/**
+.Function.getTagKey
+..cat:BAM I/O
+..signature:getTagKey(tagsDict, idx)
+..summary:Return key of a tag by index.
+..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
+..param.idx:Index of the tag whose key to retrieve.
+..returns:Infix of the underlying string.
+..include:seqan/bam_io.h
+*/
 
 template <typename TPos>
 inline Infix<Host<BamTagsDict>::Type>::Type
-getKey(BamTagsDict & tags, TPos idx)
+getTagKey(BamTagsDict & tags, TPos idx)
 {
     if (!hasIndex(tags))
         buildIndex(tags);
@@ -282,20 +317,29 @@ getKey(BamTagsDict & tags, TPos idx)
 
 template <typename TPos>
 inline Infix<Host<BamTagsDict const>::Type>::Type
-getKey(BamTagsDict const & tags, TPos idx)
+getTagKey(BamTagsDict const & tags, TPos idx)
 {
-    return getKey(const_cast<BamTagsDict &>(tags), idx);
+    return getTagKey(const_cast<BamTagsDict &>(tags), idx);
 }
 
 // ----------------------------------------------------------------------------
-// Function getValue()
+// Function getTagValue()
 // ----------------------------------------------------------------------------
 
-// Note that you will get <type char> + payload.
+/**
+.Function.getTagValue
+..cat:BAM I/O
+..signature:getTagValue(tagsDict, idx)
+..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
+..param.idx:Index of the tag whose value to retrieve.
+..returns:@Shortcut.CharString@ with the raw tags data.
+..remarks:Note that you will get $<type char> + payload$ in case of @Class.BamTagsDict@.
+..include:seqan/bam_io.h
+*/
 
 template <typename TIdx>
 inline CharString
-getValue(BamTagsDict & tags, TIdx idx)
+getTagValue(BamTagsDict & tags, TIdx idx)
 {
     if (!hasIndex(tags))
         buildIndex(tags);
@@ -318,13 +362,13 @@ getValue(BamTagsDict & tags, TIdx idx)
         __uint32 len = 0;
         memcpy(&len, &host(tags)[tags._positions[idx]] + 4, 4);
         char c = host(tags)[tags._positions[idx] + 3];
-        int typeSize = getTypeSize(c);
+        int typeSize = getBamTypeSize(c);
         SEQAN_ASSERT_GT(typeSize, 0);
         endPos += 5 + len * typeSize;
     }
     else
     {
-        endPos += getTypeSize(theType);
+        endPos += getBamTypeSize(theType);
     }
     
     return infix(host(tags), beginPos, endPos);
@@ -332,7 +376,7 @@ getValue(BamTagsDict & tags, TIdx idx)
 
 template <typename TPos>
 inline CharString //Infix<Host<BamTagsDict const>::Type>::Type
-getValue(BamTagsDict const & tags, TPos idx)
+getTagValue(BamTagsDict const & tags, TPos idx)
 {
     return getValue(const_cast<BamTagsDict &>(tags), idx);
 }
@@ -341,6 +385,22 @@ getValue(BamTagsDict const & tags, TPos idx)
 // Function extractValue()
 // ----------------------------------------------------------------------------
 
+/**
+.Function.extractValue
+..cat:BAM I/O
+..signature:extractValue(dest, tags, idx)
+..summary:Extract and cast "atomic" value from tags string with index $idx$.
+..param.dest:The variable to write the value to.
+...remarks:The value is first copied in a variable of the type indicated in the BAM file. Then it is cast into the type of $dest$.
+..param.tags:Raw tags string as in BAM.
+...type:Shortcut.CharString
+..params.idx:Index of the tag in the tag list.
+..returns:$bool$, indicating the success.
+..remarks:The function only works for atomic types such as $int$, not for $char*$ or arrays.
+..see:Function.getTagValue
+..include:seqan/bam_io.h
+*/
+
 template <typename TDest, typename TIdx>
 inline bool
 extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
@@ -348,8 +408,9 @@ extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
     if (!hasIndex(tags))
         buildIndex(tags);
 
+    // TODO(holtgrew): At the moment, TDest must be == type from field.
     char * ptr = reinterpret_cast<char *>(&dest);
-    int typeSize = getTypeSize(host(tags)[tags._positions[idx] + 2]);
+    int typeSize = getBamTypeSize(host(tags)[tags._positions[idx] + 2]);
     if (typeSize < 0)
         return false;
     memcpy(ptr, &host(tags)[tags._positions[idx] + 3], typeSize);
