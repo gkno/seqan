@@ -122,6 +122,17 @@ int write2(TStream & stream,
 // Function writeRecord()                                    BamAlignmentRecord
 // ----------------------------------------------------------------------------
 
+static inline int _reg2Bin(uint32_t beg, uint32_t end)
+{
+	--end;
+	if (beg>>14 == end>>14) return 4681 + (beg>>14);
+	if (beg>>17 == end>>17) return  585 + (beg>>17);
+	if (beg>>20 == end>>20) return   73 + (beg>>20);
+	if (beg>>23 == end>>23) return    9 + (beg>>23);
+	if (beg>>26 == end>>26) return    1 + (beg>>26);
+	return 0;
+}
+
 template <typename TStream, typename TNameStore, typename TNameStoreCache>
 int write2(TStream & stream,
            BamAlignmentRecord & record,
@@ -141,6 +152,9 @@ int write2(TStream & stream,
     // bin_mq_nl
     SEQAN_ASSERT_LT(length(record.qName) + 1u, 255u);
     __uint8 lReadName = length(record.qName) + 1;
+    unsigned l = 0;
+    _getLengthInRef(record.cigar, l);
+    record.bin = _reg2Bin(record.pos, record.pos + l);
     __uint32 binMqNl = (record.bin << 16) | (record.mapQ << 8) | lReadName;
     streamWriteBlock(buffer, reinterpret_cast<char *>(&binMqNl), 4);
 

@@ -349,6 +349,20 @@ alignAndGetCigarString(TCigar &cigar, TContig &contig, TReadSeq &readSeq, TAlign
                 sum += getValue(it).count;
     }
 
+    template <typename TCigarString, typename TNum>
+    inline void _getLengthInRef(TCigarString const & cigar, TNum & sum)
+    {
+        typedef typename Iterator<TCigarString, Standard>::Type TCigarIter;
+        
+        TCigarIter it = begin(cigar, Standard());
+        TCigarIter itEnd = end(cigar, Standard());
+        
+        sum = 0;        
+        for (; it != itEnd; ++it)
+            if (getValue(it).operation != 'S' && getValue(it).operation != 'H' && getValue(it).operation != 'I')
+                sum += getValue(it).count;
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 // convert CIGAR to gaps
 
