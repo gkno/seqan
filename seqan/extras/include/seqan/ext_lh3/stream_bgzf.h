@@ -37,6 +37,8 @@
 #ifndef EXTRAS_INCLUDE_SEQAN_EXT_LH3_STREAM_BGZF_H_
 #define EXTRAS_INCLUDE_SEQAN_EXT_LH3_STREAM_BGZF_H_
 
+// TODO(holtgrew): Check file for truncation via function.
+
 namespace seqan {
 
 // ============================================================================
@@ -220,7 +222,11 @@ streamReadChar(char & c, Stream<Bgzf> & stream)
 inline bool
 streamEof(Stream<Bgzf> & stream)
 {
-    return bgzf_check_EOF(stream._bgzf) != 0;
+    // Peek once to set EOF state.
+    char c;
+    stream._error = streamPeek(c, stream);
+    (void)c;
+    return stream._error == -1;
 }
 
 // ----------------------------------------------------------------------------
@@ -230,6 +236,8 @@ streamEof(Stream<Bgzf> & stream)
 inline int
 streamError(Stream<Bgzf> & stream)
 {
+    if (stream._error == -1)
+        return 0;
     return stream._error;
 }
 

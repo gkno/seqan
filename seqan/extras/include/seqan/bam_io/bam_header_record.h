@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,15 +29,16 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Hannes Hauswedell <hauswedell@mi.fu-berlin.de>
+// Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Adaptions for the Memorymapped Strings
+// BamHeaderRecord class, supporting types and functions for accessing tags
+// in headers.
 // ==========================================================================
 
-// TODO(holtgrew): Should better be string adaption!
+// TODO(holtgrew): Test me!
 
-#ifndef SEQAN_STREAM_ADAPT_MMAP_H_
-#define SEQAN_STREAM_ADAPT_MMAP_H_
+#ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_HEADER_RECORD_H_
+#define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_HEADER_RECORD_H_
 
 namespace seqan {
 
@@ -49,121 +50,93 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-/*
-.Adaption.IO stream
-..summary:Adaption from $fstream$, $ifstream$ and $ofstream$ to the @Concept.Stream@ concept.
- */
+enum BamHeaderRecordType
+{
+    BAM_HEADER_FIRST       = 0,
+    BAM_HEADER_REFERENCE   = 1,
+    BAM_HEADER_READ_GROUP  = 2,
+    BAM_HEADER_PROGRAM     = 3,
+    BAM_HEADER_COMMENT     = 4
+};
+
+struct BamHeaderRecord
+{
+    typedef CharString TTagName;
+    typedef CharString TTagValue;
+    typedef String<Pair<TTagName, TTagValue> > TTags;
+
+    BamHeaderRecordType type;
+    String<Pair<TTagName, TTagValue> > tags;
+
+    BamHeaderRecord() {}
+};
+
+struct BamHeader
+{
+    typedef Pair<CharString, __int32> TSequenceInfo;
+    
+    String<Pair<CharString, __int32> > sequenceInfos;
+    String<BamHeaderRecord> records;
+};
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
-
 
 // ============================================================================
 // Functions
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function streamWriteChar()
+// Function clear()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec>
-inline int
-streamWriteChar(String<TValue, TSpec> & stream, char c)
+inline void
+clear(BamHeaderRecord & record)
 {
-    appendValue(stream, c);
-    return 0;
+    clear(record.tags);
 }
 
 // ----------------------------------------------------------------------------
-// Function streamWriteChar()
+// Function findKey()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec>
-inline int
-streamWriteBlock(String<TValue, TSpec> & stream, char const * ptr, unsigned count)
+inline bool
+findKey(unsigned & idx, CharString const & key, BamHeaderRecord const & record)
 {
-    reserve(stream, length(stream) + count);
-    for (unsigned i = 0; i < count; ++i, ++ptr)
-        appendValue(stream, *ptr);
-    return count;
+    typedef BamHeaderRecord::TTags const TTags;
+    typedef Iterator<TTags, Rooted>::Type TIterator;
+
+    idx = 0;
+    for (TIterator it = begin(record.tags, Rooted()); !atEnd(it); goNext(it), ++idx)
+        if (it->i1 == key)
+            return true;
+
+    return false;
 }
 
 // ----------------------------------------------------------------------------
-// Function streamPut()
+// Function getTagValue()
 // ----------------------------------------------------------------------------
 
-template <typename TValue, typename TSpec>
-inline int
-streamPut(String<TValue, TSpec> & stream, char const c)
+inline bool
+getTagValue(CharString & key, unsigned idx, BamHeaderRecord const & record)
 {
-    appendValue(stream, c);
-    return 0;
+    if (idx >= length(record.tags))
+        return false;
+    key = record.tags[idx].i2;
+    return true;
 }
 
-template <typename TValue1, typename TSpec1, typename TValue2, typename TSpec2>
-inline int
-streamPut(String<TValue1, TSpec1> & stream,
-          SimpleType<TValue2, TSpec2> const & c)
+inline bool
+getTagValue(CharString & value, CharString const & key, BamHeaderRecord const & record)
 {
-    appendValue(stream, c);
-    return 0;
-}
-
-
-// template <typename TValue0, typename TSpec0,
-//           typename TValue, typename TSpec, typename TSpec2>
-// inline int
-// streamPut(String<TValue0, MMap<TSpec0> > & stream,
-//           String<SimpleType<TValue, TSpec>, TSpec2> const & source)
-// {
-//     String<char, CStyle> buf = source;
-//     append(stream, toCString(buf));
-//     return 0;
-// }
-
-template <typename TValue, typename TSpec, typename TValue2, typename TSpec2>
-inline int
-streamPut(String<TValue, TSpec> & stream,
-          String<TValue2, TSpec2> const & source)
-{
-    append(stream, source);
-    return 0;
-}
-
-
-template <typename TValue, typename TSpec, typename TSource>
-inline int
-_appendWithoutTrailing0(String<TValue, TSpec> & stream,
-                        TSource const & source)
-{
-    for (int i = 0; source[i] != 0; ++i)
-        appendValue(stream, source[i]);
-    return 0;
-}
-
-template <typename TValue, typename TSpec>
-inline int
-streamPut(String<TValue, TSpec> & stream, char const *source)
-{
-    return _appendWithoutTrailing0(stream, source);
-    return 0;
-}
-
-
-// for numerical types
-template <typename TValue, typename TSpec, typename TSource>
-inline int
-streamPut(String<TValue, TSpec> & stream, TSource const & source)
-{
-    std::ostringstream str;
-    str << source << std::ends;
-    if (str.fail())
-        return str.fail();
-    return _appendWithoutTrailing0(stream, str.str());
-    return 0;
+    unsigned idx = 0;
+    if (!findKey(idx, key, record))
+        return false;
+    return getTagValue(value, key, record);
 }
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_STREAM_ADAPT_MMAP_H_
+#endif  // #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_HEADER_RECORD_H_

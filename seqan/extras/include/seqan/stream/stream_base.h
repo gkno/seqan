@@ -81,6 +81,26 @@ class Stream;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Function atEnd()
+// ----------------------------------------------------------------------------
+
+///.Function.atEnd.iterator.type:Class.Stream
+
+template <typename TSpec>
+inline bool
+atEnd(Stream<TSpec> & stream)
+{
+    return streamEof(stream);
+}
+
+template <typename TSpec>
+inline bool
+atEnd(Stream<TSpec> const & stream)
+{
+    return streamEof(stream);
+}
+
+// ----------------------------------------------------------------------------
 // Function streamPut()
 // ----------------------------------------------------------------------------
 
@@ -135,7 +155,6 @@ streamPut(Stream<TStream> & stream, TSource const & source)
     return (streamWriteBlock(stream, buffer, strlen(buffer))
                 == strlen(buffer) )  ?   0 : 1;
 }
-
 
 }  // namespace seqean
 
