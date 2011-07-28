@@ -1507,8 +1507,6 @@ getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 ..include:seqan/refinement.h
 */
 
-// TODO(holtgrew): According to trausch might have to be touched when vertices can have labels of different length.
-
 template<typename TStringSet, typename TCargo, typename TSpec, typename TComponentMap, typename TOrderMap, typename TComponentLength> 
 inline bool
 convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
