@@ -46,6 +46,7 @@
 #include "test_read_bam.h"
 #include "test_write_sam.h"
 #endif  // #if SEQAN_HAS_ZLIB
+#include "test_bam_index.h"
 
 SEQAN_BEGIN_TESTSUITE(test_bam_io)
 {
@@ -148,8 +149,8 @@ SEQAN_BEGIN_TESTSUITE(test_bam_io)
     SEQAN_CALL_TEST(test_bam_io_bam_write_header);
     SEQAN_CALL_TEST(test_bam_io_bam_write_alignment);
 #endif  // #if SEQAN_HAS_ZLIB
-    
-    // Test samtools and bamtools Indices.
-    // TODO(holtgrew): Write code, write tests.
+
+    // Test BAM indices.
+    SEQAN_CALL_TEST(test_bam_io_bam_index_bai);
 }
 SEQAN_END_TESTSUITE

@@ -1,7 +1,7 @@
 // ==========================================================================
-//                 SeqAn - The Library for Sequence Analysis
+//                              bam_index_base.h
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -31,51 +31,40 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Facade header for module bam_io.
-// ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_H_
-#define EXTRAS_INCLUDE_SEQAN_BAM_IO_H_
+#ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_INDEX_BASE_H_
+#define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_INDEX_BASE_H_
 
-// ===========================================================================
-// Prerequisites.
-// ===========================================================================
+namespace seqan {
 
-#include <seqan/basic.h>
-#include <seqan/file.h>
-#include <seqan/sequence.h>
-#include <seqan/stream.h>
-#include <seqan/ext_lh3.h>
-#include <seqan/store.h>
+// ============================================================================
+// Forwards
+// ============================================================================
 
-// ===========================================================================
-// Data Structures & Conversion.
-// ===========================================================================
+// ============================================================================
+// Tags, Classes, Enums
+// ============================================================================
 
-#include <seqan/bam_io/bam_io_context.h>
-#include <seqan/bam_io/bam_alignment_record.h>
-#include <seqan/bam_io/bam_header_record.h>
-#include <seqan/bam_io/bam_sam_conversion.h>
-#include <seqan/bam_io/bam_tags_dict.h>
+/**
+.Class.BamIndex
+..cat:BAM I/O
+..summary:Access to BAM Indices.
+..signature:BamIndex<TSpec>
+..param.TSpec:Tag to specialize index.
+..include:seqan/bam_io.h
+*/
 
-// ===========================================================================
-// Actual I/O Code.
-// ===========================================================================
+template <typename TSpec>
+class BamIndex;
 
-#include <seqan/bam_io/read_sam.h>
-#include <seqan/bam_io/write_sam.h>
+// ============================================================================
+// Metafunctions
+// ============================================================================
 
-// BAM I/O is only available when ZLIB is available (and thus the BGz Stream).
-#if SEQAN_HAS_ZLIB
-#include <seqan/bam_io/read_bam.h>
-#include <seqan/bam_io/write_bam.h>
-#endif  // #if SEQAN_HAS_ZLIB
+// ============================================================================
+// Functions
+// ============================================================================
 
-// ===========================================================================
-// BAM Index Related
-// ===========================================================================
+}  // namespace seqan
 
-#include <seqan/bam_io/bam_index_base.h>
-#include <seqan/bam_io/bam_index_bai.h>
-
-#endif  // EXTRAS_INCLUDE_SEQAN_BAM_IO_H_
+#endif  // #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_INDEX_BASE_H_

@@ -31,51 +31,61 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Facade header for module bam_io.
-// ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_H_
-#define EXTRAS_INCLUDE_SEQAN_BAM_IO_H_
-
-// ===========================================================================
-// Prerequisites.
-// ===========================================================================
+#ifndef EXTRAS_TESTS_BAM_IO_TEST_BAM_INDEX_H_
+#define EXTRAS_TESTS_BAM_IO_TEST_BAM_INDEX_H_
 
 #include <seqan/basic.h>
-#include <seqan/file.h>
 #include <seqan/sequence.h>
-#include <seqan/stream.h>
-#include <seqan/ext_lh3.h>
-#include <seqan/store.h>
 
-// ===========================================================================
-// Data Structures & Conversion.
-// ===========================================================================
+#include <seqan/bam_io.h>
 
-#include <seqan/bam_io/bam_io_context.h>
-#include <seqan/bam_io/bam_alignment_record.h>
-#include <seqan/bam_io/bam_header_record.h>
-#include <seqan/bam_io/bam_sam_conversion.h>
-#include <seqan/bam_io/bam_tags_dict.h>
+SEQAN_DEFINE_TEST(test_bam_io_bam_index_bai)
+{
+    using namespace seqan;
 
-// ===========================================================================
-// Actual I/O Code.
-// ===========================================================================
+    CharString baiFilename;
+    append(baiFilename, SEQAN_PATH_TO_ROOT());
+    append(baiFilename, "/extras/tests/bam_io/small.bam.bai");
 
-#include <seqan/bam_io/read_sam.h>
-#include <seqan/bam_io/write_sam.h>
+    BamIndex<Bai> baiIndex;
+    SEQAN_ASSERT(load(baiIndex, toCString(baiFilename)));
 
-// BAM I/O is only available when ZLIB is available (and thus the BGz Stream).
-#if SEQAN_HAS_ZLIB
-#include <seqan/bam_io/read_bam.h>
-#include <seqan/bam_io/write_bam.h>
-#endif  // #if SEQAN_HAS_ZLIB
+    SEQAN_ASSERT_EQ(length(baiIndex._binIndices), 1u);
+    SEQAN_ASSERT_EQ(baiIndex._binIndices[0].size(), 2u);
+    SEQAN_ASSERT(baiIndex._binIndices[0].find(4681) != baiIndex._binIndices[0].end());
+    SEQAN_ASSERT(baiIndex._binIndices[0].find(37450) != baiIndex._binIndices[0].end());
 
-// ===========================================================================
-// BAM Index Related
-// ===========================================================================
+    SEQAN_ASSERT_EQ(length(baiIndex._linearIndices), 1u);
+    SEQAN_ASSERT_EQ(length(baiIndex._linearIndices[0]), 1u);
 
-#include <seqan/bam_io/bam_index_base.h>
-#include <seqan/bam_io/bam_index_bai.h>
+    SEQAN_ASSERT_EQ(getUnalignedCount(baiIndex), 0u);
 
-#endif  // EXTRAS_INCLUDE_SEQAN_BAM_IO_H_
+    // File has same contents as in the SAM test.
+    CharString bamFilename;
+    append(bamFilename, SEQAN_PATH_TO_ROOT());
+    append(bamFilename, "/extras/tests/bam_io/small.bam");
+
+    int f = open(toCString(bamFilename), O_RDONLY);
+    SEQAN_ASSERT_NEQ(f, -1);
+    BGZF * bgzf = bgzf_fdopen(f, "r");  // bgzf == 0 on errors
+    SEQAN_ASSERT_NOT(bgzf == 0);
+    Stream<Bgzf> stream(bgzf);
+
+    StringSet<CharString> nameStore;
+    NameStoreCache<StringSet<CharString> > nameStoreCache(nameStore);
+    BamIOContext<StringSet<CharString> > bamIOContext(nameStore, nameStoreCache);
+    
+    BamHeader header;
+    SEQAN_ASSERT_EQ(readRecord(header, bamIOContext, stream, Bam()), 0);
+
+    bool found = true;
+    SEQAN_ASSERT(jumpToPos(stream, found, bamIOContext, 0, 1, baiIndex));
+    SEQAN_ASSERT(found);
+    SEQAN_ASSERT_NOT(jumpToPos(stream, found, bamIOContext, 1, 1, baiIndex));
+    SEQAN_ASSERT_NOT(found);
+    SEQAN_ASSERT_NOT(jumpToPos(stream, found, bamIOContext, 1, 100, baiIndex));
+    SEQAN_ASSERT_NOT(found);
+}
+
+#endif  // EXTRAS_TESTS_BAM_IO_TEST_BAM_INDEX_H_

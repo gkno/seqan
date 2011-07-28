@@ -311,7 +311,7 @@ streamFlush(Stream<Bgzf> & stream)
 // ----------------------------------------------------------------------------
 
 inline int
-streamSeek(Stream<Bgzf> & stream, __int64 delta, int origin)
+streamSeek(Stream<Bgzf> & stream, __uint64 delta, int origin)
 {
     SEQAN_ASSERT_EQ(origin, SEEK_SET);  // Only SET is supported.
     return bgzf_seek(stream._bgzf, delta, origin) < 0;
