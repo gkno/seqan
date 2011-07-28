@@ -323,6 +323,39 @@ getTagKey(BamTagsDict const & tags, TPos idx)
 }
 
 // ----------------------------------------------------------------------------
+// Function findTagKey()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.findTagKey
+..cat:BAM I/O
+..signature:findTagKey(idx, tagsDict, name)
+..summary:Return key of a tag by index.
+..param.idx:Index of the tag with the given key.
+...type:nolink:$unsigned$
+..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
+..param.name:Name of the key to find.
+...type:Shortcut.CharStrin
+..returns:$bool$, indicating whether such a key could be found.
+..include:seqan/bam_io.h
+*/
+
+inline bool
+findTagKey(unsigned & idx, BamTagsDict & tags, CharString const & name)
+{
+    for (idx = 0; idx < length(tags); ++idx)
+        if (getTagKey(tags, idx) == name)
+            return true;
+    return false;
+}
+
+inline bool
+findTagKey(unsigned & idx, BamTagsDict const & tags, CharString const & name)
+{
+    return findTagKey(idx, const_cast<BamTagsDict &>(tags), name);
+}
+
+// ----------------------------------------------------------------------------
 // Function getTagValue()
 // ----------------------------------------------------------------------------
 
@@ -408,12 +441,67 @@ extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
     if (!hasIndex(tags))
         buildIndex(tags);
 
-    // TODO(holtgrew): At the moment, TDest must be == type from field.
-    char * ptr = reinterpret_cast<char *>(&dest);
-    int typeSize = getBamTypeSize(host(tags)[tags._positions[idx] + 2]);
-    if (typeSize < 0)
+    char typeC = host(tags)[tags._positions[idx] + 2];
+    if (typeC == 'A')
+    {
+        char x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 1);
+        dest = x;
+    }
+    else if (typeC == 'c')
+    {
+        __int8 x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 1);
+        dest = x;
+    }
+    else if (typeC == 'C')
+    {
+        __uint8 x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 1);
+        dest = x;
+    }
+    else if (typeC == 's')
+    {
+        __int16 x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 2);
+        dest = x;
+    }
+    else if (typeC == 'S')
+    {
+        __uint16 x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 2);
+        dest = x;
+    }
+    else if (typeC == 'i')
+    {
+        __int32 x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 4);
+        dest = x;
+    }
+    else if (typeC == 'I')
+    {
+        __uint32 x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 4);
+        dest = x;
+    }
+    else if (typeC == 'f')
+    {
+        float x = 0;
+        char * ptr = reinterpret_cast<char *>(&x);
+        memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 4);
+        dest = x;
+    }
+    else // variable sized type or invald
+    {
         return false;
-    memcpy(ptr, &host(tags)[tags._positions[idx] + 3], typeSize);
+    }
     return true;
 }
 
