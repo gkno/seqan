@@ -145,23 +145,23 @@ hasIndex(BamTagsDict & bamTags)
 }
 
 // ----------------------------------------------------------------------------
-// Function getTypeSize()
+// Function getBamTypeSize()
 // ----------------------------------------------------------------------------
 
-// Return sizeof() of the type identified with the given char.  Returns -1 if not
-// valid, -2 if of variable length.
+// Return sizeof() of the type identified with the given char.  Returns -2 if not
+// valid, -1 if of variable length.
 
 /**
-.Function.getTypeSize
-..signature:getTypeSize(c)
+.Function.getBamTypeSize
+..signature:getBamTypeSize(c)
 ..summary:Return size of the type identified by $c$.
 ..param.c:The BAM type identifier
-..returns:$int$ with the $sizeof()$ of the type, -1 for variable sized types.
+..returns:$int$ with the $sizeof()$ of the type, -1 for variable sized types, -2 for invalid parameters.
 ..include:seqan/bam_io.h
 */
 
 inline int
-getTypeSize(char c)
+getBamTypeSize(char c)
 {
     switch (c)
     {
