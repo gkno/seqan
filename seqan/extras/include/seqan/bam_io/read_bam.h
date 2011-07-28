@@ -203,7 +203,8 @@ int readRecord(BamAlignmentRecord & record,
     if (res != 4)
         return res;
     SEQAN_ASSERT_GEQ(record.rId, -1);
-    SEQAN_ASSERT_LT(static_cast<__uint64>(record.rId), length(nameStore(context)));
+    if (record.rId >= 0)
+        SEQAN_ASSERT_LT(static_cast<__uint64>(record.rId), length(nameStore(context)));
     remainingBytes -= 4;
 
     // 0-based position.
