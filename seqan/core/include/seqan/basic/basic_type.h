@@ -773,7 +773,8 @@ struct IsIntegral
 		False
 		>::Type>::Type>::Type>::Type>::Type>::Type
 		>::Type>::Type>::Type>::Type>::Type
-		>::Type>::Type>::Type>::Type>::Type>::Type VALUE;
+		>::Type>::Type>::Type>::Type>::Type>::Type Type;
+		enum { VALUE = Type::VALUE };
 };
 
 template <typename T>

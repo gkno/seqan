@@ -129,7 +129,7 @@ class LogProb
     inline
 	operator TValue2() const
     {
-		return _convert<TValue2>(typename IsIntegral<TValue2>::VALUE());
+		return _convert<TValue2>(typename IsIntegral<TValue2>::Type());
 	}
 /*
     inline
