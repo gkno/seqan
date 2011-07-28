@@ -558,6 +558,29 @@ hasFlagDuplicate(BamAlignmentRecord const & record)
     return (record.flag & BAM_FLAG_DUPLICATE) == BAM_FLAG_DUPLICATE;
 }
 
+// ----------------------------------------------------------------------------
+// Function getAlignmentLengthInRef()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getAlignmentLengthInRef
+..cat:BAM I/O
+..summary:Returns length of @Class.BamAlignmentRecord@'s projection in reference.
+..signature:getAlignmentLength(record)
+..param.record:The record to query.
+...type:Class.BamAlignmentRecord
+..returns:$unsigned$, indicating the flag's status.
+..include:seqan/bam_io.h
+*/
+
+inline unsigned
+getAlignmentLengthInRef(BamAlignmentRecord const & record)
+{
+    unsigned l = 0;
+    _getLengthInRef(record.cigar, l);
+    return l;
+}
+
 }  // namespace seqan
 
 #endif  // #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_RECORD_H_
