@@ -31,6 +31,9 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
+// A simple converter between SAM and BAM.  BAM files can be dumped region-
+// wise, using a .bai index.
+// ==========================================================================
 
 #include <iostream>
 #include <fstream>
@@ -57,10 +60,12 @@ struct Options
     bool showHelp;
     bool showVersion;
     CharString inFile;
+    CharString baiFile;
     CharString outFile;
     Format inFormat;
     Format outFormat;
     unsigned verbosity;
+    String<Triple<CharString, int, int> > regions;  // <(refName, beginPos, endPos)>
 
     Options()
     {
@@ -70,7 +75,7 @@ struct Options
         outFile = "-";
         inFormat = FORMAT_SAM;
         outFormat = FORMAT_SAM;
-        verbosity = 2;
+        verbosity = 1;
     }
 };
 
@@ -97,12 +102,59 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     addOption(parser, CommandLineOption("i", "input-file", "Path to input, '-' for stdin.", OptionType::String, options.inFile));
     addOption(parser, CommandLineOption("S", "input-sam", "Input file is SAM.", OptionType::Bool, options.inFormat == FORMAT_SAM));
     addOption(parser, CommandLineOption("B", "input-bam", "Input file is BAM.", OptionType::Bool, options.inFormat == FORMAT_BAM));
+    addOption(parser, CommandLineOption("bi", "bai-index-file", "Path to BAI index, default: input + '.bai'.", OptionType::String));
+
+	addSection(parser, "Range Specification");
+    addOption(parser, CommandLineOption("r", "region", "Regions to dump (in which aligments start). REF:FROM-TO, e.g. IV:1,000-2,000 will alignments with ref IV in range [1000,2000) (zero based).", OptionType::String | OptionType::List, options.inFile));
 
 	addSection(parser, "Output Specification");
     addOption(parser, CommandLineOption("o", "output-file", "Path to output, '-' for stdout.", OptionType::String, options.outFile));
     addOption(parser, CommandLineOption("s", "output-sam", "Output file is SAM.", OptionType::Bool, options.outFormat == FORMAT_SAM));
     addOption(parser, CommandLineOption("b", "output-bam", "Output file is BAM.", OptionType::Bool, options.outFormat == FORMAT_BAM));
 }
+
+// Parse region string CHR:FROM-TO, e.g. "X:10,000-100,000" and write the result to a triple.  Return true on success,
+// false on failure.
+
+bool
+parseRegion(Triple<CharString, int, int> & result, CharString regionString)
+{
+    Stream<CharArray<char const *> > stream(&regionString[0], &regionString[0] + length(regionString));
+    RecordReader<Stream<CharArray<char const *> >, SinglePass<> > reader(stream);
+
+    clear(result.i1);
+    int res = readUntilChar(result.i1, reader, ':');
+    if (res != 0)
+        return false;
+    if (goNext(reader))
+        return false;
+    CharString buf1;
+    res = readUntilChar(buf1, reader, '-');
+    if (res != 0)
+        return false;
+    if (goNext(reader))
+        return false;
+    CharString castBuf;
+    for (unsigned i = 0; i < length(buf1); ++i)
+        if (isdigit(buf1[i]))
+            appendValue(castBuf, buf1[i]);
+    if (!lexicalCast2(result.i2, castBuf))
+        return false;
+
+    clear(buf1);
+    res = readLine(buf1, reader);
+    if (res != 0 && res != EOF_BEFORE_SUCCESS)
+        return false;
+    clear(castBuf);
+    for (unsigned i = 0; i < length(buf1); ++i)
+        if (isdigit(buf1[i]))
+            appendValue(castBuf, buf1[i]);
+    if (!lexicalCast2(result.i3, castBuf))
+        return false;
+    return true;
+}
+
+// Parse the command line and check for any syntatical errors.
 
 int parseCommandLineAndCheck(Options & options,
                              CommandLineParser & parser,
@@ -124,27 +176,116 @@ int parseCommandLineAndCheck(Options & options,
     }
 
     if (isSetLong(parser, "verbose"))
-        options.verbosity = 1;
-    if (isSetLong(parser, "very-verbose"))
         options.verbosity = 2;
+    if (isSetLong(parser, "very-verbose"))
+        options.verbosity = 3;
 
     getOptionValueLong(parser, "input-file", options.inFile);
     if (isSetLong(parser, "input-sam"))
         options.inFormat = FORMAT_SAM;
     if (isSetLong(parser, "input-bam"))
         options.inFormat = FORMAT_BAM;
+    getOptionValueLong(parser, "bai-index-file", options.baiFile);
+    if (length(options.baiFile) == 0 && options.inFormat == FORMAT_BAM && options.inFile != "-")
+    {
+        options.baiFile = options.inFile;
+        append(options.baiFile, ".bai");
+    }
 
     getOptionValueLong(parser, "output-file", options.outFile);
     if (isSetLong(parser, "output-sam"))
         options.outFormat = FORMAT_SAM;
     if (isSetLong(parser, "output-bam"))
         options.outFormat = FORMAT_BAM;
+    if (isSetLong(parser, "region"))
+    {
+        String<CharString> regions = getOptionValuesLong(parser, "region");
+        for (unsigned i = 0; i < length(regions); ++i)
+        {
+            Triple<CharString, int, int> t;
+            if (parseRegion(t, regions[i]))
+            {
+                appendValue(options.regions, t);
+                if (options.verbosity >= 2)
+                    std::cerr << "[VERBOSE] Region " << t.i1 << ":" << t.i2 << "-" << t.i3 << std::endl;
+            }
+            else
+            {
+                std::cerr << "[WARNING] could not parse region \"" << regions[i] << "\". IGNORING." << std::endl;
+            }
+        }
+    }
 
 	return 0;
 }
 
-template <typename TInStreamOrRecordReader, typename TOutStream, typename TInTag, typename TOutTag>
-int performConversion(TInStreamOrRecordReader & in, TOutStream & out, TInTag const & inTag, TOutTag const & outTag)
+template <typename TInStreamOrRecordReader, typename TOutStream, typename TOutTag, typename TContext, typename TOptions>
+int _dumpRegion(TInStreamOrRecordReader &, TOutStream &, Sam const & /*sam*/, TOutTag const &, TContext &, TOptions const &)
+{
+    std::cerr << "Dumping of regions not supported in SAM!" << std::endl;
+    return 0;
+}
+
+template <typename TInStreamOrRecordReader, typename TOutStream, typename TOutTag, typename TContext, typename TOptions>
+int _dumpRegion(TInStreamOrRecordReader & in, TOutStream & out, Bam const & /*bam*/, TOutTag const & outTag, TContext & context, TOptions const & options)
+{
+    // TOOD(holtgrew): The index is loaded for each region.  This should probably not be the case!
+
+    // Dump each region after loading the index.
+    BamIndex<Bai> bamIndex;
+    if (!load(bamIndex, toCString(options.baiFile)))
+    {
+        std::cerr << "[ERROR] Could not open index file " << options.baiFile << ", required when specifying regions." << std::endl;
+        return 1;
+    }
+
+    for (unsigned i = 0; i < length(options.regions); ++i)
+    {
+        // Jump near range.
+        CharString refName = options.regions[i].i1;
+        unsigned refId = 0;
+        if (!getIdByName(nameStore(context), refName, refId, nameStoreCache(context)))
+        {
+            std::cerr << "[ERROR] Unknown reference " << refName << std::endl;
+            return 1;
+        }
+        bool hasAlignments = false;
+        if (!jumpToPos(in, hasAlignments, context, refId, options.regions[i].i2, bamIndex))
+        {
+            std::cerr << "[ERROR] Could not jump to " << refName << ":" << options.regions[i].i2 << std::endl;
+            return 1;
+        }
+        if (!hasAlignments)
+            continue;
+        // Dump range.
+        BamAlignmentRecord record;
+        bool stop = false;
+        while (!atEnd(in) && !stop)
+        {
+            if (readRecord(record, context, in, Bam()) != 0)
+            {
+                std::cerr << "Could not read alignment record!" << std::endl;
+                return 1;
+            }
+            if (record.pos < options.regions[i].i2)
+                continue;  // Skip, before region.
+            if (record.pos >= options.regions[i].i3)
+            {
+                stop = true;
+                continue;  // Stop, wrote out all required ones.
+            }
+            if (write2(out, record, context, outTag) != 0)
+            {
+                std::cerr << "Could not write alignment record!" << std::endl;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+template <typename TInStreamOrRecordReader, typename TOutStream, typename TInTag, typename TOutTag, typename TOptions>
+int performConversion(TInStreamOrRecordReader & in, TOutStream & out, TOptions const & options, TInTag const & inTag, TOutTag const & outTag)
 {
     typedef StringSet<CharString>      TNameStore;
     typedef NameStoreCache<TNameStore> TNameStoreCache;
@@ -165,28 +306,44 @@ int performConversion(TInStreamOrRecordReader & in, TOutStream & out, TInTag con
         return 1;
     }
 
-    BamAlignmentRecord record;
-    while (!atEnd(in))
+    if (length(options.regions) == 0u)
     {
-        if (readRecord(record, context, in, inTag) != 0)
+        // Simply dump whole file.
+        BamAlignmentRecord record;
+        while (!atEnd(in))
         {
-            std::cerr << "Could not read alignment record!" << std::endl;
-            return 1;
+            if (readRecord(record, context, in, inTag) != 0)
+            {
+                std::cerr << "Could not read alignment record!" << std::endl;
+                return 1;
+            }
+            if (write2(out, record, context, outTag) != 0)
+            {
+                std::cerr << "Could not write alignment record!" << std::endl;
+                return 1;
+            }
         }
-        if (write2(out, record, context, outTag) != 0)
-        {
-            std::cerr << "Could not write alignment record!" << std::endl;
-            return 1;
-        }
+    }
+    else
+    {
+        return _dumpRegion(in, out, inTag, outTag, context, options);
     }
     return 0;
 }
 #endif  // #if SEQAN_HAS_ZLIB
 
+// The main function.
+//
+// Don't be intimidated by its longness, most of the code is for branching the different options to types.
+
 int main(int argc, char const * argv[])
 {
 #if SEQAN_HAS_ZLIB
     using namespace seqan;
+
+    // -----------------------------------------------------------------------
+    // Handle Command Line
+    // -----------------------------------------------------------------------
 
     // Setup command line parser.
     CommandLineParser parser;
@@ -201,6 +358,14 @@ int main(int argc, char const * argv[])
     if (options.showHelp || options.showVersion)
         return 0;
 
+    // -----------------------------------------------------------------------
+    // Open Input / Output Files.
+    // -----------------------------------------------------------------------
+
+    // We go through quite some pain here since we want to support both stdin/stdout and file writing for both SAM and
+    // BAM.  The only way to do this for BGZF/BAM is to use the raw bgzf API.
+
+    // We will use 
     std::istream * inS = &std::cin;
     std::ostream * outS = &std::cout;
     int inF = STDIN_FILENO;
@@ -258,25 +423,29 @@ int main(int argc, char const * argv[])
 
     if (!ioGood)
         goto main_end;
-    
+
+    // -----------------------------------------------------------------------
+    // 4-way branch to SAM/BAM formats to read and write.
+    // -----------------------------------------------------------------------
+
     if (options.inFormat == FORMAT_SAM)
     {
         RecordReader<std::istream, SinglePass<> > reader(*inS);
-        if (options.outFormat == FORMAT_SAM)
+        if (options.outFormat == FORMAT_SAM)  // SAM -> SAM
         {
-            res = performConversion(reader, *outS, Sam(), Sam());
+            res = performConversion(reader, *outS, options, Sam(), Sam());
         }
-        else
+        else  // SAM -> BAM
         {
             BGZF * outBgzf = bgzf_fdopen(outF, "w");
             Stream<Bgzf> bamOutStream(outBgzf);
-            res = performConversion(reader, bamOutStream, Sam(), Bam());
+            res = performConversion(reader, bamOutStream, options, Sam(), Bam());
             bgzf_close(outBgzf);
         }
     }
     else
     {
-        if (options.outFormat == FORMAT_SAM)
+        if (options.outFormat == FORMAT_SAM)  // BAM -> SAM
         {
             BGZF * inBgzf = bgzf_fdopen(inF, "r");
             if (inBgzf == 0)
@@ -287,11 +456,11 @@ int main(int argc, char const * argv[])
             else
             {
                 Stream<Bgzf> bamInStream(inBgzf);
-                res = performConversion(bamInStream, *outS, Bam(), Sam());
+                res = performConversion(bamInStream, *outS, options, Bam(), Sam());
                 bgzf_close(inBgzf);
             }
         }
-        else
+        else  // BAM -> BAM
         {
             BGZF * inBgzf = bgzf_fdopen(inF, "r");
             Stream<Bgzf> bamInStream(inBgzf);
@@ -309,7 +478,7 @@ int main(int argc, char const * argv[])
             }
             else
             {
-                res = performConversion(bamInStream, bamOutStream, Bam(), Bam());
+                res = performConversion(bamInStream, bamOutStream, options, Bam(), Bam());
             }
             bgzf_close(outBgzf);
             bgzf_close(inBgzf);
@@ -320,6 +489,10 @@ int main(int argc, char const * argv[])
         std::cerr << "Error during conversion!" << std::endl;
         return 1;
     }
+
+    // -----------------------------------------------------------------------
+    // Cleanup.
+    // -----------------------------------------------------------------------
 
 main_end:
 

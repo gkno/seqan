@@ -45,6 +45,11 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+struct Bgzf_;
+typedef Tag<Bgzf_> Bgzf;
+template <> class Stream<Bgzf>;
+inline void close(Stream<Bgzf> & stream);
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -71,10 +76,19 @@ template <>
 class Stream<Bgzf>
 {
 public:
+    bool _bgzfOwned;
     BGZF * _bgzf;
     int _error;
 
-    Stream(BGZF * bgzf) : _bgzf(bgzf), _error(0) {}
+    Stream() : _bgzfOwned(false), _bgzf(0), _error(0) {}
+    
+    Stream(BGZF * bgzf) : _bgzfOwned(false), _bgzf(bgzf), _error(0) {}
+
+    ~Stream()
+    {
+        if (this->_bgzfOwned)
+            close(*this);
+    }
 };
 
 // ============================================================================
@@ -185,6 +199,52 @@ struct HasStreamFeature<Stream<Bgzf>, Tell>
 // ============================================================================
 // Functions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function open()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.open
+..signature:open(stream, fileName, mode)
+..param.stream:Stream to open.
+...type:Class.Stream
+..param.mode:Mode string for opening the file, e.g. $"r"$, $"w"$.
+...remarks:Do not specify for @Spec.Char Array Stream@.
+...type:nolink:$char const *$
+ */
+
+inline bool
+open(Stream<Bgzf> & stream, char const * filename, char const * mode)
+{
+    if (stream._bgzfOwned)
+        close(stream);
+    stream._bgzf = bgzf_open(filename, mode);
+    stream._bgzfOwned = true;
+    return stream._bgzf != 0;
+}
+
+// ----------------------------------------------------------------------------
+// Function close()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.close
+..signature:close(stream)
+..param.stream:Stream to close.
+...type:Class.Stream
+ */
+
+inline void
+close(Stream<Bgzf> & stream)
+{
+    if (stream._bgzf == 0)
+        return;
+    int res = bgzf_close(stream._bgzf);
+    (void) res;
+    stream._bgzf = 0;
+    return;
+}
 
 // ----------------------------------------------------------------------------
 // Function streamPeek()
