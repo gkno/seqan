@@ -34,8 +34,6 @@
 // Code for writing SAM.
 // ==========================================================================
 
-// TODO(holtgrew): Test me!
-
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_WRITE_SAM_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_WRITE_SAM_H_
 

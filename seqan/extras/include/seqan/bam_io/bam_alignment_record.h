@@ -34,8 +34,6 @@
 // The class BamAlignmentRecord, flag checking methods, flag constants.
 // ==========================================================================
 
-// TODO(holtgrew): Test me!
-
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_RECORD_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_RECORD_H_
 
@@ -176,19 +174,19 @@ enum BamFlags
 class BamAlignmentRecord
 {
 public:
-    static __uint32 const INVALID_POS = MaxValue<__uint32>::VALUE;
-    static __int32 const INVALID_REFID = -1;
+    static __int32 const INVALID_POS = MaxValue<__int32>::VALUE;
+    static __int32 const INVALID_REFID = -1;  // TODO(holtgrew): Rename to ...REF_ID.
     static __int32 const INVALID_LEN = MaxValue<__int32>::VALUE;
     
     CharString qName;
     __uint16 flag;
     __int32 rId;
-    __uint32 pos;
+    __int32 pos;
     __uint8 mapQ;
     __uint16 bin;
     String<CigarElement<> > cigar;
     __int32 rNextId;
-    __uint32 pNext;
+    __int32 pNext;
     __int32 tLen;
     CharString seq;
     CharString qual;
@@ -232,7 +230,6 @@ clear(BamAlignmentRecord & record)
 ...type:Class.BamAlignmentRecord
 ..returns:$bool$, indicating the flag's status.
 ..include:seqan/bam_io.h
-..see:Function.hasFlagMultiple
 ..see:Function.hasFlagAllProper
 ..see:Function.hasFlagUnmapped
 ..see:Function.hasFlagNextUnmapped

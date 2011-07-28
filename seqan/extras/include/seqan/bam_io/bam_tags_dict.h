@@ -34,8 +34,8 @@
 // Code for read/write access to BAM tag dicts.
 // ==========================================================================
 
-// TODO(holtgrew): Test me!
 // TODO(holtgrew): assignValue() is missing.
+// TODO(holtgrew): eraseValue() is missing.
 
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_TAGS_DICT_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_TAGS_DICT_H_
@@ -348,7 +348,7 @@ getTagValue(BamTagsDict & tags, TIdx idx)
     TPos beginPos = tags._positions[idx] + 2;
     TPos endPos = beginPos + 1;
     
-    char theType = getType(tags, idx);
+    char theType = getTagType(tags, idx);
     if (theType == 'Z' || theType == 'H')
     {
         typedef typename Iterator<CharString, Rooted>::Type TIterator;

@@ -34,8 +34,6 @@
 // Code to convert between SAM and BAM format tags (textual <-> binary).
 // ==========================================================================
 
-// TODO(holtgrew): Test me!
-
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_SAM_CONVERSION_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_SAM_TAGS_TO_BAM_TAGS_H_
 

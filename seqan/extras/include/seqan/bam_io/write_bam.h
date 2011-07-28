@@ -35,7 +35,6 @@
 // ==========================================================================
 
 // TODO(holtgrew): Add buffer to context?
-// TODO(holtgrew): Test me!
 
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_WRITE_BAM_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_WRITE_BAM_H_
@@ -247,7 +246,8 @@ int write2(TStream & stream,
         streamWriteChar(buffer, static_cast<char>(record.qual[i] - '!'));
 
     // tags
-    streamWriteBlock(buffer, reinterpret_cast<char *>(&record.tags[0]), length(record.tags));
+    if (length(record.tags) > 0u)
+        streamWriteBlock(buffer, reinterpret_cast<char *>(&record.tags[0]), length(record.tags));
 
     // buffer to stream
     __uint32 blockSize = length(buffer);

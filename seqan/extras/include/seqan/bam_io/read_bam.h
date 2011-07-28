@@ -34,7 +34,6 @@
 // Code for reading Bam.
 // ==========================================================================
 
-// TODO(holtgrew): Test me!
 // TODO(holtgrew): Indexing.
 
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_READ_BAM_H_
@@ -285,7 +284,7 @@ int readRecord(BamAlignmentRecord & record,
         res = streamReadBlock(reinterpret_cast<char *>(&ui), stream, 4);
         if (res != 4)
             return res;
-        record.cigar[i].operation = CIGAR_MAPPING[ui & 0x0004];
+        record.cigar[i].operation = CIGAR_MAPPING[ui & 0x0007];
         record.cigar[i].count = ui >> 4;
     }
     remainingBytes -= nCigarOp * 4;
@@ -318,7 +317,6 @@ int readRecord(BamAlignmentRecord & record,
     remainingBytes -= lSeq;
 
     // tags
-    // TODO(holtgrew): Skipped for now.
     if (remainingBytes > 0)
     {
         resize(record.tags, remainingBytes);

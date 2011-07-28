@@ -35,8 +35,6 @@
 // in headers.
 // ==========================================================================
 
-// TODO(holtgrew): Test me!
-
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_HEADER_RECORD_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_HEADER_RECORD_H_
 
@@ -88,6 +86,10 @@ enum BamHeaderRecordType
 ..class:Class.BamHeaderRecord
 ..summary:Type of the tag values.
 
+.Typedef.BamHeaderRecord#TTag
+..class:Class.BamHeaderRecord
+..summary:@Class.Pair@ to use for storing tags.
+
 .Typedef.BamHeaderRecord#TTags
 ..class:Class.BamHeaderRecord
 ..summary:Type of the string of tag @Class.Pair|Pairs@.
@@ -108,7 +110,8 @@ class BamHeaderRecord
 public:
     typedef CharString TTagName;
     typedef CharString TTagValue;
-    typedef String<Pair<TTagName, TTagValue> > TTags;
+    typedef Pair<TTagName, TTagValue> TTag;
+    typedef String<TTag> TTags;
 
     BamHeaderRecordType type;
     String<Pair<TTagName, TTagValue> > tags;
@@ -241,7 +244,7 @@ getTagValue(CharString & value, CharString const & key, BamHeaderRecord const & 
     unsigned idx = 0;
     if (!findTagKey(idx, key, record))
         return false;
-    return getTagValue(value, key, record);
+    return getTagValue(value, idx, record);
 }
 
 }  // namespace seqan

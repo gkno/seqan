@@ -31,10 +31,8 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Class BamIoContext, accessor functions.
+// Class BamIOContext, accessor functions.
 // ==========================================================================
-
-// TODO(holtgrew): Test me!
 
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_IO_CONTEXT_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_IO_CONTEXT_H_
@@ -122,6 +120,7 @@ public:
 ..include:seqan/bam_io.h
 */
 
+// TODO(holtgrew): Rename to referenceNameStore
 template <typename TNameStore, typename TNameStoreCache>
 TNameStore &
 nameStore(BamIOContext<TNameStore, TNameStoreCache> & context)
@@ -146,6 +145,7 @@ nameStore(BamIOContext<TNameStore, TNameStoreCache> & context)
 ..see:Function.nameStore
 */
 
+// TODO(holtgrew): Rename to referenceNameStoreCache
 template <typename TNameStore, typename TNameStoreCache>
 TNameStoreCache &
 nameStoreCache(BamIOContext<TNameStore, TNameStoreCache> & context)

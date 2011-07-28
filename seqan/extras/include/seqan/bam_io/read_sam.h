@@ -34,8 +34,6 @@
 // Code for reading SAM.
 // ==========================================================================
 
-// TODO(holtgrew): Test me!
-
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_READ_SAM_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_READ_SAM_H_
 
@@ -271,6 +269,11 @@ int readRecord(BamHeader & header,
             }
             typedef typename BamHeader::TSequenceInfo TSequenceInfo;
             appendValue(header.sequenceInfos, TSequenceInfo(sn, ln));
+            // Add name to name store cache if necessary.
+            unsigned unused = 0;
+            (void)unused;
+            if (!getIdByName(nameStore(context), sn, unused, nameStoreCache(context)))
+                appendName(nameStore(context), sn, nameStoreCache(context));
         }
     }
 
