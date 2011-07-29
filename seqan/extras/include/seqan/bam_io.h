@@ -47,6 +47,7 @@
 #include <seqan/stream.h>
 #include <seqan/ext_lh3.h>
 #include <seqan/store.h>
+#include <seqan/align.h>
 
 // ===========================================================================
 // Data Structures & Conversion.
@@ -72,10 +73,16 @@
 #endif  // #if SEQAN_HAS_ZLIB
 
 // ===========================================================================
-// BAM Index Related
+// BAM Index Related.
 // ===========================================================================
 
 #include <seqan/bam_io/bam_index_base.h>
 #include <seqan/bam_io/bam_index_bai.h>
+
+// ===========================================================================
+// Utility Routines.
+// ===========================================================================
+
+#include <seqan/bam_io/bam_alignment_record_util.h>
 
 #endif  // EXTRAS_INCLUDE_SEQAN_BAM_IO_H_

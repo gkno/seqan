@@ -1,5 +1,5 @@
 // ==========================================================================
-//                          bam_print_alignments.cpp
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2010, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -31,6 +31,11 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
+// Iterate over BAM alignment, dump lines in SAM format, followed by the read
+// alignment.
+//
+// USAGE: bam_print_alignments REF.fasta ALIGN.bam
+// ==========================================================================
 
 #include <iostream>
 
@@ -39,43 +44,6 @@
 #include <seqan/file.h>      // For printing SeqAn Strings.
 #include <seqan/align.h>
 #include <seqan/bam_io.h>
-
-namespace seqan {
-
-/**
-.Function.
-..signature:bamRecordToAlignment(align, reference, record)
-..param.align:The alignment to create.
-...type:Class.Align
-..param.reference:String of Dna, Dna5, ... characters.
-...type:Class.String
-..param.record:The alignment record to convert.
-...type:Class.BamAlignmentRecord
-..returns:$void$
-..include:seqan/bam_io.h
-..example.code:
-StringSet<Dna5String> references;
-BamAlignment record;
-// Read references and record.
-Align<Dna5String> align;
-if (record.rId != BamAlignmentRecord::INVALID_REFID)
-    bamRecordToAlignment(align, references[record.refId], record);
- */
-
-template <typename TSource, typename TSpec, typename TReference>
-void
-bamRecordToAlignment(Align<TSource, TSpec> & result, TReference & reference, BamAlignmentRecord & record)
-{
-    // TODO(holtgrew): Clipping better than copying infix? But is it generic?
-    resize(rows(result), 2);
-
-    assignSource(row(result, 0), infix(reference, record.pos, record.pos + getAlignmentLengthInRef(record)));
-    cigarToGapAnchorContig(record.cigar, row(result, 0));
-    assignSource(row(result, 1), record.seq);
-    cigarToGapAnchorRead(record.cigar, row(result, 1));
-}
-
-}  // namespace seqan
 
 int main(int argc, char const ** argv)
 {
