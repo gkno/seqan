@@ -20,7 +20,7 @@ int main(int, char const **)
     std::cerr << "lexicalCast2<int>(\"-123\") --> (" << b << ", " << resultI << ")" << std::endl;
     
     b = lexicalCast2<double>(resultD, "-123");
-    std::cerr << "lexicalCast2<int>(\"-123\") --> (" << b << ", " << resultD << ")" << std::endl;
+    std::cerr << "lexicalCast2<double>(\"-123\") --> (" << b << ", " << resultD << ")" << std::endl;
     
     return 0;
 }
