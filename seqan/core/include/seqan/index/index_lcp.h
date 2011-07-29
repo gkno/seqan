@@ -429,11 +429,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA const &SA,
 		Kasai const)
 	{
-		typedef typename Concatenator<StringSet<TString, TSpec> const>::Type	TText;
-		typedef typename StringSetLimits<StringSet<TString, TSpec> const>::Type	TLimitsString;
-		typedef typename Value<TSA>::Type										TPair;
-		typedef PairDecrementer_<TPair, TLimitsString>							TDecrementer;
-		typedef typename Value<TLCPTable>::Type									TSize;
+        typedef StringSet<TString, TSpec>							TStringSet;
+		typedef typename Concatenator<TStringSet const>::Type		TText;
+		typedef typename StringSetLimits<TStringSet const>::Type	TLimitsString;
+//		typedef typename Value<TSA>::Type							TPair;
+		typedef Pair<
+			typename Size<TStringSet>::Type,
+			typename Size<TString>::Type>							TPair;
+		typedef PairDecrementer_<TPair, TLimitsString>				TDecrementer;
+		typedef typename Value<TLCPTable>::Type						TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
             std::cerr << "--- CREATE LCP TABLE ---" << std::endl;
