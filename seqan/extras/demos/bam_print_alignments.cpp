@@ -42,9 +42,29 @@
 
 namespace seqan {
 
+/**
+.Function.
+..signature:bamRecordToAlignment(align, reference, record)
+..param.align:The alignment to create.
+...type:Class.Align
+..param.reference:String of Dna, Dna5, ... characters.
+...type:Class.String
+..param.record:The alignment record to convert.
+...type:Class.BamAlignmentRecord
+..returns:$void$
+..include:seqan/bam_io.h
+..example.code:
+StringSet<Dna5String> references;
+BamAlignment record;
+// Read references and record.
+Align<Dna5String> align;
+if (record.rId != BamAlignmentRecord::INVALID_REFID)
+    bamRecordToAlignment(align, references[record.refId], record);
+ */
+
 template <typename TSource, typename TSpec, typename TReference>
 void
-createAlignmentFromBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlignmentRecord & record)
+bamRecordToAlignment(Align<TSource, TSpec> & result, TReference & reference, BamAlignmentRecord & record)
 {
     // TODO(holtgrew): Clipping better than copying infix? But is it generic?
     resize(rows(result), 2);
@@ -52,10 +72,6 @@ createAlignmentFromBamRecord(Align<TSource, TSpec> & result, TReference & refere
     assignSource(row(result, 0), infix(reference, record.pos, record.pos + getAlignmentLengthInRef(record)));
     cigarToGapAnchorContig(record.cigar, row(result, 0));
     assignSource(row(result, 1), record.seq);
-    // if (hasFlagRC(record)) {
-    //     std::cerr << "RC" << std::endl;
-    //     reverseComplement(source(row(result, 1)));
-    // }
     cigarToGapAnchorRead(record.cigar, row(result, 1));
 }
 
@@ -119,12 +135,13 @@ int main(int argc, char const ** argv)
             return 1;
         }
 
-        if (record.rId == -1)
+        if (record.rId == BamAlignmentRecord::INVALID_REFID)
             continue;  // Skip * reference.
 
-        createAlignmentFromBamRecord(align, seqs[record.rId], record);
+        // Convert BAM record to alignment.
+        bamRecordToAlignment(align, seqs[record.rId], record);
+        // Dump record as SAM and the alignment.
         write2(std::cout, record, context, Sam());
-        std::cout << refNameStore[record.rId] << ", " << nameStore(context)[record.rId] << std::endl;
         std::cout << align << std::endl;
     }
 
