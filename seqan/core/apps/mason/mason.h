@@ -925,7 +925,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     //     build simulated read
     reserve(fragmentStore.readSeqStore, numReads, Exact());
     reserve(fragmentStore.readNameStore, numReads, Exact());
-    char readName[1024];
+    CharString readNameBuf;
     char outFileName[151];
     snprintf(outFileName, 150, "%s", toCString(options.outputFile));
     String<bool> flipped;
@@ -1012,22 +1012,35 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         appendValue(flipped, mateNum == 1);
                     }
                     if (options.includeReadInformation)
-                        sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
+                    {
+                        resize(readNameBuf, 1024 + length(haplotypeInfix) + length(inst.editString));
+                        sprintf(&readNameBuf[0], "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
+                    }
                     else
-                        sprintf(readName, "%s.%09u", outFileName, readId / 2);
+                    {
+                        resize(readNameBuf, 1024);
+                        sprintf(&readNameBuf[0], "%s.%09u", outFileName, readId / 2);
+                    }
                 } else {
                     if (options.includeReadInformation)
-                        sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
+                    {
+                        resize(readNameBuf, 1024 + length(haplotypeInfix) + length(inst.editString));
+                        sprintf(&readNameBuf[0], "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
+                    }
                     else
-                        sprintf(readName, "%s.%09u", outFileName, readId);
+                    {
+                        resize(readNameBuf, 1024);
+                        sprintf(&readNameBuf[0], "%s.%09u", outFileName, readId);
+                    }
                 }
                 if (options.includeReadInformation) {
                     for (unsigned i = 0; i < length(inst.editString); ++i) {
                         char buffer[2] = "*";
                         buffer[0] = "MEID"[static_cast<int>(inst.editString[i])];
-                        strcat(readName, buffer);
+                        strcat(&readNameBuf[0], buffer);
                     }
                 }
+                CharString readName(&readNameBuf[0]);
                 appendValue(fragmentStore.readNameStore, readName);
 
                 // Print info about read and haplotype.
@@ -1068,11 +1081,11 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 
                         // The first mate always comes from the forward strand.
                         if (options.includeReadInformation)
-                            append(fragmentStore.readNameStore[readId - 1], " strand=forward");
+                            append(fragmentStore.readNameStore[readId - 1], CharString(" strand=forward"));
                         // The second read always comes from the reverse strand.
                         reverseComplement(fragmentStore.readSeqStore[readId]);
                         if (options.includeReadInformation)
-                            append(fragmentStore.readNameStore[readId], " strand=reverse");
+                            append(fragmentStore.readNameStore[readId], CharString(" strand=reverse"));
                         // Note: readId is also last index of aligned read store because we only have one alignment per read!
                         std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                     }
@@ -1085,12 +1098,12 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     if (fromReverse) {
                         reverseComplement(back(fragmentStore.readSeqStore));
                         if (options.includeReadInformation)
-                            append(back(fragmentStore.readNameStore), " strand=reverse");
+                            append(back(fragmentStore.readNameStore), CharString(" strand=reverse"));
                         // Note: readId is also last index of aligned read store because we only have one alignment per read!
                         std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                     } else {
                         if (options.includeReadInformation)
-                            append(back(fragmentStore.readNameStore), " strand=forward");
+                            append(back(fragmentStore.readNameStore), CharString(" strand=forward"));
                     }
                 }
             }

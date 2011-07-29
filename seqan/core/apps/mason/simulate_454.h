@@ -300,7 +300,8 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
     }
 	
     SEQAN_ASSERT_EQ(length(inst.insertionNucleotides), inst.insCount);
-    SEQAN_ASSERT_EQ(length(inst.qualities) + inst.delCount, length(inst.editString));
+    if (options.simulateQualities)
+        SEQAN_ASSERT_EQ(length(inst.qualities) + inst.delCount, length(inst.editString));
 }
 
 template <typename TRNG, typename TString>
@@ -309,7 +310,8 @@ void applySimulationInstructions(TString & read, TRNG & /*rng*/, ReadSimulationI
     typedef typename Value<TString>::Type TAlphabet;
 
     SEQAN_ASSERT_EQ(length(inst.insertionNucleotides), inst.insCount);
-    SEQAN_ASSERT_EQ(length(inst.qualities) + inst.delCount, length(inst.editString));
+    if (options.simulateQualities)
+        SEQAN_ASSERT_EQ(length(inst.qualities) + inst.delCount, length(inst.editString));
     SEQAN_ASSERT_EQ(length(read), length(inst.editString) - inst.insCount);
     
     TString tmp;

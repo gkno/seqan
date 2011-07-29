@@ -119,7 +119,8 @@ class GenericSymbolNameRule(AllYesRule):
     
     def check(self, node):
         displayname = ci.Cursor_displayname(node)
-        # print 'checking', displayname
+        print 'checking', displayname
+        import pdb; pdb.set_trace()
         if not re.match(self.regular_ex, displayname):
             v = RuleViolation(
                 self.rule_name, displayname, node.location.file.name,
