@@ -46,6 +46,9 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+template <> class Stream<GZFile>;
+inline void close(Stream<GZFile> & stream);
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -57,7 +60,7 @@ namespace seqan {
 ..general:Class.Stream
 ..summary:Adaption from $gzFile$ of $<zlib.h>$ to streams.
 ..remarks:This is only available if @Macro.SEQAN_HAS_ZLIB@ is set to 1.
-..remarks:Not default and copy constructable, not assignable.
+..remarks:Not copy constructable, not assignable.
 ..include:seqan/stream.h
  */
 
@@ -65,9 +68,18 @@ template <>
 class Stream<GZFile>
 {
 public:
-    gzFile & _gzFile;
+    bool _gzFileOwned;
+    gzFile _gzFile;
 
-    Stream(gzFile & gzFile) : _gzFile(gzFile) {}
+    Stream() : _gzFileOwned(false), _gzFile(0) {}
+
+    Stream(gzFile & gzFile) : _gzFileOwned(false), _gzFile(&gzFile) {}
+
+    ~Stream()
+    {
+        if (this->_gzFileOwned)
+            close(*this);
+    }
 };
 
 // ============================================================================
@@ -177,6 +189,54 @@ struct HasStreamFeature<Stream<GZFile>, Tell>
 // ============================================================================
 // Functions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function open()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.open
+..signature:open(stream, fileName, mode)
+..param.stream:Stream to open.
+...type:Class.Stream
+..param.mode:Mode string for opening the file, e.g. $"r"$, $"w"$.
+...remarks:Do not specify for @Spec.Char Array Stream@.
+...type:nolink:$char const *$
+ */
+
+inline bool
+open(Stream<GZFile> & stream, char const * filename, char const * mode)
+{
+    if (stream._gzFileOwned)
+        close(stream);
+    stream._gzFile = gzopen(filename, mode);
+    if (stream._gzFile == 0)
+        return false;
+    stream._gzFileOwned = true;
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function close()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.close
+..signature:close(stream)
+..param.stream:Stream to close.
+...type:Class.Stream
+ */
+
+inline void
+close(Stream<GZFile> & stream)
+{
+    if (stream._gzFile == 0)
+        return;
+    int res = gzclose(stream._gzFile);
+    (void) res;
+    stream._gzFile = 0;
+    return;
+}
 
 // ----------------------------------------------------------------------------
 // Function streamPeek()

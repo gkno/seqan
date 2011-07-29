@@ -274,45 +274,28 @@ int readFileDefault(char const * filename, Options const & options, TPass const 
 #if SEQAN_HAS_ZLIB
     } else if (options.gzip) {
         std::cerr << "gzip" << std::flush;
-        gzFile f = gzopen(filename, "rb");
-        if (gzdirect(f)) {
-            std::cerr << std::endl << "ERROR: GZip file has the wrong format!" << std::endl;
-            gzclose(f);
+        Stream<GZFile> f;
+        if (!open(f, filename, "r"))
+        {
+            std::cerr << "Could not open input file!" << std::endl;
             return 1;
         }
-        Stream<GZFile> f2(f);
-        int res = readFastaFile(sequenceIds, sequences, f2, TPass());
+        int res = readFastaFile(sequenceIds, sequences, f, TPass());
         if (res != 0)
             std::cerr << "There was an error reading the FASTA file." << std::endl;
-        gzclose(f);
 #endif  // #if SEQAN_HAS_ZLIB
 #if SEQAN_HAS_BZIP2
     } else if (options.bzip2) {
         std::cerr << "bzip2" << std::flush;
-        FILE * f = fopen(filename, "rb");
-        if (!f) {
-            std::cerr << std::endl << "ERROR: Could not open input file!" << std::endl;
+        Stream<BZ2File> f;
+        if (!open(f, filename, "r"))
+        {
+            std::cerr << "Could not open input file!" << std::endl;
             return 1;
         }
-        int err = BZ_OK;
-        BZFILE * f2 = BZ2_bzReadOpen(&err, f, 0, 0, NULL, 0);
-        if (err != BZ_OK) {
-            std::cerr << std::endl << "ERROR: Could not open bzip2 file!" << std::endl;
-            BZ2_bzReadClose(&err, f2);
-            if (err != BZ_OK)
-                std::cerr << std::endl << "ERROR: Could not close bzip2 file!" << std::endl;
-            fclose(f);
-        }
-        Stream<BZ2File> f3(f2);
-        int res = readFastaFile(sequenceIds, sequences, f3, TPass());
+        int res = readFastaFile(sequenceIds, sequences, f, TPass());
         if (res != 0)
             std::cerr << "There was an error reading the FASTA file." << std::endl;
-        BZ2_bzReadClose(&err, f2);
-        if (err != BZ_OK) {
-            std::cerr << std::endl << "ERROR: Could not close bzip2 file!" << std::endl;
-            fclose(f);
-        }
-        fclose(f);
 #endif  // #if SEQAN_HAS_BZIP2
     } else {
         SEQAN_ASSERT_FAIL("SHOULD NEVER REACH HERE!");

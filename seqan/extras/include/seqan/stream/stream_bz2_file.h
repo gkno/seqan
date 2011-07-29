@@ -50,6 +50,9 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+template <> class Stream<BZ2File>;
+inline void close(Stream<BZ2File> & stream);
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -61,7 +64,7 @@ namespace seqan {
 ..general:Class.Stream
 ..summary:Wrapper for $BZFILE *$ streams from bzlib.
 ..remarks:This is only available if @Macro.SEQAN_HAS_ZLIB@ is set to 1.
-..remarks:Not default and copy constructable.
+..remarks:Not copy constructable.
 ..include:seqan/stream.h
  */
 
@@ -69,15 +72,26 @@ template <>
 class Stream<BZ2File>
 {
 public:
+    bool _fileOwned;
     BZFILE * _file;
+    FILE * _underlyingFile;
     int _error;
+    char _rw;
 
-    Stream(BZFILE * file) : _file(file), _error(0)
+    Stream() : _fileOwned(false), _file(0), _underlyingFile(0), _error(0), _rw('-')
     {}
+
+    Stream(BZFILE * file) : _fileOwned(false), _file(file), _error(0), _rw('-')
+    {}
+
+    ~Stream()
+    {
+        if (this->_fileOwned)
+            close(*this);
+    }
 
 private:
     // Disable default, copy construction and assignment.
-    Stream() {}
     Stream(Stream const & /*other*/) {}
     Stream & operator=(Stream const & /*other*/) { return *this; }
 };
@@ -193,6 +207,65 @@ struct HasStreamFeature<Stream<BZ2File>, Tell>
 // ============================================================================
 // Functions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function open()
+// ----------------------------------------------------------------------------
+
+inline bool
+open(Stream<BZ2File> & stream, char const * filename, char const * mode)
+{
+    if (stream._fileOwned)
+        close(stream);
+    CharString modeStr = mode;
+    if (length(modeStr) == 0u || (modeStr[0] != 'r' && modeStr[0] != 'w'))
+        return false;
+    if (modeStr == "r" || modeStr == "w")
+        appendValue(modeStr, 'b');
+    stream._underlyingFile = fopen(filename, toCString(modeStr));
+    if (stream._underlyingFile == 0)
+        return false;
+    stream._rw = modeStr[0];
+    if (stream._rw == 'w')
+        stream._file = BZ2_bzWriteOpen(&stream._error, stream._underlyingFile, 7, 0, 0);
+    else
+        stream._file = BZ2_bzReadOpen(&stream._error, stream._underlyingFile, 0, 0, NULL, 0);
+    if (stream._file == 0 || stream._error != 0)
+    {
+        stream._file = 0;
+        stream._underlyingFile = 0;
+        return false;
+    }
+    stream._fileOwned = true;
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function close()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.close
+..signature:close(stream)
+..param.stream:Stream to close.
+...type:Class.Stream
+ */
+
+inline void
+close(Stream<BZ2File> & stream)
+{
+    if (stream._file == 0 || stream._file == 0)
+        return;
+    if (stream._rw == 'w')
+        BZ2_bzWriteClose(&stream._error, stream._file, 0, NULL, NULL);
+    else
+        BZ2_bzReadClose(&stream._error, stream._file);
+    fclose(stream._underlyingFile);
+    stream._file = 0;
+    stream._underlyingFile = 0;
+    stream._rw = '-';
+    stream._fileOwned = false;
+}
 
 // ----------------------------------------------------------------------------
 // Function streamEof()
