@@ -213,6 +213,12 @@ open(Stream<GZFile> & stream, char const * filename, char const * mode)
     if (stream._gzFile == 0)
         return false;
     stream._gzFileOwned = true;
+    if (gzdirect(stream._gzFile))
+    {
+        // not a zip file
+        close(stream);
+        return false;
+    }
     return true;
 }
 

@@ -17,20 +17,18 @@ using namespace seqan;
 int openGz(char const * filename)
 {
 #if SEQAN_HAS_ZLIB
-    gzFile f = gzopen(filename, "rb");
-    if (gzdirect(f))
+    Stream<GZFile> f;
+    if (!open(f, filename, "rb"))
     {
         std::cerr << "ERROR: GZip file has the wrong format!" << std::endl;
-        gzclose(f);
         return 1;
     }
-    Stream<GZFile> f2(f);
     
     // Totally inefficient char-wise writing of characters from .gz file to stderr.
-    while (!streamEof(f2))
+    while (!streamEof(f))
     {
         char c = '\0';
-        int res = streamReadChar(c, f2);
+        int res = streamReadChar(c, f);
         if (res != 0)
         {
             std::cerr << "ERROR: Reading byte from GZip file." << std::endl;
@@ -38,8 +36,6 @@ int openGz(char const * filename)
         }
         std::cout << c;
     }
-    
-    gzclose(f);
 #else  // #if SEQAN_HAS_ZLIB
     (void) filename;
     std::cerr << "ZLIB not available!" << std::endl;
@@ -51,29 +47,18 @@ int openGz(char const * filename)
 int openBz2(char const * filename)
 {
 #if SEQAN_HAS_BZIP2
-    FILE * f = fopen(filename, "rb");
-    if (!f)
+    Stream<BZ2File> f;
+    if (!open(f, filename, "rb"))
     {
-        std::cerr << "ERROR: Could not open input file!" << std::endl;
+        std::cerr << "ERROR: BZ2 file has the wrong format!" << std::endl;
         return 1;
     }
-    int err = BZ_OK;
-    BZFILE * f2 = BZ2_bzReadOpen(&err, f, 0, 0, NULL, 0);
-    if (err != BZ_OK)
-    {
-        std::cerr << "ERROR: Could not open bzip2 file!" << std::endl;
-        BZ2_bzReadClose(&err, f2);
-        if (err != BZ_OK)
-            std::cerr << "ERROR: Could not close bzip2 file!" << std::endl;
-        fclose(f);
-    }
-    Stream<BZ2File> f3(f2);
 
     // Totally inefficient char-wise writing of characters from .bz2 file to stderr.
-    while (!streamEof(f3))
+    while (!streamEof(f))
     {
         char c = '\0';
-        int res = streamReadChar(c, f3);
+        int res = streamReadChar(c, f);
         if (res != 0)
         {
             std::cout << "ERROR: Reading byte from BZ2 file." << std::endl;
@@ -81,14 +66,6 @@ int openBz2(char const * filename)
         }
         std::cerr << c;
     }
-    
-    BZ2_bzReadClose(&err, f2);
-    if (err != BZ_OK)
-    {
-        std::cerr << "ERROR: Could not close bzip2 file!" << std::endl;
-        fclose(f);
-    }
-    fclose(f);
 #else  // #if SEQAN_HAS_BZIP2
     (void) filename;
     std::cerr << "BZLIB not available!" << std::endl;
