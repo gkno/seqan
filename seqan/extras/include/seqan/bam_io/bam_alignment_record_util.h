@@ -54,7 +54,7 @@ namespace seqan {
 // ============================================================================
 
 /**
-.Function.
+.Function.bamRecordToAlignment
 ..signature:bamRecordToAlignment(align, reference, record)
 ..param.align:The alignment to create.
 ...type:Class.Align
