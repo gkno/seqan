@@ -447,56 +447,56 @@ extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
         char x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 1);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else if (typeC == 'c')
     {
         __int8 x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 1);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else if (typeC == 'C')
     {
         __uint8 x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 1);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else if (typeC == 's')
     {
         __int16 x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 2);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else if (typeC == 'S')
     {
         __uint16 x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 2);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else if (typeC == 'i')
     {
         __int32 x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 4);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else if (typeC == 'I')
     {
         __uint32 x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 4);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else if (typeC == 'f')
     {
         float x = 0;
         char * ptr = reinterpret_cast<char *>(&x);
         memcpy(ptr, &host(tags)[tags._positions[idx] + 3], 4);
-        dest = x;
+        dest = static_cast<TDest>(x);
     }
     else // variable sized type or invald
     {
