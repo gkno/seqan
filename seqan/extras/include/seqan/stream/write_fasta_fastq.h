@@ -424,7 +424,7 @@ int write2(TStream & stream,
     typename Iterator<TIdSet>::Type  itMeta     = begin(sequenceIds);
     typename Iterator<TIdSet>::Type  itMeta_end = end(sequenceIds);
     typename Iterator<TSeqSet>::Type itSeq      = begin(sequences);
-    typename Iterator<TSeqSet>::Type itSeq_end  = end(sequences);
+//    typename Iterator<TSeqSet>::Type itSeq_end  = end(sequences);
 
     for (; itMeta != itMeta_end; ++itMeta, ++itSeq)
     {
@@ -474,7 +474,7 @@ int write2(TStream & stream,
     typename Iterator<TIdSet>::Type   itMeta      = begin(sequenceIds);
     typename Iterator<TIdSet>::Type   itMeta_end  = end(sequenceIds);
     typename Iterator<TSeqSet>::Type  itSeq       = begin(sequences);
-    typename Iterator<TSeqSet>::Type  itSeq_end   = end(sequences);
+//    typename Iterator<TSeqSet>::Type  itSeq_end   = end(sequences);
     typename Iterator<TQualSet>::Type itQual      = begin(qualities);
     typename Iterator<TQualSet>::Type itQual_end  = end(qualities);
 
@@ -521,7 +521,7 @@ int write2(TStream & stream,
     typename Iterator<TIdSet>::Type   itMeta      = begin(sequenceIds);
     typename Iterator<TIdSet>::Type   itMeta_end  = end(sequenceIds);
     typename Iterator<TSeqSet>::Type  itSeq       = begin(sequences);
-    typename Iterator<TSeqSet>::Type  itSeq_end   = end(sequences);
+//    typename Iterator<TSeqSet>::Type  itSeq_end   = end(sequences);
 
     for (; itMeta != itMeta_end; ++itMeta, ++itSeq)
     {

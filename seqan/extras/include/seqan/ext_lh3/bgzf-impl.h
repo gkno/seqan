@@ -639,6 +639,8 @@ inline int bgzf_close(BGZF* fp)
         if (bgzf_flush(fp) != 0) return -1;
 		{ // add an empty block
 			int count, block_length = deflate_block(fp, 0);
+            (void)count;
+            (void)block_length;
 #ifdef _USE_KNETFILE
 			count = fwrite(fp->compressed_block, 1, block_length, fp->x.fpw);
 #else
