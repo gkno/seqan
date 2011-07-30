@@ -76,8 +76,11 @@
 // BAM Index Related.
 // ===========================================================================
 
+// BAM indices are only available when ZLIB is available.
+#if SEQAN_HAS_ZLIB
 #include <seqan/bam_io/bam_index_base.h>
 #include <seqan/bam_io/bam_index_bai.h>
+#endif  // #if SEQAN_HAS_ZLIB
 
 // ===========================================================================
 // Utility Routines.
