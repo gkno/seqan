@@ -606,7 +606,7 @@ SEQAN_DEFINE_TEST(test_stream_adapt_ostringstream_tell)
     ostringstream.write("0123456789", 10);
     ostringstream.seekp(0);
 
-    char c;
+    char c = 'x';
     size_t pos = streamTell(ostringstream);
     SEQAN_ASSERT_EQ(pos, 0u);
     int res = streamWriteChar(ostringstream, c);
