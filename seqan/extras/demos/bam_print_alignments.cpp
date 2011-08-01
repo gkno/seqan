@@ -45,6 +45,8 @@
 #include <seqan/align.h>
 #include <seqan/bam_io.h>
 
+#if SEQAN_HAS_ZLIB
+
 int main(int argc, char const ** argv)
 {
     using namespace seqan;
@@ -115,3 +117,14 @@ int main(int argc, char const ** argv)
 
     return 0;
 }
+
+#else  // #if SEQAN_HAS_ZLIB
+
+int main()
+{
+    std::cerr << "zlib is required for bam_print_alignment demo." << std::endl;
+    
+    return 1;
+}
+
+#endif  // #if SEQAN_HAS_ZLIB
