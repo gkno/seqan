@@ -289,6 +289,7 @@ void compactPairMatches(
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
 	int scoreDistCutOff = MinValue<int>::VALUE;
+    int scoreRangeBest = (options.distanceRange == 0u)? MinValue<int>::VALUE: -(int)options.distanceRange;
 
 	TIterator it = begin(store.alignedReadStore, Standard());
 	TIterator itEnd = end(store.alignedReadStore, Standard());
@@ -302,6 +303,7 @@ void compactPairMatches(
 	{
 		SEQAN_ASSERT_NEQ((*it).id, TAlignedRead::INVALID_ID);
 		SEQAN_ASSERT_NEQ((*it).readId, TAlignedRead::INVALID_ID);
+        SEQAN_ASSERT_EQ(it->pairMatchId, (it + 1)->pairMatchId);
 		
 		// ignore pair alignments if one of the mates is marked as deleted (<=> contigId is invalid)
 		if (it->contigId == TAlignedRead::INVALID_ID || (it + 1)->contigId == TAlignedRead::INVALID_ID)
@@ -321,7 +323,7 @@ void compactPairMatches(
 				{
 					// we have enough, now look for better matches
 					int maxErrors = -1 - q.pairScore;
-					if (options.purgeAmbiguous)
+					if (options.purgeAmbiguous && q.pairScore > scoreRangeBest)
 						maxErrors = -1;
 
 					setMaxErrors(swiftL, matePairId, maxErrors);
@@ -332,16 +334,17 @@ void compactPairMatches(
 
 					if (options.purgeAmbiguous)
 					{
-						if (options.distanceRange == 0 || -q.pairScore < (int)options.distanceRange  || IsSameType<TSwiftL, Nothing>::VALUE)
+						if (q.pairScore > scoreRangeBest || IsSameType<TSwiftL, Nothing>::VALUE)
 							dit = ditBeg;
 						else {
-							*dit = *it;
-							++dit;
+							*dit = *it;	++dit; ++it;
+							*dit = *it; ++dit;
+							continue;
 						}
-
 					}
 				}
 #endif
+				++it;
 				continue;
 			}
 		}
