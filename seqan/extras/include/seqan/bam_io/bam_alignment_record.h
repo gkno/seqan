@@ -174,9 +174,9 @@ enum BamFlags
 class BamAlignmentRecord
 {
 public:
-    static __int32 const INVALID_POS = MaxValue<__int32>::VALUE;
+    static __int32 const INVALID_POS = 2147483647;
     static __int32 const INVALID_REFID = -1;  // TODO(holtgrew): Rename to ...REF_ID.
-    static __int32 const INVALID_LEN = MaxValue<__int32>::VALUE;
+    static __int32 const INVALID_LEN = 2147483647;
     
     CharString qName;
     __uint16 flag;
