@@ -43,6 +43,14 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 {
 	FragmentStore<> store;
     char buffer[1023];
+
+	// 1. LOAD CONTIGS
+    strcpy(buffer, SEQAN_PATH_TO_ROOT());
+    strcat(buffer, "/core/tests/store/ex1.fa");
+    
+	loadContigs(store, buffer);
+
+	// 2. LOAD SAM ALIGNMENTS
     strcpy(buffer, SEQAN_PATH_TO_ROOT());
     strcat(buffer, "/core/tests/store/ex1.sam.copy");
 	MultiSeqFile sam1;
@@ -56,11 +64,7 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 		read(samFile, store, Sam());
 	}
 	
-    strcpy(buffer, SEQAN_PATH_TO_ROOT());
-    strcat(buffer, "/core/tests/store/ex1.fa");
-    
-	loadContigs(store, buffer);
-
+	// 3. WRITE SAM ALIGNMENTS
     strcpy(buffer, SEQAN_TEMP_FILENAME());
 	{
 		// write Sam to temp file
@@ -69,6 +73,7 @@ SEQAN_DEFINE_TEST(test_store_io_sam)
 		write(samFileOut, store, Sam());
 	}
 	
+	// 4. COMPARE BOTH SAM FILES
 	MultiSeqFile sam2;
 	open(sam2.concat, buffer);
 	split(sam2, Raw());
