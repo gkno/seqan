@@ -476,7 +476,7 @@ int write2(TStream & stream,
     typename Iterator<TSeqSet>::Type  itSeq       = begin(sequences);
 //    typename Iterator<TSeqSet>::Type  itSeq_end   = end(sequences);
     typename Iterator<TQualSet>::Type itQual      = begin(qualities);
-    typename Iterator<TQualSet>::Type itQual_end  = end(qualities);
+    // typename Iterator<TQualSet>::Type itQual_end  = end(qualities);
 
     for (; itMeta != itMeta_end; ++itMeta, ++itSeq, ++itQual)
     {
