@@ -25,7 +25,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-//#include <sys/types.h>
 #include <errno.h>
 
 #include <seqan/sequence.h>
@@ -33,14 +32,6 @@
 #include "readSimulator.h"
 
 #include <seqan/misc/misc_parsing.h>
-
-
-
-
-
-
-
-
 
 namespace SEQAN_NAMESPACE_MAIN
 {

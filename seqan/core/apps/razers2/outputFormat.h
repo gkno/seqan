@@ -154,8 +154,8 @@ score(Score<TValue, Quality<TQualityString> > const & me,
 			if (a.readId > b.readId) return false;
 
 			// qualities
-			if (a.id == TAlignedRead::INVALID_ID) return false;
-			if (b.id == TAlignedRead::INVALID_ID) return true;
+			SEQAN_ASSERT_NEQ(a.id, TAlignedRead::INVALID_ID);
+			SEQAN_ASSERT_NEQ(b.id, TAlignedRead::INVALID_ID);
 			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
 			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
 			if (qa.pairScore > qb.pairScore) return true;
@@ -186,7 +186,7 @@ getErrorDistribution(
 	
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).id == TAlignedRead::INVALID_ID) continue;
+		if ((*it).contigId == TAlignedRead::INVALID_ID) continue;
 
 		Dna5String const &read = store.readSeqStore[(*it).readId];
 		left = (*it).beginPos;
@@ -239,7 +239,7 @@ getErrorDistribution(
 	unsigned unique = 0;
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).id == TAlignedRead::INVALID_ID) continue;
+		if ((*it).contigId == TAlignedRead::INVALID_ID) continue;
 
 		assignSource(row(align, 0), store.readSeqStore[(*it).readId]);
 		TContigPos left = (*it).beginPos;
@@ -429,115 +429,18 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations)
 	
 }
 
-
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-//////////////////////////////////////////////////////////////////////////////
-// Assign mapping quality and remove suboptimal matches
-template < typename TMatches, typename TReads, typename TCooc, typename TCounts, typename TSpec >
-void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCounts &cnts, RazerSOptions<TSpec> & options)
-{
-	typedef typename Value<TMatches>::Type				TMatch;
-	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
-
-	//matches are already sorted	
-	//std::sort(
-	//	begin(matches, Standard()),
-	//	end(matches, Standard()), 
-	//	LessRNoMQ<TMatch>());
-	
-	
-	int maxSeedErrors = (int)(options.errorRate*options.artSeedLength)+1;
-	unsigned readNo = -1;
-	
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
-	TIterator dit = it;
-
-	int bestQualSum, secondBestQualSum;
-	int secondBestDist = -1 ,secondBestMatches = -1;
-	for (; it != itEnd; ++it) 
-	{
-		if ((*it).orientation == '-') continue;
-		bool mappingQualityFound = false;
-		int mappingQuality = 0;
-		int qualTerm1,qualTerm2;
-
-		readNo = (*it).readId;
-		bestQualSum = (*it).mScore;
-		
-		if(++it!=itEnd && (*it).readId==readNo)
-		{
-			secondBestQualSum = (*it).mScore;
-			secondBestDist = (*it).editDist;
-			secondBestDist = (*it).editDist;
-			secondBestMatches = cnts[1][readNo] >> 5;
-//CHECKcnts		secondBestMatches = cnts[secondBestDist][readNo];
-//			secondBestMatches = cnts[secondBestDist][readNo];
-			(*it).orientation = '-';
-		//	if(secondBestDist<=bestDist) unique=0;
-		}
-		else secondBestQualSum = -1000;
-		--it; //it is now at best match of current readId
-
-		int bestDist = (*it).editDist;
-		int kPrime = (*it).seedEditDist;
-		if((bestQualSum==secondBestQualSum) || (kPrime>maxSeedErrors))
-			mappingQualityFound = true;   //mq=0
-		else{
-			if(secondBestQualSum == -1000) qualTerm1 = 99;
-			else
-			{
-				qualTerm1 = (int)(secondBestQualSum - bestQualSum - 4.343 * log((double)secondBestMatches));
-				//if (secondBestKPrime - kPrime <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual; //TODO abchecken was mehr sinn macht
-				if (secondBestDist - bestDist <= 1 && qualTerm1 > options.mutationRateQual) qualTerm1 = options.mutationRateQual;
-			}
-			float avgSeedQual = 0.0;
-			if(!mappingQualityFound)
-			{
-				//TODO!!! generalize and adapt to razers lossrates
-				// lossrate 0.42 => -10 log10(0.42) = 4
-				int kPrimeLoss = 4; // options.kPrimeLoss; // bezieht sich auf 3 fehler in 28bp
-				qualTerm2 = kPrimeLoss + cooc[maxSeedErrors-kPrime];
-				
-				for(unsigned j = 0; j<options.artSeedLength; ++j)
-				{
-					int q = getQualityValue(store.readSeqStore[readNo][j]);//(int)((unsigned char)(store.readSeqStore[readNo][j])>>3);
-					if(q>options.mutationRateQual) q = options.mutationRateQual;
-					avgSeedQual+=q;
-				}
-				avgSeedQual/=options.artSeedLength;
-				//-10 log10(28-2) = 14;
-				//generalize to -10 log10(artSeedLength - maxSeedErrors +1 ) // 14 fits for seedlength 28 to 32 with 2 errors
-				if(avgSeedQual>14) qualTerm2 += (int)((maxSeedErrors-kPrime)*(avgSeedQual-14));
-			}
-		}
-		if (!mappingQualityFound) mappingQuality = (qualTerm1<qualTerm2) ? qualTerm1:qualTerm2;
-		if (mappingQuality < 0) mappingQuality = 0;
-		(*it).mScore = mappingQuality;
-		
-		*dit = *it;
-	//	if(secondBestQualSum != -1000) ++it;
-		++dit;
-	}
-	resize(matches, dit - begin(matches, Standard()));
-}
-#endif
-
-
 //////////////////////////////////////////////////////////////////////////////
 // Output matches
 template <
 	typename TFSSpec,
 	typename TFSConfig,
 	typename TGNoToFile,
-	typename TCounts,
 	typename TSpec
 >
 void dumpMatches(
 	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
 	StringSet<CharString> &genomeFileNameList,		// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
 	String<TGNoToFile> &gnoToFileMap,				// map to retrieve genome filename and sequence number within that file
-	TCounts & stats,								// Match statistics (possibly empty)
 	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
 	CharString errorPrbFileName,
 	RazerSOptions<TSpec> &options)
@@ -565,10 +468,6 @@ void dumpMatches(
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
 		options.dumpAlignment = options.hammingOnly;
 	}
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if (options.maqMapping) options.outputFormat = 3;
-	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength); //without + 1 here, used to check whether match should be supported if noBelowIdentity option is switched on
-#endif
 	if (options.outputFormat == 3)
 	{
 		options.sortOrder = 1;		//  sort according to gPos
@@ -631,16 +530,20 @@ void dumpMatches(
 		std::cerr << "Failed to open output file" << std::endl;
 		return;
 	}
-
 	
+
 #ifndef RAZERS_DONTMASKDUPLICATES
-	maskDuplicates(store);
-#endif
-	if (options.outputFormat > 0
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	 && !options.maqMapping
-#endif
-	)
+#ifdef RAZERS_MATEPAIRS
+	if (options.libraryLength >= 0)
+		maskDuplicates(store);
+	else
+#endif //RAZERS_MATEPAIRS
+		maskDuplicates(store);
+#endif//RAZERS_DONTMASKDUPLICATES
+
+
+	String< String<unsigned short> > stats;
+	if (options.outputFormat >= 1 && options.outputFormat <= 3)
 	{
 		// match statistics
 		unsigned maxErrors = (int)(options.errorRate * maxReadLength);
@@ -650,28 +553,20 @@ void dumpMatches(
 			resize(stats[i], length(store.readStore), 0);
 		countMatches(store, stats);
 	}
-
-	Nothing nothing;
-	unsigned curreadId = 0;
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if(options.maqMapping)
-	{
-		String<int> cooc;
-		compactMatches(matches, stats, options, true, nothing, false); //only best two matches per read are kept
-		countCoocurrences(matches,cooc,options);	//coocurrence statistics are filled
-		assignMappingQuality(matches,reads,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
-	}
-	else	 
-#endif
 	
-#ifdef RAZERS_MICRO_RNA
-	if(options.microRNA)purgeAmbiguousRnaMatches(store,options);
-	else
-#endif
-	compactMatches(store, stats, options, true, nothing);
-
+	
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
-	calculateInsertSizes(libSize, store);
+	Nothing nothing;
+#ifdef RAZERS_MATEPAIRS
+	if (options.libraryLength >= 0)
+	{
+		compactPairMatches(store, options, nothing, nothing);
+		if (options.outputFormat == 0)
+			calculateInsertSizes(libSize, store);
+	} else
+#endif
+		compactMatches(store, options, nothing);
+
 
 	switch (options.sortOrder) {
 		case 0: 
@@ -693,6 +588,7 @@ void dumpMatches(
 	
 	Dna5String gInf;
 	char _sep_ = '\t';
+	unsigned curReadId = 0;
 
 	switch (options.outputFormat) 
 	{
@@ -703,9 +599,6 @@ void dumpMatches(
 				TQuality	qual = getValue(store.alignQualityStore, (*it).id);
 				unsigned	readLen = length(store.readSeqStore[(*it).readId]);
 				double		percId = 100.0 * (1.0 - (double)qual.errors / (double)readLen);
-#ifdef RAZERS_MICRO_RNA
-				percId = 100.0 * (1.0 - (double)qual.errors / (double) ((*it).mScore));
-#endif
 
 				switch (options.readNaming)
 				{
@@ -745,9 +638,6 @@ void dumpMatches(
 					file << _sep_ << ((*it).beginPos + options.positionFormat) << _sep_ << (*it).endPos << _sep_ << std::setprecision(5) << percId;
 				else
 					file << _sep_ << ((*it).endPos + options.positionFormat) << _sep_ << (*it).beginPos << _sep_ << std::setprecision(5) << percId;
-#ifdef RAZERS_MICRO_RNA
-				if(options.microRNA) file << _sep_ << (*it).mScore;
-#endif
 
 				if ((*it).pairMatchId != TAlignedRead::INVALID_ID)
 				{
@@ -760,11 +650,6 @@ void dumpMatches(
 
 				if (options.dumpAlignment) 
 				{
-#ifdef RAZERS_MICRO_RNA
-					if(options.microRNA)
-						assignSource(row(align, 0), prefix(store.readSeqStore[(*it).readId],(*it).mScore));
-					else
-#endif
 					assignSource(row(align, 0), store.readSeqStore[(*it).readId]);
 					
 					TContigPos left = (*it).beginPos;
@@ -855,7 +740,6 @@ void dumpMatches(
 			for(unsigned readNo = 0; readNo < length(store.readSeqStore); ++readNo)
 			{
 				TQuality	qual = getValue(store.alignQualityStore, (*it).id);
-
 				switch (options.readNaming)
 				{
 					// 0..filename is the read's Fasta id
@@ -883,6 +767,7 @@ void dumpMatches(
 					}
 				} else
 				{
+					SEQAN_ASSERT_EQ(readNo, (*it).readId);
 					file << store.readSeqStore[readNo] << _sep_;
 					unsigned bestMatches = 1;
 					if ((unsigned)qual.errors < length(stats))
@@ -955,39 +840,22 @@ void dumpMatches(
 				Dna5String	currGenome;
 				
 				// iterate over genome sequences
-				for(; !_streamEOF(gFile); ++curreadId)
+				for(; !_streamEOF(gFile); ++curReadId)
 				{
 					read(gFile, currGenome, Fasta());			// read Fasta sequence
-					while(it != itEnd && (*it).contigId == curreadId)
+					while(it != itEnd && (*it).contigId == curReadId)
 					{
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-						if(options.maqMapping && options.noBelowIdentity && (*it).seedEditDist > maxSeedErrors)
-						{
-							++it;
-							continue;
-						}
-#endif
-
 						unsigned currReadNo = (*it).readId;
 						int unique = 1;
 						unsigned bestMatches = 0;
 						//would seedEditDist make more sense here?
-//CHECKcnts					if ((unsigned)qual.errors < length(stats))
+//CHECKcnts					if ((unsigned)qual.errors < length(r))
 //							bestMatches = stats[qual.errors][currReadNo];
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-						if(options.maqMapping)
-							bestMatches = stats[0][currReadNo] >> 5;
-						else
-#endif
 							if (bestMatches == 0 && (unsigned)qual.errors < length(stats))
 								bestMatches = stats[qual.errors][currReadNo];
 
 						bool suboptimal = false;
-						if (
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-							!options.maqMapping && 
-#endif
-							(unsigned)qual.errors > 0)
+						if ((unsigned)qual.errors > 0)
 						{
 							for(unsigned d = 0; d < (unsigned)qual.errors; ++d)
 								if (stats[d][currReadNo]>0) suboptimal=true;
@@ -1034,12 +902,7 @@ void dumpMatches(
 		//				else
 		//					file << '\t' << (*it).endPos << '\t'<<((*it).beginPos + options.positionFormat)<< '\t';
 						double percId = 100.0 * (1.0 - (double)qual.errors / (double)readLen);
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-						if(options.maqMapping)
-							file << (*it).mScore << "\t";
-						else
-#endif
-							file << percId << "\t";
+						file << percId << "\t";
 					//	std::cout << "hier4\n";
 
 						if ((*it).beginPos < (*it).endPos)
@@ -1133,24 +996,6 @@ void dumpMatches(
 								
 							}
 						}
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-						if(options.maqMapping || options.fastaIdQual)
-						{
-		//					file << ";read=";
-		//					for(unsigned j=0;j<length(store.readSeqStore[currReadNo]);++j)
-		//					{
-		//						file << (Dna5)store.readSeqStore[currReadNo][j];
-		//					}
-							file << ";quality=";
-							for(unsigned j=0;j<readLen;++j)
-							{
-								//TODO need to output the original quality here!
-								//file << (char) ((int)((unsigned char)store.readSeqStore[currReadNo][j] >> 3) + 33);
-								file << (char)(getQualityValue(store.readSeqStore[currReadNo][j])+ 33);
-							}
-						}
-#endif
-						//std::cout << "hier6\n";
 						file << std::endl;
 						++it;
 					}
@@ -1159,11 +1004,27 @@ void dumpMatches(
 				++filecount;
 			}
 			break;
+
 		case 4: // Sam
-        if (options.dontShrinkAlignments)
-			convertMatchesToGlobalAlignment(store, scoreType, False());
-        else
-			convertMatchesToGlobalAlignment(store, scoreType, True());
+            if (options.dontShrinkAlignments)
+                convertMatchesToGlobalAlignment(store, scoreType, False());
+            else
+                convertMatchesToGlobalAlignment(store, scoreType, True());
+
+            switch (options.sortOrder) {
+                case 0: 
+                    sortAlignedReads(
+                        store.alignedReadStore, 
+                        LessRNoGPos<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
+                    break;
+
+                case 1:
+                    sortAlignedReads(
+                        store.alignedReadStore, 
+                        LessGPosRNo<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
+                    break;
+                    
+            }
 //            {
 //                std::cerr << "AFTER CONVERSION" << std::endl << std::endl;
 //                AlignedReadLayout layout;
@@ -1178,6 +1039,7 @@ void dumpMatches(
 //            }
 			write(file, store, Sam());
 			break;
+
 		case 5: // AFG
 			convertMatchesToGlobalAlignment(store, scoreType, True());
 			write(file, store, Amos());

@@ -148,19 +148,19 @@ bool loadReads(
 	{
 		if (options.readNaming == 0 || options.readNaming == 3)
 		{
-			assignSeqId(id[0], leftMates[i], formatL);                  // read left Fasta id
-			assignSeqId(id[1], rightMates[i], formatR);                 // read right Fasta id
-			if (options.readNaming == 0 && options.outputFormat != 4)   // don't append /L/R in SAM mode
+			assignSeqId(id[0], leftMates[i], formatL);              // read left Fasta id
+			assignSeqId(id[1], rightMates[i], formatR);             // read right Fasta id
+			if (options.readNaming == 0)
 			{
 				append(id[0], "/L");
 				append(id[1], "/R");
 			}
 		}
 		
-		assignSeq(seq[0], leftMates[i], formatL);                       // read left Read sequence
-		assignSeq(seq[1], rightMates[i], formatR);                      // read right Read sequence
-		assignQual(qual[0], leftMates[i], formatL);                     // read left ascii quality values  
-		assignQual(qual[1], rightMates[i], formatR);                    // read right ascii quality values  
+		assignSeq(seq[0], leftMates[i], formatL);                   // read left Read sequence
+		assignSeq(seq[1], rightMates[i], formatR);                  // read right Read sequence
+		assignQual(qual[0], leftMates[i], formatL);                 // read left ascii quality values  
+		assignQual(qual[1], rightMates[i], formatR);                // read right ascii quality values  
 		
 		if (countN)
 		{
@@ -248,16 +248,14 @@ bool loadReads(
 			typedef typename Id<TRead>::Type					TId;
 
 			// pair number
-			if (b.readId == TAlignedRead::INVALID_ID) return false;
-			if (a.readId == TAlignedRead::INVALID_ID) return true;
 			TRead const &ra = store.readStore[a.readId];
 			TRead const &rb = store.readStore[b.readId];
 			if (ra.matePairId < rb.matePairId) return true;
 			if (ra.matePairId > rb.matePairId) return false;
 
 			// quality
-			if (a.id == TAlignedRead::INVALID_ID) return false;
-			if (b.id == TAlignedRead::INVALID_ID) return true;
+			SEQAN_ASSERT_NEQ(a.id, TAlignedRead::INVALID_ID);
+			SEQAN_ASSERT_NEQ(b.id, TAlignedRead::INVALID_ID);
 			TQual const &qa = store.alignQualityStore[a.id];
 			TQual const &qb = store.alignQualityStore[b.id];
 			if (qa.pairScore > qb.pairScore) return true;
@@ -270,11 +268,10 @@ bool loadReads(
 
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
-template < typename TFragmentStore, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
+template < typename TFragmentStore, typename TSpec, typename TSwiftL, typename TSwiftR >
 void compactPairMatches(
 	TFragmentStore			& store,
-	TCounts					&, 
-	RazerSOptions<TSpec>	& options, 
+	RazerSOptions<TSpec>	& options,
 	TSwiftL					& swiftL, 
 	TSwiftR					& swiftR)
 {
@@ -285,6 +282,8 @@ void compactPairMatches(
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
 	typedef typename Value<TAlignQualityStore>::Type				TQual;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
+
+	SEQAN_ASSERT_EQ(length(store.alignedReadStore) % 2, 0u);
 	
 	unsigned matePairId = -2;
 	unsigned hitCount = 0;
@@ -301,7 +300,15 @@ void compactPairMatches(
 
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).id == TAlignedRead::INVALID_ID || (*it).readId == TAlignedRead::INVALID_ID) continue;
+		SEQAN_ASSERT_NEQ((*it).id, TAlignedRead::INVALID_ID);
+		SEQAN_ASSERT_NEQ((*it).readId, TAlignedRead::INVALID_ID);
+		
+		// ignore pair alignments if one of the mates is marked as deleted (<=> contigId is invalid)
+		if (it->contigId == TAlignedRead::INVALID_ID || (it + 1)->contigId == TAlignedRead::INVALID_ID)
+		{
+			++it;
+			continue;
+		}
 		TRead &r = store.readStore[(*it).readId];
 		TQual &q = store.alignQualityStore[(*it).id];
 		if (matePairId == r.matePairId)
@@ -324,7 +331,15 @@ void compactPairMatches(
 						::std::cerr << "(pair #" << matePairId << " disabled)";
 
 					if (options.purgeAmbiguous)
-						dit = ditBeg;
+					{
+						if (options.distanceRange == 0 || -q.pairScore < (int)options.distanceRange  || IsSameType<TSwiftL, Nothing>::VALUE)
+							dit = ditBeg;
+						else {
+							*dit = *it;
+							++dit;
+						}
+
+					}
 				}
 #endif
 				continue;
@@ -357,7 +372,6 @@ template <
 	typename TReadIndex, 
 	typename TSwiftSpec, 
 	typename TPreprocessing,
-	typename TCounts,
 	typename TRazerSOptions >
 void mapMatePairReads(
 	FragmentStore<TFSSpec, TFSConfig>		& store,
@@ -367,7 +381,6 @@ void mapMatePairReads(
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternR,
 	TPreprocessing							& preprocessingL,
 	TPreprocessing							& preprocessingR,
-	TCounts									& cnts,
 	char									  orientation,			// q-gram index of reads
 	TRazerSOptions							& options)
 {
@@ -401,8 +414,7 @@ void mapMatePairReads(
 		TFragmentStore, 
 		TRazerSOptions, 
 		TPreprocessing, 
-		TSwiftPattern,
-		TCounts >											TVerifier;
+		TSwiftPattern >										TVerifier;
 
 	const unsigned NOT_VERIFIED = 1u << (8*sizeof(unsigned)-1);
 
@@ -418,8 +430,8 @@ void mapMatePairReads(
 
 	TReadSet	&readSetL = host(host(swiftPatternL));
 	TReadSet	&readSetR = host(host(swiftPatternR));
-	TVerifier	verifierL(store, options, preprocessingL, swiftPatternL, cnts);
-	TVerifier	verifierR(store, options, preprocessingR, swiftPatternR, cnts);
+	TVerifier	verifierL(store, options, preprocessingL, swiftPatternL);
+	TVerifier	verifierR(store, options, preprocessingR, swiftPatternR);
 
 	verifierL.oneMatchPerBucket = true;
 	verifierR.oneMatchPerBucket = true;
@@ -458,8 +470,6 @@ void mapMatePairReads(
 	TAlignQuality qR;
 	TDequeueValue fL(-1, mR, qR);	// to supress uninitialized warnings
 	
-//	unsigned const preFetchMatches = 2048;
-
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{
@@ -473,14 +483,7 @@ void mapMatePairReads(
 			popFront(fifo);
 			++firstNo;
 		}
-/*		
-		if (empty(fifo) || back(fifo).endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
-			for (unsigned i = 0; i < preFetchMatches; ++i)
-				if (find(swiftFinderL, swiftPatternL, options.errorRate, false))
-					pushBack(fifo, mL);
-				else
-					break;
-*/
+
 		// add within-window left mates to fifo
 		while (empty(fifo) || (TSignedGPos)back(fifo).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
@@ -515,16 +518,11 @@ void mapMatePairReads(
 			it = &value(fifo, i - firstNo);
 
 			// search left mate
-//			if (((*it).i2.readId & ~NOT_VERIFIED) == leftReadId)
 			{
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.readId & NOT_VERIFIED)
 				{
 
-//					if (matchVerify(
-//							(*it).i2, (*it).i3, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-//							matePairId, readSetL, forwardPatternsL, 
-//							options, TSwiftSpec()))
 					if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
 							matePairId, readSetL, TSwiftSpec()))
 					{
@@ -541,14 +539,7 @@ void mapMatePairReads(
 					} else
 						(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
 				}
-/*
-				if ((*it).i2.readId == leftReadId)
-				{
-					bestLeft = it;
-					bestLeftScore = (*it).i3.score;
-					break;
-				}
-*/
+
 				if ((*it).i2.readId == leftReadId)
 				{
 					int score = (*it).i3.score;
@@ -574,8 +565,6 @@ void mapMatePairReads(
 					}
 				}
 			}
-//			else
-//				std::cout << "HUH?" << std::endl;
 		}
 
 		// short-cut negative matches
@@ -587,10 +576,6 @@ void mapMatePairReads(
 		// verify right mate, if left mate matches
 		if (bestLeftScore != MinValue<int>::VALUE)
 		{
-//			if (matchVerify(
-//					mR, qR, infix(swiftFinderR, genomeInf),
-//					matePairId, readSetR, forwardPatternsR,
-//					options, TSwiftSpec()))
 			if (matchVerify(verifierR, infix(swiftFinderR, genomeInf), 
 					matePairId, readSetR, TSwiftSpec()))
 			{
@@ -635,16 +620,6 @@ void mapMatePairReads(
 					fL.i3.pairScore = qR.pairScore = fL.i3.score + qR.score;
 
 					// both mates match with correct library size
-/*								std::cout << "found " << matePairId << " on " << orientation << contigId;
-					std::cout << " dist:" << dist;
-					if (orientation=='F')
-						std::cout << " \t_" << fL.i2.beginPos+1 << "_" << mR.endPos;
-					else
-						std::cout << " \t_" << mR.beginPos+1 << "_" << mL.endPos;
-//							std::cout << " L_" << (*bestLeft).beginPos << "_" << (*bestLeft).endPos << "_" << (*bestLeft).editDist;
-//							std::cout << " R_" << mR.beginPos << "_" << mR.endPos << "_" << mR.editDist;
-					std::cout << std::endl;
-*/
 					if (!options.spec.DONT_DUMP_RESULTS)
 					{
 						fL.i2.id = length(store.alignedReadStore);
@@ -657,8 +632,8 @@ void mapMatePairReads(
 						if (length(store.alignedReadStore) > options.compactThresh)
 						{
 							typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
-//									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
-							compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
+							maskDuplicates(store);	// overlapping parallelograms cause duplicates
+							compactPairMatches(store, options, swiftPatternL, swiftPatternR);
 							
 							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
 								options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
@@ -683,7 +658,6 @@ template <
 	typename TFSSpec, 
 	typename TFSConfig, 
 	typename TGNoToFile, 
-	typename TCounts,
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
@@ -691,7 +665,6 @@ int mapMatePairReads(
 	FragmentStore<TFSSpec, TFSConfig>	& store,
 	StringSet<CharString>				& genomeFileNameList,
 	String<TGNoToFile>					& gnoToFileMap,
-	TCounts								& cnts,
 	RazerSOptions<TSpec>				& options,
 	TShape const						& shape,
 	Swift<TSwiftSpec> const)
@@ -810,12 +783,12 @@ int mapMatePairReads(
 			appendValue(gnoToFileMap, TGNoToFile(genomeName, gseqNoWithinFile));
 			
 			if (options.forward)
-				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
+				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, 'F', options);
 
 			if (options.reverse)
 			{
 				reverseComplement(genome);
-				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
+				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, 'R', options);
 			}
 			++gseqNoWithinFile;
 
@@ -825,7 +798,6 @@ int mapMatePairReads(
 		++filecount;
 	}
 
-	compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
 	reverseComplement(readSetR);
 
 	if (options._debugLevel >= 1)

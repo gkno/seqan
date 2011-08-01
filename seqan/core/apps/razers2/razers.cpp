@@ -27,9 +27,7 @@
 #define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
-//#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
 #define RAZERS_MATEPAIRS				// enable paired-end matching
-//#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 //#define RAZERS_DONTMASKDUPLICATES
 #define RAZERS_NOOUTERREADGAPS			// enforce the alignment of the first and last base (determines the lakes)
@@ -48,10 +46,6 @@
 #include "paramChooser.h"
 #include <seqan/file.h>
 #include <seqan/store.h>
-
-#ifdef RAZERS_PARALLEL
-#include "razers_parallel.h"
-#endif
 
 #ifdef RAZERS_MATEPAIRS
 #include "razers_matepairs.h"
@@ -125,7 +119,6 @@ int mapReads(
 	FragmentStore<>			store;			// stores all of the tables
 
 	MultiFasta				genomeSet;
-	String<String<unsigned short> > 	stats;		// needed for mapping quality calculation 
 
 	// dump configuration in verbose mode
 	if (options._debugLevel >= 1) 
@@ -205,13 +198,8 @@ int mapReads(
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
-#ifdef RAZERS_PARALLEL
-    typedef typename RazerSOptions<TSpec>::TMutex TMutex;
-    options.patternMutex = new TMutex[length(readSet)];
-#endif
-
 	String< Pair<CharString, unsigned> > gnoToFileMap; //map to retrieve genome filename and sequence number within that file
-	int error = mapReads(store, genomeFileNames, gnoToFileMap, stats, options);
+	int error = mapReads(store, genomeFileNames, gnoToFileMap, options);
 	if (error != 0)
 	{
 		switch (error)
@@ -227,14 +215,10 @@ int mapReads(
 		return error;
 	}
 
-#ifdef RAZERS_PARALLEL
-    delete[] options.patternMutex;
-#endif
-
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(store, genomeFileNames, gnoToFileMap, stats, readFileNames[0], errorPrbFileName, options);
+		dumpMatches(store, genomeFileNames, gnoToFileMap, readFileNames[0], errorPrbFileName, options);
 
 	return 0;
 }	
@@ -311,7 +295,7 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = use Fasta id");
 	addHelpLine(parser, "1 = enumerate beginning with 1");
 	addHelpLine(parser, "2 = use the read sequence (only for short reads!)");
-	addHelpLine(parser, "3 = use the Fasta id, do NOT append '/L' or '/R' for mate pairs");
+	addHelpLine(parser, "3 = use the Fasta id, do NOT append '/L' or '/R' for mate pairs (default for Sam format)");
 	addOption(parser, CommandLineOption("so", "sort-order",        "select how matches are sorted", OptionType::Int | OptionType::Label, options.sortOrder));
 	addHelpLine(parser, "0 = 1. read number, 2. genome position");
 	addHelpLine(parser, "1 = 1. genome position, 2. read number");
@@ -325,13 +309,6 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("oc", "overabundance-cut", "set k-mer overabundance cut ratio", OptionType::Int | OptionType::Label, options.abundanceCut));
 	addOption(parser, CommandLineOption("rl", "repeat-length",     "set simple-repeat length threshold", OptionType::Int | OptionType::Label, options.repeatLength));
 	addOption(parser, CommandLineOption("tl", "taboo-length",      "set taboo length", OptionType::Int | OptionType::Label, options.tabooLength));
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	addOption(parser, CommandLineOption("lm", "low-memory",        "decrease memory usage at the expense of runtime", OptionType::Boolean));
-	addSection(parser, "Mapping Quality Options:");
-	addOption(parser, CommandLineOption("mq", "mapping-quality",   "switch on mapping quality mode", OptionType::Boolean));
-	addOption(parser, CommandLineOption("nbi","no-below-id",       "do not report matches with seed identity < percent id", OptionType::Boolean));
-	addOption(parser, CommandLineOption("qsl","mq-seed-length",    "seed length used for mapping quality assignment", OptionType::Int | OptionType::Label, options.artSeedLength));
-#endif
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
@@ -369,15 +346,6 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "threshold", options.threshold);
 	getOptionValueLong(parser, "overabundance-cut", options.abundanceCut);
 	getOptionValueLong(parser, "repeat-length", options.repeatLength);
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
-	getOptionValueLong(parser, "mapping-quality", options.maqMapping);
-	getOptionValueLong(parser, "no-below-id", options.noBelowIdentity);
-	getOptionValueLong(parser, "mq-seed-length", options.artSeedLength);
-	getOptionValueLong(parser, "seed-mism-quality", options.maxMismatchQualSum);
-	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
-	getOptionValueLong(parser, "low-memory", options.lowMemory);
-#endif
 	getOptionValueLong(parser, "trim-reads", options.trimLength);
 	getOptionValueLong(parser, "taboo-length", options.tabooLength);
 	getOptionValueLong(parser, "match-N", options.matchN);
@@ -396,6 +364,9 @@ int main(int argc, const char *argv[])
 		options.forward = true;
 		options.reverse = true;
 	}
+    // don't append /L/R in SAM mode
+    if (!isSetLong(parser, "read-naming") && options.outputFormat == 4)
+        options.readNaming = 3;
 	appendValue(genomeFileNames, getArgumentValue(parser, 0));
 	for (unsigned i = 1; i < argumentCount(parser) && i < maxFiles; ++i)
 		appendValue(readFileNames, getArgumentValue(parser, i), Generous());
@@ -460,14 +431,6 @@ int main(int argc, const char *argv[])
 		cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl;
 	if ((options.repeatLength <= 1) && (stop = true))
 		cerr << "Repeat length must be a value greater than 1" << endl;
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if ((options.artSeedLength < 24) && (stop = true))
-		cerr << "Minimum seed length is 24" << endl;
-	if ((options.maxMismatchQualSum < 0) && (stop = true))
-		cerr << "Max seed mismatch quality needs to be 0 or a positive value" << endl;
-	if ((options.absMaxQualSumErrors < 0) && (stop = true))
-		cerr << "Max total mismatch quality needs to be 0 or a positive value" << endl;
-#endif
 	if ((options.trimLength != 0 && options.trimLength < 14) && (stop = true))
 		cerr << "Minimum read length is 14" << endl;
 	if ((options.tabooLength < 1) && (stop = true))
@@ -563,10 +526,6 @@ int main(int argc, const char *argv[])
 		}
 	}
 #endif	
-
-#ifdef RAZERS_PARALLEL
-	tbb::task_scheduler_init scheduler;
-#endif
 
 	int result = mapReads(genomeFileNames, readFileNames, errorPrbFileName, options);
 	if (result != 0)
