@@ -335,7 +335,7 @@ getTagKey(BamTagsDict const & tags, TPos idx)
 ...type:nolink:$unsigned$
 ..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
 ..param.name:Name of the key to find.
-...type:Shortcut.CharStrin
+...type:Shortcut.CharString
 ..returns:$bool$, indicating whether such a key could be found.
 ..include:seqan/bam_io.h
 */
