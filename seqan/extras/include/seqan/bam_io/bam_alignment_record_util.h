@@ -55,6 +55,7 @@ namespace seqan {
 
 /**
 .Function.bamRecordToAlignment
+..summary:Convert @Class.BamAlignmentRecord@ to an @Class.Align@ object.
 ..signature:bamRecordToAlignment(align, reference, record)
 ..param.align:The alignment to create.
 ...type:Class.Align

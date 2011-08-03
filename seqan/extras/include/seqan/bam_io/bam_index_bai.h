@@ -59,7 +59,6 @@ struct BaiBamIndexBinData_
 ..general:Class.BamIndex
 ..summary:Access to BAI (samtools-style) Indices.
 ..signature:BamIndex<Bai>
-..param.TSpec:Tag to specialize index.
 ..include:seqan/bam_io.h
 */
 

@@ -328,9 +328,7 @@ getTagKey(BamTagsDict const & tags, TPos idx)
 
 /**
 .Function.findTagKey
-..cat:BAM I/O
 ..signature:findTagKey(idx, tagsDict, name)
-..summary:Return key of a tag by index.
 ..param.idx:Index of the tag with the given key.
 ...type:nolink:$unsigned$
 ..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
