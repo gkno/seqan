@@ -87,6 +87,27 @@ typedef Tag<ReScore_> const ReScore;
 // Generating an alignment graph from segment matches
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.buildAlignmentGraph:
+..summary:Builds an @Spec.Alignment Graph@ from a set of input alignments.
+..cat:Graph
+..signature:
+buildAlignmentGraph(matches, [scores,] outGraph, tag)
+buildAlignmentGraph(matches, scores, outGraph, scoreType, ReScore)
+..param.matches:A string of alignments, e.g. @Class.Fragment@ or @Class.Align@.
+...type:Class.String
+..param.scores:A string of scores.
+...type:Class.String
+..param.outGraph:An alignment graph with a set string set.
+...type:Spec.Alignment Graph
+..param.scoreType:A score type.
+...type:Class.Score
+..param.tag:A tag indicating the scoring of matches.
+...type:Tag.Alignment Graph Combination
+..returns:void
+..include:seqan/graph_msa.h
+..remarks:Calls the function @Function.matchRefinement@ and adapts scores according to tag.
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 
