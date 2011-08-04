@@ -331,7 +331,6 @@ def createLibraryHeader(name, location, options):
     replacements = buildReplacements('library_header', name, location, target_file, options)
     res = configureFile(target_file, source_file, replacements, options.dry_run)
     if res: return res
-    print 'NOTE: Do not forget to add the header to the CMakeLists.txt file!'
     return 0
 
 def createRepository(location, options):
