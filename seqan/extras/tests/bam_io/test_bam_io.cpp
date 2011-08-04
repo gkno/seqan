@@ -41,12 +41,12 @@
 #include "test_bam_sam_conversion.h"
 #include "test_bam_tags_dict.h"
 #include "test_read_sam.h"
-#include "test_write_bam.h"
+#include "test_write_sam.h"
 #if SEQAN_HAS_ZLIB
 #include "test_read_bam.h"
-#include "test_write_sam.h"
-#endif  // #if SEQAN_HAS_ZLIB
+#include "test_write_bam.h"
 #include "test_bam_index.h"
+#endif  // #if SEQAN_HAS_ZLIB
 
 SEQAN_BEGIN_TESTSUITE(test_bam_io)
 {
@@ -148,9 +148,9 @@ SEQAN_BEGIN_TESTSUITE(test_bam_io)
     SEQAN_CALL_TEST(test_bam_io_bam_read_alignment);
     SEQAN_CALL_TEST(test_bam_io_bam_write_header);
     SEQAN_CALL_TEST(test_bam_io_bam_write_alignment);
-#endif  // #if SEQAN_HAS_ZLIB
 
     // Test BAM indices.
     SEQAN_CALL_TEST(test_bam_io_bam_index_bai);
+#endif  // #if SEQAN_HAS_ZLIB
 }
 SEQAN_END_TESTSUITE

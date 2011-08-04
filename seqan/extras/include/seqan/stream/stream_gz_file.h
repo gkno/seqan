@@ -73,7 +73,7 @@ public:
 
     Stream() : _gzFileOwned(false), _gzFile(0) {}
 
-    Stream(gzFile & gzFile) : _gzFileOwned(false), _gzFile(&gzFile) {}
+    Stream(gzFile & gzFile) : _gzFileOwned(false), _gzFile(gzFile) {}
 
     ~Stream()
     {
