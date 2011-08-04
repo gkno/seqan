@@ -666,6 +666,12 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
             std::cerr << "Could not open Sam file \"" << options.samFile << "\"" << std::endl;
             return 1;
         }
+        // We have to reverse-complement the sequences in the read seq store before we write it out again.
+        for (unsigned i = 0; i < length(fragmentStore.alignedReadStore); ++i)
+        {
+            if (fragmentStore.alignedReadStore[i].beginPos > fragmentStore.alignedReadStore[i].endPos)
+                reverseComplement(fragmentStore.readSeqStore[fragmentStore.alignedReadStore[i].readId]);
+        }
         write(fstrm, fragmentStore, Sam());
     }
     return 0;
