@@ -72,7 +72,7 @@ struct BitVector_
 
 template <> struct BitVector_<8> { typedef unsigned char Type; };
 template <> struct BitVector_<16> { typedef unsigned short Type; };
-template <> struct BitVector_<32> { typedef unsigned long Type; };
+template <> struct BitVector_<32> { typedef unsigned int Type; };
 template <> struct BitVector_<64> { typedef __uint64 Type; };
 template <> struct BitVector_<255> { typedef __uint64 Type; };
 
