@@ -1161,7 +1161,7 @@ readUntilTabOrLineBreak(TBuffer & buffer,
 .Function.readLetters
 ..cat:Input/Output
 ..summary:Read characters from stream as long as characters are letters
-..signature:skipLetters(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..signature:readLetters(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
 ..param.buffer:The buffer to write to
 ...type:Shortcut.CharString
 ...type:Shortcut.DnaString
