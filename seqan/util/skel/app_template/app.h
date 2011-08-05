@@ -60,7 +60,8 @@ struct Options
     Options()
     {
         // Set defaults.
-        showHelp = true;
+        showHelp = false;
+        showVersion = false;
         i = 0;
     }
 };
