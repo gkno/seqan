@@ -354,7 +354,7 @@ int main(int argc, char const ** argv)
 
 #else
 
-int main(int argc, char const ** argv)
+int main(int, char const **)
 {
     std::cerr << "bam_stats can only be compiled correctly with zlib." << std::endl;
     return 0;
