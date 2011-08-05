@@ -338,6 +338,7 @@ int performConversion(TInStreamOrRecordReader & in, TOutStream & out, TOptions c
 
 int main(int argc, char const * argv[])
 {
+    (void)argv;
 #if SEQAN_HAS_ZLIB
     using namespace seqan;
 
