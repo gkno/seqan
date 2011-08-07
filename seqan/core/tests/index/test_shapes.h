@@ -102,19 +102,39 @@ void testShape(TShape1 shape1, TShape2 shape2, bool dump)
 	}
 }
 
+template <typename TShape>
+void testHashInit(TShape shape)
+{
+    DnaString dna = "CGGTACGTAAGTTAG";
+    Iterator<DnaString>::Type it = begin(dna);
+    
+    TShape shape2(shape);
+
+    hash(shape, it);
+    hashInit(shape2, it);
+    hashNext(shape2, it);
+    
+    SEQAN_ASSERT_EQ(value(shape), value(shape2));    
+}
+
 SEQAN_DEFINE_TEST(testShapes)
 {
 	Shape<Dna, SimpleShape > shapeA(6);
 	testShape(shapeA, Shape<Dna, UngappedShape<6> >(), false);
+	testHashInit(shapeA);
+    testHashInit(Shape<Dna, UngappedShape<6> >());
 	
 	                   // 012345678  len=9
 	CharString pattern = "11100110100";
 	Shape<Dna, GenericShape> shapeB(pattern);
 	testShape(shapeB, Shape<Dna, GappedShape<HardwiredShape<1,1,3,1,2> > >(), false);
+    testHashInit(shapeB);
+    testHashInit(Shape<Dna, GappedShape<HardwiredShape<1,1,3,1,2> > >());
 
 	pattern = "11110011";
 	Shape<Dna, OneGappedShape> shapeC(pattern);
 	testShape(shapeC, Shape<Dna, GappedShape<HardwiredShape<1,1,1,3,1> > >(), false);
+    testHashInit(shapeC);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -285,9 +285,22 @@ SEQAN_DEFINE_TEST(testCompareIndices_Esa_Wotd)
 template <typename TIndexSpec>
 void testSTreeIterators()
 {
-		typedef Index<String<char>, TIndexSpec> TIndex;
+    typedef Index<String<char>, TIndexSpec> TIndex;
+    typedef typename Iterator<TIndex, TopDown<> >::Type TIterator;
+    typedef typename Iterator<TIndex, TopDown<ParentLinks<> > >::Type TParentLinkIterator;
 
-		String<char> text("acaaacatatz");
+    // test empty trees
+    {
+        TIndex index("");
+        TIterator iter(index);
+        TParentLinkIterator piter(index);
+        SEQAN_ASSERT_NOT(goDown(iter));
+        SEQAN_ASSERT_NOT(goRight(iter));
+        SEQAN_ASSERT_NOT(goUp(piter));
+    }
+    
+    {
+        String<char> text("acaaacatatz");
 //		String<char> text("AAAAAGGGGG");
 		TIndex index(text);
 		Iter<TIndex, VSTree< TopDown< ParentLinks<Preorder> > > > it(index);
@@ -313,6 +326,7 @@ void testSTreeIterators()
 //			goNext(it);
 //		}
 //		_dump(index);
+    }
 }
 
 SEQAN_DEFINE_TEST(testSTreeIterators_Wotd)

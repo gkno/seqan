@@ -63,6 +63,15 @@ using namespace seqan;
 
 SEQAN_BEGIN_TESTSUITE(test_index)
 {
+	// test_shapes.h
+	SEQAN_CALL_TEST(testShapes);
+    
+	// test_qgram_index.h
+	SEQAN_CALL_TEST(testGappedShapes);
+	SEQAN_CALL_TEST(testUngappedShapes);
+	SEQAN_CALL_TEST(testUngappedQGramIndex);
+	SEQAN_CALL_TEST(testQGramFind);
+    
 	// test_stree_iterators.h
 	SEQAN_CALL_TEST(testSTreeIterators_Wotd);
 	SEQAN_CALL_TEST(testSTreeIterators_WotdOriginal);
@@ -81,17 +90,8 @@ SEQAN_BEGIN_TESTSUITE(test_index)
 	// test_index_creation.h
 	SEQAN_CALL_TEST(testIndexCreation);
 
-	// test_qgram_index.h
-	SEQAN_CALL_TEST(testGappedShapes);
-	SEQAN_CALL_TEST(testUngappedShapes);
-	SEQAN_CALL_TEST(testUngappedQGramIndex);
-	SEQAN_CALL_TEST(testQGramFind);
-
 	// test_sa_bwtwalk.h
 	SEQAN_CALL_TEST(testBWTWalk);
-
-	// test_shapes.h
-	SEQAN_CALL_TEST(testShapes);
 
 //	testBuild();
 
