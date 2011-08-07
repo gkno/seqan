@@ -468,13 +468,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	//////////////////////////////////////////////////////////////////////////////
-	// Alternative Skew Implementation
-	// find the suffix array SA of s[0..n-1] in {0..K}^n
+	// Skew algorithm with difference cover of Z_7
 	//
-	// the following algorithm divides the suffixes in seven residue classes
-	// that results in a more space and time efficient division
-	// 
-	// difference cover is {3,5,6} and corresponds to {1,2,4}'
+	// Construct the suffix array SA of s[0..n-1], where s is a string over
+	// the alphabet {0..K}.
+	//
+	// The following algorithm divides the suffixes in seven residue classes
+	// according to their lengths and uses a difference cover {1,2,4}. 
+	// That approach results in an algorithm that is more space and time efficient
+	// than the original skew algorithm with a difference cover {1,2} of Z_3.
 	//
 	// * no trailing 0's required
 	// * no dummy triples in special cases
