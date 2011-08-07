@@ -294,7 +294,9 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
         tls.verifier.m.readId = absReadId;
 
 #ifdef RAZERS_BANDED_MYERS
+        __int64 contigLength = length(job.globalStore->contigStore[job.contigId].seq);  // TODO(holtgrew): This should be a size type, I guess.
 		tls.verifier.patternState.leftClip = (value(it).hstkPos >= 0) ? 0 : -value(it).hstkPos;	// left clip if match begins left of the genome
+		tls.verifier.rightClip = (value(it).hstkPos + value(it).bucketWidth <= contigLength)? 0: value(it).hstkPos + value(it).bucketWidth - contigLength;  // right clip if match end right of the genome
 #endif
 		matchVerify(tls.verifier, swiftInfix(value(it), job.globalStore->contigStore[job.contigId].seq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
     }
