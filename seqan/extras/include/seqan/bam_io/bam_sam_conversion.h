@@ -91,6 +91,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
             SEQAN_ASSERT(res == 0 || res == EOF_BEFORE_SUCCESS);
             __int32 x = 0;
             bool b = lexicalCast2<__int32>(x, buffer);
+            (void)b;
             SEQAN_ASSERT(b);
             char const * ptr = reinterpret_cast<char const *>(&x);
             for (int i = 0; i < 4; ++i, ++ptr)
@@ -104,6 +105,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
             SEQAN_ASSERT(res == 0 || res == EOF_BEFORE_SUCCESS);
             float x = 0;
             bool b = lexicalCast2<float>(x, buffer);
+            (void)b;
             SEQAN_ASSERT(b);
             char const * ptr = reinterpret_cast<char const *>(&x);
             for (int i = 0; i < 4; ++i, ++ptr)
@@ -161,6 +163,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
                         appendValue(buffer2, *it);
                     __int16 x = 0;  // short to avoid textual interpretation in lexicalCast<> below.
                     bool b = lexicalCast2<__int16>(x, buffer2);
+                    (void)b;
                     SEQAN_ASSERT(b);
                     appendValue(target, static_cast<__int8>(x));
                     if (!atEnd(it) && *it == ',')
@@ -178,6 +181,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
                         appendValue(buffer2, *it);
                     __uint16 x = 0;  // short to avoid textual interpretation in lexicalCast<> below.
                     bool b = lexicalCast2<__uint16>(x, buffer2);
+                    (void)b;
                     SEQAN_ASSERT(b);
                     appendValue(target, static_cast<__int8>(x));
                     if (!atEnd(it) && *it == ',')
@@ -195,6 +199,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
                         appendValue(buffer2, *it);
                     __int16 x = 0;
                     bool b = lexicalCast2<__int16>(x, buffer2);
+                    (void)b;
                     SEQAN_ASSERT(b);
                     char const * ptr = reinterpret_cast<char const *>(&x);  // write out byte-wise
                     for (int i = 0; i < 2; ++i, ++ptr)
@@ -214,6 +219,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
                         appendValue(buffer2, *it);
                     __uint16 x = 0;
                     bool b = lexicalCast2<__uint16>(x, buffer2);
+                    (void)b;
                     SEQAN_ASSERT(b);
                     char const * ptr = reinterpret_cast<char const *>(&x);  // write out byte-wise
                     for (int i = 0; i < 2; ++i, ++ptr)
@@ -233,6 +239,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
                         appendValue(buffer2, *it);
                     __int32 x = 0;
                     bool b = lexicalCast2<__int32>(x, buffer2);
+                    (void)b;
                     SEQAN_ASSERT(b);
                     char const * ptr = reinterpret_cast<char const *>(&x);  // write out byte-wise
                     for (int i = 0; i < 4; ++i, ++ptr)
@@ -252,6 +259,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
                         appendValue(buffer2, *it);
                     __uint32 x = 0;
                     bool b = lexicalCast2<__uint32>(x, buffer2);
+                    (void)b;
                     SEQAN_ASSERT(b);
                     char const * ptr = reinterpret_cast<char const *>(&x);  // write out byte-wise
                     for (int i = 0; i < 4; ++i, ++ptr)
@@ -271,6 +279,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
                         appendValue(buffer2, *it);
                     float x = 0;
                     bool b = lexicalCast2<float>(x, buffer2);
+                    (void)b;
                     SEQAN_ASSERT(b);
                     char const * ptr = reinterpret_cast<char const *>(&x);  // write out byte-wise
                     for (int i = 0; i < 4; ++i, ++ptr)
