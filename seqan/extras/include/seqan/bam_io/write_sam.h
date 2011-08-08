@@ -186,7 +186,10 @@ int write2(TStream & stream,
 
     SEQAN_PUT_TAB;
 
-    res = streamPut(stream, record.pos + 1);
+    if (record.rId == BamAlignmentRecord::INVALID_REFID)
+        res = streamPut(stream, '*');
+    else
+        res = streamPut(stream, record.pos + 1);
     if (res != 0)
         return res;
 
@@ -234,7 +237,7 @@ int write2(TStream & stream,
     SEQAN_PUT_TAB;
 
     if (record.pNext == BamAlignmentRecord::INVALID_POS)
-        res = streamPut(stream, '*');
+        res = streamPut(stream, '0');
     else
         res = streamPut(stream, record.pNext + 1);
     if (res != 0)

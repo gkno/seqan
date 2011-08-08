@@ -333,6 +333,10 @@ int readRecord(BamAlignmentRecord & record,
     {
         record.rId = BamAlignmentRecord::INVALID_REFID;
     }
+    else if (buffer == "0")
+    {
+        record.rId = BamAlignmentRecord::INVALID_REFID;
+    }
     else if (!getIdByName(nameStore(context), buffer, record.rId))
     {
         record.rId = length(nameStore(context));
@@ -346,6 +350,8 @@ int readRecord(BamAlignmentRecord & record,
     if (res != 0)
         return res;
     if (buffer == "*")
+        record.pos = BamAlignmentRecord::INVALID_POS;
+    else if (buffer == "0")
         record.pos = BamAlignmentRecord::INVALID_POS;
     else
         record.pos = lexicalCast<__uint32>(buffer) - 1;
@@ -369,18 +375,27 @@ int readRecord(BamAlignmentRecord & record,
 
     // CIGAR
     CigarElement<> element;
-    do
+    if (atEnd(reader))
+        return EOF_BEFORE_SUCCESS;
+    if (value(reader) == '*')
     {
-        clear(buffer);
-        res = readDigits(buffer, reader);
-        if (res != 0)
-            return res;
-        element.count = lexicalCast<__uint32>(buffer);
-        element.operation = value(reader);
-        if (goNext(reader))
-            return EOF_BEFORE_SUCCESS;
-        appendValue(record.cigar, element);
-    } while (value(reader) != '\t');
+        goNext(reader);
+    }
+    else
+    {
+        do
+        {
+            clear(buffer);
+            res = readDigits(buffer, reader);
+            if (res != 0)
+                return res;
+            element.count = lexicalCast<__uint32>(buffer);
+            element.operation = value(reader);
+            if (goNext(reader))
+                return EOF_BEFORE_SUCCESS;
+            appendValue(record.cigar, element);
+        } while (value(reader) != '\t');
+    }
     SEQAN_SKIP_TAB;
 
     // RNEXT
@@ -417,7 +432,10 @@ int readRecord(BamAlignmentRecord & record,
         res = readDigits(buffer, reader);
         if (res != 0)
             return res;
-        record.pNext = lexicalCast<__uint32>(buffer) - 1;
+        if (buffer == "0")
+            record.pNext = BamAlignmentRecord::INVALID_POS;
+        else
+            record.pNext = lexicalCast<__uint32>(buffer) - 1;
     }
     SEQAN_SKIP_TAB;
 
