@@ -124,7 +124,7 @@ clippedSeqInfix(BamAlignmentRecord const & record)
 // Returns clipped infix of qual member.
 
 inline Infix<CharString>::Type
-clippedSeqInfix(BamAlignmentRecord & record)
+clippedQualInfix(BamAlignmentRecord & record)
 {
     unsigned begPos = 0, endPos = 0;
     getClippedPos(begPos, endPos, record);
@@ -132,7 +132,7 @@ clippedSeqInfix(BamAlignmentRecord & record)
 }
 
 inline Infix<CharString const>::Type
-clippedSeqInfix(BamAlignmentRecord const & record)
+clippedQualInfix(BamAlignmentRecord const & record)
 {
     unsigned begPos = 0, endPos = 0;
     getClippedPos(begPos, endPos, record);
