@@ -53,6 +53,96 @@ namespace seqan {
 // Functions
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Function getClippedPos()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Test me!
+// TODO(holtgrew): Document me!
+
+// Extract positions of soft clipping.
+
+inline bool
+getClippedPos(unsigned & posBegin, unsigned & posEnd, BamAlignmentRecord const & record)
+{
+    posBegin = 0;
+    posEnd = length(record.seq);
+
+    for (unsigned j = 0; j < length(record.cigar); ++j)
+    {
+        if (record.cigar[j].operation == 'S')
+            posBegin += record.cigar[j].count;
+        else
+            break;
+    }
+    for (unsigned j = 0; j < length(record.cigar); ++j)
+    {
+        if (record.cigar[length(record.cigar) - j - 1].operation == 'S')
+            posEnd -= record.cigar[length(record.cigar) - j - 1].count;
+        else
+            break;
+    }
+    SEQAN_ASSERT_LEQ(posBegin, posEnd);
+    SEQAN_ASSERT_LEQ(posBegin, length(record.seq));
+    SEQAN_ASSERT_LEQ(posEnd, length(record.seq));
+
+    return (posBegin != 0) || (posEnd != length(record.seq));
+}
+
+// ----------------------------------------------------------------------------
+// Function clippedSeqInfix()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Test me!
+// TODO(holtgrew): Document me!
+
+// Returns clipped infix of seq member.
+
+inline Infix<CharString>::Type
+clippedSeqInfix(BamAlignmentRecord & record)
+{
+    unsigned begPos = 0, endPos = 0;
+    getClippedPos(begPos, endPos, record);
+    return infix(record.seq, begPos, endPos);
+}
+
+inline Infix<CharString const>::Type
+clippedSeqInfix(BamAlignmentRecord const & record)
+{
+    unsigned begPos = 0, endPos = 0;
+    getClippedPos(begPos, endPos, record);
+    return infix(record.seq, begPos, endPos);
+}
+
+// ----------------------------------------------------------------------------
+// Function clippedQualInfix()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Test me!
+// TODO(holtgrew): Document me!
+
+// Returns clipped infix of qual member.
+
+inline Infix<CharString>::Type
+clippedSeqInfix(BamAlignmentRecord & record)
+{
+    unsigned begPos = 0, endPos = 0;
+    getClippedPos(begPos, endPos, record);
+    return infix(record.qual, begPos, endPos);
+}
+
+inline Infix<CharString const>::Type
+clippedSeqInfix(BamAlignmentRecord const & record)
+{
+    unsigned begPos = 0, endPos = 0;
+    getClippedPos(begPos, endPos, record);
+    return infix(record.qual, begPos, endPos);
+}
+
+// ----------------------------------------------------------------------------
+// Function bamRecordToAlignment()
+// ----------------------------------------------------------------------------
+
 /**
 .Function.bamRecordToAlignment
 ..summary:Convert @Class.BamAlignmentRecord@ to an @Class.Align@ object.
