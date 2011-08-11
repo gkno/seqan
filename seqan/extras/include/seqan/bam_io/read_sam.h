@@ -346,7 +346,7 @@ int readRecord(BamAlignmentRecord & record,
 
     // POS
     clear(buffer);
-    res = readDigits(buffer, reader);
+    res = readUntilChar(buffer, reader, '\t');
     if (res != 0)
         return res;
     if (buffer == "*")
@@ -400,7 +400,7 @@ int readRecord(BamAlignmentRecord & record,
 
     // RNEXT
     clear(buffer);
-    res = readUntilTabOrLineBreak(buffer, reader);
+    res = readUntilChar(buffer, reader, '\t');
     if (res != 0)
         return res;
     if (buffer == "*")
