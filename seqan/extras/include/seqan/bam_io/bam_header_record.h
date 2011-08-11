@@ -71,6 +71,26 @@ enum BamHeaderRecordType
 };
 
 /**
+.Enum.BamSortOrder
+..cat:BAM I/O
+..summary:Enumeration for the header record type.
+..signature:BamSortOrder
+..value.BAM_SORT_UNKNOWN:BAM file sort order is unknown.
+..value.BAM_SORT_UNSORTED:BAM file is unsorted.
+..value.BAM_SORT_QUERYNAME:BAM file is sorted by query name.
+..value.BAM_SORT_COORDINATE:BAM file is sorted by coordinates.
+..include:seqan/bam_io.h
+*/
+
+enum BamSortOrder
+{
+    BAM_SORT_UNKNOWN    = 0,
+    BAM_SORT_UNSORTED   = 1,
+    BAM_SORT_QUERYNAME  = 2,
+    BAM_SORT_COORDINATE = 3
+};
+
+/**
 .Class.BamHeaderRecord
 ..cat:BAM I/O
 ..summary:Represents a header entry in a SAM file or the header section of the BAM header.
@@ -245,6 +265,39 @@ getTagValue(CharString & value, CharString const & key, BamHeaderRecord const & 
     if (!findTagKey(idx, key, record))
         return false;
     return getTagValue(value, idx, record);
+}
+
+// ----------------------------------------------------------------------------
+// Function getSortOrder()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Document me! Test me!
+
+inline BamSortOrder
+getSortOrder(BamHeader const & header)
+{
+    for (unsigned i = 0; i < length(header.records); ++i)
+    {
+        if (header.records[i].type != BAM_HEADER_FIRST)
+            continue;  // not @HD header
+        unsigned idx = 0;
+        if (!findTagKey(idx, "SO", header.records[i]))
+            continue;  // SO tag not found.
+        CharString soString;
+        if (!getTagValue(soString, CharString("SO"), header.records[i]))
+            continue;
+
+        if (soString == "unsorted")
+            return BAM_SORT_UNSORTED;
+        else if (soString == "queryname")
+            return BAM_SORT_QUERYNAME;
+        else if (soString == "coordinate")
+            return BAM_SORT_COORDINATE;
+        else
+            return BAM_SORT_UNKNOWN;
+    }
+
+    return BAM_SORT_UNKNOWN;
 }
 
 }  // namespace seqan
