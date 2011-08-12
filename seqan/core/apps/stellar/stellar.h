@@ -162,10 +162,10 @@ SEQAN_CHECKPOINT
 template<typename TAlign, typename TScoreValue, typename TScoreValue1, typename TScoreValue2>
 void
 _splitAtXDrops(TAlign const & align,
-              Score<TScoreValue> & scoreMatrix,
-              TScoreValue1 scoreDropOff,
-              TScoreValue2 minScore,
-              String<TAlign> & alignmentString) {
+               Score<TScoreValue> & scoreMatrix,
+               TScoreValue1 scoreDropOff,
+               TScoreValue2 minScore,
+               String<TAlign> & alignmentString) {
 SEQAN_CHECKPOINT
     typedef typename Position<Row<TAlign> >::Type TPos;
     typedef Triple<TPos, TPos, TScoreValue> TMerger;
@@ -372,11 +372,11 @@ SEQAN_CHECKPOINT
 
 ///////////////////////////////////////////////////////////////////////////////
 // Conducts banded alignment on swift hit and extracts longest contained eps-match.
-template<typename TSequence, typename TEpsilon, typename TSize, typename TDelta, 
+template<typename TSequence, typename TEpsilon, typename TSize, typename TDelta,
          typename TDrop, typename TSize1, typename TId>
 void
 verifySwiftHit(typename Infix<TSequence>::Type const & a,
-			   typename Infix<TSequence>::Type const & b,
+			   Segment<typename Infix<TSequence>::Type, InfixSegment> const & b,
 			   TEpsilon eps,
 			   TSize minLength,
 			   TDrop /*xDrop*/,
@@ -389,7 +389,7 @@ verifySwiftHit(typename Infix<TSequence>::Type const & a,
 			   QueryMatches<StellarMatch<TSequence, TId> > & matches,
 			   BandedGlobal) {
 SEQAN_CHECKPOINT
-	typedef typename Infix<TSequence>::Type TInfix;
+	typedef Segment<typename Infix<TSequence>::Type, InfixSegment> TSegment;
 	typedef typename StellarMatch<TSequence, TId>::TAlign TAlign;
 
     // define a scoring scheme
@@ -405,11 +405,12 @@ SEQAN_CHECKPOINT
     if (endPosition(b) == endPosition(host(b))) lowerDiag = -(__int64)delta;
 
 	// banded alignment on parallelogram
-	Align<TInfix> bandedAlign;
+	Align<TSegment> bandedAlign;
     resize(rows(bandedAlign), 2);
-    assignSource(row(bandedAlign, 0), a);
+	TSegment segA(a, 0, length(a));
+    assignSource(row(bandedAlign, 0), segA);
     assignSource(row(bandedAlign, 1), b);
-	StringSet<TInfix> str;
+	StringSet<TSegment> str;
 	appendValue(str, a);
 	appendValue(str, b);
 	globalAlignment(bandedAlign, str, scoreMatrix, lowerDiag, upperDiag, BandedNeedlemanWunsch());
@@ -420,16 +421,16 @@ SEQAN_CHECKPOINT
 	TAlign align;
 	resize(rows(align), 2);
 	setSource(row(align, 0), host(a));
-	setSource(row(align, 1), host(b));
+	setSource(row(align, 1), host(host(b)));
 	integrateAlign(align, bandedAlign);
 
 	// set begin and end positions of align
 	setClippedBeginPosition(row(align, 0), beginPosition(a) + clippedBeginPosition(row(bandedAlign, 0)));
-	setClippedBeginPosition(row(align, 1), beginPosition(b) + clippedBeginPosition(row(bandedAlign, 1)));
+	setClippedBeginPosition(row(align, 1), beginPosition(b) + beginPosition(host(b)) + clippedBeginPosition(row(bandedAlign, 1)));
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
 	setClippedEndPosition(row(align, 0), beginPosition(a) + clippedEndPosition(row(bandedAlign, 0)));
-	setClippedEndPosition(row(align, 1), beginPosition(b) + clippedEndPosition(row(bandedAlign, 1)));
+	setClippedEndPosition(row(align, 1), beginPosition(b) + beginPosition(host(b)) + clippedEndPosition(row(bandedAlign, 1)));
 
 	if ((TSize)length(row(align, 0)) < minLength)
 		return;
@@ -441,11 +442,11 @@ SEQAN_CHECKPOINT
 
 ///////////////////////////////////////////////////////////////////////////////
 // Conducts banded alignment on swift hit, extends alignment, and extracts longest contained eps-match.
-template<typename TSequence, typename TEpsilon, typename TSize, typename TDelta, 
+template<typename TSequence, typename TEpsilon, typename TSize, typename TDelta,
          typename TDrop, typename TSize1, typename TId>
 void
 verifySwiftHit(typename Infix<TSequence>::Type const & a,
-			   typename Infix<TSequence>::Type const & b,
+			   Segment<typename Infix<TSequence>::Type, InfixSegment> const & b,
 			   TEpsilon eps,
 			   TSize minLength,
 			   TDrop xDrop,
@@ -458,7 +459,7 @@ verifySwiftHit(typename Infix<TSequence>::Type const & a,
 			   QueryMatches<StellarMatch<TSequence, TId> > & matches,
 			   BandedGlobalExtend) {
 SEQAN_CHECKPOINT
-	typedef typename Infix<TSequence>::Type TInfix;
+	typedef Segment<typename Infix<TSequence>::Type, InfixSegment> TSegment;
 	typedef typename StellarMatch<TSequence, TId>::TAlign TAlign;
 
     // define a scoring scheme
@@ -475,11 +476,12 @@ SEQAN_CHECKPOINT
     if (endPosition(b) == endPosition(host(b))) lowerDiag = -(__int64)delta;
 
 	// banded alignment on parallelogram
-	Align<TInfix> bandedAlign;
+	Align<TSegment> bandedAlign;
     resize(rows(bandedAlign), 2);
-    assignSource(row(bandedAlign, 0), a);
+	TSegment segA(a, 0, length(a));
+    assignSource(row(bandedAlign, 0), segA);
     assignSource(row(bandedAlign, 1), b);
-	StringSet<TInfix> str;
+	StringSet<TSegment> str;
 	appendValue(str, a);
 	appendValue(str, b);
 	globalAlignment(bandedAlign, str, scoreMatrix, lowerDiag, upperDiag, BandedNeedlemanWunsch());
@@ -488,7 +490,7 @@ SEQAN_CHECKPOINT
 	TAlign align;
 	resize(rows(align), 2);
 	setSource(row(align, 0), host(a));
-	setSource(row(align, 1), host(b));
+	setSource(row(align, 1), host(host(b)));
 
 	// extend alignment and obtain longest contained eps-match
 	// TODO: something is wrong here, e.g. extract around seed, but also something else
@@ -506,8 +508,8 @@ SEQAN_CHECKPOINT
 template<typename TEpsilon, typename TSize, typename TDelta, typename TDrop,
          typename TSize1, typename TId, typename TSequence, typename TTag>
 void
-verifySwiftHit(typename Infix<TSequence>::Type const & a,
-               typename Infix<TSequence>::Type const & b,
+verifySwiftHit(typename Infix<TSequence>::Type & a,
+               Segment<typename Infix<TSequence>::Type, InfixSegment> const & b,
                TEpsilon eps,
                TSize minLength,
                TDrop xDrop,
@@ -520,7 +522,7 @@ verifySwiftHit(typename Infix<TSequence>::Type const & a,
 			   QueryMatches<StellarMatch<TSequence, TId> > & matches,
 			   TTag tag) {
 SEQAN_CHECKPOINT
-	typedef typename Infix<TSequence>::Type TInfix;
+	typedef Segment<typename Infix<TSequence>::Type, InfixSegment> TSegment;
 	typedef typename StellarMatch<TSequence, TId>::TAlign TAlign;
 
     TSize maxLength = 1000000000;
@@ -559,24 +561,25 @@ SEQAN_CHECKPOINT
 
 	// banded local alignment
     LocalAlignmentFinder<> finder = LocalAlignmentFinder<>();
-	Align<TInfix> localAlign;
+	Align<TSegment> localAlign;
     resize(rows(localAlign), 2);
-    assignSource(row(localAlign, 0), a);
+	TSegment segA(a, 0, length(a));
+    assignSource(row(localAlign, 0), segA);
     assignSource(row(localAlign, 1), b);
 
 	while (localAlignment(localAlign, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
 
         // split local alignments containing an X-drop
-        String<Align<TInfix> > seedAlignments;
+        String<Align<TSegment> > seedAlignments;
         _splitAtXDrops(localAlign, scoreMatrix, scoreDropOff, minScore, seedAlignments);
 
-        typename Iterator<String<Align<TInfix> > >::Type aliIt = begin(seedAlignments);
+        typename Iterator<String<Align<TSegment> > >::Type aliIt = begin(seedAlignments);
         while (aliIt != end(seedAlignments)) {
 			// create alignment object for the complete sequences
 			TAlign align;
 			resize(rows(align), 2);
 			setSource(row(align, 0), host(a));
-			setSource(row(align, 1), host(b));
+			setSource(row(align, 1), host(host(b)));
 
             // determine extension direction
             ExtensionDirection direction;
@@ -602,10 +605,10 @@ SEQAN_CHECKPOINT
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calls swift filter and verifies swift hits. = Computes eps-matches.
-template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TSize1,
-         typename TMode, typename TSource, typename TId, typename TTag>
+template<typename TText, typename TStringSetSpec, typename TIndexSpec, typename TSize, typename TDrop, typename TSize1,
+         typename TMode, typename TId, typename TTag>
 void stellar(Finder<TText, Swift<SwiftLocal> > & finder,
-             Pattern<TIndex, Swift<SwiftLocal> > & pattern,
+             Pattern<Index<StringSet<TText, TStringSetSpec>, TIndexSpec>, Swift<SwiftLocal> > & pattern,
              double epsilon,
              TSize minLength,
              TDrop xDrop,
@@ -615,11 +618,12 @@ void stellar(Finder<TText, Swift<SwiftLocal> > & finder,
 			 TMode verbose,
 			 TId & databaseID,
 			 bool dbStrand,
-             StringSet<QueryMatches<StellarMatch<TSource, TId> > > & matches,
+             StringSet<QueryMatches<StellarMatch<TText, TId> > > & matches,
 			 TTag tag) {
 SEQAN_CHECKPOINT
-	typedef StellarMatch<TSource, TId> TMatch;
-	typedef typename Infix<TSource>::Type TInfix;
+	typedef StellarMatch<TText, TId> TMatch;
+	typedef typename GetSequenceByNo<StringSet<TText, TStringSetSpec> >::Type TPatternSeq;
+	typedef typename Infix<TText>::Type TInfix;
 
     TSize numSwiftHits = 0;
 
@@ -635,20 +639,26 @@ SEQAN_CHECKPOINT
 
 		if (value(matches, pattern.curSeqNo).disabled) continue;
 
+		TPatternSeq patternSeq = getSequenceByNo(pattern.curSeqNo, indexText(needle(pattern)));
+		typename Infix<TPatternSeq>::Type patternInfix = infix(pattern, patternSeq);
+		typename Infix<TPatternSeq>::Type patternInfixSeq = infix(patternSeq, 0, length(patternSeq));
+		Segment<TInfix, InfixSegment> patternSegment(patternInfixSeq,
+			beginPosition(patternInfix) - beginPosition(patternSeq),
+			endPosition(patternInfix) - beginPosition(patternSeq));
 
-		typename GetSequenceByNo<TIndex>::Type patternSeq = getSequenceByNo(pattern.curSeqNo, needle(pattern));
-		TInfix patternInfix = infix(pattern, patternSeq);
-		////Debug output:
+		////Debug stuff:
+		//typedef typename Infix<TPatternSeq>::Type TPatternSeqInfix;
+		//bool i = IsSameType<TInfix, TPatternSeqInfix>::VALUE;
+		//SEQAN_ASSERT(i);
 		//std::cout << beginPosition(finderInfix) << ",";
 		//std::cout << endPosition(finderInfix) << "  ";
-		//std::cout << beginPosition(patternInfix) << ",";
-		//std::cout << endPosition(patternInfix) << std::endl;
+		//std::cout << beginPosition(patternSegment) << ",";
+		//std::cout << endPosition(patternSegment) << std::endl;
 
         // verification
-		verifySwiftHit(finderInfix, patternInfix, epsilon, minLength, xDrop,
+		verifySwiftHit(finderInfix, patternSegment, epsilon, minLength, xDrop,
 					   pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap, disableThresh, compactThresh,
 					   numMatches, databaseID, dbStrand, value(matches, pattern.curSeqNo), tag);
-
 	}
 
 	if (verbose > 0 && numSwiftHits > 0) {
@@ -656,7 +666,7 @@ SEQAN_CHECKPOINT
 		std::cout << std::endl << "    Longest hit       : " << maxLength;
 		std::cout << std::endl << "    Avg hit length    : " << totalLength/numSwiftHits;
 	}
-	
+
 	typedef typename Iterator<StringSet<QueryMatches<TMatch> >, Standard>::Type TIterator;
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -672,13 +682,13 @@ SEQAN_CHECKPOINT
 
 // Wrapper for stellar
 template<typename TText, typename TIndex, typename TSize, typename TDrop,
-         typename TSource, typename TId, typename TTag>
+         typename TId, typename TTag>
 void stellar(Finder<TText, Swift<SwiftLocal> > & finder,
              Pattern<TIndex, Swift<SwiftLocal> > & pattern,
              double epsilon,
              TSize minLength,
              TDrop xDrop,
-             StringSet<QueryMatches<StellarMatch<TSource, TId> > > & matches,
+             StringSet<QueryMatches<StellarMatch<TText, TId> > > & matches,
 			 TTag tag) {
 SEQAN_CHECKPOINT
 	unsigned maxValue = (unsigned)-1;

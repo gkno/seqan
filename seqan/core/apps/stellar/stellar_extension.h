@@ -119,7 +119,7 @@ SEQAN_CHECKPOINT
 // Identifies the longest epsilon match in align and sets the view positions of
 // align to start and end position of the longest epsilon match
 template<typename TSource, typename TSize, typename TFloat>
-void 
+bool 
 longestEpsMatch(Align<TSource> & align,
                 TSize matchMinLength,
                 TFloat epsilon) {
@@ -161,6 +161,9 @@ SEQAN_CHECKPOINT
 	setBeginPosition(row(align, 1), beginPos);
 	setClippedEndPosition(row(align, 0), toSourcePosition(row(align, 0), endPos));
 	setClippedEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
+
+	if (endPos == 0 && beginPos == 0) return 1;
+	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -336,15 +339,15 @@ _align_banded_nw_best_ends(TTrace& trace,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Reverses the infixes of the left extension in place in hosts of a and b.
-template<typename TInfixA, typename TInfixB, typename TSeed>
+template<typename TSequenceA, typename TSequenceB, typename TSeed>
 void
-_reverseLeftExtension(TInfixA const & a,
-					  TInfixB const & b,
+_reverseLeftExtension(Segment<TSequenceA, InfixSegment> const & a,
+					  Segment<TSequenceB, InfixSegment> const & b,
 					  TSeed & seed,
 					  TSeed & seedOld) {
 SEQAN_CHECKPOINT
-	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
-	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
+	Segment<TSequenceA, InfixSegment> infixA(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
+	Segment<TSequenceB, InfixSegment> infixB(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
 	reverse(infixA);
 	reverse(infixB);
 }
@@ -353,23 +356,25 @@ SEQAN_CHECKPOINT
 // Computes the banded alignment matrix for the left extension and 
 //   returns a string with possible start positions of an eps-match.
 // Caution: The infixes of the left extension is reversed in place in hosts of a and b!
-template<typename TMatrix, typename TPossEnd, typename TInfixA, typename TInfixB, typename TSeed, typename TScore>
+template<typename TMatrix, typename TPossEnd, typename TSequence, typename TSeed, typename TScore>
 void
 _fillMatrixBestEndsLeft(TMatrix & matrixLeft,
-							String<TPossEnd> & possibleEndsLeft,
-							TInfixA const & a,
-							TInfixB const & b,
-							TSeed & seed,
-							TSeed & seedOld,
-							TScore const & scoreMatrix) {
+						String<TPossEnd> & possibleEndsLeft,
+						Segment<TSequence, InfixSegment> const & a,
+						Segment<TSequence, InfixSegment> const & b,
+						TSeed & seed,
+						TSeed & seedOld,
+						TScore const & scoreMatrix) {
 SEQAN_CHECKPOINT
-	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
-	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
+	typedef Segment<TSequence, InfixSegment> TInfix;
+
+	TInfix infixA(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
+	TInfix infixB(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
 
 	reverse(infixA);
 	reverse(infixB);
 
-	StringSet<TInfixB> str;
+	StringSet<TInfix> str;
 	appendValue(str, infixA);
 	appendValue(str, infixB);
 
@@ -381,19 +386,24 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////
 // Computes the banded alignment matrix for the right extension and 
 //   returns a string with possible end positions of an eps-match.
-template<typename TMatrix, typename TPossEnd, typename TInfixA, typename TInfixB, typename TSeed, typename TScore>
+template<typename TMatrix, typename TPossEnd, typename TSequence, typename TSeed, typename TScore>
 void
 _fillMatrixBestEndsRight(TMatrix & matrixRight,
-							String<TPossEnd> & possibleEndsRight,
-							TInfixA const & a,
-							TInfixB const & b,
-							TSeed & seed,
-							TSeed & seedOld,
-							TScore const & scoreMatrix) {
+						 String<TPossEnd> & possibleEndsRight,
+						 Segment<TSequence, InfixSegment> const & a,
+						 Segment<TSequence, InfixSegment> const & b,
+						 TSeed & seed,
+						 TSeed & seedOld,
+						 TScore const & scoreMatrix) {
 SEQAN_CHECKPOINT
-	StringSet<TInfixB> str;
-	appendValue(str, infix(host(a), getEndDim0(seedOld), getEndDim0(seed)));
-	appendValue(str, infix(host(b), getEndDim1(seedOld), getEndDim1(seed)));
+	typedef Segment<TSequence, InfixSegment> TInfix;
+
+	TInfix infixA(host(a), getEndDim0(seedOld), getEndDim0(seed));
+	TInfix infixB(host(b), getEndDim1(seedOld), getEndDim1(seed));
+
+	StringSet<TInfix> str;
+	appendValue(str, infixA);
+	appendValue(str, infixB);
 
 	_align_banded_nw_best_ends(matrixRight, possibleEndsRight, str, scoreMatrix, 
 							   getLowerDiagonal(seedOld) - getUpperDiagonal(seed),
@@ -404,12 +414,12 @@ SEQAN_CHECKPOINT
 // Traceback from an arbitrary point (coordinate) in the banded alignment trace matrix (trace).
 template <typename TAlign, typename TStringSet, typename TTrace, typename TCoord, typename TDiagonal>
 inline void
-_alignBandedNeedlemanWunschTrace(TAlign& align,
-					   TStringSet const& str,
-					   TTrace const& trace,
-					   TCoord const& coordinate,
-					   TDiagonal const diagL,
-					   TDiagonal const diagU)
+_alignBandedNeedlemanWunschTrace(TAlign & align,
+								 TStringSet const & str,
+								 TTrace const & trace,
+								 TCoord const & coordinate,
+								 TDiagonal const diagL,
+								 TDiagonal const diagU)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TStringSet>::Type TString;
@@ -503,25 +513,24 @@ _alignBandedNeedlemanWunschTrace(TAlign& align,
 ///////////////////////////////////////////////////////////////////////////////
 // Conducts the traceback on the extension to the left from best start position
 //   and writes the result into align.
-template<typename TMatrix, typename TCoord, typename TInfixA, typename TInfixB, typename TSeed, typename TPos, typename TAlign>
+template<typename TMatrix, typename TCoord, typename TSequence, typename TSeed, typename TPos, typename TAlign>
 void
 _tracebackLeft(TMatrix const & matrixLeft,
 			   TCoord const & coordinate,
-			   TInfixA const & a,
-			   TInfixB const & b,
+			   Segment<TSequence, InfixSegment> const & a,
+			   Segment<TSequence, InfixSegment> const & b,
 			   TSeed & seed,
 			   TSeed & seedOld,
 			   TPos const endLeftA,
 			   TPos const endLeftB,
 			   TAlign & align) {
 SEQAN_CHECKPOINT
-	typedef StringSet<TInfixB>							TInfixSet;
-	typedef typename Size<TInfixSet>::Type				TSize;
+	typedef Segment<TSequence, InfixSegment>			TInfix;
 	typedef typename Iterator<String<TraceBack> >::Type	TIterator;
 
-	TInfixSet str;
-	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
-	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
+	StringSet<TInfix> str;
+	TInfix infixA(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
+	TInfix infixB(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
 	appendValue(str, infixA);
 	appendValue(str, infixB);
 
@@ -532,7 +541,7 @@ SEQAN_CHECKPOINT
 	reverse(traceBack.sizes);
 	reverse(traceBack.tvs);
 
-	Align<TInfixB> infixAlign;
+	Align<TInfix> infixAlign;
 	resize(rows(infixAlign), 2);
 	assignSource(row(infixAlign, 0), infix(str[0], length(str[0]) - endLeftA, length(str[0])));
 	assignSource(row(infixAlign, 1), infix(str[1], length(str[1]) - endLeftB, length(str[1])));
@@ -545,31 +554,33 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////
 // Conducts the traceback on the extension to the right from best end position
 //   and writes the result into align.
-template<typename TMatrix, typename TCoord, typename TInfixA, typename TInfixB, typename TSeed, typename TPos, typename TAlign>
+template<typename TMatrix, typename TCoord, typename TSequence, typename TSeed, typename TPos, typename TAlign>
 void
 _tracebackRight(TMatrix const & matrixRight,
 			   TCoord const & coordinate,
-			   TInfixA const & a,
-			   TInfixB const & b,
+			   Segment<TSequence, InfixSegment> const & a,
+			   Segment<TSequence, InfixSegment> const & b,
 			   TSeed & seed,
 			   TSeed & seedOld,
 			   TPos const endRightA,
 			   TPos const endRightB,
 			   TAlign & align) {
 SEQAN_CHECKPOINT
-	typedef StringSet<TInfixB>							TInfixSet;
-	typedef typename Size<TInfixSet>::Type				TSize;
+	typedef Segment<TSequence, InfixSegment>			TInfix;
 	typedef typename Iterator<String<TraceBack> >::Type	TIterator;
+
+	TInfix infixA(host(a), getEndDim0(seedOld), getEndDim0(seed));
+	TInfix infixB(host(b), getEndDim1(seedOld), getEndDim1(seed));
 		
-	TInfixSet str;
-	appendValue(str, infix(host(a), getEndDim0(seedOld), getEndDim0(seed)));
-	appendValue(str, infix(host(b), getEndDim1(seedOld), getEndDim1(seed)));
+	StringSet<TInfix> str;
+	appendValue(str, infixA);
+	appendValue(str, infixB);
 
 	AlignTraceback<TPos> traceBack;
 	_alignBandedNeedlemanWunschTrace(traceBack, str, matrixRight, coordinate,
 				   getLowerDiagonal(seedOld) - getUpperDiagonal(seed), getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
 
-	Align<TInfixB> infixAlign;
+	Align<TInfix> infixAlign;
 	resize(rows(infixAlign), 2);
 	assignSource(row(infixAlign, 0), infix(str[0], 0, endRightA));
 	assignSource(row(infixAlign, 1), infix(str[1], 0, endRightB));
@@ -582,11 +593,11 @@ SEQAN_CHECKPOINT
 // Computes the banded alignment matrix and fills a string with possible start 
 //   and end positions of an eps-match. Determines the optimal start and end
 //   position for the longest eps-match and writes the trace into align.
-template<typename TInfixA, typename TInfixB, typename TSeed, typename TPos, typename TDir, typename TScore,
+template<typename TInfix, typename TSeed, typename TPos, typename TDir, typename TScore,
 		 typename TSize, typename TEps, typename TAlign>
 bool
-_bestExtension(TInfixA const & a,
-			   TInfixB const & b,
+_bestExtension(TInfix const & a,
+			   TInfix const & b,
 			   TSeed & seed,
 			   TSeed & seedOld,
 			   TPos const alignLen,
@@ -600,8 +611,6 @@ SEQAN_CHECKPOINT
 	typedef String<TraceBack>							TAlignmentMatrix;
 	typedef ExtensionEndPosition<TPos>					TEndInfo;
 	typedef typename Iterator<String<TEndInfo> >::Type	TEndIterator;
-	typedef typename Value<TScore>::Type				TScoreValue;
-	typedef StringSet<TInfixB>							TInfixSet;
 
 	// variables for banded alignment and possible ends of match
 	TAlignmentMatrix matrixRight, matrixLeft;
@@ -667,22 +676,41 @@ SEQAN_CHECKPOINT
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+template <typename TSource, typename TSpec1, typename TSpec2> 
+void
+integrateAlign(Align<TSource, TSpec1> & align,
+			   Align<Segment<typename Infix<TSource>::Type, InfixSegment>, TSpec2> const & infixAlign) {
+SEQAN_CHECKPOINT
+	typedef typename Size<TSource>::Type TSize;
+	typedef typename Position<typename Row<Align<TSource, TSpec1> >::Type>::Type TPos;
+
+	String<TPos> viewPos;
+	TPos pos;
+	for (TSize i = 0; i < length(rows(infixAlign)); ++i) {
+		pos = beginPosition(source(row(infixAlign, i))) + clippedBeginPosition(row(infixAlign, i));
+		pos += beginPosition(host(source(row(infixAlign, i))));
+		appendValue(viewPos, toViewPosition(row(align, i), pos));
+	}
+
+	integrateAlign(align, infixAlign, viewPos);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Conducts best X-drop extension and calls _bestExtension.
 //  After the call align contains the longest eps-Match that spans the eps-core (localAlign).
-template<typename TScoreValue, typename TScore, typename TInfixA, typename TInfixB, typename TSize, typename TEps, typename TAlign>
+template<typename TScoreValue, typename TScore, typename TSequence, typename TSize, typename TEps, typename TAlign>
 bool
-_extendAndExtract(Align<TInfixB> const & localAlign,
+_extendAndExtract(Align<Segment<Segment<TSequence, InfixSegment>, InfixSegment> > const & localAlign,
 				  TScoreValue scoreDropOff,
 				  TScore const & scoreMatrix,
-				  TInfixA const & a,
-				  TInfixB const & b,
+				  typename Infix<TSequence>::Type const & a,
+				  Segment<Segment<TSequence, InfixSegment>, InfixSegment>  const & b,
 				  ExtensionDirection direction,
 				  TSize minLength,
 				  TEps eps,
 				  TAlign & align) {
 SEQAN_CHECKPOINT
-    typedef typename Position<TInfixB>::Type TPos;
+    typedef typename Position<TSequence>::Type TPos;
     typedef Seed<Simple> TSeed;
 
 	integrateAlign(align, localAlign);
@@ -722,8 +750,15 @@ SEQAN_CHECKPOINT
 			if (!isMatch(localAlign, i)) ++alignErr;
 		}
 
+		// convert seeds from positions in host(b) to positions in host(host(b))
+		setBeginDim1(seedOld, getBeginDim1(seedOld) + beginPosition(host(b)));
+		setEndDim1(seedOld, getEndDim1(seedOld) + beginPosition(host(b)));
+		setBeginDim1(seed, getBeginDim1(seed) + beginPosition(host(b)));
+		setEndDim1(seed, getEndDim1(seed) + beginPosition(host(b)));
+
 		// determine best extension lengths and write the trace into align
-		if (!_bestExtension(a, b, seed, seedOld, alignLen, alignErr, scoreMatrix, direction, minLength, eps, align))
+		typename Infix<TSequence>::Type infixB = infix(host(b), beginPosition(b), endPosition(b));
+		if (!_bestExtension(a, infixB, seed, seedOld, alignLen, alignErr, scoreMatrix, direction, minLength, eps, align))
 			return false;
 	}
 	return true;
