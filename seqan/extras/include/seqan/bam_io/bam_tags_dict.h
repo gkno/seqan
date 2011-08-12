@@ -52,9 +52,10 @@ namespace seqan {
 
 /**
 .Class.BamTagsDict
+..cat:BAM I/O
 ..cat:Fragment Store
 ..signature:BamTagsDict
-..summary:Indexes start positions of BAM tags in a $Shortcut.CharString@ and provides a dict-like API.
+..summary:Indexes start positions of BAM tags in a @Shortcut.CharString@ and provides a dict-like API.
 ..example.code:
 CharString str = "AA:value1\tAB:value2";
 BamTagsDict tags(str);
@@ -153,6 +154,7 @@ hasIndex(BamTagsDict & bamTags)
 
 /**
 .Function.getBamTypeSize
+..cat:BAM I/O
 ..signature:getBamTypeSize(c)
 ..summary:Return size of the type identified by $c$.
 ..param.c:The BAM type identifier
@@ -301,6 +303,7 @@ getTagType(BamTagsDict & tags, TPos idx)
 ..signature:getTagKey(tagsDict, idx)
 ..summary:Return key of a tag by index.
 ..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
+...type:Class.BamTagsDict
 ..param.idx:Index of the tag whose key to retrieve.
 ..returns:Infix of the underlying string.
 ..include:seqan/bam_io.h
@@ -362,6 +365,7 @@ findTagKey(unsigned & idx, BamTagsDict const & tags, CharString const & name)
 ..cat:BAM I/O
 ..signature:getTagValue(tagsDict, idx)
 ..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
+...type:Class.BamTagsDict
 ..param.idx:Index of the tag whose value to retrieve.
 ..returns:@Shortcut.CharString@ with the raw tags data.
 ..remarks:Note that you will get $<type char> + payload$ in case of @Class.BamTagsDict@.
@@ -374,7 +378,9 @@ getTagValue(BamTagsDict & tags, TIdx idx)
 {
     if (!hasIndex(tags))
         buildIndex(tags);
-        
+
+    // TODO(holtgrew): Can't we use positions to speed this up?
+    
     typedef typename Position<CharString>::Type TPos;
     TPos beginPos = tags._positions[idx] + 2;
     TPos endPos = beginPos + 1;
@@ -423,8 +429,8 @@ getTagValue(BamTagsDict const & tags, TPos idx)
 ..summary:Extract and cast "atomic" value from tags string with index $idx$.
 ..param.dest:The variable to write the value to.
 ...remarks:The value is first copied in a variable of the type indicated in the BAM file. Then it is cast into the type of $dest$.
-..param.tags:Raw tags string as in BAM.
-...type:Shortcut.CharString
+..param.tags:@Class.BamTagsDict@ object.
+...type:Class.BamTagsDict
 ..params.idx:Index of the tag in the tag list.
 ..returns:$bool$, indicating the success.
 ..remarks:The function only works for atomic types such as $int$, not for $char*$ or arrays.
@@ -500,6 +506,136 @@ extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
     {
         return false;
     }
+    return true;
+}
+
+
+// ----------------------------------------------------------------------------
+// Function getBamTypeChar()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Test me! Document me!
+
+inline char getBamCharTypeImpl(char const &)
+{
+    return 'A';
+}
+
+inline char getBamCharTypeImpl(__int8 const &)
+{
+    return 'C';
+}
+
+inline char getBamCharTypeImpl(__uint8 const &)
+{
+    return 'c';
+}
+
+inline char getBamCharTypeImpl(__int16 const &)
+{
+    return 'S';
+}
+
+inline char getBamCharTypeImpl(__uint16 const &)
+{
+    return 's';
+}
+
+inline char getBamCharTypeImpl(__int32 const &)
+{
+    return 'I';
+}
+
+inline char getBamCharTypeImpl(__uint32 const &)
+{
+    return 'i';
+}
+
+inline char getBamCharTypeImpl(float const &)
+{
+    return 'f';
+}
+
+template <typename T>
+inline char getBamTypeChar()
+{
+    return getBamCharTypeImpl(T());
+}
+
+// ----------------------------------------------------------------------------
+// Function setTagValue()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Document me! Test me!
+
+// Convert "atomic" value to BAM tag.  Return whether val was atomic.
+template <typename T>
+bool _toBamTagValue(CharString & result, T const & val, char const typeC)
+{
+    appendValue(result, typeC);
+
+    if (typeC == 'A' || typeC == 'c' || typeC == 'C')
+    {
+        resize(result, length(result) + 1);
+        char * dst = reinterpret_cast<char *>(&result[0]) + length(result) - 1;
+        char const * src = reinterpret_cast<char const *>(&val);
+        memcpy(dst, src, 1);
+    }
+    else if (typeC == 's' || typeC == 'S')
+    {
+        resize(result, length(result) + 2);
+        char * dst = reinterpret_cast<char *>(&result[0]) + length(result) - 2;
+        char const * src = reinterpret_cast<char const *>(&val);
+        memcpy(dst, src, 2);
+    }
+    else if (typeC == 'i' || typeC == 'I' || typeC == 'f')
+    {
+        resize(result, length(result) + 4);
+        char * dst = reinterpret_cast<char *>(&result[0]) + length(result) - 4;
+        char const * src = reinterpret_cast<char const *>(&val);
+        memcpy(dst, src, 4);
+    }
+    else // variable sized type or invald
+    {
+        return false;
+    }
+    return true;
+}
+
+// Sets an atomic value in a BamTagsDict.
+// Returns true successful, can fail if val not atomic or key is not a valid tag id (2 chars).
+
+template <typename T>
+inline bool
+setTagValue(BamTagsDict & tags, CharString const & key, T const & val)
+{
+    if (!hasIndex(tags))
+        buildIndex(tags);
+
+    // Build value to insert/append.
+    if (length(key) != 2u)
+        return false;
+    CharString bamTagVal;
+    append(bamTagVal, key);
+    char typeC = getBamTypeChar<T>();
+    if (!_toBamTagValue(bamTagVal, val, typeC))
+        return false;
+    
+    unsigned idx = 0;
+    if (findTagKey(idx, tags, key))
+    {
+        // TODO(holtgrew): Speed this up with positions?
+        CharString tmp;
+        tmp = getTagValue(tags, idx);
+        infix(host(tags), tags._positions[idx], tags._positions[idx] + length(tmp)) = bamTagVal;
+    }
+    else
+    {
+        append(host(tags), bamTagVal);
+    }
+
+    // Remove index and return success.
+    clear(tags._positions);  // Also necessary when appending?
     return true;
 }
 

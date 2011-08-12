@@ -145,6 +145,7 @@ clippedQualInfix(BamAlignmentRecord const & record)
 
 /**
 .Function.bamRecordToAlignment
+..cat:BAM I/O
 ..summary:Convert @Class.BamAlignmentRecord@ to an @Class.Align@ object.
 ..signature:bamRecordToAlignment(align, reference, record)
 ..param.align:The alignment to create.
