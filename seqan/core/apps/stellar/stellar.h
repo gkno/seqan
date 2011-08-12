@@ -650,6 +650,7 @@ SEQAN_CHECKPOINT
 		//typedef typename Infix<TPatternSeq>::Type TPatternSeqInfix;
 		//bool i = IsSameType<TInfix, TPatternSeqInfix>::VALUE;
 		//SEQAN_ASSERT(i);
+		//
 		//std::cout << beginPosition(finderInfix) << ",";
 		//std::cout << endPosition(finderInfix) << "  ";
 		//std::cout << beginPosition(patternSegment) << ",";

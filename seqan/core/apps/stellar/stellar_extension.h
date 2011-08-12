@@ -536,7 +536,7 @@ SEQAN_CHECKPOINT
 
 	AlignTraceback<TPos> traceBack;
 	_alignBandedNeedlemanWunschTrace(traceBack, str, matrixLeft, coordinate,
-				   getUpperDiagonal(seedOld) - getUpperDiagonal(seed), getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
+				getUpperDiagonal(seedOld) - getUpperDiagonal(seed), getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
 	
 	reverse(traceBack.sizes);
 	reverse(traceBack.tvs);
@@ -578,7 +578,7 @@ SEQAN_CHECKPOINT
 
 	AlignTraceback<TPos> traceBack;
 	_alignBandedNeedlemanWunschTrace(traceBack, str, matrixRight, coordinate,
-				   getLowerDiagonal(seedOld) - getUpperDiagonal(seed), getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
+				getLowerDiagonal(seedOld) - getUpperDiagonal(seed), getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
 
 	Align<TInfix> infixAlign;
 	resize(rows(infixAlign), 2);
