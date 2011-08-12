@@ -703,8 +703,8 @@ bool
 _extendAndExtract(Align<Segment<Segment<TSequence, InfixSegment>, InfixSegment> > const & localAlign,
 				  TScoreValue scoreDropOff,
 				  TScore const & scoreMatrix,
-				  typename Infix<TSequence>::Type const & a,
-				  Segment<Segment<TSequence, InfixSegment>, InfixSegment>  const & b,
+				  Segment<typename Infix<TSequence>::Type, InfixSegment> const & a,
+				  Segment<typename Infix<TSequence>::Type, InfixSegment>  const & b,
 				  ExtensionDirection direction,
 				  TSize minLength,
 				  TEps eps,
@@ -750,15 +750,20 @@ SEQAN_CHECKPOINT
 			if (!isMatch(localAlign, i)) ++alignErr;
 		}
 
-		// convert seeds from positions in host(b) to positions in host(host(b))
+		// convert seeds from positions in host(seq) to positions in host(host(seq))
+		setBeginDim0(seedOld, getBeginDim0(seedOld) + beginPosition(host(a)));
+		setEndDim0(seedOld, getEndDim0(seedOld) + beginPosition(host(a)));
 		setBeginDim1(seedOld, getBeginDim1(seedOld) + beginPosition(host(b)));
 		setEndDim1(seedOld, getEndDim1(seedOld) + beginPosition(host(b)));
+		setBeginDim0(seed, getBeginDim0(seed) + beginPosition(host(a)));
+		setEndDim0(seed, getEndDim0(seed) + beginPosition(host(a)));
 		setBeginDim1(seed, getBeginDim1(seed) + beginPosition(host(b)));
 		setEndDim1(seed, getEndDim1(seed) + beginPosition(host(b)));
 
 		// determine best extension lengths and write the trace into align
+		typename Infix<TSequence>::Type infixA = infix(host(a), beginPosition(a), endPosition(a));
 		typename Infix<TSequence>::Type infixB = infix(host(b), beginPosition(b), endPosition(b));
-		if (!_bestExtension(a, infixB, seed, seedOld, alignLen, alignErr, scoreMatrix, direction, minLength, eps, align))
+		if (!_bestExtension(infixA, infixB, seed, seedOld, alignLen, alignErr, scoreMatrix, direction, minLength, eps, align))
 			return false;
 	}
 	return true;
