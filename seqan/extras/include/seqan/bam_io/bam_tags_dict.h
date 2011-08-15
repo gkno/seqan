@@ -525,50 +525,27 @@ extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
 ..include:seqan/bam_io.h
 */
 
-inline char getBamTypeCharImpl(char const &, DisableIf<Or<IsSameType<char, __int8>::Type, IsSameType<char, __uint8>::Type>::Type::VALUE>::Type * /*dummy*/ = 0)
-{
-    return 'A';
-}
-
-inline char getBamTypeCharImpl(__int8 const &)
-{
-    return 'C';
-}
-
-inline char getBamTypeCharImpl(__uint8 const &)
-{
-    return 'c';
-}
-
-inline char getBamTypeCharImpl(__int16 const &)
-{
-    return 'S';
-}
-
-inline char getBamTypeCharImpl(__uint16 const &)
-{
-    return 's';
-}
-
-inline char getBamTypeCharImpl(__int32 const &)
-{
-    return 'I';
-}
-
-inline char getBamTypeCharImpl(__uint32 const &)
-{
-    return 'i';
-}
-
-inline char getBamTypeCharImpl(float const &)
-{
-    return 'f';
-}
-
 template <typename T>
 inline char getBamTypeChar()
 {
-    return getBamCharTypeImpl(T());
+	if (IsSameType<T, __int8>::Type::VALUE)
+		return 'C';
+	if (IsSameType<T, __uint8>::Type::VALUE)
+		return 'c';
+	if (IsSameType<T, char>::Type::VALUE)
+		return 'A';
+	if (IsSameType<T, __int16>::Type::VALUE)
+		return 's';
+	if (IsSameType<T, __uint16>::Type::VALUE)
+		return 'S';
+	if (IsSameType<T, __int32>::Type::VALUE)
+		return 'i';
+	if (IsSameType<T, __int32>::Type::VALUE)
+		return 'I';
+	if (IsSameType<T, float>::Type::VALUE)
+		return 'f';
+	else
+		return '\0';
 }
 
 // ----------------------------------------------------------------------------
