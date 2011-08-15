@@ -284,7 +284,7 @@ struct IsSameType<Type1, Type1>
 ..include:seqan/basic.h
 ..see:Tag.NilCase
 ..see:Tag.Case
-..examples.code:
+..example.code:
 int switchTest(Nothing const &) { return -1; }
 int switchTest(False const &) { return 0; }
 int switchTest(True const &) { return 1; }
