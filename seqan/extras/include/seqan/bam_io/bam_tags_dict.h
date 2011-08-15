@@ -244,13 +244,29 @@ buildIndex(BamTagsDict & bamTags)
 }
 
 // ----------------------------------------------------------------------------
-// Function _dataHost()
+// Function setHost()
 // ----------------------------------------------------------------------------
 
 inline Holder<CharString> &
 _dataHost(BamTagsDict & bamTags)
 {
     return bamTags._host;
+}
+
+inline void
+setHost(BamTagsDict & me, CharString & host_)
+{
+    SEQAN_CHECKPOINT;
+	setValue(_dataHost(me), host_);
+    clear(me._positions);
+}
+
+inline void
+setHost(BamTagsDict & me, CharString const & host_)
+{
+    SEQAN_CHECKPOINT;
+	setValue(_dataHost(me), host_);
+    clear(me._positions);
 }
 
 // ----------------------------------------------------------------------------
