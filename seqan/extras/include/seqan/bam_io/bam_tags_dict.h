@@ -514,44 +514,55 @@ extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
 // Function getBamTypeChar()
 // ----------------------------------------------------------------------------
 
-// TODO(holtgrew): Test me! Document me!
+/**
+.Function.getBamTypeChar
+..cat:BAM I/O
+..summary:Return char identifying the type of the atomic argument.
+..signature:getBamTypeChar<T>()
+..param.T:The type to get the BAM char for.
+..returns:$char$ describing the BAM type. One of $ACcSsIif$.
+..remarks:Note that this function is defined for the $__int16$, $__uint16$ etc. but not for the types $short$, $int$ etc. An exception are 8-bit characters/char, where it is defined for $__int8$, $__uint8$, and $char$ unless $char$ is equal to one of the other two types. This is important when used in @Function.setTagValue$ etc. since BAM gives type chars for printable characters, signed 8-bit numbers and unsigned 8-bit numbers.
+..remarks:If $__int8$ and $__uint8$ are not identical to $char$, we can make this decision from the type, otherwise we cannot and we will give the integer types a higher precedence.
+..remarks:In your programs, this should not make any difference, only the written SAM/BAM will differ.
+..include:seqan/bam_io.h
+*/
 
-inline char getBamCharTypeImpl(char const &)
+inline char getBamTypeCharImpl(char const &, DisableIf<Or<IsSameType<char, __int8>::Type, IsSameType<char, __uint8>::Type>::Type::VALUE>::Type * /*dummy*/ = 0)
 {
     return 'A';
 }
 
-inline char getBamCharTypeImpl(__int8 const &)
+inline char getBamTypeCharImpl(__int8 const &)
 {
     return 'C';
 }
 
-inline char getBamCharTypeImpl(__uint8 const &)
+inline char getBamTypeCharImpl(__uint8 const &)
 {
     return 'c';
 }
 
-inline char getBamCharTypeImpl(__int16 const &)
+inline char getBamTypeCharImpl(__int16 const &)
 {
     return 'S';
 }
 
-inline char getBamCharTypeImpl(__uint16 const &)
+inline char getBamTypeCharImpl(__uint16 const &)
 {
     return 's';
 }
 
-inline char getBamCharTypeImpl(__int32 const &)
+inline char getBamTypeCharImpl(__int32 const &)
 {
     return 'I';
 }
 
-inline char getBamCharTypeImpl(__uint32 const &)
+inline char getBamTypeCharImpl(__uint32 const &)
 {
     return 'i';
 }
 
-inline char getBamCharTypeImpl(float const &)
+inline char getBamTypeCharImpl(float const &)
 {
     return 'f';
 }
@@ -566,7 +577,50 @@ inline char getBamTypeChar()
 // Function setTagValue()
 // ----------------------------------------------------------------------------
 
-// TODO(holtgrew): Document me! Test me!
+// TODO(holtgrew): Test me!
+
+/**
+.Function.setTagValue
+..cat:BAM I/O
+..summary:Set the value of a tag through a @Class.BamTagsDict@.
+..signature:setTagValue(tags, key, val[, typeC])
+..param.tags:The dict to modify.
+...type:Class.BamTagsDict
+..param.key:The key of the tag.
+...type:Shortcut.CharString
+...remarks:Must be a string of length 2.
+..param.val:The value to set the the tag to.
+..param.typeC:BAM type char to use.
+...type:nolink:By default, the type is inflected using @Function.getBamTypeChar@.
+...remarks:For portability (so the generated files are the same on all platforms), use a signed/unsigned qualified type for $val$ or give $typeC$. Also see the remarks for @Function.getBamTypeChar@.
+..returns:$bool$ indicating the success. This function can fail if the key is not a valid tag id (e.g. does not have length 2) or if the type of $val$ is not an atomic value (anything but a character, integer or float type is invalid).
+..see:Function.getBamTypeChar
+..remarks:Note that $setTagValue$ does not cast the type, so $typeC$ only influences the type character written out but $val$ is written out in binary without modification.
+..include:seqan/bam_io.h
+..example.text:An example setting some atomic tag values.
+..example.code:
+CharString rawTagsText;
+BamTagsDict tags(rawTagsText);
+setTagValue(tags, "XA", 9);    // int
+setTagValue(tags, "XB", 9u);   // unsigned int
+setTagValue(tags, "XC", 'X');  // char
+..example.text:If $char$ is equal to $__int8$ or $__uint8$ then the last line produces an entry with type 'c' or 'C'. To make sure that the type char 'A' (for "printable character") is written to the file, give it explicitely:
+..example.code:
+setTagValue(tags, "XC", 'X', 'A');  // Overrwrite XC, enforce type 'printable character'.
+..example.text:Note that on most systems $int$s have a width of 32 bytes, but the C++ standard leaves this open. For all types but characters, you should not give an explicit type char but use one of the types with explicit width and signed/unsigned qualifier such as $__int32$, $__uint32$ etc.
+..example.code:
+// The following is not recommended since the type of $x$ is not "unsigned 32 bit int."
+__int32 x = -1;
+setTagValue(tags, "XB", x, 'I');
+// Instead, explicitely use an unsigned type if you need one.  Note that your compiler
+// might warn you about assigning -1 to an unsigned variable so you know that you are
+// probably doing something unintended.
+__uint32 y = -1;
+setTagValue(tags, "XB", y);
+
+// Do not do this!
+setTagValue(tags, "XA", 9, 'f');    // BOGUS since 9 is not a floating point number.
+*/
 
 // Convert "atomic" value to BAM tag.  Return whether val was atomic.
 template <typename T>
@@ -607,7 +661,7 @@ bool _toBamTagValue(CharString & result, T const & val, char const typeC)
 
 template <typename T>
 inline bool
-setTagValue(BamTagsDict & tags, CharString const & key, T const & val)
+setTagValue(BamTagsDict & tags, CharString const & key, T const & val, char const typeC)
 {
     if (!hasIndex(tags))
         buildIndex(tags);
@@ -617,7 +671,6 @@ setTagValue(BamTagsDict & tags, CharString const & key, T const & val)
         return false;
     CharString bamTagVal;
     append(bamTagVal, key);
-    char typeC = getBamTypeChar<T>();
     if (!_toBamTagValue(bamTagVal, val, typeC))
         return false;
     
@@ -637,6 +690,13 @@ setTagValue(BamTagsDict & tags, CharString const & key, T const & val)
     // Remove index and return success.
     clear(tags._positions);  // Also necessary when appending?
     return true;
+}
+
+template <typename T>
+inline bool
+setTagValue(BamTagsDict & tags, CharString const & key, T const & val)
+{
+    return setTagValue(tags, key, val, getBamTypeChar<T>());
 }
 
 }  // namespace seqan
