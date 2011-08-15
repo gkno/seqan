@@ -244,15 +244,13 @@ buildIndex(BamTagsDict & bamTags)
 }
 
 // ----------------------------------------------------------------------------
-// Function setHost()
+// Function _dataHost()
 // ----------------------------------------------------------------------------
 
-///.Function.setHost.param.object.type:Class.BamTagsDict
-
-inline void setHost(BamTagsDict & bamTags, CharString & newHost)
+inline Holder<CharString> &
+_dataHost(BamTagsDict & bamTags)
 {
-    set(bamTags._host, newHost);
-    buildIndex(bamTags);
+    return bamTags._host;
 }
 
 // ----------------------------------------------------------------------------
