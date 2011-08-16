@@ -354,7 +354,7 @@ inline size_t
 streamReadBlock(char * target, ::std::stringstream & stream, size_t maxLen)
 {
     int res = _streamReadBlockImplIOStream(target, stream, maxLen);
-    stream.seekg(stream.tellp());
+    stream.seekp(stream.tellg());
     return res;
 }
 

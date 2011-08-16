@@ -214,7 +214,7 @@ SEQAN_DEFINE_TEST(test_stream_adapt_sstream_read_block)
         sstream.seekg(0);
         sstream.seekp(0);
         
-        testStreamReadBlockHitLimit(sstream);
+        testStreamReadBlockHitNoLimit(sstream);
     }
 }
 
