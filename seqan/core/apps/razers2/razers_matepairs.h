@@ -465,31 +465,33 @@ void mapMatePairReads(
 	__int64 firstNo = 0;				// first number over all left-mate pot. match in the queue
 	Pair<TGPos> gPair;
 
-	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
+	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-2, Exact());
 
 	TSize gLength = length(genome);
 
 	TAlignedRead mR;
 	TAlignQuality qR;
-	TDequeueValue fL(-1, mR, qR);	// to supress uninitialized warnings
+	TDequeueValue fL(-2, mR, qR);	// to supress uninitialized warnings
 	
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{
+		++options.countFiltration;
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 
-		// remove out-of-window left mates from fifo
+		// (1) Remove out-of-window left mates from fifo.
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
 			popFront(fifo);
 			++firstNo;
 		}
 
-		// add within-window left mates to fifo
+        // (2) Add within-window left mates to fifo.
 		while (empty(fifo) || (TSignedGPos)back(fifo).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
+			++options.countFiltration;
 			if (find(swiftFinderL, swiftPatternL, options.errorRate))
 			{
 				gPair = positionRange(swiftFinderL);
@@ -505,18 +507,22 @@ void mapMatePairReads(
 					
 					pushBack(fifo, fL);
 				}
-			} else
+			} else {
 				break;
+			}
 		}
 
 		int	bestLeftScore = MinValue<int>::VALUE;
 		int bestLibSizeError = MaxValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
 
+		bool rightVerified = false;
 		TDequeueIterator it;
 		unsigned leftReadId = store.matePairStore[matePairId].readId[0];
-		__int64 lastPositive = (__int64)-1;
-		for (__int64 i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
+		__int64 last = (__int64)-1;
+		__int64 lastValid = (__int64)-1;
+		__int64 i;
+		for (i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
 		{
 			it = &value(fifo, i - firstNo);
 
@@ -525,31 +531,66 @@ void mapMatePairReads(
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.readId & NOT_VERIFIED)
 				{
-
-					if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-							matePairId, readSetL, TSwiftSpec()))
+                    if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
-						verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
-						(*it).i2 = verifierL.m;
-						(*it).i3 = verifierL.q;
-						
-						// short-cut negative matches
-						if (lastPositive == (__int64)-1)
-							lastPotMatchNo[matePairId] = i;
-						else
-							value(fifo, lastPositive - firstNo).i1 = i;
-						lastPositive = i;
-					} else
-						(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
+                        ++options.countVerification;
+						if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
+								matePairId, readSetL, TSwiftSpec()))
+						{
+							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
+							(*it).i2 = verifierL.m;
+							(*it).i3 = verifierL.q;
+						} else {
+							(*it).i2.readId = ~NOT_VERIFIED;							// has been verified negatively 
+							continue;													// we intentionally do not set lastPositive to i 
+						}																// to remove i from linked list 
+					} else { 
+						lastValid = i; 
+						continue;														// left pot. hit is out of tolerance window 
+					} 
+				} //else {}																// left match is verified already 
+ 
+				// short-cut negative matches 
+				if (last != lastValid) 
+				{ 
+					SEQAN_ASSERT_NEQ(lastValid, i); 
+					if (lastValid == (__int64)-1) 
+						lastPotMatchNo[matePairId] = i; 
+					else 
+						value(fifo, lastValid - firstNo).i1 = i;
 				}
+				lastValid = i;
+				
+                if (!rightVerified)														// here a verfied left match is available
+                {
+                    ++options.countVerification;
+					if (matchVerify(verifierR, infix(swiftFinderR, genomeInf), 
+							matePairId, readSetR, TSwiftSpec()))
+                    {
+                        rightVerified = true;
+                        mR = verifierR.m;
+						qR = verifierR.q;
+                    } else {
+                        // Break out of lastPotMatch loop, rest of find(right SWIFT results loop will not
+                        // be executed since bestLeftScore remains untouched.
+                        i = (*it).i1;
+                        break;
+                    }
+                }
 
 				if ((*it).i2.readId == leftReadId)
 				{
 					int score = (*it).i3.score;
 					if (bestLeftScore <= score)
 					{
-						int libSizeError = options.libraryLength - (int)((__int64)mR.endPos - (__int64)(*it).i2.beginPos);
-						if (libSizeError < 0) libSizeError = -libSizeError;
+                        // distance between left mate beginning and right mate end
+                        __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*it).i2.beginPos;
+
+						int libSizeError = options.libraryLength - dist;
+						if (libSizeError < 0)
+							libSizeError = -libSizeError;
+                        if (libSizeError > options.libraryError)
+                            continue;
 						if (bestLeftScore == score)
 						{
 							if (bestLibSizeError > libSizeError)
@@ -563,91 +604,80 @@ void mapMatePairReads(
 							bestLeftScore = score;
 							bestLibSizeError = libSizeError;
 							bestLeft = it;
-							if (bestLeftScore == 0) break;	// TODO: replace if we have real qualities
+//							if (bestLeftScore == 0) break;	// TODO: replace if we have real qualities
 						}
 					}
 				}
 			}
 		}
 
-		// short-cut negative matches
-		if (lastPositive == (__int64)-1)
-			lastPotMatchNo[matePairId] = (__int64)-1;
-		else
-			value(fifo, lastPositive - firstNo).i1 = (__int64)-1;
+        // (3) Short-cut negative matches.
+        if (last != lastValid)
+        {
+            SEQAN_ASSERT_NEQ(lastValid, i);
+            if (lastValid == (__int64)-1)
+                lastPotMatchNo[matePairId] = i;
+            else
+                value(fifo, lastValid - firstNo).i1 = i;
+        }
 		
 		// verify right mate, if left mate matches
 		if (bestLeftScore != MinValue<int>::VALUE)
 		{
-			if (matchVerify(verifierR, infix(swiftFinderR, genomeInf), 
-					matePairId, readSetR, TSwiftSpec()))
+			fL.i2 = (*bestLeft).i2;
+			fL.i3 = (*bestLeft).i3;
+
+			// transform mate readNo to global readNo
+			TMatePair &mp = store.matePairStore[matePairId];
+			fL.i2.readId = mp.readId[0];
+			mR.readId    = mp.readId[1];
+
+			// transform coordinates to the forward strand
+			if (orientation == 'F')
 			{
-				// distance between left mate beginning and right mate end
-				__int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
-				if (dist <= options.libraryLength + options.libraryError &&
-					options.libraryLength <= dist + options.libraryError)
+				TSize temp = mR.beginPos;
+				mR.beginPos = mR.endPos;
+				mR.endPos = temp;
+			} else 
+			{
+				fL.i2.beginPos = gLength - fL.i2.beginPos;
+				fL.i2.endPos = gLength - fL.i2.endPos;
+				TSize temp = mR.beginPos;
+				mR.beginPos = gLength - mR.endPos;
+				mR.endPos = gLength - temp;
+//					dist = -dist;
+			}
+			
+			// set a unique pair id
+			fL.i2.pairMatchId = mR.pairMatchId = options.nextPairMatchId;
+			if (++options.nextPairMatchId == TAlignedRead::INVALID_ID)
+				options.nextPairMatchId = 0;
+
+			// score the whole match pair
+			fL.i3.pairScore = qR.pairScore = fL.i3.score + qR.score;
+
+			// both mates match with correct library size
+			if (!options.spec.DONT_DUMP_RESULTS)
+			{
+				fL.i2.id = length(store.alignedReadStore);
+				appendValue(store.alignedReadStore, fL.i2, Generous());
+				appendValue(store.alignQualityStore, fL.i3, Generous());
+				mR.id = length(store.alignedReadStore);
+				appendValue(store.alignedReadStore, mR, Generous());
+				appendValue(store.alignQualityStore, qR, Generous());
+
+				if (length(store.alignedReadStore) > options.compactThresh)
 				{
-					mR = verifierR.m;
-					qR = verifierR.q;
-
-					fL.i2 = (*bestLeft).i2;
-					fL.i3 = (*bestLeft).i3;
-
-					// transform mate readNo to global readNo
-					TMatePair &mp = store.matePairStore[matePairId];
-					fL.i2.readId = mp.readId[0];
-					mR.readId    = mp.readId[1];
-
-					// transform coordinates to the forward strand
-					if (orientation == 'F')
-					{
-						TSize temp = mR.beginPos;
-						mR.beginPos = mR.endPos;
-						mR.endPos = temp;
-					} else 
-					{
-						fL.i2.beginPos = gLength - fL.i2.beginPos;
-						fL.i2.endPos = gLength - fL.i2.endPos;
-						TSize temp = mR.beginPos;
-						mR.beginPos = gLength - mR.endPos;
-						mR.endPos = gLength - temp;
-						dist = -dist;
-					}
+					typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
+					maskDuplicates(store);	// overlapping parallelograms cause duplicates
+					compactPairMatches(store, options, swiftPatternL, swiftPatternR);
 					
-					// set a unique pair id
-					fL.i2.pairMatchId = mR.pairMatchId = options.nextPairMatchId;
-					if (++options.nextPairMatchId == TAlignedRead::INVALID_ID)
-						options.nextPairMatchId = 0;
-
-					// score the whole match pair
-					fL.i3.pairScore = qR.pairScore = fL.i3.score + qR.score;
-
-					// both mates match with correct library size
-					if (!options.spec.DONT_DUMP_RESULTS)
-					{
-						fL.i2.id = length(store.alignedReadStore);
-						appendValue(store.alignedReadStore, fL.i2, Generous());
-						appendValue(store.alignQualityStore, fL.i3, Generous());
-						mR.id = length(store.alignedReadStore);
-						appendValue(store.alignedReadStore, mR, Generous());
-						appendValue(store.alignQualityStore, qR, Generous());
-
-						if (length(store.alignedReadStore) > options.compactThresh)
-						{
-							typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
-							maskDuplicates(store);	// overlapping parallelograms cause duplicates
-							compactPairMatches(store, options, swiftPatternL, swiftPatternR);
-							
-							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
-								options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
-							
-							if (options._debugLevel >= 2)
-								::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
-						}
-					}
-					++options.countVerification;
+					if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+						options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
+					
+					if (options._debugLevel >= 2)
+						::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
 				}
-				++options.countFiltration;
 			}
 		} 
 	}
