@@ -319,7 +319,7 @@ getCigarString(
 	typename Iterator<TGaps1>::Type it1 = iter(gaps1, 0);
 	typename Iterator<TGaps2>::Type it2 = iter(gaps2, 0);
 	clear(cigar);
-	char op, lastOp = ' ';
+	char op = '?', lastOp = ' ';
 	unsigned numOps = 0;
 
 //	std::cout << gaps1 << std::endl;
