@@ -48,7 +48,6 @@
 
 #define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DEBUG_MATEPAIRS
-//#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
 #include <iostream>
@@ -404,13 +403,6 @@ int main(int argc, const char *argv[])
 #ifdef RAZERS_OPENADDRESSING
 	addOption(parser, CommandLineOption("lf", "load-factor", "set the load factor for the open addressing q-gram index", OptionType::Double | OptionType::Label, options.loadFactor));
 #endif
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	addOption(parser, CommandLineOption("lm", "low-memory",        "decrease memory usage at the expense of runtime", OptionType::Boolean));
-	addSection(parser, "Mapping Quality Options:");
-	addOption(parser, CommandLineOption("mq", "mapping-quality",   "switch on mapping quality mode", OptionType::Boolean));
-	addOption(parser, CommandLineOption("qsl","mq-seed-length",    "seed length used for mapping quality assignment", OptionType::Int | OptionType::Label, options.artSeedLength));
-	addOption(parser, CommandLineOption("mmq","total-mism-quality","total sum of qualities at mismatching bases", OptionType::Int | OptionType::Label, options.absMaxQualSumErrors));
-#endif
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
@@ -459,13 +451,6 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "overlap-length", options.overlap);
 	getOptionValueLong(parser, "overabundance-cut", options.abundanceCut);
 	getOptionValueLong(parser, "repeat-length", options.repeatLength);
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
-	getOptionValueLong(parser, "mapping-quality", options.maqMapping);
-	getOptionValueLong(parser, "mq-seed-length", options.artSeedLength);
-	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
-	getOptionValueLong(parser, "low-memory", options.lowMemory);
-#endif
     getOptionValueLong(parser, "thread-count", options.threadCount);
     getOptionValueLong(parser, "parallel-window-size", options.windowSize);
     getOptionValueLong(parser, "parallel-verification-size", options.verificationPackageSize);
@@ -567,12 +552,6 @@ int main(int argc, const char *argv[])
 		cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl;
 	if ((options.repeatLength <= 1) && (stop = true))
 		cerr << "Repeat length must be a value greater than 1" << endl;
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if ((options.artSeedLength < 24) && (stop = true))
-		cerr << "Minimum seed length is 24" << endl;
-	if ((options.absMaxQualSumErrors < 0) && (stop = true))
-		cerr << "Max total mismatch quality needs to be 0 or a positive value" << endl;
-#endif
 	if ((options.trimLength != 0 && options.trimLength < 14) && (stop = true))
 		cerr << "Minimum read length is 14" << endl;
 	if ((options.tabooLength < 1) && (stop = true))

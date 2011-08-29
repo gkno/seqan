@@ -16,7 +16,6 @@ if (OPENMP_FOUND)
                                 razers.h
                                 job_queue.h
                                 outputFormat.h
-                                parallel_atomic.h
                                 parallel_job_queue.h
                                 parallel_misc.h
                                 parallel_store.h
@@ -26,7 +25,6 @@ if (OPENMP_FOUND)
                                 razers_matepairs.h
                                 razers_matepairs_parallel.h
                                 razers_parallel.h
-                                razers_parallel_reads.h
                                 razers_window.h
                                 readSimulator.h)
 

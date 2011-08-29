@@ -275,6 +275,12 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
     double start = sysTime();
 
     typedef typename Iterator<THitString, Standard>::Type THitStringIterator;
+	typedef typename TFragmentStore::TContigSeq TContigSeq;
+
+    TContigSeq &contigSeq = job.globalStore->contigStore[job.contigId].seq;
+#ifdef RAZERS_BANDED_MYERS
+	__int64 contigLength = length(contigSeq);
+#endif
 
     std::tr1::shared_ptr<TMatches> localMatches(new TMatches());
 
@@ -287,18 +293,17 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
     unsigned offset = splitters[job.threadId];
     for (THitStringIterator it = iter(*job.hitsPtr, job.hitBegin), itEnd = iter(*job.hitsPtr, job.hitEnd); it != itEnd; ++it) 
 	{
-        if (length(swiftInfix(value(it), job.globalStore->contigStore[job.contigId].seq)) < length(tls.globalStore->readSeqStore[value(it).ndlSeqNo]))
-            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
+//        if (length(swiftInfix(value(it), job.globalStore->contigStore[job.contigId].seq)) < length(tls.globalStore->readSeqStore[value(it).ndlSeqNo]))
+//            continue;  // Skip if hit length < read length.  TODO(holtgrew): David has to fix something in banded myers to make this work.
 
         unsigned absReadId = offset + value(it).ndlSeqNo;
         tls.verifier.m.readId = absReadId;
 
 #ifdef RAZERS_BANDED_MYERS
-        __int64 contigLength = length(job.globalStore->contigStore[job.contigId].seq);  // TODO(holtgrew): This should be a size type, I guess.
-		tls.verifier.patternState.leftClip = (value(it).hstkPos >= 0) ? 0 : -value(it).hstkPos;	// left clip if match begins left of the genome
-		tls.verifier.rightClip = (value(it).hstkPos + value(it).bucketWidth <= contigLength)? 0: value(it).hstkPos + value(it).bucketWidth - contigLength;  // right clip if match end right of the genome
+		tls.verifier.patternState.leftClip = (it->hstkPos >= 0) ? 0 : -it->hstkPos;   // left clip if match begins left of the genome
+		tls.verifier.rightClip = (it->hstkPos + it->bucketWidth <= contigLength)? 0: it->hstkPos + it->bucketWidth - contigLength;  // right clip if match end right of the genome
 #endif
-		matchVerify(tls.verifier, swiftInfix(value(it), job.globalStore->contigStore[job.contigId].seq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
+		matchVerify(tls.verifier, swiftInfix(value(it), contigSeq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
     }
 
 // #pragma omp critical
@@ -965,7 +970,12 @@ int _mapSingleReadsParallel(
 		resize(preprocessing, readCount, Exact()); 
 		for(unsigned i = 0; i < readCount; ++i) 
 		{ 
+#ifdef RAZERS_NOOUTERREADGAPS
+			if (!empty(store.readSeqStore[i]))
+				setHost(preprocessing[i], prefix(store.readSeqStore[i], length(store.readSeqStore[i]) - 1));
+#else
 			setHost(preprocessing[i], store.readSeqStore[i]); 
+#endif
 			_patternMatchNOfPattern(preprocessing[i], options.matchN); 
 			_patternMatchNOfFinder(preprocessing[i], options.matchN); 
 		} 

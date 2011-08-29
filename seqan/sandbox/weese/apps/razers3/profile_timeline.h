@@ -47,8 +47,6 @@
 
 #include <omp.h>
 
-#include "parallel_atomic.h"
-
 namespace seqan {
 
 // ============================================================================

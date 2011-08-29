@@ -979,9 +979,8 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TSw
         typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
         typename Size<TAlignedReadStore>::Type oldSize = length(tls.matches);
 
-        // TODO(weese): Duplicates are hard to mask in paired-end mode.
-        // if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-        //   maskDuplicates(tls.store, TRazerSMode());  // overlapping parallelograms cause duplicates
+		if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+			maskDuplicates(tls.matches, tls.options, TRazerSMode());	// overlapping parallelograms cause duplicates
 
         SwiftPatternLSetMaxErrorsWrapper<TThreadLocalStorage> wrapperL(tls);
         SwiftPatternRSetMaxErrorsWrapper<TThreadLocalStorage> wrapperR(tls);
@@ -1452,10 +1451,20 @@ int _mapMatePairReadsParallel(
         #pragma omp parallel for schedule(static)
 		for (int i = 0; i < pairCount; ++i)
 		{
-			setHost(forwardPatternsL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
-			tmps[omp_get_thread_num()] = store.readSeqStore[store.matePairStore[i].readId[1]];
+#ifdef RAZERS_NOOUTERREADGAPS
+			if (!empty(store.readSeqStore[store.matePairStore[i].readId[0]]) && !empty(store.readSeqStore[store.matePairStore[i].readId[1]]))
+            {
+                setHost(forwardPatternsL[i], prefix(store.readSeqStore[store.matePairStore[i].readId[0]], length(store.readSeqStore[store.matePairStore[i].readId[0]]) - 1));
+                tmps[omp_get_thread_num()] = prefix(store.readSeqStore[store.matePairStore[i].readId[1]], length(store.readSeqStore[store.matePairStore[i].readId[1]]) - 1);
+                reverseComplement(tmps[omp_get_thread_num()]);
+                setHost(forwardPatternsR[i], tmps[omp_get_thread_num()]);
+            }
+#else
+            setHost(forwardPatternsL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
+            tmps[omp_get_thread_num()] = store.readSeqStore[store.matePairStore[i].readId[1]];
 			reverseComplement(tmps[omp_get_thread_num()]);
 			setHost(forwardPatternsR[i], tmps[omp_get_thread_num()]);
+#endif        
 			_patternMatchNOfPattern(forwardPatternsL[i], options.matchN);
 			_patternMatchNOfPattern(forwardPatternsR[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatternsL[i], options.matchN);

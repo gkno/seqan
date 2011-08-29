@@ -261,6 +261,8 @@ bool loadReads(
 			TQual const &qb = threadStore.alignQualityStore[b.id];
 			if (qa.pairScore > qb.pairScore) return true;
 			if (qa.pairScore < qb.pairScore) return false;
+            if (a.libDiff < b.libDiff) return true;
+            if (a.libDiff > b.libDiff) return false;
 			
 			return a.pairMatchId < b.pairMatchId;
 		}
@@ -272,27 +274,21 @@ bool loadReads(
         typedef typename TFragmentStore::TReadStore			TReadStore;
         typedef typename Value<TReadStore>::Type			TRead;
 
-        TFragmentStore const & mainStore;
-
-        LessPairErrors(TFragmentStore const & mainStore_)
-                : mainStore(mainStore_)
-        {}
-
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
 		{
 			// read number
             if (b.readId == TReadMatch::INVALID_ID) return false;
             if (a.readId == TReadMatch::INVALID_ID) return true;
-			TRead const &ra = mainStore.readStore[a.readId];
-			TRead const &rb = mainStore.readStore[b.readId];
-			if (ra.matePairId < rb.matePairId) return true;
-			if (ra.matePairId > rb.matePairId) return false;
+            unsigned matePairIdA = a.readId >> 1;
+            unsigned matePairIdB = b.readId >> 1;
+			if (matePairIdA < matePairIdB) return true;
+			if (matePairIdA > matePairIdB) return false;
             
 			// quality
-            if (a.orientation == '-') return false;
-            if (b.orientation == '-') return true;
 			if (a.pairScore > b.pairScore) return true;
 			if (a.pairScore < b.pairScore) return false;
+            if (a.libDiff < b.libDiff) return true;
+            if (a.libDiff > b.libDiff) return false;
 
 			if (a.pairMatchId < b.pairMatchId) return true;
 			if (a.pairMatchId > b.pairMatchId) return false;
@@ -308,32 +304,28 @@ bool loadReads(
         typedef typename TFragmentStore::TReadStore			TReadStore;
         typedef typename Value<TReadStore>::Type			TRead;
 
-        TFragmentStore const & mainStore;
-
-        LessPairErrors3Way(TFragmentStore const & mainStore_)
-                : mainStore(mainStore_)
-        {}
-
 		inline int operator() (TReadMatch const &a, TReadMatch const &b) const 
 		{
 			// read number
             if (b.readId == TReadMatch::INVALID_ID) return -1;
             if (a.readId == TReadMatch::INVALID_ID) return 1;
-			TRead const &ra = mainStore.readStore[a.readId];
-			TRead const &rb = mainStore.readStore[b.readId];
-			if (ra.matePairId < rb.matePairId) return -1;
-			if (ra.matePairId > rb.matePairId) return 1;
+            unsigned matePairIdA = a.readId >> 1;
+            unsigned matePairIdB = b.readId >> 1;
+			if (matePairIdA < matePairIdB) return -1;
+			if (matePairIdA > matePairIdB) return 1;
             
 			// quality
-            if (a.orientation == '-') return -1;
-            if (b.orientation == '-') return 1;
 			if (a.pairScore > b.pairScore) return -1;
 			if (a.pairScore < b.pairScore) return 1;
+            if (a.libDiff < b.libDiff) return -1;
+            if (a.libDiff > b.libDiff) return 1;
 
 			if (a.pairMatchId < b.pairMatchId) return -1;
 			if (a.pairMatchId > b.pairMatchId) return 1;
 
-            return a.readId < b.readId;
+            if (a.readId < b.readId) return -1;
+            if (a.readId > b.readId) return 1;
+            return 0;
 		}
 	};
 
@@ -351,6 +343,8 @@ void compactPairMatches(
 {
 	typedef typename Value<TMatches>::Type                          TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type             TIterator;
+	
+	SEQAN_ASSERT_EQ(length(store.alignedReadStore) % 2, 0u);
 	
     // fprintf(stderr, "[pair-compact]");
     double beginTime = sysTime();
@@ -387,7 +381,7 @@ void compactPairMatches(
             SEQAN_ASSERT_LEQ(cmp(matches[i - 1], matches[i]), 0);
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
-        ::std::sort(it, itEnd, LessPairErrors<TFragmentStore, TMatch>(store));
+        ::std::sort(it, itEnd, LessPairErrors<TFragmentStore, TMatch>());
 //	sortAlignedReads(threadStore, LessPairScore<TFragmentStore>(mainStore, threadStore));
 #ifdef RAZERS_EXTERNAL_MATCHES
     }
@@ -398,10 +392,19 @@ void compactPairMatches(
 
 	for (; it != itEnd; ++it) 
 	{
+        SEQAN_ASSERT_EQ(it->pairMatchId, (it + 1)->pairMatchId);
+
+        // ignore pair alignments if one of the mates is marked as deleted (<=> orientation is '-') 
+        if (it->orientation == '-' || (it + 1)->orientation == '-') 
+        { 
+            ++it; 
+            continue; 
+        } 
+
         // std::cerr << *it << std::endl;
         // std::cerr << *(it + 1) << std::endl;
         // SEQAN_ASSERT(it->pairMatchId == (it + 1)->pairMatchId);
-		if ((*it).orientation == '-' || (*it).readId == TMatch::INVALID_ID || (*it).pairMatchId == TMatch::INVALID_ID) continue;
+		// if (*it).readId == TMatch::INVALID_ID || (*it).pairMatchId == TMatch::INVALID_ID) continue;
 		if (matePairId == store.readStore[(*it).readId].matePairId)
 		{ 
 			if (it->pairScore <= scoreDistCutOff) continue;
@@ -617,6 +620,7 @@ void _mapMatePairReads(
             else
                 std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+///            std::cerr << "  -Left [" << front(fifo).i2.endPos << "\t" << front(fifo).i2.beginPos << ')' << std::endl;
 			popFront(fifo);
 			++firstNo;
 		}
@@ -642,6 +646,7 @@ void _mapMatePairReads(
 					fL.i2.beginPos = beginPosition(swiftFinderL);
 					fL.i2.endPos = gPair.i2;
 					
+///            std::cerr << "  +Left \t" << firstNo + length(fifo) << ":\t[" << fL.i2.endPos << "\t" << fL.i2.beginPos << ')' << std::endl;
 					pushBack(fifo, fL);
 				}
 			} else {
@@ -661,6 +666,7 @@ void _mapMatePairReads(
         __int64 i;
 		for (i = lastPotMatchNo[matePairId]; firstNo <= i; last = i, i = (*it).i1)
 		{
+///            std::cout<< "\t[" << i << "]" << "\t" << fifo[3].i1 << std::endl;
 			it = &value(fifo, i - firstNo);
 
 			// search left mate
@@ -684,12 +690,20 @@ void _mapMatePairReads(
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                         ++options.countVerification;
+///                        if (i==0)
+///                        std::cout<<"here"<<std::endl;
+
+                        // adjust sink position according to insert size
+                        if (!rightVerified)
+                            verifierL.sinkPos = (TSignedGPos)endPosition(swiftFinderR) - options.libraryLength;
+
                         if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
                                         matePairId, readSetL, mode))
 						{
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
+///                            std::cerr << "  Left+ " << verifierL.m.endPos << std::endl;
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 						} else {
@@ -728,6 +742,8 @@ void _mapMatePairReads(
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 						rightVerified = true;
 						mR = verifierR.m;
+                        // adjust sink position according to insert size
+                        verifierL.sinkPos = (TSignedGPos)verifierR.m.endPos - options.libraryLength;
 					} else {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  NO" << std::endl;
@@ -738,7 +754,7 @@ void _mapMatePairReads(
 						break;
 					}
 				}
-				
+
                 /*
 				if ((*it).i2.readId == leftReadId)
 				{
@@ -754,8 +770,14 @@ void _mapMatePairReads(
 					{
                         // distance between left mate beginning and right mate end
                         __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*it).i2.beginPos;
-                        
 						int libSizeError = options.libraryLength - dist;
+/*                        
+                        if (orientation == 'F')
+                            std::cout << (__int64)(*it).i2.beginPos << "\t" << (__int64)verifierR.m.beginPos;
+                        else
+                            std::cout << (__int64)(*it).i2.endPos << "\t" << (__int64)verifierR.m.endPos;
+                        std::cout << '\t' << dist << '\t' << libSizeError << std::endl;
+*/                        
 #ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "    libSizeError = " << libSizeError << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
@@ -792,7 +814,7 @@ void _mapMatePairReads(
 			else
 				value(fifo, lastValid - firstNo).i1 = i;
 		}
-		
+
 		// verify right mate, if left mate matches
 		if (bestLeftScore != MinValue<int>::VALUE)
 		{
@@ -822,17 +844,20 @@ void _mapMatePairReads(
 					fL.i2 = (*bestLeft).i2;
 					
 					// transform mate readNo to global readNo
-					TMatePair &mp = store.matePairStore[matePairId];
-					fL.i2.readId = mp.readId[0];
-					mR.readId    = mp.readId[1];
-					
+					TMatePair &mp     = store.matePairStore[matePairId];
+					fL.i2.readId      = mp.readId[0];
+					mR.readId         = mp.readId[1];
+                    mR.orientation    = (orientation == 'F') ? 'R' : 'F';
+                    fL.i2.orientation = orientation;
+
 					// transform coordinates to the forward strand
 					if (orientation == 'F')
 					{
+// TODO (weese:) Manuel, doesn't this violate the invariant begin<end for MatchRecords?
 						TSize temp = mR.beginPos;
 						mR.beginPos = mR.endPos;
 						mR.endPos = temp;
-					} else 
+					} else
 					{
 						fL.i2.beginPos = gLength - fL.i2.beginPos;
 						fL.i2.endPos = gLength - fL.i2.endPos;
@@ -841,7 +866,7 @@ void _mapMatePairReads(
 						mR.endPos = gLength - temp;
 						// dist = -dist;
 					}
-					
+
 					// set a unique pair id
 					fL.i2.pairMatchId = mR.pairMatchId = options.nextPairMatchId;
 					if (++options.nextPairMatchId == TAlignedRead::INVALID_ID)
@@ -849,6 +874,7 @@ void _mapMatePairReads(
 
 					// score the whole match pair
 					fL.i2.pairScore = mR.pairScore = fL.i2.score + mR.score;
+                    fL.i2.libDiff = mR.libDiff = bestLibSizeError;
 
 					// both mates match with correct library size
 /*								std::cout << "found " << matePairId << " on " << orientation << contigId;
@@ -864,9 +890,7 @@ void _mapMatePairReads(
 					if (!options.spec.DONT_DUMP_RESULTS)
 					{
 						appendValue(matches, fL.i2, Generous());
-                        back(matches).orientation = orientation;
 						appendValue(matches, mR, Generous());
-                        back(matches).orientation = (orientation == 'F') ? 'R' : 'F';
 
 #ifdef RAZERS_DEBUG_MATEPAIRS
                         std::cerr << "\nHIT\tL\t" << fL.i2.readId << "\t" << store.readNameStore[fL.i2.readId] << "\t" << fL.i2.beginPos << "\t" << fL.i2.endPos << std::endl;
@@ -876,9 +900,8 @@ void _mapMatePairReads(
 						if (length(store.alignedReadStore) > options.compactThresh)
 						{
 							typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
-                            // TODO(weese): Duplicates are hard to mask in paired-end mode.
-                            // if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-                            //   maskDuplicates(matches);	// overlapping parallelograms cause duplicates
+                            if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+								maskDuplicates(matches, options, mode);	// overlapping parallelograms cause duplicates
 							compactPairMatches(store, matches, cnts, options, swiftPatternL, swiftPatternR, COMPACT);
 							
 							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
@@ -1045,7 +1068,9 @@ int _mapMatePairReads(
 	}
 
     double beginCopyTime = sysTime();
-    // Final compact matches.
+    // Final compact matches
+    if (IsSameType<TGapMode, RazerSGapped>::VALUE)
+        maskDuplicates(matches, options, mode);	// overlapping parallelograms cause duplicates
     compactPairMatches(store, matches, cnts, options, swiftPatternL, swiftPatternR, COMPACT_FINAL);
     // Write back to store.
     reserve(store.alignedReadStore, length(matches));
