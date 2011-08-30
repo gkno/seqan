@@ -59,6 +59,11 @@ namespace seqan{
 
 		template< typename TFreqString >
 		explicit WaveletTreeStructure(TFreqString &string);
+		
+		bool operator==(const WaveletTreeStructure &b) const
+		{
+			return (treeNodes == b.treeNodes);
+		}
 	};
 	
 	template< typename TText >
@@ -84,6 +89,13 @@ namespace seqan{
 	template< typename TText >
 	typename Fibre< WaveletTreeStructure< TText >, FibreTreeNodes >::Type &
 	getFibre(WaveletTreeStructure< TText > &treeStructure, FibreTreeNodes)
+	{
+		return treeStructure.treeNodes;
+	}
+
+	template< typename TText >
+	typename Fibre< WaveletTreeStructure< TText >, FibreTreeNodes >::Type const &
+	getFibre(WaveletTreeStructure< TText > const &treeStructure, FibreTreeNodes)
 	{
 		return treeStructure.treeNodes;
 	}
@@ -730,6 +742,43 @@ namespace seqan{
 		}
 	}
 
+	template< typename TText >
+	inline bool open(
+		WaveletTreeStructure< TText > &structure, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".treestruct");	open(getFibre(structure, FibreTreeNodes()), toCString(name), openMode);
+		return true;
+	}
+
+	template < typename TText >
+	inline bool open(
+		WaveletTreeStructure< TText > &structure, 
+		const char *fileName)
+	{
+		return open(structure, fileName, DefaultOpenMode< WaveletTree< TText, SingleString > >::VALUE);
+	}
+
+	template< typename TText >
+	inline bool save(
+		WaveletTreeStructure< TText > const &structure, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".treestruct");	save(getFibre(structure, FibreTreeNodes()), toCString(name), openMode);
+		return true;
+	}
+
+	template < typename TText >
+	inline bool save(
+		WaveletTreeStructure< TText > const &structure, 
+		const char *fileName)
+	{
+		return save(structure, fileName, DefaultOpenMode< WaveletTree< TText, SingleString > >::VALUE);
+	}
 }
 
 #endif

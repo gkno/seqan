@@ -159,12 +159,33 @@ namespace seqan{
 			dollarSub = 0;
 			createWaveletTree(*this, text, freqTable, prefixSumTable);	
 		}
-	/*	WaveletTree(TText &text)
+		
+		bool operator==(const WaveletTree &b) const
 		{
-			assignValue(text,
-				bitStrings,
-				splitValues);	
-		}*/
+
+			typedef typename Size< TText >::Type							TSize;
+			bool test = true;
+			if(length(bitStrings) == length(b.bitStrings))
+			{				
+				for(TSize i = 0; i < length(bitStrings); ++i)
+				{
+					if(!(bitStrings[i] == b.bitStrings[i]))
+					{
+						test = false;
+					}
+				}
+			}
+			else
+			{
+				test = false;
+			}
+
+			return (test && 
+					splitValues == b.splitValues && 
+					dollarPosition == b.dollarPosition && 
+					dollarSub == b.dollarSub);
+		}
+
 	};
 	
 	template< typename TText, typename TSpec >
@@ -174,7 +195,6 @@ namespace seqan{
 		return tree.bitStrings;
 	}
 
-//	template< typename TText, typename TSpec >
 	template< typename TText, typename TSpec >
 	typename Fibre< WaveletTree< TText,TSpec >, FibreBitStrings >::Type const &
 	getFibre(const WaveletTree< TText, TSpec > &tree, const FibreBitStrings)
@@ -182,7 +202,6 @@ namespace seqan{
 		return tree.bitStrings;
 	}
 
-//	template< typename TText, typename TSpec >
 	template< typename TText, typename TSpec >
 	typename Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >::Type &
 	getFibre(WaveletTree< TText, TSpec > &tree, FibreSplitValues)
@@ -190,7 +209,6 @@ namespace seqan{
 		return tree.splitValues;
 	}
 
-//	template< typename TText, typename TSpec >
 	template< typename TText, typename TSpec >
 	typename Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >::Type const &
 	getFibre(WaveletTree< TText, TSpec > const &tree, const FibreSplitValues)
@@ -264,32 +282,40 @@ namespace seqan{
 		TPos sum = pos + 1;
 		TValue treePos = 0;
 		typename Iterator< const WaveletTreeStructure< TText > >::Type iter(tree.splitValues, treePos);
-		Pair< TValue, TValue > range(0, tree.splitValues.treeNodes[length(tree.splitValues.treeNodes)- 1].i1 + 1);
-		bool direction;	
+//		Pair< TValue, TValue > range(0, tree.splitValues.treeNodes[length(tree.splitValues.treeNodes)- 1].i1 + 1);
+	//	std::cerr << "range: " << range << std::endl;
+		bool direction;
+		TValue character;
+		//std::cerr << pos << std::endl;	
 		do
 		{
 			direction = getBit(tree.bitStrings[treePos], sum - 1);
+			//std::cerr << "treePos: " << ordValue(treePos) << std::endl;
+			//static_cast<Nothing>(tree.bitStrings[0]);
+			//std::cerr << "Tree:     " << tree.bitStrings[treePos] << std::endl;
+			//std::cerr << "sum-1: " << sum - 1 << " " << tree.bitStrings[treePos] << " " <<  std::endl;
 			TPos addValue = getRank(tree.bitStrings[treePos], sum - 1);
+			//std::cerr << "getRank: " <<  getRank(tree.bitStrings[treePos], sum - 1)<< std::endl;
+			//std::cerr << "#############################" << std::endl;
+			//std::cerr << "direction: " << direction << " addValue: " << addValue << " " << sum << std::endl;
 			if(direction)
 			{
-				range.i1 = getCharacter(iter) + 1;
+				character = getCharacter(iter) + 1;
 				sum = addValue;
 				goRight(iter);
+			//	std::cerr << "direction: " << direction << " " << sum << std::endl;
 			}
 			else
 			{	
-				range.i2 = getCharacter(iter);
+				character = getCharacter(iter);
 				sum -= addValue;
 				goLeft(iter);
+			//	std::cerr << "direction: " << direction << " " << sum << std::endl;
 			}
 			treePos = getPosition(iter);
 		}while(treePos);
 		
-		if(direction)
-		{
-			return range.i2;
-		}
-		return range.i1;
+		return character;
 	}
 	
 	template < typename TContainer, typename TPos, typename TBitsPerNumber, typename TValue >
@@ -396,8 +422,6 @@ namespace seqan{
 			lowerBound,
 			upperBound);
 
-		//typename Fibre< WaveletTree< TSplitValue, TPosInSubTree >, FibreSplitValues >::Type &splitValues = tree.splitValues;
-		//TPosInSubTree nextNode = splitValues.treeNodes[treePos].i2;
 		TValue leftUpperBound = getCharacter(iter);
 		goLeft(iter);
 		if(getPosition(iter))
@@ -410,7 +434,6 @@ namespace seqan{
 					leftUpperBound);
 		}
 
-		//nextNode = splitValues.treeNodes[treePos].i3;
 		TValue rightLowerBound = ordValue(getCharacter(iterRight)) + 1;
 		goRight(iterRight);
 		if(getPosition(iterRight))
@@ -424,7 +447,7 @@ namespace seqan{
 		}
 	}
 
-	//determine the start bucket
+/*	//determine the start bucket
 	template< typename TSpec >
 	TSpec getFinalWidth(TSpec &width)
 	{
@@ -444,7 +467,7 @@ namespace seqan{
 			return width / bitsPerValue + 1;
 		}
 		return width / bitsPerValue;
-	}
+	}*/
 
 	
 	template < 
@@ -541,6 +564,67 @@ namespace seqan{
 		getNumChars(bwt, freqTable);
 
 		createWaveletTree(tree, bwt, freqTable);
+	}
+
+	template< typename TText >
+	inline bool open(
+		WaveletTree< TText, SingleString > &tree, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		
+		typedef typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type TValue;
+		typedef typename Size< TText >::Type							TSize;
+
+		String< Pair< TValue, TSize > > dollarValues;
+
+		name = fileName;	append(name, ".dollar");
+		if(!open(dollarValues, toCString(name), openMode))
+		{
+			return false;
+		}
+		tree.dollarSub = dollarValues[0].i1;
+		tree.dollarPosition = dollarValues[0].i2;
+		name = fileName;	append(name, ".tree");	open(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
+		name = fileName;	append(name, ".split");	open(getFibre(tree, FibreSplitValues()), toCString(name), openMode);
+		return true;
+	}
+
+	template < typename TText >
+	inline bool open(
+		WaveletTree< TText, SingleString > &tree, 
+		const char *fileName)
+	{
+		return open(tree, fileName, DefaultOpenMode< WaveletTree< TText, SingleString > >::VALUE);
+	}
+
+	template< typename TText >
+	inline bool save(
+		WaveletTree< TText, SingleString > const &tree, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+
+		typedef typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type TValue;
+		typedef typename Size< TText >::Type							TSize;
+
+		String< Pair< TValue, TSize > > dollarValues;
+		append(dollarValues, Pair<TValue, TSize >(tree.dollarSub, tree.dollarPosition));
+
+		name = fileName;	append(name, ".dollar");save(dollarValues, toCString(name), openMode);
+		name = fileName;	append(name, ".tree");	save(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
+		name = fileName;	append(name, ".split");	save(getFibre(tree, FibreSplitValues()), toCString(name), openMode);
+		return true;
+	}
+
+	template < typename TText >
+	inline bool save(
+		WaveletTree< TText, SingleString > const &tree, 
+		const char *fileName)
+	{
+		return save(tree, fileName, DefaultOpenMode< WaveletTree< TText, SingleString > >::VALUE);
 	}
 }
 #endif  // #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREE_H_

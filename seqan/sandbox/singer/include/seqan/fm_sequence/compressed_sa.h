@@ -50,6 +50,13 @@ namespace seqan
 			occTable(occTable),
 			prefixSumTable(prefixSumTable)
 		{};
+		
+		bool operator==(const LFTable &b) const
+		{
+			return (occTable == b.occTable && 
+					prefixSumTable == b.prefixSumTable);
+		}
+
 	};
 
 	struct FibreOccTable_;
@@ -71,6 +78,13 @@ namespace seqan
 	};
 
 	template< typename TOccTable, typename TPrefixSumTable >
+	typename Fibre< LFTable< TOccTable, TPrefixSumTable >, FibrePrefixSumTable >::Type const &
+	getFibre(LFTable< TOccTable, TPrefixSumTable > const &lfTable, FibrePrefixSumTable)
+	{
+		return lfTable.prefixSumTable;
+	}
+
+	template< typename TOccTable, typename TPrefixSumTable >
 	typename Fibre< LFTable< TOccTable, TPrefixSumTable >, FibrePrefixSumTable >::Type &
 	getFibre(LFTable< TOccTable, TPrefixSumTable > &lfTable, FibrePrefixSumTable)
 	{
@@ -84,6 +98,63 @@ namespace seqan
 		return lfTable.occTable;
 	}
 	
+	template< typename TOccTable, typename TPrefixSumTable >
+	typename Fibre< LFTable< TOccTable, TPrefixSumTable >, FibreOccTable >::Type const &
+	getFibre(LFTable< TOccTable, TPrefixSumTable > const &lfTable, FibreOccTable)
+	{
+		return lfTable.occTable;
+	}
+	
+	template< typename TOccTable, typename TPrefixSumTable >
+	inline bool open(
+		LFTable< TOccTable, TPrefixSumTable > &lfTable, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".occ");
+		if(!open(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
+		{
+			return false;
+		}
+		name = fileName;	append(name, ".psum");	open(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
+		return true;
+	
+	}
+
+	template< typename TOccTable, typename TPrefixSumTable >
+	inline bool open(
+		LFTable< TOccTable, TPrefixSumTable > &lfTable, 
+		const char *fileName)
+	{
+		return open(lfTable, fileName, DefaultOpenMode< LFTable< TOccTable, TPrefixSumTable > >::VALUE);
+	}
+
+	template< typename TOccTable, typename TPrefixSumTable >
+	inline bool save(
+		LFTable< TOccTable, TPrefixSumTable > const &lfTable, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".occ");
+		if(!save(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
+		{
+			return false;
+		}
+		name = fileName;	append(name, ".psum");	save(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
+		return true;
+	
+	}
+
+	template< typename TOccTable, typename TPrefixSumTable >
+	inline bool save(
+		LFTable< TOccTable, TPrefixSumTable > const &lfTable, 
+		const char *fileName)
+	{
+		return save(lfTable, fileName, DefaultOpenMode< LFTable< TOccTable, TPrefixSumTable > >::VALUE);
+	}
+
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct CompressedSA
 	{
@@ -93,6 +164,7 @@ namespace seqan
 		CompressedSA(){};
 
 		typedef typename Size< typename Fibre< TSparseString, FibreSparseString >::Type >::Type TCompressedSaValue;
+
 		template < typename TPos >
 		TCompressedSaValue const operator[](TPos pos)
 		{ 
@@ -120,14 +192,27 @@ namespace seqan
 			}
 			return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
 		}
+		
+		bool operator==(const CompressedSA &b) const
+		{
+			return (compressedSA == b.compressedSA && 
+					*lfTable == *(b.lfTable));
+		}
 	};
-
 
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct Fibre< CompressedSA < TSparseString, TLfTable, TSpec >, FibreSA >
 	{
 		typedef TSparseString Type;
 	};
+
+
+	template< typename TSparseString, typename TLfTable, typename TSpec >
+	typename Fibre< CompressedSA < TSparseString, TLfTable, TSpec >, FibreSA >::Type const &
+	getFibre(CompressedSA < TSparseString, TLfTable, TSpec > const &compressedSA, FibreSA)
+	{
+		return compressedSA.compressedSA;
+	}
 
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	typename Fibre< CompressedSA < TSparseString, TLfTable, TSpec >, FibreSA >::Type &
@@ -136,6 +221,53 @@ namespace seqan
 		return compressedSA.compressedSA;
 	}
 
+	template< typename TSparseString, typename TLfTable, typename TSpec >
+	inline bool open(
+		CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".sstring");
+		if(!open(getFibre(compressedSA, FibreSA()), toCString(name), openMode))
+		{
+			return false;
+		}
+		return true;
+	
+	}
+
+	template< typename TSparseString, typename TLfTable, typename TSpec >
+	inline bool open(
+		CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, 
+		const char *fileName)
+	{
+		return open(compressedSA, fileName, DefaultOpenMode< CompressedSA< TSparseString, TLfTable, TSpec > >::VALUE);
+	}
+	
+	template< typename TSparseString, typename TLfTable, typename TSpec >
+	inline bool save(
+		CompressedSA< TSparseString, TLfTable, TSpec > const &compressedSA, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".sstring");
+		if(!save(getFibre(compressedSA, FibreSA()), toCString(name), openMode))
+		{
+			return false;
+		}
+		return true;
+	
+	}
+
+	template< typename TSparseString, typename TLfTable, typename TSpec >
+	inline bool save(
+		CompressedSA< TSparseString, TLfTable, TSpec > const &compressedSA, 
+		const char *fileName)
+	{
+		return save(compressedSA, fileName, DefaultOpenMode< CompressedSA< TSparseString, TLfTable, TSpec > >::VALUE);
+	}
 /*	template< typename TSparseString, typename TLfTable, typename TSpec, typename TSize >
 	void initCompressedSA(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, 
 			TLfTable &lfTable, 

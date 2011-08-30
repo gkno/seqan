@@ -111,8 +111,58 @@ namespace seqan{
 			unsigned const bitsPerSuperBucketStringEntrie = bitsPerBucketStringEntrie * bitsPerBucketStringEntrie;
 			resize(superBucketString, length(bucketString) / bitsPerSuperBucketStringEntrie);
 		}
+
+		bool operator==(const RankSupportBitString &b) const
+		{
+			return (length == b.length && 
+					bitString == b.bitString && 
+					bucketString == b.bucketString && 
+					superBucketString == b.superBucketString);
+		}
+
 	};
+
+	template< typename TSpec >
+	typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type &
+	getFibre(RankSupportBitString< TSpec > &string, const FibreRankSupportBitString)
+	{
+		return string.bitString;
+	}
 	
+	template< typename TSpec >
+	typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type const &
+	getFibre(RankSupportBitString< TSpec > const &string, const FibreRankSupportBitString)
+	{
+		return string.bitString;
+	}
+	
+	template< typename TSpec >
+	typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBucketString >::Type &
+	getFibre(RankSupportBitString< TSpec > &string, const FibreRankSupportBucketString)
+	{
+		return string.bucketString;
+	}
+	
+	template< typename TSpec >
+	typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBucketString >::Type const &
+	getFibre(RankSupportBitString< TSpec > const &string, const FibreRankSupportBucketString)
+	{
+		return string.bucketString;
+	}
+	
+	template< typename TSpec >
+	typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type &
+	getFibre(RankSupportBitString< TSpec > &string, const FibreRankSupportSuperBucketString)
+	{
+		return string.superBucketString;
+	}
+
+	template< typename TSpec >
+	typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type const &
+	getFibre(const RankSupportBitString< TSpec > &string, const FibreRankSupportSuperBucketString)
+	{
+		return string.superBucketString;
+	}
 
 	template< typename TValue, typename TSize>
 	std::ostream& printBits(std::ostream &stream, TValue entrie, TSize blockSize)
@@ -131,7 +181,7 @@ namespace seqan{
 	
 	
 	template< typename TSpec >
-	std::ostream& operator<<(std::ostream &stream, RankSupportBitString< TSpec > &rankSupportBitString)
+	std::ostream& operator<<(std::ostream &stream, const RankSupportBitString< TSpec > &rankSupportBitString)
 	{
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBucketString >::Type				TBucketString;
@@ -143,9 +193,9 @@ namespace seqan{
 
 		unsigned bitsPerBucket = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
 
-		TBitString &bitString = rankSupportBitString.bitString;
-		TBucketString &bucketString = rankSupportBitString.bucketString;
-		TSuperBucketString &superBucketString = rankSupportBitString.superBucketString;
+		TBitString const &bitString = rankSupportBitString.bitString;
+		TBucketString const &bucketString = rankSupportBitString.bucketString;
+		TSuperBucketString const &superBucketString = rankSupportBitString.superBucketString;
 
 		stream << "  ";
 		for(TBitStringValue i = 0; i < length(bitString); i++)
@@ -367,12 +417,14 @@ namespace seqan{
 	template< typename TValue >
 	unsigned getRankInBucket(const TValue value, False)
 	{
+		std::cerr << "int32" << std::endl;
 		return __builtin_popcountl(static_cast< int32_t >(value));
 	}
 
 	template< typename TValue >
 	unsigned getRankInBucket(const TValue value, True)
 	{
+		std::cerr << "int64" << std::endl;
 		return __builtin_popcountll(static_cast< int64_t >(value));
 	}
 
@@ -403,8 +455,11 @@ namespace seqan{
 	typename Value< typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type >::Type
 	getRank(const RankSupportBitString< TSpec > &rankSupportBitString, const TPos pos)
 	{
+		//std::cerr << "________________________________" << std::endl;
+		//std::cerr << rankSupportBitString << std::endl;
 		if(!length(rankSupportBitString))
 		{
+			std::cerr << "length = 0" << std::endl;
 			return 0;
 		}
 
@@ -414,6 +469,7 @@ namespace seqan{
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
 		unsigned bitsPerBucket = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
 		unsigned long bucketPos = pos/bitsPerBucket;
+	//	std::cerr << "bucketPos: " << bucketPos << std::endl;
 		if(bucketPos)
 		{
 			sum += rankSupportBitString.bucketString[bucketPos];
@@ -425,8 +481,10 @@ namespace seqan{
 				sum += rankSupportBitString.superBucketString[superBucketPos];
 			}
 		}
-
+		
+	//	std::cerr << "sum0: " << sum << std::endl;
 		sum += getRankInBucket(rankSupportBitString.bitString, pos);
+//		std::cerr << "sum1: " << sum << std::endl;
 		return sum;
 	}
 
@@ -566,6 +624,139 @@ namespace seqan{
 		}
 		++l;
 		return l;
+	}
+
+	template< typename TSpec >
+	inline bool open(
+		RankSupportBitString< TSpec > &string, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".bit");	
+		if(!open(getFibre(string, FibreRankSupportBitString()), toCString(name), openMode))
+			return false;
+		name = fileName;	append(name, ".bucket");	open(getFibre(string, FibreRankSupportBucketString()), toCString(name), openMode);
+		name = fileName;	append(name, ".sbucket");	open(getFibre(string, FibreRankSupportSuperBucketString()), toCString(name), openMode);
+		return true;
+	}
+
+
+	template < typename TSpec >
+	inline bool open(
+		RankSupportBitString< TSpec > &string, 
+		const char *fileName)
+	{
+		return open(string, fileName, OPEN_RDONLY);
+	}
+	// ATTENTION:
+	// This implementation of open doesn't work with external memory StringSets (External<>, MMap<>)
+	// If you need a persistent external StringSet you have to use a Owner<ConcatDirect<> > StringSet.
+	template < typename TSpec >
+	inline bool open(StringSet<RankSupportBitString< TSpec > > &multi, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
+
+		typedef typename Size< RankSupportBitString< TSpec > >::Type TSize;
+		typedef String< TSize > TSizeString;
+		TSizeString sizeString;
+		resize(sizeString, length(multi));
+		CharString name = fileName;
+		name = fileName;	append(name, ".ssize");	open(sizeString, toCString(name), openMode);
+
+		char id[12]; // 2^32 has 10 decimal digits + 1 (0x00)
+		unsigned i = 0;
+		clear(multi);
+		while (true)
+		{
+			sprintf(id, ".%u", i);
+			name = fileName;
+			append(name, id);
+			{
+				resize(multi, i + 1);
+				if (!open(multi[i], toCString(name), (openMode & ~OPEN_CREATE) | OPEN_QUIET))
+				{
+					resize(multi, i);
+					break;
+				}
+			}
+			++i;
+		}
+
+		for(TSize i = 0; i < length(multi); ++i)
+		{
+			multi[i].length = sizeString[i];
+		}
+
+		return i > 1;
+	}
+
+	template < typename TSpec >
+	inline bool open(
+		StringSet< RankSupportBitString< TSpec > > &strings, 
+		const char *fileName)
+	{
+		return open(strings, fileName, OPEN_RDONLY);
+	}
+	
+	template< typename TSpec >
+	inline bool save(
+		RankSupportBitString< TSpec > const &string, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".bit");		save(getFibre(string, FibreRankSupportBitString()), toCString(name), openMode);
+		name = fileName;	append(name, ".bucket");	save(getFibre(string, FibreRankSupportBucketString()), toCString(name), openMode);
+		name = fileName;	append(name, ".sbucket");	save(getFibre(string, FibreRankSupportSuperBucketString()), toCString(name), openMode);
+		return true;
+	}
+
+	template < typename TSpec >
+	inline bool save(
+		RankSupportBitString< TSpec > const &string, 
+		const char *fileName)
+	{
+		return save(string, fileName, DefaultOpenMode< RankSupportBitString< TSpec > >::VALUE);
+	}
+		
+	template < typename TSpec >
+	inline bool save(StringSet< RankSupportBitString< TSpec > > const &multi, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
+
+		typedef typename Size< RankSupportBitString< TSpec > >::Type TSize;
+		typedef String< TSize > TSizeString;
+		TSizeString sizeString;
+		resize(sizeString, length(multi));
+		for(TSize i = 0; i < length(multi); ++i)
+		{
+			sizeString[i] = length(multi[i]);
+		}
+
+		CharString name;
+		name = fileName;	append(name, ".ssize");	save(sizeString, toCString(name), openMode);
+		if (length(multi) == 0) return true;
+		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
+		for(unsigned i = 0; i < length(multi); ++i)
+		{
+			std::cerr << "i: " << i << std::endl;
+			sprintf(id, ".%u", i);
+			name = fileName;
+			append(name, &(id[0]));
+			std::cerr << name << " " << &(id[0]) << std::endl;
+			//char c;
+			//std::cin>>c;
+			if (!save(multi[i], toCString(name), openMode))
+				return false;
+		}
+		return true;
+	}
+	
+	template < typename TSpec >
+	inline bool save(
+		StringSet< RankSupportBitString< TSpec > > const &strings, 
+		const char *fileName)
+	{
+		return save(strings, fileName, OPEN_RDONLY);
 	}
 }
 

@@ -71,6 +71,14 @@ namespace seqan{
 		typename Size< TSparseString >::Type 	blockSize;
 
 		SparseString(){}
+		
+		bool operator==(const SparseString &b) const
+		{
+			return (string == b.string && 
+					indicatorString == b.indicatorString && 
+					//blockSize == b.blockSize);
+					1);
+		}
 	};
 	template< typename TSparseString, typename TSpec >
 	typename Fibre< SparseString < TSparseString, TSpec >, FibreSparseString >::Type &
@@ -136,7 +144,7 @@ namespace seqan{
 	template < typename TSparseString, typename TSpec, typename TValue >
 	void assignBlockSize(SparseString< TSparseString, TSpec > &string, TValue value)
 	{
-		std::cerr << "sparse" << std::endl;
+		//std::cerr << "sparse" << std::endl;
 		string.blockSize = value;
 	}
 	
@@ -156,6 +164,13 @@ namespace seqan{
 	template < typename TSparseString, typename TSpec, typename TPos >
 	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
 	getValue(SparseString< TSparseString, TSpec > &string, TPos pos)
+	{
+		return getValue(string.string, pos);
+	}
+
+	template < typename TSparseString, typename TSpec, typename TPos >
+	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type 
+	getValue(SparseString< TSparseString, TSpec > const &string, TPos pos)
 	{
 		return getValue(string.string, pos);
 	}
@@ -188,6 +203,55 @@ namespace seqan{
 	{
 		return string.string[pos];
 	}
+	
+	template< typename TSparseString, typename TSpec >
+	inline bool open(
+		SparseString< TSparseString, TSpec > &sparseString, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".sstring");
+		if(!open(getFibre(sparseString, FibreSparseString()), toCString(name), openMode))
+		{
+			return false;
+		}
+		name = fileName;	append(name, ".istring");	open(getFibre(sparseString, FibreIndicatorString()), toCString(name), openMode);
+		return true;
+	}
+	
+	template< typename TSparseString, typename TSpec >
+	inline bool open(
+		SparseString< TSparseString, TSpec > &sparseString, 
+		const char *fileName)
+	{
+		return open(sparseString, fileName, DefaultOpenMode< SparseString< TSparseString, TSpec > >::VALUE);
+	}
+	
+	template< typename TSparseString, typename TSpec >
+	inline bool save(
+		SparseString< TSparseString, TSpec > const &sparseString, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".sstring");
+		if(!save(getFibre(sparseString, FibreSparseString()), toCString(name), openMode))
+		{
+			return false;
+		}
+		name = fileName;	append(name, ".istring");	save(getFibre(sparseString, FibreIndicatorString()), toCString(name), openMode);
+		return true;
+	}
+	
+	template< typename TSparseString, typename TSpec >
+	inline bool save(
+		SparseString< TSparseString, TSpec > const &sparseString, 
+		const char *fileName)
+	{
+		return save(sparseString, fileName, DefaultOpenMode< SparseString< TSparseString, TSpec > >::VALUE);
+	}
+	
 }
 
 
