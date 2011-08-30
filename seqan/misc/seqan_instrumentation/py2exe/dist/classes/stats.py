@@ -44,7 +44,9 @@ class Stats(object):
 		json.dump(self.stats, f, indent = 4)
 		f.close()
 
-		shutil.copyfile(self.get_cMakeCache_path(), self.get_cMakeCache_copy_path())
+		cMakeCache_path = self.get_cMakeCache_path()
+		if not cMakeCache_path is None and os.path.isfile(cMakeCache_path):
+			shutil.copyfile(cMakeCache_path, self.get_cMakeCache_copy_path())
 		
 	def needs_refresh(self, stat):
 		return not stat in self.stats or self.stats[stat] is None or len(self.stats[stat]) == 0

@@ -1,6 +1,7 @@
 import os
 import subprocess
 import glob
+from datetime import datetime
 from ftplib import FTP
 
 class Diff(object):
@@ -15,23 +16,17 @@ class Diff(object):
 		self.excluded_resources = excluded_resources
 		self.bin_dir = bin_dir
 
-	def get_diff_filename(self, revision):
-		return self.results_dir + "/" + self.id.get() + "_r" + str.rjust(str(revision), self.MAX_REVISION_LENGTH, "0") + ".diff"
+	def get_diff_filename(self, revision, datetime):
+		return self.results_dir + "/" + self.id.get() + "_r" + str.rjust(str(revision), self.MAX_REVISION_LENGTH, "0") + "_" + datetime.strftime("%Y-%m-%dT%H-%M-%S") + ".diff"
 	
 	def get_diff_filenames(self):
-		diff_filenames = []
-		for i in range(2**self.MAX_REVISION_LENGTH-1):
-			diff_filename = self.get_diff_filename(i)
-			if(os.path.isfile(diff_filename)):
-				diff_filenames.append(diff_filename)
-			else:
-				return diff_filenames
+		return glob.glob(self.results_dir + "/" + self.id.get() + "_r*_*.diff")
 
 	def get_next_diff_filename(self):
 		r = len(self.get_diff_filenames())
 		if(r >= 2**self.MAX_REVISION_LENGTH):
 			raise Exception("Maximum number of " + (2**self.MAX_REVISION_LENGTH) + " exceeded!")
-		return self.get_diff_filename(r)
+		return self.get_diff_filename(r, datetime.today())
 
 	def save_diff_reset(self, filename):
 		f = open(filename, "w")
@@ -61,7 +56,7 @@ class Diff(object):
 			remote_files = ftp.nlst()
 		except:
 			pass
-	
+
 		# upload all files that are not present on the ftp server
 		for diff_filename in glob.glob(self.results_dir + "/" + self.id.get() + "_*"):
 			if(os.path.basename(diff_filename) not in remote_files):
