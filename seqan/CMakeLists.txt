@@ -1,6 +1,18 @@
 cmake_minimum_required (VERSION 2.6)
 
 # ===========================================================================
+# Iff the file TURN_ON_SEQAN_INSTRUMENTATION exists in the source root
+# turn on SeqAn instrumentation for experimental data collection.
+# ===========================================================================
+
+if(EXISTS ${CMAKE_SOURCE_DIR}/TURN_ON_SEQAN_INSTRUMENTATION)
+  set(SEQAN_INSTRUMENTATION YES)
+else(EXISTS ${CMAKE_SOURCE_DIR}/TURN_ON_SEQAN_INSTRUMENTATION)
+  set(SEQAN_INSTRUMENTATION NO)
+endif(EXISTS ${CMAKE_SOURCE_DIR}/TURN_ON_SEQAN_INSTRUMENTATION)
+
+
+# ===========================================================================
 # Warn People About the Perils Of In-Source Builds
 # ===========================================================================
 

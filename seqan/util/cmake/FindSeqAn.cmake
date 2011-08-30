@@ -3,6 +3,58 @@
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
+# Macro seqan_workshop_instrumentation_cmake ()
+# ---------------------------------------------------------------------------
+
+macro(seqan_instrumentation_cmake)
+	if(SEQAN_INSTRUMENTATION)
+	    message(STATUS "Prepare Instrumentation...")
+	    if(CMAKE_HOST_WIN32)
+	        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe cmake ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+	        add_custom_target(seqan_instrumentation_build ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
+	                          COMMENT "Build Instrumentation...")
+	    else(CMAKE_HOST_WIN32)
+	        execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py cmake ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+	        add_custom_target(seqan_instrumentation_build ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
+	                          COMMENT "Build Instrumentation...")
+	    endif(CMAKE_HOST_WIN32)
+	else(SEQAN_INSTRUMENTATION)
+		message(STATUS "SeqAn instrumentation deactivated.")
+	endif(SEQAN_INSTRUMENTATION)
+endmacro (seqan_instrumentation_cmake)
+
+
+# ---------------------------------------------------------------------------
+# Macro seqan_workshop_instrumentation_target (TARGET)
+# ---------------------------------------------------------------------------
+
+macro (seqan_instrumentation_target TARGET)
+	if(SEQAN_INSTRUMENTATION)
+	    add_dependencies(${TARGET} seqan_instrumentation_build)
+	
+	    if(CMAKE_HOST_WIN32)
+	      add_custom_command(TARGET ${TARGET}
+	                         PRE_BUILD
+	                         COMMAND ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe pre_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
+	                         COMMENT "Pre Build Instrumentation...")
+	      add_custom_command(TARGET ${TARGET}
+	                         POST_BUILD
+	                         COMMAND ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe post_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
+	                         COMMENT "Post Build Instrumentation...")
+	    else(CMAKE_HOST_WIN32)
+	      add_custom_command(TARGET ${TARGET}
+	                         PRE_BUILD
+	                         COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py pre_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
+	                         COMMENT "Pre Build Instrumentation...")
+	      add_custom_command(TARGET ${TARGET}
+	                         POST_BUILD
+	                         COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py post_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
+	                         COMMENT "Post Build Instrumentation...")
+	    endif(CMAKE_HOST_WIN32)
+	endif(SEQAN_INSTRUMENTATION)
+endmacro (seqan_instrumentation_target TARGET)
+
+# ---------------------------------------------------------------------------
 # Macro seqan_setup_global ()
 # ---------------------------------------------------------------------------
 
@@ -80,6 +132,11 @@ macro (seqan_setup_global)
         # TODO(holtgrew): Re-disable again, Microsoft's header do not compile with this option! Look for a workaround.
         #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Za")
     endif (MSVC)
+
+    # -----------------------------------------------------------------------
+    # Instrumentation
+    # -----------------------------------------------------------------------
+    seqan_instrumentation_cmake()
 endmacro (seqan_setup_global)
 
 # ---------------------------------------------------------------------------
@@ -417,7 +474,12 @@ macro (seqan_add_executable TARGET_NAME)
   	# Dependencies on all registered seqan extensions.
   	add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})
     # message(STATUS "add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})")
-	
+
+    # -----------------------------------------------------------------------
+    # Instrumentation
+    # -----------------------------------------------------------------------
+    seqan_instrumentation_target(${ARGV0})
+
   	# Link against zlib and bzlib if found.
   	if (ZLIB_FOUND)
   	    include_directories (${ZLIB_INCLUDE_DIR})
@@ -456,6 +518,11 @@ macro (seqan_add_test_executable TARGET_NAME)
   	# Dependencies on all registered seqan extensions.
     # message("add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})")
   	add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})
+
+    # -----------------------------------------------------------------------
+    # Instrumentation
+    # -----------------------------------------------------------------------
+    seqan_instrumentation_target(${ARGV0})
 
   	# Link against zlib and bzlib if found.
   	if (ZLIB_FOUND)
@@ -503,6 +570,11 @@ function (seqan_add_cuda_executable TARGET_NAME)
   	
       	# Dependencies on all registered seqan extensions.
       	add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})
+
+        # -----------------------------------------------------------------------
+        # Instrumentation
+        # -----------------------------------------------------------------------
+	seqan_instrumentation_target(${ARGV0})
 	
       	# Link against zlib and bzlib if found.
       	if (ZLIB_FOUND)
@@ -560,6 +632,11 @@ function (seqan_add_cuda_test_executable TARGET_NAME)
   	
       	# Dependencies on all registered seqan extensions.
       	add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})
+
+        # -----------------------------------------------------------------------
+        # Instrumentation
+        # -----------------------------------------------------------------------
+	seqan_instrumentation_target(${ARGV0})
 	
       	# Link against zlib and bzlib if found.
       	if (ZLIB_FOUND)
