@@ -71,8 +71,17 @@ class Stats(object):
 			lines_without_slash_comments = map(lambda x: "" if len(x) >= 2 and x[0:2] == "//" else x, lines)
 
 			config = ConfigObj(lines_without_slash_comments)
-			compiler = config["CMAKE_GENERATOR:INTERNAL"]
-			self.stats["devenv"] = { "compiler": compiler }
+			self.stats["devenv"] = {
+				"CMAKE_GENERATOR": config["CMAKE_GENERATOR:INTERNAL"],
+				"CMAKE_BUILD_TYPE": config["CMAKE_BUILD_TYPE:STRING"],
+				"CMAKE_C_COMPILER": config["CMAKE_GENERATOR:INTERNAL"],
+				"CMAKE_C_FLAGS": config["CMAKE_C_FLAGS:STRING"],
+				"CMAKE_CXX_COMPILER": config["CMAKE_CXX_COMPILER:FILEPATH"],
+				"CMAKE_CXX_FLAGS": config["CMAKE_CXX_FLAGS:STRING"],
+				"CMAKE_LINKER": config["CMAKE_LINKER:FILEPATH"],
+				"CMAKE_MODULE_LINKER_FLAGS": config["CMAKE_MODULE_LINKER_FLAGS:STRING"],
+				"CMAKE_MAKE_PROGRAM": config["CMAKE_MAKE_PROGRAM:FILEPATH"]
+			}
 			self.save()
 		return self.stats["devenv"]		
 	    
