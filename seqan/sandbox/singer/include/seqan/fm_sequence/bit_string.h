@@ -226,12 +226,13 @@ namespace seqan{
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
 		typedef typename Value< TBitString >::Type TBitStringValue;
 		unsigned bitsPerBucket = BitsPerValue< TBitStringValue >::VALUE;
+		std::cerr << "bitsPerBucket: " << bitsPerBucket << std::endl;
 		unsigned long long numberOfBuckets;
 	   	(size) ? numberOfBuckets = size / bitsPerBucket + 1 : numberOfBuckets = 0;
 
 		resize(rankSupportBitString.bitString, numberOfBuckets , 0);
 		resize(rankSupportBitString.bucketString, numberOfBuckets, 0);
-		resize(rankSupportBitString.superBucketString, numberOfBuckets / bitsPerBucket, 0);
+		resize(rankSupportBitString.superBucketString, numberOfBuckets / bitsPerBucket + 1, 0);
 	} 
 	
 	template< typename TSpec, typename TSize, typename TValue>
@@ -242,12 +243,13 @@ namespace seqan{
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type	TBitString;
 		typedef typename Value< TBitString >::Type TBitStringValue;
 		unsigned bitsPerBucket = BitsPerValue< TBitStringValue >::VALUE;
+		std::cerr << "bitsPerBucket: " << bitsPerBucket << std::endl;
 		unsigned long long numberOfBuckets;
 	   	(size) ? numberOfBuckets = size / bitsPerBucket + 1 : numberOfBuckets = 0;
 	   	
 		resize(rankSupportBitString.bitString, numberOfBuckets , value);
 		resize(rankSupportBitString.bucketString, numberOfBuckets, value);
-		resize(rankSupportBitString.superBucketString, numberOfBuckets / bitsPerBucket, value);
+		resize(rankSupportBitString.superBucketString, numberOfBuckets / bitsPerBucket + 1, value);
 	}
 
 	template< typename TSpec >
@@ -417,14 +419,12 @@ namespace seqan{
 	template< typename TValue >
 	unsigned getRankInBucket(const TValue value, False)
 	{
-		std::cerr << "int32" << std::endl;
 		return __builtin_popcountl(static_cast< int32_t >(value));
 	}
 
 	template< typename TValue >
 	unsigned getRankInBucket(const TValue value, True)
 	{
-		std::cerr << "int64" << std::endl;
 		return __builtin_popcountll(static_cast< int64_t >(value));
 	}
 
@@ -512,7 +512,8 @@ namespace seqan{
 		TBucketString &bucketString = bitString.bucketString;
 		TSuperBucketString &superBucketString = bitString.superBucketString;
 
-		typedef typename Value< TBucketString >::Type TSize;
+		typedef typename Value< TSuperBucketString >::Type TSize;
+		unsigned bla = BitsPerValue< TSize >::VALUE;
 		for(TSize i = 0; i < length(bitString_) - 1; i++)
 		{
 			tempSum = getRankInBucket(bitString_[i]);
@@ -521,13 +522,12 @@ namespace seqan{
 			if(!((i + 1) % bitsPerBucket))
 			{
 				superBucketSum += bucketSum;
+				std::cerr << i << " length(bitString_): " << length(bitString_) << " length(superBucketString): " << length(superBucketString) << " superBucketCounter: " << superBucketCounter << std::endl;
 				superBucketString[superBucketCounter] = superBucketSum;
 				bucketSum = 0;
 				++superBucketCounter;
 			}
 		}	
-
-
 	}
 	
 	//Manuel Forwards

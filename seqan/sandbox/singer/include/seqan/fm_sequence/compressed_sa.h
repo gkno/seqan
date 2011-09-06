@@ -200,6 +200,56 @@ namespace seqan
 		}
 	};
 
+	template< typename TSparseStrings, typename TLfTable, typename TSpec >
+	struct CompressedSA< StringSet< TSparseStrings >, TLfTable, TSpec >
+	{
+		typedef StringSet< TSparseStrings > 	TSparseString;
+		TSparseString							compressedSA;
+		TLfTable * 								lfTable;
+
+		CompressedSA(){};
+
+		typedef typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type TCompressedSaValue;
+
+		template < typename TPos >
+		TCompressedSaValue const operator[](TPos pos)
+		{ 
+			typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
+			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
+			TPos counter = 0;
+			while(!getBit(indicatorString, pos))
+			{
+				pos = lfMapping(*lfTable, pos);
+				++counter;
+			}
+			TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
+		   	temp.i2	+= counter;
+			return temp;	
+		}
+
+		template < typename TPos >
+		TCompressedSaValue operator[](TPos pos) const
+		{
+			typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
+			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
+			TPos counter = 0;
+			while(!getBit(indicatorString, pos))
+			{
+				pos = lfMapping(*lfTable, pos);
+				++counter;
+			}
+			TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
+		   	temp.i2	+= counter;
+			return temp;	
+		}
+		
+		bool operator==(const CompressedSA &b) const
+		{
+			return (compressedSA == b.compressedSA && 
+					*lfTable == *(b.lfTable));
+		}
+	};
+
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct Fibre< CompressedSA < TSparseString, TLfTable, TSpec >, FibreSA >
 	{

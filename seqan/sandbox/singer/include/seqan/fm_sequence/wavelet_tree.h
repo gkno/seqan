@@ -38,18 +38,39 @@
 namespace seqan{
 	
 	template < typename TText, typename TFreq >
+	void getNumCharsImpl(TText &text,
+		TFreq &freq)
+	{
+		typedef typename Size< TText >::Type TSize;
+		for (TSize i = 0; i < length(text); ++i)
+		{
+			++freq[ordValue(text[i])];
+		}
+	}
+	template < typename TText, typename TFreq >
 	void getNumChars(TText &text,
 		TFreq &freq)
 	{
-
 		typedef typename Value< TText >::Type TValue;
+		unsigned int sigmaSize = ValueSize< TValue >::VALUE;
+
+		typedef typename Value< TFreq >::Type TFreqValue;
+		resize(freq, sigmaSize, 0);
+		getNumCharsImpl(text, freq);
+	}
+	
+	template < typename TSequence, typename TFreq >
+	void getNumChars(StringSet< TSequence > &text,
+		TFreq &freq)
+	{
+		typedef typename Value< TSequence >::Type TValue;
 		unsigned int sigmaSize = ValueSize< TValue >::VALUE;
 
 		typedef typename Value< TFreq >::Type TFreqValue;
 		resize(freq, sigmaSize, 0);
 		for (unsigned i = 0; i < length(text); ++i)
 		{
-			++freq[ordValue(text[i])];
+			getNumCharsImpl(getValue(text,i), freq);
 		}
 	}
 
@@ -76,11 +97,12 @@ namespace seqan{
 	struct WaveletTree;
 
 	struct SingleString_;
-	typedef Tag< SingleString_ > SingleString;
-
+	struct MultiString_;
 	struct FibreBitStrings_;
 	struct FibreSplitValues_;
 
+	typedef Tag< SingleString_ > SingleString;
+	typedef Tag< MultiString_ > MultiString;
 	typedef Tag< FibreBitStrings_ > const FibreBitStrings;
 	typedef Tag< FibreSplitValues_ > const FibreSplitValues;
 
@@ -187,6 +209,67 @@ namespace seqan{
 		}
 
 	};
+
+	template< typename TText >
+	struct WaveletTree< TText, MultiString >
+	{
+		typedef typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type 	TValue;
+		typedef typename Fibre< WaveletTree, FibreBitStrings >::Type 								TBitStrings;
+		typedef typename Size< TText >::Type														TSize;
+		
+		TBitStrings 						bitStrings;
+		WaveletTreeStructure< TText >		splitValues;
+		TBitStrings							dollarPosition;
+		TValue		 						dollarSub;
+
+		WaveletTree(){}
+
+		WaveletTree(TText const &text)
+		{
+			dollarSub = 0;
+			createWaveletTree(*this, text);	
+		}
+
+		template< typename TFreqTable >
+		WaveletTree(TText const &text, TFreqTable const &freqTable)
+		{
+			dollarSub = 0;
+			createWaveletTree(*this, text, freqTable);	
+		}
+		
+		template< typename TFreqTable, typename TPrefixSumTable >
+		WaveletTree(TText const &text, TFreqTable const &freqTable, TPrefixSumTable const &prefixSumTable)
+		{
+			dollarSub = 0;
+			createWaveletTree(*this, text, freqTable, prefixSumTable);	
+		}
+		
+		bool operator==(const WaveletTree &b) const
+		{
+			typedef typename Size< TText >::Type TSize;
+			bool test = true;
+			if(length(bitStrings) == length(b.bitStrings))
+			{				
+				for(TSize i = 0; i < length(bitStrings); ++i)
+				{
+					if(!(bitStrings[i] == b.bitStrings[i]))
+					{
+						test = false;
+					}
+				}
+			}
+			else
+			{
+				test = false;
+			}
+
+			return (test && 
+					splitValues == b.splitValues && 
+					dollarPosition == b.dollarPosition && 
+					dollarSub == b.dollarSub);
+		}
+
+	};
 	
 	template< typename TText, typename TSpec >
 	typename Fibre< WaveletTree< TText, TSpec >, FibreBitStrings >::Type &
@@ -270,6 +353,25 @@ namespace seqan{
 		return occ;
 	}
 	
+	template< 
+		typename TText, 
+		typename TChar, 
+		typename TPos >
+	unsigned getOcc(const WaveletTree< TText, MultiString > &tree,
+		const TChar character,
+		const TPos pos)
+	{
+		typedef typename BitVector_< BitsPerValue< TChar >::VALUE >::Type TTreeSplitValue;
+		TTreeSplitValue ordChar = ordValue(character);
+		unsigned occ = getOccImpl(tree, ordChar, pos);
+		unsigned numDollar = getRank(tree.dollarPosition, pos);
+		if(ordChar == tree.dollarSub)
+		{
+			return occ - numDollar;
+		}
+		return occ;
+	}
+	
 	template<  
 		typename TText, 
 		typename TWaveletTreeSpec,
@@ -282,35 +384,23 @@ namespace seqan{
 		TPos sum = pos + 1;
 		TValue treePos = 0;
 		typename Iterator< const WaveletTreeStructure< TText > >::Type iter(tree.splitValues, treePos);
-//		Pair< TValue, TValue > range(0, tree.splitValues.treeNodes[length(tree.splitValues.treeNodes)- 1].i1 + 1);
-	//	std::cerr << "range: " << range << std::endl;
 		bool direction;
 		TValue character;
-		//std::cerr << pos << std::endl;	
 		do
 		{
 			direction = getBit(tree.bitStrings[treePos], sum - 1);
-			//std::cerr << "treePos: " << ordValue(treePos) << std::endl;
-			//static_cast<Nothing>(tree.bitStrings[0]);
-			//std::cerr << "Tree:     " << tree.bitStrings[treePos] << std::endl;
-			//std::cerr << "sum-1: " << sum - 1 << " " << tree.bitStrings[treePos] << " " <<  std::endl;
 			TPos addValue = getRank(tree.bitStrings[treePos], sum - 1);
-			//std::cerr << "getRank: " <<  getRank(tree.bitStrings[treePos], sum - 1)<< std::endl;
-			//std::cerr << "#############################" << std::endl;
-			//std::cerr << "direction: " << direction << " addValue: " << addValue << " " << sum << std::endl;
 			if(direction)
 			{
 				character = getCharacter(iter) + 1;
 				sum = addValue;
 				goRight(iter);
-			//	std::cerr << "direction: " << direction << " " << sum << std::endl;
 			}
 			else
 			{	
 				character = getCharacter(iter);
 				sum -= addValue;
 				goLeft(iter);
-			//	std::cerr << "direction: " << direction << " " << sum << std::endl;
 			}
 			treePos = getPosition(iter);
 		}while(treePos);
