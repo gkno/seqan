@@ -12,7 +12,7 @@ class DiffCollector(object):
 		self.cMake_binary_dir = cMake_binary_dir
 		self.src_dir = src_dir
 		
-		self.dirs		= dirs.Dirs(self.src_dir, [ ".svn", "build", "util", "misc", "docs"""", "core", "extras""" ], [ "*.o", "Thumbs.db", ".DS_Store", "CMakeCache.txt" ])
+		self.dirs		= dirs.Dirs(self.src_dir, [ ".svn", "build", "util", "misc", "docs" ], [ "*.o", "Thumbs.db", ".DS_Store", "CMakeCache.txt" ])
 		self.bin_dir		= self.dirs.get_abs_dir_path("misc/seqan_instrumentation/bin")
 		self.last_revision_dir	= self.dirs.get_abs_dir_path("misc/seqan_instrumentation/last_revision_copy")
 		self.userdata_dir	= self.dirs.get_abs_dir_path("misc/seqan_instrumentation/userdata")

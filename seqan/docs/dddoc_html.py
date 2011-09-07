@@ -551,6 +551,8 @@ def pageIndex(fl, path, cat, subcat, entries, subcats):
     fl.write('<head>')
     fl.write('<meta http-equiv="content-type" content="text/html; charset=UTF-8">');
     fl.write('<link rel="stylesheet" href="dddoc_html.css" type="text/css" />')
+    fl.write('<script type="text/javascript" src="http://bkahlert.com/promotion/doclog/jquery-1.6.2.min.js"></script>\n')
+    fl.write('<script type="text/javascript" src="http://bkahlert.com/promotion/doclog/doclog.js"></script>\n') 
     fl.write('</head>\n')
     fl.write('<script src="searchfile.js"></script>\n') 
     fl.write('<script src="dddoc.js"></script>\n') 
@@ -623,6 +625,8 @@ def pageIndexpage(fl, cat):
     fl.write('<head>')
     fl.write('<meta http-equiv="content-type" content="text/html; charset=UTF-8">');
     fl.write('<link rel="stylesheet" href="dddoc_html.css" type="text/css" />')
+    fl.write('<script type="text/javascript" src="http://bkahlert.com/promotion/doclog/jquery-1.6.2.min.js"></script>\n')
+    fl.write('<script type="text/javascript" src="http://bkahlert.com/promotion/doclog/doclog.js"></script>\n') 
     fl.write('<title>' + getCategoryTitle(cat) + '</title>')
     fl.write('</head>')
     fl.write('<body>')
@@ -763,6 +767,8 @@ def pageBegin(fl, data):
     fl.write('<head>')
     fl.write('<meta http-equiv="content-type" content="text/html; charset=UTF-8">');
     fl.write('<link rel="stylesheet" href="dddoc_html.css" type="text/css" />')
+    fl.write('<script type="text/javascript" src="http://bkahlert.com/promotion/doclog/jquery-1.6.2.min.js"></script>\n')
+    fl.write('<script type="text/javascript" src="http://bkahlert.com/promotion/doclog/doclog.js"></script>\n') 
     fl.write('<title>' + getPageTitle(data) + '</title>')
     fl.write('</head>')
     fl.write('<body>')
