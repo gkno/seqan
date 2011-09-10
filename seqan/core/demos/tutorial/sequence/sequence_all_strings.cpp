@@ -18,8 +18,9 @@ void printStringsRec(String<char> &current, unsigned int pos) {
     std::cout << current << std::endl;
   }
   
-  current[pos] = 'a';
+  //current[pos] = 'a';
 }
+
 
 
 // FRAGMENT(print-strings)
