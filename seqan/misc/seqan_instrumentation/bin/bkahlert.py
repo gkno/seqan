@@ -21,7 +21,7 @@ class DiffCollector(object):
 		self.id			= id.ID(self.id_file)
 
 		self.stats_file		= self.dirs.get_abs_file_path("misc/seqan_instrumentation/userdata/" + self.id.get() + "_stats.txt")
-		self.stats		= stats.Stats(cMake_binary_dir, self.stats_file)
+		self.stats		= stats.Stats(cMake_binary_dir, src_dir, self.stats_file)
 		self.stats.save("id", self.id.get())
 		
 	def getID(self):

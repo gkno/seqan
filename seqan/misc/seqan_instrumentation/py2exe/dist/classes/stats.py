@@ -10,8 +10,9 @@ from classes.configobj import ConfigObj
 class Stats(object):
 	CMakeCachePathKey = "CMakeCachePath"
         
-	def __init__(self, cMake_binary_dir, stats_cache):
+	def __init__(self, cMake_binary_dir, src_dir, stats_cache):
 		self.cMake_binary_dir = cMake_binary_dir
+		self.src_dir = src_dir
 		self.stats_cache = stats_cache
 		self.stats = {}
 		try:
@@ -71,8 +72,18 @@ class Stats(object):
 			lines_without_slash_comments = map(lambda x: "" if len(x) >= 2 and x[0:2] == "//" else x, lines)
 
 			config = ConfigObj(lines_without_slash_comments)
-			compiler = config["CMAKE_GENERATOR:INTERNAL"]
-			self.stats["devenv"] = { "compiler": compiler }
+			
+			self.stats["devenv"] = {
+				"CMAKE_GENERATOR": config["CMAKE_GENERATOR:INTERNAL"] if "CMAKE_GENERATOR:INTERNAL" in config else None,
+				"CMAKE_BUILD_TYPE": config["CMAKE_BUILD_TYPE:STRING"] if "CMAKE_BUILD_TYPE:STRING" in config else None,
+				"CMAKE_C_COMPILER": config["CMAKE_GENERATOR:INTERNAL"] if "CMAKE_GENERATOR:INTERNAL" in config else None,
+				"CMAKE_C_FLAGS": config["CMAKE_C_FLAGS:STRING"] if "CMAKE_C_FLAGS:STRING" in config else None,
+				"CMAKE_CXX_COMPILER": config["CMAKE_CXX_COMPILER:FILEPATH"] if "CMAKE_CXX_COMPILER:FILEPATH" in config else None,
+				"CMAKE_CXX_FLAGS": config["CMAKE_CXX_FLAGS:STRING"] if "CMAKE_CXX_FLAGS:STRING" in config else None,
+				"CMAKE_LINKER": config["CMAKE_LINKER:FILEPATH"] if "CMAKE_LINKER:FILEPATH" in config else None,
+				"CMAKE_MODULE_LINKER_FLAGS": config["CMAKE_MODULE_LINKER_FLAGS:STRING"] if "CMAKE_MODULE_LINKER_FLAGS:STRING" in config else None,
+				"CMAKE_MAKE_PROGRAM": config["CMAKE_MAKE_PROGRAM:FILEPATH"] if "CMAKE_MAKE_PROGRAM:FILEPATH" in config else None
+			}
 			self.save()
 		return self.stats["devenv"]		
 	    
