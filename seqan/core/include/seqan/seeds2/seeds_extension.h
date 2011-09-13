@@ -76,6 +76,17 @@ typedef Tag<UngappedXDrop_> const UnGappedXDrop;
 struct GappedXDrop_;
 typedef Tag<GappedXDrop_> const GappedXDrop;
 
+/**
+.Enum.Extension Direction
+..cat:Seed Handling
+..summary:The direction in which a seed should be extended.
+..value.EXTEND_LEFT:Extend the seed to the left.
+..value.EXTEND_RIGHT:Extend the seed to the right.
+..value.EXTEND_BOTH:Extend the seed in both directions.
+..value.EXTEND_NONE:Perform no extension.
+..see:Function.extendSeed
+..include:seqan/seeds.h
+*/
 enum ExtensionDirection
 {
     EXTEND_LEFT,
@@ -97,14 +108,15 @@ enum ExtensionDirection
 ..summary:Extends a seed.
 ..cat:Seed Handling
 ..signature:extendSeed(seed, query, database, direction, MatchExtend)
-..signature:extendSeed(seed, query, database, direction, scoreDropOff, scoreMatrix, {UngappedXDrop, GappedXDrop})
+..signature:extendSeed(seed, query, database, direction, scoreMatrix, scoreDropOff, {UngappedXDrop, GappedXDrop})
 ..param.seed: The seed to extend.
 ...type:Class.Seed
 ..param.query: The query sequence.
 ...type:Class.String
 ..param.query: The database sequence.
 ...type:Class.String
-..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
+..param.direction: Defines the direction in which the seed should be extended.
+...type:Enum.Extension Direction
 ..param.scoreDropOff: The score drop after which the extension should stop. The extension stops if this value is exceeded.
 ...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
 ..param.scoreMatrix: The scoring scheme.
