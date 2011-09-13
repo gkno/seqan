@@ -17,8 +17,6 @@ void printStringsRec(String<char> &current, unsigned int pos) {
   } else {
     std::cout << current << std::endl;
   }
-  
-  //current[pos] = 'a';
 }
 
 
