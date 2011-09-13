@@ -3,6 +3,7 @@ import subprocess
 import glob
 from datetime import datetime
 from ftplib import FTP
+import socket
 
 class Diff(object):
 	MAX_REVISION_LENGTH = 8
@@ -46,10 +47,13 @@ class Diff(object):
 	def upload(self, ftp, file):
 		ftp.storbinary("STOR " + os.path.basename(file), open(file, "rb"), 1024)
 
-	def sync_ftp(self, server, username, password):	
-		ftp = FTP(server)
-		ftp.login(username, password)
-	
+	def sync_ftp(self, server, username, password):
+		try:
+			ftp = FTP(server, timeout=5)
+			ftp.login(username, password)
+		except socket.timeout:
+			return
+
 		# get remote file list
 		remote_files = []
 		try:
