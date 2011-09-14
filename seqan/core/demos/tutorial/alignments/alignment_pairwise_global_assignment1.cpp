@@ -26,10 +26,11 @@ int main()
 	::std::cout << align;
 	
 //FRAGMENT(iterate)
+	unsigned aliLength = _max(length(row(align, 0)), length(row(align, 1)));
 	for(unsigned i = 0; i < length(rows(align)); ++i)
 	{
-		TIterator it = begin(row(align,i));
-		TIterator itEnd = end(row(align,i));
+		TIterator it = iter(row(align,i), 0);
+		TIterator itEnd = iter(row(align,i), aliLength);
 		unsigned pos = 0;
 		std::cout << "Row " << i << " contains gaps at positions: ";
 		std::cout << std::endl;
