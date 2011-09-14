@@ -241,6 +241,20 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
         source_group (${MODULE} FILES ${HEADER})
         # message("source_group(${MODULE} FILES ${HEADER})")    
     endforeach (HEADER ${HEADERS})
+
+    # -----------------------------------------------------------------------
+    # Installation
+    # -----------------------------------------------------------------------
+    foreach (HEADER ${HEADERS} ${SUPER_HEADERS} ${FORWARDS})
+        string(REPLACE ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH}/seqan "" NEW_PATH ${HEADER})
+        string(REPLACE ${BASE_ABS} "" NEW_PATH ${NEW_PATH})
+        string(REPLACE "//" "/" NEW_PATH ${NEW_PATH})
+        install(FILES ${HEADER}
+                RENAME seqan${NEW_PATH}
+                DESTINATION include
+                COMPONENT headers)
+        #message("install(FILES ${HEADER} RENAME seqan${NEW_PATH} DESTINATION include COMPONENT dev)")
+    endforeach()
 endfunction (seqan_setup_includes)
 
 # ---------------------------------------------------------------------------
