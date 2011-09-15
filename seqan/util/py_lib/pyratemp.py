@@ -840,9 +840,10 @@ class EvalPseudoSandbox:
         """
         if expr not in self._compile_cache:
             c = compile(expr, "", "eval")
-            for i in c.co_names:    #prevent breakout via new-style-classes
-                if i[0] == '_':
-                    raise NameError("Name '%s' is not allowed." %(i))
+            # TODO(holtgrew): Disabling the breakout check here so our code works in Python 2.6.
+            #for i in c.co_names:    #prevent breakout via new-style-classes
+            #    if i[0] == '_':
+            #        raise NameError("Name '%s' is not allowed." %(i))
             self._compile_cache[expr] = c
         return self._compile_cache[expr]
 
