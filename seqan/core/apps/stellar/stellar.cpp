@@ -345,8 +345,8 @@ _writeFileNames(TOptions & options) {
 
 inline void
 _addVersion(CommandLineParser& parser) {
-	::std::string rev = "$Revision: 8300 $";
-	addVersionLine(parser, "Version 1.1 (February 5th 2011) SeqAn Revision: " + rev.substr(11, 4) + "");
+	::std::string rev = "$Revision: 10372 $";
+	addVersionLine(parser, "Version 1.1 (September 16th 2011) SeqAn Revision: " + rev.substr(11, 5) + "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
