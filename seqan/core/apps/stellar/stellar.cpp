@@ -2,7 +2,7 @@
                      STELLAR - Fast Local Alignment
 
  ============================================================================
-  Copyright (C) 2010 by Birte Kehr
+  Copyright (C) 2011 by Birte Kehr
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -48,20 +48,20 @@ _stellarOnOne(TSequence & database,
 	// stellar
 	if (options.fastOption == CharString("exact"))
 		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
-							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-							   databaseID, databaseStrand, matches, AllLocal());
+				options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+				databaseID, databaseStrand, matches, AllLocal());
 	else if (options.fastOption == "bestLocal")
 		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
-							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-							   databaseID, databaseStrand, matches, BestLocal());
+				options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+				databaseID, databaseStrand, matches, BestLocal());
 	else if (options.fastOption == "bandedGlobal")
 		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
-							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-							   databaseID, databaseStrand, matches, BandedGlobal());
+				options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+				databaseID, databaseStrand, matches, BandedGlobal());
 	else if (options.fastOption == "bandedGlobalExtend")
 		stellar(swiftFinder, swiftPattern, options.epsilon, options.minLength, options.xDrop, 
-							   options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
-							   databaseID, databaseStrand, matches, BandedGlobalExtend());
+				options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
+				databaseID, databaseStrand, matches, BandedGlobalExtend());
 	else {
 		std::cerr << "\nUnknown verification strategy: " << options.fastOption << std::endl;
 		return false;
