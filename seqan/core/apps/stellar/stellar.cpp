@@ -437,7 +437,7 @@ _setParser(TParser & parser) {
 
     addTitleLine(parser, "*******************************************");
 	addTitleLine(parser, "* STELLAR - the SwifT Exact LocaL AligneR *");
-	addTitleLine(parser, "* (c) Copyright 2010 by Birte Kehr        *");
+	addTitleLine(parser, "* (c) Copyright 2011 by Birte Kehr        *");
 	addTitleLine(parser, "*******************************************");
 
 	addUsageLine(parser, "-d <FASTA sequence file> -q <FASTA sequence file> [Options]");
