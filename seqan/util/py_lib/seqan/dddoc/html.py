@@ -493,6 +493,8 @@ class HtmlHelper(object):
                 if not parent_key in node.children:
                     continue
                 for path in node.children[parent_key].texts:
+                    if '|' in path:
+                        continue  # Skip automatically generated upwards links.
                     result['parents'].append(recurseUpwards(self.tree.find(path)))
             return result
                 

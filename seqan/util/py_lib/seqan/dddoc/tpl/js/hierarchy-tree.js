@@ -79,7 +79,7 @@ seqan.doc.HierarchyNode.prototype.updateDim = function()
     if (this.uptrail_dim[0] > 0)
     {
         w = Math.max(w, this.uptrail_dim[0]);
-        h = h + c.NODE_SPACING + this.uptrail_dim[1];
+        h = h + this.uptrail_dim[1];
     }
     this.dim = [w, h];
 }
@@ -192,9 +192,9 @@ seqan.doc.computeLayoutDimsUpTrail = function(node, ctx, isRoot)
     {
         seqan.doc.computeLayoutDimsUpTrail(node.parents[0], ctx, false);
 
-        node.uptrail_dim[0] = node.parents[0].uptrail_dim[0] + c.NODE_SPACING;
+        node.uptrail_dim[0] = Math.max(node.parents[0].uptrail_dim[0], node.parents[0].label_dim[0]);
         //console.log(node.uptrail_dim, node.parents[0].label_dim);
-        node.uptrail_dim[1] = Math.max(node.uptrail_dim[1], node.parents[0].label_dim[1]);
+        node.uptrail_dim[1] = node.parents[0].uptrail_dim[1] + c.NODE_SPACING + node.label_dim[1];
         //console.log(node.uptrail_dim, node.parents[0].label_dim);
     }
 
@@ -254,7 +254,7 @@ seqan.doc.computeLayoutDims = function(node, ctx, level/*=0*/, isRoot/*=false*/)
         var child = subtree[i];
         ws[ws.length - 1] += child.dim[0];
         hs[hs.length - 1] = Math.max(hs[hs.length - 1], child.dim[1]);
-        console.log('i ==', i, 'row', Math.floor(i/c.LIMIT_FIRST), 'current height', hs[hs.length - 1])
+        //console.log('i ==', i, 'row', Math.floor(i/c.LIMIT_FIRST), 'current height', hs[hs.length - 1])
         if ((level < 1 && j == c.LIMIT_FIRST - 1) || (level >= 1 && j == c.LIMIT_AFTER - 1))
         {
             j = 0;
@@ -303,7 +303,7 @@ seqan.doc.computeLayoutPositions = function(node, x, y, level)
         if (node.parents.length > 0)
             delta = rec(node.parents[0], root_width);
         node.pos = [0, delta];
-        var lx = (root_width - node.label_dim[0] - c.NODE_SPACING / 2) / 2;
+        var lx = (root_width - node.label_dim[0]) / 2;
         node.label_pos = [lx, delta];
 
         return delta + node.label_dim[1] + c.NODE_SPACING;
@@ -311,8 +311,8 @@ seqan.doc.computeLayoutPositions = function(node, x, y, level)
     if (level == 0)
     {
         rec(node, node.dim[0]);
-        console.log(node);
-        console.log(node.title, node.label_pos)
+        //console.log(node);
+        //console.log(node.title, node.label_pos)
         y = node.label_pos[1];
     }
 
@@ -431,10 +431,10 @@ seqan.doc.drawHierarchy = function(ctx, node)
             ctx.lineTo(node_label_center_x - c.ARROW_DELTA / 2.0, node_label_center_y + c.ARROW_DELTA);
             ctx.lineTo(node_label_center_x + c.ARROW_DELTA / 2.0, node_label_center_y + c.ARROW_DELTA);
             ctx.lineTo(node_label_center_x, node_label_center_y);
-            console.log('down');
-            console.log(node_label_center_x, node_label_center_y,
-                        node_label_center_x - c.ARROW_DELTA / 2.0, node_label_center_y + c.ARROW_DELTA,
-                        node_label_center_x + c.ARROW_DELTA / 2.0, node_label_center_y + c.ARROW_DELTA);
+            //console.log('down');
+            //console.log(node_label_center_x, node_label_center_y,
+            //            node_label_center_x - c.ARROW_DELTA / 2.0, node_label_center_y + c.ARROW_DELTA,
+            //            node_label_center_x + c.ARROW_DELTA / 2.0, node_label_center_y + c.ARROW_DELTA);
             ctx.fill();
             // Compute rows.
             var rows = [];
@@ -546,28 +546,32 @@ seqan.doc.drawHierarchy = function(ctx, node)
         ctx.fillText(node.title,
                      c.MARGIN + c.NODE_SPACING + c.TEXT_PADDING + node.label_pos[0],
                      c.MARGIN + c.TEXT_PADDING + node.label_pos[1]);
-        console.log(colorScheme)
+        //console.log(colorScheme)
 
         // Draw arrowed line to parent if any.
         ctx.lineWidth = 1;
         ctx.lineCap = 'round';
+        //console.log(node.parents);
         if (node.parents.length > 0)
         {
             var node_label_center_x = c.MARGIN + c.NODE_SPACING + Math.floor(node.label_pos[0] + node.label_dim[0] / 2.0);
             var node_label_center_y = c.MARGIN + node.label_pos[1];
             ctx.moveTo(node_label_center_x, node_label_center_y);
             ctx.lineTo(node_label_center_x, node_label_center_y - c.NODE_SPACING);
-            ctx.strokeStyle = '1px black';
+            //console.log(node_label_center_x, node_label_center_y, node_label_center_x, node_label_center_y - c.NODE_SPACING);
             ctx.stroke();
             ctx.moveTo(node_label_center_x, node_label_center_y - c.NODE_SPACING);
             ctx.lineTo(node_label_center_x - c.ARROW_DELTA / 2.0, node_label_center_y - c.NODE_SPACING + c.ARROW_DELTA);
             ctx.lineTo(node_label_center_x + c.ARROW_DELTA / 2.0, node_label_center_y - c.NODE_SPACING + c.ARROW_DELTA);
             ctx.lineTo(node_label_center_x, node_label_center_y - c.NODE_SPACING);
-            console.log(node_label_center_x, node_label_center_y - c.NODE_SPACING,
-                        node_label_center_x - c.ARROW_DELTA / 2.0, node_label_center_y - c.NODE_SPACING + c.ARROW_DELTA,
-                        node_label_center_x + c.ARROW_DELTA / 2.0, node_label_center_y - c.NODE_SPACING + c.ARROW_DELTA);
+            //console.log('line')
+            //console.log(node_label_center_x, node_label_center_y - c.NODE_SPACING,
+            //            node_label_center_x - c.ARROW_DELTA / 2.0, node_label_center_y - c.NODE_SPACING + c.ARROW_DELTA,
+            //            node_label_center_x + c.ARROW_DELTA / 2.0, node_label_center_y - c.NODE_SPACING + c.ARROW_DELTA);
             ctx.fill();
         }
+        ctx.fillStyle = 'black';
+        ctx.strokeStyle = 'black';
     }
 
     // This function renders one node and all its parents.
@@ -576,8 +580,8 @@ seqan.doc.drawHierarchy = function(ctx, node)
         if (typeof(isRoot) == 'undefined') isRoot = false;
 
         renderNodeUpTrail(node, isRoot);
-        for (i in node.parents)
-            recurseUp(node.parents[i]);
+        if (node.parents.length > 0)
+            recurseUp(node.parents[0]);
     }
     
     recurseDown(node, true);

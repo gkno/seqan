@@ -241,6 +241,8 @@ def splitKeys(text, delimiters, limit=None, _cache={}):
         >>> splitKeys('.Adaption.\'std::string\'.summary')
         ['', 'Adaption', '\'std::string\'', 'summary']
     """
+    if '|' in text:
+        text = text.split('|', 1)[0]  # Remove optional label, used in inheritance.
     if _cache.has_key((text, delimiters)):
         return _cache[(text, delimiters)]
     count = 0
@@ -818,6 +820,77 @@ def generateAutomaticReferences(tree):
             res.texts.append(text)
 
 
+def generateInheritedElements(tree):
+    """Push through inheritances."""
+    print >>sys.stderr, 'Linking Inherited Entities'
+    inherit_node = tree.find('globals.inherit')
+    # Contains children: $TARGET_FIELD:$THROUGH_FIELD.$SOURCE_FIELD
+
+    all_paths = set()
+    depends_on = {}
+    inheritance_rules = []
+
+    # First build a dependency graph.
+    for target_field, child in inherit_node.children.items():
+        for txt in child.texts:
+            arr = splitKeys(txt, '.')
+            through_field = arr[0]
+            if len(arr) > 1:
+                source_field = arr[1]
+            else:
+                source_field = target_field
+            inheritance_rules.append((target_field, through_field, source_field))
+            def registerDependencies(node):
+                all_paths.add('.'.join(node.path))
+                if not through_field in node.children:
+                    return
+                for path in node.children[through_field].texts:
+                    pth = '.'.join(node.path)
+                    depends_on.setdefault(pth, set()).add(path)
+            _matchTreesInNode(tree, tree.root, ['*', '*'], registerDependencies)
+    print 'ALL PATHS', all_paths
+
+    # Now, push through references by inheritance for all paths that are not
+    # linked to and not completed yet.
+    done = set()
+    to_do = all_paths - done - set(depends_on.keys())
+    while to_do:
+        # Process all that are not completed and have no dependencies.
+        if not to_do:
+            raise Exception('Could not process all dependencies. Cyclic dependencies?')
+        # Actually perform the preprocessing.
+        for target_path in to_do:
+            for target_field, through_field, source_field in inheritance_rules:
+                target_node = tree.find(target_path)
+                if not through_field in target_node.children:
+                    continue  # Skip if no source children.
+                print 'TRYING', target_path, through_field, source_field
+                for source_path in target_node.children[through_field].texts:
+                    source_node = tree.find(source_path)
+                    if not source_field in source_node.children:
+                        continue  # Skip if no source field.
+                    for path in source_node.children[source_field].texts:
+                        if not '|' in path:
+                            path = path + '|' + '.'.join(source_node.path)
+                        # If necessary then create child in target node.
+                        if not target_field in target_node.children:
+                            target_node.children[target_field] = DddocTreeNode(tree, target_field, target_node.path + [target_field], source_node.children[source_field].entry)
+                        # Copy over path.
+                        target_node.children[target_field].texts.append(path)
+                        print '  appending', path
+                
+        # Clear out the stuff that we completed.
+        to_delete = []
+        for key in depends_on:  # Clear out all done.
+            depends_on[key] -= to_do
+            if not depends_on[key]:
+                to_delete.append(key)
+        for key in to_delete:
+            del depends_on[key]
+        done |= to_do  # Add done.
+        to_do = all_paths - done - set(depends_on.keys())
+
+
 # TODO(holtgrew): If needed, this could easily be generalized.
 def buildByTypeAndCatIndex(tree):
     """Build an index into the given DddocTree.
@@ -896,6 +969,8 @@ class App(object):
         self.dddoc_tree = DddocTree(self.file_loader.entries)
         # Generate automatic references.
         generateAutomaticReferences(self.dddoc_tree)
+        # Perform inheritance as configured in global configuration.
+        generateInheritedElements(self.dddoc_tree)
         # Move inline summaries into .summary children.
         processInlineSummaries(self.dddoc_tree, SUMMARY_PATHS)
         # Finally, after all modifications, enable caching and build indices in
