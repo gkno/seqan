@@ -228,6 +228,8 @@
           <!--(if '|' in path)-->
           $!setvar('from_label', "path.split('|', 1)[1]")!$
           $!setvar('path', "path.split('|', 1)[0]")!$
+          <!--(else)-->
+          $!setvar('from_label', "0")!$
           <!--(end)-->
           <!--(if tree.find(path))-->
           <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
@@ -235,7 +237,7 @@
             <!--(if tree.find(path + '.summary'))-->
             <td class="summary">
               $!text_field(path=[path] + ['summary'])!$
-              <!--(if exists('from_label'))-->
+              <!--(if from_label != 0)-->
               <strong>Inherited from:</strong> $!html.pageLink(txt=from_label, node=tree.find(path))!$
               <!--(end)-->
             </td>
