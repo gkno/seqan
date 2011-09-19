@@ -485,6 +485,11 @@ macro (seqan_add_executable TARGET_NAME)
     	target_link_libraries (${TARGET_NAME} rt)
   	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   	
+  	# Link against stdc++ on Mac OS X (clang seems not to do this automatically)
+  	if (APPLE)
+  		target_link_libraries (${TARGET_NAME} stdc++)
+  	endif (APPLE)
+  	
   	# Dependencies on all registered seqan extensions.
   	add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})
     # message(STATUS "add_dependencies(${ARGV0} ${SEQAN_LIBRARY_TARGETS})")
