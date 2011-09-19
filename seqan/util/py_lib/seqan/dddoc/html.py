@@ -8,10 +8,11 @@ import json
 import string
 import StringIO
 import re
-
-import pyratemp
 import datetime
 import time
+
+import pyratemp
+import json
 
 import core
 
@@ -20,12 +21,15 @@ TPL_FILES = [
     # Javascript Files
     'js/jquery-1.3.2.min.js',
     'js/jquery-effect.js',
+    'js/hierarchy-tree.js',
     'js/main.js',
     'js/searchdoc.js',
+    'js/excanvas.compiled.js',
     # CSS Files
     'css/main.css',
     'css/panel.css',
     'css/reset.css',
+    'css/hierarchy-tree.css',
     # Images
     'i/arrows.png',
     'i/results_bg.png',
@@ -469,6 +473,34 @@ class HtmlHelper(object):
         self.tree = tree
         self.markup_parser = MarkupParser(self.error_logger, tree, self)
 
+    def classHierarchyJS(self, node):
+        def recurseDownwards(node):
+            cat, subcat = node.path[0], node.path[1]
+            link = cat.upper() + escapeFiles(subcat) + ".html"
+            result = {'title': node.key, 'type': node.path[0], 'children': [], 'parents': [], 'link': link}
+            for child_key in ['spec', 'childconcept']:
+                if not child_key in node.children:
+                    continue
+                for path in node.children[child_key].texts:
+                    result['children'].append(recurseDownwards(self.tree.find(path)))
+            return result
+
+        def recurseUpwards(node):
+            cat, subcat = node.path[0], node.path[1]
+            link = cat.upper() + escapeFiles(subcat) + ".html"
+            result = {'title': node.key, 'type': node.path[0], 'children': [], 'parents': [], 'link': link}
+            for parent_key in ['implements', 'general', 'baseconcept']:
+                if not parent_key in node.children:
+                    continue
+                for path in node.children[parent_key].texts:
+                    result['parents'].append(recurseUpwards(self.tree.find(path)))
+            return result
+                
+        res = recurseDownwards(node)
+        resUp = recurseUpwards(node)
+        res['parents'] = resUp['parents']
+        return json.dumps(res)
+
     def translateId(self, txt):
         i = txt.find('#');
         if (i >= 0):
@@ -659,7 +691,8 @@ class DocsCreator(object):
                                                time=time,  # for now.strftime()
                                                iterable=lambda x: type(x) is list,
                                                core=core,
-                                               html=HtmlHelper(self.error_logger, self.tree))
+                                               html=HtmlHelper(self.error_logger, self.tree),
+                                               json=json)
                 f.write(res.encode('utf-8'))
 
     def copyFiles(self):
@@ -701,7 +734,8 @@ class DocsCreator(object):
                                              now=datetime.datetime.now(),
                                              time=time,  # for now.strftime()
                                              core=core,
-                                             html=HtmlHelper(self.error_logger, self.tree))
+                                             html=HtmlHelper(self.error_logger, self.tree),
+                                             json=json)
                     f.write(res.encode('utf-8'))
                 print >>sys.stderr, '.',
             print >>sys.stderr
