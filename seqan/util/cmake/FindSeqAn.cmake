@@ -682,7 +682,7 @@ endfunction (seqan_add_cuda_test_executable TARGET_NAME)
 macro (seqan_add_all_executables)
     file (GLOB ENTRIES
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-          ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+          ${CMAKE_CURRENT_SOURCE_DIR}/[!.]*.cpp)
     if (${ARGC} GREATER 1)
         set (PREFIX ${ARGV1})
     endif (${ARGC} GREATER 1)
