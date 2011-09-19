@@ -1,7 +1,7 @@
               *** STELLAR - the SwifT Exact LocaL AligneR ***
                  http://www.seqan.de/projects/stellar.html
-                               December, 2010
-				 
+                              September, 2011
+
 ---------------------------------------------------------------------------
 Table of Contents
 ---------------------------------------------------------------------------
@@ -10,7 +10,7 @@ Table of Contents
   3.   Usage
   4.   Output Format
   5.   Examples
-  6.   Contact
+  6.   Reference and Contact
 
 ---------------------------------------------------------------------------
 1. Overview
@@ -43,10 +43,10 @@ Alternatively you can check out the latest SVN version of STELLAR and SeqAn
 with:
 
   1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
-  2)  cd seqan/projects/library/cmake
-  3)  cmake . -DCMAKE_BUILD_TYPE=Release
+  2)  cd seqan/build/
+  3)  cmake .. -DCMAKE_BUILD_TYPE=Release
   5)  make stellar
-  7)  ./apps/stellar
+  7)  ./core/apps/stellar/stellar
 
 On success, an executable file stellar was build and a brief usage 
 description was dumped.
@@ -190,7 +190,7 @@ the command line.
                   STELLAR paper.
    bestLocal    = Only the best local alignment in a SWIFT hit is computed
                   and processed like an epsilon-core as described in the
-				  STELLAR paper.
+                  STELLAR paper.
    bandedGlobal = A banded global alignment on the SWIFT hits is processed
                   like extended epsilon-cores in the exact strategy.
   
@@ -222,7 +222,7 @@ the command line.
 3.5. Output Options
 ---------------------------------------------------------------------------
 
-  [ -o FILE ],  [ --output FILE ]
+  [ -o FILE ],  [ --out FILE ]
 
   Change the output filename to FILE. The default name of the output file
   is "stellar.gff".
@@ -308,18 +308,18 @@ wrapped after 50 alignment columns. To assist for counting positions, there
 is a '.' above each line every 5 positions and a ':' every ten positions.
 
 ---------------------------------------------------------------------------
-5. Example
+5. Examples
 ---------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------
 5.1. Two long sequences
 ---------------------------------------------------------------------------
 
-In the folder snapshot/apps/stellar/examples/ you can find the files 
+In the folder seqan/apps/stellar/examples/ you can find the files 
 NC_001477.fasta and NC_001474.fasta containing the sequences of two virus
 serotypes. To compare the two sequences do the following:
 
-  1)  cd snapshot/cmake/
+  1)  cd seqan/cmake/
   2)  ./apps/stellar -d ../apps/stellar/example/NC_001477.fasta \
                      -q ../apps/stellar/example/NC_001474.fasta
   3)  less stellar.gff
@@ -331,13 +331,13 @@ gi|9626685|ref|NC_001477.1|     Stellar eps-matches     10621   10735   95.6897 
 You may want to run STELLAR again with less stringent parameters to
 identify other similar regions, and write the output into a different file:
 
-  1) cd snapshot/cmake/
+  1) cd seqan/cmake/
   2)  ./apps/stellar -d ../apps/stellar/examples/NC_001477.fasta \
                      -q ../apps/stellar/examples/NC_001474.fasta \
-					 -o virus_serotypes.gff --epsilon 0.1 --minLength 50
+                     -o virus_serotypes.gff --epsilon 0.1 --minLength 50
   3) less virus_serotypes.gff
 
-Now, you should obtain 14 local alignments in the file virus_serotypes.gff.
+Now, you should obtain 13 local alignments in the file virus_serotypes.gff.
 
 ---------------------------------------------------------------------------
 5.2. Many-to-reference
@@ -349,10 +349,10 @@ spanning simulated breakage points. For comparison we set the minimal
 length of a match to only 30 what allows splitting a read into up to 3
 fragments:
 
-  1)  cd snapshot/cmake/
+  1)  cd seqan/cmake/
   2)  ./apps/stellar -d ../apps/stellar/examples/NC_001477.fasta \
                      -q ../apps/stellar/examples/reads.fasta \
-					 -o mapped_reads.gff --minLength 30
+                     -o mapped_reads.gff --minLength 30
   3)  less mapped_reads.gff
 
 The output file will contain 15 matches, 6 entirely mapped reads, 3 reads
@@ -360,8 +360,13 @@ split into 2 fragments each, and one read split into 3 matches at different
 genome locations.
   
 ---------------------------------------------------------------------------
-6. Contact
+6. Reference and Contact
 ---------------------------------------------------------------------------
+
+Please cite:
+  Birte Kehr, David Weese, Knut Reinert
+  STELLAR: fast and exact local alignments
+  BMC Bioinformatics, 12(Suppl 9):S15, 2011
 
 For questions or comments contact:
   Birte Kehr <birte.kehr@fu-berlin.de>
