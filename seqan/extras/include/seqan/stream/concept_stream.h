@@ -209,7 +209,7 @@ struct HasStreamFeature;
 ...type:nolink:String<char, *>
 ...type:nolink:numerical types ($int$, $double$ ...)
 ..returns:$int$ with an error code, 0 on success.
-..remarks:Implementation note: for some specializations of @Concept.Stream certain conversions take place through stringstream and a buffer of size 1023. It follows that the result of the conversion cannot be longer. However this should only effect numericals right now. If you still encounter truncated strings with another type, convert to $const char*$ manually before writing.
+..remarks:Implementation note: for some specializations of @Concept.Stream@ certain conversions take place through stringstream and a buffer of size 1023. It follows that the result of the conversion cannot be longer. However this should only effect numericals right now. If you still encounter truncated strings with another type, convert to $const char*$ manually before writing.
 ..see:Function.streamWriteChar
 ..see:Function.streamWriteBlock
 ..include:seqan/stream.h

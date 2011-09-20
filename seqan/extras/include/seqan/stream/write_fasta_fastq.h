@@ -54,7 +54,7 @@ namespace seqan {
 ..summary:Enum with flags for writing Fasta and Fastq files
 ..value.NO_FLAGS:No Flags are set.
 ..value.LINEBREAKS:Introduce linebreaks in sequences at column 70
-..value.WRITEQUALITIESMETA:Write the meta information into the "+" line in addition to writing it to the "@" line [FASTQ only]
+..value.WRITEQUALITIESMETA:Write the meta information into the "+" line in addition to writing it to the "\at" line [FASTQ only]
 ..value.DEFAULT_FASTA: currently == LINEBREAKS
 ..value.DEFAULT_FASTQ: currently == NO_FLAGS
 ..include:seqan/stream.h

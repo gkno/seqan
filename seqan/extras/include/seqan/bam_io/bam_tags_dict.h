@@ -535,7 +535,7 @@ extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
 ..signature:getBamTypeChar<T>()
 ..param.T:The type to get the BAM char for.
 ..returns:$char$ describing the BAM type. One of $ACcSsIif$.
-..remarks:Note that this function is defined for the $__int16$, $__uint16$ etc. but not for the types $short$, $int$ etc. An exception are 8-bit characters/char, where it is defined for $__int8$, $__uint8$, and $char$ unless $char$ is equal to one of the other two types. This is important when used in @Function.setTagValue$ etc. since BAM gives type chars for printable characters, signed 8-bit numbers and unsigned 8-bit numbers.
+..remarks:Note that this function is defined for the $__int16$, $__uint16$ etc. but not for the types $short$, $int$ etc. An exception are 8-bit characters/char, where it is defined for $__int8$, $__uint8$, and $char$ unless $char$ is equal to one of the other two types. This is important when used in @Function.setTagValue@ etc. since BAM gives type chars for printable characters, signed 8-bit numbers and unsigned 8-bit numbers.
 ..remarks:If $__int8$ and $__uint8$ are not identical to $char$, we can make this decision from the type, otherwise we cannot and we will give the integer types a higher precedence.
 ..remarks:In your programs, this should not make any difference, only the written SAM/BAM will differ.
 ..include:seqan/bam_io.h
