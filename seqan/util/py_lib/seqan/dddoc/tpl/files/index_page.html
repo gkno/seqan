@@ -57,7 +57,7 @@ $!text_section(path=['Indexpage', cat, 'description'])!$
   <table>
     <tbody>
       $!setvar('i', '0')!$ #!
-  <!--(for subcat, node in [(s, n) for s, n in by_subcat.iteritems() if not iterable(n) and not 'hidefromindex' in n.children])-->
+  <!--(for subcat, node in [(s, n) for s, n in sorted(by_subcat.iteritems()) if not iterable(n) and not 'hidefromindex' in n.children])-->
       <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
         <td class="signature">$!html.pageLink(arr=[cat, subcat])!$</td>
         <td class="summary">$!text_field(path=node.path + ['summary'])!$</td>
@@ -69,14 +69,14 @@ $!text_section(path=['Indexpage', cat, 'description'])!$
 </div>
 <!--(end)-->
 
-#!Then, the non-iterable entries.!#
+#!Then, the iterable entries.!#
 <div class="section">
 <!--(for subcat, nodes in sorted(by_subcat.iteritems()))-->
   <!--(if iterable(nodes))-->
     <h2 id="$!html.toGlossaryAnchor(subcat)!$" class="section-heading">$!subcat!$</h2>
     <table>
       <tbody>
-        <!--(for i, x in enumerate(nodes))-->
+        <!--(for i, x in enumerate(sorted(nodes, key=lambda n: n.key)))-->
         <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
           <td class="signature">$!html.pageLink(arr=[cat, x.key])!$</td>
           <td class="summary">$!text_field(path=x.path + ['summary'])!$</td>

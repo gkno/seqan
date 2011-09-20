@@ -116,14 +116,6 @@
   <!--(end)-->
 <!--(end)-->
 
-<!--(macro link_section)-->
-  <!--(if tree.find([cat, subcat, key]))-->
-  <div class="link_section">
-  @!html.translateMarkup(', '.join(tree.find([cat, subcat, key]).texts), node=tree.find([cat, subcat, key]))!@
-  </div>
-  <!--(end)-->
-<!--(end)-->
-
 <!--(macro list_section)-->
   <!--(if tree.find([cat, subcat, key]))-->
   <div class="list_section">
@@ -139,7 +131,7 @@
   <!--(if tree.find([cat, subcat, key]))-->
   <div class="section link_section @!key!@">
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
-    $!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key])) for txt in tree.find([cat, subcat, key]).texts])!$
+    $!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key])) for txt in sorted(tree.find([cat, subcat, key]).texts)])!$
  </div>
   <!--(end)-->
 <!--(end)-->
@@ -150,24 +142,30 @@
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
     <table>
       <tbody>
-        <!--(for i, node in enumerate(tree.find([cat, subcat, key]).children.itervalues()))-->
+        <!--(for i, node in enumerate(sorted(tree.find([cat, subcat, key]).children.itervalues())))-->
         <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
           <td class="signature">@!node.key!@</td>
           <td class="summary">
             <!--(if 'summary' in node.children)-->
             $!html.translateMarkup(node.children['summary'].text(), node=node.children['summary'])!$
+              <!--(if 'text' in node.children)-->
+              <div>$!html.translateMarkup(node.children['text'].text(), node=node.children['text'])!$</div>
+              <!--(end)-->
             <!--(else)-->
             none
             <!--(end)-->
             <!--(if 'type' in node.children)-->
             <br/><strong>Types:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['type']) for txt in node.children['type'].texts])!$
             <!--(end)-->
+            <!--(if 'metafunction' in node.children)-->
+            <br/><strong>Metafunctions:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['metafunction']) for txt in node.children['metafunction'].texts])!$
+            <!--(end)-->
             <!--(if 'default' in node.children)-->
             <br/><strong>Default:</strong> $!', '.join([html.translateMarkup(txt, node=node.children['default']) for txt in node.children['default'].texts])!$
             <!--(end)-->
-            <!--(if 'remark' in node.children)-->
-              <!--(for remark in node.children['remark'].texts)-->
-              <br/><strong>Remark:</strong> $!html.translateMarkup(remark, node=node.children['remark'])!$
+            <!--(if 'remarks' in node.children)-->
+              <!--(for remark in node.children['remarks'].texts)-->
+              <br/><strong>Remark:</strong> $!html.translateMarkup(remark, node=node.children['remarks'])!$
               <!--(end)-->
             <!--(end)-->
           </td>
@@ -220,7 +218,7 @@
 
 <!--(macro link_sigs_section)-->
   <!--(if tree.find([cat, subcat, key]))-->
-  <div class="section param_section @!key!@">
+  <div class="section link_sigs_section @!key!@">
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
     <table>
       <tbody>

@@ -44,46 +44,57 @@ TEXT_CONTAINER_PATHS = [
     'Page.*.description',
     'Page.*.summary',
     'Page.*.glossary.*',
+    'Function.*.example',
     'Function.*.summary',
     'Function.*.description',
     'Function.*.remarks',
     'Function.*.status',
+    'Class.*.example',
     'Class.*.summary',
     'Class.*.description',
     'Class.*.remarks',
     'Class.*.status',
+    'Metafunction.*.example',
     'Metafunction.*.summary',
     'Metafunction.*.description',
     'Metafunction.*.remarks',
     'Metafunction.*.status',
+    'Memfunc.*.example',
     'Memfunc.*.summary',
     'Memfunc.*.description',
     'Memfunc.*.remarks',
     'Memfunc.*.status',
+    'Memvar.*.example',
     'Memvar.*.summary',
     'Memvar.*.description',
     'Memvar.*.remarks',
     'Memvar.*.status',
+    'Macro.*.example',
     'Macro.*.summary',
     'Macro.*.description',
     'Macro.*.remarks',
     'Macro.*.status',
+    'Enum.*.example',
     'Enum.*.summary',
     'Enum.*.description',
     'Enum.*.remarks',
     'Enum.*.status',
+    'Spec.*.example',
     'Spec.*.summary',
     'Spec.*.description',
     'Spec.*.remarks',
     'Spec.*.status',
+    'Shortcut.*.example',
     'Shortcut.*.summary',
     'Shortcut.*.description',
     'Shortcut.*.remarks',
     'Shortcut.*.status',
+    'Tag.*.example',
     'Tag.*.summary',
     'Tag.*.description',
     'Tag.*.remarks',
     'Tag.*.status',
+    'Typedef.*.example',
     'Typedef.*.summary',
     'Typedef.*.description',
     'Typedef.*.remarks',
@@ -91,10 +102,12 @@ TEXT_CONTAINER_PATHS = [
     'Demo.*.summary',
     'Demo.*.description',
     'Demo.*.remarks',
+    'Adaption.*.example',
     'Adaption.*.summary',
     'Adaption.*.description',
     'Adaption.*.remarks',
     'Adaption.*.status',
+    'Concept.*.example',
     'Concept.*.summary',
     'Concept.*.description',
     'Concept.*.remarks',
@@ -848,7 +861,7 @@ def generateInheritedElements(tree):
                     pth = '.'.join(node.path)
                     depends_on.setdefault(pth, set()).add(path)
             _matchTreesInNode(tree, tree.root, ['*', '*'], registerDependencies)
-    print 'ALL PATHS', all_paths
+    ## print 'ALL PATHS', all_paths
 
     # Now, push through references by inheritance for all paths that are not
     # linked to and not completed yet.
@@ -864,7 +877,7 @@ def generateInheritedElements(tree):
                 target_node = tree.find(target_path)
                 if not through_field in target_node.children:
                     continue  # Skip if no source children.
-                print 'TRYING', target_path, through_field, source_field
+                ## print 'TRYING', target_path, through_field, source_field
                 for source_path in target_node.children[through_field].texts:
                     source_node = tree.find(source_path)
                     if not source_field in source_node.children:
@@ -877,7 +890,7 @@ def generateInheritedElements(tree):
                             target_node.children[target_field] = DddocTreeNode(tree, target_field, target_node.path + [target_field], source_node.children[source_field].entry)
                         # Copy over path.
                         target_node.children[target_field].texts.append(path)
-                        print '  appending', path
+                        ## print '  appending', path
                 
         # Clear out the stuff that we completed.
         to_delete = []

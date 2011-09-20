@@ -626,9 +626,17 @@ seqan.doc.createDivs = function(id, node)
     recurseUp(node, true);
 }
 
-function draw()
+seqan.doc.updateDivs = function(id, node)
+{
+    $(id).children().remove();
+    seqan.doc.createDivs(id, node);
+}
+
+function initHierarchyCanvas()
 {
     var canvas = document.getElementById("canvas");
+    if (!canvas)
+        return;  // Abort if no canvas element found.
     var ctx = canvas.getContext("2d");
     
     // Build tree in seqan.doc.HierarchyNode from data and compute the layout
@@ -647,5 +655,9 @@ function draw()
     // Draw hierarchy on canvas.
     seqan.doc.drawHierarchy(ctx, t);
     seqan.doc.createDivs('#class-links', t);
+    $(window).resize(function() {
+        seqan.doc.computeLayout(t, ctx);
+        seqan.doc.updateDivs('#class-links', t);
+    });
     console.log(t)
 }

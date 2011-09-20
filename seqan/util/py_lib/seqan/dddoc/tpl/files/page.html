@@ -15,6 +15,30 @@
     <script src="../js/main.js" type="text/javascript" charset="utf-8"></script>
     <link rel="stylesheet" type="text/css" href="../css/hierarchy-tree.css">
 <style type="text/css">
+$!html.highlightCss()!$
+
+table.highlighttable
+{
+width:100%;
+}
+
+td.linenos
+{
+width: 5.5%;
+padding-right: .5%;
+}
+
+div.linenodiv
+{
+text-align: right;
+}
+
+div.highlight
+{
+padding-left: 1%;
+width:93%;
+}
+
  body {
  font-size: 100%;
  width:80%;
@@ -42,14 +66,7 @@ text-align:center;
     color: #aaa;
   }
 
-  pre {
-  padding: 2px 4px;
-  margin: 0px 1em;
-  background: #ccc;
-  border: 1px solid #999;
-  }
-
-  .cat_type {
+ .cat_type {
   font-size: .75em;
   }
 
@@ -57,17 +74,25 @@ text-align:center;
   font-weight: boldest;
   color: darkred;
   }
+
+.signature_section pre,
+.example pre
+{
+  padding: 6px 11px 7px 11px;
+  background-color: #EEE;
+  border: 1px solid #666;
+  margin: 0 12px 10px 12px;
+}
+
   </style>
 </head>
-<body class="page" onload="draw()">
+<body class="page" onload="initHierarchyCanvas()">
 <div class="banner">
   <!--(if tree.find('globals.categories.' + cat))-->
   <span class="cat_type">@!tree.find('globals.categories.' + cat).text()!@</span>
   <!--(end)-->
   <h1>@!html.translateId(title)!@</h1>
 </div>
-
-#!<pre>@!tree.find([cat, subcat])!@</pre>!#
 
 $!text_section(path=[cat, subcat, 'summary'], hide_title=True)!$
 $!text_section(path=[cat, subcat, 'description'], hide_title=True)!$
@@ -122,8 +147,8 @@ $!link_section(key='demo')!$
 <!--(if tree.find([cat, subcat, 'file']))-->
 <div class="file_section file">
   <!--(for file in tree.find([cat, subcat, 'file']).texts)-->
-  <h2>File:@!file!@</h2>
-  $!html.includeFile(file, 'pre', 'source')!$
+  <h2>File: <a href="@!file.split('/')[-1]!@">@!file.split('/')[-1]!@</a></h2>
+  $!html.includeFile(file,'source', node=tree.find([cat, subcat, 'file']))!$
   <!--(end)-->
 </div>
 <!--(end)-->
@@ -133,6 +158,8 @@ $!text_section(path=[cat, subcat, 'output'])!$
 $!link_section(key='concept')!$
 $!link_section(key='demofor')!$
 $!link_section(key='see')!$
+
+#!<pre>@!tree.find([cat, subcat])!@</pre>!##! remove comment for debugging
 
 <div id="footer">built: @!now.strftime("%m/%d/%y %H:%M:%S")!@</div>
 </body>

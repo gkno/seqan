@@ -242,7 +242,7 @@ class TplDocsCreator(object):
         self.tree = tree
         self.tpl_path = tpl_path
         self.out_path = out_path
-        self.html_helper = HtmlHelper(self.error_logger, self.tree)
+        self.html_helper = HtmlHelper(self.error_logger, self.tree, out_path)
 
     def good(self):
         return True
@@ -303,12 +303,10 @@ class TplDocsCreator(object):
                 summary = self.html_helper.translateMarkup(node.children['summary'].texts[0].split(':', 1)[1])
                 summary = re.sub('<.*?>', '', summary)
                 summary = summary[:100]  # TODO(holtgrew): Smarter trimming?
-            info = ''
-            if node.children.has_key('concept'):
-                info = node.children['concept'].text()
-                info = info[:100]  # TODO(holtgrew): Smarter trimming?
+            # Get title of entry type.
+            type_ = ' ' + ', '.join(self.tree.find(['globals', 'categories', node.path[0]]).texts)
             search_index.append(name.lower())
-            long_search_index.append(info)  # TODO(holtgrew): Could be parent, ...
+            long_search_index.append(name.lower())  # TODO(holtgrew): Could be parent, ...
             # Build filename.
             filename = getPagePath(cat_type, name, 'files')
             # Build list of include headers.
@@ -318,9 +316,9 @@ class TplDocsCreator(object):
             if type_num == TYPE_FUNCTION:
                 name = name + '()'
             infos.append([name,  # Entity name.
-                          info,  # Info
+                          includes,  # Info
                           filename,  # klass.path
-                          includes,  # module name
+                          type_,
                           summary,
                           type_num])
             ## print infos[-1]
@@ -468,10 +466,11 @@ class MarkupParser(object):
 
 
 class HtmlHelper(object):
-    def __init__(self, error_logger, tree):
+    def __init__(self, error_logger, tree, out_path):
         self.error_logger = error_logger
         self.tree = tree
         self.markup_parser = MarkupParser(self.error_logger, tree, self)
+        self.out_path = out_path
 
     def classHierarchyJS(self, node):
         def recurseDownwards(node):
@@ -576,7 +575,7 @@ class HtmlHelper(object):
                 return '<a href="%s" target="_top">%s</a>' % (pyratemp.escape(txt), pyratemp.escape(title))
             elif txt.startswith('nolink:'):
                 if not title: title = txt[len('nolink:'):]
-                return pyratemp.escape(title)
+                return self.translateMarkup(title, node=node)
             else:
                 # Is not a special link, compute two-element path and title.  We
                 # will use the link generation code shared with paths as arrays.
@@ -605,7 +604,7 @@ class HtmlHelper(object):
         title = self.translateId(title)
         filename = cat.upper() + escapeFiles(subcat) + ".html"
         dead_attr = {True: ' class="dead"', False: ''}[is_dead]
-        return '<a href="%s"%s>%s</a>' % (pyratemp.escape(filename), dead_attr, pyratemp.escape(title))
+        return '<a href="%s"%s>%s</a>' % (pyratemp.escape(filename), dead_attr, title)
 
     def translateMarkup(self, text, section=None, subsection=None, node=None):
         ## print text, section, subsection
@@ -641,17 +640,70 @@ class HtmlHelper(object):
         res.append('</tr>')
         return ''.join(res)
 
-    def includeFile(self, filename, tag=None, class_=None):
-        with open(filename, 'rb') as f:
-            txt = f.read()
-        leading, trailing = '', ''
-        if tag:
-            trailing = '</%s>' % tag
-            if class_:
-                leading = '<%s class="%s">' % (tag, class_)
+    def _splitIncludeFile(self, txt):
+        """Splits text from included file.
+
+        Returns a list of pairs.  Each pair contains the type of the entry in
+        the first and the text of the entry in the second component.  The type
+        is either 'TEXT' or 'CODE'.
+        """
+        result = []
+        curr_type = None
+        curr_chunk = []
+        for line in txt.splitlines():
+            if line.startswith('///'):
+                if curr_type != 'TEXT':
+                    if curr_chunk:
+                        result.append((curr_type, curr_chunk))
+                    curr_type = 'TEXT'
+                    curr_chunk = [line[3:]]
+                else:
+                    curr_chunk.append(line[3:])
             else:
-                leading = '<%s>' % tag
-        return ''.join([leading, pyratemp.escape(txt), trailing])
+                if curr_type != 'CODE':
+                    if curr_chunk:
+                        result.append((curr_type, curr_chunk))
+                    curr_type = 'CODE'
+                    curr_chunk = [line]
+                else:
+                    curr_chunk.append(line)
+        if curr_chunk:  # Last open chunk.
+            result.append((curr_type, curr_chunk))
+        return result
+
+    def _formatCode(self, txt, linenostart):
+        try:
+            import pygments, pygments.lexers, pygments.formatters
+            return pygments.highlight(txt, pygments.lexers.CppLexer(), pygments.formatters.HtmlFormatter(linenos='table', style='friendly', linenostart=linenostart))
+        except ImportError:
+            return pyratemp.escape(txt)
+
+    def highlightCss(self):
+        try:
+            import pygments.formatters
+            return pygments.formatters.HtmlFormatter(linenos='table', style='friendly').get_style_defs('.highlight')
+        except ImportError:
+            return ''
+
+    def includeFile(self, filename, class_=None, node=None):
+        # Read in file.
+        with open(filename, 'rb') as f:
+            fcontents = f.read()
+        # Write out file to same directory as filename.
+        with open(os.path.join(self.out_path, os.path.basename(filename)), 'wb') as f:
+            f.write(fcontents)
+        # Create HTML to output.
+        chunks = self._splitIncludeFile(fcontents)
+        txts = []
+        next_lineno = 1
+        for type, lines in chunks:
+            if type == 'CODE':
+                txts.append(self._formatCode('\n'.join(lines), next_lineno))
+                next_lineno += len(lines)
+            else:
+                txts.append('<p class="' + class_ + '">' + self.translateMarkup('\n'.join(lines), node=node) + '</p>')
+        
+        return '\n'.join(txts)
 
 
 class DocsCreator(object):
@@ -693,7 +745,7 @@ class DocsCreator(object):
                                                time=time,  # for now.strftime()
                                                iterable=lambda x: type(x) is list,
                                                core=core,
-                                               html=HtmlHelper(self.error_logger, self.tree),
+                                               html=HtmlHelper(self.error_logger, self.tree, os.path.dirname(filename)),
                                                json=json)
                 f.write(res.encode('utf-8'))
 
@@ -736,7 +788,7 @@ class DocsCreator(object):
                                              now=datetime.datetime.now(),
                                              time=time,  # for now.strftime()
                                              core=core,
-                                             html=HtmlHelper(self.error_logger, self.tree),
+                                             html=HtmlHelper(self.error_logger, self.tree, os.path.dirname(filename)),
                                              json=json)
                     f.write(res.encode('utf-8'))
                 print >>sys.stderr, '.',
