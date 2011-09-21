@@ -677,7 +677,7 @@ class HtmlHelper(object):
             import pygments, pygments.lexers, pygments.formatters
             return pygments.highlight(txt, pygments.lexers.CppLexer(), pygments.formatters.HtmlFormatter(linenos='table', style='friendly', linenostart=linenostart))
         except ImportError:
-            return pyratemp.escape(txt)
+            return '<pre>' + pyratemp.escape(txt) + '</pre>'
 
     def highlightCss(self):
         try:
