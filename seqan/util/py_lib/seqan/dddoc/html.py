@@ -26,7 +26,7 @@ TPL_FILES = [
     'js/searchdoc.js',
     'js/excanvas.compiled.js',
     # CSS Files
-    #'css/main.css',
+    'css/main.css',
     'css/panel.css',
     'css/reset.css',
     'css/hierarchy-tree.css',
