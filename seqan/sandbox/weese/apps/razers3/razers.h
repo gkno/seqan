@@ -289,6 +289,7 @@ enum {
 			tabooLength = 1;
 			repeatLength = 1000;
 			abundanceCut = 1;
+			overlap = 0;
 
 			libraryLength = 220;
 			libraryError = 50;
@@ -2207,7 +2208,7 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOp
     resize(maxQ, maxOverlap + 1, 3);
 	
     // compute q-grams for different overlaps
-	for (unsigned len = 0; len <= maxLength; ++len)
+	for (unsigned len = 0; len < maxLength1; ++len)
 	{
 		if (options.readLengths[len] == 0) continue;
 		
@@ -2458,6 +2459,7 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 	if (options.lossRate == 0.0)
 	{
 		filterPattern.params.overlap = options.overlap;
+		_patternInit(filterPattern, options.errorRate);
 		return;
 	}
 
@@ -2513,7 +2515,7 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 		std::cout << ((filterPattern.params.overlap == (unsigned)estLosses[i - 2])? '*':' ');
 	}
     std::cout << std::endl;
-	
+	_patternInit(filterPattern, options.errorRate);
 }
 
 template <typename TIndex, typename TSwiftSpec, typename TOptions>
@@ -2652,8 +2654,6 @@ int _mapSingleReads(
 	
 	// configure Swift pattern
 	TFilterPattern filterPattern(readIndex);
-    _applyFilterOptions(filterPattern, options);
-	filterPattern.params.printDots = options._debugLevel > 0; 
 
 	// init edit distance verifiers
 	options.compMask[4] = (options.matchN)? 15: 0;
@@ -2679,6 +2679,11 @@ int _mapSingleReads(
 	}
 #endif  // #ifdef RAZERS_BANDED_MYERS
 	
+	// configure filter pattern 
+	// (if this is a pigeonhole filter, all sequences must be appended first)
+    _applyFilterOptions(filterPattern, options);
+	filterPattern.params.printDots = options._debugLevel > 0; 
+
 	// clear stats
 	options.countFiltration = 0;
 	options.countVerification = 0;

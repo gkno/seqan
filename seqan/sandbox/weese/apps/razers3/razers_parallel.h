@@ -824,7 +824,6 @@ void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStora
         // Clear pattern and set parameters.
         TFilterPattern & filterPattern = tls.filterPattern;
         clear(filterPattern);
-        _applyFilterOptions(filterPattern, options);
 
         // Initialize the index.
         TIndex & index = host(tls.filterPattern);
@@ -842,6 +841,9 @@ void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStora
         cargo(index).abundanceCut = options.abundanceCut;
         cargo(index)._debugLevel = options._debugLevel;
 
+		// Configure filter pattern 
+		// (if this is a pigeonhole filter, all sequences must be appended first)
+        _applyFilterOptions(filterPattern, options);
         indexRequire(index, QGramSADir());
 
         tls.filterPattern.params.printDots = (tls.threadId == 0) && (tls.options._debugLevel > 0);

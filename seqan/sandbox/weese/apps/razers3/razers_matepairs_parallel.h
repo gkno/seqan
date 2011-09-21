@@ -108,9 +108,9 @@ public:
     TReadSet readSetL, readSetR; 
 
     // Each thread has its own SWIFT finder and pattern object.
-    TFilterFinderL swiftFinderL;
-    TFilterFinderR swiftFinderR;
-    TFilterPattern swiftPatternL, swiftPatternR;
+    TFilterFinderL filterFinderL;
+    TFilterFinderR filterFinderR;
+    TFilterPattern filterPatternL, filterPatternR;
 
     TCounts counts;  // TODO(holtgrew): Artifact?
 
@@ -164,19 +164,19 @@ public:
 };
 
 template <typename TThreadLocalStorage>
-class SwiftPatternLSetMaxErrorsWrapper
+class FilterPatternLSetMaxErrorsWrapper
 {
 public:
     TThreadLocalStorage & tls;
-    SwiftPatternLSetMaxErrorsWrapper(TThreadLocalStorage & tls_) : tls(tls_) {}
+    FilterPatternLSetMaxErrorsWrapper(TThreadLocalStorage & tls_) : tls(tls_) {}
 };
 
 template <typename TThreadLocalStorage>
-class SwiftPatternRSetMaxErrorsWrapper
+class FilterPatternRSetMaxErrorsWrapper
 {
 public:
     TThreadLocalStorage & tls;
-    SwiftPatternRSetMaxErrorsWrapper(TThreadLocalStorage & tls_) : tls(tls_) {}
+    FilterPatternRSetMaxErrorsWrapper(TThreadLocalStorage & tls_) : tls(tls_) {}
 };
 
 template <typename TMatches, typename TFragmentStore, typename THitString, typename TOptions, typename TFilterPattern>
@@ -257,13 +257,13 @@ public:
     size_t hitsRBegin, hitsREnd;
     __int64 rightWindowBegin;
     TOptions * options;
-    TFilterPattern * swiftPatternL;
-    TFilterPattern * swiftPatternR;
+    TFilterPattern * filterPatternL;
+    TFilterPattern * filterPatternR;
 
     Job() {}
 
-    Job(int threadId_, TVerificationResults & verificationResults_, TFragmentStore & globalStore_, unsigned contigId_, char orientation_, THitStringPtr & prevHitsPtrL_, size_t prevHitsLBegin_, size_t prevHitsLEnd_, THitStringPtr & hitsPtrL_, size_t hitsLBegin_, size_t hitsLEnd_, THitStringPtr & hitsPtrR_, size_t hitsRBegin_, size_t hitsREnd_, __int64 rightWindowBegin_, TOptions & options_, TFilterPattern & swiftPatternL_, TFilterPattern & swiftPatternR_)
-            : threadId(threadId_), verificationResults(&verificationResults_), globalStore(&globalStore_), contigId(contigId_), orientation(orientation_), prevHitsPtrL(prevHitsPtrL_), prevHitsLBegin(prevHitsLBegin_), prevHitsLEnd(prevHitsLEnd_), hitsPtrL(hitsPtrL_), hitsLBegin(hitsLBegin_), hitsLEnd(hitsLEnd_), hitsPtrR(hitsPtrR_), hitsRBegin(hitsRBegin_), hitsREnd(hitsREnd_), rightWindowBegin(rightWindowBegin_), options(&options_), swiftPatternL(&swiftPatternL_), swiftPatternR(&swiftPatternR_)
+    Job(int threadId_, TVerificationResults & verificationResults_, TFragmentStore & globalStore_, unsigned contigId_, char orientation_, THitStringPtr & prevHitsPtrL_, size_t prevHitsLBegin_, size_t prevHitsLEnd_, THitStringPtr & hitsPtrL_, size_t hitsLBegin_, size_t hitsLEnd_, THitStringPtr & hitsPtrR_, size_t hitsRBegin_, size_t hitsREnd_, __int64 rightWindowBegin_, TOptions & options_, TFilterPattern & filterPatternL_, TFilterPattern & filterPatternR_)
+            : threadId(threadId_), verificationResults(&verificationResults_), globalStore(&globalStore_), contigId(contigId_), orientation(orientation_), prevHitsPtrL(prevHitsPtrL_), prevHitsLBegin(prevHitsLBegin_), prevHitsLEnd(prevHitsLEnd_), hitsPtrL(hitsPtrL_), hitsLBegin(hitsLBegin_), hitsLEnd(hitsLEnd_), hitsPtrR(hitsPtrR_), hitsRBegin(hitsRBegin_), hitsREnd(hitsREnd_), rightWindowBegin(rightWindowBegin_), options(&options_), filterPatternL(&filterPatternL_), filterPatternR(&filterPatternR_)
     {
         SEQAN_ASSERT_LEQ(hitsLBegin, length(*hitsPtrL));
         SEQAN_ASSERT_LEQ(hitsLEnd, length(*hitsPtrL));
@@ -290,21 +290,14 @@ public:
 // We do not disable the read right 
 template <typename TThreadLocalStorage, typename TReadNo, typename TMaxErrors>
 void
-setMaxErrors(SwiftPatternLSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
+setMaxErrors(FilterPatternLSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
              TReadNo readNo,
              TMaxErrors maxErrors)
 {
     // std::cerr << std::endl << "SET MAX ERRORS LEFT" << std::endl;
     SEQAN_ASSERT_LT(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
     SEQAN_ASSERT_GEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId]);
-	int localReadNo = readNo - wrapper.tls.splitters[wrapper.tls.threadId];
-
-	int minT = _qgramLemma(wrapper.tls.swiftPatternL, localReadNo, maxErrors);
-	if (minT > 1){
-		if (maxErrors < 0)
-            minT = MaxValue<int>::VALUE;
-		setMinThreshold(wrapper.tls.swiftPatternL, localReadNo, static_cast<unsigned>(minT));
-	}
+	setMaxErrors(wrapper.tls.filterPatternL, readNo - wrapper.tls.splitters[wrapper.tls.threadId], maxErrors);
 }
 
 // Allow disabling reads in compactPairMatches() for left-mate read set.
@@ -312,21 +305,14 @@ setMaxErrors(SwiftPatternLSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
 // We do not disable the read right 
 template <typename TThreadLocalStorage, typename TReadNo, typename TMaxErrors>
 void
-setMaxErrors(SwiftPatternRSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
+setMaxErrors(FilterPatternRSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
              TReadNo readNo,
              TMaxErrors maxErrors)
 {
     // std::cerr << std::endl << "SET MAX ERRORS LEFT" << std::endl;
     SEQAN_ASSERT_LT(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
     SEQAN_ASSERT_GEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId]);
-	int localReadNo = readNo - wrapper.tls.splitters[wrapper.tls.threadId];
-
-	int minT = _qgramLemma(wrapper.tls.swiftPatternR, localReadNo, maxErrors);
-	if (minT > 1){
-		if (maxErrors < 0)
-            minT = MaxValue<int>::VALUE;
-		setMinThreshold(wrapper.tls.swiftPatternR, localReadNo, static_cast<unsigned>(minT));
-	}
+	setMaxErrors(wrapper.tls.filterPatternR, readNo - wrapper.tls.splitters[wrapper.tls.threadId], maxErrors);
 }
 
 template <typename TFragmentStore>
@@ -390,18 +376,14 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
         reverseComplement(readSetR);
 
         // Clear patterns and set parameters.
-        TFilterPattern & swiftPatternL = tls.swiftPatternL;
-        clear(swiftPatternL);
-        _applyFilterOptions(swiftPatternL, options);
-        swiftPatternL.params.printDots = false;
-        TFilterPattern & swiftPatternR = tls.swiftPatternR;
-        clear(swiftPatternR);
-        _applyFilterOptions(swiftPatternR, options);
-        swiftPatternR.params.printDots = (tls.threadId == 0) && (tls.options._debugLevel > 0);
+        TFilterPattern & filterPatternL = tls.filterPatternL;
+        TFilterPattern & filterPatternR = tls.filterPatternR;
+        clear(filterPatternL);
+        clear(filterPatternR);
 
         // Initialize the indices.
         // TODO(holtgrew): Necessary to split into readSetL and readSetR if we assign separately anyway?
-        TIndex & indexL = host(tls.swiftPatternL);
+        TIndex & indexL = host(tls.filterPatternL);
         clear(indexL);
         clear(indexText(indexL));
         reserve(indexText(indexL), length(readSetL), Exact());
@@ -415,7 +397,7 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
         cargo(indexL)._debugLevel = options._debugLevel;
         indexRequire(indexL, QGramSADir());
 
-        TIndex & indexR = host(tls.swiftPatternR);
+        TIndex & indexR = host(tls.filterPatternR);
         clear(indexR);
         clear(indexText(indexR));
         reserve(indexText(indexR), length(readSetR), Exact());
@@ -428,6 +410,13 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
         cargo(indexR).abundanceCut = options.abundanceCut;
         cargo(indexR)._debugLevel = options._debugLevel;
         indexRequire(indexR, QGramSADir());
+
+		// Configure filter pattern 
+		// (if this is a pigeonhole filter, all sequences must be appended first)
+        _applyFilterOptions(filterPatternL, options);
+        _applyFilterOptions(filterPatternR, options);
+        filterPatternL.params.printDots = false;
+        filterPatternR.params.printDots = (tls.threadId == 0) && (tls.options._debugLevel > 0);
     }
 }
 
@@ -484,7 +473,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
     // buffer variable to extend window in previous left hits string by.
     // TODO(holtgrew): DELTA has to be set to a better value, probably.
-    unsigned const DELTA = back(tls.swiftPatternL.bucketParams).delta + back(tls.swiftPatternL.bucketParams).overlap + length(tls.swiftPatternL.bucketParams) - 2;
+    unsigned const DELTA = getMaxDeviationOfOrder(tls.filterPatternL);
 
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_VERIFY);
@@ -499,7 +488,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
     // Initialize verifiers.
     tls.verifierL.matches = localMatches;
     tls.verifierL.options = job.options;
-    tls.verifierL.filterPattern = job.swiftPatternL;
+    tls.verifierL.filterPattern = job.filterPatternL;
     tls.verifierL.cnts = 0;
 #ifndef RAZERS_BANDED_MYERS
     setBeginPosition(*tls.verifierL.preprocessing, splitters[job.threadId]);
@@ -508,7 +497,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
     tls.verifierR.matches = localMatches;
     tls.verifierR.options = job.options;
-    tls.verifierR.filterPattern = job.swiftPatternR;
+    tls.verifierR.filterPattern = job.filterPatternR;
     tls.verifierR.cnts = 0;
 #ifndef RAZERS_BANDED_MYERS
     setBeginPosition(*tls.verifierR.preprocessing, splitters[job.threadId]);
@@ -519,13 +508,13 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
     TOptions & options = tls.options;
 
-    TFilterPattern & swiftPatternL = *job.swiftPatternL;
-    TFilterPattern & swiftPatternR = *job.swiftPatternR;
-    (void)swiftPatternR;
-    // TFilterFinderL & swiftFinderL = *job.swiftFinderL;
-    // TFilterFinderR & swiftFinderR = *job.swiftFinderR;
-    TReadSet	&readSetL = indexText(host(*job.swiftPatternL));
-    TReadSet	&readSetR = indexText(host(*job.swiftPatternR));
+    TFilterPattern & filterPatternL = *job.filterPatternL;
+    TFilterPattern & filterPatternR = *job.filterPatternR;
+    (void)filterPatternR;
+    // TFilterFinderL & filterFinderL = *job.filterFinderL;
+    // TFilterFinderR & filterFinderR = *job.filterFinderR;
+    TReadSet	&readSetL = indexText(host(*job.filterPatternL));
+    TReadSet	&readSetR = indexText(host(*job.filterPatternR));
     TVerifier	&verifierL = tls.verifierL;
     TVerifier	&verifierR = tls.verifierR;
 
@@ -535,8 +524,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 	// distance <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
 	// distance >= libLen - libErr - 2*parWidth + shapeLen
 	TSize readLength = length(readSetL[0]);
-	TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(swiftPatternL)));
-	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(swiftPatternL)));
+	TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(filterPatternL)));
+	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(filterPatternL)));
 	TGPos scanShift = (minDistance < 0) ? 0 : minDistance;
 
     Pair<TGPos> gPair;
@@ -549,7 +538,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
     // TODO(holtgrew): Could do length(...)/job.stride but would have to do so everywhere else below, too.
     // TODO(holtgrew): Get around the clear() and resize-with-fill somehow.
     clear(tls.fifoLastPotMatchNo);
-    resize(tls.fifoLastPotMatchNo, length(indexText(host(swiftPatternL))), (__int64)-2, Exact());
+    resize(tls.fifoLastPotMatchNo, length(indexText(host(filterPatternL))), (__int64)-2, Exact());
     
 	TGenome & genome = tls.globalStore->contigStore[job.contigId].seq;
 
@@ -831,7 +820,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
         if (bestLeftScore != MinValue<int>::VALUE)
         {
             //			if (matchVerify(
-            //					mR, qR, infix(swiftFinderR),
+            //					mR, qR, infix(filterFinderR),
             //					matePairId, readSetR, forwardPatternsR,
             //					options, TSwiftSpec()))
             // std::cerr << " [verify]" << std::flush;
@@ -989,8 +978,8 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFi
 		if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
 			maskDuplicates(tls.matches, tls.options, TRazerSMode());	// overlapping parallelograms cause duplicates
 
-        SwiftPatternLSetMaxErrorsWrapper<TThreadLocalStorage> wrapperL(tls);
-        SwiftPatternRSetMaxErrorsWrapper<TThreadLocalStorage> wrapperR(tls);
+        FilterPatternLSetMaxErrorsWrapper<TThreadLocalStorage> wrapperL(tls);
+        FilterPatternRSetMaxErrorsWrapper<TThreadLocalStorage> wrapperR(tls);
         compactPairMatches(*tls.globalStore, tls.matches, tls.counts, tls.options, wrapperL, wrapperR, COMPACT);
 
         if (length(tls.matches) * 4 > oldSize) {     // the threshold should not be raised if too many matches were removed
@@ -1113,8 +1102,8 @@ void _mapMatePairReadsParallel(
 	// distance <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
 	// distance >= libLen - libErr - 2*parWidth + shapeLen
 	// TSize readLength = length(threadLocalStorages[0].readSetL[0]); // XXX
-	// TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(threadLocalStorages[0].swiftPatternL))); // XXX
-	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(threadLocalStorages[0].swiftPatternL)));
+	// TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(threadLocalStorages[0].filterPatternL))); // XXX
+	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(threadLocalStorages[0].filterPatternL)));
 	TGPos scanShift = (minDistance < 0) ? 0: minDistance;
 	
 	// exit if contig is shorter than library size
@@ -1164,9 +1153,9 @@ void _mapMatePairReadsParallel(
 		threadLocalStorages[i].verifierR.preprocessing = &threadLocalStorages[i].preprocessingInfixR;
 #endif  // #ifdef RAZERS_BANDED_MYERS
         
-        // threadLocalStorages[i].swiftFinderL  = TFilterFinderL(genome, options.repeatLength, 1);
+        // threadLocalStorages[i].filterFinderL  = TFilterFinderL(genome, options.repeatLength, 1);
         threadLocalStorages[i].genomeInf = infix(genome, scanShift, length(genome));
-        // threadLocalStorages[i].swiftFinderR  = TFilterFinderR(threadLocalStorages[i].genomeInf, options.repeatLength, 1);
+        // threadLocalStorages[i].filterFinderR  = TFilterFinderR(threadLocalStorages[i].genomeInf, options.repeatLength, 1);
      }
 
     // -----------------------------------------------------------------------
@@ -1182,8 +1171,8 @@ void _mapMatePairReadsParallel(
     timelineBeginTask(TASK_COPY_FINDER);
 #endif  // #ifdef RAZERS_PROFILE
 
-    threadLocalStorages[0].swiftFinderL  = TFilterFinderL(store.contigStore[contigId].seq, options.repeatLength, 1);
-    threadLocalStorages[0].swiftFinderR  = TFilterFinderR(threadLocalStorages[0].genomeInf, options.repeatLength, 1);
+    threadLocalStorages[0].filterFinderL  = TFilterFinderL(store.contigStore[contigId].seq, options.repeatLength, 1);
+    threadLocalStorages[0].filterFinderR  = TFilterFinderR(threadLocalStorages[0].genomeInf, options.repeatLength, 1);
 
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_COPY_FINDER);
@@ -1203,8 +1192,8 @@ void _mapMatePairReadsParallel(
         // tls.filterFinder = TFilterFinder(store.contigStore[contigId].seq, tls.options.repeatLength, 1);
         if (omp_get_thread_num() != 0)
         {
-            tls.swiftFinderL = threadLocalStorages[0].swiftFinderL;
-            tls.swiftFinderR = threadLocalStorages[0].swiftFinderR;
+            tls.filterFinderL = threadLocalStorages[0].filterFinderL;
+            tls.filterFinderR = threadLocalStorages[0].filterFinderR;
         }
 #ifdef RAZERS_PROFILE
         timelineEndTask(TASK_COPY_FINDER);
@@ -1214,10 +1203,10 @@ void _mapMatePairReadsParallel(
 #endif  // #ifdef RAZERS_PROFILE
 
 
-        TFilterPattern & swiftPatternL = tls.swiftPatternL;
-        TFilterPattern & swiftPatternR = tls.swiftPatternR;
-        TFilterFinderL & swiftFinderL = tls.swiftFinderL;
-        TFilterFinderR & swiftFinderR = tls.swiftFinderR;
+        TFilterPattern & filterPatternL = tls.filterPatternL;
+        TFilterPattern & filterPatternR = tls.filterPatternR;
+        TFilterFinderL & filterFinderL = tls.filterFinderL;
+        TFilterFinderR & filterFinderR = tls.filterFinderR;
         TReadSet	&readSetL = tls.readSetL;
         // TReadSet	&readSetR = tls.readSetR;  // XXX
         // TVerifier	&verifierL = tls.verifierL;  // XXX
@@ -1229,9 +1218,9 @@ void _mapMatePairReadsParallel(
 #ifdef RAZERS_PROFILE
         timelineBeginTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
-        if (!windowFindBegin(swiftFinderL, swiftPatternL, tls.options.errorRate))
+        if (!windowFindBegin(filterFinderL, filterPatternL, tls.options.errorRate))
             std::cerr << "ERROR: windowFindBegin() failed for left reads in thread " << tls.threadId << std::endl;
-        if (!windowFindBegin(swiftFinderR, swiftPatternR, tls.options.errorRate))
+        if (!windowFindBegin(filterFinderR, filterPatternR, tls.options.errorRate))
             std::cerr << "ERROR: windowFindBegin() failed for right reads in thread " << tls.threadId << std::endl;
 #ifdef RAZERS_PROFILE
         timelineEndTask(TASK_FILTER);
@@ -1261,7 +1250,7 @@ void _mapMatePairReadsParallel(
             // __int64 firstNo = 0;				// first number over all left-mate pot. match in the queue // XXX
             // Pair<TGPos> gPair;
 
-            // resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());  // XXX
+            // resize(lastPotMatchNo, length(host(filterPatternL)), (__int64)-1, Exact());  // XXX
 
             // TSize gLength = length(genome);  // XXX
 
@@ -1271,8 +1260,8 @@ void _mapMatePairReadsParallel(
 
             // Search for hits from next window.
             int delta = windowsDone == 0 ? scanShift : 0;  // First window of right finder is smaller.
-            hasMore = windowFindNext(tls.swiftFinderR, tls.swiftPatternR, tls.options.windowSize - delta);
-            bool ret = windowFindNext(tls.swiftFinderL, tls.swiftPatternL, tls.options.windowSize);
+            hasMore = windowFindNext(tls.filterFinderR, tls.filterPatternR, tls.options.windowSize - delta);
+            bool ret = windowFindNext(tls.filterFinderL, tls.filterPatternL, tls.options.windowSize);
             (void) ret;
             SEQAN_ASSERT(ret == hasMore);
             windowsDone += 1;  // Local windows done count.
@@ -1281,10 +1270,10 @@ void _mapMatePairReadsParallel(
             size_t rightWindowBegin = beginPosition(tls.genomeInf) + tls.options.windowSize * (windowsDone - 1);
 
             // Create verification jobs.
-            // std::cerr << "\nSWIFT HIT COUNT\t" << length(getSwiftHits(tls.swiftFinderL)) << "\t" << length(getSwiftHits(tls.swiftFinderR)) << std::endl;
+            // std::cerr << "\nSWIFT HIT COUNT\t" << length(getSwiftHits(tls.filterFinderL)) << "\t" << length(getSwiftHits(tls.filterFinderR)) << std::endl;
             // if (windowsDone > 1)
-            //     std::cerr << "\nPOSITION       \t" << tls.swiftFinderL.curPos << "\t" << tls.swiftFinderR.curPos << std::endl;
-            if (length(getWindowFindHits(tls.swiftFinderL)) > 0u || length(getWindowFindHits(tls.swiftFinderR)) > 0u) {
+            //     std::cerr << "\nPOSITION       \t" << tls.filterFinderL.curPos << "\t" << tls.filterFinderR.curPos << std::endl;
+            if (length(getWindowFindHits(tls.filterFinderL)) > 0u || length(getWindowFindHits(tls.filterFinderR)) > 0u) {
                 String<TVerificationJob> jobs;
 
                 // Update previous left hits and splitters.
@@ -1292,11 +1281,11 @@ void _mapMatePairReadsParallel(
                 swap(previousLeftHitsSplitters, leftHitsSplitters);
                 // Update new left hits and splitters.
                 leftHits.reset(new THitString());
-                std::swap(*leftHits, getWindowFindHits(tls.swiftFinderL));
-                buildHitSplittersAndPartitionHits(leftHitsSplitters, *leftHits, options.maxVerificationPackageCount, length(indexText(host(swiftPatternL))));
+                std::swap(*leftHits, getWindowFindHits(tls.filterFinderL));
+                buildHitSplittersAndPartitionHits(leftHitsSplitters, *leftHits, options.maxVerificationPackageCount, length(indexText(host(filterPatternL))));
                 rightHits.reset(new THitString());
-                std::swap(*rightHits, getWindowFindHits(tls.swiftFinderR));
-                buildHitSplittersAndPartitionHits(rightHitsSplitters, *rightHits, options.maxVerificationPackageCount, length(host(swiftPatternL)));
+                std::swap(*rightHits, getWindowFindHits(tls.filterFinderR));
+                buildHitSplittersAndPartitionHits(rightHitsSplitters, *rightHits, options.maxVerificationPackageCount, length(host(filterPatternL)));
 
                 for (unsigned i = 0; i < options.maxVerificationPackageCount; ++i) {
                     // std::cerr << "i == " << i << " length(leftHitsSplitters) == " << length(leftHitsSplitters) << ", length(rightHitsSplitters) == " << length(rightHitsSplitters) << ", length(previousLeftHitsSplitters) == " << length(previousLeftHitsSplitters) << ", verificationPackageCount == " << options.maxVerificationPackageCount << std::endl;
@@ -1306,7 +1295,7 @@ void _mapMatePairReadsParallel(
                     SEQAN_ASSERT_LEQ(leftHitsSplitters[i], leftHitsSplitters[i + 1]);
                     if (rightHitsSplitters[i] == rightHitsSplitters[i + 1] || (previousLeftHitsSplitters[i] == previousLeftHitsSplitters[i + 1] && leftHitsSplitters[i] == leftHitsSplitters[i + 1]))
                         continue;
-                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, orientation, previousLeftHits, previousLeftHitsSplitters[i], previousLeftHitsSplitters[i + 1], leftHits, leftHitsSplitters[i], leftHitsSplitters[i + 1], rightHits, rightHitsSplitters[i], rightHitsSplitters[i + 1], rightWindowBegin, *tls.globalOptions, tls.swiftPatternL, tls.swiftPatternR));
+                    appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, orientation, previousLeftHits, previousLeftHitsSplitters[i], previousLeftHitsSplitters[i + 1], leftHits, leftHitsSplitters[i], leftHitsSplitters[i + 1], rightHits, rightHitsSplitters[i], rightHitsSplitters[i + 1], rightWindowBegin, *tls.globalOptions, tls.filterPatternL, tls.filterPatternR));
                 }
 
                 pushFront(taskQueue, jobs);
@@ -1332,8 +1321,8 @@ void _mapMatePairReadsParallel(
             std::swap(localMatches, tls.verificationResults.localMatches);
             omp_unset_lock(&tls.verificationResults.lock->lock_);
             // Don't compact matches if in configured 'block fraction' of genome.
-            size_t hstckLen = swiftFinderR.endPos - swiftFinderR.startPos;
-            size_t hstckLeft = swiftFinderR.endPos - swiftFinderR.curPos;
+            size_t hstckLen = filterFinderR.endPos - filterFinderR.startPos;
+            size_t hstckLeft = filterFinderR.endPos - filterFinderR.curPos;
             double fracTodo = 1.0  * hstckLeft / hstckLen;
             bool dontCompact = tls.options.noCompactFrac >= fracTodo;
             // Write back the contents of these stores to the thread-local store.
@@ -1342,8 +1331,8 @@ void _mapMatePairReadsParallel(
         } while (hasMore);
 
         // Finalization
-        windowFindEnd(swiftFinderL, swiftPatternL);
-        windowFindEnd(swiftFinderR, swiftPatternR);
+        windowFindEnd(filterFinderL, filterPatternL);
+        windowFindEnd(filterFinderR, filterPatternR);
 
         #pragma omp atomic
         threadsFiltering -= 1;
@@ -1402,22 +1391,18 @@ int _mapMatePairReadsParallel(
 	typedef typename Value<TReadSeqStore>::Type			TRead;
 	typedef StringSet<TRead>							TReadSet;
 #ifndef RAZERS_OPENADDRESSING
-	typedef Index<TReadSet, IndexQGram<TShape> >	TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape> >					TIndex;			// q-gram index
 #else
 	typedef Index<TReadSet, IndexQGram<TShape, OpenAddressing> >	TIndex;
 #endif
 
-	typedef typename If<
-				IsSameType<TGapMode,RazerSGapped>::VALUE,
-				SwiftSemiGlobal,
-				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
-	typedef Pattern<TIndex, TFilterSpec>                TFilterPattern;	// filter
+	typedef Pattern<TIndex, TFilterSpec>				TFilterPattern;	// filter
 	typedef Pattern<TRead const, MyersUkkonen>			TMyersPattern;	// verifier
 
-	typedef typename TFragmentStore::TContigSeq						TContigSeq;
-	typedef Finder<TContigSeq, TFilterSpec>					TFilterFinderL;
-	typedef typename Infix<TContigSeq>::Type					    TContigInf;
-	typedef Finder<TContigInf, TFilterSpec>					TFilterFinderR;
+	typedef typename TFragmentStore::TContigSeq			TContigSeq;
+	typedef Finder<TContigSeq, TFilterSpec>				TFilterFinderL;
+	typedef typename Infix<TContigSeq>::Type			TContigInf;
+	typedef Finder<TContigInf, TFilterSpec>				TFilterFinderR;
 
     typedef typename TFragmentStore::TContigSeq TContigSeq;
     typedef typename Position<TContigSeq>::Type TContigPos;
