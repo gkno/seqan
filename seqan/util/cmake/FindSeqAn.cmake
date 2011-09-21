@@ -54,6 +54,31 @@ macro (seqan_instrumentation_target TARGET)
 	endif(SEQAN_INSTRUMENTATION)
 endmacro (seqan_instrumentation_target TARGET)
 
+
+# ---------------------------------------------------------------------------
+# Function seqan_get_version()
+#
+# Sets the variables SEQAN_VERSION, SEQAN_VERSION_MAJOR, SEQAN_VERSION_MINOR,
+# SEQAN_VERSION_PATCH, determined from seqan/version.h
+# ---------------------------------------------------------------------------
+
+macro (seqan_get_version)
+  try_run(_SEQAN_RUN_RESULT
+          _SEQAN_COMPILE_RESULT
+          ${CMAKE_BINARY_DIR}/CMakeFiles/SeqAnVersion
+          ${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/SeqAnVersion.cpp
+          CMAKE_FLAGS -DINCLUDE_DIRECTORIES:STRING=${SEQAN_INCLUDE_DIR_FOR_SeqAnCore}
+          RUN_OUTPUT_VARIABLE _RUN_OUTPUT)
+  string(REGEX REPLACE ".*SEQAN_VERSION_MAJOR:([0-9a-zA-Z]+).*" "\\1" SEQAN_VERSION_MAJOR ${_RUN_OUTPUT})
+  string(REGEX REPLACE ".*SEQAN_VERSION_MINOR:([0-9a-zA-Z]+).*" "\\1" SEQAN_VERSION_MINOR ${_RUN_OUTPUT})
+  string(REGEX REPLACE ".*SEQAN_VERSION_PATCH:([0-9a-zA-Z]+).*" "\\1" SEQAN_VERSION_PATCH ${_RUN_OUTPUT})
+  string(REGEX REPLACE ".*SEQAN_VERSION_PRE_RELEASE:([0-9a-zA-Z]+).*" "\\1" SEQAN_VERSION_PRE_RELEASE ${_RUN_OUTPUT})
+    set(SEQAN_VERSION "${SEQAN_VERSION_MAJOR}.${SEQAN_VERSION_MINOR}.${SEQAN_VERSION_PATCH}")
+  if (SEQAN_VERSION_PRE_RELEASE STREQUAL 1)
+    set(SEQAN_VERSION "pre${SEQAN_VERSION}")
+  endif (SEQAN_VERSION_PRE_RELEASE STREQUAL 1)
+endmacro (seqan_get_version)
+
 # ---------------------------------------------------------------------------
 # Macro seqan_setup_global ()
 # ---------------------------------------------------------------------------
