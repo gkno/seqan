@@ -152,12 +152,10 @@ namespace seqan{
 		typedef typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type TValue;
 		TValue position;
 		WaveletTreeStructure< TText > * waveletTreeStructure;
-		//Pair< TSplitValue, TSplitValue> range;
 
 		Iter(WaveletTreeStructure< TText > &treeStructure, TValue pos):
 			position(pos),
 			waveletTreeStructure(&treeStructure)
-//			range(0, ordValue((TSplitValue)-1))
 		{}
 	};
 

@@ -155,28 +155,28 @@ namespace seqan{
 	}
 	
 	template < typename TSparseString, typename TSpec >
-	typename Size< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
+	typename Size< typename Fibre< SparseString< TSparseString, TSpec >, FibreSparseString >::Type >::Type
 	getBlockSize(SparseString< TSparseString, TSpec > &string)
 	{
 		return string.blockSize;
 	}
 	
 	template < typename TSparseString, typename TSpec, typename TPos >
-	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
+	typename Value< typename Fibre< SparseString< TSparseString, TSpec >, FibreSparseString >::Type >::Type
 	getValue(SparseString< TSparseString, TSpec > &string, TPos pos)
 	{
 		return getValue(string.string, pos);
 	}
 
 	template < typename TSparseString, typename TSpec, typename TPos >
-	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type 
+	typename Value< typename Fibre< SparseString< TSparseString, TSpec > const, FibreSparseString >::Type >::Type 
 	getValue(SparseString< TSparseString, TSpec > const &string, TPos pos)
 	{
 		return getValue(string.string, pos);
 	}
 
 	template < typename TSparseString, typename TSpec, typename TPos >
-	typename Size< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
+	typename Size< typename Fibre< SparseString< TSparseString, TSpec >, FibreSparseString >::Type >::Type
 	length(SparseString< TSparseString, TSpec > &string, TPos pos)
 	{
 		return length(string.string);
@@ -191,14 +191,14 @@ namespace seqan{
 	}
 
 	template < typename TSparseString, typename TSpec, typename TPos >
-	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
+	typename Value< typename Fibre< SparseString< TSparseString, TSpec >, FibreSparseString >::Type >::Type
 	value(SparseString< TSparseString, TSpec > &string, TPos pos)
 	{
 		return string.string[pos];
 	}
 	
 	template < typename TSparseString, typename TSpec, typename TPos >
-	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type const
+	typename Value< typename Fibre< SparseString< TSparseString, TSpec >, FibreSparseString >::Type >::Type const
 	value(SparseString< TSparseString, TSpec > const &string, TPos pos)
 	{
 		return string.string[pos];

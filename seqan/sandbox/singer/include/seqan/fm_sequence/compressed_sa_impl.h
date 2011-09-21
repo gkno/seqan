@@ -118,6 +118,8 @@ namespace seqan
 	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type const
 	value(const CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, TPos pos)
 	{
+//		TSparseString test;
+//		static_cast<Nothing>(test);
 		return compressedSA[pos];
 	}
 }

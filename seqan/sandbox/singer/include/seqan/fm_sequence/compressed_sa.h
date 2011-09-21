@@ -163,12 +163,12 @@ namespace seqan
 
 		CompressedSA(){};
 
-		typedef typename Size< typename Fibre< TSparseString, FibreSparseString >::Type >::Type TCompressedSaValue;
+		typedef typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type TCompressedSaValue;
+		typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
 
 		template < typename TPos >
 		TCompressedSaValue const operator[](TPos pos)
 		{ 
-			typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
 			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
 			TPos counter = 0;
 			while(!getBit(indicatorString, pos))
@@ -182,7 +182,6 @@ namespace seqan
 		template < typename TPos >
 		TCompressedSaValue operator[](TPos pos) const
 		{
-			typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
 			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
 			TPos counter = 0;
 			while(!getBit(indicatorString, pos))
@@ -200,21 +199,27 @@ namespace seqan
 		}
 	};
 
-	template< typename TSparseStrings, typename TLfTable, typename TSpec >
-	struct CompressedSA< StringSet< TSparseStrings >, TLfTable, TSpec >
+
+	/*SparseString<
+		String<
+			Pair<long unsigned int, long unsigned int, Tag<seqan::Compressed_> >, 
+		seqan::Alloc<void> >, 
+		void>&)’*/
+
+	template< typename TSpecPairI1, typename TSpecPairI2, typename TSpecPairSpec, typename TStringSpec, typename TSparseStringSpec, typename TLfTable, typename TSpec >
+	struct CompressedSA< SparseString< String< Pair< TSpecPairI1, TSpecPairI2, TSpecPairSpec >, TStringSpec >, TSparseStringSpec >, TLfTable, TSpec >
 	{
-		typedef StringSet< TSparseStrings > 	TSparseString;
-		TSparseString							compressedSA;
-		TLfTable * 								lfTable;
+		typedef SparseString< String< Pair< TSpecPairI1, TSpecPairI2, TSpecPairSpec >, TStringSpec >, TSparseStringSpec > 	TSparseString;
+		typedef typename Value< typename Fibre< SparseString< TSparseString, TStringSpec >, FibreSparseString >::Type >::Type TCompressedSaValue;
+		typedef typename Fibre< SparseString< TSparseString, TStringSpec >, FibreIndicatorString>:: Type TIndicatorString;
+		TSparseString																						compressedSA;
+		TLfTable * 																							lfTable;
 
 		CompressedSA(){};
-
-		typedef typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type TCompressedSaValue;
 
 		template < typename TPos >
 		TCompressedSaValue const operator[](TPos pos)
 		{ 
-			typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
 			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
 			TPos counter = 0;
 			while(!getBit(indicatorString, pos))
@@ -230,7 +235,6 @@ namespace seqan
 		template < typename TPos >
 		TCompressedSaValue operator[](TPos pos) const
 		{
-			typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
 			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
 			TPos counter = 0;
 			while(!getBit(indicatorString, pos))
@@ -238,7 +242,9 @@ namespace seqan
 				pos = lfMapping(*lfTable, pos);
 				++counter;
 			}
+//			static_cast<Nothing>(value(compressedSA, getRank(indicatorString, pos) - 1));
 			TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
+			std::cerr << "temp: " << temp << " " << getRank(indicatorString, pos) << std::endl;
 		   	temp.i2	+= counter;
 			return temp;	
 		}
@@ -342,7 +348,27 @@ namespace seqan
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Rooted> :
 		 Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Standard> {};
-
+/*
+	template< typename TSparseStrings, typename TLfTable, typename TSpec >
+	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, Standard>
+	{        
+        typedef Iter<CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, PositionIterator > Type;
+	};
+	
+	template< typename TSparseStrings, typename TLfTable, typename TSpec >
+	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec >, Standard >
+	{        
+        typedef Iter<CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > , PositionIterator > Type;
+	};
+	
+	template< typename TSparseStrings, typename TLfTable, typename TSpec >
+	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec >, Rooted> :
+		 Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec >, Standard> {};
+	
+	template< typename TSparseStrings, typename TLfTable, typename TSpec >
+	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, Rooted> :
+		 Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, Standard> {};
+*/
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct Value< CompressedSA< TSparseString, TLfTable, TSpec > > 
 	{

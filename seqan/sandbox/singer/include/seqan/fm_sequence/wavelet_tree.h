@@ -100,22 +100,30 @@ namespace seqan{
 	struct MultiString_;
 	struct FibreBitStrings_;
 	struct FibreSplitValues_;
+	struct FibreDollarPositions_;
 
 	typedef Tag< SingleString_ > SingleString;
 	typedef Tag< MultiString_ > MultiString;
 	typedef Tag< FibreBitStrings_ > const FibreBitStrings;
 	typedef Tag< FibreSplitValues_ > const FibreSplitValues;
+	typedef Tag< FibreDollarPositions_ > const FibreDollarPositions;
 
 	template< typename TText, typename TSpec >
 	struct Fibre< WaveletTree< TText, TSpec >, FibreBitStrings >
 	{
 		typedef StringSet< RankSupportBitString< void > > Type;
 	};
-	
+		
 	template< typename TText, typename TSpec >
 	struct Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >
 	{
 		typedef WaveletTreeStructure< TText > Type;
+	};
+	
+	template< typename TText >
+	struct Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >
+	{
+		typedef typename Value< typename Fibre< WaveletTree< TText, MultiString >, FibreBitStrings >::Type >::Type Type;
 	};
 
 	template< typename TText, typename TSpec >
@@ -217,16 +225,18 @@ namespace seqan{
 		typedef typename Fibre< WaveletTree, FibreBitStrings >::Type 								TBitStrings;
 		typedef typename Size< TText >::Type														TSize;
 		
-		TBitStrings 						bitStrings;
-		WaveletTreeStructure< TText >		splitValues;
-		TBitStrings							dollarPosition;
-		TValue		 						dollarSub;
+		TBitStrings 							bitStrings;
+		WaveletTreeStructure< TText >			splitValues;
+		typedef typename Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >::Type TDollarString;
+		TDollarString							dollarPosition;
+		TValue		 							dollarSub;
 
 		WaveletTree(){}
 
 		WaveletTree(TText const &text)
 		{
 			dollarSub = 0;
+			resize(dollarPosition, length(text));
 			createWaveletTree(*this, text);	
 		}
 
@@ -234,6 +244,7 @@ namespace seqan{
 		WaveletTree(TText const &text, TFreqTable const &freqTable)
 		{
 			dollarSub = 0;
+			resize(dollarPosition, length(text));
 			createWaveletTree(*this, text, freqTable);	
 		}
 		
@@ -241,6 +252,7 @@ namespace seqan{
 		WaveletTree(TText const &text, TFreqTable const &freqTable, TPrefixSumTable const &prefixSumTable)
 		{
 			dollarSub = 0;
+			resize(dollarPosition, length(text));
 			createWaveletTree(*this, text, freqTable, prefixSumTable);	
 		}
 		
@@ -297,6 +309,20 @@ namespace seqan{
 	getFibre(WaveletTree< TText, TSpec > const &tree, const FibreSplitValues)
 	{
 		return tree.splitValues;
+	}
+
+	template< typename TText >
+	typename Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >::Type &
+	getFibre(WaveletTree< TText, MultiString > &tree, const FibreDollarPositions)
+	{
+		return tree.dollarPosition;
+	}
+
+	template< typename TText >
+	typename Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >::Type const &
+	getFibre(WaveletTree< TText, MultiString > const &tree, const FibreDollarPositions)
+	{
+		return tree.dollarPosition;
 	}
 	
 	template<  
@@ -492,6 +518,57 @@ namespace seqan{
 		return floor(log(treePosition + 1)/log(2));
 	}
 
+	template< typename TText, typename TPos >
+	void setDollarPosition(WaveletTree< TText, MultiString > &tree,
+		TPos position)
+	{
+		setBit(tree.dollarPosition, position, 1);
+	}
+
+	
+	template < typename TText, typename TWaveletTreeSpec >// typename TTreeNodeWidth >
+	void fillWaveletTree(
+			WaveletTree< TText, TWaveletTreeSpec > &tree, 		//the set of bit strings to be filled
+			const TText &text)		 					//the original string
+	{
+
+		typedef typename Fibre< WaveletTree< TText, TWaveletTreeSpec >, FibreBitStrings >::Type TFibreRankSupportBitStrings;
+		typedef typename Value< TFibreRankSupportBitStrings >::Type TFibreRankSupportBitString;
+		typedef typename Fibre< TFibreRankSupportBitString, FibreRankSupportBitString >::Type TFibreBitString;
+		typedef typename Size< TFibreBitString >::Type TSize;
+		//typename Iterator< WaveletTreeStructure< TText > >::Type iter(tree.splitValues, 0);
+
+		for(TSize i = 0; i < length(text); ++i)
+		{
+			typename Iterator< WaveletTreeStructure< TText > >::Type iter(tree.splitValues, 0);
+		//	iter = begin(tree.splitValues);
+			bool bit;
+			do{
+				if(value(text, i) > getCharacter(iter))
+				{
+					bit = 1;
+					std::cerr << length(getFibre(tree, FibreBitStrings())[getPosition(iter)]) << std::endl;
+					appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);
+					goRight(iter);
+				}
+				else
+				{
+					bit = 0; 
+					std::cerr << length(getFibre(tree, FibreBitStrings())[getPosition(iter)]) << std::endl;
+					appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);
+					goLeft(iter);
+				}
+			}while(getPosition(iter) != 0);
+		}
+
+		TFibreRankSupportBitStrings &bitStrings = getFibre(tree, FibreBitStrings());
+		for(TSize i = 0; i < length(bitStrings); ++i)
+		{
+			TFibreRankSupportBitString &temp = bitStrings[i];
+			completeRankSupportBitString(temp);
+		}
+	}
+
 	//this function is used to fill all bit strings in a wavelet tree AND counting
 	template < typename TText, typename TWaveletTreeSpec >// typename TTreeNodeWidth >
 	void fillWaveletTree(
@@ -536,7 +613,6 @@ namespace seqan{
 					upperBound);
 		}
 	}
-
 /*	//determine the start bucket
 	template< typename TSpec >
 	TSpec getFinalWidth(TSpec &width)
@@ -605,17 +681,18 @@ namespace seqan{
 		resize(tree.bitStrings, numberOfTreeNodes);
 		for(unsigned i = 0; i < numberOfTreeNodes; ++i)
 		{
-			resize(tree.bitStrings[i], lengthString[i]);
+			reserve(tree.bitStrings[i], lengthString[i]);
 		}
 
 		setPosition(iter, (TValue)0);
 
-		fillWaveletTree(	
+		fillWaveletTree(tree, bwt);
+		/*fillWaveletTree(	
 				tree,
 				iter,
 				bwt,
 				(TValue)0,
-				(TValue)-1);
+				(TValue)-1);*/
 	}
 
 	template < 

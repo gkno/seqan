@@ -112,6 +112,15 @@ namespace seqan{
 			resize(superBucketString, length(bucketString) / bitsPerSuperBucketStringEntrie);
 		}
 
+		RankSupportBitString & operator=(const RankSupportBitString &cp)
+		{
+			length = cp.length;
+			bitString = cp.bitString;
+			bucketString = cp.bucketString;
+			superBucketString = cp.superBucketString;
+			return *this;
+		}
+
 		bool operator==(const RankSupportBitString &b) const
 		{
 			return (length == b.length && 
@@ -219,20 +228,26 @@ namespace seqan{
 	}
 
 	template< typename TSpec, typename TSize >
-	void resize(RankSupportBitString< TSpec > &rankSupportBitString, TSize size)
+	void reserve(RankSupportBitString< TSpec > &rankSupportBitString, TSize size)
 	{
-		rankSupportBitString.length = size;
+		rankSupportBitString.length = 0;
 
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
 		typedef typename Value< TBitString >::Type TBitStringValue;
 		unsigned bitsPerBucket = BitsPerValue< TBitStringValue >::VALUE;
-		std::cerr << "bitsPerBucket: " << bitsPerBucket << std::endl;
 		unsigned long long numberOfBuckets;
 	   	(size) ? numberOfBuckets = size / bitsPerBucket + 1 : numberOfBuckets = 0;
 
 		resize(rankSupportBitString.bitString, numberOfBuckets , 0);
 		resize(rankSupportBitString.bucketString, numberOfBuckets, 0);
 		resize(rankSupportBitString.superBucketString, numberOfBuckets / bitsPerBucket + 1, 0);
+	} 
+	
+	template< typename TSpec, typename TSize >
+	void resize(RankSupportBitString< TSpec > &rankSupportBitString, TSize size)
+	{
+		reserve(rankSupportBitString, size);
+		rankSupportBitString.length = size;
 	} 
 	
 	template< typename TSpec, typename TSize, typename TValue>
@@ -243,7 +258,6 @@ namespace seqan{
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type	TBitString;
 		typedef typename Value< TBitString >::Type TBitStringValue;
 		unsigned bitsPerBucket = BitsPerValue< TBitStringValue >::VALUE;
-		std::cerr << "bitsPerBucket: " << bitsPerBucket << std::endl;
 		unsigned long long numberOfBuckets;
 	   	(size) ? numberOfBuckets = size / bitsPerBucket + 1 : numberOfBuckets = 0;
 	   	
@@ -320,17 +334,22 @@ namespace seqan{
 	{
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
 		typedef typename Value<TBitString>::Type TValue;
-		unsigned short bitsPerValue = BitsPerValue<TValue>::VALUE;
-		return ((bitString.bitString[(pos/bitsPerValue)] >> (bitsPerValue - (pos % bitsPerValue) - 1)) & 1);
+		TValue bitsPerValue = BitsPerValue<TValue>::VALUE;
+		TValue one = 1;
+		TValue shiftValue = pos % bitsPerValue;
+		return ((bitString.bitString[(pos/bitsPerValue)] >> shiftValue) & one);
 	}
 	
 	template < typename TSpec, typename TPos >
 	bool getBit(RankSupportBitString< TSpec > const &bitString, TPos pos)
 	{
+
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
 		typedef typename Value<TBitString>::Type TValue;
-		unsigned short bitsPerValue = BitsPerValue<TValue>::VALUE;
-		return ((bitString.bitString[(pos/bitsPerValue)] >> (bitsPerValue - (pos % bitsPerValue) - 1)) & 1);
+		TValue bitsPerValue = BitsPerValue<TValue>::VALUE;
+		TValue one = 1;
+		TValue shiftValue = pos % bitsPerValue;
+		return ((bitString.bitString[(pos/bitsPerValue)] >> shiftValue) & one);
 	}
 
 
@@ -343,20 +362,27 @@ namespace seqan{
 	template < typename TSpec, typename TPos, typename TBit >
 	void setBit(RankSupportBitString< TSpec > &bitString, TPos pos, TBit setBit)
 	{
-		//typedef typename Value< RankSupportBitString::TSize >::Type TValue;
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
-		unsigned short bitsPerValue = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
-		unsigned long long bucketPos = pos / bitsPerValue;
-		unsigned short posInBucket = pos % bitsPerValue;
+		typedef typename Value< TBitString >::Type TValue;
+		TValue const bitsPerValue = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
+		TValue const bucketPos = pos / bitsPerValue;
+		TValue const posInBucket = pos % bitsPerValue;
+		TValue const one = 1;
+		TValue const shiftValue = one << posInBucket; 
 		if(!setBit){
-			bitString.bitString[bucketPos] &= ~(1 << (bitsPerValue - posInBucket - 1));
-			//bitString.bitString[pos/64] &= ~(index.detBitMask[pos%64]);
+			bitString.bitString[bucketPos] &= ~(shiftValue);
 			return;
 		}
-		bitString.bitString[bucketPos] |= (1 << (bitsPerValue - posInBucket - 1));
-		//bitString.bitString[pos/64] |= index.detBitMask[pos%64];
+		bitString.bitString[bucketPos] |= shiftValue;
 	}
 
+	template< typename TSpec, typename TBit >
+	void appendBitOnly(RankSupportBitString< TSpec > &rankSupportBitString, TBit bit)
+	{
+		setBit(rankSupportBitString, length(rankSupportBitString), bit);
+		++rankSupportBitString.length;
+	}
+	
 	
 /*	template < typename TBitString, typename TIndex, typename TPos, typename TBit >
 	void setBit(String< TBitString > &bitString, TIndex &index, TPos pos, TBit setBit)
@@ -369,7 +395,7 @@ namespace seqan{
 		bitString[(pos/bitsPerValue)] |= index.detBitMask[pos % bitsPerValue];
 	}*/
 
-	template < typename TBitString, typename TPos, typename TBit >
+	/*template < typename TBitString, typename TPos, typename TBit >
 	void setBit(TBitString &bitString, TPos pos, TBit setBit)
 	{
 		typedef typename Value<TBitString>::Type TValue;
@@ -382,7 +408,7 @@ namespace seqan{
 		}
 		mask = 1 << (bitsPerValue - (pos % bitsPerValue) - 1);
 		bitString[(pos/bitsPerValue)] |= mask;
-	}
+	}*/
 
 	/*template< typename TValue, typename TIndex, typename TPos >
 	TValue getRankInBucket(String< TValue > &bitString, TIndex &index, TPos pos)
@@ -433,10 +459,10 @@ namespace seqan{
 	TValue getRankInBucket(const String< TValue > &bitString, const TPos pos)
 	{
 		
-		unsigned short bitsPerValue = BitsPerValue<TValue>::VALUE;
-		unsigned long long one = -1;
-		TValue mask = one << (bitsPerValue - (pos % bitsPerValue) - 1);
-		return (__builtin_popcountll(bitString[pos/bitsPerValue] & mask));
+		unsigned short const bitsPerValue = BitsPerValue<TValue>::VALUE;
+		TValue const one = -1;
+		TValue const mask = one >> (bitsPerValue - (pos % bitsPerValue) - 1);
+		return (getRankInBucket(bitString[pos/bitsPerValue] & mask));
 	}
 	
 	/*template< typename TPos >
@@ -513,7 +539,6 @@ namespace seqan{
 		TSuperBucketString &superBucketString = bitString.superBucketString;
 
 		typedef typename Value< TSuperBucketString >::Type TSize;
-		unsigned bla = BitsPerValue< TSize >::VALUE;
 		for(TSize i = 0; i < length(bitString_) - 1; i++)
 		{
 			tempSum = getRankInBucket(bitString_[i]);
