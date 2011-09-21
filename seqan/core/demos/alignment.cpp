@@ -13,7 +13,7 @@ int main()
     TSequence seq2 = "actcgttgca";
 ///Scoring objects are used to define a scoring scheme.
 ///In this case, affine gap costs with match = 0, mismatch = -1, gapextend = -1 and gapopen = -2.
-    Score<int> score(0, -1, -1, -2);
+    Score<int> scoringScheme(0, -1, -1, -2);
 ///Example 1: We use @Class.Align@ to align the two sequences.   
 ///Since we do not specify an @Tag.Global Alignment Algorithms|algorithm tag@ when we call @Function.globalAlignment@, 
 ///a suitable algorithm (@Tag.Global Alignment Algorithms|Gotoh@) is automatically choosen.
@@ -22,13 +22,13 @@ int main()
     assignSource(row(align, 0), seq1);
     assignSource(row(align, 1), seq2);
 
-    int score = globalAlignment(align, score);
+    int score = globalAlignment(align, scoringScheme);
     std::cout << "Score = " << score << std::endl;
     std::cout << align << std::endl;
 ///Example 2: We now choose explicitely the algorithm @Tag.Global Alignment Algorithms|MyersHirschberg@.
 ///Since this algorithm always works on Levenshtein distance, $score$ is ignored here.
 ///Therefore, this algorithm computes a different alignment and returns a different score.
-    score = globalAlignment(align, score, MyersHirschberg());
+    score = globalAlignment(align, scoringScheme, MyersHirschberg());
     std::cout << "Score = " << score << std::endl;
     std::cout << align << std::endl;
 ///Example 3: We now do the same as in case 1, but now we use an @Spec.Alignment Graph@ for storing the alignment.
@@ -41,7 +41,7 @@ int main()
     appendValue(string_set, seq2);
     TAlignmentGraph alignment_graph(string_set);
 
-    score = globalAlignment(alignment_graph, score, Gotoh());
+    score = globalAlignment(alignment_graph, scoringScheme, Gotoh());
     std::cout << "Score = " << score << std::endl;
     std::cout << alignment_graph << std::endl;
     return 0;

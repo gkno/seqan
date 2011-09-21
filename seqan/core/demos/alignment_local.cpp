@@ -31,9 +31,9 @@ int main()
         std::cout << "Score = " << getScore(finder) << std::endl;
         std::cout << ali2;
         unsigned cBeginPos0 = clippedBeginPosition(row(ali2, 0));
-        unsinged cEndPos0 = clippedEndPosition(row(ali2, 0)) - 1;
-        unsigned cBeginPos1 = clippedBeginPosition(row(ali2, 1))
-        unsigned cEndPos1 = clippedBeginPosition(row(ali2, 1))
+        unsigned cEndPos0 = clippedEndPosition(row(ali2, 0)) - 1;
+        unsigned cBeginPos1 = clippedBeginPosition(row(ali2, 1));
+        unsigned cEndPos1 = clippedBeginPosition(row(ali2, 1)) - 1;
         std::cout << "Aligns Seq1[" << cBeginPos0 << ":" << cEndPos0 << "]";
         std::cout << " and Seq2[" << cBeginPos1 << ":" <<  cEndPos1 << "]";
         std::cout << std::endl << std::endl;
