@@ -251,8 +251,7 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
         string(REPLACE "//" "/" NEW_PATH ${NEW_PATH})
         install(FILES ${HEADER}
                 RENAME seqan${NEW_PATH}
-                DESTINATION include
-                COMPONENT headers)
+                DESTINATION include)
         #message("install(FILES ${HEADER} RENAME seqan${NEW_PATH} DESTINATION include COMPONENT dev)")
     endforeach()
 endfunction (seqan_setup_includes)

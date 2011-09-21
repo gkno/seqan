@@ -101,4 +101,4 @@ add_subdirectory(sandbox)
 # Include CPack
 # ===========================================================================
 
-#include(${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/packge.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/package.cmake)
