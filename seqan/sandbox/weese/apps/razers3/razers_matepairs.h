@@ -474,8 +474,8 @@ template <
 	typename TFSSpec,
 	typename TFSConfig,
 	typename TReadIndex, 
-	typename TSwiftSpec, 
 	typename TPreprocessing,
+    typename TFilterSpec,
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode>
@@ -483,8 +483,8 @@ void _mapMatePairReads(
     TMatches                                & matches,
 	FragmentStore<TFSSpec, TFSConfig>		& store,
 	unsigned								  contigId,				// ... and its sequence number
-	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternL,
-	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternR,
+	Pattern<TReadIndex, TFilterSpec>        & swiftPatternL,
+	Pattern<TReadIndex, TFilterSpec>        & swiftPatternR,
 #ifdef RAZERS_BANDED_MYERS
 	TPreprocessing							&,
 	TPreprocessing							&,
@@ -516,9 +516,9 @@ void _mapMatePairReads(
     typedef typename Value<TMatches>::Type TMatch;
 
 	// FILTRATION
-	typedef Finder<TGenome, Swift<TSwiftSpec> >				TSwiftFinderL;
-	typedef Finder<TGenomeInf, Swift<TSwiftSpec> >			TSwiftFinderR;
-	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
+	typedef Finder<TGenome, TFilterSpec>                    TFilterFinderL;
+	typedef Finder<TGenomeInf, TFilterSpec>                 TFilterFinderR;
+	typedef Pattern<TReadIndex, TFilterSpec>                TFilterPattern;
 
 	// MATE-PAIR FILTRATION
 	typedef Pair<__int64, TMatch>	                        TDequeueValue;
@@ -531,7 +531,7 @@ void _mapMatePairReads(
         TMatches,
 		TRazerSOptions, 
 		TRazerSMode, 
-		TSwiftPattern,
+		TFilterPattern,
 		TCounts,
         TPreprocessing>											TVerifier;
 
@@ -581,8 +581,8 @@ void _mapMatePairReads(
 		return;
 
 	TGenomeInf genomeInf = infix(genome, scanShift, length(genome));
-	TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
-	TSwiftFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
+	TFilterFinderL swiftFinderL(genome, options.repeatLength, 1);
+	TFilterFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
 
 	TDequeue fifo;						// stores left-mate potential matches
 	String<__int64> lastPotMatchNo;		// last number of a left-mate potential
@@ -938,13 +938,15 @@ template <
 	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
-    typename TMatchNPolicy>
+    typename TMatchNPolicy,
+    typename TFilterSpec>    
 int _mapMatePairReads(
 	FragmentStore<TFSSpec, TFSConfig>					& store,
 	TCounts												& cnts,
 	RazerSOptions<TSpec>								& options,
 	TShape const										& shape,
-	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy>  const & mode)
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy>  const & mode,
+    TFilterSpec)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
@@ -961,7 +963,7 @@ int _mapMatePairReads(
 				IsSameType<TGapMode,RazerSGapped>::VALUE,
 				SwiftSemiGlobal,
 				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
-	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
+	typedef Pattern<TIndex, TFilterSpec>                TFilterPattern;	// filter
 	typedef Pattern<TRead const, MyersUkkonen>			TMyersPattern;	// verifier
 
     typedef typename TFragmentStore::TContigSeq TContigSeq;
@@ -998,12 +1000,10 @@ int _mapMatePairReads(
 	cargo(swiftIndexR)._debugLevel = options._debugLevel;
 
 	// configure Swift
-	TSwiftPattern swiftPatternL(swiftIndexL);
-	TSwiftPattern swiftPatternR(swiftIndexR);
-	swiftPatternL.params.minThreshold = options.threshold;
-	swiftPatternR.params.minThreshold = options.threshold;
-	swiftPatternL.params.tabooLength = options.tabooLength;
-	swiftPatternR.params.tabooLength = options.tabooLength;
+	TFilterPattern swiftPatternL(swiftIndexL);
+	TFilterPattern swiftPatternR(swiftIndexR);
+    _applyFilterOptions(swiftPatternL, options);
+    _applyFilterOptions(swiftPatternR, options);
 	swiftPatternL.params.printDots = false; // only one should print the dots
 	swiftPatternR.params.printDots = options._debugLevel > 0;
 

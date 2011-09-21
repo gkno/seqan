@@ -2869,6 +2869,35 @@ int _mapSingleReads(
     }    
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Wrapper for different filters specs
+template <
+	typename TFSSpec, 
+	typename TFSConfig,
+	typename TCounts,
+	typename TSpec,
+	typename TShape,
+    typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode,
+    typename TMatchNPolicy >
+int _mapMatePairReads(
+	FragmentStore<TFSSpec, TFSConfig>		& store,
+	TCounts									& cnts,
+	RazerSOptions<TSpec>					& options,
+	TShape const							& shape,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const & mode)
+{
+    if (options.threshold > 0)
+    {
+        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
+        return _mapMatePairReads(store, cnts, options, shape, mode, Swift<TSwiftSpec>());
+    } else
+    {
+        return _mapMatePairReads(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<>());
+    }    
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
