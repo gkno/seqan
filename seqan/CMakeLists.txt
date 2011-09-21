@@ -96,3 +96,9 @@ add_subdirectory(core)
 add_subdirectory(docs)
 add_subdirectory(extras)
 add_subdirectory(sandbox)
+
+# ===========================================================================
+# Include CPack
+# ===========================================================================
+
+#include(${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/packge.cmake)
