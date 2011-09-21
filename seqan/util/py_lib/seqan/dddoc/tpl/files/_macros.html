@@ -34,7 +34,7 @@
       $!setvar('section_counter', '0')!$
       <!--(for text in tree.find(path).texts)-->
         #! Open/close table if necessary.
-        <!--(if text.startswith('type=table:'))-->
+        <!--(if text.startswith('type=table:') or text.startswith('type=tableheader:'))-->
           <!--(if not table_open)-->
           <table>
           <!--(end)-->
@@ -50,7 +50,7 @@
         <!--(elif text.startswith('type=note:'))-->
         <p><strong>Note:</strong> $!html.translateMarkup(text[len('type=note:'):], node=tree.find(path))!$</p>
         <!--(elif text.startswith('type=image:'))-->
-        <div style="text-align:center;"><img src="images/$!html.imageFilename(text)!$.png" /><!--(if html.imageTitle(text))--><br />@!html.imageTitle(text)!@<!--(end)--></div>
+        <div class="image"><img src="images/$!html.imageFilename(text)!$.png" /><!--(if html.imageTitle(text))--><br />@!html.imageTitle(text)!@<!--(end)--></div>
         <!--(elif text.startswith('type=section:'))-->
         $!setvar('section_counter', 'section_counter + 1')!$
         $!setvar('subsection_counter', '0')!$
@@ -84,6 +84,7 @@
 
 <!--(macro text_section)-->
   <!--(if tree.find(path))-->
+    <div class="section text_section">
     <!--(if not exists("hide_title") and tree.find(['globals', 'sections'] + [path[-1]]))-->
       <h3>@!tree.find(['globals', 'sections'] + [path[-1]]).text()!@</h3>
     <!--(end)-->#! if not exists(...
@@ -91,19 +92,20 @@
       $!text_field(path=path)!$
       <!--(if tree.find(path + ['remarks']))-->
         <!--(for text in tree.find(path + ['remarks']).texts)-->
-        <br /><strong>Remark:</strong> $!html.translateMarkup(text, node=tree.find(path))!$
+        <div class="remark"><strong>Remark:</strong> $!html.translateMarkup(text, node=tree.find(path))!$</div>
         <!--(end)-->
       <!--(end)-->
       <!--(if tree.find(path + ['value']))-->
         <!--(for text in tree.find(path + ['value']).texts)-->
-        <br /><strong>Values:</strong> $!html.translateMarkup(text, node=tree.find(path))!$
+        <div class="values"><strong>Values:</strong> $!html.translateMarkup(text, node=tree.find(path))!$</div>
         <!--(end)-->
       <!--(end)-->
       <!--(if tree.find(path + ['default']))-->
         <!--(for text in tree.find(path + ['default']).texts)-->
-        <br /><strong>Default:</strong> $!html.translateMarkup(text, node=tree.find(path))!$
+        <div class="default"><strong>Default:</strong> $!html.translateMarkup(text, node=tree.find(path))!$</div>
         <!--(end)-->
       <!--(end)-->
+    </div>
     </div>
   <!--(end)-->#! if tree.find(path)
 <!--(end)-->
@@ -118,11 +120,11 @@
 
 <!--(macro list_section)-->
   <!--(if tree.find([cat, subcat, key]))-->
-  <div class="list_section">
+  <div class="section list_section">
     <!--(if tree.find(['globals', 'sections', key]))-->
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
     <!--(end)-->
-    $!html.translateMarkup(', '.join(tree.find([cat, subcat, key]).texts), node=tree.find([cat, subcat, key]))!$
+    <div class="list">$!html.translateMarkup(', '.join(tree.find([cat, subcat, key]).texts), node=tree.find([cat, subcat, key]))!$</div>
   </div>
   <!--(end)-->
 <!--(end)-->
@@ -131,7 +133,7 @@
   <!--(if tree.find([cat, subcat, key]))-->
   <div class="section link_section @!key!@">
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
-    $!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key])) for txt in sorted(tree.find([cat, subcat, key]).texts)])!$
+    <div class="list">$!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key])) for txt in sorted(tree.find([cat, subcat, key]).texts)])!$</div>
  </div>
   <!--(end)-->
 <!--(end)-->
@@ -155,17 +157,17 @@
             none
             <!--(end)-->
             <!--(if 'type' in node.children)-->
-            <br/><strong>Types:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['type']) for txt in node.children['type'].texts])!$
+            <div class="types"><strong>Types:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['type']) for txt in node.children['type'].texts])!$</div>
             <!--(end)-->
             <!--(if 'metafunction' in node.children)-->
-            <br/><strong>Metafunctions:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['metafunction']) for txt in node.children['metafunction'].texts])!$
+            <div class="metafunctions"><strong>Metafunctions:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['metafunction']) for txt in node.children['metafunction'].texts])!$</div>
             <!--(end)-->
             <!--(if 'default' in node.children)-->
-            <br/><strong>Default:</strong> $!', '.join([html.translateMarkup(txt, node=node.children['default']) for txt in node.children['default'].texts])!$
+            <div class="default"><strong>Default:</strong> $!', '.join([html.translateMarkup(txt, node=node.children['default']) for txt in node.children['default'].texts])!$</div>
             <!--(end)-->
             <!--(if 'remarks' in node.children)-->
               <!--(for remark in node.children['remarks'].texts)-->
-              <br/><strong>Remark:</strong> $!html.translateMarkup(remark, node=node.children['remarks'])!$
+              <div class="remark"><strong>Remark:</strong> $!html.translateMarkup(remark, node=node.children['remarks'])!$</div>
               <!--(end)-->
             <!--(end)-->
           </td>
@@ -182,7 +184,7 @@
   <div class="section return_section @!key!@">
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
     <!--(if tree.find([cat, subcat, key, 'summary']))-->
-    <div>$!' '.join([html.translateMarkup(txt) for txt in tree.find([cat, subcat, key, 'summary']).texts])!$</div>
+    <p>$!' '.join([html.translateMarkup(txt) for txt in tree.find([cat, subcat, key, 'summary']).texts])!$</p>
     <!--(end)-->
     <!--(if tree.find([cat, subcat, key, 'metafunction']))-->
     <div><strong>Metafunction:</strong> $!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key, 'metafunction'])) for txt in tree.find([cat, subcat, key, 'metafunction']).texts])!$</div>
@@ -223,9 +225,9 @@
     <table>
       <tbody>
         <!--(for i, path in enumerate(sorted(tree.find([cat, subcat, key]).texts)))-->
-          <!--(if '|' in path)-->
-          $!setvar('from_label', "path.split('|', 1)[1]")!$
-          $!setvar('path', "path.split('|', 1)[0]")!$
+          <!--(if '\u0001' in path)-->
+          $!setvar('from_label', "path.split('\u0001', 1)[1]")!$
+          $!setvar('path', "path.split('\u0001', 1)[0]")!$
           <!--(else)-->
           $!setvar('from_label', "0")!$
           <!--(end)-->
@@ -236,7 +238,7 @@
             <td class="summary">
               $!text_field(path=[path] + ['summary'])!$
               <!--(if from_label != 0)-->
-              <strong>Inherited from:</strong> $!html.pageLink(txt=from_label, node=tree.find(path))!$
+              <div class="inherited"><strong>Inherited from:</strong> $!html.pageLink(txt=from_label, node=tree.find(path))!$</div>
               <!--(end)-->
             </td>
             #!<td class="summary">$!html.translateMarkup(default("' '.join(tree.find(path + '.summary').texts)", 'none'))!$</td>!#

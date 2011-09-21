@@ -26,7 +26,7 @@ TPL_FILES = [
     'js/searchdoc.js',
     'js/excanvas.compiled.js',
     # CSS Files
-    'css/main.css',
+    #'css/main.css',
     'css/panel.css',
     'css/reset.css',
     'css/hierarchy-tree.css',
@@ -34,6 +34,7 @@ TPL_FILES = [
     'i/arrows.png',
     'i/results_bg.png',
     'i/tree_bg.png',
+    'i/seqan_logo.png',
     # Search Panel
     'panel/tree.js',
     'panel/search_index.js',
@@ -492,7 +493,7 @@ class HtmlHelper(object):
                 if not parent_key in node.children:
                     continue
                 for path in node.children[parent_key].texts:
-                    if '|' in path:
+                    if '\u0001' in path:
                         continue  # Skip automatically generated upwards links.
                     result['parents'].append(recurseUpwards(self.tree.find(path)))
             return result
@@ -624,7 +625,7 @@ class HtmlHelper(object):
         return res
 
     def translateTableHeader(self, text):
-        self.translateTableRow(text, cell_tag='th')
+        return self.translateTableRow(text, cell_tag='th')
 
     def translateTableRow(self, text, cell_tag='td'):
         parse_tree = self.markup_parser.parse(text)

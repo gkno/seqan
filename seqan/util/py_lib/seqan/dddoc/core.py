@@ -30,7 +30,7 @@ DATA = None
 ID = 0
 
 # Text attribute node keys.
-TEXT_ATTRIBUTE_KEYS = set(['text', 'table', 'code', 'section', 'subsection',
+TEXT_ATTRIBUTE_KEYS = set(['text', 'table', 'tableheader', 'code', 'section', 'subsection',
                            'image', 'contents', 'note'])
 
 # Nodes having paths matching the following patterns are considered text
@@ -254,8 +254,8 @@ def splitKeys(text, delimiters, limit=None, _cache={}):
         >>> splitKeys('.Adaption.\'std::string\'.summary')
         ['', 'Adaption', '\'std::string\'', 'summary']
     """
-    if '|' in text:
-        text = text.split('|', 1)[0]  # Remove optional label, used in inheritance.
+    if '\u0001' in text:
+        text = text.split('\u0001', 1)[0]  # Remove optional label, used in inheritance.
     if _cache.has_key((text, delimiters)):
         return _cache[(text, delimiters)]
     count = 0
@@ -883,8 +883,8 @@ def generateInheritedElements(tree):
                     if not source_field in source_node.children:
                         continue  # Skip if no source field.
                     for path in source_node.children[source_field].texts:
-                        if not '|' in path:
-                            path = path + '|' + '.'.join(source_node.path)
+                        if not '\u0001' in path:  # We use this ugly hack to add the inheritance source here.
+                            path = path + '\u0001' + '.'.join(source_node.path)
                         # If necessary then create child in target node.
                         if not target_field in target_node.children:
                             target_node.children[target_field] = DddocTreeNode(tree, target_field, target_node.path + [target_field], source_node.children[source_field].entry)

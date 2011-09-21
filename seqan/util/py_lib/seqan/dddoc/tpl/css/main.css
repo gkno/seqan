@@ -1,3 +1,325 @@
+/* ===========================================================================
+ * Main Page Structure
+ * ===========================================================================
+ */
+
+body
+{
+    background: #F6F6F1;
+    font: 14px/1.428 "Lucida Grande", "Lucida Sans Unicode", Lucida, Arial, Helvetica, sans-serif;
+    color: #333;
+    padding: 20px 10px 14px 10px;
+}
+
+div.banner div.cat_type
+{
+    margin-left: 17px;
+    font-weight: bold;
+    font-size: 10px;
+}
+
+div.banner
+{
+    background: url(../i/seqan_logo.png) no-repeat right top;
+    padding-bottom: 20px;
+    margin-right: 5px;
+    margin-top: -10px;
+    padding-top: 10px;
+}
+
+div.banner h1.first
+{
+    margin: -3px 0px 0px 16px;
+    font-weight: bold;
+}
+
+div.content
+{
+    background: white;
+}
+
+div.boxed
+{
+    padding: 18px;
+    margin: 0px 4px 26px 0px;
+    border: 1px solid #ECECE7;
+    -moz-box-shadow: 2px 2px 0 rgba(170,160,130,.5), 4px 4px 0 rgba(200,190,165,.5);
+    -webkit-box-shadow: 2px 2px 0 rgba(170,160,130,.5), 4px 4px 0 rgba(200,190,165,.5);
+    box-shadow: 2px 2px 0 rgba(170,160,130,.5), 4px 4px 0 rgba(200,190,165,.5);
+}
+
+#footer {
+    text-align: right;
+    font-size: .8em;
+    color: #aaa;
+}
+
+/* ===========================================================================
+ * Page Elements
+ * ===========================================================================
+ */
+
+div.contents
+{
+    float: right;
+    border: 5px solid white;
+    background: #F1F6FB;
+    padding: 5px;
+}
+
+div.contents_heading
+{
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 5px;
+}
+
+div.section table,
+div.section div.list,
+div.section p
+{
+    margin-bottom: 18px;
+}
+
+div.remark,
+div.values,
+div.metafunctions,
+div.types,
+div.inherited,
+div.default
+{
+    margin-top: 2px;
+}
+
+/* ===========================================================================
+ * Standard HTML Elements
+ * ===========================================================================
+ */
+
+h2, h3, h4
+{
+    /*font-family: Georgia, Times, 'Times New Roman', serif;*/
+    font: 14px/1.428 "Lucida Grande", "Lucida Sans Unicode", Lucida, Arial, Helvetica, sans-serif;
+    border-bottom: 1px solid gray;
+}
+
+h1, h2, h3, h4, h5, h6 { font-weight: bold; margin: 0 0 .8em; }
+h1, .page-title h1 { font-size: 1.857em; }
+h2 { font-size: 1.600em; }
+h3 { font-size: 1.428em; }
+h4 { font-size: 1.142em; }
+h5, h6 { font-size: 1em; }
+
+a, a:visited, a:active
+{
+    color: #25A;
+    text-decoration: none;
+}
+
+a:hover
+{
+    text-decoration: underline;
+}
+
+.hierarchy_section
+{
+    text-align:center;
+}
+
+.section table td
+{
+    padding: 3px;
+}
+
+.section table th
+{
+    font-weight: bolder;
+    padding: 3px;
+    background: #EEE;
+    border: 1px solid #CCC;
+}
+
+.section table td.signature {
+    width: 15em;
+}
+/*
+.section table tr.even td {
+    background-color: #ccc;
+}
+*/
+
+.cat_type {
+    font-size: .75em;
+}
+
+a.dead {
+    font-weight: boldest;
+    color: darkred;
+}
+
+/* Nifty paragraph effect, taken from Trac. */
+a.anchor:link, a.anchor:visited { color: #eee; }
+h1 a.anchor, h2 a.anchor, h3 a.anchor { visibility: hidden; }
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor { visibility: visible; }
+a.anchor { font-size: .8em; vertical-align: text-top; }
+
+/* ===========================================================================
+ * Tables
+ * ===========================================================================
+ */
+
+div.section table
+{
+    width: 100%;
+}
+
+div.section table td
+{
+    padding: 5px;
+    border: 1px solid #CCC;
+}
+
+div.section table td p
+{
+    margin: 0px;
+}
+
+/* ===========================================================================
+ * File Sections
+ * ===========================================================================
+ *
+ * The source code is wrapped into tables.  We treat <p> in these sections
+ * differently because file_sections do not have the CSS class section.
+ */
+
+table.highlighttable,
+div.file_section p
+{
+    margin-bottom: 10px;
+}
+
+/* ===========================================================================
+ * Text Formatting
+ * ===========================================================================
+ */
+
+div.image
+{
+    text-align: center;
+    margin: 10px 0px;
+}
+
+/* ===========================================================================
+ * Examples
+ * ===========================================================================
+ */
+
+.signature_section pre,
+.example pre
+{
+  padding: 6px 11px 7px 11px;
+  background-color: #EEE;
+  border: 1px solid #666;
+  margin-bottom: 18px;
+  /*margin: 0 12px 10px 12px;*/
+}
+
+/* ===========================================================================
+ * Nicer Integration Of pygments Output In Page
+ * ===========================================================================
+ */
+
+table.highlighttable
+{
+    width:100%;
+}
+
+td.linenos
+{
+    width: 5.5%;
+    padding-right: .5%;
+}
+
+div.linenodiv
+{
+    text-align: right;
+}
+
+div.highlight
+{
+    padding-left: 1%;
+    width: 93%;
+}
+
+/* ===========================================================================
+ * Source Code Highlighting
+ * ===========================================================================
+ */
+
+.highlight .hll { background-color: #ffffcc }
+.highlight  { background: #f0f0f0; }
+.highlight .c { color: #60a0b0; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #007020; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #007020 } /* Comment.Preproc */
+.highlight .c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #808080 } /* Generic.Output */
+.highlight .gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0040D0 } /* Generic.Traceback */
+.highlight .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #007020 } /* Keyword.Pseudo */
+.highlight .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #902000 } /* Keyword.Type */
+.highlight .m { color: #40a070 } /* Literal.Number */
+.highlight .s { color: #4070a0 } /* Literal.String */
+.highlight .na { color: #4070a0 } /* Name.Attribute */
+.highlight .nb { color: #007020 } /* Name.Builtin */
+.highlight .nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.highlight .no { color: #60add5 } /* Name.Constant */
+.highlight .nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.highlight .ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #007020 } /* Name.Exception */
+.highlight .nf { color: #06287e } /* Name.Function */
+.highlight .nl { color: #002070; font-weight: bold } /* Name.Label */
+.highlight .nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #bb60d5 } /* Name.Variable */
+.highlight .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mf { color: #40a070 } /* Literal.Number.Float */
+.highlight .mh { color: #40a070 } /* Literal.Number.Hex */
+.highlight .mi { color: #40a070 } /* Literal.Number.Integer */
+.highlight .mo { color: #40a070 } /* Literal.Number.Oct */
+.highlight .sb { color: #4070a0 } /* Literal.String.Backtick */
+.highlight .sc { color: #4070a0 } /* Literal.String.Char */
+.highlight .sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #4070a0 } /* Literal.String.Double */
+.highlight .se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #4070a0 } /* Literal.String.Heredoc */
+.highlight .si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.highlight .sx { color: #c65d09 } /* Literal.String.Other */
+.highlight .sr { color: #235388 } /* Literal.String.Regex */
+.highlight .s1 { color: #4070a0 } /* Literal.String.Single */
+.highlight .ss { color: #517918 } /* Literal.String.Symbol */
+.highlight .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.highlight .vc { color: #bb60d5 } /* Name.Variable.Class */
+.highlight .vg { color: #bb60d5 } /* Name.Variable.Global */
+.highlight .vi { color: #bb60d5 } /* Name.Variable.Instance */
+.highlight .il { color: #40a070 } /* Literal.Number.Integer.Long */
+
+/*
 body {
   font-family: "Helvetica Neue", Arial, sans-serif;
   background: #FFF;
@@ -261,3 +583,4 @@ tt {
 {
     font-size: 0.85em;
 }
+*/

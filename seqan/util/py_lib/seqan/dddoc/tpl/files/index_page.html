@@ -12,52 +12,28 @@
 <script src="../js/jquery-effect.js" type="text/javascript" charset="utf-8"></script>
 <script src="../js/main.js" type="text/javascript" charset="utf-8"></script>
  <style type="text/css">
- body {
- font-size: 100%;
- width:80%;
- margin: 0em 0em 0em 1em;
-  }
- .index-page .section table {
-    margin: 0em 1em;
-    width: 100%;
- }
-  .index-page .section table td {
-    padding: 3px;
-  }
-  .index-page .section table td.signature {
-    width: 15em;
-  }
-  .index-page .section table tr.even td {
-    background-color: #ccc;
-  }
-  #footer {
-    text-align: right;
-    font-size: .8em;
-    color: #aaa;
-  }
-
-  /* Nifty paragraph effect, taken from Trac. */
-  a.anchor:link, a.anchor:visited { color: #eee; }
-  h1 a.anchor, h2 a.anchor, h3 a.anchor { visibility: hidden; }
-  h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor { visibility: visible; }
-  a.anchor { font-size: .8em; vertical-align: text-top; }
- </style>
+</style>
 </head>
 <body class="index-page">
 #!<pre>@!tree.find(['Indexpage', cat])!@</pre>!#
-<h1>@!title!@</h1>
+<div class="banner">
+  <h1 class="first">@!title!@</h1>
+</div>
 
+<div class="content boxed">
 $!text_section(path=['Indexpage', cat, 'summary'])!$
 $!text_section(path=['Indexpage', cat, 'description'])!$
 
 #!First, the non-iterable entries.!#
-<!--(if [(s, n) for s, n in by_subcat.iteritems() if not iterable(n) and not 'hidefromindex' in n.children])-->
+<!--(if [(s, n) for s, n in by_subcat.iteritems() if not iterable(n) and not ('hidefromindex' in n.children) and n.path != ['Indexpage', cat]])-->
 <div class="section">
+  <!--(if cat != 'Page')-->
   <h2 class="section-heading">@!title!@</h2>
+  <!--(end)-->
   <table>
     <tbody>
       $!setvar('i', '0')!$ #!
-  <!--(for subcat, node in [(s, n) for s, n in sorted(by_subcat.iteritems()) if not iterable(n) and not 'hidefromindex' in n.children])-->
+  <!--(for subcat, node in [(s, n) for s, n in sorted(by_subcat.iteritems()) if not iterable(n) and not ('hidefromindex' in n.children) and n.path != ['Indexpage', cat]])-->
       <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
         <td class="signature">$!html.pageLink(arr=[cat, subcat])!$</td>
         <td class="summary">$!text_field(path=node.path + ['summary'])!$</td>
@@ -70,13 +46,14 @@ $!text_section(path=['Indexpage', cat, 'description'])!$
 <!--(end)-->
 
 #!Then, the iterable entries.!#
+<!--(if [(s, n) for s, n in sorted(by_subcat.iteritems()) if iterable(n)])-->
 <div class="section">
-<!--(for subcat, nodes in sorted(by_subcat.iteritems()))-->
-  <!--(if iterable(nodes))-->
+ <!--(for subcat, nodes in [(s, n) for s, n in sorted(by_subcat.iteritems()) if iterable(n)])-->
+  <!--(if [n for n in nodes if not 'hidefromindex' in n.children])-->
     <h2 id="$!html.toGlossaryAnchor(subcat)!$" class="section-heading">$!subcat!$</h2>
     <table>
       <tbody>
-        <!--(for i, x in enumerate(sorted(nodes, key=lambda n: n.key)))-->
+        <!--(for i, x in enumerate(sorted([n for n in nodes if not 'hidefromindex' in n.children], key=lambda n: n.key)))-->
         <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
           <td class="signature">$!html.pageLink(arr=[cat, x.key])!$</td>
           <td class="summary">$!text_field(path=x.path + ['summary'])!$</td>
@@ -85,11 +62,20 @@ $!text_section(path=['Indexpage', cat, 'description'])!$
       </tbody>
     </table>
   <!--(end)-->
-<!--(end)-->
+ <!--(end)-->
 </div>
+<!--(end)-->
 
+<!-- remarks, examples -->
 $!text_section(path=['Indexpage', cat, 'remarks'])!$
 $!text_section(path=['Indexpage', cat, 'example'])!$
+
+#!<!--(for x in by_subcat.values())-->
+#!<pre>@!x!@</pre>
+#!<!--(end)-->
+#!<pre>@!tree.find(['Indexpage', cat])!@</pre>#! remove comment for debugging
+#!<pre>@!by_subcat!@</pre>
+</div>
 
 <div id="footer">
   built: @!now.strftime("%m/%d/%y %H:%M:%S")!@

@@ -14,85 +14,16 @@
     <script src="../js/hierarchy-tree.js" type="text/javascript" charset="utf-8"></script>
     <script src="../js/main.js" type="text/javascript" charset="utf-8"></script>
     <link rel="stylesheet" type="text/css" href="../css/hierarchy-tree.css">
-<style type="text/css">
-$!html.highlightCss()!$
-
-table.highlighttable
-{
-width:100%;
-}
-
-td.linenos
-{
-width: 5.5%;
-padding-right: .5%;
-}
-
-div.linenodiv
-{
-text-align: right;
-}
-
-div.highlight
-{
-padding-left: 1%;
-width:93%;
-}
-
- body {
- font-size: 100%;
- width:80%;
- margin: 0em 0em 0em 1em;
-  }
-.hierarchy_section {
-text-align:center;
-}
-.section table {
-    margin: 0em 1em;
-    width: 100%;
- }
- .section table td {
-    padding: 3px;
-  }
- .section table td.signature {
-    width: 15em;
-  }
-  .section table tr.even td {
-    background-color: #ccc;
-  }
-  #footer {
-    text-align: right;
-    font-size: .8em;
-    color: #aaa;
-  }
-
- .cat_type {
-  font-size: .75em;
-  }
-
-  a.dead {
-  font-weight: boldest;
-  color: darkred;
-  }
-
-.signature_section pre,
-.example pre
-{
-  padding: 6px 11px 7px 11px;
-  background-color: #EEE;
-  border: 1px solid #666;
-  margin: 0 12px 10px 12px;
-}
-
-  </style>
 </head>
 <body class="page" onload="initHierarchyCanvas()">
 <div class="banner">
   <!--(if tree.find('globals.categories.' + cat))-->
-  <span class="cat_type">@!tree.find('globals.categories.' + cat).text()!@</span>
+  <div class="cat_type">@!tree.find('globals.categories.' + cat).text()!@</div>
   <!--(end)-->
-  <h1>@!html.translateId(title)!@</h1>
+  <h1 class="first">$!html.translateId(title)!$</h1>
 </div>
+
+<div class="content boxed">
 
 $!text_section(path=[cat, subcat, 'summary'], hide_title=True)!$
 $!text_section(path=[cat, subcat, 'description'], hide_title=True)!$
@@ -159,7 +90,8 @@ $!link_section(key='concept')!$
 $!link_section(key='demofor')!$
 $!link_section(key='see')!$
 
-#!<pre>@!tree.find([cat, subcat])!@</pre>!##! remove comment for debugging
+#!<pre>@!tree.find([cat, subcat])!@</pre>#! remove comment for debugging
+</div>
 
 <div id="footer">built: @!now.strftime("%m/%d/%y %H:%M:%S")!@</div>
 </body>
