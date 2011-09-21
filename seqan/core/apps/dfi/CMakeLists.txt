@@ -3,3 +3,6 @@ project (core_apps_dfi)
 
 # Update the list of file names below if you add source files to your application.
 seqan_add_executable(dfi dfi.cpp)
+
+install(TARGETS dfi
+        DESTINATION bin)

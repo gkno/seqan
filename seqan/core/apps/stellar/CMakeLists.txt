@@ -7,3 +7,6 @@ seqan_add_executable(stellar stellar.cpp
                              stellar_extension.h
 			     stellar_output.h
 			     stellar_types.h)
+
+install(TARGETS stellar
+        DESTINATION bin)

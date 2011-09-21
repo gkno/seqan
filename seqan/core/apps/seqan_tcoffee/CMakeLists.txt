@@ -3,3 +3,6 @@ project (core_apps_seqan_tcoffee)
 
 # Update the list of file names below if you add source files to your application.
 seqan_add_executable(seqan_tcoffee seqan_tcoffee.cpp)
+
+install(TARGETS seqan_tcoffee
+        DESTINATION bin)

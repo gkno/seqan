@@ -10,3 +10,6 @@ seqan_add_executable(mason mason.cpp
 			   simulate_sanger.h
 			   store_config.h
 			   util.h)
+
+install(TARGETS mason
+        DESTINATION bin)

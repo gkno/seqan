@@ -93,5 +93,6 @@ seqan_setup_global()
 # ===========================================================================
 
 add_subdirectory(core)
+add_subdirectory(docs)
 add_subdirectory(extras)
 add_subdirectory(sandbox)

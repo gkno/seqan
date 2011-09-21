@@ -3,3 +3,6 @@ project (core_apps_sak)
 
 # Update the list of file names below if you add source files to your application.
 seqan_add_executable(sak sak.cpp)
+
+install(TARGETS sak
+        DESTINATION bin)

@@ -11,7 +11,7 @@ from os import F_OK
 
 # Number of warnings.
 WARNING_COUNT = 0
-
+OUT_PATH = 'html'
 
 ################################################################################
 
@@ -430,7 +430,8 @@ def translateLink(text, attribs = "", line=None):
     
 def translateImage(text):
     in_path = 'img/' + text + '.png'
-    out_path = 'html/' + text + '.png'
+    global OUT_PATH
+    out_path = OUT_PATH + '/' + text + '.png'
     
     if os.access(in_path, os.F_OK):
         in_fl = file(in_path, "rb")

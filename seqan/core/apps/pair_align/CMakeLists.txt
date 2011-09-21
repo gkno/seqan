@@ -3,3 +3,6 @@ project (core_apps_pair_align)
 
 # Update the list of file names below if you add source files to your application.
 seqan_add_executable(pair_align pair_align.cpp)
+
+install(TARGETS pair_align
+        DESTINATION bin)

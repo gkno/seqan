@@ -99,6 +99,7 @@ class DDDocRunner(object):
           errors and warnings.
         """
         print 'Scanning modules...'
+        dddoc_html.OUT_PATH = self.out_dir
         app = dddoc.App()
         # Scan some/all modules.
         for path in base_paths:

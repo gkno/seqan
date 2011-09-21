@@ -21,3 +21,5 @@ seqan_add_executable(rabema rabema.cpp
 
 seqan_add_executable(do_search do_search.cpp witio.h find_myers_ukkonen_ext.h)
 
+install(TARGETS rabema
+        DESTINATION bin)

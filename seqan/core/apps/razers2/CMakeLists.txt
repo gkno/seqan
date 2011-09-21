@@ -8,3 +8,6 @@ seqan_add_executable(razers2 razers.cpp
                              paramChooser.h
                              razers_matepairs.h
                              readSimulator.h)
+
+install(TARGETS razers2
+        DESTINATION bin)

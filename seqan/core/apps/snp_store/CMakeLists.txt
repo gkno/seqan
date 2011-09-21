@@ -3,3 +3,6 @@ project (core_apps_snp_store)
 
 # Update the list of file names below if you add source files to your application.
 seqan_add_executable(snp_store snp_store.cpp snp_store.h)
+
+install(TARGETS snp_store
+        DESTINATION bin)

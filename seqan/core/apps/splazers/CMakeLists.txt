@@ -10,3 +10,6 @@ seqan_add_executable(splazers splazers.cpp
 			      razers_parallel.h
 			      razers_spliced.h
 			      readSimulator.h)
+
+install(TARGETS splazers
+        DESTINATION bin)

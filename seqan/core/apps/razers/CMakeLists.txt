@@ -9,3 +9,6 @@ seqan_add_executable(razers razers.cpp
 			    razers_matepairs.h
 			    razers_spliced.h
 			    readSimulator.h)
+
+install(TARGETS razers
+        DESTINATION bin)
