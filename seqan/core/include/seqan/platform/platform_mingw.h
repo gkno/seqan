@@ -55,6 +55,11 @@ typedef unsigned __int32 __uint32;
 typedef unsigned __int16 __uint16;
 typedef unsigned __int8 __uint8;
 
+// Define ftello
+#ifndef ftello
+#define ftello(fp) ftell(fp)
+#endif  // #ifndef ftello
+
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
 

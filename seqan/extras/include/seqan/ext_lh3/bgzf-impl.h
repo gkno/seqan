@@ -33,7 +33,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef PLATFORM_WINDOWS_VS
 #include <unistd.h>
+#endif  // #ifndef PLATFORM_WINDOWS_VS
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -53,8 +55,12 @@ typedef struct {
 KHASH_MAP_INIT_INT64(cache, cache_t)
 
 #if defined(_WIN32) || defined(_MSC_VER)
+#ifndef ftello
 #define ftello(fp) ftell(fp)
+#endif  // #ifndef ftello
+#ifndef fseeko
 #define fseeko(fp, offset, whence) fseek(fp, offset, whence)
+#endif  // #ifndef fseeko
 #else
 extern off_t ftello(FILE *stream);
 extern int fseeko(FILE *stream, off_t offset, int whence);
