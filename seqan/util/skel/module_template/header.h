@@ -135,7 +135,7 @@ namespace seqan {
 ..include:seqan/%(NAME)s.h
  */
 
-// NOTE: Functions can be long to concepts but do not have to.  You can use
+// NOTE: Functions can belong to concepts but do not have to.  You can use
 //       function documentations and link them to concepts in a concept_name.h
 //       header to document your concept.
 
