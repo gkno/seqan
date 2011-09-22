@@ -520,39 +520,42 @@ namespace seqan{
 	template < typename TSpec >//, typename TRankSupportBitString>
 	void completeRankSupportBitString(RankSupportBitString< TSpec > &bitString)
 	{
-		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
-		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBucketString >::Type			TBucketString;
-		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type		TSuperBucketString;
-		
-		typedef typename Value< TBucketString >::Type TBucketValue;
-		typedef typename Value< TSuperBucketString >::Type TSuperBucketValue;
-
-		unsigned bitsPerBucket = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
-		TSuperBucketValue superBucketCounter = 0;
-
-		TBucketValue tempSum = 0;
-		TBucketValue bucketSum = 0;
-		TSuperBucketValue superBucketSum = 0;
-
-		TBitString &bitString_ = bitString.bitString;
-		TBucketString &bucketString = bitString.bucketString;
-		TSuperBucketString &superBucketString = bitString.superBucketString;
-
-		typedef typename Value< TSuperBucketString >::Type TSize;
-		for(TSize i = 0; i < length(bitString_) - 1; i++)
+		if(length(bitString))
 		{
-			tempSum = getRankInBucket(bitString_[i]);
-			bucketSum += tempSum;
-			bucketString[i + 1] = bucketSum;
-			if(!((i + 1) % bitsPerBucket))
+			typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
+			typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBucketString >::Type			TBucketString;
+			typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type		TSuperBucketString;
+			
+			typedef typename Value< TBucketString >::Type TBucketValue;
+			typedef typename Value< TSuperBucketString >::Type TSuperBucketValue;
+	
+			unsigned bitsPerBucket = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
+			TSuperBucketValue superBucketCounter = 0;
+	
+			TBucketValue tempSum = 0;
+			TBucketValue bucketSum = 0;
+			TSuperBucketValue superBucketSum = 0;
+	
+			TBitString &bitString_ = bitString.bitString;
+			TBucketString &bucketString = bitString.bucketString;
+			TSuperBucketString &superBucketString = bitString.superBucketString;
+	
+			typedef typename Value< TSuperBucketString >::Type TSize;
+			for(TSize i = 0; i < length(bitString_) - 1; i++)
 			{
-				superBucketSum += bucketSum;
-				std::cerr << i << " length(bitString_): " << length(bitString_) << " length(superBucketString): " << length(superBucketString) << " superBucketCounter: " << superBucketCounter << std::endl;
-				superBucketString[superBucketCounter] = superBucketSum;
-				bucketSum = 0;
-				++superBucketCounter;
-			}
-		}	
+				tempSum = getRankInBucket(bitString_[i]);
+				bucketSum += tempSum;
+				bucketString[i + 1] = bucketSum;
+					if(!((i + 1) % bitsPerBucket))
+				{
+					superBucketSum += bucketSum;
+					std::cerr << i << " length(bitString_): " << length(bitString_) << " length(superBucketString): " << length(superBucketString) << " superBucketCounter: " << superBucketCounter << std::endl;
+					superBucketString[superBucketCounter] = superBucketSum;
+					bucketSum = 0;
+					++superBucketCounter;
+				}
+			}	
+		}
 	}
 	
 	//Manuel Forwards

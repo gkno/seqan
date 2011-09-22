@@ -526,35 +526,32 @@ namespace seqan{
 	}
 
 	
-	template < typename TText, typename TWaveletTreeSpec >// typename TTreeNodeWidth >
+	template < typename TText, typename TWaveletTreeSpec >
 	void fillWaveletTree(
 			WaveletTree< TText, TWaveletTreeSpec > &tree, 		//the set of bit strings to be filled
-			const TText &text)		 					//the original string
+			const TText &text,		 							//the original string
+			const String< unsigned long long > &lengthString)
 	{
 
 		typedef typename Fibre< WaveletTree< TText, TWaveletTreeSpec >, FibreBitStrings >::Type TFibreRankSupportBitStrings;
 		typedef typename Value< TFibreRankSupportBitStrings >::Type TFibreRankSupportBitString;
 		typedef typename Fibre< TFibreRankSupportBitString, FibreRankSupportBitString >::Type TFibreBitString;
 		typedef typename Size< TFibreBitString >::Type TSize;
-		//typename Iterator< WaveletTreeStructure< TText > >::Type iter(tree.splitValues, 0);
 
 		for(TSize i = 0; i < length(text); ++i)
 		{
 			typename Iterator< WaveletTreeStructure< TText > >::Type iter(tree.splitValues, 0);
-		//	iter = begin(tree.splitValues);
 			bool bit;
 			do{
 				if(value(text, i) > getCharacter(iter))
 				{
 					bit = 1;
-					std::cerr << length(getFibre(tree, FibreBitStrings())[getPosition(iter)]) << std::endl;
 					appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);
 					goRight(iter);
 				}
 				else
 				{
 					bit = 0; 
-					std::cerr << length(getFibre(tree, FibreBitStrings())[getPosition(iter)]) << std::endl;
 					appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);
 					goLeft(iter);
 				}
@@ -686,7 +683,7 @@ namespace seqan{
 
 		setPosition(iter, (TValue)0);
 
-		fillWaveletTree(tree, bwt);
+		fillWaveletTree(tree, bwt, lengthString);
 		/*fillWaveletTree(	
 				tree,
 				iter,
