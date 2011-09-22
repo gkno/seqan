@@ -741,7 +741,7 @@ class DocsCreator(object):
                 res = self.index_page_template(title=title,
                                                cat=cat,
                                                tree=self.tree,
-                                               now=datetime.datetime.now(),
+                                               now=datetime.datetime.utcnow(),
                                                by_subcat=index.get(cat, {}),
                                                time=time,  # for now.strftime()
                                                iterable=lambda x: type(x) is list,
@@ -786,7 +786,7 @@ class DocsCreator(object):
                                              cat=cat,
                                              subcat=subcat,
                                              tree=self.tree,
-                                             now=datetime.datetime.now(),
+                                             now=datetime.datetime.utcnow(),
                                              time=time,  # for now.strftime()
                                              core=core,
                                              html=HtmlHelper(self.error_logger, self.tree, os.path.dirname(filename)),

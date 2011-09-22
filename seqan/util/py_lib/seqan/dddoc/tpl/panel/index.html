@@ -15,6 +15,14 @@
 		//<![CDATA[
 	    function placeholder() {
  	       if (jQuery.browser.safari) return;
+           if (jQuery.browser.mozilla)
+           {
+               var version_array = jQuery.browser.version.split();
+               if (version_array.length < 1)
+                   return;  // Something went wrong, don't show label.
+               if (version_array[0] >= 5))
+                   return;  // Firefox >= 5.
+           }
  	       $('#search-label').click(function() {
  	           $('#search').focus();
  	           $('#search-label').hide();
