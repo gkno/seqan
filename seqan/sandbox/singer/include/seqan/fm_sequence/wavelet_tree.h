@@ -93,6 +93,29 @@ namespace seqan{
 		prefixSumTable[sigmaSize] = sum;
 	}
 
+	//function to create the prefixSum array
+	template< typename TPrefixSumTable, typename TPos, typename TValue >
+	void addToPrefixTable(TPrefixSumTable &prefixSumTable, TPos pos, TValue value)
+	{
+		typedef typename Value< TPrefixSumTable >::Type TCounterValue;
+		for(TPos i = pos; i < length(prefixSumTable); ++i)
+		{
+			prefixSumTable[i] += value;
+		}
+	}
+
+
+	//function to create the prefixSum array
+	template< typename TPrefixSumTable, typename TPos, typename TValue >
+	void subFromPrefixTable(TPrefixSumTable &prefixSumTable, TPos pos, TValue value)
+	{
+		typedef typename Value< TPrefixSumTable >::Type TCounterValue;
+		for(TPos i = pos; i < length(prefixSumTable); ++i)
+		{
+			prefixSumTable[i] -= value;
+		}
+	}
+
 	template< typename TText, typename TSpec >
 	struct WaveletTree;
 
@@ -542,8 +565,9 @@ namespace seqan{
 		{
 			typename Iterator< WaveletTreeStructure< TText > >::Type iter(tree.splitValues, 0);
 			bool bit;
+
 			do{
-				if(value(text, i) > getCharacter(iter))
+				if(ordValue(value(text, i)) > getCharacter(iter))
 				{
 					bit = 1;
 					appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);

@@ -123,7 +123,7 @@ namespace seqan{
 
 		bool operator==(const RankSupportBitString &b) const
 		{
-			return (length == b.length && 
+			return (length == b.length &&
 					bitString == b.bitString && 
 					bucketString == b.bucketString && 
 					superBucketString == b.superBucketString);
@@ -481,8 +481,6 @@ namespace seqan{
 	typename Value< typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type >::Type
 	getRank(const RankSupportBitString< TSpec > &rankSupportBitString, const TPos pos)
 	{
-		//std::cerr << "________________________________" << std::endl;
-		//std::cerr << rankSupportBitString << std::endl;
 		if(!length(rankSupportBitString))
 		{
 			std::cerr << "length = 0" << std::endl;
@@ -495,7 +493,6 @@ namespace seqan{
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportBitString >::Type				TBitString;
 		unsigned bitsPerBucket = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
 		unsigned long bucketPos = pos/bitsPerBucket;
-	//	std::cerr << "bucketPos: " << bucketPos << std::endl;
 		if(bucketPos)
 		{
 			sum += rankSupportBitString.bucketString[bucketPos];
@@ -508,9 +505,7 @@ namespace seqan{
 			}
 		}
 		
-	//	std::cerr << "sum0: " << sum << std::endl;
 		sum += getRankInBucket(rankSupportBitString.bitString, pos);
-//		std::cerr << "sum1: " << sum << std::endl;
 		return sum;
 	}
 
@@ -549,7 +544,6 @@ namespace seqan{
 					if(!((i + 1) % bitsPerBucket))
 				{
 					superBucketSum += bucketSum;
-					std::cerr << i << " length(bitString_): " << length(bitString_) << " length(superBucketString): " << length(superBucketString) << " superBucketCounter: " << superBucketCounter << std::endl;
 					superBucketString[superBucketCounter] = superBucketSum;
 					bucketSum = 0;
 					++superBucketCounter;
@@ -766,13 +760,9 @@ namespace seqan{
 		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
 		for(unsigned i = 0; i < length(multi); ++i)
 		{
-			std::cerr << "i: " << i << std::endl;
 			sprintf(id, ".%u", i);
 			name = fileName;
 			append(name, &(id[0]));
-			std::cerr << name << " " << &(id[0]) << std::endl;
-			//char c;
-			//std::cin>>c;
 			if (!save(multi[i], toCString(name), openMode))
 				return false;
 		}
