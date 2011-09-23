@@ -101,6 +101,7 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
     SEQAN_CALL_TEST(Ticket317);
     SEQAN_CALL_TEST(ticket848);
     SEQAN_CALL_TEST(test_find_motif_memory_leak_ticket_364);
+    SEQAN_CALL_TEST(ticket_901);
 
     // -----------------------------------------------------------------------
     // Checkpoint Verification

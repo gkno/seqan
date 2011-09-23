@@ -1185,3 +1185,16 @@ SEQAN_DEFINE_TEST(Combinatoric)
 	Test_Assignments_Combinatoric(str9, str1, Limit());
 	Test_Assignments_Combinatoric(str9, str1, Limit(), 10);
 }
+
+SEQAN_DEFINE_TEST(ticket_901)
+{
+    using namespace seqan;
+    
+    String<char> source = "acgtgcat";
+    String<Dna> target;
+    // The in-place move conversion.
+    move(target, source);
+    
+    SEQAN_ASSERT_EQ(length(source), 0u);
+    SEQAN_ASSERT_EQ(target, DnaString("acgtgcat"));
+}
