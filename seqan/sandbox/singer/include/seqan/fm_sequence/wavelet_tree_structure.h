@@ -542,11 +542,13 @@ namespace seqan{
 		resize(lengthString, length(tree.treeNodes), 0);
 		typename Iterator< WaveletTreeStructure< TText > >::Type iter(tree, 0);
 		typedef typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type TValue;
+
 		computeSingleStringLengthFromTree(lengthString,
 				prefixSumTable,
 		   		iter,
 				(TValue)0,
 				(TValue)(length(prefixSumTable)-2));
+
 	}
 
 /*

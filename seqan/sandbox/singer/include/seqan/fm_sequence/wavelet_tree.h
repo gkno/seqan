@@ -75,15 +75,15 @@ namespace seqan{
 	}
 
 	//function to create the prefixSum array
-	template< typename TPrefixSumTable, typename TFreqTable, typename TAlphabetSize >
-	void createPrefixTable(TPrefixSumTable &prefixSumTable, TFreqTable &freqTable, TAlphabetSize sigmaSize)
+	template< typename TPrefixSumTable, typename TFreqTable, typename TAlphabetSize, typename TNumSeq >
+	void createPrefixTable(TPrefixSumTable &prefixSumTable, TFreqTable &freqTable, TAlphabetSize sigmaSize, TNumSeq numSeq)
 	{
 		typedef typename Value< TPrefixSumTable >::Type TCounterValue;	
 		clear(prefixSumTable);
 		resize(prefixSumTable, sigmaSize + 1, 0);
 						
 		TCounterValue temp = 0;
-		TCounterValue sum = 1;
+		TCounterValue sum = numSeq;
 		for(TAlphabetSize i = 0; i < sigmaSize; ++i)
 		{
 			temp = freqTable[i];
@@ -92,6 +92,12 @@ namespace seqan{
 		}
 		prefixSumTable[sigmaSize] = sum;
 	}
+
+	template< typename TPrefixSumTable, typename TFreqTable, typename TAlphabetSize >
+		void createPrefixTable(TPrefixSumTable &prefixSumTable, TFreqTable &freqTable, TAlphabetSize sigmaSize)
+		{
+			createPrefixTable(prefixSumTable, freqTable, sigmaSize, 1);
+		}
 
 	//function to create the prefixSum array
 	template< typename TPrefixSumTable, typename TPos, typename TValue >
@@ -668,7 +674,7 @@ namespace seqan{
 						> &tree, 
 						TBWT const &bwt,
 						TFreqTable const &freq,
-						TPrefixSumTable const &prefixSumTable)
+						TPrefixSumTable &prefixSumTable)
 	{
 		typedef typename BitVector_< BitsPerValue< typename Value< TBWT >::Type >::VALUE >::Type TValue;
 		
@@ -694,9 +700,11 @@ namespace seqan{
 		//writeGraph(tree.splitValues);
 
 		String< unsigned long long > lengthString;
+		addToPrefixTable(prefixSumTable, ordValue(tree.dollarSub), freq[0]);
 		computeStringLengthFromTree(lengthString,
 			prefixSumTable,
 	   		tree.splitValues);
+		subFromPrefixTable(prefixSumTable, ordValue(tree.dollarSub), freq[0]);
 
 		
 		resize(tree.bitStrings, numberOfTreeNodes);
