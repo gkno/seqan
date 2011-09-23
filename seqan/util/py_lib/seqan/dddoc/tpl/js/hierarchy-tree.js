@@ -1,7 +1,10 @@
 // Namespace seqan.
-var seqan = {};
+var seqan;
+if (seqan === undefined)
+    seqan = {};
 // Namespace seqan.doc.
-seqan.doc = {};
+if (seqan.doc === undefined)
+    seqan.doc = {};
 
 // Constants.
 seqan.doc.constants = {
@@ -659,5 +662,5 @@ function initHierarchyCanvas()
         seqan.doc.computeLayout(t, ctx);
         seqan.doc.updateDivs('#class-links', t);
     });
-    console.log(t)
+    //console.log(t)
 }
