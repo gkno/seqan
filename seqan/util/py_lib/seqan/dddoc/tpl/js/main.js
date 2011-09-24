@@ -20,3 +20,19 @@ window.highlight = function(url) {
 $(function() {
     highlight('#' + location.hash);
 });
+
+function setPermalink(path)
+{
+    var loc = window.parent.location.origin + window.parent.location.pathname;
+    $('#permalink-field')[0].value = loc + '?i=' + path;
+}
+
+function togglePermalink()
+{
+    $('#permalink-div').toggle();
+    if ($('#permalink-div').is(':visible'))
+    {
+        $('#permalink-field')[0].focus();
+        $('#permalink-field')[0].select();
+    }
+}

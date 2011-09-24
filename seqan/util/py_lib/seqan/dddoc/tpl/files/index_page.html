@@ -14,10 +14,14 @@
  <style type="text/css">
 </style>
 </head>
-<body class="index-page">
+<body class="index-page" onload="setPermalink('@!'Indexpage.' + cat!@');">
 #!<pre>@!tree.find(['Indexpage', cat])!@</pre>!#
 <div class="banner">
   <h1 class="first">@!title!@</h1>
+  <div class="permalink">
+    <a href="#" onclick="togglePermalink(); return false;">permalink</a>
+    <div id="permalink-div"><input type="text" id="permalink-field" value="..." /></div>
+  </div>
 </div>
 
 <div class="content boxed">

@@ -22,6 +22,7 @@ TPL_FILES = [
     'js/jquery-1.3.2.min.js',
     'js/jquery-effect.js',
     'js/hierarchy-tree.js',
+    'js/seqan-dddoc.js',
     'js/main.js',
     'js/searchdoc.js',
     'js/excanvas.compiled.js',
@@ -31,6 +32,8 @@ TPL_FILES = [
     'css/reset.css',
     'css/hierarchy-tree.css',
     # Images
+    'favicon.ico',
+    'i/link.png',
     'i/arrows.png',
     'i/results_bg.png',
     'i/tree_bg.png',
@@ -805,6 +808,7 @@ def createDocs(error_logger, tree, tpl_path, out_path):
     creator1.createRootIndexPage()
     creator1.createPanelSearchIndex()
     creator1.createPanelTree()
+    #return 0
     # Actually create the documentation content; things that will be displayed
     # on the right hand frame.
     creator2 = DocsCreator(error_logger, tree, tpl_path, out_path)

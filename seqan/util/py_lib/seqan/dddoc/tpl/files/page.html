@@ -15,12 +15,16 @@
     <script src="../js/main.js" type="text/javascript" charset="utf-8"></script>
     <link rel="stylesheet" type="text/css" href="../css/hierarchy-tree.css">
 </head>
-<body class="page" onload="initHierarchyCanvas()">
+<body class="page" onload="initHierarchyCanvas(); setPermalink('@!cat + '.' + subcat!@');">
 <div class="banner">
   <!--(if tree.find('globals.categories.' + cat))-->
   <div class="cat_type">@!tree.find('globals.categories.' + cat).text()!@</div>
   <!--(end)-->
   <h1 class="first">$!html.translateId(title)!$</h1>
+  <div class="permalink">
+    <a href="#" onclick="togglePermalink(); return false;">permalink</a>
+    <div id="permalink-div"><input type="text" id="permalink-field" value="..." /></div>
+  </div>
 </div>
 
 <div class="content boxed">

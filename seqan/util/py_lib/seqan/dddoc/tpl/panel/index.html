@@ -44,7 +44,7 @@
            $('#search').focus();
 
            // Handle searches via top frame entry URL.
-           var s = window.parent.location.hash.match(/#q=([^&]+)/);
+           var s = window.parent.location.href.match(/\?q=([^&]+)/);
            if (s) {
                s = decodeURIComponent(s[1]).replace(/\+/g, ' ');
                if (s.length > 0)
@@ -54,18 +54,21 @@
                }
            }
 
-           // Handle direct accesses to elements.
-           s = window.parent.location.hash.match(/#i=([^&]+)/);
-           if (s) {
-               s = decodeURIComponent(s[1]).replace(/\+/g, ' ');
-               if (s.length > 0)
+           // Handle direct item access via top frame entry URL.
+           var i = window.parent.location.href.match(/[\?&]i=([^&]+)/);
+           if (i) {
+               i = decodeURIComponent(i[1]).replace(/\+/g, ' ');
+               if (i.length > 0)
                {
-                   var arr = s.split('.');
-                   var filename = seqan.doc.getPagePath(arr[0], arr[1], 'files');
-                   panel.open(filename);
+                   var arr = i.split('.');
+                   var path = seqan.doc.getPagePath(arr[0], arr[1], 'files');
+                   var a = window.parent.location.href.match(/[\?&]a=([^&]+)/);
+                   if (a)
+                       a = decodeURIComponent(a[1]).replace(/\+/g, ' ');
+                   panel.open(path + '#' + a);
                }
            }
-	   })
+        })
 		//]]>
 	</script>
 </head>

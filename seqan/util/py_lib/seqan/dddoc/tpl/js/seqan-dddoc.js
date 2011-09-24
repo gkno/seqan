@@ -37,7 +37,10 @@ seqan.doc = {};
     else:
         return '.' + ret*/
 
+seqan.doc.FILENAME_KEEP = ['-']
+
 seqan.doc.FILENAME_SUBS = {
+    "_": "__",
     "\t": "_09",
     "\n": "_0a",
     "!": "_21",
@@ -67,7 +70,7 @@ seqan.doc.escapeFilename = function(str)
     ret = [];
     for (var i = 0; i < str.length; ++i)
     {
-        if (str[i] >= 'a' && str[i] <= 'z' || str[i] == '-')
+        if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || seqan.doc.FILENAME_KEEP.indexOf(str[i]) != -1)
         {
             ret.push(str[i]);
         }
@@ -96,4 +99,11 @@ seqan.doc.getPagePath = function(cat, subcat, prefix)
     if (prefix)
         result = prefix + '/' + result;
     return result
+}
+
+// hack in startsWith()
+if (typeof String.prototype.startsWith != 'function') {
+  String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+  };
 }

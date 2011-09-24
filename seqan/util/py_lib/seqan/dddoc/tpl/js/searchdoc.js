@@ -397,7 +397,36 @@ Searchdoc.Panel.prototype = $.extend({}, Searchdoc.Navigation, new function() {
         if (jQuery.browser.msie) this.$element[0].className += '';
     }
 
+    /*
+    this.updateLocation = function(item, anchor) {
+        console.log("update(", item, anchor, ")");
+        var hash = '#i=' + item;
+        if (anchor) hash += '&a=' + anchor
+        var loc = window.parent.location.href.replace(/#./, '');
+        loc = loc + hash;
+        console.log('pushState', null, '', loc);
+        var oldTitle = window.parent.document.title;
+        window.parent.document.title = item + ' -- SeqAn';
+        window.parent.history.replaceState({'title': oldTitle}, '', loc);
+    }
+    */
+
     this.open = function(src) {
+        /*
+        var item = src;
+        if (src.indexOf('.html') == -1)
+        {
+            var arr2 = [src];
+            if (src.startsWith('Indexpage') || src.startsWith('index'))
+                arr2 = src.split('#');
+            var arr = arr2[0].split('.');
+            src = seqan.doc.getPagePath(arr[0], arr[1], 'files');
+            if (arr2.length > 1)
+                src += '#' + arr2[1];
+            item = arr[0] + '.' + arr[1];
+        }
+        console.log('updating href');
+        */
         this.frame.location.href = '../' + src;
         if (this.frame.highlight) this.frame.highlight(src);
     }
