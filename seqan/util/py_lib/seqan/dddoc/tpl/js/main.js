@@ -29,7 +29,12 @@ function setPermalink(path)
 
 function togglePermalink()
 {
+    var linkPos = $('.permalink').offset();
+    var linkWidth = $('.permalink').width();
+    var width = $('#permalink-div').width();
+    var height = $('#permalink-div').height();
     $('#permalink-div').toggle();
+    $('#permalink-div').css({'left': (linkPos.left - width + linkWidth + 10) + 'px', 'top': (linkPos.top - height - 15) + 'px'})
     if ($('#permalink-div').is(':visible'))
     {
         $('#permalink-field')[0].focus();

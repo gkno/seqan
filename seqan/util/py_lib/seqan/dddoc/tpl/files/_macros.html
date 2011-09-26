@@ -138,6 +138,16 @@
   <!--(end)-->
 <!--(end)-->
 
+<!--(macro summary_field)-->
+  <!--(for text in tree.find(path).texts)-->
+    <!--(if text.startswith('type=text:'))-->
+      $!html.translateMarkup(text[len('type=text:'):], node=tree.find(path))!$
+    <!--(else)-->
+      <pre>@!text!@</pre>
+    <!--(end)-->
+  <!--(end)-->
+<!--(end)-->
+
 <!--(macro param_section)-->
   <!--(if tree.find([cat, subcat, key]))-->
   <div class="section param_section @!key!@">
@@ -233,14 +243,16 @@
           <!--(end)-->
           <!--(if tree.find(path))-->
           <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
-            <td class="signature">$!html.pageLink(txt=path, node=tree.find(path))!$</td>
+            <td class="signature">
+              $!html.pageLink(txt=path, node=tree.find(path))!$
+            </td>
             <!--(if tree.find(path + '.summary'))-->
             <td class="summary">
-              $!text_field(path=[path] + ['summary'])!$
+              $!summary_field(path=[path] + ['summary'])!$
               <!--(if from_label != 0)-->
-              <div class="inherited"><strong>Inherited from:</strong> $!html.pageLink(txt=from_label, node=tree.find(path))!$</div>
+              <sup>[$!html.pageLink(txt=from_label, node=tree.find(path))!$]</sup>
               <!--(end)-->
-            </td>
+           </td>
             #!<td class="summary">$!html.translateMarkup(default("' '.join(tree.find(path + '.summary').texts)", 'none'))!$</td>!#
             <!--(end)-->
           </tr>

@@ -305,6 +305,7 @@ class TplDocsCreator(object):
             summary = ''
             if node.children.has_key('summary') and node.children['summary'].texts:
                 summary = self.html_helper.translateMarkup(node.children['summary'].texts[0].split(':', 1)[1])
+                summary = summary.replace('&amp;', '&').replace('&quot;', '"')
                 summary = re.sub('<.*?>', '', summary)
                 summary = summary[:100]  # TODO(holtgrew): Smarter trimming?
             # Get title of entry type.

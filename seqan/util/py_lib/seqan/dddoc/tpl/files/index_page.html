@@ -18,10 +18,6 @@
 #!<pre>@!tree.find(['Indexpage', cat])!@</pre>!#
 <div class="banner">
   <h1 class="first">@!title!@</h1>
-  <div class="permalink">
-    <a href="#" onclick="togglePermalink(); return false;">permalink</a>
-    <div id="permalink-div"><input type="text" id="permalink-field" value="..." /></div>
-  </div>
 </div>
 
 <div class="content boxed">
@@ -81,7 +77,11 @@ $!text_section(path=['Indexpage', cat, 'example'])!$
 #!<pre>@!by_subcat!@</pre>
 </div>
 
-<div id="footer">Built @!now.strftime("%y/%m/%d %H:%M:%S")!@ UTC</div>
+<div id="footer">
+  <a href="#" class="permalink" onclick="togglePermalink(); return false;">permalink</a>
+  Built @!now.strftime("%y/%m/%d %H:%M:%S")!@ UTC
+</div>
+<div id="permalink-div"><input type="text" id="permalink-field" value="..." /></div>
 </body>
 </html>
 

@@ -21,10 +21,6 @@
   <div class="cat_type">@!tree.find('globals.categories.' + cat).text()!@</div>
   <!--(end)-->
   <h1 class="first">$!html.translateId(title)!$</h1>
-  <div class="permalink">
-    <a href="#" onclick="togglePermalink(); return false;">permalink</a>
-    <div id="permalink-div"><input type="text" id="permalink-field" value="..." /></div>
-  </div>
 </div>
 
 <div class="content boxed">
@@ -97,6 +93,10 @@ $!link_section(key='see')!$
 #!<pre>@!tree.find([cat, subcat])!@</pre>#! remove comment for debugging
 </div>
 
-<div id="footer">Built @!now.strftime("%y/%m/%d %H:%M:%S")!@ UTC</div>
+<div id="footer">
+  <a href="#" class="permalink" onclick="togglePermalink(); return false;">permalink</a>
+  Built @!now.strftime("%y/%m/%d %H:%M:%S")!@ UTC
+</div>
+<div id="permalink-div"><input type="text" id="permalink-field" value="..." /></div>
 </body>
 </html>
