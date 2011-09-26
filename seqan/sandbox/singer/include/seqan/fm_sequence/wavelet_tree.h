@@ -104,9 +104,9 @@ namespace seqan{
 	void addToPrefixTable(TPrefixSumTable &prefixSumTable, TPos pos, TValue value)
 	{
 		typedef typename Value< TPrefixSumTable >::Type TCounterValue;
-		for(TPos i = pos; i < length(prefixSumTable); ++i)
+		for(TPos i = 0; i <= pos; ++i)
 		{
-			prefixSumTable[i] += value;
+			prefixSumTable[i] -= value;
 		}
 	}
 
@@ -116,9 +116,9 @@ namespace seqan{
 	void subFromPrefixTable(TPrefixSumTable &prefixSumTable, TPos pos, TValue value)
 	{
 		typedef typename Value< TPrefixSumTable >::Type TCounterValue;
-		for(TPos i = pos; i < length(prefixSumTable); ++i)
+		for(TPos i = 0; i <= pos; ++i)
 		{
-			prefixSumTable[i] -= value;
+			prefixSumTable[i] += value;
 		}
 	}
 
@@ -558,8 +558,8 @@ namespace seqan{
 	template < typename TText, typename TWaveletTreeSpec >
 	void fillWaveletTree(
 			WaveletTree< TText, TWaveletTreeSpec > &tree, 		//the set of bit strings to be filled
-			const TText &text,		 							//the original string
-			const String< unsigned long long > &lengthString)
+			const TText &text)		 							//the original string
+
 	{
 
 		typedef typename Fibre< WaveletTree< TText, TWaveletTreeSpec >, FibreBitStrings >::Type TFibreRankSupportBitStrings;
@@ -715,7 +715,7 @@ namespace seqan{
 
 		setPosition(iter, (TValue)0);
 
-		fillWaveletTree(tree, bwt, lengthString);
+		fillWaveletTree(tree, bwt);
 		/*fillWaveletTree(	
 				tree,
 				iter,
@@ -782,8 +782,12 @@ namespace seqan{
 		}
 		tree.dollarSub = dollarValues[0].i1;
 		tree.dollarPosition = dollarValues[0].i2;
+		std::cerr << "WaveletTree: Open0" << std::endl;
 		name = fileName;	append(name, ".tree");	open(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
+		std::cerr << "WaveletTree: Open1" << std::endl;
 		name = fileName;	append(name, ".split");	open(getFibre(tree, FibreSplitValues()), toCString(name), openMode);
+		std::cerr << "WaveletTree: Open02" << std::endl;
+
 		return true;
 	}
 

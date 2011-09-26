@@ -242,9 +242,7 @@ namespace seqan
 				pos = lfMapping(*lfTable, pos);
 				++counter;
 			}
-//			static_cast<Nothing>(value(compressedSA, getRank(indicatorString, pos) - 1));
 			TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
-			std::cerr << "temp: " << temp << " " << getRank(indicatorString, pos) << std::endl;
 		   	temp.i2	+= counter;
 			return temp;	
 		}

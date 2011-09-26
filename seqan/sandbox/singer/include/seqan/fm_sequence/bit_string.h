@@ -279,39 +279,6 @@ namespace seqan{
 	{
 		return rankSupportBitString.length;
 	}
-
-/*	template< typename TSpec >
-	std::ostream& print(std::ostream &stream, RankSupportBitString< TSpec > &rankSupportBitString)
-	{
-		typedef typename Value< TBitString >::Type TBitStringValue;
-		typedef typename Value< TBucketString >::Type TBucketStringValue;
-		typedef typename Value< TSuperBucketString >::Type TSuperBucketStringValue;
-		unsigned bitsPerBucket = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
-
-		TBitString &bitString = rankSupportBitString.bitString;
-		TBucketString &bucketString = rankSupportBitString.bucketString;
-		TSuperBucketString &superBucketString = rankSupportBitString.superBucketString;
-
-		stream << "  ";
-		for(TBitStringValue i = 0; i < length(bitString); i++)
-		{
-			printBits(stream, bitString[i], bitsPerBucket);
-		}
-		stream << std::endl;
-
-		for(TBucketStringValue i = 0; i < length(bucketString); i++)
-		{
-			stream << bucketString[i] << " ";
-		}
-		stream << std::endl;
-
-		for(TSuperBucketStringValue i = 0; i < length(superBucketString); i++)
-		{
-			stream << superBucketString[i] << " ";
-		}
-		return stream;
-
-	}*/
 	
 	template < typename TPos >
 	bool getBit(String< bool > &bitString, TPos &pos)
@@ -594,8 +561,6 @@ namespace seqan{
 			}	
 		}
 		completeRankSupportBitString(bitString);
-
-
 	}
 
 	template < typename TCharacterValue, typename TWaveletTreeSpec, typename TText >//, typename TRankSupportBitString>
