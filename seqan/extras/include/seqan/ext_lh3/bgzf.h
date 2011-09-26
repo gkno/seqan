@@ -30,7 +30,9 @@
 
 namespace seqan { // namespace ext_lh3 {  // TODO(holtgrew): Put into its own namespace?
 
+#ifndef PLATFORM_WINDOWS_VS
 #include <stdint.h>
+#endif  // #ifndef PLATFORM_WINDOWS_VS
 #include <stdio.h>
 #include <zlib.h>
 #ifdef _USE_KNETFILE

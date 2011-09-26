@@ -35,6 +35,9 @@
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_VS
 
+// Make <windows.h> not define min() and max() as macros.
+#define NOMINMAX
+
 // Disable warning "'function' : resolved overload was found by
 // argument-dependent lookup".  Visual Studio warns because Koenig
 // lookup was introduced in later version and behaviour has changed at some
@@ -81,6 +84,8 @@ inline T round(T const & x)
 #ifndef ftello
 #define ftello(fp) ftell(fp)
 #endif  // #ifndef ftello
+
+#include "seqan/platform/windows_stdint.h"
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 //#define SEQAN_SWITCH_USE_FORWARDS

@@ -96,7 +96,9 @@ namespace seqan { // namespace ext_lh3 {  // TODO(holtgrew): Put into its own na
 
 #define AC_VERSION_KHASH_H "0.2.2"
 
+#ifndef PLATFORM_WINDOWS_VS
 #include <stdint.h>
+#endif  // #ifndef PLATFORM_WINDOWS_VS
 #include <stdlib.h>
 #include <string.h>
 
