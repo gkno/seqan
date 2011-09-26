@@ -534,6 +534,92 @@ CursorKind.UNEXPOSED_STMT = CursorKind(200)
 # A labelled statement in a function.
 CursorKind.LABEL_STMT = CursorKind(201)
 
+# A compound statement
+CursorKind.COMPOUND_STMT = CursorKind(202)
+
+# A case statement.
+CursorKind.CASE_STMT = CursorKind(203)
+
+# A default statement.
+CursorKind.DEFAULT_STMT = CursorKind(204)
+
+# An if statement.
+CursorKind.IF_STMT = CursorKind(205)
+
+# A switch statement.
+CursorKind.SWITCH_STMT = CursorKind(206)
+
+# A while statement.
+CursorKind.WHILE_STMT = CursorKind(207)
+
+# A do statement.
+CursorKind.DO_STMT = CursorKind(208)
+
+# A for statement.
+CursorKind.FOR_STMT = CursorKind(209)
+
+# A goto statement.
+CursorKind.GOTO_STMT = CursorKind(210)
+
+# An indirect goto statement.
+CursorKind.INDIRECT_GOTO_STMT = CursorKind(211)
+
+# A continue statement.
+CursorKind.CONTINUE_STMT = CursorKind(212)
+
+# A break statement.
+CursorKind.BREAK_STMT = CursorKind(213)
+
+# A return statement.
+CursorKind.RETURN_STMT = CursorKind(214)
+
+# A GNU-style inline assembler statement.
+CursorKind.ASM_STMT = CursorKind(215)
+
+# Objective-C's overall @try-@catch-@finally statement.
+CursorKind.OBJC_AT_TRY_STMT = CursorKind(216)
+
+# Objective-C's @catch statement.
+CursorKind.OBJC_AT_CATCH_STMT = CursorKind(217)
+
+# Objective-C's @finally statement.
+CursorKind.OBJC_AT_FINALLY_STMT = CursorKind(218)
+
+# Objective-C's @throw statement.
+CursorKind.OBJC_AT_THROW_STMT = CursorKind(219)
+
+# Objective-C's @synchronized statement.
+CursorKind.OBJC_AT_SYNCHRONIZED_STMT = CursorKind(220)
+
+# Objective-C's autorealease pool statement.
+CursorKind.OBJC_AUTORELEASE_POOL_STMT = CursorKind(221)
+
+# Objective-C's for collection statement.
+CursorKind.OBJC_FOR_COLLECTION_STMT = CursorKind(222)
+
+# C++'s catch statement.
+CursorKind.CXX_CATCH_STMT = CursorKind(223)
+
+# C++'s try statement.
+CursorKind.CXX_TRY_STMT = CursorKind(224)
+
+# C++'s for (* : *) statement.
+CursorKind.CXX_FOR_RANGE_STMT = CursorKind(225)
+
+# Windows Structured Exception Handling's try statement.
+CursorKind.SEH_TRY_STMT = CursorKind(226)
+
+# Windows Structured Exception Handling's except statement.
+CursorKind.SEH_EXCEPT_STMT = CursorKind(227)
+
+# Windows Structured Exception Handling's finally statement.
+CursorKind.SEH_FINALLY_STMT = CursorKind(228)
+
+# Temporary materialized expression for C++.
+CursorKind.MATERIALIZE_TEMPORARY_EXPR = CursorKind(229)
+
+# The null statement.
+CursorKind.NULL_STMT = CursorKind(230)
 
 ###
 # Other Kinds
