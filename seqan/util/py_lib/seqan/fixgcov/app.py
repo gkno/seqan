@@ -1,7 +1,16 @@
 #!/usr/bin/env python
-"""pyclangcheck driver code
+"""Small libclang based app to fix gcov output.
 
-This code is the driver code for the pyclangcheck tool.
+Fix gcov output with templates.  This is done by first parsing in the .cpp files
+(compilation units) with libclang.  The AST is then parsed and all lines within
+composite statements ({ stmt; stmt; ... }) are memoized as 'interesting' lines.
+The resulting interesting lines are serialized to a location file with pickle.
+Finally, gcov output files are read and updated.  If a line is interesting but
+not marked as covered or uncovered (marker '-'), it is marked as uncovered
+(marker '#####').
+
+USAGE: fixgcov.py -i $include_dir -g $gcov_file
+USAGE: fixgcov.py -i $include_dir -s $source_file
 
 Copyright: (c) 2010, Knut Reinert, FU Berlin
 License:   3-clause BSD (see LICENSE)
@@ -35,12 +44,15 @@ def _hasFileLocation(node):
 
 
 class CollectCompoundStatementNodeVisitor(object):
+    """Visitor for AST nodes that collects compound statements."""
+    
     def __init__(self, options):
         self.options = options
         self.stack = []
         self.ranges = []
     
     def enterNode(self, node):
+        """Called when a node is entered ("pre-order" traversal)."""
         self.stack.append(node)
         ## print '  ' * len(self.stack), node.kind,
         num_children = len([x for x in node.get_children()])
@@ -61,10 +73,13 @@ class CollectCompoundStatementNodeVisitor(object):
             self.ranges.append((node.location.file.name, node.extent.start.line, node.extent.end.line))
 
     def exitNode(self, node):
+        """Called when a node is left ("post-order" traversa)."""
         self.stack.pop()
 
 
 class VisitAllowedRule(object):
+    """Decides whether a AST node and its children is visited."""
+    
     def __init__(self, options):
         self.options = options
         self.include_dirs = [os.path.abspath(x) for x in options.include_dirs]
@@ -72,15 +87,18 @@ class VisitAllowedRule(object):
 
     def visitAllowed(self, node):
         """Return True if visiting is allowed."""
-        # TODO(holtgrew): For this application, stopping at compound statements would be enough.
-        #print node._kind_id
+        # TODO(holtgrew): For this application, stopping at compound statements
+        # would be enough.  Visit if translation unit.
         if node.kind == ci.CursorKind.TRANSLATION_UNIT:
             return True
+        # Don't visit if it has no location (built-in).
         if not _hasFileLocation(node):
             return False
+        # Try to hit cache.
         if self.cache.has_key(node.location.file.name):
             return self.cache[node.location.file.name]
-        # Check whether node's location is below the include directories.
+        # Check whether node's location is below the include directories.  It is
+        # only visited if this is the case.
         filename = os.path.abspath(node.location.file.name)
         result = False
         for x in self.include_dirs:
@@ -88,17 +106,20 @@ class VisitAllowedRule(object):
                 # print filename, x
                 result = True
                 break
-        self.cache[node.location.file.name] = result
+        self.cache[node.location.file.name] = result  # Save in cache.
         return result
 
 
 class AstTraverser(object):
+    """Traverses AST tree and applies given visitor object."""
+    
     def __init__(self, node_visitor, options):
         self.node_visitor = node_visitor
         self.options = options
         self.visit_allowed_rule = VisitAllowedRule(options)
 
     def _recurse(self, node):
+        """Recursion helper."""
         if not self.visit_allowed_rule.visitAllowed(node):
             return False  # We did not visit this node.
         self.node_visitor.enterNode(node)
@@ -108,6 +129,7 @@ class AstTraverser(object):
         return True
 
     def run(self, filename):
+        """Main entry point."""
         index = ci.Index.create()
         args = ['-I%s' % s for s in self.options.include_dirs]
         # print args
@@ -118,13 +140,17 @@ class AstTraverser(object):
     
     @classmethod
     def visitFile(klass, filename, node_visitor, options):
+        """Don't instantiate AstTraverser yourself, use this function."""
         traverser = AstTraverser(node_visitor, options)
         res = traverser.run(filename)
         return res == True
 
 
 def main():
+    """Main entry point."""
+    # ========================================================================
     # Parse command line arguments.
+    # ========================================================================
     parser = optparse.OptionParser("USAGE: %prog [options] -s file.cpp")
     parser.add_option('-I', '--include-dir', dest='include_dirs', default=[],
                       type='string', help='Specify include directories',
@@ -155,6 +181,10 @@ def main():
 
     options.include_dirs += [os.path.abspath(os.path.dirname(s)) for s in options.source_files]
 
+    # ========================================================================
+    # Read in files with paths from arguments.
+    # ========================================================================
+
     for path in options.source_files_files:
       with open(path, 'rb') as f:
         options.source_files += [x.strip() for x in f.readlines()]
@@ -165,6 +195,10 @@ def main():
     if not options.source_files and not options.gcov_files:
         parser.error('Neither source nor gcov file given!')
         return 1
+
+    # ========================================================================
+    # Collect interesting lines if any source files given.
+    # ========================================================================
 
     if options.source_files:
         # If any source file is given, all given source files are parsed and all
@@ -196,6 +230,10 @@ def main():
             print >>sys.stderr, 'Writing out locations to', options.location_file
         with open(options.location_file, 'wb') as f:
             pickle.dump(locations, f)
+
+    # ========================================================================
+    # Process GCOV files if any are given.
+    # ========================================================================
 
     if options.gcov_files:
         # If no source files and gcov files are given then
@@ -246,5 +284,6 @@ def main():
               f.write(''.join(result))
             #print ''.join(result)
 
+# Entry point if called as program.
 if __name__ == '__main__':
     sys.exit(main())
