@@ -231,6 +231,22 @@ _initScoreMatrix(CommandLineParser& parser, Dna5 const) {
 //////////////////////////////////////////////////////////////////////////////////
 
 inline void
+_initScoreMatrix(CommandLineParser& parser, char const) {
+	String<char> matrix;
+	getOptionValueLong(parser, "matrix", matrix);
+	if (isSetLong(parser, "matrix")) {
+		Score<int, ScoreMatrix<> > sc;
+		loadScoreMatrix(sc, matrix);
+		_initAlignParams<char>(parser, sc);
+	} else {
+		Score<int> sc;
+		_initAlignParams<char>(parser, sc);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+inline void
 _initScoreMatrix(CommandLineParser& parser, Rna5 const) {
 	String<char> matrix;
 	getOptionValueLong(parser, "matrix", matrix);
@@ -277,7 +293,7 @@ int main(int argc, const char *argv[]) {
 
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s", "seq", "file with 2 sequences", OptionType::String), "<FASTA Sequence File>"));
-	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", (int)OptionType::String, "protein"), "[protein | dna | rna]"));
+	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", (int)OptionType::String, "protein"), "[protein | dna | rna | text]"));
 	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", (int)OptionType::String, "gotoh"), "[nw, gotoh, sw, lcs]"));
 	addHelpLine(parser, "nw = Needleman-Wunsch");
 	addHelpLine(parser, "gotoh = Gotoh");
@@ -321,7 +337,8 @@ int main(int argc, const char *argv[]) {
 	// Initialize scoring matrices
 	if (alphabet == "dna") _initScoreMatrix(parser, Dna5());
 	else if (alphabet == "rna") _initScoreMatrix(parser, Rna5());
-	else _initScoreMatrix(parser, AminoAcid());
+	else if (alphabet == "protein") _initScoreMatrix(parser, AminoAcid());
+	else _initScoreMatrix(parser, char());
 
 	return 0;
 }
