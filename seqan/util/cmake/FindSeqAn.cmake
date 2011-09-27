@@ -3,6 +3,21 @@
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
+# Options
+# ---------------------------------------------------------------------------
+
+# Use c++11 standard for compilation
+option (SEQAN_C++11_STANDARD "Use the c++11 standard for compilation." OFF)
+if (SEQAN_C++11_STANDARD)
+  if (APPLE)
+    set (CMAKE_XCODE_ATTRIBUTE_GCC_VERSION com.apple.compilers.llvm.clang.macports CACHE STRING "" FORCE)
+  endif (APPLE)
+  if (UNIX)
+    list (APPEND CMAKE_CXX_FLAGS -std=c++0x)
+  endif (UNIX)
+endif (SEQAN_C++11_STANDARD)
+
+# ---------------------------------------------------------------------------
 # Macro seqan_workshop_instrumentation_cmake ()
 # ---------------------------------------------------------------------------
 
@@ -31,7 +46,7 @@ endmacro (seqan_instrumentation_cmake)
 macro (seqan_instrumentation_target TARGET)
 	if(SEQAN_INSTRUMENTATION)
 	    add_dependencies(${TARGET} seqan_instrumentation_build)
-	
+
 	    if(CMAKE_HOST_WIN32)
 	      add_custom_command(TARGET ${TARGET}
 	                         PRE_BUILD
