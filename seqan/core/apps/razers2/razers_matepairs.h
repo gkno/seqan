@@ -484,6 +484,7 @@ void mapMatePairReads(
 		// (1) Remove out-of-window left mates from fifo.
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
+///            std::cerr << "  -Left [" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << ')' << std::endl;
 			popFront(fifo);
 			++firstNo;
 		}
@@ -491,9 +492,9 @@ void mapMatePairReads(
         // (2) Add within-window left mates to fifo.
 		while (empty(fifo) || (TSignedGPos)back(fifo).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
-			++options.countFiltration;
 			if (find(swiftFinderL, swiftPatternL, options.errorRate))
 			{
+				++options.countFiltration;
 				gPair = positionRange(swiftFinderL);
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
 				{
@@ -505,6 +506,7 @@ void mapMatePairReads(
 					fL.i2.beginPos = gPair.i1;
 					fL.i2.endPos = gPair.i2;
 					
+///            std::cerr << "  +Left \t" << firstNo + length(fifo) << ":\t[" << fL.i2.beginPos << "\t" << fL.i2.endPos << ')' << std::endl;
 					pushBack(fifo, fL);
 				}
 			} else {
@@ -522,8 +524,9 @@ void mapMatePairReads(
 		__int64 last = (__int64)-1;
 		__int64 lastValid = (__int64)-1;
 		__int64 i;
-		for (i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
+		for (i = lastPotMatchNo[matePairId]; firstNo <= i; last = i, i = (*it).i1)
 		{
+///            std::cout<< "\t[" << i << "]" << "\t" << fifo[3].i1 << std::endl;
 			it = &value(fifo, i - firstNo);
 
 			// search left mate
@@ -534,9 +537,12 @@ void mapMatePairReads(
                     if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
                         ++options.countVerification;
+///                        if (i==0)
+///                        std::cout<<"here"<<std::endl;
 						if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
 								matePairId, readSetL, TSwiftSpec()))
 						{
+///                            std::cerr << "  Left+ " << verifierL.m.endPos << std::endl;
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 							(*it).i3 = verifierL.q;
@@ -585,8 +591,14 @@ void mapMatePairReads(
 					{
                         // distance between left mate beginning and right mate end
                         __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*it).i2.beginPos;
-
 						int libSizeError = options.libraryLength - dist;
+                        
+///                        if (orientation == 'F')
+///                            std::cout << (__int64)(*it).i2.beginPos << "\t" << (__int64)verifierR.m.beginPos;
+///                        else
+///                            std::cout << (__int64)(*it).i2.endPos << "\t" << (__int64)verifierR.m.endPos;
+///                        std::cout << '\t' << dist << '\t' << libSizeError << std::endl;
+
 						if (libSizeError < 0)
 							libSizeError = -libSizeError;
                         if (libSizeError > options.libraryError)

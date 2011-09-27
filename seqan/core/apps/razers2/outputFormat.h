@@ -531,16 +531,9 @@ void dumpMatches(
 		return;
 	}
 	
-
 #ifndef RAZERS_DONTMASKDUPLICATES
-#ifdef RAZERS_MATEPAIRS
-	if (options.libraryLength >= 0)
-		maskDuplicates(store);
-	else
-#endif //RAZERS_MATEPAIRS
-		maskDuplicates(store);
-#endif//RAZERS_DONTMASKDUPLICATES
-
+    maskDuplicates(store);
+#endif
 
 	String< String<unsigned short> > stats;
 	if (options.outputFormat >= 1 && options.outputFormat <= 3)
