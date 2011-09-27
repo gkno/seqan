@@ -129,6 +129,13 @@ namespace seqan{
 					superBucketString == b.superBucketString);
 		}
 
+		template< typename TPos >
+		typename Value< TSuperBucketString >::Type const operator[](TPos pos)
+		{
+			unsigned const bitsPerBucket = BitsPerValue< typename Value< TBitString >::Type >::VALUE;
+			return bitString[pos/bitsPerBucket];
+		}
+
 	};
 
 	template< typename TSpec >
@@ -171,6 +178,23 @@ namespace seqan{
 	getFibre(const RankSupportBitString< TSpec > &string, const FibreRankSupportSuperBucketString)
 	{
 		return string.superBucketString;
+	}
+
+
+	template< typename TValue >
+	void printBits(TValue entrie)
+	{
+		unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
+		TValue one = 1;
+		std::cerr << "entrie: " << entrie << std::endl;
+		std::cerr << bitsPerValue << std::endl;
+		for(TValue i = 0; i < bitsPerValue; ++i)
+		{
+			std::cerr << ((entrie >> i) & one);
+		}
+		std::cerr << std::endl;
+		//char c;
+		//std::cin >> c;
 	}
 
 	template< typename TValue, typename TSize>
@@ -237,6 +261,10 @@ namespace seqan{
 		unsigned bitsPerBucket = BitsPerValue< TBitStringValue >::VALUE;
 		unsigned long long numberOfBuckets;
 	   	(size) ? numberOfBuckets = size / bitsPerBucket + 1 : numberOfBuckets = 0;
+
+	   	//std::cerr << size << " " << bitsPerBucket << " " << numberOfBuckets << std::endl;
+	   	//char c;
+	   	//std::cin >> c;
 
 		resize(rankSupportBitString.bitString, numberOfBuckets , 0);
 		resize(rankSupportBitString.bucketString, numberOfBuckets, 0);
@@ -619,12 +647,18 @@ namespace seqan{
 		const char *fileName,
 		int openMode)
 	{
+		typedef typename Value< typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString>::Type >::Type TValue;
+		String< TValue >lengthString;
+		resize(lengthString, 1);
+
 		String<char> name;
 		name = fileName;	append(name, ".bit");	
 		if(!open(getFibre(string, FibreRankSupportBitString()), toCString(name), openMode))
 			return false;
 		name = fileName;	append(name, ".bucket");	open(getFibre(string, FibreRankSupportBucketString()), toCString(name), openMode);
 		name = fileName;	append(name, ".sbucket");	open(getFibre(string, FibreRankSupportSuperBucketString()), toCString(name), openMode);
+		name = fileName;	append(name, ".length");	open(lengthString, toCString(name), openMode);
+		string.length = lengthString[0];
 		return true;
 	}
 
@@ -691,7 +725,12 @@ namespace seqan{
 		const char *fileName,
 		int openMode)
 	{
+		typedef typename Value< typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString>::Type >::Type TValue;
+		String< TValue >lengthString;
+		resize(lengthString, 1);
+		lengthString[0] = string.length;
 		String<char> name;
+		name = fileName;	append(name, ".length");	save(lengthString, toCString(name), openMode);
 		name = fileName;	append(name, ".bit");		save(getFibre(string, FibreRankSupportBitString()), toCString(name), openMode);
 		name = fileName;	append(name, ".bucket");	save(getFibre(string, FibreRankSupportBucketString()), toCString(name), openMode);
 		name = fileName;	append(name, ".sbucket");	save(getFibre(string, FibreRankSupportSuperBucketString()), toCString(name), openMode);

@@ -86,6 +86,7 @@ namespace seqan{
 		TCounterValue sum = numSeq;
 		for(TAlphabetSize i = 0; i < sigmaSize; ++i)
 		{
+
 			temp = freqTable[i];
 			prefixSumTable[i] = sum;
 			sum += temp;
@@ -94,7 +95,7 @@ namespace seqan{
 	}
 
 	template< typename TPrefixSumTable, typename TFreqTable, typename TAlphabetSize >
-		void createPrefixTable(TPrefixSumTable &prefixSumTable, TFreqTable &freqTable, TAlphabetSize sigmaSize)
+	void createPrefixTable(TPrefixSumTable &prefixSumTable, TFreqTable &freqTable, TAlphabetSize sigmaSize)
 		{
 			createPrefixTable(prefixSumTable, freqTable, sigmaSize, 1);
 		}
@@ -700,11 +701,18 @@ namespace seqan{
 		//writeGraph(tree.splitValues);
 
 		String< unsigned long long > lengthString;
-		addToPrefixTable(prefixSumTable, ordValue(tree.dollarSub), freq[0]);
+		std::cerr << "prefixSumTable: " << prefixSumTable[0] << std::endl;
+		std::cerr << "prefixSumTable: " << prefixSumTable[1] << std::endl;
+		std::cerr << "prefixSumTable: " << prefixSumTable[2] << std::endl;
+		std::cerr << "prefixSumTable: " << prefixSumTable[3] << std::endl;
+		std::cerr << "prefixSumTable: " << prefixSumTable[4] << std::endl;
+		char c;
+		std::cerr << std::endl;
+		//addToPrefixTable(prefixSumTable, ordValue(tree.dollarSub), prefixSumTable[0]);
 		computeStringLengthFromTree(lengthString,
 			prefixSumTable,
 	   		tree.splitValues);
-		subFromPrefixTable(prefixSumTable, ordValue(tree.dollarSub), freq[0]);
+		//subFromPrefixTable(prefixSumTable, ordValue(tree.dollarSub), prefixSumTable[0]);
 
 		
 		resize(tree.bitStrings, numberOfTreeNodes);
