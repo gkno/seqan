@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
     // Get parameter from args.
     TSequenceType seq1, seq2;
-    if (not parseParameters(argc, argv, seq1, seq2)) {
+    if (!parseParameters(argc, argv, seq1, seq2)) {
         std::cerr << kUsageStr << std::endl;
         return kRetArgErr;
     }
