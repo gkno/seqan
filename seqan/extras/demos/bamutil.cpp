@@ -370,8 +370,8 @@ int main(int argc, char const * argv[])
     // We will use 
     std::istream * inS = &std::cin;
     std::ostream * outS = &std::cout;
-    int inF = STDIN_FILENO;
-    int outF = STDOUT_FILENO;
+    int inF = 0; //STDIN_FILENO;
+    int outF = 1; //STDOUT_FILENO;
 
     bool ioGood = true;
     if (options.inFormat == FORMAT_SAM)
@@ -414,7 +414,11 @@ int main(int argc, char const * argv[])
     {
         if (options.outFile != "-")
         {
+#ifdef PLATFORM_WINDOWS
+            outF = open(toCString(options.outFile), O_CREAT | O_WRONLY, 00666);
+#else  // #ifdef PLATFORM_WINDOWS
             outF = open(toCString(options.outFile), O_CREAT | O_WRONLY | O_DIRECT, 00666);
+#end   // #ifdef PLATFORM_WINDOWS
             if (outF == -1)
             {
                 std::cerr << "Could not open file " << options.outFile << std::endl;
