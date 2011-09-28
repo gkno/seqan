@@ -17,7 +17,7 @@ description         C++ Sequence Analysis Library
 long_description    SeqAn is an open source C++ library of efficient algorithms \
                     and data structures for the analysis of sequences with the \
                     focus on biological data. The library is licensed under the \
-                    3-clause BSD license, the applications are licensed under GPL.
+                    3-clause BSD license except the applications which are GPL.
 
 homepage            http://www.seqan.de
 
