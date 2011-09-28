@@ -451,6 +451,19 @@ CursorKind.USING_DIRECTIVE = CursorKind(34)
 # A C++ using declaration
 CursorKind.USING_DECLARATION = CursorKind(35)
 
+# A Type alias decl.
+CursorKind.TYPE_ALIAS_DECL = CursorKind(36)
+
+# A Objective-C synthesize decl
+CursorKind.OBJC_SYNTHESIZE_DECL = CursorKind(37)
+
+# A Objective-C dynamic decl
+CursorKind.OBJC_DYNAMIC_DECL = CursorKind(38)
+
+# An access specifier decl.
+CursorKind.ACCESS_SPEC_DECL = CursorKind(39)
+
+
 ###
 # Reference Kinds
 
@@ -523,6 +536,290 @@ CursorKind.OBJC_MESSAGE_EXPR = CursorKind(104)
 
 # An expression that represents a block literal.
 CursorKind.BLOCK_EXPR = CursorKind(105)
+
+# A predefined identifier such as __func__.
+CursorKind.PREDEFINED_EXPR = CursorKind(106)
+
+# An integer literal.
+CursorKind.INTEGER_LITERAL = CursorKind(107)
+
+# A floating point number literal.
+CursorKind.FLOATING_LITERAL = CursorKind(108)
+
+# An imaginary number literal.
+CursorKind.IMAGINARY_LITERAL = CursorKind(109)
+
+# A string literal.
+CursorKind.STRING_LITERAL = CursorKind(110)
+
+# A character literal.
+CursorKind.CHARACTER_LITERAL = CursorKind(111)
+
+# A parenthesized expression, e.g. "(1)".
+#
+# This AST node is only formed if full location information is requested.
+CursorKind.PAREN_EXPR = CursorKind(112)
+
+# This represents the unary-expression's (except sizeof and
+# alignof).
+CursorKind.UNARY_OPERATOR = CursorKind(113)
+
+#  This represents an expression of the form offsetof(record-type,
+# member-designator)
+CursorKind.OFFSET_OF_EXPR = CursorKind(114)
+
+# Expression with either a type or (unevaluated) expression operand.
+#
+# Used for sizeof/alignof (C99 6.5.3.4) and vec_step (OpenCL 1.1 6.11.12).
+CursorKind.UNARY_EXPR_OR_TYPE_TRAIT_EXPR = CursorKind(115)
+
+# [C99 6.5.2.1] Array Subscripting.
+CursorKind.ARRAY_SUBSCRIPT_EXPR = CursorKind(116)
+
+# A builtin binary operation expression such as "x + y" or
+# "x <= y".
+CursorKind.BINARY_OPERATOR = CursorKind(117)
+
+# Compound assignment such as "+=".
+CursorKind.COMPOUND_ASSIGNMENT_OPERATOR = CursorKind(118)
+
+# The ?: ternary operator.
+CursorKind.CONDITONAL_OPERATOR = CursorKind(119)
+
+# The GNU extension to the conditional operator which allows
+# the middle operand to be omitted.
+CursorKind.BINARY_CONDITIONAL_OPERATOR = CursorKind(120)
+
+# Allows us to explicitly represent implicit type conversions,
+# which have no direct representation in the original source code.
+#
+# For example: converting T[]->T*, void f()->void (*f)(), float->double,
+# short->int, etc.
+CursorKind.IMPLICIT_CAST_EXPR = CursorKind(121)
+
+# An explicit cast in C (C99 6.5.4) or a C-style cast in C++
+# (C++ [expr.cast]), which uses the syntax (Type)expr.
+#
+# For example: (int)f.
+CursorKind.CSTYLE_CAST_EXPR = CursorKind(122)
+
+# [C99 6.5.2.5]
+CursorKind.COMPOUND_LITERAL_EXPR = CursorKind(123)
+
+# This represents access to specific elements of a vector, and
+# may occur on the left hand side or right hand side.
+#
+# For example the following is legal: "V.xy = V.zw" if V is a 4 element
+# extended vector.
+CursorKind.EXT_VECTOR_ELEMENT_EXPR = CursorKind(124)
+
+# Describes an C or C++ initializer list.
+CursorKind.INIT_LIST_EXPR = CursorKind(125)
+
+# Represents a C99 designated initializer expression.
+CursorKind.DESIGNATED_INIT_EXPR = CursorKind(126)
+
+# Represents an implicitly-generated value initialization of an
+# object of a given type.
+CursorKind.IMPLICIT_VALUE_INIT_EXPR = CursorKind(127)
+
+# Parenthesis list expression.
+CursorKind.PAREN_LIST_EXPR = CursorKind(128)
+
+# VAArgExpr, used for the builtin function __builtin_va_arg.
+CursorKind.VA_ARG_EXPR = CursorKind(129)
+
+# The GNU address of label extension, representing &&label.
+CursorKind.ADDR_LABEL_EXPR = CursorKind(130)
+
+# This is the GNU Statement Expression extension: ({int X=4; X;})
+CursorKind.StmtExpr = CursorKind(131)
+
+# GNU builtin-in function __builtin_choose_expr.
+CursorKind.CHOOSE_EXPR = CursorKind(132)
+
+# Represents a C1X generic selection.
+CursorKind.GENERIC_SELECTION_EXPR = CursorKind(133)
+
+# Implements the GNU __null extension, which is a name for a null
+# pointer constant that has integral type (e.g., int or long) and is the same
+# size and alignment as a pointer.
+#
+# The __null extension is typically only used by system headers, which define
+# NULL as __null in C++ rather than using 0 (which is an integer that may not
+# match the size of a pointer).
+CursorKind.GNU_NULL_EXPR = CursorKind(134)
+
+# C++'s static_cast<> expression.
+CursorKind.CXX_STATIC_CAST_EXPR = CursorKind(135)
+
+# C++'s dynamic_cast<> expression.
+CursorKind.CXX_DYNAMIC_CAST_EXPR = CursorKind(136)
+
+# C++'s reinterpret_cast<> expression.
+CursorKind.CXX_REINTERPRET_CAST_EXPR = CursorKind(137)
+
+# C++'s const_cast<> expression.
+CursorKind.CXX_CONST_CAST_EXPR = CursorKind(138)
+
+# Represents an explicit C++ type conversion that uses "functional"
+# notion (C++ [expr.type.conv]).
+#
+# Example:
+# \code
+#   x = int(0.5);
+# \endcode
+CursorKind.CXX_FUNCTIONAL_CAST_EXPR = CursorKind(139)
+
+# A C++ typeid expression (C++ [expr.typeid]).
+CursorKind.CXX_TYPEID_EXPR = CursorKind(140)
+
+# Microsoft C++ __uuidof expression.
+CursorKind.CXX_UUIDOF_EXPR = CursorKind(141)
+
+# [C++ 2.13.5] C++ Boolean Literal.
+CursorKind.CXX_BOOL_LITERAL_EXPR = CursorKind(142)
+
+# [C++0x 2.14.7] C++ Pointer Literal.
+CursorKind.CXX_NULL_PTR_LITERAL_EXPR = CursorKind(143)
+
+# Represents the "this" expression in C++
+CursorKind.CXX_THIS_EXPR = CursorKind(144)
+
+# [C++ 15] C++ Throw Expression.
+#
+# This handles 'throw' and 'throw' assignment-expression. When
+# assignment-expression isn't present, Op will be null.
+CursorKind.CXX_THROW_EXPR = CursorKind(145)
+
+# C++ [dcl.fct.default].
+CursorKind.CXX_DEFAULT_ARG_EXPR = CursorKind(146)
+
+# [C++ 5.2.3p2] Expression "T()" which creates a value-initialized
+# rvalue of type T, which is a non-class type.
+CursorKind.CXX_SCALAR_VALUE_INIT_EXPR = CursorKind(147)
+
+# A new expression for memory allocation and constructor calls, e.g:
+# "new CXXNewExpr(foo)".
+CursorKind.CXX_NEW_EXPR = CursorKind(148)
+
+# A delete expression for memory deallocation and destructor calls,
+# e.g. "delete[] pArray".
+CursorKind.CXX_DELETE_EXPR = CursorKind(149)
+
+# Represents a C++ pseudo-destructor (C++ [expr.pseudo]).
+CursorKind.CXX_PSEUDO_DESTRUCTOR_EXPR = CursorKind(150)
+
+# A reference to a name which we were able to look up during parsing
+# but could not resolve to a specific declaration.
+CursorKind.UNRESOLVED_LOOKUP_EXPR = CursorKind(151)
+
+# A GCC or MS unary type trait, as used in the implementation of
+# TR1/C++0x type trait templates.
+#
+# Example: __is_pod(int) == true __is_enum(std::string) == false
+CursorKind.UNARY_TYPE_TRAIT_EXPR = CursorKind(152)
+
+# A GCC or MS binary type trait, as used in the implementation of
+# TR1/C++0x type trait templates.
+#
+# Example: __is_base_of(Base, Derived) == true
+CursorKind.BINARY_TYPE_TRAIT_EXPR = CursorKind(153)
+
+# An Embarcadero array type trait, as used in the implementation of
+# __array_rank and __array_extent.
+#
+# Example: __array_rank(int[10][20]) == 2 __array_extent(int, 1) == 20
+CursorKind.ARRAY_TYPE_TRAIT_EXPR = CursorKind(154)
+
+# An expression trait intrinsic.
+#
+# Example: __is_lvalue_expr(std::cout) == true __is_lvalue_expr(1) == false
+CursorKind.EXPRESSION_TRAIT_EXPR = CursorKind(155)
+
+# A qualified reference to a name whose declaration cannot yet be
+# resolved.
+CursorKind.DEPENDENT_SCOPE_DECL_REF_EXPR = CursorKind(156)
+
+# Represents binding an expression to a temporary.
+CursorKind.CXX_BIND_TEMPORARY_EXPR = CursorKind(157)
+
+# Represents an expression --- generally a full-expression --- which
+# introduces cleanups to be run at the end of the sub-expression's
+# evaluation.
+CursorKind.EXPR_WITH_CLEANUPS = CursorKind(158)
+
+# Describes an explicit type conversion that uses functional notion
+# but could not be resolved because one or more arguments are type-dependent.
+CursorKind.CXX_UNRESOLVED_CONSTRUCTOR_EXPR = CursorKind(159)
+
+# Represents a C++ member access expression where the actual member
+# referenced could not be resolved because the base expression or the member
+# name was dependent.
+CursorKind.CXX_DEPENDENT_SCOPE_MEMBER_EXPR = CursorKind(160)
+
+# Represents a C++ member access expression for which lookup produced
+# a set of overloaded functions.
+CursorKind.UNRESOLVED_MEMBER_EXPR = CursorKind(161)
+
+# Represents a C++0x noexcept expression (C++ [expr.unary.noexcept]).
+CursorKind.CXX_NOEXCEPT_EXPR = CursorKind(162)
+
+# ObjCStringLiteral, used for Objective-C string literals i.e. "foo".
+CursorKind.OBJC_STRING_LITERAL = CursorKind(163)
+
+# ObjCEncodeExpr, used for in Objective-C.
+CursorKind.OBJC_ENCODE_EXPR = CursorKind(164)
+
+# ObjCSelectorExpr used for in Objective-C.
+CursorKind.OBJC_SELECTOR_EXPR = CursorKind(165)
+
+# Objective-C's protocol expression.
+CursorKind.OBJC_PROTOCOL_EXPR = CursorKind(166)
+
+# ObjCIsaExpr - Represent X->isa and X.isa when X is an ObjC 'id'
+# type.
+CursorKind.OBJC_ISA_EXPR = CursorKind(167)
+
+# Represents the passing of a function argument by indirect
+# copy-restore in ARC.
+CursorKind.OBJC_INDIRECT_COPY_RESTORE_EXPR = CursorKind(168)
+
+# An Objective-C "bridged" cast expression, which casts between
+# Objective-C pointers and C pointers, transferring ownership in the process.
+#
+# \code
+#   NSString *str = (__bridge_transfer NSString *)CFCreateString();
+# \endcode
+CursorKind.OBJC_BRIDGE_CAST_EXPR = CursorKind(169)
+
+# clang-specific builtin-in function __builtin_shufflevector.
+CursorKind.SHUFFLE_VECTOR_EXPR = CursorKind(170)
+
+# Adaptor class for mixing a BlockDecl with expressions. ^{
+# statement-body } or ^(int arg1, float arg2){ statement-body }
+CursorKind.BLOCK_EXPR = CursorKind(171)
+
+# An expression referring to an opaque object of a fixed type and
+# value class.
+CursorKind.OPAQUE_VALUE_EXPR = CursorKind(172)
+
+# Represents a C++0x pack expansion that produces a sequence of
+# expressions.
+#
+# A pack expansion expression contains a pattern (which itself is an
+# expression) followed by an ellipsis. For example:
+CursorKind.PACK_EXPANSION_EXPR = CursorKind(173)
+
+# Represents an expression that computes the length of a parameter
+# pack.
+CursorKind.SIZE_OF_PACK_EXPR = CursorKind(174)
+
+# Clang builtin function __builtin_astype [OpenCL 6.2.4.2].
+#
+# This AST node provides support for reinterpreting a type to another type of
+# the same size.
+CursorKind.AS_TYPE_EXPR = CursorKind(175)
 
 # A statement whose specific kind is not exposed via this interface.
 #
@@ -620,6 +917,9 @@ CursorKind.MATERIALIZE_TEMPORARY_EXPR = CursorKind(229)
 
 # The null statement.
 CursorKind.NULL_STMT = CursorKind(230)
+
+# Adaptor class for mixing declarations with statements and expressions.
+CursorKind.DECL_STMT = CursorKind(231)
 
 ###
 # Other Kinds

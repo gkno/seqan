@@ -7,6 +7,8 @@ import re
 
 import clang.cindex as ci
 
+import app
+
 RULE_NAMING_CONSTANT = 'naming.constant'
 RULE_NAMING_STRUCT = 'naming.struct'
 RULE_NAMING_UNION = 'naming.union'
@@ -65,62 +67,38 @@ class RuleViolation(object):
         self.column = column
     
     def key(self):
-        return (self.rule_id, self.line, self.column, self.violator)
+        return (self.file, self.line, self.column, self.rule_id, self.violator)
     
     def __str__(self):
-        msg = '%s [%s:%d/%d] "%s": %s'
-        return msg % (self.rule_id, self.file, self.line, self.column,
-                      self.violator, RULE_TEXTS[self.rule_id])
+        msg = '[%s:%d/%d] %s "%s": %s'
+        return msg % (os.path.basename(self.file), self.line, self.column,
+                      self.rule_id, self.violator, RULE_TEXTS[self.rule_id])
 
 
-def _hasFileLocation(node):
-    """Return True if node has a file lcoation."""
-    if not hasattr(node, 'location'):
-        return False
-    if not hasattr(node.location, 'file'):
-        return False
-    if not node.location.file:
-        return False
-    if not hasattr(node.location.file, 'name'):
-        return False
-    if not node.location.file.name:
-        return False
-    return True
-
-
-class AllYesRule(object):
-    """A rule that allows all visiting and checks always evaluate to True."""
-    def allowVisit(self, node):
-        return True
-
-    def allowRecurse(self, node):
-        return True
-    
-    def check(self, node):
-        return []
-
-
-class GenericSymbolNameRule(AllYesRule):
+class GenericSymbolNameRule(object):
     def __init__(self, kind, regular_ex, rule_name):
         self.kind = kind
         self.regular_ex = regular_ex
         self.rule_name = rule_name
 
     def allowVisit(self, node):
-        if not _hasFileLocation(node):
+        if not app._hasFileLocation(node):
+            #print 'no location'
             return False
         displayname = ci.Cursor_displayname(node)
         if not displayname:
+            #print 'no displayname'
             return False  # Ignore empty symbols.
         # print 'allow visit template type?', displayname, node.kind
         if node.kind == self.kind:
+            #print 'different kind'
             return True
         return False
     
     def check(self, node):
         displayname = ci.Cursor_displayname(node)
-        print 'checking', displayname
-        import pdb; pdb.set_trace()
+        #print 'checking', displayname
+        #import pdb; pdb.set_trace()
         if not re.match(self.regular_ex, displayname):
             v = RuleViolation(
                 self.rule_name, displayname, node.location.file.name,
@@ -129,7 +107,7 @@ class GenericSymbolNameRule(AllYesRule):
         return []
 
 
-class InIncludeDirsRule(AllYesRule):
+class InIncludeDirsRule(object):
     """Rule to block visiting and recursion outside include dirs."""
     
     def __init__(self, include_dirs):
@@ -140,7 +118,7 @@ class InIncludeDirsRule(AllYesRule):
         """Return True if visiting is allowed."""
         if node.kind == ci.CursorKind.TRANSLATION_UNIT:
             return True
-        if not _hasFileLocation(node):
+        if not app._hasFileLocation(node):
             return False
         if self.cache.has_key(node.location.file.name):
             return self.cache[node.location.file.name]

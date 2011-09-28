@@ -7,6 +7,8 @@ Copyright: (c) 2010, Knut Reinert, FU Berlin
 License:   3-clause BSD (see LICENSE)
 """
 
+from __future__ import with_statement
+
 __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>'
 
 import optparse
@@ -33,23 +35,58 @@ def _hasFileLocation(node):
     return True
 
 
+class FileCache(object):
+    def __init__(self):
+        self.cache = {}
+
+    def get(self, path):
+        if self.cache.has_key(path):
+            return self.cache[path]
+        with open(path, 'rb') as f:
+            fcontents = f.readlines()
+        self.cache[path] = fcontents
+        return self.cache[path]
+
+
 class CollectViolationsVisitor(object):
     """Visitor for AST nodes that collects rule violations."""
     
     def __init__(self, options, rules):
         self.options = options
-        self.rules = []
+        self.rules = rules
         self.stack = []
-        self.violations = []
+        self.violations = {}
+        self.file_cache = FileCache()
     
     def enterNode(self, node):
         """Called when a node is entered ("pre-order" traversal)."""
         self.stack.append(node)
         if self.options.verbosity >= 2:
-            print ' ' * len(self.stack), 'Entering', node.kind, node.spelling
+            if node.extent.start.file:
+                filename = node.extent.start.file.name
+                lines = self.file_cache.get(filename)
+                start = "%s:%d:%d" % (os.path.basename(filename), node.extent.start.line-1, node.extent.start.column-1)
+                end = "%s:%d:%d" % ('#', node.extent.end.line-1, node.extent.end.column-1)
+                lines = [x for x in lines[node.extent.start.line-1:node.extent.end.line]]
+                if len(lines) == 1:
+                    lines[0] = lines[0][node.extent.start.column - 1:node.extent.end.column-1]
+                else:
+                    lines[0] = lines[0][node.extent.start.column - 1:]
+                    lines[-1] = lines[-1][:node.extent.end.column-1]
+                if len(lines) > 100000:
+                    txt = '<multiline>'
+                else:
+                    txt = ''.join(lines).replace('\n', '\\n')
+                print ' ' * len(self.stack), 'Entering', node.kind, node._kind_id, node.spelling, 'txt="%s"' % txt, "%s-%s" % (start, end)
         violations = []
         for rule in self.rules:
-            violations += rule.check(node)
+            if rule.allowVisit(node):
+                #print ' ', ' ' * len(self.stack), 'Checking rule', rule.rule_id
+                vs = rule.check(node)
+                if self.options.verbosity >= 2:
+                    for v in vs:
+                        print 'VIOLATION', v
+                violations += vs
         for v in violations:
             if self.options.verbosity >= 2:
                 print v
@@ -159,18 +196,16 @@ def main():
     r = rules
     ck = ci.CursorKind
     check_rules = [
-        # TODO(holtgrew): There currently is no struct template node type, only struct, which is also used for templates.
         R(ck.STRUCT_DECL                          , r.RE_STRUCT       , r.RULE_NAMING_STRUCT                ),
         R(ck.UNION_DECL                           , r.RE_TYPE         , r.RULE_NAMING_UNION                 ),
         R(ck.CLASS_DECL                           , r.RE_TYPE         , r.RULE_NAMING_CLASS                 ),
         R(ck.ENUM_DECL                            , r.RE_TYPE         , r.RULE_NAMING_ENUM                  ),
-        # TODO(holtgrew): Analyze variable type to enforce constant syntax for constants.
         R(ck.FIELD_DECL                           , r.RE_VARIABLE     , r.RULE_NAMING_FIELD                 ),
         R(ck.ENUM_CONSTANT_DECL                   , r.RE_CONSTANT     , r.RULE_NAMING_ENUM_CONSTANT         ),
         R(ck.FUNCTION_DECL                        , r.RE_FUNCTION     , r.RULE_NAMING_FUNCTION              ),
         R(ck.VAR_DECL                             , r.RE_VARIABLE     , r.RULE_NAMING_VARIABLE              ),
         R(ck.PARM_DECL                            , r.RE_VARIABLE     , r.RULE_NAMING_PARAMETER             ),
-        # R(ck.TYPEDEF_DECL                         , r.RE_FUNCTION     , r.RULE_NAMING_TYPEDEF               ),
+        R(ck.TYPEDEF_DECL                         , r.RE_TYPE         , r.RULE_NAMING_TYPEDEF               ),
         R(ck.CXX_METHOD                           , r.RE_FUNCTION     , r.RULE_NAMING_CXX_METHOD            ),
         R(ck.TEMPLATE_TYPE_PARAMETER              , r.RE_TYPE         , r.RULE_NAMING_TPL_TYPE_PARAMETER    ),
         R(ck.TEMPLATE_NON_TYPE_PARAMETER          , r.RE_CONSTANT     , r.RULE_NAMING_TPL_NON_TYPE_PARAMETER),
@@ -186,7 +221,9 @@ def main():
         res = AstTraverser.visitFile(filename, node_visitor, options)
         if res:
             break
-    print node_visitor.violations
+    print 'VIOLATIONS'
+    for k in sorted(node_visitor.violations.keys()):
+        print node_visitor.violations[k]
     return len(node_visitor.violations) > 0
 
 
