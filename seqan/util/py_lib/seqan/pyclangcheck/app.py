@@ -210,14 +210,14 @@ def main():
                       type='string', help='Specify include directories',
                       action='append')
     parser.add_option('-e', '--exclude-dir', dest='exclude_dirs', default=[],
-                      type='string', help='Specify include directories',
+                      type='string', help='Violations in these directories are not shown.',
                       action='append')
     parser.add_option('-q', '--quiet', dest='verbosity', default=1,
                       action='store_const', const=0, help='Fewer message.')
     parser.add_option('-v', '--verbose', dest='verbosity', default=1,
                       action='store_const', const=2, help='More messages.')
     parser.add_option('--ignore-nolint', dest='ignore_nolint', default=False,
-                      action='store_const', const=True, help='Ignore //nolint statements.')
+                      action='store_const', const=True, help='Ignore // nolint statements.')
     options, args = parser.parse_args()
 
     if len(args) != 0:
