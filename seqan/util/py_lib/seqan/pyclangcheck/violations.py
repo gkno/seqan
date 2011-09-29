@@ -23,7 +23,7 @@ class RuleViolation(object):
     
     def __str__(self):
         msg = '[%s:%d/%d] %s "%s": %s'
-        return msg % (os.path.basename(self.file), self.line, self.column,
+        return msg % ('/'.join(self.file.split('/')[-2:]), self.line, self.column,
                       self.rule_id, self.violator, rules.RULE_TEXTS[self.rule_id])
 
 
