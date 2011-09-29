@@ -1220,7 +1220,7 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
         ::std::sort(itBegin, itEnd, LessRNoBeginPosMP<TMatch>());
     else
         ::std::sort(itBegin, itEnd, LessRNoBeginPos<TMatch>());
-    std::cerr << "(SORTING " << itEnd-itBegin << " MATCHES)";
+    // std::cerr << "(SORTING " << itEnd-itBegin << " MATCHES)";
 	// sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
