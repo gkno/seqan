@@ -418,7 +418,7 @@ int main(int argc, char const * argv[])
             outF = open(toCString(options.outFile), O_CREAT | O_WRONLY, 00666);
 #else  // #ifdef PLATFORM_WINDOWS
             outF = open(toCString(options.outFile), O_CREAT | O_WRONLY | O_DIRECT, 00666);
-#end   // #ifdef PLATFORM_WINDOWS
+#endif   // #ifdef PLATFORM_WINDOWS
             if (outF == -1)
             {
                 std::cerr << "Could not open file " << options.outFile << std::endl;
