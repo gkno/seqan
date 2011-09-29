@@ -27,6 +27,23 @@ class RuleViolation(object):
                       self.rule_id, self.violator, rules.RULE_TEXTS[self.rule_id])
 
 
+class SimpleRuleViolation(object):
+    def __init__(self, rule_id, file, line, column, msg):
+        self.rule_id = rule_id
+        self.file = file
+        self.line = line
+        self.column = column
+        self.msg = msg
+    
+    def key(self):
+        return (self.file, self.line, self.column, self.rule_id)
+    
+    def __str__(self):
+        msg = '[%s:%d/%d] %s : %s'
+        return msg % ('/'.join(self.file.split('/')[-2:]), self.line, self.column,
+                      self.rule_id, self.msg)
+
+
 class NolintManager(object):
     """Manage the lines ending in '//nolint'."""
 

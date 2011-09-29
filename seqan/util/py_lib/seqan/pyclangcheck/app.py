@@ -18,6 +18,7 @@ import sys
 
 import clang.cindex as ci
 
+import simple_checks
 import violations
 import rules
 
@@ -69,6 +70,7 @@ class CollectViolationsVisitor(object):
         self.violations = {}
         self.file_cache = FileCache()
         self.class_stack = []
+        self.seen_files = set()
     
     def enterNode(self, node):
         """Called when a node is entered ("pre-order" traversal)."""
@@ -77,6 +79,10 @@ class CollectViolationsVisitor(object):
         if node.kind in [ck.CLASS_TEMPLATE, ck.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION, ck.CLASS_DECL]:
             ## print 'PUSH CLASS', node.spelling
             self.class_stack.append(node)
+
+        # Mark file as seen for nodes that are directly below the compilation unit.
+        if len(self.stack) <= 2 and _hasFileLocation(node):
+            self.seen_files.add(node.location.file.name)
         
         if self.options.verbosity >= 2:
             if node.extent.start.file:
@@ -272,16 +278,26 @@ def main():
             break
 
     # ========================================================================
+    # Dumber checks (e.g. whitespace at end of file).
+    # ========================================================================
+
+    checker = simple_checks.WhitespaceChecker()
+    vs = {}
+    for filename in node_visitor.seen_files:
+        vs.update(checker.check(filename))
+
+    # ========================================================================
     # Print violations.
     # ========================================================================
 
     print 'VIOLATIONS'
     nolints = violations.NolintManager()
-    for k in sorted(node_visitor.violations.keys()):
-        violation = node_visitor.violations[k]
+    vs.update(node_visitor.violations)
+    for k in sorted(vs.keys()):
+        violation = vs[k]
         if options.ignore_nolint or not nolints.hasNolint(violation.file, violation.line):
             print violation
-    return len(node_visitor.violations) > 0
+    return len(vs) > 0
 
 
 if __name__ == '__main__':

@@ -152,7 +152,7 @@ class FunctionTemplateRule(object):
             ## print 'CHECK', self.visitor.getCurrentClassName(), '!=?', up_to_bracket
             if self.visitor.getCurrentClassName() != up_to_bracket:
                 v = violations.RuleViolation(
-                    RULE_NAMING_FUNCTION_TEMPLATE, displayname, node.location.file.name,
+                    RULE_NAMING_FUNCTION_TPL, displayname, node.location.file.name,
                     node.location.line, node.location.column)
                 return [v]
         return []
