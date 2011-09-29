@@ -16,22 +16,31 @@ import os
 import os.path
 import sys
 
-import rules
 import clang.cindex as ci
 
+import violations
+import rules
 
 def _hasFileLocation(node):
     """Return True if node has a file lcoation."""
+    if hasattr(node, '_has_file_location'):
+        return node._has_file_location
     if not hasattr(node, 'location'):
+        node._has_file_location = False
         return False
     if not hasattr(node.location, 'file'):
+        node._has_file_location = False
         return False
     if not node.location.file:
+        node._has_file_location = False
         return False
     if not hasattr(node.location.file, 'name'):
+        node._has_file_location = False
         return False
     if not node.location.file.name:
+        node._has_file_location = False
         return False
+    node._has_file_location = True
     return True
 
 
@@ -54,13 +63,21 @@ class CollectViolationsVisitor(object):
     def __init__(self, options, rules):
         self.options = options
         self.rules = rules
+        for rule in self.rules:
+            rule.visitor = self
         self.stack = []
         self.violations = {}
         self.file_cache = FileCache()
+        self.class_stack = []
     
     def enterNode(self, node):
         """Called when a node is entered ("pre-order" traversal)."""
         self.stack.append(node)
+        ck = ci.CursorKind
+        if node.kind in [ck.CLASS_TEMPLATE, ck.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION, ck.CLASS_DECL]:
+            ## print 'PUSH CLASS', node.spelling
+            self.class_stack.append(node)
+        
         if self.options.verbosity >= 2:
             if node.extent.start.file:
                 filename = node.extent.start.file.name
@@ -95,6 +112,17 @@ class CollectViolationsVisitor(object):
     def exitNode(self, node):
         """Called when a node is left ("post-order" traversa)."""
         self.stack.pop()
+        if self.class_stack and self.class_stack[-1] is node:
+            ## print 'POP CLASS', node.spelling
+            self.class_stack.pop()
+
+    def getCurrentClassName(self):
+        """Returns name of current class."""
+        if not self.class_stack:
+            ## print 'CURRENT CLASS', None
+            return None
+        ## print 'CURRENT CLASS', self.class_stack[-1].spelling
+        return self.class_stack[-1].spelling
 
 
 class VisitAllowedRule(object):
@@ -175,22 +203,39 @@ def main():
     parser.add_option('-s', '--source-file', dest='source_files', default=[],
                       type='string', help='Specify source (.cpp) files.',
                       action='append')
-    parser.add_option('-I', '--include-dir', dest='include_dirs', default=[],
+    parser.add_option('-S', '--source-file-file', dest='source_file_files', default=[],
+                      type='string', help='File with path to source files.',
+                      action='append')
+    parser.add_option('-i', '--include-dir', dest='include_dirs', default=[],
+                      type='string', help='Specify include directories',
+                      action='append')
+    parser.add_option('-e', '--exclude-dir', dest='exclude_dirs', default=[],
                       type='string', help='Specify include directories',
                       action='append')
     parser.add_option('-q', '--quiet', dest='verbosity', default=1,
                       action='store_const', const=0, help='Fewer message.')
     parser.add_option('-v', '--verbose', dest='verbosity', default=1,
                       action='store_const', const=2, help='More messages.')
+    parser.add_option('--ignore-nolint', dest='ignore_nolint', default=False,
+                      action='store_const', const=True, help='Ignore //nolint statements.')
     options, args = parser.parse_args()
 
     if len(args) != 0:
         parser.error('Incorrect number of arguments!')
         return 1
 
+    # Load source files given in file of paths.
+    for filename in options.source_file_files:
+        with open(filename, 'rb') as f:
+            options.source_files += [x.strip() for x in f.readlines()]
+
+    # ========================================================================
+    # Setup traversal.
+    # ========================================================================
+
     # Recursion Rule: Only check symbols within the include directories.
     recurse_rules = []
-    recurse_rules.append(rules.InIncludeDirsRule(options.include_dirs + ['.']))
+    recurse_rules.append(rules.InIncludeDirsRule(options.include_dirs, options.exclude_dirs, options.source_files))
     # Define symbol naming rules.
     R = rules.GenericSymbolNameRule
     r = rules
@@ -203,27 +248,39 @@ def main():
         R(ck.FIELD_DECL                           , r.RE_VARIABLE     , r.RULE_NAMING_FIELD                 ),
         R(ck.ENUM_CONSTANT_DECL                   , r.RE_CONSTANT     , r.RULE_NAMING_ENUM_CONSTANT         ),
         R(ck.FUNCTION_DECL                        , r.RE_FUNCTION     , r.RULE_NAMING_FUNCTION              ),
-        R(ck.VAR_DECL                             , r.RE_VARIABLE     , r.RULE_NAMING_VARIABLE              ),
         R(ck.PARM_DECL                            , r.RE_VARIABLE     , r.RULE_NAMING_PARAMETER             ),
         R(ck.TYPEDEF_DECL                         , r.RE_TYPE         , r.RULE_NAMING_TYPEDEF               ),
         R(ck.CXX_METHOD                           , r.RE_FUNCTION     , r.RULE_NAMING_CXX_METHOD            ),
         R(ck.TEMPLATE_TYPE_PARAMETER              , r.RE_TYPE         , r.RULE_NAMING_TPL_TYPE_PARAMETER    ),
         R(ck.TEMPLATE_NON_TYPE_PARAMETER          , r.RE_CONSTANT     , r.RULE_NAMING_TPL_NON_TYPE_PARAMETER),
         R(ck.TEMPLATE_TEMPLATE_PARAMTER           , r.RE_TYPE         , r.RULE_NAMING_TPL_TPL_PARAMETER     ),
-        R(ck.FUNCTION_TEMPLATE                    , r.RE_FUNCTION     , r.RULE_NAMING_FUNCTION_TPL          ),
+        #R(ck.FUNCTION_TEMPLATE                    , r.RE_FUNCTION     , r.RULE_NAMING_FUNCTION_TPL          ),
         R(ck.CLASS_TEMPLATE                       , r.RE_TYPE_TEMPLATE, r.RULE_NAMING_CLASS_TPL             ),
         R(ck.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION, r.RE_TYPE_TEMPLATE, r.RULE_NAMING_CLASS_TPL_SPEC        ),
+        rules.FunctionTemplateRule(),
+        rules.VariableNameRule(),
     ]
 
-    # Fire off AST traversal.
+    # ========================================================================
+    # Perform traversal.
+    # ========================================================================
+
     node_visitor = CollectViolationsVisitor(options, check_rules)
     for filename in options.source_files:
         res = AstTraverser.visitFile(filename, node_visitor, options)
         if res:
             break
+
+    # ========================================================================
+    # Print violations.
+    # ========================================================================
+
     print 'VIOLATIONS'
+    nolints = violations.NolintManager()
     for k in sorted(node_visitor.violations.keys()):
-        print node_visitor.violations[k]
+        violation = node_visitor.violations[k]
+        if options.ignore_nolint or not nolints.hasNolint(violation.file, violation.line):
+            print violation
     return len(node_visitor.violations) > 0
 
 

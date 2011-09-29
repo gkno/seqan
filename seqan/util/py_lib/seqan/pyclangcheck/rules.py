@@ -8,6 +8,7 @@ import re
 import clang.cindex as ci
 
 import app
+import violations
 
 RULE_NAMING_CONSTANT = 'naming.constant'
 RULE_NAMING_STRUCT = 'naming.struct'
@@ -58,35 +59,18 @@ RULE_TEXTS = {
 }
 
 
-class RuleViolation(object):
-    def __init__(self, rule_id, violator, file, line, column):
-        self.rule_id = rule_id
-        self.violator = violator
-        self.file = file
-        self.line = line
-        self.column = column
-    
-    def key(self):
-        return (self.file, self.line, self.column, self.rule_id, self.violator)
-    
-    def __str__(self):
-        msg = '[%s:%d/%d] %s "%s": %s'
-        return msg % (os.path.basename(self.file), self.line, self.column,
-                      self.rule_id, self.violator, RULE_TEXTS[self.rule_id])
-
-
 class GenericSymbolNameRule(object):
     def __init__(self, kind, regular_ex, rule_name):
         self.kind = kind
         self.regular_ex = regular_ex
         self.rule_name = rule_name
+        self.visitor = None
 
     def allowVisit(self, node):
         if not app._hasFileLocation(node):
             #print 'no location'
             return False
-        displayname = ci.Cursor_displayname(node)
-        if not displayname:
+        if not node.displayname:
             #print 'no displayname'
             return False  # Ignore empty symbols.
         # print 'allow visit template type?', displayname, node.kind
@@ -96,22 +80,91 @@ class GenericSymbolNameRule(object):
         return False
     
     def check(self, node):
-        displayname = ci.Cursor_displayname(node)
+        displayname = node.displayname
         #print 'checking', displayname
         #import pdb; pdb.set_trace()
         if not re.match(self.regular_ex, displayname):
-            v = RuleViolation(
+            v = violations.RuleViolation(
                 self.rule_name, displayname, node.location.file.name,
                 node.location.line, node.location.column)
             return [v]
         return []
 
 
+class VariableNameRule(object):
+    """Checks variable names (in variable declarations).
+
+    The name must either be camel case (starting with lower case character) or
+    all upper case.
+    """
+
+    def __init__(self):
+        self.visitor = None
+
+    def allowVisit(self, node):
+        if not app._hasFileLocation(node):
+            return False
+        displayname = node.displayname
+        if not displayname:
+            return False  # Ignore empty symbols.
+        if node.kind == ci.CursorKind.VAR_DECL:
+            return True
+        return False
+
+    def check(self, node):
+        displayname = node.displayname
+        if not re.match(RE_VARIABLE, displayname) and not re.match(RE_CONSTANT, displayname):
+            # TODO(holtgrew): Only allow RE_CONSTANT if 'const' in declaration type.
+            v = violations.RuleViolation(
+                RULE_NAMING_VARIABLE, displayname, node.location.file.name,
+                node.location.line, node.location.column)
+            return [v]
+        return []
+
+
+class FunctionTemplateRule(object):
+    """Checks function templates.
+
+    Function template have to follow the function naming scheme.  However,
+    libclang also exposes constructors with kind function template.  The visitor
+    keeps a stack of current classes so we look whether the current class or
+    class template has the same name as the function template and allow this
+    besides the function naming scheme.
+    """
+
+    def __init__(self):
+        self.visitor = None
+
+    def allowVisit(self, node):
+        if not app._hasFileLocation(node):
+            return False
+        displayname = node.displayname
+        if not displayname:
+            return False  # Ignore empty symbols.
+        if node.kind == ci.CursorKind.FUNCTION_TEMPLATE:
+            return True
+        return False
+
+    def check(self, node):
+        displayname = node.displayname
+        if not re.match(RE_FUNCTION, displayname):
+            up_to_bracket = displayname[:displayname.find('<')]
+            ## print 'CHECK', self.visitor.getCurrentClassName(), '!=?', up_to_bracket
+            if self.visitor.getCurrentClassName() != up_to_bracket:
+                v = violations.RuleViolation(
+                    RULE_NAMING_FUNCTION_TEMPLATE, displayname, node.location.file.name,
+                    node.location.line, node.location.column)
+                return [v]
+        return []
+
+
 class InIncludeDirsRule(object):
     """Rule to block visiting and recursion outside include dirs."""
     
-    def __init__(self, include_dirs):
+    def __init__(self, include_dirs, exclude_dirs, source_files):
         self.include_dirs = [os.path.abspath(x) for x in include_dirs]
+        self.source_files = [os.path.abspath(x) for x in source_files]
+        self.exclude_dirs = [os.path.abspath(x) for x in exclude_dirs]
         self.cache = {}
     
     def allowVisit(self, node):
@@ -122,14 +175,24 @@ class InIncludeDirsRule(object):
             return False
         if self.cache.has_key(node.location.file.name):
             return self.cache[node.location.file.name]
-        # Check whether node's location is below the include directories.
+        # Check whether node's location is below the include directories or one
+        # of the source files.
         filename = os.path.abspath(node.location.file.name)
         result = False
         for x in self.include_dirs:
             if filename.startswith(x):
-                # print filename, x
                 result = True
                 break
+        if not result:
+            for x in self.source_files:
+                if filename == x:
+                    result = True
+                    break
+        if result:
+            for x in self.exclude_dirs:
+                if filename.startswith(x):
+                    result = False
+                    break
         self.cache[node.location.file.name] = result
         return result
     

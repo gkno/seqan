@@ -13,4 +13,12 @@ def main():
     return seqan.pyclangcheck.main()
 
 if __name__ == '__main__':
+    ## import cProfile
+    ## cProfile.run('main()', 'pyclangcheck.prof')
     sys.exit(main())
+    ## import pstats
+    ## p = pstats.Stats('pyclangcheck.prof')
+    ## print 'BY TIME'
+    ## p.sort_stats('time').print_stats()
+    ## print 'BY CUMULATIVE'
+    ## p.sort_stats('cumulative').print_stats()
