@@ -297,6 +297,12 @@ bool loadReads(
         typedef typename TFragmentStore::TReadStore			TReadStore;
         typedef typename Value<TReadStore>::Type			TRead;
 
+        TFragmentStore const & mainStore;
+
+        LessPairErrors(TFragmentStore const & mainStore_)
+                : mainStore(mainStore_)
+        {}
+
 		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
 		{
 			// read number
@@ -326,6 +332,12 @@ bool loadReads(
 	{
         typedef typename TFragmentStore::TReadStore			TReadStore;
         typedef typename Value<TReadStore>::Type			TRead;
+
+        TFragmentStore const & mainStore;
+
+        LessPairErrors3Way(TFragmentStore const & mainStore_)
+                : mainStore(mainStore_)
+        {}
 
 		inline int operator() (TReadMatch const &a, TReadMatch const &b) const 
 		{
@@ -404,7 +416,7 @@ void compactPairMatches(
             SEQAN_ASSERT_LEQ(cmp(matches[i - 1], matches[i]), 0);
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
-        ::std::sort(it, itEnd, LessPairErrors<TFragmentStore, TMatch>());
+        ::std::sort(it, itEnd, LessPairErrors<TFragmentStore, TMatch>(store));
 //	sortAlignedReads(threadStore, LessPairScore<TFragmentStore>(mainStore, threadStore));
 #ifdef RAZERS_EXTERNAL_MATCHES
     }
