@@ -10,9 +10,9 @@
 namespace seqan {
 
 template <typename TThreadLocalStorage>
-class SwiftPatternLSetMaxErrorsWrapper;
+class FilterPatternLSetMaxErrorsWrapper;
 template <typename TThreadLocalStorage>
-class SwiftPatternRSetMaxErrorsWrapper;
+class FilterPatternRSetMaxErrorsWrapper;
 
 // ============================================================================
 // Forwards
@@ -196,8 +196,8 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
     if (_canBePurged(filter, histogramId)) {
         // std::cerr << "PURGED " << pairId << std::endl;
         appendValue(filter.purgedPairIds, pairId);
-        SwiftPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
-        SwiftPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
+        FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
+        FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
         setMaxErrors(wrapperL, 2 * pairId, -1);
         setMaxErrors(wrapperR, 2 * pairId + 1, -1);
         _freeHistogram(filter, histogramId);
@@ -206,8 +206,8 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
         return true;
     } else if (_canBeDisabled(filter, histogramId)) {
         // std::cerr << "DISABLED " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << std::endl;
-        SwiftPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
-        SwiftPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
+        FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
+        FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
         setMaxErrors(wrapperL, 2 * pairId, -1);
         setMaxErrors(wrapperR, 2 * pairId + 1, -1);
         _freeHistogram(filter, histogramId);
@@ -216,8 +216,8 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
         return true;
     } else if ((newLimit = _newLimit(filter, histogramId)) >= 0) {
         // std::cerr << "LIMITING " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << "\t" << newLimit << std::endl;
-        SwiftPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
-        SwiftPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
+        FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
+        FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
         setMaxErrors(wrapperL, 2 * pairId, newLimit);
         setMaxErrors(wrapperR, 2 * pairId + 1, newLimit);
     }
