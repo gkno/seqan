@@ -11,6 +11,7 @@ from __future__ import with_statement
 
 __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>'
 
+import datetime
 import optparse
 import os
 import os.path
@@ -71,7 +72,12 @@ class CollectViolationsVisitor(object):
         self.file_cache = FileCache()
         self.class_stack = []
         self.seen_files = set()
-    
+        self.blocked_files = set()
+   
+    def seenToBlocked(self):
+        """Move seen files to blocked files."""
+        self.blocked_files |= self.seen_files
+
     def enterNode(self, node):
         """Called when a node is entered ("pre-order" traversal)."""
         self.stack.append(node)
@@ -134,10 +140,11 @@ class CollectViolationsVisitor(object):
 class VisitAllowedRule(object):
     """Decides whether a AST node and its children is visited."""
     
-    def __init__(self, options):
+    def __init__(self, options, blocked_files):
         self.options = options
         self.include_dirs = [os.path.abspath(x) for x in options.include_dirs]
         self.cache = {}
+        self.blocked_files = blocked_files
 
     def visitAllowed(self, node):
         """Return True if visiting is allowed."""
@@ -150,6 +157,11 @@ class VisitAllowedRule(object):
         # Try to hit cache.
         if self.cache.has_key(node.location.file.name):
             return self.cache[node.location.file.name]
+        # Check whether the file is blocked.
+        if node.location.file.name in self.blocked_files:
+            # print 'Blocked', node.location.file.name
+            self.cache[node.location.file.name] = False
+            return False
         # Check whether node's location is below the include directories.  It is
         # only visited if this is the case.
         filename = os.path.abspath(node.location.file.name)
@@ -169,7 +181,7 @@ class AstTraverser(object):
     def __init__(self, node_visitor, options):
         self.node_visitor = node_visitor
         self.options = options
-        self.visit_allowed_rule = VisitAllowedRule(options)
+        self.visit_allowed_rule = VisitAllowedRule(options, node_visitor.blocked_files)
 
     def _recurse(self, node):
         """Recursion helper."""
@@ -273,7 +285,11 @@ def main():
 
     node_visitor = CollectViolationsVisitor(options, check_rules)
     for filename in options.source_files:
+        start = datetime.datetime.now()
         res = AstTraverser.visitFile(filename, node_visitor, options)
+        node_visitor.seenToBlocked()
+        elapsed = datetime.datetime.now() - start
+        print >>sys.stderr, '  took', elapsed.seconds, 's'
         if res:
             break
 
