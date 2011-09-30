@@ -51,6 +51,7 @@ SEQAN_BEGIN_TESTSUITE(test_parallel) {
     // Set number of threads to >=2 so there actually is parallelism.
     if (omp_get_max_threads() < 2)
         omp_set_num_threads(2);
+    std::cout << "PARALLELISM ENABLED" << std::endl;
 #endif  // #if defined(_OPENMP)
 
     // TODO(holtgrew): Re-enable tests on LLVM when bug 9041 is fixed.

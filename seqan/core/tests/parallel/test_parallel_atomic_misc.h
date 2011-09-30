@@ -61,7 +61,7 @@ void atomicMinTestImpl(T const &)
     // Compute minimum in parallel.  Not efficient, but many conflicts
     // should occur.
     x = MaxValue<T>::VALUE;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < ARR_SIZE; ++i)
         atomicMin(x, arr[i]);
 
@@ -88,7 +88,7 @@ void atomicMaxTestImpl(T const &)
     // Compute maximum in parallel.  Not efficient, but many conflicts
     // should occur.
     x = MinValue<T>::VALUE;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < ARR_SIZE; ++i)
         atomicMax(x, arr[i]);
 

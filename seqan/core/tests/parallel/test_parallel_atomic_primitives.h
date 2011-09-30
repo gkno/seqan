@@ -50,7 +50,7 @@ void atomicIncTestImpl(T const &)
     T const ITERATIONS = 4 * 1024;
 
     T volatile x = 0;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < static_cast<int>(ITERATIONS); ++i)
         atomicInc(x);
 
@@ -65,7 +65,7 @@ void atomicDecTestImpl(T const &)
     T const ITERATIONS = 4 * 1024;
 
     T volatile x = 2 * ITERATIONS;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < static_cast<int>(ITERATIONS); ++i)
         atomicDec(x);
 
@@ -80,7 +80,7 @@ void atomicAddTestImpl(T const &)
     T const ITERATIONS = 4 * 1024;
 
     T volatile x = 0;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < static_cast<int>(ITERATIONS); ++i)
         atomicAdd(x, 1);
 
@@ -99,7 +99,7 @@ void atomicOrTestImpl(T const &)
         expected |= static_cast<T>(i);
     
     T volatile x = 0;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < ITERATIONS; ++i)
         atomicOr(x, static_cast<T>(i));
 
@@ -118,7 +118,7 @@ void atomicXorTestImpl(T const &)
         expected ^= static_cast<T>(i);
     
     T volatile x = 0;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < ITERATIONS; ++i)
         atomicXor(x, static_cast<T>(i));
 
@@ -146,7 +146,7 @@ void atomicCasTestImpl(T const &)
 
     // Compute minimum.
     x = MaxValue<T>::VALUE;
-    SEQAN_OMP_PRAGMA(omp parallel for schedule(static, 1))
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < ARR_SIZE; ++i) {
         T val = x;
         while (val > arr[i]) {
