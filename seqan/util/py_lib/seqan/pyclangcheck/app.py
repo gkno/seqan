@@ -102,23 +102,23 @@ class CollectViolationsVisitor(object):
                 else:
                     lines[0] = lines[0][node.extent.start.column - 1:]
                     lines[-1] = lines[-1][:node.extent.end.column-1]
-                if len(lines) > 100000:
+                if len(lines) > 1:
                     txt = '<multiline>'
                 else:
                     txt = ''.join(lines).replace('\n', '\\n')
-                print ' ' * len(self.stack), 'Entering', node.kind, node._kind_id, node.spelling, 'txt="%s"' % txt, "%s-%s" % (start, end)
+                print '  ' * len(self.stack), 'Entering', node.kind, node._kind_id, node.spelling, 'txt="%s"' % txt, "%s-%s" % (start, end)
         violations = []
         for rule in self.rules:
             if rule.allowVisit(node):
                 #print ' ', ' ' * len(self.stack), 'Checking rule', rule.rule_id
                 vs = rule.check(node)
-                if self.options.verbosity >= 2:
-                    for v in vs:
-                        print 'VIOLATION', v
+                ## if self.options.verbosity >= 2:
+                ##     for v in vs:
+                ##         print 'VIOLATION', v
                 violations += vs
         for v in violations:
-            if self.options.verbosity >= 2:
-                print v
+            ## if self.options.verbosity >= 2:
+            ##     print v
             self.violations[v.key()] = v
 
     def exitNode(self, node):
@@ -148,7 +148,7 @@ class VisitAllowedRule(object):
 
     def visitAllowed(self, node):
         """Return True if visiting is allowed."""
-        # would be enough.  Visit if translation unit.
+        # Visit if translation unit.
         if node.kind == ci.CursorKind.TRANSLATION_UNIT:
             return True
         # Don't visit if it has no location (built-in).
@@ -236,6 +236,8 @@ def main():
                       action='store_const', const=2, help='More messages.')
     parser.add_option('--ignore-nolint', dest='ignore_nolint', default=False,
                       action='store_const', const=True, help='Ignore // nolint statements.')
+    parser.add_option('--dont-show-source', dest='show_source', default=True,
+                      action='store_const', const=False, help='Suppress source line display')
     options, args = parser.parse_args()
 
     if len(args) != 0:
@@ -297,22 +299,22 @@ def main():
     # Dumber checks (e.g. whitespace at end of file).
     # ========================================================================
 
-    checker = simple_checks.WhitespaceChecker()
+    checkers = [simple_checks.WhitespaceChecker(),
+                simple_checks.CommentChecker()]
     vs = {}
     for filename in node_visitor.seen_files:
-        vs.update(checker.check(filename))
+        for checker in checkers:
+            vs.update(checker.check(filename))
 
     # ========================================================================
     # Print violations.
     # ========================================================================
 
     print 'VIOLATIONS'
-    nolints = violations.NolintManager()
     vs.update(node_visitor.violations)
-    for k in sorted(vs.keys()):
-        violation = vs[k]
-        if options.ignore_nolint or not nolints.hasNolint(violation.file, violation.line):
-            print violation
+    printer = violations.ViolationPrinter(options.ignore_nolint,
+                                          options.show_source)
+    printer.show(vs)
     return len(vs) > 0
 
 

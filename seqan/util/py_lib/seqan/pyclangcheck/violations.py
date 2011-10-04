@@ -7,6 +7,7 @@ import os
 import os.path
 import sys
 
+import app
 import rules
 
 
@@ -65,3 +66,26 @@ class NolintManager(object):
             self.locations[filename] = line_set
         # Query self.locations[filename].
         return lineno in self.locations[filename]
+
+
+class ViolationPrinter(object):
+    def __init__(self, ignore_nolint, show_source):
+      self.nolints = NolintManager()
+      self.file_cache = app.FileCache()
+      self.ignore_nolint = ignore_nolint
+      self.show_source = show_source
+
+    def show(self, vs):
+        previous = None
+        for k in sorted(vs.keys()):
+            violation = vs[k]
+            if self.ignore_nolint or not self.nolints.hasNolint(violation.file, violation.line):
+                print violation
+                line = self.file_cache.get(violation.file)[violation.line - 1]
+                if self.show_source:
+                    print line.rstrip()
+                    print '%s^' % (' ' * (violation.column - 1))
+                    print
+            previous = violation
+        print 'Total: %d violations' % len(vs)
+
