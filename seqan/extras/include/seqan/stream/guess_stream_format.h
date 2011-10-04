@@ -93,6 +93,8 @@ typedef TagSelector<SeqStreamFormats>       AutoSeqStreamFormat;
 ..include:seqan/stream.h
 */
 
+// TODO(holtgrew): Rename to LimitRecordReaderRIIA?
+
 template <typename TStream, typename TPass>
 class LimitRecordReaderInScope
 {
@@ -195,11 +197,22 @@ private:
 ..param.TTag:The tag to check against.
 ..signature:checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
 ..param.formats:A @Class.TagSelector@ object that contains the list of tags to check and provides a tagId member with index of the detected tag.
-..returns: $True$ if (one of) the specified Tag(s) tested positive and $False$ otherwise
+..returns: $true$ if (one of) the specified Tag(s) tested positive and $False$ otherwise
 ...type:nolink:$bool$
 ..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do not (permanently) alter the position in the stream.
 ..remarks:The tagId-member of the TagSelector holds the index in inside-to-outside order and begins counting at one. E.g. The Index of FASTQ in TagList<Fastq, TagList<Fasta > > would be 2
 ..include:seqan/stream.h
+..example.text:The following guesses the sequence file format of the already open fstream $in$. After the call to `checkStreamFormat()`, the `tagSelector.tagId` contains the 1-based index of the matching tag.
+..example.code:RecordReader<std::fstream, SinglePass<> > reader(in);
+AutoSeqStreamFormat tagSelector;
+bool b = checkStreamFormat(reader, tagSelector);
+// b is true if any format was detected successfully.
+if (b == 1)
+    std::cerr << "Detected FASTA." << std::endl;
+else if (b == 2)
+    std::cerr << "Detected FASTQ." << std::endl;
+else
+    std::cerr << "Unknown file format!" << std::endl;
 */
 
 template < typename TRecordReader >
