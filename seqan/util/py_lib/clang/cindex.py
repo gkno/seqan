@@ -460,8 +460,8 @@ CursorKind.OBJC_SYNTHESIZE_DECL = CursorKind(37)
 # A Objective-C dynamic decl
 CursorKind.OBJC_DYNAMIC_DECL = CursorKind(38)
 
-# An access specifier decl.
-CursorKind.ACCESS_SPEC_DECL = CursorKind(39)
+# A C++ access specifier decl.
+CursorKind.CXX_ACCESS_SPEC_DECL = CursorKind(39)
 
 
 ###
@@ -537,79 +537,63 @@ CursorKind.OBJC_MESSAGE_EXPR = CursorKind(104)
 # An expression that represents a block literal.
 CursorKind.BLOCK_EXPR = CursorKind(105)
 
-# A predefined identifier such as __func__.
-CursorKind.PREDEFINED_EXPR = CursorKind(106)
-
 # An integer literal.
-CursorKind.INTEGER_LITERAL = CursorKind(107)
+CursorKind.INTEGER_LITERAL = CursorKind(106)
 
 # A floating point number literal.
-CursorKind.FLOATING_LITERAL = CursorKind(108)
+CursorKind.FLOATING_LITERAL = CursorKind(107)
 
 # An imaginary number literal.
-CursorKind.IMAGINARY_LITERAL = CursorKind(109)
+CursorKind.IMAGINARY_LITERAL = CursorKind(108)
 
 # A string literal.
-CursorKind.STRING_LITERAL = CursorKind(110)
+CursorKind.STRING_LITERAL = CursorKind(109)
 
 # A character literal.
-CursorKind.CHARACTER_LITERAL = CursorKind(111)
+CursorKind.CHARACTER_LITERAL = CursorKind(110)
 
 # A parenthesized expression, e.g. "(1)".
 #
 # This AST node is only formed if full location information is requested.
-CursorKind.PAREN_EXPR = CursorKind(112)
+CursorKind.PAREN_EXPR = CursorKind(111)
 
 # This represents the unary-expression's (except sizeof and
 # alignof).
-CursorKind.UNARY_OPERATOR = CursorKind(113)
+CursorKind.UNARY_OPERATOR = CursorKind(112)
 
 # [C99 6.5.2.1] Array Subscripting.
-CursorKind.ARRAY_SUBSCRIPT_EXPR = CursorKind(114)
+CursorKind.ARRAY_SUBSCRIPT_EXPR = CursorKind(113)
 
 # A builtin binary operation expression such as "x + y" or
 # "x <= y".
-CursorKind.BINARY_OPERATOR = CursorKind(115)
+CursorKind.BINARY_OPERATOR = CursorKind(114)
 
 # Compound assignment such as "+=".
-CursorKind.COMPOUND_ASSIGNMENT_OPERATOR = CursorKind(116)
+CursorKind.COMPOUND_ASSIGNMENT_OPERATOR = CursorKind(115)
 
 # The ?: ternary operator.
-CursorKind.CONDITONAL_OPERATOR = CursorKind(117)
+CursorKind.CONDITONAL_OPERATOR = CursorKind(116)
 
 # An explicit cast in C (C99 6.5.4) or a C-style cast in C++
 # (C++ [expr.cast]), which uses the syntax (Type)expr.
 #
 # For example: (int)f.
-CursorKind.CSTYLE_CAST_EXPR = CursorKind(118)
+CursorKind.CSTYLE_CAST_EXPR = CursorKind(117)
 
 # [C99 6.5.2.5]
-CursorKind.COMPOUND_LITERAL_EXPR = CursorKind(119)
-
-# This represents access to specific elements of a vector, and
-# may occur on the left hand side or right hand side.
-#
-# For example the following is legal: "V.xy = V.zw" if V is a 4 element
-# extended vector.
-CursorKind.EXT_VECTOR_ELEMENT_EXPR = CursorKind(120)
+CursorKind.COMPOUND_LITERAL_EXPR = CursorKind(118)
 
 # Describes an C or C++ initializer list.
-CursorKind.INIT_LIST_EXPR = CursorKind(121)
-
-# Represents a C99 designated initializer expression.
-CursorKind.DESIGNATED_INIT_EXPR = CursorKind(122)
-
-# VAArgExpr, used for the builtin function __builtin_va_arg.
-CursorKind.VA_ARG_EXPR = CursorKind(123)
+CursorKind.INIT_LIST_EXPR = CursorKind(119)
 
 # The GNU address of label extension, representing &&label.
-CursorKind.ADDR_LABEL_EXPR = CursorKind(124)
+CursorKind.ADDR_LABEL_EXPR = CursorKind(120)
 
 # This is the GNU Statement Expression extension: ({int X=4; X;})
-CursorKind.StmtExpr = CursorKind(125)
+CursorKind.StmtExpr = CursorKind(121)
 
 # Represents a C1X generic selection.
-CursorKind.GENERIC_SELECTION_EXPR = CursorKind(126)
+CursorKind.GENERIC_SELECTION_EXPR = CursorKind(122)
 
 # Implements the GNU __null extension, which is a name for a null
 # pointer constant that has integral type (e.g., int or long) and is the same
@@ -618,19 +602,19 @@ CursorKind.GENERIC_SELECTION_EXPR = CursorKind(126)
 # The __null extension is typically only used by system headers, which define
 # NULL as __null in C++ rather than using 0 (which is an integer that may not
 # match the size of a pointer).
-CursorKind.GNU_NULL_EXPR = CursorKind(127)
+CursorKind.GNU_NULL_EXPR = CursorKind(123)
 
 # C++'s static_cast<> expression.
-CursorKind.CXX_STATIC_CAST_EXPR = CursorKind(128)
+CursorKind.CXX_STATIC_CAST_EXPR = CursorKind(124)
 
 # C++'s dynamic_cast<> expression.
-CursorKind.CXX_DYNAMIC_CAST_EXPR = CursorKind(129)
+CursorKind.CXX_DYNAMIC_CAST_EXPR = CursorKind(125)
 
 # C++'s reinterpret_cast<> expression.
-CursorKind.CXX_REINTERPRET_CAST_EXPR = CursorKind(130)
+CursorKind.CXX_REINTERPRET_CAST_EXPR = CursorKind(126)
 
 # C++'s const_cast<> expression.
-CursorKind.CXX_CONST_CAST_EXPR = CursorKind(131)
+CursorKind.CXX_CONST_CAST_EXPR = CursorKind(127)
 
 # Represents an explicit C++ type conversion that uses "functional"
 # notion (C++ [expr.type.conv]).
@@ -639,51 +623,48 @@ CursorKind.CXX_CONST_CAST_EXPR = CursorKind(131)
 # \code
 #   x = int(0.5);
 # \endcode
-CursorKind.CXX_FUNCTIONAL_CAST_EXPR = CursorKind(132)
+CursorKind.CXX_FUNCTIONAL_CAST_EXPR = CursorKind(128)
 
 # A C++ typeid expression (C++ [expr.typeid]).
-CursorKind.CXX_TYPEID_EXPR = CursorKind(133)
+CursorKind.CXX_TYPEID_EXPR = CursorKind(129)
 
 # [C++ 2.13.5] C++ Boolean Literal.
-CursorKind.CXX_BOOL_LITERAL_EXPR = CursorKind(134)
+CursorKind.CXX_BOOL_LITERAL_EXPR = CursorKind(130)
 
 # [C++0x 2.14.7] C++ Pointer Literal.
-CursorKind.CXX_NULL_PTR_LITERAL_EXPR = CursorKind(135)
+CursorKind.CXX_NULL_PTR_LITERAL_EXPR = CursorKind(131)
 
 # Represents the "this" expression in C++
-CursorKind.CXX_THIS_EXPR = CursorKind(136)
+CursorKind.CXX_THIS_EXPR = CursorKind(132)
 
 # [C++ 15] C++ Throw Expression.
 #
 # This handles 'throw' and 'throw' assignment-expression. When
 # assignment-expression isn't present, Op will be null.
-CursorKind.CXX_THROW_EXPR = CursorKind(137)
+CursorKind.CXX_THROW_EXPR = CursorKind(133)
 
 # A new expression for memory allocation and constructor calls, e.g:
 # "new CXXNewExpr(foo)".
-CursorKind.CXX_NEW_EXPR = CursorKind(138)
+CursorKind.CXX_NEW_EXPR = CursorKind(134)
 
 # A delete expression for memory deallocation and destructor calls,
 # e.g. "delete[] pArray".
-CursorKind.CXX_DELETE_EXPR = CursorKind(139)
-
-# Represents a C++ pseudo-destructor (C++ [expr.pseudo]).
-CursorKind.CXX_PSEUDO_DESTRUCTOR_EXPR = CursorKind(140)
+CursorKind.CXX_DELETE_EXPR = CursorKind(135)
 
 # Represents a unary expression.
-CursorKind.CXX_UNARY_EXPR = CursorKind(141)
+CursorKind.CXX_UNARY_EXPR = CursorKind(136)
 
 # ObjCStringLiteral, used for Objective-C string literals i.e. "foo".
-CursorKind.OBJC_STRING_LITERAL = CursorKind(143)
+CursorKind.OBJC_STRING_LITERAL = CursorKind(137)
 
 # ObjCEncodeExpr, used for in Objective-C.
-CursorKind.OBJC_ENCODE_EXPR = CursorKind(144)
+CursorKind.OBJC_ENCODE_EXPR = CursorKind(138)
 
 # ObjCSelectorExpr used for in Objective-C.
-CursorKind.OBJC_SELECTOR_EXPR = CursorKind(145)
+CursorKind.OBJC_SELECTOR_EXPR = CursorKind(139)
 
 # Objective-C's protocol expression.
-CursorKind.OBJC_PROTOCOL_EXPR = CursorKind(146)
+CursorKind.OBJC_PROTOCOL_EXPR = CursorKind(140)
 
 # An Objective-C "bridged" cast expression, which casts between
 # Objective-C pointers and C pointers, transferring ownership in the process.
@@ -691,18 +672,18 @@ CursorKind.OBJC_PROTOCOL_EXPR = CursorKind(146)
 # \code
 #   NSString *str = (__bridge_transfer NSString *)CFCreateString();
 # \endcode
-CursorKind.OBJC_BRIDGE_CAST_EXPR = CursorKind(147)
+CursorKind.OBJC_BRIDGE_CAST_EXPR = CursorKind(141)
 
 # Represents a C++0x pack expansion that produces a sequence of
 # expressions.
 #
 # A pack expansion expression contains a pattern (which itself is an
 # expression) followed by an ellipsis. For example:
-CursorKind.PACK_EXPANSION_EXPR = CursorKind(148)
+CursorKind.PACK_EXPANSION_EXPR = CursorKind(142)
 
 # Represents an expression that computes the length of a parameter
 # pack.
-CursorKind.SIZE_OF_PACK_EXPR = CursorKind(149)
+CursorKind.SIZE_OF_PACK_EXPR = CursorKind(143)
 
 # A statement whose specific kind is not exposed via this interface.
 #
