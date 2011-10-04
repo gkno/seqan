@@ -44,3 +44,11 @@
    ...
    fun:main
 }
+{
+   Unitialized memory read in zlib's inflateReset2 (not a problem)
+   Memcheck:Cond
+   fun:inflateReset2
+   fun:inflateInit2_
+   ...
+   fun:main
+}
