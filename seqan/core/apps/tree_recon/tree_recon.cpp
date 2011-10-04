@@ -136,6 +136,11 @@ int main(int argc, const char *argv[]) {
 	String<TName> names;
 	String<TDistanceValue> matrix;
 	FILE* strmMat = fopen(infile.c_str(), "rb");
+    if (strmMat == 0)
+    {
+        std::cerr << "Could not open file " << infile.c_str() << std::endl;
+        return 1;
+    }
 	_readPhylipMatrix(strmMat, matrix, names);	
 	fclose(strmMat);
 

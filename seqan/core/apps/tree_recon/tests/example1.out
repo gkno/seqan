@@ -4,7 +4,7 @@ digraph G {
 graph [rankdir = LR];
 
 /* Node Attributes */
-node [shape = circle, fillcolor = white, style = filled, fontname = "Times-Italic"];
+node [shape = rectangle, fillcolor = white, style = filled, fontname = "Times-Italic"];
 
 /* Edge Attributes */
 edge [fontname = "Times-Italic", arrowsize = 0.75, fontsize = 16];
