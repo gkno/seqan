@@ -121,9 +121,9 @@ def autolocateBinary(base_path, relative_path, binary_name):
   """Autolocates a binary, possibly in an intermediary path.
 
   When building applications with CMake, they do not always have the same
-  relative path from the binary build directory.  For Unix Makefiles, the
-  path could be 'projects/library/cmake/apps/tree_recon' whereas for
-  Visual Studio, it could be 'projects/librar/cmake/apps/Release/tree_recon'.
+  relative path from the binary build directory.  For Unix Makefiles, the path
+  could be 'core/apps/tree_recon' whereas for Visual Studio, it could be
+  'core/apps/Release/tree_recon'.
 
   This function tries to automatically guess the name of the file and return
   the first one it finds.
