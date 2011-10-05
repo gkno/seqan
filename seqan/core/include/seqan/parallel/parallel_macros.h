@@ -61,7 +61,7 @@ i += 1;
   #if defined(PLATFORM_WINDOWS_MINGW) || defined(PLATFORM_GCC)
     // GCC _Pragma operator
     #define SEQAN_DO_PRAGMA(x) _Pragma(#x)
-    #define SEQAN_OMP_PRAGMA(x) SEQAN_DO_PRAGMA(#x)
+    #define SEQAN_OMP_PRAGMA(x) SEQAN_DO_PRAGMA(omp x)
   #else  // #if defined(PLATFORM_WINDOWS_MINGW) || defined(PLATFORM_GCC)
     // MSVC __pragma-operator
     #define SEQAN_OMP_PRAGMA(x) __pragma (omp x)
