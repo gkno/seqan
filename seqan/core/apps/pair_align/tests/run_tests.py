@@ -24,14 +24,14 @@ def main(source_base, binary_base):
     
     ph = app_tests.TestPathHelper(
         source_base, binary_base,
-        'projects/tests/apps/pair_align')  # tests dir
+        'core/apps/pair_align/tests')  # tests dir
 
     # ============================================================
     # Auto-detect the binary path.
     # ============================================================
 
     path_to_program = app_tests.autolocateBinary(
-      binary_base, 'projects/library/cmake/apps', 'pair_align')
+      binary_base, 'core/apps/pair_align', 'pair_align')
 
     # ============================================================
     # Built TestConf list.
