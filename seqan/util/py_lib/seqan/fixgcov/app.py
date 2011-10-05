@@ -68,6 +68,8 @@ class CollectCompoundStatementNodeVisitor(object):
         if node.kind == ci.CursorKind.COMPOUND_STMT and num_children > 0:
             ## print 'skipping, non-empty compound statement', num_children
             return
+        if node.kind == ci.CursorKind.DECL_STMT:
+            return  # Skip declarations.
         # Only add if has file location.
         if _hasFileLocation(node):
             self.ranges.append((node.location.file.name, node.extent.start.line, node.extent.end.line))
