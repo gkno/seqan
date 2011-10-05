@@ -24,14 +24,14 @@ def main(source_base, binary_base):
 
     ph = app_tests.TestPathHelper(
         source_base, binary_base,
-        'projects/tests/apps/sak')  # tests dir
+        'core/apps/sak/tests')  # tests dir
 
     # ============================================================
     # Auto-detect the binary path.
     # ============================================================
 
     path_to_program = app_tests.autolocateBinary(
-      binary_base, 'projects/library/cmake/apps', 'sak')
+      binary_base, 'core/apps/sak', 'sak')
 
     # ============================================================
     # Built TestConf list.
