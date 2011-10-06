@@ -99,7 +99,7 @@ struct EnableIf2
 };
 
 template <typename T>
-struct EnableIf2<True, T> {};
+struct EnableIf2<False, T> {};
 
 // ----------------------------------------------------------------------------
 // Metafunction DisableIf2
@@ -115,7 +115,7 @@ struct DisableIf2
 };
 
 template <typename T>
-struct DisableIf2<False, T> {};
+struct DisableIf2<True, T> {};
 
 }  // namespace seqan
 
