@@ -129,6 +129,14 @@ nameStore(BamIOContext<TNameStore, TNameStoreCache> & context)
     return *context._nameStore;
 }
 
+template <typename TNameStore, typename TNameStoreCache>
+TNameStore const &
+nameStore(BamIOContext<TNameStore, TNameStoreCache> const & context)
+{
+    SEQAN_ASSERT(context._nameStore != 0);
+    return *context._nameStore;
+}
+
 // ----------------------------------------------------------------------------
 // Function nameStoreCache()
 // ----------------------------------------------------------------------------
@@ -149,6 +157,14 @@ nameStore(BamIOContext<TNameStore, TNameStoreCache> & context)
 template <typename TNameStore, typename TNameStoreCache>
 TNameStoreCache &
 nameStoreCache(BamIOContext<TNameStore, TNameStoreCache> & context)
+{
+    SEQAN_ASSERT(context._nameStoreCache != 0);
+    return *context._nameStoreCache;
+}
+
+template <typename TNameStore, typename TNameStoreCache>
+TNameStoreCache const &
+nameStoreCache(BamIOContext<TNameStore, TNameStoreCache> const & context)
 {
     SEQAN_ASSERT(context._nameStoreCache != 0);
     return *context._nameStoreCache;

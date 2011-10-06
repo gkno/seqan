@@ -152,8 +152,8 @@ int write2(TStream & stream,
 
 template <typename TStream, typename TNameStore, typename TNameStoreCache>
 int write2(TStream & stream,
-           BamAlignmentRecord & record,
-           BamIOContext<TNameStore, TNameStoreCache> & context,
+           BamAlignmentRecord const & record,
+           BamIOContext<TNameStore, TNameStoreCache> const & context,
            Sam const & /*tag*/)
 {
     int res = 0;
