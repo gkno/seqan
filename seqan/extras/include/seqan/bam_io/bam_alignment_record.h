@@ -91,6 +91,12 @@ enum BamFlags
 ..include:seqan/bam_io.h
 ..see:Enum.BamFlags
 
+.Memfunc.BamAlignmentRecord#BamAlignmentRecord
+..class:Class.BamAlignmentRecord
+..summary:Constructor.
+..signature:BamAlignmentRecord()
+..remarks:Only the default constructor is provided.
+
 .Memvar.BamAlignmentRecord#INVALID_POS
 ..class:Class.BamAlignmentRecord
 ..summary:Static member with invalid/sentinel position value.
