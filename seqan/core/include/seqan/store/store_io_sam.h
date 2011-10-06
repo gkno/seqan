@@ -73,6 +73,17 @@ typedef Tag<Sam_> const Sam;
 ...default:nolink:$unsigned$
 ..include:seqan/store.h
 
+.Memfunc.CigarElement#CigarElement
+..class:Class.CigarElement
+..summary:Constructor
+..signature:CigarElement()
+..signature:CigarElement(operation, count)
+..param.operation:The operation to use.
+...type:nolink:$TOperation$, typically $char$.
+..param.count:The operation count.
+...type:nolink:$Count$, typically $unsigned$.
+..remarks:The default constructor initialized both @Memvar.CigarElement#operation@ and @Memvar.CigarElement#count@ with $0$.
+
 .Memvar.CigarElement#operation
 ..class:Class.CigarElement
 ..summary:The described operation.
