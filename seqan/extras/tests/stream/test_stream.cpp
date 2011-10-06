@@ -282,13 +282,17 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
 
     // TODO Tests for other formats once they are supported
 
-
     // Tests for file format auto-detection
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fasta);
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fastq);
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_bogus);
 
     // Tests for reading with automatic file format detection.
+    SEQAN_CALL_TEST(test_stream_read_record_auto_format_quals_fasta);
+    SEQAN_CALL_TEST(test_stream_read_record_auto_format_quals_fastq);
+    SEQAN_CALL_TEST(test_stream_read_record_auto_format_no_quals_fasta);
+    SEQAN_CALL_TEST(test_stream_read_record_auto_format_no_quals_fastq);
+
     SEQAN_CALL_TEST(test_stream_read_auto_format_quals_fasta);
     SEQAN_CALL_TEST(test_stream_read_auto_format_quals_fastq);
     SEQAN_CALL_TEST(test_stream_read_auto_format_no_quals_fasta);

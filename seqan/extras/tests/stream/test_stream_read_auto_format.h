@@ -38,7 +38,7 @@
 #ifndef TEST_STREAM_TEST_STREAM_READ_AUTO_FORMAT_H_
 #define TEST_STREAM_TEST_STREAM_READ_AUTO_FORMAT_H_
 
-SEQAN_DEFINE_TEST(test_stream_read_auto_format_quals_fasta)
+SEQAN_DEFINE_TEST(test_stream_read_record_auto_format_quals_fasta)
 {
     using namespace seqan;
 
@@ -60,13 +60,13 @@ SEQAN_DEFINE_TEST(test_stream_read_auto_format_quals_fasta)
     SEQAN_ASSERT_EQ(formatTag.tagId, 1);
 }
 
-SEQAN_DEFINE_TEST(test_stream_read_auto_format_quals_fastq)
+SEQAN_DEFINE_TEST(test_stream_read_record_auto_format_quals_fastq)
 {
     using namespace seqan;
 
     typedef Stream<CharArray<char const *> > TStream;
 
-    char const * fastaString = "@id1\nAAACCC+\n!!!!!!\n@id2\nGGGTTT+\nIIIIII\n";
+    char const * fastaString = "@id1\nAAACCC\n+\n!!!!!!\n@id2\nGGGTTT+\nIIIIII\n";
     TStream stream(fastaString, fastaString + strlen(fastaString));
     RecordReader<TStream, SinglePass<> > reader(stream);
 
@@ -82,7 +82,7 @@ SEQAN_DEFINE_TEST(test_stream_read_auto_format_quals_fastq)
     SEQAN_ASSERT_EQ(formatTag.tagId, 2);
 }
 
-SEQAN_DEFINE_TEST(test_stream_read_auto_format_no_quals_fasta)
+SEQAN_DEFINE_TEST(test_stream_read_record_auto_format_no_quals_fasta)
 {
     using namespace seqan;
 
@@ -102,13 +102,13 @@ SEQAN_DEFINE_TEST(test_stream_read_auto_format_no_quals_fasta)
     SEQAN_ASSERT_EQ(formatTag.tagId, 1);
 }
 
-SEQAN_DEFINE_TEST(test_stream_read_auto_format_no_quals_fastq)
+SEQAN_DEFINE_TEST(test_stream_read_record_auto_format_no_quals_fastq)
 {
     using namespace seqan;
 
     typedef Stream<CharArray<char const *> > TStream;
 
-    char const * fastaString = "@id1\nAAACCC+\n!!!!!!\n@id2\nGGGTTT+\nIIIIII\n";
+    char const * fastaString = "@id1\nAAACCC\n+\n!!!!!!\n@id2\nGGGTTT+\nIIIIII\n";
     TStream stream(fastaString, fastaString + strlen(fastaString));
     RecordReader<TStream, SinglePass<> > reader(stream);
 
@@ -120,6 +120,112 @@ SEQAN_DEFINE_TEST(test_stream_read_auto_format_no_quals_fastq)
     SEQAN_ASSERT_EQ(meta, "id1");
     SEQAN_ASSERT_EQ(seq, "AAACCC");
     SEQAN_ASSERT_EQ(formatTag.tagId, 2);
+}
+
+SEQAN_DEFINE_TEST(test_stream_read_auto_format_quals_fasta)
+{
+    using namespace seqan;
+
+    typedef Stream<CharArray<char const *> > TStream;
+
+    char const * fastaString = ">id1\nAAACCC\n>id2\nGGGTTT";
+    TStream stream(fastaString, fastaString + strlen(fastaString));
+    RecordReader<TStream, SinglePass<> > reader(stream);
+
+    StringSet<CharString> metas;
+    StringSet<CharString> seqs;
+    StringSet<CharString> quals;
+    AutoSeqStreamFormat formatTag;
+
+    int res = read2(metas, seqs, quals, reader, formatTag);
+
+    SEQAN_ASSERT_EQ(res, 0);
+    SEQAN_ASSERT_EQ(length(metas), 2u);
+    SEQAN_ASSERT_EQ(metas[0], "id1");
+    SEQAN_ASSERT_EQ(metas[1], "id2");
+    SEQAN_ASSERT_EQ(length(seqs), 2u);
+    SEQAN_ASSERT_EQ(seqs[0], "AAACCC");
+    SEQAN_ASSERT_EQ(seqs[1], "GGGTTT");
+    SEQAN_ASSERT_EQ(length(quals), 0u);
+}
+
+SEQAN_DEFINE_TEST(test_stream_read_auto_format_quals_fastq)
+{
+    using namespace seqan;
+
+    typedef Stream<CharArray<char const *> > TStream;
+
+    char const * fastaString = "@id1\nAAACCC\n+\n!!!!!!\n@id2\nGGGTTT+\nIIIIII\n";
+    TStream stream(fastaString, fastaString + strlen(fastaString));
+    RecordReader<TStream, SinglePass<> > reader(stream);
+
+    StringSet<CharString> metas;
+    StringSet<CharString> seqs;
+    StringSet<CharString> quals;
+    AutoSeqStreamFormat formatTag;
+
+    int res = read2(metas, seqs, quals, reader, formatTag);
+
+    SEQAN_ASSERT_EQ(res, 0);
+    SEQAN_ASSERT_EQ(length(metas), 2u);
+    SEQAN_ASSERT_EQ(metas[0], "id1");
+    SEQAN_ASSERT_EQ(metas[1], "id2");
+    SEQAN_ASSERT_EQ(length(seqs), 2u);
+    SEQAN_ASSERT_EQ(seqs[0], "AAACCC");
+    SEQAN_ASSERT_EQ(seqs[1], "GGGTTT");
+    SEQAN_ASSERT_EQ(length(quals), 2u);
+    SEQAN_ASSERT_EQ(quals[0], "!!!!!!");
+    SEQAN_ASSERT_EQ(quals[1], "IIIIII");
+}
+
+SEQAN_DEFINE_TEST(test_stream_read_auto_format_no_quals_fasta)
+{
+    using namespace seqan;
+
+    typedef Stream<CharArray<char const *> > TStream;
+
+    char const * fastaString = ">id1\nAAACCC\n>id2\nGGGTTT";
+    TStream stream(fastaString, fastaString + strlen(fastaString));
+    RecordReader<TStream, SinglePass<> > reader(stream);
+
+    StringSet<CharString> metas;
+    StringSet<CharString> seqs;
+    AutoSeqStreamFormat formatTag;
+
+    int res = read2(metas, seqs, reader, formatTag);
+
+    SEQAN_ASSERT_EQ(res, 0);
+    SEQAN_ASSERT_EQ(length(metas), 2u);
+    SEQAN_ASSERT_EQ(metas[0], "id1");
+    SEQAN_ASSERT_EQ(metas[1], "id2");
+    SEQAN_ASSERT_EQ(length(seqs), 2u);
+    SEQAN_ASSERT_EQ(seqs[0], "AAACCC");
+    SEQAN_ASSERT_EQ(seqs[1], "GGGTTT");
+}
+
+SEQAN_DEFINE_TEST(test_stream_read_auto_format_no_quals_fastq)
+{
+    using namespace seqan;
+
+    typedef Stream<CharArray<char const *> > TStream;
+
+    char const * fastaString = "@id1\nAAACCC\n+\n!!!!!!\n@id2\nGGGTTT+\nIIIIII\n";
+    TStream stream(fastaString, fastaString + strlen(fastaString));
+    RecordReader<TStream, SinglePass<> > reader(stream);
+
+    StringSet<CharString> metas;
+    StringSet<CharString> seqs;
+    AutoSeqStreamFormat formatTag;
+
+    int res = read2(metas, seqs, reader, formatTag);
+
+    SEQAN_ASSERT_EQ(res, 0);
+    SEQAN_ASSERT_EQ(length(metas), 2u);
+    SEQAN_ASSERT_EQ(metas[0], "id1");
+    SEQAN_ASSERT_EQ(metas[1], "id2");
+    SEQAN_ASSERT_EQ(length(seqs), 2u);
+    SEQAN_ASSERT_EQ(seqs[0], "AAACCC");
+    SEQAN_ASSERT_EQ(seqs[1], "GGGTTT");
 }
 
 #endif  // TEST_STREAM_TEST_STREAM_READ_AUTO_FORMAT_H_

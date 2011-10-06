@@ -864,10 +864,13 @@ template <typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec,
           typename TFile,
           typename TSpec, typename TTag>
-int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
-          StringSet<TSeqString, TSeqSpec> & sequences,
-          RecordReader<TFile, SinglePass<TSpec> > & reader,
-          TTag const & tag)
+typename EnableIf2<typename Or<typename IsSameType<typename RemoveConst_<TTag>::Type, typename RemoveConst_<Fasta>::Type >::Type,
+                               typename IsSameType<typename RemoveConst_<TTag>::Type, typename RemoveConst_<Fastq>::Type >::Type>::Type,
+                   int>::Type
+read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+      StringSet<TSeqString, TSeqSpec> & sequences,
+      RecordReader<TFile, SinglePass<TSpec> > & reader,
+      TTag const & tag)
 {
     TIdString id;
     TSeqString seq;
@@ -880,6 +883,21 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
         appendValue(sequences, seq);
     }
     return 0;
+}
+
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec,
+          typename TFile,
+          typename TSpec, typename TTag>
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+          StringSet<TSeqString, TSeqSpec> & sequences,
+          StringSet<TQualString, TQualSpec> & qualities,
+          RecordReader<TFile, SinglePass<TSpec> > & reader,
+          TTag const & tag)
+{
+    clear(qualities);
+    return read2(sequenceIds, sequences, reader, tag);
 }
 
 template <typename TIdString, typename TIdSpec,
