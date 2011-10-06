@@ -24,14 +24,14 @@ def main(source_base, binary_base):
 
     ph = app_tests.TestPathHelper(
         source_base, binary_base,
-        'projects/tests/apps/seqan_tcoffee')  # tests dir
+        'core/apps/seqan_tcoffee/tests')  # tests dir
 
     # ============================================================
     # Auto-detect the binary path.
     # ============================================================
 
     path_to_program = app_tests.autolocateBinary(
-      binary_base, 'projects/library/cmake/apps', 'seqan_tcoffee')
+      binary_base, 'core/apps/seqan_tcoffee', 'seqan_tcoffee')
 
     # ============================================================
     # Built TestConf list.
