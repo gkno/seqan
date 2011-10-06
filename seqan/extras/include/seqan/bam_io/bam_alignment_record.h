@@ -89,6 +89,7 @@ enum BamFlags
 ..summary:Represent a record from a BAM/SAM file.
 ..remarks:While also used to represent SAM records, called $BamAlignmentRecord$ since the data directly reflects a BAM record (0-based positions, identify references by ids, not names, tags stored in BAM format.)
 ..include:seqan/bam_io.h
+..see:Enum.BamFlags
 
 .Memvar.BamAlignmentRecord#INVALID_POS
 ..class:Class.BamAlignmentRecord
@@ -112,7 +113,7 @@ enum BamFlags
 
 .Memvar.BamAlignmentRecord#flag
 ..class:Class.BamAlignmentRecord
-..summary:The flag of this mapping.
+..summary:The flag of this mapping, see @Enum.BamFlags@ for flag constants and the $hasFlag*$ functions.
 ..type:nolink:$__uint16$
 
 .Memvar.BamAlignmentRecord#rId
