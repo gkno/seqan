@@ -33,6 +33,7 @@ int main(int argc, char const ** argv)
         return 1;
     }
     std::cout << "File format is " << getAutoSeqStreamFormatName(formatTag) << '\n';
+// FRAGMENT(not-so-important)
     
     // Define variables for storing the sequences and sequence ids.
     CharString id;
