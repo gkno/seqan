@@ -456,6 +456,31 @@ readRecord(TIdString & meta,
 
 template <typename TIdString,
           typename TSeqString,
+          typename TQualString,
+          typename TFile,
+          typename TPass>
+inline int
+readRecord(TIdString & meta,
+           TSeqString & seq,
+           TQualString & quals,
+           RecordReader<TFile, TPass > & reader,
+           Fasta const & /*tag*/)
+{
+    int res = _clearAndReserveMemory(meta, seq, reader, Fasta());
+    if (res)
+        return res;
+
+    clear(quals);
+
+    res = _readMetaAndSequence(meta, seq, reader, Fasta());
+    if (res)
+        return res;
+
+    return _skipQualityBlock(reader, length(seq), Fasta());
+}
+
+template <typename TIdString,
+          typename TSeqString,
           typename TFile,
           typename TPass>
 inline int
@@ -773,6 +798,21 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
          Fasta const & /*tag*/)
 {
     StringSet<CharString, TSeqSpec> qualities;
+    return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fasta());
+}
+
+template <typename TIdString, typename TIdSpec,
+          typename TSeqString, typename TSeqSpec,
+          typename TQualString, typename TQualSpec,
+          typename TFile,
+          typename TSpec>
+int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TQualString, TQualSpec> & qualities,
+         RecordReader<TFile, DoublePass<TSpec> > & reader,
+         Fasta const & /*tag*/)
+{
+    clear(qualities);
     return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fasta());
 }
 

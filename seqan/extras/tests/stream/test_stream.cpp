@@ -57,6 +57,7 @@
 #include "test_stream_write_fasta.h"
 #include "test_stream_read_embl.h"
 #include "test_stream_read_genbank.h"
+#include "test_stream_read_auto_format.h"
 
 SEQAN_BEGIN_TESTSUITE(test_stream)
 {
@@ -286,6 +287,12 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fasta);
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_fastq);
     SEQAN_CALL_TEST(test_stream_guess_stream_format_auto_bogus);
+
+    // Tests for reading with automatic file format detection.
+    SEQAN_CALL_TEST(test_stream_read_auto_format_quals_fasta);
+    SEQAN_CALL_TEST(test_stream_read_auto_format_quals_fastq);
+    SEQAN_CALL_TEST(test_stream_read_auto_format_no_quals_fasta);
+    SEQAN_CALL_TEST(test_stream_read_auto_format_no_quals_fastq);
 
     /* Tests for writing file formats.
      * Only fstream used as a representative */

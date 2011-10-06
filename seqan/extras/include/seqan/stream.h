@@ -124,6 +124,8 @@
 #include <seqan/stream/read_embl.h>
 #include <seqan/stream/read_genbank.h>
 
+#include <seqan/stream/record_reader_auto_format.h>
+
 #include <seqan/stream/write_fasta_fastq.h>
 
 #endif  // SEQAN_STREAM_H_
