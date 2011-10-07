@@ -37,91 +37,7 @@
 
 namespace seqan{
 	
-	template < typename TText, typename TFreq >
-	void getNumCharsImpl(TText &text,
-		TFreq &freq)
-	{
-		typedef typename Size< TText >::Type TSize;
-		for (TSize i = 0; i < length(text); ++i)
-		{
-			++freq[ordValue(text[i])];
-		}
-	}
-	template < typename TText, typename TFreq >
-	void getNumChars(TText &text,
-		TFreq &freq)
-	{
-		typedef typename Value< TText >::Type TValue;
-		unsigned int sigmaSize = ValueSize< TValue >::VALUE;
-
-		typedef typename Value< TFreq >::Type TFreqValue;
-		resize(freq, sigmaSize, 0);
-		getNumCharsImpl(text, freq);
-	}
 	
-	template < typename TSequence, typename TFreq >
-	void getNumChars(StringSet< TSequence > &text,
-		TFreq &freq)
-	{
-		typedef typename Value< TSequence >::Type TValue;
-		unsigned int sigmaSize = ValueSize< TValue >::VALUE;
-
-		typedef typename Value< TFreq >::Type TFreqValue;
-		resize(freq, sigmaSize, 0);
-		for (unsigned i = 0; i < length(text); ++i)
-		{
-			getNumCharsImpl(getValue(text,i), freq);
-		}
-	}
-
-	//function to create the prefixSum array
-	template< typename TPrefixSumTable, typename TFreqTable, typename TAlphabetSize, typename TNumSeq >
-	void createPrefixTable(TPrefixSumTable &prefixSumTable, TFreqTable &freqTable, TAlphabetSize sigmaSize, TNumSeq numSeq)
-	{
-		typedef typename Value< TPrefixSumTable >::Type TCounterValue;	
-		clear(prefixSumTable);
-		resize(prefixSumTable, sigmaSize + 1, 0);
-						
-		TCounterValue temp = 0;
-		TCounterValue sum = numSeq;
-		for(TAlphabetSize i = 0; i < sigmaSize; ++i)
-		{
-
-			temp = freqTable[i];
-			prefixSumTable[i] = sum;
-			sum += temp;
-		}
-		prefixSumTable[sigmaSize] = sum;
-	}
-
-	template< typename TPrefixSumTable, typename TFreqTable, typename TAlphabetSize >
-	void createPrefixTable(TPrefixSumTable &prefixSumTable, TFreqTable &freqTable, TAlphabetSize sigmaSize)
-		{
-			createPrefixTable(prefixSumTable, freqTable, sigmaSize, 1);
-		}
-
-	//function to create the prefixSum array
-	template< typename TPrefixSumTable, typename TPos, typename TValue >
-	void addToPrefixTable(TPrefixSumTable &prefixSumTable, TPos pos, TValue value)
-	{
-		typedef typename Value< TPrefixSumTable >::Type TCounterValue;
-		for(TPos i = 0; i <= pos; ++i)
-		{
-			prefixSumTable[i] -= value;
-		}
-	}
-
-
-	//function to create the prefixSum array
-	template< typename TPrefixSumTable, typename TPos, typename TValue >
-	void subFromPrefixTable(TPrefixSumTable &prefixSumTable, TPos pos, TValue value)
-	{
-		typedef typename Value< TPrefixSumTable >::Type TCounterValue;
-		for(TPos i = 0; i <= pos; ++i)
-		{
-			prefixSumTable[i] += value;
-		}
-	}
 
 	template< typename TText, typename TSpec >
 	struct WaveletTree;
@@ -314,42 +230,42 @@ namespace seqan{
 	};
 	
 	template< typename TText, typename TSpec >
-	typename Fibre< WaveletTree< TText, TSpec >, FibreBitStrings >::Type &
+	inline typename Fibre< WaveletTree< TText, TSpec >, FibreBitStrings >::Type &
 	getFibre(WaveletTree< TText, TSpec > &tree, const FibreBitStrings)
 	{
 		return tree.bitStrings;
 	}
 
 	template< typename TText, typename TSpec >
-	typename Fibre< WaveletTree< TText,TSpec >, FibreBitStrings >::Type const &
+	inline typename Fibre< WaveletTree< TText,TSpec >, FibreBitStrings >::Type const &
 	getFibre(const WaveletTree< TText, TSpec > &tree, const FibreBitStrings)
 	{
 		return tree.bitStrings;
 	}
 
 	template< typename TText, typename TSpec >
-	typename Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >::Type &
+	inline typename Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >::Type &
 	getFibre(WaveletTree< TText, TSpec > &tree, FibreSplitValues)
 	{
 		return tree.splitValues;
 	}
 
 	template< typename TText, typename TSpec >
-	typename Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >::Type const &
+	inline typename Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >::Type const &
 	getFibre(WaveletTree< TText, TSpec > const &tree, const FibreSplitValues)
 	{
 		return tree.splitValues;
 	}
 
 	template< typename TText >
-	typename Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >::Type &
+	inline typename Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >::Type &
 	getFibre(WaveletTree< TText, MultiString > &tree, const FibreDollarPositions)
 	{
 		return tree.dollarPosition;
 	}
 
 	template< typename TText >
-	typename Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >::Type const &
+	inline typename Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >::Type const &
 	getFibre(WaveletTree< TText, MultiString > const &tree, const FibreDollarPositions)
 	{
 		return tree.dollarPosition;
@@ -360,7 +276,7 @@ namespace seqan{
 		typename TWaveletTreeSpec,
 		typename TTreeSplitValue, 
 		typename TPos >
-	unsigned getOccImpl(const WaveletTree< TText, TWaveletTreeSpec > &tree,
+	inline unsigned getOccImpl(const WaveletTree< TText, TWaveletTreeSpec > &tree,
 		const TTreeSplitValue ordChar,
 		const TPos pos)
 	{
@@ -369,9 +285,10 @@ namespace seqan{
 		TValue treePos = 0;
 		
 		typename Iterator< const WaveletTreeStructure< TText > >::Type iter(tree.splitValues, treePos);
+		FibreSplitValues tag = FibreSplitValues();
 		do{
 			TPos addValue = getRank(tree.bitStrings[treePos], sum - 1);
-			if(ordChar <= getFibre(tree, FibreSplitValues()).treeNodes[treePos].i1)
+			if(ordChar <= getFibre(tree, tag).treeNodes[treePos].i1)
 			{
 				sum -= addValue;
 				goLeft(iter);
@@ -382,12 +299,11 @@ namespace seqan{
 				goRight(iter);
 			}
 			treePos = getPosition(iter);
-			if(sum == 0)
-			{
-				return 0;
-			}
-		}while(treePos);
-				
+//			if(sum == 0)
+//			{
+//				return 0;
+//			}
+		}while(treePos && sum);
 		return sum;
 	}
 
@@ -395,7 +311,7 @@ namespace seqan{
 		typename TText, 
 		typename TChar, 
 		typename TPos >
-	unsigned getOcc(const WaveletTree< TText, SingleString > &tree,
+	inline unsigned getOcc(const WaveletTree< TText, SingleString > &tree,
 		const TChar character,
 		const TPos pos)
 	{
@@ -413,7 +329,7 @@ namespace seqan{
 		typename TText, 
 		typename TChar, 
 		typename TPos >
-	unsigned getOcc(const WaveletTree< TText, MultiString > &tree,
+	inline unsigned getOcc(const WaveletTree< TText, MultiString > &tree,
 		const TChar character,
 		const TPos pos)
 	{
@@ -432,7 +348,7 @@ namespace seqan{
 		typename TText, 
 		typename TWaveletTreeSpec,
 		typename TPos >
-	typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type
+	inline typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type
 	getCharacter(const WaveletTree< TText, TWaveletTreeSpec > &tree,
 		const TPos pos)
 	{
@@ -464,8 +380,17 @@ namespace seqan{
 		return character;
 	}
 	
+	template<
+		typename TText,
+		typename TWaveletTreeSpec >
+	inline typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type
+	getDollarSub(const WaveletTree< TText, TWaveletTreeSpec > &tree)
+	{
+		return tree.dollarSub;
+	}
+
 	template < typename TContainer, typename TPos, typename TBitsPerNumber, typename TValue >
-	void numberToBits(TContainer &container, TPos pos, TBitsPerNumber bpn, TValue value)
+	inline void numberToBits(TContainer &container, TPos pos, TBitsPerNumber bpn, TValue value)
 	{
 		//determine the underlying type of the container (e.g.: char, int, unsigned, long, ...)
 		typedef typename Value< TContainer >::Type TContainerValue;
@@ -505,7 +430,7 @@ namespace seqan{
 
 
 	template < typename TReturn, typename TContainer, typename TPos, typename TBitsPerNumber >
-	TReturn bitsToNumber(TContainer container, TPos pos, TBitsPerNumber bpn)
+	inline TReturn bitsToNumber(TContainer container, TPos pos, TBitsPerNumber bpn)
 	{
 		//determine the underlying type of the container (e.g.: char, int, unsigned, long, ...)
 		typedef typename Value< TContainer >::Type TContainerValue;
@@ -538,18 +463,25 @@ namespace seqan{
 	}
 
 	//this function determines 2^value	
-	unsigned pow(unsigned value)
+	inline unsigned pow(unsigned value)
 	{
 		return (1 << value);
 	}
 
-	unsigned getTreeLevel(unsigned treePosition)
+	inline unsigned getTreeLevel(unsigned treePosition)
 	{
 		return floor(log(treePosition + 1)/log(2));
 	}
 
 	template< typename TText, typename TPos >
-	void setDollarPosition(WaveletTree< TText, MultiString > &tree,
+	inline void setDollarPosition(WaveletTree< TText, SingleString > &tree,
+		TPos position)
+	{
+		tree.dollarPosition = position;
+	}
+
+	template< typename TText, typename TPos >
+	inline void setDollarPosition(WaveletTree< TText, MultiString > &tree,
 		TPos position)
 	{
 		setBit(tree.dollarPosition, position, 1);
@@ -557,7 +489,7 @@ namespace seqan{
 
 	
 	template < typename TText, typename TWaveletTreeSpec >
-	void fillWaveletTree(
+	inline void fillWaveletTree(
 			WaveletTree< TText, TWaveletTreeSpec > &tree, 		//the set of bit strings to be filled
 			const TText &text)		 							//the original string
 
@@ -599,7 +531,7 @@ namespace seqan{
 
 	//this function is used to fill all bit strings in a wavelet tree AND counting
 	template < typename TText, typename TWaveletTreeSpec >// typename TTreeNodeWidth >
-	void fillWaveletTree(
+	inline void fillWaveletTree(
 			WaveletTree< TText, TWaveletTreeSpec > &tree, 		//the set of bit strings to be filled
 			typename Iterator< WaveletTreeStructure< TText > >::Type iter,
 			const TText &text,		 					//the original string
@@ -669,7 +601,7 @@ namespace seqan{
 			 typename TWaveletTreeSpec,
 			 typename TFreqTable,
 			 typename TPrefixSumTable >// typename TTreeNodeWidth >
-	void createWaveletTree(WaveletTree< 
+	inline void createWaveletTree(WaveletTree<
 							TBWT, 
 							TWaveletTreeSpec
 						> &tree, 
@@ -701,13 +633,6 @@ namespace seqan{
 		//writeGraph(tree.splitValues);
 
 		String< unsigned long long > lengthString;
-		std::cerr << "prefixSumTable: " << prefixSumTable[0] << std::endl;
-		std::cerr << "prefixSumTable: " << prefixSumTable[1] << std::endl;
-		std::cerr << "prefixSumTable: " << prefixSumTable[2] << std::endl;
-		std::cerr << "prefixSumTable: " << prefixSumTable[3] << std::endl;
-		std::cerr << "prefixSumTable: " << prefixSumTable[4] << std::endl;
-		char c;
-		std::cerr << std::endl;
 		//addToPrefixTable(prefixSumTable, ordValue(tree.dollarSub), prefixSumTable[0]);
 		computeStringLengthFromTree(lengthString,
 			prefixSumTable,
@@ -736,7 +661,7 @@ namespace seqan{
 			 typename TBWT, 
 			 typename TWaveletTreeSpec,
 			 typename TFreqTable >
-	void createWaveletTree(WaveletTree< 
+	inline void createWaveletTree(WaveletTree<
 							TBWT, 
 							TWaveletTreeSpec
 						> &tree, 
@@ -756,7 +681,7 @@ namespace seqan{
 	template < 
 			 typename TBWT, 
 			 typename TWaveletTreeSpec >
-	void createWaveletTree(WaveletTree< 
+	inline void createWaveletTree(WaveletTree<
 							TBWT, 
 							TWaveletTreeSpec
 						> &tree, 

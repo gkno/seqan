@@ -476,11 +476,11 @@ namespace seqan{
 	typename Value< typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type >::Type
 	getRank(const RankSupportBitString< TSpec > &rankSupportBitString, const TPos pos)
 	{
-		if(!length(rankSupportBitString))
-		{
-			std::cerr << "length = 0" << std::endl;
-			return 0;
-		}
+//		if(!length(rankSupportBitString))
+//		{
+//			std::cerr << "length = 0" << std::endl;
+//			return 0;
+//		}
 
 		typedef typename Fibre< RankSupportBitString< TSpec >, FibreRankSupportSuperBucketString >::Type TSuperBucketString;
 
