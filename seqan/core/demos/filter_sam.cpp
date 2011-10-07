@@ -40,7 +40,7 @@ struct LessAlignedReadDistance
 {
     TDistanceString const & distances;
 
-    LessAlignedReadDistance(TDistanceString const _distances)
+    LessAlignedReadDistance(TDistanceString const & _distances)
             : distances(_distances)
     {}
 
