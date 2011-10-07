@@ -133,8 +133,8 @@
 }
 
 {
-   ADDRESS_IN_RANGE/Invalid read of size 4
-   Memcheck:Value4
+   ADDRESS_IN_RANGE/Invalid read of size 8
+   Memcheck:Value8
    fun:PyObject_Free
 }
 
@@ -153,6 +153,12 @@
 {
    ADDRESS_IN_RANGE/Invalid read of size 4
    Memcheck:Value4
+   fun:PyObject_Realloc
+}
+
+{
+   ADDRESS_IN_RANGE/Invalid read of size 8
+   Memcheck:Value8
    fun:PyObject_Realloc
 }
 
