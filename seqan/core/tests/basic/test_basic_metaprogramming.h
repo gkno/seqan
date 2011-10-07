@@ -327,9 +327,9 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_enable_if_disable_if)
 
 SEQAN_DEFINE_TEST(test_basic_metaprogramming_enable_if2_disable_if2)
 {
-    SEQAN_ASSERT_EQ(false, testForEnableIf2(1));
-    SEQAN_ASSERT_EQ(true, testForEnableIf2(1u));
-    SEQAN_ASSERT_EQ(true, testForEnableIf2(1.0));
+    SEQAN_ASSERT_EQ(true, testForEnableIf2(1));
+    SEQAN_ASSERT_EQ(false, testForEnableIf2(1u));
+    SEQAN_ASSERT_EQ(false, testForEnableIf2(1.0));
 }
 
 #endif  // TEST_BASIC_TEST_BASIC_METAPROGRAMMING_H_
