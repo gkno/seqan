@@ -228,7 +228,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_get_value_type_Z)
 
     CharString str("XXZthis is a test");
     appendValue(str, '\0');
-    append(str, "\xffXAAa");
+    append(str, "XAAa");
     BamTagsDict bamTags(str);
     CharString expected("Zthis is a test");
     appendValue(expected, '\0');
