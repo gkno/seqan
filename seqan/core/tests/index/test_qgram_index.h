@@ -88,6 +88,22 @@ SEQAN_DEFINE_TEST(testUngappedShapes)
 
 }
 
+SEQAN_DEFINE_TEST(testStepSize)
+{
+    typedef Index<DnaString, IndexQGram< UngappedShape<3> > > TIndex;
+    TIndex index("CATGATTACATA");
+    setStepSize(index,2);
+    hash(indexShape(index), "CAT");
+    String<unsigned> occs;
+    occs = getOccurrences(index, indexShape(index));
+    for (unsigned i = 0; i < length(occs); ++i)
+        std::cout << occs[i] << '\t';
+    std::cout << std::endl;
+    SEQAN_ASSERT_EQ(length(occs), 2);
+    SEQAN_ASSERT_EQ(occs[0], 0);
+    SEQAN_ASSERT_EQ(occs[1], 8);
+}
+
 /*
 void testQGramIndexSchnell()
 {

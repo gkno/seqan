@@ -35,8 +35,8 @@
 #include <functional>
 #include <typeinfo>
 
-#define SEQAN_DEBUG 
-#define SEQAN_TEST 
+#define SEQAN_DEBUG
+#define SEQAN_TEST
 #define SEQAN_ENABLE_CHECKPOINTS 0
 
 #include <seqan/basic.h>
@@ -65,13 +65,14 @@ SEQAN_BEGIN_TESTSUITE(test_index)
 {
 	// test_shapes.h
 	SEQAN_CALL_TEST(testShapes);
-    
+
 	// test_qgram_index.h
+	SEQAN_CALL_TEST(testStepSize);
 	SEQAN_CALL_TEST(testGappedShapes);
 	SEQAN_CALL_TEST(testUngappedShapes);
 	SEQAN_CALL_TEST(testUngappedQGramIndex);
 	SEQAN_CALL_TEST(testQGramFind);
-    
+
 	// test_stree_iterators.h
 	SEQAN_CALL_TEST(testSTreeIterators_Wotd);
 	SEQAN_CALL_TEST(testSTreeIterators_WotdOriginal);
