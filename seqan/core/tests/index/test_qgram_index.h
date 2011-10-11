@@ -96,9 +96,9 @@ void testStepSize()
     hash(indexShape(index), "CAT");
     String<unsigned> occs;
     occs = getOccurrences(index, indexShape(index));
-    SEQAN_ASSERT_EQ(length(occs), 2);
-    SEQAN_ASSERT_EQ(occs[0], 0);
-    SEQAN_ASSERT_EQ(occs[1], 8);
+    SEQAN_ASSERT_EQ(length(occs), 2u);
+    SEQAN_ASSERT_EQ(occs[0], 0u);
+    SEQAN_ASSERT_EQ(occs[1], 8u);
 }
 
 SEQAN_DEFINE_TEST(testStepSize)
