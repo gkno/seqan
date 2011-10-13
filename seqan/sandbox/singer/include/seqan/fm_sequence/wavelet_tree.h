@@ -715,11 +715,8 @@ namespace seqan{
 		}
 		tree.dollarSub = dollarValues[0].i1;
 		tree.dollarPosition = dollarValues[0].i2;
-		std::cerr << "WaveletTree: Open0" << std::endl;
 		name = fileName;	append(name, ".tree");	open(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
-		std::cerr << "WaveletTree: Open1" << std::endl;
 		name = fileName;	append(name, ".split");	open(getFibre(tree, FibreSplitValues()), toCString(name), openMode);
-		std::cerr << "WaveletTree: Open02" << std::endl;
 
 		return true;
 	}
