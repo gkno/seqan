@@ -43,7 +43,7 @@ done
 
 for rl in 36 100; do
     # Run with defaults for everything.
-    ${RAZERS} adeno-genome.fa adeno-reads${rl}_1.fa adeno-reads${rl}_2.fa -o pe-adeno-reads${rl}_2.out > pe-adeno-reads${rl}_2..stdout
+    ${RAZERS} adeno-genome.fa adeno-reads${rl}_1.fa adeno-reads${rl}_2.fa -o pe-adeno-reads${rl}_2.out > pe-adeno-reads${rl}_2.stdout
     
     # Allow indels.
     ${RAZERS} -id adeno-genome.fa adeno-reads${rl}_1.fa adeno-reads${rl}_2.fa -o pe-adeno-reads${rl}_2-id.out > pe-adeno-reads${rl}_2-id.stdout
