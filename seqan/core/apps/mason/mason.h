@@ -130,6 +130,8 @@ struct Options<Global>
     double libraryLengthError;
     // Set how to name the reads in the FASTA/FASTQ files.
     ReadNaming readNaming;
+    // The prefix for read names.  The default is the file name.
+    CharString readNamePrefix;
 
     // Haplotype parameters.
 
@@ -271,6 +273,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  haplotypeIndelRangeMax: " << options.haplotypeIndelRangeMax << std::endl
            << "  haplotypeNoN:           " << options.haplotypeNoN << std::endl
            << "  sampleCountsFilename:   " << options.sampleCountsFilename << std::endl
+           << "  readNamePrefix          " << options.readNamePrefix << std::endl
            << "}" << std::endl;
     return stream;
 }
@@ -332,6 +335,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
 	addHelpLine(parser, "0 = No suffix, left-end and right-end read will be named 'example.fastq.0000', for example.");
 	addHelpLine(parser, "1 = Add zero-based slash-suffix, i.e. names will end on '/0' and '/1'");
 	addHelpLine(parser, "2 = Add one-based slash-suffix, i.e. names will end on '/1' and '/2'");
+    addOption(parser, CommandLineOption("rnp", "read-name-prefix", "Read name prefix. Default is output file name.", OptionType::String));
 
     addSection(parser, "Haplotype Options");
 
@@ -416,7 +420,8 @@ int parseCommandLineAndCheck(TOptions & options,
                 options.readNaming = READ_NAMING_NOSUFFIX;
         }
     }
-
+    if (isSetLong(parser, "read-name-prefix"))
+        getOptionValueLong(parser, "read-name-prefix", options.readNamePrefix);
     if (isSetLong(parser, "num-haplotypes"))
         getOptionValueLong(parser, "num-haplotypes", options.numHaplotypes);
     if (isSetLong(parser, "haplotype-snp-rate"))
@@ -550,6 +555,10 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         else
             append(options.outputFile, ".fasta");
     }
+    // Set read name prefix to file name if necessary.
+    if (empty(options.readNamePrefix))
+        options.readNamePrefix = options.outputFile;
+    // Generate SAM file if necessary.
     if (options.samFile == "") {
         options.samFile = options.outputFile;
         append(options.samFile, ".sam");
@@ -927,7 +936,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     reserve(fragmentStore.readNameStore, numReads, Exact());
     CharString readNameBuf;
     char outFileName[151];
-    snprintf(outFileName, 150, "%s", toCString(options.outputFile));
+    snprintf(outFileName, 150, "%s", toCString(options.readNamePrefix));
     String<bool> flipped;
     for (unsigned haplotypeId = 0; haplotypeId < options.numHaplotypes; ++haplotypeId) {
         std::cerr << "Simulating for haplotype #" << haplotypeId << "..." << std::endl;
