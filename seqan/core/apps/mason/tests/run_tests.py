@@ -47,58 +47,58 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('454-se-random-N1000-nm400-ne40-s0.stdout'),
-        args=['454', '-N', '1000', '-nm', '400', '-ne', '40', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('454-se-random-N1000-nm400-ne40-s0.fasta'),
+        redir_stdout=ph.outFile('454-se-random-N100-nm400-ne40-s0.stdout'),
+        args=['454', '-N', '100', '-nm', '400', '-ne', '40', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('454-se-random-N100-nm400-ne40-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('454-se-random-N1000-nm400-ne40-s0.fasta'),
-                  ph.outFile('454-se-random-N1000-nm400-ne40-s0.fasta')),
-                 (ph.inFile('454-se-random-N1000-nm400-ne40-s0.fasta.sam'),
-                  ph.outFile('454-se-random-N1000-nm400-ne40-s0.fasta.sam')),
-                 (ph.inFile('454-se-random-N1000-nm400-ne40-s0.stdout'),
-                  ph.outFile('454-se-random-N1000-nm400-ne40-s0.stdout'))])
+        to_diff=[(ph.inFile('454-se-random-N100-nm400-ne40-s0.fasta'),
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0.fasta')),
+                 (ph.inFile('454-se-random-N100-nm400-ne40-s0.fasta.sam'),
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0.fasta.sam')),
+                 (ph.inFile('454-se-random-N100-nm400-ne40-s0.stdout'),
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('454-se-random-N1000-nm400-ne40-s0-sq.stdout'),
-        args=['454', '-N', '1000', '-nm', '400', '-ne', '40', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('454-se-random-N1000-nm400-ne40-s0-sq.fastq'),
+        redir_stdout=ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.stdout'),
+        args=['454', '-N', '100', '-nm', '400', '-ne', '40', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('454-se-random-N1000-nm400-ne40-s0-sq.fastq'),
-                  ph.outFile('454-se-random-N1000-nm400-ne40-s0-sq.fastq')),
-                 (ph.inFile('454-se-random-N1000-nm400-ne40-s0-sq.fastq.sam'),
-                  ph.outFile('454-se-random-N1000-nm400-ne40-s0-sq.fastq.sam')),
-                 (ph.inFile('454-se-random-N1000-nm400-ne40-s0-sq.stdout'),
-                  ph.outFile('454-se-random-N1000-nm400-ne40-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('454-se-random-N100-nm400-ne40-s0-sq.fastq'),
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.fastq')),
+                 (ph.inFile('454-se-random-N100-nm400-ne40-s0-sq.fastq.sam'),
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.fastq.sam')),
+                 (ph.inFile('454-se-random-N100-nm400-ne40-s0-sq.stdout'),
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('454-se-random-N1000-nm200-ne20-s0.stdout'),
-        args=['454', '-N', '1000', '-nm', '200', '-ne', '20', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('454-se-random-N1000-nm200-ne20-s0.fasta'),
+        redir_stdout=ph.outFile('454-se-random-N100-nm200-ne20-s0.stdout'),
+        args=['454', '-N', '100', '-nm', '200', '-ne', '20', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('454-se-random-N100-nm200-ne20-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('454-se-random-N1000-nm200-ne20-s0.fasta'),
-                  ph.outFile('454-se-random-N1000-nm200-ne20-s0.fasta')),
-                 (ph.inFile('454-se-random-N1000-nm200-ne20-s0.fasta.sam'),
-                  ph.outFile('454-se-random-N1000-nm200-ne20-s0.fasta.sam')),
-                 (ph.inFile('454-se-random-N1000-nm200-ne20-s0.stdout'),
-                  ph.outFile('454-se-random-N1000-nm200-ne20-s0.stdout'))])
+        to_diff=[(ph.inFile('454-se-random-N100-nm200-ne20-s0.fasta'),
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0.fasta')),
+                 (ph.inFile('454-se-random-N100-nm200-ne20-s0.fasta.sam'),
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0.fasta.sam')),
+                 (ph.inFile('454-se-random-N100-nm200-ne20-s0.stdout'),
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('454-se-random-N1000-nm200-ne20-s0-sq.stdout'),
-        args=['454', '-N', '1000', '-nm', '200', '-ne', '20', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('454-se-random-N1000-nm200-ne20-s0-sq.fastq'),
+        redir_stdout=ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.stdout'),
+        args=['454', '-N', '100', '-nm', '200', '-ne', '20', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('454-se-random-N1000-nm200-ne20-s0-sq.fastq'),
-                  ph.outFile('454-se-random-N1000-nm200-ne20-s0-sq.fastq')),
-                 (ph.inFile('454-se-random-N1000-nm200-ne20-s0-sq.fastq.sam'),
-                  ph.outFile('454-se-random-N1000-nm200-ne20-s0-sq.fastq.sam')),
-                 (ph.inFile('454-se-random-N1000-nm200-ne20-s0-sq.stdout'),
-                  ph.outFile('454-se-random-N1000-nm200-ne20-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('454-se-random-N100-nm200-ne20-s0-sq.fastq'),
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.fastq')),
+                 (ph.inFile('454-se-random-N100-nm200-ne20-s0-sq.fastq.sam'),
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.fastq.sam')),
+                 (ph.inFile('454-se-random-N100-nm200-ne20-s0-sq.stdout'),
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.stdout'))])
     conf_list.append(conf)
 
     # ============================================================
@@ -107,58 +107,58 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-random-N1000-n36-s0.stdout'),
-        args=['illumina', '-N', '1000', '-n', '36', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-random-N1000-n36-s0.fasta'),
+        redir_stdout=ph.outFile('illumina-se-random-N100-n36-s0.stdout'),
+        args=['illumina', '-N', '100', '-n', '36', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-random-N100-n36-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('illumina-se-random-N1000-n36-s0.fasta'),
-                  ph.outFile('illumina-se-random-N1000-n36-s0.fasta')),
-                 (ph.inFile('illumina-se-random-N1000-n36-s0.fasta.sam'),
-                  ph.outFile('illumina-se-random-N1000-n36-s0.fasta.sam')),
-                 (ph.inFile('illumina-se-random-N1000-n36-s0.stdout'),
-                  ph.outFile('illumina-se-random-N1000-n36-s0.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-random-N100-n36-s0.fasta'),
+                  ph.outFile('illumina-se-random-N100-n36-s0.fasta')),
+                 (ph.inFile('illumina-se-random-N100-n36-s0.fasta.sam'),
+                  ph.outFile('illumina-se-random-N100-n36-s0.fasta.sam')),
+                 (ph.inFile('illumina-se-random-N100-n36-s0.stdout'),
+                  ph.outFile('illumina-se-random-N100-n36-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-random-N1000-n36-s0-sq.stdout'),
-        args=['illumina', '-N', '1000', '-n', '36', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-random-N1000-n36-s0-sq.fastq'),
+        redir_stdout=ph.outFile('illumina-se-random-N100-n36-s0-sq.stdout'),
+        args=['illumina', '-N', '100', '-n', '36', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-random-N100-n36-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('illumina-se-random-N1000-n36-s0-sq.fastq'),
-                  ph.outFile('illumina-se-random-N1000-n36-s0-sq.fastq')),
-                 (ph.inFile('illumina-se-random-N1000-n36-s0-sq.fastq.sam'),
-                  ph.outFile('illumina-se-random-N1000-n36-s0-sq.fastq.sam')),
-                 (ph.inFile('illumina-se-random-N1000-n36-s0-sq.stdout'),
-                  ph.outFile('illumina-se-random-N1000-n36-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-random-N100-n36-s0-sq.fastq'),
+                  ph.outFile('illumina-se-random-N100-n36-s0-sq.fastq')),
+                 (ph.inFile('illumina-se-random-N100-n36-s0-sq.fastq.sam'),
+                  ph.outFile('illumina-se-random-N100-n36-s0-sq.fastq.sam')),
+                 (ph.inFile('illumina-se-random-N100-n36-s0-sq.stdout'),
+                  ph.outFile('illumina-se-random-N100-n36-s0-sq.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-random-N1000-n100-s0.stdout'),
-        args=['illumina', '-N', '1000', '-n', '100', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-random-N1000-n100-s0.fasta'),
+        redir_stdout=ph.outFile('illumina-se-random-N100-n100-s0.stdout'),
+        args=['illumina', '-N', '100', '-n', '100', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-random-N100-n100-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('illumina-se-random-N1000-n100-s0.fasta'),
-                  ph.outFile('illumina-se-random-N1000-n100-s0.fasta')),
-                 (ph.inFile('illumina-se-random-N1000-n100-s0.fasta.sam'),
-                  ph.outFile('illumina-se-random-N1000-n100-s0.fasta.sam')),
-                 (ph.inFile('illumina-se-random-N1000-n100-s0.stdout'),
-                  ph.outFile('illumina-se-random-N1000-n100-s0.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-random-N100-n100-s0.fasta'),
+                  ph.outFile('illumina-se-random-N100-n100-s0.fasta')),
+                 (ph.inFile('illumina-se-random-N100-n100-s0.fasta.sam'),
+                  ph.outFile('illumina-se-random-N100-n100-s0.fasta.sam')),
+                 (ph.inFile('illumina-se-random-N100-n100-s0.stdout'),
+                  ph.outFile('illumina-se-random-N100-n100-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-random-N1000-n100-s0-sq.stdout'),
-        args=['illumina', '-N', '1000', '-n', '100', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-random-N1000-n100-s0-sq.fastq'),
+        redir_stdout=ph.outFile('illumina-se-random-N100-n100-s0-sq.stdout'),
+        args=['illumina', '-N', '100', '-n', '100', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-random-N100-n100-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('illumina-se-random-N1000-n100-s0-sq.fastq'),
-                  ph.outFile('illumina-se-random-N1000-n100-s0-sq.fastq')),
-                 (ph.inFile('illumina-se-random-N1000-n100-s0-sq.fastq.sam'),
-                  ph.outFile('illumina-se-random-N1000-n100-s0-sq.fastq.sam')),
-                 (ph.inFile('illumina-se-random-N1000-n100-s0-sq.stdout'),
-                  ph.outFile('illumina-se-random-N1000-n100-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-random-N100-n100-s0-sq.fastq'),
+                  ph.outFile('illumina-se-random-N100-n100-s0-sq.fastq')),
+                 (ph.inFile('illumina-se-random-N100-n100-s0-sq.fastq.sam'),
+                  ph.outFile('illumina-se-random-N100-n100-s0-sq.fastq.sam')),
+                 (ph.inFile('illumina-se-random-N100-n100-s0-sq.stdout'),
+                  ph.outFile('illumina-se-random-N100-n100-s0-sq.stdout'))])
     conf_list.append(conf)
 
     # ============================================================
@@ -167,58 +167,58 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-adeno-N1000-n36-s0.stdout'),
-        args=['illumina', '-N', '1000', '-n', '36', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-adeno-N1000-n36-s0.fasta'),
+        redir_stdout=ph.outFile('illumina-se-adeno-N100-n36-s0.stdout'),
+        args=['illumina', '-N', '100', '-n', '36', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-adeno-N100-n36-s0.fasta'),
               ph.inFile('adeno-genome.fa')],
-        to_diff=[(ph.inFile('illumina-se-adeno-N1000-n36-s0.fasta'),
-                  ph.outFile('illumina-se-adeno-N1000-n36-s0.fasta')),
-                 (ph.inFile('illumina-se-adeno-N1000-n36-s0.fasta.sam'),
-                  ph.outFile('illumina-se-adeno-N1000-n36-s0.fasta.sam')),
-                 (ph.inFile('illumina-se-adeno-N1000-n36-s0.stdout'),
-                  ph.outFile('illumina-se-adeno-N1000-n36-s0.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-adeno-N100-n36-s0.fasta'),
+                  ph.outFile('illumina-se-adeno-N100-n36-s0.fasta')),
+                 (ph.inFile('illumina-se-adeno-N100-n36-s0.fasta.sam'),
+                  ph.outFile('illumina-se-adeno-N100-n36-s0.fasta.sam')),
+                 (ph.inFile('illumina-se-adeno-N100-n36-s0.stdout'),
+                  ph.outFile('illumina-se-adeno-N100-n36-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-adeno-N1000-n36-s0-sq.stdout'),
-        args=['illumina', '-N', '1000', '-n', '36', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-adeno-N1000-n36-s0-sq.fastq'),
+        redir_stdout=ph.outFile('illumina-se-adeno-N100-n36-s0-sq.stdout'),
+        args=['illumina', '-N', '100', '-n', '36', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-adeno-N100-n36-s0-sq.fastq'),
               ph.inFile('adeno-genome.fa')],
-        to_diff=[(ph.inFile('illumina-se-adeno-N1000-n36-s0-sq.fastq'),
-                  ph.outFile('illumina-se-adeno-N1000-n36-s0-sq.fastq')),
-                 (ph.inFile('illumina-se-adeno-N1000-n36-s0-sq.fastq.sam'),
-                  ph.outFile('illumina-se-adeno-N1000-n36-s0-sq.fastq.sam')),
-                 (ph.inFile('illumina-se-adeno-N1000-n36-s0-sq.stdout'),
-                  ph.outFile('illumina-se-adeno-N1000-n36-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-adeno-N100-n36-s0-sq.fastq'),
+                  ph.outFile('illumina-se-adeno-N100-n36-s0-sq.fastq')),
+                 (ph.inFile('illumina-se-adeno-N100-n36-s0-sq.fastq.sam'),
+                  ph.outFile('illumina-se-adeno-N100-n36-s0-sq.fastq.sam')),
+                 (ph.inFile('illumina-se-adeno-N100-n36-s0-sq.stdout'),
+                  ph.outFile('illumina-se-adeno-N100-n36-s0-sq.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-adeno-N1000-n100-s0.stdout'),
-        args=['illumina', '-N', '1000', '-n', '100', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-adeno-N1000-n100-s0.fasta'),
+        redir_stdout=ph.outFile('illumina-se-adeno-N100-n100-s0.stdout'),
+        args=['illumina', '-N', '100', '-n', '100', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-adeno-N100-n100-s0.fasta'),
               ph.inFile('adeno-genome.fa')],
-        to_diff=[(ph.inFile('illumina-se-adeno-N1000-n100-s0.fasta'),
-                  ph.outFile('illumina-se-adeno-N1000-n100-s0.fasta')),
-                 (ph.inFile('illumina-se-adeno-N1000-n100-s0.fasta.sam'),
-                  ph.outFile('illumina-se-adeno-N1000-n100-s0.fasta.sam')),
-                 (ph.inFile('illumina-se-adeno-N1000-n100-s0.stdout'),
-                  ph.outFile('illumina-se-adeno-N1000-n100-s0.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-adeno-N100-n100-s0.fasta'),
+                  ph.outFile('illumina-se-adeno-N100-n100-s0.fasta')),
+                 (ph.inFile('illumina-se-adeno-N100-n100-s0.fasta.sam'),
+                  ph.outFile('illumina-se-adeno-N100-n100-s0.fasta.sam')),
+                 (ph.inFile('illumina-se-adeno-N100-n100-s0.stdout'),
+                  ph.outFile('illumina-se-adeno-N100-n100-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-se-adeno-N1000-n100-s0-sq.stdout'),
-        args=['illumina', '-N', '1000', '-n', '100', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('illumina-se-adeno-N1000-n100-s0-sq.fastq'),
+        redir_stdout=ph.outFile('illumina-se-adeno-N100-n100-s0-sq.stdout'),
+        args=['illumina', '-N', '100', '-n', '100', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('illumina-se-adeno-N100-n100-s0-sq.fastq'),
               ph.inFile('adeno-genome.fa')],
-        to_diff=[(ph.inFile('illumina-se-adeno-N1000-n100-s0-sq.fastq'),
-                  ph.outFile('illumina-se-adeno-N1000-n100-s0-sq.fastq')),
-                 (ph.inFile('illumina-se-adeno-N1000-n100-s0-sq.fastq.sam'),
-                  ph.outFile('illumina-se-adeno-N1000-n100-s0-sq.fastq.sam')),
-                 (ph.inFile('illumina-se-adeno-N1000-n100-s0-sq.stdout'),
-                  ph.outFile('illumina-se-adeno-N1000-n100-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('illumina-se-adeno-N100-n100-s0-sq.fastq'),
+                  ph.outFile('illumina-se-adeno-N100-n100-s0-sq.fastq')),
+                 (ph.inFile('illumina-se-adeno-N100-n100-s0-sq.fastq.sam'),
+                  ph.outFile('illumina-se-adeno-N100-n100-s0-sq.fastq.sam')),
+                 (ph.inFile('illumina-se-adeno-N100-n100-s0-sq.stdout'),
+                  ph.outFile('illumina-se-adeno-N100-n100-s0-sq.stdout'))])
     conf_list.append(conf)
 
     # ============================================================
@@ -227,66 +227,66 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-pe-random-N1000-n36-s0.stdout'),
-        args=['illumina', '-mp', '-N', '1000', '-n', '36', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('illumina-pe-random-N1000-n36-s0.fasta'),
+        redir_stdout=ph.outFile('illumina-pe-random-N100-n36-s0.stdout'),
+        args=['illumina', '-mp', '-N', '100', '-n', '36', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('illumina-pe-random-N100-n36-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('illumina-pe-random-N1000-n36-s0_1.fasta'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0_1.fasta')),
-                 (ph.inFile('illumina-pe-random-N1000-n36-s0_2.fasta'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0_2.fasta')),
-                 (ph.inFile('illumina-pe-random-N1000-n36-s0.fasta.sam'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0.fasta.sam')),
-                 (ph.inFile('illumina-pe-random-N1000-n36-s0.stdout'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0.stdout'))])
+        to_diff=[(ph.inFile('illumina-pe-random-N100-n36-s0_1.fasta'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0_1.fasta')),
+                 (ph.inFile('illumina-pe-random-N100-n36-s0_2.fasta'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0_2.fasta')),
+                 (ph.inFile('illumina-pe-random-N100-n36-s0.fasta.sam'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0.fasta.sam')),
+                 (ph.inFile('illumina-pe-random-N100-n36-s0.stdout'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-pe-random-N1000-n36-s0-sq.stdout'),
-        args=['illumina', '-mp', '-N', '1000', '-n', '36', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('illumina-pe-random-N1000-n36-s0-sq.fastq'),
+        redir_stdout=ph.outFile('illumina-pe-random-N100-n36-s0-sq.stdout'),
+        args=['illumina', '-mp', '-N', '100', '-n', '36', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('illumina-pe-random-N100-n36-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('illumina-pe-random-N1000-n36-s0-sq_1.fastq'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0-sq_1.fastq')),
-                 (ph.inFile('illumina-pe-random-N1000-n36-s0-sq_2.fastq'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0-sq_2.fastq')),
-                 (ph.inFile('illumina-pe-random-N1000-n36-s0-sq.fastq.sam'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0-sq.fastq.sam')),
-                 (ph.inFile('illumina-pe-random-N1000-n36-s0-sq.stdout'),
-                  ph.outFile('illumina-pe-random-N1000-n36-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('illumina-pe-random-N100-n36-s0-sq_1.fastq'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0-sq_1.fastq')),
+                 (ph.inFile('illumina-pe-random-N100-n36-s0-sq_2.fastq'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0-sq_2.fastq')),
+                 (ph.inFile('illumina-pe-random-N100-n36-s0-sq.fastq.sam'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0-sq.fastq.sam')),
+                 (ph.inFile('illumina-pe-random-N100-n36-s0-sq.stdout'),
+                  ph.outFile('illumina-pe-random-N100-n36-s0-sq.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-pe-random-N1000-n100-s0.stdout'),
-        args=['illumina', '-mp', '-N', '1000', '-n', '100', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('illumina-pe-random-N1000-n100-s0.fasta'),
+        redir_stdout=ph.outFile('illumina-pe-random-N100-n100-s0.stdout'),
+        args=['illumina', '-mp', '-N', '100', '-n', '100', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('illumina-pe-random-N100-n100-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('illumina-pe-random-N1000-n100-s0_1.fasta'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0_1.fasta')),
-                 (ph.inFile('illumina-pe-random-N1000-n100-s0_2.fasta'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0_2.fasta')),
-                 (ph.inFile('illumina-pe-random-N1000-n100-s0.fasta.sam'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0.fasta.sam')),
-                 (ph.inFile('illumina-pe-random-N1000-n100-s0.stdout'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0.stdout'))])
+        to_diff=[(ph.inFile('illumina-pe-random-N100-n100-s0_1.fasta'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0_1.fasta')),
+                 (ph.inFile('illumina-pe-random-N100-n100-s0_2.fasta'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0_2.fasta')),
+                 (ph.inFile('illumina-pe-random-N100-n100-s0.fasta.sam'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0.fasta.sam')),
+                 (ph.inFile('illumina-pe-random-N100-n100-s0.stdout'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('illumina-pe-random-N1000-n100-s0-sq.stdout'),
-        args=['illumina', '-mp', '-N', '1000', '-n', '100', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('illumina-pe-random-N1000-n100-s0-sq.fastq'),
+        redir_stdout=ph.outFile('illumina-pe-random-N100-n100-s0-sq.stdout'),
+        args=['illumina', '-mp', '-N', '100', '-n', '100', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('illumina-pe-random-N100-n100-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('illumina-pe-random-N1000-n100-s0-sq_1.fastq'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0-sq_1.fastq')),
-                 (ph.inFile('illumina-pe-random-N1000-n100-s0-sq_2.fastq'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0-sq_2.fastq')),
-                 (ph.inFile('illumina-pe-random-N1000-n100-s0-sq.fastq.sam'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0-sq.fastq.sam')),
-                 (ph.inFile('illumina-pe-random-N1000-n100-s0-sq.stdout'),
-                  ph.outFile('illumina-pe-random-N1000-n100-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('illumina-pe-random-N100-n100-s0-sq_1.fastq'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0-sq_1.fastq')),
+                 (ph.inFile('illumina-pe-random-N100-n100-s0-sq_2.fastq'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0-sq_2.fastq')),
+                 (ph.inFile('illumina-pe-random-N100-n100-s0-sq.fastq.sam'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0-sq.fastq.sam')),
+                 (ph.inFile('illumina-pe-random-N100-n100-s0-sq.stdout'),
+                  ph.outFile('illumina-pe-random-N100-n100-s0-sq.stdout'))])
     conf_list.append(conf)
 
     # ============================================================
@@ -295,58 +295,58 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('sanger-se-random-N1000-nm400-ne40-s0.stdout'),
-        args=['sanger', '-N', '1000', '-nm', '400', '-ne', '40', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('sanger-se-random-N1000-nm400-ne40-s0.fasta'),
+        redir_stdout=ph.outFile('sanger-se-random-N100-nm400-ne40-s0.stdout'),
+        args=['sanger', '-N', '100', '-nm', '400', '-ne', '40', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('sanger-se-random-N100-nm400-ne40-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('sanger-se-random-N1000-nm400-ne40-s0.fasta'),
-                  ph.outFile('sanger-se-random-N1000-nm400-ne40-s0.fasta')),
-                 (ph.inFile('sanger-se-random-N1000-nm400-ne40-s0.fasta.sam'),
-                  ph.outFile('sanger-se-random-N1000-nm400-ne40-s0.fasta.sam')),
-                 (ph.inFile('sanger-se-random-N1000-nm400-ne40-s0.stdout'),
-                  ph.outFile('sanger-se-random-N1000-nm400-ne40-s0.stdout'))])
+        to_diff=[(ph.inFile('sanger-se-random-N100-nm400-ne40-s0.fasta'),
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0.fasta')),
+                 (ph.inFile('sanger-se-random-N100-nm400-ne40-s0.fasta.sam'),
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0.fasta.sam')),
+                 (ph.inFile('sanger-se-random-N100-nm400-ne40-s0.stdout'),
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('sanger-se-random-N1000-nm400-ne40-s0-sq.stdout'),
-        args=['sanger', '-N', '1000', '-nm', '400', '-ne', '40', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('sanger-se-random-N1000-nm400-ne40-s0-sq.fastq'),
+        redir_stdout=ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.stdout'),
+        args=['sanger', '-N', '100', '-nm', '400', '-ne', '40', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('sanger-se-random-N1000-nm400-ne40-s0-sq.fastq'),
-                  ph.outFile('sanger-se-random-N1000-nm400-ne40-s0-sq.fastq')),
-                 (ph.inFile('sanger-se-random-N1000-nm400-ne40-s0-sq.fastq.sam'),
-                  ph.outFile('sanger-se-random-N1000-nm400-ne40-s0-sq.fastq.sam')),
-                 (ph.inFile('sanger-se-random-N1000-nm400-ne40-s0-sq.stdout'),
-                  ph.outFile('sanger-se-random-N1000-nm400-ne40-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('sanger-se-random-N100-nm400-ne40-s0-sq.fastq'),
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.fastq')),
+                 (ph.inFile('sanger-se-random-N100-nm400-ne40-s0-sq.fastq.sam'),
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.fastq.sam')),
+                 (ph.inFile('sanger-se-random-N100-nm400-ne40-s0-sq.stdout'),
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('sanger-se-random-N1000-nm200-ne20-s0.stdout'),
-        args=['sanger', '-N', '1000', '-nm', '200', '-ne', '20', '-s', '0', '-rnp', 'read',
-              '-o', ph.outFile('sanger-se-random-N1000-nm200-ne20-s0.fasta'),
+        redir_stdout=ph.outFile('sanger-se-random-N100-nm200-ne20-s0.stdout'),
+        args=['sanger', '-N', '100', '-nm', '200', '-ne', '20', '-s', '0', '-rnp', 'read',
+              '-o', ph.outFile('sanger-se-random-N100-nm200-ne20-s0.fasta'),
               'random'],
-        to_diff=[(ph.inFile('sanger-se-random-N1000-nm200-ne20-s0.fasta'),
-                  ph.outFile('sanger-se-random-N1000-nm200-ne20-s0.fasta')),
-                 (ph.inFile('sanger-se-random-N1000-nm200-ne20-s0.fasta.sam'),
-                  ph.outFile('sanger-se-random-N1000-nm200-ne20-s0.fasta.sam')),
-                 (ph.inFile('sanger-se-random-N1000-nm200-ne20-s0.stdout'),
-                  ph.outFile('sanger-se-random-N1000-nm200-ne20-s0.stdout'))])
+        to_diff=[(ph.inFile('sanger-se-random-N100-nm200-ne20-s0.fasta'),
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0.fasta')),
+                 (ph.inFile('sanger-se-random-N100-nm200-ne20-s0.fasta.sam'),
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0.fasta.sam')),
+                 (ph.inFile('sanger-se-random-N100-nm200-ne20-s0.stdout'),
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0.stdout'))])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        redir_stdout=ph.outFile('sanger-se-random-N1000-nm200-ne20-s0-sq.stdout'),
-        args=['sanger', '-N', '1000', '-nm', '200', '-ne', '20', '-s', '0', '-sq', '-rnp', 'read',
-              '-o', ph.outFile('sanger-se-random-N1000-nm200-ne20-s0-sq.fastq'),
+        redir_stdout=ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.stdout'),
+        args=['sanger', '-N', '100', '-nm', '200', '-ne', '20', '-s', '0', '-sq', '-rnp', 'read',
+              '-o', ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.fastq'),
               'random'],
-        to_diff=[(ph.inFile('sanger-se-random-N1000-nm200-ne20-s0-sq.fastq'),
-                  ph.outFile('sanger-se-random-N1000-nm200-ne20-s0-sq.fastq')),
-                 (ph.inFile('sanger-se-random-N1000-nm200-ne20-s0-sq.fastq.sam'),
-                  ph.outFile('sanger-se-random-N1000-nm200-ne20-s0-sq.fastq.sam')),
-                 (ph.inFile('sanger-se-random-N1000-nm200-ne20-s0-sq.stdout'),
-                  ph.outFile('sanger-se-random-N1000-nm200-ne20-s0-sq.stdout'))])
+        to_diff=[(ph.inFile('sanger-se-random-N100-nm200-ne20-s0-sq.fastq'),
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.fastq')),
+                 (ph.inFile('sanger-se-random-N100-nm200-ne20-s0-sq.fastq.sam'),
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.fastq.sam')),
+                 (ph.inFile('sanger-se-random-N100-nm200-ne20-s0-sq.stdout'),
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.stdout'))])
     conf_list.append(conf)
 
     # Execute the tests.
