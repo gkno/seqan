@@ -1485,14 +1485,6 @@ _convertOptionValue(CommandLineOption const & opt, unsigned int & dst, CharStrin
 }
 
 inline bool
-_convertOptionValue(CommandLineOption const & opt, size_t & dst, CharString const & src)
-{
-    if (!isIntOption(opt)) return false;
-	std::istringstream stream(toCString(src));
-	return !(stream >> dst).fail();
-}
-
-inline bool
 _convertOptionValue(CommandLineOption const & opt, __int64 & dst, CharString const & src)
 {
     if (!isIntOption(opt)) return false;
