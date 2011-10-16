@@ -6,41 +6,41 @@ BasicEnglish_KingJames_Bible_emerging_0.002_5.res bbe.fa kjv.fa --growth 0.002 5
 BasicEnglish_KingJames_Bible_minmax_155_15551.res bbe.fa kjv.fa --minmax 155 31102 --minmax 1 15551 -m
 Windows_Other_emerging_0.002_5.res CompWindows.fa CompNonWindows.fa --growth 0.002 5
 Windows_Other_minmax_10_1500.res CompWindows.fa CompNonWindows.fa --minmax 10 2000 --minmax 1 1500
-Windows_Other_emerging_0.0005_5.res CompWindows.fa CompNonWindows.fa --growth 0.0005 5
-Windows_Other_emerging_0.001_5.res CompWindows.fa CompNonWindows.fa --growth 0.001 5
-Windows_Other_emerging_0.005_5.res CompWindows.fa CompNonWindows.fa --growth 0.005 5
-Windows_Other_emerging_0.01_5.res CompWindows.fa CompNonWindows.fa --growth 0.01 5
-Windows_Other_emerging_0.05_5.res CompWindows.fa CompNonWindows.fa --growth 0.05 5
-Windows_Other_emerging_0.1_5.res CompWindows.fa CompNonWindows.fa --growth 0.1 5
-Windows_Other_emerging_0.15_5.res CompWindows.fa CompNonWindows.fa --growth 0.15 5
-Windows_Other_emerging_0.2_5.res CompWindows.fa CompNonWindows.fa --growth 0.2 5
-Windows_Other_emerging_0.25_5.res CompWindows.fa CompNonWindows.fa --growth 0.25 5
-Windows_Other_emerging_0.3_5.res CompWindows.fa CompNonWindows.fa --growth 0.3 5
-Windows_Other_emerging_0.35_5.res CompWindows.fa CompNonWindows.fa --growth 0.35 5
-Windows_Other_emerging_0.4_5.res CompWindows.fa CompNonWindows.fa --growth 0.4 5
-Windows_Other_emerging_0.45_5.res CompWindows.fa CompNonWindows.fa --growth 0.45 5
-Windows_Other_emerging_0.5_5.res CompWindows.fa CompNonWindows.fa --growth 0.5 5
-Windows_Other_emerging_0.6_5.res CompWindows.fa CompNonWindows.fa --growth 0.6 5
-Windows_Other_emerging_0.7_5.res CompWindows.fa CompNonWindows.fa --growth 0.7 5
-Windows_Other_emerging_0.8_5.res CompWindows.fa CompNonWindows.fa --growth 0.8 5
-Windows_Other_emerging_0.9_5.res CompWindows.fa CompNonWindows.fa --growth 0.9 5
-Windows_Other_emerging_1_5.res CompWindows.fa CompNonWindows.fa --growth 1 5
-Windows_Other_emerging_0.002_1.res CompWindows.fa CompNonWindows.fa --growth 0.002 1
-Windows_Other_emerging_0.002_1.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 1.5
-Windows_Other_emerging_0.002_2.res CompWindows.fa CompNonWindows.fa --growth 0.002 2
-Windows_Other_emerging_0.002_2.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 2.5
-Windows_Other_emerging_0.002_3.res CompWindows.fa CompNonWindows.fa --growth 0.002 3
-Windows_Other_emerging_0.002_3.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 3.5
-Windows_Other_emerging_0.002_4.res CompWindows.fa CompNonWindows.fa --growth 0.002 4
-Windows_Other_emerging_0.002_4.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 4.5
-Windows_Other_emerging_0.002_5.res CompWindows.fa CompNonWindows.fa --growth 0.002 5
-Windows_Other_emerging_0.002_5.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 5.5
-Windows_Other_emerging_0.002_6.res CompWindows.fa CompNonWindows.fa --growth 0.002 6
-Windows_Other_emerging_0.002_6.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 6.5
-Windows_Other_emerging_0.002_7.res CompWindows.fa CompNonWindows.fa --growth 0.002 7
-Windows_Other_emerging_0.002_7.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 7.5
-Windows_Other_emerging_0.002_8.res CompWindows.fa CompNonWindows.fa --growth 0.002 8
-Windows_Other_emerging_0.002_8.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 8.5
-Windows_Other_emerging_0.002_9.res CompWindows.fa CompNonWindows.fa --growth 0.002 9
-Windows_Other_emerging_0.002_9.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 9.5
-Windows_Other_emerging_0.002_10.res CompWindows.fa CompNonWindows.fa --growth 0.002 10
+Windows_Other_emerging_0.0005_5.res CompWindows.fa CompNonWindows.fa --growth 0.0005 5 -m
+Windows_Other_emerging_0.001_5.res CompWindows.fa CompNonWindows.fa --growth 0.001 5 -m
+Windows_Other_emerging_0.005_5.res CompWindows.fa CompNonWindows.fa --growth 0.005 5 -m
+Windows_Other_emerging_0.01_5.res CompWindows.fa CompNonWindows.fa --growth 0.01 5 -m
+Windows_Other_emerging_0.05_5.res CompWindows.fa CompNonWindows.fa --growth 0.05 5 -m
+Windows_Other_emerging_0.1_5.res CompWindows.fa CompNonWindows.fa --growth 0.1 5 -m
+Windows_Other_emerging_0.15_5.res CompWindows.fa CompNonWindows.fa --growth 0.15 5 -m
+Windows_Other_emerging_0.2_5.res CompWindows.fa CompNonWindows.fa --growth 0.2 5 -m
+Windows_Other_emerging_0.25_5.res CompWindows.fa CompNonWindows.fa --growth 0.25 5 -m
+Windows_Other_emerging_0.3_5.res CompWindows.fa CompNonWindows.fa --growth 0.3 5 -m
+Windows_Other_emerging_0.35_5.res CompWindows.fa CompNonWindows.fa --growth 0.35 5 -m
+Windows_Other_emerging_0.4_5.res CompWindows.fa CompNonWindows.fa --growth 0.4 5 -m
+Windows_Other_emerging_0.45_5.res CompWindows.fa CompNonWindows.fa --growth 0.45 5 -m
+Windows_Other_emerging_0.5_5.res CompWindows.fa CompNonWindows.fa --growth 0.5 5 -m
+Windows_Other_emerging_0.6_5.res CompWindows.fa CompNonWindows.fa --growth 0.6 5 -m
+Windows_Other_emerging_0.7_5.res CompWindows.fa CompNonWindows.fa --growth 0.7 5 -m
+Windows_Other_emerging_0.8_5.res CompWindows.fa CompNonWindows.fa --growth 0.8 5 -m
+Windows_Other_emerging_0.9_5.res CompWindows.fa CompNonWindows.fa --growth 0.9 5 -m
+Windows_Other_emerging_1_5.res CompWindows.fa CompNonWindows.fa --growth 1 5 -m
+Windows_Other_emerging_0.002_1.res CompWindows.fa CompNonWindows.fa --growth 0.002 1 -m
+Windows_Other_emerging_0.002_1.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 1.5 -m
+Windows_Other_emerging_0.002_2.res CompWindows.fa CompNonWindows.fa --growth 0.002 2 -m
+Windows_Other_emerging_0.002_2.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 2.5 -m
+Windows_Other_emerging_0.002_3.res CompWindows.fa CompNonWindows.fa --growth 0.002 3 -m
+Windows_Other_emerging_0.002_3.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 3.5 -m
+Windows_Other_emerging_0.002_4.res CompWindows.fa CompNonWindows.fa --growth 0.002 4 -m
+Windows_Other_emerging_0.002_4.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 4.5 -m
+Windows_Other_emerging_0.002_5.res CompWindows.fa CompNonWindows.fa --growth 0.002 5 -m
+Windows_Other_emerging_0.002_5.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 5.5 -m
+Windows_Other_emerging_0.002_6.res CompWindows.fa CompNonWindows.fa --growth 0.002 6 -m
+Windows_Other_emerging_0.002_6.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 6.5 -m
+Windows_Other_emerging_0.002_7.res CompWindows.fa CompNonWindows.fa --growth 0.002 7 -m
+Windows_Other_emerging_0.002_7.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 7.5 -m
+Windows_Other_emerging_0.002_8.res CompWindows.fa CompNonWindows.fa --growth 0.002 8 -m
+Windows_Other_emerging_0.002_8.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 8.5 -m
+Windows_Other_emerging_0.002_9.res CompWindows.fa CompNonWindows.fa --growth 0.002 9 -m
+Windows_Other_emerging_0.002_9.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 9.5 -m
+Windows_Other_emerging_0.002_10.res CompWindows.fa CompNonWindows.fa --growth 0.002 10 -m
