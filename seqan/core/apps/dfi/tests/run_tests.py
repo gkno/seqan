@@ -12,15 +12,18 @@ Usage:  run_tests.py SOURCE_ROOT_PATH BINARY_ROOT_PATH
 import logging
 import os.path
 import sys
+import zipfile
 
 import seqan.app_tests as app_tests
 
 def unzip_file_into_dir(file, dir):
-    os.mkdir(dir, 0777)
+    if not os.path.exists(dir):
+        os.mkdir(dir, 0777)
     zfobj = zipfile.ZipFile(file)
     for name in zfobj.namelist():
         if name.endswith('/'):
-            os.mkdir(os.path.join(dir, name))
+            if not os.path.exists(os.path.join(dir, name)):
+                os.mkdir(os.path.join(dir, name))
         else:
             outfile = open(os.path.join(dir, name), 'wb')
             outfile.write(zfobj.read(name))
@@ -30,7 +33,7 @@ def main(source_base, binary_base):
     """Main entry point of the script."""
 
     print 'Executing test for dfi'
-    print '========================='
+    print '======================'
     print
 
     ph = app_tests.TestPathHelper(
@@ -61,8 +64,7 @@ def main(source_base, binary_base):
     # We run the following for all read lengths we have reads for.
     for paramLine in paramsFile.readlines():
         params = paramLine.split();
-        print params;
-        # Run with default options.
+        # Run with options parsed from params file.
         conf = app_tests.TestConf(
             program=path_to_program,
             redir_stdout=ph.outFile(params[0]),

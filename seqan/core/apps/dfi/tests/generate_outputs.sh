@@ -58,4 +58,15 @@ do
 	echo ${RESFILE} ${inputPos} ${inputNeg} --growth ${supp} ${growth} ${flag} >> params.txt
 done
 
+# run dummy example (see dfi README)
+supp=1
+growth=2
+inputPos=fasta1.fa
+inputNeg=fasta2.fa
+result=Example
+    RESFILE=${result}_emerging_${supp}_${growth}.res
+    ${DFI} ${inputPos} ${inputNeg} --growth ${supp} ${growth} ${flag} > ${RESFILE}
+    echo ${RESFILE} ${inputPos} ${inputNeg} --growth ${supp} ${growth} ${flag} >> params.txt
+
+
 zip results.zip *.res
