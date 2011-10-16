@@ -187,7 +187,7 @@ enum {
 										// 3..use Fasta id, do not append /L and /R for mate pairs.
 		unsigned	sortOrder;			// 0..sort keys: 1. read number, 2. genome position
 										// 1..           1. genome pos50ition, 2. read number
-		unsigned	positionFormat;		// 0..gap space
+		int			positionFormat;		// 0..gap space
 										// 1..position space
 		const char	*runID;				// runID needed for gff output
         bool        computeGlobal;      // compute global alignment in SAM output
@@ -1967,17 +1967,14 @@ matchVerify(
 		SEQAN_ASSERT_LT(pos + 1, length(origInf));
 		if ((verifier.options->compMask[ordValue(origInf[pos + 1])] & verifier.options->compMask[ordValue(back(readSet[readId]))]) == 0)
 			if (--score < minScore) continue;
-#endif		
-//        std::cerr << "found " << pos << ", " << length(host(inf)) - pos << ", " << score << "\tlastPos + minDistance == " << lastPos << " + " << minDistance << std::endl;
+#endif
 #ifdef RAZERS_ISLAND_CRITERION
 		if (lastPos + minDistance < pos)
 		{
 			if (minScore <= maxScore)
 			{
 				verifier.m.endPos = beginPosition(inf) + maxPos + 1;
-//				verifier.m.errors = -maxScore;
 
-				verifier.m.pairScore = verifier.m.score = maxScore;
 				if (maxScore == 0)
 					verifier.m.beginPos = verifier.m.endPos - ndlLength;
 				else
@@ -2017,14 +2014,26 @@ matchVerify(
 
 					verifier.m.beginPos = verifier.m.endPos;
 #ifdef RAZERS_BANDED_MYERS
-					while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
+					while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore))
+                    {
+                        if (maxScore <= getScore(verifier.revPatternState))
+                        {
+                            maxScore = getScore(verifier.revPatternState);
+                            verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+                        }
+                    }
 #else
 					_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
 					_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
-					while (find(myersFinderRev, myersPatternRev, maxScore)) {
-#endif
-						verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+					while (find(myersFinderRev, myersPatternRev, maxScore))
+                    {
+                        if (maxScore <= getScore(myersPatternRev))
+                        {
+                            maxScore = getScore(myersPatternRev);
+                            verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+                        }
                     }
+#endif
 					setBeginPosition(inf, infBeginPos);
 					setEndPosition(inf, infEndPos);
 #ifdef RAZERS_BANDED_MYERS
@@ -2040,6 +2049,7 @@ matchVerify(
 				// The match end position must be increased by the omitted base.
 				++verifier.m.endPos;
 #endif
+				verifier.m.pairScore = verifier.m.score = maxScore;
 				verifier.push();
 				maxScore = minScore - 1;
                 minSinkDistance = MaxValue<TDistance>::VALUE;
@@ -2066,7 +2076,6 @@ matchVerify(
 	{
 		verifier.m.endPos = beginPosition(inf) + maxPos + 1;
 //		verifier.m.errors = -maxScore;
-		verifier.m.pairScore = verifier.m.score = maxScore;
         
         if (maxScore == 0)
             verifier.m.beginPos = verifier.m.endPos - ndlLength;
@@ -2105,14 +2114,26 @@ matchVerify(
 
             verifier.m.beginPos = verifier.m.endPos;
 #ifdef RAZERS_BANDED_MYERS
-            while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore)) {
+            while (find(myersFinderRev, readRev, verifier.revPatternState, maxScore))
+            {
+				if (maxScore <= getScore(verifier.revPatternState))
+				{
+                    maxScore = getScore(verifier.revPatternState);
+                    verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+                }
+            }
 #else
             _patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
             _patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
-            while (find(myersFinderRev, myersPatternRev, maxScore)) {
-#endif
-                verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+            while (find(myersFinderRev, myersPatternRev, maxScore))
+            {
+                if (maxScore <= getScore(myersPatternRev))
+                {
+                    maxScore = getScore(myersPatternRev);
+                    verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
+                }
             }
+#endif
 #ifdef RAZERS_BANDED_MYERS
             if (verifier.m.beginPos == verifier.m.endPos)
             {
@@ -2130,6 +2151,8 @@ matchVerify(
         ++verifier.m.endPos;
 #endif
 
+		verifier.m.pairScore = verifier.m.score = maxScore;
+//		verifier.m.errors = -maxScore;
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
         
