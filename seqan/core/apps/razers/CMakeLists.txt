@@ -10,7 +10,7 @@ seqan_add_executable(razers razers.cpp
 			    razers_spliced.h
 			    readSimulator.h)
 
-# Install pair_align in /bin directory
+# Install razers in /bin directory
 install(TARGETS razers
         DESTINATION bin)
 
