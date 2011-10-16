@@ -72,7 +72,7 @@ namespace SEQAN_NAMESPACE_MAIN
 										// 3..use Fasta id, do not append /L and /R for mate pairs.
 		unsigned	sortOrder;			// 0..sort keys: 1. read number, 2. genome position
 										// 1..           1. genome pos50ition, 2. read number
-		unsigned	positionFormat;		// 0..gap space
+		int			positionFormat;		// 0..gap space
 										// 1..position space
 		const char	*runID;				// runID needed for gff output
         bool dontShrinkAlignments;
