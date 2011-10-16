@@ -44,4 +44,4 @@ Windows_Other_emerging_0.002_8.5.res CompWindows.fa CompNonWindows.fa --growth 0
 Windows_Other_emerging_0.002_9.res CompWindows.fa CompNonWindows.fa --growth 0.002 9 -m
 Windows_Other_emerging_0.002_9.5.res CompWindows.fa CompNonWindows.fa --growth 0.002 9.5 -m
 Windows_Other_emerging_0.002_10.res CompWindows.fa CompNonWindows.fa --growth 0.002 10 -m
-Example_emerging_1_2.res fasta1.fa fasta2.fa --growth 1 2 -m
+Example_emerging_1_2.res fasta1.fa fasta2.fa --growth 1 2
