@@ -101,8 +101,9 @@ void intervalizeErrorCurves(String<WitRecord> & result,
                 }
                 ContigInterval &interval = back(intervals[e]);
                 // Either extend the interval or create a new one.
-                SEQAN_ASSERT_LEQ(interval.last, it->pos);
-                if (interval.last + 1 == it->pos)
+                if (interval.contigId == it->contigId && interval.isForward == it->isForward)
+                    SEQAN_ASSERT_LEQ(interval.last, it->pos);
+                if (interval.contigId == it->contigId && interval.isForward == it->isForward && interval.last + 1 == it->pos)
                     back(intervals[e]).last += 1;
                 else
                     appendValue(intervals[e], ContigInterval(it->contigId, it->isForward, it->pos, it->pos));

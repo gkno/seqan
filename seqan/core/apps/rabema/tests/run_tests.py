@@ -123,7 +123,6 @@ def main(source_base, binary_base):
     # Execute the tests.
     failures = 0
     for conf in conf_list:
-        print ' '.join(['rabema'] + conf.args)
         res = app_tests.runTest(conf)
         # Output to the user.
         print ' '.join(['rabema'] + conf.args),
