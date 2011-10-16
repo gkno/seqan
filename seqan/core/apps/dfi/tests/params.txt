@@ -4,8 +4,8 @@ human_dros_promoter_emerging_0.002_5.res human_ucsc.fa dros_promos.fa --growth 0
 human_dros_promoter_minmax_75_5457.res human_ucsc.fa dros_promos.fa --minmax 75 15011 --minmax 1 5457 -d
 BasicEnglish_KingJames_Bible_emerging_0.002_5.res bbe.fa kjv.fa --growth 0.002 5 -m
 BasicEnglish_KingJames_Bible_minmax_155_15551.res bbe.fa kjv.fa --minmax 155 31102 --minmax 1 15551 -m
-Windows_Other_emerging_0.002_5.res CompWindows.fa CompNonWindows.fa --growth 0.002 5
-Windows_Other_minmax_10_1500.res CompWindows.fa CompNonWindows.fa --minmax 10 2000 --minmax 1 1500
+Windows_Other_emerging_0.002_5.res CompWindows.fa CompNonWindows.fa --growth 0.002 5 -m
+Windows_Other_minmax_10_1500.res CompWindows.fa CompNonWindows.fa --minmax 10 2000 --minmax 1 1500 -m
 Windows_Other_emerging_0.0005_5.res CompWindows.fa CompNonWindows.fa --growth 0.0005 5 -m
 Windows_Other_emerging_0.001_5.res CompWindows.fa CompNonWindows.fa --growth 0.001 5 -m
 Windows_Other_emerging_0.005_5.res CompWindows.fa CompNonWindows.fa --growth 0.005 5 -m

@@ -10,7 +10,7 @@ DFI=../../../../build/make.linux/core/apps/dfi/dfi
 set1=( 25.H_sapiens.fa  human_ucsc.fa  bbe.fa CompWindows.fa )
 set2=( 59.M_musculus.fa dros_promos.fa kjv.fa CompNonWindows.fa )
 out=( Human_Mouse_Proteome human_dros_promoter BasicEnglish_KingJames_Bible Windows_Other )
-flags=( -p -d -m "" )
+flags=( -p -d -m -m )
 rm -f params.txt results.zip *.res
 
 for (( i = 0 ; i < ${#out[@]} ; i++ ))
