@@ -399,7 +399,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
     assignSource(row(align, 1), readSeq);
     
     if (!(errors == 0 || (errors == 1 && length(readSeq) == length(source(row(align, 0))))))
-        globalAlignment(align, Score<short, EditDistance>());
+        errors = -globalAlignment(align, Score<short, EditDistance>());
 	getCigarString(cigar, row(align, 0), row(align, 1));
 	getMDString(md, row(align, 0), row(align, 1));
 }
@@ -1392,7 +1392,10 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
 				clear(readSeq);
 			
             // <cigar>
-            alignAndGetCigarString(cigar, md, store.contigStore[(*it).contigId], readSeq, *it, store.alignQualityStore[alignedId].errors, doAlign);
+			int errors = -1;
+			if (alignedId < length(store.alignQualityStore))
+				errors = store.alignQualityStore[alignedId].errors;
+            alignAndGetCigarString(cigar, md, store.contigStore[(*it).contigId], readSeq, *it, errors, doAlign);
 			_streamWrite(target, cigar);
             _streamPut(target, '\t');
             
