@@ -69,7 +69,8 @@ DEFAULT_AUTHOR = 'Your Name <your.email@example.net>'
 # Program usage string for command line parser.
 USAGE = """
 Usage: %prog [options] repository NAME
-       %prog [options] [module|test|app|demo|header|lheader] NAME LOCATION
+       %prog [options] [module|test|app|demo|header|lheader] LOCATION
+       %prog [options] app_tests LOCATION
 """.strip()
 
 # Program description, used for command line parser.  Will be wrapped by, though.
@@ -78,7 +79,7 @@ The SeqAn code generator.
 
 The first version ("repository") is to be be called to create your new entries
 below the directory sandbox.  The second version is to be called to create new
-library modules, tests, apps, and demos inside a sandbox.
+library modules, tests, apps, app tests, and demos inside a sandbox.
 """.strip()
 #"""
 #Example:
@@ -161,6 +162,10 @@ def buildReplacements(type_, name, location, target_file, options):
     result['CMAKE_PROJECT_NAME'] = cmake_project_name
     if type_ == 'repository':
         result['REPOSITORY_PSEUDO_TARGET_NAME'] = string.capwords(name.replace('/', ' ')).replace(' ', '')
+    if type_ == 'app_tests':
+        result['APP_NAME'] = os.path.split(os.path.split(location)[0])[1]
+        result['APP_NAME_U'] = result['APP_NAME'].upper()
+        result['LOCATION'] = os.path.join(os.path.split(os.path.normpath(location))[0])
     return result
 
 def _checkTargetPaths(target_path):
@@ -371,6 +376,43 @@ def createRepository(location, options):
         configureFile(target_file, source_file, replacements, options.dry_run)
     return 0
 
+def createAppTests(location, options):
+    print 'Creating app tests at %s' % location
+    tests_location = os.path.join(location, 'tests')
+    target_path = paths.pathToRepository(tests_location)
+    if options.create_dirs and not _checkTargetPaths(target_path):
+        return 1
+    print '  Target path is: %s' % target_path
+    print ''
+
+    # Create directories.
+    if options.create_dirs:
+        createDirectory(target_path, options.dry_run)
+
+    # Copy over file ${APP}/tests/generate_outputs.sh
+    target_file = os.path.join(target_path, 'generate_outputs.sh')
+    source_file = paths.pathToTemplate('app_tests_template', 'generate_outputs.sh')
+    replacements = buildReplacements('app_tests', location, target_path, target_file, options)
+    configureFile(target_file, source_file, replacements, options.dry_run)
+    # Copy over file ${APP}/tests/run_tests.py
+    target_file = os.path.join(target_path, 'run_tests.py')
+    source_file = paths.pathToTemplate('app_tests_template', 'run_tests.py')
+    replacements = buildReplacements('app_tests', location, target_path, target_file, options)
+    configureFile(target_file, source_file, replacements, options.dry_run)
+
+    print '=' * 80
+    print 'Do not forget to add the tests in %s:' % os.path.join(location, 'CMakeLists.txt')
+    print ''
+    print '# Add app tests if Python interpreter could be found.'
+    print 'if(PYTHONINTERP_FOUND)'
+    print '  add_test(NAME app_test_%s COMMAND ${PYTHON_EXECUTABLE}' % os.path.split(location)[-1]
+    print '    ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tests.py ${CMAKE_SOURCE_DIR}'
+    print '    ${CMAKE_BINARY_DIR})'
+    print 'endif(PYTHONINTERP_FOUND)'
+    print '=' * 80
+    
+    return 0
+
 def main():
     # Parse arguments.
     parser = optparse.OptionParser(usage=USAGE, description=DESCRIPTION)
@@ -417,14 +459,18 @@ def main():
         print >>sys.stderr, 'Invalid argument count!'
         return 1
     if args[0] not in ['module', 'test', 'app', 'demo', 'repository',
-                       'header', 'lheader']:
+                       'header', 'lheader', 'app_tests']:
         print >>sys.stderr, 'Invalid template "%s".' % args[0]
         return 1
-    if args[0] == 'repository':
+    if args[0] in['repository', 'app_tests']:
         if len(args) != 2:
             print >>sys.stderr, 'Invalid argument count!'
             return 1
+
+    if args[0] == 'repository':
         return createRepository(args[1], options)
+    elif args[0] == 'app_tests':
+        return createAppTests(args[1], options)
     elif len(args) != 3:
         print >>sys.stderr, 'Invalid argument count!'
         return 1
