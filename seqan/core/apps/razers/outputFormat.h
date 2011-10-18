@@ -139,6 +139,10 @@ score(Score<TValue, Quality<TQualityString> > const & me,
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
+
 			// quality
 			return a.editDist < b.editDist;
 		}

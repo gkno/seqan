@@ -667,6 +667,10 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
+
 			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
@@ -674,7 +678,6 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.gBegin > b.gBegin) return false;
 			if (a.orientation < b.orientation) return true;
 			if (a.orientation > b.orientation) return false;
-
 
 			if(a.editDist < b.editDist) return true;
 			if(a.editDist > b.editDist) return false;
@@ -690,6 +693,10 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			// read number
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
+
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
 
 			if(a.editDist < b.editDist) return true;
 			if(a.editDist > b.editDist) return false;
@@ -708,6 +715,10 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			// read number
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
+
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
 
 			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
@@ -737,6 +748,10 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
+
 			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
 			if (a.gseqNo > b.gseqNo) return false;
@@ -763,6 +778,10 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
+
 			// quality
 #ifdef RAZERS_MATEPAIRS
 			return a.pairScore > b.pairScore;
@@ -783,6 +802,10 @@ struct LessSplicedErrors : public ::std::binary_function < TReadMatch, TReadMatc
 		if (a.rseqNo > b.rseqNo ) return false;
 		//if ((a.rseqNo >> 1) < (b.rseqNo >> 1)) return true;
 		//if ((a.rseqNo >> 1) > (b.rseqNo >> 1)) return false;
+
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
 
 		// quality
 		if (a.pairScore > b.pairScore) return true;
@@ -806,6 +829,10 @@ struct LessSplicedErrors : public ::std::binary_function < TReadMatch, TReadMatc
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 			
+			// pair match id
+			if (a.pairId < b.pairId) return true;
+			if (a.pairId > b.pairId) return false;
+
 			// quality
 			if (a.mScore < b.mScore) return true; // sum of quality values of mismatches (the smaller the better)
 			if (a.mScore > b.mScore) return false;
