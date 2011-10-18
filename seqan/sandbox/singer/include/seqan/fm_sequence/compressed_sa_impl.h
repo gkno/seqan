@@ -35,100 +35,99 @@
 #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSAIMPL_H_
 #define SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSAIMPL_H_
 
-namespace seqan
+namespace seqan {
+
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TValue>
+void assignBlockSize(CompressedSA<TSparseString, TLfTable, TSpec> & container, TValue value)
 {
+    assignBlockSize(getFibre(container, FibreSA()), value);
+}
 
-	template < typename TSparseString, typename TLfTable, typename TSpec, typename TValue >
-	void assignBlockSize(CompressedSA< TSparseString, TLfTable, TSpec > &container, TValue value)
-	{
-		assignBlockSize(getFibre(container, FibreSA()), value);
-	}
-	
-	template < typename TSparseString, typename TLfTable, typename TSpec >
-	void assignLfTable(CompressedSA< TSparseString, TLfTable, TSpec > &container, TLfTable &lfTable)
-	{
-		container.lfTable = &lfTable;
-	}
-	
-	template < typename TSparseString, typename TLfTable, typename TSpec, typename TPos, typename TValue >
-	void assignValue(CompressedSA< TSparseString, TLfTable, TSpec > &container, TPos pos, TValue value)
-	{
-		assignValue(container.compressedSA, pos, value);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+void assignLfTable(CompressedSA<TSparseString, TLfTable, TSpec> & container, TLfTable & lfTable)
+{
+    container.lfTable = &lfTable;
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	typename Size< typename Fibre< CompressedSA< TSparseString, TLfTable, TSpec >, FibreSparseString >::Type >::Type
-	length(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA)
-	{
-		return length(compressedSA.compressedSA);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos, typename TValue>
+void assignValue(CompressedSA<TSparseString, TLfTable, TSpec> & container, TPos pos, TValue value)
+{
+    assignValue(container.compressedSA, pos, value);
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	void clear(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA)
-	{
-		clear(compressedSA.compressedSA);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+typename Size<typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type>::Type
+length(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+{
+    return length(compressedSA.compressedSA);
+}
 
+template <typename TSparseString, typename TLfTable, typename TSpec>
+void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+{
+    clear(compressedSA.compressedSA);
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	typename Size< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
-	getBlockSize(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA)
-	{
-		return getBlockSize(compressedSA.compressedSA);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+typename Size<typename Fibre<TSparseString, FibreSparseString>::Type>::Type
+getBlockSize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+{
+    return getBlockSize(compressedSA.compressedSA);
+}
 
-	template < typename TSparseString, typename TLfTable, typename TSpec, typename TSize >
-	void resize(CompressedSA< TSparseString, TLfTable, TSpec > &container, TSize size)
-	{
-		resize(container.compressedSA, size);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
+void resize(CompressedSA<TSparseString, TLfTable, TSpec> & container, TSize size)
+{
+    resize(container.compressedSA, size);
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec, typename TSize >
-	void reserve(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, 
-			TSize size)
-	{
-		resize(compressedSA.compressedSA, size);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
+void reserve(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+             TSize size)
+{
+    resize(compressedSA.compressedSA, size);
+}
 
-	template <typename TSparseString, typename TLfTable, typename TSpec >
-	struct Reference< CompressedSA< TSparseString, TLfTable, TSpec > >
-	{
-        typedef typename Value<CompressedSA< TSparseString, TLfTable, TSpec > >::Type Type;
-	};
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Reference<CompressedSA<TSparseString, TLfTable, TSpec> >
+{
+    typedef typename Value<CompressedSA<TSparseString, TLfTable, TSpec> >::Type Type;
+};
 
-	template <typename TSparseString, typename TLfTable, typename TSpec >
-	struct Reference< const CompressedSA< TSparseString, TLfTable, TSpec > >
-	{
-        typedef typename Value<CompressedSA< TSparseString, TLfTable, TSpec > >::Type const Type;
-	};
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Reference<const CompressedSA<TSparseString, TLfTable, TSpec> >
+{
+    typedef typename Value<CompressedSA<TSparseString, TLfTable, TSpec> >::Type const Type;
+};
 
-	template < typename TSparseString, typename TLfTable, typename TSpec >
-	Iterator< CompressedSA < TSparseString, TLfTable, TSpec > > begin(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA)
-	{
-		return Iterator< CompressedSA < TSparseString, TLfTable, TSpec > >(compressedSA, 0);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+Iterator<CompressedSA<TSparseString, TLfTable, TSpec> > begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+{
+    return Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >(compressedSA, 0);
+}
 
-	template < typename TSparseString, typename TLfTable, typename TSpec >
-	Iterator< CompressedSA < TSparseString, TLfTable, TSpec > > end(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA)
-	{
-		return Iterator< CompressedSA < TSparseString, TLfTable, TSpec > >(compressedSA, length(compressedSA.compressedSA));
-	}
-	
-	template< typename TSparseString, typename TLfTable, typename TSpec, typename TPos >
-	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
-   	value(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, TPos pos)
-	{
-		return compressedSA[pos];
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+Iterator<CompressedSA<TSparseString, TLfTable, TSpec> > end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+{
+    return Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >(compressedSA, length(compressedSA.compressedSA));
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec, typename TPos >
-	typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type const
-	value(const CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, TPos pos)
-	{
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
+typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type
+value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
+{
+    return compressedSA[pos];
+}
+
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
+typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type const
+value(const CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
+{
 //		TSparseString test;
 //		static_cast<Nothing>(test);
-		return compressedSA[pos];
-	}
+    return compressedSA[pos];
+}
+
 }
 
 #endif // SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSA_H_

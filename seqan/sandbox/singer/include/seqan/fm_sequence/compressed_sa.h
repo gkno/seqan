@@ -1,4 +1,3 @@
-
 // ==========================================================================
 //                                  FMIndex
 // ==========================================================================
@@ -36,324 +35,325 @@
 #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSA_H_
 #define SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSA_H_
 
-namespace seqan
+namespace seqan {
+
+template <typename TOccTable, typename TPrefixSumTable>
+struct LFTable
 {
+    TOccTable occTable;
+    TPrefixSumTable prefixSumTable;
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	struct LFTable
-	{
-		TOccTable occTable;
-		TPrefixSumTable prefixSumTable;
+    LFTable() {}
+    LFTable(TOccTable occTable, TPrefixSumTable prefixSumTable) :
+        occTable(occTable),
+        prefixSumTable(prefixSumTable)
+    {}
 
-		LFTable() {};
-		LFTable(TOccTable occTable, TPrefixSumTable prefixSumTable) :
-			occTable(occTable),
-			prefixSumTable(prefixSumTable)
-		{};
-		
-		bool operator==(const LFTable &b) const
-		{
-			return (occTable == b.occTable && 
-					prefixSumTable == b.prefixSumTable);
-		}
+    bool operator==(const LFTable & b) const
+    {
+        return occTable == b.occTable &&
+               prefixSumTable == b.prefixSumTable;
+    }
 
-	};
+};
 
-	struct FibreOccTable_;
-	struct FibrePrefixSumTable_;
+struct FibreOccTable_;
+struct FibrePrefixSumTable_;
 
-	typedef Tag< FibreOccTable_> const FibreOccTable;
-	typedef Tag< FibrePrefixSumTable_> const FibrePrefixSumTable;
+typedef Tag<FibreOccTable_> const FibreOccTable;
+typedef Tag<FibrePrefixSumTable_> const FibrePrefixSumTable;
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	struct Fibre< LFTable< TOccTable, TPrefixSumTable >, FibreOccTable >
-	{
-		typedef TOccTable Type;
-	};
-	
-	template< typename TOccTable, typename TPrefixSumTable >
-	struct Fibre< LFTable< TOccTable, TPrefixSumTable >, FibrePrefixSumTable >
-	{
-		typedef TPrefixSumTable Type;
-	};
+template <typename TOccTable, typename TPrefixSumTable>
+struct Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>
+{
+    typedef TOccTable Type;
+};
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	typename Fibre< LFTable< TOccTable, TPrefixSumTable >, FibrePrefixSumTable >::Type const &
-	getFibre(LFTable< TOccTable, TPrefixSumTable > const &lfTable, FibrePrefixSumTable)
-	{
-		return lfTable.prefixSumTable;
-	}
+template <typename TOccTable, typename TPrefixSumTable>
+struct Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>
+{
+    typedef TPrefixSumTable Type;
+};
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	typename Fibre< LFTable< TOccTable, TPrefixSumTable >, FibrePrefixSumTable >::Type &
-	getFibre(LFTable< TOccTable, TPrefixSumTable > &lfTable, FibrePrefixSumTable)
-	{
-		return lfTable.prefixSumTable;
-	}
+template <typename TOccTable, typename TPrefixSumTable>
+typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type const &
+getFibre(LFTable<TOccTable, TPrefixSumTable> const & lfTable, FibrePrefixSumTable)
+{
+    return lfTable.prefixSumTable;
+}
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	typename Fibre< LFTable< TOccTable, TPrefixSumTable >, FibreOccTable >::Type &
-	getFibre(LFTable< TOccTable, TPrefixSumTable > &lfTable, FibreOccTable)
-	{
-		return lfTable.occTable;
-	}
-	
-	template< typename TOccTable, typename TPrefixSumTable >
-	typename Fibre< LFTable< TOccTable, TPrefixSumTable >, FibreOccTable >::Type const &
-	getFibre(LFTable< TOccTable, TPrefixSumTable > const &lfTable, FibreOccTable)
-	{
-		return lfTable.occTable;
-	}
-	
-	template< typename TOccTable, typename TPrefixSumTable >
-	void clear(LFTable< TOccTable, TPrefixSumTable > &lfTable)
-	{
-		clear(lfTable.occTable);
-		clear(lfTable.prefixSumTable);
-	}
+template <typename TOccTable, typename TPrefixSumTable>
+typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type &
+getFibre(LFTable<TOccTable, TPrefixSumTable> & lfTable, FibrePrefixSumTable)
+{
+    return lfTable.prefixSumTable;
+}
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	inline bool open(
-		LFTable< TOccTable, TPrefixSumTable > &lfTable, 
-		const char *fileName,
-		int openMode)
-	{
-		String<char> name;
-		name = fileName;	append(name, ".occ");
-		if(!open(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
-		{
-			return false;
-		}
-		name = fileName;	append(name, ".psum");	open(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
-		return true;
-	
-	}
+template <typename TOccTable, typename TPrefixSumTable>
+typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
+getFibre(LFTable<TOccTable, TPrefixSumTable> & lfTable, FibreOccTable)
+{
+    return lfTable.occTable;
+}
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	inline bool open(
-		LFTable< TOccTable, TPrefixSumTable > &lfTable, 
-		const char *fileName)
-	{
-		return open(lfTable, fileName, DefaultOpenMode< LFTable< TOccTable, TPrefixSumTable > >::VALUE);
-	}
+template <typename TOccTable, typename TPrefixSumTable>
+typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type const &
+getFibre(LFTable<TOccTable, TPrefixSumTable> const & lfTable, FibreOccTable)
+{
+    return lfTable.occTable;
+}
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	inline bool save(
-		LFTable< TOccTable, TPrefixSumTable > const &lfTable, 
-		const char *fileName,
-		int openMode)
-	{
-		String<char> name;
-		name = fileName;	append(name, ".occ");
-		if(!save(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
-		{
-			return false;
-		}
-		name = fileName;	append(name, ".psum");	save(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
-		return true;
-	
-	}
+template <typename TOccTable, typename TPrefixSumTable>
+void clear(LFTable<TOccTable, TPrefixSumTable> & lfTable)
+{
+    clear(lfTable.occTable);
+    clear(lfTable.prefixSumTable);
+}
 
-	template< typename TOccTable, typename TPrefixSumTable >
-	inline bool save(
-		LFTable< TOccTable, TPrefixSumTable > const &lfTable, 
-		const char *fileName)
-	{
-		return save(lfTable, fileName, DefaultOpenMode< LFTable< TOccTable, TPrefixSumTable > >::VALUE);
-	}
+template <typename TOccTable, typename TPrefixSumTable>
+inline bool open(
+    LFTable<TOccTable, TPrefixSumTable> & lfTable,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+    name = fileName;    append(name, ".occ");
+    if (!open(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
+    {
+        return false;
+    }
+    name = fileName;    append(name, ".psum");  open(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
+    return true;
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct CompressedSA
-	{
-		TSparseString							compressedSA;
-		TLfTable * 								lfTable;
+}
 
-		CompressedSA(){};
+template <typename TOccTable, typename TPrefixSumTable>
+inline bool open(
+    LFTable<TOccTable, TPrefixSumTable> & lfTable,
+    const char * fileName)
+{
+    return open(lfTable, fileName, DefaultOpenMode<LFTable<TOccTable, TPrefixSumTable> >::VALUE);
+}
 
-		typedef typename Value< typename Fibre< TSparseString, FibreSparseString >::Type >::Type TCompressedSaValue;
-		typedef typename Fibre< TSparseString, FibreIndicatorString>:: Type TIndicatorString;
+template <typename TOccTable, typename TPrefixSumTable>
+inline bool save(
+    LFTable<TOccTable, TPrefixSumTable> const & lfTable,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+    name = fileName;    append(name, ".occ");
+    if (!save(getFibre(lfTable, FibreOccTable()), toCString(name), openMode))
+    {
+        return false;
+    }
+    name = fileName;    append(name, ".psum");  save(getFibre(lfTable, FibrePrefixSumTable()), toCString(name), openMode);
+    return true;
 
-		template < typename TPos >
-		TCompressedSaValue const operator[](TPos pos)
-		{ 
-			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
-			TPos counter = 0;
-			while(!getBit(indicatorString, pos))
-			{
-				pos = lfMapping(*lfTable, pos);
-				++counter;
-			}
-			return compressedSA[getRank(indicatorString, pos) - 1] + counter;
-		}
+}
 
-		template < typename TPos >
-		TCompressedSaValue operator[](TPos pos) const
-		{
-			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
-			TPos counter = 0;
-			while(!getBit(indicatorString, pos))
-			{
-				pos = lfMapping(*lfTable, pos);
-				++counter;
-			}
-			return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
-		}
-		
-		bool operator==(const CompressedSA &b) const
-		{
-			return (compressedSA == b.compressedSA && 
-					*lfTable == *(b.lfTable));
-		}
-	};
+template <typename TOccTable, typename TPrefixSumTable>
+inline bool save(
+    LFTable<TOccTable, TPrefixSumTable> const & lfTable,
+    const char * fileName)
+{
+    return save(lfTable, fileName, DefaultOpenMode<LFTable<TOccTable, TPrefixSumTable> >::VALUE);
+}
 
-	template< typename TSpecPairI1, typename TSpecPairI2, typename TSpecPairSpec, typename TStringSpec, typename TSparseStringSpec, typename TLfTable, typename TSpec >
-	struct CompressedSA< SparseString< String< Pair< TSpecPairI1, TSpecPairI2, TSpecPairSpec >, TStringSpec >, TSparseStringSpec >, TLfTable, TSpec >
-	{
-		typedef SparseString< String< Pair< TSpecPairI1, TSpecPairI2, TSpecPairSpec >, TStringSpec >, TSparseStringSpec > 	TSparseString;
-		typedef typename Value< typename Fibre< SparseString< TSparseString, TStringSpec >, FibreSparseString >::Type >::Type TCompressedSaValue;
-		typedef typename Fibre< SparseString< TSparseString, TStringSpec >, FibreIndicatorString>:: Type TIndicatorString;
-		TSparseString																						compressedSA;
-		TLfTable * 																							lfTable;
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct CompressedSA
+{
+    TSparseString                           compressedSA;
+    TLfTable * lfTable;
 
-		CompressedSA(){};
+    CompressedSA(){}
 
-		template < typename TPos >
-		TCompressedSaValue const operator[](TPos pos)
-		{ 
-			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
-			TPos counter = 0;
-			while(!getBit(indicatorString, pos))
-			{
-				pos = lfMapping(*lfTable, pos);
-				++counter;
-			}
-			TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
-		   	temp.i2	+= counter;
-			return temp;	
-		}
+    typedef typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type TCompressedSaValue;
+    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
 
-		template < typename TPos >
-		TCompressedSaValue operator[](TPos pos) const
-		{
-			TIndicatorString const &indicatorString = getFibre(compressedSA, FibreIndicatorString());
-			TPos counter = 0;
-			while(!getBit(indicatorString, pos))
-			{
-				pos = lfMapping(*lfTable, pos);
-				++counter;
-			}
-			TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
-		   	temp.i2	+= counter;
-			return temp;	
-		}
-		
-		bool operator==(const CompressedSA &b) const
-		{
-			return (compressedSA == b.compressedSA && 
-					*lfTable == *(b.lfTable));
-		}
-	};
+    template <typename TPos>
+    TCompressedSaValue const operator[](TPos pos)
+    {
+        TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
+        TPos counter = 0;
+        while (!getBit(indicatorString, pos))
+        {
+            pos = lfMapping(*lfTable, pos);
+            ++counter;
+        }
+        return compressedSA[getRank(indicatorString, pos) - 1] + counter;
+    }
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct Fibre< CompressedSA < TSparseString, TLfTable, TSpec >, FibreSA >
-	{
-		typedef TSparseString Type;
-	};
+    template <typename TPos>
+    TCompressedSaValue operator[](TPos pos) const
+    {
+        TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
+        TPos counter = 0;
+        while (!getBit(indicatorString, pos))
+        {
+            pos = lfMapping(*lfTable, pos);
+            ++counter;
+        }
+        return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
+    }
+
+    bool operator==(const CompressedSA & b) const
+    {
+        return compressedSA == b.compressedSA &&
+               *lfTable == *(b.lfTable);
+    }
+
+};
+
+template <typename TSpecPairI1, typename TSpecPairI2, typename TSpecPairSpec, typename TStringSpec, typename TSparseStringSpec, typename TLfTable, typename TSpec>
+struct CompressedSA<SparseString<String<Pair<TSpecPairI1, TSpecPairI2, TSpecPairSpec>, TStringSpec>, TSparseStringSpec>, TLfTable, TSpec>
+{
+    typedef SparseString<String<Pair<TSpecPairI1, TSpecPairI2, TSpecPairSpec>, TStringSpec>, TSparseStringSpec>   TSparseString;
+    typedef typename Value<typename Fibre<SparseString<TSparseString, TStringSpec>, FibreSparseString>::Type>::Type TCompressedSaValue;
+    typedef typename Fibre<SparseString<TSparseString, TStringSpec>, FibreIndicatorString>::Type TIndicatorString;
+    TSparseString                                                                                       compressedSA;
+    TLfTable * lfTable;
+
+    CompressedSA(){}
+
+    template <typename TPos>
+    TCompressedSaValue const operator[](TPos pos)
+    {
+        TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
+        TPos counter = 0;
+        while (!getBit(indicatorString, pos))
+        {
+            pos = lfMapping(*lfTable, pos);
+            ++counter;
+        }
+        TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
+        temp.i2 += counter;
+        return temp;
+    }
+
+    template <typename TPos>
+    TCompressedSaValue operator[](TPos pos) const
+    {
+        TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
+        TPos counter = 0;
+        while (!getBit(indicatorString, pos))
+        {
+            pos = lfMapping(*lfTable, pos);
+            ++counter;
+        }
+        TCompressedSaValue temp = getValue(compressedSA, getRank(indicatorString, pos) - 1);
+        temp.i2 += counter;
+        return temp;
+    }
+
+    bool operator==(const CompressedSA & b) const
+    {
+        return compressedSA == b.compressedSA &&
+               *lfTable == *(b.lfTable);
+    }
+
+};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>
+{
+    typedef TSparseString Type;
+};
 
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	typename Fibre< CompressedSA < TSparseString, TLfTable, TSpec >, FibreSA >::Type const &
-	getFibre(CompressedSA < TSparseString, TLfTable, TSpec > const &compressedSA, FibreSA)
-	{
-		return compressedSA.compressedSA;
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>::Type const &
+getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreSA)
+{
+    return compressedSA.compressedSA;
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	typename Fibre< CompressedSA < TSparseString, TLfTable, TSpec >, FibreSA >::Type &
-	getFibre(CompressedSA < TSparseString, TLfTable, TSpec > &compressedSA, FibreSA)
-	{
-		return compressedSA.compressedSA;
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>::Type &
+getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreSA)
+{
+    return compressedSA.compressedSA;
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	inline bool open(
-		CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, 
-		const char *fileName,
-		int openMode)
-	{
-		String<char> name;
-		name = fileName;	append(name, ".sstring");
-		if(!open(getFibre(compressedSA, FibreSA()), toCString(name), openMode))
-		{
-			return false;
-		}
-		return true;
-	
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+inline bool open(
+    CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+    name = fileName;    append(name, ".sstring");
+    if (!open(getFibre(compressedSA, FibreSA()), toCString(name), openMode))
+    {
+        return false;
+    }
+    return true;
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	inline bool open(
-		CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, 
-		const char *fileName)
-	{
-		return open(compressedSA, fileName, DefaultOpenMode< CompressedSA< TSparseString, TLfTable, TSpec > >::VALUE);
-	}
-	
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	inline bool save(
-		CompressedSA< TSparseString, TLfTable, TSpec > const &compressedSA, 
-		const char *fileName,
-		int openMode)
-	{
-		String<char> name;
-		name = fileName;	append(name, ".sstring");
-		if(!save(getFibre(compressedSA, FibreSA()), toCString(name), openMode))
-		{
-			return false;
-		}
-		return true;
-	
-	}
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	inline bool save(
-		CompressedSA< TSparseString, TLfTable, TSpec > const &compressedSA, 
-		const char *fileName)
-	{
-		return save(compressedSA, fileName, DefaultOpenMode< CompressedSA< TSparseString, TLfTable, TSpec > >::VALUE);
-	}
+template <typename TSparseString, typename TLfTable, typename TSpec>
+inline bool open(
+    CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+    const char * fileName)
+{
+    return open(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Standard>
-	{        
-        typedef Iter<CompressedSA < TSparseString, TLfTable, TSpec > const, PositionIterator > Type;
-	};
-	
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < TSparseString, TLfTable, TSpec >, Standard >
-	{        
-        typedef Iter<CompressedSA < TSparseString, TLfTable, TSpec > , PositionIterator > Type;
-	};
-	
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < TSparseString, TLfTable, TSpec >, Rooted> :
-		 Iterator< CompressedSA < TSparseString, TLfTable, TSpec >, Standard> {};
-	
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Rooted> :
-		 Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Standard> {};
+template <typename TSparseString, typename TLfTable, typename TSpec>
+inline bool save(
+    CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+    name = fileName;    append(name, ".sstring");
+    if (!save(getFibre(compressedSA, FibreSA()), toCString(name), openMode))
+    {
+        return false;
+    }
+    return true;
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct Value< CompressedSA< TSparseString, TLfTable, TSpec > > 
-	{
-        typedef typename Value< TSparseString >::Type Type;
-	};
+}
 
-	template< typename TSparseString, typename TLfTable, typename TSpec >
-	struct Value< CompressedSA < TSparseString, TLfTable, TSpec > const>
-	{
-        typedef typename Value< TSparseString >::Type const Type;
-	};
+template <typename TSparseString, typename TLfTable, typename TSpec>
+inline bool save(
+    CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA,
+    const char * fileName)
+{
+    return save(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
+}
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Standard>
+{
+    typedef Iter<CompressedSA<TSparseString, TLfTable, TSpec> const, PositionIterator> Type;
+};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, Standard>
+{
+    typedef Iter<CompressedSA<TSparseString, TLfTable, TSpec>, PositionIterator> Type;
+};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, Rooted>:
+    Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, Standard>{};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Rooted>:
+    Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Standard>{};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Value<CompressedSA<TSparseString, TLfTable, TSpec> >
+{
+    typedef typename Value<TSparseString>::Type Type;
+};
+
+template <typename TSparseString, typename TLfTable, typename TSpec>
+struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
+{
+    typedef typename Value<TSparseString>::Type const Type;
+};
 
 }
 
