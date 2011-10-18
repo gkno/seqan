@@ -308,6 +308,14 @@ namespace seqan{
 		return rankSupportBitString.length;
 	}
 	
+	template< typename TSpec >
+	void clear(RankSupportBitString< TSpec > &rankSupportBitString)
+	{
+		clear(rankSupportBitString.bitString);
+		clear(rankSupportBitString.bucketString);
+		clear(rankSupportBitString.superBucketString);
+	}
+
 	template < typename TPos >
 	bool getBit(String< bool > &bitString, TPos &pos)
 	{
@@ -377,59 +385,6 @@ namespace seqan{
 		setBit(rankSupportBitString, length(rankSupportBitString), bit);
 		++rankSupportBitString.length;
 	}
-	
-	
-/*	template < typename TBitString, typename TIndex, typename TPos, typename TBit >
-	void setBit(String< TBitString > &bitString, TIndex &index, TPos pos, TBit setBit)
-	{
-		unsigned short bitsPerValue = BitsPerValue<TBitString>::VALUE;
-		if(!setBit){
-			bitString[(pos/bitsPerValue)] &= ~(index.detBitMask[pos % bitsPerValue]);
-			return;
-		}
-		bitString[(pos/bitsPerValue)] |= index.detBitMask[pos % bitsPerValue];
-	}*/
-
-	/*template < typename TBitString, typename TPos, typename TBit >
-	void setBit(TBitString &bitString, TPos pos, TBit setBit)
-	{
-		typedef typename Value<TBitString>::Type TValue;
-		unsigned short bitsPerValue = BitsPerValue<TValue>::VALUE;
-		unsigned mask;		
-		if(!setBit){
-			mask = ~(1 << (bitsPerValue - (pos % bitsPerValue) - 1));
-			bitString[(pos/bitsPerValue)] &= mask;
-			return;
-		}
-		mask = 1 << (bitsPerValue - (pos % bitsPerValue) - 1);
-		bitString[(pos/bitsPerValue)] |= mask;
-	}*/
-
-	/*template< typename TValue, typename TIndex, typename TPos >
-	TValue getRankInBucket(String< TValue > &bitString, TIndex &index, TPos pos)
-	{
-		
-		unsigned short bitsPerValue = BitsPerValue<TValue>::VALUE;
-		TValue mask = (index.detRankMask[pos % bitsPerValue]);//  & (-1u >> ((pos/4)*4)));
-		return (__builtin_popcountll(bitString[pos / bitsPerValue] & mask));
-	}*/
-
-/*	template< unsigned N >
-	struct RankInBucket
-	{
-		template< typename TValue >
-		static unsigned rankInBucket(TValue value);
-	}
-
-	template< 32 >
-	struct RankInBucket
-	{
-		template< typename TValue >
-		static unsigned rankInBucket(TValue value)
-		{
-			return __builtin_popcountl(*reinterpret_cast<unsigned*>(&value));
-		}
-	}*/
 
 	template< typename TValue >
 	unsigned getRankInBucket(const TValue value)

@@ -106,6 +106,13 @@ namespace seqan
 	}
 	
 	template< typename TOccTable, typename TPrefixSumTable >
+	void clear(LFTable< TOccTable, TPrefixSumTable > &lfTable)
+	{
+		clear(lfTable.occTable);
+		clear(lfTable.prefixSumTable);
+	}
+
+	template< typename TOccTable, typename TPrefixSumTable >
 	inline bool open(
 		LFTable< TOccTable, TPrefixSumTable > &lfTable, 
 		const char *fileName,
@@ -198,13 +205,6 @@ namespace seqan
 					*lfTable == *(b.lfTable));
 		}
 	};
-
-
-	/*SparseString<
-		String<
-			Pair<long unsigned int, long unsigned int, Tag<seqan::Compressed_> >, 
-		seqan::Alloc<void> >, 
-		void>&)’*/
 
 	template< typename TSpecPairI1, typename TSpecPairI2, typename TSpecPairSpec, typename TStringSpec, typename TSparseStringSpec, typename TLfTable, typename TSpec >
 	struct CompressedSA< SparseString< String< Pair< TSpecPairI1, TSpecPairI2, TSpecPairSpec >, TStringSpec >, TSparseStringSpec >, TLfTable, TSpec >
@@ -322,10 +322,6 @@ namespace seqan
 	{
 		return save(compressedSA, fileName, DefaultOpenMode< CompressedSA< TSparseString, TLfTable, TSpec > >::VALUE);
 	}
-/*	template< typename TSparseString, typename TLfTable, typename TSpec, typename TSize >
-	void initCompressedSA(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA, 
-			TLfTable &lfTable, 
-			TSize size);*/
 
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Standard>
@@ -346,27 +342,7 @@ namespace seqan
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Rooted> :
 		 Iterator< CompressedSA < TSparseString, TLfTable, TSpec > const, Standard> {};
-/*
-	template< typename TSparseStrings, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, Standard>
-	{        
-        typedef Iter<CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, PositionIterator > Type;
-	};
-	
-	template< typename TSparseStrings, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec >, Standard >
-	{        
-        typedef Iter<CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > , PositionIterator > Type;
-	};
-	
-	template< typename TSparseStrings, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec >, Rooted> :
-		 Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec >, Standard> {};
-	
-	template< typename TSparseStrings, typename TLfTable, typename TSpec >
-	struct Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, Rooted> :
-		 Iterator< CompressedSA < StringSet< TSparseStrings >, TLfTable, TSpec > const, Standard> {};
-*/
+
 	template< typename TSparseString, typename TLfTable, typename TSpec >
 	struct Value< CompressedSA< TSparseString, TLfTable, TSpec > > 
 	{

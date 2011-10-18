@@ -128,6 +128,12 @@ namespace seqan{
 	}
 	
 	template<typename TText >
+	void clear(WaveletTreeStructure< TText > &treeStructure)
+	{
+		clear(treeStructure.treeNodes);
+	}
+
+	template<typename TText >
 	struct Iter< WaveletTreeStructure < TText > const, Standard>
 	{        
 		typedef typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type TValue;
@@ -649,11 +655,6 @@ namespace seqan{
 	{	
 		
 		typedef typename BitVector_< BitsPerValue< typename Value< TText >::Type >::VALUE >::Type TTreeValue;
-	
-		/*String< char > name = "testfile";
-	   	appendValue(name, (char)(iter.position + 48));
-		append(name, ".dot");
-		writeGraph(*iter.waveletTreeStructure, name);*/
 
 		TValue oldSmallestValue = smallestValue;
 		TValue oldBiggestValue = biggestValue;

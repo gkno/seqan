@@ -182,6 +182,13 @@ namespace seqan{
 		return length(string.string);
 	}
 	
+	template < typename TSparseString, typename TSpec >
+	void clear(SparseString< TSparseString, TSpec > &string)
+	{
+		clear(string.string);
+		clear(string.indicatorString);
+	}
+
 	template< typename TSparseString, typename TSpec, typename TSize >
 	void resize(SparseString< TSparseString, TSpec > &string, 
 			TSize size)

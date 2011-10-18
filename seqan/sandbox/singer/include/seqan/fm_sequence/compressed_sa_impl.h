@@ -64,6 +64,13 @@ namespace seqan
 	}
 
 	template< typename TSparseString, typename TLfTable, typename TSpec >
+	void clear(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA)
+	{
+		clear(compressedSA.compressedSA);
+	}
+
+
+	template< typename TSparseString, typename TLfTable, typename TSpec >
 	typename Size< typename Fibre< TSparseString, FibreSparseString >::Type >::Type
 	getBlockSize(CompressedSA< TSparseString, TLfTable, TSpec > &compressedSA)
 	{

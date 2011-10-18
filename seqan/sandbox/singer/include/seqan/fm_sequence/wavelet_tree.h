@@ -37,10 +37,9 @@
 
 namespace seqan{
 	
-	
-
-	template< typename TText, typename TSpec >
-	struct WaveletTree;
+// ==========================================================================
+//Forwards
+// ==========================================================================
 
 	struct SingleString_;
 	struct MultiString_;
@@ -48,29 +47,19 @@ namespace seqan{
 	struct FibreSplitValues_;
 	struct FibreDollarPositions_;
 
+	template< typename TText, typename TSpec >
+	struct WaveletTree;
+
+// ==========================================================================
+//Tags, Classes, Enums
+// ==========================================================================
+
 	typedef Tag< SingleString_ > SingleString;
 	typedef Tag< MultiString_ > MultiString;
 	typedef Tag< FibreBitStrings_ > const FibreBitStrings;
 	typedef Tag< FibreSplitValues_ > const FibreSplitValues;
 	typedef Tag< FibreDollarPositions_ > const FibreDollarPositions;
-
-	template< typename TText, typename TSpec >
-	struct Fibre< WaveletTree< TText, TSpec >, FibreBitStrings >
-	{
-		typedef StringSet< RankSupportBitString< void > > Type;
-	};
-		
-	template< typename TText, typename TSpec >
-	struct Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >
-	{
-		typedef WaveletTreeStructure< TText > Type;
-	};
 	
-	template< typename TText >
-	struct Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >
-	{
-		typedef typename Value< typename Fibre< WaveletTree< TText, MultiString >, FibreBitStrings >::Type >::Type Type;
-	};
 
 	template< typename TText, typename TSpec >
 	struct WaveletTree
@@ -229,6 +218,31 @@ namespace seqan{
 
 	};
 	
+// ==========================================================================
+//Metafunctions
+// ==========================================================================
+
+	template< typename TText, typename TSpec >
+	struct Fibre< WaveletTree< TText, TSpec >, FibreBitStrings >
+	{
+		typedef StringSet< RankSupportBitString< void > > Type;
+	};
+
+	template< typename TText, typename TSpec >
+	struct Fibre< WaveletTree< TText, TSpec >, FibreSplitValues >
+	{
+		typedef WaveletTreeStructure< TText > Type;
+	};
+
+	template< typename TText >
+	struct Fibre< WaveletTree< TText, MultiString >, FibreDollarPositions >
+	{
+		typedef typename Value< typename Fibre< WaveletTree< TText, MultiString >, FibreBitStrings >::Type >::Type Type;
+	};
+
+
+
+
 	template< typename TText, typename TSpec >
 	inline typename Fibre< WaveletTree< TText, TSpec >, FibreBitStrings >::Type &
 	getFibre(WaveletTree< TText, TSpec > &tree, const FibreBitStrings)
@@ -271,6 +285,17 @@ namespace seqan{
 		return tree.dollarPosition;
 	}
 	
+	template< typename TText, typename TSpec >
+	void clear(WaveletTree< TText, TSpec > &tree)
+	{
+		for(unsigned i = 0; i < length(tree.bitStrings); ++i)
+		{
+			clear(tree.bitStrings[i]);
+		}
+		resize(tree.bitStrings, 0);
+		clear(tree.splitValues);
+	}
+
 	template<  
 		typename TText, 
 		typename TWaveletTreeSpec,
