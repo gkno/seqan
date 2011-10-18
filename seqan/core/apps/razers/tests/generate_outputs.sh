@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Currently, we run RazerS only on
+# Output generation for RazerS.
 
-# We use the current trunk version of 2011-10-13 (r10463) for building the
+# We use the current trunk version of 2011-10-18 (r10612) for building the
 # reference.
 RAZERS=../../../../build/Release/core/apps/razers/razers
 
