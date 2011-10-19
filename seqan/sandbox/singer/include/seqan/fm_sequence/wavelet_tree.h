@@ -61,7 +61,7 @@ typedef Tag<FibreSplitValues_> const FibreSplitValues;
 typedef Tag<FibreDollarPositions_> const FibreDollarPositions;
 
 
-template <typename TText, typename TSpec>
+template <typename TText, typename TSpec = void>
 struct WaveletTree
 {
     typedef typename Fibre<WaveletTree<TText, TSpec>, FibreBitStrings>::Type TBitStrings;
@@ -97,7 +97,7 @@ struct WaveletTree<TText, SingleString>
     typedef typename Size<TText>::Type                            TSize;
 
     TBitStrings                         bitStrings;
-    WaveletTreeStructure<TText>       splitValues;
+    WaveletTreeStructure<TText>       	splitValues;
     TSize                               dollarPosition;
     TValue                              dollarSub;
 
@@ -222,7 +222,6 @@ struct WaveletTree<TText, MultiString>
 // ==========================================================================
 //Metafunctions
 // ==========================================================================
-
 template <typename TText, typename TSpec>
 struct Fibre<WaveletTree<TText, TSpec>, FibreBitStrings>
 {
@@ -241,9 +240,9 @@ struct Fibre<WaveletTree<TText, MultiString>, FibreDollarPositions>
     typedef typename Value<typename Fibre<WaveletTree<TText, MultiString>, FibreBitStrings>::Type>::Type Type;
 };
 
-
-
-
+// ==========================================================================
+//Functions
+// ==========================================================================
 template <typename TText, typename TSpec>
 inline typename Fibre<WaveletTree<TText, TSpec>, FibreBitStrings>::Type &
 getFibre(WaveletTree<TText, TSpec> & tree, const FibreBitStrings)
@@ -326,10 +325,6 @@ inline unsigned getOccImpl(const WaveletTree<TText, TWaveletTreeSpec> & tree,
             goRight(iter);
         }
         treePos = getPosition(iter);
-//			if(sum == 0)
-//			{
-//				return 0;
-//			}
     }
     while (treePos && sum);
     return sum;
@@ -441,7 +436,6 @@ inline void numberToBits(TContainer & container, TPos pos, TBitsPerNumber bpn, T
         }
         container[containerPos.i1] &= ~(((1 << bpn) - 1) << numShifts);
         container[containerPos.i1] |=  (insertValue << numShifts);
-
     }
     else
     {

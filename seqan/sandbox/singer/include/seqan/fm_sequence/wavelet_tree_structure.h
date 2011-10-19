@@ -37,10 +37,17 @@
 
 namespace seqan {
 
+// ==========================================================================
+//Forwards
+// ==========================================================================
+
 template <typename TText>
 struct WaveletTreeStructure;
-
 struct FibreTreeNodes_;
+
+// ==========================================================================
+//Tags, Classes, Enums
+// ==========================================================================
 typedef Tag<FibreTreeNodes_> const FibreTreeNodes;
 
 template <typename TText>
@@ -64,7 +71,6 @@ struct WaveletTreeStructure
     {
         return treeNodes == b.treeNodes;
     }
-
 };
 
 template <typename TText>
@@ -86,6 +92,10 @@ WaveletTreeStructure<TText>::WaveletTreeStructure(TFreqString & freqString)
                        posInTree,
                        numChildNodes);
 }
+
+// ==========================================================================
+// Functions
+// ==========================================================================
 
 template <typename TText>
 typename Fibre<WaveletTreeStructure<TText>, FibreTreeNodes>::Type &
@@ -554,7 +564,6 @@ void computeStringLengthFromTree(TStringLengthString & lengthString,
                                       iter,
                                       (TValue)0,
                                       (TValue)(length(prefixSumTable) - 2));
-
 }
 
 /*
