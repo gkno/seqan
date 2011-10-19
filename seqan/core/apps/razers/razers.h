@@ -667,9 +667,11 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+#ifdef RAZERS_MATEPAIRS
 			// pair match id
 			if (a.pairId < b.pairId) return true;
 			if (a.pairId > b.pairId) return false;
+#endif
 
 			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
@@ -694,9 +696,11 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+#ifdef RAZERS_MATEPAIRS
 			// pair match id
 			if (a.pairId < b.pairId) return true;
 			if (a.pairId > b.pairId) return false;
+#endif
 
 			if(a.editDist < b.editDist) return true;
 			if(a.editDist > b.editDist) return false;
@@ -748,9 +752,11 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+#ifdef RAZERS_MATEPAIRS
 			// pair match id
 			if (a.pairId < b.pairId) return true;
 			if (a.pairId > b.pairId) return false;
+#endif
 
 			// genome position and orientation
 			if (a.gseqNo < b.gseqNo) return true;
@@ -778,9 +784,11 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 			if (a.rseqNo < b.rseqNo) return true;
 			if (a.rseqNo > b.rseqNo) return false;
 
+#ifdef RAZERS_MATEPAIRS
 			// pair match id
 			if (a.pairId < b.pairId) return true;
 			if (a.pairId > b.pairId) return false;
+#endif
 
 			// quality
 #ifdef RAZERS_MATEPAIRS
