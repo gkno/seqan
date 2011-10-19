@@ -172,7 +172,7 @@ def runTest(test_conf):
     logging.debug('Executing "%s"', ' '.join(args))
     stdout_file = subprocess.PIPE
     if test_conf.redir_stdout:
-        logging.debug('  Redirecting stout to "%s".' % test_conf.redir_stdout)
+        logging.debug('  Redirecting stdout to "%s".' % test_conf.redir_stdout)
         stdout_file = open(test_conf.redir_stdout, 'w+')
     try:
         process = subprocess.Popen(args, stdout=stdout_file,
