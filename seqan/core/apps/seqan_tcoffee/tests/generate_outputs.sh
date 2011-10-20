@@ -18,7 +18,8 @@
 #
 # TODO(holtgrew): Run with different match file variants.
 
-TCOFFEE=../../../library/cmake/Release/apps/seqan_tcoffee
+# Output was generated on 2011-10-20 (r10627).
+TCOFFEE=../../../../build/Debug/core/apps/seqan_tcoffee/seqan_tcoffee
 
 # ============================================================
 # Run on Proteins (Balibase).
