@@ -662,7 +662,6 @@ void computeTreeEntries(
     TValue biggestValue,
     TNumOfChildNodes & numChildNodes)
 {
-
     typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TTreeValue;
 
     TValue oldSmallestValue = smallestValue;
@@ -671,14 +670,20 @@ void computeTreeEntries(
     TSize leftSize = freq[smallestValue];
     TSize rightSize = freq[biggestValue];
 
+
+   // std::cerr << "pos: " << (int)getPosition(iter) << "smallestValue: " << (int) smallestValue << " biggestValue: " << (int)biggestValue << std::endl;
+
     if (smallestValue == biggestValue - 1)
     {
+    	//std::cerr << "smallestValue: " << (int) smallestValue << " biggestValue: " << (int)biggestValue << std::endl;
         setCharacter(iter, (TTreeValue)smallestValue);
+    	//std::cerr << "computeTreeEntries01" << std::endl;
         setNodeToLeaf(iter);
+    	//std::cerr << "computeTreeEntries02" << std::endl;
         ++numChildNodes;
         return;
     }
-
+    //std::cerr << "computeTreeEntries0" << std::endl;
     TValue leftCounter = 0;
     TValue rightCounter = 0;
     while (biggestValue - 1 > smallestValue)
@@ -712,6 +717,7 @@ void computeTreeEntries(
         }
     }
 
+    //std::cerr << "computeTreeEntries1" << std::endl;
     setCharacter(iter, (TTreeValue)smallestValue);
     //if the elements of the node do not appear in the text make a leaf here
     if (!leftSize && !rightSize)
@@ -721,14 +727,21 @@ void computeTreeEntries(
         return;
     }
 
+    //std::cerr << "computeTreeEntries2" << std::endl;
     //there must be either a left or right subtree or both
     typename Iterator<WaveletTreeStructure<TText> >::Type iter2 = iter;
 
     //is there only one element on the left side?
     if (oldSmallestValue == smallestValue)
     {
-        setRightChildPos(iter, iter.position + numChildNodes + 1);
-        ++numChildNodes;
+//        setRightChildPos(iter, iter.position + numChildNodes + 1);
+//        ++numChildNodes;
+    		setRightChildPos(iter2, iter2.position + numChildNodes + 1);
+    	        TNumOfChildNodes numChildNodes2 = 0;
+    	        goRight(iter2);
+    	        computeTreeEntries(freq, iter2, biggestValue, oldBiggestValue, numChildNodes2);
+    	        numChildNodes += numChildNodes2 + 1;
+    	        return;
     }
     else
     {
@@ -737,6 +750,7 @@ void computeTreeEntries(
         computeTreeEntries(freq, iter, oldSmallestValue, smallestValue, numChildNodes);
     }
 
+    //std::cerr << "computeTreeEntries3" << std::endl;
     //is there only one element on the right side?
     if (biggestValue == oldBiggestValue)
     {
@@ -752,6 +766,7 @@ void computeTreeEntries(
         numChildNodes += numChildNodes2 + 1;
         return;
     }
+    //std::cerr << "computeTreeEntries4" << std::endl;
 }
 
 template <typename TText>

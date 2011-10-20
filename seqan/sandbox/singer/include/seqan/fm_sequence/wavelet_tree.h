@@ -333,6 +333,20 @@ inline unsigned getOccImpl(const WaveletTree<TText, TWaveletTreeSpec> & tree,
 template <
     typename TText,
     typename TChar,
+    typename TPos,
+    typename TWaveletTreeSpec>
+inline unsigned getOcc(const WaveletTree<TText, TWaveletTreeSpec> & tree,
+                       const TChar character,
+                       const TPos pos)
+{
+    typedef typename BitVector_<BitsPerValue<TChar>::VALUE>::Type TTreeSplitValue;
+    TTreeSplitValue ordChar = ordValue(character);
+    return getOccImpl(tree, ordChar, pos);
+}
+
+template <
+    typename TText,
+    typename TChar,
     typename TPos>
 inline unsigned getOcc(const WaveletTree<TText, SingleString> & tree,
                        const TChar character,
@@ -551,6 +565,55 @@ inline void fillWaveletTree(
     }
 }
 
+template <typename TText, typename TWaveletTreeSpec, typename TDollarPosition>
+inline void fillWaveletTree(
+    WaveletTree<TText, TWaveletTreeSpec> & tree,                //the set of bit strings to be filled
+    const TText & text,
+    TDollarPosition dollarPosition)                                         //the original string
+{
+
+    typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreBitStrings>::Type TFibreRankSupportBitStrings;
+    typedef typename Value<TFibreRankSupportBitStrings>::Type TFibreRankSupportBitString;
+    typedef typename Fibre<TFibreRankSupportBitString, FibreRankSupportBitString>::Type TFibreBitString;
+    typedef typename Size<TFibreBitString>::Type TSize;
+
+    for (TSize i = 0; i < length(text); ++i)
+    {
+        typename Iterator<WaveletTreeStructure<TText> >::Type iter(tree.splitValues, 0);
+        bool bit;
+
+        do
+        {
+        	if(i == dollarPosition)
+        	{
+        		bit = 1;
+        		appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);
+        		goRight(iter);
+        	}
+        	else if (ordValue(value(text, i)) > getCharacter(iter))
+            {
+                bit = 1;
+                appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);
+                goRight(iter);
+            }
+            else
+            {
+                bit = 0;
+                appendBitOnly(getFibre(tree, FibreBitStrings())[getPosition(iter)], bit);
+                goLeft(iter);
+            }
+        }
+        while (getPosition(iter) != 0);
+    }
+
+    TFibreRankSupportBitStrings & bitStrings = getFibre(tree, FibreBitStrings());
+    for (TSize i = 0; i < length(bitStrings); ++i)
+    {
+        TFibreRankSupportBitString & temp = bitStrings[i];
+        completeRankSupportBitString(temp);
+    }
+}
+
 //this function is used to fill all bit strings in a wavelet tree AND counting
 template <typename TText, typename TWaveletTreeSpec>
 // typename TTreeNodeWidth >
@@ -635,15 +698,14 @@ inline void createWaveletTree(WaveletTree<
                               TPrefixSumTable & prefixSumTable)
 {
     typedef typename BitVector_<BitsPerValue<typename Value<TBWT>::Type>::VALUE>::Type TValue;
+    typedef typename Size<typename Value<TBWT>::Type>::Type TSize;
 
     //generate the tree structure
-    typedef typename Size<typename Value<TBWT>::Type>::Type TSize;
-    TSize sigmaSize = ValueSize<typename Value<TBWT>::Type>::VALUE;
+    TSize sigmaSize = length(freq);
     TValue numberOfTreeNodes = sigmaSize - 1;
     resize(tree.splitValues, numberOfTreeNodes, Pair<TValue, TValue>(0, 0));
-
     TValue smallestValue = 0;
-    TValue highestValue = sigmaSize - 1;
+    TValue highestValue = numberOfTreeNodes;
     TValue numChildNodes = 0;
 
     typename Iterator<WaveletTreeStructure<TBWT> >::Type iter(tree.splitValues, 0);
@@ -674,12 +736,65 @@ inline void createWaveletTree(WaveletTree<
     setPosition(iter, (TValue)0);
 
     fillWaveletTree(tree, bwt);
-    /*fillWaveletTree(
-            tree,
-            iter,
-            bwt,
-            (TValue)0,
-            (TValue)-1);*/
+}
+
+template <
+    typename TBWT,
+    typename TWaveletTreeSpec,
+    typename TFreqTable,
+    typename TPrefixSumTable,
+    typename TDollarPosition>
+// typename TTreeNodeWidth >
+inline void createWaveletTree(WaveletTree<
+                                  TBWT,
+                                  TWaveletTreeSpec
+                                  > & tree,
+                              TBWT const & bwt,
+                              TFreqTable const & freq,
+                              TPrefixSumTable & prefixSumTable,
+                              TDollarPosition dollarPosition)
+{
+    typedef typename BitVector_<BitsPerValue<typename Value<TBWT>::Type>::VALUE>::Type TValue;
+    typedef typename Size<typename Value<TBWT>::Type>::Type TSize;
+
+    //generate the tree structure
+    TSize sigmaSize = length(freq);
+    TValue numberOfTreeNodes = sigmaSize - 1;
+    resize(tree.splitValues, numberOfTreeNodes, Pair<TValue, TValue>(0, 0));
+    TValue smallestValue = 0;
+    TValue highestValue = numberOfTreeNodes;
+    TValue numChildNodes = 0;
+
+    std::cerr << "number of nodes: " << length(tree.splitValues) << std::endl;
+
+    typename Iterator<WaveletTreeStructure<TBWT> >::Type iter(tree.splitValues, 0);
+    computeTreeEntries(freq,
+                       iter,
+                       smallestValue,
+                       highestValue,
+                       numChildNodes);
+
+    numberOfTreeNodes = numChildNodes;
+    resize(tree.splitValues, numberOfTreeNodes);
+    //writeGraph(tree.splitValues);
+
+    String<unsigned long long> lengthString;
+    //addToPrefixTable(prefixSumTable, ordValue(tree.dollarSub), prefixSumTable[0]);
+    computeStringLengthFromTree(lengthString,
+                                prefixSumTable,
+                                tree.splitValues);
+    //subFromPrefixTable(prefixSumTable, ordValue(tree.dollarSub), prefixSumTable[0]);
+
+
+    resize(tree.bitStrings, numberOfTreeNodes);
+    for (unsigned i = 0; i < numberOfTreeNodes; ++i)
+    {
+        reserve(tree.bitStrings[i], lengthString[i]);
+    }
+
+    setPosition(iter, (TValue)0);
+
+    fillWaveletTree(tree, bwt, dollarPosition);
 }
 
 template <
