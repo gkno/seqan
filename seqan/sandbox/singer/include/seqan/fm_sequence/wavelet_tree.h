@@ -87,6 +87,31 @@ struct WaveletTree
         createWaveletTree(*this, text, freqTable, prefixSumTable);
     }
 
+    bool operator==(const WaveletTree & b) const
+    {
+
+        typedef typename Size<TText>::Type                            TSize;
+        bool test = true;
+        if (length(bitStrings) == length(b.bitStrings))
+        {
+            for (TSize i = 0; i < length(bitStrings); ++i)
+            {
+                if (!(bitStrings[i] == b.bitStrings[i]))
+                {
+                    test = false;
+                }
+            }
+        }
+        else
+        {
+            test = false;
+        }
+
+        return test &&
+               splitValues == b.splitValues;
+    }
+
+
 };
 
 template <typename TText>
@@ -837,7 +862,7 @@ inline void createWaveletTree(WaveletTree<
 }
 
 template <typename TText>
-inline bool open(
+inline bool openDollarInformation(
     WaveletTree<TText, SingleString> & tree,
     const char * fileName,
     int openMode)
@@ -856,9 +881,42 @@ inline bool open(
     }
     tree.dollarSub = dollarValues[0].i1;
     tree.dollarPosition = dollarValues[0].i2;
+    return true;
+}
+
+template <typename TText>
+inline bool openDollarInformation(
+    WaveletTree<TText, MultiString> & tree,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+
+    typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+    typedef typename Fibre<WaveletTree<TText, MultiString>, FibreDollarPositions>::Type TDollarString;
+
+    String<Pair<TValue, TDollarString> > dollarValues;
+
+    name = fileName;    append(name, ".dollar");
+    if (!open(dollarValues, toCString(name), openMode))
+    {
+        return false;
+    }
+    tree.dollarSub = dollarValues[0].i1;
+    tree.dollarPosition = dollarValues[0].i2;
+    return true;
+}
+
+template <typename TText>
+inline bool open(
+    WaveletTree<TText, SingleString> & tree,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
     name = fileName;    append(name, ".tree");  open(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
     name = fileName;    append(name, ".split"); open(getFibre(tree, FibreSplitValues()), toCString(name), openMode);
-
+    openDollarInformation(tree, fileName, openMode);
     return true;
 }
 
@@ -870,8 +928,35 @@ inline bool open(
     return open(tree, fileName, DefaultOpenMode<WaveletTree<TText, SingleString> >::VALUE);
 }
 
+template <typename TText, typename TSpec>
+inline bool saveDollarInformation(
+    WaveletTree<TText, TSpec> const & tree,
+    const char * fileName,
+    int openMode)
+{
+	return true;
+}
+
 template <typename TText>
-inline bool save(
+inline bool saveDollarInformation(
+    WaveletTree<TText, MultiString> const & tree,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+
+    typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+    typedef typename Fibre<WaveletTree<TText, MultiString>, FibreDollarPositions>::Type TDollarString;
+
+    String<Pair<TValue, TDollarString> > dollarValues;
+    append(dollarValues, Pair<TValue, TDollarString>(tree.dollarSub, tree.dollarPosition));
+
+    name = fileName;    append(name, ".dollar"); save(dollarValues, toCString(name), openMode);
+    return true;
+}
+
+template <typename TText>
+inline bool saveDollarInformation(
     WaveletTree<TText, SingleString> const & tree,
     const char * fileName,
     int openMode)
@@ -885,8 +970,19 @@ inline bool save(
     append(dollarValues, Pair<TValue, TSize>(tree.dollarSub, tree.dollarPosition));
 
     name = fileName;    append(name, ".dollar"); save(dollarValues, toCString(name), openMode);
+    return true;
+}
+
+template <typename TText, typename TSpec>
+inline bool save(
+    WaveletTree<TText, TSpec> const & tree,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
     name = fileName;    append(name, ".tree");  save(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
     name = fileName;    append(name, ".split"); save(getFibre(tree, FibreSplitValues()), toCString(name), openMode);
+    saveDollarInformation(tree, fileName, openMode);
     return true;
 }
 
