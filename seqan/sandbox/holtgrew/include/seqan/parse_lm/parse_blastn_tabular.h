@@ -142,6 +142,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: q. start
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     queryBeginPos = lexicalCast<TPosition>(buffer) - 1;
@@ -149,6 +150,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: q. end
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     queryEndPos = lexicalCast<TPosition>(buffer);
@@ -156,6 +158,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: s. start
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     subjectBeginPos = lexicalCast<TPosition>(buffer) - 1;
@@ -163,6 +166,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: s. end
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     subjectEndPos = lexicalCast<TPosition>(buffer);

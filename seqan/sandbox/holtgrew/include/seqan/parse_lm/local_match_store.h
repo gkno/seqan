@@ -174,6 +174,9 @@ public:
     
     typedef LocalMatch<TId, TPosition> TLocalMatch;
     typedef String<TLocalMatch> TMatchStore;
+
+    typedef String<CigarElement<> > TCigarString;
+    typedef String<TCigarString> TCigarStore;
     
     typedef StringSet<CharString> TNameStore;
     typedef NameStoreCache<TNameStore> TNameStoreCache_;
@@ -185,7 +188,8 @@ public:
     TNameStore       sequenceNameStore;
     TNameStoreCache_ _sequenceNameStoreCache;
 
-    TMatchStore     matchStore;
+    TMatchStore       matchStore;
+    TCigarStore       cigarStore;
 
     LocalMatchStore() :
             _sequenceNameStoreCache(sequenceNameStore)
@@ -226,7 +230,7 @@ registerSequenceName(TLocalMatchStore & store,
 ..summary:Append a new local match to a @Class.LocalMatchStore@
 ..cat:Local Match Store
 ..signature:appendLocalMatchStore(store, subjectId, subjectBeginPos, subjectEndPos, queryId, queryBeginPos, queryEndPos)
-..signature:appendLocalMatchStore(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos)
+..signature:appendLocalMatchStore(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos, cigarStringBuffer)
 ..param.store:The store to add the local match to.
 ..param.subjectId:Numeric subject sequence identifier.
 ..param.subjectName:The textual name of the query sequence.
@@ -238,6 +242,8 @@ registerSequenceName(TLocalMatchStore & store,
 ...type:Shortcut.CharString
 ..param.queryBegin:The begin position of the match in the query.
 ..param.queryEnd:The end position of the match in the query.
+..param.cigarStringBuffer:Buffer with the cigar string of the local alignment.
+...type:Shortcut.CharString
 ..remarks:Matches on the reverse-complement are encoded by the begin position being greater than the begin position.
 ..include:seqan/parse_lm.h
  */
@@ -294,6 +300,44 @@ appendLocalMatch(TLocalMatchStore & store,
     }
 
     appendLocalMatch(store, subjectId, subjectBeginPos, subjectEndPos, queryId, queryBeginPos, queryEndPos);
+}
+
+template <typename TLocalMatchStore, typename TPosition>
+inline void
+appendLocalMatch(TLocalMatchStore & store,
+                 CharString const & subjectName,
+                 TPosition const subjectBeginPos,
+                 TPosition const subjectEndPos,
+                 CharString const & queryName,
+                 TPosition const queryBeginPos,
+                 TPosition const queryEndPos,
+                 CharString const & cigarStringBuffer)
+{
+    // Append local match.
+    appendLocalMatch(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos);
+    // Make space for CIGAR string.
+    resize(store.cigarStore, back(store.matchStore).id + 1);
+    // TODO(holtgrew): Something can go wrong when parsing CIGAR string, need return value?
+    // Parse out cigar string.
+    typedef Stream<CharArray<char const *> > TCharArrayStream;
+    TCharArrayStream cigarStream(&cigarStringBuffer[0], &cigarStringBuffer[0] + length(cigarStringBuffer));
+    RecordReader<TCharArrayStream, SinglePass<> > recordReader(cigarStream);
+    CharString numBuf;
+    while (!atEnd(recordReader))
+    {
+        // Get number string into buffer.
+        clear(numBuf);
+        readDigits(numBuf, recordReader);
+        unsigned num = 0;
+        bool success = lexicalCast2<unsigned>(num, numBuf);
+        SEQAN_ASSERT(success);
+        (void)success;
+        // Read operation char and advance record reader.
+        char op = value(recordReader);
+        goNext(recordReader);
+        // Append CIGAR element to CIGAR string.
+        appendValue(back(store.cigarStore), CigarElement<>(op, num));
+    }
 }
 
 }  // namespace seqan

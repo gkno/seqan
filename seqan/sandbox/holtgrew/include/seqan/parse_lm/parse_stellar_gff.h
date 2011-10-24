@@ -124,6 +124,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: START
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     subjectBeginPos = lexicalCast<TPosition>(buffer) - 1;
@@ -131,6 +132,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: END
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     subjectEndPos = lexicalCast<TPosition>(buffer);
@@ -144,6 +146,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: STRAND
+    clear(buffer);
     res = readNChars(buffer, recordReader, 1);
     if (res) return res;
     subjectStrand = buffer[0];
@@ -167,6 +170,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, ';');
     if (res) return res;
     // "seq2Range="
+    clear(buffer);
     res = readUntilChar(buffer, recordReader, '=');
     if (res) return res;
     if (buffer != "seq2Range")
@@ -175,6 +179,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '=');
     if (res) return res;
     // query begin pos
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     queryBeginPos = lexicalCast<TPosition>(buffer) - 1;
@@ -182,14 +187,48 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, ',');
     if (res) return res;
     // query end pos
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     queryEndPos = lexicalCast<TPosition>(buffer);
+    // Skip semicolon.
+    res = skipChar(recordReader, ';');
+    if (res) return res;
+    // Skip "eValue=*;"
+    clear(buffer);
+    res = readUntilChar(buffer, recordReader, '=');
+    if (res) return res;
+    if (buffer != "eValue")
+        return 1;  // FORMAT ERROR, should probably be a constant
+    // Skip '='
+    res = skipChar(recordReader, '=');
+    if (res) return res;
+    // Skip until semicolon.
+    res = skipUntilChar(recordReader, ';');
+    if (res) return res;
+    // And skip the semicolon.
+    res = skipChar(recordReader, ';');
+    if (res) return res;
+    // Skip "cigar".
+    clear(buffer);
+    res = readUntilChar(buffer, recordReader, '=');
+    if (res) return res;
+    if (buffer != "cigar")
+        return 1;  // FORMAT ERROR, should probably be a constant
+    // Skip '='
+    res = skipChar(recordReader, '=');
+    if (res) return res;
+    // Read cigar string.
+    clear(buffer);
+    res = readUntilChar(buffer, recordReader, ';');
+    // Skip semicolon.
+    res = skipChar(recordReader, ';');
+    if (res) return res;
     // ignore rest of the field, skip to next line
     skipLine(recordReader);
 
     // Finally, append the local match.
-    appendLocalMatch(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos);
+    appendLocalMatch(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos, buffer);
 
     return 0;
 }

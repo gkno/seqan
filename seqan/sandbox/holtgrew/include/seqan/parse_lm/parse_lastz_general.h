@@ -123,6 +123,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: strand1
+    clear(buffer);
     res = readNChars(buffer, recordReader, 1);
     if (res) return res;
     subjectStrand = buffer[0];
@@ -132,6 +133,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: size1
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     // NOTE: Result is ignored.
@@ -139,6 +141,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: zstart1
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     subjectBeginPos = lexicalCast<TPosition>(buffer);
@@ -146,6 +149,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: end1
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     subjectEndPos = lexicalCast<TPosition>(buffer);
@@ -159,6 +163,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: strand2
+    clear(buffer);
     res = readNChars(buffer, recordReader, 1);
     if (res) return res;
     queryStrand = buffer[0];
@@ -168,6 +173,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: size2
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     // NOTE: Result is ignored.
@@ -175,6 +181,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: zstart2
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     queryBeginPos = lexicalCast<TPosition>(buffer);
@@ -182,6 +189,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: end2
+    clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
     queryEndPos = lexicalCast<TPosition>(buffer);
@@ -189,6 +197,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: identity
+    clear(buffer);
     res = readUntilWhitespace(buffer, recordReader);
     if (res) return res;
     // NOTE: Result is ignored.
@@ -196,6 +205,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: idPct
+    clear(buffer);
     res = readUntilWhitespace(buffer, recordReader);
     if (res) return res;
     // NOTE: Result is ignored.
@@ -203,6 +213,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: coverage
+    clear(buffer);
     res = readUntilWhitespace(buffer, recordReader);
     if (res) return res;
     // NOTE: Result is ignored.
@@ -210,6 +221,7 @@ readRecord(TLocalMatchStore & store,
     res = skipChar(recordReader, '\t');
     if (res) return res;
     // Field: covPct
+    clear(buffer);
     res = readUntilWhitespace(buffer, recordReader);
     if (res) return res;
     // NOTE: Result is ignored.
