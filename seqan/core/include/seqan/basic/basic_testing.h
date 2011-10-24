@@ -603,6 +603,7 @@ const char *tempFileName() {
 #ifdef PLATFORM_WINDOWS_VS
 		// Set CRT reporting such that everything goes to stderr and there are
 		// no popups causing timeouts.
+		_set_error_mode(_OUT_TO_STDERR);
 		_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 		_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 		_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
