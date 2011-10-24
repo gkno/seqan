@@ -676,7 +676,8 @@ class HtmlHelper(object):
             result.append((curr_type, curr_chunk))
         return result
 
-    def _formatCode(self, txt, linenostart):
+    # TODO(holtgrew): Rename into formatCode()?
+    def _formatCode(self, txt, linenostart=1):
         try:
             import pygments, pygments.lexers, pygments.formatters
             return pygments.highlight(txt, pygments.lexers.CppLexer(), pygments.formatters.HtmlFormatter(linenos='table', style='friendly', linenostart=linenostart))

@@ -69,7 +69,7 @@
         <p>$!html.translateMarkup(text[len('type=contents:'):], node=tree.find(path))!$</p>
         $!table_of_contents(path=path)!$
         <!--(elif text.startswith('type=code:'))-->
-        <pre>@!text[len('type=code:'):]!@</pre>
+        $!html._formatCode(text[len('type=code:'):])!$
         <!--(else)-->
         <pre>@!path!@ @!tree.find(path)!@</pre>
         <pre>@!text!@</pre>

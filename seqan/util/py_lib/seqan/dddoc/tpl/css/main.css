@@ -157,7 +157,8 @@ a:hover
     border: 1px solid #999;
 }
 
-.section table td.signature {
+.section table td.signature
+{
     width: 15em;
 }
 /*
@@ -282,8 +283,32 @@ div.image
  * ===========================================================================
  */
 
-.signature_section pre,
+div.example table td
+{
+    padding: 0px !important;
+    border: none !important;
+}
+
+div.example p
+{
+    margin-bottom: 10px;
+}
+
 .example pre
+{
+    padding: 5px;
+}
+
+.example .highlight pre
+{
+    background: #EDF3FE;
+    padding-left: 5px;
+    border-top: 1px solid #999;
+    border-bottom: 1px solid #999;
+}
+
+.signature_section pre/*,
+.example pre*/
 {
   padding: 6px 11px 7px 11px;
   background-color: #EDF3FE;
@@ -296,11 +321,13 @@ div.image
   border: 1px solid #999;
 }
 
+/*
 .example pre
 {
   border-top: 1px solid #999;
   border-bottom: 1px solid #999;
 }
+*/
 
 /* ===========================================================================
  * Nicer Integration Of pygments Output In Page
