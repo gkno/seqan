@@ -42,8 +42,8 @@
    index in this string sets.
  */
 
-#ifndef SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_
-#define SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_
+#ifndef EXTRAS_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_
+#define EXTRAS_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_
 
 namespace seqan {
 
@@ -63,6 +63,8 @@ namespace seqan {
 ..param.TId:Type to use for subject/query id.
 ..param.TPosition:Type to use for storing positions.
 ..remarks:Matches on the reverse-complement are encoded by the begin position being greater than the begin position.
+..remarks:Sequence names are not stored in LocalMatch objects but in the @Class.LocalMatchStore@ they belong to.
+..see:Class.LocalMatchStore
 ..include:seqan/parse_lm.h
 .Memvar.Local Match#subjectId
 ..summary:The id of the subject.
@@ -152,12 +154,46 @@ struct LocalMatchStoreConfig
 ..signature:LocalMatchStore<[TSpec[, TConfig]]>
 ..param.TSpec:Specialization tag.
 ..param.TConfig:Configuration class.
+..remarks:
+The LocalMatchStore provides information about matches.
+Similar to the @Class.FragmentStore@, the information is split into multiple sub stores.
+Each sub store stores a part of the information.
+..remarks:
+The @Memvar.LocalMatchStore#matchStore@ stores the information about a match.
+The @Memvar.LocalMatchStore#sequenceNameStore@ stores the sequence names.
+These both sub stores are "core stores", they are filled with consistent information, i.e. for each sequence id in the matchStore, there has to be a valid entry in the sequenceNameStore.
+..remarks:
+The @Memvar.LocalMatchStore#cigarStore@ optionally stores CIGAR strings for the matches.
+Its entries are referenced by $matchStore[i].id$.
+..example.text:Read Lastz matches from a @Class.RecordReader@ and then print them to stdout.
+..example.code:
+// Read local alignments from record reader.  Note that in real-world code,
+// you should have error handling.
+LocalMatchStore<> lmStore;
+while (!atEnd(recordReader))
+    readRecord(lmStore, recordReader, StellarGff());
+
+// Print local alignment information to stdout.
+std::cout << "# Reverse strandness is indicated by end < begin\n"
+          << "#db\tdb_beg\tdb_end\tquery\tq_beg\tq_end\n";
+for (unsigned i = 0; i < length(lmStore.matchStore); ++i)
+    std::cout << lmStore.sequenceNameStore[lmStore.matchStore[i].queryId] << "\t"
+              << lmStore.matchStore[i].queryBeginPos << "\t"
+              << lmStore.matchStore[i].queryEndPos << "\t"
+              << lmStore.sequenceNameStore[lmStore.matchStore[i].subjectId] << "\t"
+              << lmStore.matchStore[i].subjectBeginPos << "\t"
+              << lmStore.matchStore[i].subjectEndPos << "\n";              
 ..include:seqan/parse_lm.h
+..see:Class.LocalMatch
 .Memvar.LocalMatchStore#sequenceNameStore
 ..summary:@Class.StringSet@ storing the sequence names.
 ..class:Class.LocalMatchStore
 .Memvar.LocalMatchStore#matchStore
-..summary:@Class.String@ storing the the local matches.
+..summary:@Class.String@ storing the @Class.LocalMatch|local matches@.
+..class:Class.LocalMatchStore
+.Memvar.LocalMatchStore#cigarStore
+..summary:@Class.String@ storing the CIGAR strings.
+..type:nolink:$String<String<CigarElement<> > >$
 ..class:Class.LocalMatchStore
  */
 
@@ -232,6 +268,7 @@ registerSequenceName(TLocalMatchStore & store,
 ..signature:appendLocalMatchStore(store, subjectId, subjectBeginPos, subjectEndPos, queryId, queryBeginPos, queryEndPos)
 ..signature:appendLocalMatchStore(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos, cigarStringBuffer)
 ..param.store:The store to add the local match to.
+...type:Class.LocalMatchStore
 ..param.subjectId:Numeric subject sequence identifier.
 ..param.subjectName:The textual name of the query sequence.
 ...type:Shortcut.CharString
@@ -342,4 +379,4 @@ appendLocalMatch(TLocalMatchStore & store,
 
 }  // namespace seqan
 
-#endif  // SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_
+#endif  // EXTRAS_INCLUDE_SEQAN_PARSE_LM_LOCAL_MATCH_STORE_H_

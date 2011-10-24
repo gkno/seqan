@@ -31,11 +31,13 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
+// Parsing for the "general" format of lastz.
+// ==========================================================================
 
 // SEQAN_NO_GENERATED_FORWARDS
 
-#ifndef SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_PARSE_BLASTN_TABULAR_H_
-#define SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_PARSE_BLASTN_TABULAR_H_
+#ifndef EXTRAS_INCLUDE_SEQAN_PARSE_LM_PARSE_LASTZ_GENERAL_H_
+#define EXTRAS_INCLUDE_SEQAN_PARSE_LM_PARSE_LASTZ_GENERAL_H_
 
 namespace seqan {
 
@@ -47,8 +49,8 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-struct BlastnTabular_;
-typedef Tag<BlastnTabular_> BlastnTabular;
+struct LastzGeneral_;
+typedef Tag<LastzGeneral_> LastzGeneral;
 
 // ============================================================================
 // Metafunctions
@@ -65,7 +67,8 @@ typedef Tag<BlastnTabular_> BlastnTabular;
 /**
 .Function.readRecord
 ..cat:Local Match Store
-..signature:readRecord(store, stream, BlastnTabular())
+..signature:readRecord(store, stream, LastzGeneral())
+..summary:Read Lastz "general" format record.
 ..param.store:@Class.LocalMatchStore@ object to read into.
 ...type:Class.LocalMatchStore
 ..returns:$int$, 0 on success, non-0 on errors and EOF
@@ -76,7 +79,7 @@ template <typename TLocalMatchStore, typename TStream, typename TPassSpec>
 int
 readRecord(TLocalMatchStore & store,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
-           BlastnTabular const & /*tag*/)
+           LastzGeneral const & /*tag*/)
 {
     typedef typename TLocalMatchStore::TPosition TPosition;
     typedef typename TLocalMatchStore::TPosition TId;
@@ -100,72 +103,52 @@ readRecord(TLocalMatchStore & store,
 
     CharString subjectName;
     CharString queryName;
+    char subjectStrand = 'X';
+    char queryStrand = 'X';
     TPosition subjectBeginPos = 0;
     TPosition subjectEndPos = 0;
     TPosition queryBeginPos = 0;
     TPosition queryEndPos = 0;
 
-    // Field: query id
-    res = readUntilChar(queryName, recordReader, '\t');
+    // Field: score
+    res = readDigits(buffer, recordReader);
     if (res) return res;
     // Skip TAB.
     res = skipChar(recordReader, '\t');
     if (res) return res;
-    // Field: subject id
-    res = readUntilChar(subjectName, recordReader, '\t');
+    // Field: name1
+    readUntilChar(subjectName, recordReader, '\t');
     if (res) return res;
     // Skip TAB.
     res = skipChar(recordReader, '\t');
     if (res) return res;
-    // Field: % identity
-    res = skipUntilChar(recordReader, '\t');
+    // Field: strand1
+    clear(buffer);
+    res = readNChars(buffer, recordReader, 1);
     if (res) return res;
+    subjectStrand = buffer[0];
+    if (subjectStrand != '+' && subjectStrand != '-')
+        return 1;  // FORMAT ERROR, should probably be a constant
     // Skip TAB.
     res = skipChar(recordReader, '\t');
     if (res) return res;
-    // Field: alignment length
-    res = skipUntilChar(recordReader, '\t');
-    if (res) return res;
-    // Skip TAB.
-    res = skipChar(recordReader, '\t');
-    if (res) return res;
-    // Field: mismatches
-    res = skipUntilChar(recordReader, '\t');
-    if (res) return res;
-    // Skip TAB.
-    res = skipChar(recordReader, '\t');
-    if (res) return res;
-    // Field: gap opens
-    res = skipUntilChar(recordReader, '\t');
-    if (res) return res;
-    // Skip TAB.
-    res = skipChar(recordReader, '\t');
-    if (res) return res;
-    // Field: q. start
+    // Field: size1
     clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
-    queryBeginPos = lexicalCast<TPosition>(buffer) - 1;
+    // NOTE: Result is ignored.
     // Skip TAB.
     res = skipChar(recordReader, '\t');
     if (res) return res;
-    // Field: q. end
+    // Field: zstart1
     clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
-    queryEndPos = lexicalCast<TPosition>(buffer);
+    subjectBeginPos = lexicalCast<TPosition>(buffer);
     // Skip TAB.
     res = skipChar(recordReader, '\t');
     if (res) return res;
-    // Field: s. start
-    clear(buffer);
-    res = readDigits(buffer, recordReader);
-    if (res) return res;
-    subjectBeginPos = lexicalCast<TPosition>(buffer) - 1;
-    // Skip TAB.
-    res = skipChar(recordReader, '\t');
-    if (res) return res;
-    // Field: s. end
+    // Field: end1
     clear(buffer);
     res = readDigits(buffer, recordReader);
     if (res) return res;
@@ -173,17 +156,83 @@ readRecord(TLocalMatchStore & store,
     // Skip TAB.
     res = skipChar(recordReader, '\t');
     if (res) return res;
-    // Field: evalue
-    res = skipUntilChar(recordReader, '\t');
+    // Field: name2
+    readUntilChar(queryName, recordReader, '\t');
     if (res) return res;
     // Skip TAB.
     res = skipChar(recordReader, '\t');
     if (res) return res;
-    // Field: bit score
-    res = skipUntilWhitespace(recordReader);
+    // Field: strand2
+    clear(buffer);
+    res = readNChars(buffer, recordReader, 1);
     if (res) return res;
+    queryStrand = buffer[0];
+    if (queryStrand != '+' && queryStrand != '-')
+        return 1;  // FORMAT ERROR, should probably be a constant
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: size2
+    clear(buffer);
+    res = readDigits(buffer, recordReader);
+    if (res) return res;
+    // NOTE: Result is ignored.
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: zstart2
+    clear(buffer);
+    res = readDigits(buffer, recordReader);
+    if (res) return res;
+    queryBeginPos = lexicalCast<TPosition>(buffer);
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: end2
+    clear(buffer);
+    res = readDigits(buffer, recordReader);
+    if (res) return res;
+    queryEndPos = lexicalCast<TPosition>(buffer);
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: identity
+    clear(buffer);
+    res = readUntilWhitespace(buffer, recordReader);
+    if (res) return res;
+    // NOTE: Result is ignored.
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: idPct
+    clear(buffer);
+    res = readUntilWhitespace(buffer, recordReader);
+    if (res) return res;
+    // NOTE: Result is ignored.
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: coverage
+    clear(buffer);
+    res = readUntilWhitespace(buffer, recordReader);
+    if (res) return res;
+    // NOTE: Result is ignored.
+    // Skip TAB.
+    res = skipChar(recordReader, '\t');
+    if (res) return res;
+    // Field: covPct
+    clear(buffer);
+    res = readUntilWhitespace(buffer, recordReader);
+    if (res) return res;
+    // NOTE: Result is ignored.
+    // Skip to next line, ignore EOF here.
+    skipLine(recordReader);
 
     // Finally, append the local match.
+    if (subjectStrand == '-')
+        ::std::swap(subjectBeginPos, subjectEndPos);
+    if (queryStrand == '-')
+        ::std::swap(queryBeginPos, queryEndPos);
     appendLocalMatch(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos);
 
     return 0;
@@ -191,4 +240,4 @@ readRecord(TLocalMatchStore & store,
 
 }  // namespace seqan
 
-#endif  // SANDBOX_HOLTGREW_INCLUDE_SEQAN_PARSE_LM_PARSE_BLASTN_TABULAR_H_
+#endif  // EXTRAS_INCLUDE_SEQAN_PARSE_LM_PARSE_LASTZ_GENERAL_H_

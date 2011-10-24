@@ -32,8 +32,8 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_HOLTGREW_TESTS_PARSE_LM_TEST_PARSE_LM_H_
-#define SANDBOX_HOLTGREW_TESTS_PARSE_LM_TEST_PARSE_LM_H_
+#ifndef EXTRAS_TESTS_PARSE_LM_TEST_PARSE_LM_H_
+#define EXTRAS_TESTS_PARSE_LM_TEST_PARSE_LM_H_
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
@@ -253,4 +253,4 @@ SEQAN_DEFINE_TEST(test_parse_lm_parse_stellar_gff)
     fclose(stream);
 }
 
-#endif  // SANDBOX_HOLTGREW_TESTS_PARSE_LM_TEST_PARSE_LM_H_
+#endif  // EXTRAS_TESTS_PARSE_LM_TEST_PARSE_LM_H_
