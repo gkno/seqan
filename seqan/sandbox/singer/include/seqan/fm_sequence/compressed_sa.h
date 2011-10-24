@@ -163,8 +163,8 @@ inline bool save(
 template <typename TSparseString, typename TLfTable, typename TSpec>
 struct CompressedSA
 {
-    TSparseString                           compressedSA;
-    TLfTable * lfTable;
+    TSparseString 	compressedSA;
+    TLfTable * 		lfTable;
 
     CompressedSA(){}
 
@@ -181,7 +181,7 @@ struct CompressedSA
             pos = lfMapping(*lfTable, pos);
             ++counter;
         }
-        return compressedSA[getRank(indicatorString, pos) - 1] + counter;
+        return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
     }
 
     template <typename TPos>
