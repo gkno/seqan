@@ -472,7 +472,7 @@ endmacro (seqan_find_dependencies)
 macro (seqan_add_all_subdirectories)
     file (GLOB ENTRIES
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-          ${CMAKE_CURRENT_SOURCE_DIR}/*)
+          ${CMAKE_CURRENT_SOURCE_DIR}/[!.]*)
     foreach (ENTRY ${ENTRIES})
         if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${ENTRY})
             # message(STATUS "Going into ${ENTRY}")
@@ -765,7 +765,7 @@ macro (seqan_add_all_cuda_executables)
     if (CUDA_FOUND)
         file (GLOB ENTRIES
               RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-              ${CMAKE_CURRENT_SOURCE_DIR}/*.cu)
+              ${CMAKE_CURRENT_SOURCE_DIR}/[!.]*.cu)
         if (${ARGC} GREATER 0)
             if (TARGET ${ARGV0})  # Add target only if it does not exist yet.
             else (TARGET ${ARGV0})
