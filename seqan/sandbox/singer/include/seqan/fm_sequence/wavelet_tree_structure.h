@@ -44,18 +44,29 @@ namespace seqan {
 template <typename TText>
 struct WaveletTreeStructure;
 struct FibreTreeNodes_;
+//struct FibreTreeNodesPlusDollar_;
 
 // ==========================================================================
 //Tags, Classes, Enums
 // ==========================================================================
 typedef Tag<FibreTreeNodes_> const FibreTreeNodes;
+//typedef Tag<FibreTreeNodesPlusDollar_> const FibreTreeNodesPlusDollar;
 
 template <typename TText>
 struct Fibre<WaveletTreeStructure<TText>, FibreTreeNodes>
 {
-    typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+    //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+	typedef unsigned TValue;
     typedef String<Pair<TValue, TValue> > Type;
 };
+
+//template <typename TText>
+//struct Fibre<WaveletTreeStructure<TText>, FibreTreeNodesPlusDollar>
+//{
+//    typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+//	//typedef unsigned TValue;
+//    typedef String<Pair<TValue, TValue> > Type;
+//};
 
 template <typename TText>
 struct WaveletTreeStructure
@@ -132,8 +143,9 @@ void resize(WaveletTreeStructure<TText> & treeStructure, TSize size)
 
 template <typename TText, typename TSize>
 void resize(WaveletTreeStructure<TText> & treeStructure, TSize size,
-            Pair<typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type,
-                 typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type> value)
+			typename Value<typename Fibre<WaveletTreeStructure<TText>,FibreTreeNodes>::Type>::Type value)
+//            Pair<typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type,
+//                 typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type> value)
 {
     resize(treeStructure.treeNodes, size, value);
 }
@@ -516,18 +528,23 @@ void writeGraph(WaveletTreeStructure<TText> & tree, TString name)
     stream.close();
 }
 
-template <typename TStringLengthString, typename TPrefixSumTable, typename TIter, typename TTreeSplitValue>
+template <typename TStringLengthString, typename TPrefixSumTable, typename TIter>//, typename TTreeSplitValue>
 void computeSingleStringLengthFromTree(TStringLengthString & lengthString,
                                        TPrefixSumTable & prefixSumTable,
                                        TIter & iter,
-                                       TTreeSplitValue lowerBound,
-                                       TTreeSplitValue upperBound)
+                                       unsigned lowerBound,
+                                       unsigned upperBound)
+//										TreeSplitValue lowerBound,
+//                                       TTreeSplitValue upperBound)
 {
 
     lengthString[iter.position] = prefixSumTable[upperBound + 1] - prefixSumTable[lowerBound];
     TIter iter2 = iter;
 
-    TTreeSplitValue newSplit = getCharacter(iter);
+    std::cerr << "iter.position: " << (int)iter.position << " upperBound: " << ordValue(upperBound) << " lowerBound: " << ordValue(lowerBound) << " " <<prefixSumTable[upperBound + 1] << " " << prefixSumTable[lowerBound] << std::endl;
+
+    //TTreeSplitValue newSplit = getCharacter(iter);
+    unsigned newSplit = getCharacter(iter);
     goLeft(iter);
     if (getPosition(iter))
     {
@@ -557,7 +574,8 @@ void computeStringLengthFromTree(TStringLengthString & lengthString,
 {
     resize(lengthString, length(tree.treeNodes), 0);
     typename Iterator<WaveletTreeStructure<TText> >::Type iter(tree, 0);
-    typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+    //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+    typedef unsigned TValue;
 
     computeSingleStringLengthFromTree(lengthString,
                                       prefixSumTable,

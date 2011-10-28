@@ -779,18 +779,18 @@ inline void createWaveletTree(WaveletTree<
                               TPrefixSumTable & prefixSumTable,
                               TDollarPosition dollarPosition)
 {
-    typedef typename BitVector_<BitsPerValue<typename Value<TBWT>::Type>::VALUE>::Type TValue;
+    //typedef typename BitVector_<BitsPerValue<typename Value<TBWT>::Type>::VALUE>::Type TValue;
+    typedef unsigned TValue;
     typedef typename Size<typename Value<TBWT>::Type>::Type TSize;
 
     //generate the tree structure
     TSize sigmaSize = length(freq);
     TValue numberOfTreeNodes = sigmaSize - 1;
+
     resize(tree.splitValues, numberOfTreeNodes, Pair<TValue, TValue>(0, 0));
     TValue smallestValue = 0;
     TValue highestValue = numberOfTreeNodes;
     TValue numChildNodes = 0;
-
-    std::cerr << "number of nodes: " << length(tree.splitValues) << std::endl;
 
     typename Iterator<WaveletTreeStructure<TBWT> >::Type iter(tree.splitValues, 0);
     computeTreeEntries(freq,
@@ -810,7 +810,6 @@ inline void createWaveletTree(WaveletTree<
                                 tree.splitValues);
     //subFromPrefixTable(prefixSumTable, ordValue(tree.dollarSub), prefixSumTable[0]);
 
-
     resize(tree.bitStrings, numberOfTreeNodes);
     for (unsigned i = 0; i < numberOfTreeNodes; ++i)
     {
@@ -818,7 +817,6 @@ inline void createWaveletTree(WaveletTree<
     }
 
     setPosition(iter, (TValue)0);
-
     fillWaveletTree(tree, bwt, dollarPosition);
 }
 
