@@ -227,7 +227,9 @@ readRecord(TLocalMatchStore & store,
     // ignore rest of the field, skip to next line
     skipLine(recordReader);
 
-    // Finally, append the local match.
+	// Finally, append the local match.
+    if (subjectStrand == '-')
+        ::std::swap(subjectBeginPos, subjectEndPos);
     appendLocalMatch(store, subjectName, subjectBeginPos, subjectEndPos, queryName, queryBeginPos, queryEndPos, buffer);
 
     return 0;
