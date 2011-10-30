@@ -54,7 +54,8 @@ struct Options
 {
     bool showHelp;
     bool showVersion;
-    int i;
+    CharString inputFileName;
+    CharString outputFileName;
     String<CharString> texts;
     
     Options()
@@ -62,7 +63,6 @@ struct Options
         // Set defaults.
         showHelp = false;
         showVersion = false;
-        i = 0;
     }
 };
 
@@ -88,7 +88,8 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     addUsageLine(parser, "[OPTIONS] TEXT+");
     
 	addSection(parser, "Main Options");
-	addOption(parser, CommandLineOption("i",  "integer",  "set an integer option", OptionType::Integer | OptionType::Label, options.i));
+	addOption(parser, CommandLineOption("if",  "input-file",  "Input file.", OptionType::String | OptionType::Label, options.inputFileName));
+	addOption(parser, CommandLineOption("of",  "output-file", "Output file.", OptionType::String | OptionType::Label, options.outputFileName));
     
     requiredArguments(parser, 1);
 }
@@ -101,14 +102,19 @@ int parseCommandLineAndCheck(Options & options,
     bool stop = !parse(parser, argc, argv);
     if (stop)
         return 1;
-    if (isSetLong(parser, "help")) {
+    if (isSetLong(parser, "help"))
+    {
         options.showHelp = true;
         return 0;
     }
-    if (isSetLong(parser, "version")) {
+    if (isSetLong(parser, "version"))
+    {
         options.showVersion = true;
         return 0;
     }
+
+    getOptionValueLong(parser, "input-file", options.inputFileName);
+    getOptionValueLong(parser, "output-file", options.outputFileName);
     
     options.texts = getArgumentValues(parser);
 
@@ -118,8 +124,12 @@ int parseCommandLineAndCheck(Options & options,
 int mainWithOptions(Options & options)
 {
     typedef Iterator<String<CharString> >::Type TIterator;
+    std::cout << "Option Arguments:" << std::endl;
+    std::cout << "  input file:  \"" << options.inputFileName << "\"" << std::endl;
+    std::cout << "  output file: \"" << options.outputFileName << "\"" << std::endl;
     std::cout << "Non-option Arguments:" << std::endl;
-    for (TIterator it = begin(options.texts); it != end(options.texts); ++it) {
+    for (TIterator it = begin(options.texts); it != end(options.texts); ++it)
+    {
         std::cout << "  " << *it << std::endl;
     }
     

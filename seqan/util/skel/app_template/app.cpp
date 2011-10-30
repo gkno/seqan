@@ -53,7 +53,10 @@ int main(int argc, char const ** argv)
     // is requested or erroneous parameters were given.
     int ret = parseCommandLineAndCheck(options, parser, argc, argv);
     if (ret != 0)
+    {
+        std::cerr << "Invalid usage!" << std::endl;
         return ret;
+    }
     if (options.showHelp || options.showVersion)
         return 0;
     
