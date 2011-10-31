@@ -444,7 +444,7 @@ macro (seqan_find_dependencies)
   find_package (TR1)
   find_package (Boost)
   if (Boost_FOUND)
-    include_directories(${BOOST_INCLUDE_DIRS})
+    include_directories(${Boost_INCLUDE_DIRS})
   endif (Boost_FOUND)
 
   if (CUDA_FOUND)
