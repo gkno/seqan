@@ -57,6 +57,8 @@
 // }
 // ==========================================================================
 
+// TODO(holtgrew): Delete this, replaced by bam_io module.
+
 #ifndef SEQAN_STREAM_READ_SAM_H_
 #define SEQAN_STREAM_READ_SAM_H_
 

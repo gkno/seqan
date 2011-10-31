@@ -34,7 +34,6 @@
 // Code for writing FASTA and FASTQ files
 // ==========================================================================
 
-
 #ifndef SEQAN_STREAM_WRITE_H_
 #define SEQAN_STREAM_WRITE_H_
 
@@ -62,7 +61,8 @@ namespace seqan {
 
 // TODO(holtgrew): Rename enums?
 
-enum FastAQOutputOptions {
+enum FastAQOutputOptions
+{
     NO_FLAGS = 0,
     LINEBREAKS = 1,           // introduce linebreaks into sequence at col 70
     WRITEQUALITIESMETA = 2,    // for FastQ write meta line before qualities too

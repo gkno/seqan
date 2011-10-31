@@ -48,11 +48,9 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-
 // ============================================================================
 // Metafunctions
 // ============================================================================
-
 
 // ============================================================================
 // Functions
@@ -72,7 +70,6 @@ namespace seqan {
 ..include:seqan/stream.h
 */
 
-
 /**
 .Function.read2
 ..cat:Input/Output
@@ -89,7 +86,6 @@ namespace seqan {
 ..see:Class.RecordReader
 ..see:Function.readRecord
 */
-
 
 }  // namespace seqan
 

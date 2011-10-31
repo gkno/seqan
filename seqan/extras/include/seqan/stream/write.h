@@ -48,11 +48,9 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-
 // ============================================================================
 // Metafunctions
 // ============================================================================
-
 
 // ============================================================================
 // Functions
@@ -71,7 +69,6 @@ namespace seqan {
 ..include:seqan/stream.h
 */
 
-
 /**
 .Function.write2
 ..cat:Input/Output
@@ -85,7 +82,6 @@ namespace seqan {
 ..include:seqan/stream.h
 ..see:Function.writeRecord
 */
-
 
 }  // namespace seqan
 

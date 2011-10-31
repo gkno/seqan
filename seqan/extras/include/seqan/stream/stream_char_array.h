@@ -59,7 +59,12 @@ namespace seqan {
 ...type:nolink:$char *$, $char const *$.
 ..remarks:This class consists of the $char *$, another $char *$ to the beginning of the array and a flag signifying EOF.
 ..remarks:Note that this is a bounded string variant and might have some performance problems.
+..remarks:One major use case for this is to create a @Class.RecordReader@ of a string for parsing.
 ..include:seqan/stream.h
+..example.text:Create a Char Array Stream from a @Shortcut.CharString@.
+..example.code:
+CharString buffer = "This is a text.";
+Stream<CharArray<char const *> > stream(&buffer[0], &buffer[0] + length(buffer));
 
 .Memvar.Char Array Stream#Stream
 ..summary:Constructor

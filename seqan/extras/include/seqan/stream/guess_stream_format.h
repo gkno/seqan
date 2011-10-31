@@ -31,9 +31,8 @@
 // ==========================================================================
 // Author: Hannes Hauswedell <hauswedell@mi.fu-berlin.de>
 // ==========================================================================
-// File Format detection with Stream Class
+// File Format detection with Stream Class.
 // ==========================================================================
-
 
 #ifndef SEQAN_STREAM_GUESSSTREAMFORMAT_H_
 #define SEQAN_STREAM_GUESSSTREAMFORMAT_H_
@@ -79,8 +78,8 @@ The values of its member $tagId$ can be as follows:
 ..see:Function.checkStreamFormat
 ..include:seqan/stream.h
 */
-typedef TagSelector<SeqStreamFormats>       AutoSeqStreamFormat;
 
+typedef TagSelector<SeqStreamFormats>       AutoSeqStreamFormat;
 
 /**
 .Class.LimitRecordReaderInScope
@@ -180,7 +179,6 @@ private:
         _resumeRefillAndReset(SinglePass<TSpec>());
     }
 };
-
 
 // ============================================================================
 // Metafunctions

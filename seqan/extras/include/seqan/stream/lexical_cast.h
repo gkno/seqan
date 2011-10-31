@@ -37,26 +37,7 @@
 #ifndef SEQAN_STREAM_LEXICAL_CAST_H
 #define SEQAN_STREAM_LEXICAL_CAST_H
 
-
 namespace seqan {
-
-// template < typename TTarget, typename TSource >
-// inline TTarget*
-// lexicalCast(TSource *source)
-// {
-// 
-//     std::istringstream str(*source);
-// 
-//     TTarget* ret = new TTarget();
-// 
-//     bool success = (str >> *ret);
-// 
-//     if (success)
-//         return ret;
-// 
-//     delete ret;
-//     return 0;
-// }
 
 /**
 .Function.lexicalCast
@@ -76,12 +57,24 @@ namespace seqan {
 ...type:nolink:or similar
 ..returns:Value of Type TTarget with casted contents of source
 ...type:nolink:TTarget
-..remarks:Return value undefined if casting fails, see @Function.lexicalCast2@
-..remarks:uses istringstream internally, so right now "123foobar" will be
-succesfully cast to an int of 123
+..remarks:Return value undefined if casting fails, see @Function.lexicalCast2@ for a more robust variant.
+..remarks:This function uses $std::istringstream$ internally, so right now "123foobar" will be
+succesfully cast to an int of 123.
 ..include:seqan/stream.h
 ..see:Function.lexicalCast2
+..example.text:Using $lexicalCast<>()$ is easy but not as robust as @Function.lexicalCast2@: We cannot detect parsing or conversion errors.
+..example.code:
+unsigned u = 0;
+int i = 0;
+double = 0;
+bool success = false;
+
+u = lexicalCast<unsigned>( "3");   // => u is 3.
+u = lexicalCast<unsigned>("-3");   // => u is undefined.
+i = lexicalCast<int>("-3");        // => i is -3.
+d = lexicalCast<double>("-3.99");  // => d is -3.99.
  */
+
 template <typename TTarget, typename TSource>
 inline TTarget
 lexicalCast(TSource const & source)
@@ -132,7 +125,20 @@ lexicalCast(String<TValue, TSpec> & source)
 succesfully cast to an int of 123
 ..include:seqan/stream.h
 ..see:Function.lexicalCast
+..example.text:Using lexicalCast2 is straightforward and we can detect errors.
+..example.code:
+unsigned u = 0;
+int i = 0;
+double = 0;
+bool success = false;
+
+success = lexicalCast2(u, "3");      // => success is true, u is 3.
+success = lexicalCast2(u, "-3");     // => success is false, u is undefined.
+success = lexicalCast2(i, "-3");     // => success is true, i is -3.
+success = lexicalCast2(d, "-3.99");  // => success is true, d is -3.99.
  */
+
+// TODO(holtgrew): Why is the result of lexicalCast2(unsigned, "3.99") true?
 
 template < typename TTarget, typename TSource >
 inline bool
@@ -149,7 +155,6 @@ lexicalCast2(TTarget & target, String<TValue, TSpec> const & source)
     std::istringstream str(toCString(source));
     return (str >> target);
 }
-
 
 }
 

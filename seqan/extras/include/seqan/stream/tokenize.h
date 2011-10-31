@@ -34,6 +34,8 @@
 // Functions for tokenizing streams
 // ==========================================================================
 
+// TODO(holtgrew): Some skip*, skipUntil* functions are missing.
+
 #ifndef SEQAN_STREAM_TOKENIZE_H
 #define SEQAN_STREAM_TOKENIZE_H
 
@@ -44,8 +46,6 @@ namespace seqan {
 // ==========================================================================
 // Forwards
 // ==========================================================================
-
-// none
 
 // ==========================================================================
 // Tags, Classes, Enums
@@ -67,7 +67,6 @@ enum TokenizeResult {
     EOF_BEFORE_SUCCESS = 1024,
     NO_SUCCESS = 1025
 };
-
 
 // ----------------------- Helper structs / private tags -----------------------
 struct Whitespace__;
@@ -1834,6 +1833,6 @@ SEQAN_CHECKPOINT
 
 // TODO stuff from other files (shouldnt be that much and much is duplicate)
 
-} // NAMESPACE
+}  // namespace seqan
 
-#endif // def SEQAN_STREAM_RECORD_READER_SINGLE_H_
+#endif // #ifdef SEQAN_STREAM_RECORD_READER_SINGLE_H_

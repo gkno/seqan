@@ -63,6 +63,16 @@ struct DoublePass {};
 ..param.TSpec:The record reader specialization to chose.
 ..see:Concept.Stream
 ..include:seqan/stream.h
+
+.Memfunc.RecordReader#RecordReader
+..class:Class.RecordReader
+..summary:Constructor
+..signature:RecordReader()
+..signature:RecordReader(file[, bufferSize])
+..param.file:The file/String to use for reading.
+...type:nolink:The $TFile$ type of $RecordReader$.
+..param.bufferSize:The size of the buffer to use.
+...type:nolink:$unsigned$
  */
 
 template <typename TStream, typename TSpec>

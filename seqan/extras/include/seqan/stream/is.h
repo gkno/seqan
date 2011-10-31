@@ -34,11 +34,9 @@
 // Collection of char checking functions
 // ==========================================================================
 
-
-// ===========================================================================
-// doc for Ctype.h added for completeness
-// ===========================================================================
-
+// ==========================================================================
+// We add documentation for Ctype.h here for completeness.
+// ==========================================================================
 
 /**
 .Function.isalnum:
@@ -161,6 +159,7 @@
 */
 
 #ifdef PLATFORM_WINDOWS_VS
+// TODO(holtgrew): Adding basic/POSIX functions for OS that do not support them theirselves should go into platform.
 inline
 int isblank(int c)
 {

@@ -33,10 +33,11 @@
 // ==========================================================================
 // Wrapper to BZFILE * that fulfills the Stream concept.  Note that, different
 // from zlib, bzlib does not support seek, tell or position on BZFILE*.  We do
-// not emulate support for this either.  The most case in SeqAn is sequential
-// reading and writing and we have full support for this.  We do not support
-// peek either, however.  There is no flush(), it is a null implementation but
-// should never be required for the use cases of bzlib in SeqAn.
+// not emulate support for this either.  The main use case in SeqAn is
+// sequential reading and writing and we have full support for this.  We do
+// not support peek either, however.  There is no flush(), it is a null
+// implementation but should never be required for the use cases of bzlib in
+// SeqAn.
 // ==========================================================================
 
 #include <bzlib.h>
@@ -65,7 +66,50 @@ inline void close(Stream<BZ2File> & stream);
 ..summary:Wrapper for $BZFILE *$ streams from bzlib.
 ..remarks:This is only available if @Macro.SEQAN_HAS_ZLIB@ is set to 1.
 ..remarks:Not copy constructable.
+..remarks:Follows the RIIA pattern when the file is opened through @Function.open@ (and thus the underlying $BZFILE *$ and $FILE *$ are owned).
+..remarks:
+Can be used as a wrapper around a $BZFILE *$ or create such an object itself through @Function.open@.
+Also see @Memfunc.BZ2 File Stream#Stream|the constructor@.
 ..include:seqan/stream.h
+..example.text:It is easy to open a BZ2 file via @Function.open@.
+..example.code:
+#include <seqan/stream.h>
+
+Stream<BZ2File> bzStream;
+open(bzStream, "/path/to/file.txt.bz2", "r");  // binary is implicit
+
+// Now, work with bzStream.  The object will close the file on destruction.
+..example.text:
+You can also use BZ2 File Stream as a wrapper around $BZFILE *$.
+In this case, we have to deal with the verbose code for opening $FILE *$ and $BZFILE *$ by hand.
+..example.code:
+#include <cstdio>
+#include <bzlib.h>
+#include <seqan/stream.h>
+
+// Open normal FILE *, BZFILE * above, and Stream<BZ2File> on top.
+FILE * f = fopen("/path/to/file.txt.bz2", "rb");
+SEQAN_ASSERT(f != NULL);
+int err = BZ_OK;
+BZFILE * f2 = BZ2_bzReadOpen(&err, f, 0, 0, NULL, 0);
+SEQAN_ASSERT_EQ(err, BZ_OK);
+Stream<BZ2File> bzStream(f2);
+
+// Now, you can work with the stream bzStream.
+
+// Note that you only have to close f2 and f, not bzStream.
+BZ2_bzReadClose(&err, f2);
+SEQAN_ASSERT_EQ(err, BZ_OK);
+fclose(f);
+
+.Memfunc.BZ2 File Stream#Stream
+..summary:Constructor
+..class:Spec.BZ2 File Stream
+..signature:Stream<BZ2File>()
+..signature:Stream<BZ2File>(file)
+..param.file:The $BZFILE *$ to wrap.
+...type:nolink:$BZFILE *$.
+..remarks:When $file$ is given then the BZ2 File Stream object does not own the underlying $BZFILE *$ object and will serve as a simple wrapper.
  */
 
 template <>

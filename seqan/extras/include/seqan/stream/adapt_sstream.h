@@ -50,6 +50,13 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+/*
+.Adaption.String stream
+..cat:Input / Output
+..summary:Adaption from $fstream$, $ifstream$ and $ofstream$ to the @Concept.Stream@ concept.
+..include:seqan/stream.h
+ */
+
 // ============================================================================
 // Metafunctions
 // ============================================================================

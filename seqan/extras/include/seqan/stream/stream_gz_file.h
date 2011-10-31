@@ -61,7 +61,43 @@ inline void close(Stream<GZFile> & stream);
 ..summary:Adaption from $gzFile$ of $<zlib.h>$ to streams.
 ..remarks:This is only available if @Macro.SEQAN_HAS_ZLIB@ is set to 1.
 ..remarks:Not copy constructable, not assignable.
+..remarks:Follows the RIIA pattern when the file is opened through @Function.open@ (and thus the underlying $gzFile$ is owned).
+..remarks:
+Can be used as a wrapper around a $gzFile$ or create such an object itself through @Function.open@.
+Also see @Memfunc.GZ File Stream#Stream|the constructor@.
 ..include:seqan/stream.h
+..example.text:It is easy to open a GZ file via @Function.open@.
+..example.code:
+#include <seqan/stream.h>
+
+Stream<GZFile> gzStream;
+open(gzStream, "/path/to/file.txt.gz", "r");  // binary is implicit
+
+// Now, work with gzStream.  The object will close the file on destruction.
+..example.text:
+You can also use GZ File Stream as a wrapper around an $gzFile$ object.
+In this case, we have to deal with the verbose code for opening the $gzFile$ object.
+..example.code:
+#include <zlib.h>
+#include <seqan/stream.h>
+
+gzFile gzOut = gzopen("/path/to/file.txt.gz", "wb");
+SEQAN_ASSERT(gzOut != NULL);
+Stream<GZFile> gzStream(gzOut);
+
+// Now, you can work with the stream bzStream.
+
+// Note that you only have to close gzOut and not gzStream.
+gzFile f = gzopen(filenameBuffer, "rb");
+SEQAN_ASSERT(f != NULL);
+
+.Memfunc.GZ File Stream#Stream
+..summary:Constructor
+..signature:Stream()
+..signature:Stream(gzFile)
+..param.gzFile:The $gzFile$ to wrap.
+...type:nolink:$gzFile$ (from zlib.h).
+..remarks:When $gzFile$ is given then the GZ File Stream object does not own the underlying $gzFile$ and will serve as a simple wrapper.
  */
 
 template <>
