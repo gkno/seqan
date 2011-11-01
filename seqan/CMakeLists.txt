@@ -57,6 +57,70 @@ cmake_minimum_required (VERSION 2.6)
 project (seqan)
 
 # ===========================================================================
+# Add contrib to CMAKE_FIND_ROOT_PATH.
+# ===========================================================================
+
+if (WIN32)
+    # The contrib version we look for.
+	set (_SEQAN_CONTRIB_VERSION D20111031)
+	set (_SEQAN_CONTRIB_DIR "seqan-contrib-${_SEQAN_CONTRIB_VERSION}")
+
+	# Try to figure out where the user installed the contrib.  We expect
+	# it to be either in C:\, or one of the Program Files dirs.
+	#
+	# First, look into Program Files on 64 bit.
+	if (DEFINED ENV{ProgramW6432})
+		if (IS_DIRECTORY "$ENV{ProgramW6432}/${_SEQAN_CONTRIB_DIR}-x64")
+			set (SEQAN_CONTRIB_BASE "$ENV{ProgramW6432}/${_SEQAN_CONTRIB_DIR}-x64")
+		endif (IS_DIRECTORY "$ENV{ProgramW6432}/${_SEQAN_CONTRIB_DIR}-x64")
+	endif (DEFINED ENV{ProgramW6432})
+	# Try out Program Files for 32bit Windows.
+	if (NOT DEFINED SEQAN_CONTRIB_BASE)
+		if (IS_DIRECTORY "$ENV{ProgramFiles}/${_SEQAN_CONTRIB_DIR}-x86")
+			set (SEQAN_CONTRIB_BASE "$ENV{ProgramFiles}/${_SEQAN_CONTRIB_DIR}-x86")
+		endif (IS_DIRECTORY "$ENV{ProgramFiles}/${_SEQAN_CONTRIB_DIR}-x86")
+	endif (NOT DEFINED SEQAN_CONTRIB_BASE)
+	# Try out on C:/.
+	if (NOT DEFINED SEQAN_CONTRIB_BASE)
+		if (IS_DIRECTORY "C:/${_SEQAN_CONTRIB_DIR}-x86")
+			set (SEQAN_CONTRIB_BASE "C:/${_SEQAN_CONTRIB_DIR}-x86")
+		elseif (IS_DIRECTORY "C:/${_SEQAN_CONTRIB_DIR}-x64")
+			set (SEQAN_CONTRIB_BASE "C:/${_SEQAN_CONTRIB_DIR}-x64")
+		endif (IS_DIRECTORY "C:/${_SEQAN_CONTRIB_DIR}-x86")
+	endif (NOT DEFINED SEQAN_CONTRIB_BASE)
+
+	# Debug help.
+	if (NOT DEFINED SEQAN_CONTRIB_BASE)
+		message("SEQAN_CONTRIB_BASE is undefined!")
+	else (NOT DEFINED SEQAN_CONTRIB_BASE)
+		message("SEQAN_CONTRIB_BASE is ${SEQAN_CONTRIB_BASE}")
+	endif (NOT DEFINED SEQAN_CONTRIB_BASE)
+	
+	# Try to figure out the generator.
+	if (IS_DIRECTORY ${SEQAN_CONTRIB_BASE})
+		if (CMAKE_GENERATOR MATCHES "^Visual Studio .*")
+			string (REGEX REPLACE "^Visual Studio ([0-9]+).*$" "\\1" SEQAN_CONTRIB_VARIANT ${CMAKE_GENERATOR})
+			set (SEQAN_CONTRIB_VARIANT "vs${SEQAN_CONTRIB_VARIANT}")
+		elseif (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
+			set (SEQAN_CONTRIB_VARIANT mingw)
+		endif (CMAKE_GENERATOR MATCHES "^Visual Studio .*")
+		
+		message(STATUS "SEQAN_CONTRIB_BASE    is ${SEQAN_CONTRIB_BASE}")
+		message(STATUS "SEQAN_CONTRIB_VARIANT is ${SEQAN_CONTRIB_VARIANT}")
+
+		# Compose contrib path.
+		set(SEQAN_CONTRIB_PATH "${SEQAN_CONTRIB_BASE}/${SEQAN_CONTRIB_VARIANT}")
+
+		# Extend CMAKE_FIND_ROOT_PATH.
+		if (IS_DIRECTORY ${SEQAN_CONTRIB_PATH})
+			set (CMAKE_FIND_ROOT_PATH ${SEQAN_CONTRIB_PATH} ${CMAKE_FIND_ROOT_PATH})
+		endif (IS_DIRECTORY ${SEQAN_CONTRIB_PATH})
+	endif (IS_DIRECTORY ${SEQAN_CONTRIB_BASE})
+
+	message(STATUS "CMAKE_FIND_ROOT_PATH is \"${CMAKE_FIND_ROOT_PATH}\".")
+endif (WIN32)
+
+# ===========================================================================
 # Setup Variables
 # ===========================================================================
 
@@ -66,16 +130,23 @@ if (NOT CMAKE_BUILD_TYPE)
          FORCE)
 endif (NOT CMAKE_BUILD_TYPE)
 
+message (STATUS "CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}")
+
 # ===========================================================================
 # Setup Modules and Find Packages.
 # ===========================================================================
 
+# Note that the find modules in util/make take precedence
+# over the built-in ones from CMake.  This is used in
+# FindBZip2, for example which we slightly modify.
 set(CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/FindTBB
     ${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/cuda
     ${CMAKE_CURRENT_SOURCE_DIR}/util/cmake
     ${CMAKE_MODULE_PATH})
 
+message (STATUS "CMAKE_MODULE_PATH is ${CMAKE_MODULE_PATH}")
+	
 include(CTest)
 
 find_package (PythonInterp)
