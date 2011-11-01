@@ -524,15 +524,28 @@ int openTempFile() {
 inline
 const char *tempFileName() {
 //IOREV _duplicate_ overlaps with some stuff in system/file_sync.h, should be moved to io-module
-    static char fileNameBuffer[100];
+    static char fileNameBuffer[1000];
 #ifdef PLATFORM_WINDOWS_VS
-    char * fileName = tempnam(NULL, "SEQAN.");
-    if (!fileName) {
-        ::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
-        exit(1);
+    static char filePathBuffer[1000];
+	//  Gets the temp path env string (no guarantee it's a valid path).
+    DWORD dwRetVal = 0;
+    dwRetVal = GetTempPath(1000,            // length of the buffer
+                           filePathBuffer); // buffer for path 
+    if (dwRetVal > 1000 || (dwRetVal == 0))
+    {
+        std::cerr << "GetTempPath failed" << std::endl;
+		exit(1);
     }
-    strcpy(fileNameBuffer, fileName);
-    free(fileName);
+    UINT uRetVal   = 0;
+	uRetVal = GetTempFileName(filePathBuffer,   // directory for tmp files
+                              TEXT("SEQAN."),   // temp file name prefix 
+                              0,                // create unique name 
+                              fileNameBuffer);  // buffer for name 
+    if (uRetVal == 0)
+    {
+        std::cerr << "GetTempFileName failed" << std::endl;
+		exit(1);
+    }
     StaticData::tempFileNames().push_back(fileNameBuffer);
     return fileNameBuffer;
 #else  // ifdef PLATFORM_WINDOWS_VS

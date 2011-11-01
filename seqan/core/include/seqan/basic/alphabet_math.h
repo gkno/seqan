@@ -1,5 +1,5 @@
 // ==========================================================================
-//                             SeqAn app_template
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2010, Knut Reinert, FU Berlin
 // All rights reserved.
