@@ -722,7 +722,8 @@ inline void createWaveletTree(WaveletTree<
                               TFreqTable const & freq,
                               TPrefixSumTable & prefixSumTable)
 {
-    typedef typename BitVector_<BitsPerValue<typename Value<TBWT>::Type>::VALUE>::Type TValue;
+    //typedef typename BitVector_<BitsPerValue<typename Value<TBWT>::Type>::VALUE>::Type TValue;
+	typedef unsigned TValue;
     typedef typename Size<typename Value<TBWT>::Type>::Type TSize;
 
     //generate the tree structure
