@@ -43,7 +43,11 @@ struct LFTable
     TOccTable occTable;
     TPrefixSumTable prefixSumTable;
 
-    LFTable() {}
+    LFTable() :
+    	occTable(),
+    	prefixSumTable()
+    {}
+
     LFTable(TOccTable occTable, TPrefixSumTable prefixSumTable) :
         occTable(occTable),
         prefixSumTable(prefixSumTable)
@@ -166,7 +170,10 @@ struct CompressedSA
     TSparseString 	compressedSA;
     TLfTable * 		lfTable;
 
-    CompressedSA(){}
+    CompressedSA() :
+    	compressedSA(),
+    	lfTable()
+    {}
 
     typedef typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type TCompressedSaValue;
     typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
@@ -214,7 +221,10 @@ struct CompressedSA<SparseString<String<Pair<TSpecPairI1, TSpecPairI2, TSpecPair
     TSparseString                                                                                       compressedSA;
     TLfTable * lfTable;
 
-    CompressedSA(){}
+    CompressedSA() :
+    	compressedSA(),
+    	lfTable()
+    {}
 
     template <typename TPos>
     TCompressedSaValue const operator[](TPos pos)

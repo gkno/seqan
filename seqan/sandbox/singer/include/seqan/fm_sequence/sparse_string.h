@@ -69,7 +69,11 @@ struct SparseString
     TIndicatorString                        indicatorString;
     typename Size<TSparseString>::Type    blockSize;
 
-    SparseString(){}
+    SparseString() :
+    	string(),
+    	indicatorString(),
+    	blockSize(0)
+    {}
 
     bool operator==(const SparseString & b) const
     {

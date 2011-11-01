@@ -93,13 +93,20 @@ struct RankSupportBitString
     TSuperBucketString                              superBucketString;
     typename Value<TSuperBucketString>::Type      length;
 
-    RankSupportBitString(){}
+    RankSupportBitString() :
+    	bitString(),
+    	bucketString(),
+    	superBucketString(),
+    	length(0)
+    {}
 
     template <typename TText>
-    RankSupportBitString(TText & text)
+    RankSupportBitString(TText & text) :
+		bitString(),
+		bucketString(),
+		superBucketString(),
+        length(length(text))
     {
-        length = length(text);
-
         unsigned const bitsPerBucket = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
 
         TSuperBucketString textLength = length(text);
