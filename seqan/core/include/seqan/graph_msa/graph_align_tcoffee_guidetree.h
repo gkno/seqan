@@ -59,7 +59,7 @@ _roundToSignificantFigures(double num, int n)
     const double d = ceil(log10(num < 0 ? -num : num));
     const int power = n - (int) d;
 
-    const double magnitude = pow(10, power);
+    const double magnitude = pow(10.0, power);
     const long shifted = round(num*magnitude);
     return shifted / magnitude;
 }
