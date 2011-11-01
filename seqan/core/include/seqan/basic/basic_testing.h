@@ -579,12 +579,8 @@ const char *tempFileName() {
         StaticData::foundCheckPointCount() = 0;
         // Get path to argv0.
         const char *end = argv0;
-#ifdef PLATFORM_WINDOWS
-        const char pathSeparator = '\\';
-#else  // PLATFORM_WINDOWS
-        const char pathSeparator = '/';
-#endif  // PLATFORM_WINDOWS
-        for (const char *ptr = strchr(argv0, pathSeparator); ptr != 0; ptr = strchr(ptr+1, pathSeparator))
+		const char *ptr = std::min(strchr(argv0, '\\'), strchr(argv0, '/'));  // On Windows, we can have both \ and /.
+        for (; ptr != 0; ptr = std::min(strchr(ptr+1, '\\'), strchr(ptr+1, '/')))
             end = ptr;
         int rpos = end - argv0;
         if (rpos <= 0) {
@@ -603,7 +599,7 @@ const char *tempFileName() {
                 pos = i;
             }
         }
-        for (; pos > 0 && *(file + pos - 1) != pathSeparator; --pos)
+        for (; pos > 0 && *(file + pos - 1) != '/' &&  *(file + pos - 1) != '\\'; --pos)
             continue;
         if (pos == -1) {
             std::cerr << "Could not extrapolate path to repository from __FILE__ == \""
@@ -646,8 +642,6 @@ const char *tempFileName() {
         std::cout << " Skipped:     " << StaticData::skippedCount() << std::endl;
         std::cout << " Errors:      " << StaticData::errorCount() << std::endl;
         std::cout << "**************************************" << std::endl;
-        if (StaticData::errorCount() != 0)
-            return 1;
         // TODO(holtgrew): Re-enable that all check points have to be found for the test to return 1;
         /*
         if (StaticData::totalCheckPointCount() != StaticData::foundCheckPointCount())
@@ -662,6 +656,8 @@ const char *tempFileName() {
 #endif  // #ifdef PLATFORM_WINDOWS
         }
 
+        if (StaticData::errorCount() != 0)
+            return 1;
         return 0;
     }
 
