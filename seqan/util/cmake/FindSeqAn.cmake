@@ -162,6 +162,15 @@ macro (seqan_setup_global)
     endif (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
 
     # -----------------------------------------------------------------------
+    # Windows Setup
+    # -----------------------------------------------------------------------
+    if (WIN32)
+        # Always set NOMINMAX such that <Windows.h> does not define min/max
+        # as macros.
+        add_definitions(-DNOMINMAX)
+    endif (WIN32)
+
+    # -----------------------------------------------------------------------
     # Visual Studio Setup
     # -----------------------------------------------------------------------
     if (MSVC)
