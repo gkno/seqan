@@ -64,6 +64,9 @@ def buildProject(project_path, target_path):
             dirs.remove('CVS')
         if '.svn' in dirs:
             dirs.remove('.svn')
+        for dir in dirs:
+          if dir.startswith('.'):
+            dirs.remove(dir)
         for file in files:
             if file.startswith('.'):
               continue  # Skip hidden files.
