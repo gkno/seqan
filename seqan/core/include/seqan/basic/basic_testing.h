@@ -584,7 +584,7 @@ const char *tempFileName() {
             end = ptr;
         int rpos = end - argv0;
         if (rpos <= 0) {
-            StaticData::basePath() = new char[1];
+            StaticData::basePath() = new char[2];
             strcpy(StaticData::basePath(), ".");
         } else {
             int len = rpos;
