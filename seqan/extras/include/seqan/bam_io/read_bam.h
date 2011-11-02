@@ -189,6 +189,7 @@ int readRecord(BamAlignmentRecord & record,
                Bam const & /*tag*/)
 {
     int res = 0;
+    (void)context;  // Only used for assertions.
 
     // Read size of the remaining block.
     __int32 remainingBytes = 0;

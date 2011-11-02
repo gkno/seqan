@@ -66,7 +66,7 @@ void testStreamReadComplexUsage(TStream & stream)
     using namespace seqan;
 
     // Read lines and check whether the last one is terminated with a '\n'.
-    char c;
+    char c = '\0';
     bool wasEol = false;
     while (!streamEof(stream)) {
         int res = streamReadChar(c, stream);

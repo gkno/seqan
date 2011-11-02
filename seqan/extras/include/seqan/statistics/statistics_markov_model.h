@@ -421,16 +421,20 @@ public:
 		{
 			for(unsigned int col=0; col<column_size; col++)
 			{
-			  fscanf(file,"%lf ", & value(transition, row,col));
+			  int unused = fscanf(file,"%lf ", & value(transition, row,col));
+              (void)unused;
 			}
-			fscanf(file,"\n");
+			int unused = fscanf(file,"\n");
+            (void)unused;
 		}
 		//read the stationary distribution vector
 		for(unsigned int row=0; row<column_size; row++)
 		{
-			  fscanf(file,"%lf ",&value(stationaryDistribution, row));
+            int unused = fscanf(file,"%lf ",&value(stationaryDistribution, row));
+        (void)unused;
 		}
-		fscanf(file,"\n");
+		int unused = fscanf(file,"\n");
+        (void)unused;
 
 		if (!feof(file))
 		{
@@ -443,27 +447,33 @@ public:
 			{
 				for(unsigned int col=0; col<column_size; col++)
 				{
-					fscanf(file,"%lf ",&value(_q, row,col));
+					int unused = fscanf(file,"%lf ",&value(_q, row,col));
+                    (void)unused;
 				}
-				fscanf(file,"\n");
+				int unused = fscanf(file,"\n");
+                (void)unused;
 			}
 			setLength(_qppp, 0, column_size);
 			setLength(_qppp, 1, column_size);
 			resize(_qppp);
 			for(unsigned int row=0; row<column_size; row++){
 				for(unsigned int col=0; col<column_size; col++){
-				  fscanf(file,"%lf ",&value(_qppp, row,col));
+                  int unused = fscanf(file,"%lf ",&value(_qppp, row,col));
+                  (void)unused;
 				}
-				fscanf(file,"\n");
+				int unused = fscanf(file,"\n");
+                (void)unused;
 			}
 			setLength(_qppqpp, 0, column_size);
 			setLength(_qppqpp, 1, column_size);
 			resize(_qppqpp);
 			for(unsigned int row=0; row<column_size; row++){
 				for(unsigned int col=0; col<column_size; col++){
-					fscanf(file,"%lf ",&value(_qppqpp, row,col));
+					int unused = fscanf(file,"%lf ",&value(_qppqpp, row,col));
+                    (void)unused;
 				}
-				fscanf(file,"\n");
+				int unused = fscanf(file,"\n");
+                (void)unused;
 			}
 		}
 	}

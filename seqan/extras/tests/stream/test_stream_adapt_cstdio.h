@@ -119,7 +119,8 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_write_simple_usage)
     rewind(stream);
 
     char buffer[100];
-    fgets(buffer, 10, stream);
+    char * unused = fgets(buffer, 10, stream);
+    (void) unused;
     SEQAN_ASSERT_EQ(strcmp(buffer, "12"), 0);
     SEQAN_ASSERT_EQ(streamTell(stream), 2u);
 
@@ -138,7 +139,8 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_write_complex_usage)
    rewind(stream);
 
    char buffer[100];
-   fgets(buffer, 20, stream);
+   char * unused = fgets(buffer, 20, stream);
+   (void) unused;
    SEQAN_ASSERT_EQ(strcmp(buffer, "0123456789"), 0);
    SEQAN_ASSERT_EQ(streamTell(stream), 10u);
 
@@ -205,7 +207,8 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_write_char)
 
     rewind(stream);
     char buffer[100];
-    fgets(buffer, 99, stream);
+    char * unused = fgets(buffer, 99, stream);
+    (void) unused;
     SEQAN_ASSERT_EQ(strcmp(buffer, "345"), 0);
     fclose(stream);
 }
@@ -220,7 +223,8 @@ SEQAN_DEFINE_TEST(test_stream_adapt_cstdio_write_block)
 
     rewind(stream);
     char buffer[100];
-    fgets(buffer, 99, stream);
+    char * unused = fgets(buffer, 99, stream);
+    (void) unused;
     SEQAN_ASSERT_EQ(strcmp(buffer, "ABCDEFGH"), 0);
     fclose(stream);
 }

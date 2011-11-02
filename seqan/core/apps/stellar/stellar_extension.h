@@ -184,7 +184,8 @@ SEQAN_CHECKPOINT
     // Identify longest eps match by iterating over combinations of left and right positions
     TIterator rightIt = end(possEndsRight) - 1;
     TIterator leftIt = end(possEndsLeft) - 1;
-	TIterator right, left;
+	TIterator right = begin(possEndsRight);
+    TIterator left = begin(possEndsLeft);
 
 	/*for (int i = 0; i < length(possEndsRight); ++i) {
 		std::cout << possEndsRight[i].length << "  " << possEndsRight[i].coord.i1 << "," << possEndsRight[i].coord.i2 << std::endl;

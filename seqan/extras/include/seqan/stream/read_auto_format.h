@@ -195,6 +195,7 @@ int readRecord(TIdString & meta, TSeqString & seq, TQualString & qual, TRecordRe
 template <typename TIdString, typename TSeqString, typename TRecordReader>
 int _readRecord(TIdString & /*meta*/, TSeqString & /*seq*/, TRecordReader & /*reader*/, TagSelector<void> const & /*tagSelector*/, int i)
 {
+    (void)i;  // Only used in assertion.
     SEQAN_ASSERT_EQ(i, 0);
     return IOERR_READ_AUTO_FORMAT_UNKNOWN_FORMAT;
 }

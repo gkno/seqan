@@ -121,19 +121,22 @@ namespace SEQAN_NAMESPACE_MAIN
 			factor2(other.factor2) {}
 
 		template <typename TSpec>
-		Shape(Shape<TValue, TSpec> const &other)
+		Shape(Shape<TValue, TSpec> const &other) :
+                hValue(0), leftChar(0)
 		{
 			*this = other;
 		}	
 
 		template <typename TSpec>
-		Shape(GappedShape<TSpec> const &other)
+		Shape(GappedShape<TSpec> const &other) :
+                hValue(0), leftChar(0)
 		{
 			*this = other;
 		}
 
 		template <typename TStringValue, typename TSpec>
-		Shape(String<TStringValue, TSpec> const &bitmap)
+		Shape(String<TStringValue, TSpec> const &bitmap) :
+                hValue(0), leftChar(0)
 		{
 			*this = bitmap;
 		}	

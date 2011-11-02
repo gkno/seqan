@@ -250,7 +250,7 @@ unsigned solve(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> & m
         double best_edge_score = 0.0;
         bool init_best_edge_score = true; // take first possible value as best match
 
-        TVertexDescriptor sV,tV;
+        TVertexDescriptor sV = 0, tV = 0;
 
         while(!atEnd(edgeIt))
         {
@@ -296,7 +296,7 @@ unsigned solve(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> & m
             // reset 
             was_expanded = false;
 
-            TVertexDescriptor best_expansion;
+            TVertexDescriptor best_expansion = 0;
             bool best_expansion_init = true;
             double best_expansion_score = 0;
 

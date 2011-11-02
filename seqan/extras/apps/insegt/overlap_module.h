@@ -440,7 +440,7 @@ buildAnnoCountStore(TAnnoCountStore & annoCountStore, FragmentStore<TSpec, TConf
 	TReadIter itReadEnd = end(readAnnoStore);
 	TId readId;
 	TId matePairId;
-	TId secReadId;
+	TId secReadId = 0;
 	TIds interSecIds;
 	TIdsIter itP;
 	TIdsIter itPEnd;
