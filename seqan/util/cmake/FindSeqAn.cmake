@@ -83,7 +83,14 @@ macro (seqan_get_version)
           ${CMAKE_BINARY_DIR}/CMakeFiles/SeqAnVersion
           ${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/SeqAnVersion.cpp
           CMAKE_FLAGS -DINCLUDE_DIRECTORIES:STRING=${SEQAN_INCLUDE_DIR_FOR_SeqAnCore}
+          COMPILE_OUTPUT_VARIABLE _COMPILE_OUTPUT
           RUN_OUTPUT_VARIABLE _RUN_OUTPUT)
+  if (NOT _RUN_OUTPUT)
+	message("")
+	message("ERROR: Could not determine SeqAn version.")
+	message("COMPILE OUTPUT:")
+	message(${_COMPILE_OUTPUT})
+  endif (NOT _RUN_OUTPUT)
   string(REGEX REPLACE ".*SEQAN_VERSION_MAJOR:([0-9a-zA-Z]+).*" "\\1" SEQAN_VERSION_MAJOR ${_RUN_OUTPUT})
   string(REGEX REPLACE ".*SEQAN_VERSION_MINOR:([0-9a-zA-Z]+).*" "\\1" SEQAN_VERSION_MINOR ${_RUN_OUTPUT})
   string(REGEX REPLACE ".*SEQAN_VERSION_PATCH:([0-9a-zA-Z]+).*" "\\1" SEQAN_VERSION_PATCH ${_RUN_OUTPUT})
