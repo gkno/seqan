@@ -6,8 +6,12 @@ seqan_add_test_executable(test_index_creation
                           test_index_creation.cpp
                           test_index_creation.h)
 
-seqan_add_test_executable(test_index_crosscompare
-                          test_index_crosscompare.cpp
+seqan_add_test_executable(test_index_crosscompare_char
+                          test_index_crosscompare_char.cpp
+                          test_crosscompare.h)
+
+seqan_add_test_executable(test_index_crosscompare_dna
+                          test_index_crosscompare_dna.cpp
                           test_crosscompare.h)
 
 seqan_add_test_executable(test_index_qgram

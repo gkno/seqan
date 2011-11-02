@@ -29,26 +29,16 @@
 // DAMAGE.
 //
 // ==========================================================================
-
-#include <iostream>
-#include <fstream>
-#include <functional>
-#include <typeinfo>
-
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-#define SEQAN_ENABLE_CHECKPOINTS 0
+// Crosscompare index tests for Dna.
+//
+// We had to split this out for g++-4.2 which crashed otherwise when
+// compiling.  After support for g++-4.2 is dropped, we can merge the
+// crosscompare (or even all index) tests again.
+// ==========================================================================
 
 #include <seqan/basic.h>
-#include <seqan/align.h>
-#include <seqan/find.h>
-#include <seqan/file.h>
-#include <seqan/index.h>
-#include <seqan/sequence.h>
-#include <seqan/pipe.h>
-#include <seqan/misc/misc_random.h>
 
-#include "test_index_helpers.h"
+//#include "test_index_helpers.h"
 #include "test_crosscompare.h"
 
 using namespace std;
@@ -58,6 +48,7 @@ using namespace seqan;
 
 SEQAN_BEGIN_TESTSUITE(test_index)
 {
-	SEQAN_CALL_TEST(testIndexCrossCompare);
+	//SEQAN_CALL_TEST(testIndexCrossCompareChar);
+	SEQAN_CALL_TEST(testIndexCrossCompareDna);
 }
 SEQAN_END_TESTSUITE

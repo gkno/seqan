@@ -35,6 +35,7 @@
 #ifndef TESTS_INDEX_TEST_CROSS_COMPARE_H
 #define TESTS_INDEX_TEST_CROSS_COMPARE_H
 
+#include <seqan/index.h>
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -86,7 +87,7 @@ void crossIndex(TText &text)
 }
 
 template <typename TIndexSpec1, typename TIndexSpec2>
-void crossIndices()
+void crossIndicesChar()
 {
 /*	{
 		CharString text("mississippi");
@@ -106,7 +107,42 @@ void crossIndices()
 		t[4] = "ill";
 		t[5] = "wow";
 		crossIndex<TIndexSpec1,TIndexSpec2> (t);
+  }
+	/*{
+		StringSet<DnaString> t;
+		resize(t, 6);
+		t[0] = "caggctcgcgt";
+		t[1] = "caggaacg";
+		t[2] = "tcgttg";
+		t[3] = "tggtcg";
+		t[4] = "agg";
+		t[5] = "ctg";
+		crossIndex<TIndexSpec1,TIndexSpec2> (t);
+	}*/
+}
+
+template <typename TIndexSpec1, typename TIndexSpec2>
+void crossIndicesDna()
+{
+/*	{
+		CharString text("mississippi");
+		crossIndex<TIndexSpec1,TIndexSpec2> (text);
 	}
+	{
+		DnaString text("acaaacatat");
+		crossIndex<TIndexSpec1,TIndexSpec2> (text);
+	}
+*//*	{
+		StringSet<CharString> t;
+		resize(t, 6);
+		t[0] = "caterpillar";
+		t[1] = "catwoman";
+		t[2] = "pillow";
+		t[3] = "willow";
+		t[4] = "ill";
+		t[5] = "wow";
+		crossIndex<TIndexSpec1,TIndexSpec2> (t);
+	}*/
 	{
 		StringSet<DnaString> t;
 		resize(t, 6);
@@ -120,10 +156,16 @@ void crossIndices()
 	}
 }
 
-SEQAN_DEFINE_TEST(testIndexCrossCompare)
+SEQAN_DEFINE_TEST(testIndexCrossCompareChar)
 {
-	crossIndices<IndexEsa<>, IndexWotd<> >();
-	crossIndices<IndexWotd<>, IndexWotd<Dfi<> > >();
+	crossIndicesChar<IndexEsa<>, IndexWotd<> >();
+	crossIndicesChar<IndexWotd<>, IndexWotd<Dfi<> > >();
+}
+
+SEQAN_DEFINE_TEST(testIndexCrossCompareDna)
+{
+	crossIndicesDna<IndexEsa<>, IndexWotd<> >();
+	crossIndicesDna<IndexWotd<>, IndexWotd<Dfi<> > >();
 }
 
 //////////////////////////////////////////////////////////////////////////////
