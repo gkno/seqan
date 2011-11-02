@@ -443,51 +443,26 @@ int main(int argc, char const * argv[])
         }
         else  // SAM -> BAM
         {
-            BGZF * outBgzf = bgzf_fdopen(outF, "w");
-            Stream<Bgzf> bamOutStream(outBgzf);
+            Stream<Bgzf> bamOutStream;
+            attachToFile(bamOutStream, outF, O_CREAT | O_WRONLY | O_DIRECT);
             res = performConversion(reader, bamOutStream, options, Sam(), Bam());
-            bgzf_close(outBgzf);
         }
     }
     else
     {
         if (options.outFormat == FORMAT_SAM)  // BAM -> SAM
         {
-            BGZF * inBgzf = bgzf_fdopen(inF, "r");
-            if (inBgzf == 0)
-            {
-                std::cerr << "Could not open BGZF file!" << std::endl;
-                res = 1;
-            }
-            else
-            {
-                Stream<Bgzf> bamInStream(inBgzf);
-                res = performConversion(bamInStream, *outS, options, Bam(), Sam());
-                bgzf_close(inBgzf);
-            }
+            Stream<Bgzf> bamInStream;
+            attachToFile(bamInStream, inF, O_RDONLY);
+            res = performConversion(bamInStream, *outS, options, Bam(), Sam());
         }
         else  // BAM -> BAM
         {
-            BGZF * inBgzf = bgzf_fdopen(inF, "r");
-            Stream<Bgzf> bamInStream(inBgzf);
-            BGZF * outBgzf = bgzf_fdopen(outF, "w");
-            Stream<Bgzf> bamOutStream(outBgzf);
-            if (inBgzf == 0)
-            {
-                res = 1;
-                std::cerr << "Could not open BGZF file!" << std::endl;
-            }
-            else if (outBgzf == 0)
-            {
-                res = 1;
-                std::cerr << "Could not open BGZF file!" << std::endl;
-            }
-            else
-            {
-                res = performConversion(bamInStream, bamOutStream, options, Bam(), Bam());
-            }
-            bgzf_close(outBgzf);
-            bgzf_close(inBgzf);
+            Stream<Bgzf> bamInStream;
+            Stream<Bgzf> bamOutStream;
+            attachToFile(bamInStream, inF, O_RDONLY);
+            attachToFile(bamOutStream, outF, O_CREAT | O_WRONLY | O_DIRECT);
+            res = performConversion(bamInStream, bamOutStream, options, Bam(), Bam());
         }
     }
     if (res != 0)

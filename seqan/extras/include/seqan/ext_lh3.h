@@ -52,10 +52,10 @@
 // BGZF Support.
 // ===========================================================================
 
-#if SEQAN_HAS_ZLIB
-#include <seqan/ext_lh3/bgzf.h>
-#include <seqan/ext_lh3/bgzf-impl.h>
-#endif  // #if SEQAN_HAS_ZLIB
+// #if SEQAN_HAS_ZLIB
+// #include <seqan/ext_lh3/bgzf.h>
+// #include <seqan/ext_lh3/bgzf-impl.h>
+// #endif  // #if SEQAN_HAS_ZLIB
 
 // ===========================================================================
 // Stream wrapper for BGZF.

@@ -53,11 +53,8 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_read_header)
     append(bamFilename, SEQAN_PATH_TO_ROOT());
     append(bamFilename, "/extras/tests/bam_io/small.bam");
 
-    int f = open(toCString(bamFilename), O_RDONLY);
-    SEQAN_ASSERT_NEQ(f, -1);
-    BGZF * bgzf = bgzf_fdopen(f, "r");  // bgzf == 0 on errors
-    SEQAN_ASSERT_NOT(bgzf == 0);
-    Stream<Bgzf> stream(bgzf);
+    Stream<Bgzf> stream;
+    SEQAN_ASSERT(open(stream, toCString(bamFilename), "r"));
 
     // -----------------------------------------------------------------------
     // Call Code Under Test.
@@ -69,11 +66,6 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_read_header)
     
     BamHeader header;
     SEQAN_ASSERT_EQ(readRecord(header, bamIOContext, stream, Bam()), 0);
-
-    // TODO(holtgrew): More comfortable opening of BGZF streams.
-    // Closing.
-    bgzf_close(bgzf);
-    close(f);
 
     // -----------------------------------------------------------------------
     // Check Results.
@@ -116,11 +108,8 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_read_alignment)
     append(bamFilename, SEQAN_PATH_TO_ROOT());
     append(bamFilename, "/extras/tests/bam_io/small.bam");
 
-    int f = open(toCString(bamFilename), O_RDONLY);
-    SEQAN_ASSERT_NEQ(f, -1);
-    BGZF * bgzf = bgzf_fdopen(f, "r");  // bgzf == 0 on errors
-    SEQAN_ASSERT_NOT(bgzf == 0);
-    Stream<Bgzf> stream(bgzf);
+    Stream<Bgzf> stream;
+    SEQAN_ASSERT(open(stream, toCString(bamFilename), "r"));
 
     // -----------------------------------------------------------------------
     // Call Code Under Test.
@@ -139,11 +128,6 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_read_alignment)
         resize(alignments, length(alignments) + 1);
         SEQAN_ASSERT_EQ(readRecord(back(alignments), bamIOContext, stream, Bam()), 0);
     }
-
-    // TODO(holtgrew): More comfortable opening of BGZF streams.
-    // Closing.
-    bgzf_close(bgzf);
-    close(f);
 
     // -----------------------------------------------------------------------
     // Check Results.

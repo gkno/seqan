@@ -60,6 +60,9 @@ SEQAN_BEGIN_TESTSUITE(test_ext_lh3)
     SEQAN_CALL_TEST(test_stream_bgzf_flush);
     SEQAN_CALL_TEST(test_stream_bgzf_seek);
     SEQAN_CALL_TEST(test_stream_bgzf_tell);
+
+    SEQAN_CALL_TEST(test_stream_bgzf_write_large_and_compare_with_file);
+    SEQAN_CALL_TEST(test_stream_bgzf_from_file_and_compare);
 #endif  // #if SEQAN_HAS_ZLIB
 }
 SEQAN_END_TESTSUITE

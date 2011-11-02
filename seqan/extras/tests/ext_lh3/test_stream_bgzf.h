@@ -432,4 +432,110 @@ SEQAN_DEFINE_TEST(test_stream_bgzf_tell)
     gzclose(f);
 }
 
+SEQAN_DEFINE_TEST(test_stream_bgzf_write_large_and_compare_with_file)
+{
+    using namespace seqan;
+
+    // -----------------------------------------------------------------------
+    // Generate Paths, Open Files
+    // -----------------------------------------------------------------------
+    
+    // Open test file for reading.
+    const char * r = SEQAN_PATH_TO_ROOT();
+    char tempPath[1000];
+    strcpy(tempPath, r);
+    strcat(tempPath, "/extras/tests/ext_lh3/SRR067601_1.1k.fasta");
+    FILE * fp = fopen(tempPath, "rb");
+
+    // Open BGZF stream for writing.
+    const char * p = SEQAN_TEMP_FILENAME();
+    char outFilename[1000];
+    strcpy(outFilename, p);
+
+    Stream<Bgzf> stream;
+    open(stream, outFilename, "w");
+
+    // -----------------------------------------------------------------------
+    // Write Data.
+    // -----------------------------------------------------------------------
+
+    // Copy from fp to stream.
+    String<char> buffer;
+    resize(buffer, 765);
+    while (!feof(fp))
+    {
+        int len = fread(&buffer[0], 1, 765, fp);
+        streamWriteBlock(stream, &buffer[0], len);
+    }
+
+    // Close Stream.
+    close(stream);
+
+    // -----------------------------------------------------------------------
+    // Compare Data
+    // -----------------------------------------------------------------------
+    char inPath1[1000];
+    strcpy(inPath1, SEQAN_PATH_TO_ROOT());
+    strcat(inPath1, "/extras/tests/ext_lh3/SRR067601_1.1k.fasta.gz");
+    FILE * fin1 = fopen(inPath1, "rb");
+    SEQAN_ASSERT(fin1 != NULL);
+    // printf("inpath:%s\n", inPath1);
+
+    FILE * fin2 = fopen(outFilename, "rb");
+    SEQAN_ASSERT(fin2 != NULL);
+    // printf("inpath2:%s\n", outFilename);
+
+    int i = 0;
+    while (!feof(fin1) && !feof(fin2))
+    {
+        int i1 = fgetc(fin1);
+        int i2 = fgetc(fin2);
+        SEQAN_ASSERT_EQ_MSG(i1, i2, "At character pos %d", i);
+        ++i;
+    }
+
+    SEQAN_ASSERT(feof(fin1));
+    SEQAN_ASSERT(feof(fin2));
+}
+
+SEQAN_DEFINE_TEST(test_stream_bgzf_from_file_and_compare)
+{
+    using namespace seqan;
+
+    // Define paths to BGZF and FASTA file.
+    char gzPath[1000];
+    strcpy(gzPath, SEQAN_PATH_TO_ROOT());
+    strcat(gzPath, "/extras/tests/ext_lh3/SRR067601_1.1k.fasta.gz");
+    char fastaPath[1000];
+    strcpy(fastaPath, SEQAN_PATH_TO_ROOT());
+    strcat(fastaPath, "/extras/tests/ext_lh3/SRR067601_1.1k.fasta");
+
+    // Open files.
+    Stream<Bgzf> inBgzf;
+    SEQAN_ASSERT(open(inBgzf, gzPath, "r"));
+
+    FILE * inFasta = fopen(fastaPath, "rb");
+    SEQAN_ASSERT(inFasta != NULL);
+
+    // Read files, expect both to be of the same length and have the same
+    // (uncompressed) content.
+    int i = 0;
+    while (!streamEof(inBgzf) && !streamEof(inFasta))
+    {
+        char c = '\0';
+        int res = streamReadChar(c, inBgzf);
+        SEQAN_ASSERT_EQ_MSG(res, 0, "Failed at character pos %d", i);
+        int i1 = c;
+        int i2 = fgetc(inFasta);
+        SEQAN_ASSERT_EQ_MSG(i1, i2, "At character pos %d", i);
+        ++i;
+    }
+
+    SEQAN_ASSERT(streamEof(inBgzf));
+    // Note that BGZF files know that they are EOF before reading the last char.  For normal files we have to read
+    // beyond the end of the file.
+    SEQAN_ASSERT_LT(fgetc(inFasta), 0);
+    SEQAN_ASSERT(feof(inFasta));
+}
+
 #endif  // EXTRAS_TESTS_EXT_LH3_TEST_STREAM_BGZF_H_

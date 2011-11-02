@@ -383,15 +383,13 @@ static inline
 int
 inflate_block(BGZF* fp, int block_length)
 {
-    // Inflate the block in fp->compressed_block into fp->uncompressed_block
-
     z_stream zs;
 	int status;
     zs.zalloc = NULL;
     zs.zfree = NULL;
-    zs.next_in = static_cast<Bytef *>(fp->compressed_block) + 18;
+    zs.next_in = static_cast<Bytef *>(&stream._compressedBlock[0]) + 18;
     zs.avail_in = block_length - 16;
-    zs.next_out = static_cast<Bytef *>(fp->uncompressed_block);
+    zs.next_out = static_cast<Bytef *>(&stream._uncompressedBlock[0]);
     zs.avail_out = fp->uncompressed_block_size;
 
     status = inflateInit2(&zs, GZIP_WINDOW_BITS);

@@ -66,11 +66,8 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_index_bai)
     append(bamFilename, SEQAN_PATH_TO_ROOT());
     append(bamFilename, "/extras/tests/bam_io/small.bam");
 
-    int f = open(toCString(bamFilename), O_RDONLY);
-    SEQAN_ASSERT_NEQ(f, -1);
-    BGZF * bgzf = bgzf_fdopen(f, "r");  // bgzf == 0 on errors
-    SEQAN_ASSERT_NOT(bgzf == 0);
-    Stream<Bgzf> stream(bgzf);
+    Stream<Bgzf> stream;
+    open(stream, toCString(bamFilename), "r");
 
     StringSet<CharString> nameStore;
     NameStoreCache<StringSet<CharString> > nameStoreCache(nameStore);
