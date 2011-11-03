@@ -725,7 +725,7 @@ open(Stream<Bgzf> & stream, char const * filename, char const * mode)
     // Actually open files.
     if (mode[0] == 'r' || mode[0] == 'R')  // Open for reading.
     {
-        stream._openMode = OPEN_RDONLY | OPEN_CREATE;
+        stream._openMode = OPEN_RDONLY;
         open(stream._file, filename, stream._openMode);
     }
     else if (mode[0] == 'w' || mode[0] == 'W')  // Open for writing.
