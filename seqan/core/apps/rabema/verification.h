@@ -154,6 +154,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         TContigIdType contigId,
         String<WeightedMatch> & foundMatches,
         const QualityDpSearch<FindInfix> &) {
+    (void)options;  // Only used in assertion.
     Finder<TString> finder(contig);
     Pattern<TString, QualityDpSearch<FindInfix> > pattern(read, -maxError);
     //    setScoreLimit(pattern, -maxError);
@@ -167,6 +168,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
         SEQAN_ASSERT(ret);
+	(void)ret;  // Only used in assertion.
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
     }
 }
