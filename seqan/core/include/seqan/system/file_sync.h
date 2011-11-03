@@ -97,7 +97,7 @@ namespace SEQAN_NAMESPACE_MAIN
         File(void * /*dummy*/ = NULL): // to be compatible with the FILE*(NULL) constructor
             handle(-1) {}
 
-        File(int posixHandle) : handle(posixHandle) {}
+	//File(int posixHandle) : handle(posixHandle) {}
 
         inline int _getOFlag(int openMode) const 
 		{
@@ -233,7 +233,7 @@ namespace SEQAN_NAMESPACE_MAIN
         File(void * /*dummy*/ = NULL): // to be compatible with the FILE*(NULL) constructor
             handle(-1) {}
 
-        File(int posixHandle) : handle(posixHandle) {}
+	///File(int posixHandle) : handle(posixHandle) {}
 
         virtual ~File() {}
         
