@@ -77,6 +77,7 @@ int _read2(StringSet<TIdString, TIdSpec> & /*metas*/,
            int i)
 {
     SEQAN_ASSERT_EQ(i, 0);
+    (void)i;  // Only used for assertion.
     return IOERR_READ_AUTO_FORMAT_UNKNOWN_FORMAT;
 }
 
@@ -123,6 +124,7 @@ int _read2(StringSet<TIdString, TIdSpec> & /*metas*/,
            int i)
 {
     SEQAN_ASSERT_EQ(i, 0);
+    (void)i;  // Only used for assertion.
     return IOERR_READ_AUTO_FORMAT_UNKNOWN_FORMAT;
 }
 
@@ -166,6 +168,7 @@ template <typename TIdString, typename TSeqString, typename TQualString, typenam
 int _readRecord(TIdString & /*meta*/, TSeqString & /*seq*/, TQualString & /*qual*/, TRecordReader & /*reader*/, TagSelector<void> const & /*tagSelector*/, int i)
 {
     SEQAN_ASSERT_EQ(i, 0);
+    (void)i;  // only used for assertion.
     return IOERR_READ_AUTO_FORMAT_UNKNOWN_FORMAT;
 }
 
