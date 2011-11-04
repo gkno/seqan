@@ -35,6 +35,8 @@
 #ifndef TESTS_INDEX_TEST_CROSS_COMPARE_H
 #define TESTS_INDEX_TEST_CROSS_COMPARE_H
 
+#include <typeid>
+
 #include <seqan/index.h>
 
 //////////////////////////////////////////////////////////////////////////////
