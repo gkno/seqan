@@ -444,7 +444,7 @@ int main(int argc, char const * argv[])
         else  // SAM -> BAM
         {
             Stream<Bgzf> bamOutStream;
-            attachToFile(bamOutStream, outF, O_CREAT | O_WRONLY | O_DIRECT);
+            attachToFile(bamOutStream, outF, O_CREAT | O_WRONLY);
             res = performConversion(reader, bamOutStream, options, Sam(), Bam());
         }
     }
@@ -461,7 +461,7 @@ int main(int argc, char const * argv[])
             Stream<Bgzf> bamInStream;
             Stream<Bgzf> bamOutStream;
             attachToFile(bamInStream, inF, O_RDONLY);
-            attachToFile(bamOutStream, outF, O_CREAT | O_WRONLY | O_DIRECT);
+            attachToFile(bamOutStream, outF, O_CREAT | O_WRONLY);
             res = performConversion(bamInStream, bamOutStream, options, Bam(), Bam());
         }
     }
