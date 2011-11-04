@@ -36,7 +36,9 @@
 #define PLATFORM_WINDOWS_VS
 
 // Make <windows.h> not define min() and max() as macros.
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif  // #ifndef NOMINMAX
 
 // Disable warning "'function' : resolved overload was found by
 // argument-dependent lookup".  Visual Studio warns because Koenig
