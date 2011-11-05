@@ -35,9 +35,7 @@
 #ifndef TESTS_INDEX_TEST_CROSS_COMPARE_H
 #define TESTS_INDEX_TEST_CROSS_COMPARE_H
 
-#ifndef PLATFORM_WINDOWS_VS
-#include <typeid>
-#endif // #ifndef PLATFORM_WINDOWS_VS
+#include <typeinfo>
 
 #include <seqan/index.h>
 
