@@ -50,9 +50,6 @@
     #include <tr1/unordered_map>
   #elif TR1_UNORDERED_MAP_USE_UNORDERED_MAP && !TR1_UNORDERED_MAP_USE_TR1_UNORDERED_MAP
     #include <unordered_map>
-    namespace std { namespace tr1 {
-      using std::unordered_map;
-    } }
   #elif Boost_FOUND
     #include <boost/unordered_map.hpp>
     namespace std { namespace tr1 {
