@@ -164,8 +164,8 @@ int readRecord(BamHeader & header,
         typedef typename BamHeader::TSequenceInfo TSequenceInfo;
         appendValue(header.sequenceInfos, TSequenceInfo(name, lRef));
         // Append contig name to name store, if not known already.
-        unsigned unused = 0;
-        if (!getIdByName(nameStore(context), unused, name, nameStoreCache(context)))
+		typename Size<TNameStore>::Type unused = 0;
+        if (!getIdByName(nameStore(context), name, unused, nameStoreCache(context)))
             appendName(nameStore(context), name, nameStoreCache(context));
     }
 
