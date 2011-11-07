@@ -443,6 +443,9 @@ endmacro (seqan_setup_demos)
 #  * CUDA
 
 macro (seqan_find_dependencies)
+  # Register external include directory.
+  include_directories(${SEQAN_ROOT_SOURCE_DIR}/external/include)
+
   find_package (ZLIB QUIET)
   if (ZLIB_FOUND)
     add_definitions(-DSEQAN_HAS_ZLIB=1)
@@ -460,7 +463,7 @@ macro (seqan_find_dependencies)
   find_package (TR1)
   find_package (Boost)
   if (Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
+    #    include_directories(${Boost_INCLUDE_DIRS})
   endif (Boost_FOUND)
 
   if (CUDA_FOUND)
