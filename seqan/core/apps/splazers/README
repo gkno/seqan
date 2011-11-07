@@ -20,7 +20,7 @@ SplazerS (SplitRazerS) is a tool primarily designed for split mapping of
 sequencing reads. It is a branch of the RazerS algorithm 
 (http://www.seqan.de/projects/razers.html) and therefore also features basic 
 read mapping functionality (split mapping can be switched off via a command 
-line parameter).. 
+line parameter). 
 SplazerS searches for split read matches where prefix and suffix match of a
 read may be interrupted by a longer gap. Matches are identified with two 
 q-gram filtering criteria: one for the read prefix and one for the read 
@@ -29,7 +29,8 @@ filter return a potential match region within a certain maximum distance.
 If both are verified positively, the best split position within the read is
 located. SplazerS version 1.1 (and higher) also support anchored split mapping
 in paired-end data where the candidate region of a potential split-read is 
-defined by its mapped paired end.
+defined by its mapped paired end. Note that this feature was not yet 
+implemented in SeqAn Release 1.3.
 
 
 
@@ -37,33 +38,41 @@ defined by its mapped paired end.
 2. Installation
 ---------------------------------------------------------------------------
 
+A precompiled linux 64-bit binary of SplazerS can be downloaded from the 
+SeqAn projects download page: http://www.seqan.de/downloads/projects.html
+
 SplazerS is distributed with SeqAn - The C++ Sequence Analysis Library (see 
-http://www.seqan.de). To build SplazerS do the following:
+http://www.seqan.de). To build SplazerS yourself you can check out the latest 
+SVN version of SplazerS and SeqAn with:
+
+  1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan seqan-trunk
+  2)  mkdir seqan-trunk/build/
+  3)  cd seqan-trunk/build/
+  4)  cmake .. -DCMAKE_BUILD_TYPE=Release
+  5)  make splazers
+  6)  ./core/apps/splazers/splazers --help
+
+Alternatively, you can download the latest SeqAn snapshot and build SplazerS
+with:
 
   1)  Download the latest snapshot of SeqAn
   2)  Unzip it to a directory of your choice (e.g. snapshot)
   3)  cd snapshot/apps
   4)  make splazers
+
+If the make command was successful, you can skip ahead to step 5. Otherwise,
+you may have to manually add SplazerS to the Makefile targets. For this, open 
+the file "Makefile" and add "splazers/splazers" to the "TARGETS = " line. 
+Also, add a line "splazers: check_seqan_base splazers/splazers" anywhere below
+the "TARGETS = " and above the "check_seqan_base:" line. Now the make command 
+should be successful.
+
   5)  cd splazers
   6)  ./splazers --help
 
-Alternatively you can check out the latest SVN version of SplazerS and SeqAn
-with:
+If succesful, an executable file splazers was built and a brief usage 
+description is dumped.
 
-  1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
-  2)  cd seqan
-  3)  make forwards
-  4)  cd projects/library/apps
-  5)  make splazers
-  6)  cd splazers
-  7)  ./splazers --help
-
-If succesfull, an executable file splazers has been built and a brief usage 
-description was dumped.
-
-Another alternative is to use cmake to build SplazerS. 
-See http://trac.mi.fu-berlin.de/seqan/wiki/Tutorial/GettingStarted for 
-instructions on how to use cmake.
 
 ---------------------------------------------------------------------------
 3. Usage
@@ -81,8 +90,15 @@ two read files are given, split mapping is disabled and instead mate-pair
 mapping is switched on. In that case, the two read files must contain the
 same number of reads, corresponding to left and right mates.
 
+Important: If the splazers binary does not reside in the same directory
+as the gapped_params folder, then please specify its location with the 
+-pd option, e.g. -pd seqan-trunk/core/apps/splazers/gapped_params. If 
+SplazerS does not know where the gapped_params folder is, it will still 
+run but may produce suboptimal results and take longer than necessary.
+
 SplazerS version 1.1 (and higher) also support anchored split mapping in
-paired-end data. The anchored mode can be switched on with option -an. The
+paired-end data. Note that this feature was not yet implemented in SeqAn 
+Release 1.3. The anchored mode can be switched on with option -an. The
 input reads then must be given in SAM format. Reads with flag 85, 101, 149,
 or 165 (which are unmapped but are anchored by their mapped mate) are then
 split-mapped within a smaller candidate region (see options -ll and -le).
@@ -371,10 +387,10 @@ Error distribution files are currently not output in split mapping mode.
 4. Output Formats
 ---------------------------------------------------------------------------
 
-SplazerS currently supports the GFF output format for reporting split 
-matches. If split mapping is deactivated, it inherits SplazerS' output formats
-which are selectable via the "--output-format NUM" option. The following 
-values for NUM are then possible:
+SplazerS currently supports the GFF output format (default) and the SAM format
+(-of 4) for reporting split matches. If split mapping is deactivated, it 
+inherits SplazerS' output formats which are selectable via the 
+"--output-format NUM" option. The following values for NUM are then possible:
 
   0 = Razer Format
   1 = Enhanced Fasta Format
