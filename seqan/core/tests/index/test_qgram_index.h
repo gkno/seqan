@@ -94,7 +94,7 @@ void testStepSize()
     TIndex index("CATGATTACATA");
     setStepSize(index,2);
     hash(indexShape(index), "CAT");
-    String<unsigned> occs;
+    String<typename Position<DnaString>::Type> occs;
     occs = getOccurrences(index, indexShape(index));
     SEQAN_ASSERT_EQ(length(occs), 2u);
     SEQAN_ASSERT_EQ(occs[0], 0u);
