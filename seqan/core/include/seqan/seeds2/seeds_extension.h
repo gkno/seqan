@@ -670,6 +670,7 @@ extendSeed(Seed<Simple, TConfig> & seed,
     // The algorithm only works for linear gap scores < 0, mismatch scores < 0
     // and match scores > 0.
     // TODO(holtgrew): We could introduce such check functions for score matrices.
+    // TODO(holtgrew): Originally, this function only worked for simple scoring schemes, does the algorithm also work correctly for BLOSUM62? This matrix contains zeroes. Also see [10729].
     // SEQAN_ASSERT_GT(scoreMatch(scoringScheme), 0);
     // SEQAN_ASSERT_LT(scoreMismatch(scoringScheme), 0);
     SEQAN_ASSERT_LT(scoreGapOpen(scoringScheme), 0);
