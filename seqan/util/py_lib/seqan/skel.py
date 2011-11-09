@@ -69,7 +69,7 @@ DEFAULT_AUTHOR = 'Your Name <your.email@example.net>'
 # Program usage string for command line parser.
 USAGE = """
 Usage: %prog [options] repository NAME
-       %prog [options] [module|test|app|demo|header|lheader] LOCATION
+       %prog [options] [module|test|app|demo|header|lheader] NAME LOCATION
        %prog [options] app_tests LOCATION
 """.strip()
 
