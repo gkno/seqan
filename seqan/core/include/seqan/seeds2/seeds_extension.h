@@ -505,14 +505,14 @@ SEQAN_CHECKPOINT
     SEQAN_ASSERT_GEQ(getEndDiagonal(seed), getLowerDiagonal(seed));
 }
 
-template<typename TConfig, typename TQuerySegment, typename TDatabaseSegment, typename TScoreValue>
+template<typename TConfig, typename TQuerySegment, typename TDatabaseSegment, typename TScoreValue, typename TScoreSpec>
 TScoreValue
 _extendSeedGappedXDropOneDirection(
         Seed<Simple, TConfig> & seed,
         TQuerySegment const & querySeg,
         TDatabaseSegment const & databaseSeg,
         ExtensionDirection direction,
-        Score<TScoreValue, Simple> const & scoringScheme,
+        Score<TScoreValue, TScoreSpec> const & scoringScheme,
 		TScoreValue scoreDropOff) {
 SEQAN_CHECKPOINT
     typedef typename Size<TQuerySegment>::Type TSize;
@@ -649,13 +649,13 @@ SEQAN_CHECKPOINT
 	return longestExtensionScore;
 }
 
-template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue>
+template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue, typename TScoreSpec>
 inline void 
 extendSeed(Seed<Simple, TConfig> & seed, 
 		   TQuery const & query,
 		   TDatabase const & database,
 		   ExtensionDirection direction,
-           Score<TScoreValue, Simple> const & scoringScheme,
+           Score<TScoreValue, TScoreSpec> const & scoringScheme,
            TScoreValue scoreDropOff,
 		   GappedXDrop const &)
 {
@@ -669,8 +669,9 @@ extendSeed(Seed<Simple, TConfig> & seed,
 
     // The algorithm only works for linear gap scores < 0, mismatch scores < 0
     // and match scores > 0.
-    SEQAN_ASSERT_GT(scoreMatch(scoringScheme), 0);
-    SEQAN_ASSERT_LT(scoreMismatch(scoringScheme), 0);
+    // TODO(holtgrew): We could introduce such check functions for score matrices.
+    // SEQAN_ASSERT_GT(scoreMatch(scoringScheme), 0);
+    // SEQAN_ASSERT_LT(scoreMismatch(scoringScheme), 0);
     SEQAN_ASSERT_LT(scoreGapOpen(scoringScheme), 0);
     SEQAN_ASSERT_LT(scoreGapExtend(scoringScheme), 0);
     SEQAN_ASSERT_EQ(scoreGapExtend(scoringScheme), scoreGapOpen(scoringScheme));
@@ -707,13 +708,13 @@ extendSeed(Seed<Simple, TConfig> & seed,
 }
 
 
-template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue>
+template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue, typename TScoreSpec>
 inline void 
 extendSeed(Seed<ChainedSeed, TConfig> & /*seed*/,
 		   TQuery const & /*query*/,
 		   TDatabase const & /*database*/,
 		   ExtensionDirection /*direction*/,
-           Score<TScoreValue, Simple> const & /*scoringScheme*/,
+           Score<TScoreValue, TScoreSpec> const & /*scoringScheme*/,
            TScoreValue /*scoreDropOff*/,
 		   GappedXDrop const &)
 {
