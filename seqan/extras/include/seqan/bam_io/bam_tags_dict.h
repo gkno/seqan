@@ -34,9 +34,6 @@
 // Code for read/write access to BAM tag dicts.
 // ==========================================================================
 
-// TODO(holtgrew): assignValue() is missing.
-// TODO(holtgrew): eraseValue() is missing.
-
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_TAGS_DICT_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_TAGS_DICT_H_
 
@@ -661,7 +658,7 @@ setTagValue(BamTagsDict & tags, CharString const & key, T const & val, char cons
     if (length(key) != 2u)
         return false;
     CharString bamTagVal;
-    append(bamTagVal, key);
+    // append(bamTagVal, key);
     if (!_toBamTagValue(bamTagVal, val, typeC))
         return false;
     
@@ -671,10 +668,11 @@ setTagValue(BamTagsDict & tags, CharString const & key, T const & val, char cons
         // TODO(holtgrew): Speed this up with positions?
         CharString tmp;
         tmp = getTagValue(tags, idx);
-        infix(host(tags), tags._positions[idx], tags._positions[idx] + length(tmp)) = bamTagVal;
+        infix(host(tags), tags._positions[idx] + 2, tags._positions[idx] + 2 + length(tmp)) = bamTagVal;
     }
     else
     {
+        append(host(tags), key);
         append(host(tags), bamTagVal);
     }
 
@@ -688,6 +686,41 @@ inline bool
 setTagValue(BamTagsDict & tags, CharString const & key, T const & val)
 {
     return setTagValue(tags, key, val, getBamTypeChar<T>());
+}
+
+// ----------------------------------------------------------------------------
+// Function eraseTag()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.eraseTag
+..summary:Erase tag from @Class.BamTagsDict@.
+..cat:BAM I/O
+..signature:eraseTag(tagsDict, key)
+..param.tags:The dict to erase from.
+...type:Class.BamTagsDict
+..param.key:The key of the entry to remove.
+...type:Shortcut.CharString
+..returns:$bool$, indicating whether the key was present.
+..include:seqan/bam_io.h
+ */
+
+inline bool
+eraseTag(BamTagsDict & tags, CharString const & key)
+{
+    if (!hasIndex(tags))
+        buildIndex(tags);
+    
+    unsigned idx = 0;
+    if (!findTagKey(idx, tags, key))
+        return false;
+
+    // TODO(holtgrew): Speed this up with positions?
+    CharString tmp;
+    tmp = getTagValue(tags, idx);
+    erase(host(tags), tags._positions[idx], tags._positions[idx + 1]);
+    
+    return true;
 }
 
 }  // namespace seqan

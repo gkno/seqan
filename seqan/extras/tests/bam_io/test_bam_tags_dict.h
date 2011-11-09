@@ -375,4 +375,116 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_get_value_type_Bf)
     SEQAN_ASSERT_EQ(expected, result);
 }
 
+SEQAN_DEFINE_TEST(test_bam_tags_dict_set_tag_value)
+{
+    using namespace seqan;
+
+    // No tag.
+    {
+        CharString bamTags;
+        CharString samTags = "";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        setTagValue(tags, "XX", 'o');
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:o"), CharString(samTags));
+    }
+    // Single tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        setTagValue(tags, "XX", 'o');
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:o"), CharString(samTags));
+    }
+    // Front tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        setTagValue(tags, "XX", 'o');
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:o\tXY:A:y\tXZ:A:z"), CharString(samTags));
+    }
+    // Last tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        setTagValue(tags, "XZ", 'o');
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:x\tXY:A:y\tXZ:A:o"), CharString(samTags));
+    }
+    // Center tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        setTagValue(tags, "XY", 'o');
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:x\tXY:A:o\tXZ:A:z"), CharString(samTags));
+    }
+    // Append.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        setTagValue(tags, "XA", 'o');
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:x\tXY:A:y\tXZ:A:z\tXA:A:o"), CharString(samTags));
+    }
+}
+
+SEQAN_DEFINE_TEST(test_bam_tags_dict_erase_tag)
+{
+    using namespace seqan;
+
+    // Single tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        eraseTag(tags, "XX");
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString(""), CharString(samTags));
+    }
+    // Front tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        eraseTag(tags, "XX");
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XY:A:y\tXZ:A:z"), CharString(samTags));
+    }
+    // Last tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        eraseTag(tags, "XZ");
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:x\tXY:A:y"), CharString(samTags));
+    }
+    // Center tag.
+    {
+        CharString bamTags;
+        CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
+        assignTagsSamToBam(bamTags, samTags);
+        BamTagsDict tags(bamTags);
+        eraseTag(tags, "XY");
+        assignTagsBamToSam(samTags, bamTags);
+        SEQAN_ASSERT_EQ(CharString("XX:A:x\tXZ:A:z"), CharString(samTags));
+    }
+}
+
 #endif  // EXTRAS_TESTS_BAM_IO_TEST_BAM_TAGS_DICT_DICT_H_

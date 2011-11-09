@@ -316,6 +316,10 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
 template <typename TTarget, typename TSource>
 void assignTagsSamToBam(TTarget & target, TSource & source)
 {
+    // Handle case of empty source sequence.
+    if (empty(source))
+        clear(target);
+
     typedef typename Iterator<TSource, Standard>::Type TSourceIter;
     TSourceIter it = begin(source, Standard());
     TSourceIter itEnd = end(source, Standard());
@@ -622,6 +626,10 @@ void _assignTagsBamToSamOneTag(TTarget & target, TSourceIter & it, std::stringst
 template <typename TTarget, typename TSource>
 void assignTagsBamToSam(TTarget & target, TSource const & source)
 {
+    // Handle case of empty source sequence.
+    if (empty(source))
+        clear(target);
+
     std::stringstream ss;
     clear(target);
     
