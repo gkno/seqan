@@ -215,6 +215,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         TContigIdType contigId,
         String<WeightedMatch> &foundMatches,
         const HammingSimpleQuality &) {
+    (void) options;  // In case we run without assertions.
     Finder<TString> finder(contig);
     Pattern<TString, HammingSimpleQuality> pattern(read);
     setScoreLimit(pattern, -maxError);
@@ -227,6 +228,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
         SEQAN_ASSERT(ret);
+        (void) ret;  // In case we run without assertions.
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
     }
 }
