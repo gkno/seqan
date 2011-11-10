@@ -85,7 +85,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_A)
     CharString str("XXAa");
     BamTagsDict bamTags(str);
     char c;
-    SEQAN_ASSERT(extractValue(c, bamTags, 0));
+    SEQAN_ASSERT(extractTagValue(c, bamTags, 0));
     SEQAN_ASSERT_EQ(c, 'a');
 }
 
@@ -96,7 +96,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_c)
     CharString str("XXc\xff");
     BamTagsDict bamTags(str);
     __uint8 x;
-    SEQAN_ASSERT(extractValue(x, bamTags, 0));
+    SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, 255u);
 }
 
@@ -106,7 +106,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_C)
     CharString str("XXC\xff");
     BamTagsDict bamTags(str);
     __int8 x;
-    SEQAN_ASSERT(extractValue(x, bamTags, 0));
+    SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, -1);
 }
 
@@ -116,7 +116,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_s)
     CharString str("XXs\xff\xff");
     BamTagsDict bamTags(str);
     __uint16 x;
-    SEQAN_ASSERT(extractValue(x, bamTags, 0));
+    SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, 0xffff);
 }
 
@@ -126,7 +126,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_S)
     CharString str("XXs\xff\xff");
     BamTagsDict bamTags(str);
     __int16 x;
-    SEQAN_ASSERT(extractValue(x, bamTags, 0));
+    SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, -1);
 }
 
@@ -136,7 +136,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_i)
     CharString str("XXi\xff\xff\xff\xff");
     BamTagsDict bamTags(str);
     __uint32 x;
-    SEQAN_ASSERT(extractValue(x, bamTags, 0));
+    SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, 0xffffffff);
 }
 
@@ -146,7 +146,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_I)
     CharString str("XXI\xff\xff\xff\xff");
     BamTagsDict bamTags(str);
     __int32 x;
-    SEQAN_ASSERT(extractValue(x, bamTags, 0));
+    SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, -1);
 }
 

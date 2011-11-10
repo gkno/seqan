@@ -430,13 +430,13 @@ getTagValue(BamTagsDict const & tags, TPos idx)
 }
 
 // ----------------------------------------------------------------------------
-// Function extractValue()
+// Function extractTagValue()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.extractValue
+.Function.extractTagValue
 ..cat:BAM I/O
-..signature:extractValue(dest, tags, idx)
+..signature:extractTagValue(dest, tags, idx)
 ..summary:Extract and cast "atomic" value from tags string with index $idx$.
 ..param.dest:The variable to write the value to.
 ...remarks:The value is first copied in a variable of the type indicated in the BAM file. Then it is cast into the type of $dest$.
@@ -451,7 +451,7 @@ getTagValue(BamTagsDict const & tags, TPos idx)
 
 template <typename TDest, typename TIdx>
 inline bool
-extractValue(TDest & dest, BamTagsDict & tags, TIdx idx)
+extractTagValue(TDest & dest, BamTagsDict & tags, TIdx idx)
 {
     if (!hasIndex(tags))
         buildIndex(tags);

@@ -63,7 +63,6 @@ namespace seqan {
 ..value.BAM_FLAG_SECONDARY:$0x0100$ This is a secondary alignment.
 ..value.BAM_FLAG_QC_NO_PASS:$0x0200$ Does not pass quality controls.
 ..value.BAM_FLAG_DUPLICATE:$0x0400$ PCR or optical duplicate.
-..cat:BAM I/O
 ..remarks:Also see the SAM standard on these flags for more explanation.
 ..include:seqa/bam_io.h
 */
