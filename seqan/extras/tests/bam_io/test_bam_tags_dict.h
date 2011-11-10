@@ -385,7 +385,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_set_tag_value)
         CharString samTags = "";
         assignTagsSamToBam(bamTags, samTags);
         BamTagsDict tags(bamTags);
-        setTagValue(tags, "XX", 'o');
+        setTagValue(tags, "XX", 'o', 'A');
         assignTagsBamToSam(samTags, bamTags);
         SEQAN_ASSERT_EQ(CharString("XX:A:o"), CharString(samTags));
     }
@@ -395,7 +395,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_set_tag_value)
         CharString samTags = "XX:A:x";
         assignTagsSamToBam(bamTags, samTags);
         BamTagsDict tags(bamTags);
-        setTagValue(tags, "XX", 'o');
+        setTagValue(tags, "XX", 'o', 'A');
         assignTagsBamToSam(samTags, bamTags);
         SEQAN_ASSERT_EQ(CharString("XX:A:o"), CharString(samTags));
     }
@@ -405,7 +405,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_set_tag_value)
         CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
         assignTagsSamToBam(bamTags, samTags);
         BamTagsDict tags(bamTags);
-        setTagValue(tags, "XX", 'o');
+        setTagValue(tags, "XX", 'o', 'A');
         assignTagsBamToSam(samTags, bamTags);
         SEQAN_ASSERT_EQ(CharString("XX:A:o\tXY:A:y\tXZ:A:z"), CharString(samTags));
     }
@@ -415,7 +415,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_set_tag_value)
         CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
         assignTagsSamToBam(bamTags, samTags);
         BamTagsDict tags(bamTags);
-        setTagValue(tags, "XZ", 'o');
+        setTagValue(tags, "XZ", 'o', 'A');
         assignTagsBamToSam(samTags, bamTags);
         SEQAN_ASSERT_EQ(CharString("XX:A:x\tXY:A:y\tXZ:A:o"), CharString(samTags));
     }
@@ -425,7 +425,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_set_tag_value)
         CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
         assignTagsSamToBam(bamTags, samTags);
         BamTagsDict tags(bamTags);
-        setTagValue(tags, "XY", 'o');
+        setTagValue(tags, "XY", 'o', 'A');
         assignTagsBamToSam(samTags, bamTags);
         SEQAN_ASSERT_EQ(CharString("XX:A:x\tXY:A:o\tXZ:A:z"), CharString(samTags));
     }
@@ -435,7 +435,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_set_tag_value)
         CharString samTags = "XX:A:x\tXY:A:y\tXZ:A:z";
         assignTagsSamToBam(bamTags, samTags);
         BamTagsDict tags(bamTags);
-        setTagValue(tags, "XA", 'o');
+        setTagValue(tags, "XA", 'o', 'A');
         assignTagsBamToSam(samTags, bamTags);
         SEQAN_ASSERT_EQ(CharString("XX:A:x\tXY:A:y\tXZ:A:z\tXA:A:o"), CharString(samTags));
     }
