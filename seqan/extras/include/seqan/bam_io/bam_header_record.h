@@ -98,6 +98,12 @@ enum BamSortOrder
 ..remarks:Comment records are stored with one tag where the key is empty and the value is the comment.
 ..include:seqan/bam_io.h
 
+.Memfunc.BamHeaderRecord#BamHeaderRecord
+..class:Class.BamHeaderRecord
+..signature:BamHeaderRecord()
+..summary:Constructor.
+..remarks:Only the default constructor is provided.
+
 .Typedef.BamHeaderRecord#TTagName
 ..class:Class.BamHeaderRecord
 ..summary:Type of the tag keys.
@@ -146,6 +152,12 @@ public:
 ..signature:BamHeader
 ..see:Class.BamHeaderRecord
 ..include:seqan/bam_io.h
+
+.Memfunc.BamHeader#BamHeader
+..class:Class.BamHeader
+..signature:BamHeader()
+..summary:Constructor.
+..remarks:Only the default constructor is provided.
 
 .Memvar.BamHeader#sequenceInfos
 ..class:Class.BamHeader

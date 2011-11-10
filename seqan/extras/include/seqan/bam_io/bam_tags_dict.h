@@ -62,6 +62,12 @@ for (unsigned i = 0; i < length(tags); ++i)
 // #=> "AA -> value1"
 // #=> "AB -> value2"
 ..include:seqan/bam_io.h
+
+.Memfunc.BamTagsDict#BamTagsDict
+..class:Class.BamTagsDict
+..signature:BamTagsDict()
+..summary:Constructor.
+..remarks:Only the default constructor is provided.
 */
 
 class BamTagsDict

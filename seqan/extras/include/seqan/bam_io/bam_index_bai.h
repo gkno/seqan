@@ -60,6 +60,12 @@ struct BaiBamIndexBinData_
 ..summary:Access to BAI (samtools-style) Indices.
 ..signature:BamIndex<Bai>
 ..include:seqan/bam_io.h
+
+.Memfunc.BAI BamIndex#BamIndex
+..class:Spec.BAI BamIndex
+..signature:BamIndex()
+..summary:Constructor.
+..remarks:Only the default constructor is provided.
 */
 
 template <>

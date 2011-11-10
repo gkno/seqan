@@ -51,6 +51,7 @@ namespace seqan {
 ..summary:Access to BAM Indices.
 ..signature:BamIndex<TSpec>
 ..param.TSpec:Tag to specialize index.
+..remarks:This is an abstract class, don't use it itself but its specializations.
 ..include:seqan/bam_io.h
 */
 

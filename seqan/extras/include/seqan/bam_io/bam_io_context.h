@@ -64,11 +64,19 @@ BamIOContext<CharString> bamIOContext(nameStore, nameStoreCache);
 // ...
 ..example.text:Using a @Class.BamIOContext@ with a @Class.FragmentStore@.
 ..example.code:
-typedef FragmentStore<>::TNameStore      TNameStore;
-typedef FragmentStore<>::TNameStoreCache TNameStoreCache;
+typedef FragmentStore<>::TContigNameStore         TNameStore;
+typedef NameStoreCache<TNameStore>                TNameStoreCache;
 FragmentStore<> store;
-BamIOContext<TNameStore, TNameStoreCache> bamIOContext(nameStore, nameStoreCache);
+// Optionally, do something with store.
+typedef BamIOContext<TNameStore, TNameStoreCache> TBamIOContext;
+TBamIOContext bamIOContext(store.contigNameStore, store.contigNameStoreCache);
 // ...
+
+.Memfunc.BamIOContext#BamIOContext
+..class:Class.BamIOContext
+..signature:BamIOContext()
+..summary:Constructor.
+..remarks:Only the default constructor is provided.
 
 .Typedef.BamIOContext#TNameStore
 ..class:Class.BamIOContext
