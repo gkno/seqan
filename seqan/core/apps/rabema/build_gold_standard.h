@@ -196,6 +196,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     }
 
     bool ret;  // Flag used for assertions below.
+    (void) ret;  // If run without assertions.
     int relativeMinScore = (int)ceilAwayFromZero(100.0 * -maxError / length(read));
 
     // Setup the finder and pattern.

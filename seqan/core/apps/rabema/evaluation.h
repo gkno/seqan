@@ -188,6 +188,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
     _patternMatchNOfPattern(pattern, options.matchN);
     _patternMatchNOfFinder(pattern, options.matchN);
     bool ret = setEndPosition(finder, pattern, endPos);
+    (void)ret;  // If run without assertions.
     SEQAN_ASSERT(ret);
     SEQAN_ASSERT_EQ(endPos, endPosition(finder));
     

@@ -64,6 +64,7 @@ void _assignTagsSamToBamOneTag(TTarget & target, TRecordReader & reader, CharStr
 {
     SEQAN_ASSERT_NOT(atEnd(reader));
     int res = readNChars(target, reader, 2);  // Read tag name.
+    (void)res;  // If run without assertions.
     SEQAN_ASSERT_EQ(res, 0);
     SEQAN_ASSERT_NOT(atEnd(reader));
     
