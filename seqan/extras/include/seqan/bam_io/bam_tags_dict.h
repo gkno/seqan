@@ -226,6 +226,9 @@ buildIndex(BamTagsDict & bamTags)
     typedef Iterator<TCharString, Rooted>::Type TCharStringIter;
 
     clear(bamTags._positions);
+    if (empty(value(bamTags._host)))
+        return;  // Done.
+
     appendValue(bamTags._positions, 0);
     for (TCharStringIter it = begin(host(bamTags)); !atEnd(it);)
     {
@@ -255,8 +258,8 @@ buildIndex(BamTagsDict & bamTags)
 
         appendValue(bamTags._positions, position(it));
     }
-    if (length(host(bamTags)) != 0u)
-        appendValue(bamTags._positions, length(host(bamTags)) + 1);  // +1 since there is not tab at the end
+    // if (!empty(value(bamTags._host)))
+    //     appendValue(bamTags._positions, length(host(bamTags)) + 1);  // +1 since there is not tab at the end
 }
 
 // ----------------------------------------------------------------------------
@@ -294,6 +297,8 @@ setHost(BamTagsDict & me, CharString const & host_)
 inline unsigned
 length(BamTagsDict const & tags)
 {
+    if (empty(value(tags._host)))
+        return 0;
     if (!hasIndex(tags))
         buildIndex(const_cast<BamTagsDict &>(tags));
     return length(tags._positions) - 1;

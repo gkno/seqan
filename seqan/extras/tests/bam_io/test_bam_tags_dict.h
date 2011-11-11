@@ -78,6 +78,30 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_get_type)
     }
 }
 
+SEQAN_DEFINE_TEST(test_bam_tags_dict_length)
+{
+    using namespace seqan;
+
+    // Empty string.
+    {
+        CharString str("");
+        BamTagsDict bamTags(str);
+        SEQAN_ASSERT_EQ(length(bamTags), 0u);
+    }
+    // One entry.
+    {
+        CharString str("XXAa");
+        BamTagsDict bamTags(str);
+        SEQAN_ASSERT_EQ(length(bamTags), 1u);
+    }
+    // Two entries.
+    {
+        CharString str("XXAaXXAa");
+        BamTagsDict bamTags(str);
+        SEQAN_ASSERT_EQ(length(bamTags), 2u);
+    }
+}
+
 SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_A)
 {
     using namespace seqan;
@@ -105,6 +129,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_C)
     using namespace seqan;
     CharString str("XXC\xff");
     BamTagsDict bamTags(str);
+    SEQAN_ASSERT_EQ(length(bamTags), 1u);
     __int8 x;
     SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, -1);
@@ -115,6 +140,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_s)
     using namespace seqan;
     CharString str("XXs\xff\xff");
     BamTagsDict bamTags(str);
+    SEQAN_ASSERT_EQ(length(bamTags), 1u);
     __uint16 x;
     SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, 0xffff);
@@ -125,6 +151,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_S)
     using namespace seqan;
     CharString str("XXs\xff\xff");
     BamTagsDict bamTags(str);
+    SEQAN_ASSERT_EQ(length(bamTags), 1u);
     __int16 x;
     SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, -1);
@@ -135,6 +162,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_i)
     using namespace seqan;
     CharString str("XXi\xff\xff\xff\xff");
     BamTagsDict bamTags(str);
+    SEQAN_ASSERT_EQ(length(bamTags), 1u);
     __uint32 x;
     SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, 0xffffffff);
@@ -145,6 +173,7 @@ SEQAN_DEFINE_TEST(test_bam_tags_dict_extract_value_type_I)
     using namespace seqan;
     CharString str("XXI\xff\xff\xff\xff");
     BamTagsDict bamTags(str);
+    SEQAN_ASSERT_EQ(length(bamTags), 1u);
     __int32 x;
     SEQAN_ASSERT(extractTagValue(x, bamTags, 0));
     SEQAN_ASSERT_EQ(x, -1);

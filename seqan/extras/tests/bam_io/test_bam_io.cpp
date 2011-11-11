@@ -111,6 +111,7 @@ SEQAN_BEGIN_TESTSUITE(test_bam_io)
     // Test BamTagsDict.
     SEQAN_CALL_TEST(test_bam_tags_dict_get_type_size);
     SEQAN_CALL_TEST(test_bam_tags_dict_get_type);
+    SEQAN_CALL_TEST(test_bam_tags_dict_length);
     SEQAN_CALL_TEST(test_bam_tags_dict_extract_value_type_A);
     SEQAN_CALL_TEST(test_bam_tags_dict_extract_value_type_c);
     SEQAN_CALL_TEST(test_bam_tags_dict_extract_value_type_C);
