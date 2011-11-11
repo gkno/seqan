@@ -58,7 +58,7 @@ CharString str = "AA:value1\tAB:value2";
 BamTagsDict tags(str);
 std::cerr << length(tags) << std::endl;  // #=> "2"
 for (unsigned i = 0; i < length(tags); ++i)
-    std::cerr << getKey(tags, i) << " -> " << getValue(tags, i) << std::endl;
+    std::cerr << getTagKey(tags, i) << " -> " << getTagValue(tags, i) << std::endl;
 // #=> "AA -> value1"
 // #=> "AB -> value2"
 ..include:seqan/bam_io.h
