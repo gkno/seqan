@@ -298,6 +298,9 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_read_auto_format_no_quals_fasta);
     SEQAN_CALL_TEST(test_stream_read_auto_format_no_quals_fastq);
 
+    // Tests for FASTA with Amino Acid alphabet.
+    SEQAN_CALL_TEST(test_stream_record_reader_fasta_protein_single_fstream);
+
     /* Tests for writing file formats.
      * Only fstream used as a representative */
 

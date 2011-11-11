@@ -155,6 +155,63 @@ _charCompare(int const c, BackslashR_ const & /* tag*/)
 }
 
 inline int
+_charCompare(int const c, Tag<AminoAcid_> const & /* tag*/)
+{
+    switch (c)
+    {
+        case '*':
+        case 'A':
+        case 'B':
+        case 'C':
+        case 'D':
+        case 'E':
+        case 'F':
+        case 'G':
+        case 'H':
+        case 'I':
+        case 'K':
+        case 'L':
+        case 'M':
+        case 'N':
+        case 'P':
+        case 'Q':
+        case 'R':
+        case 'S':
+        case 'T':
+        case 'V':
+        case 'W':
+        case 'X':
+        case 'Y':
+        case 'Z':
+        case 'a':
+        case 'b':
+        case 'c':
+        case 'd':
+        case 'e':
+        case 'f':
+        case 'g':
+        case 'h':
+        case 'i':
+        case 'k':
+        case 'l':
+        case 'm':
+        case 'n':
+        case 'p':
+        case 'q':
+        case 'r':
+        case 's':
+        case 't':
+        case 'v':
+        case 'w':
+        case 'x':
+        case 'y':
+        case 'z':
+            return true;
+    }
+    return false;
+}
+
+inline int
 _charCompare(int const c, Tag<Dna_> const & /* tag*/)
 {
     switch (c)
