@@ -42,6 +42,14 @@
    fun:Py_ADDRESS_IN_RANGE
 }
 
+# Added by holtgrew on 2011-11-11: Yet anothe rpython suppression.
+{
+   Suppress conditional jump in zlib.
+   Memcheck:Cond
+   fun:inflateReset2
+   fun:inflateInit2_
+}
+
 #
 # Leaks (including possible leaks)
 #    Hmmm, I wonder if this masks some real leaks.  I think it does.
