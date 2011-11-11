@@ -54,13 +54,26 @@ namespace seqan {
 ..signature:BamTagsDict
 ..summary:Indexes start positions of BAM tags in a @Shortcut.CharString@ and provides a dict-like API.
 ..example.code:
-CharString str = "AA:value1\tAB:value2";
-BamTagsDict tags(str);
-std::cerr << length(tags) << std::endl;  // #=> "2"
+CharString samStr = "AA:Z:value1\tAB:Z:value2\tAC:i:30";
+CharString bamStr;
+assignSamToBam(bamStr, samStr);
+BamTagsDict tags(bamStr);
+std::cerr << length(tags) << std::endl;  // #=> "3"
 for (unsigned i = 0; i < length(tags); ++i)
+{
     std::cerr << getTagKey(tags, i) << " -> " << getTagValue(tags, i) << std::endl;
-// #=> "AA -> value1"
-// #=> "AB -> value2"
+    if (getTagValue(tags, i)[0] == 'i')  // is 32 bit integer
+    {
+        __int32 x = 0;
+        bool res = extractTagValue(x, tags, i);
+        SEQAN_ASSERT_MSG(res, "Not a valid integer at pos %u!", i);
+        std::cerr << "     " << x << std::endl;
+    }
+}
+// #=> "AA -> Zvalue1"
+// #=> "AB -> Zvalue2"
+// #-> "AC -> i<binary representation of 30>"
+#  #-> "      30"
 ..include:seqan/bam_io.h
 
 .Memfunc.BamTagsDict#BamTagsDict
