@@ -690,7 +690,7 @@ goNext(Iter<TSumList, SkipSumListIterator> & it)
 		if (it.element)
 		{
 			it.iter.container_ = & it.element->minilist;
-			it.iter.next_ = it.iter.here_ = it.element->minilist.data_;
+			it.iter.next_ = it.iter.here_ = it.element->minilist.data_.value_1;
 			scanValues(it.iter.next_, it.iter.values_);
 		}
 	}
@@ -847,7 +847,7 @@ _splitMiniList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterat
 	}
 
 	//must adjust the iterator "it"?
-	int it_bytepos = it.iter.here_.data_ptr - el1.minilist.data_;
+	int it_bytepos = it.iter.here_.data_ptr - el1.minilist.data_.value_1;
 	bool it_was_moved = (it_bytepos >= el1.minilist.data_size); //true if "it" points to el2
 
 	//insert new element el2 into skiplist
@@ -901,7 +901,7 @@ _splitMiniList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterat
 	if (it_was_moved)
 	{
 		int here_length = it.iter.next_.data_ptr - it.iter.here_.data_ptr; //difference between next_ and here_
-		it.iter.here_.data_ptr = el2.minilist.data_ + it_bytepos - el1.minilist.data_size; //redirect here_
+		it.iter.here_.data_ptr = el2.minilist.data_.value_1 + it_bytepos - el1.minilist.data_size; //redirect here_
 		it.iter.next_.data_ptr = it.iter.here_.data_ptr + here_length; //redirect next_
 		it.element = & el2;
 		it.iter.container_ = & el2.minilist;
@@ -1025,7 +1025,7 @@ removeValues(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator
 		if (it.element)
 		{
 			it.iter.container_ = & it.element->minilist;
-			it.iter.here_ = it.iter.next_ = it.iter.container_->data_;
+			it.iter.here_ = it.iter.next_ = it.iter.container_->data_.value_1;
 			scanValues(it.iter.next_, it.iter.values_);
 		}
 	}

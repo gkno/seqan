@@ -232,7 +232,7 @@ inline void
 assign(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & target,
 	   SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > const & source)
 {
-	arrayCopyForward(source.data_.value_1, source.data_.value_1 + source.data_size, target.data_);
+	arrayCopyForward(source.data_.value_1, source.data_.value_1 + source.data_size, target.data_.value_1);
 	target.data_length = source.data_length;
 	target.data_size = source.data_size;
 	target.data_sum = source.data_sum;
@@ -645,7 +645,7 @@ inline bool
 atEnd(Iter< TSumList, MiniSumListValueIterator_ > & it,
 	  TSumList2 const & container)
 {
-	return (!it.data_ptr) || (it.data_ptr == container.data_ + container.data_size);
+	return (!it.data_ptr) || (it.data_ptr == container.data_.value_1 + container.data_size);
 }
 
 //////////////////////////////////////////////////////////////////////////////
