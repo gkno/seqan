@@ -91,7 +91,7 @@ struct RankSupportBitString
     TBitString                                      bitString;
     TBucketString                                   bucketString;
     TSuperBucketString                              superBucketString;
-    typename Value<TSuperBucketString>::Type      length;
+    typename Value<TSuperBucketString>::Type   	   length;
 
     RankSupportBitString() :
     	bitString(),

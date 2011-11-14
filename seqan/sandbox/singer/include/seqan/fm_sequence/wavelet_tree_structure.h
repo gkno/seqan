@@ -55,6 +55,7 @@ typedef Tag<FibreTreeNodes_> const FibreTreeNodes;
 template <typename TText>
 struct Fibre<WaveletTreeStructure<TText>, FibreTreeNodes>
 {
+	//TODO
     //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
 	typedef unsigned TValue;
     typedef String<Pair<TValue, TValue> > Type;
@@ -73,10 +74,28 @@ struct WaveletTreeStructure
 {
     typename Fibre<WaveletTreeStructure, FibreTreeNodes>::Type treeNodes;
 
-    WaveletTreeStructure(){}
+    WaveletTreeStructure() :
+    	treeNodes()
+    {};
 
     template <typename TFreqString>
-    explicit WaveletTreeStructure(TFreqString & string);
+    WaveletTreeStructure(TFreqString & freqString) :
+    	treeNodes()
+    {
+        typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+        TValue sigmaSize = length(freqString);
+
+        resize(treeNodes, sigmaSize - 1);
+    	TValue numChildNodes, lowest, highest, posInTree;
+        initStartTreeStructureValue(numChildNodes, lowest, highest, posInTree, sigmaSize);
+
+        computeTreeEntries(freqString,
+                           *this,
+                           lowest,
+                           highest,
+                           posInTree,
+                           numChildNodes);
+    }
 
     bool operator==(const WaveletTreeStructure & b) const
     {
@@ -85,24 +104,67 @@ struct WaveletTreeStructure
 };
 
 template <typename TText>
-template <typename TFreqString>
-WaveletTreeStructure<TText>::WaveletTreeStructure(TFreqString & freqString)
+struct WaveletTreeStructure<TText, unsigned>
 {
-    typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
-    TValue sigmaSize = length(freqString);
+    typename Fibre<WaveletTreeStructure, FibreTreeNodes>::Type treeNodes;
 
-    resize(treeNodes, sigmaSize - 1);
-    TValue numChildNodes = 0;
-    TValue lowest = 0;
-    TValue highest = sigmaSize - 1;
-    TValue posInTree = 0;
-    computeTreeEntries(freqString,
-                       *this,
-                       lowest,
-                       highest,
-                       posInTree,
-                       numChildNodes);
+    WaveletTreeStructure() :
+    	treeNodes()
+    {};
+
+    template <typename TFreqString>
+    WaveletTreeStructure(TFreqString & freqString) :
+    	treeNodes()
+    {
+        typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
+        TValue sigmaSize = length(freqString);
+
+        resize(treeNodes, sigmaSize - 1);
+    	TValue numChildNodes, lowest, highest, posInTree;
+        initStartTreeStructureValue(numChildNodes, lowest, highest, posInTree, sigmaSize);
+
+        computeTreeEntries(freqString,
+                           *this,
+                           lowest,
+                           highest,
+                           posInTree,
+                           numChildNodes);
+    }
+
+    template <typename TFreqString>
+        WaveletTreeStructure(TFreqString & freqString, unsigned numAlphabetExtCharacters) :
+        	treeNodes()
+        {
+            typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE + numAlphabetExtCharacters>::Type TValue;
+            TValue sigmaSize = length(freqString);
+
+            resize(treeNodes, sigmaSize - 1);
+        	TValue numChildNodes, lowest, highest, posInTree;
+            initStartTreeStructureValue(numChildNodes, lowest, highest, posInTree, sigmaSize);
+
+            computeTreeEntries(freqString,
+                               *this,
+                               lowest,
+                               highest,
+                               posInTree,
+                               numChildNodes);
+        }
+
+    bool operator==(const WaveletTreeStructure & b) const
+    {
+        return treeNodes == b.treeNodes;
+    }
+};
+
+template <typename TValue>
+void initStartTreeStructureValue(TValue & numChildNodes, TValue & lowest, TValue & highest, TValue & posInTree, TValue const sigmaSize)
+{
+	numChildNodes = 0;
+	lowest = 0;
+	highest = sigmaSize - 1;
+	posInTree = 0;
 }
+
 
 // ==========================================================================
 // Functions

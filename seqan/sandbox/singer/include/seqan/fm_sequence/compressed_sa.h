@@ -322,7 +322,24 @@ inline bool save(
         return false;
     }
     return true;
+}
 
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
+bool getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
+{
+    typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
+	TIndicatorString const & indicatorString = compressedSA.compressedSA.indicatorString;
+
+	//std::cerr << "indicator String:" <<std::endl;
+	//std::cerr << indicatorString <<std::endl;
+	if (getBit(indicatorString, pos))
+	{
+		//std::cerr << "getNextPos: true" << std::endl;
+		return true;
+	}
+	pos = lfMapping(*compressedSA.lfTable, pos);
+	//std::cerr << "getNextPos: false" << std::endl;
+	return false;
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>

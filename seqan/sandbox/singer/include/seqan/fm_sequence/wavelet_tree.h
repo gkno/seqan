@@ -933,6 +933,9 @@ inline bool saveDollarInformation(
     const char * fileName,
     int openMode)
 {
+	WaveletTree<TText, TSpec> dummyTree = tree;
+	std::cerr << fileName << std::endl;
+	std::cerr << openMode << std::endl;
 	return true;
 }
 
