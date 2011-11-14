@@ -524,9 +524,9 @@ SEQAN_DEFINE_TEST(test_align_gaps_base_char_string_array_gaps) {
 }
 
 
-SEQAN_DEFINE_TEST(test_align_gaps_base_char_string_sumlist_gaps) {
-    TestGapsBase<String<char>, SumlistGaps>();
-}
+// SEQAN_DEFINE_TEST(test_align_gaps_base_char_string_sumlist_gaps) {
+//     TestGapsBase<String<char>, SumlistGaps>();
+// }
 
 
 SEQAN_DEFINE_TEST(test_align_gaps_test_gaps_iterator) {
@@ -539,9 +539,9 @@ SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_array_gaps) 
 }
 
 
-SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps) {
-    TestGapManipulation<String<char>, SumlistGaps>(); 
-}
+// SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps) {
+//     TestGapManipulation<String<char>, SumlistGaps>(); 
+// }
 
 SEQAN_DEFINE_TEST(test_align_gaps_test_trailing_gaps_char_string_array_gaps) {
 	TestTrailingGaps<String<char>, ArrayGaps>();

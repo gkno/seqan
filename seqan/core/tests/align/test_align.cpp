@@ -46,14 +46,14 @@ SEQAN_BEGIN_TESTSUITE("test_align") {
     // Call tests from test_align_align.cpp.
     SEQAN_CALL_TEST(test_align_align_char_string_array_gaps);
     SEQAN_CALL_TEST(test_align_align_dna_array_gaps);
-    SEQAN_CALL_TEST(test_align_align_char_string_sumlist_gaps);
-    SEQAN_CALL_TEST(test_align_align_dna_sumlist_gaps);
+    // SEQAN_CALL_TEST(test_align_align_char_string_sumlist_gaps);
+    // SEQAN_CALL_TEST(test_align_align_dna_sumlist_gaps);
 
     SEQAN_CALL_TEST(test_align_gaps_base_char_string_array_gaps);
-    SEQAN_CALL_TEST(test_align_gaps_base_char_string_sumlist_gaps);
+    // SEQAN_CALL_TEST(test_align_gaps_base_char_string_sumlist_gaps);
     SEQAN_CALL_TEST(test_align_gaps_test_gaps_iterator);
     SEQAN_CALL_TEST(test_align_gaps_test_gap_manipulation_char_string_array_gaps);
-    SEQAN_CALL_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps);
+    // SEQAN_CALL_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps);
     SEQAN_CALL_TEST(test_align_gaps_test_trailing_gaps_char_string_array_gaps);
     SEQAN_CALL_TEST(test_align_gaps_test_count_characters_char_string_array_gaps);
 
@@ -66,21 +66,5 @@ SEQAN_BEGIN_TESTSUITE("test_align") {
     SEQAN_CALL_TEST(test_align_hirschberger);
 
     SEQAN_CALL_TEST(test_align_matrix);
-
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_algorithms.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_cols_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_dynprog.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_hirschberg.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_iterator_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_local_dynprog.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_myers.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/align_trace.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/gaps_array.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/gaps_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/gaps_iterator_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/gaps_sumlist.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/hirschberg_set.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/align/matrix_base.h");
 }
 SEQAN_END_TESTSUITE

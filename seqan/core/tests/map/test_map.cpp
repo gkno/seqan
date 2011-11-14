@@ -33,12 +33,12 @@
 #include <seqan/basic.h>
 
 #include "test_map_map.h"
-#include "test_map_sumlist.h"
+// #include "test_map_sumlist.h"
 
 
 SEQAN_BEGIN_TESTSUITE(test_map) {
     // Call Tests.
     SEQAN_CALL_TEST(test_map_map);
-    SEQAN_CALL_TEST(test_map_sumlist);
+    // SEQAN_CALL_TEST(test_map_sumlist);
 }
 SEQAN_END_TESTSUITE

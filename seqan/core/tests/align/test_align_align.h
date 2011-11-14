@@ -345,14 +345,14 @@ SEQAN_DEFINE_TEST(test_align_align_dna_array_gaps) {
 }
 
 
-SEQAN_DEFINE_TEST(test_align_align_char_string_sumlist_gaps) {
-    TestAlign_<Align<String<char>, SumlistGaps> >();
-}
+// SEQAN_DEFINE_TEST(test_align_align_char_string_sumlist_gaps) {
+//     TestAlign_<Align<String<char>, SumlistGaps> >();
+// }
 
 
-SEQAN_DEFINE_TEST(test_align_align_dna_sumlist_gaps) {
-	TestAlign_<Align<String<Dna>, SumlistGaps> >();
-}
+// SEQAN_DEFINE_TEST(test_align_align_dna_sumlist_gaps) {
+// 	TestAlign_<Align<String<Dna>, SumlistGaps> >();
+// }
 
 
 #endif

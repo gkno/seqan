@@ -30,6 +30,8 @@
 //
 // ==========================================================================
 
+// SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
+
 #include <iostream>
 #include <cstdio>
 
@@ -477,17 +479,17 @@ void Test_MiniSumList2()
 	TIterator it(sl);
 
 	searchSumList(it, 2, 0); // SEARCH SEMANTICS
-	SEQAN_ASSERT(getValue(it, 0) == 2);
-	SEQAN_ASSERT(getValue(it, 1) == 3);
-	SEQAN_ASSERT(getValue(it, 2) == 1);
-	SEQAN_ASSERT(getSum(it, 0) == 1);
-	SEQAN_ASSERT(getSum(it, 1) == 2);
-	SEQAN_ASSERT(getSum(it, 2) == 3);
+	SEQAN_ASSERT_EQ(getValue(it, 0), 2);
+	SEQAN_ASSERT_EQ(getValue(it, 1), 3);
+	SEQAN_ASSERT_EQ(getValue(it, 2), 1);
+	SEQAN_ASSERT_EQ(getSum(it, 0), 1);
+	SEQAN_ASSERT_EQ(getSum(it, 1), 2);
+	SEQAN_ASSERT_EQ(getSum(it, 2), 3);
 
 	searchSumList(it, 10, 0);
-	SEQAN_ASSERT(getSum(it, 0) == 7);
-	SEQAN_ASSERT(getSum(it, 1) == 9);
-	SEQAN_ASSERT(getSum(it, 2) == 8);
+	SEQAN_ASSERT_EQ(getSum(it, 0), 7);
+	SEQAN_ASSERT_EQ(getSum(it, 1), 9);
+	SEQAN_ASSERT_EQ(getSum(it, 2), 8);
 
 	SEQAN_ASSERT(it == end(sl));
 	SEQAN_ASSERT(it != begin(sl));
