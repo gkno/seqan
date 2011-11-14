@@ -25,6 +25,7 @@
 
 #include <seqan/misc/misc_cmdparser.h>
 #include <seqan/index.h>
+#include <../../extras/include/seqan/math.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -34,7 +35,9 @@ using namespace seqan;
 
 //#define DEBUG_ENTROPY
 
-	static const double DFI_EPSILON = 0.0000001;
+//	typedef double TFloat;
+	typedef Rational<__int64> TFloat;
+//	static const TFloat DFI_EPSILON = 0.0000001;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -84,15 +87,17 @@ using namespace seqan;
 		unsigned minFreq;
 
 		template <typename TDataSet>
-		PredMinSupp(double _minSupp, TDataSet const &ds)
+		PredMinSupp(TFloat _minSupp, TDataSet const &ds)
 		{
 			// emerging substring mode
-			if (_minSupp * ds[1] < 1.0) {
+			
+			TFloat x = _minSupp * (TFloat)ds[1];
+			if ((_minSupp * (TFloat)ds[1]) < (TFloat)1) {
 				cerr << "Support must be at least 1/|db_1|... exit!" << endl;
 				exit(1);
 			}
 			// adapt parameters from support to frequency
-			minFreq = (unsigned) ceil(_minSupp * (double)ds[1] - DFI_EPSILON);
+			minFreq = (unsigned) ceil(_minSupp * (TFloat)ds[1] /*- DFI_EPSILON*/);
 		}
 			
 		inline bool operator()(DfiEntry_ const &entry) const {
@@ -103,16 +108,16 @@ using namespace seqan;
 	// minimal growth predicate from D1->D0
 	struct PredEmerging
 	{
-		double growthRate;
+		TFloat growthRate;
 
 		template <typename TDataSet>
-		PredEmerging(double _growthRate, TDataSet const &ds) {
-			growthRate = _growthRate * ((double) ds[1] / (double) (ds[2] - ds[1]) - DFI_EPSILON);
+		PredEmerging(TFloat _growthRate, TDataSet const &ds) {
+			growthRate = _growthRate * ((TFloat) ds[1] / (TFloat) (ds[2] - ds[1]) /*- DFI_EPSILON*/);
 		}
 			
 		// HINT: here growthRate is frequency-related, not support-related
 		inline bool operator()(DfiEntry_ const &entry) const {
-			return (double)entry.freq[0] >= (double)entry.freq[1] * growthRate;
+			return (TFloat)entry.freq[0] >= (TFloat)entry.freq[1] * growthRate;
 		}
 	};
 
@@ -126,12 +131,12 @@ using namespace seqan;
 		String<unsigned> minFreq;
 
 		template <typename TDataSet>
-		PredMinAllSupp(double _minSupp, TDataSet const &ds)
+		PredMinAllSupp(TFloat _minSupp, TDataSet const &ds)
 		{
 			resize(minFreq, length(ds) - 1, Exact());
 			// adapt parameters from support to frequency
 			for (unsigned i = 1; i < length(ds); ++i)
-				minFreq[i - 1] = (unsigned) ceil(_minSupp * (double)(ds[i] - ds[i - 1]) - DFI_EPSILON);
+				minFreq[i - 1] = (unsigned) ceil(_minSupp * (TFloat)(ds[i] - ds[i - 1]) /*- DFI_EPSILON*/);
 		}
 			
 		inline bool operator()(DfiEntry_ const &entry) const {
@@ -146,11 +151,11 @@ using namespace seqan;
 	struct PredEntropy
 	{
 		double maxEntropy;
-		String<double> dsLengths;
+		String<TFloat> dsLengths;
 
 		template <typename TDataSet>
 		PredEntropy(double _maxEntropy, TDataSet const &ds):
-			maxEntropy(_maxEntropy + DFI_EPSILON)
+			maxEntropy(_maxEntropy /*+ DFI_EPSILON*/)
 		{
 			resize(dsLengths, length(ds) - 1, Exact());
 			for (unsigned i = 1; i < length(ds); ++i)
@@ -161,21 +166,21 @@ using namespace seqan;
 		inline double
 		getEntropy(DfiEntry_ const &entry) const
 		{
-			double sum = 0;
+			TFloat sum = 0;
 			double H = 0;
 
 			for (unsigned i = 0; i < length(entry.freq); ++i)
-				sum += entry.freq[i] / dsLengths[i];
+				sum += (TFloat)entry.freq[i] / (TFloat)dsLengths[i];
 			
 			double lSum = log((double)sum);					// sum cannot be zero
 				
 			for (unsigned i = 0; i < length(entry.freq); ++i)
 				if (entry.freq[i])
 				{
-					double freq = entry.freq[i] / dsLengths[i];
+					double freq = (TFloat)entry.freq[i] / (TFloat)dsLengths[i];
 					H += freq * (log(freq) - lSum);
 				}
-			H /= -sum * log((double)length(dsLengths));		// normalize by datasets (divide by log m)
+			H /= (double)-sum * log((double)length(dsLengths));		// normalize by datasets (divide by log m)
 			return H;
 		}
 			
@@ -425,6 +430,16 @@ namespace seqan {
 	struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > > const, FibreDir>: 
 		public struct Fibre< Index<TObject, IndexWotd< Dfi<TPredHull, TPred> > >, FibreDir> {};
 */
+
+	template <typename TInt>
+	inline bool
+	_convertOptionValue(CommandLineOption const & opt, Rational<TInt> & dst, CharString const & src)
+	{
+		if (!isDoubleOption(opt)) return false;
+		std::istringstream stream(toCString(src));
+		return !(stream >> dst).fail();
+	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -455,7 +470,7 @@ int runDFI(
 	typedef String<TAlphabet, Alloc<> >								TString;
 	typedef StringSet<TString>										TStringSet;
 	typedef Index<TStringSet, IndexWotd<
-		Dfi<TPredHull, TPred> > >								TIndex;
+		Dfi<TPredHull, TPred> > >									TIndex;
 	typedef Iter<TIndex, VSTree<TopDown<ParentLinks<> > > >			TIter;
 	typedef SubstringEntry<typename Size<TIndex>::Type>				TSubstringEntry;
 
@@ -628,8 +643,8 @@ int main(int argc, const char *argv[])
 	int optionPredicate = -1; // 0..minmax, 1..growth, 2..entropy
 	String<unsigned> optionMinFreq;
 	String<unsigned> optionMaxFreq;
-	double optionMinSupp = 0;
-	double optionGrowthRate = 0;
+	TFloat optionMinSupp = 0;
+	TFloat optionGrowthRate = 0;
 	double optionEntropy = 0;
 	bool optionMaximal = false;
 		
@@ -698,9 +713,9 @@ int main(int argc, const char *argv[])
 		optionPredicate = 1;
 		getOptionValueLong(parser, "growth", 0, optionMinSupp);
 		getOptionValueLong(parser, "growth", 1, optionGrowthRate);
-		if ((optionMinSupp <= 0.0 || optionMinSupp > 1.0) && (stop = true))
+		if ((optionMinSupp <= (TFloat)0 || optionMinSupp > (TFloat)1) && (stop = true))
 			cerr << "Support threshold must be greater than 0 and less than or equal to 1." << endl;
-		if ((optionGrowthRate < 1.0) && (stop = true))
+		if ((optionGrowthRate < (TFloat)1) && (stop = true))
 			cerr << "Growth rate must not be less than 1." << endl;
 		if ((argumentCount(parser) != 2) && (stop = true))
 			cerr << "Please specify 2 databases." << endl;
@@ -710,7 +725,7 @@ int main(int argc, const char *argv[])
 		optionPredicate = 2;
 		getOptionValueLong(parser, "entropy", 0, optionMinSupp);
 		getOptionValueLong(parser, "entropy", 1, optionEntropy);
-		if ((optionMinSupp <= 0.0 || optionMinSupp > 1.0) && (stop = true))
+		if ((optionMinSupp <= (TFloat)0 || optionMinSupp > (TFloat)1) && (stop = true))
 			cerr << "Support threshold must be greater than 0 and less than or equal to 1." << endl;
 		if ((optionEntropy <= 0.0 || optionEntropy > 1.0) && (stop = true))
 			cerr << "Entropy must not be grater than 0 and less or equal to 1." << endl;
