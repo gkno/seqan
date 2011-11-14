@@ -73,9 +73,9 @@ struct MiniListEntry_
 		unsigned char value_3[sizeof(TValue)+1];
 	} data;
 
-	//MiniListEntry_() {}
-	//MiniListEntry_(TValue val) { this->assignValue(val); }
-	//~MiniListEntry_() {}
+	MiniListEntry_() {}
+	MiniListEntry_(TValue val) { this->assignValue(val); }
+	~MiniListEntry_() {}
 
 	static inline unsigned int
 	sizeNeeded(TValue val)
@@ -170,12 +170,8 @@ class SumList<DIM, TValue, MiniSumList<SIZE, TSpec> >
 public:
 	typedef typename Size<SumList>::Type TSize;
 	typedef SumListValues<DIM, TValue> TValues;
-	typedef MiniListEntry_<TValue>     TEntry_;
 
-  union _union {
-    TEntry_       value_0;
-	  unsigned char value_1 [SIZE];
-  } data_;
+	unsigned char data_ [SIZE];
 	TSize data_length;  //number of elements in list
 	TSize data_size;  //number of bytes used in data_
 	TValues data_sum; //sum of all list numbers
@@ -232,7 +228,7 @@ inline void
 assign(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & target,
 	   SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > const & source)
 {
-	arrayCopyForward(source.data_.value_1, source.data_.value_1 + source.data_size, target.data_.value_1);
+	arrayCopyForward(source.data_, source.data_ + source.data_size, target.data_);
 	target.data_length = source.data_length;
 	target.data_size = source.data_size;
 	target.data_sum = source.data_sum;
@@ -324,7 +320,7 @@ _miniSumListAssignValue(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 	{
 		int new_size = me.data_size + new_entr.size() - old_entr.size();
 		if (new_size > SIZE) return false; //not enough space
-		arrayCopy(ptr + old_entr.size(), me.data_.value_1 + me.data_size, ptr + new_entr.size());
+		arrayCopy(ptr + old_entr.size(), me.data_ + me.data_size, ptr + new_entr.size());
 	}
 	me.data_sum[dim] += (new_value - old_entr.getValue());
 	old_entr.assignValue(new_value);
@@ -351,9 +347,8 @@ _miniSumListSizeOfValues(SumListValues<DIM, TValue> const & vals)
 //////////////////////////////////////////////////////////////////////////////
 //inserts DIM-tupel at byte_position
 //returns false on capacity owerflow, true otherwise
-
 template <unsigned int DIM, typename TValue, unsigned short SIZE, typename TSpec, typename TPosition, typename TValue2>
-inline bool
+inline bool 
 _miniSumListInsertValues(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 						  TPosition byte_pos,
 						  TValue2 const & new_values,
@@ -367,22 +362,23 @@ _miniSumListInsertValues(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 
 	if (byte_pos < me.data_size)
 	{ //make room
-		arrayCopyBackward(me.data_.value_1 + byte_pos, me.data_.value_1 + me.data_size, me.data_.value_1 + byte_pos + new_values_size);
+		arrayCopyBackward(me.data_ + byte_pos, me.data_ + me.data_size, me.data_ + byte_pos + new_values_size);
 	}
 
-	unsigned char * ptr = &me.data_.value_1[byte_pos];
+	unsigned char * ptr = me.data_ + byte_pos;
 	for (unsigned int i = 0; i < DIM; ++i)
 	{
-		TEntry & entr = me.data_.value_0;
+		TEntry & entr = * reinterpret_cast<TEntry *>(ptr);
 		entr.assignValue(new_values[i]);
 		ptr += entr.size();
 	}
-
+	
 	me.data_size = new_size;
 	me.data_sum += new_values;
 	++me.data_length;
 	return true;
 }
+
 
 template <typename TSumList, typename TValues>
 inline bool 
@@ -391,7 +387,7 @@ _insertValues(TSumList & me,
 			  TValues const & new_values,
 			  /*OUT*/ unsigned int & new_values_size)
 {
-	return _miniSumListInsertValues(me, it.data_ptr - me.data_.value_1, new_values, new_values_size);
+	return _miniSumListInsertValues(me, it.data_ptr - me.data_, new_values, new_values_size);
 }
 template <typename TSumList, typename TValue>
 inline bool 
@@ -401,7 +397,7 @@ _insertValues(TSumList & me,
 			  /*OUT*/ unsigned int & new_values_size)
 {
 	SumListValues<DIMENSION<TSumList>::VALUE, typename Value<TSumList>::Type > vals(new_values);
-	return _miniSumListInsertValues(me, it.data_ptr - me.data_.value_1, vals, new_values_size);
+	return _miniSumListInsertValues(me, it.data_ptr - me.data_, vals, new_values_size);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -451,7 +447,7 @@ splitSumList(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 	TSize me_len = 0;
 	while (true)
 	{
-		if ((it.data_ptr - me.data_.value_1) >= SIZE/2) break;
+		if ((it.data_ptr - me.data_) >= SIZE/2) break;
 
 		TValues vals;
 		scanValues(it, vals);
@@ -463,14 +459,14 @@ splitSumList(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 
 	//split
 
-	arrayCopyForward(it.data_ptr, me.data_.value_1 + me.data_size, right.data_.value_1);
+	arrayCopyForward(it.data_ptr, me.data_ + me.data_size, right.data_);
 	right.data_length = me.data_length - me_len;
-	right.data_size = me.data_size - (it.data_ptr - me.data_.value_1);
+	right.data_size = me.data_size - (it.data_ptr - me.data_);
 	right.data_sum = me.data_sum;
 	right.data_sum -= sum;
 
 	me.data_length = me_len;
-	me.data_size = it.data_ptr - me.data_.value_1;
+	me.data_size = it.data_ptr - me.data_;
 	me.data_sum = sum;
 }
 
@@ -564,7 +560,7 @@ public:
 	{
 	}
 	Iter(TSumList & cont)
-		: data_ptr(cont.data_.value_1)
+		: data_ptr(cont.data_)
 	{
 	}
 	Iter(Iter const & other)
@@ -637,7 +633,7 @@ inline bool
 atEnd(Iter< TSumList, MiniSumListValueIterator_ > & it,
 	  TSumList2 & container)
 {
-	return (!it.data_ptr) || (it.data_ptr == container.data_.value_1 + container.data_size);
+	return (!it.data_ptr) || (it.data_ptr == container.data_ + container.data_size);
 }
 
 template <typename TSumList, typename TSumList2>
@@ -645,7 +641,7 @@ inline bool
 atEnd(Iter< TSumList, MiniSumListValueIterator_ > & it,
 	  TSumList2 const & container)
 {
-	return (!it.data_ptr) || (it.data_ptr == container.data_.value_1 + container.data_size);
+	return (!it.data_ptr) || (it.data_ptr == container.data_ + container.data_size);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -676,8 +672,8 @@ public:
 	}
 	Iter(TSumList & cont)
 		: container_(& cont)
-		, here_(cont.data_.value_1)
-		, next_(cont.data_.value_1)
+		, here_(cont.data_)
+		, next_(cont.data_)
 	{
 		if (!atEnd(next_, cont))
 		{
@@ -686,7 +682,7 @@ public:
 	}
 	Iter(TSumList & cont, GoEnd)
 		: container_(& cont)
-		, here_(cont.data_.value_1 + cont.data_size)
+		, here_(cont.data_ + cont.data_size)
 		, sums_(cont.data_sum)
 	{
 	}
@@ -772,7 +768,7 @@ inline void
 goBegin(Iter<TSumList, MiniSumListIterator> & it)
 {
 	clear(it.sums_);
-	it.here_ = it.next_ = it.container_->data_.value_1;
+	it.here_ = it.next_ = it.container_->data_;
 	scanValues(it.next_, it.values_);
 }
 
@@ -856,8 +852,7 @@ assignValue(Iter<SumList<DIM, TValue, MiniSumList<SIZE, TSpec> >, MiniSumListIte
 	TValue old_val = getValue(vit);
 
 	//create TEntry accessors
-	TEntry new_entr;
-	new_entr.assignValue(val);
+	TEntry new_entr(val);
 	TEntry & old_entr = * reinterpret_cast<TEntry *>(vit.data_ptr);
 
 	int diff = new_entr.size() -  old_entr.size();
@@ -868,7 +863,7 @@ assignValue(Iter<SumList<DIM, TValue, MiniSumList<SIZE, TSpec> >, MiniSumListIte
 		if (new_size > SIZE) return false; //not enough space
 
 		//make room!
-		arrayCopy(vit.data_ptr + old_entr.size(), it.container_->data_.value_1 + it.container_->data_size, vit.data_ptr + new_entr.size());
+		arrayCopy(vit.data_ptr + old_entr.size(), it.container_->data_ + it.container_->data_size, vit.data_ptr + new_entr.size());
 		it.container_->data_size += diff;
 
 		//adjust next_ pointer
@@ -922,7 +917,7 @@ removeValues(Iter<TSumList, MiniSumListIterator > & it)
 	}
 	if (!atEnd(it.next_, * it.container_))
 	{//move the rest
-		arrayCopyForward(it.next_.data_ptr, it.container_->data_.value_1 + it.container_->data_size, it.here_.data_ptr);
+		arrayCopyForward(it.next_.data_ptr, it.container_->data_ + it.container_->data_size, it.here_.data_ptr);
 	}
 	//adjust size and length
 	it.container_->data_size -= (it.next_.data_ptr - it.here_.data_ptr);
