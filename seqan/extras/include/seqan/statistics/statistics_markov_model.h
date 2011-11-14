@@ -218,15 +218,13 @@ public:
 			{
 				for(unsigned int row=0;row<column_size;++row)
 				{
-					value(transition, row,hash(orderShape, begin(qgram))) = *(itA+1) - *itA;
-
+					value(transition, row,hash(orderShape, begin(qgram))) = static_cast<TFloat>(*(itA+1) - *itA);
 				}
 			}
 			else
 			{
 				//new for the matrix
-				value(transition, hash(orderShape, begin(qgram)),hash(orderShape, begin(qgram) + 1)) = *(itA+1) - *itA;
-
+				value(transition, hash(orderShape, begin(qgram)),hash(orderShape, begin(qgram) + 1)) = static_cast<TFloat>(*(itA+1) - *itA);
 			}
 		}
 		//std::cout<<"\n"<<transition<<"\n\n";

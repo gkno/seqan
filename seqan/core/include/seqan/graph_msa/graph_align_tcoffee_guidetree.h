@@ -60,7 +60,7 @@ _roundToSignificantFigures(double num, int n)
     const int power = n - (int) d;
 
     const double magnitude = pow(10.0, power);
-    const long shifted = round(num*magnitude);
+    const long shifted = static_cast<long>(round(num*magnitude));
     return shifted / magnitude;
 }
 
@@ -133,7 +133,7 @@ njTree(String<TValue, TStringSpec> const & matIn,
     String<__int64> mat;
     resize(mat, length(matIn));
     for (unsigned i = 0; i < length(mat); ++i)
-        mat[i] = 10000000.0 * ((double)(matIn[i]) / (double)(normFactor));
+        mat[i] = static_cast<__int64>(10000000.0 * ((double)(matIn[i]) / (double)(normFactor)));
 
 	// First initialization
 	String<__int64> av;    // Average branch length to a combined node
@@ -150,7 +150,7 @@ njTree(String<TValue, TStringSpec> const & matIn,
 	}
 
 	// Main cycle
-	TCargo fnseqs=(TCargo) nseq;
+	__int64 fnseqs = static_cast<__int64>(nseq);
 	for(TSize nc=0; nc<(nseq-3); ++nc) {
 		__int64 sumOfBranches = 0;
 

@@ -182,11 +182,8 @@ macro (seqan_setup_global)
     # -----------------------------------------------------------------------
     if (MSVC)
         # Warning level 3 for MSVC is disabled for now to see how much really bad warnings there are.
-        #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3  /wd4996 -D_CRT_SECURE_NO_WARNINGS")
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2  /wd4996 -D_CRT_SECURE_NO_WARNINGS")
-        # Disable Microsoft C++ language extensions.
-        # TODO(holtgrew): Re-disable again, Microsoft's header do not compile with this option! Look for a workaround.
-        #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Za")
+        #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3)
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
     endif (MSVC)
 
     # -----------------------------------------------------------------------
