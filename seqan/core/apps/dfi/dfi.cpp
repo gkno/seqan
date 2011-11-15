@@ -35,10 +35,13 @@ using namespace seqan;
 
 //#define DEBUG_ENTROPY
 
-//	typedef double TFloat;
-	typedef Rational<__int64> TFloat;
-//	static const TFloat DFI_EPSILON = 0.0000001;
+typedef double TFloat;
+#define DFI_PLUS_EPSILON  + 0.0000001
+#define DFI_MINUS_EPSILON - 0.0000001
 
+//typedef Rational<__int64> TFloat;
+//#define DFI_PLUS_EPSILON
+//#define DFI_MINUS_EPSILON
 
 //////////////////////////////////////////////////////////////////////////////
 // predicates for the Frequent Pattern Mining Problem
@@ -97,7 +100,7 @@ using namespace seqan;
 				exit(1);
 			}
 			// adapt parameters from support to frequency
-			minFreq = (unsigned) ceil(_minSupp * (TFloat)ds[1] /*- DFI_EPSILON*/);
+			minFreq = (unsigned) ceil(_minSupp * (TFloat)ds[1] DFI_PLUS_EPSILON);
 		}
 			
 		inline bool operator()(DfiEntry_ const &entry) const {
@@ -112,7 +115,7 @@ using namespace seqan;
 
 		template <typename TDataSet>
 		PredEmerging(TFloat _growthRate, TDataSet const &ds) {
-			growthRate = _growthRate * ((TFloat) ds[1] / (TFloat) (ds[2] - ds[1]) /*- DFI_EPSILON*/);
+			growthRate = _growthRate * ((TFloat) ds[1] / (TFloat) (ds[2] - ds[1]) DFI_PLUS_EPSILON);
 		}
 			
 		// HINT: here growthRate is frequency-related, not support-related
@@ -136,7 +139,7 @@ using namespace seqan;
 			resize(minFreq, length(ds) - 1, Exact());
 			// adapt parameters from support to frequency
 			for (unsigned i = 1; i < length(ds); ++i)
-				minFreq[i - 1] = (unsigned) ceil(_minSupp * (TFloat)(ds[i] - ds[i - 1]) /*- DFI_EPSILON*/);
+				minFreq[i - 1] = (unsigned) ceil(_minSupp * (TFloat)(ds[i] - ds[i - 1]) DFI_PLUS_EPSILON);
 		}
 			
 		inline bool operator()(DfiEntry_ const &entry) const {
@@ -155,7 +158,7 @@ using namespace seqan;
 
 		template <typename TDataSet>
 		PredEntropy(double _maxEntropy, TDataSet const &ds):
-			maxEntropy(_maxEntropy /*+ DFI_EPSILON*/)
+			maxEntropy(_maxEntropy DFI_MINUS_EPSILON)
 		{
 			resize(dsLengths, length(ds) - 1, Exact());
 			for (unsigned i = 1; i < length(ds); ++i)
@@ -203,39 +206,31 @@ using namespace seqan;
 //
 template <typename TSequences, typename TFileNames, typename TDatasets>
 bool loadDatasets(
-	TSequences		&seq, 
+	TSequences		&seqs, 
 	TFileNames		const &fileNames, 
 	TDatasets		&ds)
 {
-	// count sequences
 	resize(ds, length(fileNames) + 1);
-	unsigned seqCount = 0;
+	ds[0] = 0;
+
+	CharString seq;
+	MultiFasta multiFasta;
 	for(unsigned s = 0; s < length(fileNames); ++s)
 	{
-		ds[s] = seqCount;
-		ifstream file;
-		file.open(toCString(fileNames[s]), ios_base::in | ios_base::binary);
-		if (!file.is_open()) return false;
-		while (!_streamEOF(file)) {
-			goNext(file, Fasta());
-			++seqCount;
-		}
-	}
-	ds[length(fileNames)] = seqCount;
+		if (!open(multiFasta.concat, toCString(fileNames[s]), OPEN_RDONLY)) return false;
+		AutoSeqFormat format;
+		guessFormat(multiFasta.concat, format);
+		split(multiFasta, format);		
+		unsigned seqCount = length(multiFasta);
+		
+		ds[s + 1] = ds[s] + seqCount;
+		resize(seqs, ds[s + 1]);
+		for(unsigned i = 0; i < seqCount; ++i)
+			assignSeq(seqs[ds[s] + i], multiFasta[i], format);
 
-	// import sequences
-	resize(seq, seqCount);
-	for(unsigned i = 0, s = 0; s < length(fileNames); ++s)	// for each database
-	{
-		ifstream file;
-		file.open(toCString(fileNames[s]), ios_base::in | ios_base::binary);
-		if (!file.is_open()) return false;
-
-		for(; (i < seqCount) && !_streamEOF(file); ++i)		// and each sequence
-			read(file, seq[i], Fasta());					// read sequence
-		file.close();
+		close(multiFasta.concat);
 	}
-	return (seqCount > 0);
+	return (back(ds) > 0);
 }
 
 
