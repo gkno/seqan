@@ -35,13 +35,13 @@ using namespace seqan;
 
 //#define DEBUG_ENTROPY
 
-typedef double TFloat;
-#define DFI_PLUS_EPSILON  + 0.0000001
-#define DFI_MINUS_EPSILON - 0.0000001
+//typedef double TFloat;
+//#define DFI_PLUS_EPSILON  + 0.0000001
+//#define DFI_MINUS_EPSILON - 0.0000001
 
-//typedef Rational<__int64> TFloat;
-//#define DFI_PLUS_EPSILON
-//#define DFI_MINUS_EPSILON
+typedef Rational<__int64> TFloat;
+#define DFI_PLUS_EPSILON
+#define DFI_MINUS_EPSILON
 
 //////////////////////////////////////////////////////////////////////////////
 // predicates for the Frequent Pattern Mining Problem
@@ -94,7 +94,6 @@ typedef double TFloat;
 		{
 			// emerging substring mode
 			
-			TFloat x = _minSupp * (TFloat)ds[1];
 			if ((_minSupp * (TFloat)ds[1]) < (TFloat)1) {
 				cerr << "Support must be at least 1/|db_1|... exit!" << endl;
 				exit(1);
