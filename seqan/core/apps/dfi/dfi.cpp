@@ -35,13 +35,13 @@ using namespace seqan;
 
 //#define DEBUG_ENTROPY
 
-//typedef double TFloat;
-//#define DFI_PLUS_EPSILON  + 0.0000001
-//#define DFI_MINUS_EPSILON - 0.0000001
+typedef double TFloat;
+#define DFI_PLUS_EPSILON  + 0.0000001
+#define DFI_MINUS_EPSILON - 0.0000001
 
-typedef Rational<__int64> TFloat;
-#define DFI_PLUS_EPSILON
-#define DFI_MINUS_EPSILON
+//typedef Rational<__int64> TFloat;
+//#define DFI_PLUS_EPSILON
+//#define DFI_MINUS_EPSILON
 
 //////////////////////////////////////////////////////////////////////////////
 // predicates for the Frequent Pattern Mining Problem
@@ -99,7 +99,7 @@ typedef Rational<__int64> TFloat;
 				exit(1);
 			}
 			// adapt parameters from support to frequency
-			minFreq = (unsigned) ceil(_minSupp * (TFloat)ds[1] DFI_PLUS_EPSILON);
+			minFreq = (unsigned) ceil(_minSupp * (TFloat)ds[1] DFI_MINUS_EPSILON);
 		}
 			
 		inline bool operator()(DfiEntry_ const &entry) const {
@@ -114,7 +114,7 @@ typedef Rational<__int64> TFloat;
 
 		template <typename TDataSet>
 		PredEmerging(TFloat _growthRate, TDataSet const &ds) {
-			growthRate = _growthRate * ((TFloat) ds[1] / (TFloat) (ds[2] - ds[1]) DFI_PLUS_EPSILON);
+			growthRate = _growthRate * ((TFloat) ds[1] / (TFloat) (ds[2] - ds[1]) DFI_MINUS_EPSILON);
 		}
 			
 		// HINT: here growthRate is frequency-related, not support-related
@@ -138,7 +138,7 @@ typedef Rational<__int64> TFloat;
 			resize(minFreq, length(ds) - 1, Exact());
 			// adapt parameters from support to frequency
 			for (unsigned i = 1; i < length(ds); ++i)
-				minFreq[i - 1] = (unsigned) ceil(_minSupp * (TFloat)(ds[i] - ds[i - 1]) DFI_PLUS_EPSILON);
+				minFreq[i - 1] = (unsigned) ceil(_minSupp * (TFloat)(ds[i] - ds[i - 1]) DFI_MINUS_EPSILON);
 		}
 			
 		inline bool operator()(DfiEntry_ const &entry) const {
@@ -157,7 +157,7 @@ typedef Rational<__int64> TFloat;
 
 		template <typename TDataSet>
 		PredEntropy(double _maxEntropy, TDataSet const &ds):
-			maxEntropy(_maxEntropy DFI_MINUS_EPSILON)
+			maxEntropy(_maxEntropy DFI_PLUS_EPSILON)
 		{
 			resize(dsLengths, length(ds) - 1, Exact());
 			for (unsigned i = 1; i < length(ds); ++i)
