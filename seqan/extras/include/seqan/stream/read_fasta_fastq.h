@@ -277,8 +277,8 @@ _readMetaAndSequence(TIdString & meta, TSeqString & seq,
         return 0;
 
     int res = readLine(meta, reader);
-    if (res == EOF_BEFORE_SUCCESS)  // EOF half way in ID is legal
-        return 0;
+    if (res == EOF_BEFORE_SUCCESS)
+        return EOF_BEFORE_SUCCESS;
     else if (res)
         return res;
 
@@ -287,8 +287,8 @@ _readMetaAndSequence(TIdString & meta, TSeqString & seq,
 
     // READ SEQUENCE
     res = _readSequenceFastAQ(seq, reader);
-    if (res == EOF_BEFORE_SUCCESS)  // EOF half way in sequence is legal
-        return 0;
+    if (res == EOF_BEFORE_SUCCESS)
+        return EOF_BEFORE_SUCCESS;
     else if (res)
         return res;
 
@@ -325,7 +325,9 @@ _skipQualityBlock(RecordReader<TFile, TPass > & reader,
 
     // SKIP QUALITIES
     res = skipNCharsIgnoringWhitespace(reader, seqLength); // there have to be n qualities
-    if (res)
+    if (res && res == EOF_BEFORE_SUCCESS)
+        return EOF_BEFORE_SUCCESS;
+    else if (res)
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
     skipLine(reader); // goto to next line if it exists, result is unimportant
 
@@ -399,7 +401,9 @@ _readQualityBlock(TQualString & qual,
 
     CharString qualmeta_buffer;
     int res = readLine(qualmeta_buffer, reader);
-    if (res)
+    if (res && res == EOF_BEFORE_SUCCESS)
+        return EOF_BEFORE_SUCCESS;
+    else if (res)
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
 
     // meta string has to be empty or identical to sequence's meta
@@ -412,7 +416,9 @@ _readQualityBlock(TQualString & qual,
     // READ QUALITIES
     res = _readQualityBlockHelper(qual, reader, seqLength, typename HasQualities<typename Value<TQualString>::Type>::Type());
     // there have to be n qualities
-    if (res)
+    if (res && res == EOF_BEFORE_SUCCESS)
+        return EOF_BEFORE_SUCCESS;
+    else if (res)
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
     skipLine(reader); // goto to next line if it exists, result is unimportant
 

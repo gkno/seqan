@@ -249,13 +249,31 @@ open(Stream<GZFile> & stream, char const * filename, char const * mode)
     if (stream._gzFile == 0)
         return false;
     stream._gzFileOwned = true;
-    if (gzdirect(stream._gzFile))
-    {
-        // not a zip file
-        close(stream);
-        return false;
-    }
     return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function isDirect()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.isDirect
+..cat:Input / Output
+..summary:Query a GZ File Stream for being "direct."
+..signature:isDirect(gzStream)
+..param.stream:GZ File Stream to query.
+...type:Spec.GZ File Stream
+..returns:$bool$, indicating whether the file is opened uncompressed ("direct").
+..remarks:
+GZ File Streams can also open uncompressed files (at a possible performance cost).
+This function returns whether the underlying file was not a compressed file and thus the file is read directly.
+..include:seqan/stream.h
+ */
+
+inline bool
+isDirect(Stream<GZFile> & stream)
+{
+    return gzdirect(stream._gzFile);
 }
 
 // ----------------------------------------------------------------------------
@@ -340,7 +358,10 @@ streamError(Stream<GZFile> & stream)
 inline size_t
 streamReadBlock(char * target, Stream<GZFile> & stream, size_t maxLen)
 {
-    return gzread(stream._gzFile, target, maxLen);
+    int res = gzread(stream._gzFile, target, maxLen);
+    if (res < 0)
+        return 0;
+    return res;
 }
 
 // ----------------------------------------------------------------------------
