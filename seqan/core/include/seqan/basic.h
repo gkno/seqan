@@ -79,12 +79,6 @@
 #include <seqan/basic/basic_parallelism.h>  // include after basic_testing.h!
 
 // --------------------------------------------------------------------------
-// Concept Checking
-// --------------------------------------------------------------------------
-#include <seqan/basic/boost_preprocessor_subset.h>
-#include <seqan/basic/concept_checking.h>
-
-// --------------------------------------------------------------------------
 // Metaprogramming Support Code
 // --------------------------------------------------------------------------
 //
@@ -98,6 +92,12 @@
 // ... and some utility code for computing logarithms and such.
 #include <seqan/basic/basic_math.h>
 #include <seqan/basic/basic_logvalue.h>
+
+// --------------------------------------------------------------------------
+// Concept Checking
+// --------------------------------------------------------------------------
+#include <seqan/basic/boost_preprocessor_subset.h>
+#include <seqan/basic/concept_checking.h>
 
 // --------------------------------------------------------------------------
 // SeqAn Foundation Code
