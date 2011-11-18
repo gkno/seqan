@@ -287,9 +287,7 @@ _readMetaAndSequence(TIdString & meta, TSeqString & seq,
 
     // READ SEQUENCE
     res = _readSequenceFastAQ(seq, reader);
-    if (res == EOF_BEFORE_SUCCESS)
-        return EOF_BEFORE_SUCCESS;
-    else if (res)
+    if (res && res != EOF_BEFORE_SUCCESS)
         return res;
 
     return 0;
