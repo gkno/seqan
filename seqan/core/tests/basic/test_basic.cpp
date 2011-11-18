@@ -53,6 +53,7 @@
 #include "test_basic_proxy.h"
 #include "test_basic_tag.h"
 #include "test_basic_type.h"
+#include "test_basic_concepts.h"
 
 SEQAN_BEGIN_TESTSUITE(test_basic)
 {
@@ -353,6 +354,8 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_alphabet_extreme_values);
     // SEQAN_CALL_TEST(test_basic_simple_types);
     SEQAN_CALL_TEST(test_basic_suprema_infima);
+
+    SEQAN_CALL_TEST(test_basic_concepts_integer_concept);
 }
 SEQAN_END_TESTSUITE
 
