@@ -38,6 +38,8 @@
 // errors.
 // ==========================================================================
 
+// SEQAN_NO_GENERATED_FORWARDS
+
 #ifndef CORE_INCLUDE_SEQAN_BASIC_CONCEPT_CHECKING_H_
 #define CORE_INCLUDE_SEQAN_BASIC_CONCEPT_CHECKING_H_
 
