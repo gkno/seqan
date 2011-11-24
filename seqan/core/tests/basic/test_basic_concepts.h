@@ -35,51 +35,6 @@
 #ifndef CORE_TESTS_BASIC_TEST_BASIC_CONCEPTS_H_
 #define CORE_TESTS_BASIC_TEST_BASIC_CONCEPTS_H_
 
-namespace seqan {
-// template <typename TConcept>
-// struct IsConcept : False {};
-
-template <typename T>
-struct IntegerConcept
-{
-    SEQAN_CONCEPT_USAGE(IntegerConcept)
-    {
-        x.error_type_must_be_an_integer_type();
-    }
-
-private:
-    T x;
-};
-
-template <> struct IntegerConcept<char> {};
-template <> struct IntegerConcept<signed char> {};
-template <> struct IntegerConcept<unsigned char> {};
-template <> struct IntegerConcept<short> {};
-template <> struct IntegerConcept<unsigned short> {};
-template <> struct IntegerConcept<int> {};
-template <> struct IntegerConcept<unsigned int> {};
-template <> struct IntegerConcept<long> {};
-template <> struct IntegerConcept<unsigned long> {};
-//template <> struct IntegerConcept<__int64> {};
-//template <> struct IntegerConcept<__uint64> {};
-
-template <typename T>
-struct SignedIntegerConcept
-{
-    SEQAN_CONCEPT_USAGE(SignedIntegerConcept)
-    {
-        x.error_type_must_be_a_signed_integer_type();
-    }
-
-private:
-    T x;
-};
-
-template <> struct SignedIntegerConcept<char> {};
-template <> struct SignedIntegerConcept<short> {};
-template <> struct SignedIntegerConcept<int> {};
-template <> struct SignedIntegerConcept<__int64> {};
-}  // namespace seqan
 
 //#include <boost/concept_check.hpp>
 //#include <boost/concept/assert.hpp>

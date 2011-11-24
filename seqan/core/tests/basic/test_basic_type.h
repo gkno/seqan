@@ -523,17 +523,17 @@ SEQAN_DEFINE_TEST(seqan_basic_type_metafunction_length)
 
 SEQAN_DEFINE_TEST(seqan_basic_type_metafunction_is_integral)
 {
-    bool b = IsIntegral<char>::Type::VALUE;
+    bool b = IsInteger<char>::Type::VALUE;
     SEQAN_ASSERT(b);
-    b = IsIntegral<short int>::Type::VALUE;
+    b = IsInteger<short int>::Type::VALUE;
     SEQAN_ASSERT(b);
-    b = IsIntegral<int>::Type::VALUE;
+    b = IsInteger<int>::Type::VALUE;
     SEQAN_ASSERT(b);
-    b = IsIntegral<long int>::Type::VALUE;
+    b = IsInteger<long int>::Type::VALUE;
     SEQAN_ASSERT(b);
-    b = IsIntegral<__int64>::Type::VALUE;
+    b = IsInteger<__int64>::Type::VALUE;
     SEQAN_ASSERT(b);
-    b = IsIntegral<TestStruct1_>::Type::VALUE;
+    b = IsInteger<TestStruct1_>::Type::VALUE;
     SEQAN_ASSERT_NOT(b);
 }
 

@@ -51,18 +51,6 @@ template <typename TInt>
 Rational<TInt> abs(const Rational<TInt>& r);
 
 
-
-template <bool B, class T = void>
-struct EnableIfHelper {
-  typedef T Type;
-};
-
-template <class T>
-struct EnableIfHelper<false, T> {};
-
-
-#define SEQAN_CTOR_ENABLE_IF(x) typename EnableIfHelper<x::VALUE>::Type * dummy = 0
-
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -102,7 +90,7 @@ public:
     Rational() : num(0), den(1) {}
 	
 	template <typename T>
-    Rational(T const & n, SEQAN_CTOR_ENABLE_IF( IsIntegral<T> ) ) : num(n), den(1) { (void)dummy; }
+    Rational(T const & n, SEQAN_CTOR_ENABLE_IF( IsInteger<T> ) ) : num(n), den(1) { (void)dummy; }
     Rational(param_type n, param_type d) : num(n), den(d) { normalize(); }
 
     // Default copy constructor and assignment are fine
