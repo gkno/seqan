@@ -3963,10 +3963,10 @@
 # define SEQAN_PP_SEQ_FOR_EACH_I_O_I(macro, data, seq, i) (macro, data, SEQAN_PP_SEQ_TAIL(seq), SEQAN_PP_INC(i))
 #
 //# if SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_STRICT()
-#    define SEQAN_PP_SEQ_FOR_EACH_I_M(r, x) SEQAN_PP_SEQ_FOR_EACH_I_M_IM(r, SEQAN_PP_TUPLE_REM_4 x)
-#    define SEQAN_PP_SEQ_FOR_EACH_I_M_IM(r, im) SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, im)
+//#    define SEQAN_PP_SEQ_FOR_EACH_I_M(r, x) SEQAN_PP_SEQ_FOR_EACH_I_M_IM(r, SEQAN_PP_TUPLE_REM_4 x)
+//#    define SEQAN_PP_SEQ_FOR_EACH_I_M_IM(r, im) SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, im)
 //# else
-//#    define SEQAN_PP_SEQ_FOR_EACH_I_M(r, x) SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, SEQAN_PP_TUPLE_ELEM(4, 0, x), SEQAN_PP_TUPLE_ELEM(4, 1, x), SEQAN_PP_TUPLE_ELEM(4, 2, x), SEQAN_PP_TUPLE_ELEM(4, 3, x))
+#    define SEQAN_PP_SEQ_FOR_EACH_I_M(r, x) SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, SEQAN_PP_TUPLE_ELEM(4, 0, x), SEQAN_PP_TUPLE_ELEM(4, 1, x), SEQAN_PP_TUPLE_ELEM(4, 2, x), SEQAN_PP_TUPLE_ELEM(4, 3, x))
 //# endif
 #
 # define SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, macro, data, seq, i) macro(r, data, i, SEQAN_PP_SEQ_HEAD(seq))
