@@ -56,11 +56,11 @@ namespace seqan {
 ..param.TNameStoreCache:The name store cache class.
 ...default:@Class.NameStoreCache@<TNameStore>
 ..include:bam_io.h
-..example.text:Creating a @Class.BamIOContext@ for a raw @Shortcut.CharString@.
+..example.text:Creating a @Class.BamIOContext@ for a raw @Class.StringSet@ of @Shortcut.CharString@.
 ..example.code:
-CharString nameStore;
+StringSet<CharString> nameStore;
 NameStore<CharString> nameStoreCache(nameStore);
-BamIOContext<CharString> bamIOContext(nameStore, nameStoreCache);
+BamIOContext<StringSet<CharString> > bamIOContext(nameStore, nameStoreCache);
 // ...
 ..example.text:Using a @Class.BamIOContext@ with a @Class.FragmentStore@.
 ..example.code:
