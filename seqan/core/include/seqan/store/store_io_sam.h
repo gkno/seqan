@@ -1181,7 +1181,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
                 if (readId < length(fragStore.readStore))
                     matePairId = fragStore.readStore[readId].matePairId;
                 
-				TMatchMateInfo matchMateInfo = {readId, mcontigId, pairMatchId, matePairId, (flag & 0x20), mPos};
+				TMatchMateInfo matchMateInfo = {readId, mcontigId, pairMatchId, matePairId, (flag & 0x20) != 0, mPos};
 				appendValue(matchMateInfos, matchMateInfo);
 				back(fragStore.alignedReadStore).pairMatchId = pairMatchId;
 			}
