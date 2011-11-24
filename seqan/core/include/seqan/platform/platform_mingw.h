@@ -60,6 +60,11 @@ typedef unsigned __int8 __uint8;
 #define ftello(fp) ftell(fp)
 #endif  // #ifndef ftello
 
+// detect C++11 support
+#if defined(__GXX_EXPERIMENTAL_CXX0X__)
+#  define SEQAN_CXX11_STANDARD
+#endif
+
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 #define SEQAN_SWITCH_USE_FORWARDS
 

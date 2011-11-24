@@ -96,6 +96,11 @@ typedef unsigned __int8 __uint8;
 #define SEQAN_IS_32_BIT 1
 #endif  // #if defined(_WIN64)
 
+// C++11 is supported by Visual C++ >=v10
+#if _MSC_VER >= 1600
+#  define SEQAN_CXX11_STANDARD
+#endif
+
 // ==========================================================================
 // Visual Studio Specific Workarounds.
 // ==========================================================================
