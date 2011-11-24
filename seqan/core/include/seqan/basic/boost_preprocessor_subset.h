@@ -1101,6 +1101,299 @@
 // # endif
 
 // --------------------------------------------------------------------------
+// ==> boost/preprocessor/seq/enum.hpp <==
+// --------------------------------------------------------------------------
+
+# /* **************************************************************************
+#  *                                                                          *
+#  *     (C) Copyright Paul Mensonides 2002.
+#  *     Distributed under the Boost Software License, Version 1.0. (See
+#  *     accompanying file LICENSE_1_0.txt or copy at
+#  *     http://www.boost.org/LICENSE_1_0.txt)
+#  *                                                                          *
+#  ************************************************************************** */
+#
+# /* See http://www.boost.org for most recent version. */
+#
+//# ifndef SEQAN_PREPROCESSOR_SEQ_ENUM_HPP
+//# define SEQAN_PREPROCESSOR_SEQ_ENUM_HPP
+#
+//# include <boost/preprocessor/cat.hpp>
+//# include <boost/preprocessor/config/config.hpp>
+//# include <boost/preprocessor/seq/size.hpp>
+#
+# /* SEQAN_PP_SEQ_ENUM */
+#
+//# if SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_EDG()
+#    define SEQAN_PP_SEQ_ENUM(seq) SEQAN_PP_SEQ_ENUM_I(seq)
+#    define SEQAN_PP_SEQ_ENUM_I(seq) SEQAN_PP_CAT(SEQAN_PP_SEQ_ENUM_, SEQAN_PP_SEQ_SIZE(seq)) seq
+//# elif SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_MWCC()
+//#    define SEQAN_PP_SEQ_ENUM(seq) SEQAN_PP_SEQ_ENUM_I(SEQAN_PP_SEQ_SIZE(seq), seq)
+//#    define SEQAN_PP_SEQ_ENUM_I(size, seq) SEQAN_PP_CAT(SEQAN_PP_SEQ_ENUM_, size) seq
+//# else
+//#    define SEQAN_PP_SEQ_ENUM(seq) SEQAN_PP_CAT(SEQAN_PP_SEQ_ENUM_, SEQAN_PP_SEQ_SIZE(seq)) seq
+//# endif
+#
+# define SEQAN_PP_SEQ_ENUM_1(x) x
+# define SEQAN_PP_SEQ_ENUM_2(x) x, SEQAN_PP_SEQ_ENUM_1
+# define SEQAN_PP_SEQ_ENUM_3(x) x, SEQAN_PP_SEQ_ENUM_2
+# define SEQAN_PP_SEQ_ENUM_4(x) x, SEQAN_PP_SEQ_ENUM_3
+# define SEQAN_PP_SEQ_ENUM_5(x) x, SEQAN_PP_SEQ_ENUM_4
+# define SEQAN_PP_SEQ_ENUM_6(x) x, SEQAN_PP_SEQ_ENUM_5
+# define SEQAN_PP_SEQ_ENUM_7(x) x, SEQAN_PP_SEQ_ENUM_6
+# define SEQAN_PP_SEQ_ENUM_8(x) x, SEQAN_PP_SEQ_ENUM_7
+# define SEQAN_PP_SEQ_ENUM_9(x) x, SEQAN_PP_SEQ_ENUM_8
+# define SEQAN_PP_SEQ_ENUM_10(x) x, SEQAN_PP_SEQ_ENUM_9
+# define SEQAN_PP_SEQ_ENUM_11(x) x, SEQAN_PP_SEQ_ENUM_10
+# define SEQAN_PP_SEQ_ENUM_12(x) x, SEQAN_PP_SEQ_ENUM_11
+# define SEQAN_PP_SEQ_ENUM_13(x) x, SEQAN_PP_SEQ_ENUM_12
+# define SEQAN_PP_SEQ_ENUM_14(x) x, SEQAN_PP_SEQ_ENUM_13
+# define SEQAN_PP_SEQ_ENUM_15(x) x, SEQAN_PP_SEQ_ENUM_14
+# define SEQAN_PP_SEQ_ENUM_16(x) x, SEQAN_PP_SEQ_ENUM_15
+# define SEQAN_PP_SEQ_ENUM_17(x) x, SEQAN_PP_SEQ_ENUM_16
+# define SEQAN_PP_SEQ_ENUM_18(x) x, SEQAN_PP_SEQ_ENUM_17
+# define SEQAN_PP_SEQ_ENUM_19(x) x, SEQAN_PP_SEQ_ENUM_18
+# define SEQAN_PP_SEQ_ENUM_20(x) x, SEQAN_PP_SEQ_ENUM_19
+# define SEQAN_PP_SEQ_ENUM_21(x) x, SEQAN_PP_SEQ_ENUM_20
+# define SEQAN_PP_SEQ_ENUM_22(x) x, SEQAN_PP_SEQ_ENUM_21
+# define SEQAN_PP_SEQ_ENUM_23(x) x, SEQAN_PP_SEQ_ENUM_22
+# define SEQAN_PP_SEQ_ENUM_24(x) x, SEQAN_PP_SEQ_ENUM_23
+# define SEQAN_PP_SEQ_ENUM_25(x) x, SEQAN_PP_SEQ_ENUM_24
+# define SEQAN_PP_SEQ_ENUM_26(x) x, SEQAN_PP_SEQ_ENUM_25
+# define SEQAN_PP_SEQ_ENUM_27(x) x, SEQAN_PP_SEQ_ENUM_26
+# define SEQAN_PP_SEQ_ENUM_28(x) x, SEQAN_PP_SEQ_ENUM_27
+# define SEQAN_PP_SEQ_ENUM_29(x) x, SEQAN_PP_SEQ_ENUM_28
+# define SEQAN_PP_SEQ_ENUM_30(x) x, SEQAN_PP_SEQ_ENUM_29
+# define SEQAN_PP_SEQ_ENUM_31(x) x, SEQAN_PP_SEQ_ENUM_30
+# define SEQAN_PP_SEQ_ENUM_32(x) x, SEQAN_PP_SEQ_ENUM_31
+# define SEQAN_PP_SEQ_ENUM_33(x) x, SEQAN_PP_SEQ_ENUM_32
+# define SEQAN_PP_SEQ_ENUM_34(x) x, SEQAN_PP_SEQ_ENUM_33
+# define SEQAN_PP_SEQ_ENUM_35(x) x, SEQAN_PP_SEQ_ENUM_34
+# define SEQAN_PP_SEQ_ENUM_36(x) x, SEQAN_PP_SEQ_ENUM_35
+# define SEQAN_PP_SEQ_ENUM_37(x) x, SEQAN_PP_SEQ_ENUM_36
+# define SEQAN_PP_SEQ_ENUM_38(x) x, SEQAN_PP_SEQ_ENUM_37
+# define SEQAN_PP_SEQ_ENUM_39(x) x, SEQAN_PP_SEQ_ENUM_38
+# define SEQAN_PP_SEQ_ENUM_40(x) x, SEQAN_PP_SEQ_ENUM_39
+# define SEQAN_PP_SEQ_ENUM_41(x) x, SEQAN_PP_SEQ_ENUM_40
+# define SEQAN_PP_SEQ_ENUM_42(x) x, SEQAN_PP_SEQ_ENUM_41
+# define SEQAN_PP_SEQ_ENUM_43(x) x, SEQAN_PP_SEQ_ENUM_42
+# define SEQAN_PP_SEQ_ENUM_44(x) x, SEQAN_PP_SEQ_ENUM_43
+# define SEQAN_PP_SEQ_ENUM_45(x) x, SEQAN_PP_SEQ_ENUM_44
+# define SEQAN_PP_SEQ_ENUM_46(x) x, SEQAN_PP_SEQ_ENUM_45
+# define SEQAN_PP_SEQ_ENUM_47(x) x, SEQAN_PP_SEQ_ENUM_46
+# define SEQAN_PP_SEQ_ENUM_48(x) x, SEQAN_PP_SEQ_ENUM_47
+# define SEQAN_PP_SEQ_ENUM_49(x) x, SEQAN_PP_SEQ_ENUM_48
+# define SEQAN_PP_SEQ_ENUM_50(x) x, SEQAN_PP_SEQ_ENUM_49
+# define SEQAN_PP_SEQ_ENUM_51(x) x, SEQAN_PP_SEQ_ENUM_50
+# define SEQAN_PP_SEQ_ENUM_52(x) x, SEQAN_PP_SEQ_ENUM_51
+# define SEQAN_PP_SEQ_ENUM_53(x) x, SEQAN_PP_SEQ_ENUM_52
+# define SEQAN_PP_SEQ_ENUM_54(x) x, SEQAN_PP_SEQ_ENUM_53
+# define SEQAN_PP_SEQ_ENUM_55(x) x, SEQAN_PP_SEQ_ENUM_54
+# define SEQAN_PP_SEQ_ENUM_56(x) x, SEQAN_PP_SEQ_ENUM_55
+# define SEQAN_PP_SEQ_ENUM_57(x) x, SEQAN_PP_SEQ_ENUM_56
+# define SEQAN_PP_SEQ_ENUM_58(x) x, SEQAN_PP_SEQ_ENUM_57
+# define SEQAN_PP_SEQ_ENUM_59(x) x, SEQAN_PP_SEQ_ENUM_58
+# define SEQAN_PP_SEQ_ENUM_60(x) x, SEQAN_PP_SEQ_ENUM_59
+# define SEQAN_PP_SEQ_ENUM_61(x) x, SEQAN_PP_SEQ_ENUM_60
+# define SEQAN_PP_SEQ_ENUM_62(x) x, SEQAN_PP_SEQ_ENUM_61
+# define SEQAN_PP_SEQ_ENUM_63(x) x, SEQAN_PP_SEQ_ENUM_62
+# define SEQAN_PP_SEQ_ENUM_64(x) x, SEQAN_PP_SEQ_ENUM_63
+# define SEQAN_PP_SEQ_ENUM_65(x) x, SEQAN_PP_SEQ_ENUM_64
+# define SEQAN_PP_SEQ_ENUM_66(x) x, SEQAN_PP_SEQ_ENUM_65
+# define SEQAN_PP_SEQ_ENUM_67(x) x, SEQAN_PP_SEQ_ENUM_66
+# define SEQAN_PP_SEQ_ENUM_68(x) x, SEQAN_PP_SEQ_ENUM_67
+# define SEQAN_PP_SEQ_ENUM_69(x) x, SEQAN_PP_SEQ_ENUM_68
+# define SEQAN_PP_SEQ_ENUM_70(x) x, SEQAN_PP_SEQ_ENUM_69
+# define SEQAN_PP_SEQ_ENUM_71(x) x, SEQAN_PP_SEQ_ENUM_70
+# define SEQAN_PP_SEQ_ENUM_72(x) x, SEQAN_PP_SEQ_ENUM_71
+# define SEQAN_PP_SEQ_ENUM_73(x) x, SEQAN_PP_SEQ_ENUM_72
+# define SEQAN_PP_SEQ_ENUM_74(x) x, SEQAN_PP_SEQ_ENUM_73
+# define SEQAN_PP_SEQ_ENUM_75(x) x, SEQAN_PP_SEQ_ENUM_74
+# define SEQAN_PP_SEQ_ENUM_76(x) x, SEQAN_PP_SEQ_ENUM_75
+# define SEQAN_PP_SEQ_ENUM_77(x) x, SEQAN_PP_SEQ_ENUM_76
+# define SEQAN_PP_SEQ_ENUM_78(x) x, SEQAN_PP_SEQ_ENUM_77
+# define SEQAN_PP_SEQ_ENUM_79(x) x, SEQAN_PP_SEQ_ENUM_78
+# define SEQAN_PP_SEQ_ENUM_80(x) x, SEQAN_PP_SEQ_ENUM_79
+# define SEQAN_PP_SEQ_ENUM_81(x) x, SEQAN_PP_SEQ_ENUM_80
+# define SEQAN_PP_SEQ_ENUM_82(x) x, SEQAN_PP_SEQ_ENUM_81
+# define SEQAN_PP_SEQ_ENUM_83(x) x, SEQAN_PP_SEQ_ENUM_82
+# define SEQAN_PP_SEQ_ENUM_84(x) x, SEQAN_PP_SEQ_ENUM_83
+# define SEQAN_PP_SEQ_ENUM_85(x) x, SEQAN_PP_SEQ_ENUM_84
+# define SEQAN_PP_SEQ_ENUM_86(x) x, SEQAN_PP_SEQ_ENUM_85
+# define SEQAN_PP_SEQ_ENUM_87(x) x, SEQAN_PP_SEQ_ENUM_86
+# define SEQAN_PP_SEQ_ENUM_88(x) x, SEQAN_PP_SEQ_ENUM_87
+# define SEQAN_PP_SEQ_ENUM_89(x) x, SEQAN_PP_SEQ_ENUM_88
+# define SEQAN_PP_SEQ_ENUM_90(x) x, SEQAN_PP_SEQ_ENUM_89
+# define SEQAN_PP_SEQ_ENUM_91(x) x, SEQAN_PP_SEQ_ENUM_90
+# define SEQAN_PP_SEQ_ENUM_92(x) x, SEQAN_PP_SEQ_ENUM_91
+# define SEQAN_PP_SEQ_ENUM_93(x) x, SEQAN_PP_SEQ_ENUM_92
+# define SEQAN_PP_SEQ_ENUM_94(x) x, SEQAN_PP_SEQ_ENUM_93
+# define SEQAN_PP_SEQ_ENUM_95(x) x, SEQAN_PP_SEQ_ENUM_94
+# define SEQAN_PP_SEQ_ENUM_96(x) x, SEQAN_PP_SEQ_ENUM_95
+# define SEQAN_PP_SEQ_ENUM_97(x) x, SEQAN_PP_SEQ_ENUM_96
+# define SEQAN_PP_SEQ_ENUM_98(x) x, SEQAN_PP_SEQ_ENUM_97
+# define SEQAN_PP_SEQ_ENUM_99(x) x, SEQAN_PP_SEQ_ENUM_98
+# define SEQAN_PP_SEQ_ENUM_100(x) x, SEQAN_PP_SEQ_ENUM_99
+# define SEQAN_PP_SEQ_ENUM_101(x) x, SEQAN_PP_SEQ_ENUM_100
+# define SEQAN_PP_SEQ_ENUM_102(x) x, SEQAN_PP_SEQ_ENUM_101
+# define SEQAN_PP_SEQ_ENUM_103(x) x, SEQAN_PP_SEQ_ENUM_102
+# define SEQAN_PP_SEQ_ENUM_104(x) x, SEQAN_PP_SEQ_ENUM_103
+# define SEQAN_PP_SEQ_ENUM_105(x) x, SEQAN_PP_SEQ_ENUM_104
+# define SEQAN_PP_SEQ_ENUM_106(x) x, SEQAN_PP_SEQ_ENUM_105
+# define SEQAN_PP_SEQ_ENUM_107(x) x, SEQAN_PP_SEQ_ENUM_106
+# define SEQAN_PP_SEQ_ENUM_108(x) x, SEQAN_PP_SEQ_ENUM_107
+# define SEQAN_PP_SEQ_ENUM_109(x) x, SEQAN_PP_SEQ_ENUM_108
+# define SEQAN_PP_SEQ_ENUM_110(x) x, SEQAN_PP_SEQ_ENUM_109
+# define SEQAN_PP_SEQ_ENUM_111(x) x, SEQAN_PP_SEQ_ENUM_110
+# define SEQAN_PP_SEQ_ENUM_112(x) x, SEQAN_PP_SEQ_ENUM_111
+# define SEQAN_PP_SEQ_ENUM_113(x) x, SEQAN_PP_SEQ_ENUM_112
+# define SEQAN_PP_SEQ_ENUM_114(x) x, SEQAN_PP_SEQ_ENUM_113
+# define SEQAN_PP_SEQ_ENUM_115(x) x, SEQAN_PP_SEQ_ENUM_114
+# define SEQAN_PP_SEQ_ENUM_116(x) x, SEQAN_PP_SEQ_ENUM_115
+# define SEQAN_PP_SEQ_ENUM_117(x) x, SEQAN_PP_SEQ_ENUM_116
+# define SEQAN_PP_SEQ_ENUM_118(x) x, SEQAN_PP_SEQ_ENUM_117
+# define SEQAN_PP_SEQ_ENUM_119(x) x, SEQAN_PP_SEQ_ENUM_118
+# define SEQAN_PP_SEQ_ENUM_120(x) x, SEQAN_PP_SEQ_ENUM_119
+# define SEQAN_PP_SEQ_ENUM_121(x) x, SEQAN_PP_SEQ_ENUM_120
+# define SEQAN_PP_SEQ_ENUM_122(x) x, SEQAN_PP_SEQ_ENUM_121
+# define SEQAN_PP_SEQ_ENUM_123(x) x, SEQAN_PP_SEQ_ENUM_122
+# define SEQAN_PP_SEQ_ENUM_124(x) x, SEQAN_PP_SEQ_ENUM_123
+# define SEQAN_PP_SEQ_ENUM_125(x) x, SEQAN_PP_SEQ_ENUM_124
+# define SEQAN_PP_SEQ_ENUM_126(x) x, SEQAN_PP_SEQ_ENUM_125
+# define SEQAN_PP_SEQ_ENUM_127(x) x, SEQAN_PP_SEQ_ENUM_126
+# define SEQAN_PP_SEQ_ENUM_128(x) x, SEQAN_PP_SEQ_ENUM_127
+# define SEQAN_PP_SEQ_ENUM_129(x) x, SEQAN_PP_SEQ_ENUM_128
+# define SEQAN_PP_SEQ_ENUM_130(x) x, SEQAN_PP_SEQ_ENUM_129
+# define SEQAN_PP_SEQ_ENUM_131(x) x, SEQAN_PP_SEQ_ENUM_130
+# define SEQAN_PP_SEQ_ENUM_132(x) x, SEQAN_PP_SEQ_ENUM_131
+# define SEQAN_PP_SEQ_ENUM_133(x) x, SEQAN_PP_SEQ_ENUM_132
+# define SEQAN_PP_SEQ_ENUM_134(x) x, SEQAN_PP_SEQ_ENUM_133
+# define SEQAN_PP_SEQ_ENUM_135(x) x, SEQAN_PP_SEQ_ENUM_134
+# define SEQAN_PP_SEQ_ENUM_136(x) x, SEQAN_PP_SEQ_ENUM_135
+# define SEQAN_PP_SEQ_ENUM_137(x) x, SEQAN_PP_SEQ_ENUM_136
+# define SEQAN_PP_SEQ_ENUM_138(x) x, SEQAN_PP_SEQ_ENUM_137
+# define SEQAN_PP_SEQ_ENUM_139(x) x, SEQAN_PP_SEQ_ENUM_138
+# define SEQAN_PP_SEQ_ENUM_140(x) x, SEQAN_PP_SEQ_ENUM_139
+# define SEQAN_PP_SEQ_ENUM_141(x) x, SEQAN_PP_SEQ_ENUM_140
+# define SEQAN_PP_SEQ_ENUM_142(x) x, SEQAN_PP_SEQ_ENUM_141
+# define SEQAN_PP_SEQ_ENUM_143(x) x, SEQAN_PP_SEQ_ENUM_142
+# define SEQAN_PP_SEQ_ENUM_144(x) x, SEQAN_PP_SEQ_ENUM_143
+# define SEQAN_PP_SEQ_ENUM_145(x) x, SEQAN_PP_SEQ_ENUM_144
+# define SEQAN_PP_SEQ_ENUM_146(x) x, SEQAN_PP_SEQ_ENUM_145
+# define SEQAN_PP_SEQ_ENUM_147(x) x, SEQAN_PP_SEQ_ENUM_146
+# define SEQAN_PP_SEQ_ENUM_148(x) x, SEQAN_PP_SEQ_ENUM_147
+# define SEQAN_PP_SEQ_ENUM_149(x) x, SEQAN_PP_SEQ_ENUM_148
+# define SEQAN_PP_SEQ_ENUM_150(x) x, SEQAN_PP_SEQ_ENUM_149
+# define SEQAN_PP_SEQ_ENUM_151(x) x, SEQAN_PP_SEQ_ENUM_150
+# define SEQAN_PP_SEQ_ENUM_152(x) x, SEQAN_PP_SEQ_ENUM_151
+# define SEQAN_PP_SEQ_ENUM_153(x) x, SEQAN_PP_SEQ_ENUM_152
+# define SEQAN_PP_SEQ_ENUM_154(x) x, SEQAN_PP_SEQ_ENUM_153
+# define SEQAN_PP_SEQ_ENUM_155(x) x, SEQAN_PP_SEQ_ENUM_154
+# define SEQAN_PP_SEQ_ENUM_156(x) x, SEQAN_PP_SEQ_ENUM_155
+# define SEQAN_PP_SEQ_ENUM_157(x) x, SEQAN_PP_SEQ_ENUM_156
+# define SEQAN_PP_SEQ_ENUM_158(x) x, SEQAN_PP_SEQ_ENUM_157
+# define SEQAN_PP_SEQ_ENUM_159(x) x, SEQAN_PP_SEQ_ENUM_158
+# define SEQAN_PP_SEQ_ENUM_160(x) x, SEQAN_PP_SEQ_ENUM_159
+# define SEQAN_PP_SEQ_ENUM_161(x) x, SEQAN_PP_SEQ_ENUM_160
+# define SEQAN_PP_SEQ_ENUM_162(x) x, SEQAN_PP_SEQ_ENUM_161
+# define SEQAN_PP_SEQ_ENUM_163(x) x, SEQAN_PP_SEQ_ENUM_162
+# define SEQAN_PP_SEQ_ENUM_164(x) x, SEQAN_PP_SEQ_ENUM_163
+# define SEQAN_PP_SEQ_ENUM_165(x) x, SEQAN_PP_SEQ_ENUM_164
+# define SEQAN_PP_SEQ_ENUM_166(x) x, SEQAN_PP_SEQ_ENUM_165
+# define SEQAN_PP_SEQ_ENUM_167(x) x, SEQAN_PP_SEQ_ENUM_166
+# define SEQAN_PP_SEQ_ENUM_168(x) x, SEQAN_PP_SEQ_ENUM_167
+# define SEQAN_PP_SEQ_ENUM_169(x) x, SEQAN_PP_SEQ_ENUM_168
+# define SEQAN_PP_SEQ_ENUM_170(x) x, SEQAN_PP_SEQ_ENUM_169
+# define SEQAN_PP_SEQ_ENUM_171(x) x, SEQAN_PP_SEQ_ENUM_170
+# define SEQAN_PP_SEQ_ENUM_172(x) x, SEQAN_PP_SEQ_ENUM_171
+# define SEQAN_PP_SEQ_ENUM_173(x) x, SEQAN_PP_SEQ_ENUM_172
+# define SEQAN_PP_SEQ_ENUM_174(x) x, SEQAN_PP_SEQ_ENUM_173
+# define SEQAN_PP_SEQ_ENUM_175(x) x, SEQAN_PP_SEQ_ENUM_174
+# define SEQAN_PP_SEQ_ENUM_176(x) x, SEQAN_PP_SEQ_ENUM_175
+# define SEQAN_PP_SEQ_ENUM_177(x) x, SEQAN_PP_SEQ_ENUM_176
+# define SEQAN_PP_SEQ_ENUM_178(x) x, SEQAN_PP_SEQ_ENUM_177
+# define SEQAN_PP_SEQ_ENUM_179(x) x, SEQAN_PP_SEQ_ENUM_178
+# define SEQAN_PP_SEQ_ENUM_180(x) x, SEQAN_PP_SEQ_ENUM_179
+# define SEQAN_PP_SEQ_ENUM_181(x) x, SEQAN_PP_SEQ_ENUM_180
+# define SEQAN_PP_SEQ_ENUM_182(x) x, SEQAN_PP_SEQ_ENUM_181
+# define SEQAN_PP_SEQ_ENUM_183(x) x, SEQAN_PP_SEQ_ENUM_182
+# define SEQAN_PP_SEQ_ENUM_184(x) x, SEQAN_PP_SEQ_ENUM_183
+# define SEQAN_PP_SEQ_ENUM_185(x) x, SEQAN_PP_SEQ_ENUM_184
+# define SEQAN_PP_SEQ_ENUM_186(x) x, SEQAN_PP_SEQ_ENUM_185
+# define SEQAN_PP_SEQ_ENUM_187(x) x, SEQAN_PP_SEQ_ENUM_186
+# define SEQAN_PP_SEQ_ENUM_188(x) x, SEQAN_PP_SEQ_ENUM_187
+# define SEQAN_PP_SEQ_ENUM_189(x) x, SEQAN_PP_SEQ_ENUM_188
+# define SEQAN_PP_SEQ_ENUM_190(x) x, SEQAN_PP_SEQ_ENUM_189
+# define SEQAN_PP_SEQ_ENUM_191(x) x, SEQAN_PP_SEQ_ENUM_190
+# define SEQAN_PP_SEQ_ENUM_192(x) x, SEQAN_PP_SEQ_ENUM_191
+# define SEQAN_PP_SEQ_ENUM_193(x) x, SEQAN_PP_SEQ_ENUM_192
+# define SEQAN_PP_SEQ_ENUM_194(x) x, SEQAN_PP_SEQ_ENUM_193
+# define SEQAN_PP_SEQ_ENUM_195(x) x, SEQAN_PP_SEQ_ENUM_194
+# define SEQAN_PP_SEQ_ENUM_196(x) x, SEQAN_PP_SEQ_ENUM_195
+# define SEQAN_PP_SEQ_ENUM_197(x) x, SEQAN_PP_SEQ_ENUM_196
+# define SEQAN_PP_SEQ_ENUM_198(x) x, SEQAN_PP_SEQ_ENUM_197
+# define SEQAN_PP_SEQ_ENUM_199(x) x, SEQAN_PP_SEQ_ENUM_198
+# define SEQAN_PP_SEQ_ENUM_200(x) x, SEQAN_PP_SEQ_ENUM_199
+# define SEQAN_PP_SEQ_ENUM_201(x) x, SEQAN_PP_SEQ_ENUM_200
+# define SEQAN_PP_SEQ_ENUM_202(x) x, SEQAN_PP_SEQ_ENUM_201
+# define SEQAN_PP_SEQ_ENUM_203(x) x, SEQAN_PP_SEQ_ENUM_202
+# define SEQAN_PP_SEQ_ENUM_204(x) x, SEQAN_PP_SEQ_ENUM_203
+# define SEQAN_PP_SEQ_ENUM_205(x) x, SEQAN_PP_SEQ_ENUM_204
+# define SEQAN_PP_SEQ_ENUM_206(x) x, SEQAN_PP_SEQ_ENUM_205
+# define SEQAN_PP_SEQ_ENUM_207(x) x, SEQAN_PP_SEQ_ENUM_206
+# define SEQAN_PP_SEQ_ENUM_208(x) x, SEQAN_PP_SEQ_ENUM_207
+# define SEQAN_PP_SEQ_ENUM_209(x) x, SEQAN_PP_SEQ_ENUM_208
+# define SEQAN_PP_SEQ_ENUM_210(x) x, SEQAN_PP_SEQ_ENUM_209
+# define SEQAN_PP_SEQ_ENUM_211(x) x, SEQAN_PP_SEQ_ENUM_210
+# define SEQAN_PP_SEQ_ENUM_212(x) x, SEQAN_PP_SEQ_ENUM_211
+# define SEQAN_PP_SEQ_ENUM_213(x) x, SEQAN_PP_SEQ_ENUM_212
+# define SEQAN_PP_SEQ_ENUM_214(x) x, SEQAN_PP_SEQ_ENUM_213
+# define SEQAN_PP_SEQ_ENUM_215(x) x, SEQAN_PP_SEQ_ENUM_214
+# define SEQAN_PP_SEQ_ENUM_216(x) x, SEQAN_PP_SEQ_ENUM_215
+# define SEQAN_PP_SEQ_ENUM_217(x) x, SEQAN_PP_SEQ_ENUM_216
+# define SEQAN_PP_SEQ_ENUM_218(x) x, SEQAN_PP_SEQ_ENUM_217
+# define SEQAN_PP_SEQ_ENUM_219(x) x, SEQAN_PP_SEQ_ENUM_218
+# define SEQAN_PP_SEQ_ENUM_220(x) x, SEQAN_PP_SEQ_ENUM_219
+# define SEQAN_PP_SEQ_ENUM_221(x) x, SEQAN_PP_SEQ_ENUM_220
+# define SEQAN_PP_SEQ_ENUM_222(x) x, SEQAN_PP_SEQ_ENUM_221
+# define SEQAN_PP_SEQ_ENUM_223(x) x, SEQAN_PP_SEQ_ENUM_222
+# define SEQAN_PP_SEQ_ENUM_224(x) x, SEQAN_PP_SEQ_ENUM_223
+# define SEQAN_PP_SEQ_ENUM_225(x) x, SEQAN_PP_SEQ_ENUM_224
+# define SEQAN_PP_SEQ_ENUM_226(x) x, SEQAN_PP_SEQ_ENUM_225
+# define SEQAN_PP_SEQ_ENUM_227(x) x, SEQAN_PP_SEQ_ENUM_226
+# define SEQAN_PP_SEQ_ENUM_228(x) x, SEQAN_PP_SEQ_ENUM_227
+# define SEQAN_PP_SEQ_ENUM_229(x) x, SEQAN_PP_SEQ_ENUM_228
+# define SEQAN_PP_SEQ_ENUM_230(x) x, SEQAN_PP_SEQ_ENUM_229
+# define SEQAN_PP_SEQ_ENUM_231(x) x, SEQAN_PP_SEQ_ENUM_230
+# define SEQAN_PP_SEQ_ENUM_232(x) x, SEQAN_PP_SEQ_ENUM_231
+# define SEQAN_PP_SEQ_ENUM_233(x) x, SEQAN_PP_SEQ_ENUM_232
+# define SEQAN_PP_SEQ_ENUM_234(x) x, SEQAN_PP_SEQ_ENUM_233
+# define SEQAN_PP_SEQ_ENUM_235(x) x, SEQAN_PP_SEQ_ENUM_234
+# define SEQAN_PP_SEQ_ENUM_236(x) x, SEQAN_PP_SEQ_ENUM_235
+# define SEQAN_PP_SEQ_ENUM_237(x) x, SEQAN_PP_SEQ_ENUM_236
+# define SEQAN_PP_SEQ_ENUM_238(x) x, SEQAN_PP_SEQ_ENUM_237
+# define SEQAN_PP_SEQ_ENUM_239(x) x, SEQAN_PP_SEQ_ENUM_238
+# define SEQAN_PP_SEQ_ENUM_240(x) x, SEQAN_PP_SEQ_ENUM_239
+# define SEQAN_PP_SEQ_ENUM_241(x) x, SEQAN_PP_SEQ_ENUM_240
+# define SEQAN_PP_SEQ_ENUM_242(x) x, SEQAN_PP_SEQ_ENUM_241
+# define SEQAN_PP_SEQ_ENUM_243(x) x, SEQAN_PP_SEQ_ENUM_242
+# define SEQAN_PP_SEQ_ENUM_244(x) x, SEQAN_PP_SEQ_ENUM_243
+# define SEQAN_PP_SEQ_ENUM_245(x) x, SEQAN_PP_SEQ_ENUM_244
+# define SEQAN_PP_SEQ_ENUM_246(x) x, SEQAN_PP_SEQ_ENUM_245
+# define SEQAN_PP_SEQ_ENUM_247(x) x, SEQAN_PP_SEQ_ENUM_246
+# define SEQAN_PP_SEQ_ENUM_248(x) x, SEQAN_PP_SEQ_ENUM_247
+# define SEQAN_PP_SEQ_ENUM_249(x) x, SEQAN_PP_SEQ_ENUM_248
+# define SEQAN_PP_SEQ_ENUM_250(x) x, SEQAN_PP_SEQ_ENUM_249
+# define SEQAN_PP_SEQ_ENUM_251(x) x, SEQAN_PP_SEQ_ENUM_250
+# define SEQAN_PP_SEQ_ENUM_252(x) x, SEQAN_PP_SEQ_ENUM_251
+# define SEQAN_PP_SEQ_ENUM_253(x) x, SEQAN_PP_SEQ_ENUM_252
+# define SEQAN_PP_SEQ_ENUM_254(x) x, SEQAN_PP_SEQ_ENUM_253
+# define SEQAN_PP_SEQ_ENUM_255(x) x, SEQAN_PP_SEQ_ENUM_254
+# define SEQAN_PP_SEQ_ENUM_256(x) x, SEQAN_PP_SEQ_ENUM_255
+#
+//# endif
+
+// --------------------------------------------------------------------------
 // ==> boost/preprocessor/tuple/eat.hpp <==
 // --------------------------------------------------------------------------
 
@@ -2652,6 +2945,129 @@
 // # endif
 
 // --------------------------------------------------------------------------
+// ==> boost/preprocessor/control/if.hpp <==
+// --------------------------------------------------------------------------
+
+# /* Copyright (C) 2001
+#  * Housemarque Oy
+#  * http://www.housemarque.com
+#  *
+#  * Distributed under the Boost Software License, Version 1.0. (See
+#  * accompanying file LICENSE_1_0.txt or copy at
+#  * http://www.boost.org/LICENSE_1_0.txt)
+#  */
+#
+# /* Revised by Paul Mensonides (2002) */
+#
+# /* See http://www.boost.org for most recent version. */
+#
+//# ifndef SEQAN_PREPROCESSOR_CONTROL_IF_HPP
+//# define SEQAN_PREPROCESSOR_CONTROL_IF_HPP
+#
+//# include <boost/preprocessor/config/config.hpp>
+//# include <boost/preprocessor/control/iif.hpp>
+//# include <boost/preprocessor/logical/bool.hpp>
+#
+# /* SEQAN_PP_IF */
+#
+//# if ~SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_EDG()
+#    define SEQAN_PP_IF(cond, t, f) SEQAN_PP_IIF(SEQAN_PP_BOOL(cond), t, f)
+//# else
+//#    define SEQAN_PP_IF(cond, t, f) SEQAN_PP_IF_I(cond, t, f)
+//#    define SEQAN_PP_IF_I(cond, t, f) SEQAN_PP_IIF(SEQAN_PP_BOOL(cond), t, f)
+//# endif
+#
+//# endif
+
+// --------------------------------------------------------------------------
+// ==> boost/preprocessor/facilities/empty.hpp <==
+// --------------------------------------------------------------------------
+
+# /* Copyright (C) 2001
+#  * Housemarque Oy
+#  * http://www.housemarque.com
+#  *
+#  * Distributed under the Boost Software License, Version 1.0. (See
+#  * accompanying file LICENSE_1_0.txt or copy at
+#  * http://www.boost.org/LICENSE_1_0.txt)
+#  */
+#
+# /* Revised by Paul Mensonides (2002) */
+#
+# /* See http://www.boost.org for most recent version. */
+#
+//# ifndef SEQAN_PREPROCESSOR_FACILITIES_EMPTY_HPP
+//# define SEQAN_PREPROCESSOR_FACILITIES_EMPTY_HPP
+#
+# /* SEQAN_PP_EMPTY */
+#
+# define SEQAN_PP_EMPTY()
+#
+//# endif
+
+// --------------------------------------------------------------------------
+// ==> boost/preprocessor/punctuation/comma.hpp <==
+// --------------------------------------------------------------------------
+
+# /* Copyright (C) 2001
+#  * Housemarque Oy
+#  * http://www.housemarque.com
+#  *
+#  * Distributed under the Boost Software License, Version 1.0. (See
+#  * accompanying file LICENSE_1_0.txt or copy at
+#  * http://www.boost.org/LICENSE_1_0.txt)
+#  */
+#
+# /* Revised by Paul Mensonides (2002) */
+#
+# /* See http://www.boost.org for most recent version. */
+#
+//# ifndef SEQAN_PREPROCESSOR_PUNCTUATION_COMMA_HPP
+//# define SEQAN_PREPROCESSOR_PUNCTUATION_COMMA_HPP
+#
+# /* SEQAN_PP_COMMA */
+#
+# define SEQAN_PP_COMMA() ,
+#
+//# endif
+
+// --------------------------------------------------------------------------
+// ==> boost/preprocessor/punctuation/comma_if.hpp <==
+// --------------------------------------------------------------------------
+
+# /* Copyright (C) 2001
+#  * Housemarque Oy
+#  * http://www.housemarque.com
+#  *
+#  * Distributed under the Boost Software License, Version 1.0. (See
+#  * accompanying file LICENSE_1_0.txt or copy at
+#  * http://www.boost.org/LICENSE_1_0.txt)
+#  */
+#
+# /* Revised by Paul Mensonides (2002) */
+#
+# /* See http://www.boost.org for most recent version. */
+#
+//# ifndef SEQAN_PREPROCESSOR_PUNCTUATION_COMMA_IF_HPP
+//# define SEQAN_PREPROCESSOR_PUNCTUATION_COMMA_IF_HPP
+#
+//# include <boost/preprocessor/config/config.hpp>
+//# include <boost/preprocessor/control/if.hpp>
+//# include <boost/preprocessor/facilities/empty.hpp>
+//# include <boost/preprocessor/punctuation/comma.hpp>
+#
+# /* SEQAN_PP_COMMA_IF */
+#
+//# if ~SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_EDG()
+#    define SEQAN_PP_COMMA_IF(cond) SEQAN_PP_IF(cond, SEQAN_PP_COMMA, SEQAN_PP_EMPTY)()
+//# else
+//#    define SEQAN_PP_COMMA_IF(cond) SEQAN_PP_COMMA_IF_I(cond)
+//#    define SEQAN_PP_COMMA_IF_I(cond) SEQAN_PP_IF(cond, SEQAN_PP_COMMA, SEQAN_PP_EMPTY)()
+//# endif
+#
+//# endif
+
+// --------------------------------------------------------------------------
 // ==> boost/preprocessor/repetition/for.hpp <==
 // --------------------------------------------------------------------------
 
@@ -3492,12 +3908,108 @@
 # /* SEQAN_PP_SEQ_FOR_EACH_R */
 #
 // # if ~SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_EDG()
-// #    define SEQAN_PP_SEQ_FOR_EACH_R(r, macro, data, seq) SEQAN_PP_FOR_ ## r((macro, data, seq (nil)), SEQAN_PP_SEQ_FOR_EACH_P, SEQAN_PP_SEQ_FOR_EACH_O, SEQAN_PP_SEQ_FOR_EACH_M)
+#    define SEQAN_PP_SEQ_FOR_EACH_R(r, macro, data, seq) SEQAN_PP_FOR_ ## r((macro, data, seq (nil)), SEQAN_PP_SEQ_FOR_EACH_P, SEQAN_PP_SEQ_FOR_EACH_O, SEQAN_PP_SEQ_FOR_EACH_M)
 // # else
-#    define SEQAN_PP_SEQ_FOR_EACH_R(r, macro, data, seq) SEQAN_PP_SEQ_FOR_EACH_R_I(r, macro, data, seq)
-#    define SEQAN_PP_SEQ_FOR_EACH_R_I(r, macro, data, seq) SEQAN_PP_FOR_ ## r((macro, data, seq (nil)), SEQAN_PP_SEQ_FOR_EACH_P, SEQAN_PP_SEQ_FOR_EACH_O, SEQAN_PP_SEQ_FOR_EACH_M)
+// #    define SEQAN_PP_SEQ_FOR_EACH_R(r, macro, data, seq) SEQAN_PP_SEQ_FOR_EACH_R_I(r, macro, data, seq)
+// #    define SEQAN_PP_SEQ_FOR_EACH_R_I(r, macro, data, seq) SEQAN_PP_FOR_ ## r((macro, data, seq (nil)), SEQAN_PP_SEQ_FOR_EACH_P, SEQAN_PP_SEQ_FOR_EACH_O, SEQAN_PP_SEQ_FOR_EACH_M)
 // # endif
 #
 // # endif
+
+// --------------------------------------------------------------------------
+// ==> boost/preprocessor/seq/for_each_i.hpp <==
+// --------------------------------------------------------------------------
+
+# /* **************************************************************************
+#  *                                                                          *
+#  *     (C) Copyright Paul Mensonides 2002.
+#  *     Distributed under the Boost Software License, Version 1.0. (See
+#  *     accompanying file LICENSE_1_0.txt or copy at
+#  *     http://www.boost.org/LICENSE_1_0.txt)
+#  *                                                                          *
+#  ************************************************************************** */
+#
+# /* See http://www.boost.org for most recent version. */
+#
+//# ifndef SEQAN_PREPROCESSOR_SEQ_FOR_EACH_I_HPP
+//# define SEQAN_PREPROCESSOR_SEQ_FOR_EACH_I_HPP
+#
+//# include <boost/preprocessor/arithmetic/dec.hpp>
+//# include <boost/preprocessor/arithmetic/inc.hpp>
+//# include <boost/preprocessor/config/config.hpp>
+//# include <boost/preprocessor/repetition/for.hpp>
+//# include <boost/preprocessor/seq/seq.hpp>
+//# include <boost/preprocessor/seq/size.hpp>
+//# include <boost/preprocessor/tuple/elem.hpp>
+//# include <boost/preprocessor/tuple/rem.hpp>
+#
+# /* SEQAN_PP_SEQ_FOR_EACH_I */
+#
+//# if ~SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_EDG()
+#    define SEQAN_PP_SEQ_FOR_EACH_I(macro, data, seq) SEQAN_PP_FOR((macro, data, seq (nil), 0), SEQAN_PP_SEQ_FOR_EACH_I_P, SEQAN_PP_SEQ_FOR_EACH_I_O, SEQAN_PP_SEQ_FOR_EACH_I_M)
+//# else
+//#    define SEQAN_PP_SEQ_FOR_EACH_I(macro, data, seq) SEQAN_PP_SEQ_FOR_EACH_I_I(macro, data, seq)
+//#    define SEQAN_PP_SEQ_FOR_EACH_I_I(macro, data, seq) SEQAN_PP_FOR((macro, data, seq (nil), 0), SEQAN_PP_SEQ_FOR_EACH_I_P, SEQAN_PP_SEQ_FOR_EACH_I_O, SEQAN_PP_SEQ_FOR_EACH_I_M)
+//# endif
+#
+# define SEQAN_PP_SEQ_FOR_EACH_I_P(r, x) SEQAN_PP_DEC(SEQAN_PP_SEQ_SIZE(SEQAN_PP_TUPLE_ELEM(4, 2, x)))
+#
+//# if SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_STRICT()
+#    define SEQAN_PP_SEQ_FOR_EACH_I_O(r, x) SEQAN_PP_SEQ_FOR_EACH_I_O_I x
+//# else
+//#    define SEQAN_PP_SEQ_FOR_EACH_I_O(r, x) SEQAN_PP_SEQ_FOR_EACH_I_O_I(SEQAN_PP_TUPLE_ELEM(4, 0, x), SEQAN_PP_TUPLE_ELEM(4, 1, x), SEQAN_PP_TUPLE_ELEM(4, 2, x), SEQAN_PP_TUPLE_ELEM(4, 3, x))
+//# endif
+#
+# define SEQAN_PP_SEQ_FOR_EACH_I_O_I(macro, data, seq, i) (macro, data, SEQAN_PP_SEQ_TAIL(seq), SEQAN_PP_INC(i))
+#
+//# if SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_STRICT()
+#    define SEQAN_PP_SEQ_FOR_EACH_I_M(r, x) SEQAN_PP_SEQ_FOR_EACH_I_M_IM(r, SEQAN_PP_TUPLE_REM_4 x)
+#    define SEQAN_PP_SEQ_FOR_EACH_I_M_IM(r, im) SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, im)
+//# else
+//#    define SEQAN_PP_SEQ_FOR_EACH_I_M(r, x) SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, SEQAN_PP_TUPLE_ELEM(4, 0, x), SEQAN_PP_TUPLE_ELEM(4, 1, x), SEQAN_PP_TUPLE_ELEM(4, 2, x), SEQAN_PP_TUPLE_ELEM(4, 3, x))
+//# endif
+#
+# define SEQAN_PP_SEQ_FOR_EACH_I_M_I(r, macro, data, seq, i) macro(r, data, i, SEQAN_PP_SEQ_HEAD(seq))
+#
+# /* SEQAN_PP_SEQ_FOR_EACH_I_R */
+#
+//# if ~SEQAN_PP_CONFIG_FLAGS() & SEQAN_PP_CONFIG_EDG()
+#    define SEQAN_PP_SEQ_FOR_EACH_I_R(r, macro, data, seq) SEQAN_PP_FOR_ ## r((macro, data, seq (nil), 0), SEQAN_PP_SEQ_FOR_EACH_I_P, SEQAN_PP_SEQ_FOR_EACH_I_O, SEQAN_PP_SEQ_FOR_EACH_I_M)
+//# else
+//#    define SEQAN_PP_SEQ_FOR_EACH_I_R(r, macro, data, seq) SEQAN_PP_SEQ_FOR_EACH_I_R_I(r, macro, data, seq)
+//#    define SEQAN_PP_SEQ_FOR_EACH_I_R_I(r, macro, data, seq) SEQAN_PP_FOR_ ## r((macro, data, seq (nil), 0), SEQAN_PP_SEQ_FOR_EACH_I_P, SEQAN_PP_SEQ_FOR_EACH_I_O, SEQAN_PP_SEQ_FOR_EACH_I_M)
+//# endif
+#
+//# endif
+
+// --------------------------------------------------------------------------
+// ==> boost/config/suffix.hpp <==
+// --------------------------------------------------------------------------
+
+//  Copyright (c) 2001-2003 John Maddock
+//  Copyright (c) 2001 Darin Adler
+//  Copyright (c) 2001 Peter Dimov
+//  Copyright (c) 2002 Bill Kempf 
+//  Copyright (c) 2002 Jens Maurer
+//  Copyright (c) 2002-2003 David Abrahams
+//  Copyright (c) 2003 Gennaro Prota
+//  Copyright (c) 2003 Eric Friedman
+//  Copyright (c) 2010 Eric Jourdanneau, Joel Falcou
+// Distributed under the Boost Software License, Version 1.0. (See
+// accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+//
+// Helper macro SEQAN_JOIN:
+// The following piece of macro magic joins the two
+// arguments together, even when one of the arguments is
+// itself a macro (see 16.3.1 in C++ standard).  The key
+// is that macro expansion of macro arguments does not
+// occur in SEQAN_DO_JOIN2 but does in SEQAN_DO_JOIN.
+//
+#define SEQAN_JOIN( X, Y ) SEQAN_DO_JOIN( X, Y )
+#define SEQAN_DO_JOIN( X, Y ) SEQAN_DO_JOIN2(X,Y)
+#define SEQAN_DO_JOIN2( X, Y ) X##Y
+
 
 #endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_SEQAN_PREPROCESSOR_SUBSET_H_

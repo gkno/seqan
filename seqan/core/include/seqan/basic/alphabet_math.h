@@ -125,7 +125,7 @@ struct MaxValue : TParent {};
 .Metafunction.MinValue:
 ..cat:Miscellaneous
 ..summary:Infimum for a given type.
-..signature:Infimum<T>::VALUE
+..signature:MinValue<T>::VALUE
 ..param.T:An ordered type.
 ..returns.param.VALUE:A value $inf$ for which holds: $inf <= i$ for all values $i$ of type $T$.
 ..remarks:Note tat
