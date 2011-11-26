@@ -289,45 +289,46 @@ struct IsIntegral : IsInteger<T> {};
 SEQAN_CONCEPT(IntegerConcept, (TValue)) :
 	Comparable<TValue>
 {
-    TValue val;
+    TValue val, val2;
     
     SEQAN_CONCEPT_USAGE(IntegerConcept)
     {
-        val = 1u;
+        val  = 0u;
+        val2 = 1u;
 		
-        val = val + 1u;
-        val = val + val;
-        val += val;
-        val += 1u;
-        val = val++;
-        val = ++val;
+        val2 = val + 1u;
+        val2 = val + val;
+        val2 += val;
+        val2 += 1u;
+        val2 = val++;
+        val2 = ++val;
 
-        val = val - val;
-        val = val - 1u;
-        val -= val;
-        val -= 1u;
-        val = val--;
-        val = --val;        
+        val2 = val - val;
+        val2 = val - 1u;
+        val2 -= val;
+        val2 -= 1u;
+        val2 = val--;
+        val2 = --val;
         
-        val = val * val;
-        val = val * 1u;
-        val *= val;
-        val *= 1u;
+        val2 = val * val;
+        val2 = val * 1u;
+        val2 *= val;
+        val2 *= 1u;
 
-        val = val / val;
-        val = val / 1u;
-        val /= val;
-        val /= 1u;
+        val2 = val / val;
+        val2 = val / 1u;
+        val2 /= val;
+        val2 /= 1u;
         
-        val = val << val;
-        val = val << 1;
-        val <<= val;
-        val <<= 1;
+        val2 = val << val;
+        val2 = val << 1;
+        val2 <<= val;
+        val2 <<= 1;
 
-        val = val >> val;
-        val = val >> 1;
-        val >>= val;
-        val >>= 1;
+        val2 = val >> val;
+        val2 = val >> 1;
+        val2 >>= val;
+        val2 >>= 1;
         
 		SEQAN_STATIC_ASSERT_MSG(static_cast<TValue>(0u) < static_cast<TValue>(1u), "Integer has wrong order.");
     }
