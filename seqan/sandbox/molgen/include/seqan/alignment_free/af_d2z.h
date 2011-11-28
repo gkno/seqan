@@ -31,7 +31,11 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-
+// This header contains the implementation of the D2z score for alignment free
+// sequence comparison (see Kantorovitz et al. Bioinformatics 2007, Volume23, 
+// Issue13, Pp. i249-i255).
+// These functions can be called with alignmentFreeComparison().
+// ==========================================================================
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2Z_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2Z_H_
 
@@ -41,7 +45,7 @@ namespace seqan {
  * D2z
  */
 template <typename TStringSet, typename TValue>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AF_Score<D2z> const & score)
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<D2z> const & score)
 {
     typedef typename Value<TStringSet>::Type TString;
     typedef typename Value<TString>::Type TAlphabet;
@@ -79,12 +83,17 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
             ++itKmerCounts;
             ++itBackgroundFrequencies;
         }
-
-        std::cout << "\ncounted words";
-        // calculate all pairwise scores and store them in scoreMatrix
+        if(score.verbose)
+	{
+		std::cout << "\ncounted words";
+	}
+	// calculate all pairwise scores and store them in scoreMatrix
         for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(remove diagonal seqNumber-1)
         {
-            std::cout << "\nSequence number " << rowIndex;
+		if(score.verbose)
+		{
+			std::cout << "\nSequence number " << rowIndex;
+		}
             for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex) //(remove diagonal rowIndex+1)
             {
                 alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], backgroundFrequencies[rowIndex], kmerCounts[colIndex], backgroundFrequencies[colIndex], score);
@@ -117,11 +126,17 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
             }
 
         }
-        std::cout << "\ncounted words";
+	if(score.verbose)
+	{
+		std::cout << "\ncounted words";
+	}
         // calculate all pairwise scores and store them in scoreMatrix
         for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(seqNumber-1)
         {
-            std::cout << "\nSequence number " << rowIndex;
+		if(score.verbose)
+		{
+			std::cout << "\nSequence number " << rowIndex;
+		}
             for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex)
             {
                 alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], backgroundModels[rowIndex], kmerCounts[colIndex], backgroundModels[colIndex], score);
@@ -132,7 +147,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
 }
 
 template <typename TValue, typename TStringBG>
-void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCounts1, TStringBG & backgroundFrequencies1, String<unsigned int> & kmerCounts2, TStringBG & backgroundFrequencies2, AF_Score<D2z> const & score)
+void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCounts1, TStringBG & backgroundFrequencies1, String<unsigned int> & kmerCounts2, TStringBG & backgroundFrequencies2, AFScore<D2z> const & score)
 {
     typedef typename Value<TStringBG>::Type TValueBG;
     // sum : inner product /d2 distance
@@ -165,8 +180,11 @@ void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCoun
 
     if ((var <= 0))
     {
-        std::cout << "\nlength1:" << len1 << "length2: " << len2 << "Expected value: " << E << "Variance: " << var << "Sum: " << sum << "\n";
-        std::cout << "Error: negative variance\n";
+	if(score.verbose)
+	{
+		std::cout << "\nlength1:" << len1 << "length2: " << len2 << "Expected value: " << E << "Variance: " << var << "Sum: " << sum << "\n";
+		std::cout << "Error: negative variance\n";
+	}
         result = 0;
         return;
     }
@@ -176,7 +194,7 @@ void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCoun
 }
 
 template <typename TAlphabet, typename TValue, typename TSpec>
-void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCounts1, MarkovModel<TAlphabet, TValue, TSpec> & bgModel1, String<unsigned int> & kmerCounts2, MarkovModel<TAlphabet, TValue, TSpec> & bgModel2, AF_Score<D2z> const & score)
+void alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCounts1, MarkovModel<TAlphabet, TValue, TSpec> & bgModel1, String<unsigned int> & kmerCounts2, MarkovModel<TAlphabet, TValue, TSpec> & bgModel2, AFScore<D2z> const & score)
 {
     unsigned int nvals = length(kmerCounts1);
 

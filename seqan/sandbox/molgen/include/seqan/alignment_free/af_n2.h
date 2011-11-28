@@ -31,7 +31,11 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-
+// This header contains the implementation of the N2 score for alignment free
+// sequence comparison with word neighbourhood counts
+// Goeke et al, to appear.
+// These functions can be called with alignmentFreeComparison().
+// ==========================================================================
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
 
@@ -39,7 +43,7 @@ namespace seqan {
 
 String<unsigned> revComIndex_N;
 
-void initialiseRevComIndex_N(unsigned k)
+void initialiseRevComIndexN(unsigned k)
 {
     unsigned myLength = (unsigned) pow(4, k);
     // resize(revComIndex_N,myLength);
@@ -61,7 +65,7 @@ void initialiseRevComIndex_N(unsigned k)
 }
 
 // Currently only one mismatch maximum
-StringSet<String<unsigned int> > kmerNeighbourhood_N;
+StringSet<String<unsigned int> > kmerNeighbourhoodN;
 // // template < typename TAlphabet, unsigned MISMATCHNUMBER>
 // void initialiseKmerNeighbourhood_N2(unsigned const mismatchNumber, unsigned k)
 // {
@@ -74,7 +78,7 @@ StringSet<String<unsigned int> > kmerNeighbourhood_N;
 //  unsigned myLength=(unsigned) pow(4,k);
 //  Shape<Dna,SimpleShape >	myShape;
 //  resize(myShape,k);
-//  resize(kmerNeighbourhood_N,myLength);
+//  resize(kmerNeighbourhoodN,myLength);
 //  for(unsigned i=0;i<1;++i)// myLength
 //  {
 //      String<TAlphabet> w;
@@ -94,22 +98,22 @@ StringSet<String<unsigned int> > kmerNeighbourhood_N;
 // //       }
 //  }
 // }
-void initialiseKmerNeighbourhood_N(unsigned k, bool revCom)
+void initialiseKmerNeighbourhoodN(unsigned k, bool revCom)
 {
     unsigned myLength = (unsigned) pow(4, k);
     Shape<Dna, SimpleShape> myShape;
     resize(myShape, k);
-    resize(kmerNeighbourhood_N, myLength);
+    resize(kmerNeighbourhoodN, myLength);
     for (unsigned i = 0; i < myLength; ++i)
     {
-        resize(kmerNeighbourhood_N[i], 1, i);
+        resize(kmerNeighbourhoodN[i], 1, i);
 
         String<Dna> w;
         unhash(w, i, k);
-        // appendValue(kmerNeighbourhood_N[i],i);
+        // appendValue(kmerNeighbourhoodN[i],i);
         if ((revComIndex_N[i] != i) && (revCom == true))
         {
-            appendValue(kmerNeighbourhood_N[i], revComIndex_N[i]);
+            appendValue(kmerNeighbourhoodN[i], revComIndex_N[i]);
         }
         for (unsigned j = 0; j < k; ++j)
         {
@@ -129,9 +133,9 @@ void initialiseKmerNeighbourhood_N(unsigned k, bool revCom)
                     if (revCom == true)
                     {
 
-                        for (unsigned n = 0; n < length(kmerNeighbourhood_N[i]); ++n)
+                        for (unsigned n = 0; n < length(kmerNeighbourhoodN[i]); ++n)
                         {
-                            if ((hashValue) == kmerNeighbourhood_N[i][n])
+                            if ((hashValue) == kmerNeighbourhoodN[i][n])
                             {
                                 duplicate = true;
                                 // std::cout<<"\nbreak;"<<wTMP<<" w:"<<w;
@@ -143,12 +147,12 @@ void initialiseKmerNeighbourhood_N(unsigned k, bool revCom)
 
                     if (duplicate == false)
                     {
-                        appendValue(kmerNeighbourhood_N[i], hashValue);
+                        appendValue(kmerNeighbourhoodN[i], hashValue);
                         if (revCom == true)
                         {
                             if (revComIndex_N[hashValue] != hashValue)
                             {
-                                appendValue(kmerNeighbourhood_N[i], revComIndex_N[hashValue]);
+                                appendValue(kmerNeighbourhoodN[i], revComIndex_N[hashValue]);
                             }
                         }
                     }
@@ -158,16 +162,16 @@ void initialiseKmerNeighbourhood_N(unsigned k, bool revCom)
         }
     }
 // // output of kmer neigbours
-//  for(unsigned i = 0;i< length(kmerNeighbourhood_N[0]);++i)
+//  for(unsigned i = 0;i< length(kmerNeighbourhoodN[0]);++i)
 //  {
 //          String<Dna> w2;
-//          unhash(w2, kmerNeighbourhood_N[0][i],k);
-//          std::cout<<"\n"<<w2<<kmerNeighbourhood_N[0][i];
+//          unhash(w2, kmerNeighbourhoodN[0][i],k);
+//          std::cout<<"\n"<<w2<<kmerNeighbourhoodN[0][i];
 //  }
 }
 
 template <typename TValue, typename TStringSet>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AF_Score<N2> const & score)
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<N2> const & score)
 {
 
 
@@ -183,18 +187,18 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
 
 
     // Initialise reverse complement hash table
-    initialiseRevComIndex_N(score.kmerSize);
+    initialiseRevComIndexN(score.kmerSize);
     if (score.revCom == "bothStrands")
     {
-        initialiseKmerNeighbourhood_N(score.kmerSize, true);
+        initialiseKmerNeighbourhoodN(score.kmerSize, true);
     }
     else
     {
-        initialiseKmerNeighbourhood_N(score.kmerSize, false);
+        initialiseKmerNeighbourhoodN(score.kmerSize, false);
     }
 // unsigned myMismatches=score.mismatches;
 // EditEnvironment<HammingDistance, 0> myEdit;
-// initialiseKmerNeighbourhood_N2<Dna,1>(score.kmerSize);
+// initialiseKmerNeighbourhoodN2<Dna,1>(score.kmerSize);
     // typedef typename Iterator<String<MarkovModel<Dna> > > ::Type		TIteratorMarkovModel;
 
     unsigned int seqNumber = length(sequenceSet);
@@ -214,9 +218,13 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     for (; itSeqSet < end(sequenceSet); ++itSeqSet)
     {
 
-        standardisedCounts(value(itStandardisedKmerCounts), value(itSeqSet), score);
-        std::cout << "\n" << position(itSeqSet);
-        ++itStandardisedKmerCounts;
+        standardiseCounts(value(itStandardisedKmerCounts), value(itSeqSet), score);
+	
+        if(score.verbose)
+	{
+		std::cout << "\n" << position(itSeqSet);
+	}
+	++itStandardisedKmerCounts;
     }
 
     if (score.norm == true) // normalise score so that sequence-self-comparison is maximal (1)
@@ -262,13 +270,19 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         myfile.close();
     }
 
-    std::cout << "\ncounted words";
-
+        if(score.verbose)
+	{
+		std::cout << "\ncounted words";
+	}
 
     // calculate all pairwise scores and store them in scoreMatrix
     for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(remove diagonal values seqNumber-1)
     {
-        std::cout << "\nSequence number " << rowIndex;
+	
+        if(score.verbose)
+	{
+		std::cout << "\nSequence number " << rowIndex;
+	}
         for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex) // remove diagonal values rowIndex+1
         {
 
@@ -283,7 +297,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
  */
 template <typename TValue, typename TString>
 void
-alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kmerCounts2, AF_Score<N2> const & score)
+alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kmerCounts2, AFScore<N2> const & score)
 {
     typedef typename Value<TString>::Type TStringValue;
     typedef typename Iterator<TString, Rooted>::Type        TIteratorTString;
@@ -295,10 +309,9 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
     // output of pairwise comparison kmerWeights to file
     for (; it1 < end(kmerCounts1); ++it1)
     {
-        if ((score.onlyPositiveKmers == false) || ((value(it1) > 0) || (value(it2) > 0)))
-        {
-            result += (TValue)(value(it1) * value(it2));
-        }
+
+	result += (TValue)(value(it1) * value(it2));
+
 // std::cout<<"\nval1:"<<value(it1)<<", val2:"<<value(it2)<<", prod:"<<(value(it1)*value(it2))<<", score: "<<result;
 
         // Computation of the reverse complement strand score
@@ -319,11 +332,11 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
     }
     else if (score.revCom == "max")
     {
-        result = max(resultRC, result);
+        result = std::max(resultRC, result);
     }
     else if (score.revCom == "min")
     {
-        result = min(resultRC, result);
+        result = std::min(resultRC, result);
     }
 
 
@@ -333,7 +346,7 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
  * count kmers and standardise count vectors for Dna5 and markov model background
  */
 template <typename TString, typename TSequence>
-void standardisedCounts(TString & standardisedCounts, TSequence const & sequence, AF_Score<N2> const & score)
+void standardiseCounts(TString & standardisedCounts, TSequence const & sequence, AFScore<N2> const & score)
 {
 
 
@@ -409,18 +422,18 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
             {
 
                 p_w = 0;
-                // The first word in the kmerNeighbourhood_N is the kmer itself, it is weighted normally!
+                // The first word in the kmerNeighbourhoodN is the kmer itself, it is weighted normally!
                 // unsigned row=0;
-                // counterTMP+=kmerCounts[kmerNeighbourhood_N[position(itCounts)][row]];
+                // counterTMP+=kmerCounts[kmerNeighbourhoodN[position(itCounts)][row]];
                 // Sum of all entries in the covariance matrix. only once computed
                 unsigned wordHash = position(itCounts);
                 unsigned wordRCHash = revComIndex_N[wordHash];
 
-                for (unsigned row = 0; row < length(kmerNeighbourhood_N[wordHash]); ++row)
+                for (unsigned row = 0; row < length(kmerNeighbourhoodN[wordHash]); ++row)
                 {
-                    unsigned wordRowHash = kmerNeighbourhood_N[wordHash][row];
+                    unsigned wordRowHash = kmerNeighbourhoodN[wordHash][row];
                     //// The kmer itself is weighted normally!
-                    if (wordRowHash == wordHash) //(row==0)//(kmerNeighbourhood_N[position(itCounts)]==position(itCounts))//(row==0)// The first word in the kmerNeighbourhood_N is the kmer itself, it is weighted normally!
+                    if (wordRowHash == wordHash) //(row==0)//(kmerNeighbourhoodN[position(itCounts)]==position(itCounts))//(row==0)// The first word in the kmerNeighbourhoodN is the kmer itself, it is weighted normally!
                     {
                         counterTMP += (TValue) kmerCounts[wordRowHash];
                     }
@@ -436,9 +449,9 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
                     unhash(wMM1, wordRowHash, score.kmerSize);
 // std::cout<<"\n"<<wMM1;
 
-                    for (unsigned col = row; col < length(kmerNeighbourhood_N[wordHash]); ++col)
+                    for (unsigned col = row; col < length(kmerNeighbourhoodN[wordHash]); ++col)
                     {
-                        unsigned wordColHash = kmerNeighbourhood_N[wordHash][col];
+                        unsigned wordColHash = kmerNeighbourhoodN[wordHash][col];
                         if (value(covarianceMatrix, wordColHash, wordRowHash) == missing)
                         {
 
@@ -611,18 +624,18 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
             {
 
                 p_w = 0;
-                // The first word in the kmerNeighbourhood_N is the kmer itself, it is weighted normally!
+                // The first word in the kmerNeighbourhoodN is the kmer itself, it is weighted normally!
                 // unsigned row=0;
-                // counterTMP+=kmerCounts[kmerNeighbourhood_N[position(itCounts)][row]];
+                // counterTMP+=kmerCounts[kmerNeighbourhoodN[position(itCounts)][row]];
                 // Sum of all entries in the covariance matrix. only once computed
                 unsigned wordHash = position(itCounts);
                 unsigned wordRCHash = revComIndex_N[wordHash];
 
-                for (unsigned row = 0; row < length(kmerNeighbourhood_N[wordHash]); ++row)
+                for (unsigned row = 0; row < length(kmerNeighbourhoodN[wordHash]); ++row)
                 {
-                    unsigned wordRowHash = kmerNeighbourhood_N[wordHash][row];
+                    unsigned wordRowHash = kmerNeighbourhoodN[wordHash][row];
                     //// The kmer itself is weighted normally!
-                    if (wordRowHash == wordHash) //(row==0)//(kmerNeighbourhood_N[position(itCounts)]==position(itCounts))//(row==0)// The first word in the kmerNeighbourhood_N is the kmer itself, it is weighted normally!
+                    if (wordRowHash == wordHash) //(row==0)//(kmerNeighbourhoodN[position(itCounts)]==position(itCounts))//(row==0)// The first word in the kmerNeighbourhoodN is the kmer itself, it is weighted normally!
                     {
                         counterTMP += (TValue) kmerCounts[wordRowHash];
                     }
@@ -637,9 +650,9 @@ void standardisedCounts(TString & standardisedCounts, TSequence const & sequence
                     String<Dna> wMM1;
                     unhash(wMM1, wordRowHash, score.kmerSize);
 // std::cout<<"\n"<<wMM1;
-                    for (unsigned col = row; col < length(kmerNeighbourhood_N[wordHash]); ++col)
+                    for (unsigned col = row; col < length(kmerNeighbourhoodN[wordHash]); ++col)
                     {
-                        unsigned wordColHash = kmerNeighbourhood_N[wordHash][col];
+                        unsigned wordColHash = kmerNeighbourhoodN[wordHash][col];
                         if (value(covarianceMatrix, wordColHash, wordRowHash) == missing)
                         {
 

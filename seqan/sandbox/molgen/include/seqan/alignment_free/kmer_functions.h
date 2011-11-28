@@ -31,7 +31,9 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-
+// This file contains helper functions to count words in sequences and to 
+// calculate probabilities and variances of word occurences.
+// ==========================================================================
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_KMER_FUNCTIONS_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_KMER_FUNCTIONS_H_
 
@@ -443,7 +445,7 @@ void calculateVariance(TValue & variance, String<TAlphabet, TSpec> & word, Marko
     variance += (TValue) p_w * p_w * (n - 2 * n * l + 3 * l * l - 4 * l + 1);
     // std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
 }
-
+/*
 // like the r code except the third term includes the differences for word occurences when they are so close that the stationary distribution cannot be assumed
 template <typename TValue, typename TSpec, typename TAlphabet>
 void calculateVarianceRobinBook(TValue & variance, String<TAlphabet, TSpec> & word, MarkovModel<TAlphabet, TValue> & bgModel, int l)
@@ -473,7 +475,7 @@ void calculateVarianceRobinBook(TValue & variance, String<TAlphabet, TSpec> & wo
 
     }
     // std::cout<<word<<"\np_w:"<<p_w<<", var: "<<variance<<"\n";
-}
+}*/
 
 template <typename TValue, typename TSpec, typename TAlphabet>
 void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> & word1, String<TAlphabet, TSpec> & word2, MarkovModel<TAlphabet, TValue> & bgModel, int n)
@@ -528,7 +530,7 @@ void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> & word1, 
     covariance += (TValue) p_w1 * p_w2 * (n - 2 * n * l1 + 3 * l1 * l1 - 4 * l1 + 1);
     // std::cout<<word1<<"\np_w:"<<p_w1<<", covar: "<<covariance<<"\n";
 }
-
+/*
 // like the R code without term 3, everything as in robin book
 template <typename TValue, typename TSpec, typename TAlphabet>
 void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> & word1, String<TAlphabet, TSpec> & word2, MarkovModel<TAlphabet, TValue> & bgModel, int l)
@@ -591,7 +593,7 @@ void calculateCovarianceRobinBook(TValue & covariance, String<TAlphabet, TSpec> 
     }
     // std::cout<<"\nterm1+term2:"<<covariance;
     covariance -= (l - k + 1) * p_w1 * p_w2;
-}
+}*/
 
 // calculate word peridicity (indicator for overlaps)
 // P(w1,w2)= all p where w2_j=w1_{j+p} for all j=1...k-p
@@ -609,7 +611,7 @@ void calculatePeriodicity(String<int> & periodicity, TString & word1, TString & 
     for (TSize i = 1; i < length1; ++i)
     {
         String<TAlphabet> my_suffix = suffix(word1, i);       // overlap of suffix of word1 with prefix of word2
-        TSize my_min = min(length2, (length1 - i));
+        TSize my_min = std::min(length2, (length1 - i));
         String<TAlphabet> my_prefix = prefix(word2, my_min);
         if (my_suffix == my_prefix)
         {

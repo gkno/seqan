@@ -31,34 +31,18 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-
-#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_H_
-#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_H_
+// This header contains the implementation of the D2star score for alignment 
+// free sequence comparison.
+// (see Reinert et al. J Comput Biol. 2009 Dec;16(12):1615-34.)
+// These functions can be called with alignmentFreeComparison().
+// ==========================================================================
+#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
+#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
 
 namespace seqan {
 
-String<unsigned> revComIndex_star;
-void initialiseRevComIndex_star(unsigned k)
-{
-    unsigned myLength = (unsigned) pow(4, k);
-    resize(revComIndex_star, myLength, 0);
-    Shape<Dna, SimpleShape> myShape;
-    // Declare variables
-    // TShape myShape;		// Shape, length can be changed (kmer_length)
-    resize(myShape, k);
-    for (unsigned i = 0; i < myLength; ++i)
-    {
-        String<Dna> w;
-        unhash(w, i, k);
-        DnaStringReverseComplement wRC(w);
-        unsigned hashValue = hash(myShape, begin(wRC));
-        revComIndex_star[i] = hashValue;
-    }
-
-}
-
 template <typename TValue, typename TStringSet>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AF_Score<D2star> const & score)
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<D2Star> const & score)
 {
 
 
@@ -72,9 +56,6 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     typedef typename Iterator<StringSet<String<unsigned int> > >::Type      TIteratorSetInt;
     typedef typename Iterator<StringSet<String<double> > >::Type        TIteratorSetDouble;
 
-
-    // Initialise reverse complement hash table
-    initialiseRevComIndex_star(score.kmerSize);
     unsigned int seqNumber = length(sequenceSet);
 
     // resize the distMatrix
@@ -82,54 +63,25 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     setLength(scoreMatrix, 1, seqNumber);
     resize(scoreMatrix, (TValue) 0);
 
-
     StringSet<String<double> > standardisedKmerCounts;
     resize(standardisedKmerCounts, seqNumber);
     // Count all kmers and all background nucleotide frequencies and store them in StringSets
     TIteratorSetDouble itStandardisedKmerCounts = begin(standardisedKmerCounts);
     TIteratorSet itSeqSet = begin(sequenceSet);
-    for (; itSeqSet < end(sequenceSet); ++itSeqSet)
-    {
-        standardisedCounts(value(itStandardisedKmerCounts), value(itSeqSet), score);
-        std::cout << "\n" << position(itSeqSet);
-        ++itStandardisedKmerCounts;
-    }
-    // output of pairwise kmer weight to file
-    std::ofstream myfile;
-    if (score.outputFile != "")
-    {
-        myfile.open(toCString(score.outputFile));
-        for (unsigned i = 0; i < length(standardisedKmerCounts[0]); ++i)
-        {
-            String<TUnmaskedAlphabet> w;
-            unhash(w, i, score.kmerSize);
-            // std::ofstream myfile;
-
-            myfile << "\t" << w;
-        }
-        myfile << "\n";
-        for (unsigned int seqIndex = 0; seqIndex < seqNumber; ++seqIndex)
-        {
-            myfile << "Seq" << seqIndex;
-            for (unsigned i = 0; i < length(standardisedKmerCounts[seqIndex]); ++i)
-            {
-                myfile << "\t" << standardisedKmerCounts[seqIndex][i];
-            }
-            myfile << "\n";
-        }
-        myfile.close();
-    }
-
-    std::cout << "\ncounted words";
-
 
     // calculate all pairwise scores and store them in scoreMatrix
-    for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex)
+    for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(remove diagonal values seqNumber-1)
     {
-        std::cout << "\nSequence number " << rowIndex;
-        for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex)
+        if(score.verbose)
+	{
+	  std::cout << "\nSequence number " << rowIndex;
+	}
+	for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex) // remove diagonal values rowIndex+1
         {
-            alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), standardisedKmerCounts[rowIndex], standardisedKmerCounts[colIndex], score);
+            d2star(value(scoreMatrix, rowIndex, colIndex), sequenceSet[rowIndex], sequenceSet[colIndex], score);
+// std::cout<<"\noriginal: "<<value(scoreMatrix,rowIndex,colIndex)<<"\n";
+
+            // alignmentFreeCompareCounts(value(scoreMatrix,rowIndex,colIndex), standardisedKmerCounts[rowIndex],standardisedKmerCounts[colIndex],score);
             value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  // Copy symmetric entries
         }
     }
@@ -140,7 +92,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
  */
 template <typename TValue, typename TString>
 void
-alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kmerCounts2, AF_Score<D2star> const & score)
+alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kmerCounts2, AFScore<D2Star> const & score)
 {
     typedef typename Value<TString>::Type TStringValue;
     typedef typename Iterator<TString, Rooted>::Type        TIteratorTString;
@@ -148,157 +100,321 @@ alignmentFreeCompareCounts(TValue & result, TString & kmerCounts1, TString & kme
     TIteratorTString it1 = begin(kmerCounts1);
     TIteratorTString it2 = begin(kmerCounts2);
     result = 0.0;
-    TValue resultRC = 0.0;
+    // TValue resultRC=0.0;
 
     for (; it1 < end(kmerCounts1); ++it1)
     {
-
-
         // Multiply standardised counts
         result += (TValue)(value(it1) * value(it2));
 
-
-        // Computation of the reverse complement strand score
-        if ((score.revCom != ""))  //"min" "max" "mean" ""
-        {
-            unsigned hashValue = revComIndex_star[position(it1)];
-            resultRC += (TValue)(value(it1) * kmerCounts2[hashValue]);
-        }
         ++it2;
     }
-
-    // std::cout<<"\nresult"<<result<<"\n"<<"\nresultRC"<<resultRC<<"\n";
-
-    // Compute reverse complements scores if revCom!=""
-    if (score.revCom == "mean")
-        result = (TValue) (resultRC + result) / 2;
-    else if (score.revCom == "max")
-        result = max(resultRC, result);
-    else if (score.revCom == "min")
-        result = min(resultRC, result);
 }
 
-/*
- * count kmers and standardise count vectors for Dna5 and markov model background
- */
-template <typename TString, typename TSequence>
-void standardisedCounts(TString & standardisedCounts, TSequence const & sequence, AF_Score<D2star> const & score)
+template <typename TValue, typename TSequence>
+void d2star(TValue & result, TSequence const & sequence1, TSequence const & sequence2, AFScore<D2Star> const & score)
 {
 
 
     typedef typename Value<TSequence>::Type TAlphabet;
     typedef typename _UnmaskedAlphabet<TAlphabet>::Type TUnmaskedAlphabet;
-    typedef typename Value<TString>::Type TValue;
+    // typedef typename Value<TString>::Type TValue;
     typedef typename Iterator<String<unsigned int>, Rooted>::Type       TIteratorUnsigned;
-    typedef typename Iterator<TString, Rooted>::Type        TIteratorTString;
+    // typedef typename Iterator<TString ,Rooted>::Type		TIteratorTString;
 
     TValue missing = -pow(10, 10);
-
+    TSequence seq1seq2;
+    append(seq1seq2, sequence1);
+    append(seq1seq2, sequence2);
+    result = 0.0;
     /*
     *--------ORDER 0 BACKGROUND MODEL----------
     */
     if (score.bgModelOrder == 0)
     {
-
-        String<unsigned int> kmerCounts;
+        // String<unsigned int> kmerCounts;
+        String<unsigned int> kmerCounts1;
+        String<unsigned int> kmerCounts2;
+        String<unsigned int> backgroundCounts;
         String<double> backgroundFrequencies;
-        countKmers(kmerCounts, backgroundFrequencies, sequence, score.kmerSize);
+        resize(backgroundFrequencies, 4, 0);
+        countKmers(kmerCounts1, sequence1, score.kmerSize);
+        countKmers(kmerCounts2, sequence2, score.kmerSize);
+        countKmers(backgroundCounts, seq1seq2, 1);
+        int sumBG = 0;
+        for (unsigned i = 0; i < length(backgroundCounts); ++i)
+        {
+            sumBG += backgroundCounts[i];
+        }
+        for (unsigned i = 0; i < length(backgroundCounts); ++i)
+        {
+            backgroundFrequencies[i] = backgroundCounts[i] / ((double)sumBG);
+        }
 // int tmpSum=0;
 // for(int tmp=0;tmp<length(kmerCounts);++tmp){std::cout<<kmerCounts[tmp]<<"\n";tmpSum+=kmerCounts[tmp];}
 // std::cout<<"\ntmpSum: "<<tmpSum<<"\n";
-        int nvals = length(kmerCounts); // Number of kmers
+        unsigned nvals = length(kmerCounts1); // Number of kmers
         int len1 = 0;
-        for (int l = 0; l < nvals; l++)
-        {
-            len1 += kmerCounts[l];
-        }
-        resize(standardisedCounts, nvals, (TValue) 0.0);
+        int len2 = 0;
 
+        for (unsigned l = 0; l < nvals; l++)
+        {
+            len1 += kmerCounts1[l];
+            len2 += kmerCounts2[l];
+
+        }
+        // fill(standardisedCounts,nvals,(TValue) 0.0);
 
         // string of tvalue to store p_w
         String<TValue> probabilities;
         resize(probabilities, nvals, missing);
 
-        TIteratorUnsigned itCounts;
-        TIteratorTString itStandardisedCounts;
+        // TIteratorUnsigned itCounts;
+        // TIteratorTString itStandardisedCounts;
 
-        itCounts = begin(kmerCounts);
-        itStandardisedCounts = begin(standardisedCounts);
+        // itCounts=begin(kmerCounts);
+        // itStandardisedCounts=begin(standardisedCounts);
+        //TValue normValue1 = 0.0;
+        //TValue normValue2 = 0.0;
 
-        for (; itCounts < end(kmerCounts); ++itCounts)
+        for (unsigned i = 0; i < nvals; ++i)
         {
             TValue p_w = 1;   // Probability of kmer
 
             String<TUnmaskedAlphabet> w;
-            unhash(w, (unsigned)position(itCounts), score.kmerSize);
+            unhash(w, i, score.kmerSize);
             calculateProbability(p_w, w, backgroundFrequencies);
-            TValue variance = 0;
+            TValue variance1 = 0.0;
+            TValue variance2 = 0.0;
 
-            variance = ((TValue) len1) * p_w;
+            variance1 = pow(len1 * p_w, 0.5);
+            variance2 = pow(len2 * p_w, 0.5);
+            // TValue varTMP= pow(((TValue) len1)*((TValue) len1),0.5)*p_w;
+// std::cout<<"\n1: "<<variance1<<"\n2: "<<variance2<<"\n1*2: "<<(variance1*variance2)<<"\nold: "<<varTMP;
 
             // test if variance not 0 or inf before dividing
-            if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
+            if ((variance1 > missing) && (variance1 < pow(10, 10)))
             {
                 if (p_w > 0)
                 {
-                    value(itStandardisedCounts) = ((TValue) ((TValue) value(itCounts)) - p_w * ((TValue)len1)) / ((TValue) pow(variance, 0.5));
+                    TValue stCount1 = (kmerCounts1[i] - p_w * len1) / variance1;
+                    TValue stCount2 = (kmerCounts2[i] - p_w * len2) / variance2;
+                    //normValue1 += pow(stCount1, 2);
+                    //normValue2 += pow(stCount2, 2);
 
+                    // value(itStandardisedCounts)=(((TValue) ((TValue) kmerCounts1[i])-p_w*((TValue)len1))*((TValue) ((TValue) kmerCounts2[i])-p_w*((TValue)len2)))/((TValue) variance);
+                    // result+=(((TValue) ((TValue) kmerCounts1[i])-p_w*((TValue)len1))*((TValue) ((TValue) kmerCounts2[i])-p_w*((TValue)len2)))/((TValue) variance);
+                    result += stCount1 * stCount2;
+                    // result+=((kmerCounts1[i]-p_w*len1)*(kmerCounts2[i]-p_w*len2))/varTMP;
+// TValue normValue1=(((TValue) ((TValue) kmerCounts1[i])-p_w*((TValue)len1))*((TValue) ((TValue) kmerCounts2[i])-p_w*((TValue)len2)))/((TValue) variance);
+// std::cout<<"\n1: "<<normValue1;
+// TValue normValue2=((kmerCounts1[i]-p_w*len1)*(kmerCounts2[i]-p_w*len2))/variance;
+// std::cout<<"\n2: "<<(normValue1)<<"="<<(normValue2);
                 }
             }
 // std::cout<<"\n"<<w<<"; counts:"<<value(itCounts)<<"; stCounts:"<<value(itStandardisedCounts)<<" p_w: "<<p_w<<" var:"<<variance;
-            ++itStandardisedCounts;
         }
+
     }
     /*
     *--------HIGHER ORDER BACKGROUND MODEL----------
     */
     else
     {
-        String<unsigned int> kmerCounts;
+        String<unsigned int> kmerCounts1;
+        String<unsigned int> kmerCounts2;
+        StringSet<String<TUnmaskedAlphabet> > bgSequences;
+        stringToStringSet(bgSequences, seq1seq2); // create unmasked sequnces
         MarkovModel<TUnmaskedAlphabet, TValue> backgroundModel(score.bgModelOrder);
-        countKmers(kmerCounts, backgroundModel, sequence, score.kmerSize);
+        buildMarkovModel(backgroundModel, bgSequences);
+        countKmers(kmerCounts1, sequence1, score.kmerSize);
+        countKmers(kmerCounts2, sequence2, score.kmerSize);
+
 
         // countKmers(sequence,kmerCounts,backgroundModel,k);
-        int nvals = length(kmerCounts); // Number of kmers
+        unsigned nvals = length(kmerCounts1); // Number of kmers
         int len1 = 0;
-        for (int l = 0; l < nvals; l++)
+        int len2 = 0;
+
+        for (unsigned l = 0; l < nvals; l++)
         {
-            len1 += kmerCounts[l];
+            len1 += kmerCounts1[l];
+            len2 += kmerCounts2[l];
+
         }
-        resize(standardisedCounts, nvals, (TValue) 0.0);
+        // fill(standardisedCounts,nvals,(TValue) 0.0);
 
         String<TValue> probabilities;
 
         resize(probabilities, nvals, missing);
+        // TIteratorUnsigned itCounts;
+        // TIteratorTString itStandardisedCounts;
 
-        TIteratorUnsigned itCounts;
-        TIteratorTString itStandardisedCounts;
-
-        itCounts = begin(kmerCounts);
-        itStandardisedCounts = begin(standardisedCounts);
+        // itCounts=begin(kmerCounts);
+        // itStandardisedCounts=begin(standardisedCounts);
         // double sumTMP=0;
-        for (; itCounts < end(kmerCounts); ++itCounts)
+//      for(;itCounts<end(kmerCounts);++itCounts)
+//      {
+        //TValue normValue1 = 0.0;
+        //TValue normValue2 = 0.0;
+
+        for (unsigned i = 0; i < nvals; ++i)
         {
-            TValue p_w = 1;   // Probability of kmer
-            TValue variance = 0;
+            TValue p_w = 1.0; // Probability of kmer
+            TValue variance = 0.0;
             String<TUnmaskedAlphabet> w;
-            unhash(w, (unsigned)position(itCounts), score.kmerSize);
+            unhash(w, i, score.kmerSize);
             p_w = emittedProbability(backgroundModel, w);
-            variance = ((TValue) pow(((TValue) len1) * p_w, 0.5));
+            variance = ((TValue) pow(((TValue) len1 * len2), 0.5)) * p_w;
+            TValue variance1 = 0.0;
+            TValue variance2 = 0.0;
+
+            variance1 = pow(len1 * p_w, 0.5);
+            variance2 = pow(len2 * p_w, 0.5);
+
             // Calculate standardised kmer Count
             // std::cout<<"\nword:"<<w<<", p_w:"<<p_w<<", var: "<<((TValue) pow(((TValue) len1)*p_w,0.5));
             if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
             {
                 if (p_w > 0)
                 {
-                    value(itStandardisedCounts) = ((TValue) ((TValue) value(itCounts)) - p_w * ((TValue)len1)) / ((TValue) pow(((TValue) len1) * p_w, 0.5));
+
+                    TValue stCount1 = (kmerCounts1[i] - p_w * len1) / variance1;
+                    TValue stCount2 = (kmerCounts2[i] - p_w * len2) / variance2;
+
+                    //normValue1 += pow(stCount1, 2);
+                   // normValue2 += pow(stCount2, 2);
+
+                    result += stCount1 * stCount2;
+                    // result+=(((TValue) ((TValue) kmerCounts1[i])-p_w*((TValue)len1))*((TValue) ((TValue) kmerCounts2[i])-p_w*((TValue)len2)))/((TValue) variance);
+                    // value(itStandardisedCounts)=((TValue) ((TValue) value(itCounts)) -p_w*((TValue)len1))/((TValue) pow(((TValue) len1)*p_w,0.5));
                 }
-                ++itStandardisedCounts;
+                //++itStandardisedCounts;
             }
         }
+
+       // if (score.norm == true)
+         //   result = result / pow(normValue1 * normValue2, 0.5);
     }
 }
 
+/*
+ * count kmers and standardise count vectors for Dna5 and markov model background
+ */
+// template <typename TString, typename TSequence>
+// void standardiseCounts(TString & standardisedCounts, TSequence const & sequence, AFScore<D2Star> const & score)
+// {
+// 
+// 
+//     typedef typename Value<TSequence>::Type TAlphabet;
+//     typedef typename _UnmaskedAlphabet<TAlphabet>::Type TUnmaskedAlphabet;
+//     typedef typename Value<TString>::Type TValue;
+//     typedef typename Iterator<String<unsigned int>, Rooted>::Type       TIteratorUnsigned;
+//     typedef typename Iterator<TString, Rooted>::Type        TIteratorTString;
+// 
+//     TValue missing = -pow(10, 10);
+// 
+//     /*
+//     *--------ORDER 0 BACKGROUND MODEL----------
+//     */
+//     if (score.bgModelOrder == 0)
+//     {
+// 
+//         String<unsigned int> kmerCounts;
+//         String<double> backgroundFrequencies;
+//         countKmers(kmerCounts, backgroundFrequencies, sequence, score.kmerSize);
+// // int tmpSum=0;
+// // for(int tmp=0;tmp<length(kmerCounts);++tmp){std::cout<<kmerCounts[tmp]<<"\n";tmpSum+=kmerCounts[tmp];}
+// // std::cout<<"\ntmpSum: "<<tmpSum<<"\n";
+//         int nvals = length(kmerCounts); // Number of kmers
+//         int len1 = 0;
+//         for (int l = 0; l < nvals; l++)
+//         {
+//             len1 += kmerCounts[l];
+//         }
+//         resize(standardisedCounts, nvals, (TValue) 0.0);
+// 
+// 
+//         // string of tvalue to store p_w
+//         String<TValue> probabilities;
+//         resize(probabilities, nvals, missing);
+// 
+//         TIteratorUnsigned itCounts;
+//         TIteratorTString itStandardisedCounts;
+// 
+//         itCounts = begin(kmerCounts);
+//         itStandardisedCounts = begin(standardisedCounts);
+// 
+//         for (; itCounts < end(kmerCounts); ++itCounts)
+//         {
+//             TValue p_w = 1;   // Probability of kmer
+// 
+//             String<TUnmaskedAlphabet> w;
+//             unhash(w, (unsigned)position(itCounts), score.kmerSize);
+//             calculateProbability(p_w, w, backgroundFrequencies);
+//             TValue variance = 0;
+// 
+//             variance = ((TValue) len1) * p_w;
+// 
+// 
+//             // test if variance not 0 or inf before dividing
+//             if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
+//             {
+//                 if (p_w > 0)
+//                     value(itStandardisedCounts) = ((TValue) ((TValue) value(itCounts)) - p_w * ((TValue)len1)) / ((TValue) pow(variance, 0.5));
+//             }
+// // std::cout<<"\n"<<w<<"; counts:"<<value(itCounts)<<"; stCounts:"<<value(itStandardisedCounts)<<" p_w: "<<p_w<<" var:"<<variance;
+//             ++itStandardisedCounts;
+//         }
+//     }
+//     /*
+//     *--------HIGHER ORDER BACKGROUND MODEL----------
+//     */
+//     else
+//     {
+//         String<unsigned int> kmerCounts;
+//         MarkovModel<TUnmaskedAlphabet, TValue> backgroundModel(score.bgModelOrder);
+//         countKmers(kmerCounts, backgroundModel, sequence, score.kmerSize);
+// 
+//         // countKmers(sequence,kmerCounts,backgroundModel,k);
+//         int nvals = length(kmerCounts); // Number of kmers
+//         int len1 = 0;
+//         for (int l = 0; l < nvals; l++)
+//             len1 += kmerCounts[l];
+//         resize(standardisedCounts, nvals, (TValue) 0.0);
+// 
+//         String<TValue> probabilities;
+// 
+//         resize(probabilities, nvals, missing);
+// 
+//         TIteratorUnsigned itCounts;
+//         TIteratorTString itStandardisedCounts;
+// 
+//         itCounts = begin(kmerCounts);
+//         itStandardisedCounts = begin(standardisedCounts);
+//         // double sumTMP=0;
+//         for (; itCounts < end(kmerCounts); ++itCounts)
+//         {
+//             TValue p_w = 1;   // Probability of kmer
+//             TValue variance = 0;
+//             String<TUnmaskedAlphabet> w;
+//             unhash(w, (unsigned)position(itCounts), score.kmerSize);
+//             p_w = emittedProbability(backgroundModel, w);
+//             variance = ((TValue) pow(((TValue) len1) * p_w, 0.5));
+//             // Calculate standardised kmer Count
+//             // std::cout<<"\nword:"<<w<<", p_w:"<<p_w<<", var: "<<((TValue) pow(((TValue) len1)*p_w,0.5));
+//             if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
+//             {
+//                 if (p_w > 0)
+//                 {
+//                     value(itStandardisedCounts) = ((TValue) ((TValue) value(itCounts)) - p_w * ((TValue)len1)) / ((TValue) pow(((TValue) len1) * p_w, 0.5));
+//                 }
+//                 ++itStandardisedCounts;
+//             }
+//         }
+//     }
+// }
+
 }  // namespace seqan
 
-#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_H_
+#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_

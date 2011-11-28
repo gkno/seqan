@@ -31,8 +31,9 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-// This file contains functions for alignment free sequence comparisons
-// Can be used for pairwise sequence comparison
+// This file contains the function that calls alignment free sequence 
+// comparisons algorithms (see AFScore):
+// alignmentFreeComparison()
 // ==========================================================================
 
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_COMPARISON_H_
@@ -51,7 +52,7 @@ alignmentFreeComparison(scoreMatrix, sequenceSet, score)
 ..param.sequenceSet:StringSet containing all sequences for which pairwise scores will be computed
 ...type:Class.StringSet
 ..param.score:The score values to be used for computing the alignment.
-...type:Class.AF_Score
+...type:Class.AFScore
 */
 
 template <typename TStringSet, typename TValue, typename TComparisonMethod>
@@ -60,6 +61,7 @@ void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const &
     _alignmentFreeComparison(scoreMatrix, sequenceSet, comparisonMethod);
 }
 
+//!!!NEEDED???
 template <typename TStringSet, typename TValue, typename TComparisonMethod>
 void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, TComparisonMethod & comparisonMethod)
 {

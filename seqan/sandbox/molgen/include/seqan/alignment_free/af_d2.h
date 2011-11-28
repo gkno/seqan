@@ -31,6 +31,10 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
+// This header contains the implementation of the D2 score for alignment free
+// sequence comparison (inner product of kmer counts).
+// These functions can be called with alignmentFreeComparison().
+// ==========================================================================
 
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_
@@ -38,7 +42,7 @@
 namespace seqan {
 
 template <typename TStringSet, typename TValue>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AF_Score<D2> const & score) // AF_Score<D2> const & score
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<D2> const & score) // AFScore<D2> const & score
 {
 
     typedef typename Value<TStringSet>::Type TString;
@@ -68,11 +72,17 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
         countKmers(value(itKmerCounts), value(itSeqSet), score.kmerSize);
         ++itKmerCounts;
     }
-    std::cout << "\ncounted words";
+    if(score.verbose)
+    {  
+      std::cout << "\ncounted words";
+    }
     // calculate all pairwise scores and store them in scoreMatrix
     for (unsigned int rowIndex = 0; rowIndex < (seqNumber); ++rowIndex) //(remove diagonal: seqNumber-1)
     {
-        std::cout << "\nSequence number " << rowIndex;
+        if(score.verbose)
+	{  
+	    std::cout << "\nSequence number " << rowIndex;
+	}
         for (unsigned int colIndex = rowIndex; colIndex < (seqNumber); ++colIndex) //(remove diagonal: rowIndex+1)
         {
             alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], kmerCounts[colIndex], score);
@@ -87,7 +97,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
  */
 template <typename TValue>
 void
-alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCounts1, String<unsigned int> & kmerCounts2, AF_Score<D2> const & /*score*/)
+alignmentFreeCompareCounts(TValue & result, String<unsigned int> & kmerCounts1, String<unsigned int> & kmerCounts2, AFScore<D2> const & /*score*/)
 {
     typedef typename Iterator<String<unsigned int> >::Type      TIteratorInt;
 

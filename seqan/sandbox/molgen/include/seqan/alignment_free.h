@@ -56,9 +56,7 @@
 #include <seqan/alignment_free/af_d2.h>
 #include <seqan/alignment_free/af_d2z.h>
 #include <seqan/alignment_free/af_d2star.h>
-#include <seqan/alignment_free/af_d2star_original.h>
 #include <seqan/alignment_free/af_n2.h>
-#include <seqan/alignment_free/af_m_plus_d.h>
 
 #include <seqan/alignment_free/alignment_free_comparison.h>
 
