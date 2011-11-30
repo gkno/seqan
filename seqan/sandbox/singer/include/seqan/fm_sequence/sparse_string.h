@@ -88,7 +88,6 @@ template <typename TSparseString, typename TSpec>
 typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type &
 getFibre(SparseString<TSparseString, TSpec> & sparseString, FibreSparseString)
 {
-	std::cerr << "test" << std::endl;
     return sparseString.string;
 }
 
@@ -197,9 +196,7 @@ template <typename TSparseString, typename TSpec, typename TSize>
 void resize(SparseString<TSparseString, TSpec> & string,
             TSize size)
 {
-	std::cerr << "size / getBlockSize(string) + 1: " << size / getBlockSize(string) + 1 << " " << size << " " << getBlockSize(string) << " 1" << std::endl;
     resize(getFibre(string, FibreSparseString()), size / getBlockSize(string) + 1);
-    std::cerr << "test2" << length(getFibre(string, FibreSparseString())) << std::endl;
     resize(getFibre(string, FibreIndicatorString()), size, 0);
 }
 

@@ -511,8 +511,10 @@ void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
 template <typename TText, typename TSpec>
 struct WaveletTree;
 
-template <typename TText>
+template <typename TValue, typename TSpec>
 struct WaveletTreeStructure;
+//template <typename TText>
+//struct WaveletTreeStructure;
 
 struct FibreBitStrings_;
 typedef Tag<FibreBitStrings_> const FibreBitStrings;
@@ -556,7 +558,7 @@ template <typename TCharacterValue, typename TWaveletTreeSpec, typename TText>
 //, typename TRankSupportBitString>
 void fillBitString(
     WaveletTree<TText, TWaveletTreeSpec> & waveletTree,
-    typename Iterator<WaveletTreeStructure<TText> >::Type & iter,
+    typename Iterator<WaveletTreeStructure<TText, TWaveletTreeSpec> >::Type & iter,
     const TText & text,
     const TCharacterValue lowerBound,
     const TCharacterValue upperBound)
