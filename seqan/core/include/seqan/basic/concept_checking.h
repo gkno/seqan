@@ -626,7 +626,7 @@ void sameType(T, T) { }
 /**
 .Metafunction.Is
 ..cat:Concepts
-..summary:Returns whether a concept is fulfilled. 
+..summary:Returns whether a concept is fulfilled.
 ..signature:Is<TConcept>::Type
 ..signature:Is<TConcept>::VALUE
 ..param.TConcept:A concept that is specialized with type(s) that should be tested for fulfilling the concept.
@@ -634,7 +634,7 @@ void sameType(T, T) { }
 ..remarks:
 ...text:The @Metafunction.Is@-metafunction can be used to test types for fulfilling a concept without causing compilation errors.
 If @Tag.Logical Values.tag.True@/$true$ is returned, $TConcept$ must pass the concept test via @Macro.SEQAN_CONCEPT_ASSERT@.
-It can be used to switch between different implementations depending on the concept of a type, or in combination with @Macro.SEQAN_ENABLE_IF@ to make a function only visible to types of certain concepts.
+It can be used to switch between different implementations depending on the concept of a type, or in combination with @Macro.SEQAN_FUNC_ENABLE_IF@ to make a function only visible to types of certain concepts.
 ..example.code:
 Is<SequenceConcept<TSeq> >::Type
 If<Is<ContainerConcept<TSeq> >::VALUE, T1, T2>::Type
@@ -665,7 +665,7 @@ std::cout << Is< ConceptB<Bob> >::VALUE << std::endl;   // 1
 std::cout << Is< ConceptC<Bob> >::VALUE << std::endl;   // 1
 std::cout << Is< ConceptD<Bob> >::VALUE << std::endl;   // 0
 ..include:seqan/basic.h
-..see:Macro.SEQAN_ENABLE_IF
+..see:Macro.SEQAN_FUNC_ENABLE_IF
 ..see:Macro.SEQAN_CONCEPT_ASSERT
 */
 
