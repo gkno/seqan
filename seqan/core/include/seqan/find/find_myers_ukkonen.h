@@ -205,6 +205,9 @@ struct MyersSmallState_
 	TWord VN0;					// VN[0]
     unsigned int errors;		// the current number of errors
     unsigned int maxErrors;		// the maximal number of errors allowed
+
+    MyersSmallState_() : VP0(0), VN0(0), errors(0), maxErrors(0)
+    {}
 };
 
 template <typename TNeedle, typename TSmallAlphabet>
@@ -240,8 +243,7 @@ struct MyersSmallState_<TNeedle, AlignTextBanded<TSpec, TFinderCSP, TPatternCSP>
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
     String<int> DPMat;
 #endif
-    MyersSmallState_():
-        leftClip(0) {}
+    MyersSmallState_() : bitMasks(), VP0(0), VN0(0), errors(0), maxErrors(0), leftClip(0) {}
 };
 
 // large state
@@ -257,6 +259,8 @@ struct MyersLargeState_
 	String<TWord> VP;
 	String<TWord> VN;
 	TWord scoreMask;			// the mask with a bit set at the position of the last active cell
+
+    MyersLargeState_() : lastBlock(0), scoreMask(0) {}
 };
 template <typename TNeedle, typename TSpec, typename TFinderCSP, typename TPatternCSP>
 struct MyersLargeState_<TNeedle, AlignTextBanded<TSpec, TFinderCSP, TPatternCSP> >
