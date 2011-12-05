@@ -91,7 +91,7 @@ class IncludeMacro(WikiMacroBase):
         elif source_format == 'source':
             if not req.perm.has_permission('FILE_VIEW'):
                 return ''
-            repo = self.env.get_repository(req.authname)
+            repo = self.env.get_repository(authname=req.authname)
             node = repo.get_node(source_obj)
             out = node.get_content().read()
             if dest_format is None:
