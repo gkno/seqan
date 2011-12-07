@@ -259,7 +259,7 @@ std::ostream & operator<<(std::ostream & stream, const RankSupportBitString<TSpe
 template <typename TSpec, typename TSize>
 void reserve(RankSupportBitString<TSpec> & rankSupportBitString, TSize size)
 {
-    rankSupportBitString.length = 0;
+    //rankSupportBitString.length = 0;
 
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Value<TBitString>::Type TBitStringValue;
@@ -382,6 +382,24 @@ void setBit(RankSupportBitString<TSpec> & bitString, TPos pos, TBit setBit)
         return;
     }
     bitString.bitString[bucketPos] |= shiftValue;
+}
+template <typename TSpec, typename TBit>
+void appendBit(RankSupportBitString<TSpec> & rankSupportBitString, TBit bit)
+{
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
+    typedef typename Value<TBitString>::Type TValue;
+    unsigned const bitsPerValue = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
+
+   // std::cerr << length(rankSupportBitString.bitString) * bitsPerValue << " " << length(rankSupportBitString) <<std::endl;
+
+	if( (unsigned)(length(rankSupportBitString.bitString) * bitsPerValue) <=  (unsigned)(length(rankSupportBitString)))
+	{
+//		char c;
+//		std::cin >> c;
+		reserve(rankSupportBitString, 2 * (length(rankSupportBitString) + 1));
+	}
+    setBit(rankSupportBitString, length(rankSupportBitString), bit);
+    ++rankSupportBitString.length;
 }
 
 template <typename TSpec, typename TBit>
@@ -511,8 +529,11 @@ void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
 template <typename TText, typename TSpec>
 struct WaveletTree;
 
-template <typename TValue, typename TSpec>
+template <typename TChar, typename TPointer, typename TSpec>
 struct WaveletTreeStructure;
+
+struct FibreSplitValues_;
+typedef Tag<FibreSplitValues_> const FibreSplitValues;
 //template <typename TText>
 //struct WaveletTreeStructure;
 
@@ -544,7 +565,7 @@ void fillBitString(
         character = text[i];
         if (character >= lowestValue && character <= highestValue)
         {
-            if (character > splitValue)
+            if (character >= splitValue)
             {
                 setBit(bitString, pos, 1);
             }
@@ -558,7 +579,7 @@ template <typename TCharacterValue, typename TWaveletTreeSpec, typename TText>
 //, typename TRankSupportBitString>
 void fillBitString(
     WaveletTree<TText, TWaveletTreeSpec> & waveletTree,
-    typename Iterator<WaveletTreeStructure<TText, TWaveletTreeSpec> >::Type & iter,
+    typename Iterator<typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type>::Type & iter,
     const TText & text,
     const TCharacterValue lowerBound,
     const TCharacterValue upperBound)
@@ -582,7 +603,7 @@ void fillBitString(
         character = text[i];
         if ((character >= lowestValue) && (character <= highestValue))
         {
-            if (character > splitValue)
+            if (character >= splitValue)
             {
                 setBit(bitString, pos, 1);
             }
