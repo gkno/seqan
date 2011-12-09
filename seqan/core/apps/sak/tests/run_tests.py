@@ -138,7 +138,10 @@ def main(source_base, binary_base):
         else:
             failures += 1
             print 'FAILED'
-    print
+
+    # Cleanup.
+    ph.deleteTempDir()
+
     print '=============================='
     print '     total tests: %d' % len(conf_list)
     print '    failed tests: %d' % failures

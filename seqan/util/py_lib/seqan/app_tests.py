@@ -28,6 +28,7 @@ import optparse
 import os
 import os.path
 import subprocess
+import shutil
 import sys
 import tempfile
 
@@ -86,6 +87,7 @@ class TestPathHelper(object):
         self.source_base_path = source_base_path
         self.binary_base_path = binary_base_path
         self.tests_dir = tests_dir
+        self.created_paths = []
 
     def inFile(self, path):
         """Convert the path of a test file.
@@ -112,9 +114,18 @@ class TestPathHelper(object):
         if not self.temp_dir:
             self.temp_dir = tempfile.mkdtemp()
             if not os.path.isdir(self.temp_dir):
+                self.created_paths.append(self.temp_dir)
                 os.path.makedirs(self.temp_dir)
         logging.debug('outFile(%s) = %s', path, self.temp_dir)
-        return os.path.join(self.temp_dir, path)
+        res = os.path.join(self.temp_dir, path)
+        self.created_paths.append(res)
+        return res
+
+    def deleteTempDir(self):
+        """Remove the temporary directory created earlier and all files below."""
+        print >>sys.stderr, 'DELETING TEMP DIR', self.temp_dir
+        if self.temp_dir:
+            shutil.rmtree(self.temp_dir)
 
 
 def autolocateBinary(base_path, relative_path, binary_name):
