@@ -1455,8 +1455,16 @@ SEQAN_CHECKPOINT
 // the band width is (blockCount * MACHINE_WORD_SIZE)
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFinder, typename TNeedle, typename TNeedle2, typename TSpec, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
-finline bool 
+template <
+    typename TFinder, 
+    typename TNeedle, 
+    typename TNeedle2, 
+    typename TSpec, 
+    typename TFinderCSP, 
+    typename TPatternCSP,
+    typename TFindBeginPatternSpec
+>
+inline bool 
 _findMyersSmallPatternsBanded(
 	TFinder & finder, 
 	TNeedle const & needle,
@@ -1536,6 +1544,11 @@ SEQAN_CHECKPOINT
             state.VP0 = VP;
             state.VN0 = VN;
             state.errors = errors;
+			_setFinderEnd(finder);
+			if (IsSameType<TSpec, FindPrefix>::VALUE)
+			{
+				_setFinderLength(finder, endPosition(finder));
+			}
             return true;
         }
     }
@@ -1566,6 +1579,11 @@ inline bool find (TFinder & finder,
         if (state.errors <= state.maxErrors)
         {
             goPrevious(finder);
+			_setFinderEnd(finder);
+			if (IsSameType<TSpec, FindPrefix>::VALUE)
+			{
+				_setFinderLength(finder, endPosition(finder));
+			}
             return true;
         }
 		//TODO: adapt myers-ukkonnen to dynamically change maxErrors
