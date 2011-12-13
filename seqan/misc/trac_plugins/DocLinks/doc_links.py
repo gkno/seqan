@@ -26,19 +26,6 @@ import trac.wiki
 import genshi.builder as gb
 
 
-# Map categories to better names.
-CATEGORY_NAME_MAP = {
-  'Concept': 'concept',
-  'Class' : 'class',
-  'Spec' : 'specialization',
-  'Shortcut': 'shortcut',
-  'Function': 'function',
-  'Metafunction': 'metafunction',
-  'Tag': 'tag',
-  'Adaption': 'adaption',
-  }
-
-
 def getFilename(cat, item):
     """Get the filename that dddoc would create.
 
@@ -142,6 +129,9 @@ class SeqanDocsSyntaxProvider(trac.core.Component):
             label = item
           else:
             label = target
+        # Ignore if the target does not contain a dot.
+        if not '.' in target:
+          return target
         # Now, use dddoc's logic to generate the appropriate file name for
         file_name = getFilename(*target.split('.', 1))
         span = [gb.tag.span(' ', class_='icon'), label]
