@@ -420,6 +420,31 @@ void setNodeToLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> 
     iter.waveletTreeStructure->treeNodes[iter.position].i2 = 0;
 }
 
+template <typename TChar, typename TPointer, typename TSpec, typename TPos>
+void addDollarNode(WaveletTreeStructure<TChar, TPointer, TSpec> & structure, TPos minPos)
+{
+	//adjusting the array
+	resize(structure, length(structure.treeNodes) + 1);
+
+	for(TPointer i = length(structure.treeNodes) - 1; i > minPos; --i)
+	{
+		structure.treeNodes[i] = structure.treeNodes[i - 1];
+	}
+
+	for(TPointer i = 0; i < length(structure.treeNodes); ++i)
+	{
+		if(structure.treeNodes[i].i2 >= minPos + 2)
+			++structure.treeNodes[i].i2;
+	}
+
+	//the next line can be found in wavelet_tree.h in addDollarNode
+	//structure.treeNodes[minPos].i2 = 1;
+	structure.treeNodes[minPos + 1].i1 = structure.treeNodes[minPos].i1;
+	structure.treeNodes[minPos + 1].i2 = 0;
+
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename TChar, typename TPointer, typename TSpec>
 void goLeft(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
@@ -465,13 +490,51 @@ void getNexNode(TText & alphabet, TIter & it)
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
+bool isLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard> & iter){
+	return !((*iter.waveletTreeStructure).treeNodes[iter.position].i2);
+}
+
+template <typename TChar, typename TPointer, typename TSpec>
+bool isLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter){
+	//std::cerr << (int)iter.position << " " << (int)(*iter.waveletTreeStructure).treeNodes[iter.position].i2 << std::endl;
+	return !((*iter.waveletTreeStructure).treeNodes[iter.position].i2);
+}
+
+template <typename TChar, typename TPointer, typename TSpec>
+TPointer getNodePosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TChar character){
+
+	//TPointer pos = 0;
+	while(!isLeaf(iter))
+	{
+		if(character < getCharacter(iter))
+			goLeft(iter);
+		else
+			goRight(iter);
+	}
+	return getPosition(iter);
+}
+
+template <typename TChar, typename TPointer, typename TSpec>
+TPointer getNodePosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard> & iter, TChar character){
+
+	while(!isLeaf(iter))
+		{
+			if(character < getCharacter(iter))
+				goLeft(iter);
+			else
+				goRight(iter);
+		}
+		return getPosition(iter);
+}
+
+template <typename TChar, typename TPointer, typename TSpec>
 inline String<TChar> getAlphabet(WaveletTreeStructure<TChar, TPointer, TSpec> & structure)
 {
 	typename Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> >::Type it(structure, 0);
 	String<TChar> alphabet;
 	appendValue(alphabet, structure.minCharValue);
 	getNexNode(alphabet, it);
-	std::cerr << alphabet << " " << length(alphabet) << std::endl;
+	//std::cerr << alphabet << " " << length(alphabet) << std::endl;
 	return alphabet;
 }
 
@@ -578,7 +641,7 @@ void computeSingleStringLengthFromTree(TStringLengthString & lengthString,
     TIter iter2 = iter;
 
     TChar pivot = getCharacter(iter);
-    std::cerr << "pivot: " << pivot << " " << length(alphabet) << std::endl;
+   // std::cerr << "pivot: " << pivot << " " << length(alphabet) << std::endl;
 
     unsigned newSplit, newSplit2;
     for(unsigned i = 0; i < length(alphabet); ++i)
@@ -977,7 +1040,7 @@ void computeTreeEntries(
 
     if (lowerPosInFreq == upperPosInFreq - 1)
     {
-    	//std::cerr << "pos: " << iter.position << " " << freq[upperPosInFreq].i1 << std::endl;
+    	//std::cerr << "pos: " << (int)iter.position << " " << (int)freq[upperPosInFreq].i1 << std::endl;
         setCharacter(iter, freq[upperPosInFreq].i1);
         setNodeToLeaf(iter);
         ++numChildNodes;

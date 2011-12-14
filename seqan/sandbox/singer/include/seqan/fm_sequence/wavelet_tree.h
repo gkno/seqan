@@ -124,8 +124,6 @@ struct WaveletTree<TText, DollarSubstituted>
     typedef typename Fibre<WaveletTree, FibreBitStrings>::Type    TBitStrings;
     typedef typename Size<TText>::Type                            TSize;
     typedef typename Fibre<WaveletTree<TText, DollarSubstituted>, FibreSplitValues>::Type TWaveletTreeStructure;
-    //typedef typename Fibre<TWaveletTreeStructure, FibreTreeNodes>::Value TValue;
-
     typedef typename Fibre<TWaveletTreeStructure, FibreTreeNodes>::Type TWaveletTreeStructureString;
     typedef typename Value<TWaveletTreeStructureString>::Type TWaveletTreeStructureEntry;
     typedef typename Value<TWaveletTreeStructureEntry, 1>::Type TChar;
@@ -297,6 +295,18 @@ struct Fibre<WaveletTree<TText, MultiDollarSubstituted>, FibreDollarPositions>
     typedef typename Value<typename Fibre<WaveletTree<TText, MultiDollarSubstituted>, FibreBitStrings>::Type>::Type Type;
 };
 
+template <typename TText, typename TSpec>
+struct Value<WaveletTree<TText, TSpec> >
+{
+	typedef typename Value<TText>::Type Type;
+};
+
+template <typename TText, typename TSpec>
+struct Value<WaveletTree<TText, TSpec> const>
+{
+	typedef typename Value<TText>::Type const Type;
+};
+
 // ==========================================================================
 //Functions
 // ==========================================================================
@@ -386,6 +396,7 @@ inline unsigned getOccImpl(const WaveletTree<TText, TWaveletTreeSpec> & tree,
     {
     	//static_cast<Nothing>(getFibre(tree, tag).treeNodes[treePos].i1);
     	//std::cerr << getFibre(tree, tag).treeNodes[treePos].i1 << std::endl;
+
         TPos addValue = getRank(tree.bitStrings[treePos], sum - 1);
         if (character < getFibre(tree, tag).treeNodes[treePos].i1)
         {
@@ -794,6 +805,122 @@ inline void fillWaveletTree(
     }
 }
 
+template <typename TText, typename TWaveletTreeSpec, typename TDollarChar, typename TDollarPos>
+void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarChar dollarSub, TDollarPos dollarPos)
+{
+	typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type TSplitValues;
+	typedef typename Fibre<TSplitValues, FibreTreeNodes>::Type TWaveletTreeStructureString;
+	typedef typename Value<TWaveletTreeStructureString>::Type TWaveletTreeStructureEntry;
+	typedef typename Value<TWaveletTreeStructureEntry, 1>::Type TChar;
+	typedef typename Value<TWaveletTreeStructureEntry, 2>::Type TPointer;
+	typedef typename Size<typename Value<TText>::Type>::Type TSize;
+
+	TPointer minPos = getNodePosition(tree, dollarSub);
+
+	addDollarNode(tree.splitValues, minPos);
+
+	resize(tree.bitStrings, length(tree.bitStrings) + 1);
+	for(TPointer i = length(tree.bitStrings) - 1; i > minPos; --i)
+	{
+		tree.bitStrings[i] = tree.bitStrings[i - 1];
+	}
+
+	//TChar freqChar = (TChar)minPos;
+	TSize newNodeLegth;
+	TSize dollarPosInLeaf = getOcc(tree, dollarSub, dollarPos) - 1;
+
+	//std::cerr << "DollarPosInLeaf: " << dollarPosInLeaf << std::endl;
+
+	//do we need to add 0 or 1
+	if(dollarSub < tree.splitValues.treeNodes[minPos].i1)
+	{
+		tree.splitValues.treeNodes[minPos].i2 = 2;
+		newNodeLegth = length(tree.bitStrings[minPos - 1]) - getRank(tree.bitStrings[minPos - 1], length(tree.bitStrings[minPos - 1]) - 1);
+		clear(tree.bitStrings[minPos + 1]);
+		resize(tree.bitStrings[minPos + 1], newNodeLegth, 0);
+		for(unsigned i = 0; i < newNodeLegth; ++i)
+			setBit(tree.bitStrings[minPos + 1], i, 0);
+		setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf, 1);
+	}
+	else
+	{
+		tree.splitValues.treeNodes[minPos].i2 = 1;
+		newNodeLegth = getRank(tree.bitStrings[minPos], length(tree.bitStrings[minPos]) - 1);
+		clear(tree.bitStrings[minPos + 1]);
+		resize(tree.bitStrings[minPos + 1], newNodeLegth, 0);
+		for(unsigned i = 0; i < newNodeLegth; ++i)
+			setBit(tree.bitStrings[minPos + 1], i, 1);
+		setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf, 0);
+	}
+	completeRankSupportBitString(tree.bitStrings[minPos + 1]);
+
+}
+
+template <typename TText, typename TWaveletTreeSpec, typename TFreq>
+void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, String<TFreq> & freq)
+{
+	typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type TSplitValues;
+	typedef typename Fibre<TSplitValues, FibreTreeNodes>::Type TWaveletTreeStructureString;
+	typedef typename Value<TWaveletTreeStructureString>::Type TWaveletTreeStructureEntry;
+	typedef typename Value<TWaveletTreeStructureEntry, 1>::Type TChar;
+	typedef typename Value<TWaveletTreeStructureEntry, 2>::Type TPointer;
+	typedef typename Size<typename Value<TText>::Type>::Type TSize;
+
+	TPointer minPos = 0;
+	TPointer i = 0;
+	for(; i < length(freq); ++i)
+	{
+		if(freq[i] > 0)
+		{
+			minPos = i;
+			break;
+		}
+	}
+
+	for(; i < length(freq) - 1; ++i)
+	{
+		if(freq[i] < freq[minPos] && freq[i] > 0)
+			minPos = i;
+	}
+
+	minPos = getNodePosition(tree, (TChar)minPos);
+
+	addDollarNode(tree.splitValues, minPos);
+
+	resize(tree.bitStrings, length(tree.bitStrings) + 1);
+	for(TPointer i = length(tree.bitStrings) - 1; i > minPos; --i)
+	{
+		tree.bitStrings[i] = tree.bitStrings[i - 1];
+	}
+
+	TChar freqChar = (TChar)minPos;
+	TPointer newNodeLegth;
+	//do we need to add 0 or 1
+	if(freqChar < tree.splitValues.treeNodes[minPos].i1)
+	{
+		newNodeLegth = length(tree.bitStrings[minPos - 1]) - getRank(tree.bitStrings[minPos - 1], length(tree.bitStrings[minPos - 1]) - 1);
+		resize(tree.bitStrings[minPos], newNodeLegth);
+		for(unsigned i = 0; i < newNodeLegth; ++i)
+			setBit(tree.bitStrings[minPos], i, 0);
+	}
+	else
+	{
+		newNodeLegth = getRank(tree.bitStrings[minPos], length(tree.bitStrings[minPos]) - 1);
+		resize(tree.bitStrings[minPos], newNodeLegth);
+		for(unsigned i = 0; i < newNodeLegth; ++i)
+			setBit(tree.bitStrings[minPos], i, 1);
+	}
+
+}
+
+template <typename TText, typename TWaveletTreeSpec, typename TChar>
+unsigned getNodePosition(WaveletTree<TText, TWaveletTreeSpec> & tree, TChar character)
+{
+	typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type TSplitValues;
+	typename Iterator<TSplitValues>::Type iter(tree.splitValues, 0);
+	return getNodePosition(iter, character);
+}
+
 //template <typename TText, typename TWaveletTreeSpec, typename TFreqTable>
 template <typename TText, typename TWaveletTreeSpec, typename TFreqTable>//, typename TPrefixSumTable>
 inline void createWaveletTree(WaveletTree<TText, TWaveletTreeSpec> & tree,
@@ -850,7 +977,8 @@ inline void createWaveletTree(WaveletTree<TBWT, TWaveletTreeSpec> & tree,
 
     //generate the tree structure
     TSize sigmaSize = length(freq);
-    TValue numberOfTreeNodes = sigmaSize - 1;
+    //TValue numberOfTreeNodes = sigmaSize - 1;
+    unsigned numberOfTreeNodes = sigmaSize - 1;
 
     resize(tree.splitValues, numberOfTreeNodes);//, Pair<TValue, TValue>(0, 0));
     //TValue smallestValue = 0;
@@ -926,10 +1054,14 @@ inline bool openDollarInformation(
 {
     String<char> name;
 
-	typedef typename Fibre<WaveletTree<TText, DollarSubstituted>, FibreSplitValues>::Value TValue;
-    typedef typename Size<TText>::Type                            TSize;
+    typedef typename Size<TText>::Type TSize;
 
-    String<Pair<TValue, TSize> > dollarValues;
+    typedef typename Fibre<WaveletTree<TText, DollarSubstituted>, FibreSplitValues>::Type TWaveletTreeStructure;
+    typedef typename Fibre<TWaveletTreeStructure, FibreTreeNodes>::Type TWaveletTreeStructureString;
+    typedef typename Value<TWaveletTreeStructureString>::Type TWaveletTreeStructureEntry;
+    typedef typename Value<TWaveletTreeStructureEntry, 1>::Type TChar;
+
+    String<Pair<TChar, TSize> > dollarValues;
 
     name = fileName;    append(name, ".dollar");
     if (!open(dollarValues, toCString(name), openMode))
@@ -978,6 +1110,18 @@ inline bool open(
     return true;
 }
 
+template <typename TText, typename TSpec>
+inline bool open(
+    WaveletTree<TText, TSpec> & tree,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+    name = fileName;    append(name, ".tree");  open(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
+    name = fileName;    append(name, ".split"); open(getFibre(tree, FibreSplitValues()), toCString(name), openMode);
+    return true;
+}
+
 template <typename TText>
 inline bool open(
     WaveletTree<TText, DollarSubstituted> & tree,
@@ -993,8 +1137,8 @@ inline bool saveDollarInformation(
     int openMode)
 {
 	WaveletTree<TText, TSpec> dummyTree = tree;
-	std::cerr << fileName << std::endl;
-	std::cerr << openMode << std::endl;
+	//std::cerr << fileName << std::endl;
+	//std::cerr << openMode << std::endl;
 	return true;
 }
 

@@ -78,14 +78,14 @@ getBlockSize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
 void resize(CompressedSA<TSparseString, TLfTable, TSpec> & container, TSize size)
 {
-	std::cerr << "resize: " << size << std::endl;
+	//std::cerr << "resize: " << size << std::endl;
     resize(container.compressedSA, size);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
 void resize(CompressedSA<String<TSparseString>, TLfTable, TSpec> & container, TSize size)
 {
-	std::cerr << "resize: " << size << std::endl;
+	//std::cerr << "resize: " << size << std::endl;
     resize(container.compressedSA, size);
 }
 
@@ -93,7 +93,7 @@ template <typename TSparseString, typename TLfTable, typename TSpec, typename TS
 void reserve(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
              TSize size)
 {
-	std::cerr << "reserve: " << size << std::endl;
+	//std::cerr << "reserve: " << size << std::endl;
     resize(compressedSA.compressedSA, size);
 }
 

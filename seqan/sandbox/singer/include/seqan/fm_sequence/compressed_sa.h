@@ -74,6 +74,12 @@ struct Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>
 };
 
 template <typename TOccTable, typename TPrefixSumTable>
+struct Fibre<LFTable<TOccTable, TPrefixSumTable> const, FibreOccTable>
+{
+    typedef TOccTable const Type;
+};
+
+template <typename TOccTable, typename TPrefixSumTable>
 struct Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>
 {
     typedef TPrefixSumTable Type;
@@ -97,7 +103,7 @@ template <typename TOccTable, typename TPrefixSumTable>
 typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
 getFibre(LFTable<TOccTable, TPrefixSumTable> & lfTable, FibreOccTable)
 {
-    return lfTable.occTable;
+	return lfTable.occTable;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
