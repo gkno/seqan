@@ -497,6 +497,8 @@ void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
         typedef typename Value<TBucketString>::Type TBucketValue;
         typedef typename Value<TSuperBucketString>::Type TSuperBucketValue;
 
+        resize(bitString, length(bitString));
+
         unsigned bitsPerBucket = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
         TSuperBucketValue superBucketCounter = 0;
 
