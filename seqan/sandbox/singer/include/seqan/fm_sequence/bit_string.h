@@ -72,7 +72,7 @@ struct Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>
 template <typename TSpec>
 struct Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>
 {
-    typedef String<unsigned long> Type;
+    typedef String<unsigned int> Type;
 };
 
 template <typename TSpec>
