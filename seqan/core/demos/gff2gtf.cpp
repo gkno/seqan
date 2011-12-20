@@ -41,7 +41,7 @@ int main(int argc, const char *argv[])
 			std::cerr << "Failed to open annotation outfile for writing." << std::endl ;
 		else
 		{
-			if (isSetLong(parser, "gff"))
+			if (isSetShort(parser, "gff"))
 				write(outFile, store, Gff());
 			else
 				write(outFile, store, Gtf());
