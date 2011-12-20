@@ -237,12 +237,12 @@ int readGFF(
 	file.open(filename, ::std::ios_base::in | ::std::ios_base::binary);
 	if (!file.is_open()) return 1;
 		
-	TIndel indel = {0,0,0,0,0,0,0,0,0,0};
 	
 	clear(indelSet);
 	char c = _streamGet(file);
 	while (!_streamEOF(file))
 	{
+		TIndel indel = {0,0,0,0,0,0,0,0,0,0};
 		
 		if(c == '#')
 			_parseSkipLine(file,c);	
@@ -287,7 +287,11 @@ int readGFF(
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
 		indel.field3 = temp_str;
-
+        if(indel.field3 == "inversion" || indel.field2 == "inversion" || indel.field3 == "translocation" || indel.field2 == "translocation" || indel.field3 == "duplication" || indel.field2 == "duplication")
+        {
+            _parseSkipLine(file,c);
+            continue;
+        }
 		// skip whitespaces and read entry in column 4  --> genomic begin position
 		_parseSkipWhitespace(file, c);
 		indel.originalPos = (TContigPos) _parseReadNumber(file,c) - 1;
