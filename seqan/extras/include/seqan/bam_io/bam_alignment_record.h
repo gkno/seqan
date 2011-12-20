@@ -577,10 +577,10 @@ hasFlagDuplicate(BamAlignmentRecord const & record)
 .Function.getAlignmentLengthInRef
 ..cat:BAM I/O
 ..summary:Returns length of @Class.BamAlignmentRecord@'s projection in reference.
-..signature:getAlignmentLength(record)
+..signature:getAlignmentLengthInRef(record)
 ..param.record:The record to query.
 ...type:Class.BamAlignmentRecord
-..returns:$unsigned$, indicating the flag's status.
+..returns:$unsigned$, the alignment length in the reference.
 ..include:seqan/bam_io.h
 */
 
