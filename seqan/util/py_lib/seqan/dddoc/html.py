@@ -486,7 +486,13 @@ class HtmlHelper(object):
                 if not child_key in node.children:
                     continue
                 for path in node.children[child_key].texts:
-                    result['children'].append(recurseDownwards(self.tree.find(path)))
+                    child = self.tree.find(path)
+                    if not child:
+                        self.error_logger.invalidReference(path, [('TODO', -1)])
+                        return False
+                    recRes = recurseDownwards(child)
+                    if recRes:
+                        result['children'].append(recRes)
             return result
 
         def recurseUpwards(node):
@@ -499,12 +505,19 @@ class HtmlHelper(object):
                 for path in node.children[parent_key].texts:
                     if '\u0001' in path:
                         continue  # Skip automatically generated upwards links.
-                    result['parents'].append(recurseUpwards(self.tree.find(path)))
+                    parent = self.tree.find(path)
+                    if not parent:
+                        self.error_logger.invalidReference(path, [('TODO', -1)])
+                        return False
+                    recRes = recurseUpwards(parent)
+                    if recRes:
+                        result['parents'].append(recRes)
             return result
-                
+
         res = recurseDownwards(node)
         resUp = recurseUpwards(node)
-        res['parents'] = resUp['parents']
+        if resUp:
+            res['parents'] = resUp['parents']
         return json.dumps(res)
 
     def translateId(self, txt):
