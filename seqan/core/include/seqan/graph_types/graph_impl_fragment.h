@@ -348,10 +348,11 @@ sequenceId(Fragment<TSize, TSpec> const& f,
 
 /**
 .Function.fragmentBegin:
-..signature:fragmentBegin(f,seqNum)
+..signature:fragmentBegin(f, seqId)
 ..param.f:A fragment.
 ...type:Class.Fragment
-..param.seqNum:The sequence number for which the begin position should be retrieved.
+..param.seqId:The sequence id for which the begin position should be retrieved.
+...remarks:Retrieve with @Function.sequenceId@.
 */
 template<typename TSize, typename TSpec, typename TVal>
 inline TSize&
