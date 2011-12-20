@@ -62,10 +62,10 @@ template<typename TValue>
 inline bool
 operator < (Interval<TValue> const & interval1, Interval<TValue> const & interval2)
 {
-    if(interval1.i1 == interval2.i1)
+    if (interval1.i1 == interval2.i1)
         return (interval1.i2 < interval2.i2);
     else
-	return (interval1.i1 < interval2.i1);
+        return (interval1.i1 < interval2.i1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
