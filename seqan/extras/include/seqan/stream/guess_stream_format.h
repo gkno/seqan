@@ -239,19 +239,41 @@ getAutoSeqStreamFormatName(AutoSeqStreamFormat const & format)
 ..returns: $true$ if (one of) the specified Tag(s) tested positive and $False$ otherwise
 ...type:nolink:$bool$
 ..remarks:With the help of @Class.LimitRecordReaderInScope@ these functions do not (permanently) alter the position in the stream.
-..remarks:The tagId-member of the TagSelector holds the index in inside-to-outside order and begins counting at one. E.g. The Index of FASTQ in TagList<Fastq, TagList<Fasta > > would be 2
+..remarks:The tagId-member of the TagSelector holds the index in inside-to-outside order and begins counting at one. E.g. The Index of FASTQ in TagList<Fastq, TagList<Fasta > > would be 2.
 ..include:seqan/stream.h
-..example.text:The following guesses the sequence file format of the already open fstream $in$. After the call to $checkStreamFormat()$, the $tagSelector.tagId$ contains the 1-based index of the matching tag.
-..example.code:RecordReader<std::fstream, SinglePass<> > reader(in);
+..example.text:
+The following example guesses the sequence file format of the already open fstream $in$.
+After the call to $checkStreamFormat()$, the $tagSelector.tagId$ contains the 1-based index of the matching tag.
+Here, we use the @Shortcut.AutoSeqStreamFormat@ tag selector.
+..example.code:
+RecordReader<std::fstream, SinglePass<> > reader(in);
 AutoSeqStreamFormat tagSelector;
 bool b = checkStreamFormat(reader, tagSelector);
 // b is true if any format was detected successfully.
-if (b == 1)
+if (tagSelector.tagId == 1)
     std::cerr << "Detected FASTA." << std::endl;
-else if (b == 2)
+else if (tagSelector.tagId == 2)
     std::cerr << "Detected FASTQ." << std::endl;
 else
     std::cerr << "Unknown file format!" << std::endl;
+..example.text:
+Alternatively, we can define your own tag selector.
+Note that we reverse the order of FASTA and FASTQ in respect to @Shortcut.AutoSeqStreamFormat@
+..example.code:
+typedef TagSelector<TagList<Fasta, TagList<Fastq> > > MyTagSelector;
+
+RecordReader<std::fstream, SinglePass<> > reader(in);
+AutoSeqStreamFormat tagSelector;
+MyTagSelector tagSelector;
+bool b = checkStreamFormat(reader, tagSelector);
+// b is true if any format was detected successfully.
+if (tagSelector.tagId == 1)
+    std::cerr << "Detected FASTQ." << std::endl;
+else if (tagSelector.tagId == 2)
+    std::cerr << "Detected FASTA." << std::endl;
+else
+    std::cerr << "Unknown file format!" << std::endl;
+
 */
 
 // TODO(holtgrew): Rename to guessStreamFormat().
