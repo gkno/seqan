@@ -433,7 +433,7 @@ void addDollarNode(WaveletTreeStructure<TChar, TPointer, TSpec> & structure, TPo
 
 	for(TPointer i = 0; i < length(structure.treeNodes); ++i)
 	{
-		if(structure.treeNodes[i].i2 >= minPos + 2)
+		if(structure.treeNodes[i].i2 > minPos + 2)
 			++structure.treeNodes[i].i2;
 	}
 
