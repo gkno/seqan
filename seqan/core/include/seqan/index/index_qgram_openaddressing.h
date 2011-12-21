@@ -176,8 +176,10 @@ A bucket still stores occurrences (or counts) of the same q-gram, but in contras
 	template < typename TDir, typename THashValue >
 	inline void _qgramClearDir(TDir &dir, BucketMap<THashValue> &bucketMap)
 	{
-		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
-		arrayFill(begin(bucketMap.qgramHash, Standard()), end(bucketMap.qgramHash, Standard()), (THashValue)-1);
+        if (!empty(dir))
+            arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+        if (!empty(bucketMap.qgramHash))
+            arrayFill(begin(bucketMap.qgramHash, Standard()), end(bucketMap.qgramHash, Standard()), (THashValue)-1);
 	}
 
 	// looks up the bucket for the hash
@@ -192,13 +194,13 @@ A bucket still stores occurrences (or counts) of the same q-gram, but in contras
 
 		// check whether bucket map is disabled and
 		// where the hash should be found if no collision took place before
+		register TSize hlen = length(bucketMap.qgramHash);
+		if (hlen == 0ul) return hash;
 #ifdef SEQAN_OPENADDRESSING_COMPACT
-		register TSize hlen = length(bucketMap.qgramHash) - 1;
-		if (hlen == (TSize)-1) return hash;		
+        --hlen;
 		register TSize h1 = (TSize)(hash % hlen);
 #else
-		register TSize hlen = length(bucketMap.qgramHash) - 2;
-		if (hlen == (TSize)-2) return hash;
+        hlen -= 2;
 		register TSize h1 = (TSize)(hash & hlen);
 #endif
 		// -1 is the undefiend value, hence the method works not for the largest word of length 32
@@ -246,13 +248,13 @@ A bucket still stores occurrences (or counts) of the same q-gram, but in contras
 		
 		// check whether bucket map is disabled and
 		// where the hash should be found if no collision took place before
+		register TSize hlen = length(bucketMap.qgramHash);
+		if (hlen == 0ul) return hash;
 #ifdef SEQAN_OPENADDRESSING_COMPACT
-		register TSize hlen = length(bucketMap.qgramHash) - 1;
-		if (hlen == (TSize)-1) return hash;		
+        --hlen;
 		register TSize h1 = (TSize)(hash % hlen);
 #else
-		register TSize hlen = length(bucketMap.qgramHash) - 2;
-		if (hlen == (TSize)-2) return hash;
+        hlen -= 2;
 		register TSize h1 = (TSize)(hash & hlen);
 #endif
 		
