@@ -147,10 +147,25 @@ _parseReadIdentifier(CharString & file, CharString & str, unsigned & c)
 	}
 }
 
+inline void
+_parseReadWordUntilSemicolon(CharString & file, CharString& str, unsigned & c)
+{
+        clear(str);
+        if (c == length(file)) {
+                return;
+        }
+        append(str,file[c]);
+        while (c < length(file) && !(file[c]== ' ' || file[c] == '\t' || file[c] == ';'|| file[c] == '\r'|| file[c] == '\n')) {
+                append(str, c);
+                ++c;
+        }
+        return;
+}   
 
-template <typename TIndel, typename TOptions>
+
+template <typename TIndel, typename TMap, typename TOptions>
 void
-getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TOptions &options )
+getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdNumMap, TOptions &options )
 {
 	unsigned c = 0;
 	CharString temp_str;
@@ -200,7 +215,7 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TOptions &options )
 		}
 		else
 		{
-			if(current_tag=="duplication")indel.duplication = true;
+			if(current_tag=="duplication") indel.duplication = true;
 			else if(current_tag=="seq")
 			{
 				++c;
@@ -209,6 +224,45 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TOptions &options )
 					appendValue(indel.insertionSeq,(Dna5)ninethCol[c]);
 					++c;
 				}
+			}
+			if(current_tag=="endChr") 
+			{
+				++c;
+           		CharString temp_str;
+		        _parseReadWordUntilSemicolon(ninethCol,temp_str,c); 
+        		if(prefix(temp_str,3)=="chr")
+		        	temp_str = suffix(temp_str,3);
+		
+        		int temp;
+//                std::cout << "ninethCol=" <<ninethCol << "END"<< std::endl;
+//                std::cout << "tempstr=" << temp_str << std::endl;
+
+        		//check if the genomeID is in our map of relevant genomeIDs, otherwise use fakeID
+		        typename TMap::iterator it = gIdStringToIdNumMap.find(temp_str);
+		        if(it != gIdStringToIdNumMap.end()) indel.secondGenomeId = it->second;
+                else indel.secondGenomeId = 10000; //disable
+
+			}
+			if(current_tag=="endPos") 
+			{
+				++c;
+		    	int temp = _parseReadNumber(ninethCol,c);
+	    	    if(indel.type == TRANSLOCATION) 
+                {
+                    if(indel.genomeId == indel.secondGenomeId && abs(temp-(int)indel.originalPos) < MAX_DUPLICATION_SIZE)// duplication?
+                    {
+                        indel.type = INSERTION;
+                        indel.duplication = true;
+                        indel.indelSize = -abs(temp-(int)indel.originalPos);
+                    }
+                    else
+                        indel.secondOriginalPos = temp;
+                }
+                if(indel.type == INVERSION)
+                {
+                    indel.indelSize = abs(temp-(int)indel.originalPos);
+                    indel.originalPos = _min(temp,indel.originalPos);
+                }
 			}
 		}
 	}
@@ -287,7 +341,36 @@ int readGFF(
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
 		indel.field3 = temp_str;
-        if(indel.field3 == "inversion" || indel.field2 == "inversion" || indel.field3 == "translocation" || indel.field2 == "translocation" || indel.field3 == "duplication" || indel.field2 == "duplication")
+        bool skip = true;
+        // skip everything that is not an insertion or deletion
+        if(indel.field3 == "insertion" || indel.field2 == "insertion")
+        {
+            indel.type = INSERTION;
+            skip = false;
+        }
+        else if(indel.field3 == "deletion" || indel.field2 == "deletion")
+        {
+            indel.type = DELETION;
+            skip = false;
+        }
+        else if(indel.field3 == "inversion" || indel.field2 == "inversion")
+        {
+            indel.type = INVERSION;
+            skip = false;
+        }
+        else if(indel.field3 == "translocation" || indel.field2 == "translocation")
+        {
+            indel.type = TRANSLOCATION;
+            skip = false;
+        }
+        else if(indel.field3 == "duplication" || indel.field2 == "duplication")
+        {
+            indel.type = INSERTION;
+            indel.duplication = true;
+            skip = false;
+        }
+
+        if(skip)
         {
             _parseSkipLine(file,c);
             continue;
@@ -335,9 +418,11 @@ int readGFF(
 		}
 		if(options._debugLevel > 1) std::cout << "9thcol=" <<  indel.ninethCol << "\n\n";
 		
-		getInfoFromNinethCol(indel.ninethCol,indel,options);
-		
-		appendValue(indelSet,indel);
+		getInfoFromNinethCol(indel.ninethCol,indel,gIdStringToIdNumMap,options);
+    
+        if(indel.type != TRANSLOCATION) 
+            appendValue(indelSet,indel);
+
 		_parseSkipWhitespace(file, c);
 
 /*		_parseReadIdentifier(file,temp_str,c);

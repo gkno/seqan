@@ -28,6 +28,8 @@
 #include <cmath>
 
 #define EPS_PREC 0.00000001
+#define MAX_DUPLICATION_SIZE 400000
+
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -84,12 +86,22 @@ struct IndelCompareOptions
 	
 };
 
+enum SVTypes {
+		INSERTION = 1,
+		DELETION = 2,
+		INVERSION = 3,
+        TRANSLOCATION = 4
+	};
+
 struct IndelInfo{
 	
 	unsigned genomeId;
 	unsigned originalPos;
+	unsigned secondGenomeId;
+	unsigned secondOriginalPos;
 	unsigned simPos;
 	int indelSize;
+    int type;
 	bool duplication;
 	Dna5String insertionSeq;
 	CharString idStr;
@@ -99,6 +111,8 @@ struct IndelInfo{
 	
 	// int percentRepeat;
 };
+
+
 
 //____________________________________________________________________________
 
@@ -122,6 +136,7 @@ struct LessGPos : public ::std::binary_function < TIndel, TIndel, bool >
 template <typename TIndel, typename TOptions>
 bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TOptions &options)
 {
+    if(refIndel.type != predIndel.type) return false;
 	
 	int sizeTol = int((double)abs(refIndel.indelSize) * options.sizeTolerance);
 	if(!(refIndel.indelSize - sizeTol <= predIndel.indelSize && predIndel.indelSize <= refIndel.indelSize + sizeTol))
@@ -132,7 +147,7 @@ bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TOptions &options)
 			&& predIndel.originalPos <= refIndel.originalPos + options.positionTolerance)
 		return true; // matches
 	
-	// if it is a deletion
+	// if it is a deletion or inversion
 	if(refIndel.indelSize > 0) // check if end position matches
 	{
 		if (((int)refIndel.originalPos+refIndel.indelSize-options.positionTolerance
@@ -310,6 +325,7 @@ int compareIndels(
 
 	// rememer stats for each range
 	String<unsigned> rangeCountRef,rangeCountPred,rangeTP,rangeFound;
+    unsigned predInversions = 0, refInversions = 0, inversionsTP = 0, inversionsFound = 0;
 	resize(rangeCountRef,length(options.ranges),0);
 	resize(rangeCountPred,length(options.ranges),0);
 	resize(rangeTP,length(options.ranges),0);         // to calculate FP
@@ -317,11 +333,19 @@ int compareIndels(
 	for(unsigned j = 0; j < length(options.ranges); ++j)
 	{
 		for(TIndelIt it = begin(refIndels); it != end(refIndels); ++it)
-			if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
-				++rangeCountRef[j];
+        {
+            if((*it).type == INVERSION) ++refInversions;
+            else
+    			if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
+	    			++rangeCountRef[j];
+        }
 		for(TIndelIt it = begin(predIndels); it != end(predIndels); ++it)
-			if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
-				++rangeCountPred[j];
+        {
+            if((*it).type == INVERSION) ++predInversions;
+            else
+	    		if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
+    				++rangeCountPred[j];
+        }
 	}
 	CharString tagAttach = ";";
 	if(*options.attachTag != 0) append(tagAttach,options.attachTag);
@@ -460,9 +484,12 @@ int compareIndels(
 			if(predFound)
 			{
 				++TP;
-				for(unsigned j = 0; j < length(options.ranges); ++j)
-					if(options.ranges[j].i1 <= predIndel.indelSize && predIndel.indelSize < options.ranges[j].i2)
-						++rangeTP[j];
+                if(predIndel.type == INVERSION)
+                    ++inversionsTP;
+                else
+    				for(unsigned j = 0; j < length(options.ranges); ++j)
+	    				if(options.ranges[j].i1 <= predIndel.indelSize && predIndel.indelSize < options.ranges[j].i2)
+		    				++rangeTP[j];
 			}
 			else
 			{
@@ -478,9 +505,13 @@ int compareIndels(
 
 	for(foundSetIt = refFoundSet.begin(); foundSetIt != refFoundSet.end(); ++foundSetIt)
 	{
-		for(unsigned j = 0; j < length(options.ranges); ++j)
-			if(options.ranges[j].i1 <= refIndels[*foundSetIt].indelSize && refIndels[*foundSetIt].indelSize < options.ranges[j].i2)
-				++rangeFound[j];
+        if(refIndels[*foundSetIt].type == INVERSION)
+            ++inversionsFound;
+        else   
+            for(unsigned j = 0; j < length(options.ranges); ++j)
+	    		if(options.ranges[j].i1 <= refIndels[*foundSetIt].indelSize && refIndels[*foundSetIt].indelSize < options.ranges[j].i2)
+		    		++rangeFound[j];
+                
 	}
 
 	// optionally append non-overlapped reference indels to output file
@@ -502,6 +533,14 @@ int compareIndels(
 		file << "# Number of FP predictions  : " << rangeCountPred[j]-rangeTP[j] << ::std::endl;
 		file << "# Number of FN predictions  : " << rangeCountRef[j]-rangeFound[j] << ::std::endl;
 	}
+
+    file << "###################################################" << ::std::endl;
+	file << "# Inversion Stats: " << ::std::endl;
+	file << "# Number of reference inversions: " << refInversions << ::std::endl;
+	file << "# Number of predicted inversions: " << predInversions << ::std::endl;
+	file << "# Number of TP predictions  : " << inversionsTP << ::std::endl;
+	file << "# Number of FP predictions  : " << predInversions-inversionsTP << ::std::endl;
+	file << "# Number of FN predictions  : " << refInversions-inversionsFound << ::std::endl;
 
 	file.close();
 
