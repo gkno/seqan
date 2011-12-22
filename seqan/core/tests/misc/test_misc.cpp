@@ -56,6 +56,7 @@
 
 #include "test_misc_long_word.h"
 #include "test_misc_interval_tree.h"
+#include "test_misc_accumulators.h"
 
 using namespace std;
 using namespace seqan;
@@ -98,21 +99,15 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
     SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_FindIntervalsIntervals__int_ComputeCenter);
     SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_Random__int_RandomCenter_StorePointsOnly);
 
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_int_average);
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_int_count);
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_int_sum);
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_int_clear);
 
-
-    // Verify checkpoints.
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/edit_environment.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_cmdparser.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_dequeue.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_map.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_long_word.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_parsing.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_random.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_set.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/priority_type_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/priority_type_heap.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/misc/misc_interval_tree.h");
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_double_average);
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_double_count);
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_double_sum);
+    SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_double_clear);
 }
 SEQAN_END_TESTSUITE
 

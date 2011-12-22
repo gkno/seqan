@@ -451,7 +451,7 @@ template <typename T>
 void TestExtremeValuesSigned()
 {
 	long double minVal = -1;
-	for(int e = 1; e < BitsPerValue<T>::VALUE; ++e)
+	for(unsigned e = 1; e < BitsPerValue<T>::VALUE; ++e)
 		minVal = 2*minVal;
 
 	long double maxVal = -minVal - 1;
@@ -480,7 +480,7 @@ template <typename T>
 void TestExtremeValuesUnsigned()
 {
 	long double maxVal = 1;
-	for(int e = 0; e < BitsPerValue<T>::VALUE; ++e)
+	for(unsigned e = 0; e < BitsPerValue<T>::VALUE; ++e)
 		maxVal = 2*maxVal;
 	maxVal = maxVal - 1;
 
