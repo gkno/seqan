@@ -49,6 +49,7 @@ template<typename TSpec = IndelCheck>
 struct IndelCompareOptions
 {
 	const char *output; 	    // output file for statistics and shared indels
+	const char *outputFN; 	    // output file for statistics and shared indels
 	const char *inputReference;	// reference indels in gff format
 	const char *inputPredicted;	// predicted indels in gff format
 
@@ -64,6 +65,7 @@ struct IndelCompareOptions
 	IndelCompareOptions()
 	{
 		output = "";		
+		outputFN = "";		
 		inputReference = "";		
 		inputPredicted = "";		
 		
@@ -211,8 +213,9 @@ bool write(TFile &file, IndelInfo &refIndel, CharString &genomeID, CharString &t
 	else
 	{
 		file << "ID=" << refIndel.idStr << ";size=" << refIndel.indelSize;
-		if(refIndel.duplication) file << ";duplication=1";
+//		if(refIndel.duplication) file << ";duplication=1";
 	}
+	if(refIndel.duplication) file << ";duplication=1";
 	
 	file << toCString(tagAppend) << std::endl;
 	
@@ -334,19 +337,20 @@ int compareIndels(
 	{
 		for(TIndelIt it = begin(refIndels); it != end(refIndels); ++it)
         {
-            if((*it).type == INVERSION) ++refInversions;
-            else
-    			if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
-	    			++rangeCountRef[j];
+    		if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
+	    		++rangeCountRef[j];
         }
 		for(TIndelIt it = begin(predIndels); it != end(predIndels); ++it)
         {
-            if((*it).type == INVERSION) ++predInversions;
-            else
-	    		if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
-    				++rangeCountPred[j];
+	    	if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
+   				++rangeCountPred[j];
         }
 	}
+    for(TIndelIt it = begin(refIndels); it != end(refIndels); ++it)
+        if((*it).type == INVERSION) ++refInversions;
+	for(TIndelIt it = begin(predIndels); it != end(predIndels); ++it)
+        if((*it).type == INVERSION) ++predInversions;
+ 
 	CharString tagAttach = ";";
 	if(*options.attachTag != 0) append(tagAttach,options.attachTag);
 	else append(tagAttach,"matchID");
@@ -513,6 +517,35 @@ int compareIndels(
 		    		++rangeFound[j];
                 
 	}
+
+	if(*options.outputFN != 0)
+    {
+        ::std::ofstream fileFN;
+	    fileFN.open(options.outputFN, ::std::ios_base::out | ::std::ios_base::trunc);
+    	if (!fileFN.is_open()) {
+	    	::std::cerr << "\nFailed to open FN output file" << ::std::endl;
+	    	return 1;
+    	}
+
+		CharString tagAppend = ";notMatched";
+        int currentId = 0;
+        for(foundSetIt = refFoundSet.begin(); foundSetIt != refFoundSet.end(); ++foundSetIt)
+    	{
+            while (*foundSetIt > currentId)
+            {
+			    write(fileFN,refIndels[currentId],genomeIDs[refIndels[currentId].genomeId],tagAppend,options);
+                ++currentId;
+            }
+            ++currentId;
+        }            
+        while (currentId < length(refIndels))
+        {
+		    write(fileFN,refIndels[currentId],genomeIDs[refIndels[currentId].genomeId],tagAppend,options);
+            ++currentId;
+        }
+        fileFN.close(); 
+	}
+
 
 	// optionally append non-overlapped reference indels to output file
 	file << "###################################################" << ::std::endl;

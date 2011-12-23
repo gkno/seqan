@@ -154,9 +154,8 @@ _parseReadWordUntilSemicolon(CharString & file, CharString& str, unsigned & c)
         if (c == length(file)) {
                 return;
         }
-        append(str,file[c]);
-        while (c < length(file) && !(file[c]== ' ' || file[c] == '\t' || file[c] == ';'|| file[c] == '\r'|| file[c] == '\n')) {
-                append(str, c);
+        while (c < length(file) && _parseIsAlphanumericChar(file[c]) && file[c] != ';'){//!(file[c]== ' ' || file[c] == '\t' || file[c] == ';'|| file[c] == '\r'|| file[c] == '\n')) {
+                append(str, file[c]);
                 ++c;
         }
         return;
@@ -234,8 +233,6 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdN
 		        	temp_str = suffix(temp_str,3);
 		
         		int temp;
-//                std::cout << "ninethCol=" <<ninethCol << "END"<< std::endl;
-//                std::cout << "tempstr=" << temp_str << std::endl;
 
         		//check if the genomeID is in our map of relevant genomeIDs, otherwise use fakeID
 		        typename TMap::iterator it = gIdStringToIdNumMap.find(temp_str);
@@ -513,6 +510,7 @@ void printHelp(int, const char *[],TOptions &, bool longHelp = false)
 		cerr << "  -ip,  --input-predicted FILE     \t" << "input gff file containing predicted indels" << endl;
 		cerr << "  -ir,  --input-reference FILE     \t" << "input gff file containing reference indels" << endl;
 		cerr << "  -o,   --output FILE              \t" << "output filename" << endl;
+		cerr << "  -on,  --outputFN FILE            \t" << "output filename for false negatives (unmatched reference indels)" << endl;
 		cerr << "  -pt,  --position-tolerance NUM   \t" << "position tolerance in bp" << endl;
 		cerr << "  -st,  --size-tolerance NUM       \t" << "size tolerance in percent" << endl;
 		cerr << "  -sc,  --sequence-context         \t" << "switch on sequence-context mode" << endl;
@@ -621,6 +619,15 @@ int main(int argc, const char *argv[])
 				}
 				++arg;
 				options.attachTag = argv[arg];
+				continue;
+			}
+			if (strcmp(argv[arg], "-on") == 0 || strcmp(argv[arg], "--outputFN") == 0) {
+				if (arg + 1 == argc) {
+					printHelp(argc, argv, options);
+					return 0;
+				}
+				++arg;
+				options.outputFN = argv[arg];
 				continue;
 			}
 			if (strcmp(argv[arg], "-o") == 0 || strcmp(argv[arg], "--output") == 0) {
