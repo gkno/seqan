@@ -882,7 +882,7 @@ annotationGetValueByKey (
 		return false;
 	
 	assign(value, annotation.values[keyId]);
-  return true;
+    return true;
 }
 
 template <typename TSpec, typename TConfig, typename TAnnotation, typename TKey>
