@@ -1907,9 +1907,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TSpec>
 	inline void _wotdCreateFirstLevel(Index<TText, IndexWotd<TSpec> > &index)
 	{
-		typedef Index<TText, IndexWotd<TSpec> >	TIndex;
-		typedef typename Value<TIndex>::Type		TValue;
-		typedef typename Size<TIndex>::Type			TSize;
+        typedef Index<TText, IndexWotd<TSpec> > TIndex;
+        typedef typename Value<TIndex>::Type    TValue;
+        typedef typename Size<TIndex>::Type     TSize;
 
 		resize(index.tempOcc, ValueSize<TValue>::VALUE + 1);
 		resize(index.tempBound, ValueSize<TValue>::VALUE + 1);
@@ -1975,6 +1975,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		const char *fileName,
 		int openMode)
 	{
+        typedef Index<TText, IndexWotd<TSpec> > TIndex;
+        typedef typename Value<TIndex>::Type    TValue;
+
 		String<char> name;
 		name = fileName;	append(name, ".txt");
 		bool result = true;
@@ -1983,6 +1986,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			result = false;
 		name = fileName;	append(name, ".sa");	open(getFibre(index, WotdSA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	open(getFibre(index, WotdDir()), toCString(name), openMode);
+        if (!empty(getFibre(index, WotdDir())))
+        {
+            resize(index.tempOcc, ValueSize<TValue>::VALUE + 1);
+            resize(index.tempBound, ValueSize<TValue>::VALUE + 1);
+        }
 		return result;
 	}
 	template < typename TText, typename TSpec >
