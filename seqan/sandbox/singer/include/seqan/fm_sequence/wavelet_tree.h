@@ -936,29 +936,16 @@ inline void createWaveletTree(WaveletTree<TText, TWaveletTreeSpec> & tree,
     typedef typename Value<TWaveletTreeStructureEntry, 2>::Type TPointer;
     typedef typename Size<typename Value<TText>::Type>::Type TSize;
 
+
     //generate the tree structure
     TSize sigmaSize = length(freq);
     TPointer numberOfTreeNodes = sigmaSize - 1;
-    resize(tree.splitValues, numberOfTreeNodes);//, Pair<TChar, TPointer>(0, 0));
-
-   // typename Iterator<TSplitValues>::Type iter(tree.splitValues, 0);
+    resize(tree.splitValues, numberOfTreeNodes);
     computeTreeEntries(freq,
     		tree.splitValues);
-
     numberOfTreeNodes = getNumNodes(tree);
     resize(tree.splitValues,numberOfTreeNodes);
-//    //writeGraph(tree.splitValues);
-//
-//    String<unsigned long long> lengthString;
-//    computeStringLengthFromTree(lengthString,
-//                                prefixSumTable,
-//                                tree.splitValues);
-////
     resize(tree.bitStrings, numberOfTreeNodes);
-//    for (unsigned i = 0; i < numberOfTreeNodes; ++i)
-//    {
-//        reserve(tree.bitStrings[i], lengthString[i]);
-//    }
 
     fillWaveletTree(tree, bwt);
 }
