@@ -119,14 +119,23 @@ struct RankSupportBitString
         resize(superBucketString, length(bucketString) / bitsPerSuperBucketStringEntrie);
     }
 
-    RankSupportBitString & operator=(const RankSupportBitString & cp)
+    RankSupportBitString & operator=(RankSupportBitString const & other)
     {
-        length = cp.length;
-        bitString = cp.bitString;
-        bucketString = cp.bucketString;
-        superBucketString = cp.superBucketString;
-        return *this;
+    	bitString = other.bitString;
+    	bucketString = other.bucketString;
+    	superBucketString = other.superBucketString;
+    	length = other.length;
+    	return *this;
     }
+
+//    RankSupportBitString & operator=(const RankSupportBitString & cp)
+//    {
+//        length = cp.length;
+//        bitString = cp.bitString;
+//        bucketString = cp.bucketString;
+//        superBucketString = cp.superBucketString;
+//        return *this;
+//    }
 
     bool operator==(const RankSupportBitString & b) const
     {
@@ -340,6 +349,7 @@ bool getBit(String<bool> & bitString, TPos & pos)
 template <typename TSpec, typename TPos>
 bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 {
+	//std::cerr << "0bitString: " << length(bitString) << std::endl;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Value<TBitString>::Type TValue;
     TValue bitsPerValue = BitsPerValue<TValue>::VALUE;
@@ -351,7 +361,7 @@ bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 template <typename TSpec, typename TPos>
 bool getBit(RankSupportBitString<TSpec> const & bitString, TPos pos)
 {
-
+//	std::cerr << "1bitString: " << length(bitString) << std::endl;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Value<TBitString>::Type TValue;
     TValue bitsPerValue = BitsPerValue<TValue>::VALUE;

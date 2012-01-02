@@ -93,6 +93,13 @@ struct WaveletTreeStructure
 
     }
 
+    WaveletTreeStructure & operator=(WaveletTreeStructure const & other)
+    {
+    	treeNodes = other.treeNodes;
+    	minCharValue = other.minCharValue;
+    	return *this;
+    }
+
     bool operator==(const WaveletTreeStructure & b) const
     {
         return treeNodes == b.treeNodes;

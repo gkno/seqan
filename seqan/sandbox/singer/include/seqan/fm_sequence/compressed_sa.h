@@ -53,6 +53,13 @@ struct LFTable
         prefixSumTable(prefixSumTable)
     {}
 
+    LFTable & operator=(LFTable const & other)
+    {
+    	occTable = other.occTable;
+    	prefixSumTable = other.prefixSumTable;
+    	return *this;
+    }
+
     bool operator==(const LFTable & b) const
     {
         return occTable == b.occTable &&
@@ -181,20 +188,33 @@ struct CompressedSA
     	lfTable()
     {}
 
+    CompressedSA & operator=(CompressedSA const & other)
+    {
+    	compressedSA = other.compressedSA;
+    	lfTable = other.lfTable;
+    	return *this;
+    }
+
     typedef typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type TCompressedSaValue;
     typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
 
     template <typename TPos>
     TCompressedSaValue const operator[](TPos pos)
     {
-        TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
-        TPos counter = 0;
-        while (!getBit(indicatorString, pos))
-        {
-            pos = lfMapping(*lfTable, pos);
-            ++counter;
-        }
-        return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
+    	TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
+    	TPos counter = 0;
+
+    	//std::cerr << length((*lfTable).occTable.bitStrings) << std::endl;
+    	//std::cerr << "compressed0" << std::endl;
+    	while (!getBit(indicatorString, pos))
+    	{
+    		//std::cerr << "compressed1" << std::endl;
+    		pos = lfMapping(*lfTable, pos);
+    		//std::cerr << "compressed2" << std::endl;
+    		++counter;
+    	}
+    	//std::cerr << "compressed3" << std::endl;
+    	return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
     }
 
     template <typename TPos>
@@ -202,11 +222,15 @@ struct CompressedSA
     {
         TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
         TPos counter = 0;
+        //std::cerr << "compressed0" << std::endl;
         while (!getBit(indicatorString, pos))
         {
+          //  std::cerr << "compressed1" << std::endl;
             pos = lfMapping(*lfTable, pos);
+           // std::cerr << "compressed2" << std::endl;
             ++counter;
         }
+       // std::cerr << "compressed3" << std::endl;
         return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
     }
 

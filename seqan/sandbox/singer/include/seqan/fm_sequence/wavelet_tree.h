@@ -92,6 +92,13 @@ struct WaveletTree
         createWaveletTree(*this, text, freqTable, prefixSumTable);
     }
 
+    WaveletTree & operator=(WaveletTree const & other)
+    {
+    	bitStrings = other.bitStrings;
+    	splitValues = other.splitValues;
+    	return *this;
+    }
+
     bool operator==(const WaveletTree & b) const
     {
         typedef typename Size<TText>::Type                            TSize;
@@ -516,13 +523,19 @@ getCharacter(const WaveletTree<TText, TWaveletTreeSpec> & tree,
     TPos sum = pos + 1;
     TPointer treePos = 0;
 
+    //std::cerr << "getChar0" << std::endl;
+
     typename Iterator<const TSplitValues>::Type iter(tree.splitValues, treePos);
     bool direction;
     TChar character = tree.splitValues.minCharValue;
+    //std::cerr << "getChar1" << std::endl;
     do
     {
+       // std::cerr << "getChar2 " << (int)treePos << " " << length(tree.bitStrings) << " " << pos << " "  << sum -1 << std::endl;
         direction = getBit(tree.bitStrings[treePos], sum - 1);
+        //std::cerr << "getChar2.1" << std::endl;
         TPos addValue = getRank(tree.bitStrings[treePos], sum - 1);
+        //std::cerr << "getChar2.2" << std::endl;
         if (direction)
         {
             character = getCharacter(iter);// + 1;
@@ -535,7 +548,9 @@ getCharacter(const WaveletTree<TText, TWaveletTreeSpec> & tree,
             sum -= addValue;
             goLeft(iter);
         }
+        //std::cerr << "getChar3" << std::endl;
         treePos = getPosition(iter);
+        //std::cerr << "getChar4" << std::endl;
     }
     while (treePos);
 

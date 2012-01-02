@@ -75,6 +75,14 @@ struct SparseString
     	blockSize(0)
     {}
 
+    SparseString & operator=(SparseString const & other)
+    {
+    	string = other.string;
+    	indicatorString = other.indicatorString;
+    	blockSize = other.blockSize;
+    	return *this;
+    }
+
     bool operator==(const SparseString & b) const
     {
         return string == b.string &&
