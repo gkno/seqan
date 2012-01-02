@@ -538,7 +538,7 @@ int compareIndels(
             }
             ++currentId;
         }            
-        while (currentId < length(refIndels))
+        while (currentId < (int)length(refIndels))
         {
 		    write(fileFN,refIndels[currentId],genomeIDs[refIndels[currentId].genomeId],tagAppend,options);
             ++currentId;

@@ -232,8 +232,6 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdN
         		if(prefix(temp_str,3)=="chr")
 		        	temp_str = suffix(temp_str,3);
 		
-        		int temp;
-
         		//check if the genomeID is in our map of relevant genomeIDs, otherwise use fakeID
 		        typename TMap::iterator it = gIdStringToIdNumMap.find(temp_str);
 		        if(it != gIdStringToIdNumMap.end()) indel.secondGenomeId = it->second;
@@ -258,7 +256,7 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdN
                 if(indel.type == INVERSION)
                 {
                     indel.indelSize = abs(temp-(int)indel.originalPos);
-                    indel.originalPos = _min(temp,indel.originalPos);
+                    indel.originalPos = _min(temp,(int)indel.originalPos);
                 }
 			}
 		}
@@ -293,7 +291,7 @@ int readGFF(
 	char c = _streamGet(file);
 	while (!_streamEOF(file))
 	{
-		TIndel indel = {0,0,0,0,0,0,0,0,0,0};
+		TIndel indel = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 		
 		if(c == '#')
 			_parseSkipLine(file,c);	
@@ -381,7 +379,10 @@ int readGFF(
 		// skip whitespaces and read entry in column 5  --> genomic end position // not needed here
 		_parseSkipWhitespace(file, c);
 		indel.indelSize = _parseReadNumber(file,c) - indel.originalPos;
-		
+		if(indel.indelSize > 0 && indel.type == INSERTION)
+        {
+            indel.indelSize = -indel.indelSize;
+        }
 		// skip whitespaces and read entry in column 6  --> score (percent identity or mapping quality) or a '.'
 		int readSupport = 1000; //  --> no information about read support (reference indel)
 		_parseSkipWhitespace(file, c);
