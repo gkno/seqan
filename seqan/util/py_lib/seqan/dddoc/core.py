@@ -904,6 +904,32 @@ def generateInheritedElements(tree):
         to_do = all_paths - done - set(depends_on.keys())
 
 
+def removeDuplicateTexts(tree):
+    """Remove duplicates from texts members.
+
+    Suffixes starting with '\u0001' are ignored for the comparisons
+    and strings with these suffixes are preferred.
+    """
+    ##print 'remove duplicates'
+    def recurse(node):
+        cleaned = []
+        for txt in sorted(node.texts):
+            clean = txt
+            pos = txt.find('\u0001')
+            if pos != -1:
+                clean = txt[:pos]
+            ##print cleaned, repr(clean)
+            if cleaned and cleaned[-1] == clean:
+                cleaned[-1] = txt
+            else:
+                cleaned.append(txt)
+        node.texts = cleaned
+        for child in node.children.itervalues():
+            recurse(child)
+    for child in tree.root.children.itervalues():
+        recurse(child)
+
+
 # TODO(holtgrew): If needed, this could easily be generalized.
 def buildByTypeAndCatIndex(tree):
     """Build an index into the given DddocTree.
@@ -984,6 +1010,8 @@ class App(object):
         generateAutomaticReferences(self.dddoc_tree)
         # Perform inheritance as configured in global configuration.
         generateInheritedElements(self.dddoc_tree)
+        # Clean duplicates from 'texts' members
+        removeDuplicateTexts(self.dddoc_tree)
         # Move inline summaries into .summary children.
         processInlineSummaries(self.dddoc_tree, SUMMARY_PATHS)
         # Finally, after all modifications, enable caching and build indices in

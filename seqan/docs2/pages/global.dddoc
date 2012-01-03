@@ -60,8 +60,8 @@
 ..conceptmetafunc:Required Metafunctions
 ..conceptusedbymeta:Used By Metafunction
 ..conceptusedbyfunc:Used By Function
-..baseconcept:Extends
-..childconcept:Refinements
+..baseconcept:Refines
+..childconcept:Is Refined By
 ..shortcut:Shortcuts
 ..shortcutfor:Shortcut for
 ..output:Output
@@ -120,10 +120,14 @@
 .globals.inherit:
 ..implements:general
 ..type:general
+..type:implements.conceptmetafunc
 ..type:baseconcept.conceptusedbymeta
+..memvar:implements
 ..memvar:base
 ..typedef:base
 ..memfunc:general
+..function:conceptfunc
+..function:implements
 ..function:general
 ..function:baseconcept.conceptusedbyfunc
 ..conceptmetafunc:baseconcept
@@ -140,7 +144,7 @@
 ..Class:spec
 ..Class:derived
 ..Spec:spec
-..Spec:derived
+..Spec:derived:
 .
 .globals.treeup:
 ..Concept:baseconcept
