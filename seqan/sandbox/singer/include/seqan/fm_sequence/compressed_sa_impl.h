@@ -56,41 +56,41 @@ void assignValue(CompressedSA<TSparseString, TLfTable, TSpec> & container, TPos 
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-typename Size<typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type>::Type
+inline typename Size<typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSparseString>::Type>::Type
 length(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     return length(compressedSA.compressedSA);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+inline void clear(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     clear(compressedSA.compressedSA);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-typename Size<typename Fibre<TSparseString, FibreSparseString>::Type>::Type
+inline typename Size<typename Fibre<TSparseString, FibreSparseString>::Type>::Type
 getBlockSize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     return getBlockSize(compressedSA.compressedSA);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
-void resize(CompressedSA<TSparseString, TLfTable, TSpec> & container, TSize size)
+inline void resize(CompressedSA<TSparseString, TLfTable, TSpec> & container, TSize size)
 {
 	//std::cerr << "resize: " << size << std::endl;
     resize(container.compressedSA, size);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
-void resize(CompressedSA<String<TSparseString>, TLfTable, TSpec> & container, TSize size)
+inline void resize(CompressedSA<String<TSparseString>, TLfTable, TSpec> & container, TSize size)
 {
 	//std::cerr << "resize: " << size << std::endl;
     resize(container.compressedSA, size);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
-void reserve(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
+inline void reserve(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
              TSize size)
 {
 	//std::cerr << "reserve: " << size << std::endl;
@@ -110,26 +110,28 @@ struct Reference<const CompressedSA<TSparseString, TLfTable, TSpec> >
 };
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-Iterator<CompressedSA<TSparseString, TLfTable, TSpec> > begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+inline Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >
+begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     return Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >(compressedSA, 0);
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-Iterator<CompressedSA<TSparseString, TLfTable, TSpec> > end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+inline Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >
+end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 {
     return Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >(compressedSA, length(compressedSA.compressedSA));
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type
+inline typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type
 value(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
 {
     return compressedSA[pos];
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type const
+inline typename Value<typename Fibre<TSparseString, FibreSparseString>::Type>::Type const
 value(const CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos pos)
 {
 //		TSparseString test;

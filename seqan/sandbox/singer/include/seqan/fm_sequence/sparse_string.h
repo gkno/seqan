@@ -75,7 +75,7 @@ struct SparseString
     	blockSize(0)
     {}
 
-    SparseString & operator=(SparseString const & other)
+    inline SparseString & operator=(SparseString const & other)
     {
     	string = other.string;
     	indicatorString = other.indicatorString;
@@ -83,7 +83,7 @@ struct SparseString
     	return *this;
     }
 
-    bool operator==(const SparseString & b) const
+    inline bool operator==(const SparseString & b) const
     {
         return string == b.string &&
                indicatorString == b.indicatorString &&
@@ -93,28 +93,28 @@ struct SparseString
 
 };
 template <typename TSparseString, typename TSpec>
-typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type &
+inline typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type &
 getFibre(SparseString<TSparseString, TSpec> & sparseString, FibreSparseString)
 {
     return sparseString.string;
 }
 
 template <typename TSparseString, typename TSpec>
-typename Fibre<SparseString<TSparseString, TSpec>, FibreIndicatorString>::Type &
+inline typename Fibre<SparseString<TSparseString, TSpec>, FibreIndicatorString>::Type &
 getFibre(SparseString<TSparseString, TSpec> & sparseString, FibreIndicatorString)
 {
     return sparseString.indicatorString;
 }
 
 template <typename TSparseString, typename TSpec>
-typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type const &
+inline typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type const &
 getFibre(SparseString<TSparseString, TSpec> const & sparseString, FibreSparseString)
 {
     return sparseString.string;
 }
 
 template <typename TSparseString, typename TSpec>
-typename Fibre<SparseString<TSparseString, TSpec>, FibreIndicatorString>::Type const &
+inline typename Fibre<SparseString<TSparseString, TSpec>, FibreIndicatorString>::Type const &
 getFibre(SparseString<TSparseString, TSpec> const & sparseString, FibreIndicatorString)
 {
     return sparseString.indicatorString;
@@ -153,55 +153,55 @@ struct Value<SparseString<TSparseString, TSpec> const>
 };
 
 template <typename TSparseString, typename TSpec, typename TValue>
-void assignBlockSize(SparseString<TSparseString, TSpec> & string, TValue value)
+inline void assignBlockSize(SparseString<TSparseString, TSpec> & string, TValue value)
 {
     //std::cerr << "sparse" << std::endl;
     string.blockSize = value;
 }
 
 template <typename TSparseString, typename TSpec, typename TPos, typename TValue>
-void assignValue(SparseString<TSparseString, TSpec> & string, TPos pos, TValue value)
+inline void assignValue(SparseString<TSparseString, TSpec> & string, TPos pos, TValue value)
 {
     string.string[pos] = value;
 }
 
 template <typename TSparseString, typename TSpec>
-typename Size<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
+inline typename Size<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
 getBlockSize(SparseString<TSparseString, TSpec> & string)
 {
     return string.blockSize;
 }
 
 template <typename TSparseString, typename TSpec, typename TPos>
-typename Value<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
+inline typename Value<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
 getValue(SparseString<TSparseString, TSpec> & string, TPos pos)
 {
     return getValue(string.string, pos);
 }
 
 template <typename TSparseString, typename TSpec, typename TPos>
-typename Value<typename Fibre<SparseString<TSparseString, TSpec> const, FibreSparseString>::Type>::Type
+inline typename Value<typename Fibre<SparseString<TSparseString, TSpec> const, FibreSparseString>::Type>::Type
 getValue(SparseString<TSparseString, TSpec> const & string, TPos pos)
 {
     return getValue(string.string, pos);
 }
 
 template <typename TSparseString, typename TSpec>
-typename Size<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
+inline typename Size<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
 length(SparseString<TSparseString, TSpec> & string)
 {
     return length(string.string);
 }
 
 template <typename TSparseString, typename TSpec>
-void clear(SparseString<TSparseString, TSpec> & string)
+inline void clear(SparseString<TSparseString, TSpec> & string)
 {
     clear(string.string);
     clear(string.indicatorString);
 }
 
 template <typename TSparseString, typename TSpec, typename TSize>
-void resize(SparseString<TSparseString, TSpec> & string,
+inline void resize(SparseString<TSparseString, TSpec> & string,
             TSize size)
 {
     resize(getFibre(string, FibreSparseString()), size / getBlockSize(string) + 1);
@@ -209,14 +209,14 @@ void resize(SparseString<TSparseString, TSpec> & string,
 }
 
 template <typename TSparseString, typename TSpec, typename TPos>
-typename Value<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
+inline typename Value<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type
 value(SparseString<TSparseString, TSpec> & string, TPos pos)
 {
     return string.string[pos];
 }
 
 template <typename TSparseString, typename TSpec, typename TPos>
-typename Value<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type const
+inline typename Value<typename Fibre<SparseString<TSparseString, TSpec>, FibreSparseString>::Type>::Type const
 value(SparseString<TSparseString, TSpec> const & string, TPos pos)
 {
     return string.string[pos];

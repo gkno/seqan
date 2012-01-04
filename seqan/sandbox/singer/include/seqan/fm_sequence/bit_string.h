@@ -119,7 +119,7 @@ struct RankSupportBitString
         resize(superBucketString, length(bucketString) / bitsPerSuperBucketStringEntrie);
     }
 
-    RankSupportBitString & operator=(RankSupportBitString const & other)
+    inline RankSupportBitString & operator=(RankSupportBitString const & other)
     {
     	bitString = other.bitString;
     	bucketString = other.bucketString;
@@ -137,7 +137,7 @@ struct RankSupportBitString
 //        return *this;
 //    }
 
-    bool operator==(const RankSupportBitString & b) const
+    inline bool operator==(const RankSupportBitString & b) const
     {
         return length == b.length &&
                bitString == b.bitString &&
@@ -146,7 +146,7 @@ struct RankSupportBitString
     }
 
     template <typename TPos>
-    typename Value<TSuperBucketString>::Type const operator[](TPos pos)
+    inline typename Value<TSuperBucketString>::Type const operator[](TPos pos)
     {
         unsigned const bitsPerBucket = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
         return bitString[pos / bitsPerBucket];
@@ -155,49 +155,49 @@ struct RankSupportBitString
 };
 
 template <typename TSpec>
-typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type &
+inline typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type &
 getFibre(RankSupportBitString<TSpec> & string, const FibreRankSupportBitString)
 {
     return string.bitString;
 }
 
 template <typename TSpec>
-typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type const &
+inline typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type const &
 getFibre(RankSupportBitString<TSpec> const & string, const FibreRankSupportBitString)
 {
     return string.bitString;
 }
 
 template <typename TSpec>
-typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>::Type &
+inline typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>::Type &
 getFibre(RankSupportBitString<TSpec> & string, const FibreRankSupportBucketString)
 {
     return string.bucketString;
 }
 
 template <typename TSpec>
-typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>::Type const &
+inline typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>::Type const &
 getFibre(RankSupportBitString<TSpec> const & string, const FibreRankSupportBucketString)
 {
     return string.bucketString;
 }
 
 template <typename TSpec>
-typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type &
+inline typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type &
 getFibre(RankSupportBitString<TSpec> & string, const FibreRankSupportSuperBucketString)
 {
     return string.superBucketString;
 }
 
 template <typename TSpec>
-typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type const &
+inline typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type const &
 getFibre(const RankSupportBitString<TSpec> & string, const FibreRankSupportSuperBucketString)
 {
     return string.superBucketString;
 }
 
 template <typename TValue>
-void printBits(TValue entrie)
+inline void printBits(TValue entrie)
 {
     unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue one = 1;
@@ -213,7 +213,7 @@ void printBits(TValue entrie)
 }
 
 template <typename TValue, typename TSize>
-std::ostream & printBits(std::ostream & stream, TValue entrie, TSize blockSize)
+inline std::ostream & printBits(std::ostream & stream, TValue entrie, TSize blockSize)
 {
     unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
     bool temp;
@@ -228,7 +228,7 @@ std::ostream & printBits(std::ostream & stream, TValue entrie, TSize blockSize)
 }
 
 template <typename TSpec>
-std::ostream & operator<<(std::ostream & stream, const RankSupportBitString<TSpec> & rankSupportBitString)
+inline std::ostream & operator<<(std::ostream & stream, const RankSupportBitString<TSpec> & rankSupportBitString)
 {
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>::Type             TBucketString;
@@ -266,7 +266,7 @@ std::ostream & operator<<(std::ostream & stream, const RankSupportBitString<TSpe
 }
 
 template <typename TSpec, typename TSize>
-void reserve(RankSupportBitString<TSpec> & rankSupportBitString, TSize size)
+inline void reserve(RankSupportBitString<TSpec> & rankSupportBitString, TSize size)
 {
     //rankSupportBitString.length = 0;
 
@@ -286,14 +286,14 @@ void reserve(RankSupportBitString<TSpec> & rankSupportBitString, TSize size)
 }
 
 template <typename TSpec, typename TSize>
-void resize(RankSupportBitString<TSpec> & rankSupportBitString, TSize size)
+inline void resize(RankSupportBitString<TSpec> & rankSupportBitString, TSize size)
 {
     reserve(rankSupportBitString, size);
     rankSupportBitString.length = size;
 }
 
 template <typename TSpec, typename TSize, typename TValue>
-void resize(RankSupportBitString<TSpec> & rankSupportBitString, TSize size, TValue value)
+inline void resize(RankSupportBitString<TSpec> & rankSupportBitString, TSize size, TValue value)
 {
     rankSupportBitString.length = size;
 
@@ -323,7 +323,7 @@ length(RankSupportBitString<TSpec> const & rankSupportBitString)
 }
 
 template <typename TSpec>
-void clear(RankSupportBitString<TSpec> & rankSupportBitString)
+inline void clear(RankSupportBitString<TSpec> & rankSupportBitString)
 {
     clear(rankSupportBitString.bitString);
     clear(rankSupportBitString.bucketString);
@@ -331,7 +331,7 @@ void clear(RankSupportBitString<TSpec> & rankSupportBitString)
 }
 
 template <typename TPos>
-bool getBit(String<bool> & bitString, TPos & pos)
+inline bool getBit(String<bool> & bitString, TPos & pos)
 {
     return bitString[pos];
 }
@@ -347,7 +347,7 @@ bool getBit(String<bool> & bitString, TPos & pos)
     }*/
 
 template <typename TSpec, typename TPos>
-bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
+inline bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 {
 	//std::cerr << "0bitString: " << length(bitString) << std::endl;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
@@ -359,7 +359,7 @@ bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 }
 
 template <typename TSpec, typename TPos>
-bool getBit(RankSupportBitString<TSpec> const & bitString, TPos pos)
+inline bool getBit(RankSupportBitString<TSpec> const & bitString, TPos pos)
 {
 //	std::cerr << "1bitString: " << length(bitString) << std::endl;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
@@ -371,13 +371,13 @@ bool getBit(RankSupportBitString<TSpec> const & bitString, TPos pos)
 }
 
 template <typename TIndex, typename TPos, typename TBit>
-void setBit(String<bool> & bitString, TPos pos, TBit setBit)
+inline void setBit(String<bool> & bitString, TPos pos, TBit setBit)
 {
     bitString[pos] = setBit;
 }
 
 template <typename TSpec, typename TPos, typename TBit>
-void setBit(RankSupportBitString<TSpec> & bitString, TPos pos, TBit setBit)
+inline void setBit(RankSupportBitString<TSpec> & bitString, TPos pos, TBit setBit)
 {
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Value<TBitString>::Type TValue;
@@ -394,7 +394,7 @@ void setBit(RankSupportBitString<TSpec> & bitString, TPos pos, TBit setBit)
     bitString.bitString[bucketPos] |= shiftValue;
 }
 template <typename TSpec, typename TBit>
-void appendBit(RankSupportBitString<TSpec> & rankSupportBitString, TBit bit)
+inline void appendBit(RankSupportBitString<TSpec> & rankSupportBitString, TBit bit)
 {
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Value<TBitString>::Type TValue;
@@ -413,32 +413,32 @@ void appendBit(RankSupportBitString<TSpec> & rankSupportBitString, TBit bit)
 }
 
 template <typename TSpec, typename TBit>
-void appendBitOnly(RankSupportBitString<TSpec> & rankSupportBitString, TBit bit)
+inline void appendBitOnly(RankSupportBitString<TSpec> & rankSupportBitString, TBit bit)
 {
     setBit(rankSupportBitString, length(rankSupportBitString), bit);
     ++rankSupportBitString.length;
 }
 
 template <typename TValue>
-unsigned getRankInBucket(const TValue value)
+inline unsigned getRankInBucket(const TValue value)
 {
     return getRankInBucket(value, typename Eval < (BitsPerValue<TValue>::VALUE > 32) > ::Type());
 }
 
 template <typename TValue>
-unsigned getRankInBucket(const TValue value, False)
+inline unsigned getRankInBucket(const TValue value, False)
 {
     return __builtin_popcountl(static_cast<int32_t>(value));
 }
 
 template <typename TValue>
-unsigned getRankInBucket(const TValue value, True)
+inline unsigned getRankInBucket(const TValue value, True)
 {
     return __builtin_popcountll(static_cast<int64_t>(value));
 }
 
 template <typename TValue, typename TPos>
-TValue getRankInBucket(const String<TValue> & bitString, const TPos pos)
+inline TValue getRankInBucket(const String<TValue> & bitString, const TPos pos)
 {
 
     unsigned short const bitsPerValue = BitsPerValue<TValue>::VALUE;
@@ -457,10 +457,10 @@ unsigned getRank(String< bool > &counterBitString,
 }*/
 
 template <typename TSpec>
-void printBits(const TSpec entrie, const int blocks);
+inline void printBits(const TSpec entrie, const int blocks);
 
 template <typename TSpec, typename TPos>
-typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type
 getRank(const RankSupportBitString<TSpec> & rankSupportBitString, const TPos pos)
 {
 //		if(!length(rankSupportBitString))
@@ -492,11 +492,11 @@ getRank(const RankSupportBitString<TSpec> & rankSupportBitString, const TPos pos
 }
 
 template <typename TBitString>
-void completeRankSupportBitString(TBitString & bitString){}
+inline void completeRankSupportBitString(TBitString & bitString){}
 
 template <typename TSpec>
 //, typename TRankSupportBitString>
-void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
+inline void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
 {
     if (length(bitString))
     {
@@ -557,7 +557,7 @@ typedef Tag<FibreBitStrings_> const FibreBitStrings;
 //template < typename TBitString, typename TCharacterValue, typename TPosInSubTree, typename TText, typename TWaveletTreeSpec >//, typename TRankSupportBitString>
 template <typename TBitString, typename TText>
 //, typename TRankSupportBitString>
-void fillBitString(
+inline void fillBitString(
     const unsigned lowestValue,
     const unsigned splitValue,
     const unsigned highestValue,
@@ -589,7 +589,7 @@ void fillBitString(
 
 template <typename TCharacterValue, typename TWaveletTreeSpec, typename TText>
 //, typename TRankSupportBitString>
-void fillBitString(
+inline void fillBitString(
     WaveletTree<TText, TWaveletTreeSpec> & waveletTree,
     typename Iterator<typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type>::Type & iter,
     const TText & text,
@@ -626,7 +626,7 @@ void fillBitString(
 }
 
 template <typename TText>
-unsigned short nearestPowOfTwo(TText & text)
+inline unsigned short nearestPowOfTwo(TText & text)
 {
     unsigned l = length(text);
     --l;

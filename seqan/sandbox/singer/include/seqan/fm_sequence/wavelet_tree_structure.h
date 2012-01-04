@@ -93,21 +93,21 @@ struct WaveletTreeStructure
 
     }
 
-    WaveletTreeStructure & operator=(WaveletTreeStructure const & other)
+    inline WaveletTreeStructure & operator=(WaveletTreeStructure const & other)
     {
     	treeNodes = other.treeNodes;
     	minCharValue = other.minCharValue;
     	return *this;
     }
 
-    bool operator==(const WaveletTreeStructure & b) const
+    inline bool operator==(const WaveletTreeStructure & b) const
     {
         return treeNodes == b.treeNodes;
     }
 };
 
 template <typename TValue>
-void initStartTreeStructureValue(TValue & numChildNodes,
+inline void initStartTreeStructureValue(TValue & numChildNodes,
 								 TValue & lowest,
 								 TValue & highest,
 								 TValue & posInTree,
@@ -125,14 +125,14 @@ void initStartTreeStructureValue(TValue & numChildNodes,
 // ==========================================================================
 
 template <typename TChar, typename TPointer, typename TSpec>
-typename Fibre<WaveletTreeStructure<TChar, TPointer, TSpec>, FibreTreeNodes>::Type &
+inline typename Fibre<WaveletTreeStructure<TChar, TPointer, TSpec>, FibreTreeNodes>::Type &
 getFibre(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure, FibreTreeNodes)
 {
     return treeStructure.treeNodes;
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-typename Fibre<WaveletTreeStructure<TChar, TPointer, TSpec>, FibreTreeNodes>::Type const &
+inline typename Fibre<WaveletTreeStructure<TChar, TPointer, TSpec>, FibreTreeNodes>::Type const &
 getFibre(WaveletTreeStructure<TChar, TPointer, TSpec> const & treeStructure, FibreTreeNodes)
 {
     return treeStructure.treeNodes;
@@ -146,13 +146,13 @@ getFibre(WaveletTree< TBitString, TSplitValue, TPosInSubTree, TSpec > const &tre
 }*/
 
 template <typename TChar, typename TPointer, typename TSpec>
-unsigned length(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
+inline unsigned length(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
 {
     return length(tree.treeNodes);
 }
 
 template <typename TChar, typename TPointer, typename TSpec, typename TSize>
-void resize(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure, TSize size)
+inline void resize(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure, TSize size)
 {
 //	TSize bla;
 //	static_cast<Nothing>(bla);
@@ -160,14 +160,14 @@ void resize(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure, TSize 
 }
 
 template <typename TChar, typename TPointer, typename TSpec, typename TSize>
-void resize(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure, TSize size,
+inline void resize(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure, TSize size,
 			typename Value<typename Fibre<WaveletTreeStructure<TChar, TPointer, TSpec>,FibreTreeNodes>::Type>::Type value)
 {
     resize(treeStructure.treeNodes, size, value);
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void clear(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure)
+inline void clear(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure)
 {
     clear(treeStructure.treeNodes);
 }
@@ -279,44 +279,44 @@ end(WaveletTreeStructure<TChar, TPointer, TSpec> & waveletTreeStructure)
 }
 
 template <typename TChar, typename TPointer, typename TSpec, typename TPos>
-void setPosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TPos pos)
+inline void setPosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TPos pos)
 {
     iter.position = pos;
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getPosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TPointer getPosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     return iter.position;
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getPosition(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TPointer getPosition(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     return iter.position;
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void setCharacter(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter,
+inline void setCharacter(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter,
                   TChar character)
 {
     iter.waveletTreeStructure->treeNodes[iter.position].i1 = character;
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TChar getCharacter(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TChar getCharacter(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     return iter.waveletTreeStructure->treeNodes[iter.position].i1;
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TChar getCharacter(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TChar getCharacter(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     return iter.waveletTreeStructure->treeNodes[iter.position].i1;
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void setLeftChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline void setLeftChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     if (iter.waveletTreeStructure->treeNodes[iter.position].i2 == 0)
     {
@@ -331,7 +331,7 @@ void setLeftChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getLeftChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TPointer getLeftChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     if (iter.waveletTreeStructure->treeNodes[iter.position].i2 > 1)
     {
@@ -341,7 +341,7 @@ TPointer getLeftChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Stan
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getLeftChildPos(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TPointer getLeftChildPos(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     if (iter.waveletTreeStructure->treeNodes[iter.position].i2 > 1)
     {
@@ -351,13 +351,13 @@ TPointer getLeftChildPos(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void setRightChildPosOnly(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline void setRightChildPosOnly(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     iter.waveletTreeStructure->treeNodes[iter.position].i2 = 1;
 }
 
 template <typename TChar, typename TPointer, typename TSpec, typename TPos>
-void setRightChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TPos rightChildPosition)
+inline void setRightChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TPos rightChildPosition)
 {
     if (iter.waveletTreeStructure->treeNodes[iter.position].i2 == 0)
     {
@@ -377,7 +377,7 @@ void setRightChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standar
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getRightChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TPointer getRightChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     if (iter.waveletTreeStructure->treeNodes[iter.position].i2 > 2)
     {
@@ -391,7 +391,7 @@ TPointer getRightChildPos(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Sta
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getRightChildPos(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline TPointer getRightChildPos(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     if (iter.waveletTreeStructure->treeNodes[iter.position].i2 > 2)
     {
@@ -406,7 +406,7 @@ TPointer getRightChildPos(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename TChar, typename TPointer, typename TSpec>
-void setNodeToLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline void setNodeToLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     if (iter.waveletTreeStructure->treeNodes[iter.position].i2 != 0)
     {
@@ -428,7 +428,7 @@ void setNodeToLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> 
 }
 
 template <typename TChar, typename TPointer, typename TSpec, typename TPos>
-void addDollarNode(WaveletTreeStructure<TChar, TPointer, TSpec> & structure, TPos minPos)
+inline void addDollarNode(WaveletTreeStructure<TChar, TPointer, TSpec> & structure, TPos minPos)
 {
 	//adjusting the array
 	resize(structure, length(structure.treeNodes) + 1);
@@ -454,33 +454,33 @@ void addDollarNode(WaveletTreeStructure<TChar, TPointer, TSpec> & structure, TPo
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename TChar, typename TPointer, typename TSpec>
-void goLeft(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline void goLeft(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     iter.position = getLeftChildPos(iter);
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void goLeft(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline void goLeft(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     iter.position = getLeftChildPos(iter);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename TChar, typename TPointer, typename TSpec>
-void goRight(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline void goRight(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     iter.position = getRightChildPos(iter);
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void goRight(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
+inline void goRight(Iter<const WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter)
 {
     iter.position = getRightChildPos(iter);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template <typename TText, typename TIter>
-void getNexNode(TText & alphabet, TIter & it)
+inline void getNexNode(TText & alphabet, TIter & it)
 {
 	TIter copyIt = it;
 	if(getLeftChildPos(it))
@@ -497,18 +497,18 @@ void getNexNode(TText & alphabet, TIter & it)
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-bool isLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard> & iter){
+inline bool isLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard> & iter){
 	return !((*iter.waveletTreeStructure).treeNodes[iter.position].i2);
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-bool isLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter){
+inline bool isLeaf(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter){
 	//std::cerr << (int)iter.position << " " << (int)(*iter.waveletTreeStructure).treeNodes[iter.position].i2 << std::endl;
 	return !((*iter.waveletTreeStructure).treeNodes[iter.position].i2);
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getNodePosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TChar character){
+inline TPointer getNodePosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TChar character){
 
 	//TPointer pos = 0;
 	while(!isLeaf(iter))
@@ -522,7 +522,7 @@ TPointer getNodePosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Stan
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-TPointer getNodePosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard> & iter, TChar character){
+inline TPointer getNodePosition(Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard> & iter, TChar character){
 
 	while(!isLeaf(iter))
 		{
@@ -547,7 +547,7 @@ inline String<TChar> getAlphabet(WaveletTreeStructure<TChar, TPointer, TSpec> & 
 
 
 template <typename TChar, typename TPointer, typename TSpec, typename TPosInSubTree>
-void printTreeLevel(WaveletTreeStructure<TChar, TPointer, TSpec> & tree, TPosInSubTree posInTree)
+inline void printTreeLevel(WaveletTreeStructure<TChar, TPointer, TSpec> & tree, TPosInSubTree posInTree)
 {
     TPosInSubTree leftChild = tree.treeNodes[posInTree].i2;
     TPosInSubTree rightChild = tree.treeNodes[posInTree].i3;
@@ -563,13 +563,13 @@ void printTreeLevel(WaveletTreeStructure<TChar, TPointer, TSpec> & tree, TPosInS
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void printTree(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
+inline void printTree(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
 {
     printTreeLevel(tree, 0);
 }
 
 template <typename TChar, typename TPointer, typename TSpec, typename TString>
-void writeGraphImpl(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TString name)
+inline void writeGraphImpl(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter, TString name)
 {
     //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
     typename Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> >::Type iter2 = iter;
@@ -601,7 +601,7 @@ void writeGraphImpl(Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard>
 }
 
 template <typename TChar, typename TPointer, typename TSpec>
-void writeGraph(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
+inline void writeGraph(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
 {
 
     typename Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> >::Type iter(tree, 0);
@@ -618,7 +618,7 @@ void writeGraph(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
 }
 
 template <typename TChar, typename TPointer, typename TSpec, typename TString>
-void writeGraph(WaveletTreeStructure<TChar, TPointer, TSpec> & tree, TString name)
+inline void writeGraph(WaveletTreeStructure<TChar, TPointer, TSpec> & tree, TString name)
 {
 
     typename Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> >::Type iter(tree, 0);
@@ -633,7 +633,7 @@ void writeGraph(WaveletTreeStructure<TChar, TPointer, TSpec> & tree, TString nam
 }
 
 template <typename TStringLengthString, typename TPrefixSumTable, typename TAlphabetString, typename TIter>//, typename TTreeSplitValue>
-void computeSingleStringLengthFromTree(TStringLengthString & lengthString,
+inline void computeSingleStringLengthFromTree(TStringLengthString & lengthString,
                                        TPrefixSumTable & prefixSumTable,
                                        TAlphabetString & alphabet,
                                        TIter & iter,
@@ -685,7 +685,7 @@ void computeSingleStringLengthFromTree(TStringLengthString & lengthString,
 }
 
 template <typename TStringLengthString, typename TPrefixSumTable, typename TChar, typename TPointer, typename TSpec>
-void computeStringLengthFromTree(TStringLengthString & lengthString,
+inline void computeStringLengthFromTree(TStringLengthString & lengthString,
                                  TPrefixSumTable & prefixSumTable,
                                  WaveletTreeStructure<TChar, TPointer, TSpec> & structure)
 {
@@ -1024,7 +1024,7 @@ void computeStringLengthFromTree(TStringLengthString & lengthString,
 //}
 
 template <typename TFreq, typename TChar, typename TPointer, typename TSpec, typename TNumOfChildNodes>
-void computeTreeEntries(
+inline void computeTreeEntries(
     String<Pair<TChar, TFreq> > const & freq,
     Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter,
     TPointer lowerPosInFreq,
@@ -1033,13 +1033,6 @@ void computeTreeEntries(
 {
     typedef TFreq TSize;
 
-//    std::stringstream stream;
-//    stream<<counter<<".dot";
-//    String<char> name = stream.str().c_str();
-//	writeGraph(*iter.waveletTreeStructure, name);
-
-    //TPointer numLeft = 1;
-    //TPointer numRight = 1;
 	TPointer oldLowerPosInFreq = lowerPosInFreq;
 	TPointer oldUpperPosInFreq = upperPosInFreq;
     TSize leftSize = freq[lowerPosInFreq].i2;
@@ -1124,7 +1117,7 @@ void computeTreeEntries(
 
 
 template <typename TFreq, typename TChar, typename TPointer, typename TSpec, typename TNumChildNodes>
-void computeTreeEntries(
+inline void computeTreeEntries(
     const String<Pair<TChar, TFreq> > & freq,
     WaveletTreeStructure<TChar, TPointer, TSpec> & structure,
     TNumChildNodes & numChildNodes)
@@ -1145,7 +1138,7 @@ void computeTreeEntries(
 //}
 
 template <typename TFreq, typename TChar, typename TPointer, typename TSpec, typename TNumChildNodes>
-void computeTreeEntries(
+inline void computeTreeEntries(
     const String<TFreq> & freq,
     WaveletTreeStructure<TChar, TPointer, TSpec> & structure,
     TNumChildNodes & numChildNodes)
@@ -1162,7 +1155,7 @@ void computeTreeEntries(
 }
 
 template <typename TFreq, typename TChar, typename TPointer, typename TSpec>
-void computeTreeEntries(
+inline void computeTreeEntries(
     const String<TFreq> & freq,
     WaveletTreeStructure<TChar, TPointer, TSpec> & structure)
 {

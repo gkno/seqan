@@ -92,14 +92,14 @@ struct WaveletTree
         createWaveletTree(*this, text, freqTable, prefixSumTable);
     }
 
-    WaveletTree & operator=(WaveletTree const & other)
+    inline WaveletTree & operator=(WaveletTree const & other)
     {
     	bitStrings = other.bitStrings;
     	splitValues = other.splitValues;
     	return *this;
     }
 
-    bool operator==(const WaveletTree & b) const
+    inline bool operator==(const WaveletTree & b) const
     {
         typedef typename Size<TText>::Type                            TSize;
         bool test = true;
@@ -166,7 +166,7 @@ struct WaveletTree<TText, DollarSubstituted>
         createWaveletTree(*this, text, freqTable, prefixSumTable);
     }
 
-    bool operator==(const WaveletTree & b) const
+    inline bool operator==(const WaveletTree & b) const
     {
 
         typedef typename Size<TText>::Type                            TSize;
@@ -240,7 +240,7 @@ struct WaveletTree<TText, MultiDollarSubstituted>
         createWaveletTree(*this, text, freqTable, prefixSumTable);
     }
 
-    bool operator==(const WaveletTree & b) const
+    inline bool operator==(const WaveletTree & b) const
     {
         typedef typename Size<TText>::Type TSize;
         bool test = true;
@@ -360,7 +360,7 @@ getFibre(WaveletTree<TText, MultiDollarSubstituted> const & tree, const FibreDol
 }
 
 template <typename TText, typename TSpec>
-void clear(WaveletTree<TText, TSpec> & tree)
+inline void clear(WaveletTree<TText, TSpec> & tree)
 {
     for (unsigned i = 0; i < length(tree.bitStrings); ++i)
     {
@@ -371,7 +371,7 @@ void clear(WaveletTree<TText, TSpec> & tree)
 }
 
 template <typename TText, typename TSpec>
-unsigned getNumNodes(WaveletTree<TText, TSpec> & tree)
+inline unsigned getNumNodes(WaveletTree<TText, TSpec> & tree)
 {
 	return length(tree.splitValues.treeNodes);
 }
@@ -821,7 +821,7 @@ inline void fillWaveletTree(
 }
 
 template <typename TText, typename TWaveletTreeSpec, typename TDollarChar, typename TDollarPos>
-void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarChar dollarSub, TDollarPos dollarPos)
+inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarChar dollarSub, TDollarPos dollarPos)
 {
 	typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type TSplitValues;
 	typedef typename Fibre<TSplitValues, FibreTreeNodes>::Type TWaveletTreeStructureString;
@@ -872,7 +872,7 @@ void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarChar doll
 }
 
 template <typename TText, typename TWaveletTreeSpec, typename TFreq>
-void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, String<TFreq> & freq)
+inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, String<TFreq> & freq)
 {
 	typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type TSplitValues;
 	typedef typename Fibre<TSplitValues, FibreTreeNodes>::Type TWaveletTreeStructureString;
@@ -929,7 +929,7 @@ void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, String<TFreq> & 
 }
 
 template <typename TText, typename TWaveletTreeSpec, typename TChar>
-unsigned getNodePosition(WaveletTree<TText, TWaveletTreeSpec> & tree, TChar character)
+inline unsigned getNodePosition(WaveletTree<TText, TWaveletTreeSpec> & tree, TChar character)
 {
 	typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type TSplitValues;
 	typename Iterator<TSplitValues>::Type iter(tree.splitValues, 0);

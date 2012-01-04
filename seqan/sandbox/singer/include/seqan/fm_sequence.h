@@ -50,6 +50,7 @@
 // First Header Group.
 // ===========================================================================
 
+#include "seqan/fm_sequence/prefix_sum_table.h"
 #include "seqan/fm_sequence/bit_string.h"
 #include "seqan/fm_sequence/sparse_string.h"
 #include "seqan/fm_sequence/compressed_sa.h"

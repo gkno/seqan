@@ -53,14 +53,14 @@ struct LFTable
         prefixSumTable(prefixSumTable)
     {}
 
-    LFTable & operator=(LFTable const & other)
+    inline LFTable & operator=(LFTable const & other)
     {
     	occTable = other.occTable;
     	prefixSumTable = other.prefixSumTable;
     	return *this;
     }
 
-    bool operator==(const LFTable & b) const
+    inline bool operator==(const LFTable & b) const
     {
         return occTable == b.occTable &&
                prefixSumTable == b.prefixSumTable;
@@ -93,35 +93,35 @@ struct Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>
 };
 
 template <typename TOccTable, typename TPrefixSumTable>
-typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type const &
+inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type const &
 getFibre(LFTable<TOccTable, TPrefixSumTable> const & lfTable, FibrePrefixSumTable)
 {
     return lfTable.prefixSumTable;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
-typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type &
+inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibrePrefixSumTable>::Type &
 getFibre(LFTable<TOccTable, TPrefixSumTable> & lfTable, FibrePrefixSumTable)
 {
     return lfTable.prefixSumTable;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
-typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
+inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
 getFibre(LFTable<TOccTable, TPrefixSumTable> & lfTable, FibreOccTable)
 {
 	return lfTable.occTable;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
-typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type const &
+inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type const &
 getFibre(LFTable<TOccTable, TPrefixSumTable> const & lfTable, FibreOccTable)
 {
     return lfTable.occTable;
 }
 
 template <typename TOccTable, typename TPrefixSumTable>
-void clear(LFTable<TOccTable, TPrefixSumTable> & lfTable)
+inline void clear(LFTable<TOccTable, TPrefixSumTable> & lfTable)
 {
     clear(lfTable.occTable);
     clear(lfTable.prefixSumTable);
@@ -188,7 +188,7 @@ struct CompressedSA
     	lfTable()
     {}
 
-    CompressedSA & operator=(CompressedSA const & other)
+    inline CompressedSA & operator=(CompressedSA const & other)
     {
     	compressedSA = other.compressedSA;
     	lfTable = other.lfTable;
@@ -199,7 +199,7 @@ struct CompressedSA
     typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
 
     template <typename TPos>
-    TCompressedSaValue const operator[](TPos pos)
+    inline TCompressedSaValue const operator[](TPos pos)
     {
     	TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
     	TPos counter = 0;
@@ -218,7 +218,7 @@ struct CompressedSA
     }
 
     template <typename TPos>
-    TCompressedSaValue operator[](TPos pos) const
+    inline TCompressedSaValue operator[](TPos pos) const
     {
         TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
         TPos counter = 0;
@@ -234,7 +234,7 @@ struct CompressedSA
         return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
     }
 
-    bool operator==(const CompressedSA & b) const
+    inline bool operator==(const CompressedSA & b) const
     {
         return compressedSA == b.compressedSA &&
                *lfTable == *(b.lfTable);
@@ -257,7 +257,7 @@ struct CompressedSA<SparseString<String<Pair<TSpecPairI1, TSpecPairI2, TSpecPair
     {}
 
     template <typename TPos>
-    TCompressedSaValue const operator[](TPos pos)
+    inline TCompressedSaValue const operator[](TPos pos)
     {
         TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
         TPos counter = 0;
@@ -272,7 +272,7 @@ struct CompressedSA<SparseString<String<Pair<TSpecPairI1, TSpecPairI2, TSpecPair
     }
 
     template <typename TPos>
-    TCompressedSaValue operator[](TPos pos) const
+    inline TCompressedSaValue operator[](TPos pos) const
     {
         TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
         TPos counter = 0;
@@ -286,7 +286,7 @@ struct CompressedSA<SparseString<String<Pair<TSpecPairI1, TSpecPairI2, TSpecPair
         return temp;
     }
 
-    bool operator==(const CompressedSA & b) const
+    inline bool operator==(const CompressedSA & b) const
     {
         return compressedSA == b.compressedSA &&
                *lfTable == *(b.lfTable);
@@ -302,14 +302,14 @@ struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>
 
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>::Type const &
+inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>::Type const &
 getFibre(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, FibreSA)
 {
     return compressedSA.compressedSA;
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
-typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>::Type &
+inline typename Fibre<CompressedSA<TSparseString, TLfTable, TSpec>, FibreSA>::Type &
 getFibre(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, FibreSA)
 {
     return compressedSA.compressedSA;
@@ -355,7 +355,7 @@ inline bool save(
 }
 
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
-bool getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
+inline bool getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
 {
     typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
 	TIndicatorString const & indicatorString = compressedSA.compressedSA.indicatorString;
