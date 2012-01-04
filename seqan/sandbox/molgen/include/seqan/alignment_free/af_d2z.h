@@ -31,15 +31,17 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-// This header contains the implementation of the D2z score for alignment free
-// sequence comparison (see Kantorovitz et al. Bioinformatics 2007, Volume23, 
-// Issue13, Pp. i249-i255).
+// This header contains the implementation of the D2z score for
+// alignment free sequence comparison.
+//
+// See Kantorovitz et al. Bioinformatics 2007, Volume23, Issue13,
+// Pp. i249-i255.
+//
 // These functions can be called with alignmentFreeComparison().
 // ==========================================================================
-// TODO (goeke) const could be added below for the input variables but the
-// function value() in matrix_base (align) is not defined for const.
-// Similarly, the function emittedProbabilty is not defined for const in
-// statistics_markov_model.h
+
+// TODO(goeke): const could be added below for the input variables but the function value() in matrix_base (align) is not defined for const. Similarly, the function emittedProbabilty is not defined for const in  statistics_markov_model.h
+
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2Z_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2Z_H_
 
@@ -49,7 +51,9 @@ namespace seqan {
  * _alignmentFreeComparison is called by alignmentFreeComparison() (see alignment_free_comparison.h)
  */
 template <typename TStringSet, typename TValue>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<D2z> const & score)
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix,
+                              TStringSet const & sequenceSet,
+                              AFScore<D2z> const & score)
 {
     typedef typename Value<TStringSet>::Type                                    TString;
     typedef typename Value<TString>::Type                                       TAlphabet;
@@ -68,8 +72,14 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
 
     StringSet<String<unsigned> > kmerCounts;
     resize(kmerCounts, seqNumber);
+
+    // TODO(holtgrew): There is some copy-and-paste code here for the two cases, can this be unified?
     if (score.bgModelOrder == 0)
     {
+        // --------------------------------------------------------------------
+        // Order 0 Background Model
+        // --------------------------------------------------------------------
+
         StringSet<String<double> > backgroundFrequencies;
         resize(backgroundFrequencies, seqNumber);
 
@@ -97,13 +107,19 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
             }
             for (unsigned colIndex = rowIndex; colIndex < seqNumber; ++colIndex)
             {
-                _alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], backgroundFrequencies[rowIndex], kmerCounts[colIndex], backgroundFrequencies[colIndex], score);
+                _alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex],
+                                            backgroundFrequencies[rowIndex], kmerCounts[colIndex],
+                                            backgroundFrequencies[colIndex], score);
                 value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  // Copy symmetric entries
             }
         }
     }
     else
     {
+        // --------------------------------------------------------------------
+        // Higher Order Background Model
+        // --------------------------------------------------------------------
+
         String<MarkovModel<TUnmaskedAlphabet> > backgroundModels;
         resize(backgroundModels, seqNumber, MarkovModel<TUnmaskedAlphabet>(score.bgModelOrder));
         TIteratorMarkovModel itMM = begin(backgroundModels);
@@ -135,100 +151,13 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
             }
             for (unsigned colIndex = rowIndex; colIndex < seqNumber; ++colIndex)
             {
-                _alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex], backgroundModels[rowIndex], kmerCounts[colIndex], backgroundModels[colIndex], score);
+                _alignmentFreeCompareCounts(value(scoreMatrix, rowIndex, colIndex), kmerCounts[rowIndex],
+                                            backgroundModels[rowIndex], kmerCounts[colIndex],
+                                            backgroundModels[colIndex], score);
                 value(scoreMatrix, colIndex, rowIndex) = value(scoreMatrix, rowIndex, colIndex);  // Copy symmetric entries
             }
         }
     }
-}
-
-/*
- * Calculate pairwise score given the counts of all kmers and the background Bernoulli models
- */
-template <typename TValue, typename TStringBG>
-void _alignmentFreeCompareCounts(TValue & result,
-                                String<unsigned> const & kmerCounts1,
-                                TStringBG const & backgroundFrequencies1,
-                                String<unsigned> const & kmerCounts2,
-                                TStringBG const & backgroundFrequencies2,
-                                AFScore<D2z> const & score)
-{
-    typedef typename Value<TStringBG>::Type TValueBG;
-    TValueBG sum = 0;
-    unsigned len1 = score.kmerSize - 1;
-    unsigned len2 = score.kmerSize - 1;
-    unsigned nvals = length(kmerCounts1);
-
-    for (unsigned l = 0; l < nvals; l++)
-    {
-        len1 += kmerCounts1[l];
-        len2 += kmerCounts2[l];
-
-        sum += kmerCounts1[l] * kmerCounts2[l];
-    }
-
-    TValueBG q1[4];
-    TValueBG q2[4];
-    for (int l = 0; l < 4; l++)
-    {
-        q1[l] = backgroundFrequencies1[l];
-        q2[l] = backgroundFrequencies2[l];
-    }
-
-    // Compute expected value and variance (IID)
-    double E = computeExpectationD2(len1, len2, score.kmerSize, q1, q2);
-    double var = computeVarianceD2(len1, len2, score.kmerSize, q1, q2);
-
-    if ((var <= 0))
-    {
-        if(score.verbose)
-        {
-            std::cout << "Error: negative variance\n";
-        }
-        result = 0;
-        return;
-    }
-    // Calculate z-score
-    result = (TValue) (sum - E) / pow(var, 0.5);
-}
-/*
- * Calculate pairwise score given the counts of all kmers and the background Markov models
- */
-template <typename TAlphabet, typename TValue, typename TSpec>
-void _alignmentFreeCompareCounts(TValue & result,
-                                String<unsigned> const & kmerCounts1,
-                                MarkovModel<TAlphabet, TValue, TSpec> /*const*/ & bgModel1,
-                                String<unsigned> const & kmerCounts2,
-                                MarkovModel<TAlphabet, TValue, TSpec> /*const*/ & bgModel2,
-                                AFScore<D2z> const & score)
-{
-    unsigned nvals = length(kmerCounts1);
-    int sum = 0;
-    int sumCounts1 = score.kmerSize - 1;
-    int sumCounts2 = score.kmerSize - 1;
-
-    for (unsigned l = 0; l < nvals; l++)
-    {
-        sumCounts1 += kmerCounts1[l];
-        sumCounts2 += kmerCounts2[l];
-        sum += value(kmerCounts1, l) * value(kmerCounts2, l);  // Calculate the inner product
-    }
-
-    TValue D2 = (TValue) sum;
-
-    // Compute mean and variance
-    TValue indicatorexpectation = 0;
-
-    double E = computeExpectationD2(sumCounts1, sumCounts2, score.kmerSize, bgModel1, bgModel2, indicatorexpectation);
-    double var = computeVarianceD2(sumCounts1, sumCounts2, score.kmerSize, bgModel1, bgModel2, indicatorexpectation);
-
-    if (var <= 0)
-    {
-        result = 0;
-        return;
-    }
-    // Return z-score of D2
-    result = (D2 - E) / pow(var, 0.5);
 }
 
 /*
@@ -556,6 +485,96 @@ double computeVarianceD2(int const slen1,
     TValue variance = covnonoverlap + covcrabgrass + covaccordiondiag;
     return variance;
 
+}
+
+/*
+ * Calculate pairwise score given the counts of all kmers and the background Bernoulli models
+ */
+template <typename TValue, typename TStringBG>
+void _alignmentFreeCompareCounts(TValue & result,
+                                String<unsigned> const & kmerCounts1,
+                                TStringBG const & backgroundFrequencies1,
+                                String<unsigned> const & kmerCounts2,
+                                TStringBG const & backgroundFrequencies2,
+                                AFScore<D2z> const & score)
+{
+    typedef typename Value<TStringBG>::Type TValueBG;
+    TValueBG sum = 0;
+    unsigned len1 = score.kmerSize - 1;
+    unsigned len2 = score.kmerSize - 1;
+    unsigned nvals = length(kmerCounts1);
+
+    for (unsigned l = 0; l < nvals; l++)
+    {
+        len1 += kmerCounts1[l];
+        len2 += kmerCounts2[l];
+
+        sum += kmerCounts1[l] * kmerCounts2[l];
+    }
+
+    TValueBG q1[4];
+    TValueBG q2[4];
+    for (int l = 0; l < 4; l++)
+    {
+        q1[l] = backgroundFrequencies1[l];
+        q2[l] = backgroundFrequencies2[l];
+    }
+
+    // Compute expected value and variance (IID)
+    double E = computeExpectationD2(len1, len2, score.kmerSize, q1, q2);
+    double var = computeVarianceD2(len1, len2, score.kmerSize, q1, q2);
+
+    if ((var <= 0))
+    {
+        if(score.verbose)
+        {
+            std::cout << "Error: negative variance\n";
+        }
+        result = 0;
+        return;
+    }
+    // Calculate z-score
+    result = (TValue) (sum - E) / pow(var, 0.5);
+}
+
+/*
+ * Calculate pairwise score given the counts of all kmers and the background Markov models
+ */
+template <typename TAlphabet, typename TValue, typename TSpec>
+void _alignmentFreeCompareCounts(TValue & result,
+                                String<unsigned> const & kmerCounts1,
+                                MarkovModel<TAlphabet, TValue, TSpec> /*const*/ & bgModel1,
+                                String<unsigned> const & kmerCounts2,
+                                MarkovModel<TAlphabet, TValue, TSpec> /*const*/ & bgModel2,
+                                AFScore<D2z> const & score)
+{
+    unsigned nvals = length(kmerCounts1);
+    int sum = 0;
+    int sumCounts1 = score.kmerSize - 1;
+    int sumCounts2 = score.kmerSize - 1;
+
+    for (unsigned l = 0; l < nvals; l++)
+    {
+        sumCounts1 += kmerCounts1[l];
+        sumCounts2 += kmerCounts2[l];
+        sum += value(kmerCounts1, l) * value(kmerCounts2, l);  // Calculate the inner product
+    }
+
+    TValue D2 = (TValue) sum;
+
+    // Compute mean and variance
+    TValue indicatorexpectation = 0;
+
+    double E = computeExpectationD2(sumCounts1, sumCounts2, score.kmerSize, bgModel1, bgModel2, indicatorexpectation);
+    double var = computeVarianceD2(sumCounts1, sumCounts2, score.kmerSize, bgModel1, bgModel2, indicatorexpectation);
+
+    if (var <= 0)
+    {
+        result = 0;
+        return;
+    }
+    // Return z-score of D2
+    result = (D2 - E) / pow(var, 0.5);
 }
 
 /*

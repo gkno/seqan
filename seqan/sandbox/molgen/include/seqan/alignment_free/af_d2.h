@@ -33,6 +33,7 @@
 // ==========================================================================
 // This header contains the implementation of the D2 score for alignment free
 // sequence comparison (inner product of kmer counts).
+//
 // These functions can be called with alignmentFreeComparison().
 // ==========================================================================
 
@@ -44,9 +45,10 @@ namespace seqan {
 /*
  * _alignmentFreeComparison is called by alignmentFreeComparison() (see alignment_free_comparison.h)
  */
-
 template <typename TStringSet, typename TValue>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<D2> const & score)
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix,
+                              TStringSet const & sequenceSet,
+                              AFScore<D2> const & score)
 {
 
     typedef typename Value<TStringSet>::Type                        TString;
@@ -78,6 +80,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
     {
       std::cout << "\ncounted words";
     }
+
     // Calculate all pairwise scores and store them in scoreMatrix
     for (unsigned rowIndex = 0; rowIndex < seqNumber; ++rowIndex) 
     {
@@ -99,9 +102,12 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
  */
 template <typename TValue>
 void
-_alignmentFreeCompareCounts(TValue & result, String<unsigned> const & kmerCounts1, String<unsigned> const & kmerCounts2, AFScore<D2> const & /*score*/)
+_alignmentFreeCompareCounts(TValue & result,
+                            String<unsigned> const & kmerCounts1,
+                            String<unsigned> const & kmerCounts2,
+                            AFScore<D2> const & /*score*/)
 {
-    typedef typename Iterator<String<unsigned> >::Type      TIteratorInt;
+    typedef typename Iterator<String<unsigned> >::Type TIteratorInt;
 
     TIteratorInt it1 = begin(kmerCounts1);
     TIteratorInt it2 = begin(kmerCounts2);

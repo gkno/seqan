@@ -1,10 +1,11 @@
 *** ALF - Alignment Free Sequence Comparison ***
-http://www.seqan.de/
-http://alf.molgen.mpg.de
+
+URL: http://alf.molgen.mpg.de
 
 ---------------------------------------------------------------------------
 Table of Contents
 ---------------------------------------------------------------------------
+
   1.   Overview
   2.   Installation
   3.   Usage
@@ -19,37 +20,28 @@ Table of Contents
 ALF can be used to compare the pairwise similarity of sequences using
 alignment-free methods. All methods which are implemented are based on
 k-mer counts. More details can be found in the online documentation of the
-alignment-free methods (www.seqan.de).
+alignment-free methods (alf.molgen.mpg.de).
 
 ---------------------------------------------------------------------------
 2. Installation
 ---------------------------------------------------------------------------
 
 ALF is distributed with SeqAn - The C++ Sequence Analysis Library (see 
-http://www.seqan.de). To build ALF do the following:
+http://www.seqan.de).  To build ALF from SVN do the following:
 
-----NOTE: This has to be changed, currently ALF is only available for developers-----
+  1) svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
+  2) mkdir -p build/Release
+  3) cd build/Release
+  4) cmake ../.. -DCMAKE_BUILD_TYPE=Release
+  5) make alf
+  6) ./sandbox/molgen/apps/alf/alf  --help
 
-  1)  Download the latest snapshot of SeqAn
-  2)  Unzip it to a directory of your choice (e.g. snapshot)
-  3)  cd snapshot/alf
-  4)  make alf
-  5)  cd alf
-  6)  ./alf --help
+On success, an executable file alf was build and a brief usage description
+was dumped.
 
-Alternatively you can check out the latest SVN version of RazerS and SeqAn
-with:
+For more information about retrieving SeqAn and prerequisites please visit
 
-  1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
-  2)  cd seqan
-  3)  make forwards
-  4)  cd projects/library/apps
-  5)  make alf
-  6)  cd alf
-  7)  ./alf --help
-
-On success, an executable file alf was build and a brief usage 
-description was dumped.
+  http://trac.seqan.de/wiki/Tutorial/GettingStarted
 
 ---------------------------------------------------------------------------
 3. Usage
@@ -60,9 +52,9 @@ alf --help.
 
 Usage: alf [OPTION]... -i <MULTI FASTA FILE>
 
-ALF expects one DNA (multi-)Fasta file. For all pairs of sequences, the 
+ALF expects one DNA (multi-)Fasta file. For all pairs of sequences, the
 pairwise scores will be computed. A matrix of pairwise scores will be
-returned. The default behaviour can be modified by specifying the following 
+returned. The default behaviour can be modified by specifying the following
 options at the command line:
 
 ---------------------------------------------------------------------------
@@ -75,7 +67,7 @@ options at the command line:
 
   [ -o ],   [ --outputFile ]
 
-  Name of the file to which the tab delimited matrix with pairwise scores 
+  Name of the file to which the tab delimited matrix with pairwise scores
   will be written. Default:stdout.
 
   [ -m ],   [ --method ]
@@ -93,11 +85,11 @@ options at the command line:
 
   [ -rc ],  [ --reverseComplement ]
 
-  N2 only. Specify how the k-mer counts from the reverse and foreward strand
-  should be combined. By default, only the input sequence is used for the 
-  comparison. Select 'bothStrands' to calculate the pairwise score using
-  both strands from the input sequences.
-  Default: input sequence only. ['bothStrands','mean','min','max']
+  N2 only. Specify how the k-mer counts from the reverse and foreward
+  strand should be combined. By default, only the input sequence is used
+  for the comparison. Select 'bothStrands' to calculate the pairwise score
+  using both strands from the input sequences.  Default: input sequence
+  only. ['bothStrands','mean','min','max']
 
   [ -mm ],  [ --mismatches ]
 
@@ -106,8 +98,8 @@ options at the command line:
 
   [ -mmw ], [ --mismatchWeight ]
 
-  N2 only. Weight of counts for words with mismatches, only used in combination
-  with -mm 1. Default:0.1 [Double] 
+  N2 only. Weight of counts for words with mismatches, only used in
+  combination with -mm 1. Default:0.1 [Double]
 
   [ -kwf ], [ --kmerWeightsFile ]
 
@@ -148,13 +140,14 @@ Output:
   1           0.0463497
   0.0463497   1
 
-(2) Calculate scores using N2 (-m N2), counting words of length 5 (-k 5) 
-on both strands (-rc bothStrands), including words with one mismatch 
-into the word neighbourhood (-mm 1) with a weight of 0.5 (-mmw 0.5) 
-and a background Markov model of order 1 (-mo 1), writing the output to 
-a file (-o results.txt), saving all k-mer weights to a file (-kwf kmerWeights.txt):
+(2) Calculate scores using N2 (-m N2), counting words of length 5 (-k 5) on
+both strands (-rc bothStrands), including words with one mismatch into the
+word neighbourhood (-mm 1) with a weight of 0.5 (-mmw 0.5) and a background
+Markov model of order 1 (-mo 1), writing the output to a file
+(-o results.txt), saving all k-mer weights to a file (-kwf kmerWeights.txt):
 
-  ./alf -m N2 -k 5 -mo 1 -rc bothStrands -mm 1 -mmw 0.5 -i small.fasta -o results.txt -kwf kmerWeights.txt
+  ./alf -m N2 -k 5 -mo 1 -rc bothStrands -mm 1 -mmw 0.5 -i small.fasta \
+      -o results.txt -kwf kmerWeights.txt
 
 ---------------------------------------------------------------------------
 6. Contact and Reference

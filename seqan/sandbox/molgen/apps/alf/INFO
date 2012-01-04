@@ -1,21 +1,19 @@
 Name: alf
-Author: Your Name <your.email@example.net>
-Maintainer: Your Name <your.email@example.net>
+Author: Jonathan Göke <goeke@molgen.mpg.de>
+Maintainer: Jonathan Göke <goeke@molgen.mpg.de>
+Maintainer: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 License: GPL v3
-Copyright: 2008-2011, FU Berlin
-Status: under development
-Description: One-line description for app alf.
- This is the long text description for the app.  You should wrap text to 78
- characters and you have to wrap it to 80 characters.  The lines must have one
- leading space.  Successive lines in this format will be word-wrapped when
- displayed.  Leading space is stripped off.
+Copyright: 2012, FU Berlin
+Status: testing
+Description: Alignment free sequence comparison.
+ Alignment free sequence comparison.
  .
- Use empty lines with one dot to insert an empty line / break paragraphs.
+ This application can be used to calculate pairwise scores of DNA Sequences
+ without alignments.
  .
-  Start lines with two spaces to make them display verbatim.  Lines that
-  cannot be displayed horizontally will be hard-wrapped (not at word bor-
-  ders), so maybe do your own hyphenation.
+ The following scores are implemented: N2, D2, D2Star, D2z.
  .
- Do not use tab characters, their effect is not predictable.
+ Please reference the following publication if you used ALF or the N2 method
+ for your analysis:
  .
- The INFO file format is oriented after the Debian controfields format.
+ Jonathan Göke et al. To appear.

@@ -52,6 +52,7 @@ namespace seqan {
 ...type:Class.StringSet
 ..param.score:The score values to be used for computing the alignment.
 ...type:Class.AFScore
+..include:seqan/alignment_free.h
 */
 
 template <typename TStringSet, typename TValue, typename TComparisonMethod>

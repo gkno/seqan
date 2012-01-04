@@ -34,10 +34,9 @@
 // This file contains helper functions to count words in sequences and to 
 // calculate probabilities and variances of word occurences.
 // ==========================================================================
-// TODO (goeke) const could be added below for the input variables but the
-// function value() in matrix_base (align) is not defined for const.
-// Similarly, the function emittedProbabilty is not defined for const in
-// statistics_markov_model.h
+
+// TODO (goeke) const could be added below for the input variables but the function value() in matrix_base (align) is not defined for const.  Similarly, the function emittedProbabilty is not defined for const in statistics_markov_model.h
+
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_KMER_FUNCTIONS_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_KMER_FUNCTIONS_H_
 
@@ -86,6 +85,7 @@ struct UnmaskedAlphabet_<const TAlphabet>
 ..see:Class.MarkovModel
 ..remarks:
 ...text:k-mers overlapping masked letters are not counted in case of Dna5Strings. A Bernoulli or Markov Model can be choosen as a background model. 
+..include:seqan/alignment_free.h
 */
 
 /*
@@ -309,6 +309,7 @@ void countKmers(String<unsigned> & kmerCounts, MarkovModel<TAlphabetBG, TValue> 
 ..returns:TValue probability; The probability to observe the sequence given the model
 ..see:Function.calculateVariance
 ..see:Function.alignmentFreeComparison
+..include:seqan/alignment_free.h
 ..example.text: Calculate the probability for the word CCCAAGTTT with p(A)=p(T)=0.3 and p(C)=p(G)=0.2.
 ..example.code:
 using namespace seqan;
@@ -354,6 +355,7 @@ void calculateProbability(TValue & probability, TString const & sequence, TStrin
 ..see:Function.calculateProbability
 ..see:Function.calculateCovariance
 ..see:Class.MarkovModel
+..include:seqan/alignment_free.h
 ..remarks:
 ...text:Calculates the variance for the number of word occurences of a word in a sequence of length n given a background model (Markov model or Bernoulli model). 
 The formula is obtained from Robin, S., Rodolphe, F., and Schbath, S. (2005). DNA, Words and Models. Cambridge University Press.
@@ -459,6 +461,7 @@ void calculateVariance(TValue & variance, String<TAlphabet, TSpec> const & word,
 ..see:Function.calculateProbability
 ..see:Function.calculateVariance
 ..see:Class.MarkovModel
+..include:seqan/alignment_free.h
 ..remarks:
 ...text:Calculates the covariance for the number of word occurences for two words in a sequence of length n given a background model (Markov model or Bernoulli model). 
 The covariance is influenced by the property of words to overlap, for example, the words ATAT and TATA have a high covariance since they are likely to overlap. 
@@ -601,6 +604,7 @@ void calculateCovariance(TValue & covariance, String<TAlphabet, TSpec> const & w
 ..see:Function.calculateVariance
 ..see:Function.calculateCovariance
 ..see:Function.calculateOverlapIndicator
+..include:seqan/alignment_free.h
 ..remarks:
 ...text:Calculate word periodicity (indicator for overlaps) for two words.
 */
@@ -640,6 +644,7 @@ void calculatePeriodicity(String<int> & periodicity, TString const & word1, TStr
 ..see:Function.calculateVariance
 ..see:Function.calculateCovariance
 ..see:Function.calculatePeriodicity
+..include:seqan/alignment_free.h
 ..remarks:
 ...text:Calculate the indicator for overlaps of two words.
 The formula is based on Robin, S., Rodolphe, F., and Schbath, S. (2005). DNA, Words and Models. Cambridge University Press.
@@ -685,8 +690,9 @@ void calculateOverlapIndicator(String<int> & epsilon, TString const & word1, TSt
 ...text:Transform a String into a StringSet containing this String. 
 This function can be used to split a Dna5 string (containing Ns) into a Dna StringSet by cutting out any N. 
 This function is helpful for createing a Markov model from a masked DNA sequence.
-
+..include:seqan/alignment_free.h
 */
+
 template <typename TString>
 void
 stringToStringSet(StringSet<TString> & stringSet, TString const & sequence)
@@ -745,6 +751,7 @@ stringToStringSet(StringSet<String<Dna> > & dnaStringSet, String<Dna5> const & s
 ..param.sequence:Masked DNA sequence.
 ...type:Shortcut.Dna5String
 ..returns: Returns a Dna5String similar to the input sequence with all Ns cut out.
+..include:seqan/alignment_free.h
 */
 
 void

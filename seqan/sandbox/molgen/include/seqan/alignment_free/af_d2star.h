@@ -33,9 +33,12 @@
 // ==========================================================================
 // This header contains the implementation of the D2star score for alignment 
 // free sequence comparison.
-// (see Reinert et al. J Comput Biol. 2009 Dec;16(12):1615-34.)
+//
+// See: Reinert et al. J Comput Biol. 2009 Dec;16(12):1615-34.
+//
 // These functions can be called with alignmentFreeComparison().
 // ==========================================================================
+
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
 
@@ -45,15 +48,18 @@ namespace seqan {
  * _alignmentFreeComparison is called by alignmentFreeComparison() (see alignment_free_comparison.h)
  */
 template <typename TValue, typename TStringSet>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<D2Star> const & score)
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix,
+                              TStringSet const & sequenceSet,
+                              AFScore<D2Star> const & score)
 {
 
-    typedef typename Iterator<TStringSet const>::Type                   TIteratorSet;
-    typedef typename Iterator<StringSet<String<double> > >::Type        TIteratorSetDouble;
+    typedef typename Iterator<TStringSet const>::Type             TIteratorSet;
+    typedef typename Iterator<StringSet<String<double> > >::Type  TIteratorSetDouble;
 
     typedef Matrix<TValue, 2> TMatrix;
 
     unsigned seqNumber = length(sequenceSet);
+
     // Resize the scoreMatrix
     setLength(scoreMatrix, 0, seqNumber);
     setLength(scoreMatrix, 1, seqNumber);
@@ -80,21 +86,27 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
  * _d2star calculates the pairwise score of two sequences according to the paper referenced above.
  */
 template <typename TValue, typename TSequence>
-void _d2star(TValue & result, TSequence const & sequence1, TSequence const & sequence2, AFScore<D2Star> const & score)
+void _d2star(TValue & result,
+             TSequence const & sequence1,
+             TSequence const & sequence2,
+             AFScore<D2Star> const & score)
 {
-    typedef typename Value<TSequence>::Type                     TAlphabet;
-    typedef typename UnmaskedAlphabet_<TAlphabet>::Type         TUnmaskedAlphabet;
+    typedef typename Value<TSequence>::Type              TAlphabet;
+    typedef typename UnmaskedAlphabet_<TAlphabet>::Type  TUnmaskedAlphabet;
 
     TValue missing = -pow(10, 10);
     TSequence seq1seq2;
     append(seq1seq2, sequence1);
     append(seq1seq2, sequence2);
     result = 0.0;
-    // ----------------------------------------------------------------------
-    //Order 0 Background Model
-    // ----------------------------------------------------------------------
+
+    // TODO(holtgrew): There is some copy-and-paste code here for the two cases, can this be unified?
     if (score.bgModelOrder == 0)
     {
+        // --------------------------------------------------------------------
+        // Order 0 Background Model
+        // --------------------------------------------------------------------
+
         String<unsigned> kmerCounts1;
         String<unsigned> kmerCounts2;
         String<unsigned> backgroundCounts;
@@ -150,11 +162,12 @@ void _d2star(TValue & result, TSequence const & sequence1, TSequence const & seq
             }
         }
     }
-    // ----------------------------------------------------------------------
-    //Higher Order background Model
-    // ----------------------------------------------------------------------
     else
     {
+        // --------------------------------------------------------------------
+        // Higher Order Background Model
+        // --------------------------------------------------------------------
+
         String<unsigned> kmerCounts1;
         String<unsigned> kmerCounts2;
         StringSet<String<TUnmaskedAlphabet> > bgSequences;

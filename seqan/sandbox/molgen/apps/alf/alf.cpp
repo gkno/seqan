@@ -31,10 +31,12 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-// Alignment free sequence comparison
+// Alignment free sequence comparison.
+//
 // This application can be used to calculate pairwise scores of DNA Sequences
 // without alignments.
-// The following scores are implemented: N2, D2, D2Star, D2z
+//
+// The following scores are implemented: N2, D2, D2Star, D2z.
 // ==========================================================================
 
 #include <iostream>
@@ -69,24 +71,25 @@ int main(int argc, const char * argv[])
     addOption(parser, CommandLineOption("kwf", "kmerWeightsFile", "N2 only. Print kmerWeights for every sequence to this file.", OptionType::String,""));
     addOption(parser, CommandLineOption('v', "verbose", "[true, false] Print details on progress to the screen", OptionType::Boolean));
 
-    if(!parse(parser, argc, argv)) {
+    if (!parse(parser, argc, argv)) {
         return 1;
     } else if(isSetShort(parser,'h')) {
         help(parser,std::cerr);
         return 0;
     }
-        // Declare all parameters
-    String<char> kmerWeightsFileTMP = "";
-    String<char> inFileTMP = "";
-    String<char> outFileTMP = "";
+
+    // Declare all parameters
+    String<char> kmerWeightsFileTmp = "";
+    String<char> inFileTmp = "";
+    String<char> outFileTmp = "";
 
     if (isSetShort (parser, 'i'))
-        getOptionValueShort (parser,'i',inFileTMP);
-    String<char, CStyle> inFile = inFileTMP;
+        getOptionValueShort (parser,'i',inFileTmp);
+    String<char, CStyle> inFile = inFileTmp;
 
     if (isSetShort (parser, 'o'))
-        getOptionValueShort (parser,'o',outFileTMP);
-    String<char, CStyle> outFile = outFileTMP;
+        getOptionValueShort (parser,'o',outFileTmp);
+    String<char, CStyle> outFile = outFileTmp;
 
     String<char> method = "N2";
     if (isSetShort (parser, 'm'))
@@ -114,8 +117,8 @@ int main(int argc, const char * argv[])
 
     String<char, CStyle> kmerWeightsFile = "";
     if (isSetShort (parser, "kwf"))
-        getOptionValueShort (parser,"kwf",kmerWeightsFileTMP);
-    kmerWeightsFile=kmerWeightsFileTMP;
+        getOptionValueShort (parser,"kwf",kmerWeightsFileTmp);
+    kmerWeightsFile=kmerWeightsFileTmp;
 
     bool verbose = false;
     if (isSetShort (parser, 'v'))
@@ -144,45 +147,44 @@ int main(int argc, const char * argv[])
         reserve(mySequenceSet, seqCount, Exact());
         reserve(seqIDs, seqCount, Exact());
         String<Dna5Q> seq;
-        TText sequenceTMP;
+        TText sequenceTmp;
         CharString qual;
         CharString id;
         for (unsigned i = 0; i < seqCount; ++i)
         {
-            assignSeq(sequenceTMP, multiSeqFile[i], format);        // read sequence
+            assignSeq(sequenceTmp, multiSeqFile[i], format);        // read sequence
             assignSeqId(id, multiSeqFile[i], format);       // read sequence id
-            appendValue(mySequenceSet, sequenceTMP, Generous());
+            appendValue(mySequenceSet, sequenceTmp, Generous());
             appendValue(seqIDs, id, Generous());
         }
     }
+
+    // Dispatch to alignment free comparisons with different scores.
     if (method == "D2")
     {
-        //-----D2-----
         AFScore<D2> myScoreD2(kmerSize, verbose);
         alignmentFreeComparison(myMatrix, mySequenceSet, myScoreD2);
     }
     else if (method == "D2z")
     {
-        //-----D2z-----
         AFScore<D2z> myScoreD2z(kmerSize, bgModelOrder, verbose);
         alignmentFreeComparison(myMatrix, mySequenceSet, myScoreD2z);
     }
     else if (method == "D2Star")
     {
-        //-----D2star-----
         AFScore<D2Star> myScoreD2Star(kmerSize, bgModelOrder, verbose);
         alignmentFreeComparison(myMatrix, mySequenceSet, myScoreD2Star);
     }
     else if (method == "N2")
     {
-        //-----N2-----
         AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revCom, mismatches, mismatchWeight, kmerWeightsFile, verbose);
         alignmentFreeComparison(myMatrix, mySequenceSet, myScoreN2);
     }
+
+    // Write out resulting matrix; to file if file name was given, to stdout otherwise.
     if (outFile != "")
     {
-        ofstream myfile;
-        myfile.open(outFile);
+        ofstream myfile(outFile, std::ios::binary | std::ios::out);
         myfile << myMatrix;
         myfile.close();
     }

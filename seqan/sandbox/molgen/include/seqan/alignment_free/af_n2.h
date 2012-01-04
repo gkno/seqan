@@ -33,9 +33,12 @@
 // ==========================================================================
 // This header contains the implementation of the N2 score for alignment free
 // sequence comparison with word neighbourhood counts
-// Goeke et al, to appear.
+//
+// See: Goeke et al, to appear.
+//
 // These functions can be called with alignmentFreeComparison().
 // ==========================================================================
+
 #ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
 #define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
 
@@ -67,7 +70,9 @@ void _initialiseRevComIndex(String<unsigned> & revComIndex, unsigned const k)
  * k-mers belong to the word neighbourhood for every k-mer (all k-mers with
  * one mismatch)
  */
-void _initialiseKmerNeighbourhood(StringSet<String<unsigned> > & kmerNeighbourhood, unsigned const k, bool const revCom, String<unsigned> const & revComIndex)
+void _initialiseKmerNeighbourhood(StringSet<String<unsigned> > & kmerNeighbourhood,
+                                  unsigned const k, bool const revCom,
+                                  String<unsigned> const & revComIndex)
 {
     unsigned myLength = (unsigned) pow(4, k);
     Shape<Dna, SimpleShape> myShape;
@@ -130,7 +135,9 @@ void _initialiseKmerNeighbourhood(StringSet<String<unsigned> > & kmerNeighbourho
  * _alignmentFreeComparison is called by alignmentFreeComparison() (see alignment_free_comparison.h)
  */
 template <typename TValue, typename TStringSet>
-void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, AFScore<N2> const & score)
+void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix,
+                              TStringSet const & sequenceSet,
+                              AFScore<N2> const & score)
 {
 
 
@@ -243,7 +250,11 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const 
  */
 template <typename TValue, typename TString>
 void
-_alignmentFreeCompareCounts(TValue & result, String<unsigned> const revComIndex, TString const & kmerCounts1, TString const & kmerCounts2, AFScore<N2> const & score)
+_alignmentFreeCompareCounts(TValue & result,
+                            String<unsigned> const revComIndex,
+                            TString const & kmerCounts1,
+                            TString const & kmerCounts2,
+                            AFScore<N2> const & score)
 {
     typedef typename Iterator<TString const, Rooted>::Type    TIteratorTString;
 
@@ -304,11 +315,14 @@ void _standardiseCounts(TString & standardisedCounts,
         setLength(covarianceMatrix, 1, pow(alphabetSize, score.kmerSize));
         resize(covarianceMatrix, missing);
     }
-    // ----------------------------------------------------------------------
-    // Order 0 Background Model
-    // ----------------------------------------------------------------------
+
+    // TODO(holtgrew): It appears that there is copy and paste code between the two variants. Can this be eliminated/unified?
     if (score.bgModelOrder == 0)
     {
+        // ----------------------------------------------------------------------
+        // Order 0 Background Model
+        // ----------------------------------------------------------------------
+
         String<unsigned> kmerCounts;
         String<double> backgroundFrequencies;
         countKmers(kmerCounts, backgroundFrequencies, sequence, score.kmerSize);
@@ -463,11 +477,12 @@ void _standardiseCounts(TString & standardisedCounts,
             ++itStandardisedCounts;
         }
     }
-    // ----------------------------------------------------------------------
-    //Higher Order Background Model
-    // ----------------------------------------------------------------------
     else
     {
+        // ----------------------------------------------------------------------
+        // Higher Order Background Model
+        // ----------------------------------------------------------------------
+
         String<unsigned> kmerCounts;
         MarkovModel<TUnmaskedAlphabet, TValue> backgroundModel(score.bgModelOrder);
         countKmers(kmerCounts, backgroundModel, sequence, score.kmerSize);
