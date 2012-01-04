@@ -30,6 +30,7 @@
 //
 // ==========================================================================
 // Author: Jonathan Göke <goeke@molgen.mpg.de>
+// ==========================================================================
 // Tests for all alignment free sequence comparison methods implemented in 
 // Seqan
 // ==========================================================================
@@ -132,6 +133,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_calculateCovariance)
     calculateCovariance(covar, word1, word2, modelMM1, n);  // covar = 4.74
     SEQAN_ASSERT_IN_DELTA(covar, 13.1541, 0.001);
 }
+
 SEQAN_DEFINE_TEST(test_alignment_free_d2_dna)
 {
     using namespace seqan;
@@ -240,6 +242,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_d2z_dna5)
     SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 0.218295, 0.01);
     SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 2.47939, 0.01);
 }
+
 SEQAN_DEFINE_TEST(test_alignment_free_N2_dna5)
 {
     using namespace seqan;
