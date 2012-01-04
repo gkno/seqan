@@ -50,7 +50,7 @@ namespace seqan {
  */
 void _initialiseRevComIndex(String<unsigned> & revComIndex, unsigned const k)
 {
-    unsigned myLength = (unsigned) pow(4, k);
+    unsigned myLength = (unsigned)pow(4.0, (int)k);
     resize(revComIndex, myLength, 0);
     Shape<Dna, SimpleShape> myShape;
     resize(myShape, k);
@@ -74,7 +74,7 @@ void _initialiseKmerNeighbourhood(StringSet<String<unsigned> > & kmerNeighbourho
                                   unsigned const k, bool const revCom,
                                   String<unsigned> const & revComIndex)
 {
-    unsigned myLength = (unsigned) pow(4, k);
+    unsigned myLength = (unsigned)pow(4.0, (int)k);
     Shape<Dna, SimpleShape> myShape;
     resize(myShape, k);
     resize(kmerNeighbourhood, myLength);
@@ -308,11 +308,11 @@ void _standardiseCounts(TString & standardisedCounts,
 
     // Save all word covariances which are computed in covariance Matrix to avoid double computations
     Matrix<TValue, 2> covarianceMatrix;
-    TValue missing = -pow(10, 10);
+    TValue missing = -pow(10.0, 10);
     if (score.mismatches > 0)
     {
-        setLength(covarianceMatrix, 0, pow(alphabetSize, score.kmerSize));
-        setLength(covarianceMatrix, 1, pow(alphabetSize, score.kmerSize));
+        setLength(covarianceMatrix, 0, pow((double)alphabetSize, (int)score.kmerSize));
+        setLength(covarianceMatrix, 1, pow((double)alphabetSize, (int)score.kmerSize));
         resize(covarianceMatrix, missing);
     }
 
@@ -456,7 +456,7 @@ void _standardiseCounts(TString & standardisedCounts,
                 calculateVariance(variance, w, backgroundFrequencies, (len1 + score.kmerSize - 1));
                 variance = pow(variance, 0.5);
             }
-            if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
+            if ((variance > pow(10.0, -10)) && (variance < pow(10.0, 10)))
             {
                 if (p_w > 0)
                 {
@@ -610,7 +610,7 @@ void _standardiseCounts(TString & standardisedCounts,
                 calculateVariance(variance, w, backgroundModel, (len1 + score.kmerSize - 1));
                 variance = pow(variance, 0.5);
             }
-            if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
+            if ((variance > pow(10.0, -10)) && (variance < pow(10.0, 10)))
             {
                 if (p_w > 0)
                 {

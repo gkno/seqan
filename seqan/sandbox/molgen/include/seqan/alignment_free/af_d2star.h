@@ -94,7 +94,7 @@ void _d2star(TValue & result,
     typedef typename Value<TSequence>::Type              TAlphabet;
     typedef typename UnmaskedAlphabet_<TAlphabet>::Type  TUnmaskedAlphabet;
 
-    TValue missing = -pow(10, 10);
+    TValue missing = -pow(10.0, 10);
     TSequence seq1seq2;
     append(seq1seq2, sequence1);
     append(seq1seq2, sequence2);
@@ -151,7 +151,7 @@ void _d2star(TValue & result,
             variance2 = pow(len2 * p_w, 0.5);
 
             // Test if variance is larer than 0 and smaller than inf before dividing
-            if ((variance1 > missing) && (variance1 < pow(10, 10)))
+            if ((variance1 > missing) && (variance1 < pow(10.0, 10)))
             {
                 if (p_w > 0)
                 {
@@ -203,7 +203,7 @@ void _d2star(TValue & result,
             variance2 = pow(len2 * p_w, 0.5);
 
             // Calculate standardised kmer Count
-            if ((variance > pow(10, -10)) && (variance < pow(10, 10)))
+            if ((variance > pow(10.0, -10)) && (variance < pow(10.0, 10)))
             {
                 if (p_w > 0)
                 {

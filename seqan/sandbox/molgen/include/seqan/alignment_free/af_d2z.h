@@ -176,7 +176,7 @@ double computeExpectationD2(int const len1, int const len2, unsigned const k, TV
 
     TValue retval = nbar1;
     retval *= nbar2;
-    retval *= pow(p2, k);
+    retval *= pow((double)p2, (int)k);
     return retval;
 }
 
@@ -246,20 +246,20 @@ double computeVarianceD2(int len1, int len2, unsigned k, TValue * q1, TValue * q
 
     TValue variance = 0;
     // 'Crabgrass' with l = 0 (= complete overlap), see paper referenced above
-    TValue power1 = pow(p32, k) - pow(p2, 2 * k);
+    TValue power1 = pow((double)p32, (int)k) - pow((double)p2, 2 * (int)k);
     power1 *= TValue(nbar1) * TValue(qbar2) * TValue(qbar2 - 1);
-    TValue power2 = pow(p31, k) - pow(p2, 2 * k);
+    TValue power2 = pow((double)p31, (int)k) - pow((double)p2, 2 * (int)k);
     power2 *= TValue(nbar2) * TValue(qbar1) * TValue(qbar1 - 1);
     variance += power1 + power2;
 
     // 'Crabgrasses' with l > 0, see paper referenced above
     for (unsigned l = 1; l <= k - 1; l++)
-        variance += 2 * TValue(nbar1 - l) * TValue(qbar2) * TValue(qbar2 - 1) * (pow(p2, 2 * l) * pow(p32, k - l) - pow(p2, 2 * k)) + 2 * TValue(nbar2 - l) * TValue(qbar1) * TValue(qbar1 - 1) * (pow(p2, 2 * l) * pow(p31, k - l) - pow(p2, 2 * k));
+        variance += 2 * TValue(nbar1 - l) * TValue(qbar2) * TValue(qbar2 - 1) * (pow((double)p2, (int)(2 * l)) * pow((double)p32, (int)(k - l)) - pow((double)p2, (int)(2 * k))) + 2 * TValue(nbar2 - l) * TValue(qbar1) * TValue(qbar1 - 1) * (pow((double)p2, (int)(2 * l)) * pow((double)p31, (int)(k - l)) - pow((double)p2, (int)(2 * k)));
 
     // Accordion main diagonal, see paper referenced above
-    variance += TValue(nbar1) * TValue(nbar2) * (pow(p2, k) - pow(p2, 2 * k));
+    variance += TValue(nbar1) * TValue(nbar2) * (pow((double)p2, (int)(k)) - pow((double)p2, (int)(2 * k)));
     for (unsigned l = 1; l <= k - 1; l++)
-        variance += 2 * TValue(nbar1 - l) * TValue(nbar2 - l) * (pow(p2, k + l) - pow(p2, 2 * k));
+        variance += 2 * TValue(nbar1 - l) * TValue(nbar2 - l) * (pow((double)p2, (int)(k + l)) - pow((double)p2, (int)(2 * k)));
 
     return variance;
 }
