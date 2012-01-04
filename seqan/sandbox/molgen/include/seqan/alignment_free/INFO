@@ -2,6 +2,8 @@ Name: seqan-alignment_free
 Author: Jonathan Goeke <goeke@molgen.mpg.de>
 Maintainer: Jonathan Goeke <goeke@molgen.mpg.de>
 License: BSD 3-clause
-Copyright: 2011, FU Berlin
-Status: under development
+Copyright: 2012, FU Berlin
+Status: mature
 Description: Alignment-free comparison of sequences.
+See Jonathan Göke et al. (to appear).
+This module also contains some funtions on word statistics.

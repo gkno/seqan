@@ -43,10 +43,9 @@ namespace seqan {
 
 /**
 .Function.alignmentFreeComparison:
-..summary:Computes the pairwise similarity scores or distances for a set of sequences
-..cat:AlignmentFree
-..signature:
-alignmentFreeComparison(scoreMatrix, sequenceSet, score)
+..summary:Computes the pairwise similarity scores for a set of sequences
+..cat:Alignment Free
+..signature:alignmentFreeComparison(scoreMatrix, sequenceSet, score)
 ..param.scoreMatrix:A two-dimensional Matrix, used to store all pairwise scores
 ...type:Class.Matrix
 ..param.sequenceSet:StringSet containing all sequences for which pairwise scores will be computed
@@ -57,13 +56,6 @@ alignmentFreeComparison(scoreMatrix, sequenceSet, score)
 
 template <typename TStringSet, typename TValue, typename TComparisonMethod>
 void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, TComparisonMethod const & comparisonMethod)
-{
-    _alignmentFreeComparison(scoreMatrix, sequenceSet, comparisonMethod);
-}
-
-//!!!NEEDED???
-template <typename TStringSet, typename TValue, typename TComparisonMethod>
-void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const & sequenceSet, TComparisonMethod & comparisonMethod)
 {
     _alignmentFreeComparison(scoreMatrix, sequenceSet, comparisonMethod);
 }

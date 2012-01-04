@@ -41,10 +41,12 @@ namespace seqan {
 
 /**
 .Class.AFScore:
-..cat:Miscellaneous
+..cat:Alignment Free
 ..summary:Used to specify parameters and methods for alignment-free sequence comparison
 ..signature:AFScore<TScoreType>
-..param.TScoreType:Method to use
+..param.TScoreType:Method to use: N2, D2, D2Star, D2z
+..include:seqan/alignment_free.h
+..see:Function.alignmentFreeComparison
 */
 
 template <typename TSpec>
@@ -52,25 +54,30 @@ struct AFScore;
 
 
 /**
-.Spec.D2
-..cat:Miscellaneous
+.Spec.D2 AFScore
+..general:Class.AFScore
+..cat:Alignment Free
 ..summary:D2 computes the inner product of the kmer count vectors
 ..signature:AFScore<D2>
-..general:Class.AFScore
 ..remarks:D2 can be used for alignment-free sequence comparison
-.Memvar.D2#kmerSize:
-..class:Spec.D2
+.Memvar.D2 AFScore#kmerSize:
+..class:Spec.D2 AFScore
 ..summary:Size of the kmers
 */
 
-/**.Memfunc.D2#AFScore<D2>:
-..class:Spec.D2
+/**
+.Memfunc.D2 AFScore#AFScore<D2>
+..class:Spec.D2 AFScore
 ..summary:Constructor
-..signature:AFScore<D2>(kmerSize)
+..signature:AFScore(kmerSize, verbose)
 ..param.kmerSize: Size of kmer
 ...type:nolink:unsigned
+..param.verbose:This option will report progress to standard output. 
+...type:nolink:bool
+...default:false
 ..remarks:
 ...text:No remarks
+..see:Function.alignmentFreeComparison
 */
 
 struct D2_;     // Inner product of k-mer counts, d2 score
@@ -81,7 +88,7 @@ struct AFScore<D2>
 {
     unsigned kmerSize;
     bool verbose;
-    AFScore<D2>(unsigned k, bool verbose_ = false) : kmerSize(k), verbose(verbose_)
+    AFScore(unsigned k, bool verbose_ = false) : kmerSize(k), verbose(verbose_)
     {
     }
 
@@ -89,43 +96,40 @@ struct AFScore<D2>
 
 
 /**
-.Spec.D2Star
-..cat:Miscellaneous
+.Spec.D2Star AFScore
+..general:Class.AFScore
+..cat:Alignment Free
 ..summary:D2Star computes the inner product of the standardised kmer count vectors
 ..signature:AFScore<D2Star>
-..general:Class.AFScore
 ..remarks:D2Star can be used for alignment-free sequence comparison, this version calculates the background model on the concatenation of both sequences
 ..remarks:Reinert, G.; Chew, D.; Sun, F. & Waterman, M. S. Alignment-Free Sequence Comparison (I): Statistics and Power. J Comput Biol, 2009
-.Memvar.D2Star#kmerSize:
-..class:Spec.D2Star
+.Memvar.D2Star AFScore#kmerSize:
+..class:Spec.D2Star AFScore
 ..summary:Size of the kmers
-.Memvar.D2Star#bgModelOrder:
-..class:Spec.D2Star
+.Memvar.D2Star AFScore#bgModelOrder:
+..class:Spec.D2Star AFScore
 ..summary:Order of the background model
-.Memvar.D2Star#outputFile:
-..class:Spec.D2Star
+.Memvar.D2Star AFScore#outputFile:
+..class:Spec.D2Star AFScore
 ..summary: When specified, all kmerWeights will be written to this file, for every sequence, and for every sequence comparison
+
 */
 
 
-/**.Memfunc.D2Star#AFScore<D2Star>:
-..class:Spec.D2Star
+/**.Memfunc.D2Star AFScore#AFScore<D2Star>:
+..class:Spec.D2Star AFScore
 ..summary:Constructor
-..signature:AFScore<D2Star>(kmerSize, bgModelOrder)
-..signature:AFScore<D2Star>(kmerSize, bgModelOrder, outputFile)
+..signature:AFScore<D2Star>(kmerSize, bgModelOrder, verbose)
 ..param.kmerSize: Size of kmer
 ...type:nolink:unsigned
 ..param.bgModelOrder: Order of the background Markov model
 ...type:nolink:unsigned
-...default:0
-count variance
+..param.verbose:This option will report progress to standard output. 
 ...type:nolink:bool
 ...default:false
-..param.outputFile:When specified, all kmerWeights will be written to this file, for every sequence, and for every sequence comparison. The file can be very large.
-...type:nolink:String<char>
-...default:""
 ..remarks:
 ...text:No remarks
+..see:Function.alignmentFreeComparison
 */
 
 struct D2Star_;        // Reinert and Waterman, D2 with centralised and standardised counts
@@ -145,46 +149,60 @@ struct AFScore<D2Star>
 };
 
 /**
-.Spec.N2
-..cat:Miscellaneous
+.Spec.N2 AFScore
+..general:Class.AFScore
+..cat:Alignment Free
 ..summary:N2 computes the inner product of the standardised neighbourhood kmer count vectors
 ..signature:AFScore<N2>
-..general:Class.AFScore
-..remarks:N2 can be used for alignment-free sequence comparison
-..remarks:Goeke et al. to appear
-.Memvar.N2#kmerSize:
-..class:Spec.N2
+..remarks:N2 can be used for alignment-free sequence comparison. See Jonathan Goeke et al. (to appear).
+.Memvar.N2 AFScore#kmerSize:
+..class:Spec.N2 AFScore
 ..summary:Size of the kmers
-.Memvar.N2#bgModelOrder:
-..class:Spec.N2
+.Memvar.N2 AFScore#bgModelOrder:
+..class:Spec.N2 AFScore
 ..summary:Order of the background model
-.Memvar.N2#revCom:
-..class:Spec.N2
-..summary:Scoring of reverse complements words [max/min/mean/bothStrands]
-.Memvar.N2#mismatches:
-..class:Spec.N2
+.Memvar.N2 AFScore#revCom:
+..class:Spec.N2 AFScore
+..summary:Scoring of reverse complements words [''/'max'/'min'/'mean'/'bothStrands'/]
+.Memvar.N2 AFScore#mismatches:
+..class:Spec.N2 AFScore
 ..summary:Approximate word matches [0(exact)/1(one mismatch)]
-.Memvar.N2#mismatchWeight:
-..class:Spec.N2
+.Memvar.N2 AFScore#mismatchWeight:
+..class:Spec.N2 AFScore
 ..summary:Weight for approximate word matches
-.Memvar.D2star_old#outputFile:
-..class:Spec.N2
+.Memvar.N2 AFScore#outputFile:
+..class:Spec.N2 AFScore
+..summary: When specified, all kmerWeights for every sequence will be written to this file
+
 */
 
 
-/**.Memfunc.N2#AFScore<N2>:
-..class:Spec.N2
+/**
+.Memfunc.N2#AFScore<N2>:
+..class:Spec.N2 AFScore
 ..summary:Constructor
-..signature:AFScore<N2>(kmerSize, bgModelOrder,outputFile)
+..signature:AFScore<N2>(kmerSize, bgModelOrder, outputFile, verbose)
+..signature:AFScore<N2>(kmerSize, bgModelOrder, revCom, outputFile, verbose)
+..signature:AFScore<N2>(kmerSize, bgModelOrder, revCom, mismatch, mismatchWeight, outputFile, verbose)
 ..param.kmerSize: Size of kmer
 ...type:nolink:unsigned
 ..param.bgModelOrder: Order of the background Markov model
 ...type:nolink:unsigned
-...default:0
+..param.revCom: Scoring of reverse complements words [''/'max'/'min'/'mean'/'bothStrands'/]
+...type:nolink:String<char>
+..param.mismatch: Includes words with one mismatch into the word neighbourhood. [0/1]
+...type:nolink:unsigned
+..param.mismatchWeight: Weight of word counts with one mismatch
+...type:nolink:double
 ..param.outputFile:When specified, all normalised and standardised kmer neighbourhood counts will be written to this file for every sequence
+...type:nolink:String<char>
 ...default:""
+..param.verbose:This option will report progress to standard output. 
+...type:nolink:bool
+...default:false
 ..remarks:
 ...text:No remarks
+..see:Function.alignmentFreeComparison
 */
 
 struct N2_;     // Reinert and Waterman, D2 with centralised and standardised counts
@@ -196,80 +214,85 @@ struct AFScore<N2>
     unsigned kmerSize;
     unsigned bgModelOrder;
     String<char> revCom;    // Count reverse complement words?
-    // revCom="";"mean","max","bothStrands"
+                            // revCom="";"mean","max","bothStrands"
     unsigned mismatches;    // Currently 0 or 1
-    double mismatchWeight;  // Weight of words in the mismatch neighbourhood (0-1)
+    double mismatchWeight;  // Weight of words in the mismatch neighbourhood
     bool verbose;
-    bool norm;          // Normalize score? needed to provide a proper similarity measure
-    String<char> outputFile;    // output of all pairwise kmerSores for pairwise visualisation
-    
-	//Constructor for the simple case with only exact word counts (N2*)
-    AFScore<N2>(unsigned k, unsigned m, String<char> kmerWeightsFile = "", bool verbose_ = false)
+    bool norm;              // Normalize score? Needed to provide a proper similarity measure
+    String<char> outputFile;  // Output of all kmer weights for every sequence into this file
+
+    //Constructor for the simple case with only exact word counts (N2*)
+    AFScore(unsigned k, unsigned m, String<char> kmerWeightsFile = "", bool verbose_ = false)
     {
         kmerSize = k;
         bgModelOrder = m;
         outputFile = kmerWeightsFile;
-	verbose = verbose_;
+        verbose = verbose_;
         revCom = "";
         mismatches = 0;
         mismatchWeight = 1.0;
         norm = true;
 
     };
-	//Constructor for the case with exact word counts and reverse complement (N2rc)
-    AFScore<N2>(unsigned k, unsigned m, String<char> revCom_, String<char> kmerWeightsFile = "", bool verbose_ = false)
+    //Constructor for the case with exact word counts and reverse complement (N2rc)
+    AFScore(unsigned k, unsigned m, String<char> revCom_, String<char> kmerWeightsFile = "", bool verbose_ = false)
     {
         kmerSize = k;
         bgModelOrder = m;
         revCom = revCom_;
-	outputFile = kmerWeightsFile;
-	verbose = verbose_;
+        outputFile = kmerWeightsFile;
+        verbose = verbose_;
         mismatches = 0;
         mismatchWeight = 1.0;
         norm = true;
     };
-    	//Constructor for the case with mismatch-neighbourhood word counts and reverse complement (N2mmrc)
-    AFScore<N2>(unsigned k, unsigned m, String<char> revCom_, unsigned mm, double mmw, String<char> kmerWeightsFile = "", bool verbose_ = false)
+    //Constructor for the case with mismatch-neighbourhood word counts and reverse complement (N2mmrc)
+    AFScore(unsigned k, unsigned m, String<char> revCom_, unsigned mm, double mmw, String<char> kmerWeightsFile = "", bool verbose_ = false)
     {
         kmerSize = k;
         bgModelOrder = m;
         revCom = revCom_;
         mismatches = mm;
         mismatchWeight = mmw;
-	outputFile = kmerWeightsFile;
+        outputFile = kmerWeightsFile;
         verbose = verbose_;
-	norm = true;
+        norm = true;
     };
 };
 
 
 /**
-.Spec.D2z
-..cat:Miscellaneous
+.Spec.D2z AFScore
+..cat:Alignment Free
 ..summary:D2z computes a z-score of the inner product of kmer count vectors
 ..signature:AFScore<D2z>
 ..general:Class.AFScore
 ..remarks:D2z can be used for alignment-free sequence comparison. The algorithm differs from the original implementation by the way masked sequences are handled
 ..remarks:Kantorovitz, M. R.; Robinson, G. E. & Sinha, S. A statistical method for alignment-free comparison of regulatory sequences. Bioinformatics, 2007
-.Memvar.D2z#kmerSize:
-..class:Spec.D2z
+.Memvar.D2z AFScore#kmerSize:
+..class:Spec.D2z AFScore
 ..summary:Size of the kmers
-.Memvar.D2z#bgModelOrder:
-..class:Spec.D2z
+.Memvar.D2z AFScore#bgModelOrder:
+..class:Spec.D2z AFScore
 ..summary:Order of the background model
 */
 
-/**.Memfunc.D2z#AFScore<D2z>:
-..class:Spec.D2z
+/**.Memfunc.D2z AFScore#AFScore<D2z>:
+..class:Spec.D2z AFScore
 ..summary:Constructor
-..signature:AFScore<D2z>(kmerSize, bgModelOrder)
+..signature:AFScore<D2z>(kmerSize, bgModelOrder, verbose)
 ..param.kmerSize: Size of kmer
+...type:nolink:unsigned
 ..param.bgModelOrder: Order of the background Markov model
+...type:nolink:unsigned
+..param.verbose:This option will report progress to standard output. 
+...type:nolink:bool
+...default:false
 ..remarks:
 ...text:nolink:No remarks
 */
 
-struct D2z_;        // Inner product of k-mer counts, d2 score with z-score
+struct D2z_;  // Inner product of k-mer counts, d2 score with z-score
 typedef Tag<D2z_> const D2z;
 
 template <>

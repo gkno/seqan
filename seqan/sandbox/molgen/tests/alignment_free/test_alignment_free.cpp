@@ -1,5 +1,3 @@
-//goeke@linux-cob4:~/projects/seqanNew/seqan/build/Debug> make test_alignment_free && ./sandbox/molgen/tests/alignment_free/test_alignment_free
-
 // ==========================================================================
 //                               alignmentFree
 // ==========================================================================
@@ -31,28 +29,29 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jonathan Göke <goeke@molgen.mpg.de>
+// Tests for all alignment free sequence comparison methods implemented in 
+// Seqan
 // ==========================================================================
 
 #include <seqan/basic.h>
 #include <seqan/file.h>
 #include <seqan/sequence.h>
 #include <seqan/alignment_free.h>
-#include "test_alignment_free.h"
 
 template <typename TStringSet>
 void alfTestHelperGetSequences(TStringSet & sequences)
 {
-	using namespace seqan;
-	CharString seqIID1 =
-	"TAGGTTTTCCGAAAAGGTAGCAACTTTACGTGATCAAACCTCTGACGGGGTTTTCCCCGTCGAAATTGGGTG"
+    using namespace seqan;
+    CharString seqIID1 =
+        "TAGGTTTTCCGAAAAGGTAGCAACTTTACGTGATCAAACCTCTGACGGGGTTTTCCCCGTCGAAATTGGGTG"
         "TTTCTTGTCTTGTTCTCACTTGGGGCATCTCCGTCAAGCCAAGAAAGTGCTCCCTGGATTCTGTTGCTAACG"
         "AGTCTCCTCTGCATTCCTGCTTGACTGATTGGGCGGACGGGGTGTCCACCTGACGCTGAGTATCGCCGTCAC"
         "GGTGCCACATGTCTTATCTATTCAGGGATCAGAATTTATTCAGGAAATCAGGAGATGCTACACTTGGGTTAT"
         "CGAAGCTCCTTCCAAGGCGTAGCAAGGGCGACTGAGCGCGTAAGCTCTAGATCTCCTCGTGTTGCAACTACA"
         "CGCGCGGGTCACTCGAAACACATAGTATGAACTTAACGACTGCTCGTACTGAACAATGCTGAGGCAGAAGAT"
         "CGCAGACCAGGCATCCCACTGCTTGAAAAAACTATNNNNCTACCCGCCTTTTTATTATCTCATCAGATCAAG";
-	CharString seqIID2 =
+    CharString seqIID2 =
         "ACCGACGATTAGCTTTGTCCGAGTTACAACGGTTCAATAATACAAAGGATGGCATAAACCCATTTGTGTGAA"
         "AGTGCCCATCACATTATGATTCTGTCTACTATGGTTAATTCCCAATATACTCTCGAAAAGAGGGTATGCTCC"
         "CACGGCCATTTACGTCACTAAAAGATAAGATTGCTCAAANNNNNNNNNACTGCCAACTTGCTGGTAGCTTCA"
@@ -61,186 +60,276 @@ void alfTestHelperGetSequences(TStringSet & sequences)
         "GACGGCCGCGNNNAACGATGCTATCGGTTAGGACATTGTGCCCTAGTATGTACATGCCTAATACAATTGGAT"
         "CAAACGTTATTCCCACACACGGGTAGAAGAACNNNNATTACCCGTAGGCACTCCCCGATTCAAGTAGCCGCG";
 
-	
-	clear(sequences);
-	appendValue(sequences, seqIID1);
-	appendValue(sequences, seqIID2);
-	
+    clear(sequences);
+    appendValue(sequences, seqIID1);
+    appendValue(sequences, seqIID2);
 }
 
+SEQAN_DEFINE_TEST(test_alignment_free_calculateProbability)
+{
+    using namespace seqan;
+    double p = 0.0;
+    DnaString word = "CCCAAGTTT";
+    String<double> model;
+    resize(model, 4);
+    model[0] = 0.3;  // p(A)
+    model[1] = 0.2;  // p(C)
+    model[2] = 0.2;  // p(G)
+    model[3] = 0.3;  // p(T)
+    calculateProbability(p, word, model);
+    SEQAN_ASSERT_IN_DELTA(p, 0.00000387, 0.000001);
+}
+
+SEQAN_DEFINE_TEST(test_alignment_free_calculateVariance)
+{
+    using namespace seqan;
+    double var = 0.0;
+    int n = 10000;
+    DnaString word = "CAAGTC";
+    String<double> model;
+    resize(model, 4);
+    model[0] = 0.3;  // p(A)
+    model[1] = 0.2;  // p(C)
+    model[2] = 0.2;  // p(G)
+    model[3] = 0.3;  // p(T)
+    calculateVariance(var, word, model, n);  // var = 2.16
+    SEQAN_ASSERT_IN_DELTA(var, 2.15845, 0.001);
+    StringSet<DnaString> sequences;
+    appendValue(sequences, "CAGAAAAAAACACTGATTAACAGGAATAAGCAGTTTACTTATTTTGGGCCTGGGACCCGTGTCTCTAATTTAATTAGGTGATCCCTGCGAAGTTTCTCCA");
+    MarkovModel<Dna, double> modelMM0(0);  // Bernoulli model
+    modelMM0.build(sequences);
+    calculateVariance(var, word, modelMM0, n);  // var = 2.16
+    SEQAN_ASSERT_IN_DELTA(var, 2.15845, 0.001);
+    MarkovModel<Dna, double> modelMM1(1);  // First order Markov model
+    modelMM1.build(sequences);
+    calculateVariance(var, word, modelMM1, n);  // var = 1.69716
+    SEQAN_ASSERT_IN_DELTA(var, 1.69716, 0.001);
+}
+
+SEQAN_DEFINE_TEST(test_alignment_free_calculateCovariance)
+{
+    using namespace seqan;
+    double covar = 0.0;
+    int n = 10000;
+    DnaString word1 = "ATATAT";
+    DnaString word2 = "TATATA";
+    String<double> model;
+    resize(model, 4);
+    model[0] = 0.3;  // p(A)
+    model[1] = 0.2;  // p(C)
+    model[2] = 0.2;  // p(G)
+    model[3] = 0.3;  // p(T)
+    calculateCovariance(covar, word1, word2, model, n);  // covar = 4.74
+    SEQAN_ASSERT_IN_DELTA(covar, 4.741, 0.001);
+    StringSet<DnaString> sequences;
+    appendValue(sequences, "CAGCACTGATTAACAGGAATAAGCAGTTTACTTCTGTCAGAATATTGGGCATATATACTGGGACCCGTGTAATACTCTAATTTAATTAGGTGATCCCTGCGAAGTCTCCA");
+    MarkovModel<Dna, double> modelMM0(0);  // Bernoulli model
+    modelMM0.build(sequences);
+    calculateCovariance(covar, word1, word2, modelMM0, n);  // covar = 4.74
+    SEQAN_ASSERT_IN_DELTA(covar, 4.741, 0.001);
+    MarkovModel<Dna, double> modelMM1(1);  // First order Markov model
+    modelMM1.build(sequences);
+    calculateCovariance(covar, word1, word2, modelMM1, n);  // covar = 4.74
+    SEQAN_ASSERT_IN_DELTA(covar, 13.1541, 0.001);
+}
 SEQAN_DEFINE_TEST(test_alignment_free_d2_dna)
 {
-	using namespace seqan;
-	StringSet<DnaString> sequences;
-	alfTestHelperGetSequences(sequences);
-	
-	typedef Matrix<double, 2> TMatrix;
-	TMatrix myMatrix;
-	
-	//kmerSize=3
-	unsigned kmerSize=3;
-	AFScore<D2> myScoreD2(kmerSize);
-	alignmentFreeComparison(myMatrix, sequences, myScoreD2);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 4424.0,10.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 3965.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 3965.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 4814.0,10.01);
-	
+    using namespace seqan;
+    StringSet<DnaString> sequences;
+    alfTestHelperGetSequences(sequences);
+
+    typedef Matrix<double, 2> TMatrix;
+    TMatrix myMatrix;
+
+    // kmerSize = 3
+    unsigned kmerSize = 3;
+    AFScore<D2> myScoreD2(kmerSize);
+    alignmentFreeComparison(myMatrix, sequences, myScoreD2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 4424.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 3965.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 3965.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 4814.0, 0.01);
 }
 
 SEQAN_DEFINE_TEST(test_alignment_free_d2_dna5)
 {
-	using namespace seqan;
-	StringSet<Dna5String> sequences;
-	alfTestHelperGetSequences(sequences);
-	
-	typedef Matrix<double, 2> TMatrix;
-	TMatrix myMatrix;
-	
-	//kmerSize=3
-	unsigned kmerSize=3;
-	AFScore<D2> myScoreD2(kmerSize);
-	alignmentFreeComparison(myMatrix, sequences, myScoreD2);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 4322.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 3652.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 3652.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 4030.0,0.01);
-	
-	kmerSize=5;
-	myScoreD2.kmerSize=kmerSize;
-	alignmentFreeComparison(myMatrix, sequences, myScoreD2);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 762.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 216.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 216.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 688.0,0.01);
+    using namespace seqan;
+    StringSet<Dna5String> sequences;
+    alfTestHelperGetSequences(sequences);
+
+    typedef Matrix<double, 2> TMatrix;
+    TMatrix myMatrix;
+
+    // kmerSize = 3
+    unsigned kmerSize = 3;
+    AFScore<D2> myScoreD2(kmerSize);
+    alignmentFreeComparison(myMatrix, sequences, myScoreD2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 4322.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 3652.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 3652.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 4030.0, 0.01);
+
+    kmerSize=5;
+    myScoreD2.kmerSize=kmerSize;
+    alignmentFreeComparison(myMatrix, sequences, myScoreD2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 762.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 216.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 216.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 688.0, 0.01);
 }
 
 SEQAN_DEFINE_TEST(test_alignment_free_d2star_dna5)
 {
-	using namespace seqan;
-	StringSet<Dna5String> sequences;
-	alfTestHelperGetSequences(sequences);
-	
-	typedef Matrix<double, 2> TMatrix;
-	TMatrix myMatrix;
-	
-	//kmerSize=3
-	unsigned kmerSize=3;
-	unsigned bgModelOrder=0;
-	AFScore<D2Star> myScoreD2Star(kmerSize,bgModelOrder);
-	alignmentFreeComparison(myMatrix, sequences, myScoreD2Star);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 58.2374,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -10.949,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -10.949,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 48.358,0.01);
-	
-	bgModelOrder=1;
-	myScoreD2Star.bgModelOrder=bgModelOrder;
-	alignmentFreeComparison(myMatrix, sequences,myScoreD2Star);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 30.336,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -15.104,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -15.104,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 36.3913,0.01);
+    using namespace seqan;
+    StringSet<Dna5String> sequences;
+    alfTestHelperGetSequences(sequences);
+
+    typedef Matrix<double, 2> TMatrix;
+    TMatrix myMatrix;
+
+    // kmerSize = 3
+    unsigned kmerSize = 3;
+    unsigned bgModelOrder = 0;
+    AFScore<D2Star> myScoreD2Star(kmerSize,bgModelOrder);
+    alignmentFreeComparison(myMatrix, sequences, myScoreD2Star);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 58.2374, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -10.949, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -10.949, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 48.358, 0.01);
+
+    bgModelOrder = 1;
+    myScoreD2Star.bgModelOrder=bgModelOrder;
+    alignmentFreeComparison(myMatrix, sequences,myScoreD2Star);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 30.336, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -15.104, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -15.104, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 36.3913, 0.01);
 }
 
 SEQAN_DEFINE_TEST(test_alignment_free_d2z_dna5)
 {
-	using namespace seqan;
-	StringSet<Dna5String> sequences;
-	alfTestHelperGetSequences(sequences);
-	
-	typedef Matrix<double, 2> TMatrix;
-	TMatrix myMatrix;
-	
-	//kmerSize=3
-	unsigned kmerSize=3;
-	unsigned bgModelOrder=0;
-	AFScore<D2z> myScoreD2z(kmerSize,bgModelOrder);
-	alignmentFreeComparison(myMatrix, sequences, myScoreD2z);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 5.13022,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.614828,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.614828,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 3.40064,0.01);
-	
-	bgModelOrder=1;
-	myScoreD2z.bgModelOrder=bgModelOrder;
-	alignmentFreeComparison(myMatrix, sequences,myScoreD2z);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.61939,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 0.218295,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 0.218295,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 2.47939,0.01);
+    using namespace seqan;
+    StringSet<Dna5String> sequences;
+    alfTestHelperGetSequences(sequences);
+
+    typedef Matrix<double, 2> TMatrix;
+    TMatrix myMatrix;
+
+    //kmerSize = 3
+    unsigned kmerSize = 3;
+    unsigned bgModelOrder = 0;
+    AFScore<D2z> myScoreD2z(kmerSize,bgModelOrder);
+    alignmentFreeComparison(myMatrix, sequences, myScoreD2z);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 5.13022, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.614828, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.614828, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 3.40064, 0.01);
+
+    bgModelOrder=1;
+    myScoreD2z.bgModelOrder=bgModelOrder;
+    alignmentFreeComparison(myMatrix, sequences,myScoreD2z);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.61939, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 0.218295, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 0.218295, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 2.47939, 0.01);
 }
 SEQAN_DEFINE_TEST(test_alignment_free_N2_dna5)
 {
-	using namespace seqan;
-	StringSet<Dna5String> sequences;
-	alfTestHelperGetSequences(sequences);
-	
-	typedef Matrix<double, 2> TMatrix;
-	TMatrix myMatrix;
-	
+    using namespace seqan;
+    StringSet<Dna5String> sequences;
+    alfTestHelperGetSequences(sequences);
 
-	unsigned kmerSize=3;
-	unsigned bgModelOrder=0;
-	CharString revCom="";
-	unsigned mismatches = 0;
-	double mismatchWeight = 0.5;
+    typedef Matrix<double, 2> TMatrix;
+    TMatrix myMatrix;
 
-	
-         AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revCom, mismatches, mismatchWeight);
- 	alignmentFreeComparison(myMatrix, sequences, myScoreN2);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.161242,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.161242,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0,0.01);
-	
-	bgModelOrder=1;
-	myScoreN2.bgModelOrder=bgModelOrder;
-	alignmentFreeComparison(myMatrix, sequences,myScoreN2);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 0.143021,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 0.143021,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0,0.01);
-	
-	revCom="bothStrands";
-	myScoreN2.revCom=revCom;
-	alignmentFreeComparison(myMatrix, sequences,myScoreN2);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.236594,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.236594,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0,0.01);
-	
-	mismatches=1;
-	mismatchWeight=0.5;
-	myScoreN2.mismatches=mismatches;
-	myScoreN2.mismatchWeight=mismatchWeight;
-	
-	alignmentFreeComparison(myMatrix, sequences,myScoreN2);
-	
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.382932,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.382932,0.01);
-	SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0,0.01);
+    unsigned kmerSize = 3;
+    unsigned bgModelOrder = 0;
+    String<char>  revCom = "";
+    unsigned mismatches = 0;
+    double mismatchWeight = 0.5;
+    AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revCom, mismatches, mismatchWeight);
+
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.161242, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.161242, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+
+    bgModelOrder = 1;
+    myScoreN2.bgModelOrder = bgModelOrder;
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), 0.143021, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 0.143021, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+
+    myScoreN2.revCom = "bothStrands";
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.236594, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.236594, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+
+    mismatches = 1;
+    mismatchWeight = 0.5;
+    myScoreN2.mismatches = mismatches;
+    myScoreN2.mismatchWeight = mismatchWeight;
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.382932, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.382932, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+
+    bgModelOrder=0;
+    myScoreN2.bgModelOrder = bgModelOrder;
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.675514, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.675514, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+
+    kmerSize = 4;
+    myScoreN2.kmerSize = kmerSize;
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.479099, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.479099, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+
+    bgModelOrder = 2;
+    myScoreN2.bgModelOrder = bgModelOrder;
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.0858019, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.0858019, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+
 }
 
 SEQAN_BEGIN_TESTSUITE(test_alignment_free)
 {
-
     // Call tests.
     SEQAN_CALL_TEST(test_alignment_free_d2_dna);
     SEQAN_CALL_TEST(test_alignment_free_d2_dna5);
     SEQAN_CALL_TEST(test_alignment_free_d2star_dna5);
-    SEQAN_CALL_TEST(test_alignment_free_d2z_dna5);    
+    SEQAN_CALL_TEST(test_alignment_free_d2z_dna5);
     SEQAN_CALL_TEST(test_alignment_free_N2_dna5);
+    SEQAN_CALL_TEST(test_alignment_free_calculateProbability);
+    SEQAN_CALL_TEST(test_alignment_free_calculateVariance);
+    SEQAN_CALL_TEST(test_alignment_free_calculateCovariance);
 }
 SEQAN_END_TESTSUITE
