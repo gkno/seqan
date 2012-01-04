@@ -912,15 +912,17 @@ def removeDuplicateTexts(tree):
     """
     ##print 'remove duplicates'
     def recurse(node):
+        in_cleaned = {}
         cleaned = []
-        for txt in sorted(node.texts):
+        for txt in node.texts:
             clean = txt
             pos = txt.find('\u0001')
             if pos != -1:
                 clean = txt[:pos]
             ##print cleaned, repr(clean)
-            if cleaned and cleaned[-1] == clean:
-                cleaned[-1] = txt
+            if clean in in_cleaned:
+                if '\u0001' in clean and not '\u0001' in cleaned[in_cleaned[clean]]:
+                    cleaned[in_cleaned[clean]] = txt
             else:
                 cleaned.append(txt)
         node.texts = cleaned
