@@ -176,6 +176,14 @@ a.dead {
     color: darkred;
 }
 
+ul {
+    margin-left: 2em;
+}
+
+ul li {
+    list-style-type: disc;
+}
+
 /* Nifty paragraph effect, taken from Trac. */
 a.anchor:link, a.anchor:visited { color: #eee; }
 h1 a.anchor, h2 a.anchor, h3 a.anchor { visibility: hidden; }

@@ -138,6 +138,18 @@
   <!--(end)-->
 <!--(end)-->
 
+<!--(macro itemize_section)-->
+  <!--(if tree.find(path))-->
+  <div class="section link_section @!path[-1]!@">
+    <h3>@!tree.find(['globals', 'sections', path[-1]]).text()!@</h3>
+    <ul>
+    <!--(for text in tree.find(path).texts)-->
+    <li>@!text!@</li>
+    <!--(end)-->
+    </ul>
+  <!--(end)-->
+<!--(end)-->
+
 <!--(macro summary_field)-->
   <!--(for text in tree.find(path).texts)-->
     <!--(if text.startswith('type=text:'))-->
