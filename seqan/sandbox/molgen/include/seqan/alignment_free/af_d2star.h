@@ -100,7 +100,10 @@ void _d2star(TValue & result,
     append(seq1seq2, sequence2);
     result = 0.0;
 
-    // TODO(holtgrew): There is some copy-and-paste code here for the two cases, can this be unified?
+    // Note that there is some code below that looks like copy-and-paste.  However, pulling this out into another
+    // function is the only way to get rid of the duplicate lines since we use different types.  After some discussion,
+    // weese, goeke and holtgrew agreed that it is probably easier to read and maintain this way than to spread the code
+    // over to one more function.
     if (score.bgModelOrder == 0)
     {
         // --------------------------------------------------------------------

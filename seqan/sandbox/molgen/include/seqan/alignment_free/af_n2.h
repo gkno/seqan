@@ -316,7 +316,10 @@ void _standardiseCounts(TString & standardisedCounts,
         resize(covarianceMatrix, missing);
     }
 
-    // TODO(holtgrew): It appears that there is copy and paste code between the two variants. Can this be eliminated/unified?
+    // Note that there is some code below that looks like copy-and-paste.  However, pulling this out into another
+    // function is the only way to get rid of the duplicate lines since we use different types.  After some discussion,
+    // weese, goeke and holtgrew agreed that it is probably easier to read and maintain this way than to spread the code
+    // over to one more function.
     if (score.bgModelOrder == 0)
     {
         // ----------------------------------------------------------------------
