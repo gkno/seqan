@@ -150,6 +150,14 @@
   <!--(end)-->
 <!--(end)-->
 
+<!--(macro wiki_link_section)-->
+  <!--(if tree.find(path))-->
+  <div class="section link_section @!path[-1]!@">
+    <h3>@!tree.find(['globals', 'sections', path[-1]]).text()!@</h3>
+    <div class="list">$!', '.join([html.pageLink(txt='http://trac.seqan.de/wiki/' + txt, node=tree.find([cat, subcat, path[-1]])) for txt in sorted(tree.find([cat, subcat, path[-1]]).texts)])!$</div>
+  <!--(end)-->
+<!--(end)-->
+
 <!--(macro summary_field)-->
   <!--(for text in tree.find(path).texts)-->
     <!--(if text.startswith('type=text:'))-->
