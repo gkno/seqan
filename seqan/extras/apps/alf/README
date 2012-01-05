@@ -1,5 +1,5 @@
                *** ALF - Alignment Free Sequence Comparison ***
-                           http://alf.molgen.mpg.de
+                     http://www.seqan.de/projects/alf.html
                                 January, 2012
 
 ---------------------------------------------------------------------------
@@ -20,21 +20,21 @@ Table of Contents
 ALF can be used to compare the pairwise similarity of sequences using
 alignment-free methods. All methods which are implemented are based on
 k-mer counts. More details can be found in the online documentation of the
-alignment-free methods (alf.molgen.mpg.de).
+alignment-free methods (www.seqan.de).
 
 ---------------------------------------------------------------------------
 2. Installation
 ---------------------------------------------------------------------------
 
 ALF is distributed with SeqAn - The C++ Sequence Analysis Library (see
-http://www.seqan.de).  To build ALF from SVN do the following:
+http://www.seqan.de). To build ALF from SVN do the following:
 
   1) svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
   2) mkdir -p build/Release
   3) cd build/Release
   4) cmake ../.. -DCMAKE_BUILD_TYPE=Release
   5) make alf
-  6) ./sandbox/molgen/apps/alf/alf  --help
+  6) ./extras/apps/alf/alf --help
 
 On success, an executable file alf was build and a brief usage description
 was dumped.
@@ -129,9 +129,10 @@ sequences from the input fasta file, for example:
 ---------------------------------------------------------------------------
 
 These examples use the fasta file "small.fasta" which can be found in
-alf/example/.
+seqan/extras/apps/alf/example/. Copy this file to the directory where you 
+execute alf.
 
-(1) Run ALF with default settings on a two sequences:
+(1) Run ALF with default settings on two sequences:
 
   ./alf -i small.fasta
 
