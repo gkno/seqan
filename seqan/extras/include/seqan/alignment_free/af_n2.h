@@ -39,8 +39,8 @@
 // These functions can be called with alignmentFreeComparison().
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
-#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
 
 namespace seqan {
 
@@ -66,7 +66,7 @@ void _initialiseRevComIndex(String<unsigned> & revComIndex, unsigned const k)
 }
 
 /*
- * This function returns a stringSet with strings of indices indicating which 
+ * This function returns a stringSet with strings of indices indicating which
  * k-mers belong to the word neighbourhood for every k-mer (all k-mers with
  * one mismatch)
  */
@@ -638,4 +638,4 @@ void _standardiseCounts(TString & standardisedCounts,
 
 }  // namespace seqan
 
-#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_
+#endif  // SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_N2_H_

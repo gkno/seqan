@@ -31,13 +31,13 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-// This file contains the function that calls alignment free sequence 
+// This file contains the function that calls alignment free sequence
 // comparisons algorithms (see AFScore):
 // alignmentFreeComparison()
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_COMPARISON_H_
-#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_COMPARISON_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_COMPARISON_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_COMPARISON_H_
 
 namespace seqan {
 
@@ -99,4 +99,4 @@ void alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix, TStringSet const &
 
 }  // namespace seqan
 
-#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_COMPARISON_H_
+#endif  // SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_COMPARISON_H_

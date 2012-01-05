@@ -1,6 +1,6 @@
-*** ALF - Alignment Free Sequence Comparison ***
-
-URL: http://alf.molgen.mpg.de
+               *** ALF - Alignment Free Sequence Comparison ***
+                           http://alf.molgen.mpg.de
+                                January, 2012
 
 ---------------------------------------------------------------------------
 Table of Contents
@@ -26,7 +26,7 @@ alignment-free methods (alf.molgen.mpg.de).
 2. Installation
 ---------------------------------------------------------------------------
 
-ALF is distributed with SeqAn - The C++ Sequence Analysis Library (see 
+ALF is distributed with SeqAn - The C++ Sequence Analysis Library (see
 http://www.seqan.de).  To build ALF from SVN do the following:
 
   1) svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
@@ -47,7 +47,7 @@ For more information about retrieving SeqAn and prerequisites please visit
 3. Usage
 ---------------------------------------------------------------------------
 
-To get a short usage description of ALF, you can execute alf -h or 
+To get a short usage description of ALF, you can execute alf -h or
 alf --help.
 
 Usage: alf [OPTION]... -i <MULTI FASTA FILE>
@@ -72,16 +72,16 @@ options at the command line:
 
   [ -m ],   [ --method ]
 
-  Method that will be udes for sequence comparison. 
+  Method that will be udes for sequence comparison.
   Default:N2 [N2, D2, D2Star, D2z]
 
   [ -k ],   [ --kmerSize ]
 
-  Size of the k-mers that will be counted. Default:4 [integer] 
+  Size of the k-mers that will be counted. Default:4 [integer]
 
   [ -mo ],  [ --bgModelOrder ]
 
-  Order of background markov model for N2, D2Star, D2z. Default:1 [integer] 
+  Order of background markov model for N2, D2Star, D2z. Default:1 [integer]
 
   [ -rc ],  [ --reverseComplement ]
 
@@ -94,7 +94,7 @@ options at the command line:
   [ -mm ],  [ --mismatches ]
 
   N2 only. Select -mm 1 if you want to include all words with one mismatch
-  to the k-mer neighbourhood. Default: Exact counts only [0,1] 
+  to the k-mer neighbourhood. Default: Exact counts only [0,1]
 
   [ -mmw ], [ --mismatchWeight ]
 
@@ -117,7 +117,7 @@ options at the command line:
 4. Output Format
 ---------------------------------------------------------------------------
 
-The program returns a (tab delimited) matrix with pairwise scores for all 
+The program returns a (tab delimited) matrix with pairwise scores for all
 sequences from the input fasta file, for example:
 
   1         0.046   0.052
@@ -128,7 +128,7 @@ sequences from the input fasta file, for example:
 5. Example
 ---------------------------------------------------------------------------
 
-These examples use the fasta file "small.fasta" which can be found in 
+These examples use the fasta file "small.fasta" which can be found in
 alf/example/.
 
 (1) Run ALF with default settings on a two sequences:

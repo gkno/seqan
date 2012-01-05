@@ -31,7 +31,7 @@
 // ==========================================================================
 // Author: Jonathan Goeke <goeke@molgen.mpg.de>
 // ==========================================================================
-// This header contains the implementation of the D2star score for alignment 
+// This header contains the implementation of the D2star score for alignment
 // free sequence comparison.
 //
 // See: Reinert et al. J Comput Biol. 2009 Dec;16(12):1615-34.
@@ -39,8 +39,8 @@
 // These functions can be called with alignmentFreeComparison().
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
-#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
 
 namespace seqan {
 
@@ -221,4 +221,4 @@ void _d2star(TValue & result,
 
 }  // namespace seqan
 
-#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_
+#endif  // SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2STAR_ORIGINAL_H_

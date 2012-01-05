@@ -37,8 +37,8 @@
 // These functions can be called with alignmentFreeComparison().
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_
-#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_
 
 namespace seqan {
 
@@ -82,7 +82,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix,
     }
 
     // Calculate all pairwise scores and store them in scoreMatrix
-    for (unsigned rowIndex = 0; rowIndex < seqNumber; ++rowIndex) 
+    for (unsigned rowIndex = 0; rowIndex < seqNumber; ++rowIndex)
     {
         if(score.verbose)
         {
@@ -122,4 +122,4 @@ _alignmentFreeCompareCounts(TValue & result,
 
 }  // namespace seqan
 
-#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_
+#endif  // SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_AF_D2_H_

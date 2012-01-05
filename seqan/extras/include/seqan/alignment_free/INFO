@@ -3,7 +3,9 @@ Author: Jonathan Goeke <goeke@molgen.mpg.de>
 Maintainer: Jonathan Goeke <goeke@molgen.mpg.de>
 License: BSD 3-clause
 Copyright: 2012, FU Berlin
-Status: mature
+Status: testing
 Description: Alignment-free comparison of sequences.
-See Jonathan Göke et al. (to appear).
-This module also contains some funtions on word statistics.
+ SeqAn module with code for alignment free comparison of sequences and some
+ code for computing word statistics.
+ .
+ See: Jonathan Göke et al. (to appear).

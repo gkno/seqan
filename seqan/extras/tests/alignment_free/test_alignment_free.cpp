@@ -1,5 +1,5 @@
 // ==========================================================================
-//                               alignmentFree
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -31,8 +31,7 @@
 // ==========================================================================
 // Author: Jonathan Göke <goeke@molgen.mpg.de>
 // ==========================================================================
-// Tests for all alignment free sequence comparison methods implemented in 
-// Seqan
+// Tests for the alignment_free module.
 // ==========================================================================
 
 #include <seqan/basic.h>
@@ -66,7 +65,7 @@ void alfTestHelperGetSequences(TStringSet & sequences)
     appendValue(sequences, seqIID2);
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_alignmentFreeComparison)
+SEQAN_DEFINE_TEST(test_alignment_free_alignment_free_comparison)
 {
     // This test is the example for the function alignmentFreeComparison
     using namespace seqan;
@@ -109,7 +108,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_alignmentFreeComparison)
     SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_calculateProbability)
+SEQAN_DEFINE_TEST(test_alignment_free_calculate_probability)
 {
     using namespace seqan;
     double p = 0.0;
@@ -124,7 +123,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_calculateProbability)
     SEQAN_ASSERT_IN_DELTA(p, 0.00000387, 0.000001);
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_calculateVariance)
+SEQAN_DEFINE_TEST(test_alignment_free_calculate_variance)
 {
     using namespace seqan;
     double var = 0.0;
@@ -150,7 +149,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_calculateVariance)
     SEQAN_ASSERT_IN_DELTA(var, 1.69716, 0.001);
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_calculateCovariance)
+SEQAN_DEFINE_TEST(test_alignment_free_calculate_covariance)
 {
     using namespace seqan;
     double covar = 0.0;
@@ -286,7 +285,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_d2z_dna5)
     SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 2.47939, 0.01);
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_N2_dna5)
+SEQAN_DEFINE_TEST(test_alignment_free_n2_dna5)
 {
     using namespace seqan;
     StringSet<Dna5String> sequences;
@@ -366,7 +365,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_N2_dna5)
 
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_countKmers)
+SEQAN_DEFINE_TEST(test_alignment_free_count_kmers)
 {
     using namespace seqan;
     StringSet<Dna5String> sequencesDna5;
@@ -439,7 +438,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_countKmers)
     SEQAN_ASSERT_IN_DELTA(value(backgroundModel.transition, 3, 0), 0.1641791, 0.0001);  // p(T->A)
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_calculatePeriodicity)
+SEQAN_DEFINE_TEST(test_alignment_free_calculate_periodicity)
 {
     using namespace seqan;
     DnaString word1 = "ATATA";
@@ -458,7 +457,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_calculatePeriodicity)
     SEQAN_ASSERT_EQ(periodicity[1], 3);
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_calculateOverlapIndicator)
+SEQAN_DEFINE_TEST(test_alignment_free_calculate_overlap_indicator)
 {
     using namespace seqan;
     DnaString word1 = "ATATA";
@@ -477,7 +476,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_calculateOverlapIndicator)
 }
 
 
-SEQAN_DEFINE_TEST(test_alignment_free_stringToStringSet)
+SEQAN_DEFINE_TEST(test_alignment_free_string_to_string_set)
 {
     using namespace seqan;
     Dna5String sequenceDna5 =
@@ -490,7 +489,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_stringToStringSet)
     SEQAN_ASSERT_EQ(sequencesDna[3], "TG");
 }
 
-SEQAN_DEFINE_TEST(test_alignment_free_cutNs)
+SEQAN_DEFINE_TEST(test_alignment_free_cut_ns)
 {
     using namespace seqan;
     Dna5String sequenceMasked =
@@ -507,15 +506,15 @@ SEQAN_BEGIN_TESTSUITE(test_alignment_free)
     SEQAN_CALL_TEST(test_alignment_free_d2_dna5);
     SEQAN_CALL_TEST(test_alignment_free_d2star_dna5);
     SEQAN_CALL_TEST(test_alignment_free_d2z_dna5);
-    SEQAN_CALL_TEST(test_alignment_free_N2_dna5);
-    SEQAN_CALL_TEST(test_alignment_free_calculateProbability);
-    SEQAN_CALL_TEST(test_alignment_free_calculateVariance);
-    SEQAN_CALL_TEST(test_alignment_free_calculateCovariance);
-    SEQAN_CALL_TEST(test_alignment_free_alignmentFreeComparison);
-    SEQAN_CALL_TEST(test_alignment_free_countKmers);
-    SEQAN_CALL_TEST(test_alignment_free_calculatePeriodicity);
-    SEQAN_CALL_TEST(test_alignment_free_calculateOverlapIndicator);
-    SEQAN_CALL_TEST(test_alignment_free_stringToStringSet);
-    SEQAN_CALL_TEST(test_alignment_free_cutNs);
+    SEQAN_CALL_TEST(test_alignment_free_n2_dna5);
+    SEQAN_CALL_TEST(test_alignment_free_calculate_probability);
+    SEQAN_CALL_TEST(test_alignment_free_calculate_variance);
+    SEQAN_CALL_TEST(test_alignment_free_calculate_covariance);
+    SEQAN_CALL_TEST(test_alignment_free_alignment_free_comparison);
+    SEQAN_CALL_TEST(test_alignment_free_count_kmers);
+    SEQAN_CALL_TEST(test_alignment_free_calculate_periodicity);
+    SEQAN_CALL_TEST(test_alignment_free_calculate_overlap_indicator);
+    SEQAN_CALL_TEST(test_alignment_free_string_to_string_set);
+    SEQAN_CALL_TEST(test_alignment_free_cut_ns);
 }
 SEQAN_END_TESTSUITE

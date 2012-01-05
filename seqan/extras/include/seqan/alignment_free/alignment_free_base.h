@@ -35,8 +35,8 @@
 // and N2.
 // ==========================================================================
 
-#ifndef SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
-#define SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
+#ifndef SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
+#define SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
 
 namespace seqan {
 
@@ -74,7 +74,7 @@ struct AFScore;
 ..signature:AFScore(kmerSize, verbose)
 ..param.kmerSize: Size of kmer
 ...type:nolink:unsigned
-..param.verbose:This option will report progress to standard output. 
+..param.verbose:This option will report progress to standard output.
 ...type:nolink:bool
 ...default:false
 ..remarks:
@@ -125,7 +125,7 @@ struct AFScore<D2>
 ...type:nolink:unsigned
 ..param.bgModelOrder: Order of the background Markov model
 ...type:nolink:unsigned
-..param.verbose:This option will report progress to standard output. 
+..param.verbose:This option will report progress to standard output.
 ...type:nolink:bool
 ...default:false
 ..remarks:
@@ -203,7 +203,7 @@ struct AFScore<D2Star>
 ..param.outputFile:When specified, all normalised and standardised kmer neighbourhood counts will be written to this file for every sequence
 ...type:nolink:String<char>
 ...default:""
-..param.verbose:This option will report progress to standard output. 
+..param.verbose:This option will report progress to standard output.
 ...type:nolink:bool
 ...default:false
 ..remarks:
@@ -300,7 +300,7 @@ struct AFScore<N2>
 ...type:nolink:unsigned
 ..param.bgModelOrder: Order of the background Markov model
 ...type:nolink:unsigned
-..param.verbose:This option will report progress to standard output. 
+..param.verbose:This option will report progress to standard output.
 ...type:nolink:bool
 ...default:false
 ..remarks:
@@ -323,4 +323,4 @@ struct AFScore<D2z>
 
 }  // namespace seqan
 
-#endif  // SANDBOX_ALIGNMENT_FREE_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
+#endif  // SEQAN_EXTRAS_INCLUDE_SEQAN_ALIGNMENT_FREE_ALIGNMENT_FREE_BASE_H_
