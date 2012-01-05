@@ -29,3 +29,12 @@ seqan_add_test_executable(test_index_shapes
 seqan_add_test_executable(test_index_stree_iterators
                           test_index_stree_iterators.cpp
                           test_stree_iterators.h)
+
+if (OPENMP_FOUND)
+  set(CMAKE_C_FLAGS "${C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif (OPENMP_FOUND)
+
+seqan_add_test_executable(test_index_repeats
+                          test_index_repeats.cpp
+                          test_index_repeats.h)
