@@ -727,7 +727,6 @@ void calculateOverlapIndicator(String<int> & epsilon, TString const & word1, TSt
     typedef typename Iterator<TString const, Rooted>::Type  TIterator;
     typedef typename Size<TString>::Type                    TSize;
 
-    TIterator itWord1 = begin(word1);
     TSize length1 = length(word1);
     TSize length2 = length(word2);
     clear(epsilon);
