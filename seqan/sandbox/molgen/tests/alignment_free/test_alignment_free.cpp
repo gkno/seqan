@@ -66,6 +66,49 @@ void alfTestHelperGetSequences(TStringSet & sequences)
     appendValue(sequences, seqIID2);
 }
 
+SEQAN_DEFINE_TEST(test_alignment_free_alignmentFreeComparison)
+{
+    // This test is the example for the function alignmentFreeComparison
+    using namespace seqan;
+    StringSet<Dna5String> sequences;
+    Dna5String seq1 =
+        "TAGGTTTTCCGAAAAGGTAGCAACTTTACGTGATCAAACCTCTGACGGGGTTTTCCCCGTCGAAATTGGGTG"
+        "TTTCTTGTCTTGTTCTCACTTGGGGCATCTCCGTCAAGCCAAGAAAGTGCTCCCTGGATTCTGTTGCTAACG"
+        "AGTCTCCTCTGCATTCCTGCTTGACTGATTGGGCGGACGGGGTGTCCACCTGACGCTGAGTATCGCCGTCAC"
+        "GGTGCCACATGTCTTATCTATTCAGGGATCAGAATTTATTCAGGAAATCAGGAGATGCTACACTTGGGTTAT"
+        "CGAAGCTCCTTCCAAGGCGTAGCAAGGGCGACTGAGCGCGTAAGCTCTAGATCTCCTCGTGTTGCAACTACA"
+        "CGCGCGGGTCACTCGAAACACATAGTATGAACTTAACGACTGCTCGTACTGAACAATGCTGAGGCAGAAGAT"
+        "CGCAGACCAGGCATCCCACTGCTTGAAAAAACTATNNNNCTACCCGCCTTTTTATTATCTCATCAGATCAAG";
+    Dna5String seq2 =
+        "ACCGACGATTAGCTTTGTCCGAGTTACAACGGTTCAATAATACAAAGGATGGCATAAACCCATTTGTGTGAA"
+        "AGTGCCCATCACATTATGATTCTGTCTACTATGGTTAATTCCCAATATACTCTCGAAAAGAGGGTATGCTCC"
+        "CACGGCCATTTACGTCACTAAAAGATAAGATTGCTCAAANNNNNNNNNACTGCCAACTTGCTGGTAGCTTCA"
+        "GGGGTTGTCCACAGCGGGGGGTCGTATGCCTTTGTGGTATACCTTACTAGCCGCGCCATGGTGCCTAAGAAT"
+        "GAAGTAAAACAATTGATGTGAGACTCGACAGCCAGGCTTCGCGCTAAGGACGCAAAGAAATTCCCTACATCA"
+        "GACGGCCGCGNNNAACGATGCTATCGGTTAGGACATTGTGCCCTAGTATGTACATGCCTAATACAATTGGAT"
+        "CAAACGTTATTCCCACACACGGGTAGAAGAACNNNNATTACCCGTAGGCACTCCCCGATTCAAGTAGCCGCG";
+
+    clear(sequences);
+    appendValue(sequences, seq1);
+    appendValue(sequences, seq2);
+
+    Matrix<double, 2> myMatrix;
+
+    unsigned kmerSize = 5;
+    unsigned bgModelOrder = 1;
+    String<char>  revCom = "bothStrands";
+    unsigned mismatches = 1;
+    double mismatchWeight = 0.5;
+    AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revCom, mismatches, mismatchWeight);
+
+    alignmentFreeComparison(myMatrix, sequences, myScoreN2);
+
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 1), -0.129431, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), -0.129431, 0.01);
+    SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
+}
+
 SEQAN_DEFINE_TEST(test_alignment_free_calculateProbability)
 {
     using namespace seqan;
@@ -323,6 +366,140 @@ SEQAN_DEFINE_TEST(test_alignment_free_N2_dna5)
 
 }
 
+SEQAN_DEFINE_TEST(test_alignment_free_countKmers)
+{
+    using namespace seqan;
+    StringSet<Dna5String> sequencesDna5;
+    alfTestHelperGetSequences(sequencesDna5);
+    String<unsigned> kmerCounts;
+    unsigned k = 2;
+    countKmers(kmerCounts, sequencesDna5[0], k);
+    SEQAN_ASSERT_EQ(kmerCounts[0], 34u);  // AA
+    SEQAN_ASSERT_EQ(kmerCounts[1], 30u);  // AC
+    SEQAN_ASSERT_EQ(kmerCounts[2], 28u);  // AG
+    SEQAN_ASSERT_EQ(kmerCounts[3], 27u);  // AT
+    SEQAN_ASSERT_EQ(kmerCounts[4], 32u);  // CA
+    SEQAN_ASSERT_EQ(kmerCounts[5], 24u);  // ...
+    SEQAN_ASSERT_EQ(kmerCounts[6], 27u);
+    SEQAN_ASSERT_EQ(kmerCounts[7], 44u);
+    SEQAN_ASSERT_EQ(kmerCounts[8], 31u);
+    SEQAN_ASSERT_EQ(kmerCounts[9], 29u);
+    SEQAN_ASSERT_EQ(kmerCounts[10], 31u);
+    SEQAN_ASSERT_EQ(kmerCounts[11], 27u);
+    SEQAN_ASSERT_EQ(kmerCounts[12], 22u);
+    SEQAN_ASSERT_EQ(kmerCounts[13], 43u);
+    SEQAN_ASSERT_EQ(kmerCounts[14], 33u);  // ...
+    SEQAN_ASSERT_EQ(kmerCounts[15], 36u);  // TT
+
+    String<double> nucleotideFrequencies;
+    countKmers(kmerCounts, nucleotideFrequencies, sequencesDna5[0], k);
+
+    SEQAN_ASSERT_EQ(kmerCounts[0], 34u);  // AA
+    SEQAN_ASSERT_EQ(kmerCounts[1], 30u);  // AC
+    SEQAN_ASSERT_EQ(kmerCounts[2], 28u);  // AG
+    SEQAN_ASSERT_EQ(kmerCounts[3], 27u);  // AT
+    SEQAN_ASSERT_EQ(kmerCounts[4], 32u);  // CA
+    SEQAN_ASSERT_EQ(kmerCounts[5], 24u);  // ...
+    SEQAN_ASSERT_EQ(kmerCounts[6], 27u);
+    SEQAN_ASSERT_EQ(kmerCounts[7], 44u);
+    SEQAN_ASSERT_EQ(kmerCounts[8], 31u);
+    SEQAN_ASSERT_EQ(kmerCounts[9], 29u);
+    SEQAN_ASSERT_EQ(kmerCounts[10], 31u);
+    SEQAN_ASSERT_EQ(kmerCounts[11], 27u);
+    SEQAN_ASSERT_EQ(kmerCounts[12], 22u);
+    SEQAN_ASSERT_EQ(kmerCounts[13], 43u);
+    SEQAN_ASSERT_EQ(kmerCounts[14], 33u);  // ...
+    SEQAN_ASSERT_EQ(kmerCounts[15], 36u);  // TT
+
+    SEQAN_ASSERT_EQ(nucleotideFrequencies[0],0.238);  // p(A)
+    SEQAN_ASSERT_EQ(nucleotideFrequencies[1],0.254);  // p(C)
+    SEQAN_ASSERT_EQ(nucleotideFrequencies[2],0.238);  // p(G)
+    SEQAN_ASSERT_EQ(nucleotideFrequencies[3],0.27);   // p(T)
+
+    MarkovModel<Dna, double>  backgroundModel(1);
+    countKmers(kmerCounts, backgroundModel, sequencesDna5[0], k);
+    SEQAN_ASSERT_EQ(kmerCounts[0], 34u);  // AA
+    SEQAN_ASSERT_EQ(kmerCounts[1], 30u);  // AC
+    SEQAN_ASSERT_EQ(kmerCounts[2], 28u);  // AG
+    SEQAN_ASSERT_EQ(kmerCounts[3], 27u);  // AT
+    SEQAN_ASSERT_EQ(kmerCounts[4], 32u);  // CA
+    SEQAN_ASSERT_EQ(kmerCounts[5], 24u);  // ...
+    SEQAN_ASSERT_EQ(kmerCounts[6], 27u);
+    SEQAN_ASSERT_EQ(kmerCounts[7], 44u);
+    SEQAN_ASSERT_EQ(kmerCounts[8], 31u);
+    SEQAN_ASSERT_EQ(kmerCounts[9], 29u);
+    SEQAN_ASSERT_EQ(kmerCounts[10], 31u);
+    SEQAN_ASSERT_EQ(kmerCounts[11], 27u);
+    SEQAN_ASSERT_EQ(kmerCounts[12], 22u);
+    SEQAN_ASSERT_EQ(kmerCounts[13], 43u);
+    SEQAN_ASSERT_EQ(kmerCounts[14], 33u);  // ...
+    SEQAN_ASSERT_EQ(kmerCounts[15], 36u);  // TT
+    SEQAN_ASSERT_IN_DELTA(value(backgroundModel.transition, 0, 0), 0.2857143, 0.0001);  // p(A->A)
+    SEQAN_ASSERT_IN_DELTA(value(backgroundModel.transition, 1, 2), 0.2125984, 0.0001);  // p(C->G)
+    SEQAN_ASSERT_IN_DELTA(value(backgroundModel.transition, 3, 0), 0.1641791, 0.0001);  // p(T->A)
+}
+
+SEQAN_DEFINE_TEST(test_alignment_free_calculatePeriodicity)
+{
+    using namespace seqan;
+    DnaString word1 = "ATATA";
+    DnaString word2 = "TATAT";
+    String<int> periodicity;
+    calculatePeriodicity(periodicity, word1, word2);
+    // periodocity[0] = 1:
+    // 01234
+    // ATATA
+    // -TATAT
+    SEQAN_ASSERT_EQ(periodicity[0], 1);
+    // periodocity[1] = 3:
+    // 01234
+    // ATATA
+    // ---TATAT
+    SEQAN_ASSERT_EQ(periodicity[1], 3);
+}
+
+SEQAN_DEFINE_TEST(test_alignment_free_calculateOverlapIndicator)
+{
+    using namespace seqan;
+    DnaString word1 = "ATATA";
+    DnaString word2 = "TATAT";
+    String<int> epsilon;
+    calculateOverlapIndicator(epsilon, word1, word2);
+    // epsilon =         01010:
+    // word1             ATATA
+    // word2 overlap 1:  -TATAT
+    // word2 overlap 2:  ---TATAT
+    SEQAN_ASSERT_EQ(epsilon[0], 0);
+    SEQAN_ASSERT_EQ(epsilon[1], 1);
+    SEQAN_ASSERT_EQ(epsilon[2], 0);
+    SEQAN_ASSERT_EQ(epsilon[3], 1);
+    SEQAN_ASSERT_EQ(epsilon[4], 0);
+}
+
+
+SEQAN_DEFINE_TEST(test_alignment_free_stringToStringSet)
+{
+    using namespace seqan;
+    Dna5String sequenceDna5 =
+        "NNNNNNTTTCCGAAAAGGTANNNNNGCAACTTTANNNCGTGATCAAAGTTTTCCCCGTCGAAATTGGGNNTG";
+    StringSet<DnaString> sequencesDna;
+    stringToStringSet(sequencesDna, sequenceDna5);
+    SEQAN_ASSERT_EQ(sequencesDna[0], "TTTCCGAAAAGGTA");
+    SEQAN_ASSERT_EQ(sequencesDna[1], "GCAACTTTA");
+    SEQAN_ASSERT_EQ(sequencesDna[2], "CGTGATCAAAGTTTTCCCCGTCGAAATTGGG");
+    SEQAN_ASSERT_EQ(sequencesDna[3], "TG");
+}
+
+SEQAN_DEFINE_TEST(test_alignment_free_cutNs)
+{
+    using namespace seqan;
+    Dna5String sequenceMasked =
+        "NNNNNNTTTCCGAAAAGGTANNNNNGCAACTTTANNNCGTGATCAAAGTTTTCCCCGTCGAAATTGGGNNTG";
+    Dna5String sequenceMaskedPartsRemoved;
+    cutNs(sequenceMaskedPartsRemoved, sequenceMasked);
+    SEQAN_ASSERT_EQ(sequenceMaskedPartsRemoved, "TTTCCGAAAAGGTAGCAACTTTACGTGATCAAAGTTTTCCCCGTCGAAATTGGGTG");
+}
+
 SEQAN_BEGIN_TESTSUITE(test_alignment_free)
 {
     // Call tests.
@@ -334,5 +511,11 @@ SEQAN_BEGIN_TESTSUITE(test_alignment_free)
     SEQAN_CALL_TEST(test_alignment_free_calculateProbability);
     SEQAN_CALL_TEST(test_alignment_free_calculateVariance);
     SEQAN_CALL_TEST(test_alignment_free_calculateCovariance);
+    SEQAN_CALL_TEST(test_alignment_free_alignmentFreeComparison);
+    SEQAN_CALL_TEST(test_alignment_free_countKmers);
+    SEQAN_CALL_TEST(test_alignment_free_calculatePeriodicity);
+    SEQAN_CALL_TEST(test_alignment_free_calculateOverlapIndicator);
+    SEQAN_CALL_TEST(test_alignment_free_stringToStringSet);
+    SEQAN_CALL_TEST(test_alignment_free_cutNs);
 }
 SEQAN_END_TESTSUITE
