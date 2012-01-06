@@ -211,6 +211,8 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdN
 			indel.indelSize = _parseReadNumber(ninethCol,c);
 			if(options._debugLevel > 1)
 				::std::cout << indel.indelSize << " indel size\n";
+            if(indel.type == INSERTION && indel.indelSize > 0)
+                indel.indelSize = - indel.indelSize;
 		}
 		else
 		{

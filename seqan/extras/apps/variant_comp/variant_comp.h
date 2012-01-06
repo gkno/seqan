@@ -433,7 +433,8 @@ int compareIndels(
 			if(options.sequenceContext)
 			{
 				//compute eir, equivalent indel region, Krawitz et. al
-				computeEir(predIndel,genomes[i],beginPoint,endPoint);
+                if(predIndel.type == DELETION || (predIndel.type= INSERTION && !empty(predIndel.insertionSeq)) )
+    				computeEir(predIndel,genomes[i],beginPoint,endPoint);
 				beginPoint -= options.positionTolerance;
 				endPoint += options.positionTolerance;
 				
