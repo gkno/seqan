@@ -32,8 +32,6 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#define SEQAN_PARALLEL 1
-
 #include <seqan/basic.h>
 
 #include "test_index_repeats.h"

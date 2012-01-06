@@ -36,7 +36,9 @@
 // ==========================================================================
 
 // Comment out/uncomment for using sequential/parallel repeat finding code.
-#define SEQAN_PARALLEL
+// Parallel code is enabled automatically when OpenMP is available, use this
+// preprocessor define to disable it in any case.
+// #define SEQAN_ENABLE_PARALLELISM 0
 
 #include <fstream>
 

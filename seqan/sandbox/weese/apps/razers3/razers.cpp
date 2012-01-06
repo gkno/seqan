@@ -39,7 +39,6 @@
 #ifdef _OPENMP
 #include <omp.h>
 //#define _GLIBCXX_PARALLEL               // parallel STL if available
-#define SEQAN_PARALLEL
 #define RAZERS_OPENADDRESSING
 #endif
 #define RAZERS_PROFILE                // Extensive profiling information.

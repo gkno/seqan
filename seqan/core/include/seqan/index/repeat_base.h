@@ -35,6 +35,10 @@
 #ifndef SEQAN_HEADER_REPEAT_BASE_H
 #define SEQAN_HEADER_REPEAT_BASE_H
 
+#if SEQAN_ENABLE_PARALLELISM
+#include <seqan/parallel.h>
+#endif  // #if SEQAN_ENABLE_PARALLELISM
+
 namespace seqan {
 
 /**
@@ -194,7 +198,7 @@ findRepeats(repeats, text, 3);
 		typedef typename Value<TString>::Type		TValue;
 		typedef typename Size<TString>::Type		TSize;
 
-#if defined(SEQAN_PARALLEL) && _OPENMP
+#if SEQAN_ENABLE_PARALLELISM
         if (length(text) > (TSize)(omp_get_max_threads() * 2 * minRepeatLen)) {
             // std::cerr << ">>> PARALLEL WABOOGIE!" << std::endl;
             // std::cerr << "omp_get_max_threads() == " << omp_get_max_threads() << std::endl;
@@ -375,7 +379,7 @@ findRepeats(repeats, text, 3);
                           iter(repString, outSplitters[t], Standard()));
             }  // end of #pragma omp parallel
         } else {
-#endif  // #if defined(SEQAN_PARALLEL) && _OPENMP
+#endif  // #if SEQAN_ENABLE_PARALLELISM
             // Sequential case.
             TRepeat rep;
             rep.period = 1;
@@ -410,9 +414,9 @@ findRepeats(repeats, text, 3);
                 //			::std::cerr<<"left:"<<rep.beginPosition<<"  right:"<<rep.endPosition<<"  length:"<<posSub(rep.endPosition,rep.beginPosition)<<"  period:"<<rep.period<<::std::endl;
                 appendValue(repString, rep);
             }
-#if defined(SEQAN_PARALLEL) && _OPENMP
+#if SEQAN_ENABLE_PARALLELISM
         }
-#endif  // #if defined(SEQAN_PARALLEL) && _OPENMP
+#endif  // #if SEQAN_ENABLE_PARALLELISM
         // #pragma omp critical
         // {
         //     std::cerr << "thread #" << omp_get_thread_num() << " REPEATS:";
