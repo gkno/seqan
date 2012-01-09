@@ -155,7 +155,7 @@ Rational(T const & n, SEQAN_CTOR_ENABLE_IF(Is<IntegerConcept<T> >)) :  // macro 
 }
 ..include:seqan/basic.h
  */
-#define SEQAN_CTOR_ENABLE_IF(cond) typename EnableIf<cond::VALUE>::Type * dummy = 0
+#define SEQAN_CTOR_ENABLE_IF(...) typename EnableIf<__VA_ARGS__::VALUE>::Type * dummy = 0
 
 /**
 .Macro.SEQAN_FUNC_ENABLE_IF
