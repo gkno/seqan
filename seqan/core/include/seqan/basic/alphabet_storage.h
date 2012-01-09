@@ -64,53 +64,49 @@ typedef wchar_t Unicode;
 // Metafunction BitsPerValue
 // ----------------------------------------------------------------------------
 
-/**
-.Metafunction.BitsPerValue:
-..cat:Basic
-..summary:Number of bits needed to store a value.
-..signature:BitsPerValue<T>::VALUE
-..param.T:A class.
-..returns.param.VALUE:Number of bits needed to store $T$.
-...default:$sizeof<T> * 8$
-..see:Metafunction.ValueSize
-..include:seqan/basic.h
-*/
-
 template <typename TValue>
 struct BitsPerValue
 {
-    enum { VALUE = sizeof(TValue) * 8 };
+    static const unsigned VALUE;
 };
 
 template <typename TValue>
 struct BitsPerValue<TValue const> : public BitsPerValue<TValue>
 {};
 
+template <typename TValue>
+const unsigned BitsPerValue<TValue>::VALUE = sizeof(TValue) * 8;
+
 // ----------------------------------------------------------------------------
 // Metafunction ValueSize
 // ----------------------------------------------------------------------------
 
-/**
-.Metafunction.ValueSize:
-..cat:Basic
-..summary:Number of different values a value type object can have.
-..signature:ValueSize<T>::VALUE
-..param.T:A class.
-..returns.param.VALUE:Value size of $T$.
-..remarks
-...text:This function is only defined for integral types like $unsigned int$, $double$ or @Spec.Dna@.
-..see:Metafunction.Value
-..include:seqan/basic.h
-*/
-
 template <typename T>
 struct ValueSize
 {
-    enum { VALUE = 1 << BitsPerValue<T>::VALUE };
+    typedef __uint64  Type;
+    static const Type VALUE;
 };
+
+template <typename T>
+const typename ValueSize<T>::Type ValueSize<T>::VALUE = (1llu << BitsPerValue<T>::VALUE);
+
+template <>
+const typename ValueSize<__int64>::Type ValueSize<__int64>::VALUE = 0;
+
+template <>
+const typename ValueSize<__uint64>::Type ValueSize<__uint64>::VALUE = 0;
+
+
+// TODO(holtgrew): Use static assertion to make sure that ValueSize is never called on floating point numbers? Include assertion for __int64 and __uint64?
+template <>
+const typename ValueSize<double>::Type ValueSize<double>::VALUE = 0;
+
+template <>
+const typename ValueSize<float>::Type ValueSize<float>::VALUE = 0;
+
 template <typename TValue>
-struct ValueSize<TValue const>
-        : public ValueSize<TValue>
+struct ValueSize<TValue const> : ValueSize<TValue>
 {};
 
 // TODO(holtgrew): What is this used for?
@@ -206,6 +202,49 @@ struct IntegralForValue
 // ============================================================================
 // Functions
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function ordValue()
+// ----------------------------------------------------------------------------
+
+template <typename TValue>
+inline typename ValueSize<TValue>::Type
+ordValue(TValue const & c)
+{
+	return convert<unsigned>(static_cast<typename MakeUnsigned_<TValue>::Type const &>(c));
+}
+
+template <typename TValue, typename TSpec>
+inline typename ValueSize<SimpleType<TValue, TSpec> >::Type
+ordValue(SimpleType<TValue, TSpec> const & c)
+{
+	return convert<unsigned>(c);
+}
+
+template <typename TValue>
+inline typename ValueSize<TValue>::Type
+_internalOrdValue(TValue const & c)
+{
+	return ordValue(c);
+}
+
+template <typename TValue, typename TSpec>
+inline typename ValueSize<SimpleType<TValue, TSpec> >::Type
+_internalOrdValue(SimpleType<TValue, TSpec> const & c)
+{
+	return c.value;
+}
+
+// ----------------------------------------------------------------------------
+// Function valueSize<T>()
+// ----------------------------------------------------------------------------
+
+template <typename T>
+inline typename ValueSize<T>::Type
+valueSize()
+{
+    return ValueSize<T>::VALUE;
+}
 
 }  // namespace seqan
 

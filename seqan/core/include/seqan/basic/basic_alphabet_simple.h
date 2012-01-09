@@ -64,7 +64,14 @@ specialization tag class.
 struct Dna_ {};
 typedef SimpleType<unsigned char,Dna_> Dna;
 
-template <> struct ValueSize< Dna > { enum { VALUE = 4 }; };
+template <> struct ValueSize<Dna>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<Dna>::Type VALUE;
+};
+
+const typename ValueSize<Dna>::Type ValueSize<Dna>::VALUE = 4;
+
 template <> struct BitsPerValue< Dna > { enum { VALUE = 2 }; };
 
 //____________________________________________________________________________
@@ -89,8 +96,19 @@ specialization tag class.
 struct Dna5_ {};
 typedef SimpleType<unsigned char, Dna5_> Dna5;
 
-template <> struct ValueSize< Dna5 > { enum { VALUE = 5 }; };
-template <> struct BitsPerValue< Dna5 > { enum { VALUE = 3 }; };
+template <> struct ValueSize<Dna5>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<Dna5>::Type VALUE;
+};
+
+const typename ValueSize<Dna5>::Type ValueSize<Dna5>::VALUE = 5;
+
+template <> struct BitsPerValue<Dna5>
+{
+    typedef __uint8 Type;
+    enum { VALUE = 3 };
+};
 
 //____________________________________________________________________________
 
@@ -112,10 +130,21 @@ specialization tag class.
 ..include:seqan/basic.h
 */
 struct Rna_ {};
-typedef SimpleType<unsigned char,Rna_> Rna;
+typedef SimpleType<unsigned char, Rna_> Rna;
 
-template <> struct ValueSize< Rna > { enum { VALUE = 4 }; };
-template <> struct BitsPerValue< Rna > { enum { VALUE = 2 }; };
+template <> struct ValueSize<Rna>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<Rna>::Type VALUE;
+};
+
+const typename ValueSize<Rna>::Type ValueSize<Rna>::VALUE = 4;
+
+template <> struct BitsPerValue<Rna>
+{
+    typedef __uint8 Type;
+    enum { VALUE = 2 };
+};
 
 //____________________________________________________________________________
 
@@ -139,8 +168,19 @@ specialization tag class.
 struct Rna5_ {};
 typedef SimpleType<unsigned char, Rna5_> Rna5;
 
-template <> struct ValueSize< Rna5 > { enum { VALUE = 5 }; };
-template <> struct BitsPerValue< Rna5 > { enum { VALUE = 3 }; };
+template <> struct ValueSize<Rna5>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<Rna5>::Type VALUE;
+};
+
+const typename ValueSize<Rna5>::Type ValueSize<Rna5>::VALUE = 5;
+
+template <> struct BitsPerValue<Rna5>
+{
+    typedef __uint8 Type;
+    enum { VALUE = 3 };
+};
 
 //____________________________________________________________________________
 
@@ -164,8 +204,19 @@ specialization tag class.
 struct Iupac_ {};
 typedef SimpleType<unsigned char, Iupac_> Iupac;
 
-template <> struct ValueSize< Iupac > { enum { VALUE = 16 }; };
-template <> struct BitsPerValue< Iupac > { enum { VALUE = 4 }; };
+template <> struct ValueSize<Iupac>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<Iupac>::Type VALUE;
+};
+
+const typename ValueSize<Iupac>::Type ValueSize<Iupac>::VALUE = 16;
+
+template <> struct BitsPerValue<Iupac>
+{
+    typedef __uint8 Type;
+    enum { VALUE = 4 };
+};
 
 
 //____________________________________________________________________________
@@ -192,8 +243,19 @@ specialization tag class.
 struct AminoAcid_ {};
 typedef SimpleType<unsigned char, AminoAcid_> AminoAcid;
 
-template <> struct ValueSize< AminoAcid > { enum { VALUE = 24 }; };
-template <> struct BitsPerValue< AminoAcid > { enum { VALUE = 5 }; };
+template <> struct ValueSize<AminoAcid>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<AminoAcid>::Type VALUE;
+};
+
+const typename ValueSize<AminoAcid>::Type ValueSize<AminoAcid>::VALUE = 24;
+
+template <> struct BitsPerValue<AminoAcid>
+{
+    typedef __uint8 Type;
+    enum { VALUE = 5 };
+};
 
 //____________________________________________________________________________
 
@@ -213,7 +275,14 @@ template <unsigned SIZE>
 struct Finite;
 
 template <typename TValue, unsigned SIZE> 
-struct ValueSize< SimpleType<TValue, Finite<SIZE> > > { enum { VALUE = SIZE }; };
+struct ValueSize<SimpleType<TValue, Finite<SIZE> > >
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<SimpleType<TValue, Finite<SIZE> > >::Type VALUE;
+};
+
+template <typename TValue, unsigned SIZE> 
+const typename ValueSize<SimpleType<TValue, Finite<SIZE> > >::Type ValueSize<SimpleType<TValue, Finite<SIZE> > >::VALUE = 24;
 
 template <typename TValue, unsigned SIZE> 
 struct BitsPerValue< SimpleType<TValue, Finite<SIZE> > >: Log2<SIZE> {};
@@ -518,7 +587,7 @@ struct BaseAlphabet
 
 //////////////////////////////////////////////////////////////////////////////
 
-// //DnaQ and Dna5Q
+// DnaQ and Dna5Q
 
 /**
 .Spec.DnaQ:
@@ -538,7 +607,14 @@ specialization tag class.
 struct DnaQ_ {};
 typedef SimpleType <unsigned char, DnaQ_> DnaQ;
 
-template <> struct ValueSize< DnaQ > { enum { VALUE = 4 }; };               // considering nucleotides
+template <> struct ValueSize<DnaQ>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<DnaQ>::Type VALUE;
+};
+
+const typename ValueSize<DnaQ>::Type ValueSize<DnaQ>::VALUE = 4;  // considering nucleotides
+
 template <> struct InternalValueSize_< DnaQ > { enum { VALUE = 252 }; };    // considering nucleotides x Quality 0..62
 template <> struct BitsPerValue< DnaQ > { enum { VALUE = 8 }; };
 
@@ -576,7 +652,14 @@ typedef SimpleType <unsigned char, Dna5Q_> Dna5Q;
 
 static const unsigned char Dna5QValueN_ = 252;                              // value representing N
 
-template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };              // considering nucleotides + N
+template <> struct ValueSize<Dna5Q>
+{
+    typedef __uint8 Type;
+    static const typename ValueSize<Dna5Q>::Type VALUE;
+};
+
+const typename ValueSize<Dna5Q>::Type ValueSize<Dna5Q>::VALUE = 5;  // considering nucleotides + N
+
 template <> struct InternalValueSize_< Dna5Q > { enum { VALUE = 253 }; };   // considering (nucleotides x Quality 0..62) + N
 template <> struct BitsPerValue< Dna5Q > { enum { VALUE = 8 }; };
 

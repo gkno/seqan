@@ -251,10 +251,16 @@ struct Value<SimpleType<TValue, TSpec> const>
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TSpec>
-struct MinValue<SimpleType<TValue, TSpec> > : MinimumValueUnsigned_<TValue> {};
+struct MinValue<SimpleType<TValue, TSpec> >
+{
+    static const SimpleType<TValue, TSpec> VALUE;
+};
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec>
+const SimpleType<TValue, TSpec> MinValue<SimpleType<TValue, TSpec> >::VALUE = SimpleType<TValue, TSpec>(0);
+
+template <typename TValue, typename TSpec>
+inline SimpleType<TValue, TSpec> const &
 infimumValueImpl(SimpleType<TValue, TSpec> *)
 {
     SEQAN_CHECKPOINT;
@@ -268,14 +274,14 @@ infimumValueImpl(SimpleType<TValue, TSpec> *)
 template <typename TValue, typename TSpec>
 struct MaxValue<SimpleType<TValue, TSpec> >
 {
-    static const TValue VALUE;
+    static const SimpleType<TValue, TSpec> VALUE;
 };
 
 template <typename TValue, typename TSpec>
-const TValue MaxValue<SimpleType<TValue, TSpec> >::VALUE = ((TValue)ValueSize<SimpleType<TValue, TSpec> >::VALUE - 1);
+const SimpleType<TValue, TSpec> MaxValue<SimpleType<TValue, TSpec> >::VALUE = SimpleType<TValue, TSpec>(((TValue)ValueSize<SimpleType<TValue, TSpec> >::VALUE - 1));
 
 template <typename TValue, typename TSpec>
-inline SimpleType<TValue, TSpec>
+inline SimpleType<TValue, TSpec> const &
 supremumValueImpl(SimpleType<TValue, TSpec> *)
 {
     SEQAN_CHECKPOINT;

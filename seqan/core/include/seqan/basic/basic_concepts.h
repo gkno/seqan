@@ -83,6 +83,29 @@ SEQAN_CONCEPT(DefaultConstructible,(T))
 };
 
 /**
+.Concept.Destructible
+..cat:Basic
+..summary:A type with a destructor.
+..signature:Destructible<T>
+..remarks:
+...text:Expects an instance of type $T$ to be destructible.
+..example.text:Valid expressions:
+..example.code:
+T()
+T a;
+..include:seqan/basic.h
+..see:Concept.DefaultConstructible
+*/
+
+SEQAN_CONCEPT(Destructible, (T))
+{
+    SEQAN_CONCEPT_USAGE(Destructible) 
+    {
+        // It is hard to test this.
+    }
+};
+
+/**
 .Concept.Assignable
 ..cat:Basic
 ..summary:A type with an assignment operator.
@@ -93,7 +116,12 @@ SEQAN_CONCEPT(DefaultConstructible,(T))
 ..example.code:
 a = b;  // a, b are of type T
 ..include:seqan/basic.h
+
+.Function.assign.concept:Concept.Assignable
+.Function.operator=.concept:Concept.Assignable
 */
+
+// TODO(holtgrew): Test availability of assign() function?
 
 SEQAN_CONCEPT(Assignable,(T))
 {
@@ -229,6 +257,8 @@ $\not a<a$ (irreflexivity)\nl
 $a<b$ \Rightarrow $\not b<a$ (antisymmetry)\nl
 $a<b$ and $b<c$ \Rightarrow $a<c$ (transitivity)
 ..include:seqan/basic.h
+
+.Function.operator<.concept:Concept.LessThanComparable
 */
 
 SEQAN_CONCEPT(LessThanComparable,(T))
@@ -246,7 +276,7 @@ private:
 ..cat:Comparisons
 ..summary:A type that can be compared.
 ..signature:Comparable<T>
-..general:Concept.LessThanComparable
+..baseconcept:Concept.LessThanComparable
 ..remarks:
 ...text:Expects instances of type $T$ to be comparable. Comparison operators must return boolean convertible values.
 ..example.text:Valid expressions:
@@ -262,6 +292,10 @@ $a<=b$ \Leftrightarrow $a<b$ or ($a<=b$ and $a>=b$)
 ..include:seqan/basic.h
 ..see:Concept.EqualityComparable
 ..see:Concept.LessThanComparable
+
+.Function.operator<=.concept:Concept.Comparable
+.Function.operator>.concept:Concept.Comparable
+.Function.operator>=.concept:Concept.Comparable
 */
 
 // This is equiaent to SGI STL's LessThanComparable.
@@ -413,7 +447,7 @@ struct IsIntegral : IsInteger<T> {};
 // Concepts for integers
 // ============================================================================
 
-// Generally there are two ways to check concepts:
+// Baseconceptly there are two ways to check concepts:
 //
 // 1. Define expressions and rules a passing type must fulfill.
 // 2. Let the concept check fail by default and only let it pass for the types
@@ -425,8 +459,8 @@ struct IsIntegral : IsInteger<T> {};
 /**
 .Concept.IntegerConcept
 ..cat:Basic
-..general:Concept.Comparable
-..general:Concept.EqualityComparable
+..baseconcept:Concept.Comparable
+..baseconcept:Concept.EqualityComparable
 ..summary:An integral type.
 ..signature:IntegerConcept<T>
 ..remarks:
@@ -542,7 +576,7 @@ SEQAN_CONCEPT(IntegerConcept, (TValue)) :
 /**
 .Concept.SignedIntegerConcept
 ..cat:Basic
-..general:Concept.IntegerConcept
+..baseconcept:Concept.IntegerConcept
 ..summary:An integral type with a sign.
 ..signature:SignedIntegerConcept<T>
 ..remarks:
@@ -599,7 +633,7 @@ SEQAN_CONCEPT(SignedIntegerConcept, (TValue)) :
 /**
 .Concept.UnsignedIntegerConcept
 ..cat:Basic
-..general:Concept.IntegerConcept
+..baseconcept:Concept.IntegerConcept
 ..summary:An integral type without a sign.
 ..signature:UnsignedIntegerConcept<T>
 ..remarks:

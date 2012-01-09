@@ -48,22 +48,6 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-/**
-.Concept.Alphabet With Gaps
-..summary:An alphabet that includes a specific gap character.
-
-.Function.gapValue.concept:Concept.Alphabet With Gaps
-.Function.gapValueImpl.concept:Concept.Alphabet With Gaps
- */
-
-/**
-.Concept.Alphabet With Unknown Value
-..summary:An alphabet which includes a specific "unknown" character.
-
-.Function.unknownValue.concept:Concept.Alphabet With Unknown Value
-.Function.unknownValueImpl.concept:Concept.Alphabet With Unknown Value
- */
-
 // ============================================================================
 // Metafunctions
 // ============================================================================
@@ -75,22 +59,6 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 // Function gapValueImpl
 // ----------------------------------------------------------------------------
-
-/**
-.Function.gapValueImpl
-..hidefromindex
-..cat:Alphabets
-..cat:Alignments
-..summary:Implements @Function.gapValue@.
-..signature:gapValueImpl(valuePointerTag)
-..param.valuePointerTag:A pointer that is used as a tag to specify the value type.
-...remarks:The pointer needs not to point to a valid object, so it is possible to use a null pointer here.
-..returns:A gap character.
-..see:Function.gapValue
-..remarks.text:This function implements @Function.gapValue@.
-It is recommended to use @Function.gapValue@ rather than $gapValueImpl$.
-..include:seqan/basic.h
-*/
 
 template <typename T>
 inline T
@@ -105,21 +73,6 @@ gapValueImpl(T *)
 // Function gapValue
 // ----------------------------------------------------------------------------
 
-/**
-.Function.gapValue
-..cat:Alphabets
-..cat:Alignments
-..summary:Return the "gap" value from an alphabet.
-..signature:gapValue<T>()
-..param.T:The alphabet type to query the "gap" value from.
-...type:Concept.Alphabet With Gaps
-..returns:The gap character.
-..remarks.text:The function is implemented in @Function.gapValueImpl@.
-Do not specialize $gapValue$, specialize @Function.gapValueImpl@ instead!
-..see:Function.gapValueImpl
-..include:seqan/basic.h
- */
-
 template <typename T>
 inline T
 gapValue()
@@ -133,21 +86,6 @@ gapValue()
 // Function unknownValueImpl
 // ----------------------------------------------------------------------------
 
-/**
-.Function.unknownValueImpl
-..hidefromindex
-..cat:Alphabets
-..summary:Implements @Function.unknownValue@.
-..signature:gapValueImpl(valuePointerTag)
-..param.valuePointerTag:A pointer that is used as a tag to specify the value type.
-...remarks:The pointer needs not to point to a valid object, so it is possible to use a null pointer here.
-..returns:A "unknown" character.
-..see:Function.unknownValue
-..remarks.text:This function implements @Function.unknownValue@.
-It is recommended to use @Function.gapValue@ rather than $gapValueImpl$.
-..include:seqan/basic.h
-*/
-
 template <typename T>
 inline T
 unknownValueImpl(T *)
@@ -159,16 +97,6 @@ unknownValueImpl(T *)
 // ----------------------------------------------------------------------------
 // Function unknownValue
 // ----------------------------------------------------------------------------
-
-/**
-.Function.unknownValue
-..cat:Alphabets
-..summary:Return the "unknown" value from an alphabet.
-..signature:unknownValue<T>()
-..param.T:The alphabet type to query the "unknown" value from.
-...type:Concept.Alphabet With Unknown Value
-..returns:The "unknown" value.
- */
 
 template <typename T>
 inline T

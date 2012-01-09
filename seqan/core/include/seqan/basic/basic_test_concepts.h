@@ -34,6 +34,9 @@
 // Test for fulfilled basic concepts.
 // ==========================================================================
 
+// // TODO(holtgrew): Only here temporarily.
+// #include <seqan/modifier.h>
+
 // SEQAN_NO_GENERATED_FORWARDS
 
 #ifndef CORE_INCLUDE_SEQAN_BASIC_TEST_CONCEPTS_H_
@@ -45,6 +48,8 @@ namespace seqan {
 // Test basic concepts
 // ============================================================================
 
+// Test the conformance to the Alphabet concept for (1) built-in types, (2) aggregates, (3) simple types.
+
 inline void testAlphabetConcepts()
 {
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<bool>));
@@ -52,11 +57,134 @@ inline void testAlphabetConcepts()
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<unsigned>));
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<int>));
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<double>));
+
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<Pair<int, double> >));
+
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<Dna>));
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<Dna5>));
+    SEQAN_CONCEPT_ASSERT((AlphabetConcept<DnaQ>));
+    SEQAN_CONCEPT_ASSERT((AlphabetConcept<Dna5Q>));
+    SEQAN_CONCEPT_ASSERT((AlphabetConcept<Rna>));
+    SEQAN_CONCEPT_ASSERT((AlphabetConcept<Rna5>));
+    SEQAN_CONCEPT_ASSERT((AlphabetConcept<Iupac>));
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<AminoAcid>));
     SEQAN_CONCEPT_ASSERT((AlphabetConcept<Ascii>));
+    // SEQAN_CONCEPT_ASSERT((AlphabetConcept<Finite<10> >));
+}
+
+// Test the conformance to the OrderedAlphabet concept for (1) built-in types, (2) aggregates, (3) simple types.
+
+inline void testOrderedAlphabetConcepts()
+{
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<bool>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<char>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<unsigned>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<int>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<double>));
+
+    // TODO(holtgrew): With lexicographic ordering, pairs are also ordered. We would need complete implementations of the functions then, though.
+    // SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Pair<int, double> >));
+
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Dna>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Dna5>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<DnaQ>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Dna5Q>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Rna>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Rna5>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Iupac>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<AminoAcid>));
+    SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Ascii>));
+    // SEQAN_CONCEPT_ASSERT((OrderedAlphabetConcept<Finite<10> >));
+}
+
+// Test the conformance to the FiniteOrderedAlphabet concept for (1) built-in types, (2) aggregates, (3) simple types.
+
+inline void testFiniteOrderedAlphabetConcepts()
+{
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<bool>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<char>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<unsigned>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<int>));
+
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Dna>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Dna5>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<DnaQ>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Dna5Q>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Rna>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Rna5>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Iupac>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<AminoAcid>));
+    SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Ascii>));
+    // SEQAN_CONCEPT_ASSERT((FiniteOrderedAlphabetConcept<Finite<10> >));
+}
+
+// Test the conformance to the AlphabetWithGaps concept for char and modified alphabets.
+
+inline void testAlphabetWithGapsConcept()
+{
+    SEQAN_CONCEPT_ASSERT((AlphabetWithGapsConcept<char>));
+    // // TODO(holtgrew): <seqan/modifier.h> is required for this.
+    // SEQAN_CONCEPT_ASSERT((AlphabetWithGapsConcept<ModifiedAlphabet<Dna, ModExpand<'-'> > >));
+}
+
+// Test the conformance to the AlphabetWithGaps concept for char and the *5 alphabets.
+
+inline void testAlphabetWithUnknownValueConcept()
+{
+    SEQAN_CONCEPT_ASSERT((AlphabetWithUnknownValueConcept<char>));
+    SEQAN_CONCEPT_ASSERT((AlphabetWithUnknownValueConcept<Dna5>));
+    SEQAN_CONCEPT_ASSERT((AlphabetWithUnknownValueConcept<Rna5>));
+    SEQAN_CONCEPT_ASSERT((AlphabetWithUnknownValueConcept<Dna5Q>));
+}
+
+// Test the conformance to the AlphabetWithQualities concept.
+
+inline void testAlphabetWithQualitiesConcept()
+{
+    SEQAN_CONCEPT_ASSERT((AlphabetWithQualitiesConcept<DnaQ>));
+    SEQAN_CONCEPT_ASSERT((AlphabetWithQualitiesConcept<Dna5Q>));
+}
+
+// Test conformance of pointer with TrivialIteratorConcept.
+
+inline void testTrivialIteratorConcept()
+{
+    SEQAN_CONCEPT_ASSERT((TrivialIteratorConcept<int *>));
+}
+
+// Test conformance of pointer with InputIteratorConcept.
+
+inline void testInputIteratorConcept()
+{
+    SEQAN_CONCEPT_ASSERT((InputIteratorConcept<int *>));
+}
+
+// Test conformance of pointer with OutputIteratorConcept.
+
+inline void testOutputIteratorConcept()
+{
+    SEQAN_CONCEPT_ASSERT((OutputIteratorConcept<int *>));
+}
+
+// Test conformance of pointer with ForwardIteratorConcept.
+
+inline void testForwardIteratorConcept()
+{
+    SEQAN_CONCEPT_ASSERT((ForwardIteratorConcept<int *>));
+}
+
+// Test conformance of pointer with BidirectionalIteratorConcept.
+
+inline void testBidirectionalIteratorConcept()
+{
+    SEQAN_CONCEPT_ASSERT((BidirectionalIteratorConcept<int *>));
+}
+
+// Test conformance of pointer with RandomAccessIteratorConcept.
+
+inline void testRandomAccessIteratorConcept()
+{
+    SEQAN_CONCEPT_ASSERT((RandomAccessIteratorConcept<int *>));
 }
 
 template <typename T>

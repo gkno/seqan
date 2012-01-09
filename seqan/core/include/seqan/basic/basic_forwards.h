@@ -70,8 +70,10 @@ assign(TTarget & target,
 //////////////////////////////////////////////////////////////////////////////
 // sequence/lexical.h::ordValue
 
+template <typename T> struct ValueSize;
+
 template <typename TValue>
-inline unsigned
+inline typename ValueSize<TValue>::Type
 ordValue(TValue const & c);
 
 //////////////////////////////////////////////////////////////////////////////

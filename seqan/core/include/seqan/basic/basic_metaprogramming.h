@@ -221,6 +221,36 @@ struct If<false, T1, T2>
 };
 
 // ----------------------------------------------------------------------------
+// Metafunction If2
+// ----------------------------------------------------------------------------
+
+/**
+.Metafunction.If2
+..cat:Metaprogramming
+..summary:Metaprogramming "if".
+..signature:If2<T, T1, T2>::Type
+..param.T:The condition.
+..param.T1:Result if $b$.
+..param.T2:Result if not $b$.
+..see:Metafunction.If
+..returns:If $T$ is $True$ then $T1$, otherwise $T2$.
+..include:seqan/basic.h
+*/
+
+//TODO: change bool Flag which is a boolean into typename TFlag which is True/False
+template <typename T, typename T1, typename T2>
+struct If2
+{
+    typedef T1 Type;
+};
+
+template <typename T1, typename T2>
+struct If2<False, T1, T2>
+{
+    typedef T2 Type;
+};
+
+// ----------------------------------------------------------------------------
 // Metafunction IsSameType
 // ----------------------------------------------------------------------------
 

@@ -121,6 +121,7 @@
 #include <seqan/basic/iterator_adaptor.h>
 #include <seqan/basic/iterator_position.h>
 #include <seqan/basic/iterator_adapt_std.h>
+#include <seqan/basic/iterator_concept.h>
 
 // --------------------------------------------------------------------------
 // Construction / Destruction Code
@@ -165,9 +166,9 @@
 // Alphabets
 // --------------------------------------------------------------------------
 
+#include <seqan/basic/alphabet_math.h>
 #include <seqan/basic/alphabet_storage.h>
 #include <seqan/basic/alphabet_bio.h>
-#include <seqan/basic/alphabet_math.h>
 #include <seqan/basic/alphabet_simple.h>
 #include <seqan/basic/alphabet_qualities.h>
 #include <seqan/basic/alphabet_adapt_builtins.h>
