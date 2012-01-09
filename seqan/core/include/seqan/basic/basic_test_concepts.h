@@ -146,7 +146,7 @@ inline void testAlphabetWithQualitiesConcept()
 }
 
 // Test conformance of pointer with TrivialIteratorConcept.
-
+/*
 inline void testTrivialIteratorConcept()
 {
     SEQAN_CONCEPT_ASSERT((TrivialIteratorConcept<int *>));
@@ -186,6 +186,7 @@ inline void testRandomAccessIteratorConcept()
 {
     SEQAN_CONCEPT_ASSERT((RandomAccessIteratorConcept<int *>));
 }
+*/
 
 template <typename T>
 inline void testInteger()
