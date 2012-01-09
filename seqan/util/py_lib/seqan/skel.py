@@ -334,8 +334,8 @@ def createLibraryHeader(name, location, options):
     # Copy over .h file for app and perform replacements.
     source_file = paths.pathToTemplate('header_template', 'library_header.h')
     target_file = os.path.join(target_path)
-    replacements = buildReplacements('library_header', name, location, target_file, options, options)
-    res = configureFile(target_file, source_file, replacements, options.dry_run)
+    replacements = buildReplacements('library_header', name, location, target_file, options)
+    res = configureFile(target_file, source_file, replacements, options.dry_run, options)
     if res: return res
     return 0
 
