@@ -60,7 +60,7 @@
 ..conceptmetafunc:Required Metafunctions
 ..conceptusedbymeta:Used By Metafunction
 ..conceptusedbyfunc:Used By Function
-..baseconcept:Extends
+..baseconcept:Refines
 ..childconcept:Refinements
 ..shortcut:Shortcuts
 ..shortcutfor:Shortcut for
