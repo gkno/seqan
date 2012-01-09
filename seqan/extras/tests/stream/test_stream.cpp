@@ -263,6 +263,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_single_concat_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_double_mmap);
     SEQAN_CALL_TEST(test_stream_record_reader_fastq_batch_double_concat_mmap);
+    SEQAN_CALL_TEST(test_stream_record_reader_fastq_check_stream_format);
 
     // Tests for EMBL
     SEQAN_CALL_TEST(test_stream_read_embl_single_char_array_stream);

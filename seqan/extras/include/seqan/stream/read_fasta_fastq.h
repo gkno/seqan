@@ -389,7 +389,9 @@ _readQualityBlock(TQualString & qual,
                   Fastq const & /*tag*/)
 {
     // READ AND CHECK QUALITIES' META
-    if (atEnd(reader) || value(reader) != '+')
+    if (atEnd(reader))
+        return EOF_BEFORE_SUCCESS;
+    if (value(reader) != '+')
         return RecordReader<TFile, TPass >::INVALID_FORMAT;
     goNext(reader);
     if (resultCode(reader))

@@ -297,4 +297,20 @@ SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_batch_double_concat_mmap)
     close(mmapString);
 }
 
+SEQAN_DEFINE_TEST(test_stream_record_reader_fastq_check_stream_format)
+{
+    using namespace seqan;
+
+    CharString fileName = SEQAN_PATH_TO_ROOT();
+    append(fileName, "/extras/tests/stream/files/lane_5_p1.fastq");
+    std::fstream inFile(toCString(fileName), std::ios::in | std::ios::binary);
+
+    RecordReader<std::fstream, SinglePass<> > reader(inFile);
+    AutoSeqStreamFormat tagSelector;
+    bool b = checkStreamFormat(reader, tagSelector);
+
+    SEQAN_ASSERT_MSG(b, "File format detection must have been successful.");
+    SEQAN_ASSERT_EQ_MSG(tagSelector.tagId, 2, "Format must be FASTQ.");
+}
+
 #endif // def TEST_STREAM_TEST_STREAM_READ_FASTQ_H_
