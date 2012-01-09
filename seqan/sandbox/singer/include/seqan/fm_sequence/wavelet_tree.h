@@ -401,9 +401,6 @@ inline unsigned getOccImpl(const WaveletTree<TText, TWaveletTreeSpec> & tree,
     TChar charInTree = tree.splitValues.minCharValue;
     do
     {
-    	//static_cast<Nothing>(getFibre(tree, tag).treeNodes[treePos].i1);
-    	//std::cerr << getFibre(tree, tag).treeNodes[treePos].i1 << std::endl;
-
         TPos addValue = getRank(tree.bitStrings[treePos], sum - 1);
         if (character < getFibre(tree, tag).treeNodes[treePos].i1)
         {

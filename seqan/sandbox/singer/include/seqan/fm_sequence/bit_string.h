@@ -447,15 +447,6 @@ inline TValue getRankInBucket(const String<TValue> & bitString, const TPos pos)
     return getRankInBucket(bitString[pos / bitsPerValue] & mask);
 }
 
-/*template< typename TPos >
-unsigned getRank(String< bool > &counterBitString,
-    TPos pos)
-{
-
-    sum += getRankInBucket(counterBitString.bitString, pos);
-    return sum;
-}*/
-
 template <typename TSpec>
 inline void printBits(const TSpec entrie, const int blocks);
 
@@ -463,22 +454,15 @@ template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type
 getRank(const RankSupportBitString<TSpec> & rankSupportBitString, const TPos pos)
 {
-//		if(!length(rankSupportBitString))
-//		{
-//			std::cerr << "length = 0" << std::endl;
-//			return 0;
-//		}
-
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type TSuperBucketString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type 		TSuperBucketString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
 
     typename Value<TSuperBucketString>::Type sum = 0;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     unsigned bitsPerBucket = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
     unsigned long bucketPos = pos / bitsPerBucket;
     if (bucketPos)
     {
         sum += rankSupportBitString.bucketString[bucketPos];
-
         unsigned superBucketPos = (bucketPos - 1) / bitsPerBucket;
         if (superBucketPos)
         {
