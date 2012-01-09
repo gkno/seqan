@@ -349,6 +349,7 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     // -----------------------------------------------------------------------
     // Remaining, Unported Tests
 
+    SEQAN_CALL_TEST(test_basic_alphabet_value_size);
     SEQAN_CALL_TEST(test_basic_alphabet_interface);
     // SEQAN_CALL_TEST(test_basic_conversions);
     SEQAN_CALL_TEST(test_basic_alphabet_extreme_values);

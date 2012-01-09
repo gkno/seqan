@@ -92,18 +92,18 @@ template <typename T>
 const typename ValueSize<T>::Type ValueSize<T>::VALUE = (1llu << BitsPerValue<T>::VALUE);
 
 template <>
-const typename ValueSize<__int64>::Type ValueSize<__int64>::VALUE = 0;
+const ValueSize<__int64>::Type ValueSize<__int64>::VALUE = 0;
 
 template <>
-const typename ValueSize<__uint64>::Type ValueSize<__uint64>::VALUE = 0;
+const ValueSize<__uint64>::Type ValueSize<__uint64>::VALUE = 0;
 
 
 // TODO(holtgrew): Use static assertion to make sure that ValueSize is never called on floating point numbers? Include assertion for __int64 and __uint64?
 template <>
-const typename ValueSize<double>::Type ValueSize<double>::VALUE = 0;
+const ValueSize<double>::Type ValueSize<double>::VALUE = 0;
 
 template <>
-const typename ValueSize<float>::Type ValueSize<float>::VALUE = 0;
+const ValueSize<float>::Type ValueSize<float>::VALUE = 0;
 
 template <typename TValue>
 struct ValueSize<TValue const> : ValueSize<TValue>
