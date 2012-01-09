@@ -63,6 +63,8 @@ $!link_section(key='baseconcept')!$
 $!link_section(key='childconcept')!$
 $!link_section(key='shortcutfor')!$
 $!link_section(key='implements')!$
+$!link_section(key='baseconcept')!$
+$!link_section(key='childconcept')!$
 $!link_section(key='conceptimplements')!$
 $!link_section(key='conceptusedbymeta')!$
 $!link_section(key='conceptusedbyfunc')!$
@@ -96,7 +98,8 @@ $!itemize_section(path=[cat, subcat, 'cite'])!$
 
 $!wiki_link_section(path=[cat, subcat, 'wiki'])!$
 
-#!<pre>@!tree.find([cat, subcat])!@</pre>#! remove comment for debugging
+#!<div style="font-size:80%; text-align:right;"><a href="#" onclick="javascript: $('#debug_info').toggle(); return false;">toggle debug</a></div><pre id="debug_info" style="display:none;">@!tree.find([cat, subcat])!@</pre>#! remove comment for debugging
+
 </div>
 
 <div id="footer">
