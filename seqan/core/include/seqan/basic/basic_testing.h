@@ -728,10 +728,10 @@ const char *tempFileName() {
     // Tests that the given two value are equal.  Returns true iff the
     // two values are equal.
     template <typename T1, typename T2>
-    bool testEqual(const char *file, int line,
-                   const T1 &value1, const char *expression1,
-                   const T2 &value2, const char *expression2,
-                   const char *comment, ...) {
+    bool testEqual(char const * file, int line,
+                   T1 const & value1, char const * expression1,
+                   T2 const & value2, char const * expression2,
+                   char const * comment, ...) {
         if (!(value1 == value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;

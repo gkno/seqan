@@ -67,15 +67,15 @@ typedef wchar_t Unicode;
 template <typename TValue>
 struct BitsPerValue
 {
-    static const unsigned VALUE;
+    static const unsigned VALUE = sizeof(TValue) * 8;
 };
 
 template <typename TValue>
 struct BitsPerValue<TValue const> : public BitsPerValue<TValue>
 {};
 
-template <typename TValue>
-const unsigned BitsPerValue<TValue>::VALUE = sizeof(TValue) * 8;
+// template <typename TValue>
+// const unsigned BitsPerValue<TValue>::VALUE = ;
 
 // ----------------------------------------------------------------------------
 // Metafunction ValueSize
@@ -85,25 +85,39 @@ template <typename T>
 struct ValueSize
 {
     typedef __uint64  Type;
-    static const Type VALUE;
+    static const Type VALUE = (1llu << BitsPerValue<T>::VALUE);
 };
 
-template <typename T>
-const typename ValueSize<T>::Type ValueSize<T>::VALUE = (1llu << BitsPerValue<T>::VALUE);
-
-template <>
-const ValueSize<__int64>::Type ValueSize<__int64>::VALUE = 0;
-
-template <>
-const ValueSize<__uint64>::Type ValueSize<__uint64>::VALUE = 0;
-
-
 // TODO(holtgrew): Use static assertion to make sure that ValueSize is never called on floating point numbers? Include assertion for __int64 and __uint64?
-template <>
-const ValueSize<double>::Type ValueSize<double>::VALUE = 0;
 
 template <>
-const ValueSize<float>::Type ValueSize<float>::VALUE = 0;
+struct ValueSize<__int64>
+{
+    typedef __uint64  Type;
+    static const Type VALUE = 0;
+};
+
+template <>
+struct ValueSize<__uint64>
+{
+    typedef __uint64  Type;
+    static const Type VALUE = 0;
+};
+
+template <>
+struct ValueSize<double>
+{
+    typedef __uint64  Type;
+    static const Type VALUE = 0;
+};
+
+template <>
+struct ValueSize<float>
+{
+    typedef __uint64  Type;
+    static const Type VALUE = 0;
+};
+
 
 template <typename TValue>
 struct ValueSize<TValue const> : ValueSize<TValue>

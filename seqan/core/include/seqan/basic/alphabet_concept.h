@@ -261,6 +261,16 @@ You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is
 ..remarks:
 This function is only defined for integral types like $unsigned$, $int$, or @Spec.Dna@.
 For floating point numbers and the 64 bit types $__int64$ and $__uint64$, it returns 0 since there is no standard compliant way to return the number of values for these types.
+..remarks:
+Note that you cannot get pointers or references to $ValueSize<T>::VALUE$ in your program.
+You can use @Function.valueSize@ in your programs without problems, though.
+When you get problems in your tests, use the "unary plus" workaround from the examples section.
+..example.text:The temporary assignment workaround.
+..example.code:
+SEQAN_ASSERT_EQ(ValueSize<bool>::VALUE, 2u);    // Linker error.
+SEQAN_ASSERT_EQ(+ ValueSize<bool>::VALUE, 2u);  // OK
+SEQAN_ASSERT_EQ(valueSize<bool>(), 2u);         // OK
+..see:Function.valueSize
 ..see:Metafunction.Value
 ..include:seqan/basic.h
  */

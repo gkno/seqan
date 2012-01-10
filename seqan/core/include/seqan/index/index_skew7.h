@@ -68,14 +68,14 @@ namespace SEQAN_NAMESPACE_MAIN
             const typename Septet::T *sa = a.i2.i;
             const typename Septet::T *sb = b.i2.i;
 
-            SizeType n = Septet::size;
+            SizeType n = Septet::SIZE;
             if (a.i1 < n) n = a.i1;
             if (b.i1 < n) n = b.i1;
             for(SizeType i = 0; i < n; i++, ++sa, ++sb) {
                 if (*sa == *sb) continue;
                 return (*sa < *sb)? -1 : 1;
             }
-            if (n < Septet::size) {
+            if (n < Septet::SIZE) {
                 return (a.i1 < b.i1)? -1 : 1;
             } else
                 return 0;

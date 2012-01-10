@@ -573,16 +573,25 @@ SEQAN_DEFINE_TEST(test_basic_suprema_infima)
 
 SEQAN_DEFINE_TEST(test_basic_alphabet_value_size)
 {
-    SEQAN_ASSERT_EQ(ValueSize<bool>::VALUE, 2u);
+    SEQAN_ASSERT_EQ(+ValueSize<bool>::VALUE, 2u);
+    SEQAN_ASSERT_EQ(+ValueSize<__int8>::VALUE, 256u);
+    SEQAN_ASSERT_EQ(+ValueSize<__uint8>::VALUE, 256u);
+    SEQAN_ASSERT_EQ(+ValueSize<__int16>::VALUE, 65536u);
+    SEQAN_ASSERT_EQ(+ValueSize<__uint16>::VALUE, 65536u);
+    SEQAN_ASSERT_EQ(+ValueSize<__int32>::VALUE, 4294967296llu);
+    SEQAN_ASSERT_EQ(+ValueSize<__uint32>::VALUE, 4294967296llu);
+    SEQAN_ASSERT_EQ(+ValueSize<__int64>::VALUE, 0u);
+    SEQAN_ASSERT_EQ(+ValueSize<__uint64>::VALUE, 0u);
 
-    SEQAN_ASSERT_EQ(ValueSize<__int8>::VALUE, 256u);
-    SEQAN_ASSERT_EQ(ValueSize<__uint8>::VALUE, 256u);
-    SEQAN_ASSERT_EQ(ValueSize<__int16>::VALUE, 65536u);
-    SEQAN_ASSERT_EQ(ValueSize<__uint16>::VALUE, 65536u);
-    SEQAN_ASSERT_EQ(ValueSize<__int32>::VALUE, 4294967296llu);
-    SEQAN_ASSERT_EQ(ValueSize<__uint32>::VALUE, 4294967296llu);
-    SEQAN_ASSERT_EQ(ValueSize<__int64>::VALUE, 0u);
-    SEQAN_ASSERT_EQ(ValueSize<__uint64>::VALUE, 0u);
+    SEQAN_ASSERT_EQ(valueSize<bool>(), 2u);
+    SEQAN_ASSERT_EQ(valueSize<__int8>(), 256u);
+    SEQAN_ASSERT_EQ(valueSize<__uint8>(), 256u);
+    SEQAN_ASSERT_EQ(valueSize<__int16>(), 65536u);
+    SEQAN_ASSERT_EQ(valueSize<__uint16>(), 65536u);
+    SEQAN_ASSERT_EQ(valueSize<__int32>(), 4294967296llu);
+    SEQAN_ASSERT_EQ(valueSize<__uint32>(), 4294967296llu);
+    SEQAN_ASSERT_EQ(valueSize<__int64>(), 0u);
+    SEQAN_ASSERT_EQ(valueSize<__uint64>(), 0u);
 }
 
 #endif  // #ifndef TESTS_BASIC_TEST_BASIC_ALPHABET_H_

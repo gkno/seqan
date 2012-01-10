@@ -62,7 +62,7 @@ namespace SEQAN_NAMESPACE_MAIN
             const typename Septet::T *sa = a.i2.i;
             const typename Septet::T *sb = b.i2.i;
 
-            SizeType n = Septet::size;
+            SizeType n = Septet::SIZE;
 			SizeType aLeft = getValueI2(getValueI1(a));
 			SizeType bLeft = getValueI2(getValueI1(b));
 
@@ -72,7 +72,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 if (*sa == *sb) continue;
                 return (*sa < *sb)? -1 : 1;
             }
-            if (n < Septet::size) {
+            if (n < Septet::SIZE) {
 				if (aLeft < bLeft) return -1;
 				if (aLeft > bLeft) return 1;
 				return (getValueI1(getValueI1(a)) > getValueI1(getValueI1(b)))? -1 : 1;
