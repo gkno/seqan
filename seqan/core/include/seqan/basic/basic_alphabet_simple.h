@@ -278,11 +278,8 @@ template <typename TValue, unsigned SIZE>
 struct ValueSize<SimpleType<TValue, Finite<SIZE> > >
 {
     typedef __uint8 Type;
-    static const ValueSize<SimpleType<TValue, Finite<SIZE> > >::Type VALUE;
+    static const typename ValueSize<SimpleType<TValue, Finite<SIZE> > >::Type VALUE = 24;
 };
-
-template <typename TValue, unsigned SIZE> 
-const typename ValueSize<SimpleType<TValue, Finite<SIZE> > >::Type ValueSize<SimpleType<TValue, Finite<SIZE> > >::VALUE = 24;
 
 template <typename TValue, unsigned SIZE> 
 struct BitsPerValue< SimpleType<TValue, Finite<SIZE> > >: Log2<SIZE> {};

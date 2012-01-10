@@ -107,7 +107,7 @@ struct Tuple<T_, _size, Compressed>
     // enum { bitMask = (1 << BIT_SIZE) - 1 };
     // // TODO(holtgrew): The following two computations are bogus, in cases of overflow, MaxValue<CT>::VALUE should be used.
     // enum { mask = (1 << (size * BIT_SIZE)) - 1 };
-    typedef typename BitVector_<Product<BIT_SIZE, SIZE>::VALUE>::Type CT;
+    typedef typename BitVector_<BIT_SIZE * SIZE>::Type CT;
 
     // -----------------------------------------------------------------------
     // Members
