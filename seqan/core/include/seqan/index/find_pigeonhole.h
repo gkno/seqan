@@ -59,8 +59,15 @@ namespace seqan
     template <typename TSpec = void>
     struct Pigeonhole {
         enum { ONE_PER_DIAGONAL = 1 };	// 1..record last seed diagonal and ignore seeds on the same diag. (heuristic)
+        enum { HAMMING_ONLY = 0 };		// 0..no indels; 1..allow indels
     };
 
+    template <>
+    struct Pigeonhole<Hamming_> {
+        enum { ONE_PER_DIAGONAL = 1 };	// 1..record last seed diagonal and ignore seeds on the same diag. (heuristic)
+        enum { HAMMING_ONLY = 1 };		// 0..no indels; 1..allow indels
+    };
+	
 //////////////////////////////////////////////////////////////////////////////
 
 
@@ -388,7 +395,7 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 			// sequence must have sufficient length
 			if (length <= pattern.params.overlap) continue;
 			
-			// cut ovelap many characters from the end
+			// cut overlap many characters from the end
 			length -= pattern.params.overlap;
             TSize errors = (TSize) floor(errorRate * length);
             TSize q = length / (errors + 1);
@@ -436,15 +443,15 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 template <
 	typename TFinder,
 	typename TIndex, 
-	typename TSpec_,
+	typename TSpec,
 	typename THValue
 >
 inline bool _pigeonholeProcessQGram(
 	TFinder &finder, 
-	Pattern<TIndex, Pigeonhole<TSpec_> > &pattern,
+	Pattern<TIndex, Pigeonhole<TSpec> > &pattern,
 	THValue hash)
 {
-	typedef Pattern<TIndex, Pigeonhole<TSpec_> >        TPattern;
+	typedef Pattern<TIndex, Pigeonhole<TSpec> >         TPattern;
 	typedef typename TFinder::THstkPos					THstkPos;
     
     typedef typename Fibre<TIndex, QGramSA>::Type       TSA;
@@ -469,7 +476,7 @@ inline bool _pigeonholeProcessQGram(
         posLocalize(ndlPos, *occ, stringSetLimits(index));
         hit.hstkPos = finder.curPos - getSeqOffset(ndlPos);		// bucket begin in haystack
         hit.ndlSeqNo = getSeqNo(ndlPos);						// needle seq. number
-        if (Pigeonhole<TSpec_>::ONE_PER_DIAGONAL)
+        if (Pigeonhole<TSpec>::ONE_PER_DIAGONAL)
         {
             __int64 diag = hit.hstkPos + (__int64)pattern.finderPosOffset;
             if (pattern.lastSeedDiag[hit.ndlSeqNo] == diag)
@@ -477,9 +484,17 @@ inline bool _pigeonholeProcessQGram(
             pattern.lastSeedDiag[hit.ndlSeqNo] = diag;
         }
 		unsigned ndlLength = sequenceLength(hit.ndlSeqNo, host(pattern));
-		unsigned errors = (unsigned)floor(pattern._currentErrorRate * ndlLength);
-		hit.bucketWidth = ndlLength + (errors << 1) + 1;
-		hit.hstkPos -= errors;
+
+		if (Pigeonhole<TSpec>::HAMMING_ONLY != 0)
+		{
+			hit.bucketWidth = ndlLength;
+		}
+		else
+		{
+			unsigned indels = (unsigned)floor(pattern._currentErrorRate * ndlLength);
+			hit.bucketWidth = ndlLength + (indels << 1);
+			hit.hstkPos -= indels;
+		}
         appendValue(finder.hits, hit);
     }
 

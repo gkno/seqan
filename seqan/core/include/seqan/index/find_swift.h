@@ -682,6 +682,10 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		    	// same bucket
 			    bucketParams.distanceCut = (bucketParams.threshold - 1) + span * errors;
 
+				// from now, errors is the maximal number of indels
+				if (Swift<TSpec>::HAMMING_ONLY != 0)
+					errors = 0;			
+
     			TSize bucketsPerCol2;
 	    		if(Swift<TSpec>::DIAGONAL == 1) 
 		    	{
@@ -748,6 +752,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 				else
 					bucketParams.threshold = pattern.params.minThreshold;
 				
+				// from now, errors is the maximal number of indels
 				if (Swift<TSpec>::HAMMING_ONLY != 0)
 					errors = 0;			
 
