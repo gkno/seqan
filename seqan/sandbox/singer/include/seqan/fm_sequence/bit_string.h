@@ -91,7 +91,7 @@ struct RankSupportBitString
     TBitString                                      bitString;
     TBucketString                                   bucketString;
     TSuperBucketString                              superBucketString;
-    typename Value<TSuperBucketString>::Type   	   length;
+    typename Value<TSuperBucketString>::Type   	    length;
 
     RankSupportBitString() :
     	bitString(),
@@ -354,7 +354,8 @@ inline bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
     typedef typename Value<TBitString>::Type TValue;
     TValue bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue one = 1;
-    TValue shiftValue = pos % bitsPerValue;
+    //TValue shiftValue = pos % bitsPerValue;
+    TValue shiftValue = pos & (bitsPerValue - 1);
     return (bitString.bitString[(pos / bitsPerValue)] >> shiftValue) & one;
 }
 
@@ -366,7 +367,8 @@ inline bool getBit(RankSupportBitString<TSpec> const & bitString, TPos pos)
     typedef typename Value<TBitString>::Type TValue;
     TValue bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue one = 1;
-    TValue shiftValue = pos % bitsPerValue;
+    //TValue shiftValue = pos % bitsPerValue;
+    TValue shiftValue = pos & (bitsPerValue - 1);
     return (bitString.bitString[(pos / bitsPerValue)] >> shiftValue) & one;
 }
 
@@ -402,7 +404,7 @@ inline void appendBit(RankSupportBitString<TSpec> & rankSupportBitString, TBit b
 
    // std::cerr << length(rankSupportBitString.bitString) * bitsPerValue << " " << length(rankSupportBitString) <<std::endl;
 
-	if( (unsigned)(length(rankSupportBitString.bitString) * bitsPerValue) <=  (unsigned)(length(rankSupportBitString)))
+	if((length(rankSupportBitString.bitString) * bitsPerValue) <= (length(rankSupportBitString)))
 	{
 //		char c;
 //		std::cin >> c;
@@ -443,7 +445,8 @@ inline TValue getRankInBucket(const String<TValue> & bitString, const TPos pos)
 
     unsigned short const bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue const one = -1;
-    TValue const mask = one >> (bitsPerValue - (pos % bitsPerValue) - 1);
+   // TValue const mask = one >> (bitsPerValue - (pos % bitsPerValue) - 1);
+    TValue const mask = one >> (bitsPerValue - (pos & (bitsPerValue - 1)) - 1);
     return getRankInBucket(bitString[pos / bitsPerValue] & mask);
 }
 
@@ -510,7 +513,8 @@ inline void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString
             tempSum = getRankInBucket(bitString_[i]);
             bucketSum += tempSum;
             bucketString[i + 1] = bucketSum;
-            if (!((i + 1) % bitsPerBucket))
+            //if (!((i + 1) % bitsPerBucket))
+            if (!((i + 1) & (bitsPerBucket - 1)))
             {
                 superBucketSum += bucketSum;
                 superBucketString[superBucketCounter] = superBucketSum;
