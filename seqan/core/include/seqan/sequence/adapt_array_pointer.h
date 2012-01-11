@@ -441,7 +441,7 @@ SEQAN_CHECKPOINT
 //overload of binary version for strings:
 
 template<typename TTargetValue, typename TSource>
-inline typename EnableIf<IsCharType<TTargetValue>::VALUE>::Type
+inline typename EnableIf<IsCharType<TTargetValue> >::Type
 assign(TTargetValue * target,
        TSource & source)
 {
@@ -450,7 +450,7 @@ SEQAN_CHECKPOINT
     assign(target, source, typename DefaultOverflowImplicit<TTarget>::Type());
 }
 template<typename TTargetValue, typename TSource>
-inline typename EnableIf<IsCharType<TTargetValue>::VALUE>::Type
+inline typename EnableIf<IsCharType<TTargetValue> >::Type
 assign(TTargetValue * target,
        TSource const & source)
 {
