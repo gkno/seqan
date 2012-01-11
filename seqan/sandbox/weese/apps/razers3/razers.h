@@ -2893,7 +2893,8 @@ int _mapSingleReads(
         return _mapSingleReads(store, cnts, options, shape, mode, Swift<TSwiftSpec>());
     } else
     {
-        return _mapSingleReads(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<>());
+        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, void, Hamming_>::Type TPigeonholeSpec;
+        return _mapSingleReads(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<TPigeonholeSpec>());
     }    
 }
 
