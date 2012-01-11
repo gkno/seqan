@@ -693,7 +693,7 @@ bestNeighbors(TIntSet & neighbors,
 ..cat:Motif Search
 ..signature:hasAtLeastOneOccurrence(l_mer_begin,seq_begin,seq_end,l,d,is_exact)
 ..param.l_mer_begin:An iterator pointing to the beginning of a given l-mer pattern.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
@@ -703,7 +703,7 @@ bestNeighbors(TIntSet & neighbors,
 ....see:Shortcut.PeptideIterator
 ..param.seq_begin:An iterator pointing to the beginning of a given sequence which is either
               a string of @Spec.Dna@ or a string of @Spec.AminoAcid@. 
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
@@ -713,7 +713,7 @@ bestNeighbors(TIntSet & neighbors,
 ....see:Shortcut.PeptideIterator
 ..param.seq_end:An iterator pointing to the end of a given sequence pattern which is either
             a string of @Spec.Dna@ or a string of @Spec.AminoAcid@.  
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).

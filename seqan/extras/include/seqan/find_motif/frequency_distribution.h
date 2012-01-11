@@ -311,12 +311,12 @@ struct Value< FrequencyDistribution<TValue, TSpec> const>
 ...type:Class.FrequencyDistribution
 ..param.begin:An iterator pointing to the beginning of a given sequence which is either
               a string of @Spec.Dna@ or a string of @Spec.AminoAcid@. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..param.end:An iterator pointing to the end of a given sequence which is either
             a string of @Spec.Dna@ or a string of @Spec.AminoAcid@.  
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..include:seqan/find_motif.h
@@ -345,9 +345,9 @@ absFreqOfLettersInSeq(FrequencyDistribution<TValue, TSpec> & fd,
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
 ..param.begin:An iterator pointing to the first sequence of a given set of sequences which is considered. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ..param.end:An iterator pointing to the last sequence of a given set of sequences which is considered. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ..remarks.text:This function is similar to @Function.absFreqOfLettersInSeq@ except that the function is performed
                on a set of sequences.
 ..include:seqan/find_motif.h
@@ -401,9 +401,9 @@ addValue(FrequencyDistribution<TValue, TSpec> & fd, TType const & val)
 ..param.frequencies:The @Class.FrequencyDistribution@ object which holds the calculated frequencies.
 ...type:Class.FrequencyDistribution
 ..param.begin:An iterator pointing to the first sequence of a given dataset (set of sequences) which is considered. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ..param.end:An iterator pointing to the last sequence of a given dataset (set of sequences) which is considered. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ..include:seqan/find_motif.h
 */
 

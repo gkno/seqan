@@ -50,7 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.profile:A StringSet of @Class.FrequencyDistribution|frequency distributions@.
 ...type:Class.StringSet
 ..param.dataset_start:An iterator pointing to the first input sequence of a given dataset.
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..param.oops_model:The oops_model object.

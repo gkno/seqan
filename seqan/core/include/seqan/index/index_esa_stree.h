@@ -161,7 +161,7 @@ The iterator starts in the root node by default.
 ..param.TContainer:Type of the container that can be iterated.
 ...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
-..implements:Concept.Iterator
+..implements:Concept.ForwardIteratorConcept
 ..param.TSpec:The specialization type. Specifies the depth-first search mode.
 ...type:Tag.Preorder
 ...type:Tag.PreorderEmptyEdges
@@ -247,7 +247,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..param.TContainer:Type of the container that can be iterated.
 ...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
-..implements:Concept.Iterator
+..implements:Concept.ForwardIteratorConcept
 ..param.TSpec:The specialization type.
 ..include:seqan/index.h
 

@@ -183,17 +183,17 @@ TType binomialCoefficient(TType n, TType k)
 ..param.TType:Distance type.
 ..param.begin1:An iterator pointing to the beginning of the first sequence which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..param.end1:An iterator pointing to the end of the first sequence which is either
             a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..param.begin2:An iterator pointing to the beginning of the second sequence which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@. 
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..include:seqan/find_motif.h

@@ -59,7 +59,7 @@ typedef String<char, Alloc<void> > CharString;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.CharString@.
 ..signature:CharIterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<CharString, Rooted>::Type
 ..see:Shortcut.CharString
 */
@@ -85,7 +85,7 @@ typedef String<wchar_t, Alloc<void> > UnicodeString;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.UnicodeString@.
 ..signature:UnicodeIterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<UnicodeString, Rooted>::Type
 ..see:Shortcut.UnicodeString
 */
@@ -112,7 +112,7 @@ typedef String<Dna, Alloc<void> > DnaString;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.DnaString@.
 ..signature:DnaIterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<DnaString, Rooted>::Type
 ..see:Spec.Dna
 ..see:Shortcut.DnaString
@@ -141,7 +141,7 @@ typedef String<Dna5, Alloc<void> > Dna5String;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.Dna5String@.
 ..signature:Dna5Iterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<Dna5String, Rooted>::Type
 ..see:Spec.Dna5
 ..see:Shortcut.Dna5String
@@ -170,7 +170,7 @@ typedef String<Rna, Alloc<void> > RnaString;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.RnaString@.
 ..signature:RnaIterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<RnaString, Rooted>::Type
 ..see:Spec.Rna
 ..see:Shortcut.RnaString
@@ -199,7 +199,7 @@ typedef String<Rna5, Alloc<void> > Rna5String;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.Rna5String@.
 ..signature:Rna5Iterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<Rna5String, Rooted>::Type
 ..see:Spec.Rna5
 ..see:Shortcut.Rna5String
@@ -228,7 +228,7 @@ typedef String<Iupac, Alloc<void> > IupacString;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.IupacString@.
 ..signature:IupacIterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<IupacString, Rooted>::Type
 ..see:Spec.Iupac
 ..see:Shortcut.IupacString
@@ -256,7 +256,7 @@ typedef String<AminoAcid, Alloc<void> > Peptide;
 ..cat:Iterators
 ..summary:Iterator for @Shortcut.Peptide@.
 ..signature:PeptideIterator
-..shortcutfor:Concept.Rooted Iterator
+..shortcutfor:Concept.RootedIteratorConcept
 ...signature:Iterator<Peptide, Rooted>::Type
 ..see:Spec.AminoAcid
 ..see:Shortcut.Peptide

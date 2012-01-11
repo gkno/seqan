@@ -15,7 +15,7 @@ int main()
 		++it;
 	}
 	::std::cout << ::std::endl;
-///Rooted iterators know their container (@Concept.Rooted Iterator.rooted iterator@).
+///Rooted iterators know their container (@Concept.RootedIteratorConcept|Rooted Iterator@).
 ///Hence, the functions @Function.goBegin@ and @Function.atEnd@ do
 ///not get $str$ as an argument.
 ///The following loop increments each character in $str$.

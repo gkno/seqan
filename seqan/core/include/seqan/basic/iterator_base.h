@@ -58,7 +58,7 @@ namespace seqan {
 ...metafunction:Metafunction.Container
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
-..implements:Concept.Iterator
+..implements:Concept.IteratorAssociatedTypesConcept
 ..include:seqan/basic.h
 */
 

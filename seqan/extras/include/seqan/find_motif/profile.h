@@ -51,12 +51,12 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.StringSet
 ..param.begin:An iterator pointing to the beginning of a given sequence pattern which is either
               a @Shortcut.DnaString@ or a @Shortcut.Peptide@.
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..param.end:An iterator pointing to the end of a given sequence pattern which is either
             a @Shortcut.DnaString@ or a @Shortcut.Peptide@.
-...type:Concept.Iterator
+...type:Concept.RandomAccessIteratorConcept
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
 ..remarks:The number of @Class.FrequencyDistribution@ objects which together form the profile

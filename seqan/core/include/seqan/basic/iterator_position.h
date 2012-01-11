@@ -50,15 +50,15 @@ namespace seqan {
 struct PositionIterator;
 
 /**
-.Spec.Position Iterator:
+.Spec.Position Iterator
 ..cat:Iterators
 ..general:Class.Iter
-..summary:Adapts @Metafunction.Position.position@ to @Concept.Rooted Iterator.iterator@.
+..summary:Adapts @Metafunction.Position|Position Iterator@ to @Concept.RootedIteratorConcept|Rooted Iterator@.
 ..signature:Iter<TContainer, PositionIterator>
 ..param.TContainer:Type of the container.
 ...metafunction:Metafunction.Container
 ..remarks
-...text:Position Iterators provide the concept @Concept.Rooted Iterator@.
+...text:Position Iterators provide the concept @Concept.RootedIteratorConcept|Rooted Iterator@.
 ..see:Metafunction.Position
 ..include:seqan/basic.h
 

@@ -721,7 +721,7 @@ pmsp(TStrings & result,
 ..cat:Motif Search
 ..signature:hasExactOneOccurrence(l_mer_begin,seq_begin,seq_end,l,d,is_exact)
 ..param.l_mer_begin:An iterator pointing to the beginning of a given l-mer pattern.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
@@ -730,7 +730,7 @@ pmsp(TStrings & result,
 ....remarks:Iterator for @Shortcut.Peptide@ (a string of @Spec.AminoAcid@).
 ....see:Shortcut.PeptideIterator
 ..param.seq_begin:An iterator pointing to the beginning of a given sequence.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
@@ -739,7 +739,7 @@ pmsp(TStrings & result,
 ....remarks:Iterator for @Shortcut.Peptide@ (a string of @Spec.AminoAcid@).
 ....see:Shortcut.PeptideIterator
 ..param.seq_end:An iterator pointing to the end of a given sequence.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).

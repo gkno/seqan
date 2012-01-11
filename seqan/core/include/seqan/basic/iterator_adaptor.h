@@ -59,11 +59,11 @@ struct AdaptorIterator;
 .Spec.Adaptor Iterator:
 ..cat:Iterators
 ..general:Class.Iter
-..summary:Adapts iterators to @Concept.Rooted Iterator@.
+..summary:Adapts iterators to @Concept.RootedIteratorConcept@.
 ..signature:Iter<TContainer, AdaptorIterator<TIterator [, TSpec]> >
 ..param.TContainer:Type of the container that can be iterated by $TIterator$.
 ...remarks:Use @Metafunction.Container@ to get the container type for a given iterator.
-..param.TIterator:Type of the iterator that is adapted to @Concept.Rooted Iterator@.
+..param.TIterator:Type of the iterator that is adapted to @Concept.RootedIteratorConcept@.
 ..remarks.text:Adaptor iterators can implicitly converted to $TIterator$.
 ..include:seqan/basic.h
 

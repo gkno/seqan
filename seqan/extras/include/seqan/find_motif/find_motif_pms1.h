@@ -605,7 +605,7 @@ pms1(TStrings & result_set,
 ...type:String<int>
 ...remarks:The string holds the hash-values of each pattern being in the d-vicinity of a given l-mer.
 ..param.l_mer_begin:An iterator pointing to the beginning of a given l-mer pattern.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
@@ -731,7 +731,7 @@ _getVariantsOfBitset(TStrings & bitsets,
 ...remarks:The vector holds the hash-values of each d-variant. 
 ...type:vector<int>
 ..param.l_mer_begin:An iterator pointing to the beginning of a given l-mer pattern.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).

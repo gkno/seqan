@@ -1083,7 +1083,7 @@ _getLMersWithTheLargestLikelihoodRatio(TStrings & l_mers,
 ..summary:Computes the likelihood ratio of a given l-mer.
 ..signature:_computeLikelihoodRatioOfLMer(l_mer_begin,l_mer_end,profile)
 ..param.l_mer_begin:An iterator pointing to the beginning of a given l-mer pattern.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
@@ -1092,7 +1092,7 @@ _getLMersWithTheLargestLikelihoodRatio(TStrings & l_mers,
 ....remarks:Iterator for @Shortcut.Peptide@ (a string of @Spec.AminoAcid@).
 ....see:Shortcut.PeptideIterator
 ..param.l_mer_end:An iterator pointing to the end of a given l-mer pattern.
-...type:Concept.Iterator Iterator
+...type:Concept.RandomAccessIteratorConcept
 ....remarks:Standard conform iterator
 ...type:Shortcut.DnaIterator
 ....remarks:Iterator for @Shortcut.DnaString@ (a string of @Spec.Dna@).
