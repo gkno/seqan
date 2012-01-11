@@ -111,8 +111,9 @@ String<double> nucleotideFrequencies;  // Defines a Bernoulli model for DNA sequ
 // Count all 2-mers and save the nucleotide frequencies
 countKmers(kmerCounts, nucleotideFrequencies, sequenceDna5, k);
 
-for(unsigned i = 0; i<4; ++i)                   // Print the nucleotide frequencies
-    std::cout<<nucleotideFrequencies[i]<<"\n";  // p(A) = 0.238; p(C) = 0.254; p(G) = 0.238; p(T) = 0.27;
+for(unsigned i = 0; i<4; ++i)          // Print the nucleotide frequencies
+    std::cout << nucleotideFrequencies[i] << "\n";
+// => p(A) = 0.238; p(C) = 0.254; p(G) = 0.238; p(T) = 0.27;
 
 MarkovModel<Dna, double>  backgroundModel(1);  // Markov model of order 1
 // Count all 2-mers and return a Markov model
@@ -519,19 +520,20 @@ model[3] = 0.3;  // p(T)
 calculateCovariance(covar, word1, word2, model, n);  // covar = 4.74
 ..example.text: Estimate a Markov model on a set of sequences and calculate the covariance for the number of occurences of ATATAT and TATATA in a sequence of length 10000bp.
 ..example.code:
-    using namespace seqan;
-    double covar = 0.0;
-    int n = 10000;
-    DnaString word1 = "ATATAT";
-    DnaString word2 = "TATATA";
-    StringSet<DnaString> sequences;
-    appendValue(sequences, "CAGCACTGATTAACAGGAATAAGCAGTTTACTTCTGTCAGAATATTGGGCATATATACTGGGACCCGTGTAATACTCTAATTTAATTAGGTGATCCCTGCGAAGTCTCCA");
-    MarkovModel<Dna, double> modelMM0(0);  // Bernoulli model
-    modelMM0.build(sequences);
-    calculateCovariance(covar, word1, word2, modelMM0, n);  // covar = 4.74
-    MarkovModel<Dna, double> modelMM1(1);  // First order Markov model
-    modelMM1.build(sequences);
-    calculateCovariance(covar, word1, word2, modelMM1, n);  // covar = 13.1541
+using namespace seqan;
+double covar = 0.0;
+int n = 10000;
+DnaString word1 = "ATATAT";
+DnaString word2 = "TATATA";
+StringSet<DnaString> sequences;
+appendValue(sequences, "CAGCACTGATTAACAGGAATAAGCAGTTTACTTCTGTCAGAATATTGGGCATATATA"
+                       "CTGGGACCCGTGTAATACTCTAATTTAATTAGGTGATCCCTGCGAAGTCTCCA");
+MarkovModel<Dna, double> modelMM0(0);  // Bernoulli model
+modelMM0.build(sequences);
+calculateCovariance(covar, word1, word2, modelMM0, n);  // covar = 4.74
+MarkovModel<Dna, double> modelMM1(1);  // First order Markov model
+modelMM1.build(sequences);
+calculateCovariance(covar, word1, word2, modelMM1, n);  // covar = 13.1541
 */
 
 template <typename TValue, typename TString, typename TStringBG>
@@ -708,17 +710,17 @@ The formula is based on Robin, S., Rodolphe, F., and Schbath, S. (2005). DNA, Wo
 See Jonathan Goeke et al (to appear) for details on the implementation.
 ..example.text: Calculate the overlap indicator (epsilon) for two words
 ..example.code:
-    using namespace seqan;
-    DnaString word1 = "ATATA";
-    DnaString word2 = "TATAT";
-    String<int> epsilon;
-    calculateOverlapIndicator(epsilon, word1, word2);
-    for(unsigned i = 0; i < length(epsilon); ++i)
-        std::cout << epsilon[i] << "\t";
-    // epsilon =         01010:
-    // word1             ATATA
-    // word2 overlap 1:  -TATAT
-    // word2 overlap 2:  ---TATAT
+using namespace seqan;
+DnaString word1 = "ATATA";
+DnaString word2 = "TATAT";
+String<int> epsilon;
+calculateOverlapIndicator(epsilon, word1, word2);
+for(unsigned i = 0; i < length(epsilon); ++i)
+    std::cout << epsilon[i] << "\t";
+// epsilon =         01010:
+// word1             ATATA
+// word2 overlap 1:  -TATAT
+// word2 overlap 2:  ---TATAT
 */
 template <typename TString>
 void calculateOverlapIndicator(String<int> & epsilon, TString const & word1, TString const & word2)
