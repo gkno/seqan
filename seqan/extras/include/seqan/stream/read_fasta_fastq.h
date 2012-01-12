@@ -870,8 +870,8 @@ template <typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec,
           typename TFile,
           typename TSpec, typename TTag>
-typename EnableIf2<typename Or<typename IsSameType<typename RemoveConst_<TTag>::Type, typename RemoveConst_<Fasta>::Type >::Type,
-                               typename IsSameType<typename RemoveConst_<TTag>::Type, typename RemoveConst_<Fastq>::Type >::Type>::Type,
+typename EnableIf<typename Or<typename IsSameType<typename RemoveConst_<TTag>::Type, typename RemoveConst_<Fasta>::Type >::Type,
+                              typename IsSameType<typename RemoveConst_<TTag>::Type, typename RemoveConst_<Fastq>::Type >::Type>::Type,
                    int>::Type
 read2(StringSet<TIdString, TIdSpec> & sequenceIds,
       StringSet<TSeqString, TSeqSpec> & sequences,
