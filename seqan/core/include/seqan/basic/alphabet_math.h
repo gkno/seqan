@@ -79,7 +79,10 @@ template <typename T>
 const double MaximumValueDouble_<T>::VALUE = DBL_MAX;
 
 template <>
-const bool MaximumValueSigned_<bool>::VALUE = true;
+struct MaximumValueSigned_<bool>
+{
+    static const bool VALUE = false;
+};
 
 // template <>
 // const char MaximumValueUnsigned_<char>::VALUE = CHAR_MAX;
@@ -128,7 +131,10 @@ template <typename T>
 const double MinimumValueDouble_<T>::VALUE = -DBL_MAX;
 
 template <>
-const bool MinimumValueSigned_<bool>::VALUE = false;
+struct MinimumValueSigned_<bool>
+{
+    static const bool VALUE = false;
+};
 
 // template <>
 // const char MinimumValueUnsigned_<char>::VALUE = 0;

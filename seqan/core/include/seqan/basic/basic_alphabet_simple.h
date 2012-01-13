@@ -67,10 +67,8 @@ typedef SimpleType<unsigned char,Dna_> Dna;
 template <> struct ValueSize<Dna>
 {
     typedef __uint8 Type;
-    static const ValueSize<Dna>::Type VALUE;
+    static const ValueSize<Dna>::Type VALUE = 4;
 };
-
-const ValueSize<Dna>::Type ValueSize<Dna>::VALUE = 4;
 
 template <> struct BitsPerValue< Dna > { enum { VALUE = 2 }; };
 
@@ -99,10 +97,8 @@ typedef SimpleType<unsigned char, Dna5_> Dna5;
 template <> struct ValueSize<Dna5>
 {
     typedef __uint8 Type;
-    static const ValueSize<Dna5>::Type VALUE;
+    static const ValueSize<Dna5>::Type VALUE = 5;
 };
-
-const ValueSize<Dna5>::Type ValueSize<Dna5>::VALUE = 5;
 
 template <> struct BitsPerValue<Dna5>
 {
@@ -135,10 +131,8 @@ typedef SimpleType<unsigned char, Rna_> Rna;
 template <> struct ValueSize<Rna>
 {
     typedef __uint8 Type;
-    static const ValueSize<Rna>::Type VALUE;
+    static const ValueSize<Rna>::Type VALUE = 4;
 };
-
-const ValueSize<Rna>::Type ValueSize<Rna>::VALUE = 4;
 
 template <> struct BitsPerValue<Rna>
 {
@@ -171,10 +165,8 @@ typedef SimpleType<unsigned char, Rna5_> Rna5;
 template <> struct ValueSize<Rna5>
 {
     typedef __uint8 Type;
-    static const ValueSize<Rna5>::Type VALUE;
+    static const ValueSize<Rna5>::Type VALUE = 5;
 };
-
-const ValueSize<Rna5>::Type ValueSize<Rna5>::VALUE = 5;
 
 template <> struct BitsPerValue<Rna5>
 {
@@ -207,10 +199,8 @@ typedef SimpleType<unsigned char, Iupac_> Iupac;
 template <> struct ValueSize<Iupac>
 {
     typedef __uint8 Type;
-    static const ValueSize<Iupac>::Type VALUE;
+    static const ValueSize<Iupac>::Type VALUE = 16;
 };
-
-const ValueSize<Iupac>::Type ValueSize<Iupac>::VALUE = 16;
 
 template <> struct BitsPerValue<Iupac>
 {
@@ -246,10 +236,8 @@ typedef SimpleType<unsigned char, AminoAcid_> AminoAcid;
 template <> struct ValueSize<AminoAcid>
 {
     typedef __uint8 Type;
-    static const ValueSize<AminoAcid>::Type VALUE;
+    static const ValueSize<AminoAcid>::Type VALUE = 24;
 };
-
-const ValueSize<AminoAcid>::Type ValueSize<AminoAcid>::VALUE = 24;
 
 template <> struct BitsPerValue<AminoAcid>
 {
@@ -607,10 +595,8 @@ typedef SimpleType <unsigned char, DnaQ_> DnaQ;
 template <> struct ValueSize<DnaQ>
 {
     typedef __uint8 Type;
-    static const ValueSize<DnaQ>::Type VALUE;
+    static const ValueSize<DnaQ>::Type VALUE = 4;
 };
-
-const ValueSize<DnaQ>::Type ValueSize<DnaQ>::VALUE = 4;  // considering nucleotides
 
 template <> struct InternalValueSize_< DnaQ > { enum { VALUE = 252 }; };    // considering nucleotides x Quality 0..62
 template <> struct BitsPerValue< DnaQ > { enum { VALUE = 8 }; };
@@ -652,10 +638,8 @@ static const unsigned char Dna5QValueN_ = 252;                              // v
 template <> struct ValueSize<Dna5Q>
 {
     typedef __uint8 Type;
-    static const ValueSize<Dna5Q>::Type VALUE;
+    static const ValueSize<Dna5Q>::Type VALUE = 5;
 };
-
-const ValueSize<Dna5Q>::Type ValueSize<Dna5Q>::VALUE = 5;  // considering nucleotides + N
 
 template <> struct InternalValueSize_< Dna5Q > { enum { VALUE = 253 }; };   // considering (nucleotides x Quality 0..62) + N
 template <> struct BitsPerValue< Dna5Q > { enum { VALUE = 8 }; };
