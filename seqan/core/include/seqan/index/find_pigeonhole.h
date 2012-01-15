@@ -396,8 +396,8 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 			if (length <= pattern.params.overlap) continue;
 			
 			// cut overlap many characters from the end
-			length -= pattern.params.overlap;
             TSize errors = (TSize) floor(errorRate * length);
+			length -= pattern.params.overlap;
             TSize q = length / (errors + 1);
 			
 			
@@ -431,7 +431,10 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 			}
          }
         indexShape(host(pattern)) = pattern.shape;
+//        double start = sysTime();
         indexRequire(host(pattern), QGramSADir());
+//        double stop = sysTime();
+//        std::cout << "created in " <<(stop-start) << " seconds" << std::endl;
 
         clear(pattern.lastSeedDiag);
         if (Pigeonhole<TSpec>::ONE_PER_DIAGONAL)
