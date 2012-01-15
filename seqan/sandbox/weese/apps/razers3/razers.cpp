@@ -31,7 +31,7 @@
 
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 #define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
-//#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)
+#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)s
 //#define RAZERS_DEBUG_MATEPAIRS
 #define RAZERS_DEFER_COMPACTION         // mask duplicates on the fly and defer compaction
 #define RAZERS_EXTERNAL_MATCHES         // use external memory algorithms for managing matches
