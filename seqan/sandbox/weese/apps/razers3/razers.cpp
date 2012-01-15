@@ -331,7 +331,7 @@ int main(int argc, const char *argv[])
 	
 	CommandLineParser parser;
 	string rev = "$Revision$";
-	addVersionLine(parser, "RazerS version 2.1 20120101 [" + rev.substr(11, 4) + "]");
+	addVersionLine(parser, "RazerS version 2.1 20120101 [" + rev.substr(11, 5) + "]");
 	addVersionLine(parser, "Build date: " __DATE__ ", " __TIME__);
 
 	//////////////////////////////////////////////////////////////////////////////
