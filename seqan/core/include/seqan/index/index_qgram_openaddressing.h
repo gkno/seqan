@@ -251,7 +251,7 @@ A bucket still stores occurrences (or counts) of the same q-gram, but in contras
 		register TSize hlen = length(bucketMap.qgramHash);
 		if (hlen == 0ul) return hash;
 
-        register TSize a = ((hash * 43) ^ (hash >> 20)) - hash;
+        register TSize a = ((hash * 43) ^ (hash >> 20)) + hash;
 #ifdef SEQAN_OPENADDRESSING_COMPACT
         --hlen;
 		register TSize h1 = (TSize)(a % hlen);
@@ -275,7 +275,7 @@ A bucket still stores occurrences (or counts) of the same q-gram, but in contras
 			if (bucketMap.qgramHash[h1] == hash)
 				return h1;
 			// another hash is occupying this bucket already
-			else 
+			else
 			{
 				// look one bucket further untill one is free or was requested by this hash earlier
 				do {
@@ -356,7 +356,7 @@ A bucket still stores occurrences (or counts) of the same q-gram, but in contras
 		register TSize hlen = length(bucketMap.qgramHash);
 		if (hlen == 0ul) return hash;
 
-        register TSize a = ((hash * 43) ^ (hash >> 20)) - hash;
+        register TSize a = ((hash * 43) ^ (hash >> 20)) + hash;
 #ifdef SEQAN_OPENADDRESSING_COMPACT
         --hlen;
 		register TSize h1 = (TSize)(a % hlen);
@@ -368,29 +368,17 @@ A bucket still stores occurrences (or counts) of the same q-gram, but in contras
 		// -1 is the undefined value, hence the method works not for the largest word of length 32
 		// if there is no collision with another hash value
 		// the bucket is still empty
-		if (bucketMap.qgramHash[h1] == (THashValue)-1)
-			return h1;
-		// if there is a collision
-		else
+		//
+		// look one bucket further until one is free or was requested by this hash earlier
+		while (bucketMap.qgramHash[h1] != hash && bucketMap.qgramHash[h1] != (THashValue)-1)
 		{
-			// the bucket for this hash was requested before
-			// return the same bucket
-			if (bucketMap.qgramHash[h1] == hash)
-				return h1;
-			// another hash is occupying this bucket already
-			else 
-			{
-				// look one bucket further until one is free or was requested by this hash earlier
-				do {
 #ifdef SEQAN_OPENADDRESSING_COMPACT
-					h1 = (h1 + 1) % hlen;
+			h1 = (h1 + 1) % hlen;
 #else
-					h1 = (h1 + 1) & hlen;
+			h1 = (h1 + 1) & hlen;
 #endif
-				} while (bucketMap.qgramHash[h1] != (THashValue)-1 && bucketMap.qgramHash[h1] != hash);
-				return h1;
-			}
 		}
+		return h1;
 	}
     
 
