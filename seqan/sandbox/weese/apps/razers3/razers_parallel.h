@@ -647,6 +647,9 @@ void _mapSingleReadsParallelToContig(
         if (omp_get_thread_num() != 0)
             tls.filterFinder = threadLocalStorages[0].filterFinder;
         
+        // wait until everyone copied the filter of thread 0 before it is changed
+        #pragma omp barrier
+        
 #ifdef RAZERS_PROFILE
         timelineEndTask(TASK_COPY_FINDER);
 #endif  // #ifdef RAZERS_PROFILE
@@ -844,7 +847,6 @@ void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStora
 		// Configure filter pattern 
 		// (if this is a pigeonhole filter, all sequences must be appended first)
         _applyFilterOptions(filterPattern, options);
-        indexRequire(index, QGramSADir());
 
         tls.filterPattern.params.printDots = (tls.threadId == 0) && (tls.options._debugLevel > 0);
     }

@@ -2546,6 +2546,7 @@ void _applyFilterOptions(Pattern<TIndex, Swift<TSwiftSpec> > &filterPattern, TOp
 {
     filterPattern.params.minThreshold = options.threshold;
     filterPattern.params.tabooLength = options.tabooLength;
+	_patternInit(filterPattern, options.errorRate, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
