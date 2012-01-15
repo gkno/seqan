@@ -143,9 +143,9 @@ macro (seqan_setup_global)
         # message("Determining GCC version.")
         EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
                      ARGS --version
-                     OUTPUT_VARIABLE _GCC_VERSION)
-        STRING(REGEX REPLACE ".* ([0-9])\\.([0-9])\\.([0-9]) .*" "\\1\\2\\3"
-               _GCC_VERSION ${_GCC_VERSION})
+                     OUTPUT_VARIABLE __GCC_VERSION)
+        STRING(REGEX REPLACE ".*([0-9])\\.([0-9])\\.([0-9]).*" "\\1\\2\\3"
+               _GCC_VERSION ${__GCC_VERSION})
         # message("  GCC version is ${_GCC_VERSION}")
 
         # Add -Wno-longlong if the GCC version is < 4.0.0.  Add -pedantic flag
