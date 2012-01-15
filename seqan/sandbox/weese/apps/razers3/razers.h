@@ -1346,7 +1346,8 @@ void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode const &)
 #ifdef RAZERS_PROFILE
   timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+	::std::sort(begin(store.alignedReadStore, Standard()), end(store.alignedReadStore, Standard()), LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+	//sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_PROFILE
   timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
