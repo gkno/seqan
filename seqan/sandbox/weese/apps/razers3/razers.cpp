@@ -330,8 +330,9 @@ int main(int argc, const char *argv[])
 	options.reverse = false;
 	
 	CommandLineParser parser;
-	string rev = "$Revision: 4739 $";
-	addVersionLine(parser, "RazerS version 1.1 20090909 [" + rev.substr(11, 4) + "]");
+	string rev = "$Revision$";
+	addVersionLine(parser, "RazerS version 2.1 20120101 [" + rev.substr(11, 4) + "]");
+	addVersionLine(parser, "Build date: " __DATE__ ", " __TIME__);
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
