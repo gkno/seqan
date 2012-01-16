@@ -460,6 +460,7 @@ int dumpMatches(
 	typedef typename TFragmentStore::TContigPos						TContigPos;
 
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+	typedef typename Size<TAlignedReadStore>::Type					TAlignedReadStoreSize;
 	typedef typename Value<TContigStore>::Type						TContig;
 	typedef typename Value<TContigFileStore>::Type					TContigFile;
 
@@ -520,7 +521,6 @@ int dumpMatches(
 	if (lastPos == _readName.npos) lastPos = _readName.find_last_of('\\') + 1;
 	if (lastPos == _readName.npos) lastPos = 0;
 	CharString readName = _readName.substr(lastPos);
-	
 
 	Align<String<Dna5>, ArrayGaps> align;
 	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
@@ -537,11 +537,18 @@ int dumpMatches(
 		append(fileName, ".result");
 	}
 
-	file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
-	if (!file.is_open()) {
-		std::cerr << "Failed to open output file" << std::endl;
-		return false;
-	}
+	String<char, MMap<> > fileMM;
+    if (options.outputFormat == 0)
+        open(fileMM, toCString(fileName)); //use fast mmap strings for format 0
+    else
+    {
+	    file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+        if (!file.is_open())
+        {
+            std::cerr << "Failed to open output file" << std::endl;
+            return false;
+        }
+    }
 
 	TBinFunctor binFunctor(store.alignQualityStore);
 	// maskDuplicates(store, options, mode);
@@ -588,13 +595,15 @@ int dumpMatches(
         typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode> TLess;
         switch (options.sortOrder) {
             case 0:
-                sortAlignedReads(
-                    store.alignedReadStore, 
+                sort(
+                    begin(store.alignedReadStore, Standard()),
+                    end(store.alignedReadStore, Standard()),
                     LessRNoGPos<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
                 break;
             case 1:
-                sortAlignedReads(
-                    store.alignedReadStore, 
+                sort(
+                    begin(store.alignedReadStore, Standard()),
+                    end(store.alignedReadStore, Standard()),
                     LessGPosRNo<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
                 break;
         }
@@ -608,87 +617,156 @@ int dumpMatches(
 	
 	Dna5String gInf;
 	char _sep_ = '\t';
+	char intBuf[40];
+	StringSet<CharString> lines;
+	TAlignedReadStoreSize fromIdx = 0;
 
 	switch (options.outputFormat) 
 	{
 		case 0:	// Razer Format
-		
+
 //			_sep_ = ',';
-			for(; it != itEnd; ++it) 
+			resize(lines, 100000);
+			while (fromIdx < length(store.alignedReadStore))
 			{
-				TQuality	qual = getValue(store.alignQualityStore, (*it).id);
-				unsigned	readLen = length(store.readSeqStore[(*it).readId]);
-				double		percId = 100.0 * (1.0 - (double)qual.errors / (double)readLen);
+				TAlignedReadStoreSize chunkSize = length(lines);
+				if (fromIdx + chunkSize > length(store.alignedReadStore))
+					chunkSize = length(store.alignedReadStore) - fromIdx;
 
-				switch (options.readNaming)
-				{
-					// 0..filename is the read's Fasta id
-					case 0:
-					case 3:  // same as 0 if non-paired
-						file << store.readNameStore[(*it).readId];
-						break;
+			    #pragma omp parallel for private(intBuf)
+			    for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
+                {
+                    CharString &line = lines[i];
+                    TAlignedRead &ar = store.alignedReadStore[fromIdx + i];
+                    TQuality qual = getValue(store.alignQualityStore, ar.id);
+                    unsigned readLen = length(store.readSeqStore[ar.readId]);
+                    double percId = 100.0 * (1.0 - (double)qual.errors / (double)readLen);
 
-					// 1..filename is the read filename + seqNo
-					case 1:
-						file.fill('0');
-						file << readName << '#' << std::setw(pzeros) << (*it).readId + 1;
-						break;
+                    //strstrm.str(emptyStr);
+                    clear(line);
+                    switch (options.readNaming)
+                    {
+                        // 0..filename is the read's Fasta id
+                        case 0:
+                        case 3:  // same as 0 if non-paired
+                            append(line, store.readNameStore[ar.readId]);
+                            //file << store.readNameStore[(*it).readId];
+                            break;
 
-					// 2..filename is the read sequence itself
-					case 2:
-						file << store.readSeqStore[(*it).readId];
-				}
+                        // 1..filename is the read filename + seqNo
+                        case 1:
+                            append(line, readName);
+                            appendValue(line, '#');
+                            sprintf(intBuf, "%09u", ar.readId + 1);
+                            append(line, intBuf);
+                            //file.fill('0');
+                            //file << readName << '#' << std::setw(pzeros) << (*it).readId + 1;
+                            break;
 
-				file << _sep_ << options.positionFormat << _sep_ << readLen << _sep_ << (((*it).beginPos < (*it).endPos)? 'F': 'R') << _sep_;
+                        // 2..filename is the read sequence itself
+                        case 2:
+                            append(line, store.readSeqStore[ar.readId]);
+                            //file << store.readSeqStore[(*it).readId];
+                    }
 
-				switch (options.genomeNaming)
-				{
-					// 0..filename is the genome's Fasta id
-					case 0:
-						file << store.contigNameStore[(*it).contigId];
-						break;
+                    //file << _sep_ << options.positionFormat << _sep_ << readLen << _sep_ << (((*it).beginPos < (*it).endPos)? 'F': 'R') << _sep_;
+                    appendValue(line, _sep_);
+                    appendValue(line, '0' + options.positionFormat);
+                    appendValue(line, _sep_);
+                    sprintf(intBuf, "%u", readLen);
+                    append(line, intBuf);
+                    appendValue(line, _sep_);
+                    appendValue(line, (ar.beginPos < ar.endPos)? 'F': 'R');
+                    appendValue(line, _sep_);
 
-					// 1..filename is the genome filename + seqNo
-					case 1:
-						TContig &contig = store.contigStore[(*it).contigId];
-						TContigFile &contigFile = store.contigFileStore[contig.fileId];
-						file.fill('0');
-						file << contigFile.fileName << '#' << std::setw(gzeros) << ((*it).contigId - contigFile.firstContigId + 1);
-				}
+                    switch (options.genomeNaming)
+                    {
+                        // 0..filename is the genome's Fasta id
+                        case 0:
+                            //file << store.contigNameStore[(*it).contigId];
+                            append(line, store.contigNameStore[ar.contigId]);
+                            break;
 
-				if ((*it).beginPos < (*it).endPos)
-					file << _sep_ << ((*it).beginPos + options.positionFormat) << _sep_ << (*it).endPos << _sep_ << std::setprecision(5) << percId;
-				else
-					file << _sep_ << ((*it).endPos + options.positionFormat) << _sep_ << (*it).beginPos << _sep_ << std::setprecision(5) << percId;
+                        // 1..filename is the genome filename + seqNo
+                        case 1:
+                            TContig &contig = store.contigStore[ar.contigId];
+                            TContigFile &contigFile = store.contigFileStore[contig.fileId];
+                            append(line, contigFile.fileName);
+                            appendValue(line, '#');
+                            sprintf(intBuf, "%09u", ar.contigId - contigFile.firstContigId + 1);
+                            append(line, intBuf);
+                            //strstrm.fill('0');
+                            //strstrm << contigFile.fileName << '#' << std::setw(gzeros) << ((*it).contigId - contigFile.firstContigId + 1);
+                    }
 
-				if ((*it).pairMatchId != TAlignedRead::INVALID_ID)
-				{
-					file << _sep_ << (*it).pairMatchId << _sep_ << (int)store.alignQualityStore[(*it).id].pairScore << _sep_;
-                    if ((*it).beginPos < (*it).endPos)
-                        file << libSize[(*it).pairMatchId];
+                    appendValue(line, _sep_);
+                    if ((*it).beginPos < ar.endPos)
+                        sprintf(intBuf, "%ld", (ar.beginPos + options.positionFormat));
                     else
-                        file << -libSize[(*it).pairMatchId];
-				}
-				file << '\n';
+                        sprintf(intBuf, "%ld", (ar.endPos + options.positionFormat));
+                    append(line, intBuf);
+                    appendValue(line, _sep_);
+                    if ((*it).beginPos < ar.endPos)
+                        sprintf(intBuf, "%ld", ar.endPos);
+                    else
+                        sprintf(intBuf, "%ld", ar.beginPos);
+                    append(line, intBuf);
+                    appendValue(line, _sep_);
+                    sprintf(intBuf, "%.5g", percId);
+                    append(line, intBuf);
+                    //if ((*it).beginPos < (*it).endPos)
+                    //	file << _sep_ << ((*it).beginPos + options.positionFormat) << _sep_ << (*it).endPos << _sep_ << std::setprecision(5) << percId;
+                    //else
+                    //	file << _sep_ << ((*it).endPos + options.positionFormat) << _sep_ << (*it).beginPos << _sep_ << std::setprecision(5) << percId;
 
-				if (options.dumpAlignment) 
-				{
-					assignSource(row(align, 0), store.readSeqStore[(*it).readId]);
-					
-					TContigPos left = (*it).beginPos;
-					TContigPos right = (*it).endPos;
-					
-					if (left < right)
-						assignSource(row(align, 1), infix(store.contigStore[(*it).contigId].seq, left, right));
-					else
-					{
-						assignSource(row(align, 1), infix(store.contigStore[(*it).contigId].seq, right, left));
-						reverseComplement(source(row(align, 1)));
-					}
-					globalAlignment(align, scoreType);
-					dumpAlignment(file, align);
-				}
+                    if ((*it).pairMatchId != TAlignedRead::INVALID_ID)
+                    {
+                        appendValue(line, _sep_);
+                        sprintf(intBuf, "%u", ar.pairMatchId);
+                        append(line, intBuf);
+                        appendValue(line, _sep_);
+                        sprintf(intBuf, "%i", (int)store.alignQualityStore[ar.id].pairScore);
+                        append(line, intBuf);
+                        appendValue(line, _sep_);
+                        if ((*it).beginPos < ar.endPos)
+                            sprintf(intBuf, "%i", libSize[ar.pairMatchId]);
+                        else
+                            sprintf(intBuf, "%i", -libSize[ar.pairMatchId]);
+                        append(line, intBuf);
+                        //file << _sep_ << (*it).pairMatchId << _sep_ << (int)store.alignQualityStore[(*it).id].pairScore << _sep_;
+                        //if ((*it).beginPos < (*it).endPos)
+                        //    file << libSize[(*it).pairMatchId];
+                        //else
+                        //    file << -libSize[(*it).pairMatchId];
+                    }
+                    //strstrm << '\n';
+                    appendValue(line, '\n');
 
+                    if (options.dumpAlignment) 
+                    {
+                        assignSource(row(align, 0), store.readSeqStore[ar.readId]);
+                        
+                        TContigPos left = ar.beginPos;
+                        TContigPos right = ar.endPos;
+                        
+                        if (left < right)
+                            assignSource(row(align, 1), infix(store.contigStore[ar.contigId].seq, left, right));
+                        else
+                        {
+                            assignSource(row(align, 1), infix(store.contigStore[ar.contigId].seq, right, left));
+                            reverseComplement(source(row(align, 1)));
+                        }
+                        globalAlignment(align, scoreType);
+                        ::std::ostringstream strstrm;
+                        dumpAlignment(strstrm, align);
+                        append(line, strstrm.str());
+                    }
+
+                }
+				for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
+					append(fileMM, lines[i]);
+
+				fromIdx += chunkSize;
 			}
 			break;
 
