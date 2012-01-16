@@ -47,6 +47,9 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+template <typename TValue, typename TSpec>
+class SimpleType;
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -85,7 +88,7 @@ template <typename T>
 struct ValueSize
 {
     typedef __uint64  Type;
-    static const Type VALUE = (1llu << BitsPerValue<T>::VALUE);
+    static const Type VALUE = (__uint64(1) << BitsPerValue<T>::VALUE);
 };
 
 // TODO(holtgrew): Use static assertion to make sure that ValueSize is never called on floating point numbers? Include assertion for __int64 and __uint64?
