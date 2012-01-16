@@ -619,6 +619,7 @@ int dumpMatches(
 	char _sep_ = '\t';
 	char intBuf[40];
 	StringSet<CharString> lines;
+    //String<__int64> fileOffsets;
 	TAlignedReadStoreSize fromIdx = 0;
 
 	switch (options.outputFormat) 
@@ -626,12 +627,13 @@ int dumpMatches(
 		case 0:	// Razer Format
 
 //			_sep_ = ',';
-			resize(lines, 100000);
+			resize(lines, 1000000);
 			while (fromIdx < length(store.alignedReadStore))
 			{
 				TAlignedReadStoreSize chunkSize = length(lines);
 				if (fromIdx + chunkSize > length(store.alignedReadStore))
 					chunkSize = length(store.alignedReadStore) - fromIdx;
+                //resize(fileOffsets, chunkSize + 1, 0);
 
 			    #pragma omp parallel for private(intBuf)
 			    for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
@@ -762,8 +764,19 @@ int dumpMatches(
                         append(line, strstrm.str());
                     }
 
+                    //fileOffsets[i + 1] = length(line);
                 }
-				for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
+
+                //partialSum(fileOffsets);
+                //resize(fileMM, back(fileOffsets)); 
+                //
+                //#pragma omp parallel for schedule(static)
+				//for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
+				//	infix(fileMM, fileOffsets[i], fileOffsets[i + 1]) = lines[i];
+                //
+                //fileOffsets[0] = back(fileOffsets);
+				
+                for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
 					append(fileMM, lines[i]);
 
 				fromIdx += chunkSize;
