@@ -3,6 +3,10 @@
 
 #ifdef PLATFORM_GCC
 #include <parallel/algorithm>
+#include <parallel/numeric>
+#else
+#include <parallel/algorithm>
+#include <parallel/numeric>
 #endif  // #ifdef PLATFORM_GCC
 
 using namespace seqan;
@@ -54,6 +58,16 @@ sortAlignedReads(TAlign const & alignStore, TFunctorLess const &less, Parallel c
 		less);
 }
 
+template <typename TIntString>
+inline void
+partialSum(TIntString &intString)
+{
+    __gnu_parallel::partial_sum(
+        begin(intString, Standard()), 
+        end(intString, Standard()), 
+        begin(intString, Standard()));
+}
+
 #else  // #ifdef PLATFORM_GCC
 
 /*
@@ -76,7 +90,7 @@ template <typename TAlign, typename TFunctorLess>
 inline void
 sortAlignedReads(TAlign & alignStore, TFunctorLess const &less, Parallel const &) 
 {
-  sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
+  ::std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
 //  sortAlignedReads(alignStore, less);
 }
 
@@ -84,8 +98,18 @@ template <typename TAlign, typename TFunctorLess>
 inline void
 sortAlignedReads(TAlign const & alignStore, TFunctorLess const &less, Parallel const &) 
 {
-  sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
+  ::std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
 //  sortAlignedReads(alignStore, less);
+}
+
+template <typename TIntString>
+inline void
+partialSum(TIntString &intString)
+{
+    ::std::partial_sum(
+        begin(intString, Standard()), 
+        end(intString, Standard()), 
+        begin(intString, Standard()));
 }
 
 #endif  // #ifdef PLATFORM_GCC
