@@ -1460,7 +1460,7 @@ void compactMatches(
             SEQAN_ASSERT_LEQ(TLess()(matches[i - 1], matches[i]), 0);
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
-        ::std::_sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());
+        ::std::sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());
         // sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_EXTERNAL_MATCHES
     }
