@@ -45,7 +45,9 @@
 #include <unistd.h>
 #endif  // #ifdef PLATFORM_WINDOWS
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 namespace seqan {
 

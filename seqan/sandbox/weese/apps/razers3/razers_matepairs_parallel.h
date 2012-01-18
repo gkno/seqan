@@ -704,7 +704,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
                             verifierL.sinkPos = (TSignedGPos)(itR->hstkPos + itR->bucketWidth) - options.libraryLength;
 
 						if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-										matePairId, readSetL, TRazerSMode()))
+										matePairId, readSetL[matePairId], TRazerSMode()))
                         {
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
@@ -744,7 +744,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
                     ++options.countVerification;
 //                    if (pref == s)
 //                        std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId) + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth << std::endl;
-                    if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR, TRazerSMode())) {
+                    if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR[matePairId], TRazerSMode())) {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS

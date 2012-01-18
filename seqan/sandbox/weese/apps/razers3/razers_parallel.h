@@ -303,7 +303,7 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
 		tls.verifier.patternState.leftClip = (it->hstkPos >= 0) ? 0 : -it->hstkPos;   // left clip if match begins left of the genome
 		tls.verifier.rightClip = (it->hstkPos + it->bucketWidth <= contigLength)? 0: it->hstkPos + it->bucketWidth - contigLength;  // right clip if match end right of the genome
 #endif
-		matchVerify(tls.verifier, swiftInfix(value(it), contigSeq), absReadId, tls.globalStore->readSeqStore, TRazerSMode());
+		matchVerify(tls.verifier, swiftInfix(value(it), contigSeq), absReadId, tls.globalStore->readSeqStore[absReadId], TRazerSMode());
     }
 
 // #pragma omp critical

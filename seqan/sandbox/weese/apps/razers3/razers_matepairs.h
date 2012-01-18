@@ -733,7 +733,7 @@ void _mapMatePairReads(
                             verifierL.sinkPos = (TSignedGPos)endPosition(filterFinderR) - options.libraryLength;
 
                         if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-                                        matePairId, readSetL, mode))
+                                        matePairId, readSetL[matePairId], mode))
 						{
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
@@ -771,7 +771,7 @@ void _mapMatePairReads(
 					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(filterFinderR) << "\t" << endPosition(filterFinderR) << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     ++options.countVerification;
-					if (matchVerify(verifierR, infix(filterFinderR), matePairId, readSetR, mode)) {
+					if (matchVerify(verifierR, infix(filterFinderR), matePairId, readSetR[matePairId], mode)) {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS

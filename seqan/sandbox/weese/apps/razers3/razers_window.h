@@ -148,7 +148,7 @@ TRazerSMode                      const & mode)
 				// verifiy them
 				for(THitStringSize h = 0; h < length(hits); ++h){
 					verifier.m.readId = hits[h].ndlSeqNo;         //array oder jedesmal berechnen
-					matchVerify(verifier, swiftInfix(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPattern)), mode);
+					matchVerify(verifier, swiftInfix(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPattern))[hits[h].ndlSeqNo], mode);
 					++options.countFiltration;
 				}
 				

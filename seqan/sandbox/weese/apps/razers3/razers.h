@@ -25,7 +25,9 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include <seqan/find.h>
 #include <seqan/index.h>
@@ -1175,9 +1177,9 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
     if (options.libraryLength >= 0)
-        ::std::stable_sort(itBegin, itEnd, LessRNoEndPosMP<TMatch>(options.libraryLength));
+        ::std::sort(itBegin, itEnd, LessRNoEndPosMP<TMatch>(options.libraryLength));
     else
-        ::std::stable_sort(itBegin, itEnd, LessRNoEndPos<TMatch>());
+        ::std::sort(itBegin, itEnd, LessRNoEndPos<TMatch>());
 	// sortAlignedReads(matches, TLessEndPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
@@ -1217,9 +1219,9 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
     if (options.libraryLength >= 0)
-        ::std::stable_sort(itBegin, itEnd, LessRNoBeginPosMP<TMatch>());
+        ::std::sort(itBegin, itEnd, LessRNoBeginPosMP<TMatch>());
     else
-        ::std::stable_sort(itBegin, itEnd, LessRNoBeginPos<TMatch>());
+        ::std::sort(itBegin, itEnd, LessRNoBeginPos<TMatch>());
     // std::cerr << "(SORTING " << itEnd-itBegin << " MATCHES)";
 	// sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
@@ -1255,7 +1257,7 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
 #endif  // #ifdef RAZERS_PROFILE
 	//////////////////////////////////////////////////////////////////////////////
 	// sort matches by begin position when using defered compaction
-    ::std::stable_sort(itBegin, itEnd, LessBeginPos<TMatch>());
+    ::std::sort(itBegin, itEnd, LessBeginPos<TMatch>());
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
@@ -1352,7 +1354,7 @@ void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode const &)
 #ifdef RAZERS_PROFILE
   timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	::std::stable_sort(begin(store.alignedReadStore, Standard()), end(store.alignedReadStore, Standard()), LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+	::std::sort(begin(store.alignedReadStore, Standard()), end(store.alignedReadStore, Standard()), LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 	//sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_PROFILE
   timelineEndTask(TASK_SORT);
@@ -1458,7 +1460,7 @@ void compactMatches(
             SEQAN_ASSERT_LEQ(TLess()(matches[i - 1], matches[i]), 0);
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
-        ::std::stable_sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());
+        ::std::_sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());
         // sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_EXTERNAL_MATCHES
     }
@@ -1573,7 +1575,7 @@ void compactMatches(
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	::std::stable_sort(
+	::std::sort(
 		begin(matches, Standard()),
 		end(matches, Standard()), 
 		LessScoreBackport<TMatch>());
@@ -1665,23 +1667,21 @@ void compactMatches(
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet,
+	typename TRead,
     typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,									// potential match genome region
-	unsigned readId,													// read number
-	TReadSet &readSet,													// reads
+	unsigned /*readId*/,												// read number
+	TRead const &read,                                                  // read
 	RazerSMode<RazerSPrefix, RazerSUngapped, RazerSErrors, TMatchNPolicy> const &)	// Hamming only
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
-	typedef typename Value<TReadSet>::Type const			TRead;
 	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
-	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
+	typedef typename Iterator<TRead const, Standard>::Type  TReadIterator;
 
 	// verify
-	TRead &read				= readSet[readId];
 	TReadIterator ritBeg	= begin(read, Standard());
 	TReadIterator ritEnd	= end(read, Standard());
 	unsigned ndlLength		= ritEnd - ritBeg;
@@ -1757,31 +1757,29 @@ struct UseQualityValues__<RazerSMode<TAlignMode, TGapMode, RazerSQuality<TSpec>,
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet,
+	typename TRead,
 	typename TScoreMode,
     typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,								// potential match genome region
-	unsigned readId,												// read number
-	TReadSet &readSet,												// reads
+	unsigned /*readId*/,											// read number
+	TRead const &read,                                              // reads
 	RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode, TMatchNPolicy> const &) // Semi-global, no gaps
 {
 	typedef Segment<TGenome, InfixSegment>							TGenomeInfix;
-	typedef typename Value<TReadSet>::Type const					TRead;
 	typedef typename Iterator<TGenomeInfix, Standard>::Type			TGenomeIterator;
-	typedef typename Iterator<TRead, Standard>::Type				TReadIterator;
+	typedef typename Iterator<TRead const, Standard>::Type          TReadIterator;
 	typedef RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode, TMatchNPolicy> TRazerSMode;
 
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
 	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
-	::std::cout<<"Read:   "<<readSet[readId] << ::std::endl;
+	::std::cout<<"Read:   "<<read << ::std::endl;
 #endif
 
 	// verify
-	TRead &read				= readSet[readId];
 	TReadIterator ritBeg	= begin(read, Standard());
 	TReadIterator ritEnd	= end(read, Standard());
 	unsigned ndlLength		= ritEnd - ritBeg;
@@ -1885,22 +1883,21 @@ matchVerify(
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet,
+	typename TRead,
     typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,									// potential match genome region
-	unsigned readId,														// read number
-	TReadSet &readSet,													// reads
+	unsigned readId,													// read number
+	TRead const &read,                                                  // reads
 	RazerSMode<RazerSGlobal, RazerSGapped, RazerSErrors, TMatchNPolicy> const &) // Mismatches and Indels
 {
     if (length(inf) == 0u)
       return false;
 
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
-	typedef typename Value<TReadSet>::Type const			TRead;
-	typedef typename Prefix<TRead>::Type					TReadPrefix;
+	typedef typename Prefix<TRead const>::Type              TReadPrefix;
 	typedef typename Position<TGenomeInfix>::Type			TPosition;
     typedef typename MakeSigned_<TPosition>::Type           TDistance;
 
@@ -1918,7 +1915,7 @@ matchVerify(
 #ifdef RAZERS_NOOUTERREADGAPS
 	typedef ModifiedString<TReadPrefix, ModReverse>			TReadRev;
 #else
-	typedef ModifiedString<TRead, ModReverse>				TReadRev;
+	typedef ModifiedString<TRead const, ModReverse>         TReadRev;
 #endif
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>			TMyersPatternRev;
 
@@ -1928,14 +1925,15 @@ matchVerify(
     TMyersPattern &myersPattern = (*verifier.preprocessing)[readId]; 
 #endif  // #ifdef RAZERS_BANDED_MYERS
 	TPatternState & state = verifier.patternState;
+    (void)readId;
 	
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
 	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
-	::std::cout<<"Read:   "<<readSet[readId] << "(id: " << readId << ")" <<::std::endl;
+	::std::cout<<"Read:   "<<read << "(id: " << readId << ")" <<::std::endl;
 #endif
 
-    unsigned ndlLength = sequenceLength(readId, readSet);
+    unsigned ndlLength = length(read);
 	int maxScore = MinValue<int>::VALUE;
 	int minScore = -(int)(ndlLength * verifier.options->errorRate);
     TDistance minSinkDistance = MaxValue<TDistance>::VALUE;
@@ -1949,9 +1947,9 @@ matchVerify(
 	TGenomeInfix origInf(inf);
 	setEndPosition(inf, endPosition(inf) - 1);
 	--ndlLength;
-    TReadPrefix readPrefix = prefix(readSet[readId], ndlLength);
+    TReadPrefix readPrefix = prefix(read, ndlLength);
 #else
-    TRead readPrefix(readSet[readId]);  // here only infixes (no sequence) is copied
+    TRead readPrefix(read);  // here only infixes (no sequence) is copied
 #endif
 
 	// find end of best semi-global alignment
@@ -1972,7 +1970,7 @@ matchVerify(
 		// We also have to adjust inf and remove the last base of the
 		// genomic region that has to be verified.
 		SEQAN_ASSERT_LT(pos + 1, length(origInf));
-		if ((verifier.options->compMask[ordValue(origInf[pos + 1])] & verifier.options->compMask[ordValue(back(readSet[readId]))]) == 0)
+		if ((verifier.options->compMask[ordValue(origInf[pos + 1])] & verifier.options->compMask[ordValue(back(read))]) == 0)
 			if (--score < minScore) continue;
 #endif
 #ifdef RAZERS_ISLAND_CRITERION
@@ -2010,7 +2008,7 @@ matchVerify(
 					
 #ifdef RAZERS_NOOUTERREADGAPS
                     // The best score must be corrected to hold the score of the prefix w/o the last read base
-                    if ((verifier.options->compMask[ordValue(origInf[maxPos + 1])] & verifier.options->compMask[ordValue(back(readSet[readId]))]) == 0)
+                    if ((verifier.options->compMask[ordValue(origInf[maxPos + 1])] & verifier.options->compMask[ordValue(back(read))]) == 0)
                         ++maxScore;
 #endif
 
@@ -2110,7 +2108,7 @@ matchVerify(
             
 #ifdef RAZERS_NOOUTERREADGAPS
             // The best score must be corrected to hold the score of the prefix w/o the last read base
-            if ((verifier.options->compMask[ordValue(origInf[maxPos + 1])] & verifier.options->compMask[ordValue(back(readSet[readId]))]) == 0)
+            if ((verifier.options->compMask[ordValue(origInf[maxPos + 1])] & verifier.options->compMask[ordValue(back(read))]) == 0)
                 ++maxScore;
 #endif
 
@@ -2178,7 +2176,7 @@ matchVerify(
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet,
+	typename TRead,
 	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
@@ -2188,7 +2186,7 @@ matchVerify(
 	TMatchVerifier &,
 	Segment<TGenome, InfixSegment>,								// potential match genome region
 	unsigned,													// read number
-	TReadSet &,													// reads
+	TRead const &,                                              // read
 	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const &)
 {
     SEQAN_FAIL("Verification not implemented!");
@@ -2501,51 +2499,61 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 
 	filterPattern.params.overlap = estimatePigeonholeLosses(estLosses, _pigeonholeMaxShapeWeight(indexShape(host(filterPattern))), options);
 
-    std::cout << "     e | e error reads | loss ol =" << std::setw(2) << estLosses[maxErrors1 + 2];
-	for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
-		std::cout << " |      ol =" << std::setw(2) << estLosses[i];
-	std::cout << std::endl;
-    std::cout << "       |               |       q =" << std::setw(2) << estLosses[maxErrors1 + 3];
-	for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
-		std::cout << " |       q =" << std::setw(2) << estLosses[i + 1];
-	std::cout << std::endl;
-    std::cout << " ------+---------------";
-	for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
-		std::cout << "+-------------";
-    std::cout << std::endl;
-    std::cout.setf(std::ios::fixed);
-	TFloat sumReads;
-    for (unsigned e = 0; e <= maxErrors; ++e)
+    #pragma omp critical
     {
-        std::cout.fill(' ');
-        std::cout << std::setprecision(0);
-		std::cout << std::setw(6) << e;
-        std::cout << " |";
-        std::cout << std::setw(14) << (unsigned)estLosses[e + 2];
-        std::cout << std::setprecision(2);
-		for (unsigned i = maxErrors1 + 2 + e + 2; i < length(estLosses); i += maxErrors1 + 2)
-			std::cout << " |" << std::setw(12) << estLosses[i];
+        std::cout << "     e | e error reads | loss ol =" << std::setw(2) << estLosses[maxErrors1 + 2];
+        for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
+            std::cout << " |      ol =" << std::setw(2) << estLosses[i];
         std::cout << std::endl;
-		sumReads += estLosses[e + 2];
-    }
-    std::cout << " ------+---------------";
-	for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
-		std::cout << "+-------------";
-    std::cout << std::endl;
+        std::cout << "       |               |       q =" << std::setw(2) << estLosses[maxErrors1 + 3];
+        for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
+            std::cout << " |       q =" << std::setw(2) << estLosses[i + 1];
+        std::cout << std::endl;
+        std::cout << " ------+---------------";
+        for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
+            std::cout << "+-------------";
+        std::cout << std::endl;
+        std::cout.setf(std::ios::fixed);
+        TFloat sumReads;
+        for (unsigned e = 0; e <= maxErrors; ++e)
+        {
+            std::cout.fill(' ');
+            std::cout << std::setprecision(0);
+            std::cout << std::setw(6) << e;
+            std::cout << " |";
+            std::cout << std::setw(14) << (unsigned)estLosses[e + 2];
+            std::cout << std::setprecision(2);
+            for (unsigned i = maxErrors1 + 2 + e + 2; i < length(estLosses); i += maxErrors1 + 2)
+                std::cout << " |" << std::setw(12) << estLosses[i];
+            std::cout << std::endl;
+            sumReads += estLosses[e + 2];
+        }
+        std::cout << " ------+---------------";
+        for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
+            std::cout << "+-------------";
+        std::cout << std::endl;
 
-    std::cout << std::setprecision(0);
-    std::cout << " total |" << std::setw(14) << (unsigned)sumReads << ' ';
-    std::cout << std::setprecision(2);
-	for (unsigned i = maxErrors1 + 4; i < length(estLosses); i += maxErrors1 + 2)
-	{
-		sumReads = 0.0;
-		for (unsigned e = 0; e <= maxErrors; ++e)
-			sumReads += estLosses[i + e];
-		std::cout << '|' << std::setw(12) << sumReads;
-		std::cout << ((filterPattern.params.overlap == (unsigned)estLosses[i - 2])? '*':' ');
-	}
-    std::cout << std::endl;
-	_patternInit(filterPattern, options.errorRate);
+        std::cout << std::setprecision(0);
+        std::cout << " total |" << std::setw(14) << (unsigned)sumReads << ' ';
+        std::cout << std::setprecision(2);
+        for (unsigned i = maxErrors1 + 4; i < length(estLosses); i += maxErrors1 + 2)
+        {
+            sumReads = 0.0;
+            for (unsigned e = 0; e <= maxErrors; ++e)
+                sumReads += estLosses[i + e];
+            std::cout << '|' << std::setw(12) << sumReads;
+            std::cout << ((filterPattern.params.overlap == (unsigned)estLosses[i - 2])? '*':' ');
+        }
+        std::cout << std::endl;
+        
+        _patternInit(filterPattern, options.errorRate);
+
+        CharString str;
+        shapeToString(str, filterPattern.shape);
+        std::cout << std::endl << "Pigeonhole settings:" << std::endl;
+        std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
+        std::cout << "  stepsize: " << getStepSize(host(filterPattern)) << std::endl;
+    }
 }
 
 template <typename TIndex, typename TSwiftSpec, typename TOptions>
@@ -2595,8 +2603,8 @@ void _mapSingleReadsToContig(
 		TRazerSMode,
 		TFilterPattern,
 		TCounts,
-		TPreprocessing>											TVerifier;
-	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
+		TPreprocessing>										TVerifier;
+	typedef typename Fibre<TReadIndex, FibreText>::Type     TReadSet;
 	
 	// iterate all genomic sequences
 	if (options._debugLevel >= 1)
@@ -2609,7 +2617,7 @@ void _mapSingleReadsToContig(
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
 	if (orientation == 'R')	reverseComplement(contigSeq);
 
-	TReadSet		&readSet = host(host(filterPattern));
+	TReadSet		&readSet = indexText(host(filterPattern));
 	TFilterFinder	filterFinder(contigSeq, options.repeatLength, 1);
 	TVerifier		verifier(matches, options, filterPattern, cnts);
 
@@ -2642,7 +2650,7 @@ void _mapSingleReadsToContig(
 #endif
 		verifier.m.readId = (*filterFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
-			matchVerify(verifier, infix(filterFinder), verifier.m.readId, readSet, mode);
+			matchVerify(verifier, infix(filterFinder), verifier.m.readId, readSet[verifier.m.readId], mode);
 		++options.countFiltration;
 	}
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used

@@ -435,6 +435,55 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations)
 	
 }
 
+template <typename TInt, typename T = void>
+struct AppendIntNumberFormatString;
+
+
+template <typename T>
+struct AppendIntNumberFormatString<int, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<int, T>::VALUE[] = "%i";
+
+
+template <typename T>
+struct AppendIntNumberFormatString<unsigned, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<unsigned, T>::VALUE[] = "%u";
+
+
+template <typename T>
+struct AppendIntNumberFormatString<__int64, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<__int64, T>::VALUE[] = "%lli";
+
+
+template <typename T>
+struct AppendIntNumberFormatString<__uint64, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<__uint64, T>::VALUE[] = "%llu";
+
+
+template <typename TString, typename TInt>
+void appendIntNumber(TString &str, TInt i)
+{
+    // 1 byte has at most 3 decimal digits (plus 1 for the NULL character)
+    char buf[sizeof(TInt) * 3 + 1];
+    sprintf(buf, AppendIntNumberFormatString<TInt>::VALUE, i);
+    append(str, buf);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Output matches
 template <
@@ -539,7 +588,7 @@ int dumpMatches(
 
 	String<char, MMap<> > fileMM;
     if (options.outputFormat == 0)
-        open(fileMM, toCString(fileName)); //use fast mmap strings for format 0
+        open(fileMM, toCString(fileName), OPEN_RDWR | OPEN_CREATE); //use fast mmap strings for format 0
     else
     {
 	    file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
@@ -616,7 +665,7 @@ int dumpMatches(
 	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
 	
 	Dna5String gInf;
-	char _sep_ = '\t';
+    char _sep_ = '\t';
 	char intBuf[40];
 	StringSet<CharString> lines;
     //String<__int64> fileOffsets;
@@ -675,8 +724,7 @@ int dumpMatches(
                     appendValue(line, _sep_);
                     appendValue(line, '0' + options.positionFormat);
                     appendValue(line, _sep_);
-                    sprintf(intBuf, "%u", readLen);
-                    append(line, intBuf);
+                    appendIntNumber(line, readLen);
                     appendValue(line, _sep_);
                     appendValue(line, (ar.beginPos < ar.endPos)? 'F': 'R');
                     appendValue(line, _sep_);
@@ -703,16 +751,14 @@ int dumpMatches(
 
                     appendValue(line, _sep_);
                     if ((*it).beginPos < ar.endPos)
-                        sprintf(intBuf, "%ld", (ar.beginPos + options.positionFormat));
+                        appendIntNumber(line, ar.beginPos + options.positionFormat);
                     else
-                        sprintf(intBuf, "%ld", (ar.endPos + options.positionFormat));
-                    append(line, intBuf);
+                        appendIntNumber(line, ar.endPos + options.positionFormat);
                     appendValue(line, _sep_);
                     if ((*it).beginPos < ar.endPos)
-                        sprintf(intBuf, "%ld", ar.endPos);
+                        appendIntNumber(line, ar.endPos);
                     else
-                        sprintf(intBuf, "%ld", ar.beginPos);
-                    append(line, intBuf);
+                        appendIntNumber(line, ar.beginPos);
                     appendValue(line, _sep_);
                     sprintf(intBuf, "%.5g", percId);
                     append(line, intBuf);
@@ -724,17 +770,14 @@ int dumpMatches(
                     if ((*it).pairMatchId != TAlignedRead::INVALID_ID)
                     {
                         appendValue(line, _sep_);
-                        sprintf(intBuf, "%u", ar.pairMatchId);
-                        append(line, intBuf);
+                        appendIntNumber(line, ar.pairMatchId);
                         appendValue(line, _sep_);
-                        sprintf(intBuf, "%i", (int)store.alignQualityStore[ar.id].pairScore);
-                        append(line, intBuf);
+                        appendIntNumber(line, (int)store.alignQualityStore[ar.id].pairScore);
                         appendValue(line, _sep_);
                         if ((*it).beginPos < ar.endPos)
-                            sprintf(intBuf, "%i", libSize[ar.pairMatchId]);
+                            appendIntNumber(line, libSize[ar.pairMatchId]);
                         else
-                            sprintf(intBuf, "%i", -libSize[ar.pairMatchId]);
-                        append(line, intBuf);
+                            appendIntNumber(line, -libSize[ar.pairMatchId]);
                         //file << _sep_ << (*it).pairMatchId << _sep_ << (int)store.alignQualityStore[(*it).id].pairScore << _sep_;
                         //if ((*it).beginPos < (*it).endPos)
                         //    file << libSize[(*it).pairMatchId];

@@ -5,8 +5,8 @@
 #include <parallel/algorithm>
 #include <parallel/numeric>
 #else
-#include <parallel/algorithm>
-#include <parallel/numeric>
+#include <algorithm>
+#include <numeric>
 #endif  // #ifdef PLATFORM_GCC
 
 using namespace seqan;
