@@ -1175,9 +1175,9 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
     if (options.libraryLength >= 0)
-        ::std::sort(itBegin, itEnd, LessRNoEndPosMP<TMatch>(options.libraryLength));
+        ::std::stable_sort(itBegin, itEnd, LessRNoEndPosMP<TMatch>(options.libraryLength));
     else
-        ::std::sort(itBegin, itEnd, LessRNoEndPos<TMatch>());
+        ::std::stable_sort(itBegin, itEnd, LessRNoEndPos<TMatch>());
 	// sortAlignedReads(matches, TLessEndPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
     timelineEndTask(TASK_SORT);
@@ -1217,9 +1217,9 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
     if (options.libraryLength >= 0)
-        ::std::sort(itBegin, itEnd, LessRNoBeginPosMP<TMatch>());
+        ::std::stable_sort(itBegin, itEnd, LessRNoBeginPosMP<TMatch>());
     else
-        ::std::sort(itBegin, itEnd, LessRNoBeginPos<TMatch>());
+        ::std::stable_sort(itBegin, itEnd, LessRNoBeginPos<TMatch>());
     // std::cerr << "(SORTING " << itEnd-itBegin << " MATCHES)";
 	// sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
 #ifdef RAZERS_PROFILE
@@ -1250,9 +1250,15 @@ void maskDuplicates(TMatches &, TIterator const itBegin, TIterator const itEnd, 
 	}
 
 #ifdef RAZERS_DEFER_COMPACTION
+#ifdef RAZERS_PROFILE
+    timelineBeginTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 	//////////////////////////////////////////////////////////////////////////////
 	// sort matches by begin position when using defered compaction
-    ::std::sort(itBegin, itEnd, LessBeginPos<TMatch>());
+    ::std::stable_sort(itBegin, itEnd, LessBeginPos<TMatch>());
+#ifdef RAZERS_PROFILE
+    timelineEndTask(TASK_SORT);
+#endif  // #ifdef RAZERS_PROFILE
 #endif  // #ifdef RAZERS_DEFER_COMPACTION
     
     options.timeMaskDuplicates += sysTime() - beginTime;
@@ -1346,7 +1352,7 @@ void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode const &)
 #ifdef RAZERS_PROFILE
   timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	::std::sort(begin(store.alignedReadStore, Standard()), end(store.alignedReadStore, Standard()), LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+	::std::stable_sort(begin(store.alignedReadStore, Standard()), end(store.alignedReadStore, Standard()), LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 	//sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_PROFILE
   timelineEndTask(TASK_SORT);
@@ -1452,7 +1458,7 @@ void compactMatches(
             SEQAN_ASSERT_LEQ(TLess()(matches[i - 1], matches[i]), 0);
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
-        ::std::sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());
+        ::std::stable_sort(begin(matches, Standard()), end(matches, Standard()), LessScoreBackport<TMatch>());
         // sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 #ifdef RAZERS_EXTERNAL_MATCHES
     }
@@ -1567,7 +1573,7 @@ void compactMatches(
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_SORT);
 #endif  // #ifdef RAZERS_PROFILE
-	::std::sort(
+	::std::stable_sort(
 		begin(matches, Standard()),
 		end(matches, Standard()), 
 		LessScoreBackport<TMatch>());

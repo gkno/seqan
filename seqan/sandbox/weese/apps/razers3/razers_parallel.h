@@ -402,7 +402,9 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
         size_t windowBegin = tls.options.windowSize * idx;
         if (firstWindowBegin == MaxValue<size_t>::VALUE)
             firstWindowBegin = windowBegin;
-        while (beginPos > 0u && static_cast<size_t>(tls.matches[beginPos].beginPos + DELTA) > windowBegin)
+        while (beginPos > 0u &&
+               static_cast<size_t>(tls.matches[beginPos].beginPos) < windowBegin &&
+               static_cast<size_t>(tls.matches[beginPos].beginPos + 10 * DELTA) > windowBegin)
         {
             if (beginPos > dPos)
                 beginPos -= dPos;
@@ -421,6 +423,10 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
         if (firstBeginPos == MaxValue<size_t>::VALUE)
             firstBeginPos = beginPos;
 
+// #pragma omp critical
+//         if (length(tls.matches) > 0u)
+//             std::cerr << "((MASKING FROM " << tls.matches[beginPos].beginPos << " TO " << windowBegin + tls.options.windowSize << " ~ " << back(tls.matches).beginPos << "))" << std::endl
+//                       << "  ->> " << length(tls.matches) - beginPos << " of " << length(tls.matches) << " elements , beginPos == " << beginPos << std::endl;
 // #pragma omp critical
 //         if (length(tls.matches) > 0u)
 //             std::cerr << "((MASKING FROM " << tls.matches[beginPos].beginPos << " TO " << windowBegin + tls.options.windowSize << "))" << std::endl;
@@ -1064,6 +1070,9 @@ int _mapSingleReadsParallel(
         }
     }
 
+    std::cerr << "useExternalSort == " << useExternalSort << "\n"
+              << "useSequentialCompaction == " << useSequentialCompaction << "\n";
+
     // Switch between using parallel compaction, sequential compaction, and
     // sequential compaction with external sorting.  The actual switch for the
     // sorting is in function compactMatches().
@@ -1081,14 +1090,19 @@ int _mapSingleReadsParallel(
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
         #pragma omp parallel
         {
+// TODO(holtgrew): We would really like to stop the additional masking step, the incremental masking SHOULD have taken care of this. Thus, the following should be ifndef and not ifdef.
 #ifndef RAZERS_DEFER_COMPACTION
             if (IsSameType<TGapMode, RazerSGapped>::VALUE)
                 maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
 #endif  // #ifndef RAZERS_DEFER_COMPACTION
             Nothing nothing;
             // std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+// #pragma omp critical
+//             std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
             compactMatches(threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, COMPACT_FINAL);
             // std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
+// #pragma omp critical
+//             std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
         }
         #pragma omp barrier
 #ifdef RAZERS_EXTERNAL_MATCHES
