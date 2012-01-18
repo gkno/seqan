@@ -380,8 +380,6 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 		// settings have been changed -> initialize bucket parameters
 	
 		pattern._currentErrorRate = _newErrorRate;
-		pattern.finderPosOffset = 0;
-		pattern.finderPosNextOffset = pattern.finderLength;
 
         TSize minQ = MaxValue<TSize>::VALUE;
         TSize maxQ = 3;
@@ -410,6 +408,8 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
         if (minQ < 3) minQ = maxQ;
 		
         TIndex &index = host(pattern);
+		pattern.finderPosOffset = 0;
+		pattern.finderPosNextOffset = pattern.maxSeqLen + pattern.finderLength;
 		
 		if (minQ == MaxValue<TSize>::VALUE)
 		{
@@ -421,14 +421,6 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
         {
             clear(index);
             setStepSize(index, minQ);
-            CharString str;
-            shapeToString(str, pattern.shape);
-#pragma omp critical
-			{
-				std::cout << std::endl << "Pigeonhole settings:" << std::endl;
-				std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
-				std::cout << "  stepsize: " << getStepSize(index) << std::endl;
-			}
          }
         indexShape(host(pattern)) = pattern.shape;
 //        double start = sysTime();
@@ -440,6 +432,14 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
         if (Pigeonhole<TSpec>::ONE_PER_DIAGONAL)
             resize(pattern.lastSeedDiag, seqCount, -maxSeqLen);
 		pattern.seqDisabled = -maxSeqLen - 1;
+    }
+	else
+	{
+		// settings are unchanged -> reset buckets
+
+		// finderPosOffset is used to circumvent expensive resetting of all buckets
+		pattern.finderPosOffset = pattern.finderPosNextOffset;
+		pattern.finderPosNextOffset += pattern.maxSeqLen + pattern.finderLength;
     }
 }
 
@@ -879,8 +879,8 @@ find(
 {
 	if (empty(finder)) 
 	{
+		pattern.finderLength = length(container(finder));
 		_patternInit(pattern, errorRate);
-		pattern.finderLength = pattern.maxSeqLen + length(container(finder));
 		_finderSetNonEmpty(finder);
 		finder.dotPos = 100000;
 		finder.dotPos2 = 10 * finder.dotPos;
@@ -950,8 +950,8 @@ windowFindBegin(
 {
 	SEQAN_CHECKPOINT
 	
-	_patternInit(pattern, errorRate);
 	pattern.finderLength = pattern.maxSeqLen + length(container(finder));
+	_patternInit(pattern, errorRate);
 	_finderSetNonEmpty(finder);
 	finder.dotPos = 100000;
 	finder.dotPos2 = 10 * finder.dotPos;
@@ -1039,9 +1039,16 @@ windowFindNext(
 					}
 //                     std::cout<<"hit at:\thpos="<<finder.curPos<<"\tnpos="<<getSeqOffset(ndlPos)<<"\treadNo="<<hit.ndlSeqNo<<"\thash="<<value(shape)<<std::endl;
 					unsigned ndlLength = sequenceLength(hit.ndlSeqNo, host(pattern));
-					unsigned errors = (unsigned)floor(errorRate * ndlLength);
-					hit.bucketWidth = ndlLength + (errors << 1) + 1;
-					hit.hstkPos -= errors;
+                    if (Pigeonhole<TSpec>::HAMMING_ONLY != 0)
+                    {
+                        hit.bucketWidth = ndlLength;
+                    }
+                    else
+                    {
+                        unsigned indels = (unsigned)floor(errorRate * ndlLength);
+                        hit.bucketWidth = ndlLength + (indels << 1);
+                        hit.hstkPos -= indels;
+                    }
 					appendValue(finder.hits, hit);
 				}
             }
