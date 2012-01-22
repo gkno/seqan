@@ -364,11 +364,12 @@ inline bool getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & comp
 	//std::cerr << indicatorString <<std::endl;
 	if (getBit(indicatorString, pos))
 	{
-		//std::cerr << "getNextPos: true" << std::endl;
+	//	std::cerr << "getNextPos: true" << std::endl;
 		return true;
 	}
+	//std::cerr << "getNextPos1: false" << std::endl;
 	pos = lfMapping(*compressedSA.lfTable, pos);
-	//std::cerr << "getNextPos: false" << std::endl;
+	//std::cerr << "getNextPos2: false" << std::endl;
 	return false;
 }
 

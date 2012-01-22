@@ -817,6 +817,19 @@ inline void fillWaveletTree(
     }
 }
 
+//template <typename TText, typename TWaveletTreeSpec, typename TDollarPos>
+//inline void completeDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, unsigned posInTree, TDollarPos dollarPosInLeaf, bool bit)
+//{
+//	setBit(tree.bitStrings[posInTree + 1], dollarPosInLeaf, 1);
+//}
+//
+//template <typename TText, typename TWaveletTreeSpec, typename TDollarPos>
+//inline void completeDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, unsigned posInTree, RankSupportBitString<void> & dollarPosInLeaf, bool bit)
+//{
+//	for(unsigned i = 0; i < length(dollarPosInLeaf)
+//	setBit(tree.bitStrings[posInTree + 1], dollarPosInLeaf, 1);
+//}
+
 template <typename TText, typename TWaveletTreeSpec, typename TDollarChar, typename TDollarPos>
 inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarChar dollarSub, TDollarPos dollarPos)
 {
@@ -841,8 +854,6 @@ inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarCh
 	TSize newNodeLegth;
 	TSize dollarPosInLeaf = getOcc(tree, dollarSub, dollarPos) - 1;
 
-	//std::cerr << "DollarPosInLeaf: " << dollarPosInLeaf << std::endl;
-
 	//do we need to add 0 or 1
 	if(dollarSub < tree.splitValues.treeNodes[minPos].i1)
 	{
@@ -853,6 +864,8 @@ inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarCh
 		for(unsigned i = 0; i < newNodeLegth; ++i)
 			setBit(tree.bitStrings[minPos + 1], i, 0);
 		setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf, 1);
+
+
 	}
 	else
 	{
@@ -863,8 +876,79 @@ inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarCh
 		for(unsigned i = 0; i < newNodeLegth; ++i)
 			setBit(tree.bitStrings[minPos + 1], i, 1);
 		setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf, 0);
+
 	}
 	completeRankSupportBitString(tree.bitStrings[minPos + 1]);
+
+}
+
+template <typename TText, typename TWaveletTreeSpec, typename TDollarChar>
+inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarChar dollarSub, RankSupportBitString<void> & dollarPos)
+{
+	typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type TSplitValues;
+	typedef typename Fibre<TSplitValues, FibreTreeNodes>::Type TWaveletTreeStructureString;
+	typedef typename Value<TWaveletTreeStructureString>::Type TWaveletTreeStructureEntry;
+	typedef typename Value<TWaveletTreeStructureEntry, 1>::Type TChar;
+	typedef typename Value<TWaveletTreeStructureEntry, 2>::Type TPointer;
+	typedef typename Size<typename Value<TText>::Type>::Type TSize;
+
+	TPointer minPos = getNodePosition(tree, dollarSub);
+
+	addDollarNode(tree.splitValues, minPos);
+
+	resize(tree.bitStrings, length(tree.bitStrings) + 1);
+	for(TPointer i = length(tree.bitStrings) - 1; i > minPos; --i)
+	{
+		tree.bitStrings[i] = tree.bitStrings[i - 1];
+	}
+
+	//TChar freqChar = (TChar)minPos;
+	TSize newNodeLegth;
+	String<unsigned> dollarPosInLeaf;
+
+	for(unsigned i = 0; i < length(dollarPos); ++i)
+	{
+		if(getBit(dollarPos, i))
+		{
+			appendValue(dollarPosInLeaf, getOcc(tree, dollarSub, i) - 1);
+		}
+	}
+
+	//do we need to add 0 or 1
+	if(dollarSub < tree.splitValues.treeNodes[minPos].i1)
+	{
+		tree.splitValues.treeNodes[minPos].i2 = 2;
+		newNodeLegth = length(tree.bitStrings[minPos - 1]) - getRank(tree.bitStrings[minPos - 1], length(tree.bitStrings[minPos - 1]) - 1);
+		clear(tree.bitStrings[minPos + 1]);
+		resize(tree.bitStrings[minPos + 1], newNodeLegth, 0);
+//		for(unsigned i = 0; i < newNodeLegth; ++i)
+//			setBit(tree.bitStrings[minPos + 1], i, 0);
+//		setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf, 1);
+		for(unsigned i = 0; i < newNodeLegth; ++i)
+			setBit(tree.bitStrings[minPos + 1], i, 0);
+
+		for(unsigned i = 0; i < length(dollarPosInLeaf); ++i)
+		{
+			setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf[i], 1);
+			//completeDollarNode(tree,minPos + 1, dollarPosInLeaf[i], 1);
+		}
+
+	}
+	else
+	{
+		tree.splitValues.treeNodes[minPos].i2 = 1;
+		newNodeLegth = getRank(tree.bitStrings[minPos], length(tree.bitStrings[minPos]) - 1);
+		clear(tree.bitStrings[minPos + 1]);
+		resize(tree.bitStrings[minPos + 1], newNodeLegth, 0);
+		for(unsigned i = 0; i < newNodeLegth; ++i)
+			setBit(tree.bitStrings[minPos + 1], i, 1);
+
+		for(unsigned i = 0; i < length(dollarPosInLeaf); ++i)
+		{
+			setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf[i], 0);
+			//completeDollarNode(tree,minPos + 1, dollarPosInLeaf[i], 1);
+		}
+	}
 
 }
 
