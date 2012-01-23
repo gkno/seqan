@@ -184,8 +184,6 @@ macro (seqan_setup_global)
         # Warning level 3 for MSVC is disabled for now to see how much really bad warnings there are.
         #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
-        # Enable unwind semantics.  <locale> (which itself includes <xlocale>) needs this or triggers a warning.
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
     endif (MSVC)
 
     # -----------------------------------------------------------------------
