@@ -337,12 +337,12 @@ int compareIndels(
 	{
 		for(TIndelIt it = begin(refIndels); it != end(refIndels); ++it)
         {
-    		if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
+    		if((*it).type != INVERSION  && options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
 	    		++rangeCountRef[j];
         }
 		for(TIndelIt it = begin(predIndels); it != end(predIndels); ++it)
         {
-	    	if(options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
+	    	if((*it).type != INVERSION  && options.ranges[j].i1 <= (*it).indelSize && (*it).indelSize < options.ranges[j].i2)
    				++rangeCountPred[j];
         }
 	}
