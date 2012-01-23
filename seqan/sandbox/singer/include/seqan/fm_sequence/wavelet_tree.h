@@ -858,7 +858,7 @@ inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarCh
 	if(dollarSub < tree.splitValues.treeNodes[minPos].i1)
 	{
 		tree.splitValues.treeNodes[minPos].i2 = 2;
-		newNodeLegth = length(tree.bitStrings[minPos - 1]) - getRank(tree.bitStrings[minPos - 1], length(tree.bitStrings[minPos - 1]) - 1);
+		newNodeLegth = length(tree.bitStrings[minPos-1]) - getRank(tree.bitStrings[minPos-1], length(tree.bitStrings[minPos-1]) - 1);
 		clear(tree.bitStrings[minPos + 1]);
 		resize(tree.bitStrings[minPos + 1], newNodeLegth, 0);
 		for(unsigned i = 0; i < newNodeLegth; ++i)
@@ -910,27 +910,29 @@ inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarCh
 	{
 		if(getBit(dollarPos, i))
 		{
-			appendValue(dollarPosInLeaf, getOcc(tree, dollarSub, i) - 1);
+			appendValue(dollarPosInLeaf, getOcc(tree, dollarSub, i)-1);
+//			std::cerr << getOcc(tree, dollarSub, i) << std::endl;
+//			char c;
+//			std::cin>>c;
 		}
+
 	}
+
+	std::cerr << "length(dollarPosInLeaf): " << length(dollarPosInLeaf) << std::endl;
 
 	//do we need to add 0 or 1
 	if(dollarSub < tree.splitValues.treeNodes[minPos].i1)
 	{
 		tree.splitValues.treeNodes[minPos].i2 = 2;
-		newNodeLegth = length(tree.bitStrings[minPos - 1]) - getRank(tree.bitStrings[minPos - 1], length(tree.bitStrings[minPos - 1]) - 1);
+		newNodeLegth = length(tree.bitStrings[minPos]) - getRank(tree.bitStrings[minPos], length(tree.bitStrings[minPos]) - 1);
 		clear(tree.bitStrings[minPos + 1]);
 		resize(tree.bitStrings[minPos + 1], newNodeLegth, 0);
-//		for(unsigned i = 0; i < newNodeLegth; ++i)
-//			setBit(tree.bitStrings[minPos + 1], i, 0);
-//		setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf, 1);
 		for(unsigned i = 0; i < newNodeLegth; ++i)
 			setBit(tree.bitStrings[minPos + 1], i, 0);
 
 		for(unsigned i = 0; i < length(dollarPosInLeaf); ++i)
 		{
 			setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf[i], 1);
-			//completeDollarNode(tree,minPos + 1, dollarPosInLeaf[i], 1);
 		}
 
 	}
@@ -946,9 +948,9 @@ inline void addDollarNode(WaveletTree<TText, TWaveletTreeSpec> & tree, TDollarCh
 		for(unsigned i = 0; i < length(dollarPosInLeaf); ++i)
 		{
 			setBit(tree.bitStrings[minPos + 1], dollarPosInLeaf[i], 0);
-			//completeDollarNode(tree,minPos + 1, dollarPosInLeaf[i], 1);
 		}
 	}
+	completeRankSupportBitString(tree.bitStrings[minPos + 1]);
 
 }
 
