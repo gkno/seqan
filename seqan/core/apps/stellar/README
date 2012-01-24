@@ -29,6 +29,14 @@ written to the output file.
 2. Installation
 ---------------------------------------------------------------------------
 
+For precompiled executables (Windows, Linux 64, and Mac OS X) download the
+archive stellar_v1.x.zip from http://www.seqan.de/downloads/projects.html
+and extract it.
+On linux, for example:
+  1) wget http://www.seqan.de/uploads/media/stellar_v1.1.zip
+  2) unzip stellar_v1.1.zip
+  3) ./stellar
+
 STELLAR is distributed with SeqAn - The C++ Sequence Analysis Library (see 
 http://www.seqan.de). To build STELLAR do the following:
 
@@ -37,7 +45,7 @@ http://www.seqan.de). To build STELLAR do the following:
   3)  cd seqan/projects/library/cmake
   4)  cmake . -DCMAKE_BUILD_TYPE=Release
   5)  make stellar
-  6)  ./apps/stellar
+  6)  ./apps/stellar/stellar
 
 Alternatively you can check out the latest SVN version of STELLAR and SeqAn
 with:
@@ -78,13 +86,13 @@ STELLAR always expects the two parameters --database and --query (or -d and
   Fasta format. All query sequences will be compared to all database
   sequences.
 
-Without any additional parameters STELLAR would compare the query
-sequence(s) to both strands of the database sequence(s) with an error rate
-of 0.05 (i.e. 5% errors, an identity of 95%) and a minimal length of 100,
-and dump all local alignments in an output file named "stellar.gff".
+Without any additional parameters STELLAR compares the query sequence(s)
+to both strands of the database sequence(s) with an error rate of 0.05
+(i.e. 5% errors, an identity of 95%) and a minimal length of 100, and
+dumps all local alignments in an output file named "stellar.gff".
 
 The default behaviour can be modified by adding the following options to
-the command line.
+the command line:
 
 ---------------------------------------------------------------------------
 3.2. Main Options
@@ -261,7 +269,7 @@ delimited text format with the following columns:
 See also: http://www.sanger.ac.uk/resources/software/gff/spec.html
 Consistent with this specification stellar GFF output looks as follows:
 
-GNAME razers read DBEGIN DEND PERCID DSTRAND . ATTRIBUTES
+DNAME stellar eps-matches DBEGIN DEND PERCID DSTRAND . ATTRIBUTES
 
 Match value description:
 
@@ -286,8 +294,8 @@ Attributes are:
   mutations=   Positions and bases that differ from the database sequence
                with respect to the query sequence (counting from 1)
 
-For matches on the reverse strand, GBEGIN and GEND are positions on the 
-related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
+For matches on the reverse strand, DBEGIN and DEND are positions on the 
+related forward strand. It holds DBEGIN < DEND, regardless of DSTRAND.
 
 ---------------------------------------------------------------------------
 4.2. Human Readable Alignment Format
