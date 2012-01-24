@@ -152,7 +152,7 @@ bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TOptions &options)
 	// if it is a deletion or inversion
 	if(refIndel.indelSize > 0) // check if end position matches
 	{
-		if (((int)refIndel.originalPos+refIndel.indelSize-options.positionTolerance
+		if (((int)refIndel.originalPos+refIndel.indelSize-options.positionTolerance 
 				<= (int)predIndel.originalPos+predIndel.indelSize)
 			&& ((int) predIndel.originalPos+predIndel.indelSize
 				<= (int)refIndel.originalPos+refIndel.indelSize+options.positionTolerance))
@@ -160,10 +160,10 @@ bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TOptions &options)
 	}
 	else // if it is an insertion
 	{
-		if(refIndel.duplication)
+		if(refIndel.duplication) // dirty
 		{
-			if (abs((int)refIndel.originalPos - (int)predIndel.originalPos) < -refIndel.indelSize + options.positionTolerance)
-				return true;
+	//		if (abs((int)refIndel.originalPos - (int)predIndel.originalPos) < -refIndel.indelSize + options.positionTolerance)
+		//		return true;
 	
 		}
 	}
@@ -174,7 +174,9 @@ bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TOptions &options)
 template <typename TIndel, typename TPos, typename TOptions>
 bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TPos beginPoint, TPos endPoint, TOptions &options)
 {
-	int sizeTol = int((double)abs(refIndel.indelSize) * options.sizeTolerance);
+    if(refIndel.type != predIndel.type) return false;
+
+    int sizeTol = int((double)abs(refIndel.indelSize) * options.sizeTolerance);
 	if(!(refIndel.indelSize - sizeTol <= predIndel.indelSize && predIndel.indelSize <= refIndel.indelSize + sizeTol))
 		return false; // --> doesnt match
 	
@@ -229,9 +231,10 @@ void
 computeEir(TIndel &indel, TGenome & genome, TPos & beginPoint,TPos & endPoint)
 {
 
-	SEQAN_ASSERT(indel.indelSize > 0 || (int)length(indel.insertionSeq) == -indel.indelSize );
+	SEQAN_ASSERT(indel.indelSize > 0 || (int)length(indel.insertionSeq) == -indel.indelSize || indel.duplication == true);
 
-	if(indel.indelSize > 0)	// deletion
+	if( indel.type == DELETION  // deletion
+        || (indel.type == INSERTION && indel.duplication == true && empty(indel.insertionSeq) && indel.secondOriginalPos != indel.originalPos)) // duplication, sequence not explicitly given
 	{
 		unsigned iDel = indel.originalPos;
 		unsigned iRef = indel.originalPos + indel.indelSize;
@@ -248,9 +251,9 @@ computeEir(TIndel &indel, TGenome & genome, TPos & beginPoint,TPos & endPoint)
 		}
 		beginPoint = iRef;
 	}
-	else
+	else if(indel.type == INSERTION && !empty(indel.insertionSeq))
 	{
-		SEQAN_ASSERT_EQ((int)length(indel.insertionSeq),-indel.indelSize);
+        SEQAN_ASSERT_EQ((int)length(indel.insertionSeq),-indel.indelSize);
 		unsigned iIns = 0; // relative to insertion sequence
 		unsigned iRef = indel.originalPos;
 //		std::cout << "right: iRef=" << iRef << " ->" << genome[iRef] <<"   iIns=" <<iIns << " ->" << indel.insertionSeq[iIns] << std::endl;
@@ -272,6 +275,21 @@ computeEir(TIndel &indel, TGenome & genome, TPos & beginPoint,TPos & endPoint)
 		}
 		beginPoint = iRef;
 	}
+    else if (indel.type == INVERSION)
+    {
+   		unsigned iFor = _max(0,(int)indel.originalPos - 1);
+		unsigned iRev = indel.originalPos + indel.indelSize;
+        Dna5String r(genome[iRev]);
+        reverseComplement(r);
+        while(iRev < length(genome) && iFor > 0 && r[0]==genome[iFor])
+		{
+			++iRev; --iFor;
+            r[0] = genome[iRev];
+            reverseComplement(r);
+        }
+		endPoint = iRev;
+        beginPoint = iFor;
+    }
 //	std::cout <<"begin=" << beginPoint << " end=" << endPoint << std::endl;
 	
 
@@ -433,11 +451,11 @@ int compareIndels(
 			if(options.sequenceContext)
 			{
 				//compute eir, equivalent indel region, Krawitz et. al
-                if(predIndel.type == DELETION || (predIndel.type= INSERTION && !empty(predIndel.insertionSeq)) )
+             //   if(predIndel.type == DELETION || (predIndel.type == INSERTION && !empty(predIndel.insertionSeq)) )
     				computeEir(predIndel,genomes[i],beginPoint,endPoint);
 				beginPoint -= options.positionTolerance;
 				endPoint += options.positionTolerance;
-				
+				SEQAN_ASSERT_LT(beginPoint,endPoint);
 			}
 			else
 			{
@@ -459,8 +477,10 @@ int compareIndels(
 				if(options._debugLevel > 1 ) std::cout << "+" <<std::flush;
 				TIndel &refIndel = refIndels[intersectingIntervals[j]];
 				bool res = false;
-				if(!options.sequenceContext) res = compareIndelPair(refIndel,predIndel,options);
-				else res = compareIndelPair(refIndel,predIndel,beginPoint,endPoint,options);
+				res = compareIndelPair(refIndel,predIndel,options);
+				if(!res && options.sequenceContext) res = compareIndelPair(refIndel,predIndel,beginPoint,endPoint,options);
+			//	if(!options.sequenceContext) res = compareIndelPair(refIndel,predIndel,options);
+			//	else res = compareIndelPair(refIndel,predIndel,beginPoint,endPoint,options);
 				if(res)
 				{
 					if(options.annotateRepeats>0)
@@ -492,9 +512,13 @@ int compareIndels(
                 if(predIndel.type == INVERSION)
                     ++inversionsTP;
                 else
-    				for(unsigned j = 0; j < length(options.ranges); ++j)
-	    				if(options.ranges[j].i1 <= predIndel.indelSize && predIndel.indelSize < options.ranges[j].i2)
+    			{
+                    for(unsigned j = 0; j < length(options.ranges); ++j)
+	    			{
+                        if(options.ranges[j].i1 <= predIndel.indelSize && predIndel.indelSize < options.ranges[j].i2)
 		    				++rangeTP[j];
+                    }
+                }
 			}
 			else
 			{

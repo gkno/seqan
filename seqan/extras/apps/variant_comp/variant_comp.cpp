@@ -350,6 +350,11 @@ int readGFF(
             indel.type = DELETION;
             skip = false;
         }
+        else if(indel.field3 == "intron" || indel.field2 == "intron")
+        {
+            indel.type = DELETION;
+            skip = false;
+        }
         else if(indel.field3 == "inversion" || indel.field2 == "inversion")
         {
             indel.type = INVERSION;
