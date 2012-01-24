@@ -34,6 +34,7 @@ struct StellarOptions {
 	CharString outputFile;			// name of result file
 	CharString disabledQueriesFile;	// name of result file containing disabled queries
 	CharString outputFormat;		// Possible formats: gff, text
+    bool noRT;				// suppress printing of running time if set to true
 
 	// main options
 	unsigned qGram;				// length of the q-grams
@@ -58,6 +59,7 @@ struct StellarOptions {
 		outputFile = "stellar.gff";
 		disabledQueriesFile = "stellar.disabled.fasta";
 		outputFormat = "gff";
+        noRT = false;
 
 		qGram = (unsigned)-1;
 		epsilon = 0.05;

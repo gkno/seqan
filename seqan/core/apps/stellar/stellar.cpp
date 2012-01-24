@@ -361,6 +361,7 @@ _parseOptions(TParser & parser, TOptions & options) {
     if (isSetShort(parser, 'o')) getOptionValueShort(parser, 'o', options.outputFile);
     if (isSetShort(parser, "od")) getOptionValueShort(parser, "od", options.disabledQueriesFile);
 	if (isSetShort(parser, "of")) getOptionValueShort(parser, "of", options.outputFormat);
+    if (isSetLong(parser, "no-rt")) options.noRT = true;
 
 	// main options
 	if (isSetLong(parser, "kmer")) getOptionValueLong(parser, "kmer", options.qGram);
@@ -463,11 +464,11 @@ _setParser(TParser & parser) {
     addOption(parser, CommandLineOption('v', "verbose", "Verbosity mode.", OptionType::Bool, "false"));
     
 	addSection(parser, "Filtering Options:");
-    addOption(parser, CommandLineOption('k', "kmer", "Length of the q-grams (max 32)", OptionType::Int, 10));
+    addOption(parser, CommandLineOption('k', "kmer", "Length of the q-grams (max 32)", OptionType::Int, "smin"));
     addOption(parser, CommandLineOption("rp", "repeatPeriod",
-		"Maximal period of low complexity reapeats to be filtered", OptionType::Int, 1));
+		"Maximal period of low complexity repeats to be filtered", OptionType::Int, 1));
     addOption(parser, CommandLineOption("rl", "repeatLength",
-		"Minimal length of low complexity reapeats to be filtered", OptionType::Int, 1000));
+		"Minimal length of low complexity repeats to be filtered", OptionType::Int, 1000));
     addOption(parser, CommandLineOption('a', "abundanceCut",
 		"k-mer overabundance cut ratio", OptionType::Double, "1"));
 
@@ -494,6 +495,7 @@ _setParser(TParser & parser) {
 	addOption(parser, CommandLineOption("od", "outDisabled",
 		"Name of output file containing disabled query sequences", OptionType::String));
 	addHelpLine(parser, "(default stellar.disabled.fasta)");
+    addOption(parser, CommandLineOption("t", "no-rt", "Suppress printing running time.", OptionType::Bool | OptionType::Hidden, false));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -564,7 +566,7 @@ int main(int argc, const char *argv[]) {
     SEQAN_PROTIMESTART(timeStellar);
 	if (!_stellarOnAll(databases, databaseIDs, queries, queryIDs, options)) return 1;
 
-    if (options.verbose > 0) 
+    if (options.verbose > 0 && options.noRT == false) 
 		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
 	
 	return 0;
