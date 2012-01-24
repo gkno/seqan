@@ -79,9 +79,9 @@ int main(int argc, const char * argv[])
     }
 
     // Declare all parameters
-    String<char> kmerWeightsFileTmp = "";
-    String<char> inFileTmp = "";
-    String<char> outFileTmp = "";
+    String<char> kmerWeightsFileTmp;
+    String<char> inFileTmp;
+    String<char> outFileTmp;
 
     if (isSetShort (parser, 'i'))
         getOptionValueShort (parser,'i',inFileTmp);
@@ -103,7 +103,7 @@ int main(int argc, const char * argv[])
     if (isSetShort (parser, "mo"))
         getOptionValueShort (parser,"mo",bgModelOrder);
 
-    String<char>  revCom = "";
+    String<char>  revCom;
     if (isSetShort (parser, "rc"))
         getOptionValueShort (parser,"rc",revCom);
 
@@ -115,7 +115,7 @@ int main(int argc, const char * argv[])
     if (isSetShort (parser, "mmw"))
         getOptionValueShort (parser,"mmw",mismatchWeight);
 
-    String<char, CStyle> kmerWeightsFile = "";
+    String<char, CStyle> kmerWeightsFile;
     if (isSetShort (parser, "kwf"))
         getOptionValueShort (parser,"kwf",kmerWeightsFileTmp);
     kmerWeightsFile=kmerWeightsFileTmp;
