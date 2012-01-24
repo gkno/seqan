@@ -31,9 +31,9 @@
 #include <seqan/sequence.h>
 #include "razers.h"
 #include "readSimulator.h"
+#include "param_tabs.h"
 
 #include <seqan/misc/misc_parsing.h>
-
 
 
 
@@ -138,7 +138,7 @@ struct ParamChooserOptions
 		fname[0] = "";
 		fname[1] = "";
 		fprefix[0] =  "" ;
-		
+
 		shapeFile = "";
 		paramFolderPath = "";
 		paramFolder = "";
@@ -866,6 +866,131 @@ numGaps(TShape & currShape)
 }
 
 
+template <typename TSpec>
+bool
+pickGappedParams(RazerSOptions<TSpec> & r_options,
+                 ParamChooserOptions & pm_options)
+{
+    // Pick N and edit distance mode.
+    int N = pm_options.totalN;
+    if(pm_options.extrapolate)
+        N = pm_options.extrapolN;
+    char mode = pm_options.optionHammingOnly ? 'H' : 'L';
+
+    // Retrieve records from static resource file.
+    String<GappedParamsRecord> records;
+    getGappedParamsRecords(records, N, mode);
+
+    // Now, iterate over gapped records and pick the best parameters.
+    typedef float TFloat;
+    String<CharString> shapes;
+    resize(shapes,14);  // Best shape for each possible value of q
+    String<unsigned> thresholds;
+    resize(thresholds,14);  // Corresponding t.
+    String<unsigned> measure;
+    resize(measure,14);  // Potential matches.
+    String<TFloat> lossrates;
+    resize(lossrates,14);  // Lossrates.
+    double extrapolFactor = 1.0;  // No extrapolation.
+    unsigned errorsWanted = (int)(pm_options.optionErrorRate * pm_options.totalN);
+    if (pm_options.extrapolate)
+    {
+        extrapolFactor = (double)pm_options.totalN / pm_options.extrapolN;
+        errorsWanted = pm_options.extrapolK;
+    }
+
+    bool atLeastOneFound = false;
+
+    for (unsigned i = 0; i < length(records); ++i)
+    {
+        unsigned currMeasure = records[i].measure;
+        CharString currShape = records[i].shape;
+        unsigned currThreshold = records[i].t * extrapolFactor;  // when extrapolating from shorter read length
+        TFloat currLossrate = records[i].lossRate;
+
+        if (records[i].errors != errorsWanted)
+            continue;  // Skip record with wrong error.
+        
+        if ((pm_options.chooseUngappedOnly && numGaps(currShape) > 0) ||
+            (pm_options.chooseOneGappedOnly && numGaps(currShape) > 1))
+            continue;  // Skip Record if shape has too many gaps
+
+        if (currThreshold >= pm_options.minThreshold && currLossrate <= pm_options.optionLossRate /*&& val > bestSoFar*/)
+        {
+            unsigned weight = 0;
+            for (unsigned pos = 0; pos < length(currShape) ; ++pos)
+                if (currShape[pos] == '1')
+                    ++weight;
+
+            if (length(shapes[weight-1]) > 0)  // if this is not the first shape with weight weight
+            {
+                // compare currShape to the best one found so far
+                if (currMeasure <= measure[weight-1])
+                {
+                    if (currMeasure == measure[weight-1])
+                    {
+                        bool undecided = false;
+                        // Next measure: threshold
+                        if (thresholds[weight-1] > currThreshold) 
+                            continue;
+                        else if (thresholds[weight-1] == currThreshold)
+                            undecided = true;
+
+                        // If still undecided: next measure: span.
+                        if (undecided && length(shapes[weight-1]) > length(currShape))
+                            continue;
+                        else if (undecided && length(shapes[weight-1]) < length(currShape))
+                            undecided = false;
+
+                        // If still undecided: next measure: lossrate.
+                        if (undecided && lossrates[weight-1] < currLossrate)
+                            continue;
+                    }
+                    shapes[weight-1] = currShape;
+                    measure[weight-1] = currMeasure;
+                    thresholds[weight-1] = currThreshold;
+                    lossrates[weight-1] = currLossrate;
+                    atLeastOneFound = true;
+                }
+                
+            }
+            else
+            {
+                shapes[weight-1] = currShape;
+                measure[weight-1] = currMeasure;
+                thresholds[weight-1] = currThreshold;
+                lossrates[weight-1] = currLossrate;
+                atLeastOneFound = true;
+            
+            }
+        }
+    }
+    if (!atLeastOneFound)
+    {
+        if (pm_options.verbose)
+            std::cerr << "\n" << "!!! Something wrong with precomputation data? !!!" << std::endl;
+        return false;
+    }
+    int i;
+    for (i = pm_options.maxWeight-1; i > 0; --i )
+        if(length(shapes[i]) > 0)  // if a shape of weight i+1 has been found
+            break;
+    if (i==0)
+    {
+        if (pm_options.verbose)
+            ::std::cerr << ::std::endl << "!!! Something wrong with precomputation data? !!!" << ::std::endl;
+        return false;
+    }
+    if (thresholds[i] == 1 && length(shapes[i-1])>0 && thresholds[i-1] > 2)
+        --i; 
+    pm_options.chosenLossRate = lossrates[i];
+    assign(r_options.shape, shapes[i]);
+    r_options.threshold = thresholds[i];
+    // suggest a suitable combination of q and t
+
+    return true;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Get parameters q and t optimal for given loss rate
 template<typename TFile, typename TSpec>
@@ -1083,12 +1208,11 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	}
 #endif
 
-	pm_options.fgparams = pm_options.paramFolderPath;
-	if( length(pm_options.paramFolder) > 0)
-		append(pm_options.fgparams, pm_options.paramFolder);
-	else
-		append(pm_options.fgparams, "gapped_params/");
-
+    pm_options.fgparams = pm_options.paramFolderPath;
+    if (length(pm_options.paramFolder) > 0)
+        append(pm_options.fgparams, pm_options.paramFolder);
+    else
+        append(pm_options.fgparams, "gapped_params/");
 	
 	if(pm_options.optionProbINSERT <= epsilon && pm_options.optionProbDELETE <= epsilon)
 		pm_options.optionHammingOnly=true;
@@ -1100,6 +1224,9 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 		|| (!pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedEditN ))
 		extrapolateNK(pm_options);
 	
+
+    // The following code is only active if ran from param chooser CPP file, fname is not set anywhere in the razers app
+    // code.
 
 	// compute data specific loss rates
 	if (pm_options.fnameCount0 || pm_options.fnameCount1) 
@@ -1151,31 +1278,36 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 
 	// get name of loss rate file
 	::std::stringstream paramsfile;
-	getParamsFilename(paramsfile,pm_options);
-        if (pm_options.verbose)
-        {
-               ::std::cerr << ::std::endl;
-               ::std::cerr << "Read length      = " << pm_options.totalN << "bp" << std::endl;
-               ::std::cerr << "Max num errors   = " << pm_options.totalK << std::endl;
-               ::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%" << std::endl;
-		if(pm_options.extrapolate) ::std::cerr << "Extrapolating from read length " << pm_options.extrapolN << " and " << pm_options.extrapolK << "errors." << std::endl;
-        }
+    getParamsFilename(paramsfile,pm_options);
+    if (pm_options.verbose)
+    {
+        ::std::cerr << ::std::endl;
+        ::std::cerr << "Read length      = " << pm_options.totalN << "bp" << std::endl;
+        ::std::cerr << "Max num errors   = " << pm_options.totalK << std::endl;
+        ::std::cerr << "Recognition rate = " << 100.0*(1.0-pm_options.optionLossRate) << "%" << std::endl;
+        if(pm_options.extrapolate) ::std::cerr << "Extrapolating from read length " << pm_options.extrapolN << " and " << pm_options.extrapolK << "errors." << std::endl;
+    }
 	
-	// parse loss rate file and find appropriate filter criterium
-	if(pm_options.verbose) ::std::cerr << std::endl << "--> Reading " <<  paramsfile.str()<<::std::endl;
-	::std::fstream file;
-	file.open(paramsfile.str().c_str(),::std::ios_base::in | ::std::ios_base::binary);
-	if(!file.is_open())
-	{
-		if(pm_options.verbose)::std::cerr << "Couldn't open file "<<paramsfile.str()<<::std::endl;
-		return false;
-	}
-	else
-	{
-		parseGappedParams(r_options,file,pm_options);
-		if(pm_options.verbose) ::std::cout << std::endl << " Choose "<< std::endl << "shape: " << r_options.shape << std::endl << " and " << std::endl << "threshold: " << r_options.threshold << std::endl <<" to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)" <<std::endl << std::endl;
-		file.close();
-	}
+    // Parse or pick gapped parameters.
+    if (pm_options.fnameCount0 || pm_options.fnameCount1)
+    {
+        if (pm_options.verbose)
+            std::cerr << std::endl << "--> Reading " <<  paramsfile.str() << std::endl;
+        std::fstream file;
+        file.open(paramsfile.str().c_str(), std::ios_base::in | std::ios_base::binary);
+        if (!file.is_open())
+        {
+            if(pm_options.verbose)
+                std::cerr << "Couldn't open file " << paramsfile.str() << std::endl;
+            return false;
+        }
+        parseGappedParams(r_options, file, pm_options);
+    }
+    else
+    {
+        pickGappedParams(r_options, pm_options);
+    }
+    if(pm_options.verbose) ::std::cout << std::endl << " Choose "<< std::endl << "shape: " << r_options.shape << std::endl << " and " << std::endl << "threshold: " << r_options.threshold << std::endl <<" to achieve optimal performance for expected recognition rate >= " << (100.0-100.0*pm_options.optionLossRate) << "% (expected recognition = " << (100.0-pm_options.chosenLossRate*100.0) <<"%)" <<std::endl << std::endl;
 
 	return true;
 }

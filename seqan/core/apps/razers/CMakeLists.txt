@@ -4,11 +4,17 @@ project (core_apps_razers)
 # Update the list of file names below if you add source files to your application.
 seqan_add_executable(razers razers.cpp
 			    razers.h
+                param_tabs.h
+                param_tabs.cpp
+                param_tabs.inc
 			    outputFormat.h
 			    paramChooser.h
 			    razers_matepairs.h
 			    razers_spliced.h
-			    readSimulator.h)
+			    readSimulator.h
+                param_tabs.h)
+
+seqan_add_executable(param_tabs param_tabs.cpp param_tabs.h param_tabs.inc)
 
 # Install razers in /bin directory
 install(TARGETS razers

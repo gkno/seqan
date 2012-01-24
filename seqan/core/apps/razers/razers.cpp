@@ -355,7 +355,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "percent-identity", options.errorRate);
 #ifndef NO_PARAM_CHOOSER
 	getOptionValueLong(parser, "recognition-rate", pm_options.optionLossRate);
-	getOptionValueLong(parser, "param-dir", pm_options.paramFolder);
+	// getOptionValueLong(parser, "param-dir", pm_options.paramFolder);
 #endif
 	getOptionValueLong(parser, "indels", options.hammingOnly);
 	options.hammingOnly = !options.hammingOnly;
@@ -561,15 +561,15 @@ int main(int argc, const char *argv[])
 			pm_options.optionProbDELETE = (ParamChooserOptions::TFloat)0.01;	//edit distance parameter choosing
 		}
 
-		if (empty(pm_options.paramFolder)) 
-		{
-			string razersFolder = argv[0];
-			size_t lastPos = razersFolder.find_last_of('/') + 1;
-			if (lastPos == razersFolder.npos + 1) lastPos = razersFolder.find_last_of('\\') + 1;
-			if (lastPos == razersFolder.npos + 1) lastPos = 0;
-			razersFolder.erase(lastPos); 
-			pm_options.paramFolderPath = razersFolder;
-		}
+		// if (empty(pm_options.paramFolder)) 
+		// {
+		// 	string razersFolder = argv[0];
+		// 	size_t lastPos = razersFolder.find_last_of('/') + 1;
+		// 	if (lastPos == razersFolder.npos + 1) lastPos = razersFolder.find_last_of('\\') + 1;
+		// 	if (lastPos == razersFolder.npos + 1) lastPos = 0;
+		// 	razersFolder.erase(lastPos); 
+		// 	pm_options.paramFolderPath = razersFolder;
+		// }
 		if (options.trimLength > 0) readLength = options.trimLength;
 		if (readLength > 0)
 		{
