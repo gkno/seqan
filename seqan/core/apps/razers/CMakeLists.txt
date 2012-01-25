@@ -14,8 +14,6 @@ seqan_add_executable(razers razers.cpp
 			    readSimulator.h
                 param_tabs.h)
 
-seqan_add_executable(param_tabs param_tabs.cpp param_tabs.h param_tabs.inc)
-
 # Install razers in /bin directory
 install(TARGETS razers
         DESTINATION bin)
@@ -25,3 +23,5 @@ if(PYTHONINTERP_FOUND)
   add_test(NAME app_test_razers COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tests.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
   message(STATUS "add_test(NAME app_test_razers COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_tests.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})")
 endif(PYTHONINTERP_FOUND)
+
+include(package.cmake)
