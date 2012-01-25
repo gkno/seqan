@@ -2,7 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 project (core_apps_micro_razers)
 
 # Update the list of file names below if you add source files to your application.
-seqan_add_executable(micro_razers micro_razers.cpp outputFormat.h)
+seqan_add_executable(micro_razers micro_razers.cpp outputFormat.h ../razers/paramChooser.h ../razers/param_tabs.h ../razers/param_tabs.cpp ../razers/param_tabs.inc
+)
 
 # Add app tests if Python interpreter could be found.
 if(PYTHONINTERP_FOUND)

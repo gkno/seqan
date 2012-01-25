@@ -2,7 +2,7 @@
 #
 # Output generation script for micro_razers
 
-MICRO_RAZERS=../../../../build/Debug/core/apps/micro_razers/micro_razers
+MICRO_RAZERS=../../../../build/Release/core/apps/micro_razers/micro_razers
 
 # ============================================================
 # First Section
