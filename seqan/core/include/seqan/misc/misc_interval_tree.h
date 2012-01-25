@@ -884,6 +884,23 @@ SEQAN_CHECKPOINT
 }
 
 
+
+/**
+.signature:createIntervalTree(intervalTree, intervals)
+..param.intervalTree:An interval tree
+..param.intervals:A container of intervals
+*/
+template<typename TValue,typename TCargo, typename TIntervals>
+void 
+createIntervalTree(IntervalTree<TValue,TCargo> & it,
+				   TIntervals & intervals)
+{
+SEQAN_CHECKPOINT
+	createIntervalTree(it.g,it.pm,intervals);
+}
+
+
+
 /**
 ..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals, center, tag)
  */
