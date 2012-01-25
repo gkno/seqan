@@ -100,8 +100,6 @@ int main(int argc, char const ** argv)
         if (ret != 0)
             return ret;
         return evaluateReadMapperResult(options);
-    } else {
-        SEQAN_ASSERT_FAIL("Invalid command!");
     }
 
     return 0;
