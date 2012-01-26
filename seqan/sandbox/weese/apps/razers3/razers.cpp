@@ -41,7 +41,7 @@
 //#define _GLIBCXX_PARALLEL               // parallel STL if available
 #define RAZERS_OPENADDRESSING
 #endif
-#define RAZERS_PROFILE                // Extensive profiling information.
+//#define RAZERS_PROFILE                // Extensive profiling information.
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 

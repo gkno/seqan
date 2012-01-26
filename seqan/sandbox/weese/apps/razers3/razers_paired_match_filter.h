@@ -198,8 +198,8 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
         appendValue(filter.purgedPairIds, pairId);
         FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
         FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
-        setMaxErrors(wrapperL, 2 * pairId, -1);
-        setMaxErrors(wrapperR, 2 * pairId + 1, -1);
+        setMaxErrors(wrapperL, pairId, -1);
+        setMaxErrors(wrapperR, pairId, -1);
         _freeHistogram(filter, histogramId);
         filter.pairIdToHistogramId.erase(pairId);
         filter.hitCount[pairId - filter.readOffset] = MaxValue<unsigned>::VALUE;
@@ -208,8 +208,8 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
         // std::cerr << "DISABLED " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << std::endl;
         FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
         FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
-        setMaxErrors(wrapperL, 2 * pairId, -1);
-        setMaxErrors(wrapperR, 2 * pairId + 1, -1);
+        setMaxErrors(wrapperL, pairId, -1);
+        setMaxErrors(wrapperR, pairId, -1);
         _freeHistogram(filter, histogramId);
         filter.pairIdToHistogramId.erase(pairId);
         filter.hitCount[pairId - filter.readOffset] = MaxValue<unsigned>::VALUE;
@@ -218,8 +218,8 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
         // std::cerr << "LIMITING " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << "\t" << newLimit << std::endl;
         FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
         FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
-        setMaxErrors(wrapperL, 2 * pairId, newLimit);
-        setMaxErrors(wrapperR, 2 * pairId + 1, newLimit);
+        setMaxErrors(wrapperL, pairId, newLimit);
+        setMaxErrors(wrapperR, pairId, newLimit);
     }
     return false;
 }

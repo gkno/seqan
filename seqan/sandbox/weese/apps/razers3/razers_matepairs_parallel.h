@@ -291,13 +291,13 @@ public:
 template <typename TThreadLocalStorage, typename TReadNo, typename TMaxErrors>
 void
 setMaxErrors(FilterPatternLSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
-             TReadNo readNo,
+             TReadNo pairNo,
              TMaxErrors maxErrors)
 {
     // std::cerr << std::endl << "SET MAX ERRORS LEFT" << std::endl;
-    SEQAN_ASSERT_LT(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
-    SEQAN_ASSERT_GEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId]);
-	setMaxErrors(wrapper.tls.filterPatternL, readNo - wrapper.tls.splitters[wrapper.tls.threadId], maxErrors);
+    SEQAN_ASSERT_LT(pairNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
+    SEQAN_ASSERT_GEQ(pairNo, wrapper.tls.splitters[wrapper.tls.threadId]);
+  	setMaxErrors(wrapper.tls.filterPatternL, pairNo- wrapper.tls.splitters[wrapper.tls.threadId], maxErrors);
 }
 
 // Allow disabling reads in compactPairMatches() for left-mate read set.
@@ -306,13 +306,13 @@ setMaxErrors(FilterPatternLSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
 template <typename TThreadLocalStorage, typename TReadNo, typename TMaxErrors>
 void
 setMaxErrors(FilterPatternRSetMaxErrorsWrapper<TThreadLocalStorage> & wrapper,
-             TReadNo readNo,
+             TReadNo pairNo,
              TMaxErrors maxErrors)
 {
-    // std::cerr << std::endl << "SET MAX ERRORS LEFT" << std::endl;
-    SEQAN_ASSERT_LT(readNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
-    SEQAN_ASSERT_GEQ(readNo, wrapper.tls.splitters[wrapper.tls.threadId]);
-	setMaxErrors(wrapper.tls.filterPatternR, readNo - wrapper.tls.splitters[wrapper.tls.threadId], maxErrors);
+    // std::cerr << std::endl << "SET MAX ERRORS RIGHT" << std::endl;
+    SEQAN_ASSERT_LT(pairNo, wrapper.tls.splitters[wrapper.tls.threadId + 1]);
+    SEQAN_ASSERT_GEQ(pairNo, wrapper.tls.splitters[wrapper.tls.threadId]);
+	  setMaxErrors(wrapper.tls.filterPatternR, pairNo - wrapper.tls.splitters[wrapper.tls.threadId], maxErrors);
 }
 
 template <typename TFragmentStore>
@@ -1154,7 +1154,10 @@ void _mapMatePairReadsParallel(
 #endif  // #ifdef RAZERS_BANDED_MYERS
         
         // threadLocalStorages[i].filterFinderL  = TFilterFinderL(genome, options.repeatLength, 1);
-        threadLocalStorages[i].genomeInf = infix(genome, scanShift, length(genome));
+        typedef typename TFragmentStore::TContigSeq TGenome;
+        typedef typename Infix<TGenome>::Type       TGenomeInfix;
+        TGenomeInfix inf(genome, scanShift, length(genome));
+        set(threadLocalStorages[i].genomeInf, inf);
         // threadLocalStorages[i].filterFinderR  = TFilterFinderR(threadLocalStorages[i].genomeInf, options.repeatLength, 1);
      }
 
