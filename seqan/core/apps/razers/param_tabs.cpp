@@ -32,9 +32,9 @@ bool getGappedParamsRecords(seqan::String<GappedParamsRecord> & records,
                             unsigned n,
                             char errorModel)
 {
-    if (n < 15u or n > 75u)
+    if (n < 15u || n > 75u)
         return false;  // We do not have parameter for these settings.
-    if (errorModel != 'L' and errorModel != 'H')
+    if (errorModel != 'L' && errorModel != 'H')
         return false;  // Invalid error model.
 
     // We can iterate until readLength == 0 since the generator script creates
