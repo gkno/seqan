@@ -1354,7 +1354,7 @@ getHomoProbs(THomoTable & cnks,
 #endif		
 		for(unsigned j = 0; j < length(qualitiesForward[i]); ++j)
 		{
-			qual = ordValue(qualitiesForward[i][j])-33;
+			qual = static_cast<double>(ordValue(qualitiesForward[i][j])-33);
 			//qual = rescale into regular log
 			if(j>=256) fk = fks[255];
 			else fk = fks[j];
@@ -1374,7 +1374,7 @@ getHomoProbs(THomoTable & cnks,
 #endif
 		for(unsigned j = 0; j < length(qualitiesReverse[i]); ++j)
 		{
-			qual = ordValue(qualitiesReverse[i][j])-33;
+			qual = static_cast<double>(ordValue(qualitiesReverse[i][j])-33);
 			if(j>=256) fk = fks[255];
 			else fk = fks[j];
 			sumE[i] += fk * qual;
