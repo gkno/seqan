@@ -905,7 +905,7 @@ pickGappedParams(RazerSOptions<TSpec> & r_options,
     {
         unsigned currMeasure = records[i].measure;
         CharString currShape = records[i].shape;
-        unsigned currThreshold = records[i].t * extrapolFactor;  // when extrapolating from shorter read length
+        unsigned currThreshold = static_cast<unsigned>(records[i].t * extrapolFactor);  // when extrapolating from shorter read length
         TFloat currLossrate = records[i].lossRate;
 
         if (records[i].errors != errorsWanted)
