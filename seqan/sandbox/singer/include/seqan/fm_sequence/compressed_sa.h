@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSA_H_
@@ -204,16 +204,11 @@ struct CompressedSA
     	TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
     	TPos counter = 0;
 
-    	//std::cerr << length((*lfTable).occTable.bitStrings) << std::endl;
-    	//std::cerr << "compressed0" << std::endl;
     	while (!getBit(indicatorString, pos))
     	{
-    		//std::cerr << "compressed1" << std::endl;
     		pos = lfMapping(*lfTable, pos);
-    		//std::cerr << "compressed2" << std::endl;
     		++counter;
     	}
-    	//std::cerr << "compressed3" << std::endl;
     	return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
     }
 
@@ -222,15 +217,11 @@ struct CompressedSA
     {
         TIndicatorString const & indicatorString = getFibre(compressedSA, FibreIndicatorString());
         TPos counter = 0;
-        //std::cerr << "compressed0" << std::endl;
         while (!getBit(indicatorString, pos))
         {
-          //  std::cerr << "compressed1" << std::endl;
             pos = lfMapping(*lfTable, pos);
-           // std::cerr << "compressed2" << std::endl;
             ++counter;
         }
-       // std::cerr << "compressed3" << std::endl;
         return getValue(compressedSA, getRank(indicatorString, pos) - 1) + counter;
     }
 
@@ -360,16 +351,11 @@ inline bool getNextPos(CompressedSA<TSparseString, TLfTable, TSpec> const & comp
     typedef typename Fibre<TSparseString, FibreIndicatorString>::Type TIndicatorString;
 	TIndicatorString const & indicatorString = compressedSA.compressedSA.indicatorString;
 
-	//std::cerr << "indicator String:" <<std::endl;
-	//std::cerr << indicatorString <<std::endl;
 	if (getBit(indicatorString, pos))
 	{
-	//	std::cerr << "getNextPos: true" << std::endl;
 		return true;
 	}
-	//std::cerr << "getNextPos1: false" << std::endl;
 	pos = lfMapping(*compressedSA.lfTable, pos);
-	//std::cerr << "getNextPos2: false" << std::endl;
 	return false;
 }
 

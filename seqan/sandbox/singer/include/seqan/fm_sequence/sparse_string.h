@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_SPARSE_STRING_H_
@@ -204,11 +204,7 @@ template <typename TSparseString, typename TSpec, typename TSize>
 inline void resize(SparseString<TSparseString, TSpec> & string,
             TSize size)
 {
-	//std::cerr << length(string) << " " << size << " " << getBlockSize(string) << std::endl;
-	//char c;
-	//std::cin>>c;
-	resize(getFibre(string, FibreSparseString()), 400000);
-    //resize(getFibre(string, FibreSparseString()), size / getBlockSize(string) + 1);
+    resize(getFibre(string, FibreSparseString()), size / getBlockSize(string) + 1);
     resize(getFibre(string, FibreIndicatorString()), size, 0);
 }
 

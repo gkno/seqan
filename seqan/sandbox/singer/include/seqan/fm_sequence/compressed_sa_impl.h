@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSAIMPL_H_

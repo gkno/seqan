@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREESTRUCTURE_H_
@@ -60,14 +60,6 @@ struct Fibre<WaveletTreeStructure<TChar, TPointer, TSpec>, FibreTreeNodes>
     typedef TPointer Value;
 };
 
-//template <typename TText>
-//struct Fibre<WaveletTreeStructure<TChar, TPointer, TSpec>, FibreTreeNodesPlusDollar>
-//{
-//    typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
-//	//typedef unsigned TValue;
-//    typedef String<Pair<TValue, TValue> > Type;
-//};
-
 template <typename TChar, typename TPointer, typename TSpec>
 struct WaveletTreeStructure
 {
@@ -84,12 +76,9 @@ struct WaveletTreeStructure
     	treeNodes(),
     	minCharValue()
     {
-    	//std::cerr << "treeStructure Constructor0" << std::endl;
         resize(treeNodes, length(freqString) - 1);
-    	//std::cerr << "treeStructure Constructor1" << std::endl;
         computeTreeEntries(freqString,
                            *this);
-    	//std::cerr << "treeStructure Constructor2" << std::endl;
 
     }
 
@@ -154,8 +143,6 @@ inline unsigned length(WaveletTreeStructure<TChar, TPointer, TSpec> & tree)
 template <typename TChar, typename TPointer, typename TSpec, typename TSize>
 inline void resize(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure, TSize size)
 {
-//	TSize bla;
-//	static_cast<Nothing>(bla);
     resize(treeStructure.treeNodes, size);
 }
 
@@ -175,7 +162,6 @@ inline void clear(WaveletTreeStructure<TChar, TPointer, TSpec> & treeStructure)
 template <typename TChar, typename TPointer, typename TSpec>
 struct Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard>
 {
-    //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
     TPointer position;
     const WaveletTreeStructure<TChar, TPointer, TSpec> * waveletTreeStructure;
 
@@ -191,7 +177,6 @@ struct Iter<WaveletTreeStructure<TChar, TPointer, TSpec> const, Standard>
 template <typename TChar, typename TPointer, typename TSpec>
 struct Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard>
 {
-    //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TPointer;
     TPointer position;
     WaveletTreeStructure<TChar, TPointer, TSpec> * waveletTreeStructure;
 
@@ -226,14 +211,12 @@ struct Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> const, Rooted>:
 template <typename TChar, typename TPointer, typename TSpec>
 struct Value<WaveletTreeStructure<TChar, TPointer, TSpec> >
 {
-    //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
     typedef Pair<TChar, TPointer> Type;
 };
 
 template <typename TChar, typename TPointer, typename TSpec>
 struct Value<WaveletTreeStructure<TChar, TPointer, TSpec> const>
 {
-    //typedef typename BitVector_<BitsPerValue<typename Value<TText>::Type>::VALUE>::Type TValue;
     typedef Pair<TChar, TPointer> const Type;
 };
 
@@ -648,7 +631,6 @@ inline void computeSingleStringLengthFromTree(TStringLengthString & lengthString
     TIter iter2 = iter;
 
     TChar pivot = getCharacter(iter);
-   // std::cerr << "pivot: " << pivot << " " << length(alphabet) << std::endl;
 
     unsigned newSplit, newSplit2;
     for(unsigned i = 0; i < length(alphabet); ++i)
@@ -702,326 +684,6 @@ inline void computeStringLengthFromTree(TStringLengthString & lengthString,
                                       (TPointer)(length(prefixSumTable) - 2));
 }
 
-//template <typename TFreqString, typename TChar, typename TPointer, typename TSpec, typename TNumOfChildNodes>
-//void computeTreeEntries(
-//    TFreqString & freq,
-//    Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter,
-//    TPointer smallestValue,
-//    TPointer biggestValue,
-//    TNumOfChildNodes & numChildNodes)
-//{
-//	TPointer oldSmallestValue = smallestValue;
-//	TPointer oldBiggestValue = biggestValue;
-//    typedef typename Value<TFreqString>::Type TSize;
-//    TSize leftSize = freq[smallestValue];
-//    TSize rightSize = freq[biggestValue];
-//
-//
-//   // std::cerr << "pos: " << (int)getPosition(iter) << "smallestValue: " << (int) smallestValue << " biggestValue: " << (int)biggestValue << std::endl;
-//
-//    if (smallestValue == biggestValue - 1)
-//    {
-//    	//std::cerr << "smallestValue: " << (int) smallestValue << " biggestValue: " << (int)biggestValue << std::endl;
-//        setCharacter(iter, (TValue)smallestValue);
-//    	//std::cerr << "computeTreeEntries01" << std::endl;
-//        setNodeToLeaf(iter);
-//    	//std::cerr << "computeTreeEntries02" << std::endl;
-//        ++numChildNodes;
-//        return;
-//    }
-//    //std::cerr << "computeTreeEntries0" << std::endl;
-//    TPointer leftCounter = 0;
-//    TPointer rightCounter = 0;
-//    while (biggestValue - 1 > smallestValue)
-//    {
-//        if (leftSize < rightSize)
-//        {
-//            ++smallestValue;
-//            leftSize += freq[smallestValue];
-//            ++leftCounter;
-//        }
-//        else if (leftSize > rightSize)
-//        {
-//            --biggestValue;
-//            rightSize += freq[biggestValue];
-//            ++rightCounter;
-//        }
-//        else
-//        {
-//            if (leftCounter < rightCounter)
-//            {
-//                ++smallestValue;
-//                leftSize += freq[smallestValue];
-//                ++leftCounter;
-//            }
-//            else
-//            {
-//                --biggestValue;
-//                rightSize += freq[biggestValue];
-//                ++rightCounter;
-//            }
-//        }
-//    }
-//
-//    //std::cerr << "computeTreeEntries1" << std::endl;
-//    setCharacter(iter, (TPointer)smallestValue);
-//    //if the elements of the node do not appear in the text make a leaf here
-//    if (!leftSize && !rightSize)
-//    {
-//        setNodeToLeaf(iter);
-//        ++numChildNodes;
-//        return;
-//    }
-//
-//    //std::cerr << "computeTreeEntries2" << std::endl;
-//    //there must be either a left or right subtree or both
-//    typename Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> >::Type iter2 = iter;
-//
-//    //is there only one element on the left side?
-//    if (oldSmallestValue == smallestValue)
-//    {
-////        setRightChildPos(iter, iter.position + numChildNodes + 1);
-////        ++numChildNodes;
-//    		setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-//    	        TNumOfChildNodes numChildNodes2 = 0;
-//    	        goRight(iter2);
-//    	        computeTreeEntries(freq, iter2, biggestValue, oldBiggestValue, numChildNodes2);
-//    	        numChildNodes += numChildNodes2 + 1;
-//    	        return;
-//    }
-//    else
-//    {
-//        setLeftChildPos(iter);
-//        goLeft(iter);
-//        computeTreeEntries(freq, iter, oldSmallestValue, smallestValue, numChildNodes);
-//    }
-//
-//    //std::cerr << "computeTreeEntries3" << std::endl;
-//    //is there only one element on the right side?
-//    if (biggestValue == oldBiggestValue)
-//    {
-//        setLeftChildPos(iter2);
-//        ++numChildNodes;
-//    }
-//    else
-//    {
-//        setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-//        TNumOfChildNodes numChildNodes2 = 0;
-//        goRight(iter2);
-//        computeTreeEntries(freq, iter2, biggestValue, oldBiggestValue, numChildNodes2);
-//        numChildNodes += numChildNodes2 + 1;
-//        return;
-//    }
-//    //std::cerr << "computeTreeEntries4" << std::endl;
-//}
-
-//template <typename TFreq, typename TChar, typename TPointer, typename TSpec, typename TNumOfChildNodes>
-//void computeTreeEntries(
-//    String<Pair<TChar, TFreq> > & freq,
-//    Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter,
-//    TPointer smallestValue,
-//    TPointer biggestValue,
-//    TNumOfChildNodes & numChildNodes)
-//{
-//    typedef TFreq TSize;
-//
-//	TPointer oldSmallestValue = smallestValue;
-//	TPointer oldBiggestValue = biggestValue;
-//
-//    TSize leftSize = freq[smallestValue];
-//    TSize rightSize = freq[biggestValue];
-//
-//    if (smallestValue == biggestValue - 1)
-//    {
-//        setCharacter(iter, (TValue)smallestValue);
-//        setNodeToLeaf(iter);
-//        ++numChildNodes;
-//        return;
-//    }
-//    //std::cerr << "computeTreeEntries0" << std::endl;
-//    TPointer leftCounter = 0;
-//    TPointer rightCounter = 0;
-//    while (biggestValue - 1 > smallestValue)
-//    {
-//        if (leftSize < rightSize)
-//        {
-//            ++smallestValue;
-//            leftSize += freq[smallestValue];
-//            ++leftCounter;
-//        }
-//        else if (leftSize > rightSize)
-//        {
-//            --biggestValue;
-//            rightSize += freq[biggestValue];
-//            ++rightCounter;
-//        }
-//        else
-//        {
-//            if (leftCounter < rightCounter)
-//            {
-//                ++smallestValue;
-//                leftSize += freq[smallestValue];
-//                ++leftCounter;
-//            }
-//            else
-//            {
-//                --biggestValue;
-//                rightSize += freq[biggestValue];
-//                ++rightCounter;
-//            }
-//        }
-//    }
-//
-//    //std::cerr << "computeTreeEntries1" << std::endl;
-//    setCharacter(iter, (TPointer)smallestValue);
-//    //if the elements of the node do not appear in the text make a leaf here
-//    if (!leftSize && !rightSize)
-//    {
-//        setNodeToLeaf(iter);
-//        ++numChildNodes;
-//        return;
-//    }
-//
-//    //std::cerr << "computeTreeEntries2" << std::endl;
-//    //there must be either a left or right subtree or both
-//    typename Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> >::Type iter2 = iter;
-//
-//    //is there only one element on the left side?
-//    if (oldSmallestValue == smallestValue)
-//    {
-////        setRightChildPos(iter, iter.position + numChildNodes + 1);
-////        ++numChildNodes;
-//    		setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-//    	        TNumOfChildNodes numChildNodes2 = 0;
-//    	        goRight(iter2);
-//    	        computeTreeEntries(freq, iter2, biggestValue, oldBiggestValue, numChildNodes2);
-//    	        numChildNodes += numChildNodes2 + 1;
-//    	        return;
-//    }
-//    else
-//    {
-//        setLeftChildPos(iter);
-//        goLeft(iter);
-//        computeTreeEntries(freq, iter, oldSmallestValue, smallestValue, numChildNodes);
-//    }
-//
-//    //std::cerr << "computeTreeEntries3" << std::endl;
-//    //is there only one element on the right side?
-//    if (biggestValue == oldBiggestValue)
-//    {
-//        setLeftChildPos(iter2);
-//        ++numChildNodes;
-//    }
-//    else
-//    {
-//        setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-//        TNumOfChildNodes numChildNodes2 = 0;
-//        goRight(iter2);
-//        computeTreeEntries(freq, iter2, biggestValue, oldBiggestValue, numChildNodes2);
-//        numChildNodes += numChildNodes2 + 1;
-//        return;
-//    }
-//    //std::cerr << "computeTreeEntries4" << std::endl;
-//}
-
-//template <typename TFreq, typename TChar, typename TPointer, typename TSpec, typename TNumOfChildNodes>
-//void computeTreeEntries(
-//    String<Pair<TChar, TFreq> > & freq,
-//    Iter<WaveletTreeStructure<TChar, TPointer, TSpec>, Standard> & iter,
-//    TPointer lowerPosInFreq,
-//    TPointer upperPosInFreq,
-//    TNumOfChildNodes & numChildNodes,
-//    unsigned & counter)
-//{
-//    typedef TFreq TSize;
-//
-//    std::stringstream stream;
-//    stream<<counter<<".dot";
-//    String<char> name = stream.str().c_str();
-//	writeGraph(*iter.waveletTreeStructure, name);
-//
-//    TPointer numLeft = 1;
-//    TPointer numRight = 1;
-//	TPointer oldLowerPosInFreq = lowerPosInFreq;
-//	TPointer oldUpperPosInFreq = upperPosInFreq;
-//    TSize leftSize = freq[lowerPosInFreq].i2;
-//    TSize rightSize = freq[upperPosInFreq].i2;
-//
-//    if (lowerPosInFreq == upperPosInFreq - 1)
-//    {
-//    	std::cerr << "pos: " << iter.position << " " << freq[upperPosInFreq].i1 << std::endl;
-//        setCharacter(iter, freq[upperPosInFreq].i1);
-//        setNodeToLeaf(iter);
-//        ++numChildNodes;
-//        return;
-//    }
-//
-//    //determine the pivot element such that the number of 0 and 1 are as equal as possible
-//    while (upperPosInFreq - 1 > lowerPosInFreq)
-//    {
-//        if (leftSize < rightSize)
-//        {
-//            ++lowerPosInFreq;
-//            leftSize += freq[lowerPosInFreq].i2;
-//            //numLeft += (freq[lowerPosInFreq].i2 > 0);
-//        }
-//        else
-//        {
-//        	--upperPosInFreq;
-//        	rightSize += freq[upperPosInFreq].i2;
-//        	//numRight += (freq[upperPosInFreq].i2 > 0);
-//        }
-//    }
-//
-//    std::cerr << freq[upperPosInFreq].i1 << std::endl;
-//    setCharacter(iter, freq[upperPosInFreq].i1);
-//    if (!leftSize && !rightSize)
-//    {
-//    	setNodeToLeaf(iter);
-//    	++numChildNodes;
-//    	return;
-//    }
-//
-//    //there must be either a left or right subtree or both
-//    typename Iterator<WaveletTreeStructure<TChar, TPointer, TSpec> >::Type iter2 = iter;
-//
-//    //is there only one element on the left side?
-//    if (oldLowerPosInFreq == lowerPosInFreq)
-//    {
-//   		setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-//   		TNumOfChildNodes numChildNodes2 = 0;
-//   		goRight(iter2);
-//   		++counter;
-//    	computeTreeEntries(freq, iter2, upperPosInFreq, oldUpperPosInFreq, numChildNodes2, counter);
-//    	numChildNodes += numChildNodes2 + 1;
-//    	return;
-//    }
-//    else
-//    {
-//        setLeftChildPos(iter);
-//        goLeft(iter);
-//        ++counter;
-//        computeTreeEntries(freq, iter, oldLowerPosInFreq, lowerPosInFreq, numChildNodes, counter);
-//    }
-//
-//    //is there only one element on the right side?
-//    if (oldUpperPosInFreq == upperPosInFreq)
-//    {
-//        setLeftChildPos(iter2);
-//        ++numChildNodes;
-//    }
-//    else
-//    {
-//    	setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-//        TNumOfChildNodes numChildNodes2 = 0;
-//        goRight(iter2);
-//        ++counter;
-//        computeTreeEntries(freq, iter2, upperPosInFreq, oldUpperPosInFreq, numChildNodes2, counter);
-//        numChildNodes += numChildNodes2 + 1;
-//        return;
-//    }
-//    //std::cerr << "computeTreeEntries4" << std::endl;
-//}
 
 template <typename TFreq, typename TChar, typename TPointer, typename TSpec, typename TNumOfChildNodes>
 inline void computeTreeEntries(
@@ -1040,7 +702,6 @@ inline void computeTreeEntries(
 
     if (lowerPosInFreq == upperPosInFreq - 1)
     {
-    	//std::cerr << "pos: " << (int)iter.position << " " << (int)freq[upperPosInFreq].i1 << std::endl;
         setCharacter(iter, freq[upperPosInFreq].i1);
         setNodeToLeaf(iter);
         ++numChildNodes;
@@ -1054,17 +715,14 @@ inline void computeTreeEntries(
         {
             ++lowerPosInFreq;
             leftSize += freq[lowerPosInFreq].i2;
-            //numLeft += (freq[lowerPosInFreq].i2 > 0);
         }
         else
         {
         	--upperPosInFreq;
         	rightSize += freq[upperPosInFreq].i2;
-        	//numRight += (freq[upperPosInFreq].i2 > 0);
         }
     }
 
-   // std::cerr << freq[upperPosInFreq].i1 << std::endl;
     setCharacter(iter, freq[upperPosInFreq].i1);
     if (!leftSize && !rightSize)
     {
@@ -1091,7 +749,6 @@ inline void computeTreeEntries(
     {
         setLeftChildPos(iter);
         goLeft(iter);
-        //++counter;
         computeTreeEntries(freq, iter, oldLowerPosInFreq, lowerPosInFreq, numChildNodes);
     }
 
@@ -1106,12 +763,10 @@ inline void computeTreeEntries(
     	setRightChildPos(iter2, iter2.position + numChildNodes + 1);
         TNumOfChildNodes numChildNodes2 = 0;
         goRight(iter2);
-        //++counter;
         computeTreeEntries(freq, iter2, upperPosInFreq, oldUpperPosInFreq, numChildNodes2);
         numChildNodes += numChildNodes2 + 1;
         return;
     }
-    //std::cerr << "computeTreeEntries4" << std::endl;
 }
 
 
@@ -1127,15 +782,6 @@ inline void computeTreeEntries(
 	resize(structure, length(freq) - 1);
 	computeTreeEntries(freq, iter, (TPointer)0, (TPointer)(length(freq)-1), numChildNodes);
 }
-
-//template <typename TFreq, typename TChar, typename TPointer, typename TSpec>
-//void computeTreeEntries(
-//    const String<Pair<TChar, TFreq> > & freq,
-//    WaveletTreeStructure<TChar, TPointer, TSpec> & structure)
-//{
-//	TPointer numChildNodes = 0;
-//	computeTreeEntries(freq, structure, numChildNodes);
-//}
 
 template <typename TFreq, typename TChar, typename TPointer, typename TSpec, typename TNumChildNodes>
 inline void computeTreeEntries(

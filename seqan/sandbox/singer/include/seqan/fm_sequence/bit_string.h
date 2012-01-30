@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Your Name <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_BITSTRING_H_
@@ -128,15 +128,6 @@ struct RankSupportBitString
     	return *this;
     }
 
-//    RankSupportBitString & operator=(const RankSupportBitString & cp)
-//    {
-//        length = cp.length;
-//        bitString = cp.bitString;
-//        bucketString = cp.bucketString;
-//        superBucketString = cp.superBucketString;
-//        return *this;
-//    }
-
     inline bool operator==(const RankSupportBitString & b) const
     {
         return length == b.length &&
@@ -208,8 +199,6 @@ inline void printBits(TValue entrie)
         std::cerr << ((entrie >> i) & one);
     }
     std::cerr << std::endl;
-    //char c;
-    //std::cin >> c;
 }
 
 template <typename TValue, typename TSize>
@@ -276,10 +265,6 @@ inline void reserve(RankSupportBitString<TSpec> & rankSupportBitString, TSize si
     unsigned long long numberOfBuckets;
     (size) ? numberOfBuckets = size / bitsPerBucket + 1 : numberOfBuckets = 0;
 
-    //std::cerr << size << " " << bitsPerBucket << " " << numberOfBuckets << std::endl;
-    //char c;
-    //std::cin >> c;
-
     resize(rankSupportBitString.bitString, numberOfBuckets, 0);
     resize(rankSupportBitString.bucketString, numberOfBuckets, 0);
     resize(rankSupportBitString.superBucketString, numberOfBuckets / bitsPerBucket + 1, 0);
@@ -336,25 +321,13 @@ inline bool getBit(String<bool> & bitString, TPos & pos)
     return bitString[pos];
 }
 
-/*	template < typename TBitString, typename TPos >
-    bool getBit(TBitString &bitString, TPos &pos)
-    {
-        typedef typename Value<TBitString>::Type TValue;
-        unsigned short bitsPerValue = BitsPerValue<TValue>::VALUE;
-        unsigned mask = 1 << (bitsPerValue - (pos % bitsPerValue) - 1);
-        //return ((bitString[(pos/bitsPerValue)] >> (bitsPerValue - (pos % bitsPerValue) - 1)) & 1);
-        return (bitString[(pos/bitsPerValue)] & mask);
-    }*/
-
 template <typename TSpec, typename TPos>
 inline bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 {
-	//std::cerr << "0bitString: " << length(bitString) << std::endl;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Value<TBitString>::Type TValue;
     TValue bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue one = 1;
-    //TValue shiftValue = pos % bitsPerValue;
     TValue shiftValue = pos & (bitsPerValue - 1);
     return (bitString.bitString[(pos / bitsPerValue)] >> shiftValue) & one;
 }
@@ -362,12 +335,10 @@ inline bool getBit(RankSupportBitString<TSpec> & bitString, TPos pos)
 template <typename TSpec, typename TPos>
 inline bool getBit(RankSupportBitString<TSpec> const & bitString, TPos pos)
 {
-//	std::cerr << "1bitString: " << length(bitString) << std::endl;
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
     typedef typename Value<TBitString>::Type TValue;
     TValue bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue one = 1;
-    //TValue shiftValue = pos % bitsPerValue;
     TValue shiftValue = pos & (bitsPerValue - 1);
     return (bitString.bitString[(pos / bitsPerValue)] >> shiftValue) & one;
 }
@@ -402,12 +373,9 @@ inline void appendBit(RankSupportBitString<TSpec> & rankSupportBitString, TBit b
     typedef typename Value<TBitString>::Type TValue;
     unsigned const bitsPerValue = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
 
-   // std::cerr << length(rankSupportBitString.bitString) * bitsPerValue << " " << length(rankSupportBitString) <<std::endl;
 
 	if((length(rankSupportBitString.bitString) * bitsPerValue) <= (length(rankSupportBitString)))
 	{
-//		char c;
-//		std::cin >> c;
 		reserve(rankSupportBitString, 2 * (length(rankSupportBitString) + 1));
 	}
     setBit(rankSupportBitString, length(rankSupportBitString), bit);
@@ -513,7 +481,6 @@ inline void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString
             tempSum = getRankInBucket(bitString_[i]);
             bucketSum += tempSum;
             bucketString[i + 1] = bucketSum;
-            //if (!((i + 1) % bitsPerBucket))
             if (!((i + 1) & (bitsPerBucket - 1)))
             {
                 superBucketSum += bucketSum;
@@ -550,12 +517,10 @@ inline void fillBitString(
     const unsigned splitValue,
     const unsigned highestValue,
     TBitString & bitString,        //TRankSupportBitString &counterBitString,
-    //const unsigned long long treePos,//String< unsigned long long > &bitMask,
     const TText & text)
 {
     unsigned short character;
     unsigned long long pos = 0;
-    //	TBitString &bitString = tree.bitStrings[treePos];
     if (length(bitString) == 0)
     {
         return;
