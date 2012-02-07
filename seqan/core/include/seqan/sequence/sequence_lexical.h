@@ -94,7 +94,7 @@ struct DefaultPrefixOrder
 ...default:$size_t$
 ..remarks:
 ...text:This class implement comparator objects that perform (lexical) comparisons between two sequences.
-The result of the comparison is stored in the data members of the instance an can be
+The result of the comparison is stored in the data members of the instance and can be
 accessed by some functions, for example @Function.isLess@ or @Function.isEqual@.
 ...text:In most cases, there is no need for an explicite use of comparators,
 but sometimes this concept provide the opportunity to speed up the code.
