@@ -153,3 +153,9 @@ genome and then counting mismatches.  The read set accession ids are part of
 the name.  For example, the file SRR049254.1.1M.error_dist was obtained
 by aligning the first 1 million left-end reads from read set SRR049254 against
 the drosophila genome.
+
+Changes
+-------
+
+ * Making copy of journaled strings for simulation.  Greatly improves
+   performance of simulation (2012-02-07).

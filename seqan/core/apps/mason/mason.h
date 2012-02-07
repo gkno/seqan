@@ -747,12 +747,12 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
 // simulate edit string
 // build quality values
 // possibly adjust mate if left read has insert at the beginning or right read has insert at the right
-template <typename TReadsTag, typename TRNG>
+template <typename TReadsTag, typename TRNG, typename THaplotypeSpec>
 int buildReadSimulationInstruction(
         String<ReadSimulationInstruction<TReadsTag> > & instructions,
         TRNG & rng,
         unsigned const & haplotypeId,
-        StringSet<String<Dna5, Journaled<Alloc<> > > > const & haplotype,
+        StringSet<String<Dna5, THaplotypeSpec> > const & haplotype,
         String<double> const & relativeContigLengths,
         size_t const & contigId,
         bool fixedContigId,
@@ -837,7 +837,7 @@ int buildReadSimulationInstruction(
         // Check whether there are Ns in the selected areas.
         if (!options.allowNFromGenome) {
             for (unsigned i = 0; i < length(instructions); ++i) {
-                String<Dna5, Journaled<Alloc<> > > const & contig = haplotype[instructions[i].contigId];
+                String<Dna5, THaplotypeSpec> const & contig = haplotype[instructions[i].contigId];
                 typedef typename Position<Dna5String>::Type TPosition;
                 TPosition beginPos = instructions[i].beginPos;
                 TPosition endPos = instructions[i].endPos;
@@ -943,6 +943,10 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
         std::cout << "  Building haplotype..." << std::endl;
         StringSet<String<Dna5, Journaled<Alloc<> > > > haplotypeContigs;
         buildHaplotype(haplotypeContigs, fragmentStore, rng, options);
+        // TODO(holtgrew): Assigning of string set with compatible string should be possible.
+        StringSet<String<Dna5> > haplotypeContigsCopy;
+        for (unsigned i = 0; i < length(haplotypeContigs); ++i)
+            appendValue(haplotypeContigsCopy, haplotypeContigs[i]);
 
         // Build partial sums over relative contig lengths so we can pick the contigs later on.
         size_t totalLength = 0;
@@ -979,7 +983,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 else
                     contigId = contigIds[length(fragmentStore.readSeqStore)];
             }
-            int res = buildReadSimulationInstruction(instructions, rng, haplotypeId, haplotypeContigs, relativeContigLengths, contigId, fixedContigId, parameters, options);
+            int res = buildReadSimulationInstruction(instructions, rng, haplotypeId, haplotypeContigsCopy, relativeContigLengths, contigId, fixedContigId, parameters, options);
             if (res != 0)
                 return res;
 
@@ -989,7 +993,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 // Apply simulation instructions.
                 SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.readNameStore));
                 // Cut out segment from haplotype.
-                String<Dna5Q> read = infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos);
+                String<Dna5Q> read = infix(haplotypeContigsCopy[inst.contigId], inst.beginPos, inst.endPos);
                 String<Dna5Q> haplotypeInfix = read;  // Copy for printing later on.
                 applySimulationInstructions(read, rng, inst, options);
                 // Append read sequence to read seq store and mate pair to read
@@ -1064,7 +1068,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                               << "| isgapinhost      " << isGapInHost(haplotypeContigs[inst.contigId], inst.beginPos+1) << std::endl
                               << "| name:            " << readName << std::endl
                               << "| original infix:  " << infix(fragmentStore.contigStore[inst.contigId].seq, origBeginPos, origEndPos) << std::endl
-                              << "| haplotype infix: " << infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos) << std::endl
+                              << "| haplotype infix: " << infix(haplotypeContigsCopy[inst.contigId], inst.beginPos, inst.endPos) << std::endl
                               << "| read:            " << read << std::endl
                               << "`-- " << std::endl;
                 }
