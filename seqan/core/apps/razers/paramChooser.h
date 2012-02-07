@@ -482,13 +482,13 @@ interpolateErrorDistr(TError & errorDistr, ParamChooserOptions & pm_options)
 	// prepare log error distribution 
 	TError shorterErrorDistr;
 	resize(shorterErrorDistr, totalN);
-	float x =(float) (totalLargeN-2)/(totalN-2);
+	double x =(double) (totalLargeN-2)/(totalN-2);
 	// transformed probs for seeing 1s at positions 0...optionMaxN-1
 	for(unsigned j = 0; j < totalN; ++j) 
 	{
 		typename Value<TError>::Type newVal;
-		float index = j * x;
-		float add = index - (int)index;
+		double index = j * x;
+		double add = index - (int)index;
 		if(j<totalN-1)
 			newVal = errorDistr[(int)index] + add * (errorDistr[(int)index+1] - errorDistr[(int)index]) ;
 		else newVal = errorDistr[totalLargeN-1];
@@ -882,7 +882,7 @@ pickGappedParams(RazerSOptions<TSpec> & r_options,
     getGappedParamsRecords(records, N, mode);
 
     // Now, iterate over gapped records and pick the best parameters.
-    typedef float TFloat;
+    typedef double TFloat;
     String<CharString> shapes;
     resize(shapes,14);  // Best shape for each possible value of q
     String<unsigned> thresholds;
@@ -892,6 +892,7 @@ pickGappedParams(RazerSOptions<TSpec> & r_options,
     String<TFloat> lossrates;
     resize(lossrates,14);  // Lossrates.
     double extrapolFactor = 1.0;  // No extrapolation.
+    pm_options.optionErrorRate += 0.0000001;
     unsigned errorsWanted = (int)(pm_options.optionErrorRate * pm_options.totalN);
     if (pm_options.extrapolate)
     {
@@ -997,7 +998,7 @@ template<typename TFile, typename TSpec>
 bool
 parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOptions & pm_options)
 {
-	typedef float TFloat;
+	typedef double TFloat;
 	String<CharString> shapes;
 	resize(shapes,14); //best shape for each possible value of q
 	String<unsigned> thresholds;
@@ -1161,7 +1162,7 @@ extrapolateNK(TOptions & pm_options)
 			bestN = currN;
 	}
 	pm_options.extrapolN = bestN;
-	pm_options.extrapolK = (unsigned)ceil(((double)bestN * 1.0/recErrorRatio)-0.00001);
+	pm_options.extrapolK = (unsigned)ceil(((double)bestN * 1.0/recErrorRatio)-0.0000001);
 	
 
 }
@@ -1171,8 +1172,8 @@ template<typename TSpec>
 bool
 chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 {
-	typedef float TFloat;
-	static const TFloat epsilon = (TFloat)0.00000000001;	
+	typedef double TFloat;
+	static const double epsilon = 0.0000001;
 	pm_options.optionLossRate += epsilon;
 
 
@@ -1218,6 +1219,7 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 		pm_options.optionHammingOnly=true;
 
 
+  pm_options.optionErrorRate += 0.0000001;
 	pm_options.totalK = (int)(pm_options.optionErrorRate * pm_options.totalN);
 	
 	if ((pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedHammingN )
