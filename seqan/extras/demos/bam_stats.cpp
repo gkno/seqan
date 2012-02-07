@@ -144,10 +144,12 @@ struct Stats
     String<unsigned> mismatchHisto;
     String<unsigned> insertHisto;
     String<unsigned> deletionHisto;
+    String<unsigned> avrgQuality;
 
     Stats() : numRecords(0), alignedRecords(0)
     {}
 };
+
 
 template <typename TStreamOrReader, typename TSeqString, typename TSpec, typename TFormat>
 int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Options const & options, TFormat const & tag)
@@ -155,6 +157,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
     StringSet<CharString> refNames;
     NameStoreCache<StringSet<CharString> > refNamesCache(refNames);
     BamIOContext<StringSet<CharString> > context(refNames, refNamesCache);
+	String<__uint64> qualSum;
 
     // Read header.
     BamHeader header;
@@ -173,6 +176,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
     if (options.verbosity >= 2)
         std::cerr << "Reading alignments" << std::endl;
     Align<Dna5String> align;
+    __int64 reads = 0;
     while (!atEnd(reader))
     {
         // Read alignment record.
@@ -197,9 +201,14 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
             typedef typename Row<TAlign>::Type    TRow;
             typedef typename Iterator<TRow>::Type TRowIter;
             unsigned editDistance = 0;
-            unsigned posRead = 0;
+            unsigned posReadFwd = 0;
             for (TRowIter it0 = begin(row(align, 0)), it1 = begin(row(align, 1)); !atEnd(it0); goNext(it0), goNext(it1))
             {
+                unsigned posRead = posReadFwd;
+                // is read aligned to reverse strand?
+                if ((record.flag & 0x10) != 0)
+                    posRead = (length(record.seq) - 1) - posReadFwd;
+                
                 if (isGap(it0) && isGap(it1))
                     continue;
                 if (isGap(it0) || isGap(it1))
@@ -209,7 +218,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                         unsigned len = length(stats.insertHisto);
                         resize(stats.insertHisto, std::max(len, posRead + 1), 0);
                         stats.insertHisto[posRead] += 1;
-                        posRead += 1;
+                        posReadFwd += 1;
                     }
                     else
                     {
@@ -227,8 +236,23 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                     stats.mismatchHisto[posRead] += 1;
                     editDistance += 1;
                 }
-                posRead += 1;
+                posReadFwd += 1;
             }
+            
+            resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
+            if ((record.flag & 0x10) == 0)
+            {
+                // read aligns to forward strand
+                for (unsigned i = 0; i < length(record.qual); ++i)
+                    qualSum[i] += record.qual[i] - '!';
+            } else
+            {
+                // read aligns to reverse strand
+                for (unsigned i = 0; i < length(record.qual); ++i)
+                    qualSum[(length(record.qual) - 1) - i] += record.qual[i] - '!';
+            }
+            ++reads;
+            
             if (options.verbosity >= 3)
                 std::cerr << "edit distance: " << editDistance << std::endl;
             unsigned len = length(stats.editDistanceHisto);
@@ -236,25 +260,34 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
             stats.editDistanceHisto[editDistance] += 1;
         }
     }
+    
+    // compute error probabilities
+    resize(stats.avrgQuality, length(qualSum));
+    for (unsigned i = 0; i < length(qualSum); ++i)
+        stats.avrgQuality[i] = (double)qualSum[i] / (double)reads;
 
     // Print results.
-    std::cerr << "RESULTS\n\n";
-    std::cerr << "num records     \t" << stats.numRecords << std::endl;
-    std::cerr << "aligned records \t" << stats.alignedRecords << std::endl;
-    std::cerr << "aligned record %\t" << 100.0 * stats.alignedRecords / stats.numRecords << std::endl;
-    std::cerr << "distance histogram" << std::endl;
+    std::cout << "RESULTS\n\n";
+    std::cout << "num records     \t" << stats.numRecords << std::endl;
+    std::cout << "aligned records \t" << stats.alignedRecords << std::endl;
+    std::cout << "aligned record %\t" << 100.0 * stats.alignedRecords / stats.numRecords << std::endl;
+    std::cout << "distance histogram" << std::endl;
+    std::cout << "#distance\tnumber of reads" << std::endl;
     for (unsigned i = 0; i < length(stats.editDistanceHisto); ++i)
-        std::cerr << "  " << i << "\t" << stats.editDistanceHisto[i] << std::endl;
-    std::cerr << "mismatch histogram" << std::endl;
+        std::cout << i << '\t' << stats.editDistanceHisto[i] << std::endl;
+    std::cout << "read position histogram" << std::endl;
+    std::cout << "#position\tmismatches\tinsertions\tdeletions\terror prob\tquality-based error prob\tquality" << std::endl;
     for (unsigned i = 0; i < length(stats.mismatchHisto); ++i)
-        std::cerr << "  " << i << "\t" << stats.mismatchHisto[i] << std::endl;
-    std::cerr << "insertion histogram" << std::endl;
-    for (unsigned i = 0; i < length(stats.insertHisto); ++i)
-        std::cerr << "  " << i << "\t" << stats.insertHisto[i] << std::endl;
-    std::cerr << "deletion histogram" << std::endl;
-    for (unsigned i = 0; i < length(stats.deletionHisto); ++i)
-        std::cerr << "  " << i << "\t" << stats.deletionHisto[i] << std::endl;
-    
+    {
+        std::cout << i << '\t';
+        std::cout << stats.mismatchHisto[i] << '\t';
+        std::cout << stats.insertHisto[i] << '\t';
+        std::cout << stats.deletionHisto[i] << '\t';
+        std::cout << (stats.mismatchHisto[i] + stats.insertHisto[i] + stats.deletionHisto[i]) / (double)reads << '\t';
+		double e = stats.avrgQuality[i] * log(10.0) / -10.0;
+        std::cout << exp(e) << '\t';
+        std::cout << stats.avrgQuality[i] << std::endl;
+    }
     return 0;
 }
 
