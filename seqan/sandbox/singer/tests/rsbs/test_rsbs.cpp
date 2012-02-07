@@ -1,5 +1,5 @@
 // ==========================================================================
-//                                  fm_sequence
+//                                    rsbs
 // ==========================================================================
 // Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -29,35 +29,32 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <jochen.singer@fu-berlin.de>
+// Author: Your Name <your.email@example.net>
 // ==========================================================================
-// Facade header for module fm_sequence.
-// ==========================================================================
-
-#ifndef SANDBOX_SINGER_INCLUDE_SEQAN_FM_SEQUENCE_H_
-#define SANDBOX_SINGER_INCLUDE_SEQAN_FM_SEQUENCE_H_
-
-// ===========================================================================
-// Prerequisites.
-// ===========================================================================
 
 #include <seqan/basic.h>
 #include <seqan/file.h>
-#include <seqan/sequence.h>
-#include <seqan/index.h>
 
-// ===========================================================================
-// First Header Group.
-// ===========================================================================
+#include "test_rsbs.h"
 
-//#include "seqan/fm_sequence/prefix_sum_table.h"
-#include "seqan/fm_sequence/bit_string.h"
-#include "seqan/fm_sequence/bit_string_beta.h"
-#include "seqan/fm_sequence/sparse_string.h"
-#include "seqan/fm_sequence/compressed_sa.h"
-#include "seqan/fm_sequence/compressed_sa_impl.h"
-#include "seqan/fm_sequence/wavelet_tree.h"
-#include "seqan/fm_sequence/wavelet_tree_structure.h"
-//#include <seqan/fm_sequence/compressed_string.h>
 
-#endif  // SANDBOX_SINGER_INCLUDE_SEQAN_FM_SEQUENCE_H_
+SEQAN_BEGIN_TESTSUITE(test_rsbs)
+{
+
+    // Call tests.
+    SEQAN_CALL_TEST(test_rsbs_defaultConstructor);
+    SEQAN_CALL_TEST(test_rsbs_resize);
+    SEQAN_CALL_TEST(test_rsbs_getBuPos);
+    SEQAN_CALL_TEST(test_rsbs_getSBuPos);
+    SEQAN_CALL_TEST(test_rsbs_getPosInBu);
+    SEQAN_CALL_TEST(test_rsbs_getSetBit);
+    SEQAN_CALL_TEST(test_rsbs_append);
+    SEQAN_CALL_TEST(test_rsbs_rank);
+    SEQAN_CALL_TEST(test_rsbs_completeRsbs);
+    SEQAN_CALL_TEST(test_rsbs_constructor);
+	SEQAN_CALL_TEST(test_rsbs_equalOperator);
+	SEQAN_CALL_TEST(test_rsbs_assignOperator);
+
+
+}
+SEQAN_END_TESTSUITE
