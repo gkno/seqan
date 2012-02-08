@@ -144,7 +144,7 @@ struct Stats
     String<unsigned> mismatchHisto;
     String<unsigned> insertHisto;
     String<unsigned> deletionHisto;
-    String<unsigned> avrgQuality;
+    String<double> avrgQuality;
 
     Stats() : numRecords(0), alignedRecords(0)
     {}
