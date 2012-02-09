@@ -4,7 +4,7 @@
 
 # We use the current trunk version of 2011-10-18 (r10612) for building the
 # reference.
-RAZERS=../../../../build/Release/core/apps/razers/razers
+RAZERS="../../../../build/Release/core/apps/razers/razers --low-memory"
 
 # ============================================================
 # Run Adeno Single-End Example

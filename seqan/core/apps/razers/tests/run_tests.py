@@ -51,8 +51,9 @@ def main(source_base, binary_base):
         conf = app_tests.TestConf(
             program=path_to_program,
             redir_stdout=ph.outFile('se-adeno-reads%d_1.stdout' % rl),
-            args=[ph.inFile('adeno-genome.fa'),
-                  ph.inFile('adeno-reads%d_1.fa' % rl),
+            args=['--low-memory',
+                  ph.inFile('adeno-genome.fa'),
+                  ph.inFile('adeno-reads%d_1.fa' % rl,),
                   '-o', ph.outFile('se-adeno-reads%d_1.out' % rl)],
             to_diff=[(ph.inFile('se-adeno-reads%d_1.out' % rl),
                       ph.outFile('se-adeno-reads%d_1.out' % rl)),
@@ -64,7 +65,8 @@ def main(source_base, binary_base):
         conf = app_tests.TestConf(
             program=path_to_program,
             redir_stdout=ph.outFile('se-adeno-reads%d_1-id.stdout' % rl),
-            args=['-id',
+            args=['--low-memory',
+                  '-id',
                   ph.inFile('adeno-genome.fa'),
                   ph.inFile('adeno-reads%d_1.fa' % rl),
                   '-o', ph.outFile('se-adeno-reads%d_1-id.out' % rl)],
@@ -79,7 +81,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('se-adeno-reads%d_1-id%s.stdout' % (rl, o)),
-                args=['-id', o,
+                args=['--low-memory',
+                      '-id', o,
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       '-o', ph.outFile('se-adeno-reads%d_1-id%s.out' % (rl, o))],
@@ -94,7 +97,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('se-adeno-reads%d_1-id-i%d.stdout' % (rl, i)),
-                args=['-id', '-i', str(i),
+                args=['--low-memory',
+                      '-id', '-i', str(i),
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       '-o', ph.outFile('se-adeno-reads%d_1-id-i%d.out' % (rl, i))],
@@ -109,7 +113,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('se-adeno-reads%d_1-id-of%d.stdout' % (rl, of)),
-                args=['-id', '-of', str(of),
+                args=['--low-memory',
+                      '-id', '-of', str(of),
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       '-o', ph.outFile('se-adeno-reads%d_1-id-of%d.out' % (rl, of))],
@@ -124,7 +129,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('se-adeno-reads%d_1-id-so%d.stdout' % (rl, so)),
-                args=['-id', '-so', str(so),
+                args=['--low-memory',
+                      '-id', '-so', str(so),
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       '-o', ph.outFile('se-adeno-reads%d_1-id-so%d.out' % (rl, so))],
@@ -144,7 +150,8 @@ def main(source_base, binary_base):
         conf = app_tests.TestConf(
             program=path_to_program,
             redir_stdout=ph.outFile('pe-adeno-reads%d_2.stdout' % rl),
-            args=[ph.inFile('adeno-genome.fa'),
+            args=['--low-memory',
+                  ph.inFile('adeno-genome.fa'),
                   ph.inFile('adeno-reads%d_1.fa' % rl),
                   ph.inFile('adeno-reads%d_2.fa' % rl),
                   '-o', ph.outFile('pe-adeno-reads%d_2.out' % rl)],
@@ -158,7 +165,8 @@ def main(source_base, binary_base):
         conf = app_tests.TestConf(
             program=path_to_program,
             redir_stdout=ph.outFile('pe-adeno-reads%d_2-id.stdout' % rl),
-            args=['-id',
+            args=['--low-memory',
+                  '-id',
                   ph.inFile('adeno-genome.fa'),
                   ph.inFile('adeno-reads%d_1.fa' % rl),
                   ph.inFile('adeno-reads%d_2.fa' % rl),
@@ -174,7 +182,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('pe-adeno-reads%d_2-id%s.stdout' % (rl, o)),
-                args=['-id', o,
+                args=['--low-memory',
+                      '-id', o,
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       ph.inFile('adeno-reads%d_2.fa' % rl),
@@ -190,7 +199,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('pe-adeno-reads%d_2-id-i%d.stdout' % (rl, i)),
-                args=['-id', '-i', str(i),
+                args=['--low-memory',
+                      '-id', '-i', str(i),
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       ph.inFile('adeno-reads%d_2.fa' % rl),
@@ -206,7 +216,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('pe-adeno-reads%d_2-id-of%d.stdout' % (rl, of)),
-                args=['-id', '-of', str(of),
+                args=['--low-memory',
+                      '-id', '-of', str(of),
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       ph.inFile('adeno-reads%d_2.fa' % rl),
@@ -222,7 +233,8 @@ def main(source_base, binary_base):
             conf = app_tests.TestConf(
                 program=path_to_program,
                 redir_stdout=ph.outFile('pe-adeno-reads%d_2-id-so%d.stdout' % (rl, so)),
-                args=['-id', '-so', str(so),
+                args=['--low-memory',
+                      '-id', '-so', str(so),
                       ph.inFile('adeno-genome.fa'),
                       ph.inFile('adeno-reads%d_1.fa' % rl),
                       ph.inFile('adeno-reads%d_2.fa' % rl),
