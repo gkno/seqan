@@ -234,12 +234,20 @@ def runTest(test_conf):
     # Compare results with expected results, if the expected and actual result
     # are not equal then print diffs.
     result = True
-    for expected_path, result_path in test_conf.to_diff:
+    for tuple_ in test_conf.to_diff:
+        expected_path, result_path = tuple_[:2]
+        transforms = []
+        if len(tuple_) >= 3:
+            transforms += tuple_[2]
         try:
             with open(expected_path, 'r') as f:
                 expected_str = f.read()
+            for t in transforms:
+                expected_str = t.apply(expected_str, True)
             with open(result_path, 'r') as f:
                 result_str = f.read()
+            for t in transforms:
+                result_str = t.apply(result_str, True)
             if expected_str == result_str:
                 continue
             fmt = 'Comparing %s against %s'
@@ -254,6 +262,21 @@ def runTest(test_conf):
             print >>sys.stderr, fmt % (expected_path, result_path, e)
             result = False
     return result
+
+
+class ReplaceTransform(object):
+    """Transformation on left and/or right files to diff."""
+
+    def __init__(self, needle, replacement, left=False, right=False):
+        self.needle = needle
+        self.replacement = replacement
+        self.left = left
+        self.right = right
+
+    def apply(self, text, is_left):
+        if (is_left and not self.left) or (not is_left and not self.right):
+            return  # Skip if no transform is to be applied.
+        return self.text.replace(self.needle, self.replacement)
 
 
 def main(main_func):
