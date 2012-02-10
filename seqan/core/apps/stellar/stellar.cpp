@@ -498,9 +498,55 @@ _setParser(TParser & parser) {
     addOption(parser, CommandLineOption("t", "no-rt", "Suppress printing running time.", OptionType::Bool | OptionType::Hidden, false));
 }
 
+// TODO(holtgrew): Move this into a SeqAn misc module.
+
+/*
+.Class.ScientificNotationExponentOutputNormalizer
+..summary:RAII class to normalize the output of exponents in scientific notation.
+..signature:ScientificNotationExponentOutputNormalizer
+..remarks:
+The C/C++ standard only specifies that exponents in scientific notation have to be printed with at least two characters.
+MSVC prints three and thus the output of otherwise identical programs differs.
+This RAII class fixes the problem.
+..example.text:Use this class in your $main()$ function, for example.
+..example.code:
+int main()
+{
+	// Make sure doubles are printed consistently on all platforms.
+	ScientificNotationExponentOutputNormalizer normalizer;
+
+	std::cout << 1e-8 << std::endl;
+    return 0;
+}
+*/
+
+class ScientificNotationExponentOutputNormalizer
+{
+public:
+	unsigned _oldExponentFormat;
+
+	ScientificNotationExponentOutputNormalizer() : _oldExponentFormat(0)
+	{
+#ifdef PLATFORM_WINDOWS
+		// Set scientific format to print two places.
+		unsigned _oldExponentFormat = _set_output_format(_TWO_DIGIT_EXPONENT);
+#endif
+	}
+
+	~ScientificNotationExponentOutputNormalizer()
+	{
+#ifdef PLATFORM_WINDOWS
+		// Enable old exponent format.
+		_set_output_format(_oldExponentFormat);
+#endif
+	}
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Parses and outputs parameters, calls _stellarOnAll
 int main(int argc, const char *argv[]) {
+	// Makes sure that printing doubles in scientific notation is normalized on all platforms.
+	ScientificNotationExponentOutputNormalizer scientificNotationNormalizer; 
 
     // command line parsing
     CommandLineParser parser("stellar");
@@ -568,6 +614,6 @@ int main(int argc, const char *argv[]) {
 
     if (options.verbose > 0 && options.noRT == false) 
 		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
-	
+
 	return 0;
 }
