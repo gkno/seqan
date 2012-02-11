@@ -527,7 +527,7 @@ public:
 
 	ScientificNotationExponentOutputNormalizer() : _oldExponentFormat(0)
 	{
-#ifdef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS_VS
 		// Set scientific format to print two places.
 		unsigned _oldExponentFormat = _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
@@ -535,7 +535,7 @@ public:
 
 	~ScientificNotationExponentOutputNormalizer()
 	{
-#ifdef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS_VS
 		// Enable old exponent format.
 		_set_output_format(_oldExponentFormat);
 #endif
