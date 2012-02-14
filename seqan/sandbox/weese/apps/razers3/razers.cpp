@@ -406,6 +406,7 @@ int main(int argc, const char *argv[])
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
+	addOption(parser, addArgumentText(CommandLineOption("mf", "mismatch-file",     "write mismatch patterns to FILE", OptionType::String), "FILE"));
 	addSection(parser, "Parallelism Options:");
 	addOption(parser, CommandLineOption("tc", "thread-count",   "Set the number of threads to use (0 to force sequential mode).", OptionType::Int | OptionType::Label, options.threadCount));
 	addOption(parser, CommandLineOption("pws", "parallel-window-size",   "Collect SWIFT hits in windows of this length.", OptionType::Int | OptionType::Label, options.windowSize));
@@ -464,6 +465,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "taboo-length", options.tabooLength);
 	getOptionValueLong(parser, "match-N", options.matchN);
 	getOptionValueLong(parser, "error-distr", errorPrbFileName);
+	getOptionValueLong(parser, "mismatch-file", options.mismatchFilename);
 	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
 	if (isSetLong(parser, "verbose")) options._debugLevel = max(options._debugLevel, 1);
 	if (isSetLong(parser, "vverbose")) options._debugLevel = max(options._debugLevel, 3);
@@ -547,6 +549,7 @@ int main(int argc, const char *argv[])
 #endif
         if ((ones < 7 || ones > maxOnes) && !stop)
 			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes << " '1's" << endl;
+        options.delta = ones + zeros;
 	}
 	if ((options.abundanceCut <= 0 || options.abundanceCut > 1) && (stop = true))
 		cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl;

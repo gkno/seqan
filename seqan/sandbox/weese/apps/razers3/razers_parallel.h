@@ -787,7 +787,11 @@ void _mapSingleReadsParallelToContig(
     }
 
 
-    // NOTE: We never undo the reverse-complementing!
+    // NOTE:
+    // We never undo the reverse-complementing!
+    // It is not necessary as the contigs are freed by unlockAndFreeContig
+    // They are loaded again in dumpMatches if necessary
+    //
 	// if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
     //     if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
 #ifdef RAZERS_PROFILE

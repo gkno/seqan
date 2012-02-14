@@ -280,6 +280,50 @@ getErrorDistribution(
 	return unique;
 }
 
+template <typename TMismatchFile, typename TFragmentStore, typename TSpec>
+inline void
+writeMismatchFile(
+	TMismatchFile &file,
+	TFragmentStore &store, 
+	RazerSOptions<TSpec> &options)
+{
+	typedef typename TFragmentStore::TAlignedReadStore	TAlignedReadStore;
+	typedef typename Value<TAlignedReadStore>::Type		TAlignedRead;
+	typedef typename TFragmentStore::TContigPos			TContigPos;
+	
+	typename Iterator<TAlignedReadStore, Standard>::Type	it = begin(store.alignedReadStore, Standard());
+	typename Iterator<TAlignedReadStore, Standard>::Type	itEnd = end(store.alignedReadStore, Standard());
+    
+    Dna5String contigInf, readInf;
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).id == TAlignedRead::INVALID_ID) continue;
+
+		TContigPos left = (*it).beginPos;
+		TContigPos right = (*it).endPos;
+		
+		if (left < right)
+			contigInf = infix(store.contigStore[(*it).contigId].seq, left, right);
+		else
+		{
+			contigInf = infix(store.contigStore[(*it).contigId].seq, right, left);
+			reverseComplement(contigInf);
+		}
+        
+        readInf = store.readSeqStore[(*it).readId];
+
+		for (unsigned i = 0; i < length(readInf); ++i)
+        {
+            if (i > 0) file << '\t';
+            if ((options.compMask[ordValue(readInf[i])] & options.compMask[ordValue(contigInf[i])]) == 0)
+                file << '1';
+            else
+                file << '0';
+		}
+        file << '\n';
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Dump an alignment
@@ -435,44 +479,80 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations)
 	
 }
 
-template <typename TInt, typename T = void>
+template <typename TUnsigned, unsigned SIZE, typename T = void>
 struct AppendIntNumberFormatString;
 
 
 template <typename T>
-struct AppendIntNumberFormatString<int, T>
+struct AppendIntNumberFormatString<False, 1, T>
 {
     static const char VALUE[];
 };
 template <typename T>
-const char AppendIntNumberFormatString<int, T>::VALUE[] = "%i";
+const char AppendIntNumberFormatString<False, 1, T>::VALUE[] = "%hhi";
 
 
 template <typename T>
-struct AppendIntNumberFormatString<unsigned, T>
+struct AppendIntNumberFormatString<True, 1, T>
 {
     static const char VALUE[];
 };
 template <typename T>
-const char AppendIntNumberFormatString<unsigned, T>::VALUE[] = "%u";
+const char AppendIntNumberFormatString<True, 1, T>::VALUE[] = "%hhu";
 
 
 template <typename T>
-struct AppendIntNumberFormatString<__int64, T>
+struct AppendIntNumberFormatString<False, 2, T>
 {
     static const char VALUE[];
 };
 template <typename T>
-const char AppendIntNumberFormatString<__int64, T>::VALUE[] = "%lli";
+const char AppendIntNumberFormatString<False, 2, T>::VALUE[] = "%hi";
 
 
 template <typename T>
-struct AppendIntNumberFormatString<__uint64, T>
+struct AppendIntNumberFormatString<True, 2, T>
 {
     static const char VALUE[];
 };
 template <typename T>
-const char AppendIntNumberFormatString<__uint64, T>::VALUE[] = "%llu";
+const char AppendIntNumberFormatString<True, 2, T>::VALUE[] = "%hu";
+
+
+template <typename T>
+struct AppendIntNumberFormatString<False, 4, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<False, 4, T>::VALUE[] = "%i";
+
+
+template <typename T>
+struct AppendIntNumberFormatString<True, 4, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<True, 4, T>::VALUE[] = "%u";
+
+
+template <typename T>
+struct AppendIntNumberFormatString<False, 8, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<False, 8, T>::VALUE[] = "%lli";
+
+
+template <typename T>
+struct AppendIntNumberFormatString<True, 8, T>
+{
+    static const char VALUE[];
+};
+template <typename T>
+const char AppendIntNumberFormatString<True, 8, T>::VALUE[] = "%llu";
 
 
 template <typename TString, typename TInt>
@@ -480,7 +560,7 @@ void appendIntNumber(TString &str, TInt i)
 {
     // 1 byte has at most 3 decimal digits (plus 1 for the NULL character)
     char buf[sizeof(TInt) * 3 + 1];
-    sprintf(buf, AppendIntNumberFormatString<TInt>::VALUE, i);
+    sprintf(buf, AppendIntNumberFormatString<typename Is<UnsignedIntegerConcept<TInt> >::Type, sizeof(TInt)>::VALUE, i);
     append(str, buf);
 }
 
@@ -548,7 +628,7 @@ int dumpMatches(
 	SEQAN_PROTIMESTART(dump_time);
 
 	// load Genome sequences for alignment dumps
-	if (options.dumpAlignment || options.outputFormat == 4 || options.outputFormat == 5 || !empty(errorPrbFileName))
+	if (options.dumpAlignment || options.outputFormat == 4 || options.outputFormat == 5 || !empty(errorPrbFileName) || !empty(options.mismatchFilename))
 		if (!lockContigs(store)) {
 			std::cerr << "Failed to load genomes" << std::endl;
 			options.dumpAlignment = false;
@@ -1189,6 +1269,17 @@ int dumpMatches(
 	if (options.dumpAlignment || options.outputFormat == 4 || options.outputFormat == 5 || !empty(errorPrbFileName))
 		unlockAndFreeContigs(store);
 
+	// get mismatch distributions
+    if (!empty(options.mismatchFilename))
+    {
+        std::ofstream mismatchFile;
+        mismatchFile.open(toCString(options.mismatchFilename), std::ios_base::out | std::ios_base::trunc);
+        if (mismatchFile.is_open())
+            writeMismatchFile(mismatchFile, store, options);
+        else
+            std::cerr << "Failed to open mismatch file" << std::endl;
+    }
+
 	// get empirical error distribution
 	if (!empty(errorPrbFileName) && maxReadLength > 0)
 	{
@@ -1202,7 +1293,9 @@ int dumpMatches(
 			resize(posError, maxReadLength, 0);
 			
 			if (options.gapMode == RAZERS_UNGAPPED)
+            {
 				unique = getErrorDistribution(posError, store, options);
+            }
 			else
 			{
 				unique = getErrorDistribution(posError, insertions, deletions, store, options);

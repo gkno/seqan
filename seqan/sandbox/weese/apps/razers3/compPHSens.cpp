@@ -18,13 +18,12 @@ int main(int argc, const char *argv[])
 
 	addUsageLine(parser, "[OPTION]... <error_dist file>");
 
-	unsigned maxOverlap = 6;
-	unsigned maxErrors = 12;
-	unsigned numReads = 1000000;
+	unsigned maxOverlap = 10;
+	unsigned maxErrors = 10;
 
-	addOption(parser, CommandLineOption("n",   "num-reads",    "number of reads", OptionType::Int | OptionType::Label, numReads));
-	addOption(parser, CommandLineOption("mo",  "max-overlap",  "estimate for overlaps 0,1,...,max-overlap", OptionType::Int | OptionType::Label, maxOverlap));
-	addOption(parser, CommandLineOption("me",  "max-errors",   "estimate for errors 0,1,...,max-errors", OptionType::Int | OptionType::Label, maxErrors));
+	addOption(parser, CommandLineOption("d",   "delta",       2, "delta range", OptionType::Int | OptionType::Label));
+	addOption(parser, CommandLineOption("mo",  "max-overlap",    "estimate for overlaps 0,1,...,max-overlap", OptionType::Int | OptionType::Label, maxOverlap));
+	addOption(parser, CommandLineOption("me",  "max-errors",     "estimate for errors 0,1,...,max-errors", OptionType::Int | OptionType::Label, maxErrors));
 	requiredArguments(parser, 1);
 
 	bool stop = !parse(parser, argc, argv, std::cerr);
@@ -32,21 +31,46 @@ int main(int argc, const char *argv[])
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Extract and check options
-    getOptionValueLong(parser, "num-reads", numReads);
     getOptionValueLong(parser, "max-overlap", maxOverlap);
     getOptionValueLong(parser, "max-errors", maxErrors);
 
+    int deltaMin = 11;
+    int deltaMax = 31;    
+    if (isSetLong(parser, "delta"))
+    {
+        getOptionValueLong(parser, "delta", 0, deltaMin);
+        getOptionValueLong(parser, "delta", 1, deltaMax);
+    }
+
 	std::ifstream errorDistFile(toCString(getArgumentValue(parser, 0)), std::ios_base::in | std::ios_base::binary);
-	double errorProb;
+	double prob;
+//    char buf[256];
 	
 	while (true)
 	{
-		errorDistFile >> errorProb;
+//        int pos, dummy;
+//		errorDistFile >> pos;
+//		errorDistFile >> dummy;
+//		errorDistFile >> dummy;
+//		errorDistFile >> dummy;
+		errorDistFile >> prob;
 		if (!errorDistFile.good()) break;
-		appendValue(options.errorProb, errorProb);
+//        errorDistFile.getline(buf, 256);
+//        std::cout<< errorProb<<std::endl;
+		appendValue(options.errorProb, prob);
 	}
+    
+    if (empty(options.errorProb))
+    {
+        std::cerr << "Couldn't read error distribution file." << std::endl;
+        return 1;
+    }
+    
+//    clear(options.errorProb);
+//    resize(options.errorProb, 22,0.4);    
+    
 	resize(options.readLengths, length(options.errorProb), 0);
-	appendValue(options.readLengths, numReads);
+	appendValue(options.readLengths, 1);
 	options.lossRate = 1.0;
 	
 //	for(unsigned k=0;k<length(options.errorProb);++k)
@@ -55,39 +79,53 @@ int main(int argc, const char *argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Output losses to file
 	
-	unsigned errorLimit = 10;
-	std::cout << "error_dist_file\terrors\toverlap\tq";
-	for (unsigned i = 0; i <= errorLimit; ++i)
-		std::cout << '\t' << i << "-error_loss";
+    
+    std::cout << "# ==========================================================" << std::endl;
+    std::cout << "# Estimated losses for " << getArgumentValue(parser, 0) << std::endl;
+    std::cout << "# Format Description" << std::endl;
+    std::cout << "# <q>\t<overlap>\t<real time>";
+    for (unsigned i = 0; i <= maxErrors; ++i)
+		std::cout << "\t<" << i << "-error loss>";
 	std::cout << std::endl;
+    std::cout << "# ==========================================================" << std::endl;
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Compute losses for different errors, overlaps
-	
+    	
 	Shape<Dna, GenericShape> dummyShape;
-	unsigned maxLength = length(options.readLengths) - 1;
-	for (unsigned errors = 0; errors <= maxErrors; ++errors)
-	{
-		options.errorRate = (double)errors / (double)maxLength + 0.00001;
-		
-		typedef TOptions::TProb TFloat;
-		String<TFloat> estLosses;
-		estimatePigeonholeLosses(estLosses, _pigeonholeMaxShapeWeight(dummyShape), options);
+    String<unsigned> deltas;
 
-		for (unsigned idx = 3 + errors; idx < length(estLosses); idx += 3 + errors)
-		{
-			unsigned ol = estLosses[idx];
-			unsigned q  = estLosses[idx + 1];
+	for (int delta = deltaMax; delta >= deltaMin; --delta)
+    {
+        clear(deltas);
+        resize(deltas, maxOverlap + 1, delta);
+        unsigned maxLength = length(options.readLengths) - 1;
+        options.errorRate = (double)maxErrors / (double)maxLength + 0.00001;
 
-			std::cout << getArgumentValue(parser, 0) << '\t' << errors << '\t' << ol << '\t' << q;
-				
-			for (unsigned e = 0; e <= errorLimit; ++e)
-				if (e <= errors)
-					std::cout << '\t' << estLosses[idx + 2 + e];
-			
-			std::cout << std::endl;
-		}
-	}
+        typedef TOptions::TProb TFloat;
+        String<TFloat> estLosses;
+        estimatePigeonholeLosses(estLosses, deltas, options);
+
+//            for (unsigned e = 0; e <= maxErrors; ++e)
+//                std::cerr << "prob to see " <<e<< " errors: " << 1000000*estLosses[2 + e] << std::endl;
+
+
+        for (int idx = length(estLosses) - (3 + maxErrors); idx > 0; idx -= 3 + maxErrors)
+        {
+            unsigned ol = estLosses[idx];
+            unsigned q  = estLosses[idx + 1];
+
+            std::cout << q - ol << '\t' << ol << "\t0:00.00";
+                
+            for (unsigned e = 0; e <= maxErrors; ++e)
+                std::cout << '\t' << estLosses[idx + 2 + e] / estLosses[2 + e];
+            std::cout << std::endl;
+
+//            for (unsigned e = 0; e <= maxErrors; ++e)
+//                std::cerr << '\t' << estLosses[idx + 2 + e];            
+//            std::cerr << std::endl;
+        }
+    }
 
 	return 0;
 }

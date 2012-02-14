@@ -200,7 +200,9 @@ enum {
 		int			tabooLength;		// taboo length
 		int			repeatLength;		// repeat length threshold
 		double		abundanceCut;		// abundance threshold
-        int         overlap;            // q-gram overlap (in pigeonhole mode)
+        int         delta;              // q-gram delta (in pigeonhole mode), 0=automatic
+        int         overlap;            // q-gram overlap (in pigeonhole mode), 0=lossless
+        unsigned    maxOverlap;         // limits the overlap in automatic mode
 
 	// mate-pair parameters
 		int			libraryLength;		// offset between two mates
@@ -216,9 +218,11 @@ enum {
 
 	// statistics
 		typedef LogProb<> TProb;
+//		typedef double TProb;
 		String<unsigned> readLengths;	// read length histogram (i -> #reads of length i)
 		String<double>   avrgQuality;	// average error quality per base
 		String<TProb>    errorProb;		// error probability per base
+        CharString  mismatchFilename;
 
 		String<double> errorDist;		// error distribution
 		__int64		countFiltration;	// matches returned by the filter
@@ -291,7 +295,9 @@ enum {
 			tabooLength = 1;
 			repeatLength = 1000;
 			abundanceCut = 1;
+            delta = 0;
 			overlap = 0;
+            maxOverlap = 10;
 
 			libraryLength = 220;
 			libraryError = 50;
@@ -1979,6 +1985,8 @@ matchVerify(
 			if (minScore <= maxScore)
 			{
 				verifier.m.endPos = beginPosition(inf) + maxPos + 1;
+				verifier.m.pairScore = verifier.m.score = maxScore;
+//              verifier.m.errors = -maxScore;
 
 				if (maxScore == 0)
 					verifier.m.beginPos = verifier.m.endPos - ndlLength;
@@ -2054,7 +2062,6 @@ matchVerify(
 				// The match end position must be increased by the omitted base.
 				++verifier.m.endPos;
 #endif
-				verifier.m.pairScore = verifier.m.score = maxScore;
 				verifier.push();
 				maxScore = minScore - 1;
                 minSinkDistance = MaxValue<TDistance>::VALUE;
@@ -2080,6 +2087,7 @@ matchVerify(
 	if (minScore <= maxScore)
 	{
 		verifier.m.endPos = beginPosition(inf) + maxPos + 1;
+		verifier.m.pairScore = verifier.m.score = maxScore;
 //		verifier.m.errors = -maxScore;
         
         if (maxScore == 0)
@@ -2156,8 +2164,6 @@ matchVerify(
         ++verifier.m.endPos;
 #endif
 
-		verifier.m.pairScore = verifier.m.score = maxScore;
-//		verifier.m.errors = -maxScore;
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
         
@@ -2217,62 +2223,64 @@ estimateErrorDistributionFromQualities(TOptions &options)
 //	std::cout<<std::endl<<std::endl;
 }
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Customize filter
-template <typename TEstLosses, typename TOptions>
-unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOptions const &options)
+template <typename TDelta, typename TOptions>
+void computeQGramLengths(TDelta &minDelta, TOptions const &options)
 {
-	typedef typename Value<TEstLosses>::Type TFloat;
-
-    const unsigned maxOverlap = 10;
 	const unsigned maxLength1 = length(options.readLengths);
-    const unsigned maxLength = maxLength1 - 1;
-    const unsigned maxErrors = (unsigned) floor(options.errorRate * maxLength);
-    const unsigned maxErrors1 = maxErrors + 1;
+//    const unsigned maxLength = maxLength1 - 1;
+//    const unsigned maxErrors = (unsigned) floor(options.errorRate * maxLength);
+//    const unsigned maxErrors1 = maxErrors + 1;
 
 	unsigned seqCount = 0;
-    String<unsigned> minQ, maxQ;
-    resize(minQ, maxOverlap + 1, MaxValue<unsigned>::VALUE);
-    resize(maxQ, maxOverlap + 1, 3);
+    String<unsigned> maxDelta;
+    resize(minDelta, options.maxOverlap + 1, MaxValue<unsigned>::VALUE);
+    resize(maxDelta, options.maxOverlap + 1, 3);
 	
-    // compute q-grams for different overlaps
+    // compute delta (==stepSize) for different overlaps
 	for (unsigned len = 0; len < maxLength1; ++len)
 	{
 		if (options.readLengths[len] == 0) continue;
 		
 		seqCount += options.readLengths[len];
-        for (unsigned ol = 0; ol <= maxOverlap; ++ol)
+        for (unsigned ol = 0; ol <= options.maxOverlap; ++ol)
         {
             // sequence must have sufficient length
             if (len <= ol) continue;
             
             // cut overlap many characters from the end
             unsigned errors = (unsigned) floor(options.errorRate * len);
-            unsigned q = (len - ol) / (errors + 1);
+            unsigned delta = (len - ol) / (errors + 1);
                     
-            // ignore too short q-grams
-            if (q < 3) continue;
-            if (minQ[ol] > q) minQ[ol] = q;
-            if (maxQ[ol] < q) maxQ[ol] = q;
+            // ignore too short delta-grams
+            if (delta < 3) continue;
+            if (minDelta[ol] > delta) minDelta[ol] = delta;
+            if (maxDelta[ol] < delta) maxDelta[ol] = delta;
         }
 	}
     
-//	std::cout<< "QGRAMS:"<<std::endl;
-//    for (unsigned ol = 0; ol <= maxOverlap; ++ol)
+//	std::cout<< "Deltas:"<<std::endl;
+//    for (unsigned ol = 0; ol < length(minDelta); ++ol)
 //	{
-//        if (minQ[ol] < 3) minQ[ol] = maxQ[ol];
-//		std::cout<<minQ[ol]+ol<<'\t';
+//        if (minDelta[ol] < 3) minDelta[ol] = maxDelta[ol];
+//		std::cout<<minDelta[ol]+ol<<'\t';
 //	}
 //	std::cout<<std::endl<<std::endl;
-        
-    // we can stop if the proposed weight exceeds or reaches the maximum
-    if (minQ[0] >= maxWeight || options.lossRate == 0.0)
-        return 0;
-    
-	// ------------------------------------------------------------------------------------------------
-    // we can try lossy settings
-	// ------------------------------------------------------------------------------------------------
+}
 
+template <typename TEstLosses, typename TDelta, typename TOptions>
+unsigned estimatePigeonholeLosses(TEstLosses &estLosses, TDelta const &delta, TOptions const &options)
+{
+	typedef typename Value<TEstLosses>::Type TFloat;
+
+	const unsigned maxLength1 = length(options.readLengths);
+    const unsigned maxLength = maxLength1 - 1;
+    const unsigned maxErrors = (unsigned) floor(options.errorRate * maxLength);
+    const unsigned maxErrors1 = maxErrors + 1;
+    
 	// ------------------------------------------------------------------------------------------------
 	// compute probs to have 0,1,...,maxErrors errors in the prefix of length 1,...,maxLength
 	// ------------------------------------------------------------------------------------------------
@@ -2291,6 +2299,10 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOp
 			p_prefix[idx] = p_prefix[idx - maxErrors1] * ((TFloat)1.0 - options.errorProb[i]) + p_prefix[idx - maxErrors1 - 1] * options.errorProb[i];
 	}
 	
+	// ------------------------------------------------------------------------------------------------
+	// compute expected numbers of reads with 0,1,...,maxErrors errors 
+	// ------------------------------------------------------------------------------------------------
+
 	clear(estLosses);
 	resize(estLosses, maxErrors1 + 2, 0.0);
 	double maxLoss = 0.0;
@@ -2313,18 +2325,21 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOp
 	
 	unsigned overlap = 0;
 	
-    // select best the shape
-    for (unsigned ol = 1; ol <= maxOverlap; ++ol)
+	// ------------------------------------------------------------------------------------------------
+	// compute loss for each overlap and select best the shape
+	// ------------------------------------------------------------------------------------------------
+
+    for (unsigned ol = 0; ol < length(delta); ++ol)
     {
-        unsigned stepSize = minQ[ol];
+        unsigned stepSize = delta[ol];
         unsigned q = stepSize + ol;
 		
 		// if we had the same q-gram before
-		if (minQ[ol - 1] + ol - 1 == q)
+		if (ol > 0 && delta[ol - 1] + ol - 1 == q)
 			continue;
 		
 		// don't allow more than two overlapping q-grams
-		if (ol > stepSize / 2) break;
+		if (2 * ol > stepSize) break;
         
 		// ------------------------------------------------------------------------------------------------
         // compute probs to have 0,1,...,maxErrors errors in a segment
@@ -2334,7 +2349,7 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOp
         resize(p, maxLength * maxErrors1);
         for (unsigned i = 0, idx = 0; i < maxLength; ++i)
         {
-            if (i % stepSize == 0 || (i > stepSize && i % stepSize == ol))
+            if (i % stepSize == 0 || (i >= stepSize && i % stepSize == ol))
             {
                 // initialization
                 p[idx++] = (TFloat)1.0 - options.errorProb[i];      // 0 error
@@ -2360,7 +2375,7 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOp
         resize(p_last, maxLength * maxErrors1);
         for (unsigned i = 0, idx = 0; i < maxLength; ++i)
         {
-            if (i == 0 || (i > stepSize && i % stepSize == ol))
+            if (i == 0 || (i >= stepSize && i % stepSize == ol))
             {
                 // initialization
                 p_last[idx++] = (TFloat)1.0 - options.errorProb[i]; // 0 error
@@ -2380,47 +2395,81 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOp
 		// ------------------------------------------------------------------------------------------------
 		// compute probs to lose every prefix of pigeonhole segments (q-grams) with 0,...,maxErrors errors
 		// ------------------------------------------------------------------------------------------------
+        unsigned maxXErrors1 = _min(maxErrors, ol) + 1;
         unsigned maxSegments = (maxLength - ol) / stepSize;
         String<TFloat> M;
-        resize(M, maxSegments * maxErrors1 * maxErrors1, 0.0);
+        resize(M, maxSegments * maxErrors1 * maxXErrors1, 0.0);
         
-        unsigned idx = maxErrors1;
-        for (unsigned e0 = 1; e0 <= maxErrors; ++e0, idx += maxErrors1)
+        unsigned idx = maxXErrors1;
+        for (unsigned e0 = 1; e0 <= maxErrors; ++e0, idx += maxXErrors1)
 		{
-            for (unsigned x0 = 0; x0 <= e0; ++x0)
-			{
-                M[idx + x0] = p[(stepSize - 1) * maxErrors1 + (e0 - x0)] * p[(q - 1) * maxErrors1 + x0];
-//				std::cout<<"M[0,"<<e0<<','<<x0<<"]="<<M[idx + x0]<<std::endl;
-			}
-        
+            if (q != stepSize)
+            {
+                unsigned maxX = _min(e0, ol);
+                for (unsigned x0 = 0; x0 <= maxX; ++x0)
+                {
+                    M[idx + x0] = p[(stepSize - 1) * maxErrors1 + (e0 - x0)] * p[(q - 1) * maxErrors1 + x0];
+//                  std::cout<<"M[0,"<<e0<<','<<x0<<"]="<<M[idx + x0]<<std::endl;
+                }
+            }
+            else
+                M[idx] = p[(stepSize - 1) * maxErrors1 + e0];
 //		std::cout<<"p(C_"<<0<<'='<<e0<<")="<<p[( (stepSize - 1)) * maxErrors1 + e0]<<std::endl;
 //		std::cout<<"p(X_"<<0<<'='<<e0<<")="<<p[( (q - 1)) * maxErrors1 + e0]<<std::endl;
 		}
+/*
+    #pragma omp critical
+    {
+        for (unsigned e0 = 1; e0 <= maxErrors; ++e0)
+            for (unsigned i = 0; i < maxLength; ++i)
+                std::cerr<<"p("<<i<<'='<<e0<<")="<<p[i * maxErrors1 + e0]<<std::endl;
+        for (unsigned e0 = 1; e0 <= maxErrors; ++e0)
+            for (unsigned i = 0; i < maxLength; ++i)
+                std::cerr<<"p_last("<<i<<'='<<e0<<")="<<p_last[i * maxErrors1 + e0]<<std::endl;
+    }
+*/
 //		std::cout<<"=============================="<<std::endl;
 
+        // M[s,e,x] at position ((s * maxErrors1) + e) * maxErrors1 + x
         for (unsigned s = 1; s < maxSegments; ++s)
-            for (unsigned e = 0; e <= maxErrors; ++e, idx += maxErrors1)
+            for (unsigned e = 0; e <= maxErrors; ++e, idx += maxXErrors1)
             {
-                for (unsigned x = 0; x <= e; ++x)
+                if (ol != 0)
+                {
+                    unsigned maxX = _min(e, ol);
+                    for (unsigned x = 0; x <= maxX; ++x)
+                    {
+                        TFloat sum = 0.0;
+                        for (unsigned _e = 0; _e <= e - x; ++_e)
+                        {
+                            unsigned max_X = _min(_e, ol);
+                            for (unsigned _x = 0; _x <= max_X; ++_x)
+                                if (_e - _x < e)    // at least one error in seed X_{s-1} C_s X_s
+                                    sum +=   M[((s - 1) * maxErrors1 + _e) * maxXErrors1 + _x]
+                                           * p[(stepSize * s + (stepSize - 1)) * maxErrors1 + (e - _e - x)]
+                                           * p[(stepSize * s + (q - 1)) * maxErrors1 + x];
+                        }
+                        
+                        M[idx + x] = sum;
+//                        std::cerr<<"M["<<s<<','<<e<<','<<x<<"]="<<M[idx + x]<<std::endl;
+                    }
+//    				std::cerr<<"p(C_"<<s<<'='<<e<<")="<<p[(stepSize * s + (stepSize - 1)) * maxErrors1 + e]<<std::endl;
+//    				std::cerr<<"p(X_"<<s<<'='<<e<<")="<<p[(stepSize * s + (q - 1)) * maxErrors1 + e]<<std::endl;
+                }
+                else
                 {
                     TFloat sum = 0.0;
-                    for (unsigned _e = 0; _e <= e - x; ++_e)
-                        for (unsigned _x = 0; _x <= _e; ++_x)
-                            if (_e - _x < e)
-                                sum +=   M[((s - 1) * maxErrors1 + _e) * maxErrors1 + _x]
-                                       * p[(stepSize * s + (stepSize - 1)) * maxErrors1 + (e - _e - x)]
-                                       * p[(stepSize * s + (q - 1)) * maxErrors1 + x];
+                    for (unsigned _e = 0; _e < e; ++_e)
+                        sum +=   M[((s - 1) * maxErrors1 + _e) * maxXErrors1]
+                               * p[(stepSize * s + (stepSize - 1)) * maxErrors1 + (e - _e)];
                     
-                    M[idx + x] = sum;
-//					std::cout<<"M["<<s<<','<<e<<','<<x<<"]="<<M[idx + x]<<std::endl;
+                    M[idx] = sum;
+//                    std::cerr<<"M["<<s<<','<<e<<",0]="<<M[idx]<<std::endl;
                 }
-//				std::cout<<"p(C_"<<s<<'='<<e<<")="<<p[(stepSize * s + (stepSize - 1)) * maxErrors1 + e]<<std::endl;
-//				std::cout<<"p(X_"<<s<<'='<<e<<")="<<p[(stepSize * s + (q - 1)) * maxErrors1 + e]<<std::endl;
-
             }
 			
-		// no overlap => no loss => no estimation required
-		if (ol == 0) continue;
+//		// no overlap => no loss => no estimation required
+//		if (ol == 0) continue;
 
 		// ------------------------------------------------------------------------------------------------
 		// sum up the expected numbers of lost reads for every read length 0,...,maxLength
@@ -2449,33 +2498,43 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, unsigned maxWeight, TOp
 //			std::cout<<"DIVIDERSUM:"<<divider<<std::endl;
 
 			TFloat lossPerLength = 0.0;
+            unsigned segmentedLen = segments * stepSize + ol;
 			for (unsigned e1 = 0; e1 <= errors; ++e1)
-				for (unsigned x = 0; x <= e1; ++x)
+            {
+                unsigned maxX = _min(e1, ol);
+				for (unsigned x = 0; x <= maxX; ++x)
 				{
 					TFloat sum = 0.0;
-					for (unsigned e2 = 0; e2 <= errors - e1; ++e2)
-					{
-						sum += p_last[(len - 1) * maxErrors1 + e2];
-						estLosses[length(estLosses) - maxErrors1 + e1 + e2] += (M[((segments - 1) * maxErrors1 + e1) * maxErrors1 + x] * p_last[(len - 1) * maxErrors1 + e2] /*/ divider*/) * options.readLengths[len];
-					}
-					lossPerLength += M[((segments - 1) * maxErrors1 + e1) * maxErrors1 + x] * sum;
+                    if (segmentedLen < len)
+                    {
+                        unsigned maxE2 = _min(errors - e1, len - segmentedLen);
+                        for (unsigned e2 = 0; e2 <= maxE2; ++e2)
+                        {
+                            sum += p_last[(len - 1) * maxErrors1 + e2];
+                            estLosses[length(estLosses) - maxErrors1 + e1 + e2] += (M[((segments - 1) * maxErrors1 + e1) * maxXErrors1 + x] * p_last[(len - 1) * maxErrors1 + e2] /*/ divider*/) * options.readLengths[len];
+                        }
+                    }
+                    else
+                    {
+                        sum = 1.0;
+                        estLosses[length(estLosses) - maxErrors1 + e1] += (M[((segments - 1) * maxErrors1 + e1) * maxXErrors1 + x] /*/ divider*/) * options.readLengths[len];
+                    }
+                    lossPerLength += M[((segments - 1) * maxErrors1 + e1) * maxXErrors1 + x] * sum;
 				}
+            }
 	
 //			lossPerLength /= divider;
 			loss += options.readLengths[len] * (double)lossPerLength;
 //			std::cout<<len<<':'<<options.readLengths[len] * (double)lossPerLength<<'\t';
 						
-//			if (len >= minQ[ol] * (errors + 2) + ol) continue;			
-//			loss += options.readLengths[len] * (q0[len * maxOverlap + ol - 1] / p[len * maxErrors1 + errors]);
+//			if (len >= delta[ol] * (errors + 2) + ol) continue;			
+//			loss += options.readLengths[len] * (q0[len * options.maxOverlap + ol - 1] / p[len * maxErrors1 + errors]);
 		}
 		if (loss > maxLoss)
 			break;
 //		std::cout<<std::endl<<std::endl;
 
 		overlap = ol;
-
-        // we can stop if the proposed weight exceeds or reaches the maximum
-        if (minQ[ol] >= maxWeight) break;		
     }
 
 	return overlap;
@@ -2486,8 +2545,18 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 {
 	if (options.lossRate == 0.0)
 	{
+		filterPattern.params.delta = options.delta;
 		filterPattern.params.overlap = options.overlap;
 		_patternInit(filterPattern, options.errorRate);
+
+        #pragma omp critical
+        {
+            CharString str;
+            shapeToString(str, filterPattern.shape);
+            std::cout << std::endl << "Pigeonhole settings:" << std::endl;
+            std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
+            std::cout << "  stepsize: " << getStepSize(host(filterPattern)) << std::endl;
+        }
 		return;
 	}
 
@@ -2497,7 +2566,29 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 	const unsigned maxErrors = (unsigned) floor(options.errorRate * length(options.readLengths));
     const unsigned maxErrors1 = maxErrors + 1;
 
-	filterPattern.params.overlap = estimatePigeonholeLosses(estLosses, _pigeonholeMaxShapeWeight(indexShape(host(filterPattern))), options);
+	String<unsigned> delta;
+	computeQGramLengths(delta, options);
+	unsigned maxWeight = _pigeonholeMaxShapeWeight(indexShape(host(filterPattern)));
+	
+    if (delta[0] < maxWeight && options.lossRate != 0.0)
+    {
+    	// lossy filtration
+
+    	// we can stop if the proposed weight exceeds or reaches the maximum
+    	for (unsigned ol = 0; ol < length(delta); ++ol)
+        	if (delta[ol] + ol > maxWeight)
+        	{
+        		resize(delta, ol);
+        		break;
+        	}
+
+		filterPattern.params.overlap = estimatePigeonholeLosses(estLosses, delta, options);
+	}
+	else
+	{
+    	// lossless filtration
+		filterPattern.params.overlap = 0;
+	}
 
     #pragma omp critical
     {
