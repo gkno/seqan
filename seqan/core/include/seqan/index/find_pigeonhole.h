@@ -89,11 +89,13 @@ namespace seqan
         
     struct PigeonholeParameters {
         unsigned overlap;           // overlap length of adjacent q-grams, default is to use non-overlapping q-grams (=0)
-        bool printDots;
+        unsigned delta;             // delta length (0 = automatic detection), becomes index stepSize
+        bool printDots;             // the q-gram will have length q=delta+overlap
         bool debug;
         
         PigeonholeParameters():
             overlap(0),
+            delta(0),
             printDots(false),		// print a . for every 100kbps mapped genome
             debug(false) {}
     };
@@ -381,8 +383,8 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 	
 		pattern._currentErrorRate = _newErrorRate;
 
-        TSize minQ = MaxValue<TSize>::VALUE;
-        TSize maxQ = 3;
+        TSize minDelta = MaxValue<TSize>::VALUE;
+        TSize maxDelta = 3;
         TSize maxSeqLen = 0;
         for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
         {
@@ -396,31 +398,37 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 			// cut overlap many characters from the end
             TSize errors = (TSize) floor(errorRate * length);
 			length -= pattern.params.overlap;
-            TSize q = length / (errors + 1);
+            TSize delta = length / (errors + 1);
 			
 			
 			// ignore too short q-grams
-			if (q < 3) continue;
-            if (minQ > q) minQ = q;
-            if (maxQ < q) maxQ = q;
+			if (delta < 3) continue;
+            if (minDelta > delta) minDelta = delta;
+            if (maxDelta < delta) maxDelta = delta;
         }
         pattern.maxSeqLen = maxSeqLen;
-        if (minQ < 3) minQ = maxQ;
+        if (minDelta < 3) minDelta = maxDelta;
 		
         TIndex &index = host(pattern);
 		pattern.finderPosOffset = 0;
 		pattern.finderPosNextOffset = pattern.maxSeqLen + pattern.finderLength;
 		
-		if (minQ == MaxValue<TSize>::VALUE)
+        if (pattern.params.delta != 0)
+		{
+			// use user-defined delta
+            minDelta = pattern.params.delta;
+        }
+
+		if (minDelta == MaxValue<TSize>::VALUE)
 		{
 			// disable index
-			minQ = pattern.maxSeqLen + 1;
+			minDelta = pattern.maxSeqLen + 1;
 		}
-		
-        if (_pigeonholeUpdateShapeLength(pattern.shape, minQ + pattern.params.overlap) || getStepSize(index) != minQ)
+        		
+        if (_pigeonholeUpdateShapeLength(pattern.shape, minDelta + pattern.params.overlap) || getStepSize(index) != minDelta)
         {
             clear(index);
-            setStepSize(index, minQ);
+            setStepSize(index, minDelta);
          }
         indexShape(host(pattern)) = pattern.shape;
 //        double start = sysTime();
