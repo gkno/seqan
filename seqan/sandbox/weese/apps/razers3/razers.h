@@ -2583,6 +2583,62 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
         	}
 
 		filterPattern.params.overlap = estimatePigeonholeLosses(estLosses, delta, options);
+
+        #pragma omp critical
+        {
+            std::cout << "     e | e error reads | loss ol =" << std::setw(2) << estLosses[maxErrors1 + 2];
+            for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
+                std::cout << " |      ol =" << std::setw(2) << estLosses[i];
+            std::cout << std::endl;
+            std::cout << "       |               |       q =" << std::setw(2) << estLosses[maxErrors1 + 3];
+            for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
+                std::cout << " |       q =" << std::setw(2) << estLosses[i + 1];
+            std::cout << std::endl;
+            std::cout << " ------+---------------";
+            for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
+                std::cout << "+-------------";
+            std::cout << std::endl;
+            std::cout.setf(std::ios::fixed);
+            TFloat sumReads;
+            for (unsigned e = 0; e <= maxErrors; ++e)
+            {
+                std::cout.fill(' ');
+                std::cout << std::setprecision(0);
+                std::cout << std::setw(6) << e;
+                std::cout << " |";
+                std::cout << std::setw(14) << (unsigned)estLosses[e + 2];
+                std::cout << std::setprecision(2);
+                for (unsigned i = maxErrors1 + 2 + e + 2; i < length(estLosses); i += maxErrors1 + 2)
+                    std::cout << " |" << std::setw(12) << estLosses[i];
+                std::cout << std::endl;
+                sumReads += estLosses[e + 2];
+            }
+            std::cout << " ------+---------------";
+            for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
+                std::cout << "+-------------";
+            std::cout << std::endl;
+
+            std::cout << std::setprecision(0);
+            std::cout << " total |" << std::setw(14) << (unsigned)sumReads << ' ';
+            std::cout << std::setprecision(2);
+            for (unsigned i = maxErrors1 + 4; i < length(estLosses); i += maxErrors1 + 2)
+            {
+                sumReads = 0.0;
+                for (unsigned e = 0; e <= maxErrors; ++e)
+                    sumReads += estLosses[i + e];
+                std::cout << '|' << std::setw(12) << sumReads;
+                std::cout << ((filterPattern.params.overlap == (unsigned)estLosses[i - 2])? '*':' ');
+            }
+            std::cout << std::endl;
+            
+            _patternInit(filterPattern, options.errorRate);
+
+            CharString str;
+            shapeToString(str, filterPattern.shape);
+            std::cout << std::endl << "Pigeonhole settings:" << std::endl;
+            std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
+            std::cout << "  stepsize: " << getStepSize(host(filterPattern)) << std::endl;
+        }
 	}
 	else
 	{
@@ -2590,61 +2646,6 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 		filterPattern.params.overlap = 0;
 	}
 
-    #pragma omp critical
-    {
-        std::cout << "     e | e error reads | loss ol =" << std::setw(2) << estLosses[maxErrors1 + 2];
-        for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
-            std::cout << " |      ol =" << std::setw(2) << estLosses[i];
-        std::cout << std::endl;
-        std::cout << "       |               |       q =" << std::setw(2) << estLosses[maxErrors1 + 3];
-        for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
-            std::cout << " |       q =" << std::setw(2) << estLosses[i + 1];
-        std::cout << std::endl;
-        std::cout << " ------+---------------";
-        for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
-            std::cout << "+-------------";
-        std::cout << std::endl;
-        std::cout.setf(std::ios::fixed);
-        TFloat sumReads;
-        for (unsigned e = 0; e <= maxErrors; ++e)
-        {
-            std::cout.fill(' ');
-            std::cout << std::setprecision(0);
-            std::cout << std::setw(6) << e;
-            std::cout << " |";
-            std::cout << std::setw(14) << (unsigned)estLosses[e + 2];
-            std::cout << std::setprecision(2);
-            for (unsigned i = maxErrors1 + 2 + e + 2; i < length(estLosses); i += maxErrors1 + 2)
-                std::cout << " |" << std::setw(12) << estLosses[i];
-            std::cout << std::endl;
-            sumReads += estLosses[e + 2];
-        }
-        std::cout << " ------+---------------";
-        for (unsigned i = maxErrors1 + 2; i < length(estLosses); i += maxErrors1 + 2)
-            std::cout << "+-------------";
-        std::cout << std::endl;
-
-        std::cout << std::setprecision(0);
-        std::cout << " total |" << std::setw(14) << (unsigned)sumReads << ' ';
-        std::cout << std::setprecision(2);
-        for (unsigned i = maxErrors1 + 4; i < length(estLosses); i += maxErrors1 + 2)
-        {
-            sumReads = 0.0;
-            for (unsigned e = 0; e <= maxErrors; ++e)
-                sumReads += estLosses[i + e];
-            std::cout << '|' << std::setw(12) << sumReads;
-            std::cout << ((filterPattern.params.overlap == (unsigned)estLosses[i - 2])? '*':' ');
-        }
-        std::cout << std::endl;
-        
-        _patternInit(filterPattern, options.errorRate);
-
-        CharString str;
-        shapeToString(str, filterPattern.shape);
-        std::cout << std::endl << "Pigeonhole settings:" << std::endl;
-        std::cout << "  shape:    " << length(str) << '\t' << str << std::endl;
-        std::cout << "  stepsize: " << getStepSize(host(filterPattern)) << std::endl;
-    }
 }
 
 template <typename TIndex, typename TSwiftSpec, typename TOptions>
