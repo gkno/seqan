@@ -74,12 +74,14 @@
 ..remarks:Use this if something really unexpected happens inside your functions and there is no way to report this through the API. A good example would be logic errors, e.g. invalid values.
 ..example.text:In the following example, the $SEQAN_FAIL$ is there if a possible value is added to $MyEnum$ but the function $foo$ is not updated accordingly.
 ..example.code:
-enum MyEnum {
+enum MyEnum
+{
   VALUE_ONE,
   VALUE_TWO
 };
 
-bool foo(MyEnum x) {
+bool foo(MyEnum x)
+{
     switch (x) {
     case VALUE_ONE:
         // do something
@@ -107,18 +109,20 @@ bool foo(MyEnum x) {
 .Macro.SEQAN_CHECK
 ..cat:Miscellaneous
 ..summary:Force abortion of program if a condition is not met, regardless of debugging settings.
-..signature:SEQAN_FAIL(condition, msg[, args])
+..signature:SEQAN_CHECK(condition, msg[, args])
 ..param.msg:A format string.
 ..param.args:An optional list of arguments.
 ..remarks:Use this if something really unexpected happens inside your functions and there is no way to report this through the API. A good example would be logic errors, e.g. invalid values.
 ..example.text:In the following example, the $SEQAN_CHECK$ stops program execution if a value is added to $MyEnum$ but the function $foo$ is not updated accordingly.
 ..example.code:
-enum MyEnum {
+enum MyEnum
+{
   VALUE_ONE,
   VALUE_TWO
 };
 
-bool foo(MyEnum x) {
+bool foo(MyEnum x)
+{
     SEQAN_CHECK((x == VALUE_ONE || x == VALUE_TWO), "Invalid value for x == %d.", x);
 
     switch (x) {
