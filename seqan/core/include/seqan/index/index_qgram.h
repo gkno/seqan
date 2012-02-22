@@ -1753,35 +1753,42 @@ The resulting tables must have appropriate size before calling this function.
 		qcomp_t	qcomp;
 		qhash_t qhash;
 
-		typename Value<TSortTuples>::Type	old_qgram;
-		typename Size<TDir>::Type			hash, old_hash = 0;
-        typename Size<TSortTuples>::Type	leftToRead = length(sorter);
-		bool first = true;
+        typename Size<TSortTuples>::Type leftToRead = length(sorter);
+        typename Size<TDir>::Type hash, old_hash = 0;
+        
+        if (leftToRead > 0)
+        {
+            typename Value<TSortTuples>::Type old_qgram = *sorter;
 
-		for (leftToRead = length(sorter); leftToRead > 0; --leftToRead, ++sorter, ++itSA)
-		{
-			// copy occurence position
-			*itSA = (*sorter).i1;
-			if (first || qcomp(old_qgram, *sorter) != 0) 
-			{
-				old_qgram = *sorter;
-				hash = qhash(old_qgram);
+            old_hash = qhash(old_qgram);
+            *itSA = (*sorter).i1;
+            *itDir = 0;
+            --leftToRead, ++sorter, ++itSA, ++itDir;
+            
+            for (; leftToRead > 0; --leftToRead, ++sorter, ++itSA)
+            {
+                // copy occurence position
+                *itSA = (*sorter).i1;
+                if (qcomp(old_qgram, *sorter) != 0) 
+                {
+                    old_qgram = *sorter;
+                    hash = qhash(old_qgram);
 
-				SEQAN_ASSERT_LT(old_hash, hash);
+                    SEQAN_ASSERT_LT(old_hash, hash);
 
-				// copy bucket begin
-				typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;
-				for(; old_hash < hash; ++old_hash, ++itDir)
-					*itDir = i;
-				first = false;
-			}
-		}
+                    // copy bucket begin
+                    typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;
+                    for(; old_hash < hash; ++old_hash, ++itDir)
+                        *itDir = i;
+                }
+            }
+        }
 
-		// fill bucket table
-		typename Size<TSortTuples>::Type i = length(sorter);
-		hash = length(dir);
-		for(; old_hash < hash; ++old_hash, ++itDir)
-			*itDir = i;
+        // fill bucket table
+        typename Size<TSortTuples>::Type i = length(sorter);
+        hash = length(dir);
+        for(; old_hash < hash; ++old_hash, ++itDir)
+            *itDir = i;
 
 		endRead(sorter);
 	}
@@ -1847,36 +1854,45 @@ The resulting tables must have appropriate size before calling this function.
 		qcomp_t	qcomp;
 		qhash_t qhash;
 
-		typename Value<TSortTuples>::Type	old_qgram = *sorter;
-		typename Size<TDir>::Type			hash, old_hash = 0;
-        typename Size<TSortTuples>::Type	leftToRead;
-		bool first = true;
+        typename Size<TSortTuples>::Type leftToRead = length(sorter);
+        typename Size<TDir>::Type hash, old_hash = 0;
+        
+        if (leftToRead > 0)
+        {
+            typename Value<TSortTuples>::Type old_qgram = *sorter;
 
-		for (leftToRead = length(sorter); leftToRead > 0; --leftToRead, ++sorter, ++itSA)
-		{
-			// copy occurence position
-			*itSA = (*sorter).i1;
-			
-			if (first || qcomp(old_qgram, *sorter) != 0) 
-			{
-				old_qgram = *sorter;
-				hash = qhash(old_qgram);
-				
-				SEQAN_ASSERT_LEQ(old_hash, hash);
+            old_hash = qhash(old_qgram);
+            *itSA = (*sorter).i1;
+            *itDir = 0;
+            --leftToRead, ++sorter, ++itSA, ++itDir;
+            
+            for (; leftToRead > 0; --leftToRead, ++sorter, ++itSA)
+            {
+                // copy occurence position
+                *itSA = (*sorter).i1;
+                
+                if (qcomp(old_qgram, *sorter) != 0) 
+                {
+                    old_qgram = *sorter;
+                    hash = qhash(old_qgram);
+                    
+                    SEQAN_ASSERT_LEQ(old_hash, hash);
+                    if (old_hash > hash)
+                        std::cerr << "ERROR!!"  <<std::endl;
+                    
+                    // copy bucket begin
+                    typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;
+                    for(; old_hash < hash; ++old_hash, ++itDir)
+                        *itDir = i;
+                }
+            }
+        }
 
-				// copy bucket begin
-				typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;
-				for(; old_hash < hash; ++old_hash, ++itDir)
-					*itDir = i;
-				first = false;
-			}
-		}
-
-		// fill bucket table
-		typename Size<TSortTuples>::Type i = length(sorter);
-		hash = length(dir);
-		for(; old_hash < hash; ++old_hash, ++itDir)
-			*itDir = i;
+        // fill bucket table
+        typename Size<TSortTuples>::Type i = length(sorter);
+        hash = length(dir);
+        for(; old_hash < hash; ++old_hash, ++itDir)
+            *itDir = i;
 
 		endRead(sorter);
 	}
