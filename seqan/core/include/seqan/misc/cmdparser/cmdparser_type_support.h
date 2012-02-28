@@ -29,13 +29,40 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
+// ==========================================================================
 
-#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_H_
-#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_H_
+#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_TYPE_SUPPORT_H_
+#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_TYPE_SUPPORT_H_
 
-#include <seqan/misc/cmdparser/cmdparser.h>
-#include <seqan/misc/cmdparser/cmdoption.h>
-#include <seqan/misc/cmdparser/cmdparser_ctd_support.h>
-#include <seqan/misc/cmdparser/cmdparser_parse.h>
+namespace seqan {
 
-#endif  // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_H_
+// ----------------------------------------------------------------------------
+// Function _isDouble()
+// ----------------------------------------------------------------------------
+
+template <typename TString>
+inline bool
+_isDouble(TString const s)
+{
+    double dst;
+    std::istringstream stream(toCString(s));
+    return (!(stream >> dst).fail()) && (stream.rdbuf()->in_avail() == 0);
+}
+
+// ----------------------------------------------------------------------------
+// Function _isInt()
+// ----------------------------------------------------------------------------
+
+template <typename TString>
+inline bool
+_isInt(TString const s)
+{
+    int dst;
+    std::istringstream stream(toCString(s));
+    return (!(stream >> dst).fail()) && (stream.rdbuf()->in_avail() == 0);
+}
+
+} // namespace seqan
+
+#endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_TYPE_SUPPORT_H_

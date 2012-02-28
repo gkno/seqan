@@ -566,7 +566,7 @@ int main(int argc, const char *argv[]) {
 	typedef String<Dna5> TSequence;
 
 	// output header
-	_title(parser, std::cout);
+	_printTitle(parser, std::cout);
 	std::cout << std::endl;
 
 	// output file names

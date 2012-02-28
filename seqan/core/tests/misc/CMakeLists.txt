@@ -6,3 +6,6 @@ seqan_add_test_executable(test_misc test_misc.cpp
 				          test_misc_accumulators.h
 				          test_misc_interval_tree.h
 				          test_misc_long_word.h)
+
+seqan_add_test_executable(test_misc_cmdparser 
+                          test_misc_cmdparser.cpp)

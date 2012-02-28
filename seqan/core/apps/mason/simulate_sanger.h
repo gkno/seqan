@@ -153,11 +153,11 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addSection(parser, "Sanger Error Model Parameters");
 
     addOption(parser, CommandLineOption("pmb",  "probability-mismatch-begin", "Probability for a mismatch at begin of read.  Default: 0.005.", OptionType::Double));
-    addOption(parser, CommandLineOption("pme",  "probability-mismatch-begin", "Probability for a mismatch at end of read.  Default: 0.01.", OptionType::Double));
+    addOption(parser, CommandLineOption("pme",  "probability-mismatch-end", "Probability for a mismatch at end of read.  Default: 0.01.", OptionType::Double));
     addOption(parser, CommandLineOption("pib",  "probability-insert-begin", "Probability for a insert at begin of read.  Default: 0.0025.", OptionType::Double));
-    addOption(parser, CommandLineOption("pie",  "probability-insert-begin", "Probability for a insert at end of read.  Default: 0.005.", OptionType::Double));
+    addOption(parser, CommandLineOption("pie",  "probability-insert-end", "Probability for a insert at end of read.  Default: 0.005.", OptionType::Double));
     addOption(parser, CommandLineOption("pdb",  "probability-delete-begin", "Probability for a delete at begin of read.  Default: 0.0025.", OptionType::Double));
-    addOption(parser, CommandLineOption("pde",  "probability-delete-begin", "Probability for a delete at end of read.  Default: 0.005.", OptionType::Double));
+    addOption(parser, CommandLineOption("pde",  "probability-delete-end", "Probability for a delete at end of read.  Default: 0.005.", OptionType::Double));
 
     addSection(parser, "Base Quality Model Parameters");
     addOption(parser, CommandLineOption("qmsm",  "quality-match-start-mean", "Mean quality for matches at start of read.  Default: 40.", OptionType::Double));
@@ -201,14 +201,14 @@ int parseCommandLineAndCheckModelSpecific(Options<SangerReads> & options,
         getOptionValueLong(parser, "quality-match-start-std-dev", options.qualityMatchStartStdDev);
     if (isSetLong(parser, "quality-match-end-std-dev"))
         getOptionValueLong(parser, "quality-match-end-std-dev", options.qualityMatchEndStdDev);
-    if (isSetLong(parser, "quality-Error-start-mean"))
-        getOptionValueLong(parser, "quality-Error-start-mean", options.qualityErrorStartMean);
-    if (isSetLong(parser, "quality-Error-end-mean"))
-        getOptionValueLong(parser, "quality-Error-end-mean", options.qualityErrorEndMean);
-    if (isSetLong(parser, "quality-Error-start-std-dev"))
-        getOptionValueLong(parser, "quality-Error-start-std-dev", options.qualityErrorStartStdDev);
-    if (isSetLong(parser, "quality-Error-end-std-dev"))
-        getOptionValueLong(parser, "quality-Error-end-std-dev", options.qualityErrorEndStdDev);
+    if (isSetLong(parser, "quality-error-start-mean"))
+        getOptionValueLong(parser, "quality-error-start-mean", options.qualityErrorStartMean);
+    if (isSetLong(parser, "quality-error-end-mean"))
+        getOptionValueLong(parser, "quality-error-end-mean", options.qualityErrorEndMean);
+    if (isSetLong(parser, "quality-error-start-std-dev"))
+        getOptionValueLong(parser, "quality-error-start-std-dev", options.qualityErrorStartStdDev);
+    if (isSetLong(parser, "quality-error-end-std-dev"))
+        getOptionValueLong(parser, "quality-error-end-std-dev", options.qualityErrorEndStdDev);
 
     return 0;
 }
