@@ -159,7 +159,7 @@ _addValidValuesRestrictions(StringSet<CharString> & restrictions, CommandLineOpt
 inline bool
 _includeInCTD(CommandLineOption const & opt)
 {
-    return !(opt.shortName == "h" || opt.shortName == "V" || opt.longName == "write-    ctd" || (opt.shortName == "" && opt.longName == ""));
+    return !(opt.shortName == "h" || opt.shortName == "V" || opt.longName == "write-ctd" || (opt.shortName == "" && opt.longName == ""));
 }
 
 // ----------------------------------------------------------------------------
@@ -170,7 +170,7 @@ _includeInCTD(CommandLineOption const & opt)
 .Function.writeCTD
 ..summary:Exports the app's interface description to a .ctd file.
 ..cat:Miscellaneous
-..signature:write_ctd(parser)
+..signature:writeCTD(parser)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..include:seqan/misc/misc_cmdparser.h
@@ -184,7 +184,7 @@ writeCTD(CommandLineParser const & me)
 
     // create file [appname].ctd in working directory
     CharString ctdfilename;
-    getOptionValueLong(me, "write_ctd", ctdfilename);
+    getOptionValueLong(me, "write-ctd", ctdfilename);
 
     std::ofstream ctdfile;
     ctdfile.open(toCString(ctdfilename));
