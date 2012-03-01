@@ -53,6 +53,7 @@
 #include <seqan/misc/misc_interval_tree.h>
 #include <seqan/misc/priority_type_base.h>
 #include <seqan/misc/priority_type_heap.h>
+#include <seqan/misc/misc_terminal.h>
 
 #include "test_misc_long_word.h"
 #include "test_misc_interval_tree.h"
@@ -63,21 +64,32 @@ using namespace seqan;
 
 
 SEQAN_DEFINE_TEST(test_misc_random) {
-	mtRandInit();
+    mtRandInit();
 
-	for (unsigned int i=0; i<100; ++i)
-	{
-		cout << mtRand() << ", ";
-	}
-	cout << "\n\n";
+    for (unsigned int i=0; i<100; ++i)
+    {
+        cout << mtRand() << ", ";
+    }
+    cout << "\n\n";
 
-	for (unsigned int i=0; i<100; ++i)
-	{
-		cout << geomRand<int>() << ", ";
-	}
+    for (unsigned int i=0; i<100; ++i)
+    {
+        cout << geomRand<int>() << ", ";
+    }
 
 }
 
+SEQAN_DEFINE_TEST(test_misc_terminal_get_terminal_size)
+{
+    using namespace seqan;
+    
+    unsigned cols = 0, rows = 0;
+    bool succ = getTerminalSize(cols, rows);
+    
+    SEQAN_ASSERT(succ);
+    SEQAN_ASSERT_GT(cols, 0u);
+    SEQAN_ASSERT_GT(rows, 0u);
+}
 
 SEQAN_BEGIN_TESTSUITE(test_misc) {
     //     SEQAN_CALL_TEST(test_misc_random);
@@ -86,6 +98,7 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
     SEQAN_CALL_TEST(test_misc_long_word_static_interface);
     SEQAN_CALL_TEST(test_misc_long_word_dynamic_interface);
 
+    SEQAN_CALL_TEST(test_misc_terminal_get_terminal_size);
 
     // Test IntervalTree class
     SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_IntervalTree__int);
