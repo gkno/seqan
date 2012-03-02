@@ -987,14 +987,14 @@ template <typename TValue, typename TErrorStream>
 bool _checkMinMaxValue(CommandLineOption const & opt, CharString const & val, 
                        TErrorStream & estream)
 {
-    TValue d_value = 0.0;
+    TValue d_value = 0;
     if (!_convertOptionValue(opt, d_value, val)) 
         SEQAN_FAIL("Conversion should work");
 
     if (opt.minValue != "")
     {
         // check min and max
-        TValue minVal = 0.0;
+        TValue minVal = 0;
         _convertOptionValue(opt, minVal, opt.minValue);
 
         if (d_value < minVal)
@@ -1006,7 +1006,7 @@ bool _checkMinMaxValue(CommandLineOption const & opt, CharString const & val,
 
     if (opt.maxValue != "")
     {
-        TValue maxVal = 0.0;
+        TValue maxVal = 0;
         _convertOptionValue(opt, maxVal, opt.maxValue);
 
         if (d_value > maxVal)
