@@ -83,12 +83,12 @@ SEQAN_DEFINE_TEST(test_misc_terminal_get_terminal_size)
 {
     using namespace seqan;
     
-    unsigned cols = 0, rows = 0;
+    unsigned cols = maxValue<unsigned>(), rows = maxValue<unsigned>();
     bool succ = getTerminalSize(cols, rows);
     
     SEQAN_ASSERT(succ);
-    SEQAN_ASSERT_GT(cols, 0u);
-    SEQAN_ASSERT_GT(rows, 0u);
+    SEQAN_ASSERT_NEQ(cols, maxValue<unsigned>());
+    SEQAN_ASSERT_NEQ(rows, maxValue<unsigned>());
 }
 
 SEQAN_BEGIN_TESTSUITE(test_misc) {
