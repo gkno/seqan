@@ -63,8 +63,8 @@ def main(source_base, binary_base):
     paramsFile = open(ph.inFile("params.txt"), "r")
 
     # unzip datasets into test directory
-    unzip_file_into_dir(ph.inFile("datasets.zip"), ph.inFile(""))
-    unzip_file_into_dir(ph.inFile("results.zip"), ph.inFile(""))
+    unzip_file_into_dir(ph.inFile("datasets.zip"), ph.outFile('', 'datasets'))
+    unzip_file_into_dir(ph.inFile("results.zip"), ph.outFile('', 'expected'))
 
     # We run the following for all read lengths we have reads for.
     for paramLine in paramsFile.readlines():
@@ -73,9 +73,9 @@ def main(source_base, binary_base):
         conf = app_tests.TestConf(
             program=path_to_program,
             redir_stdout=ph.outFile(params[0]),
-            args=[ph.inFile(params[1]),
-                  ph.inFile(params[2])] + params[3:],
-            to_diff=[(ph.inFile(params[0]),
+            args=[ph.outFile(params[1], 'datasets'),
+                  ph.outFile(params[2], 'datasets')] + params[3:],
+            to_diff=[(ph.outFile(params[0], 'expected'),
                       ph.outFile(params[0]))])
         conf_list.append(conf)
 

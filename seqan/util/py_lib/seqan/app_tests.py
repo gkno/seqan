@@ -105,19 +105,28 @@ class TestPathHelper(object):
         logging.debug('inFile(%s) = %s', path, result)
         return result
 
-    def outFile(self, path):
+    def outFile(self, path, subdir=None):
         """Convert the path of an output file.
 
         The given path will be converted to a path to a temporary file.  The path
         to this file will be created.
+
+        If subdir is set then a subdirectory with this name will be created and
+        the output will be relative to subdir.
         """
         if not self.temp_dir:
             self.temp_dir = tempfile.mkdtemp()
             if not os.path.isdir(self.temp_dir):
                 self.created_paths.append(self.temp_dir)
-                os.path.makedirs(self.temp_dir)
-        logging.debug('outFile(%s) = %s', path, self.temp_dir)
-        res = os.path.join(self.temp_dir, path)
+                os.makedirs(self.temp_dir)
+        target_dir = self.temp_dir
+        if subdir:
+            target_dir = os.path.join(self.temp_dir, subdir)
+            if not os.path.isdir(target_dir):
+                self.created_paths.append(target_dir)
+                os.makedirs(target_dir)
+        logging.debug('outFile(%s, %s) = %s', path, subdir, self.temp_dir)
+        res = os.path.join(target_dir, path)
         self.created_paths.append(res)
         return res
 
