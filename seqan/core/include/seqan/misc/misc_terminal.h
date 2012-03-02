@@ -109,7 +109,7 @@ bool getTerminalSize(unsigned & cols, unsigned & rows)
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-bool getTerminalSize(unsigned & rows, unsigned & cols)
+bool getTerminalSize(unsigned & cols, unsigned & rows)
 {
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
