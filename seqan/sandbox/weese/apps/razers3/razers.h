@@ -2284,7 +2284,6 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, TDelta const &delta, TO
 	// ------------------------------------------------------------------------------------------------
 	// compute probs to have 0,1,...,maxErrors errors in the prefix of length 1,...,maxLength
 	// ------------------------------------------------------------------------------------------------
-
     String<TFloat> p_prefix;
 	resize(p_prefix, maxLength * maxErrors1);
 	p_prefix[0] = (TFloat)1.0 - options.errorProb[0];   // 0 error
@@ -2328,7 +2327,6 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, TDelta const &delta, TO
 	// ------------------------------------------------------------------------------------------------
 	// compute loss for each overlap and select best the shape
 	// ------------------------------------------------------------------------------------------------
-
     for (unsigned ol = 0; ol < length(delta); ++ol)
     {
         unsigned stepSize = delta[ol];
@@ -2536,7 +2534,6 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, TDelta const &delta, TO
 
 		overlap = ol;
     }
-
 	return overlap;
 }
 
@@ -2583,6 +2580,7 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
         	}
 
 		filterPattern.params.overlap = estimatePigeonholeLosses(estLosses, delta, options);
+        _patternInit(filterPattern, options.errorRate);            
 
         #pragma omp critical
         {
@@ -2630,8 +2628,6 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
                 std::cout << ((filterPattern.params.overlap == (unsigned)estLosses[i - 2])? '*':' ');
             }
             std::cout << std::endl;
-            
-            _patternInit(filterPattern, options.errorRate);
 
             CharString str;
             shapeToString(str, filterPattern.shape);
