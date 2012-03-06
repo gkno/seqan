@@ -39,6 +39,9 @@
 #include <seqan/file.h>
 #include <seqan/misc/cmdparser/cmdoption.h>
 #include <seqan/misc/cmdparser/cmdparser_type_support.h>
+#include <seqan/misc/cmdparser/cmdparser_doc.h>
+
+#include <seqan/misc/misc_terminal.h>
 
 #include <iostream>
 #include <fstream>
@@ -49,6 +52,40 @@ namespace seqan {
  * TODO: arguments also need a type if they are used as input/output file
  * TODO: correct parameter ordering of nearly all cmdparser function to be seqan conform f(out,in)
  */
+
+// ---------------------------------------------------------------------------
+// Class EnvVarDescription
+// ---------------------------------------------------------------------------
+
+/**
+.Class.EnvVarDescription
+..cat:Miscellaneous
+..summary:Description of environment variable.
+..signature:EnvVarDescription
+..remarks:Don't use directly, use @Function.describeEnvVar@ instead.
+..see:Function.describeEnvVar
+..include:seqan/misc/misc_cmdparser.h
+
+.Memfunc.EnvVarDescription#EnvVarDescription
+..class:Class.CommandLineParser
+..summary:Constructor
+..signature:CommandLineParser(name, text)
+..param.name:Name of the environment variable.
+...type:Shortcut.CharString
+..param.text:Description of the environment variable.
+...type:Shortcut.CharString
+*/
+
+class EnvVarDescription
+{
+public:
+    CharString _name;
+    CharString _text;
+
+    EnvVarDescription(CharString const & name, CharString const & doc) :
+            _name(name), _text(doc)
+    {}
+};
 
 /**
 .Class.CommandLineParser
@@ -86,6 +123,8 @@ public:
     TStringMap shortNameMap;
     TStringMap longNameMap;
     TOptionMap optionMap;
+    
+    String<EnvVarDescription> envVars;
 
     // ----------------------------------------------------------------------------
     // Members
@@ -100,11 +139,41 @@ public:
     // ----------------------------------------------------------------------------
     // Command line formating members
     // ----------------------------------------------------------------------------
-    unsigned _lineWidth;
+
+    // The following is an example for a command line options list:
+    //
+    //    -i,   --insert-foo   This is the description of the insert-foo parameters.
+    //                         Its description is pretty long.
+    //          --long-only    This is a parameter with a long variant only.
+    //    -vvl, --very-very-long-param
+    //                         This is a very very long parameter.
+    //     `-'  `----------'
+    //      A        B
+    //    `----------------'
+    // `-'       C          `-'
+    //  D                    E
+    // `----------------------------------------------------------------------------'
+    //                                      F
+    //
+    // We have the following measures:
+    //
+    // A: Longest short option's length, determined from options given by user.
+    // B: Longest long options' length, determined from options given by user.
+    // C: Left column width, determined by A and B, there is an upper limit.
+    // D: Padding on left-hand side, configuration.
+    // E: Center padding, configuration.
+    // F: Maximal screen width, given by terminal window width, configuration.
+    //
+    // Additionally, the configuration contains a minimal screen width, and a
+    // default screen width.
+
     unsigned _paddingLeft;
-    unsigned _shortWidth;
-    unsigned _longWidth;
-    unsigned _fullWidth;
+    unsigned _paddingCenter;
+    unsigned _paddingRight;
+    unsigned _maximalLeftColumnWidth;
+    unsigned _minimalScreenWidth;
+    unsigned _maximalScreenWidth;
+    unsigned _defaultScreenWidth;
 
     // ----------------------------------------------------------------------------
     // return values for unset parameters
@@ -120,33 +189,33 @@ public:
     // ----------------------------------------------------------------------------
     void init()
     {
-        // TODO: we could try to automatically determine these settings
-        // Linux:   http://stackoverflow.com/questions/1022957/getting-terminal-width-in-c
-        // Windows: http://stackoverflow.com/questions/8627327/how-to-get-number-of-characters-in-line-in-console-that-my-process-is-bind-to
-        _lineWidth         = 32;
-        _paddingLeft       = 2;
-        _shortWidth        = 0;
-        _longWidth         = 0;
-        _fullWidth         = 0;
+        // Set defaults for the layout.
+        _paddingLeft = 2;
+        _paddingRight = 1;
+        _paddingCenter = 4;
+        _maximalLeftColumnWidth = 25;
+        _minimalScreenWidth = 40;
+        _maximalScreenWidth = 200;
+        _defaultScreenWidth = 80;
+
         _requiredArguments = 0;
-        addOption(*this, CommandLineOption("h", "help", "displays this help message", OptionType::Boolean));
-        addOption(*this, CommandLineOption("", "write-ctd", "exports the app's interface description to a .ctd file", OptionType::OUTPUTFILE));
+        addOption(*this, CommandLineOption("h", "help", "Displays this help message.", OptionType::Boolean));
+        addOption(*this, CommandLineOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", OptionType::OUTPUTFILE));
     }
 
     // ----------------------------------------------------------------------------
-    // c'tors
+    // Constructors
     // ----------------------------------------------------------------------------
+
     CommandLineParser()       
     {
         init();
     }
 
-    CommandLineParser(CharString _appName) :
-        _appName(_appName)
+    CommandLineParser(CharString _appName) : _appName(_appName)
     {
         init();
     }
-
 };
 
 // ----------------------------------------------------------------------------
@@ -216,6 +285,29 @@ hasOption(CommandLineParser const & me, CharString const & _name)
 }
 
 // ----------------------------------------------------------------------------
+// Function describeEnvVar()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.describeEnvVar
+..summary:Adds a @Class.EnvVarDescription@ object to the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:describeEnvVar(parser, name, description)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.name:The name of the environment variable.
+...type:Shortcut.CharString
+..param.name:The description for the environment variable.
+...type:Shortcut.CharString
+..include:seqan/misc/misc_cmdparser.h
+*/
+
+void describeEnvVar(CommandLineParser & parser, CharString const & name, CharString const & txt)
+{
+    appendValue(parser.envVars, EnvVarDescription(name, txt));
+}
+
+// ----------------------------------------------------------------------------
 // Function addOption()
 // ----------------------------------------------------------------------------
 
@@ -235,32 +327,16 @@ inline void
 addOption(CommandLineParser & me, CommandLineOption const & opt)
 {
     // check if an option with the same identifiers was already registered
-    SEQAN_CHECK(!hasOption(me, opt.shortName), "There already is an option with the name %s", toCString(opt.shortName));
-    SEQAN_CHECK(!hasOption(me, opt.longName), "There already is an option with the name %s", toCString(opt.longName));
+    SEQAN_CHECK(!hasOption(me, opt.shortName), "There already is an option with the name %s!", toCString(opt.shortName));
+    SEQAN_CHECK(!hasOption(me, opt.longName), "There already is an option with the name %s!", toCString(opt.longName));
 
     // finally append the option
     appendValue(me.optionMap, opt);
 
     if (!empty(opt.shortName))
-    {
         insert(me.shortNameMap, opt.shortName, length(me.optionMap) - 1);
-        unsigned width = 3 + length(opt.shortName);
-        if (me._shortWidth < width)
-            me._shortWidth = width;
-        if (empty(opt.longName))
-        {
-            width += 1 + length(argumentText(opt));
-            if (me._fullWidth < width)
-                me._fullWidth = width;
-        }
-    }
     if (!empty(opt.longName))
-    {
         insert(me.longNameMap, opt.longName, length(me.optionMap) - 1);
-        unsigned width = 3 + length(opt.longName) + length(argumentText(opt));
-        if (me._longWidth < width)
-            me._longWidth = width;
-    }
 }
 
 // ----------------------------------------------------------------------------
@@ -377,7 +453,7 @@ inline void
 addVersionLine(CommandLineParser & me, TString const & line)
 {
     if (empty(me._versionText))
-        addOption(me, CommandLineOption("V", "version", "print version information", OptionType::Boolean));
+        addOption(me, CommandLineOption("V", "version", "Print version information.", OptionType::Boolean));
     appendValue(me._versionText, line);
 }
 
@@ -600,6 +676,10 @@ shortHelp(CommandLineParser const & me)
 // Function printHelp()
 // ----------------------------------------------------------------------------
 
+// TODO(holtgrew): Reorder?
+template <typename TStream>
+void printEnvVarDocumentation(TStream & stream, CommandLineParser const & me);
+
 /**
 .Function.printHelp
 ..summary:Prints the complete help message for the parser to a stream.
@@ -621,61 +701,150 @@ printHelp(CommandLineParser const & me, TStream & target)
     _printUsage(me, target);
     _streamPut(target, '\n');
 
+    // Compute length of longest short option.
+    unsigned longestShort = 0;
+    for (unsigned i = 0; i < length(me.optionMap); ++i)
+    {
+        CommandLineOption const & opt = me.optionMap[i];
+        if (length(opt.shortName) > longestShort)
+            longestShort = length(opt.shortName) + 1;
+    }
+
+    // Now, get longest long option that does not violate the maximal length of the left column.
+    const unsigned COMMA_PADDING = 2;  // == length(", ")
+    unsigned longestLong = 0;
+    for (unsigned i = 0; i < length(me.optionMap); ++i)
+    {
+        CommandLineOption const & opt = me.optionMap[i];
+        unsigned len = length(opt.longName) + 2;
+        if (me._paddingLeft + longestShort + COMMA_PADDING + len > me._maximalLeftColumnWidth)
+            continue;  // Ignore, will put description one line below.
+        if (len > longestLong)
+            longestLong = len;
+    }
+
+    // Compute virtual tabs to shift to.
+    unsigned tabShort = me._paddingLeft;
+    unsigned tabLong  = tabShort + COMMA_PADDING + longestShort;
+    unsigned tabDescription = tabLong + me._paddingCenter + longestLong;
+
+    // Get screen width from terminal size, default and minimal screen width.
+    unsigned screenWidth = 0, screenHeight = 0;
+    bool success = getTerminalSize(screenWidth, screenHeight);
+    if (!success)
+        screenWidth = me._defaultScreenWidth;
+    if (screenWidth < me._minimalScreenWidth)
+        screenWidth = me._minimalScreenWidth;
+    if (me._maximalScreenWidth > 0u && screenWidth > me._maximalScreenWidth)
+        screenWidth = me._maximalScreenWidth;
+    screenWidth -= me._paddingRight;
+    // std::cerr << "screen-width  == " << screenWidth << std::endl;
+    // std::cerr << "tab-short     == " << tabShort << std::endl;
+    // std::cerr << "tab-long      == " << tabLong << std::endl;
+    // std::cerr << "tab-descript  == " << tabDescription << std::endl;
+    // std::cerr << "longest-short == " << longestShort << std::endl;
+    // std::cerr << "longest-long  == " << longestLong << std::endl;
+
+    // Print the options.
     for (unsigned o = 0; o < length(me.optionMap); ++o)
     {
-        const CommandLineOption & opt = me.optionMap[o];
+        unsigned s = 0;  // Column of current caret.
+        CommandLineOption const & opt = me.optionMap[o];
         if (isHiddenOption(opt))
-            continue;                                                   // do not print hidden options
+            continue;  // do not print hidden options
+        if (opt.optionType == 0)
+            continue;  // TODO(holtgrew): Can this happen, isn't this an error?
 
-        if (opt.optionType > 0)
+        // Print short and long option.
+        for (; s < tabShort; ++s)
+            _streamPut(target, ' ');
+        if (!empty(opt.shortName))
         {
-            unsigned s = 0;
-            for (; s < me._paddingLeft; ++s)
-                _streamPut(target, ' ');
-
-            unsigned t1 = s + me._shortWidth;                           // first tab
-            unsigned t2 = _max(t1 + me._longWidth, me._fullWidth) + 1;  // second tab (one extra space looks better)
-
-            if (!empty(opt.shortName))
-            {
-                _streamPut(target, '-');
-                _streamWrite(target, opt.shortName);
-                s += 1 + length(opt.shortName);
-                if (!empty(opt.longName))
-                {
-                    _streamPut(target, ',');
-                    ++s;
-                }
-                else
-                {
-                    _streamWrite(target, argumentText(opt));
-                    s += length(argumentText(opt));
-                }
-            }
-
-            for (; s < t1; ++s)
-                _streamPut(target, ' ');
-
+            _streamPut(target, '-');
+            _streamWrite(target, opt.shortName);
+            s += length(opt.shortName) + 1;
             if (!empty(opt.longName))
             {
-                _streamWrite(target, "--");
-                _streamWrite(target, opt.longName);
-                _streamWrite(target, argumentText(opt));
-                s += 2 + length(opt.longName) + length(argumentText(opt));
+                _streamWrite(target, ", ");
+                s += 2;
             }
-
-            for (; s < t2; ++s)
-                _streamPut(target, ' ');
+        }
+        for (; s < tabLong; ++s)
+            _streamPut(target, ' ');
+        if (!empty(opt.longName))
+        {
+            _streamWrite(target, "--");
+            _streamWrite(target, opt.longName);
+            s += length(opt.longName) + 2;
         }
 
-        _streamWrite(target, opt.helpText);
+        // Start description on next line if necessary.
+        if (s > me._maximalLeftColumnWidth)
+        {
+            _streamPut(target, '\n');
+            s = 0;
+        }
+        for (; s < tabDescription; ++s)
+            _streamPut(target, ' ');
 
-        if (isOptionMandatory(opt))
-            _streamWrite(target, "*");
+        // Print description.
 
+        // First, tokenize text into words.
+        StringSet<CharString> words;
+        CharString word;
+        for (unsigned i = 0; i < length(opt.helpText); ++i)
+        {
+            char c = opt.helpText[i];
+            if (isspace(c))
+            {
+                if (!empty(word))
+                    appendValue(words, word);
+                clear(word);
+            }
+            else
+            {
+                appendValue(word, c);
+            }
+        }
+        if (!empty(word))
+            appendValue(words, word);
+
+        // Now, print all the words.
+        bool firstWord = true;
+        for (unsigned i = 0; i < length(words); ++i)
+        {
+            if (s + 1 + length(words[i]) <= screenWidth)
+            {
+                // Fits on this line.  First, print space if not first word.
+                if (!firstWord)
+                {
+                    _streamPut(target, ' ');
+                    s += 1;
+                }
+                firstWord = false;
+
+                // Print word itself.
+                _streamWrite(target, words[i]);
+                s += length(words[i]);
+            }
+            else
+            {
+                // Does not fit on this line.  Print on next.
+                _streamPut(target, '\n');
+                for (s = 0; s < tabDescription; ++s)
+                    _streamPut(target, ' ');
+                _streamWrite(target, words[i]);
+                s += length(words[i]);
+            }
+        }
         _streamPut(target, '\n');
     }
-    _streamPut(target, '\n');
+
+    if (!empty(me.envVars))
+    {
+        _streamWrite(target, "\nEnvironment Variables\n\n");
+        printEnvVarDocumentation(target, me);
+    }
 }
 
 /**
@@ -1548,7 +1717,7 @@ argumentCount(CommandLineParser const & me)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.option:The identifier of the command line option.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.minValue:A @Shortcut.CharString@ containing a string representation of the minimum value of the @Class.CommandLineOption@.
 ..include:seqan/misc/misc_cmdparser.h
 */
@@ -1571,7 +1740,7 @@ setMinValue(CommandLineParser & me, CharString const & name, CharString const & 
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.option:The identifier of the command line option.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.maxValue:A @Shortcut.CharString@ containing a string representation of the maximum value of the @Class.CommandLineOption@.
 ..include:seqan/misc/misc_cmdparser.h
 */
@@ -1596,7 +1765,7 @@ setMaxValue(CommandLineParser & me, CharString const & name,
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.option:The identifier of the command line option.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.values:A $String<CharString>$ containing all valid entries for the option.
 ..include:seqan/misc/misc_cmdparser.h
 */
@@ -1636,6 +1805,106 @@ setValidValues(CommandLineParser & me, CharString const & name,
     setValidValues(me, name, values);
 }
 
-} // end seqan
+// ----------------------------------------------------------------------------
+// Function printEnvVarDocumentation()
+// ----------------------------------------------------------------------------
+
+template <typename TStream>
+void printEnvVarDocumentation(TStream & stream, CommandLineParser const & me)
+{
+    // Get screen width from terminal size, default and minimal screen width.
+    unsigned screenWidth = 0, screenHeight = 0;
+    bool success = getTerminalSize(screenWidth, screenHeight);
+    if (!success)
+        screenWidth = me._defaultScreenWidth;
+    if (screenWidth < me._minimalScreenWidth)
+        screenWidth = me._minimalScreenWidth;
+    if (me._maximalScreenWidth > 0u && screenWidth > me._maximalScreenWidth)
+        screenWidth = me._maximalScreenWidth;
+    screenWidth -= me._paddingRight;
+
+    // Compute length of longest env var name.
+    unsigned longestName = 0;
+    for (unsigned i = 0; i < length(me.envVars); ++i)
+    {
+        EnvVarDescription const & desc = me.envVars[i];
+        unsigned len = length(desc._name) + 1;
+        if (me._paddingLeft + len + 1 > me._maximalLeftColumnWidth)
+            continue;  // Ignore, will put description one line below.
+        if (len > longestName)
+            longestName  = len;
+    }
+
+    for (unsigned i = 0; i < length(me.envVars); ++i)
+    {
+        EnvVarDescription const & desc = me.envVars[i];
+
+        // Tokenize text into words.
+        StringSet<CharString> words;
+        CharString word;
+        for (unsigned i = 0; i < length(desc._text); ++i)
+        {
+            char c = desc._text[i];
+            if (isspace(c))
+            {
+                if (!empty(word))
+                    appendValue(words, word);
+                clear(word);
+            }
+            else
+            {
+                appendValue(word, c);
+            }
+        }
+        if (!empty(word))
+            appendValue(words, word);
+
+        // Compute tabs.
+        unsigned tabVar = me._paddingLeft;
+        unsigned tabDesc = tabVar + longestName + me._paddingCenter;
+        
+        // Print variable and description.
+        unsigned s = 0;
+        for (; s < tabVar; ++s)
+            _streamPut(stream, ' ');
+        _streamPut(stream, '$');
+        _streamWrite(stream, desc._name);
+        s += length(desc._name) + 1;
+        for (; s < tabDesc; ++s)
+            _streamPut(stream, ' ');
+
+        // Now, print all the words.
+        bool firstWord = true;
+        for (unsigned i = 0; i < length(words); ++i)
+        {
+            if (s + 1 + length(words[i]) <= screenWidth)
+            {
+                // Fits on this line.  First, print space if not first word.
+                if (!firstWord)
+                {
+                    _streamPut(stream, ' ');
+                    s += 1;
+                }
+                firstWord = false;
+
+                // Print word itself.
+                _streamWrite(stream, words[i]);
+                s += length(words[i]);
+            }
+            else
+            {
+                // Does not fit on this line.  Print on next.
+                _streamPut(stream, '\n');
+                for (s = 0; s < tabDesc; ++s)
+                    _streamPut(stream, ' ');
+                _streamWrite(stream, words[i]);
+                s += length(words[i]);
+            }
+        }
+        _streamPut(stream, '\n');
+    }
+}
+
+}  // namespace seqan
 
 #endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_H_
