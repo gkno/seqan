@@ -1,0 +1,104 @@
+// ==========================================================================
+//                                 arg_parse
+// ==========================================================================
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of Knut Reinert or the FU Berlin nor the names of
+//       its contributors may be used to endorse or promote products derived
+//       from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL KNUT REINERT OR THE FU BERLIN BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+// DAMAGE.
+//
+// ==========================================================================
+// Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
+// ==========================================================================
+
+#include <seqan/basic.h>
+#include <seqan/file.h>
+
+#include "test_arg_parse.h"
+
+
+SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
+{
+    // Call the int option tests
+    SEQAN_CALL_TEST(test_int_short_argument);
+    SEQAN_CALL_TEST(test_int_long_argument);
+    SEQAN_CALL_TEST(test_int_merged_short_argument);
+    SEQAN_CALL_TEST(test_non_int_argument);
+
+    // Call the double option tests
+    SEQAN_CALL_TEST(test_double_short_argument);
+    SEQAN_CALL_TEST(test_double_long_argument);
+    SEQAN_CALL_TEST(test_double_merged_short_argument);
+    SEQAN_CALL_TEST(test_non_double_argument);
+    SEQAN_CALL_TEST(test_double_scientific_notation);
+
+    // Call the string option tests
+    SEQAN_CALL_TEST(test_string_short_argument);
+    SEQAN_CALL_TEST(test_string_long_argument);
+    SEQAN_CALL_TEST(test_string_merged_short_argument);
+
+    // Test missing argument with string option
+    SEQAN_CALL_TEST(test_string_missing_argument);
+
+    // Test list of arguments
+    SEQAN_CALL_TEST(test_string_list);
+
+    // Test min/max restrictions
+    SEQAN_CALL_TEST(test_min_max_double_values_in_range);
+    SEQAN_CALL_TEST(test_min_max_double_values_to_small);
+    SEQAN_CALL_TEST(test_min_max_double_values_to_big);
+
+    SEQAN_CALL_TEST(test_min_max_int_values_in_range);
+    SEQAN_CALL_TEST(test_min_max_int_values_to_small);
+    SEQAN_CALL_TEST(test_min_max_int_values_to_big);
+
+    // Test allowed values.
+    SEQAN_CALL_TEST(test_allowed_values_contained);
+    SEQAN_CALL_TEST(test_allowed_values_not_contained);
+
+    // Test file types
+    SEQAN_CALL_TEST(test_input_file_short);
+    SEQAN_CALL_TEST(test_input_file_long);
+    SEQAN_CALL_TEST(test_input_file_merged);
+    SEQAN_CALL_TEST(test_input_file_missing);
+    SEQAN_CALL_TEST(test_input_file_invalid_type);
+    SEQAN_CALL_TEST(test_input_file_valid_type);
+
+    SEQAN_CALL_TEST(test_output_file_short);
+    SEQAN_CALL_TEST(test_output_file_long);
+    SEQAN_CALL_TEST(test_output_file_merged);
+    SEQAN_CALL_TEST(test_output_file_missing);
+    SEQAN_CALL_TEST(test_output_file_invalid_type);
+    SEQAN_CALL_TEST(test_output_file_valid_type);
+
+    // test command line arguments
+    SEQAN_CALL_TEST(test_commandline_argument_not_enough_arguments);
+    SEQAN_CALL_TEST(test_commandline_argument_required_arguments_set);
+
+    // conversion tests
+    SEQAN_CALL_TEST(test_isDouble);
+    SEQAN_CALL_TEST(test_isInt);
+}
+SEQAN_END_TESTSUITE
+
