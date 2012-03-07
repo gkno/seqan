@@ -1548,7 +1548,7 @@ argumentCount(CommandLineParser const & me)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.option:The identifier of the command line option.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.minValue:A @Shortcut.CharString@ containing a string representation of the minimum value of the @Class.CommandLineOption@.
 ..include:seqan/misc/misc_cmdparser.h
 */
@@ -1571,7 +1571,7 @@ setMinValue(CommandLineParser & me, CharString const & name, CharString const & 
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.option:The identifier of the command line option.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.maxValue:A @Shortcut.CharString@ containing a string representation of the maximum value of the @Class.CommandLineOption@.
 ..include:seqan/misc/misc_cmdparser.h
 */
@@ -1596,7 +1596,7 @@ setMaxValue(CommandLineParser & me, CharString const & name,
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.option:The identifier of the command line option.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.values:A $String<CharString>$ containing all valid entries for the option.
 ..include:seqan/misc/misc_cmdparser.h
 */
