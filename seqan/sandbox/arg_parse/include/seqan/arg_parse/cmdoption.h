@@ -146,7 +146,7 @@ public:
                       shortName(_short),
                       helpText(_help),
                       optionType(_type),
-                      argumentsPerOption(1),
+                      argumentsPerOption(!(_type & OptionType::Bool)),
                       minValue(""),
                       maxValue("")
     {}
@@ -180,6 +180,7 @@ public:
                       minValue(""),
                       maxValue("")
     {
+        // TODO(holtgrew): Does this make sense if it is empty?
         std::stringstream strm;
         strm << _default;
         appendValue(defaultValue, strm.str());
@@ -198,10 +199,11 @@ public:
                       shortName(_short),
                       helpText(_help),
                       optionType(_type),
-                      argumentsPerOption(1),
+                      argumentsPerOption(!(_type & OptionType::Bool)),
                       minValue(""),
                       maxValue("")
     {
+        // TODO(holtgrew): Does this make sense if it is empty?
         std::stringstream strm;
         strm << _default;
         appendValue(defaultValue, strm.str());

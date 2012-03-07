@@ -206,6 +206,20 @@ bool parse(CommandLineParser & me, int argc, const char * argv[], TErrorStream &
         printHelp(me, estream);
         return false;
     }
+    if (isSet(me, "export-help"))
+    {
+        CharString format;
+        getOptionValueLong(me, "export-help", format);
+        printHelp(me, estream, format);
+        return false;
+    }
+    if (isSet(me, "export-help"))
+    {
+        CharString format;
+        getOptionValueLong(me, "export-help", format);
+        printHelp(me, estream, format);
+        return false;
+    }
     if (argc == 1 && me._requiredArguments > 0)
     {
         // print short help and exit

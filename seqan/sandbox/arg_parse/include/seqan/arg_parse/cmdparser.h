@@ -42,6 +42,7 @@
 // #include <seqan/misc/cmdparser/cmdparser_doc.h>
 
 #include <seqan/misc/misc_terminal.h>
+#include <seqan/misc/tool_doc.h>
 
 #include <iostream>
 #include <fstream>
@@ -53,49 +54,46 @@ namespace seqan {
  * TODO: correct parameter ordering of nearly all cmdparser function to be seqan conform f(out,in)
  */
 
-// ---------------------------------------------------------------------------
-// Class EnvVarDescription
-// ---------------------------------------------------------------------------
-
-/**
-.Class.EnvVarDescription
-..cat:Miscellaneous
-..summary:Description of environment variable.
-..signature:EnvVarDescription
-..remarks:Don't use directly, use @Function.describeEnvVar@ instead.
-..see:Function.describeEnvVar
-..include:seqan/misc/misc_cmdparser.h
-
-.Memfunc.EnvVarDescription#EnvVarDescription
-..class:Class.CommandLineParser
-..summary:Constructor
-..signature:CommandLineParser(name, text)
-..param.name:Name of the environment variable.
-...type:Shortcut.CharString
-..param.text:Description of the environment variable.
-...type:Shortcut.CharString
-*/
-
-class EnvVarDescription
-{
-public:
-    CharString _name;
-    CharString _text;
-
-    EnvVarDescription(CharString const & name, CharString const & doc) :
-            _name(name), _text(doc)
-    {}
-};
-
 /**
 .Class.CommandLineParser
 ..cat:Miscellaneous
 ..summary:Stores multiple @Class.CommandLineOption@ objects and parses the command line _arguments for these options.
 ..signature:CommandLineParser
 ..include:seqan/misc/misc_cmdparser.h
-*/
+..remarks:
+See the documentation of @Class.ToolDoc@ on how to format text.
+Where possible, formatting is added automatically for you.
+You have to use formatting in the following places: (1) usage lines, (2) option help texts, (3) description and additional text sections.
+..example.text:
+The following gives a simple example of how to use the @Class.CommandLineParser@.
+..example.code:
+CommandLineParser parser("alf");
+setShortDescription(parser, "Alignment free sequence comparison");
+setVersion(parser, "1.0");
+setDate(parser, "Jan 2010");
 
-/**
+
+addUsageLine(parser, "[\\fIOPTIONS\\fP] \\fB-i\\fP \\fIIN\\fP \\fB-o\\fP \\fIOUT\\fP");
+
+addDescription(parser,
+               "ALF can be used to calculate the pairwise similarity of sequences "
+               "using alignment-free methods.  All methods which are implemented are "
+               "based on k-mer counts.");
+
+CommandLineOption optionInputFile("i", "inputFile", "Name of the multi-FASTA input.",
+                                  OptionType::String | OptionType::Mandatory);
+optionInputFile = addArgumentText(optionInputFile, "IN");
+addOption(parser, optionInputFile);
+
+CommandLineOption optionInputFile("o", "outputFile", "Name of the output file.",
+                                  OptionType::String | OptionType::Mandatory);
+optionInputFile = addArgumentText(optionInputFile, "OUT");
+addOption(parser, optionInputFile);
+
+addTextSection(parser, "See Also");
+addText(parser, "http://www.seqan.de/projects/alf");
+..see:Class.ToolDoc
+
 .Memfunc.CommandLineParser#CommandLineParser
 ..class:Class.CommandLineParser
 ..summary:Constructor
@@ -124,56 +122,18 @@ public:
     TStringMap longNameMap;
     TOptionMap optionMap;
     
-    String<EnvVarDescription> envVars;
-
     // ----------------------------------------------------------------------------
     // Members
     // ----------------------------------------------------------------------------
-    unsigned           _requiredArguments;
-    String<CharString> _arguments;
-    CharString         _appName;
-    String<CharString> _titleText;
-    String<CharString> _usageText;
-    String<CharString> _versionText;
-
-    // ----------------------------------------------------------------------------
-    // Command line formating members
-    // ----------------------------------------------------------------------------
-
-    // The following is an example for a command line options list:
-    //
-    //    -i,   --insert-foo   This is the description of the insert-foo parameters.
-    //                         Its description is pretty long.
-    //          --long-only    This is a parameter with a long variant only.
-    //    -vvl, --very-very-long-param
-    //                         This is a very very long parameter.
-    //     `-'  `----------'
-    //      A        B
-    //    `----------------'
-    // `-'       C          `-'
-    //  D                    E
-    // `----------------------------------------------------------------------------'
-    //                                      F
-    //
-    // We have the following measures:
-    //
-    // A: Longest short option's length, determined from options given by user.
-    // B: Longest long options' length, determined from options given by user.
-    // C: Left column width, determined by A and B, there is an upper limit.
-    // D: Padding on left-hand side, configuration.
-    // E: Center padding, configuration.
-    // F: Maximal screen width, given by terminal window width, configuration.
-    //
-    // Additionally, the configuration contains a minimal screen width, and a
-    // default screen width.
-
-    unsigned _paddingLeft;
-    unsigned _paddingCenter;
-    unsigned _paddingRight;
-    unsigned _maximalLeftColumnWidth;
-    unsigned _minimalScreenWidth;
-    unsigned _maximalScreenWidth;
-    unsigned _defaultScreenWidth;
+    unsigned              _requiredArguments;
+    StringSet<CharString> _description;
+    String<CharString>    _arguments;
+    CharString            _appName;
+    String<CharString>    _titleText;
+    String<CharString>    _usageText;
+    String<CharString>    _versionText;
+    
+    ToolDoc _toolDoc;
 
     // ----------------------------------------------------------------------------
     // return values for unset parameters
@@ -189,18 +149,11 @@ public:
     // ----------------------------------------------------------------------------
     void init()
     {
-        // Set defaults for the layout.
-        _paddingLeft = 2;
-        _paddingRight = 1;
-        _paddingCenter = 4;
-        _maximalLeftColumnWidth = 25;
-        _minimalScreenWidth = 40;
-        _maximalScreenWidth = 200;
-        _defaultScreenWidth = 80;
-
         _requiredArguments = 0;
         addOption(*this, CommandLineOption("h", "help", "Displays this help message.", OptionType::Boolean));
         addOption(*this, CommandLineOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", OptionType::OUTPUTFILE));
+        addOption(*this, CommandLineOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", OptionType::String));
+        back(this->optionMap) = addArgumentText(back(this->optionMap), "FORMAT");
     }
 
     // ----------------------------------------------------------------------------
@@ -214,6 +167,7 @@ public:
 
     CommandLineParser(CharString _appName) : _appName(_appName)
     {
+        setName(_toolDoc, _appName);
         init();
     }
 };
@@ -282,29 +236,6 @@ inline bool
 hasOption(CommandLineParser const & me, CharString const & _name)
 {
     return (hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name));
-}
-
-// ----------------------------------------------------------------------------
-// Function describeEnvVar()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.describeEnvVar
-..summary:Adds a @Class.EnvVarDescription@ object to the @Class.CommandLineParser@.
-..cat:Miscellaneous
-..signature:describeEnvVar(parser, name, description)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.name:The name of the environment variable.
-...type:Shortcut.CharString
-..param.name:The description for the environment variable.
-...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-void describeEnvVar(CommandLineParser & parser, CharString const & name, CharString const & txt)
-{
-    appendValue(parser.envVars, EnvVarDescription(name, txt));
 }
 
 // ----------------------------------------------------------------------------
@@ -676,176 +607,131 @@ shortHelp(CommandLineParser const & me)
 // Function printHelp()
 // ----------------------------------------------------------------------------
 
-// TODO(holtgrew): Reorder?
-template <typename TStream>
-void printEnvVarDocumentation(TStream & stream, CommandLineParser const & me);
-
 /**
 .Function.printHelp
 ..summary:Prints the complete help message for the parser to a stream.
 ..cat:Miscellaneous
-..signature:printHelp(parser[, stream])
+..signature:printHelp(parser[, stream][, format])
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 ...default: $std::cerr$
+..param.format:Format to print, one of "html", "man", "txt".
+...type:Shortcut.CharString
 ..include:seqan/misc/misc_cmdparser.h
 */
 
 template <typename TStream>
 inline void
-printHelp(CommandLineParser const & me, TStream & target)
+printHelp(CommandLineParser const & me, TStream & target, CharString const & format)
 {
-    _printTitle(me, target);
-    _streamPut(target, '\n');
-    _printUsage(me, target);
-    _streamPut(target, '\n');
+    ToolDoc toolDoc(me._toolDoc);
+    clearEntries(toolDoc);  // We will append me._toolDoc later.
 
-    // Compute length of longest short option.
-    unsigned longestShort = 0;
+    // Build synopsis section.
+    addSection(toolDoc, "Synopsis");
+    for (unsigned i = 0; i < length(me._usageText); ++i)
+    {
+        CharString text = "\\fB";
+        append(text, me._appName);
+        append(text, "\\fP ");
+        append(text, me._usageText[i]);
+        addText(toolDoc, text, false);
+    }
+
+    // Build Description section, include options.
+    addSection(toolDoc, "Description");
+
+    // Add description to tool documentation.
+    for (unsigned i = 0; i < length(me._description); ++i)
+        addText(toolDoc, me._description[i]);
+
+    // Add options to description section.
     for (unsigned i = 0; i < length(me.optionMap); ++i)
     {
         CommandLineOption const & opt = me.optionMap[i];
-        if (length(opt.shortName) > longestShort)
-            longestShort = length(opt.shortName) + 1;
-    }
-
-    // Now, get longest long option that does not violate the maximal length of the left column.
-    const unsigned COMMA_PADDING = 2;  // == length(", ")
-    unsigned longestLong = 0;
-    for (unsigned i = 0; i < length(me.optionMap); ++i)
-    {
-        CommandLineOption const & opt = me.optionMap[i];
-        unsigned len = length(opt.longName) + 2;
-        if (me._paddingLeft + longestShort + COMMA_PADDING + len > me._maximalLeftColumnWidth)
-            continue;  // Ignore, will put description one line below.
-        if (len > longestLong)
-            longestLong = len;
-    }
-
-    // Compute virtual tabs to shift to.
-    unsigned tabShort = me._paddingLeft;
-    unsigned tabLong  = tabShort + COMMA_PADDING + longestShort;
-    unsigned tabDescription = tabLong + me._paddingCenter + longestLong;
-
-    // Get screen width from terminal size, default and minimal screen width.
-    unsigned screenWidth = 0, screenHeight = 0;
-    bool success = getTerminalSize(screenWidth, screenHeight);
-    if (!success)
-        screenWidth = me._defaultScreenWidth;
-    if (screenWidth < me._minimalScreenWidth)
-        screenWidth = me._minimalScreenWidth;
-    if (me._maximalScreenWidth > 0u && screenWidth > me._maximalScreenWidth)
-        screenWidth = me._maximalScreenWidth;
-    screenWidth -= me._paddingRight;
-    // std::cerr << "screen-width  == " << screenWidth << std::endl;
-    // std::cerr << "tab-short     == " << tabShort << std::endl;
-    // std::cerr << "tab-long      == " << tabLong << std::endl;
-    // std::cerr << "tab-descript  == " << tabDescription << std::endl;
-    // std::cerr << "longest-short == " << longestShort << std::endl;
-    // std::cerr << "longest-long  == " << longestLong << std::endl;
-
-    // Print the options.
-    for (unsigned o = 0; o < length(me.optionMap); ++o)
-    {
-        unsigned s = 0;  // Column of current caret.
-        CommandLineOption const & opt = me.optionMap[o];
-        if (isHiddenOption(opt))
-            continue;  // do not print hidden options
-        if (opt.optionType == 0)
-            continue;  // TODO(holtgrew): Can this happen, isn't this an error?
-
-        // Print short and long option.
-        for (; s < tabShort; ++s)
-            _streamPut(target, ' ');
-        if (!empty(opt.shortName))
+        if (empty(opt.shortName) && empty(opt.longName))
         {
-            _streamPut(target, '-');
-            _streamWrite(target, opt.shortName);
-            s += length(opt.shortName) + 1;
+            if (empty(opt.helpText))  // TODO(holtgrew): Should go away in future.
+                continue;  // Skip empty lines.
+            // Is command line parser section, maps to ToolDoc subsection.
+            CharString title = opt.helpText;
+            append(title, ":");
+            addSubSection(toolDoc, title);
+        }
+        else
+        {
+            // Build list item term.
+            CharString term;
+            if (!empty(opt.shortName))
+            {
+                term = "\\fB-";
+                append(term, opt.shortName);
+                append(term, "\\fP");
+            }
+            if (!empty(opt.shortName) && !empty(opt.longName))
+                append(term, ", ");
             if (!empty(opt.longName))
             {
-                _streamWrite(target, ", ");
-                s += 2;
+                append(term, "\\fB--");
+                append(term, opt.longName);
+                append(term, "\\fP");
             }
-        }
-        for (; s < tabLong; ++s)
-            _streamPut(target, ' ');
-        if (!empty(opt.longName))
-        {
-            _streamWrite(target, "--");
-            _streamWrite(target, opt.longName);
-            s += length(opt.longName) + 2;
-        }
-
-        // Start description on next line if necessary.
-        if (s > me._maximalLeftColumnWidth)
-        {
-            _streamPut(target, '\n');
-            s = 0;
-        }
-        for (; s < tabDescription; ++s)
-            _streamPut(target, ' ');
-
-        // Print description.
-
-        // First, tokenize text into words.
-        StringSet<CharString> words;
-        CharString word;
-        for (unsigned i = 0; i < length(opt.helpText); ++i)
-        {
-            char c = opt.helpText[i];
-            if (isspace(c))
+            // Get arguments, autogenerate if necessary.
+            CharString arguments = opt.arguments;
+            if (empty(arguments) && opt.argumentsPerOption > 0)
             {
-                if (!empty(word))
-                    appendValue(words, word);
-                clear(word);
-            }
-            else
-            {
-                appendValue(word, c);
-            }
-        }
-        if (!empty(word))
-            appendValue(words, word);
-
-        // Now, print all the words.
-        bool firstWord = true;
-        for (unsigned i = 0; i < length(words); ++i)
-        {
-            if (s + 1 + length(words[i]) <= screenWidth)
-            {
-                // Fits on this line.  First, print space if not first word.
-                if (!firstWord)
+                CharString type;
+                if (opt.optionType & OptionType::String)
+                    type = "STRING";
+                else if (opt.optionType & OptionType::Int)
+                    type = "INT";
+                else if (opt.optionType & OptionType::Double)
+                    type = "DOUBLE";
+                else
+                    type = "PARAM";
+                for (int i = 0; i < opt.argumentsPerOption; ++i)
                 {
-                    _streamPut(target, ' ');
-                    s += 1;
+                    if (i != 0)
+                        appendValue(arguments, ' ');
+                    append(arguments, type);
                 }
-                firstWord = false;
-
-                // Print word itself.
-                _streamWrite(target, words[i]);
-                s += length(words[i]);
             }
-            else
+            // Write arguments to term line.
+            if (!empty(arguments))
             {
-                // Does not fit on this line.  Print on next.
-                _streamPut(target, '\n');
-                for (s = 0; s < tabDescription; ++s)
-                    _streamPut(target, ' ');
-                _streamWrite(target, words[i]);
-                s += length(words[i]);
+                // Tokenize argument names.
+                std::istringstream iss(toCString(arguments));
+                std::vector<std::string> tokens;
+                std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(),
+                          std::back_inserter<std::vector<std::string> >(tokens));
+                // Append them, formatted in italic.
+                for (unsigned i = 0; i < length(tokens); ++i)
+                {
+                    append(term, " \\fI");
+                    append(term, tokens[i]);
+                    append(term, "\\fP");
+                }
             }
+            // Add list item.
+            addListItem(toolDoc, term, opt.helpText);
         }
-        _streamPut(target, '\n');
     }
 
-    if (!empty(me.envVars))
-    {
-        _streamWrite(target, "\nEnvironment Variables\n\n");
-        printEnvVarDocumentation(target, me);
-    }
+    append(toolDoc, me._toolDoc);
+    print(target, toolDoc, format);
 }
+
+template <typename TStream>
+inline void
+printHelp(CommandLineParser const & me, TStream & target)
+{
+    printHelp(me, target, "txt");
+}
+
+// ----------------------------------------------------------------------------
+// Function help()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.help
@@ -1806,103 +1692,181 @@ setValidValues(CommandLineParser & me, CharString const & name,
 }
 
 // ----------------------------------------------------------------------------
-// Function printEnvVarDocumentation()
+// Function addDescription()
 // ----------------------------------------------------------------------------
 
-template <typename TStream>
-void printEnvVarDocumentation(TStream & stream, CommandLineParser const & me)
+/**
+.Function.addDescription
+..summary:Appends a description paragraph to the @Class.CommandLineParser@ documentation.
+..cat:Miscellaneous
+..signature:addDescription(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:The description paragraph.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/misc/misc_cmdparser.h
+*/
+
+inline void addDescription(CommandLineParser & me, CharString const & description)
 {
-    // Get screen width from terminal size, default and minimal screen width.
-    unsigned screenWidth = 0, screenHeight = 0;
-    bool success = getTerminalSize(screenWidth, screenHeight);
-    if (!success)
-        screenWidth = me._defaultScreenWidth;
-    if (screenWidth < me._minimalScreenWidth)
-        screenWidth = me._minimalScreenWidth;
-    if (me._maximalScreenWidth > 0u && screenWidth > me._maximalScreenWidth)
-        screenWidth = me._maximalScreenWidth;
-    screenWidth -= me._paddingRight;
+    appendValue(me._description, description);
+}
 
-    // Compute length of longest env var name.
-    unsigned longestName = 0;
-    for (unsigned i = 0; i < length(me.envVars); ++i)
-    {
-        EnvVarDescription const & desc = me.envVars[i];
-        unsigned len = length(desc._name) + 1;
-        if (me._paddingLeft + len + 1 > me._maximalLeftColumnWidth)
-            continue;  // Ignore, will put description one line below.
-        if (len > longestName)
-            longestName  = len;
-    }
+// ----------------------------------------------------------------------------
+// Function setAppName()
+// ----------------------------------------------------------------------------
 
-    for (unsigned i = 0; i < length(me.envVars); ++i)
-    {
-        EnvVarDescription const & desc = me.envVars[i];
+/**
+.Function.setAppName
+..summary:Sets application name of @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:setAppName(parser, appName)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.appName:The name of the application.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/misc/misc_cmdparser.h
+*/
 
-        // Tokenize text into words.
-        StringSet<CharString> words;
-        CharString word;
-        for (unsigned i = 0; i < length(desc._text); ++i)
-        {
-            char c = desc._text[i];
-            if (isspace(c))
-            {
-                if (!empty(word))
-                    appendValue(words, word);
-                clear(word);
-            }
-            else
-            {
-                appendValue(word, c);
-            }
-        }
-        if (!empty(word))
-            appendValue(words, word);
+inline void setAppName(CommandLineParser & me, CharString const & name)
+{
+    setName(me._toolDoc, name);
+}
 
-        // Compute tabs.
-        unsigned tabVar = me._paddingLeft;
-        unsigned tabDesc = tabVar + longestName + me._paddingCenter;
-        
-        // Print variable and description.
-        unsigned s = 0;
-        for (; s < tabVar; ++s)
-            _streamPut(stream, ' ');
-        _streamPut(stream, '$');
-        _streamWrite(stream, desc._name);
-        s += length(desc._name) + 1;
-        for (; s < tabDesc; ++s)
-            _streamPut(stream, ' ');
+// ----------------------------------------------------------------------------
+// Function setShortDescription()
+// ----------------------------------------------------------------------------
 
-        // Now, print all the words.
-        bool firstWord = true;
-        for (unsigned i = 0; i < length(words); ++i)
-        {
-            if (s + 1 + length(words[i]) <= screenWidth)
-            {
-                // Fits on this line.  First, print space if not first word.
-                if (!firstWord)
-                {
-                    _streamPut(stream, ' ');
-                    s += 1;
-                }
-                firstWord = false;
+/**
+.Function.setShortDescription
+..summary:Sets short description test of @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:setShortDescription(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:The short description text.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/misc/misc_cmdparser.h
+*/
 
-                // Print word itself.
-                _streamWrite(stream, words[i]);
-                s += length(words[i]);
-            }
-            else
-            {
-                // Does not fit on this line.  Print on next.
-                _streamPut(stream, '\n');
-                for (s = 0; s < tabDesc; ++s)
-                    _streamPut(stream, ' ');
-                _streamWrite(stream, words[i]);
-                s += length(words[i]);
-            }
-        }
-        _streamPut(stream, '\n');
-    }
+inline void setShortDescription(CommandLineParser & me, CharString const & description)
+{
+    setShortDescription(me._toolDoc, description);
+}
+
+// ----------------------------------------------------------------------------
+// Function setVersion()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.setVersion
+..summary:Sets version string of @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:setVersion(parser, versionString)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.versionString:The version string to set.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/misc/misc_cmdparser.h
+*/
+
+inline void setVersion(CommandLineParser & me, CharString const & versionString)
+{
+    setVersion(me._toolDoc, versionString);
+}
+
+// ----------------------------------------------------------------------------
+// Function setDate()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.setDate
+..summary:Sets date string of @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:setDate(parser, date)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.date:The date string.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/misc/misc_cmdparser.h
+*/
+
+inline void setDate(CommandLineParser & me, CharString const & date)
+{
+    setDate(me._toolDoc, date);
+}
+
+// ----------------------------------------------------------------------------
+// Function addTextSection()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.addTextSection
+..summary:Adds a text section to the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:addTextSection(parser, title)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.title:The section title.
+...type:Shortcut.CharString
+..returns:$void$
+..remarks:This will result in an additional section heading to be printed.
+..include:seqan/misc/misc_cmdparser.h
+*/
+
+inline void addTextSection(CommandLineParser & me, CharString const & title)
+{
+    addSection(me._toolDoc, title);
+}
+
+// ----------------------------------------------------------------------------
+// Function addTextSubSection()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.addTextSubSection
+..summary:Adds a text subsection to the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:addTextSubSection(parser, title)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.title:The subsection title.
+...type:Shortcut.CharString
+..returns:$void$
+..remarks:This will result in an additional subsection heading to be printed.
+..include:seqan/misc/misc_cmdparser.h
+*/
+
+inline void addTextSubSection(CommandLineParser & me, CharString const & title)
+{
+    addSubSection(me._toolDoc, title);
+}
+
+// ----------------------------------------------------------------------------
+// Function addText()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.addText
+..summary:Appends a text paragraph to the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:addText(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:The content of the text.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/misc/misc_cmdparser.h
+*/
+
+inline void addText(CommandLineParser & me, CharString const & text)
+{
+    addText(me._toolDoc, text);
 }
 
 }  // namespace seqan
