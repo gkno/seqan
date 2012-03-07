@@ -58,6 +58,71 @@ namespace seqan {
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Function isTerminal()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.isTerminal()
+..cat:Miscalleneous
+..summary:Check whether we are printing to a terminal.
+..signature:isTerminal()
+..returns:$true$ if we are on the terminal, false otherwise.
+..include:seqan/misc/misc_terminal.h
+*/
+
+#if defined(PLATFORM_WINDOWS)
+
+#include <io.h>
+
+inline bool isTerminal()
+{
+    return _isatty(_fileno(stdout));
+}
+
+#endif  // #if defined(PLATFORM_WINDOWS)
+
+#if defined(PLATFORM_GCC)
+
+#include <unistd.h>
+
+inline bool isTerminal()
+{
+    return isatty(fileno(stdout));
+}
+
+#endif  // #if defined(PLATFORM_GCC)
+
+// ----------------------------------------------------------------------------
+// Function isAnsiColorTerminal()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.isAnsiColorTerminal
+..cat:Miscalleneous
+..summary:Check whether we are printing to a terminal.
+..signature:isTerminal()
+..returns:$true$ if we are in a terminal and the terminal knows ANSI color codes.
+..remarks:Currently, we assume that Unix terminals support color while Windows terminals and no terminals do not.
+..include:seqan/misc/misc_terminal.h
+*/
+
+#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_GCC_MINGW)
+
+inline bool isAnsiColorTerminal()
+{
+    return false;
+}
+
+#else  // #if defined(PLATFORM_WINDOWS) || defined(PLATFORM_GCC_MINGW)
+
+inline bool isAnsiColorTerminal()
+{
+    return isTerminal();
+}
+
+#endif  // #if defined(PLATFORM_WINDOWS) || defined(PLATFORM_GCC_MINGW)
+
+// ----------------------------------------------------------------------------
 // Function getTerminalSize()
 // ----------------------------------------------------------------------------
 
@@ -67,9 +132,9 @@ namespace seqan {
 ..summary:Retrieve size of terminal.
 ..signature:getTerminalSize(cols, rows)
 ..param.cols:The column count is written here.
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..param.rows:The line count is written here.
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..returns:$true$ on success, $false$ otherwise.
 ...type:nolink:$bool$
 ..remarks:On Windows, $rows$ contains the number of rows in the terminal *buffer*, not the window.
@@ -89,7 +154,7 @@ std::cerr << "rows == " << rows << ", cols == " << cols
 #include <Windows.h>
 
 // NOTE: cols actually is the buffer size :(
-bool getTerminalSize(unsigned & cols, unsigned & rows)
+inline bool getTerminalSize(unsigned & cols, unsigned & rows)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -102,14 +167,14 @@ bool getTerminalSize(unsigned & cols, unsigned & rows)
     return true;
 }
 
-#endif  // #if defined(PLATFORM_WINDOWS_MINGW)
+#endif  // #if defined(PLATFORM_WINDOWS)
 
 #if defined(PLATFORM_GCC)
 
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-bool getTerminalSize(unsigned & cols, unsigned & rows)
+inline bool getTerminalSize(unsigned & cols, unsigned & rows)
 {
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
