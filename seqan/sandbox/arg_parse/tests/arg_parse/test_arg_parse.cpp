@@ -36,6 +36,7 @@
 #include <seqan/file.h>
 
 #include "test_arg_parse.h"
+#include "test_misc_cmdargument.h"
 
 
 SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
@@ -95,6 +96,15 @@ SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
     // test command line arguments
     SEQAN_CALL_TEST(test_commandline_argument_not_enough_arguments);
     SEQAN_CALL_TEST(test_commandline_argument_required_arguments_set);
+
+    // cmd argument tests
+    SEQAN_CALL_TEST(test_argument_string_label);
+    SEQAN_CALL_TEST(test_argument_int_label);
+    SEQAN_CALL_TEST(test_argument_double_label);
+    SEQAN_CALL_TEST(test_argument_inputfile_label);
+    SEQAN_CALL_TEST(test_argument_outputfile_label);
+    SEQAN_CALL_TEST(test_argument_user_defined_label);
+    SEQAN_CALL_TEST(test_argument_min_max_boundaries);
 
     // conversion tests
     SEQAN_CALL_TEST(test_isDouble);

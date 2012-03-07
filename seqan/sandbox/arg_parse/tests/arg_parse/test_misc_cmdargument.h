@@ -39,7 +39,7 @@
 
 #include <seqan/basic.h>
 
-#include <seqan/misc/cmdparser/cmdargument.h>
+#include <seqan/arg_parse/cmdargument.h>
 
 namespace seqan
 {
