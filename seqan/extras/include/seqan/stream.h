@@ -90,8 +90,10 @@
 
 #include <seqan/stream/stream_base.h>
 #include <seqan/stream/stream_char_array.h>
-#if SEQAN_HAS_ZLIB  // Enable Stream<GZFile> if available.
+#if SEQAN_HAS_ZLIB
+// Enable Stream<GZFile> and Stream<Bgzf> if available.
 #include <seqan/stream/stream_gz_file.h>
+#include <seqan/stream/stream_bgzf.h>
 #endif  // #if SEQAN_HAS_ZLIB
 #if SEQAN_HAS_BZIP2  // Enable Stream<BZ2File> if available.
 #include <seqan/stream/stream_bz2_file.h>

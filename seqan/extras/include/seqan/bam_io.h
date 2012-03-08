@@ -45,7 +45,6 @@
 #include <seqan/file.h>
 #include <seqan/sequence.h>
 #include <seqan/stream.h>
-#include <seqan/ext_lh3.h>
 #include <seqan/store.h>
 #include <seqan/align.h>
 

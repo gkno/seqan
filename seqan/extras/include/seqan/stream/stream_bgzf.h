@@ -60,8 +60,8 @@
    THE SOFTWARE.
 */
 
-#ifndef EXTRAS_INCLUDE_SEQAN_EXT_LH3_STREAM_BGZF_H_
-#define EXTRAS_INCLUDE_SEQAN_EXT_LH3_STREAM_BGZF_H_
+#ifndef EXTRAS_INCLUDE_SEQAN_STREAM_STREAM_BGZF_H_
+#define EXTRAS_INCLUDE_SEQAN_STREAM_STREAM_BGZF_H_
 
 #include <map>
 
@@ -178,7 +178,6 @@ public:
 // ============================================================================
 // Metafunctions
 // ============================================================================
-
 
 // ----------------------------------------------------------------------------
 // Metafunction Difference
@@ -1110,4 +1109,4 @@ streamTell(Stream<Bgzf> & stream)
 
 }  // namespace seqan
 
-#endif  // #ifndef EXTRAS_INCLUDE_SEQAN_EXT_LH3_STREAM_BGZF_H_
+#endif  // #ifndef EXTRAS_INCLUDE_SEQAN_STREAM_STREAM_BGZF_H_

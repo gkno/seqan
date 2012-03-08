@@ -41,6 +41,7 @@
 #include "test_stream_char_array.h"
 #if SEQAN_HAS_ZLIB
 #include "test_stream_gz_file.h"
+#include "test_stream_bgzf.h"
 #endif  // #if SEQAN_HAS_ZLIB
 #if SEQAN_HAS_BZIP2
 #include "test_stream_bz2_file.h"
@@ -78,7 +79,7 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_char_array_seek);
     SEQAN_CALL_TEST(test_stream_char_array_tell);
 
-#if SEQAN_HAS_ZLIB  // Enable tests for Stream<GZFile> if available.
+#if SEQAN_HAS_ZLIB  // Enable tests for Stream<GZFile>, Stream<Bgzf> if available.
     // Tests for BZ2 File Stream.
     SEQAN_CALL_TEST(test_stream_gz_file_metafunctions);
     SEQAN_CALL_TEST(test_stream_gz_file_read_simple_usage);
@@ -95,6 +96,26 @@ SEQAN_BEGIN_TESTSUITE(test_stream)
     SEQAN_CALL_TEST(test_stream_gz_file_flush);
     SEQAN_CALL_TEST(test_stream_gz_file_seek);
     SEQAN_CALL_TEST(test_stream_gz_file_tell);
+
+    // Test Stream<Bgzf>.
+    SEQAN_CALL_TEST(test_stream_bgzf_metafunctions);
+    SEQAN_CALL_TEST(test_stream_bgzf_read_simple_usage);
+    SEQAN_CALL_TEST(test_stream_bgzf_read_complex_usage);
+    SEQAN_CALL_TEST(test_stream_bgzf_write_simple_usage);
+    SEQAN_CALL_TEST(test_stream_bgzf_write_complex_usage);
+    SEQAN_CALL_TEST(test_stream_bgzf_eof);
+    SEQAN_CALL_TEST(test_stream_bgzf_peek);
+    SEQAN_CALL_TEST(test_stream_bgzf_read_char);
+    SEQAN_CALL_TEST(test_stream_bgzf_read_block);
+    SEQAN_CALL_TEST(test_stream_bgzf_write_block);
+    SEQAN_CALL_TEST(test_stream_bgzf_streamPut);
+    SEQAN_CALL_TEST(test_stream_bgzf_write_char);
+    SEQAN_CALL_TEST(test_stream_bgzf_flush);
+    SEQAN_CALL_TEST(test_stream_bgzf_seek);
+    SEQAN_CALL_TEST(test_stream_bgzf_tell);
+
+    SEQAN_CALL_TEST(test_stream_bgzf_write_large_and_compare_with_file);
+    SEQAN_CALL_TEST(test_stream_bgzf_from_file_and_compare);
 #endif  // #if SEQAN_HAS_ZLIB
 
 #if SEQAN_HAS_BZIP2  // Enable tests for Stream<BZ2File> if available.

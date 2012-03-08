@@ -1,9 +1,0 @@
-Name: ext_lh3
-Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
-Maintainer: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
-License: BSD 3-clause
-License: MIT License
-Copyright: 2011, FU Berlin
-Status: stable
-Description: This module contains external software from Heng Li.
-The code was extracted from samtools.
