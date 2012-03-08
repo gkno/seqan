@@ -66,6 +66,8 @@ public:
         SUBSECTION, SECTION, LINE, LIST_ITEM
     };
 
+    virtual ~ToolDocEntry_() {}
+
     virtual EntryType getType() const = 0;
 };
 
@@ -1051,7 +1053,7 @@ inline void print(std::ostream & stream, ToolDoc const & doc, CharString const &
 
 inline void clearEntries(ToolDoc & doc)
 {
-    typedef typename Iterator<String<ToolDocEntry_ *>, Rooted>::Type TIter;
+    typedef Iterator<String<ToolDocEntry_ *>, Rooted>::Type TIter;
     for (TIter it = begin(doc._entries, Rooted()); !atEnd(it); goNext(it))
         delete *it;
     clear(doc._entries);
@@ -1076,7 +1078,7 @@ void HtmlToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
     stream << "<h1>" << _toHtml(doc._name) << "</h1>\n"
            << "<div>" << _toHtml(doc._shortDescription) << "</div>\n";
 
-    typedef typename Iterator<String<ToolDocEntry_ *> const, Rooted>::Type TIter;
+    typedef Iterator<String<ToolDocEntry_ *> const, Rooted>::Type TIter;
     bool isDl = false;
     bool isP = false;
     for (TIter it = begin(doc._entries, Rooted()); !atEnd(it); goNext(it))
@@ -1157,7 +1159,7 @@ void TextToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
     std::fill_n(out, len, '=');
     stream << '\n';
 
-    typedef typename Iterator<String<ToolDocEntry_ *> const, Rooted>::Type TIter;
+    typedef Iterator<String<ToolDocEntry_ *> const, Rooted>::Type TIter;
     bool prevWasParagraph = false;  // Stores whether to add a line break.
     for (TIter it = begin(doc._entries, Rooted()); !atEnd(it); goNext(it))
     {
@@ -1224,7 +1226,7 @@ void ManToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
            << doc._name << " \\- " << doc._shortDescription << std::endl;
 
     // Print text.
-    typedef typename Iterator<String<ToolDocEntry_ *> const, Rooted>::Type TIter;
+    typedef Iterator<String<ToolDocEntry_ *> const, Rooted>::Type TIter;
     bool isFirstInSection = true;
     for (TIter it = begin(doc._entries, Rooted()); !atEnd(it); goNext(it))
     {
