@@ -187,6 +187,7 @@ int _readRecord(TIdString & meta, TSeqString & seq, TQualString & qual, TRecordR
 template <typename TIdString, typename TSeqString, typename TQualString, typename TRecordReader, typename TTagList>
 int readRecord(TIdString & meta, TSeqString & seq, TQualString & qual, TRecordReader & reader, TagSelector<TTagList> & tagSelector)
 {
+    // TODO(holtgrew): The check should only happen once! Otherwise we waste time :(
     if (!checkStreamFormat(reader, tagSelector))
         return IOERR_READ_AUTO_FORMAT_UNKNOWN_FORMAT;
 
@@ -218,6 +219,7 @@ int _readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, TagS
 template <typename TIdString, typename TSeqString, typename TRecordReader, typename TTagList>
 int readRecord(TIdString & meta, TSeqString & seq, TRecordReader & reader, TagSelector<TTagList> & tagSelector)
 {
+    // TODO(holtgrew): The check should only happen once! Otherwise we waste time :(
     if (!checkStreamFormat(reader, tagSelector))
         return IOERR_READ_AUTO_FORMAT_UNKNOWN_FORMAT;
 
