@@ -3027,7 +3027,8 @@ int _mapMatePairReads(
         return _mapMatePairReads(store, cnts, options, shape, mode, Swift<TSwiftSpec>());
     } else
     {
-        return _mapMatePairReads(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<>());
+        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, void, Hamming_>::Type TPigeonholeSpec;
+        return _mapMatePairReads(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<TPigeonholeSpec>());
     }    
 }
 
