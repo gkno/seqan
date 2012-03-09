@@ -1556,7 +1556,7 @@ _parseReadFilepath(TFile& file, TChar& c)
 .Function.skipLine
 ..cat:Input/Output
 ..summary:Skip a line in stream and go to beginning of next
-..signature:readLine(RecordReader<TStream, TPass> & recordReader)
+..signature:skipLine(RecordReader<TStream, TPass> & recordReader)
 ..param.recordReader:The @Class.RecordReader@ to read from.
 ...type:Class.RecordReader
 ..returns:0 if there was no error reading
