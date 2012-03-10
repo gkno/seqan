@@ -43,7 +43,7 @@
 #include <seqan/file.h>      // For printing SeqAn Strings.
 #include <seqan/misc/misc_cmdparser.h>
 #include <seqan/bam_io.h>
-#include <seqan/ext_lh3.h>
+#include <seqan/stream.h>
 
 #if SEQAN_HAS_ZLIB
 
