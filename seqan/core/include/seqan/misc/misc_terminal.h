@@ -37,6 +37,8 @@
 #ifndef SEQAN_MISC_MISC_TERMINAL_H_
 #define SEQAN_MISC_MISC_TERMINAL_H_
 
+#include <cstdio>
+
 #include <seqan/platform.h>
 
 namespace seqan {
