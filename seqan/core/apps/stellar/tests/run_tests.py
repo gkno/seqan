@@ -10,6 +10,7 @@ directory.
 Usage:  run_tests.py SOURCE_ROOT_PATH BINARY_ROOT_PATH
 """
 import logging
+import os
 import os.path
 import sys
 
@@ -51,8 +52,9 @@ def main(source_base, binary_base):
     # make it more canonical and host independent.
     ph.outFile('-')  # To ensure that the out path is set.
     transforms = [
-        app_tests.ReplaceTransform(ph.source_base_path + '/', '', right=True),
-        app_tests.ReplaceTransform(ph.temp_dir + '/', '', right=True),
+        app_tests.ReplaceTransform(os.path.join(ph.source_base_path, 'core/apps/stellar/tests') + os.sep, '', right=True),
+        app_tests.ReplaceTransform(ph.temp_dir + os.sep, '', right=True),
+        app_tests.NormalizeScientificExponentsTransform(),
         ]
 
     # ============================================================
@@ -72,7 +74,8 @@ def main(source_base, binary_base):
                   ph.outFile('e-1.stdout'),
                   transforms),
                  (ph.inFile('e-1.gff'),
-                  ph.outFile('e-1.gff'))])
+                  ph.outFile('e-1.gff'),
+                  transforms)])
     conf_list.append(conf)
 
     # Error rate 0.05:
@@ -88,7 +91,8 @@ def main(source_base, binary_base):
                   ph.outFile('5e-2.stdout'),
                   transforms),
                  (ph.inFile('5e-2.gff'),
-                  ph.outFile('5e-2.gff'))])
+                  ph.outFile('5e-2.gff'),
+                  transforms)])
     conf_list.append(conf)
 
     # Error rate 0.25:
@@ -104,7 +108,8 @@ def main(source_base, binary_base):
                   ph.outFile('25e-3.stdout'),
                   transforms),
                  (ph.inFile('25e-3.gff'),
-                  ph.outFile('25e-3.gff'))])
+                  ph.outFile('25e-3.gff'),
+                  transforms)])
     conf_list.append(conf)
 
     # Error rate 0.75:
@@ -120,7 +125,8 @@ def main(source_base, binary_base):
                   ph.outFile('75e-3.stdout'),
                   transforms),
                  (ph.inFile('75e-3.gff'),
-                  ph.outFile('75e-3.gff'))])
+                  ph.outFile('75e-3.gff'),
+                  transforms)])
     conf_list.append(conf)
 
     # Error rate 0.0001:
@@ -136,7 +142,8 @@ def main(source_base, binary_base):
                   ph.outFile('e-4.stdout'),
                   transforms),
                  (ph.inFile('e-4.gff'),
-                  ph.outFile('e-4.gff'))])
+                  ph.outFile('e-4.gff'),
+                  transforms)])
     conf_list.append(conf)
 
     # Minimal length: 20, Error rate 0.05:
@@ -152,7 +159,8 @@ def main(source_base, binary_base):
                   ph.outFile('minLen20.stdout'),
                   transforms),
                  (ph.inFile('minLen20.gff'),
-                  ph.outFile('minLen20.gff'))])
+                  ph.outFile('minLen20.gff'),
+                  transforms)])
     conf_list.append(conf)
 
     # Minimal length: 150, Error rate 0.05:
@@ -168,7 +176,8 @@ def main(source_base, binary_base):
                   ph.outFile('minLen150.stdout'),
                   transforms),
                  (ph.inFile('minLen150.gff'),
-                  ph.outFile('minLen150.gff'))])
+                  ph.outFile('minLen150.gff'),
+                  transforms)])
     conf_list.append(conf)
 
     # Output format text:
@@ -184,7 +193,8 @@ def main(source_base, binary_base):
                   ph.outFile('5e-2txt.stdout'),
                   transforms),
                  (ph.inFile('5e-2.txt'),
-                  ph.outFile('5e-2.txt'))])
+                  ph.outFile('5e-2.txt'),
+                  transforms)])
     conf_list.append(conf)
 
     # ============================================================

@@ -264,7 +264,8 @@ def runTest(test_conf):
             print >>sys.stderr, fmt % (expected_path, result_path)
             diff = difflib.unified_diff(expected_str.splitlines(),
                                         result_str.splitlines())
-            sys.stderr.writelines(diff)
+            for line in diff:
+                print >>sys.stderr, line
             result = False
         except Exception, e:
             fmt = 'Error when trying to compare %s to %s: %s ' + str(type(e))
