@@ -27,6 +27,7 @@ import logging
 import optparse
 import os
 import os.path
+import re
 import subprocess
 import shutil
 import sys
@@ -256,18 +257,17 @@ def runTest(test_conf):
             with open(result_path, 'r') as f:
                 result_str = f.read()
             for t in transforms:
-                result_str = t.apply(result_str, True)
+                result_str = t.apply(result_str, False)
             if expected_str == result_str:
                 continue
             fmt = 'Comparing %s against %s'
             print >>sys.stderr, fmt % (expected_path, result_path)
-            differ = difflib.Differ()
-            diff = differ.compare(expected_str.splitlines(),
-                                  result_str.splitlines())
-            print >>sys.stderr, '\n'.join(list(diff))
+            diff = difflib.unified_diff(expected_str.splitlines(),
+                                        result_str.splitlines())
+            sys.stderr.writelines(diff)
             result = False
         except Exception, e:
-            fmt = 'Error when trying to compare %s to %s: %s'
+            fmt = 'Error when trying to compare %s to %s: %s ' + str(type(e))
             print >>sys.stderr, fmt % (expected_path, result_path, e)
             result = False
     return result
@@ -284,8 +284,28 @@ class ReplaceTransform(object):
 
     def apply(self, text, is_left):
         if (is_left and not self.left) or (not is_left and not self.right):
-            return  # Skip if no transform is to be applied.
-        return self.text.replace(self.needle, self.replacement)
+            return text  # Skip if no transform is to be applied.
+        return text.replace(self.needle, self.replacement)
+
+
+class NormalizeScientificExponentsTransform(object):
+	"""Transformation that normalized scientific notation exponents.
+	
+	On Windows, scientific numbers are printed with an exponent padded to
+	a width of three with zeros, e.g. 1e003 instead of 1e03 as on Unix.
+	
+	This transform normalizes to Unix or Windows.
+	"""
+	
+	def __init__(self, normalize_to_unix=True):
+		self.normalize_to_unix = normalize_to_unix
+	
+	def apply(self, text, is_left):
+		"""Apply the transform."""
+		if self.normalize_to_unix:
+			return re.sub(r'([-+]?[0-9]*\.[0-9]+[eE][-+]?)0([0-9]{2})', r'\1\2', text)
+		else:
+			return re.sub(r'([-+]?[0-9]*\.[0-9]+[eE][-+]?)([0-9]{2})', r'\10\2', text)
 
 
 def main(main_func):
