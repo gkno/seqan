@@ -592,6 +592,28 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	}
 
+	template < typename TObject, unsigned DISTANCE >
+    inline bool
+	atEnd(Iter<Enumerator<TObject, EditEnvironment<LevenshteinDistance, DISTANCE> >, Standard> const & it)
+	{
+		typedef typename Size<TObject>::Type                TSize;
+		typedef typename MakeSigned_<TSize>::Type           TSignedSize;
+		typedef EnumeratorLevenshteinModifier_<TSignedSize>	TModifier;
+
+		for(unsigned i = 0; i < DISTANCE; ++i) {
+			TModifier const &mod = it.mod[i];
+			if (mod.errorPos != (TSignedSize)-1 || mod.character != 0u || mod.state != TModifier::SUBST_)
+				return false;
+		}
+		return true;
+	}
+
+	template < typename TObject, unsigned DISTANCE >
+    inline bool
+	atEnd(Iter<Enumerator<TObject, EditEnvironment<LevenshteinDistance, DISTANCE> >, Standard> & it)
+	{
+		return atEnd(const_cast<Iter<Enumerator<TObject, EditEnvironment<LevenshteinDistance, DISTANCE> >, Standard> const &>(it));
+	}
 
 	template < typename TObject, unsigned DISTANCE >
     inline Iter<Enumerator<TObject, EditEnvironment<LevenshteinDistance, DISTANCE> >, Standard> &
@@ -608,17 +630,21 @@ namespace SEQAN_NAMESPACE_MAIN
 		do
 		{
 			// next replacement/insert value (loop core)
-			if (++(mod->character) < ValueSize<TValue>::VALUE) {
+			if (++(mod->character) < ValueSize<TValue>::VALUE) 
+            {
 				// output the original tuple only once
 				if (mod->character == mod->skipChar) continue;
-				assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+                if (mod->errorPos >= 0)
+                    assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
 				return it;
 			}
 
 			// reset counter
-			if (mod->state != mod->DELETE_) {
+			if (mod->state != mod->DELETE_) 
+            {
 				mod->character = (0 == mod->skipChar)? 1: 0;
-				assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+                if (mod->errorPos >= 0)
+                    assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
 			}
 
 			// next modifier
@@ -630,7 +656,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		do
 		{
 			// restore char at old position
-			if (mod->errorPos >= 0)
+			if (mod->errorPos >= 0 && mod->errorPos < length(it.tmp))
 				assignValueAt(it.tmp, mod->errorPos, it.orig[mod->errorPosOrig]);
 
 //					int iMax = (TSignedSize)(length(it.tmp) - i);
@@ -644,7 +670,8 @@ namespace SEQAN_NAMESPACE_MAIN
 				// set next char
 				if (mod == it.mod)
 				{	// for the first modifier we use an optimization
-					if (mod->state != mod->DELETE_) {
+					if (mod->state != mod->DELETE_)
+                    {
 						if (mod->state == mod->SUBST_)
 							mod->skipChar = (unsigned) it.orig[mod->errorPosOrig];
 						else
@@ -666,14 +693,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		TModifier *modEnd = mod + DISTANCE;
 		do 
 		{
-			// next edit state (subst->insert->delete)
+			// next edit state (subst->delete->insert)
 			if (mod->state != mod->INSERT_) 
 			{
 				mod->state = (TState)(mod->state + 1);
 				if (mod->state == TModifier::SUBST_)
 					++it.currentDistance;
 			
-				if (!it._reinit(0, 0)) {
+				if (!it._reinit(0, 0)) 
+                {
 					mod = it.mod;
                     continue;						
 				}
@@ -684,11 +712,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		} while (mod != modEnd);
 
 		// end
-		for(mod = it.mod; mod != modEnd; ++mod) {
-			mod->errorPos = -1;
-			mod->character = 0;
-			mod->state = mod->SUBST_;
-		}
+        goEnd(it);
 		return it;
     }
 
@@ -795,7 +819,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		if (&a.orig != &b.orig) return false;
 
-		for(unsigned i = 0; i < DISTANCE; ++i) {
+		for(unsigned i = 0; i < DISTANCE; ++i) 
+        {
 			TModifier const &modA = a.mod[i];
 			TModifier const &modB = b.mod[i];
 			if (modA.errorPos != modB.errorPos || modA.character != modB.character)
@@ -817,7 +842,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		if (&a.orig != &b.orig) return false;
 
-		for(unsigned i = 0; i < DISTANCE; ++i) {
+		for(unsigned i = 0; i < DISTANCE; ++i) 
+        {
 			TModifier const &modA = a.mod[i];
 			TModifier const &modB = b.mod[i];
 			if (modA.errorPos != modB.errorPos || 
