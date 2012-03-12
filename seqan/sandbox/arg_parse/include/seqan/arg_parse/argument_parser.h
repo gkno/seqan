@@ -30,16 +30,15 @@
 //
 // ==========================================================================
 
-#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_H_
-#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_H_
+#ifndef SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_
+#define SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_
 
 #include <sstream>
 #include <seqan/map.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
-#include <seqan/misc/cmdparser/cmdoption.h>
-#include <seqan/misc/cmdparser/cmdparser_type_support.h>
-// #include <seqan/misc/cmdparser/cmdparser_doc.h>
+#include <seqan/arg_parse/arg_parse_option.h>
+#include <seqan/arg_parse/arg_parse_type_support.h>
 
 #include <seqan/misc/misc_terminal.h>
 #include <seqan/misc/tool_doc.h>
@@ -1871,4 +1870,4 @@ inline void addText(CommandLineParser & me, CharString const & text)
 
 }  // namespace seqan
 
-#endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_H_
+#endif // SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_

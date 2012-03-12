@@ -31,15 +31,15 @@
 // ==========================================================================
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
-// Tests for misc/cmdparser/cmdargument.h.
+// Tests for arg_parse/arg_parse_argument.h.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_TEST_MISC_CMDARGUMENT_H_
-#define SEQAN_HEADER_TEST_MISC_CMDARGUMENT_H_
+#ifndef SEQAN_HEADER_TEST_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
+#define SEQAN_HEADER_TEST_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
 
 #include <seqan/basic.h>
 
-#include <seqan/arg_parse/cmdargument.h>
+#include <seqan/arg_parse/arg_parse_argument.h>
 
 namespace seqan
 {
@@ -124,4 +124,4 @@ SEQAN_DEFINE_TEST(test_argument_min_max_boundaries)
 
 }  // namespace seqan
 
-#endif // SEQAN_HEADER_TEST_MISC_CMDARGUMENT_H_
+#endif // SEQAN_HEADER_TEST_ARG_PARSE_ARG_PARSE_ARGUMENT_H_

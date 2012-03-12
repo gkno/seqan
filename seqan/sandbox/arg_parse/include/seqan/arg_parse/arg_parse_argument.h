@@ -30,12 +30,12 @@
 //
 // ==========================================================================
 
-#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDARGUMENT_H_
-#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDARGUMENT_H_
+#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
+#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
 
 #include <seqan/sequence.h>
 
-#include <seqan/misc/cmdparser/cmdparser_type_support.h>
+#include <seqan/arg_parse/arg_parse_type_support.h>
 
 namespace seqan
 {
@@ -535,5 +535,5 @@ assignValue(CommandLineArgument & me, CharString const & value)
 
 } // namespace seqan
 
-#endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDARGUMENT_H_
+#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
 

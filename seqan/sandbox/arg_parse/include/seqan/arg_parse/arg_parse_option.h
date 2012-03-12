@@ -30,8 +30,8 @@
 //
 // ==========================================================================
 
-#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDOPTION_H_
-#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDOPTION_H_
+#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_
+#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_
 
 #include <seqan/sequence.h>
 
@@ -662,4 +662,4 @@ setValidValues(CommandLineOption & me, StringSet<CharString> const & _values)
 
 } // namespace seqan
 
-#endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDOPTION_H_
+#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_

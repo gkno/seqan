@@ -33,9 +33,10 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_CTD_SUPPORT_H_
-#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_CTD_SUPPORT_H_
+#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
+#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
 
+#include <seqan/arg_parse/argument_parser.h>
 
 namespace seqan {
 
@@ -277,4 +278,4 @@ writeCTD(CommandLineParser const & me)
 
 } // namespace seqan
 
-#endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_CTD_SUPPORT_H_
+#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_

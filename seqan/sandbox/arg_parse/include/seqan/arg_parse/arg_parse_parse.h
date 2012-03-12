@@ -32,12 +32,12 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_PARSE_H_
-#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_PARSE_H_
+#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_
+#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_
 
-#include <seqan/misc/cmdparser/cmdoption.h>
-#include <seqan/misc/cmdparser/cmdparser.h>
-#include <seqan/misc/cmdparser/cmdparser_ctd_support.h>
+#include <seqan/arg_parse/arg_parse_option.h>
+#include <seqan/arg_parse/argument_parser.h>
+#include <seqan/arg_parse/arg_parse_ctd_support.h>
 
 namespace seqan {
 
@@ -238,4 +238,4 @@ parse(CommandLineParser & me, int argc, const char * argv[])
 
 } // namespace seqan
 
-#endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_PARSE_H_
+#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_

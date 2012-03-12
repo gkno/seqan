@@ -36,7 +36,7 @@
 #include <seqan/file.h>
 
 #include "test_arg_parse.h"
-#include "test_misc_cmdargument.h"
+#include "test_arg_parse_argument.h"
 
 
 SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)

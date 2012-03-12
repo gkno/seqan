@@ -32,8 +32,8 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_TYPE_SUPPORT_H_
-#define CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_TYPE_SUPPORT_H_
+#ifndef SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
+#define SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
 
 namespace seqan {
 
@@ -101,4 +101,4 @@ _isInt(TString const s)
 
 } // namespace seqan
 
-#endif // CORE_INCLUDE_SEQAN_MISC_CMDPARSER_CMDPARSER_TYPE_SUPPORT_H_
+#endif // SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
