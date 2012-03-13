@@ -1187,14 +1187,14 @@ lgamma(TVal x)
   
 }
 
+#endif
 
 template<typename TValue>
-inline bool isnan(TValue value)
+inline bool my_isnan(TValue value)
 {
 	return value != value;
 }
 
-#endif
 
 
 
@@ -1258,7 +1258,7 @@ void computeCnks(THomoTable & cnks, TDependencies & fks, TOptions & options)
 			{ 
 				temp[k] = -4.343 * logl(1.0 - expl(lFks[k] * logl(beta[k])));
 				cnks[q<<16|n<<8|k] = (k > 0 ? q_c[k-1] : 0);// + temp[k]; 
-				cnks[q<<16|n<<8|k] += (isnan(temp[k]) ? 0 : temp[k]);
+				cnks[q<<16|n<<8|k] += (my_isnan(temp[k]) ? 0 : temp[k]);
 			}
 			
 		}
@@ -1455,9 +1455,9 @@ getHomoProbs(THomoTable & cnks,
 	if(extraV)std::cout << "totalCount" <<  countTotal << " countBest"<< countBest << " countSecondBest"<< countSecondBest << "\n";
 #endif
 	probQ1 = ((countSecondBest > 0) ? sumE[secondBest] : 0);
-	probQ1 += (isnan(cnks[qAvgSecondBest<<16|countTotal<<8|countSecondBest])) ? 0 : cnks[qAvgSecondBest<<16|countTotal<<8|countSecondBest];
+	probQ1 += (my_isnan(cnks[qAvgSecondBest<<16|countTotal<<8|countSecondBest])) ? 0 : cnks[qAvgSecondBest<<16|countTotal<<8|countSecondBest];
 	probQ2 = ((countBest > 0) ? sumE[best] : 0);
-	probQ2 += (isnan(cnks[qAvgBest<<16|countTotal<<8|countBest])) ? 0 : cnks[qAvgBest<<16|countTotal<<8|countBest];
+	probQ2 += (my_isnan(cnks[qAvgBest<<16|countTotal<<8|countBest])) ? 0 : cnks[qAvgBest<<16|countTotal<<8|countBest];
 	
 #ifdef SNPSTORE_DEBUG_CANDPOS
 	if(extraV)std::cout << "cnkBest" <<  cnks[qAvgBest<<16|countTotal<<8|countBest] << "  bei cnkindex " <<(qAvgBest<<16|countTotal<<8|countBest)<<"\n";
