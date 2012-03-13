@@ -7,3 +7,5 @@ seqan_add_test_executable(test_sequence test_sequence.cpp
 					test_sequence_std_adaptions.h
 					test_string.h
 					test_stringset.h)
+seqan_add_test_executable(test_sequence_v2 test_sequence_v2.cpp
+					test_sequence.h)
