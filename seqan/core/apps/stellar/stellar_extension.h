@@ -112,7 +112,8 @@ SEQAN_CHECKPOINT
     TPos len = right.i1 - left.i2;
 
     // check error rate
-    return errors/(TFloat)(len) <= eps;
+	double const DELTA = 0.000001;  // Small delta against floating point precision problems.
+    return errors/(TFloat)(len) <= eps + DELTA;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

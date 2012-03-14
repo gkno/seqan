@@ -160,7 +160,6 @@ SEQAN_CHECKPOINT
 template<typename TRow, typename TSize>
 inline void
 _analyzeAlignment(TRow const & row0, TRow const & row1, TSize & aliLen, TSize & matches) {
-SEQAN_CHECKPOINT
 	TSize pos = 0;
     TSize end0 = endPosition(row0);
     TSize end1 = endPosition(row1);
@@ -183,12 +182,11 @@ SEQAN_CHECKPOINT
 template<typename TRow>
 double
 _computeIdentity(TRow const & row0, TRow const & row1) {
-SEQAN_CHECKPOINT
     typedef typename Size<TRow>::Type TSize;
     TSize matches, aliLen;
 	_analyzeAlignment(row0, row1, aliLen, matches);
 
-    return ((double)matches/(double)aliLen)*100.0;
+    return floor(1000000.0 * matches / aliLen) / 10000.0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -196,7 +194,6 @@ SEQAN_CHECKPOINT
 template<typename TRow, typename TSize>
 double
 _computeEValue(TRow & row0, TRow & row1, TSize lengthAdjustment) {
-SEQAN_CHECKPOINT
 	TSize m = length(source(row0)) - lengthAdjustment;
 	TSize n = length(source(row1)) - lengthAdjustment;
 	double minusLambda = -1.19; // -lambda
@@ -217,7 +214,6 @@ SEQAN_CHECKPOINT
 template<typename TSize>
 double
 _computeEValue(TSize score, TSize len0, TSize len1) {
-SEQAN_CHECKPOINT
 	double minusLambda = -1.19; // -lambda
 	double K = 0.34;
 
