@@ -58,10 +58,10 @@
 #include "test_misc_long_word.h"
 #include "test_misc_interval_tree.h"
 #include "test_misc_accumulators.h"
+#include "test_misc_edit_environment.h"
 
 using namespace std;
 using namespace seqan;
-
 
 SEQAN_DEFINE_TEST(test_misc_random) {
     mtRandInit();
@@ -121,6 +121,11 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
     SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_double_count);
     SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_double_sum);
     SEQAN_CALL_TEST(test_misc_accumulators_average_accumulator_double_clear);
+
+    SEQAN_CALL_TEST(test_misc_edit_environment_string_enumerator_hamming);
+    SEQAN_CALL_TEST(test_misc_edit_environment_string_enumerator_iterator_hamming);
+    SEQAN_CALL_TEST(test_misc_edit_environment_string_enumerator_edit);
+    SEQAN_CALL_TEST(test_misc_edit_environment_string_enumerator_iterator_edit);
 }
 SEQAN_END_TESTSUITE
 
