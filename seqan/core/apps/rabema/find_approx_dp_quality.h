@@ -60,7 +60,7 @@ public:
     String<TScoreValue> data_tab;
     TScoreValue data_maxscore;  // Score of the needle matching itself
 
-    typedef typename If<HasFindBeginSupport, Pattern<ModifiedString<TNeedle, ModReverse>, QualityDpSearch<FindPrefix, false> >, EmptyFindBegin_>::Type TFindBeginPattern;
+    typedef typename IfC<HasFindBeginSupport, Pattern<ModifiedString<TNeedle, ModReverse>, QualityDpSearch<FindPrefix, false> >, EmptyFindBegin_>::Type TFindBeginPattern;
     TFindBeginPattern _findBeginPattern;
 
     Pattern() {}

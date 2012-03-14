@@ -85,12 +85,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     SEQAN_CALL_TEST(test_basic_metaprogramming_enable_if_disable_if);
     SEQAN_CALL_TEST(test_basic_metaprogramming_enable_if2_disable_if2);
 
-    SEQAN_CALL_TEST(test_basic_math_int_pow);
-    SEQAN_CALL_TEST(test_basic_math_log2);
-    SEQAN_CALL_TEST(test_basic_math_min);
-    SEQAN_CALL_TEST(test_basic_math_max);
-    SEQAN_CALL_TEST(test_basic_math_abs);
-
     SEQAN_CALL_TEST(test_basic_tag_tag_struct);
     SEQAN_CALL_TEST(test_basic_tag_tag_basic_tags);
     SEQAN_CALL_TEST(test_basic_tag_move);
@@ -240,15 +234,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic)
     // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
     SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_stream_output);
 
-    // =======================================================================
-    // Tests for Allocators
-    // =======================================================================
-
-    SEQAN_CALL_TEST(test_basic_allocator_simple);
-    SEQAN_CALL_TEST(test_basic_allocator_pool);
-    SEQAN_CALL_TEST(test_basic_allocator_multi_pool);
-    SEQAN_CALL_TEST(test_basic_allocator_chunk_pool);
-    // TODO(holtgrew): Test for std:: adaption!
 
     // =======================================================================
     // Tests for Iterators

@@ -36,10 +36,14 @@
 #ifndef TESTS_BASIC_TEST_BASIC_PROXY_H_
 #define TESTS_BASIC_TEST_BASIC_PROXY_H_
 
+#include <sstream>
+
 // TODO(holtgrew): Use the helper struct from test construct/destruct.
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator)
 {
+    using namespace seqan;
+
 	int i1[] = {10, 20, 30};
 	int * pi1 = i1;
 	Proxy<IteratorProxy<int *> > px(pi1);
@@ -82,6 +86,7 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator)
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_constructors)
 {
     using namespace seqan;
+
     typedef Proxy<IteratorProxy<char *> > TProxy;
 
     // Construct from iterator.
@@ -100,6 +105,7 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator_constructors)
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_assign)
 {
     using namespace seqan;
+
     typedef Proxy<IteratorProxy<int *> > TProxy;
 
     int data[3] = { 0, 1, 2 };
@@ -119,6 +125,7 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator_assign)
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_getValue)
 {
     using namespace seqan;
+
     typedef Proxy<IteratorProxy<int *> > TProxy;
 
     int data[3] = { 0, 1, 2 };
@@ -132,6 +139,7 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator_getValue)
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_comparators)
 {
     using namespace seqan;
+
     typedef Proxy<IteratorProxy<int *> > TProxy;
 
     int data[4] = { 0, 1, 2, 1 };
@@ -166,6 +174,8 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator_comparators)
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_stream_read)
 {
+    using namespace seqan;
+
     std::stringstream ss;
     ss << 33;
 
@@ -182,6 +192,8 @@ SEQAN_DEFINE_TEST(test_basic_proxy_iterator_stream_read)
 
 SEQAN_DEFINE_TEST(test_basic_proxy_iterator_stream_write)
 {
+    using namespace seqan;
+
     std::stringstream ss;
     int x = 33;
 

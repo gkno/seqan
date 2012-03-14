@@ -41,8 +41,7 @@
 #include <vector>
 #include <map>
 
-#include <seqan/basic.h>
-
+// TODO(holtgrew): Get rid fo using namespace
 using namespace seqan;
 
 // ==========================================================================

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <seqan/graph_algorithms.h>
-#include <seqan/basic/basic_logvalue.h>
+#include <seqan/basic/basic_math.h>
 
 using namespace seqan;
 

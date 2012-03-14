@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,14 +29,14 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// Author: Andreas Gogol-Döring <andreas.doering@mdc-berlin.de>
 // ==========================================================================
 // Implementation of the adaptor iterator that makes a non-rooted iterator
 // rooted by adding a pointer to the original container.
 // ==========================================================================
 
-#ifndef SEQAN_BASIC_BASIC_ITERATOR_ADAPTOR_H_
-#define SEQAN_BASIC_BASIC_ITERATOR_ADAPTOR_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ITERATOR_ADAPTOR_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_ITERATOR_ADAPTOR_H_
 
 namespace seqan {
 
@@ -620,4 +620,4 @@ assign(Iter<TTargetContainer, AdaptorIterator<TIterator, TSpec> > & target,
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_BASIC_ITERATOR_ADAPTOR_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ITERATOR_ADAPTOR_H_

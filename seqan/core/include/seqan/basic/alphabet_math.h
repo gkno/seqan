@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 // Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Alphabet concepts stemming from mathematics.
+// Math functions for alphabets.
 // ==========================================================================
 
 #include <climits>
@@ -40,6 +40,8 @@
 
 #ifndef SEQAN_BASIC_ALPHABET_MATH_H_
 #define SEQAN_BASIC_ALPHABET_MATH_H_
+
+// TODO(holtgrew): Move actual implementations to alphabet_adapt_builtins. IF POSSIBLE
 
 namespace seqan {
 
@@ -81,7 +83,7 @@ const double MaximumValueDouble_<T>::VALUE = DBL_MAX;
 template <>
 struct MaximumValueSigned_<bool>
 {
-    static const bool VALUE = false;
+    static const bool VALUE = true;
 };
 
 // template <>
@@ -91,13 +93,13 @@ struct MaximumValueSigned_<bool>
 
 template <
     typename T,
-    typename TParent = typename If<
+    typename TParent = typename IfC<
       IsSameType<double, T>::VALUE,
       MaximumValueDouble_<>,
-      typename If<
+      typename IfC<
       IsSameType<float, T>::VALUE,
       MaximumValueFloat_<>,
-      typename If<
+      typename IfC<
         IsSameType< typename MakeSigned_<T>::Type, T >::VALUE,
         MaximumValueSigned_<T>,
         MaximumValueUnsigned_<T>
@@ -105,14 +107,20 @@ template <
       >::Type
     >::Type
   >
-struct MaxValue : TParent {};
+struct MaxValue_ : TParent {};
+
+// We use two levels here, so we can forward declare MaxValue with one
+// template parameter.
+
+template <typename T>
+struct MaxValue : MaxValue_<T> {};
 
 // ----------------------------------------------------------------------------
 // Metafunction MinValue
 // ----------------------------------------------------------------------------
 
 template <typename T>
-struct MinimumValueUnsigned_ {  static const T VALUE; };
+struct MinimumValueUnsigned_ { static const T VALUE; };
 template <typename T>
 struct MinimumValueSigned_ { static const T VALUE; };
 
@@ -143,13 +151,13 @@ struct MinimumValueSigned_<bool>
 
 template <
     typename T,
-    typename TParent = typename If<
+    typename TParent = typename IfC<
       IsSameType<double, T>::VALUE,
       MinimumValueDouble_<>,
-      typename If<
+      typename IfC<
       IsSameType<float, T>::VALUE,
       MinimumValueFloat_<>,
-      typename If<
+      typename IfC<
         IsSameType< typename MakeSigned_<T>::Type, T >::VALUE,
         MinimumValueSigned_<T>,
         MinimumValueUnsigned_<T>
@@ -157,7 +165,13 @@ template <
       >::Type
     >::Type
   >
-struct MinValue : TParent {};
+struct MinValue_ : TParent {};
+
+// We use two levels here, so we can forward declare MinValue with one
+// template parameter.
+
+template <typename T>
+struct MinValue : MinValue_<T> {};
 
 // ============================================================================
 // Functions
@@ -167,9 +181,13 @@ struct MinValue : TParent {};
 // Function supremumValueImpl
 // ----------------------------------------------------------------------------
 
+template <typename T> inline T const & supremumValueImpl(T *);
+
 // ----------------------------------------------------------------------------
 // Function maxValue
 // ----------------------------------------------------------------------------
+
+// Forward to supremumValueImpl() only.
 
 template <typename T>
 inline T const &
@@ -182,7 +200,7 @@ maxValue()
 
 template <typename T>
 inline T const &
-maxValue(T)
+maxValue(T /*tag*/)
 {
     SEQAN_CHECKPOINT;
     T * _tag = 0;
@@ -193,9 +211,13 @@ maxValue(T)
 // Function infimumValueImpl
 // ----------------------------------------------------------------------------
 
+template <typename T> inline T const & infimumValueImpl(T *);
+
 // ----------------------------------------------------------------------------
 // Function minValue
 // ----------------------------------------------------------------------------
+
+// Forward to infimumValueImpl() only.
 
 template <typename T>
 inline T const &
@@ -208,7 +230,7 @@ minValue()
 
 template <typename T>
 inline T const &
-minValue(T)
+minValue(T /*tag*/)
 {
     SEQAN_CHECKPOINT;
     T * _tag = 0;

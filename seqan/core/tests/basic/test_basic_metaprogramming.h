@@ -85,14 +85,6 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_and)
     SEQAN_ASSERT_EQ(b, false);
 }
 
-SEQAN_DEFINE_TEST(test_basic_metaprogramming_if)
-{
-    bool b = If<true, False, True>::Type::VALUE;
-    SEQAN_ASSERT_EQ(b, false);
-    b = If<false, False, True>::Type::VALUE;
-    SEQAN_ASSERT_EQ(b, true);
-}
-
 SEQAN_DEFINE_TEST(test_basic_metaprogramming_is_same_type)
 {
     bool b = IsSameType<True, False>::Type::VALUE;
@@ -102,72 +94,6 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_is_same_type)
 }
 
 // Helper functions and struct for the test for metaprogrammign Switch.
-
-int switchTest(Nothing const &) { return -1; }
-int switchTest(False const &) { return 0; }
-int switchTest(True const &) { return 1; }
-int switchTest(NilCase const &) { return 2; }
-
-template <int X>
-struct SwitchTest
-{
-    typedef typename Switch<
-        X,
-        Case<-1, Nothing,
-        Case<0, False,
-        Case<1, True
-        > > > >::Type Type;
-};
-
-SEQAN_DEFINE_TEST(test_basic_metaprogramming_switch)
-{
-    using namespace seqan;
-
-    typedef typename SwitchTest<-1>::Type T1;
-    SEQAN_ASSERT_EQ(switchTest(T1()), -1);
-
-    typedef typename SwitchTest<0>::Type T2;
-    SEQAN_ASSERT_EQ(switchTest(T2()), 0);
-
-    typedef typename SwitchTest<1>::Type T3;
-    SEQAN_ASSERT_EQ(switchTest(T3()), 1);
-
-    typedef typename SwitchTest<2>::Type T4;
-    SEQAN_ASSERT_EQ(switchTest(T4()), 2);
-}
-
-struct LoopTestWorker_
-{
-    template <typename TArg>
-    static inline void body(TArg & arg, int I)
-    {
-        arg[I - 1] += I;
-    }
-};
-
-SEQAN_DEFINE_TEST(test_basic_metaprogramming_loop)
-{
-    int i[5] = { 1, 2, 3, 4, 5 };
-    Loop<LoopTestWorker_, 5>::run(i);
-
-    SEQAN_ASSERT_EQ(i[0], 2);
-    SEQAN_ASSERT_EQ(i[1], 4);
-    SEQAN_ASSERT_EQ(i[2], 6);
-    SEQAN_ASSERT_EQ(i[3], 8);
-    SEQAN_ASSERT_EQ(i[4], 10);
-}
-
-SEQAN_DEFINE_TEST(test_basic_metaprogramming_loop_reverse)
-{
-    int i[5] = { 1, 2, 3, 4, 5 };
-    LoopReverse<LoopTestWorker_, 5>::run(i);
-
-    SEQAN_ASSERT_EQ(i[0], 2);
-    SEQAN_ASSERT_EQ(i[1], 4);
-    SEQAN_ASSERT_EQ(i[2], 6);
-    SEQAN_ASSERT_EQ(i[3], 8);
-    SEQAN_ASSERT_EQ(i[4], 10);
-}
 
 SEQAN_DEFINE_TEST(test_basic_metaprogramming_log2)
 {

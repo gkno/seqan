@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,10 @@
 // Alphabet concepts stemming from biological applications.
 // ==========================================================================
 
-#ifndef SEQAN_BASIC_ALPHABET_BIO_H_
-#define SEQAN_BASIC_ALPHABET_BIO_H_
+// TODO(holtgrew): Where is the documentation, shouldnt it be here?
+
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_BIO_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_BIO_H_
 
 namespace seqan {
 
@@ -60,11 +62,12 @@ namespace seqan {
 // Function gapValueImpl
 // ----------------------------------------------------------------------------
 
+// TODO(holtgrew): This looks wrong.
+
 template <typename T>
 inline T
 gapValueImpl(T *)
 {
-    SEQAN_CHECKPOINT;
     static T const _gap = T();
     return _gap;
 }
@@ -77,21 +80,8 @@ template <typename T>
 inline T
 gapValue()
 {
-    SEQAN_CHECKPOINT;
     static T * _tag = 0;
     return gapValueImpl(_tag);
-}
-
-// ----------------------------------------------------------------------------
-// Function unknownValueImpl
-// ----------------------------------------------------------------------------
-
-template <typename T>
-inline T
-unknownValueImpl(T *)
-{
-    SEQAN_CHECKPOINT;
-    return 'N';
 }
 
 // ----------------------------------------------------------------------------
@@ -102,11 +92,10 @@ template <typename T>
 inline T
 unknownValue()
 {
-    SEQAN_CHECKPOINT;
     static T * _tag = 0;
     return unknownValueImpl(_tag);
 }
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_ALPHABET_BIO_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_BIO_H_

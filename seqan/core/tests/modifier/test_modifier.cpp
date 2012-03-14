@@ -108,15 +108,5 @@ SEQAN_BEGIN_TESTSUITE(test_modifier)
     SEQAN_CALL_TEST(test_modifier_view_string_alphabet_conversion);
     SEQAN_CALL_TEST(test_modifier_view_string_alphabet_conversion);
     SEQAN_CALL_TEST(test_modifier_view_string_nested_modifier);
-
-    // Verify check points for all headers in the module modifier.
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_alphabet.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_alphabet_expansion.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_functors.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_iterator.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_reverse.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_shortcuts.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_string.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/modifier/modifier_view.h");
 }
 SEQAN_END_TESTSUITE

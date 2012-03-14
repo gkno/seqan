@@ -130,7 +130,7 @@ if (NOT CMAKE_BUILD_TYPE)
          FORCE)
 endif (NOT CMAKE_BUILD_TYPE)
 
-message (STATUS "CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}")
+#message (STATUS "CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}")
 
 # ===========================================================================
 # Setup Modules and Find Packages.
@@ -145,7 +145,7 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/util/cmake
     ${CMAKE_MODULE_PATH})
 
-message (STATUS "CMAKE_MODULE_PATH is ${CMAKE_MODULE_PATH}")
+#message (STATUS "CMAKE_MODULE_PATH is ${CMAKE_MODULE_PATH}")
 	
 include(CTest)
 

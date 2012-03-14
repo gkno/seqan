@@ -162,6 +162,48 @@ struct IsSequence< TValue const [SIZE] >
     enum { VALUE = true };
 };
 
+// ----------------------------------------------------------------------------
+// Metafunction Iterator
+// ----------------------------------------------------------------------------
+
+///.Metafunction.Iterator.param.T.type:Adaption.char array
+
+template <typename TValue>
+struct Iterator<TValue *, Standard>
+{
+    typedef TValue * Type;
+};
+
+template <typename TValue>
+struct Iterator<TValue * const, Standard>
+{
+    typedef TValue * Type;
+};
+
+template <typename TValue, size_t SIZE>
+struct Iterator<TValue [SIZE], Standard>
+        : Iterator<TValue *, Standard>
+{
+};
+
+template <typename TValue, size_t SIZE>
+struct Iterator<TValue const [SIZE], Standard>
+        : Iterator<TValue const *, Standard>
+{
+};
+
+template <typename TValue, size_t SIZE>
+struct Iterator<TValue [SIZE], Rooted>
+        : Iterator<TValue *, Rooted>
+{
+};
+
+template <typename TValue, size_t SIZE>
+struct Iterator<TValue const [SIZE], Rooted>
+        : Iterator<TValue const *, Rooted>
+{
+};
+
 // ===========================================================================
 // Functions
 // ===========================================================================

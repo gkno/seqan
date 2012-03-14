@@ -37,6 +37,128 @@
 
 #include <vector>
 
+// ==========================================================================
+// Helper Code
+// ==========================================================================
+
+struct CDStruct
+{
+    static int nextId;
+    static int defaultConstructions;
+    static int copyConstructions;
+    static int moveConstructions;
+    static int moves;
+    static int destructions;
+    static int assignments;
+    static int sets;
+    static CDStruct const * lastOther;
+
+    // Note that we use construct this type in char arrays below.  This is no
+    // problem since it only contains ints and there should be no alignment
+    // problems.
+
+    int id;
+    int copiedFrom;
+    int movedFrom;
+    int assignedFrom;
+    int setFrom;
+    
+    CDStruct() : copiedFrom(-1), movedFrom(-1), assignedFrom(-1), setFrom(-1)
+    {
+        id = nextId++;
+        defaultConstructions += 1;
+    }
+
+    CDStruct(CDStruct const & other)
+            : copiedFrom(other.id), movedFrom(-1), assignedFrom(-1), setFrom(-1)
+    {
+        id = nextId++;
+        lastOther = &other;
+        copyConstructions += 1;
+    }
+
+    CDStruct(CDStruct & other, seqan::Move const & /*tag*/)
+            : copiedFrom(-1), movedFrom(other.id), assignedFrom(-1), setFrom(-1)
+    {
+        lastOther = &other;
+        moveConstructions += 1;
+    }
+
+    CDStruct & operator=(CDStruct const & other)
+    {
+        lastOther = &other;
+        assignments += 1;
+        copiedFrom = -1;
+        movedFrom = -1;
+        assignedFrom = other.id;
+        setFrom = -1;
+        return *this;
+    }
+
+    ~CDStruct()
+    {
+        destructions += 1;
+    }
+};
+
+void move(CDStruct & target, CDStruct const & source)
+{
+    CDStruct::lastOther = &source;
+    CDStruct::moves += 1;
+    target.copiedFrom = -1;
+    target.assignedFrom = -1;
+    target.movedFrom = source.id;
+    target.setFrom = -1;
+}
+
+
+void move(CDStruct & target, CDStruct & source)
+{
+    move(target, const_cast<CDStruct const &>(source));
+}
+
+void set(CDStruct & target, CDStruct const & source)
+{
+    CDStruct::lastOther = &source;
+    CDStruct::sets += 1;
+    target.copiedFrom = -1;
+    target.assignedFrom = -1;
+    target.movedFrom = -1;
+    target.setFrom = source.id;
+}
+
+
+void set(CDStruct & target, CDStruct & source)
+{
+    set(target, const_cast<CDStruct const &>(source));
+}
+
+int CDStruct::nextId = 0;
+int CDStruct::defaultConstructions = 0;
+int CDStruct::copyConstructions = 0;
+int CDStruct::moveConstructions = 0;
+int CDStruct::moves = 0;
+int CDStruct::destructions = 0;
+int CDStruct::assignments = 0;
+int CDStruct::sets = 0;
+CDStruct const * CDStruct::lastOther = 0;
+
+void resetCDStructStatics()
+{
+    CDStruct::lastOther = 0;
+    CDStruct::defaultConstructions = 0;
+    CDStruct::copyConstructions = 0;
+    CDStruct::moveConstructions = 0;
+    CDStruct::moves = 0;
+    CDStruct::destructions = 0;
+    CDStruct::assignments = 0;
+    CDStruct::sets = 0;
+}
+
+// ==========================================================================
+// Tests
+// ==========================================================================
+
 // --------------------------------------------------------------------------
 // Pointer adaptions to test the positional iterator.
 // --------------------------------------------------------------------------
@@ -57,7 +179,7 @@ assignValue(TValue * me,
             TValue2 const & _value)
 {
     SEQAN_CHECKPOINT;
-    assign(value(me, pos), _value);
+    seqan::assign(value(me, pos), _value);
 }
 
 template <typename TValue, typename TValue2, typename TPos>

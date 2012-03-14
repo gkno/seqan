@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,10 @@
 // Definitions for piggybacking qualities in free bits of bytes.
 // ==========================================================================
 
-#ifndef SEQAN_BASIC_ALPHABET_QUALITIES_H_
-#define SEQAN_BASIC_ALPHABET_QUALITIES_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_QUALITIES_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_QUALITIES_H_
+
+// TODO(holtgrew): Should the documentation be here?
 
 namespace seqan {
 
@@ -56,7 +58,7 @@ namespace seqan {
 // Metafunction QualityValueSize
 // ----------------------------------------------------------------------------
 
-// TODO(holtgrew): Do we want a default specialization?
+// TODO(holtgrew): Do we want a default specialization? Should it return 0?
 template <typename TValue>
 struct QualityValueSize
 {
@@ -64,7 +66,12 @@ struct QualityValueSize
 };
 
 template <typename TValue>
-struct QualityValueSize<TValue const> : QualityValueSize<TValue> {};
+struct QualityValueSize<TValue const> : QualityValueSize<TValue>
+{};
+
+// ----------------------------------------------------------------------------
+// Metafunction HasQualities
+// ----------------------------------------------------------------------------
 
 template <typename TValue>
 struct HasQualities
@@ -78,8 +85,16 @@ struct HasQualities
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Function assignQualityValue()
+// ----------------------------------------------------------------------------
+
+// Documentation is in alphabet_concept.h.
+
+// ----------------------------------------------------------------------------
 // Function getQualityValue()
 // ----------------------------------------------------------------------------
+
+// Documentation is in alphabet_concept.h.
 
 // ----------------------------------------------------------------------------
 // Function convertQuality()
@@ -102,47 +117,11 @@ struct HasQualities
  */
 
 inline 
-void convertQuality(Ascii & c, int q) 
+void convertQuality(char & c, int q) 
 {
-    c = '!' + Ascii(q);
-}
-
-// ----------------------------------------------------------------------------
-// Function assignQualityValue()
-// ----------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------
-// Function assignQualities()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.assignQualities
-..cat:Alphabets
-..summary:Assign quality values between strings.
-..signature:assignQualities(target, source)
-..param.target:Target string
-...type:nolink:@Class.String@ of any alphabet with qualities, e.g. @Spec.DnaQ@, @Spec.Dna5Q@
-..param.source:Source string.
-...type:nolink:@Class.String@ of $int$ or $char$.
-..remarks:This funciton calls @Function.assignQualityValue@ for all entries of $target$ and $source$, look at the documentation of @Function.assignQualityValue@ on how the values of $source$ are interpreted.
-..see:Function.assignQualityValue
-..include:seqan/basic.h
-*/
-
-template <typename TDest, typename TSource>
-void assignQualities(TDest &dst, TSource const &src)
-{
-    typedef typename Iterator<TDest>::Type TDestIter;
-    typedef typename Iterator<TSource>::Type TSourceIter;
-
-    TDestIter itDst = begin(dst, Standard());
-    TDestIter itDstEnd = end(dst, Standard());
-    TSourceIter itSrcEnd = end(src, Standard());
-    
-    for (TSourceIter itSrc = begin(src, Standard()); itDst != itDstEnd && itSrc != itSrcEnd; ++itDst, ++itSrc)
-        assignQualityValue(*itDst, *itSrc);
+    c = '!' + char(q);
 }
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_ALPHABET_QUALITIES_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_QUALITIES_H_

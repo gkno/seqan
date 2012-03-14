@@ -202,7 +202,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         // use compression if lessorequal 16 different values per char
-        typedef typename If< 
+        typedef typename IfC< 
             (BitsPerValue<TypeOf_(TInput)>::VALUE > 0) && 
             (BitsPerValue<TypeOf_(TInput)>::VALUE <= 4), 
             Compressed, 

@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
 
 // TODO(holtgrew): What about move construction? Useful for pairs of strings and such. Tricky to implement since ints have no move constructor, for example.
 
-#ifndef SEQAN_BASIC_TUPLE_BASE_H_
-#define SEQAN_BASIC_TUPLE_BASE_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_TUPLE_BASE_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_TUPLE_BASE_H_
 
 namespace seqan {
 
@@ -382,7 +382,7 @@ inline unsigned length(Tuple<T_, _size, TSpec> const &)
 template <typename T_, unsigned _size, typename TSpec>
 inline void clear(Tuple<T_, _size, TSpec> & me)
 {
-    memset<sizeof(me.i), 0>(&(me.i));
+   memset<sizeof(me.i), 0>(&(me.i));
 }
 
 // -----------------------------------------------------------------------
@@ -525,4 +525,4 @@ operator>=(Tuple<T_, _size, TSpec> const & _left,
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_TUPLE_BASE_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_TUPLE_BASE_H_

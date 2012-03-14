@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
 
 // TODO(holtgrew): Split into iterator_interface.h and iterator_adapt_pointer.h.
 
-#ifndef SEQAN_BASIC_BASIC_ITERATOR_H_
-#define SEQAN_BASIC_BASIC_ITERATOR_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ITERATOR_INTERFACE_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_ITERATOR_INTERFACE_H_
 
 namespace seqan {
 
@@ -222,14 +222,6 @@ value(T const & me)
     return *me;
 }
 
-template <typename T>
-inline T &
-value(T * me)
-{
-    SEQAN_CHECKPOINT;
-    return *me;
-}
-
 // ---------------------------------------------------------------------------
 // Function getValue()
 // ---------------------------------------------------------------------------
@@ -256,14 +248,6 @@ getValue(T & me)
 template <typename T>
 inline typename GetValue<T const>::Type
 getValue(T const & me)
-{
-    SEQAN_CHECKPOINT;
-    return value(me);
-}
-
-template <typename T>
-inline T &
-getValue(T * me)
 {
     SEQAN_CHECKPOINT;
     return value(me);
@@ -866,4 +850,4 @@ atNil(TIterator * me)
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_BASIC_ITERATOR_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ITERATOR_INTERFACE_H_

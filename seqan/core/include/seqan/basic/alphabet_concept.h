@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2011, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,8 @@
 
 // SEQAN_NO_GENERATED_FORWARDS
 
-#ifndef CORE_INCLUDE_SEQAN_BASIC_ALPHABET_CONCEPT_H_
-#define CORE_INCLUDE_SEQAN_BASIC_ALPHABET_CONCEPT_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_CONCEPT_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_CONCEPT_H_
 
 namespace seqan {
 
@@ -71,12 +71,14 @@ unsigned bpv = BitsPerValue<T>::VALUE;
 ..include:seqan/basic.h
  */
 
+// Forwards for Metafunctions and Functions.
 template <typename T> struct BitsPerValue;
-template <typename T> struct ValueSize;
 
 // minimal requirements for the alphabet of a String class
 SEQAN_CONCEPT_REFINE(AlphabetConcept, (TValue), (Assignable)(DefaultConstructible)(CopyConstructible))
 {
+    typedef typename BitsPerValue<TValue>::Type TBitsPerValue;
+    
     TValue val, val2;
 
     SEQAN_CONCEPT_USAGE(AlphabetConcept)
@@ -86,6 +88,10 @@ SEQAN_CONCEPT_REFINE(AlphabetConcept, (TValue), (Assignable)(DefaultConstructibl
         // assign must be available as an equivalent to '='
         assign(val, val2);
 //      swap(val, val2);
+
+        TBitsPerValue b = BitsPerValue<TValue>::VALUE;
+        
+        ignoreUnusedVariableWarning(b);
     }
 };
 
@@ -102,6 +108,8 @@ SEQAN_CONCEPT_REFINE(AlphabetConcept, (TValue), (Assignable)(DefaultConstructibl
 ..baseconcept:Concept.Comparable
 ..summary:Ordered alphabet value.
 ..include:seqan/basic.h
+
+.Function.operator<.concept:Concept.OrderedAlphabetConcept
 
 .Metafunction.MaxValue
 ..concept:Concept.OrderedAlphabetConcept
@@ -190,8 +198,13 @@ Do not specialize $minValue$, specialize @Function.infimumValueImpl@ instead!
 ..include:seqan/basic.h
 */
 
-template <typename T, typename TParent_> struct MinValue;
-template <typename T, typename TParent_> struct MaxValue;
+// Forwards for Metafunctions and Functions.
+template <typename T> struct MinValue;
+template <typename T> struct MaxValue;
+template <typename T> T const & minValue();
+template <typename T> T const & minValue(T);
+template <typename T> T const & maxValue();
+template <typename T> T const & maxValue(T);
 
 SEQAN_CONCEPT_REFINE(OrderedAlphabetConcept, (TValue), (AlphabetConcept)(Comparable))
 {
@@ -268,12 +281,18 @@ When you get problems in your tests, use the "unary plus" workaround from the ex
 ..example.text:The temporary assignment workaround.
 ..example.code:
 SEQAN_ASSERT_EQ(ValueSize<bool>::VALUE, 2u);    // Linker error.
-SEQAN_ASSERT_EQ(+ ValueSize<bool>::VALUE, 2u);  // OK
+SEQAN_ASSERT_EQ(+ValueSize<bool>::VALUE, 2u);  // OK
 SEQAN_ASSERT_EQ(valueSize<bool>(), 2u);         // OK
 ..see:Function.valueSize
 ..see:Metafunction.Value
 ..include:seqan/basic.h
  */
+
+// Forwards for Metafunctions and Functions.
+template <typename T> struct ValueSize;
+template <typename T> typename ValueSize<T>::Type valueSize();
+// Forwards for Metafunctions and Functions.
+template <typename TValue> typename ValueSize<TValue>::Type ordValue(TValue const & c);
 
 SEQAN_CONCEPT_REFINE(FiniteOrderedAlphabetConcept, (TValue), (OrderedAlphabetConcept))
 {
@@ -347,6 +366,10 @@ It is recommended to use @Function.gapValue@ rather than $gapValueImpl$.
 ..include:seqan/basic.h
 */
 
+// Forwards for Metafunctions and Functions.
+template <typename T> T gapValue();
+template <typename T> T gapValueImpl(T *);
+
 SEQAN_CONCEPT_REFINE(AlphabetWithGapsConcept, (TValue), (AlphabetConcept))
 {
     TValue val;
@@ -391,13 +414,17 @@ It is recommended to use @Function.gapValue@ rather than $gapValueImpl$.
 ..returns:The "unknown" value.
  */
 
+// Forwards for Metafunctions and Functions.
+template <typename T> T unknownValue();
+template <typename T> T unknownValueImpl(T *);
+
 SEQAN_CONCEPT_REFINE(AlphabetWithUnknownValueConcept, (TValue), (AlphabetConcept))
 {
     TValue val;
 
     SEQAN_CONCEPT_USAGE(AlphabetWithUnknownValueConcept)
     {
-        // Test the availability and return type of gapValue() and gapValueImpl().
+        // Test the availability and return type of unknownValue() and unknownValueImpl().
         sameType(unknownValue<TValue>(), val);
         sameType(unknownValueImpl<TValue>(static_cast<TValue *>(0)), val);
     }
@@ -469,13 +496,11 @@ SEQAN_CONCEPT_REFINE(AlphabetWithQualitiesConcept, (TValue), (AlphabetConcept))
 
     SEQAN_CONCEPT_USAGE(AlphabetWithQualitiesConcept)
     {
-        // Test the availability and return type of gapValue() and gapValueImpl().
-        sameType(unknownValue<TValue>(), val);
-        sameType(unknownValueImpl<TValue>(static_cast<TValue *>(0)), val);
+        // TODO(holtgrew): Write me!
     }
 };
 
 
 }  // namespace seqan
 
-#endif  // #ifndef CORE_INCLUDE_SEQAN_BASIC_ALPHABET_CONCEPT_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_CONCEPT_H_

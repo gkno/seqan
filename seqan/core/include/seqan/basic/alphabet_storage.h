@@ -1,7 +1,7 @@
 // ==========================================================================
 //                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
+// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
 // construction type (simple, non-simple) and storage size.
 // ==========================================================================
 
-#ifndef SEQAN_BASIC_ALPHABET_STORAGE_H_
-#define SEQAN_BASIC_ALPHABET_STORAGE_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_STORAGE_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_STORAGE_H_
 
 #include <float.h>
 
@@ -71,6 +71,7 @@ template <typename TValue>
 struct BitsPerValue
 {
     static const unsigned VALUE = sizeof(TValue) * 8;
+    typedef unsigned Type;
 };
 
 template <typename TValue>
@@ -84,12 +85,18 @@ struct BitsPerValue<TValue const> : public BitsPerValue<TValue>
 // Metafunction ValueSize
 // ----------------------------------------------------------------------------
 
+// TODO(holtgrew): Enable default implementation only for integers? Move to adapt builtins?
+
 template <typename T>
 struct ValueSize
 {
     typedef __uint64  Type;
     static const Type VALUE = (__uint64(1) << BitsPerValue<T>::VALUE);
 };
+
+template <typename T>
+struct ValueSize<T const> : ValueSize<T>
+{};
 
 // TODO(holtgrew): Use static assertion to make sure that ValueSize is never called on floating point numbers? Include assertion for __int64 and __uint64?
 
@@ -122,11 +129,10 @@ struct ValueSize<float>
 };
 
 
-template <typename TValue>
-struct ValueSize<TValue const> : ValueSize<TValue>
-{};
+// The internal value size is used for alphabets with piggyback qualities,
+// for example Dna5Q.  Here, the public value size is 5 but the internal
+// value size is 256.  
 
-// TODO(holtgrew): What is this used for?
 template <typename TValue> 
 struct InternalValueSize_
         : public ValueSize<TValue>
@@ -187,6 +193,7 @@ struct IntegralForValueImpl_
     typedef __int64 Type;
 };
 
+// TODO(holtgrew): Switch to __uint8, __uint16, __uint32?
 template <>
 struct IntegralForValueImpl_<1>
 {
@@ -212,8 +219,7 @@ struct IntegralForValueImpl_<4>
 };
 
 template <typename TValue>
-struct IntegralForValue
-        : IntegralForValueImpl_<BytesPerValue<TValue>::VALUE>
+struct IntegralForValue : IntegralForValueImpl_<BytesPerValue<TValue>::VALUE>
 {};
 
 // ============================================================================
@@ -224,6 +230,8 @@ struct IntegralForValue
 // Function ordValue()
 // ----------------------------------------------------------------------------
 
+// TODO(holtgrew): Enable only for integers, move to adapt builtins?
+
 template <typename TValue>
 inline typename ValueSize<TValue>::Type
 ordValue(TValue const & c)
@@ -231,25 +239,13 @@ ordValue(TValue const & c)
 	return convert<unsigned>(static_cast<typename MakeUnsigned_<TValue>::Type const &>(c));
 }
 
-template <typename TValue, typename TSpec>
-inline typename ValueSize<SimpleType<TValue, TSpec> >::Type
-ordValue(SimpleType<TValue, TSpec> const & c)
-{
-	return convert<unsigned>(c);
-}
+// The internal ord value is used for alphabets with piggyback qualities.
 
 template <typename TValue>
 inline typename ValueSize<TValue>::Type
 _internalOrdValue(TValue const & c)
 {
 	return ordValue(c);
-}
-
-template <typename TValue, typename TSpec>
-inline typename ValueSize<SimpleType<TValue, TSpec> >::Type
-_internalOrdValue(SimpleType<TValue, TSpec> const & c)
-{
-	return c.value;
 }
 
 // ----------------------------------------------------------------------------
@@ -260,9 +256,9 @@ template <typename T>
 inline typename ValueSize<T>::Type
 valueSize()
 {
-    return ValueSize<T>::VALUE;
+    return +ValueSize<T>::VALUE;
 }
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_BASIC_ALPHABET_STORAGE_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_ALPHABET_STORAGE_H_

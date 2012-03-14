@@ -1,8 +1,8 @@
 ///A tutorial about HMMs.
 #include <iostream>
 #include <fstream>
+#include <seqan/basic.h>
 #include <seqan/graph_algorithms.h>
-#include <seqan/basic/basic_logvalue.h>
 
 using namespace seqan;
 
