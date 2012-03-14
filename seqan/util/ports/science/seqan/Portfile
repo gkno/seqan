@@ -3,14 +3,14 @@
 
 PortSystem          1.0
 
-name                SeqAn
+name                seqan
 version             1.3.1
 categories          science
 platforms           darwin
 
 license             BSD
-maintainers         david.weese@fu-berlin.de \
-                    knut.reinert@fu-berlin.de
+maintainers         fu-berlin.de:david.weese \
+                    fu-berlin.de:knut.reinert
 
 description         C++ Sequence Analysis Library
 
@@ -23,11 +23,11 @@ homepage            http://www.seqan.de
 
 
 depends_build
-depends_lib         port:cmake
+depends_lib         port:cmake port:python27
 
 master_sites        http://ftp.seqan.de/releases
-distfiles           seqan-${version}.zip
-checksums           md5     05e4eeb68184b765f356cf9e0040cbb5
+distname            ${name}-${version}
+checksums           md5     64ab18ea576ee365f9d8e21556121eec
 use_zip             yes
 
 configure.dir       ${worksrcpath}/cmake
@@ -35,7 +35,8 @@ configure.ccache    no
 configure.cmd       cmake
 configure.pre_args  -DCMAKE_INSTALL_PREFIX=${prefix} \
                     -DCMAKE_VERBOSE_MAKEFILE=ON \
-                    -DCMAKE_BUILD_TYPE=Release
+                    -DCMAKE_BUILD_TYPE=Release \
+                    -DPYTHON_EXECUTABLE=${prefix}/bin/python2.7
 
 
 build.dir           ${worksrcpath}/cmake
