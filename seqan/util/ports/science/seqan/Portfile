@@ -5,6 +5,7 @@ PortSystem          1.0
 
 name                seqan
 version             1.3.1
+# 1 stealth update has occurred, see dist_subdir
 categories          science
 platforms           darwin
 
@@ -26,9 +27,11 @@ depends_build
 depends_lib         port:cmake port:python27
 
 master_sites        http://ftp.seqan.de/releases
-distname            ${name}-${version}
-checksums           md5     64ab18ea576ee365f9d8e21556121eec
 use_zip             yes
+dist_subdir         ${name}/${version}_1
+
+checksums           rmd160  cf19b391de789ec525d3b1e8164cf76a291beba6 \
+                    sha256  87eebe73ace9ada2f4664a768ae212d4acc5fb3ce87702709c3d15bf2d153aeb
 
 configure.dir       ${worksrcpath}/cmake
 configure.ccache    no
