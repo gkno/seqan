@@ -32,32 +32,35 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
+#define SEQAN_DEBUG
+#define SEQAN_TEST
+
 #include <seqan/basic.h>
 #include <seqan/file.h>
 
 #include "test_arg_parse.h"
 #include "test_arg_parse_argument.h"
+#include "test_arg_parse_option.h"
+#include "test_argument_parser.h"
 
+using namespace seqan;
 
 SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
 {
     // Call the int option tests
     SEQAN_CALL_TEST(test_int_short_argument);
     SEQAN_CALL_TEST(test_int_long_argument);
-    SEQAN_CALL_TEST(test_int_merged_short_argument);
     SEQAN_CALL_TEST(test_non_int_argument);
 
     // Call the double option tests
     SEQAN_CALL_TEST(test_double_short_argument);
     SEQAN_CALL_TEST(test_double_long_argument);
-    SEQAN_CALL_TEST(test_double_merged_short_argument);
     SEQAN_CALL_TEST(test_non_double_argument);
     SEQAN_CALL_TEST(test_double_scientific_notation);
 
     // Call the string option tests
     SEQAN_CALL_TEST(test_string_short_argument);
     SEQAN_CALL_TEST(test_string_long_argument);
-    SEQAN_CALL_TEST(test_string_merged_short_argument);
 
     // Test missing argument with string option
     SEQAN_CALL_TEST(test_string_missing_argument);
@@ -81,21 +84,20 @@ SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
     // Test file types
     SEQAN_CALL_TEST(test_input_file_short);
     SEQAN_CALL_TEST(test_input_file_long);
-    SEQAN_CALL_TEST(test_input_file_merged);
     SEQAN_CALL_TEST(test_input_file_missing);
     SEQAN_CALL_TEST(test_input_file_invalid_type);
     SEQAN_CALL_TEST(test_input_file_valid_type);
 
     SEQAN_CALL_TEST(test_output_file_short);
     SEQAN_CALL_TEST(test_output_file_long);
-    SEQAN_CALL_TEST(test_output_file_merged);
     SEQAN_CALL_TEST(test_output_file_missing);
     SEQAN_CALL_TEST(test_output_file_invalid_type);
     SEQAN_CALL_TEST(test_output_file_valid_type);
 
-    // test command line arguments
-    SEQAN_CALL_TEST(test_commandline_argument_not_enough_arguments);
-    SEQAN_CALL_TEST(test_commandline_argument_required_arguments_set);
+    SEQAN_CALL_TEST(test_argument_string);
+    SEQAN_CALL_TEST(test_argument_not_all_set);
+    SEQAN_CALL_TEST(test_argument_double);
+    SEQAN_CALL_TEST(test_argument_not_a_double);
 
     // cmd argument tests
     SEQAN_CALL_TEST(test_argument_string_label);
@@ -104,7 +106,11 @@ SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
     SEQAN_CALL_TEST(test_argument_inputfile_label);
     SEQAN_CALL_TEST(test_argument_outputfile_label);
     SEQAN_CALL_TEST(test_argument_user_defined_label);
+    SEQAN_CALL_TEST(test_argument_invalid_cast);
     SEQAN_CALL_TEST(test_argument_min_max_boundaries);
+    SEQAN_CALL_TEST(test_argument_valid_values);
+
+    SEQAN_CALL_TEST(test_argument_parser);
 
     // conversion tests
     SEQAN_CALL_TEST(test_isDouble);

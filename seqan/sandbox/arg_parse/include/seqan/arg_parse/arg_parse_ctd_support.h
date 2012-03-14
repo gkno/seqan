@@ -37,6 +37,7 @@
 #define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
 
 #include <seqan/arg_parse/argument_parser.h>
+#include <seqan/sequence.h>
 
 namespace seqan {
 
@@ -100,28 +101,51 @@ inline TSequence _xmlEscape(TSequence const & original)
     return escaped;
 }
 
+inline std::string _xmlEscape(std::string const & original)
+{
+    std::string escaped;
+    for (std::string::const_iterator ch  = original.begin(); ch != original.end(); ++ch)
+    {
+        if (*ch == '"')
+            append(escaped, "&quot;");
+        else if (*ch == '\'')
+            append(escaped, "&apos;");
+        else if (*ch == '&')
+            append(escaped, "&amp;");
+        else if (*ch == '<')
+            append(escaped, "&lt;");
+        else if (*ch == '>')
+            append(escaped, "&gt;");
+        else
+            append(escaped, *ch);
+    }
+    return escaped;
+}
+
 // ----------------------------------------------------------------------------
 // Function _addMinMaxRestrictions()
 // ----------------------------------------------------------------------------
 
 inline void
-_addMinMaxRestrictions(StringSet<CharString> & restrictions, CommandLineOption const & opt)
+_addMinMaxRestrictions(std::vector<std::string> & restrictions, ArgParseOption const & opt)
 {
-    CharString minMaxRestriction = "";
-    if (opt.minValue != "")
+
+    std::string minMaxRestriction = "";
+    if (opt._argument.minValue != "")
     {
-        append(minMaxRestriction, opt.minValue);
+        append(minMaxRestriction, opt._argument.minValue);
         append(minMaxRestriction, ":");
     }
-    if (opt.maxValue != "")
+    if (opt._argument.maxValue != "")
     {
         if (minMaxRestriction == "")
             append(minMaxRestriction, ":");
-        append(minMaxRestriction, opt.maxValue);
+        append(minMaxRestriction, opt._argument.maxValue);
     }
 
     if (minMaxRestriction != "")
         appendValue(restrictions, minMaxRestriction);
+
 }
 
 // ----------------------------------------------------------------------------
@@ -129,16 +153,18 @@ _addMinMaxRestrictions(StringSet<CharString> & restrictions, CommandLineOption c
 // ----------------------------------------------------------------------------
 
 inline void
-_addValidValuesRestrictions(StringSet<CharString> & restrictions, CommandLineOption const & opt)
+_addValidValuesRestrictions(std::vector<std::string> & restrictions, ArgParseOption const & opt)
 {
-    if (length(opt.validValues) != 0)
+    if (length(opt._argument.validValues) != 0)
     {
-        for (Iterator<StringSet<CharString> const, Rooted>::Type valid = begin(opt.validValues); valid != end(opt.validValues); goNext(valid))
+        for (std::vector<std::string>::const_iterator valid = opt._argument.validValues.begin();
+             valid != opt._argument.validValues.end();
+             ++valid)
         {
             // for files we set *.(Name of the format)
             if (isOutputFile(opt) || isInputFile(opt))
             {
-                CharString filetype = "*.";
+                std::string filetype = "*.";
                 append(filetype, *valid);
                 appendValue(restrictions, filetype);
             }
@@ -158,7 +184,7 @@ _addValidValuesRestrictions(StringSet<CharString> & restrictions, CommandLineOpt
  * returns true if this option should be included in the ctd
  */
 inline bool
-_includeInCTD(CommandLineOption const & opt)
+_includeInCTD(ArgParseOption const & opt)
 {
     return !(opt.shortName == "h" || opt.shortName == "V" || opt.longName == "write-ctd" || (opt.shortName == "" && opt.longName == ""));
 }
@@ -178,27 +204,27 @@ _includeInCTD(CommandLineOption const & opt)
 */
 
 inline void
-writeCTD(CommandLineParser const & me)
+writeCTD(ArgumentParser const & me)
 {
-    typedef Iterator<CommandLineParser::TOptionMap>::Type TOptionMapIterator;
+    typedef Iterator<ArgumentParser::TOptionMap>::Type TOptionMapIterator;
     TOptionMapIterator optionMapIterator;
 
     // create file [appname].ctd in working directory
-    CharString ctdfilename;
-    getOptionValueLong(me, "write-ctd", ctdfilename);
+    std::string ctdfilename;
+    // getOptionValueLong(me, "write-ctd", ctdfilename);
 
     std::ofstream ctdfile;
     ctdfile.open(toCString(ctdfilename));
     ctdfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     ctdfile << "<tool status=\"external\">\n";
     ctdfile << "\t<name>" << _xmlEscape(me._appName) << "</name>\n";
-    ctdfile << "\t<version>" << _xmlEscape(me._versionText) << "</version>\n";
+    //ctdfile << "\t<version>" << _xmlEscape(me._versionText) << "</version>\n";
     ctdfile << "\t<description><![CDATA[" << _xmlEscape(me._appName) << ".]]></description>\n";
     ctdfile << "\t<manual><![CDATA[" << _xmlEscape(me._appName) << ".]]></manual>\n"; // TODO: as soon as we have a more sophisticated documentation embedded into the CmdParser, we should at this here
     ctdfile << "\t<docurl>Direct links in docs</docurl>\n";
     ctdfile << "\t<category>SeqAn - Sequence Analaysis</category>\n";
     ctdfile << "\t<mapping><![CDATA[\n";
-
+/*
     for (optionMapIterator = begin(me.optionMap); optionMapIterator != end(me.optionMap); optionMapIterator++)
     {
 
@@ -207,17 +233,17 @@ writeCTD(CommandLineParser const & me)
         if (!_includeInCTD(opt))
             continue;
 
-        CharString optionName = (opt.shortName != "" ? opt.shortName : opt.longName);
-        CharString flagName = (opt.shortName != "" ? "-" : "--");
+        std::string optionName = (opt.shortName != "" ? opt.shortName : opt.longName);
+        std::string flagName = (opt.shortName != "" ? "-" : "--");
         append(flagName, optionName);
 
         ctdfile << "<mapparam CLISwitch=\"" << flagName << "\" name=\"" << _xmlEscape(me._appName) << "." << optionName << "\"/>\n";
     }
-
+*/
     ctdfile << "]]></mapping>\n";
     ctdfile << "\t<PARAMETERS version=\"1.3\" xsi:noNamespaceSchemaLocation=\"http://open-ms.sourceforge.net/schemas/Param_1_3.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" << std::endl;
     ctdfile << "\t\t<NODE name=\"" << _xmlEscape(me._appName) << "\" description=\"???\">" << std::endl;
-
+/*
     for (optionMapIterator = begin(me.optionMap); optionMapIterator != end(me.optionMap); optionMapIterator++)
     {
         CommandLineOption const & opt = *optionMapIterator;
@@ -227,9 +253,9 @@ writeCTD(CommandLineParser const & me)
             continue;
 
         // prefer short name for options
-        CharString optionName = (opt.shortName != "" ? opt.shortName : opt.longName);
+        std::string optionName = (opt.shortName != "" ? opt.shortName : opt.longName);
 
-        CharString type;
+        std::string type;
 
         if (isStringOption(opt))
             type = "string";
@@ -239,7 +265,7 @@ writeCTD(CommandLineParser const & me)
             type = "double";
 
         // set up tags
-        StringSet<CharString> tags;
+        std::vector<std::string> tags;
         if (isInputFile(opt))
         {
             appendValue(tags,"input file");
@@ -248,13 +274,13 @@ writeCTD(CommandLineParser const & me)
         {
             appendValue(tags, "output file");
         }
-        if (isOptionMandatory(*optionMapIterator))
+        if (isMandatory(*optionMapIterator))
         {
             appendValue(tags, "required");
         }
 
         // set up restrictions
-        StringSet<CharString> restrictions;
+        std::vector<std::string> restrictions;
         _addValidValuesRestrictions(restrictions, opt);
         _addMinMaxRestrictions(restrictions, opt);
 
@@ -268,7 +294,7 @@ writeCTD(CommandLineParser const & me)
         "restrictions=\"" << _xmlEscape(_join(restrictions, ",")) << "\"" <<
         "/>" << std::endl;
     }
-
+*/
     ctdfile << "\t\t</NODE>" << std::endl;
     ctdfile << "\t</PARAMETERS>" << std::endl;
     ctdfile << "</tool>" << std::endl;

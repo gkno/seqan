@@ -34,11 +34,12 @@
 // Tests for arg_parse/arg_parse_argument.h.
 // ==========================================================================
 
-#ifndef SEQAN_HEADER_TEST_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
-#define SEQAN_HEADER_TEST_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
+#ifndef SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_
+#define SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_
 
 #include <seqan/basic.h>
 
+#include "test_extensions.h"
 #include <seqan/arg_parse/arg_parse_argument.h>
 
 namespace seqan
@@ -46,82 +47,127 @@ namespace seqan
 
 SEQAN_DEFINE_TEST(test_argument_string_label)
 {
-    CommandLineArgument arg1(CommandLineArgument::STRING);
+    ArgParseArgument arg1(ArgParseArgument::STRING);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "STR");
 
     arg1._numberOfArguments = 2;
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "STR STR");
 
-    CommandLineArgument arg2(CommandLineArgument::STRING);
+    ArgParseArgument arg2(ArgParseArgument::STRING);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg2), "STR");
 }
 
 SEQAN_DEFINE_TEST(test_argument_int_label)
 {
-    CommandLineArgument arg1(CommandLineArgument::INTEGER);
+    ArgParseArgument arg1(ArgParseArgument::INTEGER);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "NUM");
 
     arg1._numberOfArguments = 2;
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "NUM NUM");
 
-    CommandLineArgument arg2(CommandLineArgument::INTEGER);
+    ArgParseArgument arg2(ArgParseArgument::INTEGER);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg2), "NUM");
 }
 
 SEQAN_DEFINE_TEST(test_argument_double_label)
 {
-    CommandLineArgument arg1(CommandLineArgument::DOUBLE);
+    ArgParseArgument arg1(ArgParseArgument::DOUBLE);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "NUM");
 
     arg1._numberOfArguments = 2;
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "NUM NUM");
 
-    CommandLineArgument arg2(CommandLineArgument::DOUBLE);
+    ArgParseArgument arg2(ArgParseArgument::DOUBLE);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg2), "NUM");
 }
 
 SEQAN_DEFINE_TEST(test_argument_inputfile_label)
 {
-    CommandLineArgument arg1(CommandLineArgument::INPUTFILE);
+    ArgParseArgument arg1(ArgParseArgument::INPUTFILE);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "FILE");
 
     arg1._numberOfArguments = 2;
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "FILE FILE");
 
-    CommandLineArgument arg2(CommandLineArgument::INPUTFILE);
+    ArgParseArgument arg2(ArgParseArgument::INPUTFILE);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg2), "FILE");
 }
 
 SEQAN_DEFINE_TEST(test_argument_outputfile_label)
 {
-    CommandLineArgument arg1(CommandLineArgument::OUTPUTFILE);
+    ArgParseArgument arg1(ArgParseArgument::OUTPUTFILE);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "FILE");
 
     arg1._numberOfArguments = 2;
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "FILE FILE");
 
-    CommandLineArgument arg2(CommandLineArgument::OUTPUTFILE);
+    ArgParseArgument arg2(ArgParseArgument::OUTPUTFILE);
     SEQAN_ASSERT_EQ(getArgumentLabel(arg2), "FILE");
 }
 
 SEQAN_DEFINE_TEST(test_argument_user_defined_label)
 {
-    CommandLineArgument arg1(CommandLineArgument::STRING, false, "my_label");
+    ArgParseArgument arg1(ArgParseArgument::STRING, false, "my_label");
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "my_label");
 
     arg1._numberOfArguments = 2;
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "my_label");
 }
 
+SEQAN_DEFINE_TEST(test_argument_invalid_cast)
+{
+    ArgParseArgument doubleArg(ArgParseArgument::DOUBLE);
+
+    assignArgumentValue(doubleArg, "6.0221418e23");
+    SEQAN_ASSERT_EQ(getArgumentValue(doubleArg), "6.0221418e23");
+
+    assignArgumentValue(doubleArg, "-6.022");
+    SEQAN_ASSERT_EQ(getArgumentValue(doubleArg), "-6.022");
+
+    SEQAN_TEST_EXCEPTION(ParseException,
+                         assignArgumentValue(doubleArg, "-6.022aaa"),
+                         "the given value '-6.022aaa' cannot be casted to double");
+}
+
 SEQAN_DEFINE_TEST(test_argument_min_max_boundaries)
 {
-    CommandLineArgument arg(CommandLineArgument::INTEGER);
+    ArgParseArgument arg(ArgParseArgument::DOUBLE);
     setMinValue(arg, "1");
-    setMaxValue(arg, "10");
+    setMaxValue(arg, "6.0221418e23");
 
+    assignArgumentValue(arg, "1"); // should just work without throwing any exception
+    SEQAN_ASSERT_EQ(getArgumentValue(arg), "1");
+    SEQAN_TEST_EXCEPTION(ParseException,
+                         assignArgumentValue(arg, "-1"),
+                         "the given value '-1' is not in the interval [1:6.0221418e23]");
 
+    SEQAN_TEST_EXCEPTION(ParseException,
+                         assignArgumentValue(arg, "6.0321418e23"),
+                         "the given value '6.0321418e23' is not in the interval [1:6.0221418e23]");
+}
+
+SEQAN_DEFINE_TEST(test_argument_valid_values)
+{
+    ArgParseArgument arg(ArgParseArgument::STRING);
+    setValidValues(arg, "this that");
+
+    assignArgumentValue(arg, "this");
+    SEQAN_ASSERT_EQ(getArgumentValue(arg), "this");
+    SEQAN_TEST_EXCEPTION(ParseException,
+                         assignArgumentValue(arg, "not-this-or-that"),
+                         "the given value 'not-this-or-that' is not in the list of allowed values [this, that]");
+
+    ArgParseArgument filearg(ArgParseArgument::INPUTFILE);
+    setValidValues(filearg, "txt fasta");
+
+    assignArgumentValue(filearg, "textfile.txt");
+    SEQAN_ASSERT_EQ(value(filearg.value, 0), "textfile.txt");
+
+    SEQAN_TEST_EXCEPTION(ParseException,
+                         assignArgumentValue(filearg, "not-a-validfile.qxt"),
+                         "the given value 'not-a-validfile.qxt' is not in the list of allowed file extensions [*.txt, *.fasta]");
 }
 
 }  // namespace seqan
 
-#endif // SEQAN_HEADER_TEST_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
+#endif // SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_

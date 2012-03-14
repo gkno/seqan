@@ -35,17 +35,32 @@
 #ifndef SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
 #define SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
 
+#include <sstream>
+#include <string>
+
+#include <seqan/sequence.h>
+
 namespace seqan {
 
+// ----------------------------------------------------------------------------
+// Function toCString()
+// ----------------------------------------------------------------------------
+
+// toCString impl for std::string
+inline char const *
+toCString(std::string const & me)
+{
+    return me.c_str();
+}
 
 // ----------------------------------------------------------------------------
 // Function _canCast()
 // ----------------------------------------------------------------------------
 template <typename TTarget, typename TString>
-inline TTarget
-_canCast(TTarget & dest, TString const s)
+inline bool
+_tryCast(TTarget & dest, TString const source)
 {
-    std::istringstream stream(toCString(s));
+    std::istringstream stream(toCString(source));
     bool result = (!(stream >> dest).fail()) && (stream.rdbuf()->in_avail() == 0);
     return result;
 }
@@ -60,7 +75,7 @@ _cast(TString const s)
     TTarget dst;
     std::istringstream stream(toCString(s));
     bool result = (!(stream >> dst).fail()) && (stream.rdbuf()->in_avail() == 0);
-    SEQAN_ASSERT_MSG(result, "could not cast %s", toCString(s));
+    SEQAN_CHECK(result, "could not cast %s", toCString(s));
     return dst;
 }
 
@@ -97,6 +112,176 @@ inline bool
 _isInt(TString const s)
 {
     return _isCastable<int>(s);
+}
+
+// ----------------------------------------------------------------------------
+// Function _convertOptionValue()
+// ----------------------------------------------------------------------------
+
+class ArgParseOption;
+inline bool isBooleanOption(ArgParseOption const & me);
+inline bool isIntOption(ArgParseOption const & me);
+inline bool isDoubleOption(ArgParseOption const & me);
+inline bool isStringOption(ArgParseOption const & me);
+
+inline bool
+_convertOptionValue(bool & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isBooleanOption(opt))
+        return false;
+
+    dst = !empty(src);
+    return true;
+}
+
+inline bool
+_convertOptionValue(int & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isIntOption(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertOptionValue(unsigned int & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isIntOption(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertOptionValue(__int64 & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isIntOption(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertOptionValue(__uint64 & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isIntOption(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertOptionValue(float & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isDoubleOption(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertOptionValue(double & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isDoubleOption(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+template <typename TObject>
+inline bool
+_convertOptionValue(TObject & dst, ArgParseOption const & opt, std::string const & src)
+{
+    if (!isStringOption(opt))
+        return false;
+
+    assign(dst, src);
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function _convertArgumentValue()
+// ----------------------------------------------------------------------------
+
+class ArgParseArgument;
+inline bool isBooleanArgument(ArgParseArgument const & me);
+inline bool isIntegerArgument(ArgParseArgument const & me);
+inline bool isDoubleArgument(ArgParseArgument const & me);
+inline bool isStringArgument(ArgParseArgument const & me);
+
+inline bool
+_convertArgumentValue(bool & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isBooleanArgument(opt))
+        return false;
+
+    dst = !empty(src);
+    return true;
+}
+
+inline bool
+_convertArgumentValue(int & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isIntegerArgument(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertArgumentValue(unsigned int & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isIntegerArgument(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertArgumentValue(__int64 & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isIntegerArgument(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertArgumentValue(__uint64 & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isIntegerArgument(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertArgumentValue(float & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isDoubleArgument(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+inline bool
+_convertArgumentValue(double & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isDoubleArgument(opt))
+        return false;
+
+    return _tryCast(dst, src);
+}
+
+template <typename TObject>
+inline bool
+_convertArgumentValue(TObject & dst, ArgParseArgument const & opt, std::string const & src)
+{
+    if (!isStringArgument(opt))
+        return false;
+
+    assign(dst, src);
+    return true;
 }
 
 } // namespace seqan

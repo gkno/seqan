@@ -37,6 +37,8 @@
 #include <seqan/map.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
+
+#include <seqan/arg_parse/arg_parse_argument.h>
 #include <seqan/arg_parse/arg_parse_option.h>
 #include <seqan/arg_parse/arg_parse_type_support.h>
 
@@ -54,19 +56,19 @@ namespace seqan {
  */
 
 /**
-.Class.CommandLineParser
+.Class.ArgumentParser
 ..cat:Miscellaneous
-..summary:Stores multiple @Class.CommandLineOption@ objects and parses the command line _arguments for these options.
-..signature:CommandLineParser
-..include:seqan/misc/misc_cmdparser.h
+..summary:Stores multiple @Class.ArgParseOption@ objects and parses the command line _arguments for these options.
+..signature:ArgumentParser
+..include:seqan/arg_parse.h
 ..remarks:
 See the documentation of @Class.ToolDoc@ on how to format text.
 Where possible, formatting is added automatically for you.
 You have to use formatting in the following places: (1) usage lines, (2) option help texts, (3) description and additional text sections.
 ..example.text:
-The following gives a simple example of how to use the @Class.CommandLineParser@.
+The following gives a simple example of how to use the @Class.ArgumentParser@.
 ..example.code:
-CommandLineParser parser("alf");
+ArgumentParser parser("alf");
 setShortDescription(parser, "Alignment free sequence comparison");
 setVersion(parser, "1.0");
 setDate(parser, "Jan 2010");
@@ -79,12 +81,12 @@ addDescription(parser,
                "using alignment-free methods.  All methods which are implemented are "
                "based on k-mer counts.");
 
-CommandLineOption optionInputFile("i", "inputFile", "Name of the multi-FASTA input.",
+ArgParseOption optionInputFile("i", "inputFile", "Name of the multi-FASTA input.",
                                   OptionType::String | OptionType::Mandatory);
 optionInputFile = addArgumentText(optionInputFile, "IN");
 addOption(parser, optionInputFile);
 
-CommandLineOption optionInputFile("o", "outputFile", "Name of the output file.",
+ArgParseOption optionInputFile("o", "outputFile", "Name of the output file.",
                                   OptionType::String | OptionType::Mandatory);
 optionInputFile = addArgumentText(optionInputFile, "OUT");
 addOption(parser, optionInputFile);
@@ -93,127 +95,97 @@ addTextSection(parser, "See Also");
 addText(parser, "http://www.seqan.de/projects/alf");
 ..see:Class.ToolDoc
 
-.Memfunc.CommandLineParser#CommandLineParser
-..class:Class.CommandLineParser
+.Memfunc.ArgumentParser#ArgumentParser
+..class:Class.ArgumentParser
 ..summary:Constructor
-..signature:CommandLineParser ()
-..signature:CommandLineParser (applicationName)
-..param.applicationName:A @Shortcut.CharString@ containing the name of the application.
+..signature:ArgumentParser ()
+..signature:ArgumentParser (applicationName)
+..param.applicationName:A std::string containing the name of the application.
 ..remarks:If the name of the application is not passed to the constructor it will be extracted from the command line.
 */
 
-class CommandLineParser
+class ArgumentParser
 {
 public:
+
+    // ----------------------------------------------------------------------------
+    // Enum ParseResult
+    // ----------------------------------------------------------------------------
+    // will be used as return value of parse(..) to indicate whether parsing worked
+    enum ParseResult
+    {
+        OK,
+        ERROR,
+        HELP,
+        VERSION,
+        WRITE_CTD,
+        EXPORT_HELP
+    };
+
     // ----------------------------------------------------------------------------
     // Class Typedefs
     // ----------------------------------------------------------------------------
-    typedef String<CommandLineOption>   TOptionMap;
-    typedef Size<TOptionMap>::Type      TSize;
+    typedef std::vector<ArgParseOption>   TOptionMap;
+    typedef std::vector<ArgParseArgument> TArgumentMap;
+    typedef Size<TOptionMap>::Type        TOptionMapSize;
+    typedef Size<TArgumentMap>::Type      TArgumentMapSize;
 
-    typedef std::map<CharString, TSize> TStringMap;
-    typedef String<CharString>          TValueMap;
+    typedef std::map<std::string, TOptionMapSize> TStringMap;
+    typedef std::vector<std::string>              TValueMap;
 
     // ----------------------------------------------------------------------------
     // Mapping of option names to options
     // ----------------------------------------------------------------------------
-    TStringMap shortNameMap;
-    TStringMap longNameMap;
-    TOptionMap optionMap;
-    
+    TStringMap   shortNameMap;
+    TStringMap   longNameMap;
+    TOptionMap   optionMap;
+    TArgumentMap argumentList;
+
     // ----------------------------------------------------------------------------
     // Members
     // ----------------------------------------------------------------------------
-    unsigned              _requiredArguments;
-    StringSet<CharString> _description;
-    String<CharString>    _arguments;
-    CharString            _appName;
-    String<CharString>    _titleText;
-    String<CharString>    _usageText;
-    String<CharString>    _versionText;
+    std::vector<std::string> _description;
+    std::string              _appName;
+    std::vector<std::string> _titleText;
+    std::vector<std::string> _usageText;
+    std::vector<std::string> _versionText;
     
     ToolDoc _toolDoc;
 
     // ----------------------------------------------------------------------------
     // return values for unset parameters
     // ----------------------------------------------------------------------------
-    const CharString         _null;
-    const String<CharString> _nullSet;
+    const std::string              _null;
+    const std::vector<std::string> _nullSet;
 
     // friend declaration to make addOption() available in init function
-    friend inline void addOption(CommandLineParser & me, CommandLineOption const & opt);
+    friend inline void addOption(ArgumentParser & me, ArgParseOption const & opt);
 
     // ----------------------------------------------------------------------------
     // Function init()
     // ----------------------------------------------------------------------------
     void init()
     {
-        _requiredArguments = 0;
-        addOption(*this, CommandLineOption("h", "help", "Displays this help message.", OptionType::Boolean));
-        addOption(*this, CommandLineOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", OptionType::OUTPUTFILE));
-        addOption(*this, CommandLineOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", OptionType::String));
-        back(this->optionMap) = addArgumentText(back(this->optionMap), "FORMAT");
+        addOption(*this, ArgParseOption("h", "help", "Displays this help message."));
+        addOption(*this, ArgParseOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", ArgParseArgument(ArgParseArgument::OUTPUTFILE)));
+        addOption(*this, ArgParseOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", ArgParseArgument(ArgParseArgument::STRING, false, "FORMAT")));
     }
 
     // ----------------------------------------------------------------------------
     // Constructors
     // ----------------------------------------------------------------------------
 
-    CommandLineParser()       
+    ArgumentParser()
     {
         init();
     }
 
-    CommandLineParser(CharString _appName) : _appName(_appName)
+    ArgumentParser(std::string _appName) : _appName(_appName)
     {
         setName(_toolDoc, _appName);
         init();
     }
 };
-
-// ----------------------------------------------------------------------------
-// Function hasOptionLong()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.hasOptionLong:
-..summary:Returns whether a certain long-name option is registered in the parser.
-..cat:Miscellaneous
-..signature:hasOptionLong(parser, optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name option.
-..returns:$true$ if the option is registered.
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline bool
-hasOptionLong(CommandLineParser const & me, CharString const & _long)
-{
-    return hasKey(me.longNameMap, _long);
-}
-
-// ----------------------------------------------------------------------------
-// Function hasOptionShort()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.hasOptionShort:
-..summary:Returns whether a certain short-name option is registered in the parser.
-..cat:Miscellaneous
-..signature:hasOptionShort(parser, optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name option.
-..returns:$true$ if the option is registered.
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline bool
-hasOptionShort(CommandLineParser const & me, CharString const & _short)
-{
-    return hasKey(me.shortNameMap, _short);
-}
 
 // ----------------------------------------------------------------------------
 // Function hasOption()
@@ -224,15 +196,15 @@ hasOptionShort(CommandLineParser const & me, CharString const & _short)
 ..summary:Returns whether a certain option is registered in the parser.
 ..cat:Miscellaneous
 ..signature:hasOption(parser, optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.optionIdentifier:A @Shortcut.CharString@ that identifies the option.
 ..returns:$true$ if the option is registered.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
-hasOption(CommandLineParser const & me, CharString const & _name)
+hasOption(ArgumentParser const & me, std::string const & _name)
 {
     return (hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name));
 }
@@ -243,18 +215,18 @@ hasOption(CommandLineParser const & me, CharString const & _name)
 
 /**
 .Function.addOption
-..summary:Adds a @Class.CommandLineOption@ object to the @Class.CommandLineParser@.
+..summary:Adds a @Class.ArgParseOption@ object to the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addOption(parser, option)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.option:The new @Class.CommandLineOption@ object that should be added.
-...type:Class.CommandLineOption
-..include:seqan/misc/misc_cmdparser.h
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.option:The new @Class.ArgParseOption@ object that should be added.
+...type:Class.ArgParseOption
+..include:seqan/arg_parse.h
 */
 
 inline void
-addOption(CommandLineParser & me, CommandLineOption const & opt)
+addOption(ArgumentParser & me, ArgParseOption const & opt)
 {
     // check if an option with the same identifiers was already registered
     SEQAN_CHECK(!hasOption(me, opt.shortName), "There already is an option with the name %s!", toCString(opt.shortName));
@@ -264,9 +236,40 @@ addOption(CommandLineParser & me, CommandLineOption const & opt)
     appendValue(me.optionMap, opt);
 
     if (!empty(opt.shortName))
-        insert(me.shortNameMap, opt.shortName, length(me.optionMap) - 1);
+        me.shortNameMap.insert(std::make_pair<std::string, ArgumentParser::TOptionMapSize>(opt.shortName, length(me.optionMap) - 1));
     if (!empty(opt.longName))
-        insert(me.longNameMap, opt.longName, length(me.optionMap) - 1);
+        me.longNameMap.insert(std::make_pair<std::string, ArgumentParser::TOptionMapSize>(opt.longName, length(me.optionMap) - 1));
+}
+
+/**
+.Function.addArgument
+..summary:Adds a @Class.ArgParseArgument@ object to the @Class.ArgumentParser@.
+..cat:Miscellaneous
+..signature:addArgument(parser, argument)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.option:The new @Class.ArgParseArgument@ object that should be added.
+...type:Class.ArgParseArgument
+..include:seqan/arg_parse.h
+*/
+
+inline void
+addArgument(ArgumentParser & me, ArgParseArgument const & arg)
+{
+    // check previous arguments
+    //  .. lists can only be last argument
+    if(!me.argumentList.empty())
+    {
+        SEQAN_CHECK(!isListArgument(me.argumentList[me.argumentList.size() - 1]),
+                    "You cannot add an additional argument after a list argument.");
+    }
+
+    // check current argument
+    //  .. arguments should not have default values
+    SEQAN_CHECK(arg.defaultValue.empty(), "Arguments cannot have default values.");
+    SEQAN_CHECK(arg._numberOfArguments == 1, "n-Tuple of arguments are not supported.");
+
+    me.argumentList.push_back(arg);
 }
 
 // ----------------------------------------------------------------------------
@@ -275,21 +278,21 @@ addOption(CommandLineParser & me, CommandLineOption const & opt)
 
 /**
 .Function.addLine:
-..summary:Adds a line of text to the help output of the @Class.CommandLineParser@.
+..summary:Adds a line of text to the help output of the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addLine(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:A line of text that will be added to the help output.
 ...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TString>
 inline void
-addLine(CommandLineParser & me, TString const & line)
+addLine(ArgumentParser & me, TString const & line)
 {
-    addOption(me, CommandLineOption("", "", line, 0));
+    addOption(me, ArgParseOption("", "", line));
 }
 
 // ----------------------------------------------------------------------------
@@ -301,18 +304,18 @@ addLine(CommandLineParser & me, TString const & line)
 ..summary:Adds an extra line of text below the help text of an option.
 ..cat:Miscellaneous
 ..signature:addHelpLine(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:A line of text that will be added below the help text of an option.
 ...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TString>
 inline void
-addHelpLine(CommandLineParser & me, TString const & line)
+addHelpLine(ArgumentParser & me, TString const & line)
 {
-    addOption(me, CommandLineOption("", "", line, 1));
+    addOption(me, ArgParseOption("", "", line));
 }
 
 // ----------------------------------------------------------------------------
@@ -321,19 +324,19 @@ addHelpLine(CommandLineParser & me, TString const & line)
 
 /**
 .Function.addSection:
-..summary:Adds a new section the help output of the @Class.CommandLineParser@.
+..summary:Adds a new section the help output of the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addSection(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:A section header that will be added to the help output.
 ...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TString>
 inline void
-addSection(CommandLineParser & me, TString const & line)
+addSection(ArgumentParser & me, TString const & line)
 {
     addLine(me, "");
     addLine(me, line);
@@ -345,21 +348,21 @@ addSection(CommandLineParser & me, TString const & line)
 
 /**
 .Function.addTitleLine:
-..summary:Adds a line of text to the title output of the @Class.CommandLineParser@.
+..summary:Adds a line of text to the title output of the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addTitleLine(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:A text line that will be added to the title output.
 ...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TString>
 inline void
-addTitleLine(CommandLineParser & me, TString const & line)
+addTitleLine(ArgumentParser & me, TString const & line)
 {
-    appendValue(me._titleText, line);
+    me._titleText.push_back(line);
 }
 
 // ----------------------------------------------------------------------------
@@ -368,23 +371,23 @@ addTitleLine(CommandLineParser & me, TString const & line)
 
 /**
 .Function.addVersionLine:
-..summary:Adds a line of text to the version output of the @Class.CommandLineParser@.
+..summary:Adds a line of text to the version output of the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addVersionLine(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:A text line that will be added to the version output.
 ...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TString>
 inline void
-addVersionLine(CommandLineParser & me, TString const & line)
+addVersionLine(ArgumentParser & me, TString const & line)
 {
     if (empty(me._versionText))
-        addOption(me, CommandLineOption("V", "version", "Print version information.", OptionType::Boolean));
-    appendValue(me._versionText, line);
+        addOption(me, ArgParseOption("V", "version", "Print version information."));
+    me._versionText.push_back(line);
 }
 
 // ----------------------------------------------------------------------------
@@ -393,32 +396,32 @@ addVersionLine(CommandLineParser & me, TString const & line)
 
 /**
 .Function.addUsageLine:
-..summary:Adds a line of text to the usage output of the @Class.CommandLineParser@.
+..summary:Adds a line of text to the usage output of the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addUsageLine(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:A text line that will be added to the usage output.
-...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline void
-addUsageLine(CommandLineParser & me, CharString const & line)
+addUsageLine(ArgumentParser & me, std::string const & line)
 {
-    appendValue(me._usageText, line);
+    me._usageText.push_back(line);
 }
 
 // ----------------------------------------------------------------------------
 // Function _getOptionIndex()
 // ----------------------------------------------------------------------------
+// note that it is assumed that the option exists if this method is called
 
-inline Size< String<CommandLineOption> >::Type
-_getOptionIndex(CommandLineParser const & me, CharString const & _name)
+inline Size< String<ArgParseOption> >::Type
+_getOptionIndex(ArgumentParser const & me, std::string const & _name)
 {
-    typedef Size< String<CommandLineOption> >::Type TOptionPosition;
+    typedef Size< String<ArgParseOption> >::Type TOptionPosition;
     TOptionPosition option_index;
-    if (hasKey(me.shortNameMap, _name))
+    if (me.shortNameMap.find(_name) != me.shortNameMap.end())
     {
         option_index = me.shortNameMap.find(_name)->second;
     }
@@ -433,59 +436,40 @@ _getOptionIndex(CommandLineParser const & me, CharString const & _name)
 // Function getOption()
 // ----------------------------------------------------------------------------
 
-inline CommandLineOption &
-getOption(CommandLineParser & me, CharString const & _name)
+inline ArgParseOption &
+getOption(ArgumentParser & me, std::string const & _name)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, _name), "Unknown option: %s", toCString(_name));
+    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     return me.optionMap[_getOptionIndex(me,_name)];
 }
 
-inline CommandLineOption const &
-getOption(CommandLineParser const & me, CharString const & _name)
+inline ArgParseOption const &
+getOption(ArgumentParser const & me, std::string const & _name)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, _name), "Unknown option: %s", toCString(_name));
+    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     return me.optionMap[_getOptionIndex(me,_name)];
 }
 
 // ----------------------------------------------------------------------------
-// Function setRequiredArguments()
+// Function getArgument()
 // ----------------------------------------------------------------------------
 
-/**
-.Function.setRequiredArguments
-..summary:Sets the number of _arguments (non-parameterized options) are required by the program.
-..cat:Miscellaneous
-..signature:requiredArguments(parser, count)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.count:A $unsigned int$ defining the amount of non-parameterized options requried by the program.
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline void
-setRequiredArguments(CommandLineParser & me, unsigned count)
+inline ArgParseArgument &
+getArgument(ArgumentParser & me, unsigned position)
 {
-    me._requiredArguments = count;
+    SEQAN_CHECK(position < me.argumentList.size(),
+                "ArgumentParser: Only %d arguments available", me.argumentList.size());
+    return me.argumentList[position];
 }
 
-/**
-.Function.requiredArguments
-..summary:Sets the number of _arguments (non-parameterized options) are required by the program.
-..cat:Miscellaneous
-..signature:requiredArguments(parser, count)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.count:A $unsigned int$ defining the amount of non-parameterized options requried by the program.
-..status:deprecated, use $Function.setRequiredArguments$
-..see:Function.setRequiredArguments
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline void
-requiredArguments(CommandLineParser & me, unsigned count)
+inline ArgParseArgument const &
+getArgument(ArgumentParser const & me, unsigned position)
 {
-    setRequiredArguments(me, count);
+    SEQAN_CHECK(position < me.argumentList.size(),
+                "ArgumentParser: Only %d arguments available", me.argumentList.size());
+    return me.argumentList[position];
 }
+
 
 // ----------------------------------------------------------------------------
 // Function _printStringSet()
@@ -502,24 +486,34 @@ _printStringSet(TStringSet const & set, TStream & target)
     }
 }
 
+template <typename TStream>
+inline void
+_printStringSet(std::vector<std::string> const & set, TStream & target)
+{
+    for (unsigned r = 0; r < length(set); ++r)
+    {
+        target << set[r] << "\n";
+    }
+}
+
+
 // ----------------------------------------------------------------------------
 // Function _printUsage()
 // ----------------------------------------------------------------------------
 
 template <typename TStream>
 inline void
-_printUsage(CommandLineParser const & me, TStream & target)
+_printUsage(ArgumentParser const & me, TStream & target)
 {
     _streamWrite(target, "Usage: ");
     if (empty(me._usageText))
     {
-        _streamWrite(target, me._appName);
+        target << me._appName;
         _streamWrite(target, " [OPTION]... ");
-        for (unsigned r = 0; r < me._requiredArguments; ++r)
+
+        for (unsigned r = 0; r < me.argumentList.size(); ++r)
         {
-            _streamWrite(target, "<ARG");
-            _streamPutInt(target, r + 1);
-            _streamWrite(target, "> ");
+            target << getArgumentLabel(getArgument(me, r));
         }
         _streamPut(target, '\n');
     }
@@ -529,9 +523,9 @@ _printUsage(CommandLineParser const & me, TStream & target)
         {
             if (r)
                 _streamWrite(target, "       ");
-            _streamWrite(target, me._appName);
+            target << me._appName;
             _streamPut(target, ' ');
-            _streamWrite(target, me._usageText[r]);
+            target << me._usageText[r];
             _streamPut(target, '\n');
         }
     }
@@ -543,7 +537,7 @@ _printUsage(CommandLineParser const & me, TStream & target)
 
 template <typename TStream>
 inline void
-_printTitle(CommandLineParser const & me, TStream & target)
+_printTitle(ArgumentParser const & me, TStream & target)
 {
     _printStringSet(me._titleText, target);
 }
@@ -557,49 +551,21 @@ _printTitle(CommandLineParser const & me, TStream & target)
 ..summary:Prints a short help message for the parser to a stream
 ..cat:Miscellaneous
 ..signature:printShortHelp(parser[, stream])
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.stream:Target stream (e.g. $std::cerr$).
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TStream>
 inline void
-printShortHelp(CommandLineParser const & me, TStream & target)
+printShortHelp(ArgumentParser const & me, TStream & target)
 {
     _printTitle(me, target);
     _printUsage(me, target);
     _streamWrite(target, "Try '");
-    _streamWrite(target, me._appName);
+    target << me._appName;
     _streamWrite(target, " --help' for more information.\n");
-}
-
-
-/**
-.Function.shortHelp
-..summary:Prints a short help message for the parser to a stream
-..cat:Miscellaneous
-..signature:shortHelp(parser[, stream])
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.stream:Target stream (e.g. $std::cerr$).
-..status:deprecated, use $Function.printShortHelp$
-..see:Function.printShortHelp
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-template <typename TStream>
-inline void
-shortHelp(CommandLineParser const & me, TStream & target)
-{
-    printShortHelp(me, target);
-}
-
-template <typename TStream>
-inline void
-shortHelp(CommandLineParser const & me)
-{
-    printShortHelp(me, std::cerr);
 }
 
 // ----------------------------------------------------------------------------
@@ -611,18 +577,17 @@ shortHelp(CommandLineParser const & me)
 ..summary:Prints the complete help message for the parser to a stream.
 ..cat:Miscellaneous
 ..signature:printHelp(parser[, stream][, format])
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 ...default: $std::cerr$
 ..param.format:Format to print, one of "html", "man", "txt".
-...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TStream>
 inline void
-printHelp(CommandLineParser const & me, TStream & target, CharString const & format)
+printHelp(ArgumentParser const & me, TStream & target, CharString const & format)
 {
     ToolDoc toolDoc(me._toolDoc);
     clearEntries(toolDoc);  // We will append me._toolDoc later.
@@ -631,7 +596,7 @@ printHelp(CommandLineParser const & me, TStream & target, CharString const & for
     addSection(toolDoc, "Synopsis");
     for (unsigned i = 0; i < length(me._usageText); ++i)
     {
-        CharString text = "\\fB";
+        std::string text = "\\fB";
         append(text, me._appName);
         append(text, "\\fP ");
         append(text, me._usageText[i]);
@@ -648,20 +613,21 @@ printHelp(CommandLineParser const & me, TStream & target, CharString const & for
     // Add options to description section.
     for (unsigned i = 0; i < length(me.optionMap); ++i)
     {
-        CommandLineOption const & opt = me.optionMap[i];
-        if (empty(opt.shortName) && empty(opt.longName))
+        ArgParseOption const & opt = me.optionMap[i];
+        if (empty(opt.shortName) && empty(opt.longName))  // this is not an option but a text line
         {
-            if (empty(opt.helpText))  // TODO(holtgrew): Should go away in future.
+            if (empty(opt._helpText))  // TODO(holtgrew): Should go away in future.
                 continue;  // Skip empty lines.
+
             // Is command line parser section, maps to ToolDoc subsection.
-            CharString title = opt.helpText;
+            std::string title = opt._helpText;
             append(title, ":");
             addSubSection(toolDoc, title);
         }
         else
         {
             // Build list item term.
-            CharString term;
+            std::string term;
             if (!empty(opt.shortName))
             {
                 term = "\\fB-";
@@ -677,26 +643,9 @@ printHelp(CommandLineParser const & me, TStream & target, CharString const & for
                 append(term, "\\fP");
             }
             // Get arguments, autogenerate if necessary.
-            CharString arguments = opt.arguments;
-            if (empty(arguments) && opt.argumentsPerOption > 0)
-            {
-                CharString type;
-                if (opt.optionType & OptionType::String)
-                    type = "STRING";
-                else if (opt.optionType & OptionType::Int)
-                    type = "INT";
-                else if (opt.optionType & OptionType::Double)
-                    type = "DOUBLE";
-                else
-                    type = "PARAM";
-                for (int i = 0; i < opt.argumentsPerOption; ++i)
-                {
-                    if (i != 0)
-                        appendValue(arguments, ' ');
-                    append(arguments, type);
-                }
-            }
-            // Write arguments to term line.
+            std::string arguments = getArgumentLabel(opt);
+
+            // Write arguments to term line -> only exception, boolean flags
             if (!empty(arguments))
             {
                 // Tokenize argument names.
@@ -712,8 +661,9 @@ printHelp(CommandLineParser const & me, TStream & target, CharString const & for
                     append(term, "\\fP");
                 }
             }
+
             // Add list item.
-            addListItem(toolDoc, term, opt.helpText);
+            addListItem(toolDoc, term, opt._helpText);
         }
     }
 
@@ -723,40 +673,9 @@ printHelp(CommandLineParser const & me, TStream & target, CharString const & for
 
 template <typename TStream>
 inline void
-printHelp(CommandLineParser const & me, TStream & target)
+printHelp(ArgumentParser const & me, TStream & target)
 {
     printHelp(me, target, "txt");
-}
-
-// ----------------------------------------------------------------------------
-// Function help()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.help
-..summary:Prints the complete help message for the parser to a stream.
-..cat:Miscellaneous
-..signature:help(parser[, stream])
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.stream:Target stream (e.g. $std::cerr$).
-...default: $std::cerr$
-..status:deprecated, use $Function.printHelp$
-..see:Function.printHelp
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-template <typename TStream>
-inline void
-help(CommandLineParser const & me, TStream & target)
-{
-    printHelp(me, target);
-}
-
-inline void
-help(CommandLineParser const & me)
-{
-    printHelp(me, std::cerr);
 }
 
 // ----------------------------------------------------------------------------
@@ -768,45 +687,18 @@ help(CommandLineParser const & me)
 ..summary:Prints a version text to a stream.
 ..cat:Miscellaneous
 ..signature:version(parser[, stream])
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 ...default: $std::cerr$
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TStream>
 inline void
-printVersion(CommandLineParser const & me, TStream & target)
+printVersion(ArgumentParser const & me, TStream & target)
 {
     _printStringSet(me._versionText, target);
-}
-
-/**
-.Function.version
-..summary:Prints a version text to a stream.
-..cat:Miscellaneous
-..signature:version(parser[, stream])
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.stream:Target stream (e.g. $std::cerr$).
-...default: $std::cerr$
-..status:deprecated, use $Function.printVersion$
-..see:Function.printVersion
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-template <typename TStream>
-inline void
-version(CommandLineParser const & me, TStream & target)
-{
-    printVersion(me, target);
-}
-
-inline void
-version(CommandLineParser const & me)
-{
-    printVersion(me, std::cerr);
 }
 
 // ----------------------------------------------------------------------------
@@ -818,71 +710,46 @@ version(CommandLineParser const & me)
 ..summary:Returns whether an option was set on the parsed command line.
 ..cat:Miscellaneous
 ..signature:isSet(parser,optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the option (either short or long name).
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionIdentifier:A std::string that identifies the option (either short or long name).
 ..returns:$true$ if the option was set.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
-isSet(CommandLineParser const & me, CharString const & name)
+isSet(ArgumentParser const & me, std::string const & name)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
-    return !empty(getOption(me, name).value);
-}
-
-/**
-.Function.isSetShort
-..summary:Returns whether a short-name option was set on the parsed command line.
-..cat:Miscellaneous
-..signature:isSetShort(parser,optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name option.
-..returns:$true$ if the option was set.
-..status:deprecated, use $Function.isSet$
-..see:Function.isSet
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline bool
-isSetShort(CommandLineParser & me, CharString const & shortName)
-{
-    return isSet(me, shortName);
-}
-
-/**
-.Function.isSetLong
-..summary:Returns whether a long-name option was set on the parsed command line.
-..cat:Miscellaneous
-..signature:isSetLong(parser, optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name option.
-..returns:$true$ if the option was set.
-..status:deprecated, use $Function.isSet$
-..see:Function.isSet
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline bool
-isSetLong(CommandLineParser & me, CharString const & longName)
-{
-    return isSet(me, longName);
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return isSet(getOption(me, name));
 }
 
 // ----------------------------------------------------------------------------
-// Function _allMandatorySet()
+// Function _allRequiredSet()
 // ----------------------------------------------------------------------------
 
 inline bool
-_allMandatorySet(CommandLineParser const & me)
+_allRequiredSet(ArgumentParser const & me)
 {
     for (unsigned o = 0; o < length(me.optionMap); ++o)
-        if (empty(me.optionMap[o].value) && isOptionMandatory(me.optionMap[o]))
+        if (!isSet(me.optionMap[o]) && isRequired(me.optionMap[o]))
             return false;
 
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function _allArgumentsSet()
+// ----------------------------------------------------------------------------
+
+inline bool
+_allArgumentsSet(ArgumentParser const & me)
+{
+    for(unsigned a = 0; a < me.argumentList.size(); ++a)
+    {
+        if(!isSet(me.argumentList[a]))
+            return false;
+    }
     return true;
 }
 
@@ -890,8 +757,8 @@ _allMandatorySet(CommandLineParser const & me)
 // Function _parseAppName()
 // ----------------------------------------------------------------------------
 
-inline CharString
-_parseAppName(CharString const & candidate)
+inline std::string
+_parseAppName(std::string const & candidate)
 {
     //IOREV _notio_ irrelevant for io-revision
     int i = length(candidate) - 1;
@@ -899,446 +766,7 @@ _parseAppName(CharString const & candidate)
     for (; i >= 0; --i)
         if (candidate[i] == '\\' || candidate[i] == '/')
             break;
-
-    return suffix(candidate, i + 1);
-}
-
-// ----------------------------------------------------------------------------
-// Function _reportInvalidType()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-inline void
-_reportInvalidType(CommandLineParser const & me, CommandLineOption const & opt,
-                   CharString const & val, TErrorStream & estream)
-{
-    _streamWrite(estream, me._appName);
-    _streamWrite(estream, ": \"");
-    _streamWrite(estream, val);
-    _streamWrite(estream, "\" is not a valid ");
-
-    // there should be no other situation then those two
-    if (isIntOption(opt))
-        _streamWrite(estream, "integer");
-    else if (isDoubleOption(opt))
-        _streamWrite(estream, "double");
-
-    _streamWrite(estream, " value for '");
-    _writeOptName(estream, opt);
-    _streamWrite(estream, "'\n");
-}
-
-// ----------------------------------------------------------------------------
-// Function _reportMissingArguments()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-inline void
-_reportMissingArgument(CommandLineParser const & me, 
-                       CommandLineOption const & opt, TErrorStream & estream)
-{
-    _streamWrite(estream, me._appName);
-    _streamWrite(estream, ": \'");
-    _writeOptName(estream, opt);
-    _streamWrite(estream, "\' requires ");
-    _streamPutInt(estream, opt.argumentsPerOption);
-    _streamWrite(estream, " value(s)\n");
-}
-
-// ----------------------------------------------------------------------------
-// Function _reportInvalidOption()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-inline void
-_reportInvalidOption(CommandLineParser const & me, CharString const & option, 
-                     TErrorStream & estream)
-{
-    _streamWrite(estream, me._appName);
-    _streamWrite(estream, ": invalid option '");
-    _streamWrite(estream, option);
-    _streamWrite(estream, "\'\n");
-}
-
-// ----------------------------------------------------------------------------
-// Function _reportValueNotInRange()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-inline void
-_reportValueNotInRange(CommandLineOption const & opt, CharString const & val, 
-                       TErrorStream & estream)
-{
-    _writeOptName(estream, opt);
-    _streamWrite(estream, ": given argument \"");
-    _streamWrite(estream, val);
-    _streamWrite(estream, "\" is not in the required range [");
-    _streamWrite(estream, (opt.minValue != "" ? opt.minValue : "-inf"));
-    _streamWrite(estream, ":");
-    _streamWrite(estream, (opt.maxValue != "" ? opt.maxValue : "+inf"));
-    _streamWrite(estream, "]\n");
-}
-
-// ----------------------------------------------------------------------------
-// Function _reportInvalidValue()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-inline void
-_reportInvalidValue(CommandLineOption const & opt, CharString const & val, 
-                    TErrorStream & estream)
-{
-    typedef Iterator<StringSet<CharString> const, Rooted>::Type TStringSetIter;
-
-    _writeOptName(estream, opt);
-    _streamWrite(estream, ": given argument \"");
-    _streamWrite(estream, val);
-    _streamWrite(estream, "\" is not a valid value [");
-    for (TStringSetIter valid = begin(opt.validValues);; )
-    {
-        _streamWrite(estream, *valid);
-
-        goNext(valid);
-        if (valid == end(opt.validValues))
-            break;
-        else
-            _streamWrite(estream, ", ");
-    }
-    _streamWrite(estream, "]\n");
-}
-
-// ----------------------------------------------------------------------------
-// Function _reportInvalidFileType()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-inline void
-_reportInvalidFileType(CommandLineOption const & opt, CharString const & val, 
-                       TErrorStream & estream)
-{
-    _writeOptName(estream, opt);
-    _streamWrite(estream, ": given argument \"");
-    _streamWrite(estream, val);
-    _streamWrite(estream, "\" is not a valid file type [");
-    for (Iterator<StringSet<CharString> const, Rooted>::Type valid = begin(opt.validValues);; )
-    {
-        _streamWrite(estream, *valid);
-
-        goNext(valid);
-        if (valid == end(opt.validValues))
-            break;
-        else
-            _streamWrite(estream, ", ");
-    }
-    _streamWrite(estream, "]\n");
-}
-
-// ----------------------------------------------------------------------------
-// Function _checkMinMaxValue()
-// ----------------------------------------------------------------------------
-
-template <typename TValue, typename TErrorStream>
-bool _checkMinMaxValue(CommandLineOption const & opt, CharString const & val, 
-                       TErrorStream & estream)
-{
-    TValue d_value = 0;
-    if (!_convertOptionValue(opt, d_value, val)) 
-        SEQAN_FAIL("Conversion should work");
-
-    if (opt.minValue != "")
-    {
-        // check min and max
-        TValue minVal = 0;
-        _convertOptionValue(opt, minVal, opt.minValue);
-
-        if (d_value < minVal)
-        {
-            _reportValueNotInRange(opt, val, estream);
-            return false;
-        }
-    }
-
-    if (opt.maxValue != "")
-    {
-        TValue maxVal = 0;
-        _convertOptionValue(opt, maxVal, opt.maxValue);
-
-        if (d_value > maxVal)
-        {
-            _reportValueNotInRange(opt, val, estream);
-            return false;
-        }
-    }
-
-    return true;
-    
-}
-
-// ----------------------------------------------------------------------------
-// Function _checkValidValue()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-bool _checkValidValues(CommandLineOption const & opt, CharString const & val, 
-                       TErrorStream & estream)
-{
-    typedef Iterator<StringSet<CharString> const, Rooted>::Type TStringSetIter;
-
-    if (length(opt.validValues) == 0) return true; // no restrictions
-
-    if (isInputFile(opt) || isOutputFile(opt))
-    {
-        // check if our val is in the valid strings
-        for (TStringSetIter valid = begin(opt.validValues); valid != end(opt.validValues); goNext(valid))
-        {
-            if (length(*valid) > length(val))
-                continue;
-            else if (suffix(val, length(val) - length(*valid)) == *valid)
-                return true;
-        }
-        // couldn't find our target
-        _reportInvalidFileType(opt, val, estream);
-        return false;
-    }
-    else
-    {
-        // check if our val is in the valid strings
-        for (TStringSetIter valid = begin(opt.validValues); valid != end(opt.validValues); goNext(valid))
-        {
-            if (*valid == val)
-                return true;
-        }
-        // couldn't find our target
-        _reportInvalidValue(opt, val, estream);
-        return false;
-    }
-}
-
-// ----------------------------------------------------------------------------
-// Function _checkRestrictions()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-bool _checkRestrictions(CommandLineOption const & opt, CharString const & val,
-                        TErrorStream & estream)
-{
-    // we already know that the value can be converted to double/int, so we only need to check if it is
-    // also in the required range
-    if (isDoubleOption(opt))
-    {
-        return _checkMinMaxValue<double, TErrorStream>(opt, val, estream) && _checkValidValues(opt, val, estream);
-    }
-    if (isIntOption(opt))
-    {
-        return _checkMinMaxValue<int, TErrorStream>(opt, val, estream) && _checkValidValues(opt, val, estream);
-    }
-    if (isStringOption(opt))
-    {
-        return _checkValidValues(opt, val, estream);
-    }
-
-    // no restrictions to check
-    return true;
-}
-
-// ----------------------------------------------------------------------------
-// Function _assignOptionValue()
-// ----------------------------------------------------------------------------
-
-template <typename TErrorStream>
-bool _assignOptionValue(CommandLineParser & me, CommandLineOption & opt, 
-                        CharString const & val, unsigned argNo, TErrorStream & estream)
-{
-    if (isDoubleOption(opt) && !_isDouble(val))
-    {
-        _reportInvalidType(me, opt, val, estream);
-        return false;
-    }
-    else if (isIntOption(opt) && !_isInt(val))
-    {
-        _reportInvalidType(me, opt, val, estream);
-        return false;
-    }
-
-    if (!_checkRestrictions(opt, val, estream)) 
-        return false;
-    
-    if (isOptionList(opt))
-    {
-        appendValue(opt.value, val, Generous());
-    }
-    else
-    {
-        if (argNo == 0) clear(opt.value);
-        appendValue(opt.value, val, Exact());
-    }
-    return true;
-}
-
-template <typename TErrorStream>
-bool
-_assignOptionValue(CommandLineParser & me, CommandLineOption & opt, 
-                   CharString const & val, TErrorStream & estream)
-{
-    return _assignOptionValue(me, opt, val, 0, estream);
-}
-
-template <typename TErrorStream>
-bool
-_assignOptionValue(CommandLineParser & me, unsigned option_index, 
-                   CharString const & val, unsigned argNo, TErrorStream & estream)
-{
-    // get the option object
-    CommandLineOption & opt = me.optionMap[option_index];
-    return _assignOptionValue(me, opt, val, argNo, estream);
-}
-
-
-template <typename TErrorStream>
-inline bool
-_assignOptionValue(CommandLineParser & me, unsigned option_index, 
-                   CharString const & val, TErrorStream & estream)
-{
-    return _assignOptionValue(me, option_index, val, 0, estream);
-}
-
-// ----------------------------------------------------------------------------
-// Function _getOptionValues()
-// ----------------------------------------------------------------------------
-
-inline String<CharString> const &
-_getOptionValues(CommandLineParser const &, CommandLineOption const & opt)
-{
-    if (empty(opt.value))
-        return opt.defaultValue;
-    else
-        return opt.value;
-}
-
-inline String<CharString> const &
-_getOptionValues(CommandLineParser const & me, unsigned option_index)
-{
-    return _getOptionValues(me, me.optionMap[option_index]);
-}
-
-// ----------------------------------------------------------------------------
-// Function _getOptionValue()
-// ----------------------------------------------------------------------------
-
-inline CharString const &
-_getOptionValue(CommandLineParser const & me, 
-                CommandLineOption const & opt, unsigned argNo)
-{
-    if (argNo < length(opt.value))
-        return opt.value[argNo];
-    if (argNo < length(opt.defaultValue))
-        return opt.defaultValue[argNo];
-    
-    return me._null; 
-}
-
-inline CharString const &
-_getOptionValue(CommandLineParser const & me, CommandLineOption const & opt)
-{
-    return _getOptionValue(me, opt, 0);
-}
-
-inline CharString const &
-_getOptionValue(CommandLineParser const & me, unsigned option_index, unsigned argNo)
-{
-    CommandLineOption const & opt = me.optionMap[option_index];
-    return _getOptionValue(me, opt, argNo);
-}
-
-inline CharString const &
-_getOptionValue(CommandLineParser const & me, unsigned option_index)
-{
-    return _getOptionValue(me, option_index, 0);
-}
-
-// ----------------------------------------------------------------------------
-// Function _convertOptionValue()
-// ----------------------------------------------------------------------------
-
-inline bool
-_convertOptionValue(CommandLineOption const & opt, bool & dst, CharString const & src)
-{
-    if (!isBooleanOption(opt))
-        return false;
-
-    dst = !empty(src);
-    return true;
-}
-
-inline bool
-_convertOptionValue(CommandLineOption const & opt, int & dst, CharString const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    std::istringstream stream(toCString(src));
-    return !(stream >> dst).fail();
-}
-
-inline bool
-_convertOptionValue(CommandLineOption const & opt, unsigned int & dst, CharString const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    std::istringstream stream(toCString(src));
-    return !(stream >> dst).fail();
-}
-
-inline bool
-_convertOptionValue(CommandLineOption const & opt, __int64 & dst, CharString const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    std::istringstream stream(toCString(src));
-    return !(stream >> dst).fail();
-}
-
-inline bool
-_convertOptionValue(CommandLineOption const & opt, __uint64 & dst, CharString const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    std::istringstream stream(toCString(src));
-    return !(stream >> dst).fail();
-}
-
-inline bool
-_convertOptionValue(CommandLineOption const & opt, float & dst, CharString const & src)
-{
-    if (!isDoubleOption(opt))
-        return false;
-
-    std::istringstream stream(toCString(src));
-    return !(stream >> dst).fail();
-}
-
-inline bool
-_convertOptionValue(CommandLineOption const & opt, double & dst, CharString const & src)
-{
-    if (!isDoubleOption(opt))
-        return false;
-
-    std::istringstream stream(toCString(src));
-    return !(stream >> dst).fail();
-}
-
-template <typename TObject>
-inline bool
-_convertOptionValue(CommandLineOption const & opt, TObject & dst, CharString const & src)
-{
-    if (!isStringOption(opt))
-        return false;
-
-    assign(dst, src);
-    return true;
+    return candidate.substr(i+1);
 }
 
 // ----------------------------------------------------------------------------
@@ -1349,32 +777,65 @@ _convertOptionValue(CommandLineOption const & opt, TObject & dst, CharString con
 .Function.getOptionValue:
 ..summary:Retrieves the value of an option given either the short or long name.
 ..cat:Miscellaneous
-..signature:getOptionValue(parser, optionIdentifier[, argNo], value)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that is either the short or long name of the option.
-..param.argNo:If the option is list, the $argNo$-th list element is returned.
+..signature:getOptionValue(value, parser, optionIdentifier[, argNo])
 ..param.value:The variable where the resulting value should be stored.
 ...remarks:The type of $value$ must be compatible the option type.
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionIdentifier:A @Shortcut.std::string@ that is either the short or long name of the option.
+..param.argNo:If the option is list, the $argNo$-th list element is returned.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TValue>
 inline bool
-getOptionValue(CommandLineParser const & me, CharString const & name, 
-               unsigned argNo, TValue & val)
+getOptionValue(TValue & val, ArgumentParser const & me, std::string const & name,
+               unsigned argNo)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
-    return _convertOptionValue(getOption(me, name), val, _getOptionValue(me, getOption(me, name), argNo));
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return _convertOptionValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
 }
 
 template <typename TValue>
 inline bool
-getOptionValue(CommandLineParser const & me, CharString const & name,
-               TValue & val)
+getOptionValue(TValue & val, ArgumentParser const & me, std::string const & name)
 {
-    return getOptionValue(me, name, 0, val);
+    return getOptionValue(val, me, name, 0);
+}
+
+// ----------------------------------------------------------------------------
+// Function getArgumentValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getArgumentValue:
+..summary:Retrieves the value of an argument given by its position.
+..cat:Miscellaneous
+..signature:getArgumentValue(value, parser, argumentPosition[, argNo])
+..param.value:The variable where the resulting value should be stored.
+...remarks:The type of $value$ must be compatible the option type.
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.argumentPosition:The index of the argument in the argument list.
+..param.argNo:If the argument is a list, the $argNo$-th list element is returned.
+..returns: $true$ if the requested argument is set and has the requested type, $false$ otherwise.
+..include:seqan/arg_parse.h
+*/
+
+template <typename TValue>
+inline bool
+getArgumentValue(TValue & value, ArgumentParser & me, unsigned argumentPosition, unsigned argNo)
+{
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    return _convertArgumentValue(value, getArgument(me, argumentPosition), getArgumentValue(getArgument(me, argumentPosition), argNo));
+}
+
+template <typename TValue>
+inline bool
+getArgumentValue(TValue & value, ArgumentParser & me, unsigned argumentPosition)
+{
+    return getArgumentValue(value, me, argumentPosition, 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -1386,166 +847,18 @@ getOptionValue(CommandLineParser const & me, CharString const & name,
 ..summary:Returns all values of an option given on the command line.
 ..cat:Miscellaneous
 ..signature:getOptionValues(parser, optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that is either the short or long name of the option.
-..returns: A $String<CharString>$ of option values.
-..include:seqan/misc/misc_cmdparser.h
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionIdentifier:A @Shortcut.std::string@ that is either the short or long name of the option.
+..returns: A $String<std::string>$ of option values.
+..include:seqan/arg_parse.h
 */
 
-inline String<CharString> const &
-getOptionValues(CommandLineParser & me, CharString const & name)
+inline std::vector<std::string> const &
+getOptionValues(ArgumentParser & me, std::string const & name)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
-    return _getOptionValues(me, getOption(me, name));
-}
-
-// ----------------------------------------------------------------------------
-// Function getOptionValueShort()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getOptionValueShort
-..summary:Retrieves the value of a short-name option given on the command line.
-..cat:Miscellaneous
-..signature:getOptionValueShort(parser, optionIdentifier[, argNo], value)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name of the option.
-..param.argNo:If the option is list, the $argNo$-th list element is returned.
-..param.value:The variable where the resulting value should be stored.
-...remarks:The type of $value$ must be compatible the option type.
-..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
-..status:deprecated, use $Function.getOptionValue$
-..see:Function.getOptionValue
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-template <typename TValue>
-inline bool
-getOptionValueShort(CommandLineParser const & me, CharString
-                    const & shortName, unsigned argNo, TValue & val)
-{
-    return getOptionValue(me, shortName, argNo, val);
-}
-
-template <typename TValue>
-inline bool
-getOptionValueShort(CommandLineParser const & me, 
-                    CharString const & shortName, TValue & val)
-{
-    return getOptionValueShort(me, shortName, 0, val);
-}
-
-// ----------------------------------------------------------------------------
-// Function getOptionValuesShort()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getOptionValuesShort
-..summary:Returns all values of a short-name option given on the command line.
-..cat:Miscellaneous
-..signature:getOptionValuesShort(parser, optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name of the option.
-..returns: A $String<CharString>$ of option values.
-..status:deprecated, use $Function.getOptionValues$
-..see:Function.getOptionValues
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline String<CharString> const &
-getOptionValuesShort(CommandLineParser & me, CharString const & shortName)
-{
-    return getOptionValues(me, shortName);
-}
-
-// ----------------------------------------------------------------------------
-// Function getOptionValueLong()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getOptionValueLong
-..summary:Retrieves the value of a long-name option given on the command line.
-..cat:Miscellaneous
-..signature:getOptionValueLong(parser, optionIdentifier[, argNo], value)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name of the option.
-..param.argNo:If the option is list, the $argNo$-th list element is returned.
-..param.value:The variable where the resulting value should be stored.
-...remarks:The type of $value$ must be compatible the option type.
-..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
-..status:deprecated, use $Function.getOptionValue$
-..see:Function.getOptionValue
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-template <typename TValue>
-inline bool
-getOptionValueLong(CommandLineParser const & me, 
-                   CharString const & longName, unsigned argNo, TValue & val)
-{
-    return getOptionValue(me, longName, argNo, val);
-}
-
-template <typename TValue>
-inline bool
-getOptionValueLong(CommandLineParser const & me, 
-                   CharString const & longName, TValue & val)
-{
-    return getOptionValueLong(me, longName, 0, val);
-}
-
-// ----------------------------------------------------------------------------
-// Function getOptionValuesLong()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getOptionValuesLong
-..summary:Returns all values of a long-name option given on the command line.
-..cat:Miscellaneous
-..signature:getOptionValuesLong(parser, optionIdentifier)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name of the option.
-..returns: A $String<CharString>$ of option values.
-..include:seqan/misc/misc_cmdparser.h
-..status:deprecated, use $Function.getOptionValues$
-..see:Function.getOptionValues
-*/
-
-inline String<CharString> const &
-getOptionValuesLong(CommandLineParser & me, CharString const & longName)
-{
-    return getOptionValues(me, longName);
-}
-
-// ----------------------------------------------------------------------------
-// Function getArgumentValue()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getArgumentValue
-..summary:Returns an argument set on the command line.
-..cat:Miscellaneous
-..signature:getArgumentValue(parser, position)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..param.position:A zero based $int$ indicating which argument you want to get.
-..returns:The command line argument or an empty string if it doesn't exist.
-...type:Shortcut.CharString
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline CharString const &
-getArgumentValue(CommandLineParser const & me, unsigned position)
-{
-    if (position < length(me._arguments))
-        return me._arguments[position];
-    else
-        return me._null;
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return getArgumentValues(getOption(me, name));
 }
 
 // ----------------------------------------------------------------------------
@@ -1554,41 +867,23 @@ getArgumentValue(CommandLineParser const & me, unsigned position)
 
 /**
 .Function.getArgumentValues
-..summary:Returns all _arguments set on the command line.
+..summary:Returns all values of an option given on the command line.
 ..cat:Miscellaneous
-..signature:getArgumentValues(parser)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..returns:All command line _arguments as a $String<CharString>$.
-..see:Function.getArgumentValue
-..include:seqan/misc/misc_cmdparser.h
+..signature:getArgumentValues(parser, argumentPosition)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.argumentPosition:The index of the argument in the argument list.
+..returns: A $String<std::string>$ of argument values.
+..include:seqan/arg_parse.h
 */
 
-inline String<CharString> const &
-getArgumentValues(CommandLineParser const & me)
+inline std::vector<std::string> const &
+getOptionValues(ArgumentParser & me, unsigned argumentPosition)
 {
-    return me._arguments;
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    return getArgumentValues(getArgument(me, argumentPosition));
 }
 
-// ----------------------------------------------------------------------------
-// Function argumentCount()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.argumentCount
-..summary:Returns the count of passed _arguments.
-..cat:Miscellaneous
-..signature:argumentCount(parser)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..include:seqan/misc/misc_cmdparser.h
-*/
-
-inline Size<String<CharString> >::Type
-argumentCount(CommandLineParser const & me)
-{
-    return length(me._arguments);
-}
 
 // ----------------------------------------------------------------------------
 // Function setMinValue()
@@ -1596,20 +891,20 @@ argumentCount(CommandLineParser const & me)
 
 /**
 .Function.setMinValue
-..summary:Sets the minimum value of a @Class.CommandLineOption@ object identified by .
+..summary:Sets the minimum value of a @Class.ArgParseOption@ object identified by .
 ..cat:Miscellaneous
 ..signature:setMinValue(parser,optionName,minValue)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-...type:Shortcut.CharString
-..param.minValue:A @Shortcut.CharString@ containing a string representation of the minimum value of the @Class.CommandLineOption@.
-..include:seqan/misc/misc_cmdparser.h
+...type:Shortcut.std::string
+..param.minValue:A @Shortcut.std::string@ containing a string representation of the minimum value of the @Class.ArgParseOption@.
+..include:seqan/arg_parse.h
 */
 inline void
-setMinValue(CommandLineParser & me, CharString const & name, CharString const & _minValue)
+setMinValue(ArgumentParser & me, std::string const & name, std::string const & _minValue)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setMinValue(getOption(me, name), _minValue);
 }
 
@@ -1619,22 +914,22 @@ setMinValue(CommandLineParser & me, CharString const & name, CharString const & 
 
 /**
 .Function.setMaxValue
-..summary:Sets the maximum value of a @Class.CommandLineOption@ object.
+..summary:Sets the maximum value of a @Class.ArgParseOption@ object.
 ..cat:Miscellaneous
 ..signature:setMaxValue(parser,optionName,maxValue)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-...type:Shortcut.CharString
-..param.maxValue:A @Shortcut.CharString@ containing a string representation of the maximum value of the @Class.CommandLineOption@.
-..include:seqan/misc/misc_cmdparser.h
+...type:Shortcut.std::string
+..param.maxValue:A @Shortcut.std::string@ containing a string representation of the maximum value of the @Class.ArgParseOption@.
+..include:seqan/arg_parse.h
 */
 
 inline void
-setMaxValue(CommandLineParser & me, CharString const & name, 
-            CharString const & _maxValue)
+setMaxValue(ArgumentParser & me, std::string const & name,
+            std::string const & _maxValue)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setMaxValue(getOption(me, name), _maxValue);
 }
 
@@ -1644,50 +939,31 @@ setMaxValue(CommandLineParser & me, CharString const & name,
 
 /**
 .Function.setValidValues
-..summary:Sets the set of allowed values of a @Class.CommandLineOption@ object.
+..summary:Sets the set of allowed values of a @Class.ArgParseOption@ object.
 ..cat:Miscellaneous
 ..signature:setValidValues(parser,optionName,values)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-...type:Shortcut.CharString
-..param.values:A $String<CharString>$ containing all valid entries for the option.
-..include:seqan/misc/misc_cmdparser.h
+...type:Shortcut.std::string
+..param.values:A $String<std::string>$ containing all valid entries for the option.
+..include:seqan/arg_parse.h
 */
 
 inline void
-setValidValues(CommandLineParser & me, CharString const & name, 
-               StringSet<CharString> const & _values)
+setValidValues(ArgumentParser & me, std::string const & name,
+               std::vector<std::string> const & _values)
 {
-    SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setValidValues(getOption(me, name), _values);
 }
 
 inline void
-setValidValues(CommandLineParser & me, CharString const & name, 
-               CharString const & _values)
+setValidValues(ArgumentParser & me, std::string const & name,
+               std::string const & _values)
 {
-    // convert array to String<CharString>
-    StringSet<CharString> values;
-    CharString current_argument;
-
-    for (Iterator<CharString const, Rooted>::Type ch  = begin(_values); ch != end(_values); goNext(ch))
-    {
-        if (*ch == ' ')
-        {
-            appendValue(values, current_argument);
-            current_argument = "";
-        }
-        else
-        {
-            append(current_argument, *ch);
-        }
-    }
-    if (current_argument != "")
-        appendValue(values, current_argument);
-
-    // add as restriction
-    setValidValues(me, name, values);
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    setValidValues(getOption(me, name), _values);
 }
 
 // ----------------------------------------------------------------------------
@@ -1696,18 +972,17 @@ setValidValues(CommandLineParser & me, CharString const & name,
 
 /**
 .Function.addDescription
-..summary:Appends a description paragraph to the @Class.CommandLineParser@ documentation.
+..summary:Appends a description paragraph to the @Class.ArgumentParser@ documentation.
 ..cat:Miscellaneous
 ..signature:addDescription(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:The description paragraph.
-...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void addDescription(CommandLineParser & me, CharString const & description)
+inline void addDescription(ArgumentParser & me, std::string const & description)
 {
     appendValue(me._description, description);
 }
@@ -1718,18 +993,17 @@ inline void addDescription(CommandLineParser & me, CharString const & descriptio
 
 /**
 .Function.setAppName
-..summary:Sets application name of @Class.CommandLineParser@.
+..summary:Sets application name of @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:setAppName(parser, appName)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.appName:The name of the application.
-...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void setAppName(CommandLineParser & me, CharString const & name)
+inline void setAppName(ArgumentParser & me, std::string const & name)
 {
     setName(me._toolDoc, name);
 }
@@ -1740,18 +1014,17 @@ inline void setAppName(CommandLineParser & me, CharString const & name)
 
 /**
 .Function.setShortDescription
-..summary:Sets short description test of @Class.CommandLineParser@.
+..summary:Sets short description test of @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:setShortDescription(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:The short description text.
-...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void setShortDescription(CommandLineParser & me, CharString const & description)
+inline void setShortDescription(ArgumentParser & me, std::string const & description)
 {
     setShortDescription(me._toolDoc, description);
 }
@@ -1762,18 +1035,17 @@ inline void setShortDescription(CommandLineParser & me, CharString const & descr
 
 /**
 .Function.setVersion
-..summary:Sets version string of @Class.CommandLineParser@.
+..summary:Sets version string of @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:setVersion(parser, versionString)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.versionString:The version string to set.
-...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void setVersion(CommandLineParser & me, CharString const & versionString)
+inline void setVersion(ArgumentParser & me, std::string const & versionString)
 {
     setVersion(me._toolDoc, versionString);
 }
@@ -1784,18 +1056,17 @@ inline void setVersion(CommandLineParser & me, CharString const & versionString)
 
 /**
 .Function.setDate
-..summary:Sets date string of @Class.CommandLineParser@.
+..summary:Sets date string of @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:setDate(parser, date)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.date:The date string.
-...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void setDate(CommandLineParser & me, CharString const & date)
+inline void setDate(ArgumentParser & me, std::string const & date)
 {
     setDate(me._toolDoc, date);
 }
@@ -1806,19 +1077,18 @@ inline void setDate(CommandLineParser & me, CharString const & date)
 
 /**
 .Function.addTextSection
-..summary:Adds a text section to the @Class.CommandLineParser@.
+..summary:Adds a text section to the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addTextSection(parser, title)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.title:The section title.
-...type:Shortcut.CharString
 ..returns:$void$
 ..remarks:This will result in an additional section heading to be printed.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void addTextSection(CommandLineParser & me, CharString const & title)
+inline void addTextSection(ArgumentParser & me, std::string const & title)
 {
     addSection(me._toolDoc, title);
 }
@@ -1829,19 +1099,18 @@ inline void addTextSection(CommandLineParser & me, CharString const & title)
 
 /**
 .Function.addTextSubSection
-..summary:Adds a text subsection to the @Class.CommandLineParser@.
+..summary:Adds a text subsection to the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addTextSubSection(parser, title)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.title:The subsection title.
-...type:Shortcut.CharString
 ..returns:$void$
 ..remarks:This will result in an additional subsection heading to be printed.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void addTextSubSection(CommandLineParser & me, CharString const & title)
+inline void addTextSubSection(ArgumentParser & me, std::string const & title)
 {
     addSubSection(me._toolDoc, title);
 }
@@ -1852,18 +1121,17 @@ inline void addTextSubSection(CommandLineParser & me, CharString const & title)
 
 /**
 .Function.addText
-..summary:Appends a text paragraph to the @Class.CommandLineParser@.
+..summary:Appends a text paragraph to the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addText(parser, text)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.text:The content of the text.
-...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
-inline void addText(CommandLineParser & me, CharString const & text)
+inline void addText(ArgumentParser & me, std::string const & text)
 {
     addText(me._toolDoc, text);
 }

@@ -61,177 +61,161 @@ namespace seqan {
  */
 
 template <typename TErrorStream>
-bool parse(CommandLineParser & me, int argc, const char * argv[], TErrorStream & estream)
+inline ArgumentParser::ParseResult
+parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream)
 {
-    typedef Size<String<CommandLineOption> >::Type TOptionPosition;
+    typedef ArgumentParser::TOptionMapSize   TOptionPosition;
+    typedef ArgumentParser::TArgumentMapSize TArgumentPosition;
+
+    TArgumentPosition currentArgument = 0;
+
     // if the appName wasn't set .. parse from command line
     if (empty(me._appName))
         me._appName = _parseAppName(argv[0]);
 
-    for (int argument_index = 1; argument_index < argc; ++argument_index)
+    try
     {
-        if (argv[argument_index][0] == '-')  // this is possibly an option value
+        for (int arg = 1; arg < argc; ++arg)
         {
-            CharString inParam = argv[argument_index];
-            unsigned len = length(inParam);
+            if (argv[arg][0] == '-')  // this is possibly an option value
+            {
+                const std::string inParam = argv[arg];
+                unsigned len = length(inParam);
 
-            if (len == 1)
-            {
-                _streamWrite(estream, me._appName);
-                _streamWrite(estream, ": invalid option '-'\n");
-                return false;
-            }
-            else if (inParam[1] != '-') // maybe a combination of multiple bool opts
-            {
-                for (unsigned s = 1; s < len; ++s)
+                if (len == 1)
                 {
-                    unsigned e = len;
-                    for (; s < e; --e)
+                    throw InvalidOptionException("-");
+                }
+                else if (inParam[1] != '-') // maybe a combination of multiple bool opts
+                {
+                    for (unsigned s = 1; s < len; ++s)
                     {
-                        if (hasOption(me, infix(inParam, s, e)))
+                        unsigned e = len;
+                        for (; s < e; --e)
                         {
-                            CommandLineOption & opt = getOption(me, infix(inParam, s, e));
-                            s = --e;
-                            if (isBooleanOption(opt))
-                                _assignOptionValue(me, opt, "true", estream);
-                            else
+                            if (hasOption(me, inParam.substr(s, e)))
                             {
-                                int firstArgIndex = 0;
-
-                                if (e < len - 1)
+                                ArgParseOption & opt = getOption(me, inParam.substr(s, e));
+                                s = --e;
+                                if (isBooleanOption(opt))
+                                    assignArgumentValue(opt, "true");
+                                else
                                 {
-                                    // Try getting the first option argument from the remaining characters
-                                    // of this program argument. Use-case: immediately adjacent option
-                                    // values without separating space, as in `-x1` instead of `-x 1`.
-                                    if (!_assignOptionValue(me, opt, suffix(inParam, e + 1), 0, estream))
-                                        return false;
+                                    if (e < len - 1)
+                                    {
+                                        std::stringstream what;
+                                        what << "invalid combination of arguments -- " << inParam << std::endl;
+                                        throw ParseException(what.str());
+                                    }
 
-                                    firstArgIndex = 1;
-                                    s = len - 1;
-                                }
-
-                                if (argument_index + opt.argumentsPerOption - firstArgIndex < argc)
-                                {
-                                    for (int t = firstArgIndex; t < opt.argumentsPerOption; ++t)
-                                        if (!_assignOptionValue(me, opt, argv[++argument_index], t, estream))
-                                            return false;
-                                }
-                                else  // no value available
-                                {
-                                    _reportMissingArgument(me, opt, estream);
-                                    return false;
+                                    // assign the following values to this option
+                                    if (arg + static_cast<int>(numberOfArguments(opt)) < argc)
+                                    {
+                                        for (int t = 0; t < static_cast<int>(numberOfArguments(opt)); ++t)
+                                            assignArgumentValue(opt, argv[++arg]);
+                                    }
+                                    else  // no value available
+                                    {
+                                        throw MissingArgumentException(opt.shortName);
+                                    }
                                 }
                             }
                         }
-                    }
-                    if (s == e)
-                    {
-                        CharString invalidOpt("-");
-                        append(invalidOpt, suffix(inParam, s));
-
-                        _reportInvalidOption(me, invalidOpt, estream);
-                        return false;
+                        if (s == e)
+                        {
+                            throw InvalidOptionException(inParam.substr(s));
+                        }
                     }
                 }
+                else if (inParam[1] == '-')  // this is a long option
+                {
+                    unsigned t = 2;
+                    std::string longOpt, val;
+                    for (; t < len && inParam[t] != '='; ++t)
+                        longOpt += inParam[t];
+
+                    if (t < len) // this one is a --name=value option
+                        val = inParam.substr(t+1);
+
+                    // We might already have a value
+                    if (hasOption(me, longOpt))
+                    {
+                        ArgParseOption & opt = getOption(me, longOpt);
+
+                        if (!empty(val))
+                        {
+                            // we can only assign one value since it was set by --longOpt=val
+                            if (numberOfArguments(opt) == 1)
+                                assignArgumentValue(opt, val);
+                            else
+                                throw MissingArgumentException(longOpt);
+                        }
+                        else if (isBooleanOption(opt))
+                            assignArgumentValue(opt, "true");
+                        else if (arg + static_cast<int>(numberOfArguments(opt)) < argc)
+                        {
+                            for (int t = 0; t < static_cast<int>(numberOfArguments(opt)); ++t)
+                                assignArgumentValue(opt,argv[++arg]);
+                        }
+                        else  // no value available
+                            throw MissingArgumentException(longOpt);
+                    }
+                    else
+                        throw InvalidOptionException(longOpt);
+                }
             }
-            else if (inParam[1] == '-')  // this is a long option
+            else  // this seems to be a normal argument
             {
-                unsigned t = 2;
-                CharString longOpt, val;
-                for (; t < len && inParam[t] != '='; ++t)
-                    appendValue(longOpt, inParam[t], Generous());
-                if (t < len) // this one is a --name=value option
-                    val = suffix(inParam, t + 1);
+                ArgParseArgument & argument = getArgument(me, currentArgument);
+                assignArgumentValue(argument, argv[arg]);
 
-                // We might already have a value
-                if (hasOption(me, longOpt))
-                {
-                    CommandLineOption & opt = getOption(me, longOpt);
-
-                    if (!empty(val))
-                    {
-                        if (opt.argumentsPerOption == 1)
-                        {
-                            if (!_assignOptionValue(me, opt, val, estream))
-                                return false;
-                        }
-                        else
-                        {
-                            _reportMissingArgument(me, opt, estream);
-                            return false;
-                        }
-                    }
-                    else if (isBooleanOption(opt))
-                    {
-                        _assignOptionValue(me, opt, "true", estream);
-                    }
-                    else if (argument_index + opt.argumentsPerOption < argc)
-                    {
-                        for (int t = 0; t < opt.argumentsPerOption; ++t)
-                            if (!_assignOptionValue(me, opt, argv[++argument_index], t, estream))
-                                return false;
-                    }
-                    else  // no value available
-                    {
-                        _reportMissingArgument(me, opt, estream);
-                        return false;
-                    }
-                }
-                else
-                {
-                    CharString invalidOpt("--");
-                    append(invalidOpt, longOpt);
-                    _reportInvalidOption(me, invalidOpt, estream);
-                    return false;
-                }
+                if(!isListArgument(argument)) ++currentArgument;
             }
         }
-        else  // this seems to be a normal argument
+        if (hasOption(me, "version") && isSet(me, "version"))
         {
-            appendValue(me._arguments, argv[argument_index]);
+            printVersion(me, estream);
+            return ArgumentParser::VERSION;
         }
+        if (hasOption(me, "write-ctd") && isSet(me, "write-ctd"))
+        {
+            writeCTD(me);
+            return ArgumentParser::WRITE_CTD;
+        }
+        if (isSet(me, "help"))
+        {
+            printHelp(me, estream);
+            return ArgumentParser::HELP;
+        }
+        if (isSet(me, "export-help"))
+        {
+            std::string format;
+            getOptionValue(format, me, "export-help");
+            printHelp(me, estream, format);
+            return ArgumentParser::EXPORT_HELP;
+        }
+        if (argc == 1 && me.argumentList.size() > 0)
+        {
+            // print short help and exit
+            printShortHelp(me, estream);
+            return ArgumentParser::HELP;
+        }
+
     }
-    if (hasOption(me, "version") && isSet(me, "version"))
+    catch(ParseException& ex)
     {
-        printVersion(me, estream);
-        return false;
-    }
-    if (hasOption(me, "write-ctd") && isSet(me, "write-ctd"))
-    {
-        writeCTD(me);
-        return false;
-    }
-    if (isSet(me, "help"))
-    {
-        printHelp(me, estream);
-        return false;
-    }
-    if (isSet(me, "export-help"))
-    {
-        CharString format;
-        getOptionValueLong(me, "export-help", format);
-        printHelp(me, estream, format);
-        return false;
-    }
-    if (isSet(me, "export-help"))
-    {
-        CharString format;
-        getOptionValueLong(me, "export-help", format);
-        printHelp(me, estream, format);
-        return false;
-    }
-    if (argc == 1 && me._requiredArguments > 0)
-    {
-        // print short help and exit
-        printShortHelp(me, estream); 
-        return false;
+        estream << me._appName << ": " << ex.what() << std::endl;
+        return ArgumentParser::ERROR;
     }
 
-    return _allMandatorySet(me) && (length(me._arguments) >= me._requiredArguments);
+    if(_allRequiredSet(me) && _allArgumentsSet(me))
+        return ArgumentParser::OK;
+    else
+        return ArgumentParser::ERROR;
 }
 
-inline bool
-parse(CommandLineParser & me, int argc, const char * argv[])
+inline ArgumentParser::ParseResult
+parse(ArgumentParser & me, int argc, const char * argv[])
 {
     return parse(me, argc, argv, std::cerr);
 }

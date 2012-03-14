@@ -33,44 +33,48 @@
 #ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
 #define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
 
-#include <seqan/sequence.h>
-
+#include <seqan/arg_parse/arg_parse_exceptions.h>
 #include <seqan/arg_parse/arg_parse_type_support.h>
+
+#include <string>
+#include <vector>
+
+#include <sstream>
 
 namespace seqan
 {
 
 // ----------------------------------------------------------------------------
-// Class CommandLineArgument
+// Class ArgParseArgument
 // ----------------------------------------------------------------------------
 
 /**
-.Class.CommandLineArgument:
+.Class.ArgParseArgument:
 ..cat:Miscellaneous
 ..summary:Stores information for a specific command line argument. It can be either an argument of
-a CommandLineOption or directly an Argument on the command line.
-..signature:CommandLineArgument
+a ArgParseArgument or directly an Argument on the command line.
+..signature:ArgParseArgument
 ..remarks: .
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 /**
-.Memfunc.CommandLineArgument#CommandLineArgument:
-..class:Class.CommandLineArgument
+.Memfunc.ArgParseArgument#ArgParseArgument:
+..class:Class.ArgParseArgument
 ..summary:Constructor
-..signature:CommandLineOption (argumentType [, isListArgument, argumentLabel, numberOfArguments, _default])
-..param.argumentType:A CommandLineArgument.ArgumentType value defining the type (e.g., String) of the
-CommandLineArgument.
+..signature:ArgParseArgument (argumentType [, isListArgument, argumentLabel, numberOfArguments, _default])
+..param.argumentType:A ArgParseArgument.ArgumentType value defining the type (e.g., String) of the
+ArgParseArgument.
 ...tableheader:Flag|Description
-...table:$CommandLineArgument::STRING$|Argument is a string
-...table:$CommandLineArgument::INTEGER$|Argument is an integer
-...table:$CommandLineArgument::DOUBLE$|A float
-...table:$CommandLineArgument::INPUTFILE$|An input file
-...table:$CommandLineArgument::OUTPUTFILE$|An output file
+...table:$ArgParseArgument::STRING$|Argument is a string
+...table:$ArgParseArgument::INTEGER$|Argument is an integer
+...table:$ArgParseArgument::DOUBLE$|A float
+...table:$ArgParseArgument::INPUTFILE$|An input file
+...table:$ArgParseArgument::OUTPUTFILE$|An output file
 ..param.isListArgument:Defines if the argument can be given multiple times.
 ...default:false.
 ..param.argumentLabel:Defines a user defined argument label for the help output. If this option is
-not set, CommandLineArgument will automatically define a label based on the ArgumentType.
+not set, ArgParseArgument will automatically define a label based on the ArgumentType.
 ..param.numberOfArguments: Defines if the argument consists of defined number of elements (e.g., if
 you want to provide an interval you would set this option to 2, so the parser knows that he needs
 to search for exactly 2 values).
@@ -78,7 +82,7 @@ to search for exactly 2 values).
 ..param:_default:Sets the default value for this argument.
 */
 
-class CommandLineArgument
+class ArgParseArgument
 {
 public:
     enum ArgumentType
@@ -96,57 +100,130 @@ public:
     // Members to store type information
     // ----------------------------------------------------------------------------
     ArgumentType _argumentType;
-    int          _numberOfArguments;
-    CharString   _argumentLabel;
+    unsigned     _numberOfArguments;
+    std::string  _argumentLabel;
     bool         _isListArgument;
 
     // ----------------------------------------------------------------------------
     // Members to store the values
     // ----------------------------------------------------------------------------
-    String<CharString>  defaultValue;
-    String<CharString>  value;
+    // TODO: move default values to Options, since they only make sense there
+    std::vector<std::string>  defaultValue;
+    std::vector<std::string>  value;
 
     // ----------------------------------------------------------------------------
     // Members for restrictions
     // ----------------------------------------------------------------------------
-    CharString            minValue;
-    CharString            maxValue;
-    StringSet<CharString> validValues;
+    std::string           minValue;
+    std::string           maxValue;
+    std::vector<std::string> validValues;
 
     // ----------------------------------------------------------------------------
     // Constructors
     // ----------------------------------------------------------------------------
-    CommandLineArgument(ArgumentType argumentType,
-                        bool isListArgument = false,
-                        CharString const & argumentLabel = "",
-                        int numberOfArguments = 1) :
-                        _argumentType(argumentType),
-                        _numberOfArguments(numberOfArguments),
-                        _argumentLabel(argumentLabel),
-                        _isListArgument(isListArgument),
-                        minValue(""),
-                        maxValue("")
-    {}
+    ArgParseArgument(ArgumentType argumentType,
+                     bool isListArgument = false,
+                     std::string const & argumentLabel = "",
+                     unsigned numberOfArguments = 1) :
+                     _argumentType(argumentType),
+                     _numberOfArguments(numberOfArguments),
+                     _argumentLabel(argumentLabel),
+                     _isListArgument(isListArgument),
+                     minValue(""),
+                     maxValue("")
+    {
+        SEQAN_CHECK( ((_isListArgument && _numberOfArguments == 1) || (!_isListArgument && _numberOfArguments >= 1)),
+                     "ArgParse currently does not support arguments that are lists of n-tuples." );
+    }
 
 
     template <typename TValue>
-    CommandLineArgument(ArgumentType argumentType,
-                        bool isListArgument,
-                        CharString const & argumentLabel,
-                        int numberOfArguments,
-                        TValue const & _default) :
-                        _argumentType(argumentType),
-                        _numberOfArguments(numberOfArguments),
-                        _argumentLabel(argumentLabel),
-                        _isListArgument(isListArgument),
-                        minValue(""),
-                        maxValue("")
+    ArgParseArgument(ArgumentType argumentType,
+                     bool isListArgument,
+                     std::string const & argumentLabel,
+                     unsigned numberOfArguments,
+                     TValue const & _default) :
+                     _argumentType(argumentType),
+                     _numberOfArguments(numberOfArguments),
+                     _argumentLabel(argumentLabel),
+                     _isListArgument(isListArgument),
+                     minValue(""),
+                     maxValue("")
     {
+        SEQAN_CHECK( ((_isListArgument && _numberOfArguments == 1) || (!_isListArgument && _numberOfArguments >= 1)),
+                     "ArgParse currently does not support arguments that are lists of n-tuples." );
+
         std::stringstream strm;
         strm << _default;
         appendValue(defaultValue, strm.str());
     }
+
+    ArgParseArgument(ArgParseArgument const & other) :
+                    _argumentType(other._argumentType),
+                    _numberOfArguments(other._numberOfArguments),
+                    _argumentLabel(other._argumentLabel),
+                    _isListArgument(other._isListArgument),
+                    defaultValue(other.defaultValue),
+                    value(other.value),
+                    minValue(other.minValue),
+                    maxValue(other.maxValue),
+                    validValues(other.validValues)
+    {
+    }
+
+    ArgParseArgument & operator= (ArgParseArgument const & other)
+    {
+        if(this != &other)
+        {
+            _argumentType = other._argumentType;
+            _numberOfArguments = other._numberOfArguments;
+            _argumentLabel = other._argumentLabel;
+            _isListArgument = other._isListArgument;
+            defaultValue = other.defaultValue;
+            value = other.value;
+            minValue = other.minValue;
+            maxValue = other.maxValue;
+            validValues = other.validValues;
+        }
+
+        return *this;
+    }
+
 };
+
+// ----------------------------------------------------------------------------
+// Helper Function _typeToString()
+// ----------------------------------------------------------------------------
+
+inline std::string
+_typeToString(ArgParseArgument const & me)
+{
+    std::string typeName = "";
+
+    switch(me._argumentType)
+    {
+        case ArgParseArgument::DOUBLE:
+            typeName = "double";
+            break;
+        case ArgParseArgument::INTEGER:
+            typeName = "integer";
+            break;
+        case ArgParseArgument::STRING:
+            typeName = "string";
+            break;
+        case ArgParseArgument::INPUTFILE:
+            typeName = "inputfile";
+            break;
+        case ArgParseArgument::OUTPUTFILE:
+            typeName = "outputfile";
+            break;
+        default:
+            typeName = "unknown";
+            break;
+    }
+
+    return typeName;
+}
 
 // ----------------------------------------------------------------------------
 // Function isListArgument()
@@ -156,15 +233,15 @@ public:
 ..summary:Returns whether the argument can be given multiple times.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
 ..returns:$true$ if the argument argument can be given multiple times.
-..see:Memfunc.CommandLineArgument#CommandLineArgument.param.isListArgument
-..include:seqan/misc/misc_cmdparser.h
+..see:Memfunc.ArgParseArgument#ArgParseArgument.param.isListArgument
+..include:seqan/arg_parse.h
 */
 
 inline bool
-isListArgument(CommandLineArgument const & me)
+isListArgument(ArgParseArgument const & me)
 {
     return me._isListArgument;
 }
@@ -177,19 +254,19 @@ isListArgument(CommandLineArgument const & me)
 ..summary:Returns whether the argument is a string.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
 ..returns:$true$ if the argument argument is a string argument.
-..see:Memfunc.CommandLineArgument#CommandLineArgument.param.argumentType
-..include:seqan/misc/misc_cmdparser.h
+..see:Memfunc.ArgParseArgument#ArgParseArgument.param.argumentType
+..include:seqan/arg_parse.h
 */
 
 inline bool
-isStringArgument(CommandLineArgument const & me)
+isStringArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == CommandLineArgument::STRING) ||
-           (me._argumentType == CommandLineArgument::INPUTFILE) ||
-           (me._argumentType == CommandLineArgument::OUTPUTFILE);
+    return (me._argumentType == ArgParseArgument::STRING) ||
+           (me._argumentType == ArgParseArgument::INPUTFILE) ||
+           (me._argumentType == ArgParseArgument::OUTPUTFILE);
 }
 
 // ----------------------------------------------------------------------------
@@ -200,17 +277,17 @@ isStringArgument(CommandLineArgument const & me)
 ..summary:Returns whether the argument is an integer.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
 ..returns:$true$ if the argument argument is an integer argument.
-..see:Memfunc.CommandLineArgument#CommandLineArgument.param.argumentType
-..include:seqan/misc/misc_cmdparser.h
+..see:Memfunc.ArgParseArgument#ArgParseArgument.param.argumentType
+..include:seqan/arg_parse.h
 */
 
 inline bool
-isIntegerArgument(CommandLineArgument const & me)
+isIntegerArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == CommandLineArgument::INTEGER);
+    return (me._argumentType == ArgParseArgument::INTEGER);
 }
 
 // ----------------------------------------------------------------------------
@@ -221,17 +298,17 @@ isIntegerArgument(CommandLineArgument const & me)
 ..summary:Returns whether the argument is a double.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
 ..returns:$true$ if the argument argument is a double argument.
-..see:Memfunc.CommandLineArgument#CommandLineArgument.param.argumentType
-..include:seqan/misc/misc_cmdparser.h
+..see:Memfunc.ArgParseArgument#ArgParseArgument.param.argumentType
+..include:seqan/arg_parse.h
 */
 
 inline bool
-isDoubleArgument(CommandLineArgument const & me)
+isDoubleArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == CommandLineArgument::DOUBLE);
+    return (me._argumentType == ArgParseArgument::DOUBLE);
 }
 
 // ----------------------------------------------------------------------------
@@ -242,17 +319,17 @@ isDoubleArgument(CommandLineArgument const & me)
 ..summary:Returns whether the argument is an input file.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
 ..returns:$true$ if the argument argument is an input file argument.
-..see:Memfunc.CommandLineArgument#CommandLineArgument.param.argumentType
-..include:seqan/misc/misc_cmdparser.h
+..see:Memfunc.ArgParseArgument#ArgParseArgument.param.argumentType
+..include:seqan/arg_parse.h
 */
 
 inline bool
-isInputFileArgument(CommandLineArgument const & me)
+isInputFileArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == CommandLineArgument::INPUTFILE);
+    return (me._argumentType == ArgParseArgument::INPUTFILE);
 }
 
 // ----------------------------------------------------------------------------
@@ -263,17 +340,17 @@ isInputFileArgument(CommandLineArgument const & me)
 ..summary:Returns whether the argument is an output file.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
 ..returns:$true$ if the argument argument is an output file argument.
-..see:Memfunc.CommandLineArgument#CommandLineArgument.param.argumentType
-..include:seqan/misc/misc_cmdparser.h
+..see:Memfunc.ArgParseArgument#ArgParseArgument.param.argumentType
+..include:seqan/arg_parse.h
 */
 
 inline bool
-isOutputFileArgument(CommandLineArgument const & me)
+isOutputFileArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == CommandLineArgument::OUTPUTFILE);
+    return (me._argumentType == ArgParseArgument::OUTPUTFILE);
 }
 
 // ----------------------------------------------------------------------------
@@ -281,18 +358,18 @@ isOutputFileArgument(CommandLineArgument const & me)
 // ----------------------------------------------------------------------------
 /**
 .Function.getArgumentLabel
-..summary:Returns the label for the given @Class.CommandLineArgument@. Either the user defined label
+..summary:Returns the label for the given @Class.ArgParseArgument@. Either the user defined label
 is returned or a default label (based on the ArgumentType is used).
 ..cat:Miscellaneous
 ..signature:getArgumentLabel(argument)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
-..returns:A $ShortCut.CharString$ containing the label.
-..include:seqan/misc/misc_cmdparser.h
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..returns:A $ShortCut.std::string$ containing the label.
+..include:seqan/arg_parse.h
 */
 
-inline CharString const
-getArgumentLabel(CommandLineArgument const & me)
+inline std::string const
+getArgumentLabel(ArgParseArgument const & me)
 {
     if(me._argumentLabel != "")
     {
@@ -301,16 +378,16 @@ getArgumentLabel(CommandLineArgument const & me)
     else
     {
         // infer from argument type
-        CharString baseLabel = "";
+        std::string baseLabel = "";
         if(isInputFileArgument(me) || isOutputFileArgument(me)) baseLabel = "FILE";
         else if(isStringArgument(me)) baseLabel = "STR";
         else if(isIntegerArgument(me) || isDoubleArgument(me)) baseLabel = "NUM";
 
-        CharString finalLabel;
+        std::string finalLabel;
 
         if(me._numberOfArguments != 1)
         {
-            for(int i = 0; i < me._numberOfArguments; ++i)
+            for(unsigned i = 0; i < me._numberOfArguments; ++i)
             {
                 if(i != 0) append(finalLabel, " ");
                 append(finalLabel, baseLabel);
@@ -331,13 +408,13 @@ getArgumentLabel(CommandLineArgument const & me)
 // otherwise it will trigger a SEQAN_CHECK failure
 template<typename TIntervalBorder>
 inline void
-_intervalAssert(const CharString minValueAsString, const CharString maxValueAsString)
+_intervalAssert(const std::string minValueAsString, const std::string maxValueAsString)
 {
     if(minValueAsString != "" && maxValueAsString != "")
         SEQAN_CHECK(_cast<TIntervalBorder>(minValueAsString) < _cast<TIntervalBorder>(maxValueAsString),
                     "The interval [%s:%s] is empty. Please specify a valid, non-empty interval.",
-                    toCString(minValueAsString),
-                    toCString(maxValueAsString));
+                    minValueAsString.c_str(),
+                    maxValueAsString.c_str());
 }
 
 // ----------------------------------------------------------------------------
@@ -346,18 +423,18 @@ _intervalAssert(const CharString minValueAsString, const CharString maxValueAsSt
 
 /**
 .Function.setMinValue
-..summary:Sets the minimum value of a @Class.CommandLineArgument@ object.
+..summary:Sets the minimum value of a @Class.ArgParseArgument@ object.
 ..cat:Miscellaneous
 ..signature:setMinValue(argument,minValue)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
-..param.minValue:A @Shortcut.CharString@ containing a string representation of the minimum value
-of the @Class.CommandLineArgument@.
-..include:seqan/misc/misc_cmdparser.h
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..param.minValue:A std::string containing a string representation of the minimum value
+of the @Class.ArgParseArgument@.
+..include:seqan/arg_parse.h
 */
 
 inline void
-setMinValue(CommandLineArgument & me, const CharString _minValue)
+setMinValue(ArgParseArgument & me, const std::string _minValue)
 {
     if(isDoubleArgument(me))
     {
@@ -381,18 +458,18 @@ setMinValue(CommandLineArgument & me, const CharString _minValue)
 
 /**
 .Function.setMaxValue
-..summary:Sets the maximum value of a @Class.CommandLineArgument@ object.
+..summary:Sets the maximum value of a @Class.ArgParseArgument@ object.
 ..cat:Miscellaneous
 ..signature:setMaxValue(argument,maxValue)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
-..param.maxValue:A @Shortcut.CharString@ containing a string representation of the maximum value
-of the @Class.CommandLineArgument@.
-..include:seqan/misc/misc_cmdparser.h
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..param.maxValue:A std::string containing a string representation of the maximum value
+of the @Class.ArgParseArgument@.
+..include:seqan/arg_parse.h
 */
 
 inline void
-setMaxValue(CommandLineArgument & me, const CharString _maxValue)
+setMaxValue(ArgParseArgument & me, const std::string _maxValue)
 {
     if(isDoubleArgument(me))
     {
@@ -416,22 +493,48 @@ setMaxValue(CommandLineArgument & me, const CharString _maxValue)
 
 /**
 .Function.setValidValues
-..summary:Sets the set of allowed values of a @Class.CommandLineArgument@ object.
+..summary:Sets the set of allowed values of a @Class.ArgParseArgument@ object.
 ..cat:Miscellaneous
 ..signature:setValidValues(argument,values)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
-..param.values:A $String<CharString>$ containing all valid entries for the option.
-..include:seqan/misc/misc_cmdparser.h
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..param.values:A std::vector<std::string> containing all valid entries for the option or a std::string
+with valid values separated by spaces.
+..include:seqan/arg_parse.h
 */
 
 inline void
-setValidValues(CommandLineArgument & me, StringSet<CharString> const & _values)
+setValidValues(ArgParseArgument & me, std::vector<std::string> const & _values)
 {
     if(isDoubleArgument(me) || isIntegerArgument(me))
-        SEQAN_FAIL("CommandLineArgument does not support setting valid values for numeric arguments.");
+        SEQAN_FAIL("ArgParseArgument does not support setting valid values for numeric arguments.");
 
     me.validValues = _values;
+}
+
+inline void
+setValidValues(ArgParseArgument & me, std::string const & _values)
+{
+    // convert array to String<std::string>
+    std::vector<std::string> values;
+    std::string current_argument;
+
+    for (Iterator<std::string const, Rooted>::Type ch  = begin(_values); ch != end(_values); goNext(ch))
+    {
+        if (*ch == ' ')
+        {
+            appendValue(values, current_argument);
+            current_argument = "";
+        }
+        else
+        {
+            append(current_argument, *ch);
+        }
+    }
+    if (current_argument != "")
+        appendValue(values, current_argument);
+
+    setValidValues(me, values);
 }
 
 // ----------------------------------------------------------------------------
@@ -454,81 +557,250 @@ _isInInterval(TString value, TString lowerIntervalBound, TString upperIntervalBo
 }
 
 // ----------------------------------------------------------------------------
+// Helper Function _checkNumericArgument()
+// ----------------------------------------------------------------------------
+// test if the values can be assigned to the option and is in the given boundaries
+template<typename TNumerical>
+inline void
+_checkNumericArgument(ArgParseArgument const & me, std::string const & value)
+{
+    if(!_isCastable<TNumerical>(value))
+    {
+        std::stringstream what;
+        what << "the given value '" << value << "' cannot be casted to " << _typeToString(me);
+        throw ParseException(what.str());
+    }
+
+    if(!_isInInterval<TNumerical>(value, me.minValue, me.maxValue))
+    {
+        std::stringstream what;
+        what << "the given value '" << value << "' is not in the interval ["
+             << (me.minValue != "" ? me.minValue : "-inf") << ":"
+             << (me.maxValue != "" ? me.maxValue : "+inf") << "]";
+
+        throw ParseException(what.str());
+    }
+}
+
+inline void
+_checkStringRestrictions(ArgParseArgument const & me, std::string const & value)
+{
+    typedef std::vector<std::string>::const_iterator TVectorIterator;
+
+    if(!empty(me.validValues))
+    {
+        bool isContained = false;
+        for(TVectorIterator validValue = me.validValues.begin();
+            validValue != me.validValues.end();
+            ++validValue)
+        {
+            // if it is an input or output file, we only check the file endings
+            if(isInputFileArgument(me) || isOutputFileArgument(me))
+            {
+                if (length(*validValue) > length(value))
+                    continue;
+                else
+                    isContained |= (suffix(value, length(value) - length(*validValue)) == *validValue);
+            }
+            else
+            {
+                isContained |= (*validValue == value);
+            }
+            if(isContained) break;
+        }
+        if(!isContained)
+        {
+            std::stringstream what;
+            what << "the given value '" << value <<
+                    "' is not in the list of allowed" <<
+                    ((isInputFileArgument(me) || isOutputFileArgument(me)) ? " file extensions " : " values ") <<
+                    "[";
+            for(TVectorIterator validValue = me.validValues.begin();
+                validValue != me.validValues.end();
+                ++validValue)
+            {
+                if(validValue != me.validValues.begin()) what << ", ";
+                what << ((isInputFileArgument(me) || isOutputFileArgument(me)) ? "*." : "") << *validValue;
+            }
+            what << "]";
+            throw ParseException(what.str());
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 // Function assignValue()
 // ----------------------------------------------------------------------------
 
 /**
 .Function.assignValue
-..summary:Assigns the given value (if applicable) to the @Class.CommandLineArgument@ object. If
-the @Class.CommandLineArgument@ is a list or can hold multiple values
-(@Memfunc.CommandLineArgument#CommandLineArgument.param.numberOfArguments@) the value will be appended.
+..summary:Assigns the given value (if applicable) to the @Class.ArgParseArgument@ object. If
+the @Class.ArgParseArgument@ is a list or can hold multiple values
+(@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) the value will be appended.
 Otherwise the value will be overwritten.
-If the value can be assigned the method returns $true$, $false$ otherwise.
 ..cat:Miscellaneous
-..signature:assignValue(argument,value)
-..param.option:The @Class.CommandLineArgument@ object.
-...type:Class.CommandLineArgument
-..param.value:A @ShortCut.CharString>@ containing the value that should be assigned.
-..include:seqan/misc/misc_cmdparser.h
+..signature:assignArgumentValue(argument,value [, argNo])
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..param.value:A std::string containing the value that should be assigned.
+..include:seqan/arg_parse.h
 */
 
-inline bool
-assignValue(CommandLineArgument & me, CharString const & value)
+inline void
+assignArgumentValue(ArgParseArgument & me, std::string const & value) throw (ParseException)
 {
-    typedef Iterator<StringSet<CharString>, Rooted>::Type TStringSetIterator;
-
     // type checks
     if(isIntegerArgument(me))
-    {
-        if(!_isCastable<int>(value))
-            return false;
-        if(!_isInInterval<int>(value, me.minValue, me.maxValue))
-            return false;
-    }
+        _checkNumericArgument<int>(me, value);
 
     if(isDoubleArgument(me))
-    {
-        if(!_isCastable<double>(value))
-            return false;
-        if(!_isInInterval<double>(value, me.minValue, me.maxValue))
-            return false;
-    }
+        _checkNumericArgument<double>(me, value);
 
     // check valid values
     if(isStringArgument(me))
-    {
-        if(!empty(me.validValues))
-        {
-            bool isContained = false;
-            for(TStringSetIterator validValue = begin(me.validValues);
-                validValue != end(me.validValues);
-                goNext(validValue))
-            {
-                if(isInputFileArgument(me) || isOutputFileArgument(me))
-                {
-                    if (length(*validValue) > length(value))
-                        continue;
-                    else
-                        isContained |= (suffix(value, length(value) - length(*validValue)) == *validValue);
-                }
-                else
-                {
-                    isContained |= (*validValue == value);
-                }
-                if(isContained) break;
-            }
-            if(!isContained) return false;
-        }
-    }
+        _checkStringRestrictions(me, value);
 
     // assignment
-    if(isListArgument(me)) // just append
+    if(isListArgument(me))  // just append
         appendValue(me.value, value, Exact());
-    else if(me._numberOfArguments != 1)
+    else
     {
-
+        // check if we already set all expected arguments
+        if(length(me.value) == me._numberOfArguments) clear(me.value);
+        appendValue(me.value, value, Exact());
     }
+}
 
+// ----------------------------------------------------------------------------
+// Function getArgumentValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getArgumentValue
+..summary:Returns the value of the @Class.ArgParseArgument@ object. If
+the @Class.ArgParseArgument@ is a list or can hold multiple values
+(@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) you can specify which value
+you want to get. If not set the first value will be returned.
+..cat:Miscellaneous
+..signature:getArgumentValue(argument [, position])
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..param.position:A unsigned int defining the which value should be returned.
+..returns:The value set at position $position$.
+..include:seqan/arg_parse.h
+*/
+
+inline std::string const &
+getArgumentValue(ArgParseArgument const & me, unsigned position)
+{
+    SEQAN_CHECK(position < me.value.size() || position < me.defaultValue.size(),
+                "ArgParseArgument: No value set for index %d", position);
+
+    if(position < me.value.size())
+        return me.value[position];
+    else
+        return me.defaultValue[position];
+}
+
+inline std::string const &
+getArgumentValue(ArgParseArgument const & me)
+{
+    return getArgumentValue(me, 0);
+}
+
+// ----------------------------------------------------------------------------
+// Function getArgumentValues()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getArgumentValues
+..summary:Returns all values of the @Class.ArgParseArgument@ object as const std::vector.
+..cat:Miscellaneous
+..signature:getArgumentValues(argument)
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..returns:$std::vector<std::string>$ containing the values.
+..include:seqan/arg_parse.h
+*/
+
+inline std::vector<std::string> const &
+getArgumentValues(ArgParseArgument const & me)
+{
+    SEQAN_CHECK(!(me.value.empty() && me.defaultValue.empty()),
+                "ArgParseArgument: No value available.");
+    if(!me.value.empty())
+        return me.value;
+    else
+        return me.defaultValue;
+}
+
+// ----------------------------------------------------------------------------
+// Function hasArgumentValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.hasArgumentValue
+..summary:Returns true if a value for the given position is available.
+..cat:Miscellaneous
+..signature:hasValue(argument [, position=0])
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..param.position:The position for which the availability should be tested.
+..returns: $true$ if a value is available, $false$ if not.
+..include:seqan/arg_parse.h
+*/
+inline bool
+hasValue(ArgParseArgument const & arg, unsigned position)
+{
+    return (arg.value.size() > position || arg.defaultValue.size() > position);
+}
+
+inline bool
+hasValue(ArgParseArgument const & arg)
+{
+    return hasValue(arg, 0);
+}
+
+// ----------------------------------------------------------------------------
+// Function isSet()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.isSet
+..summary:Returns true if a value was assigned to the argument.
+..cat:Miscellaneous
+..signature:isSet(argument)
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..returns:$true$ if a value was assigned to the argument, $false$ if not.
+..include:seqan/arg_parse.h
+*/
+
+inline bool
+isSet(ArgParseArgument const & me)
+{
+    return !me.value.empty();
+}
+
+// ----------------------------------------------------------------------------
+// Function numberOfArguments
+// ----------------------------------------------------------------------------
+
+/**
+.Function.numberOfArguments
+..summary:Returns the number of arguments for this @Class.ArgParseArgument@.
+..cat:Miscellaneous
+..signature:numberOfArguments(argument)
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..returns:The number of allowed arguments for this @Class.ArgParseArgument@.
+..include:seqan/arg_parse.h
+*/
+
+inline unsigned
+numberOfArguments(ArgParseArgument const & me)
+{
+    return me._numberOfArguments;
 }
 
 
@@ -536,4 +808,3 @@ assignValue(CommandLineArgument & me, CharString const & value)
 } // namespace seqan
 
 #endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
-

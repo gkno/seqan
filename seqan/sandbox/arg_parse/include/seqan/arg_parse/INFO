@@ -2,7 +2,7 @@ Name: arg_parse
 Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 Maintainer: Stephan Aiche <stephan.aiche@fu-berlin.de>
 License: BSD 3-clause
-Copyright: 2008-2011, FU Berlin
+Copyright: 2008-2012, FU Berlin
 Status: under development
 Description: One-line description for module arg_parse.
  This is the long text description for the module.  You should wrap text to 78
