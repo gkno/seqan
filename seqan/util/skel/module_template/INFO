@@ -2,7 +2,7 @@ Name: %(NAME)s
 Author: %(AUTHOR)s
 Maintainer: %(AUTHOR)s
 License: BSD 3-clause
-Copyright: 2008-2011, FU Berlin
+Copyright: 2008-2012, FU Berlin
 Status: under development
 Description: One-line description for module %(NAME)s.
  This is the long text description for the module.  You should wrap text to 78

@@ -2,7 +2,7 @@ Name: %(NAME)s
 Author: %(AUTHOR)s
 Maintainer: %(AUTHOR)s
 License: GPL v3
-Copyright: 2008-2011, FU Berlin
+Copyright: 2008-2012, FU Berlin
 Status: under development
 Description: One-line description for app %(NAME)s.
  This is the long text description for the app.  You should wrap text to 78
