@@ -26,6 +26,7 @@
 .Function.beginPosition.concept:Concept.Container
 .Function.end.concept:Concept.Container
 .Function.endPosition.concept:Concept.Container
+.Function.empty.concept:Concept.Container
 .Function.length.concept:Concept.Container
 .Function.capacity.concept:Concept.Container
 
