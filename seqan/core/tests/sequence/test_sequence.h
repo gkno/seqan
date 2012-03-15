@@ -189,11 +189,11 @@ void testSequenceAppendValue(TString & /*Tag*/)
 
     // Test the appendValue function
     TValue value = 'A';
-    appendValue(string, value);   
+    appendValue(string, value);
     SEQAN_ASSERT_EQ(string, "A");
 
     // Test the appendValue function
-    appendValue(string, 'A');   
+    appendValue(string, 'A');
     SEQAN_ASSERT_EQ(string, "AA");
 }
 
@@ -254,6 +254,37 @@ void testSequenceAssignValue(TString & /*Tag*/)
 
 }
 
+// We need two back() tests, since back() returns a reference or a copy
+// (depending on TString). We check whether we can modify the reference.
+// Test of back() for non const strings.
+template <typename TString>
+void testSequenceBack(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    typedef typename Value<TString>::Type TValue;
+    TString string = "ACGT";
+
+    // val is a reference in contrast to the const version of back().
+    TValue & val = back(string);
+    val = 'A';
+    SEQAN_ASSERT_EQ(val, string[length(string) - 1]);
+}
+
+// Test of back() for const strings.
+template <typename TString>
+void testSequenceBack(TString const & /*Tag*/)
+{
+    using namespace seqan;
+
+    typedef typename Value<TString>::Type TValue;
+    TString const string = "ACGT";
+
+    // val is not a reference in contrast to the non const version of back().
+    TValue val = back(string);
+    SEQAN_ASSERT_EQ(val, string[length(string) - 1]);
+}
+
 // Test of begin().
 template <typename TString>
 void testSequenceBegin(TString & /*Tag*/)
@@ -298,6 +329,24 @@ void testSequenceCapacity(TString & /*Tag*/)
     SEQAN_ASSERT_GEQ(capacity(string2), length(string2));
 }
 
+// Test of clear().
+template <typename TString>
+void testSequenceClear(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    // Test on an empty string.
+    TString string = "";
+    clear(string);
+    SEQAN_ASSERT_EQ(begin(string), end(string));
+    SEQAN_ASSERT_EQ(capacity(string), 0u);
+
+    // Test on a non empty string.
+    string = "ACGTACGTACGT";
+    clear(string);
+    SEQAN_ASSERT_EQ(string, TString());
+}
+
 // Test of end().
 template <typename TString>
 void testSequenceEnd(TString & /*Tag*/)
@@ -335,6 +384,61 @@ void testSequenceEndPosition(TString & /*Tag*/)
     SEQAN_ASSERT_EQ(endPosition(string2), length(string2));
 }
 
+// Test of erase().
+template <typename TString>
+void testSequenceErase(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    // Test on an empty string.
+    TString string1 = "";
+
+    // TODO (singer): erasing an empty string is not possible.
+    // Error message: std::bad_alloc.
+    //erase(string1, 0);
+    //SEQAN_ASSERT_EQ(string1, "");
+
+    //erase(string1, 0, 0);
+    //SEQAN_ASSERT_EQ(string1, "");
+
+    // Test on a non empty string.
+    string1 = "ACGTACGTACGT";
+    erase(string1, 1);
+    SEQAN_ASSERT_EQ(string1, "AGTACGTACGT");
+
+    erase(string1, 2, 5);
+    SEQAN_ASSERT_EQ(string1, "AGGTACGT");
+}
+
+// Test of front() for non const strings.
+template <typename TString>
+void testSequenceFront(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    typedef typename Value<TString>::Type TValue;
+    TString string = "ACGT";
+
+    // val is a reference in contrast to the const version of front()
+    TValue & val = front(string);
+    val = 'A';
+    SEQAN_ASSERT_EQ(val, string[0]);
+}
+
+// Test of front() for const strings.
+template <typename TString>
+void testSequenceFront(TString const & /*Tag*/)
+{
+    using namespace seqan;
+
+    typedef typename Value<TString>::Type TValue;
+    TString string = "ACGT";
+
+    // val is not a reference in contrast to the non const version of front()
+    TValue val = front(string);
+    SEQAN_ASSERT_EQ(val, string[0]);
+}
+
 // Test of getValue().
 template <typename TString>
 void testSequenceGetValue(TString & /*Tag*/)
@@ -347,15 +451,55 @@ void testSequenceGetValue(TString & /*Tag*/)
      // We test this using the variable value_.
     TString string = "ACGT";
     TValue dummy_ = 'T';
-    TValue & value_ = dummy_; 
+    TValue & value_ = dummy_;
     SEQAN_ASSERT_EQ(value_, TValue('T'));
 
-    value_ = getValue(string, 0);   
+    value_ = getValue(string, 0);
     SEQAN_ASSERT_EQ(value_, TValue('A'));
 
     value_ = 'T';
     SEQAN_ASSERT_EQ(getValue(string, 0), TValue('A'));
 }
+
+// Test of insert().
+template <typename TString>
+void testSequenceInsert(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    typedef typename Value<TString>::Type TValue;
+
+    // Test of inserting an empty string.
+    TString string1 = "";
+    TString string2 = "";
+    insert(string1, 0, string2);
+    SEQAN_ASSERT_EQ(string1, "");
+
+    // Test of inserting an string.
+    string1 = "A";
+    string2 = "ACGT";
+    insert(string1, 0, string2);
+    SEQAN_ASSERT_EQ(string1, "ACGTA");
+}
+
+// Test of insertValue().
+template <typename TString>
+void testSequenceInsertValue(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    typedef typename Value<TString>::Type TValue;
+
+    // Test of inserting into an empty string.
+    TString string = "";
+    insert(string, 0, 'A');
+    SEQAN_ASSERT_EQ(string, "A");
+
+    // Test of inserting into a non empty string.
+    insert(string, 0, 'C');
+    SEQAN_ASSERT_EQ(string, "CA");
+}
+
 
 // Test of length().
 template <typename TString>
@@ -381,7 +525,7 @@ void testSequenceMoveValue(TString & /*Tag*/)
     TString string = "";
 
     resize(string, 2);
-    moveValue(string, 1, 'G');  
+    moveValue(string, 1, 'G');
     SEQAN_ASSERT_EQ(string[1], 'G');
 }
 
@@ -395,7 +539,7 @@ void testSequenceReplace(TString & /*Tag*/)
     TString string2 = "";
 
     // This is problematic according to the documentation.
-       // 0 can be a position or an iterator causing compiler errors.
+    // 0 can be a position or an iterator causing compiler errors.
     replace(string1, 0, 0, string2);
     SEQAN_ASSERT_EQ(string1, "");
 
@@ -418,7 +562,55 @@ void testSequenceReplace(TString & /*Tag*/)
     SEQAN_ASSERT_EQ(string1, "ACACGTGTGTGTACAC");
 }
 
-// Test of append().
+// Test of reserve().
+template <typename TString>
+void testSequenceReserve(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    TString string = "";
+
+    reserve(string, 0);
+    SEQAN_ASSERT_EQ(capacity(string), 0u);
+
+    reserve(string, 1000);
+    SEQAN_ASSERT_GEQ(capacity(string), 10u);
+
+    // If the the new capacity is smaller than the current one
+    // the new capacity must be larger or equal to the current length.
+    reserve(string, 1);
+    SEQAN_ASSERT_GEQ(capacity(string), length(string));
+}
+
+// Test of resize().
+template <typename TString>
+void testSequenceResize(TString & /*Tag*/)
+{
+    using namespace seqan;
+
+    typedef typename Value<TString>::Type TValue;
+
+    TString string = "";
+
+    resize(string, 0);
+    SEQAN_ASSERT_EQ(length(string), 0u);
+
+    resize(string, 10);
+    SEQAN_ASSERT_EQ(length(string), 10u);
+    // TODO (singer): resize should initialize newly allocated memory,
+    // which it does not at the moment!
+    //SEQAN_ASSERT_EQ(string[0], TValue());
+    //SEQAN_ASSERT_EQ(string[0], TValue());
+
+    resize(string, 0);
+    SEQAN_ASSERT_EQ(length(string), 0u);
+
+    resize(string, 10, TValue('C'));
+    SEQAN_ASSERT_EQ(string[0], TValue('C'));
+    SEQAN_ASSERT_EQ(string[0], TValue('C'));
+}
+
+// Test of value().
 template <typename TString>
 void testSequenceValue(TString & /*Tag*/)
 {
@@ -429,7 +621,7 @@ void testSequenceValue(TString & /*Tag*/)
     // In contrast to getValue(), value() does not return a copy but a reference.
     // We test this using the variable value_.
     TString string = "ACAC";
-    TValue & value_ = value(string, 0);  
+    TValue & value_ = value(string, 0);
     SEQAN_ASSERT_EQ(value_, 'A');
 
     value_ = 'G';
@@ -479,7 +671,7 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_append_value)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceAppendValue(tag);
 }
 
@@ -501,12 +693,24 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_assign_value)
     testSequenceAssignValue(tag);
 }
 
+// Test of back().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_back)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceBack(tag);
+
+    String<Dna, Alloc<> > const constTag;
+    testSequenceBack(constTag);
+}
+
 // Test of begin().
 SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_begin)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceBegin(tag);
 
     String<Dna, Alloc<> > const constTag;
@@ -518,7 +722,7 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_begin_position)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceBeginPosition(tag);
 
     String<Dna, Alloc<> > const constTag;
@@ -530,11 +734,20 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_capacity)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceCapacity(tag);
 
     String<Dna, Alloc<> > const constTag;
     testSequenceCapacity(constTag);
+}
+
+// Test of clear().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_clear)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceClear(tag);
 }
 
 // Test of end().
@@ -542,7 +755,7 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_end)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceEnd(tag);
 
     String<Dna, Alloc<> > const constTag;
@@ -554,11 +767,29 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_end_position)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceEndPosition(tag);
 
     String<Dna, Alloc<> > const constTag;
     testSequenceEndPosition(constTag);
+}
+
+// Test of erase().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_erase)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceErase(tag);
+}
+
+// Test of front().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_front)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceFront(tag);
 }
 
 // Test of getValue().
@@ -566,11 +797,29 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_get_value)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceGetValue(tag);
 
     String<Dna, Alloc<> > const constTag;
     testSequenceGetValue(constTag);
+}
+
+// Test of insert().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_insert)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceInsert(tag);
+}
+
+// Test of insertValue().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_insert_value)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceInsertValue(tag);
 }
 
 // Test of length().
@@ -578,7 +827,7 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_length)
 {
     using namespace seqan;
 
-    String<Dna, Alloc<> > tag; 
+    String<Dna, Alloc<> > tag;
     testSequenceLength(tag);
 
     String<Dna, Alloc<> > const constTag;
@@ -601,6 +850,24 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_replace)
 
     String<Dna, Alloc<> > tag;
     testSequenceReplace(tag);
+}
+
+// Test of reserve().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_reserve)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceReserve(tag);
+}
+
+// Test of resize().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_dna_resize)
+{
+    using namespace seqan;
+
+    String<Dna, Alloc<> > tag;
+    testSequenceResize(tag);
 }
 
 // Test of value().
@@ -705,6 +972,23 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_assign_value)
     SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
 }
 
+// Test of back().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_back)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceBack(tag);
+
+    String<CountingChar, Alloc<> > const constTag;
+    testSequenceBack(constTag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+    SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
+}
+
 // Test of begin().
 SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_begin)
 {
@@ -712,7 +996,7 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_begin)
 
     CountingChar::clear();
 
-    String<CountingChar, Alloc<> > tag; 
+    String<CountingChar, Alloc<> > tag;
     testSequenceBegin(tag);
 
     String<CountingChar, Alloc<> > const constTag;
@@ -729,7 +1013,7 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_begin_position)
 
     CountingChar::clear();
 
-    String<CountingChar, Alloc<> > tag; 
+    String<CountingChar, Alloc<> > tag;
     testSequenceBeginPosition(tag);
 
     String<CountingChar, Alloc<> > const constTag;
@@ -746,11 +1030,25 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_capacity)
 
     CountingChar::clear();
 
-    String<CountingChar, Alloc<> > tag; 
+    String<CountingChar, Alloc<> > tag;
     testSequenceCapacity(tag);
 
     String<CountingChar, Alloc<> > const constTag;
     testSequenceCapacity(constTag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+    SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
+}
+
+// Test of clear().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_clear)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceClear(tag);
 
     SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
     SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
@@ -763,11 +1061,28 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_end)
 
     CountingChar::clear();
 
-    String<CountingChar, Alloc<> > tag; 
+    String<CountingChar, Alloc<> > tag;
     testSequenceEnd(tag);
 
     String<CountingChar, Alloc<> > const constTag;
     testSequenceEnd(constTag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+    SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
+}
+
+// Test of front().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_front)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceFront(tag);
+
+    String<CountingChar, Alloc<> > const constTag;
+    testSequenceFront(constTag);
 
     SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
     SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
@@ -780,11 +1095,25 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_end_position)
 
     CountingChar::clear();
 
-    String<CountingChar, Alloc<> > tag; 
+    String<CountingChar, Alloc<> > tag;
     testSequenceEndPosition(tag);
 
     String<CountingChar, Alloc<> > const constTag;
     testSequenceEndPosition(constTag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+    SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
+}
+
+// Test of erase().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_erase)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceErase(tag);
 
     SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
     SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
@@ -797,11 +1126,39 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_get_value)
 
     CountingChar::clear();
 
-    String<CountingChar, Alloc<> > tag; 
+    String<CountingChar, Alloc<> > tag;
     testSequenceGetValue(tag);
 
     String<CountingChar, Alloc<> > const constTag;
     testSequenceGetValue(constTag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+    SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
+}
+
+// Test of insert().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_insert)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceInsert(tag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+    SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
+}
+
+// Test of insert().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_insert_value)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceInsertValue(tag);
 
     SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
     SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
@@ -814,7 +1171,7 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_length)
 
     CountingChar::clear();
 
-    String<CountingChar, Alloc<> > tag; 
+    String<CountingChar, Alloc<> > tag;
     testSequenceLength(tag);
 
     String<CountingChar, Alloc<> > const constTag;
@@ -847,6 +1204,33 @@ SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_replace)
 
     String<CountingChar, Alloc<> > tag;
     testSequenceReplace(tag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+    SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);
+}
+
+// Test of reserve().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_reserve)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceReserve(tag);
+
+    SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
+}
+
+// Test of resize().
+SEQAN_DEFINE_TEST(test_sequence_alloc_string_counting_char_resize)
+{
+    using namespace seqan;
+
+    CountingChar::clear();
+
+    String<CountingChar, Alloc<> > tag;
+    testSequenceResize(tag);
 
     SEQAN_ASSERT_EQ(CountingChar::numConstruct, CountingChar::numDeconstruct);
     SEQAN_ASSERT_GT(CountingChar::numConstruct, 0u);

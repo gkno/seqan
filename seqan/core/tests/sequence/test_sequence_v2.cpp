@@ -50,15 +50,23 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_append_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_assignable);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_assign_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_back);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_begin);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_begin_position);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_capacity);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_clear);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_end);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_end_position);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_erase);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_front);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_get_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_insert);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_insert_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_length);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_move_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_replace);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_reserve);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_resize);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_value);
     
     // --------------------------------------------------------------------------
@@ -70,15 +78,23 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_append_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_assignable);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_assign_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_back);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_begin);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_begin_position);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_capacity);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_clear);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_end);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_end_position);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_erase);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_front);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_get_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_insert);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_insert_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_length);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_move_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_replace);
-    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_value); 
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_reserve);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_resize);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_value);
 }
 SEQAN_END_TESTSUITE
