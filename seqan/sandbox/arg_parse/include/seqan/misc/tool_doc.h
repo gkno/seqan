@@ -35,6 +35,8 @@
 #ifndef SEQAN_CORE_INCLUDE_MISC_TOOL_DOC_H_
 #define SEQAN_CORE_INCLUDE_MISC_TOOL_DOC_H_
 
+#include <iterator>
+
 #include <seqan/misc/misc_terminal.h>
 
 namespace seqan {
