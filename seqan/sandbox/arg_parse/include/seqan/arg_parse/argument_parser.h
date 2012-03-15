@@ -48,12 +48,8 @@
 #include <iostream>
 #include <fstream>
 
-namespace seqan {
-
-/**
- * TODO: arguments also need a type if they are used as input/output file
- * TODO: correct parameter ordering of nearly all cmdparser function to be seqan conform f(out,in)
- */
+namespace seqan
+{
 
 /**
 .Class.ArgumentParser
@@ -83,8 +79,7 @@ addDescription(parser,
 
 ArgParseOption optionInputFile("i", "inputFile", "Name of the multi-FASTA input.",
                                   OptionType::String | OptionType::Mandatory);
-optionInputFile = addArgumentText(optionInputFile, "IN");
-addOption(parser, optionInputFile);
+addOption(parser, ArgParseOption("i", "inputFile", "Name of the multi-FASTA input.", ));
 
 ArgParseOption optionInputFile("o", "outputFile", "Name of the output file.",
                                   OptionType::String | OptionType::Mandatory);
@@ -448,6 +443,31 @@ getOption(ArgumentParser const & me, std::string const & _name)
 {
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     return me.optionMap[_getOptionIndex(me,_name)];
+}
+
+// ----------------------------------------------------------------------------
+// Function setRequired()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.setRequired
+..summary:Sets whether or not the option defined by the parameter $name$ (which can be
+ either the short or the long name) is mandatory.
+..cat:Miscellaneous
+..signature:setRequired(parser, optionName, required)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionName:The identifier of the command line option.
+..param.required:The new required value of the option.
+...type:Bool
+..include:seqan/arg_parse.h
+*/
+
+inline void
+setRequired(ArgumentParser & me, std::string const & _name, bool required)
+{
+    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
+    return setRequired(getOption(me, _name), required);
 }
 
 // ----------------------------------------------------------------------------
@@ -897,7 +917,6 @@ getOptionValues(ArgumentParser & me, unsigned argumentPosition)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-...type:Shortcut.std::string
 ..param.minValue:A @Shortcut.std::string@ containing a string representation of the minimum value of the @Class.ArgParseOption@.
 ..include:seqan/arg_parse.h
 */
@@ -920,7 +939,6 @@ setMinValue(ArgumentParser & me, std::string const & name, std::string const & _
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-...type:Shortcut.std::string
 ..param.maxValue:A @Shortcut.std::string@ containing a string representation of the maximum value of the @Class.ArgParseOption@.
 ..include:seqan/arg_parse.h
 */
@@ -945,7 +963,6 @@ setMaxValue(ArgumentParser & me, std::string const & name,
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-...type:Shortcut.std::string
 ..param.values:A $String<std::string>$ containing all valid entries for the option.
 ..include:seqan/arg_parse.h
 */

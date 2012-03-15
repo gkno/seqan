@@ -48,8 +48,8 @@ namespace seqan {
 ..cat:Miscellaneous
 ..summary:Stores information for a specific command line option.
 ..signature:ArgParseOption
-..remarks:A @Class.ArgParseOption@ object can be added to a @Class.CommandLineParser@ via @Function.addOption@.
-..include:seqan/misc/misc_cmdparser.h
+..remarks:A @Class.ArgParseOption@ object can be added to a @Class.ArgumentParser@ via @Function.addOption@.
+..include:seqan/arg_parse.h
 */
 
 /**
@@ -63,7 +63,7 @@ Although not suggested the short-name can contain more than 1 character.
 ..param.longName:A std::string containing the long-name option identifier (e.g. $"help"$ for the $-h/--help$ option).
 ...remarks:Note that the leading "--" is not passed.
 ..param.helpText:A std::string containing the help text associated with this option.
-..param.argument:A ArgParseArgument for the option (e.g., an integer argument).
+..param.argument:A @Class.ArgParseArgument@ for the option (e.g., an integer argument).
 ...type:Class.ArgParseArgument
 */
 
@@ -136,8 +136,7 @@ public:
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option argument can be a string.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -158,8 +157,7 @@ isStringOption(ArgParseOption const & me)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option is a switch.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -180,8 +178,7 @@ isBooleanOption(ArgParseOption const & me)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option argument can be a double.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -202,8 +199,7 @@ isDoubleOption(ArgParseOption const & me)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option argument can be an integer.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -224,8 +220,7 @@ isIntOption(ArgParseOption const & me)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option is hidden on the help screen.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -247,7 +242,7 @@ isVisible(ArgParseOption const & me)
 ...type:Class.ArgParseOption
 ..param.visibility:The new visibility of the option.
 ...type:Bool
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline void
@@ -268,8 +263,7 @@ setVisibility(ArgParseOption & me, bool visibility)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option is mandatory.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -291,8 +285,7 @@ isRequired(ArgParseOption const & me)
 ...type:Class.ArgParseOption
 ..param.required:The new required value of the option.
 ...type:Bool
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline void
@@ -313,8 +306,7 @@ setRequired(ArgParseOption & me, bool required)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option can be given multiple times on command line.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -336,7 +328,7 @@ isListOption(ArgParseOption const & me)
 ...type:Class.ArgParseOption
 ..returns:$true$ if the argument of the option is an input file.
 ..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -358,7 +350,7 @@ isInputFile(ArgParseOption const & me)
 ...type:Class.ArgParseOption
 ..returns:$true$ if the argument of the option is an output file.
 ..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline bool
@@ -398,7 +390,7 @@ _writeOptName(TStream & target, ArgParseOption const & me)
 ..param.stream:The target stream.
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TStream>
@@ -438,7 +430,7 @@ operator<<(TStream & target, ArgParseOption const & source)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..param.minValue:A std::string containing a string representation of the minimum value of the @Class.ArgParseOption@.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline void
@@ -459,7 +451,7 @@ setMinValue(ArgParseOption & me, const std::string _minValue)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..param.maxValue:A std::string containing a string representation of the maximum value of the @Class.ArgParseOption@.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline void
@@ -481,7 +473,7 @@ setMaxValue(ArgParseOption & me, const std::string _maxValue)
 ...type:Class.ArgParseOption
 ..param.values:A std::vector<std::string> containing all valid entries for the option or a
 std::string with valid values separated by spaces.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 inline void

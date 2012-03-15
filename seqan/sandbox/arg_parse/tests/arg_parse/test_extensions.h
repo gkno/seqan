@@ -35,11 +35,7 @@
 #ifndef SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_
 #define SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_
 
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-#define SEQAN_ENABLE_TESTING 1
-
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic/debug_test_system.h>
 #include <string>
 
 namespace seqan
