@@ -118,7 +118,7 @@ SEQAN_CHECKPOINT
     TSize queryEndPos = endPosition(row1);
 
     bool first = true;
-    TSize readBasePos = pos;
+    TSize readBasePos = pos + clippedBeginPosition(row1);
     TSize readPos = 0;
 	while (pos < dbEndPos || pos < queryEndPos) {
 		int matched = 0;
