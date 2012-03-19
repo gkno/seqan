@@ -143,6 +143,11 @@ int mapReads(
 		cerr << "Compute reverse matches:         \t";
 		if (options.reverse)		cerr << "YES" << endl;
 		else				cerr << "NO" << endl;
+		cerr << "Allow Indels:                    \t";
+		if (options.gapMode == RAZERS_GAPPED)
+		    cerr << "YES" << endl;
+    else
+        cerr << "NO" << endl;
 		cerr << "Error rate:                      \t" << options.errorRate << endl;
         if (options.threshold > 0)
             cerr << "Minimal threshold:               \t" << options.threshold << endl;
@@ -415,6 +420,13 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("amms", "available-matches-memory-size",   "Bytes of main memory available for storing matches.  Used to switch to external sorting.  -1 for always external, 0 for never, other value as threshold.", OptionType::Int | OptionType::Label, options.availableMatchesMemorySize));
 	addOption(parser, CommandLineOption("mhst", "match-histo-start-threshold",   "When to start histogram.", OptionType::Int | OptionType::Label, options.matchHistoStartThreshold));
 	bool stop = !parse(parser, argc, argv, cerr);
+  std::cerr << "COMMAND LINE\t";
+  for (int i = 0; i < argc; ++i)
+    std::cerr << " " << argv[i];
+  std::cerr << "\n";
+	version(parser);
+  std::cerr << "DEBUG\t";
+  printDebugLevel(std::cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Extract options

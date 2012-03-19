@@ -1183,11 +1183,11 @@ int _mapSingleReadsParallel(
 {
     if (options.threshold > 0)
     {
-        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
+        typedef typename If<IsSameType<TGapMode,RazerSGapped>, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
         return _mapSingleReadsParallel(store, cnts, options, shape, mode, Swift<TSwiftSpec>());
     } else
     {
-        typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, void, Hamming_>::Type TPigeonholeSpec;
+        typedef typename If<IsSameType<TGapMode,RazerSGapped>, void, Hamming_>::Type TPigeonholeSpec;
         return _mapSingleReadsParallel(store, cnts, options, Shape<Dna, OneGappedShape>(), mode, Pigeonhole<TPigeonholeSpec>());
     }
 }

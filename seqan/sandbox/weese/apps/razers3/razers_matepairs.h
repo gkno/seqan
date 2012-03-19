@@ -995,7 +995,7 @@ int _mapMatePairReads(
 #endif
 
 	typedef typename If<
-				IsSameType<TGapMode,RazerSGapped>::VALUE,
+				IsSameType<TGapMode,RazerSGapped>,
 				SwiftSemiGlobal,
 				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
 	typedef Pattern<TIndex, TFilterSpec>                TFilterPattern;	// filter
