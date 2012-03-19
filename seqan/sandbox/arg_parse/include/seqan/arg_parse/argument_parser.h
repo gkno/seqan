@@ -69,22 +69,20 @@ setShortDescription(parser, "Alignment free sequence comparison");
 setVersion(parser, "1.0");
 setDate(parser, "Jan 2010");
 
-
 addUsageLine(parser, "[\\fIOPTIONS\\fP] \\fB-i\\fP \\fIIN\\fP \\fB-o\\fP \\fIOUT\\fP");
 
 addDescription(parser,
                "ALF can be used to calculate the pairwise similarity of sequences "
-               "using alignment-free methods.  All methods which are implemented are "
+               "using alignment-free methods. All methods which are implemented are "
                "based on k-mer counts.");
 
-ArgParseOption optionInputFile("i", "inputFile", "Name of the multi-FASTA input.",
-                                  OptionType::String | OptionType::Mandatory);
-addOption(parser, ArgParseOption("i", "inputFile", "Name of the multi-FASTA input.", ));
+addOption(parser, ArgParseOption("i", "inputFile", "Name of the multi-FASTA input.",
+                                 ArgParseArgument(ArgParseArgument::INPUTFILE, false, "IN")));
+setRequired(parser, "i");
 
-ArgParseOption optionInputFile("o", "outputFile", "Name of the output file.",
-                                  OptionType::String | OptionType::Mandatory);
-optionInputFile = addArgumentText(optionInputFile, "OUT");
-addOption(parser, optionInputFile);
+addOption(parser, ArgParseOption("o", "outputFile", "Name of the multi-FASTA input.",
+                                 ArgParseArgument(ArgParseArgument::OUTPUTFILE, false, "OUT")));
+setRequired(parser, "o");
 
 addTextSection(parser, "See Also");
 addText(parser, "http://www.seqan.de/projects/alf");
@@ -137,16 +135,15 @@ public:
     TArgumentMap argumentList;
 
     // ----------------------------------------------------------------------------
-    // Members
+    // Documentation Members
     // ----------------------------------------------------------------------------
-    std::vector<std::string> _description;
-    std::string              _appName;
-    std::vector<std::string> _titleText;
-    std::vector<std::string> _usageText;
-    std::vector<std::string> _versionText;
+    ToolDoc                  _toolDoc;      // the tool doc for all user specified
+                                            // text
+    ToolDoc                  _description;  // the description which we need to
+                                            // separate to put it on top of the rest
+    std::vector<std::string> _usageText;    // the usage lines as strings, to avoid
+                                            // interference with the rest of the doc
     
-    ToolDoc _toolDoc;
-
     // ----------------------------------------------------------------------------
     // return values for unset parameters
     // ----------------------------------------------------------------------------
@@ -164,6 +161,10 @@ public:
         addOption(*this, ArgParseOption("h", "help", "Displays this help message."));
         addOption(*this, ArgParseOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", ArgParseArgument(ArgParseArgument::OUTPUTFILE)));
         addOption(*this, ArgParseOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", ArgParseArgument(ArgParseArgument::STRING, false, "FORMAT")));
+
+        // this is our ToolDoc only for the Description, we will later append it to the
+        // real ToolDoc, but we need to separate it to ease the formating
+        addSection(_description, "Description");
     }
 
     // ----------------------------------------------------------------------------
@@ -175,7 +176,7 @@ public:
         init();
     }
 
-    ArgumentParser(std::string _appName) : _appName(_appName)
+    ArgumentParser(std::string _appName)
     {
         setName(_toolDoc, _appName);
         init();
@@ -198,8 +199,7 @@ public:
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-hasOption(ArgumentParser const & me, std::string const & _name)
+inline bool hasOption(ArgumentParser const & me, std::string const & _name)
 {
     return (hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name));
 }
@@ -220,8 +220,7 @@ hasOption(ArgumentParser const & me, std::string const & _name)
 ..include:seqan/arg_parse.h
 */
 
-inline void
-addOption(ArgumentParser & me, ArgParseOption const & opt)
+inline void addOption(ArgumentParser & me, ArgParseOption const & opt)
 {
     // check if an option with the same identifiers was already registered
     SEQAN_CHECK(!hasOption(me, opt.shortName), "There already is an option with the name %s!", toCString(opt.shortName));
@@ -248,8 +247,7 @@ addOption(ArgumentParser & me, ArgParseOption const & opt)
 ..include:seqan/arg_parse.h
 */
 
-inline void
-addArgument(ArgumentParser & me, ArgParseArgument const & arg)
+inline void addArgument(ArgumentParser & me, ArgParseArgument const & arg)
 {
     // check previous arguments
     //  .. lists can only be last argument
@@ -265,145 +263,6 @@ addArgument(ArgumentParser & me, ArgParseArgument const & arg)
     SEQAN_CHECK(arg._numberOfArguments == 1, "n-Tuple of arguments are not supported.");
 
     me.argumentList.push_back(arg);
-}
-
-// ----------------------------------------------------------------------------
-// Function addLine()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addLine:
-..summary:Adds a line of text to the help output of the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addLine(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:A line of text that will be added to the help output.
-...type:Shortcut.CharString
-..include:seqan/arg_parse.h
-*/
-
-template <typename TString>
-inline void
-addLine(ArgumentParser & me, TString const & line)
-{
-    addOption(me, ArgParseOption("", "", line));
-}
-
-// ----------------------------------------------------------------------------
-// Function addHelpLine()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addHelpLine:
-..summary:Adds an extra line of text below the help text of an option.
-..cat:Miscellaneous
-..signature:addHelpLine(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:A line of text that will be added below the help text of an option.
-...type:Shortcut.CharString
-..include:seqan/arg_parse.h
-*/
-
-template <typename TString>
-inline void
-addHelpLine(ArgumentParser & me, TString const & line)
-{
-    addOption(me, ArgParseOption("", "", line));
-}
-
-// ----------------------------------------------------------------------------
-// Function addSection()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addSection:
-..summary:Adds a new section the help output of the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addSection(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:A section header that will be added to the help output.
-...type:Shortcut.CharString
-..include:seqan/arg_parse.h
-*/
-
-template <typename TString>
-inline void
-addSection(ArgumentParser & me, TString const & line)
-{
-    addLine(me, "");
-    addLine(me, line);
-}
-
-// ----------------------------------------------------------------------------
-// Function addTitleLine()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addTitleLine:
-..summary:Adds a line of text to the title output of the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addTitleLine(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:A text line that will be added to the title output.
-...type:Shortcut.CharString
-..include:seqan/arg_parse.h
-*/
-
-template <typename TString>
-inline void
-addTitleLine(ArgumentParser & me, TString const & line)
-{
-    me._titleText.push_back(line);
-}
-
-// ----------------------------------------------------------------------------
-// Function addVersionLine()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addVersionLine:
-..summary:Adds a line of text to the version output of the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addVersionLine(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:A text line that will be added to the version output.
-...type:Shortcut.CharString
-..include:seqan/arg_parse.h
-*/
-
-template <typename TString>
-inline void
-addVersionLine(ArgumentParser & me, TString const & line)
-{
-    if (empty(me._versionText))
-        addOption(me, ArgParseOption("V", "version", "Print version information."));
-    me._versionText.push_back(line);
-}
-
-// ----------------------------------------------------------------------------
-// Function addUsageLine()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addUsageLine:
-..summary:Adds a line of text to the usage output of the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addUsageLine(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:A text line that will be added to the usage output.
-..include:seqan/arg_parse.h
-*/
-
-inline void
-addUsageLine(ArgumentParser & me, std::string const & line)
-{
-    me._usageText.push_back(line);
 }
 
 // ----------------------------------------------------------------------------
@@ -431,15 +290,13 @@ _getOptionIndex(ArgumentParser const & me, std::string const & _name)
 // Function getOption()
 // ----------------------------------------------------------------------------
 
-inline ArgParseOption &
-getOption(ArgumentParser & me, std::string const & _name)
+inline ArgParseOption & getOption(ArgumentParser & me, std::string const & _name)
 {
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     return me.optionMap[_getOptionIndex(me,_name)];
 }
 
-inline ArgParseOption const &
-getOption(ArgumentParser const & me, std::string const & _name)
+inline ArgParseOption const & getOption(ArgumentParser const & me, std::string const & _name)
 {
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     return me.optionMap[_getOptionIndex(me,_name)];
@@ -463,8 +320,7 @@ getOption(ArgumentParser const & me, std::string const & _name)
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setRequired(ArgumentParser & me, std::string const & _name, bool required)
+inline void setRequired(ArgumentParser & me, std::string const & _name, bool required = true)
 {
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     return setRequired(getOption(me, _name), required);
@@ -474,251 +330,18 @@ setRequired(ArgumentParser & me, std::string const & _name, bool required)
 // Function getArgument()
 // ----------------------------------------------------------------------------
 
-inline ArgParseArgument &
-getArgument(ArgumentParser & me, unsigned position)
+inline ArgParseArgument & getArgument(ArgumentParser & me, unsigned position)
 {
     SEQAN_CHECK(position < me.argumentList.size(),
                 "ArgumentParser: Only %d arguments available", me.argumentList.size());
     return me.argumentList[position];
 }
 
-inline ArgParseArgument const &
-getArgument(ArgumentParser const & me, unsigned position)
+inline ArgParseArgument const & getArgument(ArgumentParser const & me, unsigned position)
 {
     SEQAN_CHECK(position < me.argumentList.size(),
                 "ArgumentParser: Only %d arguments available", me.argumentList.size());
     return me.argumentList[position];
-}
-
-
-// ----------------------------------------------------------------------------
-// Function _printStringSet()
-// ----------------------------------------------------------------------------
-
-template <typename TStringSet, typename TStream>
-inline void
-_printStringSet(TStringSet const & set, TStream & target)
-{
-    for (unsigned r = 0; r < length(set); ++r)
-    {
-        _streamWrite(target, set[r]);
-        _streamPut(target, '\n');
-    }
-}
-
-template <typename TStream>
-inline void
-_printStringSet(std::vector<std::string> const & set, TStream & target)
-{
-    for (unsigned r = 0; r < length(set); ++r)
-    {
-        target << set[r] << "\n";
-    }
-}
-
-
-// ----------------------------------------------------------------------------
-// Function _printUsage()
-// ----------------------------------------------------------------------------
-
-template <typename TStream>
-inline void
-_printUsage(ArgumentParser const & me, TStream & target)
-{
-    _streamWrite(target, "Usage: ");
-    if (empty(me._usageText))
-    {
-        target << me._appName;
-        _streamWrite(target, " [OPTION]... ");
-
-        for (unsigned r = 0; r < me.argumentList.size(); ++r)
-        {
-            target << getArgumentLabel(getArgument(me, r));
-        }
-        _streamPut(target, '\n');
-    }
-    else
-    {
-        for (unsigned r = 0; r < length(me._usageText); ++r)
-        {
-            if (r)
-                _streamWrite(target, "       ");
-            target << me._appName;
-            _streamPut(target, ' ');
-            target << me._usageText[r];
-            _streamPut(target, '\n');
-        }
-    }
-}
-
-// ----------------------------------------------------------------------------
-// Function _printTitle()
-// ----------------------------------------------------------------------------
-
-template <typename TStream>
-inline void
-_printTitle(ArgumentParser const & me, TStream & target)
-{
-    _printStringSet(me._titleText, target);
-}
-
-// ----------------------------------------------------------------------------
-// Function printShortHelp()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.printShortHelp
-..summary:Prints a short help message for the parser to a stream
-..cat:Miscellaneous
-..signature:printShortHelp(parser[, stream])
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.stream:Target stream (e.g. $std::cerr$).
-..include:seqan/arg_parse.h
-*/
-
-template <typename TStream>
-inline void
-printShortHelp(ArgumentParser const & me, TStream & target)
-{
-    _printTitle(me, target);
-    _printUsage(me, target);
-    _streamWrite(target, "Try '");
-    target << me._appName;
-    _streamWrite(target, " --help' for more information.\n");
-}
-
-// ----------------------------------------------------------------------------
-// Function printHelp()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.printHelp
-..summary:Prints the complete help message for the parser to a stream.
-..cat:Miscellaneous
-..signature:printHelp(parser[, stream][, format])
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.stream:Target stream (e.g. $std::cerr$).
-...default: $std::cerr$
-..param.format:Format to print, one of "html", "man", "txt".
-..include:seqan/arg_parse.h
-*/
-
-template <typename TStream>
-inline void
-printHelp(ArgumentParser const & me, TStream & target, CharString const & format)
-{
-    ToolDoc toolDoc(me._toolDoc);
-    clearEntries(toolDoc);  // We will append me._toolDoc later.
-
-    // Build synopsis section.
-    addSection(toolDoc, "Synopsis");
-    for (unsigned i = 0; i < length(me._usageText); ++i)
-    {
-        std::string text = "\\fB";
-        append(text, me._appName);
-        append(text, "\\fP ");
-        append(text, me._usageText[i]);
-        addText(toolDoc, text, false);
-    }
-
-    // Build Description section, include options.
-    addSection(toolDoc, "Description");
-
-    // Add description to tool documentation.
-    for (unsigned i = 0; i < length(me._description); ++i)
-        addText(toolDoc, me._description[i]);
-
-    // Add options to description section.
-    for (unsigned i = 0; i < length(me.optionMap); ++i)
-    {
-        ArgParseOption const & opt = me.optionMap[i];
-        if (empty(opt.shortName) && empty(opt.longName))  // this is not an option but a text line
-        {
-            if (empty(opt._helpText))  // TODO(holtgrew): Should go away in future.
-                continue;  // Skip empty lines.
-
-            // Is command line parser section, maps to ToolDoc subsection.
-            std::string title = opt._helpText;
-            append(title, ":");
-            addSubSection(toolDoc, title);
-        }
-        else
-        {
-            // Build list item term.
-            std::string term;
-            if (!empty(opt.shortName))
-            {
-                term = "\\fB-";
-                append(term, opt.shortName);
-                append(term, "\\fP");
-            }
-            if (!empty(opt.shortName) && !empty(opt.longName))
-                append(term, ", ");
-            if (!empty(opt.longName))
-            {
-                append(term, "\\fB--");
-                append(term, opt.longName);
-                append(term, "\\fP");
-            }
-            // Get arguments, autogenerate if necessary.
-            std::string arguments = getArgumentLabel(opt);
-
-            // Write arguments to term line -> only exception, boolean flags
-            if (!empty(arguments))
-            {
-                // Tokenize argument names.
-                std::istringstream iss(toCString(arguments));
-                std::vector<std::string> tokens;
-                std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(),
-                          std::back_inserter<std::vector<std::string> >(tokens));
-                // Append them, formatted in italic.
-                for (unsigned i = 0; i < length(tokens); ++i)
-                {
-                    append(term, " \\fI");
-                    append(term, tokens[i]);
-                    append(term, "\\fP");
-                }
-            }
-
-            // Add list item.
-            addListItem(toolDoc, term, opt._helpText);
-        }
-    }
-
-    append(toolDoc, me._toolDoc);
-    print(target, toolDoc, format);
-}
-
-template <typename TStream>
-inline void
-printHelp(ArgumentParser const & me, TStream & target)
-{
-    printHelp(me, target, "txt");
-}
-
-// ----------------------------------------------------------------------------
-// Function printVersion()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.printVersion
-..summary:Prints a version text to a stream.
-..cat:Miscellaneous
-..signature:version(parser[, stream])
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.stream:Target stream (e.g. $std::cerr$).
-...default: $std::cerr$
-..include:seqan/arg_parse.h
-*/
-
-template <typename TStream>
-inline void
-printVersion(ArgumentParser const & me, TStream & target)
-{
-    _printStringSet(me._versionText, target);
 }
 
 // ----------------------------------------------------------------------------
@@ -737,8 +360,7 @@ printVersion(ArgumentParser const & me, TStream & target)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isSet(ArgumentParser const & me, std::string const & name)
+inline bool isSet(ArgumentParser const & me, std::string const & name)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     return isSet(getOption(me, name));
@@ -748,8 +370,7 @@ isSet(ArgumentParser const & me, std::string const & name)
 // Function _allRequiredSet()
 // ----------------------------------------------------------------------------
 
-inline bool
-_allRequiredSet(ArgumentParser const & me)
+inline bool _allRequiredSet(ArgumentParser const & me)
 {
     for (unsigned o = 0; o < length(me.optionMap); ++o)
         if (!isSet(me.optionMap[o]) && isRequired(me.optionMap[o]))
@@ -762,8 +383,7 @@ _allRequiredSet(ArgumentParser const & me)
 // Function _allArgumentsSet()
 // ----------------------------------------------------------------------------
 
-inline bool
-_allArgumentsSet(ArgumentParser const & me)
+inline bool _allArgumentsSet(ArgumentParser const & me)
 {
     for(unsigned a = 0; a < me.argumentList.size(); ++a)
     {
@@ -771,22 +391,6 @@ _allArgumentsSet(ArgumentParser const & me)
             return false;
     }
     return true;
-}
-
-// ----------------------------------------------------------------------------
-// Function _parseAppName()
-// ----------------------------------------------------------------------------
-
-inline std::string
-_parseAppName(std::string const & candidate)
-{
-    //IOREV _notio_ irrelevant for io-revision
-    int i = length(candidate) - 1;
-
-    for (; i >= 0; --i)
-        if (candidate[i] == '\\' || candidate[i] == '/')
-            break;
-    return candidate.substr(i+1);
 }
 
 // ----------------------------------------------------------------------------
@@ -809,17 +413,16 @@ _parseAppName(std::string const & candidate)
 */
 
 template <typename TValue>
-inline bool
-getOptionValue(TValue & val, ArgumentParser const & me, std::string const & name,
-               unsigned argNo)
+inline bool getOptionValue(TValue & val, ArgumentParser const & me,
+                           std::string const & name, unsigned argNo)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     return _convertOptionValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
 }
 
 template <typename TValue>
-inline bool
-getOptionValue(TValue & val, ArgumentParser const & me, std::string const & name)
+inline bool getOptionValue(TValue & val, ArgumentParser const & me,
+                           std::string const & name)
 {
     return getOptionValue(val, me, name, 0);
 }
@@ -844,16 +447,16 @@ getOptionValue(TValue & val, ArgumentParser const & me, std::string const & name
 */
 
 template <typename TValue>
-inline bool
-getArgumentValue(TValue & value, ArgumentParser & me, unsigned argumentPosition, unsigned argNo)
+inline bool getArgumentValue(TValue & value, ArgumentParser & me,
+                             unsigned argumentPosition, unsigned argNo)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
     return _convertArgumentValue(value, getArgument(me, argumentPosition), getArgumentValue(getArgument(me, argumentPosition), argNo));
 }
 
 template <typename TValue>
-inline bool
-getArgumentValue(TValue & value, ArgumentParser & me, unsigned argumentPosition)
+inline bool getArgumentValue(TValue & value, ArgumentParser & me,
+                             unsigned argumentPosition)
 {
     return getArgumentValue(value, me, argumentPosition, 0);
 }
@@ -874,8 +477,8 @@ getArgumentValue(TValue & value, ArgumentParser & me, unsigned argumentPosition)
 ..include:seqan/arg_parse.h
 */
 
-inline std::vector<std::string> const &
-getOptionValues(ArgumentParser & me, std::string const & name)
+inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
+                                                        std::string const & name)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     return getArgumentValues(getOption(me, name));
@@ -897,8 +500,8 @@ getOptionValues(ArgumentParser & me, std::string const & name)
 ..include:seqan/arg_parse.h
 */
 
-inline std::vector<std::string> const &
-getOptionValues(ArgumentParser & me, unsigned argumentPosition)
+inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
+                                                        unsigned argumentPosition)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
     return getArgumentValues(getArgument(me, argumentPosition));
@@ -920,8 +523,8 @@ getOptionValues(ArgumentParser & me, unsigned argumentPosition)
 ..param.minValue:A @Shortcut.std::string@ containing a string representation of the minimum value of the @Class.ArgParseOption@.
 ..include:seqan/arg_parse.h
 */
-inline void
-setMinValue(ArgumentParser & me, std::string const & name, std::string const & _minValue)
+inline void setMinValue(ArgumentParser & me, std::string const & name,
+                        std::string const & _minValue)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setMinValue(getOption(me, name), _minValue);
@@ -943,8 +546,7 @@ setMinValue(ArgumentParser & me, std::string const & name, std::string const & _
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setMaxValue(ArgumentParser & me, std::string const & name,
+inline void setMaxValue(ArgumentParser & me, std::string const & name,
             std::string const & _maxValue)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
@@ -967,190 +569,18 @@ setMaxValue(ArgumentParser & me, std::string const & name,
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setValidValues(ArgumentParser & me, std::string const & name,
-               std::vector<std::string> const & _values)
+inline void setValidValues(ArgumentParser & me, std::string const & name,
+                           std::vector<std::string> const & _values)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setValidValues(getOption(me, name), _values);
 }
 
-inline void
-setValidValues(ArgumentParser & me, std::string const & name,
-               std::string const & _values)
+inline void setValidValues(ArgumentParser & me, std::string const & name,
+                           std::string const & _values)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setValidValues(getOption(me, name), _values);
-}
-
-// ----------------------------------------------------------------------------
-// Function addDescription()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addDescription
-..summary:Appends a description paragraph to the @Class.ArgumentParser@ documentation.
-..cat:Miscellaneous
-..signature:addDescription(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:The description paragraph.
-..returns:$void$
-..include:seqan/arg_parse.h
-*/
-
-inline void addDescription(ArgumentParser & me, std::string const & description)
-{
-    appendValue(me._description, description);
-}
-
-// ----------------------------------------------------------------------------
-// Function setAppName()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setAppName
-..summary:Sets application name of @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:setAppName(parser, appName)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.appName:The name of the application.
-..returns:$void$
-..include:seqan/arg_parse.h
-*/
-
-inline void setAppName(ArgumentParser & me, std::string const & name)
-{
-    setName(me._toolDoc, name);
-}
-
-// ----------------------------------------------------------------------------
-// Function setShortDescription()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setShortDescription
-..summary:Sets short description test of @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:setShortDescription(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:The short description text.
-..returns:$void$
-..include:seqan/arg_parse.h
-*/
-
-inline void setShortDescription(ArgumentParser & me, std::string const & description)
-{
-    setShortDescription(me._toolDoc, description);
-}
-
-// ----------------------------------------------------------------------------
-// Function setVersion()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setVersion
-..summary:Sets version string of @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:setVersion(parser, versionString)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.versionString:The version string to set.
-..returns:$void$
-..include:seqan/arg_parse.h
-*/
-
-inline void setVersion(ArgumentParser & me, std::string const & versionString)
-{
-    setVersion(me._toolDoc, versionString);
-}
-
-// ----------------------------------------------------------------------------
-// Function setDate()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setDate
-..summary:Sets date string of @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:setDate(parser, date)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.date:The date string.
-..returns:$void$
-..include:seqan/arg_parse.h
-*/
-
-inline void setDate(ArgumentParser & me, std::string const & date)
-{
-    setDate(me._toolDoc, date);
-}
-
-// ----------------------------------------------------------------------------
-// Function addTextSection()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addTextSection
-..summary:Adds a text section to the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addTextSection(parser, title)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.title:The section title.
-..returns:$void$
-..remarks:This will result in an additional section heading to be printed.
-..include:seqan/arg_parse.h
-*/
-
-inline void addTextSection(ArgumentParser & me, std::string const & title)
-{
-    addSection(me._toolDoc, title);
-}
-
-// ----------------------------------------------------------------------------
-// Function addTextSubSection()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addTextSubSection
-..summary:Adds a text subsection to the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addTextSubSection(parser, title)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.title:The subsection title.
-..returns:$void$
-..remarks:This will result in an additional subsection heading to be printed.
-..include:seqan/arg_parse.h
-*/
-
-inline void addTextSubSection(ArgumentParser & me, std::string const & title)
-{
-    addSubSection(me._toolDoc, title);
-}
-
-// ----------------------------------------------------------------------------
-// Function addText()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.addText
-..summary:Appends a text paragraph to the @Class.ArgumentParser@.
-..cat:Miscellaneous
-..signature:addText(parser, text)
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.text:The content of the text.
-..returns:$void$
-..include:seqan/arg_parse.h
-*/
-
-inline void addText(ArgumentParser & me, std::string const & text)
-{
-    addText(me._toolDoc, text);
 }
 
 }  // namespace seqan

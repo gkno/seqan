@@ -70,8 +70,8 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
     TArgumentPosition currentArgument = 0;
 
     // if the appName wasn't set .. parse from command line
-    if (empty(me._appName))
-        me._appName = _parseAppName(argv[0]);
+    if (empty(getAppName(me)))
+        _parseAppName(me, argv[0]);
 
     try
     {
@@ -174,7 +174,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
         }
         if (hasOption(me, "version") && isSet(me, "version"))
         {
-            printVersion(me, estream);
+            // printVersion(me, estream);
             return ArgumentParser::VERSION;
         }
         if (hasOption(me, "write-ctd") && isSet(me, "write-ctd"))
@@ -204,7 +204,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
     }
     catch(ParseException& ex)
     {
-        estream << me._appName << ": " << ex.what() << std::endl;
+        estream << getAppName(me) << ": " << ex.what() << std::endl;
         return ArgumentParser::ERROR;
     }
 

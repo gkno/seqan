@@ -538,7 +538,7 @@ public:
 ..summary:Container for string documentation on a command line tool.
 ..signature:ToolDoc
 ..remarks:
-This class is generally not used directly by the user but through @Class.CommandLineParser@.
+This class is generally not used directly by the user but through @Class.ArgumentParser@.
 It allows to store and represent all information related to a command line tool that would normally go into a man page.
 It can be printed to STL streams in different formats, currently plain text, HTML and man pages are supported.
 ..remarks:

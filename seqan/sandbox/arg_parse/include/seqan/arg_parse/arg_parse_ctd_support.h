@@ -217,10 +217,10 @@ writeCTD(ArgumentParser const & me)
     ctdfile.open(toCString(ctdfilename));
     ctdfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     ctdfile << "<tool status=\"external\">\n";
-    ctdfile << "\t<name>" << _xmlEscape(me._appName) << "</name>\n";
+    ctdfile << "\t<name>" << _xmlEscape(getAppName(me)) << "</name>\n";
     //ctdfile << "\t<version>" << _xmlEscape(me._versionText) << "</version>\n";
-    ctdfile << "\t<description><![CDATA[" << _xmlEscape(me._appName) << ".]]></description>\n";
-    ctdfile << "\t<manual><![CDATA[" << _xmlEscape(me._appName) << ".]]></manual>\n"; // TODO: as soon as we have a more sophisticated documentation embedded into the CmdParser, we should at this here
+    ctdfile << "\t<description><![CDATA[" << _xmlEscape(getAppName(me)) << ".]]></description>\n";
+    ctdfile << "\t<manual><![CDATA[" << _xmlEscape(getAppName(me)) << ".]]></manual>\n"; // TODO: as soon as we have a more sophisticated documentation embedded into the CmdParser, we should at this here
     ctdfile << "\t<docurl>Direct links in docs</docurl>\n";
     ctdfile << "\t<category>SeqAn - Sequence Analaysis</category>\n";
     ctdfile << "\t<mapping><![CDATA[\n";
@@ -242,7 +242,7 @@ writeCTD(ArgumentParser const & me)
 */
     ctdfile << "]]></mapping>\n";
     ctdfile << "\t<PARAMETERS version=\"1.3\" xsi:noNamespaceSchemaLocation=\"http://open-ms.sourceforge.net/schemas/Param_1_3.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" << std::endl;
-    ctdfile << "\t\t<NODE name=\"" << _xmlEscape(me._appName) << "\" description=\"???\">" << std::endl;
+    ctdfile << "\t\t<NODE name=\"" << _xmlEscape(getAppName(me)) << "\" description=\"???\">" << std::endl;
 /*
     for (optionMapIterator = begin(me.optionMap); optionMapIterator != end(me.optionMap); optionMapIterator++)
     {
