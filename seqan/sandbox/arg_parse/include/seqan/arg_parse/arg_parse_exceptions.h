@@ -100,6 +100,18 @@ public:
     }
 };
 
+class NotEnoughArguments : public ParseException
+{
+public:
+    NotEnoughArguments(std::string const & option)
+        : ParseException("")
+    {
+        std::stringstream what;
+        what << "option requires more arguments -- " << option;
+        _what = what.str();
+    }
+};
+
 // ============================================================================
 // Metafunctions
 // ============================================================================

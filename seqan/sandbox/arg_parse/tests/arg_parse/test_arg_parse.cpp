@@ -99,6 +99,11 @@ SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
     SEQAN_CALL_TEST(test_argument_double);
     SEQAN_CALL_TEST(test_argument_not_a_double);
 
+    // Test list of n-tuples arguments
+    SEQAN_CALL_TEST(test_int_list_option);
+    SEQAN_CALL_TEST(test_double_list_option);
+    SEQAN_CALL_TEST(test_double_list_option_not_enough_arguments);
+
     // cmd argument tests
     SEQAN_CALL_TEST(test_argument_string_label);
     SEQAN_CALL_TEST(test_argument_int_label);

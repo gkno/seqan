@@ -158,7 +158,10 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                                 assignArgumentValue(opt,argv[++arg]);
                         }
                         else  // no value available
+                        {
                             throw MissingArgumentException(longOpt);
+                        }
+
                     }
                     else
                         throw InvalidOptionException(longOpt);

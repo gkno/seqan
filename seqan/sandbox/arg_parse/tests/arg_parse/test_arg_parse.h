@@ -81,7 +81,23 @@ const char * A_ARGUMENT_3 = "argument3";
 const char * A_ARGUMENT_INT_4 = "-10";
 const char * A_ARGUMENT_DOUBLE_5 = "6.0221418e23";
 
-namespace seqan {
+const char * A_TUPLE_LIST = "test_tuple_list";
+const char * A_TUPLE_LIST_L = "-l";
+const char * A_TUPLE_LIST_L_1 = "10";
+const char * A_TUPLE_LIST_L_2 =  "20";
+const char * A_TUPLE_LIST_L_3 =  "30";
+const char * A_TUPLE_LIST_L_4 =  "40";
+
+const char * A_TUPLE_LIST_DL = "-k";
+const char * A_TUPLE_LIST_DL_1 = "5.1";
+const char * A_TUPLE_LIST_DL_2 = "6.2";
+const char * A_TUPLE_LIST_DL_3 = "7.3";
+const char * A_TUPLE_LIST_DL_4 = "5.5";
+const char * A_TUPLE_LIST_DL_5 = "6.6";
+const char * A_TUPLE_LIST_DL_6 = "7.7";
+
+namespace seqan
+{
 
 // moved initialization of cmd parser out of the test functions
 // to have single place to change in case of interface changes
@@ -707,6 +723,75 @@ SEQAN_DEFINE_TEST(test_isInt)
     SEQAN_ASSERT(_isInt(b));
     SEQAN_ASSERT(_isInt(c));
     SEQAN_ASSERT(!_isInt(d));
+}
+
+// Testing lists of tuples
+SEQAN_DEFINE_TEST(test_int_list_option)
+{
+    ArgumentParser parser;
+    addOption(parser, ArgParseOption("l", "list", "this is a list option", ArgParseArgument(ArgParseArgument::INTEGER, true, "",2)));
+
+    int argc = 7;
+    const char* argv[7] = {A_TUPLE_LIST, A_TUPLE_LIST_L, A_TUPLE_LIST_L_1, A_TUPLE_LIST_L_2, A_TUPLE_LIST_L, A_TUPLE_LIST_L_3, A_TUPLE_LIST_L_4};
+
+    std::stringstream error_stream;
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+
+    SEQAN_ASSERT_EQ(getOptionValueCount(parser, "list"), 4u);
+
+    int value = 0;
+    SEQAN_ASSERT(getOptionValue(value, parser, "list", 0));
+    SEQAN_ASSERT_EQ(value, 10);
+    SEQAN_ASSERT(getOptionValue(value, parser, "list", 1));
+    SEQAN_ASSERT_EQ(value, 20);
+
+    SEQAN_ASSERT(getOptionValue(value, parser, "list", 2));
+    SEQAN_ASSERT_EQ(value, 30);
+    SEQAN_ASSERT(getOptionValue(value, parser, "list", 3));
+    SEQAN_ASSERT_EQ(value, 40);
+}
+
+SEQAN_DEFINE_TEST(test_double_list_option)
+{
+    ArgumentParser parser;
+    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument(ArgParseArgument::DOUBLE, true, "", 3)));
+
+    int argc = 9;
+    const char* argv[9] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5, A_TUPLE_LIST_DL_6};
+
+    std::stringstream error_stream;
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+
+    SEQAN_ASSERT_EQ(getOptionValueCount(parser, "double-list"), 6u);
+
+    double value = 0;
+    SEQAN_ASSERT(getOptionValue(value, parser, "double-list", 0));
+    SEQAN_ASSERT_EQ(value, 5.1);
+    SEQAN_ASSERT(getOptionValue(value, parser, "double-list", 1));
+    SEQAN_ASSERT_EQ(value, 6.2);
+    SEQAN_ASSERT(getOptionValue(value, parser, "double-list", 2));
+    SEQAN_ASSERT_EQ(value, 7.3);
+
+    SEQAN_ASSERT(getOptionValue(value, parser, "double-list", 3));
+    SEQAN_ASSERT_EQ(value, 5.5);
+    SEQAN_ASSERT(getOptionValue(value, parser, "double-list", 4));
+    SEQAN_ASSERT_EQ(value, 6.6);
+    SEQAN_ASSERT(getOptionValue(value, parser, "double-list", 5));
+    SEQAN_ASSERT_EQ(value, 7.7);
+
+}
+
+SEQAN_DEFINE_TEST(test_double_list_option_not_enough_arguments)
+{
+    ArgumentParser parser;
+    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument(ArgParseArgument::DOUBLE, true, "", 3)));
+
+    int argc = 8;
+    const char* argv[8] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5};
+
+    std::stringstream error_stream;
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(error_stream.str(), "test_tuple_list: option requires an argument -- k\n");
 }
 
 } // namespace seqan

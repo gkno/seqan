@@ -406,7 +406,7 @@ inline bool _allArgumentsSet(ArgumentParser const & me)
 ...remarks:The type of $value$ must be compatible the option type.
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
-..param.optionIdentifier:A @Shortcut.std::string@ that is either the short or long name of the option.
+..param.optionIdentifier:A std::string that is either the short or long name of the option.
 ..param.argNo:If the option is list, the $argNo$-th list element is returned.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
 ..include:seqan/arg_parse.h
@@ -425,6 +425,52 @@ inline bool getOptionValue(TValue & val, ArgumentParser const & me,
                            std::string const & name)
 {
     return getOptionValue(val, me, name, 0);
+}
+
+// ----------------------------------------------------------------------------
+// Function getOptionValueCount()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getOptionValueCount:
+..summary:Returns the number of values stored in the specified option.
+..cat:Miscellaneous
+..signature:getOptionValueCount(parser, optionIdentifier)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionIdentifier:A std::string that is either the short or long name of the option.
+..param.argNo:If the option is list, the $argNo$-th list element is returned.
+..returns: The number of values stored for this option.
+..include:seqan/arg_parse.h
+*/
+
+inline unsigned getOptionValueCount(ArgumentParser const & me, std::string const & name)
+{
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return getArgumentValues(getOption(me, name)).size();
+}
+
+// ----------------------------------------------------------------------------
+// Function getArgumentValueCount()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getArgumentValueCount:
+..summary:Retunrs the number of values stored in the specified option.
+..cat:Miscellaneous
+..signature:getOptionValueCount(parser, optionIdentifier)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionIdentifier:A std::string that is either the short or long name of the option.
+..param.argNo:If the option is list, the $argNo$-th list element is returned.
+..returns: The number of values stored for this option.
+..include:seqan/arg_parse.h
+*/
+
+inline unsigned getArgumentValueCount(ArgumentParser const & me, unsigned argumentPosition)
+{
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    return getArgumentValues(getArgument(me, argumentPosition)).size();
 }
 
 // ----------------------------------------------------------------------------
@@ -461,6 +507,7 @@ inline bool getArgumentValue(TValue & value, ArgumentParser & me,
     return getArgumentValue(value, me, argumentPosition, 0);
 }
 
+
 // ----------------------------------------------------------------------------
 // Function getOptionValues()
 // ----------------------------------------------------------------------------
@@ -472,7 +519,7 @@ inline bool getArgumentValue(TValue & value, ArgumentParser & me,
 ..signature:getOptionValues(parser, optionIdentifier)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
-..param.optionIdentifier:A @Shortcut.std::string@ that is either the short or long name of the option.
+..param.optionIdentifier:A std::string that is either the short or long name of the option.
 ..returns: A $String<std::string>$ of option values.
 ..include:seqan/arg_parse.h
 */
@@ -520,7 +567,7 @@ inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-..param.minValue:A @Shortcut.std::string@ containing a string representation of the minimum value of the @Class.ArgParseOption@.
+..param.minValue:A std::string containing a string representation of the minimum value of the @Class.ArgParseOption@.
 ..include:seqan/arg_parse.h
 */
 inline void setMinValue(ArgumentParser & me, std::string const & name,
@@ -542,7 +589,7 @@ inline void setMinValue(ArgumentParser & me, std::string const & name,
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
-..param.maxValue:A @Shortcut.std::string@ containing a string representation of the maximum value of the @Class.ArgParseOption@.
+..param.maxValue:A std::string containing a string representation of the maximum value of the @Class.ArgParseOption@.
 ..include:seqan/arg_parse.h
 */
 

@@ -132,8 +132,6 @@ public:
                      minValue(""),
                      maxValue("")
     {
-        SEQAN_CHECK( ((_isListArgument && _numberOfArguments == 1) || (!_isListArgument && _numberOfArguments >= 1)),
-                     "ArgParse currently does not support arguments that are lists of n-tuples." );
     }
 
 
@@ -150,9 +148,6 @@ public:
                      minValue(""),
                      maxValue("")
     {
-        SEQAN_CHECK( ((_isListArgument && _numberOfArguments == 1) || (!_isListArgument && _numberOfArguments >= 1)),
-                     "ArgParse currently does not support arguments that are lists of n-tuples." );
-
         std::stringstream strm;
         strm << _default;
         appendValue(defaultValue, strm.str());
