@@ -83,8 +83,8 @@ public:
     bool                _isFlag;      // true if this a bool option, that has no
                                       // argument we will internally represent it as a
                                       // string option set to either "true" or "false"
-    bool                _isRequired; // true if this ArgParseOption must be set
-    bool                _isVisible;    // true if this ArgParseOption should not be
+    bool                _isRequired;  // true if this ArgParseOption must be set
+    bool                _isHidden;    // true if this ArgParseOption should not be
                                       // shown on the command line
 
     // ----------------------------------------------------------------------------
@@ -105,7 +105,7 @@ public:
                    _argument(argument),
                    _isFlag(false),
                    _isRequired(false),
-                   _isVisible(false),
+                   _isHidden(false),
                    _helpText(_help)
     {}
 
@@ -117,7 +117,7 @@ public:
                    _argument(ArgParseArgument::STRING, false, "", 1, "true"),
                    _isFlag(true),
                    _isRequired(false),
-                   _isVisible(false),
+                   _isHidden(false),
                    _helpText(_help)
     {
         setValidValues(_argument, "true false");
@@ -214,41 +214,39 @@ isIntOption(ArgParseOption const & me)
 
 /**
 .Function.isVisible
-..summary:Returns whether option is hidden on the help screen.
+..summary:Returns whether option is visible on the help screen. Default is true.
 ..cat:Miscellaneous
 ..signature:isHiddenOption(option)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
-..returns:$true$ if the option is hidden on the help screen.
+..returns:$true$ if the option is shown on the help screen.
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isVisible(ArgParseOption const & me)
+inline bool isVisible(ArgParseOption const & me)
 {
-    return me._isVisible;
+    return me._isHidden;
 }
 
 // ----------------------------------------------------------------------------
-// Function setVisibility()
+// Function hideOption()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.setVisibility
-..summary:Sets the visibility of the ArgParseOption.
+.Function.hideOption
+..summary:Hides the ArgParseOption from the help screen.
 ..cat:Miscellaneous
-..signature:setVisibility(option, visibility)
+..signature:hideOption(option [, hide])
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
-..param.visibility:The new visibility of the option.
+..param.hide:The new visibility of the option. Default is false.
 ...type:Bool
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setVisibility(ArgParseOption & me, bool visibility)
+inline void hideOption(ArgParseOption & me, bool hide = true)
 {
-    me._isVisible = visibility;
+    me._isHidden = hide;
 }
 
 // ----------------------------------------------------------------------------
@@ -266,8 +264,7 @@ setVisibility(ArgParseOption & me, bool visibility)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isRequired(ArgParseOption const & me)
+inline bool isRequired(ArgParseOption const & me)
 {
     return me._isRequired;
 }
@@ -288,8 +285,7 @@ isRequired(ArgParseOption const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setRequired(ArgParseOption & me, bool required)
+inline void setRequired(ArgParseOption & me, bool required)
 {
     me._isRequired = required;
 }
@@ -309,8 +305,7 @@ setRequired(ArgParseOption & me, bool required)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isListOption(ArgParseOption const & me)
+inline bool isListOption(ArgParseOption const & me)
 {
     return isListArgument(me._argument);
 }
@@ -331,8 +326,7 @@ isListOption(ArgParseOption const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isInputFile(ArgParseOption const & me)
+inline bool isInputFile(ArgParseOption const & me)
 {
     return isInputFileArgument(me._argument);
 }
@@ -353,8 +347,7 @@ isInputFile(ArgParseOption const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isOutputFile(ArgParseOption const & me)
+inline bool isOutputFile(ArgParseOption const & me)
 {
     return isOutputFileArgument(me._argument);
 }
@@ -364,8 +357,7 @@ isOutputFile(ArgParseOption const & me)
 // ----------------------------------------------------------------------------
 
 template <typename TStream>
-inline void
-_writeOptName(TStream & target, ArgParseOption const & me)
+inline void _writeOptName(TStream & target, ArgParseOption const & me)
 {
     //IOREV _notio_ irrelevant for iorev
     _streamWrite(target, empty(me.shortName) ? "" : "-");
@@ -394,8 +386,7 @@ _writeOptName(TStream & target, ArgParseOption const & me)
 */
 
 template <typename TStream>
-inline void
-write(TStream & target, ArgParseOption const & me)
+inline void write(TStream & target, ArgParseOption const & me)
 {
     //IOREV _nodoc_ this specialization is not documented
     _streamPut(target, '\t');
@@ -410,8 +401,7 @@ write(TStream & target, ArgParseOption const & me)
 // ----------------------------------------------------------------------------
 
 template <typename TStream>
-inline TStream &
-operator<<(TStream & target, ArgParseOption const & source)
+inline TStream & operator<<(TStream & target, ArgParseOption const & source)
 {
     //IOREV _nodoc_ this specialization is not documented
     write(target, source);
@@ -433,8 +423,7 @@ operator<<(TStream & target, ArgParseOption const & source)
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setMinValue(ArgParseOption & me, const std::string _minValue)
+inline void setMinValue(ArgParseOption & me, const std::string _minValue)
 {
     setMinValue(me._argument, _minValue);
 }
@@ -454,8 +443,7 @@ setMinValue(ArgParseOption & me, const std::string _minValue)
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setMaxValue(ArgParseOption & me, const std::string _maxValue)
+inline void setMaxValue(ArgParseOption & me, const std::string _maxValue)
 {
     setMaxValue(me._argument, _maxValue);
 }
@@ -476,14 +464,12 @@ std::string with valid values separated by spaces.
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setValidValues(ArgParseOption & me, std::vector<std::string> const & _values)
+inline void setValidValues(ArgParseOption & me, std::vector<std::string> const & _values)
 {
     setValidValues(me._argument, _values);
 }
 
-inline void
-setValidValues(ArgParseOption & me, std::string const & _values)
+inline void setValidValues(ArgParseOption & me, std::string const & _values)
 {
     setValidValues(me._argument, _values);
 }
@@ -503,8 +489,7 @@ is returned or a default label (based on the ArgumentType is used).
 ..include:seqan/arg_parse.h
 */
 
-inline std::string const
-getArgumentLabel(ArgParseOption const & me)
+inline std::string const getArgumentLabel(ArgParseOption const & me)
 {
     if(isBooleanOption(me))
         return "";
@@ -526,8 +511,7 @@ getArgumentLabel(ArgParseOption const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isSet(ArgParseOption const & me)
+inline bool isSet(ArgParseOption const & me)
 {
     return isSet(me._argument);
 }
@@ -550,8 +534,7 @@ Otherwise the value will be overwritten.
 ..include:seqan/arg_parse.h
 */
 
-inline void
-assignArgumentValue(ArgParseOption & me, std::string const & value) throw (ParseException)
+inline void assignArgumentValue(ArgParseOption & me, std::string const & value) throw (ParseException)
 {
     assignArgumentValue(me._argument, value);
 }
@@ -575,14 +558,12 @@ you want to get. If not set the first value will be returned.
 ..include:seqan/arg_parse.h
 */
 
-inline std::string const &
-getArgumentValue(ArgParseOption const & me, unsigned position)
+inline std::string const & getArgumentValue(ArgParseOption const & me, unsigned position)
 {
     return getArgumentValue(me._argument, position);
 }
 
-inline std::string const &
-getArgumentValue(ArgParseOption const & me)
+inline std::string const & getArgumentValue(ArgParseOption const & me)
 {
     return getArgumentValue(me, 0);
 }
@@ -602,8 +583,7 @@ getArgumentValue(ArgParseOption const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline std::vector<std::string> const &
-getArgumentValues(ArgParseOption const & me)
+inline std::vector<std::string> const & getArgumentValues(ArgParseOption const & me)
 {
     return getArgumentValues(me._argument);
 }
@@ -623,13 +603,10 @@ getArgumentValues(ArgParseOption const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline unsigned
-numberOfArguments(ArgParseOption const & me)
+inline unsigned numberOfArguments(ArgParseOption const & me)
 {
     return numberOfArguments(me._argument);
 }
-
-
 
 } // namespace seqan
 

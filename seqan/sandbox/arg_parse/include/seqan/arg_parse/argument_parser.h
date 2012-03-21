@@ -311,11 +311,11 @@ inline ArgParseOption const & getOption(ArgumentParser const & me, std::string c
 ..summary:Sets whether or not the option defined by the parameter $name$ (which can be
  either the short or the long name) is mandatory.
 ..cat:Miscellaneous
-..signature:setRequired(parser, optionName, required)
+..signature:setRequired(parser, optionName [, required])
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.optionName:The identifier of the command line option.
-..param.required:The new required value of the option.
+..param.required:The new required value of the option. Default is true.
 ...type:Bool
 ..include:seqan/arg_parse.h
 */
@@ -325,6 +325,31 @@ inline void setRequired(ArgumentParser & me, std::string const & _name, bool req
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     return setRequired(getOption(me, _name), required);
 }
+
+// ----------------------------------------------------------------------------
+// Function hideOption()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.hideOption
+..summary:Hides the ArgParseOption defined by the parameter $name$ (which can be
+ either the short or the long name) from the help screen.
+..cat:Miscellaneous
+..signature:hideOption(parser, optionName [, hide])
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionName:The identifier of the command line option.
+..param.hide:The new visibility of the option. Default is false.
+...type:Bool
+..include:seqan/arg_parse.h
+*/
+
+inline void hideOption(ArgumentParser & me, std::string const & _name, bool hide = true)
+{
+    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
+    hideOption(getOption(me, _name), hide);
+}
+
 
 // ----------------------------------------------------------------------------
 // Function getArgument()

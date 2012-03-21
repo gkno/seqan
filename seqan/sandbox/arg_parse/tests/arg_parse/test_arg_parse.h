@@ -64,6 +64,12 @@ const char * A_STRING_1 = "-s";
 const char * A_STRING_2 = "--string";
 const char * A_STRING_3 = "this-is-a-string-value";
 
+const char * A_BOOL = "test-boolean-flags";
+const char * A_BOOL_1 = "-b";
+const char * A_BOOL_2 = "-c";
+const char * A_BOOL_3 = "-bc";
+const char * A_BOOL_4 = "-cb";
+
 const char * A_IN_FILE_0 = "test";
 const char * A_IN_FILE_1 = "-i";
 const char * A_IN_FILE_2 = "--in";
@@ -102,27 +108,27 @@ namespace seqan
 // moved initialization of cmd parser out of the test functions
 // to have single place to change in case of interface changes
 // or test extensions
-void testInitDoubleParser(ArgumentParser & parser)
+void setupDoubleParser(ArgumentParser & parser)
 {
     addOption(parser, ArgParseOption("d", "double","set a double option", ArgParseArgument(ArgParseArgument::DOUBLE)));
 }
 
-void testInitIntegerParser(ArgumentParser & parser)
+void setupIntegerParser(ArgumentParser & parser)
 {
     addOption(parser, ArgParseOption("i", "integer","set an integer option", ArgParseArgument(ArgParseArgument::INTEGER)));
 }
 
-void testInitStringParser(ArgumentParser & parser)
+void setupStringParser(ArgumentParser & parser)
 {
     addOption(parser, ArgParseOption("s", "string", "set a string option", ArgParseArgument(ArgParseArgument::STRING, true)));
 }
 
-void testInFileTypeParser(ArgumentParser & parser)
+void setupInputFileParser(ArgumentParser & parser)
 {
     addOption(parser, ArgParseOption("i", "in", "set an input file", ArgParseArgument(ArgParseArgument::INPUTFILE)));
 }
 
-void testOutFileTypeParser(ArgumentParser & parser)
+void setupOutputFileParser(ArgumentParser & parser)
 {
     addOption(parser, ArgParseOption("o", "out", "set an output file", ArgParseArgument(ArgParseArgument::OUTPUTFILE)));
 }
@@ -131,7 +137,7 @@ SEQAN_DEFINE_TEST(test_int_short_argument)
 {
 
     ArgumentParser parser;
-    testInitIntegerParser(parser);
+    setupIntegerParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_INT_0, A_INT_1, A_INT_3};
@@ -150,7 +156,7 @@ SEQAN_DEFINE_TEST(test_int_long_argument)
 {
 
     ArgumentParser parser;
-    testInitIntegerParser(parser);
+    setupIntegerParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_INT_0, A_INT_2, A_INT_3};
@@ -169,7 +175,7 @@ SEQAN_DEFINE_TEST(test_non_int_argument)
 {
 
     ArgumentParser parser;
-    testInitIntegerParser(parser);
+    setupIntegerParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_INT_0, A_INT_1, A_INT_5};
@@ -184,7 +190,7 @@ SEQAN_DEFINE_TEST(test_double_short_argument)
 {
 
     ArgumentParser parser;
-    testInitDoubleParser(parser);
+    setupDoubleParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_DOUBLE_0, A_DOUBLE_1, A_DOUBLE_3};
@@ -204,7 +210,7 @@ SEQAN_DEFINE_TEST(test_double_long_argument)
 {
 
     ArgumentParser parser;
-    testInitDoubleParser(parser);
+    setupDoubleParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_DOUBLE_0, A_DOUBLE_2, A_DOUBLE_3};
@@ -223,7 +229,7 @@ SEQAN_DEFINE_TEST(test_non_double_argument)
 {
 
     ArgumentParser parser;
-    testInitDoubleParser(parser);
+    setupDoubleParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_DOUBLE_0, A_DOUBLE_1, A_DOUBLE_5};
@@ -238,7 +244,7 @@ SEQAN_DEFINE_TEST(test_double_scientific_notation)
 {
 
     ArgumentParser parser;
-    testInitDoubleParser(parser);
+    setupDoubleParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_DOUBLE_0, A_DOUBLE_1, A_DOUBLE_6};
@@ -256,7 +262,7 @@ SEQAN_DEFINE_TEST(test_string_short_argument)
 {
 
     ArgumentParser parser;
-    testInitStringParser(parser);
+    setupStringParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_STRING_0, A_STRING_1, A_STRING_3};
@@ -275,7 +281,7 @@ SEQAN_DEFINE_TEST(test_string_long_argument)
 {
 
     ArgumentParser parser;
-    testInitStringParser(parser);
+    setupStringParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_STRING_0, A_STRING_2, A_STRING_3};
@@ -293,7 +299,7 @@ SEQAN_DEFINE_TEST(test_string_missing_argument)
 {
 
     ArgumentParser parser;
-    testInitStringParser(parser);
+    setupStringParser(parser);
 
     int argc = 2;
     const char * argv[2] = {A_STRING_0, A_STRING_2};
@@ -307,7 +313,7 @@ SEQAN_DEFINE_TEST(test_string_missing_argument)
 SEQAN_DEFINE_TEST(test_string_list)
 {
     ArgumentParser parser;
-    testInitStringParser(parser);
+    setupStringParser(parser);
 
     int argc = 7;
     const char * argv[7] = {A_STRING_0, A_STRING_1, A_STRING_3, A_STRING_2, A_STRING_3, A_STRING_1, A_STRING_3};
@@ -331,7 +337,7 @@ SEQAN_DEFINE_TEST(test_string_list)
 SEQAN_DEFINE_TEST(test_min_max_double_values_in_range)
 {
     ArgumentParser parser;
-    testInitDoubleParser(parser);
+    setupDoubleParser(parser);
 
     setMinValue(parser, "double", "1.0");
     setMaxValue(parser, "double", "2.0");
@@ -352,7 +358,7 @@ SEQAN_DEFINE_TEST(test_min_max_double_values_in_range)
 SEQAN_DEFINE_TEST(test_min_max_double_values_to_small)
 {
     ArgumentParser parser;
-    testInitDoubleParser(parser);
+    setupDoubleParser(parser);
 
     setMinValue(parser, "double", "1.6");
 
@@ -368,7 +374,7 @@ SEQAN_DEFINE_TEST(test_min_max_double_values_to_small)
 SEQAN_DEFINE_TEST(test_min_max_double_values_to_big)
 {
     ArgumentParser parser;
-    testInitDoubleParser(parser);
+    setupDoubleParser(parser);
 
     setMaxValue(parser, "double", "1.5");
 
@@ -384,7 +390,7 @@ SEQAN_DEFINE_TEST(test_min_max_double_values_to_big)
 SEQAN_DEFINE_TEST(test_min_max_int_values_in_range)
 {
     ArgumentParser parser;
-    testInitIntegerParser(parser);
+    setupIntegerParser(parser);
 
     setMinValue(parser, "integer", "-10");
     setMaxValue(parser, "integer", "2");
@@ -405,7 +411,7 @@ SEQAN_DEFINE_TEST(test_min_max_int_values_in_range)
 SEQAN_DEFINE_TEST(test_min_max_int_values_to_small)
 {
     ArgumentParser parser;
-    testInitIntegerParser(parser);
+    setupIntegerParser(parser);
 
     setMinValue(parser, "integer", "3");
 
@@ -421,7 +427,7 @@ SEQAN_DEFINE_TEST(test_min_max_int_values_to_small)
 SEQAN_DEFINE_TEST(test_min_max_int_values_to_big)
 {
     ArgumentParser parser;
-    testInitIntegerParser(parser);
+    setupIntegerParser(parser);
 
     setMaxValue(parser, "integer", "-3");
 
@@ -437,7 +443,7 @@ SEQAN_DEFINE_TEST(test_min_max_int_values_to_big)
 SEQAN_DEFINE_TEST(test_allowed_values_contained)
 {
     ArgumentParser parser;
-    testInitStringParser(parser);
+    setupStringParser(parser);
 
     setValidValues(parser, "string", "a b c this-is-a-string-value");
 
@@ -457,7 +463,7 @@ SEQAN_DEFINE_TEST(test_allowed_values_contained)
 SEQAN_DEFINE_TEST(test_allowed_values_not_contained)
 {
     ArgumentParser parser;
-    testInitStringParser(parser);
+    setupStringParser(parser);
 
     setValidValues(parser, "string", "a b c");
 
@@ -473,7 +479,7 @@ SEQAN_DEFINE_TEST(test_allowed_values_not_contained)
 SEQAN_DEFINE_TEST(test_input_file_short)
 {
     ArgumentParser parser;
-    testInFileTypeParser(parser);
+    setupInputFileParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_IN_FILE_0, A_IN_FILE_1, A_IN_FILE_3};
@@ -491,7 +497,7 @@ SEQAN_DEFINE_TEST(test_input_file_short)
 SEQAN_DEFINE_TEST(test_input_file_long)
 {
     ArgumentParser parser;
-    testInFileTypeParser(parser);
+    setupInputFileParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_IN_FILE_0, A_IN_FILE_2, A_IN_FILE_3};
@@ -509,7 +515,7 @@ SEQAN_DEFINE_TEST(test_input_file_long)
 SEQAN_DEFINE_TEST(test_input_file_missing)
 {
     ArgumentParser parser;
-    testInFileTypeParser(parser);
+    setupInputFileParser(parser);
 
     int argc = 2;
     const char * argv[2] = {A_IN_FILE_0, A_IN_FILE_1};
@@ -523,7 +529,7 @@ SEQAN_DEFINE_TEST(test_input_file_missing)
 SEQAN_DEFINE_TEST(test_input_file_invalid_type)
 {
     ArgumentParser parser;
-    testInFileTypeParser(parser);
+    setupInputFileParser(parser);
 
     setValidValues(parser, "in", "FASTA fa");
 
@@ -539,7 +545,7 @@ SEQAN_DEFINE_TEST(test_input_file_invalid_type)
 SEQAN_DEFINE_TEST(test_input_file_valid_type)
 {
     ArgumentParser parser;
-    testInFileTypeParser(parser);
+    setupInputFileParser(parser);
 
     setValidValues(parser, "in", "fasta FASTA fa");
 
@@ -559,7 +565,7 @@ SEQAN_DEFINE_TEST(test_input_file_valid_type)
 SEQAN_DEFINE_TEST(test_output_file_short)
 {
     ArgumentParser parser;
-    testOutFileTypeParser(parser);
+    setupOutputFileParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_OUT_FILE_0, A_OUT_FILE_1, A_OUT_FILE_3};
@@ -577,7 +583,7 @@ SEQAN_DEFINE_TEST(test_output_file_short)
 SEQAN_DEFINE_TEST(test_output_file_long)
 {
     ArgumentParser parser;
-    testOutFileTypeParser(parser);
+    setupOutputFileParser(parser);
 
     int argc = 3;
     const char * argv[3] = {A_OUT_FILE_0, A_OUT_FILE_2, A_OUT_FILE_3};
@@ -595,7 +601,7 @@ SEQAN_DEFINE_TEST(test_output_file_long)
 SEQAN_DEFINE_TEST(test_output_file_missing)
 {
     ArgumentParser parser;
-    testOutFileTypeParser(parser);
+    setupOutputFileParser(parser);
 
     int argc = 2;
     const char * argv[2] = {A_OUT_FILE_0, A_OUT_FILE_1};
@@ -609,7 +615,7 @@ SEQAN_DEFINE_TEST(test_output_file_missing)
 SEQAN_DEFINE_TEST(test_output_file_invalid_type)
 {
     ArgumentParser parser;
-    testOutFileTypeParser(parser);
+    setupOutputFileParser(parser);
 
     setValidValues(parser, "out", "FASTA fa");
 
@@ -625,7 +631,7 @@ SEQAN_DEFINE_TEST(test_output_file_invalid_type)
 SEQAN_DEFINE_TEST(test_output_file_valid_type)
 {
     ArgumentParser parser;
-    testOutFileTypeParser(parser);
+    setupOutputFileParser(parser);
 
     setValidValues(parser, "out", "fasta FASTA fa");
 
@@ -794,6 +800,36 @@ SEQAN_DEFINE_TEST(test_double_list_option_not_enough_arguments)
     SEQAN_ASSERT_EQ(error_stream.str(), "test_tuple_list: option requires an argument -- k\n");
 }
 
+void setUpBoolParser(ArgumentParser& parser)
+{
+    addOption(parser, ArgParseOption("b", "", "This is a boolean flag"));
+    addOption(parser, ArgParseOption("c", "", "This is a boolean flag"));
+}
+
+SEQAN_DEFINE_TEST(test_boolean_flags)
+{
+    ArgumentParser parser;
+    setUpBoolParser(parser);
+
+    int argc = 3;
+    const char* argv[3] = { A_BOOL, A_BOOL_1, A_BOOL_2 };
+
+    std::stringstream error_stream;
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+
+    bool isSet = false;
+    SEQAN_ASSERT(getOptionValue(isSet, parser, "b"));
+    SEQAN_ASSERT(isSet);
+
+    isSet = false;
+    SEQAN_ASSERT(getOptionValue(isSet, parser, "c"));
+    SEQAN_ASSERT(isSet);
+}
+
+SEQAN_DEFINE_TEST(test_boolean_combined_boolean_flags)
+{
+}
+    
 } // namespace seqan
 
 #endif  // SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_H_

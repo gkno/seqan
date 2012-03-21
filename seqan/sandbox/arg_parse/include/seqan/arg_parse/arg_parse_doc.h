@@ -35,6 +35,10 @@
 #ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
 #define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
 
+#include <seqan/arg_parse/argument_parser.h>
+
+#include <seqan/misc/tool_doc.h>
+
 namespace seqan
 {
 
@@ -247,7 +251,7 @@ inline void printHelp(ArgumentParser const & me, std::ostream & stream, CharStri
             append(title, ":");
             addSubSection(toolDoc, title);
         }
-        else
+        else if(!isVisible(opt))
         {
             // Build list item term.
             std::string term;
@@ -381,6 +385,27 @@ inline void setShortDescription(ArgumentParser & me, std::string const & descrip
 inline void setVersion(ArgumentParser & me, std::string const & versionString)
 {
     setVersion(me._toolDoc, versionString);
+}
+
+// --------------------------------------------------------------------------
+// Function getVersion()                                              ToolDoc
+// --------------------------------------------------------------------------
+
+/**
+.Function.getVersion
+..cat:Miscalleneous
+..summary:Get version string from @Class.ArgumentParser@ object.
+..signature:getVersion(parser)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..returns:Date string.
+...type:Shortcut.CharString
+..include:seqan/misc/tool_doc.h
+*/
+
+inline CharString const & getVersion(ArgumentParser const & me)
+{
+    return getVersion(me._toolDoc);
 }
 
 // ----------------------------------------------------------------------------

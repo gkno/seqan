@@ -865,7 +865,7 @@ inline void setVersion(ToolDoc & doc, CharString const & version)
 ..include:seqan/misc/tool_doc.h
 */
 
-inline CharString const & getVersion(ToolDoc & doc)
+inline CharString const & getVersion(ToolDoc const & doc)
 {
     return doc._version;
 }

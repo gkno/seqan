@@ -47,8 +47,7 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 
 // toCString impl for std::string
-inline char const *
-toCString(std::string const & me)
+inline char const * toCString(std::string const & me)
 {
     return me.c_str();
 }
@@ -57,8 +56,7 @@ toCString(std::string const & me)
 // Function _canCast()
 // ----------------------------------------------------------------------------
 template <typename TTarget, typename TString>
-inline bool
-_tryCast(TTarget & dest, TString const source)
+inline bool _tryCast(TTarget & dest, TString const source)
 {
     std::istringstream stream(toCString(source));
     bool result = (!(stream >> dest).fail()) && (stream.rdbuf()->in_avail() == 0);
@@ -69,8 +67,7 @@ _tryCast(TTarget & dest, TString const source)
 // Function _cast()
 // ----------------------------------------------------------------------------
 template <typename TTarget, typename TString>
-inline TTarget
-_cast(TString const s)
+inline TTarget _cast(TString const s)
 {
     TTarget dst;
     std::istringstream stream(toCString(s));
@@ -83,22 +80,19 @@ _cast(TString const s)
 // Function _isCastable()
 // ----------------------------------------------------------------------------
 template <typename TTarget, typename TString>
-inline bool
-_isCastable(TString const s)
+inline bool _isCastable(TString const s)
 {
     TTarget dst;
     std::istringstream stream(toCString(s));
     return (!(stream >> dst).fail()) && (stream.rdbuf()->in_avail() == 0);
 }
 
-
 // ----------------------------------------------------------------------------
 // Function _isDouble()
 // ----------------------------------------------------------------------------
 
 template <typename TString>
-inline bool
-_isDouble(TString const s)
+inline bool _isDouble(TString const s)
 {
     return _isCastable<double>(s);
 }
@@ -108,8 +102,7 @@ _isDouble(TString const s)
 // ----------------------------------------------------------------------------
 
 template <typename TString>
-inline bool
-_isInt(TString const s)
+inline bool _isInt(TString const s)
 {
     return _isCastable<int>(s);
 }
@@ -124,8 +117,7 @@ inline bool isIntOption(ArgParseOption const & me);
 inline bool isDoubleOption(ArgParseOption const & me);
 inline bool isStringOption(ArgParseOption const & me);
 
-inline bool
-_convertOptionValue(bool & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(bool & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isBooleanOption(opt))
         return false;
@@ -134,8 +126,7 @@ _convertOptionValue(bool & dst, ArgParseOption const & opt, std::string const & 
     return true;
 }
 
-inline bool
-_convertOptionValue(int & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(int & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isIntOption(opt))
         return false;
@@ -143,8 +134,7 @@ _convertOptionValue(int & dst, ArgParseOption const & opt, std::string const & s
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertOptionValue(unsigned int & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(unsigned int & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isIntOption(opt))
         return false;
@@ -152,8 +142,7 @@ _convertOptionValue(unsigned int & dst, ArgParseOption const & opt, std::string 
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertOptionValue(__int64 & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(__int64 & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isIntOption(opt))
         return false;
@@ -161,8 +150,7 @@ _convertOptionValue(__int64 & dst, ArgParseOption const & opt, std::string const
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertOptionValue(__uint64 & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(__uint64 & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isIntOption(opt))
         return false;
@@ -170,8 +158,7 @@ _convertOptionValue(__uint64 & dst, ArgParseOption const & opt, std::string cons
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertOptionValue(float & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(float & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isDoubleOption(opt))
         return false;
@@ -179,8 +166,7 @@ _convertOptionValue(float & dst, ArgParseOption const & opt, std::string const &
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertOptionValue(double & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(double & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isDoubleOption(opt))
         return false;
@@ -189,8 +175,7 @@ _convertOptionValue(double & dst, ArgParseOption const & opt, std::string const 
 }
 
 template <typename TObject>
-inline bool
-_convertOptionValue(TObject & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertOptionValue(TObject & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isStringOption(opt))
         return false;
@@ -204,23 +189,11 @@ _convertOptionValue(TObject & dst, ArgParseOption const & opt, std::string const
 // ----------------------------------------------------------------------------
 
 class ArgParseArgument;
-inline bool isBooleanArgument(ArgParseArgument const & me);
 inline bool isIntegerArgument(ArgParseArgument const & me);
 inline bool isDoubleArgument(ArgParseArgument const & me);
 inline bool isStringArgument(ArgParseArgument const & me);
 
-inline bool
-_convertArgumentValue(bool & dst, ArgParseArgument const & opt, std::string const & src)
-{
-    if (!isBooleanArgument(opt))
-        return false;
-
-    dst = !empty(src);
-    return true;
-}
-
-inline bool
-_convertArgumentValue(int & dst, ArgParseArgument const & opt, std::string const & src)
+inline bool _convertArgumentValue(int & dst, ArgParseArgument const & opt, std::string const & src)
 {
     if (!isIntegerArgument(opt))
         return false;
@@ -228,8 +201,7 @@ _convertArgumentValue(int & dst, ArgParseArgument const & opt, std::string const
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertArgumentValue(unsigned int & dst, ArgParseArgument const & opt, std::string const & src)
+inline bool _convertArgumentValue(unsigned int & dst, ArgParseArgument const & opt, std::string const & src)
 {
     if (!isIntegerArgument(opt))
         return false;
@@ -237,8 +209,7 @@ _convertArgumentValue(unsigned int & dst, ArgParseArgument const & opt, std::str
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertArgumentValue(__int64 & dst, ArgParseArgument const & opt, std::string const & src)
+inline bool _convertArgumentValue(__int64 & dst, ArgParseArgument const & opt, std::string const & src)
 {
     if (!isIntegerArgument(opt))
         return false;
@@ -246,8 +217,7 @@ _convertArgumentValue(__int64 & dst, ArgParseArgument const & opt, std::string c
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertArgumentValue(__uint64 & dst, ArgParseArgument const & opt, std::string const & src)
+inline bool _convertArgumentValue(__uint64 & dst, ArgParseArgument const & opt, std::string const & src)
 {
     if (!isIntegerArgument(opt))
         return false;
@@ -255,8 +225,7 @@ _convertArgumentValue(__uint64 & dst, ArgParseArgument const & opt, std::string 
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertArgumentValue(float & dst, ArgParseArgument const & opt, std::string const & src)
+inline bool _convertArgumentValue(float & dst, ArgParseArgument const & opt, std::string const & src)
 {
     if (!isDoubleArgument(opt))
         return false;
@@ -264,8 +233,7 @@ _convertArgumentValue(float & dst, ArgParseArgument const & opt, std::string con
     return _tryCast(dst, src);
 }
 
-inline bool
-_convertArgumentValue(double & dst, ArgParseArgument const & opt, std::string const & src)
+inline bool _convertArgumentValue(double & dst, ArgParseArgument const & opt, std::string const & src)
 {
     if (!isDoubleArgument(opt))
         return false;
@@ -274,8 +242,7 @@ _convertArgumentValue(double & dst, ArgParseArgument const & opt, std::string co
 }
 
 template <typename TObject>
-inline bool
-_convertArgumentValue(TObject & dst, ArgParseArgument const & opt, std::string const & src)
+inline bool _convertArgumentValue(TObject & dst, ArgParseArgument const & opt, std::string const & src)
 {
     if (!isStringArgument(opt))
         return false;

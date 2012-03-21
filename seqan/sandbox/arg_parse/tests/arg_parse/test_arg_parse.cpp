@@ -104,6 +104,9 @@ SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
     SEQAN_CALL_TEST(test_double_list_option);
     SEQAN_CALL_TEST(test_double_list_option_not_enough_arguments);
 
+    // Test bools
+    SEQAN_CALL_TEST(test_boolean_flags);
+
     // cmd argument tests
     SEQAN_CALL_TEST(test_argument_string_label);
     SEQAN_CALL_TEST(test_argument_int_label);

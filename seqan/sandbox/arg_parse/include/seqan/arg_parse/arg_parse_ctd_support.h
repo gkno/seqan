@@ -36,8 +36,10 @@
 #ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
 #define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
 
-#include <seqan/arg_parse/argument_parser.h>
 #include <seqan/sequence.h>
+
+#include <seqan/arg_parse/argument_parser.h>
+#include <seqan/arg_parse/arg_parse_doc.h>
 
 namespace seqan {
 
@@ -206,24 +208,31 @@ _includeInCTD(ArgParseOption const & opt)
 inline void
 writeCTD(ArgumentParser const & me)
 {
-    typedef Iterator<ArgumentParser::TOptionMap>::Type TOptionMapIterator;
-    TOptionMapIterator optionMapIterator;
+    typedef ArgumentParser::TOptionMap::const_iterator TOptionMapIterator;
 
     // create file [appname].ctd in working directory
     std::string ctdfilename;
-    // getOptionValueLong(me, "write-ctd", ctdfilename);
+    getOptionValue(ctdfilename, me, "write-ctd");
 
     std::ofstream ctdfile;
     ctdfile.open(toCString(ctdfilename));
     ctdfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     ctdfile << "<tool status=\"external\">\n";
     ctdfile << "\t<name>" << _xmlEscape(getAppName(me)) << "</name>\n";
-    //ctdfile << "\t<version>" << _xmlEscape(me._versionText) << "</version>\n";
+    ctdfile << "\t<version>" << _xmlEscape(getVersion(me)) << "</version>\n";
     ctdfile << "\t<description><![CDATA[" << _xmlEscape(getAppName(me)) << ".]]></description>\n";
     ctdfile << "\t<manual><![CDATA[" << _xmlEscape(getAppName(me)) << ".]]></manual>\n"; // TODO: as soon as we have a more sophisticated documentation embedded into the CmdParser, we should at this here
     ctdfile << "\t<docurl>Direct links in docs</docurl>\n";
     ctdfile << "\t<category>SeqAn - Sequence Analaysis</category>\n";
     ctdfile << "\t<mapping><![CDATA[\n";
+
+    for(TOptionMapIterator optionMapIterator = me.optionMap.begin();
+        optionMapIterator != me.optionMap.end();
+        ++optionMapIterator)
+    {
+
+    }
+
 /*
     for (optionMapIterator = begin(me.optionMap); optionMapIterator != end(me.optionMap); optionMapIterator++)
     {
