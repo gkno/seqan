@@ -39,8 +39,7 @@
 
 #include <seqan/misc/tool_doc.h>
 
-namespace seqan
-{
+namespace seqan {
 
 // ============================================================================
 // Functions
@@ -80,9 +79,8 @@ inline void _parseAppName(ArgumentParser & parser, std::string const & candidate
         if (candidate[i] == '\\' || candidate[i] == '/')
             break;
 
-    setName(parser._toolDoc, candidate.substr(i+1));
+    setName(parser._toolDoc, candidate.substr(i + 1));
 }
-
 
 // ----------------------------------------------------------------------------
 // Helper Function _addLine()
@@ -166,7 +164,7 @@ inline void addUsageLine(ArgumentParser & me, std::string const & line)
 // Helper Function _addUsage()
 // ----------------------------------------------------------------------------
 
-void _addUsage(ToolDoc& toolDoc, ArgumentParser const& me)
+void _addUsage(ToolDoc & toolDoc, ArgumentParser const & me)
 {
     for (unsigned i = 0; i < length(me._usageText); ++i)
     {
@@ -251,7 +249,7 @@ inline void printHelp(ArgumentParser const & me, std::ostream & stream, CharStri
             append(title, ":");
             addSubSection(toolDoc, title);
         }
-        else if(!isVisible(opt))
+        else if (!isVisible(opt))
         {
             // Build list item term.
             std::string term;

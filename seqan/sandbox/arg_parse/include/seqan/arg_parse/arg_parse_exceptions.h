@@ -49,34 +49,36 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-class ParseException: public std::exception
+class ParseException :
+    public std::exception
 {
 protected:
     std::string _what;
 
 public:
-    ParseException(std::string const & what)
-        : _what(what)
-    {
-    }
+    ParseException(std::string const & what) :
+        _what(what)
+    {}
 
     // we need to define this one to avoid looser throw specifier error
     virtual ~ParseException() throw()
     {}
 
-    virtual const char* what() const throw()
+    virtual const char * what() const throw()
     {
         return _what.c_str();
     }
+
 };
 
 
-class InvalidOptionException : public ParseException
+class InvalidOptionException :
+    public ParseException
 {
 
 public:
-    InvalidOptionException(std::string const & option)
-        : ParseException("")
+    InvalidOptionException(std::string const & option) :
+        ParseException("")
     {
         std::stringstream what;
         what << "illegal option -- " << option;
@@ -88,28 +90,32 @@ public:
     {}
 };
 
-class MissingArgumentException : public ParseException
+class MissingArgumentException :
+    public ParseException
 {
 public:
-    MissingArgumentException(std::string const & option)
-        : ParseException("")
+    MissingArgumentException(std::string const & option) :
+        ParseException("")
     {
         std::stringstream what;
         what << "option requires an argument -- " << option;
         _what = what.str();
     }
+
 };
 
-class NotEnoughArguments : public ParseException
+class NotEnoughArguments :
+    public ParseException
 {
 public:
-    NotEnoughArguments(std::string const & option)
-        : ParseException("")
+    NotEnoughArguments(std::string const & option) :
+        ParseException("")
     {
         std::stringstream what;
         what << "option requires more arguments -- " << option;
         _what = what.str();
     }
+
 };
 
 // ============================================================================

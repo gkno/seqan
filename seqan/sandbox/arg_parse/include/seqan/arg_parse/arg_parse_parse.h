@@ -46,19 +46,19 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 
 /**
- .Function.parse:
- ..summary:Parses the command line.
- ..cat:Miscellaneous
- ..signature:parse(parser, argc, argv[, errorStream])
- ..param.parser:The @Class.CommandLineParser@ object.
- ...type:Class.CommandLineParser
- ..param.argc:Count of the objects on the command line.
- ..param.argv:Array of the different command line arguments ($const char *argv[]$).
- ..param.errorStream:A stream where error messages are sent to.
- ..remarks:Must be called before retrieving options or arguments.
- ..returns:$true$ if all required arguments are set and parseable and neither the help nor version argument is set.
- ..include:seqan/misc/misc_cmdparser.h
- */
+.Function.parse:
+..summary:Parses the command line.
+..cat:Miscellaneous
+..signature:parse(parser, argc, argv[, errorStream])
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.argc:Count of the objects on the command line.
+..param.argv:Array of the different command line arguments ($const char *argv[]$).
+..param.errorStream:A stream where error messages are sent to.
+..remarks:Must be called before retrieving options or arguments.
+..returns:$true$ if all required arguments are set and parseable and neither the help nor version argument is set.
+..include:seqan/misc/misc_cmdparser.h
+*/
 
 template <typename TErrorStream>
 inline ArgumentParser::ParseResult
@@ -135,7 +135,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                         longOpt += inParam[t];
 
                     if (t < len) // this one is a --name=value option
-                        val = inParam.substr(t+1);
+                        val = inParam.substr(t + 1);
 
                     // We might already have a value
                     if (hasOption(me, longOpt))
@@ -155,7 +155,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                         else if (arg + static_cast<int>(numberOfArguments(opt)) < argc)
                         {
                             for (int t = 0; t < static_cast<int>(numberOfArguments(opt)); ++t)
-                                assignArgumentValue(opt,argv[++arg]);
+                                assignArgumentValue(opt, argv[++arg]);
                         }
                         else  // no value available
                         {
@@ -172,7 +172,8 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                 ArgParseArgument & argument = getArgument(me, currentArgument);
                 assignArgumentValue(argument, argv[arg]);
 
-                if(!isListArgument(argument)) ++currentArgument;
+                if (!isListArgument(argument))
+                    ++currentArgument;
             }
         }
         if (hasOption(me, "version") && isSet(me, "version"))
@@ -205,13 +206,13 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
         }
 
     }
-    catch(ParseException& ex)
+    catch (ParseException & ex)
     {
         estream << getAppName(me) << ": " << ex.what() << std::endl;
         return ArgumentParser::ERROR;
     }
 
-    if(_allRequiredSet(me) && _allArgumentsSet(me))
+    if (_allRequiredSet(me) && _allArgumentsSet(me))
         return ArgumentParser::OK;
     else
         return ArgumentParser::ERROR;

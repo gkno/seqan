@@ -226,12 +226,10 @@ writeCTD(ArgumentParser const & me)
     ctdfile << "\t<category>SeqAn - Sequence Analaysis</category>\n";
     ctdfile << "\t<mapping><![CDATA[\n";
 
-    for(TOptionMapIterator optionMapIterator = me.optionMap.begin();
-        optionMapIterator != me.optionMap.end();
-        ++optionMapIterator)
-    {
-
-    }
+    for (TOptionMapIterator optionMapIterator = me.optionMap.begin();
+         optionMapIterator != me.optionMap.end();
+         ++optionMapIterator)
+    {}
 
 /*
     for (optionMapIterator = begin(me.optionMap); optionMapIterator != end(me.optionMap); optionMapIterator++)

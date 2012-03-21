@@ -41,8 +41,7 @@
 
 #include <sstream>
 
-namespace seqan
-{
+namespace seqan {
 
 // ----------------------------------------------------------------------------
 // Class ArgParseArgument
@@ -87,7 +86,7 @@ class ArgParseArgument
 public:
     enum ArgumentType
     {
-                    // argument is
+        // argument is
         STRING,     // ..  a string
         INTEGER,    // .. an integer
         DOUBLE,     // .. a float
@@ -125,15 +124,13 @@ public:
                      bool isListArgument = false,
                      std::string const & argumentLabel = "",
                      unsigned numberOfArguments = 1) :
-                     _argumentType(argumentType),
-                     _numberOfArguments(numberOfArguments),
-                     _argumentLabel(argumentLabel),
-                     _isListArgument(isListArgument),
-                     minValue(""),
-                     maxValue("")
-    {
-    }
-
+        _argumentType(argumentType),
+        _numberOfArguments(numberOfArguments),
+        _argumentLabel(argumentLabel),
+        _isListArgument(isListArgument),
+        minValue(""),
+        maxValue("")
+    {}
 
     template <typename TValue>
     ArgParseArgument(ArgumentType argumentType,
@@ -141,12 +138,12 @@ public:
                      std::string const & argumentLabel,
                      unsigned numberOfArguments,
                      TValue const & _default) :
-                     _argumentType(argumentType),
-                     _numberOfArguments(numberOfArguments),
-                     _argumentLabel(argumentLabel),
-                     _isListArgument(isListArgument),
-                     minValue(""),
-                     maxValue("")
+        _argumentType(argumentType),
+        _numberOfArguments(numberOfArguments),
+        _argumentLabel(argumentLabel),
+        _isListArgument(isListArgument),
+        minValue(""),
+        maxValue("")
     {
         std::stringstream strm;
         strm << _default;
@@ -154,21 +151,20 @@ public:
     }
 
     ArgParseArgument(ArgParseArgument const & other) :
-                    _argumentType(other._argumentType),
-                    _numberOfArguments(other._numberOfArguments),
-                    _argumentLabel(other._argumentLabel),
-                    _isListArgument(other._isListArgument),
-                    defaultValue(other.defaultValue),
-                    value(other.value),
-                    minValue(other.minValue),
-                    maxValue(other.maxValue),
-                    validValues(other.validValues)
-    {
-    }
+        _argumentType(other._argumentType),
+        _numberOfArguments(other._numberOfArguments),
+        _argumentLabel(other._argumentLabel),
+        _isListArgument(other._isListArgument),
+        defaultValue(other.defaultValue),
+        value(other.value),
+        minValue(other.minValue),
+        maxValue(other.maxValue),
+        validValues(other.validValues)
+    {}
 
-    ArgParseArgument & operator= (ArgParseArgument const & other)
+    ArgParseArgument & operator=(ArgParseArgument const & other)
     {
-        if(this != &other)
+        if (this != &other)
         {
             _argumentType = other._argumentType;
             _numberOfArguments = other._numberOfArguments;
@@ -195,26 +191,31 @@ _typeToString(ArgParseArgument const & me)
 {
     std::string typeName = "";
 
-    switch(me._argumentType)
+    switch (me._argumentType)
     {
-        case ArgParseArgument::DOUBLE:
-            typeName = "double";
-            break;
-        case ArgParseArgument::INTEGER:
-            typeName = "integer";
-            break;
-        case ArgParseArgument::STRING:
-            typeName = "string";
-            break;
-        case ArgParseArgument::INPUTFILE:
-            typeName = "inputfile";
-            break;
-        case ArgParseArgument::OUTPUTFILE:
-            typeName = "outputfile";
-            break;
-        default:
-            typeName = "unknown";
-            break;
+    case ArgParseArgument::DOUBLE:
+        typeName = "double";
+        break;
+
+    case ArgParseArgument::INTEGER:
+        typeName = "integer";
+        break;
+
+    case ArgParseArgument::STRING:
+        typeName = "string";
+        break;
+
+    case ArgParseArgument::INPUTFILE:
+        typeName = "inputfile";
+        break;
+
+    case ArgParseArgument::OUTPUTFILE:
+        typeName = "outputfile";
+        break;
+
+    default:
+        typeName = "unknown";
+        break;
     }
 
     return typeName;
@@ -282,7 +283,7 @@ isStringArgument(ArgParseArgument const & me)
 inline bool
 isIntegerArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == ArgParseArgument::INTEGER);
+    return me._argumentType == ArgParseArgument::INTEGER;
 }
 
 // ----------------------------------------------------------------------------
@@ -303,7 +304,7 @@ isIntegerArgument(ArgParseArgument const & me)
 inline bool
 isDoubleArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == ArgParseArgument::DOUBLE);
+    return me._argumentType == ArgParseArgument::DOUBLE;
 }
 
 // ----------------------------------------------------------------------------
@@ -324,7 +325,7 @@ isDoubleArgument(ArgParseArgument const & me)
 inline bool
 isInputFileArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == ArgParseArgument::INPUTFILE);
+    return me._argumentType == ArgParseArgument::INPUTFILE;
 }
 
 // ----------------------------------------------------------------------------
@@ -345,7 +346,7 @@ isInputFileArgument(ArgParseArgument const & me)
 inline bool
 isOutputFileArgument(ArgParseArgument const & me)
 {
-    return (me._argumentType == ArgParseArgument::OUTPUTFILE);
+    return me._argumentType == ArgParseArgument::OUTPUTFILE;
 }
 
 // ----------------------------------------------------------------------------
@@ -366,7 +367,7 @@ is returned or a default label (based on the ArgumentType is used).
 inline std::string const
 getArgumentLabel(ArgParseArgument const & me)
 {
-    if(me._argumentLabel != "")
+    if (me._argumentLabel != "")
     {
         return me._argumentLabel;
     }
@@ -374,22 +375,28 @@ getArgumentLabel(ArgParseArgument const & me)
     {
         // infer from argument type
         std::string baseLabel = "";
-        if(isInputFileArgument(me) || isOutputFileArgument(me)) baseLabel = "FILE";
-        else if(isStringArgument(me)) baseLabel = "STR";
-        else if(isIntegerArgument(me) || isDoubleArgument(me)) baseLabel = "NUM";
+        if (isInputFileArgument(me) || isOutputFileArgument(me))
+            baseLabel = "FILE";
+        else if (isStringArgument(me))
+            baseLabel = "STR";
+        else if (isIntegerArgument(me) || isDoubleArgument(me))
+            baseLabel = "NUM";
 
         std::string finalLabel;
 
-        if(me._numberOfArguments != 1)
+        if (me._numberOfArguments != 1)
         {
-            for(unsigned i = 0; i < me._numberOfArguments; ++i)
+            for (unsigned i = 0; i < me._numberOfArguments; ++i)
             {
-                if(i != 0) append(finalLabel, " ");
+                if (i != 0)
+                    append(finalLabel, " ");
                 append(finalLabel, baseLabel);
             }
         }
-        else if(isListArgument(me)) finalLabel = baseLabel; // maybe we want to customize list labels
-        else finalLabel = baseLabel;
+        else if (isListArgument(me))
+            finalLabel = baseLabel;                         // maybe we want to customize list labels
+        else
+            finalLabel = baseLabel;
 
         return finalLabel;
     }
@@ -401,11 +408,11 @@ getArgumentLabel(ArgParseArgument const & me)
 
 // this methods ensures that the given arguments define a non emtpy value interval
 // otherwise it will trigger a SEQAN_CHECK failure
-template<typename TIntervalBorder>
+template <typename TIntervalBorder>
 inline void
 _intervalAssert(const std::string minValueAsString, const std::string maxValueAsString)
 {
-    if(minValueAsString != "" && maxValueAsString != "")
+    if (minValueAsString != "" && maxValueAsString != "")
         SEQAN_CHECK(_cast<TIntervalBorder>(minValueAsString) < _cast<TIntervalBorder>(maxValueAsString),
                     "The interval [%s:%s] is empty. Please specify a valid, non-empty interval.",
                     minValueAsString.c_str(),
@@ -431,13 +438,13 @@ of the @Class.ArgParseArgument@.
 inline void
 setMinValue(ArgParseArgument & me, const std::string _minValue)
 {
-    if(isDoubleArgument(me))
+    if (isDoubleArgument(me))
     {
         SEQAN_CHECK(_isCastable<double>(_minValue), "The maximal value for a double argument must be double.");
         _intervalAssert<double>(_minValue, me.maxValue);
         me.minValue = _minValue;
     }
-    else if(isIntegerArgument(me))
+    else if (isIntegerArgument(me))
     {
         SEQAN_CHECK(_isCastable<int>(_minValue), "The maximal value for an integer argument must be an integer");
         _intervalAssert<int>(_minValue, me.maxValue);
@@ -466,13 +473,13 @@ of the @Class.ArgParseArgument@.
 inline void
 setMaxValue(ArgParseArgument & me, const std::string _maxValue)
 {
-    if(isDoubleArgument(me))
+    if (isDoubleArgument(me))
     {
         SEQAN_CHECK(_isCastable<double>(_maxValue), "The maximal value for a double argument must be double.");
         _intervalAssert<double>(me.minValue, _maxValue);
         me.maxValue = _maxValue;
     }
-    else if(isIntegerArgument(me))
+    else if (isIntegerArgument(me))
     {
         SEQAN_CHECK(_isCastable<int>(_maxValue), "The maximal value for an integer argument must be an integer");
         _intervalAssert<int>(me.minValue, _maxValue);
@@ -501,7 +508,7 @@ with valid values separated by spaces.
 inline void
 setValidValues(ArgParseArgument & me, std::vector<std::string> const & _values)
 {
-    if(isDoubleArgument(me) || isIntegerArgument(me))
+    if (isDoubleArgument(me) || isIntegerArgument(me))
         SEQAN_FAIL("ArgParseArgument does not support setting valid values for numeric arguments.");
 
     me.validValues = _values;
@@ -537,15 +544,15 @@ setValidValues(ArgParseArgument & me, std::string const & _values)
 // ----------------------------------------------------------------------------
 
 // check if the given value is in the provided interval
-template<typename TTarget, typename TString>
+template <typename TTarget, typename TString>
 inline bool
 _isInInterval(TString value, TString lowerIntervalBound, TString upperIntervalBound)
 {
     bool isInInterval = true;
 
-    if(lowerIntervalBound != "")
+    if (lowerIntervalBound != "")
         isInInterval &= (_cast<TTarget>(lowerIntervalBound) <= _cast<TTarget>(value));
-    if(upperIntervalBound != "")
+    if (upperIntervalBound != "")
         isInInterval &= (_cast<TTarget>(value) <= _cast<TTarget>(upperIntervalBound));
 
     return isInInterval;
@@ -555,18 +562,18 @@ _isInInterval(TString value, TString lowerIntervalBound, TString upperIntervalBo
 // Helper Function _checkNumericArgument()
 // ----------------------------------------------------------------------------
 // test if the values can be assigned to the option and is in the given boundaries
-template<typename TNumerical>
+template <typename TNumerical>
 inline void
 _checkNumericArgument(ArgParseArgument const & me, std::string const & value)
 {
-    if(!_isCastable<TNumerical>(value))
+    if (!_isCastable<TNumerical>(value))
     {
         std::stringstream what;
         what << "the given value '" << value << "' cannot be casted to " << _typeToString(me);
         throw ParseException(what.str());
     }
 
-    if(!_isInInterval<TNumerical>(value, me.minValue, me.maxValue))
+    if (!_isInInterval<TNumerical>(value, me.minValue, me.maxValue))
     {
         std::stringstream what;
         what << "the given value '" << value << "' is not in the interval ["
@@ -582,15 +589,15 @@ _checkStringRestrictions(ArgParseArgument const & me, std::string const & value)
 {
     typedef std::vector<std::string>::const_iterator TVectorIterator;
 
-    if(!empty(me.validValues))
+    if (!empty(me.validValues))
     {
         bool isContained = false;
-        for(TVectorIterator validValue = me.validValues.begin();
-            validValue != me.validValues.end();
-            ++validValue)
+        for (TVectorIterator validValue = me.validValues.begin();
+             validValue != me.validValues.end();
+             ++validValue)
         {
             // if it is an input or output file, we only check the file endings
-            if(isInputFileArgument(me) || isOutputFileArgument(me))
+            if (isInputFileArgument(me) || isOutputFileArgument(me))
             {
                 if (length(*validValue) > length(value))
                     continue;
@@ -601,20 +608,22 @@ _checkStringRestrictions(ArgParseArgument const & me, std::string const & value)
             {
                 isContained |= (*validValue == value);
             }
-            if(isContained) break;
+            if (isContained)
+                break;
         }
-        if(!isContained)
+        if (!isContained)
         {
             std::stringstream what;
             what << "the given value '" << value <<
-                    "' is not in the list of allowed" <<
-                    ((isInputFileArgument(me) || isOutputFileArgument(me)) ? " file extensions " : " values ") <<
-                    "[";
-            for(TVectorIterator validValue = me.validValues.begin();
-                validValue != me.validValues.end();
-                ++validValue)
+            "' is not in the list of allowed" <<
+            ((isInputFileArgument(me) || isOutputFileArgument(me)) ? " file extensions " : " values ") <<
+            "[";
+            for (TVectorIterator validValue = me.validValues.begin();
+                 validValue != me.validValues.end();
+                 ++validValue)
             {
-                if(validValue != me.validValues.begin()) what << ", ";
+                if (validValue != me.validValues.begin())
+                    what << ", ";
                 what << ((isInputFileArgument(me) || isOutputFileArgument(me)) ? "*." : "") << *validValue;
             }
             what << "]";
@@ -645,23 +654,24 @@ inline void
 assignArgumentValue(ArgParseArgument & me, std::string const & value) throw (ParseException)
 {
     // type checks
-    if(isIntegerArgument(me))
+    if (isIntegerArgument(me))
         _checkNumericArgument<int>(me, value);
 
-    if(isDoubleArgument(me))
+    if (isDoubleArgument(me))
         _checkNumericArgument<double>(me, value);
 
     // check valid values
-    if(isStringArgument(me))
+    if (isStringArgument(me))
         _checkStringRestrictions(me, value);
 
     // assignment
-    if(isListArgument(me))  // just append
+    if (isListArgument(me)) // just append
         appendValue(me.value, value, Exact());
     else
     {
         // check if we already set all expected arguments
-        if(length(me.value) == me._numberOfArguments) clear(me.value);
+        if (length(me.value) == me._numberOfArguments)
+            clear(me.value);
         appendValue(me.value, value, Exact());
     }
 }
@@ -691,7 +701,7 @@ getArgumentValue(ArgParseArgument const & me, unsigned position)
     SEQAN_CHECK(position < me.value.size() || position < me.defaultValue.size(),
                 "ArgParseArgument: No value set for index %d", position);
 
-    if(position < me.value.size())
+    if (position < me.value.size())
         return me.value[position];
     else
         return me.defaultValue[position];
@@ -723,7 +733,7 @@ getArgumentValues(ArgParseArgument const & me)
 {
     SEQAN_CHECK(!(me.value.empty() && me.defaultValue.empty()),
                 "ArgParseArgument: No value available.");
-    if(!me.value.empty())
+    if (!me.value.empty())
         return me.value;
     else
         return me.defaultValue;
@@ -747,7 +757,7 @@ getArgumentValues(ArgParseArgument const & me)
 inline bool
 hasValue(ArgParseArgument const & arg, unsigned position)
 {
-    return (arg.value.size() > position || arg.defaultValue.size() > position);
+    return arg.value.size() > position || arg.defaultValue.size() > position;
 }
 
 inline bool
@@ -797,8 +807,6 @@ numberOfArguments(ArgParseArgument const & me)
 {
     return me._numberOfArguments;
 }
-
-
 
 } // namespace seqan
 

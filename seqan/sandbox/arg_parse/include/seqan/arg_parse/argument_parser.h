@@ -48,8 +48,7 @@
 #include <iostream>
 #include <fstream>
 
-namespace seqan
-{
+namespace seqan {
 
 /**
 .Class.ArgumentParser
@@ -143,7 +142,7 @@ public:
                                             // separate to put it on top of the rest
     std::vector<std::string> _usageText;    // the usage lines as strings, to avoid
                                             // interference with the rest of the doc
-    
+
     // ----------------------------------------------------------------------------
     // return values for unset parameters
     // ----------------------------------------------------------------------------
@@ -181,6 +180,7 @@ public:
         setName(_toolDoc, _appName);
         init();
     }
+
 };
 
 // ----------------------------------------------------------------------------
@@ -201,7 +201,7 @@ public:
 
 inline bool hasOption(ArgumentParser const & me, std::string const & _name)
 {
-    return (hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name));
+    return hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name);
 }
 
 // ----------------------------------------------------------------------------
@@ -251,7 +251,7 @@ inline void addArgument(ArgumentParser & me, ArgParseArgument const & arg)
 {
     // check previous arguments
     //  .. lists can only be last argument
-    if(!me.argumentList.empty())
+    if (!me.argumentList.empty())
     {
         SEQAN_CHECK(!isListArgument(me.argumentList[me.argumentList.size() - 1]),
                     "You cannot add an additional argument after a list argument.");
@@ -270,10 +270,10 @@ inline void addArgument(ArgumentParser & me, ArgParseArgument const & arg)
 // ----------------------------------------------------------------------------
 // note that it is assumed that the option exists if this method is called
 
-inline Size< String<ArgParseOption> >::Type
+inline Size<String<ArgParseOption> >::Type
 _getOptionIndex(ArgumentParser const & me, std::string const & _name)
 {
-    typedef Size< String<ArgParseOption> >::Type TOptionPosition;
+    typedef Size<String<ArgParseOption> >::Type TOptionPosition;
     TOptionPosition option_index;
     if (me.shortNameMap.find(_name) != me.shortNameMap.end())
     {
@@ -293,13 +293,13 @@ _getOptionIndex(ArgumentParser const & me, std::string const & _name)
 inline ArgParseOption & getOption(ArgumentParser & me, std::string const & _name)
 {
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    return me.optionMap[_getOptionIndex(me,_name)];
+    return me.optionMap[_getOptionIndex(me, _name)];
 }
 
 inline ArgParseOption const & getOption(ArgumentParser const & me, std::string const & _name)
 {
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    return me.optionMap[_getOptionIndex(me,_name)];
+    return me.optionMap[_getOptionIndex(me, _name)];
 }
 
 // ----------------------------------------------------------------------------
@@ -349,7 +349,6 @@ inline void hideOption(ArgumentParser & me, std::string const & _name, bool hide
     SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
     hideOption(getOption(me, _name), hide);
 }
-
 
 // ----------------------------------------------------------------------------
 // Function getArgument()
@@ -410,9 +409,9 @@ inline bool _allRequiredSet(ArgumentParser const & me)
 
 inline bool _allArgumentsSet(ArgumentParser const & me)
 {
-    for(unsigned a = 0; a < me.argumentList.size(); ++a)
+    for (unsigned a = 0; a < me.argumentList.size(); ++a)
     {
-        if(!isSet(me.argumentList[a]))
+        if (!isSet(me.argumentList[a]))
             return false;
     }
     return true;
@@ -532,7 +531,6 @@ inline bool getArgumentValue(TValue & value, ArgumentParser & me,
     return getArgumentValue(value, me, argumentPosition, 0);
 }
 
-
 // ----------------------------------------------------------------------------
 // Function getOptionValues()
 // ----------------------------------------------------------------------------
@@ -579,7 +577,6 @@ inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
     return getArgumentValues(getArgument(me, argumentPosition));
 }
 
-
 // ----------------------------------------------------------------------------
 // Function setMinValue()
 // ----------------------------------------------------------------------------
@@ -619,7 +616,7 @@ inline void setMinValue(ArgumentParser & me, std::string const & name,
 */
 
 inline void setMaxValue(ArgumentParser & me, std::string const & name,
-            std::string const & _maxValue)
+                        std::string const & _maxValue)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setMaxValue(getOption(me, name), _maxValue);

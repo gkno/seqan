@@ -100,28 +100,29 @@ public:
                    std::string const & _longName,
                    std::string const & _help,
                    ArgParseArgument const & argument) :
-                   shortName(_shortName),
-                   longName(_longName),
-                   _argument(argument),
-                   _isFlag(false),
-                   _isRequired(false),
-                   _isHidden(false),
-                   _helpText(_help)
+        shortName(_shortName),
+        longName(_longName),
+        _argument(argument),
+        _isFlag(false),
+        _isRequired(false),
+        _isHidden(false),
+        _helpText(_help)
     {}
 
     ArgParseOption(std::string const & _shortName,
                    std::string const & _longName,
                    std::string const & _help) :
-                   shortName(_shortName),
-                   longName(_longName),
-                   _argument(ArgParseArgument::STRING, false, "", 1, "true"),
-                   _isFlag(true),
-                   _isRequired(false),
-                   _isHidden(false),
-                   _helpText(_help)
+        shortName(_shortName),
+        longName(_longName),
+        _argument(ArgParseArgument::STRING, false, "", 1, "true"),
+        _isFlag(true),
+        _isRequired(false),
+        _isHidden(false),
+        _helpText(_help)
     {
         setValidValues(_argument, "true false");
     }
+
 };
 
 // ----------------------------------------------------------------------------
@@ -491,7 +492,7 @@ is returned or a default label (based on the ArgumentType is used).
 
 inline std::string const getArgumentLabel(ArgParseOption const & me)
 {
-    if(isBooleanOption(me))
+    if (isBooleanOption(me))
         return "";
     else
         return getArgumentLabel(me._argument);
