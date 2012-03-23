@@ -1,36 +1,25 @@
 // ==========================================================================
 //                           breakpoint_calculator
 // ==========================================================================
-// Copyright (c) 2006-2010, Knut Reinert, FU Berlin
-// All rights reserved.
+// Copyright (C) 2012 by Birte Kehr
 //
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version.
 //
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of Knut Reinert or the FU Berlin nor the names of
-//       its contributors may be used to endorse or promote products derived
-//       from this software without specific prior written permission.
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL KNUT REINERT OR THE FU BERLIN BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-// DAMAGE.
+// You should have received a copy of the GNU General Public License along
+// with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // ==========================================================================
-// Author: bkehr
+// Author: Birte Kehr <birte.kehr@fu-berlin.de>
 // ==========================================================================
+
 
 #ifndef SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_BREAKPOINT_CALCULATOR_H_
 #define SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_BREAKPOINT_CALCULATOR_H_
@@ -49,8 +38,6 @@
 #include "parse_alignment.h"
 #include "score_blocks.h"
 #include "breakpoint_counts.h"
-//#include "pw_breakpoints.h"
-//#include "shortest_cycles.h"
 
 using namespace seqan;
 
@@ -80,7 +67,6 @@ struct Options
 	bool sopScore;
 
 	CharString inputFile;
-	//CharString cyclesFile;
 	AlignmentFormat inputFormat;
 	bool swapPositionsXmfa;
     
@@ -138,7 +124,6 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
 	addOption(parser, CommandLineOption("f", "inFormat", "input file format: XMFA, MAF", OptionType::String | OptionType::Label, "XMFA"));
 	addOption(parser, CommandLineOption("x", "swapPositions", "swap start and end position for reverse orientation", OptionType::Bool | OptionType::Label));
 	addHelpLine(parser, "in XMFA format (necessary for sgEvolver output) (default false)");
-	//addOption(parser, CommandLineOption("c", "cyclesFile", "output file for shortest cycles", OptionType::String | OptionType::Label, "<alignment file>.cyc"));
 	addOption(parser, CommandLineOption("v", "verbose", "verbosity mode", OptionType::Bool | OptionType::Label, "false"));
 	addOption(parser, CommandLineOption("d", "detailed", "print breakpoint counts of all pairs and triplets", OptionType::Bool | OptionType::Label, "false"));
 
@@ -217,14 +202,6 @@ int parseCommandLineAndCheck(Options & options,
 		options.swapPositionsXmfa = true;
 	}
 
-//	if (isSetLong(parser, "cyclesFile")) {
-//		getOptionValueLong(parser, "cyclesFile", options.cyclesFile);
-//	}
-//	else
-//	{
-//		options.cyclesFile = options.inputFile;
-//		append(options.cyclesFile, ".cyc");
-//	}
 	if (options.gapOpen > 0) std::cerr << "WARNING: Positive gap open penalty." << std::endl;
 	if (options.gapExtend > 0) std::cerr << "WARNING: Positive gap extension penalty." << std::endl;
 
@@ -237,11 +214,9 @@ int mainWithOptions(Options & options)
 	typedef double TScoreValue;
 
 	typedef String<TAlphabet> TSequence;
-	//typedef Id<TSequence>::Type TId;
 	typedef Size<TSequence>::Type TSize;
 
 	typedef StringSet<TSequence> TStringSet;
-	//typedef Position<TStringSet>::Type TPosition;
 
 	typedef Align<TSequence, ArrayGaps> TAlign;
 	typedef std::map<CharString, AlignmentBlockRow<TSize, TSize> > TIdRowMap;
@@ -339,14 +314,6 @@ int mainWithOptions(Options & options)
 		//	std::cout << std::endl;
 		//}
 
-		/*resize(blockSeqs, 3);
-		String<char> s1 = "12345678";
-		String<char> s2 = "21534867";
-		String<char> s3 = "25143678";
-		for (int i = 0; i < length(s1); ++i) appendValue(blockSeqs[0], s1[i]);
-		for (int i = 0; i < length(s2); ++i) appendValue(blockSeqs[1], s2[i]);
-		for (int i = 0; i < length(s3); ++i) appendValue(blockSeqs[2], s3[i]);*/
-
 		std::map<CharString, StringSet<String<TBlockId>, Dependent<> > > blockSeqSets;
 		collateChromosomes(blockSeqSets, blockSeqs);
 
@@ -363,64 +330,5 @@ int mainWithOptions(Options & options)
 
 	return 0;
 }
-
-// old version with breakpointa and shortest cycle computation
-//int mainWithOptions(Options & options)
-//{
-//	typedef Dna5String TSequence;
-//	//typedef Id<TSequence>::Type TId;
-//	//typedef Size<TSequence>::Type TSize;
-//	//typedef Position<StringSet<TSequence> >::Type TPosition;
-//
-//	typedef StringSet<TSequence> TStringSet;
-//	typedef StringSet<TSequence, Dependent<> > TDepStringSet;
-//	typedef Graph<Alignment<TDepStringSet> > TAlignmentGraph;
-//	typedef VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
-//
-//    std::cout << "Alignment file: " << options.inputFile << std::endl;
-//	std::cout << std::endl;
-//
-//	// Open input file.
-//	std::fstream inStream(toCString(options.inputFile), std::ios::in | std::ios::binary);
-//	if (!inStream.good())
-//	{
-//		std::cerr << "ERROR: Could not open " << options.inputFile << "!\n";
-//		return 1;
-//	}
-//
-//	TStringSet seqs;
-//	TAlignmentGraph align;
-//
-//	if (options.inputFormat == MAF && parseAlignment(align, seqs, inStream, options.verbose, Maf())) 
-//	{
-//		std::cerr << "ERROR: Parsing file " << options.inputFile << " in MAF format failed!" << std::endl;
-//		return 1;
-//	}
-//	else if (options.inputFormat == XMFA && parseAlignment(align, seqs, inStream, options.verbose, Xmfa())) 
-//	{
-//		std::cerr << "ERROR: Parsing file " << options.inputFile << " in XMFA format failed!" << std::endl;
-//		return 1;
-//	}
-//	inStream.close();
-//
-//	String<std::set<TVertexDescriptor> > bp; // breakpoint directly behind the one vertex
-//	computeBreakpoints(bp, align);
-//
-//	typedef String<TVertexDescriptor> TCycle;
-//	std::set<TCycle> cycles;
-//	shortestCycles(cycles, options.verbose, align, bp);
-//
-//	// Open output file.
-//	std::ofstream outStream(toCString(options.cyclesFile), std::ios::out);
-//	if (!outStream.good())
-//	{
-//		std::cerr << "ERROR: Could not open " << options.cyclesFile << "!\n";
-//		return 1;
-//	}
-//	outStream << "# 'Shortest cycles' in alignment from file " << options.inputFile << ".\n#\n";
-//	analyzeCycles(outStream, align, cycles);
-//
-//    return 0;
-//}
 
 #endif  // #ifndef SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_BREAKPOINT_CALCULATOR_H_

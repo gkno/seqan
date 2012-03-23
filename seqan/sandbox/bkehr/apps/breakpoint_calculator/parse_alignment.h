@@ -1,10 +1,24 @@
 // ==========================================================================
-//                              parse_alignment
+//                             parse_alignment.h
+//                           breakpoint_calculator
 // ==========================================================================
-// Copyright (c) 2011, Birte Kehr
+// Copyright (C) 2012 by Birte Kehr
+//
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // ==========================================================================
-// Author: bkehr
+// Author: Birte Kehr <birte.kehr@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_PARSE_ALIGNMENT_
@@ -255,7 +269,6 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 		res = readGappedSeq(gapseq, buffer);
 		if (res) return res;
 
-		//std::cout << endPos << "  " << startPos << std::endl;
 		SEQAN_ASSERT_EQ(length(source(gapseq)), endPos-startPos);
 		
 		if (endPos != startPos) {
@@ -400,89 +413,6 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 	return 0;
 }
 
-
-template<typename TDepStringSet, typename TStringSet, typename TSize, typename TSequence>
-int
-buildAlignmentGraph(Graph<Alignment<TDepStringSet> > & graph,
-					TStringSet & seqs,
-					String<std::map<CharString, AlignmentBlockRow<TSize, TSize> > > const & idToRowMaps,
-					String<Align<TSequence, ArrayGaps> > const & aligns)
-{
-	typedef typename Id<TDepStringSet>::Type TId;
-	typedef Graph<Alignment<TDepStringSet> > TAlignmentGraph;
-	typedef typename VertexDescriptor<TAlignmentGraph>::Type TVertexDescriptor;
-
-	typedef std::map<CharString, Triple<TSize> > TMap;
-	typedef typename TMap::const_iterator TMapIterator;
-
-	// count the number of sequences
-	std::map<TId, std::set<TSize> > startPositionsById; 
-	std::map<TId, std::set<TSize> > endPositionsById;
-	std::map<CharString, TId> idToSeqId;
-	typename Iterator<String<TMap> >::Type it = begin(idToRowMaps);
-	for (; it != end(idToRowMaps); ++it)
-	{
-		for (TMapIterator mapIt = (*it).begin(); mapIt != (*it).end(); ++mapIt) 
-		{
-			if (idToSeqId.count((*mapIt).first) == 0)
-				idToSeqId[(*mapIt).first] = idToSeqId.size();
-			TId seqId = idToSeqId[(*mapIt).first];
-			startPositionsById[seqId].insert((*mapIt).second.startPos);
-			endPositionsById[seqId].insert((*mapIt).second.endPos);
-		}
-	}
-
-	// set sequences
-	TDepStringSet depSeqs;
-	typename std::map<TId, std::set<TSize> >::iterator eIt = endPositionsById.begin();
-	for (; eIt != endPositionsById.end(); ++eIt)
-	{
-		TSequence seq;
-		resize(seq, *(--(*eIt).second.end()));
-		appendValue(seqs, seq);
-		appendValue(depSeqs, seqs[length(seqs)-1]);
-	}
-
-	graph = Graph<Alignment<TDepStringSet> >(depSeqs);
-
-	// add vertices
-	typename std::map<TId, std::set<TSize> >::iterator sIt = startPositionsById.begin();
-	for (eIt = endPositionsById.begin(); eIt != endPositionsById.end(); ++sIt, ++eIt)
-	{
-		TId seqId = (*sIt).first;
-		typename std::set<TSize>::iterator startPosIt = (*sIt).second.begin();
-		typename std::set<TSize>::iterator endPosIt = (*eIt).second.begin();
-		for (; startPosIt != (*sIt).second.end(); ++startPosIt, ++endPosIt)
-		{
-			if ((*endPosIt) != (*startPosIt))
-				addVertex(graph, seqId, *startPosIt, (*endPosIt) - (*startPosIt));
-		}
-	}
-
-	// add edges and set seqs
-	int i = 0;
-	for (it = begin(idToRowMaps); it < end(idToRowMaps); ++it, ++i)
-	{
-		for (TMapIterator mapIt = (*it).begin(); mapIt != (*it).end(); ++mapIt) 
-		{
-			TVertexDescriptor v1 = findVertex(graph, idToSeqId[(*mapIt).first], (*mapIt).second.startPos);
-			if (v1 == getNil<TVertexDescriptor>()) return 1;
-			TMapIterator mapIt2 = mapIt;
-			for (++mapIt2; mapIt2 != (*it).end(); ++mapIt2)
-			{
-				TId seqId = idToSeqId[(*mapIt2).first];
-				infix(valueById(seqs, seqId), (*mapIt2).second.startPos (*mapIt2).second.endPos) = source(row(aligns[i], (*mapIt2).second.rowNum));
-				TVertexDescriptor v2 = findVertex(graph, seqId, (*mapIt2).second.startPos);
-				//int score = ;
-				addEdge(graph, v1, v2/*, score*/);
-				if (v1 == getNil<TVertexDescriptor>()) return 1;
-			}
-		}
-	}
-
-	return 0;
-}
-
 template<typename TSequence, typename TStringSet, typename TFile, typename TTag>
 int
 parseAlignment(String<Align<TSequence, ArrayGaps> > & aligns,
@@ -527,49 +457,6 @@ parseAlignment(String<Align<TSequence, ArrayGaps> > & aligns,
 	}
 
 	return 0;
-}
-
-template<typename TDepStringSet, typename TStringSet, typename TFile, typename TTag>
-int
-parseAlignment(Graph<Alignment<TDepStringSet> > & graph,
-			   TStringSet & seqs,
-			   TFile & file,
-			   bool verbose,
-			   TTag tag)
-{	
-	typedef typename Size<TStringSet>::Type TSize;
-	typedef std::map<CharString, AlignmentBlockRow<TSize, TSize> > TMap;
-	String<TMap> idToRowMaps;
-
-	typedef typename Value<TStringSet>::Type TSequence;
-	typedef Align<TSequence, ArrayGaps> TAlign;
-	String<TAlign> aligns;
-
-	if (parseAlignment(aligns, idToRowMaps, seqs, file, false, tag))
-	{
-		std::cerr << "ERROR: Failed reading alignment blocks from input file." << std::endl;
-		return 1;
-	}
-
-	if (buildAlignmentGraph(graph, seqs, idToRowMaps, aligns))
-	{
-		std::cerr << "ERROR: Failed building alignment graph from alignment blocks." << std::endl;
-		return 1;
-	}
-
-	if (verbose)
-	{
-		std::cout << "Finished building alignment graph from alignment blocks." << std::endl;
-	}
-
-	return 0;
-}
-
-template<typename TAlignmentGraph, typename TStringSet, typename TFile, typename TTag>
-int
-parseAlignment(TAlignmentGraph & align, TStringSet & seqs, TFile & file, TTag tag)
-{
-	return parseAlignment(align, seqs, file, false, tag);
 }
 
 

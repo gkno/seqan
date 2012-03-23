@@ -1,10 +1,24 @@
 // ==========================================================================
 //                               score_blocks.h
+//                           breakpoint_calculator
 // ==========================================================================
-// Copyright (c) 2006-2010, Birte Kehr
-// All rights reserved.
+// Copyright (C) 2012 by Birte Kehr
+//
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 // ==========================================================================
-// Author: bkehr
+// Author: Birte Kehr <birte.kehr@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_SCORE_BLOCKS_H_

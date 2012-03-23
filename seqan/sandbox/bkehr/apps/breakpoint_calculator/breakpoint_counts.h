@@ -1,10 +1,24 @@
 // ==========================================================================
 //                            breakpoint_counts.h
+//                           breakpoint_calculator
 // ==========================================================================
-// Copyright (c) 2006-2010, Birte Kehr
-// All rights reserved.
+// Copyright (C) 2012 by Birte Kehr
+//
+// This program is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 // ==========================================================================
-// Author: bkehr
+// Author: Birte Kehr <birte.kehr@fu-berlin.de>
 // ==========================================================================
 
 #ifndef SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_BREAKPOINT_COUNTS_H_
@@ -14,7 +28,6 @@
 
 #include <lemon/lgf_writer.h>
 #include <lemon/smart_graph.h>
-//#include <lemon/matching.h>
 
 
 using namespace seqan;
@@ -48,9 +61,7 @@ template<typename TSeqId, typename TSize>
 int
 sequencesOfBlocks(std::map<TSeqId, String<int> > & blockSeqs,
 				  String<std::map<CharString, AlignmentBlockRow<TSize, TSize> > > & idToRowMaps)
-				  //String<std::map<CharString, Triple<TSize> > > & idToRowMaps)
 {
-	//typedef std::map<CharString, Triple<TSize> > TIdRowMap;
 	typedef std::map<CharString, AlignmentBlockRow<TSize, TSize> >  TIdRowMap;
 
 	// map of seq ids to maps of start positions to block numbers
@@ -264,20 +275,6 @@ createMatchingGraph(TGraph & graph, String<BlockInMatchingGraph> & nodes, TSize 
 		// add telomere edges for block
 		graph.addEdge(value(nodes, i).head, value(nodes, i).headTelomere);
 		graph.addEdge(value(nodes, i).tail, value(nodes, i).tailTelomere);
-
-		//// make complete graph halves
-		//graph.addEdge(value(nodes, i).head, value(nodes, i).tail);
-		//for (TSize j = 0; j < i; ++j)
-		//{
-		//	graph.addEdge(value(nodes, i).head, value(nodes, j).head);
-		//	graph.addEdge(value(nodes, i).head, value(nodes, j).tail);
-		//	graph.addEdge(value(nodes, i).tail, value(nodes, j).head);
-		//	graph.addEdge(value(nodes, i).tail, value(nodes, j).tail);
-		//	graph.addEdge(value(nodes, i).headTelomere, value(nodes, j).headTelomere);
-		//	graph.addEdge(value(nodes, i).headTelomere, value(nodes, j).tailTelomere);
-		//	graph.addEdge(value(nodes, i).tailTelomere, value(nodes, j).headTelomere);
-		//	graph.addEdge(value(nodes, i).tailTelomere, value(nodes, j).tailTelomere);
-		//}
 	}
 }
 
@@ -478,23 +475,18 @@ pairwiseCounts(std::map<TSeqId, StringSet<String<TBlockId>, Dependent<> > > & bl
 			// set edge weights
 			graphWeight += addSequenceToMatchingGraph(graph, eMap, itSeq1->second, nMap, blocks);
 			graphWeight += addSequenceToMatchingGraph(graph, eMap, itSeq2->second, nMap, blocks);
-			
-			// Output graph before matching
-			//lemon::GraphWriter<TGraph>(graph, std::cout).edgeMap("edge map", eMap).run();
 
 			lemon::MaxWeightedPerfectMatching<TGraph, TEdgeMap> matching(graph, eMap);
 			if (!matching.run())
 			{
 				std::cerr << "ERROR: Pairwise perfect Matching failed!";
 			}
-			//std::cout << "Weight of maximum perfect matching: " << matching.matchingWeight() << std::endl;
 
 			SEQAN_ASSERT_LEQ(matching.matchingWeight(), static_cast<__int64>(graphWeight));
 			TSize weightRemoved = graphWeight - matching.matchingWeight();
 			if (detailed)
 			{
 				std::cout << itSeq1->first << "\t" << itSeq2->first << "\t" << weightRemoved;
-				//std::cout << "\t" << pwCount(itSeq1->second, itSeq2->second, blocks);
 				std::cout << std::endl;
 			}
 
@@ -522,16 +514,10 @@ pairwiseWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
 
 	// setup graph
 	createMatchingGraph(graph, nMap, length(blocks));
-	//std::cerr << "Graph created.\n";
 
 	// set edge weights
 	graphWeight += addSequenceToMatchingGraph(graph, eMap, seq1, nMap, blocks);
 	graphWeight += addSequenceToMatchingGraph(graph, eMap, seq2, nMap, blocks);
-
-	//std::cerr << "Edge weights added.\n";
-	
-	// Output graph before matching
-	//lemon::GraphWriter<TGraph>(graph, std::cout).edgeMap("edge map", eMap).run();
 
 	lemon::MaxWeightedPerfectMatching<TGraph, TEdgeMap> matching(graph, eMap);
 	if (!matching.run())
@@ -539,30 +525,9 @@ pairwiseWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
 		std::cerr << "ERROR: Perfect matching failed while computing triplet breakpoint counts!\n";
 		return maxValue<TSize>();
 	}
-	//std::cout << "Weight of maximum perfect matching: " << matching.matchingWeight() << std::endl;
 
 	SEQAN_ASSERT_LEQ(matching.matchingWeight(), static_cast<__int64>(graphWeight));
 	TSize weightRemoved = graphWeight - matching.matchingWeight();
-	//std::cout << "Weight removed (pair): " << weightRemoved << std::endl;
-
-	//TGraph::EdgeIt eIt(graph);
-	//while (eIt != lemon::Invalid())
-	//{
-	//	if (eMap[eIt] > 0) {
-	//		TGraph::Node u = graph.u(eIt);
-	//		TGraph::Node v = graph.v(eIt);
-	//		std::cerr << eMap[eIt] << "\t";
-	//		if (nMap[graph.id(u)/4].head == u) std::cerr << graph.id(u)/4 << "h\t";
-	//		else if (nMap[graph.id(u)/4].tail == u) std::cerr << graph.id(u)/4 << "t\t";
-	//		else if (nMap[graph.id(u)/4].headTelomere == u) std::cerr << graph.id(u)/4 << "hT\t";
-	//		else if (nMap[graph.id(u)/4].tailTelomere == u) std::cerr << graph.id(u)/4 << "tT\t";
-	//		if (nMap[graph.id(v)/4].head == v) std::cerr << graph.id(v)/4 << "h\n";
-	//		else if (nMap[graph.id(v)/4].tail == v) std::cerr << graph.id(v)/4 << "t\n";
-	//		else if (nMap[graph.id(v)/4].headTelomere == v) std::cerr << graph.id(v)/4 << "hT\n";
-	//		else if (nMap[graph.id(v)/4].tailTelomere == v) std::cerr << graph.id(v)/4 << "tT\n";
-	//	}
-	//	++eIt;
-	//} std::cerr << "\n======\n\n";
 
 	return weightRemoved;
 }
@@ -589,9 +554,6 @@ tripletWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
 	graphWeight += addSequenceToMatchingGraph(graph, eMap, seq1, nMap, blocks);
 	graphWeight += addSequenceToMatchingGraph(graph, eMap, seq2, nMap, blocks);
 	graphWeight += addSequenceToMatchingGraph(graph, eMap, seq3, nMap, blocks);
-	
-	// Output graph before matching
-	//lemon::GraphWriter<TGraph>(graph, std::cout).edgeMap("edge map", eMap).run();
 
 	lemon::MaxWeightedPerfectMatching<TGraph, TEdgeMap> matching(graph, eMap);
 	if (!matching.run())
@@ -599,29 +561,9 @@ tripletWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
 		std::cerr << "ERROR: Perfect matching failed while computing triplet breakpoint counts!\n";
 		return maxValue<TSize>();
 	}
-	//std::cout << "Weight of maximum perfect matching: " << matching.matchingWeight() << std::endl;
 
 	SEQAN_ASSERT_LEQ(matching.matchingWeight(), static_cast<__int64>(graphWeight));
 	TSize weightRemoved = graphWeight - matching.matchingWeight();
-	//std::cout << "Weight removed (triplet): " << weightRemoved << std::endl;
-	//TGraph::EdgeIt eIt(graph);
-	//while (eIt != lemon::Invalid())
-	//{
-	//	if (eMap[eIt] > 0) {
-	//		TGraph::Node u = graph.u(eIt);
-	//		TGraph::Node v = graph.v(eIt);
-	//		std::cerr << eMap[eIt] << "\t";
-	//		if (nMap[graph.id(u)/4].head == u) std::cerr << graph.id(u)/4 << "h\t";
-	//		else if (nMap[graph.id(u)/4].tail == u) std::cerr << graph.id(u)/4 << "t\t";
-	//		else if (nMap[graph.id(u)/4].headTelomere == u) std::cerr << graph.id(u)/4 << "hT\t";
-	//		else if (nMap[graph.id(u)/4].tailTelomere == u) std::cerr << graph.id(u)/4 << "tT\t";
-	//		if (nMap[graph.id(v)/4].head == v) std::cerr << graph.id(v)/4 << "h\n";
-	//		else if (nMap[graph.id(v)/4].tail == v) std::cerr << graph.id(v)/4 << "t\n";
-	//		else if (nMap[graph.id(v)/4].headTelomere == v) std::cerr << graph.id(v)/4 << "hT\n";
-	//		else if (nMap[graph.id(v)/4].tailTelomere == v) std::cerr << graph.id(v)/4 << "tT\n";
-	//	}
-	//	++eIt;
-	//} std::cerr << "\n______\n\n";
 
 	return weightRemoved;
 }
@@ -660,7 +602,6 @@ tripletCounts(std::map<TSeqId, StringSet<String<TBlockId>, Dependent<> > > & blo
 				TSize count123 = tripletWeightRemoved(itSeq1->second, itSeq2->second, itSeq3->second, blocks);
 
 				SEQAN_ASSERT_GEQ(count123, (count12 + count13 + count23) / 2);
-				//std::cout << count123 << " - (" << count12 << " + " << count13 << " + " << count23 << ")\n";
 
 				double count = count123 - (count12 + count13 + count23) / 2.0;
 				if (detailed)
