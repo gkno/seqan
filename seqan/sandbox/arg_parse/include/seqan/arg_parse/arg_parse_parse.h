@@ -179,43 +179,43 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
         if (hasOption(me, "version") && isSet(me, "version"))
         {
             // printVersion(me, estream);
-            return ArgumentParser::VERSION;
+            return ArgumentParser::PARSE_VERSION;
         }
         if (hasOption(me, "write-ctd") && isSet(me, "write-ctd"))
         {
             writeCTD(me);
-            return ArgumentParser::WRITE_CTD;
+            return ArgumentParser::PARSE_WRITE_CTD;
         }
         if (isSet(me, "help"))
         {
             printHelp(me, estream);
-            return ArgumentParser::HELP;
+            return ArgumentParser::PARSE_HELP;
         }
         if (isSet(me, "export-help"))
         {
             std::string format;
             getOptionValue(format, me, "export-help");
             printHelp(me, estream, format);
-            return ArgumentParser::EXPORT_HELP;
+            return ArgumentParser::PARSE_EXPORT_HELP;
         }
         if (argc == 1 && me.argumentList.size() > 0)
         {
             // print short help and exit
             printShortHelp(me, estream);
-            return ArgumentParser::HELP;
+            return ArgumentParser::PARSE_HELP;
         }
 
     }
     catch (ParseException & ex)
     {
         estream << getAppName(me) << ": " << ex.what() << std::endl;
-        return ArgumentParser::ERROR;
+        return ArgumentParser::PARSE_ERROR;
     }
 
     if (_allRequiredSet(me) && _allArgumentsSet(me))
-        return ArgumentParser::OK;
+        return ArgumentParser::PARSE_OK;
     else
-        return ArgumentParser::ERROR;
+        return ArgumentParser::PARSE_ERROR;
 }
 
 inline ArgumentParser::ParseResult

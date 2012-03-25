@@ -144,7 +144,7 @@ SEQAN_DEFINE_TEST(test_int_short_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     int integerValue = 0;
     SEQAN_ASSERT(getOptionValue(integerValue, parser, "integer"));
@@ -163,7 +163,7 @@ SEQAN_DEFINE_TEST(test_int_long_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     int integerValue = 0;
     SEQAN_ASSERT(getOptionValue(integerValue, parser, "integer"));
@@ -182,7 +182,7 @@ SEQAN_DEFINE_TEST(test_non_int_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'not-an-int' cannot be casted to integer\n");
 }
 
@@ -197,7 +197,7 @@ SEQAN_DEFINE_TEST(test_double_short_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     double doubleValue = 0.0;
     SEQAN_ASSERT(getOptionValue(doubleValue, parser, "double"));
@@ -217,7 +217,7 @@ SEQAN_DEFINE_TEST(test_double_long_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     double doubleValue = 0.0;
     SEQAN_ASSERT(getOptionValue(doubleValue, parser, "double"));
@@ -236,7 +236,7 @@ SEQAN_DEFINE_TEST(test_non_double_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'not-a-double' cannot be casted to double\n");
 }
 
@@ -252,7 +252,7 @@ SEQAN_DEFINE_TEST(test_double_scientific_notation)
     std::stringstream error_stream;
 
     double doubleValue = 0.0;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
     SEQAN_ASSERT(getOptionValue(doubleValue, parser, "double"));
     SEQAN_ASSERT_EQ(doubleValue, 6.0221418e23);
     SEQAN_ASSERT_EQ(error_stream.str(), "");
@@ -269,7 +269,7 @@ SEQAN_DEFINE_TEST(test_string_short_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "string"));
@@ -287,7 +287,7 @@ SEQAN_DEFINE_TEST(test_string_long_argument)
     const char * argv[3] = {A_STRING_0, A_STRING_2, A_STRING_3};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "string"));
@@ -306,7 +306,7 @@ SEQAN_DEFINE_TEST(test_string_missing_argument)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: option requires an argument -- string\n");
 }
 
@@ -320,7 +320,7 @@ SEQAN_DEFINE_TEST(test_string_list)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     std::vector<std::string> const & values = getOptionValues(parser, "string");
 
@@ -347,7 +347,7 @@ SEQAN_DEFINE_TEST(test_min_max_double_values_in_range)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     double doubleValue = 0.0;
     SEQAN_ASSERT(getOptionValue(doubleValue, parser, "double"));
@@ -367,7 +367,7 @@ SEQAN_DEFINE_TEST(test_min_max_double_values_to_small)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value '1.56' is not in the interval [1.6:+inf]\n");
 }
 
@@ -383,7 +383,7 @@ SEQAN_DEFINE_TEST(test_min_max_double_values_to_big)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value '1.56' is not in the interval [-inf:1.5]\n");
 }
 
@@ -400,7 +400,7 @@ SEQAN_DEFINE_TEST(test_min_max_int_values_in_range)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     int integerValue = 0;
     SEQAN_ASSERT(getOptionValue(integerValue, parser, "integer"));
@@ -420,7 +420,7 @@ SEQAN_DEFINE_TEST(test_min_max_int_values_to_small)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value '1' is not in the interval [3:+inf]\n");
 }
 
@@ -436,7 +436,7 @@ SEQAN_DEFINE_TEST(test_min_max_int_values_to_big)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value '1' is not in the interval [-inf:-3]\n");
 }
 
@@ -452,7 +452,7 @@ SEQAN_DEFINE_TEST(test_allowed_values_contained)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "string"));
@@ -472,7 +472,7 @@ SEQAN_DEFINE_TEST(test_allowed_values_not_contained)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'this-is-a-string-value' is not in the list of allowed values [a, b, c]\n");
 }
 
@@ -486,7 +486,7 @@ SEQAN_DEFINE_TEST(test_input_file_short)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "in"));
@@ -504,7 +504,7 @@ SEQAN_DEFINE_TEST(test_input_file_long)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "in"));
@@ -522,7 +522,7 @@ SEQAN_DEFINE_TEST(test_input_file_missing)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: option requires an argument -- i\n");
 }
 
@@ -538,7 +538,7 @@ SEQAN_DEFINE_TEST(test_input_file_invalid_type)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'input.fasta' is not in the list of allowed file extensions [*.FASTA, *.fa]\n");
 }
 
@@ -554,7 +554,7 @@ SEQAN_DEFINE_TEST(test_input_file_valid_type)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "in"));
@@ -572,7 +572,7 @@ SEQAN_DEFINE_TEST(test_output_file_short)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "out"));
@@ -590,7 +590,7 @@ SEQAN_DEFINE_TEST(test_output_file_long)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "out"));
@@ -608,7 +608,7 @@ SEQAN_DEFINE_TEST(test_output_file_missing)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: option requires an argument -- o\n");
 }
 
@@ -624,7 +624,7 @@ SEQAN_DEFINE_TEST(test_output_file_invalid_type)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'output.fasta' is not in the list of allowed file extensions [*.FASTA, *.fa]\n");
 }
 
@@ -640,7 +640,7 @@ SEQAN_DEFINE_TEST(test_output_file_valid_type)
 
     std::stringstream error_stream;
 
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     CharString value;
     SEQAN_ASSERT(getOptionValue(value, parser, "out"));
@@ -658,7 +658,7 @@ SEQAN_DEFINE_TEST(test_argument_string)
     const char * argv[3] = {A_ARGUMENT_0, A_ARGUMENT_1, A_ARGUMENT_2};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
 }
 
@@ -672,7 +672,7 @@ SEQAN_DEFINE_TEST(test_argument_not_all_set)
     const char * argv[2] = {A_ARGUMENT_0, A_ARGUMENT_1};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
 }
 
 SEQAN_DEFINE_TEST(test_argument_double)
@@ -684,7 +684,7 @@ SEQAN_DEFINE_TEST(test_argument_double)
     const char * argv[2] = {A_ARGUMENT_0, A_ARGUMENT_DOUBLE_5};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
     double doubleValue = 0.0;
     SEQAN_ASSERT(getArgumentValue(doubleValue, parser, 0));
     SEQAN_ASSERT_EQ(doubleValue, 6.0221418e23);
@@ -699,7 +699,7 @@ SEQAN_DEFINE_TEST(test_argument_not_a_double)
     const char * argv[2] = {A_ARGUMENT_0, A_ARGUMENT_1};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'argument1' cannot be casted to double\n");
 }
 
@@ -741,7 +741,7 @@ SEQAN_DEFINE_TEST(test_int_list_option)
     const char* argv[7] = {A_TUPLE_LIST, A_TUPLE_LIST_L, A_TUPLE_LIST_L_1, A_TUPLE_LIST_L_2, A_TUPLE_LIST_L, A_TUPLE_LIST_L_3, A_TUPLE_LIST_L_4};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     SEQAN_ASSERT_EQ(getOptionValueCount(parser, "list"), 4u);
 
@@ -766,7 +766,7 @@ SEQAN_DEFINE_TEST(test_double_list_option)
     const char* argv[9] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5, A_TUPLE_LIST_DL_6};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     SEQAN_ASSERT_EQ(getOptionValueCount(parser, "double-list"), 6u);
 
@@ -796,7 +796,7 @@ SEQAN_DEFINE_TEST(test_double_list_option_not_enough_arguments)
     const char* argv[8] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5};
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::ERROR);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_ERROR);
     SEQAN_ASSERT_EQ(error_stream.str(), "test_tuple_list: option requires an argument -- k\n");
 }
 
@@ -815,7 +815,7 @@ SEQAN_DEFINE_TEST(test_boolean_flags)
     const char* argv[3] = { A_BOOL, A_BOOL_1, A_BOOL_2 };
 
     std::stringstream error_stream;
-    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::OK);
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, error_stream), ArgumentParser::PARSE_OK);
 
     bool isSet = false;
     SEQAN_ASSERT(getOptionValue(isSet, parser, "b"));

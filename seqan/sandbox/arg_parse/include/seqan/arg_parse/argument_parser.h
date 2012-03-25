@@ -38,15 +38,16 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 
+#include <seqan/arg_parse/arg_parse_type_support.h>
 #include <seqan/arg_parse/arg_parse_argument.h>
 #include <seqan/arg_parse/arg_parse_option.h>
-#include <seqan/arg_parse/arg_parse_type_support.h>
 
 #include <seqan/misc/misc_terminal.h>
 #include <seqan/misc/tool_doc.h>
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 namespace seqan {
 
@@ -106,12 +107,12 @@ public:
     // will be used as return value of parse(..) to indicate whether parsing worked
     enum ParseResult
     {
-        OK,
-        ERROR,
-        HELP,
-        VERSION,
-        WRITE_CTD,
-        EXPORT_HELP
+        PARSE_OK,
+        PARSE_ERROR,
+        PARSE_HELP,
+        PARSE_VERSION,
+        PARSE_WRITE_CTD,
+        PARSE_EXPORT_HELP
     };
 
     // ----------------------------------------------------------------------------
@@ -270,11 +271,10 @@ inline void addArgument(ArgumentParser & me, ArgParseArgument const & arg)
 // ----------------------------------------------------------------------------
 // note that it is assumed that the option exists if this method is called
 
-inline Size<String<ArgParseOption> >::Type
-_getOptionIndex(ArgumentParser const & me, std::string const & _name)
+inline ArgumentParser::TOptionMapSize _getOptionIndex(ArgumentParser const & me,
+                                                      std::string const & _name)
 {
-    typedef Size<String<ArgParseOption> >::Type TOptionPosition;
-    TOptionPosition option_index;
+    ArgumentParser::TOptionMapSize option_index;
     if (me.shortNameMap.find(_name) != me.shortNameMap.end())
     {
         option_index = me.shortNameMap.find(_name)->second;
