@@ -62,7 +62,7 @@ namespace seqan {
 ..signature:LocalMatch<TId, TPosition>
 ..param.TId:Type to use for subject/query id.
 ..param.TPosition:Type to use for storing positions.
-..remarks:Matches on the reverse-complement are encoded by the begin position being greater than the begin position.
+..remarks:Matches on the reverse-complement are encoded by the begin position being greater than the end position.
 ..remarks:Sequence names are not stored in LocalMatch objects but in the @Class.LocalMatchStore@ they belong to.
 ..see:Class.LocalMatchStore
 ..include:seqan/parse_lm.h
