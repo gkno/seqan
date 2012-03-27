@@ -19,13 +19,14 @@ int main ()
 	typedef Index< StringSet<String<char> >, IndexQGram<UngappedShape<2> > > TIndex;
 	typedef Infix<Fibre<TIndex, QGramCounts>::Type const>::Type TCounts;
 
-  TIndex myIndex(mySet);
+    TIndex myIndex(mySet);
 
 ///Finally we output how often $"be"$ occurs in each sequence.
-  hash(indexShape(myIndex), "be");
-	TCounts cnts = countOccurrencesMultiple(myIndex, indexShape(myIndex));
-	for (unsigned i = 0; i < length(cnts); ++i)
-    std::cout << cnts[i].i2 << " occurrences in sequence " << cnts[i].i1  << std::endl;
+    std::cout << "Number of sequences: " << countSequences(myIndex) << ::std::endl;  
+    hash(indexShape(myIndex), "be");
+    TCounts cnts = countOccurrencesMultiple(myIndex, indexShape(myIndex));
+    for (unsigned i = 0; i < length(cnts); ++i)
+       std::cout << cnts[i].i2 << " occurrences in sequence " << cnts[i].i1  << std::endl;
 
-	return 0;
+    return 0;
 }
