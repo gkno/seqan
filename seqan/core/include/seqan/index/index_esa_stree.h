@@ -1010,6 +1010,26 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..returns:The number of children of a tree node.
 If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Type$.
 ..include:seqan/index.h
+..example.code:
+ 
+ // this code is in seqan/index/index_esa_stree.h
+ 
+ typedef Index< String<char> > TMyIndex;
+ TMyIndex myIndex(myString);
+ 
+ Iterator< TMyIndex, TopDown<ParentLinks<PreorderEmptyEdges> > >::Type tdIterator(myIndex);
+ Size<TMyIndex>::Type count;
+ 
+ while (!atEnd(tdIterator)) {
+ // We print out the representatives of all nodes that have more than 3 children and the number of occurrences.
+ count = countChildren(tdIterator);
+ if (count >= 3)
+ {
+     ::std::cout << "Representative " << representative(tdIterator) << " has " <<  count << " children  and " << countOccurrences(tdIterator) << " Occurrences " << ::std::endl;
+ 
+     ++tdIterator;
+ }
+
 */
 
 	template < typename TIndex, typename TSpec >
