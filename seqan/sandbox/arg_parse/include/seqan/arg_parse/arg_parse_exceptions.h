@@ -42,12 +42,18 @@
 namespace seqan {
 
 // ============================================================================
-// Forwards
-// ============================================================================
-
-// ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// Class ParseException
+// ----------------------------------------------------------------------------
+
+/**
+.class.ParseException
+..cat:Miscellaneous
+..summary:General ParseException.
+*/
 
 class ParseException :
     public std::exception
@@ -71,6 +77,15 @@ public:
 
 };
 
+// ----------------------------------------------------------------------------
+// Class InvalidOptionException
+// ----------------------------------------------------------------------------
+
+/**
+.class.InvalidOptionException
+..cat:Miscellaneous
+..summary:Thrown if an unknown option was set on the command line.
+*/
 
 class InvalidOptionException :
     public ParseException
@@ -90,6 +105,17 @@ public:
     {}
 };
 
+// ----------------------------------------------------------------------------
+// Class MissingArgumentException
+// ----------------------------------------------------------------------------
+
+/**
+.class.MissingArgumentException
+..cat:Miscellaneous
+..summary:Thrown if an option was set on the command line but without giving the
+required arguments for this option.
+*/
+
 class MissingArgumentException :
     public ParseException
 {
@@ -104,11 +130,22 @@ public:
 
 };
 
-class NotEnoughArguments :
+// ----------------------------------------------------------------------------
+// Class NotEnoughArguments
+// ----------------------------------------------------------------------------
+
+/**
+.class.NotEnoughArgumentsException
+..cat:Miscellaneous
+..summary:Thrown if an option was set on the command line but not enough arguments for 
+this option were provided.
+*/
+
+class NotEnoughArgumentsException :
     public ParseException
 {
 public:
-    NotEnoughArguments(std::string const & option) :
+    NotEnoughArgumentsException(std::string const & option) :
         ParseException("")
     {
         std::stringstream what;

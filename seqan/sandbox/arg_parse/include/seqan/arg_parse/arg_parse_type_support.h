@@ -53,7 +53,7 @@ inline char const * toCString(std::string const & me)
 }
 
 // ----------------------------------------------------------------------------
-// Function _canCast()
+// Function _tryCast()
 // ----------------------------------------------------------------------------
 template <typename TTarget, typename TString>
 inline bool _tryCast(TTarget & dest, TString const source)
@@ -113,74 +113,13 @@ inline bool _isInt(TString const s)
 
 class ArgParseOption;
 inline bool isBooleanOption(ArgParseOption const & me);
-inline bool isIntOption(ArgParseOption const & me);
-inline bool isDoubleOption(ArgParseOption const & me);
-inline bool isStringOption(ArgParseOption const & me);
 
-inline bool _convertOptionValue(bool & dst, ArgParseOption const & opt, std::string const & src)
+inline bool _convertArgumentValue(bool & dst, ArgParseOption const & opt, std::string const & src)
 {
     if (!isBooleanOption(opt))
         return false;
 
     dst = !empty(src);
-    return true;
-}
-
-inline bool _convertOptionValue(int & dst, ArgParseOption const & opt, std::string const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    return _tryCast(dst, src);
-}
-
-inline bool _convertOptionValue(unsigned int & dst, ArgParseOption const & opt, std::string const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    return _tryCast(dst, src);
-}
-
-inline bool _convertOptionValue(__int64 & dst, ArgParseOption const & opt, std::string const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    return _tryCast(dst, src);
-}
-
-inline bool _convertOptionValue(__uint64 & dst, ArgParseOption const & opt, std::string const & src)
-{
-    if (!isIntOption(opt))
-        return false;
-
-    return _tryCast(dst, src);
-}
-
-inline bool _convertOptionValue(float & dst, ArgParseOption const & opt, std::string const & src)
-{
-    if (!isDoubleOption(opt))
-        return false;
-
-    return _tryCast(dst, src);
-}
-
-inline bool _convertOptionValue(double & dst, ArgParseOption const & opt, std::string const & src)
-{
-    if (!isDoubleOption(opt))
-        return false;
-
-    return _tryCast(dst, src);
-}
-
-template <typename TObject>
-inline bool _convertOptionValue(TObject & dst, ArgParseOption const & opt, std::string const & src)
-{
-    if (!isStringOption(opt))
-        return false;
-
-    assign(dst, src);
     return true;
 }
 

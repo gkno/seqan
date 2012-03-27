@@ -110,27 +110,27 @@ namespace seqan
 // or test extensions
 void setupDoubleParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("d", "double","set a double option", ArgParseArgument(ArgParseArgument::DOUBLE)));
+    addOption(parser, ArgParseOption("d", "double","set a double option", ArgParseArgument::DOUBLE));
 }
 
 void setupIntegerParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("i", "integer","set an integer option", ArgParseArgument(ArgParseArgument::INTEGER)));
+    addOption(parser, ArgParseOption("i", "integer","set an integer option", ArgParseArgument::INTEGER));
 }
 
 void setupStringParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("s", "string", "set a string option", ArgParseArgument(ArgParseArgument::STRING, true)));
+    addOption(parser, ArgParseOption("s", "string", "set a string option", ArgParseArgument::STRING, true));
 }
 
 void setupInputFileParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("i", "in", "set an input file", ArgParseArgument(ArgParseArgument::INPUTFILE)));
+    addOption(parser, ArgParseOption("i", "in", "set an input file", ArgParseArgument::INPUTFILE));
 }
 
 void setupOutputFileParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("o", "out", "set an output file", ArgParseArgument(ArgParseArgument::OUTPUTFILE)));
+    addOption(parser, ArgParseOption("o", "out", "set an output file", ArgParseArgument::OUTPUTFILE));
 }
 
 SEQAN_DEFINE_TEST(test_int_short_argument)
@@ -735,7 +735,7 @@ SEQAN_DEFINE_TEST(test_isInt)
 SEQAN_DEFINE_TEST(test_int_list_option)
 {
     ArgumentParser parser;
-    addOption(parser, ArgParseOption("l", "list", "this is a list option", ArgParseArgument(ArgParseArgument::INTEGER, true, "",2)));
+    addOption(parser, ArgParseOption("l", "list", "this is a list option", ArgParseArgument::INTEGER, true, "",2));
 
     int argc = 7;
     const char* argv[7] = {A_TUPLE_LIST, A_TUPLE_LIST_L, A_TUPLE_LIST_L_1, A_TUPLE_LIST_L_2, A_TUPLE_LIST_L, A_TUPLE_LIST_L_3, A_TUPLE_LIST_L_4};
@@ -760,7 +760,7 @@ SEQAN_DEFINE_TEST(test_int_list_option)
 SEQAN_DEFINE_TEST(test_double_list_option)
 {
     ArgumentParser parser;
-    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument(ArgParseArgument::DOUBLE, true, "", 3)));
+    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument::DOUBLE, true, "", 3));
 
     int argc = 9;
     const char* argv[9] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5, A_TUPLE_LIST_DL_6};
@@ -790,7 +790,7 @@ SEQAN_DEFINE_TEST(test_double_list_option)
 SEQAN_DEFINE_TEST(test_double_list_option_not_enough_arguments)
 {
     ArgumentParser parser;
-    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument(ArgParseArgument::DOUBLE, true, "", 3)));
+    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument::DOUBLE, true, "", 3));
 
     int argc = 8;
     const char* argv[8] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5};

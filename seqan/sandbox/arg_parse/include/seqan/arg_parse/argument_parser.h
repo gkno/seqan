@@ -159,8 +159,9 @@ public:
     void init()
     {
         addOption(*this, ArgParseOption("h", "help", "Displays this help message."));
-        addOption(*this, ArgParseOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", ArgParseArgument(ArgParseArgument::OUTPUTFILE)));
-        addOption(*this, ArgParseOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", ArgParseArgument(ArgParseArgument::STRING, false, "FORMAT")));
+        // TODO: HIDE
+        addOption(*this, ArgParseOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", ArgParseArgument::OUTPUTFILE));
+        addOption(*this, ArgParseOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", ArgParseArgument::STRING, false, "FORMAT"));
 
         // this is our ToolDoc only for the Description, we will later append it to the
         // real ToolDoc, but we need to separate it to ease the formating
@@ -261,7 +262,7 @@ inline void addArgument(ArgumentParser & me, ArgParseArgument const & arg)
     // check current argument
     //  .. arguments should not have default values
     SEQAN_CHECK(arg.defaultValue.empty(), "Arguments cannot have default values.");
-    SEQAN_CHECK(arg._numberOfArguments == 1, "n-Tuple of arguments are not supported.");
+    SEQAN_CHECK(arg._numberOfValues == 1, "n-Tuple of arguments are not supported.");
 
     me.argumentList.push_back(arg);
 }
@@ -441,7 +442,7 @@ inline bool getOptionValue(TValue & val, ArgumentParser const & me,
                            std::string const & name, unsigned argNo)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
-    return _convertOptionValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
+    return _convertArgumentValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
 }
 
 template <typename TValue>
@@ -570,8 +571,8 @@ inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
 ..include:seqan/arg_parse.h
 */
 
-inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
-                                                        unsigned argumentPosition)
+inline std::vector<std::string> const & getArgumentValues(ArgumentParser & me,
+                                                          unsigned argumentPosition)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
     return getArgumentValues(getArgument(me, argumentPosition));

@@ -51,9 +51,9 @@ namespace seqan
 SEQAN_DEFINE_TEST(test_argument_parser)
 {
     ArgumentParser parser;
-    addOption(parser, ArgParseOption("i", "integer", "help of an integer option", ArgParseArgument(ArgParseArgument::INTEGER, true)));
-    assignArgumentValue(getOption(parser, "i"), "10");
-    assignArgumentValue(getOption(parser, "i"), "12");
+    addOption(parser, ArgParseOption("i", "integer", "help of an integer option", ArgParseArgument::INTEGER, true));
+    _assignArgumentValue(getOption(parser, "i"), "10");
+    _assignArgumentValue(getOption(parser, "i"), "12");
 }
 
 

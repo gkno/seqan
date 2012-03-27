@@ -383,6 +383,7 @@ inline void setShortDescription(ArgumentParser & me, std::string const & descrip
 inline void setVersion(ArgumentParser & me, std::string const & versionString)
 {
     setVersion(me._toolDoc, versionString);
+    if(!hasOption(me, "v")) addOption(me, ArgParseOption("v", "version", "Display version information"));
 }
 
 // --------------------------------------------------------------------------

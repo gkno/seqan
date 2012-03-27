@@ -44,7 +44,8 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 
 /**
-.Class.ArgParseOption:
+.Class.ArgParseOption
+..base:Class.ArgParseArgument
 ..cat:Miscellaneous
 ..summary:Stores information for a specific command line option.
 ..signature:ArgParseOption
@@ -53,7 +54,7 @@ namespace seqan {
 */
 
 /**
-.Memfunc.ArgParseOption#ArgParseOption:
+.Memfunc.ArgParseOption#ArgParseOption
 ..class:Class.ArgParseOption
 ..summary:Constructor
 ..signature:ArgParseOption (shortName, longName, helpText [, argument])
@@ -67,7 +68,10 @@ Although not suggested the short-name can contain more than 1 character.
 ...type:Class.ArgParseArgument
 */
 
+///.Function.isOutputFileArgument.param.argument.type:Class.ArgParseOption
+
 class ArgParseOption
+    : public ArgParseArgument
 {
 public:
     // ----------------------------------------------------------------------------
@@ -79,7 +83,6 @@ public:
     // ----------------------------------------------------------------------------
     // Members representing type, content and restrictions of the ArgParseOption
     // ----------------------------------------------------------------------------
-    ArgParseArgument    _argument;    // the argument of the option (if aplicable)
     bool                _isFlag;      // true if this a bool option, that has no
                                       // argument we will internally represent it as a
                                       // string option set to either "true" or "false"
@@ -88,52 +91,74 @@ public:
                                       // shown on the command line
 
     // ----------------------------------------------------------------------------
-    // Members to help text
-    // ----------------------------------------------------------------------------
-    std::string         _helpText;    // The help text shown on the command
-                                      // line
-
-    // ----------------------------------------------------------------------------
     // Constructors
     // ----------------------------------------------------------------------------
     ArgParseOption(std::string const & _shortName,
                    std::string const & _longName,
                    std::string const & _help,
-                   ArgParseArgument const & argument) :
+                   ArgumentType argumentType,
+                   bool isListArgument = false,
+                   std::string const & argumentLabel = "",
+                   unsigned numberOfValues = 1) :
+        ArgParseArgument(argumentType, isListArgument, argumentLabel, numberOfValues),
         shortName(_shortName),
         longName(_longName),
-        _argument(argument),
         _isFlag(false),
         _isRequired(false),
-        _isHidden(false),
-        _helpText(_help)
-    {}
+        _isHidden(false)
+    {
+        _helpText = _help;    
+    }
+
+    template <typename TValue>
+    ArgParseOption(std::string const & _shortName,
+                   std::string const & _longName,
+                   std::string const & _help,
+                   ArgumentType argumentType,
+                   bool isListArgument,
+                   std::string const & argumentLabel,
+                   unsigned numberOfValues,
+                   TValue const & _default) :
+        ArgParseArgument(argumentType, isListArgument, argumentLabel, numberOfValues),
+        shortName(_shortName),
+        longName(_longName),
+        _isFlag(false),
+        _isRequired(false),
+        _isHidden(false)
+    {
+        _helpText = _help;  
+
+        std::stringstream strm;
+        strm << _default;
+        appendValue(defaultValue, strm.str());
+    }
 
     ArgParseOption(std::string const & _shortName,
                    std::string const & _longName,
                    std::string const & _help) :
+        ArgParseArgument(ArgParseArgument::STRING),
         shortName(_shortName),
         longName(_longName),
-        _argument(ArgParseArgument::STRING, false, "", 1, "true"),
         _isFlag(true),
         _isRequired(false),
-        _isHidden(false),
-        _helpText(_help)
+        _isHidden(false)
     {
-        setValidValues(_argument, "true false");
+        defaultValue.push_back("true");
+        setValidValues(*this, "true false");
+        _helpText = _help;
     }
 
 };
 
 // ----------------------------------------------------------------------------
-// Function isStringOption()
+// Function isStringArgument()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.isStringOption
+.Function.isStringArgument
 ..summary:Returns whether option argument can be a string.
 ..cat:Miscellaneous
-..signature:isStringOption(option)
+..signature:isStringArgument(option)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..returns:$true$ if the option argument can be a string.
@@ -141,9 +166,9 @@ public:
 */
 
 inline bool
-isStringOption(ArgParseOption const & me)
+isStringArgument(ArgParseOption const & me)
 {
-    return isStringArgument(me._argument) && !me._isFlag;
+    return isStringArgument(me) && !me._isFlag;
 }
 
 // ----------------------------------------------------------------------------
@@ -165,48 +190,6 @@ inline bool
 isBooleanOption(ArgParseOption const & me)
 {
     return me._isFlag;
-}
-
-// ----------------------------------------------------------------------------
-// Function isDoubleOption()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.isDoubleOption
-..summary:Returns whether option argument can be a double.
-..cat:Miscellaneous
-..signature:isDoubleOption(option)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..returns:$true$ if the option argument can be a double.
-..include:seqan/arg_parse.h
-*/
-
-inline bool
-isDoubleOption(ArgParseOption const & me)
-{
-    return isDoubleArgument(me._argument);
-}
-
-// ----------------------------------------------------------------------------
-// Function isIntOption()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.isIntOption
-..summary:Returns whether option argument can be an integer.
-..cat:Miscellaneous
-..signature:isIntOption(option)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..returns:$true$ if the option argument can be an integer.
-..include:seqan/arg_parse.h
-*/
-
-inline bool
-isIntOption(ArgParseOption const & me)
-{
-    return isIntegerArgument(me._argument);
 }
 
 // ----------------------------------------------------------------------------
@@ -292,68 +275,6 @@ inline void setRequired(ArgParseOption & me, bool required)
 }
 
 // ----------------------------------------------------------------------------
-// Function isOptionList()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.isOptionList
-..summary:Returns whether the option can be given multiple times.
-..cat:Miscellaneous
-..signature:isOptionList(option)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..returns:$true$ if the option can be given multiple times on command line.
-..include:seqan/arg_parse.h
-*/
-
-inline bool isListOption(ArgParseOption const & me)
-{
-    return isListArgument(me._argument);
-}
-
-// ----------------------------------------------------------------------------
-// Function isInputFile()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.isInputFile
-..summary:Returns whether the argument of the given option is an input file.
-..cat:Miscellaneous
-..signature:isInputFile(option)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..returns:$true$ if the argument of the option is an input file.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/arg_parse.h
-*/
-
-inline bool isInputFile(ArgParseOption const & me)
-{
-    return isInputFileArgument(me._argument);
-}
-
-// ----------------------------------------------------------------------------
-// Function isOutputFile()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.isOutputFile
-..summary:Returns whether the argument of the given option is an output file.
-..cat:Miscellaneous
-..signature:isOutputFile(option)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..returns:$true$ if the argument of the option is an output file.
-..see:Memfunc.ArgParseOption#ArgParseOption.param.optionType
-..include:seqan/arg_parse.h
-*/
-
-inline bool isOutputFile(ArgParseOption const & me)
-{
-    return isOutputFileArgument(me._argument);
-}
-
-// ----------------------------------------------------------------------------
 // Helper Function _writeOptName()
 // ----------------------------------------------------------------------------
 
@@ -407,206 +328,6 @@ inline TStream & operator<<(TStream & target, ArgParseOption const & source)
     //IOREV _nodoc_ this specialization is not documented
     write(target, source);
     return target;
-}
-
-// ----------------------------------------------------------------------------
-// Function setMinValue()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setMinValue
-..summary:Sets the minimum value of a @Class.ArgParseOption@ object.
-..cat:Miscellaneous
-..signature:setMinValue(option,minValue)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..param.minValue:A std::string containing a string representation of the minimum value of the @Class.ArgParseOption@.
-..include:seqan/arg_parse.h
-*/
-
-inline void setMinValue(ArgParseOption & me, const std::string _minValue)
-{
-    setMinValue(me._argument, _minValue);
-}
-
-// ----------------------------------------------------------------------------
-// Function setMaxValue()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setMaxValue
-..summary:Sets the maximum value of a @Class.ArgParseOption@ object.
-..cat:Miscellaneous
-..signature:setMaxValue(option,maxValue)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..param.maxValue:A std::string containing a string representation of the maximum value of the @Class.ArgParseOption@.
-..include:seqan/arg_parse.h
-*/
-
-inline void setMaxValue(ArgParseOption & me, const std::string _maxValue)
-{
-    setMaxValue(me._argument, _maxValue);
-}
-
-// ----------------------------------------------------------------------------
-// Function setValidValues()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.setValidValues
-..summary:Sets the set of allowed values of a @Class.ArgParseOption@ object.
-..cat:Miscellaneous
-..signature:setValidValues(option,values)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..param.values:A std::vector<std::string> containing all valid entries for the option or a
-std::string with valid values separated by spaces.
-..include:seqan/arg_parse.h
-*/
-
-inline void setValidValues(ArgParseOption & me, std::vector<std::string> const & _values)
-{
-    setValidValues(me._argument, _values);
-}
-
-inline void setValidValues(ArgParseOption & me, std::string const & _values)
-{
-    setValidValues(me._argument, _values);
-}
-
-// ----------------------------------------------------------------------------
-// Function getArgumentLabel()
-// ----------------------------------------------------------------------------
-/**
-.Function.getArgumentLabel
-..summary:Returns the label for the given @Class.ArgParseArgument@. Either the user defined label
-is returned or a default label (based on the ArgumentType is used).
-..cat:Miscellaneous
-..signature:getArgumentLabel(argument)
-..param.option:The @Class.ArgParseArgument@ object.
-...type:Class.ArgParseArgument
-..returns:A $ShortCut.std::string$ containing the label.
-..include:seqan/arg_parse.h
-*/
-
-inline std::string const getArgumentLabel(ArgParseOption const & me)
-{
-    if (isBooleanOption(me))
-        return "";
-    else
-        return getArgumentLabel(me._argument);
-}
-
-// ----------------------------------------------------------------------------
-// Function isSet()
-// ----------------------------------------------------------------------------
-/**
-.Function.isSet
-..summary:Returns whether the option was set on the command line or not.
-..cat:Miscellaneous
-..signature:isSet(option)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseArgument
-..returns:True if the option was used on the command line, otherwise false.
-..include:seqan/arg_parse.h
-*/
-
-inline bool isSet(ArgParseOption const & me)
-{
-    return isSet(me._argument);
-}
-
-// ----------------------------------------------------------------------------
-// Function assignValue()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.assignValue
-..summary:Assigns the given value (if applicable) to the @Class.ArgParseOption@ object. If
-the @Class.ArgParseOption@ is a list or can hold multiple values
-(@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) the value will be appended.
-Otherwise the value will be overwritten.
-..cat:Miscellaneous
-..signature:assignArgumentValue(option,value [, argNo])
-..param.argument:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..param.value:A std::string containing the value that should be assigned.
-..include:seqan/arg_parse.h
-*/
-
-inline void assignArgumentValue(ArgParseOption & me, std::string const & value) throw (ParseException)
-{
-    assignArgumentValue(me._argument, value);
-}
-
-// ----------------------------------------------------------------------------
-// Function getArgumentValue()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getArgumentValue
-..summary:Returns the value of the @Class.ArgParseOption@ object. If
-the @Class.ArgParseOption@ is a list or can hold multiple values
-(@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) you can specify which value
-you want to get. If not set the first value will be returned.
-..cat:Miscellaneous
-..signature:getArgumentValue(option [, position])
-..param.argument:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..param.position:A unsigned int defining the which value should be returned.
-..returns:The value set at position $position$.
-..include:seqan/arg_parse.h
-*/
-
-inline std::string const & getArgumentValue(ArgParseOption const & me, unsigned position)
-{
-    return getArgumentValue(me._argument, position);
-}
-
-inline std::string const & getArgumentValue(ArgParseOption const & me)
-{
-    return getArgumentValue(me, 0);
-}
-
-// ----------------------------------------------------------------------------
-// Function getArgumentValues()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.getArgumentValues
-..summary:Returns all values of the @Class.ArgParseOption@ object as const std::vector.
-..cat:Miscellaneous
-..signature:getArgumentValues(option)
-..param.argument:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..returns:$std::vector<std::string>$ containing the values.
-..include:seqan/arg_parse.h
-*/
-
-inline std::vector<std::string> const & getArgumentValues(ArgParseOption const & me)
-{
-    return getArgumentValues(me._argument);
-}
-
-// ----------------------------------------------------------------------------
-// Function numberOfArguments
-// ----------------------------------------------------------------------------
-
-/**
-.Function.numberOfArguments
-..summary:Returns the number of arguments for this @Class.ArgParseOption@.
-..cat:Miscellaneous
-..signature:numberOfArguments(argument)
-..param.argument:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseArgument
-..returns:The number of allowed arguments for this @Class.ArgParseOption@.
-..include:seqan/arg_parse.h
-*/
-
-inline unsigned numberOfArguments(ArgParseOption const & me)
-{
-    return numberOfArguments(me._argument);
 }
 
 } // namespace seqan

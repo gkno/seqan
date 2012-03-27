@@ -48,7 +48,7 @@ namespace seqan {
 // ----------------------------------------------------------------------------
 
 /**
-.Class.ArgParseArgument:
+.Class.ArgParseArgument
 ..cat:Miscellaneous
 ..summary:Stores information for a specific command line argument. It can be either an argument of
 a ArgParseArgument or directly an Argument on the command line.
@@ -58,7 +58,7 @@ a ArgParseArgument or directly an Argument on the command line.
 */
 
 /**
-.Memfunc.ArgParseArgument#ArgParseArgument:
+.Memfunc.ArgParseArgument#ArgParseArgument
 ..class:Class.ArgParseArgument
 ..summary:Constructor
 ..signature:ArgParseArgument (argumentType [, isListArgument, argumentLabel, numberOfArguments, _default])
@@ -99,7 +99,7 @@ public:
     // Members to store type information
     // ----------------------------------------------------------------------------
     ArgumentType _argumentType;
-    unsigned     _numberOfArguments;
+    unsigned     _numberOfValues;
     std::string  _argumentLabel;
     bool         _isListArgument;
 
@@ -118,48 +118,38 @@ public:
     std::vector<std::string> validValues;
 
     // ----------------------------------------------------------------------------
+    // Members to help text
+    // ----------------------------------------------------------------------------
+    std::string         _helpText;    // The help text shown on the command
+                                      // line
+
+    // ----------------------------------------------------------------------------
     // Constructors
     // ----------------------------------------------------------------------------
     ArgParseArgument(ArgumentType argumentType,
                      bool isListArgument = false,
                      std::string const & argumentLabel = "",
-                     unsigned numberOfArguments = 1) :
+                     unsigned numberOfValues = 1) :
         _argumentType(argumentType),
-        _numberOfArguments(numberOfArguments),
+        _numberOfValues(numberOfValues),
         _argumentLabel(argumentLabel),
         _isListArgument(isListArgument),
         minValue(""),
-        maxValue("")
+        maxValue(""),
+        _helpText("")
     {}
-
-    template <typename TValue>
-    ArgParseArgument(ArgumentType argumentType,
-                     bool isListArgument,
-                     std::string const & argumentLabel,
-                     unsigned numberOfArguments,
-                     TValue const & _default) :
-        _argumentType(argumentType),
-        _numberOfArguments(numberOfArguments),
-        _argumentLabel(argumentLabel),
-        _isListArgument(isListArgument),
-        minValue(""),
-        maxValue("")
-    {
-        std::stringstream strm;
-        strm << _default;
-        appendValue(defaultValue, strm.str());
-    }
 
     ArgParseArgument(ArgParseArgument const & other) :
         _argumentType(other._argumentType),
-        _numberOfArguments(other._numberOfArguments),
+        _numberOfValues(other._numberOfValues),
         _argumentLabel(other._argumentLabel),
         _isListArgument(other._isListArgument),
         defaultValue(other.defaultValue),
         value(other.value),
         minValue(other.minValue),
         maxValue(other.maxValue),
-        validValues(other.validValues)
+        validValues(other.validValues),
+        _helpText(other._helpText)
     {}
 
     ArgParseArgument & operator=(ArgParseArgument const & other)
@@ -167,7 +157,7 @@ public:
         if (this != &other)
         {
             _argumentType = other._argumentType;
-            _numberOfArguments = other._numberOfArguments;
+            _numberOfValues = other._numberOfValues;
             _argumentLabel = other._argumentLabel;
             _isListArgument = other._isListArgument;
             defaultValue = other.defaultValue;
@@ -175,6 +165,7 @@ public:
             minValue = other.minValue;
             maxValue = other.maxValue;
             validValues = other.validValues;
+            _helpText = other._helpText;
         }
 
         return *this;
@@ -186,8 +177,7 @@ public:
 // Helper Function _typeToString()
 // ----------------------------------------------------------------------------
 
-inline std::string
-_typeToString(ArgParseArgument const & me)
+inline std::string _typeToString(ArgParseArgument const & me)
 {
     std::string typeName = "";
 
@@ -236,8 +226,7 @@ _typeToString(ArgParseArgument const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isListArgument(ArgParseArgument const & me)
+inline bool isListArgument(ArgParseArgument const & me)
 {
     return me._isListArgument;
 }
@@ -257,8 +246,7 @@ isListArgument(ArgParseArgument const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isStringArgument(ArgParseArgument const & me)
+inline bool isStringArgument(ArgParseArgument const & me)
 {
     return (me._argumentType == ArgParseArgument::STRING) ||
            (me._argumentType == ArgParseArgument::INPUTFILE) ||
@@ -280,8 +268,7 @@ isStringArgument(ArgParseArgument const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isIntegerArgument(ArgParseArgument const & me)
+inline bool isIntegerArgument(ArgParseArgument const & me)
 {
     return me._argumentType == ArgParseArgument::INTEGER;
 }
@@ -301,8 +288,7 @@ isIntegerArgument(ArgParseArgument const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isDoubleArgument(ArgParseArgument const & me)
+inline bool isDoubleArgument(ArgParseArgument const & me)
 {
     return me._argumentType == ArgParseArgument::DOUBLE;
 }
@@ -322,8 +308,7 @@ isDoubleArgument(ArgParseArgument const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isInputFileArgument(ArgParseArgument const & me)
+inline bool isInputFileArgument(ArgParseArgument const & me)
 {
     return me._argumentType == ArgParseArgument::INPUTFILE;
 }
@@ -338,13 +323,13 @@ isInputFileArgument(ArgParseArgument const & me)
 ..signature:isListArgument(argument)
 ..param.argument:The @Class.ArgParseArgument@ object.
 ...type:Class.ArgParseArgument
+...type:Class.ArgParseOption
 ..returns:$true$ if the argument argument is an output file argument.
 ..see:Memfunc.ArgParseArgument#ArgParseArgument.param.argumentType
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isOutputFileArgument(ArgParseArgument const & me)
+inline bool isOutputFileArgument(ArgParseArgument const & me)
 {
     return me._argumentType == ArgParseArgument::OUTPUTFILE;
 }
@@ -364,8 +349,7 @@ is returned or a default label (based on the ArgumentType is used).
 ..include:seqan/arg_parse.h
 */
 
-inline std::string const
-getArgumentLabel(ArgParseArgument const & me)
+inline std::string const getArgumentLabel(ArgParseArgument const & me)
 {
     if (me._argumentLabel != "")
     {
@@ -384,9 +368,9 @@ getArgumentLabel(ArgParseArgument const & me)
 
         std::string finalLabel;
 
-        if (me._numberOfArguments != 1)
+        if (me._numberOfValues != 1)
         {
-            for (unsigned i = 0; i < me._numberOfArguments; ++i)
+            for (unsigned i = 0; i < me._numberOfValues; ++i)
             {
                 if (i != 0)
                     append(finalLabel, " ");
@@ -409,8 +393,7 @@ getArgumentLabel(ArgParseArgument const & me)
 // this methods ensures that the given arguments define a non emtpy value interval
 // otherwise it will trigger a SEQAN_CHECK failure
 template <typename TIntervalBorder>
-inline void
-_intervalAssert(const std::string minValueAsString, const std::string maxValueAsString)
+inline void _intervalAssert(const std::string minValueAsString, const std::string maxValueAsString)
 {
     if (minValueAsString != "" && maxValueAsString != "")
         SEQAN_CHECK(_cast<TIntervalBorder>(minValueAsString) < _cast<TIntervalBorder>(maxValueAsString),
@@ -435,8 +418,7 @@ of the @Class.ArgParseArgument@.
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setMinValue(ArgParseArgument & me, const std::string _minValue)
+inline void setMinValue(ArgParseArgument & me, const std::string _minValue)
 {
     if (isDoubleArgument(me))
     {
@@ -470,8 +452,7 @@ of the @Class.ArgParseArgument@.
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setMaxValue(ArgParseArgument & me, const std::string _maxValue)
+inline void setMaxValue(ArgParseArgument & me, const std::string _maxValue)
 {
     if (isDoubleArgument(me))
     {
@@ -505,8 +486,7 @@ with valid values separated by spaces.
 ..include:seqan/arg_parse.h
 */
 
-inline void
-setValidValues(ArgParseArgument & me, std::vector<std::string> const & _values)
+inline void setValidValues(ArgParseArgument & me, std::vector<std::string> const & _values)
 {
     if (isDoubleArgument(me) || isIntegerArgument(me))
         SEQAN_FAIL("ArgParseArgument does not support setting valid values for numeric arguments.");
@@ -514,8 +494,7 @@ setValidValues(ArgParseArgument & me, std::vector<std::string> const & _values)
     me.validValues = _values;
 }
 
-inline void
-setValidValues(ArgParseArgument & me, std::string const & _values)
+inline void setValidValues(ArgParseArgument & me, std::string const & _values)
 {
     // convert array to String<std::string>
     std::vector<std::string> values;
@@ -545,8 +524,7 @@ setValidValues(ArgParseArgument & me, std::string const & _values)
 
 // check if the given value is in the provided interval
 template <typename TTarget, typename TString>
-inline bool
-_isInInterval(TString value, TString lowerIntervalBound, TString upperIntervalBound)
+inline bool _isInInterval(TString value, TString lowerIntervalBound, TString upperIntervalBound)
 {
     bool isInInterval = true;
 
@@ -563,8 +541,7 @@ _isInInterval(TString value, TString lowerIntervalBound, TString upperIntervalBo
 // ----------------------------------------------------------------------------
 // test if the values can be assigned to the option and is in the given boundaries
 template <typename TNumerical>
-inline void
-_checkNumericArgument(ArgParseArgument const & me, std::string const & value)
+inline void _checkNumericArgument(ArgParseArgument const & me, std::string const & value)
 {
     if (!_isCastable<TNumerical>(value))
     {
@@ -584,8 +561,7 @@ _checkNumericArgument(ArgParseArgument const & me, std::string const & value)
     }
 }
 
-inline void
-_checkStringRestrictions(ArgParseArgument const & me, std::string const & value)
+inline void _checkStringRestrictions(ArgParseArgument const & me, std::string const & value)
 {
     typedef std::vector<std::string>::const_iterator TVectorIterator;
 
@@ -637,21 +613,20 @@ _checkStringRestrictions(ArgParseArgument const & me, std::string const & value)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.assignValue
+.Function._assignArgumentValue
 ..summary:Assigns the given value (if applicable) to the @Class.ArgParseArgument@ object. If
 the @Class.ArgParseArgument@ is a list or can hold multiple values
 (@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) the value will be appended.
 Otherwise the value will be overwritten.
-..cat:Miscellaneous
-..signature:assignArgumentValue(argument,value [, argNo])
+..cat:internal
+..signature:_assignArgumentValue(argument,value [, argNo])
 ..param.argument:The @Class.ArgParseArgument@ object.
 ...type:Class.ArgParseArgument
 ..param.value:A std::string containing the value that should be assigned.
 ..include:seqan/arg_parse.h
 */
 
-inline void
-assignArgumentValue(ArgParseArgument & me, std::string const & value) throw (ParseException)
+inline void _assignArgumentValue(ArgParseArgument & me, std::string const & value) throw (ParseException)
 {
     // type checks
     if (isIntegerArgument(me))
@@ -670,7 +645,7 @@ assignArgumentValue(ArgParseArgument & me, std::string const & value) throw (Par
     else
     {
         // check if we already set all expected arguments
-        if (length(me.value) == me._numberOfArguments)
+        if (length(me.value) == me._numberOfValues)
             clear(me.value);
         appendValue(me.value, value, Exact());
     }
@@ -695,8 +670,7 @@ you want to get. If not set the first value will be returned.
 ..include:seqan/arg_parse.h
 */
 
-inline std::string const &
-getArgumentValue(ArgParseArgument const & me, unsigned position)
+inline std::string const & getArgumentValue(ArgParseArgument const & me, unsigned position)
 {
     SEQAN_CHECK(position < me.value.size() || position < me.defaultValue.size(),
                 "ArgParseArgument: No value set for index %d", position);
@@ -707,8 +681,7 @@ getArgumentValue(ArgParseArgument const & me, unsigned position)
         return me.defaultValue[position];
 }
 
-inline std::string const &
-getArgumentValue(ArgParseArgument const & me)
+inline std::string const & getArgumentValue(ArgParseArgument const & me)
 {
     return getArgumentValue(me, 0);
 }
@@ -728,8 +701,7 @@ getArgumentValue(ArgParseArgument const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline std::vector<std::string> const &
-getArgumentValues(ArgParseArgument const & me)
+inline std::vector<std::string> const & getArgumentValues(ArgParseArgument const & me)
 {
     SEQAN_CHECK(!(me.value.empty() && me.defaultValue.empty()),
                 "ArgParseArgument: No value available.");
@@ -754,14 +726,12 @@ getArgumentValues(ArgParseArgument const & me)
 ..returns: $true$ if a value is available, $false$ if not.
 ..include:seqan/arg_parse.h
 */
-inline bool
-hasValue(ArgParseArgument const & arg, unsigned position)
+inline bool hasValue(ArgParseArgument const & arg, unsigned position)
 {
     return arg.value.size() > position || arg.defaultValue.size() > position;
 }
 
-inline bool
-hasValue(ArgParseArgument const & arg)
+inline bool hasValue(ArgParseArgument const & arg)
 {
     return hasValue(arg, 0);
 }
@@ -781,8 +751,7 @@ hasValue(ArgParseArgument const & arg)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isSet(ArgParseArgument const & me)
+inline bool isSet(ArgParseArgument const & me)
 {
     return !me.value.empty();
 }
@@ -792,20 +761,19 @@ isSet(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.numberOfArguments
-..summary:Returns the number of arguments for this @Class.ArgParseArgument@.
+.Function.numberOfAllowedValues
+..summary:Returns the number of allowed values for this @Class.ArgParseArgument@.
 ..cat:Miscellaneous
-..signature:numberOfArguments(argument)
+..signature:numberOfAllowedValues(argument)
 ..param.argument:The @Class.ArgParseArgument@ object.
 ...type:Class.ArgParseArgument
-..returns:The number of allowed arguments for this @Class.ArgParseArgument@.
+..returns:The number of allowed values for this @Class.ArgParseArgument@.
 ..include:seqan/arg_parse.h
 */
 
-inline unsigned
-numberOfArguments(ArgParseArgument const & me)
+inline unsigned numberOfAllowedValues(ArgParseArgument const & me)
 {
-    return me._numberOfArguments;
+    return me._numberOfValues;
 }
 
 } // namespace seqan

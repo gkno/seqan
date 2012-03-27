@@ -57,7 +57,7 @@ namespace seqan {
 ..param.errorStream:A stream where error messages are sent to.
 ..remarks:Must be called before retrieving options or arguments.
 ..returns:$true$ if all required arguments are set and parseable and neither the help nor version argument is set.
-..include:seqan/misc/misc_cmdparser.h
+..include:seqan/arg_parse.h
 */
 
 template <typename TErrorStream>
@@ -98,7 +98,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                                 ArgParseOption & opt = getOption(me, inParam.substr(s, e));
                                 s = --e;
                                 if (isBooleanOption(opt))
-                                    assignArgumentValue(opt, "true");
+                                    _assignArgumentValue(opt, "true");
                                 else
                                 {
                                     if (e < len - 1)
@@ -109,10 +109,10 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                                     }
 
                                     // assign the following values to this option
-                                    if (arg + static_cast<int>(numberOfArguments(opt)) < argc)
+                                    if (arg + static_cast<int>(numberOfAllowedValues(opt)) < argc)
                                     {
-                                        for (int t = 0; t < static_cast<int>(numberOfArguments(opt)); ++t)
-                                            assignArgumentValue(opt, argv[++arg]);
+                                        for (int t = 0; t < static_cast<int>(numberOfAllowedValues(opt)); ++t)
+                                            _assignArgumentValue(opt, argv[++arg]);
                                     }
                                     else  // no value available
                                     {
@@ -145,17 +145,17 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                         if (!empty(val))
                         {
                             // we can only assign one value since it was set by --longOpt=val
-                            if (numberOfArguments(opt) == 1)
-                                assignArgumentValue(opt, val);
+                            if (numberOfAllowedValues(opt) == 1)
+                                _assignArgumentValue(opt, val);
                             else
                                 throw MissingArgumentException(longOpt);
                         }
                         else if (isBooleanOption(opt))
-                            assignArgumentValue(opt, "true");
-                        else if (arg + static_cast<int>(numberOfArguments(opt)) < argc)
+                            _assignArgumentValue(opt, "true");
+                        else if (arg + static_cast<int>(numberOfAllowedValues(opt)) < argc)
                         {
-                            for (int t = 0; t < static_cast<int>(numberOfArguments(opt)); ++t)
-                                assignArgumentValue(opt, argv[++arg]);
+                            for (int t = 0; t < static_cast<int>(numberOfAllowedValues(opt)); ++t)
+                                _assignArgumentValue(opt, argv[++arg]);
                         }
                         else  // no value available
                         {
@@ -170,7 +170,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
             else  // this seems to be a normal argument
             {
                 ArgParseArgument & argument = getArgument(me, currentArgument);
-                assignArgumentValue(argument, argv[arg]);
+                _assignArgumentValue(argument, argv[arg]);
 
                 if (!isListArgument(argument))
                     ++currentArgument;

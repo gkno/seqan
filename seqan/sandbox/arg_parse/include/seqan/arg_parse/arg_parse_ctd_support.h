@@ -133,16 +133,16 @@ _addMinMaxRestrictions(std::vector<std::string> & restrictions, ArgParseOption c
 {
 
     std::string minMaxRestriction = "";
-    if (opt._argument.minValue != "")
+    if (opt.minValue != "")
     {
-        append(minMaxRestriction, opt._argument.minValue);
+        append(minMaxRestriction, opt.minValue);
         append(minMaxRestriction, ":");
     }
-    if (opt._argument.maxValue != "")
+    if (opt.maxValue != "")
     {
         if (minMaxRestriction == "")
             append(minMaxRestriction, ":");
-        append(minMaxRestriction, opt._argument.maxValue);
+        append(minMaxRestriction, opt.maxValue);
     }
 
     if (minMaxRestriction != "")
@@ -157,14 +157,14 @@ _addMinMaxRestrictions(std::vector<std::string> & restrictions, ArgParseOption c
 inline void
 _addValidValuesRestrictions(std::vector<std::string> & restrictions, ArgParseOption const & opt)
 {
-    if (length(opt._argument.validValues) != 0)
+    if (length(opt.validValues) != 0)
     {
-        for (std::vector<std::string>::const_iterator valid = opt._argument.validValues.begin();
-             valid != opt._argument.validValues.end();
+        for (std::vector<std::string>::const_iterator valid = opt.validValues.begin();
+             valid != opt.validValues.end();
              ++valid)
         {
             // for files we set *.(Name of the format)
-            if (isOutputFile(opt) || isInputFile(opt))
+            if (isOutputFileArgument(opt) || isInputFileArgument(opt))
             {
                 std::string filetype = "*.";
                 append(filetype, *valid);
