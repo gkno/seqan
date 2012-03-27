@@ -20,7 +20,7 @@ int main ()
 	while (!atEnd(tdIterator)) 
 	{
 ///We print out the representatives of all nodes that have more than 3 children and the number of occurrences. Also, we print a message if a node is a leaf.
-		count = countChildren(tdIterator);
+        count = countChildren(tdIterator);
         if( count >= 3 )
             ::std::cout << "Representative " << representative(tdIterator) << " has " <<  count << " children  and " << countOccurrences(tdIterator) << " occurrences " << ::std::endl;
         if ( isLeaf(tdIterator) )
