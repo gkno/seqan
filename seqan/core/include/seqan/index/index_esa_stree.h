@@ -876,7 +876,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 /**
 .Function.alignment:
 ..summary:Returns an alignment of the occurences of the @Function.representative@ substring in the index text.
-..cat:Index
+..cat:internal
 ..signature:alignment(iterator)
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
@@ -2172,7 +2172,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 /**
-.Function.Index#isLeaf:
+.Function.isLeaf:
 ..summary:Test whether iterator points to a leaf.
 ..cat:Index
 ..signature:bool isLeaf(iterator)

@@ -1985,12 +1985,12 @@ The resulting tables must have appropriate size before calling this function.
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..param.distMat:The resulting q-gram similarity matrix.
-...type:Concept.Container
+...type:Concept.Container 
 ..param.seqSet:Contains sequence numbers if only a subset of sequences should be compared.
 ...type:Concept.Container
-..remarks:$distMat$ will be resized to $seqCount*seqCount$, where $seqCount$ is the number of sequences in the index/in $seqSet$.
-The number of common q-grams between sequence $i$ and $j$ is stored at position $i*seqCount + j$.
-It sums up the minimum number of q-gram occurrences between both sequences for each q-gram.
+..remarks:$distMat$ need to be a container of a floating point type and will be resized to $seqCount*seqCount$, where $seqCount$ is the number of sequences in the index/in $seqSet$.
+The fraction of common q-grams between sequence $i$ and $j$ is stored at position $i*seqCount + j$.
+It sums up the minimum number of q-gram occurrences between both sequences for each q-gram and normalizes it.
 ..include:seqan/index.h
 */
 
