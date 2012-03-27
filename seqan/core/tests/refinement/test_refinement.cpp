@@ -43,14 +43,6 @@
 #define TEST_PATH "projects/tests/refinement/"
 #define LIB_PATH "core/include/seqan/refinement/"
 
-//#define LIB_PATH "/home/bude2/emde/seqan/core/include/seqan/refinement/"
-//#define TEST_PATH "/home/bude2/emde/seqan/projects/tests/refinement/"
-
-// External / STL
-#include <iostream>
-#include <fstream>
-#include <string>
-
 // SeqAn Includes
 #include <seqan/refinement.h>
 #include <seqan/basic.h>
@@ -66,18 +58,13 @@ using namespace seqan;
 
 SEQAN_BEGIN_TESTSUITE(test_refinement)
 {
-    // Redirect std::cout
-//     std::ofstream file(TEST_PATH "redirect.txt");
-//     std::streambuf* strm_puffer = std::cout.rdbuf();
-//     std::cout.rdbuf(file.rdbuf());
-
-//      Test_AlignmentGraph();
-     // Test_GraphMatchRefinement();// Test Match Refinement
-
     // Test AlignmentGraph.
-//     SEQAN_CALL_TEST(AlignmentGraphFunctions);
-  //   SEQAN_CALL_TEST(HeaviestCommonSubsequence);
-    // SEQAN_CALL_TEST(OutEdgeIteratorAlignment);
+	 SEQAN_CALL_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights);
+	 SEQAN_CALL_TEST(Test_Refinement_AlignmentGraphEdgeWeights);
+	 SEQAN_CALL_TEST(Test_Refinement_AlignmentGraphIterators);
+	 SEQAN_CALL_TEST(Test_Refinement_AlignmentGraphOutput);
+     SEQAN_CALL_TEST(Test_Refinement_HeaviestCommonSubsequence);
+     SEQAN_CALL_TEST(Test_Refinement_OutEdgeIteratorAlignment);
 
     // Test Match Refinement.
     SEQAN_CALL_TEST(RefineMatchesSelfEdges);
@@ -85,9 +72,6 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     //SEQAN_CALL_TEST(GraphMatchRefine);
     SEQAN_CALL_TEST(RefineAlign);
     SEQAN_CALL_TEST(RefineInexactFragment);
-
-    // Restore std::cout
-//      std::cout.rdbuf(strm_puffer);
 
     SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_align.h");
     SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_aligngraph.h");
@@ -99,6 +83,5 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_scoring.h");
     SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_impl_align.h");
     SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_impl_align_adapt.h");
-
 }
 SEQAN_END_TESTSUITE
