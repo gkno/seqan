@@ -46,6 +46,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Strings
 ..summary:A string of $char$.
 ..signature:CharString
+..description:
+This is a useful replacement of $std::string$.
+If you want a C-style $char *$ string, use @Function.toCString@.
 ..shortcutfor:Spec.Alloc String
 ...signature:String<char, Alloc<> >
 */

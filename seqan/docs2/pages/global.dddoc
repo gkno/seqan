@@ -132,6 +132,7 @@
 ..function:implements
 ..function:general
 ..function:baseconcept.conceptusedbyfunc
+..function:shortcutfor
 ..conceptmetafunc:baseconcept
 ..conceptmemvar:baseconcept
 ..conceptmemfunc:baseconcept
