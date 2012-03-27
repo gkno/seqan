@@ -11,7 +11,7 @@ int main ()
 	resize(mySet, 4);
 	mySet[0] = "tobeornottobe";
 	mySet[1] = "thebeeonthecomb";
-	mySet[2] = "helloworld";
+	mySet[2] = "hellobebe";
 	mySet[3] = "beingjohnmalkovich";
 
 ///Then we create an @Class.Index@ of our @Class.StringSet@ and
@@ -21,12 +21,21 @@ int main ()
 
     TIndex myIndex(mySet);
 
-///Finally we output how often $"be"$ occurs in each sequence.
+/// Now we output how often $"be"$ occurs in each sequence.
     std::cout << "Number of sequences: " << countSequences(myIndex) << ::std::endl;  
     hash(indexShape(myIndex), "be");
     TCounts cnts = countOccurrencesMultiple(myIndex, indexShape(myIndex));
     for (unsigned i = 0; i < length(cnts); ++i)
        std::cout << cnts[i].i2 << " occurrences in sequence " << cnts[i].i1  << std::endl;
 
+/// Remember that we constructed the q-gram index with ungapped 2-grams. The following function computes the fraction of common 2-grams between all pairs of sequences and outputs them.
+    
+    String<double> distMat;
+    getKmerSimilarityMatrix(myIndex,distMat);
+    
+    for( unsigned i=0; i < length(distMat); ++i)
+        ::std::cout << distMat[i] << " ";
+    ::std::cout << ::std::endl;
+    
     return 0;
 }
