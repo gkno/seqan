@@ -248,6 +248,31 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.find
 .
 
+.Demo.Index countChildren:
+..cat:Index
+..summary:Example for using a @Function.countChildren@  and @Function.countOccurrences@ for indices.
+..description:This example shows how to iterate over a suffix tree and print the number of children and the number of occurrences of the node representatitves.
+..file:../core/demos/index_counting.cpp
+..output:
+...code:
+Representative  has 17 children  and 91 Occurrences 
+Representative   has 5 children  and 16 Occurrences 
+Representative a has 3 children  and 5 Occurrences 
+Representative c has 3 children  and 12 Occurrences 
+Representative chuck has 3 children  and 5 Occurrences 
+Representative ck has 3 children  and 5 Occurrences 
+Representative d has 3 children  and 7 Occurrences 
+Representative huck has 3 children  and 5 Occurrences 
+Representative k has 3 children  and 5 Occurrences 
+Representative o has 4 children  and 13 Occurrences 
+Representative uck has 3 children  and 5 Occurrences 
+..demofor:Class.Index
+..demofor:Function.countChildren
+..demofor:Function.countOccurrences
+
+
+
+
 .Demo.Index Finder StringSet:
 ..cat:Index
 ..summary:Example for using a @Class.Finder@ of an @Class.Index@ of a @Class.StringSet@.
