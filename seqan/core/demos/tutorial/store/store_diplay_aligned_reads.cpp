@@ -15,13 +15,11 @@ int main ()
 // FRAGMENT(ascii)
     AlignedReadLayout layout;
     layoutAlignment(layout, store);
-    for (unsigned i = 0; i < length(store.contigStore); ++i)
-        printAlignment(std::cout, Raw(), layout, store, i, 50, 150, 0, 30);
+    printAlignment(std::cout, Raw(), layout, store, 1, 0, 150, 0, 36);
 
 // FRAGMENT(svg)
     SVGFile svg("layout.svg");
-    for (unsigned i = 0; i < length(store.contigStore); ++i)
-        printAlignment(svg, Raw(), layout, store, i, 50, 150, 0, 30);
+    printAlignment(svg, Raw(), layout, store, 1, 0, 150, 0, 36);
 
 	return 0;
 }
