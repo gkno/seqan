@@ -134,6 +134,11 @@
   <div class="section link_section @!key!@">
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
     <div class="list">$!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key])) for txt in sorted(tree.find([cat, subcat, key]).texts)])!$</div>
+    <!--(if tree.find([cat, subcat, key, 'signature']))-->
+    <div class="section signature_section">
+      <pre>@!'\n'.join(tree.find([cat, subcat, key, 'signature']).texts)!@</pre>
+    </div>
+    <!--(end)-->
  </div>
   <!--(end)-->
 <!--(end)-->
