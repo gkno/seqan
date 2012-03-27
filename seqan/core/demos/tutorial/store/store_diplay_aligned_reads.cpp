@@ -5,7 +5,6 @@
 
 using namespace seqan;
 
-// FRAGMENT(import)
 int main ()
 {
     FragmentStore<> store;
