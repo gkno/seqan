@@ -510,18 +510,18 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		inline void end() {
-			if (handler1)	return handler1->end();
-			else			return handler2->end();
+			if (handler1)	handler1->end();
+			else			handler2->end();
 		}
 
 		inline void process() {
-			if (handler1)	return handler1->process();
-			else			return handler2->process();
+			if (handler1)	handler1->process();
+			else			handler2->process();
 		}
 
 		inline void cancel() {
-			if (handler1)	return handler1->cancel();
-			else			return handler2->cancel();
+			if (handler1)	handler1->cancel();
+			else			handler2->cancel();
 		}
 	};
 
@@ -581,13 +581,13 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
 		inline void end() {
-			if (handler1)	return handler1->end();
-			else			return handler2->end();
+			if (handler1)	handler1->end();
+			else			handler2->end();
 		}
 
 		inline void process() {
-			if (handler1)	return handler1->process();
-			else			return handler2->process();
+			if (handler1)	handler1->process();
+			else			handler2->process();
 		}
 	};
 
