@@ -162,7 +162,7 @@ macro (seqan_setup_global)
         # This is mainly important for 64 bit but does not get into the way
         # on 32 bit either at minimal performance impact.
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer")
-        set (CMAKE_CXX_FLAGS_RELDEBUG "${CMAKE_CXX_FLAGS_RELEASE} -g -fno-omit-frame-pointer")
+        set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g -fno-omit-frame-pointer")
   
         # Pass CXX flags to flags.
         #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_CXX_FLAGS_=\"${CMAKE_CXX_FLAGS}\"")
@@ -382,12 +382,12 @@ endmacro (seqan_setup_tests)
 # * A target with the name APP_TARGET will be created and dependencies
 #   of this target to subsequently targets added by seqan_add_test will
 #   be added.
-# * Setup the correct flags for Debug, Release and RelDebug mode.
+# * Setup the correct flags for Debug, Release and RelWithDebInfo mode.
 
 macro (seqan_setup_apps APP_TARGET)
     # Set flags for SeqAn.
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
-    set (CMAKE_CXX_FLAGS_RELDEBUG "${CMAKE_CXX_FLAGS_RELDEBUG} -DSEQAN_ENABLE_DEBUG=0")
+    set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
 
@@ -410,12 +410,12 @@ endmacro (seqan_setup_apps)
 # * A target with the name DEMO_TARGET will be created and dependencies of
 #   this target to subsequently targets added by seqan_add_executable will be
 #   added.
-# * Setup the correct flags for Debug, Release and RelDebug mode.
+# * Setup the correct flags for Debug, Release and RelWithDebInfo mode.
 
 macro (seqan_setup_demos DEMO_TARGET)
     # Set flags for SeqAn.
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
-    set (CMAKE_CXX_FLAGS_RELDEBUG "${CMAKE_CXX_FLAGS_RELDEBUG} -DSEQAN_ENABLE_DEBUG=0")
+    set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
 
