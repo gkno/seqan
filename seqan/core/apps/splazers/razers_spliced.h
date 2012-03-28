@@ -30,7 +30,8 @@
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
 #include <seqan/graph_align.h>
-#include <seqan/seeds.h>
+//#include <seqan/seeds.h>
+#include <seqan/seeds2.h>
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -153,7 +154,6 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 	TSize numErrors = static_cast<int>(readLen * options.errorRate);
 	TSize maxD = options.maxGap;
 	TSize minD = options.minGap;
-
 	//expected number of random deletion matches:
 	double delMatches = _expMatchesDel(readLen,M1,M2,numErrors,d_m1, d_m2, genomeLen, numReads, maxD, minD);
 	if (options.reverse) delMatches *= 2;
@@ -784,7 +784,9 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 //	unsigned rDim0 = length(readSet[rseqNo])-1-options.minMatchLen;
 	unsigned rDim0 = length(readSet[rseqNo])-1;
 	unsigned rDim1 = m.gEnd - beginPosition(inf)-1;
-	Seed<int,SimpleSeed> seed(lDim0, lDim1, rDim0, rDim1);
+
+//    Seed<int,SimpleSeed> seed(lDim0, lDim1, rDim0, rDim1);
+    Seed<Simple> seed(lDim0, lDim1, rDim0+1, rDim1+1);
 	Score<int> scoreMatrix(0,-1,-1,-1);
 	int scoreDropOff = static_cast<int>((sequenceLength(rseqNo,readSet) * options.errorRate) - m.editDist);
 
@@ -803,11 +805,20 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 #endif
 
 	int extScore = 0;
-	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, readSet[rseqNo],inf,0,GappedXDrop());
-//  XXXIMPROV
-//	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, suffix(readSet[rseqNo],options.minMatchLen),inf,0,GappedXDrop());
-	m.gBegin = leftDim1(seed) + beginPosition(inf);
-	m.mScore = rightDim0(seed) - leftDim0(seed) + 1;
+	//extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, readSet[rseqNo],inf,0,GappedXDrop());
+	    
+    typedef typename Prefix<typename Value<TReadSet>::Type >::Type TQueryPrefix;
+    typedef typename Prefix<TInf>::Type TDatabasePrefix;
+
+    TQueryPrefix queryPrefix = prefix(readSet[rseqNo], getBeginDim0(seed));
+    TDatabasePrefix databasePrefix = prefix(inf, getBeginDim1(seed));
+    extScore = _extendSeedGappedXDropOneDirection(seed, queryPrefix, databasePrefix, EXTEND_LEFT, scoreMatrix, scoreDropOff);
+    
+//	m.gBegin = leftDim1(seed) + beginPosition(inf);
+//	m.mScore = rightDim0(seed) - leftDim0(seed) + 1;
+
+	m.gBegin = getBeginDim1(seed) + beginPosition(inf);
+	m.mScore = getEndDim0(seed) - getBeginDim0(seed);
 	m.editDist -= extScore;
 
 #ifdef RAZERS_DEBUG
@@ -835,7 +846,8 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 	unsigned lDim1 = m.gBegin - beginPosition(inf);
 	unsigned rDim0 = _min(options.minMatchLen,length(readSet[rseqNo])) - 1;
 	unsigned rDim1 = m.gEnd - beginPosition(inf) - 1;
-	Seed<int,SimpleSeed> seed(lDim0, lDim1, rDim0, rDim1);
+//	Seed<int,SimpleSeed> seed(lDim0, lDim1, rDim0, rDim1);
+	Seed<Simple> seed(lDim0, lDim1, rDim0+1, rDim1+1);
 	Score<int> scoreMatrix(0,-1,-1,-1);
 	int scoreDropOff = static_cast<int>((sequenceLength(rseqNo,readSet) * options.errorRate) - m.editDist);
 
@@ -856,19 +868,30 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 	int extScore = 0;
 //  XXXIMPROV
 //	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, prefix(readSet[rseqNo],length(readSet[rseqNo])-options.minMatchLen),inf,1,GappedXDrop());
-	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, readSet[rseqNo],inf,1,GappedXDrop());
-	m.gEnd = rightDim1(seed) + 1 + beginPosition(inf);
-	m.mScore = rightDim0(seed) - leftDim0(seed) + 1;
+    
+    typedef typename Suffix<typename Value<TReadSet>::Type >::Type TQuerySuffix;
+    typedef typename Suffix<TInf>::Type TDatabaseSuffix;
+
+    TQuerySuffix querySuffix = suffix(readSet[rseqNo], getEndDim0(seed));
+    TDatabaseSuffix databaseSuffix = suffix(inf, getEndDim1(seed));
+    extScore = _extendSeedGappedXDropOneDirection(seed, querySuffix, databaseSuffix, EXTEND_RIGHT, scoreMatrix, scoreDropOff);
+
+
+	//extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, readSet[rseqNo],inf,1,GappedXDrop());
+	//m.gEnd = rightDim1(seed) + 1 + beginPosition(inf);
+	//m.mScore = rightDim0(seed) - leftDim0(seed) + 1;
+	m.gEnd = getEndDim1(seed)  + beginPosition(inf);
+	m.mScore = getEndDim0(seed) - getBeginDim0(seed);
 	m.editDist -= extScore;
 
 #ifdef RAZERS_DEBUG
-	::std::cout << " lDim0: " << leftDim0(seed) << ::std::endl;
-	::std::cout << " lDim1: " << leftDim1(seed) << ::std::endl;
-	::std::cout << " rDim0: " << rightDim0(seed) << ::std::endl;
-	::std::cout << " rDim1: " << rightDim1(seed) << ::std::endl;
+	::std::cout << " lDim0: " << getBeginDim0(seed) << ::std::endl;
+	::std::cout << " lDim1: " << getBeginDim1(seed) << ::std::endl;
+	::std::cout << " rDim0: " << getEndDim0(seed) << ::std::endl;
+	::std::cout << " rDim1: " << getEndDim1(seed) << ::std::endl;
 	::std::cout << " scoreDropOff: "<<scoreDropOff << ::std::endl;
-	::std::cout << " readInf: "<< infix(readSet[rseqNo],leftDim0(seed),rightDim0(seed)+1) << ::std::endl;
-	::std::cout << " gInfInf: "<< infix(inf,leftDim1(seed),rightDim1(seed)+1) << ::std::endl;
+	::std::cout << " readInf: "<< infix(readSet[rseqNo],getBeginDim0(seed),getEndDim0(seed)) << ::std::endl;
+	::std::cout << " gInfInf: "<< infix(inf,getBeginDim1(seed),getEndDim1(seed)) << ::std::endl;
 	::std::cout << " read: "<< readSet[rseqNo] << ::std::endl;
 	::std::cout << " gInf: "<< inf << ::std::endl;
 #endif

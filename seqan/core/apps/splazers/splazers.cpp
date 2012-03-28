@@ -368,6 +368,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("es", "errors-suffix",    "max. number of errors in suffix match", OptionType::Int | OptionType::Label, options.maxSuffixErrors));
 	addOption(parser, CommandLineOption("gl", "genome-len",    "genome length, for computation of expected number of random matches", OptionType::Int | OptionType::Label, options.specifiedGenomeLen));
 	addOption(parser, CommandLineOption("an", "anchored",           "anchored split mapping, only unmapped reads with mapped mates will be considered, requires the reads to be given in SAM format", OptionType::Boolean));
+	addOption(parser, CommandLineOption("pc",  "penalty-c",    "percent of read length, used as penalty for split-gap", OptionType::Int | OptionType::Label, options.penaltyC));
 
 
 
@@ -445,6 +446,7 @@ int main(int argc, const char *argv[])
  	getOptionValueLong(parser, "errors-suffix", options.maxSuffixErrors);
  	getOptionValueLong(parser, "genome-len", options.specifiedGenomeLen);
 	getOptionValueLong(parser, "anchored", options.anchored);
+	getOptionValueLong(parser, "penalty-c", options.penaltyC);
 	
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	getOptionValueLong(parser, "min-clipped-len", options.minClippedLen);

@@ -1100,9 +1100,8 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 		|| (!pm_options.optionHammingOnly && pm_options.totalN > pm_options.maxComputedEditN ))
 		extrapolateNK(pm_options);
 	
-
-	// compute data specific loss rates
-	if (pm_options.fnameCount0 || pm_options.fnameCount1) 
+    // compute data specific loss rates
+	if (pm_options.fnameCount0 || pm_options.fnameCount1)
 	{
 		if(!pm_options.prefixCount)
 		{

@@ -492,8 +492,8 @@ bool loadReads(
 	const char *fileName, 
 	TRazerSOptions &options)
 {
-	bool countN = !(options.matchN || options.outputFormat == 1 );
-	if (!empty(CharString(options.outputUnmapped))) countN = false;
+	bool countN = !(options.matchN || options.outputFormat == 1);
+	if (!empty(options.outputUnmapped)) countN = false;
 #ifdef RAZERS_MICRO_RNA
 	if(options.microRNA) countN = false;
 #endif
