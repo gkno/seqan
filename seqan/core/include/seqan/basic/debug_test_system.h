@@ -2233,7 +2233,8 @@ SEQAN_CHECKPOINT;
     (void) argc;                                                        \
     (void) argv;                                                        \
     fprintf(stderr, "Warning: SEQAN_ENABLE_TESTING is wrong and you used the macro SEQAN_BEGIN_TESTSUITE!\n");
-#define SEQAN_END_TESTSUITE }
+#define SEQAN_END_TESTSUITE return 0;                                   \
+    }
 #define SEQAN_CALL_TEST(test_name) do { SEQAN_TEST_ ## test_name(); } while (false)
 #define SEQAN_SKIP_TEST do {} while (false)
 
