@@ -355,6 +355,18 @@ inline void hideOption(ArgumentParser & me, std::string const & _name, bool hide
 // Function getArgument()
 // ----------------------------------------------------------------------------
 
+/**
+.Function.getArgument
+..summary:
+..cat:Miscellaneous
+..signature:getArgument(parser, argumentPosition)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.argumentPosition:The index of the argument in the argument list.
+..returns: a reference to the specified @Class.ArgParseArgument@ object.
+..include:seqan/arg_parse.h
+*/
+
 inline ArgParseArgument & getArgument(ArgumentParser & me, unsigned position)
 {
     SEQAN_CHECK(position < me.argumentList.size(),
@@ -464,7 +476,6 @@ inline bool getOptionValue(TValue & val, ArgumentParser const & me,
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.optionIdentifier:A std::string that is either the short or long name of the option.
-..param.argNo:If the option is list, the $argNo$-th list element is returned.
 ..returns: The number of values stored for this option.
 ..include:seqan/arg_parse.h
 */
@@ -483,12 +494,11 @@ inline unsigned getOptionValueCount(ArgumentParser const & me, std::string const
 .Function.getArgumentValueCount:
 ..summary:Retunrs the number of values stored in the specified option.
 ..cat:Miscellaneous
-..signature:getOptionValueCount(parser, optionIdentifier)
+..signature:getArgumentValueCount(parser, argumentPosition)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
-..param.optionIdentifier:A std::string that is either the short or long name of the option.
-..param.argNo:If the option is list, the $argNo$-th list element is returned.
-..returns: The number of values stored for this option.
+..param.argumentPosition:The index of the argument in the argument list.
+..returns: The number of values stored for the specified argument.
 ..include:seqan/arg_parse.h
 */
 
