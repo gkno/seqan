@@ -89,16 +89,16 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	SEQAN_ASSERT_EQ(getStringSet(g)[0], str0);
 	SEQAN_ASSERT_EQ(getStringSet(g)[1], str1);
 	SEQAN_ASSERT_EQ(stringSet(g)[2], str2);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
-	SEQAN_ASSERT_EQ(numVertices(g), 0);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
+	SEQAN_ASSERT_EQ(numVertices(g), 0u);
 	SEQAN_ASSERT(empty(g));
 
 	TVertexDescriptor v0 = addVertex(g, id1, 0, 2);
 	SEQAN_ASSERT_EQ(v0, 0);
-	SEQAN_ASSERT_EQ(outDegree(g, v0), 0);	
-	SEQAN_ASSERT_EQ(inDegree(g, 0), 0);
-	SEQAN_ASSERT_EQ(degree(g, 0), 0);
-	SEQAN_ASSERT_EQ(numVertices(g), 1);
+	SEQAN_ASSERT_EQ(outDegree(g, v0), 0u);	
+	SEQAN_ASSERT_EQ(inDegree(g, 0), 0u);
+	SEQAN_ASSERT_EQ(degree(g, 0), 0u);
+	SEQAN_ASSERT_EQ(numVertices(g), 1u);
 	SEQAN_ASSERT(!empty(g));
 	SEQAN_ASSERT_EQ(sequenceId(g, v0), id1);
 	SEQAN_ASSERT_EQ(label(g, v0), "cc");
@@ -114,14 +114,14 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	SEQAN_ASSERT_EQ(getIdUpperBound(_getVertexIdManager(g)), 2);
 	SEQAN_ASSERT_EQ(getIdUpperBound(_getEdgeIdManager(g)), 1);
 	SEQAN_ASSERT_EQ(v1, 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 2);
-	SEQAN_ASSERT_EQ(targetVertex(g, e), 1);
-	SEQAN_ASSERT_EQ(sourceVertex(g, e), 0);
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(outDegree(g, v0), 1);
-	SEQAN_ASSERT_EQ(inDegree(g, 1), 1);
-	SEQAN_ASSERT_EQ(inDegree(g, 0), 1);
-	SEQAN_ASSERT_EQ(degree(g, 0), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 2u);
+	SEQAN_ASSERT_EQ(targetVertex(g, e), 1u);
+	SEQAN_ASSERT_EQ(sourceVertex(g, e), 0u);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(outDegree(g, v0), 1u);
+	SEQAN_ASSERT_EQ(inDegree(g, 1), 1u);
+	SEQAN_ASSERT_EQ(inDegree(g, 0), 1u);
+	SEQAN_ASSERT_EQ(degree(g, 0), 1u);
 	SEQAN_ASSERT_EQ(findVertex(g, id2, 0), v1);
 	SEQAN_ASSERT_EQ(findVertex(g, id2, 1), v1);
 	SEQAN_ASSERT_EQ(findVertex(g, id2, 4), v1);
@@ -141,18 +141,18 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	TEdgeDescriptor my_edge = addEdge(g, 3, 1);
 	addEdge(g, 3, 0);
 	SEQAN_ASSERT_EQ(v3, 3);
-	SEQAN_ASSERT_EQ(numVertices(g), 5);
+	SEQAN_ASSERT_EQ(numVertices(g), 5u);
 	SEQAN_ASSERT_EQ(targetVertex(g, my_edge), 3);
 	SEQAN_ASSERT_EQ(sourceVertex(g, my_edge), 1);
-	SEQAN_ASSERT_EQ(numEdges(g), 4);
-	SEQAN_ASSERT_EQ(outDegree(g, v3), 3);
-	SEQAN_ASSERT_EQ(inDegree(g, v3), 3);
-	SEQAN_ASSERT_EQ(degree(g, v3), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 4u);
+	SEQAN_ASSERT_EQ(outDegree(g, v3), 3u);
+	SEQAN_ASSERT_EQ(inDegree(g, v3), 3u);
+	SEQAN_ASSERT_EQ(degree(g, v3), 3u);
 
 	// Remove edges
 	removeEdge(g, 3, 1);
 	removeEdge(g, 0, 1);
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
 	
 	// Remove vertices 
 	addVertex(g, id2, 14, 4);  // 5
@@ -160,73 +160,73 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	addEdge(g, 2, 3);
 	addEdge(g, 1, 3);
 	addEdge(g, 1, 4);
-	SEQAN_ASSERT_EQ(outDegree(g, 3), 4);
-	SEQAN_ASSERT_EQ(outDegree(g, 4), 2);
+	SEQAN_ASSERT_EQ(outDegree(g, 3), 4u);
+	SEQAN_ASSERT_EQ(outDegree(g, 4), 2u);
 	removeVertex(g, v3);
-	SEQAN_ASSERT_EQ(outDegree(g, 4), 1);
-	SEQAN_ASSERT_EQ(outDegree(g, 0), 0);
-	SEQAN_ASSERT_EQ(numVertices(g), 5);
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(outDegree(g, 4), 1u);
+	SEQAN_ASSERT_EQ(outDegree(g, 0), 0u);
+	SEQAN_ASSERT_EQ(numVertices(g), 5u);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
 
 	// Clear graph
 	clearEdges(g);
-	SEQAN_ASSERT_EQ(numVertices(g), 5);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
+	SEQAN_ASSERT_EQ(numVertices(g), 5u);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
 	addEdge(g, 2, 0);
 	addEdge(g, 4, 1);
 	clearVertices(g);
-	SEQAN_ASSERT_EQ(numVertices(g), 0);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
+	SEQAN_ASSERT_EQ(numVertices(g), 0u);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
 	addVertex(g, id1, 0, 1); addVertex(g, id1, 1, 1); addVertex(g, id1, 2, 1);
 	addVertex(g, id1, 3, 1); addVertex(g, id1, 4, 1);
 	addEdge(g, 2, 0);
 	addEdge(g, 4, 1);
 	clear(g);
 	assignStringSet(g, str);
-	SEQAN_ASSERT_EQ(numVertices(g), 0);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
+	SEQAN_ASSERT_EQ(numVertices(g), 0u);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
 	addVertex(g, id1, 0, 1); addVertex(g, id1, 1, 1); addVertex(g, id1, 2, 1);
 	addVertex(g, id1, 3, 1); addVertex(g, id1, 4, 1);
 	addEdge(g, 2, 0);
 	addEdge(g, 4, 1);
 	addEdge(g, 4, 2);
 	removeVertex(g, 3);
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
-	SEQAN_ASSERT_EQ(numEdges(g), 3);
-	SEQAN_ASSERT_EQ(outDegree(g, 4), 2);
-	SEQAN_ASSERT_EQ(inDegree(g, 4), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
+	SEQAN_ASSERT_EQ(numEdges(g), 3u);
+	SEQAN_ASSERT_EQ(outDegree(g, 4), 2u);
+	SEQAN_ASSERT_EQ(inDegree(g, 4), 2u);
 
 	// Transpose
 	transpose(g); 
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
-	SEQAN_ASSERT_EQ(numEdges(g), 3);
-	SEQAN_ASSERT_EQ(outDegree(g, 4), 2);
-	SEQAN_ASSERT_EQ(inDegree(g, 4), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
+	SEQAN_ASSERT_EQ(numEdges(g), 3u);
+	SEQAN_ASSERT_EQ(outDegree(g, 4), 2u);
+	SEQAN_ASSERT_EQ(inDegree(g, 4), 2u);
 	TGraph g_copy(g);
-	SEQAN_ASSERT_EQ(numVertices(g_copy), 4);
-	SEQAN_ASSERT_EQ(numEdges(g_copy), 3);
-	SEQAN_ASSERT_EQ(outDegree(g_copy, 4), 2);
-	SEQAN_ASSERT_EQ(inDegree(g_copy, 4), 2);
+	SEQAN_ASSERT_EQ(numVertices(g_copy), 4u);
+	SEQAN_ASSERT_EQ(numEdges(g_copy), 3u);
+	SEQAN_ASSERT_EQ(outDegree(g_copy, 4), 2u);
+	SEQAN_ASSERT_EQ(inDegree(g_copy, 4), 2u);
 	addVertex(g_copy, id0, 0, 3);
 	addEdge(g_copy, 3, 0);
 	g_copy = g;
-	SEQAN_ASSERT_EQ(numVertices(g_copy), 4);
-	SEQAN_ASSERT_EQ(numEdges(g_copy), 3);
-	SEQAN_ASSERT_EQ(outDegree(g_copy, 4), 2);
-	SEQAN_ASSERT_EQ(inDegree(g_copy, 4), 2);
+	SEQAN_ASSERT_EQ(numVertices(g_copy), 4u);
+	SEQAN_ASSERT_EQ(numEdges(g_copy), 3u);
+	SEQAN_ASSERT_EQ(outDegree(g_copy, 4), 2u);
+	SEQAN_ASSERT_EQ(inDegree(g_copy, 4), 2u);
 	//Copies the graph and transposes just the copy
 	transpose(g, g_copy);  // g does not change!
-	SEQAN_ASSERT_EQ(numVertices(g_copy), 4);
-	SEQAN_ASSERT_EQ(numEdges(g_copy), 3);
-	SEQAN_ASSERT_EQ(outDegree(g_copy, 4), 2);
-	SEQAN_ASSERT_EQ(inDegree(g_copy, 4), 2);
+	SEQAN_ASSERT_EQ(numVertices(g_copy), 4u);
+	SEQAN_ASSERT_EQ(numEdges(g_copy), 3u);
+	SEQAN_ASSERT_EQ(outDegree(g_copy, 4), 2u);
+	SEQAN_ASSERT_EQ(inDegree(g_copy, 4), 2u);
 
 	// Adjacency matrix
 	String<unsigned int> mat;
 	getAdjacencyMatrix(g, mat);
 	unsigned int len = (unsigned int) std::sqrt((double) length(mat));
-	SEQAN_ASSERT_EQ(getValue(mat, 0 * len + 2), 1);
-	SEQAN_ASSERT_EQ(getValue(mat, 3 * len + 2), 0);
+	SEQAN_ASSERT_EQ(getValue(mat, 0 * len + 2), 1u);
+	SEQAN_ASSERT_EQ(getValue(mat, 3 * len + 2), 0u);
 	SEQAN_ASSERT_EQ(getValue(mat, 0 * len + 2), getValue(mat, 2 * len + 0));
 	SEQAN_ASSERT_EQ(getValue(mat, 1 * len + 4), getValue(mat, 4 * len + 1));
 	SEQAN_ASSERT_EQ(getValue(mat, 2 * len + 4), getValue(mat, 4 * len + 2));
@@ -247,15 +247,15 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphEdgeWeights)
 
 	TStringSet str;
 	TString str0("acaagtaacataaaaaaaaaaaaaaaacccccccccttttttttaaaaa");
-	TId id0 = assignValueById(str, str0);
+	appendValue(str, str0);
 	TString str1("cccaaagggtttttccccccccccccttttttttttaaaaaaagggggggg");
 	TId id1 = assignValueById(str, str1);
 	TString str2("cacatgtaatcatgggggggggccccccttttaaaaaaaaaaatttt");
 	TId id2 = assignValueById(str, str2);
 
 	TGraph g(str);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
-	SEQAN_ASSERT_EQ(numVertices(g), 0);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
+	SEQAN_ASSERT_EQ(numVertices(g), 0u);
 	SEQAN_ASSERT(empty(g));
 
 	TVertexDescriptor v0 = addVertex(g, id1, 0, 2);
@@ -264,18 +264,18 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphEdgeWeights)
 	SEQAN_ASSERT_EQ(v1, 1);
 	TEdgeDescriptor e1 = addEdge(g, 0, 1, 100);
 	SEQAN_ASSERT_EQ(getCargo(e1), 100);
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
 	removeEdge(g, e1);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
 	e1 = addEdge(g, 0, 1, 1005);
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
 	removeOutEdges(g, 0);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
 	e1 = addEdge(g, 0, 1, 1005);
 	SEQAN_ASSERT_EQ(findEdge(g, 0, 1), e1);
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
 	removeInEdges(g, 0);
-	SEQAN_ASSERT_EQ(numEdges(g), 0);
+	SEQAN_ASSERT_EQ(numEdges(g), 0u);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -292,11 +292,11 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 
 	TStringSet str;
 	TString str0("acaagtaacataaaaaaaaaaaaaaaacccccccccttttttttaaaaa");
-	TId id0 = assignValueById(str, str0);
+	appendValue(str, str0);
 	TString str1("cccaaagggtttttccccccccccccttttttttttaaaaaaagggggggg");
 	TId id1 = assignValueById(str, str1);
 	TString str2("cacatgtaatcatgggggggggccccccttttaaaaaaaaaaatttt");
-	TId id2 = assignValueById(str, str2);
+	appendValue(str, str2);
 
 	TGraph g(str);
 	TVertexDescriptor v0 = addVertex(g, id1, 0, 1);
