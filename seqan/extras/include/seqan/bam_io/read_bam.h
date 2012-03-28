@@ -280,14 +280,15 @@ int readRecord(BamAlignmentRecord & record,
     SEQAN_ASSERT_GT(remainingBytes, nCigarOp * 4);
     resize(record.cigar, nCigarOp, Exact());
     static char const * CIGAR_MAPPING = "MIDNSHP=";
-    for (__int32 i = 0; i < nCigarOp; ++i)
+    typedef typename Iterator<String<CigarElement<> >, Rooted>::Type TCigarIter;
+    for (TCigarIter it = begin(record.cigar, Rooted()); !atEnd(it); goNext(it))
     {
         __uint32 ui = 0;
         res = streamReadBlock(reinterpret_cast<char *>(&ui), stream, 4);
         if (res != 4)
             return res;
-        record.cigar[i].operation = CIGAR_MAPPING[ui & 0x0007];
-        record.cigar[i].count = ui >> 4;
+        it->operation = CIGAR_MAPPING[ui & 0x0007];
+        it->count = ui >> 4;
     }
     remainingBytes -= nCigarOp * 4;
 
@@ -295,14 +296,21 @@ int readRecord(BamAlignmentRecord & record,
     SEQAN_ASSERT_GT(remainingBytes, (lSeq + 2) / 2);
     resize(record.seq, lSeq + 1, Exact());
     static char const * SEQ_MAPPING = "=ACMGRSVTWYHKDBN";
-    for (__int32 i = 0, j = 0; i < lSeq; i += 2, ++j)
+    
+    typedef typename Iterator<CharString, Rooted>::Type TSeqIter;
     {
-        __uint8 ui;
-        res = streamReadChar(reinterpret_cast<char &>(ui), stream);
-        if (res != 0)
-            return res;
-        record.seq[i] = SEQ_MAPPING[ui >> 4];
-        record.seq[i + 1] = SEQ_MAPPING[ui & 0x0f];
+        // Note: Yes, we need separate index i and iterator.  The iterator allows the fast iteration and i is for
+        // book-keeping since we potentially create too long seq records.
+        TSeqIter it = begin(record.seq, Rooted());
+        for (__int32 i = 0; i < lSeq; i += 2)
+        {
+            __uint8 ui;
+            res = streamReadChar(reinterpret_cast<char &>(ui), stream);
+            if (res != 0)
+                return res;
+            *it++ = SEQ_MAPPING[ui >> 4];
+            *it++ = SEQ_MAPPING[ui & 0x0f];
+        }
     }
     resize(record.seq, lSeq);  // Possibly trim last, overlap base.
     remainingBytes -= (lSeq + 1) / 2;
@@ -314,8 +322,9 @@ int readRecord(BamAlignmentRecord & record,
     res = streamReadBlock(&(record.qual[0]), stream, lSeq);
     if (res != lSeq)
         return res;
-    for (__int32 i = 0; i < lSeq; ++i)
-        record.qual[i] += '!';
+    typedef typename Iterator<CharString, Rooted>::Type TQualIter;
+    for (TQualIter it = begin(record.qual, Rooted()); !atEnd(it); goNext(it))
+        *it += '!';
     remainingBytes -= lSeq;
 
     // tags
