@@ -21,5 +21,5 @@ int main ()
     SVGFile svg("layout.svg");
     printAlignment(svg, Raw(), layout, store, 1, 0, 150, 0, 36);
 
-	return 0;
+    return 0;
 }
