@@ -32,6 +32,32 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
+// The index building algorithm is based on the samtools implementation which
+// is under the MIT License:
+
+/* The MIT License
+
+   Copyright (c) 2008-2009 Genome Research Ltd.
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   THE SOFTWARE.
+*/
+
 #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_INDEX_BAI_H_
 #define EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_INDEX_BAI_H_
 
@@ -76,12 +102,14 @@ public:
     typedef String<__uint64> TLinearIndex_;
 
     __uint64 _unalignedCount;
+
+    // 1<<14 is the size of the minimum bin.
+    static const __int32 BAM_LIDX_SHIFT = 14;
     
     String<TBinIndex_> _binIndices;
     String<TLinearIndex_> _linearIndices;
     
-    BamIndex() :
-            _unalignedCount(0)
+    BamIndex() : _unalignedCount(maxValue<__uint64>())
     {}
 };
 
@@ -342,6 +370,276 @@ load(BamIndex<Bai> & index, char const * filename)
     index._unalignedCount = nNoCoord;
 
     return true;
+}
+
+// ----------------------------------------------------------------------------
+// Function buildIndex()
+// ----------------------------------------------------------------------------
+
+/*DISABLED
+.Function.BamIndex#buildIndex
+..cat:BAM I/O
+..signature:buildIndex(index, filename)
+..summary:Build index for BAM file with given filename.
+..remarks:This will create an index file named $filename + ".bai"$.
+..param.index:Target data structure.
+...type:Class.BamIndex
+..param.filename:Path to BAM file to load.
+...type:nolink:$char const *$
+..returns:$bool$ indicating success.
+..include:seqan/bam_io.h
+ */
+
+inline int _writeIndex(BamIndex<Bai> const & index, char const * filename)
+{
+    std::cerr << "WRITE INDEX TO " << filename << std::endl;
+    // Open output stream.
+    std::ofstream out(filename, std::ios::binary | std::ios::out);
+
+    SEQAN_ASSERT_EQ(length(index._binIndices), length(index._linearIndices));
+    
+    // Write header.
+    out.write("BAI\1", 4);
+    __int32 numRefSeqs = length(index._binIndices);
+    out.write(reinterpret_cast<char *>(&numRefSeqs), 4);
+
+    // Write out indices.
+    typedef BamIndex<Bai> const                TBamIndex;
+    typedef TBamIndex::TBinIndex_ const        TBinIndex;
+    typedef TBinIndex::const_iterator          TBinIndexIter;
+    typedef TBamIndex::TLinearIndex_           TLinearIndex;
+    for (int i = 0; i < numRefSeqs; ++i)
+    {
+        TBinIndex const & binIndex = index._binIndices[i];
+        TLinearIndex const & linearIndex = index._linearIndices[i];
+
+        // Write out binning index.
+        __int32 numBins = binIndex.size();
+        out.write(reinterpret_cast<char *>(&numBins), 4);
+        for (TBinIndexIter itB = binIndex.begin(), itBEnd = binIndex.end(); itB != itBEnd; ++itB)
+        {
+            // Write out bin id.
+            out.write(reinterpret_cast<char const *>(&itB->first), 4);
+            // Write out number of chunks.
+            __uint32 numChunks = length(itB->second.chunkBegEnds);
+            out.write(reinterpret_cast<char *>(&numChunks), 4);
+            // Write out all chunks.
+            typedef Iterator<String<Pair<__uint64> > const, Rooted>::Type TChunkIter;
+            for (TChunkIter itC = begin(itB->second.chunkBegEnds); !atEnd(itC); goNext(itC))
+            {
+                out.write(reinterpret_cast<char const *>(&itC->i1), 8);
+                out.write(reinterpret_cast<char const *>(&itC->i2), 8);
+            }
+        }
+
+        // Write out linear index.
+        __int32 numIntervals = length(index._linearIndices);
+        out.write(reinterpret_cast<char *>(&numIntervals), 4);
+        typedef Iterator<String<__uint64> const, Rooted>::Type TLinearIndexIter;
+        for (TLinearIndexIter it = begin(linearIndex, Rooted()); !atEnd(it); goNext(it))
+            out.write(reinterpret_cast<char const *>(&*it), 8);
+    }
+
+    // Write the number of unaligned reads if set.
+    std::cerr << "UNALIGNED\t" << index._unalignedCount << std::endl;
+    if (index._unalignedCount != maxValue<__uint64>())
+        out.write(reinterpret_cast<char const *>(&index._unalignedCount), 8);
+
+    return !out.good();  // 1 on error, 0 on success.
+}
+
+inline void _baiAddAlignmentChunkToBin(BamIndex<Bai> & index,
+                                       __uint32 currBin,
+                                       __uint32 currOffset,
+                                       __uint64 prevOffset)
+{
+    // If this is not the first reference sequence then add previous reference data.
+    Pair<__uint64> newChunk(currOffset, prevOffset);
+
+    // If no interest exists yet for this bin, create one and store alignment chunk.
+    BamIndex<Bai>::TBinIndex_::iterator binIter = back(index._binIndices).find(currBin);
+    if (binIter == back(index._binIndices).end())
+    {
+        BaiBamIndexBinData_ binData;
+        appendValue(binData.chunkBegEnds, newChunk);
+        back(index._binIndices).insert(std::make_pair(currBin, binData));
+    }
+    else
+    {
+        // Otherwise, just append alignment chunk.
+        appendValue(binIter->second.chunkBegEnds, newChunk);
+    }
+}
+
+inline bool
+buildIndex(BamIndex<Bai> & index, char const * filename)
+{
+    SEQAN_FAIL("This does not work ye!");
+
+    index._unalignedCount = 0;
+    clear(index._binIndices);
+    clear(index._linearIndices);
+    
+    // Open BAM file for reading.
+    Stream<Bgzf> bamStream;
+    if (!open(bamStream, filename, "r"))
+        return false;  // Could not open BAM file.
+
+    // Initialize BamIOContext.
+    typedef StringSet<CharString>      TNameStore;
+    typedef NameStoreCache<TNameStore> TNameStoreCache;
+    
+    TNameStore refNameStore;
+    TNameStoreCache refNameStoreCache(refNameStore);
+    BamIOContext<TNameStore> bamIOContext(refNameStore, refNameStoreCache);
+
+    // Read BAM header.
+    BamHeader header;
+    int res = readRecord(header, bamIOContext, bamStream, Bam());
+    if (res != 0)
+        return false;  // Could not read BAM header.
+    __uint32 numRefSeqs = length(header.sequenceInfos);
+
+    // Scan over BAM file and create index.
+    BamAlignmentRecord record;
+    __uint32 currBin    = maxValue<__uint32>();
+    __uint32 prevBin    = maxValue<__uint32>();
+    __int32 currRefId   = BamAlignmentRecord::INVALID_REFID;
+    __int32 prevRefId   = BamAlignmentRecord::INVALID_REFID;
+    __uint64 currOffset = streamTell(bamStream);
+    __uint64 prevOffset = currOffset;
+    __int32 prevPos     = minValue<__int32>();
+
+    while (!atEnd(bamStream))
+    {
+        // Load next record.
+        res = readRecord(record, bamIOContext, bamStream, Bam());
+        if (res != 0)
+            return false;
+        
+        // Check ordering.
+        if (prevRefId == record.rId && prevPos > record.pos)
+            return false;
+
+        // The reference sequence changed, close bins for previous reference.
+        if (prevRefId != record.rId)
+        {
+            if (prevRefId != BamAlignmentRecord::INVALID_REFID)
+            {
+                _baiAddAlignmentChunkToBin(index, currBin, currOffset, prevOffset);
+
+                // Add an index for all empty references between prevRefId (excluded) and record.rId (included).
+                for (int i = prevRefId + 1; i < record.rId; ++i)
+                {
+                    BamIndex<Bai>::TBinIndex_ binIndex;
+                    appendValue(index._binIndices, binIndex);
+                    BamIndex<Bai>::TLinearIndex_ linearIndex;
+                    appendValue(index._linearIndices, linearIndex);
+                }
+
+                // Update bin book keeping.
+                currOffset = prevOffset;
+                currBin    = record.bin;
+                prevBin    = record.bin;
+                currRefId  = record.rId;
+            }
+            else
+            {
+                // Otherwise, this is the first pass.  Create an index for all empty references up to and including
+                // current refId.
+                for (int i = 0; i < record.rId; ++i)
+                {
+                    BamIndex<Bai>::TBinIndex_ binIndex;
+                    appendValue(index._binIndices, binIndex);
+                    BamIndex<Bai>::TLinearIndex_ linearIndex;
+                    appendValue(index._linearIndices, linearIndex);
+                }
+            }
+
+            // Update reference book keeping.
+            prevRefId = record.rId;
+            prevBin = minValue<__int32>();
+        }
+
+        // If the alignment's reference id is valid and its bin is not a leaf.
+        if (record.rId >= 0 && record.bin < 4681)
+        {
+            __int32 beginOffset = record.pos >> BamIndex<Bai>::BAM_LIDX_SHIFT;
+            __int32 endPos      = getAlignmentLengthInRef(record);
+            __int32 endOffset   = (endPos - 1) >> BamIndex<Bai>::BAM_LIDX_SHIFT;
+
+            // Resize linear index if necessary.
+            unsigned oldSize = length(index._linearIndices);
+            unsigned newSize = endOffset + 1;
+            if (oldSize < newSize)
+                resize(back(index._linearIndices), newSize, 0);
+
+            // Store offset.
+            for (int i = beginOffset + 1; i <= endOffset; ++i)
+                if (back(index._linearIndices)[i] == 0u)
+                    back(index._linearIndices)[i] = prevOffset;
+        }
+
+        // Handle the case if we changed to a new BAI bin.
+        if (record.bin != prevBin)
+        {
+            // If not first bin of reference, save previous bin data.
+            if (currBin != maxValue<__uint32>())
+                _baiAddAlignmentChunkToBin(index, currBin, currOffset, prevOffset);
+
+            // Update markers.
+            currOffset = prevOffset;
+            currBin    = record.bin;
+            prevBin    = record.bin;
+            currRefId  = record.rId;
+
+            // If the reference id is invalid then break out.
+            if (currRefId < 0)
+                break;
+        }
+
+        // Make sure that the current file pointer is beyond prevOffset.
+        if (streamTell(bamStream) <= static_cast<__int64>(prevOffset))
+            return false;  // Calculating offsets failed.
+
+        // Update prevOffset and prevPos.
+        prevOffset = streamTell(bamStream);
+        prevPos    = record.pos;
+    }
+
+    // Count remaining unaligned records.
+    while (!streamEof(bamStream))
+    {
+        SEQAN_ASSERT_GT(index._unalignedCount, 0u);
+
+        res = readRecord(record, bamIOContext, bamStream, Bam());
+        if (res != 0 || record.rId >= 0)
+            return false;  // Could not read record.
+
+        index._unalignedCount += 1;
+    }
+
+    // After loading all alignments, if any data was read, perform checks.
+    if (currRefId >= 0)
+    {
+        // Store last alignment chunk to its bin and then write last reference entry with data.
+        _baiAddAlignmentChunkToBin(index, currBin, currOffset, prevOffset);
+
+        // Finally, write any empty references remaining at end of file.
+        SEQAN_ASSERT_GEQ(numRefSeqs, length(index._binIndices));
+        BamIndex<Bai>::TBinIndex_ binIndex;
+        resize(index._binIndices, numRefSeqs, binIndex);  // TODO(holtgrew): binIndex is unnecessary if resize used T() as default value as vector.resize() does.
+    }
+
+    // Merge small bins if possible.
+    SEQAN_FAIL("TODO: Merge bins!");
+
+    // Write out index.
+    CharString baiFilename(filename);
+    append(baiFilename, ".bai");
+    res = _writeIndex(index, toCString(baiFilename));
+
+    return (res == 0);
 }
 
 }  // namespace seqan
