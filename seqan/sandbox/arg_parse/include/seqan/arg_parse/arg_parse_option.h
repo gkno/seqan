@@ -68,7 +68,21 @@ Although not suggested the short-name can contain more than 1 character.
 ...type:Class.ArgParseArgument
 */
 
+///.Function.isListArgument.param.argument.type:Class.ArgParseOption
+///.Function.isStringArgument.param.argument.type:Class.ArgParseOption
+///.Function.isIntegerArgument.param.argument.type:Class.ArgParseOption
+///.Function.isDoubleArgument.param.argument.type:Class.ArgParseOption
+///.Function.isInputFileArgument.param.argument.type:Class.ArgParseOption
 ///.Function.isOutputFileArgument.param.argument.type:Class.ArgParseOption
+///.Function.getArgumentLabel.param.argument.type:Class.ArgParseOption
+///.Function.setMinValue.param.argument.type:Class.ArgParseOption
+///.Function.setMaxValue.param.argument.type:Class.ArgParseOption
+///.Function.setValidValues.param.argument.type:Class.ArgParseOption
+///.Function.getArgumentValue.param.argument.type:Class.ArgParseOption
+///.Function.getArgumentValues.param.argument.type:Class.ArgParseOption
+///.Function.hasValue.param.argument.type:Class.ArgParseOption
+///.Function.isSet.param.argument.type:Class.ArgParseOption
+///.Function.numberOfAllowedValues.param.argument.type:Class.ArgParseOption
 
 class ArgParseOption
     : public ArgParseArgument
@@ -165,8 +179,7 @@ public:
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isStringArgument(ArgParseOption const & me)
+inline bool isStringArgument(ArgParseOption const & me)
 {
     return isStringArgument(me) && !me._isFlag;
 }
@@ -186,8 +199,7 @@ isStringArgument(ArgParseOption const & me)
 ..include:seqan/arg_parse.h
 */
 
-inline bool
-isBooleanOption(ArgParseOption const & me)
+inline bool isBooleanOption(ArgParseOption const & me)
 {
     return me._isFlag;
 }
@@ -224,7 +236,7 @@ inline bool isVisible(ArgParseOption const & me)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..param.hide:The new visibility of the option. Default is false.
-...type:Bool
+...type:nolink:bool
 ..include:seqan/arg_parse.h
 */
 
@@ -265,7 +277,7 @@ inline bool isRequired(ArgParseOption const & me)
 ..param.option:The @Class.ArgParseOption@ object.
 ...type:Class.ArgParseOption
 ..param.required:The new required value of the option.
-...type:Bool
+...type:nolink:bool
 ..include:seqan/arg_parse.h
 */
 

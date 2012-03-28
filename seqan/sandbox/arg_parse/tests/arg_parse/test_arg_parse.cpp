@@ -45,7 +45,7 @@
 
 using namespace seqan;
 
-SEQAN_BEGIN_TESTSUITE(test_misc_cmdparser)
+SEQAN_BEGIN_TESTSUITE(test_arg_parse)
 {
     // Call the int option tests
     SEQAN_CALL_TEST(test_int_short_argument);

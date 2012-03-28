@@ -57,7 +57,7 @@ void failExceptionTest()
         {                                                                           \
             command;                                                                \
         }                                                                           \
-        catch(_exception_type ex)                                                   \
+        catch(_exception_type& ex)                                                   \
         {                                                                           \
             if(std::string(ex.what()) != _message)                                  \
             {                                                                       \

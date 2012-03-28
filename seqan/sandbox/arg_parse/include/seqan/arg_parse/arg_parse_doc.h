@@ -87,11 +87,11 @@ inline void _parseAppName(ArgumentParser & parser, std::string const & candidate
 // ----------------------------------------------------------------------------
 
 /**
-.Function._addLine:
+.Function.addLine:
 ..summary:Adds a line of text to the help output of the @Class.ArgumentParser@ in the block of
-@Class.ArgumentOption@s.
+@Class.ArgParseOption@s.
 ..cat:Miscellaneous
-..signature:_addLine(parser, text)
+..signature:addLine(parser, text)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.text:A line of text that will be added to the help output.
@@ -100,7 +100,7 @@ inline void _parseAppName(ArgumentParser & parser, std::string const & candidate
 */
 
 template <typename TString>
-inline void _addLine(ArgumentParser & me, TString const & line)
+inline void addLine(ArgumentParser & me, TString const & line)
 {
     addOption(me, ArgParseOption("", "", line));
 }
@@ -111,7 +111,7 @@ inline void _addLine(ArgumentParser & me, TString const & line)
 
 /**
 .Function.addSection:
-..summary:Begins a new section of @Class.ArgParseOptions@ the help output of
+..summary:Begins a new section of @Class.ArgParseOption@ the help output of
 the @Class.ArgumentParser@.
 ..cat:Miscellaneous
 ..signature:addSection(parser, text)
@@ -136,8 +136,8 @@ addOption("x", ... );
 template <typename TString>
 inline void addSection(ArgumentParser & me, TString const & line)
 {
-    _addLine(me, "");
-    _addLine(me, line);
+    addLine(me, "");
+    addLine(me, line);
 }
 
 // ----------------------------------------------------------------------------

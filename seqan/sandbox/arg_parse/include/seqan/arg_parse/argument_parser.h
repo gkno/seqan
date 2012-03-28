@@ -54,7 +54,7 @@ namespace seqan {
 /**
 .Class.ArgumentParser
 ..cat:Miscellaneous
-..summary:Stores multiple @Class.ArgParseOption@ objects and parses the command line _arguments for these options.
+..summary:Stores multiple @Class.ArgParseOption@ objects and parses the command line arguments for these options.
 ..signature:ArgumentParser
 ..include:seqan/arg_parse.h
 ..remarks:
@@ -317,7 +317,7 @@ inline ArgParseOption const & getOption(ArgumentParser const & me, std::string c
 ...type:Class.ArgumentParser
 ..param.optionName:The identifier of the command line option.
 ..param.required:The new required value of the option. Default is true.
-...type:Bool
+...type:nolink:bool
 ..include:seqan/arg_parse.h
 */
 
@@ -341,7 +341,7 @@ inline void setRequired(ArgumentParser & me, std::string const & _name, bool req
 ...type:Class.ArgumentParser
 ..param.optionName:The identifier of the command line option.
 ..param.hide:The new visibility of the option. Default is false.
-...type:Bool
+...type:nolink:bool
 ..include:seqan/arg_parse.h
 */
 
