@@ -162,7 +162,7 @@ def buildReplacements(type_, name, location, target_file, options):
     cmake_project_name = _pathToIdentifier(path)
     result['CMAKE_PROJECT_NAME'] = cmake_project_name
     if type_ == 'repository':
-        result['REPOSITORY_PSEUDO_TARGET_NAME'] = string.capwords(name.replace('/', ' ')).replace(' ', '')
+        result['REPOSITORY_PSEUDO_TARGET_NAME'] = string.capwords(name.replace('/', ' ').replace('\\', ' ')).replace(' ', '')
     if type_ == 'app_tests':
         result['APP_NAME'] = os.path.split(os.path.split(location)[0])[1]
         result['APP_NAME_U'] = result['APP_NAME'].upper()
