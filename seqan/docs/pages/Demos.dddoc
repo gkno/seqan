@@ -248,6 +248,309 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.find
 .
 
+.Demo.Index countOccurrencesMultiple:
+..cat:Index
+..summary:Example for using the functions @Function.countOccurrencesMultiple@ and @Function.countSequences@ for q-gram indices.
+..description:This example shows how to create a q-gram index for a string set and subsequently how to count the number of occurrences of a pattern in all strings of the stringset. Before this we output the number of sequences in the index. Finally we output the frequencies of shared q-grams between pairs of sequences in the string set.
+..file:../core/demos/index_qgram_counts.cpp
+..output:
+...code:
+Number of sequences: 4
+2 occurrences in sequence 0
+1 occurrences in sequence 1
+1 occurrences in sequence 3
+..demofor:Class.Index
+..demofor:Function.countOccurrencesMultiple
+..demofor:Function.countSequences
+..demofor:Function.getKmerSimilarityMatrix
+.
+
+.Demo.Index lcpAt, saAt:
+..cat:Index
+..summary:Example for using the functions @Function.saAt@ and @Function.lcpAt@ for esa indices.
+..description:This example shows how to create an esa index for a string set and how to contruct the lcp table.
+Then the program iterates over the lcp table and outputs the corresponding suffixes.
+..file:../core/demos/index_lcp.cpp
+..output:
+...code:
+0 3 < 2 , 40 >  Segment class.
+1 6 < 2 , 32 >  SeqAn's Segment class.
+2 2 < 1 , 52 >  SeqAn.
+3 1 < 1 , 3 >  String class is the fundamental sequence type in SeqAn.
+4 2 < 0 , 8 >  a library for sequence analysis.
+5 1 < 0 , 31 >  analysis.
+6 1 < 2 , 16 >  be handled with SeqAn's Segment class.
+7 2 < 2 , 12 >  can be handled with SeqAn's Segment class.
+8 6 < 1 , 10 >  class is the fundamental sequence type in SeqAn.
+9 1 < 2 , 48 >  class.
+10 2 < 0 , 18 >  for sequence analysis.
+11 1 < 1 , 23 >  fundamental sequence type in SeqAn.
+12 1 < 2 , 19 >  handled with SeqAn's Segment class.
+13 2 < 1 , 49 >  in SeqAn.
+14 4 < 0 , 5 >  is a library for sequence analysis.
+15 1 < 1 , 16 >  is the fundamental sequence type in SeqAn.
+16 1 < 0 , 10 >  library for sequence analysis.
+17 10 < 0 , 22 >  sequence analysis.
+18 1 < 1 , 35 >  sequence type in SeqAn.
+19 2 < 1 , 19 >  the fundamental sequence type in SeqAn.
+20 1 < 1 , 44 >  type in SeqAn.
+21 0 < 2 , 27 >  with SeqAn's Segment class.
+22 0 < 2 , 38 > 's Segment class.
+23 1 < 2 , 54 > .
+24 1 < 1 , 58 > .
+25 0 < 0 , 40 > .
+26 2 < 0 , 3 > An is a library for sequence analysis.
+27 2 < 2 , 36 > An's Segment class.
+28 0 < 1 , 56 > An.
+29 2 < 2 , 41 > Segment class.
+30 5 < 0 , 0 > SeqAn is a library for sequence analysis.
+31 5 < 2 , 33 > SeqAn's Segment class.
+32 1 < 1 , 53 > SeqAn.
+33 1 < 1 , 4 > String class is the fundamental sequence type in SeqAn.
+34 0 < 2 , 0 > Subsequences can be handled with SeqAn's Segment class.
+35 0 < 1 , 0 > The String class is the fundamental sequence type in SeqAn.
+36 1 < 0 , 9 > a library for sequence analysis.
+37 2 < 1 , 33 > al sequence type in SeqAn.
+38 1 < 0 , 34 > alysis.
+39 1 < 1 , 28 > amental sequence type in SeqAn.
+40 2 < 2 , 14 > an be handled with SeqAn's Segment class.
+41 2 < 0 , 32 > analysis.
+42 1 < 2 , 21 > andled with SeqAn's Segment class.
+43 1 < 0 , 15 > ary for sequence analysis.
+44 3 < 1 , 13 > ass is the fundamental sequence type in SeqAn.
+45 0 < 2 , 51 > ass.
+46 1 < 2 , 17 > be handled with SeqAn's Segment class.
+47 1 < 0 , 13 > brary for sequence analysis.
+48 0 < 2 , 2 > bsequences can be handled with SeqAn's Segment class.
+49 1 < 2 , 13 > can be handled with SeqAn's Segment class.
+50 3 < 0 , 29 > ce analysis.
+51 2 < 1 , 42 > ce type in SeqAn.
+52 1 < 2 , 9 > ces can be handled with SeqAn's Segment class.
+53 5 < 1 , 11 > class is the fundamental sequence type in SeqAn.
+54 0 < 2 , 49 > class.
+55 1 < 2 , 26 > d with SeqAn's Segment class.
+56 1 < 1 , 27 > damental sequence type in SeqAn.
+57 0 < 2 , 23 > dled with SeqAn's Segment class.
+58 2 < 1 , 2 > e String class is the fundamental sequence type in SeqAn.
+59 2 < 0 , 30 > e analysis.
+60 2 < 1 , 22 > e fundamental sequence type in SeqAn.
+61 2 < 2 , 18 > e handled with SeqAn's Segment class.
+62 2 < 1 , 48 > e in SeqAn.
+63 1 < 1 , 43 > e type in SeqAn.
+64 1 < 2 , 25 > ed with SeqAn's Segment class.
+65 1 < 2 , 42 > egment class.
+66 5 < 0 , 27 > ence analysis.
+67 4 < 1 , 40 > ence type in SeqAn.
+68 2 < 2 , 7 > ences can be handled with SeqAn's Segment class.
+69 3 < 2 , 45 > ent class.
+70 1 < 1 , 30 > ental sequence type in SeqAn.
+71 4 < 0 , 1 > eqAn is a library for sequence analysis.
+72 4 < 2 , 34 > eqAn's Segment class.
+73 2 < 1 , 54 > eqAn.
+74 8 < 0 , 24 > equence analysis.
+75 7 < 1 , 37 > equence type in SeqAn.
+76 1 < 2 , 4 > equences can be handled with SeqAn's Segment class.
+77 0 < 2 , 10 > es can be handled with SeqAn's Segment class.
+78 1 < 0 , 19 > for sequence analysis.
+79 0 < 1 , 24 > fundamental sequence type in SeqAn.
+80 1 < 1 , 9 > g class is the fundamental sequence type in SeqAn.
+81 0 < 2 , 43 > gment class.
+82 1 < 2 , 31 > h SeqAn's Segment class.
+83 1 < 2 , 20 > handled with SeqAn's Segment class.
+84 3 < 1 , 1 > he String class is the fundamental sequence type in SeqAn.
+85 0 < 1 , 21 > he fundamental sequence type in SeqAn.
+86 1 < 0 , 12 > ibrary for sequence analysis.
+87 2 < 1 , 50 > in SeqAn.
+88 1 < 1 , 7 > ing class is the fundamental sequence type in SeqAn.
+89 3 < 0 , 6 > is a library for sequence analysis.
+90 2 < 1 , 17 > is the fundamental sequence type in SeqAn.
+91 1 < 0 , 38 > is.
+92 0 < 2 , 29 > ith SeqAn's Segment class.
+93 1 < 1 , 34 > l sequence type in SeqAn.
+94 4 < 1 , 12 > lass is the fundamental sequence type in SeqAn.
+95 1 < 2 , 50 > lass.
+96 1 < 2 , 24 > led with SeqAn's Segment class.
+97 1 < 0 , 11 > library for sequence analysis.
+98 0 < 0 , 35 > lysis.
+99 4 < 2 , 44 > ment class.
+100 0 < 1 , 29 > mental sequence type in SeqAn.
+101 2 < 1 , 51 > n SeqAn.
+102 2 < 2 , 15 > n be handled with SeqAn's Segment class.
+103 1 < 0 , 4 > n is a library for sequence analysis.
+104 1 < 2 , 37 > n's Segment class.
+105 1 < 1 , 57 > n.
+106 1 < 0 , 33 > nalysis.
+107 4 < 0 , 28 > nce analysis.
+108 3 < 1 , 41 > nce type in SeqAn.
+109 1 < 2 , 8 > nces can be handled with SeqAn's Segment class.
+110 2 < 1 , 26 > ndamental sequence type in SeqAn.
+111 1 < 2 , 22 > ndled with SeqAn's Segment class.
+112 1 < 1 , 8 > ng class is the fundamental sequence type in SeqAn.
+113 2 < 2 , 46 > nt class.
+114 0 < 1 , 31 > ntal sequence type in SeqAn.
+115 0 < 0 , 20 > or sequence analysis.
+116 0 < 1 , 47 > pe in SeqAn.
+117 3 < 0 , 2 > qAn is a library for sequence analysis.
+118 3 < 2 , 35 > qAn's Segment class.
+119 1 < 1 , 55 > qAn.
+120 7 < 0 , 25 > quence analysis.
+121 6 < 1 , 38 > quence type in SeqAn.
+122 0 < 2 , 5 > quences can be handled with SeqAn's Segment class.
+123 1 < 0 , 21 > r sequence analysis.
+124 1 < 0 , 14 > rary for sequence analysis.
+125 1 < 1 , 6 > ring class is the fundamental sequence type in SeqAn.
+126 0 < 0 , 16 > ry for sequence analysis.
+127 2 < 2 , 39 > s Segment class.
+128 2 < 0 , 7 > s a library for sequence analysis.
+129 2 < 2 , 11 > s can be handled with SeqAn's Segment class.
+130 2 < 1 , 15 > s is the fundamental sequence type in SeqAn.
+131 1 < 1 , 18 > s the fundamental sequence type in SeqAn.
+132 2 < 2 , 53 > s.
+133 1 < 0 , 39 > s.
+134 9 < 0 , 23 > sequence analysis.
+135 8 < 1 , 36 > sequence type in SeqAn.
+136 1 < 2 , 3 > sequences can be handled with SeqAn's Segment class.
+137 1 < 0 , 37 > sis.
+138 2 < 1 , 14 > ss is the fundamental sequence type in SeqAn.
+139 0 < 2 , 52 > ss.
+140 1 < 2 , 47 > t class.
+141 1 < 1 , 32 > tal sequence type in SeqAn.
+142 2 < 2 , 30 > th SeqAn's Segment class.
+143 1 < 1 , 20 > the fundamental sequence type in SeqAn.
+144 1 < 1 , 5 > tring class is the fundamental sequence type in SeqAn.
+145 0 < 1 , 45 > type in SeqAn.
+146 1 < 2 , 1 > ubsequences can be handled with SeqAn's Segment class.
+147 6 < 0 , 26 > uence analysis.
+148 5 < 1 , 39 > uence type in SeqAn.
+149 1 < 2 , 6 > uences can be handled with SeqAn's Segment class.
+150 0 < 1 , 25 > undamental sequence type in SeqAn.
+151 0 < 2 , 28 > with SeqAn's Segment class.
+152 1 < 0 , 17 > y for sequence analysis.
+153 1 < 1 , 46 > ype in SeqAn.
+154 0 < 0 , 36 > ysis.
+..demofor:Class.Index
+..demofor:Function.saAt
+..demofor:Function.lcpAt
+.
+
+
+.Demo.Index countChildren:
+..cat:Index
+..summary:Example for using a @Function.countChildren@  and @Function.countOccurrences@ for indices.
+..description:This example shows how to iterate over a suffix tree and print the number of children and the number of occurrences of the node representatitves.
+..file:../core/demos/index_counting.cpp
+..output:
+...code:
+Representative  has 17 children  and 91 occurrences 
+Representative   has 5 children  and 16 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative a has 3 children  and 5 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative c has 3 children  and 12 occurrences 
+The node is a leaf 
+Representative chuck has 3 children  and 5 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative ck has 3 children  and 5 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative d has 3 children  and 7 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative huck has 3 children  and 5 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative k has 3 children  and 5 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative o has 4 children  and 13 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+Representative uck has 3 children  and 5 occurrences 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+The node is a leaf 
+..demofor:Class.Index
+..demofor:Function.countChildren
+..demofor:Function.countOccurrences
+..demofor:Function.isLeaf
+.
+
+
+
 .Demo.Index Finder StringSet:
 ..cat:Index
 ..summary:Example for using a @Class.Finder@ of an @Class.Index@ of a @Class.StringSet@.
@@ -292,7 +595,7 @@ weese@tanne:~/seqan/demos$
 ..demofor:Function.repLength
 ..demofor:Function.getOccurrences
 ..demofor:Function.orderOccurrences
-..seealso:Demo.Mummy
+..see:Demo.Mummy
 .
 
 .Demo.Supermaximal Repeats:
@@ -396,7 +699,7 @@ weese@tanne:~/seqan/demos$ head mums.txt
     2132    324372      2726        20
     2183    324423      2777        24
 weese@tanne:~/seqan/demos$
-..seealso:Demo.Maximal Unique Matches
+..see:Demo.Maximal Unique Matches
 ..demofor:Class.Index
 ..demofor:Class.StringSet
 ..demofor:Spec.Mums Iterator
