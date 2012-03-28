@@ -124,6 +124,12 @@ public:
 
     StringEnumerator(TObject & _original, unsigned _minDist) : data_host(_original), minDist(_minDist), trim(true)
     {}
+
+    StringEnumerator(TObject const & _original) : data_host(_original), minDist(0), trim(true)
+    {}
+
+    StringEnumerator(TObject const & _original, unsigned _minDist) : data_host(_original), minDist(_minDist), trim(true)
+    {}
 };
 
 // --------------------------------------------------------------------------
