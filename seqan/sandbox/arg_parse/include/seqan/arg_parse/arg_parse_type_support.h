@@ -119,7 +119,7 @@ inline bool _convertArgumentValue(bool & dst, ArgParseOption const & opt, std::s
     if (!isBooleanOption(opt))
         return false;
 
-    dst = !empty(src);
+    dst = !empty(src) && (src != "false");
     return true;
 }
 

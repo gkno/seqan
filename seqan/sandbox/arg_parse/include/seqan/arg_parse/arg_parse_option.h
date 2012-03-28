@@ -157,7 +157,7 @@ public:
         _isRequired(false),
         _isHidden(false)
     {
-        defaultValue.push_back("true");
+        defaultValue.push_back("false");
         setValidValues(*this, "true false");
         _helpText = _help;
     }
