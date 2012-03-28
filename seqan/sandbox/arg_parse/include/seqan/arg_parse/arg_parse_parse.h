@@ -178,7 +178,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
         }
         if (hasOption(me, "version") && isSet(me, "version"))
         {
-            // printVersion(me, estream);
+            printVersion(me, estream);
             return ArgumentParser::PARSE_VERSION;
         }
         if (hasOption(me, "write-ctd") && isSet(me, "write-ctd"))

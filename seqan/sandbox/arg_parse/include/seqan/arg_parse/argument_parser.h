@@ -152,6 +152,7 @@ public:
 
     // friend declaration to make addOption() available in init function
     friend inline void addOption(ArgumentParser & me, ArgParseOption const & opt);
+    friend inline void hideOption(ArgumentParser & me, std::string const & _name, bool hide);
 
     // ----------------------------------------------------------------------------
     // Function init()
@@ -159,9 +160,12 @@ public:
     void init()
     {
         addOption(*this, ArgParseOption("h", "help", "Displays this help message."));
-        // TODO: HIDE
+
+        // hidden flags used for export of man pages and ctd formats
         addOption(*this, ArgParseOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", ArgParseArgument::OUTPUTFILE));
+        hideOption(*this, "write-ctd", true);
         addOption(*this, ArgParseOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", ArgParseArgument::STRING, false, "FORMAT"));
+        hideOption(*this, "export-help", true);
 
         // this is our ToolDoc only for the Description, we will later append it to the
         // real ToolDoc, but we need to separate it to ease the formating
@@ -594,20 +598,27 @@ inline std::vector<std::string> const & getArgumentValues(ArgumentParser & me,
 
 /**
 .Function.setMinValue
-..summary:Sets the minimum value of a @Class.ArgParseOption@ object identified by .
-..cat:Miscellaneous
 ..signature:setMinValue(parser,optionName,minValue)
+..signature:setMinValue(parser,argumentPosition,minValue)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..param.option:The identifier of the command line option.
+..param.argumentPosition:The index of the argument in the argument list.
 ..param.minValue:A std::string containing a string representation of the minimum value of the @Class.ArgParseOption@.
-..include:seqan/arg_parse.h
 */
+
 inline void setMinValue(ArgumentParser & me, std::string const & name,
                         std::string const & _minValue)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setMinValue(getOption(me, name), _minValue);
+}
+
+inline void setMinValue(ArgumentParser & me, unsigned argumentPosition,
+                        std::string const & _minValue)
+{
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    setMinValue(getArgument(me, argumentPosition), _minValue);
 }
 
 // ----------------------------------------------------------------------------
@@ -616,14 +627,13 @@ inline void setMinValue(ArgumentParser & me, std::string const & name,
 
 /**
 .Function.setMaxValue
-..summary:Sets the maximum value of a @Class.ArgParseOption@ object.
-..cat:Miscellaneous
 ..signature:setMaxValue(parser,optionName,maxValue)
+..signature:setMaxValue(parser,argumentPosition,minValue)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
-..param.option:The identifier of the command line option.
+..param.optionName:The identifier of the command line option.
+..param.argumentPosition:The index of the argument in the argument list.
 ..param.maxValue:A std::string containing a string representation of the maximum value of the @Class.ArgParseOption@.
-..include:seqan/arg_parse.h
 */
 
 inline void setMaxValue(ArgumentParser & me, std::string const & name,
@@ -633,20 +643,27 @@ inline void setMaxValue(ArgumentParser & me, std::string const & name,
     setMaxValue(getOption(me, name), _maxValue);
 }
 
+inline void setMaxValue(ArgumentParser & me, unsigned argumentPosition,
+                        std::string const & _minValue)
+{
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    setMaxValue(getArgument(me, argumentPosition), _minValue);
+}
+
 // ----------------------------------------------------------------------------
 // Function setValidValues()
 // ----------------------------------------------------------------------------
 
 /**
 .Function.setValidValues
-..summary:Sets the set of allowed values of a @Class.ArgParseOption@ object.
-..cat:Miscellaneous
 ..signature:setValidValues(parser,optionName,values)
+..signature:setValidValues(parser,argumentPosition,values)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
-..param.option:The identifier of the command line option.
-..param.values:A $String<std::string>$ containing all valid entries for the option.
-..include:seqan/arg_parse.h
+..param.optionName:The identifier of the command line option.
+..param.argumentPosition:The index of the argument in the argument list.
+..param.values:A $std::string$ containing all valid entries for the option.
+Alternatively you can pass a string containing all values separated by spaces.
 */
 
 inline void setValidValues(ArgumentParser & me, std::string const & name,
@@ -661,6 +678,20 @@ inline void setValidValues(ArgumentParser & me, std::string const & name,
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setValidValues(getOption(me, name), _values);
+}
+
+inline void setValidValues(ArgumentParser & me, unsigned argumentPosition,
+                           std::vector<std::string> const & _values)
+{
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    setValidValues(getArgument(me, argumentPosition), _values);
+}
+
+inline void setValidValues(ArgumentParser & me, unsigned argumentPosition,
+                           std::string const & _values)
+{
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    setValidValues(getArgument(me, argumentPosition), _values);
 }
 
 }  // namespace seqan

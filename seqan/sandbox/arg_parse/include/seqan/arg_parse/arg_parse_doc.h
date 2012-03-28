@@ -177,131 +177,6 @@ void _addUsage(ToolDoc & toolDoc, ArgumentParser const & me)
 }
 
 // ----------------------------------------------------------------------------
-// Function printShortHelp()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.printShortHelp
-..summary:Prints a short help message for the parser to a stream
-..cat:Miscellaneous
-..signature:printShortHelp(parser[, stream])
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.stream:Target stream (e.g. $std::cerr$).
-..include:seqan/arg_parse.h
-*/
-
-inline void printShortHelp(ArgumentParser const & me, std::ostream & stream)
-{
-    // TODO: maybe we can get this a bit prettier
-    ToolDoc shortDoc(me._toolDoc);
-    clearEntries(shortDoc);
-
-    _addUsage(shortDoc, me);
-
-    std::stringstream shortHelp;
-    shortHelp << "Try '" << getAppName(me) << " --help' for more information.\n";
-    addText(shortDoc, shortHelp.str());
-
-    print(stream, shortDoc, "txt");
-}
-
-// ----------------------------------------------------------------------------
-// Function printHelp()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.printHelp
-..summary:Prints the complete help message for the parser to a stream.
-..cat:Miscellaneous
-..signature:printHelp(parser[, stream][, format])
-..param.parser:The @Class.ArgumentParser@ object.
-...type:Class.ArgumentParser
-..param.stream:Target std::ostream (e.g. $std::cerr$).
-...default: $std::cerr$
-..param.format:Format to print, one of "html", "man", "txt".
-..include:seqan/arg_parse.h
-*/
-
-inline void printHelp(ArgumentParser const & me, std::ostream & stream, CharString const & format)
-{
-    ToolDoc toolDoc(me._toolDoc);
-    clearEntries(toolDoc);  // We will append me._toolDoc later.
-
-    // Build synopsis section.
-    addSection(toolDoc, "Synopsis");
-    _addUsage(toolDoc, me);
-
-    // Add description to tool documentation.
-    append(toolDoc, me._description);
-
-    // Add options to description section.
-    for (unsigned i = 0; i < length(me.optionMap); ++i)
-    {
-        ArgParseOption const & opt = me.optionMap[i];
-        if (empty(opt.shortName) && empty(opt.longName))  // this is not an option but a text line
-        {
-            if (empty(opt._helpText))  // TODO(holtgrew): Should go away in future.
-                continue;  // Skip empty lines.
-
-            // Is command line parser section, maps to ToolDoc subsection.
-            std::string title = opt._helpText;
-            append(title, ":");
-            addSubSection(toolDoc, title);
-        }
-        else if (!isVisible(opt))
-        {
-            // Build list item term.
-            std::string term;
-            if (!empty(opt.shortName))
-            {
-                term = "\\fB-";
-                append(term, opt.shortName);
-                append(term, "\\fP");
-            }
-            if (!empty(opt.shortName) && !empty(opt.longName))
-                append(term, ", ");
-            if (!empty(opt.longName))
-            {
-                append(term, "\\fB--");
-                append(term, opt.longName);
-                append(term, "\\fP");
-            }
-            // Get arguments, autogenerate if necessary.
-            std::string arguments = getArgumentLabel(opt);
-
-            // Write arguments to term line -> only exception, boolean flags
-            if (!empty(arguments))
-            {
-                // Tokenize argument names.
-                std::istringstream iss(toCString(arguments));
-                std::vector<std::string> tokens;
-                std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(),
-                          std::back_inserter<std::vector<std::string> >(tokens));
-                // Append them, formatted in italic.
-                for (unsigned i = 0; i < length(tokens); ++i)
-                {
-                    append(term, " \\fI");
-                    append(term, tokens[i]);
-                    append(term, "\\fP");
-                }
-            }
-
-            // Add list item.
-            addListItem(toolDoc, term, opt._helpText);
-        }
-    }
-
-    append(toolDoc, me._toolDoc);
-    print(stream, toolDoc, format);
-}
-
-inline void printHelp(ArgumentParser const & me, std::ostream & stream)
-{
-    printHelp(me, stream, "txt");
-}
-
-// ----------------------------------------------------------------------------
 // Function addDescription()
 // ----------------------------------------------------------------------------
 
@@ -491,6 +366,157 @@ inline void addTextSubSection(ArgumentParser & me, std::string const & title)
 inline void addText(ArgumentParser & me, std::string const & text)
 {
     addText(me._toolDoc, text);
+}
+
+// ----------------------------------------------------------------------------
+// Function printShortHelp()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.printShortHelp
+..summary:Prints a short help message for the parser to a stream
+..cat:Miscellaneous
+..signature:printShortHelp(parser[, stream])
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.stream:Target stream (e.g. $std::cerr$).
+..include:seqan/arg_parse.h
+*/
+
+inline void printShortHelp(ArgumentParser const & me, std::ostream & stream)
+{
+    // TODO: maybe we can get this a bit prettier
+    ToolDoc shortDoc(me._toolDoc);
+    clearEntries(shortDoc);
+
+    _addUsage(shortDoc, me);
+
+    std::stringstream shortHelp;
+    shortHelp << "Try '" << getAppName(me) << " --help' for more information.\n";
+    addText(shortDoc, shortHelp.str());
+
+    print(stream, shortDoc, "txt");
+}
+
+// ----------------------------------------------------------------------------
+// Function printVersion()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.printVersion
+..summary:Prints the version information of the parser to a stream.
+..cat:Miscellaneous
+..signature:printVersion(parser[, stream])
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.stream:Target std::ostream (e.g. $std::cerr$).
+...default: $std::cerr$
+..include:seqan/arg_parse.h
+*/
+
+inline void printVersion(ArgumentParser const & me, std::ostream & stream)
+{
+    stream << getAppName(me) << " version " << getVersion(me) << std::endl;
+}
+
+inline void printVersion(ArgumentParser const & me)
+{
+    printVersion(me, std::cerr);
+}
+
+// ----------------------------------------------------------------------------
+// Function printHelp()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.printHelp
+..summary:Prints the complete help message for the parser to a stream.
+..cat:Miscellaneous
+..signature:printHelp(parser[, stream][, format])
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.stream:Target std::ostream (e.g. $std::cerr$).
+...default: $std::cerr$
+..param.format:Format to print, one of "html", "man", "txt".
+..include:seqan/arg_parse.h
+*/
+
+inline void printHelp(ArgumentParser const & me, std::ostream & stream, CharString const & format)
+{
+    ToolDoc toolDoc(me._toolDoc);
+    clearEntries(toolDoc);  // We will append me._toolDoc later.
+
+    // Build synopsis section.
+    addSection(toolDoc, "Synopsis");
+    _addUsage(toolDoc, me);
+
+    // Add description to tool documentation.
+    append(toolDoc, me._description);
+
+    // Add options to description section.
+    for (unsigned i = 0; i < length(me.optionMap); ++i)
+    {
+        ArgParseOption const & opt = me.optionMap[i];
+        if (empty(opt.shortName) && empty(opt.longName))  // this is not an option but a text line
+        {
+            if (empty(opt._helpText))  // TODO(holtgrew): Should go away in future.
+                continue;  // Skip empty lines.
+
+            // Is command line parser section, maps to ToolDoc subsection.
+            std::string title = opt._helpText;
+            append(title, ":");
+            addSubSection(toolDoc, title);
+        }
+        else if (!isVisible(opt))
+        {
+            // Build list item term.
+            std::string term;
+            if (!empty(opt.shortName))
+            {
+                term = "\\fB-";
+                append(term, opt.shortName);
+                append(term, "\\fP");
+            }
+            if (!empty(opt.shortName) && !empty(opt.longName))
+                append(term, ", ");
+            if (!empty(opt.longName))
+            {
+                append(term, "\\fB--");
+                append(term, opt.longName);
+                append(term, "\\fP");
+            }
+            // Get arguments, autogenerate if necessary.
+            std::string arguments = getArgumentLabel(opt);
+
+            // Write arguments to term line -> only exception, boolean flags
+            if (!empty(arguments))
+            {
+                // Tokenize argument names.
+                std::istringstream iss(toCString(arguments));
+                std::vector<std::string> tokens;
+                std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(),
+                          std::back_inserter<std::vector<std::string> >(tokens));
+                // Append them, formatted in italic.
+                for (unsigned i = 0; i < length(tokens); ++i)
+                {
+                    append(term, " \\fI");
+                    append(term, tokens[i]);
+                    append(term, "\\fP");
+                }
+            }
+
+            // Add list item.
+            addListItem(toolDoc, term, opt._helpText);
+        }
+    }
+
+    append(toolDoc, me._toolDoc);
+    print(stream, toolDoc, format);
+}
+
+inline void printHelp(ArgumentParser const & me, std::ostream & stream)
+{
+    printHelp(me, stream, "txt");
 }
 
 }  // namespace seqan

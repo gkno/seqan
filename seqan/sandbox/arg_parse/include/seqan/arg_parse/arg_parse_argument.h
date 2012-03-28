@@ -483,6 +483,8 @@ inline void setMaxValue(ArgParseArgument & me, const std::string _maxValue)
 ...type:Class.ArgParseArgument
 ..param.values:A std::vector<std::string> containing all valid entries for the option or a std::string
 with valid values separated by spaces.
+..remarks:If the argument or option is an in- or output file. The valid strings will be interpreted as
+file endings and the command line parser checks if the provided file has the required file ending.
 ..include:seqan/arg_parse.h
 */
 
