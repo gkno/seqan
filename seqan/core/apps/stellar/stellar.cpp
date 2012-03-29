@@ -40,6 +40,7 @@ _stellarOnOne(TSequence & database,
 			  StellarOptions & options) {
 	std::cout << "  " << databaseID;
 	if (!databaseStrand) std::cout << ", complement";
+  std::cout << std::flush;
 
 	// finder
     typedef Finder<TSequence, Swift<SwiftLocal> > TFinder;
