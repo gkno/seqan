@@ -298,7 +298,10 @@ struct AndC<true, true> : True {};
 
 // TODO(holtgrew): Inherit from T1/T2 to follow pattern for Or<>, And<>?
 template <typename TCondition, typename T1, typename T2>
-struct If
+struct If : If<typename TCondition::Type, T1, T2>{};
+
+template <typename T1, typename T2>
+struct If<True, T1, T2>
 {
     typedef T1 Type;
 };
