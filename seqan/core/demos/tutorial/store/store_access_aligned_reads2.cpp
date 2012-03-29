@@ -22,9 +22,9 @@ int main ()
     typedef Value<TStore::TAlignedReadStore>::Type                          TAlignedRead;
 
     typedef Gaps<TContig::TContigSeq, AnchorGaps<TContig::TGapAnchors> >    TContigGaps;
-    typedef Gaps<TStore::TReadSeq, AnchorGaps<TAlignedRead::TGapAnchors> >  TReadGaps;
+    typedef Gaps<CharString, AnchorGaps<TAlignedRead::TGapAnchors> >  TReadGaps;
 
-    TStore::TReadSeq readSeq;
+    CharString readSeq;
 
 // FRAGMENT(output)
     for (int i = 140; i < 160; i += 4)
@@ -33,7 +33,10 @@ int main ()
 
         readSeq = store.readSeqStore[ar.readId];
         if (ar.endPos < ar.beginPos)
+        {
             reverseComplement(readSeq);
+            toLower(readSeq);
+        }
 
         TContigGaps contigGaps(
             store.contigStore[ar.contigId].seq, 
