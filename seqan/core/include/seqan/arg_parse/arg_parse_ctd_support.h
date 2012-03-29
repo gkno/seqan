@@ -29,17 +29,19 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Björn Kahlert <Bjoern.Kahlert@fu-berlin.de>
+// Author: Bjoern Kahlert <Bjoern.Kahlert@fu-berlin.de>
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
-#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
 
 #include <seqan/sequence.h>
 
 #include <seqan/arg_parse/argument_parser.h>
 #include <seqan/arg_parse/arg_parse_doc.h>
+
+#include <fstream>
 
 namespace seqan {
 
@@ -311,4 +313,4 @@ writeCTD(ArgumentParser const & me)
 
 } // namespace seqan
 
-#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_
+#endif // SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_CTD_SUPPORT_H_

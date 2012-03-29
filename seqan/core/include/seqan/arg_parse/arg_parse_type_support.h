@@ -32,8 +32,10 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
-#define SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
+// TODO(aiche): check if parts of the functionality could be merged with lexicalCast in stream module
+
+#ifndef SEQAN_CORE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
+#define SEQAN_CORE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
 
 #include <sstream>
 #include <string>
@@ -46,7 +48,7 @@ namespace seqan {
 // Function toCString()
 // ----------------------------------------------------------------------------
 
-// toCString impl for std::string
+// TODO(aiche): move to stl_adapter
 inline char const * toCString(std::string const & me)
 {
     return me.c_str();
@@ -192,4 +194,4 @@ inline bool _convertArgumentValue(TObject & dst, ArgParseArgument const & opt, s
 
 } // namespace seqan
 
-#endif // SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_
+#endif // SEQAN_CORE_INCLUDE_ARG_PARSE_ARG_PARSE_TYPE_SUPPRT_H_

@@ -34,24 +34,20 @@
 // Tests for arg_parse/arg_parse_option.h.
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_OPTION_H_
-#define SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_OPTION_H_
+#ifndef SEQAN_CORE_TESTS_ARG_PARSE_TEST_ARG_PARSE_OPTION_H_
+#define SEQAN_CORE_TESTS_ARG_PARSE_TEST_ARG_PARSE_OPTION_H_
 
 #include <seqan/basic.h>
 
 #include <seqan/arg_parse/arg_parse_option.h>
 
-namespace seqan
-{
+using namespace seqan;
 
-// TODO: write tests for basic functions in ArgParseOption
+// TODO(aiche): extend tests if needed
 
 SEQAN_DEFINE_TEST(test_option)
 {
     ArgParseOption opt("s", "string", "this is a flag");
 }
 
-
-}  // namespace seqan
-
-#endif // SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_OPTION_H_
+#endif // SEQAN_CORE_TESTS_ARG_PARSE_TEST_ARG_PARSE_OPTION_H_

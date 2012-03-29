@@ -29,9 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
+// ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_
-#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_
 
 #include <string>
 #include <vector>
@@ -74,7 +76,6 @@ Although not suggested the short-name can contain more than 1 character.
 ///.Function.isDoubleArgument.param.argument.type:Class.ArgParseOption
 ///.Function.isInputFileArgument.param.argument.type:Class.ArgParseOption
 ///.Function.isOutputFileArgument.param.argument.type:Class.ArgParseOption
-///.Function.getArgumentLabel.param.argument.type:Class.ArgParseOption
 ///.Function.setMinValue.param.argument.type:Class.ArgParseOption
 ///.Function.setMaxValue.param.argument.type:Class.ArgParseOption
 ///.Function.setValidValues.param.argument.type:Class.ArgParseOption
@@ -168,16 +169,7 @@ public:
 // Function isStringArgument()
 // ----------------------------------------------------------------------------
 
-/**
-.Function.isStringArgument
-..summary:Returns whether option argument can be a string.
-..cat:Miscellaneous
-..signature:isStringArgument(option)
-..param.option:The @Class.ArgParseOption@ object.
-...type:Class.ArgParseOption
-..returns:$true$ if the option argument can be a string.
-..include:seqan/arg_parse.h
-*/
+///.Function.isStringArgument.param.argument.type:Class.ArgParseOption
 
 inline bool isStringArgument(ArgParseOption const & me)
 {
@@ -287,6 +279,20 @@ inline void setRequired(ArgParseOption & me, bool required)
 }
 
 // ----------------------------------------------------------------------------
+// Function getArgumentLabel()
+// ----------------------------------------------------------------------------
+
+///.Function.getArgumentLabel.param.argument.type:Class.ArgParseOption
+
+inline std::string const getArgumentLabel(ArgParseOption const & me)
+{
+    if(isBooleanOption(me))
+        return "";
+    else
+        return getArgumentLabel(static_cast<ArgParseArgument>(me));
+}
+
+// ----------------------------------------------------------------------------
 // Helper Function _writeOptName()
 // ----------------------------------------------------------------------------
 
@@ -344,4 +350,4 @@ inline TStream & operator<<(TStream & target, ArgParseOption const & source)
 
 } // namespace seqan
 
-#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_
+#endif // SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_OPTION_H_

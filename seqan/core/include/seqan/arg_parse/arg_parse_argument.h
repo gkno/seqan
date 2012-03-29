@@ -29,9 +29,11 @@
 // DAMAGE.
 //
 // ==========================================================================
+// Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
+// ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
-#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
 
 #include <seqan/arg_parse/arg_parse_exceptions.h>
 #include <seqan/arg_parse/arg_parse_type_support.h>
@@ -42,6 +44,14 @@
 #include <sstream>
 
 namespace seqan {
+
+// ==========================================================================
+// Forwards
+// ==========================================================================
+
+// ==========================================================================
+// Tags, Classes, Enums
+// ==========================================================================
 
 // ----------------------------------------------------------------------------
 // Class ArgParseArgument
@@ -106,7 +116,7 @@ public:
     // ----------------------------------------------------------------------------
     // Members to store the values
     // ----------------------------------------------------------------------------
-    // TODO: move default values to Options, since they only make sense there
+    // TODO(aiche): move default values to Options, since they only make sense there
     std::vector<std::string>  defaultValue;
     std::vector<std::string>  value;
 
@@ -172,6 +182,14 @@ public:
     }
 
 };
+
+// ==========================================================================
+// Metafunctions
+// ==========================================================================
+
+// ==========================================================================
+// Functions
+// ==========================================================================
 
 // ----------------------------------------------------------------------------
 // Helper Function _typeToString()
@@ -418,19 +436,19 @@ of the @Class.ArgParseArgument@.
 ..include:seqan/arg_parse.h
 */
 
-inline void setMinValue(ArgParseArgument & me, const std::string _minValue)
+inline void setMinValue(ArgParseArgument & me, const std::string minValue)
 {
     if (isDoubleArgument(me))
     {
-        SEQAN_CHECK(_isCastable<double>(_minValue), "The maximal value for a double argument must be double.");
-        _intervalAssert<double>(_minValue, me.maxValue);
-        me.minValue = _minValue;
+        SEQAN_CHECK(_isCastable<double>(minValue), "The maximal value for a double argument must be double.");
+        _intervalAssert<double>(minValue, me.maxValue);
+        me.minValue = minValue;
     }
     else if (isIntegerArgument(me))
     {
-        SEQAN_CHECK(_isCastable<int>(_minValue), "The maximal value for an integer argument must be an integer");
-        _intervalAssert<int>(_minValue, me.maxValue);
-        me.minValue = _minValue;
+        SEQAN_CHECK(_isCastable<int>(minValue), "The maximal value for an integer argument must be an integer");
+        _intervalAssert<int>(minValue, me.maxValue);
+        me.minValue = minValue;
     }
     else
         SEQAN_FAIL("min/max values are not applicable to non numeric arguments");
@@ -452,19 +470,19 @@ of the @Class.ArgParseArgument@.
 ..include:seqan/arg_parse.h
 */
 
-inline void setMaxValue(ArgParseArgument & me, const std::string _maxValue)
+inline void setMaxValue(ArgParseArgument & me, const std::string maxValue)
 {
     if (isDoubleArgument(me))
     {
-        SEQAN_CHECK(_isCastable<double>(_maxValue), "The maximal value for a double argument must be double.");
-        _intervalAssert<double>(me.minValue, _maxValue);
-        me.maxValue = _maxValue;
+        SEQAN_CHECK(_isCastable<double>(maxValue), "The maximal value for a double argument must be double.");
+        _intervalAssert<double>(me.minValue, maxValue);
+        me.maxValue = maxValue;
     }
     else if (isIntegerArgument(me))
     {
-        SEQAN_CHECK(_isCastable<int>(_maxValue), "The maximal value for an integer argument must be an integer");
-        _intervalAssert<int>(me.minValue, _maxValue);
-        me.maxValue = _maxValue;
+        SEQAN_CHECK(_isCastable<int>(maxValue), "The maximal value for an integer argument must be an integer");
+        _intervalAssert<int>(me.minValue, maxValue);
+        me.maxValue = maxValue;
     }
     else
         SEQAN_FAIL("min/max values are not applicable to non numeric arguments");
@@ -488,21 +506,21 @@ file endings and the command line parser checks if the provided file has the req
 ..include:seqan/arg_parse.h
 */
 
-inline void setValidValues(ArgParseArgument & me, std::vector<std::string> const & _values)
+inline void setValidValues(ArgParseArgument & me, std::vector<std::string> const & values)
 {
     if (isDoubleArgument(me) || isIntegerArgument(me))
         SEQAN_FAIL("ArgParseArgument does not support setting valid values for numeric arguments.");
 
-    me.validValues = _values;
+    me.validValues = values;
 }
 
-inline void setValidValues(ArgParseArgument & me, std::string const & _values)
+inline void setValidValues(ArgParseArgument & me, std::string const & valuesString)
 {
     // convert array to String<std::string>
     std::vector<std::string> values;
     std::string current_argument;
 
-    for (Iterator<std::string const, Rooted>::Type ch  = begin(_values); ch != end(_values); goNext(ch))
+    for (std::string::const_iterator ch  = valuesString.begin(); ch != valuesString.end(); ++ch)
     {
         if (*ch == ' ')
         {
@@ -541,6 +559,7 @@ inline bool _isInInterval(TString value, TString lowerIntervalBound, TString upp
 // ----------------------------------------------------------------------------
 // Helper Function _checkNumericArgument()
 // ----------------------------------------------------------------------------
+
 // test if the values can be assigned to the option and is in the given boundaries
 template <typename TNumerical>
 inline void _checkNumericArgument(ArgParseArgument const & me, std::string const & value)
@@ -780,4 +799,4 @@ inline unsigned numberOfAllowedValues(ArgParseArgument const & me)
 
 } // namespace seqan
 
-#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_
+#endif // SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_ARGUMENT_H_

@@ -34,16 +34,15 @@
 // Tests for arg_parse/arg_parse_argument.h.
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_
-#define SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_
+#ifndef SEQAN_CORE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_
+#define SEQAN_CORE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_
 
 #include <seqan/basic.h>
 
 #include "test_extensions.h"
 #include <seqan/arg_parse/arg_parse_argument.h>
 
-namespace seqan
-{
+using namespace seqan;
 
 SEQAN_DEFINE_TEST(test_argument_string_label)
 {
@@ -168,6 +167,4 @@ SEQAN_DEFINE_TEST(test_argument_valid_values)
                          "the given value 'not-a-validfile.qxt' is not in the list of allowed file extensions [*.txt, *.fasta]");
 }
 
-}  // namespace seqan
-
-#endif // SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_
+#endif // SEQAN_CORE_TESTS_ARG_PARSE_TEST_ARG_PARSE_ARGUMENT_H_

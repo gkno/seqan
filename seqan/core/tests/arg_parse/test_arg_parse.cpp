@@ -106,6 +106,8 @@ SEQAN_BEGIN_TESTSUITE(test_arg_parse)
 
     // Test bools
     SEQAN_CALL_TEST(test_boolean_flags);
+    SEQAN_CALL_TEST(test_combined_boolean_flags);
+    SEQAN_CALL_TEST(test_long_short_flag_name);
 
     // cmd argument tests
     SEQAN_CALL_TEST(test_argument_string_label);

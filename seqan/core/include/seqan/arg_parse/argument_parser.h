@@ -30,10 +30,9 @@
 //
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_
-#define SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_
+#ifndef SEQAN_CORE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_
+#define SEQAN_CORE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_
 
-#include <sstream>
 #include <seqan/map.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
@@ -46,10 +45,26 @@
 #include <seqan/misc/tool_doc.h>
 
 #include <iostream>
-#include <fstream>
 #include <string>
+#include <vector>
+#include <map>
 
 namespace seqan {
+
+// ==========================================================================
+// Forwards
+// ==========================================================================
+
+// friend declaration to make addOption() and hideOption() available
+// in ArgumentParser::init()
+class ArgumentParser;
+class ArgParseOption;
+void addOption(ArgumentParser & me, ArgParseOption const & opt);
+void hideOption(ArgumentParser & me, std::string const & name, bool hide);
+
+// ==========================================================================
+// Tags, Classes, Enums
+// ==========================================================================
 
 /**
 .Class.ArgumentParser
@@ -104,6 +119,7 @@ public:
     // ----------------------------------------------------------------------------
     // Enum ParseResult
     // ----------------------------------------------------------------------------
+
     // will be used as return value of parse(..) to indicate whether parsing worked
     enum ParseResult
     {
@@ -118,6 +134,7 @@ public:
     // ----------------------------------------------------------------------------
     // Class Typedefs
     // ----------------------------------------------------------------------------
+
     typedef std::vector<ArgParseOption>   TOptionMap;
     typedef std::vector<ArgParseArgument> TArgumentMap;
     typedef Size<TOptionMap>::Type        TOptionMapSize;
@@ -129,6 +146,7 @@ public:
     // ----------------------------------------------------------------------------
     // Mapping of option names to options
     // ----------------------------------------------------------------------------
+
     TStringMap   shortNameMap;
     TStringMap   longNameMap;
     TOptionMap   optionMap;
@@ -137,6 +155,7 @@ public:
     // ----------------------------------------------------------------------------
     // Documentation Members
     // ----------------------------------------------------------------------------
+
     ToolDoc                  _toolDoc;      // the tool doc for all user specified
                                             // text
     ToolDoc                  _description;  // the description which we need to
@@ -145,18 +164,9 @@ public:
                                             // interference with the rest of the doc
 
     // ----------------------------------------------------------------------------
-    // return values for unset parameters
-    // ----------------------------------------------------------------------------
-    const std::string              _null;
-    const std::vector<std::string> _nullSet;
-
-    // friend declaration to make addOption() available in init function
-    friend inline void addOption(ArgumentParser & me, ArgParseOption const & opt);
-    friend inline void hideOption(ArgumentParser & me, std::string const & _name, bool hide);
-
-    // ----------------------------------------------------------------------------
     // Function init()
     // ----------------------------------------------------------------------------
+
     void init()
     {
         addOption(*this, ArgParseOption("h", "help", "Displays this help message."));
@@ -181,13 +191,20 @@ public:
         init();
     }
 
-    ArgumentParser(std::string _appName)
+    ArgumentParser(std::string const & _appName)
     {
         setName(_toolDoc, _appName);
         init();
     }
-
 };
+
+// ==========================================================================
+// Metafunctions
+// ==========================================================================
+
+// ==========================================================================
+// Functions
+// ==========================================================================
 
 // ----------------------------------------------------------------------------
 // Function hasOption()
@@ -205,9 +222,9 @@ public:
 ..include:seqan/arg_parse.h
 */
 
-inline bool hasOption(ArgumentParser const & me, std::string const & _name)
+inline bool hasOption(ArgumentParser const & me, std::string const & name)
 {
-    return hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name);
+    return hasKey(me.shortNameMap, name) || hasKey(me.longNameMap, name);
 }
 
 // ----------------------------------------------------------------------------
@@ -240,6 +257,10 @@ inline void addOption(ArgumentParser & me, ArgParseOption const & opt)
     if (!empty(opt.longName))
         me.longNameMap.insert(std::make_pair<std::string, ArgumentParser::TOptionMapSize>(opt.longName, length(me.optionMap) - 1));
 }
+
+// ----------------------------------------------------------------------------
+// Function addArgument()
+// ----------------------------------------------------------------------------
 
 /**
 .Function.addArgument
@@ -277,16 +298,16 @@ inline void addArgument(ArgumentParser & me, ArgParseArgument const & arg)
 // note that it is assumed that the option exists if this method is called
 
 inline ArgumentParser::TOptionMapSize _getOptionIndex(ArgumentParser const & me,
-                                                      std::string const & _name)
+                                                      std::string const & name)
 {
     ArgumentParser::TOptionMapSize option_index;
-    if (me.shortNameMap.find(_name) != me.shortNameMap.end())
+    if (me.shortNameMap.find(name) != me.shortNameMap.end())
     {
-        option_index = me.shortNameMap.find(_name)->second;
+        option_index = me.shortNameMap.find(name)->second;
     }
     else
     {
-        option_index = me.longNameMap.find(_name)->second;
+        option_index = me.longNameMap.find(name)->second;
     }
     return option_index;
 }
@@ -295,16 +316,28 @@ inline ArgumentParser::TOptionMapSize _getOptionIndex(ArgumentParser const & me,
 // Function getOption()
 // ----------------------------------------------------------------------------
 
-inline ArgParseOption & getOption(ArgumentParser & me, std::string const & _name)
+/**
+.Function.getOption
+..summary:Returns a reference to the specified option.
+..cat:Miscellaneous
+..signature:getOption(parser, optionName)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionName:The identifier of the command line option.
+..returns: a reference to the specified @Class.ArgParseOption@ object.
+..include:seqan/arg_parse.h
+*/
+
+inline ArgParseOption & getOption(ArgumentParser & me, std::string const & name)
 {
-    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    return me.optionMap[_getOptionIndex(me, _name)];
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return me.optionMap[_getOptionIndex(me, name)];
 }
 
-inline ArgParseOption const & getOption(ArgumentParser const & me, std::string const & _name)
+inline ArgParseOption const & getOption(ArgumentParser const & me, std::string const & name)
 {
-    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    return me.optionMap[_getOptionIndex(me, _name)];
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return me.optionMap[_getOptionIndex(me, name)];
 }
 
 // ----------------------------------------------------------------------------
@@ -325,10 +358,10 @@ inline ArgParseOption const & getOption(ArgumentParser const & me, std::string c
 ..include:seqan/arg_parse.h
 */
 
-inline void setRequired(ArgumentParser & me, std::string const & _name, bool required = true)
+inline void setRequired(ArgumentParser & me, std::string const & name, bool required = true)
 {
-    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    return setRequired(getOption(me, _name), required);
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return setRequired(getOption(me, name), required);
 }
 
 // ----------------------------------------------------------------------------
@@ -349,10 +382,10 @@ inline void setRequired(ArgumentParser & me, std::string const & _name, bool req
 ..include:seqan/arg_parse.h
 */
 
-inline void hideOption(ArgumentParser & me, std::string const & _name, bool hide = true)
+inline void hideOption(ArgumentParser & me, std::string const & name, bool hide = true)
 {
-    SEQAN_CHECK(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    hideOption(getOption(me, _name), hide);
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    hideOption(getOption(me, name), hide);
 }
 
 // ----------------------------------------------------------------------------
@@ -361,7 +394,7 @@ inline void hideOption(ArgumentParser & me, std::string const & _name, bool hide
 
 /**
 .Function.getArgument
-..summary:
+..summary:Returns a reference to the specified argument.
 ..cat:Miscellaneous
 ..signature:getArgument(parser, argumentPosition)
 ..param.parser:The @Class.ArgumentParser@ object.
@@ -422,15 +455,14 @@ inline bool _allRequiredSet(ArgumentParser const & me)
 
 // ----------------------------------------------------------------------------
 // Function _allArgumentsSet()
-// ----------------------------------------------------------------------------
+// -------------------------------------------------------------------------}---
 
 inline bool _allArgumentsSet(ArgumentParser const & me)
 {
     for (unsigned a = 0; a < me.argumentList.size(); ++a)
-    {
         if (!isSet(me.argumentList[a]))
             return false;
-    }
+
     return true;
 }
 
@@ -454,15 +486,18 @@ inline bool _allArgumentsSet(ArgumentParser const & me)
 */
 
 template <typename TValue>
-inline bool getOptionValue(TValue & val, ArgumentParser const & me,
-                           std::string const & name, unsigned argNo)
+inline bool getOptionValue(TValue & val,
+                           ArgumentParser const & me,
+                           std::string const & name,
+                           unsigned argNo)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     return _convertArgumentValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
 }
 
 template <typename TValue>
-inline bool getOptionValue(TValue & val, ArgumentParser const & me,
+inline bool getOptionValue(TValue & val,
+                           ArgumentParser const & me,
                            std::string const & name)
 {
     return getOptionValue(val, me, name, 0);
@@ -504,7 +539,14 @@ inline unsigned getOptionValueCount(ArgumentParser const & me, std::string const
 ..param.argumentPosition:The index of the argument in the argument list.
 ..returns: The number of values stored for the specified argument.
 ..include:seqan/arg_parse.h
-*/
+*/// ==========================================================================
+// Metafunctions
+// ==========================================================================
+
+// ==========================================================================
+// Functions
+// ==========================================================================
+
 
 inline unsigned getArgumentValueCount(ArgumentParser const & me, unsigned argumentPosition)
 {
@@ -532,15 +574,18 @@ inline unsigned getArgumentValueCount(ArgumentParser const & me, unsigned argume
 */
 
 template <typename TValue>
-inline bool getArgumentValue(TValue & value, ArgumentParser & me,
-                             unsigned argumentPosition, unsigned argNo)
+inline bool getArgumentValue(TValue & value,
+                             ArgumentParser & me,
+                             unsigned argumentPosition,
+                             unsigned argNo)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
     return _convertArgumentValue(value, getArgument(me, argumentPosition), getArgumentValue(getArgument(me, argumentPosition), argNo));
 }
 
 template <typename TValue>
-inline bool getArgumentValue(TValue & value, ArgumentParser & me,
+inline bool getArgumentValue(TValue & value,
+                             ArgumentParser & me,
                              unsigned argumentPosition)
 {
     return getArgumentValue(value, me, argumentPosition, 0);
@@ -607,14 +652,16 @@ inline std::vector<std::string> const & getArgumentValues(ArgumentParser & me,
 ..param.minValue:A std::string containing a string representation of the minimum value of the @Class.ArgParseOption@.
 */
 
-inline void setMinValue(ArgumentParser & me, std::string const & name,
+inline void setMinValue(ArgumentParser & me,
+                        std::string const & name,
                         std::string const & _minValue)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setMinValue(getOption(me, name), _minValue);
 }
 
-inline void setMinValue(ArgumentParser & me, unsigned argumentPosition,
+inline void setMinValue(ArgumentParser & me,
+                        unsigned argumentPosition,
                         std::string const & _minValue)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
@@ -636,14 +683,16 @@ inline void setMinValue(ArgumentParser & me, unsigned argumentPosition,
 ..param.maxValue:A std::string containing a string representation of the maximum value of the @Class.ArgParseOption@.
 */
 
-inline void setMaxValue(ArgumentParser & me, std::string const & name,
+inline void setMaxValue(ArgumentParser & me,
+                        std::string const & name,
                         std::string const & _maxValue)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
     setMaxValue(getOption(me, name), _maxValue);
 }
 
-inline void setMaxValue(ArgumentParser & me, unsigned argumentPosition,
+inline void setMaxValue(ArgumentParser & me,
+                        unsigned argumentPosition,
                         std::string const & _minValue)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
@@ -666,34 +715,38 @@ inline void setMaxValue(ArgumentParser & me, unsigned argumentPosition,
 Alternatively you can pass a string containing all values separated by spaces.
 */
 
-inline void setValidValues(ArgumentParser & me, std::string const & name,
-                           std::vector<std::string> const & _values)
+inline void setValidValues(ArgumentParser & me,
+                           std::string const & name,
+                           std::vector<std::string> const & values)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
-    setValidValues(getOption(me, name), _values);
+    setValidValues(getOption(me, name), values);
 }
 
-inline void setValidValues(ArgumentParser & me, std::string const & name,
-                           std::string const & _values)
+inline void setValidValues(ArgumentParser & me,
+                           std::string const & name,
+                           std::string const & values)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
-    setValidValues(getOption(me, name), _values);
+    setValidValues(getOption(me, name), values);
 }
 
-inline void setValidValues(ArgumentParser & me, unsigned argumentPosition,
-                           std::vector<std::string> const & _values)
+inline void setValidValues(ArgumentParser & me,
+                           unsigned argumentPosition,
+                           std::vector<std::string> const & values)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
-    setValidValues(getArgument(me, argumentPosition), _values);
+    setValidValues(getArgument(me, argumentPosition), values);
 }
 
-inline void setValidValues(ArgumentParser & me, unsigned argumentPosition,
-                           std::string const & _values)
+inline void setValidValues(ArgumentParser & me,
+                           unsigned argumentPosition,
+                           std::string const & values)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
-    setValidValues(getArgument(me, argumentPosition), _values);
+    setValidValues(getArgument(me, argumentPosition), values);
 }
 
 }  // namespace seqan
 
-#endif // SANDBOX_ARG_PARSE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_
+#endif // SEQAN_CORE_INCLUDE_ARG_PARSE_ARGUMENT_PARSER_H_

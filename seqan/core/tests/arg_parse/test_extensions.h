@@ -32,8 +32,8 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_
-#define SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_
+#ifndef SEQAN_CORE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_
+#define SEQAN_CORE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_
 
 #include <seqan/basic/debug_test_system.h>
 #include <string>
@@ -57,7 +57,7 @@ void failExceptionTest()
         {                                                                           \
             command;                                                                \
         }                                                                           \
-        catch(_exception_type& ex)                                                   \
+        catch(_exception_type& ex)                                                  \
         {                                                                           \
             if(std::string(ex.what()) != _message)                                  \
             {                                                                       \
@@ -81,4 +81,4 @@ void failExceptionTest()
 
 }  // namespace seqan
 
-#endif // SANDBOX_ARG_PARSE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_
+#endif // SEQAN_CORE_TESTS_ARG_PARSE_TEST_EXTENSIONS_H_

@@ -32,8 +32,8 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_
-#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_
 
 #include <seqan/arg_parse/arg_parse_option.h>
 #include <seqan/arg_parse/argument_parser.h>
@@ -49,7 +49,7 @@ namespace seqan {
 .Function.parse:
 ..summary:Parses the command line.
 ..cat:Miscellaneous
-..signature:parse(parser, argc, argv[, errorStream])
+..signature:parse(parser, argc, argv[, outputStream, errorStream])
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.argc:Count of the objects on the command line.
@@ -60,9 +60,11 @@ namespace seqan {
 ..include:seqan/arg_parse.h
 */
 
-template <typename TErrorStream>
-inline ArgumentParser::ParseResult
-parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream)
+inline ArgumentParser::ParseResult parse(ArgumentParser & me,
+                                         int argc,
+                                         const char * argv[],
+                                         std::ostream & outputStream,
+                                         std::ostream & errorStream)
 {
     typedef ArgumentParser::TOptionMapSize   TOptionPosition;
     typedef ArgumentParser::TArgumentMapSize TArgumentPosition;
@@ -73,6 +75,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
     if (empty(getAppName(me)))
         _parseAppName(me, argv[0]);
 
+    // we use exceptions here as an indicator for parse errors
     try
     {
         for (int arg = 1; arg < argc; ++arg)
@@ -93,9 +96,9 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
                         unsigned e = len;
                         for (; s < e; --e)
                         {
-                            if (hasOption(me, inParam.substr(s, e)))
+                            if (hasOption(me, inParam.substr(s, e-s)))
                             {
-                                ArgParseOption & opt = getOption(me, inParam.substr(s, e));
+                                ArgParseOption & opt = getOption(me, inParam.substr(s, e-s));
                                 s = --e;
                                 if (isBooleanOption(opt))
                                     _assignArgumentValue(opt, "true");
@@ -178,7 +181,7 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
         }
         if (hasOption(me, "version") && isSet(me, "version"))
         {
-            printVersion(me, estream);
+            printVersion(me, outputStream);
             return ArgumentParser::PARSE_VERSION;
         }
         if (hasOption(me, "write-ctd") && isSet(me, "write-ctd"))
@@ -188,42 +191,46 @@ parse(ArgumentParser & me, int argc, const char * argv[], TErrorStream & estream
         }
         if (isSet(me, "help"))
         {
-            printHelp(me, estream);
+            printHelp(me, outputStream);
             return ArgumentParser::PARSE_HELP;
         }
         if (isSet(me, "export-help"))
         {
             std::string format;
             getOptionValue(format, me, "export-help");
-            printHelp(me, estream, format);
+            printHelp(me, outputStream, format);
             return ArgumentParser::PARSE_EXPORT_HELP;
         }
         if (argc == 1 && me.argumentList.size() > 0)
         {
             // print short help and exit
-            printShortHelp(me, estream);
+            printShortHelp(me, errorStream);
             return ArgumentParser::PARSE_HELP;
         }
 
     }
     catch (ParseException & ex)
     {
-        estream << getAppName(me) << ": " << ex.what() << std::endl;
+        errorStream << getAppName(me) << ": " << ex.what() << std::endl;
         return ArgumentParser::PARSE_ERROR;
     }
 
     if (_allRequiredSet(me) && _allArgumentsSet(me))
         return ArgumentParser::PARSE_OK;
     else
+    {
+        errorStream << getAppName(me) << ": Not all required arguments or options were set" << std::endl;
         return ArgumentParser::PARSE_ERROR;
+    }
 }
 
-inline ArgumentParser::ParseResult
-parse(ArgumentParser & me, int argc, const char * argv[])
+inline ArgumentParser::ParseResult parse(ArgumentParser & me,
+                                         int argc,
+                                         const char * argv[])
 {
-    return parse(me, argc, argv, std::cerr);
+    return parse(me, argc, argv, std::cout, std::cerr);
 }
 
 } // namespace seqan
 
-#endif // SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_
+#endif // SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_PARSE_H_

@@ -1,5 +1,5 @@
 // ==========================================================================
-//                              arg_parse_doc.h
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2012, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -32,8 +32,8 @@
 // Author: Stephan Aiche <stephan.aiche@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
-#define SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
+#ifndef SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
+#define SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
 
 #include <seqan/arg_parse/argument_parser.h>
 
@@ -258,7 +258,7 @@ inline void setShortDescription(ArgumentParser & me, std::string const & descrip
 inline void setVersion(ArgumentParser & me, std::string const & versionString)
 {
     setVersion(me._toolDoc, versionString);
-    if(!hasOption(me, "v")) addOption(me, ArgParseOption("v", "version", "Display version information"));
+    if(!hasOption(me, "version")) addOption(me, ArgParseOption("", "version", "Display version information"));
 }
 
 // --------------------------------------------------------------------------
@@ -521,4 +521,4 @@ inline void printHelp(ArgumentParser const & me, std::ostream & stream)
 
 }  // namespace seqan
 
-#endif  // #ifndef SANDBOX_ARG_PARSE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
+#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
