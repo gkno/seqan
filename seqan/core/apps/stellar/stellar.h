@@ -161,7 +161,7 @@ SEQAN_CHECKPOINT
 // Splits an alignment into sub-alignments that contain no x-Drop.
 template<typename TAlign, typename TScoreValue, typename TScoreValue1, typename TScoreValue2>
 void
-_splitAtXDrops(TAlign const & align,
+_splitAtXDrops(TAlign & align,
                Score<TScoreValue> & scoreMatrix,
                TScoreValue1 scoreDropOff,
                TScoreValue2 minScore,
