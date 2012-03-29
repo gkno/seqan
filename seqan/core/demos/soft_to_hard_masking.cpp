@@ -50,7 +50,7 @@ void convertToHardMasked(TStream & stream, char const * filename)
 {
     using namespace seqan;
 
-    std::fstream in(filename, std::ios::binary | std::ios::out);
+    std::fstream in(filename, std::ios::binary | std::ios::in);
     if (!in.good())
     {
         std::cerr << "ERROR: Could not open " << filename << '\n';
@@ -78,7 +78,7 @@ void convertToHardMasked(TStream & stream, char const * filename)
                 if (std::islower(*it))
                     *it = 'N';
         }
-        
+
         stream << buffer << '\n';
     }
 }
