@@ -126,13 +126,13 @@ void assignQualities(TDest &dst, TSource const &src)
     typedef typename Iterator<TDest>::Type TDestIter;
     typedef typename Iterator<TSource>::Type TSourceIter;
 
-    resize(dst, length(src));
+	if (length(dst) < length(src))
+        resize(dst, length(src));
 
     TDestIter itDst = begin(dst, Standard());
-    TDestIter itDstEnd = end(dst, Standard());
     TSourceIter itSrcEnd = end(src, Standard());
-    
-    for (TSourceIter itSrc = begin(src, Standard()); itDst != itDstEnd && itSrc != itSrcEnd; ++itDst, ++itSrc)
+
+    for (TSourceIter itSrc = begin(src, Standard()); itSrc != itSrcEnd; ++itDst, ++itSrc)
         assignQualityValue(*itDst, *itSrc);
 }
 
