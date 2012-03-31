@@ -112,7 +112,9 @@ struct Cargo<Pair<TKey, TCargo, TSpec> >
 ...type:nolink:@Class.String@ of any alphabet with qualities, e.g. @Spec.DnaQ@, @Spec.Dna5Q@
 ..param.source:Source string.
 ...type:nolink:@Class.String@ of $int$ or $char$.
-..remarks:This funciton calls @Function.assignQualityValue@ for all entries of $target$ and $source$, look at the documentation of @Function.assignQualityValue@ on how the values of $source$ are interpreted.
+..remarks:
+The target is resized to the length of source.
+This function calls @Function.assignQualityValue@ for all entries of $target$ and $source$, look at the documentation of @Function.assignQualityValue@ on how the values of $source$ are interpreted.
 ..see:Function.assignQualityValue
 ..include:seqan/basic.h
 */
@@ -123,6 +125,8 @@ void assignQualities(TDest &dst, TSource const &src)
 {
     typedef typename Iterator<TDest>::Type TDestIter;
     typedef typename Iterator<TSource>::Type TSourceIter;
+
+    resize(dst, length(src));
 
     TDestIter itDst = begin(dst, Standard());
     TDestIter itDstEnd = end(dst, Standard());
