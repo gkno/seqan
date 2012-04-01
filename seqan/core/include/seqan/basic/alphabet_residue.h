@@ -159,7 +159,7 @@ unknownValueImpl(Dna5 *)
 /**
 .Spec.DnaQ:
 ..cat:Alphabets
-..summary:Alphabet for DNA plus phred quality.
+..summary:Alphabet for DNA plus PHRED quality.
 ..general:Class.SimpleType
 ..signature:DnaQ
 ..remarks:
@@ -252,7 +252,7 @@ void assignQualityValue(char & q, DnaQ c)
 /**
 .Spec.Dna5Q:
 ..cat:Alphabets
-..summary:Alphabet for DNA plus phred quality including 'N' character.
+..summary:Alphabet for DNA plus PHRED quality including 'N' character.
 ..general:Class.SimpleType
 ..signature:Dna5Q
 ..remarks:
