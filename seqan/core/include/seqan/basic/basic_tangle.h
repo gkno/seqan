@@ -115,6 +115,8 @@ struct Cargo<Pair<TKey, TCargo, TSpec> >
 ..remarks:
 The target is resized to the length of source.
 This function calls @Function.assignQualityValue@ for all entries of $target$ and $source$, look at the documentation of @Function.assignQualityValue@ on how the values of $source$ are interpreted.
+..remarks:
+Note that qualities are expected to be in PHRED scale.
 ..see:Function.assignQualityValue
 ..include:seqan/basic.h
 */
