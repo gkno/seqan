@@ -85,11 +85,11 @@ gzFile gzOut = gzopen("/path/to/file.txt.gz", "wb");
 SEQAN_ASSERT(gzOut != NULL);
 Stream<GZFile> gzStream(gzOut);
 
-// Now, you can work with the stream bzStream.
+// Now, you can work with the stream gzStream.
 
 // Note that you only have to close gzOut and not gzStream.
-gzFile f = gzopen(filenameBuffer, "rb");
-SEQAN_ASSERT(f != NULL);
+int res = gzclose(gzOut);
+SEQAN_ASSERT_EQ(res, 0);
 
 .Memfunc.GZ File Stream#Stream
 ..summary:Constructor
