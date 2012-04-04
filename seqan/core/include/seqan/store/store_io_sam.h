@@ -447,7 +447,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
         TCigarIter it = begin(cigar, Standard());
         TCigarIter itEnd = end(cigar, Standard());
         
-        sum = 0;        
+        sum = 0;
         for (; it != itEnd; ++it)
             if (getValue(it).operation != 'S' && getValue(it).operation != 'H')
                 sum += getValue(it).count;
@@ -461,7 +461,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
         TCigarIter it = begin(cigar, Standard());
         TCigarIter itEnd = end(cigar, Standard());
         
-        sum = 0;        
+        sum = 0;
         for (; it != itEnd; ++it)
             if (getValue(it).operation != 'S' && getValue(it).operation != 'H' && getValue(it).operation != 'I')
                 sum += getValue(it).count;
@@ -1117,7 +1117,8 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
         
         SEQAN_ASSERT_NOT(newRead && empty(readSeq));
         
-        if (rname == "*") return; // stop here if read is not aligned
+        if (rname == "*")
+            return; // stop here if read is not aligned
         
         // check if the contig is already in the store
         // get its ID or create a new one otherwise
