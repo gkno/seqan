@@ -1,15 +1,15 @@
 cmake_minimum_required (VERSION 2.8.3)
 
 # ===========================================================================
-# Iff the file INST exists in the source root
+# Iff the file INST or SUA exists in the source root
 # turn on SeqAn instrumentation for experimental data collection.
 # ===========================================================================
 
-if(EXISTS ${CMAKE_SOURCE_DIR}/INST)
+if(EXISTS ${CMAKE_SOURCE_DIR}/INST OR EXISTS ${CMAKE_SOURCE_DIR}/SUA OR EXISTS ${CMAKE_SOURCE_DIR}/../SUA)
   set(SEQAN_INSTRUMENTATION YES)
-else(EXISTS ${CMAKE_SOURCE_DIR}/INST)
+else(EXISTS ${CMAKE_SOURCE_DIR}/INST OR EXISTS ${CMAKE_SOURCE_DIR}/SUA OR EXISTS ${CMAKE_SOURCE_DIR}/../SUA)
   set(SEQAN_INSTRUMENTATION NO)
-endif(EXISTS ${CMAKE_SOURCE_DIR}/INST)
+endif(EXISTS ${CMAKE_SOURCE_DIR}/INST OR EXISTS ${CMAKE_SOURCE_DIR}/SUA OR EXISTS ${CMAKE_SOURCE_DIR}/../SUA)
 
 
 # ===========================================================================

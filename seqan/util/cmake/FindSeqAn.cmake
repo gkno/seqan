@@ -23,7 +23,7 @@ endif (SEQAN_C++11_STANDARD)
 
 macro(seqan_instrumentation_cmake)
 	if(SEQAN_INSTRUMENTATION)
-	    message(STATUS "Prepare Instrumentation...")
+	    message(STATUS "Prepare SeqAn Usability Analyzer data collection...")
 	    if(CMAKE_HOST_WIN32)
 	        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe cmake ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 	        add_custom_target(seqan_instrumentation_build ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
@@ -34,7 +34,7 @@ macro(seqan_instrumentation_cmake)
 	                          COMMENT "Build Instrumentation...")
 	    endif(CMAKE_HOST_WIN32)
 	else(SEQAN_INSTRUMENTATION)
-		#message(STATUS "SeqAn instrumentation deactivated.")
+		#message(STATUS "SeqAn Usability Analyzer data collection deactivated")
 	endif(SEQAN_INSTRUMENTATION)
 endmacro (seqan_instrumentation_cmake)
 

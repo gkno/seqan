@@ -2,8 +2,8 @@ import os
 import subprocess
 import glob
 from datetime import datetime
-from ftplib import FTP
 import socket
+import requests
 
 class Diff(object):
 	MAX_REVISION_LENGTH = 8
@@ -16,9 +16,18 @@ class Diff(object):
 		self.id = id
 		self.excluded_resources = excluded_resources
 		self.bin_dir = bin_dir
+		
+	def get_timezone_string(self):
+		import time
+		offset = -time.timezone
+		if(time.localtime().tm_isdst):
+			offset = -time.altzone
+		hours = abs(offset)/3600
+		minutes = (abs(offset)%3600)/60
+		return ("+" if offset >= 0 else "-") + str(hours).rjust(2, "0") + str(minutes).rjust(2, "0")
 
 	def get_diff_filename(self, revision, datetime):
-		return self.results_dir + "/" + self.id.get() + "_r" + str.rjust(str(revision), self.MAX_REVISION_LENGTH, "0") + "_" + datetime.strftime("%Y-%m-%dT%H-%M-%S") + ".diff"
+		return self.results_dir + "/" + self.id.get() + "_r" + str.rjust(str(revision), self.MAX_REVISION_LENGTH, "0") + "_" + datetime.strftime("%Y-%m-%dT%H-%M-%S") + self.get_timezone_string() + ".diff"
 	
 	def get_diff_filenames(self):
 		return glob.glob(self.results_dir + "/" + self.id.get() + "_r*_*.diff")
@@ -44,25 +53,31 @@ class Diff(object):
 		f.write(output)
 		f.close()
 
-	def upload(self, ftp, file):
-		ftp.storbinary("STOR " + os.path.basename(file), open(file, "rb"), 1024)
-
-	def sync_ftp(self, server, username, password):
-		try:
-			ftp = FTP(server, timeout=5)
-			ftp.login(username, password)
-		except socket.timeout:
-			return
-
+	def sync(self, url):
 		# get remote file list
 		remote_files = []
+		
 		try:
-			remote_files = ftp.nlst()
-		except:
-			pass
+			r = requests.get(url + "/" + self.id.get())
+			if(r.status_code != 200):
+				raise Exception;
+			remote_files = {}
+			for line in r.text.split("\n"):
+				file = line.strip().split("\t")
+				if(len(file) < 2): continue
+				remote_files[file[0]] = file[1]
+		except Exception:
+			print("Error connecting to " + url + "! Retrying next time.")
+			return
 
 		# upload all files that are not present on the ftp server
-		for diff_filename in glob.glob(self.results_dir + "/" + self.id.get() + "_*"):
-			if(os.path.basename(diff_filename) not in remote_files):
-				self.upload(ftp, diff_filename)	
-		ftp.quit()
+		for filename in glob.glob(self.results_dir + "/" + self.id.get() + "_*"):
+			copy = True
+			if(os.path.basename(filename) in remote_files.keys()):
+				remote_size = int(remote_files[os.path.basename(filename)])
+				local_size = os.path.getsize(filename)
+				if(remote_size == local_size): copy = False
+			
+			if(copy):
+				files = {self.id.get(): open(filename, 'rb')}
+				r = requests.post(url, files=files)

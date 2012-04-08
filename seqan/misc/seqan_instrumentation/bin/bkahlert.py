@@ -4,6 +4,7 @@ import os
 import sys
 import threading
 import binascii
+import shutil
 from classes import *
 sys.stdout = flushfile.Flushfile(sys.stdout)
 
@@ -12,13 +13,24 @@ class DiffCollector(object):
 		self.cMake_binary_dir = cMake_binary_dir
 		self.src_dir = src_dir
 		
-		self.dirs		= dirs.Dirs(self.src_dir, [ ".svn", "build", "util", "misc", "docs" ], [ "*.o", "Thumbs.db", ".DS_Store", "CMakeCache.txt" ])
+		self.dirs		= dirs.Dirs(self.src_dir, [ ".svn", "bin", "build", "util", "misc", "docs" ], [ "*.o", "Thumbs.db", ".DS_Store", "CMakeCache.txt" ])
 		self.bin_dir		= self.dirs.get_abs_dir_path("misc/seqan_instrumentation/bin")
 		self.last_revision_dir	= self.dirs.get_abs_dir_path("misc/seqan_instrumentation/last_revision_copy")
 		self.userdata_dir	= self.dirs.get_abs_dir_path("misc/seqan_instrumentation/userdata")
 
-		self.id_file		= self.dirs.get_abs_file_path("misc/seqan_instrumentation/userdata/id.txt")
-		self.id			= id.ID(self.id_file)
+		# if possible save user ID in the user's home directory
+		# otherwise use sub folder of SeqAn installation
+		old_id_file = self.dirs.get_abs_file_path("misc/seqan_instrumentation/userdata/id.txt")
+		self.id_file = os.getenv("HOME", os.getenv("USERPROFILE"))
+		if(self.id_file is None):
+			self.id_file = old_id_file
+		else:
+			self.id_file += "/.SUA.ID"
+			# migrate old ID if no new one exists
+			if(os.path.isfile(old_id_file) and not os.path.isfile(self.id_file)):
+				shutil.move(old_id_file, self.id_file)
+				
+		self.id	= id.ID(self.id_file)
 
 		self.stats_file		= self.dirs.get_abs_file_path("misc/seqan_instrumentation/userdata/" + self.id.get() + "_stats.txt")
 		self.stats		= stats.Stats(cMake_binary_dir, src_dir, self.stats_file)
@@ -45,7 +57,7 @@ class DiffCollector(object):
 
 	def upload_diff(self, differ):
 		print("[2] Uploading diff files...");
-		differ.sync_ftp("ftp.bkahlert.com", "u49635740-promo", binascii.unhexlify("684a753337685f5f5f6d"))
+		differ.sync("http://dalak.imp.fu-berlin.de/SUAsrv/diff")
 		print("[2] Diff files uploaded.")
 
 	def update_comparision_copy(self, syncer):

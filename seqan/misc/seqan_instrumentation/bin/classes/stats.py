@@ -1,11 +1,14 @@
 import os
 import glob
-import json
 import socket
 import sys
 import platform
 import shutil
-from classes.configobj import ConfigObj
+
+import inspect
+# appends shipped lib dir
+sys.path.append(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
+import simplejson as json
 
 class Stats(object):
 	CMakeCachePathKey = "CMakeCachePath"
@@ -23,7 +26,6 @@ class Stats(object):
 
 		self.get_os()
 		self.get_machine()
-		self.get_devenv()
 		self.get_ip()
 
 	def get(self, key):
@@ -63,29 +65,6 @@ class Stats(object):
 			self.stats["machine"] = { "machine": platform.machine(), "processor": platform.processor(), "architecture": [ platform.architecture(), "64" if sys.maxsize > 2**32 else "no64" ]}
 			self.save()
 		return self.stats["machine"]
-
-	def get_devenv(self):
-		if(self.needs_refresh("devenv")):
-			f = open(self.get_cMakeCache_path(), "r")
-			lines = f.readlines()
-			f.close()
-			lines_without_slash_comments = map(lambda x: "" if len(x) >= 2 and x[0:2] == "//" else x, lines)
-
-			config = ConfigObj(lines_without_slash_comments)
-			
-			self.stats["devenv"] = {
-				"CMAKE_GENERATOR": config["CMAKE_GENERATOR:INTERNAL"] if "CMAKE_GENERATOR:INTERNAL" in config else None,
-				"CMAKE_BUILD_TYPE": config["CMAKE_BUILD_TYPE:STRING"] if "CMAKE_BUILD_TYPE:STRING" in config else None,
-				"CMAKE_C_COMPILER": config["CMAKE_GENERATOR:INTERNAL"] if "CMAKE_GENERATOR:INTERNAL" in config else None,
-				"CMAKE_C_FLAGS": config["CMAKE_C_FLAGS:STRING"] if "CMAKE_C_FLAGS:STRING" in config else None,
-				"CMAKE_CXX_COMPILER": config["CMAKE_CXX_COMPILER:FILEPATH"] if "CMAKE_CXX_COMPILER:FILEPATH" in config else None,
-				"CMAKE_CXX_FLAGS": config["CMAKE_CXX_FLAGS:STRING"] if "CMAKE_CXX_FLAGS:STRING" in config else None,
-				"CMAKE_LINKER": config["CMAKE_LINKER:FILEPATH"] if "CMAKE_LINKER:FILEPATH" in config else None,
-				"CMAKE_MODULE_LINKER_FLAGS": config["CMAKE_MODULE_LINKER_FLAGS:STRING"] if "CMAKE_MODULE_LINKER_FLAGS:STRING" in config else None,
-				"CMAKE_MAKE_PROGRAM": config["CMAKE_MAKE_PROGRAM:FILEPATH"] if "CMAKE_MAKE_PROGRAM:FILEPATH" in config else None
-			}
-			self.save()
-		return self.stats["devenv"]		
 	    
 	def get_ip(self):
 		if(self.needs_refresh("ip")):
