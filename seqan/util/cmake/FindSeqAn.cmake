@@ -24,15 +24,15 @@ endif (SEQAN_C++11_STANDARD)
 macro(seqan_instrumentation_cmake)
 	if(SEQAN_INSTRUMENTATION)
 	    message(STATUS "Prepare SeqAn Usability Analyzer data collection...")
-	    if(CMAKE_HOST_WIN32)
+	    if(CMAKE_HOST_WIN32 AND NOT PYTHONINTERP_FOUND)
 	        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe cmake ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 	        add_custom_target(seqan_instrumentation_build ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
 	                          COMMENT "Build Instrumentation...")
-	    else(CMAKE_HOST_WIN32)
+	    else(CMAKE_HOST_WIN32 AND NOT PYTHONINTERP_FOUND)
 	        execute_process(COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py cmake ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 	        add_custom_target(seqan_instrumentation_build ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
 	                          COMMENT "Build Instrumentation...")
-	    endif(CMAKE_HOST_WIN32)
+	    endif(CMAKE_HOST_WIN32 AND NOT PYTHONINTERP_FOUND)
 	else(SEQAN_INSTRUMENTATION)
 		#message(STATUS "SeqAn Usability Analyzer data collection deactivated")
 	endif(SEQAN_INSTRUMENTATION)
@@ -47,7 +47,7 @@ macro (seqan_instrumentation_target TARGET)
 	if(SEQAN_INSTRUMENTATION)
 	    add_dependencies(${TARGET} seqan_instrumentation_build)
 
-	    if(CMAKE_HOST_WIN32)
+	    if(CMAKE_HOST_WIN32 AND NOT PYTHONINTERP_FOUND)
 	      add_custom_command(TARGET ${TARGET}
 	                         PRE_BUILD
 	                         COMMAND ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe pre_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
@@ -56,7 +56,7 @@ macro (seqan_instrumentation_target TARGET)
 	                         POST_BUILD
 	                         COMMAND ${CMAKE_SOURCE_DIR}/misc/seqan_instrumentation/py2exe/dist/seqan_instrumentation.exe post_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
 	                         COMMENT "Post Build Instrumentation...")
-	    else(CMAKE_HOST_WIN32)
+	    else(CMAKE_HOST_WIN32 AND NOT PYTHONINTERP_FOUND)
 	      add_custom_command(TARGET ${TARGET}
 	                         PRE_BUILD
 	                         COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py pre_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
@@ -65,7 +65,7 @@ macro (seqan_instrumentation_target TARGET)
 	                         POST_BUILD
 	                         COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/misc/seqan_instrumentation/bin/seqan_instrumentation.py post_build ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${TARGET}
 	                         COMMENT "Post Build Instrumentation...")
-	    endif(CMAKE_HOST_WIN32)
+	    endif(CMAKE_HOST_WIN32 AND NOT PYTHONINTERP_FOUND)
 	endif(SEQAN_INSTRUMENTATION)
 endmacro (seqan_instrumentation_target TARGET)
 
