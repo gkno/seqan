@@ -59,7 +59,7 @@ namespace seqan {
 ..example.text:Creating a @Class.BamIOContext@ for a raw @Class.StringSet@ of @Shortcut.CharString@.
 ..example.code:
 StringSet<CharString> nameStore;
-NameStore<CharString> nameStoreCache(nameStore);
+NameStoreCache<StringSet<CharString> > nameStoreCache(nameStore);
 BamIOContext<StringSet<CharString> > bamIOContext(nameStore, nameStoreCache);
 // ...
 ..example.text:Using a @Class.BamIOContext@ with a @Class.FragmentStore@.
