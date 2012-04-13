@@ -13,7 +13,7 @@ class DiffCollector(object):
 		self.cMake_binary_dir = cMake_binary_dir
 		self.src_dir = src_dir		
 		
-		self.dirs		= dirs.Dirs(self.src_dir, [ ".svn", "bin", "build", "util", "misc", "docs" ], [ "*.o", "Thumbs.db", ".DS_Store", "CMakeCache.txt" ])
+		self.dirs		= dirs.Dirs(self.src_dir, [ ".svn", "bin", "build", "util", "misc", "docs", "docs2", "extras", "core" ], [ "*.o", "Thumbs.db", ".DS_Store", "CMakeCache.txt" ])
 		self.bin_dir		= self.dirs.get_abs_dir_path("misc/seqan_instrumentation/bin")
 		try:
 			os.mkdir(self.dirs.get_abs_dir_path("misc/seqan_instrumentation/last_revision_copy"))
