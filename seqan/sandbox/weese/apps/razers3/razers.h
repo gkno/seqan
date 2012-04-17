@@ -656,6 +656,7 @@ bool loadReads(
 					{
 						clear(seq);
 						clear(id);
+						clear(qual);  // So no qualities are assigned below.
 						++kickoutcount;
 						break;
 					}
