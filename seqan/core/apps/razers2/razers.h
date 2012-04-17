@@ -415,6 +415,7 @@ bool loadReads(
 					if (++count > cutoffCount)
 					{
 						clear(seq);
+                        clear(qual);  // So no qualities are assigned below.
 						clear(id);
 						++kickoutcount;
 						break;
