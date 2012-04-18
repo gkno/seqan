@@ -987,7 +987,7 @@ _patternInitSmallStateBanded(
 {
 	typedef Pattern<TNeedle, Myers<AlignTextBanded<TSpec, TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > TPattern;
 	typedef typename TPattern::TWord TWord;
-	typedef typename Iterator<TNeedle const, Standard>::Type TIter;
+	typedef typename Iterator<TNeedle2 const, Standard>::Type TIter;
 	typedef typename Value<TNeedle>::Type TValue;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
