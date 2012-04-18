@@ -4,9 +4,9 @@
 #include <iostream>
 
 using namespace seqan;
-// FRAGMENT(showAllLetterOfMyAlphabet)
+// FRAGMENT(showAllLettersOfMyAlphabet)
 template <typename TAlphabet>
-void showAllLetterOfMyAlphabet(TAlphabet const &)
+void showAllLettersOfMyAlphabet(TAlphabet const &)
 {
 	typedef typename Size<TAlphabet>::Type TSize;
 	TSize alphSize = ValueSize<TAlphabet>::VALUE;
@@ -17,8 +17,8 @@ void showAllLetterOfMyAlphabet(TAlphabet const &)
 // FRAGMENT(main)
 int main()
 {
-	showAllLetterOfMyAlphabet(AminoAcid());
-	showAllLetterOfMyAlphabet(Dna());
-	showAllLetterOfMyAlphabet(Dna5());
+	showAllLettersOfMyAlphabet(AminoAcid());
+	showAllLettersOfMyAlphabet(Dna());
+	showAllLettersOfMyAlphabet(Dna5());
 	return 0;
 }
