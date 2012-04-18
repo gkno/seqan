@@ -533,23 +533,31 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename TIndex>
-	inline __int64 _fullDirLength(TIndex const &index) 
+	template <typename TValue, typename TSpec>
+	inline __int64 _fullDirLength(Shape<TValue, TSpec> const &shape)
 	{
-		typedef typename Fibre<TIndex, FibreShape>::Type	TShape;
-		typedef typename Host<TShape>::Type					TTextValue;
-		return _intPow((__int64)ValueSize<TTextValue>::VALUE, weight(indexShape(index))) + 1;
+		return _intPow((__int64)ValueSize<TValue>::VALUE, weight(shape)) + 1;
+	}
+
+	template <typename TValue, typename TSpec>
+	inline __int64 _fullDir2Length(Shape<TValue, TSpec> const &shape)
+	{
+		return (_intPow(
+					(__int64)ValueSize<TValue>::VALUE,
+					weight(shape) + 1) - 1)
+				/ ((unsigned)ValueSize<TValue>::VALUE - 1) + 1;
 	}
 
 	template <typename TIndex>
-	inline __int64 _fullDir2Length(TIndex const &index) 
+	inline __int64 _fullDirLength(TIndex const &index)
 	{
-		typedef typename Fibre<TIndex, FibreShape>::Type	TShape;
-		typedef typename Host<TShape>::Type					TTextValue;
-		return (_intPow(
-					(__int64)ValueSize<TTextValue>::VALUE,
-					weight(indexShape(index)) + 1) - 1)
-				/ ((unsigned)ValueSize<TTextValue>::VALUE - 1) + 1;
+		return _fullDirLength(indexShape(index));
+	}
+
+	template <typename TIndex>
+	inline __int64 _fullDir2Length(TIndex const &index)
+	{
+		return _fullDir2Length(indexShape(index));
 	}
 
 
@@ -1554,7 +1562,7 @@ The resulting tables must have appropriate size before calling this function.
 		typedef typename Size<TString>::Type						TSize;
 
 		TDir lastSeqSeen;
-		resize(lastSeqSeen, length(dir));
+		resize(lastSeqSeen, length(dir), Exact());
 		
 		// 1. clear counters
 		_qgramClearDir(dir, bucketMap);
@@ -1599,7 +1607,7 @@ The resulting tables must have appropriate size before calling this function.
 		}
 
 		// 3. cumulative sum
-		resize(counts, _qgramCummulativeSum(dir, False()));
+		resize(counts, _qgramCummulativeSum(dir, False()), Exact());
 
 		// 4. fill count array
 		arrayFill(begin(lastSeqSeen, Standard()), end(lastSeqSeen, Standard()), -1);
@@ -1878,7 +1886,7 @@ The resulting tables must have appropriate size before calling this function.
                     
                     SEQAN_ASSERT_LEQ(old_hash, hash);
                     if (old_hash > hash)
-                        std::cerr << "ERROR!!"  <<std::endl;
+                        std::cerr << "ERROR!! " << old_qgram << "\t" << old_hash << "  > " << hash <<std::endl;
                     
                     // copy bucket begin
                     typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;

@@ -74,7 +74,7 @@ namespace SEQAN_NAMESPACE_MAIN {
                typename TText >
     void createSuffixArray(
 		TSA &SA,
-		TText &s,
+		TText const &s,
 		Shawarma<DeepShallow> const)
 	{
 		typedef typename Value<TText>::Type	TValue;
