@@ -341,6 +341,7 @@ getTagType(BamTagsDict & tags, TPos idx)
 ...type:Class.BamTagsDict
 ..param.idx:Index of the tag whose key to retrieve.
 ..returns:Infix of the underlying string.
+..remarks:See @Class.BamTagsDict@ for an example.
 ..include:seqan/bam_io.h
 */
 
@@ -404,6 +405,7 @@ findTagKey(unsigned & idx, BamTagsDict const & tags, CharString const & name)
 ..param.idx:Index of the tag whose value to retrieve.
 ..returns:@Shortcut.CharString@ with the raw tags data.
 ..remarks:Note that you will get $<type char> + payload$ in case of @Class.BamTagsDict@.
+..remarks:See @Class.BamTagsDict@ for an example.
 ..include:seqan/bam_io.h
 */
 
@@ -469,6 +471,7 @@ getTagValue(BamTagsDict const & tags, TPos idx)
 ..params.idx:Index of the tag in the tag list.
 ..returns:$bool$, indicating the success.
 ..remarks:The function only works for atomic types such as $int$, not for $char*$ or arrays.
+..remarks:See @Class.BamTagsDict@ for an example.
 ..see:Function.getTagValue
 ..include:seqan/bam_io.h
 */
