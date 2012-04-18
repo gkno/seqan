@@ -1695,7 +1695,7 @@ inline void eraseBack(T & me)
 ..include:seqan/sequence.h
 */
 
-template <typename T, typename TSize, typename TValue>
+template <typename T>
 inline void
 shrinkToFit(T & me)
 {
