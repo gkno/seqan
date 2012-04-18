@@ -61,8 +61,8 @@ namespace seqan {
 ...default:$void$
 ..include:seqan/sequence.h
 */
-template <typename TValue>
-class String<TValue, Alloc<void> >
+template <typename TValue, typename TSpec>
+class String<TValue, Alloc<TSpec> >
 {
 public:
     typename Value<String>::Type * data_begin;
