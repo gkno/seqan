@@ -65,7 +65,7 @@
 
 /**
 .Macro.SEQAN_FAIL
-..cat:Miscellaneous
+..cat:Assertions
 ..summary:Force abortion of program, regardless of debugging settings.
 ..signature:SEQAN_FAIL(msg[, args])
 ..param.msg:A format string.
@@ -104,7 +104,7 @@ bool foo(MyEnum x) {
 
 /**
 .Macro.SEQAN_CHECK
-..cat:Miscellaneous
+..cat:Assertions
 ..summary:Force abortion of program if a condition is not met, regardless of debugging settings.
 ..signature:SEQAN_CHECK(condition, msg[, args])
 ..param.msg:A format string.
@@ -1581,10 +1581,21 @@ SEQAN_DEFINE_TEST(test_skipped)
 ..signature:SEQAN_ASSERT(expression)
 ..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT(0);  // will fail
 SEQAN_ASSERT(1);  // will run through 
 SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_NOT
 ..cat:Assertions
@@ -1592,10 +1603,21 @@ SEQAN_ASSERT_MSG(0, "message %d", 2);  // Will fail with message.
 ..signature:SEQAN_ASSERT(expression)
 ..signature:SEQAN_ASSERT_MSG(expression, message[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_NOT(0);  // will run through
 SEQAN_ASSERT_NOT(1);  // will fail
 SEQAN_ASSERT_NOT_MSG(0, "msg %s", "test");  // will fail with message
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_EQ
 ..cat:Assertions
@@ -1603,11 +1625,22 @@ SEQAN_ASSERT_NOT_MSG(0, "msg %s", "test");  // will fail with message
 ..signature:SEQAN_ASSERT_EQ(expression1, expression2)
 ..signature:SEQAN_ASSERT_EQ_MSG(expression1, expression2, comment[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_EQ(0, false);  // will run through
 SEQAN_ASSERT_EQ(1, false);  // will fail
 SEQAN_ASSERT_EQ(1, "foo");  // will not compile
 SEQAN_ASSERT_EQ_MSG(1, false, "msg");  // will fail with message
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_NEQ
 ..cat:Assertions
@@ -1615,11 +1648,22 @@ SEQAN_ASSERT_EQ_MSG(1, false, "msg");  // will fail with message
 ..signature:SEQAN_ASSERT_NEQ(expression)
 ..signature:SEQAN_ASSERT_NEQ_MSG(expression, message[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_NEQ(0, false);  // will fail
 SEQAN_ASSERT_NEQ(1, false);  // will run through
 SEQAN_ASSERT_NEQ(1, "foo");  // will not compile
 SEQAN_ASSERT_NEQ_MSG(1, false, "msg");  // will fail with message
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_LT
 ..cat:Assertions
@@ -1627,10 +1671,21 @@ SEQAN_ASSERT_NEQ_MSG(1, false, "msg");  // will fail with message
 ..signature:SEQAN_ASSERT_LT(expression1, expression2)
 ..signature:SEQAN_ASSERT_LT(expression1, expression2, comment[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_LT(0, 1);  // will run through
 SEQAN_ASSERT_LT(1, 1);  // will not run through
 SEQAN_ASSERT_LT_MSG(1, 1, "msg");  // will fail with message
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_LEQ
 ..cat:Assertions
@@ -1638,10 +1693,21 @@ SEQAN_ASSERT_LT_MSG(1, 1, "msg");  // will fail with message
 ..signature:SEQAN_ASSERT_LEQ(expression1, expression2)
 ..signature:SEQAN_ASSERT_LEQ_MSG(expression1, expression2, comment[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_LEQ(1, 1);  // will run through
 SEQAN_ASSERT_LEQ(1, 2);  // will not run through
 SEQAN_ASSERT_LEQ_MSG(1, 2, "msg");  // will fail with message
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_GT
 ..cat:Assertions
@@ -1649,10 +1715,21 @@ SEQAN_ASSERT_LEQ_MSG(1, 2, "msg");  // will fail with message
 ..signature:SEQAN_ASSERT_GT(expression1, expression2)
 ..signature:SEQAN_ASSERT_GT_MSG(expression1, expression2, comment[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_GT(2, 1);  // will run through
 SEQAN_ASSERT_GT(1, 1);  // will not run through
 SEQAN_ASSERT_GT_MSG(1, 1, "msg");  // will fail with message
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_GEQ
 ..cat:Assertions
@@ -1660,10 +1737,21 @@ SEQAN_ASSERT_GT_MSG(1, 1, "msg");  // will fail with message
 ..signature:SEQAN_ASSERT_GEQ(expression1, expression2)
 ..signature:SEQAN_ASSERT_GEQ_MSG(expression1, expression2, comment[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_GEQ(1, 1);  // will run through
 SEQAN_ASSERT_GEQ(0, 1);  // will not run through
 SEQAN_ASSERT_GEQ_MSG(0, 1, "msg");  // will fail with message
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_ASSERT_IN_DELTA
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
 
 .Macro.SEQAN_ASSERT_IN_DELTA
 ..cat:Assertions
@@ -1671,12 +1759,22 @@ SEQAN_ASSERT_GEQ_MSG(0, 1, "msg");  // will fail with message
 ..signature:SEQAN_ASSERT_IN_DELTA(x, y, delta)
 ..signature:SEQAN_ASSERT_IN_DELTA_MSG(x, y, delta, comment[, parameters])
 ..remarks:The main advantage of this macro is that it prints the values of its argument on failures. Note that the $operator<<$ to the type of $std::cerr$ has to be defined for the type of both expression parameters. Otherwise, simply use the equivalent @Macro.SEQAN_ASSERT@ call.
+..remarks:See @Macro.SEQAN_CHECK@ and @Macro.SEQAN_FAIL@ for (conditionally) aborting your program regardless of debug settings.
 ..example.code:
 SEQAN_ASSERT_IN_DELTA(0, 0, 0.1);  // will run through
 SEQAN_ASSERT_IN_DELTA(1, -2, 1);  // will fail
 SEQAN_ASSERT_IN_DELTA(1, "foo");  // will not compile
 SEQAN_ASSERT_IN_DELTA_MSG(1, 0, 0.1, "msg");  // will fail with message
-
+..see:Macro.SEQAN_ASSERT
+..see:Macro.SEQAN_ASSERT_NOT
+..see:Macro.SEQAN_ASSERT_EQ
+..see:Macro.SEQAN_ASSERT_NEQ
+..see:Macro.SEQAN_ASSERT_LEQ
+..see:Macro.SEQAN_ASSERT_GEQ
+..see:Macro.SEQAN_ASSERT_LT
+..see:Macro.SEQAN_ASSERT_GT
+..see:Macro.SEQAN_CHECK
+..see:Macro.SEQAN_FAIL
  */
 
 // Force a test failure.
