@@ -120,7 +120,6 @@ private:
 	}
 };
 
-template <>
 inline void svgResize(SVGFile &svg, int width, int height)
 {
     svg.size.i1 = width;
