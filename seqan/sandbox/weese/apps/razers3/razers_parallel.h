@@ -181,7 +181,7 @@ public:
 template <typename TSpec>
 void limitRead(ThreadLocalStorage<TSpec> & tls, unsigned readId, int newLimit)
 {
-    setMaxErrors(tls, readId, -newLimit);
+    setMaxErrors(tls, readId, newLimit);
 }
 
 template <typename TSpec>
