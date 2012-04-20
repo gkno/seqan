@@ -888,8 +888,8 @@ writeBackToGlobalStore(
 
 	// Resize first so copying happens at most once and not every for each
 	// block in the worst case
-	resize(target.alignedReadStore, newSize, Exact());
-	resize(target.alignQualityStore, newSize, Exact());
+	resize(target.alignedReadStore, newSize);
+	resize(target.alignQualityStore, newSize);
 
 	// Append single block stores.
 	// TODO(holtgrew): Do in parallel!
