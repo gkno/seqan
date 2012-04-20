@@ -257,7 +257,7 @@ findTagKey(unsigned & idx, CharString const & key, BamHeaderRecord const & recor
 ..include:seqan/bam_io.h
 ..example.code:
 CharString tagValue;
-bool keyFound = findTagKey(tagValue, "SN", record);
+bool keyFound = getTagValue(tagValue, "SN", record);
 ..see:Function.findTagKey
 */
 
