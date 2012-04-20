@@ -48,11 +48,11 @@ def main(source_base, binary_base):
     # App TestConf objects to conf_list, just like this for each
     # test you want to run.
     
-	 # Example 1
+    # Example 1
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('iso_r01_m200.A00_B00.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/r01/iso_r01_m200.A00','-c','../../../../../sandbox/jhu/apps/sgip/example/r01/iso_r01_m200.B00','-v','2','-i'],
+        args=['-o', '../../../../../extras/apps/sgip/example/r01/iso_r01_m200.A00','-c','../../../../../extras/apps/sgip/example/r01/iso_r01_m200.B00','-v','2','-i'],
         to_diff=[(ph.inFile('iso_r01_m200.A00_B00.stdout'),
                   ph.outFile('iso_r01_m200.A00_B00.stdout'))])
     conf_list.append(conf)
@@ -61,7 +61,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('iso_r01_m200.A01_B01.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/r01/iso_r01_m200.A01','-c','../../../../../sandbox/jhu/apps/sgip/example/r01/iso_r01_m200.B01','-v','2','-i'],
+        args=['-o', '../../../../../extras/apps/sgip/example/r01/iso_r01_m200.A01','-c','../../../../../extras/apps/sgip/example/r01/iso_r01_m200.B01','-v','2','-i'],
         to_diff=[(ph.inFile('iso_r01_m200.A01_B01.stdout'),
                   ph.outFile('iso_r01_m200.A01_B01.stdout'))])
     conf_list.append(conf)
@@ -69,7 +69,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('iso_r01_m200.A00_B01.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/r01/iso_r01_m200.A00','-c','../../../../../sandbox/jhu/apps/sgip/example/r01/iso_r01_m200.B01','-v','2','-i'],
+        args=['-o', '../../../../../extras/apps/sgip/example/r01/iso_r01_m200.A00','-c','../../../../../extras/apps/sgip/example/r01/iso_r01_m200.B01','-v','2','-i'],
         to_diff=[(ph.inFile('iso_r01_m200.A00_B01.stdout'),
                   ph.outFile('iso_r01_m200.A00_B01.stdout'))])
     conf_list.append(conf)
@@ -77,7 +77,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('iso_r01_m200.A00.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/r01/iso_r01_m200.A00','-v','2'],
+        args=['-o', '../../../../../extras/apps/sgip/example/r01/iso_r01_m200.A00','-v','2'],
         to_diff=[(ph.inFile('iso_r01_m200.A00.stdout'),
                   ph.outFile('iso_r01_m200.A00.stdout'))])
     conf_list.append(conf)
@@ -87,7 +87,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('srg_latin-4.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/srg/latin-4','-v','2'],
+        args=['-o', '../../../../../extras/apps/sgip/example/srg/latin-4','-v','2'],
         to_diff=[(ph.inFile('srg_latin-4.stdout'),
                   ph.outFile('srg_latin-4.stdout'))])
     conf_list.append(conf)
@@ -95,7 +95,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('srg_lattice-4.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/srg/lattice-4','-v','2'],
+        args=['-o', '../../../../../extras/apps/sgip/example/srg/lattice-4','-v','2'],
         to_diff=[(ph.inFile('srg_lattice-4.stdout'),
                   ph.outFile('srg_lattice-4.stdout'))])
     conf_list.append(conf)
@@ -103,7 +103,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('srg_paley-5.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/srg/paley-5','-v','2'],
+        args=['-o', '../../../../../extras/apps/sgip/example/srg/paley-5','-v','2'],
         to_diff=[(ph.inFile('srg_paley-5.stdout'),
                   ph.outFile('srg_paley-5.stdout'))])
     conf_list.append(conf)
@@ -111,7 +111,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('srg_sts7.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/srg/sts-7','-v','2'],
+        args=['-o', '../../../../../extras/apps/sgip/example/srg/sts-7','-v','2'],
         to_diff=[(ph.inFile('srg_sts7.stdout'),
                   ph.outFile('srg_sts7.stdout'))])
     conf_list.append(conf)
@@ -119,7 +119,7 @@ def main(source_base, binary_base):
     conf = app_tests.TestConf(
         program=path_to_program,
         redir_stdout=ph.outFile('srg_triang-5.stdout'),
-        args=['-o', '../../../../../sandbox/jhu/apps/sgip/example/srg/triang-5','-v','2'],
+        args=['-o', '../../../../../extras/apps/sgip/example/srg/triang-5','-v','2'],
         to_diff=[(ph.inFile('srg_triang-5.stdout'),
                   ph.outFile('srg_triang-5.stdout'))])
     conf_list.append(conf)

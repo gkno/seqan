@@ -82,8 +82,8 @@ void outputLabel(TStr & str, General const &)
     using namespace seqan;
 
     typedef typename Iterator<TStr>::Type TIterator;
-    TIterator it = begin(str);
-    TIterator itEnd = end(str);
+    TIterator it = begin(str,Standard());
+    TIterator itEnd = end(str,Standard());
     std::cout << "String: ";
     while (it != itEnd)
     {

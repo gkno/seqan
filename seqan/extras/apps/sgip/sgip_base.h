@@ -561,13 +561,11 @@ bool _getHeuristicList(TString & rset, TXMap & cand, TMatrix & dismat, TString &
         if (it->second)
             continue;
         rset.push_back(it->first);
-
         THMap hmap;
         size_t len = length(rset);
         for (TIter ti = cand.begin(); ti != itEnd; ++ti)
         {
             TString t_key;
-
             t_key.push_back(degreemap[ti->first].inDegree);
             t_key.push_back(degreemap[ti->first].outDegree);
             for (size_t i = 0; i < len; i++)
@@ -578,14 +576,21 @@ bool _getHeuristicList(TString & rset, TXMap & cand, TMatrix & dismat, TString &
 
         if (hmap.size() > max_capacity)
         {
-            max_capacity = hmap.size(); heuristicString.clear(); heuristicString.push_back(it->first);
+            max_capacity = hmap.size();
+            heuristicString.clear();
+            heuristicString.push_back(it->first);
         }
         else if (hmap.size() == max_capacity)
         {
             if (compare_(degreemap[it->first], degreemap[heuristicString[0]]) == 0)
+            {
                 heuristicString.push_back(it->first);
+            }
             else if (compare_(degreemap[it->first], degreemap[heuristicString[0]]) < 0)
-                heuristicString.clear(); heuristicString.push_back(it->first);
+            {
+                heuristicString.clear();
+                heuristicString.push_back(it->first);
+            }
         }
         hmap.clear();
         rset.pop_back();
@@ -769,18 +774,24 @@ void _createParityMap(
             TString str;
             TMapIterator ti = it;
             ti++;
-            while (ti->first.inDegree == it->first.inDegree &&
-                ti->first.outDegree == it->first.outDegree && ti != itEnd)
+            while(ti != itEnd)
             {
-                if (!getProperty(visitedRecord, ti->second))
+                if(ti->first.inDegree == it->first.inDegree && ti->first.outDegree == it->first.outDegree)
                 {
-                    if (isParity(mat, it->second, ti->second, numVer))
+                    if (!getProperty(visitedRecord, ti->second))
                     {
-                        str.push_back(ti->second);
-                        assignProperty(visitedRecord, ti->second, VISITED);
+                        if (isParity(mat, it->second, ti->second, numVer))
+                        {
+                            str.push_back(ti->second);
+                            assignProperty(visitedRecord, ti->second, VISITED);
+                        }
                     }
+                    goNext(ti);
                 }
-                goNext(ti);
+                else
+                {
+                    break;
+                }
             }
             cand.push_back(it->second);
             parityMap[it->second] = str;
