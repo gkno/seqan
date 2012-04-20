@@ -1700,7 +1700,15 @@ inline void
 shrinkToFit(T & me)
 {
     SEQAN_CHECKPOINT;
-    reserve(me, length(me), Exact());
+
+//  following line has no effect as in SeqAn it is not yet possible
+//  to reduce the memory consumption of a string with resize/reserve
+//
+//  reserve(me, length(me), Exact());
+
+    T tmp;
+    assign(tmp, me, Exact());
+    swap(me, tmp);
 }
 
 }  // namespace seqan
