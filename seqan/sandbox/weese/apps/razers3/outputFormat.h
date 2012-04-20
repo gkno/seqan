@@ -756,7 +756,7 @@ int dumpMatches(
 		case 0:	// Razer Format
 
 //			_sep_ = ',';
-			resize(lines, 1000000);
+			resize(lines, 1000000, Exact());
 			while (fromIdx < length(store.alignedReadStore))
 			{
 				TAlignedReadStoreSize chunkSize = length(lines);

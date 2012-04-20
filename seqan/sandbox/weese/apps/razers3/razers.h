@@ -685,8 +685,9 @@ bool loadReads(
 	}
 
 	// memory optimization
-	reserve(store.readSeqStore.concat, length(store.readSeqStore.concat), Exact());
-//	reserve(store.readNameStore.concat, length(store.readNameStore.concat), Exact());
+    // we store reads in a concat-direct stringset and can shrink its size
+    shrinkToFit(store.readSeqStore.concat);
+    shrinkToFit(store.readSeqStore.limits);
 
 	// compute error probabilities
 	resize(options.avrgQuality, length(qualSum));
@@ -2860,8 +2861,8 @@ int _mapSingleReads(
         maskDuplicates(matches, options, mode);
     compactMatches(matches, cnts, options, mode, nothing, COMPACT_FINAL);
     // Write back to store.
-    reserve(store.alignedReadStore, length(matches));
-    reserve(store.alignQualityStore, length(matches));
+    reserve(store.alignedReadStore, length(matches), Exact());
+    reserve(store.alignQualityStore, length(matches), Exact());
     typedef typename Iterator<String<TMatchRecord>, Standard>::Type TIterator;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
 	typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;

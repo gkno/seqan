@@ -6,7 +6,7 @@ namespace seqan {
 template <typename TPos, typename TSize, typename TCount>
 void computeSplittersBySlotCount(String<TPos> & splitters, TSize size, TCount count)
 {
-    resize(splitters, count + 1);
+    resize(splitters, count + 1, Exact());
     splitters[0] = 0;
     TSize blockLength = size / count;
     TSize rest = size % count;
@@ -28,7 +28,7 @@ void computeSplittersBySlotSize(String<TPos> & splitters, TDataSize size, TSlotS
         slotSize = size / maxPackageCount + (static_cast<TSlotSize>(size % maxPackageCount) > static_cast<TSlotSize>(0));
     // Compute splitters.
     unsigned count = size / slotSize + (static_cast<TSlotSize>(size % slotSize) > static_cast<TSlotSize>(0));
-    resize(splitters, count + 1);
+    resize(splitters, count + 1, Exact());
     splitters[0] = 0;
     for (unsigned i = 1; i < count; ++i)
         splitters[i] = splitters[i - 1] + slotSize;
