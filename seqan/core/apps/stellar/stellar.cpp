@@ -1,22 +1,25 @@
- /*==========================================================================
-                     STELLAR - Fast Local Alignment
-
- ============================================================================
-  Copyright (C) 2011 by Birte Kehr
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 3 of the License, or (at your options) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ==========================================================================*/
+// ==========================================================================
+//                    STELLAR - SwifT Exact LocaL AligneR
+//                   http://www.seqan.de/projects/stellar/
+// ==========================================================================
+// Copyright (C) 2010-2012 by Birte Kehr
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 3 of the License, or (at your options) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// ==========================================================================
+// Author: Birte Kehr <birte.kehr@fu-berlin.de>
+// ==========================================================================
 
 #define SEQAN_PROFILE
 
@@ -224,7 +227,7 @@ _importSequences(CharString const & fileName,
     reserve(seqs, seqCount, Exact());
     reserve(ids, seqCount, Exact());
 
-	std::set<TId> uniqueIds; // set of short IDs (up to first space)
+	std::set<TId> uniqueIds; // set of short IDs (cut at first whitespace)
 	bool idsUnique = true;
 
     TSequence seq;
@@ -380,8 +383,8 @@ _writeFileNames(TOptions & options) {
 
 inline void
 _addVersion(CommandLineParser& parser) {
-	::std::string rev = "$Revision: 10372 $";
-	addVersionLine(parser, "Version 1.1 (September 16th 2011) SeqAn Revision: " + rev.substr(11, 5) + "");
+	::std::string rev = "$Revision: 11692 $";
+	addVersionLine(parser, "Version 1.2 (April 20th 2012) SeqAn Revision: " + rev.substr(11, 5) + "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -473,7 +476,7 @@ _setParser(TParser & parser) {
 
     addTitleLine(parser, "*******************************************");
 	addTitleLine(parser, "* STELLAR - the SwifT Exact LocaL AligneR *");
-	addTitleLine(parser, "* (c) Copyright 2011 by Birte Kehr        *");
+	addTitleLine(parser, "* (c) Copyright 2010-2012 by Birte Kehr        *");
 	addTitleLine(parser, "*******************************************");
 
 	addUsageLine(parser, "-d <FASTA sequence file> -q <FASTA sequence file> [Options]");
