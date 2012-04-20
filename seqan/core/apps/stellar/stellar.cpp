@@ -175,6 +175,30 @@ _stellarOnAll(StringSet<TSequence> & databases,
 	return 0;
 }
 
+template<typename TId>
+inline bool
+_checkUniqueId(std::set<TId> & uniqueIds, TId & id)
+{
+	TId shortId;
+	typedef typename Iterator<TId>::Type TIterator;
+
+	TIterator it = begin(id);
+	TIterator itEnd = end(id);
+	while (it != itEnd && *it > 32)
+	{
+		appendValue(shortId, *it);
+		++it;
+	}
+	
+	if (uniqueIds.count(shortId) == 0)
+	{
+		uniqueIds.insert(shortId);
+		return 1;
+	}
+
+	return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Imports sequences from a file, 
 //  stores them in the StringSet seqs and their identifiers in the StringSet ids
@@ -183,9 +207,11 @@ inline bool
 _importSequences(CharString const & fileName,
 				 CharString const & name,
                  StringSet<TSequence> & seqs,
-                 StringSet<TId> & ids) {
+                 StringSet<TId> & ids)
+{
     MultiSeqFile multiSeqFile;
-	if (!open(multiSeqFile.concat, toCString(fileName), OPEN_RDONLY)) {
+	if (!open(multiSeqFile.concat, toCString(fileName), OPEN_RDONLY))
+	{
 		std::cerr << "Failed to open " << name << " file." << std::endl;
         return false;
 	}
@@ -198,16 +224,24 @@ _importSequences(CharString const & fileName,
     reserve(seqs, seqCount, Exact());
     reserve(ids, seqCount, Exact());
 
+	std::set<TId> uniqueIds; // set of short IDs (up to first space)
+	bool idsUnique = true;
+
     TSequence seq;
     TId id;
-    for(unsigned i = 0; i < seqCount; ++i) {
+    for(unsigned i = 0; i < seqCount; ++i)
+	{
         assignSeq(seq, multiSeqFile[i], format);
         assignSeqId(id, multiSeqFile[i], format);
+
+		idsUnique &= _checkUniqueId(uniqueIds, id);
+
         appendValue(seqs, seq, Generous());
         appendValue(ids, id, Generous());
     }
 
 	std::cout << "Loaded " << seqCount << " " << name << " sequence" << ((seqCount>1)?"s.":".") << std::endl;
+	if (!idsUnique) std::cerr << "WARNING: Non-unique " << name << " ids. Output can be ambigous.\n";
     return true;
 }
 

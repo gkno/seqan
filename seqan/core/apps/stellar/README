@@ -1,6 +1,6 @@
               *** STELLAR - the SwifT Exact LocaL AligneR ***
                  http://www.seqan.de/projects/stellar.html
-                              September, 2011
+                              April, 2012
 
 ---------------------------------------------------------------------------
 Table of Contents
@@ -78,13 +78,15 @@ STELLAR always expects the two parameters --database and --query (or -d and
  [ -d FILE ],  [ --database FILE ]
  
   Set the name of the file containing the database sequence(s) in
-  (multi-)Fasta format.  
+  (multi-)Fasta format.  Note that STELLAR expects Fasta identifiers to
+  be unique before the first whitespace.
  
  [ -q FILE ],  [ --query FILE ]
  
   Set the name of the file containing the query sequence(s) in (multi-)
   Fasta format. All query sequences will be compared to all database
-  sequences.
+  sequences.  Note that STELLAR expects Fasta identifiers to be unique
+  before the first whitespace.
 
 Without any additional parameters STELLAR compares the query sequence(s)
 to both strands of the database sequence(s) with an error rate of 0.05
