@@ -16,7 +16,10 @@
 //#define RAZERS_DUMP_SNPS
 //#define COVBASED_INDELCALLING
 
-//#define TRACE_PIPELINE
+//#define SNP_STORE_RTTEST
+
+#define CORRECTED_HET
+#define TRACE_PIPELINE
 //#define READS_454
 
 //#define SNPSTORE_DEBUG
@@ -32,8 +35,8 @@
 #include <seqan/align.h>
 #include <seqan/store.h>
 #include <seqan/consensus.h>
+#include <seqan/stream.h>
 #include "seqan/bam_io.h"
-#include "seqan/stream.h"
 //#include "snp_store_underconstruction.h"
 
 
@@ -65,8 +68,8 @@ using namespace seqan;
 
 
 // load entire genome into memory
-template <typename TGenomeSet>
-bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList, ::std::map<CharString,unsigned> &gIdStringToIdNumMap)
+template <typename TGenomeSet, typename TGenomeNames>
+bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList, ::std::map<CharString,unsigned> &gIdStringToIdNumMap, TGenomeNames & genomeNames)
 {
     unsigned gSeqNo = 0;
     unsigned filecount = 0;
@@ -94,6 +97,7 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList, ::std
                 }
             }
             gIdStringToIdNumMap.insert(::std::make_pair<CharString,unsigned>(temp,gSeqNo+i)); //TODO shortID
+            appendValue(genomeNames,temp);
         }
         gSeqNo += seqCount;
         ++filecount;
@@ -133,6 +137,7 @@ void
 copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
                               TReadCounts &readCounts,
                               TReadCigars &readCigars,
+                              TReadClips  &readClips,
                               TReadCounts &tmpReadCounts,
                               typename TFragmentStore::TReadSeqStore &tmpReads,
                               typename TFragmentStore::TReadStore &tmpRs,
@@ -144,17 +149,17 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
                               TContigPos currentWindowEnd,
                               TOptions &options)
 {
-    
+
     typedef typename TFragmentStore::TAlignedReadStore          TMatches;
     typedef typename Value<TMatches>::Type                      TMatch;
     typedef typename Iterator<TMatches,Standard>::Type          TMatchIt;
     typedef typename Id<TFragmentStore>::Type                   TId;
     typedef typename Value<TReadClips>::Type                    TPair;
-    
+
     SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore),length(fragmentStore.alignQualityStore));
-    
+
     ::std::sort(begin(fragmentStore.alignedReadStore, Standard()), end(fragmentStore.alignedReadStore, Standard()), LessGPos<TMatch>());    
-    
+
     if(options._debugLevel > 1 )::std::cout << "Copying matches overlapping more than one window ... \n";
     
     TMatchIt mIt        = end(fragmentStore.alignedReadStore,Standard());
@@ -180,7 +185,8 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
             if(!empty(readCounts))appendValue(tmpReadCounts,readCounts[(*mIt).id]);
             appendValue(tmpQualities,fragmentStore.alignQualityStore[(*mIt).id]);
             appendValue(tmpReadCigars,readCigars[(*mIt).id]);
-            appendValue(tmpReadClips,TPair(0,0));
+//            appendValue(tmpReadClips,TPair(0,0));
+            appendValue(tmpReadClips,readClips[(*mIt).id]);
             if(_max((*mIt).beginPos,(*mIt).endPos) > (TContigPos)options.maxCoord) options.maxCoord = (unsigned) _max((*mIt).beginPos,(*mIt).endPos);
             if(_min((*mIt).beginPos,(*mIt).endPos) < (TContigPos)options.minCoord) options.minCoord = (unsigned) _min((*mIt).beginPos,(*mIt).endPos);
             
@@ -404,6 +410,14 @@ clipReads(TFragmentStore    &fragmentStore,
             clipLeft = length(read);
             clipRight = 0;
         }
+#ifdef SNPSTORE_DEBUG
+            ::std::cout << "readlength = "<<length(read)<< " \n";
+            ::std::cout << "readId = "<<m.readId << "id=" << m.id << " \n";
+            ::std::cout << "clipLeft = " << clipLeft << " clipRight = "<<clipRight << "\n";
+            ::std::cout << "read=" << read << std::endl;
+            ::std::cout << "beginPos=" << beginPos << std::endl;
+            ::std::cout << "endPos=" << endPos << std::endl; 
+#endif
         if(clipLeft > 0 || clipRight > 0)
         {
             //  if(extraV) ::std::cout << "clipLeft = " << clipLeft << " clipRight = "<<clipRight << std::endl;
@@ -626,17 +640,20 @@ int detectSNPs(
     SEQAN_PROTIMESTART(load_time);
     
     int result = getGenomeFileNameList(genomeFileName, genomeFileNameList, options);
-    if(result == CALLSNPS_GENOME_FAILED || !loadGenomes(genomes, genomeFileNameList,gIdStringToIdNumMap))
+    if(result == CALLSNPS_GENOME_FAILED || !loadGenomes(genomes, genomeFileNameList,gIdStringToIdNumMap,genomeNames))
     {
         ::std::cerr << "Failed to open genome file " << genomeFileName << ::std::endl;
         return result;
     }
     
     
-    resize(genomeNames,gIdStringToIdNumMap.size()); //prepare genomeNames
-    TMapIter gIt=gIdStringToIdNumMap.begin();
-    for(unsigned i=0; i < length(genomeNames); ++i,++gIt)
-        genomeNames[i] = gIt->first;
+//    resize(genomeNames,gIdStringToIdNumMap.size()); //prepare genomeNames
+//    TMapIter gIt=gIdStringToIdNumMap.begin();
+//    for(unsigned i=0; i < length(genomeNames); ++i,++gIt)
+//    {
+//        genomeNames[i] = gIt->first;
+//        std::cout << "gIt->first=" << gIt->first << std::endl;
+//    }
     
     
     //////////////////////////////////////////////////////////////////////////////
@@ -656,38 +673,45 @@ int detectSNPs(
         }
     }
     String<RecordReader<std::fstream, SinglePass< > >* > recordReaders;
-    //String<Stream<Bgzf>* > bgzfReaders;
+
+    String<Stream<Bgzf>* > bgzfStreams;
     if(options.inputFormat == 2)
     {
-        //resize(bgzfReaders,length(readFNames));
+        resize(bgzfStreams,length(readFNames));
         for(unsigned i = 0; i < length(readFNames); ++i)
         {
+            bgzfStreams[i] = new Stream<Bgzf>();
             std::cout <<"Opening bam file" << std::endl;
-            //if (!open(*bgzfReaders[i], toCString(readFNames[i]), "r"))
-            //{
-            //    std::cerr << "[ERROR] Could not open BAM file" << readFNames[i] << std::endl;
-            //  return 1;
-            //}
+            if (!open(*bgzfStreams[i], toCString(readFNames[i]), "r"))
+            {
+                std::cerr << "[ERROR] Could not open BAM file" << readFNames[i] << std::endl;
+              return 1;
+            }
         }
     }
 
     typedef StringSet<CharString>      TNameStore;
     typedef NameStoreCache<TNameStore> TNameStoreCache;
 
-    TNameStore refNameStore;
-    TNameStoreCache refNameStoreCache(refNameStore);
+    //TNameStore refNameStore;
+    //for(unsigned i=0; i < length(genomeNames); ++i)
+    //{
+
+    TNameStoreCache refNameStoreCache(genomeNames);
+//    TNameStoreCache refNameStoreCache(refNameStore);
     String<BamIOContext<TNameStore> > contexts;
     String<BamAlignmentRecord> records;
     if(options.inputFormat > 0)
     {
-        resize(recordReaders, length(readFNames));
+        if(options.inputFormat == 1) resize(recordReaders, length(readFNames));
         resize(records, length(readFNames));
         //resize(contexts, length(readFNames));
         for (unsigned i = 0; i < length(readFNames); ++i)
         {
             clear(records[i].qName);
-            recordReaders[i] = new RecordReader<std::fstream,SinglePass< > >(*readFileStreams[i]);
-            appendValue(contexts,BamIOContext<TNameStore>(refNameStore, refNameStoreCache));
+            if(options.inputFormat == 1) recordReaders[i] = new RecordReader<std::fstream,SinglePass< > >(*readFileStreams[i]);
+            //appendValue(contexts,BamIOContext<TNameStore>(refNameStore, refNameStoreCache));
+            appendValue(contexts,BamIOContext<TNameStore>(genomeNames, refNameStoreCache));
         }
     }
     /////////////////////////////////////////////////////////////////////
@@ -700,8 +724,11 @@ int detectSNPs(
         if (options.method == 1 )
         {
             computeCnks(options.cnks,options.fks,options);
-            if(!options.correctedHetTable) options.priorHetQ = computeHetTable(options.hetTable,options,MaqMethod()); // original Maq method
-            else options.priorHetQ = computeHetTable(options.hetTable,options); // corrected het table computed with normal distribution
+#ifdef CORRECTED_HET
+            if(options.correctedHetTable) options.priorHetQ = computeHetTable(options.hetTable,options); // corrected het table computed with normal distribution
+            else
+#endif
+                options.priorHetQ = computeHetTable(options.hetTable,options,MaqMethod()); // original Maq method
             //printHetTable(options.hetTable);
             //printHetTable(options.hetTable2);
 
@@ -718,7 +745,7 @@ int detectSNPs(
             else
                 snpFileStream << "#chr\tpos\tref\tA\tC\tG\tT\tcov\tcall";
             //if(options.method==1)
-            snpFileStream << "\tquality\n";
+            snpFileStream << "\tquality\tsnpQ\n";
             //else
             //  file <<"\n";
         }
@@ -766,12 +793,14 @@ int detectSNPs(
     bool positionStatsOnly = (*options.outputSNP == 0 && *options.outputPosition != 0);
     TPosIterator inspectPosIt, inspectPosItEnd;
 
+    bool firstCall = true;
+
     /////////////////////////////////////////////////////////////////////////////
     // Start scanning for SNPs/indels
     // for each chromosome
     for(unsigned i=0; i < length(genomeNames); ++i)
     {
-        std::cout << genomeNames[i] << "\n";
+        //std::cout << genomeNames[i] << "\n";
         if(!empty(positions))
         {
             inspectPosIt = begin(positions[i],Standard());
@@ -803,6 +832,7 @@ int detectSNPs(
             
             if(positionStatsOnly && !(currentWindowBegin <= *inspectPosIt && *inspectPosIt< currentWindowEnd))
             {
+                SEQAN_ASSERT_LEQ(currentWindowBegin,*inspectPosIt);
                 clear(tmpReads); clear(tmpRs); clear(tmpMatches); clear(tmpQualities);
                 clear(tmpReadClips); clear(tmpReadCounts); clear(tmpReadCigars);
                 currentWindowBegin = currentWindowEnd;
@@ -846,6 +876,7 @@ int detectSNPs(
             {
                 unsigned sizeBefore = length(fragmentStore.alignedReadStore);
                 
+                
                 // currently only gff supported
                 if(options.inputFormat == 0) // GFF
                     result = readMatchesFromGFF_Batch(readFileStreams[j], fragmentStore, readCounts, readClips,
@@ -854,11 +885,13 @@ int detectSNPs(
                 if(options.inputFormat == 1) // SAM
                     result = readMatchesFromSamBam_Batch(*recordReaders[j], contexts[j], records[j], fragmentStore, readCounts, readClips,
                                               readCigars, genomes[i], gIdStringToIdNumMap, 
-                                              i, currentWindowBegin, currentWindowEnd, highestChrId[j], options, Sam());
-            //  if(options.inputFormat == 2) // BAM
-            //      result = readMatchesFromSamBam_Batch(*bgzfReaders[j], contexts[j], records[j], fragmentStore, readCounts, readClips,
-            //                                readCigars, genomes[i], gIdStringToIdNumMap, 
-            //                                i, currentWindowBegin, currentWindowEnd, highestChrId[j], options, Bam());
+                                              i, currentWindowBegin, currentWindowEnd, highestChrId[j], options, Sam(),firstCall);
+               if(options.inputFormat == 2) // BAM
+                    result = readMatchesFromSamBam_Batch(*bgzfStreams[j], contexts[j], records[j], fragmentStore, readCounts, readClips,
+//                    result = readMatchesFromSamBam_Batch(*recordReaders[j], contexts[j], records[j], fragmentStore, readCounts, readClips,
+                                              readCigars, genomes[i], gIdStringToIdNumMap, 
+                                              i, currentWindowBegin, currentWindowEnd, highestChrId[j], options, Bam(),firstCall);
+               firstCall = false;
                 if(result == CALLSNPS_GFF_FAILED)
                 {
                     ::std::cerr << "Failed to open read file " << readFNames[j] << ::std::endl;
@@ -908,7 +941,7 @@ int detectSNPs(
                     clear(tmpReadCounts);
                     clear(tmpReadClips);
                     clear(tmpReadCigars);
-                    copyNextWindowMatchesAndReads(fragmentStore,readCounts,readCigars,tmpReadCounts,tmpReads,tmpRs,tmpMatches,tmpQualities,tmpReadClips,tmpReadCigars,i,currentWindowEnd,options);
+                    copyNextWindowMatchesAndReads(fragmentStore,readCounts,readCigars,readClips,tmpReadCounts,tmpReads,tmpRs,tmpMatches,tmpQualities,tmpReadClips,tmpReadCigars,i,currentWindowEnd,options);
                 }   
                 
                 //  ::std::cout << "Min = " << options.minCoord << " Max = " << options.maxCoord << std::endl;
@@ -961,20 +994,20 @@ int detectSNPs(
                     else dumpPosBatch(fragmentStore, inspectPosIt, inspectPosItEnd, readCigars, readCounts, genomeNames[i], startCoord, currentWindowBegin, currentWindowEnd, posFileStream, options);
                 }  
             }
-            else 
-            {
+//            else 
+//            {
                 if(positionStatsOnly && !empty(positions))
                 {
                     while(inspectPosIt != inspectPosItEnd && *inspectPosIt < currentWindowEnd)
                     {
                         if(options.orientationAware)
-                            posFileStream << genomeNames[i] << '\t' << *inspectPosIt + options.positionFormat << "\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0" << std::endl;
+                            posFileStream << genomeNames[i] << '\t' << *inspectPosIt + options.positionFormat << "\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0" << std::endl;
                         else
-                            posFileStream << genomeNames[i] << '\t' << *inspectPosIt + options.positionFormat << "\t0\t0\t0\t0\t0" << std::endl;
+                            posFileStream << genomeNames[i] << '\t' << *inspectPosIt + options.positionFormat << "\t0\t0\t0\t0\t0\t0" << std::endl;
                         ++inspectPosIt;
                     } 
                 }            
-            }
+//            }
             currentWindowBegin = currentWindowEnd;
             ++sumwindows;
         }
@@ -1095,16 +1128,17 @@ void printHelp(int, const char *[], TOptions &options, bool longHelp = false)
         cerr << "  -pt, --perc-threshold NUM        \t" << "minimal percentage of mutational base for mutation to be called (" << options.percentageT << ")" << endl;
         cerr << "  -mq, --min-quality NUM           \t" << "minimal average quality of mutational base for mutation to be called ("<<options.avgQualT <<")" << endl;
         cerr << "  Maq method related: " << endl;
-        cerr << "  -th, --theta                     \t" << "dependency coefficient ("<< options.theta <<")" << endl;
-        cerr << "  -hr, --hetero-rate               \t" << "heterozygote rate ("<< options.hetRate <<")" <<  endl;
-        cerr << "  -mmq,--min-map-quality           \t" << "minimum base call (mapping) quality for a match to be considered ("<< options.minMapQual <<")" <<  endl;
+        cerr << "  -th, --theta NUM                 \t" << "dependency coefficient ("<< options.theta <<")" << endl;
+        cerr << "  -hr, --hetero-rate NUM           \t" << "heterozygote rate ("<< options.hetRate <<")" <<  endl;
+        cerr << "  -mmq,--min-map-quality NUM       \t" << "minimum base call (mapping) quality for a match to be considered ("<< options.minMapQual <<")" <<  endl;
         cerr << "  -ch, --corrected-het             \t" << "use amplification bias corrected distribution for heterozygotes (off)" << endl;
-        cerr << "  -maf,--mean-alleleFreq           \t" << "mean ref allele frequency in heterozygotes (" << options.meanAlleleFrequency << ")"  << endl;
-        cerr << "  -ac, --amp-cycles                \t" << "number of amplification cycles (" << options.amplificationCycles << ")"  << endl;
-        cerr << "  -ae, --amp-efficiency            \t" << "polymerase efficiency, probability of amplification (" << options.amplificationEfficiency << ")"  << endl;
-        cerr << "  -in, --initialN                  \t" << "initial allele population size (" << options.initialN << ")" << endl;
+        cerr << "  -maf,--mean-alleleFreq NUM       \t" << "mean ref allele frequency in heterozygotes (" << options.meanAlleleFrequency << ")"  << endl;
+        cerr << "  -ac, --amp-cycles NUM            \t" << "number of amplification cycles (" << options.amplificationCycles << ")"  << endl;
+        cerr << "  -ae, --amp-efficiency NUM        \t" << "polymerase efficiency, probability of amplification (" << options.amplificationEfficiency << ")"  << endl;
+        cerr << "  -in, --initialN NUM              \t" << "initial allele population size (" << options.initialN << ")" << endl;
         cerr << "  -pht,--print-hetTable            \t" << "print het table (off)" << endl;
-    
+//        cerr << "  -cq, --corrected-quality NUM     \t" << "do simple quality recalibration with x=NUM (" << options.newQualityCalibrationFactor << ")" << endl;
+        cerr << "  -mec,--min-explained-col         \t" << "minimum fraction of alignment column reads explained by genotype call (" << options.minExplainedColumn << ")"  << endl;
         cerr << "Indel calling options: " << endl;
         cerr << "  -it, --indel-threshold           \t" << "minimal number of indel-supporting reads required for indel calling (" << options.indelCountThreshold<<")"<< endl;
         cerr << "  -ipt,--indel-perc-threshold NUM  \t" << "minimal ratio of indel-supporting/covering reads for indel to be called (" << options.indelPercentageT<<")" << endl;
@@ -1210,6 +1244,17 @@ int main(int argc, const char *argv[])
                         else continue;
                     }
                     
+                }
+                printHelp(argc, argv, options, true);
+                return 0;
+            }
+            if (strcmp(argv[arg], "-mec") == 0 || strcmp(argv[arg], "--min-explained-column") == 0) {
+                if (arg + 1 < argc) {
+                    ++arg;
+                    istringstream istr(argv[arg]);
+                    istr >> options.minExplainedColumn;
+                    if (!istr.fail())
+                        continue;
                 }
                 printHelp(argc, argv, options, true);
                 return 0;
@@ -1339,6 +1384,18 @@ int main(int argc, const char *argv[])
                 printHelp(argc, argv, options, true);
                 return 0;
             }
+            if (strcmp(argv[arg], "-cq") == 0 || strcmp(argv[arg], "--corrected-quality") == 0) {
+                if (arg + 1 < argc) {
+                    ++arg;
+                    istringstream istr(argv[arg]);
+                    istr >> options.newQualityCalibrationFactor;
+                    if (!istr.fail())
+                        continue;
+                }
+                printHelp(argc, argv, options, true);
+                return 0;
+            }
+
             if (strcmp(argv[arg], "-maf") == 0 || strcmp(argv[arg], "--mean-alleleFreq") == 0) {
                 if (arg + 1 < argc) {
                     ++arg;
@@ -1473,7 +1530,7 @@ int main(int argc, const char *argv[])
                     istr >> options.inputFormat;
                     if (!istr.fail())
                     {
-                        if(options.inputFormat > 1 )
+                        if(options.inputFormat > 2 )
                             cerr << "--input-format expects 0 or 1." << endl;   
                         else continue;
                     }
