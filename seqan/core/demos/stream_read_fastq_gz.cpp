@@ -8,6 +8,7 @@
 
 int main(int argc, char const ** argv)
 {
+#ifdef SEQAN_HAS_ZLIB
     using namespace seqan;
 
     // Check arguments.
@@ -49,5 +50,6 @@ int main(int argc, char const ** argv)
         std::cerr << id << '\t' << seq << '\t' << qual << '\n';
     }
 
+#endif  // #ifdef SEQAN_HAS_ZLIB
     return 0;
 }
