@@ -18,7 +18,7 @@
 
 //#define SNP_STORE_RTTEST
 
-#define CORRECTED_HET
+//#define CORRECTED_HET
 #define TRACE_PIPELINE
 //#define READS_454
 
@@ -74,6 +74,7 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList, ::std
     unsigned gSeqNo = 0;
     unsigned filecount = 0;
     CharString temp;
+    clear(genomeNames);
     while(filecount < length(fileNameList))
     {
         clear(temp);
@@ -646,16 +647,6 @@ int detectSNPs(
         return result;
     }
     
-    
-//    resize(genomeNames,gIdStringToIdNumMap.size()); //prepare genomeNames
-//    TMapIter gIt=gIdStringToIdNumMap.begin();
-//    for(unsigned i=0; i < length(genomeNames); ++i,++gIt)
-//    {
-//        genomeNames[i] = gIt->first;
-//        std::cout << "gIt->first=" << gIt->first << std::endl;
-//    }
-    
-    
     //////////////////////////////////////////////////////////////////////////////
     // Step 2: Load fragmentStore.readSeqStore and fragmentStore.alignedReadStore
     // open read files and  store open file pointers
@@ -693,12 +684,8 @@ int detectSNPs(
     typedef StringSet<CharString>      TNameStore;
     typedef NameStoreCache<TNameStore> TNameStoreCache;
 
-    //TNameStore refNameStore;
-    //for(unsigned i=0; i < length(genomeNames); ++i)
-    //{
 
     TNameStoreCache refNameStoreCache(genomeNames);
-//    TNameStoreCache refNameStoreCache(refNameStore);
     String<BamIOContext<TNameStore> > contexts;
     String<BamAlignmentRecord> records;
     if(options.inputFormat > 0)
@@ -798,7 +785,7 @@ int detectSNPs(
     /////////////////////////////////////////////////////////////////////////////
     // Start scanning for SNPs/indels
     // for each chromosome
-    for(unsigned i=0; i < length(genomeNames); ++i)
+    for(unsigned i=0; i < length(genomes); ++i)
     {
         //std::cout << genomeNames[i] << "\n";
         if(!empty(positions))
@@ -891,6 +878,7 @@ int detectSNPs(
 //                    result = readMatchesFromSamBam_Batch(*recordReaders[j], contexts[j], records[j], fragmentStore, readCounts, readClips,
                                               readCigars, genomes[i], gIdStringToIdNumMap, 
                                               i, currentWindowBegin, currentWindowEnd, highestChrId[j], options, Bam(),firstCall);
+
                firstCall = false;
                 if(result == CALLSNPS_GFF_FAILED)
                 {
@@ -912,6 +900,7 @@ int detectSNPs(
                     applyPileupCorrection(fragmentStore,sizeBefore,(unsigned)length(fragmentStore.alignedReadStore),options);
                 
             }
+
             if (options._debugLevel > 1)  // number of reads currently in memory
                 ::std::cerr << lengthSum(fragmentStore.readSeqStore) << " bps of " << length(fragmentStore.readSeqStore) << " reads in memory." << ::std::endl;
             sumreads +=  length(fragmentStore.readSeqStore);  // total count of reads
@@ -1244,6 +1233,32 @@ int main(int argc, const char *argv[])
                         else continue;
                     }
                     
+                }
+                printHelp(argc, argv, options, true);
+                return 0;
+            }
+            if (strcmp(argv[arg], "-mpr") == 0 || strcmp(argv[arg], "--max-polymer-run") == 0) {
+                if (arg + 1 < argc) {
+                    ++arg;
+                    istringstream istr(argv[arg]);
+                    istr >> options.maxPolymerRun;
+                    if (!istr.fail())
+                        continue;
+                }
+                printHelp(argc, argv, options, true);
+                return 0;
+            }
+            if (strcmp(argv[arg], "-bsi") == 0 || strcmp(argv[arg], "--both-strands-indel") == 0) {
+                options.bothIndelStrands = true;
+                continue;
+            }
+            if (strcmp(argv[arg], "-iqt") == 0 || strcmp(argv[arg], "--indel-quality-thresh") == 0) {
+                if (arg + 1 < argc) {
+                    ++arg;
+                    istringstream istr(argv[arg]);
+                    istr >> options.indelQualityThreshold;
+                    if (!istr.fail())
+                        continue;
                 }
                 printHelp(argc, argv, options, true);
                 return 0;

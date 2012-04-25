@@ -187,6 +187,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
         int         forceCallCount;
         int     realignAddBorder;
         int     indelDepthMinOverlap;
+        int         maxPolymerRun;
 
     // misc
         unsigned    compactThresh;      // compact match array if larger than compactThresh
@@ -214,10 +215,13 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
     
         const char  *outputIndel;           // name of result file
         bool        doIndelCalling;
+        
         // int     maxIndelLen;
         // int     slopeSmooth;
         // double      slopeTolerance;
         
+        bool        bothIndelStrands;
+        int         indelQualityThreshold;
         float       indelPercentageT;
         unsigned    indelCountThreshold;
         unsigned    indelWindow;
@@ -312,7 +316,10 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
             meanAlleleFrequency = 0.54;
             newQualityCalibrationFactor = 0.0; // off
             minExplainedColumn = 0.0;  //off
-
+            maxPolymerRun = 100;  //off
+            bothIndelStrands = false;
+            indelQualityThreshold = 1; //
+        
             stepInterval = 1;
             coverageFile = "";
             maxHitLength = 1;           
@@ -1491,6 +1498,11 @@ int readMatchesFromSamBam_Batch(
             return 2;
         }
     
+        if (hasFlagUnmapped(record))
+        {
+            clear(record); continue;
+        }
+        
         TId contigId;
 
         // clear temporary variables
@@ -4058,7 +4070,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
 
     
     // forward match qualities
-
+    
     String<int> columnQualityF;         resize(columnQualityF,5);
     String<unsigned> countF;            resize(countF,5);
     String<CharString> qualityStringF;  resize(qualityStringF,5);
@@ -4192,6 +4204,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
         int quality;
         std::set<int> readPosMap;
         std::set<int> indelReadPosMap;
+        
 
         for(unsigned t=0;t<5;++t) 
         {
@@ -4205,8 +4218,12 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
         }
 
         bool observedAtLeastOneMut = false;
-        int numIndelsObserved = 0;  // if refGap then this counts the number of insertions
+        int numIndelsObservedF = 0;  // if refGap then this counts the number of insertions on forward
+        int numIndelsObservedR = 0;  // if refGap then this counts the number of insertions on reverse
                         // else it counts the number of deletions
+        int indelQualF = 0;
+        int indelQualR = 0;
+
         int positionCoverage = 0;   // how many reads actually span the position?
 
         // now check reads
@@ -4250,7 +4267,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                 
                 if(refGap)
                 { 
-                    ++numIndelsObserved; // count insertions
+                    if(orientation == 'F')
+                        ++numIndelsObservedF; // count insertions
+                    else ++numIndelsObservedR;
                     if(options.minDifferentReadPos > 0)
                         if((unsigned)(length(reads[(*matchIt).readId]) - readPos) > options.excludeBorderPos  &&
                             (unsigned) readPos >= options.excludeBorderPos )
@@ -4295,12 +4314,22 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
 
                 if(!refGap)
                 {
-                    ++numIndelsObserved;
+                    readPos = positionGapToSeq(readGaps,candidateViewPos - currViewBegin);
+                    if(orientation == 'R')
+                        readPos = length(reads[(*matchIt).readId]) - readPos - 1;
+                    quality = (int)((double)getQualityValue(reads[(*matchIt).readId][readPos]) + getQualityValue(reads[(*matchIt).readId][readPos+1])) / 2.0;
+                    if(orientation == 'F')
+                    {
+                        indelQualF += quality;
+                        ++numIndelsObservedF; 
+                    }
+                    else
+                    {
+                        ++numIndelsObservedR;                   
+                        indelQualR += quality;
+                    }
                     if(options.minDifferentReadPos > 0)
                     {
-                        readPos = positionGapToSeq(readGaps,candidateViewPos - currViewBegin);
-                        if(orientation == 'R')
-                            readPos = length(reads[(*matchIt).readId]) - readPos - 1;
                         if((unsigned)(length(reads[(*matchIt).readId]) - readPos) > options.excludeBorderPos  &&
                             (unsigned) readPos >= options.excludeBorderPos )
                         indelReadPosMap.insert(readPos);
@@ -4312,7 +4341,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             ++matchIt;
         }
         matchIt = matchRangeBegin; //set iterator back to where we started from, same matches might be involved in next cand pos
-        
+        int numIndelsObserved = numIndelsObservedF + numIndelsObservedR;
 #ifdef SNPSTORE_DEBUG
         if(extraVVVV)
         {
@@ -4364,10 +4393,30 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             
         }
 
+        bool isIndel = true;
+        if (!indelfile.is_open() || numIndelsObserved < (int)options.indelCountThreshold) // count threshold
+            isIndel = false;
+
+        if(isIndel && ((float)numIndelsObserved/(float)positionCoverage) < options.indelPercentageT)
+            isIndel = false;
+        
+        if (isIndel && options.minDifferentReadPos > 0 && indelReadPosMap.size() < options.minDifferentReadPos) // minDiffReadPos criterium
+            isIndel = false;
+        
+        if(isIndel && options.bothIndelStrands && ((float)numIndelsObservedF==0 || numIndelsObservedR==0))
+            isIndel = false;
+        
+          // possible deletion, insertion quality will be handled later
+        int avgIndelQuality = (int)((double)indelQualF+indelQualR)/numIndelsObserved;
+        if(isIndel && !refGap && (float)avgIndelQuality < options.indelQualityThreshold)
+            isIndel = false;
+        
+        
         // do indel calling  //TODO: for 454 data look at sequence content! for >=6bp homopolymer runs needs to be more strict
-        if (indelfile.is_open() && numIndelsObserved >= (int)options.indelCountThreshold // count threshold
-            && ((float)numIndelsObserved/(float)positionCoverage) >= options.indelPercentageT // percentage threshold
-            && (options.minDifferentReadPos == 0 || indelReadPosMap.size() >= options.minDifferentReadPos)) // minDiffReadPos criterium
+        //if (indelfile.is_open() && numIndelsObserved >= (int)options.indelCountThreshold // count threshold
+        //    && ((float)numIndelsObserved/(float)positionCoverage) >= options.indelPercentageT // percentage threshold
+        //    && (options.minDifferentReadPos == 0 || indelReadPosMap.size() >= options.minDifferentReadPos)) // minDiffReadPos criterium
+        if(isIndel)
         {
             bool indelCalled = true;
             char mostCommonBase = 5; // 5 represents gap char "-", potential deletion
@@ -4386,11 +4435,19 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                         mostCommonBase = j;
                     }
                 // number of ref reads + insertion reads
+                if(maxCount < options.indelCountThreshold) indelCalled = false;
+                if((int)((double)maxCount/positionCoverage) < options.indelPercentageT) indelCalled = false;
                 if((double)(maxCount+positionCoverage-numIndelsObserved)/positionCoverage < options.minExplainedColumn) indelCalled = false;
+            
+                // check quality
+                //avgIndelQuality = (int) ((double)columnQualityR[mostCommonBase] +columnQualityF[mostCommonBase])/numIndelsObserved; // divide by all observed insertions?
+                avgIndelQuality = (int) ((double)columnQualityR[mostCommonBase] +columnQualityF[mostCommonBase])/maxCount;  // or just candidate insertions?
+                if ((float)avgIndelQuality < options.indelQualityThreshold) indelCalled = false;
+            
             }
             if(indelCalled)
             {
-                indelConsens[candidateViewPos].i1 = mostCommonBase;
+                indelConsens[candidateViewPos].i1 = avgIndelQuality << 8 | mostCommonBase;
 #ifdef SNPSTORE_DEBUG
                 if(extraVVVV) std::cout << "mosCommonBase = " << (int)mostCommonBase << std::endl;
 #endif
@@ -4421,7 +4478,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
 #ifdef SNPSTORE_DEBUG
     // write out indels
     for(unsigned i = refStart; i < refStart + length(referenceGaps); ++i)
-        std::cout << indelConsens[i].i1;
+        std::cout << (indelConsens[i].i1 & 7);
     std::cout << std::endl;
 #endif
 
@@ -4434,7 +4491,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
         {
 
             if(candidateViewPos < refStart + (TContigPos)length(referenceGaps) &&
-                indelConsens[candidateViewPos].i1==6) // not a relevant position
+                (indelConsens[candidateViewPos].i1 & 7) ==6) // not a relevant position
             {
 #ifdef SNPSTORE_DEBUG
                 ::std::cout << candidateViewPos << "not relevant for indels" <<  std::endl;
@@ -4448,23 +4505,25 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             int indelSize = 0;
             unsigned depth = 0;
             float percentage = 0.0;
+            int quality = 0;
             // gap position
 #ifdef SNPSTORE_DEBUG
             ::std::cout << candidateViewPos << " indel?" <<  std::endl;
 #endif
             while(candidateViewPos < refStart + (TContigPos)length(referenceGaps) && // shouldnt happen actually
-                (indelConsens[candidateViewPos].i1==5 ||        // deletion in consens
-                (indelConsens[candidateViewPos].i1==6 && isGap(referenceGaps, candidateViewPos-refStart)))  // position in consensus is the same as in reference
+                ((indelConsens[candidateViewPos].i1 & 7) == 5  ||        // deletion in consens
+                ((indelConsens[candidateViewPos].i1 & 7) == 6  && isGap(referenceGaps, candidateViewPos-refStart)))  // position in consensus is the same as in reference
                 )                                                   // and reference is a gap (same candidatePosition as before)
             {
 #ifdef SNPSTORE_DEBUG
                 ::std::cout << startCoord + candidateViewPos << " del!!" <<  std::endl;
 #endif
-                if(indelConsens[candidateViewPos].i1==5) 
+                if((indelConsens[candidateViewPos].i1 & 7) == 5) 
                 {
                     ++indelSize;
                     depth += (indelConsens[candidateViewPos].i2 & 255);
                     percentage += (float)((indelConsens[candidateViewPos].i2 >> 8) & 255);
+                    quality += (float)((indelConsens[candidateViewPos].i1 >> 8) & 255);
                 }
                 ++candidateViewPos;
                 
@@ -4473,23 +4532,28 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             {
                 // check for the longest adjacent stretch of homopolymers
                 int homoLength = checkSequenceContext(reference,candidatePos,indelSize);
-                percentage = percentage/(float)depth; // low coverage positions get a lower weight here
-                depth = (unsigned)round(depth/indelSize);   // coverage is spread over all positions
-                //print deletion
-                indelfile << chrPrefix << genomeID << '\t' << runID << "\tdeletion\t";
-                indelfile << candidatePos + startCoord + options.positionFormat  << '\t';
-                indelfile << candidatePos + startCoord + options.positionFormat + indelSize - 1;
-                indelfile << "\t" << percentage;
-                indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat ;
-                indelfile << ";size=" << indelSize;
-                indelfile << ";depth=" << depth;
-                indelfile << ";homorun=" << homoLength;
-                indelfile << ";seqContext=" << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+indelSize+6,(int)length(reference)));
-                if(percentage <= options.indelHetMax) indelfile << ";geno=het";
-                else indelfile << ";geno=hom";
+                if(homoLength <= options.maxPolymerRun)
+                {
+                    percentage = percentage/(float)depth; // low coverage positions get a lower weight here
+                    depth = (unsigned)round(depth/indelSize);   // coverage is spread over all positions
+                    quality = (int)round(quality/indelSize);   // quality is spread over all positions
+                    //print deletion
+                    indelfile << chrPrefix << genomeID << '\t' << runID << "\tdeletion\t";
+                    indelfile << candidatePos + startCoord + options.positionFormat  << '\t';
+                    indelfile << candidatePos + startCoord + options.positionFormat + indelSize - 1;
+                    indelfile << "\t" << percentage;
+                    indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat ;
+                    indelfile << ";size=" << indelSize;
+                    indelfile << ";depth=" << depth;
+                    indelfile << ";quality=" << (int)(quality * percentage);
+                    indelfile << ";homorun=" << homoLength;
+                    indelfile << ";seqContext=" << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+indelSize+6,(int)length(reference)));
+                    if(percentage <= options.indelHetMax) indelfile << ";geno=het";
+                    else indelfile << ";geno=hom";
 
-                //if(splitSupport>0) indelfile << ";splitSupport=" << splitSupport;
-                indelfile << std::endl;
+                    //if(splitSupport>0) indelfile << ";splitSupport=" << splitSupport;
+                    indelfile << std::endl;
+                }
         
         
                 //reset     
@@ -4497,48 +4561,55 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                 indelSize = 0;
                 depth = 0;
                 percentage = 0.0;
+                quality = 0;
             }
             clear(insertionSeq);
             while(candidateViewPos < refStart + (TContigPos)length(referenceGaps) && // shouldnt happen actually
-                (indelConsens[candidateViewPos].i1<5 ||          // insertion in consensus
-                (indelConsens[candidateViewPos].i1==6 && candidatePos == positionGapToSeq(referenceGaps, candidateViewPos-refStart)))   // position in consensus is the same as in reference
+                ((indelConsens[candidateViewPos].i1 & 7) < 5 ||          // insertion in consensus
+                ((indelConsens[candidateViewPos].i1 & 7) == 6  && candidatePos == positionGapToSeq(referenceGaps, candidateViewPos-refStart)))   // position in consensus is the same as in reference
                 )                                                   // and reference is a gap (same candidatePosition as before)
             {
 #ifdef SNPSTORE_DEBUG
                 ::std::cout << candidateViewPos << " ins!!!" <<  std::endl;
 #endif
-                if(indelConsens[candidateViewPos].i1<5)
+                if((indelConsens[candidateViewPos].i1 & 7) < 5)
                 {
                     --indelSize;
                     depth += (indelConsens[candidateViewPos].i2 & 255);
                     percentage += (float)((indelConsens[candidateViewPos].i2 >> 8) & 255);
-                    appendValue(insertionSeq,(Dna5)indelConsens[candidateViewPos].i1);
+                    quality += (float)((indelConsens[candidateViewPos].i1 >> 8) & 255);
+                    appendValue(insertionSeq,(Dna5)(indelConsens[candidateViewPos].i1 & 7));
                 }
                 ++candidateViewPos;
             }
             if(indelSize<0)
             {
                 int homoLength = checkSequenceContext(reference,candidatePos,indelSize);
-                percentage = percentage/(float)depth; // low coverage positions get a lower weight here
-                depth = (unsigned) round(depth/-indelSize);   // coverage is spread over all positions
+                if(homoLength <= options.maxPolymerRun)
+                {
+           
+                    percentage = percentage/(float)depth; // low coverage positions get a lower weight here
+                    depth = (unsigned) round(depth/-indelSize);   // coverage is spread over all positions
+                    quality = (unsigned) round(quality/-indelSize);   // quality is spread over all positions
         
-                //print insertion
-                indelfile << chrPrefix <<genomeID << '\t' << runID << "\tinsertion\t";
-                indelfile << candidatePos + startCoord + options.positionFormat - 1 << '\t';
-                indelfile << candidatePos + startCoord;// + options.positionFormat; //VORSICHT!!!
-                indelfile << "\t" << percentage;
-                indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat;
-                indelfile << ";size=" << indelSize;
-                indelfile << ";seq="<< insertionSeq;
-                indelfile << ";depth=" << depth;
-                indelfile << ";homorun=" << homoLength;
-                indelfile << ";seqContext=" << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+6,(int)length(reference)));
-                if(percentage <= options.indelHetMax) indelfile << ";geno=het";
-                else indelfile << ";geno=hom";
+                    //print insertion
+                    indelfile << chrPrefix <<genomeID << '\t' << runID << "\tinsertion\t";
+                    indelfile << candidatePos + startCoord + options.positionFormat - 1 << '\t';
+                    indelfile << candidatePos + startCoord;// + options.positionFormat; //VORSICHT!!!
+                    indelfile << "\t" << percentage;
+                    indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat;
+                    indelfile << ";size=" << indelSize;
+                    indelfile << ";seq="<< insertionSeq;
+                    indelfile << ";depth=" << depth;
+                    indelfile << ";quality=" << (int)(quality * percentage);
+                    indelfile << ";homorun=" << homoLength;
+                    indelfile << ";seqContext=" << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+6,(int)length(reference)));
+                    if(percentage <= options.indelHetMax) indelfile << ";geno=het";
+                    else indelfile << ";geno=hom";
 
-                //if(splitSupport>0) indelfile << ";splitSupport=" << splitSupport;
-                indelfile << std::endl;
-        
+                    //if(splitSupport>0) indelfile << ";splitSupport=" << splitSupport;
+                    indelfile << std::endl;
+                }
                 //resetting will be done in next round
             }
         
