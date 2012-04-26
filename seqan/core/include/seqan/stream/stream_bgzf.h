@@ -298,11 +298,13 @@ struct HasStreamFeature<Stream<Bgzf>, Tell>
 
 // Just forward to underlying Class.File's size().
 
+/*
 inline typename Size<Stream<Bgzf> >::Type
 size(Stream<Bgzf> const & stream)
 {
     return size(stream._file);
 }
+*/
 
 // ----------------------------------------------------------------------------
 // Helper Function _bgzfUnpackInt16()
