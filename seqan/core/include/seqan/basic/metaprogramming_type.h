@@ -62,8 +62,8 @@ namespace seqan {
 .Metafunction.IsSameType
 ..cat:Metaprogramming
 ..summary:Metaprogramming type comparison.
-..signature:Or<T1, T2>::Type
-..signature:Or<T1, T2>::VALUE
+..signature:IsSameType<T1, T2>::Type
+..signature:IsSameType<T1, T2>::VALUE
 ..param.T1:Left-hand argument.
 ..param.T2:Right-hand argument.
 ..returns:@Tag.Logical Values.tag.True@/$true$ if $T1$ is the same as $T2$, otherwise @Tag.Logical Values.tag.False@/$false$.
