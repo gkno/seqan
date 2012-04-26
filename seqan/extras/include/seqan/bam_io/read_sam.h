@@ -475,6 +475,9 @@ int readRecord(BamAlignmentRecord & record,
         return 0;
     if (res != 0)
         return res;
+    // Handle case of missing quality:  Clear qual string as documented.
+    if (record.qual == "*")
+        clear(record.qual);
 
     // The following list of tags is optional.  A line break or EOF could also follow.
     if (atEnd(reader))

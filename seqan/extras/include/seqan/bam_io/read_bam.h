@@ -316,12 +316,15 @@ int readRecord(BamAlignmentRecord & record,
     remainingBytes -= (lSeq + 1) / 2;
 
     // phred quality
-    // TODO(holtgrew): Handling of "sequence of 0xff if absent."
     SEQAN_ASSERT_GEQ(remainingBytes, lSeq);
     resize(record.qual, lSeq, Exact());
     res = streamReadBlock(&(record.qual[0]), stream, lSeq);
     if (res != lSeq)
         return res;
+    // If qual is a sequence of 0xff (heuristic same as samtools: Only look at first byte) then we clear it, to get the
+    // representation of '*';
+    if (record.qual[0] == static_cast<char>(0xff))
+        clear(record.qual);
     typedef typename Iterator<CharString, Rooted>::Type TQualIter;
     for (TQualIter it = begin(record.qual, Rooted()); !atEnd(it); goNext(it))
         *it += '!';
@@ -334,6 +337,10 @@ int readRecord(BamAlignmentRecord & record,
         res = streamReadBlock(&record.tags[0], stream, remainingBytes);
         if (res != remainingBytes)
             return 1;
+    }
+    else
+    {
+        clear(record.tags);
     }
     
     return 0;

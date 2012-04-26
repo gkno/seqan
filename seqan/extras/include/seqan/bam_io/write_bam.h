@@ -242,8 +242,16 @@ int write2(TStream & stream,
     }
 
     // qual
-    for (unsigned i = 0; i < length(record.qual); ++i)
-        streamWriteChar(buffer, static_cast<char>(record.qual[i] - '!'));
+    if (empty(record.qual))
+    {
+        for (unsigned i = 0; i < length(record.qual); ++i)
+            streamWriteChar(buffer, 0xff);
+    }
+    else
+    {
+        for (unsigned i = 0; i < length(record.qual); ++i)
+            streamWriteChar(buffer, static_cast<char>(record.qual[i] - '!'));
+    }
 
     // tags
     if (length(record.tags) > 0u)
