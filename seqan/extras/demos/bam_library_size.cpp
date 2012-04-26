@@ -256,16 +256,16 @@ int main(int argc, char const ** argv)
     switch (libInfo.defaultOrient)
     {
         case LibraryInfo::F_PLUS:
-            std::cout << "F+ -->R1 -->R2\n";
+            std::cout << "F+ R1 ---> ---> R2\n";
             break;
         case LibraryInfo::F_MINUS:
-            std::cout << "F- -->R2 -->R1\n";
+            std::cout << "F- R1 ---> ---> R2\n";
             break;
         case LibraryInfo::R_PLUS:
-            std::cout << "R+ -->R1 <-->R2\n";
+            std::cout << "R+ R1 ---> <--- R2\n";
             break;
         case LibraryInfo::R_MINUS:
-            std::cout << "R- <--R1 --->R2\n";
+            std::cout << "R- R1 <--- ---> R2\n";
             break;
     }
 
