@@ -1364,12 +1364,15 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
             // <qname>
             if (readId < length(store.readNameStore)) {
                 typedef typename Iterator<CharString, Standard>::Type TCharStringIterator;
+                if (empty(store.readNameStore[readId]))
+                    continue;
                 for (TCharStringIterator it = begin(store.readNameStore[readId]); it != end(store.readNameStore[readId]); ++it) {
                     if (*it == ' ' || *it == '\t' || *it == '\n' || *it == '\r')
                         break;
                     _streamPut(target, *it);
                 }
-            }
+            } else
+                continue;
             _streamPut(target, '\t');
             
             // <flag>
@@ -1483,12 +1486,15 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
             // <qname>
             if (readId < length(store.readNameStore)) {
                 typedef typename Iterator<CharString, Standard>::Type TCharStringIterator;
+                if (empty(store.readNameStore[readId]))
+                    continue;
                 for (TCharStringIterator it = begin(store.readNameStore[readId]); it != end(store.readNameStore[readId]); ++it) {
                     if (*it == ' ' || *it == '\t' || *it == '\n' || *it == '\r')
                         break;
                     _streamPut(target, *it);
                 }
-            }
+            } else
+                continue;
             _streamPut(target, '\t');
             
             // <flag>
