@@ -18,7 +18,7 @@
 
 //#define SNP_STORE_RTTEST
 
-//#define CORRECTED_HET
+#define CORRECTED_HET
 #define TRACE_PIPELINE
 //#define READS_454
 
@@ -321,7 +321,9 @@ addReadQualityToMatches(TFragmentStore  &fragmentStore,
         avgRQ = 0;
         for(unsigned i = 0; i < length(read); ++i)
             avgRQ += (int) getQualityValue(read[i]);
-        (fragmentStore.alignQualityStore[(*it).id]).score = (char)(avgRQ/length(read));
+        // watch out, this is new: use mapping quality if given
+        if((fragmentStore.alignQualityStore[(*it).id]).score == 0 || (char)(avgRQ/length(read))<(fragmentStore.alignQualityStore[(*it).id]).score)
+            (fragmentStore.alignQualityStore[(*it).id]).score = (char)(avgRQ/length(read));
     }
     
 }
@@ -1129,8 +1131,10 @@ void printHelp(int, const char *[], TOptions &options, bool longHelp = false)
 //        cerr << "  -cq, --corrected-quality NUM     \t" << "do simple quality recalibration with x=NUM (" << options.newQualityCalibrationFactor << ")" << endl;
         cerr << "  -mec,--min-explained-col         \t" << "minimum fraction of alignment column reads explained by genotype call (" << options.minExplainedColumn << ")"  << endl;
         cerr << "Indel calling options: " << endl;
-        cerr << "  -it, --indel-threshold           \t" << "minimal number of indel-supporting reads required for indel calling (" << options.indelCountThreshold<<")"<< endl;
+        cerr << "  -it, --indel-threshold NUM       \t" << "minimal number of indel-supporting reads required for indel calling (" << options.indelCountThreshold<<")"<< endl;
         cerr << "  -ipt,--indel-perc-threshold NUM  \t" << "minimal ratio of indel-supporting/covering reads for indel to be called (" << options.indelPercentageT<<")" << endl;
+        cerr << "  -iqt,--indel-quality-thresh NUM  \t" << "minimal average quality of inserted base/deletion-neighboring bases for indel to be called (" << options.indelQualityThreshold<<")" << endl;
+        cerr << "  -bsi,--both-strands-indel        \t" << "both strands need to be observed for indel to be called (off)" << endl;
 //      cerr << "  -iw, --indel-window              \t" << "overlap window used for indel calling (" << options.indelWindow<<")"<< endl;
         
         cerr << endl<< "Other options: " << endl;

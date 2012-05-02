@@ -313,9 +313,10 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
             amplificationCycles = 18;
             amplificationEfficiency = 0.3;
             initialN = 10;
-            meanAlleleFrequency = 0.54;
+            meanAlleleFrequency = 0.51;
             newQualityCalibrationFactor = 0.0; // off
-            minExplainedColumn = 0.0;  //off
+//            minExplainedColumn = 0.0;  //off
+            minExplainedColumn = 0.8;  //
             maxPolymerRun = 100;  //off
             bothIndelStrands = false;
             indelQualityThreshold = 1; //
@@ -340,7 +341,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
             outputIndel = "";
             outputCNV = "";
             doIndelCalling = true;
-            indelHetMax = 0.75;
+            indelHetMax = 0.70;
             // maxIndelLen = 10; // names are misleading, needs to be rethought
             // slopeSmooth = 32; // both are < rLen-2
             // slopeTolerance = 10.0;
@@ -1774,7 +1775,7 @@ int readMatchesFromSamBam_Batch(
             // corresponding match quality attributes are stored in q
             TMatchQuality q;
             q.errors = (char)editDist;
-            q.score = (char) 0;
+            q.score = (char) mScore;
             if(options._debugLevel > 1)
             {
                 if(splitRead && hasIndel)
@@ -1786,7 +1787,7 @@ int readMatchesFromSamBam_Batch(
                 q.pairScore = 1;
             else
                 q.pairScore = 0;
-            
+
             typename Value<TReadStore>::Type r;
             r.matePairId = TReadStoreElement::INVALID_ID;
             if(readCount > 0) appendValue(readCounts, readCount, Generous());
@@ -4256,6 +4257,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             }
 
 #ifdef SNPSTORE_DEBUG
+            extraVVVV = true;
             std::cout << "ReadPos = " << readPos << std::endl;
 #endif
 
@@ -4308,16 +4310,19 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             }
             else
             {   //potential deletions
-#ifdef SNPSTORE_DEBUG
-                if(extraVVVV) std::cout <<"readPos = -1 " << std::endl;
-#endif
 
                 if(!refGap)
                 {
                     readPos = positionGapToSeq(readGaps,candidateViewPos - currViewBegin);
+#ifdef SNPSTORE_DEBUG
+                    if(extraVVVV) std::cout <<"del readPos = " << readPos  << "readlength=" << length(reads[(*matchIt).readId]) << std::endl;
+#endif
                     if(orientation == 'R')
-                        readPos = length(reads[(*matchIt).readId]) - readPos - 1;
-                    quality = (int)((double)getQualityValue(reads[(*matchIt).readId][readPos]) + getQualityValue(reads[(*matchIt).readId][readPos+1])) / 2.0;
+                        readPos = length(reads[(*matchIt).readId]) - readPos;
+#ifdef SNPSTORE_DEBUG
+                    if(extraVVVV) std::cout <<"del readPos = " << readPos  << "readlength=" << length(reads[(*matchIt).readId]) << std::endl;
+#endif
+                    quality = (int)((double)getQualityValue(reads[(*matchIt).readId][readPos-1]) + getQualityValue(reads[(*matchIt).readId][readPos])) / 2.0;
                     if(orientation == 'F')
                     {
                         indelQualF += quality;
@@ -4407,7 +4412,8 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             isIndel = false;
         
           // possible deletion, insertion quality will be handled later
-        int avgIndelQuality = (int)((double)indelQualF+indelQualR)/numIndelsObserved;
+        int avgIndelQuality;
+        if(isIndel && numIndelsObserved > 0) avgIndelQuality = (int)((double)indelQualF+indelQualR)/numIndelsObserved;
         if(isIndel && !refGap && (float)avgIndelQuality < options.indelQualityThreshold)
             isIndel = false;
         
@@ -4436,18 +4442,25 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     }
                 // number of ref reads + insertion reads
                 if(maxCount < options.indelCountThreshold) indelCalled = false;
-                if((int)((double)maxCount/positionCoverage) < options.indelPercentageT) indelCalled = false;
+               // if(!indelCalled) std::cout << "verloren1\n";
+                if(((double)maxCount/positionCoverage) < options.indelPercentageT) indelCalled = false;
+               // if(!indelCalled) std::cout << "verloren2\n";
                 if((double)(maxCount+positionCoverage-numIndelsObserved)/positionCoverage < options.minExplainedColumn) indelCalled = false;
+               // if(!indelCalled) std::cout << "maxCount = " << maxCount << " positionCoverage = "<< positionCoverage << "numIndelsObserved = " << numIndelsObserved <<" verloren3\n";
             
                 // check quality
                 //avgIndelQuality = (int) ((double)columnQualityR[mostCommonBase] +columnQualityF[mostCommonBase])/numIndelsObserved; // divide by all observed insertions?
                 avgIndelQuality = (int) ((double)columnQualityR[mostCommonBase] +columnQualityF[mostCommonBase])/maxCount;  // or just candidate insertions?
                 if ((float)avgIndelQuality < options.indelQualityThreshold) indelCalled = false;
-            
+               // if(!indelCalled) std::cout << "verloren4\n";
+                numIndelsObserved = maxCount;
             }
             if(indelCalled)
             {
-                indelConsens[candidateViewPos].i1 = avgIndelQuality << 8 | mostCommonBase;
+                int bothStrandsObserved = 0;
+                if(numIndelsObservedF>0 && numIndelsObservedR>0) // remember that both strands were observed --> increase quality of call later
+                    bothStrandsObserved = 1;
+                indelConsens[candidateViewPos].i1 = avgIndelQuality << 8 | bothStrandsObserved << 4 | mostCommonBase;
 #ifdef SNPSTORE_DEBUG
                 if(extraVVVV) std::cout << "mosCommonBase = " << (int)mostCommonBase << std::endl;
 #endif
@@ -4458,13 +4471,10 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
 #ifdef SNPSTORE_DEBUG
                     if(extraVVVV) std::cout << "downscaled to " << numIndelsObserved << std::endl;
 #endif
-
                 }
                 indelConsens[candidateViewPos].i2 = numIndelsObserved << 8 | positionCoverage;
             }
         }
-
-    
     }
 
     CharString chrPrefix = "";
@@ -4490,8 +4500,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
         while(candidateViewPos < refStart + (TContigPos)length(referenceGaps))
         {
 
+            bool bsi = true;
             if(candidateViewPos < refStart + (TContigPos)length(referenceGaps) &&
-                (indelConsens[candidateViewPos].i1 & 7) ==6) // not a relevant position
+                (indelConsens[candidateViewPos].i1 & 7) == 6) // not a relevant position
             {
 #ifdef SNPSTORE_DEBUG
                 ::std::cout << candidateViewPos << "not relevant for indels" <<  std::endl;
@@ -4524,6 +4535,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     depth += (indelConsens[candidateViewPos].i2 & 255);
                     percentage += (float)((indelConsens[candidateViewPos].i2 >> 8) & 255);
                     quality += (float)((indelConsens[candidateViewPos].i1 >> 8) & 255);
+                    bsi = bsi && (((indelConsens[candidateViewPos].i1 >> 4) & 1) == 1 );
                 }
                 ++candidateViewPos;
                 
@@ -4537,6 +4549,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     percentage = percentage/(float)depth; // low coverage positions get a lower weight here
                     depth = (unsigned)round(depth/indelSize);   // coverage is spread over all positions
                     quality = (int)round(quality/indelSize);   // quality is spread over all positions
+                    int indelQ = (quality * percentage);
+                    if(!bsi) indelQ /= 2;
+
                     //print deletion
                     indelfile << chrPrefix << genomeID << '\t' << runID << "\tdeletion\t";
                     indelfile << candidatePos + startCoord + options.positionFormat  << '\t';
@@ -4545,8 +4560,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat ;
                     indelfile << ";size=" << indelSize;
                     indelfile << ";depth=" << depth;
-                    indelfile << ";quality=" << (int)(quality * percentage);
+                    indelfile << ";quality=" << indelQ;
                     indelfile << ";homorun=" << homoLength;
+                    if(bsi)indelfile << ";bsi";
                     indelfile << ";seqContext=" << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+indelSize+6,(int)length(reference)));
                     if(percentage <= options.indelHetMax) indelfile << ";geno=het";
                     else indelfile << ";geno=hom";
@@ -4562,6 +4578,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                 depth = 0;
                 percentage = 0.0;
                 quality = 0;
+                bsi = true;
             }
             clear(insertionSeq);
             while(candidateViewPos < refStart + (TContigPos)length(referenceGaps) && // shouldnt happen actually
@@ -4579,6 +4596,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     percentage += (float)((indelConsens[candidateViewPos].i2 >> 8) & 255);
                     quality += (float)((indelConsens[candidateViewPos].i1 >> 8) & 255);
                     appendValue(insertionSeq,(Dna5)(indelConsens[candidateViewPos].i1 & 7));
+                    bsi = bsi && (((indelConsens[candidateViewPos].i1 >> 4) & 1) == 1 );
                 }
                 ++candidateViewPos;
             }
@@ -4591,7 +4609,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     percentage = percentage/(float)depth; // low coverage positions get a lower weight here
                     depth = (unsigned) round(depth/-indelSize);   // coverage is spread over all positions
                     quality = (unsigned) round(quality/-indelSize);   // quality is spread over all positions
-        
+                    int indelQ = (quality * percentage);
+                    if(!bsi) indelQ /= 2;
+
                     //print insertion
                     indelfile << chrPrefix <<genomeID << '\t' << runID << "\tinsertion\t";
                     indelfile << candidatePos + startCoord + options.positionFormat - 1 << '\t';
@@ -4601,8 +4621,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     indelfile << ";size=" << indelSize;
                     indelfile << ";seq="<< insertionSeq;
                     indelfile << ";depth=" << depth;
-                    indelfile << ";quality=" << (int)(quality * percentage);
+                    indelfile << ";quality=" << indelQ;
                     indelfile << ";homorun=" << homoLength;
+                    if(bsi)indelfile << ";bsi";
                     indelfile << ";seqContext=" << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+6,(int)length(reference)));
                     if(percentage <= options.indelHetMax) indelfile << ";geno=het";
                     else indelfile << ";geno=hom";
