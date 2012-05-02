@@ -49,6 +49,9 @@ namespace seqan {
 template <typename TString, typename TSpec>
 class StringSet;
 
+template <typename TString>
+struct StringSetLimits;
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
