@@ -322,7 +322,7 @@ addReadQualityToMatches(TFragmentStore  &fragmentStore,
         for(unsigned i = 0; i < length(read); ++i)
             avgRQ += (int) getQualityValue(read[i]);
         // watch out, this is new: use mapping quality if given
-        if((fragmentStore.alignQualityStore[(*it).id]).score == 0 || (char)(avgRQ/length(read))<(fragmentStore.alignQualityStore[(*it).id]).score)
+        //if((fragmentStore.alignQualityStore[(*it).id]).score == 0 || (char)(avgRQ/length(read))<(fragmentStore.alignQualityStore[(*it).id]).score)
             (fragmentStore.alignQualityStore[(*it).id]).score = (char)(avgRQ/length(read));
     }
     

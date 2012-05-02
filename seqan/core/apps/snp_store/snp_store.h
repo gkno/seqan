@@ -315,8 +315,8 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
             initialN = 10;
             meanAlleleFrequency = 0.51;
             newQualityCalibrationFactor = 0.0; // off
-//            minExplainedColumn = 0.0;  //off
-            minExplainedColumn = 0.8;  //
+            minExplainedColumn = 0.0;  //off
+//            minExplainedColumn = 0.8;  //
             maxPolymerRun = 100;  //off
             bothIndelStrands = false;
             indelQualityThreshold = 1; //
@@ -4412,7 +4412,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             isIndel = false;
         
           // possible deletion, insertion quality will be handled later
-        int avgIndelQuality;
+        int avgIndelQuality = 0;
         if(isIndel && numIndelsObserved > 0) avgIndelQuality = (int)((double)indelQualF+indelQualR)/numIndelsObserved;
         if(isIndel && !refGap && (float)avgIndelQuality < options.indelQualityThreshold)
             isIndel = false;
