@@ -172,7 +172,12 @@ bamRecordToAlignment(Align<TSource, TSpec> & result, TReference & reference, Bam
     // TODO(holtgrew): Clipping better than copying infix? But is it generic?
     resize(rows(result), 2);
 
-    setSource(row(result, 0), reference, record.pos, record.pos + getAlignmentLengthInRef(record));
+    unsigned len = record.pos + getAlignmentLengthInRef(record);
+    for (unsigned i = 0; i < length(record.cigar); ++i)
+        if (record.cigar[i].operation == 'P')
+            len -= record.cigar[i].count;
+
+    setSource(row(result, 0), reference, record.pos, len);
     cigarToGapAnchorContig(record.cigar, row(result, 0));
     assignSource(row(result, 1), record.seq);
     cigarToGapAnchorRead(record.cigar, row(result, 1));
