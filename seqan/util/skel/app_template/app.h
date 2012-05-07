@@ -58,12 +58,10 @@ struct Options
     CharString outputFileName;
     String<CharString> texts;
     
-    Options()
-    {
-        // Set defaults.
-        showHelp = false;
-        showVersion = false;
-    }
+    Options() :
+            showHelp(0),
+            showVersion(false)
+    {}
 };
 
 // ============================================================================
