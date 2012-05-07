@@ -206,8 +206,9 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
             {
                 unsigned posRead = posReadFwd;
                 // is read aligned to reverse strand?
-                if ((record.flag & 0x10) != 0)
-                    posRead = (length(record.seq) - 1) - posReadFwd;
+                if (hasFlagRC(record))
+                    posRead = (length(record.seq)) - posReadFwd;
+                SEQAN_ASSERT_LEQ(posRead, length(record.seq));
                 
                 if (isGap(it0) && isGap(it1))
                     continue;
@@ -265,6 +266,17 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
     resize(stats.avrgQuality, length(qualSum));
     for (unsigned i = 0; i < length(qualSum); ++i)
         stats.avrgQuality[i] = (double)qualSum[i] / (double)reads;
+
+    // Resize histograms so they are of equal size.
+    unsigned len = length(stats.mismatchHisto);
+    len = std::max(len, (unsigned)length(stats.insertHisto));
+    len = std::max(len, (unsigned)length(stats.deletionHisto));
+    len = std::max(len, (unsigned)length(stats.mismatchHisto));
+    len = std::max(len, (unsigned)length(stats.avrgQuality));
+    resize(stats.insertHisto, len, 0);
+    resize(stats.deletionHisto, len, 0);
+    resize(stats.mismatchHisto, len, 0);
+    resize(stats.avrgQuality, len, 0);
 
     // Print results.
     std::cout << "RESULTS\n\n";
