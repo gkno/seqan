@@ -450,6 +450,11 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
                 Pdf<Normal> pdf(parameters.qualityMeans[j], parameters.qualityStdDevs[j]);
                 inst.qualities[i] = static_cast<int>(pickRandomNumber(rng, pdf));
             }
+            // Limit qualities to 0..40.
+            if (inst.qualities[i] < 0)
+                inst.qualities[i] = 0;
+            if (inst.qualities[i] > 40)
+                inst.qualities[i] = 40;
 
             if (inst.editString[i] == ERROR_TYPE_MISMATCH || inst.editString[i] == ERROR_TYPE_MATCH)
                 j += 1;

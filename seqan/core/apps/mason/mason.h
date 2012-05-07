@@ -747,6 +747,11 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
 // simulate edit string
 // build quality values
 // possibly adjust mate if left read has insert at the beginning or right read has insert at the right
+//
+// Note that we set the isForward flag of the simulation instructions here.  Notably, the technology specific simulation
+// parts do not interpret this flag but only provide simulation instructions on the forward strand.  Later, when actually
+// cutting out the sequences and modifying the sampled read, we have to take this in mind.  This means, there we have to
+// reverse the edit string etc. there.
 template <typename TReadsTag, typename TRNG, typename THaplotypeSpec>
 int buildReadSimulationInstruction(
         String<ReadSimulationInstruction<TReadsTag> > & instructions,
@@ -811,8 +816,20 @@ int buildReadSimulationInstruction(
             // Pick a library length, according to the options.
             size_t libraryLength = pickLibraryLength(rng, options);
             // Compute start and end position.
-            inst.endPos = inst.beginPos + libraryLength;
-            inst.beginPos = inst.endPos - readLength;
+            if (inst.isForward)
+            {
+                inst.endPos = inst.beginPos + libraryLength;
+                inst.beginPos = inst.endPos - readLength;
+            }
+            else
+            {
+                if (inst.endPos < libraryLength)
+                    invalid = true;
+                inst.beginPos = inst.endPos - libraryLength;
+                inst.endPos = inst.beginPos + readLength;
+            }
+            // Set orientation of second mate.
+            inst.isForward = !back(instructions).isForward;
             // Verify that the mate fits right of the originally simulated read.
             size_t contigLength = length(haplotype[inst.contigId]);
             if ((inst.beginPos > contigLength) || (inst.endPos > contigLength)) {
@@ -937,7 +954,6 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     CharString readNameBuf;
     char outFileName[151];
     snprintf(outFileName, 150, "%s", toCString(options.readNamePrefix));
-    String<bool> flipped;
     for (unsigned haplotypeId = 0; haplotypeId < options.numHaplotypes; ++haplotypeId) {
         std::cerr << "Simulating for haplotype #" << haplotypeId << "..." << std::endl;
         std::cout << "  Building haplotype..." << std::endl;
@@ -987,43 +1003,45 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
             if (res != 0)
                 return res;
 
-            int previousMateNum = 0;
             for (unsigned k = 0; k < length(instructions); ++k) {
-                ReadSimulationInstruction<TReadsTag> const & inst = instructions[k];
+                ReadSimulationInstruction<TReadsTag> & inst = instructions[k];
+                // Reverse edit string and qualities string if this instruction simulates from reverse strand.
+                if (!inst.isForward)
+                {
+                    reverse(inst.editString);
+                    reverse(inst.qualities);
+                }
                 // Apply simulation instructions.
                 SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.readNameStore));
                 // Cut out segment from haplotype.
                 String<Dna5Q> read = infix(haplotypeContigsCopy[inst.contigId], inst.beginPos, inst.endPos);
                 String<Dna5Q> haplotypeInfix = read;  // Copy for printing later on.
                 applySimulationInstructions(read, rng, inst, options);
-                // Append read sequence to read seq store and mate pair to read
-                // name store.  This also yields the read id.  We will generate
-                // and append the read name below, depending on the read id.
+                if (!inst.isForward)
+                {
+                    reverseComplement(read);
+                    // Reconstruct edit string and qualities in sequencing direction.
+                    reverse(inst.editString);
+                    reverse(inst.qualities);
+                }
+                // Append read sequence to read seq store and mate pair to read name store.  This also yields the read
+                // id.  We will generate and append the read name below, depending on the read id.
                 unsigned readId;
                 if (options.generateMatePairs)
                     readId = appendRead(fragmentStore, read, length(fragmentStore.matePairStore));
                 else
                     readId = appendRead(fragmentStore, read);
 
-                // Get expected begin/end position in the original sequence.  If we decide to flip this read later on, we will modify the WIT store.
+                // Get expected begin/end position in the original sequence.
                 TPos origBeginPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.beginPos);
                 TPos origEndPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.endPos);
 
                 // Generate read name.
                 // TODO(holtgrew): Remove mateNum, not required?
-                if (options.generateMatePairs) {
-                    // Generate the mate num \in {1, 2}, randomly but consistent so two entries belonging together have different nums.  This also decides about the flipping.
-                    int mateNum = 3 - previousMateNum;
-                    if (readId % 2 == 0) {
-                        mateNum = pickRandomNumber(rng, Pdf<Uniform<int> >(1, 2));
-						SEQAN_ASSERT_GEQ(mateNum, 1);
-						SEQAN_ASSERT_LEQ(mateNum, 2);
-                        previousMateNum = mateNum;
-                        appendValue(flipped, mateNum == 2);
-                    } else {
-						SEQAN_ASSERT_EQ(flipped[readId - 1], mateNum == 1);
-                        appendValue(flipped, mateNum == 1);
-                    }
+                if (options.generateMatePairs)
+                {
+                    // Generate the mate num \in {1, 2}, randomly but consistent so two entries belonging together have
+                    // different nums.
                     if (options.includeReadInformation)
                     {
                         resize(readNameBuf, 1024 + length(haplotypeInfix) + length(inst.editString));
@@ -1053,7 +1071,12 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         strcat(&readNameBuf[0], buffer);
                     }
                 }
+                
                 CharString readName(&readNameBuf[0]);
+                if (inst.isForward)
+                    append(readName, " strand=forward");
+                else
+                    append(readName, " strand=reverse");
                 appendValue(fragmentStore.readNameStore, readName);
 
                 // Print info about read and haplotype.
@@ -1073,54 +1096,27 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                               << "`-- " << std::endl;
                 }
 
-                // Tentatively add matches to aligned read store.  We will
-                // maybe flip begin and end position below in the "flipping and
-                // reordering" step and convert the matches to a global
-                // alignment in the "convertMatchesToGlobalAlignment" call.
-                // std::cout << "origBeginPos = " << origBeginPos << ", origEndPos = " << origEndPos << std::endl;
+                // Swap original begin and end position if from reverse strand.
+                if (!inst.isForward)
+                    std::swap(origBeginPos, origEndPos);
+
+                // Add matches to aligned read store.
                 if (options.generateMatePairs)
                     appendAlignedRead(fragmentStore, readId, inst.contigId, origBeginPos, origEndPos, length(fragmentStore.matePairStore));
                 else
                     appendAlignedRead(fragmentStore, readId, inst.contigId, origBeginPos, origEndPos);
 
-                // Perform flipping and reordering.
-                if (options.generateMatePairs) {
-                    if (readId % 2 == 1) {  // Only flip and append mate pair info after simulating second mate.
-                        // Append mate pair element to fragment store's mate pair store.
-                        TMatePairStoreElement matePair;
-                        matePair.readId[0] = readId - 1 + flipped[readId];
-                        matePair.readId[1] = readId - flipped[readId];
-                        appendValue(fragmentStore.matePairStore, matePair);
-
-                        // The first mate always comes from the forward strand.
-                        if (options.includeReadInformation)
-                            append(fragmentStore.readNameStore[readId - 1], CharString(" strand=forward"));
-                        // The second read always comes from the reverse strand.
-                        reverseComplement(fragmentStore.readSeqStore[readId]);
-                        if (options.includeReadInformation)
-                            append(fragmentStore.readNameStore[readId], CharString(" strand=reverse"));
-                        // Note: readId is also last index of aligned read store because we only have one alignment per read!
-                        std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
-                    }
-                } else {
-                    bool fromReverse = pickRandomNumber(rng, Pdf<Uniform<double> >(0.0, 1.0)) < 0.5;
-                    if (options.onlyReverse)
-                        fromReverse = true;
-                    else if (options.onlyForward)
-                        fromReverse = false;
-                    if (fromReverse) {
-                        reverseComplement(back(fragmentStore.readSeqStore));
-                        if (options.includeReadInformation)
-                            append(back(fragmentStore.readNameStore), CharString(" strand=reverse"));
-                        // Note: readId is also last index of aligned read store because we only have one alignment per read!
-                        std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
-                    } else {
-                        if (options.includeReadInformation)
-                            append(back(fragmentStore.readNameStore), CharString(" strand=forward"));
-                    }
+                // Adding mate pair information.
+                if (options.generateMatePairs && readId % 2 == 1) {  // Only append mate pair info after simulating second mate.
+                    // Append mate pair element to fragment store's mate pair store.
+                    TMatePairStoreElement matePair;
+                    matePair.readId[0] = readId - 1;
+                    matePair.readId[1] = readId;
+                    appendValue(fragmentStore.matePairStore, matePair);
                 }
             }
-			if (options.generateMatePairs) {
+			if (options.generateMatePairs)
+            {
                 // When generating mate pairs, an even number of reads is generated in each step.
  				SEQAN_ASSERT_EQ(length(fragmentStore.alignedReadStore) % 2, 0u);
 				SEQAN_ASSERT_EQ(length(fragmentStore.readNameStore) % 2, 0u);
