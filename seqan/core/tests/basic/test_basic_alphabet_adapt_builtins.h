@@ -218,10 +218,10 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_int)
     // Ordered Alphabet Concept
     {
         int b = 0, c = 42;
-        
-        SEQAN_ASSERT_EQ(minValue(int()), -(int)2147483648);
-        SEQAN_ASSERT_EQ(minValue<int>(), -(int)2147483648);
-        SEQAN_ASSERT_EQ(+(MinValue<int>::VALUE), -(int)2147483648);
+
+        SEQAN_ASSERT_EQ(minValue(int()), -(int)2147483648u);
+        SEQAN_ASSERT_EQ(minValue<int>(), -(int)2147483648u);
+        SEQAN_ASSERT_EQ(+(MinValue<int>::VALUE), -(int)2147483648u);
         SEQAN_ASSERT_EQ(maxValue(int()), 2147483647);
         SEQAN_ASSERT_EQ(maxValue<int>(), 2147483647);
         SEQAN_ASSERT_EQ(+(MaxValue<int>::VALUE), 2147483647);
@@ -236,8 +236,8 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_int)
         SEQAN_ASSERT_EQ(ordValue(0), 0u);
         SEQAN_ASSERT_EQ(ordValue(int(-1)), 4294967295u);
         SEQAN_ASSERT_EQ(ordValue(int(1)), 1u);
-        SEQAN_ASSERT_EQ(+ValueSize<int>::VALUE, 4294967296lu);
-        SEQAN_ASSERT_EQ(valueSize<int>(), 4294967296lu);
+        SEQAN_ASSERT_EQ(+ValueSize<int>::VALUE, 4294967296ull);
+        SEQAN_ASSERT_EQ(valueSize<int>(), 4294967296ull);
 
         b = 1;
         SEQAN_ASSERT_EQ(b, 1);
@@ -255,8 +255,12 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_long)
     // Alphabet Concept
     {
         long b = 0;
-        
+
+#if SEQAN_IS_32_BIT
+        SEQAN_ASSERT_EQ(+(BitsPerValue<long>::VALUE), 32u);
+#else  // #if SEQAN_IS_32_BIT
         SEQAN_ASSERT_EQ(+(BitsPerValue<long>::VALUE), 64u);
+#endif  // #if SEQAN_IS_32_BIT
         assign(b, 1);
         SEQAN_ASSERT_EQ(b, 1);
     }
@@ -264,7 +268,7 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_long)
     // Ordered Alphabet Concept
     {
         long b = 0, c = 42;
-        
+
         SEQAN_ASSERT_LEQ(minValue(long()), +(MinValue<int>::VALUE));
         SEQAN_ASSERT_LEQ(minValue<long>(), +(MinValue<int>::VALUE));
         SEQAN_ASSERT_LEQ(+(MinValue<long>::VALUE), +(MinValue<int>::VALUE));
@@ -282,8 +286,13 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_long)
         SEQAN_ASSERT_EQ(ordValue(0), 0u);
         SEQAN_ASSERT_EQ(ordValue(long(-1)), 4294967295u);
         SEQAN_ASSERT_EQ(ordValue(long(1)), 1u);
+#if SEQAN_IS_32_BIT
+        SEQAN_ASSERT_EQ(+ValueSize<long>::VALUE, 4294967296ull);
+        SEQAN_ASSERT_EQ(valueSize<long>(), 4294967296ull);
+#else  // #if SEQAN_IS_32_BIT
         SEQAN_ASSERT_EQ(+ValueSize<long>::VALUE, 0u);
         SEQAN_ASSERT_EQ(valueSize<long>(), 0u);
+#endif  // #if SEQAN_IS_32_BIT
 
         b = 1;
         SEQAN_ASSERT_EQ(b, 1);
@@ -489,9 +498,9 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_int32)
     {
         __int32 b = 0, c = 42;
 
-        SEQAN_ASSERT_EQ(minValue(__int32()), -(int)2147483648);
-        SEQAN_ASSERT_EQ(minValue<__int32>(), -(int)2147483648);
-        SEQAN_ASSERT_EQ(+(MinValue<__int32>::VALUE), -(int)2147483648);
+        SEQAN_ASSERT_EQ(minValue(__int32()), -(int)2147483648u);
+        SEQAN_ASSERT_EQ(minValue<__int32>(), -(int)2147483648u);
+        SEQAN_ASSERT_EQ(+(MinValue<__int32>::VALUE), -(int)2147483648u);
         SEQAN_ASSERT_EQ(maxValue(__int32()), 2147483647);
         SEQAN_ASSERT_EQ(maxValue<__int32>(), 2147483647);
         SEQAN_ASSERT_EQ(+(MaxValue<__int32>::VALUE), 2147483647);
@@ -506,8 +515,8 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_int32)
         SEQAN_ASSERT_EQ(ordValue(0), 0u);
         SEQAN_ASSERT_EQ(ordValue(__int32(-23)), 4294967273u);
         SEQAN_ASSERT_EQ(ordValue(__int32(42)), 42u);
-        SEQAN_ASSERT_EQ(+ValueSize<__int32>::VALUE, 4294967296u);
-        SEQAN_ASSERT_EQ(valueSize<__int32>(), 4294967296u);
+        SEQAN_ASSERT_EQ(+ValueSize<__int32>::VALUE, 4294967296ull);
+        SEQAN_ASSERT_EQ(valueSize<__int32>(), 4294967296ull);
 
         b = 1;
         SEQAN_ASSERT_EQ(b, 1);
@@ -525,7 +534,7 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_uint32)
     // Alphabet Concept
     {
         __uint32 b = 0;
-        
+
         SEQAN_ASSERT_EQ(+(BitsPerValue<__uint32>::VALUE), 32u);
         assign(b, 1);
         SEQAN_ASSERT_EQ(b, 1u);
@@ -551,8 +560,8 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_uint32)
         SEQAN_ASSERT_EQ(ordValue(0), 0u);
         SEQAN_ASSERT_EQ(ordValue(__uint32(23)), 23u);
         SEQAN_ASSERT_EQ(ordValue(__uint32(42)), 42u);
-        SEQAN_ASSERT_EQ(+ValueSize<__uint32>::VALUE, 4294967296u);
-        SEQAN_ASSERT_EQ(valueSize<__uint32>(), 4294967296u);
+        SEQAN_ASSERT_EQ(+ValueSize<__uint32>::VALUE, 4294967296ull);
+        SEQAN_ASSERT_EQ(valueSize<__uint32>(), 4294967296ull);
 
         b = 1;
         SEQAN_ASSERT_EQ(b, 1u);
