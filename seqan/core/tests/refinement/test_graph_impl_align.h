@@ -94,7 +94,7 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	SEQAN_ASSERT(empty(g));
 
 	TVertexDescriptor v0 = addVertex(g, id1, 0, 2);
-	SEQAN_ASSERT_EQ(v0, 0);
+	SEQAN_ASSERT_EQ(v0, 0u);
 	SEQAN_ASSERT_EQ(outDegree(g, v0), 0u);	
 	SEQAN_ASSERT_EQ(inDegree(g, 0), 0u);
 	SEQAN_ASSERT_EQ(degree(g, 0), 0u);
@@ -113,7 +113,7 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	SEQAN_ASSERT_EQ(_getVertexString(g)[0], e);
 	SEQAN_ASSERT_EQ(getIdUpperBound(_getVertexIdManager(g)), 2);
 	SEQAN_ASSERT_EQ(getIdUpperBound(_getEdgeIdManager(g)), 1);
-	SEQAN_ASSERT_EQ(v1, 1);
+	SEQAN_ASSERT_EQ(v1, 1u);
 	SEQAN_ASSERT_EQ(numVertices(g), 2u);
 	SEQAN_ASSERT_EQ(targetVertex(g, e), 1u);
 	SEQAN_ASSERT_EQ(sourceVertex(g, e), 0u);
@@ -132,18 +132,18 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	SEQAN_ASSERT_EQ(findVertex(g, id1, 0), v0);
 	SEQAN_ASSERT_EQ(findVertex(g, id1, 1), v0);
 	SEQAN_ASSERT_EQ(findVertex(g, id1, 2), nilVertex);
-	SEQAN_ASSERT_EQ(findVertex(g, id1, 10), 2);
-	SEQAN_ASSERT_EQ(findVertex(g, id1, 19), 2);
+	SEQAN_ASSERT_EQ(findVertex(g, id1, 10), 2u);
+	SEQAN_ASSERT_EQ(findVertex(g, id1, 19), 2u);
 	SEQAN_ASSERT_EQ(findVertex(g, id1, 30), nilVertex);
 	TVertexDescriptor v3 = addVertex(g, id2, 5, 2);  // 3
 	addVertex(g, id1, 7, 3);  // 4
 	addEdge(g, 3, 4);
 	TEdgeDescriptor my_edge = addEdge(g, 3, 1);
 	addEdge(g, 3, 0);
-	SEQAN_ASSERT_EQ(v3, 3);
+	SEQAN_ASSERT_EQ(v3, 3u);
 	SEQAN_ASSERT_EQ(numVertices(g), 5u);
-	SEQAN_ASSERT_EQ(targetVertex(g, my_edge), 3);
-	SEQAN_ASSERT_EQ(sourceVertex(g, my_edge), 1);
+	SEQAN_ASSERT_EQ(targetVertex(g, my_edge), 3u);
+	SEQAN_ASSERT_EQ(sourceVertex(g, my_edge), 1u);
 	SEQAN_ASSERT_EQ(numEdges(g), 4u);
 	SEQAN_ASSERT_EQ(outDegree(g, v3), 3u);
 	SEQAN_ASSERT_EQ(inDegree(g, v3), 3u);
@@ -260,8 +260,8 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphEdgeWeights)
 
 	TVertexDescriptor v0 = addVertex(g, id1, 0, 2);
 	TVertexDescriptor v1 = addVertex(g, id2, 0, 5);
-	SEQAN_ASSERT_EQ(v0, 0);
-	SEQAN_ASSERT_EQ(v1, 1);
+	SEQAN_ASSERT_EQ(v0, 0u);
+	SEQAN_ASSERT_EQ(v1, 1u);
 	TEdgeDescriptor e1 = addEdge(g, 0, 1, 100);
 	SEQAN_ASSERT_EQ(getCargo(e1), 100);
 	SEQAN_ASSERT_EQ(numEdges(g), 1u);
@@ -311,37 +311,37 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator itV(g);
 	SEQAN_ASSERT(atBegin(itV));
-	SEQAN_ASSERT_EQ(getValue(itV), 0);
-	SEQAN_ASSERT_EQ(value(itV), 0);
-	SEQAN_ASSERT_EQ(*itV, 0);
+	SEQAN_ASSERT_EQ(getValue(itV), 0u);
+	SEQAN_ASSERT_EQ(value(itV), 0u);
+	SEQAN_ASSERT_EQ(*itV, 0u);
 	goNext(itV);
 	SEQAN_ASSERT(!atBegin(itV));
-	SEQAN_ASSERT_EQ(getValue(itV), 1);
+	SEQAN_ASSERT_EQ(getValue(itV), 1u);
 	++itV;
-	SEQAN_ASSERT_EQ(getValue(itV), 2);
+	SEQAN_ASSERT_EQ(getValue(itV), 2u);
 	SEQAN_ASSERT(!atEnd(itV));
 	goPrevious(itV);
-	SEQAN_ASSERT_EQ(*itV, 1);
+	SEQAN_ASSERT_EQ(*itV, 1u);
 	SEQAN_ASSERT_NOT(atEnd(itV));
 	itV--;
-	SEQAN_ASSERT_EQ(getValue(itV), 0);
+	SEQAN_ASSERT_EQ(getValue(itV), 0u);
 	SEQAN_ASSERT(atBegin(itV));
 
 	// OutEdge Iterator
 	typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	TOutEdgeIterator it(g, v0);
-	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2);
-	SEQAN_ASSERT_EQ(sourceVertex(g, value(it)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, *it), 2);
+	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2u);
+	SEQAN_ASSERT_EQ(sourceVertex(g, value(it)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, *it), 2u);
 	SEQAN_ASSERT_NOT(atEnd(it));
 	SEQAN_ASSERT(atBegin(it));
 	goNext(it);
 	SEQAN_ASSERT(atEnd(it));
 	SEQAN_ASSERT_NOT(atBegin(it));
 	goPrevious(it);
-	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2);
+	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2u);
 	--it;
 	it--;
 	SEQAN_ASSERT(atBegin(it));
@@ -361,19 +361,19 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 	// EdgeIterator
 	typedef Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator itEdge(g);
-	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(itEdge)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, getValue(itEdge)), 2);
-	SEQAN_ASSERT_EQ(sourceVertex(g, value(itEdge)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, *itEdge), 2);
+	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(itEdge)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, getValue(itEdge)), 2u);
+	SEQAN_ASSERT_EQ(sourceVertex(g, value(itEdge)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, *itEdge), 2u);
 	SEQAN_ASSERT_NOT(atEnd(itEdge));
 	SEQAN_ASSERT(atBegin(itEdge));
 	goNext(itEdge);
-	SEQAN_ASSERT_EQ(sourceVertex(g, value(itEdge)), 1);
-	SEQAN_ASSERT_EQ(targetVertex(g, *itEdge), 4);
+	SEQAN_ASSERT_EQ(sourceVertex(g, value(itEdge)), 1u);
+	SEQAN_ASSERT_EQ(targetVertex(g, *itEdge), 4u);
 	++itEdge;
 	--itEdge;
-	SEQAN_ASSERT_EQ(sourceVertex(g, value(itEdge)), 1);
-	SEQAN_ASSERT_EQ(targetVertex(g, *itEdge), 4);
+	SEQAN_ASSERT_EQ(sourceVertex(g, value(itEdge)), 1u);
+	SEQAN_ASSERT_EQ(targetVertex(g, *itEdge), 4u);
 	goEnd(itEdge);
 	SEQAN_ASSERT(atEnd(itEdge));
 	SEQAN_ASSERT_NOT(atBegin(itEdge));
@@ -384,14 +384,14 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 	// Adjacency Iterator
 	typedef Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
 	TAdjacencyIterator itAdj(g, 2);
-	SEQAN_ASSERT_EQ(getValue(itAdj), 4);
+	SEQAN_ASSERT_EQ(getValue(itAdj), 4u);
 	SEQAN_ASSERT_EQ(&hostGraph(itAdj),  &g);
-	SEQAN_ASSERT_EQ(value(itAdj),  4);
-	SEQAN_ASSERT_EQ(*itAdj,  4);
+	SEQAN_ASSERT_EQ(value(itAdj),  4u);
+	SEQAN_ASSERT_EQ(*itAdj,  4u);
 	SEQAN_ASSERT_NOT(atEnd(itAdj));
 	SEQAN_ASSERT(atBegin(itAdj));
 	goNext(itAdj);
-	SEQAN_ASSERT_EQ(*itAdj, 0);
+	SEQAN_ASSERT_EQ(*itAdj, 0u);
 	SEQAN_ASSERT_NOT(atEnd(itAdj));
 	SEQAN_ASSERT_NOT(atBegin(itAdj));
 	++itAdj;
@@ -399,7 +399,7 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 	SEQAN_ASSERT_NOT(atBegin(itAdj));
 	goPrevious(itAdj);
 	--itAdj;
-	SEQAN_ASSERT_EQ(*itAdj, 4);
+	SEQAN_ASSERT_EQ(*itAdj, 4u);
 	goBegin(itAdj);
 	SEQAN_ASSERT(atBegin(itAdj));
 	goEnd(itAdj);
@@ -411,12 +411,12 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 	SEQAN_ASSERT_NOT(atEnd(bfsIt));
 	SEQAN_ASSERT(atBegin(bfsIt));
 	++bfsIt;
-	SEQAN_ASSERT_EQ(getValue(bfsIt), 4);
+	SEQAN_ASSERT_EQ(getValue(bfsIt), 4u);
 	SEQAN_ASSERT_EQ(&hostGraph(bfsIt), &g);
-	SEQAN_ASSERT_EQ(value(bfsIt), 4);
-	SEQAN_ASSERT_EQ(*bfsIt, 4);
+	SEQAN_ASSERT_EQ(value(bfsIt), 4u);
+	SEQAN_ASSERT_EQ(*bfsIt, 4u);
 	goNext(bfsIt);
-	SEQAN_ASSERT_EQ(value(bfsIt), 0);
+	SEQAN_ASSERT_EQ(value(bfsIt), 0u);
 
 	// Dfs Iterator
 	typedef Iterator<TGraph, DfsPreorder>::Type TDfsPreorder;
@@ -425,10 +425,10 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 	SEQAN_ASSERT(atBegin(dfsIt));
 	SEQAN_ASSERT_EQ(*dfsIt, 2);
 	++dfsIt;
-	SEQAN_ASSERT_EQ(getValue(dfsIt), 0);
+	SEQAN_ASSERT_EQ(getValue(dfsIt), 0u);
 	SEQAN_ASSERT_EQ(&hostGraph(dfsIt), &g);
-	SEQAN_ASSERT_EQ(value(dfsIt), 0);
-	SEQAN_ASSERT_EQ(*dfsIt, 0);
+	SEQAN_ASSERT_EQ(value(dfsIt), 0u);
+	SEQAN_ASSERT_EQ(*dfsIt, 0u);
 	goNext(dfsIt);
 }
 
@@ -702,23 +702,23 @@ SEQAN_DEFINE_TEST(Test_Refinement_OutEdgeIteratorAlignment)
 	typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	TOutEdgeIterator it(g, v0);
 	// Slow
-	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2);
-	SEQAN_ASSERT_EQ(sourceVertex(g, value(it)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, *it), 2);
+	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2u);
+	SEQAN_ASSERT_EQ(sourceVertex(g, value(it)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, *it), 2u);
 	SEQAN_ASSERT_NOT(atEnd(it));
 	SEQAN_ASSERT(atBegin(it));
 	// Fast
-	SEQAN_ASSERT_EQ(sourceVertex(it), 0);
-	SEQAN_ASSERT_EQ(targetVertex(it), 2);
+	SEQAN_ASSERT_EQ(sourceVertex(it), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(it), 2u);
 	SEQAN_ASSERT_NOT(atEnd(it));
 	SEQAN_ASSERT(atBegin(it));
 	++it;
 	SEQAN_ASSERT(atEnd(it));
 	SEQAN_ASSERT_NOT(atBegin(it));
 	goPrevious(it);
-	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0);
-	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2);
+	SEQAN_ASSERT_EQ(sourceVertex(g, getValue(it)), 0u);
+	SEQAN_ASSERT_EQ(targetVertex(g, getValue(it)), 2u);
 	goNext(it);
 	--it;
 
