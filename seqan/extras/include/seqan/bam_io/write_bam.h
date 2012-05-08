@@ -245,7 +245,7 @@ int write2(TStream & stream,
     if (empty(record.qual))
     {
         for (unsigned i = 0; i < length(record.qual); ++i)
-            streamWriteChar(buffer, 0xff);
+            streamWriteChar(buffer, static_cast<unsigned char>(0xff));
     }
     else
     {
