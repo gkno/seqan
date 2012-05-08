@@ -202,14 +202,14 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
             typedef typename Iterator<TRow>::Type TRowIter;
             unsigned editDistance = 0;
             unsigned posReadFwd = 0;
-            for (TRowIter it0 = begin(row(align, 0)), it1 = begin(row(align, 1)); !atEnd(it0); goNext(it0), goNext(it1))
+            for (TRowIter it0 = iter(row(align, 0), 0), it1 = iter(row(align, 1), 0); !atEnd(it0); goNext(it0), goNext(it1))
             {
                 unsigned posRead = posReadFwd;
                 // is read aligned to reverse strand?
                 if (hasFlagRC(record))
                     posRead = (length(record.seq)) - posReadFwd;
                 SEQAN_ASSERT_LEQ(posRead, length(record.seq));
-                
+
                 if (isGap(it0) && isGap(it1))
                     continue;
                 if (isGap(it0) || isGap(it1))
@@ -239,7 +239,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                 }
                 posReadFwd += 1;
             }
-            
+
             resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
             if ((record.flag & 0x10) == 0)
             {
@@ -253,7 +253,15 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                     qualSum[(length(record.qual) - 1) - i] += record.qual[i] - '!';
             }
             ++reads;
-            
+
+            /*if (options.verbosity >= 2 && editDistance > 20)
+            {
+                std::cerr << "EDIT DISTANCE == " << editDistance << "\n"
+                          << "ALIGNMENT\n" << align
+                          << "READ NAME\t" << record.qName << "\n";
+            }
+            */
+
             if (options.verbosity >= 3)
                 std::cerr << "edit distance: " << editDistance << std::endl;
             unsigned len = length(stats.editDistanceHisto);
@@ -261,7 +269,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
             stats.editDistanceHisto[editDistance] += 1;
         }
     }
-    
+
     // compute error probabilities
     resize(stats.avrgQuality, length(qualSum));
     for (unsigned i = 0; i < length(qualSum); ++i)
