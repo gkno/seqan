@@ -320,7 +320,10 @@ int main(int argc, char const ** argv)
     // is requested or erroneous parameters were given.
     int res = parseCommandLineAndCheck(options, parser, argc, argv);
     if (res != 0)
+    {
+        std::cerr << "Error with command line arguments.\n";
         return 1;
+    }
     if (options.showHelp || options.showVersion)
         return 0;
 
