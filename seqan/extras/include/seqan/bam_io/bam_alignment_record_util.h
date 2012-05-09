@@ -140,6 +140,21 @@ clippedQualInfix(BamAlignmentRecord const & record)
 }
 
 // ----------------------------------------------------------------------------
+// Function countPaddings()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): This actually belongs to wherever CigarElement is defined.
+
+inline unsigned countPaddings(String<CigarElement<> > const & cigarString)
+{
+    unsigned result = 0;
+    for (unsigned i = 0; i < length(cigarString); ++i)
+        if (cigarString[i].operation == 'P')
+            result += cigarString[i].count;
+    return result;
+}
+
+// ----------------------------------------------------------------------------
 // Function bamRecordToAlignment()
 // ----------------------------------------------------------------------------
 
@@ -172,10 +187,7 @@ bamRecordToAlignment(Align<TSource, TSpec> & result, TReference & reference, Bam
     // TODO(holtgrew): Clipping better than copying infix? But is it generic?
     resize(rows(result), 2);
 
-    unsigned len = record.pos + getAlignmentLengthInRef(record);
-    for (unsigned i = 0; i < length(record.cigar); ++i)
-        if (record.cigar[i].operation == 'P')
-            len -= record.cigar[i].count;
+    unsigned len = record.pos + getAlignmentLengthInRef(record) - countPaddings(record.cigar);
 
     setSource(row(result, 0), reference, record.pos, len);
     cigarToGapAnchorContig(record.cigar, row(result, 0));
