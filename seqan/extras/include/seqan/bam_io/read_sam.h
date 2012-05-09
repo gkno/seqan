@@ -467,6 +467,9 @@ int readRecord(BamAlignmentRecord & record,
     res = readUntilTabOrLineBreak(record.seq, reader);
     if (res != 0)
         return res;
+    // Handle case of missing sequence:  Clear seq string as documented.
+    if (record.seq == "*")
+        clear(record.seq);
     SEQAN_SKIP_TAB;
 
     // QUAL
