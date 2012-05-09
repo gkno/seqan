@@ -241,7 +241,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline void
     appendName(TNameStore &store, TName &name, TContext &)
     {
-		appendName(store, name, Generous());
+		appendName(store, name);
 	}
 	
     template <typename TNameStore, typename TName, typename TCNameStore, typename TCName>
