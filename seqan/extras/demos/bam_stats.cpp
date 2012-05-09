@@ -59,15 +59,18 @@ struct Options
 {
     bool showHelp;
     bool showVersion;
+    bool realign;
     unsigned verbosity;
     CharString refFile;
     CharString inFile;
+    CharString bestMatchFile;
     Format inFormat;
 
     Options()
     {
         showHelp = false;
         showVersion = false;
+        realign = false;
         verbosity = 1;
         inFormat = FORMAT_AUTO;
     }
@@ -94,8 +97,10 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
 
 	addSection(parser, "Input Specification");
     addOption(parser, CommandLineOption("i", "input-file", "Path to input, '-' for stdin.", OptionType::String, options.inFile));
+    addOption(parser, CommandLineOption("",  "best-match-file", "Output file with minimal found errors for each read", OptionType::String));
     addOption(parser, CommandLineOption("S", "input-sam", "Input file is SAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_SAM));
     addOption(parser, CommandLineOption("B", "input-bam", "Input file is BAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_BAM));
+    addOption(parser, CommandLineOption("r", "realign",   "Don't trust NM values and realign instead", OptionType::Bool));
 
     requiredArguments(parser, 2);
 }
@@ -125,6 +130,7 @@ int parseCommandLineAndCheck(Options & options,
         options.verbosity = 3;
 
     getOptionValueLong(parser, "input-file", options.inFile);
+    getOptionValueLong(parser, "best-match-file", options.bestMatchFile);
     if (isSetLong(parser, "input-sam"))
         options.inFormat = FORMAT_SAM;
     if (isSetLong(parser, "input-bam"))
@@ -132,6 +138,7 @@ int parseCommandLineAndCheck(Options & options,
 
     options.refFile = getArgumentValue(parser, 0);
     options.inFile = getArgumentValue(parser, 1);
+    options.realign = isSetLong(parser, "realign");
 
 	return 0;
 }
@@ -149,6 +156,34 @@ struct Stats
     Stats() : numRecords(0), alignedRecords(0)
     {}
 };
+
+
+template <typename TSource, typename TSpec, typename TReference>
+int
+realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlignmentRecord & record, unsigned maxIndels)
+{
+    resize(rows(result), 2);
+
+    unsigned len = getAlignmentLengthInRef(record);
+    __int64 posBegin = record.pos;
+
+    for (unsigned i = 0; i < length(record.cigar); ++i)
+        if (record.cigar[i].operation == 'S')
+            posBegin -= record.cigar[i].count;
+
+    __int64 posEnd = posBegin + len + maxIndels;
+    posBegin = _max(0, posBegin - maxIndels);
+    posEnd = _min(posEnd, (__int64)length(reference));
+
+    assignSource(row(result, 0), infix(reference, posBegin, posEnd));
+    assignSource(row(result, 1), record.seq);
+
+    AlignConfig<true, false, false, true> alignConfig;
+    Score<int, Simple> scoringScheme(0, -3000, -3001);
+    return -globalAlignment(result, scoringScheme, alignConfig, NeedlemanWunsch()) / 3000;
+}
+
+
 
 
 template <typename TStreamOrReader, typename TSeqString, typename TSpec, typename TFormat>
@@ -177,12 +212,20 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
         std::cerr << "Reading alignments" << std::endl;
     Align<Dna5String> align;
     __int64 reads = 0;
+    
+    // record best-match errors
+    String<unsigned> minErrors;
+    StringSet<CharString> readNames;
+    typedef NameStoreCache<StringSet<CharString> > TNameCache;
+    TNameCache readNameCache(readNames);
+    unsigned line = 0;
     while (!atEnd(reader))
     {
         // Read alignment record.
+        ++line;
         if (readRecord(record, context, reader, tag) != 0)
         {
-            std::cerr << "Could not read alignment!" << std::endl;
+            std::cerr << "Could not read alignment! lineNo=" << line << std::endl;
             return 1;
         }
         if (options.verbosity >= 3)
@@ -194,9 +237,14 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
         // Compute alignment.
         if (record.rId != -1 && record.rId < static_cast<int>(length(seqs)))
         {
-            bamRecordToAlignment(align, seqs[record.rId], record);
+            if (options.realign)
+                realignBamRecord(align, seqs[record.rId], record, 10);  // realign in a window 10bp left and right of the original alignment
+            else
+                bamRecordToAlignment(align, seqs[record.rId], record);
+                
             if (options.verbosity >= 3)
                 std::cerr << align << std::endl;
+            
             typedef Align<Dna5String>             TAlign;
             typedef typename Row<TAlign>::Type    TRow;
             typedef typename Iterator<TRow>::Type TRowIter;
@@ -238,6 +286,35 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                     editDistance += 1;
                 }
                 posReadFwd += 1;
+            }
+            
+//            {
+//                Align<Dna5String> realign;
+//                unsigned realignEditDist = realignBamRecord(realign, seqs[record.rId], record, 10);
+//                if (editDistance != realignEditDist)
+//                {
+//                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
+//                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
+//                    std::cout << align;
+//                    std::cout << realign;
+//                    std::cout << std::endl;
+//                }
+//            }
+            
+            if (!empty(options.bestMatchFile))
+            {
+                // update best-match errors
+                unsigned readId;
+                if (getIdByName(readNames, record.qName, readId, readNameCache))
+                {
+                    minErrors[readId] = _min(minErrors[readId], editDistance);
+                }
+                else
+                {
+                    // add read name and entry
+                    appendName(readNames, record.qName, readNameCache);
+                    appendValue(minErrors, editDistance);
+                }
             }
 
             resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
@@ -308,6 +385,18 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
         std::cout << exp(e) << '\t';
         std::cout << stats.avrgQuality[i] << std::endl;
     }
+    
+    // write best-match error file
+    if (!empty(options.bestMatchFile))
+    {
+        std::ofstream bestMatchFile(toCString(options.bestMatchFile));
+        // sort output by read name
+        TNameCache::TSet::iterator it = readNameCache.nameSet.begin();
+        TNameCache::TSet::iterator itEnd = readNameCache.nameSet.end();
+        for (; it != itEnd; ++it)
+            bestMatchFile << readNames[*it] << '\t' << minErrors[*it] << '\n';
+    }
+
     return 0;
 }
 
