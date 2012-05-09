@@ -369,6 +369,30 @@ inline void addText(ArgumentParser & me, std::string const & text)
 }
 
 // ----------------------------------------------------------------------------
+// Function addListItem()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.addListItem
+..summary:Appends a list item to the @Class.ArgumentParser@.
+..cat:Miscellaneous
+..signature:addListItem(parser, item, description)
+..description:
+This method adds a list item to the parser's output.
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.item:The item text.
+..param.description:The description text.
+..returns:$void$
+..include:seqan/arg_parse.h
+*/
+
+inline void addListItem(ArgumentParser & me, std::string const & item, std::string const & description)
+{
+    addListItem(me._toolDoc, item, description);
+}
+
+// ----------------------------------------------------------------------------
 // Function printShortHelp()
 // ----------------------------------------------------------------------------
 
