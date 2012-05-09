@@ -28,6 +28,7 @@
 #include <map>
 
 #include <seqan/store.h>
+#include <seqan/bam_io.h>
 
 #include "rabema.h"
 #include "build_gold_standard_options.h"
@@ -53,14 +54,34 @@
 // Functions
 // ============================================================================
 
+void trimSeqHeaderToId(seqan::CharString & header)
+{
+    unsigned i = 0;
+    for (; i < length(header); ++i)
+        if (isspace(header[i]))
+          break;
+    resize(header, i);
+}
+
 // Build intervals from the error curves.
-template <typename TFragmentStore>
 void intervalizeErrorCurves(String<WitRecord> & result,
                             TErrorCurves const & errorCurves,
-                            TFragmentStore const & fragments,
+                            StringSet<CharString> const & readNameStore,
+                            StringSet<CharString> const & contigNameStore,
                             Options<BuildGoldStandard> const & options) {
-    typedef typename TErrorCurves::const_iterator TErrorCurvesIter;
-    for (TErrorCurvesIter it = errorCurves.begin(); it != errorCurves.end(); ++it) {
+
+    std::cerr << "\n____POINT TO INTERVAL CONVERSION______________________________________________\n\n"
+              << "Progress: ";
+    unsigned tenPercent = errorCurves.size() / 10;
+    unsigned progressI = 0;
+    typedef TErrorCurves::const_iterator TErrorCurvesIter;
+    for (TErrorCurvesIter it = errorCurves.begin(); it != errorCurves.end(); ++it, ++progressI)
+    {
+        if (progressI % tenPercent == 0u)
+            std::cerr << progressI / tenPercent * 10 << '%';
+        else if (progressI % (tenPercent / 5) == 0u)
+            std::cerr << '.';
+
         size_t readId = it->first;
         TWeightedMatches const & matches = it->second;
         
@@ -121,19 +142,27 @@ void intervalizeErrorCurves(String<WitRecord> & result,
             typedef Iterator<String<ContigInterval> >::Type TIntervalIter;
             for (TIntervalIter it2 = begin(*it); it2 != end(*it); ++it2) {
                 int flags = 0;
-                int mateNo = getMateNo(fragments, readId);
+                // We appended custom prefixes to the read ids.  "/S" means single-end, "/0" means left mate, "/1" means
+                // right mate.
+                int mateNo = -1;
+                if (back(readNameStore[readId]) == '0')
+                    mateNo = 0;
+                if (back(readNameStore[readId]) == '1')
+                    mateNo = 1;
+                SEQAN_ASSERT_EQ(readNameStore[readId][length(readNameStore[readId]) - 2], '/');
                 if (mateNo == 0)
                   flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_FIRST_MATE;
                 else if (mateNo == 1)
                   flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_SECOND_MATE;
 
                 appendValue(result,
-                            WitRecord(fragments.readNameStore[readId], flags,
-                                      distance, fragments.contigNameStore[it2->contigId],
+                            WitRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
+                                      distance, contigNameStore[it2->contigId],
                                       it2->isForward, it2->first, it2->last));
             }
         }
     }
+    std::cerr << "100% DONE\n";
 }
 
 
@@ -177,7 +206,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     // Debug-adjustments.
     #define ENABLE 0
     #define ALL 0
-    #define READID 993
+    #define READID 2
 
 //     if (readNames[readId] == CharString("SRR027007.862.1")) {
 //           std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
@@ -463,52 +492,170 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 
 // Compute error curve from the reads and reference sequences in the
 // fragment score.
-template <typename TFragmentStore, typename TPatternSpec>
-void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
-                            TErrorCurves & errorCurves,
-                            Options<BuildGoldStandard> const & options,
-                            TPatternSpec const &)
+template <typename TPatternSpec>
+int matchesToErrorFunction(TErrorCurves & errorCurves,
+                           RecordReader<std::ifstream, SinglePass<> > & samReader,
+                           BamIOContext<StringSet<CharString> > & samIOContext,
+                           StringSet<CharString> & readNameStore,
+                           StringSet<CharString> const & contigNameStore,
+                           StringSet<Dna5String> /*const*/ & contigSeqStore,
+                           Options<BuildGoldStandard> const & options,
+                           TPatternSpec const &)
 {
-    typedef typename TFragmentStore::TAlignedReadStore                   TAlignedReadStore;
-    typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
-    typedef typename Iterator<TAlignedReadStore, Standard>::Type         TAlignedReadIterator;
-    typedef typename TFragmentStore::TContigStore                        TContigStore;
-    typedef typename TFragmentStore::TReadStore                          TReadStore;
-    typedef typename TFragmentStore::TReadSeqStore                       TReadSeqStore;
-    typedef typename Value<TReadStore>::Type                             TRead;
-    typedef typename TRead::TId                                          TReadId;
-    typedef typename Value<TContigStore>::Type                           TContig;
-    typedef typename TContig::TId                                        TContigId;
-    typedef typename TFragmentStore::TContigSeq                          TContigSeq;
-    typedef typename TFragmentStore::TReadSeq                            TReadSeq;
-    typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
-    typedef typename TAlignedRead::TPos                                  TAlignedReadPos;
-    typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
+    // typedef typename TFragmentStore::TAlignedReadStore                   TAlignedReadStore;
+    // typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
+    // typedef typename Iterator<TAlignedReadStore, Standard>::Type         TAlignedReadIterator;
+    // typedef typename TFragmentStore::TContigStore                        TContigStore;
+    // typedef typename TFragmentStore::TReadStore                          TReadStore;
+    // typedef typename TFragmentStore::TReadSeqStore                       TReadSeqStore;
+    // typedef typename Value<TReadStore>::Type                             TRead;
+    // typedef typename TRead::TId                                          TReadId;
+    // typedef typename Value<TContigStore>::Type                           TContig;
+    // typedef typename TContig::TId                                        TContigId;
+    // typedef typename TFragmentStore::TContigSeq                          TContigSeq;
+    // typedef typename TFragmentStore::TReadSeq                            TReadSeq;
+    // typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
+    // typedef typename TAlignedRead::TPos                                  TAlignedReadPos;
+    // typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
 
     double startTime = 0;
 
-    if (length(fragments.alignedReadStore) == 0)
-        return;  // Do nothing if the aligned read store is empty.
+    if (atEnd(samReader))
+        return 0;  // Do nothing if there are no more alignments in the file.
 
-    // In oracle Sam mode, we store the distance of the alignment from the Sam file for each read.
+    // TODO(holtgrew): Can we circumvent using a store here? Requires lots of memory.
+
+    // We store the read names and append "/0" and "/1", depending on their flag value ("/0" for first, "/1" for last
+    // flag).  Sadly, there is no easy way out here.  Single-end reads are stored as "/S".
+    NameStoreCache<StringSet<CharString> > readNameStoreCache(readNameStore);
+    String<unsigned> readLengthStore;
+
+    // In oracle SAM mode, we store the distance of the alignment from the SAM file for each read.  Otherwise, this
+    // variable remains unused.
     String<int> readAlignmentDistances;
-    if (options.oracleSamMode)
-        resize(readAlignmentDistances, length(fragments.readNameStore), -1);
     
 //     for (TAlignedReadIterator it = begin(fragments.alignedReadStore, Standard()); it != end(fragments.alignedReadStore, Standard()); ++it) {
 //         fprintf(stderr, "%3u\t%3u\t%8lu\t%3s\n", it->contigId, it->readId, it->endPos, (it->endPos < it->beginPos ? "R" : "F"));
 //     }
 
-    // For each contig:
-    //   For each read alignments:
-    //     Skip if not aligned on read.
-    //     If aligned on forward strand:
-    //       Build error curve for this read alignment on forward strand.
-    //     Else:
-    //       Build error curve for this read alignment on backward strand.
+    std::cerr << "\n____EXTENDING INTERVALS_______________________________________________________\n\n"
+              << "Each dot represents work for 100k nucleotides in the genome.\n";
 
-    startTime = sysTime();
-    std::cerr << "Each dot represents roughly 5% of work for the given contig in the given orientation." << std::endl;
+    // Stream over SAM file.  The main assumption here is that the reads are sorted by coordinate, which is check when
+    // loading the SAM header.
+    //
+    // For each read alignments:
+    //   If aligned on forward strand:
+    //     Build error curve for this read alignment on forward strand.
+    //   Else:
+    //     Build error curve for this read alignment on backward strand.
+
+    startTime = sysTime();      // Time at beginning for total time display at end.
+    int prevRefId = -1;      // Previous contig id.
+    unsigned prevReadId = maxValue<unsigned>();
+    size_t prevRightBorder = maxValue<size_t>();
+    int posOnContig = 0;
+    BamAlignmentRecord record;  // Current read record.
+    Dna5String /*const*/ * contig = 0;
+    Dna5String rcContig;
+    Dna5String readSeq;
+    CharString readName;
+    while (!atEnd(samReader))
+    {
+        // -------------------------------------------------------------------
+        // Read SAM Record and retrieve name and sequence.
+        // -------------------------------------------------------------------
+
+        // Read SAM record.
+        if (readRecord(record, samIOContext, samReader, Sam()) != 0)
+        {
+            std::cerr << "ERROR reading SAM record!\n";
+            return 1;
+        }
+        // Break if we have an unaligned SAM record.
+        if (record.rId == -1)
+            break;  // Done!
+        // Get read name and sequence from record.
+        readSeq = record.seq;  // Convert read sequence to Dna5.
+        // Compute reverse complement since we align against reverse strand, SAM has aligned sequence against forward
+        // strand.
+        if (hasFlagRC(record))
+            reverseComplement(readSeq);
+        trimSeqHeaderToId(record.qName);  // Remove everything after the first whitespace.
+        if (!hasFlagMultiple(record))
+            append(record.qName, "/S");
+        if (hasFlagMultiple(record) && hasFlagFirst(record))
+            append(record.qName, "/0");
+        if (hasFlagMultiple(record) && hasFlagLast(record))
+            append(record.qName, "/1");
+        // Translate read to read id.
+        // TODO(holtgrew): Can we get rid of this translation to numeric ids?
+        unsigned readId = 0;
+        if (!getIdByName(readNameStore, record.qName, readId, readNameStoreCache))
+        {
+            readId = length(readNameStore);
+            appendName(readNameStore, record.qName, readNameStoreCache);
+            appendValue(readLengthStore, length(record.seq));
+            if (options.oracleSamMode)
+                appendValue(readAlignmentDistances, -1);
+        }
+
+        // -------------------------------------------------------------------
+        // Handle Progress
+        // -------------------------------------------------------------------
+
+        // Handle progress: Change of contig.
+        SEQAN_ASSERT_LEQ(prevRefId, record.rId);
+        if (prevRefId != record.rId)
+        {
+            for (int i = prevRefId + 1; i <= record.rId; ++i)
+            {
+                if (i != prevRefId)
+                    std::cerr << "\n";
+                std::cerr << contigNameStore[record.rId] << " (" << record.rId + 1 << "/" << length(contigNameStore) << ") ";
+            }
+            posOnContig = 0;
+
+            contig = &contigSeqStore[record.rId];
+            rcContig = *contig;
+            reverseComplement(rcContig);
+        }
+        // Handle progress: Position on contig.
+        for (; posOnContig < record.pos; posOnContig += 100*1000)
+        {
+            if (posOnContig % (1000*1000) == 0 && posOnContig > 0)
+                std::cerr << posOnContig / 1000 / 1000 << "M";
+            else
+                std::cerr << ".";
+        }
+
+        // -------------------------------------------------------------------
+        // Extend error curve points for read.
+        // -------------------------------------------------------------------
+
+        // In oracle SAM mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position
+        // from the SAM file.  In normal mode, convert from error rate from options to error count.
+        int maxError = options.oracleSamMode ? -1 : static_cast<int>(floor(0.01 * options.maxError * length(record.seq)));
+
+        // Compute end position of alignment.
+        int endPos = record.pos + getAlignmentLengthInRef(record) - countPaddings(record.cigar);
+
+        size_t right = 0;
+        if (!hasFlagRC(record))
+            right = buildErrorCurvePoints(errorCurves[readId], maxError, *contig, record.rId, !hasFlagRC(record), readSeq, readId, endPos, prevReadId, prevRefId, prevRightBorder, readNameStore, options.matchN, TPatternSpec());
+        else
+            right = buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, record.rId, !hasFlagRC(record), readSeq, readId, length(rcContig) - record.pos, prevReadId, prevRefId, prevRightBorder, readNameStore, options.matchN, TPatternSpec());
+        if (options.oracleSamMode)
+            readAlignmentDistances[readId] = maxError;
+
+        // Update variables storing the previous read/contig id and position.
+        prevReadId = readId;
+        prevRefId = record.rId;
+        prevRightBorder = right;
+    }
+    std::cerr << "\n\nTook " << sysTime() - startTime << " s\n";
+
+#if 0
     TContigStore /*const*/ & contigStore = fragments.contigStore;
     TAlignedReadStore /*const*/ & alignedReadStore = fragments.alignedReadStore;
     for (size_t contigId = 0; contigId < length(contigStore); ++contigId) {
@@ -598,6 +745,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     }
     if (options.verbosity >= 2)
         std::cerr << "[timer] sorting/gap filling/smoothing/filtering: " << sysTime() - startTime << " s" << std::endl;
+#endif  // #if 0
 
     // For all reads:
     //   Sort all error curve points.
@@ -605,85 +753,132 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     //   Smooth them.
     //   Filter out low scoring ones.
 
+    std::cerr << "\n____SMOOTHING ERROR CURVES____________________________________________________\n\n";
     startTime = sysTime();
-    TReadSeqStore const & readSeqs = fragments.readSeqStore;
-    for (TReadId i = 0; i < length(readSeqs); ++i) {
-        std::sort(begin(errorCurves[i], Standard()), end(errorCurves[i], Standard()));
-        fillGaps(errorCurves[i]);
-        smoothErrorCurve(errorCurves[i]);
+    unsigned tenPercent = length(readLengthStore) / 10;
+    std::cerr << "Progress: ";
+    for (unsigned readId = 0; readId < length(readLengthStore); ++readId) {
+        if (readId % tenPercent == 0u)
+            std::cerr << readId / tenPercent * 10 << '%';
+        else if (readId % (tenPercent / 5) == 0u)
+            std::cerr << '.';
+        
+        std::sort(begin(errorCurves[readId], Standard()), end(errorCurves[readId], Standard()));
+        fillGaps(errorCurves[readId]);
+        smoothErrorCurve(errorCurves[readId]);
 
         // Compute relative min score for the read.
         String<WeightedMatch> filtered;
-        TReadSeq read = readSeqs[i];
-        int maxError = (int)floor(options.maxError / 100.0 * length(read));
+        int maxError = (int)floor(options.maxError / 100.0 * readLengthStore[readId]);
         if (options.oracleSamMode) {
-            SEQAN_ASSERT_NEQ(readAlignmentDistances[i], -1);
-            maxError = readAlignmentDistances[i];
+            SEQAN_ASSERT_NEQ(readAlignmentDistances[readId], -1);
+            maxError = readAlignmentDistances[readId];
         }
-        int relativeMinScore = (int)ceilAwayFromZero(100.0 * -maxError / length(read));
+        int relativeMinScore = (int)ceilAwayFromZero(100.0 * -maxError / readLengthStore[readId]);
 
         // Filter out low scoring ones.
         typedef typename Iterator<String<WeightedMatch> >::Type TIterator;
-        for (TIterator it = begin(errorCurves[i]); it != end(errorCurves[i]); ++it) {
+        for (TIterator it = begin(errorCurves[readId]); it != end(errorCurves[readId]); ++it) {
             if (value(it).distance >= relativeMinScore) {
                 #if ENABLED
-                std::cerr << fragments.readNameStore[i] << " accepting  " << value(it) << std::endl;
+                std::cerr << fragments.readNameStore[readId] << " accepting  " << value(it) << std::endl;
                 #endif
                 appendValue(filtered, value(it));
             } else {
                 #if ENABLED
-                std::cerr << fragments.readNameStore[i] << " discarding " << value(it) << std::endl;
+                std::cerr << fragments.readNameStore[readId] << " discarding " << value(it) << std::endl;
                 #endif
             }
         }
-        move(errorCurves[i], filtered);
+        move(errorCurves[readId], filtered);
     }
-    if (options.verbosity >= 2)
-        std::cerr << "[timer] sorting/gap filling/smoothing/filtering: " << sysTime() - startTime << " s" << std::endl;
+    std::cerr << "100% DONE\n"
+              << "\nTook: " << sysTime() - startTime << " s\n";
+
+    return 0;
 }
 
 // Entry point for the gold standard building subprogram.
 int buildGoldStandard(Options<BuildGoldStandard> const & options)
 {
     double startTime = 0;  // For measuring time below.
+
+    typedef StringSet<CharString>      TNameStore;
+    typedef NameStoreCache<TNameStore> TNameStoreCache; // TODO(holtgrew): Remove?
     
+    std::cerr << "==============================================================================\n"
+              << "                RABEMA - Read Alignment BEnchMArk\n"
+              << "==============================================================================\n"
+              << "                      Building Gold Standard\n"
+              << "==============================================================================\n"
+              << "\n"
+              << "____LOADING FILES_____________________________________________________________\n\n";
+
     // =================================================================
-    // Load contigs and Sam file.
+    // Load contigs.
     // =================================================================
     startTime = sysTime();
-    typedef FragmentStore<> TFragmentStore;
-    TFragmentStore fragmentStore;
-    // Load contigs.
-    if (!loadContigs(fragmentStore, options.referenceSeqFilename)) {
-        std::cerr << "Could not read contigs." << std::endl;
+    TNameStore refNameStore;
+    StringSet<Dna5String> refSeqStore;
+    // TODO(holtgrew): Use fast double-pass I/O with mmap string?
+    std::cerr << "Reference      " << options.referenceSeqFilename << " ...";
+    std::ifstream inContigs(toCString(options.referenceSeqFilename), std::ios::binary | std::ios::in);
+    if (!inContigs.good())
+    {
+        std::cerr << "Could not read contigs.\n";
         return 1;
     }
+    RecordReader<std::ifstream, SinglePass<> > contigReader(inContigs);
+    if (read2(refNameStore, refSeqStore, contigReader, Fasta()) != 0)
+    {
+        std::cerr << "Could not read contigs from file " << options.referenceSeqFilename << "\n";
+        return 1;
+    }
+    for (unsigned i = 0; i < length(refNameStore); ++i)
+        trimSeqHeaderToId(refNameStore[i]);
+    TNameStoreCache refNameStoreCache(refNameStore);  // TODO(holtgrew): Remove?
+    std::cerr << " OK\n";
     if (options.verbosity >= 2)
         std::cerr << "[timer] reading contigs: " << sysTime() - startTime << " s" << std::endl;
     
-    // Load Sam file.
-    startTime = sysTime();
+    // Open SAM file and read in header.
+    std::cerr << "Alignments     " << options.perfectMapFilename << " (header) ...";
+    std::ifstream inSam(toCString(options.perfectMapFilename), std::ios_base::in | std::ios_base::binary);
+    if (!inSam.is_open())
     {
-        std::fstream fstrm(toCString(options.perfectMapFilename),
-                           std::ios_base::in | std::ios_base::binary);
-        if (!fstrm.is_open()) {
-            std::cerr << "Could not open Sam file." << std::endl;
-            return 1;
-        }
-        read(fstrm, fragmentStore, Sam());
+        std::cerr << "Could not open SAM file." << std::endl;
+        return 1;
     }
-    if (options.verbosity >= 2)
-        std::cerr << "[timer] loading SAM: " << sysTime() - startTime << " s" << std::endl;
+    RecordReader<std::ifstream, SinglePass<> > samReader(inSam);
+    BamIOContext<TNameStore> samIOContext(refNameStore, refNameStoreCache);
+    BamHeader samHeader;
+    if (readRecord(samHeader, samIOContext, samReader, Sam()) != 0)
+    {
+        std::cerr << "Could not read SAM header.\n";
+        return 1;
+    }
+    // Check that the SAM file is sorted by COORDINATE.
+    if (getSortOrder(samHeader) != BAM_SORT_COORDINATE)
+    {
+        std::cerr << "SAM file not sorted by 'coordinate'!\n";
+        return 1;
+    }
+    std::cerr << " OK\n";
+    std::cerr << "\nTook " << sysTime() - startTime << "s\n";
 
     // =================================================================
     // Build point-wise error curve.
     // =================================================================
     startTime = sysTime();
     TErrorCurves errorCurves;
+    int res = 0;
+    StringSet<CharString> readNameStore;
     if (options.distanceFunction == "edit")
-        matchesToErrorFunction(fragmentStore, errorCurves, options, MyersUkkonenReads());
+        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, refSeqStore, options, MyersUkkonenReads());
     else // options.distanceFunction == "hamming"
-        matchesToErrorFunction(fragmentStore, errorCurves, options, HammingSimple());
+        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, refSeqStore, options, HammingSimple());
+    if (res != 0)
+        return 1;
     if (options.verbosity >= 2)
         std::cerr << "[timer] building error curve: " << sysTime() - startTime << " s" << std::endl;
 
@@ -691,6 +886,9 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // Verify result when enabled.
     // =================================================================
     if (options.verify) {
+        // TODO(holtgrew): Re-enable?
+        std::cerr << "VERIFICATION DISABLED AT THE MOMENT!\n";
+#if 0
         startTime = sysTime();
         if (options.oracleSamMode) {
             std::cerr << "WARNING: Not verifying since we run in oracle Sam mode!" << std::endl;
@@ -710,6 +908,7 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         }
         if (options.verbosity >= 2)
             std::cerr << "[timer] verification: " << sysTime() - startTime << " s" << std::endl;
+#endif  // #if 0
     }
 
     // =================================================================
@@ -719,18 +918,21 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     startTime = sysTime();
     String<WitRecord> witRecords;
     typedef Iterator<String<WitRecord>, Standard>::Type TWitRecordIterator;
-    intervalizeErrorCurves(witRecords, errorCurves, fragmentStore, options);
-    if (options.verbosity >= 2)
-        std::cerr << "[timer] error curve points to intervals: " << sysTime() - startTime << " s" << std::endl;
+    intervalizeErrorCurves(witRecords, errorCurves, readNameStore, refNameStore, options);
+    std::cerr << "Took " << sysTime() - startTime << " s\n";
     // The two alternatives are equivalent after opening the file.
     startTime = sysTime();
+    std::cerr << "\n____WRITING OUTPUT____________________________________________________________\n\n";
     if (options.outFileName == "-") {
+        std::cerr << "Writing to stdout ...\n";
         writeWitHeader(std::cout);
         writeWitComment(std::cout, WIT_COLUMN_NAMES);
         for (TWitRecordIterator it = begin(witRecords, Standard());
              it != end(witRecords, Standard()); ++it)
             std::cout << *it << std::endl;
+        std::cerr << "DONE\n";
     } else {
+        std::cerr << "Writing to " << options.outFileName << " ...";
         std::fstream fstrm(toCString(options.outFileName), std::ios_base::out);
         if (!fstrm.is_open()) {
             std::cerr << "Could not open out file \"" << options.outFileName << "\""
@@ -742,9 +944,9 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         for (TWitRecordIterator it = begin(witRecords, Standard());
              it != end(witRecords, Standard()); ++it)
             fstrm << *it << std::endl;
+        std::cerr << " DONE\n";
     }
-    if (options.verbosity >= 2)
-        std::cerr << "[timer] writing output: " << sysTime() - startTime << " s" << std::endl;
+    std::cerr << "\n Took " << sysTime() - startTime << " s\n";
 
     return 0;
 }

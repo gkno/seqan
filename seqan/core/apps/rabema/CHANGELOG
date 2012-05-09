@@ -1,0 +1,11 @@
+== Trunk ==
+
+ * 
+ * Added `prepare_sam` tool to prepare the updated RazerS 2 output to be used with new Rabema versions.
+   The updated fragment store does not output read sequences for secondary alignments.
+   However, this requires a global view and the read sequences to be always in memory.
+   The tool accepts a SAM file sorted by query name, copies over sequences from primary alignments to secondary alignments (it knows about paired-end reads).
+
+== Release 1.0 ==
+
+Initial realease for the published paper.
