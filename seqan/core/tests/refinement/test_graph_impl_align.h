@@ -102,8 +102,8 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	SEQAN_ASSERT(!empty(g));
 	SEQAN_ASSERT_EQ(sequenceId(g, v0), id1);
 	SEQAN_ASSERT_EQ(label(g, v0), "cc");
-	SEQAN_ASSERT_EQ(fragmentBegin(g, v0), 0);
-	SEQAN_ASSERT_EQ(fragmentLength(g, v0), 2);
+	SEQAN_ASSERT_EQ(fragmentBegin(g, v0), 0u);
+	SEQAN_ASSERT_EQ(fragmentLength(g, v0), 2u);
 	SEQAN_ASSERT_EQ(findVertex(g, id1, 0), v0);
 	SEQAN_ASSERT_EQ(findVertex(g, id1, 1), v0);
 	SEQAN_ASSERT_EQ(findVertex(g, id1, 2), nilVertex);
@@ -111,8 +111,8 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphNoEdgeWeights)
 	TVertexDescriptor v1 = addVertex(g, id2, 0, 5);
 	TEdgeDescriptor e = addEdge(g,0,1);
 	SEQAN_ASSERT_EQ(_getVertexString(g)[0], e);
-	SEQAN_ASSERT_EQ(getIdUpperBound(_getVertexIdManager(g)), 2);
-	SEQAN_ASSERT_EQ(getIdUpperBound(_getEdgeIdManager(g)), 1);
+	SEQAN_ASSERT_EQ(getIdUpperBound(_getVertexIdManager(g)), 2u);
+	SEQAN_ASSERT_EQ(getIdUpperBound(_getEdgeIdManager(g)), 1u);
 	SEQAN_ASSERT_EQ(v1, 1u);
 	SEQAN_ASSERT_EQ(numVertices(g), 2u);
 	SEQAN_ASSERT_EQ(targetVertex(g, e), 1u);
