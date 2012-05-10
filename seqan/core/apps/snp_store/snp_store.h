@@ -238,6 +238,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
         unsigned    cnvWindowSize;
         int         minClippedLength;
         bool        clipTagsInFile;
+        bool        softClipTagsInFile;
 
         int         asciiQualOffset;
         const char  *outputLog;
@@ -294,7 +295,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
             percentageT = (float)0.25;
             minMutT = 3;
             snpHetMax = (float)0.8;
-            useBaseQuality = true;
+            useBaseQuality = true; /// XXXXXXXXXX
             asciiQualOffset = 33;
 
             minCoverage = 5;
@@ -315,8 +316,8 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
             initialN = 10;
             meanAlleleFrequency = 0.51;
             newQualityCalibrationFactor = 0.0; // off
-            minExplainedColumn = 0.0;  //off
-//            minExplainedColumn = 0.8;  //
+//            minExplainedColumn = 0.0;  //off
+            minExplainedColumn = 0.8;  /// XXXXXXXXXX
             maxPolymerRun = 100;  //off
             bothIndelStrands = false;
             indelQualityThreshold = 1; //
@@ -353,8 +354,11 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
             expectedReadsPerBin = 125;
             expectedReadsSD = 25;
             cnvWindowSize = 1000;
+
+            // clipping options
             minClippedLength = 10; //20;
             clipTagsInFile = false;
+            softClipTagsInFile = false;
             outputLog = "";
         }
     };
@@ -926,6 +930,10 @@ int readMatchesFromGFF_Batch(
         bool multi = false, suboptimal = false/*, unique = true*/, splitRead = false;
         clipLeft = 0; clipRight = 0; 
         bool discardRead = false;
+        bool first = true;
+//        bool softClipped = false;
+        int softClippedLeft = 0, softClippedRight = 0;
+
         //int maxIndelLen = 0;
         clear(gAliPos);
         clear(tmpCigarStr);
@@ -1056,6 +1064,7 @@ int readMatchesFromGFF_Batch(
                             append(temp_read,infix(readTemplate,pos,pos2));
                             pos = pos2;
                             c = _streamGet(*file);
+                            first = false;
                             continue;
                         }
                         if(c=='I')
@@ -1074,6 +1083,7 @@ int readMatchesFromGFF_Batch(
                             rLen += pos2;
                             options.hammingOnly = false;
                             hasIndel = true;
+                            first = false;
                 //            if(maxIndelLen < pos2) maxIndelLen = pos2;
                             continue;
                         }
@@ -1093,13 +1103,55 @@ int readMatchesFromGFF_Batch(
                             options.hammingOnly = false;
                             c = _streamGet(*file);
                             hasIndel = true;
+                            first = false;
                //             if(maxIndelLen < pos2) maxIndelLen = pos2;
+                            continue;
+                        }
+                        if(c=='S')
+                        {
+                            if(first) 
+                            {
+//                                gInf = infix(genome, _max(0,(int)beginPos-pos2), endPos);
+//                                if (orientation == 'R')
+//                                    reverseComplement(gInf);
+//                                readTemplate = gInf;
+                                softClippedLeft = pos2;
+//                                alignLength += _min((int)beginPos,pos2);
+                                //beginPos = _max(0,(int)beginPos-pos2);
+                            }
+                            else
+                            {
+//                                gInf = infix(genome, endPos, _min(endPos+pos2,length(genome)));
+//                                if (orientation == 'R')
+//                                    reverseComplement(gInf);
+//                                append(temp_read,gInf);
+                                softClippedRight = pos2;
+                                //endPos = _min(endPos+pos2,length(genome));
+//                                alignLength += _min(pos2,length(genome)-endPos);
+                            }
+                            unsigned k= 0;
+                            while(k<pos2)
+                            {
+                                appendValue(gAliPos,gPos,Generous());
+                                ++gPos;
+                                ++k;
+                            }
+                            appendValue(tmpCigarStr,TCigar('S',pos2));
+                            alignLength += pos2;
+                            pos2 += pos;
+//                            if(first)
+                                append(temp_read,infix(readTemplate,pos,pos2));
+                            pos = pos2;
+                            c = _streamGet(*file);
+                            first = false;
+                            options.softClipTagsInFile = true;
                             continue;
                         }
                     }
                     if(alignLength != endPos - beginPos)
                     {
                         std::cerr << "WARNING! Read "<<readName<<": cigar alignment length does not match genome coordinates. Discarding read.."<<std::endl;
+                        //std::cout << "align length = " << alignLength << " endPos=" << endPos << " beginPos=" << beginPos << std::endl;
                         discardRead = true;
                     }
                     curr_read = temp_read;
@@ -1117,6 +1169,18 @@ int readMatchesFromGFF_Batch(
                 temp_read = infix(readTemplate,0,gMatchLen);
                 curr_read = temp_read;
             }
+            // make sure softClipping is taken into account in clip tags
+            if(options.dontClip) // only soft clipping if other clipping is switched off
+            {
+                    clipRight = softClippedRight;
+                    clipLeft = softClippedLeft;
+            }
+            else
+            {
+                clipRight = _max(clipRight,softClippedRight);
+                clipLeft = _max(clipLeft,softClippedLeft);
+            }
+
             if(clipLeft + clipRight > (int)length(curr_read) - (int)options.minClippedLength)
             {
                 if (options._debugLevel>1) std::cout <<"Discarding read "<<readName<<", too short after clipping.."<<std::endl;
@@ -1332,10 +1396,10 @@ interpretBamTags(TBamTags & tags, int & editDist, bool & multi,
     
 
 // TODO: implement this, currently bam tags are not considered when parsing .bam files
-template<typename TBamTags, typename TOptions>
+template<typename TBamTags, typename TOptions, typename TTag>
 int
 interpretBamTags(TBamTags & /*tags*/, int & /*editDist*/, bool & /*multi*/, 
-                int & /*clipLeft*/, int & /*clipRight*/, TOptions & /*options*/, Bam)
+                int & /*clipLeft*/, int & /*clipRight*/, TOptions & /*options*/, TTag)
 {
     
 //    char* bamTags = reinterpret_cast<char *>(toCString(tags));
@@ -1476,7 +1540,7 @@ int readMatchesFromSamBam_Batch(
     TCigarStr tmpCigarStr;
     CharString readTemplate, temp_read;
     CharString readName, temp_str;
-    String<int> gAliPos;
+//    String<int> gAliPos;
 //  BamAlignmentRecord record;
     BamHeader header;
     int res = 0;
@@ -1498,9 +1562,10 @@ int readMatchesFromSamBam_Batch(
             ::std::cerr << "Something wrong with SAM/BAM file?" << std::endl;
             return 2;
         }
-    
-        if (hasFlagUnmapped(record))
+        
+        if ( hasFlagUnmapped(record) || empty(record.cigar) || (!options.keepSuboptimalReads && hasFlagSecondary(record)))
         {
+            //std::cout << "Read " << record.qName << " has Flag=" << record.flag << std::endl;
             clear(record); continue;
         }
         
@@ -1617,18 +1682,25 @@ int readMatchesFromSamBam_Batch(
                 if(first)
                 {
                     softClippedLeft = record.cigar[j].count;
-                    arrayMove(iter(record.seq, record.cigar[j].count, Standard()), end(record.seq, Standard()), begin(record.seq, Standard()));
-                    arrayMove(iter(record.qual, record.cigar[j].count, Standard()), end(record.qual, Standard()), begin(record.qual, Standard()));
-                    resize(record.seq,length(record.seq)-record.cigar[j].count);
-                    resize(record.qual,length(record.qual)-record.cigar[j].count);
+                 // dont apply tags yet, wait until after pile up correction
+                 //   arrayMove(iter(record.seq, record.cigar[j].count, Standard()), end(record.seq, Standard()), begin(record.seq, Standard()));
+                 //   arrayMove(iter(record.qual, record.cigar[j].count, Standard()), end(record.qual, Standard()), begin(record.qual, Standard()));
+                 //   resize(record.seq,length(record.seq)-record.cigar[j].count);
+                 //   resize(record.qual,length(record.qual)-record.cigar[j].count);
+                 // instead act as if clipped positions were matched characters --> change mapping cooridnates (will be adjusted again in clipReads function)
+                    beginPos = _max(0,beginPos-softClippedLeft);
                 }
                 else
                 {
                     softClippedRight = record.cigar[j].count;
-                    resize(record.seq,length(record.seq)-record.cigar[j].count);
-                    resize(record.qual,length(record.qual)-record.cigar[j].count);
+                 // dont apply tags yet, wait until after pile up correction
+                 //   resize(record.seq,length(record.seq)-record.cigar[j].count);
+                 //   resize(record.qual,length(record.qual)-record.cigar[j].count);
+                 // instead act as if clipped positions were matched characters --> change mapping cooridnates (will be adjusted again in clipReads function)
+                    endPos += (TContigPos) record.cigar[j].count;
                 }
                 first = false;
+                options.softClipTagsInFile = true;
             }
         
         }
@@ -1687,8 +1759,18 @@ int readMatchesFromSamBam_Batch(
         interpretBamTags(record.tags,editDist,multi,clipLeft,clipRight,options,TTag());
          
         // make sure softClipping is taken into account in clip tags
-        if(softClippedRight > 0) clipRight = _max(0,clipRight-softClippedRight);
-        if(softClippedLeft > 0) clipLeft = _max(0,clipLeft-softClippedLeft);
+        if(options.dontClip) // only soft clipping if other clipping is switched off
+        {
+                clipRight = softClippedRight;
+                clipLeft = softClippedLeft;
+        }
+        else
+        {
+            clipRight = _max(clipRight,softClippedRight);
+            clipLeft = _max(clipLeft,softClippedLeft);
+        }
+//        if(softClippedRight > 0) clipRight = _max(0,clipRight-softClippedRight); // this is for if soft clipping is applied directly
+//        if(softClippedLeft > 0) clipLeft = _max(0,clipLeft-softClippedLeft);
         if (orientation == 'R') 
         {
             int temp = clipLeft;
@@ -1699,7 +1781,7 @@ int readMatchesFromSamBam_Batch(
 
         
         if (options._debugLevel>0&&(rSeq%1000000)==0) std::cout <<rSeq<<".."<<std::flush;
-        if(/*length(curr_read)> 30 && */ mScore >= options.minMapQual && (!multi || options.keepMultiReads) && (!suboptimal || options.keepSuboptimalReads))// && (!((*mIt).hasIndel==1 && options.hammingOnly)))
+        if( /*length(curr_read)> 30 && */ mScore >= options.minMapQual && (!multi || options.keepMultiReads) && (!suboptimal || options.keepSuboptimalReads))// && (!((*mIt).hasIndel==1 && options.hammingOnly)))
         {
             if(empty(curr_read))
             {   //read sequence not found
@@ -2171,6 +2253,7 @@ getHomoProbs(THomoTable & cnks,
         for(unsigned j = 0; j < length(qualitiesForward[i]); ++j)
         {
             qual = static_cast<double>(ordValue(qualitiesForward[i][j])-33);
+            if(qual > 30.0) qual = 30.0; /// XXXXXXXXXX
             //qual = rescale into regular log
             if(j>=256) fk = fks[255];
             else fk = fks[j];
@@ -2191,6 +2274,7 @@ getHomoProbs(THomoTable & cnks,
         for(unsigned j = 0; j < length(qualitiesReverse[i]); ++j)
         {
             qual = static_cast<double>(ordValue(qualitiesReverse[i][j])-33);
+            if(qual > 30.0) qual = 30.0; /// XXXXXXXXXX
             if(j>=256) fk = fks[255];
             else fk = fks[j];
             sumE[i] += fk * qual;
@@ -2926,7 +3010,7 @@ _doSnpCall(TCounts & countF,
 // write to file
 template<typename TFile, typename TString, typename TQualities, typename TPos, typename TOptions>
 inline bool
-_write(TFile &file, 
+_writeSnp(TFile &file, 
        SingleBaseVariant &snp, 
        TQualities &qualityStringF, 
        TQualities &qualityStringR,
@@ -3382,7 +3466,8 @@ realignReferenceToReadProfile(TFragmentStore & fragmentStore,
     TFragmentString fragments2;
     //// Debug code
     Graph<Alignment<TStringSet, void, WithoutEdgeId> > g3(pairSet3);
-    int sc3 = globalAlignment(g3, consScore3, AlignConfig<false,true,true,false>(), leftDiag, rightDiag, BandedGotoh());
+    //int sc3 = 
+    globalAlignment(g3, consScore3, AlignConfig<false,true,true,false>(), leftDiag, rightDiag, BandedGotoh());
     //std::cout << sc3 << std::endl;
     //std::cout << g3 << std::endl;
 
@@ -3592,6 +3677,7 @@ realignReferenceToDiploidConsensusProfile(TFragmentStore & fragmentStore,
             remove = false;
         }
 //        *sit = remove;
+        remove= false;
         if(!remove){
             *posIt = pos;
             ++posIt;
@@ -3648,8 +3734,12 @@ realignReferenceToDiploidConsensusProfile(TFragmentStore & fragmentStore,
 //  std::cout << sc3 << std::endl;
 //  std::cout << g3 << std::endl;
 
+//    std::cout << "leftDiag="<< leftDiag << std::endl;
+//    std::cout << "rightDiag="<< rightDiag << std::endl;
     // reference can be aligned to gaps at the ends, diploidConsensus needs to be fully aligned
-    globalAlignment(fragments, pairSet, consScore, AlignConfig<false,true,true,false>(), leftDiag, rightDiag, BandedGotoh());
+//    globalAlignment(fragments, pairSet, consScore, AlignConfig<false,true,true,false>(), leftDiag, rightDiag, BandedGotoh());
+    globalAlignment(fragments, pairSet, consScore, AlignConfig<false,false,false,false>(), _max(leftDiag, -1 * (int) length(refProfile)), _min(rightDiag, (int) length(diploidConsensus)), BandedGotoh());
+    
     //if(options.realignAddBorder == 0)
     //    globalAlignment(fragments, pairSet, consScore, AlignConfig<false,false,false,false>(), leftDiag, rightDiag, BandedGotoh());
 
@@ -3742,7 +3832,8 @@ realignReferenceToDiploidConsensusProfile(TFragmentStore & fragmentStore,
                     appendValue(fragmentStore.alignedReadStore[refMatchPosId].gaps, TGapAnchor(referencePos,referencePos + diff), Generous() );
                     gapLen = 0; // do this only once
                 }
-                int numGaps = insertGap(matches, bandOffset + alignPos);
+                //int numGaps = 
+                insertGap(matches, bandOffset + alignPos);
                 ++referencePos; 
                 ++alignPos;
             }
@@ -3762,7 +3853,8 @@ realignReferenceToDiploidConsensusProfile(TFragmentStore & fragmentStore,
     }
     
     for (; referencePos < (TReadPos)length(fragmentStore.readSeqStore[refReadId]); ++referencePos) {
-        int numGaps = insertGap(matches, bandOffset + alignPos);
+        //int numGaps = 
+        insertGap(matches, bandOffset + alignPos);
         ++alignPos;
     }
     fragmentStore.alignedReadStore[refMatchPosId].endPos = fragmentStore.alignedReadStore[refMatchPosId].beginPos + referencePos + diff;
@@ -3786,6 +3878,7 @@ checkSequenceContext(TSequence &reference,
     if(indelSize > 0) // deletion
     {
 #ifdef SNPSTORE_DEBUG
+        std::cout << "indelSize=" << indelSize << std::endl;
         std::cout << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+indelSize+6,(int)length(reference)));
 #endif
    
@@ -3797,6 +3890,7 @@ checkSequenceContext(TSequence &reference,
     else
     {
 #ifdef SNPSTORE_DEBUG
+        std::cout << "indelSize=" << indelSize << std::endl;
         std::cout << infix(reference,_max((int)0,(int)candidatePos-6),_min((int)candidatePos+6,(int)length(reference)));
 #endif
    
@@ -3817,7 +3911,7 @@ checkSequenceContext(TSequence &reference,
         --i;
     //check to the right
     TSignedPos j = extendPos1; 
-    while(j <= (TSignedPos)length(reference) && reference[j]==candBase)
+    while(j < (TSignedPos)length(reference) && reference[j]==candBase)
         ++j;
     count = j - i - 1;
 
@@ -3831,9 +3925,13 @@ checkSequenceContext(TSequence &reference,
         --i;
     //check to the right
     j = extendPos2; 
-    while(j <= (TSignedPos)length(reference) && reference[j]==candBase)
+    while(j < (TSignedPos)length(reference) && reference[j]==candBase)
         ++j;
     count = j - i - 1 > (TSignedPos)count ? j - i - 1 : (TSignedPos)count;
+
+#ifdef SNPSTORE_DEBUG
+        std::cout << "done with seqContext" << std::endl;
+#endif
 
     return count;
 
@@ -4015,6 +4113,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             layoutAlignment(layout, fragmentStore);
             printAlignment(std::cout, Raw(), layout, fragmentStore, 0, (TContigPos)0, (TContigPos)maxPos, 0, 150);
         }
+
 #endif      
 
         
@@ -4028,6 +4127,8 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
 //  
 #ifndef  READS_454
     reAlign(fragmentStore,consScore,0,1,/*bandWidth*/5,false);
+    //reAlign(fragmentStore,consScore,0,1,/*bandWidth*/5,true);
+    //++numReads;
     //realignReferenceToReadProfile(fragmentStore,refId,options);
     //realignReferenceToDiploidConsensusProfileDeleteSeqErrors(fragmentStore,refId,options);
     //realignReferenceToDiploidConsensusProfile(fragmentStore,refId,options);
@@ -4046,6 +4147,8 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
     ::std::cout << "Realignment done.\n";
     if(extraV)
     {
+        CharString strstr = "aftRefReal";
+        _dumpMatches(fragmentStore,strstr);
         TContigGaps contigGaps(fragmentStore.contigStore[0].seq, fragmentStore.contigStore[0].gaps);
         TContigPos maxPos = positionSeqToGap(contigGaps,length(fragmentStore.contigStore[0].seq)-1)+1;
         maxPos = _max(maxPos,(TContigPos)length(fragmentStore.contigStore[0].seq));
@@ -4394,7 +4497,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
             
             // write SNP to file
             if(isSnp && (snp.called || options.outputFormat == 0))
-                _write(file,snp,qualityStringF,qualityStringR,refAllele,genomeID,candidatePos+startCoord,realCoverage,options);
+                _writeSnp(file,snp,qualityStringF,qualityStringR,refAllele,genomeID,candidatePos+startCoord,realCoverage,options);
             
         }
 
@@ -4952,7 +5055,7 @@ void dumpSNPsBatch(
         
         // write SNP to file
         if(isSnp && (snp.called || options.outputFormat == 0))
-            _write(file,snp,qualityStringF,qualityStringR,refAllele,genomeID,candidatePos+startCoord,realCoverage,options);
+            _writeSnp(file,snp,qualityStringF,qualityStringR,refAllele,genomeID,candidatePos+startCoord,realCoverage,options);
             
     }
 

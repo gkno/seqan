@@ -18,7 +18,7 @@
 
 //#define SNP_STORE_RTTEST
 
-#define CORRECTED_HET
+//#define CORRECTED_HET
 #define TRACE_PIPELINE
 //#define READS_454
 
@@ -29,14 +29,14 @@
 //#define SNPSTORE_DEBUG_CANDPOS
 //#endif
 
-#include "seqan/platform.h"
+#include <seqan/platform.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/align.h>
 #include <seqan/store.h>
 #include <seqan/consensus.h>
 #include <seqan/stream.h>
-#include "seqan/bam_io.h"
+#include <seqan/bam_io.h>
 //#include "snp_store_underconstruction.h"
 
 
@@ -172,6 +172,7 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
     //CharString str = "discBef";
     //_dumpMatches(fragmentStore, str);
     
+    //std::cout << " max hit length = " << options.maxHitLength << std::endl;
     // look for matches that are inside our window of interest, copy corresponding matches,reads,qualities
     while(mIt >= mItBegin && _min((*mIt).beginPos,(*mIt).endPos) + (TContigPos)options.maxHitLength + (TContigPos)options.windowBuff >= currentWindowEnd )
     {
@@ -181,13 +182,13 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
             appendValue(tmpMatches,*mIt);
             tmpMatches[id].id = id;
             tmpMatches[id].readId = id;
-            appendValue(tmpReads,fragmentStore.readSeqStore[(*mIt).id]);
-            appendValue(tmpRs,fragmentStore.readStore[(*mIt).id]);
-            if(!empty(readCounts))appendValue(tmpReadCounts,readCounts[(*mIt).id]);
-            appendValue(tmpQualities,fragmentStore.alignQualityStore[(*mIt).id]);
-            appendValue(tmpReadCigars,readCigars[(*mIt).id]);
+            appendValue(tmpReads,fragmentStore.readSeqStore[(*mIt).readId]);
+            appendValue(tmpRs,fragmentStore.readStore[(*mIt).readId]);
+            if(!empty(readCounts))appendValue(tmpReadCounts,readCounts[(*mIt).readId]);
+            appendValue(tmpQualities,fragmentStore.alignQualityStore[(*mIt).readId]);
+            appendValue(tmpReadCigars,readCigars[(*mIt).readId]);
 //            appendValue(tmpReadClips,TPair(0,0));
-            appendValue(tmpReadClips,readClips[(*mIt).id]);
+            appendValue(tmpReadClips,readClips[(*mIt).readId]);
             if(_max((*mIt).beginPos,(*mIt).endPos) > (TContigPos)options.maxCoord) options.maxCoord = (unsigned) _max((*mIt).beginPos,(*mIt).endPos);
             if(_min((*mIt).beginPos,(*mIt).endPos) < (TContigPos)options.minCoord) options.minCoord = (unsigned) _min((*mIt).beginPos,(*mIt).endPos);
             
@@ -322,7 +323,7 @@ addReadQualityToMatches(TFragmentStore  &fragmentStore,
         for(unsigned i = 0; i < length(read); ++i)
             avgRQ += (int) getQualityValue(read[i]);
         // watch out, this is new: use mapping quality if given
-        //if((fragmentStore.alignQualityStore[(*it).id]).score == 0 || (char)(avgRQ/length(read))<(fragmentStore.alignQualityStore[(*it).id]).score)
+        if((fragmentStore.alignQualityStore[(*it).id]).score == 0 || (char)(avgRQ/length(read))<(fragmentStore.alignQualityStore[(*it).id]).score)
             (fragmentStore.alignQualityStore[(*it).id]).score = (char)(avgRQ/length(read));
     }
     
@@ -455,7 +456,7 @@ clipReads(TFragmentStore    &fragmentStore,
             
 #ifdef SNPSTORE_DEBUG
             if(extraV) ::std::cout << align << std::endl;
-            if(extraV) ::std::cout << "aliQ.errors = " << aliQ.errors << std::endl; 
+            if(extraV) ::std::cout << "aliQ.errors = " << (int) aliQ.errors << std::endl; 
 #endif
             
             // transform first and last read character to genomic positions
@@ -559,6 +560,36 @@ printHetTable(TTable & hetTable)
     }
     cout << std::endl;
 }
+
+template<typename TTmpReads, typename TTmpMatches, typename TTmpQualities, typename TStr>
+void
+_dumpMatches(TTmpReads & reads, TTmpMatches & matches, TTmpQualities & qualities, TStr str)
+{
+    
+    std::cout << "Length of matches = " << length(matches)  << "\n";
+    std::cout << "Length of reads   = " << length(reads)  << "\n";
+    std::cout << "Length of matchqs = " << length(qualities)  << "\n";
+    
+    for(unsigned i = 0 ; i < length(matches); ++i)
+    {
+        char ori = (matches[i].beginPos < matches[i].endPos) ? 'F' : 'R';
+        std::cout << "--"<<str<<"Match number " << i << ":\n";
+        std::cout << "--"<<str<<"MatchId  = " << matches[i].id << "\n";
+        std::cout << "--"<<str<<"ReadId   = " << matches[i].readId << "\n";
+        std::cout << "--"<<str<<"ContigId = " << matches[i].contigId << std::flush << "\n";
+        std::cout << "--"<<str<<"gBegin   = " << _min(matches[i].beginPos, matches[i].endPos) << "\n";
+        std::cout << "--"<<str<<"gEnd     = " << _max(matches[i].beginPos, matches[i].endPos) << "\n";
+        std::cout << "--"<<str<<"orient   = " << ori << std::flush << std::endl;
+        if(length(qualities) > matches[i].id)
+        {
+            std::cout << "--"<<str<<"EditDist = " << (int) qualities[matches[i].id].errors << "\n";
+            std::cout << "--"<<str<<"AvgQ     = " << (int) qualities[matches[i].id].score << "\n";
+        }
+        std::cout << "--"<<str<<"Readseq  = " << reads[matches[i].readId] << std::flush << "\n";
+        
+    }
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -855,6 +886,10 @@ int detectSNPs(
                 if(!empty(tmpReadCounts)) arrayMoveForward(begin(tmpReadCounts,Standard()), end(tmpReadCounts,Standard()), begin(readCounts,Standard()));
                 if(!empty(tmpReadCigars)) arrayMoveForward(begin(tmpReadCigars,Standard()), end(tmpReadCigars,Standard()), begin(readCigars,Standard()));
                 if(!empty(tmpReadClips)) arrayMoveForward(begin(tmpReadClips,Standard()), end(tmpReadClips,Standard()), begin(readClips,Standard()));
+#ifdef SNPSTORE_DEBUG
+                CharString strstr = "afterCopyInFrag";
+                _dumpMatches(fragmentStore,strstr);
+#endif
                 
             }   
             
@@ -933,6 +968,10 @@ int detectSNPs(
                     clear(tmpReadClips);
                     clear(tmpReadCigars);
                     copyNextWindowMatchesAndReads(fragmentStore,readCounts,readCigars,readClips,tmpReadCounts,tmpReads,tmpRs,tmpMatches,tmpQualities,tmpReadClips,tmpReadCigars,i,currentWindowEnd,options);
+#ifdef SNPSTORE_DEBUG
+                    CharString strstr = "afterCopyInTmp";
+                    _dumpMatches(tmpReads,tmpMatches,tmpQualities,strstr);
+#endif
                 }   
                 
                 //  ::std::cout << "Min = " << options.minCoord << " Max = " << options.maxCoord << std::endl;
@@ -940,7 +979,7 @@ int detectSNPs(
                 
                 // coordinates are relative to current chromosomal window (segment)
                 transformCoordinates(fragmentStore,startCoord,options);
-                
+
                 // set the current chromosomal segment as contig sequence 
                 TContig conti;
                 conti.seq = infix(genomes[i],startCoord,endCoord);
@@ -948,7 +987,7 @@ int detectSNPs(
                 appendValue(fragmentStore.contigNameStore, genomeNames[i], Generous() );// internal id is always 0
                 
                 // clip Reads if clipping is switched on and there were clip tags in the gff file
-                if(!options.dontClip && options.clipTagsInFile)
+                if((!options.dontClip && options.clipTagsInFile) || options.softClipTagsInFile)
                 {
                     options.useBaseQuality = false; // activate "average read quality"-mode for snp calling, low quality bases should be clipped anyway
                     clipReads(fragmentStore,readClips,(unsigned)0,(unsigned)length(fragmentStore.alignedReadStore),options);
@@ -1708,7 +1747,7 @@ int main(int argc, const char *argv[])
         return 0;
     }
     
-    if(options.realign || options.windowSize > 100000) 
+    if((options.realign && options.windowSize > 50000) || options.windowSize > 1000000) 
         options.windowSize = 10000;
     
     if (*options.outputLog != 0)

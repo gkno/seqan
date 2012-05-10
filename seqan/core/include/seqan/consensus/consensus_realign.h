@@ -211,9 +211,10 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	// Initialization
 	typedef typename Value<TConsensus>::Type TProfileChar;
 	TSize gapPos = ValueSize<TProfileChar>::VALUE - 1;
+//    int refId = length(fragStore.readSeqStore) - 1;
 
 	// Remove each fragment and realign it to the profile.
-	TAlignedReadIter beg = begin(contigReads, Standard());
+//	TAlignedReadIter beg = begin(contigReads, Standard());
 	TAlignedReadIter alignIt = begin(contigReads, Standard());
 	TAlignedReadIter alignItEnd = end(contigReads, Standard());
 	if (includeReference)
@@ -225,7 +226,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 	for (; alignIt != alignItEnd; ++alignIt) {
         double tBegin = sysTime();
         if (i++ > 1000 || i == 1) {
-            printf("realigning %u/%u\r", unsigned(alignIt-beg), unsigned(alignItEnd-beg));
+            //printf("realigning %u/%u\r", unsigned(alignIt-beg), unsigned(alignItEnd-beg));
             if (i != 1)
                 i = 0;
             fflush(stdout);
@@ -265,7 +266,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 		int leftDiag = (alignIt->beginPos - bandOffset) - bandwidth;
 		int rightDiag = leftDiag + 2 * bandwidth;
-		int increaseBand = 0;
+		//int increaseBand = 0;
+		int increaseBandLeft = 0;
+		int increaseBandRight = 0;
 		int removedBeginPos = 0;
 		int removedEndPos = 0;
 		for (TReadPos iPos = bandOffset; iPos < alignIt->beginPos && itCons != itConsEnd; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
@@ -314,9 +317,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					removedEndPos = 0;
 				} else {
 					if (itConsPosBegin != itConsPos) {
-						++increaseBand;
+                        ++increaseBandLeft; // insertion --> increaseBandLeft, read has character here, consensus doesnt
 						++removedEndPos;
-					} else ++removedBeginPos;
+					} else ++removedBeginPos; // begin gaps
 					removeGap(contigReads, itConsPos);
 				}
 				(*myReadIt).count[0] = ordValue(*itRead); 
@@ -325,14 +328,14 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
                 //SEQAN_ASSERT_LT(itRead, itReadEnd);
 			}
 			for (; diff < newDiff && itCons != itConsEnd; ++diff) {
-				++increaseBand;
+                ++increaseBandRight; // deletion --> increaseBandRight, read has gaps here, consensus doesnt
 				//SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[gapPos];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
 					++bandConsIt;
 					++itConsPos;
-				} else removeGap(contigReads, itConsPos);
+				} else removeGap(contigReads, itConsPos);  //++increaseBandRight;}
 				++itCons;
 			}
 		}
@@ -348,8 +351,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					removedEndPos = 0;
 				} else {  // only gaps left in this column after removing myRead
 					if (itConsPosBegin != itConsPos) {
-						++increaseBand;
-						++removedEndPos; 
+                        ++increaseBandLeft; // insertion --> increaseBandLeft, read is longer than consensus here
+                        ++removedEndPos; 
 					} else ++removedBeginPos;
 					removeGap(contigReads, itConsPos);
 				}
@@ -359,8 +362,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			}
 		}
 		bool singleton = (itConsPosBegin == itConsPos);
-		increaseBand -= removedEndPos;
-
+		increaseBandLeft -= removedEndPos; 
+        //increaseBand = increaseBandLeft + increaseBandRight;
+        
 		// Go further up to the bandwidth
 		for (TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); ++itCons, ++iPos, ++bandConsIt)
             *bandConsIt = *itCons;
@@ -389,11 +393,20 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
         double tBegAlign = sysTime();
 		leftDiag -= removedBeginPos;
 		rightDiag -= removedBeginPos;
+        //if(alignIt->readId == refId)
+        //{
+        //    std::cout << "length(Cons)=" <<  (int) length(pairSet[0]) << std::endl;
+        //    std::cout << "length(Ref)=" <<  (int) length(pairSet[1]) << std::endl;
+        //    std::cout << "-->leftDiag" << _max(leftDiag - increaseBandLeft, -1 * (int) length(pairSet[1])) << std::endl;
+        //    std::cout << "-->rightDiag" << _min(rightDiag + increaseBandRight, (int) length(pairSet[0])) << std::endl;
+        //}
 		if (!singleton) {
 			if (rmethod == 0)
-                globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+                globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBandLeft, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBandRight, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+                // globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
 			else if (rmethod == 1)
-                globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
+                globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBandLeft, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBandRight, (int) length(pairSet[0])), BandedGotoh());
+                // globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
 		}
         double tEndAlign = sysTime();
 
@@ -426,6 +439,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				--fragIt;
 				int gapLen = fragIt->begin1 - consPos;
 				if (firstMatch) gapLen = 0; // gap between two adjacent segment matches
+                // equivalent to profilePos + fraglen < nextProfilePos
 				while (consPos < (TReadPos)fragIt->begin1) { // cons stretch before newCons start
 					SEQAN_ASSERT_LT(bandIt, bandItEnd);
 					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
@@ -436,17 +450,19 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					++consPos; 
 					++alignPos;
 				}
-				while (readPos < (TReadPos)fragIt->begin2) { // read stretch before newCons start
+                // equivalent to refPos + fraglen < nextRefPos
+				while (readPos < (TReadPos)fragIt->begin2) { // read stretch before matching fragment starts
 					SEQAN_ASSERT_LT(readPos, (TReadPos)length(fragStore.readSeqStore[alignIt->readId]));
 					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
-					if (gapLen) {
+                    // equivalent to profileDel
+                    if (gapLen) {
 						diff += gapLen; // add gap of length gaplen to readGaps
 						appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
 						gapLen = 0; // do this only once
 					}
 					int numGaps = insertGap(contigReads, bandOffset + alignPos);
 					TProfileChar tmpChar;
-					++tmpChar.count[myRead[readPos].count[0]];
+					++tmpChar.count[myRead[readPos].count[0]]; // insert new column in profile
 					tmpChar.count[gapPos] += numGaps;
 					*newConsIt = tmpChar; ++newConsIt;
 					++readPos; ++alignPos;
@@ -588,11 +604,13 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
     // Append reference sequence to aligned reads for contigs if requested to do so.
 	if (includeReference) {
 		TId dummyReadId = length(fragStore.readSeqStore);
+		TId dummyMatchId = length(fragStore.alignedReadStore);
 		appendRead(fragStore, fragStore.contigStore[contigId].seq);
 		appendValue(fragStore.readNameStore, fragStore.contigNameStore[contigId], Generous());
 		fragStore.contigNameStore[contigId] += "Consensus_";
         
 		TAlignedElement el;
+		el.id = dummyMatchId;
 		el.readId = dummyReadId;
 		el.contigId = contigId;
 		minPos = el.beginPos = 0;
@@ -673,7 +691,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
-//		std::cout << "Score: " << score << std::endl;
+		//std::cout << "Score: " << score << std::endl;
 		oldScore = score;
 //        double beginTime = sysTime();
         double tBefore = 0, tAlign = 0, tAfter = 0;
@@ -683,7 +701,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 //        std::cerr << "TIME realign " << endTime - beginTime << std::endl;
 		score = scoreConsensus(consensus);
 	}
-//	std::cout << "FinalScore: " << score << std::endl;
+	//std::cout << "FinalScore: " << score << std::endl;
 
     // beginTime = sysTime();
 	// Update all the aligned reads and the new consensus
