@@ -44,14 +44,22 @@
 template <typename T1, typename T2>
 struct TestTypeEq
 {
-    enum TValue_ { VALUE = 0 };
+    typedef bool TValue;
+    static const bool VALUE;
 };
 
 template <typename T>
 struct TestTypeEq<T, T>
 {
-    enum TValue_ { VALUE = 1 };
+    typedef bool TValue;
+    static const bool VALUE;
 };
+
+template <typename T1, typename T2>
+const bool TestTypeEq<T1, T2>::VALUE = false;
+
+template <typename T>
+const bool TestTypeEq<T, T>::VALUE = true;
 
 // --------------------------------------------------------------------------
 // Actual Tests.
