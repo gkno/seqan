@@ -328,7 +328,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                 unsigned idx = 0;
                 int nmValue =-1;
                 BamTagsDict tagsDict(record.tags);
-                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx))
+                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx) && nmValue != -1)
                     editDistance = nmValue;
                 else
                     std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
