@@ -23,6 +23,9 @@
 #ifndef APPS_RABEMA_BUILD_GOLD_STANDARD_H_
 #define APPS_RABEMA_BUILD_GOLD_STANDARD_H_
 
+// TODO(holtgrew): Another possible way to save memory is not to store the first, always identical part of the read id.
+// TODO(holtgrew): Yet another way to save memory is to load the contigs on demand, i.e. using FAI.
+
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -41,6 +44,8 @@
 #include "find_approx_dp_quality.h"
 #include "intervals.h"
 #include "verification.h"
+
+#include "fai_index.h"
 
 // ============================================================================
 // Enums, Tags, Classes, Typedefs.
@@ -498,7 +503,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
                            BamIOContext<StringSet<CharString> > & samIOContext,
                            StringSet<CharString> & readNameStore,
                            StringSet<CharString> const & contigNameStore,
-                           StringSet<Dna5String> /*const*/ & contigSeqStore,
+                           FaiIndex const & faiIndex,
                            Options<BuildGoldStandard> const & options,
                            TPatternSpec const &)
 {
@@ -556,7 +561,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     size_t prevRightBorder = maxValue<size_t>();
     int posOnContig = 0;
     BamAlignmentRecord record;  // Current read record.
-    Dna5String /*const*/ * contig = 0;
+    Dna5String contig;
     Dna5String rcContig;
     Dna5String readSeq;
     CharString readName;
@@ -616,8 +621,21 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
             }
             posOnContig = 0;
 
-            contig = &contigSeqStore[record.rId];
-            rcContig = *contig;
+            // Load reference sequence on the fly using FAI index to save memory.
+            unsigned faiRefId = 0;
+            if (!getIdByName(faiIndex, contigNameStore[record.rId], faiRefId))
+            {
+                std::cerr << "Reference sequence " << contigNameStore[record.rId] << " not known in FAI file.\n";
+                return 1;
+            }
+            if (getSequence(contig, faiIndex, faiRefId) != 0)
+            {
+                std::cerr << "Could not load sequence " << contigNameStore[record.rId] << " from FASTA file with FAI.\n";
+                return 1;
+            }
+            // std::cerr << "PREFIX " << prefix(contig, 100) << "\n";
+            // std::cerr << "SUFFIX " << suffix(contig, length(contig) - 100) << "\n";
+            rcContig = contig;
             reverseComplement(rcContig);
         }
         // Handle progress: Position on contig.
@@ -642,7 +660,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
 
         size_t right = 0;
         if (!hasFlagRC(record))
-            right = buildErrorCurvePoints(errorCurves[readId], maxError, *contig, record.rId, !hasFlagRC(record), readSeq, readId, endPos, prevReadId, prevRefId, prevRightBorder, readNameStore, options.matchN, TPatternSpec());
+            right = buildErrorCurvePoints(errorCurves[readId], maxError, contig, record.rId, !hasFlagRC(record), readSeq, readId, endPos, prevReadId, prevRefId, prevRightBorder, readNameStore, options.matchN, TPatternSpec());
         else
             right = buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, record.rId, !hasFlagRC(record), readSeq, readId, length(rcContig) - record.pos, prevReadId, prevRefId, prevRightBorder, readNameStore, options.matchN, TPatternSpec());
         if (options.oracleSamMode)
@@ -818,31 +836,17 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // Load contigs.
     // =================================================================
     startTime = sysTime();
-    TNameStore refNameStore;
-    StringSet<Dna5String> refSeqStore;
-    // TODO(holtgrew): Use fast double-pass I/O with mmap string?
-    std::cerr << "Reference      " << options.referenceSeqFilename << " ...";
-    std::ifstream inContigs(toCString(options.referenceSeqFilename), std::ios::binary | std::ios::in);
-    if (!inContigs.good())
+    std::cerr << "Reference Index      " << options.referenceSeqFilename << ".fai ...";
+    FaiIndex faiIndex;
+    if (load(faiIndex, toCString(options.referenceSeqFilename)) != 0)
     {
-        std::cerr << "Could not read contigs.\n";
+        std::cerr << "Could not read reference FAI index.\n";
         return 1;
     }
-    RecordReader<std::ifstream, SinglePass<> > contigReader(inContigs);
-    if (read2(refNameStore, refSeqStore, contigReader, Fasta()) != 0)
-    {
-        std::cerr << "Could not read contigs from file " << options.referenceSeqFilename << "\n";
-        return 1;
-    }
-    for (unsigned i = 0; i < length(refNameStore); ++i)
-        trimSeqHeaderToId(refNameStore[i]);
-    TNameStoreCache refNameStoreCache(refNameStore);  // TODO(holtgrew): Remove?
     std::cerr << " OK\n";
-    if (options.verbosity >= 2)
-        std::cerr << "[timer] reading contigs: " << sysTime() - startTime << " s" << std::endl;
     
     // Open SAM file and read in header.
-    std::cerr << "Alignments     " << options.perfectMapFilename << " (header) ...";
+    std::cerr << "Alignments           " << options.perfectMapFilename << " (header) ...";
     std::ifstream inSam(toCString(options.perfectMapFilename), std::ios_base::in | std::ios_base::binary);
     if (!inSam.is_open())
     {
@@ -850,6 +854,8 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         return 1;
     }
     RecordReader<std::ifstream, SinglePass<> > samReader(inSam);
+    TNameStore refNameStore;
+    TNameStoreCache refNameStoreCache(refNameStore);
     BamIOContext<TNameStore> samIOContext(refNameStore, refNameStoreCache);
     BamHeader samHeader;
     if (readRecord(samHeader, samIOContext, samReader, Sam()) != 0)
@@ -874,9 +880,9 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     int res = 0;
     StringSet<CharString> readNameStore;
     if (options.distanceFunction == "edit")
-        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, refSeqStore, options, MyersUkkonenReads());
+        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, MyersUkkonenReads());
     else // options.distanceFunction == "hamming"
-        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, refSeqStore, options, HammingSimple());
+        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, HammingSimple());
     if (res != 0)
         return 1;
     if (options.verbosity >= 2)

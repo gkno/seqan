@@ -1,6 +1,11 @@
 == Trunk ==
 
- * 
+ * Reference sequences are now loaded using an FAI index on demand.
+   This reduces the memory requirement for reference sequences to storing the longest contig two times (forward and RC).
+ * Improved the output of Rabema to look nicer, progress displays are more exact.
+ * Adjusting Rabema to use `bam_io` module and stream through the SAM file.
+   The only thing to keep resident in memory is a few integers for each read (not alignment) and a mapping of read names to ids.
+   This greatly reduces the memory consumption, e.g. from X GB to Y GB on the example from the Rabema homepage.
  * Added `prepare_sam` tool to prepare the updated RazerS 2 output to be used with new Rabema versions.
    The updated fragment store does not output read sequences for secondary alignments.
    However, this requires a global view and the read sequences to be always in memory.
