@@ -32,12 +32,14 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 // This file coordinates the calls of tests to ensure that the sequence
-// module fulfills the requirements. 
+// module fulfills the requirements.
 // ==========================================================================
 #include <seqan/basic.h>
 #include <seqan/file.h>
 
 #include "test_sequence.h"
+#include "test_segment_beta.h"
+#include "test_string_set.h"
 
 SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
 {
@@ -46,6 +48,12 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
     // --------------------------------------------------------------------------
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_copy_constructible);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_default_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_less);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_less_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_greater);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_greater_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_unequal);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_append);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_append_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_assignable);
@@ -58,22 +66,31 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_end);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_end_position);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_erase);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_erase_back);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_front);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_get_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_insert);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_insert_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_iter);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_length);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_move_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_replace);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_reserve);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_resize);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_dna_swap);
     SEQAN_CALL_TEST(test_sequence_alloc_string_dna_value);
-    
+
     // --------------------------------------------------------------------------
     // Testing Alloc Strings With Non Simple Types
     // --------------------------------------------------------------------------
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_copy_constructible);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_default_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_less);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_less_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_greater);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_greater_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_unequal);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_append);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_append_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_assignable);
@@ -86,15 +103,94 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_end);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_end_position);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_erase);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_erase_back);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_front);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_get_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_insert);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_insert_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_iter);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_length);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_move_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_replace);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_reserve);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_swap);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_resize);
     SEQAN_CALL_TEST(test_sequence_alloc_string_counting_char_value);
+
+    // --------------------------------------------------------------------------
+    // Testing Alloc Segments With Simple Types
+    // (Alloc Segments = Segments of Alloc Strings)
+    // --------------------------------------------------------------------------
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_copy_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_default_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_less);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_less_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_greater);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_greater_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_unequal);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_assignable);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_assign_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_back);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_begin);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_begin_position);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_clear);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_end);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_end_position);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_front);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_get_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_iter);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_length);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_move_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_replace);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_resize);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_swap);
+    SEQAN_CALL_TEST(test_sequence_alloc_segment_dna_value);
+
+/*
+ * Not tested: append(), appendValue(), capacity(), erase(), eraseBack(),
+ * insert(), insertValue(), reserve().
+ */
+
+    // --------------------------------------------------------------------------
+    // Testing Alloc Strings With Simple Types
+    // --------------------------------------------------------------------------
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_copy_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_default_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_less_greater_equal);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_append);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_append_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_assign);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_assign_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_assign_value_by_id);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_begin);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_begin_position);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_back);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_clear);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_concat);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_end);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_end_position);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_erase);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_erase_back);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_front);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_get_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_get_value_by_id);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_infix);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_infix_with_length);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_insert);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_insert_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_iter);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_length);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_move_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_prefix);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_resize);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_suffix);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_swap);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_value);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_value_by_id);
+
+
+
 }
 SEQAN_END_TESTSUITE
