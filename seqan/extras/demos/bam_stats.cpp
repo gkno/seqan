@@ -189,7 +189,7 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
         setClippedBeginPosition(row(result, 0), toViewPosition(row(result, 1), 0));
     if (toViewPosition(row(result, 0), length(source(row(result, 0)))) >
         toViewPosition(row(result, 1), length(source(row(result, 1)))))
-    setClippedEndPosition(row(result, 0), toViewPosition(row(result, 1), length(source(row(result, 1))) -1 ));
+    setClippedEndPosition(row(result, 0), toViewPosition(row(result, 1), length(source(row(result, 1))) ));
     return errors;
 }
 
@@ -274,6 +274,7 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
         }
 
         // Now, do something with it ;)
+        unsigned editDistance = 0;
         stats.numRecords += 1;  // One more record.
         stats.alignedRecords += !hasFlagUnmapped(record);
         // Compute alignment.
@@ -292,7 +293,7 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
             unsigned seqId = rIdToSeqId[record.rId];
             
             if (options.realign)
-                realignBamRecord(align, seqs[seqId], record, 10);  // realign in a window 10bp left and right of the original alignment
+                editDistance = realignBamRecord(align, seqs[seqId], record, 10);  // realign in a window 10bp left and right of the original alignment
             else
             {
                 // convert soft clipping into match/mismatches
@@ -311,49 +312,65 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
             if (options.verbosity >= 3)
                 std::cerr << align << std::endl;
             
-            typedef Align<Dna5String>             TAlign;
-            typedef typename Row<TAlign>::Type    TRow;
-            typedef typename Iterator<TRow>::Type TRowIter;
-            unsigned editDistance = 0;
-            unsigned posReadFwd = 0;
-            for (TRowIter it0 = iter(row(align, 0), 0), it1 = iter(row(align, 1), 0); !atEnd(it0); goNext(it0), goNext(it1))
+            if (!options.realign)
             {
-                unsigned posRead = posReadFwd;
-                // is read aligned to reverse strand?
-                if (hasFlagRC(record))
-                    posRead = (length(record.seq)) - posReadFwd;
-                SEQAN_ASSERT_LEQ(posRead, length(record.seq));
+                typedef Align<Dna5String>             TAlign;
+                typedef typename Row<TAlign>::Type    TRow;
+                typedef typename Iterator<TRow>::Type TRowIter;
+                unsigned posReadFwd = 0;
+                for (TRowIter it0 = iter(row(align, 0), 0), it1 = iter(row(align, 1), 0); !atEnd(it0); goNext(it0), goNext(it1))
+                {
+                    unsigned posRead = posReadFwd;
+                    // is read aligned to reverse strand?
+                    if (hasFlagRC(record))
+                        posRead = (length(record.seq)) - posReadFwd;
+                    SEQAN_ASSERT_LEQ(posRead, length(record.seq));
 
-                if (isGap(it0) && isGap(it1))
-                    continue;
-                if (isGap(it0) || isGap(it1))
-                {
-                    if (isGap(it0))
+                    if (isGap(it0) && isGap(it1))
+                        continue;
+                    if (isGap(it0) || isGap(it1))
                     {
-                        unsigned len = length(stats.insertHisto);
-                        resize(stats.insertHisto, std::max(len, posRead + 1), 0);
-                        stats.insertHisto[posRead] += 1;
-                        posReadFwd += 1;
+                        if (isGap(it0))
+                        {
+                            unsigned len = length(stats.insertHisto);
+                            resize(stats.insertHisto, std::max(len, posRead + 1), 0);
+                            stats.insertHisto[posRead] += 1;
+                            posReadFwd += 1;
+                        }
+                        else
+                        {
+                            unsigned len = length(stats.deletionHisto);
+                            resize(stats.deletionHisto, std::max(len, posRead + 1), 0);
+                            stats.deletionHisto[posRead] += 1;
+                        }
+                        editDistance += 1;
+                        continue;
                     }
-                    else
+                    if (*it0 != *it1)
                     {
-                        unsigned len = length(stats.deletionHisto);
-                        resize(stats.deletionHisto, std::max(len, posRead + 1), 0);
-                        stats.deletionHisto[posRead] += 1;
+                        unsigned len = length(stats.mismatchHisto);
+                        resize(stats.mismatchHisto, std::max(len, posRead + 1), 0);
+                        stats.mismatchHisto[posRead] += 1;
+                        editDistance += 1;
                     }
-                    editDistance += 1;
-                    continue;
+                    posReadFwd += 1;
                 }
-                if (*it0 != *it1)
+                
+                resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
+                if (hasFlagRC(record))
                 {
-                    unsigned len = length(stats.mismatchHisto);
-                    resize(stats.mismatchHisto, std::max(len, posRead + 1), 0);
-                    stats.mismatchHisto[posRead] += 1;
-                    editDistance += 1;
+                    // read aligns to forward strand
+                    for (unsigned i = 0; i < length(record.qual); ++i)
+                        qualSum[i] += record.qual[i] - '!';
+                } else
+                {
+                    // read aligns to reverse strand
+                    for (unsigned i = 0; i < length(record.qual); ++i)
+                        qualSum[(length(record.qual) - 1) - i] += record.qual[i] - '!';
                 }
-                posReadFwd += 1;
+                ++reads;
             }
-            
+
             if (options.useNM)
             {
                 // trust NM instead of CIGAR string
@@ -365,21 +382,21 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
                 else
                     std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
             }
-
-//            if (editDistance >7)
-//            {
-//                Align<Dna5String> realign;
-//                unsigned realignEditDist = realignBamRecord(realign, seqs[seqId], record, 10);
-//                if (editDistance != realignEditDist)
-//                {
-//                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
-//                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
-//                    std::cout << align;
-//                    std::cout << realign;
-//                    std::cout << std::endl;
-//                }
-//            }
-//            
+            
+            if (editDistance >= 10)
+            {
+                Align<Dna5String> realign;
+                unsigned realignEditDist = realignBamRecord(realign, seqs[seqId], record, 10);
+                if (editDistance != realignEditDist)
+                {
+                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
+                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
+                    std::cout << align;
+                    std::cout << realign;
+                    std::cout << std::endl;
+                }
+            }
+            
             // update best-match errors
             if (readId != -1)
             {
@@ -394,20 +411,6 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
                 if (hasFlagRC(record))
                     reverseComplement(back(readSeqs));
             }
-
-            resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
-            if (hasFlagRC(record))
-            {
-                // read aligns to forward strand
-                for (unsigned i = 0; i < length(record.qual); ++i)
-                    qualSum[i] += record.qual[i] - '!';
-            } else
-            {
-                // read aligns to reverse strand
-                for (unsigned i = 0; i < length(record.qual); ++i)
-                    qualSum[(length(record.qual) - 1) - i] += record.qual[i] - '!';
-            }
-            ++reads;
 
             /*if (options.verbosity >= 2 && editDistance > 20)
             {
