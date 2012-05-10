@@ -239,10 +239,16 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
         // Compute alignment.
         if (record.rId != -1 && record.rId < static_cast<int>(length(seqs)))
         {
+            bool onFwdStrand = ((record.flag & 0x10) == 0);
+            
             // retrieve (possibly) missing read sequence
             unsigned readId;
             if (getIdByName(readNames, record.qName, readId, readNameCache))
+            {
                 record.seq = readSeqs[readId];
+                if (!onFwdStrand)
+                    reverseComplement(record.seq);
+            }
             
             if (options.realign)
                 realignBamRecord(align, seqs[record.rId], record, 10);  // realign in a window 10bp left and right of the original alignment
@@ -294,19 +300,20 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                 }
                 posReadFwd += 1;
             }
-            
-//            {
-//                Align<Dna5String> realign;
-//                unsigned realignEditDist = realignBamRecord(realign, seqs[record.rId], record, 10);
-//                if (editDistance != realignEditDist)
-//                {
-//                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
-//                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
-//                    std::cout << align;
-//                    std::cout << realign;
-//                    std::cout << std::endl;
-//                }
-//            }
+
+            if (editDistance ==100)
+            {
+                Align<Dna5String> realign;
+                unsigned realignEditDist = realignBamRecord(realign, seqs[record.rId], record, 10);
+                if (editDistance != realignEditDist)
+                {
+                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
+                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
+                    std::cout << align;
+                    std::cout << realign;
+                    std::cout << std::endl;
+                }
+            }
             
             if (!empty(options.bestMatchFile))
             {
@@ -321,11 +328,13 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                     appendValue(readSeqs, record.seq);
                     appendName(readNames, record.qName, readNameCache);
                     appendValue(minErrors, editDistance);
+                    if (!onFwdStrand)
+                        reverseComplement(back(readSeqs));
                 }
             }
 
             resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
-            if ((record.flag & 0x10) == 0)
+            if (onFwdStrand)
             {
                 // read aligns to forward strand
                 for (unsigned i = 0; i < length(record.qual); ++i)
