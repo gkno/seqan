@@ -263,7 +263,7 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphEdgeWeights)
 	SEQAN_ASSERT_EQ(v0, 0u);
 	SEQAN_ASSERT_EQ(v1, 1u);
 	TEdgeDescriptor e1 = addEdge(g, 0, 1, 100);
-	SEQAN_ASSERT_EQ(getCargo(e1), 100);
+	SEQAN_ASSERT_EQ(getCargo(e1), 100u);
 	SEQAN_ASSERT_EQ(numEdges(g), 1u);
 	removeEdge(g, e1);
 	SEQAN_ASSERT_EQ(numEdges(g), 0u);
@@ -423,7 +423,7 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphIterators)
 	TDfsPreorder dfsIt(g, 2);
 	SEQAN_ASSERT_NOT(atEnd(dfsIt));
 	SEQAN_ASSERT(atBegin(dfsIt));
-	SEQAN_ASSERT_EQ(*dfsIt, 2);
+	SEQAN_ASSERT_EQ(*dfsIt, 2u);
 	++dfsIt;
 	SEQAN_ASSERT_EQ(getValue(dfsIt), 0u);
 	SEQAN_ASSERT_EQ(&hostGraph(dfsIt), &g);
@@ -458,14 +458,14 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphOutput)
 
 	TAlignmentGraph g(str);
 	TVD vH = addVertex(g, i1, 8, 3);
-	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i3), 9);  // Not found, length of the sequence
-	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i3), 0);  // Not found, 0
-	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i1), 8);
-	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i1), 11);
+	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i3), 9u);  // Not found, length of the sequence
+	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i3), 0u);  // Not found, 0
+	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i1), 8u);
+	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i1), 11u);
 	TVD vT = addVertex(g, i1, 13, 1); TVD vS = addVertex(g, i3, 6, 3);
 	TVD vW = addVertex(g, i2, 18, 1); TVD vA = addVertex(g, i0, 0, 8);
-	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i0), 0);
-	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i0), 8);
+	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i0), 0u);
+	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i0), 8u);
 	TVD vM = addVertex(g, i2, 11, 4); TVD vK = addVertex(g, i2, 0, 8);
 	TVD vC = addVertex(g, i0, 11, 4); TVD vD = addVertex(g, i0, 15, 2);
 	TVD vF = addVertex(g, i0, 18, 3); TVD vG = addVertex(g, i1, 0, 8);
@@ -483,8 +483,8 @@ SEQAN_DEFINE_TEST(Test_Refinement_AlignmentGraphOutput)
 	addEdge(g, vE, vW); addEdge(g, vE, vR); addEdge(g, vU, vW); addEdge(g, vU, vR);
 	addEdge(g, vW, vR); addEdge(g, vF, vJ); addEdge(g, vF, vO); addEdge(g, vF, vS);
 	addEdge(g, vJ, vO); addEdge(g, vJ, vS); addEdge(g, vO, vS);
-	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i3), 0);
-	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i3), 9);
+	SEQAN_ASSERT_EQ(getFirstCoveredPosition(g, i3), 0u);
+	SEQAN_ASSERT_EQ(getLastCoveredPosition(g, i3), 9u);
 
 	// Output of the alignment graph
 	std::stringstream sstream, expected;
