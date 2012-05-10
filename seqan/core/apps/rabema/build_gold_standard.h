@@ -82,19 +82,23 @@ void intervalizeErrorCurves(String<WitRecord> & result,
     typedef TErrorCurves::const_iterator TErrorCurvesIter;
     for (TErrorCurvesIter it = errorCurves.begin(); it != errorCurves.end(); ++it, ++progressI)
     {
-        if (progressI % tenPercent == 0u)
+        if (tenPercent > 0u && progressI % tenPercent == 0u)
             std::cerr << progressI / tenPercent * 10 << '%';
-        else if (progressI % (tenPercent / 5) == 0u)
+        else if (tenPercent > 5u && progressI % (tenPercent / 5) == 0u)
             std::cerr << '.';
 
         size_t readId = it->first;
         TWeightedMatches const & matches = it->second;
-        
+
         // Sort the matches.  Matches with high scores (negative score and
         // low absolute value) come first.
         TWeightedMatches sortedMatches(matches);
         std::sort(begin(sortedMatches, Standard()), end(sortedMatches, Standard()));
-    
+        //std::cerr << "\n -- " << readNameStore[readId] << "\n";
+        //for (unsigned i = 0; i < length(sortedMatches); ++i)
+        //    std::cerr << sortedMatches[i] << "\n";
+        //std::cerr << "\n";
+
         // intervals[e] holds the intervals for error e of the current read.
         String<String<ContigInterval> > intervals;
         int maxError = options.oracleSamMode ? 0 : (int)options.maxError;
@@ -219,15 +223,16 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 
     // The read maps with less than the given number of errors to [left, right]
     // to the contig sequence, is forward strand iff is Forwar is true.
-    TPosition left = endPos, right = endPos;
+    TPosition /*left = endPos,*/ right = endPos;
 
     // Skip this alignment position if not right of previously
     // right border of the interval.
+    // TODO(holtgrew): Remove this piece, it's unused right now. We could/should also fix this to work for streaming over SAM files.
     // TODO(holtgrew): U-oh, what about a +-1 error here?
-    if (readId == previousReadId && contigId == previousContigId && left <= previousRightBorder) {
-//        std::cerr << __FILE__  << ":" << __LINE__ << " Skipping because " << left << " <= " << previousRightBorder << std::endl;
-        return previousRightBorder;
-    }
+    //if (readId == previousReadId && contigId == previousContigId && left <= previousRightBorder) {
+    //    //std::cerr << __FILE__  << ":" << __LINE__ << " Skipping because " << left << " <= " << previousRightBorder << std::endl;
+    //    return previousRightBorder;
+    //}
 
     bool ret;  // Flag used for assertions below.
     (void) ret;  // If run without assertions.
@@ -354,8 +359,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
             while (tentativeLeft > 0 && !loopedAfterFoundTooLowScore && !hitLastRight) {
                 // Stop if went went to the rightmost position of the
                 // last interval with the previous loop iteration.
-                if (readId == previousReadId && contigId == previousContigId && tentativeLeft == previousRightBorder)
-                    break;
+                //if (readId == previousReadId && contigId == previousContigId && tentativeLeft == previousRightBorder)
+                //    break;
                 loopedAfterFoundTooLowScore = foundTooLowScore;
                 TPosition oldTentativeLeft = tentativeLeft;
                 // Move the tentative left position left by kIntervalLen but not
@@ -538,7 +543,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     // In oracle SAM mode, we store the distance of the alignment from the SAM file for each read.  Otherwise, this
     // variable remains unused.
     String<int> readAlignmentDistances;
-    
+
 //     for (TAlignedReadIterator it = begin(fragments.alignedReadStore, Standard()); it != end(fragments.alignedReadStore, Standard()); ++it) {
 //         fprintf(stderr, "%3u\t%3u\t%8lu\t%3s\n", it->contigId, it->readId, it->endPos, (it->endPos < it->beginPos ? "R" : "F"));
 //     }
@@ -776,11 +781,11 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     unsigned tenPercent = length(readLengthStore) / 10;
     std::cerr << "Progress: ";
     for (unsigned readId = 0; readId < length(readLengthStore); ++readId) {
-        if (readId % tenPercent == 0u)
+        if (tenPercent > 0u && readId % tenPercent == 0u)
             std::cerr << readId / tenPercent * 10 << '%';
-        else if (readId % (tenPercent / 5) == 0u)
+        else if (tenPercent > 5u && readId % (tenPercent / 5) == 0u)
             std::cerr << '.';
-        
+
         std::sort(begin(errorCurves[readId], Standard()), end(errorCurves[readId], Standard()));
         fillGaps(errorCurves[readId]);
         smoothErrorCurve(errorCurves[readId]);
