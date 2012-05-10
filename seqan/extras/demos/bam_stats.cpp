@@ -60,6 +60,7 @@ struct Options
     bool showHelp;
     bool showVersion;
     bool realign;
+    bool useNM;
     unsigned verbosity;
     CharString refFile;
     CharString inFile;
@@ -71,6 +72,7 @@ struct Options
         showHelp = false;
         showVersion = false;
         realign = false;
+        useNM = false;
         verbosity = 1;
         inFormat = FORMAT_AUTO;
     }
@@ -101,6 +103,7 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     addOption(parser, CommandLineOption("S", "input-sam", "Input file is SAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_SAM));
     addOption(parser, CommandLineOption("B", "input-bam", "Input file is BAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_BAM));
     addOption(parser, CommandLineOption("r", "realign",   "Don't trust NM values and realign instead", OptionType::Bool));
+    addOption(parser, CommandLineOption("nm","use-nm-tag","Get errors from NM values instead of CIGAR string", OptionType::Bool));
 
     requiredArguments(parser, 2);
 }
@@ -131,6 +134,7 @@ int parseCommandLineAndCheck(Options & options,
 
     getOptionValueLong(parser, "input-file", options.inFile);
     getOptionValueLong(parser, "best-match-file", options.bestMatchFile);
+    getOptionValueLong(parser, "use-nm-tag", options.useNM);
     if (isSetLong(parser, "input-sam"))
         options.inFormat = FORMAT_SAM;
     if (isSetLong(parser, "input-bam"))
@@ -167,9 +171,8 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
     unsigned len = getAlignmentLengthInRef(record);
     __int64 posBegin = record.pos;
 
-    for (unsigned i = 0; i < length(record.cigar); ++i)
-        if (record.cigar[i].operation == 'S')
-            posBegin -= record.cigar[i].count;
+    if (record.cigar[0].operation == 'S')
+        posBegin -= record.cigar[0].count;
 
     __int64 posEnd = posBegin + len + maxIndels;
     posBegin = _max(0, posBegin - maxIndels);
@@ -180,7 +183,14 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
 
     AlignConfig<true, false, false, true> alignConfig;
     Score<int, Simple> scoringScheme(0, -3000, -3001);
-    return -globalAlignment(result, scoringScheme, alignConfig, NeedlemanWunsch()) / 3000;
+    int errors =  -globalAlignment(result, scoringScheme, alignConfig, NeedlemanWunsch()) / 3000;
+	   
+    if (toViewPosition(row(result, 0), 0) < toViewPosition(row(result, 1), 0))
+        setClippedBeginPosition(row(result, 0), toViewPosition(row(result, 1), 0));
+    if (toViewPosition(row(result, 0), length(source(row(result, 0)))) >
+        toViewPosition(row(result, 1), length(source(row(result, 1)))))
+    setClippedEndPosition(row(result, 0), toViewPosition(row(result, 1), length(source(row(result, 1))) -1 ));
+    return errors;
 }
 
 
@@ -239,21 +249,32 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
         // Compute alignment.
         if (record.rId != -1 && record.rId < static_cast<int>(length(seqs)))
         {
-            bool onFwdStrand = ((record.flag & 0x10) == 0);
-            
             // retrieve (possibly) missing read sequence
-            unsigned readId;
+            int readId;
             if (getIdByName(readNames, record.qName, readId, readNameCache))
             {
                 record.seq = readSeqs[readId];
-                if (!onFwdStrand)
+                if (hasFlagRC(record))
                     reverseComplement(record.seq);
-            }
+            } else
+                readId = -1;
             
             if (options.realign)
                 realignBamRecord(align, seqs[record.rId], record, 10);  // realign in a window 10bp left and right of the original alignment
             else
+            {
+                // convert soft clipping into match/mismatches
+                if (record.cigar[0].operation == 'S')
+                    record.pos -= record.cigar[0].count;
+
+                for (unsigned i = 0; i < length(record.cigar); ++i)
+                {
+                    if (record.cigar[i].operation == 'S')
+                        record.cigar[i].operation = 'M';
+                }
+                
                 bamRecordToAlignment(align, seqs[record.rId], record);
+            }
                 
             if (options.verbosity >= 3)
                 std::cerr << align << std::endl;
@@ -300,41 +321,50 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                 }
                 posReadFwd += 1;
             }
-
-            if (editDistance ==100)
-            {
-                Align<Dna5String> realign;
-                unsigned realignEditDist = realignBamRecord(realign, seqs[record.rId], record, 10);
-                if (editDistance != realignEditDist)
-                {
-                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
-                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
-                    std::cout << align;
-                    std::cout << realign;
-                    std::cout << std::endl;
-                }
-            }
             
-            if (!empty(options.bestMatchFile))
+            if (options.useNM)
             {
-                // update best-match errors
-                if (getIdByName(readNames, record.qName, readId, readNameCache))
-                {
-                    minErrors[readId] = _min(minErrors[readId], editDistance);
-                }
+                // trust NM instead of CIGAR string
+                unsigned idx = 0;
+                int nmValue =-1;
+                BamTagsDict tagsDict(record.tags);
+                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx))
+                    editDistance = nmValue;
                 else
-                {
-                    // add read name and entry
-                    appendValue(readSeqs, record.seq);
-                    appendName(readNames, record.qName, readNameCache);
-                    appendValue(minErrors, editDistance);
-                    if (!onFwdStrand)
-                        reverseComplement(back(readSeqs));
-                }
+                    std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
+            }
+
+//            if (editDistance >7)
+//            {
+//                Align<Dna5String> realign;
+//                unsigned realignEditDist = realignBamRecord(realign, seqs[record.rId], record, 10);
+//                if (editDistance != realignEditDist)
+//                {
+//                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
+//                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
+//                    std::cout << align;
+//                    std::cout << realign;
+//                    std::cout << std::endl;
+//                }
+//            }
+//            
+            // update best-match errors
+            if (readId != -1)
+            {
+                minErrors[readId] = _min(minErrors[readId], editDistance);
+            }
+            else
+            {
+                // add read name and entry
+                appendValue(readSeqs, record.seq);
+                appendName(readNames, record.qName, readNameCache);
+                appendValue(minErrors, editDistance);
+                if (hasFlagRC(record))
+                    reverseComplement(back(readSeqs));
             }
 
             resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
-            if (onFwdStrand)
+            if (hasFlagRC(record))
             {
                 // read aligns to forward strand
                 for (unsigned i = 0; i < length(record.qual); ++i)
@@ -476,12 +506,14 @@ int main(int argc, char const ** argv)
         std::cerr << "Could not open " << options.refFile << std::endl;
         return 1;
     }
+    double start = sysTime();
     RecordReader<String<char, MMap<> >, DoublePass<Mapped> > refReader(seqMMapString);
     if (read2(seqIds, seqs, refReader, Fasta()) != 0)
     {
         std::cerr << "Could not read reference from " << options.refFile << std::endl;
         return 1;
     }
+    std::cerr << "Loading reference took" << sysTime() - start << std::endl;
 
     // Open SAM/BAM file and do work.
     if (options.inFormat == FORMAT_SAM)
