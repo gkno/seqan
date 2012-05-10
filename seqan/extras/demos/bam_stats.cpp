@@ -215,6 +215,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
     
     // record best-match errors
     String<unsigned> minErrors;
+    StringSet<Dna5String> readSeqs;
     StringSet<CharString> readNames;
     typedef NameStoreCache<StringSet<CharString> > TNameCache;
     TNameCache readNameCache(readNames);
@@ -223,6 +224,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
     {
         // Read alignment record.
         ++line;
+        if (line % 100000 == 0) std::cerr << '.' << std::flush;
         if (readRecord(record, context, reader, tag) != 0)
         {
             std::cerr << "Could not read alignment! lineNo=" << line << std::endl;
@@ -237,6 +239,11 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
         // Compute alignment.
         if (record.rId != -1 && record.rId < static_cast<int>(length(seqs)))
         {
+            // retrieve (possibly) missing read sequence
+            unsigned readId;
+            if (getIdByName(readNames, record.qName, readId, readNameCache))
+                record.seq = readSeqs[readId];
+            
             if (options.realign)
                 realignBamRecord(align, seqs[record.rId], record, 10);  // realign in a window 10bp left and right of the original alignment
             else
@@ -304,7 +311,6 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
             if (!empty(options.bestMatchFile))
             {
                 // update best-match errors
-                unsigned readId;
                 if (getIdByName(readNames, record.qName, readId, readNameCache))
                 {
                     minErrors[readId] = _min(minErrors[readId], editDistance);
@@ -312,6 +318,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                 else
                 {
                     // add read name and entry
+                    appendValue(readSeqs, record.seq);
                     appendName(readNames, record.qName, readNameCache);
                     appendValue(minErrors, editDistance);
                 }
