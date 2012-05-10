@@ -93,7 +93,7 @@ void intervalizeErrorCurves(String<WitRecord> & result,
         // Sort the matches.  Matches with high scores (negative score and
         // low absolute value) come first.
         TWeightedMatches sortedMatches(matches);
-        std::sort(begin(sortedMatches, Standard()), end(sortedMatches, Standard()));
+        //std::sort(begin(sortedMatches, Standard()), end(sortedMatches, Standard()));
         //std::cerr << "\n -- " << readNameStore[readId] << "\n";
         //for (unsigned i = 0; i < length(sortedMatches); ++i)
         //    std::cerr << sortedMatches[i] << "\n";
@@ -189,9 +189,9 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                              TReadSeq /*const*/ &read,
                              size_t readId,
                              size_t endPos,
-                             size_t previousReadId,
-                             size_t previousContigId,
-                             size_t previousRightBorder,
+                             size_t /*previousReadId*/,
+                             size_t /*previousContigId*/,
+                             size_t /*previousRightBorder*/,
                              TReadNames const & readNames,
                              bool matchN,
                              TPatternSpec const &) {
@@ -371,10 +371,10 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 if (ENABLE && (ALL || readId == READID))
                     std::cerr << "tentativeLeft after = " << tentativeLeft << std::endl;
                 // Do not go further than the previous right position.
-                if (readId == previousReadId && contigId == previousContigId && tentativeLeft <= previousRightBorder) {
-                    tentativeLeft = previousRightBorder;
-                    hitLastRight = true;
-                }
+                //if (readId == previousReadId && contigId == previousContigId && tentativeLeft <= previousRightBorder) {
+                //    tentativeLeft = previousRightBorder;
+                //    hitLastRight = true;
+                //}
                 if (ENABLE && (ALL || readId == READID)) {
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- tentative left = " << tentativeLeft << std::endl;
                 }
