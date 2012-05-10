@@ -197,8 +197,10 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
 
 
 template <typename TStreamOrReader, typename TSeqString, typename TSpec, typename TFormat>
-int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Options const & options, TFormat const & tag)
+int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<TSeqString, TSpec> & seqs, Options const & options, TFormat const & tag)
 {
+    NameStoreCache<StringSet<CharString> > seqIdsCache(seqIds);
+
     StringSet<CharString> refNames;
     NameStoreCache<StringSet<CharString> > refNamesCache(refNames);
     BamIOContext<StringSet<CharString> > context(refNames, refNamesCache);
@@ -230,6 +232,19 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
     typedef NameStoreCache<StringSet<CharString> > TNameCache;
     TNameCache readNameCache(readNames);
     unsigned line = 0;
+    unsigned oldNumRefs = length(refNames);
+    // Initialize mapping from record.rId to seq id from reference.
+    String<unsigned> rIdToSeqId;
+    for (unsigned i = 0; i < length(refNames); ++i)
+    {
+        unsigned idx = 0;
+        if (!getIdByName(seqIds, refNames[i], idx, seqIdsCache))
+        {
+            std::cerr << "Invalid reference name " << refNames[i] << " from SAM/BAM header!\n";
+            return 1;
+        }
+        appendValue(rIdToSeqId, idx);
+    }
     while (!atEnd(reader))
     {
         // Read alignment record.
@@ -242,6 +257,21 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
         }
         if (options.verbosity >= 3)
             write2(std::cerr, record, context, Sam());
+        // Update mapping from SAM rId to index of sequence in reference sequences.
+        if (oldNumRefs != length(refNames))
+        {
+            for (unsigned i = oldNumRefs; i < length(refNames); ++i)
+            {
+                unsigned idx = 0;
+                if (!getIdByName(seqIds, refNames[i], idx, seqIdsCache))
+                {
+                    std::cerr << "Invalid reference name " << refNames[i] << " from SAM/BAM record!\n";
+                    return 1;
+                }
+                appendValue(rIdToSeqId, idx);
+            }
+            oldNumRefs = length(refNames);
+        }
 
         // Now, do something with it ;)
         stats.numRecords += 1;  // One more record.
@@ -258,9 +288,11 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                     reverseComplement(record.seq);
             } else
                 readId = -1;
+
+            unsigned seqId = rIdToSeqId[record.rId];
             
             if (options.realign)
-                realignBamRecord(align, seqs[record.rId], record, 10);  // realign in a window 10bp left and right of the original alignment
+                realignBamRecord(align, seqs[seqId], record, 10);  // realign in a window 10bp left and right of the original alignment
             else
             {
                 // convert soft clipping into match/mismatches
@@ -273,7 +305,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
                         record.cigar[i].operation = 'M';
                 }
                 
-                bamRecordToAlignment(align, seqs[record.rId], record);
+                bamRecordToAlignment(align, seqs[seqId], record);
             }
                 
             if (options.verbosity >= 3)
@@ -337,7 +369,7 @@ int doWork(TStreamOrReader & reader, StringSet<TSeqString, TSpec> & seqs, Option
 //            if (editDistance >7)
 //            {
 //                Align<Dna5String> realign;
-//                unsigned realignEditDist = realignBamRecord(realign, seqs[record.rId], record, 10);
+//                unsigned realignEditDist = realignBamRecord(realign, seqs[seqId], record, 10);
 //                if (editDistance != realignEditDist)
 //                {
 //                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
@@ -527,7 +559,7 @@ int main(int argc, char const ** argv)
             return 1;
         }
         RecordReader<String<char, MMap<> >, SinglePass<Mapped> > samReader(samMMapString);
-        return doWork(samReader, seqs, options, Sam());
+        return doWork(samReader, seqIds, seqs, options, Sam());
     }
     else  // options.inFormat == FORMAT_BAM
     {
@@ -539,7 +571,7 @@ int main(int argc, char const ** argv)
             std::cerr << "Could not open " << options.inFile << std::endl;
             return 1;
         }
-        return doWork(bamStream, seqs, options, Bam());
+        return doWork(bamStream, seqIds, seqs, options, Bam());
     }
 
     return 0;
