@@ -888,7 +888,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.signature:createIntervalTree(intervalTree, intervals)
+..signature:createIntervalTree(intervalTree, intervals)
 ..param.intervalTree:An interval tree
 ..param.intervals:A container of intervals
 */
