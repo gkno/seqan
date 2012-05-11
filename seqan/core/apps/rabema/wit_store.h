@@ -234,6 +234,10 @@ template <typename TFragmentStore>
 void loadWitFile(WitStore & store,
                  TFragmentStore /*const*/ & fragments,
                  CharString const & fileName) {
+    (void) store;
+    (void) fragments;
+    (void) fileName;
+#if 0
 //IOREV uses custom io, maybe the whole wit-store should be moved to stor_io module?
     typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
 
@@ -358,8 +362,8 @@ void loadWitFile(WitStore & store,
         /*int id = */appendValue(store, record);
         //std::cerr << "   record.id == " << id << std::endl;
     }
+#endif  // #if 0
 }
-
 
 void
 performIntervalScoreLowering(WitStore & witStore, unsigned const maxError)

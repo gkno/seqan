@@ -122,10 +122,10 @@ inline bool getIdByName(FaiIndex const & index, CharString const & name, unsigne
 }
 
 // ----------------------------------------------------------------------------
-// Function getSequenceLength()
+// Function sequenceLength()
 // ----------------------------------------------------------------------------
 
-inline __uint64 getSequenceLength(FaiIndex const & index, unsigned refId)
+inline __uint64 sequenceLength(FaiIndex const & index, unsigned refId)
 {
     return index.indexEntryStore[refId].sequenceLength;
 }
@@ -184,7 +184,7 @@ inline int getSequenceInfix(String<TValue, TSpec> & str, FaiIndex const & index,
 template <typename TValue, typename TSpec>
 inline int getSequence(String<TValue, TSpec> & str, FaiIndex const & index, unsigned refId)
 {
-    return getSequenceInfix(str, index, refId, 0, getSequenceLength(index, refId));
+    return getSequenceInfix(str, index, refId, 0, sequenceLength(index, refId));
 }
 
 // ----------------------------------------------------------------------------

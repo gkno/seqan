@@ -39,6 +39,16 @@ using namespace seqan;
 // The columns in a WIT file.
 #define WIT_COLUMN_NAMES "QNAME\tSCORE\tRNAME\tRDIR\tSPOS\tEPOS"
 
+struct Gsi_;
+typedef seqan::Tag<Gsi_> Gsi;
+
+// Dummy only at the moment.
+class WitHeader
+{
+public:
+    WitHeader() {}
+};
+
 
 // A simple record class that stores the information of a weighted
 // interval for WIT files.
@@ -59,6 +69,9 @@ struct WitRecord {
     // Id of the read, possibly not set.
     size_t readId;
 
+    // Original distance of the interval before lowering.
+    int originalDistance;
+
     // Distance associated with the interval.
     int distance;
 
@@ -78,14 +91,15 @@ struct WitRecord {
     size_t lastPos;
 
     // Default constructor.
-    WitRecord() {}
+    WitRecord() : flags(0), readId(0), originalDistance(0), distance(0), contigId(0), isForward(0), firstPos(0), lastPos(0)
+    {}
 
     // Complete constructor for all properties.
     WitRecord(CharString const & _readName, int const & _flags,
               int const & _distance,
               CharString const & _contigName, bool const & _isForward,
               size_t const & _firstPos, size_t const & _lastPos)
-            : readName(_readName), flags(_flags), readId(0), distance(_distance),
+            : readName(_readName), flags(_flags), readId(0), originalDistance(_distance), distance(_distance),
               contigName(_contigName), contigId(0), isForward(_isForward),
               firstPos(_firstPos), lastPos(_lastPos) {}
 
@@ -122,6 +136,20 @@ struct WitRecord_Lt_ContigIdReadIdLastPos {
     }
 };
 
+void clear(WitRecord & record)
+{
+    clear(record.readName);
+    record.flags = 0;
+    record.readId = 0;
+    record.originalDistance = 0;
+    record.distance = 0;
+    clear(record.contigName);
+    record.contigId = 0;
+    record.isForward = true;
+    record.firstPos = 0;
+    record.lastPos = 0;
+}
+
 
 // Output-stream operator for WitRecord objects.
 //
@@ -145,7 +173,7 @@ TStream & operator<<(TStream & stream, WitRecord const & record) {
            << record.contigName << "\t"
            << (record.isForward ? "F" : "R") << "\t"
            << record.firstPos << "\t"
-           << record.lastPos << "\t";
+           << record.lastPos;
     return stream;
 }
 
@@ -192,33 +220,40 @@ TStream &writeWitRecord(TStream & stream, WitRecord const & record) {
 }
 
 
-// Read WIT header line ("@WIT\tVN:1.0") from stream.
-//
-// TStream -- type of the stream.
-// TChar   -- type of lookahead character.
-//
-// stream -- Stream to read from.
-// c -- Lookahead character.
-template <typename TStream, typename TChar>
-void readWitHeader(TStream &stream, TChar &c) {
-//IOREV _hasCRef_ _nodoc_
+// Read WIT header line ("@WIT\tVN:1.0") from record reader.
+
+template <typename TStream, typename TSpec>
+int readRecord(WitHeader & header, RecordReader<TStream, TSpec> & reader, Gsi const & /*tag*/)
+{
+    (void) header;
+    
     CharString tmp;
     // Read "@WIT".
-    c = _streamGet(stream);
-    tmp = _parseReadWordUntilWhitespace(stream, c);
-    if (tmp != CharString("@WIT"))
+    if (readUntilTabOrLineBreak(tmp, reader) != 0)
+        return 1;  // Could not read header.
+    if (tmp != "@WIT")
         std::cerr << "WARNING: File did not begin with \"@WIT\", was: \"" << tmp << "\"" << std::endl;
     // Skip "\t".
-    _parseSkipWhitespace(stream, c);
+    if (skipChar(reader, '\t') != 0)
+        return 1;  // Next char was not TAB.
     // Read "VN:1.0".
-    tmp = _parseReadWordUntilWhitespace(stream, c);
-    if (tmp != CharString("VN:1.0"))
-        std::cerr << "WARNING: Version is not \"VN:1.0\"" << std::endl;
+    clear(tmp);
+    if (readUntilTabOrLineBreak(tmp, reader) != 0)
+        return 1;  // Could not read version.
+    if (tmp != "VN:1.0")
+        std::cerr << "WARNING: Version is not \"VN:1.0\", was: \"" << tmp << "\"" << std::endl;
     // Skip to and after end of line.
-    _parseSkipLine(stream, c);
+    skipLine(reader);
     // Maybe read/skip additional header lines.
-    while (c == '@')
-      _parseSkipLine(stream, c);
+    while (!atEnd(reader) && value(reader) == '@')
+        if (skipLine(reader) != 0)
+            return 1;
+
+    // Skipy any trailing comment lines.
+    while (!atEnd(reader) && value(reader) == '#')
+        if (skipLine(reader) != 0)
+            return 1;
+    return 0;
 }
 
 
@@ -235,34 +270,92 @@ void readWitHeader(TStream &stream, TChar &c) {
 // at this location.
 //
 // Returns true iff the record could be successfully read from the file.
-template <typename TStream, typename TChar>
-bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
-//IOREV _hasCRef_
-    String<char> tmp;
 
-    // Maybe skip comments.
-    while (not _streamEOF(stream) && c == '#')
-        _parseSkipLine(stream, c);
-    if (_streamEOF(stream))
-        return false;
+template <typename TStream, typename TSpec>
+int readRecord(WitRecord & record, RecordReader<TStream, TSpec> & reader, Gsi const & /*tag*/)
+{
+    CharString buffer;
 
-    // Read line.
-    _parseReadIdentifier(stream, record.readName, c);
-    _parseReadIdentifier(stream, record.readName, c);
-    _parseSkipWhitespace(stream, c);
-    record.distance = _parseReadNumber(stream, c);
-    _parseSkipWhitespace(stream, c);
-    _parseReadIdentifier(stream, record.contigName, c);
-    _parseSkipWhitespace(stream, c);
-    record.isForward = (_parseReadChar(stream, c) == 'F');
-    _parseSkipWhitespace(stream, c);
-    record.firstPos = _parseReadNumber(stream, c);
-    _parseSkipWhitespace(stream, c);
-    record.lastPos = _parseReadNumber(stream, c);
+    // No more records in file.
+    if (atEnd(reader))
+        return 1;
+
+    // Read read name.
+    clear(record);
+    if (readUntilTabOrLineBreak(record.readName, reader) != 0)
+        return 1;
+    if (value(reader) != '\t')
+        return 1;
+    skipChar(reader, '\t');
+
+    // Interpret trailing characters for mate-pair identifier in read name.
+    if (length(record.readName) >= 2u && record.readName[length(record.readName) - 2] == '/')
+    {
+        char c = back(record.readName);
+        if (c == '0')
+            record.flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_FIRST_MATE;
+        else if (c == '1')
+            record.flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_SECOND_MATE;
+        else
+            return 1;  // Could not interpret trailing mate indicator.
+        resize(record.readName, length(record.readName) - 2);
+    }
+
+    // Read distance.
+    if (readUntilTabOrLineBreak(buffer, reader) != 0)
+        return 1;
+    if (!lexicalCast2(record.distance, buffer))
+        return 1;  // Could not convert distance.
+    record.originalDistance = record.distance;
+    if (value(reader) != '\t')
+        return 1;
+    skipChar(reader, '\t');
+
+    // Read contig name.
+    if (readUntilTabOrLineBreak(record.contigName, reader) != 0)
+        return 1;
+    if (value(reader) != '\t')
+        return 1;
+    skipChar(reader, '\t');
+
+    // Read 'F'/'R'.
+    clear(buffer);
+    if (readUntilTabOrLineBreak(buffer, reader) != 0)
+        return 1;
+    if (buffer != "F" && buffer != "R")
+        return 1;
+    record.isForward = (buffer[0] == 'F');
+    if (value(reader) != '\t')
+        return 1;
+    skipChar(reader, '\t');
+
+    // Read first pos.
+    clear(buffer);
+    if (readUntilTabOrLineBreak(buffer, reader) != 0)
+        return 1;
+    if (!lexicalCast2(record.firstPos, buffer))
+        return 1;
+    if (value(reader) != '\t')
+        return 1;
+    skipChar(reader, '\t');
     
-    // Skip to and after end of line.
-    _parseSkipLine(stream, c);
-    return true;
+    // Read last pos.
+    clear(buffer);
+    if (readUntilTabOrLineBreak(buffer, reader) != 0)
+        return 1;
+    if (!lexicalCast2(record.lastPos, buffer))
+        return 1;
+    if (value(reader) != '\t' && value(reader) != '\r' && value(reader) != '\n')  // TODO(holtgrew): \t only here because output buggy.
+        return 1;
+    if (skipLine(reader) != 0)
+        return 1;  // Skip line.
+
+    // Skipy any trailing comment lines.
+    while (!atEnd(reader) && value(reader) == '#')
+        if (skipLine(reader) != 0)
+            return 1;
+
+    return 0;
 }
 
 #endif  // WIT_BUILDER_INTERVALS_H_

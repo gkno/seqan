@@ -68,6 +68,20 @@ void trimSeqHeaderToId(seqan::CharString & header)
     resize(header, i);
 }
 
+struct IntervalizeCmp
+{
+    StringSet<CharString> const & readNameStore;
+
+    IntervalizeCmp(StringSet<CharString> const & readNameStore) :
+            readNameStore(readNameStore)
+    {}
+
+    bool operator()(unsigned lhs, unsigned rhs) const
+    {
+        return readNameStore[lhs] < readNameStore[rhs];
+    }
+};
+
 // Build intervals from the error curves.
 void intervalizeErrorCurves(String<WitRecord> & result,
                             TErrorCurves const & errorCurves,
@@ -77,14 +91,29 @@ void intervalizeErrorCurves(String<WitRecord> & result,
 
     std::cerr << "\n____POINT TO INTERVAL CONVERSION______________________________________________\n\n"
               << "Progress: ";
-    unsigned tenPercent = errorCurves.size() / 10;
-    unsigned progressI = 0;
+
+    // Get a list of read ids, sorted by their read name.
+    String<unsigned> sortedReadIds;
+    reserve(sortedReadIds, length(readNameStore));
+    for (unsigned i = 0; i < length(readNameStore); ++i)
+        appendValue(sortedReadIds, i);
+    IntervalizeCmp cmp(readNameStore);
+    std::sort(begin(sortedReadIds, Standard()), end(sortedReadIds, Standard()), cmp);
+
+    unsigned tenPercent = errorCurves.size() / 10 + 1;
     typedef TErrorCurves::const_iterator TErrorCurvesIter;
-    for (TErrorCurvesIter it = errorCurves.begin(); it != errorCurves.end(); ++it, ++progressI)
+    for (unsigned i = 0; i < length(sortedReadIds); ++i)
     {
-        if (tenPercent > 0u && progressI % tenPercent == 0u)
-            std::cerr << progressI / tenPercent * 10 << '%';
-        else if (tenPercent > 5u && progressI % (tenPercent / 5) == 0u)
+        TErrorCurvesIter it = errorCurves.find(sortedReadIds[i]);
+        if (it == errorCurves.end())
+        {
+            std::cerr << "WARNING: Something went wrong with read ids! This should not happen.\n";
+            continue;
+        }
+        
+        if (tenPercent > 0u && i % tenPercent == 0u)
+            std::cerr << i / tenPercent * 10 << '%';
+        else if (tenPercent > 5u && i % (tenPercent / 5) == 0u)
             std::cerr << '.';
 
         size_t readId = it->first;
@@ -778,7 +807,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
 
     std::cerr << "\n____SMOOTHING ERROR CURVES____________________________________________________\n\n";
     startTime = sysTime();
-    unsigned tenPercent = length(readLengthStore) / 10;
+    unsigned tenPercent = length(readLengthStore) / 10 + 1;
     std::cerr << "Progress: ";
     for (unsigned readId = 0; readId < length(readLengthStore); ++readId) {
         if (tenPercent > 0u && readId % tenPercent == 0u)
@@ -827,7 +856,7 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     double startTime = 0;  // For measuring time below.
 
     typedef StringSet<CharString>      TNameStore;
-    typedef NameStoreCache<TNameStore> TNameStoreCache; // TODO(holtgrew): Remove?
+    typedef NameStoreCache<TNameStore> TNameStoreCache;
     
     std::cerr << "==============================================================================\n"
               << "                RABEMA - Read Alignment BEnchMArk\n"
@@ -838,8 +867,9 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
               << "____LOADING FILES_____________________________________________________________\n\n";
 
     // =================================================================
-    // Load contigs.
+    // Prepare File I/O.
     // =================================================================
+
     startTime = sysTime();
     std::cerr << "Reference Index      " << options.referenceSeqFilename << ".fai ...";
     FaiIndex faiIndex;
