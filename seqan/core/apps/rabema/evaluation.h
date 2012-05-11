@@ -562,6 +562,11 @@ struct RabemaStats
     // SAM records that did not correspond to alignments below the configured maximal error rate.
     __uint64 invalidAlignments;
 
+    // Total number of reads that we have GSI records for, equals number of normalized intervals to be found.
+    __uint64 totalReads;
+    // Normalized number of found intervals.
+    double normalizedIntervals;
+
     // The following arrays are indexed by the integer value of the error rate.
 
     // Number of intervals that were to find for each error rate.
@@ -569,13 +574,23 @@ struct RabemaStats
     // Number of found intervals for each error rate.
     String<unsigned> intervalsFoundForErrorRate;
 
-    RabemaStats() : intervalsToFind(0), intervalsFound(0), invalidAlignments(0)
+    // The following values are normalized towards all intervals.
+
+    // Normalized number of intervals to find for each error rate.
+    String<double> normalizedIntervalsToFindForErrorRate;
+    // Normalized number of intervals found for each error rate.
+    String<double> normalizedIntervalsFoundForErrorRate;
+
+    RabemaStats() : intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0)
     {}
 
-    RabemaStats(unsigned maxErrorRate) : intervalsToFind(0), intervalsFound(0), invalidAlignments(0)
+    RabemaStats(unsigned maxErrorRate) :
+            intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0)
     {
         resize(intervalsToFindForErrorRate, maxErrorRate + 1, 0);
         resize(intervalsFoundForErrorRate, maxErrorRate + 1, 0);
+        resize(normalizedIntervalsToFindForErrorRate, maxErrorRate + 1, 0.0);
+        resize(normalizedIntervalsFoundForErrorRate, maxErrorRate + 1, 0.0);
     }
 };
 
@@ -586,9 +601,19 @@ TStream & operator<<(TStream & stream, RabemaStats const & stats)
            << "Intervals found:\t" << stats.intervalsFound << '\n'
            << "Invalid alignments:\t" << stats.invalidAlignments << '\n'
            << '\n'
-           << "ERR\t#ToFind\t#Found\n";
+           << "Number of reads:\t" << stats.totalReads << '\n'
+           << "Normalized intervals:\t" << stats.normalizedIntervals << '\n'
+           << '\n';
+    char buffer[1000];
+    sprintf(buffer, "  ERR\t%8s\t%8s\t%8s\t%10s\n", "#max", "#found", "norm max", "norm found");
+    stream << buffer;
+    stream << "--------------------------------------------------------------------\n";
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
-        stream << i << '\t' << stats.intervalsToFindForErrorRate[i] << '\t' << stats.intervalsFoundForErrorRate[i] << '\n';
+    {
+        sprintf(buffer, "%5u\t%8d\t%8d\t%8.2f\t%10.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
+                stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i]);
+        stream << buffer;
+    }
     return stream << '\n';
 }
 
@@ -886,23 +911,37 @@ void benchmarkReadResult(RabemaStats & result,
     }
     
     // Update the resulting RabemaStats.
+    result.totalReads += 1;
     if (options.oracleWitMode || options.benchmarkCategory == "any-best")
     {
         bool found = (length(numFound) > 0u);
         result.intervalsToFind += 1;
         result.intervalsFound += found;
+        result.normalizedIntervals += found;
         int d = (smallestDistance == maxValue<int>()) ? 0 : smallestDistance;
         result.intervalsToFindForErrorRate[d] += 1;
         result.intervalsFoundForErrorRate[d] += found;
+        result.normalizedIntervalsToFindForErrorRate[d] += 1;
+        result.normalizedIntervalsFoundForErrorRate[d] += found;
     }
     else  // all-best or all was selected
     {
+        unsigned intervalsToFind = 0;
+        unsigned intervalsFound = 0;
         for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
         {
-            result.intervalsToFind += numIntervalsForErrorRate[d];
-            result.intervalsFound += foundIntervalsForErrorRate[d];
+            intervalsToFind += numIntervalsForErrorRate[d];
+            intervalsFound += foundIntervalsForErrorRate[d];;
             result.intervalsToFindForErrorRate[d] += numIntervalsForErrorRate[d];
             result.intervalsFoundForErrorRate[d] += foundIntervalsForErrorRate[d];
+        }
+        result.intervalsToFind += intervalsToFind;
+        result.intervalsFound += intervalsFound;
+        result.normalizedIntervals += 1.0 * intervalsFound / intervalsToFind;
+        for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
+        {
+            result.normalizedIntervalsToFindForErrorRate[d] += 1.0 * numIntervalsForErrorRate[d] / intervalsToFind;
+            result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsFound;
         }
     }
 }
@@ -1394,9 +1433,10 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     std::cerr << "Note that in all-best and any-best mode, we differentiate the intervals we\n"
               << "found and those we have to find by their distance.  This is not possible in\n"
               << "all mode since a multiple lower-error intervals might be contained in an\n"
-              << "higher-error interval.\n\n";
+              << "higher-error interval.\n"
+              << '\n';
     
-    std::cerr << result << '\n';
+    std::cerr << '\n' << result << '\n';
 
     /*
 
