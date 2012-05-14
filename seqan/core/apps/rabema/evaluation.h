@@ -989,15 +989,15 @@ compareAlignedReadsToReference(RabemaStats & result,
 
     // The main loop: We walk over both the SAM and GSI records.
     // unsigned chunkI = 0;
-    std::cerr << "Each dot corresponds to 100k processed reads.\n"
+    std::cerr << "Each dot corresponds to 10k processed reads.\n"
               << "\n"
               << "Progress: ";
     unsigned i = 0;
     while (!samDone || !gsiDone)
     {
-        if (i > 0u && i % (1000*1000) == 0u)
-            std::cerr << i / 1000 / 1000 << 'M';
-        else if (i > 0 && i % (100*1000) == 0u)
+        if (i > 0u && i % (100*1000) == 0u)
+            std::cerr << i / 100 / 1000 << 'M';
+        else if (i > 0 && i % (10*1000) == 0u)
             std::cerr << '.';
         ++i;
         
