@@ -20,6 +20,8 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
+// TODO(holtgrew): I think most time is spent reading the GSI file. We should be able to speed this up greatly with a more compact file format.
+
 #ifndef APPS_RABEMA_EVALUATION_H_
 #define APPS_RABEMA_EVALUATION_H_
 
@@ -597,23 +599,27 @@ struct RabemaStats
 template <typename TStream>
 void write(TStream & stream, RabemaStats const & stats, Options<EvaluateResults> const & options)
 {
-    stream << "Intervals to find:\t" << stats.intervalsToFind << '\n'
-           << "Intervals found:\t" << stats.intervalsFound << '\n'
-           << "Invalid alignments:\t" << stats.invalidAlignments << '\n'
+    stream << "Intervals to find:              " << stats.intervalsToFind << '\n'
+           << "Intervals found:                " << stats.intervalsFound << '\n'
+           << "Intervals found [%]             " << (100.0 * stats.intervalsFound / stats.intervalsToFind) << '\n'
+           << "Invalid alignments:             " << stats.invalidAlignments << '\n'
            << '\n'
-           << "Number of reads:\t" << stats.totalReads << '\n'
-           << "Normalized intervals:\t" << stats.normalizedIntervals << '\n'
+           << "Number of reads:                " << stats.totalReads << '\n'
+           << "Normalized intervals found:     " << stats.normalizedIntervals << '\n'
+           << "Normalized intervals found [%]: " << (100.0 * stats.normalizedIntervals / stats.totalReads) << '\n'
            << '\n';
     char buffer[1000];
-    sprintf(buffer, "  ERR\t%8s\t%8s\t%8s\t%10s\n", "#max", "#found", "norm max", "norm found");
+    sprintf(buffer, "  ERR\t%8s\t%8s\t%8s\t%8s\t%10s\t%10s\n", "#max", "#found", "%found", "norm max", "norm found", "norm found [%]");
     stream << buffer;
-    stream << "--------------------------------------------------------------------\n";
+    stream << "------------------------------------------------------------------------------------------------------\n";
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
     {
         if (options.benchmarkCategory == "all" && (int)i != options.maxError)
             continue;
-        sprintf(buffer, "%5u\t%8d\t%8d\t%8.2f\t%10.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
-                stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i]);
+        sprintf(buffer, "%5u\t%8d\t%8d\t%8.2f\t%8.2f\t%10.2f\t%10.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
+                100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i],
+                stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i],
+                100.0 * stats.normalizedIntervalsFoundForErrorRate[i] / stats.normalizedIntervalsToFindForErrorRate[i]);
         stream << buffer;
     }
     stream << '\n';
@@ -1456,6 +1462,10 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
               << "Oracle mode           " << (options.oracleWitMode ? (char const *) "yes" : (char const *) "no") << "\n"
               << "Benchmark category    " << options.benchmarkCategory << "\n"
               << "Distance measure      " << options.distanceFunction << "\n"
+              << "Match Ns              " << (options.matchN ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "GSI File              " << options.witFileName << '\n'
+              << "SAM File              " << options.samFileName << '\n'
+              << "Reference File        " << options.seqFileName << '\n'
               << "Show\n"
               << "    additional        " << (options.showAdditionalIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
               << "    hit               " << (options.showHitIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
