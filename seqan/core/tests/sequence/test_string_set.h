@@ -237,7 +237,7 @@ void testStringSetAssignValue(TStringSet & /*Tag*/)
 
     // Test the assignValue function
     resize(stringSet, 3);
-    assignValue(stringSet, 1, string);
+    assignValue(stringSet, 1u, string);
     SEQAN_ASSERT_EQ(length(stringSet), 3u);
     SEQAN_ASSERT_EQ(stringSet[1], string);
 }
