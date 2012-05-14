@@ -595,7 +595,7 @@ struct RabemaStats
 };
 
 template <typename TStream>
-TStream & operator<<(TStream & stream, RabemaStats const & stats)
+void write(TStream & stream, RabemaStats const & stats, Options<EvaluateResults> const & options)
 {
     stream << "Intervals to find:\t" << stats.intervalsToFind << '\n'
            << "Intervals found:\t" << stats.intervalsFound << '\n'
@@ -610,11 +610,13 @@ TStream & operator<<(TStream & stream, RabemaStats const & stats)
     stream << "--------------------------------------------------------------------\n";
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
     {
+        if (options.benchmarkCategory == "all" && (int)i != options.maxError)
+            continue;
         sprintf(buffer, "%5u\t%8d\t%8d\t%8.2f\t%10.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
                 stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i]);
         stream << buffer;
     }
-    return stream << '\n';
+    stream << '\n';
 }
 
 struct CmpWitRecordLowering
@@ -728,24 +730,24 @@ void performIntervalLowering(String<WitRecord> & gsiRecords, int maxError)
 
 
 template <typename TPatternSpec>
-void benchmarkReadResult(RabemaStats & result,
-                         String<BamAlignmentRecord> const & samRecords,
-                         BamIOContext<StringSet<CharString > > const & bamIOContext,
-                         String<WitRecord> const & gsiRecords,
-                         StringSet<CharString> const & refSeqNames,
-                         NameStoreCache<StringSet<CharString> > const & refSeqNamesCache,
-                         StringSet<Dna5String> const & refSeqs,
-                         RefIdMapping const & refIdMapping,
-                         Options<EvaluateResults> const & options,
-                         TPatternSpec const & /*tagPattern*/,
-                         bool pairedEnd = false,
-                         bool second = false)
+int benchmarkReadResult(RabemaStats & result,
+                        String<BamAlignmentRecord> const & samRecords,
+                        BamIOContext<StringSet<CharString > > const & bamIOContext,
+                        String<WitRecord> const & gsiRecords,
+                        StringSet<CharString> const & refSeqNames,
+                        NameStoreCache<StringSet<CharString> > const & refSeqNamesCache,
+                        StringSet<Dna5String> const & refSeqs,
+                        RefIdMapping const & refIdMapping,
+                        Options<EvaluateResults> const & options,
+                        TPatternSpec const & /*tagPattern*/,
+                        bool pairedEnd = false,
+                        bool second = false)
 {
     (void)bamIOContext;
     typedef IntervalAndCargo<unsigned, unsigned> TInterval;
 
     // TODO(holtgrew): While much clearer and simpler than the old version, I'm not quite sure that this one is bug free yet.
-    // TODO(holtgrew): Interval lowering required.
+    // TODO(holtgrew): What about additional interval logging and counting, those that SHOULD be in the standard but are not there?
 
     // Select gold standard intervals (GSI) records.
     //
@@ -782,16 +784,17 @@ void benchmarkReadResult(RabemaStats & result,
         // Get index of the sequence from GSI record contig name.
         if (!getIdByName(refSeqNames, back(pickedGsiRecords).contigName, back(pickedGsiRecords).contigId, refSeqNamesCache))
         {
-            std::cerr << "WARNING: Could not find reference sequence for name " << back(pickedGsiRecords).contigName << '\n';
-            eraseBack(pickedGsiRecords);
-            continue;
+            std::cerr << "ERROR: Could not find reference sequence for name " << back(pickedGsiRecords).contigName << '\n';
+            return 1;
         }
     }
 
     // If no GSI records were picked then we do not have to collect any statistic about this read any more: There are no
     // valid alignments within the given distance.
+    //
+    // TODO(holtgrew): Actually, we need to check for hits in SAM that are not GSI!
     if (empty(pickedGsiRecords))
-        return;
+        return 0;
 
     // On these selected GSI records, we now perform interval lowering in case of "any-best" and "all-best".  This means
     // that an interval I with distance k_i containing an interval J with distance k_j < k_i is re-labeled with a
@@ -816,17 +819,15 @@ void benchmarkReadResult(RabemaStats & result,
     resize(intervals, length(refSeqs));
     String<unsigned> numIntervalsForErrorRate;
     resize(numIntervalsForErrorRate, options.maxError + 1, 0);
-    String<unsigned> intervalDistances;  // Distance of interval i.
-    if (options.benchmarkCategory == "any-best")
-        numIntervalsForErrorRate[smallestDistance] += 1;
+    String<int> intervalDistances;  // Distance of interval i.
     for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
     {
         int distance = pickedGsiRecords[i].distance;
         // Ignore any interval distances in oracle mode.
         if (options.oracleWitMode)
             distance = options.maxError;
-        else if (distance != options.maxError)
-            continue;  // Only search if interval distance matches.
+        else if (options.benchmarkCategory != "all" && distance != options.maxError)
+            continue;  // Only search if interval distance matches -- in *-best.
         int originalDistance = pickedGsiRecords[i].originalDistance;
 
         appendValue(intervals[pickedGsiRecords[i].contigId], TInterval(pickedGsiRecords[i].firstPos, pickedGsiRecords[i].lastPos + 1, length(intervalDistances)));
@@ -844,20 +845,104 @@ void benchmarkReadResult(RabemaStats & result,
     for (unsigned i = 0; i < length(intervalTrees); ++i)
         createIntervalTree(intervalTrees[i], intervals[i]);
 
+    // One of the SAM records must have a non-empty SEQ field, extract the read seq.
+    Dna5String readSeqL, readSeqR;
+    bool seenL = false, seenR = false;
+    for (unsigned i = 0; i < length(samRecords); ++i)
+    {
+        seenL |= hasFlagFirst(samRecords[i]) || (!hasFlagFirst(samRecords[i]) && !hasFlagLast(samRecords[i]));
+        seenR |= hasFlagLast(samRecords[i]);
+        if ((hasFlagFirst(samRecords[i]) || (!hasFlagFirst(samRecords[i]) && !hasFlagLast(samRecords[i]))) && !empty(samRecords[i].seq))
+        {
+            readSeqL = samRecords[i].seq;
+            if (hasFlagRC(samRecords[i]))
+                reverseComplement(readSeqL);
+        }
+        else if (hasFlagLast(samRecords[i]) && !empty(samRecords[i].seq))
+        {
+            readSeqR = samRecords[i].seq;
+            if (hasFlagRC(samRecords[i]))
+                reverseComplement(readSeqR);
+        }
+        if (!empty(readSeqL) && !empty(readSeqR))
+            break;  // Short-circuit and break.
+    }
+    if (seenL && empty(readSeqL))
+    {
+        std::cerr << "ERROR: No alignment for query " << front(samRecords).qName << " (left-end)\n";
+        return 1;
+    }
+    if (seenR && empty(readSeqR))
+    {
+        std::cerr << "ERROR: No alignment for query " << front(samRecords).qName << " (right-end)\n";
+        return 1;
+    }
+
     // Try to hit intervals.
     // std::cerr << "NUM SAM RECORDS\t" << length(samRecords) << '\n';
     for (unsigned i = 0; i < length(samRecords); ++i)
     {
         BamAlignmentRecord const & samRecord = samRecords[i];
+        int seqId = refIdMapping.map[samRecord.rId];
 
         // Compute actual alignment score to rule out invalidly reported alignments.  If we run in oracle mode then we
         // ignore the actual alignment score.  We only care about the alignment's end position in this case.
         if (!options.oracleWitMode)
         {
-            int bestDistance = 0; // TODO(holtgrew): Write me!
-            // TODO(holtgrew): Logging of invalid alignments?
-            if (bestDistance > static_cast<int>(0.01 * options.maxError * length(samRecord.seq)))
+            int bestDistance = minValue<int>();  // Marker for "not set yet".
+            // Get best distance from NM tag if set and we are to trust it.
+            if (options.trustNM)
             {
+                BamTagsDict bamTags(const_cast<CharString &>(samRecord.tags));  // TODO(holtgrew): Repair once we have const holders!
+                unsigned idx = 0;
+                if (findTagKey(idx, bamTags, "NM"))
+                {
+                    if (!extractTagValue(bestDistance, bamTags, idx))
+                        bestDistance = minValue<int>();  // Reset to sentinel.
+                }
+            }
+            // Otherwise, perform a realignment.
+            Dna5String readSeq;
+            Dna5String contigSeq;
+            if (bestDistance == minValue<int>())
+            {
+                if (hasFlagFirst(samRecord) || (!hasFlagFirst(samRecord) && !hasFlagLast(samRecord)))
+                    readSeq = readSeqL;
+                if (hasFlagLast(samRecord))
+                    readSeq = readSeqR;
+                __int32 beginPos = samRecord.pos;
+                __int32 endPos = beginPos + getAlignmentLengthInRef(samRecord) - countPaddings(samRecord.cigar);
+                // if (hasFlagRC(samRecord))
+                // {
+                //     endPos = length(refSeqs[seqId]) - endPos;
+                //     beginPos = length(refSeqs[seqId]) - beginPos;
+                //     std::swap(endPos, beginPos);
+                // }
+                contigSeq = infix(refSeqs[seqId], beginPos, endPos);
+                if (hasFlagRC(samRecord))
+                    reverseComplement(contigSeq);
+                Finder<Dna5String> finder(contigSeq);
+                Pattern<Dna5String, TPatternSpec> pattern(readSeq, -static_cast<int>(length(readSeq)) * 1000);
+                _patternMatchNOfPattern(pattern, options.matchN);
+                _patternMatchNOfFinder(pattern, options.matchN);
+                bool ret = setEndPosition(finder, pattern, length(contigSeq));
+                (void) ret;  // When run without assertions.
+                SEQAN_CHECK(ret, "setEndPosition() must not fail!");
+                bestDistance = -getScore(pattern);
+            }
+
+            // Skip invalid alignments.
+            if (bestDistance > static_cast<int>(0.01 * options.maxError * length(readSeq)))
+            {
+                if (options.showSuperflousIntervals)
+                {
+                    std::cerr << "SUPERFLOUS/INVALID\t";
+                    write2(std::cerr, samRecord, bamIOContext, Sam());
+                    std::cerr << "  READ:  \t" << readSeq << '\n'
+                              << "  CONTIG:\t" << contigSeq << '\n'
+                              << "  DISTANCE:        \t" << bestDistance << '\n'
+                              << "  ALLOWED DISTANCE:\t" << static_cast<int>(0.01 * options.maxError * length(readSeq)) << '\n';
+                }
                 result.invalidAlignments += 1;
                 continue;
             }
@@ -869,13 +954,15 @@ void benchmarkReadResult(RabemaStats & result,
 
         // Get sequence id and last position of alignment.  We try to hit the interval with the last position (not
         // C-style end) of the read.
-        int seqId = refIdMapping.map[samRecord.rId];
         unsigned lastPos = 0;
         if (!hasFlagRC(samRecord))
             lastPos = samRecord.pos + getAlignmentLengthInRef(samRecord) - countPaddings(samRecord.cigar) - 1;
         else
             lastPos = length(refSeqs[seqId]) - samRecord.pos - 1;
 
+        if (options.showTryHitIntervals)
+            std::cerr << "TRY HIT\tchr=" << refSeqNames[seqId] << "\tlastPos=" << lastPos << "\tqName=" << samRecord.qName << "\n";
+        
         // Try to hit any interval.
         String<unsigned> result;
         findIntervals(intervalTrees[seqId], lastPos, result);
@@ -889,24 +976,39 @@ void benchmarkReadResult(RabemaStats & result,
     resize(foundIntervalsForErrorRate, options.maxError + 1, 0);
     if (options.oracleWitMode || options.benchmarkCategory == "any-best")
     {
-        unsigned bestDistance = maxValue<unsigned>();
+        int bestDistance = maxValue<int>();
         for (unsigned i = 0; i < length(intervalDistances); ++i)
             if (intervalHit[i])
+            {
+                if (options.showHitIntervals)
+                    std::cerr << "HIT\t" << pickedGsiRecords[i] << "\n";
                 bestDistance = std::min(bestDistance, intervalDistances[i]);
-        if (bestDistance != maxValue<unsigned>())
+            }
+        if (bestDistance != maxValue<int>())
         {
             numFound += 1;
             foundIntervalsForErrorRate[bestDistance] += 1;
         }
     }
-    else
+    else  // !options.oracleWitMode && options.benchmarkCategory in ["all-best", "all"]
     {
         for (unsigned i = 0; i < length(intervalDistances); ++i)
+        {
+            if (options.benchmarkCategory == "all" && intervalDistances[i] != options.maxError)
+                continue;  // Only count intervals on our maximal error rate in "all" mode.
             if (intervalHit[i])
             {
+                if (options.showHitIntervals)
+                    std::cerr << "HIT\t" << pickedGsiRecords[i] << "\n";
                 numFound += 1;
                 foundIntervalsForErrorRate[intervalDistances[i]] += 1;
             }
+            else
+            {
+                if (options.showMissedIntervals)  // inside braces for consistency with above
+                    std::cerr  << "MISSED\t" << pickedGsiRecords[i] << "\n";
+            }
+        }
         SEQAN_ASSERT_LEQ(numFound, length(intervalDistances));
     }
     
@@ -914,7 +1016,7 @@ void benchmarkReadResult(RabemaStats & result,
     result.totalReads += 1;
     if (options.oracleWitMode || options.benchmarkCategory == "any-best")
     {
-        bool found = (length(numFound) > 0u);
+        bool found = (numFound > 0u);
         result.intervalsToFind += 1;
         result.intervalsFound += found;
         result.normalizedIntervals += found;
@@ -930,20 +1032,33 @@ void benchmarkReadResult(RabemaStats & result,
         unsigned intervalsFound = 0;
         for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
         {
-            intervalsToFind += numIntervalsForErrorRate[d];
-            intervalsFound += foundIntervalsForErrorRate[d];;
-            result.intervalsToFindForErrorRate[d] += numIntervalsForErrorRate[d];
-            result.intervalsFoundForErrorRate[d] += foundIntervalsForErrorRate[d];
+            // In case of "all", we only count the intervals from with maximal error rate.
+            if (options.benchmarkCategory != "all" || (int)d == options.maxError)
+            {
+                intervalsToFind += numIntervalsForErrorRate[d];
+                intervalsFound += foundIntervalsForErrorRate[d];;
+                result.intervalsToFindForErrorRate[d] += numIntervalsForErrorRate[d];
+                result.intervalsFoundForErrorRate[d] += foundIntervalsForErrorRate[d];
+            }
         }
         result.intervalsToFind += intervalsToFind;
         result.intervalsFound += intervalsFound;
         result.normalizedIntervals += 1.0 * intervalsFound / intervalsToFind;
         for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
         {
-            result.normalizedIntervalsToFindForErrorRate[d] += 1.0 * numIntervalsForErrorRate[d] / intervalsToFind;
-            result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsFound;
+            // In case of "all", we only count the intervals from with maximal error rate.
+            if (options.benchmarkCategory != "all" || (int)d == options.maxError)
+            {
+                if (intervalsToFind > 0u)
+                {
+                    result.normalizedIntervalsToFindForErrorRate[d] += 1.0 * numIntervalsForErrorRate[d] / intervalsToFind;
+                    result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsToFind;
+                }
+            }
         }
     }
+
+    return 0;
 }
 
 // Stream over both the SAM and GSI file and compare the hits in the SAM file against the intervals in the GSI file.
@@ -996,20 +1111,28 @@ compareAlignedReadsToReference(RabemaStats & result,
     while (!samDone || !gsiDone)
     {
         if (i > 0u && i % (100*1000) == 0u)
-            std::cerr << i / 100 / 1000 << 'M';
+            std::cerr << i / 100 / 1000 << "00k";
         else if (i > 0 && i % (10*1000) == 0u)
             std::cerr << '.';
         ++i;
         
         // We process the record for the next query/read.  Since records for this next query/read might be missing in
         // both files, we need to determine which is the next one.
-        CharString currentReadName = (gsiRecord.readName < samRecord.qName) ? gsiRecord.readName : samRecord.qName;
+        CharString currentReadName;
+        if (gsiDone)
+            currentReadName = samRecord.qName;
+        else if (samDone)
+            currentReadName = gsiRecord.readName;
+        else
+            currentReadName = (gsiRecord.readName < samRecord.qName) ? gsiRecord.readName : samRecord.qName;
+        // std::cerr << "CURRENT\t" << currentReadName << '\n';
 
         // These flags determine whether evaluation is run for single-end and/or paired-end reads.
         bool seenSingleEnd = false, seenPairedEnd = false;
 
         // Read all SAM records with the same query name.
         clear(currentSamRecords);
+        // std::cerr << "SAM\t" << samRecord.qName << '\n';
         while (!samDone && samRecord.qName == currentReadName)
         {
             if (!hasFlagUnmapped(samRecord))  // Ignore records with non-aligned reads.
@@ -1040,6 +1163,7 @@ compareAlignedReadsToReference(RabemaStats & result,
         }
 
         // Read in the next block of GSI records.
+        // std::cerr << "GSI\t" << gsiRecord.readName << '\n';
         clear(currentGsiRecords);
         while (!gsiDone && gsiRecord.readName == currentReadName)
         {
@@ -1332,6 +1456,12 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
               << "Oracle mode           " << (options.oracleWitMode ? (char const *) "yes" : (char const *) "no") << "\n"
               << "Benchmark category    " << options.benchmarkCategory << "\n"
               << "Distance measure      " << options.distanceFunction << "\n"
+              << "Show\n"
+              << "    additional        " << (options.showAdditionalIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "    hit               " << (options.showHitIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "    missed            " << (options.showMissedIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "    superflous        " << (options.showSuperflousIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "    try hit           " << (options.showTryHitIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
               << "\n";
 
     std::cerr << "____LOADING FILES_____________________________________________________________\n\n";
@@ -1366,7 +1496,7 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     std::cerr << " OK\n";
 
     // Open gold standard intervals (GSI) file and read in header.
-    std::cerr << "Gold Standard Intervals   " << options.witFileName << " ...";
+    std::cerr << "Gold Standard Intervals   " << options.witFileName << " (header) ...";
     std::ifstream inGsi(toCString(options.witFileName), std::ios::in | std::ios::binary);
     if (!inGsi.is_open())
     {
@@ -1420,11 +1550,14 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     startTime = sysTime();
     typedef Position<WitStore::TIntervalStore>::Type TPos;
     // The result will be a list of ids to entries in witStore.
+    int res = 0;
     RabemaStats result(options.maxError);
     if (options.distanceFunction == "edit")
-        compareAlignedReadsToReference(result, samReader, samIOContext, refNameStore, refNameStoreCache, refSeqs, gsiReader, options, MyersUkkonenReads());
+        res = compareAlignedReadsToReference(result, samReader, samIOContext, refNameStore, refNameStoreCache, refSeqs, gsiReader, options, MyersUkkonenReads());
     else  // options.distanceFunction == "hamming"
-        compareAlignedReadsToReference(result, samReader, samIOContext, refNameStore, refNameStoreCache, refSeqs, gsiReader, options, HammingSimple());
+        res = compareAlignedReadsToReference(result, samReader, samIOContext, refNameStore, refNameStoreCache, refSeqs, gsiReader, options, HammingSimple());
+    if (res != 0)
+        return 1;
 
     std::cerr << "\nTook " << sysTime() - startTime << " s\n";
 
@@ -1434,9 +1567,15 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
               << "found and those we have to find by their distance.  This is not possible in\n"
               << "all mode since a multiple lower-error intervals might be contained in an\n"
               << "higher-error interval.\n"
-              << '\n';
+              << '\n'
+              << "Alignments will be marked as \"invalid\" if they have a higher error rate than\n"
+              << "allowed, i.e. they might become valid when increasing the allowed error rate.\n"
+              << '\n'
+              << "In \"all\" mode, only intervals from the maximal level are required.  In \"all-best\"\n"
+              << "and \"any-best\" mode, the intervals are relabeled with the smallest distance that\n"
+              << "a containing interval has.  Contained intervals are then removed.\n\n\n";
     
-    std::cerr << '\n' << result << '\n';
+    write(std::cerr, result, options);
 
     /*
 

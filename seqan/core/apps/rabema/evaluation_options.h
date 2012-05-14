@@ -56,6 +56,10 @@ public:
     // Print each end position that we try to match agains the interval.
     bool showTryHitIntervals;
 
+    // If true then we trust the "NM" tag of the SAM alignment if present.  Otherwise, we perform a realignment at the
+    // target position.
+    bool trustNM;
+
     // If enabled, don't panic on additional hits in non-weighted mode.
     bool dontPanic;
 
@@ -94,6 +98,7 @@ public:
               showAdditionalIntervals(false),
               showHitIntervals(false),
               showTryHitIntervals(false),
+              trustNM(false),
               dontPanic(false),
               oracleWitMode(false),
               matchN(false),
