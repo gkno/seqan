@@ -882,20 +882,20 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // =================================================================
 
     startTime = sysTime();
-    std::cerr << "Reference Index           " << options.seqFileName << ".fai ...";
+    std::cerr << "Reference Index           " << options.referenceSeqFilename << ".fai ...";
     FaiIndex faiIndex;
-    if (load(faiIndex, toCString(options.seqFileName)) != 0)
+    if (load(faiIndex, toCString(options.referenceSeqFilename)) != 0)
     {
         std::cerr << " FAILED (not fatal, we can just build it)\n";
-        std::cerr << "Building Index            " << options.seqFileName << ".fai ...";
-        if (buildIndex(toCString(options.seqFileName), Fai()) != 0)
+        std::cerr << "Building Index            " << options.referenceSeqFilename << ".fai ...";
+        if (buildIndex(toCString(options.referenceSeqFilename), Fai()) != 0)
         {
             std::cerr << "Could not build FAI index.\n";
             return 1;
         }
         std::cerr << " OK\n";
-        std::cerr << "Reference Index           " << options.seqFileName << ".fai ...";
-        if (load(faiIndex, toCString(options.seqFileName)) != 0)
+        std::cerr << "Reference Index           " << options.referenceSeqFilename << ".fai ...";
+        if (load(faiIndex, toCString(options.referenceSeqFilename)) != 0)
         {
             std::cerr << "Could not load FAI index we just build.\n";
             return 1;
