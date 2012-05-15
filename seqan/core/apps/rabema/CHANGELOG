@@ -1,5 +1,8 @@
 == Trunk ==
 
+ * Sort order of SAM files is now checked on the fly and not at the beginning any more.
+ * Oracle also works in Rabema 1.1.
+ * Major restructuring of the code, removing unused parts, debug comments etc.
  * Reference sequences are now loaded using an FAI index on demand.
    This reduces the memory requirement for reference sequences to storing the longest contig two times (forward and RC).
  * Improved the output of Rabema to look nicer, progress displays are more exact.

@@ -14,14 +14,12 @@ seqan_add_executable(rabema rabema.cpp
                      find_hamming_simple_ext.h
                      find_myers_ukkonen_ext.h
                      find_myers_ukkonen_reads.h
-                     intervals.h
+                     io_gsi.h
                      rabema.h
                      rabema_stats.h
-                     ref_id_mapping.h
-                     witio.h
-                     wit_store.h)
+                     ref_id_mapping.h)
 
-seqan_add_executable(do_search do_search.cpp witio.h find_myers_ukkonen_ext.h)
+seqan_add_executable(do_search do_search.cpp find_myers_ukkonen_ext.h)
 
 seqan_add_executable(prepare_sam prepare_sam.cpp)
 

@@ -45,8 +45,8 @@
 #include <seqan/file.h>
 #include <seqan/stream.h>
 
-#ifndef CORE_APPS_RABEMA_FAI_INDEX_H_
-#define CORE_APPS_RABEMA_FAI_INDEX_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_FAI_INDEX_H_
+#define SEQAN_CORE_APPS_RABEMA_FAI_INDEX_H_
 
 namespace seqan {
 
@@ -384,4 +384,4 @@ inline int buildIndex(CharString const & seqFilename, Fai const & tag)
 
 }  // namespace seqan
 
-#endif  // #ifndef CORE_APPS_RABEMA_FAI_INDEX_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_FAI_INDEX_H_

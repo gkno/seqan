@@ -20,8 +20,8 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#ifndef APPS_RABEMA_BUILD_GOLD_STANDARD_OPTIONS_H_
-#define APPS_RABEMA_BUILD_GOLD_STANDARD_OPTIONS_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_OPTIONS_H_
+#define SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_OPTIONS_H_
 
 #include <iostream>
 
@@ -170,4 +170,4 @@ int parseCommandLineAndCheck(Options<BuildGoldStandard> & options, CommandLinePa
     return 0;
 }
 
-#endif  // #ifndef APPS_RABEMA_BUILD_GOLD_STANDARD_OPTIONS_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_OPTIONS_H_

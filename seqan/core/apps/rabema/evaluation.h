@@ -22,8 +22,8 @@
 
 // TODO(holtgrew): I think most time is spent reading the GSI file. We should be able to speed this up greatly with a more compact file format.
 
-#ifndef APPS_RABEMA_EVALUATION_H_
-#define APPS_RABEMA_EVALUATION_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_EVALUATION_H_
+#define SEQAN_CORE_APPS_RABEMA_EVALUATION_H_
 
 #include <seqan/bam_io.h>
 #include <seqan/basic.h>
@@ -36,7 +36,7 @@
 
 #include "rabema.h"
 
-#include "wit_store.h"
+#include "io_gsi.h"
 #include "find_hamming_simple_ext.h"
 #include "find_myers_ukkonen_reads.h"
 #include "find_myers_ukkonen_ext.h"
@@ -49,14 +49,14 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Helper Class CmpWitRecordLowering.
+// Helper Class CmpGsiRecordLowering.
 // ----------------------------------------------------------------------------
 
 // Comparison functor for lexicographically sorting by (readId, contigId, first pos).
 
-struct CmpWitRecordLowering
+struct CmpGsiRecordLowering
 {
-    bool operator()(WitRecord const & lhs, WitRecord const & rhs) const
+    bool operator()(GsiRecord const & lhs, GsiRecord const & rhs) const
     {
         return (lhs.readId < rhs.readId) || (lhs.readId == rhs.readId && lhs.contigId < rhs.contigId) ||
                 (lhs.readId == rhs.readId && lhs.contigId == rhs.contigId && lhs.firstPos < rhs.firstPos);
@@ -77,19 +77,19 @@ struct CmpWitRecordLowering
 
 // Relabel intervals with the smallest distance of a contained interval.  Filter out intervals with distance > maxError.
 
-void performIntervalLowering(String<WitRecord> & gsiRecords, int maxError)
+void performIntervalLowering(String<GsiRecord> & gsiRecords, int maxError)
 {
     if (empty(gsiRecords))
         return;
 
-    typedef Iterator<String<WitRecord> >::Type TIterator;
+    typedef Iterator<String<GsiRecord> >::Type TIterator;
     typedef IntervalAndCargo<unsigned, unsigned> TInterval;
 
     // Step 1: Adjust distances.
-    std::sort(begin(gsiRecords, Standard()), end(gsiRecords, Standard()), CmpWitRecordLowering());
+    std::sort(begin(gsiRecords, Standard()), end(gsiRecords, Standard()), CmpGsiRecordLowering());
 
     // Add sentinel interval.
-    WitRecord sentinel(back(gsiRecords));
+    GsiRecord sentinel(back(gsiRecords));
     sentinel.firstPos = MaxValue<size_t>::VALUE;
     sentinel.lastPos = MaxValue<size_t>::VALUE;
     // sentinel.id = MaxValue<size_t>::VALUE;
@@ -103,7 +103,7 @@ void performIntervalLowering(String<WitRecord> & gsiRecords, int maxError)
         for (unsigned j = 0; j < length(openIntervals); ++j)
         {
             unsigned idx = length(openIntervals) - 1 - j;
-            WitRecord const thisIntervalRecord = gsiRecords[cargo(openIntervals[idx])];
+            GsiRecord const thisIntervalRecord = gsiRecords[cargo(openIntervals[idx])];
             SEQAN_ASSERT_EQ(thisIntervalRecord.readName, it->readName);
             if (thisIntervalRecord.contigId != it->contigId || thisIntervalRecord.lastPos < it->firstPos)
                 count += 1;
@@ -125,7 +125,7 @@ void performIntervalLowering(String<WitRecord> & gsiRecords, int maxError)
     }
 
     // Step 2: Filter out intervals that are contained in intervals of lesser/equal distance.
-    String<WitRecord> filteredGsiRecords;
+    String<GsiRecord> filteredGsiRecords;
     clear(openIntervals);
     i = 0;
     for (TIterator it = begin(gsiRecords, Standard()), itend = end(gsiRecords, Standard()); it != itend; ++it, ++i)
@@ -134,7 +134,7 @@ void performIntervalLowering(String<WitRecord> & gsiRecords, int maxError)
         unsigned count = 0;
         for (unsigned j = 0; j < length(openIntervals); ++j) {
             unsigned idx = length(openIntervals) - 1 - j;
-            WitRecord const & thisIntervalRecord = gsiRecords[cargo(openIntervals[idx])];
+            GsiRecord const & thisIntervalRecord = gsiRecords[cargo(openIntervals[idx])];
             SEQAN_ASSERT_EQ(thisIntervalRecord.readName, it->readName);
             if (thisIntervalRecord.contigId != it->contigId || thisIntervalRecord.lastPos < it->firstPos)
             {
@@ -180,7 +180,7 @@ template <typename TPatternSpec>
 int benchmarkReadResult(RabemaStats & result,
                         String<BamAlignmentRecord> const & samRecords,
                         BamIOContext<StringSet<CharString > > const & bamIOContext,
-                        String<WitRecord> const & gsiRecords,
+                        String<GsiRecord> const & gsiRecords,
                         StringSet<CharString> const & refSeqNames,
                         NameStoreCache<StringSet<CharString> > const & refSeqNamesCache,
                         StringSet<Dna5String> const & refSeqs,
@@ -210,7 +210,7 @@ int benchmarkReadResult(RabemaStats & result,
         largestDistance = smallestDistance;
     // if (options.oracleWitMode)
     //     smallestDistance = 0;
-    String<WitRecord> pickedGsiRecords;
+    String<GsiRecord> pickedGsiRecords;
     for (unsigned i = 0; i < length(gsiRecords); ++i)
     {
         // Note: In case of oracle mode, we ignore the distance.
@@ -218,11 +218,11 @@ int benchmarkReadResult(RabemaStats & result,
             continue;  // Skip with wrong distance.
         if (!options.oracleWitMode && gsiRecords[i].distance > options.maxError)
             continue;  // Ignore intervals with too high error rate.
-        if (!pairedEnd && (gsiRecords[i].flags & WitRecord::FLAG_PAIRED))
+        if (!pairedEnd && (gsiRecords[i].flags & GsiRecord::FLAG_PAIRED))
             continue;  // Skip paired if non-paired selected.
-        if (pairedEnd && !(gsiRecords[i].flags & WitRecord::FLAG_PAIRED))
+        if (pairedEnd && !(gsiRecords[i].flags & GsiRecord::FLAG_PAIRED))
             continue;  // Skip non-paired if paired selected.
-        if (pairedEnd && second && !(gsiRecords[i].flags & WitRecord::FLAG_SECOND_MATE))
+        if (pairedEnd && second && !(gsiRecords[i].flags & GsiRecord::FLAG_SECOND_MATE))
             continue;  // Skip if second selected but this interval is not for second.
 
         appendValue(pickedGsiRecords, gsiRecords[i]);
@@ -508,7 +508,7 @@ compareAlignedReadsToReference(RabemaStats & result,
         std::cerr << "ERROR: Could not read first SAM record.\n";
         return 1;
     }
-    WitRecord gsiRecord;
+    GsiRecord gsiRecord;
     if (atEnd(gsiReader) || readRecord(gsiRecord, gsiReader, Gsi()) != 0)
     {
         std::cerr << "ERROR: Could not read first GSI record.\n";
@@ -521,7 +521,7 @@ compareAlignedReadsToReference(RabemaStats & result,
 
     // Current SAM and GSI records are stored in these arrays.
     String<BamAlignmentRecord> currentSamRecords;
-    String<WitRecord> currentGsiRecords;
+    String<GsiRecord> currentGsiRecords;
 
     // These flags store whether we processed the last SAM/GSI record.
     bool samDone = false, gsiDone = false;
@@ -591,8 +591,8 @@ compareAlignedReadsToReference(RabemaStats & result,
         clear(currentGsiRecords);
         while (!gsiDone && gsiRecord.readName == currentReadName)
         {
-            seenSingleEnd |= !(gsiRecord.flags & WitRecord::FLAG_PAIRED);
-            seenPairedEnd |= (gsiRecord.flags & WitRecord::FLAG_PAIRED);
+            seenSingleEnd |= !(gsiRecord.flags & GsiRecord::FLAG_PAIRED);
+            seenPairedEnd |= (gsiRecord.flags & GsiRecord::FLAG_PAIRED);
             appendValue(currentGsiRecords, gsiRecord);
             if (atEnd(gsiReader))
             {
@@ -723,7 +723,7 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
         return 1;
     }
     RecordReader<std::ifstream, SinglePass<> > gsiReader(inGsi);
-    WitHeader gsiHeader;
+    GsiHeader gsiHeader;
     if (readRecord(gsiHeader, gsiReader, Gsi()) != 0)
     {
         std::cerr << "Could not read GSI header.\n";
@@ -766,7 +766,7 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     std::cerr << "\n____COMPARING SAM HITS WITH INTERVALS_________________________________________\n\n";
 
     startTime = sysTime();
-    typedef Position<WitStore::TIntervalStore>::Type TPos;
+    typedef Position<String<int> >::Type TPos;
     // The result will be a list of ids to entries in witStore.
     int res = 0;
     RabemaStats result(options.maxError);
@@ -798,4 +798,4 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     return 0;
 }
 
-#endif  // #ifndef APPS_RABEMA_EVALUATION_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_EVALUATION_H_

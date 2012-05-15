@@ -22,8 +22,8 @@
 // Globally shared code for the rabema tool.
 // ==========================================================================
 
-#ifndef APPS_MARK_MARK_H_
-#define APPS_MARK_MARK_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_RABEMA_H_
+#define SEQAN_CORE_APPS_RABEMA_RABEMA_H_
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
@@ -112,4 +112,4 @@ void setUpCommandLineParser(CommandLineParser & parser)
 }
 
 
-#endif  // #ifndef APPS_MARK_MARK_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_RABEMA_H_

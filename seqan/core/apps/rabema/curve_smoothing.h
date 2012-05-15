@@ -19,28 +19,118 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
+// Definition of the class WeightedMatch and curve smoothing operations on
+// strings of WeightedMatch objects.
+// ==========================================================================
 
-#ifndef WIT_BUILDER_CURVE_SMOOTHING_H_
-#define WIT_BUILDER_CURVE_SMOOTHING_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_CURVE_SMOOTHING_H_
+#define SEQAN_CORE_APPS_RABEMA_CURVE_SMOOTHINGH_
 
 #include <algorithm>
 
 #include <seqan/modifier.h>
 #include <seqan/sequence.h>
 
-#include "witio.h"
-
 using namespace seqan;
 
-/*
-  Fills gaps in the given error curve.  If there are two adjacent
-  entries in the string that have the same start position but not
-  adjacent end positions then we add an entry for each end position
-  in between.
+// ============================================================================
+// Enums, Tags, Classes, Typedefs.
+// ============================================================================
 
-  errorCurve must be sorted by (contigId, endPosition).
- */
-void fillGaps(String<WeightedMatch> & errorCurve) {
+// ----------------------------------------------------------------------------
+// Class WeightedMatch
+// ----------------------------------------------------------------------------
+
+// Represents a read match to a contig with an error.
+//
+// WeightedMatch(c, p, d) represents a match of a read at position p in contig c with distance d.
+
+class WeightedMatch
+{
+public:
+    size_t contigId;
+    bool isForward;
+    size_t pos;
+    int distance;
+    // Optional begin position, used in wit builder to smooth matches.
+    // Is not written out or used in the less than operator.
+    size_t beginPos;
+  
+    WeightedMatch() {}
+
+    WeightedMatch(size_t _contigId, bool _isForward, size_t _pos, int _distance, size_t _beginPos)
+            : contigId(_contigId), isForward(_isForward), pos(_pos), distance(_distance), beginPos(_beginPos)
+    {}
+
+    // Order lexicographically by (contigId, pos, -distance).
+    bool operator<(WeightedMatch const & other) const
+    {
+        if (contigId < other.contigId) return true;
+        if (contigId == other.contigId && isForward > other.isForward) return true;
+        if (contigId == other.contigId && isForward == other.isForward &&
+            pos < other.pos) return true;
+        if (contigId == other.contigId && isForward == other.isForward &&
+            pos == other.pos && distance > other.distance) return true;
+        return false;
+    }
+
+    bool operator==(WeightedMatch const & other) const
+    {
+        if (contigId != other.contigId) return false;
+        if (isForward != other.isForward) return false;
+        if (pos != other.pos) return false;
+        if (distance != other.distance) return false;
+        if (beginPos != other.beginPos) return false;
+        return true;
+    }
+};
+
+typedef String<WeightedMatch> TWeightedMatches;
+
+// ----------------------------------------------------------------------------
+// Helper Class WeightedMatchBeginPosNeqOrContigIdNeq
+// ----------------------------------------------------------------------------
+
+struct WeightedMatchBeginPosNeqOrContigIdNeq : std::binary_function<WeightedMatch, WeightedMatch, bool>
+{
+    bool operator()(WeightedMatch const & arg1, WeightedMatch const & arg2)
+    {
+        return arg1.beginPos != arg2.beginPos || arg1.contigId != arg2.contigId || arg1.isForward != arg2.isForward;
+    }
+};
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function operator<<()                                        [WeightedMatch]
+// ----------------------------------------------------------------------------
+
+// Stream output for WeightedMatch objects, for debugging.
+template <typename TStream>
+TStream &operator<<(TStream &out, WeightedMatch const & m)
+{
+    out << "(" << m.contigId << ", " << (m.isForward ? "F, " : "R, ")
+        << m.pos << ", " << m.distance << ", " << m.beginPos << ")";
+    return out;
+}
+
+// ----------------------------------------------------------------------------
+// Function fillGaps()
+// ----------------------------------------------------------------------------
+
+// Fills gaps in the given error curve.  If there are two adjacent entries in the string that have the same start
+// position but not adjacent end positions then we add an entry for each end position in between.
+
+// errorCurve must be sorted by (contigId, endPosition).
+
+void fillGaps(String<WeightedMatch> & errorCurve)
+{
     typedef Iterator<String<WeightedMatch>, Standard>::Type TIterator;
 
     // Guard against not enough items in string.
@@ -69,16 +159,18 @@ void fillGaps(String<WeightedMatch> & errorCurve) {
     std::sort(begin(errorCurve), end(errorCurve));
 }
 
+// ----------------------------------------------------------------------------
+// Function smoothErrorCurve()
+// ----------------------------------------------------------------------------
 
-/*
-  The algorithm works as follows.  For each contiguous interval of
-  tuples with the same start position, do the following.  From the
-  left to the right and from the right to the left to the first
-  absolute maximum in each direction, make the curve monotonously
-  increasing.  Between the rightmost and the leftmost maximum, set the
-  values to the maximal value.
- */
-void smoothErrorCurve(String<WeightedMatch> &errorCurve)
+// Smoothing of error curves, for the application of match equivalence.
+//
+// The algorithm works as follows.  For each contiguous interval of tuples with the same start position, do the
+// following.  From the left to the right and from the right to the left to the first absolute maximum in each
+// direction, make the curve monotonously increasing.  Between the rightmost and the leftmost maximum, set the values to
+// the maximal value.
+
+void smoothErrorCurve(String<WeightedMatch> & errorCurve)
 {
     if (length(errorCurve) == 0u) return;
     // TODO(holtgrew): Standard should be the standard iterator, yes?
@@ -162,4 +254,4 @@ void smoothErrorCurve(String<WeightedMatch> &errorCurve)
     } while (itBegin != end(errorCurve));
 }
 
-#endif  // WIT_BUILDER_CURVE_SMOOTHING_H_
+#endif  // SEQAN_CORE_APPS_RABEMA_CURVE_SMOOTHING_H_

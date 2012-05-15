@@ -20,8 +20,8 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#ifndef CORE_APPS_RABEMA_RABEMA_STATS_H_
-#define CORE_APPS_RABEMA_RABEMA_STATS_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_RABEMA_STATS_H_
+#define SEQAN_CORE_APPS_RABEMA_RABEMA_STATS_H_
 
 #include <seqan/sequence.h>
 
@@ -137,4 +137,4 @@ void write(TStream & stream, RabemaStats const & stats, Options<EvaluateResults>
     stream << '\n';
 }
 
-#endif  // #ifndef CORE_APPS_RABEMA_RABEMA_STATS_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_RABEMA_STATS_H_

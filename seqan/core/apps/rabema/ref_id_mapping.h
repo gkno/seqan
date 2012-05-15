@@ -19,12 +19,21 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
+// A simple dense mapping between two reference sequence id spaces.  This is
+// required, for example, when loading both a BAM file and a reference FASTA
+// file.  The order in the BAM file might not be the same as in the FASTA
+// file.
+//
+// The function rebuildMapping() allows to rebuild the mapping from two
+// name store caches.
+// ==========================================================================
 
 // TODO(holtgrew): Consider for inclusion in SeqAn library.
 
-#ifndef CORE_APPS_RABEMA_REF_ID_MAPPING_H_
-#define CORE_APPS_RABEMA_REF_ID_MAPPING_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_REF_ID_MAPPING_H_
+#define SEQAN_CORE_APPS_RABEMA_REF_ID_MAPPING_H_
 
+#include <seqan/store.h>
 #include <seqan/sequence.h>
 
 // ============================================================================
@@ -85,4 +94,4 @@ void rebuildMapping(RefIdMapping & mapping,
     }
 }
 
-#endif  // #ifndef CORE_APPS_RABEMA_REF_ID_MAPPING_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_REF_ID_MAPPING_H_

@@ -20,8 +20,8 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#ifndef APPS_RABEMA_BUILD_GOLD_STANDARD_H_
-#define APPS_RABEMA_BUILD_GOLD_STANDARD_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_H_
+#define SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_H_
 
 // TODO(holtgrew): Another possible way to save memory is not to store the first, always identical part of the read id.
 
@@ -38,9 +38,8 @@
 #include "fai_index.h"
 #include "find_hamming_simple_ext.h"
 #include "find_myers_ukkonen_reads.h"
-#include "intervals.h"
+#include "io_gsi.h"
 #include "rabema.h"
-#include "witio.h"
 #include "curve_smoothing.h"
 
 // ============================================================================
@@ -125,7 +124,7 @@ void trimSeqHeaderToId(seqan::CharString & header)
 
 // Build intervals from the error curves.
 
-void intervalizeErrorCurves(String<WitRecord> & result,
+void intervalizeErrorCurves(String<GsiRecord> & result,
                             TErrorCurves const & errorCurves,
                             String<int> const & readAlignmentDistances,
                             StringSet<CharString> const & readNameStore,
@@ -225,13 +224,13 @@ void intervalizeErrorCurves(String<WitRecord> & result,
                     mateNo = 1;
                 SEQAN_ASSERT_EQ(readNameStore[readId][length(readNameStore[readId]) - 2], '/');
                 if (mateNo == 0)
-                  flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_FIRST_MATE;
+                  flags = GsiRecord::FLAG_PAIRED | GsiRecord::FLAG_FIRST_MATE;
                 else if (mateNo == 1)
-                  flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_SECOND_MATE;
+                  flags = GsiRecord::FLAG_PAIRED | GsiRecord::FLAG_SECOND_MATE;
 
                 int gsiDistance = options.oracleSamMode ? readAlignmentDistances[i] : distance;
                 appendValue(result,
-                            WitRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
+                            GsiRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
                                       gsiDistance, contigNameStore[it2->contigId],
                                       it2->isForward, it2->first, it2->last));
             }
@@ -803,7 +802,7 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // =================================================================
 
     startTime = sysTime();
-    std::cerr << "Reference Index           " << options.referenceSeqFilename << ".fai ...";
+    std::cerr << "Reference Index       " << options.referenceSeqFilename << ".fai ...";
     FaiIndex faiIndex;
     if (load(faiIndex, toCString(options.referenceSeqFilename)) != 0)
     {
@@ -880,8 +879,8 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
 
     // TODO(holtgrew): If we get rid of the witRecords string and print directly to output then save a lot of memory!
     startTime = sysTime();
-    String<WitRecord> witRecords;
-    typedef Iterator<String<WitRecord>, Standard>::Type TWitRecordIterator;
+    String<GsiRecord> witRecords;
+    typedef Iterator<String<GsiRecord>, Standard>::Type TGsiRecordIterator;
     intervalizeErrorCurves(witRecords, errorCurves, readAlignmentDistances, readNameStore, refNameStore, options);
     std::cerr << "Took " << sysTime() - startTime << " s\n";
     // The two alternatives are equivalent after opening the file.
@@ -889,25 +888,25 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     std::cerr << "\n____WRITING OUTPUT____________________________________________________________\n\n";
     if (options.outFileName == "-") {
         std::cerr << "Writing to stdout ...\n";
-        writeWitHeader(std::cout);
-        writeWitComment(std::cout, WIT_COLUMN_NAMES);
-        for (TWitRecordIterator it = begin(witRecords, Standard());
-             it != end(witRecords, Standard()); ++it)
+        GsiHeader header;
+        writeRecord(std::cout, header, Gsi());
+        writeRecord(std::cout, GSI_COLUMN_NAMES, Gsi());
+        for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
             std::cout << *it << std::endl;
         std::cerr << "DONE\n";
     } else {
         std::cerr << "Writing to " << options.outFileName << " ...";
         std::fstream fstrm(toCString(options.outFileName), std::ios_base::out);
-        if (!fstrm.is_open()) {
-            std::cerr << "Could not open out file \"" << options.outFileName << "\""
-                      << std::endl;
+        if (!fstrm.is_open())
+        {
+            std::cerr << "Could not open out file \"" << options.outFileName << "\"\n";
             return 1;
         }
-        writeWitHeader(fstrm);
-        writeWitComment(fstrm, WIT_COLUMN_NAMES);
-        for (TWitRecordIterator it = begin(witRecords, Standard());
-             it != end(witRecords, Standard()); ++it)
-            fstrm << *it << std::endl;
+        GsiHeader header;
+        writeRecord(fstrm, header, Gsi());
+        writeRecord(fstrm, GSI_COLUMN_NAMES, Gsi());
+        for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
+            writeRecord(fstrm, *it, Gsi());
         std::cerr << " DONE\n";
     }
     std::cerr << "\n Took " << sysTime() - startTime << " s\n";
@@ -915,4 +914,4 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     return 0;
 }
 
-#endif  // #ifndef APPS_RABEMA_BUILD_GOLD_STANDARD_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_H_

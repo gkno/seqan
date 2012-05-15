@@ -20,8 +20,8 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#ifndef APPS_RABEMA_EVALUATION_OPTIONS_H_
-#define APPS_RABEMA_EVALUATION_OPTIONS_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_EVALUATION_OPTIONS_H_
+#define SEQAN_CORE_APPS_RABEMA_EVALUATION_OPTIONS_H_
 
 #include "rabema.h"
 
@@ -234,4 +234,4 @@ int parseCommandLineAndCheck(Options<EvaluateResults> & options, CommandLinePars
     return 0;
 }
 
-#endif  // #ifndef APPS_RABEMA_EVALUATION_OPTIONS_H_
+#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_EVALUATION_OPTIONS_H_

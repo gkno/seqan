@@ -11,7 +11,6 @@
 #include <seqan/store.h>
 
 #include "curve_smoothing.h"
-#include "witio.h"
 #include "find_myers_ukkonen_reads.h"
 
 using namespace seqan;

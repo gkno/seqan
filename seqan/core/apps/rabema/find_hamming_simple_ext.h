@@ -22,8 +22,8 @@
 // Extensions for the naive hamming finder.
 // ==========================================================================
 
-#ifndef FIND_HAMMING_SIMPLE_EXT_H_
-#define FIND_HAMMING_SIMPLE_EXT_H_
+#ifndef SEQAN_CORE_APPS_RABEMA_FIND_HAMMING_SIMPLE_EXT_H_
+#define SEQAN_CORE_APPS_RABEMA_FIND_HAMMING_SIMPLE_EXT_H_
 
 // Set the end position of the pattern in the finder.
 template <typename THaystack, typename TNeedle, typename TPosition>
@@ -55,4 +55,4 @@ inline bool setEndPosition(Finder<THaystack, void> & finder,
     return result;
 }
 
-#endif  // FIND_HAMMING_SIMPLE_EXT_H_
+#endif  // SEQAN_CORE_APPS_RABEMA_FIND_HAMMING_SIMPLE_EXT_H_
