@@ -24,49 +24,36 @@
 #define APPS_RABEMA_BUILD_GOLD_STANDARD_H_
 
 // TODO(holtgrew): Another possible way to save memory is not to store the first, always identical part of the read id.
-// TODO(holtgrew): Yet another way to save memory is to load the contigs on demand, i.e. using FAI.
 
 #include <fstream>
 #include <iostream>
 #include <map>
 
+#include <seqan/basic.h>
 #include <seqan/store.h>
+#include <seqan/sequence.h>
 #include <seqan/bam_io.h>
 
-#include "rabema.h"
 #include "build_gold_standard_options.h"
-
-#include "find_myers_ukkonen_reads.h"
-
-#include "verification.h"
-#include "find_hamming_simple_ext.h"
-#include "find_hamming_simple_quality.h"
-#include "find_approx_dp_quality.h"
-#include "intervals.h"
-#include "verification.h"
-
 #include "fai_index.h"
+#include "find_hamming_simple_ext.h"
+#include "find_myers_ukkonen_reads.h"
+#include "intervals.h"
+#include "rabema.h"
+#include "witio.h"
+#include "curve_smoothing.h"
 
 // ============================================================================
 // Enums, Tags, Classes, Typedefs.
 // ============================================================================
 
-// ============================================================================
-// Metafunctions
-// ============================================================================
+typedef std::map<int, TWeightedMatches> TErrorCurves;
 
-// ============================================================================
-// Functions
-// ============================================================================
+// ----------------------------------------------------------------------------
+// Helper Class IntervalizeCmp
+// ----------------------------------------------------------------------------
 
-void trimSeqHeaderToId(seqan::CharString & header)
-{
-    unsigned i = 0;
-    for (; i < length(header); ++i)
-        if (isspace(header[i]))
-          break;
-    resize(header, i);
-}
+// Comparison functor used in intervalizeErrorCurves().
 
 struct IntervalizeCmp
 {
@@ -82,7 +69,62 @@ struct IntervalizeCmp
     }
 };
 
+// ----------------------------------------------------------------------------
+// Class ContigInterval
+// ----------------------------------------------------------------------------
+
+// Represents an interval in a contig.
+struct ContigInterval
+{
+    // Contig the interval is in.
+    size_t contigId;
+
+    // true iff the interval is on the forward strand.
+    bool isForward;
+
+    // First value of interval
+    size_t first;
+
+    // Last value of interval.
+    size_t last;
+
+    // Default constructor so it can be used in containers.
+    ContigInterval() {}
+
+    // Constructor for the record.
+    ContigInterval(size_t _contigId, bool _isForward, size_t _first, size_t _last)
+            : contigId(_contigId), isForward(_isForward), first(_first), last(_last)
+    {}
+};
+
+// ============================================================================
+// Metafunctions
+// ============================================================================
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Function trimSeqHeaderToId()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): Such a method is already in the SeqAn library, but in extras. Remove here when it is in core.
+void trimSeqHeaderToId(seqan::CharString & header)
+{
+    unsigned i = 0;
+    for (; i < length(header); ++i)
+        if (isspace(header[i]))
+          break;
+    resize(header, i);
+}
+
+// ----------------------------------------------------------------------------
+// Function intervalizeErrorCurves()
+// ----------------------------------------------------------------------------
+
 // Build intervals from the error curves.
+
 void intervalizeErrorCurves(String<WitRecord> & result,
                             TErrorCurves const & errorCurves,
                             String<int> const & readAlignmentDistances,
@@ -120,14 +162,8 @@ void intervalizeErrorCurves(String<WitRecord> & result,
         size_t readId = it->first;
         TWeightedMatches const & matches = it->second;
 
-        // Sort the matches.  Matches with high scores (negative score and
-        // low absolute value) come first.
+        // Sort the matches.  Matches with high scores (negative score and low absolute value) come first.
         TWeightedMatches sortedMatches(matches);
-        //std::sort(begin(sortedMatches, Standard()), end(sortedMatches, Standard()));
-        //std::cerr << "\n -- " << readNameStore[readId] << "\n";
-        //for (unsigned i = 0; i < length(sortedMatches); ++i)
-        //    std::cerr << sortedMatches[i] << "\n";
-        //std::cerr << "\n";
 
         // intervals[e] holds the intervals for error e of the current read.
         String<String<ContigInterval> > intervals;
@@ -136,8 +172,7 @@ void intervalizeErrorCurves(String<WitRecord> & result,
 
         // Join the intervals stored in sortedMatches.
         //
-        // The position of the previous match, so we can consider only the
-        // ones with the smallest error.
+        // The position of the previous match, so we can consider only the ones with the smallest error.
         //
         // The following two vars should be != first pos and contigId.
         size_t previousPos = maxValue<size_t>();
@@ -149,8 +184,8 @@ void intervalizeErrorCurves(String<WitRecord> & result,
             // one with smaller absolute distance.
             if (it->pos == previousPos && it->contigId == previousContigId)
                 continue;
-            // Consider all currently open intervals with a greater error
-            // than the error in *it and extend them or create a new one.
+            // Consider all currently open intervals with a greater error than the error in *it and extend them or
+            // create a new one.
             int error = options.oracleSamMode ? 0 : abs(it->distance);
             SEQAN_ASSERT_LEQ(error, maxError);
             for (int e = error; e <= maxError; ++e) {
@@ -205,6 +240,11 @@ void intervalizeErrorCurves(String<WitRecord> & result,
     std::cerr << "100% DONE\n";
 }
 
+// ----------------------------------------------------------------------------
+// Function buildErrorCurvePoint()
+// ----------------------------------------------------------------------------
+
+// TODO(holtgrew): This function has still a lot of cleanup potential.
 
 // Build the error curve points around the end position of the given contig.
 //
@@ -212,24 +252,18 @@ void intervalizeErrorCurves(String<WitRecord> & result,
 //
 // Returns rightmost border of the added points.
 template <typename TContigSeq, typename TReadSeq, typename TPatternSpec, typename TReadNames>
-size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
-                             int & maxError,
-                             TContigSeq /*const*/ & contig,
-                             size_t contigId,
-                             bool isForward,
-                             TReadSeq /*const*/ &read,
-                             size_t readId,
-                             size_t endPos,
-                             size_t /*previousReadId*/,
-                             size_t /*previousContigId*/,
-                             size_t /*previousRightBorder*/,
-                             TReadNames const & readNames,
-                             bool matchN,
-                             TPatternSpec const &) {
+void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
+                           int & maxError,
+                           TContigSeq /*const*/ & contig,
+                           size_t contigId,
+                           bool isForward,
+                           TReadSeq /*const*/ &read,
+                           size_t readId,
+                           size_t endPos,
+                           TReadNames const & readNames,
+                           bool matchN,
+                           TPatternSpec const &) {
     typedef typename Position<TContigSeq>::Type TPosition;
-
-//     std::cerr << __FILE__ << ":" << __LINE__ << " readId = " << readId << ", name = " << readNames[readId] << ", contigId = " << contigId << ", endPos = " << endPos << std::endl;
-//     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
     // In oracle Sam mode, the maximum error is the error at the position given in the Sam alignment.
     bool oracleSamMode = false;
@@ -526,14 +560,14 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     }
     
 //     std::cerr << __FILE__ << ":" << __LINE__ << " return " << right << std::endl;
-
-    return right;
 }
 
+// ----------------------------------------------------------------------------
+// Function matchesToErrorFunction()
+// ----------------------------------------------------------------------------
 
+// Compute error curve from the reads and reference sequences.
 
-// Compute error curve from the reads and reference sequences in the
-// fragment score.
 template <typename TPatternSpec>
 int matchesToErrorFunction(TErrorCurves & errorCurves,
                            String<int> & readAlignmentDistances,  // only used in case of oracle mode
@@ -545,22 +579,6 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
                            Options<BuildGoldStandard> const & options,
                            TPatternSpec const &)
 {
-    // typedef typename TFragmentStore::TAlignedReadStore                   TAlignedReadStore;
-    // typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
-    // typedef typename Iterator<TAlignedReadStore, Standard>::Type         TAlignedReadIterator;
-    // typedef typename TFragmentStore::TContigStore                        TContigStore;
-    // typedef typename TFragmentStore::TReadStore                          TReadStore;
-    // typedef typename TFragmentStore::TReadSeqStore                       TReadSeqStore;
-    // typedef typename Value<TReadStore>::Type                             TRead;
-    // typedef typename TRead::TId                                          TReadId;
-    // typedef typename Value<TContigStore>::Type                           TContig;
-    // typedef typename TContig::TId                                        TContigId;
-    // typedef typename TFragmentStore::TContigSeq                          TContigSeq;
-    // typedef typename TFragmentStore::TReadSeq                            TReadSeq;
-    // typedef typename Value<TAlignedReadStore>::Type                      TAlignedRead;
-    // typedef typename TAlignedRead::TPos                                  TAlignedReadPos;
-    // typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
-
     double startTime = 0;
 
     if (atEnd(samReader))
@@ -572,10 +590,6 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     // flag).  Sadly, there is no easy way out here.  Single-end reads are stored as "/S".
     NameStoreCache<StringSet<CharString> > readNameStoreCache(readNameStore);
     String<unsigned> readLengthStore;
-
-//     for (TAlignedReadIterator it = begin(fragments.alignedReadStore, Standard()); it != end(fragments.alignedReadStore, Standard()); ++it) {
-//         fprintf(stderr, "%3u\t%3u\t%8lu\t%3s\n", it->contigId, it->readId, it->endPos, (it->endPos < it->beginPos ? "R" : "F"));
-//     }
 
     std::cerr << "\n____EXTENDING INTERVALS_______________________________________________________\n\n"
               << "Each dot represents work for 100k nucleotides in the genome.\n";
@@ -592,8 +606,6 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     startTime = sysTime();      // Time at beginning for total time display at end.
     int prevRefId = -1;      // Previous contig id.
     int prevPos = -1;
-    unsigned prevReadId = maxValue<unsigned>();
-    size_t prevRightBorder = maxValue<size_t>();
     int posOnContig = 0;
     BamAlignmentRecord record;  // Current read record.
     Dna5String contig;
@@ -674,8 +686,6 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
                 std::cerr << "Could not load sequence " << contigNameStore[record.rId] << " from FASTA file with FAI.\n";
                 return 1;
             }
-            // std::cerr << "PREFIX " << prefix(contig, 100) << "\n";
-            // std::cerr << "SUFFIX " << suffix(contig, length(contig) - 100) << "\n";
             rcContig = contig;
             reverseComplement(rcContig);
         }
@@ -699,113 +709,18 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
         // Compute end position of alignment.
         int endPos = record.pos + getAlignmentLengthInRef(record) - countPaddings(record.cigar);
 
-        size_t right = 0;
         if (!hasFlagRC(record))
-            right = buildErrorCurvePoints(errorCurves[readId], maxError, contig, record.rId, !hasFlagRC(record), readSeq, readId, endPos, prevReadId, prevRefId, prevRightBorder, readNameStore, options.matchN, TPatternSpec());
+            buildErrorCurvePoints(errorCurves[readId], maxError, contig, record.rId, !hasFlagRC(record), readSeq, readId, endPos, readNameStore, options.matchN, TPatternSpec());
         else
-            right = buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, record.rId, !hasFlagRC(record), readSeq, readId, length(rcContig) - record.pos, prevReadId, prevRefId, prevRightBorder, readNameStore, options.matchN, TPatternSpec());
+            buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, record.rId, !hasFlagRC(record), readSeq, readId, length(rcContig) - record.pos, readNameStore, options.matchN, TPatternSpec());
         if (options.oracleSamMode)
             readAlignmentDistances[readId] = maxError;
 
         // Update variables storing the previous read/contig id and position.
-        prevReadId = readId;
         prevRefId = record.rId;
         prevPos = record.pos;
-        prevRightBorder = right;
     }
     std::cerr << "\n\nTook " << sysTime() - startTime << " s\n";
-
-#if 0
-    TContigStore /*const*/ & contigStore = fragments.contigStore;
-    TAlignedReadStore /*const*/ & alignedReadStore = fragments.alignedReadStore;
-    for (size_t contigId = 0; contigId < length(contigStore); ++contigId) {
-        TContigGaps contigGaps(contigStore[contigId].seq, contigStore[contigId].gaps);
-        TContigSeq /*const*/ & contig = contigStore[contigId].seq;
-        // Get reverse-complement of the contig.
-        TContigSeq rcContig(contig);
-        reverseComplement(rcContig);
-
-        for (int isForward = 0; isForward <= 1; ++isForward) {
-            std::cerr << "[" << fragments.contigNameStore[contigId] << "] (" << (contigId + 1) << "/" << length(contigStore) << ") " << (isForward ? "F" : "R") << " ";
-
-            // Sort aligned reads by (contig index, read index, end
-            // position) when iterating forward and by begin position
-            // instead when iterating backwards.
-            //
-            // TODO(holtgrew): Only re-sort with a given contig id? We are sorting $contig-count times too often.
-            if (isForward) {
-                sortAlignedReads(fragments.alignedReadStore, SortEndPos());
-                sortAlignedReads(fragments.alignedReadStore, SortReadId());
-                sortAlignedReads(fragments.alignedReadStore, SortContigId());
-            } else {
-                sortAlignedReads(fragments.alignedReadStore, SortBeginPos());
-                sortAlignedReads(fragments.alignedReadStore, SortReadId());
-                sortAlignedReads(fragments.alignedReadStore, SortContigId());
-            }
-            
-            // Previous contig id and right border for both forward and backward
-            // strand.  The number of contigs suffices as a sentinel value.
-            TReadId previousReadId = length(fragments.readStore);
-            TContigId previousContigId = length(fragments.contigStore);
-            TAlignedReadPos previousRightBorder = 0;
-
-            for (size_t i = 0; i < length(alignedReadStore); ++i) {
-                if (length(alignedReadStore) / 20 > 0 && i % (length(alignedReadStore) / 20) == 0)
-                    std::cerr << ".";
-                size_t idx = isForward ? i : length(alignedReadStore) - i - 1;
-                TAlignedRead const & alignedRead = alignedReadStore[idx];
-                if (alignedRead.contigId != contigId) 
-                    continue;  // Skip alignments on other contig.
-                if ((isForward && (alignedRead.beginPos > alignedRead.endPos)) ||
-                    (!isForward && (alignedRead.beginPos < alignedRead.endPos)))
-                    continue;  // Skip alignments on backwards strand when processing on forward strand.
-                TReadId readId = alignedRead.readId;
-                TReadSeq /*const*/ read = fragments.readSeqStore[readId];
-
-                // Convert mapped begin and end positions from gap space
-                // (with gaps in the alignment) to sequence space.
-//                 std::cerr << "read name == " << fragments.readNameStore[readId] << std::endl;
-//                 std::cerr << "alignedRead.contigId = " << alignedRead.contigId << std::endl;
-//                 std::cerr << "alignedRead.readId = " << alignedRead.readId << std::endl;
-//                 std::cerr << "alignedRead.beginPos = " << alignedRead.beginPos << std::endl;
-//                 std::cerr << "alignedRead.endPos = " << alignedRead.endPos << std::endl;
-                TAlignedReadPos endPos = positionGapToSeq(contigGaps, alignedRead.endPos);
-                if (ENABLE && (ALL || readId == READID)) {
-                    std::cerr << __FILE__ << ":" << __LINE__ << " -- beginPos = " << positionGapToSeq(contigGaps, alignedRead.beginPos) << ", endPos = " << endPos << std::endl;
-                    std::cerr << __FILE__ << ":" << __LINE__ << " -- rev beginPos = " << length(contig) - positionGapToSeq(contigGaps, alignedRead.beginPos) << ", rev endPos = " << length(contig) - endPos << std::endl;
-                }
-
-                // Build error curve fragment around the aligned read's
-                // position, depending on which strand the read was aligned.
-                size_t right;
-//                std::cerr << __FILE__ << ":" << __LINE__ << " -- read name == " << fragments.readNameStore[readId] << ", isForward = " << isForward << ", endPos = " << endPos << ", beginPos = " << positionGapToSeq(contigGaps, alignedRead.beginPos) << std::endl;
-
-                int maxError;
-                if (options.oracleSamMode) {
-                    // In oracle Sam mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position from the Sam file.
-                    maxError = -1;
-                } else {
-                    // In normal mode, convert from error rate from options to error count.
-                    maxError = (int)floor(0.01 * options.maxError * length(read));
-                }
-                
-                if (isForward) {
-                    right = buildErrorCurvePoints(errorCurves[readId], maxError, contig, contigId, isForward, read, readId, endPos, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
-                } else {
-                    right = buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, contigId, isForward, read, readId, length(contig) - endPos, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
-                }
-                if (options.oracleSamMode)
-                    readAlignmentDistances[readId] = maxError;
-                previousReadId = readId;
-                previousContigId = contigId;
-                previousRightBorder = right;
-            }
-            std::cerr << std::endl;
-        }
-    }
-    if (options.verbosity >= 2)
-        std::cerr << "[timer] sorting/gap filling/smoothing/filtering: " << sysTime() - startTime << " s" << std::endl;
-#endif  // #if 0
 
     // For all reads:
     //   Sort all error curve points.
@@ -838,17 +753,10 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
 
         // Filter out low scoring ones.
         typedef typename Iterator<String<WeightedMatch> >::Type TIterator;
-        for (TIterator it = begin(errorCurves[readId]); it != end(errorCurves[readId]); ++it) {
-            if (value(it).distance >= relativeMinScore) {
-                #if ENABLED
-                std::cerr << fragments.readNameStore[readId] << " accepting  " << value(it) << std::endl;
-                #endif
+        for (TIterator it = begin(errorCurves[readId]); it != end(errorCurves[readId]); ++it)
+        {
+            if (value(it).distance >= relativeMinScore)
                 appendValue(filtered, value(it));
-            } else {
-                #if ENABLED
-                std::cerr << fragments.readNameStore[readId] << " discarding " << value(it) << std::endl;
-                #endif
-            }
         }
         move(errorCurves[readId], filtered);
     }
@@ -858,7 +766,12 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     return 0;
 }
 
+// ---------------------------------------------------------------------------
+// Function buildGoldStandard()
+// ---------------------------------------------------------------------------
+
 // Entry point for the gold standard building subprogram.
+
 int buildGoldStandard(Options<BuildGoldStandard> const & options)
 {
     double startTime = 0;  // For measuring time below.
@@ -933,12 +846,11 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         std::cerr << "Could not read SAM header.\n";
         return 1;
     }
-    // Check that the SAM file is sorted by COORDINATE.
-    // if (getSortOrder(samHeader) != BAM_SORT_COORDINATE)
-    // {
-    //     std::cerr << "SAM file not sorted by 'coordinate'!\n";
-    //     return 1;
-    // }
+    // The SAM file has to be sorted by coordinate.
+    //
+    // We do not look at the SAM header for read ordering since samtools sort does not update the SAM header.  This
+    // means users would have to update it manually after sorting which is painful.  We will check SAM record order on
+    // the fly.
     std::cerr << " OK\n";
     std::cerr << "\nTook " << sysTime() - startTime << "s\n";
 
@@ -962,38 +874,10 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         std::cerr << "[timer] building error curve: " << sysTime() - startTime << " s" << std::endl;
 
     // =================================================================
-    // Verify result when enabled.
-    // =================================================================
-    if (options.verify) {
-        // TODO(holtgrew): Re-enable?
-        std::cerr << "VERIFICATION DISABLED AT THE MOMENT!\n";
-#if 0
-        startTime = sysTime();
-        if (options.oracleSamMode) {
-            std::cerr << "WARNING: Not verifying since we run in oracle Sam mode!" << std::endl;
-        } else {
-            bool valid;
-            if (options.distanceFunction == "edit")
-                valid = verifyMatchesToErrorFunctionResults(fragmentStore, errorCurves, options, MyersUkkonenReads());
-            else // options.distanceFunction == "hamming"
-                valid = verifyMatchesToErrorFunctionResults(fragmentStore, errorCurves, options, HammingSimple());
-            
-            if (!valid) {
-                std::cerr << "ERROR: Result does not validate!" << std::endl;
-                return 1;
-            }
-            // else...
-            std::cerr << "Result DID validate!" << std::endl;
-        }
-        if (options.verbosity >= 2)
-            std::cerr << "[timer] verification: " << sysTime() - startTime << " s" << std::endl;
-#endif  // #if 0
-    }
-
-    // =================================================================
     // Convert points in error curves to intervals and write them to
     // stdout or a file.
     // =================================================================
+
     // TODO(holtgrew): If we get rid of the witRecords string and print directly to output then save a lot of memory!
     startTime = sysTime();
     String<WitRecord> witRecords;
