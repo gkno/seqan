@@ -1698,6 +1698,11 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 	typedef Gaps<TReadSeq, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
 	typedef typename Iterator<TContigGaps>::Type							TContigIter;
 	typedef typename Iterator<TReadGaps>::Type								TReadIter;
+
+    // Number of alignments with a quality score (edit distance) before computing global alignment.  We will fill the
+    // store for all alignments that do not yet have an entry.
+    unsigned alignQualityStoreLengthPre = length(store.alignQualityStore);
+    resize(store.alignQualityStore, length(store.alignedReadStore));
 	
 	// sort matches by increasing begin positions
 	sortAlignedReads(store.alignedReadStore, SortBeginPos());
@@ -1750,10 +1755,16 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 //        else
 //		    globalAlignment(align, score, ld, ud);
 
+        int qualValue = 0;
 		if (IsSameType<TShrinkMatches, True>::VALUE)
-		    globalAlignment(align, score, AlignConfig<true, false, false, true>(), Gotoh());
+		    qualValue = globalAlignment(align, score, AlignConfig<true, false, false, true>(), Gotoh());
         else
-		    globalAlignment(align, score);
+		    qualValue = globalAlignment(align, score);
+        if (it->id >= alignQualityStoreLengthPre)
+        {
+            store.alignQualityStore[it->id].errors = qualValue / scoreMismatch(score);
+            store.alignQualityStore[it->id].score = -qualValue / scoreMismatch(score);
+        }
 //    if (cBegin > 5349500 && cBegin < 5349700)
 //    {
 //        if (theIt->id != 29971)
