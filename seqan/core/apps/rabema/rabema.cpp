@@ -25,7 +25,7 @@
 // headers contain the code for building the gold standard and
 // comparing the read mapper results against the gold standard.  They
 // also contain the command line parsing code used here.
-// 
+//
 // Usage: rabema build_standard -o GOLD_STANDARD.gsi GENOME.fasta GOLD.sam
 //        rabema compare GENOME.fasta GOLD_STANDARD.gsi READ_MAPPER_OUTPUT.sam
 // ==========================================================================
@@ -40,7 +40,8 @@
 /* Print global help.  This function is called when the user specifies
    a wrong simulation command.
  */
-void printHelpGlobal() {
+void printHelpGlobal()
+{
     std::cerr << "RABEMA - Read Alignment Benchmark" << std::endl
               << "(c) 2010 by Manuel Holtgrewe" << std::endl
               << std::endl
@@ -50,22 +51,31 @@ void printHelpGlobal() {
               << "Call with 'rabema COMMAND --help' to get detailed help." << std::endl;
 }
 
-int parseOptions(Options<Global> & options, const int argc, const char * argv[]) {
+int parseOptions(Options<Global> & options, const int argc, const char * argv[])
+{
     if (argc == 1 ||
         (argc >= 2 && CharString(argv[1]) == "--help") ||
-        (argc >= 2 && CharString(argv[1]) == "-h")) {
+        (argc >= 2 && CharString(argv[1]) == "-h"))
+    {
         printHelpGlobal();
         return 0;
-    } else if (argc >=2 && CharString(argv[1]) != "build_standard" && CharString(argv[1]) != "compare") {
+    }
+    else if (argc >= 2 && CharString(argv[1]) != "build_standard" && CharString(argv[1]) != "compare")
+    {
         printHelpGlobal();
         return 1;
     }
 
-    if (CharString(argv[1]) == "build_standard") {
+    if (CharString(argv[1]) == "build_standard")
+    {
         options.selectedCommand = COMMAND_BUILD_STANDARD;
-    } else if (CharString(argv[1]) == "compare") {
+    }
+    else if (CharString(argv[1]) == "compare")
+    {
         options.selectedCommand = COMMAND_EVALUATE;
-    } else {
+    }
+    else
+    {
         printHelpGlobal();
         return 1;
     }
@@ -79,26 +89,33 @@ int main(int argc, char const ** argv)
     int ret = parseOptions(globalOptions, argc, argv);
     if (ret)
         return ret;
-    
-    if (globalOptions.selectedCommand == COMMAND_BUILD_STANDARD) {
+
+    if (globalOptions.selectedCommand == COMMAND_BUILD_STANDARD)
+    {
         CommandLineParser parser;
         setUpCommandLineParser(parser, BuildGoldStandard());
         Options<BuildGoldStandard> options;
         int ret = parseCommandLineAndCheck(options, parser, argc, argv);
         if (options.showHelp)
             return 0;
+
         if (ret != 0)
             return ret;
+
         return buildGoldStandard(options);
-    } else if (globalOptions.selectedCommand == COMMAND_EVALUATE) {
+    }
+    else if (globalOptions.selectedCommand == COMMAND_EVALUATE)
+    {
         CommandLineParser parser;
         setUpCommandLineParser(parser, EvaluateResults());
         Options<EvaluateResults> options;
         int ret = parseCommandLineAndCheck(options, parser, argc, argv);
         if (options.showHelp)
             return 0;
+
         if (ret != 0)
             return ret;
+
         return evaluateReadMapperResult(options);
     }
 

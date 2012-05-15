@@ -128,7 +128,7 @@ int fixRecords(seqan::String<seqan::BamAlignmentRecord> & records)
             }
         }
     }
-    
+
     return 0;
 }
 
@@ -155,7 +155,7 @@ int main(int argc, char const ** argv)
     // Read header.
     typedef StringSet<CharString>      TNameStore;
     typedef NameStoreCache<TNameStore> TNameStoreCache;
-    
+
     TNameStore refNameStore;
     TNameStoreCache refNameStoreCache(refNameStore);
     BamIOContext<TNameStore> context(refNameStore, refNameStoreCache);
@@ -208,6 +208,6 @@ int main(int argc, char const ** argv)
     }
     for (unsigned i = 0; i < length(records); ++i)
         write2(std::cout, records[i], context, Sam());
-    
+
     return 0;
 }

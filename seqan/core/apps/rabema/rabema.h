@@ -51,7 +51,8 @@ struct EvaluateResults_ {};
 typedef Tag<EvaluateResults_> EvaluateResults;
 
 // Enum for selecting a subprogram.
-enum SelectedCommand {
+enum SelectedCommand
+{
     COMMAND_NONE,
     COMMAND_BUILD_STANDARD,
     COMMAND_EVALUATE
@@ -77,7 +78,8 @@ public:
     // Path to the file to write the output to.  "-" for stdout.
     CharString outputFile;
 
-    Options() : verbose(false), veryVerbose(false), selectedCommand(COMMAND_NONE), outputFile("-")
+    Options() :
+        verbose(false), veryVerbose(false), selectedCommand(COMMAND_NONE), outputFile("-")
     {}
 };
 
@@ -94,9 +96,11 @@ public:
 // ceilAwayFromZero(-1.5) == -2
 // ceilAwayFromZero(1.5) == 2
 template <typename T>
-inline T ceilAwayFromZero(const T &x) {
+inline T ceilAwayFromZero(const T & x)
+{
     if (x < 0)
         return floor(x);
+
     return ceil(x);
 }
 
@@ -110,6 +114,5 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addTitleLine(parser, "");
     addTitleLine(parser, "(c) 2010 by Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>");
 }
-
 
 #endif  // #ifndef SEQAN_CORE_APPS_RABEMA_RABEMA_H_

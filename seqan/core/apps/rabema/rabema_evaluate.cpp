@@ -103,7 +103,7 @@ public:
     // ------------------------------------------------------------------------
     // Logging configuration.
     // ------------------------------------------------------------------------
-    
+
     // Print the missed intervals to stderr for debugging purposes.
     bool showMissedIntervals;
 
@@ -120,20 +120,20 @@ public:
     bool showTryHitIntervals;
 
     RabemaEvaluationOptions() :
-            verbosity(1),
-            maxError(0),
-            matchN(false),
-            oracleMode(false),
-            benchmarkCategory("all"),
-            distanceMetric("edit"),
-            trustNM(false),
-            dontPanic(false),
-            // outPath("-"),
-            showMissedIntervals(false),
-            showSuperflousIntervals(false),
-            showAdditionalIntervals(false),
-            showHitIntervals(false),
-            showTryHitIntervals(false)
+        verbosity(1),
+        maxError(0),
+        matchN(false),
+        oracleMode(false),
+        benchmarkCategory("all"),
+        distanceMetric("edit"),
+        trustNM(false),
+        dontPanic(false),
+        // outPath("-"),
+        showMissedIntervals(false),
+        showSuperflousIntervals(false),
+        showAdditionalIntervals(false),
+        showHitIntervals(false),
+        showTryHitIntervals(false)
     {}
 };
 
@@ -148,8 +148,9 @@ struct CmpGsiRecordLowering
     bool operator()(GsiRecord const & lhs, GsiRecord const & rhs) const
     {
         return (lhs.readId < rhs.readId) || (lhs.readId == rhs.readId && lhs.contigId < rhs.contigId) ||
-                (lhs.readId == rhs.readId && lhs.contigId == rhs.contigId && lhs.firstPos < rhs.firstPos);
+               (lhs.readId == rhs.readId && lhs.contigId == rhs.contigId && lhs.firstPos < rhs.firstPos);
     }
+
 };
 
 // ============================================================================
@@ -221,7 +222,8 @@ void performIntervalLowering(String<GsiRecord> & gsiRecords, int maxError)
     {
         // Remove non-overlapping intervals on top of openInterval stack, appending to filtered intervals
         unsigned count = 0;
-        for (unsigned j = 0; j < length(openIntervals); ++j) {
+        for (unsigned j = 0; j < length(openIntervals); ++j)
+        {
             unsigned idx = length(openIntervals) - 1 - j;
             GsiRecord const & thisIntervalRecord = gsiRecords[cargo(openIntervals[idx])];
             SEQAN_ASSERT_EQ(thisIntervalRecord.readName, it->readName);
@@ -229,7 +231,8 @@ void performIntervalLowering(String<GsiRecord> & gsiRecords, int maxError)
             {
                 count += 1;
                 unsigned startDistance = gsiRecords[cargo(openIntervals[idx])].distance;
-                if (!empty(filteredGsiRecords)) {
+                if (!empty(filteredGsiRecords))
+                {
                     if (back(filteredGsiRecords).lastPos >= leftBoundary(openIntervals[idx]))
                     {
                         if (back(filteredGsiRecords).contigId == gsiRecords[cargo(openIntervals[idx])].contigId)
@@ -268,7 +271,7 @@ void performIntervalLowering(String<GsiRecord> & gsiRecords, int maxError)
 template <typename TPatternSpec>
 int benchmarkReadResult(RabemaStats & result,
                         String<BamAlignmentRecord> const & samRecords,
-                        BamIOContext<StringSet<CharString > > const & bamIOContext,
+                        BamIOContext<StringSet<CharString> > const & bamIOContext,
                         String<GsiRecord> const & gsiRecords,
                         StringSet<CharString> const & refSeqNames,
                         NameStoreCache<StringSet<CharString> > const & refSeqNamesCache,
@@ -466,10 +469,10 @@ int benchmarkReadResult(RabemaStats & result,
             lastPos = samRecord.pos + getAlignmentLengthInRef(samRecord) - countPaddings(samRecord.cigar) - 1;
         else
             lastPos = length(refSeqs[seqId]) - samRecord.pos - 1;
-        
+
         if (options.showTryHitIntervals)
             std::cerr << "TRY HIT\tchr=" << refSeqNames[seqId] << "\tlastPos=" << lastPos << "\tqName=" << samRecord.qName << "\n";
-        
+
         // Try to hit any interval.
         String<unsigned> result;
         findIntervals(intervalTrees[seqId], lastPos, result);
@@ -534,12 +537,12 @@ int benchmarkReadResult(RabemaStats & result,
             else
             {
                 if (options.showMissedIntervals)  // inside braces for consistency with above
-                    std::cerr  << "MISSED\t" << pickedGsiRecords[i] << "\n";
+                    std::cerr << "MISSED\t" << pickedGsiRecords[i] << "\n";
             }
         }
         SEQAN_ASSERT_LEQ(numFound, length(intervalDistances));
     }
-    
+
     // Update the resulting RabemaStats.
     updateMaximalErrorRate(result, largestDistance);
     result.totalReads += 1;
@@ -565,7 +568,7 @@ int benchmarkReadResult(RabemaStats & result,
             if (options.benchmarkCategory != "all" || (int)d == options.maxError)
             {
                 intervalsToFind += numIntervalsForErrorRate[d];
-                intervalsFound += foundIntervalsForErrorRate[d];;
+                intervalsFound += foundIntervalsForErrorRate[d];
                 result.intervalsToFindForErrorRate[d] += numIntervalsForErrorRate[d];
                 result.intervalsFoundForErrorRate[d] += foundIntervalsForErrorRate[d];
             }
@@ -643,12 +646,12 @@ compareAlignedReadsToReference(RabemaStats & result,
     unsigned i = 0;
     while (!samDone || !gsiDone)
     {
-        if (i > 0u && i % (100*1000) == 0u)
+        if (i > 0u && i % (100 * 1000) == 0u)
             std::cerr << i / 100 / 1000 << "00k";
-        else if (i > 0 && i % (10*1000) == 0u)
+        else if (i > 0 && i % (10 * 1000) == 0u)
             std::cerr << '.';
         ++i;
-        
+
         // We process the record for the next query/read.  Since records for this next query/read might be missing in
         // both files, we need to determine which is the next one.
         CharString currentReadName;
@@ -726,12 +729,12 @@ compareAlignedReadsToReference(RabemaStats & result,
         // We collected the records for all queries.  Here, we differentiate between the different cases.
         if (seenSingleEnd)
         {
-            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/false);
+            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ false);
         }
         if (seenPairedEnd)
         {
-            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/true, /*second=*/false);
-            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/true, /*second=*/true);
+            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ false);
+            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ true);
         }
     }
     std::cerr << " DONE\n";
@@ -828,7 +831,7 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     addText(parser, "A return value of 0 indicates success, any other value indicates an error.");
 
     // addTextSection(parser, "Examples");
-    
+
     // addListItem(parser,
     //             "\\fBrabema_build_gold_standard\\fP \\fB-e\\fP \\fI4\\fP \\fB-o\\fP \\fIOUT.gsi\\fP \\fB-i\\fP "
     //                 "\\fIIN.sam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
@@ -1027,7 +1030,7 @@ int main(int argc, char const ** argv)
     // means users would have to update it manually after sorting which is painful.  We will check SAM record order on
     // the fly.
     std::cerr << " OK\n";
-    
+
     std::cerr << "\nTook " << sysTime() - startTime << "s\n";
 
     // =================================================================

@@ -55,34 +55,44 @@ public:
     // Optional begin position, used in wit builder to smooth matches.
     // Is not written out or used in the less than operator.
     size_t beginPos;
-  
+
     WeightedMatch() {}
 
-    WeightedMatch(size_t _contigId, bool _isForward, size_t _pos, int _distance, size_t _beginPos)
-            : contigId(_contigId), isForward(_isForward), pos(_pos), distance(_distance), beginPos(_beginPos)
+    WeightedMatch(size_t _contigId, bool _isForward, size_t _pos, int _distance, size_t _beginPos) :
+        contigId(_contigId), isForward(_isForward), pos(_pos), distance(_distance), beginPos(_beginPos)
     {}
 
     // Order lexicographically by (contigId, pos, -distance).
     bool operator<(WeightedMatch const & other) const
     {
         if (contigId < other.contigId) return true;
+
         if (contigId == other.contigId && isForward > other.isForward) return true;
+
         if (contigId == other.contigId && isForward == other.isForward &&
             pos < other.pos) return true;
+
         if (contigId == other.contigId && isForward == other.isForward &&
             pos == other.pos && distance > other.distance) return true;
+
         return false;
     }
 
     bool operator==(WeightedMatch const & other) const
     {
         if (contigId != other.contigId) return false;
+
         if (isForward != other.isForward) return false;
+
         if (pos != other.pos) return false;
+
         if (distance != other.distance) return false;
+
         if (beginPos != other.beginPos) return false;
+
         return true;
     }
+
 };
 
 typedef String<WeightedMatch> TWeightedMatches;
@@ -91,12 +101,14 @@ typedef String<WeightedMatch> TWeightedMatches;
 // Helper Class WeightedMatchBeginPosNeqOrContigIdNeq
 // ----------------------------------------------------------------------------
 
-struct WeightedMatchBeginPosNeqOrContigIdNeq : std::binary_function<WeightedMatch, WeightedMatch, bool>
+struct WeightedMatchBeginPosNeqOrContigIdNeq :
+    std::binary_function<WeightedMatch, WeightedMatch, bool>
 {
     bool operator()(WeightedMatch const & arg1, WeightedMatch const & arg2)
     {
         return arg1.beginPos != arg2.beginPos || arg1.contigId != arg2.contigId || arg1.isForward != arg2.isForward;
     }
+
 };
 
 // ============================================================================
@@ -113,10 +125,10 @@ struct WeightedMatchBeginPosNeqOrContigIdNeq : std::binary_function<WeightedMatc
 
 // Stream output for WeightedMatch objects, for debugging.
 template <typename TStream>
-TStream &operator<<(TStream &out, WeightedMatch const & m)
+TStream & operator<<(TStream & out, WeightedMatch const & m)
 {
     out << "(" << m.contigId << ", " << (m.isForward ? "F, " : "R, ")
-        << m.pos << ", " << m.distance << ", " << m.beginPos << ")";
+    << m.pos << ", " << m.distance << ", " << m.beginPos << ")";
     return out;
 }
 
@@ -139,7 +151,8 @@ void fillGaps(String<WeightedMatch> & errorCurve)
 
     // The insertion buffer.
     String<WeightedMatch> buffer;
-    for (TIterator it = begin(errorCurve, Standard()); (it + 1) != end(errorCurve, Standard()); ++it) {
+    for (TIterator it = begin(errorCurve, Standard()); (it + 1) != end(errorCurve, Standard()); ++it)
+    {
         if (value(it).contigId != value(it + 1).contigId)
             continue;  // Skip if contigId is not equal.
         if (value(it).isForward != value(it + 1).isForward)
@@ -172,7 +185,9 @@ void fillGaps(String<WeightedMatch> & errorCurve)
 
 void smoothErrorCurve(String<WeightedMatch> & errorCurve)
 {
-    if (length(errorCurve) == 0u) return;
+    if (length(errorCurve) == 0u)
+        return;
+
     // TODO(holtgrew): Standard should be the standard iterator, yes?
     typedef Iterator<String<WeightedMatch>, Standard>::Type TIterator;
     typedef Position<String<WeightedMatch> >::Type TPosition;
@@ -181,14 +196,16 @@ void smoothErrorCurve(String<WeightedMatch> & errorCurve)
     WeightedMatchBeginPosNeqOrContigIdNeq pred;
     TIterator itBegin = begin(errorCurve, Standard());
     TIterator itEnd = std::adjacent_find(itBegin, end(errorCurve, Standard()), pred);
-    do {
+    do
+    {
 //         std::cerr << "begin is " << (itBegin - begin(errorCurve, Standard())) << std::endl;
 //         std::cerr << "end is " << (itEnd - begin(errorCurve, Standard())) << std::endl;
         if (itEnd != end(errorCurve, Standard()))
             itEnd += 1;
         SEQAN_ASSERT_NEQ(itBegin, itEnd);
 
-        if (itBegin != itEnd) {
+        if (itBegin != itEnd)
+        {
             // Find maximal score value.
             int maxScore = value(itBegin).distance;
             for (TIterator it = itBegin; it != itEnd; ++it)
@@ -204,7 +221,8 @@ void smoothErrorCurve(String<WeightedMatch> & errorCurve)
 
             // Search leftmost and rightmost maximum.
             TIterator itLeftmost = 0, itRightmost = 0;
-            for (TIterator it = itBegin; it != itEnd; ++it) {
+            for (TIterator it = itBegin; it != itEnd; ++it)
+            {
                 if (value(it).distance != maxScore)
                     continue;
                 if (itLeftmost == 0)
@@ -221,7 +239,8 @@ void smoothErrorCurve(String<WeightedMatch> & errorCurve)
 
             // Make monotonously decreasing from begin to leftmost.
             int currentMax = value(itBegin).distance;
-            for (TIterator it = itBegin; it != itLeftmost; ++it) {
+            for (TIterator it = itBegin; it != itLeftmost; ++it)
+            {
                 currentMax = _max(currentMax, value(it).distance);
 //                 std::cerr << "value(" << (it - begin(errorCurve, Standard())) << ") = " << currentMax << std::endl;
                 value(it).distance = currentMax;
@@ -235,7 +254,8 @@ void smoothErrorCurve(String<WeightedMatch> & errorCurve)
             TModifiedString rRightInterval(infix(errorCurve, rightmostPos, offset + intervalLength));
             typedef Iterator<TModifiedString>::Type TModifiedStringIterator;
             currentMax = front(rRightInterval).distance;
-            for (TModifiedStringIterator it = begin(rRightInterval, Standard()); it != end(rRightInterval, Standard()); ++it) {
+            for (TModifiedStringIterator it = begin(rRightInterval, Standard()); it != end(rRightInterval, Standard()); ++it)
+            {
                 currentMax = _max(currentMax, value(it).distance);
 //                 std::cerr << "value(" << value(it) << ") = " << currentMax << std::endl;
                 value(it).distance = currentMax;
@@ -251,7 +271,8 @@ void smoothErrorCurve(String<WeightedMatch> & errorCurve)
         // Proceed.
         itBegin = itEnd;
         itEnd = std::adjacent_find(itBegin, end(errorCurve, Standard()), pred);
-    } while (itBegin != end(errorCurve));
+    }
+    while (itBegin != end(errorCurve));
 }
 
 #endif  // SEQAN_CORE_APPS_RABEMA_CURVE_SMOOTHING_H_

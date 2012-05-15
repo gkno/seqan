@@ -69,19 +69,21 @@ struct RabemaStats
     // Normalized number of intervals found for each error rate.
     String<double> normalizedIntervalsFoundForErrorRate;
 
-    RabemaStats() : intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
-                    additionalHits(0)
+    RabemaStats() :
+        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
+        additionalHits(0)
     {}
 
     RabemaStats(unsigned maxErrorRate) :
-            intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
-            additionalHits(0)
+        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
+        additionalHits(0)
     {
         resize(intervalsToFindForErrorRate, maxErrorRate + 1, 0);
         resize(intervalsFoundForErrorRate, maxErrorRate + 1, 0);
         resize(normalizedIntervalsToFindForErrorRate, maxErrorRate + 1, 0.0);
         resize(normalizedIntervalsFoundForErrorRate, maxErrorRate + 1, 0.0);
     }
+
 };
 
 // ============================================================================

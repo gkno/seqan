@@ -64,7 +64,8 @@ struct MyersUkkonenReads_;
 typedef Tag<MyersUkkonenReads_> MyersUkkonenReads;
 
 template <typename TNeedle>
-class Pattern<TNeedle, MyersUkkonenReads> {
+class Pattern<TNeedle, MyersUkkonenReads>
+{
 public:
     // Shortcut to the MyersUkkonen-Pattern we will use internally.
     typedef Pattern<Segment<TNeedle, InfixSegment>, Myers<FindInfix> > TMyersUkkonen_;
@@ -96,156 +97,148 @@ public:
     // The whole needle, wrapped has one char less.
     //Holder<TNeedle> data_host;
 
-    Pattern()
-            : _score(0),
-              _scoreLimit(0),
-              _firstFind(true) {
-        SEQAN_CHECKPOINT;
-    }
+    Pattern() :
+        _score(0),
+        _scoreLimit(0),
+        _firstFind(true)
+    {}
 
     template <typename TNeedle2>
-    Pattern(TNeedle2 &ndl, int score = -1)
-            : _wrappedPattern(infix(ndl, 0, length(ndl) - 1), score),
-              _lastCharacter(back(ndl)),
-              _score(score),
-              _scoreLimit(score),
-              data_host(ndl),
-              _firstFind(true)/*,
-                                data_host(needle)*/ {
+    Pattern(TNeedle2 & ndl, int score = -1) :
+        _wrappedPattern(infix(ndl, 0, length(ndl) - 1), score),
+        _lastCharacter(back(ndl)),
+        _score(score),
+        _scoreLimit(score),
+        data_host(ndl),
+        _firstFind(true)
+    {
         typedef typename Value<TNeedle>::Type TAlphabet;
         resize(_matchNMask, ValueSize<TAlphabet>::VALUE * ValueSize<TAlphabet>::VALUE);
 
-        for (unsigned i = 0; i < ValueSize<TAlphabet>::VALUE; ++i) {
-          for (unsigned j = 0; j < ValueSize<TAlphabet>::VALUE; ++j) {
-            if (i == ordValue(TAlphabet('N')) || j == ordValue(TAlphabet('N')))
-              _matchNMask[ValueSize<TAlphabet>::VALUE * i + j] = -1;
-            else if (i == j)
-              _matchNMask[ValueSize<TAlphabet>::VALUE * i + j] = 0;
-            else
-              _matchNMask[ValueSize<TAlphabet>::VALUE * i + j] = -1;
-          }
+        for (unsigned i = 0; i < ValueSize<TAlphabet>::VALUE; ++i)
+        {
+            for (unsigned j = 0; j < ValueSize<TAlphabet>::VALUE; ++j)
+            {
+                if (i == ordValue(TAlphabet('N')) || j == ordValue(TAlphabet('N')))
+                    _matchNMask[ValueSize < TAlphabet > ::VALUE * i + j] = -1;
+                else if (i == j)
+                    _matchNMask[ValueSize < TAlphabet > ::VALUE * i + j] = 0;
+                else
+                    _matchNMask[ValueSize < TAlphabet > ::VALUE * i + j] = -1;
+            }
         }
-        SEQAN_CHECKPOINT;
     }
+
 };
 
 
 template <typename TNeedle>
 void _patternMatchNOfPattern(Pattern<TNeedle, MyersUkkonenReads> & me, bool match)
 {
-    SEQAN_CHECKPOINT;
     _patternMatchNOfPattern(me._wrappedPattern, match);
 
     typedef typename Value<TNeedle>::Type TAlphabet;
     for (unsigned i = 0; i < ValueSize<TAlphabet>::VALUE; ++i)
-        me._matchNMask[ValueSize<TAlphabet>::VALUE * i + ordValue(TAlphabet('N'))] = match ? 0 : -1;
+        me._matchNMask[ValueSize < TAlphabet > ::VALUE * i + ordValue(TAlphabet('N'))] = match ? 0 : -1;
 }
-
 
 template <typename TNeedle>
 void _patternMatchNOfFinder(Pattern<TNeedle, MyersUkkonenReads> & me, bool match)
 {
-    SEQAN_CHECKPOINT;
     _patternMatchNOfFinder(me._wrappedPattern, match);
-    
+
     typedef typename Value<TNeedle>::Type TAlphabet;
     for (unsigned i = 0; i < ValueSize<TAlphabet>::VALUE; ++i)
-        me._matchNMask[ValueSize<TAlphabet>::VALUE * ordValue(TAlphabet('N')) + i] = match ? 0 : -1;
+        me._matchNMask[ValueSize < TAlphabet > ::VALUE * ordValue(TAlphabet('N')) + i] = match ? 0 : -1;
 }
-
 
 template <typename TNeedle>
-inline int 
-scoreLimit(Pattern<TNeedle, MyersUkkonenReads> const & me) {
-    SEQAN_CHECKPOINT;
-
+inline int
+scoreLimit(Pattern<TNeedle, MyersUkkonenReads> const & me)
+{
     // The score limit for us is "one more" than for the wrapped
     // pattern, meaning "one more negative."
-	return scoreLimit(me._wrappedPattern) - 1;
+    return scoreLimit(me._wrappedPattern) - 1;
 }
 
-
 template <typename TNeedle, typename TScoreValue>
-inline void 
-setScoreLimit(Pattern<TNeedle, MyersUkkonenReads> & me, 
-			  TScoreValue _limit) {
-    SEQAN_CHECKPOINT;
-
+inline void
+setScoreLimit(Pattern<TNeedle, MyersUkkonenReads> & me,
+              TScoreValue _limit)
+{
     // The score limit for the wrapped pattern is "one less", meaning
     // "one less negative."
     setScoreLimit(me._wrappedPattern, _limit + 1);
 }
 
-
 template <typename TNeedle>
-int getScore(const Pattern<TNeedle, MyersUkkonenReads> & me)  {
-	return static_cast<int>(me._score);
+int getScore(const Pattern<TNeedle, MyersUkkonenReads> & me)
+{
+    return static_cast<int>(me._score);
 }
 
-
 template <typename TNeedle, typename TNeedle2>
-inline void setHost(Pattern<TNeedle, MyersUkkonenReads> &me,
-                    const TNeedle2 &needle) {
-    SEQAN_CHECKPOINT;
-
+inline void setHost(Pattern<TNeedle, MyersUkkonenReads> & me,
+                    const TNeedle2 & needle)
+{
     setHost(me._wrappedPattern, prefix(needle, length(needle) - 1));
     me._lastCharacter = back(needle);
 }
 
-
 // TODO(holtgrew): Is using reinterpret_cast<> wise?
 template <typename TNeedle, typename TNeedle2>
-inline void setHost(Pattern<TNeedle, MyersUkkonenReads> &me, TNeedle2 &needle) {
-    SEQAN_CHECKPOINT;
-
+inline void setHost(Pattern<TNeedle, MyersUkkonenReads> & me, TNeedle2 & needle)
+{
     setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
 }
 
-
 template <typename TNeedle>
-inline void _patternInit(Pattern<TNeedle, MyersUkkonenReads> &me) {
-    SEQAN_CHECKPOINT;
-
+inline void _patternInit(Pattern<TNeedle, MyersUkkonenReads> & me)
+{
     _patternInit(me._wrappedPattern);
 }
 
-
 template <typename TNeedle>
-inline int getScoreLimit(Pattern<TNeedle, MyersUkkonenReads> &me) {
-    SEQAN_CHECKPOINT;
+inline int getScoreLimit(Pattern<TNeedle, MyersUkkonenReads> & me)
+{
     return me._scoreLimit;
 }
 
-
 template <typename TFinder, typename TNeedle>
-inline bool find(TFinder &finder, Pattern<TNeedle, MyersUkkonenReads> &me) {
-    SEQAN_CHECKPOINT;
-
+inline bool find(TFinder & finder, Pattern<TNeedle, MyersUkkonenReads> & me)
+{
     // Go back in finder by one if this is not the first find call
     // because the wrapped pattern on the infix trick.
-    if (me._firstFind) {
+    if (me._firstFind)
+    {
         me._firstFind = false;
-    } else {
+    }
+    else
+    {
         // std::cout << "before go previous " << endPosition(finder);
         goPrevious(finder);
         _setFinderEnd(finder);
         // std::cout << ", after go previous " << endPosition(finder) << std::endl;
     }
 
-    do {
+    do
+    {
         // Make sure we find something with the wrapped pattern.
         if (!find(finder, me._wrappedPattern))
             return false;
+
         // Make sure we are not at the end of the haystack with the
         // wrapped pattern yet.
         size_t endPos = endPosition(finder);
         if (endPos == length(haystack(finder)))
             return false;
+
         // Compute the current score.
         typedef typename Value<TNeedle>::Type TAlphabet;
-        int lastCharScore = me._matchNMask[ordValue(me._lastCharacter) + ValueSize<TAlphabet>::VALUE * ordValue(haystack(finder)[endPos])];
+        int lastCharScore = me._matchNMask[ordValue(me._lastCharacter) + ValueSize < TAlphabet > ::VALUE * ordValue(haystack(finder)[endPos])];
         me._score = getScore(me._wrappedPattern) + lastCharScore;
-    } while (me._score < scoreLimit(me));
+    }
+    while (me._score < scoreLimit(me));
 
     // Advance finder by one, will wind back by one before calling
     // wrapped finder in next call.
@@ -257,54 +250,49 @@ inline bool find(TFinder &finder, Pattern<TNeedle, MyersUkkonenReads> &me) {
     return true;
 }
 
-
 template <typename TFinder, typename TNeedle>
-inline bool find(TFinder & finder, 
-                 Pattern<TNeedle, MyersUkkonenReads> & me, 
-                 int const k) {
-    SEQAN_CHECKPOINT;
-
-	setScoreLimit(me, k);
-	return find(finder, me);
+inline bool find(TFinder & finder,
+                 Pattern<TNeedle, MyersUkkonenReads> & me,
+                 int const k)
+{
+    setScoreLimit(me, k);
+    return find(finder, me);
 }
-
 
 template <typename TFinder, typename TNeedle, typename TLimit>
 inline bool findBegin(TFinder & finder,
                       Pattern<TNeedle, MyersUkkonenReads> & me,
-                      TLimit limit) {
-    SEQAN_CHECKPOINT;
-
+                      TLimit limit)
+{
     // Compute score of last character.
     size_t endPos = endPosition(finder) - 1;
-	int lastCharScore = (me._lastCharacter == haystack(finder)[endPos])? 0: -1;
+    int lastCharScore = (me._lastCharacter == haystack(finder)[endPos]) ? 0 : -1;
     // Go back one with the finder because of the "last character is compared manually" trick.
     goPrevious(finder);
-	finder.data_endPos -= 1;
+    finder.data_endPos -= 1;
     finder.data_length -= 1;
     // We have to incorporate the last character's score into limit
     // used for the wrapped pattern's findBegin().
     bool res = findBegin(finder, me._wrappedPattern, limit - lastCharScore);
     goNext(finder);
-	finder.data_endPos += 1;
+    finder.data_endPos += 1;
     finder.data_length += 1;
     return res;
 }
 
-
 template <typename TFinder, typename TNeedle>
 inline bool findBegin(TFinder & finder,
-                      Pattern<TNeedle, MyersUkkonenReads> & me) {
-    SEQAN_CHECKPOINT;
+                      Pattern<TNeedle, MyersUkkonenReads> & me)
+{
     return findBegin(finder, me._wrappedPattern, getScoreLimit(me));
 }
-
 
 // Set the end position of the pattern in the finder.
 template <typename THaystack, typename TNeedle, typename TPosition>
 inline bool setEndPosition(Finder<THaystack, void> & finder,
                            Pattern<TNeedle, MyersUkkonenReads> & pattern,
-                           const TPosition & pos) {
+                           const TPosition & pos)
+{
     // Compute delta, such that we start searching at pos - delta.
     TPosition delta = length(needle(pattern)) + _min(length(needle(pattern)), static_cast<size_t>(-getScoreLimit(pattern)));
     if (delta > pos)

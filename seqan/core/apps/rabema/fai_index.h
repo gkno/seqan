@@ -74,8 +74,9 @@ public:
     unsigned lineLength;
     // Number of overall characters per line, including newline character(s).
     unsigned overallLineLength;
-    
-    FaiIndexEntry_() : sequenceLength(0), offset(0), lineLength(0), overallLineLength(0)
+
+    FaiIndexEntry_() :
+        sequenceLength(0), offset(0), lineLength(0), overallLineLength(0)
     {}
 };
 
@@ -84,12 +85,13 @@ class FaiIndex
 public:
     CharString fastaFilename;
     CharString faiFilename;
-    
+
     String<FaiIndexEntry_> indexEntryStore;
     StringSet<CharString> refNameStore;
     NameStoreCache<StringSet<CharString> > refNameStoreCache;
 
-    FaiIndex() : refNameStoreCache(refNameStore)
+    FaiIndex() :
+        refNameStoreCache(refNameStore)
     {}
 };
 
@@ -165,7 +167,7 @@ inline int getSequenceInfix(String<TValue, TSpec> & str, FaiIndex const & index,
     // Copy out the characters from FASTA file and convert via iterator assignment to target string's type.
     resize(str, toRead, TValue());
     TTargetIter itTarget = begin(str, Standard());
-    for (unsigned i = 0; i < toRead;)
+    for (unsigned i = 0; i < toRead; )
     {
         if (isspace(*itSource))
         {
@@ -203,8 +205,8 @@ inline int load(FaiIndex & index, char const * fastaFilename_, char const * faiF
     CharString faiFilename = faiFilename_;
     clear(index);  // Also clears filename, thus backup above and restore below.
     index.fastaFilename = fastaFilename;
-    index.faiFilename = faiFilename;    
-    
+    index.faiFilename = faiFilename;
+
     // Open file.
     std::ifstream faiStream(toCString(faiFilename), std::ios::binary | std::ios::in);
     if (!faiStream.good())
@@ -220,49 +222,63 @@ inline int load(FaiIndex & index, char const * fastaFilename_, char const * faiF
         // Read REF_NAME.
         if (readUntilTabOrLineBreak(entry.name, reader) != 0)
             return 1;
+
         appendValue(index.refNameStore, entry.name);
         if (atEnd(reader) || value(reader) != '\t')
             return 1;  // Must be on tab.
+
         skipChar(reader, '\t');  // Must have been on tab, no checking.
 
         // Read SEQ_LENGTH.
         clear(buffer);
         if (readUntilTabOrLineBreak(buffer, reader) != 0)
             return 1;
+
         if (!lexicalCast2(entry.sequenceLength, buffer))
             return 1;  // Could not cast to integer.
+
         if (atEnd(reader) || value(reader) != '\t')
             return 1;  // Must be on tab.
+
         skipChar(reader, '\t');  // Must have been on tab, no checking.
 
         // Read OFFSET.
         clear(buffer);
         if (readUntilTabOrLineBreak(buffer, reader) != 0)
             return 1;
+
         if (!lexicalCast2(entry.offset, buffer))
             return 1;  // Could not cast to integer.
+
         if (atEnd(reader) || value(reader) != '\t')
             return 1;  // Must be on tab.
+
         skipChar(reader, '\t');  // Must have been on tab, no checking.
 
         // Read LINE_LENGTH.
         clear(buffer);
         if (readUntilTabOrLineBreak(buffer, reader) != 0)
             return 1;
+
         if (!lexicalCast2(entry.lineLength, buffer))
             return 1;  // Could not cast to integer.
+
         if (atEnd(reader) || value(reader) != '\t')
             return 1;  // Must be on tab.
+
         skipChar(reader, '\t');  // Must have been on tab, no checking.
 
         // Read OVERALL_LINE_LENGTH.
         clear(buffer);
         if (readUntilTabOrLineBreak(buffer, reader) != 0)
             return 1;
+
         if (!lexicalCast2(entry.overallLineLength, buffer))
             return 1;  // Could not cast to integer.
+
         if (!atEnd(reader) && value(reader) != '\r' && value(reader) != '\n')
             return 1;  // Must be on end of line or file.
+
         if (!atEnd(reader))
             skipLine(reader);  // Skip over line ending.
 
@@ -287,6 +303,7 @@ inline int load(FaiIndex & index)
     // Cannot load if FAI filename is empty.
     if (empty(index.faiFilename))
         return 1;
+
     return load(index, toCString(index.fastaFilename), toCString(index.faiFilename));
 }
 
@@ -315,11 +332,13 @@ inline int buildIndex(CharString const & seqFilename, CharString const & faiFile
     TMMapString mmapString;
     if (!open(mmapString, toCString(seqFilename), OPEN_RDONLY))
         return 1;  // Could not open file.
+
     RecordReader<TMMapString, SinglePass<Mapped> > reader(mmapString);
     // Get file format, must be FASTA for FAI.
     AutoSeqStreamFormat tagSelector;
     if (!checkStreamFormat(reader, tagSelector))
         return 1;  // Invalid format.
+
     if (tagSelector.tagId != 1)
         return 1;  // Invalid format, not FASTA.
 
@@ -340,20 +359,24 @@ inline int buildIndex(CharString const & seqFilename, CharString const & faiFile
         clear(readName);
 
         if (value(reader) != '>')
-            return 1; // Must be >.
+            return 1;  // Must be >.
+
         goNext(reader);
 
         int res = readUntilWhitespace(readName, reader);
         if (res != 0)
             return res;  // Error reading.
+
         res = skipLine(reader);
         if (res != 0)
             return res;  // Error reading.
+
         seqOffset = reader._current - begin(reader._string, Standard());
 
         res = readLine(line, reader);
         if (res != 0 && res != EOF_BEFORE_SUCCESS)
             return res;  // Error reading.
+
         lineSize = reader._current - begin(reader._string, Standard()) - seqOffset;
         lineLength = length(line);
         seqLength = lineLength;

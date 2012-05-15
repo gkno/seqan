@@ -15,8 +15,10 @@
 
 using namespace seqan;
 
-int main(int argc, char **argv) {
-    if (argc != 3) return 1;
+int main(int argc, char ** argv)
+{
+    if (argc != 3)
+        return 1;
 
     Dna5String contig = argv[1];
     Dna5String read = argv[2];
@@ -26,7 +28,8 @@ int main(int argc, char **argv) {
 
     EditDistanceScore scoring;
 
-    while (find(finder, pattern)) {
+    while (find(finder, pattern))
+    {
         if (endPosition(finder) < length(read))
             continue;
         if (endPosition(finder) > length(contig))

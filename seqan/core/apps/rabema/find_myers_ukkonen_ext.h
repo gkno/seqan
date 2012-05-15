@@ -33,7 +33,8 @@ using namespace seqan;
 template <typename THaystack, typename TNeedle, typename TPosition>
 inline bool setEndPosition(Finder<THaystack, void> & finder,
                            Pattern<TNeedle, Myers<FindInfix> > & pattern,
-                           const TPosition & pos) {
+                           const TPosition & pos)
+{
     // Compute delta, such that we start searching at pos - delta.
     TPosition delta = pattern.needleSize + _min(pattern.needleSize, static_cast<size_t>(-scoreLimit(pattern))) + 1;
     if (delta > pos)

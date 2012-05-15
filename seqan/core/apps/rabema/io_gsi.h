@@ -63,9 +63,9 @@ struct GsiRecord
 
     enum
     {
-      FLAG_PAIRED = 0x01,
-      FLAG_FIRST_MATE = 0x40,
-      FLAG_SECOND_MATE = 0x80
+        FLAG_PAIRED = 0x01,
+        FLAG_FIRST_MATE = 0x40,
+        FLAG_SECOND_MATE = 0x80
     };
 
     // Flags, 0x01 - paired, 0x40 - first read in pair, 0x80 - second read in pair.
@@ -96,7 +96,8 @@ struct GsiRecord
     size_t lastPos;
 
     // Default constructor.
-    GsiRecord() : flags(0), readId(0), originalDistance(0), distance(0), contigId(0), isForward(0), firstPos(0), lastPos(0)
+    GsiRecord() :
+        flags(0), readId(0), originalDistance(0), distance(0), contigId(0), isForward(0), firstPos(0), lastPos(0)
     {}
 
     // Complete constructor for all properties.
@@ -106,9 +107,9 @@ struct GsiRecord
               CharString const & _contigName,
               bool const & _isForward,
               size_t const & _firstPos,
-              size_t const & _lastPos)
-            : readName(_readName), flags(_flags), readId(0), originalDistance(_distance), distance(_distance),
-              contigName(_contigName), contigId(0), isForward(_isForward), firstPos(_firstPos), lastPos(_lastPos)
+              size_t const & _lastPos) :
+        readName(_readName), flags(_flags), readId(0), originalDistance(_distance), distance(_distance),
+        contigName(_contigName), contigId(0), isForward(_isForward), firstPos(_firstPos), lastPos(_lastPos)
     {}
 
     // Lexicographic comparison.
@@ -116,20 +117,26 @@ struct GsiRecord
     {
         if (readId < other.readId)
             return true;
+
         if (readId == other.readId && distance < other.distance)
             return true;
+
         if (readId == other.readId && distance == other.distance &&
             contigId < other.contigId)
             return true;
+
         if (readId == other.readId && distance == other.distance &&
             contigId == other.contigId && firstPos < other.firstPos)
             return true;
+
         if (readId == other.readId && distance == other.distance &&
             contigId == other.contigId && firstPos == other.firstPos &&
             lastPos < other.lastPos)
             return true;
+
         return false;
     }
+
 };
 
 // ============================================================================
@@ -174,19 +181,19 @@ TStream & operator<<(TStream & stream, GsiRecord const & record)
     stream << record.readName;
     if (record.flags & GsiRecord::FLAG_PAIRED)
     {
-      if (record.flags & GsiRecord::FLAG_FIRST_MATE)
-        stream << "/0";
-      else if (record.flags & GsiRecord::FLAG_SECOND_MATE)
-        stream << "/1";
-      else
-        stream << "/?";
+        if (record.flags & GsiRecord::FLAG_FIRST_MATE)
+            stream << "/0";
+        else if (record.flags & GsiRecord::FLAG_SECOND_MATE)
+            stream << "/1";
+        else
+            stream << "/?";
     }
     stream << "\t"
-           << record.distance << "\t"
-           << record.contigName << "\t"
-           << (record.isForward ? "F" : "R") << "\t"
-           << record.firstPos << "\t"
-           << record.lastPos;
+    << record.distance << "\t"
+    << record.contigName << "\t"
+    << (record.isForward ? "F" : "R") << "\t"
+    << record.firstPos << "\t"
+    << record.lastPos;
     return stream;
 }
 
@@ -200,20 +207,23 @@ template <typename TStream, typename TSpec>
 int readRecord(GsiHeader & header, RecordReader<TStream, TSpec> & reader, Gsi const & /*tag*/)
 {
     (void) header;
-    
+
     CharString tmp;
     // Read "@GSI".
     if (readUntilTabOrLineBreak(tmp, reader) != 0)
         return 1;  // Could not read header.
+
     if (tmp != "@GSI")
         std::cerr << "WARNING: File did not begin with \"@GSI\", was: \"" << tmp << "\"" << std::endl;
     // Skip "\t".
     if (skipChar(reader, '\t') != 0)
         return 1;  // Next char was not TAB.
+
     // Read "VN:1.0".
     clear(tmp);
     if (readUntilTabOrLineBreak(tmp, reader) != 0)
         return 1;  // Could not read version.
+
     if (tmp != "VN:1.0")
         std::cerr << "WARNING: Version is not \"VN:1.0\", was: \"" << tmp << "\"" << std::endl;
     // Skip to and after end of line.
@@ -227,6 +237,7 @@ int readRecord(GsiHeader & header, RecordReader<TStream, TSpec> & reader, Gsi co
     while (!atEnd(reader) && value(reader) == '#')
         if (skipLine(reader) != 0)
             return 1;
+
     return 0;
 }
 
@@ -261,8 +272,10 @@ int readRecord(GsiRecord & record, RecordReader<TStream, TSpec> & reader, Gsi co
     clear(record);
     if (readUntilTabOrLineBreak(record.readName, reader) != 0)
         return 1;
+
     if (value(reader) != '\t')
         return 1;
+
     skipChar(reader, '\t');
 
     // Interpret trailing characters for mate-pair identifier in read name.
@@ -275,55 +288,70 @@ int readRecord(GsiRecord & record, RecordReader<TStream, TSpec> & reader, Gsi co
             record.flags = GsiRecord::FLAG_PAIRED | GsiRecord::FLAG_SECOND_MATE;
         else
             return 1;  // Could not interpret trailing mate indicator.
+
         resize(record.readName, length(record.readName) - 2);
     }
 
     // Read distance.
     if (readUntilTabOrLineBreak(buffer, reader) != 0)
         return 1;
+
     if (!lexicalCast2(record.distance, buffer))
         return 1;  // Could not convert distance.
+
     record.originalDistance = record.distance;
     if (value(reader) != '\t')
         return 1;
+
     skipChar(reader, '\t');
 
     // Read contig name.
     if (readUntilTabOrLineBreak(record.contigName, reader) != 0)
         return 1;
+
     if (value(reader) != '\t')
         return 1;
+
     skipChar(reader, '\t');
 
     // Read 'F'/'R'.
     clear(buffer);
     if (readUntilTabOrLineBreak(buffer, reader) != 0)
         return 1;
+
     if (buffer != "F" && buffer != "R")
         return 1;
+
     record.isForward = (buffer[0] == 'F');
     if (value(reader) != '\t')
         return 1;
+
     skipChar(reader, '\t');
 
     // Read first pos.
     clear(buffer);
     if (readUntilTabOrLineBreak(buffer, reader) != 0)
         return 1;
+
     if (!lexicalCast2(record.firstPos, buffer))
         return 1;
+
     if (value(reader) != '\t')
         return 1;
+
     skipChar(reader, '\t');
-    
+
     // Read last pos.
     clear(buffer);
     if (readUntilTabOrLineBreak(buffer, reader) != 0)
         return 1;
+
     if (!lexicalCast2(record.lastPos, buffer))
         return 1;
+
     if (value(reader) != '\t' && value(reader) != '\r' && value(reader) != '\n')  // TODO(holtgrew): \t only here because output buggy.
         return 1;
+
     if (skipLine(reader) != 0)
         return 1;  // Skip line.
 
@@ -349,7 +377,7 @@ template <typename TStream>
 int writeRecord(TStream & stream, GsiHeader const & /*header*/, Gsi const & /*tag*/)
 {
     stream << "@GSI\tVN:1.1\n"
-           << "@MATES\tSEP:/\tTYPE:01\n";
+    << "@MATES\tSEP:/\tTYPE:01\n";
     return 0;
 }
 
@@ -366,7 +394,7 @@ int writeRecord(TStream & stream, GsiHeader const & /*header*/, Gsi const & /*ta
 // str    -- string to write to stream.
 
 template <typename TStream>
-int writeRecord(TStream &stream, CharString const & str, Gsi const & /*tag*/)
+int writeRecord(TStream & stream, CharString const & str, Gsi const & /*tag*/)
 {
     stream << "# " << str << '\n';
     return 0;

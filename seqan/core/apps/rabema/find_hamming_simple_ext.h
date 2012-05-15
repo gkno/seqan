@@ -31,7 +31,8 @@
 template <typename THaystack, typename TNeedle, typename TPosition>
 inline bool setEndPosition(seqan::Finder<THaystack, void> & finder,
                            seqan::Pattern<TNeedle, seqan::HammingSimple> & pattern,
-                           const TPosition & pos) {
+                           const TPosition & pos)
+{
 //     std::cerr << "setEndPosition(finder, pattern, " << pos << ")" << std::endl;
     // Compute delta, such that we start searching at pos - delta.
     TPosition delta = length(needle(pattern));
@@ -48,7 +49,8 @@ inline bool setEndPosition(seqan::Finder<THaystack, void> & finder,
 
     // Clear the pattern, and search until we are at pos.
     bool result;
-    while ((result = find(finder, pattern)) && endPosition(finder) < pos) {
+    while ((result = find(finder, pattern)) && endPosition(finder) < pos)
+    {
 //         std::cerr << "Skipping over end pos " << endPosition(finder) << std::endl;
         continue;
     }

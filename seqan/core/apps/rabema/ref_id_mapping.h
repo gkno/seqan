@@ -52,7 +52,7 @@ class RefIdMapping
 {
 public:
     String<unsigned> map;
-    
+
     RefIdMapping() {}
 };
 
