@@ -21,6 +21,7 @@
 // ==========================================================================
 
 // TODO(holtgrew): I think most time is spent reading the GSI file. We should be able to speed this up greatly with a more compact file format.
+// TODO(holtgrew): Clean up, remove cruft.
 
 #ifndef APPS_RABEMA_EVALUATION_H_
 #define APPS_RABEMA_EVALUATION_H_
@@ -525,6 +526,8 @@ compareAlignedReadsToReferenceOnContig(Options<EvaluateResults> const & options,
     }
 }
 
+// TODO(holtgrew): Move this into its own header?
+
 class RefIdMapping
 {
 public:
@@ -596,6 +599,18 @@ struct RabemaStats
     }
 };
 
+void updateMaximalErrorRate(RabemaStats & stats, unsigned maxErrorRate)
+{
+    if (length(stats.intervalsToFindForErrorRate) <= maxErrorRate + 1)
+        resize(stats.intervalsToFindForErrorRate, maxErrorRate + 1, 0);
+    if (length(stats.intervalsFoundForErrorRate) <= maxErrorRate + 1)
+        resize(stats.intervalsFoundForErrorRate, maxErrorRate + 1, 0);
+    if (length(stats.normalizedIntervalsToFindForErrorRate) <= maxErrorRate + 1)
+        resize(stats.normalizedIntervalsToFindForErrorRate, maxErrorRate + 1, 0.0);
+    if (length(stats.normalizedIntervalsFoundForErrorRate) <= maxErrorRate + 1)
+        resize(stats.normalizedIntervalsFoundForErrorRate, maxErrorRate + 1, 0.0);
+}
+
 template <typename TStream>
 void write(TStream & stream, RabemaStats const & stats, Options<EvaluateResults> const & options)
 {
@@ -614,7 +629,7 @@ void write(TStream & stream, RabemaStats const & stats, Options<EvaluateResults>
     stream << "------------------------------------------------------------------------------------------------------\n";
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
     {
-        if (options.benchmarkCategory == "all" && (int)i != options.maxError)
+        if (!options.oracleWitMode && options.benchmarkCategory == "all" && (int)i != options.maxError)
             continue;
         sprintf(buffer, "%5u\t%8d\t%8d\t%8.2f\t%8.2f\t%10.2f\t%10.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
                 100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i],
@@ -749,7 +764,6 @@ int benchmarkReadResult(RabemaStats & result,
                         bool pairedEnd = false,
                         bool second = false)
 {
-    (void)bamIOContext;
     typedef IntervalAndCargo<unsigned, unsigned> TInterval;
 
     // TODO(holtgrew): While much clearer and simpler than the old version, I'm not quite sure that this one is bug free yet.
@@ -761,15 +775,18 @@ int benchmarkReadResult(RabemaStats & result,
     // error rate less than or equal to the maximal configured one.  In case of any-best or all-best mode, we only
     // select those of the eligible intervals with the lowest error rate.
     //
-    // In case of oracle mode, we ignore the distance of the intervals in the GSI file.
+    // In case of oracle mode, we ignore the distance of the intervals in the GSI file here but use it later on.
     //
     // Start with picking the smallest distance if *-best mode.
-    int smallestDistance = options.maxError;//maxValue<int>();
-    if (!options.oracleWitMode && (options.benchmarkCategory == "any-best" || options.benchmarkCategory == "all-best"))
+    int smallestDistance = options.oracleWitMode ? maxValue<int>() : options.maxError;
+    if (options.oracleWitMode || options.benchmarkCategory == "any-best" || options.benchmarkCategory == "all-best")
         for (unsigned i = 0; i < length(gsiRecords); ++i)
             smallestDistance = std::min(smallestDistance, gsiRecords[i].distance);
-    if (options.oracleWitMode)
-        smallestDistance = 0;
+    int largestDistance = options.maxError;
+    if (options.oracleWitMode && smallestDistance != maxValue<int>())
+        largestDistance = smallestDistance;
+    // if (options.oracleWitMode)
+    //     smallestDistance = 0;
     String<WitRecord> pickedGsiRecords;
     for (unsigned i = 0; i < length(gsiRecords); ++i)
     {
@@ -795,25 +812,18 @@ int benchmarkReadResult(RabemaStats & result,
         }
     }
 
-    // If no GSI records were picked then we do not have to collect any statistic about this read any more: There are no
-    // valid alignments within the given distance.
-    //
-    // TODO(holtgrew): Actually, we need to check for hits in SAM that are not GSI!
-    if (empty(pickedGsiRecords))
-        return 0;
-
     // On these selected GSI records, we now perform interval lowering in case of "any-best" and "all-best".  This means
     // that an interval I with distance k_i containing an interval J with distance k_j < k_i is re-labeled with a
     // distance of k_j for the smallest k_j of all contained intervals J.
     if (!options.oracleWitMode && (options.benchmarkCategory == "any-best" || options.benchmarkCategory == "all-best"))
     {
-        std::sort(begin(pickedGsiRecords, Standard()), end(pickedGsiRecords, Standard()), CmpWitRecordLowering());
+        // std::sort(begin(pickedGsiRecords, Standard()), end(pickedGsiRecords, Standard()), CmpWitRecordLowering());
         // std::cerr << ",-- pre-lowering\n";
         // for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
         //     std::cerr << "| " << pickedGsiRecords[i] << "\n";
         // std::cerr << "`--\n";
         performIntervalLowering(pickedGsiRecords, options.maxError);
-        std::sort(begin(pickedGsiRecords, Standard()), end(pickedGsiRecords, Standard()), CmpWitRecordLowering());
+        // std::sort(begin(pickedGsiRecords, Standard()), end(pickedGsiRecords, Standard()), CmpWitRecordLowering());
         // std::cerr << ",-- post-lowering\n";
         // for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
         //     std::cerr << "| " << pickedGsiRecords[i] << "\n";
@@ -829,16 +839,13 @@ int benchmarkReadResult(RabemaStats & result,
     for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
     {
         int distance = pickedGsiRecords[i].distance;
-        // Ignore any interval distances in oracle mode.
-        if (options.oracleWitMode)
-            distance = options.maxError;
-        else if (options.benchmarkCategory != "all" && distance != options.maxError)
+        if (!options.oracleWitMode && options.benchmarkCategory != "all" && distance != options.maxError)
             continue;  // Only search if interval distance matches -- in *-best.
         int originalDistance = pickedGsiRecords[i].originalDistance;
 
         appendValue(intervals[pickedGsiRecords[i].contigId], TInterval(pickedGsiRecords[i].firstPos, pickedGsiRecords[i].lastPos + 1, length(intervalDistances)));
         appendValue(intervalDistances, originalDistance);
-        if (options.benchmarkCategory != "any-best")
+        if (!options.oracleWitMode && options.benchmarkCategory != "any-best")
             numIntervalsForErrorRate[originalDistance] += 1;
     }
     // Marker array that states whether an interval was hit.
@@ -891,15 +898,18 @@ int benchmarkReadResult(RabemaStats & result,
         BamAlignmentRecord const & samRecord = samRecords[i];
         int seqId = refIdMapping.map[samRecord.rId];
 
-        // Compute actual alignment score to rule out invalidly reported alignments.  If we run in oracle mode then we
-        // ignore the actual alignment score.  We only care about the alignment's end position in this case.
+        // Compute actual alignment score to rule out invalidly reported alignments.
+        //
+        // If we run in oracle mode then we ignore the actual alignment score and use the best alignment.  We only care
+        // about the alignment's end position in this case.
         if (!options.oracleWitMode)
         {
             int bestDistance = minValue<int>();  // Marker for "not set yet".
             // Get best distance from NM tag if set and we are to trust it.
             if (options.trustNM)
             {
-                BamTagsDict bamTags(const_cast<CharString &>(samRecord.tags));  // TODO(holtgrew): Repair once we have const holders!
+                // TODO(holtgrew): Remove const cast once we have const holders!
+                BamTagsDict bamTags(const_cast<CharString &>(samRecord.tags));
                 unsigned idx = 0;
                 if (findTagKey(idx, bamTags, "NM"))
                 {
@@ -966,7 +976,7 @@ int benchmarkReadResult(RabemaStats & result,
             lastPos = samRecord.pos + getAlignmentLengthInRef(samRecord) - countPaddings(samRecord.cigar) - 1;
         else
             lastPos = length(refSeqs[seqId]) - samRecord.pos - 1;
-
+        
         if (options.showTryHitIntervals)
             std::cerr << "TRY HIT\tchr=" << refSeqNames[seqId] << "\tlastPos=" << lastPos << "\tqName=" << samRecord.qName << "\n";
         
@@ -980,7 +990,8 @@ int benchmarkReadResult(RabemaStats & result,
     // Compute number of found intervals.
     unsigned numFound = 0;
     String<unsigned> foundIntervalsForErrorRate;
-    resize(foundIntervalsForErrorRate, options.maxError + 1, 0);
+    if ((int)length(foundIntervalsForErrorRate) <= largestDistance + 1)
+        resize(foundIntervalsForErrorRate, largestDistance + 1, 0);
     if (options.oracleWitMode || options.benchmarkCategory == "any-best")
     {
         int bestDistance = maxValue<int>();
@@ -1020,6 +1031,7 @@ int benchmarkReadResult(RabemaStats & result,
     }
     
     // Update the resulting RabemaStats.
+    updateMaximalErrorRate(result, largestDistance);
     result.totalReads += 1;
     if (options.oracleWitMode || options.benchmarkCategory == "any-best")
     {
@@ -1559,11 +1571,11 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
         return 1;
     }
     // Check that the SAM file is sorted by query name.
-    if (getSortOrder(samHeader) != BAM_SORT_QUERYNAME)
-    {
-        std::cerr << "SAM file not sorted by 'queryname'!\n";
-        return 1;
-    }
+    // if (getSortOrder(samHeader) != BAM_SORT_QUERYNAME)
+    // {
+    //     std::cerr << "SAM file not sorted by 'queryname'!\n";
+    //     return 1;
+    // }
     std::cerr << " OK\n";
     
     std::cerr << "\nTook " << sysTime() - startTime << "s\n";

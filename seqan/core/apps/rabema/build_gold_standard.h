@@ -85,6 +85,7 @@ struct IntervalizeCmp
 // Build intervals from the error curves.
 void intervalizeErrorCurves(String<WitRecord> & result,
                             TErrorCurves const & errorCurves,
+                            String<int> const & readAlignmentDistances,
                             StringSet<CharString> const & readNameStore,
                             StringSet<CharString> const & contigNameStore,
                             Options<BuildGoldStandard> const & options) {
@@ -193,9 +194,10 @@ void intervalizeErrorCurves(String<WitRecord> & result,
                 else if (mateNo == 1)
                   flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_SECOND_MATE;
 
+                int gsiDistance = options.oracleSamMode ? readAlignmentDistances[i] : distance;
                 appendValue(result,
                             WitRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
-                                      distance, contigNameStore[it2->contigId],
+                                      gsiDistance, contigNameStore[it2->contigId],
                                       it2->isForward, it2->first, it2->last));
             }
         }
@@ -231,7 +233,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 
     // In oracle Sam mode, the maximum error is the error at the position given in the Sam alignment.
     bool oracleSamMode = false;
-    if (maxError == -1) {
+    if (maxError == maxValue<int>())
+    {
         oracleSamMode = true;
         Finder<TContigSeq> finder(contig);
         Pattern<TReadSeq, TPatternSpec> pattern(read, -(int)length(read) * 40);
@@ -533,6 +536,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 // fragment score.
 template <typename TPatternSpec>
 int matchesToErrorFunction(TErrorCurves & errorCurves,
+                           String<int> & readAlignmentDistances,  // only used in case of oracle mode
                            RecordReader<std::ifstream, SinglePass<> > & samReader,
                            BamIOContext<StringSet<CharString> > & samIOContext,
                            StringSet<CharString> & readNameStore,
@@ -568,10 +572,6 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     // flag).  Sadly, there is no easy way out here.  Single-end reads are stored as "/S".
     NameStoreCache<StringSet<CharString> > readNameStoreCache(readNameStore);
     String<unsigned> readLengthStore;
-
-    // In oracle SAM mode, we store the distance of the alignment from the SAM file for each read.  Otherwise, this
-    // variable remains unused.
-    String<int> readAlignmentDistances;
 
 //     for (TAlignedReadIterator it = begin(fragments.alignedReadStore, Standard()); it != end(fragments.alignedReadStore, Standard()); ++it) {
 //         fprintf(stderr, "%3u\t%3u\t%8lu\t%3s\n", it->contigId, it->readId, it->endPos, (it->endPos < it->beginPos ? "R" : "F"));
@@ -694,7 +694,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
 
         // In oracle SAM mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position
         // from the SAM file.  In normal mode, convert from error rate from options to error count.
-        int maxError = options.oracleSamMode ? -1 : static_cast<int>(floor(0.01 * options.maxError * length(record.seq)));
+        int maxError = options.oracleSamMode ? maxValue<int>() : static_cast<int>(floor(0.01 * options.maxError * length(record.seq)));
 
         // Compute end position of alignment.
         int endPos = record.pos + getAlignmentLengthInRef(record) - countPaddings(record.cigar);
@@ -949,10 +949,13 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     TErrorCurves errorCurves;
     int res = 0;
     StringSet<CharString> readNameStore;
+    // In oracle mode, we store the distance of the alignment from the SAM file for each read.  Otherwise, this variable
+    // remains unused.
+    String<int> readAlignmentDistances;
     if (options.distanceFunction == "edit")
-        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, MyersUkkonenReads());
+        res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, MyersUkkonenReads());
     else // options.distanceFunction == "hamming"
-        res = matchesToErrorFunction(errorCurves, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, HammingSimple());
+        res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, HammingSimple());
     if (res != 0)
         return 1;
     if (options.verbosity >= 2)
@@ -991,10 +994,11 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // Convert points in error curves to intervals and write them to
     // stdout or a file.
     // =================================================================
+    // TODO(holtgrew): If we get rid of the witRecords string and print directly to output then save a lot of memory!
     startTime = sysTime();
     String<WitRecord> witRecords;
     typedef Iterator<String<WitRecord>, Standard>::Type TWitRecordIterator;
-    intervalizeErrorCurves(witRecords, errorCurves, readNameStore, refNameStore, options);
+    intervalizeErrorCurves(witRecords, errorCurves, readAlignmentDistances, readNameStore, refNameStore, options);
     std::cerr << "Took " << sysTime() - startTime << " s\n";
     // The two alternatives are equivalent after opening the file.
     startTime = sysTime();
