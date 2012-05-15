@@ -43,6 +43,7 @@
 #include <seqan/sequence.h>
 #include <seqan/store.h>
 #include <seqan/file.h>
+#include <seqan/stream.h>
 
 #ifndef CORE_APPS_RABEMA_FAI_INDEX_H_
 #define CORE_APPS_RABEMA_FAI_INDEX_H_
@@ -56,6 +57,9 @@ namespace seqan {
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
+
+struct Fai_;
+typedef Tag<Fai_> Fai;
 
 class FaiIndexEntry_
 {
@@ -284,6 +288,98 @@ inline int load(FaiIndex & index)
     if (empty(index.faiFilename))
         return 1;
     return load(index, toCString(index.fastaFilename), toCString(index.faiFilename));
+}
+
+// ---------------------------------------------------------------------------
+// Function buildIndex()
+// ---------------------------------------------------------------------------
+
+/**
+.Function.FaiIndex#buildIndex
+..summary:Build an index file for a sequence file.
+..signature:buildIndex(seqFilename[, faiFilename], Fai())
+..param.seqFilename:Name of sequence file to build an index for.
+...type:Shortcut.CharString
+..param.faiFilename:Target name of the FAI file.
+...type:Shortcut.CharString
+..tag:Select the index type to build.  Must be $Fai()$.
+..returns:$int$, equal to 0 on success, != 0 otherwise.
+..remarks:The name of the output file will be derived from $seqFilename$.
+..include:seqan/stream.h
+ */
+
+inline int buildIndex(CharString const & seqFilename, CharString const & faiFilename, Fai const & /*tag*/)
+{
+    // Open sequence file and create RecordReader.
+    typedef String<char, MMap<> > TMMapString;
+    TMMapString mmapString;
+    if (!open(mmapString, toCString(seqFilename), OPEN_RDONLY))
+        return 1;  // Could not open file.
+    RecordReader<TMMapString, SinglePass<Mapped> > reader(mmapString);
+    // Get file format, must be FASTA for FAI.
+    AutoSeqStreamFormat tagSelector;
+    if (!checkStreamFormat(reader, tagSelector))
+        return 1;  // Invalid format.
+    if (tagSelector.tagId != 1)
+        return 1;  // Invalid format, not FASTA.
+
+    // Open index files.
+    std::ofstream indexOut(toCString(faiFilename), std::ios::binary | std::ios::out);
+
+    // Re-using the FASTA/FASTQ parsing code from read_fasta_fastq is not really feasible here.  We roll our own
+    // mini-parser from scratch.
+    CharString line;
+    CharString readName;
+    __uint32 seqLength = 0;
+    __uint64 seqOffset = 0;
+    __uint32 lineLength = 0;
+    __uint32 lineSize = 0;
+    while (!atEnd(reader))
+    {
+        clear(line);
+        clear(readName);
+
+        if (value(reader) != '>')
+            return 1; // Must be >.
+        goNext(reader);
+
+        int res = readUntilWhitespace(readName, reader);
+        if (res != 0)
+            return res;  // Error reading.
+        res = skipLine(reader);
+        if (res != 0)
+            return res;  // Error reading.
+        seqOffset = reader._current - begin(reader._string, Standard());
+
+        res = readLine(line, reader);
+        if (res != 0 && res != EOF_BEFORE_SUCCESS)
+            return res;  // Error reading.
+        lineSize = reader._current - begin(reader._string, Standard()) - seqOffset;
+        lineLength = length(line);
+        seqLength = lineLength;
+
+        while (!atEnd(reader))
+        {
+            char c = value(reader);
+            if (c == '>')
+                break;
+            if (!isspace(c))
+                seqLength += 1;
+            goNext(reader);
+        }
+
+        indexOut << readName << '\t' << seqLength << '\t' << seqOffset << '\t'
+                 << lineLength << '\t' << lineSize << '\n';
+    }
+
+    return 0;
+}
+
+inline int buildIndex(CharString const & seqFilename, Fai const & tag)
+{
+    CharString faiFilename(seqFilename);
+    append(faiFilename, ".fai");
+    return buildIndex(seqFilename, faiFilename, tag);
 }
 
 }  // namespace seqan
