@@ -61,9 +61,12 @@ struct Options
     bool showVersion;
     bool realign;
     bool useNM;
+    bool goldStandard;
+    
     unsigned verbosity;
     CharString refFile;
     CharString inFile;
+    CharString goldStandardFile;
     CharString bestMatchFile;
     Format inFormat;
 
@@ -73,6 +76,8 @@ struct Options
         showVersion = false;
         realign = false;
         useNM = false;
+        goldStandard = false;
+        
         verbosity = 1;
         inFormat = FORMAT_AUTO;
     }
@@ -99,6 +104,7 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
 
 	addSection(parser, "Input Specification");
     addOption(parser, CommandLineOption("i", "input-file", "Path to input, '-' for stdin.", OptionType::String, options.inFile));
+    addOption(parser, CommandLineOption("g", "gold-standard", "Input file with gold standard", OptionType::String));
     addOption(parser, CommandLineOption("",  "best-match-file", "Output file with minimal found errors for each read", OptionType::String));
     addOption(parser, CommandLineOption("S", "input-sam", "Input file is SAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_SAM));
     addOption(parser, CommandLineOption("B", "input-bam", "Input file is BAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_BAM));
@@ -140,6 +146,12 @@ int parseCommandLineAndCheck(Options & options,
     if (isSetLong(parser, "input-bam"))
         options.inFormat = FORMAT_BAM;
 
+    if (isSetLong(parser, "gold-standard"))
+    {
+        options.goldStandard = true;
+        getOptionValueLong(parser, "gold-standard", options.goldStandardFile);
+    }
+    
     options.refFile = getArgumentValue(parser, 0);
     options.inFile = getArgumentValue(parser, 1);
     options.realign = isSetLong(parser, "realign");
@@ -161,6 +173,23 @@ struct Stats
     {}
 };
 
+struct Read
+{
+    unsigned contigId;
+    unsigned beginPos;
+    bool     reverseComplemented;
+    
+    unsigned errors;
+    unsigned numSNP;
+    
+    Read() :
+        contigId(0),
+        beginPos(0),
+        reverseComplemented(false),
+        errors(0),
+        numSNP(0)
+    {}
+};
 
 template <typename TSource, typename TSpec, typename TReference>
 int
@@ -194,20 +223,139 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
 }
 
 
-
-
 template <typename TStreamOrReader, typename TSeqString, typename TSpec, typename TFormat>
-int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<TSeqString, TSpec> & seqs, Options const & options, TFormat const & tag)
+int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
+           StringSet<CharString> & seqIds, StringSet<TSeqString, TSpec> & seqs,
+           Options const & options, TFormat const & tag)
 {
-    NameStoreCache<StringSet<CharString> > seqIdsCache(seqIds);
+    typedef NameStoreCache<StringSet<CharString> >  TNameCache;
+    typedef BamIOContext<StringSet<CharString> >    TBamContext;
+    
+    Stats stats;
+    String<__uint64> qualSum;
+    
+    String<Read> goldStandard;
+
+    // record best-match errors
+    String<unsigned> minErrors;
+    String<unsigned> minErrorsOrigin;
+    String<unsigned> matchesCount;
+    
+    TNameCache seqIdsCache(seqIds);
 
     StringSet<CharString> refNames;
-    NameStoreCache<StringSet<CharString> > refNamesCache(refNames);
-    BamIOContext<StringSet<CharString> > context(refNames, refNamesCache);
-	String<__uint64> qualSum;
+    TNameCache refNamesCache(refNames);
+    TBamContext context(refNames, refNamesCache);
+    
+    StringSet<Dna5String> readSeqs;
+    StringSet<CharString> readNames;
+    TNameCache readNameCache(readNames);
 
-    // Read header.
     BamHeader header;
+    BamAlignmentRecord record;
+    
+    unsigned line;
+    unsigned oldNumRefs;
+    
+    // =================================================================================================================
+    
+    // Read gold standard.
+    if (options.goldStandard)
+    {
+        // Read header.
+        if (options.verbosity >= 2)
+            std::cerr << "Reading gold standard header" << std::endl;
+        if (readRecord(header, context, greader, tag) != 0)
+        {
+            std::cerr << "Could not read gold standard header!" << std::endl;
+            return 1;
+        }
+        
+        // Initialize mapping from record.rId to seq id from reference.
+        String<unsigned> rIdToSeqId;
+        for (unsigned i = 0; i < length(refNames); ++i)
+        {
+            unsigned idx = 0;
+            if (!getIdByName(seqIds, refNames[i], idx, seqIdsCache))
+            {
+                std::cerr << "Invalid reference name " << refNames[i] << " from gold standard header!\n";
+                return 1;
+            }
+            appendValue(rIdToSeqId, idx);
+        }
+        
+        line = 0;
+        oldNumRefs = length(refNames);
+        
+        while (!atEnd(greader))
+        {
+            if (readRecord(record, context, greader, tag) != 0)
+            {
+                std::cerr << "Could not read gold standard alignment! lineNo=" << line << std::endl;
+                return 1;
+            }
+            
+            // Update mapping from SAM rId to index of sequence in reference sequences.
+            if (oldNumRefs != length(refNames))
+            {
+                for (unsigned i = oldNumRefs; i < length(refNames); ++i)
+                {
+                    unsigned idx = 0;
+                    if (!getIdByName(seqIds, refNames[i], idx, seqIdsCache))
+                    {
+                        std::cerr << "Invalid reference name " << refNames[i] << " from gold standard record!\n";
+                        return 1;
+                    }
+                    appendValue(rIdToSeqId, idx);
+                }
+                oldNumRefs = length(refNames);
+            }
+            
+            // Check reference id.
+            if (record.rId != -1 && record.rId < static_cast<int>(length(seqs)))
+            {
+                Read read;
+                
+                // Read reference id.
+                read.contigId = record.rId;
+                
+                // Read begin position.
+                read.beginPos = record.pos;
+                
+                // Read reverse complemented tag.
+                if (hasFlagRC(record)) read.reverseComplemented = true;
+                
+                // Read errors from NM tag.
+/*
+                unsigned idx = 0;
+                int nmValue =-1;
+                BamTagsDict tagsDict(record.tags);
+                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx) && nmValue != -1)
+                    read.errors = nmValue;
+                else
+                    std::cerr << "WARNING: Could find NM tag in gold standard " << record.qName << std::endl;
+*/
+                // Read read sequence.
+                appendValue(readSeqs, record.seq);
+                if (hasFlagRC(record)) reverseComplement(back(readSeqs));
+                
+                // Read read name.
+                appendName(readNames, record.qName, readNameCache);
+                
+                // Add read to gold standard.                
+                appendValue(goldStandard, read);
+            }
+        }
+        
+        // Initialize stats.
+        resize(minErrors, length(readNames), MaxValue<unsigned>::VALUE, Exact());
+        resize(minErrorsOrigin, length(readNames), MaxValue<unsigned>::VALUE, Exact());
+        resize(matchesCount, length(readNames), 0, Exact());
+    }
+    
+    // =================================================================================================================
+    
+    // Read header.
     if (options.verbosity >= 2)
         std::cerr << "Reading header" << std::endl;
     if (readRecord(header, context, reader, tag) != 0)
@@ -216,23 +364,6 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
         return 1;
     }
 
-    Stats stats;
-
-    // Read alignments.
-    BamAlignmentRecord record;
-    if (options.verbosity >= 2)
-        std::cerr << "Reading alignments" << std::endl;
-    Align<Dna5String> align;
-    __int64 reads = 0;
-    
-    // record best-match errors
-    String<unsigned> minErrors;
-    StringSet<Dna5String> readSeqs;
-    StringSet<CharString> readNames;
-    typedef NameStoreCache<StringSet<CharString> > TNameCache;
-    TNameCache readNameCache(readNames);
-    unsigned line = 0;
-    unsigned oldNumRefs = length(refNames);
     // Initialize mapping from record.rId to seq id from reference.
     String<unsigned> rIdToSeqId;
     for (unsigned i = 0; i < length(refNames); ++i)
@@ -245,11 +376,22 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
         }
         appendValue(rIdToSeqId, idx);
     }
+    
+    // Read alignments.
+    if (options.verbosity >= 2)
+        std::cerr << "Reading alignments" << std::endl;
+    Align<Dna5String> align;
+    __int64 reads = 0;
+    
+    oldNumRefs = length(refNames);
+    line = 0;
+    
     while (!atEnd(reader))
     {
         // Read alignment record.
         ++line;
         if (line % 100000 == 0) std::cerr << '.' << std::flush;
+        
         if (readRecord(record, context, reader, tag) != 0)
         {
             std::cerr << "Could not read alignment! lineNo=" << line << std::endl;
@@ -257,6 +399,7 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
         }
         if (options.verbosity >= 3)
             write2(std::cerr, record, context, Sam());
+        
         // Update mapping from SAM rId to index of sequence in reference sequences.
         if (oldNumRefs != length(refNames))
         {
@@ -277,6 +420,7 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
         unsigned editDistance = 0;
         stats.numRecords += 1;  // One more record.
         stats.alignedRecords += !hasFlagUnmapped(record);
+        
         // Compute alignment.
         if (record.rId != -1 && record.rId < static_cast<int>(length(seqs)))
         {
@@ -287,9 +431,19 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
                 record.seq = readSeqs[readId];
                 if (hasFlagRC(record))
                     reverseComplement(record.seq);
-            } else
+            }
+            else
+            {
+                // This should never happen with a gold standard.
+                if (options.goldStandard)
+                {
+                    std::cerr << "WARNING: A read unknown to the gold standard has been found: " << record.qName << std::endl;
+                    return 1;
+                }
+                
                 readId = -1;
-
+            }
+ 
             unsigned seqId = rIdToSeqId[record.rId];
             
             if (options.realign)
@@ -397,21 +551,53 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
                 }
             }
             
-            // update best-match errors
-            if (readId != -1)
+            if (options.goldStandard)
             {
+                /*
+                std::cout << "Record Pos " << record.pos << std::endl;
+                std::cout << "Gold Pos " << goldStandard[readId].beginPos << std::endl;
+                
+                std::cout << "Record rId " << record.rId << std::endl;
+                std::cout << "Gold rId " << goldStandard[readId].contigId << std::endl;
+                
+                std::cout << "Record RC" << hasFlagRC(record) << std::endl;
+                std::cout << "Gold RC" << goldStandard[readId].reverseComplemented << std::endl;
+                */
+                
+                // Check if match corresponds to the true origin in gold standard.
+                if ((record.pos >= goldStandard[readId].beginPos - 12 &&
+                     record.pos <= goldStandard[readId].beginPos + 12) &&
+                    record.rId == goldStandard[readId].contigId &&
+                    hasFlagRC(record) == goldStandard[readId].reverseComplemented)
+                {
+                    minErrorsOrigin[readId] = _min(minErrors[readId], editDistance);
+                }
+                
                 minErrors[readId] = _min(minErrors[readId], editDistance);
+                matchesCount[readId]++;
             }
             else
             {
-                // add read name and entry
-                appendValue(readSeqs, record.seq);
-                appendName(readNames, record.qName, readNameCache);
-                appendValue(minErrors, editDistance);
-                if (hasFlagRC(record))
-                    reverseComplement(back(readSeqs));
+                // update best-match errors
+                if (readId != -1)
+                {
+                    minErrors[readId] = _min(minErrors[readId], editDistance);
+                    matchesCount[readId]++;
+                }
+                else
+                {
+                    // add read name and entry
+                    appendValue(readSeqs, record.seq);
+                    if (hasFlagRC(record)) reverseComplement(back(readSeqs));
+                    appendName(readNames, record.qName, readNameCache);
+                    
+                    // Update stats.
+                    appendValue(minErrors, editDistance);
+                    appendValue(matchesCount, 1);
+                }                
             }
 
+            
             /*if (options.verbosity >= 2 && editDistance > 20)
             {
                 std::cerr << "EDIT DISTANCE == " << editDistance << "\n"
@@ -444,6 +630,19 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
     resize(stats.mismatchHisto, len, 0);
     resize(stats.avrgQuality, len, 0);
 
+/*
+    if (options.goldStandard)
+    {
+        std::cout << "Gold Standard" << std::endl;
+        
+        for (unsigned i = 0; i < length(goldStandard); ++i)
+        {
+            std::cout << i << " " << goldStandard[i].contigId << " " << goldStandard[i].beginPos << std::endl;
+        }
+        
+        std::cout << std::endl;
+    }
+*/    
     // Print results.
     std::cout << "RESULTS\n\n";
     std::cout << "num records     \t" << stats.numRecords << std::endl;
@@ -475,7 +674,9 @@ int doWork(TStreamOrReader & reader, StringSet<CharString> & seqIds, StringSet<T
         TNameCache::TSet::iterator it = readNameCache.nameSet.begin();
         TNameCache::TSet::iterator itEnd = readNameCache.nameSet.end();
         for (; it != itEnd; ++it)
-            bestMatchFile << readNames[*it] << '\t' << minErrors[*it] << '\n';
+        {
+            bestMatchFile << readNames[*it] << '\t' << minErrorsOrigin[*it] << '\t' << minErrors[*it] << '\t' << matchesCount[*it] << '\n';
+        }
     }
 
     return 0;
@@ -562,7 +763,22 @@ int main(int argc, char const ** argv)
             return 1;
         }
         RecordReader<String<char, MMap<> >, SinglePass<Mapped> > samReader(samMMapString);
-        return doWork(samReader, seqIds, seqs, options, Sam());
+        
+        if (options.goldStandard)
+        {
+            String<char, MMap<> > goldMMapString;
+            if (!open(goldMMapString, toCString(options.goldStandardFile), OPEN_RDONLY))
+            {
+                std::cerr << "Could not open " << options.goldStandardFile << std::endl;
+                return 1;
+            }
+            RecordReader<String<char, MMap<> >, SinglePass<Mapped> > goldReader(goldMMapString);
+            return doWork(samReader, goldReader, seqIds, seqs, options, Sam());
+        }
+        else
+        {
+            return doWork(samReader, samReader, seqIds, seqs, options, Sam());
+        }
     }
     else  // options.inFormat == FORMAT_BAM
     {
@@ -574,7 +790,7 @@ int main(int argc, char const ** argv)
             std::cerr << "Could not open " << options.inFile << std::endl;
             return 1;
         }
-        return doWork(bamStream, seqIds, seqs, options, Bam());
+        return doWork(bamStream, bamStream, seqIds, seqs, options, Bam());
     }
 
     return 0;
