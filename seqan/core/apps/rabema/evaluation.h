@@ -916,8 +916,9 @@ int benchmarkReadResult(RabemaStats & result,
                     readSeq = readSeqL;
                 if (hasFlagLast(samRecord))
                     readSeq = readSeqR;
-                __int32 beginPos = samRecord.pos;
-                __int32 endPos = beginPos + getAlignmentLengthInRef(samRecord) - countPaddings(samRecord.cigar);
+                int bandwidth = static_cast<int>(ceil(0.01 * options.maxError * length(readSeq)));
+                __int32 beginPos = samRecord.pos - bandwidth;
+                __int32 endPos = beginPos + getAlignmentLengthInRef(samRecord) - countPaddings(samRecord.cigar) + 2 * bandwidth;
                 // if (hasFlagRC(samRecord))
                 // {
                 //     endPos = length(refSeqs[seqId]) - endPos;
@@ -931,7 +932,7 @@ int benchmarkReadResult(RabemaStats & result,
                 Pattern<Dna5String, TPatternSpec> pattern(readSeq, -static_cast<int>(length(readSeq)) * 1000);
                 _patternMatchNOfPattern(pattern, options.matchN);
                 _patternMatchNOfFinder(pattern, options.matchN);
-                bool ret = setEndPosition(finder, pattern, length(contigSeq));
+                bool ret = setEndPosition(finder, pattern, length(contigSeq) - bandwidth);
                 (void) ret;  // When run without assertions.
                 SEQAN_CHECK(ret, "setEndPosition() must not fail!");
                 bestDistance = -getScore(pattern);
@@ -1486,10 +1487,26 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     FaiIndex faiIndex;
     if (load(faiIndex, toCString(options.seqFileName)) != 0)
     {
-        std::cerr << "Could not read reference FAI index.\n";
-        return 1;
+        std::cerr << " FAILED (not fatal, we can just build it)\n";
+        std::cerr << "Building Index            " << options.seqFileName << ".fai ...";
+        if (buildIndex(toCString(options.seqFileName), Fai()) != 0)
+        {
+            std::cerr << "Could not build FAI index.\n";
+            return 1;
+        }
+        std::cerr << " OK\n";
+        std::cerr << "Reference Index           " << options.seqFileName << ".fai ...";
+        if (load(faiIndex, toCString(options.seqFileName)) != 0)
+        {
+            std::cerr << "Could not load FAI index we just build.\n";
+            return 1;
+        }
+        std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";
     }
-    std::cerr << " OK\n";
+    else
+    {
+        std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";
+    }
 
     std::cerr << "Reference Sequences       " << options.seqFileName << " ...";
     StringSet<Dna5String> refSeqs;
