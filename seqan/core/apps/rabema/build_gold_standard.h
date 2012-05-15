@@ -562,7 +562,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     if (atEnd(samReader))
         return 0;  // Do nothing if there are no more alignments in the file.
 
-    // TODO(holtgrew): Can we circumvent using a store here? Requires lots of memory.
+    // TODO(holtgrew): We could also trim the part of the read name that is always equal to save some more memory.
 
     // We store the read names and append "/0" and "/1", depending on their flag value ("/0" for first, "/1" for last
     // flag).  Sadly, there is no easy way out here.  Single-end reads are stored as "/S".
@@ -864,21 +864,48 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
               << "                      Building Gold Standard\n"
               << "==============================================================================\n"
               << "\n"
-              << "____LOADING FILES_____________________________________________________________\n\n";
+              << "____OPTIONS___________________________________________________________________\n\n";
+
+    std::cerr << "Max error rate [%]    " << options.maxError << "\n"
+              << "Oracle mode           " << (options.oracleSamMode ? (char const *) "yes" : (char const *) "no") << "\n"
+              << "Distance measure      " << options.distanceFunction << "\n"
+              << "Match Ns              " << (options.matchN ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "GSI Output File       " << options.outFileName << '\n'
+              << "SAM Input File        " << options.perfectMapFilename << '\n'
+              << "Reference File        " << options.referenceSeqFilename << '\n'
+              << "Verbosity             " << options.verbosity << "\n\n";
+
+    std::cerr << "____LOADING FILES_____________________________________________________________\n\n";
 
     // =================================================================
     // Prepare File I/O.
     // =================================================================
 
     startTime = sysTime();
-    std::cerr << "Reference Index      " << options.referenceSeqFilename << ".fai ...";
+    std::cerr << "Reference Index           " << options.seqFileName << ".fai ...";
     FaiIndex faiIndex;
-    if (load(faiIndex, toCString(options.referenceSeqFilename)) != 0)
+    if (load(faiIndex, toCString(options.seqFileName)) != 0)
     {
-        std::cerr << "Could not read reference FAI index.\n";
-        return 1;
+        std::cerr << " FAILED (not fatal, we can just build it)\n";
+        std::cerr << "Building Index            " << options.seqFileName << ".fai ...";
+        if (buildIndex(toCString(options.seqFileName), Fai()) != 0)
+        {
+            std::cerr << "Could not build FAI index.\n";
+            return 1;
+        }
+        std::cerr << " OK\n";
+        std::cerr << "Reference Index           " << options.seqFileName << ".fai ...";
+        if (load(faiIndex, toCString(options.seqFileName)) != 0)
+        {
+            std::cerr << "Could not load FAI index we just build.\n";
+            return 1;
+        }
+        std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";
     }
-    std::cerr << " OK\n";
+    else
+    {
+        std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";
+    }
     
     // Open SAM file and read in header.
     std::cerr << "Alignments           " << options.perfectMapFilename << " (header) ...";
