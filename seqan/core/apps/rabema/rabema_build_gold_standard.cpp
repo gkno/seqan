@@ -19,9 +19,12 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-
-#ifndef SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_H_
-#define SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_H_
+// RABEMA is a read mapping benchmark tool.  See README for an overview.
+//
+// This is the program for building the RABEMA gold standard.  The input to
+// this program is the reference sequence as a FASTA file and a "perfect
+// mapping" SAM file (see README on how to obtain such a gold standard).
+// ==========================================================================
 
 // TODO(holtgrew): Another possible way to save memory is not to store the first, always identical part of the read id.
 
@@ -29,18 +32,17 @@
 #include <iostream>
 #include <map>
 
-#include <seqan/basic.h>
-#include <seqan/store.h>
-#include <seqan/sequence.h>
+#include <seqan/arg_parse.h>
 #include <seqan/bam_io.h>
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
+#include <seqan/store.h>
 
-#include "build_gold_standard_options.h"
+#include "curve_smoothing.h"
 #include "fai_index.h"
 #include "find_hamming_simple_ext.h"
 #include "find_myers_ukkonen_reads.h"
 #include "io_gsi.h"
-#include "rabema.h"
-#include "curve_smoothing.h"
 
 // ============================================================================
 // Enums, Tags, Classes, Typedefs.
@@ -96,6 +98,47 @@ struct ContigInterval
     {}
 };
 
+// ---------------------------------------------------------------------------
+// Class BuildGoldStandardOptions
+// ---------------------------------------------------------------------------
+
+struct BuildGoldStandardOptions
+{
+    // Verbosity level, quiet: 0, normal: 1, verbose: 2, very verbose: 3.
+    int verbosity;
+
+    // Whether N should match all characters without penalty.
+    bool matchN;
+
+    // Whether or not to run in oracle mode.  The input SAM file must only contain the sample location for each read in
+    // this case.  This is used when building a GSI file for reads simulated by Mason where the original locations are
+    // written out in a SAM file.
+    bool oracleMode;
+
+    // Maximal error rate in percent, relative to the read length.
+    int maxError;
+
+    // Distance function to use.
+    // TODO(holtgrew): Convert to enum.
+    seqan::CharString distanceMetric;
+
+    // Path to the output file that we will write the GSI to.
+    seqan::CharString outGsiPath;
+
+    // Path to the reference contigs file.
+    seqan::CharString referencePath;
+
+    // Path to the perfect input SAM file.
+    seqan::CharString inSamPath;
+
+    BuildGoldStandardOptions() :
+            verbosity(1),
+            matchN(false),
+            oracleMode(false),
+            maxError(0)
+    {}
+};
+
 // ============================================================================
 // Metafunctions
 // ============================================================================
@@ -129,7 +172,7 @@ void intervalizeErrorCurves(String<GsiRecord> & result,
                             String<int> const & readAlignmentDistances,
                             StringSet<CharString> const & readNameStore,
                             StringSet<CharString> const & contigNameStore,
-                            Options<BuildGoldStandard> const & options) {
+                            BuildGoldStandardOptions const & options) {
 
     std::cerr << "\n____POINT TO INTERVAL CONVERSION______________________________________________\n\n"
               << "Progress: ";
@@ -166,7 +209,7 @@ void intervalizeErrorCurves(String<GsiRecord> & result,
 
         // intervals[e] holds the intervals for error e of the current read.
         String<String<ContigInterval> > intervals;
-        int maxError = options.oracleSamMode ? 0 : (int)options.maxError;
+        int maxError = options.oracleMode ? 0 : (int)options.maxError;
         resize(intervals, maxError + 1);
 
         // Join the intervals stored in sortedMatches.
@@ -185,7 +228,7 @@ void intervalizeErrorCurves(String<GsiRecord> & result,
                 continue;
             // Consider all currently open intervals with a greater error than the error in *it and extend them or
             // create a new one.
-            int error = options.oracleSamMode ? 0 : abs(it->distance);
+            int error = options.oracleMode ? 0 : abs(it->distance);
             SEQAN_ASSERT_LEQ(error, maxError);
             for (int e = error; e <= maxError; ++e) {
                 // Handle base case of no open interval:  Create new one.
@@ -228,7 +271,7 @@ void intervalizeErrorCurves(String<GsiRecord> & result,
                 else if (mateNo == 1)
                   flags = GsiRecord::FLAG_PAIRED | GsiRecord::FLAG_SECOND_MATE;
 
-                int gsiDistance = options.oracleSamMode ? readAlignmentDistances[i] : distance;
+                int gsiDistance = options.oracleMode ? readAlignmentDistances[i] : distance;
                 appendValue(result,
                             GsiRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
                                       gsiDistance, contigNameStore[it2->contigId],
@@ -237,6 +280,22 @@ void intervalizeErrorCurves(String<GsiRecord> & result,
         }
     }
     std::cerr << "100% DONE\n";
+}
+
+// ----------------------------------------------------------------------------
+// Function ceilAwayFromZero()
+// ----------------------------------------------------------------------------
+
+// Ceil away from Zero.
+//
+// ceilAwayFromZero(-1.5) == -2
+// ceilAwayFromZero(1.5) == 2
+template <typename T>
+inline T ceilAwayFromZero(T x)
+{
+    if (x < 0)
+        return floor(x);
+    return ceil(x);
 }
 
 // ----------------------------------------------------------------------------
@@ -265,10 +324,10 @@ void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     typedef typename Position<TContigSeq>::Type TPosition;
 
     // In oracle Sam mode, the maximum error is the error at the position given in the Sam alignment.
-    bool oracleSamMode = false;
+    bool oracleMode = false;
     if (maxError == maxValue<int>())
     {
-        oracleSamMode = true;
+        oracleMode = true;
         Finder<TContigSeq> finder(contig);
         Pattern<TReadSeq, TPatternSpec> pattern(read, -(int)length(read) * 40);
         bool ret = setEndPosition(finder, pattern, endPos);
@@ -525,7 +584,7 @@ void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     std::sort(begin(tempMatches, Standard()), end(tempMatches, Standard()));
     smoothErrorCurve(tempMatches);
     appendValue(tempMatches, WeightedMatch(0, 0, 0, relativeMinScore - 1, 0));  // Sentinel.
-    if (oracleSamMode) {
+    if (oracleMode) {
         // In oracle Sam mode, we only want the lake with last pos endPos-1.
         String<WeightedMatch> buffer;
         bool flag = false;
@@ -575,7 +634,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
                            StringSet<CharString> & readNameStore,
                            StringSet<CharString> const & contigNameStore,
                            FaiIndex const & faiIndex,
-                           Options<BuildGoldStandard> const & options,
+                           BuildGoldStandardOptions const & options,
                            TPatternSpec const &)
 {
     double startTime = 0;
@@ -653,7 +712,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
             readId = length(readNameStore);
             appendName(readNameStore, record.qName, readNameStoreCache);
             appendValue(readLengthStore, length(record.seq));
-            if (options.oracleSamMode)
+            if (options.oracleMode)
                 appendValue(readAlignmentDistances, -1);
         }
 
@@ -703,7 +762,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
 
         // In oracle SAM mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position
         // from the SAM file.  In normal mode, convert from error rate from options to error count.
-        int maxError = options.oracleSamMode ? maxValue<int>() : static_cast<int>(floor(0.01 * options.maxError * length(record.seq)));
+        int maxError = options.oracleMode ? maxValue<int>() : static_cast<int>(floor(0.01 * options.maxError * length(record.seq)));
 
         // Compute end position of alignment.
         int endPos = record.pos + getAlignmentLengthInRef(record) - countPaddings(record.cigar);
@@ -712,7 +771,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
             buildErrorCurvePoints(errorCurves[readId], maxError, contig, record.rId, !hasFlagRC(record), readSeq, readId, endPos, readNameStore, options.matchN, TPatternSpec());
         else
             buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, record.rId, !hasFlagRC(record), readSeq, readId, length(rcContig) - record.pos, readNameStore, options.matchN, TPatternSpec());
-        if (options.oracleSamMode)
+        if (options.oracleMode)
             readAlignmentDistances[readId] = maxError;
 
         // Update variables storing the previous read/contig id and position.
@@ -744,7 +803,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
         // Compute relative min score for the read.
         String<WeightedMatch> filtered;
         int maxError = (int)floor(options.maxError / 100.0 * readLengthStore[readId]);
-        if (options.oracleSamMode) {
+        if (options.oracleMode) {
             SEQAN_ASSERT_NEQ(readAlignmentDistances[readId], -1);
             maxError = readAlignmentDistances[readId];
         }
@@ -766,13 +825,138 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
 }
 
 // ---------------------------------------------------------------------------
-// Function buildGoldStandard()
+// Function parseCommandLine()
 // ---------------------------------------------------------------------------
 
-// Entry point for the gold standard building subprogram.
-
-int buildGoldStandard(Options<BuildGoldStandard> const & options)
+seqan::ArgumentParser::ParseResult
+parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** argv)
 {
+    // -----------------------------------------------------------------------
+    // Parse Command Line Using ArgumentParser
+    // -----------------------------------------------------------------------
+
+    seqan::ArgumentParser parser("rabema_build_gold_standard");
+    setShortDescription(parser, "RABEMA Gold Standard Builder");
+    setVersion(parser, "1.1");
+    setDate(parser, "May 2012");
+
+    addUsageLine(parser,
+                 "[\\fIOPTIONS\\fP] \\fB--out-gsi\\fP \\fIOUT.gsi\\fP \\fB--reference\\fP \\fIREF.fa\\fP "
+                 "\\fB--in-sam\\fP \\fIPERFECT.sam\\fP");
+    addDescription(parser,
+                   "This program allows to build a RABEMA gold standard.  The input is a reference FASTA file "
+                   "and a perfect SAM map (e.g. created using RazerS 2 in full-sensitivity mode).");
+    addDescription(parser,
+                   "The input SAM file must be \\fIsorted by coordinate\\fP.  The program will create a "
+                   "FASTA index file \\fIREF.fa.fai\\fP for fast random access to the reference.");
+
+    addOption(parser, seqan::ArgParseOption("v", "verbose", "Enable verbose output."));
+    addOption(parser, seqan::ArgParseOption("vv", "very-verbose", "Enable even more verbose output."));
+
+    addSection(parser, "Input / Output");
+    addOption(parser, seqan::ArgParseOption("o", "out-gsi", "Path to write the resulting GSI file to.",
+                                            seqan::ArgParseArgument::STRING, false, "GSI"));
+    setRequired(parser, "out-gsi", true);
+    addOption(parser, seqan::ArgParseOption("r", "reference", "Path to load reference FASTA from.",
+                                            seqan::ArgParseArgument::STRING, false, "FASTA"));
+    setRequired(parser, "reference", true);
+    addOption(parser, seqan::ArgParseOption("s", "in-sam", "Path to load the \"perfect\" SAM file from.",
+                                            seqan::ArgParseArgument::STRING, false, "SAM"));
+    setRequired(parser, "in-sam", true);
+
+    addSection(parser, "Gold Standard Parameters");
+    addOption(parser, seqan::ArgParseOption("", "oracle-mode",
+                                            "Enable oracle mode.  This is used for simulated data when the input "
+                                            "SAM file gives exactly one position that is considered as the true "
+                                            "sample position."));
+    addOption(parser, seqan::ArgParseOption("", "match-N", "When set, N matches all characters without penalty."));
+    addOption(parser, seqan::ArgParseOption("", "distance-metric",
+                                            "Set distance metric.  Valid values: hamming, edit.  Default: edit.",
+                                            seqan::ArgParseOption::STRING, false, "METRIC", 1, "edit"));
+    setValidValues(parser, "distance-metric", "hamming edit");
+    addOption(parser, seqan::ArgParseOption("e", "max-error",
+                                            "Maximal error rate to build gold standard for in percent.  This "
+                                            "parameter is an integer and relative to the read length.  "
+                                            "The error rate is ignored in oracle mode, here the distance "
+                                            "of the read at the sample position is taken, individually "
+                                            "for each read.  Default: 0",
+                                            seqan::ArgParseArgument::INTEGER, false, "RATE", 1, 0));
+
+    addTextSection(parser, "Return Values");
+    addText(parser, "A return value of 0 indicates success, any other value indicates an error.");
+
+    addTextSection(parser, "Examples");
+    
+    addListItem(parser,
+                "\\fBrabema_build_gold_standard\\fP \\fB-e\\fP \\fI4\\fP \\fB-o\\fP \\fIOUT.gsi\\fP \\fB-i\\fP "
+                    "\\fIIN.sam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
+                "Build gold standard from a SAM file \\fIIN.sam\\fP with all mapping locations and a FASTA "
+                "reference \\fIREF.fa\\fP to GSI file \\fIOUT.gsi\\fP with a maximal error rate of \\fI4\\fP.");
+    addListItem(parser,
+                "\\fBrabema_build_gold_standard\\fP \\fB--distance-metric\\fP \\fIedit\\fP \\fB-e\\fP \\fI4\\fP "
+                    "\\fB-o\\fP \\fIOUT.gsi\\fP \\fB-i\\fP \\fIIN.sam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
+                "Same as above, but using Hamming instead of edit distance.");
+    addListItem(parser,
+                "\\fBrabema_build_gold_standard\\fP \\fB--oracle-mode\\fP \\fB-o\\fP \\fIOUT.gsi\\fP \\fB-i\\fP "
+                    "\\fIIN.sam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
+                "Build gold standard from a SAM file \\fIIN.sam\\fP with the original sample position, e.g.  "
+                "as exported by read simulator Mason.");
+
+    addTextSection(parser, "Memory Requirements");
+    addText(parser,
+            "From version 1.1, great care has been taken to keep the memory requirements as low as possible.");
+    // TODO(holtgrew): Give some rough estimates for the human genome data set, for example.
+
+    addTextSection(parser, "References");
+    addText(parser,
+            "M. Holtgrewe, A.-K. Emde, D. Weese and K. Reinert.  A Novel And Well-Defined Benchmarking Method "
+            "For Second Generation Read Mapping, BMC Bioinformatics 2011, 12:210.");
+    addListItem(parser, "\\fIhttp://www.seqan.de/rabema\\fP", "RABEMA Homepage");
+    addListItem(parser, "\\fIhttp://www.seqan.de/mason\\fP", "Mason Homepage");
+
+    // Actually do the parsing and exit on error, help display etc.
+    seqan::ArgumentParser::ParseResult res = parse(parser, argc, argv);
+    if (res != seqan::ArgumentParser::PARSE_OK)
+        return res;
+
+    // -----------------------------------------------------------------------
+    // Fill BuildGoldStandardOptions Object
+    // -----------------------------------------------------------------------
+
+    if (isSet(parser, "verbose"))
+        options.verbosity = 2;
+    if (isSet(parser, "very-verbose"))
+        options.verbosity = 3;
+
+    if (isSet(parser, "match-N"))
+        options.matchN = true;
+    if (isSet(parser, "oracle-mode"))
+        options.oracleMode = true;
+    getOptionValue(options.maxError, parser, "max-error");
+    getOptionValue(options.distanceMetric, parser, "distance-metric");
+
+    if (isSet(parser, "out-gsi"))
+        getOptionValue(options.outGsiPath, parser, "out-gsi");
+    if (isSet(parser, "reference"))
+        getOptionValue(options.referencePath, parser, "reference");
+    if (isSet(parser, "in-sam"))
+        getOptionValue(options.inSamPath, parser, "in-sam");
+
+    return res;
+}
+
+// ----------------------------------------------------------------------------
+// Function main()
+// ----------------------------------------------------------------------------
+
+int main(int argc, char const ** argv)
+{
+    // Parse command line and store results in options.
+    BuildGoldStandardOptions options;
+    seqan::ArgumentParser::ParseResult parseRes = parseCommandLine(options, argc, argv);
+    if (parseRes != seqan::ArgumentParser::PARSE_OK)
+        return parseRes == seqan::ArgumentParser::PARSE_ERROR;
+    
     double startTime = 0;  // For measuring time below.
 
     typedef StringSet<CharString>      TNameStore;
@@ -787,12 +971,12 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
               << "____OPTIONS___________________________________________________________________\n\n";
 
     std::cerr << "Max error rate [%]    " << options.maxError << "\n"
-              << "Oracle mode           " << (options.oracleSamMode ? (char const *) "yes" : (char const *) "no") << "\n"
-              << "Distance measure      " << options.distanceFunction << "\n"
+              << "Oracle mode           " << (options.oracleMode ? (char const *) "yes" : (char const *) "no") << "\n"
+              << "Distance measure      " << options.distanceMetric << "\n"
               << "Match Ns              " << (options.matchN ? (char const *) "yes" : (char const *) "no") << '\n'
-              << "GSI Output File       " << options.outFileName << '\n'
-              << "SAM Input File        " << options.perfectMapFilename << '\n'
-              << "Reference File        " << options.referenceSeqFilename << '\n'
+              << "GSI Output File       " << options.outGsiPath << '\n'
+              << "SAM Input File        " << options.inSamPath << '\n'
+              << "Reference File        " << options.referencePath << '\n'
               << "Verbosity             " << options.verbosity << "\n\n";
 
     std::cerr << "____LOADING FILES_____________________________________________________________\n\n";
@@ -802,20 +986,20 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // =================================================================
 
     startTime = sysTime();
-    std::cerr << "Reference Index       " << options.referenceSeqFilename << ".fai ...";
+    std::cerr << "Reference Index       " << options.referencePath << ".fai ...";
     FaiIndex faiIndex;
-    if (load(faiIndex, toCString(options.referenceSeqFilename)) != 0)
+    if (load(faiIndex, toCString(options.referencePath)) != 0)
     {
         std::cerr << " FAILED (not fatal, we can just build it)\n";
-        std::cerr << "Building Index            " << options.referenceSeqFilename << ".fai ...";
-        if (buildIndex(toCString(options.referenceSeqFilename), Fai()) != 0)
+        std::cerr << "Building Index            " << options.referencePath << ".fai ...";
+        if (buildIndex(toCString(options.referencePath), Fai()) != 0)
         {
             std::cerr << "Could not build FAI index.\n";
             return 1;
         }
         std::cerr << " OK\n";
-        std::cerr << "Reference Index           " << options.referenceSeqFilename << ".fai ...";
-        if (load(faiIndex, toCString(options.referenceSeqFilename)) != 0)
+        std::cerr << "Reference Index           " << options.referencePath << ".fai ...";
+        if (load(faiIndex, toCString(options.referencePath)) != 0)
         {
             std::cerr << "Could not load FAI index we just build.\n";
             return 1;
@@ -828,8 +1012,8 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     }
     
     // Open SAM file and read in header.
-    std::cerr << "Alignments           " << options.perfectMapFilename << " (header) ...";
-    std::ifstream inSam(toCString(options.perfectMapFilename), std::ios_base::in | std::ios_base::binary);
+    std::cerr << "Alignments            " << options.inSamPath << " (header) ...";
+    std::ifstream inSam(toCString(options.inSamPath), std::ios_base::in | std::ios_base::binary);
     if (!inSam.is_open())
     {
         std::cerr << "Could not open SAM file." << std::endl;
@@ -863,9 +1047,9 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // In oracle mode, we store the distance of the alignment from the SAM file for each read.  Otherwise, this variable
     // remains unused.
     String<int> readAlignmentDistances;
-    if (options.distanceFunction == "edit")
+    if (options.distanceMetric == "edit")
         res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, MyersUkkonenReads());
-    else // options.distanceFunction == "hamming"
+    else // options.distanceMetric == "hamming"
         res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, HammingSimple());
     if (res != 0)
         return 1;
@@ -886,7 +1070,7 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
     // The two alternatives are equivalent after opening the file.
     startTime = sysTime();
     std::cerr << "\n____WRITING OUTPUT____________________________________________________________\n\n";
-    if (options.outFileName == "-") {
+    if (options.outGsiPath == "-") {
         std::cerr << "Writing to stdout ...\n";
         GsiHeader header;
         writeRecord(std::cout, header, Gsi());
@@ -895,11 +1079,11 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
             std::cout << *it << std::endl;
         std::cerr << "DONE\n";
     } else {
-        std::cerr << "Writing to " << options.outFileName << " ...";
-        std::fstream fstrm(toCString(options.outFileName), std::ios_base::out);
+        std::cerr << "Writing to " << options.outGsiPath << " ...";
+        std::fstream fstrm(toCString(options.outGsiPath), std::ios_base::out);
         if (!fstrm.is_open())
         {
-            std::cerr << "Could not open out file \"" << options.outFileName << "\"\n";
+            std::cerr << "Could not open out file \"" << options.outGsiPath << "\"\n";
             return 1;
         }
         GsiHeader header;
@@ -913,5 +1097,3 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
 
     return 0;
 }
-
-#endif  // #ifndef SEQAN_CORE_APPS_RABEMA_BUILD_GOLD_STANDARD_H_

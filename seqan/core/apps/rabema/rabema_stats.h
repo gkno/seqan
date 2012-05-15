@@ -52,6 +52,8 @@ struct RabemaStats
     __uint64 totalReads;
     // Normalized number of found intervals.
     double normalizedIntervals;
+    // Number of additional alignments in SAM file with low enough error rate but no GSI record.
+    unsigned additionalHits;
 
     // The following arrays are indexed by the integer value of the error rate.
 
@@ -67,11 +69,13 @@ struct RabemaStats
     // Normalized number of intervals found for each error rate.
     String<double> normalizedIntervalsFoundForErrorRate;
 
-    RabemaStats() : intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0)
+    RabemaStats() : intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
+                    additionalHits(0)
     {}
 
     RabemaStats(unsigned maxErrorRate) :
-            intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0)
+            intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
+            additionalHits(0)
     {
         resize(intervalsToFindForErrorRate, maxErrorRate + 1, 0);
         resize(intervalsFoundForErrorRate, maxErrorRate + 1, 0);
@@ -109,12 +113,13 @@ void updateMaximalErrorRate(RabemaStats & stats, unsigned maxErrorRate)
 // ----------------------------------------------------------------------------
 
 template <typename TStream>
-void write(TStream & stream, RabemaStats const & stats, Options<EvaluateResults> const & options)
+void write(TStream & stream, RabemaStats const & stats, int maxError)
 {
     stream << "Intervals to find:              " << stats.intervalsToFind << '\n'
            << "Intervals found:                " << stats.intervalsFound << '\n'
            << "Intervals found [%]             " << (100.0 * stats.intervalsFound / stats.intervalsToFind) << '\n'
            << "Invalid alignments:             " << stats.invalidAlignments << '\n'
+           << "Additional Hits:                " << stats.additionalHits << '\n'
            << '\n'
            << "Number of reads:                " << stats.totalReads << '\n'
            << "Normalized intervals found:     " << stats.normalizedIntervals << '\n'
@@ -126,7 +131,7 @@ void write(TStream & stream, RabemaStats const & stats, Options<EvaluateResults>
     stream << "------------------------------------------------------------------------------------------------------\n";
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
     {
-        if (!options.oracleWitMode && options.benchmarkCategory == "all" && (int)i != options.maxError)
+        if (maxError != -1  && (int)i != maxError)
             continue;
         sprintf(buffer, "%5u\t%8d\t%8d\t%8.2f\t%8.2f\t%10.2f\t%10.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
                 100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i],

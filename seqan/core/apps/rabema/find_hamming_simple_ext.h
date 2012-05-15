@@ -25,10 +25,12 @@
 #ifndef SEQAN_CORE_APPS_RABEMA_FIND_HAMMING_SIMPLE_EXT_H_
 #define SEQAN_CORE_APPS_RABEMA_FIND_HAMMING_SIMPLE_EXT_H_
 
+#include <seqan/find.h>
+
 // Set the end position of the pattern in the finder.
 template <typename THaystack, typename TNeedle, typename TPosition>
-inline bool setEndPosition(Finder<THaystack, void> & finder,
-                           Pattern<TNeedle, HammingSimple> & pattern,
+inline bool setEndPosition(seqan::Finder<THaystack, void> & finder,
+                           seqan::Pattern<TNeedle, seqan::HammingSimple> & pattern,
                            const TPosition & pos) {
 //     std::cerr << "setEndPosition(finder, pattern, " << pos << ")" << std::endl;
     // Compute delta, such that we start searching at pos - delta.

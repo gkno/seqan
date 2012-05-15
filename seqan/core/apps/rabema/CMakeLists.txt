@@ -1,30 +1,42 @@
 cmake_minimum_required (VERSION 2.6)
 project (core_apps_rabema)
 
+# We need the module bam_io from extras, so add the necessary include
+# directory here.
 include_directories(../../../extras/include)
 
-# Update the list of file names below if you add source files to your application.
-seqan_add_executable(rabema rabema.cpp
-                     build_gold_standard.h
-                     build_gold_standard_options.h
+
+# Preparation of SAM files, i.e. filling SEQ field of each record.
+seqan_add_executable(rabema_prepare_sam prepare_sam.cpp)
+
+# Building of GSI file from "perfect" SAM file and reference sequence.
+seqan_add_executable(rabema_build_gold_standard rabema_build_gold_standard.cpp
                      curve_smoothing.h
-                     evaluation.h
-                     evaluation_options.h
                      fai_index.h
                      find_hamming_simple_ext.h
                      find_myers_ukkonen_ext.h
                      find_myers_ukkonen_reads.h
                      io_gsi.h
-                     rabema.h
                      rabema_stats.h
                      ref_id_mapping.h)
 
+# Comparison of arbitrary read mapper SAM against GSI file.
+seqan_add_executable(rabema_evaluate rabema_evaluate.cpp
+                     curve_smoothing.h
+                     fai_index.h
+                     find_hamming_simple_ext.h
+                     find_myers_ukkonen_ext.h
+                     find_myers_ukkonen_reads.h
+                     io_gsi.h
+                     rabema_stats.h
+                     ref_id_mapping.h)
+
+# Small tool for helping in debugging.
 seqan_add_executable(do_search do_search.cpp find_myers_ukkonen_ext.h)
 
-seqan_add_executable(prepare_sam prepare_sam.cpp)
 
 # Install rabema in /bin directory
-install(TARGETS rabema
+install(TARGETS rabema_prepare_sam rabema_build_gold_standard rabema_evaluate
         DESTINATION bin)
 
 # Run app tests if python was found
