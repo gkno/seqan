@@ -591,6 +591,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
 
     startTime = sysTime();      // Time at beginning for total time display at end.
     int prevRefId = -1;      // Previous contig id.
+    int prevPos = -1;
     unsigned prevReadId = maxValue<unsigned>();
     size_t prevRightBorder = maxValue<size_t>();
     int posOnContig = 0;
@@ -614,6 +615,12 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
         // Break if we have an unaligned SAM record.
         if (record.rId == -1)
             break;  // Done!
+        // Check that the file is actually sorted by coordinate.
+        if (prevRefId != -1 && (prevRefId > record.rId || (prevRefId == record.rId && prevPos > record.pos)))
+        {
+            std::cerr << "ERROR: File was not sorted by coordinate!\n";
+            return 1;
+        }
         // Get read name and sequence from record.
         readSeq = record.seq;  // Convert read sequence to Dna5.
         // Compute reverse complement since we align against reverse strand, SAM has aligned sequence against forward
@@ -703,6 +710,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
         // Update variables storing the previous read/contig id and position.
         prevReadId = readId;
         prevRefId = record.rId;
+        prevPos = record.pos;
         prevRightBorder = right;
     }
     std::cerr << "\n\nTook " << sysTime() - startTime << " s\n";
@@ -926,11 +934,11 @@ int buildGoldStandard(Options<BuildGoldStandard> const & options)
         return 1;
     }
     // Check that the SAM file is sorted by COORDINATE.
-    if (getSortOrder(samHeader) != BAM_SORT_COORDINATE)
-    {
-        std::cerr << "SAM file not sorted by 'coordinate'!\n";
-        return 1;
-    }
+    // if (getSortOrder(samHeader) != BAM_SORT_COORDINATE)
+    // {
+    //     std::cerr << "SAM file not sorted by 'coordinate'!\n";
+    //     return 1;
+    // }
     std::cerr << " OK\n";
     std::cerr << "\nTook " << sysTime() - startTime << "s\n";
 
