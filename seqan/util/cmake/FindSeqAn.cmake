@@ -233,7 +233,6 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     # Forwards Generation.
     # ---------------------------------------------------------------------------
     if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
-	message(STATUS "HALLO")
         file (GLOB BASE_CONTENTS RELATIVE ${PATH}/seqan ${PATH}/seqan/[A-z]*)
         foreach (ENTRY ${BASE_CONTENTS})
             if (IS_DIRECTORY ${PATH}/seqan/${ENTRY})
