@@ -729,12 +729,18 @@ compareAlignedReadsToReference(RabemaStats & result,
         // We collected the records for all queries.  Here, we differentiate between the different cases.
         if (seenSingleEnd)
         {
-            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ false);
+            int res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ false);
+            if (res != 0)
+                return 1;
         }
         if (seenPairedEnd)
         {
-            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ false);
-            benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ true);
+            int res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ false);
+            if (res != 0)
+                return 1;
+            res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ true);
+            if (res != 0)
+                return 1;
         }
     }
     std::cerr << " DONE\n";
