@@ -781,10 +781,10 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
                                             seqan::ArgParseArgument::STRING, false, "FASTA"));
     setRequired(parser, "reference", true);
     addOption(parser, seqan::ArgParseOption("g", "in-gsi", "Path to load gold standard intervals from.",
-                                            seqan::ArgParseArgument::STRING, false, "SAM"));
+                                            seqan::ArgParseArgument::STRING, false, "GSI"));
     setRequired(parser, "in-gsi", true);
     addOption(parser, seqan::ArgParseOption("s", "in-sam", "Path to load the read mapper output from.",
-                                            seqan::ArgParseArgument::STRING, false, "GSI"));
+                                            seqan::ArgParseArgument::STRING, false, "SAM"));
     setRequired(parser, "in-sam", true);
 
     addSection(parser, "Benchmark Parameters");
