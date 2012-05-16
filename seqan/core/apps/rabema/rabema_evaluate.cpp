@@ -759,7 +759,7 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     setDate(parser, "May 2012");
 
     addUsageLine(parser,
-                 "[\\fIOPTIONS\\fP] \\fB--reference\\fP \\fIREF.fa\\fP \\fB--in-gsi\\fP \\fIN.gsi\\fP "
+                 "[\\fIOPTIONS\\fP] \\fB--reference\\fP \\fIREF.fa\\fP \\fB--in-gsi\\fP \\fIIN.gsi\\fP "
                  "\\fB--in-sam\\fP \\fIMAPPING.sam\\fP");
     addDescription(parser,
                    "Compare the SAM output \\fIMAPPING.sam\\fP of any read mapper against the RABEMA "
