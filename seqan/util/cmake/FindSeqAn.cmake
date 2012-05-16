@@ -118,17 +118,17 @@ macro (seqan_setup_global)
     # Check whether we compile with CLANG.
     # -----------------------------------------------------------------------
     set (COMPILER_IS_CLANG FALSE)
-    if (CMAKE_CXX_COMPILER MATCHES "clang\\+\\+")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
       set (COMPILER_IS_CLANG TRUE)
-    endif (CMAKE_CXX_COMPILER MATCHES "clang\\+\\+")
+    endif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		
     # -----------------------------------------------------------------------
     # Fix CMAKE_COMPILER_IS_GNUCXX for MinGW.
     # -----------------------------------------------------------------------
 		
-    if (CMAKE_CXX_COMPILER MATCHES "g\\+\\+")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       set (CMAKE_COMPILER_IS_GNUCXX TRUE)
-    endif (CMAKE_CXX_COMPILER MATCHES "g\\+\\+")
+    endif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
     # -----------------------------------------------------------------------
     # GCC Setup
@@ -205,7 +205,7 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     set (PATH_BIN ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH})
     file (GLOB HEADERS_TMP ${PATH}/seqan/[A-z]*/[A-z]*.h)
     file (GLOB SUPER_HEADERS ${PATH}/seqan/[A-z]*.h)
-
+	
     set (SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH} CACHE INTERNAL "asdf" FORCE)
     # message("SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME} <- ${SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME}}")
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH})
@@ -228,18 +228,19 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     if (FORWARDS)
         list (SORT FORWARDS)
     endif (FORWARDS)
-
+	
     # ---------------------------------------------------------------------------
     # Forwards Generation.
     # ---------------------------------------------------------------------------
     if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
+	message(STATUS "HALLO")
         file (GLOB BASE_CONTENTS RELATIVE ${PATH}/seqan ${PATH}/seqan/[A-z]*)
         foreach (ENTRY ${BASE_CONTENTS})
             if (IS_DIRECTORY ${PATH}/seqan/${ENTRY})
                 list (APPEND MODULES ${ENTRY})
             endif (IS_DIRECTORY ${PATH}/seqan/${ENTRY})
         endforeach (ENTRY ${SEQAN_BASE_CONTENTS})
-        
+	
         if (MODULES)
             list (SORT MODULES)
             list (REMOVE_DUPLICATES MODULES)
