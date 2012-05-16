@@ -870,6 +870,7 @@ SEQAN_CHECKPOINT
 
 
 /**
+.Function.createIntervalTree
 ..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals)
 ..param.tag.default:Tag.IntervalTree Centers.tag.ComputeCenter
  */
@@ -888,6 +889,7 @@ SEQAN_CHECKPOINT
 
 
 /**
+.Function.createIntervalTree
 ..signature:createIntervalTree(intervalTree, intervals)
 ..param.intervalTree:An interval tree
 ..param.intervals:A container of intervals
