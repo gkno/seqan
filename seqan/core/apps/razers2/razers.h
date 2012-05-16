@@ -72,6 +72,8 @@ namespace SEQAN_NAMESPACE_MAIN
 										// 3..use Fasta id, do not append /L and /R for mate pairs.
 		unsigned	sortOrder;			// 0..sort keys: 1. read number, 2. genome position
 										// 1..           1. genome pos50ition, 2. read number
+		                       			// 2..           1. read name, 2. genome position
+										// 3..           1. genome position, 2. read name
 		int			positionFormat;		// 0..gap space
 										// 1..position space
 		const char	*runID;				// runID needed for gff output
@@ -575,7 +577,54 @@ inline int estimateReadLength(char const *fileName)
 			return _min(a.beginPos, a.endPos) < _min(b.beginPos, b.endPos);
 		}
 	};
+	
+    template <typename TAlignedReadStore, typename TReadNameStore, typename TAlignedReadQualityStore>
+	struct LessRNameGPos : 
+		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
+	{
+		typedef typename Value<TAlignedReadStore>::Type TAlignedRead;		
+		TReadNameStore &nameStore;
+		TAlignedReadQualityStore &qualStore;
 		
+		LessRNameGPos(TReadNameStore &nameStore, TAlignedReadQualityStore &_qualStore):
+            nameStore(nameStore), qualStore(_qualStore) {}
+		
+		inline bool operator() (TAlignedRead const &a, TAlignedRead const &b) const 
+		{
+			// read name
+			if (nameStore[a.readId] < nameStore[b.readId]) return true;
+			if (nameStore[a.readId] > nameStore[b.readId]) return false;
+
+			// contig number
+			if (a.contigId < b.contigId) return true;
+			if (a.contigId > b.contigId) return false;
+
+			// beginning position
+			typename TAlignedRead::TPos ba = _min(a.beginPos, a.endPos);
+			typename TAlignedRead::TPos bb = _min(b.beginPos, b.endPos);
+			if (ba < bb) return true;
+			if (ba > bb) return false;
+
+			// orientation
+			bool oa = a.beginPos < a.endPos;
+			bool ob = b.beginPos < b.endPos;
+			if (oa != ob) return oa;
+
+			// qualities
+			SEQAN_ASSERT_NEQ(a.id, TAlignedRead::INVALID_ID);
+			SEQAN_ASSERT_NEQ(b.id, TAlignedRead::INVALID_ID);
+			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
+			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
+			if (qa.pairScore > qb.pairScore) return true;
+			if (qa.pairScore < qb.pairScore) return false;
+			if (qa.score > qb.score) return true;
+			if (qb.score > qa.score) return false;
+			
+			// prefer reads that support more of the reference
+			return _max(a.beginPos, a.endPos) > _max(b.beginPos, b.endPos);
+		}
+	};
+	
 	template <typename TAlignedReadStore, typename TAlignedReadQualityStore>
 	struct LessErrors : 
 		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >

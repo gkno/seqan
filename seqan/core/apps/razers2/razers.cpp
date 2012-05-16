@@ -299,7 +299,9 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("so", "sort-order",        "select how matches are sorted", OptionType::Int | OptionType::Label, options.sortOrder));
 	addHelpLine(parser, "0 = 1. read number, 2. genome position");
 	addHelpLine(parser, "1 = 1. genome position, 2. read number");
-	addOption(parser, CommandLineOption("pf", "position-format",   "select begin/end position numbering", OptionType::Int | OptionType::Label, options.sortOrder));
+	addHelpLine(parser, "2 = 1. read name, 2. genome position");
+	addHelpLine(parser, "3 = 1. genome position, 2. read name");
+	addOption(parser, CommandLineOption("pf", "position-format",   "select begin/end position numbering", OptionType::Int | OptionType::Label, options.positionFormat));
 	addHelpLine(parser, "0 = gap space");
 	addHelpLine(parser, "1 = position space");
 	addOption(parser, CommandLineOption("ds",  "dont-shrink-alignments",           "Disable alignment shrinking in SAM(required for full sensitivity, otherwise not recommended).", OptionType::Boolean));
@@ -387,7 +389,7 @@ int main(int argc, const char *argv[])
 		cerr << "Maximum hits threshold must be greater than 0" << endl;
 	if ((options.outputFormat > 5) && (stop = true))
 		cerr << "Invalid output format option." << endl;
-	if ((options.sortOrder > 1) && (stop = true))
+	if ((options.sortOrder > 3) && (stop = true))
 		cerr << "Invalid sort order options." << endl;
 	if ((options.genomeNaming > 1) && (stop = true))
 		cerr << "Invalid genome naming options." << endl;

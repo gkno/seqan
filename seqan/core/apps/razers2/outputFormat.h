@@ -164,6 +164,49 @@ score(Score<TValue, Quality<TQualityString> > const & me,
 		}
 	};
 
+    template <typename TAlignedReadStore, typename TReadNameStore, typename TAlignedReadQualityStore>
+	struct LessGPosRName : 
+		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
+	{
+		typedef typename Value<TAlignedReadStore>::Type TAlignedRead;		
+		TReadNameStore & nameStore;
+		TAlignedReadQualityStore &qualStore;
+		
+		LessGPosRName(TReadNameStore & nameStore, TAlignedReadQualityStore &_qualStore):
+            nameStore(nameStore), qualStore(_qualStore) {}
+		
+		inline bool operator() (TAlignedRead const &a, TAlignedRead const &b) const 
+		{
+			// contig
+			if (a.contigId < b.contigId) return true;
+			if (a.contigId > b.contigId) return false;
+
+			// beginning position
+			typename TAlignedRead::TPos ba = _min(a.beginPos, a.endPos);
+			typename TAlignedRead::TPos bb = _min(b.beginPos, b.endPos);
+			if (ba < bb) return true;
+			if (ba > bb) return false;
+
+			// orientation
+			bool oa = a.beginPos < a.endPos;
+			bool ob = b.beginPos < b.endPos;
+			if (oa != ob) return oa;
+
+			// read name
+			if (nameStore[a.readId] < nameStore[b.readId]) return true;
+			if (nameStore[a.readId] > nameStore[b.readId]) return false;
+
+			// qualities
+			SEQAN_ASSERT_NEQ(a.id, TAlignedRead::INVALID_ID);
+			SEQAN_ASSERT_NEQ(b.id, TAlignedRead::INVALID_ID);
+			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
+			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
+			if (qa.pairScore > qb.pairScore) return true;
+			if (qa.pairScore < qb.pairScore) return false;
+			return qa.score > qb.score;
+		}
+	};
+
 //////////////////////////////////////////////////////////////////////////////
 // Determine error distribution
 template <typename TErrDistr, typename TFragmentStore, typename TOptions>
@@ -448,6 +491,7 @@ void dumpMatches(
 	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
+	typedef typename TFragmentStore::TReadNameStore                 TReadNameStore;
 	typedef typename TFragmentStore::TContigPos						TContigPos;
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
@@ -573,7 +617,16 @@ void dumpMatches(
 				store.alignedReadStore, 
 				LessGPosRNo<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
 			break;
-			
+		case 2:
+			sortAlignedReads(
+				store.alignedReadStore, 
+				LessRNameGPos<TAlignedReadStore, TReadNameStore, TAlignQualityStore>(store.readNameStore, store.alignQualityStore));
+			break;
+		case 3:
+			sortAlignedReads(
+				store.alignedReadStore, 
+				LessGPosRName<TAlignedReadStore, TReadNameStore, TAlignQualityStore>(store.readNameStore, store.alignQualityStore));
+			break;
 	}
 	
 	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
@@ -1016,7 +1069,16 @@ void dumpMatches(
                         store.alignedReadStore, 
                         LessGPosRNo<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
                     break;
-                    
+                case 2:
+                    sortAlignedReads(
+                            store.alignedReadStore, 
+                            LessRNameGPos<TAlignedReadStore, TReadNameStore, TAlignQualityStore>(store.readNameStore, store.alignQualityStore));
+                    break;
+                case 3:
+                    sortAlignedReads(
+                            store.alignedReadStore, 
+                            LessGPosRName<TAlignedReadStore, TReadNameStore, TAlignQualityStore>(store.readNameStore, store.alignQualityStore));
+                    break;
             }
 //            {
 //                std::cerr << "AFTER CONVERSION" << std::endl << std::endl;
