@@ -39,10 +39,16 @@
 
 #include "test_sequence.h"
 #include "test_segment_beta.h"
-#include "test_string_set.h"
+// #include "test_string_set.h"
 
 SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
 {
+
+    //unsigned a = 1;
+    //int b = -1;
+
+    //std::cerr << (a<b) << std::endl;
+
     // --------------------------------------------------------------------------
     // Testing Alloc Strings With Simple Types
     // --------------------------------------------------------------------------
@@ -156,7 +162,7 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
     // --------------------------------------------------------------------------
     // Testing Alloc Strings With Simple Types
     // --------------------------------------------------------------------------
-/*    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_copy_constructible);
+    SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_copy_constructible);
     SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_default_constructible);
     SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_less_greater_equal);
     SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_append);
@@ -189,8 +195,5 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_concept)
     SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_swap);
     SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_value);
     SEQAN_CALL_TEST(test_sequence_alloc_string_set_dna_value_by_id);
-*/
-
-
 }
 SEQAN_END_TESTSUITE
