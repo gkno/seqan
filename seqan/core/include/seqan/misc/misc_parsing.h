@@ -146,6 +146,15 @@ _parseSkipUntilChar(TFile& file, const TChar &x, TChar& c)
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TChar>
+inline bool
+_parseIsWhiteSpace(TChar const c)
+{
+//IOREV _nodoc_ lacks Ref, maybe rename to _is* because there is no fileparsing
+    return ((unsigned char)c <= ' ');
+}
+
+
 template<typename TChar>
 inline bool
 _parseIsDigit(TChar const c)
@@ -324,7 +333,8 @@ _parseReadFilepath(TFile& file, TChar& c)
 }
 
 
-//read filename (read line and trim trailing whitespaces)
+// read filename (read line and trim trailing whitespaces)
+// OBSOLETE
 template<typename TFile, typename TChar>
 inline String<char>
 _parseReadWordUntilWhitespace(TFile& file, TChar& c)
@@ -342,6 +352,23 @@ _parseReadWordUntilWhitespace(TFile& file, TChar& c)
 	}
 	return str;
 }
+
+// better use this function instead of _parseReadWordUntilWhitespace
+template<typename TFile, typename TChar, typename TString>
+inline void
+_parseCharsUntilWhitespace(TFile & file, TChar& c, TString & str)
+{
+//IOREV _nodoc_ _hasCRef_
+    if (_parseIsWhiteSpace(c)) return;
+    appendValue(str, c);
+    while (!_streamEOF(file)) 
+    {
+        c = _streamGet(file);
+        if (_parseIsWhiteSpace(c)) return;
+        appendValue(str, c);
+    }
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
