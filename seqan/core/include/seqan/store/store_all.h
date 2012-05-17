@@ -684,9 +684,30 @@ _storeAppendRead (
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
 
-	// search for readId by name
-	if (getIdByName(fragStore.readNameStore, qname, readId, fragStore.readNameStoreCache))
-	{
+	// search for readId by name (could be me or my mate)
+	bool found = getIdByName(fragStore.readNameStore, qname, readId, fragStore.readNameStoreCache);
+    
+    // if naming scheme is xx/1, xx/2 or xx/L, xx/R try to look up my mate
+    if (!found && (flag & 1) == 1 && length(qname) >= 2 && qname[length(qname) - 2] == '/')
+    {
+        CharString mate;
+
+        char tag = back(qname);
+        if (tag == '1' || tag == '2')
+        {
+            mate = qname;
+            back(mate) = (tag == '1')? '2': '1';
+        } 
+        else if (tag == 'L' || tag == 'R')
+        {
+            mate = qname;
+            back(mate) = (tag == 'L')? 'R': 'L';
+        }
+        found = getIdByName(fragStore.readNameStore, mate, readId, fragStore.readNameStoreCache);
+    }
+    
+	if (found)
+    {
 		if ((flag & 1) == 1)
 		{
 			// if the read is in the store and paired
