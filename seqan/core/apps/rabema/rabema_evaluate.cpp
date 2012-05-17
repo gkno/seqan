@@ -100,6 +100,9 @@ public:
     // Path to input Sam file.
     CharString inSamPath;
 
+    // Path to output TSV stats file.
+    CharString outTsvPath;
+
     // ------------------------------------------------------------------------
     // Logging configuration.
     // ------------------------------------------------------------------------
@@ -813,6 +816,8 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     addOption(parser, seqan::ArgParseOption("s", "in-sam", "Path to load the read mapper output from.",
                                             seqan::ArgParseArgument::STRING, false, "SAM"));
     setRequired(parser, "in-sam", true);
+    addOption(parser, seqan::ArgParseOption("", "out-tsv", "Path to write the statistics to as TSV.",
+                                            seqan::ArgParseArgument::STRING, false, "TSV"));
 
     addSection(parser, "Benchmark Parameters");
     addOption(parser, seqan::ArgParseOption("", "oracle-mode",
@@ -909,6 +914,8 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
         getOptionValue(options.inSamPath, parser, "in-sam");
     if (isSet(parser, "in-gsi"))
         getOptionValue(options.inGsiPath, parser, "in-gsi");
+    if (isSet(parser, "out-tsv"))
+        getOptionValue(options.outTsvPath, parser, "out-tsv");
 
     getOptionValue(options.maxError, parser, "max-error");
     options.matchN = isSet(parser, "match-N");
@@ -960,6 +967,7 @@ int main(int argc, char const ** argv)
               << "GSI File              " << options.inGsiPath << '\n'
               << "SAM File              " << options.inSamPath << '\n'
               << "Reference File        " << options.referencePath << '\n'
+              << "TSV Output File       " << options.outTsvPath << '\n'
               << "Show\n"
               << "    additional        " << (options.showAdditionalIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
               << "    hit               " << (options.showHitIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
@@ -1097,7 +1105,27 @@ int main(int argc, char const ** argv)
     int maxError = -1;
     if (!options.oracleMode && options.benchmarkCategory == "all")
         maxError = options.maxError;
-    write(std::cerr, result, maxError);
+    write(std::cout, result, maxError, Raw());
+
+    if (!empty(options.outTsvPath))
+    {
+        std::cerr << '\n'
+                  << "Writting output TSV       " << options.outTsvPath << " ...";
+        std::ofstream tsvOut(toCString(options.outTsvPath), std::ios::out | std::ios::binary);
+        bool failed = false;
+        if (!tsvOut.good())
+        {
+            failed = true;
+            std::cerr << " FAILED - could not open!\n";
+        }
+        else if (write(tsvOut, result, options.maxError, options.benchmarkCategory, options.oracleMode, options.distanceMetric, Tsv()) != 0)
+        {
+            failed = true;
+            std::cerr << " FAILED - could not write!\n";
+        }
+        if (!failed)
+            std::cerr << " OK\n";
+    }
 
     return 0;
 }

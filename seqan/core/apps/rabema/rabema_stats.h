@@ -33,6 +33,11 @@
 // Tags, Classes, Enums
 // ============================================================================
 
+namespace seqan {
+struct Tsv_;
+typedef Tag<Tsv_> Tsv;
+}
+
 // ----------------------------------------------------------------------------
 // Class RabemaStats
 // ----------------------------------------------------------------------------
@@ -113,11 +118,11 @@ void updateMaximalErrorRate(RabemaStats & stats, unsigned maxErrorRate)
 }
 
 // ----------------------------------------------------------------------------
-// Function write()
+// Function write()                                                       [Raw]
 // ----------------------------------------------------------------------------
 
 template <typename TStream>
-void write(TStream & stream, RabemaStats const & stats, int maxError)
+void write(TStream & stream, RabemaStats const & stats, int maxError, seqan::Raw const & /*tag*/)
 {
     stream << "Intervals to find:              " << stats.intervalsToFind << '\n'
            << "Intervals found:                " << stats.intervalsFound << '\n'
@@ -145,6 +150,49 @@ void write(TStream & stream, RabemaStats const & stats, int maxError)
         stream << buffer;
     }
     stream << '\n';
+}
+
+// ----------------------------------------------------------------------------
+// Function write()                                                       [Tsv]
+// ----------------------------------------------------------------------------
+
+template <typename TStream>
+int write(TStream & stream, RabemaStats const & stats, int maxError, CharString const & benchmarkCategory,
+          bool oracleMode, CharString const & distanceMetric, seqan::Tsv const & /*tag*/)
+{
+    stream << "##Rabema Results\n"
+           << "##\n"
+           << "##category\t" << benchmarkCategory << '\n'
+           << "##max_distance\t" << maxError<< '\n'
+           << "##oracle_mode\t" << (oracleMode ? (char const *) "yes" : (char const *) "no") << "\n"
+           << "##distance_metric\t" << distanceMetric << '\n'
+           << "##\n"
+           << "##intervals_to_find\t" << stats.intervalsToFind << '\n'
+           << "##intervals_found\t" << stats.intervalsFound << '\n'
+           << "##intervals_found_percent\t" << (100.0 * stats.intervalsFound / stats.intervalsToFind) << '\n'
+           << "##invalid_alignments\t" << stats.invalidAlignments << '\n'
+           << "##additional_hits\t" << stats.additionalHits << '\n'
+           << "##\n"
+           << "##number_of_reads\t" << stats.totalReads << '\n'
+           << "##number_of_reads_with_intervals\t" << stats.readsInGsi << '\n'
+           << "##normalized_intervals_found\t" << stats.normalizedIntervals << '\n'
+           << "##normalized_intervals_found_percent\t" << (100.0 * stats.normalizedIntervals / stats.readsInGsi) << '\n'
+           << "##\n"
+           << "#error_rate\tnum_max\tnum_found\tpercent_found\tnorm_max\tnorm_found\tpercent_norm_found\n";
+    for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
+    {
+        if (maxError != -1  && (int)i != maxError)
+            continue;
+        char buffer[1000];
+        sprintf(buffer, "%u\t%d\t%d\t%.2f\t%.2f\t%1.2f\t%.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
+                100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i],
+                stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i],
+                100.0 * stats.normalizedIntervalsFoundForErrorRate[i] / stats.normalizedIntervalsToFindForErrorRate[i]);
+        stream << buffer;
+    }
+    stream << '\n';
+
+    return 0;
 }
 
 #endif  // #ifndef SEQAN_CORE_APPS_RABEMA_RABEMA_STATS_H_
