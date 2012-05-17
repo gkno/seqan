@@ -277,12 +277,12 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
         for (; j < calledBaseCount; ++j) {
             appendValue(inst.insertionNucleotides, Dna(i % 4));
             appendValue(inst.editString, ERROR_TYPE_INSERT);
-            inst.insCount += 1;
+            ++inst.insCount;
         }
         // Add deletions, if any.
         for (; j < realBaseCount[i]; ++j) {
             appendValue(inst.editString, ERROR_TYPE_DELETE);
-            inst.delCount += 1;
+            ++inst.delCount;
         }
         // Simulate qualities if configured to do so.
         if (options.simulateQualities) {

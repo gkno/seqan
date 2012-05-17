@@ -263,20 +263,21 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
         double pMatch    = 1.0 - pMismatch - pInsert - pDelete;
         if (x < pMatch) {
             // match
-            i += 1;
+            ++i;
             appendValue(inst.editString, ERROR_TYPE_MATCH);
         } else if (x < pMatch + pMismatch) {
             // mismatch
-            i += 1;
+            ++i;
+            ++inst.mismatchCount;
             appendValue(inst.editString, ERROR_TYPE_MISMATCH);
         } else if (x < pMatch + pMismatch + pInsert) {
             // insert
             if (length(inst.editString) > 0 && back(inst.editString == ERROR_TYPE_DELETE)) {
-                inst.delCount -= 1;
+                --inst.delCount;
                 eraseBack(inst.editString);
             } else {
-                i += 1;
-                inst.insCount += 1;
+                ++i;
+                ++inst.insCount;
                 appendValue(inst.editString, ERROR_TYPE_INSERT);
             }
         } else {
@@ -284,11 +285,11 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
             // too short, possibly remove insert from edit string.
             if (length(inst.editString) > 0) {
                 if (back(inst.editString == ERROR_TYPE_INSERT)) {
-                    i -= 1;
-                    inst.insCount -= 1;
+                    --i;
+                    --inst.insCount;
                     eraseBack(inst.editString);
                 } else {
-                    inst.delCount += 1;
+                    ++inst.delCount;
                     appendValue(inst.editString, ERROR_TYPE_DELETE);
                 }
             }

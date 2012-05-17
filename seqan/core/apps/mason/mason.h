@@ -26,6 +26,7 @@
 #define MASON_H_
 
 #include <numeric>
+#include <map>
 
 #include <seqan/random.h>
 #include <seqan/sequence_journaled.h>
@@ -105,6 +106,8 @@ struct Options<Global>
     // Path to the Sam file to generate.  Defaults to fastq file name
     // with suffix ".sam"
     CharString samFile;
+    // Path to the VCF file to generate the haplotype from
+    CharString vcfFile;
     // true iff qualities are to be simulated.
     bool simulateQualities;
     // true iff additional information is to be included in the reads file.
@@ -164,6 +167,7 @@ struct Options<Global>
               onlyReverse(false),
               outputFile(""),
               samFile(""),
+              vcfFile(""),
               simulateQualities(false),
               includeReadInformation(false),
               generateMatePairs(false),
@@ -213,25 +217,50 @@ struct ReadSimulationInstruction;
 template <>
 struct ReadSimulationInstruction<Global>
 {
-    // Index of the haplotype to sample the read from.
-    unsigned haplotype;
     // Index of the contig to sample the read from.
     unsigned contigId;
-    // Whether or not the read is to be sampled from the forward strand.
-    bool isForward;
     // Begin and end position of the infix to sample the read from.
     size_t beginPos;
     size_t endPos;
+    // Index of the haplotype to sample the read from.
+    unsigned char haplotype;
+    // Whether or not the read is to be sampled from the forward strand.
+    bool isForward;
     // Number of characters added/removed to the string by indels.
-    unsigned delCount;
-    unsigned insCount;
+    unsigned short mismatchCount;
+    unsigned short delCount;
+    unsigned short insCount;
     // Edit string of the read.
     String<ErrorType> editString;
     // String of qualities for the bases written out.
     String<int> qualities;
 
-    ReadSimulationInstruction() : delCount(0), insCount(0) {}
+    ReadSimulationInstruction() : mismatchCount(0), delCount(0), insCount(0) {}
 };
+
+// Class to represent variations on a contig
+struct Snp
+{
+    unsigned int    virtualPos;
+    unsigned short  length;
+//    unsigned char   contigId; // SNPs are grouped by contigId, hence superfluous
+    unsigned char   type;
+};
+
+// Functor to sort variations
+struct SnpLess
+{
+    inline bool operator() (Snp const &a, Snp const &b) const
+    {
+//        if (a.contigId < b.contigId) return true;
+//        if (a.contigId > b.contigId) return false;
+        if (a.virtualPos < b.virtualPos) return true;
+        if (a.virtualPos > b.virtualPos) return false;
+        return true;
+    }
+};
+
+
 
 // ============================================================================
 // Metafunctions
@@ -259,6 +288,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  onlyReverse:            " << (options.onlyReverse ? "true" : "false") << std::endl
            << "  outputFile:             \"" << options.outputFile << "\"" << std::endl
            << "  samFile:                \"" << options.samFile << "\"" << std::endl
+           << "  vcfFile:                \"" << options.vcfFile << "\"" << std::endl
            << "  simulateQualities:      " << (options.simulateQualities ? "true" : "false") << std::endl
            << "  includeReadInformation: " << options.includeReadInformation << std::endl
            << "  generateMatePairs:      " << (options.generateMatePairs ? "true" : "false") << std::endl
@@ -322,6 +352,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("v", "verbose", "Verbosity mode.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("vv", "very-verbose", "High verbosity mode, implies verbosity mode.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("scf", "sample-counts-file", "Path to TSV file that maps contig ids to read counts.", OptionType::String));
+    addOption(parser, CommandLineOption("vcf", "vcf-allele-file", "Path to VCF file to synthesize the haplotype from.", OptionType::String));
 
     addSection(parser, "Mate-Pair Options");
 
@@ -435,8 +466,8 @@ int parseCommandLineAndCheck(TOptions & options,
     if (isSetLong(parser, "haplotype-no-N"))
         options.haplotypeNoN = true;
 
-    if (isSetLong(parser, "sample-counts-file"))
-        getOptionValueLong(parser, "sample-counts-file", options.sampleCountsFilename);
+    getOptionValueLong(parser, "sample-counts-file", options.sampleCountsFilename);
+    getOptionValueLong(parser, "vcf-allele-file", options.vcfFile);
 
     // First argument is "illumina", second one name of reference file.
     referenceFilename = getArgumentValue(parser, 1);
@@ -679,6 +710,289 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     }
     return 0;
 }
+
+// Load a haplotype from a VCF file.
+void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
+                    FragmentStore<MyFragmentStoreConfig> & fragmentStore,
+                    String<String<Snp> > & snpSet,
+                    Options<Global> const & options)
+{
+    refresh(fragmentStore.contigNameStoreCache);
+
+    clear(snpSet);
+    resize(snpSet, length(fragmentStore.contigStore), Exact());
+
+    clear(haplotype);
+    resize(haplotype, length(fragmentStore.contigStore), Exact());
+    for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i)
+        setHost(haplotype[i], fragmentStore.contigStore[i].seq);
+    
+    std::ifstream file(toCString(options.vcfFile), std::ios_base::in | std::ios_base::binary);
+    if (!file.is_open())
+    {
+        std::cerr << "Couldn't read VCF file " << options.vcfFile << std::endl;
+        return;
+    }
+    
+    char c;
+    CharString contigName, oldContigName, dummy;
+    CharString ref, altStr, formatStr, valuesStr;
+    StringSet<CharString> alt, format, values, genotypes;
+    int delta = 0; // stores the difference between genomic and allele position
+    int oldContigId = -2;
+    __int64 ignoreUpTo = -1;
+    Snp snp;
+    
+    // statistics
+    unsigned numInconsistencies = 0;
+    unsigned numSNPs = 0;
+    unsigned numIndels = 0;
+    unsigned unknownContigs = 0;
+    
+    while (!_streamEOF(file)) 
+    {
+        // ignore comments
+        _parseSkipWhitespace(file, c);
+        
+        if (c == '#')
+        {
+            _parseSkipLine(file, c);
+            continue;
+        }
+        
+        // read column 1: contig name
+        clear(contigName);
+        _parseCharsUntilWhitespace(file, c, contigName);
+        _parseSkipWhitespace(file, c);
+        
+        // read column 2: contig position (fwd strand, 1-based counting)
+        __int64 pos = _parseReadNumber(file, c);
+        --pos;
+        _parseSkipWhitespace(file, c);
+        
+        // skip column 3: id
+        clear(dummy);
+        _parseCharsUntilWhitespace(file, c, dummy);
+        _parseSkipWhitespace(file, c);
+        
+        // read column 4: ref sequence
+        clear(ref);
+        _parseCharsUntilWhitespace(file, c, ref);
+        _parseSkipWhitespace(file, c);
+        
+        // read column 5: alt sequence
+        clear(altStr);
+        _parseCharsUntilWhitespace(file, c, altStr);
+        _parseSkipWhitespace(file, c);
+
+        clear(alt);
+        strSplit(alt, altStr, ',');
+        
+        // skip column 6: qual
+        clear(dummy);
+        _parseCharsUntilWhitespace(file, c, dummy);
+        _parseSkipWhitespace(file, c);
+        
+        // skip column 7: filter
+        clear(dummy);
+        _parseCharsUntilWhitespace(file, c, dummy);
+        _parseSkipWhitespace(file, c);
+        
+        // skip column 8: info
+        clear(dummy);
+        _parseCharsUntilWhitespace(file, c, dummy);
+        _parseSkipWhitespace(file, c);
+        
+        // skip column 9: format
+        clear(formatStr);
+        _parseCharsUntilWhitespace(file, c, formatStr);
+        _parseSkipWhitespace(file, c);
+        
+        // skip column 10: values
+        clear(valuesStr);
+        _parseCharsUntilWhitespace(file, c, valuesStr);
+        _parseSkipLine(file, c);
+        
+        clear(format);
+        clear(values);
+        strSplit(format, formatStr, ':');
+        strSplit(values, valuesStr, ':');
+        unsigned idx;
+        for (idx = 0; idx < length(format); ++idx)
+            if (format[idx] == "GT")
+                break;
+        
+        // extract genotype information
+        if (idx >= length(values))
+            continue;
+        
+        clear(genotypes);
+        strSplit(genotypes, values[idx], ':');
+        unsigned gt;
+        for (gt = 0; gt < length(genotypes); ++gt)
+            if (!empty(genotypes[gt]) && genotypes[gt][0] != '0')
+                break;
+        
+        if (gt == length(genotypes))
+            continue;
+
+        SEQAN_ASSERT(!empty(genotypes[gt]));
+        unsigned allele = genotypes[gt][0] - '1';
+
+        // trim common left characters
+        while (!empty(ref))
+        {
+            char leftChar = ref[0];
+            unsigned i;
+//            for (i = 0; i < length(alt); ++i)
+//            {
+//                if (empty(alt[i]) || leftChar != alt[i][0])
+//                    break;
+//            }
+            // cut first characters if they are all equal
+//            if (i == length(alt))
+            if (!empty(alt[allele]) && leftChar == alt[allele][0])
+            {
+                ++pos;
+                erase(ref, 0);
+                i = allele;
+//                for (i = 0; i < length(alt); ++i)
+                    erase(alt[i], 0);
+            }
+            else
+                break;
+        }
+
+        // trim common right characters
+        while (!empty(ref))
+        {
+            char rightChar = back(ref);
+            unsigned i;
+//            for (i = 0; i < length(alt); ++i)
+//            {
+//                if (empty(alt[i]) || rightChar != back(alt[i]))
+//                    break;
+//            }
+            // cut last characters if they are all equal
+//            if (i == length(alt))
+            if (!empty(alt[allele]) && rightChar == back(alt[allele]))
+            {
+                eraseBack(ref);
+                i = allele;
+//                for (i = 0; i < length(alt); ++i)
+                    eraseBack(alt[i]);
+            }
+            else
+                break;
+        }
+        
+        int contigId;
+        
+        // cached lookup of contig name 
+        if (oldContigName == contigName)
+            contigId = oldContigId;
+        else
+        {
+            oldContigName = contigName;
+            if (!getIdByName(fragmentStore.contigNameStore, contigName, contigId, fragmentStore.contigNameStoreCache)) 
+            {
+                dummy = "chr";
+                append(dummy, contigName);
+                if (!getIdByName(fragmentStore.contigNameStore, dummy, contigId, fragmentStore.contigNameStoreCache)) 
+                {
+                    contigId = -1;
+                    if (oldContigId == -1)
+                        oldContigId = -2;
+                }
+            }
+        }
+        
+        if (oldContigId != contigId)
+        {
+            if (oldContigId >= 0)
+            {
+                std::cerr << "    " << fragmentStore.contigNameStore[oldContigId] << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tvrate:" << (numSNPs+numIndels)/(double)length(fragmentStore.contigStore[oldContigId].seq);
+                if (numInconsistencies > 0)
+                    std::cerr << "\tinconsistencies:" << numInconsistencies;
+                std::cerr << std::endl;
+            }
+            if (contigId < 0)
+            {
+                ++unknownContigs;
+                std::cerr << "    WARNING: contig " << contigName << " not found" << std::endl;
+            }
+            delta = 0;
+            numIndels = 0;
+            numSNPs = 0;
+            numInconsistencies = 0;
+            ignoreUpTo = -1;
+            oldContigId = contigId;
+        }
+        
+        if (contigId < 0)
+            continue;
+
+        if (!empty(ref))
+        {
+            if (pos < ignoreUpTo) continue;
+            if (infix(fragmentStore.contigStore[contigId].seq, pos, pos + length(ref)) != ref)
+            {
+                ++numInconsistencies;
+//                std::cerr << "DIFFERENCE: " << contigName << '\t' << pos << "\t." << infix(fragmentStore.contigStore[contigId].seq, pos, pos + length(ref)) << ".\t!=\t." << ref << ".\t" << delta <<std::endl;
+            } else
+            {
+//                std::cerr << "OK: " << contigName << '\t' << pos << "\t." << infix(fragmentStore.contigStore[contigId].seq, pos, pos + length(ref)) << ".\t=>\t." << alt[allele] << ".\t" << delta << std::endl;
+            }
+            erase(haplotype[contigId], pos + delta, pos + delta + length(ref));
+            ignoreUpTo = pos + length(ref);
+        }
+        if (!empty(alt[allele]))
+        {
+            insert(haplotype[contigId], pos + delta, alt[allele]);
+//            if (empty(ref))
+//                std::cerr << "OK: " << contigName << '\t' << pos << "\t..\t=>\t." << alt[allele] << ".\t" << delta << std::endl;
+        }
+        delta += length(alt[allele]) - length(ref);
+        
+        
+//        snp.contigId = contigId;
+        snp.virtualPos = pos + delta;
+        if (length(ref) == length(alt[allele]))
+        {
+            snp.type = ERROR_TYPE_MISMATCH;
+            snp.length = length(ref);
+            ++numSNPs;
+        }
+        else if (length(ref) < length(alt[allele]))
+        {
+            snp.type = ERROR_TYPE_INSERT;
+            snp.length = length(alt[allele]);
+            ++numIndels;
+        }
+        else
+        {
+            snp.type = ERROR_TYPE_DELETE;
+            snp.length = length(ref);
+            ++numIndels;
+        }
+        appendValue(snpSet[contigId], snp);
+    }
+    if (oldContigId >= 0)
+    {
+        std::cerr << "    " << fragmentStore.contigNameStore[oldContigId] << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tvrate:" << (numSNPs+numIndels)/(double)length(fragmentStore.contigStore[oldContigId].seq);
+        if (numInconsistencies > 0)
+            std::cerr << "\tinconsistencies:" << numInconsistencies;
+        std::cerr << std::endl;
+    }
+    if (unknownContigs > 0)
+        std::cerr << "    " << unknownContigs << " contigs not found" << std::endl;
+    
+    #pragma omp parallel for schedule(static,1)
+    for (int i = 0; i < (int)length(snpSet); ++i)
+        std::sort(begin(snpSet[i], Standard()), end(snpSet[i], Standard()), SnpLess());
+}
+
+
 
 // Build a haplotype, based on the contigs from the given fragment store.
 template <typename TRNG>
@@ -954,11 +1268,23 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     CharString readNameBuf;
     char outFileName[151];
     snprintf(outFileName, 150, "%s", toCString(options.readNamePrefix));
-    for (unsigned haplotypeId = 0; haplotypeId < options.numHaplotypes; ++haplotypeId) {
+    for (unsigned haplotypeId = 0; haplotypeId < options.numHaplotypes; ++haplotypeId)
+    {
         std::cerr << "Simulating for haplotype #" << haplotypeId << "..." << std::endl;
         std::cout << "  Building haplotype..." << std::endl;
         StringSet<String<Dna5, Journaled<Alloc<> > > > haplotypeContigs;
-        buildHaplotype(haplotypeContigs, fragmentStore, rng, options);
+
+        typedef String<Snp> TContigSnpSet;
+        String<TContigSnpSet> snpSet;
+        
+        double buildStart = sysTime();
+
+        if (empty(options.vcfFile))
+            buildHaplotype(haplotypeContigs, fragmentStore, rng, options);
+        else
+            loadHaplotype(haplotypeContigs, fragmentStore, snpSet, options);
+        std::cout << "  Finished haplotype creation in " << (sysTime() - buildStart) << 's' << std::endl;
+
         // TODO(holtgrew): Assigning of string set with compatible string should be possible.
         StringSet<String<Dna5> > haplotypeContigsCopy;
         for (unsigned i = 0; i < length(haplotypeContigs); ++i)
@@ -982,6 +1308,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
         std::cerr << "  Simulating reads for haplotype #" << haplotypeId << "..." << std::endl;
 
 //         std::cerr << "Journal: " << haplotypeContigs[0]._journalEntries << std::endl;
+
+        Snp searchSnp;
+        char tagBuffer[40];
 
         for (unsigned j = 0; j < length(haplotypeIds); ++j) {
             if (haplotypeIds[j] != haplotypeId)
@@ -1035,6 +1364,38 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 // Get expected begin/end position in the original sequence.
                 TPos origBeginPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.beginPos);
                 TPos origEndPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.endPos);
+                
+                unsigned numSNPs = 0;
+                unsigned numIndels = 0;
+                
+                if (options.includeReadInformation && inst.contigId < length(snpSet))
+                {
+                    typedef Iterator<TContigSnpSet, Standard>::Type TIter;                    
+                    TIter allBeg = begin(snpSet[inst.contigId], Standard());
+                    TIter allEnd = end(snpSet[inst.contigId], Standard());
+
+//                    searchSnp.contigId = inst.contigId;
+                    searchSnp.virtualPos = inst.beginPos;
+                    TIter snpBeg = std::lower_bound(allBeg, allEnd, searchSnp, SnpLess());
+                    searchSnp.virtualPos = inst.endPos;
+                    TIter snpEnd = std::upper_bound(allBeg, allEnd, searchSnp, SnpLess());
+                
+                    for (TIter it = snpBeg; it != snpEnd; ++it)
+                    {
+                        int len = it->length;
+                        if (it->virtualPos + len > inst.endPos)
+                            len = inst.endPos - it->virtualPos;
+                        
+                        if (it->type == ERROR_TYPE_MISMATCH)
+                            numSNPs += len;
+                        else if (it->type == ERROR_TYPE_INSERT)
+                            numIndels += len;
+                        else // if (it->type == ERROR_TYPE_DELETE)
+                            // at least one base left and right of the deletion is required
+                            if (inst.beginPos < it->virtualPos && it->virtualPos + 1 < inst.endPos)
+                                numIndels += it->length;
+                    }
+                }
 
                 // Generate read name.
                 // TODO(holtgrew): Remove mateNum, not required?
@@ -1045,7 +1406,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     if (options.includeReadInformation)
                     {
                         resize(readNameBuf, 1024 + length(haplotypeInfix) + length(inst.editString));
-                        sprintf(&readNameBuf[0], "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
+                        sprintf(&readNameBuf[0], "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu snps=%u indels=%u haplotype_infix=%s edit_string=", outFileName, readId / 2, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos),                             numSNPs, numIndels, toCString(CharString(haplotypeInfix)));
                     }
                     else
                     {
@@ -1056,7 +1417,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     if (options.includeReadInformation)
                     {
                         resize(readNameBuf, 1024 + length(haplotypeInfix) + length(inst.editString));
-                        sprintf(&readNameBuf[0], "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
+                        sprintf(&readNameBuf[0], "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu snps=%u indels=%u haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos),                             numSNPs, numIndels, toCString(CharString(haplotypeInfix)));
                     }
                     else
                     {
@@ -1064,9 +1425,10 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         sprintf(&readNameBuf[0], "%s.%09u", outFileName, readId);
                     }
                 }
-                if (options.includeReadInformation) {
+                if (options.includeReadInformation) 
+                {
+                    char buffer[2] = "*";
                     for (unsigned i = 0; i < length(inst.editString); ++i) {
-                        char buffer[2] = "*";
                         buffer[0] = "MEID"[static_cast<int>(inst.editString[i])];
                         strcat(&readNameBuf[0], buffer);
                     }
@@ -1086,6 +1448,8 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                               << "| inst.endPos      " << inst.endPos << std::endl
                               << "| origBeginPos     " << origBeginPos << std::endl
                               << "| origEndPos       " << origEndPos << std::endl
+                              << "| numSNPs          " << numSNPs << std::endl
+                              << "| numIndels        " << numIndels << std::endl
                               << "| isgapinhost      " << isGapInHost(haplotypeContigs[inst.contigId], inst.beginPos-1) << std::endl
                               << "| isgapinhost      " << isGapInHost(haplotypeContigs[inst.contigId], inst.beginPos) << std::endl
                               << "| isgapinhost      " << isGapInHost(haplotypeContigs[inst.contigId], inst.beginPos+1) << std::endl
@@ -1105,6 +1469,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     appendAlignedRead(fragmentStore, readId, inst.contigId, origBeginPos, origEndPos, length(fragmentStore.matePairStore));
                 else
                     appendAlignedRead(fragmentStore, readId, inst.contigId, origBeginPos, origEndPos);
+                
+                sprintf(tagBuffer, "XE:i:%u\tXS:i:%u\tXI:i:%u", (inst.mismatchCount + inst.insCount + inst.delCount), numSNPs, numIndels);
+                appendValue(fragmentStore.alignedReadTagStore, tagBuffer);
 
                 // Adding mate pair information.
                 if (options.generateMatePairs && readId % 2 == 1) {  // Only append mate pair info after simulating second mate.
