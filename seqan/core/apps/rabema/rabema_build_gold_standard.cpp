@@ -1031,14 +1031,14 @@ int main(int argc, char const ** argv)
     if (load(faiIndex, toCString(options.referencePath)) != 0)
     {
         std::cerr << " FAILED (not fatal, we can just build it)\n";
-        std::cerr << "Building Index            " << options.referencePath << ".fai ...";
+        std::cerr << "Building Index        " << options.referencePath << ".fai ...";
         if (buildIndex(toCString(options.referencePath), Fai()) != 0)
         {
             std::cerr << "Could not build FAI index.\n";
             return 1;
         }
         std::cerr << " OK\n";
-        std::cerr << "Reference Index           " << options.referencePath << ".fai ...";
+        std::cerr << "Reference Index       " << options.referencePath << ".fai ...";
         if (load(faiIndex, toCString(options.referencePath)) != 0)
         {
             std::cerr << "Could not load FAI index we just build.\n";

@@ -48,8 +48,10 @@ struct RabemaStats
     // SAM records that did not correspond to alignments below the configured maximal error rate.
     __uint64 invalidAlignments;
 
-    // Total number of reads that we have GSI records for, equals number of normalized intervals to be found.
+    // Total number of reads.
     __uint64 totalReads;
+    // Total number of reads with GSI records equals number of normalized intervals to find.
+    __uint64 readsInGsi;
     // Normalized number of found intervals.
     double normalizedIntervals;
     // Number of additional alignments in SAM file with low enough error rate but no GSI record.
@@ -70,12 +72,12 @@ struct RabemaStats
     String<double> normalizedIntervalsFoundForErrorRate;
 
     RabemaStats() :
-        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
+        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), readsInGsi(0), normalizedIntervals(0),
         additionalHits(0)
     {}
 
     RabemaStats(unsigned maxErrorRate) :
-        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), normalizedIntervals(0),
+        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), readsInGsi(0), normalizedIntervals(0),
         additionalHits(0)
     {
         resize(intervalsToFindForErrorRate, maxErrorRate + 1, 0);
@@ -124,8 +126,9 @@ void write(TStream & stream, RabemaStats const & stats, int maxError)
            << "Additional Hits:                " << stats.additionalHits << '\n'
            << '\n'
            << "Number of reads:                " << stats.totalReads << '\n'
+           << "Number of reads with intervals: " << stats.readsInGsi << '\n'
            << "Normalized intervals found:     " << stats.normalizedIntervals << '\n'
-           << "Normalized intervals found [%]: " << (100.0 * stats.normalizedIntervals / stats.totalReads) << '\n'
+           << "Normalized intervals found [%]: " << (100.0 * stats.normalizedIntervals / stats.readsInGsi) << '\n'
            << '\n';
     char buffer[1000];
     sprintf(buffer, "  ERR\t%8s\t%8s\t%8s\t%8s\t%10s\t%10s\n", "#max", "#found", "%found", "norm max", "norm found", "norm found [%]");

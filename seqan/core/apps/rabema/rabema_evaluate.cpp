@@ -339,6 +339,7 @@ int benchmarkReadResult(RabemaStats & result,
     String<unsigned> numIntervalsForErrorRate;
     resize(numIntervalsForErrorRate, options.maxError + 1, 0);
     String<int> intervalDistances;  // Distance of interval i.
+    unsigned numIntervals = 0;
     for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
     {
         int distance = pickedGsiRecords[i].distance;
@@ -348,6 +349,7 @@ int benchmarkReadResult(RabemaStats & result,
 
         appendValue(intervals[pickedGsiRecords[i].contigId], TInterval(pickedGsiRecords[i].firstPos, pickedGsiRecords[i].lastPos + 1, length(intervalDistances)));
         appendValue(intervalDistances, originalDistance);
+        numIntervals += 1;
         if (!options.oracleMode && options.benchmarkCategory != "any-best")
             numIntervalsForErrorRate[originalDistance] += 1;
     }
@@ -446,7 +448,10 @@ int benchmarkReadResult(RabemaStats & result,
             }
 
             // Skip invalid alignments.
-            if (bestDistance > static_cast<int>(0.01 * options.maxError * length(readSeq)))
+            int allowedDistance = static_cast<int>(0.01 * options.maxError * length(readSeq));
+            if ((options.benchmarkCategory == "all-best" || options.benchmarkCategory == "any-best") && (smallestDistance != maxValue<int>()))
+                allowedDistance = smallestDistance;
+            if (bestDistance > allowedDistance)
             {
                 if (options.showSuperflousIntervals)
                 {
@@ -489,6 +494,20 @@ int benchmarkReadResult(RabemaStats & result,
                 std::cerr << "ADDITIONAL HIT\t";
                 write2(std::cerr, samRecord, bamIOContext, Sam());
                 std::cerr << '\n';
+                //if (hasFlagRC(samRecord))
+                //    std::cerr << "\tbeginPos on reverse strand\t" << length(refSeqs[seqId]) - samRecord.pos << "\tseqId==" << seqId << "\tlstPos=" << lastPos << "\n\n";
+                //std::cerr << ",-- Intervals\n";
+                //for (unsigned i = 0; i < length(intervals[seqId]); ++i)
+                //    std::cerr << "| " << intervals[seqId][i].i1 << "\t" << intervals[seqId][i].i2 << "\n";
+                //std::cerr << "`--\n";
+                //std::cerr << ",-- Picked GSI Records\n";
+                //for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
+                //    std::cerr << "| " << pickedGsiRecords[i] << "\t" << pickedGsiRecords[i].contigId << "\t" << pickedGsiRecords[i].flags << "\n";
+                //std::cerr << "`--\n";
+                //std::cerr << ",-- GSI Records\n";
+                //for (unsigned i = 0; i < length(gsiRecords); ++i)
+                //    std::cerr << "| " << gsiRecords[i] << "\t" << gsiRecords[i].contigId << "\t" << gsiRecords[i].flags << "\n";
+                //std::cerr << "`--\n";
             }
 
             if (!options.dontPanic)
@@ -546,6 +565,7 @@ int benchmarkReadResult(RabemaStats & result,
     // Update the resulting RabemaStats.
     updateMaximalErrorRate(result, largestDistance);
     result.totalReads += 1;
+    result.readsInGsi += (numIntervals > 0u);
     if (options.oracleMode || options.benchmarkCategory == "any-best")
     {
         bool found = (numFound > 0u);
@@ -575,7 +595,8 @@ int benchmarkReadResult(RabemaStats & result,
         }
         result.intervalsToFind += intervalsToFind;
         result.intervalsFound += intervalsFound;
-        result.normalizedIntervals += 1.0 * intervalsFound / intervalsToFind;
+        if (intervalsToFind > 0u)
+            result.normalizedIntervals += 1.0 * intervalsFound / intervalsToFind;
         for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
         {
             // In case of "all", we only count the intervals from with maximal error rate.
@@ -613,6 +634,10 @@ compareAlignedReadsToReference(RabemaStats & result,
                                RabemaEvaluationOptions const & options,
                                TPatternSpec const & tagPattern)
 {
+    // Mapping between ref IDs from SAM file and reference sequence (from SAM file to reference sequences).
+    RefIdMapping refIdMapping;
+    rebuildMapping(refIdMapping, refNameStore, refNameStoreCache, nameStore(bamIOContext));
+
     // Read in initial SAM/GSI records.
     BamAlignmentRecord samRecord;
     if (atEnd(samReader) || readRecord(samRecord, bamIOContext, samReader, Sam()) != 0)
@@ -626,10 +651,6 @@ compareAlignedReadsToReference(RabemaStats & result,
         std::cerr << "ERROR: Could not read first GSI record.\n";
         return 1;
     }
-
-    // Mapping between ref IDs from SAM file and reference sequence (from SAM file to reference sequences).
-    RefIdMapping refIdMapping;
-    rebuildMapping(refIdMapping, refNameStore, refNameStoreCache, nameStore(bamIOContext));
 
     // Current SAM and GSI records are stored in these arrays.
     String<BamAlignmentRecord> currentSamRecords;
