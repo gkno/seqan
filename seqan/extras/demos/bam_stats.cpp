@@ -175,19 +175,23 @@ struct Stats
 
 struct Read
 {
-    unsigned contigId;
-    unsigned beginPos;
-    bool     reverseComplemented;
+    int     contigId;
+    int     beginPos;
+    bool    reverseComplemented;
     
-    unsigned errors;
-    unsigned numSNP;
+    unsigned char errors;
+    unsigned char seqErrors;
+    unsigned char SNPs;
+    unsigned char indels;
     
     Read() :
         contigId(0),
         beginPos(0),
         reverseComplemented(false),
         errors(0),
-        numSNP(0)
+        seqErrors(0),
+        SNPs(0),
+        indels(0)
     {}
 };
 
@@ -316,6 +320,10 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             {
                 Read read;
                 
+                BamTagsDict tagsDict(record.tags);
+                unsigned idx;
+                int tagValue;
+                
                 // Read reference id.
                 read.contigId = record.rId;
                 
@@ -325,22 +333,48 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 // Read reverse complemented tag.
                 if (hasFlagRC(record)) read.reverseComplemented = true;
                 
-                // Read errors from NM tag.
-/*
-                unsigned idx = 0;
-                int nmValue =-1;
-                BamTagsDict tagsDict(record.tags);
-                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx) && nmValue != -1)
-                    read.errors = nmValue;
-                else
-                    std::cerr << "WARNING: Could find NM tag in gold standard " << record.qName << std::endl;
-*/
                 // Read read sequence.
                 appendValue(readSeqs, record.seq);
                 if (hasFlagRC(record)) reverseComplement(back(readSeqs));
                 
                 // Read read name.
                 appendName(readNames, record.qName, readNameCache);
+                
+                // Read total errors from NM tag.
+                idx = 0;
+                tagValue =-1;
+                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(tagValue, tagsDict, idx) && tagValue != -1)
+                    read.errors = tagValue;
+                else
+                    std::cerr << "WARNING: Could find NM tag in gold standard " << record.qName << std::endl;
+
+                // Read sequencing errors from XQ tag.
+                idx = 0;
+                tagValue =-1;
+                if (findTagKey(idx, tagsDict, "XQ") && extractTagValue(tagValue, tagsDict, idx) && tagValue != -1)
+                    read.seqErrors = tagValue;
+                else
+                    std::cerr << "WARNING: Could find XQ tag in gold standard " << record.qName << std::endl;
+
+                // Read SNPs from XS tag.
+                idx = 0;
+                tagValue =-1;
+                if (findTagKey(idx, tagsDict, "XS") && extractTagValue(tagValue, tagsDict, idx) && tagValue != -1)
+                    read.SNPs = tagValue;
+                else
+                    std::cerr << "WARNING: Could find XS tag in gold standard " << record.qName << std::endl;
+
+                // Read indels from XI tag.
+                idx = 0;
+                tagValue =-1;
+                if (findTagKey(idx, tagsDict, "XI") && extractTagValue(tagValue, tagsDict, idx) && tagValue != -1)
+                    read.indels = tagValue;
+                else
+                    std::cerr << "WARNING: Could find XI tag in gold standard " << record.qName << std::endl;
+
+                // Check for inconsistencies in error tags.
+                if (read.indels + read.SNPs + read.seqErrors != read.errors)
+                    std::cerr << "WARNING: Inconsistencies in error tags " << record.qName << std::endl;
                 
                 // Add read to gold standard.                
                 appendValue(goldStandard, read);
@@ -553,20 +587,9 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             
             if (options.goldStandard)
             {
-                /*
-                std::cout << "Record Pos " << record.pos << std::endl;
-                std::cout << "Gold Pos " << goldStandard[readId].beginPos << std::endl;
-                
-                std::cout << "Record rId " << record.rId << std::endl;
-                std::cout << "Gold rId " << goldStandard[readId].contigId << std::endl;
-                
-                std::cout << "Record RC" << hasFlagRC(record) << std::endl;
-                std::cout << "Gold RC" << goldStandard[readId].reverseComplemented << std::endl;
-                */
-                
                 // Check if match corresponds to the true origin in gold standard.
-                if ((record.pos >= goldStandard[readId].beginPos - 12 &&
-                     record.pos <= goldStandard[readId].beginPos + 12) &&
+                if ((record.pos >= goldStandard[readId].beginPos - 2 * goldStandard[readId].errors &&
+                     record.pos <= goldStandard[readId].beginPos + 2 * goldStandard[readId].errors) &&
                     record.rId == goldStandard[readId].contigId &&
                     hasFlagRC(record) == goldStandard[readId].reverseComplemented)
                 {
@@ -630,19 +653,6 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
     resize(stats.mismatchHisto, len, 0);
     resize(stats.avrgQuality, len, 0);
 
-/*
-    if (options.goldStandard)
-    {
-        std::cout << "Gold Standard" << std::endl;
-        
-        for (unsigned i = 0; i < length(goldStandard); ++i)
-        {
-            std::cout << i << " " << goldStandard[i].contigId << " " << goldStandard[i].beginPos << std::endl;
-        }
-        
-        std::cout << std::endl;
-    }
-*/    
     // Print results.
     std::cout << "RESULTS\n\n";
     std::cout << "num records     \t" << stats.numRecords << std::endl;
@@ -675,7 +685,23 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         TNameCache::TSet::iterator itEnd = readNameCache.nameSet.end();
         for (; it != itEnd; ++it)
         {
-            bestMatchFile << readNames[*it] << '\t' << minErrorsOrigin[*it] << '\t' << minErrors[*it] << '\t' << matchesCount[*it] << '\n';
+            bestMatchFile << readNames[*it]                         << '\t' <<
+                             (unsigned)goldStandard[*it].errors     << '\t' <<
+                             (unsigned)goldStandard[*it].seqErrors  << '\t' <<
+                             (unsigned)goldStandard[*it].SNPs       << '\t' <<
+                             (unsigned)goldStandard[*it].indels     << '\t';
+            
+            if (minErrorsOrigin[*it] != MaxValue<unsigned>::VALUE)
+                bestMatchFile << minErrorsOrigin[*it] << '\t';
+            else
+                bestMatchFile << "None" << '\t';
+            
+            if (minErrors[*it] != MaxValue<unsigned>::VALUE)
+                bestMatchFile << minErrors[*it] << '\t';
+            else
+                bestMatchFile << "None" << '\t';
+            
+            bestMatchFile << matchesCount[*it] << std::endl;
         }
     }
 
