@@ -1341,6 +1341,93 @@ concat(StringSet<TString, TSpec> const & constMe)
 }
 
 // --------------------------------------------------------------------------
+// Function strSplit()
+// --------------------------------------------------------------------------
+
+/**
+.Function.stringSplit:
+..summary:Append a list of the words in the string, using sep as the delimiter string @Class.StringSet@.
+..cat:Sequences
+..signature:strSplit(stringSet, sequence)
+..signature:strSplit(stringSet, sequence, sep)
+..signature:strSplit(stringSet, sequence, sep, allowEmptyStrings)
+..signature:strSplit(stringSet, sequence, sep, allowEmptyStrings, maxSplit)
+..param.stringSet:The @Class.StringSet@ object the words are appended to.
+...type:Class.StringSet
+..param.sequence:A sequence of words.
+..param.sep:Word separator (default: ' ').
+..param.allowEmptyStrings:Boolean to specify whether empty words should be considered (default: true, iff sep is given).
+..param.maxSplit:If maxsplit is given, at most maxsplit splits are done.
+..include:seqan/sequence.h
+*/
+
+template <typename TString, typename TSpec, typename TSequence, typename TSeparator, typename TSize>
+inline void
+strSplit(StringSet<TString, TSpec> & result, TSequence const &sequence, TSeparator sep, bool allowEmptyStrings, TSize maxSplit)
+{
+    typedef typename Iterator<TSequence, Standard>::Type TIter;
+    
+    TIter itBeg = begin(sequence, Standard());
+    TIter itEnd = end(sequence, Standard());
+    TIter itFrom = itBeg;
+    
+    if (maxSplit == 0)
+    {
+        appendValue(result, sequence);
+        return;
+    }
+    
+    for (TIter it = itBeg; it != itEnd; ++it)
+        if (*it == sep)
+        {
+            if (allowEmptyStrings || itFrom != it)
+            {
+                appendValue(result, infix(sequence, itFrom - itBeg, it - itBeg));
+                if (--maxSplit == 0)
+                {
+                    if (!allowEmptyStrings)
+                    {
+                        while (it != itEnd && *it == sep)
+                            ++it;
+                    }
+                    else
+                        ++it;
+                    
+                    if (it != itEnd)
+                        appendValue(result, infix(sequence, it - itBeg, itEnd - itBeg));
+                    
+                    return;
+                }
+            }
+            itFrom = it + 1;
+        }
+    
+    if (allowEmptyStrings || itFrom != itEnd)
+        appendValue(result, infix(sequence, itFrom - itBeg, itEnd - itBeg));
+}
+
+template <typename TString, typename TSpec, typename TSequence, typename TSeparator>
+inline void
+strSplit(StringSet<TString, TSpec> & result, TSequence const &sequence, TSeparator sep, bool allowEmptyStrings)
+{
+    strSplit(result, sequence, sep, allowEmptyStrings, maxValue<typename Size<TSequence>::Type>());
+}
+
+template <typename TString, typename TSpec, typename TSequence, typename TSeparator>
+inline void
+strSplit(StringSet<TString, TSpec> & result, TSequence const &sequence, TSeparator sep)
+{
+    strSplit(result, sequence, sep, true);
+}
+
+template <typename TString, typename TSpec, typename TSequence>
+inline void
+strSplit(StringSet<TString, TSpec> & result, TSequence const &sequence)
+{
+    strSplit(result, sequence, ' ', false);
+}
+
+// --------------------------------------------------------------------------
 // Function idToPosition()
 // --------------------------------------------------------------------------
 
