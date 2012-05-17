@@ -141,7 +141,7 @@ public:
 
     inline
     typename Reference<String>::Type
-    operator[](TPosition const & pos)
+    operator[](TPosition pos)
     {
         SEQAN_CHECKPOINT;
         return value(*this, pos);
@@ -149,7 +149,7 @@ public:
 
     inline
     typename Reference<String const>::Type
-    operator[](TPosition const & pos) const
+    operator[](TPosition pos) const
     {
         SEQAN_CHECKPOINT;
         return value(*this, pos);
@@ -509,8 +509,8 @@ clear(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TBeginPos, typename TEndPos>
 inline void
 erase(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString,
-      TBeginPos const & pos,
-      TEndPos const & posEnd)
+      TBeginPos pos,
+      TEndPos posEnd)
 {
     SEQAN_CHECKPOINT;
 	SEQAN_ASSERT_GEQ(static_cast<TBeginPos>(journaledString._length), pos);
@@ -525,7 +525,7 @@ erase(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
 inline void
 erase(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString,
-      TPos const & pos)
+      TPos pos)
 {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_GEQ(journaledString._length, 1u);
@@ -539,7 +539,7 @@ erase(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TString, typename TPos>
 inline void
 insert(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString,
-       TPos const & pos,
+       TPos pos,
        TString const & seq)
 {
     SEQAN_CHECKPOINT;
@@ -556,7 +556,7 @@ insert(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journa
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos, typename TValue2>
 inline void
 insertValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString,
-            TPos const & pos,
+            TPos pos,
             TValue2 const & value)
 {
     SEQAN_CHECKPOINT;
@@ -573,8 +573,8 @@ insertValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & j
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TBeginPos, typename TEndPos, typename TSequence2>
 inline void
 assignInfix(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString,
-            TBeginPos const & beginPos,
-            TEndPos const & endPos,
+            TBeginPos beginPos,
+            TEndPos endPos,
             TSequence2 const & valueString)
 {
     SEQAN_CHECKPOINT;
@@ -589,7 +589,7 @@ assignInfix(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & j
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos, typename TValue2>
 inline void
 assignValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString,
-            TPos const & pos,
+            TPos pos,
             TValue2 const & value)
 {
     SEQAN_CHECKPOINT;
@@ -708,7 +708,7 @@ template <typename TValue, typename THostSpec, typename TJournalSpec, typename T
 inline
 typename GetValue<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const>::Type
 getValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & journaledString,
-         typename Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type const & pos)
+         typename Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type pos)
 {
     SEQAN_CHECKPOINT;
     typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const TJournaledString;
@@ -735,7 +735,7 @@ template <typename TValue, typename THostSpec, typename TJournalSpec, typename T
 inline
 typename Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type
 virtualToHostPosition(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & journaledString,
-                      TPos const & pos)
+                      TPos pos)
 {
     SEQAN_CHECKPOINT;
     // TODO(holtgrew): With a better journal entries datastructure, we could solve the main problem here. At the moment, we delegate completely.
@@ -750,7 +750,7 @@ template <typename TValue, typename THostSpec, typename TJournalSpec, typename T
 inline
 bool
 isGapInHost(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & journaledString,
-            TPos const & pos)
+            TPos pos)
 {
     SEQAN_CHECKPOINT;
     // TODO(holtgrew): With a better journal entries datastructure, we could solve the main problem here. At the moment, we delegate completely.

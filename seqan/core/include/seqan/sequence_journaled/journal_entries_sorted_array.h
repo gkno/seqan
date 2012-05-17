@@ -193,15 +193,19 @@ void reinit(JournalEntries<TCargo, SortedArray> & tree,
 }
 
 
-template <typename TCargo>
+template <typename TCargo, typename TPos>
 inline
 typename Iterator<JournalEntries<TCargo, SortedArray> const, Standard>::Type 
 findInJournalEntries(JournalEntries<TCargo, SortedArray> const & journalEntries,
-                     typename Position<TCargo>::Type const & pos) {
+                     TPos pos) 
+{
     typedef typename Size<TCargo>::Type TSize;
-    typedef typename Position<TCargo>::Type TPos;
+    typedef typename Position<TCargo>::Type TPos_;
     typedef typename Iterator<String<TCargo>, Standard>::Type TIterator;
-    typedef JournalEntryLtByVirtualPos<TPos, TSize> TCmp;
+    typedef JournalEntryLtByVirtualPos<TPos_, TSize> TCmp;
+
+    if (pos >= back(journalEntries._journalNodes).virtualPosition)
+        return end(journalEntries._journalNodes, Standard()) - 1;
 
     TCargo refCargo;
     refCargo.virtualPosition = pos;
@@ -210,19 +214,18 @@ findInJournalEntries(JournalEntries<TCargo, SortedArray> const & journalEntries,
                                       refCargo,
                                       TCmp());
     SEQAN_ASSERT(iter != begin(journalEntries._journalNodes, Standard()));
-    iter -= 1;
-
-    SEQAN_ASSERT(iter != end(journalEntries._journalNodes, Standard()));
+    --iter;
 
     return iter;
 }
 
 
-template <typename TCargo>
+template <typename TCargo, typename TPos>
 inline
 TCargo const &
 findJournalEntry(JournalEntries<TCargo, SortedArray> const & journalEntries,
-                 typename Position<TCargo>::Type const & pos) {
+                 TPos pos)
+{
     return *findInJournalEntries(journalEntries, pos);
 }
 
@@ -230,9 +233,9 @@ findJournalEntry(JournalEntries<TCargo, SortedArray> const & journalEntries,
 template <typename TCargo>
 inline
 void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
-                     typename Position<TCargo>::Type const & virtualPosition,
-                     typename Position<TCargo>::Type const & physicalBeginPos,
-                     typename Size<TCargo>::Type const & len)
+                     typename Position<TCargo>::Type virtualPosition,
+                     typename Position<TCargo>::Type physicalBeginPos,
+                     typename Size<TCargo>::Type len)
 {
     SEQAN_CHECKPOINT;
     typedef typename Size<TCargo>::Type TSize;
@@ -244,7 +247,8 @@ void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
     //std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
     // Handle special case that the entry list is empty.
-    if (empty(tree._journalNodes)) {
+    if (empty(tree._journalNodes))
+    {
         SEQAN_ASSERT_EQ(virtualPosition, 0u);
         if (len == 0)
             return;
@@ -253,36 +257,31 @@ void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
     }
 
     // Find position in sorted array of nodes to insert in.
-    TCargo refCargo;
-    refCargo.virtualPosition = virtualPosition;
-    TIterator iter = std::upper_bound(begin(tree._journalNodes, Standard()),
-                                      end(tree._journalNodes, Standard()),
-                                      refCargo,
-                                      TCmp());
+    TIterator iter = findInJournalEntries(tree, virtualPosition);
     // TODO(holtgrew): Maybe move and update entries right of pos at the same time?
     
-	// MUST NOT find begin.
-	SEQAN_ASSERT(iter != begin(tree._journalNodes, Standard()));
-	--iter;
-	
     // Create new journal entries.
-    String<TCargo> buffer;
-    reserve(buffer, 3, Exact());
-	if (iter->virtualPosition + iter->length > virtualPosition) {
+	if (iter->virtualPosition + iter->length > virtualPosition)
+    {
 		TPos pos = iter - begin(tree._journalNodes, Standard());
 		TPos shiftRightOf = pos;
         // Found node that contains virtualPos.
         SEQAN_ASSERT_LEQ(iter->virtualPosition, virtualPosition);
-        if (iter->virtualPosition == virtualPosition) {
+        if (iter->virtualPosition == virtualPosition)
+        {
             // Simple case:  Insert left of iter.
             insertValue(tree._journalNodes, pos, TCargo(SOURCE_PATCH, physicalBeginPos, virtualPosition, len));
 			shiftRightOf += 1;
-        } else {
+        }
+        else 
+        {
             // Harder case:  Split current and insert new node.
+            String<TCargo, Array<3> > buffer;
+            resize(buffer, 3);
             TPos offset = virtualPosition - iter->virtualPosition;
-            appendValue(buffer, TCargo(iter->segmentSource, iter->physicalPosition, iter->virtualPosition, offset));
-            appendValue(buffer, TCargo(SOURCE_PATCH, physicalBeginPos, virtualPosition, len));
-            appendValue(buffer, TCargo(iter->segmentSource, iter->physicalPosition + offset, virtualPosition + len, iter->length - offset));
+            buffer[0] = TCargo(iter->segmentSource, iter->physicalPosition, iter->virtualPosition, offset);
+            buffer[1] = TCargo(SOURCE_PATCH, physicalBeginPos, virtualPosition, len);
+            buffer[2] = TCargo(iter->segmentSource, iter->physicalPosition + offset, virtualPosition + len, iter->length - offset);
             // Insert new journal entries.
             infix(tree._journalNodes, pos, pos + 1) = buffer;
 			shiftRightOf += 3;
@@ -290,7 +289,9 @@ void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
         // Update journal entries right of pos.
         for (TIterator it = begin(tree._journalNodes, Standard()) + shiftRightOf, itend = end(tree._journalNodes, Standard()); it != itend; ++it)
             it->virtualPosition += len;
-    } else {
+    }
+    else 
+    {
         // Insert at end.
 		SEQAN_ASSERT_EQ(virtualPosition, iter->virtualPosition + iter->length);
         appendValue(tree._journalNodes, TCargo(SOURCE_PATCH, physicalBeginPos, virtualPosition, len));
@@ -303,8 +304,8 @@ void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
 template <typename TCargo>
 inline
 void recordErase(JournalEntries<TCargo, SortedArray> & tree,
-                 typename Position<TCargo>::Type const & pos,
-                 typename Position<TCargo>::Type const & posEnd)
+                 typename Position<TCargo>::Type pos,
+                 typename Position<TCargo>::Type posEnd)
 {
     SEQAN_CHECKPOINT;
     typedef typename Size<TCargo>::Type TSize;
@@ -315,55 +316,54 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
 //    std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
     // Handle special case of removing all of the singleton existing entry.
-    if (length(tree._journalNodes) == 1 && pos == 0 && front(tree._journalNodes).length == posEnd) {
+    if (length(tree._journalNodes) == 1 && pos == 0 && front(tree._journalNodes).length == posEnd)
+    {
         clear(tree._journalNodes);
         return;
     }
     // Handle case of an empty journal.
-    if (length(tree._journalNodes) == 0) {
+    if (empty(tree._journalNodes))
+    {
         SEQAN_ASSERT_EQ(pos, 0u);
         SEQAN_ASSERT_EQ(posEnd, 0u);
         return;
     }
 
     // Find node.
-    TCargo refCargo;
-    refCargo.virtualPosition = pos;
-    TIter it = std::upper_bound(
-            begin(tree._journalNodes, Standard()),
-            end(tree._journalNodes, Standard()),
-            refCargo,
-            TCmp());
+    TIter it = findInJournalEntries(tree, pos);
 
     // We will shift the virtual positions of all entries right of and
     // including beginShiftPos by delta positions to the left.
     TPos delta = 0;
     TPos beginShiftPos = 0;
 
-	// MUST NOT find begin.
-	SEQAN_ASSERT(it != begin(tree._journalNodes, Standard()));
-	--it;
-	
 	TPos itPos = it - begin(tree._journalNodes, Standard());
-	if (it->virtualPosition == pos && it->length == posEnd - pos) {
+	if (it->virtualPosition == pos && it->length == posEnd - pos) 
+    {
 		// Remove the whole entry.
 		erase(tree._journalNodes, itPos);
 		delta = posEnd - pos;
 		beginShiftPos = itPos;
-	} else if (it->virtualPosition == pos && it->length > posEnd - pos) {
+	} 
+    else if (it->virtualPosition == pos && it->length > posEnd - pos) 
+    {
 		// Remove a prefix of the entry.
 		SEQAN_ASSERT_LT(pos, it->virtualPosition + it->length);
 		delta = posEnd - pos;
 		it->physicalPosition += delta;
 		it->length -= delta;
 		beginShiftPos = itPos + 1;
-	} else if (it->virtualPosition < pos && it->virtualPosition + it->length == posEnd) {
+	}
+    else if (it->virtualPosition < pos && it->virtualPosition + it->length == posEnd) 
+    {
 		// Remove a suffix of the entry.
 		SEQAN_ASSERT_GT(pos, it->virtualPosition);
 		delta = posEnd - pos;
 		it->length -= delta;
 		beginShiftPos = itPos + 1;
-	} else if (it->virtualPosition < pos && it->virtualPosition + it->length > posEnd) {
+	}
+    else if (it->virtualPosition < pos && it->virtualPosition + it->length > posEnd) 
+    {
 		// Remove a true infix of the entry.
 		TSize prefixLength = pos - it->virtualPosition;
 		TSize suffixLength = it->length - prefixLength - (posEnd - pos);
@@ -376,33 +376,42 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
 		// Set shift position and delta.
 		delta = removedInfixLength;
 		beginShiftPos = itPos + 2;
-	} else {
+	}
+    else 
+    {
 		// Remove more than one entry.
 		TPos rmBeginPos = itPos;
 		TPos rmEndPos = itPos;
-		if (it->virtualPosition != pos) {
+		if (it->virtualPosition != pos)
+        {
 			// Do not remove all of first.
 			delta += it->length - (pos - it->virtualPosition);
 			rmBeginPos += 1;
 			rmEndPos += 1;
 			it->length = (pos - it->virtualPosition);
-		} else {
+		}
+        else
+        {
 			// Remove all of first.
 			delta = it->length;
 			rmEndPos += 1;
 		}
 		it += 1;
-		while (posEnd > it->virtualPosition + it->length) {
+		while (posEnd > it->virtualPosition + it->length) 
+        {
 			rmEndPos += 1;
 			delta += it->length;
 			it += 1;
 		}
-		if (it->virtualPosition + it->length == posEnd) {
+		if (it->virtualPosition + it->length == posEnd) 
+        {
 			// Remove all of last.
 			rmEndPos += 1;
 			delta += it->length;
 			beginShiftPos = rmBeginPos;
-		} else {
+		}
+        else
+        {
 			// Do not remove all of last.
 			SEQAN_ASSERT_GT(it->virtualPosition + it->length, posEnd);
 			TSize tmpDelta = delta;
@@ -431,7 +440,7 @@ template <typename TNode, typename TJournalSpec, typename TPos>
 inline
 typename Position<typename Cargo<TNode>::Type >::Type
 virtualToHostPosition(JournalEntries<TNode, TJournalSpec> const & journalEntries,
-                      TPos const & pos)
+                      TPos pos)
 {
     SEQAN_CHECKPOINT;
     typedef JournalEntries<TNode, TJournalSpec> TJournalEntries;
@@ -472,7 +481,7 @@ template <typename TNode, typename TJournalSpec, typename TPos>
 inline
 bool
 isGapInHost(JournalEntries<TNode, TJournalSpec> const & journalEntries,
-            TPos const & pos)
+            TPos pos)
 {
     SEQAN_CHECKPOINT;
     typedef JournalEntries<TNode, TJournalSpec> TJournalEntries;
