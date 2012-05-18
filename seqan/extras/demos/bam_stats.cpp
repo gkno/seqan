@@ -348,13 +348,13 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 else
                     std::cerr << "WARNING: Could find NM tag in gold standard " << record.qName << std::endl;
 
-                // Read sequencing errors from XQ tag.
+                // Read sequencing errors from XE tag.
                 idx = 0;
                 tagValue =-1;
-                if (findTagKey(idx, tagsDict, "XQ") && extractTagValue(tagValue, tagsDict, idx) && tagValue != -1)
+                if (findTagKey(idx, tagsDict, "XE") && extractTagValue(tagValue, tagsDict, idx) && tagValue != -1)
                     read.seqErrors = tagValue;
                 else
-                    std::cerr << "WARNING: Could find XQ tag in gold standard " << record.qName << std::endl;
+                    std::cerr << "WARNING: Could find XE tag in gold standard " << record.qName << std::endl;
 
                 // Read SNPs from XS tag.
                 idx = 0;
@@ -373,8 +373,8 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     std::cerr << "WARNING: Could find XI tag in gold standard " << record.qName << std::endl;
 
                 // Check for inconsistencies in error tags.
-                if (read.indels + read.SNPs + read.seqErrors != read.errors)
-                    std::cerr << "WARNING: Inconsistencies in error tags " << record.qName << std::endl;
+//                if (read.indels + read.SNPs + read.seqErrors != read.errors)
+//                    std::cerr << "WARNING: Inconsistencies in error tags " << record.qName << std::endl;
                 
                 // Add read to gold standard.                
                 appendValue(goldStandard, read);
