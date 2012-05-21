@@ -365,6 +365,7 @@ template <typename TRNG, typename TContig>
 void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst, TRNG & rng, unsigned readLength, TContig const & contig, ModelParameters<IlluminaReads> const & parameters, Options<IlluminaReads> const & options) {
     clear(inst.editString);
     reserve(inst.editString, static_cast<size_t>(1.2 * readLength), Generous());
+    inst.mismatchCount = 0;
     inst.delCount = 0;
     inst.insCount = 0;
 

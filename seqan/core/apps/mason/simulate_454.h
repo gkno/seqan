@@ -257,6 +257,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
         }
     }
 
+    inst.mismatchCount = 0;
     inst.insCount = 0;
     inst.delCount = 0;
 	clear(inst.insertionNucleotides);

@@ -244,6 +244,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
 {
     clear(inst.editString);
     reserve(inst.editString, static_cast<size_t>(1.2 * readLength), Generous());
+    inst.mismatchCount = 0;
     inst.delCount = 0;
     inst.insCount = 0;
     if (options.simulateQualities) {
