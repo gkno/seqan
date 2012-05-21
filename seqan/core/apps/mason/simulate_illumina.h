@@ -389,7 +389,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
             appendValue(inst.editString, ERROR_TYPE_MISMATCH);
         } else if (x < pMatch + pMismatch + pInsert) {
             // insert
-            if (length(inst.editString) > 0 && back(inst.editString == ERROR_TYPE_DELETE)) {
+            if (!empty(inst.editString) && back(inst.editString) == ERROR_TYPE_DELETE) {
                 inst.delCount -= 1;
                 eraseBack(inst.editString);
             } else {
@@ -401,10 +401,15 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
             // Decrement string size, do not add a delete if string is
             // too short, possibly remove insert from edit string.
             if (length(inst.editString) > 0) {
-                if (back(inst.editString == ERROR_TYPE_INSERT)) {
+                if (!empty(inst.editString) && back(inst.editString) == ERROR_TYPE_INSERT) {
                     --i;
                     --inst.insCount;
                     eraseBack(inst.editString);
+
+                    // mismatch
+                    ++i;
+                    ++inst.mismatchCount;
+                    appendValue(inst.editString, ERROR_TYPE_MISMATCH);
                 } else {
                     ++inst.delCount;
                     appendValue(inst.editString, ERROR_TYPE_DELETE);
@@ -413,7 +418,6 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
         }
     }
     SEQAN_ASSERT_EQ(readLength, length(inst.editString) - inst.delCount);
-
 
     //
     // Adjust Positions.
