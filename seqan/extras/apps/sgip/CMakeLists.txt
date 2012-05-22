@@ -1,8 +1,15 @@
 cmake_minimum_required (VERSION 2.6)
 project (extras_apps_sgip)
 
-# Update the list of file names below if you add source files to your application.
-seqan_add_executable(sgip sgip.cpp sgip.h sgip_base.h sgip_output.h)
+# Do not build SGIP on MSVC <10.
+set(BUILD_SGIP TRUE)
+if (MSVC AND NOT MSVC10)
+    set(BUILD_SGIP FALSE)
+endif (MSVC AND NOT MSVC10)
+
+if (BUILD_SGIP)
+	seqan_add_executable(sgip sgip.cpp sgip.h sgip_base.h sgip_output.h)
+endif (BUILD_SGIP)
 
 # Add app tests if Python interpreter could be found.
 if(PYTHONINTERP_FOUND)
