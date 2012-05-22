@@ -822,7 +822,9 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     addOption(parser, seqan::ArgParseOption("r", "reference", "Path to load reference FASTA from.",
                                             seqan::ArgParseArgument::STRING, false, "FASTA"));
     setRequired(parser, "reference", true);
-    addOption(parser, seqan::ArgParseOption("g", "in-gsi", "Path to load gold standard intervals from.",
+    addOption(parser, seqan::ArgParseOption("g", "in-gsi",
+                                            "Path to load gold standard intervals from. If compressed using gzip, "
+                                            "the file will be decompressed on the fly.",
                                             seqan::ArgParseArgument::STRING, false, "GSI"));
     setRequired(parser, "in-gsi", true);
     addOption(parser, seqan::ArgParseOption("s", "in-sam", "Path to load the read mapper SAM output from.",
