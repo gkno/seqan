@@ -318,9 +318,12 @@ int readRecord(BamAlignmentRecord & record,
     // phred quality
     SEQAN_ASSERT_GEQ(remainingBytes, lSeq);
     resize(record.qual, lSeq, Exact());
-    res = streamReadBlock(&(record.qual[0]), stream, lSeq);
-    if (res != lSeq)
-        return res;
+    if (lSeq > 0)
+    {
+        res = streamReadBlock(&(record.qual[0]), stream, lSeq);
+        if (res != lSeq)
+            return res;
+    }
     // If qual is a sequence of 0xff (heuristic same as samtools: Only look at first byte) then we clear it, to get the
     // representation of '*';
     if (record.qual[0] == static_cast<char>(0xff))
