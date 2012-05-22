@@ -794,7 +794,7 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
 
     seqan::ArgumentParser parser("rabema_evaluate");
     setShortDescription(parser, "RABEMA Evaluation");
-    setVersion(parser, "1.1");
+    setVersion(parser, "1.1beta");
     setDate(parser, "May 2012");
 
     addUsageLine(parser,
