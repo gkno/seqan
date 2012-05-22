@@ -360,6 +360,8 @@ int benchmarkReadResult(RabemaStats & result,
         if (!options.oracleMode && options.benchmarkCategory != "any-best")
             numIntervalsForErrorRate[originalDistance] += 1;
     }
+    if (options.benchmarkCategory == "any-best" && !empty(pickedGsiRecords))
+        numIntervalsForErrorRate[smallestDistance] += 1;
     // Marker array that states whether an interval was hit.
     String<bool> intervalHit;
     resize(intervalHit, length(intervalDistances), false);
@@ -426,8 +428,15 @@ int benchmarkReadResult(RabemaStats & result,
                 unsigned idx = 0;
                 if (findTagKey(idx, bamTags, "NM"))
                 {
-                    if (!extractTagValue(bestDistance, bamTags, idx))
+                    if (extractTagValue(bestDistance, bamTags, idx))
+                    {
+                        // Convert from count to rate.
+                        bestDistance = ceil(100.0 * bestDistance / length(readSeq));
+                    }
+                    else
+                    {
                         bestDistance = minValue<int>();  // Reset to sentinel.
+                    }
                 }
             }
             // Otherwise, perform a realignment.
@@ -451,7 +460,7 @@ int benchmarkReadResult(RabemaStats & result,
                 bool ret = setEndPosition(finder, pattern, length(contigSeq) - bandwidth);
                 (void) ret;  // When run without assertions.
                 SEQAN_CHECK(ret, "setEndPosition() must not fail!");
-                bestDistance = -getScore(pattern);
+                bestDistance = ceil(-100.0 * getScore(pattern) / length(readSeq));
             }
 
             // Skip invalid alignments.
@@ -467,7 +476,7 @@ int benchmarkReadResult(RabemaStats & result,
                     std::cerr << "  READ:  \t" << readSeq << '\n'
                               << "  CONTIG:\t" << contigSeq << '\n'
                               << "  DISTANCE:        \t" << bestDistance << '\n'
-                              << "  ALLOWED DISTANCE:\t" << static_cast<int>(0.01 * options.maxError * length(readSeq)) << '\n';
+                              << "  ALLOWED DISTANCE:\t" << allowedDistance << '\n';
                 }
                 result.invalidAlignments += 1;
                 continue;
@@ -573,7 +582,7 @@ int benchmarkReadResult(RabemaStats & result,
     updateMaximalErrorRate(result, largestDistance);
     result.totalReads += 1;
     result.readsInGsi += (numIntervals > 0u);
-    if (options.oracleMode || options.benchmarkCategory == "any-best")
+    if (options.oracleMode)
     {
         bool found = (numFound > 0u);
         result.intervalsToFind += 1;
@@ -583,6 +592,20 @@ int benchmarkReadResult(RabemaStats & result,
         result.intervalsToFindForErrorRate[d] += 1;
         result.intervalsFoundForErrorRate[d] += found;
         result.normalizedIntervalsToFindForErrorRate[d] += 1;
+        result.normalizedIntervalsFoundForErrorRate[d] += found;
+    }
+    else if (options.benchmarkCategory == "any-best")
+    {
+        int d = (smallestDistance == maxValue<int>()) ? 0 : smallestDistance;
+        bool toFind = (numIntervalsForErrorRate[d] > 0u);
+        bool found = (foundIntervalsForErrorRate[d] > 0u);
+        SEQAN_ASSERT_LEQ(found, toFind);
+        result.intervalsToFind += toFind;
+        result.intervalsFound += found;
+        result.normalizedIntervals += found;
+        result.intervalsToFindForErrorRate[d] += toFind;
+        result.intervalsFoundForErrorRate[d] += found;
+        result.normalizedIntervalsToFindForErrorRate[d] += toFind;
         result.normalizedIntervalsFoundForErrorRate[d] += found;
     }
     else  // all-best or all was selected
@@ -606,14 +629,19 @@ int benchmarkReadResult(RabemaStats & result,
             result.normalizedIntervals += 1.0 * intervalsFound / intervalsToFind;
         for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
         {
-            // In case of "all", we only count the intervals from with maximal error rate.
-            if (options.benchmarkCategory != "all" || (int)d == options.maxError)
+            if (intervalsToFind == 0u)
+                continue;
+            // In case of "all", we only count the intervals from with maximal error rate.  In case of all-best we only
+            // count those with the best error rate for this read.
+            if (options.benchmarkCategory == "all" && (int)d == options.maxError)
             {
-                if (intervalsToFind > 0u)
-                {
-                    result.normalizedIntervalsToFindForErrorRate[d] += 1.0 * numIntervalsForErrorRate[d] / intervalsToFind;
-                    result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsToFind;
-                }
+                result.normalizedIntervalsToFindForErrorRate[d] += 1.0 * numIntervalsForErrorRate[d] / intervalsToFind;
+                result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsToFind;
+            }
+            else if (options.benchmarkCategory == "all-best" && (int)d == smallestDistance)
+            {
+                result.normalizedIntervalsToFindForErrorRate[d] += 1;
+                result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsToFind;
             }
         }
     }

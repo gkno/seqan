@@ -125,16 +125,21 @@ template <typename TStream>
 void write(TStream & stream, RabemaStats const & stats, int maxError, seqan::Raw const & /*tag*/)
 {
     stream << "Intervals to find:              " << stats.intervalsToFind << '\n'
-           << "Intervals found:                " << stats.intervalsFound << '\n'
-           << "Intervals found [%]             " << (100.0 * stats.intervalsFound / stats.intervalsToFind) << '\n'
-           << "Invalid alignments:             " << stats.invalidAlignments << '\n'
+           << "Intervals found:                " << stats.intervalsFound << '\n';
+    if (stats.intervalsToFind > 0u)
+        stream << "Intervals found [%]             " << (100.0 * stats.intervalsFound / stats.intervalsToFind) << '\n';
+    else
+        stream << "Intervals found [%]             " << 0 << '\n';
+    stream << "Invalid alignments:             " << stats.invalidAlignments << '\n'
            << "Additional Hits:                " << stats.additionalHits << '\n'
            << '\n'
            << "Number of reads:                " << stats.totalReads << '\n'
            << "Number of reads with intervals: " << stats.readsInGsi << '\n'
-           << "Normalized intervals found:     " << stats.normalizedIntervals << '\n'
-           << "Normalized intervals found [%]: " << (100.0 * stats.normalizedIntervals / stats.readsInGsi) << '\n'
-           << '\n';
+           << "Normalized intervals found:     " << stats.normalizedIntervals << '\n';
+    if (stats.readsInGsi > 0u)
+        stream << "Normalized intervals found [%]: " << (100.0 * stats.normalizedIntervals / stats.readsInGsi) << "\n\n";
+    else
+        stream << "Normalized intervals found [%]: " << 0 << "\n\n";
     char buffer[1000];
     sprintf(buffer, "  ERR\t%8s\t%8s\t%8s\t%8s\t%10s\t%10s\n", "#max", "#found", "%found", "norm max", "norm found", "norm found [%]");
     stream << buffer;

@@ -167,13 +167,6 @@ int main(int argc, char const ** argv)
         return 1;
     }
 
-    // Check sort order.
-    if (getSortOrder(header) != BAM_SORT_QUERYNAME)
-    {
-        std::cerr << "SAM file not sorted by 'queryname'\n";
-        return 1;
-    }
-
     write2(std::cout, header, context, Sam());
 
     // Read file in chunks, one for each query name.
@@ -189,6 +182,12 @@ int main(int argc, char const ** argv)
 
         if (!empty(records) && record.qName != back(records).qName)
         {
+            if (!empty(record) && record.qName < back(records).qName)
+            {
+                std::cerr << "ERROR: " << record.qName << " succeeds " << back(records).qName << " in SAM file.\n";
+                std::cerr << "File must be sorted by query name.\n";
+                return 1;
+            }
             if (fixRecords(records) != 0)
             {
                 std::cerr << "Could not fix records!\n";
