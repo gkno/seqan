@@ -80,8 +80,10 @@ typedef Tag<FibreWaveletTreeStructure_> const FibreWaveletTreeStructure;
 template <typename TChar, typename TSpec>
 struct Fibre<WaveletTreeStructure<TChar, TSpec>, FibreTreeNodes>
 {
-    //typedef typename If<(BitsPerValue<TChar>::VALUE < (1u << 16) -1), unsigned short, unsigned int>::Type TPos;
-    typedef unsigned TPos;
+    typedef typename IfC< BitsPerValue<TChar>::VALUE < 17, 
+            typename BitVector_<ValueSize<TChar>::VALUE>::Type,
+            unsigned int>::Type TPos;
+    //typedef unsigned TPos;
     typedef String<Pair<TChar, TPos> > Type;
 };
 

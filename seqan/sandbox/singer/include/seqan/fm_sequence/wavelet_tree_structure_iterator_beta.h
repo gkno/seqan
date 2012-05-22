@@ -651,7 +651,7 @@ inline bool goToPosition(Iter<WaveletTreeStructure<TChar, TSpec>, TopDown<Parent
 
 /**
 .Function.WaveletTreeStructure#goUp
-..signature:bool goUp(iterator)
+..signature:goUp(iterator)
 ..param.iterator:An iterator of a wavelet tree structure.
 ...type:Spec.TopDownHistory Iterator
 ..remarks:$goUp(iterator)$ goes to the parent node.
