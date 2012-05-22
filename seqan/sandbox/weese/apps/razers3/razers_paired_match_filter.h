@@ -74,84 +74,20 @@ _createHistogram(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filte
     unsigned result = obtainId(filter.idManager);
     if (result >= length(filter.histograms))
         resize(filter.histograms, length(filter.histograms) + 1);
-    resize(filter.histograms[result], ceil(filter.options.errorRate * (length(filter.readSeqs[2 * pairId]) + length(filter.readSeqs[2 * pairId + 1]))), 0, Exact());
+    resize(filter.histograms[result], 1 + (int)(filter.options.errorRate * (length(filter.readSeqs[2 * pairId]) + length(filter.readSeqs[2 * pairId + 1]))), 0, Exact());
     SEQAN_ASSERT_LT(result, length(filter.histograms));
     return result;
 }
 
 template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
 inline void
-_freeHistogram(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned histogramId)
-{
-    clear(filter.histograms[histogramId]);
-    releaseId(filter.idManager, histogramId);
-}
-
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-inline void
-_incrementCount(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned histogramId, int score)
-{
-    SEQAN_ASSERT_LEQ(score, 0);
-    filter.histograms[histogramId][-score] += 1;
-}
-
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-inline bool
-_canBePurged(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> const & filter, unsigned histogramId)
-{
-    // TODO(holtgrew): This could be speeded up if using prefix sum data structures for histograms.
-    if (!filter.options.purgeAmbiguous || filter.options.maxHits == 0)
-        return false;
-    unsigned sumUpTo = length(filter.histograms[histogramId]);
-    if (filter.options.errorDistanceRange != 0)
-        sumUpTo = filter.options.errorDistanceRange;
-    // std::cerr << "sumUpTo == " << sumUpTo << std::endl;
-    unsigned sum = 0;
-    for (unsigned i = 0; i < sumUpTo; ++i) {
-        sum += filter.histograms[histogramId][i];
-        if (sum > filter.options.maxHits) {
-            // std::cerr << "sum == " << sum << std::endl;
-            return true;
-        }
-    }
-    return false;
-}
-
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-inline bool
-_canBeDisabled(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> const & filter, unsigned histogramId)
-{
-    if (filter.options.maxHits == 0)
-        return false;
-    // std::cerr << "histo " << histogramId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.options.maxHits << std::endl;
-    return filter.histograms[histogramId][0] >= filter.options.maxHits;
-}
-
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-inline int
-_newLimit(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> const & filter, unsigned histogramId)
-{
-    // TODO(holtgrew): This could be speeded up if using prefix sum data structures for histograms.
-    if (filter.options.maxHits == 0)
-        return -1;
-    unsigned sumUpTo = length(filter.histograms[histogramId]);
-    unsigned sum = 0;
-    for (unsigned i = 0; i < sumUpTo; ++i) {
-        sum += filter.histograms[histogramId][i];
-        if (sum > filter.options.maxHits)
-            return i;
-    }
-    return -1;
-}
-
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-void
 registerRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned pairId, int score)
 {
     // std::cerr << "registering read " << pairId << std::endl;
     if (filter.hitCount[pairId - filter.readOffset] == MaxValue<unsigned>::VALUE)
         return;
-    filter.hitCount[pairId - filter.readOffset] += 1;
+    if (++filter.hitCount[pairId - filter.readOffset] < filter.matchThreshold)
+        return;
 
     // TODO(holtgrew): Maybe global read to histogram map; faster?
 
@@ -161,14 +97,14 @@ registerRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, u
         // std::cerr << "new histogram for read " << pairId << std::endl;
         histogramId = _createHistogram(filter, pairId);
         filter.pairIdToHistogramId[pairId] = histogramId;
-    } else if (filter.hitCount[pairId - filter.readOffset] > filter.matchThreshold) {
+    }
+    else
+    {
         // std::cerr << "updating histogram for read " << pairId << std::endl;
         typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
         TIterator it = filter.pairIdToHistogramId.find(pairId);
         SEQAN_ASSERT(it != filter.pairIdToHistogramId.end());
         histogramId = it->second;
-    } else {
-        return;
     }
 
     // Insert value into histogram.
@@ -176,7 +112,7 @@ registerRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, u
 }
 
 template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-bool
+inline bool
 processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned pairId)
 {
     typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
@@ -193,33 +129,43 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
 
     // Perform actions.
     int newLimit;
-    if (_canBePurged(filter, histogramId)) {
-        // std::cerr << "PURGED " << pairId << std::endl;
-        appendValue(filter.purgedPairIds, pairId);
-        FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
-        FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
-        setMaxErrors(wrapperL, pairId, -1);
-        setMaxErrors(wrapperR, pairId, -1);
+    
+    if (filter.options.scoreDistanceRange == 0)
+    {
+        newLimit = _newLimit(filter, histogramId);
+        if (newLimit == NO_NEW_LIMIT) return false;
+        if (filter.options.purgeAmbiguous)
+        {
+//            std::cerr << "PURGED " << pairId << std::endl;            
+            appendValue(filter.purgedPairIds, pairId);
+            newLimit = 0;
+        }
+    } 
+    else
+    {
+        newLimit = _newLimitDistRange(filter, histogramId);
+        if (newLimit == CAN_BE_PURGED)
+        {
+            // std::cerr << "PURGED " << pairId << std::endl;            
+            appendValue(filter.purgedPairIds, pairId);
+            newLimit = 0;
+        }
+    }
+    
+//    std::cerr << "LIMITING " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << "\t" << newLimit << std::endl;
+    FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
+    FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
+    setMaxErrors(wrapperL, pairId, newLimit-1);
+    setMaxErrors(wrapperR, pairId, newLimit-1);
+    filter.options.errorCutOff[2*pairId]   = newLimit;
+    filter.options.errorCutOff[2*pairId+1] = newLimit;
+    
+    if (newLimit == 0)
+    {
         _freeHistogram(filter, histogramId);
         filter.pairIdToHistogramId.erase(pairId);
         filter.hitCount[pairId - filter.readOffset] = MaxValue<unsigned>::VALUE;
         return true;
-    } else if (_canBeDisabled(filter, histogramId)) {
-        // std::cerr << "DISABLED " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << std::endl;
-        FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
-        FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
-        setMaxErrors(wrapperL, pairId, -1);
-        setMaxErrors(wrapperR, pairId, -1);
-        _freeHistogram(filter, histogramId);
-        filter.pairIdToHistogramId.erase(pairId);
-        filter.hitCount[pairId - filter.readOffset] = MaxValue<unsigned>::VALUE;
-        return true;
-    } else if ((newLimit = _newLimit(filter, histogramId)) >= 0) {
-        // std::cerr << "LIMITING " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << "\t" << newLimit << std::endl;
-        FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
-        FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
-        setMaxErrors(wrapperL, pairId, newLimit);
-        setMaxErrors(wrapperR, pairId, newLimit);
     }
     return false;
 }

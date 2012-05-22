@@ -23,6 +23,7 @@ project (sandbox_weese_apps_razers3)
                                 paramChooser.h
                                 profile_timeline.h
                                 razers_match_filter.h
+                                razers_paired_match_filter.h
                                 razers_matepairs.h
                                 razers_matepairs_parallel.h
                                 razers_parallel.h

@@ -1,20 +1,20 @@
 #ifndef APPS_RAZERS_PARALLEL_STORE_H
 #define APPS_RAZERS_PARALLEL_STORE_H
 
-#ifdef PLATFORM_GCC
+#ifdef PLATFORM_GCC_DIS
 #include <parallel/algorithm>
 #include <parallel/numeric>
 #else
 #include <algorithm>
 #include <numeric>
-#endif  // #ifdef PLATFORM_GCC
+#endif  // #ifdef PLATFORM_GCC_DIS
 
 using namespace seqan;
 
 struct Parallel_;
 typedef Tag<Parallel_> Parallel;
 
-#ifdef PLATFORM_GCC
+#ifdef PLATFORM_GCC_DIS
 
 /*
 template <typename TAlign, typename TSortSpec>

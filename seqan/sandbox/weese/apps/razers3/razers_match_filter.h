@@ -55,6 +55,9 @@ public:
     }
 };
 
+const int NO_NEW_LIMIT = -1;
+const int CAN_BE_PURGED = -2;
+
 // ============================================================================
 // Metafunctions
 // ============================================================================
@@ -70,84 +73,113 @@ _createHistogram(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, uns
     unsigned result = obtainId(filter.idManager);
     if (result >= length(filter.histograms))
         resize(filter.histograms, length(filter.histograms) + 1);
-    resize(filter.histograms[result], ceil(filter.options.errorRate * length(filter.readSeqs[readId])), 0, Exact());
+    resize(filter.histograms[result], 1 + (int)(filter.options.errorRate * length(filter.readSeqs[readId])), 0, Exact());
     SEQAN_ASSERT_LT(result, length(filter.histograms));
     return result;
 }
 
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
+template <typename TMatchFilter>
 inline void
-_freeHistogram(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned histogramId)
+_freeHistogram(TMatchFilter & filter, unsigned histogramId)
 {
     clear(filter.histograms[histogramId]);
     releaseId(filter.idManager, histogramId);
 }
 
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
+template <typename TMatchFilter>
 inline void
-_incrementCount(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned histogramId, int score)
+_incrementCount(TMatchFilter & filter, unsigned histogramId, int score)
 {
     SEQAN_ASSERT_LEQ(score, 0);
-    filter.histograms[histogramId][-score] += 1;
+    ++filter.histograms[histogramId][-score];
 }
 
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-inline bool
-_canBePurged(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> const & filter, unsigned histogramId)
+template <typename TMatchFilter>
+inline int
+_newLimit(TMatchFilter const & filter, unsigned histogramId)
 {
     // TODO(holtgrew): This could be speeded up if using prefix sum data structures for histograms.
-    if (!filter.options.purgeAmbiguous || filter.options.maxHits == 0)
-        return false;
-    unsigned sumUpTo = length(filter.histograms[histogramId]);
-    if (filter.options.errorDistanceRange != 0)
-        sumUpTo = filter.options.errorDistanceRange;
-    // std::cerr << "sumUpTo == " << sumUpTo << std::endl;
-    unsigned sum = 0;
-    for (unsigned i = 0; i < sumUpTo; ++i) {
-        sum += filter.histograms[histogramId][i];
-        if (sum > filter.options.maxHits) {
-            // std::cerr << "sum == " << sum << std::endl;
-            return true;
+    typedef typename Iterator<String<unsigned> const, Standard>::Type TIter;
+    
+    register int max = filter.options.maxHits;
+    if (max == 0)
+        return NO_NEW_LIMIT;
+
+    // we need at least one more than max before we can purge
+    if (filter.options.purgeAmbiguous) 
+        ++max;
+    
+    String<unsigned> const &hist = filter.histograms[histogramId];
+    TIter itBeg = begin(hist, Standard());
+    TIter itEnd = end(hist, Standard());
+    
+    for (register TIter it = itBeg; it != itEnd; ++it) 
+    {
+        max -= *it;
+        if (max <= 0)
+            return it - itBeg;
+    }
+    return NO_NEW_LIMIT;
+}
+
+template <typename TMatchFilter>
+inline int
+_newLimitDistRange(TMatchFilter const & filter, unsigned histogramId)
+{
+    // TODO(holtgrew): This could be speeded up if using prefix sum data structures for histograms.
+    typedef typename Iterator<String<unsigned> const, Standard>::Type TIter;
+    
+    String<unsigned> const &hist = filter.histograms[histogramId];
+
+    register int max = filter.options.maxHits;
+    TIter itBeg = begin(hist, Standard());
+    TIter itEnd = end(hist, Standard());
+    register TIter it = itBeg;
+    
+    if (max == 0)
+    {
+        // adapt maximal errors
+        while (it != itEnd && *it == 0)
+            ++it;
+
+        return _min((it - itBeg) + filter.options.scoreDistanceRange, itEnd - itBeg);
+    }
+
+    // we need at least one more than max before we can purge
+    if (filter.options.purgeAmbiguous) 
+        ++max;
+    
+    while (it != itEnd && *it == 0)
+        ++it;
+    
+    // look in a range [minErrors..minErrors+scoreDistanceRange)
+    if (itEnd > it + filter.options.scoreDistanceRange)
+        itEnd = it + filter.options.scoreDistanceRange;
+    
+    for (; it != itEnd; ++it) 
+    {
+        max -= *it;
+        if (max <= 0)
+        {
+            // do we have enough matches in [0..scoreDistanceRange) ?
+            if (filter.options.purgeAmbiguous && it - itBeg < filter.options.scoreDistanceRange)
+                return CAN_BE_PURGED;
+            else
+                return it - itBeg;
         }
     }
-    return false;
+    return it - itBeg;
 }
 
 template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-inline bool
-_canBeDisabled(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> const & filter, unsigned histogramId)
-{
-    if (filter.options.maxHits == 0)
-        return false;
-    // std::cerr << "histo " << histogramId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.options.maxHits << std::endl;
-    return filter.histograms[histogramId][0] >= filter.options.maxHits;
-}
-
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-inline int
-_newLimit(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> const & filter, unsigned histogramId)
-{
-    // TODO(holtgrew): This could be speeded up if using prefix sum data structures for histograms.
-    if (filter.options.maxHits == 0)
-        return -1;
-    unsigned sumUpTo = length(filter.histograms[histogramId]);
-    unsigned sum = 0;
-    for (unsigned i = 0; i < sumUpTo; ++i) {
-        sum += filter.histograms[histogramId][i];
-        if (sum > filter.options.maxHits)
-            return i;
-    }
-    return -1;
-}
-
-template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-void
+inline void
 registerRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned readId, int score)
 {
     // std::cerr << "registering read " << readId << std::endl;
     if (filter.hitCount[readId - filter.readOffset] == MaxValue<unsigned>::VALUE)
         return;
-    filter.hitCount[readId - filter.readOffset] += 1;
+    if (++filter.hitCount[readId - filter.readOffset] < filter.matchThreshold)
+        return;
 
     // TODO(holtgrew): Maybe global read to histogram map; faster?
 
@@ -157,14 +189,14 @@ registerRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigne
         // std::cerr << "new histogram for read " << readId << std::endl;
         histogramId = _createHistogram(filter, readId);
         filter.readIdToHistogramId[readId] = histogramId;
-    } else if (filter.hitCount[readId - filter.readOffset] > filter.matchThreshold) {
+    }
+    else
+    {
         // std::cerr << "updating histogram for read " << readId << std::endl;
         typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
         TIterator it = filter.readIdToHistogramId.find(readId);
         SEQAN_ASSERT(it != filter.readIdToHistogramId.end());
         histogramId = it->second;
-    } else {
-        return;
     }
 
     // Insert value into histogram.
@@ -172,7 +204,7 @@ registerRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigne
 }
 
 template <typename TOptionsSpec, typename TReadSeqSet, typename TCallback>
-bool
+inline bool
 processRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned readId)
 {
     typedef typename std::tr1::unordered_map<unsigned, unsigned>::iterator TIterator;
@@ -189,24 +221,38 @@ processRead(MatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, unsigned
 
     // Perform actions.
     int newLimit;
-    if (_canBePurged(filter, histogramId)) {
-        // std::cerr << "PURGED " << readId << std::endl;
-        appendValue(filter.purgedReadIds, readId);
-        disableRead(value(filter.callback), readId);
+    
+    if (filter.options.scoreDistanceRange == 0)
+    {
+        newLimit = _newLimit(filter, histogramId);
+        if (newLimit == NO_NEW_LIMIT) return false;
+        if (filter.options.purgeAmbiguous)
+        {
+//            std::cerr << "PURGED " << readId << std::endl;            
+            appendValue(filter.purgedReadIds, readId);
+            newLimit = 0;
+        }
+    } 
+    else
+    {
+        newLimit = _newLimitDistRange(filter, histogramId);
+        if (newLimit == CAN_BE_PURGED)
+        {
+            // std::cerr << "PURGED " << readId << std::endl;            
+            appendValue(filter.purgedReadIds, readId);
+            newLimit = 0;
+        }
+    }
+    
+//    std::cerr << "LIMITING " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId - filter.readOffset] << "\t" << newLimit << std::endl;
+    limitRead(value(filter.callback), readId, newLimit - 1);
+    filter.options.errorCutOff[readId] = newLimit;
+    if (newLimit == 0)
+    {
         _freeHistogram(filter, histogramId);
         filter.readIdToHistogramId.erase(readId);
         filter.hitCount[readId - filter.readOffset] = MaxValue<unsigned>::VALUE;
         return true;
-    } else if (_canBeDisabled(filter, histogramId)) {
-        // std::cerr << "DISABLED " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId - filter.readOffset] << std::endl;
-        disableRead(value(filter.callback), readId);
-        _freeHistogram(filter, histogramId);
-        filter.readIdToHistogramId.erase(readId);
-        filter.hitCount[readId - filter.readOffset] = MaxValue<unsigned>::VALUE;
-        return true;
-    } else if ((newLimit = _newLimit(filter, histogramId)) >= 0) {
-        // std::cerr << "LIMITING " << readId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[readId - filter.readOffset] << "\t" << newLimit << std::endl;
-        limitRead(value(filter.callback), readId, newLimit);
     }
     return false;
 }

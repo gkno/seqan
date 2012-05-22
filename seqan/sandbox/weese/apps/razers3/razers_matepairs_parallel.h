@@ -73,12 +73,12 @@ public:
     }
 };
 
-template <typename TMatches, typename TFragmentStore, typename TFilterFinderL, typename TFilterFinderR, typename TFilterPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+template <typename TMatches, typename TFragmentStore, typename TFilterFinderL, typename TFilterFinderR, typename TFilterPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode>
 struct MapPairedReads {};
 
 // ThreadLocalStorage specialization for single-end read mapping in RazerS.
-template <typename TMatches_, typename TFragmentStore, typename TFilterFinderL_, typename TFilterFinderR_, typename TFilterPattern_, typename TShape_/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
-class ThreadLocalStorage<MapPairedReads<TMatches_, TFragmentStore, TFilterFinderL_, TFilterFinderR_, TFilterPattern_, TShape_, TOptions, TCounts, TRazerSMode, TPreprocessing> >
+template <typename TMatches_, typename TFragmentStore, typename TFilterFinderL_, typename TFilterFinderR_, typename TFilterPattern_, typename TShape_/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode>
+class ThreadLocalStorage<MapPairedReads<TMatches_, TFragmentStore, TFilterFinderL_, TFilterFinderR_, TFilterPattern_, TShape_, TOptions, TCounts, TRazerSMode> >
 {
 public:
 	typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
@@ -126,12 +126,7 @@ public:
 
     TShape shape;
 
-    #ifdef RAZERS_BANDED_MYERS
-    typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TFilterPattern, TCounts, TPreprocessing> TMatchVerifier;
-    #else  // #ifdef RAZERS_BANDED_MYERS
-    typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TFilterPattern, TCounts, typename Infix<TPreprocessing>::Type> TMatchVerifier;
-    typename Infix<TPreprocessing>::Type preprocessingInfixL, preprocessingInfixR;
-    #endif  // #ifdef RAZERS_BANDED_MYERS
+    typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TFilterPattern, TCounts> TMatchVerifier;
     TMatchVerifier verifierL, verifierR;
 
     // Mailbox for the verification results.
@@ -420,12 +415,12 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
     }
 }
 
-template <typename TMatches, typename TFragmentStore, typename TFilterFinderL, typename TFilterFinderR, typename TFilterPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename THitString, typename TPreprocessing>
-void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls,
+template <typename TMatches, typename TFragmentStore, typename TFilterFinderL, typename TFilterFinderR, typename TFilterPattern, typename TShape/*TODO(holtgrew): Superflous.*/, typename TOptions, typename TCounts, typename TRazerSMode, typename THitString>
+void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls,
                       Job<PairedVerification<TMatches, TFragmentStore, THitString, TOptions, TFilterPattern> > & job,
                       String<unsigned> const & splitters)
 {
-    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
+    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > TThreadLocalStorage;
 
     typedef typename TThreadLocalStorage::TReadSet TReadSet;
 
@@ -457,12 +452,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 		TOptions, 
 		TRazerSMode, 
 		TFilterPattern,
-		TCounts,
-#ifdef RAZERS_BANDED_MYERS
-        TPreprocessing>										TVerifier;
-#else  // #ifdef RAZERS_BANDED_MYERS
-        typename Infix<TPreprocessing>::Type>	            TVerifier;
-#endif  // #ifdef RAZERS_BANDED_MYERS
+		TCounts>                                            TVerifier;
 
 	// MATE-PAIR FILTRATION
 	typedef Pair<__int64, TMatch>	TDequeueValue;
@@ -490,19 +480,11 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
     tls.verifierL.options = job.options;
     tls.verifierL.filterPattern = job.filterPatternL;
     tls.verifierL.cnts = 0;
-#ifndef RAZERS_BANDED_MYERS
-    setBeginPosition(*tls.verifierL.preprocessing, splitters[job.threadId]);
-    setEndPosition(*tls.verifierL.preprocessing, splitters[job.threadId + 1]);
-#endif  // #ifdef RAZERS_BANDED_MYERS
 
     tls.verifierR.matches = localMatches;
     tls.verifierR.options = job.options;
     tls.verifierR.filterPattern = job.filterPatternR;
     tls.verifierR.cnts = 0;
-#ifndef RAZERS_BANDED_MYERS
-    setBeginPosition(*tls.verifierR.preprocessing, splitters[job.threadId]);
-    setEndPosition(*tls.verifierR.preprocessing, splitters[job.threadId + 1]);
-#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	const unsigned NOT_VERIFIED = 1u << (8 * sizeof(unsigned) - 1);
 
@@ -683,10 +665,6 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
                 // verify left mate (equal seqNo), if not done already
                 if ((*it).i2.readId & NOT_VERIFIED)
                 {
-//					if (matchVerify(
-//							(*it).i2, (*it).i3, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-//							matePairId, readSetL, forwardPatternsL, 
-//							options, TSwiftSpec()))
                     if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
                     {
 #ifdef RAZERS_BANDED_MYERS
@@ -704,7 +682,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
                             verifierL.sinkPos = (TSignedGPos)(itR->hstkPos + itR->bucketWidth) - options.libraryLength;
 
 						if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-										matePairId, readSetL[matePairId], TRazerSMode()))
+										leftReadId, readSetL[matePairId], TRazerSMode()))
                         {
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
@@ -744,7 +722,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
                     ++options.countVerification;
 //                    if (pref == s)
 //                        std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId) + 1] << "\t" << itR->hstkPos << "\t" << itR->hstkPos + itR->bucketWidth << std::endl;
-                    if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), matePairId, readSetR[matePairId], TRazerSMode())) {
+                    if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf), 2 * matePairId + 1, readSetR[matePairId], TRazerSMode())) {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
@@ -818,24 +796,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 		
         // (4) Verify right mate, if left mate matches.
         if (bestLeftScore != MinValue<int>::VALUE)
-        {
-            //			if (matchVerify(
-            //					mR, qR, infix(filterFinderR),
-            //					matePairId, readSetR, forwardPatternsR,
-            //					options, TSwiftSpec()))
-            // std::cerr << " [verify]" << std::flush;
-
-            // if (matchVerify(verifierR, swiftInfix(*itR, tls.genomeInf),
-            //                 matePairId, readSetR, TRazerSMode()))
-            // {
-                // distance between left mate beginning and right mate end
-                // __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
-                // if (dist <= options.libraryLength + options.libraryError &&
-                //     options.libraryLength <= dist + options.libraryError)
-                // {
-                    // mR = verifierR.m;
-                    // qR = verifierR.q;
-					
+        {					
                     fL.i2 = (*bestLeft).i2;
 					
                     // transform mate readNo to global readNo
@@ -909,9 +870,9 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 #endif  // #ifdef RAZERS_PROFILE
 }
 
-template <typename TMatches, typename TFragmentStore, typename TFilterFinderL, typename TFilterFinderR, typename TFilterPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode, typename TPreprocessing>
+template <typename TMatches, typename TFragmentStore, typename TFilterFinderL, typename TFilterFinderR, typename TFilterPattern, typename TShape, typename TOptions, typename TCounts, typename TRazerSMode>
 void
-writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<TMatches *> & verificationHits, bool dontCompact)
+writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, String<TMatches *> & verificationHits, bool dontCompact)
 {
     // TODO(holtgrew): The same as single read writeback! Really? Combine?
 #ifdef RAZERS_PROFILE
@@ -920,7 +881,7 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFi
     if (tls.threadId == 0u && tls.options._debugLevel >= 3)
         fprintf(stderr, "[writeback]");
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
-    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
+    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > TThreadLocalStorage;
 
     // Compute new length for the matches.
     TAlignedReadStoreSize oldSize = length(tls.matches);
@@ -1013,7 +974,6 @@ template <
 	typename TFSSpec,
 	typename TFSConfig,
     typename TThreadLocalStorages,
-	typename TPreprocessing,
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode>
@@ -1022,8 +982,6 @@ void _mapMatePairReadsParallel(
 	unsigned								  contigId,				// ... and its sequence number
     TThreadLocalStorages                    & threadLocalStorages,
     String<unsigned> const & splitters,
-	TPreprocessing							& preprocessingL,
-	TPreprocessing							& preprocessingR,
 	TCounts									& /*cnts*/,  // TODO(holtgrew): What about this?
 	char									  orientation,			// q-gram index of reads
 	TRazerSOptions							& options,
@@ -1071,12 +1029,8 @@ void _mapMatePairReadsParallel(
 		TRazerSOptions, 
 		TRazerSMode, 
 		TFilterPattern,
-		TCounts,
-#ifdef RAZERS_BANDED_MYERS
-        TPreprocessing>										TVerifier;
-#else  // #ifdef RAZERS_BANDED_MYERS
-        typename Infix<TPreprocessing>::Type>	            TVerifier;
-#endif  // #ifdef RAZERS_BANDED_MYERS
+		TCounts
+    > TVerifier;
 
 	typedef typename TFilterFinderL::THitString THitString;
     typedef Job<PairedVerification<TMatches, TFragmentStore, THitString, TOptions, TFilterPattern> > TVerificationJob;
@@ -1135,23 +1089,11 @@ void _mapMatePairReadsParallel(
 		threadLocalStorages[i].verifierL.genomeLength = length(genome);
 		threadLocalStorages[i].verifierL.oneMatchPerBucket = true;
 		threadLocalStorages[i].verifierL.m.contigId = contigId;
-#ifdef RAZERS_BANDED_MYERS
-		threadLocalStorages[i].verifierL.preprocessing = &preprocessingL;
-#else  // #ifdef RAZERS_BANDED_MYERS
-        set(threadLocalStorages[i].preprocessingInfixL, infix(preprocessingL, 0, length(preprocessingL)));
-		threadLocalStorages[i].verifierL.preprocessing = &threadLocalStorages[i].preprocessingInfixL;
-#endif  // #ifdef RAZERS_BANDED_MYERS
 
 		threadLocalStorages[i].verifierR.onReverseComplement = (orientation == 'R');
 		threadLocalStorages[i].verifierR.genomeLength = length(genome);
 		threadLocalStorages[i].verifierR.oneMatchPerBucket = true;
 		threadLocalStorages[i].verifierR.m.contigId = contigId;
-#ifdef RAZERS_BANDED_MYERS
-		threadLocalStorages[i].verifierR.preprocessing = &preprocessingR;
-#else  // #ifdef RAZERS_BANDED_MYERS
-        set(threadLocalStorages[i].preprocessingInfixR, infix(preprocessingR, 0, length(preprocessingR)));
-		threadLocalStorages[i].verifierR.preprocessing = &threadLocalStorages[i].preprocessingInfixR;
-#endif  // #ifdef RAZERS_BANDED_MYERS
         
         // threadLocalStorages[i].filterFinderL  = TFilterFinderL(genome, options.repeatLength, 1);
         typedef typename TFragmentStore::TContigSeq TGenome;
@@ -1428,15 +1370,8 @@ int _mapMatePairReadsParallel(
     double beginInit = sysTime();
 #endif  // #ifdef RAZERS_PROFILE
 
-    // Verifier preprocessing.
-#ifdef RAZERS_BANDED_MYERS
-	typedef Nothing TPreprocessing;
-	TPreprocessing forwardPatternsL;
-	TPreprocessing forwardPatternsR;
-#else  // #ifdef RAZERS_BANDED_MYERS
-    typedef String<TMyersPattern> TPreprocessing;
-	TPreprocessing forwardPatternsL;
-	TPreprocessing forwardPatternsR;
+//TODO:REVCOMP right mates
+/*
 	options.compMask[4] = (options.matchN)? 15: 0;
 	if (options.gapMode == RAZERS_GAPPED)
 	{
@@ -1469,6 +1404,7 @@ int _mapMatePairReadsParallel(
 		}
 	}
 #endif  // #ifdef RAZERS_BANDED_MYERS
+*/
 
     // Clear/initialize global stats.
 	options.countFiltration = 0;
@@ -1482,7 +1418,7 @@ int _mapMatePairReadsParallel(
 	SEQAN_PROTIMESTART(initTime);
     String<unsigned> splitters;
     computeSplittersBySlotCount(splitters, length(store.matePairStore), options.threadCount);
-    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
+    typedef ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFilterFinderL, TFilterFinderR, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > TThreadLocalStorage;
     String<TThreadLocalStorage> threadLocalStorages;
     initializeThreadLocalStoragesPaired(threadLocalStorages, store, splitters, shape, options);
 
@@ -1509,9 +1445,9 @@ int _mapMatePairReadsParallel(
 		// (once per _mapSingleReadsToContig call)
 		lockContig(store, contigId);
 		if (options.forward)
-			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, splitters, forwardPatternsL, forwardPatternsR, cnts, 'F', options, mode);
+			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, splitters, cnts, 'F', options, mode);
 		if (options.reverse)
-			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, splitters, forwardPatternsL, forwardPatternsR, cnts, 'R', options, mode);
+			_mapMatePairReadsParallel(store, contigId, threadLocalStorages, splitters, cnts, 'R', options, mode);
 		unlockAndFreeContig(store, contigId);
 	}
 #ifdef RAZERS_PROFILE

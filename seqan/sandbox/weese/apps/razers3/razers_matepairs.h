@@ -147,8 +147,16 @@ bool loadReads(
 	{
 		if (options.readNaming == 0 || options.readNaming == 3)
 		{
-			assignSeqId(id[0], leftMates[i], formatL);                  // read left Fasta id
-			assignSeqId(id[1], rightMates[i], formatR);                 // read right Fasta id
+            if (options.fullFastaId)
+            {
+                assignSeqId(id[0], leftMates[i], formatL);              // read full left Fasta id
+                assignSeqId(id[1], rightMates[i], formatR);             // read full right Fasta id
+            }
+            else
+            {
+                assignCroppedSeqId(id[0], leftMates[i], formatL);       // read left Fasta id up to the first whitespace
+                assignCroppedSeqId(id[1], rightMates[i], formatR);      // read right Fasta id up to the first whitespace
+            }
 			if (options.readNaming == 0)
 			{
 				append(id[0], "/L", Exact());
@@ -176,6 +184,8 @@ bool loadReads(
 						clear(seq[1]);
 						clear(id[0]);
 						clear(id[1]);
+                        clear(qual[0]);
+                        clear(qual[1]);
 						++kickoutcount;
 						break;
 					}
@@ -442,29 +452,55 @@ void compactPairMatches(
         // std::cerr << *(it + 1) << std::endl;
         // SEQAN_ASSERT(it->pairMatchId == (it + 1)->pairMatchId);
 		// if (*it).readId == TMatch::INVALID_ID || (*it).pairMatchId == TMatch::INVALID_ID) continue;
-		if (matePairId == store.readStore[(*it).readId].matePairId)
+		if (matePairId == store.readStore[it->readId].matePairId)
 		{ 
-			if (it->pairScore <= scoreDistCutOff) continue;
+			if (it->pairScore <= scoreDistCutOff )
+            {
+                typename Iterator<String<unsigned char>, Standard>::Type p = begin(options.errorCutOff, Standard()) + (2*matePairId);
+
+                int maxErrors = -scoreDistCutOff;
+                if (*p > (unsigned)maxErrors)
+                    *p = maxErrors;
+                ++p;
+                if (*p > (unsigned)maxErrors)
+                    *p = maxErrors;
+                
+                setMaxErrors(filterL, matePairId, maxErrors - 1);
+                setMaxErrors(filterR, matePairId, maxErrors - 1);
+                
+                while (it != itEnd && matePairId == store.readStore[it->readId].matePairId)
+                    ++it;
+                --it;
+                continue;
+            }
+
 			if (++hitCount >= hitCountCutOff)
 			{
 #ifdef RAZERS_MASK_READS
 				if (hitCount == hitCountCutOff)
 				{
 					// we have enough, now look for better matches
-					int maxErrors = -1 - (*it).pairScore;
+					int maxErrors = -(*it).pairScore;
 					if (options.purgeAmbiguous && (*it).pairScore > scoreRangeBest)
-						maxErrors = -1;
+						maxErrors = 0;
 
-					setMaxErrors(filterL, matePairId, maxErrors);
-					setMaxErrors(filterR, matePairId, maxErrors);
+					setMaxErrors(filterL, matePairId, maxErrors - 1);
+					setMaxErrors(filterR, matePairId, maxErrors - 1);
 
-					if (maxErrors == -1 && options._debugLevel >= 2)
+                    typename Iterator<String<unsigned char>, Standard>::Type p = begin(options.errorCutOff, Standard()) + (2*matePairId);
+                    if (*p > (unsigned)maxErrors)
+                        *p = maxErrors;
+                    ++p;
+                    if (*p > (unsigned)maxErrors)
+                        *p = maxErrors;
+                    
+					if (maxErrors == 0 && options._debugLevel >= 2)
                         disabled += 1;
 						// ::std::cerr << "(pair #" << matePairId << " disabled)";
 
 					if (options.purgeAmbiguous)
                     {
-						if ((*it).pairScore > scoreRangeBest || compactMode == COMPACT_FINAL || compactMode == COMPACT_FINAL_EXTERNAL)
+						if (it->pairScore > scoreRangeBest || compactMode == COMPACT_FINAL || compactMode == COMPACT_FINAL_EXTERNAL)
                         {
 							dit = ditBeg;
 						} 
@@ -511,7 +547,6 @@ template <
 	typename TFSSpec,
 	typename TFSConfig,
 	typename TReadIndex, 
-	typename TPreprocessing,
     typename TFilterSpec,
 	typename TCounts,
 	typename TRazerSOptions,
@@ -522,13 +557,6 @@ void _mapMatePairReads(
 	unsigned								  contigId,				// ... and its sequence number
 	Pattern<TReadIndex, TFilterSpec>        & filterPatternL,
 	Pattern<TReadIndex, TFilterSpec>        & filterPatternR,
-#ifdef RAZERS_BANDED_MYERS
-	TPreprocessing							&,
-	TPreprocessing							&,
-#else  // #ifdef RAZERS_BANDED_MYERS
-	TPreprocessing							& preprocessingL,
-	TPreprocessing							& preprocessingR,
-#endif  // #ifdef RAZERS_BANDED_MYERS
 	TCounts									& cnts,
 	char									  orientation,			// q-gram index of reads
 	TRazerSOptions							& options,
@@ -569,8 +597,8 @@ void _mapMatePairReads(
 		TRazerSOptions, 
 		TRazerSMode, 
 		TFilterPattern,
-		TCounts,
-        TPreprocessing>											TVerifier;
+		TCounts
+    > TVerifier;
 
 	const unsigned NOT_VERIFIED = 1u << (8*sizeof(unsigned)-1);
 
@@ -592,11 +620,6 @@ void _mapMatePairReads(
 	TReadSet	&readSetR = host(host(filterPatternR));
 	TVerifier	verifierL(matches, options, filterPatternL, cnts);
 	TVerifier	verifierR(matches, options, filterPatternR, cnts);
-
-#ifndef RAZERS_BANDED_MYERS
-	verifierL.preprocessing = &preprocessingL;
-	verifierR.preprocessing = &preprocessingR;
-#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	verifierL.oneMatchPerBucket = true;
 	verifierR.oneMatchPerBucket = true;
@@ -714,10 +737,6 @@ void _mapMatePairReads(
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.readId & NOT_VERIFIED)
 				{
-//					if (matchVerify(
-//							(*it).i2, (*it).i3, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-//							matePairId, readSetL, forwardPatternsL, 
-//							options, TSwiftSpec()))
 					if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
 #ifdef RAZERS_BANDED_MYERS
@@ -735,7 +754,7 @@ void _mapMatePairReads(
                             verifierL.sinkPos = (TSignedGPos)endPosition(filterFinderR) - options.libraryLength;
 
                         if (matchVerify(verifierL, infix(genome, ((*it).i2.beginPos >= 0)? (TSignedGPos)(*it).i2.beginPos: (TSignedGPos)0, (TSignedGPos)(*it).i2.endPos), 
-                                        matePairId, readSetL[matePairId], mode))
+                                        leftReadId, readSetL[matePairId], mode))
 						{
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
@@ -773,7 +792,8 @@ void _mapMatePairReads(
 					std::cerr << "\nVERIFY\tR\t" << matePairId << "\t" << store.readNameStore[2 * matePairId + 1] << "\t" << beginPosition(filterFinderR) << "\t" << endPosition(filterFinderR) << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                     ++options.countVerification;
-					if (matchVerify(verifierR, infix(filterFinderR), matePairId, readSetR[matePairId], mode)) {
+					if (matchVerify(verifierR, infix(filterFinderR), 2 * matePairId + 1, readSetR[matePairId], mode)) 
+                    {
 #ifdef RAZERS_DEBUG_MATEPAIRS
 						std::cerr << "  YES: " << verifierR.m.beginPos << "\t" << verifierR.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
@@ -854,30 +874,7 @@ void _mapMatePairReads(
 
 		// verify right mate, if left mate matches
 		if (bestLeftScore != MinValue<int>::VALUE)
-		{
-// //			if (matchVerify(
-// //					mR, qR, infix(filterFinderR),
-// //					matePairId, readSetR, forwardPatternsR,
-// //					options, TSwiftSpec()))
-            // XXX
-// 			if (matchVerify(verifierR, infix(filterFinderR), 
-// 					matePairId, readSetR, mode))
-// 			{
-            // XXX
-                // XXX
-				// distance between left mate beginning and right mate end
-				// __int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
-                // std::cerr << "    COND = " << (dist <= options.libraryLength + options.libraryError) << " && " << (options.libraryLength <= dist + options.libraryError) << std::endl;
-                // std::cerr << "    dist = " << dist << std::endl;
-                // XXX
-                // XXX
-				// if (dist <= options.libraryLength + options.libraryError &&
-				// 	options.libraryLength <= dist + options.libraryError)
-				// {
-                // XXX
-					// mR = verifierR.m;
-					// qR = verifierR.q;
-					
+		{					
 					fL.i2 = (*bestLeft).i2;
 					
 					// transform mate readNo to global readNo
@@ -1001,7 +998,6 @@ int _mapMatePairReads(
 				SwiftSemiGlobal,
 				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
 	typedef Pattern<TIndex, TFilterSpec>                TFilterPattern;	// filter
-	typedef Pattern<TRead const, MyersUkkonen>			TMyersPattern;	// verifier
 
     typedef typename TFragmentStore::TContigSeq TContigSeq;
     typedef typename Position<TContigSeq>::Type TContigPos;
@@ -1041,39 +1037,6 @@ int _mapMatePairReads(
 
 	// right mate qualities are reversed -> reverse right shape
 	reverse(indexShape(filterIndexR));
-	
-    // Verifier preprocessing.
-#ifdef RAZERS_BANDED_MYERS
-	typedef Nothing TPreprocessing;
-	TPreprocessing forwardPatternsL;
-	TPreprocessing forwardPatternsR;
-#else  // #ifdef RAZERS_BANDED_MYERS
-    typedef String<TMyersPattern> TPreprocessing;
-	TPreprocessing forwardPatternsL;
-	TPreprocessing forwardPatternsR;
-	options.compMask[4] = (options.matchN)? 15: 0;
-	if (options.gapMode == RAZERS_GAPPED)
-	{
-		resize(forwardPatternsL, pairCount, Exact());
-		resize(forwardPatternsR, pairCount, Exact());
-		for(unsigned i = 0; i < pairCount; ++i)
-		{
-#ifdef RAZERS_NOOUTERREADGAPS
-			if (!empty(readSetL[i]) && !empty(readSetR[i])) {
-				setHost(forwardPatternsL[i], prefix(readSetL[i], length(readSetL[i]) - 1));
-				setHost(forwardPatternsR[i], prefix(readSetR[i], length(readSetR[i]) - 1));
-			}
-#else
-			setHost(forwardPatternsL[i], readSetL[i]);
-			setHost(forwardPatternsR[i], readSetR[i]);
-#endif        
-			_patternMatchNOfPattern(forwardPatternsL[i], options.matchN);
-			_patternMatchNOfPattern(forwardPatternsR[i], options.matchN);
-			_patternMatchNOfFinder(forwardPatternsL[i], options.matchN);
-			_patternMatchNOfFinder(forwardPatternsR[i], options.matchN);
-		}
-	}
-#endif  // #ifdef RAZERS_BANDED_MYERS
 
 	// Configure filter pattern 
 	// (if this is a pigeonhole filter, all sequences must be appended first)
@@ -1103,10 +1066,10 @@ int _mapMatePairReads(
 		std::cout<<"contigLen: "<<length(store.contigStore[contigId].seq)<<std::endl;
 		
 		if (options.forward)
-			_mapMatePairReads(matches, store, contigId, filterPatternL, filterPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options, mode);
+			_mapMatePairReads(matches, store, contigId, filterPatternL, filterPatternR, cnts, 'F', options, mode);
 		
 		if (options.reverse)
-			_mapMatePairReads(matches, store, contigId, filterPatternL, filterPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options, mode);
+			_mapMatePairReads(matches, store, contigId, filterPatternL, filterPatternR, cnts, 'R', options, mode);
 		
 		unlockAndFreeContig(store, contigId);
 	}
@@ -1150,7 +1113,6 @@ int _mapMatePairReads(
 
 	return 0;
 }
-
 
 } // End namespace
 

@@ -93,8 +93,7 @@ template <
     typename TShape/*TODO(holtgrew): Superflous.*/,
     typename TOptions,
     typename TCounts,
-    typename TRazerSMode,
-    typename TPreprocessing>
+    typename TRazerSMode>
 struct MapSingleReads {};
 
 /**
@@ -114,8 +113,7 @@ template <
     typename TShape/*TODO(holtgrew): Superflous.*/, 
     typename TOptions, 
     typename TCounts, 
-    typename TRazerSMode, 
-    typename TPreprocessing
+    typename TRazerSMode
 >
 class ThreadLocalStorage<
     MapSingleReads<
@@ -126,8 +124,7 @@ class ThreadLocalStorage<
         TShape, 
         TOptions, 
         TCounts, 
-        TRazerSMode, 
-        TPreprocessing> >
+        TRazerSMode> >
 {
 public:
     typedef TFilterPattern_ TFilterPattern;
@@ -164,7 +161,7 @@ public:
     String<unsigned> missingInBucket;
     unsigned nextBucketToWriteBack;
 
-    typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TFilterPattern, TCounts, TPreprocessing> TMatchVerifier;
+    typedef MatchVerifier<TFragmentStore, TMatches, TOptions, TRazerSMode, TFilterPattern, TCounts> TMatchVerifier;
     TMatchVerifier verifier;
 
     // Mailbox for the verification results.
@@ -179,13 +176,13 @@ public:
 };
 
 template <typename TSpec>
-void limitRead(ThreadLocalStorage<TSpec> & tls, unsigned readId, int newLimit)
+inline void limitRead(ThreadLocalStorage<TSpec> & tls, unsigned readId, int newLimit)
 {
     setMaxErrors(tls, readId, newLimit);
 }
 
 template <typename TSpec>
-void disableRead(ThreadLocalStorage<TSpec> & tls, unsigned readId)
+inline void disableRead(ThreadLocalStorage<TSpec> & tls, unsigned readId)
 {
     setMaxErrors(tls, readId, -1);
 }
@@ -263,9 +260,8 @@ template <
     typename TOptions,
     typename TCounts,
     typename TRazerSMode,
-    typename TPreprocessing,
     typename THitString >
-void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFilterFinder, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls,
+void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFilterFinder, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls,
                       Job<SingleVerification<TMatches, TFragmentStore, THitString, TOptions, TFilterPattern> > & job,
                       String<unsigned> const & splitters)
 {
@@ -329,10 +325,9 @@ template <
     typename TShape/*TODO(holtgrew): Superflous.*/,
     typename TOptions,
     typename TCounts,
-    typename TRazerSMode,
-    typename TPreprocessing >
+    typename TRazerSMode >
 void
-writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFilterFinder, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > & tls, String<SingleVerificationResult<TMatches> > & verificationHits, bool dontCompact)
+writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFilterFinder, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > & tls, String<SingleVerificationResult<TMatches> > & verificationHits, bool dontCompact)
 {
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_WRITEBACK);
@@ -348,7 +343,8 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
     (void) dontCompact;  // unused
 
     // (1) Write back verification results into bucket.
-    for (unsigned i = 0; i < length(verificationHits); ++i) {
+    for (unsigned i = 0; i < length(verificationHits); ++i) 
+    {
         // verificationHits[i].windowNo;
 // #pragma omp critical
 //         std::cerr << "thread " << omp_get_thread_num() << " got (" << verificationHits[i].windowNo << ", " << verificationHits[i].hitGroupId << ")" << std::endl;
@@ -388,7 +384,7 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
         }
         reserve(tls.matches, newSize);
         for (unsigned i = 0; i < length(tls.verificationResultBuckets[idx]); ++i) {
-            if (length(*tls.verificationResultBuckets[idx][i].matches) > 0u)
+            if (!empty(*tls.verificationResultBuckets[idx][i].matches))
                 // std::cerr << "BUCKET FROM WINDOW " << tls.nextBucketToWriteBack << "\t" << front(*tls.verificationResultBuckets[idx][i].matches).beginPos << "\t" << back(*tls.verificationResultBuckets[idx][i].matches).endPos << "\t" << length(*tls.verificationResultBuckets[idx][i].matches) << std::endl;
             append(tls.matches, *tls.verificationResultBuckets[idx][i].matches);
         }
@@ -441,7 +437,8 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
     }
 
     // std::cerr << "[wrote back " << bucketsWrittenBack << " buckets (" << tls.nextBucketToWriteBack << "/" << length(tls.missingInBucket) << ")]" << std::endl;
-    if (bucketsWrittenBack > 0u) {
+    if (bucketsWrittenBack > 0u) 
+    {
         // (3) Update match filter data structure for disabling reads.
         size_t nextWindowBegin = tls.options.windowSize * (tls.nextBucketToWriteBack);
         if (tls.nextBucketToWriteBack == length(tls.missingInBucket)) // is last?
@@ -465,7 +462,7 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
             if (it->orientation == '-') continue;  // Skip masked reads.
             disabled += processRead(*tls.matchFilter, it->readId);
         }
-        if (tls.options._debugLevel >= 2)
+        if (tls.options._debugLevel >= 2 && disabled > 0)
             fprintf(stderr, " [%u reads disabled]", disabled);
     }
 #else  // #ifdef RAZERS_DEFER_COMPACTION
@@ -545,7 +542,6 @@ template <
 	typename TGapMode,
 	typename TScoreMode,
     typename TMatchNPolicy,
-    typename TPreprocessing,
     typename TFilterSpec>
 void _mapSingleReadsParallelToContig(
 	FragmentStore<TFSSpec, TFSConfig>						& store,
@@ -557,7 +553,6 @@ void _mapSingleReadsParallelToContig(
 	RazerSOptions<TSpec>									& options,
 	TShape const											& /*shape*/,
 	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const      & /*mode*/,
-    TPreprocessing                                          & preprocessing,
     TFilterSpec)
 {
 #ifdef RAZERS_PROFILE
@@ -618,7 +613,6 @@ void _mapSingleReadsParallelToContig(
 		threadLocalStorages[i].verifier.genomeLength = length(contigSeq);
 		threadLocalStorages[i].verifier.oneMatchPerBucket = false;
 		threadLocalStorages[i].verifier.m.contigId = contigId;
-		threadLocalStorages[i].verifier.preprocessing = &preprocessing;
     }
 
     // -----------------------------------------------------------------------
@@ -841,6 +835,9 @@ void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStora
         // Initialize the index.
         TIndex & index = host(tls.filterPattern);
         clear(index);
+//        indexText(index).limitsValid = false;
+//        assign(indexText(index).strings, infix(store.readSeqStore, splitters[i], splitters[i + 1]), Exact());
+        
         clear(indexText(index));
         for (TPosition j = splitters[i]; j < splitters[i + 1]; ++j)
             appendValue(indexText(index), store.readSeqStore[j]);
@@ -970,32 +967,6 @@ int _mapSingleReadsParallel(
     int oldMaxThreads = omp_get_max_threads();
     omp_set_num_threads(options.threadCount);
 
-    // Verifier preprocessing
-#ifdef RAZERS_BANDED_MYERS
-	typedef Nothing TPreprocessing;
-	TPreprocessing preprocessing;
-#else
-    // TODO(holtgrew): Parallelize preprocessing?
-	typedef String<TMyersPattern> TPreprocessing;
-    TPreprocessing preprocessing;
-	if (options.gapMode == RAZERS_GAPPED) 
-	{
-		unsigned readCount = countSequences(store.readSeqStore);
-		resize(preprocessing, readCount, Exact()); 
-		for(unsigned i = 0; i < readCount; ++i) 
-		{ 
-#ifdef RAZERS_NOOUTERREADGAPS
-			if (!empty(store.readSeqStore[i]))
-				setHost(preprocessing[i], prefix(store.readSeqStore[i], length(store.readSeqStore[i]) - 1));
-#else
-			setHost(preprocessing[i], store.readSeqStore[i]); 
-#endif
-			_patternMatchNOfPattern(preprocessing[i], options.matchN); 
-			_patternMatchNOfFinder(preprocessing[i], options.matchN); 
-		} 
-	}
-#endif
-
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_INIT);
     double beginInit = sysTime();
@@ -1013,7 +984,7 @@ int _mapSingleReadsParallel(
 	SEQAN_PROTIMESTART(initTime);
     String<unsigned> splitters;
     computeSplittersBySlotCount(splitters, length(store.readNameStore), options.threadCount);
-    typedef ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFilterFinder, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode, TPreprocessing> > TThreadLocalStorage;
+    typedef ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFilterFinder, TFilterPattern, TShape, TOptions, TCounts, TRazerSMode> > TThreadLocalStorage;
     String<TThreadLocalStorage> threadLocalStorages;
     initializeThreadLocalStoragesSingle(threadLocalStorages, store, splitters, shape, options);
 
@@ -1039,9 +1010,9 @@ int _mapSingleReadsParallel(
     for (unsigned contigId = 0; contigId < length(store.contigStore); ++contigId) {
 		lockContig(store, contigId);
 		if (options.forward)
-			_mapSingleReadsParallelToContig(store, threadLocalStorages, splitters, contigId, cnts, 'F', options, shape, mode, preprocessing, TFilterSpec());
+			_mapSingleReadsParallelToContig(store, threadLocalStorages, splitters, contigId, cnts, 'F', options, shape, mode, TFilterSpec());
 		if (options.reverse)
-			_mapSingleReadsParallelToContig(store, threadLocalStorages, splitters, contigId, cnts, 'R', options, shape, mode, preprocessing, TFilterSpec());
+			_mapSingleReadsParallelToContig(store, threadLocalStorages, splitters, contigId, cnts, 'R', options, shape, mode, TFilterSpec());
 		unlockAndFreeContig(store, contigId);
     }
     double endMapping = sysTime();

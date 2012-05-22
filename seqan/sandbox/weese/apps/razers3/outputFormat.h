@@ -566,8 +566,7 @@ void appendIntNumber(TString &str, TInt i)
 
 //////////////////////////////////////////////////////////////////////////////
 // Output matches
-template <
-	typename TFSSpec,
+template <	typename TFSSpec,
 	typename TFSConfig,
 	typename TCounts,
 	typename TSpec,
@@ -590,6 +589,7 @@ int dumpMatches(
 
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
 	typedef typename Size<TAlignedReadStore>::Type					TAlignedReadStoreSize;
+	typedef typename MakeSigned<TAlignedReadStoreSize>::Type		TAlignedReadStoreSizeSigned;
 	typedef typename Value<TContigStore>::Type						TContig;
 	typedef typename Value<TContigFileStore>::Type					TContigFile;
 
@@ -765,7 +765,7 @@ int dumpMatches(
                 //resize(fileOffsets, chunkSize + 1, 0);
 
 			    #pragma omp parallel for private(intBuf)
-			    for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
+			    for (TAlignedReadStoreSizeSigned i = 0; i < (TAlignedReadStoreSizeSigned)chunkSize; ++i)
                 {
                     CharString &line = lines[i];
                     TAlignedRead &ar = store.alignedReadStore[fromIdx + i];
@@ -781,7 +781,7 @@ int dumpMatches(
                         case 0:
                         case 3:  // same as 0 if non-paired
                             append(line, store.readNameStore[ar.readId]);
-                            //file << store.readNameStore[(*it).readId];
+                            //file << store.readNameStore[ar.readId];
                             break;
 
                         // 1..filename is the read filename + seqNo
@@ -791,16 +791,16 @@ int dumpMatches(
                             sprintf(intBuf, "%09u", ar.readId + 1);
                             append(line, intBuf);
                             //file.fill('0');
-                            //file << readName << '#' << std::setw(pzeros) << (*it).readId + 1;
+                            //file << readName << '#' << std::setw(pzeros) << ar.readId + 1;
                             break;
 
                         // 2..filename is the read sequence itself
                         case 2:
                             append(line, store.readSeqStore[ar.readId]);
-                            //file << store.readSeqStore[(*it).readId];
+                            //file << store.readSeqStore[ar.readId];
                     }
 
-                    //file << _sep_ << options.positionFormat << _sep_ << readLen << _sep_ << (((*it).beginPos < (*it).endPos)? 'F': 'R') << _sep_;
+                    //file << _sep_ << options.positionFormat << _sep_ << readLen << _sep_ << ((ar.beginPos < ar.endPos)? 'F': 'R') << _sep_;
                     appendValue(line, _sep_);
                     appendValue(line, '0' + options.positionFormat);
                     appendValue(line, _sep_);
@@ -813,7 +813,7 @@ int dumpMatches(
                     {
                         // 0..filename is the genome's Fasta id
                         case 0:
-                            //file << store.contigNameStore[(*it).contigId];
+                            //file << store.contigNameStore[ar.contigId];
                             append(line, store.contigNameStore[ar.contigId]);
                             break;
 
@@ -826,43 +826,43 @@ int dumpMatches(
                             sprintf(intBuf, "%09u", ar.contigId - contigFile.firstContigId + 1);
                             append(line, intBuf);
                             //strstrm.fill('0');
-                            //strstrm << contigFile.fileName << '#' << std::setw(gzeros) << ((*it).contigId - contigFile.firstContigId + 1);
+                            //strstrm << contigFile.fileName << '#' << std::setw(gzeros) << (ar.contigId - contigFile.firstContigId + 1);
                     }
 
                     appendValue(line, _sep_);
-                    if ((*it).beginPos < ar.endPos)
+                    if (ar.beginPos < ar.endPos)
                         appendIntNumber(line, ar.beginPos + options.positionFormat);
                     else
                         appendIntNumber(line, ar.endPos + options.positionFormat);
                     appendValue(line, _sep_);
-                    if ((*it).beginPos < ar.endPos)
+                    if (ar.beginPos < ar.endPos)
                         appendIntNumber(line, ar.endPos);
                     else
                         appendIntNumber(line, ar.beginPos);
                     appendValue(line, _sep_);
                     sprintf(intBuf, "%.5g", percId);
                     append(line, intBuf);
-                    //if ((*it).beginPos < (*it).endPos)
-                    //	file << _sep_ << ((*it).beginPos + options.positionFormat) << _sep_ << (*it).endPos << _sep_ << std::setprecision(5) << percId;
+                    //if (ar.beginPos < ar.endPos)
+                    //	file << _sep_ << (ar.beginPos + options.positionFormat) << _sep_ << ar.endPos << _sep_ << std::setprecision(5) << percId;
                     //else
-                    //	file << _sep_ << ((*it).endPos + options.positionFormat) << _sep_ << (*it).beginPos << _sep_ << std::setprecision(5) << percId;
+                    //	file << _sep_ << (ar.endPos + options.positionFormat) << _sep_ << ar.beginPos << _sep_ << std::setprecision(5) << percId;
 
-                    if ((*it).pairMatchId != TAlignedRead::INVALID_ID)
+                    if (ar.pairMatchId != TAlignedRead::INVALID_ID)
                     {
                         appendValue(line, _sep_);
                         appendIntNumber(line, ar.pairMatchId);
                         appendValue(line, _sep_);
                         appendIntNumber(line, (int)store.alignQualityStore[ar.id].pairScore);
                         appendValue(line, _sep_);
-                        if ((*it).beginPos < ar.endPos)
+                        if (ar.beginPos < ar.endPos)
                             appendIntNumber(line, libSize[ar.pairMatchId]);
                         else
                             appendIntNumber(line, -libSize[ar.pairMatchId]);
-                        //file << _sep_ << (*it).pairMatchId << _sep_ << (int)store.alignQualityStore[(*it).id].pairScore << _sep_;
-                        //if ((*it).beginPos < (*it).endPos)
-                        //    file << libSize[(*it).pairMatchId];
+                        //file << _sep_ << ar.pairMatchId << _sep_ << (int)store.alignQualityStore[ar.id].pairScore << _sep_;
+                        //if (ar.beginPos < ar.endPos)
+                        //    file << libSize[ar.pairMatchId];
                         //else
-                        //    file << -libSize[(*it).pairMatchId];
+                        //    file << -libSize[ar.pairMatchId];
                     }
                     //strstrm << '\n';
                     appendValue(line, '\n');

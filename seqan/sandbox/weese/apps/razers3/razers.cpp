@@ -388,6 +388,7 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "1 = enumerate beginning with 1");
 	addHelpLine(parser, "2 = use the read sequence (only for short reads!)");
 	addHelpLine(parser, "3 = use the Fasta id, do NOT append '/L' or '/R' for mate pairs");
+	addOption(parser, CommandLineOption("",   "full-readid",       "use the whole read id (don't clip after whitespace)", OptionType::Boolean));
 	addOption(parser, CommandLineOption("so", "sort-order",        "select how matches are sorted", OptionType::Int | OptionType::Label, options.sortOrder));
 	addHelpLine(parser, "0 = 1. read number, 2. genome position");
 	addHelpLine(parser, "1 = 1. genome position, 2. read number");
@@ -455,6 +456,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "sort-order", options.sortOrder);
 	getOptionValueLong(parser, "genome-naming", options.genomeNaming);
 	getOptionValueLong(parser, "read-naming", options.readNaming);
+	getOptionValueLong(parser, "full-readid", options.fullFastaId);    
 	getOptionValueLong(parser, "position-format", options.positionFormat);
 	getOptionValueLong(parser, "compact-mult", options.compactMult);
 	getOptionValueLong(parser, "no-compact-frac", options.noCompactFrac);
@@ -486,7 +488,7 @@ int main(int argc, const char *argv[])
 		options.maxHits = 1;
 		options.scoreDistanceRange = 1;
 		options.purgeAmbiguous = true;
-	}	
+	}
 	if (!options.forward && !options.reverse)  // enable both per default
 	{
 		options.forward = true;
