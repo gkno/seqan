@@ -256,7 +256,7 @@ struct SnpLess
 //        if (a.contigId > b.contigId) return false;
         if (a.virtualPos < b.virtualPos) return true;
         if (a.virtualPos > b.virtualPos) return false;
-        return true;
+        return false;
     }
 };
 
@@ -951,9 +951,7 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             insert(haplotype[contigId], pos + delta, alt[allele]);
 //            if (empty(ref))
 //                std::cerr << "OK: " << contigName << '\t' << pos << "\t..\t=>\t." << alt[allele] << ".\t" << delta << std::endl;
-        }
-        delta += length(alt[allele]) - length(ref);
-        
+        }        
         
 //        snp.contigId = contigId;
         snp.virtualPos = pos + delta;
@@ -976,6 +974,8 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             ++numIndels;
         }
         appendValue(snpSet[contigId], snp);
+
+        delta += length(alt[allele]) - length(ref);
     }
     if (oldContigId >= 0)
     {
@@ -1379,6 +1379,15 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     TIter snpBeg = std::lower_bound(allBeg, allEnd, searchSnp, SnpLess());
                     searchSnp.virtualPos = inst.endPos;
                     TIter snpEnd = std::upper_bound(allBeg, allEnd, searchSnp, SnpLess());
+                    
+//                    if (readId == 88704)
+//                    {
+//                        std::cout << "begPos:\t" << inst.beginPos << std::endl;
+//                        std::cout << "endPos:\t" << inst.endPos << std::endl;
+//                        for (TIter it = snpBeg; it != snpEnd; ++it)
+//                            std::cout << it->virtualPos << '\t' << (int)it->type << '\t' << it->length << std::endl;
+//                    }
+
                 
                     for (TIter it = snpBeg; it != snpEnd; ++it)
                     {
@@ -1509,3 +1518,4 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 }
 
 #endif  // MASON_H_
+                                                                                                        
