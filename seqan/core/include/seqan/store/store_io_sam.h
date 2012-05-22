@@ -1475,7 +1475,9 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
             
             _streamPut(target, '\n');
         }
-        
+
+#if 0  // DISABLE FOR NOW
+        // Write out records for unaligned reads.
         TSize readCount = length(store.readSeqStore);
         for (unsigned readId = 0; readId < readCount; ++readId)
         {
@@ -1550,6 +1552,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
             
             _streamPut(target, '\n');
         }
+#endif  // #if 0
     }
     
     template<typename TFile, typename TSpec, typename TConfig>
