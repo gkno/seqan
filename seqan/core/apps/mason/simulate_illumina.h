@@ -448,7 +448,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
 
         for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
             SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
-            if (inst.editString[i] == ERROR_TYPE_MISMATCH) {
+            if (inst.editString[i] == ERROR_TYPE_MISMATCH || inst.editString[i] == ERROR_TYPE_INSERT) {
                 // std::cout << "i == " << i << ", j == " << j << ", parameters.mismatchQualityMeans[j] == " << parameters.mismatchQualityMeans[j] << ", parameters.mismatchQualityStdDevs[j] == " << parameters.mismatchQualityStdDevs[j] << std::endl;
                 Pdf<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
                 inst.qualities[i] = static_cast<int>(pickRandomNumber(rng, pdf));
