@@ -143,10 +143,15 @@ void write(TStream & stream, RabemaStats const & stats, int maxError, seqan::Raw
     {
         if (maxError != -1  && (int)i != maxError)
             continue;
+        double percFoundIntervals = 100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i];
+        if (stats.intervalsToFindForErrorRate[i] == 0u)
+            percFoundIntervals = 0;
+        double percFoundNormalizedIntervals = 100.0 * stats.normalizedIntervalsFoundForErrorRate[i] / stats.normalizedIntervalsToFindForErrorRate[i];
+        if (stats.normalizedIntervalsToFindForErrorRate[i] == 0)
+            percFoundNormalizedIntervals = 0;
         sprintf(buffer, "%5u\t%8d\t%8d\t%8.2f\t%8.2f\t%10.2f\t%10.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
-                100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i],
-                stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i],
-                100.0 * stats.normalizedIntervalsFoundForErrorRate[i] / stats.normalizedIntervalsToFindForErrorRate[i]);
+                percFoundIntervals, stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i],
+                percFoundNormalizedIntervals);
         stream << buffer;
     }
     stream << '\n';
