@@ -1435,10 +1435,13 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 }
                 
                 CharString readName(&readNameBuf[0]);
-                if (inst.isForward)
-                    append(readName, " strand=forward");
-                else
-                    append(readName, " strand=reverse");
+                if (options.includeReadInformation)
+                {
+                    if (inst.isForward)
+                        append(readName, " strand=forward");
+                    else
+                        append(readName, " strand=reverse");
+                }
                 appendValue(fragmentStore.readNameStore, readName);
 
                 // Print info about read and haplotype.
