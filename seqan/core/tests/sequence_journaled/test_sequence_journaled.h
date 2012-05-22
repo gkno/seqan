@@ -323,11 +323,11 @@ void testJournaledStringVirtualToHostPosition(TStringJournalSpec const &)
     {
         CharString charStr = "test";
         String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
-        
+
         insertValue(journaledString, 0, '!');
         erase(journaledString, 2);
         insertValue(journaledString, 4, '!');
-        
+
         // journaledString == !tst!
         //
         //                           01234
@@ -335,25 +335,25 @@ void testJournaledStringVirtualToHostPosition(TStringJournalSpec const &)
         //                         "!t-st!"
         //                          01 2345
 
-        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0));
-        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 1));
-        SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 2));
-        SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 3));
-        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 4));
-        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 5));
+        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0u));
+        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 1u));
+        SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 2u));
+        SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 3u));
+        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 4u));
+        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 5u));
     }
     {
         CharString charStr = "ABCDE";
         String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
         insert(journaledString, 1, "XX");
-        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0));
-        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 1));
-        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 2));
-        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 3));
-        SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 4));
-        SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 5));
-        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 6));
-        SEQAN_ASSERT_EQ(5u, virtualToHostPosition(journaledString, 7));
+        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0u));
+        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 1u));
+        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 2u));
+        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 3u));
+        SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 4u));
+        SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 5u));
+        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 6u));
+        SEQAN_ASSERT_EQ(5u, virtualToHostPosition(journaledString, 7u));
     }
 }
 
