@@ -136,11 +136,15 @@ struct BuildGoldStandardOptions
     // Path to the perfect input BAM file.
     seqan::CharString inBamPath;
 
+    // Whether or not to compress GSI output.
+    bool compressGsi;
+
     BuildGoldStandardOptions() :
         verbosity(1),
         matchN(false),
         oracleMode(false),
-        maxError(0)
+        maxError(0),
+        compressGsi(false)
     {}
 };
 
@@ -905,6 +909,7 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     addOption(parser, seqan::ArgParseOption("o", "out-gsi", "Path to write the resulting GSI file to.",
                                             seqan::ArgParseArgument::STRING, false, "GSI"));
     setRequired(parser, "out-gsi", true);
+    addOption(parser, seqan::ArgParseOption("z", "gzip-gsi", "Compress GSI output using gzip."));
     addOption(parser, seqan::ArgParseOption("r", "reference", "Path to load reference FASTA from.",
                                             seqan::ArgParseArgument::STRING, false, "FASTA"));
     setRequired(parser, "reference", true);
@@ -1000,6 +1005,7 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
         getOptionValue(options.inSamPath, parser, "in-sam");
     if (isSet(parser, "in-bam"))
         getOptionValue(options.inBamPath, parser, "in-bam");
+    options.compressGsi = isSet(parser, "gzip-gsi");
 
     return res;
 }
@@ -1033,7 +1039,8 @@ int main(int argc, char const ** argv)
               << "Oracle mode           " << (options.oracleMode ? (char const *) "yes" : (char const *) "no") << "\n"
               << "Distance measure      " << options.distanceMetric << "\n"
               << "Match Ns              " << (options.matchN ? (char const *) "yes" : (char const *) "no") << '\n'
-              << "GSI Output File       " << options.outGsiPath << '\n'
+              << "GSI Output File       " << options.outGsiPath  << '\n'
+              << "  compress GSI?       " << (options.compressGsi ? (char const *) "yes" : (char const *) "no") << '\n'
               << "SAM Input File        " << options.inSamPath << '\n'
               << "BAM Input File        " << options.inBamPath << '\n'
               << "Reference File        " << options.referencePath << '\n'
@@ -1089,6 +1096,11 @@ int main(int argc, char const ** argv)
             std::cerr << "Could not open SAM file.\n";
             return 1;
         }
+        if (readRecord(bamHeader, bamIOContext, samReader, Sam()) != 0)
+        {
+            std::cerr << "Could not read SAM header.\n";
+            return 1;
+        }
     }
     else
     {
@@ -1100,7 +1112,7 @@ int main(int argc, char const ** argv)
         }
         if (readRecord(bamHeader, bamIOContext, bamStream, Bam()) != 0)
         {
-            std::cerr << "Could not read SAM header.\n";
+            std::cerr << "Could not read BAM header.\n";
             return 1;
         }
     }
@@ -1168,17 +1180,34 @@ int main(int argc, char const ** argv)
     else
     {
         std::cerr << "Writing to " << options.outGsiPath << " ...";
-        std::fstream fstrm(toCString(options.outGsiPath), std::ios_base::out);
-        if (!fstrm.is_open())
+        if (options.compressGsi)
         {
-            std::cerr << "Could not open out file \"" << options.outGsiPath << "\"\n";
-            return 1;
+            Stream<GZFile> gsiStream;
+            if (!open(gsiStream, toCString(options.outGsiPath), "wb"))
+            {
+                std::cerr << "Could not open out file \"" << options.outGsiPath << "\"\n";
+                return 1;
+            }
+            GsiHeader header;
+            writeRecord(gsiStream, header, Gsi());
+            writeRecord(gsiStream, GSI_COLUMN_NAMES, Gsi());
+            for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
+                writeRecord(gsiStream, *it, Gsi());
         }
-        GsiHeader header;
-        writeRecord(fstrm, header, Gsi());
-        writeRecord(fstrm, GSI_COLUMN_NAMES, Gsi());
-        for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
-            writeRecord(fstrm, *it, Gsi());
+        else
+        {
+            std::fstream gsiStream(toCString(options.outGsiPath), std::ios::binary | std::ios::out);
+            if (!gsiStream.good())
+            {
+                std::cerr << "Could not open out file \"" << options.outGsiPath << "\"\n";
+                return 1;
+            }
+            GsiHeader header;
+            writeRecord(gsiStream, header, Gsi());
+            writeRecord(gsiStream, GSI_COLUMN_NAMES, Gsi());
+            for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
+                writeRecord(gsiStream, *it, Gsi());
+        }
         std::cerr << " DONE\n";
     }
     std::cerr << "\n Took " << sysTime() - startTime << " s\n";

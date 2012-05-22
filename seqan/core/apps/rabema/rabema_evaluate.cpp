@@ -1049,13 +1049,15 @@ int main(int argc, char const ** argv)
 
     // Open gold standard intervals (GSI) file and read in header.
     std::cerr << "Gold Standard Intervals   " << options.inGsiPath << " (header) ...";
-    std::ifstream inGsi(toCString(options.inGsiPath), std::ios::in | std::ios::binary);
-    if (!inGsi.is_open())
+    Stream<GZFile> inGsi;
+    if (!open(inGsi, toCString(options.inGsiPath), "rb"))
     {
         std::cerr << "Could not open GSI file.\n";
         return 1;
     }
-    RecordReader<std::ifstream, SinglePass<> > gsiReader(inGsi);
+    if (!isDirect(inGsi))
+        std::cerr << " (is gzip'ed)";
+    RecordReader<Stream<GZFile>, SinglePass<> > gsiReader(inGsi);
     GsiHeader gsiHeader;
     if (readRecord(gsiHeader, gsiReader, Gsi()) != 0)
     {
@@ -1099,7 +1101,7 @@ int main(int argc, char const ** argv)
         }
         if (readRecord(bamHeader, bamIOContext, bamStream, Bam()) != 0)
         {
-            std::cerr << "Could not read SAM header.\n";
+            std::cerr << "Could not read BAM header.\n";
             return 1;
         }
     }

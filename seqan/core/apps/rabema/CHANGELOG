@@ -1,5 +1,11 @@
 == Trunk ==
 
+ * GSI can now be written and read from compressed file.
+ * A detailed and updated manual is now available.
+ * Using new command line parser yields better documentation.
+ * WIT is replaced by GSI file format (gold standard intervals).
+ * Rabema can handle BAM now as well as SAM.
+ * Rabema has been split into two programs `rabema_build_gold_standard` and `rabema_evaluate`.
  * Sort order of SAM files is now checked on the fly and not at the beginning any more.
  * Oracle also works in Rabema 1.1.
  * Major restructuring of the code, removing unused parts, debug comments etc.

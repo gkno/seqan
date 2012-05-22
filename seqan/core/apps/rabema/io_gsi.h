@@ -376,8 +376,10 @@ int readRecord(GsiRecord & record, RecordReader<TStream, TSpec> & reader, Gsi co
 template <typename TStream>
 int writeRecord(TStream & stream, GsiHeader const & /*header*/, Gsi const & /*tag*/)
 {
-    stream << "@GSI\tVN:1.1\n"
-    << "@MATES\tSEP:/\tTYPE:01\n";
+    if (streamPut(stream, "@GSI\tVN:1.1\n") != 0)
+        return 1;
+    if (streamPut(stream, "@MATES\tSEP:/\tTYPE:01\n") != 0)
+        return 1;
     return 0;
 }
 
@@ -396,7 +398,12 @@ int writeRecord(TStream & stream, GsiHeader const & /*header*/, Gsi const & /*ta
 template <typename TStream>
 int writeRecord(TStream & stream, CharString const & str, Gsi const & /*tag*/)
 {
-    stream << "# " << str << '\n';
+    if (streamPut(stream, '#') != 0)
+        return 1;
+    if (streamPut(stream, str) != 0)
+        return 1;
+    if (streamPut(stream, '\n') != 0)
+        return 1;
     return 0;
 }
 
@@ -414,7 +421,49 @@ int writeRecord(TStream & stream, CharString const & str, Gsi const & /*tag*/)
 template <typename TStream>
 int writeRecord(TStream & stream, GsiRecord const & record, Gsi const & /*tag*/)
 {
-    stream << record << '\n';
+    if (streamPut(stream, record.readName) != 0)
+        return 1;
+    if (record.flags & GsiRecord::FLAG_PAIRED)
+    {
+        if (record.flags & GsiRecord::FLAG_FIRST_MATE)
+        {
+            if (streamPut(stream, "/0") != 0)
+                return 1;
+        }
+        else if (record.flags & GsiRecord::FLAG_SECOND_MATE)
+        {
+            if (streamPut(stream, "/1") != 0)
+                return 1;
+        }
+        else
+        {
+            if (streamPut(stream, "/?") != 0)
+                return 1;
+        }
+    }
+    if (streamPut(stream, '\t') != 0)
+        return 1;
+    if (streamPut(stream, record.distance) != 0)
+        return 1;
+    if (streamPut(stream, '\t') != 0)
+        return 1;
+    if (streamPut(stream, record.contigName) != 0)
+        return 1;
+    if (streamPut(stream, '\t') != 0)
+        return 1;
+    if (streamPut(stream, (record.isForward ? 'F' : 'R')) != 0)
+        return 1;
+    if (streamPut(stream, '\t') != 0)
+        return 1;
+    if (streamPut(stream, record.firstPos) != 0)
+        return 1;
+    if (streamPut(stream, '\t') != 0)
+        return 1;
+    if (streamPut(stream, record.lastPos) != 0)
+        return 1;
+    if (streamPut(stream, '\n') != 0)
+        return 1;
+
     return 0;
 }
 
