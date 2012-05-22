@@ -9,27 +9,31 @@ include_directories(../../../extras/include)
 # Preparation of SAM files, i.e. filling SEQ field of each record.
 seqan_add_executable(rabema_prepare_sam prepare_sam.cpp)
 
-# Building of GSI file from "perfect" SAM file and reference sequence.
-seqan_add_executable(rabema_build_gold_standard rabema_build_gold_standard.cpp
-                     curve_smoothing.h
-                     fai_index.h
-                     find_hamming_simple_ext.h
-                     find_myers_ukkonen_ext.h
-                     find_myers_ukkonen_reads.h
-                     io_gsi.h
-                     rabema_stats.h
-                     ref_id_mapping.h)
+if (ZLIB_FOUND)
+    # Building of GSI file from "perfect" SAM file and reference sequence.
+    seqan_add_executable(rabema_build_gold_standard rabema_build_gold_standard.cpp
+                         curve_smoothing.h
+                         fai_index.h
+                         find_hamming_simple_ext.h
+                         find_myers_ukkonen_ext.h
+                         find_myers_ukkonen_reads.h
+                         io_gsi.h
+                         rabema_stats.h
+                         ref_id_mapping.h)
 
-# Comparison of arbitrary read mapper SAM against GSI file.
-seqan_add_executable(rabema_evaluate rabema_evaluate.cpp
-                     curve_smoothing.h
-                     fai_index.h
-                     find_hamming_simple_ext.h
-                     find_myers_ukkonen_ext.h
-                     find_myers_ukkonen_reads.h
-                     io_gsi.h
-                     rabema_stats.h
-                     ref_id_mapping.h)
+    # Comparison of arbitrary read mapper SAM against GSI file.
+    seqan_add_executable(rabema_evaluate rabema_evaluate.cpp
+                         curve_smoothing.h
+                         fai_index.h
+                         find_hamming_simple_ext.h
+                         find_myers_ukkonen_ext.h
+                         find_myers_ukkonen_reads.h
+                         io_gsi.h
+                         rabema_stats.h
+                         ref_id_mapping.h)
+else (ZLIB_FOUND)
+    message(STATUS "INFO: Rabema not build because zlib was not found.")
+endif (ZLIB_FOUND)
 
 # Small tool for helping in debugging.
 seqan_add_executable(do_search do_search.cpp find_myers_ukkonen_ext.h)

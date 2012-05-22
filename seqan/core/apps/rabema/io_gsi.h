@@ -201,7 +201,7 @@ TStream & operator<<(TStream & stream, GsiRecord const & record)
 // Function readRecord()                                           [GsiHeader]
 // ---------------------------------------------------------------------------
 
-// Read GSI header line ("@GSI\tVN:1.0") from record reader.
+// Read GSI header line ("@GSI\tVN:1.1") from record reader.
 
 template <typename TStream, typename TSpec>
 int readRecord(GsiHeader & header, RecordReader<TStream, TSpec> & reader, Gsi const & /*tag*/)
@@ -219,13 +219,13 @@ int readRecord(GsiHeader & header, RecordReader<TStream, TSpec> & reader, Gsi co
     if (skipChar(reader, '\t') != 0)
         return 1;  // Next char was not TAB.
 
-    // Read "VN:1.0".
+    // Read "VN:1.1".
     clear(tmp);
     if (readUntilTabOrLineBreak(tmp, reader) != 0)
         return 1;  // Could not read version.
 
-    if (tmp != "VN:1.0")
-        std::cerr << "WARNING: Version is not \"VN:1.0\", was: \"" << tmp << "\"" << std::endl;
+    if (tmp != "VN:1.1")
+        std::cerr << "WARNING: Version is not \"VN:1.1\", was: \"" << tmp << "\"" << std::endl;
     // Skip to and after end of line.
     skipLine(reader);
     // Maybe read/skip additional header lines.

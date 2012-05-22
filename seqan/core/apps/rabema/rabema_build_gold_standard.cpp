@@ -23,7 +23,7 @@
 //
 // This is the program for building the RABEMA gold standard.  The input to
 // this program is the reference sequence as a FASTA file and a "perfect
-// mapping" SAM file (see README on how to obtain such a gold standard).
+// mapping" SAM/BAM file (see README on how to obtain such a gold standard).
 // ==========================================================================
 
 // TODO(holtgrew): Another possible way to save memory is not to store the first, always identical part of the read id.
@@ -111,9 +111,9 @@ struct BuildGoldStandardOptions
     // Whether N should match all characters without penalty.
     bool matchN;
 
-    // Whether or not to run in oracle mode.  The input SAM file must only contain the sample location for each read in
-    // this case.  This is used when building a GSI file for reads simulated by Mason where the original locations are
-    // written out in a SAM file.
+    // Whether or not to run in oracle mode.  The input SAM/BAM file must only contain the sample location for each read
+    // in this case.  This is used when building a GSI file for reads simulated by Mason where the original locations
+    // are written out in a SAM/BAM file.
     bool oracleMode;
 
     // Maximal error rate in percent, relative to the read length.
@@ -129,8 +129,12 @@ struct BuildGoldStandardOptions
     // Path to the reference contigs file.
     seqan::CharString referencePath;
 
+    // Exactly one of the following two has to be given.
+    //
     // Path to the perfect input SAM file.
     seqan::CharString inSamPath;
+    // Path to the perfect input BAM file.
+    seqan::CharString inBamPath;
 
     BuildGoldStandardOptions() :
         verbosity(1),
@@ -664,20 +668,21 @@ void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 
 // Compute error curve from the reads and reference sequences.
 
-template <typename TPatternSpec>
+template <typename TPatternSpec, typename TStreamOrReader, typename TFormat>
 int matchesToErrorFunction(TErrorCurves & errorCurves,
                            String<int> & readAlignmentDistances,  // only used in case of oracle mode
-                           RecordReader<std::ifstream, SinglePass<> > & samReader,
+                           TStreamOrReader & streamOrReader,
                            BamIOContext<StringSet<CharString> > & samIOContext,
                            StringSet<CharString> & readNameStore,
                            StringSet<CharString> const & contigNameStore,
                            FaiIndex const & faiIndex,
                            BuildGoldStandardOptions const & options,
-                           TPatternSpec const &)
+                           TPatternSpec const & /*patternTag*/,
+                           TFormat const & formatTag)
 {
     double startTime = 0;
 
-    if (atEnd(samReader))
+    if (atEnd(streamOrReader))
         return 0;  // Do nothing if there are no more alignments in the file.
 
     // TODO(holtgrew): We could also trim the part of the read name that is always equal to save some more memory.
@@ -690,8 +695,8 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     std::cerr << "\n____EXTENDING INTERVALS_______________________________________________________\n\n"
               << "Each dot represents work for 100k nucleotides in the genome.\n";
 
-    // Stream over SAM file.  The main assumption here is that the reads are sorted by coordinate, which is check when
-    // loading the SAM header.
+    // Stream over SAM/BAM file.  The main assumption here is that the reads are sorted by coordinate, which is check
+    // when loading the header.
     //
     // For each read alignments:
     //   If aligned on forward strand:
@@ -708,19 +713,19 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
     Dna5String rcContig;
     Dna5String readSeq;
     CharString readName;
-    while (!atEnd(samReader))
+    while (!atEnd(streamOrReader))
     {
         // -------------------------------------------------------------------
-        // Read SAM Record and retrieve name and sequence.
+        // Read SAM/BAM Record and retrieve name and sequence.
         // -------------------------------------------------------------------
 
-        // Read SAM record.
-        if (readRecord(record, samIOContext, samReader, Sam()) != 0)
+        // Read SAM/BAM record.
+        if (readRecord(record, samIOContext, streamOrReader, formatTag) != 0)
         {
-            std::cerr << "ERROR reading SAM record!\n";
+            std::cerr << "ERROR reading SAM/BAM record!\n";
             return 1;
         }
-        // Break if we have an unaligned SAM record.
+        // Break if we have an unaligned SAM/BAM record.
         if (record.rId == -1)
             break;  // Done!
         // Check that the file is actually sorted by coordinate.
@@ -798,8 +803,8 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
         // Extend error curve points for read.
         // -------------------------------------------------------------------
 
-        // In oracle SAM mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position
-        // from the SAM file.  In normal mode, convert from error rate from options to error count.
+        // In oracle mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position
+        // from the SAM/BAM file.  In normal mode, convert from error rate from options to error count.
         int maxError = options.oracleMode ? maxValue<int>() : static_cast<int>(floor(0.01 * options.maxError * length(record.seq)));
 
         // Compute end position of alignment.
@@ -883,11 +888,14 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     addUsageLine(parser,
                  "[\\fIOPTIONS\\fP] \\fB--out-gsi\\fP \\fIOUT.gsi\\fP \\fB--reference\\fP \\fIREF.fa\\fP "
                  "\\fB--in-sam\\fP \\fIPERFECT.sam\\fP");
+    addUsageLine(parser,
+                 "[\\fIOPTIONS\\fP] \\fB--out-gsi\\fP \\fIOUT.gsi\\fP \\fB--reference\\fP \\fIREF.fa\\fP "
+                 "\\fB--in-bam\\fP \\fIPERFECT.bam\\fP");
     addDescription(parser,
                    "This program allows to build a RABEMA gold standard.  The input is a reference FASTA file "
-                   "and a perfect SAM map (e.g. created using RazerS 2 in full-sensitivity mode).");
+                   "and a perfect SAM/BAM map (e.g. created using RazerS 2 in full-sensitivity mode).");
     addDescription(parser,
-                   "The input SAM file must be \\fIsorted by coordinate\\fP.  The program will create a "
+                   "The input SAM/BAM file must be \\fIsorted by coordinate\\fP.  The program will create a "
                    "FASTA index file \\fIREF.fa.fai\\fP for fast random access to the reference.");
 
     addOption(parser, seqan::ArgParseOption("v", "verbose", "Enable verbose output."));
@@ -902,12 +910,13 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     setRequired(parser, "reference", true);
     addOption(parser, seqan::ArgParseOption("s", "in-sam", "Path to load the \"perfect\" SAM file from.",
                                             seqan::ArgParseArgument::STRING, false, "SAM"));
-    setRequired(parser, "in-sam", true);
+    addOption(parser, seqan::ArgParseOption("b", "in-bam", "Path to load the \"perfect\" BAM file from.",
+                                            seqan::ArgParseArgument::STRING, false, "BAM"));
 
     addSection(parser, "Gold Standard Parameters");
     addOption(parser, seqan::ArgParseOption("", "oracle-mode",
                                             "Enable oracle mode.  This is used for simulated data when the input "
-                                            "SAM file gives exactly one position that is considered as the true "
+                                            "SAM/BAM file gives exactly one position that is considered as the true "
                                             "sample position."));
     addOption(parser, seqan::ArgParseOption("", "match-N", "When set, N matches all characters without penalty."));
     addOption(parser, seqan::ArgParseOption("", "distance-metric",
@@ -928,16 +937,16 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     addTextSection(parser, "Examples");
 
     addListItem(parser,
-                "\\fBrabema_build_gold_standard\\fP \\fB-e\\fP \\fI4\\fP \\fB-o\\fP \\fIOUT.gsi\\fP \\fB-i\\fP "
+                "\\fBrabema_build_gold_standard\\fP \\fB-e\\fP \\fI4\\fP \\fB-o\\fP \\fIOUT.gsi\\fP \\fB-s\\fP "
                 "\\fIIN.sam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
                 "Build gold standard from a SAM file \\fIIN.sam\\fP with all mapping locations and a FASTA "
                 "reference \\fIREF.fa\\fP to GSI file \\fIOUT.gsi\\fP with a maximal error rate of \\fI4\\fP.");
     addListItem(parser,
                 "\\fBrabema_build_gold_standard\\fP \\fB--distance-metric\\fP \\fIedit\\fP \\fB-e\\fP \\fI4\\fP "
-                "\\fB-o\\fP \\fIOUT.gsi\\fP \\fB-i\\fP \\fIIN.sam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
-                "Same as above, but using Hamming instead of edit distance.");
+                "\\fB-o\\fP \\fIOUT.gsi\\fP \\fB-b\\fP \\fIIN.bam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
+                "Same as above, but using Hamming instead of edit distance and BAM as the input.");
     addListItem(parser,
-                "\\fBrabema_build_gold_standard\\fP \\fB--oracle-mode\\fP \\fB-o\\fP \\fIOUT.gsi\\fP \\fB-i\\fP "
+                "\\fBrabema_build_gold_standard\\fP \\fB--oracle-mode\\fP \\fB-o\\fP \\fIOUT.gsi\\fP \\fB-s\\fP "
                 "\\fIIN.sam\\fP \\fB-r\\fP \\fIREF.fa\\fP",
                 "Build gold standard from a SAM file \\fIIN.sam\\fP with the original sample position, e.g.  "
                 "as exported by read simulator Mason.");
@@ -958,6 +967,14 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     seqan::ArgumentParser::ParseResult res = parse(parser, argc, argv);
     if (res != seqan::ArgumentParser::PARSE_OK)
         return res;
+
+    // Check that either "--in-sam" or "--in-bam" was used.
+    if ((!isSet(parser, "in-sam") && !isSet(parser, "in-bam")) ||
+        (isSet(parser, "in-sam") && isSet(parser, "in-bam")))
+    {
+        std::cerr << "You have to specify either --in-sam or --in-bam.\n";
+        return seqan::ArgumentParser::PARSE_ERROR;
+    }
 
     // -----------------------------------------------------------------------
     // Fill BuildGoldStandardOptions Object
@@ -981,6 +998,8 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
         getOptionValue(options.referencePath, parser, "reference");
     if (isSet(parser, "in-sam"))
         getOptionValue(options.inSamPath, parser, "in-sam");
+    if (isSet(parser, "in-bam"))
+        getOptionValue(options.inBamPath, parser, "in-bam");
 
     return res;
 }
@@ -1016,6 +1035,7 @@ int main(int argc, char const ** argv)
               << "Match Ns              " << (options.matchN ? (char const *) "yes" : (char const *) "no") << '\n'
               << "GSI Output File       " << options.outGsiPath << '\n'
               << "SAM Input File        " << options.inSamPath << '\n'
+              << "BAM Input File        " << options.inBamPath << '\n'
               << "Reference File        " << options.referencePath << '\n'
               << "Verbosity             " << options.verbosity << "\n\n";
 
@@ -1052,28 +1072,38 @@ int main(int argc, char const ** argv)
     }
 
     // Open SAM file and read in header.
-    std::cerr << "Alignments            " << options.inSamPath << " (header) ...";
-    std::ifstream inSam(toCString(options.inSamPath), std::ios_base::in | std::ios_base::binary);
-    if (!inSam.is_open())
-    {
-        std::cerr << "Could not open SAM file." << std::endl;
-        return 1;
-    }
-    RecordReader<std::ifstream, SinglePass<> > samReader(inSam);
     TNameStore refNameStore;
     TNameStoreCache refNameStoreCache(refNameStore);
-    BamIOContext<TNameStore> samIOContext(refNameStore, refNameStoreCache);
-    BamHeader samHeader;
-    if (readRecord(samHeader, samIOContext, samReader, Sam()) != 0)
+    BamIOContext<TNameStore> bamIOContext(refNameStore, refNameStoreCache);
+    BamHeader bamHeader;
+    std::ifstream inSam;  // Use this for reading SAM.
+    RecordReader<std::ifstream, SinglePass<> > samReader(inSam);
+    Stream<Bgzf> bamStream;   // Use this for reading BAM.
+    bool fromSam = !empty(options.inSamPath);
+    if (fromSam)
     {
-        std::cerr << "Could not read SAM header.\n";
-        return 1;
+        std::cerr << "Alignments            " << options.inSamPath << " (header) ...";
+        inSam.open(toCString(options.inSamPath), std::ios_base::in | std::ios_base::binary);
+        if (!inSam.is_open())
+        {
+            std::cerr << "Could not open SAM file.\n";
+            return 1;
+        }
     }
-    // The SAM file has to be sorted by coordinate.
-    //
-    // We do not look at the SAM header for read ordering since samtools sort does not update the SAM header.  This
-    // means users would have to update it manually after sorting which is painful.  We will check SAM record order on
-    // the fly.
+    else
+    {
+        std::cerr << "Alignments            " << options.inBamPath << " (header) ...";
+        if (!open(bamStream, toCString(options.inBamPath), "r"))
+        {
+            std::cerr << "Could not read BAM header.\n";
+            return 1;
+        }
+        if (readRecord(bamHeader, bamIOContext, bamStream, Bam()) != 0)
+        {
+            std::cerr << "Could not read SAM header.\n";
+            return 1;
+        }
+    }
     std::cerr << " OK\n";
     std::cerr << "\nTook " << sysTime() - startTime << "s\n";
 
@@ -1087,10 +1117,24 @@ int main(int argc, char const ** argv)
     // In oracle mode, we store the distance of the alignment from the SAM file for each read.  Otherwise, this variable
     // remains unused.
     String<int> readAlignmentDistances;
-    if (options.distanceMetric == "edit")
-        res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, MyersUkkonenReads());
-    else // options.distanceMetric == "hamming"
-        res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, samIOContext, readNameStore, refNameStore, faiIndex, options, HammingSimple());
+    if (fromSam)
+    {
+        if (options.distanceMetric == "edit")
+            res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, bamIOContext, readNameStore,
+                                         refNameStore, faiIndex, options, MyersUkkonenReads(), Sam());
+        else // options.distanceMetric == "hamming"
+            res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, bamIOContext, readNameStore,
+                                         refNameStore, faiIndex, options, HammingSimple(), Sam());
+    }
+    else
+    {
+        if (options.distanceMetric == "edit")
+            res = matchesToErrorFunction(errorCurves, readAlignmentDistances, bamStream, bamIOContext, readNameStore,
+                                         refNameStore, faiIndex, options, MyersUkkonenReads(), Bam());
+        else // options.distanceMetric == "hamming"
+            res = matchesToErrorFunction(errorCurves, readAlignmentDistances, bamStream, bamIOContext, readNameStore,
+                                         refNameStore, faiIndex, options, HammingSimple(), Bam());
+    }
     if (res != 0)
         return 1;
 
