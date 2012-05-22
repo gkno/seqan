@@ -39,54 +39,54 @@ namespace seqan {
 
 //Rank Support Bit String
 template <typename TSpec = void>
-struct Rsbs;
+struct RankSupportBitString;
 
-struct FibreRsbsBS_;
-struct FibreRsbsBuS_;
-struct FibreRsbsSBuS_;
+struct FibreBitString_;
+struct FibreBucketString_;
+struct FibreSuperBucketString_;
 
-typedef Tag<FibreRsbsBS_> const RsbsBS;
-typedef Tag<FibreRsbsBuS_> const RsbsBuS;
-typedef Tag<FibreRsbsSBuS_> const RsbsSBuS;
+typedef Tag<FibreBitString_> const FibreBitString;
+typedef Tag<FibreBucketString_> const FibreBucketString;
+typedef Tag<FibreSuperBucketString_> const FibreSuperBucketString;
 
 template <typename TSpec>
-struct Fibre<Rsbs<TSpec>, RsbsBS>
+struct Fibre<RankSupportBitString<TSpec>, FibreBitString>
 {
     typedef String<unsigned long> Type;
 };
 
 template <typename TSpec>
-struct Fibre<Rsbs<TSpec>, RsbsBuS>
+struct Fibre<RankSupportBitString<TSpec>, FibreBucketString>
 {
     typedef String<unsigned short> Type;
 };
 
 template <typename TSpec>
-struct Fibre<Rsbs<TSpec>, RsbsSBuS>
+struct Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>
 {
     typedef String<unsigned int> Type;
 };
 
 //The limiting factor of the size is the underlying data type of the super bucket string
 template <typename TSpec>
-struct Size<Rsbs<TSpec> >
+struct Size<RankSupportBitString<TSpec> >
 {
-    typedef typename Value<typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type>::Type Type;
+    typedef typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type Type;
 };
 
 template <typename TSpec>
-struct Rsbs
+struct RankSupportBitString
 {
-    typedef typename Fibre<Rsbs, RsbsBS>::Type      TBitString;
-    typedef typename Fibre<Rsbs, RsbsBuS>::Type     TBucketString;
-    typedef typename Fibre<Rsbs, RsbsSBuS>::Type    TSuperBucketString;
+    typedef typename Fibre<RankSupportBitString, FibreBitString>::Type      TBitString;
+    typedef typename Fibre<RankSupportBitString, FibreBucketString>::Type     TBucketString;
+    typedef typename Fibre<RankSupportBitString, FibreSuperBucketString>::Type    TSuperBucketString;
 
     TBitString                  bString;
     TBucketString               buString;
     TSuperBucketString          sBuString;
-    typename Size<Rsbs>::Type   length_;
+    typename Size<RankSupportBitString>::Type   length_;
 
-    Rsbs() :
+    RankSupportBitString() :
         bString(),
         buString(),
         sBuString(),
@@ -94,25 +94,25 @@ struct Rsbs
     {}
 
     template <typename TString>
-    Rsbs(TString const & input) :
+    RankSupportBitString(TString const & input) :
         bString(),
         buString(),
         sBuString(),
         length_(length(input))
     {
-        typedef Rsbs<TSpec>                                     TRsbs;
-        typedef typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type     TRsbsSBuS;
-        typedef typename Value<TRsbsSBuS>::Type                 TRsbsSBuSValue;
+        typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
+        typedef typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type     TFibreSuperBucketString;
+        typedef typename Value<TFibreSuperBucketString>::Type                 TFibreSuperBucketStringValue;
 
         resize(*this, length_);
-        for (TRsbsSBuSValue i = 0; i < length(*this); ++i)
+        for (TFibreSuperBucketStringValue i = 0; i < length(*this); ++i)
         {
             setBit(*this, i, input[i]);
         }
-        completeRsbs(*this);
+        completeRankSupportBitString(*this);
     }
 
-    inline Rsbs & operator=(Rsbs const & other)
+    inline RankSupportBitString & operator=(RankSupportBitString const & other)
     {
         bString = other.bString;
         buString = other.buString;
@@ -121,7 +121,7 @@ struct Rsbs
         return *this;
     }
 
-    inline bool operator==(const Rsbs & other) const
+    inline bool operator==(const RankSupportBitString & other) const
     {
         return length_ == other.length_ &&
                bString == other.bString &&
@@ -132,105 +132,111 @@ struct Rsbs
 };
 
 template <typename TSpec>
-inline typename Fibre<Rsbs<TSpec>, RsbsBS>::Type &
-getFibre(Rsbs<TSpec>&string, const RsbsBS)
+inline typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type &
+getFibre(RankSupportBitString<TSpec>&string, const FibreBitString)
 {
     return string.bString;
 }
 
 template <typename TSpec>
-inline typename Fibre<Rsbs<TSpec>, RsbsBS>::Type const &
-getFibre(Rsbs<TSpec> const & string, const RsbsBS)
+inline typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type const &
+getFibre(RankSupportBitString<TSpec> const & string, const FibreBitString)
 {
     return string.bString;
 }
 
 template <typename TSpec>
-inline typename Fibre<Rsbs<TSpec>, RsbsBuS>::Type &
-getFibre(Rsbs<TSpec>&string, const RsbsBuS)
+inline typename Fibre<RankSupportBitString<TSpec>, FibreBucketString>::Type &
+getFibre(RankSupportBitString<TSpec>&string, const FibreBucketString)
 {
     return string.buString;
 }
 
 template <typename TSpec>
-inline typename Fibre<Rsbs<TSpec>, RsbsBuS>::Type const &
-getFibre(Rsbs<TSpec> const & string, const RsbsBuS)
+inline typename Fibre<RankSupportBitString<TSpec>, FibreBucketString>::Type const &
+getFibre(RankSupportBitString<TSpec> const & string, const FibreBucketString)
 {
     return string.buString;
 }
 
 template <typename TSpec>
-inline typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type &
-getFibre(Rsbs<TSpec>&string, const RsbsSBuS)
+inline typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type &
+getFibre(RankSupportBitString<TSpec>&string, const FibreSuperBucketString)
 {
     return string.sBuString;
 }
 
 template <typename TSpec>
-inline typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type const &
-getFibre(const Rsbs<TSpec>&string, const RsbsSBuS)
+inline typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type const &
+getFibre(const RankSupportBitString<TSpec>&string, const FibreSuperBucketString)
 {
     return string.sBuString;
 }
 
 template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<Rsbs<TSpec>, RsbsBuS>::Type>::Type
-getPosInBu_(Rsbs<TSpec> const & /*bitString*/, TPos const pos)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreBucketString>::Type>::Type
+getPosInBu_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<TRsbs, RsbsBS>::Type     TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type   TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type           TRsbsBSValue;
-    typedef typename Value<TRsbsSBuS>::Type         TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type     TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type   TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type           TFibreBitStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type         TFibreSuperBucketStringValue;
 
-    TRsbsSBuSValue bitsPerValue = BitsPerValue<TRsbsBSValue>::VALUE;
+    TFibreSuperBucketStringValue bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
     return pos % bitsPerValue;
 }
 
 template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type>::Type
-getBuPos_(Rsbs<TSpec> const & /*bitString*/, TPos const pos)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+getBuPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
 {
-    typedef Rsbs<TSpec>                             TRsbs;
-    typedef typename Fibre<TRsbs, RsbsBS>::Type     TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type   TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type           TRsbsBSValue;
-    typedef typename Value<TRsbsSBuS>::Type         TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type     TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type   TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type           TFibreBitStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type         TFibreSuperBucketStringValue;
 
-    TRsbsSBuSValue const bitsPerValue_ = BitsPerValue<TRsbsBSValue>::VALUE;
+    TFibreSuperBucketStringValue const bitsPerValue_ = BitsPerValue<TFibreBitStringValue>::VALUE;
     return pos / bitsPerValue_;
 }
 
 template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type>::Type
-getSBuPos_(Rsbs<TSpec> const & /*bitString*/, TPos const pos)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+getSBuPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
 {
-    typedef Rsbs<TSpec>                             TRsbs;
-    typedef typename Fibre<TRsbs, RsbsBS>::Type     TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type   TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type           TRsbsBSValue;
-    typedef typename Value<TRsbsSBuS>::Type         TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type     TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type   TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type           TFibreBitStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type         TFibreSuperBucketStringValue;
 
-    TRsbsSBuSValue const bitsPerValue_ = BitsPerValue<TRsbsBSValue>::VALUE;
+    TFibreSuperBucketStringValue const bitsPerValue_ = BitsPerValue<TFibreBitStringValue>::VALUE;
 
     return pos / (bitsPerValue_ * bitsPerValue_);
 }
 
-template <typename TSpec, typename TSize>
-inline void reserve(Rsbs<TSpec> & bitString, TSize const size)
+template <typename TSpec, typename TSize, typename TValue>
+inline void reserve(RankSupportBitString<TSpec> & bitString, TSize const size, TValue const /*dummy*/)
 {
-    typedef Rsbs<TSpec>                             TRsbs;
-    typedef typename Fibre<TRsbs, RsbsBS>::Type     TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsBuS>::Type    TRsbsBuS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type   TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type           TRsbsBSValue;
-    typedef typename Value<TRsbsBuS>::Type          TRsbsBuSValue;
-    typedef typename Value<TRsbsSBuS>::Type         TRsbsSBuSValue;
+    reserve(bitString, size);
+}
+
+template <typename TSpec, typename TSize>
+inline void reserve(RankSupportBitString<TSpec> & bitString, TSize const size)
+{
+    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type     TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type    TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type   TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type           TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type          TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type         TFibreSuperBucketStringValue;
 
     if (size)
     {
-        TRsbsBuSValue bitsPerBucket_ = BitsPerValue<TRsbsBSValue>::VALUE;
-        TRsbsSBuSValue numberOfBuckets_ = size / bitsPerBucket_;
+        TFibreBucketStringValue bitsPerBucket_ = BitsPerValue<TFibreBitStringValue>::VALUE;
+        TFibreSuperBucketStringValue numberOfBuckets_ = size / bitsPerBucket_;
 
         resize(bitString.bString, numberOfBuckets_ + 1, 0);
         resize(bitString.buString, numberOfBuckets_ + 2, 0);
@@ -245,28 +251,35 @@ inline void reserve(Rsbs<TSpec> & bitString, TSize const size)
 }
 
 template <typename TSpec, typename TSize>
-inline void resize(Rsbs<TSpec> & bitString, TSize const size)
+inline void resize(RankSupportBitString<TSpec> & bitString, TSize const size)
 {
     reserve(bitString, size);
     bitString.length_ = size;
 }
 
+template <typename TSpec, typename TSize, typename TValue>
+inline void resize(RankSupportBitString<TSpec> & bitString, TSize const size, TValue const value)
+{
+    reserve(bitString, size, value);
+    bitString.length_ = size;
+}
+
 template <typename TSpec>
-inline typename Value<typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type>::Type
-length(Rsbs<TSpec> const & bitString)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+length(RankSupportBitString<TSpec> const & bitString)
 {
     return bitString.length_;
 }
 
 template <typename TSpec>
-inline typename Value<typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type>::Type
-length(Rsbs<TSpec> & bitString)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+length(RankSupportBitString<TSpec> & bitString)
 {
     return bitString.length_;
 }
 
 template <typename TSpec>
-inline void clear(Rsbs<TSpec> & bitString)
+inline void clear(RankSupportBitString<TSpec> & bitString)
 {
     clear(bitString.bString);
     clear(bitString.buString);
@@ -274,56 +287,56 @@ inline void clear(Rsbs<TSpec> & bitString)
 }
 
 template <typename TSpec, typename TPos>
-inline bool getBit(Rsbs<TSpec> & bitString, TPos const pos)
+inline bool getBit(RankSupportBitString<TSpec> & bitString, TPos const pos)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<TRsbs, RsbsBS>::Type         TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsBuS>::Type        TRsbsBuS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type               TRsbsBSValue;
-    typedef typename Value<TRsbsBuS>::Type              TRsbsBuSValue;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type         TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsBuSValue const bitsPerValue = BitsPerValue<TRsbsBSValue>::VALUE;
-    TRsbsBSValue const one = 1;
-    TRsbsBSValue const shiftValue = pos % bitsPerValue;
-    TRsbsBSValue const buPos = getBuPos_(bitString, pos);
+    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreBitStringValue const one = 1;
+    TFibreBitStringValue const shiftValue = pos % bitsPerValue;
+    TFibreBitStringValue const buPos = getBuPos_(bitString, pos);
     return (bitString.bString[buPos] >> shiftValue) & one;
 }
 
 template <typename TSpec, typename TPos>
-inline bool getBit(Rsbs<TSpec> const & bitString, TPos const pos)
+inline bool getBit(RankSupportBitString<TSpec> const & bitString, TPos const pos)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<Rsbs<TSpec>, RsbsBS>::Type   TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsBuS>::Type        TRsbsBuS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type               TRsbsBSValue;
-    typedef typename Value<TRsbsBuS>::Type              TRsbsBuSValue;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsBuSValue const bitsPerValue = BitsPerValue<TRsbsBSValue>::VALUE;
-    TRsbsBSValue const one = 1;
-    TRsbsBSValue const shiftValue = pos % bitsPerValue;
-    TRsbsBSValue const buPos = getBuPos_(bitString, pos);
+    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreBitStringValue const one = 1;
+    TFibreBitStringValue const shiftValue = pos % bitsPerValue;
+    TFibreBitStringValue const buPos = getBuPos_(bitString, pos);
     return (bitString.bString[buPos] >> shiftValue) & one;
 }
 
 template <typename TSpec, typename TPos, typename TBit>
-inline void setBit(Rsbs<TSpec> & bitString, TPos const pos, TBit const setBit)
+inline void setBit(RankSupportBitString<TSpec> & bitString, TPos const pos, TBit const setBit)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<Rsbs<TSpec>, RsbsBS>::Type   TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsBuS>::Type        TRsbsBuS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type               TRsbsBSValue;
-    typedef typename Value<TRsbsBuS>::Type              TRsbsBuSValue;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsSBuSValue const buPos = getBuPos_(bitString, pos);
-    TRsbsBSValue const posInBucket = getPosInBu_(bitString, pos);
-    TRsbsBSValue const one = 1;
-    TRsbsBSValue const shiftValue = one << posInBucket;
+    TFibreSuperBucketStringValue const buPos = getBuPos_(bitString, pos);
+    TFibreBitStringValue const posInBucket = getPosInBu_(bitString, pos);
+    TFibreBitStringValue const one = 1;
+    TFibreBitStringValue const shiftValue = one << posInBucket;
     if (!setBit)
     {
         bitString.bString[buPos] &= ~(shiftValue);
@@ -338,18 +351,18 @@ inline void setBit(Rsbs<TSpec> & bitString, TPos const pos, TBit const setBit)
  * bucket values have to be copied.
  */
 template <typename TSpec, typename TPos, typename TBitsPerBucket>
-inline void takeBuValueAlong_(Rsbs<TSpec> & bitString, TPos const pos, TBitsPerBucket const bpb)
+inline void takeBuValueAlong_(RankSupportBitString<TSpec> & bitString, TPos const pos, TBitsPerBucket const bpb)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsSBuSValue buPos = getBuPos_(bitString, pos);
+    TFibreSuperBucketStringValue buPos = getBuPos_(bitString, pos);
     if (buPos)
     {
         if (!(pos % bpb) && ((pos + bpb) % (bpb * bpb)))
         {
-            getFibre(bitString, RsbsBuS())[buPos + 1] = getFibre(bitString, RsbsBuS())[buPos];
+            getFibre(bitString, FibreBucketString())[buPos + 1] = getFibre(bitString, FibreBucketString())[buPos];
         }
     }
 }
@@ -360,35 +373,35 @@ inline void takeBuValueAlong_(Rsbs<TSpec> & bitString, TPos const pos, TBitsPerB
  * superBucket values have to be copied.
  */
 template <typename TSpec, typename TPos, typename TBitsPerBucket>
-inline void takeSBuValueAlong_(Rsbs<TSpec> & bitString, TPos const pos, TBitsPerBucket const bpb)
+inline void takeSBuValueAlong_(RankSupportBitString<TSpec> & bitString, TPos const pos, TBitsPerBucket const bpb)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsSBuSValue sBuPos = getSBuPos_(bitString, pos);
+    TFibreSuperBucketStringValue sBuPos = getSBuPos_(bitString, pos);
     if (sBuPos)
     {
         if (!(pos % (bpb * bpb)))
         {
-            getFibre(bitString, RsbsSBuS())[sBuPos + 1] = getFibre(bitString, RsbsSBuS())[sBuPos];
+            getFibre(bitString, FibreSuperBucketString())[sBuPos + 1] = getFibre(bitString, FibreSuperBucketString())[sBuPos];
         }
     }
 }
 
 template <typename TSpec, typename TBit>
-inline void append(Rsbs<TSpec> & bitString, TBit const bit)
+inline void append(RankSupportBitString<TSpec> & bitString, TBit const bit)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<Rsbs<TSpec>, RsbsBS>::Type   TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsBuS>::Type        TRsbsBuS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type               TRsbsBSValue;
-    typedef typename Value<TRsbsBuS>::Type              TRsbsBuSValue;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsBuSValue const bitsPerValue_ = BitsPerValue<TRsbsBSValue>::VALUE;
-    TRsbsSBuSValue const length_ = length(bitString);
+    TFibreBucketStringValue const bitsPerValue_ = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreSuperBucketStringValue const length_ = length(bitString);
 
     //check if the new size exceeds the reserved memory
     if ((length(bitString.bString) * bitsPerValue_) <= length_)
@@ -405,72 +418,68 @@ inline void append(Rsbs<TSpec> & bitString, TBit const bit)
         setBit(bitString, length_, bit);
 
         //determine whether
-        TRsbsSBuSValue buPos = getBuPos_(bitString, length_);
+        TFibreSuperBucketStringValue buPos = getBuPos_(bitString, length_);
         if (((buPos + 1) % (bitsPerValue_)))
         {
-            ++getFibre(bitString, RsbsBuS())[buPos + 1];
+            ++getFibre(bitString, FibreBucketString())[buPos + 1];
         }
-        TRsbsSBuSValue sBuPos = getSBuPos_(bitString, length_);
-        ++getFibre(bitString, RsbsSBuS())[sBuPos + 1];
+        TFibreSuperBucketStringValue sBuPos = getSBuPos_(bitString, length_);
+        ++getFibre(bitString, FibreSuperBucketString())[sBuPos + 1];
     }
     ++bitString.length_;
 }
 
 template <typename TValue>
-inline unsigned getRankInBucket_(const TValue value, False)
+inline unsigned getRankInBucket_(TValue const value, False)
 {
     return __builtin_popcountl(static_cast<int32_t>(value));
 }
 
 template <typename TValue>
-inline unsigned getRankInBucket_(const TValue value, True)
+inline unsigned getRankInBucket_(TValue const value, True)
 {
     return __builtin_popcountll(static_cast<int64_t>(value));
 }
 
 template <typename TValue>
-inline unsigned getRankInBucket_(const TValue value)
+inline unsigned getRankInBucket_(TValue const value)
 {
     return getRankInBucket_(value, typename Eval<(BitsPerValue<TValue>::VALUE > 32)>::Type());
 }
 
 template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type>::Type
-getRankInBucket_(Rsbs<TSpec> & bitString, TPos const pos)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+getRankInBucket_(RankSupportBitString<TSpec> const & bitString, TPos const pos)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<Rsbs<TSpec>, RsbsBS>::Type   TRsbsBS;
-    typedef typename Fibre<TRsbs, RsbsBuS>::Type        TRsbsBuS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsBS>::Type               TRsbsBSValue;
-    typedef typename Value<TRsbsBuS>::Type              TRsbsBuSValue;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsBuSValue const posInBu = getPosInBu_(bitString, pos);
-    TRsbsSBuSValue const buPos = getBuPos_(bitString, pos);
-    TRsbsBuSValue const bitsPerValue = BitsPerValue<TRsbsBSValue>::VALUE;
-    TRsbsBSValue const one = -1;
-    TRsbsBSValue const mask = one >> (bitsPerValue - posInBu - 1);
+    TFibreBucketStringValue const posInBu = getPosInBu_(bitString, pos);
+    TFibreSuperBucketStringValue const buPos = getBuPos_(bitString, pos);
+    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreBitStringValue const one = -1;
+    TFibreBitStringValue const mask = one >> (bitsPerValue - posInBu - 1);
     //std::cerr << "one: " << one << " mask1: " << mask << " " << (getRankInBucket_(bitString.bString[buPos] & mask)) <<  std::endl;
     return getRankInBucket_(bitString.bString[buPos] & mask);
 }
 
 template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<Rsbs<TSpec>, RsbsSBuS>::Type>::Type
-getRank(Rsbs<TSpec> & bitString, TPos const pos)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+getRank(RankSupportBitString<TSpec> const & bitString, TPos const pos)
 {
-    typedef Rsbs<TSpec>                                 TRsbs;
-    typedef typename Fibre<TRsbs, RsbsBuS>::Type        TRsbsBuS;
-    typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-    typedef typename Value<TRsbsBuS>::Type              TRsbsBuSValue;
-    typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TRsbsSBuSValue const buPos = getBuPos_(bitString, pos);
-    TRsbsSBuSValue const sBuPos = getSBuPos_(bitString, pos);
-
-    //std::cerr << "buPos: " <<  buPos << " " << sBuPos << std::endl;
-//	std::cerr << "getRankInBucket_(bitString, pos): " <<  getRankInBucket_(bitString, pos) << " " <<  bitString.buString[buPos] << " " << bitString.sBuString[sBuPos] << std::endl;
-
+    TFibreSuperBucketStringValue const buPos = getBuPos_(bitString, pos);
+    TFibreSuperBucketStringValue const sBuPos = getSBuPos_(bitString, pos);
 
     return getRankInBucket_(bitString, pos)
            + bitString.buString[buPos]
@@ -478,25 +487,25 @@ getRank(Rsbs<TSpec> & bitString, TPos const pos)
 }
 
 template <typename TSpec>
-inline void completeRsbs(Rsbs<TSpec> & bitString)
+inline void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
 {
     if (length(bitString))
     {
 
-        typedef Rsbs<TSpec>                                 TRsbs;
-        typedef typename Fibre<Rsbs<TSpec>, RsbsBS>::Type   TRsbsBS;
-        typedef typename Fibre<TRsbs, RsbsBuS>::Type        TRsbsBuS;
-        typedef typename Fibre<TRsbs, RsbsSBuS>::Type       TRsbsSBuS;
-        typedef typename Value<TRsbsBS>::Type               TRsbsBSValue;
-        typedef typename Value<TRsbsBuS>::Type              TRsbsBuSValue;
-        typedef typename Value<TRsbsSBuS>::Type             TRsbsSBuSValue;
+        typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+        typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+        typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+        typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+        typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+        typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+        typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-        TRsbsBuSValue buSum_ = 0;
-        TRsbsSBuSValue sBuSum_ = 0;
-        TRsbsSBuSValue superBucketCounter = 1;
-        TRsbsBuSValue const bitsPerValue = BitsPerValue<TRsbsBSValue>::VALUE;
+        TFibreBucketStringValue buSum_ = 0;
+        TFibreSuperBucketStringValue sBuSum_ = 0;
+        TFibreSuperBucketStringValue superBucketCounter = 1;
+        TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
 
-        for (TRsbsSBuSValue i = 0; i < length(bitString.bString) - 1; ++i)
+        for (TFibreSuperBucketStringValue i = 0; i < length(bitString.bString) - 1; ++i)
         {
             buSum_ += getRankInBucket_(bitString.bString[i]);
             bitString.buString[i + 1] = buSum_;
@@ -513,7 +522,7 @@ inline void completeRsbs(Rsbs<TSpec> & bitString)
 }
 
 /*template <typename TSpec, typename TBit>
-inline void appendBitOnly(Rsbs<TSpec> & rankSupportBitString, TBit bit)
+inline void appendBitOnly(RankSupportBitString<TSpec> & rankSupportBitString, TBit bit)
 {
     setBit(rankSupportBitString, length(rankSupportBitString), bit);
     ++rankSupportBitString.length;
@@ -552,11 +561,11 @@ template <typename TSpec>
 inline void printBits(const TSpec entrie, const int blocks);
 
 template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<Rsbs<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type
-getRank(const Rsbs<TSpec> & rankSupportBitString, const TPos pos)
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type
+getRank(const RankSupportBitString<TSpec> & rankSupportBitString, const TPos pos)
 {
-    typedef typename Fibre<Rsbs<TSpec>, FibreRankSupportSuperBucketString>::Type        TSuperBucketString;
-    typedef typename Fibre<Rsbs<TSpec>, FibreRsbs>::Type                TBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type        TSuperBucketString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
 
     typename Value<TSuperBucketString>::Type sum = 0;
     unsigned bitsPerBucket = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
@@ -577,17 +586,17 @@ getRank(const Rsbs<TSpec> & rankSupportBitString, const TPos pos)
 }
 
 template <typename TBitString>
-inline void completeRsbs(TBitString & bString){}
+inline void completeRankSupportBitString(TBitString & bString){}
 
 template <typename TSpec>
-//, typename TRsbs>
-inline void completeRsbs(Rsbs<TSpec> & bString)
+//, typename TRankSupportBitString>
+inline void completeRankSupportBitString(RankSupportBitString<TSpec> & bString)
 {
     if (length(bString))
     {
-        typedef typename Fibre<Rsbs<TSpec>, FibreRsbs>::Type                TBitString;
-        typedef typename Fibre<Rsbs<TSpec>, FibreRankSupportBucketString>::Type         TBucketString;
-        typedef typename Fibre<Rsbs<TSpec>, FibreRankSupportSuperBucketString>::Type        TSuperBucketString;
+        typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
+        typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>::Type         TBucketString;
+        typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type        TSuperBucketString;
 
         typedef typename Value<TBucketString>::Type TBucketValue;
         typedef typename Value<TSuperBucketString>::Type TSuperBucketValue;
@@ -639,14 +648,14 @@ typedef Tag<FibreBitStrings_> const FibreBitStrings;
 
 //fills ONE bit string with 0 for characters that will appear in the left branch and
 //1 for characters that will appear in the right branch
-//template < typename TBitString, typename TCharacterValue, typename TPosInSubTree, typename TText, typename TWaveletTreeSpec >//, typename TRsbs>
+//template < typename TBitString, typename TCharacterValue, typename TPosInSubTree, typename TText, typename TWaveletTreeSpec >//, typename TRankSupportBitString>
 template <typename TBitString, typename TText>
-//, typename TRsbs>
+//, typename TRankSupportBitString>
 inline void fillBitString(
     const unsigned lowestValue,
     const unsigned splitValue,
     const unsigned highestValue,
-    TBitString & bString,        //TRsbs &counterBitString,
+    TBitString & bString,        //TRankSupportBitString &counterBitString,
     const TText & text)
 {
     unsigned short character;
@@ -667,11 +676,11 @@ inline void fillBitString(
             ++pos;
         }
     }
-    completeRsbs(bString);
+    completeRankSupportBitString(bString);
 }
 
 template <typename TCharacterValue, typename TWaveletTreeSpec, typename TText>
-//, typename TRsbs>
+//, typename TRankSupportBitString>
 inline void fillBitString(
     WaveletTree<TText, TWaveletTreeSpec> & waveletTree,
     typename Iterator<typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreSplitValues>::Type>::Type & iter,
@@ -705,7 +714,7 @@ inline void fillBitString(
             ++pos;
         }
     }
-    completeRsbs(bString);
+    completeRankSupportBitString(bString);
 }
 
 template <typename TText>
@@ -723,17 +732,17 @@ inline unsigned short nearestPowOfTwo(TText & text)
 
 template <typename TSpec>
 inline bool open(
-    Rsbs<TSpec> & string,
+    RankSupportBitString<TSpec> & string,
     const char * fileName,
     int openMode)
 {
-    typedef typename Value<typename Fibre<Rsbs<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type TValue;
+    typedef typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type TValue;
     String<TValue> lengthString;
     resize(lengthString, 1);
 
     String<char> name;
     name = fileName;    append(name, ".bit");
-    if (!open(getFibre(string, FibreRsbs()), toCString(name), openMode))
+    if (!open(getFibre(string, FibreRankSupportBitString()), toCString(name), openMode))
         return false;
 
     name = fileName;    append(name, ".bucket");    open(getFibre(string, FibreRankSupportBucketString()), toCString(name), openMode);
@@ -745,7 +754,7 @@ inline bool open(
 
 template <typename TSpec>
 inline bool open(
-    Rsbs<TSpec> & string,
+    RankSupportBitString<TSpec> & string,
     const char * fileName)
 {
     return open(string, fileName, OPEN_RDONLY);
@@ -755,11 +764,11 @@ inline bool open(
 // This implementation of open doesn't work with external memory StringSets (External<>, MMap<>)
 // If you need a persistent external StringSet you have to use a Owner<ConcatDirect<> > StringSet.
 template <typename TSpec>
-inline bool open(StringSet<Rsbs<TSpec> > & multi, const char * fileName, int openMode)
+inline bool open(StringSet<RankSupportBitString<TSpec> > & multi, const char * fileName, int openMode)
 {
     SEQAN_CHECKPOINT
 
-    typedef typename Size<Rsbs<TSpec> >::Type TSize;
+    typedef typename Size<RankSupportBitString<TSpec> >::Type TSize;
     typedef String<TSize> TSizeString;
     TSizeString sizeString;
     resize(sizeString, length(multi));
@@ -795,7 +804,7 @@ inline bool open(StringSet<Rsbs<TSpec> > & multi, const char * fileName, int ope
 
 template <typename TSpec>
 inline bool open(
-    StringSet<Rsbs<TSpec> > & strings,
+    StringSet<RankSupportBitString<TSpec> > & strings,
     const char * fileName)
 {
     return open(strings, fileName, OPEN_RDONLY);
@@ -803,17 +812,17 @@ inline bool open(
 
 template <typename TSpec>
 inline bool save(
-    Rsbs<TSpec> const & string,
+    RankSupportBitString<TSpec> const & string,
     const char * fileName,
     int openMode)
 {
-    typedef typename Value<typename Fibre<Rsbs<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type TValue;
+    typedef typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type>::Type TValue;
     String<TValue> lengthString;
     resize(lengthString, 1);
     lengthString[0] = string.length;
     String<char> name;
     name = fileName;    append(name, ".length");    save(lengthString, toCString(name), openMode);
-    name = fileName;    append(name, ".bit");       save(getFibre(string, FibreRsbs()), toCString(name), openMode);
+    name = fileName;    append(name, ".bit");       save(getFibre(string, FibreRankSupportBitString()), toCString(name), openMode);
     name = fileName;    append(name, ".bucket");    save(getFibre(string, FibreRankSupportBucketString()), toCString(name), openMode);
     name = fileName;    append(name, ".sbucket");   save(getFibre(string, FibreRankSupportSuperBucketString()), toCString(name), openMode);
     return true;
@@ -821,18 +830,18 @@ inline bool save(
 
 template <typename TSpec>
 inline bool save(
-    Rsbs<TSpec> const & string,
+    RankSupportBitString<TSpec> const & string,
     const char * fileName)
 {
-    return save(string, fileName, DefaultOpenMode<Rsbs<TSpec> >::VALUE);
+    return save(string, fileName, DefaultOpenMode<RankSupportBitString<TSpec> >::VALUE);
 }
 
 template <typename TSpec>
-inline bool save(StringSet<Rsbs<TSpec> > const & multi, const char * fileName, int openMode)
+inline bool save(StringSet<RankSupportBitString<TSpec> > const & multi, const char * fileName, int openMode)
 {
     SEQAN_CHECKPOINT
 
-    typedef typename Size<Rsbs<TSpec> >::Type TSize;
+    typedef typename Size<RankSupportBitString<TSpec> >::Type TSize;
     typedef String<TSize> TSizeString;
     TSizeString sizeString;
     resize(sizeString, length(multi));
@@ -859,7 +868,7 @@ inline bool save(StringSet<Rsbs<TSpec> > const & multi, const char * fileName, i
 
 template <typename TSpec>
 inline bool save(
-    StringSet<Rsbs<TSpec> > const & strings,
+    StringSet<RankSupportBitString<TSpec> > const & strings,
     const char * fileName)
 {
     return save(strings, fileName, OPEN_RDONLY);
@@ -876,7 +885,7 @@ inline bool save(
 
 
 /*    template <typename TText>
-    Rsbs(TText & text) :
+    RankSupportBitString(TText & text) :
         bString(),
         butString(),
         sButString(),
@@ -930,11 +939,11 @@ inline std::ostream & printBits(std::ostream & stream, TValue entrie, TSize bloc
 
 /*
 template <typename TSpec>
-inline std::ostream & operator<<(std::ostream & stream, const Rsbs<TSpec> & rankSupportBitString)
+inline std::ostream & operator<<(std::ostream & stream, const RankSupportBitString<TSpec> & rankSupportBitString)
 {
-    typedef typename Fibre<Rsbs<TSpec>, FibreRsbs>::Type                TBitString;
-    typedef typename Fibre<Rsbs<TSpec>, FibreRankSupportBucketString>::Type             TBucketString;
-    typedef typename Fibre<Rsbs<TSpec>, FibreRankSupportSuperBucketString>::Type        TSuperBucketString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type                TBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBucketString>::Type             TBucketString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportSuperBucketString>::Type        TSuperBucketString;
 
     typedef typename Value<TBitString>::Type          TBitStringValue;
     typedef typename Value<TBucketString>::Type       TBucketStringValue;
@@ -968,18 +977,18 @@ inline std::ostream & operator<<(std::ostream & stream, const Rsbs<TSpec> & rank
 }
 */
 /*template <typename TSpec, typename TSize>
-inline void resize(Rsbs<TSpec> & bitString, TSize size)
+inline void resize(RankSupportBitString<TSpec> & bitString, TSize size)
 {
     reserve(rankSupportBitString, size);
     rankSupportBitString.length = size;
 }
 
 template <typename TSpec, typename TSize, typename TValue>
-inline void resize(Rsbs<TSpec> & rankSupportBitString, TSize size, TValue value)
+inline void resize(RankSupportBitString<TSpec> & rankSupportBitString, TSize size, TValue value)
 {
     rankSupportBitString.length = size;
 
-    typedef typename Fibre<Rsbs<TSpec>, FibreRsbs>::Type    TBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreRankSupportBitString>::Type    TBitString;
     typedef typename Value<TBitString>::Type TBitStringValue;
     unsigned bitsPerBucket = BitsPerValue<TBitStringValue>::VALUE;
     unsigned long long numberOfBuckets;

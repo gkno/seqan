@@ -271,6 +271,4 @@ inline bool save(
 }
 
 }
-
-
 #endif // SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSA_H_

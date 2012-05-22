@@ -51,13 +51,21 @@
 // ===========================================================================
 
 //#include "seqan/fm_sequence/prefix_sum_table.h"
-#include "seqan/fm_sequence/bit_string.h"
+//#include "seqan/fm_sequence/bit_string.h"
+//#include "seqan/fm_sequence/bit_string_beta.h"
+//#include "seqan/fm_sequence/sparse_string.h"
+//#include "seqan/fm_sequence/compressed_sa.h"
+//#include "seqan/fm_sequence/compressed_sa_impl.h"
+//#include "seqan/fm_sequence/wavelet_tree.h"
+//#include "seqan/fm_sequence/wavelet_tree_structure.h"
+
 #include "seqan/fm_sequence/bit_string_beta.h"
-#include "seqan/fm_sequence/sparse_string.h"
-#include "seqan/fm_sequence/compressed_sa.h"
-#include "seqan/fm_sequence/compressed_sa_impl.h"
-#include "seqan/fm_sequence/wavelet_tree.h"
-#include "seqan/fm_sequence/wavelet_tree_structure.h"
-//#include <seqan/fm_sequence/compressed_string.h>
+#include "seqan/fm_sequence/sparse_string_beta.h"
+#include "seqan/fm_sequence/compressed_sa_beta.h"
+#include "seqan/fm_sequence/lf_table_beta.h"
+#include "seqan/fm_sequence/prefix_sum_table_beta.h"
+#include "seqan/fm_sequence/wavelet_tree_structure_beta.h"
+#include "seqan/fm_sequence/wavelet_tree_structure_iterator_beta.h"
+#include "seqan/fm_sequence/wavelet_tree_beta.h"
 
 #endif  // SANDBOX_SINGER_INCLUDE_SEQAN_FM_SEQUENCE_H_
