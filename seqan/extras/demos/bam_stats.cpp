@@ -83,6 +83,29 @@ struct Options
     }
 };
 
+namespace  seqan {
+    struct _OurScoreMatrix {};
+    
+    template <>
+    struct ScoringMatrixData_<int, Dna5, _OurScoreMatrix> {
+        enum {
+            VALUE_SIZE = ValueSize<Dna5>::VALUE,
+            TAB_SIZE = VALUE_SIZE * VALUE_SIZE
+        };
+        static inline int const * getData() {
+            // The user defined data table.  In this case, we use the data from BLOSUM-30.
+            static int const _data[TAB_SIZE] = {
+                0, -3000, -3000, -3000, -3000,
+                -3000, 0, -3000, -3000, -3000,
+                -3000, -3000, 0, -3000, -3000,
+                -3000, -3000, -3000, 0, -3000,
+                -3000, -3000, -3000, -3000, -3000,
+            };
+            return _data;
+        }
+    };    
+}
+
 void
 setupCommandLineParser(CommandLineParser & parser, Options const & options)
 {
@@ -215,7 +238,7 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
     assignSource(row(result, 1), record.seq);
 
     AlignConfig<true, false, false, true> alignConfig;
-    Score<int, Simple> scoringScheme(0, -3000, -3001);
+    Score<int, ScoreMatrix<Dna5, _OurScoreMatrix> > scoringScheme(-3001);
     int errors =  -globalAlignment(result, scoringScheme, alignConfig, NeedlemanWunsch()) / 3000;
 	   
     if (toViewPosition(row(result, 0), 0) < toViewPosition(row(result, 1), 0))
