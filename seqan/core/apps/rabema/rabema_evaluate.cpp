@@ -102,15 +102,11 @@ public:
     bool trustNM;
 
     // If enabled, don't panic on additional hits in non-weighted mode.
-    // TODO(holtgrew): Actually panic!
     bool dontPanic;
 
     // ------------------------------------------------------------------------
     // Input / Output
     // ------------------------------------------------------------------------
-
-    // // Output filename.
-    // CharString outPath;
 
     // Path to reference sequence file.
     CharString referencePath;
@@ -387,9 +383,11 @@ int benchmarkReadResult(RabemaStats & result,
         appendValue(pickedGsiRecords, gsiRecords[i]);
 
         // Get index of the sequence from GSI record contig name.
-        if (!getIdByName(refSeqNames, back(pickedGsiRecords).contigName, back(pickedGsiRecords).contigId, refSeqNamesCache))
+        if (!getIdByName(refSeqNames, back(pickedGsiRecords).contigName, back(pickedGsiRecords).contigId,
+                         refSeqNamesCache))
         {
-            std::cerr << "ERROR: Could not find reference sequence for name " << back(pickedGsiRecords).contigName << '\n';
+            std::cerr << "ERROR: Could not find reference sequence for name "
+                      << back(pickedGsiRecords).contigName << '\n';
             return 1;
         }
     }
@@ -397,7 +395,8 @@ int benchmarkReadResult(RabemaStats & result,
     // On these selected GSI records, we now perform interval lowering in case of "any-best" and "all-best".  This means
     // that an interval I with distance k_i containing an interval J with distance k_j < k_i is re-labeled with a
     // distance of k_j for the smallest k_j of all contained intervals J.
-    if (!options.oracleMode && (options.benchmarkCategory == CATEGORY_ANY_BEST || options.benchmarkCategory == CATEGORY_ALL_BEST))
+    if (!options.oracleMode && (options.benchmarkCategory == CATEGORY_ANY_BEST ||
+                                options.benchmarkCategory == CATEGORY_ALL_BEST))
         performIntervalLowering(pickedGsiRecords, options.maxError);
 
     // Build string of intervals for each reference sequence from these filtered and lowered records.
@@ -414,7 +413,8 @@ int benchmarkReadResult(RabemaStats & result,
             continue;  // Only search if interval distance matches -- in *-best.
         int originalDistance = pickedGsiRecords[i].originalDistance;
 
-        appendValue(intervals[pickedGsiRecords[i].contigId], TInterval(pickedGsiRecords[i].firstPos, pickedGsiRecords[i].lastPos + 1, length(intervalDistances)));
+        appendValue(intervals[pickedGsiRecords[i].contigId],
+                    TInterval(pickedGsiRecords[i].firstPos,pickedGsiRecords[i].lastPos + 1, length(intervalDistances)));
         appendValue(intervalDistances, originalDistance);
         numIntervals += 1;
         if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ANY_BEST)
@@ -439,7 +439,8 @@ int benchmarkReadResult(RabemaStats & result,
     {
         seenL |= hasFlagFirst(samRecords[i]) || (!hasFlagFirst(samRecords[i]) && !hasFlagLast(samRecords[i]));
         seenR |= hasFlagLast(samRecords[i]);
-        if ((hasFlagFirst(samRecords[i]) || (!hasFlagFirst(samRecords[i]) && !hasFlagLast(samRecords[i]))) && !empty(samRecords[i].seq))
+        if ((hasFlagFirst(samRecords[i]) || (!hasFlagFirst(samRecords[i]) && !hasFlagLast(samRecords[i]))) &&
+            !empty(samRecords[i].seq))
         {
             readSeqL = samRecords[i].seq;
             if (hasFlagRC(samRecords[i]))
@@ -466,7 +467,6 @@ int benchmarkReadResult(RabemaStats & result,
     }
 
     // Try to hit intervals.
-    // std::cerr << "NUM SAM RECORDS\t" << length(samRecords) << '\n';
     for (unsigned i = 0; i < length(samRecords); ++i)
     {
         BamAlignmentRecord const & samRecord = samRecords[i];
@@ -509,7 +509,8 @@ int benchmarkReadResult(RabemaStats & result,
                     readSeq = readSeqR;
                 int bandwidth = static_cast<int>(ceil(0.01 * options.maxError * length(readSeq)));
                 __int32 beginPos = samRecord.pos - bandwidth;
-                __int32 endPos = beginPos + getAlignmentLengthInRef(samRecord) - countPaddings(samRecord.cigar) + 2 * bandwidth;
+                __int32 endPos = (beginPos + getAlignmentLengthInRef(samRecord) -
+                                  countPaddings(samRecord.cigar) + 2 * bandwidth);
                 contigSeq = infix(refSeqs[seqId], beginPos, endPos);
                 if (hasFlagRC(samRecord))
                     reverseComplement(contigSeq);
@@ -553,7 +554,8 @@ int benchmarkReadResult(RabemaStats & result,
             lastPos = length(refSeqs[seqId]) - samRecord.pos - 1;
 
         if (options.showTryHitIntervals)
-            std::cerr << "TRY HIT\tchr=" << refSeqNames[seqId] << "\tlastPos=" << lastPos << "\tqName=" << samRecord.qName << "\n";
+            std::cerr << "TRY HIT\tchr=" << refSeqNames[seqId] << "\tlastPos=" << lastPos << "\tqName="
+                      << samRecord.qName << "\n";
 
         // Try to hit any interval.
         String<unsigned> result;
@@ -563,7 +565,8 @@ int benchmarkReadResult(RabemaStats & result,
             for (unsigned i = 0; i < length(result); ++i)
                 intervalHit[result[i]] = true;
         }
-        else if (bestDistance != minValue<int>() && bestDistance <= static_cast<int>(0.01 * options.maxError * length(readSeq)))
+        else if (bestDistance != minValue<int>() &&
+                 bestDistance <= static_cast<int>(0.01 * options.maxError * length(readSeq)))
         {
             // We found an additional hit.
             if (options.showAdditionalIntervals || !options.dontPanic)
@@ -571,20 +574,6 @@ int benchmarkReadResult(RabemaStats & result,
                 std::cerr << "ADDITIONAL HIT\t";
                 write2(std::cerr, samRecord, bamIOContext, Sam());
                 std::cerr << '\n';
-                //if (hasFlagRC(samRecord))
-                //    std::cerr << "\tbeginPos on reverse strand\t" << length(refSeqs[seqId]) - samRecord.pos << "\tseqId==" << seqId << "\tlstPos=" << lastPos << "\n\n";
-                //std::cerr << ",-- Intervals\n";
-                //for (unsigned i = 0; i < length(intervals[seqId]); ++i)
-                //    std::cerr << "| " << intervals[seqId][i].i1 << "\t" << intervals[seqId][i].i2 << "\n";
-                //std::cerr << "`--\n";
-                //std::cerr << ",-- Picked GSI Records\n";
-                //for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
-                //    std::cerr << "| " << pickedGsiRecords[i] << "\t" << pickedGsiRecords[i].contigId << "\t" << pickedGsiRecords[i].flags << "\n";
-                //std::cerr << "`--\n";
-                //std::cerr << ",-- GSI Records\n";
-                //for (unsigned i = 0; i < length(gsiRecords); ++i)
-                //    std::cerr << "| " << gsiRecords[i] << "\t" << gsiRecords[i].contigId << "\t" << gsiRecords[i].flags << "\n";
-                //std::cerr << "`--\n";
             }
 
             if (!options.dontPanic)
@@ -781,14 +770,12 @@ compareAlignedReadsToReference(RabemaStats & result,
             currentReadName = gsiRecord.readName;
         else
             currentReadName = (gsiRecord.readName < samRecord.qName) ? gsiRecord.readName : samRecord.qName;
-        // std::cerr << "CURRENT\t" << currentReadName << '\n';
 
         // These flags determine whether evaluation is run for single-end and/or paired-end reads.
         bool seenSingleEnd = false, seenPairedEnd = false;
 
         // Read all SAM/BAM records with the same query name.
         clear(currentSamRecords);
-        // std::cerr << "SAM/BAM\t" << samRecord.qName << '\n';
         while (!samDone && samRecord.qName == currentReadName)
         {
             if (!hasFlagUnmapped(samRecord))  // Ignore records with non-aligned reads.
@@ -810,7 +797,8 @@ compareAlignedReadsToReference(RabemaStats & result,
             }
             if (samRecord.qName < currentReadName)
             {
-                std::cerr << "ERROR: Wrong order in SAM/BAM file: " << samRecord.qName << " succeeds " << currentReadName << " in file.\n"
+                std::cerr << "ERROR: Wrong order in SAM/BAM file: " << samRecord.qName << " succeeds "
+                          << currentReadName << " in file.\n"
                           << "File must be sorted by read name/queryname.\n";
                 return 1;
             }
@@ -820,7 +808,6 @@ compareAlignedReadsToReference(RabemaStats & result,
         }
 
         // Read in the next block of GSI records.
-        // std::cerr << "GSI\t" << gsiRecord.readName << '\n';
         clear(currentGsiRecords);
         while (!gsiDone && gsiRecord.readName == currentReadName)
         {
@@ -840,7 +827,8 @@ compareAlignedReadsToReference(RabemaStats & result,
             }
             if (gsiRecord.readName < currentReadName)
             {
-                std::cerr << "ERROR: Wrong order in GSI file: " << gsiRecord.readName << " succeeds " << currentReadName << " in file.\n"
+                std::cerr << "ERROR: Wrong order in GSI file: " << gsiRecord.readName << " succeeds "
+                          << currentReadName << " in file.\n"
                           << "File must be sorted by read name/queryname.\n";
                 return 1;
             }
@@ -851,16 +839,22 @@ compareAlignedReadsToReference(RabemaStats & result,
         // We collected the records for all queries.  Here, we differentiate between the different cases.
         if (seenSingleEnd)
         {
-            int res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ false);
+            int res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore,
+                                          refNameStoreCache, refSeqs, refIdMapping, options, tagPattern,
+                                          /*pairedEnd=*/ false);
             if (res != 0)
                 return 1;
         }
         if (seenPairedEnd)
         {
-            int res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ false);
+            int res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore,
+                                          refNameStoreCache, refSeqs, refIdMapping, options, tagPattern,
+                                          /*pairedEnd=*/ true, /*second=*/ false);
             if (res != 0)
                 return 1;
-            res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore, refNameStoreCache, refSeqs, refIdMapping, options, tagPattern, /*pairedEnd=*/ true, /*second=*/ true);
+            res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore,
+                                      refNameStoreCache, refSeqs, refIdMapping, options, tagPattern,
+                                      /*pairedEnd=*/ true, /*second=*/ true);
             if (res != 0)
                 return 1;
         }
@@ -956,10 +950,13 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     addText(parser,
             "The occurence of \"invalid\" hits in the read mapper's output is not an error.  If there are "
             "additional hits, however, this shows an error in the gold standard.");
-    addOption(parser, seqan::ArgParseOption("", "show-missed-intervals", "Show details for each missed interval from the GSI."));
-    addOption(parser, seqan::ArgParseOption("", "show-invalid-hits", "Show details for invalid hits (with too high error rate)."));
+    addOption(parser, seqan::ArgParseOption("", "show-missed-intervals",
+                                            "Show details for each missed interval from the GSI."));
+    addOption(parser, seqan::ArgParseOption("", "show-invalid-hits",
+                                            "Show details for invalid hits (with too high error rate)."));
     addOption(parser, seqan::ArgParseOption("", "show-additional-hits",
-                                            "Show details for additional hits (low enough error rate but not in gold standard."));
+                                            "Show details for additional hits (low enough error rate but not in "
+                                            "gold standard."));
     addOption(parser, seqan::ArgParseOption("", "show-hits", "Show details for hit intervals."));
     addOption(parser, seqan::ArgParseOption("", "show-try-hit", "Show details for each alignment in SAM/BAM input."));
 
@@ -1168,7 +1165,6 @@ int main(int argc, char const ** argv)
         return 1;
     }
     std::cerr << " OK\n";
-    // TODO(holtgrew): Do anything with GSI header?
 
     // Open SAM/BAM file and read in header.
     TNameStore refNameStore;
@@ -1279,12 +1275,13 @@ int main(int argc, char const ** argv)
         if (!tsvOut.good())
         {
             failed = true;
-            std::cerr << " FAILED - could not open!\n";
+            std::cerr << " FAILED - could not open output file!\n";
         }
-        else if (write(tsvOut, result, options.maxError, options.benchmarkCategory, options.oracleMode, options.distanceMetric, Tsv()) != 0)
+        else if (write(tsvOut, result, options.maxError, options.benchmarkCategory, options.oracleMode,
+                       options.distanceMetric, Tsv()) != 0)
         {
             failed = true;
-            std::cerr << " FAILED - could not write!\n";
+            std::cerr << " FAILED - error writing to output file!\n";
         }
         if (!failed)
             std::cerr << " OK\n";

@@ -185,11 +185,10 @@ inline void setHost(Pattern<TNeedle, MyersUkkonenReads> & me,
     me._lastCharacter = back(needle);
 }
 
-// TODO(holtgrew): Is using reinterpret_cast<> wise?
 template <typename TNeedle, typename TNeedle2>
 inline void setHost(Pattern<TNeedle, MyersUkkonenReads> & me, TNeedle2 & needle)
 {
-    setHost(me, reinterpret_cast<TNeedle2 const &>(needle));
+    setHost(me, const_cast<TNeedle2 const &>(needle));
 }
 
 template <typename TNeedle>

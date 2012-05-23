@@ -349,7 +349,8 @@ int readRecord(GsiRecord & record, RecordReader<TStream, TSpec> & reader, Gsi co
     if (!lexicalCast2(record.lastPos, buffer))
         return 1;
 
-    if (value(reader) != '\t' && value(reader) != '\r' && value(reader) != '\n')  // TODO(holtgrew): \t only here because output buggy.
+    // We only allow '\t' here because output buggy.
+    if (value(reader) != '\t' && value(reader) != '\r' && value(reader) != '\n')
         return 1;
 
     if (skipLine(reader) != 0)
