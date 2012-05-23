@@ -100,11 +100,22 @@ struct ContigInterval
 };
 
 // ---------------------------------------------------------------------------
+// Enum DistanceMetric
+// ---------------------------------------------------------------------------
+
+enum DistanceMetric
+{
+    HAMMING_DISTANCE,
+    EDIT_DISTANCE
+};
+
+// ---------------------------------------------------------------------------
 // Class BuildGoldStandardOptions
 // ---------------------------------------------------------------------------
 
 struct BuildGoldStandardOptions
 {
+    
     // Verbosity level, quiet: 0, normal: 1, verbose: 2, very verbose: 3.
     int verbosity;
 
@@ -119,9 +130,8 @@ struct BuildGoldStandardOptions
     // Maximal error rate in percent, relative to the read length.
     int maxError;
 
-    // Distance function to use.
-    // TODO(holtgrew): Convert to enum.
-    seqan::CharString distanceMetric;
+    // Distance metric to use.
+    DistanceMetric distanceMetric;
 
     // Path to the output file that we will write the GSI to.
     seqan::CharString outGsiPath;
@@ -144,6 +154,7 @@ struct BuildGoldStandardOptions
         matchN(false),
         oracleMode(false),
         maxError(0),
+        distanceMetric(EDIT_DISTANCE),
         compressGsi(false)
     {}
 };
@@ -155,6 +166,30 @@ struct BuildGoldStandardOptions
 // ============================================================================
 // Functions
 // ============================================================================
+
+// ---------------------------------------------------------------------------
+// Function metricName()
+// ---------------------------------------------------------------------------
+
+char const * metricName(DistanceMetric met)
+{
+    if (met == EDIT_DISTANCE)
+        return "edit";
+    else  // if (met == HAMMING_DISTANCE)
+        return "hamming";
+}
+
+// ---------------------------------------------------------------------------
+// Function yesNo()
+// ---------------------------------------------------------------------------
+
+char const * yesNo(bool b)
+{
+    if (b)
+        return "yes";
+    else
+        return "no";
+}
 
 // ----------------------------------------------------------------------------
 // Function trimSeqHeaderToId()
@@ -171,21 +206,30 @@ void trimSeqHeaderToId(seqan::CharString & header)
 }
 
 // ----------------------------------------------------------------------------
-// Function intervalizeErrorCurves()
+// Function intervalizeAndDumpErrorCurves()
 // ----------------------------------------------------------------------------
 
-// Build intervals from the error curves.
+// Build intervals from the error curves and print them to stream.
 
-void intervalizeErrorCurves(String<GsiRecord> & result,
-                            TErrorCurves const & errorCurves,
-                            String<int> const & readAlignmentDistances,
-                            StringSet<CharString> const & readNameStore,
-                            StringSet<CharString> const & contigNameStore,
-                            BuildGoldStandardOptions const & options)
+template <typename TStream>
+int intervalizeAndDumpErrorCurves(TStream & stream,
+                                  TErrorCurves const & errorCurves,
+                                  String<int> const & readAlignmentDistances,
+                                  StringSet<CharString> const & readNameStore,
+                                  StringSet<CharString> const & contigNameStore,
+                                  BuildGoldStandardOptions const & options,
+                                  bool toStdout)
 {
+    if (!toStdout)
+        std::cerr << "\n____POINT TO INTERVAL CONVERSION______________________________________________\n\n"
+                  << "Progress: ";
 
-    std::cerr << "\n____POINT TO INTERVAL CONVERSION______________________________________________\n\n"
-              << "Progress: ";
+    // Write out the header.
+    GsiHeader header;
+    if (writeRecord(stream, header, Gsi()) != 0)
+        return 1;
+    if (writeRecord(stream, GSI_COLUMN_NAMES, Gsi()) != 0)
+        return 1;
 
     // Get a list of read ids, sorted by their read name.
     String<unsigned> sortedReadIds;
@@ -202,14 +246,18 @@ void intervalizeErrorCurves(String<GsiRecord> & result,
         TErrorCurvesIter it = errorCurves.find(sortedReadIds[i]);
         if (it == errorCurves.end())
         {
-            std::cerr << "WARNING: Something went wrong with read ids! This should not happen.\n";
+            if (!toStdout)
+                std::cerr << "WARNING: Something went wrong with read ids! This should not happen.\n";
             continue;
         }
 
-        if (tenPercent > 0u && i % tenPercent == 0u)
-            std::cerr << i / tenPercent * 10 << '%';
-        else if (tenPercent > 5u && i % (tenPercent / 5) == 0u)
-            std::cerr << '.';
+        if (!toStdout)
+        {
+            if (tenPercent > 0u && i % tenPercent == 0u)
+                std::cerr << i / tenPercent * 10 << '%';
+            else if (tenPercent > 5u && i % (tenPercent / 5) == 0u)
+                std::cerr << '.';
+        }
 
         size_t readId = it->first;
         TWeightedMatches const & matches = it->second;
@@ -287,14 +335,17 @@ void intervalizeErrorCurves(String<GsiRecord> & result,
                     flags = GsiRecord::FLAG_PAIRED | GsiRecord::FLAG_SECOND_MATE;
 
                 int gsiDistance = options.oracleMode ? readAlignmentDistances[i] : distance;
-                appendValue(result,
-                            GsiRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
-                                      gsiDistance, contigNameStore[it2->contigId],
-                                      it2->isForward, it2->first, it2->last));
+                GsiRecord gsiRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
+                                    gsiDistance, contigNameStore[it2->contigId],
+                                    it2->isForward, it2->first, it2->last);
+                writeRecord(stream, gsiRecord, Gsi());
             }
         }
     }
-    std::cerr << "100% DONE\n";
+    if (!toStdout)
+        std::cerr << "100% DONE\n";
+
+    return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -995,7 +1046,10 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     if (isSet(parser, "oracle-mode"))
         options.oracleMode = true;
     getOptionValue(options.maxError, parser, "max-error");
-    getOptionValue(options.distanceMetric, parser, "distance-metric");
+    CharString distanceMetric;
+    getOptionValue(distanceMetric, parser, "distance-metric");
+    if (distanceMetric == "hamming")
+        options.distanceMetric = HAMMING_DISTANCE;
 
     if (isSet(parser, "out-gsi"))
         getOptionValue(options.outGsiPath, parser, "out-gsi");
@@ -1036,11 +1090,11 @@ int main(int argc, char const ** argv)
               << "____OPTIONS___________________________________________________________________\n\n";
 
     std::cerr << "Max error rate [%]    " << options.maxError << "\n"
-              << "Oracle mode           " << (options.oracleMode ? (char const *) "yes" : (char const *) "no") << "\n"
-              << "Distance measure      " << options.distanceMetric << "\n"
-              << "Match Ns              " << (options.matchN ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "Oracle mode           " << yesNo(options.oracleMode) << '\n';
+              << "Distance measure      " << metricName(options.distanceMetric) << "\n"
+              << "Match Ns              " << yesNo(options.matchN) << '\n'
               << "GSI Output File       " << options.outGsiPath  << '\n'
-              << "  compress GSI?       " << (options.compressGsi ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "  compress GSI?       " << yesNo(options.compressGsi) << '\n'
               << "SAM Input File        " << options.inSamPath << '\n'
               << "BAM Input File        " << options.inBamPath << '\n'
               << "Reference File        " << options.referencePath << '\n'
@@ -1131,50 +1185,38 @@ int main(int argc, char const ** argv)
     String<int> readAlignmentDistances;
     if (fromSam)
     {
-        if (options.distanceMetric == "edit")
+        if (options.distanceMetric == EDIT_DISTANCE)
             res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, bamIOContext, readNameStore,
                                          refNameStore, faiIndex, options, MyersUkkonenReads(), Sam());
-        else // options.distanceMetric == "hamming"
+        else // options.distanceMetric == DISTANCE_HAMMING
             res = matchesToErrorFunction(errorCurves, readAlignmentDistances, samReader, bamIOContext, readNameStore,
                                          refNameStore, faiIndex, options, HammingSimple(), Sam());
     }
     else
     {
-        if (options.distanceMetric == "edit")
+        if (options.distanceMetric == EDIT_DISTANCE)
             res = matchesToErrorFunction(errorCurves, readAlignmentDistances, bamStream, bamIOContext, readNameStore,
                                          refNameStore, faiIndex, options, MyersUkkonenReads(), Bam());
-        else // options.distanceMetric == "hamming"
+        else // options.distanceMetric == DISTANCE_HAMMING
             res = matchesToErrorFunction(errorCurves, readAlignmentDistances, bamStream, bamIOContext, readNameStore,
                                          refNameStore, faiIndex, options, HammingSimple(), Bam());
     }
     if (res != 0)
         return 1;
 
-    if (options.verbosity >= 2)
-        std::cerr << "[timer] building error curve: " << sysTime() - startTime << " s" << std::endl;
-
     // =================================================================
     // Convert points in error curves to intervals and write them to
     // stdout or a file.
     // =================================================================
 
-    // TODO(holtgrew): If we get rid of the witRecords string and print directly to output then save a lot of memory!
-    startTime = sysTime();
-    String<GsiRecord> witRecords;
-    typedef Iterator<String<GsiRecord>, Standard>::Type TGsiRecordIterator;
-    intervalizeErrorCurves(witRecords, errorCurves, readAlignmentDistances, readNameStore, refNameStore, options);
-    std::cerr << "Took " << sysTime() - startTime << " s\n";
     // The two alternatives are equivalent after opening the file.
     startTime = sysTime();
     std::cerr << "\n____WRITING OUTPUT____________________________________________________________\n\n";
     if (options.outGsiPath == "-")
     {
         std::cerr << "Writing to stdout ...\n";
-        GsiHeader header;
-        writeRecord(std::cout, header, Gsi());
-        writeRecord(std::cout, GSI_COLUMN_NAMES, Gsi());
-        for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
-            std::cout << *it << std::endl;
+        intervalizeAndDumpErrorCurves(std::cout, errorCurves, readAlignmentDistances, readNameStore, refNameStore,
+                                      options, true);
         std::cerr << "DONE\n";
     }
     else
@@ -1188,11 +1230,8 @@ int main(int argc, char const ** argv)
                 std::cerr << "Could not open out file \"" << options.outGsiPath << "\"\n";
                 return 1;
             }
-            GsiHeader header;
-            writeRecord(gsiStream, header, Gsi());
-            writeRecord(gsiStream, GSI_COLUMN_NAMES, Gsi());
-            for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
-                writeRecord(gsiStream, *it, Gsi());
+            intervalizeAndDumpErrorCurves(gsiStream, errorCurves, readAlignmentDistances, readNameStore, refNameStore,
+                                          options, false);
         }
         else
         {
@@ -1202,11 +1241,8 @@ int main(int argc, char const ** argv)
                 std::cerr << "Could not open out file \"" << options.outGsiPath << "\"\n";
                 return 1;
             }
-            GsiHeader header;
-            writeRecord(gsiStream, header, Gsi());
-            writeRecord(gsiStream, GSI_COLUMN_NAMES, Gsi());
-            for (TGsiRecordIterator it = begin(witRecords, Standard()); it != end(witRecords, Standard()); ++it)
-                writeRecord(gsiStream, *it, Gsi());
+            intervalizeAndDumpErrorCurves(gsiStream, errorCurves, readAlignmentDistances, readNameStore, refNameStore,
+                                          options, false);
         }
         std::cerr << " DONE\n";
     }

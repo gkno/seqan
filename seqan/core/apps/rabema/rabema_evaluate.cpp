@@ -45,6 +45,27 @@
 // Enums, Tags, Classes.
 // ============================================================================
 
+// ---------------------------------------------------------------------------
+// Enum BenchmarkCategory
+// ---------------------------------------------------------------------------
+
+enum BenchmarkCategory
+{
+    CATEGORY_ALL,
+    CATEGORY_ALL_BEST,
+    CATEGORY_ANY_BEST
+};
+
+// ---------------------------------------------------------------------------
+// Enum DistanceMetric
+// ---------------------------------------------------------------------------
+
+enum DistanceMetric
+{
+    HAMMING_DISTANCE,
+    EDIT_DISTANCE
+};
+
 // ----------------------------------------------------------------------------
 // Class RabemaEvaluationOptions
 // ----------------------------------------------------------------------------
@@ -71,10 +92,10 @@ public:
     bool oracleMode;
 
     // The benchmark category, one of {"all", "any-best", "all-best"}.
-    CharString benchmarkCategory;
+    BenchmarkCategory benchmarkCategory;
 
     // Distance function to use, also see validDistanceFunction.
-    CharString distanceMetric;
+    DistanceMetric distanceMetric;
 
     // If true then we trust the "NM" tag of the SAM alignment if present.  Otherwise, we perform a realignment at the
     // target position.
@@ -131,8 +152,8 @@ public:
         maxError(0),
         matchN(false),
         oracleMode(false),
-        benchmarkCategory("all"),
-        distanceMetric("edit"),
+        benchmarkCategory(CATEGORY_ALL),
+        distanceMetric(EDIT_DISTANCE),
         trustNM(false),
         dontPanic(false),
         // outPath("-"),
@@ -167,6 +188,44 @@ struct CmpGsiRecordLowering
 // ============================================================================
 // Functions
 // ============================================================================
+
+// ---------------------------------------------------------------------------
+// Function categoryName()
+// ---------------------------------------------------------------------------
+
+char const * categoryName(BenchmarkCategory cat)
+{
+    if (cat == CATEGORY_ALL)
+        return "all";
+    else if (cat == CATEGORY_ALL_BEST)
+        return "all-best";
+    else
+        return "any-best";
+}
+
+// ---------------------------------------------------------------------------
+// Function metricName()
+// ---------------------------------------------------------------------------
+
+char const * metricName(DistanceMetric met)
+{
+    if (met == EDIT_DISTANCE)
+        return "edit";
+    else  // if (met == HAMMING_DISTANCE)
+        return "hamming";
+}
+
+// ---------------------------------------------------------------------------
+// Function yesNo()
+// ---------------------------------------------------------------------------
+
+char const * yesNo(bool b)
+{
+    if (b)
+        return "yes";
+    else
+        return "no";
+}
 
 // ----------------------------------------------------------------------------
 // Function performIntervalLowering()
@@ -301,7 +360,8 @@ int benchmarkReadResult(RabemaStats & result,
     //
     // Start with picking the smallest distance if *-best mode.
     int smallestDistance = options.oracleMode ? maxValue<int>() : options.maxError;
-    if (options.oracleMode || options.benchmarkCategory == "any-best" || options.benchmarkCategory == "all-best")
+    if (options.oracleMode || options.benchmarkCategory == CATEGORY_ANY_BEST ||
+        options.benchmarkCategory == CATEGORY_ALL_BEST)
         for (unsigned i = 0; i < length(gsiRecords); ++i)
             smallestDistance = std::min(smallestDistance, gsiRecords[i].distance);
     int largestDistance = options.maxError;
@@ -337,7 +397,7 @@ int benchmarkReadResult(RabemaStats & result,
     // On these selected GSI records, we now perform interval lowering in case of "any-best" and "all-best".  This means
     // that an interval I with distance k_i containing an interval J with distance k_j < k_i is re-labeled with a
     // distance of k_j for the smallest k_j of all contained intervals J.
-    if (!options.oracleMode && (options.benchmarkCategory == "any-best" || options.benchmarkCategory == "all-best"))
+    if (!options.oracleMode && (options.benchmarkCategory == CATEGORY_ANY_BEST || options.benchmarkCategory == CATEGORY_ALL_BEST))
         performIntervalLowering(pickedGsiRecords, options.maxError);
 
     // Build string of intervals for each reference sequence from these filtered and lowered records.
@@ -350,17 +410,17 @@ int benchmarkReadResult(RabemaStats & result,
     for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
     {
         int distance = pickedGsiRecords[i].distance;
-        if (!options.oracleMode && options.benchmarkCategory != "all" && distance != options.maxError)
+        if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ALL && distance != options.maxError)
             continue;  // Only search if interval distance matches -- in *-best.
         int originalDistance = pickedGsiRecords[i].originalDistance;
 
         appendValue(intervals[pickedGsiRecords[i].contigId], TInterval(pickedGsiRecords[i].firstPos, pickedGsiRecords[i].lastPos + 1, length(intervalDistances)));
         appendValue(intervalDistances, originalDistance);
         numIntervals += 1;
-        if (!options.oracleMode && options.benchmarkCategory != "any-best")
+        if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ANY_BEST)
             numIntervalsForErrorRate[originalDistance] += 1;
     }
-    if (options.benchmarkCategory == "any-best" && !empty(pickedGsiRecords))
+    if (options.benchmarkCategory == CATEGORY_ANY_BEST && !empty(pickedGsiRecords))
         numIntervalsForErrorRate[smallestDistance] += 1;
     // Marker array that states whether an interval was hit.
     String<bool> intervalHit;
@@ -465,7 +525,8 @@ int benchmarkReadResult(RabemaStats & result,
 
             // Skip invalid alignments.
             int allowedDistance = static_cast<int>(0.01 * options.maxError * length(readSeq));
-            if ((options.benchmarkCategory == "all-best" || options.benchmarkCategory == "any-best") && (smallestDistance != maxValue<int>()))
+            if ((options.benchmarkCategory == CATEGORY_ALL_BEST || options.benchmarkCategory == CATEGORY_ANY_BEST) &&
+                (smallestDistance != maxValue<int>()))
                 allowedDistance = smallestDistance;
             if (bestDistance > allowedDistance)
             {
@@ -540,7 +601,7 @@ int benchmarkReadResult(RabemaStats & result,
     String<unsigned> foundIntervalsForErrorRate;
     if ((int)length(foundIntervalsForErrorRate) <= largestDistance + 1)
         resize(foundIntervalsForErrorRate, largestDistance + 1, 0);
-    if (options.oracleMode || options.benchmarkCategory == "any-best")
+    if (options.oracleMode || options.benchmarkCategory == CATEGORY_ANY_BEST)
     {
         int bestDistance = maxValue<int>();
         for (unsigned i = 0; i < length(intervalDistances); ++i)
@@ -560,7 +621,7 @@ int benchmarkReadResult(RabemaStats & result,
     {
         for (unsigned i = 0; i < length(intervalDistances); ++i)
         {
-            if (options.benchmarkCategory == "all" && intervalDistances[i] != options.maxError)
+            if (options.benchmarkCategory == CATEGORY_ALL && intervalDistances[i] != options.maxError)
                 continue;  // Only count intervals on our maximal error rate in "all" mode.
             if (intervalHit[i])
             {
@@ -594,7 +655,7 @@ int benchmarkReadResult(RabemaStats & result,
         result.normalizedIntervalsToFindForErrorRate[d] += 1;
         result.normalizedIntervalsFoundForErrorRate[d] += found;
     }
-    else if (options.benchmarkCategory == "any-best")
+    else if (options.benchmarkCategory == CATEGORY_ANY_BEST)
     {
         int d = (smallestDistance == maxValue<int>()) ? 0 : smallestDistance;
         bool toFind = (numIntervalsForErrorRate[d] > 0u);
@@ -615,7 +676,7 @@ int benchmarkReadResult(RabemaStats & result,
         for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
         {
             // In case of "all", we only count the intervals from with maximal error rate.
-            if (options.benchmarkCategory != "all" || (int)d == options.maxError)
+            if (options.benchmarkCategory != CATEGORY_ALL || (int)d == options.maxError)
             {
                 intervalsToFind += numIntervalsForErrorRate[d];
                 intervalsFound += foundIntervalsForErrorRate[d];
@@ -633,12 +694,12 @@ int benchmarkReadResult(RabemaStats & result,
                 continue;
             // In case of "all", we only count the intervals from with maximal error rate.  In case of all-best we only
             // count those with the best error rate for this read.
-            if (options.benchmarkCategory == "all" && (int)d == options.maxError)
+            if (options.benchmarkCategory == CATEGORY_ALL && (int)d == options.maxError)
             {
                 result.normalizedIntervalsToFindForErrorRate[d] += 1.0 * numIntervalsForErrorRate[d] / intervalsToFind;
                 result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsToFind;
             }
-            else if (options.benchmarkCategory == "all-best" && (int)d == smallestDistance)
+            else if (options.benchmarkCategory == CATEGORY_ALL_BEST && (int)d == smallestDistance)
             {
                 result.normalizedIntervalsToFindForErrorRate[d] += 1;
                 result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsToFind;
@@ -973,8 +1034,20 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     getOptionValue(options.maxError, parser, "max-error");
     options.matchN = isSet(parser, "match-N");
     options.oracleMode = isSet(parser, "oracle-mode");
-    getOptionValue(options.benchmarkCategory, parser, "benchmark-category");
-    getOptionValue(options.distanceMetric, parser, "distance-metric");
+    CharString benchmarkCategory;
+    getOptionValue(benchmarkCategory, parser, "benchmark-category");
+    if (benchmarkCategory == "all")
+        options.benchmarkCategory = CATEGORY_ALL;
+    else if (benchmarkCategory == "all-best")
+        options.benchmarkCategory = CATEGORY_ALL_BEST;
+    else  // if (benchmarkCategory == "any-best")
+        options.benchmarkCategory = CATEGORY_ANY_BEST;
+    CharString distanceMetric;
+    getOptionValue(distanceMetric, parser, "distance-metric");
+    if (distanceMetric == "edit")
+        options.distanceMetric = EDIT_DISTANCE;
+    else
+        options.distanceMetric = HAMMING_DISTANCE;
     options.trustNM = isSet(parser, "trust-NM");
     options.dontPanic = isSet(parser, "DONT-PANIC");
 
@@ -1013,21 +1086,21 @@ int main(int argc, char const ** argv)
     std::cerr << "____OPTIONS___________________________________________________________________\n\n";
 
     std::cerr << "Max error rate [%]    " << options.maxError << "\n"
-              << "Oracle mode           " << (options.oracleMode ? (char const *) "yes" : (char const *) "no") << "\n"
-              << "Benchmark category    " << options.benchmarkCategory << "\n"
-              << "Distance measure      " << options.distanceMetric << "\n"
-              << "Match Ns              " << (options.matchN ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "Oracle mode           " << yesNo(options.oracleMode) << '\n'
+              << "Benchmark category    " << categoryName(options.benchmarkCategory) << "\n"
+              << "Distance measure      " << metricName(options.distanceMetric) << "\n"
+              << "Match Ns              " << yesNo(options.matchN) << '\n'
               << "GSI File              " << options.inGsiPath << '\n'
               << "SAM File              " << options.inSamPath << '\n'
               << "BAM File              " << options.inBamPath << '\n'
               << "Reference File        " << options.referencePath << '\n'
               << "TSV Output File       " << options.outTsvPath << '\n'
               << "Show\n"
-              << "    additional        " << (options.showAdditionalIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
-              << "    hit               " << (options.showHitIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
-              << "    missed            " << (options.showMissedIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
-              << "    superflous        " << (options.showSuperflousIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
-              << "    try hit           " << (options.showTryHitIntervals ? (char const *) "yes" : (char const *) "no") << '\n'
+              << "    additional        " << yesNo(options.showAdditionalIntervals) << '\n'
+              << "    hit               " << yesNo(options.showHitIntervals) << '\n'
+              << "    missed            " << yesNo(options.showMissedIntervals) << '\n'
+              << "    superflous        " << yesNo(options.showSuperflousIntervals) << '\n'
+              << "    try hit           " << yesNo(options.showTryHitIntervals) << '\n'
               << "\n";
 
     std::cerr << "____LOADING FILES_____________________________________________________________\n\n";
@@ -1157,19 +1230,19 @@ int main(int argc, char const ** argv)
     RabemaStats result(options.maxError);
     if (fromSam)
     {
-        if (options.distanceMetric == "edit")
+        if (options.distanceMetric == EDIT_DISTANCE)
             res = compareAlignedReadsToReference(result, samReader, bamIOContext, refNameStore, refNameStoreCache,
                                                  refSeqs, gsiReader, options, MyersUkkonenReads(), Sam());
-        else  // options.distanceMetric == "hamming"
+        else  // options.distanceMetric == HAMMING_DISTANCE
             res = compareAlignedReadsToReference(result, samReader, bamIOContext, refNameStore, refNameStoreCache,
                                                  refSeqs, gsiReader, options, HammingSimple(), Sam());
     }
     else
     {
-        if (options.distanceMetric == "edit")
+        if (options.distanceMetric == EDIT_DISTANCE)
             res = compareAlignedReadsToReference(result, bamStream, bamIOContext, refNameStore, refNameStoreCache,
                                                  refSeqs, gsiReader, options, MyersUkkonenReads(), Bam());
-        else  // options.distanceMetric == "hamming"
+        else  // options.distanceMetric == HAMMING_DISTANCE
             res = compareAlignedReadsToReference(result, bamStream, bamIOContext, refNameStore, refNameStoreCache,
                                                  refSeqs, gsiReader, options, HammingSimple(), Bam());
     }
@@ -1193,7 +1266,7 @@ int main(int argc, char const ** argv)
               << "a containing interval has.  Contained intervals are then removed.\n\n\n";
 
     int maxError = -1;
-    if (!options.oracleMode && options.benchmarkCategory == "all")
+    if (!options.oracleMode && options.benchmarkCategory == CATEGORY_ALL)
         maxError = options.maxError;
     write(std::cout, result, maxError, Raw());
 

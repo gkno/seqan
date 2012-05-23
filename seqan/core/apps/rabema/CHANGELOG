@@ -1,5 +1,7 @@
 == Trunk ==
 
+ * Changing distance metric to enum in Rabema.
+ * Lowering memory usage of rabema_build_gold_standard by not storing whole GSI in memory but dumping directly.
  * GSI can now be written and read from compressed file.
  * A detailed and updated manual is now available.
  * Using new command line parser yields better documentation.
