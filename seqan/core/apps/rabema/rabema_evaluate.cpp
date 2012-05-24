@@ -1277,8 +1277,8 @@ int main(int argc, char const ** argv)
             failed = true;
             std::cerr << " FAILED - could not open output file!\n";
         }
-        else if (write(tsvOut, result, options.maxError, options.benchmarkCategory, options.oracleMode,
-                       options.distanceMetric, Tsv()) != 0)
+        else if (write(tsvOut, result, options.maxError, categoryName(options.benchmarkCategory),
+                       options.oracleMode, metricName(options.distanceMetric), Tsv()) != 0)
         {
             failed = true;
             std::cerr << " FAILED - error writing to output file!\n";
