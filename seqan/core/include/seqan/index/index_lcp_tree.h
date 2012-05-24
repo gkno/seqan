@@ -161,7 +161,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned treeLevels = 1;
 		--lcpSize;
 		TSize _xSize = 1;
-		for(; lcpSize > _xSize; _xSize *= 2, ++treeLevels) ;
+		for (; lcpSize > _xSize; _xSize *= 2, ++treeLevels)
+            continue;  // Get smallest 2^k that is <= lcpSize.
         return treeLevels;
     }
 

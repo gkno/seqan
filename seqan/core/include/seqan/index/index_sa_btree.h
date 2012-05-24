@@ -116,7 +116,8 @@ namespace SEQAN_NAMESPACE_MAIN
     inline unsigned treeLevelsSAB(TSize saSize, unsigned BlockSize)
 	{
 		unsigned treeLevels = 1;
-		for(TSize _xSize = 1; _xSize <= saSize; _xSize *= BlockSize, ++treeLevels) ;
+		for (TSize _xSize = 1; _xSize <= saSize; _xSize *= BlockSize, ++treeLevels)
+            continue;  // Get smallest 2^k that is > saSize.
         return treeLevels;
     }
 
