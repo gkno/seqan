@@ -589,10 +589,10 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_int64)
     {
         __int64 b = 0, c = 42;
 
-        SEQAN_ASSERT_LT(minValue(__int64()), minValue(__int32()));
+        SEQAN_ASSERT_LT(minValue((__int64)(0)), minValue((__int32)(0)));
         SEQAN_ASSERT_LT(minValue<__int64>(), minValue<__int32>());
         SEQAN_ASSERT_LT(+(MinValue<__int64>::VALUE), +(MinValue<__int32>::VALUE));
-        SEQAN_ASSERT_GT(maxValue(__int64()), maxValue(__int32()));
+        SEQAN_ASSERT_GT(maxValue((__int64)(0)), maxValue((__int32)(0)));
         SEQAN_ASSERT_GT(maxValue<__int64>(), maxValue<__int32>());
         SEQAN_ASSERT_GT(+(MaxValue<__int64>::VALUE), +(MaxValue<__int32>::VALUE));
         SEQAN_ASSERT(b < c);
@@ -604,8 +604,8 @@ SEQAN_DEFINE_TEST(test_basic_alphabet_adapt_builtins_concepts_int64)
 
         // The following is most probably wrong.
         SEQAN_ASSERT_EQ(ordValue(0), 0u);
-        // SEQAN_ASSERT_EQ(ordValue(__int64(-23)), 65513u);
-        SEQAN_ASSERT_EQ(ordValue(__int64(42)), 42u);
+        // SEQAN_ASSERT_EQ(ordValue((__int64)(-23)), 65513u);
+        SEQAN_ASSERT_EQ(ordValue((__int64)(42)), 42u);
         SEQAN_ASSERT_EQ(+ValueSize<__int64>::VALUE, 0u);
         SEQAN_ASSERT_EQ(valueSize<__int64>(), 0u);
 
