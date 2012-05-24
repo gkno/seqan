@@ -76,13 +76,13 @@ std::cout << IsSameType<False,False::Type>::VALUE << std::endl; // 1
 struct True
 {
     typedef True Type;
-    enum TValue_ { VALUE = true };
+	static const bool VALUE = true;
 };
 
 struct False
 {
     typedef False Type;
-    enum TValue_ { VALUE = false };
+	static const bool VALUE = false;
 };
 
 // ============================================================================
