@@ -986,8 +986,8 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
     }
     if (unknownContigs > 0)
         std::cerr << "    " << unknownContigs << " contigs not found" << std::endl;
-    
-    #pragma omp parallel for schedule(static,1)
+
+    SEQAN_OMP_PRAGMA(parallel for schedule(static,1))
     for (int i = 0; i < (int)length(snpSet); ++i)
         std::sort(begin(snpSet[i], Standard()), end(snpSet[i], Standard()), SnpLess());
 }
@@ -1518,4 +1518,3 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 }
 
 #endif  // MASON_H_
-                                                                                                        
