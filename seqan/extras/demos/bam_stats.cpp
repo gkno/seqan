@@ -708,7 +708,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         TNameCache::TSet::iterator itEnd = readNameCache.nameSet.end();
         for (; it != itEnd; ++it)
         {
-            bestMatchFile << readNames[*it]                         << '\t';
+            bestMatchFile << readNames[*it] << '\t';
             
             if (options.goldStandard)
             {
@@ -716,12 +716,12 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                                  (unsigned)goldStandard[*it].seqErrors  << '\t' <<
                                  (unsigned)goldStandard[*it].SNPs       << '\t' <<
                                  (unsigned)goldStandard[*it].indels     << '\t';
+                
+                if (minErrorsOrigin[*it] != MaxValue<unsigned>::VALUE)
+                    bestMatchFile << minErrorsOrigin[*it] << '\t';
+                else
+                    bestMatchFile << "None" << '\t';
             }
-            
-            if (minErrorsOrigin[*it] != MaxValue<unsigned>::VALUE)
-                bestMatchFile << minErrorsOrigin[*it] << '\t';
-            else
-                bestMatchFile << "None" << '\t';
             
             if (minErrors[*it] != MaxValue<unsigned>::VALUE)
                 bestMatchFile << minErrors[*it] << '\t';
