@@ -39,10 +39,10 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>      // For printing SeqAn Strings.
-
 #include <seqan/stream.h>
 #include <seqan/bam_io.h>
 #include <seqan/misc/misc_cmdparser.h>
+#include <seqan/find.h>
 
 #if SEQAN_HAS_ZLIB
 
@@ -249,6 +249,40 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
     return errors;
 }
 
+template <typename TReference>
+int realignBamRecord(TReference & reference, BamAlignmentRecord & record, unsigned maxIndels)
+{
+    typedef Myers<AlignTextBanded<FindInfix, NMatchesNone_, NMatchesNone_>, True, void> TAlgorithmSpec;
+    
+    typedef String<Dna5>                                TReadSeq;
+	typedef PatternState_<TReadSeq, TAlgorithmSpec>     TPatternState;
+    
+    typedef Segment<TReference, InfixSegment>           TReferenceInfix;
+    typedef Finder<TReferenceInfix>                     TFinder;
+    
+    unsigned len = getAlignmentLengthInRef(record);
+    __int64 posBegin = record.pos;
+    
+    if (record.cigar[0].operation == 'S')
+        posBegin -= record.cigar[0].count;
+    
+    __int64 posEnd = posBegin + len + maxIndels;
+    posBegin = _max(0, posBegin - maxIndels);
+    posEnd = _min(posEnd, (__int64)length(reference));
+    
+    TReferenceInfix refInfix(reference, posBegin, posEnd);
+    TReadSeq readSeq = record.seq;
+    if (hasFlagRC(record)) reverseComplement(readSeq);
+    
+    TFinder finder(refInfix);
+    TPatternState patternState;
+    
+    int distance = maxIndels + 1;
+    while (find(finder, readSeq, patternState, -maxIndels))
+        distance = std::min(distance, -getScore(patternState));
+    
+    return distance;
+}
 
 template <typename TStreamOrReader, typename TSeqString, typename TSpec, typename TFormat>
 int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
@@ -503,8 +537,9 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
  
             unsigned seqId = rIdToSeqId[record.rId];
             
+            // realign in a window 10bp left and right of the original alignment
             if (options.realign)
-                editDistance = realignBamRecord(align, seqs[seqId], record, 10);  // realign in a window 10bp left and right of the original alignment
+                editDistance = realignBamRecord(seqs[seqId], record, 10);
             else
             {
                 // convert soft clipping into match/mismatches
