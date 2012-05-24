@@ -1032,8 +1032,12 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
 
     addTextSection(parser, "Memory Requirements");
     addText(parser,
-            "From version 1.1, great care has been taken to keep the memory requirements as low as possible.");
-    // TODO(holtgrew): Give some rough estimates for the human genome data set, for example.
+            "From version 1.1, great care has been taken to keep the memory requirements as low as possible. "
+            "There memory required is two times the size of the largest chromosome plus some constant memory "
+            "for each match.");
+    addText(parser,
+            "For example, the memory usage for 100bp human genome reads at 5% error rate was 1.7GB. Of this, "
+            "roughly 400GB came from the chromosome and 1.3GB from the matches.");
 
     addTextSection(parser, "References");
     addText(parser,
