@@ -326,7 +326,7 @@ int readRecord(BamAlignmentRecord & record,
     }
     // If qual is a sequence of 0xff (heuristic same as samtools: Only look at first byte) then we clear it, to get the
     // representation of '*';
-    if (record.qual[0] == static_cast<char>(0xff))
+    if (record.qual[0] == '\xFF')
         clear(record.qual);
     typedef typename Iterator<CharString, Rooted>::Type TQualIter;
     for (TQualIter it = begin(record.qual, Rooted()); !atEnd(it); goNext(it))
