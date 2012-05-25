@@ -74,8 +74,8 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_bool_type)
     SEQAN_ASSERT_EQ(+True::VALUE, 1);
 
     // Test for type of the Type members.
-    SEQAN_ASSERT_EQ((+TestTypeEq<typename False::Type, False>::VALUE), true);
-    SEQAN_ASSERT_EQ((+TestTypeEq<typename True::Type,  True>::VALUE), true);
+    SEQAN_ASSERT_EQ((TestTypeEq<typename False::Type, False>::VALUE), true);
+    SEQAN_ASSERT_EQ((TestTypeEq<typename True::Type,  True>::VALUE), true);
 }
 
 SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_eval)
@@ -83,12 +83,12 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_eval)
     using namespace seqan;
 
     // Test for the VALUE members.
-    SEQAN_ASSERT_EQ(+Eval<false>::VALUE, false);
-    SEQAN_ASSERT_EQ(+Eval<true>::VALUE, true);
+    SEQAN_ASSERT_EQ(+Eval<false>::VALUE, +false);
+    SEQAN_ASSERT_EQ(+Eval<true>::VALUE, +true);
 
     // Test for the Type members.
-    SEQAN_ASSERT_EQ((TestTypeEq<Eval<false>::Type, False>::VALUE), true);
-    SEQAN_ASSERT_EQ((TestTypeEq<Eval<true>::Type,  True>::VALUE),  true);
+    SEQAN_ASSERT_EQ((+TestTypeEq<Eval<false>::Type, False>::VALUE), +true);
+    SEQAN_ASSERT_EQ((+TestTypeEq<Eval<true>::Type,  True>::VALUE),  +true);
 }
 
 SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_or)
@@ -96,10 +96,10 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_or)
     using namespace seqan;
 
     // Test for the VALUE members.
-    SEQAN_ASSERT_EQ((+Or<False, False>::VALUE), false);
-    SEQAN_ASSERT_EQ((+Or<False, True>::VALUE),  true);
-    SEQAN_ASSERT_EQ((+Or<True, False>::VALUE),  true);
-    SEQAN_ASSERT_EQ((+Or<True, True>::VALUE),   true);
+    SEQAN_ASSERT_EQ((+Or<False, False>::VALUE), +false);
+    SEQAN_ASSERT_EQ((+Or<False, True>::VALUE),  +true);
+    SEQAN_ASSERT_EQ((+Or<True, False>::VALUE),  +true);
+    SEQAN_ASSERT_EQ((+Or<True, True>::VALUE),   +true);
 
     // Test for the Type members.
     SEQAN_ASSERT_EQ((TestTypeEq<Or<False, False>::Type, False>::VALUE), true);
@@ -113,10 +113,10 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_or_c)
     using namespace seqan;
 
     // Test for the VALUE members.
-    SEQAN_ASSERT_EQ((+OrC<false, false>::VALUE), false);
-    SEQAN_ASSERT_EQ((+OrC<false, true>::VALUE),  true);
-    SEQAN_ASSERT_EQ((+OrC<true, false>::VALUE),  true);
-    SEQAN_ASSERT_EQ((+OrC<true, true>::VALUE),   true);
+    SEQAN_ASSERT_EQ((+OrC<false, false>::VALUE), +false);
+    SEQAN_ASSERT_EQ((+OrC<false, true>::VALUE),  +true);
+    SEQAN_ASSERT_EQ((+OrC<true, false>::VALUE),  +true);
+    SEQAN_ASSERT_EQ((+OrC<true, true>::VALUE),   +true);
 
     // Test for the Type members.
     SEQAN_ASSERT_EQ((TestTypeEq<OrC<false, false>::Type, False>::VALUE), true);
@@ -130,10 +130,10 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_and)
     using namespace seqan;
 
     // Test for the VALUE members.
-    SEQAN_ASSERT_EQ((+And<False, False>::VALUE), false);
-    SEQAN_ASSERT_EQ((+And<False, True>::VALUE),  false);
-    SEQAN_ASSERT_EQ((+And<True, False>::VALUE),  false);
-    SEQAN_ASSERT_EQ((+And<True, True>::VALUE),   true);
+    SEQAN_ASSERT_EQ((+And<False, False>::VALUE), +false);
+    SEQAN_ASSERT_EQ((+And<False, True>::VALUE),  +false);
+    SEQAN_ASSERT_EQ((+And<True, False>::VALUE),  +false);
+    SEQAN_ASSERT_EQ((+And<True, True>::VALUE),   +true);
 
     // Test for the Type members.
     SEQAN_ASSERT_EQ((TestTypeEq<And<False, False>::Type, False>::VALUE), true);
@@ -147,10 +147,10 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_logic_and_c)
     using namespace seqan;
 
     // Test for the VALUE members.
-    SEQAN_ASSERT_EQ((+AndC<false, false>::VALUE), false);
-    SEQAN_ASSERT_EQ((+AndC<false, true>::VALUE),  false);
-    SEQAN_ASSERT_EQ((+AndC<true, false>::VALUE),  false);
-    SEQAN_ASSERT_EQ((+AndC<true, true>::VALUE),   true);
+    SEQAN_ASSERT_EQ((+AndC<false, false>::VALUE), +false);
+    SEQAN_ASSERT_EQ((+AndC<false, true>::VALUE),  +false);
+    SEQAN_ASSERT_EQ((+AndC<true, false>::VALUE),  +false);
+    SEQAN_ASSERT_EQ((+AndC<true, true>::VALUE),   +true);
 
     // Test for the Type members.
     SEQAN_ASSERT_EQ((TestTypeEq<AndC<false, false>::Type, False>::VALUE), true);
