@@ -30,6 +30,7 @@
 
 #include <seqan/random.h>
 #include <seqan/sequence_journaled.h>
+#include <seqan/parallel.h>
 
 #include "store_config.h"
 #include "util.h"
