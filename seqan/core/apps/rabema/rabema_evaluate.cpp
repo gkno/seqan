@@ -491,7 +491,7 @@ int benchmarkReadResult(RabemaStats & result,
                     if (extractTagValue(bestDistance, bamTags, idx))
                     {
                         // Convert from count to rate.
-                        bestDistance = ceil(100.0 * bestDistance / length(readSeq));
+                        bestDistance = static_cast<int>(ceil(100.0 * bestDistance / length(readSeq)));
                     }
                     else
                     {
@@ -521,7 +521,7 @@ int benchmarkReadResult(RabemaStats & result,
                 bool ret = setEndPosition(finder, pattern, length(contigSeq) - bandwidth);
                 (void) ret;  // When run without assertions.
                 SEQAN_CHECK(ret, "setEndPosition() must not fail!");
-                bestDistance = ceil(-100.0 * getScore(pattern) / length(readSeq));
+                bestDistance = static_cast<int>(ceil(-100.0 * getScore(pattern) / length(readSeq)));
             }
 
             // Skip invalid alignments.
