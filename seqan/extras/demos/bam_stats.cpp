@@ -272,7 +272,6 @@ int realignBamRecord(TReference & reference, BamAlignmentRecord & record, unsign
     
     TReferenceInfix refInfix(reference, posBegin, posEnd);
     TReadSeq readSeq = record.seq;
-    if (hasFlagRC(record)) reverseComplement(readSeq);
     
     TFinder finder(refInfix);
     TPatternState patternState;
