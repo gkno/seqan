@@ -309,6 +309,22 @@ class NormalizeScientificExponentsTransform(object):
 			return re.sub(r'([-+]?[0-9]*\.[0-9]+[eE][-+]?)([0-9]{2})', r'\10\2', text)
 
 
+class RegexpReplaceTransform(object):
+    """Transformation that applies regular expression replacement."""
+    
+    def __init__(self, needle, replacement, left=True, right=True):
+        self.needle = needle
+        self.replacement = replacement
+        self.left = left
+        self.right = right
+    
+    def apply(self, text, is_left):
+        """Apply the transform."""
+        if (is_left and not self.left) or (not is_left and not self.right):
+            return text  # Skip if no transform is to be applied.
+            return re.sub(self.needle, self.replacement, text)
+
+
 def main(main_func):
     """Run main_func with the first and second positional parameter.""" 
     parser = optparse.OptionParser("usage: run_tests [options] SOURCE_ROOT_PATH BINARY_ROOT_PATH")

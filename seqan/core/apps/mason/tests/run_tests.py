@@ -46,6 +46,14 @@ def main(source_base, binary_base):
     # was generated in generate_outputs.sh.
     conf_list = []
 
+    # We prepare a list of transforms to apply to the output files: Strip the
+    # running times from output.
+    transforms = [
+        app_tests.RegexpReplaceTransform(r'Finished haplotype creation in [0-9.]+s',
+                                         r'Finished haplotype creation in <cut out>s',
+                                         left=True, right=True),
+        ]
+
     # ============================================================
     # Run 454 Reads, Single-End
     # ============================================================
@@ -61,7 +69,8 @@ def main(source_base, binary_base):
                  (ph.inFile('454-se-random-N100-nm400-ne40-s0.fasta.sam'),
                   ph.outFile('454-se-random-N100-nm400-ne40-s0.fasta.sam')),
                  (ph.inFile('454-se-random-N100-nm400-ne40-s0.stdout'),
-                  ph.outFile('454-se-random-N100-nm400-ne40-s0.stdout'))])
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -75,7 +84,8 @@ def main(source_base, binary_base):
                  (ph.inFile('454-se-random-N100-nm400-ne40-s0-sq.fastq.sam'),
                   ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.fastq.sam')),
                  (ph.inFile('454-se-random-N100-nm400-ne40-s0-sq.stdout'),
-                  ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.stdout'))])
+                  ph.outFile('454-se-random-N100-nm400-ne40-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -89,7 +99,8 @@ def main(source_base, binary_base):
                  (ph.inFile('454-se-random-N100-nm200-ne20-s0.fasta.sam'),
                   ph.outFile('454-se-random-N100-nm200-ne20-s0.fasta.sam')),
                  (ph.inFile('454-se-random-N100-nm200-ne20-s0.stdout'),
-                  ph.outFile('454-se-random-N100-nm200-ne20-s0.stdout'))])
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -103,7 +114,8 @@ def main(source_base, binary_base):
                  (ph.inFile('454-se-random-N100-nm200-ne20-s0-sq.fastq.sam'),
                   ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.fastq.sam')),
                  (ph.inFile('454-se-random-N100-nm200-ne20-s0-sq.stdout'),
-                  ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.stdout'))])
+                  ph.outFile('454-se-random-N100-nm200-ne20-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     # ============================================================
@@ -121,7 +133,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-random-N100-n36-s0.fasta.sam'),
                   ph.outFile('illumina-se-random-N100-n36-s0.fasta.sam')),
                  (ph.inFile('illumina-se-random-N100-n36-s0.stdout'),
-                  ph.outFile('illumina-se-random-N100-n36-s0.stdout'))])
+                  ph.outFile('illumina-se-random-N100-n36-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -135,7 +148,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-random-N100-n36-s0-sq.fastq.sam'),
                   ph.outFile('illumina-se-random-N100-n36-s0-sq.fastq.sam')),
                  (ph.inFile('illumina-se-random-N100-n36-s0-sq.stdout'),
-                  ph.outFile('illumina-se-random-N100-n36-s0-sq.stdout'))])
+                  ph.outFile('illumina-se-random-N100-n36-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -149,7 +163,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-random-N100-n100-s0.fasta.sam'),
                   ph.outFile('illumina-se-random-N100-n100-s0.fasta.sam')),
                  (ph.inFile('illumina-se-random-N100-n100-s0.stdout'),
-                  ph.outFile('illumina-se-random-N100-n100-s0.stdout'))])
+                  ph.outFile('illumina-se-random-N100-n100-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -163,7 +178,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-random-N100-n100-s0-sq.fastq.sam'),
                   ph.outFile('illumina-se-random-N100-n100-s0-sq.fastq.sam')),
                  (ph.inFile('illumina-se-random-N100-n100-s0-sq.stdout'),
-                  ph.outFile('illumina-se-random-N100-n100-s0-sq.stdout'))])
+                  ph.outFile('illumina-se-random-N100-n100-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     # ============================================================
@@ -181,7 +197,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-adeno-N100-n36-s0.fasta.sam'),
                   ph.outFile('illumina-se-adeno-N100-n36-s0.fasta.sam')),
                  (ph.inFile('illumina-se-adeno-N100-n36-s0.stdout'),
-                  ph.outFile('illumina-se-adeno-N100-n36-s0.stdout'))])
+                  ph.outFile('illumina-se-adeno-N100-n36-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -195,7 +212,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-adeno-N100-n36-s0-sq.fastq.sam'),
                   ph.outFile('illumina-se-adeno-N100-n36-s0-sq.fastq.sam')),
                  (ph.inFile('illumina-se-adeno-N100-n36-s0-sq.stdout'),
-                  ph.outFile('illumina-se-adeno-N100-n36-s0-sq.stdout'))])
+                  ph.outFile('illumina-se-adeno-N100-n36-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -209,7 +227,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-adeno-N100-n100-s0.fasta.sam'),
                   ph.outFile('illumina-se-adeno-N100-n100-s0.fasta.sam')),
                  (ph.inFile('illumina-se-adeno-N100-n100-s0.stdout'),
-                  ph.outFile('illumina-se-adeno-N100-n100-s0.stdout'))])
+                  ph.outFile('illumina-se-adeno-N100-n100-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -223,7 +242,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-se-adeno-N100-n100-s0-sq.fastq.sam'),
                   ph.outFile('illumina-se-adeno-N100-n100-s0-sq.fastq.sam')),
                  (ph.inFile('illumina-se-adeno-N100-n100-s0-sq.stdout'),
-                  ph.outFile('illumina-se-adeno-N100-n100-s0-sq.stdout'))])
+                  ph.outFile('illumina-se-adeno-N100-n100-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     # ============================================================
@@ -243,7 +263,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-pe-random-N100-n36-s0.fasta.sam'),
                   ph.outFile('illumina-pe-random-N100-n36-s0.fasta.sam')),
                  (ph.inFile('illumina-pe-random-N100-n36-s0.stdout'),
-                  ph.outFile('illumina-pe-random-N100-n36-s0.stdout'))])
+                  ph.outFile('illumina-pe-random-N100-n36-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -259,7 +280,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-pe-random-N100-n36-s0-sq.fastq.sam'),
                   ph.outFile('illumina-pe-random-N100-n36-s0-sq.fastq.sam')),
                  (ph.inFile('illumina-pe-random-N100-n36-s0-sq.stdout'),
-                  ph.outFile('illumina-pe-random-N100-n36-s0-sq.stdout'))])
+                  ph.outFile('illumina-pe-random-N100-n36-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -275,7 +297,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-pe-random-N100-n100-s0.fasta.sam'),
                   ph.outFile('illumina-pe-random-N100-n100-s0.fasta.sam')),
                  (ph.inFile('illumina-pe-random-N100-n100-s0.stdout'),
-                  ph.outFile('illumina-pe-random-N100-n100-s0.stdout'))])
+                  ph.outFile('illumina-pe-random-N100-n100-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -291,7 +314,8 @@ def main(source_base, binary_base):
                  (ph.inFile('illumina-pe-random-N100-n100-s0-sq.fastq.sam'),
                   ph.outFile('illumina-pe-random-N100-n100-s0-sq.fastq.sam')),
                  (ph.inFile('illumina-pe-random-N100-n100-s0-sq.stdout'),
-                  ph.outFile('illumina-pe-random-N100-n100-s0-sq.stdout'))])
+                  ph.outFile('illumina-pe-random-N100-n100-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     # ============================================================
@@ -309,7 +333,8 @@ def main(source_base, binary_base):
                  (ph.inFile('sanger-se-random-N100-nm400-ne40-s0.fasta.sam'),
                   ph.outFile('sanger-se-random-N100-nm400-ne40-s0.fasta.sam')),
                  (ph.inFile('sanger-se-random-N100-nm400-ne40-s0.stdout'),
-                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0.stdout'))])
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -323,7 +348,8 @@ def main(source_base, binary_base):
                  (ph.inFile('sanger-se-random-N100-nm400-ne40-s0-sq.fastq.sam'),
                   ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.fastq.sam')),
                  (ph.inFile('sanger-se-random-N100-nm400-ne40-s0-sq.stdout'),
-                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.stdout'))])
+                  ph.outFile('sanger-se-random-N100-nm400-ne40-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -337,7 +363,8 @@ def main(source_base, binary_base):
                  (ph.inFile('sanger-se-random-N100-nm200-ne20-s0.fasta.sam'),
                   ph.outFile('sanger-se-random-N100-nm200-ne20-s0.fasta.sam')),
                  (ph.inFile('sanger-se-random-N100-nm200-ne20-s0.stdout'),
-                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0.stdout'))])
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     conf = app_tests.TestConf(
@@ -351,7 +378,8 @@ def main(source_base, binary_base):
                  (ph.inFile('sanger-se-random-N100-nm200-ne20-s0-sq.fastq.sam'),
                   ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.fastq.sam')),
                  (ph.inFile('sanger-se-random-N100-nm200-ne20-s0-sq.stdout'),
-                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.stdout'))])
+                  ph.outFile('sanger-se-random-N100-nm200-ne20-s0-sq.stdout'),
+                             transforms)])
     conf_list.append(conf)
 
     # Execute the tests.
