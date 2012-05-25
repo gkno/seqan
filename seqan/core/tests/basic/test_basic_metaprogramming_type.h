@@ -43,8 +43,8 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_type_same_type)
     using namespace seqan;
     
     // Test for the values of the VALUE members.
-    SEQAN_ASSERT_EQ((IsSameType<bool, int>::VALUE),  false);
-    SEQAN_ASSERT_EQ((IsSameType<bool, bool>::VALUE), true);
+    SEQAN_ASSERT_EQ((+IsSameType<bool, int>::VALUE),  false);
+    SEQAN_ASSERT_EQ((+IsSameType<bool, bool>::VALUE), true);
 
     // Test for type of the Type members.
     SEQAN_ASSERT_EQ((TestTypeEq<IsSameType<bool, int>::Type,  False>::VALUE), true);
@@ -126,8 +126,8 @@ SEQAN_DEFINE_TEST(test_basic_metaprogramming_type_is_const)
     using namespace seqan;
 
     // Test for the values of the VALUE members.
-    SEQAN_ASSERT_EQ((IsConst_<bool>::VALUE),       false);
-    SEQAN_ASSERT_EQ((IsConst_<bool const>::VALUE), true);
+    SEQAN_ASSERT_EQ((+IsConst_<bool>::VALUE),       false);
+    SEQAN_ASSERT_EQ((+IsConst_<bool const>::VALUE), true);
 
     // Test for type of the Type members.
     SEQAN_ASSERT_EQ((TestTypeEq<IsConst_<bool>::Type,       False>::VALUE), true);
