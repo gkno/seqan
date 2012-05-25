@@ -277,7 +277,7 @@ int realignBamRecord(TReference & reference, BamAlignmentRecord & record, unsign
     TPatternState patternState;
     
     int distance = maxIndels + 1;
-    while (find(finder, readSeq, patternState, -maxIndels))
+    while (find(finder, readSeq, patternState, -static_cast<int>(maxIndels)))
         distance = std::min(distance, -getScore(patternState));
     
     return distance;
