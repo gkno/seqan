@@ -173,3 +173,9 @@ add_subdirectory(sandbox)
 # ===========================================================================
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/util/cmake/package.cmake)
+
+# ===========================================================================
+# Check Optional Libraries, Print Usage
+# ===========================================================================
+
+include(FeatureSummary)
