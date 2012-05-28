@@ -31,6 +31,10 @@ if (ZLIB_FOUND)
                          io_gsi.h
                          rabema_stats.h
                          ref_id_mapping.h)
+
+    # Install rabema in /bin directory
+    install(TARGETS rabema_prepare_sam rabema_build_gold_standard rabema_evaluate
+            DESTINATION bin)
 else (ZLIB_FOUND)
     message(STATUS "INFO: Rabema not build because zlib was not found.")
 endif (ZLIB_FOUND)
@@ -38,10 +42,6 @@ endif (ZLIB_FOUND)
 # Small tool for helping in debugging.
 seqan_add_executable(do_search do_search.cpp find_myers_ukkonen_ext.h)
 
-
-# Install rabema in /bin directory
-install(TARGETS rabema_prepare_sam rabema_build_gold_standard rabema_evaluate
-        DESTINATION bin)
 
 # Run app tests if python was found
 if(PYTHONINTERP_FOUND)
