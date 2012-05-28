@@ -90,11 +90,11 @@ if (WIN32)
 	endif (NOT DEFINED SEQAN_CONTRIB_BASE)
 
 	# Debug help.
-	if (NOT DEFINED SEQAN_CONTRIB_BASE)
-		message("SEQAN_CONTRIB_BASE is undefined!")
-	else (NOT DEFINED SEQAN_CONTRIB_BASE)
-		message("SEQAN_CONTRIB_BASE is ${SEQAN_CONTRIB_BASE}")
-	endif (NOT DEFINED SEQAN_CONTRIB_BASE)
+    #if (NOT DEFINED SEQAN_CONTRIB_BASE)
+    #	message("SEQAN_CONTRIB_BASE is undefined!")
+    #else (NOT DEFINED SEQAN_CONTRIB_BASE)
+    #	message("SEQAN_CONTRIB_BASE is ${SEQAN_CONTRIB_BASE}")
+    #endif (NOT DEFINED SEQAN_CONTRIB_BASE)
 	
 	# Try to figure out the generator.
 	if (IS_DIRECTORY ${SEQAN_CONTRIB_BASE})
@@ -105,8 +105,8 @@ if (WIN32)
 			set (SEQAN_CONTRIB_VARIANT mingw)
 		endif (CMAKE_GENERATOR MATCHES "^Visual Studio .*")
 		
-		message(STATUS "SEQAN_CONTRIB_BASE    is ${SEQAN_CONTRIB_BASE}")
-		message(STATUS "SEQAN_CONTRIB_VARIANT is ${SEQAN_CONTRIB_VARIANT}")
+        #message(STATUS "SEQAN_CONTRIB_BASE    is ${SEQAN_CONTRIB_BASE}")
+        #message(STATUS "SEQAN_CONTRIB_VARIANT is ${SEQAN_CONTRIB_VARIANT}")
 
 		# Compose contrib path.
 		set(SEQAN_CONTRIB_PATH "${SEQAN_CONTRIB_BASE}/${SEQAN_CONTRIB_VARIANT}")
@@ -117,7 +117,7 @@ if (WIN32)
 		endif (IS_DIRECTORY ${SEQAN_CONTRIB_PATH})
 	endif (IS_DIRECTORY ${SEQAN_CONTRIB_BASE})
 
-	message(STATUS "CMAKE_FIND_ROOT_PATH is \"${CMAKE_FIND_ROOT_PATH}\".")
+    #message(STATUS "CMAKE_FIND_ROOT_PATH is \"${CMAKE_FIND_ROOT_PATH}\".")
 endif (WIN32)
 
 # ===========================================================================
