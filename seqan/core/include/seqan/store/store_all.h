@@ -107,7 +107,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		TSet nameSet;
 		TNameStore &store;
-		TName name;
+        // TODO(holtgrew): Mutable here necessary for conceptual const-ness.  However, we would rather have a thread-safe interface!
+		TName mutable name;
 
 		NameStoreCache(TNameStore &_store):
 			nameSet(TLess(_store, name)),
@@ -165,9 +166,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template <typename TNameStore, typename TName, typename TPos>
     inline bool 
-    getIdByName(TNameStore &store, TName &name, TPos &pos)
+    getIdByName(TNameStore const & store, TName const & name, TPos & pos)
     {
-        typedef typename Iterator<TNameStore, Standard>::Type TNameStoreIter;
+        typedef typename Iterator<TNameStore const, Standard>::Type TNameStoreIter;
         
         // Iterator over read names
         for (TNameStoreIter iter = begin(store); iter != end(store); ++iter)
@@ -186,18 +187,18 @@ namespace SEQAN_NAMESPACE_MAIN
 	
     template <typename TNameStore, typename TName, typename TPos, typename TContext>
     inline bool 
-    getIdByName(TNameStore &store, TName &name, TPos &pos, TContext &)
+    getIdByName(TNameStore const & store, TName const & name, TPos & pos, TContext const & /*not a cache*/)
 	{
 		return getIdByName(store, name, pos);
 	}
     
     template<typename TNameStore, typename TName, typename TPos, typename TCNameStore, typename TCName>
     inline bool 
-    getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TCNameStore, TCName> &context)
+    getIdByName(TNameStore const & /*store*/, TName const & name, TPos & pos, NameStoreCache<TCNameStore, TCName> const & context)
     {
         typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
-		typedef typename Position<TNameStore>::Type TId;
-		typedef NameStoreCache<TCNameStore, TCName> TNameStoreCache;
+		typedef typename Position<TNameStore const>::Type TId;
+		typedef NameStoreCache<TCNameStore, TCName> const TNameStoreCache;
 		typedef typename TNameStoreCache::TSet TSet;
 		
 		TSet const &set = context.nameSet;	
