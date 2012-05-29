@@ -858,6 +858,7 @@ bool getCanonicalLabel(TMat & leastmat, seqan::Graph<TSpec> const & graph)
     typedef StringSet<TString>                                             TMatrix;
     typedef std::deque<TVertexDescriptor>                                  TVertexString;
     typedef std::tr1::unordered_map<TVertexDescriptor, bool>               TCandMap;
+	typedef typename Value<TMat>::Type                                     TMatValue;
 
     TFlag    flag = false;
     TMat     mat;
@@ -876,8 +877,8 @@ bool getCanonicalLabel(TMat & leastmat, seqan::Graph<TSpec> const & graph)
     size_t  len = -1;
 
     getAdjacencyMatrix(graph, mat);
-    resize(tempmat, length(mat), 0);
-    resize(leastmat, length(mat), 1);
+    resize(tempmat, length(mat), TMatValue(0));
+    resize(leastmat, length(mat), TMatValue(1));
     resize(vertexorder, numVertices(graph));
     _caculateDegreeMap(orderedmap, degreemap, graph);
     _createParityMap(mat, paritymap, orderedmap, graph, cand);
