@@ -575,7 +575,6 @@ SEQAN_CHECKPOINT
 
         typename Iterator<String<Align<TSegment> > >::Type aliIt = begin(seedAlignments);
         while (aliIt != end(seedAlignments)) {
-            std::cerr << "aliIt == \n" << row(*aliIt, 0) << "\n " << row(*aliIt, 1) << "\n";
 			// create alignment object for the complete sequences
 			TAlign align;
 			resize(rows(align), 2);

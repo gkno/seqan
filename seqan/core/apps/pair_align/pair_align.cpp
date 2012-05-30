@@ -58,6 +58,7 @@ bool _loadSequences(TSeqSet& sequences,
 }
 
 
+
 //////////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TAlignConfig, typename TScore, typename TSeqFile, typename TMethod, typename TDiag, typename TOutputFormat, typename TOutfile>
