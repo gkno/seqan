@@ -55,6 +55,8 @@ struct RabemaStats
 
     // Total number of reads.
     __uint64 totalReads;
+    // Number of reads with alignments below maximal error rate.
+    __uint64 mappedReads;
     // Total number of reads with GSI records equals number of normalized intervals to find.
     __uint64 readsInGsi;
     // Normalized number of found intervals.
@@ -77,12 +79,13 @@ struct RabemaStats
     String<double> normalizedIntervalsFoundForErrorRate;
 
     RabemaStats() :
-        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), readsInGsi(0), normalizedIntervals(0),
-        additionalHits(0)
+        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), mappedReads(0),
+        readsInGsi(0), normalizedIntervals(0), additionalHits(0)
     {}
 
     RabemaStats(unsigned maxErrorRate) :
-        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), readsInGsi(0), normalizedIntervals(0),
+        intervalsToFind(0), intervalsFound(0), invalidAlignments(0), totalReads(0), mappedReads(0),
+        readsInGsi(0), normalizedIntervals(0),
         additionalHits(0)
     {
         resize(intervalsToFindForErrorRate, maxErrorRate + 1, 0);
@@ -122,7 +125,7 @@ void updateMaximalErrorRate(RabemaStats & stats, unsigned maxErrorRate)
 // ----------------------------------------------------------------------------
 
 template <typename TStream>
-void write(TStream & stream, RabemaStats const & stats, int maxError, seqan::Raw const & /*tag*/)
+void write(TStream & stream, RabemaStats const & stats, /*int maxError,*/ seqan::Raw const & /*tag*/)
 {
     stream << "Intervals to find:              " << stats.intervalsToFind << '\n'
            << "Intervals found:                " << stats.intervalsFound << '\n';
@@ -135,19 +138,26 @@ void write(TStream & stream, RabemaStats const & stats, int maxError, seqan::Raw
            << '\n'
            << "Number of reads:                " << stats.totalReads << '\n'
            << "Number of reads with intervals: " << stats.readsInGsi << '\n'
+           << '\n'
+           << "Mapped reads:                   " << stats.mappedReads << '\n'
+           << "Mapped reads [% of total]:      " << 100.0 * stats.mappedReads / stats.totalReads << '\n'
+           << "Mapped reads [% of mappable]:   " << 100.0 * stats.mappedReads / stats.readsInGsi  << '\n'
+           << '\n'
            << "Normalized intervals found:     " << stats.normalizedIntervals << '\n';
     if (stats.readsInGsi > 0u)
         stream << "Normalized intervals found [%]: " << (100.0 * stats.normalizedIntervals / stats.readsInGsi) << "\n\n";
     else
         stream << "Normalized intervals found [%]: " << 0 << "\n\n";
+    stream << "Found Intervals By Error Rate\n"
+           << "\n";
     char buffer[1000];
     sprintf(buffer, "  ERR\t%8s\t%8s\t%8s\t%8s\t%10s\t%10s\n", "#max", "#found", "%found", "norm max", "norm found", "norm found [%]");
-    stream << buffer;
-    stream << "------------------------------------------------------------------------------------------------------\n";
+    stream << buffer
+           << "------------------------------------------------------------------------------------------------------\n";
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
     {
-        if (maxError != -1  && (int)i != maxError)
-            continue;
+        // if (maxError != -1  && (int)i != maxError)
+        //     continue;
         double percFoundIntervals = 100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i];
         if (stats.intervalsToFindForErrorRate[i] == 0u)
             percFoundIntervals = 0;
@@ -185,14 +195,21 @@ int write(TStream & stream, RabemaStats const & stats, int maxError, CharString 
            << "##\n"
            << "##number_of_reads\t" << stats.totalReads << '\n'
            << "##number_of_reads_with_intervals\t" << stats.readsInGsi << '\n'
+           << "##\n"
+           << "##mapped_reads\t" << stats.mappedReads << '\n'
+           << "##mapped_reads_percent_of_total\t" << 100.0 * stats.mappedReads / stats.totalReads << '\n'
+           << "##mapped_reads_percent_of_mappable\t" << 100.0 * stats.mappedReads / stats.readsInGsi << '\n'
+           << "##\n"
            << "##normalized_intervals_found\t" << stats.normalizedIntervals << '\n'
            << "##normalized_intervals_found_percent\t" << (100.0 * stats.normalizedIntervals / stats.readsInGsi) << '\n'
+           << "##\n"
+           << "##Found Intervals By Distance\n"
            << "##\n"
            << "#error_rate\tnum_max\tnum_found\tpercent_found\tnorm_max\tnorm_found\tpercent_norm_found\n";
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
     {
-        if (maxError != -1  && (int)i != maxError)
-            continue;
+        // if (maxError != -1  && (int)i != maxError)
+        //     continue;
         char buffer[1000];
         sprintf(buffer, "%u\t%d\t%d\t%.2f\t%.2f\t%1.2f\t%.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
                 100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i],

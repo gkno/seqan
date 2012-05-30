@@ -29,6 +29,8 @@
 #include <seqan/bam_io.h>
 #include <seqan/stream.h>
 
+#include "sorting.h"
+
 int fixRecords(seqan::String<seqan::BamAlignmentRecord> & records)
 {
     using namespace seqan;
@@ -182,7 +184,7 @@ int main(int argc, char const ** argv)
 
         if (!empty(records) && record.qName != back(records).qName)
         {
-            if (!empty(record) && record.qName < back(records).qName)
+            if (!empty(record) && lessThanSamtoolsQueryName(record.qName, back(records).qName))
             {
                 std::cerr << "ERROR: " << record.qName << " succeeds " << back(records).qName << " in SAM file.\n";
                 std::cerr << "File must be sorted by query name.\n";

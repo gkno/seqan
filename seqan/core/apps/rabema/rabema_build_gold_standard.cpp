@@ -43,6 +43,7 @@
 #include "find_hamming_simple_ext.h"
 #include "find_myers_ukkonen_reads.h"
 #include "io_gsi.h"
+#include "sorting.h"
 
 // ============================================================================
 // Enums, Tags, Classes, Typedefs.
@@ -66,7 +67,7 @@ struct IntervalizeCmp
 
     bool operator()(unsigned lhs, unsigned rhs) const
     {
-        return readNameStore[lhs] < readNameStore[rhs];
+        return lessThanSamtoolsQueryName(readNameStore[lhs], readNameStore[rhs]);
     }
 
 };

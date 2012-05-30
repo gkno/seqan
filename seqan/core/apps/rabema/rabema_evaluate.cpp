@@ -40,6 +40,7 @@
 #include "io_gsi.h"
 #include "rabema_stats.h"
 #include "ref_id_mapping.h"
+#include "sorting.h"
 
 // ============================================================================
 // Enums, Tags, Classes.
@@ -263,9 +264,13 @@ void performIntervalLowering(String<GsiRecord> & gsiRecords, int maxError)
         resize(openIntervals, length(openIntervals) - count);
 
         // Perform distance lowering for containing intervals.
+        // std::cerr << "OPEN INTERVALS\n";
+        // for (unsigned j = 0; j < length(openIntervals); ++j)
+        //     std::cerr << "  " << gsiRecords[cargo(openIntervals[j])] << "\t" << gsiRecords[cargo(openIntervals[j])].originalDistance << "\n";
+        // std::cerr << "\n";
         for (unsigned j = 0; j < length(openIntervals); ++j)
         {
-            unsigned idx = length(openIntervals) - 1 - j;
+            unsigned idx = j; //length(openIntervals) - 1 - j;
             unsigned id = cargo(openIntervals[idx]);
             if (gsiRecords[id].distance <= maxError)
                 gsiRecords[id].distance = _min(gsiRecords[id].distance, it->distance);
@@ -313,7 +318,7 @@ void performIntervalLowering(String<GsiRecord> & gsiRecords, int maxError)
                 for (unsigned i = startDistance; i <= upperLimit; ++i)
                 {
                     appendValue(filteredGsiRecords, gsiRecords[cargo(openIntervals[idx])]);
-                    back(filteredGsiRecords).distance = i;
+                    back(filteredGsiRecords).originalDistance = i;
                 }
             }
         }
@@ -345,6 +350,17 @@ int benchmarkReadResult(RabemaStats & result,
                         bool second = false)
 {
     typedef IntervalAndCargo<unsigned, unsigned> TInterval;
+// #define DEBUG_RABEMA 1
+#if DEBUG_RABEMA
+    std::cerr << ",--\n"
+              << "| num SAM\t" << length(samRecords) << "\n"
+              << "| num GSI\t" << length(gsiRecords) << "\n"
+              << "`--\n";
+    if (!empty(samRecords))
+        std::cerr << "SAM ID\t" << samRecords[0].qName << "\n";
+    if (!empty(gsiRecords))
+        std::cerr << "GSI ID\t" << gsiRecords[0].readName << "\n";
+#endif  // #if DEBUG_RABEMA
 
     // Select gold standard intervals (GSI) records.
     //
@@ -363,9 +379,10 @@ int benchmarkReadResult(RabemaStats & result,
     int largestDistance = options.maxError;
     if (options.oracleMode && smallestDistance != maxValue<int>())
         largestDistance = smallestDistance;
-    // if (options.oracleMode)
-    //     smallestDistance = 0;
     String<GsiRecord> pickedGsiRecords;
+#if DEBUG_RABEMA
+    std::cerr << "--\n";
+#endif  // #if DEBUG_RABEMA
     for (unsigned i = 0; i < length(gsiRecords); ++i)
     {
         // Note: In case of oracle mode, we ignore the distance.
@@ -381,6 +398,9 @@ int benchmarkReadResult(RabemaStats & result,
             continue;  // Skip if second selected but this interval is not for second.
 
         appendValue(pickedGsiRecords, gsiRecords[i]);
+#if DEBUG_RABEMA
+        std::cerr << "PICKED\t" << gsiRecords[i] << "\t" << gsiRecords[i].originalDistance << "\n";
+#endif  // DEBUG_RABEMA
 
         // Get index of the sequence from GSI record contig name.
         if (!getIdByName(refSeqNames, back(pickedGsiRecords).contigName, back(pickedGsiRecords).contigId,
@@ -391,36 +411,59 @@ int benchmarkReadResult(RabemaStats & result,
             return 1;
         }
     }
+#if DEBUG_RABEMA
+    std::cerr << "--\n";
+#endif  // DEBUG_RABEMA
 
-    // On these selected GSI records, we now perform interval lowering in case of "any-best" and "all-best".  This means
-    // that an interval I with distance k_i containing an interval J with distance k_j < k_i is re-labeled with a
-    // distance of k_j for the smallest k_j of all contained intervals J.
-    if (!options.oracleMode && (options.benchmarkCategory == CATEGORY_ANY_BEST ||
-                                options.benchmarkCategory == CATEGORY_ALL_BEST))
+    // On these selected GSI records, we now perform interval lowering if not in oracle mode..  This means that an
+    // interval I with distance k_i containing an interval J with distance k_j < k_i is re-labeled with a distance of
+    // k_j for the smallest k_j of all contained intervals J.  The original distance is stored in the originalDistance
+    // member.
+    if (!options.oracleMode)
         performIntervalLowering(pickedGsiRecords, options.maxError);
 
-    // Build string of intervals for each reference sequence from these filtered and lowered records.
+#if DEBUG_RABEMA
+    for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
+        std::cerr << "LOWERED\t" << pickedGsiRecords[i] << "\t" << pickedGsiRecords[i].originalDistance << "\n";
+    std::cerr << "--\n";
+#endif  // DEBUG_RABEMA
+
+    // Next we filter the lowered intervals to those with an original distance of options.maxError.  In the case of
+    // all-best and any-best we also only keep those with the smallest distance of all intervals for this read.
+    String<GsiRecord> filteredGsiRecords;
+    for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
+    {
+        GsiRecord const & record = pickedGsiRecords[i];
+        bool keep = (record.originalDistance == options.maxError);
+        if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ALL)
+            keep = keep && (record.distance == smallestDistance);
+        if (keep)
+            appendValue(filteredGsiRecords, record);
+    }
+
+    // Build string of intervals for each reference sequence from these lowered and filtered records.
     String<String<TInterval> > intervals;
     resize(intervals, length(refSeqs));
     String<unsigned> numIntervalsForErrorRate;
     resize(numIntervalsForErrorRate, options.maxError + 1, 0);
     String<int> intervalDistances;  // Distance of interval i.
     unsigned numIntervals = 0;
-    for (unsigned i = 0; i < length(pickedGsiRecords); ++i)
+    for (unsigned i = 0; i < length(filteredGsiRecords); ++i)
     {
-        int distance = pickedGsiRecords[i].distance;
-        if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ALL && distance != options.maxError)
-            continue;  // Only search if interval distance matches -- in *-best.
-        int originalDistance = pickedGsiRecords[i].originalDistance;
+#if DEBUG_RABEMA
+        std::cerr << "USED\t" << filteredGsiRecords[i] << "\t" << filteredGsiRecords[i].originalDistance << "\n";
+#endif  // #if DEBUG_RABEMA
+        int distance = filteredGsiRecords[i].distance;
 
-        appendValue(intervals[pickedGsiRecords[i].contigId],
-                    TInterval(pickedGsiRecords[i].firstPos,pickedGsiRecords[i].lastPos + 1, length(intervalDistances)));
-        appendValue(intervalDistances, originalDistance);
+        appendValue(intervals[filteredGsiRecords[i].contigId],
+                    TInterval(filteredGsiRecords[i].firstPos, filteredGsiRecords[i].lastPos + 1,
+                              length(intervalDistances)));
+        appendValue(intervalDistances, distance);
         numIntervals += 1;
         if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ANY_BEST)
-            numIntervalsForErrorRate[originalDistance] += 1;
+            numIntervalsForErrorRate[distance] += 1;
     }
-    if (options.benchmarkCategory == CATEGORY_ANY_BEST && !empty(pickedGsiRecords))
+    if (options.benchmarkCategory == CATEGORY_ANY_BEST && !empty(filteredGsiRecords))
         numIntervalsForErrorRate[smallestDistance] += 1;
     // Marker array that states whether an interval was hit.
     String<bool> intervalHit;
@@ -467,6 +510,7 @@ int benchmarkReadResult(RabemaStats & result,
     }
 
     // Try to hit intervals.
+    bool mappedAny = false;  // Whether any valid alignment was found.
     for (unsigned i = 0; i < length(samRecords); ++i)
     {
         BamAlignmentRecord const & samRecord = samRecords[i];
@@ -523,6 +567,8 @@ int benchmarkReadResult(RabemaStats & result,
                 SEQAN_CHECK(ret, "setEndPosition() must not fail!");
                 bestDistance = static_cast<int>(ceil(-100.0 * getScore(pattern) / length(readSeq)));
             }
+            // Update flag whether any valid mapping was found.
+            mappedAny = mappedAny || (bestDistance <= options.maxError);
 
             // Skip invalid alignments.
             int allowedDistance = static_cast<int>(0.01 * options.maxError * length(readSeq));
@@ -544,6 +590,10 @@ int benchmarkReadResult(RabemaStats & result,
                 continue;
             }
         }
+#if DEBUG_RABEMA
+        if (mappedAny)
+            std::cout << "MAPPED\t" << front(samRecords).qName << "\n";
+#endif  // #if DEBUG_RABEMA
 
         // Get sequence id and last position of alignment.  We try to hit the interval with the last position (not
         // C-style end) of the read.
@@ -565,8 +615,7 @@ int benchmarkReadResult(RabemaStats & result,
             for (unsigned i = 0; i < length(result); ++i)
                 intervalHit[result[i]] = true;
         }
-        else if (bestDistance != minValue<int>() &&
-                 bestDistance <= static_cast<int>(0.01 * options.maxError * length(readSeq)))
+        else if (bestDistance != minValue<int>() && bestDistance <= options.maxError)
         {
             // We found an additional hit.
             if (options.showAdditionalIntervals || !options.dontPanic)
@@ -610,8 +659,8 @@ int benchmarkReadResult(RabemaStats & result,
     {
         for (unsigned i = 0; i < length(intervalDistances); ++i)
         {
-            if (options.benchmarkCategory == CATEGORY_ALL && intervalDistances[i] != options.maxError)
-                continue;  // Only count intervals on our maximal error rate in "all" mode.
+            // if (options.benchmarkCategory == CATEGORY_ALL && intervalDistances[i] != options.maxError)
+            //     continue;  // Only count intervals on our maximal error rate in "all" mode.
             if (intervalHit[i])
             {
                 if (options.showHitIntervals)
@@ -632,6 +681,7 @@ int benchmarkReadResult(RabemaStats & result,
     updateMaximalErrorRate(result, largestDistance);
     result.totalReads += 1;
     result.readsInGsi += (numIntervals > 0u);
+    result.mappedReads += mappedAny;
     if (options.oracleMode)
     {
         bool found = (numFound > 0u);
@@ -664,14 +714,10 @@ int benchmarkReadResult(RabemaStats & result,
         unsigned intervalsFound = 0;
         for (unsigned d = 0; d < length(numIntervalsForErrorRate); ++d)
         {
-            // In case of "all", we only count the intervals from with maximal error rate.
-            if (options.benchmarkCategory != CATEGORY_ALL || (int)d == options.maxError)
-            {
-                intervalsToFind += numIntervalsForErrorRate[d];
-                intervalsFound += foundIntervalsForErrorRate[d];
-                result.intervalsToFindForErrorRate[d] += numIntervalsForErrorRate[d];
-                result.intervalsFoundForErrorRate[d] += foundIntervalsForErrorRate[d];
-            }
+            intervalsToFind += numIntervalsForErrorRate[d];
+            intervalsFound += foundIntervalsForErrorRate[d];
+            result.intervalsToFindForErrorRate[d] += numIntervalsForErrorRate[d];
+            result.intervalsFoundForErrorRate[d] += foundIntervalsForErrorRate[d];
         }
         result.intervalsToFind += intervalsToFind;
         result.intervalsFound += intervalsFound;
@@ -681,9 +727,8 @@ int benchmarkReadResult(RabemaStats & result,
         {
             if (intervalsToFind == 0u)
                 continue;
-            // In case of "all", we only count the intervals from with maximal error rate.  In case of all-best we only
-            // count those with the best error rate for this read.
-            if (options.benchmarkCategory == CATEGORY_ALL && (int)d == options.maxError)
+            // In case of all-best we only count those with the best error rate for this read.
+            if (options.benchmarkCategory == CATEGORY_ALL)
             {
                 result.normalizedIntervalsToFindForErrorRate[d] += 1.0 * numIntervalsForErrorRate[d] / intervalsToFind;
                 result.normalizedIntervalsFoundForErrorRate[d] += 1.0 * foundIntervalsForErrorRate[d] / intervalsToFind;
@@ -769,7 +814,8 @@ compareAlignedReadsToReference(RabemaStats & result,
         else if (samDone)
             currentReadName = gsiRecord.readName;
         else
-            currentReadName = (gsiRecord.readName < samRecord.qName) ? gsiRecord.readName : samRecord.qName;
+            currentReadName = lessThanSamtoolsQueryName(gsiRecord.readName, samRecord.qName) ?
+                    gsiRecord.readName : samRecord.qName;
 
         // These flags determine whether evaluation is run for single-end and/or paired-end reads.
         bool seenSingleEnd = false, seenPairedEnd = false;
@@ -795,7 +841,7 @@ compareAlignedReadsToReference(RabemaStats & result,
                 std::cerr << "ERROR: Could not read SAM/BAM record.\n";
                 return 1;
             }
-            if (samRecord.qName < currentReadName)
+            if (lessThanSamtoolsQueryName(samRecord.qName, currentReadName))
             {
                 std::cerr << "ERROR: Wrong order in SAM/BAM file: " << samRecord.qName << " succeeds "
                           << currentReadName << " in file.\n"
@@ -825,7 +871,7 @@ compareAlignedReadsToReference(RabemaStats & result,
                 std::cerr << "ERROR: Could not read GSI record.\n";
                 return 1;
             }
-            if (gsiRecord.readName < currentReadName)
+            if (lessThanSamtoolsQueryName(gsiRecord.readName, currentReadName))
             {
                 std::cerr << "ERROR: Wrong order in GSI file: " << gsiRecord.readName << " succeeds "
                           << currentReadName << " in file.\n"
@@ -1261,10 +1307,10 @@ int main(int argc, char const ** argv)
               << "and \"any-best\" mode, the intervals are relabeled with the smallest distance that\n"
               << "a containing interval has.  Contained intervals are then removed.\n\n\n";
 
-    int maxError = -1;
-    if (!options.oracleMode && options.benchmarkCategory == CATEGORY_ALL)
-        maxError = options.maxError;
-    write(std::cout, result, maxError, Raw());
+    // int maxError = -1;
+    // if (!options.oracleMode && options.benchmarkCategory == CATEGORY_ALL)
+    //     maxError = options.maxError;
+    write(std::cout, result, /*options.maxError,*/ Raw());
 
     if (!empty(options.outTsvPath))
     {
@@ -1277,7 +1323,7 @@ int main(int argc, char const ** argv)
             failed = true;
             std::cerr << " FAILED - could not open output file!\n";
         }
-        else if (write(tsvOut, result, maxError, categoryName(options.benchmarkCategory),
+        else if (write(tsvOut, result, options.maxError, categoryName(options.benchmarkCategory),
                        options.oracleMode, metricName(options.distanceMetric), Tsv()) != 0)
         {
             failed = true;

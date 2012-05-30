@@ -7,7 +7,7 @@ include_directories(../../../extras/include)
 
 
 # Preparation of SAM files, i.e. filling SEQ field of each record.
-seqan_add_executable(rabema_prepare_sam prepare_sam.cpp)
+seqan_add_executable(rabema_prepare_sam prepare_sam.cpp sorting.h)
 
 if (ZLIB_FOUND)
     # Building of GSI file from "perfect" SAM file and reference sequence.
@@ -19,7 +19,8 @@ if (ZLIB_FOUND)
                          find_myers_ukkonen_reads.h
                          io_gsi.h
                          rabema_stats.h
-                         ref_id_mapping.h)
+                         ref_id_mapping.h
+                         sorting.h)
 
     # Comparison of arbitrary read mapper SAM against GSI file.
     seqan_add_executable(rabema_evaluate rabema_evaluate.cpp
@@ -30,7 +31,8 @@ if (ZLIB_FOUND)
                          find_myers_ukkonen_reads.h
                          io_gsi.h
                          rabema_stats.h
-                         ref_id_mapping.h)
+                         ref_id_mapping.h
+                         sorting.h)
 
     # Install rabema in /bin directory
     install(TARGETS rabema_prepare_sam rabema_build_gold_standard rabema_evaluate
