@@ -958,18 +958,24 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
         snp.virtualPos = pos + delta;
         if (length(ref) == length(alt[allele]))
         {
+            // HAPTYPE  ----GATTACA---- 
+            // REF      ----CACACAC----
             snp.type = ERROR_TYPE_MISMATCH;
             snp.length = length(ref);
             ++numSNPs;
         }
         else if (length(ref) < length(alt[allele]))
         {
+            // HAPTYPE  ----GATTACA---- 
+            // REF      ----       ----
             snp.type = ERROR_TYPE_INSERT;
             snp.length = length(alt[allele]);
             ++numIndels;
         }
         else
         {
+            // HAPTYPE  ----       ----
+            // REF      ----GATTACA---- 
             snp.type = ERROR_TYPE_DELETE;
             snp.length = length(ref);
             ++numIndels;
@@ -999,14 +1005,22 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
 template <typename TRNG>
 void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                     FragmentStore<MyFragmentStoreConfig> & fragmentStore,
+                    String<String<Snp> > & snpSet,
                     TRNG & rng,
-                    Options<Global> const & options) {
+                    Options<Global> const & options)
+{
     resize(haplotype, length(fragmentStore.contigStore), Exact());
     String<Dna5> buffer;
     reserve(buffer, options.haplotypeIndelRangeMax);
+    Snp snp;
 
-    for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i) {
-        std::cout << "    contig # " << i+1 << "/" << length(fragmentStore.contigStore) << std::endl;
+    for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i)
+    {
+        // statistics
+        unsigned numSNPs = 0;
+        unsigned numIndels = 0;
+
+        std::cout << "    contig # " << i+1 << "/" << length(fragmentStore.contigStore) << '\t' << fragmentStore.contigNameStore[i] << std::flush;
         clear(haplotype[i]);
         setHost(haplotype[i], fragmentStore.contigStore[i].seq);
         String<Dna5> const & contig = fragmentStore.contigStore[i].seq;
@@ -1016,45 +1030,74 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
         int maxOrdValue = options.haplotypeNoN ? 3 : 4;
 
         // j is position in original sequence, k is position in haplotype
-        for (size_t j = 0, k = 0; j < length(contig);) {
+        for (size_t j = 0, k = 0; j < length(contig);)
+        {
             double x = pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1));
+            snp.virtualPos = k;
             if (x < options.haplotypeSnpRate) {
                 // SNP
+                ++numSNPs;
+                snp.length = 1;
+                
                 Dna5 c = Dna5(pickRandomNumber(rng, Pdf<Uniform<int> >(0, maxOrdValue - 1)));
                 if (c == contig[j])
                     c = Dna5(ordValue(c) + 1);
                 if (options.haplotypeNoN)
                     SEQAN_ASSERT(c != Dna5('N'));
                 assignValue(haplotypeContig, k, c);
-                j += 1;
-                k += 1;
-            } else if (x < options.haplotypeSnpRate + options.haplotypeIndelRate) {
+                ++j;
+                ++k;
+
+                // HAPTYPE  ----GATTACA---- 
+                // REF      ----CACACAC----
+                snp.type = ERROR_TYPE_MISMATCH;
+                appendValue(snpSet[i], snp);
+            }
+            else if (x < options.haplotypeSnpRate + options.haplotypeIndelRate) 
+            {
                 // Indel of random length.
+                ++numIndels;                
                 unsigned rangeLen = options.haplotypeIndelRangeMax - options.haplotypeIndelRangeMin;
                 unsigned indelLen = options.haplotypeIndelRangeMin + static_cast<unsigned>(pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1)) * rangeLen);
-                if (pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1)) < 0.5) {
+                snp.length = indelLen;
+                if (pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1)) < 0.5) 
+                {
                     // Insertion.
                     clear(buffer);
                     for (unsigned ii = 0; ii < indelLen; ++ii)
                         appendValue(buffer, Dna5(pickRandomNumber(rng, Pdf<Uniform<int> >(0, maxOrdValue))));
                     insert(haplotypeContig, k, buffer);
                     k += indelLen;
-                } else {
+
+                    // HAPTYPE  ----GATTACA---- 
+                    // REF      ----       ----
+                    snp.type = ERROR_TYPE_INSERT;
+                }
+                else
+                {
                     // Deletion.
                     indelLen = _min(indelLen, length(haplotypeContig) - k);
                     erase(haplotypeContig, k, k + indelLen);
                     j += indelLen;
+
+                    // HAPTYPE  ----       ----
+                    // REF      ----GATTACA---- 
+                    snp.type = ERROR_TYPE_DELETE;
                 }
-            } else {
+                appendValue(snpSet[i], snp);
+            }
+            else 
+            {
                 // Match.
                 j += 1;
                 k += 1;
             }
         }
+        std::cout << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tvrate:" << (numSNPs+numIndels)/(double)length(contig) << std::endl;
     }
 }
 
-// Build a read simulation instructions for a haplotype.
+// Build read simulation instructions for a haplotype.
 //
 // pick a contig, probability is proportional to the length
 // pick a start position, end position = start position + read length
@@ -1281,7 +1324,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
         double buildStart = sysTime();
 
         if (empty(options.vcfFile))
-            buildHaplotype(haplotypeContigs, fragmentStore, rng, options);
+            buildHaplotype(haplotypeContigs, fragmentStore, snpSet, rng, options);
         else
             loadHaplotype(haplotypeContigs, fragmentStore, snpSet, options);
         std::cout << "  Finished haplotype creation in " << (sysTime() - buildStart) << 's' << std::endl;
@@ -1381,6 +1424,10 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     searchSnp.virtualPos = inst.endPos;
                     TIter snpEnd = std::upper_bound(allBeg, allEnd, searchSnp, SnpLess());
                     
+                    // find first SNP that overlaps the read
+                    while (snpBeg != allBeg && (snpBeg - 1)->virtualPos + (snpBeg - 1)->length > inst.beginPos)
+                        --snpBeg;
+                    
 //                    if (readId == 88704)
 //                    {
 //                        std::cout << "begPos:\t" << inst.beginPos << std::endl;
@@ -1393,8 +1440,21 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     for (TIter it = snpBeg; it != snpEnd; ++it)
                     {
                         int len = it->length;
+
+                        // cut at the right end of the read
                         if (it->virtualPos + len > inst.endPos)
                             len = inst.endPos - it->virtualPos;
+
+                        // cut at the left end of the read
+                        if (it->virtualPos <= inst.beginPos)
+                        {
+                            // deletions must occur in the read to affect it
+                            if (it->type == ERROR_TYPE_DELETE)
+                                continue;
+                            len -= inst.beginPos - it->virtualPos;
+                        }
+                        
+                        if (len <= 0) continue;
                         
                         if (it->type == ERROR_TYPE_MISMATCH)
                             numSNPs += len;
@@ -1402,10 +1462,11 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                             numIndels += len;
                         else // if (it->type == ERROR_TYPE_DELETE)
                             // at least one base left and right of the deletion is required
-                            if (inst.beginPos < it->virtualPos && it->virtualPos + 1 < inst.endPos)
+                            if (it->virtualPos < inst.endPos)
                                 numIndels += it->length;
                     }
                 }
+                
 
                 // Generate read name.
                 // TODO(holtgrew): Remove mateNum, not required?
