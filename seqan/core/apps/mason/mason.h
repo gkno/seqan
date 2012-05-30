@@ -748,6 +748,7 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
     unsigned numInconsistencies = 0;
     unsigned numSNPs = 0;
     unsigned numIndels = 0;
+    unsigned indelLenSum = 0;
     unsigned unknownContigs = 0;
     
     while (!_streamEOF(file)) 
@@ -912,7 +913,7 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
         {
             if (oldContigId >= 0)
             {
-                std::cerr << "    " << fragmentStore.contigNameStore[oldContigId] << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tvrate:" << (numSNPs+numIndels)/(double)length(fragmentStore.contigStore[oldContigId].seq);
+                std::cerr << "    " << fragmentStore.contigNameStore[oldContigId] << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tindel len sum:\t" << indelLenSum << "\tvrate:" << (numSNPs+indelLenSum)/(double)length(fragmentStore.contigStore[oldContigId].seq);
                 if (numInconsistencies > 0)
                     std::cerr << "\tinconsistencies:" << numInconsistencies;
                 std::cerr << std::endl;
@@ -924,6 +925,7 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             }
             delta = 0;
             numIndels = 0;
+            indelLenSum = 0;
             numSNPs = 0;
             numInconsistencies = 0;
             ignoreUpTo = -1;
@@ -962,6 +964,7 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             // REF      ----CACACAC----
             snp.type = ERROR_TYPE_MISMATCH;
             snp.length = length(ref);
+            indelLenSum += snp.length;
             ++numSNPs;
         }
         else if (length(ref) < length(alt[allele]))
@@ -970,6 +973,7 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             // REF      ----       ----
             snp.type = ERROR_TYPE_INSERT;
             snp.length = length(alt[allele]);
+            indelLenSum += snp.length;
             ++numIndels;
         }
         else
@@ -986,7 +990,7 @@ void loadHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
     }
     if (oldContigId >= 0)
     {
-        std::cerr << "    " << fragmentStore.contigNameStore[oldContigId] << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tvrate:" << (numSNPs+numIndels)/(double)length(fragmentStore.contigStore[oldContigId].seq);
+        std::cerr << "    " << fragmentStore.contigNameStore[oldContigId] << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tindel len sum:\t" << indelLenSum << "\tvrate:" << (numSNPs+indelLenSum)/(double)length(fragmentStore.contigStore[oldContigId].seq);
         if (numInconsistencies > 0)
             std::cerr << "\tinconsistencies:" << numInconsistencies;
         std::cerr << std::endl;
@@ -1019,6 +1023,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
         // statistics
         unsigned numSNPs = 0;
         unsigned numIndels = 0;
+        unsigned indelLenSum = 0;
 
         std::cout << "    contig # " << i+1 << "/" << length(fragmentStore.contigStore) << '\t' << fragmentStore.contigNameStore[i] << std::flush;
         clear(haplotype[i]);
@@ -1038,7 +1043,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                 // SNP
                 ++numSNPs;
                 snp.length = 1;
-                
+
                 Dna5 c = Dna5(pickRandomNumber(rng, Pdf<Uniform<int> >(0, maxOrdValue - 1)));
                 if (c == contig[j])
                     c = Dna5(ordValue(c) + 1);
@@ -1056,10 +1061,11 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             else if (x < options.haplotypeSnpRate + options.haplotypeIndelRate) 
             {
                 // Indel of random length.
-                ++numIndels;                
+                ++numIndels;
                 unsigned rangeLen = options.haplotypeIndelRangeMax - options.haplotypeIndelRangeMin;
                 unsigned indelLen = options.haplotypeIndelRangeMin + static_cast<unsigned>(pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1)) * rangeLen);
                 snp.length = indelLen;
+                indelLenSum += indelLen;
                 if (pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1)) < 0.5) 
                 {
                     // Insertion.
@@ -1093,7 +1099,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                 k += 1;
             }
         }
-        std::cout << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tvrate:" << (numSNPs+numIndels)/(double)length(contig) << std::endl;
+        std::cout << "\tSNPs:" << numSNPs << "\tindels:" << numIndels << "\tindel len sum:\t" << indelLenSum << "\tvrate:" << (numSNPs+indelLenSum)/(double)length(contig) << std::endl;
     }
 }
 
@@ -1320,7 +1326,8 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 
         typedef String<Snp> TContigSnpSet;
         String<TContigSnpSet> snpSet;
-        
+        resize(snpSet, length(fragmentStore.contigNameStore));
+
         double buildStart = sysTime();
 
         if (empty(options.vcfFile))
