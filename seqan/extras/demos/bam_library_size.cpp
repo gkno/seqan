@@ -44,6 +44,8 @@
 #include <seqan/stream.h>
 #include <seqan/bam_io.h>
 
+#if SEQAN_HAS_ZLIB
+
 using namespace seqan;
 
 // Stores information about a library.
@@ -271,3 +273,14 @@ int main(int argc, char const ** argv)
 
     return 0;
 }
+
+#else
+
+int main(int, char const **)
+{
+    std::cerr << "bam_library_size can only be compiled correctly with zlib." << std::endl;
+    return 0;
+}
+
+#endif  // #if SEQAN_HAS_ZLIB
+
