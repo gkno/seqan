@@ -97,7 +97,7 @@ setBitTo(TWord & word, unsigned index, bool value)
 .Function.setBit
 ..cat:Bit Twiddling
 ..summary:Set the bit with the given index to 1.
-..signature:clearBit(word, index)
+..signature:setBit(word, index)
 ..param.word:The number.
 ..param.index:The index of the bit in the word.
 ...type:nolink:$unsigned$
@@ -153,7 +153,7 @@ clearBit(TWord & word, unsigned index)
 .Function.clearAllBits
 ..cat:Bit Twiddling
 ..summary:Set all bits to 0.
-..signature:clearBits(word)
+..signature:clearAllBits(word)
 ..param.word:The number.
 ..returns:$void$
 ..include:seqan/misc/misc_bit_twiddling.h
