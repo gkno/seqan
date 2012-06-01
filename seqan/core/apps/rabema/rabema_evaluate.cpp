@@ -173,7 +173,11 @@ struct CmpGsiRecordLowering
     bool operator()(GsiRecord const & lhs, GsiRecord const & rhs) const
     {
         return (lhs.readId < rhs.readId) || (lhs.readId == rhs.readId && lhs.contigId < rhs.contigId) ||
-               (lhs.readId == rhs.readId && lhs.contigId == rhs.contigId && lhs.firstPos < rhs.firstPos);
+               (lhs.readId == rhs.readId && lhs.contigId == rhs.contigId && lhs.firstPos < rhs.firstPos) ||
+               (lhs.readId == rhs.readId && lhs.contigId == rhs.contigId && lhs.firstPos == rhs.firstPos &&
+                lhs.lastPos > rhs.lastPos) ||
+               (lhs.readId == rhs.readId && lhs.contigId == rhs.contigId && lhs.firstPos == rhs.firstPos &&
+                lhs.lastPos == rhs.lastPos && lhs.distance > rhs.distance);
     }
 
 };
