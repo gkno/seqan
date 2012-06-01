@@ -157,8 +157,10 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
     FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
     setMaxErrors(wrapperL, pairId, newLimit-1);
     setMaxErrors(wrapperR, pairId, newLimit-1);
-    filter.options.errorCutOff[2*pairId]   = newLimit;
-    filter.options.errorCutOff[2*pairId+1] = newLimit;
+    if (filter.options.errorCutOff[2*pairId] > newLimit)
+        filter.options.errorCutOff[2*pairId] = newLimit;
+    if (filter.options.errorCutOff[2*pairId+1] > newLimit)
+        filter.options.errorCutOff[2*pairId+1] = newLimit;
     
     if (newLimit == 0)
     {
