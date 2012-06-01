@@ -1023,7 +1023,7 @@ _patternInitSmallStateBanded(
 	//  VP = 100...      VP = 111...
 	//
 
-    register TWord VP = (MyersUkkonenHP0_<TSpec>::VALUE == 1)? (TWord)1 << ((int)BitsPerValue<TWord>::VALUE-1): -1; // HP[0]==1 <-> global, HP[0]==0 <-> local
+    register TWord VP = (MyersUkkonenHP0_<TSpec>::VALUE == 1)? (TWord)1 << ((int)BitsPerValue<TWord>::VALUE-1): maxValue<TWord>(); // HP[0]==1 <-> global, HP[0]==0 <-> local
     register TWord VN = 0;
 	
 	// Errors are counted along the lowest diagonal and the
