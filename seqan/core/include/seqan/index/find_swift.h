@@ -1164,7 +1164,8 @@ inline bool _swiftMultiProcessQGram(
                     THit hit = {
                         bktBeginHstk,                                       // bucket begin in haystack
                         getSeqNo(ndlPos),                                   // needle seq. number
-                        height + bucketParams.delta + bucketParams.overlap  // bucket width (non-diagonal)
+                        static_cast<unsigned>(height + bucketParams.delta +
+                                              bucketParams.overlap)         // bucket width (non-diagonal)
                     };
                     appendValue(finder.hits, hit);
 //              } else {
