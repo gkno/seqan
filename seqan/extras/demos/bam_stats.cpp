@@ -628,19 +628,19 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
             }
             
-            if (editDistance >= 10)
-            {
-                Align<Dna5String> realign;
-                unsigned realignEditDist = realignBamRecord(realign, seqs[seqId], record, 10);
-                if (editDistance != realignEditDist)
-                {
-                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
-                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
-                    std::cout << align;
-                    std::cout << realign;
-                    std::cout << std::endl;
-                }
-            }
+//            if (editDistance >= 10)
+//            {
+//                Align<Dna5String> realign;
+//                unsigned realignEditDist = realignBamRecord(realign, seqs[seqId], record, 10);
+//                if (editDistance != realignEditDist)
+//                {
+//                    std::cout << "Realignment difference " << record.qName << " (old=" << editDistance << ", new=" << realignEditDist << ")\n";
+//                    std::cout << "improvement=" << (editDistance - realignEditDist) << '\t' << record.qName << '\t' << record.pos << '\n';
+//                    std::cout << align;
+//                    std::cout << realign;
+//                    std::cout << std::endl;
+//                }
+//            }
             
             if (options.goldStandard)
             {
