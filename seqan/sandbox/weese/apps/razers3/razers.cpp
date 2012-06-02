@@ -46,7 +46,6 @@
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
 #define RAZERS_MATEPAIRS				// enable paired-end matching
-//#define RAZERS_DEBUG_MATEPAIRS
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
 #include <iostream>

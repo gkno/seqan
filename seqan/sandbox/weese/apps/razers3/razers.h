@@ -1969,7 +1969,7 @@ matchVerify(
 	TRead const &read,                                                  // reads
 	RazerSMode<RazerSGlobal, RazerSGapped, RazerSErrors, TMatchNPolicy> const &) // Mismatches and Indels
 {
-    if (length(inf) == 0u)
+    if (empty(inf))
       return false;
 
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;

@@ -673,8 +673,9 @@ void _mapSingleReadsParallelToContig(
         resize(tls.missingInBucket, length(tls.verificationResultBuckets), MaxValue<unsigned>::VALUE);
 
         // For each filtration window...
-        bool hasMore = false;
-        do {
+        bool hasMore = !empty(host(tls.filterFinder));
+        while (hasMore)
+        {
 #ifdef RAZERS_PROFILE
             timelineBeginTask(TASK_FILTER);
 #endif  // #ifdef RAZERS_PROFILE
@@ -756,7 +757,7 @@ void _mapSingleReadsParallelToContig(
 // #ifndef RAZERS_DEFER_COMPACTION
             clearLocalMatches(localMatches);
 // #endif  // #ifndef RAZERS_DEFER_COMPACTION
-        } while (hasMore);
+        }
 
         // Finalization
         windowFindEnd(tls.filterFinder, tls.filterPattern);
