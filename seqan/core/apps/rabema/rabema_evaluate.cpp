@@ -354,7 +354,7 @@ int benchmarkReadResult(RabemaStats & result,
                         bool second = false)
 {
     typedef IntervalAndCargo<unsigned, unsigned> TInterval;
-// #define DEBUG_RABEMA 1
+#define DEBUG_RABEMA 0
 #if DEBUG_RABEMA
     std::cerr << ",--\n"
               << "| num SAM\t" << length(samRecords) << "\n"
@@ -382,16 +382,22 @@ int benchmarkReadResult(RabemaStats & result,
             smallestDistance = std::min(smallestDistance, gsiRecords[i].distance);
     int largestDistance = options.maxError;
     if (options.oracleMode && smallestDistance != maxValue<int>())
-        largestDistance = smallestDistance;
+        for (unsigned i = 0; i < length(gsiRecords); ++i)
+            largestDistance = std::max(largestDistance, gsiRecords[i].distance);
     String<GsiRecord> pickedGsiRecords;
 #if DEBUG_RABEMA
     std::cerr << "--\n";
 #endif  // #if DEBUG_RABEMA
     for (unsigned i = 0; i < length(gsiRecords); ++i)
     {
+#if DEBUG_RABEMA
+        std::cerr << "ORIGINAL\t" << gsiRecords[i] << "\t" << gsiRecords[i].originalDistance << "\n";
+#endif  // DEBUG_RABEMA
+
         // Note: In case of oracle mode, we ignore the distance.
-        if (!options.oracleMode && gsiRecords[i].distance > smallestDistance)
-            continue;  // Skip with wrong distance.
+        // TODO(holtgrew): Remove the following two lines.
+        //if (!options.oracleMode && gsiRecords[i].distance > smallestDistance)
+        //    continue;  // Skip with wrong distance.
         if (!options.oracleMode && gsiRecords[i].distance > options.maxError)
             continue;  // Ignore intervals with too high error rate.
         if (!pairedEnd && (gsiRecords[i].flags & GsiRecord::FLAG_PAIRED))
@@ -441,6 +447,8 @@ int benchmarkReadResult(RabemaStats & result,
         bool keep = (record.originalDistance == options.maxError);
         if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ALL)
             keep = keep && (record.distance == smallestDistance);
+        if (options.oracleMode && record.originalDistance == largestDistance)
+            keep = true;
         if (keep)
             appendValue(filteredGsiRecords, record);
     }
@@ -571,33 +579,7 @@ int benchmarkReadResult(RabemaStats & result,
                 SEQAN_CHECK(ret, "setEndPosition() must not fail!");
                 bestDistance = static_cast<int>(ceil(-100.0 * getScore(pattern) / length(readSeq)));
             }
-            // Update flag whether any valid mapping was found.
-            mappedAny = mappedAny || (bestDistance <= options.maxError);
-
-            // Skip invalid alignments.
-            int allowedDistance = static_cast<int>(0.01 * options.maxError * length(readSeq));
-            if ((options.benchmarkCategory == CATEGORY_ALL_BEST || options.benchmarkCategory == CATEGORY_ANY_BEST) &&
-                (smallestDistance != maxValue<int>()))
-                allowedDistance = smallestDistance;
-            if (bestDistance > allowedDistance)
-            {
-                if (options.showSuperflousIntervals)
-                {
-                    std::cerr << "SUPERFLOUS/INVALID\t";
-                    write2(std::cerr, samRecord, bamIOContext, Sam());
-                    std::cerr << "  READ:  \t" << readSeq << '\n'
-                              << "  CONTIG:\t" << contigSeq << '\n'
-                              << "  DISTANCE:        \t" << bestDistance << '\n'
-                              << "  ALLOWED DISTANCE:\t" << allowedDistance << '\n';
-                }
-                result.invalidAlignments += 1;
-                continue;
-            }
         }
-#if DEBUG_RABEMA
-        if (mappedAny)
-            std::cout << "MAPPED\t" << front(samRecords).qName << "\n";
-#endif  // #if DEBUG_RABEMA
 
         // Get sequence id and last position of alignment.  We try to hit the interval with the last position (not
         // C-style end) of the read.
@@ -612,21 +594,52 @@ int benchmarkReadResult(RabemaStats & result,
                       << samRecord.qName << "\n";
 
         // Try to hit any interval.
-        String<unsigned> result;
-        findIntervals(intervalTrees[seqId], lastPos, result);
-        if (!empty(result))
+        String<unsigned> queryResult;
+        findIntervals(intervalTrees[seqId], lastPos, queryResult);
+        mappedAny = mappedAny || !empty(queryResult);
+#if DEBUG_RABEMA
+        if (mappedAny)
+            std::cout << "MAPPED\t" << front(samRecords).qName << "\n";
+#endif  // #if DEBUG_RABEMA
+        if (!empty(queryResult))
         {
-            for (unsigned i = 0; i < length(result); ++i)
-                intervalHit[result[i]] = true;
+            for (unsigned i = 0; i < length(queryResult); ++i)
+                intervalHit[queryResult[i]] = true;
         }
-        else if (bestDistance != minValue<int>() && bestDistance <= options.maxError)
+        else if (bestDistance != minValue<int>())
         {
+            // && bestDistance <= options.maxError)
+
+            // We now have a hit with a distance below the maximal configured error.  This is a candidate for an
+            // additional hit.  In case of all-best and any-best, this is only one if its distance is better than the
+            // best distance for this read.  In the case of all, it is one if its distance is less than the allowed
+            // maximal distance.  If it is not an additional hit then it is an invalid one.
+            int allowedDistance = static_cast<int>(0.01 * options.maxError * length(readSeq));
+            if ((options.benchmarkCategory == CATEGORY_ALL_BEST || options.benchmarkCategory == CATEGORY_ANY_BEST) &&
+                (smallestDistance != maxValue<int>()))
+                allowedDistance = smallestDistance;
+            if (bestDistance > allowedDistance)
+            {
+                if (options.showSuperflousIntervals)
+                {
+                    std::cerr << "SUPERFLOUS/INVALID\t";
+                    write2(std::cerr, samRecord, bamIOContext, Sam());
+                    std::cerr << "  DISTANCE:        \t" << bestDistance << '\n'
+                              << "  ALLOWED DISTANCE:\t" << options.maxError << '\n';
+                }
+                result.invalidAlignments += 1;
+                continue;
+            }
+
             // We found an additional hit.
             if (options.showAdditionalIntervals || !options.dontPanic)
             {
                 std::cerr << "ADDITIONAL HIT\t";
                 write2(std::cerr, samRecord, bamIOContext, Sam());
                 std::cerr << '\n';
+
+                for (unsigned i = 0; i < length(filteredGsiRecords); ++i)
+                    std::cerr << "FILTERED GSI RECORD\t" << filteredGsiRecords[i] << "\n";
             }
 
             if (!options.dontPanic)
@@ -646,17 +659,27 @@ int benchmarkReadResult(RabemaStats & result,
     if (options.oracleMode || options.benchmarkCategory == CATEGORY_ANY_BEST)
     {
         int bestDistance = maxValue<int>();
+        int bestIdx = 0;
         for (unsigned i = 0; i < length(intervalDistances); ++i)
             if (intervalHit[i])
             {
                 if (options.showHitIntervals)
-                    std::cerr << "HIT\t" << pickedGsiRecords[i] << "\n";
+                    std::cerr << "HIT\t" << filteredGsiRecords[i] << "\t" << filteredGsiRecords[i].originalDistance << "\n";
+                if (bestDistance > intervalDistances[i])
+                    bestIdx = i;
                 bestDistance = std::min(bestDistance, intervalDistances[i]);
             }
         if (bestDistance != maxValue<int>())
         {
+            if (options.showHitIntervals)
+                std::cerr << "HIT_BEST\t" << filteredGsiRecords[bestIdx] << "\t" << filteredGsiRecords[bestIdx].originalDistance << "\n";
             numFound += 1;
             foundIntervalsForErrorRate[bestDistance] += 1;
+        }
+        if (!mappedAny && options.showMissedIntervals)
+        {
+            for (unsigned i = 0; i < length(filteredGsiRecords); ++i)
+                std::cerr << "MISSED\t" << filteredGsiRecords[i] << "\t" << filteredGsiRecords[i].originalDistance << "\n";
         }
     }
     else  // !options.oracleMode && options.benchmarkCategory in ["all-best", "all"]
@@ -668,14 +691,14 @@ int benchmarkReadResult(RabemaStats & result,
             if (intervalHit[i])
             {
                 if (options.showHitIntervals)
-                    std::cerr << "HIT\t" << pickedGsiRecords[i] << "\n";
+                    std::cerr << "HIT\t" << filteredGsiRecords[i] << "\t" << filteredGsiRecords[i].originalDistance << "\n";
                 numFound += 1;
                 foundIntervalsForErrorRate[intervalDistances[i]] += 1;
             }
             else
             {
                 if (options.showMissedIntervals)  // inside braces for consistency with above
-                    std::cerr << "MISSED\t" << pickedGsiRecords[i] << "\n";
+                    std::cerr << "MISSED\t" << filteredGsiRecords[i] << "\n";
             }
         }
         SEQAN_ASSERT_LEQ(numFound, length(intervalDistances));
