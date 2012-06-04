@@ -459,6 +459,8 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 // Add read to gold standard.                
                 appendValue(goldStandard, read);
             }
+        
+            line += 1; 
         }
         
         // Initialize stats.
@@ -620,6 +622,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                         SEQAN_CHECK(chunk[i].rNextId == chunk[j].rId, "Mate references must be symmetric.");
                         SEQAN_CHECK(chunk[i].pos == chunk[j].pNext, "Mate references must be symmetric.");
                         mate = j;
+                        break;
                     }
                 }
                 if (mate == i)
@@ -758,9 +761,9 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             {
                 if (chunk[i].rId != chunk[i + 1].rId)
                     continue;  // Invalid: Not even on same reference.
-                if (chunk[i].pos < chunk[i + 1].pos && (hasFlagRC(chunk[i]) || !hasFlagRC(chunk[i])))
+                if (chunk[i].pos < chunk[i + 1].pos && (hasFlagRC(chunk[i]) || !hasFlagRC(chunk[i + 1])))
                     continue;  // Invalid: Not aligned --> <--, case where chunk[i] is left.
-                if (chunk[i].pos > chunk[i + 1].pos && (!hasFlagRC(chunk[i]) || hasFlagRC(chunk[i])))
+                if (chunk[i].pos > chunk[i + 1].pos && (!hasFlagRC(chunk[i]) || hasFlagRC(chunk[i + 1])))
                     continue;  // Invalid: Not aligned --> <--, case where chunk[i] is right.
                 chunk[i].tLen = chunk[i + 1].pos - chunk[i].pos;
                 chunk[i + 1].tLen = chunk[i].pos - chunk[i + 1].pos;
@@ -770,6 +773,8 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     continue;  // Invalid: Insert size not allowed.
                 appendValue(tmpChunk, chunk[i]);
                 appendValue(tmpEditDistances, editDistances[i]);
+                appendValue(tmpChunk, chunk[i + 1]);
+                appendValue(tmpEditDistances, editDistances[i + 1]);
             }
 
             move(chunk, tmpChunk);
@@ -813,15 +818,23 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     // add read name and entry
                     appendValue(readSeqs, record.seq);
                     if (hasFlagRC(record)) reverseComplement(back(readSeqs));
-                    appendName(readNames, record.qName, readNameCache);
-                    
+                    CharString readName = record.qName;
+                    if (hasFlagMultiple(record))
+                    {
+                        // Append mate discriminator if paired-end read.
+                        if (hasFlagFirst(record))
+                            append(readName, "/1");
+                        else if (hasFlagLast(record))
+                            append(readName, "/2");
+                    }
+                    appendName(readNames, readName, readNameCache);
+
                     // Update stats.
                     appendValue(minErrors, editDistance);
                     appendValue(matchesCount, 1);
-                }                
+                }
             }
 
-            
             /*if (options.verbosity >= 2 && editDistance > 20)
             {
                 std::cerr << "EDIT DISTANCE == " << editDistance << "\n"
