@@ -49,14 +49,17 @@ template<typename TSpec = IndelCheck>
 struct IndelCompareOptions
 {
 	const char *output; 	    // output file for statistics and shared indels
-	const char *outputFN; 	    // output file for statistics and shared indels
-	const char *inputReference;	// reference indels in gff format
-	const char *inputPredicted;	// predicted indels in gff format
+	const char *outputFN; 	    // output file for unmatched reference indels
+	const char *outputSnp; 	        // output file for statistics and shared SNPs
+	const char *outputSnpFN; 	    // output file for unmatched reference SNPs
+	const char *inputReference;	// reference indels+SNPs in gff format
+	const char *inputPredicted;	// predicted indels+SNPs in gff format
 
 	int positionTolerance;		// max. deviation of predicted indel position from reference indel position
 	double sizeTolerance;		    // max. deviation of predicted indel size from reference indel size (in percent)
 	bool sequenceContext;
 	int annotateRepeats;
+    bool genotypeAware;
 	
 	const char *attachTag;          // tag to attach to overlap output
 	int _debugLevel;
@@ -66,12 +69,15 @@ struct IndelCompareOptions
 	{
 		output = "";		
 		outputFN = "";		
+		outputSnp = "";		
+		outputSnpFN = "";		
 		inputReference = "";		
 		inputPredicted = "";		
 		
 		positionTolerance  = 10;  
 		sizeTolerance = 0.0;
 		sequenceContext = false;
+        genotypeAware = false;
 		
 		annotateRepeats = 50;	// 0 -> dont add "percentRepeat"-tag in result file
 								// otherwise take +- x flanking sequence
@@ -89,6 +95,7 @@ struct IndelCompareOptions
 };
 
 enum SVTypes {
+		SNP = 0,
 		INSERTION = 1,
 		DELETION = 2,
 		INVERSION = 3,
@@ -104,7 +111,9 @@ struct IndelInfo{
 	unsigned simPos;
 	int indelSize;
     int type;
+	double quality; // should be int (and real quality value)
 	bool duplication;
+    CharString genotype; // het or hom
 	Dna5String insertionSeq;
 	CharString idStr;
 	CharString ninethCol;
@@ -115,11 +124,43 @@ struct IndelInfo{
 };
 
 
+struct SnpInfo{
+	
+	unsigned genomeId;
+	unsigned originalPos;
+	unsigned simPos;
+	int quality;
+    CharString genotype; // het or hom
+    CharString idStr;
+	CharString ninethCol;
+	CharString field2;
+	CharString field3;
+	
+	// int percentRepeat;
+};
+
+/*
+inline void
+dumpSnpInfo(SnpInfo & snp)
+{
+    std::cout << "genomeId" << snp.genomeId << std::endl;
+	std::cout << "originalPos" << snp.originalPos << std::endl;
+	std::cout << "simPos" << snp.simPos << std::endl;
+	std::cout << "quality" << snp.quality << std::endl;
+    std::cout << "genotype" << snp.genotype << std::endl; // het or hom
+    std::cout << "idStr" << snp.idStr << std::endl;
+	std::cout << "ninethCol" << snp.ninethCol << std::endl;
+	std::cout << "field2" << snp.field2 << std::endl;
+	std::cout << "field3" << snp.field3 << std::endl;
+	
+
+}
+*/
 
 //____________________________________________________________________________
 
 template <typename TIndel>
-struct LessGPos : public ::std::binary_function < TIndel, TIndel, bool >
+struct LessGPosSize : public ::std::binary_function < TIndel, TIndel, bool >
 {
 	inline bool operator() (TIndel const &a, TIndel const &b) const
 	{
@@ -140,6 +181,9 @@ bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TOptions &options)
 {
     if(refIndel.type != predIndel.type) return false;
 	
+    if(options.genotypeAware && predIndel.genotype != refIndel.genotype)
+        return false;
+
 	int sizeTol = int((double)abs(refIndel.indelSize) * options.sizeTolerance);
 	if(!(refIndel.indelSize - sizeTol <= predIndel.indelSize && predIndel.indelSize <= refIndel.indelSize + sizeTol))
 		return false; // --> doesnt match
@@ -176,6 +220,9 @@ bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TPos beginPoint, TPos
 {
     if(refIndel.type != predIndel.type) return false;
 
+    if(options.genotypeAware && predIndel.genotype != refIndel.genotype)
+        return false;
+
     int sizeTol = int((double)abs(refIndel.indelSize) * options.sizeTolerance);
 	if(!(refIndel.indelSize - sizeTol <= predIndel.indelSize && predIndel.indelSize <= refIndel.indelSize + sizeTol))
 		return false; // --> doesnt match
@@ -191,7 +238,7 @@ bool compareIndelPair(TIndel &refIndel, TIndel &predIndel, TPos beginPoint, TPos
 
 // write one gff line
 template <typename TFile, typename TOptions>
-bool write(TFile &file, IndelInfo &refIndel, CharString &genomeID, CharString &tagAppend, TOptions &)
+bool write(TFile &file, IndelInfo &refIndel, CharString &genomeID, CharString &tagAppend, TOptions & options)
 {
 	if(!file.is_open()) return false;
 	file << genomeID << '\t';
@@ -210,11 +257,14 @@ bool write(TFile &file, IndelInfo &refIndel, CharString &genomeID, CharString &t
 	if(refIndel.indelSize <= 0) file << refIndel.originalPos + 1 << '\t' << refIndel.originalPos + 1 ;
 	else file << refIndel.originalPos + 1 << '\t' << refIndel.originalPos + refIndel.indelSize ;
 	
-	file << "\t+\t.\t.\t";
+	file << "\t" << refIndel.quality << "\t+\t.\t";
 	if(!empty(refIndel.ninethCol)) file << refIndel.ninethCol;
 	else
 	{
 		file << "ID=" << refIndel.idStr << ";size=" << refIndel.indelSize;
+        if(options.genotypeAware && refIndel.genotype==0) file << ";geno=hom";
+        else if(options.genotypeAware && refIndel.genotype==1) file << ";geno=het";
+
 //		if(refIndel.duplication) file << ";duplication=1";
 	}
 	if(refIndel.duplication) file << ";duplication=1";
@@ -333,8 +383,8 @@ int compareIndels(
 	::std::set<int> refFoundSet;
 	typename ::std::set<int>::iterator foundSetIt;
 	
-	::std::sort(begin(predIndels),end(predIndels),LessGPos<TIndel>());
-	::std::sort(begin(refIndels),end(refIndels),LessGPos<TIndel>());
+	::std::sort(begin(predIndels),end(predIndels),LessGPosSize<TIndel>());
+	::std::sort(begin(refIndels),end(refIndels),LessGPosSize<TIndel>());
 
 	TIndelIt refIndelIt = begin(refIndels);
 	TIndelIt refIndelsEnd = end(refIndels);
@@ -438,8 +488,8 @@ int compareIndels(
 			TIndel &predIndel = *predIndelIt;
 			if(options._debugLevel > 1 ) std::cout << "." <<std::flush;
 
-			// hack!!! needs to be fixed in snpStore, insertion position is one position to the left!
-			if(predIndel.indelSize < 0) predIndel.originalPos += 1;
+			// hack! needs to be fixed in snpStore, insertion position is one position to the left!
+			// if(predIndel.indelSize < 0) predIndel.originalPos += 1;
 			
 			// "core" interval
 			TValue beginPoint = predIndel.originalPos;
@@ -619,6 +669,217 @@ int compareIndels(
 	return 0;
 	
 }
+
+
+
+template <typename TVariant>
+struct LessGPos : public ::std::binary_function < TVariant, TVariant, bool >
+{
+	inline bool operator() (TVariant const &a, TVariant const &b) const 
+	{
+		// genome sequence
+		if (a.genomeID < b.genomeID) return true;
+		if (a.genomeID > b.genomeID) return false;
+
+        // genome position
+        return (a.originalPos < b.originalPos);
+	}
+};
+
+// write one gff line
+template <typename TFile, typename TOptions>
+bool write(TFile &file, SnpInfo &refSnp, CharString &genomeID, CharString &tagAppend, TOptions & options)
+{
+	if(!file.is_open()) return false;
+	file << genomeID << '\t';
+	
+	if(!empty(refSnp.field2)) file << refSnp.field2 << '\t';
+	else file << "variantCmp\t";
+
+	if(!empty(refSnp.field3)) file << refSnp.field3 << '\t';
+	else file << "snp\t";
+		
+	file << refSnp.originalPos + 1 << '\t' << refSnp.originalPos + 1 ;
+    file << "\t" << refSnp.quality << "\t+\t.\t";
+	if(!empty(refSnp.ninethCol)) file << refSnp.ninethCol;
+	else
+	{
+		file << "ID=" << refSnp.idStr;
+        if(options.genotypeAware && refSnp.genotype==0) file << ";geno=hom";
+        else if(options.genotypeAware && refSnp.genotype==1) file << ";geno=het";
+	}
+	
+	file << toCString(tagAppend) << std::endl;
+	
+	return true;
+	
+}
+
+template<typename TOptions>
+bool
+compareSnpPair(SnpInfo & predSnp, SnpInfo & refSnp, TOptions & options)
+{
+    if (predSnp.genomeId != refSnp.genomeId || predSnp.originalPos != refSnp.originalPos)
+        return false;
+    if(options.genotypeAware && predSnp.genotype != refSnp.genotype)
+        return false;
+    return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// 1) sort SNP sets according to genome and position
+// 2) scan over them and record shared/missing entries
+template <
+	typename TSnpSet,
+	typename TGenome,
+	typename TGenomeIDs,
+	typename TOptions
+>
+int compareSnps(
+	TSnpSet			&refSnps,		  // reference SNPs
+	TSnpSet			&predSnps, // predicted SNPs
+	TGenome				&,
+	TGenomeIDs			&genomeIDs,
+	TOptions 			&options)	  	  // options
+{
+	
+	typedef typename Value<TSnpSet>::Type    TSnp;
+	typedef typename Iterator<TSnpSet>::Type TSnpIt;
+
+	::std::ostringstream fileName;
+	if (*options.outputSnp != 0)
+		fileName << options.outputSnp;
+	else
+		fileName << options.inputPredicted << ".snp_overlap.gff";
+	
+	::std::ofstream file;
+	file.open(fileName.str().c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+	if (!file.is_open()) {
+		::std::cerr << "\nFailed to open SNP output file" << ::std::endl;
+		return 1;
+	}
+    ::std::ofstream fileFN;
+   	if(*options.outputSnpFN != 0)
+    {
+	    fileFN.open(options.outputSnpFN, ::std::ios_base::out | ::std::ios_base::trunc);
+    	if (!fileFN.is_open()) {
+	    	::std::cerr << "\nFailed to open SNP FN output file" << ::std::endl;
+	    	return 1;
+    	}
+    }
+
+	int predTP = 0; // true positive predicted SNPs
+    int refTP = 0;  // recovered refset SNPs  // actually for SNPs we should have predTP==refTP
+
+	TSnpIt refSnpIt = begin(refSnps);
+	TSnpIt refSnpsEnd = end(refSnps);
+	TSnpIt predSnpIt = begin(predSnps);
+	TSnpIt predSnpsEnd = end(predSnps);
+	TSnpIt currPredGenomeEnd,currPredGenomeBegin,currRefGenomeEnd,currRefGenomeBegin;
+
+	CharString tagAppendEmpty = "";
+
+	if(options._debugLevel > 0) std::cout << "Starting to compare SNPs..." <<std::endl;
+	for(unsigned i = 0; i < length(genomeIDs); ++i)
+	{
+		if(options._debugLevel > 1 ) std::cout << "." <<std::flush;
+
+		//skip ahead if necessary
+		while(refSnpIt != refSnpsEnd && (*refSnpIt).genomeId < i)
+			++refSnpIt;
+		while(predSnpIt != predSnpsEnd && (*predSnpIt).genomeId < i)
+			++predSnpIt;
+		
+		// get range of ref variants that are on current chromosome
+		TSnpIt currRefGenomeBegin = refSnpIt;
+		while(refSnpIt != refSnpsEnd && (*refSnpIt).genomeId == i)
+			++refSnpIt;
+		TSnpIt currRefGenomeEnd = refSnpIt;
+//		if(currRefGenomeEnd - currRefGenomeBegin == 0)
+//			continue;
+			
+		// get range of predicted variants that are on current chromosome
+		TSnpIt currPredGenomeBegin = predSnpIt;
+		while(predSnpIt != predSnpsEnd && (*predSnpIt).genomeId == i)
+			++predSnpIt;
+		TSnpIt currPredGenomeEnd = predSnpIt;
+		if(currPredGenomeEnd - currPredGenomeBegin == 0)
+			continue;
+        predSnpIt = currPredGenomeBegin;
+        refSnpIt = currRefGenomeBegin;
+
+		// for each predicted SNP, check if matched
+        for(; predSnpIt != currPredGenomeEnd; ++predSnpIt)
+		{
+            while(refSnpIt != currRefGenomeEnd && (*predSnpIt).originalPos > (*refSnpIt).originalPos) //refSnp iterator is behind
+            {
+                if(options.outputSnpFN != 0)// SNP was not matched
+                    write(fileFN,*predSnpIt,genomeIDs[i],tagAppendEmpty,options);
+                ++refSnpIt;
+                //FN++
+            }
+            if(refSnpIt != currRefGenomeEnd && (*predSnpIt).originalPos < (*refSnpIt).originalPos) //unmatched prediction
+            {
+       			write(file,*predSnpIt,genomeIDs[i],tagAppendEmpty,options);
+                continue;
+            }
+            bool first = true;
+            while(refSnpIt != currRefGenomeEnd && (*predSnpIt).originalPos == (*refSnpIt).originalPos) // there could be more than one refSnp (different genotypes)
+            {
+                bool res = compareSnpPair(*predSnpIt,*refSnpIt,options);
+	            if(res) // match
+                {
+                    ++refTP; //count TP wrt ref set
+                    if(first) //only write to file once
+                    {
+                        CharString tagAttach = ";";
+                    	append(tagAttach,"matchID=");
+                    	append(tagAttach,(*refSnpIt).idStr);
+       		    	    write(file,*predSnpIt,genomeIDs[i],tagAttach,options);
+                        ++predTP; //count TP prediction only once
+                        first = false;
+                    }
+                }
+                ++refSnpIt;
+            }
+            if(first && options.outputSnpFN != 0)// SNP was not matched
+                write(fileFN,*predSnpIt,genomeIDs[i],tagAppendEmpty,options);
+                     
+        }
+
+    }
+
+	if(*options.outputSnpFN != 0)
+        fileFN.close(); 
+
+
+	// optionally append non-overlapped reference indels to output file
+	file << "###################################################" << ::std::endl;
+	file << "# Total Stats: " << ::std::endl;
+	file << "# Number of reference SNPs: " << length(refSnps) << ::std::endl;
+	file << "# Number of predicted SNPs: " << length(predSnps) << ::std::endl;
+	file << "# Number of TP predictions  : " << predTP << ::std::endl;
+	file << "# Number of FP predictions  : " << length(predSnps)-predTP << ::std::endl;
+	file << "# Number of FN predictions  : " << length(refSnps)-refTP << ::std::endl;
+
+	file.close();
+
+	if(options._debugLevel > 0)
+	{
+	    ::std::cout << "# Total Stats: " << ::std::endl;
+	    ::std::cout << "# Number of reference SNPs: " << length(refSnps) << ::std::endl;
+	    ::std::cout << "# Number of predicted SNPs: " << length(predSnps) << ::std::endl;
+	    ::std::cout << "# Number of TP predictions  : " << predTP << ::std::endl;
+	    ::std::cout << "# Number of FP predictions  : " << length(predSnps)-predTP << ::std::endl;
+	    ::std::cout << "# Number of FN predictions  : " << length(refSnps)-refTP << ::std::endl;
+	}
+	
+	return 0;
+	
+}
+
+
 
 
 

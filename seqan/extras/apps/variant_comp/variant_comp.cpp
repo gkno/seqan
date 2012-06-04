@@ -161,7 +161,8 @@ _parseReadWordUntilSemicolon(CharString & file, CharString& str, unsigned & c)
         return;
 }   
 
-
+// parse last column of GFF file, containing id, tags,...
+// add genotype information
 template <typename TIndel, typename TMap, typename TOptions>
 void
 getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdNumMap, TOptions &options )
@@ -226,6 +227,16 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdN
 					++c;
 				}
 			}
+		    if(current_tag=="geno") 
+		    {
+			    ++c;
+      		    CharString temp_str;
+                _parseReadWordUntilSemicolon(ninethCol,temp_str,c); 
+                indel.genotype=temp_str;
+       		    if(prefix(temp_str,3)=="hom")
+	                indel.genotype=0; //hom
+                else indel.genotype=1; //het
+    	    }
 			if(current_tag=="endChr") 
 			{
 				++c;
@@ -266,20 +277,137 @@ getInfoFromNinethCol(CharString &ninethCol, TIndel &indel, TMap & gIdStringToIdN
 }
 
 
+// parse last column of GFF file, containing id, tags,... for SNPs
+template <typename TSnp, typename TMap, typename TOptions>
+void
+getSnpInfoFromNinethCol(CharString &ninethCol, TSnp &snp, TMap & , TOptions &options )
+{
+	unsigned c = 0;
+	CharString temp_str;
+	_parseReadIdentifier(ninethCol,temp_str,c);
+	if(options._debugLevel > 1)
+		::std::cout << temp_str << "\t";
+//      if(!(temp_str == "ID")) ::std::cout << "first feature field should be 'ID' but is " << temp_str<<::std::endl;
+
+	// skip the "="
+	++c;
+	// read the ID
+	clear(temp_str);
+	clear(snp.idStr);
+	CharString snpID;
+	_parseReadIdentifier(ninethCol,snp.idStr,c);
+	if(options._debugLevel > 1)
+		::std::cout << "myID = "<< snp.idStr << "\n";
+
+	// process tags in a loop
+	CharString current_tag;
+	_parseSkipWhitespace(ninethCol,c);
+	while(c < length(ninethCol))
+	{
+		// different tags are separated by ';'  
+		while(ninethCol[c] != ';')
+		{
+			if(c == length(ninethCol)-1) // end of line
+				break;
+			++c;
+		}
+		if(c == length(ninethCol)-1) // end of line
+			break;
+
+		// get the current tag
+		clear(current_tag);
+		++c;
+		_parseReadIdentifier(ninethCol,current_tag,c);
+		if(options._debugLevel > 1)
+		    ::std::cout << current_tag << " in features\n";
+		if(current_tag=="geno") 
+		{
+			++c;
+      		CharString temp_str;
+            _parseReadWordUntilSemicolon(ninethCol,temp_str,c); 
+            snp.genotype=temp_str;
+       		if(prefix(temp_str,3)=="hom")
+	            snp.genotype=0; //hom
+            else snp.genotype=1; //het
+    	}
+    }
+	return;
+}
+
+template<typename TSnp, typename TFile, typename TChar, typename TMap, typename TOptions>
+void
+_parseSnp(TSnp & snp, TFile & file, TChar & c, TMap & gIdStringToIdNumMap, TOptions & options)
+{
+    typedef int	TContigPos;
+	
+    // skip whitespaces and read entry in column 4  --> genomic begin position
+	_parseSkipWhitespace(file, c);
+	snp.originalPos = (TContigPos) _parseReadNumber(file,c) - 1;
+	if(options._debugLevel > 1) 
+		::std::cout << snp.originalPos << "\t";
+		
+	// skip whitespaces and read entry in column 5  --> genomic end position // not needed here
+	_parseSkipWhitespace(file, c);
+    snp.simPos = _parseReadNumber(file,c) - 1; // this is not the sim pos, we are just using this field to avoid unused variable warnings
+	SEQAN_ASSERT_EQ(snp.simPos,snp.originalPos); // make sure begin and end pos are the same, this is a SNP!
+
+    // skip whitespaces and read entry in column 6  --> score (percent identity or mapping quality) or a '.'
+	int readSupport = 1000; //  --> no information about read support (reference indel)
+	_parseSkipWhitespace(file, c);
+	if(c=='.')
+		c = _streamGet(file);               // 
+	else 
+		readSupport = (TContigPos) _parseReadDouble(file,c); // number of supporting reads
+			
+	if(options._debugLevel > 1) 
+		::std::cout << readSupport << "\t";
+	
+    snp.quality = readSupport;	
+
+	// skip whitespaces and read entry in column 7  --> strand information: '+' or '-' // not needed here
+	_parseSkipWhitespace(file, c);
+	c = _streamGet(file);
+		
+	// skip whitespaces and read entry in column 8  --> always '.' here
+	_parseSkipWhitespace(file, c);
+	c = _streamGet(file);
+		
+	// skip whitespaces and read entry in column 9  --> tags, extra information. first tag is always "ID"
+	_parseSkipWhitespace(file, c);
+		
+	//remember this position and store the whole 9th column
+	//typename std::fstream::pos_type idtagstart = file.tellg();
+	clear(snp.ninethCol);
+	while(!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n'))) // while in same line
+	{
+		append(snp.ninethCol,c);
+		c = _streamGet(file);
+	}
+	if(options._debugLevel > 1) std::cout << "9thcol=" <<  snp.ninethCol << "\n\n";
+		
+	getSnpInfoFromNinethCol(snp.ninethCol,snp,gIdStringToIdNumMap,options);
+  
+	_parseSkipWhitespace(file, c);
+
+}
+
 /////////////////////////////////////////////////////////////
-// read Gff input file containing indels
+// read Gff input file containing indels and SNPs
 template <
 	typename TIndelSet,
+	typename TSnpSet,
 	typename TGenomeMap,
 	typename TOptions
 >
 int readGFF(
 	const char*				&filename,
 	TIndelSet 				&indelSet,
+	TSnpSet 				&snpSet,
 	TGenomeMap				&gIdStringToIdNumMap,
 	TOptions				&options)
 {
 	typedef typename Value<TIndelSet>::Type	TIndel;
+	typedef typename Value<TSnpSet>::Type	TSnp;
 	typedef int				TId;
 	typedef int				TContigPos;
 	
@@ -293,7 +421,8 @@ int readGFF(
 	char c = _streamGet(file);
 	while (!_streamEOF(file))
 	{
-		TIndel indel = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+		TIndel indel = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		TSnp snp = {0,0,0,0,0,0,0,0,0};
 		
 		if(c == '#')
 			_parseSkipLine(file,c);	
@@ -322,6 +451,7 @@ int readGFF(
 			continue;
 		}
 		indel.genomeId = contigId;
+		snp.genomeId = contigId;
 
 		// skip whitespaces and read entry in column 2
 		_parseSkipWhitespace(file, c);
@@ -330,6 +460,7 @@ int readGFF(
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
 		indel.field2 = temp_str;
+		snp.field2 = temp_str;
 
 		// skip whitespaces and read entry in column 3
 		_parseSkipWhitespace(file, c);
@@ -340,7 +471,14 @@ int readGFF(
 		indel.field3 = temp_str;
         bool skip = true;
         // skip everything that is not an insertion or deletion
-        if(indel.field3 == "insertion" || indel.field2 == "insertion")
+        if(temp_str == "snp" || snp.field2 == "snp")
+        {
+            snp.field3 = temp_str;
+            _parseSnp(snp, file, c, gIdStringToIdNumMap, options);
+            appendValue(snpSet,snp);
+            continue;
+        }
+        else if(indel.field3 == "insertion" || indel.field2 == "insertion")
         {
             indel.type = INSERTION;
             skip = false;
@@ -391,13 +529,16 @@ int readGFF(
             indel.indelSize = -indel.indelSize;
         }
 		// skip whitespaces and read entry in column 6  --> score (percent identity or mapping quality) or a '.'
-		int readSupport = 1000; //  --> no information about read support (reference indel)
+		double readSupport = 1000.0; //  --> no information about read support (reference indel)
 		_parseSkipWhitespace(file, c);
 		if(c=='.')
 			c = _streamGet(file);               // 
 		else 
-			readSupport = (TContigPos) _parseReadDouble(file,c); // number of supporting reads
+			readSupport = _parseReadDouble(file,c); // number of supporting reads
 			
+        indel.quality = readSupport;
+        snp.quality = (int)readSupport;
+
 		if(options._debugLevel > 1) 
 			::std::cout << readSupport << "\t";
 		
@@ -517,8 +658,11 @@ void printHelp(int, const char *[],TOptions &, bool longHelp = false)
 	if (longHelp) {
 		cerr << "  -ip,  --input-predicted FILE     \t" << "input gff file containing predicted indels" << endl;
 		cerr << "  -ir,  --input-reference FILE     \t" << "input gff file containing reference indels" << endl;
-		cerr << "  -o,   --output FILE              \t" << "output filename" << endl;
-		cerr << "  -on,  --outputFN FILE            \t" << "output filename for false negatives (unmatched reference indels)" << endl;
+		cerr << "  -o,   --output FILE              \t" << "indel output filename" << endl;
+		cerr << "  -on,  --outputFN FILE            \t" << "indel output filename for false negatives (unmatched reference indels)" << endl;
+		cerr << "  -os,  --outputSnp FILE           \t" << "snp output filename" << endl;
+		cerr << "  -osn, --outputSnpFN FILE         \t" << "snp output filename for false negatives (unmatched reference snps) " << endl;
+		cerr << "  -gta, --genotype-aware           \t" << "genotype aware (het/hom) matching of snps" << endl;
 		cerr << "  -pt,  --position-tolerance NUM   \t" << "position tolerance in bp" << endl;
 		cerr << "  -st,  --size-tolerance NUM       \t" << "size tolerance in percent" << endl;
 		cerr << "  -sc,  --sequence-context         \t" << "switch on sequence-context mode" << endl;
@@ -647,6 +791,28 @@ int main(int argc, const char *argv[])
 				options.output = argv[arg];
 				continue;
 			}
+			if (strcmp(argv[arg], "-osn") == 0 || strcmp(argv[arg], "--outputSnpFN") == 0) {
+				if (arg + 1 == argc) {
+					printHelp(argc, argv, options);
+					return 0;
+				}
+				++arg;
+				options.outputSnpFN = argv[arg];
+				continue;
+			}
+			if (strcmp(argv[arg], "-os") == 0 || strcmp(argv[arg], "--outputSnp") == 0) {
+				if (arg + 1 == argc) {
+					printHelp(argc, argv, options);
+					return 0;
+				}
+				++arg;
+				options.outputSnp = argv[arg];
+				continue;
+			}
+			if (strcmp(argv[arg], "-gta") == 0 || strcmp(argv[arg], "--genotype-aware") == 0) {
+				options.genotypeAware = true;
+				continue;
+			}
 			if (strcmp(argv[arg], "-sc") == 0 || strcmp(argv[arg], "--sequence-context") == 0) {
 				options.sequenceContext = true;
 				continue;
@@ -680,6 +846,7 @@ int main(int argc, const char *argv[])
 	}
 	
 	StringSet<IndelInfo>		refIndels, predictedIndels;
+	StringSet<SnpInfo>		    refSnps, predictedSnps;
 	
 	::std::map<CharString,unsigned> gIdStringToIdNumMap;
 	String<CharString> genomeIDs;
@@ -687,24 +854,33 @@ int main(int argc, const char *argv[])
 	
 	loadGenomes(fname[0],genomes,genomeIDs,gIdStringToIdNumMap,options);
 	
-	if (readGFF(options.inputReference, refIndels, gIdStringToIdNumMap, options) > 0) 
+	if (readGFF(options.inputReference, refIndels, refSnps, gIdStringToIdNumMap, options) > 0) 
 	{
-		cerr << "Reference indels " << options.inputReference << " can't be loaded." << endl;
+		cerr << "Reference variants " << options.inputReference << " can't be loaded." << endl;
 		return 0;
 	}
-	if (readGFF(options.inputPredicted, predictedIndels, gIdStringToIdNumMap, options) > 0) 
+	if (readGFF(options.inputPredicted, predictedIndels, predictedSnps, gIdStringToIdNumMap, options) > 0) 
 	{
-		cerr << "Predicted indels " << options.inputPredicted << " can't be loaded." << endl;
+		cerr << "Predicted variants " << options.inputPredicted << " can't be loaded." << endl;
 		return 0;
 	}
 	
 	if(options._debugLevel > 0 )
 	{
-		::std::cout << "Number of reference indels: " << length(refIndels) << endl;
+		::std::cout << endl << "Number of reference indels: " << length(refIndels) << endl;
 		::std::cout << "Number of predicted indels: " << length(predictedIndels) << endl;
+		::std::cout << endl << "Number of reference SNPs: " << length(refSnps) << endl;
+		::std::cout << "Number of predicted SNPs: " << length(predictedSnps) << endl << endl;
 	}
 	
 	int result = compareIndels(refIndels,predictedIndels,genomes,genomeIDs,options);
+	if(result > 0)
+	{
+		cerr << "Something went wrong.. Exiting..\n";
+		return 1;
+	}
+    if(!empty(predictedSnps) || !empty(refSnps))
+        result = compareSnps(refSnps,predictedSnps,genomes,genomeIDs,options);
 	if(result > 0)
 	{
 		cerr << "Something went wrong.. Exiting..\n";
