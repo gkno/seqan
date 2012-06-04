@@ -34,6 +34,8 @@
 // Read a BAM file and collect statistics on the alignments therein.
 // ==========================================================================
 
+// TODO(holtgrew): Check for valid insert size / corcondantness.
+
 #include <iostream>
 
 #include <seqan/basic.h>
@@ -70,7 +72,12 @@ struct Options
     CharString bestMatchFile;
     Format inFormat;
 
-    Options()
+    int insertSizeMin;
+    int insertSizeMax;
+
+    Options() :
+            insertSizeMin(-1),
+            insertSizeMax(-1)
     {
         showHelp = false;
         showVersion = false;
@@ -133,6 +140,8 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     addOption(parser, CommandLineOption("B", "input-bam", "Input file is BAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_BAM));
     addOption(parser, CommandLineOption("r", "realign",   "Don't trust NM values and realign instead", OptionType::Bool));
     addOption(parser, CommandLineOption("nm","use-nm-tag","Get errors from NM values instead of CIGAR string", OptionType::Bool));
+    addOption(parser, CommandLineOption("", "insert-size-min", "Minimal allowed insert size.  Default: any.", OptionType::Integer));
+    addOption(parser, CommandLineOption("", "insert-size-max", "Maximal allowed insert size.  Default: any.", OptionType::Integer));
 
     requiredArguments(parser, 2);
 }
@@ -178,6 +187,11 @@ int parseCommandLineAndCheck(Options & options,
     options.refFile = getArgumentValue(parser, 0);
     options.inFile = getArgumentValue(parser, 1);
     options.realign = isSetLong(parser, "realign");
+
+    if (isSet(parser, "insert-size-min"))
+        getOptionValueLong(parser, "insert-size-min", options.insertSizeMin);
+    if (isSet(parser, "insert-size-max"))
+        getOptionValueLong(parser, "insert-size-max", options.insertSizeMax);
 
 	return 0;
 }
@@ -312,7 +326,6 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
     TNameCache readNameCache(readNames);
 
     BamHeader header;
-    BamAlignmentRecord record;
     
     unsigned line;
     unsigned oldNumRefs;
@@ -322,6 +335,8 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
     // Read gold standard.
     if (options.goldStandard)
     {
+        BamAlignmentRecord record;
+
         // Read header.
         if (options.verbosity >= 2)
             std::cerr << "Reading gold standard header" << std::endl;
@@ -394,7 +409,16 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 if (hasFlagRC(record)) reverseComplement(back(readSeqs));
                 
                 // Read read name.
-                appendName(readNames, record.qName, readNameCache);
+                CharString readName = record.qName;
+                if (hasFlagMultiple(record))
+                {
+                    // Append mate discriminator if paired-end read.
+                    if (hasFlagFirst(record))
+                        append(readName, "/1");
+                    else if (hasFlagLast(record))
+                        append(readName, "/2");
+                }
+                appendName(readNames, readName, readNameCache);
                 
                 // Read total errors from NM tag.
                 idx = 0;
@@ -475,7 +499,346 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
     
     oldNumRefs = length(refNames);
     line = 0;
-    
+
+    // Chunk-based reading of BAM/SAM records.
+    String<BamAlignmentRecord> chunk;
+    // Pre-read first record.
+    BamAlignmentRecord record;
+    if (readRecord(record, context, reader, tag) != 0)
+    {
+        std::cerr << "Could not read alignment! lineNo=" << line << std::endl;
+        return 1;
+    }
+    if (options.verbosity >= 3)
+        write2(std::cerr, record, context, Sam());
+
+    bool done = false;
+    while (!done)
+    {
+        // Read next chunk of records (with the same query name).
+        clear(chunk);
+        appendValue(chunk, record);
+        done = true;
+        while (!atEnd(reader))
+        {
+            // Read alignment record.
+            ++line;
+            if (line % 100000 == 0) std::cerr << '.' << std::flush;
+
+            if (readRecord(record, context, reader, tag) != 0)
+            {
+                std::cerr << "Could not read alignment! lineNo=" << line << std::endl;
+                return 1;
+            }
+            if (options.verbosity >= 3)
+                write2(std::cerr, record, context, Sam());
+
+            // Update mapping from SAM rId to index of sequence in reference sequences.
+            if (oldNumRefs != length(refNames))
+            {
+                for (unsigned i = oldNumRefs; i < length(refNames); ++i)
+                {
+                    unsigned idx = 0;
+                    if (!getIdByName(seqIds, refNames[i], idx, seqIdsCache))
+                    {
+                        std::cerr << "Invalid reference name " << refNames[i] << " from SAM/BAM record!\n";
+                        return 1;
+                    }
+                    appendValue(rIdToSeqId, idx);
+                }
+                oldNumRefs = length(refNames);
+            }
+
+            if (front(chunk).qName != record.qName)
+            {
+                // If we break out here and not at the atEnd(record) above then we are not done yet.
+                done = false;
+                break;
+            }
+            appendValue(chunk, record);
+        }
+
+        // Fill in any missing read seqs.
+        stats.numRecords += length(chunk);
+        for (unsigned i = 0; i < length(chunk); ++i)
+        {
+            BamAlignmentRecord & record = chunk[i];
+            
+            // retrieve (possibly) missing read sequence
+            __uint32 readId = 0;
+            CharString readName = record.qName;
+            if (hasFlagMultiple(record))
+            {
+                if (hasFlagFirst(record))
+                    append(readName, "/1");
+                else
+                    append(readName, "/2");
+            }
+            if (getIdByName(readNames, readName, readId, readNameCache))
+            {
+                record.seq = readSeqs[readId];
+                if (hasFlagRC(record))
+                    reverseComplement(record.seq);
+            }
+            else
+            {
+                // This should never happen with a gold standard.
+                if (options.goldStandard)
+                {
+                    std::cerr << "WARNING: A read unknown to the gold standard has been found: " << record.qName << std::endl;
+                    return 1;
+                }
+                
+                readId = maxValue<__uint32>();
+            }
+            record._qId = readId;
+        }
+
+        // Remove any unmapped records.
+        {
+            String<BamAlignmentRecord> tmpChunk;
+            for (unsigned i = 0; i < length(chunk); ++i)
+            {
+                if (hasFlagUnmapped(chunk[i]) || chunk[i].rId == -1)
+                    continue;
+                appendValue(tmpChunk, chunk[i]);
+            }
+            move(chunk, tmpChunk);
+        }
+
+        // In case of PE data: Sort such that the mates in the pairs folow each other.
+        if (!empty(chunk) && hasFlagMultiple(front(chunk)))
+        {
+            using std::swap;  // seqan::swap still is available
+            for (unsigned i = 0; i < length(chunk); /*nop*/)
+            {
+                unsigned mate = i;
+                for (unsigned j = i + 1; j < length(chunk); ++j)
+                {
+                    if (chunk[i].rId == chunk[j].rNextId && chunk[i].pos == chunk[j].pNext)
+                    {
+                        SEQAN_CHECK(chunk[i].rNextId == chunk[j].rId, "Mate references must be symmetric.");
+                        SEQAN_CHECK(chunk[i].pos == chunk[j].pNext, "Mate references must be symmetric.");
+                        mate = j;
+                    }
+                }
+                if (mate == i)
+                {
+                    std::cerr << "Could not find any mate for record\n";
+                    write2(std::cerr, record, context, Sam());
+                    return 1;
+                }
+                swap(chunk[i + 1], chunk[mate]);
+                if (hasFlagMultiple(chunk[i]) && hasFlagLast(chunk[i]))
+                {
+                    SEQAN_CHECK(hasFlagFirst(chunk[mate]), "Must be first in pair!");
+                    swap(chunk[i], chunk[i + 1]);
+                }
+                i = i + 2;
+            }
+        }
+
+        // Realign or compute alignment from CIGAR; Maybe interpret NM Tag.
+        String<unsigned> editDistances;
+        resize(editDistances, length(chunk), 0);
+        for (unsigned chunkI = 0; chunkI < length(chunk); ++chunkI)
+        {
+            BamAlignmentRecord & record = chunk[chunkI];
+            unsigned & editDistance = editDistances[chunkI];
+
+            SEQAN_CHECK(record.rId != -1 && record.rId < static_cast<int>(length(seqs)),
+                        "Must be aligned!");
+
+            unsigned seqId = rIdToSeqId[record.rId];
+            
+            // realign in a window 10bp left and right of the original alignment
+            if (options.realign)
+            {
+                editDistance = realignBamRecord(seqs[seqId], record, 10);
+            }
+            else
+            {
+                // convert soft clipping into match/mismatches
+                if (record.cigar[0].operation == 'S')
+                    record.pos -= record.cigar[0].count;
+
+                for (unsigned i = 0; i < length(record.cigar); ++i)
+                {
+                    if (record.cigar[i].operation == 'S')
+                        record.cigar[i].operation = 'M';
+                }
+                
+                bamRecordToAlignment(align, seqs[seqId], record);
+            }
+                
+            if (options.verbosity >= 3)
+                std::cerr << align << std::endl;
+            
+            if (!options.realign)
+            {
+                typedef Align<Dna5String>             TAlign;
+                typedef typename Row<TAlign>::Type    TRow;
+                typedef typename Iterator<TRow>::Type TRowIter;
+                unsigned posReadFwd = 0;
+                for (TRowIter it0 = iter(row(align, 0), 0), it1 = iter(row(align, 1), 0); !atEnd(it0); goNext(it0), goNext(it1))
+                {
+                    unsigned posRead = posReadFwd;
+                    // is read aligned to reverse strand?
+                    if (hasFlagRC(record))
+                        posRead = (length(record.seq)) - posReadFwd;
+                    SEQAN_ASSERT_LEQ(posRead, length(record.seq));
+
+                    if (isGap(it0) && isGap(it1))
+                        continue;
+                    if (isGap(it0) || isGap(it1))
+                    {
+                        if (isGap(it0))
+                        {
+                            unsigned len = length(stats.insertHisto);
+                            resize(stats.insertHisto, std::max(len, posRead + 1), 0);
+                            stats.insertHisto[posRead] += 1;
+                            posReadFwd += 1;
+                        }
+                        else
+                        {
+                            unsigned len = length(stats.deletionHisto);
+                            resize(stats.deletionHisto, std::max(len, posRead + 1), 0);
+                            stats.deletionHisto[posRead] += 1;
+                        }
+                        editDistance += 1;
+                        continue;
+                    }
+                    if (*it0 != *it1)
+                    {
+                        unsigned len = length(stats.mismatchHisto);
+                        resize(stats.mismatchHisto, std::max(len, posRead + 1), 0);
+                        stats.mismatchHisto[posRead] += 1;
+                        editDistance += 1;
+                    }
+                    posReadFwd += 1;
+                }
+                
+                resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
+                if (hasFlagRC(record))
+                {
+                    // read aligns to forward strand
+                    for (unsigned i = 0; i < length(record.qual); ++i)
+                        qualSum[i] += record.qual[i] - '!';
+                } else
+                {
+                    // read aligns to reverse strand
+                    for (unsigned i = 0; i < length(record.qual); ++i)
+                        qualSum[(length(record.qual) - 1) - i] += record.qual[i] - '!';
+                }
+                ++reads;
+            }
+
+            if (options.useNM)
+            {
+                // trust NM instead of CIGAR string
+                unsigned idx = 0;
+                int nmValue =-1;
+                BamTagsDict tagsDict(record.tags);
+                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx) && nmValue != -1)
+                    editDistance = nmValue;
+                else
+                    std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
+            }
+        }
+
+        // Filter out the reads that do not mapp acording to the gold standard or concordantly.  This has to be done
+        // after realigning.
+        if (!empty(chunk) && hasFlagMultiple(front(chunk)))
+        {
+            String<BamAlignmentRecord> tmpChunk;
+            String<unsigned> tmpEditDistances;
+
+            SEQAN_CHECK(length(chunk) % 2 == 0u, "Chunk length must be even.");
+            for (unsigned i = 0; i < length(chunk); i += 2)
+            {
+                if (chunk[i].rId != chunk[i + 1].rId)
+                    continue;  // Invalid: Not even on same reference.
+                if (chunk[i].pos < chunk[i + 1].pos && (hasFlagRC(chunk[i]) || !hasFlagRC(chunk[i])))
+                    continue;  // Invalid: Not aligned --> <--, case where chunk[i] is left.
+                if (chunk[i].pos > chunk[i + 1].pos && (!hasFlagRC(chunk[i]) || hasFlagRC(chunk[i])))
+                    continue;  // Invalid: Not aligned --> <--, case where chunk[i] is right.
+                chunk[i].tLen = chunk[i + 1].pos - chunk[i].pos;
+                chunk[i + 1].tLen = chunk[i].pos - chunk[i + 1].pos;
+                __int32 tlen = abs(chunk[i].tLen);
+                if ((options.insertSizeMax != -1 && tlen > options.insertSizeMax) ||
+                    (options.insertSizeMin != -1 && tlen < options.insertSizeMin))
+                    continue;  // Invalid: Insert size not allowed.
+                appendValue(tmpChunk, chunk[i]);
+                appendValue(tmpEditDistances, editDistances[i]);
+            }
+
+            move(chunk, tmpChunk);
+            move(editDistances, tmpEditDistances);
+        }
+
+        // Now, finally we have a chunk of alignments that we can compute statistics on.
+        stats.alignedRecords += length(chunk);
+
+        for (unsigned i = 0; i < length(chunk); ++i)
+        {
+            BamAlignmentRecord & record = chunk[i];
+            int readId = record._qId;
+            unsigned editDistance = editDistances[i];
+            
+            // Update the maps minErrors, matchesCount, and minErrorsOrigin.  These will be used to print the results.
+            if (options.goldStandard)
+            {
+                // Check if match corresponds to the true origin in gold standard.
+                if ((record.pos >= goldStandard[readId].beginPos - 2 * goldStandard[readId].errors &&
+                     record.pos <= goldStandard[readId].beginPos + 2 * goldStandard[readId].errors) &&
+                    record.rId == goldStandard[readId].contigId &&
+                    hasFlagRC(record) == goldStandard[readId].reverseComplemented)
+                {
+                    minErrorsOrigin[readId] = _min(minErrors[readId], editDistance);
+                }
+                
+                minErrors[readId] = _min(minErrors[readId], editDistance);
+                matchesCount[readId]++;
+            }
+            else
+            {
+                // update best-match errors
+                if (readId != -1)
+                {
+                    minErrors[readId] = _min(minErrors[readId], editDistance);
+                    matchesCount[readId]++;
+                }
+                else
+                {
+                    // add read name and entry
+                    appendValue(readSeqs, record.seq);
+                    if (hasFlagRC(record)) reverseComplement(back(readSeqs));
+                    appendName(readNames, record.qName, readNameCache);
+                    
+                    // Update stats.
+                    appendValue(minErrors, editDistance);
+                    appendValue(matchesCount, 1);
+                }                
+            }
+
+            
+            /*if (options.verbosity >= 2 && editDistance > 20)
+            {
+                std::cerr << "EDIT DISTANCE == " << editDistance << "\n"
+                          << "ALIGNMENT\n" << align
+                          << "READ NAME\t" << record.qName << "\n";
+            }
+            */
+
+            if (options.verbosity >= 3)
+                std::cerr << "edit distance: " << editDistance << std::endl;
+            unsigned len = length(stats.editDistanceHisto);
+            resize(stats.editDistanceHisto, std::max(len, editDistance + 1), 0);
+            stats.editDistanceHisto[editDistance] += 1;
+        }
+    }
+
+    /*
     while (!atEnd(reader))
     {
         // Read alignment record.
@@ -505,10 +868,12 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             }
             oldNumRefs = length(refNames);
         }
+        */
 
+            /*
         // Now, do something with it ;)
         unsigned editDistance = 0;
-        stats.numRecords += 1;  // One more record.
+        // stats.numRecords += 1;  // One more record.
         stats.alignedRecords += !hasFlagUnmapped(record);
         
         // Compute alignment.
@@ -538,7 +903,9 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             
             // realign in a window 10bp left and right of the original alignment
             if (options.realign)
+            {
                 editDistance = realignBamRecord(seqs[seqId], record, 10);
+            }
             else
             {
                 // convert soft clipping into match/mismatches
@@ -628,6 +995,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
             }
             
+            
 //            if (editDistance >= 10)
 //            {
 //                Align<Dna5String> realign;
@@ -641,7 +1009,8 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
 //                    std::cout << std::endl;
 //                }
 //            }
-            
+
+            // Update the maps minErrors, matchesCount, and minErrorsOrigin.  These will be used to print the results.
             if (options.goldStandard)
             {
                 // Check if match corresponds to the true origin in gold standard.
@@ -678,13 +1047,12 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             }
 
             
-            /*if (options.verbosity >= 2 && editDistance > 20)
-            {
-                std::cerr << "EDIT DISTANCE == " << editDistance << "\n"
-                          << "ALIGNMENT\n" << align
-                          << "READ NAME\t" << record.qName << "\n";
-            }
-            */
+            // if (options.verbosity >= 2 && editDistance > 20)
+            // {
+            //     std::cerr << "EDIT DISTANCE == " << editDistance << "\n"
+            //               << "ALIGNMENT\n" << align
+            //               << "READ NAME\t" << record.qName << "\n";
+            // }
 
             if (options.verbosity >= 3)
                 std::cerr << "edit distance: " << editDistance << std::endl;
@@ -693,6 +1061,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             stats.editDistanceHisto[editDistance] += 1;
         }
     }
+*/
 
     // compute error probabilities
     resize(stats.avrgQuality, length(qualSum));
@@ -742,7 +1111,11 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         TNameCache::TSet::iterator itEnd = readNameCache.nameSet.end();
         for (; it != itEnd; ++it)
         {
-            bestMatchFile << readNames[*it] << '\t';
+            // Strip any trailing "/*" from read name.
+            CharString readName = readNames[*it];
+            if (length(readName) > 2u && readName[length(readName) - 2] == '/')
+                resize(readName, length(readName) - 2);
+            bestMatchFile << readName << '\t';
             
             if (options.goldStandard)
             {
