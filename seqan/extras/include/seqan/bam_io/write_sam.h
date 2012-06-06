@@ -254,7 +254,10 @@ int write2(TStream & stream,
 
     SEQAN_PUT_TAB;
 
-    res = streamPut(stream, record.seq);
+    if (empty(record.seq))
+        res = streamPut(stream, '*');  // Case of empty seq string / "*".
+    else
+        res = streamPut(stream, record.seq);
     if (res != 0)
         return res;
 
