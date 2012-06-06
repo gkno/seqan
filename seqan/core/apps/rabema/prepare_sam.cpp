@@ -65,7 +65,7 @@ int fixRecords(seqan::String<seqan::BamAlignmentRecord> & records)
     Dna5String seqFirstRC = seqFirst;
     reverseComplement(seqFirstRC);
     CharString qualFirstRC = qualFirst;
-    reverse(qualFirst);
+    reverse(qualFirstRC);
     Dna5String seqSecond;
     CharString qualSecond;
     if (idxSeqSecond != -1)
