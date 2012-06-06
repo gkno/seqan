@@ -962,6 +962,13 @@ streamEof(Stream<Bgzf> & stream)
     return stream._atEof;
 }
 
+// TODO(holtgrew): We would rather have the const version only and then need to make some things in Stream<Bgzf> mutable.
+inline bool
+streamEof(Stream<Bgzf> const & stream)
+{
+    return streamEof(const_cast<Stream<Bgzf> &>(stream));
+}
+
 // ----------------------------------------------------------------------------
 // Function streamError
 // ----------------------------------------------------------------------------

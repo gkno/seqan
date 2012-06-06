@@ -119,6 +119,15 @@ atEnd(RecordReader<TMMapString, SinglePass<Mapped> > & recordReader)
     return recordReader._current == recordReader._end;
 }
 
+// TODO(holtgrew): We would rather have the const version only.
+
+template <typename TMMapString>
+inline bool
+atEnd(RecordReader<TMMapString, SinglePass<Mapped> > const & recordReader)
+{
+    return recordReader._current == recordReader._end;
+}
+
 // ----------------------------------------------------------------------------
 // Function resultCode()
 // ----------------------------------------------------------------------------
