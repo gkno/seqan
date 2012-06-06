@@ -628,7 +628,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 if (mate == i)
                 {
                     std::cerr << "Could not find any mate for record\n";
-                    write2(std::cerr, record, context, Sam());
+                    write2(std::cerr, chunk[i], context, Sam());
                     return 1;
                 }
                 swap(chunk[i + 1], chunk[mate]);
