@@ -312,6 +312,20 @@ getSortOrder(BamHeader const & header)
     return BAM_SORT_UNKNOWN;
 }
 
+// ----------------------------------------------------------------------------
+// Function clear()
+// ----------------------------------------------------------------------------
+
+///.Function.clear.param.object.type:Class.BamHeader
+
+inline void
+clear(BamHeader & header)
+{
+    clear(header.sequenceInfos);
+    clear(header.records);
+}
+
+
 }  // namespace seqan
 
 #endif  // #ifndef EXTRAS_INCLUDE_SEQAN_BAM_IO_BAM_HEADER_RECORD_H_
