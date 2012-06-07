@@ -627,17 +627,30 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 }
                 if (mate == i)
                 {
-                    std::cerr << "Could not find any mate for record\n";
+                    std::cerr << "WARNING: Could not find any mate for record\n";
                     write2(std::cerr, chunk[i], context, Sam());
-                    return 1;
+                    if (options.verbosity >= 2)
+                    {
+                        std::cerr << "Chunk (of same-query name records is\n,--\n";
+                        for (unsigned k = 0; k < length(chunk); ++k)
+                        {
+                            std::cerr << "| ";
+                            write2(std::cerr, chunk[k], context, Sam());
+                        }
+                        std::cerr << "`--\n";
+                    }
+                    i += 1;
                 }
-                swap(chunk[i + 1], chunk[mate]);
-                if (hasFlagMultiple(chunk[i]) && hasFlagLast(chunk[i]))
+                else
                 {
-                    SEQAN_CHECK(hasFlagFirst(chunk[mate]), "Must be first in pair!");
-                    swap(chunk[i], chunk[i + 1]);
+                    swap(chunk[i + 1], chunk[mate]);
+                    if (hasFlagMultiple(chunk[i]) && hasFlagLast(chunk[i]))
+                    {
+                        SEQAN_CHECK(hasFlagFirst(chunk[mate]), "Must be first in pair!");
+                        swap(chunk[i], chunk[i + 1]);
+                    }
+                    i += 2;
                 }
-                i = i + 2;
             }
         }
 
