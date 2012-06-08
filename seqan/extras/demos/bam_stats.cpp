@@ -666,15 +666,32 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                         "Must be aligned!");
 
             unsigned seqId = rIdToSeqId[record.rId];
-            
+
             // realign in a window 10bp left and right of the original alignment
             if (options.realign)
             {
                 editDistance = realignBamRecord(seqs[seqId], record, 10);
             }
+            else if (options.useNM)
+            {
+                // trust NM instead of CIGAR string
+                unsigned idx = 0;
+                int nmValue =-1;
+                BamTagsDict tagsDict(record.tags);
+                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx) && nmValue != -1)
+                    editDistance = nmValue;
+                else
+                    std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
+            }
             else
             {
                 // convert soft clipping into match/mismatches
+                if (empty(record.cigar))
+                {
+                    std::cerr << "ERROR: Realigning is disabled by CIGAR string missing in record!\n";
+                    write2(std::cerr, record, context, Sam());
+                    return 1;
+                }
                 if (record.cigar[0].operation == 'S')
                     record.pos -= record.cigar[0].count;
 
@@ -683,15 +700,12 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     if (record.cigar[i].operation == 'S')
                         record.cigar[i].operation = 'M';
                 }
-                
+
                 bamRecordToAlignment(align, seqs[seqId], record);
-            }
-                
-            if (options.verbosity >= 3)
-                std::cerr << align << std::endl;
-            
-            if (!options.realign)
-            {
+
+                if (options.verbosity >= 3)
+                    std::cerr << align << std::endl;
+
                 typedef Align<Dna5String>             TAlign;
                 typedef typename Row<TAlign>::Type    TRow;
                 typedef typename Iterator<TRow>::Type TRowIter;
@@ -733,7 +747,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     }
                     posReadFwd += 1;
                 }
-                
+
                 resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
                 if (hasFlagRC(record))
                 {
@@ -747,18 +761,6 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                         qualSum[(length(record.qual) - 1) - i] += record.qual[i] - '!';
                 }
                 ++reads;
-            }
-
-            if (options.useNM)
-            {
-                // trust NM instead of CIGAR string
-                unsigned idx = 0;
-                int nmValue =-1;
-                BamTagsDict tagsDict(record.tags);
-                if (findTagKey(idx, tagsDict, "NM") && extractTagValue(nmValue, tagsDict, idx) && nmValue != -1)
-                    editDistance = nmValue;
-                else
-                    std::cerr << "WARNING: Could find NM tag in match of read " << record.qName << std::endl;
             }
         }
 
