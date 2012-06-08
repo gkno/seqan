@@ -596,12 +596,12 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             record._qId = readId;
         }
 
-        // Remove any unmapped records.
+        // Remove any unmapped records or records with unmapped mate.
         {
             String<BamAlignmentRecord> tmpChunk;
             for (unsigned i = 0; i < length(chunk); ++i)
             {
-                if (hasFlagUnmapped(chunk[i]) || chunk[i].rId == -1)
+                if (hasFlagUnmapped(chunk[i]) || chunk[i].rId == -1 || hasFlagNextUnmapped(chunk[i]))
                     continue;
                 appendValue(tmpChunk, chunk[i]);
             }
