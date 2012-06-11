@@ -617,10 +617,9 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 unsigned mate = i;
                 for (unsigned j = i + 1; j < length(chunk); ++j)
                 {
-                    if (chunk[i].rId == chunk[j].rNextId && chunk[i].pos == chunk[j].pNext)
+                    if (chunk[i].rId == chunk[j].rNextId && chunk[i].pos == chunk[j].pNext &&
+                        chunk[j].rId == chunk[i].rNextId && chunk[j].pos == chunk[i].pNext)
                     {
-                        SEQAN_CHECK(chunk[i].rNextId == chunk[j].rId, "Mate references must be symmetric.");
-                        SEQAN_CHECK(chunk[i].pos == chunk[j].pNext, "Mate references must be symmetric.");
                         mate = j;
                         break;
                     }
