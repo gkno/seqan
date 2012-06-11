@@ -384,7 +384,7 @@ getCigarString(
 
 template <typename TCigar, typename TMDString, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
 inline void
-alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors errors, True)
+alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors &errors, True)
 {
     typedef Align<TReadSeq, ArrayGaps> TAlign;
 
@@ -400,13 +400,14 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
     
     if (!(errors == 0 || (errors == 1 && length(readSeq) == length(source(row(align, 0))))))
         errors = -globalAlignment(align, Score<short, EditDistance>());
+
     getCigarString(cigar, row(align, 0), row(align, 1));
     getMDString(md, row(align, 0), row(align, 1));
 }
 
 template <typename TCigar, typename TMDString, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
 inline void
-alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors, False)
+alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors &, False)
 {
     typedef typename TContig::TContigSeq                                    TContigSeq;
     typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >    TContigGaps;
@@ -1455,10 +1456,10 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
             
             // <tags>
             
-            if (alignedId < length(store.alignQualityStore))
+            if (errors != -1)
             {
                 _streamWrite(target, "\tNM:i:");
-                _streamPutInt(target, store.alignQualityStore[alignedId].errors);
+                _streamPutInt(target, errors);
             }
 
             if (!empty(md))
