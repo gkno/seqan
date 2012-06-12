@@ -241,7 +241,7 @@ realignBamRecord(Align<TSource, TSpec> & result, TReference & reference, BamAlig
     unsigned len = getAlignmentLengthInRef(record);
     __int64 posBegin = record.pos;
 
-    if (record.cigar[0].operation == 'S')
+    if (!empty(record.cigar) && record.cigar[0].operation == 'S')
         posBegin -= record.cigar[0].count;
 
     __int64 posEnd = posBegin + len + maxIndels;
@@ -277,7 +277,7 @@ int realignBamRecord(TReference & reference, BamAlignmentRecord & record, unsign
     unsigned len = getAlignmentLengthInRef(record);
     __int64 posBegin = record.pos;
     
-    if (record.cigar[0].operation == 'S')
+    if (!empty(record.cigar) && record.cigar[0].operation == 'S')
         posBegin -= record.cigar[0].count;
     
     __int64 posEnd = posBegin + len + maxIndels;
