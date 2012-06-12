@@ -34,8 +34,8 @@ class Diff(object):
 
 	def get_next_diff_filename(self):
 		r = len(self.get_diff_filenames())
-		if(r >= 2**self.MAX_REVISION_LENGTH):
-			raise Exception("Maximum number of " + (2**self.MAX_REVISION_LENGTH) + " exceeded!")
+		if(r >= 10**self.MAX_REVISION_LENGTH):
+			raise Exception("Maximum number of " + (10**self.MAX_REVISION_LENGTH) + " exceeded!")
 		return self.get_diff_filename(r, datetime.today())
 
 	def save_diff_reset(self, filename):
