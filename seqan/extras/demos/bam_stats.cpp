@@ -638,7 +638,9 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                         }
                         std::cerr << "`--\n";
                     }
-                    i += 1;
+                    // Purge this record.
+                    std::rotate(begin(chunk, Standard()) + i, begin(chunk, Standard()) + i + 1, end(chunk, Standard()));
+                    resize(chunk, length(chunk) - 1);
                 }
                 else
                 {
