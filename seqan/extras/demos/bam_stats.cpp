@@ -1126,8 +1126,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         std::cout << stats.insertHisto[i] << '\t';
         std::cout << stats.deletionHisto[i] << '\t';
         std::cout << (stats.mismatchHisto[i] + stats.insertHisto[i] + stats.deletionHisto[i]) / (double)reads << '\t';
-		double e = stats.avrgQuality[i] * log(10.0) / -10.0;
-        std::cout << exp(e) << '\t';
+        std::cout << pow(10.0, stats.avrgQuality[i] / -10.0) << '\t';
         std::cout << stats.avrgQuality[i] << std::endl;
     }
     
