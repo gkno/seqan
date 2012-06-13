@@ -750,7 +750,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 }
 
                 resize(qualSum, std::max(length(qualSum), length(record.qual)), 0);
-                if (hasFlagRC(record))
+                if (!hasFlagRC(record))
                 {
                     // read aligns to forward strand
                     for (unsigned i = 0; i < length(record.qual); ++i)
