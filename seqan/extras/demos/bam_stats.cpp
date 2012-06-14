@@ -565,7 +565,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         for (unsigned i = 0; i < length(chunk); ++i)
         {
             BamAlignmentRecord & record = chunk[i];
-            
+
             // retrieve (possibly) missing read sequence
             __uint32 readId = 0;
             CharString readName = record.qName;
@@ -590,8 +590,15 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     std::cerr << "WARNING: A read unknown to the gold standard has been found: " << record.qName << std::endl;
                     return 1;
                 }
-                
-                readId = maxValue<__uint32>();
+
+                // Add read name and entry.
+                readId = length(readNames);
+                appendValue(readSeqs, record.seq);
+                if (hasFlagRC(record))
+                    reverseComplement(back(readSeqs));
+                appendName(readNames, record.qName, readNameCache);
+                appendValue(minErrors, maxValue<unsigned>());
+                appendValue(matchesCount, 0);
             }
             record._qId = readId;
         }
@@ -805,7 +812,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             BamAlignmentRecord & record = chunk[i];
             int readId = record._qId;
             unsigned editDistance = editDistances[i];
-            
+
             // Update the maps minErrors, matchesCount, and minErrorsOrigin.  These will be used to print the results.
             if (options.goldStandard)
             {
@@ -817,7 +824,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 {
                     minErrorsOrigin[readId] = _min(minErrors[readId], editDistance);
                 }
-                
+
                 minErrors[readId] = _min(minErrors[readId], editDistance);
                 matchesCount[readId]++;
             }
