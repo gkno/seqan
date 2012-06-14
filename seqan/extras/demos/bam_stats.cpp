@@ -146,6 +146,15 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     requiredArguments(parser, 2);
 }
 
+void trimSeqHeaderToId(seqan::CharString & header)
+{
+    unsigned i = 0;
+    for (; i < length(header); ++i)
+        if (isspace(header[i]))
+            break;
+    resize(header, i);
+}
+
 int parseCommandLineAndCheck(Options & options,
                              CommandLineParser & parser,
                              int argc,
@@ -492,7 +501,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         }
         appendValue(rIdToSeqId, idx);
     }
-    
+
     // Read alignments.
     if (options.verbosity >= 2)
         std::cerr << "Reading alignments" << std::endl;
@@ -511,6 +520,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         std::cerr << "Could not read alignment! lineNo=" << line << std::endl;
         return 1;
     }
+    trimSeqHeaderToId(record.qName);  // Some mappers create invalid query names.
     if (options.verbosity >= 3)
         write2(std::cerr, record, context, Sam());
 
@@ -532,6 +542,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 std::cerr << "Could not read alignment! lineNo=" << line << std::endl;
                 return 1;
             }
+            trimSeqHeaderToId(record.qName);  // Some mappers create invalid query names.
             if (options.verbosity >= 3)
                 write2(std::cerr, record, context, Sam());
 
