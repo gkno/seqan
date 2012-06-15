@@ -63,11 +63,13 @@ struct Options
     bool showVersion;
     bool realign;
     bool useNM;
+    bool pairedEnd;
     bool goldStandard;
     
     unsigned verbosity;
     CharString refFile;
     CharString inFile;
+    CharString inFastqFile;
     CharString goldStandardFile;
     CharString bestMatchFile;
     Format inFormat;
@@ -83,6 +85,7 @@ struct Options
         showVersion = false;
         realign = false;
         useNM = false;
+        pairedEnd = false;
         goldStandard = false;
         
         verbosity = 1;
@@ -133,15 +136,21 @@ setupCommandLineParser(CommandLineParser & parser, Options const & options)
     addOption(parser, CommandLineOption("vv", "very-verbose", "Enable very verbose mode (show SAM lines and actual aligments).", OptionType::Bool));
 
 	addSection(parser, "Input Specification");
-    addOption(parser, CommandLineOption("i", "input-file", "Path to input, '-' for stdin.", OptionType::String, options.inFile));
-    addOption(parser, CommandLineOption("g", "gold-standard", "Input file with gold standard", OptionType::String));
-    addOption(parser, CommandLineOption("",  "best-match-file", "Output file with minimal found errors for each read", OptionType::String));
     addOption(parser, CommandLineOption("S", "input-sam", "Input file is SAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_SAM));
     addOption(parser, CommandLineOption("B", "input-bam", "Input file is BAM (default: auto).", OptionType::Bool, options.inFormat == FORMAT_BAM));
+    addOption(parser, CommandLineOption("i", "input-file", "Path to input, '-' for stdin.", OptionType::String, options.inFile));
+    addOption(parser, CommandLineOption("fi", "fastq-input-file", "Path to fastq input (prefix excluding _1.fastq).", OptionType::String, options.inFastqFile));
+    addOption(parser, CommandLineOption("g", "gold-standard", "Input file with gold standard", OptionType::String));
+
+	addSection(parser, "Stats Specification");    
+    addOption(parser, CommandLineOption("pe","paired-end","Paired-end mode.", OptionType::Bool));
     addOption(parser, CommandLineOption("r", "realign",   "Don't trust NM values and realign instead", OptionType::Bool));
     addOption(parser, CommandLineOption("nm","use-nm-tag","Get errors from NM values instead of CIGAR string", OptionType::Bool));
     addOption(parser, CommandLineOption("", "insert-size-min", "Minimal allowed insert size.  Default: any.", OptionType::Integer));
     addOption(parser, CommandLineOption("", "insert-size-max", "Maximal allowed insert size.  Default: any.", OptionType::Integer));
+    
+    addSection(parser, "Output Specification");
+    addOption(parser, CommandLineOption("bm",  "best-match-file", "Output file with minimal found errors for each read", OptionType::String));
 
     requiredArguments(parser, 2);
 }
@@ -179,6 +188,8 @@ int parseCommandLineAndCheck(Options & options,
     if (isSetLong(parser, "very-verbose"))
         options.verbosity = 3;
 
+    getOptionValueLong(parser, "paired-end", options.pairedEnd);
+
     getOptionValueLong(parser, "input-file", options.inFile);
     getOptionValueLong(parser, "best-match-file", options.bestMatchFile);
     getOptionValueLong(parser, "use-nm-tag", options.useNM);
@@ -186,7 +197,9 @@ int parseCommandLineAndCheck(Options & options,
         options.inFormat = FORMAT_SAM;
     if (isSetLong(parser, "input-bam"))
         options.inFormat = FORMAT_BAM;
-
+    
+    getOptionValueLong(parser, "fastq-input-file", options.inFastqFile);
+    
     if (isSetLong(parser, "gold-standard"))
     {
         options.goldStandard = true;
@@ -306,6 +319,45 @@ int realignBamRecord(TReference & reference, BamAlignmentRecord & record, unsign
     return distance;
 }
 
+template <typename TString, typename TReadNames, typename TReadNameCache, typename TReadSeqs, typename TNamesSuffix>
+bool loadFastqFile(TString & inFastqFile, TReadNames & readNames, TReadNameCache & readNameCache,
+                   TReadSeqs & readSeqs, TNamesSuffix const & namesSuffix)
+{
+    MultiFasta multiFasta;
+    if (!open(multiFasta.concat, toCString(inFastqFile), OPEN_RDONLY)) return false;
+        
+    AutoSeqFormat format;
+    guessFormat(multiFasta.concat, format);
+    split(multiFasta, format);
+    unsigned seqCount = length(multiFasta);
+
+    String<Dna5Q>	seq;
+	CharString		qual;
+	CharString      seqId;
+    
+    // Scan fastq file.
+    for (unsigned i = 0; i < seqCount; ++i) 
+	{
+        assignSeqId(seqId, multiFasta[i], format);
+		assignSeq(seq, multiFasta[i], format);
+		assignQual(qual, multiFasta[i], format);
+        
+        // Truncate fastq seqId.
+        CharString seqIdTruncated(seqId);
+        trimSeqHeaderToId(seqIdTruncated);
+
+        // Append left/mate suffix
+        append(seqIdTruncated, namesSuffix);
+        
+        appendName(readNames, seqIdTruncated, readNameCache);
+        appendValue(readSeqs, seq);
+    }
+    
+    close(multiFasta.concat);
+    
+    return true;
+}
+
 template <typename TStreamOrReader, typename TSeqString, typename TSpec, typename TFormat>
 int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
            StringSet<CharString> & seqIds, StringSet<TSeqString, TSpec> & seqs,
@@ -338,6 +390,50 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
     
     unsigned line;
     unsigned oldNumRefs;
+
+    // =================================================================================================================
+    
+    // Read fastq file.
+    if (!empty(options.inFastqFile))
+    {
+        if (options.pairedEnd)
+        {
+            CharString fastqFile1(options.inFastqFile);
+            append(fastqFile1, "_1.fastq");
+            
+            if (options.verbosity >= 2) std::cerr << "Loading reads from file " << fastqFile1 << std::endl;
+            
+            if (!loadFastqFile(fastqFile1, readNames, readNameCache, readSeqs, "/1"))
+            {
+                std::cerr << "Could not open file " << fastqFile1 << std::endl;
+                return 1;
+            }
+
+            CharString fastqFile2(options.inFastqFile);
+            append(fastqFile2, "_2.fastq");
+            
+            if (options.verbosity >= 2) std::cerr << "Loading reads from file " << fastqFile2 << std::endl;
+            
+            if (!loadFastqFile(fastqFile2, readNames, readNameCache, readSeqs, "/2"))
+            {
+                std::cerr << "Could not open file " << fastqFile2 << std::endl;
+                return 1;
+            }
+        }
+        else
+        {
+            CharString fastqFile(options.inFastqFile);
+            append(fastqFile, ".fastq");
+            
+            if (options.verbosity >= 2) std::cerr << "Loading reads from file " << fastqFile << std::endl;
+
+            if (!loadFastqFile(fastqFile, readNames, readNameCache, readSeqs, ""))
+            {
+                std::cerr << "Could not open file " << fastqFile << std::endl;
+                return 1;
+            }
+        }
+    }
     
     // =================================================================================================================
     
@@ -471,13 +567,15 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         
             line += 1; 
         }
-        
-        // Initialize stats.
-        resize(minErrors, length(readNames), MaxValue<unsigned>::VALUE, Exact());
-        resize(minErrorsOrigin, length(readNames), MaxValue<unsigned>::VALUE, Exact());
-        resize(matchesCount, length(readNames), 0, Exact());
     }
-    
+
+    // =================================================================================================================
+
+    // Initialize stats.
+    resize(minErrors, length(readNames), MaxValue<unsigned>::VALUE, Exact());
+    resize(minErrorsOrigin, length(readNames), MaxValue<unsigned>::VALUE, Exact());
+    resize(matchesCount, length(readNames), 0, Exact());
+
     // =================================================================================================================
     
     // Read header.
