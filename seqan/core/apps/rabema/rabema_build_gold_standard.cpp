@@ -130,6 +130,9 @@ struct BuildGoldStandardOptions
     // Maximal error rate in percent, relative to the read length.
     int maxError;
 
+    // Indicates whether a maximal error was set.
+    bool maxErrorSet;
+
     // Distance metric to use.
     DistanceMetric distanceMetric;
 
@@ -154,6 +157,7 @@ struct BuildGoldStandardOptions
         matchN(false),
         oracleMode(false),
         maxError(0),
+        maxErrorSet(false),
         distanceMetric(EDIT_DISTANCE),
         compressGsi(false)
     {}
@@ -268,6 +272,9 @@ int intervalizeAndDumpErrorCurves(TStream & stream,
         // intervals[e] holds the intervals for error e of the current read.
         String<String<ContigInterval> > intervals;
         int maxError = options.oracleMode ? 0 : (int)options.maxError;
+        if (options.oracleMode)
+            for (unsigned j = 0; j < length(matches); ++j)
+                maxError = std::max(maxError, matches[j].distance);
         resize(intervals, maxError + 1);
 
         // Join the intervals stored in sortedMatches.
@@ -335,7 +342,9 @@ int intervalizeAndDumpErrorCurves(TStream & stream,
                 else if (mateNo == 1)
                     flags = GsiRecord::FLAG_PAIRED | GsiRecord::FLAG_SECOND_MATE;
 
-                int gsiDistance = options.oracleMode ? readAlignmentDistances[i] : distance;
+                int gsiDistance = options.oracleMode ? readAlignmentDistances[readId] : distance;
+                if (options.oracleMode && options.maxErrorSet && gsiDistance > options.maxError)
+                    continue;  // Skip if cut off in Rabema oracle mode.
                 GsiRecord gsiRecord(prefix(readNameStore[readId], length(readNameStore[readId]) - 2), flags,
                                     gsiDistance, contigNameStore[it2->contigId],
                                     it2->isForward, it2->first, it2->last);
@@ -394,7 +403,7 @@ void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 
     // In oracle Sam mode, the maximum error is the error at the position given in the Sam alignment.
     bool oracleMode = false;
-    if (maxError == maxValue<int>())
+    if (maxError == maxValue<int>())  // We are in oracle mode.
     {
         oracleMode = true;
         Finder<TContigSeq> finder(contig);
@@ -407,12 +416,12 @@ void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 
     // Debug-adjustments.
     #define ENABLE 0
-    #define ALL 0
-    #define READID 2
+    #define ALL 1
+    #define READID 1
 
-//     if (readNames[readId] == CharString("SRR027007.862.1")) {
-//           std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
-//     }
+    //if (readNames[readId] == CharString("rabema_synthetic_ecoli_illumina_l100_100k_e3.000000376")) {
+    //      std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << " maxError == " << maxError << std::endl;
+    //}
 
     // The read maps with less than the given number of errors to [left, right]
     // to the contig sequence, is forward strand iff is Forwar is true.
@@ -443,6 +452,7 @@ void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     {
         std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId]
                   << " read = " << read << std::endl;
+        std::cerr << __FILE__ << ":" << __LINE__ << " maxError = " << maxError << std::endl;
         std::cerr << __FILE__ << ":" << __LINE__ << " relative min score = " << relativeMinScore << std::endl;
         std::cerr << __FILE__ << ":" << __LINE__ << " extending to the right." << std::endl;
         std::cerr << __FILE__ << ":" << __LINE__ << " contig id == " << contigId << std::endl;
@@ -893,6 +903,9 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
             buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, record.rId, !hasFlagRC(record),
                                   readSeq, readId, length(rcContig) - record.pos, readNameStore, options.matchN,
                                   TPatternSpec());
+#if ENABLE
+        std::cerr << "AFTER BUILD, readId == " << readId << ", read name == " << readNameStore[readId] << ", maxError == " << maxError << "\n";
+#endif  // #if ENABLE
         if (options.oracleMode)
             readAlignmentDistances[readId] = maxError;
 
@@ -930,8 +943,13 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
         {
             SEQAN_ASSERT_NEQ(readAlignmentDistances[readId], -1);
             maxError = readAlignmentDistances[readId];
+            if (options.maxErrorSet && maxError > options.maxError)
+                maxError = options.maxError;
         }
         int relativeMinScore = (int)ceilAwayFromZero(100.0 * -maxError / readLengthStore[readId]);
+#if ENABLE
+        std::cerr << "AFTER SMOOTHING, readId == " << readId << ", read name == " << readNameStore[readId] << ", maxError == " << maxError << "\n";
+#endif  // #if ENABLE
 
         // Filter out low scoring ones.
         typedef typename Iterator<String<WeightedMatch> >::Type TIterator;
@@ -1006,9 +1024,9 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     addOption(parser, seqan::ArgParseOption("e", "max-error",
                                             "Maximal error rate to build gold standard for in percent.  This "
                                             "parameter is an integer and relative to the read length.  "
-                                            "The error rate is ignored in oracle mode, here the distance "
-                                            "of the read at the sample position is taken, individually "
-                                            "for each read.  Default: 0",
+                                            "In case of oracle mode, the error rate for the read at the "
+                                            "sampling position is used and \\fIRATE\\fP is used as a cutoff "
+                                            "threshold.",
                                             seqan::ArgParseArgument::INTEGER, false, "RATE", 1, 0));
 
     addTextSection(parser, "Return Values");
@@ -1073,7 +1091,11 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
         options.matchN = true;
     if (isSet(parser, "oracle-mode"))
         options.oracleMode = true;
-    getOptionValue(options.maxError, parser, "max-error");
+    if (isSet(parser, "max-error"))
+    {
+        getOptionValue(options.maxError, parser, "max-error");
+        options.maxErrorSet = true;
+    }
     CharString distanceMetric;
     getOptionValue(distanceMetric, parser, "distance-metric");
     if (distanceMetric == "hamming")

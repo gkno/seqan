@@ -366,6 +366,13 @@ int benchmarkReadResult(RabemaStats & result,
         std::cerr << "GSI ID\t" << gsiRecords[0].readName << "\n";
 #endif  // #if DEBUG_RABEMA
 
+    if (options.oracleMode && empty(gsiRecords))
+    {
+        // There are no GSI intervals in oracle mode.  This can be the case if we constructed the gold standard
+        // with a maximal error rate.  If this is the case then we ignore these reads.
+        return 0;
+    }
+
     // Select gold standard intervals (GSI) records.
     //
     // We only select intervals that match the specification of pairedEnd, second.  Also, the intervals must be for an
@@ -447,7 +454,7 @@ int benchmarkReadResult(RabemaStats & result,
         bool keep = (record.originalDistance == options.maxError);
         if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ALL)
             keep = keep && (record.distance == smallestDistance);
-        if (options.oracleMode && record.originalDistance == largestDistance)
+        if (options.oracleMode && record.originalDistance <= largestDistance)
             keep = true;
         if (keep)
             appendValue(filteredGsiRecords, record);
@@ -472,6 +479,8 @@ int benchmarkReadResult(RabemaStats & result,
                               length(intervalDistances)));
         appendValue(intervalDistances, distance);
         numIntervals += 1;
+        if (distance >= (int)length(numIntervalsForErrorRate))
+            resize(numIntervalsForErrorRate, distance + 1, 0);
         if (!options.oracleMode && options.benchmarkCategory != CATEGORY_ANY_BEST)
             numIntervalsForErrorRate[distance] += 1;
     }

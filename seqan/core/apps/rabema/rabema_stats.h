@@ -206,15 +206,20 @@ int write(TStream & stream, RabemaStats const & stats, int maxError, CharString 
            << "##Found Intervals By Distance\n"
            << "##\n"
            << "#error_rate\tnum_max\tnum_found\tpercent_found\tnorm_max\tnorm_found\tpercent_norm_found\n";
+    char buffer[1000];
     for (unsigned i = 0; i < length(stats.intervalsToFindForErrorRate); ++i)
     {
         // if (maxError != -1  && (int)i != maxError)
         //     continue;
-        char buffer[1000];
+        double percFoundIntervals = 100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i];
+        if (stats.intervalsToFindForErrorRate[i] == 0u)
+            percFoundIntervals = 0;
+        double percFoundNormalizedIntervals = 100.0 * stats.normalizedIntervalsFoundForErrorRate[i] / stats.normalizedIntervalsToFindForErrorRate[i];
+        if (stats.normalizedIntervalsToFindForErrorRate[i] == 0)
+            percFoundNormalizedIntervals = 0;
         sprintf(buffer, "%u\t%d\t%d\t%.2f\t%.2f\t%1.2f\t%.2f\n", i, stats.intervalsToFindForErrorRate[i], stats.intervalsFoundForErrorRate[i],
-                100.0 * stats.intervalsFoundForErrorRate[i] / stats.intervalsToFindForErrorRate[i],
-                stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i],
-                100.0 * stats.normalizedIntervalsFoundForErrorRate[i] / stats.normalizedIntervalsToFindForErrorRate[i]);
+                percFoundIntervals, stats.normalizedIntervalsToFindForErrorRate[i], stats.normalizedIntervalsFoundForErrorRate[i],
+                percFoundNormalizedIntervals);
         stream << buffer;
     }
     stream << '\n';
