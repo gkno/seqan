@@ -763,7 +763,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     swap(chunk[i + 1], chunk[mate]);
                     if (hasFlagMultiple(chunk[i]) && hasFlagLast(chunk[i]))
                     {
-                        SEQAN_CHECK(hasFlagFirst(chunk[i + 1]), "Must be first in pair!");
+                        //SEQAN_CHECK(hasFlagFirst(chunk[i + 1]), "Must be first in pair!");
                         swap(chunk[i], chunk[i + 1]);
                     }
                     i += 2;
