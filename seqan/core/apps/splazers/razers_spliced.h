@@ -822,13 +822,13 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 	m.editDist -= extScore;
 
 #ifdef RAZERS_DEBUG
-	::std::cout << " lDim0: " << leftDim0(seed) << ::std::endl;
-	::std::cout << " lDim1: " << leftDim1(seed) << ::std::endl;
-	::std::cout << " rDim0: " << rightDim0(seed) << ::std::endl;
-	::std::cout << " rDim1: " << rightDim1(seed) << ::std::endl;
+	::std::cout << " lDim0: " << getBeginDim0(seed) << ::std::endl;
+	::std::cout << " lDim1: " << getBeginDim1(seed) << ::std::endl;
+	::std::cout << " rDim0: " << getEndDim0(seed) << ::std::endl;
+	::std::cout << " rDim1: " << getEndDim1(seed) << ::std::endl;
 	::std::cout << " scoreDropOff: "<<scoreDropOff << ::std::endl;
-	::std::cout << " readInf: "<< infix(readSet[rseqNo],leftDim0(seed),rightDim0(seed)+1) << ::std::endl;
-	::std::cout << " gInfInf: "<< infix(inf,leftDim1(seed),rightDim1(seed)+1) << ::std::endl;
+	::std::cout << " readInf: "<< infix(readSet[rseqNo],getBeginDim0(seed),getEndDim0(seed)+1) << ::std::endl;
+	::std::cout << " gInfInf: "<< infix(inf,getBeginDim1(seed),getEndDim1(seed)+1) << ::std::endl;
 	::std::cout << " read: "<< readSet[rseqNo] << ::std::endl;
 	::std::cout << " gInf: "<< inf << ::std::endl;
 #endif
@@ -1380,7 +1380,7 @@ combineLeftRight(TMatch & mR,
 #endif
 
 		// compute best split position
-		int seq0Len = readLength;
+		int seq0Len = readLength - 2*options.minMatchLen;
 		int traceExt = 0;
 		if(orientation == 'R')
 			findBestSplitPosition(maxColsL,maxColsR,rowPosL1,rowPosL2,rowPosR1,rowPosR2,seq0Len,traceExt,OrientationReverse(),SwiftSemiGlobal());
