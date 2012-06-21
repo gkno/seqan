@@ -244,7 +244,7 @@ struct Read
     unsigned char indels;
     
     Read() :
-        contigId(0),
+        contigId(-1),
         beginPos(0),
         reverseComplemented(false),
         errors(0),
@@ -508,11 +508,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 
                 // Read reverse complemented tag.
                 if (hasFlagRC(record)) read.reverseComplemented = true;
-                
-                // Read read sequence.
-                appendValue(readSeqs, record.seq);
-                if (hasFlagRC(record)) reverseComplement(back(readSeqs));
-                
+                                
                 // Read read name.
                 CharString readName = record.qName;
                 if (hasFlagMultiple(record))
@@ -523,7 +519,15 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                     else if (hasFlagLast(record))
                         append(readName, "/2");
                 }
-                appendName(readNames, readName, readNameCache);
+                int readId = -1;
+                if (!getIdByName(readNames, readName, readId, readNameCache))
+                {
+                    // Append read sequence and name.
+                    readId = length(readNames);
+                    appendName(readNames, readName, readNameCache);
+                    appendValue(readSeqs, record.seq);
+                    if (hasFlagRC(record)) reverseComplement(back(readSeqs));
+                }
                 
                 // Read total errors from NM tag.
                 idx = 0;
@@ -561,8 +565,14 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
 //                if (read.indels + read.SNPs + read.seqErrors != read.errors)
 //                    std::cerr << "WARNING: Inconsistencies in error tags " << record.qName << std::endl;
                 
-                // Add read to gold standard.                
-                appendValue(goldStandard, read);
+                // Add read to gold standard.
+                if (readId >= (int)length(goldStandard))
+                {
+                    resize(goldStandard, readId + 1);
+                    if (!empty(options.inFastqFile))
+                        std::cerr << "WARNING: A read in the gold standard is not in the fasta file: " << record.qName << std::endl;
+                }
+                goldStandard[readId] = read;
             }
         
             line += 1; 
@@ -676,7 +686,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             BamAlignmentRecord & record = chunk[i];
 
             // retrieve (possibly) missing read sequence
-            __uint32 readId = 0;
+            int readId = -1;
             CharString readName = record.qName;
             if (hasFlagMultiple(record))
             {
@@ -696,18 +706,21 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 // This should never happen with a gold standard.
                 if (options.goldStandard)
                 {
-                    std::cerr << "WARNING: A read unknown to the gold standard has been found: " << record.qName << std::endl;
+                    std::cerr << "WARNING: A read unknown to the gold standard/fasta file has been found: " << record.qName << std::endl;
                     return 1;
                 }
 
-                // Add read name and entry.
-                readId = length(readNames);
-                appendValue(readSeqs, record.seq);
-                if (hasFlagRC(record))
-                    reverseComplement(back(readSeqs));
-                appendName(readNames, record.qName, readNameCache);
-                appendValue(minErrors, maxValue<unsigned>());
-                appendValue(matchesCount, 0);
+                if (readId == -1)
+                {
+                    // Add read name and entry.
+                    readId = length(readNames);
+                    appendValue(readSeqs, record.seq);
+                    if (hasFlagRC(record))
+                        reverseComplement(back(readSeqs));
+                    appendName(readNames, record.qName, readNameCache);
+                    appendValue(minErrors, maxValue<unsigned>());
+                    appendValue(matchesCount, 0);
+                }
             }
             record._qId = readId;
         }
