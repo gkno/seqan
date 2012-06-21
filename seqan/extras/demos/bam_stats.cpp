@@ -522,13 +522,15 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 int readId = -1;
                 if (!getIdByName(readNames, readName, readId, readNameCache))
                 {
+                    if (!empty(options.inFastqFile))
+                        std::cerr << "WARNING: A read in the gold standard is not in the fasta file: " << readName << std::endl;
                     // Append read sequence and name.
                     readId = length(readNames);
                     appendName(readNames, readName, readNameCache);
                     appendValue(readSeqs, record.seq);
                     if (hasFlagRC(record)) reverseComplement(back(readSeqs));
                 }
-                
+
                 // Read total errors from NM tag.
                 idx = 0;
                 tagValue =-1;
@@ -564,18 +566,14 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 // Check for inconsistencies in error tags.
 //                if (read.indels + read.SNPs + read.seqErrors != read.errors)
 //                    std::cerr << "WARNING: Inconsistencies in error tags " << record.qName << std::endl;
-                
+
                 // Add read to gold standard.
                 if (readId >= (int)length(goldStandard))
-                {
                     resize(goldStandard, readId + 1);
-                    if (!empty(options.inFastqFile))
-                        std::cerr << "WARNING: A read in the gold standard is not in the fasta file: " << record.qName << std::endl;
-                }
                 goldStandard[readId] = read;
             }
-        
-            line += 1; 
+
+            line += 1;
         }
     }
 
@@ -757,7 +755,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                 {
                     std::cerr << "WARNING: Could not find any mate for record\n";
                     write2(std::cerr, chunk[i], context, Sam());
-                    if (options.verbosity >= 2)
+                    if (options.verbosity >= 3)
                     {
                         std::cerr << "Chunk (of same-query name records is\n,--\n";
                         for (unsigned k = 0; k < length(chunk); ++k)
