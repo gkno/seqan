@@ -305,6 +305,8 @@ int realignBamRecord(TReference & reference, BamAlignmentRecord & record, unsign
     __int64 posEnd = posBegin + len + maxIndels;
     posBegin = _max(0, posBegin - maxIndels);
     posEnd = _min(posEnd, (__int64)length(reference));
+    if (posBegin > posEnd)
+        return maxIndels + 1;  // Not possible to align.
     
     TReferenceInfix refInfix(reference, posBegin, posEnd);
     TReadSeq readSeq = record.seq;
@@ -702,10 +704,12 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
             else
             {
                 // This should never happen with a gold standard.
+                //
+                // However it DOES with incorrect flags by Hobbes if the flags are incorrect.  In this case, we mark the read as unmapped, it is then ignored below.
                 if (options.goldStandard)
                 {
-                    std::cerr << "WARNING: A read unknown to the gold standard/fasta file has been found: " << record.qName << std::endl;
-                    return 1;
+                    std::cerr << "WARNING: A read unknown to the gold standard/fasta file has been found: " << readName << std::endl;
+                    record.flag |= BAM_FLAG_UNMAPPED;
                 }
 
                 if (readId == -1)
