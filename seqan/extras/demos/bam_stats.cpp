@@ -1270,8 +1270,11 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
         TNameCache::TSet::iterator itEnd = readNameCache.nameSet.end();
         for (; it != itEnd; ++it)
         {
-            // Strip any trailing "/*" from read name.
             CharString readName = readNames[*it];
+            // Do not output single-end records in paired-end mode.
+            if (options.pairedEnd && readName[length(readName) - 2] != '/')
+                continue;
+            // Strip any trailing "/*" from read name.
             if (length(readName) > 2u && readName[length(readName) - 2] == '/')
                 resize(readName, length(readName) - 2);
             bestMatchFile << readName << '\t';
