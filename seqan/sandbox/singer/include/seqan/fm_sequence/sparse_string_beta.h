@@ -46,6 +46,10 @@ struct FibreIndicatorString_;
 typedef Tag<FibreValueString_>       const FibreValueString;
 typedef Tag<FibreIndicatorString_>    const FibreIndicatorString;
 
+// ==========================================================================
+//Metafunctions
+// ==========================================================================
+
 template <typename TFibreValueString, typename TSpec>
 struct Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>
 {
@@ -53,9 +57,21 @@ struct Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>
 };
 
 template <typename TFibreValueString, typename TSpec>
+struct Fibre<SparseString<TFibreValueString, TSpec> const, FibreValueString>
+{
+    typedef TFibreValueString const Type;
+};
+
+template <typename TFibreValueString, typename TSpec>
 struct Fibre<SparseString<TFibreValueString, TSpec>, FibreIndicatorString>
 {
     typedef RankSupportBitString<void> Type;
+};
+
+template <typename TFibreValueString, typename TSpec>
+struct Fibre<SparseString<TFibreValueString, TSpec> const, FibreIndicatorString>
+{
+    typedef RankSupportBitString<void> const Type;
 };
 
 template <typename TFibreValueString, typename TSpec>
@@ -90,7 +106,21 @@ struct Value<SparseString<TFibreValueString, TSpec> const>
     typedef typename Value<TFibreValueString>::Type const Type;
 };
 
-template <typename TFibreValueString, typename TSpec>
+// ==========================================================================
+// Classes
+// ==========================================================================
+
+/**
+.Class.SparseString:
+..cat:String
+..summary:A string storing only a fraction of the values of the original string..
+..signature:SparseString<TValueString, TSpec>
+..param.TValueString:The string containing the values. 
+..param.TSpec:The specialisation tag.
+...default:void.
+..include:seqan/String.h
+*/
+template <typename TValueString, typename TSpec = void>
 struct SparseString
 {
     typedef typename Fibre<SparseString, FibreValueString>::Type TFibreValueString_;
@@ -98,25 +128,25 @@ struct SparseString
 
     TFibreValueString_                           valueString;
     TFibreIndicatorString                        indicatorString;
-    typename Size<TFibreValueString>::Type      blockSize;
+    typename Size<TValueString>::Type      compressionFactor;
 
     SparseString() :
         valueString(),
         indicatorString(),
-        blockSize(0)
+        compressionFactor(0)
     {}
 
-    SparseString(unsigned blockSize) :
+    SparseString(unsigned compressionFactor) :
         valueString(),
         indicatorString(),
-        blockSize(blockSize)
+        compressionFactor(compressionFactor)
     {}
 
     inline SparseString & operator=(SparseString const & other)
     {
         valueString = other.valueString;
         indicatorString = other.indicatorString;
-        blockSize = other.blockSize;
+        compressionFactor = other.compressionFactor;
         return *this;
     }
 
@@ -124,24 +154,100 @@ struct SparseString
     {
         return valueString == b.valueString &&
                indicatorString == b.indicatorString &&
-               //blockSize == b.blockSize);
+               //compressionFactor == b.compressionFactor);
                1;
     }
 
 };
-template <typename TFibreValueString, typename TSpec>
-inline typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type &
-getFibre(SparseString<TFibreValueString, TSpec>&sparseString, FibreValueString)
+
+// ==========================================================================
+// Functions 
+// ==========================================================================
+
+/**
+.Function.assignCompressionFactor
+..summary:Assings the compression factor of the container.
+..signature:assignCompressionFactor(container, value) 
+..param.container:The container holding the entries.
+...type:Class.SparseString
+..param.value.
+..include:seqan/index.h
+*/
+template <typename TFibreValueString, typename TSpec, typename TValue>
+inline void assignCompressionFactor(SparseString<TFibreValueString, TSpec> & string, TValue value)
 {
-    return sparseString.valueString;
+    SEQAN_ASSERT_GT_MSG(value, 0u, "The compresssion factor is not acceptable!"); 
+    string.compressionFactor = value;
 }
 
+/**
+.Function.assignValue
+..param.container:
+...type:Class.CompressedSA
+*/
+template <typename TFibreValueString, typename TSpec, typename TPos, typename TValue>
+inline void assignValue(SparseString<TFibreValueString, TSpec> & string, TPos pos, TValue value)
+{
+    getFibre(string, FibreValueString())[pos] = value;
+}
+
+/**
+.Function.clear
+..param.object:
+...type:Class.SparseString
+*/
+template <typename TFibreValueString, typename TSpec>
+inline void clear(SparseString<TFibreValueString, TSpec> & string)
+{
+    clear(getFibre(string, FibreValueString()));
+    clear(getFibre(string, FibreIndicatorString()));
+}
+
+/**
+.Function.empty
+..param.object:
+...type:Class.SparseString
+*/
+template <typename TFibreValueString, typename TSpec>
+inline bool empty(SparseString<TFibreValueString, TSpec> const & string)
+{
+    return empty(getFibre(string, FibreValueString()))
+           && empty(getFibre(string, FibreIndicatorString()));
+}
+
+template <typename TFibreValueString, typename TSpec, typename TPos>
+inline bool entryStored(SparseString<TFibreValueString, TSpec> const & string, TPos const & pos)
+{
+    return getBit(getFibre(string, FibreIndicatorString()), pos);
+}
+
+/**
+.Function.getCompressionFactor
+..summary:Returns the compression factor of the container.
+..signature:getCompressionFactor(container)
+..param.container:The container holding the entries.
+...type:Class.SparseString
+..include:seqan/index.h
+*/
+template <typename TFibreValueString, typename TSpec>
+inline typename Size<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type
+getCompressionFactor(SparseString<TFibreValueString, TSpec> & string)
+{
+    return string.compressionFactor;
+}
+
+/**
+.Function.getFibre
+..param.container:
+...type:Class.CompressedSA
+*/
 template <typename TFibreValueString, typename TSpec>
 inline typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type const &
 getFibre(SparseString<TFibreValueString, TSpec> const & sparseString, FibreValueString)
 {
     return sparseString.valueString;
 }
+
 
 template <typename TFibreValueString, typename TSpec>
 inline typename Fibre<SparseString<TFibreValueString, TSpec>, FibreIndicatorString>::Type &
@@ -157,25 +263,18 @@ getFibre(SparseString<TFibreValueString, TSpec> const & sparseString, FibreIndic
     return sparseString.indicatorString;
 }
 
-template <typename TFibreValueString, typename TSpec, typename TValue>
-inline void assignBlockSize(SparseString<TFibreValueString, TSpec> & string, TValue value)
-{
-    string.blockSize = value;
-}
-
-template <typename TFibreValueString, typename TSpec, typename TPos, typename TValue>
-inline void assignValue(SparseString<TFibreValueString, TSpec> & string, TPos pos, TValue value)
-{
-    getFibre(string, FibreValueString())[pos] = value;
-}
-
 template <typename TFibreValueString, typename TSpec>
-inline typename Size<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type
-getBlockSize(SparseString<TFibreValueString, TSpec> & string)
+inline typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type &
+getFibre(SparseString<TFibreValueString, TSpec>&sparseString, FibreValueString)
 {
-    return string.blockSize;
+    return sparseString.valueString;
 }
 
+/**
+.Function.getValue
+..param.object:
+...type:Class.SparseString
+*/
 template <typename TFibreValueString, typename TSpec, typename TPos>
 inline typename Value<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type
 getValue(SparseString<TFibreValueString, TSpec> & string, TPos pos)
@@ -190,6 +289,11 @@ getValue(SparseString<TFibreValueString, TSpec> const & string, TPos pos)
     return getValue(getFibre(string, FibreValueString()), pos);
 }
 
+/**
+.Function.length
+..param.object:
+...type:Class.SparseString
+*/
 template <typename TFibreValueString, typename TSpec>
 inline typename Size<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type
 length(SparseString<TFibreValueString, TSpec> & string)
@@ -197,35 +301,11 @@ length(SparseString<TFibreValueString, TSpec> & string)
     return length(getFibre(string, FibreValueString()));
 }
 
-template <typename TFibreValueString, typename TSpec>
-inline void clear(SparseString<TFibreValueString, TSpec> & string)
-{
-    clear(getFibre(string, FibreValueString()));
-    clear(getFibre(string, FibreIndicatorString()));
-}
-
-template <typename TFibreValueString, typename TSpec, typename TSize>
-inline void resize(SparseString<TFibreValueString, TSpec> & string,
-                   TSize const size)
-{
-    resize(getFibre(string, FibreValueString()), size / getBlockSize(string) + 1);
-    resize(getFibre(string, FibreIndicatorString()), size, 0);
-}
-
-template <typename TFibreValueString, typename TSpec, typename TPos>
-inline typename Value<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type
-value(SparseString<TFibreValueString, TSpec> & string, TPos pos)
-{
-    return getFibre(string, FibreValueString())[pos];
-}
-
-template <typename TFibreValueString, typename TSpec, typename TPos>
-inline typename Value<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type const
-value(SparseString<TFibreValueString, TSpec> const & string, TPos pos)
-{
-    return getFibre(string, FibreValueString())[pos];
-}
-
+/**
+.Function.open
+..param.string:
+...type:Class.SparseString
+*/
 template <typename TFibreValueString, typename TSpec>
 inline bool open(
     SparseString<TFibreValueString, TSpec> & sparseString,
@@ -250,6 +330,33 @@ inline bool open(
     return open(sparseString, fileName, DefaultOpenMode<SparseString<TFibreValueString, TSpec> >::VALUE);
 }
 
+/**
+.Function.resize
+..param.object:
+...type:Class.SparseString
+*/
+template <typename TFibreValueString, typename TSpec, typename TSize>
+inline void resize(SparseString<TFibreValueString, TSpec> & string,
+                   TSize const size)
+{
+    // the +1 is necessary because fractional result may occur
+    resize(getFibre(string, FibreValueString()), size / getCompressionFactor(string) + 1);
+    resize(getFibre(string, FibreIndicatorString()), size, 0);
+}
+
+/**
+.Function.save
+..param.string:
+...type:Class.SparseString
+*/
+template <typename TFibreValueString, typename TSpec>
+inline bool save(
+    SparseString<TFibreValueString, TSpec> const & sparseString,
+    const char * fileName)
+{
+    return save(sparseString, fileName, DefaultOpenMode<SparseString<TFibreValueString, TSpec> >::VALUE);
+}
+
 template <typename TFibreValueString, typename TSpec>
 inline bool save(
     SparseString<TFibreValueString, TSpec> const & sparseString,
@@ -266,12 +373,23 @@ inline bool save(
     return true;
 }
 
-template <typename TFibreValueString, typename TSpec>
-inline bool save(
-    SparseString<TFibreValueString, TSpec> const & sparseString,
-    const char * fileName)
+/**
+.Function.value
+..param.container:
+...type:Class.SparseString
+*/
+template <typename TFibreValueString, typename TSpec, typename TPos>
+inline typename Value<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type &
+value(SparseString<TFibreValueString, TSpec> & string, TPos pos)
 {
-    return save(sparseString, fileName, DefaultOpenMode<SparseString<TFibreValueString, TSpec> >::VALUE);
+    return getFibre(string, FibreValueString())[pos];
+}
+
+template <typename TFibreValueString, typename TSpec, typename TPos>
+inline typename Value<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type const &
+value(SparseString<TFibreValueString, TSpec> const & string, TPos pos)
+{
+    return getFibre(string, FibreValueString())[pos];
 }
 
 }

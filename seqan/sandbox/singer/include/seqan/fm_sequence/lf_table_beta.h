@@ -38,35 +38,96 @@
 namespace seqan {
 
 // ==========================================================================
-// LFTable is an object storing all necessary information for the LF-mapping.
+// LfTable is an object storing all necessary information for the LF-mapping.
 // To be more precise, the occurrence-table data structure as well as the
 // prefix-sum table are stored.
 // ==========================================================================
 
+template <typename TText, typename TSpec>
+class WaveletTree;
+
+template <typename TSpec = void>
+struct FmiDollarSubstituted;
+
+struct FibreOccTable_;
+struct FibrePrefixSumTable_;
+struct FibreDollarPosition_;
+
+
+typedef Tag<FibreOccTable_> const FibreOccTable;
+typedef Tag<FibrePrefixSumTable_> const FMTablePrefixSumTable;
+typedef Tag<FibreDollarPosition_> const FibreDollarPosition;
+
 template <typename TOccTable, typename TPrefixSumTable>
-struct LFTable
+struct LfTable;
+
+// ==========================================================================
+//Metafunctions
+// ==========================================================================
+
+template <typename TOccTable, typename TPrefixSumTable>
+struct Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>
+{
+    typedef TOccTable Type;
+};
+
+template <typename TOccTable, typename TPrefixSumTable>
+struct Fibre<LfTable<TOccTable, TPrefixSumTable> const, FibreOccTable>
+{
+    typedef TOccTable const Type;
+};
+
+template <typename TOccTable, typename TPrefixSumTable>
+struct Fibre<LfTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>
+{
+    typedef TPrefixSumTable Type;
+};
+
+template <typename TOccTable, typename TPrefixSumTable>
+struct Reference<LfTable<TOccTable, TPrefixSumTable> >
+{
+    typedef TPrefixSumTable & Type;
+};
+
+// ==========================================================================
+// Classes
+// ==========================================================================
+
+/**
+.Class.LfTable:
+..cat:Index
+..summary:LfTable is an object storing all necessary information for the LF-mapping.
+..signature:LfTable<TOccTable, TPrefixSumTable>
+..param.TOccTable:The occurrence table data structure.
+...type.class:WaveletTree
+..param.TPrefixSumTable:The specialisation tag.
+...default:String
+..include:seqan/Index.h
+*/
+template <typename TOccTable, typename TPrefixSumTable>
+struct LfTable
 {
     TOccTable occTable;
     TPrefixSumTable prefixSumTable;
 
-    LFTable() :
+    LfTable() :
         occTable(),
         prefixSumTable()
     {}
 
-    LFTable(TOccTable const & occTable, TPrefixSumTable const & prefixSumTable) :
+    LfTable(TOccTable const & occTable, TPrefixSumTable const & prefixSumTable) :
         occTable(occTable),
         prefixSumTable(prefixSumTable)
     {}
 
-    inline LFTable & operator=(LFTable const & other)
+    inline LfTable & operator=(LfTable const & other)
     {
         occTable = other.occTable;
         prefixSumTable = other.prefixSumTable;
         return *this;
     }
 
-    inline bool operator==(const LFTable & b) const
+    inline bool operator==(const LfTable & b) const
     {
         return occTable == b.occTable &&
                prefixSumTable == b.prefixSumTable;
@@ -74,74 +135,134 @@ struct LFTable
 
 };
 
-struct FibreOccTable_;
-struct FibrePrefixSumTable_;
+// ==========================================================================
+// Functions 
+// ==========================================================================
 
-typedef Tag<FibreOccTable_> const FibreOccTable;
-typedef Tag<FibrePrefixSumTable_> const FMTablePrefixSumTable;
 
+///.Function.clear.param.object.type:Class.LfTable
 template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>
-{
-    typedef TOccTable Type;
-};
-
-template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LFTable<TOccTable, TPrefixSumTable> const, FibreOccTable>
-{
-    typedef TOccTable const Type;
-};
-
-template <typename TOccTable, typename TPrefixSumTable>
-struct Fibre<LFTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>
-{
-    typedef TPrefixSumTable Type;
-};
-
-template <typename TOccTable, typename TPrefixSumTable>
-struct Reference<LFTable<TOccTable, TPrefixSumTable> >
-{
-    typedef TPrefixSumTable & Type;
-};
-
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>::Type const &
-getFibre(LFTable<TOccTable, TPrefixSumTable> const & lfTable, FMTablePrefixSumTable)
-{
-    return lfTable.prefixSumTable;
-}
-
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>::Type &
-getFibre(LFTable<TOccTable, TPrefixSumTable>&lfTable, FMTablePrefixSumTable)
-{
-    return lfTable.prefixSumTable;
-}
-
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
-getFibre(LFTable<TOccTable, TPrefixSumTable>&lfTable, FibreOccTable)
-{
-    return lfTable.occTable;
-}
-
-template <typename TOccTable, typename TPrefixSumTable>
-inline typename Fibre<LFTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type const &
-getFibre(LFTable<TOccTable, TPrefixSumTable> const & lfTable, FibreOccTable)
-{
-    return lfTable.occTable;
-}
-
-template <typename TOccTable, typename TPrefixSumTable>
-inline void clear(LFTable<TOccTable, TPrefixSumTable> & lfTable)
+inline void clear(LfTable<TOccTable, TPrefixSumTable> & lfTable)
 {
     clear(lfTable.occTable);
     clear(lfTable.prefixSumTable);
 }
 
+
+///.Function.empty.param.object.type:Class.LfTable
+template <typename TOccTable, typename TPrefixSumTable>
+inline bool empty(LfTable<TOccTable, TPrefixSumTable> & lfTable)
+{
+    return empty(lfTable.occTable)
+           && empty(lfTable.prefixSumTable);
+}
+
+/**
+.Function.createLfTable
+..summary:Creates the LF table
+..signature:createLfTable(LfTable<WaveletTree<TText, FmiDollarSubstituted<> >, TPrefixSumTable> & lfTable, TText text)
+..param.lfTable:The lf table to be constructed.
+..type:Class:LfTable.
+..param.text:The underlying text.
+...type.class:String
+..include:seqan/index.h
+*/
+template <typename TPrefixSumTable, typename TText, typename TDollarSpec, typename TText2>
+inline bool createLfTable(LfTable<WaveletTree<TText, FmiDollarSubstituted<TDollarSpec> >, TPrefixSumTable> & lfTable, TText2 text)
+{
+    typedef typename Alphabet<TText2>::Type TChar;
+    typedef typename SAValue<TText2>::Type   TSAValue;
+	typedef typename Alphabet<TText>::Type     TAlphabet;
+	typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<TDollarSpec> >, FibreDollarPosition>::Type TDollarPos;
+
+    String<TSAValue> sa;
+    resize(sa,length(text));
+    createSuffixArray(sa, text, Skew7());
+
+    createPrefixSumTable(lfTable.prefixSumTable, text);
+
+	TAlphabet dollarSub;
+	determineDollarSubstitute_(lfTable.prefixSumTable, dollarSub);
+
+	String<TChar> bwt;
+	TDollarPos dollarPos;
+	resize(bwt, computeBwtLength(text));
+	createBwTable_(bwt, dollarPos, text, sa, dollarSub);
+
+	clear(sa);
+
+    createOccurrenceTable(lfTable, bwt, dollarSub, dollarPos);
+	clear(bwt);
+
+	insertDollar_(lfTable.prefixSumTable, getNumDollar(text));
+
+	//here comes the dollar modification
+	//addDollarNode(index.lfTable.occTable, dollarSub, dollarPos);
+	return true;
+}
+
+/**
+.Function.getFibre
+..param.container:
+...type:Class.LfTable
+*/
+template <typename TOccTable, typename TPrefixSumTable>
+inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>::Type const &
+getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FMTablePrefixSumTable)
+{
+    return lfTable.prefixSumTable;
+}
+
+template <typename TOccTable, typename TPrefixSumTable>
+inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FMTablePrefixSumTable>::Type &
+getFibre(LfTable<TOccTable, TPrefixSumTable>&lfTable, FMTablePrefixSumTable)
+{
+    return lfTable.prefixSumTable;
+}
+
+template <typename TOccTable, typename TPrefixSumTable>
+inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type &
+getFibre(LfTable<TOccTable, TPrefixSumTable>&lfTable, FibreOccTable)
+{
+    return lfTable.occTable;
+}
+
+template <typename TOccTable, typename TPrefixSumTable>
+inline typename Fibre<LfTable<TOccTable, TPrefixSumTable>, FibreOccTable>::Type const &
+getFibre(LfTable<TOccTable, TPrefixSumTable> const & lfTable, FibreOccTable)
+{
+    return lfTable.occTable;
+}
+
+/**
+.Function.lfMapping:
+..summary:Returns the position of the character L[c] in F.
+..cat:Index
+..signature:lfMapping(lfTable, pos)
+..param.lfTable:The @Class.LfTable@ holding the occurrence and prefix sum table.
+...type:Class.LfTable
+..param.pos:The position in L
+..returns:Returns the position of the character L[c] in F. The returned position is of the same type as pos.
+..include:seqan/index.h
+*/
+template <typename TLfTable, typename TPos>
+inline TPos lfMapping(TLfTable & lfTable,
+		TPos pos)
+{
+	typedef typename Fibre<TLfTable, FibreOccTable>::Type TOccTable;
+	typedef typename Value<TOccTable>::Type TChar;
+	TChar c = getCharacter(lfTable.occTable, pos);
+	return getOccurrences(lfTable.occTable, c, pos) + getPrefixSum(lfTable.prefixSumTable, getCharacterPosition(lfTable.prefixSumTable, c)) - 1;
+}
+
+/**
+.Function.open
+..param.string:
+...type:Class.LfTable
+*/
 template <typename TOccTable, typename TPrefixSumTable>
 inline bool open(
-    LFTable<TOccTable, TPrefixSumTable> & lfTable,
+    LfTable<TOccTable, TPrefixSumTable> & lfTable,
     const char * fileName,
     int openMode)
 {
@@ -158,15 +279,20 @@ inline bool open(
 
 template <typename TOccTable, typename TPrefixSumTable>
 inline bool open(
-    LFTable<TOccTable, TPrefixSumTable> & lfTable,
+    LfTable<TOccTable, TPrefixSumTable> & lfTable,
     const char * fileName)
 {
-    return open(lfTable, fileName, DefaultOpenMode<LFTable<TOccTable, TPrefixSumTable> >::VALUE);
+    return open(lfTable, fileName, DefaultOpenMode<LfTable<TOccTable, TPrefixSumTable> >::VALUE);
 }
 
+/**
+.Function.save
+..param.string:
+...type:Class.LfTable
+*/
 template <typename TOccTable, typename TPrefixSumTable>
 inline bool save(
-    LFTable<TOccTable, TPrefixSumTable> const & lfTable,
+    LfTable<TOccTable, TPrefixSumTable> const & lfTable,
     const char * fileName,
     int openMode)
 {
@@ -182,10 +308,10 @@ inline bool save(
 
 template <typename TOccTable, typename TPrefixSumTable>
 inline bool save(
-    LFTable<TOccTable, TPrefixSumTable> const & lfTable,
+    LfTable<TOccTable, TPrefixSumTable> const & lfTable,
     const char * fileName)
 {
-    return save(lfTable, fileName, DefaultOpenMode<LFTable<TOccTable, TPrefixSumTable> >::VALUE);
+    return save(lfTable, fileName, DefaultOpenMode<LfTable<TOccTable, TPrefixSumTable> >::VALUE);
 }
 
 }

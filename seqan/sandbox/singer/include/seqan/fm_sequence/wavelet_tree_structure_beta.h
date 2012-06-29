@@ -40,23 +40,22 @@ namespace seqan {
 // ==========================================================================
 //Forwards
 // ==========================================================================
-
 template <typename TText, typename TSpec>
 class WaveletTree;
 
 template <typename TChar, typename TSpec = void>
-class WaveletTreeStructure;
+class RightArrayBinaryTree;
 
 //////////////////////////////////////////////////////////////////////////////
-// WaveletTreeStructure fibres
+// RightArrayBinaryTree fibres
 
 /**
-.Tag.WaveletTreeStructure Fibres
-..summary:Tag to select a specific fibre (e.g. table, object, ...) of a @Class.WaveletTreeStructure@.
-..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a WaveletTreeStructure.
-..cat:WaveletTreeStructure
+.Tag.RightArrayBinaryTree Fibres
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of a @Class.RightArrayBinaryTree@.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a RightArrayBinaryTree.
+..cat:RightArrayBinaryTree
 
-..tag.FibreTreeNodes:The string encoding the wavelet tree structure.
+..tag.FibreTreeVertieces:The string encoding the wavelet tree structure.
 
 
 ..see:Metafunction.Fibre
@@ -65,56 +64,60 @@ class WaveletTreeStructure;
 ..include:seqan/index.h
 */
 
-///.Metafunction.Fibre.param.TSpec.type:Tag.WaveletTreeStructure Fibres
+///.Metafunction.Fibre.param.TSpec.type:Tag.RightArrayBinaryTree Fibres
 
-struct FibreTreeNodes_;
+struct FibreTreeVertieces_;
 struct FibreWaveletTreeStructure_;
 
-typedef Tag<FibreTreeNodes_> const FibreTreeNodes;
+typedef Tag<FibreTreeVertieces_> const FibreTreeVertieces;
 typedef Tag<FibreWaveletTreeStructure_> const FibreWaveletTreeStructure;
 
 // ==========================================================================
 // Metafunctions
 // ==========================================================================
 
+// TODO (singer): Dna, Dna5 and AS require onle unsigned char
 template <typename TChar, typename TSpec>
-struct Fibre<WaveletTreeStructure<TChar, TSpec>, FibreTreeNodes>
+struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>
 {
     typedef typename IfC< BitsPerValue<TChar>::VALUE < 17, 
-            typename BitVector_<ValueSize<TChar>::VALUE>::Type,
+            unsigned short,
             unsigned int>::Type TPos;
-    //typedef unsigned TPos;
+
+//     typedef typename IfC< BitsPerValue<TChar>::VALUE < 17, 
+//             typename BitVector_<ValueSize<TChar>::VALUE>::Type,
+//             unsigned int>::Type TPos;
     typedef String<Pair<TChar, TPos> > Type;
 };
 
 template <typename TChar, typename TSpec>
-struct Reference<WaveletTreeStructure<TChar, TSpec> >
+struct Reference<RightArrayBinaryTree<TChar, TSpec> >
 {
-    typedef typename Value<WaveletTreeStructure<TChar, TSpec> >::Type & Type;
+    typedef typename Value<RightArrayBinaryTree<TChar, TSpec> >::Type & Type;
 };
 
 template <typename TChar, typename TSpec>
-struct Reference<const WaveletTreeStructure<TChar, TSpec> >
+struct Reference<const RightArrayBinaryTree<TChar, TSpec> >
 {
-    typedef typename Value<WaveletTreeStructure<TChar, TSpec> >::Type const Type;
+    typedef typename Value<RightArrayBinaryTree<TChar, TSpec> >::Type const Type;
 };
 
 template <typename TChar, typename TSpec>
-struct Value<WaveletTreeStructure<TChar, TSpec> >
+struct Value<RightArrayBinaryTree<TChar, TSpec> >
 {
-    typedef typename Fibre<WaveletTreeStructure<TChar, TSpec>, FibreTreeNodes>::Type TWaveletTreeNodes;
-    typedef typename Value<TWaveletTreeNodes>::Type TWaveletTreeNode;
-    typedef typename Value<TWaveletTreeNode, 2>::Type TPos;
+    typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>::Type TWaveletTreeVertieces;
+    typedef typename Value<TWaveletTreeVertieces>::Type TWaveletTreeVertex;
+    typedef typename Value<TWaveletTreeVertex, 2>::Type TPos;
 
     typedef Pair<TChar, TPos> Type;
 };
 
 template <typename TChar, typename TSpec>
-struct Value<WaveletTreeStructure<TChar, TSpec> const>
+struct Value<RightArrayBinaryTree<TChar, TSpec> const>
 {
-    typedef typename Fibre<WaveletTreeStructure<TChar, TSpec>, FibreTreeNodes>::Type TWaveletTreeNodes;
-    typedef typename Value<TWaveletTreeNodes>::Type TWaveletTreeNode;
-    typedef typename Value<TWaveletTreeNode, 2>::Type TPos;
+    typedef typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>::Type TWaveletTreeVertieces;
+    typedef typename Value<TWaveletTreeVertieces>::Type TWaveletTreeVertex;
+    typedef typename Value<TWaveletTreeVertex, 2>::Type TPos;
 
     typedef Pair<TChar, TPos> Type;
 };
@@ -124,46 +127,46 @@ struct Value<WaveletTreeStructure<TChar, TSpec> const>
 // ==========================================================================
 
 /**
-.Class.WaveletTreeStructure:
+.Class.RightArrayBinaryTree:
 ..cat:WaveletTree
 ..summary:A special format to encode the structure of a wavelet tree. The structure is very space efficient because only one position is stored which encodes where the left and right subtree of a given node exist. 
-..signature:WaveletTreeStructure<TValue, TSpec>
+..signature:RightArrayBinaryTree<TValue, TSpec>
 ..param.TSpec:The value type, that is the type of the stored characters.
 ..param.TSpec:The wavelet tree structure specialisation.
 ...default:void.
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec>
-class WaveletTreeStructure
+class RightArrayBinaryTree
 {
 public:
-    typename Fibre<WaveletTreeStructure, FibreTreeNodes>::Type treeNodes;
+    typename Fibre<RightArrayBinaryTree, FibreTreeVertieces>::Type treeVertieces;
     TChar minCharValue;
 
-    WaveletTreeStructure() :
-        treeNodes(),
+    RightArrayBinaryTree() :
+        treeVertieces(),
         minCharValue()
     {}
 
     template <typename TText>
-    WaveletTreeStructure(TText const & text) :
-        treeNodes(),
+    RightArrayBinaryTree(TText const & text) :
+        treeVertieces(),
         minCharValue()
     {
-        computeWaveletTreeStructure(*this,
+        computeRightArrayBinaryTree(*this,
                                     text);
     }
 
-    inline WaveletTreeStructure & operator=(WaveletTreeStructure const & other)
+    inline RightArrayBinaryTree & operator=(RightArrayBinaryTree const & other)
     {
-        treeNodes = other.treeNodes;
+        treeVertieces = other.treeVertieces;
         minCharValue = other.minCharValue;
         return *this;
     }
 
-    inline bool operator==(const WaveletTreeStructure & b) const
+    inline bool operator==(const RightArrayBinaryTree & b) const
     {
-        return treeNodes == b.treeNodes;
+        return treeVertieces == b.treeVertieces;
     }
 
 };
@@ -174,76 +177,75 @@ public:
 
 /**
 .Function.clear
-..cat:Graph
 ..param.object:
-...type:Class.WaveletTreeStructure
+...type:Class.RightArrayBinaryTree
 */
 template <typename TChar, typename TSpec>
-inline void clear(WaveletTreeStructure<TChar, TSpec> & treeStructure)
+inline void clear(RightArrayBinaryTree<TChar, TSpec> & treeStructure)
 {
-    clear(treeStructure.treeNodes);
+    clear(treeStructure.treeVertieces);
 }
 
 /**
-.Function.computeWaveletTreeStructure
+.Function.computeRightArrayBinaryTree
 ..summary:Computes the wavelet tree structure of a text.
-..signature:computeWaveletTreeStructure(waveletTreeStructure, text)
+..signature:computeRightArrayBinaryTree(waveletTreeStructure, text)
 ..param.waveletTreeStructure:A wavelet tree structure.
-...type:Class.WaveletTreeStructure
+...type:Class.RightArrayBinaryTree
 ..param.text:A text.
 ...type:Class.String
 ..include:seqan/index.h
 ..example.code:
 String<Dna5> genome = "ACGTACGT";
 
-WaveletTreeStructure<Dna5> waveletTreeStructure;
-computeWaveletTreeStructure(genome);
+RightArrayBinaryTree<Dna5> waveletTreeStructure;
+computeRightArrayBinaryTree(genome);
 */
 template <typename TChar, typename TSpec, typename TText>
-inline void computeWaveletTreeStructure(WaveletTreeStructure<TChar, TSpec> & waveletTreeStructure, TText const & text)
+inline void computeRightArrayBinaryTree(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure, TText const & text)
 {
     PrefixSumTable<TChar, void> pst(text);
 
-    typename Iterator<WaveletTreeStructure<TChar, TSpec>, TopDown<ParentLinks<void> > >::Type it(waveletTreeStructure, 0u);
+    typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TopDown<ParentLinks<> > >::Type it(waveletTreeStructure, 0u);
 
-    computeWaveletTreeStructure(it, pst);
+    computeRightArrayBinaryTree(it, pst);
 }
 
 // This function computes the wavelet tree structure contained in the lfTable.
 template <typename TSpec, typename TPrefixSumTable, typename TText>
-inline void computeWaveletTreeStructure(LFTable<WaveletTree<TText, TSpec>, TPrefixSumTable> & lfTable)
+inline void computeRightArrayBinaryTree(LfTable<WaveletTree<TText, TSpec>, TPrefixSumTable> & lfTable)
 {
-    typedef typename Fibre<WaveletTree<TText, TSpec>, FibreWaveletTreeStructure>::Type TWaveletTreeStructure;
+    typedef typename Fibre<WaveletTree<TText, TSpec>, FibreWaveletTreeStructure>::Type TRightArrayBinaryTree;
 
-    TWaveletTreeStructure & waveletTreeStructure = lfTable.occTable.waveletTreeStructure;
+    TRightArrayBinaryTree & rightArrayBinaryTree = lfTable.occTable.waveletTreeStructure;
 
-    typename Iterator<TWaveletTreeStructure, TopDown<ParentLinks<void> > >::Type it(waveletTreeStructure, 0u);
+    typename Iterator<TRightArrayBinaryTree, TopDown<ParentLinks<void> > >::Type it(rightArrayBinaryTree, 0u);
 
-    computeWaveletTreeStructure(it, lfTable.prefixSumTable);
+    computeRightArrayBinaryTree(it, lfTable.prefixSumTable);
 }
 
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TPrefixSumTable>
-inline void computeWaveletTreeStructure(Iter<WaveletTreeStructure<TChar, TSpec>, TIterSpec> & it,
+inline void computeRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
                                         TPrefixSumTable & pst)
 {
-    typedef WaveletTreeStructure<TChar, TSpec> TWaveletTreeStructure;
+    typedef RightArrayBinaryTree<TChar, TSpec> TRightArrayBinaryTree;
 
-    TWaveletTreeStructure & waveletTreeStructure = container(it);
+    TRightArrayBinaryTree & waveletTreeStructure = container(it);
 
     unsigned alpSize = getAlphabetSize(pst);
     String<Pair<unsigned> > borderString;
     appendValue(borderString, Pair<unsigned>(0, alpSize - 1));
-    resize(waveletTreeStructure, alpSize - 1);
+    
+    resize(waveletTreeStructure, 1);
 
-    computeWaveletTreeStructure(it, borderString, pst);
+    computeRightArrayBinaryTree(it, borderString, pst);
 
-    resize(waveletTreeStructure, getNumChildNodes(it) + 1);
 }
 
 // This function computes the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TBorderString, typename TPrefixSumTable, typename TIterSpec>
-inline void computeWaveletTreeStructure(Iter<WaveletTreeStructure<TChar, TSpec>, TIterSpec> & it,
+inline void computeRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
                                         TBorderString & borderString,
                                         TPrefixSumTable & pst)
 {
@@ -253,133 +255,151 @@ inline void computeWaveletTreeStructure(Iter<WaveletTreeStructure<TChar, TSpec>,
             getPrefixSum(pst, borderString[length(borderString) - 1].i1) == getPrefixSum(pst, borderString[length(borderString) - 1].i2 + 1))
         {
             setCharacter(it, getCharacter(pst, (borderString[length(borderString) - 1].i1 + 1)));
-            setNodeToLeaf(it);
+            setVertexToLeaf_(it);
         }
         else
-            setChildNodes_(it, borderString, pst);
+            setChildVertieces_(it, borderString, pst);
 
-        if (!goDown(it) && !setAndGoRight(it, borderString, pst))
-            while (goUpStructureConstruction_(it, borderString) && !setAndGoRight(it, borderString, pst))
+        if (!goDownConstruction(it) && !setAndGoRight_(it, borderString, pst))
+            while (goUpStructureConstruction_(it, borderString) && !setAndGoRight_(it, borderString, pst))
                 ;
     }
     while (!isRoot(it));
 }
 
 /**
-.Function.getFibre
-..cat:Graph
-..param.container:
-...type:Class.WaveletTreeStructure
+.Function.empty
+..param.object:
+...type:Class.RightArrayBinaryTree
 */
 template <typename TChar, typename TSpec>
-inline typename Fibre<WaveletTreeStructure<TChar, TSpec>, FibreTreeNodes>::Type &
-getFibre(WaveletTreeStructure<TChar, TSpec>&treeStructure, FibreTreeNodes)
+inline bool empty(RightArrayBinaryTree<TChar, TSpec> & treeStructure)
 {
-    return treeStructure.treeNodes;
+    return empty(getFibre(treeStructure, FibreTreeVertieces()));
+}
+
+    template <typename TChar, typename TSpec>
+inline bool empty(RightArrayBinaryTree<TChar, TSpec> const & treeStructure)
+{
+    return empty(getFibre(treeStructure, FibreTreeVertieces()));
+}
+
+/**
+.Function.getFibre
+..param.container:
+...type:Class.RightArrayBinaryTree
+..param.fibreTag:
+...type:Tag.WaveletTree Fibres
+*/
+template <typename TChar, typename TSpec>
+inline typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>::Type &
+getFibre(RightArrayBinaryTree<TChar, TSpec>&treeStructure, FibreTreeVertieces)
+{
+    return treeStructure.treeVertieces;
 }
 
 template <typename TChar, typename TSpec>
-inline typename Fibre<WaveletTreeStructure<TChar, TSpec>, FibreTreeNodes>::Type const &
-getFibre(WaveletTreeStructure<TChar, TSpec> const & treeStructure, FibreTreeNodes)
+inline typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>::Type const &
+getFibre(RightArrayBinaryTree<TChar, TSpec> const & treeStructure, FibreTreeVertieces)
 {
-    return treeStructure.treeNodes;
+    return treeStructure.treeVertieces;
 }
 
 // This function returns the number of different entries in the wavelet tree structure.
 template <typename TChar, typename TSpec>
-inline unsigned length(WaveletTreeStructure<TChar, TSpec> & tree)
+inline unsigned length(RightArrayBinaryTree<TChar, TSpec> & tree)
 {
-    return length(tree.treeNodes);
+    return length(tree.treeVertieces);
 }
 
 // This function resizes the string holding the nodes of the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TSize>
-inline void resize(WaveletTreeStructure<TChar, TSpec> & treeStructure, TSize size)
+inline void resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size)
 {
-    resize(treeStructure.treeNodes, size);
+    resize(treeStructure.treeVertieces, size);
 }
 
 // This function resizes the string holding the nodes of the wavelet tree structure.
 template <typename TChar, typename TSpec, typename TSize>
-inline void resize(WaveletTreeStructure<TChar, TSpec> & treeStructure, TSize size,
-                   typename Value<typename Fibre<WaveletTreeStructure<TChar, TSpec>, FibreTreeNodes>::Type>::Type value)
+inline void resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize size,
+                   typename Value<typename Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>::Type>::Type value)
 {
-    resize(treeStructure.treeNodes, size, value);
+    resize(treeStructure.treeVertieces, size, value);
 }
 
 /**
 .Function.getAlphabet
 ..summary:Determines the characters 
-..signature:computeWaveletTreeStructure(waveletTreeStructure)
+..signature:computeRightArrayBinaryTree(waveletTreeStructure)
 ..param.waveletTreeStructure:A wavelet tree structure.
-...type:Class.WaveletTreeStructure
+...type:Class.RightArrayBinaryTree
 ..remarks:This function determines all 
 ..include:seqan/index.h
 ..example.code:
 String<Dna5> genome = "ACGTACGT";
 
-WaveletTreeStructure<Dna5> waveletTreeStructure;
-computeWaveletTreeStructure(genome);
+RightArrayBinaryTree<Dna5> waveletTreeStructure;
+computeRightArrayBinaryTree(genome);
 */
 
 /*template <typename TChar, typename TSpec>
-inline String<TChar> getAlphabet(WaveletTreeStructure<TChar, TSpec> & structure)
+inline String<TChar> getAlphabet(RightArrayBinaryTree<TChar, TSpec> & structure)
 {
-    typename Iterator<WaveletTreeStructure<TChar, TSpec> >::Type it(structure, 0);
+    typename Iterator<RightArrayBinaryTree<TChar, TSpec> >::Type it(structure, 0);
     String<TChar> alphabet;
     appendValue(alphabet, structure.minCharValue);
-    getNexNode(alphabet, it);
+    getNexVertex(alphabet, it);
     return alphabet;
 }*/
 
 
 /*template <typename TPos>
-unsigned getNumRequieredNodes(Pair<TPos> const & range)
+unsigned getNumRequieredVertieces(Pair<TPos> const & range)
 {
     return range.i2 - range.i1;
 }*/
 
 /*template <typename TBWT, typename TWaveletTreeSpec, typename TPrefixSumTable>
-inline void computeTreeEntries(LFTable<WaveletTree<TBWT, TWaveletTreeSpec>, TPrefixSumTable> & lfTable)
+inline void computeTreeEntries(LfTable<WaveletTree<TBWT, TWaveletTreeSpec>, TPrefixSumTable> & lfTable)
 {
     resize(lfTable.prefixSumTable, getAlphabetSize(lfTable.prefixSumTable), 0);
     computeTreeEntries(infix(lfTable.prefixSumTable, 0, getAlphabetSize(lfTable.prefixSumTable)));
 }
 
 
-template <typename TFreq, typename TChar, typename TSpec, typename TNumChildNodes>
+template <typename TFreq, typename TChar, typename TSpec, typename TNumChildVertieces>
 inline void computeTreeEntries(
     const String<Pair<TChar, TFreq> > & freq,
-    WaveletTreeStructure<TChar, TSpec> & structure,
-    TNumChildNodes & numChildNodes)
+    RightArrayBinaryTree<TChar, TSpec> & structure,
+    TNumChildVertieces & numChildVertieces)
 {
     structure.minCharValue = freq[0].i1;
-    typename Iterator<WaveletTreeStructure<TChar, TSpec> >::Type iter(structure, 0);
+    typename Iterator<RightArrayBinaryTree<TChar, TSpec> >::Type iter(structure, 0);
     resize(structure, length(freq) - 1);
-    computeTreeEntries(freq, iter, 0, (length(freq) - 1), numChildNodes);
+    computeTreeEntries(freq, iter, 0, (length(freq) - 1), numChildVertieces);
 }*/
 
 /*template <typename TChar, typename TSpec, typename TPos>
-inline void addDollarNode(WaveletTreeStructure<TChar, TSpec> & structure, TPos minPos)
+inline void addDollarVertex(RightArrayBinaryTree<TChar, TSpec> & structure, TPos minPos)
 {
     //adjusting the array
-    resize(structure, length(structure.treeNodes) + 1);
+    resize(structure, length(structure.treeVertieces) + 1);
 
-    for (unsigned i = length(structure.treeNodes) - 1; i > minPos; --i)
+    for (unsigned i = length(structure.treeVertieces) - 1; i > minPos; --i)
     {
-        structure.treeNodes[i] = structure.treeNodes[i - 1];
+        structure.treeVertieces[i] = structure.treeVertieces[i - 1];
     }
 
-    for (unsigned i = 0; i < length(structure.treeNodes); ++i)
+    for (unsigned i = 0; i < length(structure.treeVertieces); ++i)
     {
-        if (structure.treeNodes[i].i2 > minPos + 2)
-            ++structure.treeNodes[i].i2;
+        if (structure.treeVertieces[i].i2 > minPos + 2)
+            ++structure.treeVertieces[i].i2;
     }
 
-    //the next line can be found in wavelet_tree.h in addDollarNode
-    //structure.treeNodes[minPos].i2 = 1;
-    structure.treeNodes[minPos + 1].i1 = structure.treeNodes[minPos].i1;
-    structure.treeNodes[minPos + 1].i2 = 0;
+    //the next line can be found in wavelet_tree.h in addDollarVertex
+    //structure.treeVertieces[minPos].i2 = 1;
+    structure.treeVertieces[minPos + 1].i1 = structure.treeVertieces[minPos].i1;
+    structure.treeVertieces[minPos + 1].i2 = 0;
 
 
 }*/
@@ -387,13 +407,13 @@ inline void addDollarNode(WaveletTreeStructure<TChar, TSpec> & structure, TPos m
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 
-/*template <typename TFreq, typename TChar, typename TSpec, typename TNumOfChildNodes>
+/*template <typename TFreq, typename TChar, typename TSpec, typename TNumOfChildVertieces>
 inline void computeTreeEntries(
     String<Pair<TChar, TFreq> > const & freq,
-    Iter<WaveletTreeStructure<TChar, TSpec>, Standard> & iter,
+    Iter<RightArrayBinaryTree<TChar, TSpec>, Standard> & iter,
     unsigned lowerPosInFreq,
     unsigned upperPosInFreq,
-    TNumOfChildNodes & numChildNodes)
+    TNumOfChildVertieces & numChildVertieces)
 {
     typedef TFreq TSize;
 
@@ -405,8 +425,8 @@ inline void computeTreeEntries(
     if ((lowerPosInFreq == upperPosInFreq - 1) || (lowerPosInFreq == upperPosInFreq))
     {
         setCharacter(iter, freq[upperPosInFreq].i1);
-        setNodeToLeaf(iter);
-        ++numChildNodes;
+        setVertexToLeaf(iter);
+        ++numChildVertieces;
         return;
     }
 
@@ -428,111 +448,111 @@ inline void computeTreeEntries(
     setCharacter(iter, freq[upperPosInFreq].i1);
     if (!leftSize && !rightSize)
     {
-        setNodeToLeaf(iter);
-        ++numChildNodes;
+        setVertexToLeaf(iter);
+        ++numChildVertieces;
         return;
     }
 
     //there must be either a left or right subtree or both
-    typename Iterator<WaveletTreeStructure<TChar, TSpec> >::Type iter2 = iter;
+    typename Iterator<RightArrayBinaryTree<TChar, TSpec> >::Type iter2 = iter;
 
     //is there only one element on the left side?
     if (oldLowerPosInFreq == lowerPosInFreq)
     {
-        setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-        TNumOfChildNodes numChildNodes2 = 0;
+        setRightChildPos(iter2, iter2.position + numChildVertieces + 1);
+        TNumOfChildVertieces numChildVertieces2 = 0;
         goRightChild(iter2);
         //++counter;
-        computeTreeEntries(freq, iter2, upperPosInFreq, oldUpperPosInFreq, numChildNodes2);
-        numChildNodes += numChildNodes2 + 1;
+        computeTreeEntries(freq, iter2, upperPosInFreq, oldUpperPosInFreq, numChildVertieces2);
+        numChildVertieces += numChildVertieces2 + 1;
         return;
     }
     else
     {
         setLeftChildPos(iter);
         goLeftChild(iter);
-        computeTreeEntries(freq, iter, oldLowerPosInFreq, lowerPosInFreq, numChildNodes);
+        computeTreeEntries(freq, iter, oldLowerPosInFreq, lowerPosInFreq, numChildVertieces);
     }
 
     //is there only one element on the right side?
     if (oldUpperPosInFreq == upperPosInFreq)
     {
         setLeftChildPos(iter2);
-        ++numChildNodes;
+        ++numChildVertieces;
     }
     else
     {
-        setRightChildPos(iter2, iter2.position + numChildNodes + 1);
-        TNumOfChildNodes numChildNodes2 = 0;
+        setRightChildPos(iter2, iter2.position + numChildVertieces + 1);
+        TNumOfChildVertieces numChildVertieces2 = 0;
         goRightChild(iter2);
-        computeTreeEntries(freq, iter2, upperPosInFreq, oldUpperPosInFreq, numChildNodes2);
-        numChildNodes += numChildNodes2 + 1;
+        computeTreeEntries(freq, iter2, upperPosInFreq, oldUpperPosInFreq, numChildVertieces2);
+        numChildVertieces += numChildVertieces2 + 1;
         return;
     }
 }*/
 
 
 
-//template <typename TFreq, typename TChar, typename TSpec, typename TNumChildNodes>
+//template <typename TFreq, typename TChar, typename TSpec, typename TNumChildVertieces>
 //inline void computeTreeEntries(
 //		const String<TFreq> & freq,
-//		WaveletTreeStructure<TChar, TSpec> & structure,
-//		TNumChildNodes & numChildNodes)
+//		RightArrayBinaryTree<TChar, TSpec> & structure,
+//		TNumChildVertieces & numChildVertieces)
 //{
 //	String<Pair<TChar,TFreq> > newFreq;
 //	for(TFreq i = 0; i < length(freq); ++i)
 //		if(freq[i])
 //			appendValue(newFreq, Pair<TChar, TFreq>((TChar)i, freq[i]));
 //	structure.minCharValue = newFreq[0].i1;
-//	typename Iterator<WaveletTreeStructure<TChar, TSpec> >::Type iter(structure, 0);
+//	typename Iterator<RightArrayBinaryTree<TChar, TSpec> >::Type iter(structure, 0);
 //
 //	resize(structure, length(newFreq) - 1);
-//	computeTreeEntries(newFreq, iter, 0, (length(newFreq)-1), numChildNodes);
+//	computeTreeEntries(newFreq, iter, 0, (length(newFreq)-1), numChildVertieces);
 //}
 
 //template <typename TFreq, typename TChar, typename TSpec>
-//inline void computeTreeEntries(WaveletTreeStructure<TChar, TSpec> & structure,
+//inline void computeTreeEntries(RightArrayBinaryTree<TChar, TSpec> & structure,
 //							   const String<TFreq> & freq)
 //{
-//	unsigned numChildNodes = 0;
-//	computeTreeEntries(freq, structure, numChildNodes);
+//	unsigned numChildVertieces = 0;
+//	computeTreeEntries(freq, structure, numChildVertieces);
 //}
 
 /*template <typename TChar, typename TSpec>
 inline bool open(
-    WaveletTreeStructure<TChar, TSpec> & structure,
+    RightArrayBinaryTree<TChar, TSpec> & structure,
     const char * fileName,
     int openMode)
 {
     String<char> name;
-    name = fileName;    append(name, ".treestruct");    open(getFibre(structure, FibreTreeNodes()), toCString(name), openMode);
+    name = fileName;    append(name, ".treestruct");    open(getFibre(structure, FibreTreeVertieces()), toCString(name), openMode);
     return true;
 }
 
 template <typename TChar, typename TSpec>
-inline bool open(WaveletTreeStructure<TChar, TSpec> & structure,
+inline bool open(RightArrayBinaryTree<TChar, TSpec> & structure,
                  const char * fileName)
 {
-    return open(structure, fileName, DefaultOpenMode<WaveletTreeStructure<TChar, TSpec> >::VALUE);
+    return open(structure, fileName, DefaultOpenMode<RightArrayBinaryTree<TChar, TSpec> >::VALUE);
 }
 
 template <typename TChar, typename TSpec>
 inline bool save(
-    WaveletTreeStructure<TChar, TSpec> const & structure,
+    RightArrayBinaryTree<TChar, TSpec> const & structure,
     const char * fileName,
     int openMode)
 {
     String<char> name;
-    name = fileName;    append(name, ".treestruct");    save(getFibre(structure, FibreTreeNodes()), toCString(name), openMode);
+    name = fileName;    append(name, ".treestruct");    save(getFibre(structure, FibreTreeVertieces()), toCString(name), openMode);
     return true;
 }
 
 template <typename TChar, typename TSpec>
 inline bool save(
-    WaveletTreeStructure<TChar, TSpec> const & structure,
+    RightArrayBinaryTree<TChar, TSpec> const & structure,
     const char * fileName)
 {
-    return save(structure, fileName, DefaultOpenMode<WaveletTreeStructure<TChar, TSpec> >::VALUE);
+    return save(structure, fileName, DefaultOpenMode<RightArrayBinaryTree<TChar, TSpec> >::VALUE);
 }*/
 
 }

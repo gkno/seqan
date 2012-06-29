@@ -41,13 +41,34 @@ namespace seqan {
 template <typename TSpec = void>
 struct RankSupportBitString;
 
+// FM index fibres
+
+/**
+.Tag.Rank Support Bit String Index Fibres
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of a @Class.RankSupportBitString@.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a rank support bit string. 
+..cat:Index
+
+..tag.FibreBitString:The bit string. 
+..tag.FibreBucketString:The bucket string.
+..tag.FibreSuperBucketString:The super bucket string.
+
+..see:Metafunction.Fibre
+..see:Function.getFibre
+..include:seqan/index.h
+*/
+
 struct FibreBitString_;
 struct FibreBucketString_;
 struct FibreSuperBucketString_;
 
-typedef Tag<FibreBitString_> const FibreBitString;
-typedef Tag<FibreBucketString_> const FibreBucketString;
-typedef Tag<FibreSuperBucketString_> const FibreSuperBucketString;
+typedef Tag<FibreBitString_> const          FibreBitString;         typedef FibreBitString          RankSupportBitStringBitString;
+typedef Tag<FibreBucketString_> const       FibreBucketString;      typedef FibreBucketString       RankSupportBitStringBucketString;
+typedef Tag<FibreSuperBucketString_> const  FibreSuperBucketString; typedef FibreSuperBucketString  RankSupportBitStringSuperBucketString;
+
+// ==========================================================================
+// Metafunctions
+// ==========================================================================
 
 template <typename TSpec>
 struct Fibre<RankSupportBitString<TSpec>, FibreBitString>
@@ -74,6 +95,20 @@ struct Size<RankSupportBitString<TSpec> >
     typedef typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type Type;
 };
 
+// ==========================================================================
+// Classes
+// ==========================================================================
+
+/**
+.Class.RankSupportBitString:
+..summary:A bit string supporting rank queries in constant time.
+..cat:Index
+..signature:RankSupportBitString<TSpec>
+..param.TSpec:Specialisation tag. 
+...default:void
+..remarks:The constant rank query time is achieved by evaluating precomputed subsolutions. In order to do so, the bit string is divided into buckets of length l. A super bucket string stores for each block of l buckets the number of bits set from the beginning. In addition a bucket string stores the number of bits set in each bucket from the start of the last super bucket block. Therefore it is possible to compute the result of a rank query in constant time by adding information from the bit, bucket and super bucket string.
+..include:seqan/index.h
+*/
 template <typename TSpec>
 struct RankSupportBitString
 {
@@ -131,6 +166,215 @@ struct RankSupportBitString
 
 };
 
+/**
+.Function.appendValue:
+..param.target:
+...type:Class.RankSupportBitString
+*/
+template <typename TSpec, typename TBit>
+inline void appendValue(RankSupportBitString<TSpec> & bitString, TBit const bit)
+{
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
+
+    TFibreBucketStringValue const bitsPerValue_ = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreSuperBucketStringValue const length_ = length(bitString);
+
+    //check if the new size exceeds the reserved memory
+    if ((length(bitString.bString) * bitsPerValue_) <= length_)
+    {
+        reserve(bitString, 2 * (length_ + 1));
+    }
+
+    //initialize current (super)bucket with preceding one
+    takeBuValueAlong_(bitString, length_, bitsPerValue_);
+    takeSBuValueAlong_(bitString, length_, bitsPerValue_);
+
+    if (bit)
+    {
+        setBit(bitString, length_, bit);
+
+        //determine whether
+        TFibreSuperBucketStringValue buPos = getBuPos_(bitString, length_);
+        if (((buPos + 1) % (bitsPerValue_)))
+        {
+            ++getFibre(bitString, FibreBucketString())[buPos + 1];
+        }
+        TFibreSuperBucketStringValue sBuPos = getSBuPos_(bitString, length_);
+        ++getFibre(bitString, FibreSuperBucketString())[sBuPos + 1];
+    }
+    ++bitString.length_;
+}
+
+/**
+.Function.clear
+..param.object:
+...type:Class.RankSupportBitString
+*/
+template <typename TSpec>
+inline void clear(RankSupportBitString<TSpec> & bitString)
+{
+    clear(bitString.bString);
+    clear(bitString.buString);
+    clear(bitString.sBuString);
+}
+
+// TODO (singer): Why do I need this forward?
+template <typename TValue>
+inline unsigned getRankInBucket_(TValue const value);
+
+/**
+.Function.completeRankSupportBitString
+..summary:Adds the bucket and super bucket information to the bit string.
+..signature:completeRankSupportBitString(bitString)
+..param.bitString:The bit string to be completed.
+...type:Class.RankSupportBitString
+..include:seqan/index.h
+..example.code:
+String<Dna5> genome = "ACGTACGT";
+
+RankSupportBitString<> bitString;
+resize(bitString, length(genome));
+
+for (unsigned i = 0; i < length(genome); ++i)
+    if(genome[i] < Dna5('c'))
+        setBit(bitString, 1);
+
+completeRankSupportBitString(bitString);
+*/
+template <typename TSpec>
+inline void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
+{
+    if (length(bitString))
+    {
+
+        typedef RankSupportBitString<TSpec>                                         TRankSupportBitString;
+        typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+        typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type      TFibreBucketString;
+        typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type TFibreSuperBucketString;
+        typedef typename Value<TFibreBitString>::Type                               TFibreBitStringValue;
+        typedef typename Value<TFibreBucketString>::Type                            TFibreBucketStringValue;
+        typedef typename Value<TFibreSuperBucketString>::Type                       TFibreSuperBucketStringValue;
+
+        TFibreBucketStringValue buSum_ = 0;
+        TFibreSuperBucketStringValue sBuSum_ = 0;
+        TFibreSuperBucketStringValue superBucketCounter = 1;
+        TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
+
+        for (TFibreSuperBucketStringValue i = 0; i < length(bitString.bString) - 1; ++i)
+        {
+            buSum_ += getRankInBucket_(bitString.bString[i]);
+            bitString.buString[i + 1] = buSum_;
+            if (!((i + 1) % bitsPerValue))
+            {
+                sBuSum_ += buSum_;
+                bitString.sBuString[superBucketCounter] = sBuSum_;
+                buSum_ = 0;
+                bitString.buString[i + 1] = buSum_;
+                ++superBucketCounter;
+            }
+        }
+    }
+}
+
+/**
+.Function.empty
+..param.object:
+...type:Class.RankSupportBitString
+*/
+template <typename TSpec>
+inline bool empty(RankSupportBitString<TSpec> & bitString)
+{
+    return empty(getFibre(bitString, FibreBitString()))
+        && empty(getFibre(bitString, FibreBucketString()))
+        && empty(getFibre(bitString, FibreSuperBucketString()));
+}
+
+/**
+.Function.getBit
+..summary:Returns whether a specified bit is set or not.
+..signature:getBit(bitString, pos)
+..param.bitString:The bit string.
+...type:Class.RankSupportBitString
+..param.pos:Position of the bit.
+..returns:Returns whether a specified bit is set or not.
+..include:seqan/index.h
+..example.code:
+String<Dna5> genome = "ACGTACGT";
+
+RankSupportBitString<> bitString;
+resize(bitString, length(genome));
+...
+mark all 'a's
+...
+
+for (unsigned i = 0; i < length(bitString); ++i)
+    if(getBit(bitString, i))
+        std::cout << "a found at: " << i << std::endl;
+*/
+template <typename TSpec, typename TPos>
+inline bool getBit(RankSupportBitString<TSpec> & bitString, TPos const pos)
+{
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type         TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
+
+    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreBitStringValue const one = 1;
+    TFibreBitStringValue const shiftValue = pos % bitsPerValue;
+    TFibreBitStringValue const buPos = getBuPos_(bitString, pos);
+    return (bitString.bString[buPos] >> shiftValue) & one;
+}
+
+template <typename TSpec, typename TPos>
+inline bool getBit(RankSupportBitString<TSpec> const & bitString, TPos const pos)
+{
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
+
+    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreBitStringValue const one = 1;
+    TFibreBitStringValue const shiftValue = pos % bitsPerValue;
+    TFibreBitStringValue const buPos = getBuPos_(bitString, pos);
+    return (bitString.bString[buPos] >> shiftValue) & one;
+}
+
+// This function returns the position in the bucket string of the corresponding bucket.
+template <typename TSpec, typename TPos>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+getBuPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
+{
+    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type     TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type   TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type           TFibreBitStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type         TFibreSuperBucketStringValue;
+
+    TFibreSuperBucketStringValue const bitsPerValue_ = BitsPerValue<TFibreBitStringValue>::VALUE;
+    return pos / bitsPerValue_;
+}
+
+/**
+.Function.getFibre
+..param.container:
+...type:Class.RankSupportBitString
+..param.fibreTag:
+...type:Tag.Rank Support Bit String Fibres
+*/
 template <typename TSpec>
 inline typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type &
 getFibre(RankSupportBitString<TSpec>&string, const FibreBitString)
@@ -173,6 +417,7 @@ getFibre(const RankSupportBitString<TSpec>&string, const FibreSuperBucketString)
     return string.sBuString;
 }
 
+// This function returns the position of a specified bit within a bucket.
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreBucketString>::Type>::Type
 getPosInBu_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
@@ -187,20 +432,89 @@ getPosInBu_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
     return pos % bitsPerValue;
 }
 
+
+/**
+.Function.getRank
+..summary:Returns the rank (the number of bits set from the start of the bit string) of a specified position.
+..signature:getRank(bitString, pos)
+..param.bitString:The bit string.
+...type:Class.RankSupportBitString
+..param.pos:Position of a bit.
+..returns:Value type of the super bucket fibre (default unsigned long).
+..include:seqan/index.h
+..example.code:
+String<Dna5> genome = "ACGTACGT";
+
+RankSupportBitString<> bitString;
+resize(bitString, length(genome));
+    
+    ...
+    mark all 'a's
+    ...
+
+for (unsigned i = 0; i < length(bitString); ++i)
+    if(getBit(bitString, i))
+        std::cout << "found the << getRank(bitString, i) << " a at: " << i << std::endl;
+*/
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
-getBuPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
+getRank(RankSupportBitString<TSpec> const & bitString, TPos const pos)
 {
-    typedef RankSupportBitString<TSpec>                             TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type     TFibreBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type   TFibreSuperBucketString;
-    typedef typename Value<TFibreBitString>::Type           TFibreBitStringValue;
-    typedef typename Value<TFibreSuperBucketString>::Type         TFibreSuperBucketStringValue;
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
 
-    TFibreSuperBucketStringValue const bitsPerValue_ = BitsPerValue<TFibreBitStringValue>::VALUE;
-    return pos / bitsPerValue_;
+    TFibreSuperBucketStringValue const buPos = getBuPos_(bitString, pos);
+    TFibreSuperBucketStringValue const sBuPos = getSBuPos_(bitString, pos);
+
+    return getRankInBucket_(bitString, pos)
+           + bitString.buString[buPos]
+           + bitString.sBuString[sBuPos];
 }
 
+// This function returns the number of bits set in a bucket until a specified position
+template <typename TValue>
+inline unsigned getRankInBucket_(TValue const value)
+{
+    return getRankInBucket_(value, typename Eval<(BitsPerValue<TValue>::VALUE > 32)>::Type());
+}
+
+template <typename TValue>
+inline unsigned getRankInBucket_(TValue const value, False)
+{
+    return __builtin_popcountl(static_cast<int32_t>(value));
+}
+
+template <typename TValue>
+inline unsigned getRankInBucket_(TValue const value, True)
+{
+    return __builtin_popcountll(static_cast<int64_t>(value));
+}
+
+template <typename TSpec, typename TPos>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+getRankInBucket_(RankSupportBitString<TSpec> const & bitString, TPos const pos)
+{
+    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
+    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
+    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
+    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
+    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
+    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
+    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
+
+    TFibreBucketStringValue const posInBu = getPosInBu_(bitString, pos);
+    TFibreSuperBucketStringValue const buPos = getBuPos_(bitString, pos);
+    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
+    TFibreBitStringValue const one = -1;
+    TFibreBitStringValue const mask = one >> (bitsPerValue - posInBu - 1);
+    //std::cerr << "one: " << one << " mask1: " << mask << " " << (getRankInBucket_(bitString.bString[buPos] & mask)) <<  std::endl;
+    return getRankInBucket_(bitString.bString[buPos] & mask);
+}
+
+// This function returns the number of bits set in a bucket until a specified position
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
 getSBuPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
@@ -216,6 +530,31 @@ getSBuPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
     return pos / (bitsPerValue_ * bitsPerValue_);
 }
 
+/**
+.Function.length
+..param.object:
+...type:Class.RankSupportBitString
+*/
+template <typename TSpec>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+length(RankSupportBitString<TSpec> const & bitString)
+{
+    return bitString.length_;
+}
+
+template <typename TSpec>
+inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
+length(RankSupportBitString<TSpec> & bitString)
+{
+    return bitString.length_;
+}
+
+
+/**
+.Function.reserve
+..param.object:
+...type:Class.RankSupportBitString
+*/
 template <typename TSpec, typename TSize, typename TValue>
 inline void reserve(RankSupportBitString<TSpec> & bitString, TSize const size, TValue const /*dummy*/)
 {
@@ -250,6 +589,11 @@ inline void reserve(RankSupportBitString<TSpec> & bitString, TSize const size)
     }
 }
 
+/**
+.Function.resize
+..param.object:
+...type:Class.RankSupportBitString
+*/
 template <typename TSpec, typename TSize>
 inline void resize(RankSupportBitString<TSpec> & bitString, TSize const size)
 {
@@ -264,64 +608,28 @@ inline void resize(RankSupportBitString<TSpec> & bitString, TSize const size, TV
     bitString.length_ = size;
 }
 
-template <typename TSpec>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
-length(RankSupportBitString<TSpec> const & bitString)
-{
-    return bitString.length_;
-}
+/**
+.Function.setBit
+..summary:Set a specified bit to true or false.
+..signature:setBit(bitString, pos, bit)
+..param.bitString:The bit string.
+...type:Class.RankSupportBitString
+..param.pos:Position of the bit.
+..param.bit:The value of the bit.
+...remarks:Note that values different from 0 are interpreted as 1.
+..include:seqan/index.h
+..example.code:
+String<Dna5> genome = "ACGTACGT";
 
-template <typename TSpec>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
-length(RankSupportBitString<TSpec> & bitString)
-{
-    return bitString.length_;
-}
+RankSupportBitString<> bitString;
+resize(bitString, length(genome));
 
-template <typename TSpec>
-inline void clear(RankSupportBitString<TSpec> & bitString)
-{
-    clear(bitString.bString);
-    clear(bitString.buString);
-    clear(bitString.sBuString);
-}
+for (unsigned i = 0; i < length(genome); ++i)
+    if(genome[i] < Dna5('c'))
+        setBit(bitString, 1);
 
-template <typename TSpec, typename TPos>
-inline bool getBit(RankSupportBitString<TSpec> & bitString, TPos const pos)
-{
-    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBitString>::Type         TFibreBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
-    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
-    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
-    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
-
-    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
-    TFibreBitStringValue const one = 1;
-    TFibreBitStringValue const shiftValue = pos % bitsPerValue;
-    TFibreBitStringValue const buPos = getBuPos_(bitString, pos);
-    return (bitString.bString[buPos] >> shiftValue) & one;
-}
-
-template <typename TSpec, typename TPos>
-inline bool getBit(RankSupportBitString<TSpec> const & bitString, TPos const pos)
-{
-    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
-    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
-    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
-    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
-
-    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
-    TFibreBitStringValue const one = 1;
-    TFibreBitStringValue const shiftValue = pos % bitsPerValue;
-    TFibreBitStringValue const buPos = getBuPos_(bitString, pos);
-    return (bitString.bString[buPos] >> shiftValue) & one;
-}
-
+completeRankSupportBitString(bitString);
+*/
 template <typename TSpec, typename TPos, typename TBit>
 inline void setBit(RankSupportBitString<TSpec> & bitString, TPos const pos, TBit const setBit)
 {
@@ -345,11 +653,10 @@ inline void setBit(RankSupportBitString<TSpec> & bitString, TPos const pos, TBit
     bitString.bString[buPos] |= shiftValue;
 }
 
-/*
- * This function checks if the specified position corresponds to the first
- * position in a new bucket in the current superBucket. If this is the case the former
- * bucket values have to be copied.
- */
+
+// This function checks if the specified position corresponds to the first
+// position in a new bucket in the current superBucket. If this is the case the former
+// bucket values have to be copied.
 template <typename TSpec, typename TPos, typename TBitsPerBucket>
 inline void takeBuValueAlong_(RankSupportBitString<TSpec> & bitString, TPos const pos, TBitsPerBucket const bpb)
 {
@@ -367,11 +674,9 @@ inline void takeBuValueAlong_(RankSupportBitString<TSpec> & bitString, TPos cons
     }
 }
 
-/*
- * This function checks if the specified position corresponds to the first
- * position in a new superBucket. If this is the case the former
- * superBucket values have to be copied.
- */
+// This function checks if the specified position corresponds to the first
+// position in a new superBucket. If this is the case the former
+// superBucket values have to be copied.
 template <typename TSpec, typename TPos, typename TBitsPerBucket>
 inline void takeSBuValueAlong_(RankSupportBitString<TSpec> & bitString, TPos const pos, TBitsPerBucket const bpb)
 {
@@ -385,138 +690,6 @@ inline void takeSBuValueAlong_(RankSupportBitString<TSpec> & bitString, TPos con
         if (!(pos % (bpb * bpb)))
         {
             getFibre(bitString, FibreSuperBucketString())[sBuPos + 1] = getFibre(bitString, FibreSuperBucketString())[sBuPos];
-        }
-    }
-}
-
-template <typename TSpec, typename TBit>
-inline void append(RankSupportBitString<TSpec> & bitString, TBit const bit)
-{
-    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
-    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
-    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
-    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
-
-    TFibreBucketStringValue const bitsPerValue_ = BitsPerValue<TFibreBitStringValue>::VALUE;
-    TFibreSuperBucketStringValue const length_ = length(bitString);
-
-    //check if the new size exceeds the reserved memory
-    if ((length(bitString.bString) * bitsPerValue_) <= length_)
-    {
-        reserve(bitString, 2 * (length_ + 1));
-    }
-
-    //initialize current (super)bucket with preceding one
-    takeBuValueAlong_(bitString, length_, bitsPerValue_);
-    takeSBuValueAlong_(bitString, length_, bitsPerValue_);
-
-    if (bit)
-    {
-        setBit(bitString, length_, bit);
-
-        //determine whether
-        TFibreSuperBucketStringValue buPos = getBuPos_(bitString, length_);
-        if (((buPos + 1) % (bitsPerValue_)))
-        {
-            ++getFibre(bitString, FibreBucketString())[buPos + 1];
-        }
-        TFibreSuperBucketStringValue sBuPos = getSBuPos_(bitString, length_);
-        ++getFibre(bitString, FibreSuperBucketString())[sBuPos + 1];
-    }
-    ++bitString.length_;
-}
-
-template <typename TValue>
-inline unsigned getRankInBucket_(TValue const value, False)
-{
-    return __builtin_popcountl(static_cast<int32_t>(value));
-}
-
-template <typename TValue>
-inline unsigned getRankInBucket_(TValue const value, True)
-{
-    return __builtin_popcountll(static_cast<int64_t>(value));
-}
-
-template <typename TValue>
-inline unsigned getRankInBucket_(TValue const value)
-{
-    return getRankInBucket_(value, typename Eval<(BitsPerValue<TValue>::VALUE > 32)>::Type());
-}
-
-template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
-getRankInBucket_(RankSupportBitString<TSpec> const & bitString, TPos const pos)
-{
-    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
-    typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
-    typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
-    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
-    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
-
-    TFibreBucketStringValue const posInBu = getPosInBu_(bitString, pos);
-    TFibreSuperBucketStringValue const buPos = getBuPos_(bitString, pos);
-    TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
-    TFibreBitStringValue const one = -1;
-    TFibreBitStringValue const mask = one >> (bitsPerValue - posInBu - 1);
-    //std::cerr << "one: " << one << " mask1: " << mask << " " << (getRankInBucket_(bitString.bString[buPos] & mask)) <<  std::endl;
-    return getRankInBucket_(bitString.bString[buPos] & mask);
-}
-
-template <typename TSpec, typename TPos>
-inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBucketString>::Type>::Type
-getRank(RankSupportBitString<TSpec> const & bitString, TPos const pos)
-{
-    typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
-    typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
-    typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
-    typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
-
-    TFibreSuperBucketStringValue const buPos = getBuPos_(bitString, pos);
-    TFibreSuperBucketStringValue const sBuPos = getSBuPos_(bitString, pos);
-
-    return getRankInBucket_(bitString, pos)
-           + bitString.buString[buPos]
-           + bitString.sBuString[sBuPos];
-}
-
-template <typename TSpec>
-inline void completeRankSupportBitString(RankSupportBitString<TSpec> & bitString)
-{
-    if (length(bitString))
-    {
-
-        typedef RankSupportBitString<TSpec>                                 TRankSupportBitString;
-        typedef typename Fibre<RankSupportBitString<TSpec>, FibreBitString>::Type   TFibreBitString;
-        typedef typename Fibre<TRankSupportBitString, FibreBucketString>::Type        TFibreBucketString;
-        typedef typename Fibre<TRankSupportBitString, FibreSuperBucketString>::Type       TFibreSuperBucketString;
-        typedef typename Value<TFibreBitString>::Type               TFibreBitStringValue;
-        typedef typename Value<TFibreBucketString>::Type              TFibreBucketStringValue;
-        typedef typename Value<TFibreSuperBucketString>::Type             TFibreSuperBucketStringValue;
-
-        TFibreBucketStringValue buSum_ = 0;
-        TFibreSuperBucketStringValue sBuSum_ = 0;
-        TFibreSuperBucketStringValue superBucketCounter = 1;
-        TFibreBucketStringValue const bitsPerValue = BitsPerValue<TFibreBitStringValue>::VALUE;
-
-        for (TFibreSuperBucketStringValue i = 0; i < length(bitString.bString) - 1; ++i)
-        {
-            buSum_ += getRankInBucket_(bitString.bString[i]);
-            bitString.buString[i + 1] = buSum_;
-            if (!((i + 1) % bitsPerValue))
-            {
-                sBuSum_ += buSum_;
-                bitString.sBuString[superBucketCounter] = sBuSum_;
-                buSum_ = 0;
-                bitString.buString[i + 1] = buSum_;
-                ++superBucketCounter;
-            }
         }
     }
 }
