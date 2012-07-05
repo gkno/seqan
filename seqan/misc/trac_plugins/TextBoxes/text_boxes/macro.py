@@ -19,10 +19,14 @@ Success!
 }}}
 """
 
+import StringIO
+
 from trac.core import *
 from trac.web.chrome import ITemplateProvider, add_stylesheet
 from trac.wiki.macros import WikiMacroBase
 
+import trac.wiki
+import genshi.core
 from genshi.builder import tag
 
 CLASSES = {
@@ -50,9 +54,16 @@ class TextBoxMacro(WikiMacroBase):
         #add_stylesheet(formatter.req, 'text_boxes/css/text_boxes.css')
         className = CLASSES.get(name, 'ShellBox')
         if name == 'WarningBox':
-            return tag.div(content, class_=className, style=STYLES.get(name))
+            content_html = self.format_wiki(formatter, content)
+            return tag.div(genshi.core.Markup(content_html), class_=className, style=STYLES.get(name))
         else:
             return tag.pre(content, class_='wiki ' + className, style=STYLES.get(name))
+
+    def format_wiki(self, formatter, wiki_string):
+        """Format the given string wiki_string to HTML."""
+        out = StringIO.StringIO()
+        trac.wiki.Formatter(self.env, formatter.context).format(wiki_string, out)
+        return out.getvalue()
 
     ### ITemplateProvider methods
 
