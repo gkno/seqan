@@ -1,0 +1,13 @@
+pre.shell_box
+{
+    background-color: black;
+    color: lightgray;
+}
+
+pre.ide_box
+{
+    background-color: white;
+    color: black;
+    border:1px solid black;
+}
+
