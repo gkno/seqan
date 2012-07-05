@@ -28,11 +28,13 @@ from genshi.builder import tag
 CLASSES = {
     'ShellBox' : 'shell_box',
     'IdeBox' : 'ide_box',
+    'WarningBox': 'system-message',  # Use trac class.
 }
 
 STYLES = {
     'ShellBox' : 'background-color: black; color: lightgray;',
     'IdeBox' : 'background-color: white; color: black; border:1px solid black;',
+    'WarningBox' : None,
 }
 
 class TextBoxMacro(WikiMacroBase):
@@ -41,12 +43,16 @@ class TextBoxMacro(WikiMacroBase):
     def get_macros(self):
         yield 'ShellBox'
         yield 'IdeBox'
+        yield 'WarningBox'
 
     def expand_macro(self, formatter, name, content, args):
         # TODO(holtgrew): Actually, we would like to add a style sheet but this does not work. Thus we use a style tag below.
         #add_stylesheet(formatter.req, 'text_boxes/css/text_boxes.css')
         className = CLASSES.get(name, 'ShellBox')
-        return tag.pre(content, class_='wiki ' + className, style=STYLES.get(name))
+        if name == 'WarningBox':
+            return tag.div(content, class_=className, style=STYLES.get(name))
+        else:
+            return tag.pre(content, class_='wiki ' + className, style=STYLES.get(name))
 
     ### ITemplateProvider methods
 
