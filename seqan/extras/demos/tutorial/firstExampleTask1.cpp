@@ -16,6 +16,8 @@ int main()
     seqan::String<seqan::Dna> text = "This is an awesome tutorial to get to now the basic principles of SeqAn!";
     seqan::String<seqan::Dna> pattern = "tutorial";
 
+    std::cout << text << std::endl;
+
     seqan::String<int> score;
     seqan::resize(score, seqan::length(text), 0);
 
