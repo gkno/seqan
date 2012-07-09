@@ -68,7 +68,7 @@ class TextBoxMacro(WikiMacroBase):
             content_html = self.format_wiki(formatter, content)
             img = ''
             if name == 'AssignmentBox':
-                img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left; margin-left: -58px')
+                img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left;')
             elif ICONS.get(name):
                 img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left;')
             return tag.div(img + genshi.core.Markup(content_html) + tag.br(style='clear:both;'), class_=className)

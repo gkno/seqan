@@ -40,6 +40,13 @@ div.info_box
 
 div.assignment_box
 {
-    padding-left: 58px;
+    padding: .5em .5em .5em 70px;
+    background-color: #eed;
+}
+
+div.assignment_box img
+{
+    margin-left: -62px;
+    margin-top: 4px;
 }
 
