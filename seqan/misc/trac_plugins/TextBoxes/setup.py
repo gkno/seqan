@@ -8,6 +8,7 @@ setup(
                                   'htdocs/dialog-information.png',
                                   'htdocs/dialog-warning.png',
                                   'htdocs/emblem-important.png',
+                                  'Accessories-text-editor.png',
                                   ]},
     entry_points = {'trac.plugins': ['textboxesmacros = text_boxes.macro']},
     )
