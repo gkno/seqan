@@ -11,3 +11,32 @@ pre.ide_box
     border:1px solid black;
 }
 
+div.warning_box
+{
+    background: #fdc;
+    border: 2px solid #d00;
+    color: #500;
+    padding: .5em;
+    margin: 1em 0;
+}
+
+div.important_box
+{
+    background: #ffefa5;
+    border: 2px solid #aaa072;
+    color: black;
+    padding: .5em;
+    margin: 1em 0;
+}
+
+div.info_box
+{
+    background: #ffefa5;
+    border: 2px solid #aaa072;
+    color: black;
+    padding: .5em;
+    margin: 1em 0;
+}
+
+/*#content.error .message, div.system-message {
+}*/
