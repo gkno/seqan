@@ -38,5 +38,8 @@ div.info_box
     margin: 1em 0;
 }
 
-/*#content.error .message, div.system-message {
-}*/
+div.assignment_box
+{
+    padding-left: 58px;
+}
+

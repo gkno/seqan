@@ -35,15 +35,17 @@ from genshi.builder import tag
 CLASSES = {
     'ShellBox' : 'shell_box',
     'IdeBox' : 'ide_box',
-    'WarningBox': 'warning_box',  # Use trac class.
-    'InfoBox': 'info_box',  # Use trac class.
-    'ImportantBox': 'important_box',  # Use trac class.
+    'WarningBox': 'warning_box',
+    'InfoBox': 'info_box',
+    'ImportantBox': 'important_box',
+    'AssignmentBox': 'assignment_box',
 }
 
 ICONS = {
     'WarningBox': 'dialog-warning',
     'InfoBox': 'dialog-information',
     'ImportantBox': 'emblem-important',
+    'AssignmentBox': 'Accessories-text-editor',
 }
 
 class TextBoxMacro(WikiMacroBase):
@@ -55,16 +57,19 @@ class TextBoxMacro(WikiMacroBase):
         yield 'WarningBox'
         yield 'InfoBox'
         yield 'ImportantBox'
+        yield 'AssignmentBox'
 
     def expand_macro(self, formatter, name, content, args):
         add_stylesheet(formatter.req, 'text_boxes/css/text_boxes.css')
         # TODO(holtgrew): Actually, we would like to add a style sheet but this does not work. Thus we use a style tag below.
         #add_stylesheet(formatter.req, 'text_boxes/css/text_boxes.css')
         className = CLASSES.get(name, 'ShellBox')
-        if name in ['WarningBox', 'InfoBox', 'ImportantBox']:
+        if name in ['WarningBox', 'InfoBox', 'ImportantBox', 'AssignmentBox']:
             content_html = self.format_wiki(formatter, content)
             img = ''
-            if ICONS.get(name):
+            if name == 'AssignmentBox':
+                img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left; margin-left: -58px')
+            elif ICONS.get(name):
                 img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left;')
             return tag.div(img + genshi.core.Markup(content_html) + tag.br(style='clear:both;'), class_=className)
         else:
