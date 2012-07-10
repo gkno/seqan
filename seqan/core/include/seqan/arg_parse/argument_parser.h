@@ -93,11 +93,11 @@ addDescription(parser,
                "based on k-mer counts.");
 
 addOption(parser, ArgParseOption("i", "inputFile", "Name of the multi-FASTA input.",
-                                 ArgParseArgument(ArgParseArgument::INPUTFILE, false, "IN")));
+                                 ArgParseArgument(ArgParseArgument::INPUTFILE, "IN")));
 setRequired(parser, "i");
 
 addOption(parser, ArgParseOption("o", "outputFile", "Name of the multi-FASTA input.",
-                                 ArgParseArgument(ArgParseArgument::OUTPUTFILE, false, "OUT")));
+                                 ArgParseArgument(ArgParseArgument::OUTPUTFILE, "OUT")));
 setRequired(parser, "o");
 
 addTextSection(parser, "See Also");
