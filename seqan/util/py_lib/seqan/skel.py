@@ -270,12 +270,6 @@ def createApp(name, location, options):
         replacements = buildReplacements('app', name, location, target_file, options)
         res = configureFile(target_file, source_file, replacements, options.dry_run, options)
         if res: return res
-        # Copy over .h file for app and perform replacements.
-        source_file = paths.pathToTemplate('app_template', 'app.h')
-        target_file = os.path.join(target_path, '%s.h' % name)
-        replacements = buildReplacements('app', name, location, target_file, options)
-        res = configureFile(target_file, source_file, replacements, options.dry_run, options)
-        if res: return res
     if options.create_infos:
         # Copy over INFO file for app and perform replacements.
         source_file = paths.pathToTemplate('app_template', 'INFO')
