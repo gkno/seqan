@@ -1940,7 +1940,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the node representing a suffix, otherwise $false$.
-..remarks:Every leaf is also a right terminal (see @Function.Index#isLeaf@), but not vice versa.
+..remarks:Every leaf is also a right terminal (see @Function.isLeaf@), but not vice versa.
 ..include:seqan/index.h
 */
 
