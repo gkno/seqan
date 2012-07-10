@@ -1,4 +1,5 @@
-//Adjust the code to handle Strings of type Dna, Dna5 and AminoAcid. Print the text on screen and observe how it changes depending on the type of the string.
+// Write a print function that print a text on the screen. If the type of the string is int include a space between the values. Do NOT change existing code.
+// Hint: Start by implementing the generic version.
 
 #include <iostream>
 #include <seqan/sequence.h>
@@ -19,6 +20,13 @@ void print(TText const & text)
     std::cout << text << std::endl;
 }
 
+void print(seqan::String<int> const & text)
+{
+    for (unsigned i = 0; i < seqan::length(text); ++i)
+        std::cout << text[i] << " ";
+    std::cout << std::endl;
+}
+
 int main()
 {
     seqan::String<char> text = "This is an awesome tutorial to get to now the basic principles of SeqAn!";
@@ -36,3 +44,4 @@ int main()
 
     return 0;
 }
+
