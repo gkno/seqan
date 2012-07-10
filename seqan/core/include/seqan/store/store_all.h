@@ -1690,6 +1690,7 @@ void printAlignment(
 This function iterates over entries in the @Memvar.FragmentStore#alignedReadStore@ and semi-global aligns each read to its contig segments given by begin and end position.
 Gaps introduced by these pair-wise alignments are then inserted to the affected contig and reads correspondingly.
 ..remarks:The invariant that positions in the @Memvar.FragmentStore#alignedReadStore@ are in gap-space holds before (there were no gaps in alignments) and after calling this functions.
+..remarks:If the @Memvar.FragmentStore#alignQualityStore@ of the @Class.FragmentStore@ is empty when $convertMatchesToGlobalAlignment()$ is called then the @Memvar.FragmentStore#alignQualityStore@ is filled with the edit distance scores.
 ..include:seqan/store.h
 */
 
@@ -1722,9 +1723,10 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 	typedef typename Iterator<TReadGaps>::Type								TReadIter;
 
     // Number of alignments with a quality score (edit distance) before computing global alignment.  We will fill the
-    // store for all alignments that do not yet have an entry.
+    // store for all alignments if there are no scores yet.
     unsigned alignQualityStoreLengthPre = length(store.alignQualityStore);
-    resize(store.alignQualityStore, length(store.alignedReadStore));
+    if (alignQualityStoreLengthPre == 0u)
+        resize(store.alignQualityStore, length(store.alignedReadStore));
 	
 	// sort matches by increasing begin positions
 	sortAlignedReads(store.alignedReadStore, SortBeginPos());
@@ -1782,7 +1784,8 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 		    qualValue = globalAlignment(align, score, AlignConfig<true, false, false, true>(), Gotoh());
         else
 		    qualValue = globalAlignment(align, score);
-        if (it->id >= alignQualityStoreLengthPre)
+        // Update quality score entry if there were no scores before convertMatchesToGlobal() call.
+        if (alignQualityStoreLengthPre > 0u && it->id >= alignQualityStoreLengthPre)
         {
             store.alignQualityStore[it->id].errors = qualValue / scoreMismatch(score);
             store.alignQualityStore[it->id].score = -qualValue / scoreMismatch(score);
