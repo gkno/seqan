@@ -102,25 +102,24 @@ const char * A_TUPLE_LIST_DL_4 = "5.5";
 const char * A_TUPLE_LIST_DL_5 = "6.6";
 const char * A_TUPLE_LIST_DL_6 = "7.7";
 
-namespace seqan
-{
+namespace seqan {
 
 // moved initialization of cmd parser out of the test functions
 // to have single place to change in case of interface changes
 // or test extensions
 void setupDoubleParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("d", "double","set a double option", ArgParseArgument::DOUBLE));
+    addOption(parser, ArgParseOption("d", "double", "set a double option", ArgParseArgument::DOUBLE));
 }
 
 void setupIntegerParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("i", "integer","set an integer option", ArgParseArgument::INTEGER));
+    addOption(parser, ArgParseOption("i", "integer", "set an integer option", ArgParseArgument::INTEGER));
 }
 
 void setupStringParser(ArgumentParser & parser)
 {
-    addOption(parser, ArgParseOption("s", "string", "set a string option", ArgParseArgument::STRING, true));
+    addOption(parser, ArgParseOption("s", "string", "set a string option", ArgParseArgument::STRING, "", true));
 }
 
 void setupInputFileParser(ArgumentParser & parser)
@@ -135,41 +134,41 @@ void setupOutputFileParser(ArgumentParser & parser)
 
 SEQAN_DEFINE_TEST(test_unset_value)
 {
-  ArgumentParser parser;
-  setupIntegerParser(parser);
+    ArgumentParser parser;
+    setupIntegerParser(parser);
 
-  int argc = 1;
-  const char * argv[1] = {A_INT_0};
+    int argc = 1;
+    const char * argv[1] = {A_INT_0};
 
-  std::stringstream error_stream;
-  std::stringstream outputStream;
+    std::stringstream error_stream;
+    std::stringstream outputStream;
 
-  SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
-  SEQAN_ASSERT_EQ(error_stream.str(), "");
-  SEQAN_ASSERT_EQ(outputStream.str(), "");
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
+    SEQAN_ASSERT_EQ(error_stream.str(), "");
+    SEQAN_ASSERT_EQ(outputStream.str(), "");
 
-  int integerValue = 584864836;
-  SEQAN_ASSERT(!getOptionValue(integerValue, parser, "integer"));
-  SEQAN_ASSERT_EQ(integerValue, 584864836);
+    int integerValue = 584864836;
+    SEQAN_ASSERT(!getOptionValue(integerValue, parser, "integer"));
+    SEQAN_ASSERT_EQ(integerValue, 584864836);
 }
 
 SEQAN_DEFINE_TEST(test_unset_values)
 {
-  ArgumentParser parser;
-  setupIntegerParser(parser);
+    ArgumentParser parser;
+    setupIntegerParser(parser);
 
-  int argc = 1;
-  const char * argv[1] = {A_INT_0};
+    int argc = 1;
+    const char * argv[1] = {A_INT_0};
 
-  std::stringstream error_stream;
-  std::stringstream outputStream;
+    std::stringstream error_stream;
+    std::stringstream outputStream;
 
-  SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
-  SEQAN_ASSERT_EQ(error_stream.str(), "");
-  SEQAN_ASSERT_EQ(outputStream.str(), "");
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
+    SEQAN_ASSERT_EQ(error_stream.str(), "");
+    SEQAN_ASSERT_EQ(outputStream.str(), "");
 
-  std::vector<std::string> values = getOptionValues(parser, "integer");
-  SEQAN_ASSERT_EQ(values.size(), 0u);
+    std::vector<std::string> values = getOptionValues(parser, "integer");
+    SEQAN_ASSERT_EQ(values.size(), 0u);
 }
 
 
@@ -846,10 +845,10 @@ SEQAN_DEFINE_TEST(test_isInt)
 SEQAN_DEFINE_TEST(test_int_list_option)
 {
     ArgumentParser parser;
-    addOption(parser, ArgParseOption("l", "list", "this is a list option", ArgParseArgument::INTEGER, true, "",2));
+    addOption(parser, ArgParseOption("l", "list", "this is a list option", ArgParseArgument::INTEGER, "", true, 2));
 
     int argc = 7;
-    const char* argv[7] = {A_TUPLE_LIST, A_TUPLE_LIST_L, A_TUPLE_LIST_L_1, A_TUPLE_LIST_L_2, A_TUPLE_LIST_L, A_TUPLE_LIST_L_3, A_TUPLE_LIST_L_4};
+    const char * argv[7] = {A_TUPLE_LIST, A_TUPLE_LIST_L, A_TUPLE_LIST_L_1, A_TUPLE_LIST_L_2, A_TUPLE_LIST_L, A_TUPLE_LIST_L_3, A_TUPLE_LIST_L_4};
 
     std::stringstream error_stream;
     std::stringstream outputStream;
@@ -875,10 +874,10 @@ SEQAN_DEFINE_TEST(test_int_list_option)
 SEQAN_DEFINE_TEST(test_double_list_option)
 {
     ArgumentParser parser;
-    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument::DOUBLE, true, "", 3));
+    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument::DOUBLE, "", true, 3));
 
     int argc = 9;
-    const char* argv[9] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5, A_TUPLE_LIST_DL_6};
+    const char * argv[9] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5, A_TUPLE_LIST_DL_6};
 
     std::stringstream error_stream;
     std::stringstream outputStream;
@@ -909,10 +908,10 @@ SEQAN_DEFINE_TEST(test_double_list_option)
 SEQAN_DEFINE_TEST(test_double_list_option_not_enough_arguments)
 {
     ArgumentParser parser;
-    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument::DOUBLE, true, "", 3));
+    addOption(parser, ArgParseOption("k", "double-list", "this is a list option", ArgParseArgument::DOUBLE, "", true, 3));
 
     int argc = 8;
-    const char* argv[8] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5};
+    const char * argv[8] = {A_TUPLE_LIST, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_1, A_TUPLE_LIST_DL_2, A_TUPLE_LIST_DL_3, A_TUPLE_LIST_DL, A_TUPLE_LIST_DL_4, A_TUPLE_LIST_DL_5};
 
     std::stringstream error_stream;
     std::stringstream outputStream;
@@ -922,7 +921,7 @@ SEQAN_DEFINE_TEST(test_double_list_option_not_enough_arguments)
     SEQAN_ASSERT_EQ(outputStream.str(), "");
 }
 
-void setUpBoolParser(ArgumentParser& parser)
+void setUpBoolParser(ArgumentParser & parser)
 {
     addOption(parser, ArgParseOption("b", "", "This is a boolean flag"));
     addOption(parser, ArgParseOption("c", "", "This is a boolean flag"));
@@ -935,7 +934,7 @@ SEQAN_DEFINE_TEST(test_boolean_flags)
     setUpBoolParser(parser);
 
     int argc = 3;
-    const char* argv[3] = { A_BOOL, A_BOOL_1, A_BOOL_2 };
+    const char * argv[3] = { A_BOOL, A_BOOL_1, A_BOOL_2 };
 
     std::stringstream error_stream;
     std::stringstream outputStream;
@@ -959,30 +958,30 @@ SEQAN_DEFINE_TEST(test_boolean_flags)
 
 SEQAN_DEFINE_TEST(test_combined_boolean_flags)
 {
-   ArgumentParser parser;
-   setUpBoolParser(parser);
+    ArgumentParser parser;
+    setUpBoolParser(parser);
 
-   int argc = 2;
-   const char* argv[2] = { A_BOOL, A_BOOL_3 };
+    int argc = 2;
+    const char * argv[2] = { A_BOOL, A_BOOL_3 };
 
-   std::stringstream error_stream;
-   std::stringstream outputStream;
+    std::stringstream error_stream;
+    std::stringstream outputStream;
 
-   SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
-   SEQAN_ASSERT_EQ(error_stream.str(), "");
-   SEQAN_ASSERT_EQ(outputStream.str(), "");
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
+    SEQAN_ASSERT_EQ(error_stream.str(), "");
+    SEQAN_ASSERT_EQ(outputStream.str(), "");
 
-   bool isSet = false;
-   SEQAN_ASSERT(getOptionValue(isSet, parser, "b"));
-   SEQAN_ASSERT(isSet);
+    bool isSet = false;
+    SEQAN_ASSERT(getOptionValue(isSet, parser, "b"));
+    SEQAN_ASSERT(isSet);
 
-   isSet = false;
-   SEQAN_ASSERT(getOptionValue(isSet, parser, "c"));
-   SEQAN_ASSERT(isSet);
+    isSet = false;
+    SEQAN_ASSERT(getOptionValue(isSet, parser, "c"));
+    SEQAN_ASSERT(isSet);
 
-   isSet = true;
-   SEQAN_ASSERT(getOptionValue(isSet, parser, "d"));
-   SEQAN_ASSERT(!isSet);
+    isSet = true;
+    SEQAN_ASSERT(getOptionValue(isSet, parser, "d"));
+    SEQAN_ASSERT(!isSet);
 }
 
 SEQAN_DEFINE_TEST(test_long_short_flag_name)
@@ -992,7 +991,7 @@ SEQAN_DEFINE_TEST(test_long_short_flag_name)
     addOption(parser, ArgParseOption("d", "", "This is a boolean flag"));
 
     int argc = 2;
-    const char* argv[2] = { A_BOOL, A_BOOL_3 };
+    const char * argv[2] = { A_BOOL, A_BOOL_3 };
 
     std::stringstream error_stream;
     std::stringstream outputStream;
@@ -1009,6 +1008,33 @@ SEQAN_DEFINE_TEST(test_long_short_flag_name)
     SEQAN_ASSERT(getOptionValue(isSet, parser, "d"));
     SEQAN_ASSERT(!isSet);
 }
+
+SEQAN_DEFINE_TEST(test_default_value)
+{
+
+    ArgumentParser parser;
+    setupStringParser(parser);
+    setDefaultValue(parser, "string", "default-string-value");
+
+    CharString defaultValue;
+    SEQAN_ASSERT(getOptionValue(defaultValue, parser, "string"));
+    SEQAN_ASSERT_EQ(defaultValue, "default-string-value");
+
+    int argc = 3;
+    const char * argv[3] = {A_STRING_0, A_STRING_1, A_STRING_3};
+
+    std::stringstream error_stream;
+    std::stringstream outputStream;
+
+    SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
+    SEQAN_ASSERT_EQ(error_stream.str(), "");
+    SEQAN_ASSERT_EQ(outputStream.str(), "");
+
+    CharString value;
+    SEQAN_ASSERT(getOptionValue(value, parser, "string"));
+    SEQAN_ASSERT_EQ(value, "this-is-a-string-value");
+}
+
 
 } // namespace seqan
 

@@ -71,7 +71,7 @@ a ArgParseArgument or directly an Argument on the command line.
 .Memfunc.ArgParseArgument#ArgParseArgument
 ..class:Class.ArgParseArgument
 ..summary:Constructor
-..signature:ArgParseArgument (argumentType [, isListArgument, argumentLabel, numberOfArguments, _default])
+..signature:ArgParseArgument (argumentType [, argumentLabel, isListArgument, numberOfArguments])
 ..param.argumentType:A ArgParseArgument.ArgumentType value defining the type (e.g., String) of the
 ArgParseArgument.
 ...tableheader:Flag|Description
@@ -80,15 +80,14 @@ ArgParseArgument.
 ...table:$ArgParseArgument::DOUBLE$|A float
 ...table:$ArgParseArgument::INPUTFILE$|An input file
 ...table:$ArgParseArgument::OUTPUTFILE$|An output file
+ ..param.argumentLabel:Defines a user defined argument label for the help output. If this option is
+ not set, ArgParseArgument will automatically define a label based on the ArgumentType.
 ..param.isListArgument:Defines if the argument can be given multiple times.
 ...default:false.
-..param.argumentLabel:Defines a user defined argument label for the help output. If this option is
-not set, ArgParseArgument will automatically define a label based on the ArgumentType.
 ..param.numberOfArguments: Defines if the argument consists of defined number of elements (e.g., if
 you want to provide an interval you would set this option to 2, so the parser knows that he needs
 to search for exactly 2 values).
 ...default:1.
-..param:_default:Sets the default value for this argument.
 */
 
 class ArgParseArgument
@@ -97,11 +96,11 @@ public:
     enum ArgumentType
     {
         // argument is
-        STRING,     // ..  a string
+        STRING,     // .. a string
         INTEGER,    // .. an integer
         DOUBLE,     // .. a float
-        INPUTFILE,  // .. an inputfile (implicitly also a string, since paths/filenames are strings
-        OUTPUTFILE  // .. an outputfile (implicitly also a string, since paths/filenames are strings)
+        INPUTFILE,  // .. an inputfile (implicitly also a string)
+        OUTPUTFILE  // .. an outputfile (implicitly also a string)
     };
 
 
@@ -116,7 +115,6 @@ public:
     // ----------------------------------------------------------------------------
     // Members to store the values
     // ----------------------------------------------------------------------------
-    // TODO(aiche): move default values to Options, since they only make sense there
     std::vector<std::string>  defaultValue;
     std::vector<std::string>  value;
 
@@ -137,8 +135,8 @@ public:
     // Constructors
     // ----------------------------------------------------------------------------
     ArgParseArgument(ArgumentType argumentType,
-                     bool isListArgument = false,
                      std::string const & argumentLabel = "",
+                     bool isListArgument = false,
                      unsigned numberOfValues = 1) :
         _argumentType(argumentType),
         _numberOfValues(numberOfValues),
@@ -630,6 +628,24 @@ inline void _checkStringRestrictions(ArgParseArgument const & me, std::string co
 }
 
 // ----------------------------------------------------------------------------
+// Function _checkValue()
+// ----------------------------------------------------------------------------
+
+inline void _checkValue(ArgParseArgument const & me, std::string const & value)
+{
+    // type checks
+    if (isIntegerArgument(me))
+        _checkNumericArgument<int>(me, value);
+
+    if (isDoubleArgument(me))
+        _checkNumericArgument<double>(me, value);
+
+    // check valid values
+    if (isStringArgument(me))
+        _checkStringRestrictions(me, value);
+}
+
+// ----------------------------------------------------------------------------
 // Function assignValue()
 // ----------------------------------------------------------------------------
 
@@ -649,16 +665,8 @@ Otherwise the value will be overwritten.
 
 inline void _assignArgumentValue(ArgParseArgument & me, std::string const & value) throw (ParseException)
 {
-    // type checks
-    if (isIntegerArgument(me))
-        _checkNumericArgument<int>(me, value);
-
-    if (isDoubleArgument(me))
-        _checkNumericArgument<double>(me, value);
-
-    // check valid values
-    if (isStringArgument(me))
-        _checkStringRestrictions(me, value);
+    // check values
+    _checkValue(me, value);
 
     // assignment
     if (isListArgument(me)) // just append
@@ -718,7 +726,7 @@ inline std::string const & getArgumentValue(ArgParseArgument const & me)
 ..signature:getArgumentValues(argument)
 ..param.argument:The @Class.ArgParseArgument@ object.
 ...type:Class.ArgParseArgument
-..returns:$std::vector<std::string>$ containing the values. If no value was set and no 
+..returns:$std::vector<std::string>$ containing the values. If no value was set and no
 default value exists an empty vector will be returned.
 ..include:seqan/arg_parse.h
 */
@@ -795,7 +803,6 @@ inline bool hasDefault(ArgParseArgument const & me)
 {
     return !me.defaultValue.empty();
 }
-
 
 // ----------------------------------------------------------------------------
 // Function numberOfArguments

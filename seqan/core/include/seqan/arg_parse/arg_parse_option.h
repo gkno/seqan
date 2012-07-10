@@ -38,6 +38,7 @@
 #include <string>
 #include <vector>
 #include <seqan/arg_parse/arg_parse_argument.h>
+#include <seqan/arg_parse/arg_parse_exceptions.h>
 
 namespace seqan {
 
@@ -86,8 +87,8 @@ Although not suggested the short-name can contain more than 1 character.
 ///.Function.hasDefault.param.argument.type:Class.ArgParseOption
 ///.Function.numberOfAllowedValues.param.argument.type:Class.ArgParseOption
 
-class ArgParseOption
-    : public ArgParseArgument
+class ArgParseOption :
+    public ArgParseArgument
 {
 public:
     // ----------------------------------------------------------------------------
@@ -113,40 +114,17 @@ public:
                    std::string const & _longName,
                    std::string const & _help,
                    ArgumentType argumentType,
-                   bool isListArgument = false,
                    std::string const & argumentLabel = "",
+                   bool isListArgument = false,
                    unsigned numberOfValues = 1) :
-        ArgParseArgument(argumentType, isListArgument, argumentLabel, numberOfValues),
+        ArgParseArgument(argumentType, argumentLabel, isListArgument, numberOfValues),
         shortName(_shortName),
         longName(_longName),
         _isFlag(false),
         _isRequired(false),
         _isHidden(false)
     {
-        _helpText = _help;    
-    }
-
-    template <typename TValue>
-    ArgParseOption(std::string const & _shortName,
-                   std::string const & _longName,
-                   std::string const & _help,
-                   ArgumentType argumentType,
-                   bool isListArgument,
-                   std::string const & argumentLabel,
-                   unsigned numberOfValues,
-                   TValue const & _default) :
-        ArgParseArgument(argumentType, isListArgument, argumentLabel, numberOfValues),
-        shortName(_shortName),
-        longName(_longName),
-        _isFlag(false),
-        _isRequired(false),
-        _isHidden(false)
-    {
-        _helpText = _help;  
-
-        std::stringstream strm;
-        strm << _default;
-        appendValue(defaultValue, strm.str());
+        _helpText = _help;
     }
 
     ArgParseOption(std::string const & _shortName,
@@ -259,6 +237,81 @@ inline bool isRequired(ArgParseOption const & me)
 }
 
 // ----------------------------------------------------------------------------
+// Function setDefaultValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.setDefaultValue
+..summary:Sets the default value for the given option.
+..cat:Miscellaneous
+..remarks:Note that this overwrites any previously given default values.
+..signature:setDefaultValue(option, value)
+..param.option:The @Class.ArgParseOption@ object.
+...type:Class.ArgParseOption
+..param.value:The new default value.
+..include:seqan/arg_parse.h
+*/
+
+template <typename TValue>
+inline void setDefaultValue(ArgParseOption & me, const TValue & value)
+{
+    try
+    {
+        std::stringstream strm;
+        strm << value;
+
+        // check if all constraints are satisfied
+        _checkValue(me, strm.str());
+
+        // clear old values
+        me.defaultValue.clear();
+
+        // add defaultValue
+        me.defaultValue.push_back(strm.str());
+    }
+    catch (ParseException & ex)
+    {
+        SEQAN_FAIL("Default value does not satisfy the restrictions:\n %s", ex.what());
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function addDefaultValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.addDefaultValue
+..summary:Adds/appends a new value to the list of default values.
+..cat:Miscellaneous
+..remarks:Note that this method does not check any length restrictions for this value.
+..signature:addDefaultValue(option, value)
+..param.option:The @Class.ArgParseOption@ object.
+...type:Class.ArgParseOption
+..param.value:The new default value.
+..include:seqan/arg_parse.h
+*/
+
+template <typename TValue>
+inline void addDefaultValue(ArgParseOption & me, const TValue & value)
+{
+    try
+    {
+        std::stringstream strm;
+        strm << value;
+
+        // check if all constraints are satisfied
+        _checkValue(me, strm.str());
+
+        // add defaultValue
+        me.defaultValue.push_back(strm.str());
+    }
+    catch (ParseException & ex)
+    {
+        SEQAN_FAIL("Default value does not satisfy the restrictions:\n %s", ex.what());
+    }
+}
+
+// ----------------------------------------------------------------------------
 // Function setRequired()
 // ----------------------------------------------------------------------------
 
@@ -287,7 +340,7 @@ inline void setRequired(ArgParseOption & me, bool required)
 
 inline std::string const getArgumentLabel(ArgParseOption const & me)
 {
-    if(isBooleanOption(me))
+    if (isBooleanOption(me))
         return "";
     else
         return getArgumentLabel(static_cast<ArgParseArgument>(me));

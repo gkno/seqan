@@ -851,7 +851,7 @@ compareAlignedReadsToReference(RabemaStats & result,
             currentReadName = gsiRecord.readName;
         else
             currentReadName = lessThanSamtoolsQueryName(gsiRecord.readName, samRecord.qName) ?
-                    gsiRecord.readName : samRecord.qName;
+                              gsiRecord.readName : samRecord.qName;
 
         // These flags determine whether evaluation is run for single-end and/or paired-end reads.
         bool seenSingleEnd = false, seenPairedEnd = false;
@@ -934,6 +934,7 @@ compareAlignedReadsToReference(RabemaStats & result,
                                           /*pairedEnd=*/ true, /*second=*/ false);
             if (res != 0)
                 return 1;
+
             res = benchmarkReadResult(result, currentSamRecords, bamIOContext, currentGsiRecords, refNameStore,
                                       refNameStoreCache, refSeqs, refIdMapping, options, tagPattern,
                                       /*pairedEnd=*/ true, /*second=*/ true);
@@ -985,19 +986,19 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     //                                         seqan::ArgParseArgument::STRING, false, "GSI"));
     // setRequired(parser, "out-gsi", true);
     addOption(parser, seqan::ArgParseOption("r", "reference", "Path to load reference FASTA from.",
-                                            seqan::ArgParseArgument::STRING, false, "FASTA"));
+                                            seqan::ArgParseArgument::STRING, "FASTA"));
     setRequired(parser, "reference", true);
     addOption(parser, seqan::ArgParseOption("g", "in-gsi",
                                             "Path to load gold standard intervals from. If compressed using gzip, "
                                             "the file will be decompressed on the fly.",
-                                            seqan::ArgParseArgument::STRING, false, "GSI"));
+                                            seqan::ArgParseArgument::STRING, "GSI"));
     setRequired(parser, "in-gsi", true);
     addOption(parser, seqan::ArgParseOption("s", "in-sam", "Path to load the read mapper SAM output from.",
-                                            seqan::ArgParseArgument::STRING, false, "SAM"));
+                                            seqan::ArgParseArgument::STRING, "SAM"));
     addOption(parser, seqan::ArgParseOption("b", "in-bam", "Path to load the read mapper BAM output from.",
-                                            seqan::ArgParseArgument::STRING, false, "BAM"));
+                                            seqan::ArgParseArgument::STRING, "BAM"));
     addOption(parser, seqan::ArgParseOption("", "out-tsv", "Path to write the statistics to as TSV.",
-                                            seqan::ArgParseArgument::STRING, false, "TSV"));
+                                            seqan::ArgParseArgument::STRING, "TSV"));
 
     addSection(parser, "Benchmark Parameters");
     addOption(parser, seqan::ArgParseOption("", "oracle-mode",
@@ -1007,19 +1008,25 @@ parseCommandLine(RabemaEvaluationOptions & options, int argc, char const ** argv
     addOption(parser, seqan::ArgParseOption("", "match-N", "When set, N matches all characters without penalty."));
     addOption(parser, seqan::ArgParseOption("", "distance-metric",
                                             "Set distance metric.  Valid values: hamming, edit.  Default: edit.",
-                                            seqan::ArgParseOption::STRING, false, "METRIC", 1, "edit"));
+                                            seqan::ArgParseOption::STRING, "METRIC"));
     setValidValues(parser, "distance-metric", "hamming edit");
+    setDefaultValue(parser, "distance-metric", "edit");
+
     addOption(parser, seqan::ArgParseOption("e", "max-error",
                                             "Maximal error rate to build gold standard for in percent.  This "
                                             "parameter is an integer and relative to the read length.  "
                                             "The error rate is ignored in oracle mode, here the distance "
                                             "of the read at the sample position is taken, individually "
                                             "for each read.  Default: 0",
-                                            seqan::ArgParseArgument::INTEGER, false, "RATE", 1, 0));
+                                            seqan::ArgParseArgument::INTEGER, "RATE"));
+    setDefaultValue(parser, "max-error", 0);
+
     addOption(parser, seqan::ArgParseOption("c", "benchmark-category",
                                             "Set benchmark category.  One of {all, all-best, any-best.  Default: all",
-                                            seqan::ArgParseOption::STRING, false, "CAT", 1, "all"));
+                                            seqan::ArgParseOption::STRING, "CAT"));
     setValidValues(parser, "benchmark-category", "all all-best any-best");
+    setDefaultValue(parser, "benchmark-category", "all");
+
     addOption(parser, seqan::ArgParseOption("", "trust-NM",
                                             "When set, we trust the alignment and distance from SAM/BAM file and no "
                                             "realignment is performed.  Off by default."));

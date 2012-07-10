@@ -126,9 +126,11 @@ SEQAN_BEGIN_TESTSUITE(test_arg_parse)
 
     SEQAN_CALL_TEST(test_argument_parser);
 
+    // default value test
+    SEQAN_CALL_TEST(test_default_value);
+
     // conversion tests
     SEQAN_CALL_TEST(test_isDouble);
     SEQAN_CALL_TEST(test_isInt);
 }
 SEQAN_END_TESTSUITE
-

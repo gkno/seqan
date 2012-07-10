@@ -51,34 +51,34 @@ int main(int argc, char const ** argv)
     setShortDescription(parser, "Just a demo of the new seqan::ArgumentParser!");
     setVersion(parser, "0.1");
     setDate(parser, "Mar 2012");
-    
+
     addUsageLine(parser, "[\\fIOPTIONS\\fP] \\fIIN\\fP \\fIOUT\\fP ");
-    
+
     addDescription(parser, "This is just a little demo to show what seqan::ArgumentParser is able to do.");
     addDescription(parser, "\\fIIN\\fP is a multi-FASTA input.");
     addDescription(parser, "\\fIOUT\\fP is a txt output.");
-    
-    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE, false, "IN"));
-    addArgument(parser, ArgParseArgument(ArgParseArgument::OUTPUTFILE, false, "OUT"));
+
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE, "IN"));
+    addArgument(parser, ArgParseArgument(ArgParseArgument::OUTPUTFILE, "OUT"));
 
     // allow only fasta files as input
     setValidValues(parser, 0, "FASTA fa");
     setValidValues(parser, 1, "txt");
 
     addSection(parser, "Important Tool Parameters");
-    addOption(parser, ArgParseOption("", "id", "Sequence identity between [0.0:1.0]", ArgParseArgument::DOUBLE, false, "ID"));
+    addOption(parser, ArgParseOption("", "id", "Sequence identity between [0.0:1.0]", ArgParseArgument::DOUBLE, "ID"));
     setRequired(parser, "id", true);
     setMinValue(parser, "id", "0.0");
     setMaxValue(parser, "id", "1.0");
 
     addSection(parser, "Miscellaneous");
     addOption(parser, ArgParseOption("v", "verbose", "Turn on verbose output."));
-    addOption(parser, ArgParseOption("H", "hidden",  "Super mysterious flag that will not be shown in the help screen or man-page."));
+    addOption(parser, ArgParseOption("H", "hidden", "Super mysterious flag that will not be shown in the help screen or man-page."));
     hideOption(parser, "H");
 
     addTextSection(parser, "References");
     addText(parser, "http://www.seqan.de");
-    
+
     ArgumentParser::ParseResult res = parse(parser, argc, argv);
 
     if (res == ArgumentParser::PARSE_OK)

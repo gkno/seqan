@@ -61,6 +61,7 @@ class ArgumentParser;
 class ArgParseOption;
 void addOption(ArgumentParser & me, ArgParseOption const & opt);
 void hideOption(ArgumentParser & me, std::string const & name, bool hide);
+void setValidValues(ArgumentParser & me, std::string const & name, std::string const & values);
 
 // ==========================================================================
 // Tags, Classes, Enums
@@ -172,10 +173,19 @@ public:
         addOption(*this, ArgParseOption("h", "help", "Displays this help message."));
 
         // hidden flags used for export of man pages and ctd formats
-        addOption(*this, ArgParseOption("", "write-ctd", "Exports the app's interface description to a .ctd file.", ArgParseArgument::OUTPUTFILE));
+        addOption(*this, ArgParseOption("",
+                                        "write-ctd",
+                                        "Exports the app's interface description to a .ctd file.",
+                                        ArgParseArgument::OUTPUTFILE));
         hideOption(*this, "write-ctd", true);
-        addOption(*this, ArgParseOption("", "export-help", "Export help to a format. One of {'html', 'man', 'txt'}.", ArgParseArgument::STRING, false, "FORMAT"));
+
+        addOption(*this, ArgParseOption("",
+                                        "export-help",
+                                        "Export help to a format. One of {'html', 'man', 'txt'}.",
+                                        ArgParseArgument::STRING,
+                                        "FORMAT"));
         hideOption(*this, "export-help", true);
+        setValidValues(*this, "export-help", "html man txt");
 
         // this is our ToolDoc only for the Description, we will later append it to the
         // real ToolDoc, but we need to separate it to ease the formating
@@ -196,6 +206,7 @@ public:
         setName(_toolDoc, _appName);
         init();
     }
+
 };
 
 // ==========================================================================
@@ -516,10 +527,10 @@ inline bool getOptionValue(TValue & val,
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
 
-    if (isSet(me,name) || hasDefault(me, name))
-      return _convertArgumentValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
+    if (isSet(me, name) || hasDefault(me, name))
+        return _convertArgumentValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
     else
-      return false;
+        return false;
 }
 
 template <typename TValue>
@@ -566,14 +577,7 @@ inline unsigned getOptionValueCount(ArgumentParser const & me, std::string const
 ..param.argumentPosition:The index of the argument in the argument list.
 ..returns: The number of values stored for the specified argument.
 ..include:seqan/arg_parse.h
-*/// ==========================================================================
-// Metafunctions
-// ==========================================================================
-
-// ==========================================================================
-// Functions
-// ==========================================================================
-
+*/                                                                                                                                                                                                                                                                                                                                                                                                                                               
 
 inline unsigned getArgumentValueCount(ArgumentParser const & me, unsigned argumentPosition)
 {
@@ -665,6 +669,50 @@ inline std::vector<std::string> const & getArgumentValues(ArgumentParser & me,
 }
 
 // ----------------------------------------------------------------------------
+// Function setDefaultValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.setDefaultValue
+..signature:setDefaultValue(parser, optionName, value)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionName:The identifier of the command line option.
+..param.value:The new default value.
+*/
+
+template <typename TValue>
+inline void setDefaultValue(ArgumentParser & me,
+                            std::string const & name,
+                            const TValue & value)
+{
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    setDefaultValue(getOption(me, name), value);
+}
+
+// ----------------------------------------------------------------------------
+// Function addDefaultValue()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.addDefaultValue
+..signature:addDefaultValue(parser, optionName, value)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionName:The identifier of the command line option.
+..param.value:The new default value.
+*/
+
+template <typename TValue>
+inline void addDefaultValue(ArgumentParser & me,
+                            std::string const & name,
+                            const TValue & value)
+{
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    addDefaultValue(getOption(me, name), value);
+}
+
+// ----------------------------------------------------------------------------
 // Function setMinValue()
 // ----------------------------------------------------------------------------
 
@@ -674,7 +722,7 @@ inline std::vector<std::string> const & getArgumentValues(ArgumentParser & me,
 ..signature:setMinValue(parser,argumentPosition,minValue)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
-..param.option:The identifier of the command line option.
+..param.optionName:The identifier of the command line option.
 ..param.argumentPosition:The index of the argument in the argument list.
 ..param.minValue:A std::string containing a string representation of the minimum value of the @Class.ArgParseOption@.
 */

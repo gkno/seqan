@@ -232,6 +232,7 @@ int intervalizeAndDumpErrorCurves(TStream & stream,
     GsiHeader header;
     if (writeRecord(stream, header, Gsi()) != 0)
         return 1;
+
     if (writeRecord(stream, GSI_COLUMN_NAMES, Gsi()) != 0)
         return 1;
 
@@ -508,7 +509,7 @@ void buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- Found too low score." << std::endl;
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- low scoring match was "
                               << WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore,
-                                               beginPosition(finder)) << std::endl;
+                                     beginPosition(finder)) << std::endl;
                 }
                 break;
             }
@@ -1000,16 +1001,16 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
 
     addSection(parser, "Input / Output");
     addOption(parser, seqan::ArgParseOption("o", "out-gsi", "Path to write the resulting GSI file to.",
-                                            seqan::ArgParseArgument::STRING, false, "GSI"));
+                                            seqan::ArgParseArgument::STRING, "GSI"));
     setRequired(parser, "out-gsi", true);
     addOption(parser, seqan::ArgParseOption("z", "gzip-gsi", "Compress GSI output using gzip."));
     addOption(parser, seqan::ArgParseOption("r", "reference", "Path to load reference FASTA from.",
-                                            seqan::ArgParseArgument::STRING, false, "FASTA"));
+                                            seqan::ArgParseArgument::STRING, "FASTA"));
     setRequired(parser, "reference", true);
     addOption(parser, seqan::ArgParseOption("s", "in-sam", "Path to load the \"perfect\" SAM file from.",
-                                            seqan::ArgParseArgument::STRING, false, "SAM"));
+                                            seqan::ArgParseArgument::STRING, "SAM"));
     addOption(parser, seqan::ArgParseOption("b", "in-bam", "Path to load the \"perfect\" BAM file from.",
-                                            seqan::ArgParseArgument::STRING, false, "BAM"));
+                                            seqan::ArgParseArgument::STRING, "BAM"));
 
     addSection(parser, "Gold Standard Parameters");
     addOption(parser, seqan::ArgParseOption("", "oracle-mode",
@@ -1019,15 +1020,18 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
     addOption(parser, seqan::ArgParseOption("", "match-N", "When set, N matches all characters without penalty."));
     addOption(parser, seqan::ArgParseOption("", "distance-metric",
                                             "Set distance metric.  Valid values: hamming, edit.  Default: edit.",
-                                            seqan::ArgParseOption::STRING, false, "METRIC", 1, "edit"));
+                                            seqan::ArgParseOption::STRING, "METRIC"));
     setValidValues(parser, "distance-metric", "hamming edit");
+    setDefaultValue(parser, "distance-metric", "edit");
+
     addOption(parser, seqan::ArgParseOption("e", "max-error",
                                             "Maximal error rate to build gold standard for in percent.  This "
                                             "parameter is an integer and relative to the read length.  "
                                             "In case of oracle mode, the error rate for the read at the "
                                             "sampling position is used and \\fIRATE\\fP is used as a cutoff "
                                             "threshold.",
-                                            seqan::ArgParseArgument::INTEGER, false, "RATE", 1, 0));
+                                            seqan::ArgParseArgument::INTEGER, "RATE"));
+    setDefaultValue(parser, "max-error", 0);
 
     addTextSection(parser, "Return Values");
     addText(parser, "A return value of 0 indicates success, any other value indicates an error.");

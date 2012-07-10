@@ -106,7 +106,7 @@ SEQAN_DEFINE_TEST(test_argument_outputfile_label)
 
 SEQAN_DEFINE_TEST(test_argument_user_defined_label)
 {
-    ArgParseArgument arg1(ArgParseArgument::STRING, false, "my_label");
+    ArgParseArgument arg1(ArgParseArgument::STRING, "my_label");
     SEQAN_ASSERT_EQ(getArgumentLabel(arg1), "my_label");
 
     arg1._numberOfValues = 2;
