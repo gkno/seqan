@@ -28,6 +28,7 @@
 
 #include <lemon/lgf_writer.h>
 #include <lemon/smart_graph.h>
+#include <lemon/matching.h>
 
 
 using namespace seqan;

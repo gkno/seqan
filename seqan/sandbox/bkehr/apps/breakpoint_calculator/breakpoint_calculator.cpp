@@ -20,13 +20,7 @@
 // Author: Birte Kehr <birte.kehr@fu-berlin.de>
 // ==========================================================================
 
-#include <lemon/smart_graph.h>
-#include <lemon/matching.h>
-
-#include <seqan/basic.h>
-#include <seqan/sequence.h>
-
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 
 #include "breakpoint_calculator.h"
 
@@ -35,20 +29,17 @@ using namespace seqan;
 // Program entry point
 int main(int argc, char const ** argv)
 {
-    // Setup command line parser.
-    CommandLineParser parser;
+    // Setup argument parser.
+    ArgumentParser parser("breakpoint_calculator");
     Options options;
-    setupCommandLineParser(parser, options);
+    setupCommandLineParser(parser);
     
-    // Then, parse the command line and handle the cases where help display
-    // is requested or erroneous parameters were given.
-    int ret = parseCommandLineAndCheck(options, parser, argc, argv);
-    if (ret != 0)
-        return ret;
-    if (options.showHelp || options.showVersion)
-        return 0;
+    // Then, parse the command line.
+	ArgumentParser::ParseResult res = parseArgumentsAndCheck(options, parser, argc, argv);
     
     // Finally, launch the program.
-    ret = mainWithOptions(options);
-    return ret;
+    if (res == ArgumentParser::PARSE_OK)
+	    return mainWithOptions(options);
+	else
+	    return res == ArgumentParser::PARSE_ERROR; // 1 - error, 0 - otherwise
 }

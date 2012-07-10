@@ -24,7 +24,10 @@
 #ifndef SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_PARSE_ALIGNMENT_
 #define SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_PARSE_ALIGNMENT_
 
+#include <seqan/stream.h>
 #include <seqan/align.h>
+
+#include "parse_alignment.h"
 
 namespace seqan {
 
@@ -84,14 +87,6 @@ skipHeader(RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
 	CharString buffer;
 	int res = 0;
 
-	//// Check first line
-	//res = readUntilWhitespace(buffer, recordReader);
-	//if (res) return res;
-	//if (buffer != "##maf")
-	//	return 1;  // FORMAT ERROR, should probably be a constant
-	//res = skipLine(recordReader);
-	//if (res) return res;
-
 	// Skip comment lines
 	while (value(recordReader) == '#')
 	{
@@ -110,14 +105,6 @@ skipHeader(RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
 {
 	CharString buffer;
 	int res = 0;
-
-	//// Check first line
-	//res = readUntilWhitespace(buffer, recordReader);
-	//if (res) return res;
-	//if (buffer != "#FormatVersion")
-	//	return 1;  // FORMAT ERROR, should probably be a constant
-	//res = skipLine(recordReader);
-	//if (res) return res;
 
 	// Skip comment lines
 	while (value(recordReader) == '#')

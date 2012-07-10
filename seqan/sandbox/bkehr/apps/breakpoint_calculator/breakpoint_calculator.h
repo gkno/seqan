@@ -29,14 +29,9 @@
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/refinement.h>
-#include <seqan/stream.h>
-#include <seqan/score.h>
-
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 
 #include "parse_alignment.h"
-#include "score_blocks.h"
 #include "breakpoint_counts.h"
 
 using namespace seqan;
@@ -57,42 +52,24 @@ enum AlignmentFormat
 
 struct Options
 {
-    bool showHelp;
-    bool showVersion;
 	bool verbose;
 	bool detailed;
 
 	bool pairwiseCount;
 	bool tripletCount;
-	bool sopScore;
 
 	CharString inputFile;
 	AlignmentFormat inputFormat;
 	bool swapPositionsXmfa;
-    
-	CharString matrixFile;
-	bool hoxdMatrix;
-	bool computeMatrix;
-	int gapOpen;
-	int gapExtend;
-
 
     Options()
     {
         // Set defaults.
-        showHelp = false;
-        showVersion = false;
 		verbose = false;
 		detailed = false;
 
 		pairwiseCount = false;
 		tripletCount = false;
-		sopScore = false;
-
-		hoxdMatrix = false;
-		computeMatrix = true;
-		gapOpen = -4;
-		gapExtend = -1;
 
 		inputFormat = XMFA;
 		swapPositionsXmfa = false;
@@ -108,110 +85,72 @@ struct Options
 // ============================================================================
 
 void
-setupCommandLineParser(CommandLineParser & parser, Options const & options)
+setupCommandLineParser(ArgumentParser & parser)
 {
-    addVersionLine(parser, "0.1");
+    setShortDescription(parser, "for multiple genome alignments");
+    setVersion(parser, "0.2");
+    setDate(parser, "Jul 2012");
     
-    addTitleLine(parser, "****************************");
-    addTitleLine(parser, "*  breakpoint_calculator   *");
-    addTitleLine(parser, "****************************");
-    addTitleLine(parser, "");
-    addTitleLine(parser, "(c) 2012 by Birte Kehr");
+    addUsageLine(parser, "[\\fIOPTIONS\\fP] \\fIALIGNMENTFILE\\fP");
+    
+    addDescription(parser, "Can calculate pairwise and hidden threeway breakpoints in multiple genome alignments. The alignment must be given in MAF or XMFA format. If the format is not directly specified, it is guessed from the file extension.");
+    addDescription(parser, "(c) 2012 by Birte Kehr");
+    
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE, false, "IALIGNMENTFILE"));
+    //setValidValues(parser, 0, "xmfa maf"); // allow only *.xmfa and *.maf files as input
 
-    addUsageLine(parser, "[OPTIONS] <ALIGNMENT FILE>");
-    
 	addSection(parser, "Main Options");
-	addOption(parser, CommandLineOption("f", "inFormat", "input file format: XMFA, MAF", OptionType::String | OptionType::Label, "XMFA"));
-	addOption(parser, CommandLineOption("x", "swapPositions", "swap start and end position for reverse orientation", OptionType::Bool | OptionType::Label));
-	addHelpLine(parser, "in XMFA format (necessary for sgEvolver output) (default false)");
-	addOption(parser, CommandLineOption("v", "verbose", "verbosity mode", OptionType::Bool | OptionType::Label, "false"));
-	addOption(parser, CommandLineOption("d", "detailed", "print breakpoint counts of all pairs and triplets", OptionType::Bool | OptionType::Label, "false"));
+	addOption(parser, ArgParseOption("d2", "pairwiseCount", "Compute pairwise breakpoint counts."));
+	addOption(parser, ArgParseOption("d3", "tripletCount", "Compute triplet breakpoint counts."));
+	addOption(parser, ArgParseOption("d", "detailed", "Print breakpoint counts of all pairs/triplets."));
 
-	addOption(parser, CommandLineOption("d2", "pairwiseCount", "compute pairwise breakpoint counts", OptionType::Bool | OptionType::Label, "false"));
-	addOption(parser, CommandLineOption("d3", "tripletCount", "compute triplet breakpoint counts", OptionType::Bool | OptionType::Label, "false"));
-	addOption(parser, CommandLineOption("s", "score", "compute sum-of-pairs score for alignment blocks", OptionType::Bool | OptionType::Label, "false"));
+    addSection(parser, "Miscellaneous");
+	addOption(parser, ArgParseOption("f", "inFormat", "Format of input file (xmfa or maf).", ArgParseArgument::STRING));
+    setValidValues(parser, "f", "xmfa maf");
+    addOption(parser, ArgParseOption("v", "verbose", "Turn on verbose output."));
+    addOption(parser, ArgParseOption("x", "swapPositions", "Turn on swapping of start and end position for reverse orientation in XMFA format (necessary for sgEvolver output)."));
+	hideOption(parser, "x");
 
-	addSection(parser, "Scoring Options");
-	addOption(parser, CommandLineOption("m", "scoreMatrix", "file containing a DNA scoring matrix OR 'compute'", OptionType::String | OptionType::Label, "compute"));
-	addOption(parser, CommandLineOption("go", "gapOpen", "gap open penalty", OptionType::Int | OptionType::Label, options.gapOpen));
-	addOption(parser, CommandLineOption("ge", "gapExtend", "gap extension penalty", OptionType::Int | OptionType::Label, options.gapExtend));
-    
-    requiredArguments(parser, 1);
+    addTextSection(parser, "References");
+    addText(parser, "Kehr, B., Reinert, K., Darling, A.: Hidden breakpoints in genome alignments. WABI 2012. To be presented.");
 }
 
-int parseCommandLineAndCheck(Options & options,
-                             CommandLineParser & parser,
-                             int argc,
-                             char const ** argv)
+ArgumentParser::ParseResult
+parseArgumentsAndCheck(Options & options,
+                       ArgumentParser & parser,
+                       int argc,
+                       char const ** argv)
 {
-    bool stop = !parse(parser, argc, argv);
-    if (stop)
-        return 1;
+    ArgumentParser::ParseResult res = parse(parser, argc, argv);
+    
+	if (res == ArgumentParser::PARSE_OK)
+	{
+		getArgumentValue(options.inputFile, parser, 0);
+		getOptionValue(options.verbose, parser, "verbose");
+		getOptionValue(options.detailed, parser, "detailed");
+		getOptionValue(options.pairwiseCount, parser, "pairwiseCount");
+		getOptionValue(options.tripletCount, parser, "tripletCount");
+		getOptionValue(options.swapPositionsXmfa, parser, "swapPositions");
 
-    options.inputFile = getArgumentValue(parser, 0);
-
-    if (isSetLong(parser, "help")) {
-        options.showHelp = true;
-        return 0;
-    }
-    if (isSetLong(parser, "version")) {
-        options.showVersion = true;
-        return 0;
-    }
-	if (isSetLong(parser, "verbose")) {
-		options.verbose = true;
-	}
-	if (isSetLong(parser, "detailed")) {
-		options.detailed = true;
-	}
-	if (isSetLong(parser, "pairwiseCount")) {
-		options.pairwiseCount = true;
-	}
-	if (isSetLong(parser, "tripletCount")) {
-		options.tripletCount = true;
-	}
-	if (isSetLong(parser, "score")) {
-		options.sopScore = true;
-	}
-	if (isSetLong(parser, "scoreMatrix")) {
-		CharString matrix;
-		getOptionValueLong(parser, "scoreMatrix", matrix);
-		options.matrixFile = matrix;
-		toUpper(matrix);
-		if (matrix == "HOXD") options.hoxdMatrix = true;
-		else if (matrix == "COMPUTE") options.computeMatrix = true;
-	}
-	if (isSetLong(parser, "gapOpen")) {
-		getOptionValueLong(parser, "gapOpen", options.gapOpen);
-	}
-	if (isSetLong(parser, "gapExtend")) {
-		getOptionValueLong(parser, "gapExtend", options.gapExtend);
-	}
-	if (isSetLong(parser, "inFormat")) {
 		CharString format;
-		getOptionValueLong(parser, "inFormat", format);
+		if (isSet(parser, "f"))
+			getOptionValue(format, parser, "inFormat");
+		else
+			format = suffix(options.inputFile, length(options.inputFile) - 3);
+
 		toUpper(format);
-		if (format == "XMFA") options.inputFormat = XMFA;
-		else if (format == "MAF") options.inputFormat = MAF;
-		else { 
-			std::cerr << "ERROR: Invalid input format." << std::endl;
-			return 1;
-		}
-	}
-	if (isSetShort(parser, "x")) {
-		options.swapPositionsXmfa = true;
+		if (format == "MAF")
+			options.inputFormat = MAF;
+		else
+			options.inputFormat = XMFA;
 	}
 
-	if (options.gapOpen > 0) std::cerr << "WARNING: Positive gap open penalty." << std::endl;
-	if (options.gapExtend > 0) std::cerr << "WARNING: Positive gap extension penalty." << std::endl;
-
-	return 0;
+	return res;
 }
 
 int mainWithOptions(Options & options)
 {
 	typedef Dna5 TAlphabet;
-	typedef double TScoreValue;
 
 	typedef String<TAlphabet> TSequence;
 	typedef Size<TSequence>::Type TSize;
@@ -224,9 +163,6 @@ int mainWithOptions(Options & options)
 	if (options.verbose)
 	{
 		std::cout << "Alignment file: " << options.inputFile << std::endl;
-		if (!options.computeMatrix && !options.hoxdMatrix)
-			std::cout << "Scoring matrix file: " << options.matrixFile << std::endl;
-
 		std::cout << std::endl;
 	}
 
@@ -245,58 +181,20 @@ int mainWithOptions(Options & options)
 	// Parse the input alignment file
 	if (options.inputFormat == MAF && parseAlignment(aligns, idToRowMaps, seqs, inStream, options.verbose, Maf())) 
 	{
-		std::cerr << "ERROR: Parsing file " << options.inputFile << " in MAF format failed!" << std::endl;
+		std::cerr << "ERROR: Parsing file in MAF format failed for " << options.inputFile << "!" << std::endl;
 		return 1;
 	}
 	else if (options.inputFormat == XMFA && options.swapPositionsXmfa && parseAlignment(aligns, idToRowMaps, seqs, inStream, options.verbose, XmfaSwap())) 
 	{
-		std::cerr << "ERROR: Parsing file " << options.inputFile << " in XMFA format failed!" << std::endl;
+		std::cerr << "ERROR: Parsing file in XMFA format failed for " << options.inputFile << "!" << std::endl;
 		return 1;
 	}
 	else if (options.inputFormat == XMFA && !options.swapPositionsXmfa && parseAlignment(aligns, idToRowMaps, seqs, inStream, options.verbose, Xmfa())) 
 	{
-		std::cerr << "ERROR: Parsing file " << options.inputFile << " in XMFA format failed!" << std::endl;
+		std::cerr << "ERROR: Parsing file in XMFA format failed for " << options.inputFile << "!" << std::endl;
 		return 1;
 	}
 	inStream.close();
-
-	// Compute the sum-of-pairs alignment score
-	if (options.sopScore)
-	{
-		if (options.verbose) std::cout << "Computing sum-of-pairs score..." << std::endl;
-
-		Score<TScoreValue, ScoreMatrix<TAlphabet, Default> > score(static_cast<TScoreValue>(options.gapExtend), static_cast<TScoreValue>(options.gapOpen));
-
-		if (options.computeMatrix)
-		{
-			CharString matrixFile = options.inputFile;
-			append(matrixFile, ".matrix");
-			if (sopScore(aligns, score, matrixFile))
-			{
-				std::cerr << "ERROR: Computation of sum-of-pairs score failed!" << std::endl;
-				return 1;
-			}
-		}
-		//else if (options.hoxdMatrix)
-		//{
-		//	if (sopScore(aligns, Score<TSCoreValue, ScoreMatrix<Dna, Hoxd> >()))
-		//	{
-		//		std::cerr << "ERROR: Computation of sum-of-pairs score failed!" << std::endl;
-		//		return 1;
-		//	}
-		//}
-		else // read score matrix from file
-		{
-			char * file = toCString(options.matrixFile);
-			loadScoreMatrix(score, file);
-
-			if (sopScore(aligns, score))
-			{
-				std::cerr << "ERROR: Computation of sum-of-pairs score failed!" << std::endl;
-				return 1;
-			}
-		}
-	}
 	
 	// Compute the breakpoint counts
 	if (options.pairwiseCount || options.tripletCount)
@@ -306,12 +204,13 @@ int mainWithOptions(Options & options)
 		std::map<CharString, String<TBlockId> > blockSeqs;
 		sequencesOfBlocks(blockSeqs, idToRowMaps);
 
-		//for (std::map<CharString, String<TBlockId> >::const_iterator it = blockSeqs.begin(); it != blockSeqs.end(); ++it)
-		//{
-		//	std::cout << it->first << ": ";
-		//	for (Iterator<String<TBlockId> >::Type itit = begin(it->second); itit != end(it->second); ++itit)
-		//		std::cout << *itit << "  ";
-		//	std::cout << std::endl;
+		// // Debug code:
+		// for (std::map<CharString, String<TBlockId> >::const_iterator it = blockSeqs.begin(); it != blockSeqs.end(); ++it)
+		// {
+		// 	std::cout << it->first << ": ";
+		// 	for (Iterator<String<TBlockId> >::Type itit = begin(it->second); itit != end(it->second); ++itit)
+		// 		std::cout << *itit << "  ";
+		// 	std::cout << std::endl;
 		//}
 
 		std::map<CharString, StringSet<String<TBlockId>, Dependent<> > > blockSeqSets;
