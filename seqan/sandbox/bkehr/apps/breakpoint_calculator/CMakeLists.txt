@@ -10,5 +10,4 @@ include_directories(Z:/workspace/LEMON/include)
 seqan_add_executable(breakpoint_calculator breakpoint_calculator.cpp
                                            breakpoint_calculator.h
                                            parse_alignment.h
-                                           score_blocks.h
                                            breakpoint_counts.h)
