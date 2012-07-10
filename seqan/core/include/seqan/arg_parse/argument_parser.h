@@ -441,6 +441,28 @@ inline bool isSet(ArgumentParser const & me, std::string const & name)
 }
 
 // ----------------------------------------------------------------------------
+// Function hasDefault()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.hasDefault
+..summary:Returns whether an option has a default value or not.
+..cat:Miscellaneous
+..signature:hasDefault(parser,optionIdentifier)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..param.optionIdentifier:A std::string that identifies the option (either short or long name).
+..returns:$true$ if the option has a default value, $false$ otherwise.
+..include:seqan/arg_parse.h
+*/
+
+inline bool hasDefault(ArgumentParser const & me, std::string const & name)
+{
+    SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
+    return hasDefault(getOption(me, name));
+}
+
+// ----------------------------------------------------------------------------
 // Function _allRequiredSet()
 // ----------------------------------------------------------------------------
 
@@ -482,6 +504,7 @@ inline bool _allArgumentsSet(ArgumentParser const & me)
 ..param.optionIdentifier:A std::string that is either the short or long name of the option.
 ..param.argNo:If the option is list, the $argNo$-th list element is returned.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
+..remakrs:The value passed to the method (value) was only updated if the method returns $true$.
 ..include:seqan/arg_parse.h
 */
 
@@ -492,7 +515,11 @@ inline bool getOptionValue(TValue & val,
                            unsigned argNo)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
-    return _convertArgumentValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
+
+    if (isSet(me,name) || hasDefault(me, name))
+      return _convertArgumentValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
+    else
+      return false;
 }
 
 template <typename TValue>

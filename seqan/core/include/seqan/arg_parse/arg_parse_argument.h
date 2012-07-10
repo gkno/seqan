@@ -718,14 +718,13 @@ inline std::string const & getArgumentValue(ArgParseArgument const & me)
 ..signature:getArgumentValues(argument)
 ..param.argument:The @Class.ArgParseArgument@ object.
 ...type:Class.ArgParseArgument
-..returns:$std::vector<std::string>$ containing the values.
+..returns:$std::vector<std::string>$ containing the values. If no value was set and no 
+default value exists an empty vector will be returned.
 ..include:seqan/arg_parse.h
 */
 
 inline std::vector<std::string> const & getArgumentValues(ArgParseArgument const & me)
 {
-    SEQAN_CHECK(!(me.value.empty() && me.defaultValue.empty()),
-                "ArgParseArgument: No value available.");
     if (!me.value.empty())
         return me.value;
     else
@@ -776,6 +775,27 @@ inline bool isSet(ArgParseArgument const & me)
 {
     return !me.value.empty();
 }
+
+// ----------------------------------------------------------------------------
+// Function hasDefault()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.hasDefault
+..summary:Returns true if a default value was given for that argument.
+..cat:Miscellaneous
+..signature:hasDefault(argument)
+..param.argument:The @Class.ArgParseArgument@ object.
+...type:Class.ArgParseArgument
+..returns:$true$ if a default value was given for the argument, $false$ if not.
+..include:seqan/arg_parse.h
+*/
+
+inline bool hasDefault(ArgParseArgument const & me)
+{
+    return !me.defaultValue.empty();
+}
+
 
 // ----------------------------------------------------------------------------
 // Function numberOfArguments

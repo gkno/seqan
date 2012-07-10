@@ -47,6 +47,10 @@ using namespace seqan;
 
 SEQAN_BEGIN_TESTSUITE(test_arg_parse)
 {
+    // Test an unset value
+    SEQAN_CALL_TEST(test_unset_value);
+    SEQAN_CALL_TEST(test_unset_values);
+
     // Call the int option tests
     SEQAN_CALL_TEST(test_int_short_argument);
     SEQAN_CALL_TEST(test_int_long_argument);

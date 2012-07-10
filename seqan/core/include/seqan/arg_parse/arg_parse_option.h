@@ -83,6 +83,7 @@ Although not suggested the short-name can contain more than 1 character.
 ///.Function.getArgumentValues.param.argument.type:Class.ArgParseOption
 ///.Function.hasValue.param.argument.type:Class.ArgParseOption
 ///.Function.isSet.param.argument.type:Class.ArgParseOption
+///.Function.hasDefault.param.argument.type:Class.ArgParseOption
 ///.Function.numberOfAllowedValues.param.argument.type:Class.ArgParseOption
 
 class ArgParseOption

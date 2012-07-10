@@ -133,6 +133,46 @@ void setupOutputFileParser(ArgumentParser & parser)
     addOption(parser, ArgParseOption("o", "out", "set an output file", ArgParseArgument::OUTPUTFILE));
 }
 
+SEQAN_DEFINE_TEST(test_unset_value)
+{
+  ArgumentParser parser;
+  setupIntegerParser(parser);
+
+  int argc = 1;
+  const char * argv[1] = {A_INT_0};
+
+  std::stringstream error_stream;
+  std::stringstream outputStream;
+
+  SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
+  SEQAN_ASSERT_EQ(error_stream.str(), "");
+  SEQAN_ASSERT_EQ(outputStream.str(), "");
+
+  int integerValue = 584864836;
+  SEQAN_ASSERT(!getOptionValue(integerValue, parser, "integer"));
+  SEQAN_ASSERT_EQ(integerValue, 584864836);
+}
+
+SEQAN_DEFINE_TEST(test_unset_values)
+{
+  ArgumentParser parser;
+  setupIntegerParser(parser);
+
+  int argc = 1;
+  const char * argv[1] = {A_INT_0};
+
+  std::stringstream error_stream;
+  std::stringstream outputStream;
+
+  SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_OK);
+  SEQAN_ASSERT_EQ(error_stream.str(), "");
+  SEQAN_ASSERT_EQ(outputStream.str(), "");
+
+  std::vector<std::string> values = getOptionValues(parser, "integer");
+  SEQAN_ASSERT_EQ(values.size(), 0u);
+}
+
+
 SEQAN_DEFINE_TEST(test_int_short_argument)
 {
 
@@ -969,7 +1009,7 @@ SEQAN_DEFINE_TEST(test_long_short_flag_name)
     SEQAN_ASSERT(getOptionValue(isSet, parser, "d"));
     SEQAN_ASSERT(!isSet);
 }
-    
+
 } // namespace seqan
 
 #endif  // SEQAN_CORE_TESTS_ARG_PARSE_TEST_ARG_PARSE_H_
