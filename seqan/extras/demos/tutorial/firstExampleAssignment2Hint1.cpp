@@ -1,6 +1,6 @@
 // Write a print function that print a text on the screen. If the type of the string is int include a space between the values. Do NOT change existing code.
 // Hint: Start by implementing the generic version.
-// Hint: Continue by implementing the specialized int version.
+
 #include <iostream>
 #include <seqan/sequence.h>
 
