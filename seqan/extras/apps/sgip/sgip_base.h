@@ -74,7 +74,7 @@ inline int compare_(std::vector<TValue> const & obj1, std::vector<TValue> const 
 // Class SgipDegreeDir_
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Class.SgipDegreeDir_:
 ..cat:Class.Graph
 ..summary:A degree type of directed graphs.
@@ -105,7 +105,7 @@ struct SgipDegreeDir_
 // Class SgipDegreeUndir_
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Class.SgipDegreeUndir_:
 ..cat:Class.Graph
 ..summary:A degree type of undirected graphs.
@@ -124,7 +124,7 @@ struct SgipDegreeUndir_
 // Class SgipHash
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Class.SgipHash:
 ..cat:Class.Graph
 ..summary:A user-defined Hash type to get hash Value for a set of data.
@@ -182,7 +182,7 @@ struct SgipHash<std::vector<TValue> >
 // Class SgipEqualTo
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Class.SgipEqualTo:
 ..cat:Class.Graph
 ..summary:A user-defined EqualTo type for two dataset, like std::EqualTo<T>.
@@ -244,7 +244,7 @@ struct SgipEqualTo<std::vector<TValue> >
 // Class LessCompare_
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Class.LessCompare_:
 ..cat:Class.Graph
 ..summary:A user-defined less function for various data types.
@@ -297,7 +297,7 @@ struct LessCompare_<std::vector<TValue> >
 // Function compare_()
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Function.compare_:
 ..cat:Graph
 ..summary:comparison of various value type, e.g. degree type.
@@ -820,7 +820,7 @@ void _createCandMap(std::tr1::unordered_map<TVal, bool> & hmap, TString & cand)
 // Function getCanonicalLabel()
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Function.getCanonicalLabel:
 ..cat:Graph
 ..summary:Implements graph canonization on a graph.
@@ -895,7 +895,7 @@ bool getCanonicalLabel(TMat & leastmat, seqan::Graph<TSpec> const & graph)
 // Function checkIsomorphic()
 // --------------------------------------------------------------------------
 
-/**
+/*
 .Function.checkIsomorphic:
 ..cat:Graph
 ..summary:Solve graph isomorphism which is a problem of determining whether two given graph are isomorphic or not.
