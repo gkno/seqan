@@ -2,7 +2,7 @@
 #
 # Output generation script for breakpoint_calculator
 
-BREAKPOINT_CALCULATOR=../../../../../build/debug_linux/sandbox/bkehr/apps/breakpoint_calculator/breakpoint_calculator
+BREAKPOINT_CALCULATOR=../../../../build/debug_linux/extras/apps/breakpoint_calculator/breakpoint_calculator
 
 # ============================================================
 # First Section

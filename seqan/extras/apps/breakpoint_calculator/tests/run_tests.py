@@ -29,14 +29,14 @@ def main(source_base, binary_base):
     
     ph = app_tests.TestPathHelper(
         source_base, binary_base,
-        'sandbox/bkehr/apps/breakpoint_calculator/tests')  # tests dir
+        'extras/apps/breakpoint_calculator/tests')  # tests dir
 
     # ============================================================
     # Auto-detect the binary path.
     # ============================================================
 
     path_to_program = app_tests.autolocateBinary(
-      binary_base, 'sandbox/bkehr/apps/breakpoint_calculator', 'breakpoint_calculator')
+      binary_base, 'extras/apps/breakpoint_calculator', 'breakpoint_calculator')
 
     # ============================================================
     # Built TestConf list.
