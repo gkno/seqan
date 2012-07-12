@@ -1,5 +1,5 @@
 // ==========================================================================
-//                           breakpoint_calculator
+//                           Breakpoint Calculator
 // ==========================================================================
 // Copyright (C) 2012 by Birte Kehr
 //
@@ -35,11 +35,11 @@ int main(int argc, char const ** argv)
     setupCommandLineParser(parser);
     
     // Then, parse the command line.
-	ArgumentParser::ParseResult res = parseArgumentsAndCheck(options, parser, argc, argv);
+    ArgumentParser::ParseResult res = parseArgumentsAndCheck(options, parser, argc, argv);
     
     // Finally, launch the program.
     if (res == ArgumentParser::PARSE_OK)
-	    return mainWithOptions(options);
-	else
-	    return res == ArgumentParser::PARSE_ERROR; // 1 - error, 0 - otherwise
+        return mainWithOptions(options);
+    else
+        return res == ArgumentParser::PARSE_ERROR; // 1 - error, 0 - otherwise
 }
