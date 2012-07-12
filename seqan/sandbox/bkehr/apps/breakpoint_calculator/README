@@ -1,0 +1,24 @@
+=====================
+Breakpoint Calculator
+=====================
+
+Building Breakpoint Calculator
+==============================
+
+Breakpoint Calculator requires the LEMON library.  You can get a copy from
+
+    http://lemon.cs.elte.hu/trac/lemon
+
+If you do not install LEMON in a "standard" location (e.g. "/usr" on Unix or
+"C:\Program Files\LEMON") then you have to set LEMON_ROOT_DIR when calling
+CMake.
+
+For example, if you have installed LEMON in $HOME/local/LEMON, then you would
+use the following commands to build the program on Unix in Release mode:
+
+    svn co https://svn.mi.fu-berlin.de/seqan/trunk/seqan seqan-trunk
+    mkdir -p seqan-trunk-build/Release
+    cd seqan-trunk-build/Release
+    cmake ../../seqan-trunk -DCMAKE_BUILD_TYPE=Release -DLEMON_ROOT_DIR=$HOME/local/LEMON
+    make breakpoint_calculator
+
