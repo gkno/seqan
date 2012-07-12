@@ -285,6 +285,12 @@ streamPut(FILE * stream, SimpleType<TValue, TSpec> const & c)
 // --- numbers
 
 inline char const *
+_streamPutChar(char const * /*tag*/)
+{
+    return "%s";
+}
+
+inline char const *
 _streamPutChar(int const /*tag*/)
 {
     return "%d";

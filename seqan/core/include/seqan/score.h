@@ -40,12 +40,15 @@
 #include <seqan/basic.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/score/score_generated_forwards.h>
+//#include <seqan/score/score_generated_forwards.h>
 #endif
+
+#include <seqan/stream.h>
 
 #include <seqan/score/score_base.h>
 #include <seqan/score/score_edit.h>
 #include <seqan/score/score_matrix.h>
+#include <seqan/score/score_matrix_io.h>
 #include <seqan/score/score_matrix_data.h>
 #include <seqan/score/score_simple.h>
 
