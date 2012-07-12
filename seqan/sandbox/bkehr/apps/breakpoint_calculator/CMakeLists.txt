@@ -14,10 +14,8 @@ if (LEMON_FOUND)
       ${CMAKE_BINARY_DIR})
   endif(PYTHONINTERP_FOUND)
 
-  # Lemon, in case we compile on Linux.
-  include_directories($ENV{HOME}/workspace/LEMON/include)
-  # Lemon, in case we compile on Windows.
-  include_directories(Z:/workspace/LEMON/include)
+  # add lemon include path
+  include_directories(${LEMON_INCLUDE_DIRS})
 
   # Update the list of file names below if you add source files to your application.
   seqan_add_executable(breakpoint_calculator breakpoint_calculator.cpp
