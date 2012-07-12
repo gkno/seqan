@@ -37,10 +37,7 @@
 #ifndef SEQAN_SCORE_SCORE_MATRIX_H_
 #define SEQAN_SCORE_SCORE_MATRIX_H_
 
-#include <seqan/file.h>
-
 // TODO(holtgrew): If the complex type conversions are necessary, a static_cast<> is more C++ and explicit.
-
 
 namespace SEQAN_NAMESPACE_MAIN {
 
