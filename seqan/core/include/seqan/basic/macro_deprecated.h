@@ -31,53 +31,48 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Facade hader for the submodule basic_fundamental.
-//
-// This module contains fundamental code such as forward declarations and
-// prototypes for common metafunctions like Value<>, functions assign() etc.
+// Macro for deprecating code.
 // ==========================================================================
 
-#ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_BASIC_FUNDAMENTAL_H_
-#define SEQAN_CORE_INCLUDE_SEQAN_BASIC_BASIC_FUNDAMENTAL_H_
+#ifndef CORE_INCLUDE_SEQAN_BASIC_MACRO_DEPRECATED_H_
+#define CORE_INCLUDE_SEQAN_BASIC_MACRO_DEPRECATED_H_
 
-// --------------------------------------------------------------------------
-// Prerequisites
-// --------------------------------------------------------------------------
+namespace seqan {
 
-#include <seqan/platform.h>
-#include <seqan/basic/basic_metaprogramming.h>
+// ============================================================================
+// Macros
+// ============================================================================
 
-// --------------------------------------------------------------------------
-// Sub Module Headers
-// --------------------------------------------------------------------------
+// Macros SEQAN_DEPRECATED_PRE SEQAN_DEPRECATED_POST
+//
+// For internal use only.
+//
+// For cross-platform compatibility, you can use this in declarations only.
+// We need a version that comes before and one that comes after the symbol
+// because of cross-compiler compatibility.
+//
+// Example:
+//
+// void
+// SEQAN_DEPRECATED_PRE("Use bar instead.")
+// f()
+// SEQAN_DEPRECATED_POST("Use bar instead.");
 
-// Macros for deprecating code.
-#include <seqan/basic/macro_deprecated.h>
+#if defined(__clang__)
+#define SEQAN_DEPRECATED_PRE(msg)
+#define SEQAN_DEPRECATED_POST(msg) __attribute__((deprecated(msg)))
+#elif defined(__GNUC__)
+#define SEQAN_DEPRECATED_PRE(msg)
+#define SEQAN_DEPRECATED_POST(msg) __attribute__((__deprecated__))
+#elif defined(_MSC_VER)
+#define SEQAN_DEPRECATED_PRE(msg) __declspec(deprecated(msg))
+#define SEQAN_DEPRECATED_POST(msg)
+#else
+#pragma message("WARNING: You need to implement DEPRECATED_PRE and DEPRECATED_POST for this compiler")
+#define SEQAN_DEPRECATED_PRE(func)
+#define SEQAN_DEPRECATED_POST(func)
+#endif
 
-// Pseudo header with documentation for builtin functions.
-#include <seqan/basic/builtin_functions.h>
+}  // namespace seqan
 
-// Common metafunctions such as Value<>.
-#include <seqan/basic/fundamental_metafunctions.h>
-
-// Basic tag-related code.
-#include <seqan/basic/fundamental_tags.h>
-
-// Definition of assign(), set(), move().
-#include <seqan/basic/fundamental_transport.h>
-
-// Code supporting comparison.
-#include <seqan/basic/fundamental_comparison.h>
-
-// Conversion support.
-#include <seqan/basic/fundamental_conversion.h>
-
-// TODO(holtgrew): This is not fundamental.  Should go into sequence module.
-// Construct/destruct functions for arrays.
-#include <seqan/basic/array_construct_destruct.h>
-
-// TODO(holtgrew): This is not really fundamental, either. Should go into its own sub module.
-// Hosted type.
-#include <seqan/basic/hosted_type_interface.h>
-
-#endif  // #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_HOSTED_TYPE_INTERFACE_H_
+#endif  // #ifndef CORE_INCLUDE_SEQAN_BASIC_MACRO_DEPRECATED_H_
