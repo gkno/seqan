@@ -116,7 +116,7 @@ setupCommandLineParser(ArgumentParser & parser)
 
     addSection(parser, "Main Options");
     addOption(parser, ArgParseOption("d2", "pairwiseCount", "Compute pairwise breakpoint counts."));
-    addOption(parser, ArgParseOption("d3", "tripletCount", "Compute triplet breakpoint counts."));
+    addOption(parser, ArgParseOption("d3", "threewayCount", "Compute threeway hidden breakpoint counts."));
     addOption(parser, ArgParseOption("d", "detailed", "Print breakpoint counts of all pairs/triplets."));
 
     addSection(parser, "Miscellaneous");
@@ -151,7 +151,7 @@ parseArgumentsAndCheck(Options & options,
         getOptionValue(options.verbose, parser, "verbose");
         getOptionValue(options.detailed, parser, "detailed");
         getOptionValue(options.pairwiseCount, parser, "pairwiseCount");
-        getOptionValue(options.tripletCount, parser, "tripletCount");
+        getOptionValue(options.tripletCount, parser, "threewayCount");
         getOptionValue(options.swapPositionsXmfa, parser, "swapPositions");
 
         CharString format;
