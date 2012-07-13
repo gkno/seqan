@@ -33,6 +33,8 @@
 #ifndef SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_IO_H
 #define SEQAN_HEADER_GRAPH_ALIGN_TCOFFEE_IO_H
 
+#include <seqan/stream.h>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -112,11 +114,13 @@ read(TFile & file,
 	 TCoffeeLib) 
 {
 //IOREV _nodoc_ _notinlined_ specialization not documented
-	SEQAN_CHECKPOINT
 	typedef typename Size<TFragment>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TNames>::Type TName;
 	
+	// We will use this RecordReader object for reading the file.
+	RecordReader<TFile, SinglePass<> > reader(file);
+	CharString buffer;
 	
 	// Map the names to slots
 	typedef std::map<TName, TSize> TNameToPosition;
@@ -124,12 +128,14 @@ read(TFile & file,
 	for(TSize i = 0;i<length(names);++i) namePosMap.insert(std::make_pair(names[i], i));
 	
 	// Remember the correct spots
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
-	_parseSkipLine(file, c);
-	TSize nseq = (TSize) _parseReadNumber(file, c);
-	_parseSkipLine(file, c);
+	if (atEnd(reader))
+	    return;
+	skipLine(reader);
+	clear(buffer);
+    readDigits(buffer, reader);
+    TSize nseq = 0;
+    lexicalCast2(nseq, buffer);
+    skipLine(reader);
 
 	// Read sequences
 	typedef String<TSize> TMapping;
@@ -137,13 +143,13 @@ read(TFile & file,
 	resize(posMap, nseq);
 	for(TSize i=0; i<nseq; ++i) {
 		TName myName;
-		_parseReadIdentifier(file, myName, c);
+        readIdentifier(myName, reader);
 		value(posMap, i) = namePosMap.find(myName)->second;
-		_parseSkipLine(file, c);
+        skipLine(reader);
 	}
 
 	bool seq1ToN = false;
-	if (_streamEOF(file)) return;
+	if (atEnd(reader)) return;
 	
 	typedef std::pair<std::pair<TSize, TSize>, TScoreValue> TResiduePair;
 	typedef std::set<TResiduePair> TResiduePairSet;
@@ -152,15 +158,19 @@ read(TFile & file,
 	TSize seq1 = 0;
 	TSize seq2 = 0;
 	bool firstPass = true;
-	while (!_streamEOF(file)) {
-		_parseSkipWhitespace(file,c);
-		if (_streamEOF(file)) break;
-		if (c == '#') {
-			c = _streamGet(file);
-			_parseSkipWhitespace(file,c);
-			seq1 = _parseReadNumber(file, c);
-			_parseSkipWhitespace(file,c);
-			seq2 = _parseReadNumber(file, c);
+	while (!atEnd(reader)) {
+        skipWhitespaces(reader);
+		if (atEnd(reader)) break;
+		if (value(reader) == '#') {
+            goNext(reader);
+            skipWhitespaces(reader);
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(seq1, buffer);
+            skipWhitespaces(reader);
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(seq2, buffer);
 			if (firstPass) {
 				firstPass = false;
 				if ((seq1 != 0) && (seq2 != 0)) seq1ToN = true;
@@ -171,15 +181,23 @@ read(TFile & file,
 			}
 			seq1 = value(posMap, seq1);
 			seq2 = value(posMap, seq2);
-		} else if (c == '!') {
-			_parseSkipLine(file, c);
+		} else if (value(reader) == '!') {
+            skipWhitespaces(reader);
 		} else {
-			TSize res1 = _parseReadNumber(file, c);
-			_parseSkipWhitespace(file,c);
-			TSize res2 = _parseReadNumber(file, c);
-			_parseSkipWhitespace(file,c);
-			TScoreValue weight = _parseReadNumber(file, c);
-			_parseSkipLine(file,c);
+            TSize res1 = 0, res2 = 0;
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(res1, buffer);
+            skipWhitespaces(reader);
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(res2, buffer);
+            skipWhitespaces(reader);
+            TScoreValue weight = 0;
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(weight, buffer);
+            skipLine(reader);
 
 			if (seq1 < seq2) {
 				TSize index = seq1 * nseq + seq2;
@@ -235,31 +253,40 @@ read(TFile & file,
 	 TCoffeeLib) 
 {
 //IOREV _nodoc_ _notinlined_ specialization not documented
-	SEQAN_CHECKPOINT
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Position<TFile>::Type TPosition;
 	typedef typename Value<TFile>::Type TValue;
+
+    CharString buffer;
+    RecordReader<TFile, SinglePass<> > reader(file);
 	
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
+	if (atEnd(reader))
+        return;
 
 	// Ignore first line
-	_parseSkipLine(file, c);
+    skipLine(reader);
 	
 	// Read number of sequences
-	TSize nSeq = (TSize) _parseReadNumber(file, c);
+    TSize nSeq = 0;
+    clear(buffer);
+    readDigits(buffer, reader);
+    lexicalCast2(nSeq, buffer);
 	resize(oriStr, nSeq);
-	_parseSkipLine(file, c);
+    skipLine(reader);
 
 	// Read sequences
-	for(TSize i=0; i<nSeq; ++i) {
-		appendValue(names, _parseReadIdentifier(file, c));
-		_parseSkipWhitespace(file, c);
-		_parseReadNumber(file, c);
-		_parseSkipWhitespace(file, c);
-		_parseReadSequenceData(file,c,oriStr[i]);
-		_parseSkipLine(file, c);
+	for(TSize i = 0; i < nSeq; ++i)
+    {
+        clear(buffer);
+        readIdentifier(buffer, reader);
+		appendValue(names, buffer);
+        skipWhitespaces(reader);
+        clear(buffer);
+        readDigits(buffer, reader);
+        // Note, not used.
+        skipWhitespaces(reader);
+        readLetters(oriStr[i], reader);
+        skipLine(reader);
 	}
 }
 
@@ -303,43 +330,43 @@ void write(TFile & file,
 		}
 	}
 
-	_streamWrite(file, "! TC_LIB_FORMAT_01\n");
+	streamPut(file, "! TC_LIB_FORMAT_01\n");
 	TSize len = length(getStringSet(g));
-	_streamPutInt(file, len);
-	_streamPut(file, '\n');
+	streamPut(file, (int)len);
+	streamPut(file, '\n');
 	for(TSize i=0;i<len;++i) {
-		_streamWrite(file, names[i]);
-		_streamPut(file, ' ');
+		streamPut(file, names[i]);
+		streamPut(file, ' ');
 		TString str = value(getStringSet(g), i);
-		_streamPutInt(file, length(str));
-		_streamPut(file, ' ');
-		_streamWrite(file, str);
-		_streamPut(file, '\n');
+		streamPut(file, length(str));
+		streamPut(file, ' ');
+		streamPut(file, str);
+		streamPut(file, '\n');
 	}
 
 	for(TSize i = 0; i<length(resPair); ++i) {
 		if (resPair[i].empty()) continue;
 		TSize seq1 = i / nseq;
 		TSize seq2 = i % nseq;
-		_streamPut(file, '#');
-		_streamPutInt(file, seq1 + 1);
-		_streamPut(file, ' ');
-		_streamPutInt(file, seq2 + 1);
-		_streamPut(file, '\n');	
+		streamPut(file, '#');
+		streamPut(file, seq1 + 1);
+		streamPut(file, ' ');
+		streamPut(file, seq2 + 1);
+		streamPut(file, '\n');	
 		typename TResiduePairSet::const_iterator pos = resPair[i].begin();
 		typename TResiduePairSet::const_iterator posEnd = resPair[i].end();
 		while(pos != posEnd) {
-			_streamPutInt(file, pos->first.first + 1);
-			_streamPut(file, ' ');
-			_streamPutInt(file, pos->first.second + 1);
-			_streamPut(file, ' ');
-			_streamPutInt(file, pos->second);
-			_streamPut(file, '\n');	
+			streamPut(file, pos->first.first + 1);
+			streamPut(file, ' ');
+			streamPut(file, pos->first.second + 1);
+			streamPut(file, ' ');
+			streamPut(file, pos->second);
+			streamPut(file, '\n');	
 			++pos;
 		}
 	}
-	_streamWrite(file, "! SEQ_1_TO_N");
-	_streamPut(file, '\n');
+	streamPut(file, "! SEQ_1_TO_N");
+	streamPut(file, '\n');
 }
 
 
@@ -361,32 +388,45 @@ read(TFile & file,
 	typedef typename Size<TNames>::Type TSize;
 	typedef TSize TWord;
 	typedef typename Value<TFile>::Type TValue;
-	
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
+
+    CharString buffer;
+    RecordReader<TFile, SinglePass<> > reader(file);
+    if (atEnd(reader))
+        return;
 
 	// Read sequences
 	TString seq;
-	while(!_streamEOF(file)) {
-		_parseSkipWhitespace(file, c);
-		if (_streamEOF(file)) break;
-		if (c == '>') {
-			if (length(seq)) {
+	while(!atEnd(reader))
+    {
+        skipWhitespaces(reader);
+		if (atEnd(reader))
+            break;
+		if (value(reader) == '>')
+        {
+			if (!empty(seq))
+            {
 				appendValue(oriStr, seq);
 				clear(seq);
 			}
-			c = _streamGet(file);
-			appendValue(names, _parseReadIdentifier(file, c));
-			_parseSkipLine(file, c);
-		} else if ((c == '-') || (c == '.') || (c == '\n') || (c == '\r')) {
-			c = _streamGet(file);
-		} else {
-			appendValue(seq, c);
-			c = _streamGet(file);
+            goNext(reader);
+            clear(buffer);
+            readIdentifier(buffer, reader);
+			appendValue(names, buffer);
+            skipLine(reader);
+		}
+        else if ((value(reader) == '-') || (value(reader) == '.') || (value(reader) == '\n') ||
+                 (value(reader) == '\r'))
+        {
+            goNext(reader);
+		}
+        else
+        {
+			appendValue(seq, value(reader));
+            goNext(reader);
 		}
 	}
-	if (length(seq)) appendValue(oriStr, seq);
+	if (!empty(seq))
+        appendValue(oriStr, seq);
 }
 
 
@@ -467,28 +507,36 @@ read(TFile & file,
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TNames>::Type TName;
 	
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
+    CharString buffer;
+    RecordReader<TFile, SinglePass<> > reader(file);
+    if (atEnd(reader))
+        return;
 
 	// Read sequences
 	String<TValue> mat;
 	TNames names;
 	TName nextSeq;
-	while(!_streamEOF(file)) {
-		_parseSkipWhitespace(file, c);
-		if (_streamEOF(file)) break;
-		if (c == '>') {
-			c = _streamGet(file);
+	while (!atEnd(reader))
+    {
+        skipWhitespaces(reader);
+		if (atEnd(reader))
+            break;
+		if (value(reader) == '>')
+        {
+            goNext(reader);
 			clear(nextSeq);
-			_parseReadIdentifier(file, nextSeq, c);
+            readIdentifier(nextSeq, reader);
 			appendValue(names, nextSeq);
-			_parseSkipLine(file, c);
-		} else if ((c == '\n') || (c == '\r')) {
-			c = _streamGet(file);
-		} else {
-			appendValue(mat, c);
-			c = _streamGet(file);
+            skipLine(reader);
+		}
+        else if ((value(reader) == '\n') || (value(reader) == '\r'))
+        {
+            goNext(reader);
+		}
+        else
+        {
+            appendValue(mat, value(reader));
+            goNext(reader);
 		}
 	}
 	// Reorder rows according to names order
@@ -571,47 +619,70 @@ read(TFile & file,
 	TNameToPosition namePosMap;
 	for(TSize i = 0;i<length(names);++i) namePosMap.insert(std::make_pair(names[i], i));
 	
-	// Read the Blast file
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
+    CharString buffer;
+    RecordReader<TFile, SinglePass<> > reader(file);
 
 	TName seq1;
 	TName seq2;
-	while (!_streamEOF(file)) {
+	while (!atEnd(reader))
+    {
 		clear(seq1);
 		clear(seq2);
-		_parseSkipWhitespace(file, c);
-		seq1 = _parseReadIdentifier(file, c);
-		_parseSkipWhitespace(file, c);
-		seq2 = _parseReadIdentifier(file, c);
-		if (seq1 == seq2) {
-			_parseSkipLine(file, c);
+        skipWhitespaces(reader);
+        readIdentifier(seq1, reader);
+        skipWhitespaces(reader);
+        readIdentifier(seq2, reader);
+        skipWhitespaces(reader);
+		if (seq1 == seq2)
+        {
+            skipLine(reader);
 			continue;
 		}
 		TSize seq1Id = namePosMap[seq1];
 		TSize seq2Id = namePosMap[seq2];
-		_parseSkipWhitespace(file, c);
-		_parseReadDouble(file, c);
-		_parseSkipWhitespace(file, c);
-		_parseReadNumber(file, c);
-		_parseSkipWhitespace(file, c);
-		_parseReadNumber(file, c);
-		_parseSkipWhitespace(file, c);
-		_parseReadNumber(file, c);
-		_parseSkipWhitespace(file, c);
-		TSize beg1 = _parseReadNumber(file, c);
-		_parseSkipWhitespace(file, c);
-		TSize end1 = _parseReadNumber(file, c);
+        skipWhitespaces(reader);
+        // We skip the data from the file, buffer is only rarely used.
+        clear(buffer);
+        readFloat(buffer, reader);
+        skipWhitespaces(reader);
+        clear(buffer);
+        readDigits(buffer, reader);
+        skipWhitespaces(reader);
+        clear(buffer);
+        readDigits(buffer, reader);
+        skipWhitespaces(reader);
+        clear(buffer);
+        readDigits(buffer, reader);
+        skipWhitespaces(reader);
+        TSize beg1 = 0;
+        clear(buffer);
+        readDigits(buffer, reader);
+        lexicalCast2(beg1, buffer);
+        skipWhitespaces(reader);
+		TSize end1 = 0;
+        clear(buffer);
+        readDigits(buffer, reader);
+        lexicalCast2(end1, buffer);
+        skipWhitespaces(reader);
 		TSize len = end1 - beg1 + 1;
-		_parseSkipWhitespace(file, c);
-		TSize beg2 = _parseReadNumber(file, c);
-		_parseSkipWhitespace(file, c);
-		TSize end2 = _parseReadNumber(file, c);
-		_parseSkipWhitespace(file, c);
-		_parseReadIdentifier(file, c);
-		_parseSkipWhitespace(file, c);
-		TScoreValue rawScore = (TScoreValue) _parseReadDouble(file, c);
+		TSize beg2 = 0;
+        clear(buffer);
+        readDigits(buffer, reader);
+        lexicalCast2(beg2, buffer);
+        skipWhitespaces(reader);
+		TSize end2 = 0;
+        clear(buffer);
+        readDigits(buffer, reader);
+        lexicalCast2(end2, buffer);
+        skipWhitespaces(reader);
+        clear(buffer);
+        readIdentifier(buffer, reader);
+        skipWhitespaces(reader);
+        clear(buffer);
+        readFloat(buffer, reader);
+        double tmpDouble = 0;
+        lexicalCast2(tmpDouble, buffer);
+        TScoreValue rawScore = static_cast<TScoreValue>(tmpDouble);
 
 		bool reversed = false;
 		if (beg1 > end1) { TSize tmp = beg1; beg1 = end1; end1 = tmp; reversed = !reversed; }
@@ -623,7 +694,7 @@ read(TFile & file,
 
 		_appendFragment(matches, seq1Id, --beg1, seq2Id, --beg2, len, reversed);
 		appendValue(scores, rawScore);
-		_parseSkipLine(file, c);
+		skipLine(reader);
 	}
 }
 
@@ -662,37 +733,37 @@ void write(TFile & file,
 		TSize seq1 = idToPosition(str, sequenceId(g,sV));
 		TSize seq2 = idToPosition(str, sequenceId(g,tV));
 		TCargo my_carg =  getCargo(*it);
-		_streamWrite(file, names[seq1]);
-		_streamPut(file, '\t');	
-		_streamWrite(file, names[seq2]);
-		_streamPut(file, '\t');	
-		_streamPutInt(file, 0);
-		_streamPut(file, '\t');	
-		_streamPutInt(file, fragLen);
-		_streamPut(file, '\t');	
-		_streamPutInt(file, 0);
-		_streamPut(file, '\t');	
-		_streamPutInt(file, 0);
-		_streamPut(file, '\t');	
-		_streamPutInt(file, fragPos1+1);
-		_streamPut(file, '\t');	
-		_streamPutInt(file, fragPos1 + fragLen);
-		_streamPut(file, '\t');	
+		streamPut(file, names[seq1]);
+		streamPut(file, '\t');	
+		streamPut(file, names[seq2]);
+		streamPut(file, '\t');	
+		streamPut(file, 0);
+		streamPut(file, '\t');	
+		streamPut(file, fragLen);
+		streamPut(file, '\t');	
+		streamPut(file, 0);
+		streamPut(file, '\t');	
+		streamPut(file, 0);
+		streamPut(file, '\t');	
+		streamPut(file, fragPos1+1);
+		streamPut(file, '\t');	
+		streamPut(file, fragPos1 + fragLen);
+		streamPut(file, '\t');	
 		if (!property(edgeMap, *it)) {
-			_streamPutInt(file, fragPos2+1);
-			_streamPut(file, '\t');	
-			_streamPutInt(file, fragPos2 + fragLen);
-			_streamPut(file, '\t');	
+			streamPut(file, fragPos2+1);
+			streamPut(file, '\t');	
+			streamPut(file, fragPos2 + fragLen);
+			streamPut(file, '\t');	
 		} else {
-			_streamPutInt(file, fragPos2 + fragLen);
-			_streamPut(file, '\t');		
-			_streamPutInt(file, fragPos2+1);
-			_streamPut(file, '\t');	
+			streamPut(file, fragPos2 + fragLen);
+			streamPut(file, '\t');		
+			streamPut(file, fragPos2+1);
+			streamPut(file, '\t');	
 		}
-		_streamPutInt(file, 0);
-		_streamPut(file, '\t');	
-		_streamPutInt(file, my_carg);
-		_streamPut(file, '\n');
+		streamPut(file, 0);
+		streamPut(file, '\t');	
+		streamPut(file, my_carg);
+		streamPut(file, '\n');
 	}
 }
 
@@ -772,6 +843,9 @@ read(TFile & file,
 	typedef typename Size<TNames>::Type TSize;
 	typedef typename Value<TFile>::Type TValue;
 	typedef typename Value<TNames>::Type TName;
+
+    CharString buffer;
+    RecordReader<TFile, SinglePass<> > reader(file);
 	
 	// Map the names to slots
 	typedef std::map<TName, TSize> TNameToPosition;
@@ -779,43 +853,64 @@ read(TFile & file,
 	for(TSize i = 0;i<length(names);++i) namePosMap.insert(std::make_pair(value(names, i), i));
 	
 	// Read the Mummer file
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
+    if (atEnd(reader))
+        return ;
 	TName seq1;
 	TName seq2;
 	TSize seq1Id = 0;
 	TSize seq2Id = 0;
 	bool reversed = false;
-	while (!_streamEOF(file)) {
-		if (c == '>') {
-			c = _streamGet(file);
-			_parseSkipWhitespace(file, c);
-			seq1 = _parseReadIdentifier(file, c);
-			 seq1Id = namePosMap[seq1];
-			 _parseSkipWhitespace(file, c);
-			 if (c == 'R') {
+	while (!atEnd(reader))
+    {
+		if (value(reader) == '>')
+        {
+            goNext(reader);
+            skipWhitespaces(reader);
+            clear(seq1);
+            readIdentifier(seq1, reader);
+            seq1Id = namePosMap[seq1];
+            skipWhitespaces(reader);
+            if (value(reader) == 'R')
+            {
 				 reversed = true;
-				 _parseSkipLine(file, c);
-			 } else reversed = false;
-		} else {
-			_parseSkipWhitespace(file, c);
-			if (_streamEOF(file)) {
-				break;
-			}
-			seq2 = _parseReadIdentifier(file, c);
+                 skipLine(reader);
+            }
+            else
+            {
+                reversed = false;
+            }
+		}
+        else
+        {
+            skipWhitespaces(reader);
+            if (atEnd(reader))
+                break;
+            clear(seq2);
+            readIdentifier(seq2, reader);
 			seq2Id = namePosMap[seq2];
-			_parseSkipWhitespace(file, c);
-			TSize beg2 = _parseReadNumber(file, c);
-			_parseSkipWhitespace(file, c);
-			TSize beg1 = _parseReadNumber(file, c);
-			_parseSkipWhitespace(file, c);
-			TSize len = _parseReadNumber(file, c);
-			_parseSkipLine(file, c);
-			if (seq1Id == seq2Id) continue;
+            skipWhitespaces(reader);
+            TSize beg2 = 0;
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(beg2, buffer);
+            skipWhitespaces(reader);
+            TSize beg1 = 0;
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(beg1, buffer);
+            skipWhitespaces(reader);
+            TSize len = 0;
+            clear(buffer);
+            readDigits(buffer, reader);
+            lexicalCast2(len, buffer);
+            skipLine(reader);
+			if (seq1Id == seq2Id)
+                continue;
 			
-			if (!reversed) _appendNewMatch(matches, scores, seq1Id, seq2Id, --beg1, --beg2, len, reversed);
-			else _appendNewMatch(matches, scores, seq1Id, seq2Id, (length(value(strSet, seq1Id)) - (--beg1 + len)), --beg2, len, reversed);
+			if (!reversed)
+                _appendNewMatch(matches, scores, seq1Id, seq2Id, --beg1, --beg2, len, reversed);
+			else
+                _appendNewMatch(matches, scores, seq1Id, seq2Id, (length(value(strSet, seq1Id)) - (--beg1 + len)), --beg2, len, reversed);
 		}
 	}
 }
@@ -834,7 +929,6 @@ read(TFile & file,
 	 NewickFormat) 
 {
 //IOREV _nodoc_ _notinlined_ specialization not documented
-	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGuideTree;
 	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGuideTree>::Type TEdgeDescriptor;
@@ -846,7 +940,8 @@ read(TFile & file,
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 
-	if (length(names) < 3) {
+	if (length(names) < 3)
+    {
 		TVertexDescriptor v1 = addVertex(guideTree);
 		TVertexDescriptor v2 = addVertex(guideTree);
 		TVertexDescriptor internalVertex = addVertex(guideTree);
@@ -856,7 +951,6 @@ read(TFile & file,
 		return;
 	}
 
-
 	typedef std::map<TName, TId> TNameToId;
 	TNameToId nameToId;
 	for(TId i=0; i<length(names);++i) {
@@ -864,14 +958,17 @@ read(TFile & file,
 		nameToId.insert(std::make_pair(names[i], i));
 	}
 
-	TValue c;
-	if (_streamEOF(file)) return;
-	else c = _streamGet(file);
+    CharString buffer;
+    RecordReader<TFile, SinglePass<> > reader(file);
+    if (atEnd(reader))
+        return;
 
 	TVertexDescriptor lastVertex = nilVertex;
 	TVertexDescriptor lastChild = nilVertex;
-	while (!_streamEOF(file)) {
-		if (c=='(') {
+	while (!atEnd(reader))
+    {
+		if (value(reader) == '(')
+        {
 			if (lastVertex == nilVertex) {
 				lastVertex = addVertex(guideTree);
 				assignRoot(guideTree, lastVertex);
@@ -879,9 +976,11 @@ read(TFile & file,
 				TVertexDescriptor ch = addChild(guideTree, lastVertex);
 				lastVertex = ch;
 			}
-			c = _streamGet(file);
-			_parseSkipWhitespace(file, c);
-		} else if (c==')') {
+            goNext(reader);
+            skipWhitespaces(reader);
+		}
+        else if (value(reader) == ')')
+        {
 			if (!isRoot(guideTree, lastVertex)) {
 				lastChild = lastVertex;
 				lastVertex = parentVertex(guideTree, lastVertex);
@@ -889,19 +988,24 @@ read(TFile & file,
 				lastChild = lastVertex;
 				lastVertex = nilVertex;
 			}
-			c = _streamGet(file);
-			_parseSkipWhitespace(file, c);
-		} else if (c==',') {
-			c = _streamGet(file);
-			_parseSkipWhitespace(file, c);
-		} else if (c==':') {
-			c = _streamGet(file);
-			cargo(findEdge(guideTree, lastVertex, lastChild)) = (TCargo) (_parseReadDouble(file,c) * SEQAN_DISTANCE_UNITY);
-		} else if (c==';') {
-			c = _streamGet(file);
-			_parseSkipWhitespace(file, c);
+            goNext(reader);
+            skipWhitespaces(reader);
+		} else if (value(reader) == ',') {
+            goNext(reader);
+            skipWhitespaces(reader);
+		} else if (value(reader) == ':') {
+            goNext(reader);
+            clear(buffer);
+            readFloat(buffer, reader);
+            double tmpDouble = 0;
+            lexicalCast2(tmpDouble, buffer);
+			cargo(findEdge(guideTree, lastVertex, lastChild)) = (TCargo) (tmpDouble * SEQAN_DISTANCE_UNITY);
+		} else if (value(reader) == ';') {
+            goNext(reader);
+            skipWhitespaces(reader);
 		} else {
-			TName tmp = _parseReadIdentifier(file, c);
+            TName tmp;
+            readIdentifier(tmp, reader);
 			//std::cout << tmp << std::endl;
 			if (lastVertex == nilVertex) {
 				// Tree is rooted at a leaf
@@ -1031,9 +1135,8 @@ write(TFile & file,
 	
 	String<char> myNewickString;
 	_buildNewickString(guideTree, names, myNewickString, getRoot(guideTree), collapseRoot);
-	_streamWrite(file, myNewickString);
-	_streamPut(file, ';');	
-	_streamPut(file, '\n');	
+	streamPut(file, myNewickString);
+	streamPut(file, ";\n");	
 }
 
 //////////////////////////////////////////////////////////////////////////////
