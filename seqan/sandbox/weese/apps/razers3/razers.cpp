@@ -57,7 +57,8 @@
 #include <seqan/store.h>
 #include <seqan/misc/misc_cmdparser.h>
 
-#include "config.h"
+// For GCC.
+#include <tr1/memory>
 
 #include "razers.h"
 #include "outputFormat.h"

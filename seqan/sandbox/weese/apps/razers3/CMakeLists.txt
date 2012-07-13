@@ -4,9 +4,9 @@ project (sandbox_weese_apps_razers3)
 #if (OPENMP_FOUND)
   # We need a configuration header file.  First, configure this file, then
   # add the target directory to the inclue path.
-  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
-                  ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  #configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+  #                ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+  #include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
   # Enable OpenMP.
   #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -fno-exceptions")
