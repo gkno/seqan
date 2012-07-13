@@ -772,14 +772,6 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		}
 		return i > 1;
 	}
-
-    template < typename TValue, typename TSpec, typename TSSSpec >
-    inline bool open(StringSet<String<TValue, TSpec>, Dependent<TSSSpec> > &, const char *, int) {
-        SEQAN_CHECKPOINT
-        // Do nothing for dependent string sets
-        return true;
-    }
-
 	template < typename TValue, typename TSpec, typename TSSSpec >
 	inline bool open(StringSet<String<TValue, TSpec>, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
@@ -857,14 +849,6 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		}
 		return true;
 	}
-
-    template < typename TValue, typename TSpec, typename TSSSpec >
-    inline bool save(StringSet<String<TValue, TSpec>, Dependent<TSSSpec> > &, const char *, int) {
-        SEQAN_CHECKPOINT
-        // Do nothing for dependent string sets
-        return true;
-    }
-
 	template < typename TValue, typename TSpec, typename TSSSpec >
 	inline bool save(StringSet<String<TValue, TSpec>, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
@@ -877,7 +861,6 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		if (!save(multi.limits, toCString(name), openMode)) return false;
 		return true;
 	}
-        
 	template < typename TValue, typename TSpec, typename TSSSpec>
 	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName) {
 	SEQAN_CHECKPOINT

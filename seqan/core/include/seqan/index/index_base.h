@@ -822,9 +822,6 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..include:seqan/index.h
 */
 
-//	template <typename TPos, typename TString, typename TSpec>
-//	inline typename Reference<typename Fibre<Index<TString, TSpec>, FibreRawText>::Type>::Type 
-//	textAt(TPos i, Index<TString, TSpec> &index) {
 	template <typename TPos, typename TIndex>
 	inline typename Reference<typename Fibre<TIndex, FibreRawText>::Type>::Type 
 	textAt(TPos i, TIndex &index) {
@@ -844,26 +841,6 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 		posLocalize(locPos, i, stringSetLimits(index));
 		return value(value(getFibre(index, FibreText()), getValueI1(locPos)), getValueI2(locPos));
 	}
-//    
-//	template <typename TPos, typename TString, typename TSpec>
-//	inline typename GetValue<typename Fibre<Index<TString, TSpec> const, FibreRawText>::Type>::Type 
-//	textAt(TPos i, Index<TString, TSpec> const &index) {
-//		return getValue(getFibre(index, FibreRawText()), i);
-//	}
-//	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
-//	inline typename GetValue<typename Fibre< Index< StringSet<TString, TSSetSpec>, TSpec> const, FibreRawText>::Type>::Type 
-//	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, TSpec> const &index) {
-//		return getValue(getFibre(index, FibreRawText()), posGlobalize(i, stringSetLimits(index)));
-//	}
-//	template <typename TPos, typename TString, typename TSpec>
-//	inline typename GetValue<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec> const, FibreRawText>::Type>::Type 
-//	textAt(TPos i, Index< StringSet<TString, Owner<Default> >, TSpec> const &index) {
-//		Pair <
-//        typename Size< StringSet<TString, Owner<Default> > >::Type,
-//        typename Size< TString >::Type > locPos;
-//		posLocalize(locPos, i, stringSetLimits(index));
-//		return getValue(getValue(getFibre(index, FibreText()), getValueI1(locPos)), getValueI2(locPos));
-//	}
 
 //////////////////////////////////////////////////////////////////////////////
 // infix

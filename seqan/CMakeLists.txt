@@ -16,10 +16,10 @@ endif(EXISTS ${CMAKE_SOURCE_DIR}/INST OR EXISTS ${CMAKE_SOURCE_DIR}/SUA OR EXIST
 # Warn People About the Perils Of In-Source Builds
 # ===========================================================================
 
-if (EXISTS "$CMAKE_BINARY_DIR/CMakeLists.txt")
-  if (EXISTS "$CMAKE_BINARY_DIR/I_WANT_IN_SOURCE_BUILDS")
+if (EXISTS "$ENV{PWD}/CMakeLists.txt" OR EXISTS "$ENV{CD}/CMakeLists.txt")
+  if (EXISTS "$ENV{PWD}/I_WANT_IN_SOURCE_BUILDS" OR EXISTS "$ENV{CD}/I_WANT_IN_SOURCE_BUILDS")
     set(IN_SOURCE_BUILD YES)
-  else (EXISTS "$CMAKE_BINARY_DIR/I_WANT_IN_SOURCE_BUILDS")
+  else (EXISTS "$ENV{PWD}/I_WANT_IN_SOURCE_BUILDS" OR EXISTS "$ENV{CD}/I_WANT_IN_SOURCE_BUILDS")
     message("CAUTION: In-source builds are not allowed by default!")
     message("")
     message("(If you want to use Eclipse and have read the 'Getting Started,")
@@ -50,8 +50,8 @@ if (EXISTS "$CMAKE_BINARY_DIR/CMakeLists.txt")
     message("  [Windows]          type nul >> I_WANT_IN_SOURCE_BUILDS")
     message("")
     message(FATAL_ERROR "Please follow the instructions above.")
-  endif (EXISTS "$CMAKE_BINARY_DIR/I_WANT_IN_SOURCE_BUILDS")
-endif (EXISTS "$CMAKE_BINARY_DIR/CMakeLists.txt")
+  endif (EXISTS "$ENV{PWD}/I_WANT_IN_SOURCE_BUILDS" OR EXISTS "$ENV{CD}/I_WANT_IN_SOURCE_BUILDS")
+endif (EXISTS "$ENV{PWD}/CMakeLists.txt" OR EXISTS "$ENV{CD}/CMakeLists.txt")
 
 cmake_minimum_required (VERSION 2.6)
 project (seqan)
