@@ -528,7 +528,9 @@ inline bool getOptionValue(TValue & val,
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
 
     if (isSet(me, name) || hasDefault(me, name))
-        return _convertArgumentValue(val, getOption(me, name), getArgumentValue(getOption(me, name), argNo));
+        return _convertArgumentValue(val,
+                                     getOption(me, name),
+                                     getArgumentValue(getOption(me, name), argNo));
     else
         return false;
 }
@@ -577,11 +579,13 @@ inline unsigned getOptionValueCount(ArgumentParser const & me, std::string const
 ..param.argumentPosition:The index of the argument in the argument list.
 ..returns: The number of values stored for the specified argument.
 ..include:seqan/arg_parse.h
-*/                                                                                                                                                                                                                                                                                                                                                                                                                                               
+*/
 
 inline unsigned getArgumentValueCount(ArgumentParser const & me, unsigned argumentPosition)
 {
-    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition,
+                "Argument Parser has only %d arguments.",
+                me.argumentList.size());
     return getArgumentValues(getArgument(me, argumentPosition)).size();
 }
 
@@ -610,7 +614,9 @@ inline bool getArgumentValue(TValue & value,
                              unsigned argumentPosition,
                              unsigned argNo)
 {
-    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition,
+                "Argument Parser has only %d arguments.",
+                me.argumentList.size());
     return _convertArgumentValue(value, getArgument(me, argumentPosition), getArgumentValue(getArgument(me, argumentPosition), argNo));
 }
 
@@ -664,7 +670,9 @@ inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
 inline std::vector<std::string> const & getArgumentValues(ArgumentParser & me,
                                                           unsigned argumentPosition)
 {
-    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition,
+                "Argument Parser has only %d arguments.",
+                me.argumentList.size());
     return getArgumentValues(getArgument(me, argumentPosition));
 }
 
@@ -739,7 +747,9 @@ inline void setMinValue(ArgumentParser & me,
                         unsigned argumentPosition,
                         std::string const & _minValue)
 {
-    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition,
+                "Argument Parser has only %d arguments.",
+                me.argumentList.size());
     setMinValue(getArgument(me, argumentPosition), _minValue);
 }
 
@@ -770,7 +780,9 @@ inline void setMaxValue(ArgumentParser & me,
                         unsigned argumentPosition,
                         std::string const & _minValue)
 {
-    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition,
+                "Argument Parser has only %d arguments.",
+                me.argumentList.size());
     setMaxValue(getArgument(me, argumentPosition), _minValue);
 }
 
@@ -810,7 +822,9 @@ inline void setValidValues(ArgumentParser & me,
                            unsigned argumentPosition,
                            std::vector<std::string> const & values)
 {
-    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition,
+                "Argument Parser has only %d arguments.",
+                me.argumentList.size());
     setValidValues(getArgument(me, argumentPosition), values);
 }
 
@@ -818,7 +832,9 @@ inline void setValidValues(ArgumentParser & me,
                            unsigned argumentPosition,
                            std::string const & values)
 {
-    SEQAN_CHECK(me.argumentList.size() > argumentPosition, "Argument Parser has only %d arguments.", me.argumentList.size());
+    SEQAN_CHECK(me.argumentList.size() > argumentPosition,
+                "Argument Parser has only %d arguments.",
+                me.argumentList.size());
     setValidValues(getArgument(me, argumentPosition), values);
 }
 

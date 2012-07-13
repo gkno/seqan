@@ -202,9 +202,9 @@ _includeInCTD(ArgParseOption const & opt)
 ..summary:Exports the app's interface description to a .ctd file.
 ..cat:Miscellaneous
 ..signature:writeCTD(parser)
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
-..include:seqan/misc/misc_cmdparser.h
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..include:seqan/arg_parse.h
 */
 
 inline void

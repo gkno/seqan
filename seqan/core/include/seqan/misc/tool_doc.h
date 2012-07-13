@@ -64,7 +64,8 @@ inline void append(ToolDoc & a, ToolDoc const & b);
 class ToolDocEntry_
 {
 public:
-    enum EntryType {
+    enum EntryType
+    {
         SUBSECTION, SECTION, LINE, LIST_ITEM
     };
 
@@ -79,21 +80,25 @@ public:
 
 // A section in the ToolDoc class.
 
-class ToolDocSection_ : public ToolDocEntry_
+class ToolDocSection_ :
+    public ToolDocEntry_
 {
 public:
     CharString _title;
 
-    ToolDocSection_(ToolDocSection_ const & sec) : _title(sec._title)
+    ToolDocSection_(ToolDocSection_ const & sec) :
+        _title(sec._title)
     {}
 
-    ToolDocSection_(CharString const & title) : _title(title)
+    ToolDocSection_(CharString const & title) :
+        _title(title)
     {}
 
     virtual EntryType getType() const
     {
         return SECTION;
     }
+
 };
 
 // --------------------------------------------------------------------------
@@ -102,19 +107,23 @@ public:
 
 // A subsection.
 
-class ToolDocSubSection_ : public ToolDocSection_
+class ToolDocSubSection_ :
+    public ToolDocSection_
 {
 public:
-    ToolDocSubSection_(ToolDocSubSection_ const & sec) : ToolDocSection_(sec)
+    ToolDocSubSection_(ToolDocSubSection_ const & sec) :
+        ToolDocSection_(sec)
     {}
 
-    ToolDocSubSection_(CharString const & title) : ToolDocSection_(title)
+    ToolDocSubSection_(CharString const & title) :
+        ToolDocSection_(title)
     {}
 
     virtual EntryType getType() const
     {
         return SUBSECTION;
     }
+
 };
 
 // --------------------------------------------------------------------------
@@ -123,17 +132,20 @@ public:
 
 // A Line/Paragraph in ToolDoc documents.
 
-class ToolDocLine_ : public ToolDocEntry_
+class ToolDocLine_ :
+    public ToolDocEntry_
 {
 public:
     CharString _text;
     // Evaluates to true if it is a paragraph and separated by .sp, false if it is a line, separated by .br.
     bool _isPar;
 
-    ToolDocLine_(ToolDocLine_ const & line) : _text(line._text), _isPar(line._isPar)
+    ToolDocLine_(ToolDocLine_ const & line) :
+        _text(line._text), _isPar(line._isPar)
     {}
 
-    ToolDocLine_(CharString const & text, bool isParagraph) : _text(text), _isPar(isParagraph)
+    ToolDocLine_(CharString const & text, bool isParagraph) :
+        _text(text), _isPar(isParagraph)
     {}
 
     virtual EntryType getType() const
@@ -145,6 +157,7 @@ public:
     {
         return _isPar;
     }
+
 };
 
 // --------------------------------------------------------------------------
@@ -153,23 +166,26 @@ public:
 
 // A list item in ToolDoc documents.
 
-class ToolDocListItem_ : public ToolDocEntry_
+class ToolDocListItem_ :
+    public ToolDocEntry_
 {
 public:
     CharString _term;
     CharString _description;
 
-    ToolDocListItem_(ToolDocListItem_ const & item) : _term(item._term), _description(item._description)
+    ToolDocListItem_(ToolDocListItem_ const & item) :
+        _term(item._term), _description(item._description)
     {}
 
     ToolDocListItem_(CharString const & term, CharString const & description) :
-            _term(term), _description(description)
+        _term(term), _description(description)
     {}
 
     virtual EntryType getType() const
     {
         return LIST_ITEM;
     }
+
 };
 
 // --------------------------------------------------------------------------
@@ -181,7 +197,7 @@ public:
 class ToolDocPrinter_
 {
 public:
-     virtual void print(std::ostream & stream, ToolDoc const & doc) = 0;
+    virtual void print(std::ostream & stream, ToolDoc const & doc) = 0;
 };
 
 // --------------------------------------------------------------------------
@@ -190,7 +206,8 @@ public:
 
 // Print ToolDoc instance in man format.
 
-class ManToolDocPrinter_ : public ToolDocPrinter_
+class ManToolDocPrinter_ :
+    public ToolDocPrinter_
 {
 public:
     virtual void print(std::ostream & stream, ToolDoc const & doc);
@@ -202,13 +219,15 @@ public:
 
 // Print ToolDoc instance in HTML format.
 
-class HtmlToolDocPrinter_ : public ToolDocPrinter_
+class HtmlToolDocPrinter_ :
+    public ToolDocPrinter_
 {
 public:
     void _maybeCloseList(std::ostream & stream, bool & isListOpen)
     {
         if (!isListOpen)
             return;
+
         stream << "</dl>\n";
         isListOpen = false;
     }
@@ -217,6 +236,7 @@ public:
     {
         if (!isParOpen)
             return;
+
         stream << "</p>\n";
         isParOpen = false;
     }
@@ -227,7 +247,7 @@ public:
         CharString buffer = _xmlEscape(input);
         CharString result;
         String<CharString> openTags;
-        
+
         typedef Iterator<CharString const, Rooted>::Type TIterator;
         for (TIterator it = begin(input, Rooted()); !atEnd(it); goNext(it))
         {
@@ -292,7 +312,8 @@ public:
 
 // Print ToolDoc objects in Text format, suitable for console output.
 
-class TextToolDocPrinter_ : public ToolDocPrinter_
+class TextToolDocPrinter_ :
+    public ToolDocPrinter_
 {
 public:
     // Stores the relevant parameters of the documentation on the screen.
@@ -310,8 +331,8 @@ public:
         unsigned rightColumnTab;
 
         Layout_() :
-                screenWidth(0), defaultScreenWidth(80), maximalScreenWidth(120), minimalScreenWidth(40),
-                leftPadding(4), centerPadding(2), rightPadding(2), leftColumnWidth(4), rightColumnWidth(0)
+            screenWidth(0), defaultScreenWidth(80), maximalScreenWidth(120), minimalScreenWidth(40),
+            leftPadding(4), centerPadding(2), rightPadding(2), leftColumnWidth(4), rightColumnWidth(0)
         {
             // Guess terminal screen width and set into layout.
             unsigned cols = 0, rows = 0;
@@ -326,6 +347,7 @@ public:
 
             // std::cerr << "screen width\t" << screenWidth << std::endl;
         }
+
     };
 
     Layout_ _layout;
@@ -359,7 +381,7 @@ public:
     CharString _toText(CharString const & str) const
     {
         CharString result;
-        
+
         typedef Iterator<CharString const, Rooted>::Type TIterator;
         for (TIterator it = begin(str, Rooted()); !atEnd(it); goNext(it))
         {
@@ -476,7 +498,8 @@ public:
     }
 
     // Print text, must be at tab already.
-    void _printText(std::ostream & stream, CharString const & text, unsigned tab) {
+    void _printText(std::ostream & stream, CharString const & text, unsigned tab)
+    {
         unsigned pos = tab;
         std::ostream_iterator<char> out(stream);
 
@@ -526,6 +549,7 @@ public:
         if (!empty(tokens))
             stream << '\n';
     }
+
 };
 
 // --------------------------------------------------------------------------
@@ -596,14 +620,15 @@ public:
 
     String<ToolDocEntry_ *> _entries;
 
-    enum Format { FORMAT_HTML, FORMAT_MAN, FORMAT_TXT };
+    enum Format {FORMAT_HTML, FORMAT_MAN, FORMAT_TXT};
 
-    ToolDoc() : _manSection(1) {}
+    ToolDoc() :
+        _manSection(1) {}
 
     ToolDoc(ToolDoc const & toolDoc) :
-            _name(toolDoc._name), _shortDescription(toolDoc._shortDescription),
-            _date(toolDoc._date), _version(toolDoc._version), _manTitle(toolDoc._manTitle),
-            _manSection(1)
+        _name(toolDoc._name), _shortDescription(toolDoc._shortDescription),
+        _date(toolDoc._date), _version(toolDoc._version), _manTitle(toolDoc._manTitle),
+        _manSection(1)
     {
         append(*this, toolDoc);
     }
@@ -617,24 +642,26 @@ public:
     {
         switch (format)
         {
-            case FORMAT_HTML:
-                {
-                    HtmlToolDocPrinter_ p;
-                    p.print(stream, *this);
-                }
-                break;
-            case FORMAT_MAN:
-                {
-                    ManToolDocPrinter_ p;
-                    p.print(stream, *this);
-                }
-                break;
-            case FORMAT_TXT:
-                {
-                    TextToolDocPrinter_ p;
-                    p.print(stream, *this);
-                }
-                break;
+        case FORMAT_HTML:
+        {
+            HtmlToolDocPrinter_ p;
+            p.print(stream, *this);
+        }
+        break;
+
+        case FORMAT_MAN:
+        {
+            ManToolDocPrinter_ p;
+            p.print(stream, *this);
+        }
+        break;
+
+        case FORMAT_TXT:
+        {
+            TextToolDocPrinter_ p;
+            p.print(stream, *this);
+        }
+        break;
         }
     }
 
@@ -665,7 +692,7 @@ public:
 /**
 .Function.append#Class.ToolDoc
 ..summary:Append two @Class.ToolDoc@ objects.
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..signature:append(a, b)
 ..param.a:This object is updated.
 ...type:Class.ToolDoc
@@ -682,18 +709,21 @@ inline void append(ToolDoc & a, ToolDoc const & b)
         // TODO(holtgrew): This is quite ugly and can be made better with shared_ptr<> in C++11.
         switch (b._entries[i]->getType())
         {
-            case ToolDocEntry_::SUBSECTION:
-                appendValue(a._entries, new ToolDocSubSection_(*static_cast<ToolDocSubSection_ *>(b._entries[i])));
-                break;
-            case ToolDocEntry_::SECTION:
-                appendValue(a._entries, new ToolDocSection_(*static_cast<ToolDocSection_ *>(b._entries[i])));
-                break;
-            case ToolDocEntry_::LINE:
-                appendValue(a._entries, new ToolDocLine_(*static_cast<ToolDocLine_ *>(b._entries[i])));
-                break;
-            case ToolDocEntry_::LIST_ITEM:
-                appendValue(a._entries, new ToolDocListItem_(*static_cast<ToolDocListItem_ *>(b._entries[i])));
-                break;
+        case ToolDocEntry_::SUBSECTION:
+            appendValue(a._entries, new ToolDocSubSection_(*static_cast<ToolDocSubSection_ *>(b._entries[i])));
+            break;
+
+        case ToolDocEntry_::SECTION:
+            appendValue(a._entries, new ToolDocSection_(*static_cast<ToolDocSection_ *>(b._entries[i])));
+            break;
+
+        case ToolDocEntry_::LINE:
+            appendValue(a._entries, new ToolDocLine_(*static_cast<ToolDocLine_ *>(b._entries[i])));
+            break;
+
+        case ToolDocEntry_::LIST_ITEM:
+            appendValue(a._entries, new ToolDocListItem_(*static_cast<ToolDocListItem_ *>(b._entries[i])));
+            break;
         }
     }
 }
@@ -705,7 +735,7 @@ inline void append(ToolDoc & a, ToolDoc const & b)
 /**
 .Function.setName
 ..summary:Set tool name for @Class.ToolDoc@ object.
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..signature:setName(doc, name)
 ..param.doc:Tool documentation object to set the name of.
 ...type:Class.ToolDoc
@@ -727,7 +757,7 @@ inline void setName(ToolDoc & doc, CharString const & name)
 /**
 .Function.getName
 ..summary:Get tool name of @Class.ToolDoc@ object.
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..signature:setName(doc)
 ..param.doc:Tool documentation object to set the tool name of.
 ...type:Class.ToolDoc
@@ -748,7 +778,7 @@ inline CharString const & getName(ToolDoc const & doc)
 /**
 .Function.setShortDescription
 ..summary:Set short description for @Class.ToolDoc@ object.
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..signature:setShortDescriptioin(doc, description)
 ..param.doc:Tool documentation object to set the short description of.
 ...type:Class.ToolDoc
@@ -770,7 +800,7 @@ inline void setShortDescription(ToolDoc & doc, CharString const & shortDescripti
 /**
 .Function.getShortDescription
 ..summary:Get short description of @Class.ToolDoc@ object.
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..signature:setName(doc)
 ..param.doc:Tool documentation object to set the short description of.
 ...type:Class.ToolDoc
@@ -790,7 +820,7 @@ inline CharString const & getShortDescription(ToolDoc const & doc)
 
 /**
 .Function.setDate
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Set date string for @Class.ToolDoc@ object.
 ..signature:setDate(doc, date)
 ..param.doc:Tool documentation object to set the date string to.
@@ -812,7 +842,7 @@ inline void setDate(ToolDoc & doc, CharString const & date)
 
 /**
 .Function.getDate
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Get date string from @Class.ToolDoc@ object.
 ..signature:getDate(doc)
 ..param.doc:Tool documentation object to get the date string of.
@@ -833,7 +863,7 @@ inline CharString const & getDate(ToolDoc const & doc)
 
 /**
 .Function.setVersion
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Set version string for @Class.ToolDoc@ object.
 ..signature:setVersion(doc, version)
 ..param.doc:Tool documentation object to set the version string to.
@@ -855,7 +885,7 @@ inline void setVersion(ToolDoc & doc, CharString const & version)
 
 /**
 .Function.getVersion
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Get version string from @Class.ToolDoc@ object.
 ..signature:getVersion(doc)
 ..param.doc:Tool documentation object to get the version string of.
@@ -876,7 +906,7 @@ inline CharString const & getVersion(ToolDoc const & doc)
 
 /**
 .Function.setManTitle
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Set version string for @Class.ToolDoc@ object.
 ..signature:setManTitle(doc, title)
 ..param.doc:Tool documentation object to set the man title to.
@@ -898,7 +928,7 @@ inline void setManTitle(ToolDoc & doc, CharString const & title)
 
 /**
 .Function.getManTitle
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Get man title from @Class.ToolDoc@ object.
 ..signature:getManTitle(doc)
 ..param.doc:Tool documentation object to get the man title of.
@@ -919,7 +949,7 @@ inline CharString const & getManTitle(ToolDoc & doc)
 
 /**
 .Function.addSection
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Add section to @Class.ToolDoc@ object.
 ..signature:addSection(doc, title)
 ..param.doc:Tool documentation object to add section to.
@@ -941,7 +971,7 @@ inline void addSection(ToolDoc & doc, CharString const & title)
 
 /**
 .Function.addSubSection
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Add subsection to @Class.ToolDoc@ object.
 ..signature:addSubSection(doc, title)
 ..param.doc:Tool documentation object to add subsection to.
@@ -963,7 +993,7 @@ inline void addSubSection(ToolDoc & doc, CharString const & title)
 
 /**
 .Function.addText
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Add text line/paragraph to @Class.ToolDoc@.
 ..signature:addText(doc, text, [isParagraph])
 ..param.doc:Tool documentation object to text to.
@@ -994,7 +1024,7 @@ inline void addText(ToolDoc & doc, CharString const & text)
 
 /**
 .Function.addListItem
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Add list item to @Class.ToolDoc@ object.
 ..signature:addListItem(doc, key, value)
 ..param.doc:Tool documentation object to add subsection to.
@@ -1020,7 +1050,7 @@ inline void addListItem(ToolDoc & doc, CharString const & key, CharString const 
 
 /**
 .Function.print
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Print @Class.ToolDoc@ object in a given format.
 ..signature:print(doc, format)
 ..param.stream:List item key.
@@ -1044,7 +1074,7 @@ inline void print(std::ostream & stream, ToolDoc const & doc, CharString const &
 
 /**
 .Function.clearEntries
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Clear entries from @Class.ToolDoc@ object.
 ..signature:clearEntries(doc)
 ..param.doc:Tool documentation object to clear.
@@ -1090,51 +1120,54 @@ void HtmlToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
 
         switch (entry->getType())
         {
-            case ToolDocEntry_::SECTION:
-                {
-                    _maybeCloseList(stream, isDl);
-                    _maybeCloseParagraph(stream, isP);
-                    ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
-                    stream << "<h2>" << _toHtml(sec->_title) << "</h2>\n";
-                }
-                break;
-            case ToolDocEntry_::SUBSECTION:
-                {
-                    _maybeCloseList(stream, isDl);
-                    _maybeCloseParagraph(stream, isP);
-                    ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
-                    stream << "<h3>" << _toHtml(sec->_title) << "</h3>\n";
-                }
-                break;
-            case ToolDocEntry_::LINE:
-                {
-                    ToolDocLine_ const * line = static_cast<ToolDocLine_ const *>(entry);
-                    _maybeCloseList(stream, isDl);
-                    if (!isP)
-                    {
-                        stream << "<p>\n";
-                        isP = true;
-                    }
-                    stream << _toHtml(line->_text) << "\n";
-                    if (line->isParagraph())
-                        _maybeCloseParagraph(stream, isP);
-                    else
-                        stream << "<br />\n";
-                }
-                break;
-            case ToolDocEntry_::LIST_ITEM:
-                {
-                    _maybeCloseParagraph(stream, isP);
-                    ToolDocListItem_ const * item = static_cast<ToolDocListItem_ const *>(entry);
-                    if (!isDl)
-                    {
-                        stream << "<dl>\n";
-                        isDl = true;
-                    }
-                    stream << "<dt>" << _toHtml(item->_term) << "</dt>\n"
-                           << "<dd>" << _toHtml(item->_description) << "</dd>\n";
-                }
-                break;
+        case ToolDocEntry_::SECTION:
+        {
+            _maybeCloseList(stream, isDl);
+            _maybeCloseParagraph(stream, isP);
+            ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
+            stream << "<h2>" << _toHtml(sec->_title) << "</h2>\n";
+        }
+        break;
+
+        case ToolDocEntry_::SUBSECTION:
+        {
+            _maybeCloseList(stream, isDl);
+            _maybeCloseParagraph(stream, isP);
+            ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
+            stream << "<h3>" << _toHtml(sec->_title) << "</h3>\n";
+        }
+        break;
+
+        case ToolDocEntry_::LINE:
+        {
+            ToolDocLine_ const * line = static_cast<ToolDocLine_ const *>(entry);
+            _maybeCloseList(stream, isDl);
+            if (!isP)
+            {
+                stream << "<p>\n";
+                isP = true;
+            }
+            stream << _toHtml(line->_text) << "\n";
+            if (line->isParagraph())
+                _maybeCloseParagraph(stream, isP);
+            else
+                stream << "<br />\n";
+        }
+        break;
+
+        case ToolDocEntry_::LIST_ITEM:
+        {
+            _maybeCloseParagraph(stream, isP);
+            ToolDocListItem_ const * item = static_cast<ToolDocListItem_ const *>(entry);
+            if (!isDl)
+            {
+                stream << "<dl>\n";
+                isDl = true;
+            }
+            stream << "<dt>" << _toHtml(item->_term) << "</dt>\n"
+                   << "<dd>" << _toHtml(item->_description) << "</dd>\n";
+        }
+        break;
         }
     }
     _maybeCloseList(stream, isDl);
@@ -1169,46 +1202,49 @@ void TextToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
 
         switch (entry->getType())
         {
-            case ToolDocEntry_::SECTION:
-                {
-                    ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
-                    _printSection(stream, *sec);
-                    prevWasParagraph = false;
-                }
-                break;
-            case ToolDocEntry_::SUBSECTION:
-                {
-                    ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
-                    _printSubSection(stream, *sec);
-                    prevWasParagraph = false;
-                }
-                break;
-            case ToolDocEntry_::LINE:
-                {
-                    if (prevWasParagraph)
-                        stream << '\n';
-                    ToolDocLine_ const * line = static_cast<ToolDocLine_ const *>(entry);
-                    _printLine(stream, *line);
-                    prevWasParagraph = line->isParagraph();
-                }
-                break;
-            case ToolDocEntry_::LIST_ITEM:
-                {
-                    if (prevWasParagraph)
-                        stream << '\n';
-                    ToolDocListItem_ const * item = static_cast<ToolDocListItem_ const *>(entry);
-                    _printListItem(stream, *item);
-                    prevWasParagraph = false;
-                }
-                break;
+        case ToolDocEntry_::SECTION:
+        {
+            ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
+            _printSection(stream, *sec);
+            prevWasParagraph = false;
+        }
+        break;
+
+        case ToolDocEntry_::SUBSECTION:
+        {
+            ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
+            _printSubSection(stream, *sec);
+            prevWasParagraph = false;
+        }
+        break;
+
+        case ToolDocEntry_::LINE:
+        {
+            if (prevWasParagraph)
+                stream << '\n';
+            ToolDocLine_ const * line = static_cast<ToolDocLine_ const *>(entry);
+            _printLine(stream, *line);
+            prevWasParagraph = line->isParagraph();
+        }
+        break;
+
+        case ToolDocEntry_::LIST_ITEM:
+        {
+            if (prevWasParagraph)
+                stream << '\n';
+            ToolDocListItem_ const * item = static_cast<ToolDocListItem_ const *>(entry);
+            _printListItem(stream, *item);
+            prevWasParagraph = false;
+        }
+        break;
         }
     }
 
     // Print version and date.
     stream << "\n" << _toText("\\fB") << "VERSION" << _toText("\\fP") << "\n";
-    std::fill_n(out,  _layout.leftPadding, ' ');
+    std::fill_n(out, _layout.leftPadding, ' ');
     stream << doc._name << " version: " << doc._version << "\n";
-    std::fill_n(out,  _layout.leftPadding, ' ');
+    std::fill_n(out, _layout.leftPadding, ' ');
     stream << "Last update " << doc._date << "\n";
 }
 
@@ -1235,42 +1271,45 @@ void ManToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
         ToolDocEntry_ * entry = *it;
         switch (entry->getType())
         {
-            case ToolDocEntry_::SUBSECTION:
-                {
-                    ToolDocSubSection_ const * sec = static_cast<ToolDocSubSection_ const *>(entry);
-                    stream << ".SS " << sec->_title << "\n";
-                    isFirstInSection = true;
-                }
-                break;
-            case ToolDocEntry_::SECTION:
-                {
-                    ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
-                    stream << ".SH ";
-                    std::transform(begin(sec->_title), end(sec->_title), out, toupper);
-                    stream << "\n";
-                    isFirstInSection = true;
-                }
-                break;
-            case ToolDocEntry_::LINE:
-                {
-                    ToolDocLine_ const * line = static_cast<ToolDocLine_ const *>(entry);
-                    if (!isFirstInSection && line->isParagraph())
-                        stream << ".sp\n";
-                    else if (!isFirstInSection && !line->isParagraph())
-                        stream << ".br\n";
-                    stream << line->_text << "\n";
-                    isFirstInSection = false;
-                }
-                break;
-            case ToolDocEntry_::LIST_ITEM:
-                {
-                    ToolDocListItem_ const * item = static_cast<ToolDocListItem_ const *>(entry);
-                    stream << ".TP\n"
-                           << item->_term << "\n"
-                           << item->_description << "\n";
-                    isFirstInSection = false;
-                }
-                break;
+        case ToolDocEntry_::SUBSECTION:
+        {
+            ToolDocSubSection_ const * sec = static_cast<ToolDocSubSection_ const *>(entry);
+            stream << ".SS " << sec->_title << "\n";
+            isFirstInSection = true;
+        }
+        break;
+
+        case ToolDocEntry_::SECTION:
+        {
+            ToolDocSection_ const * sec = static_cast<ToolDocSection_ const *>(entry);
+            stream << ".SH ";
+            std::transform(begin(sec->_title), end(sec->_title), out, toupper);
+            stream << "\n";
+            isFirstInSection = true;
+        }
+        break;
+
+        case ToolDocEntry_::LINE:
+        {
+            ToolDocLine_ const * line = static_cast<ToolDocLine_ const *>(entry);
+            if (!isFirstInSection && line->isParagraph())
+                stream << ".sp\n";
+            else if (!isFirstInSection && !line->isParagraph())
+                stream << ".br\n";
+            stream << line->_text << "\n";
+            isFirstInSection = false;
+        }
+        break;
+
+        case ToolDocEntry_::LIST_ITEM:
+        {
+            ToolDocListItem_ const * item = static_cast<ToolDocListItem_ const *>(entry);
+            stream << ".TP\n"
+                   << item->_term << "\n"
+                   << item->_description << "\n";
+            isFirstInSection = false;
+        }
+        break;
         }
     }
 }

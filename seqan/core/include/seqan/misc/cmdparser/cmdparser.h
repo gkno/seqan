@@ -45,12 +45,12 @@
 
 namespace seqan {
 
-/**
+/*
  * TODO: arguments also need a type if they are used as input/output file
  * TODO: correct parameter ordering of nearly all cmdparser function to be seqan conform f(out,in)
  */
 
-/**
+/*
 .Class.CommandLineParser
 ..cat:Miscellaneous
 ..summary:Stores multiple @Class.CommandLineOption@ objects and parses the command line _arguments for these options.
@@ -58,7 +58,7 @@ namespace seqan {
 ..include:seqan/misc/misc_cmdparser.h
 */
 
-/**
+/*
 .Memfunc.CommandLineParser#CommandLineParser
 ..class:Class.CommandLineParser
 ..summary:Constructor
@@ -136,7 +136,7 @@ public:
     // ----------------------------------------------------------------------------
     // c'tors
     // ----------------------------------------------------------------------------
-    CommandLineParser()       
+    CommandLineParser()
     {
         init();
     }
@@ -153,7 +153,7 @@ public:
 // Function hasOptionLong()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.hasOptionLong:
 ..summary:Returns whether a certain long-name option is registered in the parser.
 ..cat:Miscellaneous
@@ -175,7 +175,7 @@ hasOptionLong(CommandLineParser const & me, CharString const & _long)
 // Function hasOptionShort()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.hasOptionShort:
 ..summary:Returns whether a certain short-name option is registered in the parser.
 ..cat:Miscellaneous
@@ -197,7 +197,7 @@ hasOptionShort(CommandLineParser const & me, CharString const & _short)
 // Function hasOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.hasOption:
 ..summary:Returns whether a certain option is registered in the parser.
 ..cat:Miscellaneous
@@ -212,14 +212,14 @@ hasOptionShort(CommandLineParser const & me, CharString const & _short)
 inline bool
 hasOption(CommandLineParser const & me, CharString const & _name)
 {
-    return (hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name));
+    return hasKey(me.shortNameMap, _name) || hasKey(me.longNameMap, _name);
 }
 
 // ----------------------------------------------------------------------------
 // Function addOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addOption
 ..summary:Adds a @Class.CommandLineOption@ object to the @Class.CommandLineParser@.
 ..cat:Miscellaneous
@@ -267,7 +267,7 @@ addOption(CommandLineParser & me, CommandLineOption const & opt)
 // Function addLine()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addLine:
 ..summary:Adds a line of text to the help output of the @Class.CommandLineParser@.
 ..cat:Miscellaneous
@@ -290,7 +290,7 @@ addLine(CommandLineParser & me, TString const & line)
 // Function addHelpLine()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addHelpLine:
 ..summary:Adds an extra line of text below the help text of an option.
 ..cat:Miscellaneous
@@ -313,7 +313,7 @@ addHelpLine(CommandLineParser & me, TString const & line)
 // Function addSection()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addSection:
 ..summary:Adds a new section the help output of the @Class.CommandLineParser@.
 ..cat:Miscellaneous
@@ -337,7 +337,7 @@ addSection(CommandLineParser & me, TString const & line)
 // Function addTitleLine()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addTitleLine:
 ..summary:Adds a line of text to the title output of the @Class.CommandLineParser@.
 ..cat:Miscellaneous
@@ -360,7 +360,7 @@ addTitleLine(CommandLineParser & me, TString const & line)
 // Function addVersionLine()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addVersionLine:
 ..summary:Adds a line of text to the version output of the @Class.CommandLineParser@.
 ..cat:Miscellaneous
@@ -385,7 +385,7 @@ addVersionLine(CommandLineParser & me, TString const & line)
 // Function addUsageLine()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addUsageLine:
 ..summary:Adds a line of text to the usage output of the @Class.CommandLineParser@.
 ..cat:Miscellaneous
@@ -407,10 +407,10 @@ addUsageLine(CommandLineParser & me, CharString const & line)
 // Function _getOptionIndex()
 // ----------------------------------------------------------------------------
 
-inline Size< String<CommandLineOption> >::Type
+inline Size<String<CommandLineOption> >::Type
 _getOptionIndex(CommandLineParser const & me, CharString const & _name)
 {
-    typedef Size< String<CommandLineOption> >::Type TOptionPosition;
+    typedef Size<String<CommandLineOption> >::Type TOptionPosition;
     TOptionPosition option_index;
     if (hasKey(me.shortNameMap, _name))
     {
@@ -431,21 +431,21 @@ inline CommandLineOption &
 getOption(CommandLineParser & me, CharString const & _name)
 {
     SEQAN_ASSERT_MSG(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    return me.optionMap[_getOptionIndex(me,_name)];
+    return me.optionMap[_getOptionIndex(me, _name)];
 }
 
 inline CommandLineOption const &
 getOption(CommandLineParser const & me, CharString const & _name)
 {
     SEQAN_ASSERT_MSG(hasOption(me, _name), "Unknown option: %s", toCString(_name));
-    return me.optionMap[_getOptionIndex(me,_name)];
+    return me.optionMap[_getOptionIndex(me, _name)];
 }
 
 // ----------------------------------------------------------------------------
 // Function setRequiredArguments()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setRequiredArguments
 ..summary:Sets the number of _arguments (non-parameterized options) are required by the program.
 ..cat:Miscellaneous
@@ -462,7 +462,7 @@ setRequiredArguments(CommandLineParser & me, unsigned count)
     me._requiredArguments = count;
 }
 
-/**
+/*
 .Function.requiredArguments
 ..summary:Sets the number of _arguments (non-parameterized options) are required by the program.
 ..cat:Miscellaneous
@@ -546,7 +546,7 @@ _printTitle(CommandLineParser const & me, TStream & target)
 // Function printShortHelp()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.printShortHelp
 ..summary:Prints a short help message for the parser to a stream
 ..cat:Miscellaneous
@@ -568,8 +568,7 @@ printShortHelp(CommandLineParser const & me, TStream & target)
     _streamWrite(target, " --help' for more information.\n");
 }
 
-
-/**
+/*
 .Function.shortHelp
 ..summary:Prints a short help message for the parser to a stream
 ..cat:Miscellaneous
@@ -600,7 +599,7 @@ shortHelp(CommandLineParser const & me)
 // Function printHelp()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.printHelp
 ..summary:Prints the complete help message for the parser to a stream.
 ..cat:Miscellaneous
@@ -678,7 +677,7 @@ printHelp(CommandLineParser const & me, TStream & target)
     _streamPut(target, '\n');
 }
 
-/**
+/*
 .Function.help
 ..summary:Prints the complete help message for the parser to a stream.
 ..cat:Miscellaneous
@@ -709,7 +708,7 @@ help(CommandLineParser const & me)
 // Function printVersion()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.printVersion
 ..summary:Prints a version text to a stream.
 ..cat:Miscellaneous
@@ -728,7 +727,7 @@ printVersion(CommandLineParser const & me, TStream & target)
     _printStringSet(me._versionText, target);
 }
 
-/**
+/*
 .Function.version
 ..summary:Prints a version text to a stream.
 ..cat:Miscellaneous
@@ -759,7 +758,7 @@ version(CommandLineParser const & me)
 // Function isSet()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isSet
 ..summary:Returns whether an option was set on the parsed command line.
 ..cat:Miscellaneous
@@ -778,7 +777,7 @@ isSet(CommandLineParser const & me, CharString const & name)
     return !empty(getOption(me, name).value);
 }
 
-/**
+/*
 .Function.isSetShort
 ..summary:Returns whether a short-name option was set on the parsed command line.
 ..cat:Miscellaneous
@@ -798,7 +797,7 @@ isSetShort(CommandLineParser & me, CharString const & shortName)
     return isSet(me, shortName);
 }
 
-/**
+/*
 .Function.isSetLong
 ..summary:Returns whether a long-name option was set on the parsed command line.
 ..cat:Miscellaneous
@@ -880,7 +879,7 @@ _reportInvalidType(CommandLineParser const & me, CommandLineOption const & opt,
 
 template <typename TErrorStream>
 inline void
-_reportMissingArgument(CommandLineParser const & me, 
+_reportMissingArgument(CommandLineParser const & me,
                        CommandLineOption const & opt, TErrorStream & estream)
 {
     _streamWrite(estream, me._appName);
@@ -897,7 +896,7 @@ _reportMissingArgument(CommandLineParser const & me,
 
 template <typename TErrorStream>
 inline void
-_reportInvalidOption(CommandLineParser const & me, CharString const & option, 
+_reportInvalidOption(CommandLineParser const & me, CharString const & option,
                      TErrorStream & estream)
 {
     _streamWrite(estream, me._appName);
@@ -912,7 +911,7 @@ _reportInvalidOption(CommandLineParser const & me, CharString const & option,
 
 template <typename TErrorStream>
 inline void
-_reportValueNotInRange(CommandLineOption const & opt, CharString const & val, 
+_reportValueNotInRange(CommandLineOption const & opt, CharString const & val,
                        TErrorStream & estream)
 {
     _writeOptName(estream, opt);
@@ -931,7 +930,7 @@ _reportValueNotInRange(CommandLineOption const & opt, CharString const & val,
 
 template <typename TErrorStream>
 inline void
-_reportInvalidValue(CommandLineOption const & opt, CharString const & val, 
+_reportInvalidValue(CommandLineOption const & opt, CharString const & val,
                     TErrorStream & estream)
 {
     typedef Iterator<StringSet<CharString> const, Rooted>::Type TStringSetIter;
@@ -959,7 +958,7 @@ _reportInvalidValue(CommandLineOption const & opt, CharString const & val,
 
 template <typename TErrorStream>
 inline void
-_reportInvalidFileType(CommandLineOption const & opt, CharString const & val, 
+_reportInvalidFileType(CommandLineOption const & opt, CharString const & val,
                        TErrorStream & estream)
 {
     _writeOptName(estream, opt);
@@ -984,11 +983,11 @@ _reportInvalidFileType(CommandLineOption const & opt, CharString const & val,
 // ----------------------------------------------------------------------------
 
 template <typename TValue, typename TErrorStream>
-bool _checkMinMaxValue(CommandLineOption const & opt, CharString const & val, 
+bool _checkMinMaxValue(CommandLineOption const & opt, CharString const & val,
                        TErrorStream & estream)
 {
     TValue d_value = 0;
-    if (!_convertOptionValue(opt, d_value, val)) 
+    if (!_convertOptionValue(opt, d_value, val))
         SEQAN_FAIL("Conversion should work");
 
     if (opt.minValue != "")
@@ -1017,7 +1016,7 @@ bool _checkMinMaxValue(CommandLineOption const & opt, CharString const & val,
     }
 
     return true;
-    
+
 }
 
 // ----------------------------------------------------------------------------
@@ -1025,12 +1024,13 @@ bool _checkMinMaxValue(CommandLineOption const & opt, CharString const & val,
 // ----------------------------------------------------------------------------
 
 template <typename TErrorStream>
-bool _checkValidValues(CommandLineOption const & opt, CharString const & val, 
+bool _checkValidValues(CommandLineOption const & opt, CharString const & val,
                        TErrorStream & estream)
 {
     typedef Iterator<StringSet<CharString> const, Rooted>::Type TStringSetIter;
 
-    if (length(opt.validValues) == 0) return true; // no restrictions
+    if (length(opt.validValues) == 0)
+        return true;                               // no restrictions
 
     if (isInputFile(opt) || isOutputFile(opt))
     {
@@ -1092,7 +1092,7 @@ bool _checkRestrictions(CommandLineOption const & opt, CharString const & val,
 // ----------------------------------------------------------------------------
 
 template <typename TErrorStream>
-bool _assignOptionValue(CommandLineParser & me, CommandLineOption & opt, 
+bool _assignOptionValue(CommandLineParser & me, CommandLineOption & opt,
                         CharString const & val, unsigned argNo, TErrorStream & estream)
 {
     if (isDoubleOption(opt) && !_isDouble(val))
@@ -1106,16 +1106,17 @@ bool _assignOptionValue(CommandLineParser & me, CommandLineOption & opt,
         return false;
     }
 
-    if (!_checkRestrictions(opt, val, estream)) 
+    if (!_checkRestrictions(opt, val, estream))
         return false;
-    
+
     if (isOptionList(opt))
     {
         appendValue(opt.value, val, Generous());
     }
     else
     {
-        if (argNo == 0) clear(opt.value);
+        if (argNo == 0)
+            clear(opt.value);
         appendValue(opt.value, val, Exact());
     }
     return true;
@@ -1123,7 +1124,7 @@ bool _assignOptionValue(CommandLineParser & me, CommandLineOption & opt,
 
 template <typename TErrorStream>
 bool
-_assignOptionValue(CommandLineParser & me, CommandLineOption & opt, 
+_assignOptionValue(CommandLineParser & me, CommandLineOption & opt,
                    CharString const & val, TErrorStream & estream)
 {
     return _assignOptionValue(me, opt, val, 0, estream);
@@ -1131,7 +1132,7 @@ _assignOptionValue(CommandLineParser & me, CommandLineOption & opt,
 
 template <typename TErrorStream>
 bool
-_assignOptionValue(CommandLineParser & me, unsigned option_index, 
+_assignOptionValue(CommandLineParser & me, unsigned option_index,
                    CharString const & val, unsigned argNo, TErrorStream & estream)
 {
     // get the option object
@@ -1139,10 +1140,9 @@ _assignOptionValue(CommandLineParser & me, unsigned option_index,
     return _assignOptionValue(me, opt, val, argNo, estream);
 }
 
-
 template <typename TErrorStream>
 inline bool
-_assignOptionValue(CommandLineParser & me, unsigned option_index, 
+_assignOptionValue(CommandLineParser & me, unsigned option_index,
                    CharString const & val, TErrorStream & estream)
 {
     return _assignOptionValue(me, option_index, val, 0, estream);
@@ -1172,15 +1172,16 @@ _getOptionValues(CommandLineParser const & me, unsigned option_index)
 // ----------------------------------------------------------------------------
 
 inline CharString const &
-_getOptionValue(CommandLineParser const & me, 
+_getOptionValue(CommandLineParser const & me,
                 CommandLineOption const & opt, unsigned argNo)
 {
     if (argNo < length(opt.value))
         return opt.value[argNo];
+
     if (argNo < length(opt.defaultValue))
         return opt.defaultValue[argNo];
-    
-    return me._null; 
+
+    return me._null;
 }
 
 inline CharString const &
@@ -1291,7 +1292,7 @@ _convertOptionValue(CommandLineOption const & opt, TObject & dst, CharString con
 // Function getOptionValue()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getOptionValue:
 ..summary:Retrieves the value of an option given either the short or long name.
 ..cat:Miscellaneous
@@ -1308,7 +1309,7 @@ _convertOptionValue(CommandLineOption const & opt, TObject & dst, CharString con
 
 template <typename TValue>
 inline bool
-getOptionValue(CommandLineParser const & me, CharString const & name, 
+getOptionValue(CommandLineParser const & me, CharString const & name,
                unsigned argNo, TValue & val)
 {
     SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
@@ -1327,7 +1328,7 @@ getOptionValue(CommandLineParser const & me, CharString const & name,
 // Function getOptionValues()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getOptionValues
 ..summary:Returns all values of an option given on the command line.
 ..cat:Miscellaneous
@@ -1350,7 +1351,7 @@ getOptionValues(CommandLineParser & me, CharString const & name)
 // Function getOptionValueShort()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getOptionValueShort
 ..summary:Retrieves the value of a short-name option given on the command line.
 ..cat:Miscellaneous
@@ -1377,7 +1378,7 @@ getOptionValueShort(CommandLineParser const & me, CharString
 
 template <typename TValue>
 inline bool
-getOptionValueShort(CommandLineParser const & me, 
+getOptionValueShort(CommandLineParser const & me,
                     CharString const & shortName, TValue & val)
 {
     return getOptionValueShort(me, shortName, 0, val);
@@ -1387,7 +1388,7 @@ getOptionValueShort(CommandLineParser const & me,
 // Function getOptionValuesShort()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getOptionValuesShort
 ..summary:Returns all values of a short-name option given on the command line.
 ..cat:Miscellaneous
@@ -1411,7 +1412,7 @@ getOptionValuesShort(CommandLineParser & me, CharString const & shortName)
 // Function getOptionValueLong()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getOptionValueLong
 ..summary:Retrieves the value of a long-name option given on the command line.
 ..cat:Miscellaneous
@@ -1430,7 +1431,7 @@ getOptionValuesShort(CommandLineParser & me, CharString const & shortName)
 
 template <typename TValue>
 inline bool
-getOptionValueLong(CommandLineParser const & me, 
+getOptionValueLong(CommandLineParser const & me,
                    CharString const & longName, unsigned argNo, TValue & val)
 {
     return getOptionValue(me, longName, argNo, val);
@@ -1438,7 +1439,7 @@ getOptionValueLong(CommandLineParser const & me,
 
 template <typename TValue>
 inline bool
-getOptionValueLong(CommandLineParser const & me, 
+getOptionValueLong(CommandLineParser const & me,
                    CharString const & longName, TValue & val)
 {
     return getOptionValueLong(me, longName, 0, val);
@@ -1448,7 +1449,7 @@ getOptionValueLong(CommandLineParser const & me,
 // Function getOptionValuesLong()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getOptionValuesLong
 ..summary:Returns all values of a long-name option given on the command line.
 ..cat:Miscellaneous
@@ -1472,7 +1473,7 @@ getOptionValuesLong(CommandLineParser & me, CharString const & longName)
 // Function getArgumentValue()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getArgumentValue
 ..summary:Returns an argument set on the command line.
 ..cat:Miscellaneous
@@ -1498,7 +1499,7 @@ getArgumentValue(CommandLineParser const & me, unsigned position)
 // Function getArgumentValues()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.getArgumentValues
 ..summary:Returns all _arguments set on the command line.
 ..cat:Miscellaneous
@@ -1520,7 +1521,7 @@ getArgumentValues(CommandLineParser const & me)
 // Function argumentCount()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.argumentCount
 ..summary:Returns the count of passed _arguments.
 ..cat:Miscellaneous
@@ -1540,7 +1541,7 @@ argumentCount(CommandLineParser const & me)
 // Function setMinValue()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setMinValue
 ..summary:Sets the minimum value of a @Class.CommandLineOption@ object identified by .
 ..cat:Miscellaneous
@@ -1563,7 +1564,7 @@ setMinValue(CommandLineParser & me, CharString const & name, CharString const & 
 // Function setMaxValue()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setMaxValue
 ..summary:Sets the maximum value of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
@@ -1577,7 +1578,7 @@ setMinValue(CommandLineParser & me, CharString const & name, CharString const & 
 */
 
 inline void
-setMaxValue(CommandLineParser & me, CharString const & name, 
+setMaxValue(CommandLineParser & me, CharString const & name,
             CharString const & _maxValue)
 {
     SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
@@ -1588,7 +1589,7 @@ setMaxValue(CommandLineParser & me, CharString const & name,
 // Function setValidValues()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setValidValues
 ..summary:Sets the set of allowed values of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
@@ -1602,7 +1603,7 @@ setMaxValue(CommandLineParser & me, CharString const & name,
 */
 
 inline void
-setValidValues(CommandLineParser & me, CharString const & name, 
+setValidValues(CommandLineParser & me, CharString const & name,
                StringSet<CharString> const & _values)
 {
     SEQAN_ASSERT_MSG(hasOption(me, name), "Unknown option: %s", toCString(name));
@@ -1610,7 +1611,7 @@ setValidValues(CommandLineParser & me, CharString const & name,
 }
 
 inline void
-setValidValues(CommandLineParser & me, CharString const & name, 
+setValidValues(CommandLineParser & me, CharString const & name,
                CharString const & _values)
 {
     // convert array to String<CharString>

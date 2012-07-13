@@ -65,7 +65,7 @@ namespace seqan {
 
 /**
 .Function.isTerminal()
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Check whether we are printing to a terminal.
 ..signature:isTerminal()
 ..returns:$true$ if we are on the terminal, false otherwise.
@@ -100,7 +100,7 @@ inline bool isTerminal()
 
 /**
 .Function.isAnsiColorTerminal
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Check whether we are printing to a terminal.
 ..signature:isTerminal()
 ..returns:$true$ if we are in a terminal and the terminal knows ANSI color codes.
@@ -130,7 +130,7 @@ inline bool isAnsiColorTerminal()
 
 /**
 .Function.getTerminalSize
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Retrieve size of terminal.
 ..signature:getTerminalSize(cols, rows)
 ..param.cols:The column count is written here.
@@ -162,10 +162,10 @@ inline bool getTerminalSize(unsigned & cols, unsigned & rows)
     int ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     if (ret == 0)
         return false;
-    
+
     rows = csbi.dwSize.X;
     cols = csbi.dwSize.Y;
-    
+
     return true;
 }
 
@@ -183,7 +183,7 @@ inline bool getTerminalSize(unsigned & cols, unsigned & rows)
 
     rows = w.ws_row;
     cols = w.ws_col;
-    
+
     return true;
 }
 

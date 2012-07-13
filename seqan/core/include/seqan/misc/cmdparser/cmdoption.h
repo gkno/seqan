@@ -37,12 +37,12 @@
 
 namespace seqan {
 
-/**
+/*
  * TODO: support some more formating options
  * TODO: store/return error code (invalid argument, invalid option, etc.)
  * TODO: support named arguments (e.g. <ARG1> -> <INPUT FILE>)
  * TODO: support user defined option argument names (e.g., -q QUALITY instead of -q NUM
- * TODO: correct parameter ordering of nearly all cmdparser function to be seqan conform f(out,in) 
+ * TODO: correct parameter ordering of nearly all cmdparser function to be seqan conform f(out,in)
  */
 struct OptionType
 {
@@ -68,7 +68,7 @@ struct OptionType
 // Class CommandLineOption
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Class.CommandLineOption:
 ..cat:Miscellaneous
 ..summary:Stores information for a specific command line option.
@@ -77,7 +77,7 @@ struct OptionType
 ..include:seqan/misc/misc_cmdparser.h
 */
 
-/**
+/*
 .Memfunc.CommandLineOption#CommandLineOption:
 ..class:Class.CommandLineOption
 ..summary:Constructor
@@ -138,17 +138,17 @@ public:
     // ----------------------------------------------------------------------------
     CommandLineOption() {}
 
-    CommandLineOption(CharString const & _short, 
-                      CharString const & _long, 
-                      CharString const & _help, 
+    CommandLineOption(CharString const & _short,
+                      CharString const & _long,
+                      CharString const & _help,
                       int _type) :
-                      longName(_long),
-                      shortName(_short),
-                      helpText(_help),
-                      optionType(_type),
-                      argumentsPerOption(1),
-                      minValue(""),
-                      maxValue("")
+        longName(_long),
+        shortName(_short),
+        helpText(_help),
+        optionType(_type),
+        argumentsPerOption(1),
+        minValue(""),
+        maxValue("")
     {}
 
     CommandLineOption(CharString const & _short,
@@ -156,29 +156,29 @@ public:
                       int _argumentsPerOption,
                       CharString const & _help,
                       int _type) :
-                      longName(_long),
-                      shortName(_short),
-                      helpText(_help),
-                      optionType(_type),
-                      argumentsPerOption(_argumentsPerOption),
-                      minValue(""),
-                      maxValue("")
+        longName(_long),
+        shortName(_short),
+        helpText(_help),
+        optionType(_type),
+        argumentsPerOption(_argumentsPerOption),
+        minValue(""),
+        maxValue("")
     {}
 
     template <typename TValue>
-    CommandLineOption(CharString const & _short, 
-                      CharString const & _long, 
-                      int _argumentsPerOption, 
-                      CharString const & _help, 
+    CommandLineOption(CharString const & _short,
+                      CharString const & _long,
+                      int _argumentsPerOption,
+                      CharString const & _help,
                       int _type,
                       TValue const & _default) :
-                      longName(_long),
-                      shortName(_short),
-                      helpText(_help),
-                      optionType(_type),
-                      argumentsPerOption(_argumentsPerOption),
-                      minValue(""),
-                      maxValue("")
+        longName(_long),
+        shortName(_short),
+        helpText(_help),
+        optionType(_type),
+        argumentsPerOption(_argumentsPerOption),
+        minValue(""),
+        maxValue("")
     {
         std::stringstream strm;
         strm << _default;
@@ -194,13 +194,13 @@ public:
                       CharString const & _help,
                       int _type,
                       TValue const & _default) :
-                      longName(_long),
-                      shortName(_short),
-                      helpText(_help),
-                      optionType(_type),
-                      argumentsPerOption(1),
-                      minValue(""),
-                      maxValue("")
+        longName(_long),
+        shortName(_short),
+        helpText(_help),
+        optionType(_type),
+        argumentsPerOption(1),
+        minValue(""),
+        maxValue("")
     {
         std::stringstream strm;
         strm << _default;
@@ -209,13 +209,14 @@ public:
         append(helpText, strm.str());
         appendValue(helpText, ')');
     }
+
 };
 
 // ----------------------------------------------------------------------------
 // Function addArgumentText()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.addArgumentText:
 ..summary:Return a @Class.CommandLineOption@ object extended by an argument text.
 ..cat:Miscellaneous
@@ -243,7 +244,7 @@ addArgumentText(CommandLineOption const & opt, CharString const & text)
 // Function isStringOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isStringOption
 ..summary:Returns whether option argument can be a string.
 ..cat:Miscellaneous
@@ -265,7 +266,7 @@ isStringOption(CommandLineOption const & me)
 // Function isBooleanOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isBooleanOption
 ..summary:Returns whether option is a switch.
 ..cat:Miscellaneous
@@ -287,7 +288,7 @@ isBooleanOption(CommandLineOption const & me)
 // Function isDoubleOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isDoubleOption
 ..summary:Returns whether option argument can be a double.
 ..cat:Miscellaneous
@@ -309,7 +310,7 @@ isDoubleOption(CommandLineOption const & me)
 // Function isIntOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isIntOption
 ..summary:Returns whether option argument can be an integer.
 ..cat:Miscellaneous
@@ -331,7 +332,7 @@ isIntOption(CommandLineOption const & me)
 // Function isHiddenOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isHiddenOption
 ..summary:Returns whether option is hidden on the help screen.
 ..cat:Miscellaneous
@@ -353,7 +354,7 @@ isHiddenOption(CommandLineOption const & me)
 // Function isOptionMandatory()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isOptionMandatory
 ..summary:Returns whether option is mandatory.
 ..cat:Miscellaneous
@@ -375,7 +376,7 @@ isOptionMandatory(CommandLineOption const & me)
 // Function isLabelOption()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isLabelOption
 ..summary:Returns whether an option label should be printed on the help screen.
 ..cat:Miscellaneous
@@ -397,7 +398,7 @@ isLabelOption(CommandLineOption const & me)
 // Function isOptionList()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isOptionList
 ..summary:Returns whether the option can be given multiple times.
 ..cat:Miscellaneous
@@ -419,7 +420,7 @@ isOptionList(CommandLineOption const & me)
 // Function isInputFile()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isInputFile
 ..summary:Returns whether the argument of the given option is an input file.
 ..cat:Miscellaneous
@@ -441,7 +442,7 @@ isInputFile(CommandLineOption const & me)
 // Function isOutputFile()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.isOutputFile
 ..summary:Returns whether the argument of the given option is an output file.
 ..cat:Miscellaneous
@@ -463,7 +464,7 @@ isOutputFile(CommandLineOption const & me)
 // Function setOptionType()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setOptionType:
 ..summary:Set the option type.
 ..cat:Miscellaneous
@@ -485,7 +486,7 @@ setOptionType(CommandLineOption & me, const int _newOptionType)
 // Function argumentText()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.argumentText
 ..summary:Returns the argument text of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
@@ -553,7 +554,7 @@ _writeOptName(TStream & target, CommandLineOption const & me)
 // Function write()                                           CommandLineOption
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.write
 ..summary:Writes the basic information about the @Class.CommandLineOption@ to the provided stream.
 ..cat:Miscellaneous
@@ -593,7 +594,7 @@ operator<<(TStream & target, CommandLineOption const & source)
 // Function setMinValue()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setMinValue
 ..summary:Sets the minimum value of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
@@ -616,7 +617,7 @@ setMinValue(CommandLineOption & me, const CharString _minValue)
 // Function setMaxValue()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setMaxValue
 ..summary:Sets the maximum value of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
@@ -639,7 +640,7 @@ setMaxValue(CommandLineOption & me, const CharString _maxValue)
 // Function setValidValues()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.setValidValues
 ..summary:Sets the set of allowed values of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous

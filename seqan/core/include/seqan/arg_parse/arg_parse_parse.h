@@ -50,8 +50,8 @@ namespace seqan {
 ..summary:Parses the command line.
 ..cat:Miscellaneous
 ..signature:parse(parser, argc, argv[, outputStream, errorStream])
-..param.parser:The @Class.CommandLineParser@ object.
-...type:Class.CommandLineParser
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
 ..param.argc:Count of the objects on the command line.
 ..param.argv:Array of the different command line arguments ($const char *argv[]$).
 ..param.errorStream:A stream where error messages are sent to.
@@ -96,9 +96,9 @@ inline ArgumentParser::ParseResult parse(ArgumentParser & me,
                         unsigned e = len;
                         for (; s < e; --e)
                         {
-                            if (hasOption(me, inParam.substr(s, e-s)))
+                            if (hasOption(me, inParam.substr(s, e - s)))
                             {
-                                ArgParseOption & opt = getOption(me, inParam.substr(s, e-s));
+                                ArgParseOption & opt = getOption(me, inParam.substr(s, e - s));
                                 s = --e;
                                 if (isBooleanOption(opt))
                                     _assignArgumentValue(opt, "true");

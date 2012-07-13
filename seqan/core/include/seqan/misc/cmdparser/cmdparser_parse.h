@@ -45,7 +45,7 @@ namespace seqan {
 // Function parse()
 // ----------------------------------------------------------------------------
 
-/**
+/*
  .Function.parse:
  ..summary:Parses the command line.
  ..cat:Miscellaneous
@@ -209,7 +209,7 @@ bool parse(CommandLineParser & me, int argc, const char * argv[], TErrorStream &
     if (argc == 1 && me._requiredArguments > 0)
     {
         // print short help and exit
-        printShortHelp(me, estream); 
+        printShortHelp(me, estream);
         return false;
     }
 

@@ -52,7 +52,7 @@ namespace seqan {
 /**
 .Function.getAppName
 ..summary:Get tool name of @Class.ArgumentParser@ object.
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..signature:getAppName(parser)
 ..param.doc:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
@@ -258,7 +258,8 @@ inline void setShortDescription(ArgumentParser & me, std::string const & descrip
 inline void setVersion(ArgumentParser & me, std::string const & versionString)
 {
     setVersion(me._toolDoc, versionString);
-    if(!hasOption(me, "version")) addOption(me, ArgParseOption("", "version", "Display version information"));
+    if (!hasOption(me, "version"))
+        addOption(me, ArgParseOption("", "version", "Display version information"));
 }
 
 // --------------------------------------------------------------------------
@@ -267,7 +268,7 @@ inline void setVersion(ArgumentParser & me, std::string const & versionString)
 
 /**
 .Function.getVersion
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Get version string from @Class.ArgumentParser@ object.
 ..signature:getVersion(parser)
 ..param.parser:The @Class.ArgumentParser@ object.

@@ -43,7 +43,7 @@ namespace seqan {
 // Function _join()
 // ----------------------------------------------------------------------------
 
-/**
+/*
  * joins all elements of the the passed StringSet into a single CharString
  * the provided delimiter is used to separate the single entries in the
  * resulting CharString
@@ -68,7 +68,7 @@ _join(StringSet<TValue> const & v, CharString const & delimiter)
 // Function _xmlEscape()
 // ----------------------------------------------------------------------------
 
-/**
+/*
  * make sure that the text we put into the XML does not break the XML
  * candidates are
  *  " -> &quot;
@@ -153,7 +153,7 @@ _addValidValuesRestrictions(StringSet<CharString> & restrictions, CommandLineOpt
 // Function _includeInCTD()
 // ----------------------------------------------------------------------------
 
-/**
+/*
  * returns true if this option should be included in the ctd
  */
 inline bool
@@ -166,7 +166,7 @@ _includeInCTD(CommandLineOption const & opt)
 // Function writeCTD()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.writeCTD
 ..summary:Exports the app's interface description to a .ctd file.
 ..cat:Miscellaneous
@@ -241,7 +241,7 @@ writeCTD(CommandLineParser const & me)
         StringSet<CharString> tags;
         if (isInputFile(opt))
         {
-            appendValue(tags,"input file");
+            appendValue(tags, "input file");
         }
         if (isOutputFile(opt))
         {
