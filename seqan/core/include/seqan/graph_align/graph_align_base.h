@@ -122,33 +122,33 @@ _alignTracePrint(TFile& file,
 
 	if (tv == Horizontal) {
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
-			_streamPut(file, '(');
-			_streamPut(file, (str[0])[i]);
-			_streamPut(file, ',');
-			_streamPut(file, gapValue<char>());
-			_streamPut(file, ')');
-			_streamPut(file, '\n');
+			streamPut(file, '(');
+			streamPut(file, (str[0])[i]);
+			streamPut(file, ',');
+			streamPut(file, gapValue<char>());
+			streamPut(file, ')');
+			streamPut(file, '\n');
 		}
 	}
 	else if (tv == Vertical) {
 		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
-			_streamPut(file, '(');
-			_streamPut(file, gapValue<char>());
-			_streamPut(file, ',');
-			_streamPut(file, (str[1])[i]);
-			_streamPut(file, ')');
-			_streamPut(file, '\n');
+			streamPut(file, '(');
+			streamPut(file, gapValue<char>());
+			streamPut(file, ',');
+			streamPut(file, (str[1])[i]);
+			streamPut(file, ')');
+			streamPut(file, '\n');
 		}
 	}
 	else if (tv == Diagonal) {
 		int j = pos2 + segLen - 1;
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
-			_streamPut(file, '(');
-			_streamPut(file, (str[0])[i]);
-			_streamPut(file, ',');
-			_streamPut(file, (str[1])[j]);
-			_streamPut(file, ')');
-			_streamPut(file, '\n');
+			streamPut(file, '(');
+			streamPut(file, (str[0])[i]);
+			streamPut(file, ',');
+			streamPut(file, (str[1])[j]);
+			streamPut(file, ')');
+			streamPut(file, '\n');
 			--j;
 		}
 	}
