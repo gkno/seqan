@@ -78,7 +78,7 @@ namespace seqan {
 
 inline bool isTerminal()
 {
-    return _isatty(_fileno(stdout));
+    return false;  // Windows does not understand ANSI codes.
 }
 
 #endif  // #if defined(PLATFORM_WINDOWS)
