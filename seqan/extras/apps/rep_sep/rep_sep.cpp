@@ -209,7 +209,7 @@ int main(int argc, const char *argv[])
     cout << "############################################" << endl << endl << flush;
 
     // TODO: implement heurisitics 
-    typedef Graph_< ReadGraph<TColumnAlphabet, Value<TFragmentStore::TAlignedReadStore>::Type, TReadPos > >::Type TGraph;
+    typedef SelectGraph_< ReadGraph<TColumnAlphabet, Value<TFragmentStore::TAlignedReadStore>::Type, TReadPos > >::Type TGraph;
     typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
     typedef String<TVertexDescriptor> TComponent;

@@ -31,7 +31,7 @@ double distance(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> & 
 {
     // graph typedefs
     typedef ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> RGraph;
-    typedef typename Graph_< RGraph >::Type  TGraph;
+    typedef typename SelectGraph_< RGraph >::Type  TGraph;
     typedef typename EdgeDescriptor<TGraph>::Type               TEdgeDescriptor;
     typedef typename Size<String<TVertexDescriptor> >::Type     TSize;
 
@@ -63,7 +63,7 @@ unsigned solve(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> & m
 
     // graph typedefs
     typedef ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> RGraph;
-    typedef typename Graph_< RGraph >::Type  TGraph;
+    typedef typename SelectGraph_< RGraph >::Type  TGraph;
     typedef typename VertexDescriptor<TGraph>::Type             TVertexDescriptor;
     typedef typename EdgeDescriptor<TGraph>::Type               TEdgeDescriptor;
     typedef typename Iterator<TGraph, OutEdgeIterator>::Type    TOutEdgeIterator;
@@ -221,7 +221,7 @@ unsigned solve(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> & m
 
     // graph typedefs
     typedef ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> RGraph;
-    typedef typename Graph_< RGraph >::Type  TGraph;
+    typedef typename SelectGraph_< RGraph >::Type  TGraph;
     typedef typename VertexDescriptor<TGraph>::Type             TVertexDescriptor;
     typedef typename EdgeDescriptor<TGraph>::Type               TEdgeDescriptor;
     typedef typename Iterator<TGraph, OutEdgeIterator>::Type    TOutEdgeIterator;

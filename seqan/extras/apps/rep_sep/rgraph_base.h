@@ -108,10 +108,10 @@ struct ReadGraph {
 //////////////////////////////////////////////////////////////////////////////
 // not the best way
 template <typename T>
-struct Graph_;
+struct SelectGraph_;
 
 template <typename TColumnAlphabet, typename TAlignedReadStoreElement, typename TPosition>
-struct Graph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement, TPosition> >
+struct SelectGraph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement, TPosition> >
 {
     typedef Graph<Undirected<double> > Type;
 };
@@ -124,7 +124,7 @@ struct Graph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement, TPosition> >
 template<typename TColumnAlphabet, typename TAlignedReadStoreElement, typename TPosition>
 bool hasMultipleComponents(ReadGraph<TColumnAlphabet, TAlignedReadStoreElement, TPosition> & me)
 {
-    typedef typename Graph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> >::Type TGraph;
+    typedef typename SelectGraph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> >::Type TGraph;
     typedef typename Size<TGraph>::Type TSize;
     typedef String<TSize> TComponentMap;
 

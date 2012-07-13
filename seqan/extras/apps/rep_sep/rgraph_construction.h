@@ -135,7 +135,7 @@ void add_mate_pairs(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition
     typedef typename Size<TFragmentStore>::Type TSize;
     typedef typename TFragmentStore::TReadPos TReadPos;
 
-    typedef typename Graph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> >::Type TGraphInternal;
+    typedef typename SelectGraph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> >::Type TGraphInternal;
     
     typedef typename Iterator<TGraphInternal, VertexIterator>::Type TVertexIterator;
     */
@@ -157,7 +157,7 @@ void scoreGraph_(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> &
     typedef typename Size<TFragmentStore>::Type TSize;
     typedef typename TFragmentStore::TReadPos TReadPos;
 
-    typedef typename Graph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> >::Type TGraphInternal;
+    typedef typename SelectGraph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> >::Type TGraphInternal;
     
     typedef typename Iterator<TGraphInternal, EdgeIterator>::Type TEdgeIterator;
     typedef typename ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition>::TVertexDescriptor TVertexDescriptor;
