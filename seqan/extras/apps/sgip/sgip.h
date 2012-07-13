@@ -27,7 +27,6 @@
 #include <vector>
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/misc/misc_cmdparser.h>
 #include <seqan/graph_types.h>
 
 // ==========================================================================

@@ -27,7 +27,7 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/graph_types.h>
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 
 #include "sgip.h"
 #include "sgip_base.h"
@@ -166,75 +166,87 @@ int _sgip(TOption & options)
 template <typename TParser>
 void _setupParser(TParser & parser)
 {
-    addVersionLine(parser, "Version 1.1 (Nov. 16th 2011) SeqAn Revision:");
-
-    addTitleLine(parser, "***********************************************");
-    addTitleLine(parser, "* SGIP - Solution of Graph Isomorphism Problem*");
-    addTitleLine(parser, "*      (c) Copyright 2011 by Jialu HU         *");
-    addTitleLine(parser, "*       email<Jialu.Hu@fu-berlin.de>          *");
-    addTitleLine(parser, "***********************************************");
-    addTitleLine(parser, "");
-
-    addUsageLine(parser, "-o <orginal graph> [Option]");
+    setVersion(parser, "1.2 (July. 13th 2012)");
+    addDescription(parser, " SGIP - Solution of Graph Isomorphism Problem");
+    addUsageLine(parser, "-o <orginal graph> [Option]");    
     addSection(parser, "Mandatory Options");
-    addOption(parser, CommandLineOption("o", "orginal", "File containing orginal graph", OptionType::String | OptionType::Mandatory));
+    addOption(parser, ArgParseOption("o", "orginal", "File containing orginal graph", ArgParseArgument::INPUTFILE,"IN"));
+    setRequired(parser, "o");
     addSection(parser, "Main Options");
-    addOption(parser, CommandLineOption("a", "algorithm", "Algorithm used for searching metric dimension", OptionType::String, "greedy"));
-    addOption(parser, CommandLineOption("s", "searching", "Searching algorithm used for detecting resolving set,heuristic 0 bruteforce 1.", OptionType::Int, 0));
-    addOption(parser, CommandLineOption("i", "isomorphism", "To check whether two given graphs are isomorphic", OptionType::Bool));
-    addOption(parser, CommandLineOption("c", "comparitive", "File containing comparitive graph", OptionType::String));
-    addOption(parser, CommandLineOption("od", "odimension", "Specified initial dimension of orginal graph by user", OptionType::Int, 3));
-    addOption(parser, CommandLineOption("cd", "cdimension", "Specified initial dimension of comparitive graph by user", OptionType::Int, 3));
-    addOption(parser, CommandLineOption("ad", "directory", "test for all graphs in a specified directory", OptionType::String));
-    addOption(parser, CommandLineOption('v', "verbose", "control the level of output files ", OptionType::Int, 0));
-
+    addOption(parser, ArgParseOption("a", "algorithm", "Algorithm used for searching metric dimension", ArgParseArgument::STRING));
+    setDefaultValue(parser, "algorithm", "greedy");
+    addOption(parser, ArgParseOption("s", "searching", "Searching algorithm used for detecting resolving set,heuristic 0 bruteforce 1.", ArgParseArgument::INTEGER));
+    setDefaultValue(parser, "searching", "0");
+    addOption(parser, ArgParseOption("i", "isomorphism", "To check whether two given graphs are isomorphic"));
+    addOption(parser, ArgParseOption("c", "comparitive", "File containing comparitive graph", ArgParseArgument::INPUTFILE,"IN"));
+    addOption(parser, ArgParseOption("od", "odimension", "Specified initial dimension of orginal graph by user", ArgParseArgument::INTEGER));
+    setDefaultValue(parser, "odimension", "3");
+    addOption(parser, ArgParseOption("cd", "cdimension", "Specified initial dimension of comparitive graph by user", ArgParseArgument::INTEGER));
+    setDefaultValue(parser, "cdimension", "3");
+    addOption(parser, ArgParseOption("ad", "directory", "test for all graphs in a specified directory", ArgParseArgument::STRING));
+    addOption(parser, ArgParseOption("v", "verbose", "control the level of output files ", ArgParseArgument::INTEGER));
+    setDefaultValue(parser, "verbose", "0");
     addSection(parser, "Output Option");
-    addOption(parser, CommandLineOption("r", "result", "File containing canonical label of input graphs", OptionType::String));
+    addOption(parser, ArgParseOption("r", "result", "File containing canonical label of input graphs", ArgParseArgument::OUTPUTFILE,"OUT"));
 }
 
 // --------------------------------------------------------------------------
 // Function _parseOptions()
 // --------------------------------------------------------------------------
 
-template <typename TOption, typename TParser>
-int _parseOptions(TOption & options, TParser & parser)
+template <typename TOption>
+ArgumentParser::ParseResult _parseOptions(TOption & options,
+                                          int argc,
+                                          char const ** argv)
 {
-    getOptionValueShort(parser, 'o', options.orginalFile);
-    if (isSetShort(parser, 'i'))
+    // Setup ArgumentParsre.
+    ArgumentParser parser("sgip");
+    _setupParser(parser);
+
+    // Parse commandline.
+    ArgumentParser::ParseResult res=parse(parser,argc,argv);
+
+    // Only extract options if the program will continue after parse().
+    if(res != ArgumentParser::PARSE_OK)
+        return res;
+        
+    // Extract option value.
+    getOptionValue(options.orginalFile, parser, "o");
+    if (isSet(parser, "i"))
     {
-        if (!isSetShort(parser, 'c'))
+        if (!isSet(parser, "c"))
         {
-            if (!isSetShort(parser, "ad"))
+            if (!isSet(parser, "ad"))
             {
                 std::cerr << "sgip" << ":comparitive file has not been specified!" << std::endl;
-                shortHelp(parser, std::cerr);
-                return 0;
+                printShortHelp(parser, std::cerr);
+                return ArgumentParser::PARSE_ERROR;
             }
         }
         options.isoCheck = true;
-        getOptionValueShort(parser, 'c', options.comparFile);
+        getOptionValue(options.comparFile, parser, "c");
     }
-    if (isSetShort(parser, 'r'))
+    if (isSet(parser, "r"))
     {
         options.isPrintFile = true;
-        getOptionValueShort(parser, 'r', options.outputFile);
+        getOptionValue(options.outputFile, parser, "r");
     }
-    if (isSetShort(parser, "od"))
-        getOptionValueShort(parser, "od", options.odimension);
-    if (isSetShort(parser, "cd"))
-        getOptionValueShort(parser, "cd", options.cdimension);
-    if (isSetShort(parser, 'a'))
-        getOptionValueShort(parser, 'a', options.algorithm);
-    if (isSetShort(parser, 'v'))
-        getOptionValueShort(parser, 'v', options.verbose);
-    if (isSetShort(parser, 's'))
+    if (isSet(parser, "od"))
+        getOptionValue(options.odimension, parser, "od");
+    if (isSet(parser, "cd"))
+        getOptionValue(options.cdimension, parser, "cd");
+    if (isSet(parser, "a"))
+        getOptionValue(options.algorithm, parser, "a");
+    if (isSet(parser, "v"))
+        getOptionValue(options.verbose, parser, "v");
+    if (isSet(parser, "s"))
     {
         int s;
-        getOptionValueShort(parser, 's', s);
+        getOptionValue(s, parser, "s");
         options.searchingType = static_cast<SearchingType>(s);
     }
-    _printTitle(parser, std::cerr);
-    return 1;
+    printVersion(parser, std::cerr);
+    return ArgumentParser::PARSE_OK;
 }
 
 // --------------------------------------------------------------------------
@@ -244,29 +256,19 @@ int _parseOptions(TOption & options, TParser & parser)
 // Program entry point.
 int main(int argc, char const ** argv)
 {
-    // Setup command line parser.
-    CharString        appName("sgip");
-    CommandLineParser parser(appName);
+    // Initial options and time variables.
     SgipOption options;
     time_t start, end;
     double dif;
-
-    time(&start);
-    _setupParser(parser);
-    // Then, parse the command line and handle the cases where help display
-    // is requested or erroneous parameters were given.
-    if (!parse(parser, argc, argv))
-    {
-        if (isSetShort(parser, 'h') || isSetShort(parser, 'v'))
-            return 0;
-
-        shortHelp(parser, std::cerr);
-        return 1;
-    }
-    if (!_parseOptions(options, parser))
-        return 1;
-    // Finally, launch the program.
     int ret = 0;
+    time(&start);
+
+    // Setup parser and parse the commandline.
+    ArgumentParser::ParseResult res = _parseOptions(options, argc, argv);
+    if(res != ArgumentParser::PARSE_OK)
+        return res == ArgumentParser::PARSE_ERROR;
+
+    // Finally, launch the program.
     if (!options.isAllatOnce)
         ret = _sgip(options);
     time(&end);
