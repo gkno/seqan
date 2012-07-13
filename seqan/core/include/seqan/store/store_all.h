@@ -270,6 +270,8 @@ struct FragmentStoreConfig
 		
 	typedef void					TReadStoreElementSpec;
 	typedef Owner<ConcatDirect<> >	TReadSeqStoreSpec;
+	typedef Alloc<>					TReadNameSpec;
+	typedef Owner<ConcatDirect<> >	TReadNameStoreSpec;
 	typedef void					TMatePairStoreElementSpec;
 	typedef void					TLibraryStoreElementSpec;
 	typedef void					TContigStoreElementSpec;
@@ -417,6 +419,8 @@ class FragmentStore
 private:
 	typedef typename TConfig::TReadStoreElementSpec			TReadStoreElementSpec;
 	typedef typename TConfig::TReadSeqStoreSpec				TReadSeqStoreSpec;
+	typedef typename TConfig::TReadNameSpec					TReadNameSpec;
+	typedef typename TConfig::TReadNameStoreSpec			TReadNameStoreSpec;
 	typedef typename TConfig::TMatePairStoreElementSpec		TMatePairStoreElementSpec;
 	typedef typename TConfig::TLibraryStoreElementSpec		TLibraryStoreElementSpec;
 	typedef typename TConfig::TContigStoreElementSpec		TContigStoreElementSpec;
@@ -457,9 +461,9 @@ public:
 	typedef String< TAnnotationStoreElement >																TAnnotationStore;
 	typedef String< IntervalTree< TContigPos, TAnnotationStoreElementId > >									TIntervalTreeStore;
 	typedef StringSet<TReadSeq, TReadSeqStoreSpec>															TReadSeqStore;
+	typedef StringSet<String<char, TReadNameSpec>, TReadNameStoreSpec>										TReadNameStore;
+	typedef StringSet<String<char, TReadNameSpec>, TReadNameStoreSpec>										TMatePairNameStore;
 	
-	typedef TNameStore																						TReadNameStore;
-	typedef TNameStore																						TMatePairNameStore;
 	typedef TNameStore																						TLibraryNameStore;
 	typedef TNameStore																						TContigNameStore;
 	typedef TNameStore																						TAnnotationNameStore;
