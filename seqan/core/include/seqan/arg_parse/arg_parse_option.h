@@ -354,18 +354,18 @@ template <typename TStream>
 inline void _writeOptName(TStream & target, ArgParseOption const & me)
 {
     //IOREV _notio_ irrelevant for iorev
-    _streamWrite(target, empty(me.shortName) ? "" : "-");
-    _streamWrite(target, me.shortName);
-    _streamWrite(target, (empty(me.shortName) || empty(me.longName)) ? "" : ", ");
+    streamWrite(target, empty(me.shortName) ? "" : "-");
+    streamWrite(target, me.shortName);
+    streamWrite(target, (empty(me.shortName) || empty(me.longName)) ? "" : ", ");
     if (!empty(me.longName))
     {
-        _streamWrite(target, "--");
-        _streamWrite(target, me.longName);
+        streamWrite(target, "--");
+        streamWrite(target, me.longName);
     }
 }
 
 // ----------------------------------------------------------------------------
-// Function write()                                           ArgParseOption
+// Function write()                                            [ArgParseOption]
 // ----------------------------------------------------------------------------
 
 /**
@@ -382,22 +382,23 @@ inline void _writeOptName(TStream & target, ArgParseOption const & me)
 template <typename TStream>
 inline void write(TStream & target, ArgParseOption const & me)
 {
-    //IOREV _nodoc_ this specialization is not documented
-    _streamPut(target, '\t');
+    streamPut(target, '\t');
     _writeOptName(target, me);
-    _streamPut(target, '\t');
-    _streamPut(target, '\t');
-    _streamWrite(target, me._helpText);
+    streamPut(target, '\t');
+    streamPut(target, '\t');
+    streamPut(target, me._helpText);
 }
 
 // ----------------------------------------------------------------------------
-// operator<<()                                               ArgParseOption
+// operator<<()                                                [ArgParseOption]
 // ----------------------------------------------------------------------------
+
+// TODO(holtgrew): We need to work out a consistent scheme with operator<<().
 
 template <typename TStream>
 inline TStream & operator<<(TStream & target, ArgParseOption const & source)
 {
-    //IOREV _nodoc_ this specialization is not documented
+
     write(target, source);
     return target;
 }
