@@ -457,7 +457,6 @@ macro (seqan_find_dependencies)
 
   find_package (OpenMP QUIET)
   find_package (CUDA QUIET)
-  find_package (TR1)
   find_package (Boost)
   if (Boost_FOUND)
     #    include_directories(${Boost_INCLUDE_DIRS})
