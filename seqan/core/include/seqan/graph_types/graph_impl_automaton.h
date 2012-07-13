@@ -657,7 +657,7 @@ write(TFile & target,
 	typedef typename Size<TAlphabet>::Type TSize;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 
-	_streamWrite(target,"Automaton - State: (Input / NextState)\n");
+	streamPut(target,"Automaton - State: (Input / NextState)\n");
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Standard>::Type TIterConst;
 	TIterConst it = begin(g.data_vertex, Standard());
 	TIterConst itEnd = end(g.data_vertex, Standard());
@@ -665,21 +665,21 @@ write(TFile & target,
 	for(;it!=itEnd;++it, ++pos) {
 		if (!idInUse(g.data_id_managerV, pos)) continue;
 		TVertexDescriptor sourceVertex = pos;
-		_streamPutInt(target, sourceVertex);
-		_streamWrite(target,": ");
+		streamPut(target, (int)sourceVertex);
+		streamPut(target,": ");
 		for(TSize i=0;i< (TSize) ValueSize<TAlphabet>::VALUE;++i) {
-			_streamPut(target, ' ');
-			_streamPut(target, '(');
-			_streamPut(target, TAlphabet(i));
-			_streamPut(target, ' ');
-			_streamPut(target, '/');
-			_streamPut(target, ' ');
-			if (g.data_vertex[sourceVertex].data_edge[i].data_target ==  nilVal) _streamWrite(target,"nil");
-			else _streamPutInt(target, g.data_vertex[sourceVertex].data_edge[i].data_target);
-			_streamPut(target, ')');
-			_streamPut(target, ' ');
+			streamPut(target, ' ');
+			streamPut(target, '(');
+			streamPut(target, TAlphabet(i));
+			streamPut(target, ' ');
+			streamPut(target, '/');
+			streamPut(target, ' ');
+			if (g.data_vertex[sourceVertex].data_edge[i].data_target ==  nilVal) streamPut(target,"nil");
+			else streamPut(target, (int)g.data_vertex[sourceVertex].data_edge[i].data_target);
+			streamPut(target, ')');
+			streamPut(target, ' ');
 		}
-		_streamPut(target, '\n');
+		streamPut(target, '\n');
 	}
 }
 

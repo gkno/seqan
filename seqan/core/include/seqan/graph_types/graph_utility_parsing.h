@@ -47,6 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+// This is unused and a deletion candidate.
 template<typename TPath, typename TStringSet, typename TNames>
 inline unsigned int
 _loadSequences(TPath const& in_path,
@@ -63,7 +64,7 @@ _loadSequences(TPath const& in_path,
 	input << in_path;
 	file.open(input.str().c_str(), std::ios_base::in | std::ios_base::binary);
 	if (!file.is_open()) return 0;
-	while (!_streamEOF(file)) {
+	while (!file.eof()) {
 		String<char> id;
 		readID(file, id, Fasta());
 		appendValue(names, id);
@@ -76,7 +77,7 @@ _loadSequences(TPath const& in_path,
 	file.seekg(0, std::ios_base::beg);
 	resize(origStrSet, seqCount);
 	TSize count = 0;
-	for(TSize i = 0; (i < seqCount) && !_streamEOF(file); ++i) 	{
+	for(TSize i = 0; (i < seqCount) && !file.eof(); ++i) 	{
 		read(file, origStrSet[i], Fasta());
 		count += length(origStrSet[i]);
 	}

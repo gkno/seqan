@@ -194,7 +194,7 @@ write(TFile & target,
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 
-	_streamWrite(target,"WordGraph - Directed:\n");
+	streamPut(target,"WordGraph - Directed:\n");
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Rooted>::Type TIterConst;
 	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
 		if (!idInUse(g.data_id_managerV, position(it))) continue;
@@ -202,15 +202,15 @@ write(TFile & target,
 		for(TSize i=0;i<table_length;++i) {
 			TEdge const* ed = &g.data_vertex[sourceVertex].data_edge[i];
 			if (getTarget(ed) ==  nilVal) continue;
-			_streamPutInt(target, sourceVertex);
-			_streamWrite(target,"->");
-			_streamPutInt(target, getTarget(ed));
-			_streamPut(target, ' ');
-			_streamPut(target, ' ');
-			_streamWrite(target, "Label: ");
-			_streamPut(target, TAlphabet(i));
-			_streamWrite(target, getCargo(ed));
-			_streamPut(target, '\n');
+			streamPut(target, (int)sourceVertex);
+			streamPut(target,"->");
+			streamPut(target, (int)getTarget(ed));
+			streamPut(target, ' ');
+			streamPut(target, ' ');
+			streamPut(target, "Label: ");
+			streamPut(target, TAlphabet(i));
+			streamPut(target, CharString(getCargo(ed)));
+			streamPut(target, '\n');
 		}
 	}
 }

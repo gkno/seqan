@@ -765,47 +765,47 @@ write(TFile & target,
 	typedef typename Iterator<String<TEdgeStump*> const, Standard>::Type TIterConst;
 	TIterConst it = begin(g.data_vertex, Standard());
 	TIterConst itEnd = end(g.data_vertex, Standard());
-	_streamWrite(target,"Adjacency list:\n");
+	streamPut(target,"Adjacency list:\n");
 	TVertexDescriptor pos = 0;
 	for(;it != itEnd; ++it, ++pos) {
 		TVertexDescriptor sourceV = pos;
-		_streamPutInt(target, sourceV);
-		_streamWrite(target," -> ");
+		streamPut(target, (int)sourceV);
+		streamPut(target," -> ");
 		TEdgeStump* current = *it;
 		while(current!=0) {
 			TVertexDescriptor adjV = getTarget(current);
 			if (adjV != sourceV) {
-				_streamPutInt(target, adjV);
-				_streamPut(target, ',');
+				streamPut(target, (int)adjV);
+				streamPut(target, ',');
 				current=getNextS(current);
 			} else {
 				adjV = getSource(current);
-				_streamPutInt(target, adjV);
-				_streamPut(target, ',');
+				streamPut(target, (int)adjV);
+				streamPut(target, ',');
 				current=getNextT(current);
 			}
 		}
-		_streamPut(target, '\n');
+		streamPut(target, '\n');
 	}
 	it = begin(g.data_vertex, Standard());
 	pos = 0;
-	_streamWrite(target,"Edge list:\n");
+	streamPut(target,"Edge list:\n");
 	for(; it != itEnd; ++it, ++pos) {
 		TVertexDescriptor sourceV = pos;
 		TEdgeStump* current = *it;
 		while(current!=0) {
 			TVertexDescriptor targetV = getTarget(current);
 			if (sourceV != targetV) {
-				_streamWrite(target,"Source: ");
-				_streamPutInt(target, sourceV);		
-				_streamPut(target, ',');
-				_streamWrite(target,"Target: ");
-				_streamPutInt(target, targetV);
-				_streamPut(target, ' ');
-				_streamWrite(target,"(Id: ");
-				_streamPutInt(target, _getId(current));
-				_streamPut(target, ')');
-				_streamPut(target, '\n');
+				streamPut(target,"Source: ");
+				streamPut(target, (int)sourceV);		
+				streamPut(target, ',');
+				streamPut(target,"Target: ");
+				streamPut(target, (int)targetV);
+				streamPut(target, ' ');
+				streamPut(target,"(Id: ");
+				streamPut(target, (int)_getId(current));
+				streamPut(target, ')');
+				streamPut(target, '\n');
 				current=getNextS(current);
 			} else {
 				current=getNextT(current);

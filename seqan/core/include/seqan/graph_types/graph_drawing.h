@@ -381,8 +381,7 @@ _writeGraphType(TFile & file,
 				DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, "digraph");
+	streamPut(file, "digraph");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -394,8 +393,7 @@ _writeGraphType(TFile & file,
 				DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, "digraph");
+	streamPut(file, "digraph");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -407,8 +405,7 @@ _writeGraphType(TFile & file,
 				DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, "graph");
+	streamPut(file, "graph");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -420,8 +417,7 @@ _writeGraphType(TFile & file,
 				DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, "digraph");
+	streamPut(file, "digraph");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -433,8 +429,7 @@ _writeEdgeType(TFile & file,
 			   DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, " -> ");
+	streamPut(file, " -> ");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -446,8 +441,7 @@ _writeEdgeType(TFile & file,
 			   DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, " -> ");
+	streamPut(file, " -> ");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -459,8 +453,7 @@ _writeEdgeType(TFile & file,
 			   DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, " -- ");
+	streamPut(file, " -- ");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -472,8 +465,7 @@ _writeEdgeType(TFile & file,
 			   DotDrawing)
 {
 //IOREV
-	SEQAN_CHECKPOINT
-	_streamWrite(file, " -> ");
+	streamPut(file, " -> ");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -503,53 +495,52 @@ write(TFile & file,
 	  DotDrawing) 
 {
 //IOREV _doc_ _batchreading_
-	SEQAN_CHECKPOINT
 	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 
 	_writeGraphType(file,g,DotDrawing());
-	_streamWrite(file, " G {\n");
-	_streamPut(file, '\n');
-	_streamWrite(file, "/* Graph Attributes */\n");
-	_streamWrite(file, "graph [rankdir = LR];\n");
-	_streamPut(file, '\n');
-	_streamWrite(file, "/* Node Attributes */\n");
-	_streamWrite(file, "node [shape = rectangle, fillcolor = white, style = filled, fontname = \"Times-Italic\"];\n");
-	_streamPut(file, '\n');
-	_streamWrite(file, "/* Edge Attributes */\n");
-	_streamWrite(file, "edge [fontname = \"Times-Italic\", arrowsize = 0.75, fontsize = 16];\n");
-	_streamPut(file, '\n');
+	streamPut(file, " G {\n");
+	streamPut(file, '\n');
+	streamPut(file, "/* Graph Attributes */\n");
+	streamPut(file, "graph [rankdir = LR];\n");
+	streamPut(file, '\n');
+	streamPut(file, "/* Node Attributes */\n");
+	streamPut(file, "node [shape = rectangle, fillcolor = white, style = filled, fontname = \"Times-Italic\"];\n");
+	streamPut(file, '\n');
+	streamPut(file, "/* Edge Attributes */\n");
+	streamPut(file, "edge [fontname = \"Times-Italic\", arrowsize = 0.75, fontsize = 16];\n");
+	streamPut(file, '\n');
 
-	_streamWrite(file, "/* Nodes */\n");
+	streamPut(file, "/* Nodes */\n");
 	typedef typename Iterator<TGraph, VertexIterator>::Type TConstIter;
 	TConstIter it(g);
 	for(;!atEnd(it);++it) {
-		_streamPutInt(file, *it);
-		_streamWrite(file, " [");
-		_streamWrite(file, getProperty(nodeMap, *it));
-		_streamWrite(file, "];\n");
+		streamPut(file, (int)*it);
+		streamPut(file, " [");
+		streamPut(file, getProperty(nodeMap, *it));
+		streamPut(file, "];\n");
 	}
-	_streamPut(file, '\n');
+	streamPut(file, '\n');
 
-	_streamWrite(file, "/* Edges */\n");
+	streamPut(file, "/* Edges */\n");
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TConstEdIter;
 	TConstEdIter itEd(g);
 	for(;!atEnd(itEd);++itEd) {
 		TVertexDescriptor sc = sourceVertex(itEd);
 		TVertexDescriptor tr = targetVertex(itEd);
-		_streamPutInt(file, sc);
+		streamPut(file, (int)sc);
 		_writeEdgeType(file, g, DotDrawing());
-		_streamPutInt(file, tr);
-		_streamWrite(file, " [");
-		_streamWrite(file, getProperty(edgeMap, *itEd));
-		_streamWrite(file, "];\n");
+		streamPut(file, (int)tr);
+		streamPut(file, " [");
+		streamPut(file, getProperty(edgeMap, *itEd));
+		streamPut(file, "];\n");
 	}
-	_streamPut(file, '\n');
+	streamPut(file, '\n');
 
 	_writeGraphFooter(file,g,DotDrawing());
 
-	_streamWrite(file, "}\n");
+	streamPut(file, "}\n");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -567,7 +558,6 @@ write(TFile & file,
 	  DotDrawing) 
 {
 //IOREV _doc_ _batchreading_
-	SEQAN_CHECKPOINT
 	String<String<char> > edgeMap;
 	_createEdgeAttributes(g,edgeMap);
 	write(file,g,nodeMap,edgeMap,DotDrawing());
@@ -588,7 +578,6 @@ write(TFile & file,
 	  DotDrawing) 
 {
 //IOREV _doc_ _batchreading_
-	SEQAN_CHECKPOINT
 	String<String<char> > nodeMap;
 	_createNodeAttributes(g,nodeMap);
 	String<String<char> > edgeMap;
@@ -914,7 +903,7 @@ void read(TFile & file,
 		  TEdgeAttributes& edgeMap,
 		  DotDrawing) 
 {
-//IOREV _batchreading_ uses custom EOL code
+    // TODO(holtgrew): Could be adapted to use RecordReader for parsing.
 	typedef Graph<TSpec> TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Position<TFile>::Type TPosition;
@@ -924,8 +913,8 @@ void read(TFile & file,
 
 	TValue c;
 	String<TValue> stmt;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
+	while (!streamEOF(file)) {
+        streamReadChar(c, file);
 		
 		if (c == ';') _processStatement(g,stmt, nodeMap, edgeMap, nodeIdMap);
 		else if ((c == '\n') ||

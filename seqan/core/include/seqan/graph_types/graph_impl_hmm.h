@@ -536,64 +536,64 @@ write(TFile & target,
 	
 	
 	// Alphabet
-	_streamWrite(target,"Alphabet:\n");
-	_streamPut(target,'{');
+	streamPut(target,"Alphabet:\n");
+	streamPut(target,'{');
 	for(TSize counter = 0; counter<alph_size-1;++counter) {
-		_streamPut(target,TAlphabet(counter));
-		_streamPut(target,',');
+		streamPut(target,TAlphabet(counter));
+		streamPut(target,',');
 	}
-	_streamPut(target,TAlphabet(alph_size-1));
-	_streamPut(target,'}');
-	_streamPut(target,'\n');
+	streamPut(target,TAlphabet(alph_size-1));
+	streamPut(target,'}');
+	streamPut(target,'\n');
 
 	// States
-	_streamWrite(target,"States:\n");
-	_streamPut(target,'{');
+	streamPut(target,"States:\n");
+	streamPut(target,'{');
 	TIterConst it = begin(_getVertexString(g), Standard());
 	TIterConst itEnd = end(_getVertexString(g), Standard());
 	bool first = true;
 	for(TSize pos = 0;it!=itEnd;goNext(it), ++pos) {
 		if (!idInUse(_getVertexIdManager(g), pos)) continue;
-		if (!first) _streamPut(target,',');
+		if (!first) streamPut(target,',');
 		else first = false;
-		_streamPutInt(target, pos);	
-		if (isSilent(g, pos)) _streamWrite(target," (Silent)");
+		streamPut(target, (int)pos);	
+		if (isSilent(g, pos)) streamPut(target," (Silent)");
 	}
-	_streamPut(target,'}');
-	_streamPut(target,'\n');
+	streamPut(target,'}');
+	streamPut(target,'\n');
 
 	// Begin and end state
-	_streamWrite(target,"Begin state: ");
-	_streamPutInt(target, getBeginState(g));
-	_streamPut(target,'\n');
-	_streamWrite(target,"End state: ");
-	_streamPutInt(target, getEndState(g));
-	_streamPut(target,'\n');
+	streamPut(target,"Begin state: ");
+	streamPut(target, (int)getBeginState(g));
+	streamPut(target,'\n');
+	streamPut(target,"End state: ");
+	streamPut(target, (int)getEndState(g));
+	streamPut(target,'\n');
 
 	// Transition probabilities
-	_streamWrite(target,"Transition probabilities:\n");
+	streamPut(target,"Transition probabilities:\n");
 	itEnd = end(_getVertexString(g));
 	it = begin(_getVertexString(g));
 	for(TSize pos = 0;it!=itEnd;goNext(it), ++pos) {
 		if (!idInUse(_getVertexIdManager(g), pos)) continue;
 		TEdgeStump* current = getValue(it);
-		_streamPutInt(target, pos);
-		_streamWrite(target," -> ");
+		streamPut(target, (int)pos);
+		streamPut(target," -> ");
 		first = true;
 		while(current!=0) {
-			if (!first) _streamPut(target, ',');
+			if (!first) streamPut(target, ',');
 			else first = false;
-			_streamPutInt(target, getTarget(current));
-			_streamWrite(target," (");
-			_streamPutFloat(target, cargo(current));
-			_streamWrite(target,") ");
+			streamPut(target, (int)getTarget(current));
+			streamPut(target," (");
+			streamPut(target, (double)cargo(current));
+			streamPut(target,") ");
 			current=getNextT(current);
 		}
-		_streamPut(target, '\n');
+		streamPut(target, '\n');
 	}
 
 	// Emission probabilities
-	_streamWrite(target,"Emission probabilities:\n");
+	streamPut(target,"Emission probabilities:\n");
 	TEmisIter itEmis = begin(g.data_emission, Standard());
 	itEnd = end(_getVertexString(g), Standard());
 	it = begin(_getVertexString(g), Standard());	
@@ -601,20 +601,20 @@ write(TFile & target,
 	for(TSize pos = 0;it!=itEnd;++it, ++pos) {
 		if (!idInUse(_getVertexIdManager(g), pos)) continue;
 		if (isSilent(g, pos)) continue;
-		if (!first) _streamPut(target,'\n');
+		if (!first) streamPut(target,'\n');
 		else first = false;
-		_streamPutInt(target, pos);
-		_streamWrite(target,": ");
+		streamPut(target, (int)pos);
+		streamPut(target,": ");
 		bool my_first = true;
 		itEmis = begin(g.data_emission, Standard());
 		itEmis += pos * alph_size;
 		for(TSize counter = 0; counter < alph_size; ++itEmis, ++counter) {
-			if (!my_first) _streamPut(target, ',');
+			if (!my_first) streamPut(target, ',');
 			else my_first = false;
-			_streamPut(target, TAlphabet(counter));
-			_streamWrite(target," (");
-			_streamPutFloat(target, *itEmis);
-			_streamWrite(target,") ");
+			streamPut(target, TAlphabet(counter));
+			streamPut(target," (");
+			streamPut(target, (double)*itEmis);
+			streamPut(target,") ");
 			
 		}
 	}
