@@ -72,16 +72,5 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     //SEQAN_CALL_TEST(GraphMatchRefine);
     SEQAN_CALL_TEST(RefineAlign);
     SEQAN_CALL_TEST(RefineInexactFragment);
-
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_align.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_aligngraph.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_annotation.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_exact.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_exact_iterative.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_fragment.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_inexact.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_algorithm_refine_scoring.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_impl_align.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/refinement/graph_impl_align_adapt.h");
 }
 SEQAN_END_TESTSUITE
