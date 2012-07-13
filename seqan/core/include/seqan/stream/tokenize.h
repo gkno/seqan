@@ -79,6 +79,7 @@ struct UnixEOL__;
 struct BackslashR__;
 struct Graph__;
 struct TabOrLineBreak__;
+struct Identifier__;
 
 typedef Tag<Whitespace__> Whitespace_;
 typedef Tag<Blank__> Blank_;
@@ -90,6 +91,7 @@ typedef Tag<UnixEOL__> UnixEOL_;
 typedef Tag<BackslashR__> BackslashR_;
 typedef Tag<Graph__> Graph_;
 typedef Tag<TabOrLineBreak__> TabOrLineBreak_;
+typedef Tag<Identifier__> Identifier_;
 
 // ==========================================================================
 // Metafunctions
@@ -128,6 +130,12 @@ inline int
 _charCompare(int const c, AlphaNum_ const & /* tag*/)
 {
     return isalnum(c);
+}
+
+inline int
+_charCompare(int const c, Identifier_ const & /* tag*/)
+{
+    return isalnum(c) || c == '-' || c == '_';
 }
 
 inline int
@@ -1289,6 +1297,77 @@ readDigits(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
 }
 
 /**
+.Function.readGraphs
+..cat:Input/Output
+..summary:Read characters from stream as long as characters are graph characters.
+..signature:readGraphs(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString
+...type:nolink:or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:Enum.TokenizeResult
+..remarks:This function stops *behind* the last letter read.
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+..see:Function.isgraph
+ */
+template <typename TStream, typename TPass, typename TBuffer>
+inline int
+readGraphs(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
+{
+    SEQAN_CHECKPOINT
+    return _readHelper(buffer, reader, Graph_(), false);
+}
+
+/**
+.Function.readFloat
+..cat:Input/Output
+..summary:Read characters from stream as long as the number is a valid floating point numbers.
+..description:A floating point number matches either $"[digits]+.[digits]*"$ or $"[digits]"$ or $"[digits]*.[digits]+"$.
+..description:Scientific notation is currently not supported.
+..signature:readFloat(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString
+...type:nolink:or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:Enum.TokenizeResult
+..remarks:This function stops *behind* the last letter read.
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+..see:Function.isdigit
+ */
+template <typename TStream, typename TPass, typename TBuffer>
+inline int
+readFloat(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
+{
+    unsigned lenPre = length(buffer);
+    int res = _readHelper(buffer, reader, Digit_(), false);
+    if (res != 0)
+        return res;
+    unsigned digitsBeforeDot = length(buffer) - lenPre;
+
+    if (value(reader) != '.')
+        return 0;
+
+    appendValue(buffer, value(reader));
+    goNext(reader);
+
+    if (digitsBeforeDot == 0u && !isdigit(value(reader)))
+        return 1;  // No digits before dot but no digit afterwards.
+
+    res = _readHelper(buffer, reader, Digit_(), false);
+    return res;
+}
+
+/**
 .Function.readAlphaNums
 ..cat:Input/Output
 ..summary:Read characters from stream as long as characters are letters
@@ -1331,6 +1410,31 @@ _parseReadIdentifier(TFile & file, TString& str, TChar& c)
     }
 }*/
 
+/**
+.Function.readIdentifier
+..cat:Input/Output
+..summary:Read characters from stream as long as characters are identifiers (alphanumeric, $'-'$, and $'_'$).
+..signature:readIdentifier(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader)
+..param.buffer:The buffer to write to
+...type:Shortcut.CharString
+...type:nolink:or similar
+..param.recordReader:The @Class.RecordReader@ to read from.
+...type:Class.RecordReader
+..returns:0 if there was no error reading
+..returns:non-zero value on errors, especially EOF_BEFORE_SUCCESS
+...type:nolink:$int$
+...type:Enum.TokenizeResult
+..remarks:This function stops *behind* the last letter read.
+..include:seqan/stream.h
+..see:Enum.TokenizeResult
+..see:Function.isalnum
+ */
+template <typename TStream, typename TPass, typename TBuffer>
+inline int
+readIdentifier(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
+{
+    return _readHelper(buffer, reader, Identifier_(), false);
+}
 
 /**
 .Function.skipWhitespaces
