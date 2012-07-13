@@ -100,7 +100,22 @@ void Test_Directed() {
 	SEQAN_ASSERT(outDegree(g, v3) == 3);	
 	
 	// Output
-	std::cout << g << std::endl;
+	std::stringstream sstream;
+	sstream << g;
+	char const * EXPECTED =
+	    "Adjacency list:\n"
+        "0 -> 1,0,\n"
+        "1 -> \n"
+        "2 -> \n"
+        "3 -> 0,1,4,\n"
+        "4 -> \n"
+        "Edge list:\n"
+        "Source: 0,Target: 1 (Id: 1)\n"
+        "Source: 0,Target: 0 (Id: 0)\n"
+        "Source: 3,Target: 0 (Id: 4)\n"
+        "Source: 3,Target: 1 (Id: 3)\n"
+        "Source: 3,Target: 4 (Id: 2)\n";
+    SEQAN_ASSERT(EXPECTED == sstream.str());
 
 	// Remove edges
 	removeEdge(g,my_edge);
@@ -341,7 +356,21 @@ void Test_Undirected() {
 	SEQAN_ASSERT(degree(g, v3) == 3);
 
 	// Output
-	std::cout << g << std::endl;
+	std::stringstream sstream;
+	sstream << g;
+	char const * EXPECTED =
+        "Adjacency list:\n"
+        "0 -> 3,1,\n"
+        "1 -> 3,0,\n"
+        "2 -> \n"
+        "3 -> 0,1,4,\n"
+        "4 -> 3,\n"
+        "Edge list:\n"
+        "Source: 0,Target: 3 (Id: 3)\n"
+        "Source: 0,Target: 1 (Id: 0)\n"
+        "Source: 1,Target: 3 (Id: 2)\n"
+        "Source: 3,Target: 4 (Id: 1)\n";
+    SEQAN_ASSERT(EXPECTED == sstream.str());
 
 	// Remove edges
 	removeEdge(g,my_edge);
@@ -695,7 +724,16 @@ void Test_Automaton() {
 	SEQAN_ASSERT(outDegree(g, v3) == 3);	
 
 	// Output
-	std::cout << g << std::endl;
+	std::stringstream sstream;
+	sstream << g;
+	char const * EXPECTED =
+        "Automaton - State: (Input / NextState)\n"
+        "0:  (A / 0)  (C / nil)  (G / 1)  (T / nil) \n"
+        "1:  (A / nil)  (C / nil)  (G / nil)  (T / nil) \n"
+        "2:  (A / nil)  (C / nil)  (G / nil)  (T / nil) \n"
+        "3:  (A / nil)  (C / 1)  (G / 4)  (T / 0) \n"
+        "4:  (A / nil)  (C / nil)  (G / nil)  (T / nil) \n";
+    SEQAN_ASSERT(EXPECTED == sstream.str());
 
 	// Remove edges
 	removeEdge(g,3,1,'c');
@@ -1097,7 +1135,18 @@ void Test_WordGraph() {
 	assignRoot(g,0);
 
 	// Output
-	std::cout << g << std::endl;
+	std::stringstream sstream;
+	sstream << g;
+	char const * EXPECTED =
+        "WordGraph - Directed:\n"
+        "0->3  Label: AG\n"
+        "0->5  Label: G\n"
+        "3->1  Label: AGGG\n"
+        "3->4  Label: GG\n"
+        "5->2  Label: AGGG\n"
+        "5->7  Label: G\n"
+        "7->6  Label: G\n";
+    SEQAN_ASSERT(EXPECTED == sstream.str());
 
 	assignRoot(g,2);
 	TWordGraph g_tmp(g);
@@ -1181,7 +1230,29 @@ void Test_Tree() {
 	TEdgeDescriptor childC2C1C1e = findEdge(g, childC2C1C1, childC2C1);
 	
 	// Output
-	std::cout << g << std::endl;
+	std::stringstream sstream;
+	sstream << g;
+	char const * EXPECTED =
+        "Adjacency list:\n"
+        "0 -> 8,3,2,1,\n"
+        "1 -> \n"
+        "2 -> 4,\n"
+        "3 -> \n"
+        "4 -> 5,\n"
+        "5 -> 7,6,\n"
+        "6 -> \n"
+        "7 -> \n"
+        "8 -> \n"
+        "Edge list:\n"
+        "Source: 0,Target: 8 (Id: 8)\n"
+        "Source: 0,Target: 3 (Id: 3)\n"
+        "Source: 0,Target: 2 (Id: 2)\n"
+        "Source: 0,Target: 1 (Id: 1)\n"
+        "Source: 2,Target: 4 (Id: 4)\n"
+        "Source: 4,Target: 5 (Id: 5)\n"
+        "Source: 5,Target: 7 (Id: 7)\n"
+        "Source: 5,Target: 6 (Id: 6)\n";
+    SEQAN_ASSERT(EXPECTED == sstream.str());
 
 	SEQAN_ASSERT(g.data_parent[0]==getNil<TVertexDescriptor>());
 	SEQAN_ASSERT(g.data_parent[1]==0);
@@ -1617,7 +1688,26 @@ void Test_Hmm() {
 	SEQAN_ASSERT(getEndState(hmm) == eState);
 	
 	// Output
-	std::cout << hmm << std::endl;
+	std::stringstream sstream;
+	sstream << hmm;
+	char const * EXPECTED =
+        "Alphabet:\n"
+        "{A,C,G,T}\n"
+        "States:\n"
+        "{0,1,2,3 (Silent),4 (Silent)}\n"
+        "Begin state: 3\n"
+        "End state: 4\n"
+        "Transition probabilities:\n"
+        "0 -> 2 (0.050000) ,0 (0.950000) \n"
+        "1 -> 1 (1.000000) \n"
+        "2 -> 4 (0.500000) ,0 (0.100000) ,2 (0.400000) \n"
+        "3 -> 0 (1.000000) \n"
+        "4 -> 4 (1.000000) \n"
+        "Emission probabilities:\n"
+        "0: A (0.200000) ,C (0.200000) ,G (0.300000) ,T (0.300000) \n"
+        "1: A (0.500000) ,C (0.500000) ,G (0.000000) ,T (0.000000) \n"
+        "2: A (0.300000) ,C (0.300000) ,G (0.200000) ,T (0.200000) ";
+    SEQAN_ASSERT(EXPECTED == sstream.str());
 
 	// Change model
 	removeVertex(hmm, state2);
