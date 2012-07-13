@@ -49,14 +49,5 @@ SEQAN_BEGIN_TESTSUITE(test_graph_align) {
     SEQAN_CALL_TEST(test_graph_align_smith_waterman);
     SEQAN_CALL_TEST(test_graph_align_smith_waterman_clump);
     SEQAN_CALL_TEST(test_graph_align_banded_smith_waterman_clump);
-    
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_config.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_interface.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_needleman_wunsch.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_gotoh.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_hirschberg.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_smith_waterman.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/graph_align/graph_align_smith_waterman_clump.h");
 }
 SEQAN_END_TESTSUITE
