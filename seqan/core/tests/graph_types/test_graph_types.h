@@ -1146,7 +1146,7 @@ void Test_WordGraph() {
         "5->2  Label: AGGG\n"
         "5->7  Label: G\n"
         "7->6  Label: G\n";
-    SEQAN_ASSERT(EXPECTED == sstream.str());
+    SEQAN_ASSERT_EQ(EXPECTED, sstream.str());
 
 	assignRoot(g,2);
 	TWordGraph g_tmp(g);
@@ -1698,16 +1698,16 @@ void Test_Hmm() {
         "Begin state: 3\n"
         "End state: 4\n"
         "Transition probabilities:\n"
-        "0 -> 2 (0.050000) ,0 (0.950000) \n"
-        "1 -> 1 (1.000000) \n"
-        "2 -> 4 (0.500000) ,0 (0.100000) ,2 (0.400000) \n"
-        "3 -> 0 (1.000000) \n"
-        "4 -> 4 (1.000000) \n"
+        "0 -> 2 (0.05) ,0 (0.95) \n"
+        "1 -> 1 (1) \n"
+        "2 -> 4 (0.5) ,0 (0.1) ,2 (0.4) \n"
+        "3 -> 0 (1) \n"
+        "4 -> 4 (1) \n"
         "Emission probabilities:\n"
-        "0: A (0.200000) ,C (0.200000) ,G (0.300000) ,T (0.300000) \n"
-        "1: A (0.500000) ,C (0.500000) ,G (0.000000) ,T (0.000000) \n"
-        "2: A (0.300000) ,C (0.300000) ,G (0.200000) ,T (0.200000) ";
-    SEQAN_ASSERT(EXPECTED == sstream.str());
+        "0: A (0.2) ,C (0.2) ,G (0.3) ,T (0.3) \n"
+        "1: A (0.5) ,C (0.5) ,G (0) ,T (0) \n"
+        "2: A (0.3) ,C (0.3) ,G (0.2) ,T (0.2) ";
+    SEQAN_ASSERT_EQ(EXPECTED, sstream.str());
 
 	// Change model
 	removeVertex(hmm, state2);
