@@ -90,19 +90,19 @@ struct Difference< ::std::ofstream>
 template <>
 struct Size< ::std::fstream>
 {
-    typedef ::std::fstream::pos_type Type;
+    typedef size_t Type;
 };
 
 template <>
 struct Size< ::std::ifstream>
 {
-    typedef ::std::ifstream::pos_type Type;
+    typedef size_t Type;
 };
 
 template <>
 struct Size< ::std::ofstream>
 {
-    typedef ::std::ofstream::pos_type Type;
+    typedef size_t Type;
 };
 
 // ----------------------------------------------------------------------------
