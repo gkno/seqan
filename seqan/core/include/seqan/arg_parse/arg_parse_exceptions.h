@@ -137,7 +137,7 @@ public:
 /**
 .class.NotEnoughArgumentsException
 ..cat:Miscellaneous
-..summary:Thrown if an option was set on the command line but not enough arguments for 
+..summary:Thrown if an option was set on the command line but not enough arguments for
 this option were provided.
 */
 
