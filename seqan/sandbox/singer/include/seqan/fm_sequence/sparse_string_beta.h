@@ -115,7 +115,7 @@ struct Value<SparseString<TFibreValueString, TSpec> const>
 ..cat:String
 ..summary:A string storing only a fraction of the values of the original string..
 ..signature:SparseString<TValueString, TSpec>
-..param.TValueString:The string containing the values. 
+..param.TValueString:The string containing the values.
 ..param.TSpec:The specialisation tag.
 ...default:void.
 ..include:seqan/String.h
@@ -161,13 +161,13 @@ struct SparseString
 };
 
 // ==========================================================================
-// Functions 
+// Functions
 // ==========================================================================
 
 /**
 .Function.assignCompressionFactor
 ..summary:Assings the compression factor of the container.
-..signature:assignCompressionFactor(container, value) 
+..signature:assignCompressionFactor(container, value)
 ..param.container:The container holding the entries.
 ...type:Class.SparseString
 ..param.value.
@@ -176,7 +176,7 @@ struct SparseString
 template <typename TFibreValueString, typename TSpec, typename TValue>
 inline void assignCompressionFactor(SparseString<TFibreValueString, TSpec> & string, TValue value)
 {
-    SEQAN_ASSERT_GT_MSG(value, 0u, "The compresssion factor is not acceptable!"); 
+    SEQAN_ASSERT_GT_MSG(value, 0u, "The compresssion factor is not acceptable!");
     string.compressionFactor = value;
 }
 
@@ -380,7 +380,7 @@ inline bool save(
 */
 template <typename TFibreValueString, typename TSpec, typename TPos>
 inline typename Value<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type &
-value(SparseString<TFibreValueString, TSpec> & string, TPos pos)
+value(SparseString<TFibreValueString, TSpec>&string, TPos pos)
 {
     return getFibre(string, FibreValueString())[pos];
 }

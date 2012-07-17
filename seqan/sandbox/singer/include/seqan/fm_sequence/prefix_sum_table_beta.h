@@ -98,7 +98,7 @@ struct CharacterValue;
 template <typename TChar, typename TSpec>
 struct CharacterValue<PrefixSumTable<TChar, TSpec> >
 {
-    typedef typename MakeUnsigned<TChar>::Type TUChar; 
+    typedef typename MakeUnsigned<TChar>::Type TUChar;
     typedef TUChar Type;
 };
 
@@ -165,7 +165,7 @@ public:
     {
         return value(*this, pos);
     }
-        
+
     inline bool operator==(PrefixSumTable const & other)
     {
         return entries == other.entries;
@@ -181,7 +181,7 @@ public:
 template <typename TChar, typename TSpec>
 inline void clear(PrefixSumTable<TChar, TSpec> & prefixSumTable)
 {
-    clear(prefixSumTable.entries);    
+    clear(prefixSumTable.entries);
 }
 
 template <typename TChar, typename TSpec, typename TText>
@@ -198,7 +198,7 @@ inline void createPrefixSumTable(PrefixSumTable<TChar, TSpec> & prefixSumTable, 
 
 
     TPrefixSumValue temp = 0;
-    TPrefixSumValue sum = 0; 
+    TPrefixSumValue sum = 0;
     for (TPrefixSumValue i = 0; i < alpSize; ++i)
     {
         temp = getPrefixSum(freq, i);
@@ -232,13 +232,13 @@ inline unsigned getCharacterPosition(PrefixSumTable<TChar, TSpec> const & /*tag*
 // {
 //     return static_cast<int>(character) + 128;
 // }
-// 
+//
 // template <typename TSpec>
 // inline int getCharacterPosition(PrefixSumTable<char, TSpec> const & /*tag*/, char character)
 // {
 //     return static_cast<int>(character) + 128;
 // }
-// 
+//
 // template <typename TSpec, typename TPos>
 // inline char getCharacter(PrefixSumTable<char, TSpec> const & /*tag*/, TPos const pos)
 // {
@@ -275,8 +275,8 @@ unsigned getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos be
     unsigned tooSmallValues = pst[beginPos];
 
     int direction;
-    ((pst[pivotPos] - tooSmallValues) >= (pst[realEndPos] - pst[pivotPos])) ? direction = -1 : direction = 1; 
-    long currentMin = pst[realEndPos] + 1; 
+    ((pst[pivotPos] - tooSmallValues) >= (pst[realEndPos] - pst[pivotPos])) ? direction = -1 : direction = 1;
+    long currentMin = pst[realEndPos] + 1;
 
     if (direction == -1)
     {
@@ -289,10 +289,10 @@ unsigned getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos be
     }
     else
     {
-        while (std::abs((long)((pst[pivotPos ] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos ]))) < currentMin && (pivotPos < realEndPos))
+        while (std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos]))) < currentMin && (pivotPos < realEndPos))
         {
-            currentMin = abs((long)((pst[pivotPos ] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos ])));
-            ++pivotPos;            
+            currentMin = abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
+            ++pivotPos;
         }
         --pivotPos;
     }

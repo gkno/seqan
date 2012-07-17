@@ -53,9 +53,14 @@ void fmIndexIteratorConstuctor(TIter & /*tag*/)
 	TText text;
 	generateText(text);
 
+	Index<TText> esa(text);
+	typename Iterator<Index<TText>, TopDown<> >::Type esaIt(esa);
+	goDown(esaIt);
+
 	TIndex fmIndex(text);
 
 	TIter it(fmIndex);
+    //static_cast<Nothing>(it);
 
 	SEQAN_ASSERT_EQ(isRoot(it), true);
 	SEQAN_ASSERT_EQ(repLength(it), 0u);
@@ -66,19 +71,66 @@ void fmIndexIteratorConstuctor(TIter & /*tag*/)
 	SEQAN_ASSERT_EQ(goRight(it), true);
 	SEQAN_ASSERT_EQ(representative(it), 'C');
 	SEQAN_ASSERT_EQ(repLength(it), 1u);
+	SEQAN_ASSERT_EQ(goRight(it), true);
+	SEQAN_ASSERT_EQ(representative(it), 'G');
+	SEQAN_ASSERT_EQ(repLength(it), 1u);
+	SEQAN_ASSERT_EQ(goRight(it), true);
+	SEQAN_ASSERT_EQ(representative(it), 'T');
+	SEQAN_ASSERT_EQ(repLength(it), 1u);
+	SEQAN_ASSERT_EQ(goRight(it), false);
+	SEQAN_ASSERT_EQ(representative(it), 'T');
+	SEQAN_ASSERT_EQ(repLength(it), 1u);
+	SEQAN_ASSERT_EQ(goDown(it), true);
+	SEQAN_ASSERT_EQ(goDown(it), true);
+	SEQAN_ASSERT_EQ(goUp(it), true);
+	SEQAN_ASSERT_EQ(representative(it), "AT");
+	SEQAN_ASSERT_EQ(goUp(it), true);
+	SEQAN_ASSERT_EQ(representative(it), "T");
+	
+}
+
+template <typename TIter>
+void fmIndexIteratorGoDown(TIter & /*tag*/)
+{
+    typedef typename Container<TIter>::Type TIndex;
+    typedef typename Value<TIndex>::Type TText;
+
+	TText text = "ACGACGACG";
+	TIndex fmIndex(text);
+	TIter it(fmIndex);
+
+	SEQAN_ASSERT_EQ(goDown(it), true);
+	SEQAN_ASSERT_EQ(representative(it), 'A');
+
+	SEQAN_ASSERT_EQ(goDown(it, 'G'), true);
+	SEQAN_ASSERT_EQ(representative(it), "AG");
+	
+	SEQAN_ASSERT_EQ(goDown(it, "ACGAC"), true);
+	SEQAN_ASSERT_EQ(representative(it), "AGCAGCA");
+
+	SEQAN_ASSERT_EQ(goDown(it), false);
+	SEQAN_ASSERT_EQ(representative(it), "AGCAGCA");
+
+	SEQAN_ASSERT_EQ(goDown(it, 'G'), false);
+	SEQAN_ASSERT_EQ(representative(it), "AGCAGCA");
+	
+	SEQAN_ASSERT_EQ(goDown(it, "ACGAC"), false);
+	SEQAN_ASSERT_EQ(representative(it), "AGCAGCA");
 }
 
 SEQAN_DEFINE_TEST(fm_index_iterator_constuctor)
 {
     using namespace seqan;
 
-    typedef FmIndex<WaveletTreeBased<FmiDollarSubstituted<SingleDollar<void> > >, TextVerification<void> > TIndexSpec;
-    typedef TopDown<> TIterSpec;
+    typedef FmIndex<WaveletTreeBased<FmiDollarSubstituted<SingleDollar<void> > >, void > TIndexSpec;
+    //typedef TopDown<ParentLinks<void> > TIterSpec;
+    typedef TopDown<ParentLinks<> > TIterSpec;
 
     DnaString genome = "AAA";
     Index<DnaString,TIndexSpec> index(genome);
 
-    Iterator<Index<DnaString,TIndexSpec>, TIterSpec>::Type dnaTag(index);// = begin(Index<DnaString,TIndexSpec>(genome));
+    typedef Iterator<Index<DnaString,TIndexSpec>, TIterSpec>::Type TIter;
+    TIter dnaTag(index);// = begin(Index<DnaString,TIndexSpec>(genome));
 //     Index<String<Dna5>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, void > > dna5Tag;
 //     Index<String<AminoAcid>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, void > > asTag;
 //     Index<String<signed char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, void > > charTag;

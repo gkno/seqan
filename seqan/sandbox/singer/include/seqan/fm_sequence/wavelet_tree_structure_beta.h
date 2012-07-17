@@ -80,11 +80,11 @@ typedef Tag<FibreWaveletTreeStructure_> const FibreWaveletTreeStructure;
 template <typename TChar, typename TSpec>
 struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>
 {
-    typedef typename IfC< BitsPerValue<TChar>::VALUE < 17, 
-            unsigned short,
-            unsigned int>::Type TPos;
+    typedef typename IfC < BitsPerValue<TChar>::VALUE<17,
+                                                      unsigned short,
+                                                      unsigned int>::Type TPos;
 
-//     typedef typename IfC< BitsPerValue<TChar>::VALUE < 17, 
+//     typedef typename IfC< BitsPerValue<TChar>::VALUE < 17,
 //             typename BitVector_<ValueSize<TChar>::VALUE>::Type,
 //             unsigned int>::Type TPos;
     typedef String<Pair<TChar, TPos> > Type;
@@ -129,7 +129,7 @@ struct Value<RightArrayBinaryTree<TChar, TSpec> const>
 /**
 .Class.RightArrayBinaryTree:
 ..cat:WaveletTree
-..summary:A special format to encode the structure of a wavelet tree. The structure is very space efficient because only one position is stored which encodes where the left and right subtree of a given node exist. 
+..summary:A special format to encode the structure of a wavelet tree. The structure is very space efficient because only one position is stored which encodes where the left and right subtree of a given node exist.
 ..signature:RightArrayBinaryTree<TValue, TSpec>
 ..param.TSpec:The value type, that is the type of the stored characters.
 ..param.TSpec:The wavelet tree structure specialisation.
@@ -236,7 +236,7 @@ inline void computeRightArrayBinaryTree(Iter<RightArrayBinaryTree<TChar, TSpec>,
     unsigned alpSize = getAlphabetSize(pst);
     String<Pair<unsigned> > borderString;
     appendValue(borderString, Pair<unsigned>(0, alpSize - 1));
-    
+
     resize(waveletTreeStructure, 1);
 
     computeRightArrayBinaryTree(it, borderString, pst);
@@ -278,7 +278,7 @@ inline bool empty(RightArrayBinaryTree<TChar, TSpec> & treeStructure)
     return empty(getFibre(treeStructure, FibreTreeVertieces()));
 }
 
-    template <typename TChar, typename TSpec>
+template <typename TChar, typename TSpec>
 inline bool empty(RightArrayBinaryTree<TChar, TSpec> const & treeStructure)
 {
     return empty(getFibre(treeStructure, FibreTreeVertieces()));
@@ -329,11 +329,11 @@ inline void resize(RightArrayBinaryTree<TChar, TSpec> & treeStructure, TSize siz
 
 /**
 .Function.getAlphabet
-..summary:Determines the characters 
+..summary:Determines the characters
 ..signature:computeRightArrayBinaryTree(waveletTreeStructure)
 ..param.waveletTreeStructure:A wavelet tree structure.
 ...type:Class.RightArrayBinaryTree
-..remarks:This function determines all 
+..remarks:This function determines all
 ..include:seqan/index.h
 ..example.code:
 String<Dna5> genome = "ACGTACGT";

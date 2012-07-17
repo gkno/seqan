@@ -42,7 +42,7 @@ namespace seqan {
 // ==========================================================================
 
 struct FibreSparseString_;
-typedef Tag<FibreSparseString_> const FibreSparseString;    
+typedef Tag<FibreSparseString_> const FibreSparseString;
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA;
@@ -90,7 +90,7 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
 // ==========================================================================
 // Classes
 // ==========================================================================
-    
+
 // forwards
 template <typename TPos, typename TOffSet>
 TPos addGapDistance_(TPos const & value, TOffSet const & offSet);
@@ -102,7 +102,7 @@ Pair<TSeqId, TPos> addGapDistance_(Pair<TSeqId, TPos> const & value, TOffSet con
 /**
 .Class.CompressedSA:
 ..cat:String
-..summary:A suffix array storing only a few suffix array entries and computing the remaining on demand. 
+..summary:A suffix array storing only a few suffix array entries and computing the remaining on demand.
 ..signature:CompressedSA<TSparseString, TLfTable, TSpec>
 ..param.TSparseString:The string containing specific suffix array entries.
 ...type:Class.SparseString
@@ -195,7 +195,7 @@ Pair<TSeqId, TPos> addGapDistance_(Pair<TSeqId, TPos> const & value, TOffSet con
 }
 
 // ==========================================================================
-// Functions 
+// Functions
 // ==========================================================================
 
 /**
@@ -256,7 +256,6 @@ inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     return entryStored(getFibre(compressedSA, FibreSparseString()), pos);
 }
 
-
 // This function creates a compressed suffix array using a normal one.
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA>
 void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSA const & completeSA, unsigned offSet)
@@ -271,7 +270,7 @@ void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     TIndicatorString & indicatorString = getFibre(sparseString, FibreIndicatorString());
 
     TSize n = length(completeSA);
-    
+
     //resize(compressedSA, n);
 
     for (unsigned i = 0; i < offSet; ++i)
@@ -306,7 +305,6 @@ void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     compressedSaCreate(compressedSA, completeSA, 0);
 }
 
-
 /**
 .Function.getCompressionFactor
 ..param.container:The container holding the entries.
@@ -338,7 +336,7 @@ getFibre(CompressedSA<TSparseString, TLfTable, TSpec>&compressedSA, FibreSparseS
     return compressedSA.sparseString;
 }
 
-// This functions computes the position in the suffix array of text[sa[pos] - 1] 
+// This functions computes the position in the suffix array of text[sa[pos] - 1]
 // iff the current position is not present in the compressed suffix array.
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TPos>
 inline bool getNextPos_(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TPos & pos)
@@ -373,7 +371,7 @@ length(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 */
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSize>
 inline void resize(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA,
-                    TSize size)
+                   TSize size)
 {
     resize(getFibre(compressedSA, FibreSparseString()), size);
 }
@@ -441,15 +439,13 @@ inline bool save(
     return save(compressedSA, fileName, DefaultOpenMode<CompressedSA<TSparseString, TLfTable, TSpec> >::VALUE);
 }
 
-
-
 // ==========================================================================
-// Functions 
+// Functions
 // ==========================================================================
 /**
 .Function.setLfTable
 ..summary:Set the LfTable of the compressed suffix array..
-..signature:setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> compressedSa, TLfTable & lfTable) 
+..signature:setLfTable(CompressedSA<TSparseString, TLfTable, TSpec> compressedSa, TLfTable & lfTable)
 ..param.CompressedSA<TSparseString, TLfTable, TSpec>:The compressed suffix array.
 ...type:Class.CompressedSA
 ..param.lfTable

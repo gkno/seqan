@@ -62,6 +62,7 @@
 #include "seqan/fm_sequence/bit_string_beta.h"
 #include "seqan/fm_sequence/sparse_string_beta.h"
 #include "seqan/fm_sequence/compressed_sa_beta.h"
+#include "seqan/fm_sequence/compressed_sa_iterator_beta.h"
 #include "seqan/fm_sequence/lf_table_beta.h"
 #include "seqan/fm_sequence/prefix_sum_table_beta.h"
 #include "seqan/fm_sequence/wavelet_tree_structure_beta.h"

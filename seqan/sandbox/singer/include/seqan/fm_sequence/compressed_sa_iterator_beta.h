@@ -42,7 +42,7 @@ namespace seqan {
 // ==========================================================================
 
 struct FibreSparseString_;
-typedef Tag<FibreSparseString_> const FibreSparseString;    
+typedef Tag<FibreSparseString_> const FibreSparseString;
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
 class CompressedSA;
@@ -87,4 +87,3 @@ end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 
 }
 #endif // COMPRESSED_SA_ITERATOR_BETA_H_
-

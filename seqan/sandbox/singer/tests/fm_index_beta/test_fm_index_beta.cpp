@@ -128,6 +128,21 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
 //     SEQAN_CALL_TEST(test_fm_index_get_fibre);
 //     SEQAN_CALL_TEST(test_fm_index_search);
 
-    SEQAN_CALL_TEST(fm_index_iterator_constuctor);
+//     SEQAN_CALL_TEST(fm_index_iterator_constuctor);
+
+    String<Dna5> genome = "ACGT";
+    Index<String<Dna5> > index_esa(genome);
+
+    Finder<Index<String<Dna5> > > finder0(index_esa);
+    find(finder0, "AC");
+
+    clear(genome);
+    std::cerr << "This is a stupid test!" << std::endl;
+    std::cerr << getFibre(index_esa, FibreText()) << std::endl;
+
+    Finder<Index<String<Dna5> > > finder1(index_esa);
+    find(finder1, "AC");
+    std::cerr << "This is a stupid test!" << std::endl;
+
 }
 SEQAN_END_TESTSUITE

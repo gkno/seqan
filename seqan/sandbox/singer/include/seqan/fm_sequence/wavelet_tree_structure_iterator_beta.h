@@ -220,7 +220,7 @@ public:
 };
 
 // ==========================================================================
-// Functions 
+// Functions
 // ==========================================================================
 
 ///.Function.begin.param.object.type:Class.RightArrayBinaryTree
@@ -232,10 +232,10 @@ begin(RightArrayBinaryTree<TChar, TSpec> const & waveletTreeStructure, TIterSpec
 }
 
 template <typename TChar, typename TSpec, typename TIterSpec>
-inline typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec >::Type
+inline typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>::Type
 begin(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure, TIterSpec const &)
 {
-    return typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec >::Type(waveletTreeStructure, 0);
+    return typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>::Type(waveletTreeStructure, 0);
 }
 
 ///.Function.container.param.object.type:Class.RightArrayBinaryTree
@@ -262,10 +262,10 @@ end(RightArrayBinaryTree<TChar, TSpec> const & waveletTreeStructure, TIterSpec c
 }
 
 template <typename TChar, typename TSpec, typename TIterSpec>
-inline typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec >::Type
+inline typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>::Type
 end(RightArrayBinaryTree<TChar, TSpec> & waveletTreeStructure, TIterSpec const &)
 {
-    return typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec >::Type(waveletTreeStructure, length(waveletTreeStructure));
+    return typename Iterator<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>::Type(waveletTreeStructure, length(waveletTreeStructure));
 }
 
 /**
@@ -314,7 +314,6 @@ inline unsigned int getLeftChildPos(Iter<const RightArrayBinaryTree<TChar, TSpec
     }
     return 0;
 }
-
 
 /*template <typename TText, typename TIter>
 inline void getNexVertex(TText & alphabet, TIter & it)
@@ -409,7 +408,7 @@ inline unsigned getNumChildVertieces(Iter<RightArrayBinaryTree<TChar, TSpec>, TI
     while (goRightChild(it) || goLeftChild(it))
         continue;
 
-    unsigned newPos= getPosition(it);
+    unsigned newPos = getPosition(it);
     goToPosition(it, originalPos);
 
     return newPos - originalPos;
@@ -490,7 +489,7 @@ inline unsigned int getRightChildPos(Iter<const RightArrayBinaryTree<TChar, TSpe
 ...type:Spec.TopDown Iterator
 ..param.char:$iterator$ goes down the edge beginning with $char$.
 ...type:Class.RightArrayBinaryTree
-..remarks:$goDown(iterator)$ goes down the left edge if it exist, the right edge otherwise. 
+..remarks:$goDown(iterator)$ goes down the left edge if it exist, the right edge otherwise.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
 ..include:seqan/index.h
 ..example.code:
@@ -529,7 +528,7 @@ inline bool goDown(Iter<RightArrayBinaryTree<TChar, TSpec> const, TIterSpec> & i
 template <typename TChar, typename TSpec, typename TIterSpec>
 inline bool goDownConstruction(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it)
 {
-    if (goLeftChild(it)) 
+    if (goLeftChild(it))
     {
         resize(container(it).treeVertieces, length(container(it).treeVertieces) + 1);
         return true;
@@ -550,7 +549,7 @@ inline bool goDownConstruction(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpe
 ..param.iterator:An iterator of a wavelet tree structure.
 ...type:Spec.TopDown Iterator
 ...type:Class.RightArrayBinaryTree
-..remarks:$goLeftChild(iterator)$ goes down the left edge if it exist. 
+..remarks:$goLeftChild(iterator)$ goes down the left edge if it exist.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
 ..include:seqan/index.h
 ..example.code:
@@ -668,7 +667,7 @@ inline bool goRight(Iter<RightArrayBinaryTree<TChar, TSpec> const, TIterSpec> & 
 ..param.iterator:An iterator of a wavelet tree structure.
 ...type:Spec.TopDown Iterator
 ...type:Class.RightArrayBinaryTree
-..remarks:$goRightChild(iterator)$ goes down the right edge if it exist. 
+..remarks:$goRightChild(iterator)$ goes down the right edge if it exist.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
 ..include:seqan/index.h
 ..example.code:
@@ -724,14 +723,13 @@ inline bool goRightChild(Iter<const RightArrayBinaryTree<TChar, TSpec>, RightArr
     return true;
 }
 
-
 /**
 .Function.goToPosition
 ..signature:bool goToPosition(iterator, pos)
 ..param.iterator:An iterator of a wavelet tree structure.
 ...type:Spec.TopDown Iterator
 ..param.pos:A position.
-..remarks:$goToPosition(iterator)$ goes to position pos if it exist. 
+..remarks:$goToPosition(iterator)$ goes to position pos if it exist.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
 ..include:seqan/index.h
 ..example.code:
@@ -770,7 +768,7 @@ inline bool goToPosition(Iter<RightArrayBinaryTree<TChar, TSpec>, RightArrayBina
 ..param.iterator:An iterator of a wavelet tree structure.
 ...type:Spec.TopDownHistory Iterator
 ..remarks:$goUp(iterator)$ goes to the parent node.
-..returns:$true$ if the current node is not the root node. 
+..returns:$true$ if the current node is not the root node.
 ..include:seqan/index.h
 ..example.code:
 String<Dna5> genome = "ACGTACGT";
@@ -811,7 +809,7 @@ inline bool goUp(Iter<RightArrayBinaryTree<TChar, TSpec> const, RightArrayBinary
     return true;
 }
 
-// This function implements the functionality of go up and 
+// This function implements the functionality of go up and
 // resizes the borderString of the structure construction.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TBorderString>
 inline bool goUpStructureConstruction_(Iter<RightArrayBinaryTree<TChar, TSpec>, RightArrayBinaryTreeIterator<TopDown<ParentLinks<TIterSpec> > > > & it, TBorderString & borderString)
@@ -854,14 +852,14 @@ inline bool isLeaf(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & iter)
 }
 
 // This function creates the right sibling of the current node
-// and goes to that one. 
+// and goes to that one.
 // Note: It acn only be called, if the right sibling really exists!
 template <typename TChar, typename TSpec, typename TIterSpec, typename TBorderString, typename TPrefixSumTable>
 inline bool setAndGoRight_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it, TBorderString & borderString, TPrefixSumTable & pst)
 {
     if (isRoot(it) || (borderString[length(borderString) - 1].i2 == borderString[length(borderString) - 2].i2))
         return false;
-    
+
     goUp(it);
 
     if (borderString[length(borderString) - 2].i2 == ordValue(getCharacter(it)))
@@ -872,7 +870,7 @@ inline bool setAndGoRight_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> &
 
     resize(container(it).treeVertieces, length(container(it).treeVertieces) + 1);
     TChar pivot = getCharacter(it);
-    SEQAN_ASSERT_MSG(setRightChildPos_(it,  length(container(it).treeVertieces) -1), "You just deleted inserted vertieves!");
+    SEQAN_ASSERT_MSG(setRightChildPos_(it, length(container(it).treeVertieces) - 1), "You just deleted inserted vertieves!");
     goRightChild(it);
     borderString[length(borderString) - 1].i1 = getCharacterPosition(pst, pivot);
     borderString[length(borderString) - 1].i2 = borderString[length(borderString) - 2].i2;
@@ -910,8 +908,8 @@ inline void setCharacter(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & i
 // This function sets the left child of the current node, or the right if there is no left child.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TBorderString, typename TCharPST, typename TSpecPST>
 void setChildVertieces_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it,
-                   TBorderString & borderString,
-                   PrefixSumTable<TCharPST, TSpecPST> & pst)
+                        TBorderString & borderString,
+                        PrefixSumTable<TCharPST, TSpecPST> & pst)
 {
     typedef typename Value<TBorderString>::Type TBorderStringValue;
     unsigned leftBorder = borderString[length(borderString) - 1].i1;
@@ -941,13 +939,15 @@ inline bool setLeftChildPos_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>
 {
     switch (iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2)
     {
-        case (0) :
-            iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 = 2;
-            return true;
-        case (2) :
-            return true;
-        default :
-            return false;
+    case (0):
+        iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 = 2;
+        return true;
+
+    case (2):
+        return true;
+
+    default:
+        return false;
     }
 
 //     if (iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 == 0)
@@ -962,8 +962,6 @@ inline bool setLeftChildPos_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec>
 //     //std::cerr << "ERROR: The right child has just been deleted!" << std::endl;
 //     return false;
 }
-
-
 
 // This function sets the position of iter to pos.
 template <typename TChar, typename TSpec, typename TIterSpec, typename TPos>
@@ -1000,18 +998,21 @@ inline bool setRightChildPos_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec
 {
     switch (iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2)
     {
-        case (0) :
-            SEQAN_ASSERT_MSG(rightChildPosition == 0u, "Wrong right child position!"); 
-            iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 = 1;
-            return true;    
-        case (2) :
-            iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 = rightChildPosition + 2;
-            return true;
-        case (1) :
-            SEQAN_ASSERT_MSG(rightChildPosition == 0u, "Wrong right child position!"); 
-            return true;
-        default : 
-            return false;
+    case (0):
+        SEQAN_ASSERT_MSG(rightChildPosition == 0u, "Wrong right child position!");
+        iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 = 1;
+        return true;
+
+    case (2):
+        iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 = rightChildPosition + 2;
+        return true;
+
+    case (1):
+        SEQAN_ASSERT_MSG(rightChildPosition == 0u, "Wrong right child position!");
+        return true;
+
+    default:
+        return false;
     }
 }
 
@@ -1051,25 +1052,26 @@ inline bool isRoot(Iter<RightArrayBinaryTree<TChar, TSpec> const, TIterSpec> & i
 template <typename TChar, typename TSpec, typename TIterSpec>
 inline bool setVertexToLeaf_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & iter)
 {
-     if (iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 != 0)
-     {
+    if (iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2 != 0)
+    {
         std::cerr << "You just deleted ";
         switch (iter.waveletTreeStructure->treeVertieces[getPosition(iter)].i2)
         {
-            case (1) :
-                std::cerr << "the right sub tree!" << std::endl;
-                return false;
-            case (2) :
-                std::cerr << "the left sub tree!" << std::endl;
-                return false;
-            default :
-                std::cerr << "both sub trees!" << std::endl;
-                return false;
-        }
-     }
-     return true;
-}
+        case (1):
+            std::cerr << "the right sub tree!" << std::endl;
+            return false;
 
+        case (2):
+            std::cerr << "the left sub tree!" << std::endl;
+            return false;
+
+        default:
+            std::cerr << "both sub trees!" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
 
 template <typename TChar, typename TSpec, typename TIterSpec, typename TString>
 inline void writeGraphImpl(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & iter, TString name)
@@ -1092,7 +1094,7 @@ inline void writeGraphImpl(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> &
     pos = getRightChildPos(iter2);
     if (pos)
     {
-        stream <<(unsigned) ordValue(iter2.waveletTreeStructure->treeVertieces[getPosition(iter2)].i1) << " -> " << (unsigned)ordValue(iter2.waveletTreeStructure->treeVertieces[pos].i1) << ";" << std::endl;
+        stream << (unsigned) ordValue(iter2.waveletTreeStructure->treeVertieces[getPosition(iter2)].i1) << " -> " << (unsigned)ordValue(iter2.waveletTreeStructure->treeVertieces[pos].i1) << ";" << std::endl;
 
         goRightChild(iter2);
         writeGraphImpl(iter2, name);
@@ -1120,7 +1122,6 @@ inline void writeGraph(RightArrayBinaryTree<TChar, TSpec> & treeStructure)
     stream << "}" << std::endl;
     stream.close();
 }
-
 
 }
 #endif // SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELET_TREE_STRUCTURE_ITERATOR_BETA_H_

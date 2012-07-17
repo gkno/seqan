@@ -46,10 +46,10 @@ struct RankSupportBitString;
 /**
 .Tag.Rank Support Bit String Index Fibres
 ..summary:Tag to select a specific fibre (e.g. table, object, ...) of a @Class.RankSupportBitString@.
-..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a rank support bit string. 
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a rank support bit string.
 ..cat:Index
 
-..tag.FibreBitString:The bit string. 
+..tag.FibreBitString:The bit string.
 ..tag.FibreBucketString:The bucket string.
 ..tag.FibreSuperBucketString:The super bucket string.
 
@@ -104,7 +104,7 @@ struct Size<RankSupportBitString<TSpec> >
 ..summary:A bit string supporting rank queries in constant time.
 ..cat:Index
 ..signature:RankSupportBitString<TSpec>
-..param.TSpec:Specialisation tag. 
+..param.TSpec:Specialisation tag.
 ...default:void
 ..remarks:The constant rank query time is achieved by evaluating precomputed subsolutions. In order to do so, the bit string is divided into buckets of length l. A super bucket string stores for each block of l buckets the number of bits set from the beginning. In addition a bucket string stores the number of bits set in each bucket from the start of the last super bucket block. Therefore it is possible to compute the result of a rank query in constant time by adding information from the bit, bucket and super bucket string.
 ..include:seqan/index.h
@@ -291,8 +291,8 @@ template <typename TSpec>
 inline bool empty(RankSupportBitString<TSpec> & bitString)
 {
     return empty(getFibre(bitString, FibreBitString()))
-        && empty(getFibre(bitString, FibreBucketString()))
-        && empty(getFibre(bitString, FibreSuperBucketString()));
+           && empty(getFibre(bitString, FibreBucketString()))
+           && empty(getFibre(bitString, FibreSuperBucketString()));
 }
 
 /**
@@ -432,7 +432,6 @@ getPosInBu_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
     return pos % bitsPerValue;
 }
 
-
 /**
 .Function.getRank
 ..summary:Returns the rank (the number of bits set from the start of the bit string) of a specified position.
@@ -447,7 +446,7 @@ String<Dna5> genome = "ACGTACGT";
 
 RankSupportBitString<> bitString;
 resize(bitString, length(genome));
-    
+
     ...
     mark all 'a's
     ...
@@ -548,7 +547,6 @@ length(RankSupportBitString<TSpec> & bitString)
 {
     return bitString.length_;
 }
-
 
 /**
 .Function.reserve
@@ -652,7 +650,6 @@ inline void setBit(RankSupportBitString<TSpec> & bitString, TPos const pos, TBit
     }
     bitString.bString[buPos] |= shiftValue;
 }
-
 
 // This function checks if the specified position corresponds to the first
 // position in a new bucket in the current superBucket. If this is the case the former
