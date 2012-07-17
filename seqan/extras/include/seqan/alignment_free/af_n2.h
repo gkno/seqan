@@ -153,7 +153,7 @@ void _alignmentFreeComparison(Matrix<TValue, 2> & scoreMatrix,
     String<unsigned> revComIndex;
     StringSet<String<unsigned> > kmerNeighbourhood;
     _initialiseRevComIndex(revComIndex, score.kmerSize);
-    if (score.revCom == "bothStrands")
+    if (score.revCom == "both_strands")
     {
         _initialiseKmerNeighbourhood(kmerNeighbourhood, score.kmerSize, true, revComIndex);
     }
@@ -266,7 +266,7 @@ _alignmentFreeCompareCounts(TValue & result,
     {
         result += (TValue)(value(it1) * value(it2));
         // Computation of the reverse complement strand score
-        if ((score.revCom != "") && (score.revCom != "bothStrands"))
+        if ((score.revCom != "") && (score.revCom != "both_strands"))
         {
             unsigned hashValue = revComIndex[position(it1)];
             resultRC += (TValue)(value(it1) * kmerCounts2[hashValue]);
@@ -373,7 +373,7 @@ void _standardiseCounts(TString & standardisedCounts,
                     {
                         counterTMP += (TValue) kmerCounts[wordRowHash];
                     }
-                    else if ((score.revCom == "bothStrands") && (wordRowHash == wordRCHash))
+                    else if ((score.revCom == "both_strands") && (wordRowHash == wordRCHash))
                     {
                         counterTMP += ((TValue) kmerCounts[wordRowHash]);
                     }
@@ -397,7 +397,7 @@ void _standardiseCounts(TString & standardisedCounts,
                         }
                         if (row == col)  // Variance of weighted variables
                         {
-                            if ((wordRowHash == wordHash) || (score.revCom == "bothStrands" && (wordRowHash == wordRCHash)))  // The variance of the kmer is counted full
+                            if ((wordRowHash == wordHash) || (score.revCom == "both_strands" && (wordRowHash == wordRCHash)))  // The variance of the kmer is counted full
                             {
                                 variance += value(covarianceMatrix, wordRowHash, wordColHash);
                             }
@@ -407,11 +407,11 @@ void _standardiseCounts(TString & standardisedCounts,
                             }
                         }
                         // The covariance of the kmer and the reverse complement is weighted full
-                        else if ((score.revCom == "bothStrands") && (((wordRowHash == wordHash) && (wordColHash == wordRCHash)) || ((wordRowHash == wordRCHash) && (wordColHash == wordHash))))
+                        else if ((score.revCom == "both_strands") && (((wordRowHash == wordHash) && (wordColHash == wordRCHash)) || ((wordRowHash == wordRCHash) && (wordColHash == wordHash))))
                         {
                             variance += (2.0) * value(covarianceMatrix, wordRowHash, wordColHash);
                         }
-                        else if ((wordRowHash == wordHash || wordColHash == wordHash) || (score.revCom == "bothStrands" && (wordRowHash == wordRCHash || wordColHash == wordRCHash)))  // The covariance is weighted half
+                        else if ((wordRowHash == wordHash || wordColHash == wordHash) || (score.revCom == "both_strands" && (wordRowHash == wordRCHash || wordColHash == wordRCHash)))  // The covariance is weighted half
                         {
                             variance += (2.0) * score.mismatchWeight * value(covarianceMatrix, wordRowHash, wordColHash);
                         }
@@ -428,7 +428,7 @@ void _standardiseCounts(TString & standardisedCounts,
                     {
                         p_w += probabilities[wordRowHash];
                     }
-                    else if ((score.revCom == "bothStrands") && (wordRowHash == wordRCHash))  // Weight the probabiliets and expected values, normal weight for the reverse complement kmer itself
+                    else if ((score.revCom == "both_strands") && (wordRowHash == wordRCHash))  // Weight the probabiliets and expected values, normal weight for the reverse complement kmer itself
                     {
                         p_w += probabilities[wordRowHash];
                     }
@@ -439,7 +439,7 @@ void _standardiseCounts(TString & standardisedCounts,
                 }
                 variance = pow(variance, 0.5);
             }  // End of mismatch calculation
-            else if (score.revCom == "bothStrands")
+            else if (score.revCom == "both_strands")
             {
                 TValue variance1;
                 TValue variance2;
@@ -467,7 +467,7 @@ void _standardiseCounts(TString & standardisedCounts,
                     {
                         value(itStandardisedCounts) = ((TValue) ((TValue) counterTMP) - p_w * ((TValue)len1)) / variance;
                     }
-                    else if (score.revCom == "bothStrands")
+                    else if (score.revCom == "both_strands")
                     {
                          value(itStandardisedCounts) = ((TValue) ((TValue) value(itCounts) + kmerCounts[revComIndex[(unsigned)position(itCounts)]]) - p_w * ((TValue)len1)) / variance;
                     }
@@ -529,7 +529,7 @@ void _standardiseCounts(TString & standardisedCounts,
                     {
                         counterTMP += (TValue) kmerCounts[wordRowHash];
                     }
-                    else if ((score.revCom == "bothStrands") && (wordRowHash == wordRCHash))
+                    else if ((score.revCom == "both_strands") && (wordRowHash == wordRCHash))
                     {
                         counterTMP += ((TValue) kmerCounts[wordRowHash]);
                     }
@@ -551,7 +551,7 @@ void _standardiseCounts(TString & standardisedCounts,
                         }
                         if (row == col)  // Variance of weighted variables
                         {
-                            if ((wordRowHash == wordHash) || (score.revCom == "bothStrands" && (wordRowHash == wordRCHash)))  // The variance of the kmer is counted full
+                            if ((wordRowHash == wordHash) || (score.revCom == "both_strands" && (wordRowHash == wordRCHash)))  // The variance of the kmer is counted full
                             {
                                 variance += value(covarianceMatrix, wordRowHash, wordColHash);
                             }
@@ -561,11 +561,11 @@ void _standardiseCounts(TString & standardisedCounts,
                             }
                         }
                         // The covariance of the kmer and the reverse complement is weighted full
-                        else if ((score.revCom == "bothStrands") && (((wordRowHash == wordHash) && (wordColHash == wordRCHash)) || ((wordRowHash == wordRCHash) && (wordColHash == wordHash))))
+                        else if ((score.revCom == "both_strands") && (((wordRowHash == wordHash) && (wordColHash == wordRCHash)) || ((wordRowHash == wordRCHash) && (wordColHash == wordHash))))
                         {
                             variance += (2.0) * value(covarianceMatrix, wordRowHash, wordColHash);
                         }
-                        else if ((wordRowHash == wordHash || wordColHash == wordHash) || (score.revCom == "bothStrands" && (wordRowHash == wordRCHash || wordColHash == wordRCHash)))  // The covariance is weighted half
+                        else if ((wordRowHash == wordHash || wordColHash == wordHash) || (score.revCom == "both_strands" && (wordRowHash == wordRCHash || wordColHash == wordRCHash)))  // The covariance is weighted half
                         {
                             variance += (2.0) * score.mismatchWeight * value(covarianceMatrix, wordRowHash, wordColHash);
                         }
@@ -582,7 +582,7 @@ void _standardiseCounts(TString & standardisedCounts,
                     {
                         p_w += probabilities[wordRowHash];
                     }
-                    else if ((score.revCom == "bothStrands") && (wordRowHash == wordRCHash)) // Weight the probabiliets and expected values, normal weight for the reverse complement kmer itself
+                    else if ((score.revCom == "both_strands") && (wordRowHash == wordRCHash)) // Weight the probabiliets and expected values, normal weight for the reverse complement kmer itself
                     {
                         p_w += probabilities[wordRowHash];
                     }
@@ -593,7 +593,7 @@ void _standardiseCounts(TString & standardisedCounts,
                 }
                 variance = pow(variance, 0.5);  // Calculate the standard deviation
             }  // End of mismatch calculations
-            else if (score.revCom == "bothStrands")
+            else if (score.revCom == "both_strands")
             {
                 TValue variance1;
                 TValue variance2;
@@ -621,7 +621,7 @@ void _standardiseCounts(TString & standardisedCounts,
                     {
                         value(itStandardisedCounts) = ((TValue) ((TValue) counterTMP) - p_w * ((TValue)len1)) / variance;
                     }
-                    else if (score.revCom == "bothStrands")
+                    else if (score.revCom == "both_strands")
                     {
                         value(itStandardisedCounts) = ((TValue) ((TValue) value(itCounts) + kmerCounts[revComIndex[(unsigned)position(itCounts)]]) - p_w * ((TValue)len1)) / variance;
                     }

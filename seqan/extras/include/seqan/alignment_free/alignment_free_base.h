@@ -170,7 +170,7 @@ struct AFScore<D2Star>
 
 .Memvar.N2 AFScore#revCom:
 ..class:Spec.N2 AFScore
-..summary:Scoring of reverse complements words [''/'max'/'min'/'mean'/'bothStrands'/]
+..summary:Scoring of reverse complements words [''/'max'/'min'/'mean'/'both_strands'/]
 
 .Memvar.N2 AFScore#mismatches:
 ..class:Spec.N2 AFScore
@@ -194,7 +194,7 @@ struct AFScore<D2Star>
 ...type:nolink:unsigned
 ..param.bgModelOrder: Order of the background Markov model
 ...type:nolink:unsigned
-..param.revCom: Scoring of reverse complements words [''/'max'/'min'/'mean'/'bothStrands'/]
+..param.revCom: Scoring of reverse complements words [''/'max'/'min'/'mean'/'both_strands'/]
 ...type:nolink:String<char>
 ..param.mismatch: Includes words with one mismatch into the word neighbourhood. [0/1]
 ...type:nolink:unsigned
@@ -220,7 +220,7 @@ struct AFScore<N2>
     unsigned kmerSize;
     unsigned bgModelOrder;
     String<char> revCom;    // Count reverse complement words?
-                            // revCom="";"mean","max","bothStrands"
+                            // revCom="";"mean","max","both_strands"
     unsigned mismatches;    // Currently 0 or 1
     double mismatchWeight;  // Weight of words in the mismatch neighbourhood
     bool verbose;

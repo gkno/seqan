@@ -82,7 +82,7 @@ Matrix<double, 2> myMatrix;
 
 unsigned kmerSize = 5;
 unsigned bgModelOrder = 1;
-String<char>  revCom = "bothStrands";
+String<char>  revCom = "both_strands";
 unsigned mismatches = 1;
 double mismatchWeight = 0.5;
 AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revCom, mismatches, mismatchWeight);

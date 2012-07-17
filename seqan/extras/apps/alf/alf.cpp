@@ -45,84 +45,103 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/misc/edit_environment.h>
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 #include <seqan/alignment_free.h>
 
 using namespace seqan;
 using namespace std;
 
+// TODO(holtgrew): Adapt parameters to naming conventions, i.e. use --parameter-name.
+
 int main(int argc, const char * argv[])
 {
-    CommandLineParser parser("alf");
-    addTitleLine(parser, "******************************************");
-    addTitleLine(parser, "***                 ALF                ***");
-    addTitleLine(parser, "*** Alignment free sequence comparison ***");
-    addTitleLine(parser, "******************************************");
-    addUsageLine(parser, "-i <inputFile.fasta> -o <outputFile.txt> [Options]");
+    // -----------------------------------------------------------------------
+    // Setup argument parser
+    // -----------------------------------------------------------------------
+    seqan::ArgumentParser parser("alf");
 
-    addOption(parser, CommandLineOption('i', "inputFile", "Name of the multifasta input file",  (OptionType::String | OptionType::Mandatory),""));
-    addOption(parser, CommandLineOption('o', "outputFile", "Name of the file to which the tab delimited matrix with pairwise scores will be written" , OptionType::String,""));
-    addOption(parser, CommandLineOption('m', "method", "[N2, D2, D2Star, D2z]", OptionType::String));
-    addOption(parser, CommandLineOption('k', "kmerSize", "[integer] Size of the k-mers", OptionType::Int));
-    addOption(parser, CommandLineOption("mo", "bgModelOrder", "[integer] Order of background markov model", OptionType::Int));
-    addOption(parser, CommandLineOption("rc", "reverseComplement", "['','bothStrands','mean','min','max'] N2 only. Default: only input strand. Select 'bothStrands' to score both strands simultaneously)", OptionType::String));
-    addOption(parser, CommandLineOption("mm", "mismatches", "[0,1] N2 only. Default '0' (off), '1': Calculate N2 using the kmer-neighbourhood with one mismatch", OptionType::Int));
-    addOption(parser, CommandLineOption("mmw", "mismatchWeight", "[Double] N2 only.  Weight of counts for words with mismatches", OptionType::Double));
-    addOption(parser, CommandLineOption("kwf", "kmerWeightsFile", "N2 only. Print kmerWeights for every sequence to this file.", OptionType::String,""));
-    addOption(parser, CommandLineOption('v', "verbose", "[true, false] Print details on progress to the screen", OptionType::Boolean));
+    // Set short description, version, date.
+    setShortDescription(parser, "Alignment free sequence comparison");
+    setVersion(parser, "1.1");
+    setDate(parser, "Januar 5, 2012");
+    
+    // Usage line and description.
+    addUsageLine(parser, "[\\fIOPTIONS\\fP] \\fB-i\\fP \\fIIN.FASTA\\fP [\\fB-o\\fP \\fIOUT.TXT\\fP]");
+    addDescription(parser, "Compute pairwise similarity of sequences using alignment-free methods in \\fIIN.FASTA\\fP and write out tab-delimited matrix with pairwise scores to \\fIOUT.TXT\\fP.");
+    addOption(parser, seqan::ArgParseOption("v", "verbose", "When given, details about the progress are printed to the screen."));
 
-    if (!parse(parser, argc, argv)) {
-        return 1;
-    } else if(isSetShort(parser,'h')) {
-        help(parser,std::cerr);
-        return 0;
-    }
+    // Options Section: Input / Output parameters.
+    addSection(parser, "Input / Output");
+    addOption(parser, seqan::ArgParseOption("i", "input-file", "Name of the multi-FASTA input file.", seqan::ArgParseArgument::INPUTFILE));
+    setRequired(parser, "input-file");
+    addOption(parser, seqan::ArgParseOption("o", "output-file", "Name of the file to which the tab-delimtied matrix with pairwise scores will be written to.  Default is to write to stdout.", seqan::ArgParseArgument::OUTPUTFILE));
+    
+    addSection(parser, "General Algorithm Parameters");
+    addOption(parser, seqan::ArgParseOption("m", "method", "Select method to use.  One of \\fIN2\\fP, \\fID2\\fP, \\fID2Star\\fP, and \\fID2z\\fP.", seqan::ArgParseArgument::STRING, "METHOD"));
+    setValidValues(parser, "method", "N2 D2 D2Star D2z");
+    setDefaultValue(parser, "method", "N2");
+    addOption(parser, seqan::ArgParseOption("k", "k-mer-size", "Size of the k-mers.", seqan::ArgParseArgument::INTEGER, "K"));
+    setDefaultValue(parser, "k-mer-size", "4");
+    addOption(parser, seqan::ArgParseOption("mo", "bg-model-order", "Order of background Markov Model.", seqan::ArgParseArgument::INTEGER, "ORDER"));
+    setDefaultValue(parser, "bg-model-order", "1");
+
+    addSection(parser, "N2 Algorithm Parameters");
+    addText(parser, "The following parameters are only used in the N2 algorithm.");
+    addOption(parser, seqan::ArgParseOption("rc", "reverse-complement", "Which strand to score, one of \\fIinput\\fP, \\fIboth_strands\\fP, \\fImean\\fP, \\fImin\\fP, \\fImax\\fP.  Use \\fIboth_strands\\fP to score both strands simultaneously.", seqan::ArgParseArgument::STRING, "MODE"));
+    setDefaultValue(parser, "reverse-complement", "input");
+    addOption(parser, seqan::ArgParseOption("mm", "mismatches", "Number of mismatches, one of \\fI0\\fP and \\fI1\\fP.  When \\fI1\\fP is used, N2 uses the k-mer-neighbour with one mismatch.", seqan::ArgParseArgument::INTEGER, "MISMATCHES"));
+    setDefaultValue(parser, "mismatches", "0");
+    addOption(parser, seqan::ArgParseOption("mmw", "mismatch-weight", "Real-valued weight of counts for words with mismatches.", seqan::ArgParseArgument::DOUBLE, "WEIGHT"));
+    setDefaultValue(parser, "mismatch-weight", "0.1");
+    addOption(parser, seqan::ArgParseOption("kwf", "k-mer-weights-file", "Print k-mer weights for every sequence to this file if given.", seqan::ArgParseArgument::OUTPUTFILE, "FILE.TXT"));
+
+    addTextSection(parser, "Contact and References");
+    addListItem(parser, "For questions or comments, contact:", "Jonathan Goeke <goeke@molgen.mpg.de>");
+    addListItem(parser, "Please reference the following publication if you used ALF or the N2 method for your analysis:", "Jonathan Goeke, Marcel H. Schulz, Julia Lasserre, and Martin Vingron. Estimation of Pairwise Sequence Similarity of Mammalian Enhancers with Word Neighbourhood Counts. Bioinformatics (2012).");
+    addListItem(parser, "Project Homepage:", "http://www.seqan.de/projects/alf");
+
+    // Parse command line.
+    seqan::ArgumentParser::ParseResult res = seqan::parse(parser, argc, argv);
+    // Only extract  options if the program will continue after parseCommandLine()
+    if (res != seqan::ArgumentParser::PARSE_OK)
+        return res;
 
     // Declare all parameters
     String<char> kmerWeightsFileTmp;
     String<char> inFileTmp;
     String<char> outFileTmp;
 
-    if (isSetShort (parser, 'i'))
-        getOptionValueShort (parser,'i',inFileTmp);
+    getOptionValue(inFileTmp, parser, "input-file");
     String<char, CStyle> inFile = inFileTmp;
 
-    if (isSetShort (parser, 'o'))
-        getOptionValueShort (parser,'o',outFileTmp);
+    getOptionValue(outFileTmp, parser, "output-file");
     String<char, CStyle> outFile = outFileTmp;
 
-    String<char> method = "N2";
-    if (isSetShort (parser, 'm'))
-        getOptionValueShort (parser,'m',method);
+    String<char> method;
+    getOptionValue(method, parser, "method");
 
-    int kmerSize = 4;
-    if (isSetShort (parser, 'k'))
-        getOptionValueShort (parser,'k',kmerSize);
+    int kmerSize = 0;
+    getOptionValue(kmerSize, parser, "k-mer-size");
 
     int bgModelOrder = 1;
-    if (isSetShort (parser, "mo"))
-        getOptionValueShort (parser,"mo",bgModelOrder);
+    getOptionValue(bgModelOrder, parser, "bg-model-order");
 
-    String<char>  revCom;
-    if (isSetShort (parser, "rc"))
-        getOptionValueShort (parser,"rc",revCom);
+    String<char> revComp;
+    getOptionValue(revComp, parser, "reverse-complement");
+    if (revComp == "input")
+        clear(revComp);
 
     unsigned mismatches = 0;
-    if (isSetShort (parser, "mm"))
-        getOptionValueShort (parser,"mm",mismatches);
+    getOptionValue(mismatches, parser, "mm");
 
-    double  mismatchWeight = 0.1;
-    if (isSetShort (parser, "mmw"))
-        getOptionValueShort (parser,"mmw",mismatchWeight);
+    double mismatchWeight = 0.1;
+    getOptionValue(mismatchWeight, parser, "mmw");
 
     String<char, CStyle> kmerWeightsFile;
-    if (isSetShort (parser, "kwf"))
-        getOptionValueShort (parser,"kwf",kmerWeightsFileTmp);
-    kmerWeightsFile=kmerWeightsFileTmp;
+    getOptionValue(kmerWeightsFileTmp, parser, "k-mer-weights-file");
+    kmerWeightsFile = kmerWeightsFileTmp;
 
-    bool verbose = false;
-    if (isSetShort (parser, 'v'))
-        getOptionValueShort (parser,'v',verbose);
+    bool verbose = isSet(parser, "verbose");
 
     // Definition of type DNA string sets
     typedef String<Dna5>        TText;
@@ -177,12 +196,12 @@ int main(int argc, const char * argv[])
     }
     else if (method == "N2")
     {
-        AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revCom, mismatches, mismatchWeight, kmerWeightsFile, verbose);
+        AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revComp, mismatches, mismatchWeight, kmerWeightsFile, verbose);
         alignmentFreeComparison(myMatrix, mySequenceSet, myScoreN2);
     }
 
     // Write out resulting matrix; to file if file name was given, to stdout otherwise.
-    if (outFile != "")
+    if (!empty(outFile))
     {
         ofstream myfile(outFile, std::ios::binary | std::ios::out);
         myfile << myMatrix;
