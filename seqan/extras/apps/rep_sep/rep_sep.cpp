@@ -24,7 +24,7 @@
 #include <fstream>
 
 // load command line parser
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 
 #include <seqan/store.h>
 
@@ -36,64 +36,108 @@
 using namespace seqan;
 using namespace std;
 
-void _makeParser(CommandLineParser & parser)
+struct RepSepOptions
 {
-    // needed input file    
-    //addOption(parser,CommandLineOption('a',"afg","filename of the afg assembly file",(OptionType::String | OptionType::Mandatory ) ));    
-    
-    addOption(parser, CommandLineOption("a", "assembly", "input assembly filename", (OptionType::String | OptionType::Mandatory ) ));
-    addHelpLine(parser, "Currently supported input formats are afg (AMOS message format)"); 
-    addOption(parser,CommandLineOption("c","contig","(zero based) number of the contig in the assembly that should be analyzed, default is 0",OptionType::Int ));
-    addOption(parser,CommandLineOption("n","copy-number","number of compressed repeat copies in the given contig (default is 2)",OptionType::Int ));
-    addHelpLine(parser, "");
-    
-    addOption(parser,CommandLineOption("","no-clean","do not clean the graph",OptionType::Boolean));
-    addOption(parser,CommandLineOption("","dotfile","write constructed graph as dotfile to visualize in Graphviz",OptionType::Boolean));
-    addHelpLine(parser, "");
-    
-    addOption(parser,CommandLineOption("p","output-prefix","filename prefix for the result files.",(OptionType::String | OptionType::Mandatory ) ));
-    addHelpLine(parser, "Files for the ILP and the Result will be named PREFIX.(lp|rs|dot|heu)");
-    // only needed for Gunnar
-    //addHelpLine(parser, "");
-    //addOption(parser,CommandLineOption(' ',"side-chain-format","reformulate the problem into the side-chain positioning problem",OptionType::Boolean));
-    
-    addSection(parser, "Column Detection Strategy");
-    addOption(parser, CommandLineOption("d","dnp", "use DNP strategy for column detection [DEFAULT]",OptionType::Boolean));
-    addOption(parser, CommandLineOption("s","simple-columns", "use the simple (normal distributed) column detection strategy",OptionType::Boolean));
-    addOption(parser, CommandLineOption("e","error", "expected sequencing error (is only used in combination with simple strategy)", OptionType::Double));
-    //addHelpLine(parser, "The default is DNP");
+    CharString assembly;
+    int contig;
+    int copyNumber;
+    bool noClean;
+    bool createDotFile;
+    CharString outputPrefix;
+    //bool useDNP;
+    //bool useSimpleColumns;
+    double error;
+    bool hmce;
+    bool hsce;
 
-    addSection(parser, "Heuristic selection");
-    addOption(parser, CommandLineOption("","hpcm", "try to solve the problem with the multi-component-expansion (mce) heuristic [DEFAULT]",OptionType::Boolean));
-    addOption(parser, CommandLineOption("","hsce", "try to solve the problem with the single-component-expansion (sce) heuristic",OptionType::Boolean));
-    //addHelpLine(parser, "The default is hpcm");
+    RepSepOptions() :
+        assembly(""),
+        contig(0),
+        copyNumber(2),
+        noClean(false),
+        createDotFile(false),
+        outputPrefix(""),
+        //useDNP(true),
+        //useSimpleColumns(false),
+        error(0.0),
+        hmce(true),
+        hsce(false)
+    {}
+};
 
-    addTitleLine(parser,"***********************************************");
-    addTitleLine(parser,"***                 RepSep                  ***");
-    addTitleLine(parser,"***          (c) Stephan Aiche 2009         ***");
-    addTitleLine(parser,"***********************************************");
+seqan::ArgumentParser::ParseResult
+parseCommandLine(RepSepOptions & options, int argc, char const ** argv)
+{
+    ArgumentParser parser;
 
     addUsageLine(parser, "[OPTION]... --assembly <input file> --output-prefix <prefix>");
+    setVersion(parser, "0.1.1 20120717");
+    setDate(parser, "2012/07/17");
+    setShortDescription(parser, "Repeat Seperation Tool -- Copyright (c) 2009, Stephan Aiche");
+
+    // needed input file
+    addOption(parser, ArgParseOption("a", "assembly", "input assembly filename", ArgParseArgument::INPUTFILE));
+    setValidValues(parser, "assembly", "afg");
+    setRequired(parser, "assembly");
+
+    addOption(parser, ArgParseOption("c", "contig", "Index of the contig in the assembly that should be analyzed (NOTE: the index is 0 based).", ArgParseArgument::INTEGER));
+    setDefaultValue(parser, "contig", 0);
+    setMinValue(parser, "contig", "0");
+
+    addOption(parser, ArgParseOption("n", "copy-number", "Number of compressed repeat copies in the given contig.", ArgParseArgument::INTEGER));
+    setDefaultValue(parser, "copy-number", 2);
+    setMinValue(parser, "copy-number", "2");
+
+    addOption(parser, ArgParseOption("", "no-clean", "Disable automatic graph cleaning."));
+    addOption(parser, ArgParseOption("", "dotfile", "Write constructed graph as dotfile to visualize in Graphviz."));
+
+    addOption(parser, ArgParseOption("p", "output-prefix", "Filename prefix for the result files. Files for the ILP and the Result will be named PREFIX.(lp|rs|dot|heu)", ArgParseArgument::STRING, "PREFIX"));
+    setRequired(parser, "output-prefix");
+
+    addSection(parser, "Column Detection Strategy");
+    //addOption(parser, ArgParseOption("d", "dnp", "Use DNP strategy for column detection [DEFAULT]"));
+    //addOption(parser, ArgParseOption("s", "simple-columns", "Use the simple (normal distributed) column detection strategy"));
+    addOption(parser, ArgParseOption("e", "error", "Expected sequencing error.", ArgParseArgument::DOUBLE, "ERROR"));
+
+    addSection(parser, "Heuristic selection");
+    addOption(parser, ArgParseOption("", "hmce", "try to solve the problem with the multi-component-expansion (mce) heuristic [DEFAULT]"));
+    addOption(parser, ArgParseOption("", "hsce", "try to solve the problem with the single-component-expansion (sce) heuristic"));
+
+    // Parse command line.
+    seqan::ArgumentParser::ParseResult res = seqan::parse(parser, argc, argv);
+
+    // Only extract  options if the program will continue after parseCommandLine()
+    if (res != seqan::ArgumentParser::PARSE_OK)
+        return res;
+
+    // extract option values
+    getOptionValue(options.assembly, parser, "assembly");
+
+    getOptionValue(options.contig, parser, "contig");
+    getOptionValue(options.copyNumber, parser, "copy-number");
+
+    options.noClean = isSet(parser, "no-clean");
+    options.createDotFile = isSet(parser, "dotfile");
+
+    getOptionValue(options.outputPrefix, parser, "output-prefix");
+
+    //options.useDNP = isSet(parser, "dnp");
+    //options.useSimpleColumns = isSet(parser, "simple-columns") && !options.useDNP; // we prefer useDNP
+    getOptionValue(options.error, parser, "error");
+
+    options.hmce = isSet(parser, "hmce");
+    options.hsce = isSet(parser, "hsce") && !options.hmce; // we prefer hmce
+
+    return seqan::ArgumentParser::PARSE_OK;
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, const char * argv[])
 {
-    CommandLineParser parser;
-    addVersionLine(parser, "RepSep version 0.1 20090723");
-    _makeParser(parser);
+    RepSepOptions options;
+    ArgumentParser::ParseResult res = parseCommandLine(options, argc, argv);
 
-    if (argc == 1)
-    {
-        shortHelp(parser, cerr);	// print short help and exit
-        return 0;
-    }
-
-    bool stop = !parse(parser, argc, argv, cerr);
-
-    if (isSetLong(parser, "help") || isSetLong(parser, "version") || stop) return 0;	// print help or version and exit
-
-    // print some hello text
-    version(parser); 
+    if (res != seqan::ArgumentParser::PARSE_OK)
+        return res == seqan::ArgumentParser::PARSE_ERROR;
 
     // run starts
     SEQAN_PROTIMESTART(profileTime);
@@ -102,22 +146,19 @@ int main(int argc, const char *argv[])
     typedef Size<TFragmentStore>::Type TSize;
     TFragmentStore fragStore;
 
-    CharString assembly_filename;
-    getOptionValueLong(parser, "assembly", assembly_filename);
-    
-    cout << "loading data from " << assembly_filename << " .. " << flush;
+    cout << "loading data from " << options.assembly << " .. " << flush;
 
     TSize numberOfContigs = 0;
     // TSize numberOfReads = 0;
 
-    FILE* strmReads = fopen(toCString(assembly_filename), "rb");
+    FILE * strmReads = fopen(toCString(options.assembly), "rb");
     read(strmReads, fragStore, Amos());
     fclose(strmReads);
     numberOfContigs = length(fragStore.contigStore);
     // numberOfReads = length(fragStore.readStore);
 
     cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
-    
+
     /*
     cout << endl << "------------------------------- " << endl;
     cout << "stats: " << endl;
@@ -125,23 +166,21 @@ int main(int argc, const char *argv[])
     cout << "number of reads:   " << numberOfReads << endl;
     cout << "------------------------------- " << endl;
     */
-    int selected_contig = 0;
-    getOptionValueLong(parser, "contig", selected_contig);
-
-    if(! (static_cast<TSize>(selected_contig) < numberOfContigs) ) {
+    if (!(static_cast<TSize>(options.contig) < numberOfContigs))
+    {
         cout << "You have selected an invalid contig! Only " << numberOfContigs << " different contig(s) were found" << endl;
         cout << "in the currently assembly" << endl;
         return 1;
     }
 
-    cout << "#INFO: you have selected contig nr. " << selected_contig << endl;
+    cout << "#INFO: you have selected contig nr. " << options.contig << endl;
 
     // construct matrix for parsing
     typedef char TAlpahbet;
     typedef Id<TFragmentStore::TAlignedReadStore>::Type TId;
     typedef Size<TFragmentStore::TReadSeq>::Type TReadPos;
 
-    typedef Triple<TAlpahbet,TId,TReadPos> TMatrixValue;
+    typedef Triple<TAlpahbet, TId, TReadPos> TMatrixValue;
     typedef String<TMatrixValue> TMatrix;
 
     TMatrix matrix;
@@ -152,42 +191,44 @@ int main(int argc, const char *argv[])
 
     SEQAN_PROTIMEUPDATE(profileTime);
     cout << "parsing contig for candidate columns .. " << flush;
-    
-    // TODO: add code for selection of scanner
-    parseContig(fragStore, selected_contig, candidates, SimpleColumn());
-    
-    for(TSize x = 0 ; x < length(candidates) ; ++x)
-    {
-      cout << candidates[x].i1 << endl;
-    }
-    
-    cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
-    cout << "#INFO: <" << length(candidates) << "> possible candidate columns were identified" << endl; 
 
-    
-    ReadGraph<TColumnAlphabet, Value<TFragmentStore::TAlignedReadStore>::Type, TReadPos > rgraph;
-    
+    // TODO: add code for selection of scanner
+    SimpleColumn algoSpec;
+    algoSpec.parameters.error_probability = options.error;
+    parseContig(fragStore, options.contig, candidates, algoSpec);
+
+    for (TSize x = 0; x < length(candidates); ++x)
+    {
+        cout << candidates[x].i1 << endl;
+    }
+
+    cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
+    cout << "#INFO: <" << length(candidates) << "> possible candidate columns were identified" << endl;
+
+
+    ReadGraph<TColumnAlphabet, Value<TFragmentStore::TAlignedReadStore>::Type, TReadPos> rgraph;
+
     cout << "adding candidates to graph .. " << flush;
-    construct(rgraph, candidates, fragStore, selected_contig);
+    construct(rgraph, candidates, fragStore, options.contig);
     cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
 
     cout << "adding mate pairs to graph .. " << flush;
-    add_mate_pairs(rgraph, fragStore, selected_contig);
-    cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;   
+    add_mate_pairs(rgraph, fragStore, options.contig);
+    cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
 
     GraphScoring scoring_scheme;
-    
-    cout << "compute scores for graph edges .. " << flush;
-    scoreGraph_(rgraph, fragStore, static_cast<TSize>( selected_contig ), scoring_scheme);
-    cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;   
 
-    if(!isSetLong(parser, "no-clean") )
+    cout << "compute scores for graph edges .. " << flush;
+    scoreGraph_(rgraph, fragStore, static_cast<TSize>(options.contig), scoring_scheme);
+    cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
+
+    if (!options.noClean)
     {
         cout << "cleaning graph .. " << flush;
         // TODO: cleaning needs to be implemented
-        cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;   
+        cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
     }
-    else 
+    else
     {
         cout << "#INFO: skipped graph cleaning" << endl;
     }
@@ -196,20 +237,21 @@ int main(int argc, const char *argv[])
     bool hasMultiComp = hasMultipleComponents(rgraph);
     cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
 
-    if(hasMultiComp) {
+    if (hasMultiComp)
+    {
         cout << "This graph has multiple components!!" << endl;
     }
 
     // TODO: add some statistics for the graph
     cout << endl << "################ graph info ################" << endl;
-    
+
     cout << " |edges| " << numEdges(rgraph) << endl;
     cout << " |vertices| " << numVertices(rgraph) << endl;
 
     cout << "############################################" << endl << endl << flush;
 
-    // TODO: implement heurisitics 
-    typedef SelectGraph_< ReadGraph<TColumnAlphabet, Value<TFragmentStore::TAlignedReadStore>::Type, TReadPos > >::Type TGraph;
+    // TODO: implement heurisitics
+    typedef SelectGraph_<ReadGraph<TColumnAlphabet, Value<TFragmentStore::TAlignedReadStore>::Type, TReadPos> >::Type TGraph;
     typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
     typedef String<TVertexDescriptor> TComponent;
@@ -217,29 +259,26 @@ int main(int argc, const char *argv[])
 
     TComponentList components;
 
-    int copy_number = 0;
-    getOptionValueLong(parser, "copy-number", copy_number);
+    if (options.hmce)
+    {
+        cout << "separate the graph using (GuidedParallelComponentMerge) .. " << flush;
+        solve(rgraph, components, options.copyNumber, GuidedParallelComponentMerge());
+        cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
+    }
+    else
+    {
+        cout << "separate the graph using (SingleComponentExpansion) .. " << flush;
+        solve(rgraph, components, options.copyNumber, SingleComponentExpansion());
+        cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;
+    }
 
-    if(isSetLong(parser, "hpcm"))
+    for (TSize c = 0; c < length(components); ++c)
     {
-      cout << "separate the graph using (GuidedParallelComponentMerge) .. " << flush;
-      solve(rgraph,components,copy_number,GuidedParallelComponentMerge());
-      cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;       
-    }
-    else 
-    {
-      cout << "separate the graph using (SingleComponentExpansion) .. " << flush;
-      solve(rgraph,components,copy_number,SingleComponentExpansion());
-      cout << "done (" << SEQAN_PROTIMEUPDATE(profileTime) << " seconds)" << endl;        
-    }
-    
-    for(TSize c = 0 ; c < length(components) ; ++c)
-    {
-      cout << "Component <" << c << "> contains " << length(components[c]) << " reads " << endl;
-      for(TSize r = 0 ; r < length(components[c]) ; ++r)
-      {
-        cout << value(rgraph.vertexCargo,components[c][r]).alignedRead.readId << " (" << fragStore.readNameStore[value(rgraph.vertexCargo,value(components[c],r)).alignedRead.readId] << ")" << endl;
-      }
+        cout << "Component <" << c << "> contains " << length(components[c]) << " reads " << endl;
+        for (TSize r = 0; r < length(components[c]); ++r)
+        {
+            cout << value(rgraph.vertexCargo, components[c][r]).alignedRead.readId << " (" << fragStore.readNameStore[value(rgraph.vertexCargo, value(components[c], r)).alignedRead.readId] << ")" << endl;
+        }
     }
     // TODO: implement IO stuff
 }
