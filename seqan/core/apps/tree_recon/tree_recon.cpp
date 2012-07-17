@@ -18,21 +18,13 @@ Lesser General Public License for more details.
 #include <seqan/basic.h>
 #include <seqan/graph_msa.h>
 #include <seqan/modifier.h>
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 
 #include <iostream>
 #include <fstream>
 
 
 using namespace seqan;
-
-//////////////////////////////////////////////////////////////////////////////////
-
-inline void
-_addVersion(CommandLineParser& parser) {
-	::std::string rev = "$Revision: 4692 $";
-	addVersionLine(parser, "Version 1.01 (18. August 2009) Revision: " + rev.substr(11, 4) + "");
-}
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -74,42 +66,45 @@ _readPhylipMatrix(TFile& file,
 
 //////////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, const char *argv[]) {
+int main(int argc, const char *argv[])
+{
+    // -----------------------------------------------------------------------
+    // Setup argument parser
+    // -----------------------------------------------------------------------
+    seqan::ArgumentParser parser("tree_recon");
 
-	// Command line parsing
-	CommandLineParser parser;
-	_addVersion(parser);
-	
-	addTitleLine(parser, "***************************************");
-	addTitleLine(parser, "* Tree reconstrucion - TreeRecon      *");
-	addTitleLine(parser, "* (c) Copyright 2009 by Tobias Rausch *");
-	addTitleLine(parser, "***************************************");
+    // Set short description, version, date.
+    setShortDescription(parser, "Tree reconstruction");
+    setVersion(parser, "1.02");
+    setDate(parser, "July 17, 2012");
 
-	addUsageLine(parser, "-m <Phylip distance matrix> [Options]");
+    // Usage line and description.
+    addUsageLine(parser, "[\\fIOPTIONS\\fP] \\fB-m\\fP \\fIIN.DIST\\fP");
+    addDescription(parser, "Reconstruct phylogenetic tree from Phylip matrix \\fIIN.DIST\\fP.");
 
-	addSection(parser, "Main Options:");
-	addOption(parser, addArgumentText(CommandLineOption("m", "matrix", "file with distance matrix", OptionType::String), "<Phylip distance matrix>"));
-	addHelpLine(parser, "At least 3 species required.");
-	addOption(parser, addArgumentText(CommandLineOption("b", "build", "tree building method", (int)OptionType::String, "nj"), "[nj, min, max, avg, wavg]"));
-	addHelpLine(parser, "nj = Neighbor-joining");
-	addHelpLine(parser, "min = UPGMA single linkage");
-	addHelpLine(parser, "max = UPGMA complete linkage");
-	addHelpLine(parser, "avg = UPGMA average linkage");
-	addHelpLine(parser, "wavg = UPGMA weighted average linkage");
-	addHelpLine(parser, "/*Neighbor-joining creates an");
-	addHelpLine(parser, "  unrooted tree. We root that tree");
-	addHelpLine(parser, "  at the last joined pair.*/");
-	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", (int)OptionType::String, "tree.dot"), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", (int)OptionType::String, "dot"), "[dot | newick]"));
-		
-	if (argc == 1)
-	{
-		shortHelp(parser, std::cerr);	// print short help and exit
-		return 0;
-	}
+	addSection(parser, "Input / Output");
+    addOption(parser, seqan::ArgParseOption("m", "matrix", "Name Phylip distance matrix file.  Must contain at least three species.", seqan::ArgParseArgument::INPUTFILE, "FILE"));
+    setRequired(parser, "matrix");
+	addOption(parser, seqan::ArgParseOption("o", "out-file", "Path to write output to.", seqan::ArgParseArgument::OUTPUTFILE, "FILE"));
+    setDefaultValue(parser, "out-file", "tree.dot");
+	addOption(parser, seqan::ArgParseOption("f", "format", "The output format.", seqan::ArgParseArgument::STRING, "FORMAT"));
+    setValidValues(parser, "format", "dot newick");
+    setDefaultValue(parser, "format", "dot");
 
-	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
-	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
+    addSection(parser, "Algorithm Options");
+    addOption(parser, seqan::ArgParseOption("b", "build", "Tree building method. \\fInj\\fP: neighbour-joining, \\fImin\\fP: UPGMA single linkage, \\fImax\\fP: UPGMA complete linkage, \\fIavg\\fP: UPGMA average linkage, \\fIwavg\\fP: UPGMA weighted average linkage.  Neighbour-joining creates an unrooted tree.  We root that tree at the least joined pair.", seqan::ArgParseArgument::STRING, "METHOD"));
+    setValidValues(parser, "build", "nj min max avg wavg");
+    setDefaultValue(parser, "build", "nj");
+
+    addTextSection(parser, "Contact and References");
+    addListItem(parser, "For questions or comments, contact:", "Tobias Rausch <rausch@embl.de>");
+    addListItem(parser, "SeqAn Homepage:", "http://www.seqan.de");
+
+    // Parse command line.
+    seqan::ArgumentParser::ParseResult res = seqan::parse(parser, argc, argv);
+    // Only extract  options if the program will continue after parseCommandLine()
+    if (res != seqan::ArgumentParser::PARSE_OK)
+        return res;
 
 	// Tree reconstruction
 	typedef double TDistanceValue;
@@ -118,19 +113,19 @@ int main(int argc, const char *argv[]) {
 
 	// Read the options	
 	::std::string infile;
-	getOptionValueLong(parser, "matrix", infile);
+    getOptionValue(infile, parser, "matrix");
 	::std::string outfile;
-	getOptionValueLong(parser, "outfile", outfile);
+    getOptionValue(outfile, parser, "out-file");
 	TSize build = 0;
 	String<char> meth;
-	getOptionValueLong(parser, "build", meth);
+    getOptionValue(meth, parser, "build");
 	if (meth == "nj") build = 0;
 	else if (meth == "min") build = 1;
 	else if (meth == "max") build = 2;
 	else if (meth == "avg") build = 3;
 	else if (meth == "wavg") build = 4;
 	String<char> format;
-	getOptionValueLong(parser, "format", format);
+	getOptionValue(format, parser, "format");
 
 	// Read the distance matrix
 	String<TName> names;
