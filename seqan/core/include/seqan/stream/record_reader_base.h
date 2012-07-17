@@ -88,6 +88,7 @@ class RecordReader;
 
 /**
 .Function.resultCode
+..class:Class.RecordReader
 ..cat:Input/Output
 ..summary:Returns $true$ if there is more data to read.
 ..signature:resultCode(recordReader)
@@ -97,6 +98,7 @@ class RecordReader;
 ..include:seqan/stream.h
 
 .Function.value
+..class:Class.RecordReader
 ..cat:Input/Output
 ..param.object.type:Class.RecordReader
 ..include:seqan/stream.h
@@ -109,6 +111,7 @@ class RecordReader;
 ..include:seqan/stream.h
 
 .Function.nextIs
+..class:Class.RecordReader
 ..cat:Input/Output
 ..signature:nextIs(recordReader, tag)
 ..summary:Query whether the next record is of a given type.
@@ -121,6 +124,7 @@ class RecordReader;
 ..include:seqan/stream.h
 
 .Function.atEnd
+..class:Class.RecordReader
 ..cat:Input/Output
 ..summaryDISABLED:Returns $true$ if there is no more data to be read.
 ..signature:atEnd(recordReader)

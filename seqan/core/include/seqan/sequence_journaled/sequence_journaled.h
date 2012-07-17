@@ -164,7 +164,12 @@ public:
 // Metafunction Host
 // ----------------------------------------------------------------------------
 
-///.Metafunction.Host.param.T:Spec.Journaled String
+/**
+.Metafunction.Host
+..param.T:Spec.Journaled String
+...type:Spec.Journaled String
+*/
+
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct Host<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
 {
@@ -301,6 +306,7 @@ struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > co
 ..signature:JournalType<T>::Type
 ..summary:Metafunction for returning the type of the journal of a Journaled String.
 ..param.T:Spec.Journaled String
+...type:Spec.Journaled String
 ..include:seqan/string_journaled.h
  */
 template <typename T>
@@ -425,6 +431,7 @@ set(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & target,
 
 /**
 .Function.setHost:
+..class:Spec.Journaled String
 ..param.object.type:Spec.Journaled String
 ..param.host.type:Class.String
 ..include:seqan/sequence_journaled.h
@@ -446,6 +453,7 @@ setHost(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journ
 
 /**
 .Function.host:
+..class:Spec.Journaled String
 ..param.object.type:Spec.Journaled String
 ..include:seqan/sequence_journaled.h
 */
@@ -473,6 +481,7 @@ host(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & jo
 
 /**
 .Function.clear:
+..class:Spec.Journaled String
 ..param.object.type:Spec.Journaled String
 ..include:seqan/sequence_journaled.h
  */
@@ -493,6 +502,7 @@ clear(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 
 /**
 .Function.flatten:
+..class:Spec.Journaled String  
 ..cat:Sequences
 ..summary:Apply the journal to the underlying string, destructively on the underlying string.
 ..signature:flatten(journaledString)

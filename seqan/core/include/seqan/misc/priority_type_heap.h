@@ -89,6 +89,7 @@ SEQAN_CHECKPOINT
 
 // Empty the priority queue
 ///.Function.clear.param.object.type:Class.PriorityType
+///.Function.clear.class:Class.PriorityType
 template <typename TValue, typename TLess>
 inline void 
 clear (PriorityType<TValue,TLess, PriorityHeap> & me)
@@ -98,6 +99,7 @@ clear (PriorityType<TValue,TLess, PriorityHeap> & me)
 
 // true if priority queue is empty 
 ///.Function.empty.param.object.type:Class.PriorityType
+///.Function.empty.clas:Class.PriorityType
 template <typename TValue, typename TLess>
 inline bool 
 empty(PriorityType<TValue, TLess, PriorityHeap> const & me) 
@@ -108,6 +110,7 @@ SEQAN_CHECKPOINT
 
 // Number of elements in the priority queue
 ///.Function.length.param.object.type:Class.PriorityType
+///.Function.length.class:Class.PriorityType
 template <typename TValue, typename TLess>
 inline typename Size<PriorityType<TValue, TLess, PriorityHeap> >::Type
 length( PriorityType<TValue, TLess, PriorityHeap> const & me)
@@ -127,6 +130,7 @@ SEQAN_CHECKPOINT
 ..summary:Reference to the item with the highest priority.
 ..cat:Content Manipulation
 ..signature:top(object)
+..class:Class.PriorityType
 ..param.object:A priority queue.
 ...type:Class.PriorityType
 ..remarks:To delete this item and adjust the priority queue use @Function.PriorityType#pop@.
@@ -174,6 +178,8 @@ SEQAN_CHECKPOINT
 /**
 .Function.adjustTop
 ..cat:Miscellaneous
+..signature:adjustTop(object)
+..class:Class.PriorityType
 ..summary:Adjusts the priority of the first item.
 ..param.object
 ...type:Class.PriorityType
@@ -199,6 +205,7 @@ SEQAN_CHECKPOINT
 ..summary:Inserts a new item and adjusts the priority queue if necessary.
 ..cat:Content Manipulation
 ..signature:push(object, element)
+..class:Class.PriorityType
 ..param.object:A priority queue.
 ...type:Class.PriorityType
 ..param.element:The item to be inserted in the priority queue.
@@ -253,6 +260,7 @@ SEQAN_CHECKPOINT
 ..summary:Deletes item with the highest priority and adjusts the priority queue.
 ..cat:Content Manipulation
 ..signature:pop(object)
+..class:Class.PriorityType
 ..param.object:A priority queue.
 ...type:Class.PriorityType
 ..remarks:This function only deletes this item, but does not return it. To access the item use @Function.PriorityType#top@.
@@ -313,13 +321,15 @@ SEQAN_CHECKPOINT
 	//MetaFunctions
 
 ///.Metafunction.Size.param.T.type:Class.PriorityType
+///.Metafunction.Size.class:Class.PriorityType
 template < typename TValue, typename TLess>
 struct Size<PriorityType<TValue, TLess, PriorityHeap> >
 {
 	typedef typename Size<typename PriorityType<TValue, TLess, PriorityHeap>::THeap>::Type Type;
 };
 
-///.Metafunction.Value.param.T.type:Class.PriorityType
+///.metafunction.value.param.t.type:class.prioritytype
+///.metafunction.value.class:class.prioritytype
 template < typename TValue, typename TLess>
 struct Value<PriorityType<TValue, TLess, PriorityHeap> >
 {

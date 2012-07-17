@@ -570,9 +570,11 @@ SEQAN_CHECKPOINT
 #else
 
 ///.Function.flush.param.string.type:Spec.MMap String
+///.Function.flush.class:Spec.MMap String
 
 /**
 .Function.mmapAdvise
+..class:Spec.MMap String
 ..cat:Sequences
 ..summary:Call advise function for memory mapped files.
 ..signature:mmapAdvise(mmapString, scheme, beginPos, endPos)
@@ -785,6 +787,7 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 ///.Function.open.param.string.type:Spec.MMap String
+///.Function.open.class:Spec.MMap String
 
 	template < typename TValue, typename TConfig >
     inline bool 
@@ -832,6 +835,7 @@ SEQAN_CHECKPOINT
     }
 
 ///.Function.openTemp.param.string.type:Spec.MMap String
+///.Function.openTemp.class:Spec.MMap String
 
 	template < typename TValue, typename TConfig >
     inline bool 
@@ -889,6 +893,7 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 ///.Function.flush.close.string.type:Spec.MMap String
+///.Function.flush.class:Spec.MMap String
 
 	template < typename TValue, typename TConfig >
     inline bool 

@@ -95,3 +95,4 @@ Finds q-grams in a @Spec.IndexQGram@ index using the hash table.
 } //namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_
+

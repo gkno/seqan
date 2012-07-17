@@ -118,6 +118,7 @@ pickRandomNumber(Rng<MersenneTwister> & mt)
 
 /**
 .Function.reSeed
+..class:Spec.Mersenne Twister Rng
 ..summary:Reset and re-seed MersenneTwister
 ..cat:Random
 ..signature:reSeed(mt[, seed])

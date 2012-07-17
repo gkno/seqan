@@ -59,9 +59,13 @@ namespace seqan {
 ..notes:Useful for external storage.
 ..remarks:Memory access could be slower. Direct access to members by pointers is not allowed on all platforms.
 ..include:seqan/basic.h
+
 .Memfunc.Triple#Triple.class:Spec.Packed Triple
+
 .Memvar.Triple#i1.class:Spec.Packed Triple
+
 .Memvar.Triple#i2.class:Spec.Packed Triple
+
 .Memvar.Triple#i3.class:Spec.Packed Triple
 */
 

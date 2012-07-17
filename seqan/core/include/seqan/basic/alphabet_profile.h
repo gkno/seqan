@@ -153,6 +153,7 @@ public:
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.ValueSize.param.T.type:Class.ProfileChar
+///.Metafunction.ValueSize.class:Class.ProfileChar
 
 template <typename TValue, typename TCount, typename TSpec>
 struct ValueSize<ProfileChar<TValue, TCount, TSpec> >
@@ -167,6 +168,7 @@ struct ValueSize<ProfileChar<TValue, TCount, TSpec> >
 
 /**
 .Metafunction.SourceValue
+..class:Class.ProfileChar
 ..cat:Alphabets
 ..summary:Returns underlying value for @Class.ProfileChar@.
 ..signature:SourceValue<T>::Type

@@ -100,6 +100,7 @@ class Seed;
 // ===========================================================================
 
 ///.Metafunction.Position.param.T:type:Class.Seed
+///.Metafunction.Position.class:Class.Seed
 template <typename TSpec, typename TConfig>
 struct Position<Seed<TSpec, TConfig> >
 {
@@ -111,6 +112,7 @@ struct Position<Seed<TSpec, TConfig> const>
         : Position<Seed<TSpec, TConfig> > {};
 
 ///Metafunction.Size.param.T:type:Class.Seed
+///Metafunction.Size.class:Class.Seed
 template <typename TSpec, typename TConfig>
 struct Size<Seed<TSpec, TConfig> >
 {
@@ -126,6 +128,7 @@ struct Size<Seed<TSpec, TConfig> const>
 ..cat:Seed Handling
 ..summary:Returns type of the value for the diagonal of a seed.
 ..signature:Diagonal<T>::Type
+..class:Class.Seed
 ..param.T:Type of the seed to retrieve the diagonal for.
 ...type:Class.Seed
 ..include:seqan/seeds2.h
@@ -148,6 +151,7 @@ struct Diagonal<Seed<TSpec, TConfig> const>
 ..cat:Seed Handling
 ..summary:Returns True if the seed stores a score, False otherwise.
 ..signature:HasScore<T>::Type
+..class:Class.Seed
 ..param.T:Type of the seed to retrieve whether it has a score for.
 ...type:Class.Seed
 ..include:seqan/seeds2.h
@@ -170,6 +174,7 @@ struct HasScore<Seed<TSpec, TConfig> const>
 ..cat:Seed Handling
 ..summary:Returns type of the value for the score of a seed.
 ..signature:SeedScore<T>::Type
+..class:Class.Seed
 ..param.T:Type of the seed to retrieve the score for.
 ...type:Class.Seed
 ..include:seqan/seeds2.h
@@ -195,9 +200,13 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 
 /**
 .Function.assign.param.source.type:Class.Seed
+.Function.assign.class:Class.Seed
 .Function.assign.param.target.type:Class.Seed
+.Function.assign.class:Class.Seed
 .Function.move.param.source.type:Class.Seed
+.Function.move.class:Class.Seed
 .Function.move.param.target.type:Class.Seed
+.Function.move.class:Class.Seed
 ..include:seqan/seeds2.h
 */
 
@@ -206,6 +215,7 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 ..summary: Returns the first position of the seed in the query.
 ..cat:Seed Handling
 ..signature:beginDim0(seed)
+..class:Class.Seed
 ..param.seed:The seed whose query position should be returned.
 ...type:Class.Seed
 ..returns: Begin of the seed.
@@ -217,6 +227,7 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 ..summary: Returns the last position of the seed in the query.
 ..cat:Seed Handling
 ..signature:endDim0(seed)
+..class:Class.Seed
 ..param.seed:The seed whose last in the query position should be returned.
 ...type:Class.Seed
 ..returns: End of the seed.
@@ -228,6 +239,7 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 ..summary: Returns the first position of the seed in the database.
 ..cat:Seed Handling
 ..signature:beginDim1(seed)
+..class:Class.Seed
 ..param.seed:The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns: Begin of the seed.
@@ -239,6 +251,7 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 ..summary: Returns the last position of the seed in the database.
 ..cat:Seed Handling
 ..signature:endDim1(seed)
+..class:Class.Seed
 ..param.seed:The seed whose last in the database position should be returned.
 ...type:Class.Seed
 ..returns: End of the seed.
@@ -250,6 +263,7 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 ..summary: Returns the most left diagonal of the seed (maximum diagonal value).
 ..cat:Seed Handling
 ..signature:getLowerDiagonal(seed)
+..class:Class.Seed
 ..param.seed:The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns:The most left diagonal.
@@ -268,6 +282,7 @@ getLowerDiagonal(Seed<TSpec, TConfig> const & seed)
 ..summary: Sets a new value for the most left diagonal.
 ..cat:Seed Handling
 ..signature:setLowerDiagonal(seed, diag)
+..class:Class.Seed
 ..param.seed:The seed whose left diagonal value should be updated.
 ...type:Class.Seed
 ..param.diag:The new value for the most left diagonal.
@@ -287,6 +302,7 @@ setLowerDiagonal(Seed<TSpec, TConfig> & seed,
 ..summary: Returns the most right diagonal of the seed (minimum diagonal value).
 ..cat:Seed Handling
 ..signature:getUpperDiagonal(seed)
+..class:Class.Seed
 ..param.seed:The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns:The most right diagonal.
@@ -305,6 +321,7 @@ getUpperDiagonal(Seed<TSpec, TConfig> const & seed)
 ..summary: Sets a new value for the most right diagonal.
 ..cat:Seed Handling
 ..signature:setUpperDiagonal(seed, diag)
+..class:Class.Seed
 ..param.seed:The seed whose right diagonal value should be updated.
 ...type:Class.Seed
 ..param.diag:The new value for the most right diagonal.
@@ -323,6 +340,8 @@ setUpperDiagonal(Seed<TSpec, TConfig> & seed,
 /**
 .Function.getSeedSize
 ..summary:Returns the number of matches and mismatches of the seed.  This is the longest true diagonal fitting into its dimensions.
+..signature:getSeedSize(seed)
+..class:Class.Seed
 ..remark:"Seed size" is mostly called "seed length" in the literature.  However, in SeqAn reverse "length" is reserved to be the size of a container.
 ..include:seqan/seeds2.h
 */
@@ -354,6 +373,7 @@ getSeedSize(Seed<TSpec, TConfig> const & seed)
 ..summary: Returns the diagonal of the start point.
 ..cat:Seed Handling
 ..signature:startDiagonal(seed)
+..class:Class.Seed
 ..param.seed:The seed whose start diagonal should be returned.
 ...type:Class.Seed
 ..returns:The diagonal of the start point.
@@ -372,6 +392,7 @@ getStartDiagonal(Seed<TSpec, TConfig> const & seed)
 ..summary: Returns the diagonal of the end point.
 ..cat:Seed Handling
 ..signature:endDiagonal(seed)
+..class:Class.Seed
 ..param.seed:The seed whose end diagonal should be returned.
 ...type:Class.Seed
 ..returns:The diagonal of the end point.

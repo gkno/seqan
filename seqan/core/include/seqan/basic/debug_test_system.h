@@ -256,7 +256,7 @@ namespace seqan {
 
 
 /**
-.Function.printDebugLevel:
+.Function.printDebugLevel
 ..cat:Testing & Debugging
 ..summary:Print the current SeqAn debug level and the compiler flags to the given stream.
 ..signature:printDebugLevel(stream)

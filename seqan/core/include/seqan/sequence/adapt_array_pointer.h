@@ -113,6 +113,7 @@ struct DefaultOverflowExplicit< TValue const [SIZE] >
 };
 
 ///.Metafunction.IsContiguous.param.T.type:Adaption.char array
+///.Metafunction.IsContiguous.class:Adaption.char array
 
 template <typename TValue>
 struct IsContiguous;
@@ -138,10 +139,8 @@ struct IsContiguous< TValue const [SIZE] >
     enum { VALUE = true };
 };
 
-/*
-.Metafunction.IsSequence.param.T.type:Adaption.char array
-..include:seqan/sequence.h
-*/
+///.Metafunction.IsSequence.param.T.type:Adaption.char array
+///.Metafunction.IsSequence.class:Adaption.char array
 
 template <typename TValue>
 struct IsSequence< TValue * >
@@ -167,6 +166,7 @@ struct IsSequence< TValue const [SIZE] >
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Iterator.param.T.type:Adaption.char array
+///.Metafunction.Iterator.class:Adaption.char array
 
 template <typename TValue>
 struct Iterator<TValue *, Standard>
@@ -217,6 +217,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.begin.param.object.type:Adaption.char array
+///.Function.begin.class:Adaption.char array
 
 template <typename TValue>
 inline typename Iterator<TValue *, Standard>::Type
@@ -259,6 +260,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.end.param.object.type:Adaption.char array
+///.Function.end.class:Adaption.char array
 
 template <typename TValue>
 inline typename Iterator<TValue *, Standard>::Type
@@ -298,6 +300,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.value.param.container.type:Adaption.char array
+///.Function.value.class:Adaption.char array
 
 template <typename TValue, typename TPos>
 inline TValue &
@@ -318,6 +321,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.assignValue.param.container.type:Adaption.char array
+///.Function.assignValue.class:Adaption.char array
 
 template <typename TValue, typename TPos>
 inline void
@@ -330,6 +334,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.moveValue.param.container.type:Adaption.char array
+///.Function.moveValue.class:Adaption.char array
 
 template <typename TValue, typename TPos>
 inline void
@@ -361,6 +366,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.length.param.object.type:Adaption.char array
+///.Function.length.class:Adaption.char array
 
 template <typename TValue>
 inline size_t
@@ -410,6 +416,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.clear.param.object.type:Adaption.char array
+///.Function.clearValue.class:Adaption.char array
 
 template <typename TValue>
 inline void
@@ -479,6 +486,7 @@ SEQAN_CHECKPOINT
 
 ///.Function.assign.param.target.type:.Adaption.char array
 ///.Function.assign.param.source.type:.Adaption.char array
+///.Function.assign.class:Adaption.char array
 
 //overload of binary version for strings:
 
@@ -547,6 +555,7 @@ SEQAN_CHECKPOINT
 }
 
 ///.Function.move.param.target.type:Adaption.char array
+///.Function.move.class:Adaption.char array
 
 //overload of binary version for strings:
 
@@ -574,6 +583,7 @@ SEQAN_CHECKPOINT
 
 ///.Function.append.param.target.type:.Adaption.char array
 ///.Function.append.param.source.type:.Adaption.char array
+///.Function.append.class:Adaption.char array
 
 template<typename TTargetValue, typename TSource, typename TExpand>
 inline void

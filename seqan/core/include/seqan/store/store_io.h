@@ -838,6 +838,7 @@ write(TFile & target,
 
 /**
 .Function.writeContigs
+..class:Class.FragmentStore
 ..summary:Write contigs from fragment store into file.
 ..cat:Fragment Store
 ..signature:writeContigs(file, store, tag)
@@ -861,6 +862,7 @@ bool writeContigs(TStream & file, FragmentStore<TFSSpec, TFSConfig> & store, TFo
 
 /**
 .Function.loadContigs
+..class:Class.FragmentStore
 ..summary:Loads contigs into fragment store.
 ..cat:Fragment Store
 ..signature:loadContigs(store, fileName[, loadSeqs])
@@ -950,6 +952,7 @@ bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, TFileNames const &fil
 
 /**
 .Function.loadContig
+..class:Class.FragmentStore
 ..summary:Manually loads a contig sequence.
 ..cat:Fragment Store
 ..signature:loadContig(store, contigId)
@@ -1133,6 +1136,7 @@ bool unlockAndFreeContigs(FragmentStore<TSpec, TConfig> &store)
 
 /**
 .Function.loadReads
+..class:Class.FragmentStore
 ..summary:Loads reads into fragment store.
 ..remarks:When two file names are given, the files are expected to contain the same number of reads and reads with the same index are assumed to be mate pairs.
 Mate pairs are stored internally in an "interleaved" mode, i.e. a read is read from each file before reading the next one.

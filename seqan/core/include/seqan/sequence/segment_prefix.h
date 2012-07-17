@@ -359,6 +359,7 @@ SEQAN_CHECKPOINT
 /**
 .Metafunction.Prefix:
 ..cat:Segments
+..class:Class.String
 ..summary:Prefix sequence type.
 ..signature:Prefix<T>::Type
 ..param.T:A sequence type.
@@ -529,6 +530,8 @@ operator --(Segment<THost, PrefixSegment> & segment)
 /**
 .Function.prefix:
 ..cat:Containers
+..class:Class.String
+..class:Adaption.char array
 ..summary:Creates prefix object.
 ..signature:prefix(host, end)
 ..remarks:Note that a prefix of a @Class.Segment@ object is an @Spec.SuffixSegment@ object having the same host type.

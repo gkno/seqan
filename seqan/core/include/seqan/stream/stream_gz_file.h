@@ -232,6 +232,7 @@ struct HasStreamFeature<Stream<GZFile>, Tell>
 
 /**
 .Function.open
+..class:Class.Stream
 ..signature:open(stream, fileName, mode)
 ..param.stream:Stream to open.
 ...type:Class.Stream
@@ -258,6 +259,7 @@ open(Stream<GZFile> & stream, char const * filename, char const * mode)
 
 /**
 .Function.isDirect
+..class:Spec.GZ File Stream
 ..cat:Input / Output
 ..summary:Query a GZ File Stream for being "direct."
 ..signature:isDirect(gzStream)
@@ -282,6 +284,7 @@ isDirect(Stream<GZFile> & stream)
 
 /**
 .Function.close
+..class:Class.Stream
 ..signature:close(stream)
 ..param.stream:Stream to close.
 ...type:Class.Stream

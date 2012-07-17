@@ -197,7 +197,7 @@ _includeInCTD(ArgParseOption const & opt)
 // Function writeCTD()
 // ----------------------------------------------------------------------------
 
-/**
+/*
 .Function.writeCTD
 ..summary:Exports the app's interface description to a .ctd file.
 ..cat:Miscellaneous

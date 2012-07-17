@@ -172,6 +172,29 @@ SEQAN_DEFINE_TEST(test_align_myers_test_short) {
 
 
 SEQAN_DEFINE_TEST(test_align_myers_test_long) {
+    {
+        Dna5String strH = "AAAAAATTTTTTTTG";
+        Dna5String strV = "AATTTTTTTTTTGGGGG";
+
+        Align<Dna5String> align;
+        resize(rows(align), 2);
+        assignSource(row(align, 0), strH);
+        assignSource(row(align, 1), strV);
+
+        int score = globalAlignment(align, SimpleScore(), MyersHirschberg());
+        std::cerr << align << "\n";
+
+        SEQAN_ASSERT_EQ(score, -8);
+
+        std::stringstream ssH, ssV;
+        ssH << row(align, 0);
+        ssV << row(align, 1);
+
+        SEQAN_ASSERT_EQ(ssH.str(), "AAAAAATTTTTTTT----G");
+        SEQAN_ASSERT_EQ(ssV.str(), "A--ATTTTTTTTTTGGGGG");
+    }
+
+    /*
     int nw_score,m_score,hm_score;
     int test_repeat = 1;
     int test_count = 0;
@@ -214,6 +237,7 @@ SEQAN_DEFINE_TEST(test_align_myers_test_long) {
 
         ++test_count;
     }
+    */
 }
 
 

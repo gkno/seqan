@@ -99,6 +99,7 @@ public:
 // ===========================================================================
 
 ///.Metafunction.Value.param.T:Spec.ChainedSeed
+///.Metafunction.Value.class:Spec.ChainedSeed
 template <typename TConfig>
 struct Value<Seed<ChainedSeed, TConfig> >
 {
@@ -120,6 +121,7 @@ struct Value<Seed<ChainedSeed, TConfig> const>
 };
 
 ///.Metafunction.Size.param.T:Spec.ChainedSeed
+///.Metafunction.Size.class:Spec.ChainedSeed
 template <typename TConfig>
 struct Size<Seed<ChainedSeed, TConfig> >
 {
@@ -131,6 +133,7 @@ struct Size<Seed<ChainedSeed, TConfig> const>
         : Size<Seed<ChainedSeed, TConfig> > {};
 
 ///.Metafunction.Iterator.param.T:Spec.ChainedSeed
+///.Metafunction.Iterator.class:Spec.ChainedSeed
 template <typename TConfig>
 struct Iterator<Seed<ChainedSeed, TConfig>, Standard>
 {
@@ -148,6 +151,7 @@ struct Iterator<Seed<ChainedSeed, TConfig> const, Standard>
 };
 
 ///.Metafunction.Reference.param.T:Spec.ChainedSeed
+///.Metafunction.Reference.class:Spec.ChainedSeed
 template <typename TConfig>
 struct Reference<Seed<ChainedSeed, TConfig> >
 {
@@ -229,6 +233,7 @@ getEndDim1(Seed<ChainedSeed, TConfig> const & seed)
 
 /**
 .Function.length.param.object.type:Spec.ChainedSeed
+.Function.length.class:Spec.ChainedSeed
 ..include:seqan/seeds2.h
 */
 template <typename TConfig>
@@ -244,6 +249,7 @@ length(Seed<ChainedSeed, TConfig> const & seed)
 ..summary: Adds diagonal to the Chained Seed.
 ..cat:Seed Handling
 ..signature:appendDiag(seed, diagonal)
+..class:Spec.ChainedSeed
 ..param.seed: The seed to which the diagonal should be added.
 ...type:Spec.ChainedSeed
 ..param.diag: The diagonal to add.
@@ -271,6 +277,7 @@ appendDiagonal(Seed<ChainedSeed, TConfig> & seed,
 ..summary:Removes diagonals from the given first one to the end of the seed's diagonals.
 ..cat:Seed Handling
 ..signature:truncateDiagonals(seed, first)
+..class:Spec.ChainedSeed
 ..param.seed: The seed to which the diagonal should be added.
 ...type:Spec.ChainedSeed
 ..param.first: Iterator the first diagonal to remove.
@@ -288,6 +295,7 @@ truncateDiagonals(Seed<ChainedSeed, TConfig> & seed,
 
 /**
 .Function.begin.param.object.type:Spec.ChainedSeed
+..class:Spec.ChainedSeed
 ..include:seqan/seeds2.h
 */
 template <typename TConfig>
@@ -308,6 +316,7 @@ begin(Seed<ChainedSeed, TConfig> const & seed, Standard const &)
 
 /**
 .Function.front.param.object.type:Spec.ChainedSeed
+..class:Spec.ChainedSeed
 ..include:seqan/seeds2.h
 */
 template <typename TConfig>
@@ -328,6 +337,7 @@ front(Seed<ChainedSeed, TConfig> const & seed)
 
 /**
 .Function.back.param.container.type:Spec.ChainedSeed
+..class:Spec.ChainedSeed
 ..include:seqan/seeds2.h
 */
 template <typename TConfig>
@@ -348,6 +358,7 @@ back(Seed<ChainedSeed, TConfig> const & seed)
 
 /**
 .Function.end.param.object.type:Spec.ChainedSeed
+..class:Spec.ChainedSeed
 ..include:seqan/seeds2.h
 */
 template <typename TConfig>

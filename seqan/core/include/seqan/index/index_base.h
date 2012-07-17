@@ -100,6 +100,7 @@ for @Class.Index@ based substring searches.
 ..cat:Index
 ..summary:Default @Class.Index@ specialization type.
 ..signature:DefaultIndexSpec<TText>::Type
+..class:Class.Index
 ..param.TText:The given text type.
 ..returns:Can be @Spec.IndexEsa@ or $IndexQGram$, etc.
 ..remarks:Currently @Spec.IndexEsa@ is default if $TText$ is a @Class.String@.
@@ -116,6 +117,7 @@ for @Class.Index@ based substring searches.
 ..cat:Index
 ..summary:Default @Class.String@ specialization type of the @Metafunction.Fibre@ of an @Class.Index@. 
 ..signature:DefaultIndexStringSpec<TIndex>::Type
+..class:Class.Index
 ..param.TIndex:An @Class.Index@ Type.
 ..returns:If the underlying text is a @Class.String@ or a set of Strings (see @Class.StringSet@) the String's spec. type is returned.
 ..remarks:Most of the @Class.Index@ fibres are strings. The @Class.String@ specialization type is chosen by this meta-function.
@@ -172,23 +174,26 @@ for @Class.Index@ based substring searches.
 		typedef TSpec Type;
 	};
 
-
+// TODO(singer): include @ sign before WaveletTree and WaveletTreeStructure when incoorporated.
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Metafunction.Fibre:
-..summary:Type of a specific index member (fibre).
-..signature:Fibre<TIndex, TSpec>::Type
+..summary:Type of a specific container member (fibre).
+..signature:Fibre<TContainer, TSpec>::Type
+..class:Class.Index
 ..cat:Index
-..param.TIndex:The index type.
+..param.TContainer:The container type.
 ...type:Class.Index
 ..param.TSpec:Tag to specify the fibre.
 ..returns:Fibre type.
-..remarks:An @Class.Index@ can be seen as a bundle consisting of various fibres. In most cases this type is $String<Size<TIndex>::Type>$.
-The fibre interface was designed to unify the access to the members of different index data structures.
+..remarks:Some containers, such as @Class.Index@, Class.WaveletTree or WaveletTreeStructure, can be seen as a bundle consisting of various fibres. Because not every table is a fibre we did not call them tables, however, in many cases one can think of fibres as tables. The fibre interface was designed to unify the access to the members of the different fibres.
 To get a reference or the type of a specific fibre use @Function.getFibre@ or @Metafunction.Fibre@.		
-..remarks:A @Metafunction.Fibre@ need not to be a real container. It can also be view (see @Tag.ESA Index Fibres.EsaRawText@).
+..remarks:A @Metafunction.Fibre@ does not need to be a real container. It can also be a view (see @Tag.ESA Index Fibres.EsaRawText@).
 ..include:seqan/index.h
 */
+
+// In most cases this type is $String<Size<TIndex>::Type>$.
+
 	// meta function to get the type of a bundle fibre
 	template < typename TIndex, typename TSpec >
 	struct Fibre {
@@ -221,6 +226,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 ..cat:Index
 ..summary:Default algorithm to create a demanded and not yet existing @Metafunction.Fibre@.
 ..signature:DefaultIndexCreator<TIndex, TFibre>::Type
+..class:Class.Index
 ..param.TIndex:An @Class.Index@ Type.
 ..param.TFibre:A tag specifying the fibre (e.g. @Tag.ESA Index Fibres.EsaSA@).
 ..returns:A tag specifying the default algorithm to create the fibre with.
@@ -261,7 +267,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 
 
 //////////////////////////////////////////////////////////////////////////////
-/**
+/*
 	.Class.Bundle:
 	..summary:General purpose container of various members.
 	..signature:Bundle<TValue, TSize>
@@ -272,7 +278,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 */
 /*
 	template < typename TSpec = void >
-	struct Bundle {
+	truct Bundle {
 		typedef ::std::vector<FibreRecord>	TFibreRecords;
 		TFibreRecords						fibres;
 	};
@@ -343,6 +349,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 ..cat:Index
 ..summary:The default alphabet type of a suffix array, i.e. the type to store a position of a string or string set.
 ..signature:SAValue<TObject>::Type
+..class:Class.Index
 ..param.TObject:A string, string set, or index type.
 ...type:Class.String
 ...type:Class.StringSet
@@ -575,14 +582,20 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 /**
 .Function.getFibre:
-..summary:Returns a specific @Metafunction.Fibre@ of an @Class.Index@ object.
+..summary:Returns a specific fibre of a container.
+..signature:getFibre(container, fibreTag)
+..class:Class.Index
 ..cat:Index
-..signature:getFibre(index, fibre_tag)
-..param.index:The @Class.Index@ object holding the fibre.
+..param.container:The container holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
+..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
+...type:Tag.ESA Index Fibres
 ..returns:A reference to the @Metafunction.Fibre@ object.
 ..include:seqan/index.h
+..example.code:
+Index< String<char> > index_esa("tobeornottobe");
+
+String<char> & text = getFibre(indexEsa, EsaText());
 */
 
 	template <typename TText, typename TSpec>
@@ -749,6 +762,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..cat:Index
 ..summary:Return the number of sequences in an index' underlying text.
 ..signature:countSequences(index)
+..class:Class.Index
 ..param.index:The index to return the number of sequences of.
 ...type:Class.Index
 ..returns:The number of sequences in the index' underlying text.
@@ -815,6 +829,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexText(..), ..)$.
 ..cat:Index
 ..signature:textAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -865,6 +880,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexRawText(..), ..)$.
 ..cat:Index
 ..signature:rawtextAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -887,6 +903,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexSA(..), ..)$.
 ..cat:Index
 ..signature:saAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -909,6 +926,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexRawSA(..), ..)$.
 ..cat:Index
 ..signature:saAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -928,6 +946,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexLcp(..), ..)$.
 ..cat:Index
 ..signature:lcpAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -950,6 +969,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexLcpe(..), ..)$.
 ..cat:Index
 ..signature:lcpeAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -972,6 +992,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexChildtab(..), ..)$.
 ..cat:Index
 ..signature:childAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -994,6 +1015,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $value(indexBwt(..), ..)$.
 ..cat:Index
 ..signature:bwtAt(position, index)
+..class:Class.Index
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
@@ -1030,6 +1052,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaText)$.
 ..cat:Index
 ..signature:indexText(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaText@ fibre (original text).
@@ -1073,6 +1096,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaRawText)$.
 ..cat:Index
 ..signature:indexRawText(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaRawText@ fibre (concatenated input text).
@@ -1090,6 +1114,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaSA)$.
 ..cat:Index
 ..signature:indexSA(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaSA@ fibre (suffix array).
@@ -1107,6 +1132,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaRawSA)$.
 ..cat:Index
 ..signature:indexRawSA(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaRawSA@ fibre (suffix array).
@@ -1129,6 +1155,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaLcp)$.
 ..cat:Index
 ..signature:indexLcp(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaLcp@ fibre (lcp table).
@@ -1146,6 +1173,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaLcpe)$.
 ..cat:Index
 ..signature:indexLcpe(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaLcpe@ fibre (enhanced lcp table).
@@ -1163,6 +1191,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaBwt)$.
 ..cat:Index
 ..signature:indexBwt(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaBwt@ fibre (Burrows-Wheeler table).
@@ -1180,6 +1209,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..summary:Shortcut for $getFibre(.., EsaChildtab)$.
 ..cat:Index
 ..signature:indexChildtab(index)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexEsa
 ..returns:A reference to the @Tag.ESA Index Fibres.EsaChildtab@ fibre (child table).
@@ -1194,3 +1224,4 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 }
 
 #endif
+

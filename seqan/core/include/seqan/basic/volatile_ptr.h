@@ -195,6 +195,7 @@ struct VolatilePtr
     
 /**
 .Function.nukeCopies
+..class:Class.VolatilePtr
 ..cat:Basic
 ..summary:Reset all pointers connected to a given one.
 ..signature:nukeCopies(ptr)

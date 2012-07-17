@@ -476,7 +476,8 @@ _writeEdgeType(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.write:
+.Function.write
+..class:Class.Graph
 ..signature:write(file, graph, nodeMap, edgeMap, tag)
 ..param.graph:The graph to write out.
 ...type:Class.Graph
@@ -546,7 +547,7 @@ write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.write:
+.Function.write
 ..signature:write(file, graph, nodeMap, tag)
 ..include:seqan/graph_types.h
  */
@@ -567,7 +568,7 @@ write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.write:
+.Function.write
 ..signature:write(file, graph, tag)
 ..include:seqan/graph_types.h
  */

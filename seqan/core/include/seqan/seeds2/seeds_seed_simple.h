@@ -173,6 +173,7 @@ getBeginDim0(Seed<Simple, TConfig> const & seed)
 ..summary: Updates the start point of the seed.
 ..cat:Seed Handling
 ..signature:setBeginDim0(seed, start)
+..class:Spec.SimpleSeed
 ..param.seed:The seed whose start position should be updated.
 ...type:Spec.SimpleSeed
 ..param.start:The query position where the seed should start.
@@ -208,6 +209,7 @@ getBeginDim1(Seed<Simple, TConfig> const & seed)
 ..summary: Updates the start point of the seed.
 ..cat:Seed Handling
 ..signature:setBeginDim1(seed, start)
+..class:Spec.SimpleSeed
 ..param.seed:The seed whose start position should be updated.
 ...type:Spec.SimpleSeed
 ..param.start:The database position where the seed should start.
@@ -235,6 +237,7 @@ getEndDim1(Seed<Simple, TConfig> const & seed)
 ..summary: Updates the end point of the seed.
 ..cat:Seed Handling
 ..signature:setEndDim0(seed, end)
+..class:Spec.SimpleSeed
 ..param.seed:The seed whose end position should be updated.
 ...type:Spec.SimpleSeed
 ..param.end:The query position where the seed should end.
@@ -254,6 +257,7 @@ setEndDim0(Seed<Simple, TConfig> & seed,
 ..summary: Updates the end point of the seed.
 ..cat:Seed Handling
 ..signature:setEndDim1(seed, end)
+..class:Spec.SimpleSeed
 ..param.seed:The seed whose end position should be updated.
 ...type:Spec.SimpleSeed
 ..param.end:The database position where the seed should end.

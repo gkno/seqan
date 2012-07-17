@@ -1491,6 +1491,7 @@ _helperIsNegative(T t, True)
 
 /**
 .Function.positionGapToSeq
+..class:Spec.AnchorGaps
 ..cat:Fragment Store
 ..signature:positionGapToSeq(gaps, pos)
 ..summary:Convert from gap-space in the global alignment to the sequence-space on the reference.
@@ -1575,6 +1576,7 @@ positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 
 /**
 .Function.positionSeqToGap
+..class:Spec.AnchorGaps
 ..cat:Fragment Store
 ..signature:positionGapToSeq(gaps, pos)
 ..summary:Convert from sequence space on the reference to gap space in the global alignment.

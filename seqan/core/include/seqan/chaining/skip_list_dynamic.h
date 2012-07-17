@@ -120,6 +120,7 @@ namespace seqan
 	
 /**
 .Function.insert:
+..class:Class.SkipList
 ..summary:Inserts an object into a SkipList.
 ..cat:SkipList
 ..signature:insert(list, object)
@@ -244,6 +245,7 @@ namespace seqan
 
 /**
 .Function.erase:
+..class:Class.SkipList
 ..summary:Deletes object from a SkipList.
 ..cat:SkipList
 ..signature:erase(list, iterator)

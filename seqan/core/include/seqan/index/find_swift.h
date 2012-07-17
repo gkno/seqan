@@ -1447,6 +1447,7 @@ endPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 ..cat:Searching
 ..summary:Returns a pair of the begin and end position in or beyond the haystack or needle for the last hit found.
 ..signature:positionRangeNoClip(finder)
+..class:Class.Finder
 ..signature:positionRangeNoClip(pattern)
 ..param.finder:A @Class.Finder@ object.
 ...type:Spec.Swift
@@ -1482,6 +1483,7 @@ positionRangeNoClip(Finder<THaystack, Swift<TSpec> > & finder)
 ..cat:Searching
 ..summary:Returns a pair of the begin and end position in the haystack or needle for the last hit found.
 ..signature:positionRange(finder)
+..class:Class.Finder
 ..signature:positionRange(pattern)
 ..param.finder:A @Class.Finder@ object.
 ...type:Spec.Swift
@@ -1885,6 +1887,7 @@ find(
  Gets the first non-repeat range and sets it in the finder.
  Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
 ..signature:windowFindBegin(finder, pattern, errorRate)
+..class:Spec.Swift
 ..param.finder:A finder with window interface.
 ...type:Spec.Swift
 ..param.pattern: A pattern with window interface.
@@ -1923,6 +1926,7 @@ windowFindBegin(
  Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
 ..signature:windowFindNext(finder, pattern, finderWindowLength)
 ..param.finder:A finder with window interface.
+..class:Spec.Swift
 ...type:Spec.Swift
 ..param.pattern: A pattern with window interface.
 ...type:Spec.Swift
@@ -1992,6 +1996,7 @@ windowFindNext(
 ..summary:Flushes the pattern. Used together with @Function.windowFindBegin@ and @Function.windowFindNext@.
 ..signature:windowFindNext(finder, pattern)
 ..param.finder:A finder with window interface.
+..class:Spec.Swift
 ...type:Spec.Swift
 ..param.pattern: A pattern with window interface.
 ...type:Spec.Swift
@@ -2014,6 +2019,7 @@ windowFindEnd(
 ..cat:Searching
 ..summary:Returns the string of hits from the finder.
 ..signature:getWindowFindHits(finder)
+..class:Spec.Swift
 ..param.finder:A finder with window interface.
 ...type:Spec.Swift
 ..returns:@Class.String@ of Hits (use Finder<...>::THitString as Type).
@@ -2033,6 +2039,7 @@ getWindowFindHits(Finder<THaystack, Swift<TSpec> > &finder)
 ..cat:Searching
 ..summary:Returns the maximal out-of-order distance of adjacent hits.
 ..signature:getMaxDeviationOfOrder(pattern)
+..class:Class.Pattern
 ..param.pattern:A pattern with window interface.
 ...type:Spec.Swift
 ..returns:Returns the maximal distance two adjacent hits can have which are not in increasing order.
@@ -2051,3 +2058,4 @@ getMaxDeviationOfOrder(Pattern<TIndex, Swift<TSpec> > &pattern)
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_FIND_SHIFTAND_H
+

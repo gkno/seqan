@@ -303,7 +303,8 @@ struct Value< FrequencyDistribution<TValue, TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.absFreqOfLettersInSeq:
+.Function.absFreqOfLettersInSeq
+..class:Class.FrequencyDistribution
 ..summary:Counts the number of times each residue of a fixed sequence alphabet occurs in a given sequence.
 ..cat:Motif Search
 ..signature:absFreqOfLettersInSeq(frequencies,begin,end)
@@ -339,6 +340,7 @@ absFreqOfLettersInSeq(FrequencyDistribution<TValue, TSpec> & fd,
 
 /**
 .Function.absFreqOfLettersInSetOfSeqs:
+..class:Class.FrequencyDistribution
 ..summary:Counts the number of times each residue of a fixed sequence alphabet occurs in a given set of sequences.
 ..cat:Motif Search
 ..signature:absFreqOfLettersInSetOfSeqs(frequencies,begin,end)
@@ -370,6 +372,7 @@ absFreqOfLettersInSetOfSeqs(FrequencyDistribution<TValue, TSpec> & fd,
 
 /**
 .Function.addValue:
+..class:Class.FrequencyDistribution
 ..summary:Adds a value of a specific type to each element of a given @Class.FrequencyDistribution@ object.
 ..cat:Motif Search
 ..signature:addValue(frequencies,value)
@@ -395,6 +398,7 @@ addValue(FrequencyDistribution<TValue, TSpec> & fd, TType const & val)
 
 /**
 .Function.backgroundFrequency:
+..class:Class.FrequencyDistribution
 ..summary:Determines the background letter frequencies in a given dataset
 ..cat:Motif Search
 ..signature:backgroundFrequency(frequencies,begin,end)
@@ -429,6 +433,7 @@ backgroundFrequency(FrequencyDistribution<TValue, TSpec> & fd,
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.begin.param.object.type:Class.FrequencyDistribution
+///.Function.begin.class:Class.FrequencyDistribution
 
 template <typename TValue, typename TSpec>
 inline typename Iterator< FrequencyDistribution<TValue, TSpec> >::Type
@@ -446,6 +451,7 @@ begin(FrequencyDistribution<TValue, TSpec> const & me)
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.clear.param.object.type:Class.FrequencyDistribution
+///.Function.clear.class:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
 void 
@@ -457,7 +463,8 @@ clear(FrequencyDistribution<TValue, TSpec> & fd)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.convertResidueToFrequencyDist:
+.Function.convertResidueToFrequencyDist
+..class:Class.FrequencyDistribution
 ..summary:Coverts a residue to a frequency distribution (profile).
 ..cat:Motif Search
 ..signature:convertResidueToFrequencyDist(frequencies,residue)
@@ -495,6 +502,7 @@ convertResidueToFrequencyDist(FrequencyDistribution<TValue, TSpec> & fd, TValue 
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.end.param.object.type:Class.FrequencyDistribution
+///.Function.end.class:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
 inline typename Iterator< FrequencyDistribution<TValue, TSpec> >::Type
@@ -512,6 +520,7 @@ end(FrequencyDistribution<TValue, TSpec> const & me)
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.length.param.object.type:Class.FrequencyDistribution
+///.Function.length.class:Class.FrequencyDistribution
 
 template<typename TValue, typename TSpec>
 inline typename Size< FrequencyDistribution<TValue, TSpec> >::Type
@@ -530,7 +539,8 @@ length(FrequencyDistribution<TValue, TSpec> const & me)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.logarithmize:
+.Function.logarithmize
+..class:Class.FrequencyDistribution
 ..summary:Logarithmizes each element of a given @Class.FrequencyDistribution@ object.
 ..cat:Motif Search
 ..signature:logarithmize(frequencies)
@@ -582,6 +592,7 @@ normalize(FrequencyDistribution<TValue, TSpec> & fd)
 
 /**
 .Function.posOfMax:
+..class:Class.FrequencyDistribution
 ..summary:Determines the residue position in a given @Class.FrequencyDistribution@ object with the maximum frequency.
 ..cat:Motif Search
 ..signature:posOfMax(frequencies)
@@ -615,6 +626,7 @@ posOfMax(FrequencyDistribution<TValue, TSpec> & me)
 
 /**
 .Function.sum:
+..class:Class.FrequencyDistribution
 ..summary:Determines the sum of all frequencies in a given @Class.FrequencyDistribution@ object.
 ..cat:Motif Search
 ..signature:sum(frequencies)

@@ -100,7 +100,8 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 /**
-.Function.bundle2:
+.Function.bundle2
+..class:Class.Bundle2
 ..cat:Pipelining
 ..summary:Returns a bundle of two objects.
 ..signature:bundle2(in1, in2)
@@ -149,7 +150,8 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 /**
-.Function.bundle3:
+.Function.bundle3
+..class:Class.Bundle3
 ..cat:Pipelining
 ..summary:Returns a bundle of three objects.
 ..signature:bundle3(in1, in2, in3)
@@ -208,7 +210,8 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 /**
-.Function.bundle5:
+.Function.bundle5
+..class:Class.Bundle5
 ..cat:Pipelining
 ..summary:Returns a bundle of five objects.
 ..signature:bundle5(in1, in2, in3, in4, in5)
@@ -311,6 +314,7 @@ SEQAN_CHECKPOINT
 
 
 ///.Function.length.param.object.type:Class.Pipe
+///.Function.length.class:Class.Pipe
 
 	template < typename TInput, typename TSpec >
     inline typename Size< Pipe<TInput, TSpec> >::Type
@@ -371,7 +375,8 @@ SEQAN_CHECKPOINT
         return countSequences(me.in1);
     }
 /**
-.Function.Pipelining#front:
+.Function.Pipelining#front
+..class:Class.Pipe
 ..cat:Pipelining
 ..summary:Gets the first element of the remaining stream.
 ..signature:front(object)
@@ -393,6 +398,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.pop:
+..class:Class.Pipe
 ..cat:Pipelining
 ..summary:Pops the first element of the remaining stream.
 ..signature:pop(object[, ref])
@@ -420,6 +426,7 @@ SEQAN_CHECKPOINT
     }
 
 ///.Function.atEnd.param.iterator.type:Class.Pipe
+///.Function.atEnd.class:Class.Pipe
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -462,7 +469,9 @@ SEQAN_CHECKPOINT
     }
 
 /**
-.Function.beginRead:
+.Function.beginRead
+..class:Class.Pipe
+..class:Class.Pool
 ..cat:Pipelining
 ..summary:Initiates a read process.
 ..signature:beginRead(object)
@@ -482,7 +491,9 @@ SEQAN_CHECKPOINT
     }
 
 /**
-.Function.endRead:
+.Function.endRead
+..class:Class.Pipe
+..class:Class.Pool
 ..cat:Pipelining
 ..summary:Terminates a read process.
 ..signature:beginRead(object)
@@ -530,6 +541,7 @@ SEQAN_CHECKPOINT
     }
 
 ///.Function.assign.param.source.type:Class.Pipe
+///.Function.assign.class:Class.Pipe
 
 	//////////////////////////////////////////////////////////////////////////////
     // pipe -> string

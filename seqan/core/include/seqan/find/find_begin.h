@@ -334,6 +334,7 @@ _findBeginInit(TPattern & pattern, TNeedle & needle_)
 ..summary:Search the begin of an approximate match.
 ..cat:Searching
 ..signature:findBegin(finder, pattern [, limit])
+..class:Class.Finder
 ..param.finder:The @Class.Finder@ object to search through.
 ...type:Class.Finder
 ..param.pattern:The @Class.Pattern@ object to search for.
@@ -372,6 +373,7 @@ findBegin(TFinder & finder,
 ..cat:Searching
 ..summary:Score of the last match found by @Function.findBegin@ during approximate searching.
 ..signature:getBeginScore(pattern)
+..class:Class.Finder
 ..param.pattern:A @Concept.Pattern|pattern@ that can be used for approximate searching.
 ...type:Spec.DPSearch
 ..returns:The score of the last match found using $pattern$.

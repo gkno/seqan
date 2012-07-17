@@ -100,7 +100,9 @@ template <typename TSpec>
 struct Allocator;
 
 ///.Function.allocate.param.object.type:Class.Allocator
+///.Function.allocate.class:Class.Allocator
 ///.Function.deallocate.param.object.type:Class.Allocator
+///.Function.deallocate.class:Class.Allocator
 
 // ============================================================================
 // Metafunctions
@@ -123,7 +125,8 @@ struct Spec<Allocator<TSpec> >
 // ----------------------------------------------------------------------------
 
 /**
-.Function.allocate:
+.Function.allocate
+..class:Class.Allocator
 ..cat:Memory
 ..summary:Allocates memory from heap.
 ..signature:allocate(object, data, count [, usage_tag])
@@ -233,7 +236,8 @@ allocate(T &,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.deallocate:
+.Function.deallocate
+..class:Class.Allocator
 ..cat:Memory
 ..summary:Deallocates memory.
 ..signature:deallocate(object, data, count [, usage_tag])

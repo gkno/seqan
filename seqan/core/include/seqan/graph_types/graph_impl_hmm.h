@@ -625,7 +625,8 @@ write(TFile & target,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignBeginState:
+.Function.assignBeginState
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Assigns a begin state.
 ..signature:assignBeginState(g, vertex)
@@ -652,6 +653,7 @@ assignBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.assignEndState:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Assigns an end state.
 ..signature:assignEndState(g, vertex)
@@ -678,6 +680,7 @@ assignEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.beginState:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns a reference to the begin state.
 ..signature:beginState(g)
@@ -698,6 +701,7 @@ beginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 
 /**
 .Function.endState:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns a reference to the end state.
 ..signature:endState(g)
@@ -718,6 +722,7 @@ endState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 
 /**
 .Function.getBeginState:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns the begin state.
 ..signature:getBeginState(g)
@@ -738,6 +743,7 @@ getBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g)
 
 /**
 .Function.getEndState:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns the end state.
 ..signature:getEndState(g)
@@ -758,6 +764,7 @@ getEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g)
 
 /**
 .Function.getTransitionProbability:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns the transition probability.
 ..signature:getTransitionProbability(g, [s1, s2 | e])
@@ -801,6 +808,7 @@ getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const&,
 
 /**
 .Function.transitionProbability:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns a reference to the transition probability.
 ..signature:transitionProbability(g, [s1, s2 | e])
@@ -843,6 +851,7 @@ transitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
 
 /**
 .Function.assignTransitionProbability:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Assigns a new transition probability to an existing edge.
 ..signature:assignTransitionProbability(g, s1, s2, prob)
@@ -886,6 +895,7 @@ assignTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
 
 /**
 .Function.getEmissionProbability:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns the emission probability.
 ..signature:getEmissionProbability(g, state, symbol)
@@ -915,6 +925,7 @@ getEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 
 /**
 .Function.emissionProbability:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Returns a reference to the emission probability.
 ..signature:emissionProbability(g, state, symbol)
@@ -944,6 +955,7 @@ emissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.assignEmissionProbability:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Assigns a new emission probability.
 ..signature:assignEmissionProbability(g, state, symbol, prob)
@@ -977,6 +989,7 @@ assignEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.assignSilentStatus:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Assigns a silent status to a state.
 ..signature:assignBeginState(g, vertex, silent)
@@ -1003,6 +1016,7 @@ assignSilentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.silentStatus:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Reference to the silent status of a state.
 ..signature:silentStatus(g, vertex)
@@ -1027,6 +1041,7 @@ silentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 /**
 .Function.isSilent:
+..class:Spec.Hmm
 ..cat:Graph
 ..summary:Indicates whether a state is silent or not.
 ..signature:isSilent(g, vertex)

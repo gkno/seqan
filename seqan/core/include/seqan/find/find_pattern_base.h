@@ -100,6 +100,7 @@ struct Container< Pattern<TNeedle, TSpec> const > {
 };
 
 ///.Metafunction.Host.param.T.type:Class.Pattern
+///.Metafunction.Host.class:Class.Pattern
 template <typename TNeedle, typename TSpec>
 struct Host< Pattern<TNeedle, TSpec> > {
 	typedef TNeedle Type;
@@ -257,6 +258,7 @@ segment(Pattern<TNeedle, TSpec> const & me)
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.host.param.object.type:Class.Pattern
+///.Function.host.class:Class.Pattern
 
 template <typename TNeedle, typename TSpec>
 inline typename Host<Pattern<TNeedle, TSpec> >::Type & 
@@ -282,6 +284,7 @@ SEQAN_CHECKPOINT
 ..summary:Returns the needle of a @Class.Pattern@ object (not implemented for some online-algorithms).
 ..cat:Searching
 ..signature:needle(pattern)
+..class:Class.Pattern
 ..param.pattern:The @Class.Pattern@ object to search with.
 ...type:Class.Pattern
 ..returns:The needle object to search for.
@@ -309,6 +312,7 @@ needle(TObject const &obj)
 
 
 ///.Function.position.param.iterator.type:Class.Pattern
+///.Function.position.class:Class.Pattern
 
 template < typename TNeedle, typename TSpec >
 inline typename Needle< Pattern<TNeedle, TSpec> >::Type &
@@ -329,6 +333,7 @@ needle(Pattern<TNeedle, TSpec> const & obj)
 ..summary:Sets the needle of a @Class.Pattern@ object and optionally induces preprocessing.
 ..cat:Searching
 ..signature:setNeedle(pattern, needle)
+..class:Class.Pattern
 ..param.pattern:The @Class.Pattern@ object to search with.
 ...type:Class.Pattern
 ..param.needle:The needle object to search for.
@@ -349,6 +354,7 @@ setNeedle(Pattern<TNeedle, TSpec> &obj, TNeedle const &ndl) {
 ..cat:Searching
 ..summary:The @glos:Scoring Scheme|scoring scheme@ used for finding or aligning.
 ..signature:scoringScheme(obj)
+..class:Class.Pattern
 ..param.obj:Object that holds a @glos:Scoring Scheme|scoring scheme@
 ...type:Class.Pattern
 ..returns:The @glos:Scoring Scheme|scoring scheme@ used in $obj$
@@ -378,6 +384,7 @@ SEQAN_CHECKPOINT
 ..cat:Searching
 ..summary:Sets the @glos:Scoring Scheme|scoring scheme@ used for finding or aligning.
 ..signature:setScoringScheme(obj, score)
+..class:Class.Pattern
 ..param.obj:Object that holds a @glos:Scoring Scheme|scoring scheme@.
 ...type:Class.Pattern
 ..param.score:The new @glos:Scoring Scheme|scoring scheme@ used by $obj$.

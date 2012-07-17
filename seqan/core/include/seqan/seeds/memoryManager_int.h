@@ -166,6 +166,8 @@ struct DefaultOverflowImplicit< MemoryManager<TValue, Block<SPACE> , FreeMemoryI
 
 
 ///.Metafunction.Value.param.T.type:Class.MemoryManager
+///.Metafunction.Value.class:Class.MemoryManager
+
 template <typename TValue, unsigned int SPACE>
 struct Value<MemoryManager<TValue,Block<SPACE>, FreeMemoryInt > >
 {

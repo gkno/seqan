@@ -43,7 +43,8 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Metafunction.EdgeDescriptor:
+.Metafunction.EdgeDescriptor
+..class:Class.Graph
 ..cat:Graph
 ..summary:Type of an object that represents an edge descriptor.
 ..signature:EdgeDescriptor<T>::Type
@@ -62,6 +63,7 @@ struct EdgeDescriptor;
 
 /**
 .Metafunction.Cargo
+..class:Class.Graph
 ..cat:Graph
 ..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
 ..include:seqan/graph_types.h
@@ -74,6 +76,7 @@ struct Cargo;
 
 /**
 .Metafunction.EdgeType:
+..class:Class.Graph
 ..cat:Graph
 ..summary:Edge type of a graph object.
 ..signature:EdgeType<T>::Type
@@ -90,6 +93,8 @@ struct EdgeType;
 
 /**
 .Metafunction.Alphabet:
+..class:Spec.Word Graph
+..class:Spec.Automaton
 ..cat:Graph
 ..summary:Access to the Alphabet type.
 ..signature:Alphabet<T>::Type
@@ -107,6 +112,7 @@ struct Alphabet;
 
 /**
 .Metafunction.EdgeIdHandler:
+..class:Class.Graph
 ..cat:Graph
 ..summary:Type of an object that represents an Id Manager.
 ..signature:EdgeIdHandler<T>::Type
@@ -126,6 +132,7 @@ struct EdgeIdHandler;
 
 /**
 .Metafunction.VertexIdHandler:
+..class:Class.Graph
 ..cat:Graph
 ..summary:Type of an object that represents an Id Manager.
 ..signature:VertexIdHandler<T>::Type
@@ -237,6 +244,7 @@ class EdgeStump;
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.VertexDescriptor.param.T.type:Class.EdgeStump
+///.Metafunction.VertexDescriptor.class:Class.EdgeStump
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 struct VertexDescriptor<EdgeStump<TCargo, TList, TSource, TId, TSpec> > 
@@ -267,6 +275,7 @@ class IdManager;
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.EdgeIdHandler.param.T.type:Class.EdgeStump
+///.Metafunction.EdgeIdHandler.class:Class.EdgeStump
 
 template<typename TCargo, bool TList, bool TSource, typename TSpec>
 struct EdgeIdHandler<EdgeStump<TCargo, TList, TSource, false, TSpec> > {

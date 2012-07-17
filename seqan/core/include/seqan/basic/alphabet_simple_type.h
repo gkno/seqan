@@ -55,6 +55,7 @@ namespace seqan {
 /**
 .Class.SimpleType:
 ..cat:Basic
+..implements:Concept.FiniteOrderedAlphabetConcept
 ..summary:Implementation for "simple" types.
 ..signature:SimpleType<TValue, TSpec>
 ..param.TValue:Type that stores the values of an instance.
@@ -367,7 +368,8 @@ operator>>(TStream & stream,
 // ----------------------------------------------------------------------------
 
 ///.Function.assign.param.target.type:Class.SimpleType
-///.Function.assign.param.source.type:Class.SimpleType
+///.Function.assign.param.target.type:Class.SimpleType
+///.Function.assign.class:Class.SimpleType
 
 template <typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TSourceSpec>
 inline void 

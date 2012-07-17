@@ -53,6 +53,8 @@ namespace seqan {
 // ===========================================================================
 
 ///.Metafunction.IsContiguous.param.T.type:Adaption.std::list
+///.Metafunction.IsContiguous.class:Adaption.std::list
+
 template <typename TChar, typename TAlloc>
 struct IsContiguous< ::std::basic_string<TChar, TAlloc> >
 {
@@ -64,6 +66,8 @@ struct IsContiguous< ::std::basic_string<TChar, TAlloc> const>
         : IsContiguous< ::std::basic_string<TChar, TAlloc> > {};
 
 ///.Metafunction.Value.param.T.type:Adaption.std::list
+///.Metafunction.Value.class:Adaption.std::list
+
 template <typename TValue, typename TAlloc>
 struct Value< ::std::list<TValue, TAlloc> >
 {
@@ -75,6 +79,8 @@ struct Value< ::std::list<TValue, TAlloc> const>
         : Value< ::std::list<TValue, TAlloc> > {};
 
 ///.Metafunction.GetValue.param.T.type:Adaption.std::list
+///.Metafunction.GetValue.class:Adaption.std::list
+
 template <typename TValue, typename TAlloc>
 struct GetValue< ::std::list<TValue, TAlloc> >
 {
@@ -88,6 +94,8 @@ struct GetValue< ::std::list<TValue, TAlloc> const>
 };
 
 ///.Metafunction.Iterator.param.T.type:Adaption.std::list
+///.Metafunction.Iterator.class:Adaption.std::list
+
 template <typename TValue, typename TAlloc>
 struct Iterator< ::std::list<TValue, TAlloc>, Rooted>
 {
@@ -117,6 +125,8 @@ struct Iterator< ::std::list<TValue, TAlloc> const, Standard>
 };
 
 ///.Metafunction.Position.param.T.type:Adaption.std::list
+///.Metafunction.Position.class:Adaption.std::list
+
 template <typename TValue, typename TAlloc>
 struct Position< ::std::list<TValue, TAlloc> >
 {
@@ -128,6 +138,8 @@ struct Position< ::std::list<TValue, TAlloc> const>
         : Position< ::std::list<TValue, TAlloc> > {};
 
 ///.Metafunction.Size.param.T.type:Adaption.std::list
+///.Metafunction.Size.class:Adaption.std::list
+
 template <typename TValue, typename TAlloc>
 struct Size< ::std::list<TValue, TAlloc> >
 {
@@ -139,6 +151,8 @@ struct Size< ::std::list<TValue, TAlloc> const>
         : Size< ::std::list<TValue, TAlloc> > {};
 
 ///.Metafunction.StdContainerIterator.param.T.type:Adaption.std::list
+///.Metafunction.StdContainerIterator.class:Adaption.std::list
+
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> >
 {
@@ -158,6 +172,8 @@ struct StdContainerIterator< ::std::list<TValue, TAlloc> const>
 // ===========================================================================
 
 ///.Function.begin.param.object.type:Adaption.std::list
+///.Function.begin.class:Adaption.std::list
+
 template<typename TValue>
 inline
 typename Iterator<std::list<TValue>, Standard>::Type
@@ -179,6 +195,8 @@ begin(std::list<TValue> const & list,
 }
 
 ///.Function.end.param.object.type:Adaption.std::list
+///.Function.end.class:Adaption.std::list
+
 template<typename TValue>
 inline
 typename Iterator<std::list<TValue>, Standard>::Type
@@ -199,9 +217,9 @@ end(std::list<TValue> const & list,
     return list.end();
 }
 
-/**
-.Function.front.param.container.type:Adaption.std::list
-*/
+///.Function.front.param.container.type:Adaption.std::list
+///.Function.front.class:Adaption.std::list
+
 template <typename TValue>
 inline typename Reference<std::list<TValue> >::Type
 front(std::list<TValue> & list)
@@ -219,6 +237,8 @@ front(std::list<TValue> const & list)
 }
 
 ///.Function.back.param.container.type:Adaption.std::list
+///.Function.back.class:Adaption.std::list
+
 template <typename TValue>
 inline typename Reference<std::list<TValue> >::Type
 back(std::list<TValue> & list)
@@ -236,6 +256,8 @@ back(std::list<TValue> const & list)
 }
 
 ///.Function.length.param.object.type:Adaption.std::list
+///.Function.length.class:Adaption.std::list
+
 template <typename TValue>
 inline typename Size<std::list<TValue> >::Type
 length(std::list<TValue> & list)
@@ -262,6 +284,8 @@ length(std::list<TValue> const & list)
 ..param.value:The value to prepend to the container.
 ..include:seqan/sequence.h
 */
+///.Function.prependValue.class:Adaption.std::list
+
 template <typename T, typename T2>
 inline void
 prependValue(std::list<T> & list,
@@ -272,6 +296,8 @@ prependValue(std::list<T> & list,
 }
 
 ///.Function.appendValue.param.target.type:Adaption.std::list
+///.Function.appendValue.class:Adaption.std::list
+
 template <typename T, typename T2>
 inline void
 appendValue(std::list<T> & list,
@@ -282,6 +308,8 @@ appendValue(std::list<T> & list,
 }
 
 ///.Function.clear.param.object.type:Adaption.std::list
+///.Function.clear.class:Adaption.std::list
+
 template <typename T>
 inline void
 clear(std::list<T> & list)
@@ -291,6 +319,8 @@ clear(std::list<T> & list)
 }
 
 ///.Function.reserve.param.object.type:Adaption.std::list
+///.Function.reserve.class:Adaption.std::list
+
 template <typename T, typename TTag>
 inline void
 reserve(std::list<T> & /*list*/, TTag const & /*tag*/)
@@ -299,6 +329,8 @@ reserve(std::list<T> & /*list*/, TTag const & /*tag*/)
 }
 
 ///.Function.capacity.param.object.type:Adaption.std::list
+///.Function.capacity.class:Adaption.std::list
+
 template <typename T>
 inline typename Size<std::list<T> >::Type
 capacity(std::list<T> const & list)

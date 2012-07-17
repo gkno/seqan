@@ -235,6 +235,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.open:
+..class:Class.File
 ..summary:Opens a file.
 ..cat:Input/Output
 ..signature:open(file, fileName[, openMode])
@@ -267,6 +268,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.openTemp:
+..class:Class.File
 ..summary:Opens a temporary file.
 ..cat:Input/Output
 ..signature:openTemp(file)
@@ -300,6 +302,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
 /**
 .Function.close:
+..class:Class.File
 ..cat:Input/Output
 ..summary:Closes a file.
 ..signature:close(file)
@@ -329,6 +332,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.read:
+..class:Class.File
 ..cat:Input/Output
 ..summary:Loads records from a file.
 ..signature:read(file, memPtr, count)
@@ -350,6 +354,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
 /**
 .Function.write:
+..class:Class.File
 ..cat:Input/Output
 ..summary:Saves records to a file.
 ..signature:write(file, memPtr, count)
@@ -371,6 +376,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.readAt:
+..class:Class.File
 ..summary:Loads records from a specific position in a file.
 ..cat:Input/Output
 ..signature:readAt(file, memPtr, count, fileOfs)
@@ -394,6 +400,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
 /**
 .Function.writeAt:
+..class:Class.File
 ..summary:Saves records to a specific position in a file.
 ..cat:Input/Output
 ..signature:writeAt(file, memPtr, count, fileOfs)
@@ -422,6 +429,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.seek:
+..class:Class.File
 ..summary:Changes the current file pointer.
 ..cat:Input/Output
 ..signature:seek(file, fileOfs[, origin])
@@ -457,6 +465,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	}
 /**
 .Function.tell:
+..class:Class.File
 ..summary:Gets the current file pointer.
 ..cat:Input/Output
 ..signature:tell(file)
@@ -475,6 +484,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.rewind:
+..class:Class.File
 ..summary:Sets the current file pointer to the beginning.
 ..cat:Input/Output
 ..signature:rewind(file)
@@ -493,6 +503,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
 /**
 .Function.size:
+..class:Class.File
 ..summary:Gets the file size.
 ..cat:Input/Output
 ..signature:size(file)
@@ -514,6 +525,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.resize:
+..class:Class.File
 ..cat:Input/Output
 ..signature:resize(file, new_length)
 ..param.file:A File object.
@@ -534,6 +546,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.setEof:
+..class:Class.File
 ..summary:Sets the file end to the current pointer.
 ..cat:Input/Output
 ..signature:setEof(file)
@@ -655,6 +668,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.asyncReadAt:
+..class:Class.File
 ..summary:Asynchronously loads records from a specific position in a file.
 ..cat:Input/Output
 ..signature:asyncReadAt(file, memPtr, count, fileOfs, request)
@@ -681,6 +695,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
 /**
 .Function.asyncWriteAt:
+..class:Class.File
 ..summary:Asynchronously saves records to a specific position in a file.
 ..cat:Input/Output
 ..signature:asyncWriteAt(file, memPtr, count, fileOfs, request)
@@ -711,6 +726,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.flush:
+..class:Class.File
 ..summary:Waits for all open requests to complete.
 ..cat:Input/Output
 ..signature:flush(file)
@@ -728,6 +744,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.waitFor:
+..class:Class.AsyncRequest
 ..summary:Waits for an asynchronous request to complete.
 ..cat:Input/Output
 ..signature:waitFor(request[, timeout_millis])
@@ -763,6 +780,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
 /**
 .Function.cancel:
+..class:Class.File
 ..summary:Cancels an asynchronous request.
 ..cat:Input/Output
 ..signature:cancel(file, request)

@@ -556,6 +556,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..summary:Creates a specific @Metafunction.Fibre@.
 ..cat:Index
 ..signature:indexCreate(index, fibre_tag[, algo_tag])
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
 ..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
@@ -623,6 +624,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..summary:Returns whether a specific @Metafunction.Fibre@ is present.
 ..cat:Index
 ..signature:indexSupplied(index, fibre_tag)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
 ..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
@@ -643,6 +645,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..summary:On-demand creation of a specific @Metafunction.Fibre@.
 ..cat:Index
 ..signature:indexRequire(index, fibre_tag)
+..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
 ..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).

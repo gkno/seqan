@@ -130,6 +130,7 @@ struct IsSimple<T const> : public IsSimple<T> {};
 // TODO(holtgrew): This should probably to into sequence module along with this header.
 
 ///.Metafunction.Value.param.T.type:Adaption.char array
+///.Metafunction.Value.class:Adaption.char array
 
 template <typename TValue>
 struct Value<TValue *>
@@ -167,6 +168,7 @@ struct Value<TValue const [SIZE]>
 // TODO(holtgrew): This should probably to into sequence module along with this header.
 
 ///.Metafunction.Reference.param.T.type:Adaption.char array
+///.Metafunction.Reference.class:Adaption.char array
 
 template <typename TValue>
 struct Reference<TValue *>
@@ -221,7 +223,7 @@ getValue(T * me)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.valueConstruct:
+.Function.valueConstruct
 ..cat:Content Manipulation
 ..summary:Constructs an object at specified position.
 ..signature:valueConstruct(iterator [, param [, move_tag] ])
@@ -379,7 +381,7 @@ struct ValueDestructorProxy_
 };
 
 /**
-.Function.valueDestruct:
+.Function.valueDestruct
 ..cat:Content Manipulation
 ..summary:Destoys an object at specified position.
 ..signature:valueDestruct(iterator)
@@ -413,7 +415,7 @@ valueDestruct(TIterator it)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayConstruct:
+.Function.arrayConstruct
 ..cat:Array Handling
 ..summary:Construct objects in a given memory buffer.
 ..signature:arrayConstruct(begin, end [, value])
@@ -485,7 +487,7 @@ arrayConstruct(TIterator1 begin_,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayConstructCopy:
+.Function.arrayConstructCopy
 ..cat:Array Handling
 ..summary:Copy constructs an array of objects into in a given memory buffer.
 ..signature:arrayConstructCopy(source_begin, source_end, target)
@@ -536,7 +538,7 @@ arrayConstructCopy(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayConstructMove:
+.Function.arrayConstructMove
 ..cat:Array Handling
 ..summary:Move constructs an array of objects into in a given memory buffer.
 ..signature:arrayConstructMove(source_begin, source_end, target)
@@ -590,7 +592,7 @@ arrayConstructMove(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayDestruct:
+.Function.arrayDestruct
 ..cat:Array Handling
 ..summary:Destroys an array of objects.
 ..signature:arrayDestruct(begin, end)
@@ -631,7 +633,7 @@ arrayDestruct(TIterator1 begin_,
 // TODO(holtgrew): What is the advantage over arrayConstruct() with prototype?
 
 /**
-.Function.arrayFill:
+.Function.arrayFill
 ..cat:Array Handling
 ..summary:Assigns one object to each element of a range.
 ..signature:arrayFill(begin, end, value)
@@ -661,7 +663,7 @@ arrayFill(TIterator1 begin_,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayCopyForward:
+.Function.arrayCopyForward
 ..cat:Array Handling
 ..summary:Copies a range of objects into another range of objects starting from the first element.
 ..signature:arrayCopyForward(source_begin, source_end, target)
@@ -702,7 +704,7 @@ arrayCopyForward(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayCopyBackward:
+.Function.arrayCopyBackward
 ..cat:Array Handling
 ..summary:Copies a range of objects into another range of objects starting from the last element.
 ..signature:arrayCopyBackward(source_begin, source_end, target)
@@ -748,7 +750,7 @@ arrayCopyBackward(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayCopy:
+.Function.arrayCopy
 ..cat:Array Handling
 ..summary:Copies a range of objects into another range of objects.
 ..signature:arrayCopy(source_begin, source_end, target)
@@ -789,7 +791,7 @@ inline void arrayCopy(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayMoveForward:
+.Function.arrayMoveForward
 ..cat:Array Handling
 ..summary:Moves a range of objects into another range of objects starting from the first element.
 ..signature:arrayMoveForward(source_begin, source_end, target)
@@ -837,7 +839,7 @@ arrayMoveForward(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayMoveBackward:
+.Function.arrayMoveBackward
 ..cat:Array Handling
 ..summary:Moves a range of objects into another range of objects starting from the last element.
 ..signature:arrayMoveBackward(source_begin, source_end, target)
@@ -889,7 +891,7 @@ arrayMoveBackward(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayMove:
+.Function.arrayMove
 ..cat:Array Handling
 ..summary:Moves a range of objects into another range of objects.
 ..signature:arrayMove(source_begin, source_end, target)
@@ -934,7 +936,7 @@ arrayMove(TSource1 source_begin,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.arrayClearSpace:
+.Function.arrayClearSpace
 ..cat:Array Handling
 ..summary:Destroys the begin of an array and keeps the rest.
 ..signature:arrayClearSpace(arr_begin, arr_length, keep_from, move_to)

@@ -668,6 +668,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.bandedAlignment:
+..class:Class.Seed
 ..summary:Calculates a banded alignment around a Seed.
 ..cat:Seed Handling
 ..signature:bandedAlignmnet(align, seed, k, score)

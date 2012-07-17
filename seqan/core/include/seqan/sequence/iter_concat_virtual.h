@@ -477,6 +477,7 @@ atEnd(Iter<TSSet, ConcatVirtual<TSpec> > const & me)
 
 /**
 .Function.atEndOfSequence
+..class:Class.Iter
 ..summary:Returns true if the iterator is at the end of a sequence.
 ..cat:Sequences
 ..signature:atEndOfSequence(iter)

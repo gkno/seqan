@@ -573,6 +573,7 @@ inline bool _findAbndmLargeNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> 
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.scoreLimit.param.pattern.type:Spec.AbndmAlgo
+///.Function.scoreLimit.class:Spec.AbndmAlgo
 
 template <typename TNeedle>
 inline int 
@@ -585,6 +586,7 @@ scoreLimit(Pattern<TNeedle, AbndmAlgo > const & me)
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.setScoreLimit.param.pattern.type:Spec.AbndmAlgo
+///.Function.setScoreLimit.class:Spec.AbndmAlgo
 
 template <typename TNeedle, typename TScoreValue>
 inline void 

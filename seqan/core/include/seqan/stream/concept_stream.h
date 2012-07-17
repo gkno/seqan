@@ -100,6 +100,7 @@ typedef Tag<Tell_> Tell;
 
 /**
 .Metafunction.HasStreamFeature
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Query features of a stream type.
 ..signature:HasStreamFeature<TStream, TFeatureTag>::Type
@@ -121,6 +122,7 @@ struct HasStreamFeature;
 
 /**
 .Function.streamPeek
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Read next character from stream without advancing current position.
 ..signature:streamPeek(c, stream)
@@ -135,6 +137,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamReadChar
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Read next character from stream and advance the current position.
 ..signature:streamReadChar(c, stream)
@@ -148,6 +151,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamEof
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Check end-of-file state of a @Concept.Stream@.
 ..signature:streamReadChar(stream)
@@ -158,6 +162,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamReadBlock
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Read a block of bytes into a buffer.
 ..signature:streamReadBlock(target, stream, maxLen)
@@ -172,6 +177,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamWriteChar
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Write one character to the stream.
 ..signature:streamWriteChar(stream, c)
@@ -184,6 +190,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamWriteBlock
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Write one character to the stream.
 ..signature:streamWriteChar(stream, source, count)
@@ -198,6 +205,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamPut
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Write different types to stream
 ..signature:streamPut(stream, source)
@@ -215,6 +223,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamFlush
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Flush the underlying stream.
 ..signature:streamFlush(stream)
@@ -224,6 +233,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamError
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Return the stream's error code.
 ..signature:streamError(stream)
@@ -233,6 +243,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamSeek
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Perform a seek operation on the stream.
 ..signature:streamSeek(stream, delta, origin)
@@ -248,6 +259,7 @@ struct HasStreamFeature;
 ..include:seqan/stream.h
 
 .Function.streamTell
+..concept:Concept.Stream
 ..cat:Input/Output
 ..summary:Get the position in the current stream.
 ..signature:streamTell(stream)

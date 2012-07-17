@@ -353,6 +353,7 @@ Consider to use the @Spec.OpenAddressing@ q-gram index for longer q-grams if you
 ..summary:Shortcut for $getFibre(.., QGramDir)$.
 ..cat:Index
 ..signature:indexDir(index)
+..class:Spec.IndexQGram
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexQGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGramDir@ fibre (q-gram directory).
@@ -376,6 +377,7 @@ Consider to use the @Spec.OpenAddressing@ q-gram index for longer q-grams if you
 ..summary:Shortcut for $value(indexDir(..), ..)$.
 ..cat:Index
 ..signature:dirAt(position, index)
+..class:Spec.IndexQGram
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexQGram
@@ -401,6 +403,7 @@ Consider to use the @Spec.OpenAddressing@ q-gram index for longer q-grams if you
 ..summary:Shortcut for $getFibre(.., QGramCounts)$.
 ..cat:Index
 ..signature:indexCounts(index)
+..class:Spec.IndexQGram
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexQGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGramCounts@ fibre (counts array).
@@ -424,6 +427,7 @@ Consider to use the @Spec.OpenAddressing@ q-gram index for longer q-grams if you
 ..summary:Shortcut for $getFibre(.., QGramCountsDir)$.
 ..cat:Index
 ..signature:indexCountsDir(index)
+..class:Spec.IndexQGram
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexQGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGramCountsDir@ fibre (counts directory).
@@ -447,6 +451,7 @@ Consider to use the @Spec.OpenAddressing@ q-gram index for longer q-grams if you
 ..summary:Shortcut for $getFibre(.., QGramBucketMap)$.
 ..cat:Index
 ..signature:indexBucketMap(index)
+..class:Spec.IndexQGram
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexQGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGramBucketMap@ fibre (maps q-gram hashes to buckets).
@@ -470,6 +475,7 @@ Consider to use the @Spec.OpenAddressing@ q-gram index for longer q-grams if you
 ..summary:Shortcut for $getFibre(.., QGramShape)$.
 ..cat:Index
 ..signature:indexShape(index)
+..class:Spec.IndexQGram
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.IndexQGram
 ..returns:Returns a reference to the @Class.Shape@ object of a q-gram index.
@@ -495,6 +501,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGramShape@ fibre.
 ..summary:Return the q-gram step size used for index creation.
 ..cat:Index
 ..signature:getStepSize(index)
+..class:Spec.IndexQGram
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..returns:The step size. If $x$ is returned every $x$'th q-gram is stored in the index.
@@ -514,6 +521,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGramShape@ fibre.
 ..summary:Change the q-gram step size used for index creation.
 ..cat:Index
 ..signature:setStepSize(index, stepSize)
+..class:Spec.IndexQGram
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..param.stepSize:Store every $stepSize$'th q-gram in the index.
@@ -1189,6 +1197,7 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 ..cat:Index
 ..signature:createQGramIndex(index)
 ..signature:createQGramIndex(sa, dir, bucketMap, text, shape, stepSize) [DEPRECATED]
+..class:Spec.IndexQGram
 ..param.index:The q-gram index.
 ...type:Spec.IndexQGram
 ..param.sa:The resulting list in which all q-grams are sorted alphabetically.
@@ -1307,6 +1316,7 @@ The resulting tables must have appropriate size before calling this function.
 ..summary:Builds the suffix array of a q-gram index on a sequence. 
 ..cat:Index
 ..signature:createQGramIndexSAOnly(sa, text, shape, stepSize)
+..class:Spec.IndexQGram
 ..param.sa:The resulting list in which all q-grams are sorted alphabetically.
 ..param.text:The sequence.
 ..param.shape:The shape to be used. q is the length of this shape
@@ -1454,6 +1464,7 @@ The resulting tables must have appropriate size before calling this function.
 ..summary:Builds the directory of a q-gram index on a sequence. 
 ..cat:Index
 ..signature:createQGramIndexDirOnly(dir, bucketMap, text, shape, stepSize)
+..class:Spec.IndexQGram
 ..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
 ..param.bucketMap:Stores the q-gram hashes for the openaddressing hash maps, see @Function.indexBucketMap@.
 If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket address in the index.
@@ -1990,6 +2001,7 @@ The resulting tables must have appropriate size before calling this function.
 ..summary:Creates a matrix storing the number of common q-grams between all pairs of sequences.
 ..cat:Index
 ..signature:getKmerSimilarityMatrix(index, distMat[, seqSet])
+..class:Spec.IndexQGram
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..param.distMat:The resulting q-gram similarity matrix.
@@ -2219,6 +2231,7 @@ It sums up the minimum number of q-gram occurrences between both sequences for e
 /**
 .Function.range:
 ..signature:range(index, shape)
+..class:Spec.IndexQGram
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..param.shape:A shape object.
@@ -2258,6 +2271,7 @@ If the type of $index$ is $TIndex$ the return type is $Pair<Size<TIndex>::Type>.
 /**
 .Function.getOccurrence:
 ..signature:getOccurrence(index, shape)
+..class:Spec.IndexQGram
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..param.shape:A shape object.
@@ -2291,6 +2305,7 @@ If the type of $index$ is $TIndex$ the return type is $SAValue<TIndex>::Type$.
 /**
 .Function.getOccurrences:
 ..signature:getOccurrences(index, shape)
+..class:Spec.IndexQGram
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..param.shape:A shape object.
@@ -2328,6 +2343,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 .Function.countOccurrences:
  ..cat:Index
 ..signature:countOccurrences(index, shape)
+..class:Spec.IndexQGram
 ..param.index:A q-gram index.
 ...type:Spec.IndexQGram
 ..param.shape:A shape object.
@@ -2366,6 +2382,7 @@ If the type of $index$ is $TIndex$ the return type is $Size<TIndex>::Type$.
 ..cat:Index
 ..summary:Returns the number of occurences of a q-gram for every sequence of a @Class.StringSet@ .
 ..signature:countOccurrencesMultiple(index, shape)
+..class:Spec.IndexQGram
 ..param.index:A q-gram index of a @Class.StringSet@.
 ...type:Spec.IndexQGram
 ..param.shape:A shape object.

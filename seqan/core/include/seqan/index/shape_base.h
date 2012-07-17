@@ -71,6 +71,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.Shape
+///.Metafunction.Value.class:Class.Shape
 	template <typename TValue, typename TSpec>
 	struct Value<Shape<TValue,TSpec> >
 	{
@@ -78,6 +79,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 ///.Metafunction.Size.param.T.type:Class.Shape
+///.Metafunction.Size.class:Class.Shape
 	template <typename TValue, typename TSpec>
 	struct Size<Shape<TValue,TSpec> >
 	{
@@ -85,6 +87,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 ///.Metafunction.LENGTH.param.T.type:Class.Shape
+///.Metafunction.LENGTH.class:Class.Shape
     template <typename TValue, unsigned q>
 	struct LENGTH< Shape<TValue, UngappedShape<q> > >
 	{
@@ -92,6 +95,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 ///.Metafunction.WEIGHT.param.T.type:Class.Shape
+///.Metafunction.WEIGHT.class:Class.Shape
     template <typename TValue, unsigned q>
 	struct WEIGHT< Shape<TValue, UngappedShape<q> > >
 	{
@@ -99,6 +103,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 ///.Metafunction.ValueSize.param.T.type:Class.Shape
+///.Metafunction.ValueSize.class:Class.Shape
 	template <typename TValue, typename TSpec>
 	struct ValueSize< Shape<TValue, TSpec> > 
 	{
@@ -109,6 +114,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 ///.Metafunction.Host.param.T.type:Class.Shape
+///.Metafunction.Host.class:Class.Shape
 	template <typename TValue, typename TSpec>
 	struct Host<Shape<TValue,TSpec> >
 	{
@@ -240,6 +246,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.value.param.object.type:Class.Shape
+///.Function.value.class:Class.Shape
 	template <typename TValue, typename TSpec>
 	inline typename Value< Shape<TValue, TSpec> >::Type
 	value(Shape<TValue, TSpec> &me)
@@ -258,6 +265,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 ///.Function.length.param.object.type:Class.Shape
+///.Function.length.class:Class.Shape
 	template <typename TValue, typename TSpec>
 	inline typename Size< Shape<TValue, TSpec> >::Type
 	length(Shape<TValue, TSpec> const &me)
@@ -272,6 +280,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Index
 ..summary:Number of relevant positions in a shape.
 ..signature:weight(shape)
+..class:Class.Shape
 ..param.shape:Shape object for which the number of relevant positions is determined.
 ...type:Class.Shape
 ..returns:Number of relevant positions.
@@ -289,6 +298,7 @@ For gapped shapes this is the number of '1's.
 //____________________________________________________________________________
 
 ///.Function.resize.param.object.type:Spec.SimpleShape
+///.Function.resize.class:Spec.SimpleShape
 	template <typename TValue, typename TSize>
 	inline typename Size< Shape<TValue, SimpleShape> >::Type
 	resize(Shape<TValue, SimpleShape> & me, TSize new_length)
@@ -307,6 +317,7 @@ For gapped shapes this is the number of '1's.
 ..summary:Computes a (lower) hash value for a shape applied to a sequence.
 ..signature:hash(shape, it)
 ..signature:hash(shape, it, charsLeft)
+..class:Class.Shape
 ..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the shape.
@@ -499,6 +510,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 ..cat:Index
 ..summary:Computes an upper hash value for a shape applied to a sequence.
 ..signature:hashUpper(shape, it, charsLeft)
+..class:Class.Shape
 ..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the shape.
@@ -544,6 +556,7 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 ..cat:Index
 ..summary:Computes the hash value for the adjacent shape.
 ..signature:hashNext(shape, it)
+..class:Class.Shape
 ..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the adjacent shape.
@@ -576,6 +589,7 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 ..cat:Index
 ..summary:Computes an unique hash value of a shape applied to a sequence, even if the sequence is shorter than the shape span
 ..signature:hash2(shape, it, charsLeft)
+..class:Class.Shape
 ..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the shape.
@@ -620,6 +634,7 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 ..cat:Index
 ..summary:Computes an upper unique hash value of a shape applied to a sequence, even if the sequence is shorter than the shape span.
 ..signature:hash2Upper(shape, it, charsLeft)
+..class:Class.Shape
 ..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the shape.
@@ -673,6 +688,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 ..cat:Index
 ..summary:Computes a unique hash value for the adjacent shape, even if it is shorter than q.
 ..signature:hash2Next(shape, it)
+..class:Class.Shape
 ..param.shape:Shape to be used for hashing the q-gram.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the adjacent shape.
@@ -714,6 +730,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 ..cat:Index
 ..summary:Inverse of the @Function.hash@ function; for ungapped shapes.
 ..signature:unhash(result, hash, q)
+..class:Class.Shape
 ..param.result:String to write the result to.
 ...type:Class.String
 ..param.hash:The hash value previously computed with @Function.hash@.
@@ -747,6 +764,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 ..summary:Takes a shape given as a string of '1' (relevant position) and '0' 
 (irrelevant position) and converts it into a Shape object.
 ..signature:stringToShape(shape, bitmap)
+..class:Class.Shape
 ..param.shape:Shape object that is manipulated.
 ...type:Spec.SimpleShape
 ..param.bitmap:A character string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively.
@@ -784,9 +802,11 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 
 /**.Function.shapeToString:
 ..cat:Index
+..class:Class.Shape
 ..summary:Converts a given shape into a sequence of '1' (relevant position) and '0' 
 (irrelevant position).
 ..signature:shapeToString(bitmap, shape)
+..class:Class.Shape
 ..param.bitmap:The resulting sequence object.
 ...type:Class.String
 ..param.shape:Shape object.
@@ -809,6 +829,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 //____________________________________________________________________________
 	
 ///.Function.reverse.param.object.type:Spec.SimpleShape
+///.Function.reverse.class:Spec.SimpleShape
 
 	template <typename TValue, typename TSpec>
 	inline void

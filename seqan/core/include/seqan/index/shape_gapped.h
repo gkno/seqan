@@ -594,6 +594,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 //____________________________________________________________________________
 ///.Function.stringToShape.param.shape.type:Spec.GenericShape
+///.Function.stringToShape.class:Spec.GenericShape
 
 	template <typename TValue, typename TSpec, typename TShapeString>
 	inline bool
@@ -671,6 +672,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 //____________________________________________________________________________
 ///.Function.reverse.param.object.type:Spec.GenericShape
+///.Function.reverse.class:Spec.GenericShape
 
 	template <typename TValue, typename TSpec>
 	inline void

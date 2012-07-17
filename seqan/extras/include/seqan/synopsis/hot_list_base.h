@@ -79,6 +79,7 @@ struct CmpTripleI2DescI3DescI1Asc_
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T:Class.HotList
+///.Metafunction.Value.class:Class.HotList
 
 template <typename TValue, typename TSpec, typename TCallback>
 struct Value<HotList<TValue, TSpec, TCallback> >
@@ -97,6 +98,7 @@ struct Value<HotList<TValue, TSpec, TCallback> const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Size.param.T:Class.HotList
+///.Metafunction.Size.class:Class.HotList
 
 template <typename TValue, typename TSpec, typename TCallback>
 struct Size<HotList<TValue, TSpec, TCallback> >
@@ -166,6 +168,7 @@ _callbackContext(HotList<TValue, TSpec, TCallback> & hotList)
 // ----------------------------------------------------------------------------
 
 ///.Function.clear.param.object.type:Class.HotList
+///.Function.clear.class:Class.HotList
 
 // ----------------------------------------------------------------------------
 // Function registerItem()
@@ -173,6 +176,7 @@ _callbackContext(HotList<TValue, TSpec, TCallback> & hotList)
 
 /**
 .Function.registerItem:
+..class:Class.HotList
 ..cat:Synopsis Data Structures
 ..summary:Register an item as seen with a @Class.HotList@.
 ..signature:registerItem(hotList, value)
@@ -188,6 +192,7 @@ _callbackContext(HotList<TValue, TSpec, TCallback> & hotList)
 
 /**
 .Function.removeItem
+..class:Class.HotList
 ..cat:Synopsis Data Structures
 ..summary:Manually remove an item from a @Class.HotList@.
 ..signature:removeItem(hotList, value)
@@ -203,6 +208,7 @@ _callbackContext(HotList<TValue, TSpec, TCallback> & hotList)
 
 /**
 .Function.getItems
+..class:Class.HotList
 ..cat:Synopsis Data Structures
 ..summary:Get the frequent items.
 ..signature:getItems(items, hotList)

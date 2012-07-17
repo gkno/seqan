@@ -68,7 +68,7 @@ _roundToSignificantFigures(double num, int n)
 
 
 /**
-.Function.njTree:
+.Function.njTree
 ..summary:Computes a guide tree from a distance matrix.
 ..cat:Graph
 ..signature:
@@ -885,7 +885,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.upgmaTree:
+.Function.upgmaTree
 ..summary:Computes a guide tree from a distance matrix.
 ..cat:Graph
 ..signature:

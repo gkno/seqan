@@ -442,7 +442,7 @@ inline void functionRequires(Model* = 0)
 }
 
 /**
-.Function.ignoreUnusedVariableWarning:
+.Function.ignoreUnusedVariableWarning
 ..summary:Removes unused variable warning.
 ..cat:Concepts
 ..signature:ignoreUnusedVariableWarning(x)
@@ -605,7 +605,7 @@ SEQAN_CONCEPT_IMPL(String<TValue, TSpec>, (StringConcept));
 // ============================================================================
 
 /**
-.Function.sameType:
+.Function.sameType
 ..summary:Tests for equality of types.
 ..cat:Concepts
 ..signature:sameType(x, y)

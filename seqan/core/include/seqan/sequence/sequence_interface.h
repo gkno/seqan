@@ -101,6 +101,7 @@ typedef Tag<TagExact_> const Exact;
 /**
 .Metafunction.DefaultOverflowImplicit:
 ..hidefromindex
+..class:Class.String
 ..summary:The default overflow strategy for implicit resize.
 ..signature:DefaultOverflowImplicit<T>::Type
 ..param.T:Type for which the overflow strategy is determined.
@@ -124,6 +125,7 @@ struct DefaultOverflowImplicit
 /**
 .Metafunction.DefaultOverflowExplicit:
 ..hidefromindex
+..class:Class.String
 ..summary:The default overflow strategy for explicit resize.
 ..signature:DefaultOverflowExplicit<T>::Type
 ..param.T:Type for which the overflow strategy is determined.
@@ -230,6 +232,7 @@ struct AllowsFastRandomAccess<T const>
 /**
 .Function.getObjectId:
 ..cat:Miscellaneous
+..class:Class.String
 ..summary:A value that identifies the underlying sequence.
 ..signature:void const * getObjectId(object)
 ..param.object:The object for which the id will be determined.
@@ -265,6 +268,7 @@ getObjectId(T const & me)
 /**
 .Function.shareResources:
 ..cat:Miscellaneous
+..class:Class.String
 ..summary:Determines whether two sequences share the same resource.
 ..signature:bool shareResources(sequence1, sequence2)
 ..param.sequence1, sequence2:Two sequences.
@@ -335,6 +339,8 @@ _beginDefault(T const & me,
 .Function.begin:
 ..cat:Iteration
 ..cat:Containers
+..class:Class.String
+..class:Concept.Container
 ..summary:The begin of a container.
 ..signature:Iterator begin(object [, tag])
 ..param.object:A container.
@@ -440,6 +446,8 @@ begin(TValue const * me,
 ..cat:Containers
 ..summary:Begin position of object in host.
 ..signature:Position beginPosition(object)
+..class:Class.String
+..class:Concept.Container
 ..param.object:An object.
 ...type:Class.String
 ...concept:Concept.Container
@@ -522,6 +530,8 @@ _endDefault(T const & me,
 .Function.end:
 ..cat:Iteration
 ..cat:Containers
+..class:Class.String
+..concept:Concept.Container
 ..summary:The end of a container.
 ..signature:Iterator end(object [, tag])
 ..param.object:A container.
@@ -577,6 +587,8 @@ end(T const & me,
 /**
 .Function.endPosition:
 ..cat:Containers
+..class:Class.String
+..concept:Concept.Container
 ..summary:End position of object in host.
 ..signature:Position endPosition(object)
 ..param.object:An object.
@@ -612,6 +624,7 @@ endPosition(T const & me)
 .Function.value:
 ..cat:Iteration
 ..cat:Containers
+..concept:Concept.Container
 ..summary:Reference to the value.
 ..signature:Reference value(container, position)
 ..param.container:A container of values.
@@ -649,6 +662,7 @@ value(T const & me,
 ..summary:Access to the value.
 ..cat:Containers
 ..cat:Content Manipulation
+..concept:Concept.Container
 ..signature:GetValue getValue(container, pos)
 ..param.container:A container.
 ...concept:Concept.Container
@@ -689,6 +703,7 @@ getValue(T const & me,
 /**
 .Function.front:
 ..cat:Containers
+..concept:Concept.Container
 ..summary:The first item in container.
 ..signature:Iterator front(container)
 ..param.container:A container.
@@ -723,6 +738,7 @@ front(T const & me)
 /**
 .Function.back:
 ..cat:Containers
+..concept:Concept.Container
 ..summary:The last item in container.
 ..signature:Iterator back(container)
 ..param.container:A container.
@@ -759,6 +775,7 @@ back(T & me)
 /**
 .Function.iter:
 ..cat:Containers
+..class:Class.String
 ..summary:Iterator to item at given position.
 ..signature:Iterator iter(object, pos [, tag])
 ..param.object:A container.
@@ -823,6 +840,7 @@ iter(T const & me,
 /**
 .Function.assignValue:
 ..cat:Content Manipulation
+..concept:Concept.Container
 ..signature:assignValue(container, pos, value)
 ..param.container:A container.
 ...concept:Concept.Container
@@ -852,6 +870,7 @@ assignValue(T & me,
 /**
 .Function.moveValue:
 ..cat:Content Manipulation
+..concept:Concept.Container
 ..signature:moveValue(container, pos, value)
 ..param.object:
 ...concept:Concept.Container
@@ -893,6 +912,7 @@ moveValue(T const & me,
 /**
 .Function.length:
 ..cat:Containers
+..concetp:Concept.Container
 ..summary:The number of items/characters.
 ..signature:Size length(object)
 ..param.object:A container.
@@ -921,6 +941,7 @@ length(T const & /*me*/)
 /**
 .Function.capacity:
 ..cat:Containers
+..concept:Concept.Container
 ..summary:The maximal length.
 ..signature:Size capacity(object)
 ..param.object:A container.
@@ -948,6 +969,7 @@ capacity(T const & me)
 /**
 .Function.empty:
 ..cat:Containers
+..concept:Concept.Container
 ..summary:Test a container for being empty.
 ..signature:bool empty(object)
 ..param.object:A container.
@@ -997,6 +1019,7 @@ _computeSizeForCapacity(T const & /*me*/,
 .Function.computeGenerousCapacity:
 ..hidefromindex
 ..cat:Containers
+..concept:Concept.Container
 ..summary:Capacity for generous expansion.
 ..signature:Size computeGenerousCapacity(container, capacity)
 ..param.container:A container that should be expanded.
@@ -1096,6 +1119,7 @@ assign(TTarget const & target,
 .Function.append:
 ..summary:Concatenate two containers.
 ..cat:Content Manipulation
+..concept:Concept.Container
 ..signature:append(target, source [, limit] [,resize_tag])
 ..param.target: A container $source$ is append to.
 ..param.source: A container that is append to $target$.
@@ -1193,6 +1217,7 @@ append(TTarget const & target,
 .Function.appendValue:
 ..signature:appendValue(target, value [, resize_tag])
 ..cat:Content Manipulation
+..concept:Concept.Container
 ..summary:Appends a value to a container.
 ..param.target:A container.
 ..param.value:Value that is appended to $target$.
@@ -1230,6 +1255,7 @@ appendValue(T const & me,
 ..cat:Content Manipulation
 ..summary:Inserts a sequence into a container.
 ..signature:insert(target, pos, insertSeq [, resize_tag])
+..concept:Concept.Container
 ..param.target:The container
 ..param.pos:Position within $target$ at which $insertSeq$ is to be inserted.
 ..param.insertSeq:Sequence that will be inserted into $target$.
@@ -1291,6 +1317,7 @@ insert(T const & me,
 ..cat:Content Manipulation
 ..summary:Inserts a single value into a container.
 ..signature:insertValue(target, pos, value [, resize_tag])
+..concept:Concept.Container
 ..param.target:The container
 ..param.pos:Position within $target$ at which $value$ is to be inserted.
 ..param.value:Value that will be inserted into $target$.
@@ -1329,6 +1356,7 @@ insertValue(T const & me,
 .Function.replace:
 ..summary:Replaces a part of a container with another container.
 ..cat:Content Manipulation
+..concept:Concept.Container
 ..signature:replace(target, pos_begin, pos_end, source [, limit] [,resize_tag])
 ..param.target: A container that is modified.
 ..param.pos_begin: Begin of replaced area.
@@ -1464,6 +1492,7 @@ _capacityReturned(T &,
 .Function.reserve:
 ..cat:Containers
 ..summary:Increases the capacity.
+..concept:Concept.Container
 ..signature:Size reserve(object, new_capacity [, resize_tag])
 ..param.object: A container.
 ..param.new_capacity: The new capacity $object$ will get.
@@ -1508,6 +1537,7 @@ reserve(T & me,
 /**
 .Function.resize:
 ..cat:Containers
+..concept:Concept.Container
 ..summary:Resizes a container. If the new length exceeds the old length the new elements are filled with copies of $value$.
 ..signature:Size resize(object, newLength [value], [resizeTag])
 ..param.object: A container.
@@ -1552,6 +1582,7 @@ resize(T & me,
 /**
 .Function.resizeSpace:
 ..cat:Containers
+..concept:Concept.Container
 ..summary:Makes free space in container
 ..signature:Size resizeSpace(object, size, pos_begin, pos_end [, limit] [, resize_tag])
 ..param.object:The container.
@@ -1601,6 +1632,7 @@ resizeSpace(T & me,
 .Function.erase:
 ..summary:Erases a part of a container
 ..cat:Containers
+..concept:Concept.Container
 ..signature:erase(object, pos [, pos_end])
 ..param.object:The container.
 ...type:Class.String
@@ -1661,6 +1693,7 @@ erase(T const & me,
 .Function.eraseBack:
 ..summary:Deletes the last item of a container and reduces its size by 1.  The container must have a size greater than or equal to 1.
 ..cat:Containers
+..concept:Concept.Container
 ..signature:eraseBack(object)
 ..param.object:The container.
 ...type:Class.String
@@ -1684,9 +1717,11 @@ inline void eraseBack(T & me)
 /**
 .Function.shrinkToFit:
 ..cat:Containers
+..concept:Concept.Container
 ..summary:Resizes container to minimum capacity
 ..signature:shrinkToFit(object)
 ..param.object: A container.
+...type:Concept.Container
 ..remarks
 ...text:$shrinkToFit(object)$ is equivalent to $reserve(object, length(object), Exact())$.
 ..see:Function.capacity

@@ -543,6 +543,7 @@ _skiplistFind(Map<TValue, Skiplist<TSpec> > & me,
 ..cat:Map
 ..summary:Find a value in a map. 
 ..signature:Iterator find(map, key)
+..class:Class.Map
 ..param.map:A map.
 ...type:Class.Map
 ..param.key:A key.
@@ -621,6 +622,7 @@ _skiplistInsertElement(Map<TValue, Skiplist<TSpec> > & me,
 ..cat:Map
 ..summary:Returns a value given a key. 
 ..signature:Reference find(map, key)
+..class:Class.Map
 ..param.map:A map.
 ...type:Class.Map
 ..param.key:A key.
@@ -670,6 +672,7 @@ value(Map<TValue, Skiplist<TSpec> > & me,
 ..cat:Map
 ..summary:Returns a cargo given a key. 
 ..signature:Cargo find(map, key)
+..class:Class.Map
 ..param.map:A map.
 ...type:Class.Map
 ..param.key:A key.
@@ -699,6 +702,7 @@ cargo(Map<TValue, Skiplist<TSpec> > & me,
 ..summary:Insert new value into map. 
 ..signature:insert(map, value)
 ..signature:insert(map, key, cargo)
+..class:Class.Map
 ..param.map:A map.
 ...type:Class.Map
 ..param.value:A value that is added to $map$.
@@ -741,6 +745,7 @@ insert(Map<TValue, Skiplist<TSpec> > & me,
 ..summary:Insert another value into a multi map.
 ..signature:add(map, value)
 ..signature:add(map, key, cargo)
+..class:Class.Map
 ..param.map:A map.
 ...type:Spec.Skiplist
 ..param.value:A value that is added to $map$.
@@ -808,6 +813,7 @@ _skiplistUnlinkElement(Map<TValue, Skiplist<TSpec> > & me,
 ..summary:Removes a value from a map. 
 ..signature:erase(map, key)
 ..signature:erase(map, iterator)
+..class:Class.Map
 ..param.map:A map.
 ...type:Class.Map
 ..param.key:The key of a value in $map$.
@@ -851,6 +857,7 @@ erase(Map<TValue, Skiplist<TSpec> > & me,
 ..cat:Map
 ..summary:Removes a value from a map. 
 ..signature:eraseAll(map, key)
+..class:Class.Map
 ..param.map:A map.
 ...type:Spec.Skiplist
 ..param.key:The key of a value in $map$.
@@ -902,6 +909,7 @@ clear(Map<TValue, Skiplist<TSpec> > & me)
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.length.param.object.type:Class.Map
+///.Function.length.class:Class.Map
 
 template <typename TValue, typename TSpec>
 inline typename Size< Map<TValue, Skiplist<TSpec> > >::Type
@@ -912,7 +920,7 @@ length(Map<TValue, Skiplist<TSpec> > const & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.begin.param.object.type:Class.Map
+///.Function.begin.class:Class.Map
 
 template <typename TValue, typename TSpec, typename TIteratorSpec>
 inline typename Iterator< Map<TValue, Skiplist<TSpec> >, TIteratorSpec>::Type
@@ -932,7 +940,7 @@ begin(Map<TValue, Skiplist<TSpec> > & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.end.param.object.type:Class.Map
+///.Function.end.class:Class.Map
 
 template <typename TValue, typename TSpec, typename TIteratorSpec>
 inline typename Iterator< Map<TValue, Skiplist<TSpec> >, TIteratorSpec>::Type
@@ -995,6 +1003,7 @@ mapValue(Map<TValue, Skiplist<TSpec> > & me,
 ..cat:Map
 ..summary:Determines whether a map contains a value given key. 
 ..signature:hasKey(map, key)
+..class:Class.Map
 ..param.map:A map.
 ...type:Class.Map
 ..param.key:A key.

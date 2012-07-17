@@ -750,6 +750,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 ///.Function.scoreLimit.param.pattern.type:Spec.Myers
+///.Function.scoreLimit.class:Spec.Myers
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline int 
@@ -771,6 +772,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 ///.Function.setScoreLimit.param.pattern.type:Spec.Myers
+///.Function.setScoreLimit.class.type:Spec.Myers
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TScoreValue>
 inline void 
@@ -798,6 +800,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 ///.Function.getScore.param.pattern.type:Spec.Myers
+///.Function.getScore.class:Spec.Myers
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline int 

@@ -687,7 +687,9 @@ write(TFile & target,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.createRoot:
+.Function.createRoot
+..class:Spec.Automaton
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Creates the root in a tree or an automaton.
 ..signature:createRoot(g)
@@ -709,7 +711,9 @@ createRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignRoot:
+.Function.assignRoot
+..class:Spec.Automaton
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Assigns a new root vertex to the graph.
 ..signature:assignRoot(g, vertex)
@@ -737,7 +741,9 @@ assignRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.root:
+.Function.root
+..class:Spec.Automaton
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Gets a reference to the root of the tree.
 ..signature:root(g)
@@ -763,7 +769,9 @@ root(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getRoot:
+.Function.getRoot
+..class:Spec.Automaton
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Get method for the root of a tree or an automaton.
 ..signature:getRoot(g)
@@ -789,7 +797,9 @@ getRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.Graph#isRoot:
+.Function.Graph#isRoot
+..class:Spec.Automaton
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Tests whether a given vertex is the root or not.
 ..signature:isRoot(g, v)
@@ -818,7 +828,9 @@ isRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getSuccessor:
+.Function.getSuccessor
+..class:Spec.Automaton
+..class:Spec.Word Graph
 ..cat:Graph
 ..summary:Gets the successor for a given vertex and an edge label.
 For an automaton a single character is required whereas for a word graph getSuccessor takes a string.
@@ -854,7 +866,9 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.parseString:
+.Function.parseString
+..class:Spec.Automaton
+..class:Spec.Word Graph
 ..cat:Graph
 ..summary:Parses a string one character at a time and moves accordingly in the automaton.
 ..signature:parseString(g, v, beginIt, endIt)
@@ -939,7 +953,9 @@ parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.canParseString:
+.Function.canParseString
+..class:Spec.Automaton
+..class:Spec.Word Graph
 ..cat:Graph
 ..summary:Test whether an automaton can parse a string completely.
 ..signature:canParseString(g [, v], str)

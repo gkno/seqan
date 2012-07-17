@@ -206,7 +206,8 @@ _copyGraph(Graph<Directed<TCargo, TSpec> > const& source,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.transpose:
+.Function.transpose
+..class:Class.Graph
 ..cat:Graph
 ..summary:Transposes a graph, either in-place or from source to dest.
 ..signature:transpose(source [, dest])
@@ -242,7 +243,8 @@ transpose(Graph<Directed<TCargo, TSpec> >& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.numEdges:
+.Function.numEdges
+..class:Class.Graph
 ..cat:Graph
 ..summary:Number of edges in a graph.
 ..signature:numEdges(g)
@@ -264,7 +266,8 @@ numEdges(Graph<Directed<TCargo, TSpec> > const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.numVertices:
+.Function.numVertices
+..class:Class.Graph
 ..cat:Graph
 ..summary:Number of vertices in a graph.
 ..signature:numVertices(g)
@@ -286,7 +289,8 @@ numVertices(Graph<Directed<TCargo, TSpec> > const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.empty:
+.Function.empty
+..class:Class.Graph
 ..cat:Graph
 ..param.object.type:Class.Graph
 ..include:seqan/graph_types.h
@@ -303,7 +307,8 @@ empty(Graph<Directed<TCargo, TSpec> > const& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.clearEdges:
+.Function.clearEdges
+..class:Class.Graph
 ..cat:Graph
 ..summary:Removes all edges in a graph.
 ..signature:clearEdges(g)
@@ -334,7 +339,8 @@ clearEdges(Graph<Directed<TCargo, TSpec> >& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.clearVertices:
+.Function.clearVertices
+..class:Class.Graph
 ..cat:Graph
 ..summary:Removes all vertices in a graph.
 ..signature:clearVertices(g)
@@ -361,7 +367,8 @@ clearVertices(Graph<Directed<TCargo, TSpec> >& g)
 
 
 /**
-.Function.clear:
+.Function.clear
+..class:Class.Graph
 ..cat:Graph
 ..param.object.type:Class.Graph
 ..remarks:If $object$ is a @Class.Graph.graph@, then all vertices and all edges are removed.
@@ -379,7 +386,8 @@ clear(Graph<Directed<TCargo, TSpec> >& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.outDegree:
+.Function.outDegree
+..class:Class.Graph
 ..cat:Graph
 ..summary:Number of outgoing edges for a given vertex.
 ..signature:outDegree(g, vertex)
@@ -416,7 +424,8 @@ outDegree(Graph<Directed<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.inDegree:
+.Function.inDegree
+..class:Class.Graph
 ..cat:Graph
 ..summary:Number of incoming edges for a given vertex.
 ..signature:inDegree(g, vertex)
@@ -459,7 +468,8 @@ inDegree(Graph<Directed<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.degree:
+.Function.degree
+..class:Class.Graph
 ..cat:Graph
 ..summary:Number of incident edges for a given vertex.
 ..signature:degree(g, vertex)
@@ -485,7 +495,8 @@ degree(Graph<Directed<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.addVertex:
+.Function.addVertex
+..class:Class.Graph
 ..cat:Graph
 ..summary:Adds a new vertex to the graph.
 ..signature:addVertex(g)
@@ -514,7 +525,8 @@ addVertex(Graph<Directed<TCargo, TSpec> >& g)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeVertex:
+.Function.removeVertex
+..class:Class.Graph
 ..cat:Graph
 ..summary:Removes a vertex.
 ..signature:removeVertex(g, v)
@@ -543,7 +555,8 @@ removeVertex(Graph<Directed<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.addEdge:
+.Function.addEdge
+..class:Class.Graph
 ..cat:Graph
 ..summary:Adds a new edge to the graph, either with or without cargo.
 ..remarks:For automatons a label is required.
@@ -613,7 +626,8 @@ addEdge(Graph<Directed<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeEdge:
+.Function.removeEdge
+..class:Class.Graph
 ..cat:Graph
 ..summary:Removes an edge from the graph. For automatons a label is required.
 ..signature:removeEdge(g, source, target [, label])
@@ -709,7 +723,8 @@ removeEdge(Graph<Directed<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeOutEdges:
+.Function.removeOutEdges
+..class:Class.Graph
 ..cat:Graph
 ..summary:Removes the outgoing edges of a given vertex.
 ..signature:removeOutEdges(g, v)
@@ -741,7 +756,8 @@ removeOutEdges(Graph<Directed<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeInEdges:
+.Function.removeInEdges
+..class:Class.Graph
 ..cat:Graph
 ..summary:Removes the incoming edges of a given vertex.
 ..signature:removeInEdges(g, v)
@@ -786,7 +802,8 @@ removeInEdges(Graph<Directed<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.targetVertex:
+.Function.targetVertex
+..class:Class.Graph
 ..cat:Graph
 ..summary:Returns the target vertex of an edge.
 ..remarks:In a tree the target vertex is always the child. 
@@ -819,7 +836,8 @@ targetVertex(Graph<Directed<TCargo, TSpec> > const&,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.sourceVertex:
+.Function.sourceVertex
+..class:Class.Graph
 ..cat:Graph
 ..summary:Returns the source vertex of an edge.
 ..remarks:In a tree the source vertex is always the parent. 
@@ -867,7 +885,8 @@ sourceVertex(Graph<Directed<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getAdjacencyMatrix:
+.Function.getAdjacencyMatrix
+..class:Class.Graph
 ..cat:Graph
 ..summary:Returns an adjacency matrix representation of the graph.
 ..signature:getAdjacencyMatrix(g, mat)
@@ -914,7 +933,8 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 
 
 /**
-.Function.findEdge:
+.Function.findEdge
+..class:Class.Graph
 ..cat:Graph
 ..summary:Finds an edge. 
 ..remarks:In an automaton an edge is uniquely defined by a vertex and a label.

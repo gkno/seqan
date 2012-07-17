@@ -461,6 +461,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..summary:Returns the length of the substring representing the path from root to $iterator$ node.
 ..cat:Index
 ..signature:repLength(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:The length of the sequence returned by @Function.representative@
@@ -510,6 +511,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..summary:Returns the zero-based node depth of the $iterator$ node.
 ..cat:Index
 ..signature:nodeDepth(iterator)
+..class:Spec.TopDownHistory Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
 ..returns:The length of the path from root to $iterator$ node, e.g. 0 is returned for the root node.
@@ -530,6 +532,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..summary:Returns the length of the substring representing the path from root to $iterator$'s parent node.
 ..cat:Index
 ..signature:parentRepLength(iterator)
+..class:Spec.TopDown Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
 ..returns:The length of the sequence returned by @Function.representative@ of the parent node.
@@ -551,6 +554,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..summary:Returns $true$ iff the edge label from the $iterator$ node to its parent is empty.
 ..cat:Index
 ..signature:bool emptyParentEdge(iterator)
+..classSpec.TopDown Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
 ..returns:$true$ if @Function.parentEdgeLength@$ returns 0, otherwise $false$.
@@ -577,6 +581,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..summary:Returns the last common ancestor of two tree nodes.
 ..cat:Index
 ..signature:bool lca(a, b, result)
+..class:Spec.TopDownHistory Iterator
 ..param.a:The first node.
 ...type:Spec.TopDownHistory Iterator
 ..param.b:The second node.
@@ -636,6 +641,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..summary:Returns the length of the longest-common-prefix of two suffix tree nodes.
 ..cat:Index
 ..signature:lcp(a, b)
+..class:Spec.TopDownHistory Iterator
 ..param.a:The first node.
 ...type:Spec.TopDownHistory Iterator
 ..param.b:The second node.
@@ -776,6 +782,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..summary:Returns an occurence of the @Function.representative@ substring or a q-gram in the index text.
 ..cat:Index
 ..signature:getOccurrence(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:A position where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.EsaText@).
@@ -797,6 +804,7 @@ If $iterator$'s container type is $TIndex$ the return type is $SAValue<TIndex>::
 ..summary:Returns the number of occurences of @Function.representative@ substring or a q-gram in the index text.
 ..cat:Index
 ..signature:countOccurrences(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:The number of positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.EsaText@).
@@ -820,6 +828,8 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 ..summary:Returns the suffix array interval borders of occurences of @Function.representative@ substring or a q-gram in the index text.
 ..cat:Index
 ..signature:range(iterator)
+..class:Spec.VSTree Iterator
+..class:Class.Index
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:All positions where a substring occurs in the text (see @Tag.ESA Index Fibres.EsaText@) 
@@ -855,6 +865,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Pair<Size<TIndex>
 ..summary:Returns all occurences of the @Function.representative@ substring or a q-gram in the index text.
 ..cat:Index
 ..signature:getOccurrences(iterator)
+..classSpec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.EsaText@).
@@ -958,9 +969,10 @@ otherwise the seed returned is one many.
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOccurrencesBwt:
-..summary:Returns the characters left beside all occurence of the @Function.representative@ substring in the index text.
+..summary:Returns the characters left beside all occurrence of the @Function.representative@ substring in the index text.
 ..cat:Index
 ..signature:getOccurrencesBwt(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.EsaText@).
@@ -984,6 +996,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Returns a substring representing the path from root to $iterator$ node.
 ..cat:Index
 ..signature:representative(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:An @Spec.InfixSegment@ of the text of an index (see @Tag.ESA Index Fibres.EsaText@).
@@ -1005,6 +1018,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Count the number of children of a tree node.
 ..cat:Index
 ..signature:countChildren(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:The number of children of a tree node.
@@ -1162,6 +1176,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:If $false$ this node will be skipped during the bottom-up traversal.
 ..cat:Index
 ..signature:bool nodePredicate(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:
@@ -1181,6 +1196,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:If $false$ this node and its subtree is concealed.
 ..cat:Index
 ..signature:bool nodeHullPredicate(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:
@@ -1201,6 +1217,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:Move iterator to the root node.
 ..cat:Index
 ..signature:goRoot(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
 ..include:seqan/index.h
@@ -1218,6 +1235,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 //____________________________________________________________________________
 
 ///.Function.begin.param.object.type:Class.Index
+///.Function.begin.class:Class.Index
 	template < typename TText, typename TIndexSpec, class TSpec >
 	inline typename Iterator<Index<TText, TIndexSpec>, TSpec >::Type
 	begin(Index<TText, TIndexSpec> &index, TSpec const) 
@@ -1229,7 +1247,9 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 ///.Function.goBegin.param.iterator.type:Spec.BottomUp Iterator
+///.Function.goBegin.class:Spec.BottomUp Iterator
 ///.Function.goBegin.param.iterator.type:Spec.TopDownHistory Iterator
+///.Function.goBegin.class:Spec.TopDownHistory Iterator
 	template < typename TText, typename TIndexSpec, class TSpec >
 	inline void goBegin(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 
 	{
@@ -1269,6 +1289,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 //____________________________________________________________________________
 
 ///.Function.end.param.object.type:Class.Index
+///.Function.end.class:Class.Index
 	template < typename TText, typename TIndexSpec, class TSpec >
 	inline typename Iterator<Index<TText, TIndexSpec>, TSpec >::Type
 	end(Index<TText, TIndexSpec> &index, TSpec const) 
@@ -1280,7 +1301,9 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 ///.Function.goEnd.param.iterator.type:Spec.BottomUp Iterator
+///.Function.goEnd.class:Spec.BottomUp Iterator
 ///.Function.goEnd.param.iterator.type:Spec.TopDownHistory Iterator
+///.Function.goEnd.class:Spec.TopDownHistory Iterator
 	template < typename TText, typename TIndexSpec, class TSpec >
 	inline void goEnd(Iter<Index<TText, IndexEsa<TIndexSpec> >, VSTree<TSpec> > &it) 
 	{
@@ -1298,7 +1321,9 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 //____________________________________________________________________________
 
 ///.Function.goNext.param.iterator.type:Spec.BottomUp Iterator
+///.Function.goNext.class:Spec.BottomUp Iterator
 ///.Function.goNext.param.iterator.type:Spec.TopDownHistory Iterator
+///.Function.goNext.class:Spec.TopDownHistory Iterator
 
 	template < typename TIndex, typename TSpec >
 	inline void goNext(Iter<TIndex, VSTree<TSpec> > &it) {
@@ -1338,6 +1363,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..signature:bool goDown(iterator)
 ..signature:bool goDown(iterator, char)
 ..signature:bool goDown(iterator, text[, lcp])
+..class:Spec.TopDown Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
 ..param.char:$iterator$ goes down the edge beginning with $char$.
@@ -1584,6 +1610,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:Iterates up one edge to the parent in a tree.
 ..cat:Index
 ..signature:goUp(iterator)
+..class:Spec.TopDownHistory Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
 ..include:seqan/index.h
@@ -1632,6 +1659,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..summary:Returns the vertex descriptor of the parent node.
 ..cat:Index
 ..signature:nodeUp(iterator)
+..class:Spec.TopDown Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
 ..returns:The vertex descriptor of the parent node. The type is $VertexDescriptor<TIndex>::Type$.
@@ -1668,6 +1696,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 ..summary:Iterates to the next sibling in a tree.
 ..cat:Index
 ..signature:goRight(iterator)
+..class:Spec.TopDown Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
 ..include:seqan/index.h
@@ -1718,6 +1747,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 ..summary:Returns the length of the edge from the $iterator$ node to its parent.
 ..cat:Index
 ..signature:parentEdgeLength(iterator)
+..class:Spec.TopDownHistory Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
 ..returns:The returned value is equal to $length(parentEdgeLabel(iterator))$.
@@ -1738,6 +1768,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 ..summary:Returns a substring representing the edge from an $iterator$ node to its parent.
 ..cat:Index
 ..signature:parentEdgeLabel(iterator)
+..class:Spec.TopDownHistory Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
 ..returns:An @Spec.InfixSegment@ of the text of an index (see @Tag.ESA Index Fibres.EsaText@).
@@ -1760,6 +1791,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Returns the first character of the edge from an $iterator$ node to its parent.
 ..cat:Index
 ..signature:parentEdgeFirstChar(iterator)
+..class:Spec.TopDownHistory Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
 ..returns:A single character of type $Value<TIndex>::Type$ which is identical to $Value<Fibre<TIndex, EsaRawText>::Type>::Type$.
@@ -1888,7 +1920,9 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 ///.Function.atEnd.param.iterator.type:Spec.BottomUp Iterator
+///.Function.atEnd.class:Spec.BottomUp Iterator
 ///.Function.atEnd.param.iterator.type:Spec.TopDownHistory Iterator
+///.Function.atEnd.class:Spec.TopDownHistory Iterator
 
 	template < typename TIndex, class TSpec >
 	inline bool atEnd(Iter<TIndex, VSTree<TSpec> > &it) 
@@ -1907,6 +1941,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to the root node.
 ..cat:Index
 ..signature:bool isRoot(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the root of the tree, otherwise $false$.
@@ -1937,6 +1972,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to a suffix.
 ..cat:Index
 ..signature:bool isRightTerminal(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the node representing a suffix, otherwise $false$.
@@ -1961,6 +1997,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether the occurences of an iterator's @Function.representative@ mutually differ in the character left of the hits.
 ..cat:Index
 ..signature:bool isLeftMaximal(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
@@ -2010,6 +2047,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether the characters left of the two occurences of @Function.representative@ are equal.
 ..cat:Index
 ..signature:bool isPartiallyLeftExtensible(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
@@ -2063,6 +2101,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether the @Function.representative@ occurs only once in every sequence.
 ..cat:Index
 ..signature:bool isUnique(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
@@ -2108,6 +2147,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Returns the number of sequences, which contain the @Function.representative@ as a substring.
 ..cat:Index
 ..signature:int getFrequency(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:The number of different sequences containing the @Function.representative@.
@@ -2159,6 +2199,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to a node with only leaf-children.
 ..cat:Index
 ..signature:bool childrenAreLeaves(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to an inner node of the tree, whose children are leaves. Otherwise it is $false$.
@@ -2176,6 +2217,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..summary:Test whether iterator points to a leaf.
 ..cat:Index
 ..signature:bool isLeaf(iterator)
+..class:Spec.VSTree Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to a leaf of the tree, otherwise $false$.

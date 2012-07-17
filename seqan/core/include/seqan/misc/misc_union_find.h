@@ -79,6 +79,7 @@ public:
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Class.UnionFind
+///.Metafunction.Value.class:Class.UnionFind
 
 template <typename TValue>
 struct Value<UnionFind<TValue> >
@@ -101,6 +102,7 @@ struct Value<UnionFind<TValue> const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.GetValue.param.T.type:Class.UnionFind
+///.Metafunction.GetValue.class:Class.UnionFind
 
 template <typename TValue>
 struct GetValue<UnionFind<TValue> >
@@ -123,6 +125,7 @@ struct GetValue<UnionFind<TValue> const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Size.param.T.type:Class.UnionFind
+///.Metafunction.Size.class:Class.UnionFind
 
 template <typename TValue>
 struct Size<UnionFind<TValue> >
@@ -149,6 +152,7 @@ struct Size<UnionFind<TValue> const>
 // ----------------------------------------------------------------------------
 
 ///.Function.clear.param.object.type:Class.UnionFind
+///.Function.clear.class:Class.UnionFind
 
 template <typename TValue>
 inline
@@ -163,6 +167,7 @@ clear(UnionFind<TValue> & unionFind)
 // ----------------------------------------------------------------------------
 
 ///.Function.length.param.object.type:Class.UnionFind
+///.Function.length.class:Class.UnionFind
 
 template <typename TValue>
 inline
@@ -177,6 +182,7 @@ length(UnionFind<TValue> const & unionFind)
 // ----------------------------------------------------------------------------
 
 ///.Function.reserve.param.object.type:Class.UnionFind
+///.Function.reserve.class:Class.UnionFind
 
 template <typename TValue, typename TSize, typename TTag>
 inline
@@ -193,6 +199,7 @@ reserve(UnionFind<TValue> & unionFind,
 // ----------------------------------------------------------------------------
 
 ///.Function.resize.param.object.type:Class.UnionFind
+///.Function.resize.class:Class.UnionFind
 ///.Function.resize.remarks:If $pm$ is of the @Class.UnionFind@, $value$ will automatically be set to -1.
 
 template <typename TValue, typename TSize, typename TTag>
@@ -210,6 +217,7 @@ resize(UnionFind<TValue> & unionFind,
 // ----------------------------------------------------------------------------
 
 ///.Function.resizeVertexMap.param.pm.type:Class.UnionFind
+///.Function.resizeVertexMap.class:Class.UnionFind
 ///.Function.resizeVertexMap.remarks:If $pm$ is of type @Class.UnionFind@ then the $prototype$ parameter is not available.
 
 template <typename TSpec, typename TValue>
@@ -231,6 +239,7 @@ resizeVertexMap(Graph<TSpec> const & g,
 ..cat:Miscellaneous
 ..summary:Return set identifier, given an element identifier.
 ..signature:find(unionFind, query)
+..class:Class.UnionFind
 ..param.unionFind:The Union-Find data structure query.
 ...type:Class.UnionFind
 ..param.query:The value to query for.
@@ -272,6 +281,7 @@ findSet(UnionFind<TValue> & unionFind,
 ..cat:Miscellaneous
 ..summary:UNION() operation for UF data structure.
 ..signature:joinSets(unionFind, left, right)
+..class:Class.UnionFind
 ..param.unionFind:The type the data structure operates on.
 ...type:Class.UnionFind
 ..param.left:Representant of the left set to union.

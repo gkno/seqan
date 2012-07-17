@@ -55,6 +55,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.HammingSimpleFinder
+///.Class.Pattern.class:Spec.HammingSimpleFinder
 
 struct HammingSimple_;
 typedef Tag<HammingSimple_> HammingSimple;

@@ -167,7 +167,7 @@ Do not specialize $maxValue$, specialize @Function.supremumValueImpl@ instead!
 
 // TODO(holtgrew): Rename to minValueImpl?
 
-.Function.infimumValueImpl:
+.Function.infimumValueImpl
 ..concept:Concept.OrderedAlphabetConcept
 ..hidefromindex
 ..cat:Alphabets
@@ -182,7 +182,7 @@ It is recommended to use @Function.minValue@ rather than $infimumValueImpl$.
 ..status:deprecated, will be removed in favour of @Metafunction.MinValue@
 ..include:seqan/basic.h
 
-.Function.minValue:
+.Function.minValue
 ..concept:Concept.OrderedAlphabetConcept
 ..cat:Alphabets
 ..summary:Infimum for a given type.
@@ -240,7 +240,7 @@ SEQAN_CONCEPT_REFINE(OrderedAlphabetConcept, (TValue), (AlphabetConcept)(Compara
 ..baseconcept:Concept.OrderedAlphabetConcept
 ..include:seqan/basic.h
 
-.Function.ordValue:
+.Function.ordValue
 ..concept:Concept.FiniteOrderedAlphabetConcept
 ..summary:Maps an alphabet 1-to-1 to the interval [0..ValueSize).
 ..cat:Alphabets

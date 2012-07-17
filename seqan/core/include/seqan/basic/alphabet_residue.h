@@ -158,6 +158,7 @@ unknownValueImpl(Dna5 *)
 
 /**
 .Spec.DnaQ:
+..implements:Concept.AlphabetWithQualitiesConcept
 ..cat:Alphabets
 ..summary:Alphabet for DNA plus PHRED quality.
 ..general:Class.SimpleType
@@ -250,7 +251,8 @@ void assignQualityValue(char & q, DnaQ c)
 // ----------------------------------------------------------------------------
 
 /**
-.Spec.Dna5Q:
+.Spec.Dna5Q
+..implements:Concept.AlphabetWithQualitiesConcept
 ..cat:Alphabets
 ..summary:Alphabet for DNA plus PHRED quality including 'N' character.
 ..general:Class.SimpleType
@@ -311,7 +313,9 @@ unknownValueImpl(Dna5Q *)
     static const Dna5Q _result = Dna5Q('N');
     return _result;
 }
+
 ///.Function.getQualityValue.param.c.type:Spec.Dna5Q
+///.Function.getQualityValue.class.Spec.Dna5Q
 
 inline int getQualityValue(Dna5Q const &c) 
 {
@@ -340,6 +344,7 @@ inline int getQualityValue(Dna5Q const &c)
 }
 
 ///.Function.assignQualityValue.c.type:Spec.Dna5Q
+///.Function.assignQualityValue.class:Spec.Dna5Q
 
 inline
 void assignQualityValue(Dna5Q &c, int q)

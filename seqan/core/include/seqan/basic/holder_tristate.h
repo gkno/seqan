@@ -482,6 +482,7 @@ _dataValue(Holder<TValue * const, Tristate> const & me)
 // ----------------------------------------------------------------------------
 
 ///.Function.empty.param.object.type:Class.Holder
+///.Function.empty.class:Class.Holder
 
 template <typename TValue>
 inline bool
@@ -496,6 +497,7 @@ SEQAN_CHECKPOINT
 // ----------------------------------------------------------------------------
 
 ///.Function.dependent.param.object.type:Class.Holder
+///.Function.dependent.class:Class.Holder
 
 template <typename TValue>
 inline bool
@@ -539,6 +541,7 @@ _holderDeallocate(THolder & me, TValue * data)
     return _holderDeallocate(me, data, IsSimple<TValue>());         // try to distinguish between a pointer to one/array of object(s)
 }
 
+///.Function.clear.class:Class.Holder
 ///.Function.clear.param.object.type:Class.Holder
 ///.Function.clear.remarks.text:If $clear$ is applied on a @Class.Holder@ object,
 ///the state of this object is set to 'empty'.
@@ -604,7 +607,8 @@ _holderAllocatePointer(THolder & me, TValue * data)
 #endif  // #if SEQAN_ENABLE_POINTER_HOLDER
 
 /**
-.Function.create:
+.Function.create
+..class:Class.Holder
 ..summary:Makes an object to owner of its content.
 ..cat:Dependent Objects
 ..signature:create(holder [, object])
@@ -766,7 +770,8 @@ create(Holder<TValue, Tristate> & me,
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.detach:
+.Function.detach
+..class:Class.Holder
 ..summary:Makes an object independent from other objects.
 ..cat:Dependent Objects
 ..signature:detach(object)
@@ -795,7 +800,8 @@ detach(Holder<TValue, Tristate> & me)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.setValue:
+.Function.setValue
+..class:Class.Holder
 ..cat:Content Manipulation
 ..summary:Makes holder dependent.
 ..signature:setValue(holder, object)
@@ -947,6 +953,7 @@ setValue(Holder<TValue, Tristate> & me,
 // ----------------------------------------------------------------------------
 
 ///.Function.value.param.object.type:Class.Holder
+///.Function.value.class:Class.Holder
 
 template <typename TValue>
 inline typename Reference<Holder<TValue, Tristate> >::Type
@@ -978,6 +985,7 @@ value(Holder<TValue, Tristate> const & me)
 // ----------------------------------------------------------------------------
 
 ///.Function.assignValue.param.object.type:Class.Holder
+///.Function.assignValue.class:Class.Holder
 
 template <typename TValue, typename TSource>
 inline void
@@ -998,6 +1006,7 @@ assignValue(Holder<TValue, Tristate> & me,
 // ----------------------------------------------------------------------------
 
 ///.Function.moveValue.param.object.type:Class.Holder
+///.Function.moveValue.class:Class.Holder
 
 template <typename TValue, typename TSource>
 inline void
@@ -1017,7 +1026,9 @@ moveValue(Holder<TValue, Tristate> & me,
 // ----------------------------------------------------------------------------
 
 ///.Function.assign.param.target.type:Class.Holder
+///.Function.assign.class:Class.Holder
 ///.Function.assign.param.source.type:Class.Holder
+///.Function.assign.class:Class.Holder
 
 template <typename TValue>
 inline void

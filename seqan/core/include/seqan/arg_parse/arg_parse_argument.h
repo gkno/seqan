@@ -63,8 +63,9 @@ namespace seqan {
 ..summary:Stores information for a specific command line argument. It can be either an argument of
 a ArgParseArgument or directly an Argument on the command line.
 ..signature:ArgParseArgument
-..remarks: .
 ..include:seqan/arg_parse.h
+..see:Class.ArgParseOption
+..see:Class.ArgumentParser
 */
 
 /**
@@ -230,8 +231,10 @@ inline std::string _typeToString(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 // Function isListArgument()
 // ----------------------------------------------------------------------------
+
 /**
 .Function.isListArgument
+..class:Class.ArgParseArgument
 ..summary:Returns whether the argument can be given multiple times.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
@@ -250,8 +253,10 @@ inline bool isListArgument(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 // Function isStringArgument()
 // ----------------------------------------------------------------------------
+
 /**
 .Function.isStringArgument
+..class:Class.ArgParseArgument
 ..summary:Returns whether the argument is a string.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
@@ -272,8 +277,10 @@ inline bool isStringArgument(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 // Function isIntegerArgument()
 // ----------------------------------------------------------------------------
+
 /**
 .Function.isIntegerArgument
+..class:Class.ArgParseArgument
 ..summary:Returns whether the argument is an integer.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
@@ -292,8 +299,10 @@ inline bool isIntegerArgument(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 // Function isDoubleArgument()
 // ----------------------------------------------------------------------------
+
 /**
 .Function.isDoubleArgument
+..class:Class.ArgParseArgument
 ..summary:Returns whether the argument is a double.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
@@ -312,8 +321,10 @@ inline bool isDoubleArgument(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 // Function isInputFileArgument()
 // ----------------------------------------------------------------------------
+
 /**
 .Function.isInputFileArgument
+..class:Class.ArgParseArgument
 ..summary:Returns whether the argument is an input file.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
@@ -332,8 +343,10 @@ inline bool isInputFileArgument(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 // Function isOutputFileArgument()
 // ----------------------------------------------------------------------------
+
 /**
 .Function.isOutputFileArgument
+..class:Class.ArgParseArgument
 ..summary:Returns whether the argument is an output file.
 ..cat:Miscellaneous
 ..signature:isListArgument(argument)
@@ -353,8 +366,10 @@ inline bool isOutputFileArgument(ArgParseArgument const & me)
 // ----------------------------------------------------------------------------
 // Function getArgumentLabel()
 // ----------------------------------------------------------------------------
+
 /**
 .Function.getArgumentLabel
+..class:Class.ArgParseArgument
 ..summary:Returns the label for the given @Class.ArgParseArgument@. Either the user defined label
 is returned or a default label (based on the ArgumentType is used).
 ..cat:Miscellaneous
@@ -424,6 +439,7 @@ inline void _intervalAssert(const std::string minValueAsString, const std::strin
 
 /**
 .Function.setMinValue
+..class:Class.ArgParseArgument
 ..summary:Sets the minimum value of a @Class.ArgParseArgument@ object.
 ..cat:Miscellaneous
 ..signature:setMinValue(argument,minValue)
@@ -458,6 +474,7 @@ inline void setMinValue(ArgParseArgument & me, const std::string minValue)
 
 /**
 .Function.setMaxValue
+..class:Class.ArgParseArgument
 ..summary:Sets the maximum value of a @Class.ArgParseArgument@ object.
 ..cat:Miscellaneous
 ..signature:setMaxValue(argument,maxValue)
@@ -492,6 +509,7 @@ inline void setMaxValue(ArgParseArgument & me, const std::string maxValue)
 
 /**
 .Function.setValidValues
+..class:Class.ArgParseArgument
 ..summary:Sets the set of allowed values of a @Class.ArgParseArgument@ object.
 ..cat:Miscellaneous
 ..signature:setValidValues(argument,values)
@@ -650,7 +668,8 @@ inline void _checkValue(ArgParseArgument const & me, std::string const & value)
 // ----------------------------------------------------------------------------
 
 /**
-.Function._assignArgumentValue
+.Internal.Function._assignArgumentValue
+..class:Class.ArgParseArgument
 ..summary:Assigns the given value (if applicable) to the @Class.ArgParseArgument@ object. If
 the @Class.ArgParseArgument@ is a list or can hold multiple values
 (@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) the value will be appended.
@@ -686,6 +705,7 @@ inline void _assignArgumentValue(ArgParseArgument & me, std::string const & valu
 
 /**
 .Function.getArgumentValue
+..class:Class.ArgParseArgument
 ..summary:Returns the value of the @Class.ArgParseArgument@ object. If
 the @Class.ArgParseArgument@ is a list or can hold multiple values
 (@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) you can specify which value
@@ -721,6 +741,7 @@ inline std::string const & getArgumentValue(ArgParseArgument const & me)
 
 /**
 .Function.getArgumentValues
+..class:Class.ArgParseArgument
 ..summary:Returns all values of the @Class.ArgParseArgument@ object as const std::vector.
 ..cat:Miscellaneous
 ..signature:getArgumentValues(argument)
@@ -745,6 +766,7 @@ inline std::vector<std::string> const & getArgumentValues(ArgParseArgument const
 
 /**
 .Function.hasArgumentValue
+..class:Class.ArgParseArgument
 ..summary:Returns true if a value for the given position is available.
 ..cat:Miscellaneous
 ..signature:hasValue(argument [, position=0])
@@ -770,6 +792,7 @@ inline bool hasValue(ArgParseArgument const & arg)
 
 /**
 .Function.isSet
+..class:Class.ArgParseArgument
 ..summary:Returns true if a value was assigned to the argument.
 ..cat:Miscellaneous
 ..signature:isSet(argument)
@@ -810,6 +833,7 @@ inline bool hasDefault(ArgParseArgument const & me)
 
 /**
 .Function.numberOfAllowedValues
+..class:Class.ArgParseArgument
 ..summary:Returns the number of allowed values for this @Class.ArgParseArgument@.
 ..cat:Miscellaneous
 ..signature:numberOfAllowedValues(argument)

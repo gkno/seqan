@@ -58,6 +58,7 @@ namespace seqan {
 
 /**
 .Function.readRecord
+..class:Class.RecordReader
 ..cat:Input/Output
 ..summary:reads one record (e.g. a single DNA-sequence and its meta data) from a @Concept.Stream@, by the means of @Class.RecordReader@
 ..signature:readRecord(<format specific>, TRecordReader & reader, TTag const &)
@@ -72,6 +73,7 @@ namespace seqan {
 
 /**
 .Function.read2
+..class:Class.RecordReader
 ..cat:Input/Output
 ..summary:reads an entire document from a @Concept.Stream@, by the means of @Class.RecordReader@
 ..signature:read2(<format specific>, TRecordReader & reader, TTag const &)

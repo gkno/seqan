@@ -122,7 +122,8 @@ struct Pair
 // Metafunction LENGTH
 // -----------------------------------------------------------------------
 
-///.Metafunction.LENGTH.param.T.type:Class.Triple
+///.Metafunction.LENGTH.param.T.type:Class.Pair
+///.Metafunction.LENGTH.class:Class.Pair
 
 template <typename T1, typename T2, typename TSpec>
 struct LENGTH<Pair<T1, T2, TSpec> >
@@ -138,6 +139,9 @@ struct LENGTH<Pair<T1, T2, TSpec> >
 
 /**
 .Metafunction.Value
+..class:Class.Pair
+..class:Class.Triple
+..class:Class.Tuple
 ..signature:Value<TTuple, POSITION>::Type
 ..param.TTuple:@Class.Pair@, @Class.Triple@, or @Class.Tuple@ to return value from.
 ...type:Class.Pair
@@ -164,6 +168,7 @@ struct Value<Pair<T1, T2, TSpec>, 2>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Spec.param.T.type:Class.Pair
+///.Metafunction.Spec.class:Class.Pair
 
 template <typename T1, typename T2, typename TSpec>
 struct Spec<Pair<T1, T2, TSpec> >

@@ -123,6 +123,8 @@ public:
 
 
 ///.Metafunction.Value.param.T.type:Class.PropertyMap
+///.Metafunction.Value.class:Class.PropertyMap
+
 template <typename TValue, unsigned int SPACE>
 struct Value<PropertyMap<TValue,Block<SPACE> > >
 {

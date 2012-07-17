@@ -42,7 +42,8 @@
 ..memvar:Data Members
 ..memfunc:Member Functions
 ..typedef:Typedefs
-..function:Functions
+..interfacefunc:Functions
+..function:Used in Functions
 ..remarks:Remarks
 ..example:Examples
 ..demo:Example Programs
@@ -52,7 +53,7 @@
 ..see:See Also
 ..cite:References
 ..wiki:SeqAn Wiki Resources
-..implements:Implements
+..implements:Implemented Concepts
 ..conceptimplements:Implemented by
 ..concept:Part of Concept
 ..conceptmemvar:Required Member Variables
@@ -94,6 +95,8 @@
 ..Tag:bigsmall
 .
 .globals.relations:
+..interfacefunc:Function.*.class
+..interfacefunc:Function.*.concept
 ..memfunc:Memfunc.*.class
 ..memvar:Memvar.*.class
 ..typedef:Typedef.*.class
@@ -120,6 +123,9 @@
 ..shortcutfor:*.*.shortcut
 .
 .globals.inherit:
+..interfacefunc:general
+..interfacefunc:base
+..interfacefunc:implements.interfacefunc
 ..implements:general
 ..type:general
 ..type:implements.conceptmetafunc

@@ -207,6 +207,7 @@ container(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
 // TODO(holtgrew): Also defined in index module, change documentation?
 /**
 .Function.setContainer
+..class:Spec.Adaptor Iterator
 ..summary:Set container of an adaptor iterator.
 ..cat:Dependent Objects
 ..signature:setContainer(object, container)
@@ -237,6 +238,7 @@ setContainer(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,
 
 /**
 .Function.hostIterator
+..class:Spec.Adaptor Iterator
 ..cat:Dependent Objects
 ..summary:Return host iterator.
 ..signature:hostIterator(object)
@@ -290,6 +292,7 @@ position(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me,
 
 /**
 .Function.setPosition
+..class:Spec.Adaptor Iterator
 ..cat:Dependent Objects
 ..signature:setPosition(iterator, pos)
 ..param.iterator:The iterator to set the position of.

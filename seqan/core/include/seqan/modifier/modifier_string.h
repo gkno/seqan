@@ -139,6 +139,7 @@ struct Reference< ModifiedString<THost, TSpec> const >:
     Reference< typename Iterator< ModifiedString<THost, TSpec> const, Rooted >::Type > {};
 
 ///.Metafunction.Size.param.T.type:Class.ModifiedString
+///.Metafunction.Size.class:Class.ModifiedString
 
 template < typename THost, typename TSpec >
 struct Size< ModifiedString<THost, TSpec> >:
@@ -154,6 +155,7 @@ struct Difference< ModifiedString<THost, TSpec> >:
 
 
 ///.Metafunction.Iterator.param.T.type:Class.ModifiedString
+///.Metafunction.Iterator.class:Class.ModifiedString
 
 template <typename THost, typename TSpec>
 struct Iterator< ModifiedString<THost, TSpec>, Standard > {
@@ -175,8 +177,8 @@ struct Iterator< ModifiedString<THost, TSpec> const, Rooted > {
     typedef ModifiedIterator<typename Iterator<THost const, Rooted>::Type, TSpec> Type;
 };
 
-
 ///.Metafunction.Host.param.T.type:Class.ModifiedString
+///.Metafunction.Host.class:Class.ModifiedString
 
 template < typename THost, typename TSpec >
 struct Host< ModifiedString<THost, TSpec> > {

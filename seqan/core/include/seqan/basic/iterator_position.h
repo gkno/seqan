@@ -186,6 +186,7 @@ container(Iter<TContainer, PositionIterator> const & me)
 // ----------------------------------------------------------------------------
 
 ///.Function.setContainer.param.object.type:Spec.Position Iterator
+///.Function.setContainer.class:Spec.Position Iterator
 
 template <typename TContainer>
 inline void
@@ -203,6 +204,7 @@ setContainer(Iter<TContainer, PositionIterator> & me, typename Parameter_<TConta
 // ----------------------------------------------------------------------------
 
 ///.Function.position.param.iterator.type:Spec.Position Iterator
+///.Function.position.class:Spec.Position Iterator
 
 template <typename TContainer>
 inline typename Position<TContainer>::Type &
@@ -225,6 +227,7 @@ position(Iter<TContainer, PositionIterator> const & me)
 // ----------------------------------------------------------------------------
 
 ///.Function.setPosition.param.iterator.type:Spec.Position Iterator
+///.Function.setPosition.class:Spec.Position Iterator
 
 template <typename TContainer, typename TPosition>
 inline void

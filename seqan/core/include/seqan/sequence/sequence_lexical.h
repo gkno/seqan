@@ -337,6 +337,7 @@ compare(Lexical<TSpec> & lexical,
 /**
 .Function.isEqual:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Operator "==".
 ..signature:isEqual(left, right)
 ..signature:isEqual(comparator)
@@ -372,6 +373,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.isNotEqual:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Operator "!=".
 ..signature:isNotEqual(left, right)
 ..signature:isNotEqual(comparator)
@@ -407,6 +409,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.isLess:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Operator "<".
 ..signature:isLess(left, right [, prefix_order_tag])
 ..signature:isLess(comparator)
@@ -475,6 +478,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.isLessOrEqual:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Operator "<=".
 ..signature:isLessOrEqual(left, right [, prefix_order_tag])
 ..signature:isLessOrEqual(comparator)
@@ -544,6 +548,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.isGreater:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Operator ">".
 ..signature:isGreater(left, right [, prefix_order_tag])
 ..signature:isGreater(comparator)
@@ -612,6 +617,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.isGreaterOrEqual:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Operator ">=".
 ..signature:isGreaterOrEqual(left, right [, prefix_order_tag])
 ..signature:isGreaterOrEqual(comparator)
@@ -681,6 +687,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.isPrefix:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Test whether a sequence is prefix of another sequence.
 ..signature:isPrefix(left, right)
 ..signature:isPrefix(comparator)
@@ -719,6 +726,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.hasPrefix:
 ..cat:Comparisons
+..class:Class.Lexical
 ..summary:Test whether a sequence is prefix of another sequence.
 ..signature:hasPrefix(left, right)
 ..signature:hasPrefix(comparator)
@@ -758,6 +766,7 @@ SEQAN_CHECKPOINT
 .Function.lcpLength:
 ..summary:Length of longest common prefix.
 ..cat:Comparisons
+..class:Class.Lexical
 ..signature:lcpLength(left, right)
 ..signature:lcpLength(comparator)
 ..param.left:The first sequence.

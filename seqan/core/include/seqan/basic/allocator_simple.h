@@ -139,7 +139,8 @@ parentAllocator(Allocator<SimpleAlloc<TParentAllocator> > & me)
 
 // TODO(holtgrew): Using #-functions messes up search results.
 /**
-.Function.Allocator#clear:
+.Function.Allocator#clear
+..class:Class.Allocator
 ..cat:Memory
 ..summary:Deallocates all memory blocks.
 ..signature:clear(allocator)

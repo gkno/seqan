@@ -104,6 +104,7 @@ class IdManager
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.IdManager
+///.Metafunction.Value.class:Class.IdManager
 
 template<typename TIdType, typename TSpec> 
 struct Value<IdManager<TIdType, TSpec> > 
@@ -120,6 +121,7 @@ struct Value<IdManager<TIdType, TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Spec.param.T.type:Class.IdManager
+///.Metafunction.Spec.class:Class.IdManager
 
 template<typename TIdType, typename TSpec> 
 struct Spec<IdManager<TIdType, TSpec> > 
@@ -140,7 +142,8 @@ struct Spec<IdManager<TIdType, TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.obtainId:
+.Function.obtainId
+..class:Class.IdManager
 ..cat:Graph
 ..summary:Obtains a new id from the id manager.
 ..signature:obtainId(idm)
@@ -175,7 +178,8 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.releaseId:
+.Function.releaseId
+..class:Class.IdManager
 ..cat:Graph
 ..summary:Releases a given id so it can be redistributed later on.
 ..signature:releaseId(idm, id)
@@ -209,7 +213,8 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.releaseAll:
+.Function.releaseAll
+..class:Class.IdManager
 ..cat:Graph
 ..summary:Releases all ids handled by this id manager at once.
 ..signature:releaseAll(idm)
@@ -233,7 +238,8 @@ releaseAll(IdManager<TIdType, TSpec>& idm)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getIdUpperBound:
+.Function.getIdUpperBound
+..class:Class.IdManager
 ..cat:Graph
 ..summary:Returns the largest distributed id plus 1. That is, the return value is guaranteed to be an upper bound on all distributed ids.
 ..signature:getIdUpperBound(idm)
@@ -255,7 +261,8 @@ getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getIdLowerBound:
+.Function.getIdLowerBound
+..class:Class.IdManager
 ..cat:Graph
 ..summary:Returns the smallest distributed id. That is, the return value is guaranteed to be the smallest id obtained so far.
 ..signature:getIdLowerBound(idm)
@@ -282,6 +289,7 @@ getIdLowerBound(IdManager<TIdType, TSpec> const& idm)
 
 /**
 .Function.idCount:
+..class:Class.IdManager
 ..cat:Graph
 ..summary:Determines the number of ids that were obtained.
 ..signature:idCount(idm)
@@ -304,6 +312,7 @@ idCount(IdManager<TIdType, TSpec> const& idm)
 
 /**
 .Function.idInUse:
+..class:Class.IdManager
 ..cat:Graph
 ..summary:Checks whether the given id is in use or not.
 ..signature:idInUse(idm, id)
@@ -383,6 +392,8 @@ class IdManager<void, TSpec>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.IdManager
+///.Metafunction.Value.class:Class.IdManager
+
 template<typename TSpec> 
 struct Value<IdManager<void, TSpec> > {
 	typedef typename Size<IdManager<void, TSpec> >::Type Type;

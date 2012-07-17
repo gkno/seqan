@@ -233,6 +233,7 @@ struct BLOCK_SIZE<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> >
 };
 
 ///.Metafunction.Spec.param.T.type:Class.SeedSet
+///.Metafunction.Spec.class:Class.SeedSet
 template <typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 struct Spec<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec > >
 {
@@ -240,6 +241,7 @@ struct Spec<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec > >
 };
 
 ///.Metafunction.Value.param.T.type:Class.SeedSet
+///.Metafunction.Value.class:Class.SeedSet
 template <typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 struct Value<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> >
 {
@@ -248,6 +250,7 @@ struct Value<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> >
 
 
 ///.Metafunction.Iterator.param.T.type:Class.SeedSet
+///.Metafunction.Iterator.class:Class.SeedSet
 template <typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 struct Iterator<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec>, Standard >
 {
@@ -274,6 +277,7 @@ struct Size<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> >
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //.Function.append.param.object.type:Class.SeedSet
+//.Function.append.class:Class.SeedSet
 template<typename TValue, typename TSeedSpec, typename TContainer2, typename TSpecScoring, typename TSpec>
 void
 append(SeedSet<TValue, TSeedSpec, 
@@ -297,6 +301,7 @@ appendValue(SeedSet<TValue,
 }
 
 ///.Function.end.param.object.type:Class.SeedSet
+///.Function.end.class:Class.SeedSet
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline typename Iterator<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec>, Standard >::Type
 begin(SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> &set)
@@ -306,6 +311,7 @@ begin(SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> &set)
 }
 
 ///.Function.begin.param.object.type:Class.SeedSet
+///.Function.begin.class:Class.SeedSet
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline typename Iterator<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec>, Standard >::Type
 end(SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> &set)
@@ -316,6 +322,7 @@ end(SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> &set)
 
 
 ///.Function.end.param.object.type:Class.SeedSet
+///.Function.end.class:Class.SeedSet
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline typename Iterator<SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> const, Standard>::Type
 begin(SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> const &set)
@@ -325,6 +332,7 @@ begin(SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> const &set)
 }
 
 ///.Function.begin.param.object.type:Class.SeedSet
+///.Function.begin.class:Class.SeedSet
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline typename Iterator<SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> const, Standard>::Type
 end(SeedSet<TValue,TSeedSpec, TSpecScoring, TSpec> const &set)
@@ -345,7 +353,6 @@ template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TS
 inline int
 length(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> const &set)
 {
-	//SaEQAN_CHECKPOINT
 	return set.result.size();
 }
 
@@ -380,6 +387,7 @@ clear(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCo
 
 /**
 .Function.setMaximumDistance:
+..class:Class.SeedSet
 ..summary:Sets the maximal distance between two seed during a chaining process.
 ..cat:Seed Handling
 ..signature:setMaximumDistance(set, distance)
@@ -400,6 +408,7 @@ setMaximumDistance(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set,
 
 /**
 .Function.setQualityValue:
+..class:Class.SeedSet
 ..summary:Sets the minimum length for a seed to be saved permanently.
 ..cat:Seed Handling
 ..signature:setQualityValue(set, distance)
@@ -419,6 +428,7 @@ setQualityValue(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set,
 
 /**
 .Function.maximumDistance:
+..class:Class.SeedSet
 ..summary:Sets the maximal distance between two seed during a chaining process.
 ..cat:Seed Handling
 ..signature:maximumDistance(set)
@@ -437,6 +447,7 @@ maximumDistance(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set)
 
 /**
 .Function.qualityValue:
+..class:Class.SeedSet
 ..summary:Sets the minimum length for a seed to be saved permanently.
 ..cat:Seed Handling
 ..signature:qualityValue(set)
@@ -460,6 +471,7 @@ qualityValue(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set)
 
 /**
 .Function.addSeed:
+..class:Class.SeedSet
 ..summary:Adds a seed to an existing set.
 ..cat:Seed Handling
 ..signature:addSeed(set, qPos, dPos, length, tag)
@@ -485,6 +497,7 @@ qualityValue(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set)
 
 /**
 .Function.addSeeds:
+..class:Class.SeedSet
 ..summary:Adds several seeds to an existing set. If a merging or chaining algorithm is used seeds are added if the merging or chaining fails.
 ..cat:Seed Handling
 ..signature:addSeed(set, container, tag)

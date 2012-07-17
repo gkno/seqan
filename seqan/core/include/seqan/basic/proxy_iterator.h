@@ -51,7 +51,7 @@ namespace seqan {
 // ============================================================================
 
 /**
-.Spec.Iterator Proxy:
+.Spec.Iterator Proxy
 ..cat:Proxies
 ..general:Class.Proxy
 ..summary:Proxy that is implemented by an iterator.
@@ -142,6 +142,7 @@ public:
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Class.Proxy
+///.Metafunction.Value.class:Class.Proxy
 
 template <typename TIterator>
 struct Value<Proxy<IteratorProxy<TIterator> > >
@@ -160,6 +161,7 @@ struct Value<Proxy<IteratorProxy<TIterator> > const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.GetValue.param.T.type:Class.Proxy
+///.Metafunction.GetValue.class:Class.Proxy
 
 template <typename TIterator>
 struct GetValue<Proxy<IteratorProxy<TIterator> > >
@@ -178,6 +180,7 @@ struct GetValue<Proxy<IteratorProxy<TIterator> > const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Reference.param.T.type:Class.Proxy
+///.Metafunction.Reference.class:Class.Proxy
 
 template <typename TIterator>
 struct Reference<Proxy<IteratorProxy<TIterator> > >
@@ -196,6 +199,7 @@ struct Reference<Proxy<IteratorProxy<TIterator> > const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Size.param.T.type:Class.Proxy
+///.Metafunction.Size.class:Class.Proxy
 
 template <typename TIterator>
 struct Size<Proxy<IteratorProxy<TIterator> > >
@@ -214,6 +218,7 @@ struct Size<Proxy<IteratorProxy<TIterator> > const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Difference.param.T.type:Class.Proxy
+///.Metafunction.Difference.class:Class.Proxy
 
 template <typename TIterator>
 struct Difference<Proxy<IteratorProxy<TIterator> > >
@@ -236,6 +241,7 @@ struct Difference<Proxy<IteratorProxy<TIterator> > const>
 // ----------------------------------------------------------------------------
 
 ///.Function.iter.param.object.type:Spec.Iterator Proxy
+///.Function.iter.class:Spec.Iterator Proxy
 
 template <typename TIterator>
 inline TIterator &

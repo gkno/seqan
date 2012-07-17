@@ -88,7 +88,8 @@ typedef Tag<ReScore_> const ReScore;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.buildAlignmentGraph:
+.Function.buildAlignmentGraph
+..class:Spec.Alignment Graph
 ..summary:Builds an @Spec.Alignment Graph@ from a set of input alignments.
 ..cat:Graph
 ..signature:
@@ -310,7 +311,8 @@ struct LessMsaEdgeCargo_ :
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.tripletLibraryExtension:
+.Function.tripletLibraryExtension
+..class:Spec.Alignment Graph
 ..summary:Performs a full or group-based consistency extension.
 ..cat:Graph
 ..signature:
@@ -762,7 +764,8 @@ graphBasedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& 
 // This version is sensitive to gap openings
 
 /**
-.Function.sumOfPairsScore:
+.Function.sumOfPairsScore
+..class:Spec.Alignment Graph
 ..summary:Given a multiple alignment, this function calculates the sum-of-pairs score.
 ..cat:Graph
 ..signature:
@@ -874,7 +877,8 @@ sumOfPairsScoreInd(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.alignmentEvaluation:
+.Function.alignmentEvaluation
+..class:Spec.Alignment Graph
 ..summary:Given a multiple alignment, this function calculates all kinds of alignment statistics.
 ..cat:Graph
 ..signature:

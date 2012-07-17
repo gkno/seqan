@@ -130,6 +130,7 @@ const unsigned Tuple<T_, _size, TSpec>::SIZE = _size;
 // -----------------------------------------------------------------------
 
 ///.Metafunction.LENGTH.param.T.type:Class.Tuple
+///.Metafunction.LENGTH.class:Class.Tuple
 
 template <typename T_, unsigned _size, typename TSpec>
 struct LENGTH<Tuple<T_, _size, TSpec> >
@@ -142,6 +143,7 @@ struct LENGTH<Tuple<T_, _size, TSpec> >
 // -----------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Class.Tuple
+///.Metafunction.Value.class:Class.Tuple
 
 template <typename T_, unsigned _size, typename TSpec>
 struct Value<Tuple<T_, _size, TSpec> >
@@ -154,6 +156,7 @@ struct Value<Tuple<T_, _size, TSpec> >
 // -----------------------------------------------------------------------
 
 ///.Metafunction.Spec.param.T.type:Class.Tuple
+///.Metafunction.Spec.class:Class.Tuple
 
 template <typename T_, unsigned _size, typename TSpec>
 struct Spec<Tuple<T_, _size, TSpec> >

@@ -55,6 +55,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.BndmAlgo
+///.Class.Pattern.class:Spec.BndmAlgo
 
 struct BndmAlgo_;
 typedef Tag<BndmAlgo_> BndmAlgo;

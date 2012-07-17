@@ -186,7 +186,8 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 
 /**
-.Function.getDistanceMatrix:
+.Function.getDistanceMatrix
+..class:Spec.Alignment Graph
 ..summary:Computes a pairwise distance matrix from an alignment graph.
 ..cat:Graph
 ..signature:

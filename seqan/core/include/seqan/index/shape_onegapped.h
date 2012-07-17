@@ -343,6 +343,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 ///.Function.stringToShape.param.shape.type:Spec.OneGappedShape
+///.Function.stringToShape.class:Spec.OneGappedShape
 ///.Function.stringToShape.param.bitmap.remarks:If $shape$ is a @Spec.OneGappedShape@ at most two contiguous sequences of '1's are allowed.
 
 	template <typename TValue, typename TShapeString>
@@ -399,6 +400,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 ///.Function.reverse.param.object.type:Spec.OneGappedShape
+///.Function.reverse.class:Spec.OneGappedShape
 
 	template <typename TValue>
 	inline void

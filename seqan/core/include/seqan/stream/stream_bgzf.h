@@ -295,6 +295,7 @@ struct HasStreamFeature<Stream<Bgzf>, Tell>
 
 // TODO(holtgrew): Do we want a trait for this? Only possible for random access streams and those that have an underlying file.
 ///.Function.size.param.file.type:Spec.BGZF Stream
+///.Function.size.class:Spec.BGZF Stream
 
 // Just forward to underlying Class.File's size().
 
@@ -693,6 +694,7 @@ _bgzfDeflateBlock(Stream<Bgzf> & stream, int blockLength)
 
 /**
 .Function.attachToFile
+..class:Spec.BGZF Stream
 ..cat:Input / Output
 ..summary:Attach to already open input / output file.
 ..signature:attachToFile(stream, fileHandle, mode)
@@ -724,6 +726,7 @@ attachToFile(Stream<Bgzf> & stream, int fileHandle, int mode)
 
 /**
 .Function.open
+..class:Spec.BGZF Stream
 ..param.stream.type:Spec.BGZF Stream
 ..param.mode.remarks:When opening $Stream<Bgzf>$ for writing, you can append $'0'$-$'9'$ or $'u'$ to $"w"$ for setting the compression level to 0-9 or "no compression".
  */
@@ -803,6 +806,7 @@ streamFlush(Stream<Bgzf> & stream)
 
 /**
 .Function.close
+..class:Spec.BGZF Stream
 ..signature:close(stream)
 ..param.stream:Stream to close.
 ...type:Class.Stream
@@ -902,6 +906,7 @@ streamReadChar(char & c, Stream<Bgzf> & stream)
 
 /**
 .Function.checkEof
+..class:Spec.BGZF Stream
 ..cat:Input / Output
 ..summary:Check that the EOF marker is present in a BGZF(/BAM) file.
 ..signature:streamEof(stream)

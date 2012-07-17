@@ -412,6 +412,7 @@ _deallocateStorage(
 /**
 .Function.dependent:
 ..summary:Test whether object depends on other objects.
+..class:Spec.CStyle String
 ..cat:Dependent Objects
 ..signature:bool dependent(object)
 ..param.object:An object.
@@ -608,6 +609,8 @@ clear(String<TValue, CStyle> & me)
 //see basic_holder
 /**
 .Function.create:
+..cat:Containers
+..class:Spec.CStyle String
 ..signature:create(target, source [, limit] [,resize_tag])
 ..param.target: Gets a copy of the content of $source$.
 ...type:Spec.CStyle String
@@ -850,6 +853,8 @@ create(String<TTargetValue, CStyle> & target,
 /**
 .Function.toCString:
 ..cat:Containers
+..class:Spec.CStyle String
+..class:Adaption.char array
 ..summary:Access sequence as c-style string.
 ..signature:toCString(object)
 ..param.object:A string.

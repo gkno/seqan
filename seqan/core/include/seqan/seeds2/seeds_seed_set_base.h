@@ -162,11 +162,17 @@ class SeedSet;
 // ===========================================================================
 
 ///.Metafunction.Position.param.T:Class.SeedSet
+///.Metafunction.Position.class:Class.SeedSet
 ///.Metafunction.Size.param.T:Class.SeedSet
+///.Metafunction.Size.class:Class.SeedSet
 ///.Metafunction.Value.param.T:Class.SeedSet
+///.Metafunction.Value.class:Class.SeedSet
 ///.Metafunction.GetValue.param.T:Class.SeedSet
+///.Metafunction.GetValue.class:Class.SeedSet
 ///.Metafunction.Reference.param.T:Class.SeedSet
+///.Metafunction.Reference.class:Class.SeedSet
 ///.Metafunction.Iterator.param.T:Class.SeedSet
+///.Metafunction.Iterator.class:Class.SeedSet
 /**
 .Metafunction.Seed:
 ..summary:Return the type of the underlying seed.
@@ -190,10 +196,23 @@ class SeedSet;
 
 /**
 .Function.begin.param.object.type:Class.SeedSet
+..class:Class.SeedSet
 .Function.end.param.object.type:Class.SeedSet
+..class:Class.SeedSet
+.Function.end.param.object.type:Class.SeedSet
+..class:Class.SeedSet
 .Function.length.param.object.type:Class.SeedSet
+..class:Class.SeedSet
+.Function.length.param.object.type:Class.SeedSet
+..class:Class.SeedSet
 .Function.front.param.object.type:Class.SeedSet
+..class:Class.SeedSet
+.Function.front.param.object.type:Class.SeedSet
+..class:Class.SeedSet
 .Function.back.param.container.type:Class.SeedSet
+..class:Class.SeedSet
+.Function.back.param.container.type:Class.SeedSet
+..class:Class.SeedSet
 ..include:seqan/seeds2.h
  */
 // TODO(holtgrew): dddoc {begin,end,length,front,back}All(T)
@@ -207,6 +226,7 @@ class SeedSet;
 ..signature:addSeed(set, qPos, dPos, length, tag)
 ..signature:addSeed(set, qPos, dPos, qrPos, drPos, tag)
 ..signature:addSeed(set, seed, tag)
+..class:Class.SeedSet
 ..param.set:The set to which the new seed should be added.
 ...type:Class.SeedSet
 ..param.qPos: Start position in sequence1.
@@ -231,6 +251,7 @@ class SeedSet;
 ..cat:Seed Handling
 ..signature:addSeed(set, container, tag)
 ..signature:addSeed(set, begin, end, tag)
+..class:Class.SeedSet
 ..param.set:The set to which the new seed sould be added.
 ...type:Class.SeedSet
 ..param.container: Content is copied to set.

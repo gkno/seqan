@@ -924,6 +924,7 @@ def removeDuplicateTexts(tree):
                 if '\u0001' in clean and not '\u0001' in cleaned[in_cleaned[clean]]:
                     cleaned[in_cleaned[clean]] = txt
             else:
+                in_cleaned[clean] = len(cleaned)
                 cleaned.append(txt)
         node.texts = cleaned
         for child in node.children.itervalues():

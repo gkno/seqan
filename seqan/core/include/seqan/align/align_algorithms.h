@@ -98,7 +98,8 @@ SEQAN_CHECKPOINT
 }
 
 /**
-.Function.integrateAlign:
+.Function.integrateAlign
+..class:Class.Align
 ..summary:Integrates an alignment into another by copying the gaps.
 ..cat:Alignments
 ...type:Class.Align

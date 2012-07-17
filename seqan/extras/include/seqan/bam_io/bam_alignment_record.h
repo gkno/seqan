@@ -216,6 +216,7 @@ public:
 // ----------------------------------------------------------------------------
 
 ///.Function.clear.param.object.type:Class.BamAlignmentRecord
+///.Function.clear.class:Class.BamAlignmentRecord
 
 inline void
 clear(BamAlignmentRecord & record)
@@ -296,6 +297,7 @@ hasFlagAllProper(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagUnmapped
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "fragment unmapped" flag set.
 ..signature:hasFlagUnmapped(record)
@@ -327,6 +329,7 @@ hasFlagUnmapped(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagNextUnmapped
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "next fragment unmapped" flag set.
 ..signature:hasFlagNextUnmapped(record)
@@ -358,6 +361,7 @@ hasFlagNextUnmapped(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagRC
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "reverse-complemented" flag set.
@@ -389,6 +393,7 @@ hasFlagRC(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagNextRC
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "next fragment reverse-complemented" flag set.
 ..signature:hasFlagNextRC(record)
@@ -420,6 +425,7 @@ hasFlagNextRC(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagFirst
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "first fragment of template" flag set.
 ..signature:hasFlagFirst(record)
@@ -451,6 +457,7 @@ hasFlagFirst(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagLast
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "last fragment of template" flag set.
 ..signature:hasFlagLast(record)
@@ -482,6 +489,7 @@ hasFlagLast(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagSecondary
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "secondary alignment" flag set.
 ..signature:hasFlagSecondary(record)
@@ -513,6 +521,7 @@ hasFlagSecondary(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagQCNoPass
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "does not pass quality controls" flag set.
 ..signature:hasFlagQCNoPass(record)
@@ -544,6 +553,7 @@ hasFlagQCNoPass(BamAlignmentRecord const & record)
 
 /**
 .Function.hasFlagDuplicate
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Return true if a @Class.BamAlignmentRecord@ has the "PCR or optical duplicate" flag set.
 ..signature:hasFlagDuplicate(record)
@@ -575,6 +585,7 @@ hasFlagDuplicate(BamAlignmentRecord const & record)
 
 /**
 .Function.getAlignmentLengthInRef
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Returns length of @Class.BamAlignmentRecord@'s projection in reference.
 ..signature:getAlignmentLengthInRef(record)

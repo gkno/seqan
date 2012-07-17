@@ -149,6 +149,7 @@ score(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc, TVal1 val1,
 
 /**
 .Function.setScore:
+..class:Spec.Score Matrix
 ..cat:Scoring
 ..summary:Set the substitution score between two values.
 ..signature:setScore(scoreMatrix, val1, val2, score)

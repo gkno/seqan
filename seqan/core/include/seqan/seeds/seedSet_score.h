@@ -135,6 +135,7 @@ _calculateScoringValue(TSeed &,
 
 
 ///.Metafunction.Value.param.T.type:Class.SeedSet
+///.Metafunction.Value.class:Class.SeedSet
 template <typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 struct ScoringScheme<SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> >
 {
@@ -256,6 +257,7 @@ SeedSet(TValue maxDistance, TValue qualityValue, Score<int,Simple> matrix):maxDi
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //.Function.append.param.object.type:Class.SeedSet
+//.Function.append.class:Class.SeedSet
 template<typename TValue, typename TSeedSpec, typename TContainer1, typename TContainer2, typename TSpec, typename TScoringSpec>
 void
 append(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &target, 
@@ -1786,6 +1788,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 
 /**
 .Function.extendSeedScore
+..class:Class.Seed
 ..summary:Extends a seed and increases the score.
 ..cat:Seed Handling
 ..signature:extendSeedScore(seed, score, query, database, direction, tag)

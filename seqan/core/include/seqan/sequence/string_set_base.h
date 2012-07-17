@@ -74,6 +74,7 @@ class StringSet;
 
 /**
 .Metafunction.Concatenator:
+..class:Class.StringSet
 ..summary:Returns the type of the concatenation sequence of all sequences in a @Class.StringSet@.
 ..cat:Sequences
 ..signature:Concatenator<TStringSet>::Type
@@ -283,6 +284,7 @@ struct DefaultOverflowImplicit<StringSet< TString, TSpec> const>
 
 ///.Function.swap.param.left.type:Class.StringSet
 ///.Function.swap.param.right.type:Class.StringSet
+///.Function.swap.class:Class.StringSet
 
 template <typename TString, typename TSpec>
 inline void
@@ -304,6 +306,8 @@ swap(StringSet<TString, TSpec> & left,
 /**
 .Function.stringSetLimits:
 ..cat:Sequences
+..class:Class.String
+..class:Class.StringSet
 ..summary:Retrieves a string of delimiter positions of a @Class.StringSet@ which is needed for local<->global position conversions.
 ..signature:stringSetLimits(me)
 ..param.me:A string or string set.
@@ -588,6 +592,7 @@ inline void posLocalize(TResult & result, Pair<T1, T2, TCompression> const & pos
 // --------------------------------------------------------------------------
 
 ///.Function.prefix.param.host.type:Class.StringSet
+///.Function.prefix.class:Class.StringSet
 
 template < typename TString, typename TSpec, typename TPosition >
 inline typename Prefix<TString>::Type
@@ -622,6 +627,7 @@ prefix(StringSet< TString, TSpec > const & me, TPosition pos)
 // --------------------------------------------------------------------------
 
 ///.Function.suffix.param.host.type:Class.StringSet
+///.Function.suffix.class:Class.StringSet
 
 template < typename TString, typename TSpec, typename TPosition >
 inline typename Suffix<TString>::Type
@@ -656,6 +662,7 @@ suffix(StringSet< TString, TSpec > const & me, TPosition pos)
 // --------------------------------------------------------------------------
 
 ///.Function.infixWithLength.param.host.type:Class.StringSet
+///.Function.infixWithLength.class:Class.StringSet
 
 template < typename TString, typename TSpec, typename TPosition, typename TSize >
 inline typename Infix<TString>::Type
@@ -690,6 +697,7 @@ infixWithLength(StringSet< TString, TSpec > const & me, TPosition pos, TSize len
 // --------------------------------------------------------------------------
 
 ///.Function.infix.param.host.type:Class.StringSet
+///.Function.infix.class:Class.StringSet
 
 template < typename TString, typename TSpec, typename TPosBegin, typename TPosEnd >
 inline typename Infix<TString>::Type
@@ -1067,9 +1075,14 @@ lengthSum(StringSet< TString, TSpec > const & me)
 // --------------------------------------------------------------------------
 
 ///.Function.appendValue.param.target.type:Class.StringSet
+///.Function.appendValue.class:Class.StringSet
 ///.Function.clear.param.object.type:Class.StringSet
+///.Function.clear.class:Class.StringSet
 ///.Function.resize.param.object.type:Class.StringSet
+///.Function.resize.class:Class.StringSet
 ///.Function.length.param.object.type:Class.StringSet
+///.Function.length.class:Class.StringSet
+
 template <typename TString, typename TSpec >
 inline typename Size<StringSet<TString, TSpec > >::Type
 length(StringSet<TString, TSpec > const & me)
@@ -1111,6 +1124,8 @@ iter(StringSet<TString, TSpec > const & me,
 // --------------------------------------------------------------------------
 
 ///.Function.begin.param.object.type:Class.StringSet
+///.Function.begin.class:Class.StringSet
+
 template <typename TString, typename TSpec, typename TTag>
 inline typename Iterator<StringSet<TString, TSpec >, Tag<TTag> const>::Type
 begin(StringSet<TString, TSpec > & me,
@@ -1132,6 +1147,8 @@ begin(StringSet<TString, TSpec > const & me,
 // --------------------------------------------------------------------------
 
 ///.Function.end.param.object.type:Class.StringSet
+///.Function.end.class:Class.StringSet
+
 template <typename TString, typename TSpec, typename TTag>
 inline typename Iterator<StringSet<TString, TSpec >, Tag<TTag> const>::Type
 end(StringSet<TString, TSpec > & me,
@@ -1153,6 +1170,7 @@ return iter(me, length(me), tag);
 // --------------------------------------------------------------------------
 
 ///.Function.value.param.object.type:Class.StringSet
+///.Function.value.class:Class.StringSet
 
 // --------------------------------------------------------------------------
 // Function getValueById()
@@ -1161,6 +1179,7 @@ return iter(me, length(me), tag);
 /**
 .Function.getValueById:
 ..cat:Sequences
+..class:Class.StringSet
 ..summary:Retrieves a string from the StringSet given an id.
 ..signature:getValueById(me, id)
 ..param.me:A StringSet.
@@ -1182,6 +1201,7 @@ return iter(me, length(me), tag);
 /**
 .Function.valueById:
 ..cat:Sequences
+..class:Class.StringSet
 ..summary:Retrieves a string from the StringSet given an id.
 ..signature:valueById(me, id)
 ..param.me:A StringSet.
@@ -1210,6 +1230,7 @@ valueById(StringSet<TString, TSpec> & me,
 /**
 .Function.assignValueById:
 ..cat:Sequences
+..class:Class.StringSet
 ..summary:Adds a new string to the StringSet and returns an id.
 ..signature:assignValueById(dest, str, [id])
 ..signature:assignValueById(dest, source, id)
@@ -1256,6 +1277,7 @@ assignValueById(StringSet<TString, TSpec1>& dest,
 /**
 .Function.removeValueById:
 ..cat:Sequences
+..class:Class.StringSet
 ..summary:Removes a string from the StringSet given an id.
 ..signature:removeValueById(me, id)
 ..param.me:A StringSet.
@@ -1276,6 +1298,7 @@ assignValueById(StringSet<TString, TSpec1>& dest,
 /**
 .Function.positionToId:
 ..cat:Sequences
+..class:Class.StringSet
 ..summary:Retrieves the id of a string in the StringSet given a position.
 ..signature:positionToId(string_set, pos)
 ..param.string_set:A StringSet.
@@ -1297,6 +1320,7 @@ assignValueById(StringSet<TString, TSpec1>& dest,
 .Function.concat:
 ..summary:Returns the concatenation sequence of all sequences in a @Class.StringSet@.
 ..cat:Sequences
+..class:Class.StringSet
 ..signature:concat(stringSet)
 ..param.stringSet:A @Class.StringSet@ object.
 ...type:Class.StringSet
@@ -1348,6 +1372,7 @@ concat(StringSet<TString, TSpec> const & constMe)
 .Function.stringSplit:
 ..summary:Append a list of the words in the string, using sep as the delimiter string @Class.StringSet@.
 ..cat:Sequences
+..class:Class.StringSet
 ..signature:strSplit(stringSet, sequence)
 ..signature:strSplit(stringSet, sequence, sep)
 ..signature:strSplit(stringSet, sequence, sep, allowEmptyStrings)
@@ -1434,6 +1459,7 @@ strSplit(StringSet<TString, TSpec> & result, TSequence const &sequence)
 /**
 .Function.idToPosition:
 ..cat:Sequences
+..class:Class.StringSet
 ..summary:Retrieves the position of a string in the StringSet given an id.
 ..signature:idToPosition(me, id)
 ..param.me:A StringSet.

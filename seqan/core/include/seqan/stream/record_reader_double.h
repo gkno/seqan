@@ -178,6 +178,7 @@ _fillNextBuffer(RecordReader<TFile, DoublePass<> > & recordReader)
 
 /**
 .Function.startFirstPass
+..class:Spec.Double-Pass RecordReader
 ..cat:Input/Output
 ..signature:startFirstPass(recordReader)
 ..summary:Start the first reading pass.
@@ -238,6 +239,7 @@ _jumpToNextBuffer(RecordReader<TFile, DoublePass<> > & recordReader)
 
 /**
 .Function.startSecondPass
+..class:Spec.Double-Pass RecordReader
 ..cat:Input/Output
 ..signature:startSecondPass(recordReader)
 ..summary:Start the second reading pass.

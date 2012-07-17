@@ -79,7 +79,7 @@ inline TValue _intPow(TValue a, TExponent b)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.log2:
+.Function.log2
 ..cat:Miscellaneous
 ..summary:Computes floored logarithm of base 2 for integer types
 ..signature:unsigned int log2(i)

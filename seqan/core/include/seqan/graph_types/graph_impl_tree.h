@@ -812,7 +812,8 @@ isRoot(Graph<Tree<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.Graph#isLeaf:
+.Function.Graph#isLeaf
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Tests whether a given vertex is a leaf or not.
 ..signature:isLeaf(g, v)
@@ -840,7 +841,8 @@ isLeaf(Graph<Tree<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.numTreeEdges:
+.Function.numTreeEdges
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Number of tree edges.
 ..signature:numTreeEdges(g)
@@ -863,6 +865,7 @@ numTreeEdges(Graph<Tree<TCargo, TSpec> > const& g)
 
 /**
 .Function.numChildren:
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Number of children of a given tree vertex.
 ..signature:numChildren(g, v)
@@ -887,7 +890,8 @@ numChildren(Graph<Tree<TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.addChild:
+.Function.addChild
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Adds a new child vertex to a parent vertex.
 Optionally a cargo can be attached to the parent-child edge.
@@ -935,7 +939,8 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeChild:
+.Function.removeChild
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Removes a child from the tree given a parent.
 ..signature:removeChild(g, parent, child)
@@ -966,7 +971,8 @@ removeChild(Graph<Tree<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeAllChildren:
+.Function.removeAllChildren
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Removes all children from the tree given a parent.
 ..signature:removeChild(g, parent)
@@ -1001,7 +1007,8 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.childVertex:
+.Function.childVertex
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Returns the child vertex of an edge.
 ..signature:childVertex(g, e)
@@ -1026,7 +1033,8 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.parentVertex:
+.Function.parentVertex
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Returns the parent vertex of an edge or vertex.
 ..signature:parentVertex(g, e)
@@ -1066,7 +1074,8 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 
 
 /**
-.Function.collectLeaves:
+.Function.collectLeaves
+..class:Spec.Tree
 ..cat:Graph
 ..summary:Returns all leaves underneath a given vertex.
 ..signature:collectLeaves(g, subtree_root, group)

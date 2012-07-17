@@ -354,6 +354,7 @@ _setLength(Segment<THost_, SuffixSegment> &, TSize)
 /**
 .Metafunction.Suffix:
 ..cat:Segments
+..class:Class.String
 ..summary:Suffix sequence type.
 ..signature:Suffix<T>::Type
 ..param.T:A sequence type.
@@ -525,6 +526,8 @@ operator --(Segment<THost, SuffixSegment> & segment)
 /**
 .Function.suffix:
 ..cat:Containers
+..class:Class.String
+..class:Adaption.char array
 ..summary:Creates suffix object.
 ..signature:suffix(host, begin)
 ..remarks:Note that a suffix of a @Class.Segment@ object is an @Spec.SuffixSegment@ object having the same host type.

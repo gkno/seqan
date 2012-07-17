@@ -114,7 +114,8 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.progressiveAlignment:
+.Function.progressiveAlignment
+..class:Spec.Alignment Graph
 ..summary:Performs a progressive alignment.
 ..cat:Graph
 ..signature:

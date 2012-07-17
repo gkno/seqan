@@ -229,6 +229,7 @@ getAutoSeqStreamFormatName(AutoSeqStreamFormat const & format)
 
 /**
 .Function.checkStreamFormat
+..class:Class.RecordReader
 ..cat:Input/Output
 ..summary:check whether the data provided by reader is (one of) the specified format(s).
 ..signature:checkStreamFormat(TRecordReader & reader, TTag const &)

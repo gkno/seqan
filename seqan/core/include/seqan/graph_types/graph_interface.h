@@ -8,7 +8,7 @@
 // modification, are permitted provided that the following conditions are met:
 //
 //     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
+//       notice, this list of conditions and the following disclaimerf
 //     * Redistributions in binary form must reproduce the above copyright
 //       notice, this list of conditions and the following disclaimer in the
 //       documentation and/or other materials provided with the distribution.
@@ -81,6 +81,7 @@ class Graph;
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Spec.param.T.type:Class.Graph
+///.Metafunction.Spec.class:Class.Graph
 
 template<typename TSpec>
 struct Spec<Graph<TSpec> > 
@@ -99,6 +100,7 @@ struct Spec<Graph<TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.EdgeDescriptor.param.T.type:Class.Graph
+///.Metafunction.EdgeDescriptor.class:Class.Graph
 
 template<typename TSpec>
 struct EdgeDescriptor<Graph<TSpec> > 
@@ -115,6 +117,7 @@ struct EdgeDescriptor<Graph<TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.VertexDescriptor.param.T.type:Class.Graph
+///.Metafunction.VertexDescriptor.class:Class.Graph
 
 template<typename TSpec>
 struct VertexDescriptor<Graph<TSpec> > 
@@ -132,6 +135,7 @@ struct VertexDescriptor<Graph<TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.EdgeType.param.T.type:Class.Graph
+///.Metafunction.EdgeType.class:Class.Graph
 
 template<typename TCargo, typename TSpec>
 struct EdgeType<Graph<Directed<TCargo, TSpec> > > {
@@ -248,6 +252,7 @@ struct EdgeType<Graph<Hmm<TAlphabet, TCargo, TSpec> > > {
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Cargo.param.T.type:Class.Graph
+///.Metafunction.Cargo.class:Class.Graph
 
 template<typename TSpec>
 struct Cargo<Graph<TSpec> > {
@@ -265,6 +270,7 @@ struct Cargo<Graph<TSpec> const> {
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.EdgeIdHandler.param.T.type:Class.Graph
+///.Metafunction.EdgeIdHandler.class:Class.Graph
 
 template<typename TSpec>
 struct EdgeIdHandler<Graph<TSpec> const> {
@@ -284,6 +290,7 @@ struct EdgeIdHandler<Graph<TSpec> > {
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Alphabet.param.T.type:Class.Graph
+///.Metafunction.Alphabet.class:Class.Graph
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
 struct Alphabet<Graph<Automaton<TAlphabet, TCargo, TSpec> > > {
@@ -318,7 +325,8 @@ struct Alphabet<Graph<Hmm<TAlphabet, TCargo, TSpec> > const> {
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getNil:
+.Function.getNil
+..class:Class.Graph
 ..cat:Graph
 ..summary:Utility function returning a value that represents nil.
 Useful for various graph algorithms, e.g., missing predecessors, vertices that have not been visited, etc.
@@ -411,7 +419,8 @@ _createVertices(Graph<TSpec>& g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.addEdges:
+.Function.addEdges
+..class:Class.Graph
 ..cat:Graph
 ..summary:Shortcut to add multiple edges at once.
 Creates vertices implicitly.

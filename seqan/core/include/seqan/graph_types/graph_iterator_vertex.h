@@ -193,7 +193,13 @@ struct Spec<Iter<TGraph const, GraphIterator<InternalVertexIterator<TIteratorSpe
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getValue:
+.Function.getValue
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..param.object
 ...type:Spec.Vertex Iterator
@@ -217,6 +223,12 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.value:
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..param.object
 ...type:Spec.Vertex Iterator
@@ -249,7 +261,13 @@ operator * (Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.hostGraph:
+.Function.hostGraph
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..summary:The graph this iterator is working on.
 ..signature:hostGraph(it)
@@ -275,7 +293,13 @@ hostGraph(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.atBegin:
+.Function.atBegin
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..param.iterator
 ...type:Spec.Vertex Iterator
@@ -299,7 +323,13 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.goBegin:
+.Function.goBegin
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..param.iterator
 ...type:Spec.Vertex Iterator
@@ -322,7 +352,13 @@ goBegin(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.atEnd:
+.Function.atEnd
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..param.iterator
 ...type:Spec.Vertex Iterator
@@ -346,7 +382,13 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.goEnd:
+.Function.goEnd
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..param.iterator
 ...type:Spec.Vertex Iterator
@@ -368,7 +410,13 @@ goEnd(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.goNext:
+.Function.goNext
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
+..class:Spec.Bfs Iterator
+..class:Spec.Dfs Preorder Iterator
 ..cat:Graph
 ..param.iterator
 ...type:Spec.Vertex Iterator
@@ -415,7 +463,11 @@ operator ++(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it, in
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.goPrevious:
+.Function.goPrevious
+..class:Spec.Vertex Iterator
+..class:Spec.Out-Edge Iterator
+..class:Spec.Edge Iterator
+..class:Spec.Adjacency Iterator
 ..cat:Graph
 ..param.iterator
 ...type:Spec.Vertex Iterator

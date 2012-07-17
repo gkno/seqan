@@ -160,6 +160,7 @@ inline unsigned countPaddings(String<CigarElement<> > const & cigarString)
 
 /**
 .Function.bamRecordToAlignment
+..class:Class.BamAlignmentRecord
 ..cat:BAM I/O
 ..summary:Convert @Class.BamAlignmentRecord@ to an @Class.Align@ object.
 ..signature:bamRecordToAlignment(align, reference, record)

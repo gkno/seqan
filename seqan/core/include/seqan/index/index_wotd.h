@@ -358,6 +358,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.resizeVertexMap.type:Spec.IndexWotd
+///.Function.resizeVertexMap.class:Spec.IndexWotd
 
 	template < typename TText, typename TIndexSpec, typename TPropertyMap >
 	inline void
@@ -1072,6 +1073,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Builds a q-gram index on a sequence. 
 ..cat:Index
 ..signature:createWotdIndex(sa, dir, text)
+..class:Spec.IndexWotd
 ..param.text:The sequence.
 ..param.sa:The resulting list in which all q-grams are sorted alphabetically.
 ..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.

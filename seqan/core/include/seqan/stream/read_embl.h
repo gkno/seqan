@@ -1,5 +1,5 @@
 // ==========================================================================
-//                                read_embl.h
+//                 SeqAn - The Library for Sequence Analysis
 // ==========================================================================
 // Copyright (c) 2006-2010, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -77,6 +77,7 @@ enum EmblErrorCodes_
 
 /**
 .Function.startsWith
+..concept:Class.String
 ..cat:Input/Output
 ..signature:startsWith(str, prefix)
 ..summary:Check whether a sequence starts with a given prefix.

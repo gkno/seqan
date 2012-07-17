@@ -175,7 +175,7 @@
 //IOREV
 
 /**
-.Function.cpuTime:
+.Function.cpuTime
 ..cat:Misc
 ..summary:Returns the cpu time in seconds.
 ..signature:cpuTime()
@@ -205,7 +205,7 @@ Wall clock time is returned by @Function.sysTime@.
 
 
 /**
-.Function.sysTime:
+.Function.sysTime
 ..cat:Misc
 ..summary:Returns the system time in seconds.
 ..signature:sysTime()

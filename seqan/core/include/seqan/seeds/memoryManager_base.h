@@ -176,6 +176,7 @@ struct DefaultOverflowImplicit< MemoryManager<TValue, Block<SPACE> , TFree> >
 
 
 ///.Metafunction.Value.param.T.type:Class.MemoryManager
+///.Metafunction.Value.class:Class.MemoryManager
 template <typename TValue, unsigned int SPACE, typename TFree>
 struct Value<MemoryManager<TValue,Block<SPACE>, TFree > >
 {
@@ -290,7 +291,8 @@ _raiseMemory(MemoryManager<TValue,Block<SPACE>, TFree > &manager,
 
 
 /**
-.Function.releaseID:
+.Function.releaseID
+..class:Class.MemoryManager
 ..summary: Releases a given id so it can be redistributed later on.
 ..cat:Seed Handling
 ..signature:releaseID(manager,pos)
@@ -313,7 +315,8 @@ releaseID(MemoryManager<TValue,Block<SPACE>, TFree > &manager,
 
 
 /**
-.Function.obtainID:
+.Function.obtainID
+..class:Class.MemoryManager
 ..summary: btains a new id from the id manager.
 ..cat:Seed Handling
 ..signature:obtainID(manager)

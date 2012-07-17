@@ -41,7 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Class.External Property Map:
+.Class.External Property Map
 ..cat:Graph
 ..summary:An external property map.
 ..remarks:The external property map is assumed to be an instance of @Class.String@.
@@ -64,7 +64,8 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.resizeVertexMap:
+.Function.resizeVertexMap
+..class:Class.Graph
 ..cat:Graph
 ..summary:Initializes a vertex map. 
 ..signature:resizeVertexMap(g, pm [, prototype])
@@ -142,6 +143,10 @@ resizeEdgeMap(Graph<TSpec> const & g,
 
 /**
 .Function.assignProperty:
+..class:Class.External Property Map
+..class:Class.InternalMap
+..class:Class.InternalPointerMap
+..class:Class.InternalRawMap
 ..cat:Graph
 ..summary:Assigns a property to an item in the property map.
 ..signature:assignProperty(pm, d, val)
@@ -176,7 +181,11 @@ assignProperty(TPropertyMap& pm,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.property:
+.Function.property
+..class:Class.External Property Map
+..class:Class.InternalMap
+..class:Class.InternalPointerMap
+..class:Class.InternalRawMap
 ..cat:Graph
 ..summary:Accesses the property of an item in the property map.
 ..signature:property(pm, d)
@@ -218,7 +227,11 @@ property(TPropertyMap const& pm,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getProperty:
+.Function.getProperty
+..class:Class.External Property Map
+..class:Class.InternalMap
+..class:Class.InternalPointerMap
+..class:Class.InternalRawMap
 ..cat:Graph
 ..summary:Get method for an item's property.
 ..signature:getProperty(pm, d)
@@ -268,6 +281,9 @@ getProperty(TPropertyMap const& pm,
 Note: If zero it is assumed that the cargo is a simple type (e.g., int).
 ...default:$0$.
 ..include:seqan/graph_types.h
+..see:Class.External Property Map
+..see:Class.InternalPointerMap
+..see:Class.InternalRawMap
 */
 template<typename TContainer, unsigned int const MemberId = 0>
 struct InternalMap 
@@ -282,6 +298,7 @@ struct InternalMap
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.InternalMap
+///.Metafunction.Value.class:Class.InternalMap
 
 template<typename T1, typename T2>
 struct Value<InternalMap<Pair<T1, T2>, 1> const> {
@@ -549,6 +566,9 @@ getProperty(InternalMap<T, 0>&,
 ..param.TPropmap:A pointer to member type.
 ..param.Instance:A pointer to a member of type TPropmap.
 ..include:seqan/graph_types.h
+..see:Class.External Property Map
+..see:Class.InternalMap
+..see:Class.InternalRawMap
 */
 template <typename TPropmap, TPropmap const Instance> 
 struct InternalPointerMap 
@@ -562,6 +582,7 @@ struct InternalPointerMap
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.InternalPointerMap
+///.Metafunction.Value.class:Class.InternalMap
 
 template<typename TClass, typename TValue, TValue TClass:: * TPMember>
 struct Value<InternalPointerMap<TValue TClass::*, TPMember> const> {
@@ -669,6 +690,9 @@ getProperty(InternalPointerMap<TValue TClass::*, TPMember>&,
 ..summary:An internal property map using raw pointer to members.
 ..remarks:Internal property maps are used to access internal edge cargos.
 ..include:seqan/graph_types.h
+..see:Class.External Property Map
+..see:Class.InternalMap
+..see:Class.InternalPointerMap
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -678,6 +702,7 @@ getProperty(InternalPointerMap<TValue TClass::*, TPMember>&,
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.InternalRawMap
+///.Metafunction.Value.class:Class.InternalRawMap
 
 template <typename TClass, typename TValue> 
 struct Value<TValue TClass:: *> {
@@ -761,7 +786,11 @@ getProperty(TValue TClass:: * const ptr_to_member,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignVertexMap:
+.Function.assignVertexMap
+..class:Class.External Property Map
+..class:Class.InternalMap
+..class:Class.InternalPointerMap
+..class:Class.InternalRawMap
 ..cat:Graph
 ..summary:Initializes a vertex map with values of an array.
 ..signature:assignVertexMap(g, pm, prop)
@@ -794,7 +823,11 @@ assignVertexMap(Graph<TSpec> const & g,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignEdgeMap:
+.Function.assignEdgeMap
+..class:Class.External Property Map
+..class:Class.InternalMap
+..class:Class.InternalPointerMap
+..class:Class.InternalRawMap
 ..cat:Graph
 ..summary:Initializes a vertex map with values of an array.
 ..signature:assignEdgeMap(g, pm, prop)

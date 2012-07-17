@@ -641,6 +641,7 @@ endPosition(Pattern<TIndex, Pigeonhole<TSpec> > & pattern)
 }
 
 ///.Function.positionRangeNoClip.param.finder.type:Spec.Pigeonhole
+///.Function.positionRangeNoClip.class:Spec.Pigeonhole
 ///.Function.positionRangeNoClip.param.pattern.type:Spec.Pigeonhole
 
 template <typename THaystack, typename TSpec>
@@ -661,6 +662,7 @@ positionRangeNoClip(Finder<THaystack, Pigeonhole<TSpec> > & finder)
 }
 
 ///.Function.positionRange.param.finder.type:Spec.Pigeonhole
+///.Function.positionRange.class:Spec.Pigeonhole
 ///.Function.positionRange.param.pattern.type:Spec.Pigeonhole
 
 template <typename THaystack, typename TSpec>
@@ -722,6 +724,7 @@ pigeonholeInfix(TPigeonholeHit const &hit, TText &text)
 //____________________________________________________________________________
 
 ///.Function.infix.param.finder.type:Spec.Pigeonhole
+///.Function.infix.class:Spec.Pigeonhole
 
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
@@ -945,6 +948,7 @@ find(
 
 /**
 .Function.windowFindBegin:
+..class:Spec.Pigeonhole
 ..param.finder.type:Spec.Pigeonhole
 ..param.pattern.type:Spec.Pigeonhole
 */
@@ -973,6 +977,7 @@ windowFindBegin(
 
 /**
 .Function.windowFindNext:
+..class:Spec.Pigeonhole
 ..param.finder.type:Spec.Pigeonhole
 ..param.pattern.type:Spec.Pigeonhole
 */
@@ -1077,6 +1082,7 @@ windowFindNext(
 
 /**
 .Function.windowFindEnd:
+..class:Spec.Pigeonhole
 ..param.finder.type:Spec.Pigeonhole
 ..param.pattern.type:Spec.Pigeonhole
 */
@@ -1114,3 +1120,4 @@ getMaxDeviationOfOrder(Pattern<TIndex, Pigeonhole<TSpec> > &pattern)
 }// namespace seqan
 
 #endif //#ifndef CORE_INCLUDE_SEQAN_FIND_PIGEONHOLE_H_
+

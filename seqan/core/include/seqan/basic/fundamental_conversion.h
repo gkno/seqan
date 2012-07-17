@@ -84,7 +84,7 @@ struct Convert
 // ----------------------------------------------------------------------------
 
 /**
-.Function.convertImpl:
+.Function.convertImpl
 ..hidefromindex
 ..cat:Alphabets
 ..summary:Implements @Function.convert@.
@@ -118,7 +118,7 @@ convertImpl(Convert<TTarget, T> const,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.convert:
+.Function.convert
 ..cat:Alphabets
 ..summary:Converts a value into another value.
 ..signature:Convert convert<Target>(source)

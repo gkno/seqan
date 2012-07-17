@@ -101,6 +101,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Reference.param.T.type:Class.Segment
+///.Metafunction.Reference.class:Class.Segment
 
 template <typename TValue, typename TSpec>
 struct Reference<Dequeue<TValue, TSpec> >
@@ -120,6 +121,7 @@ struct Reference<Dequeue<TValue, TSpec> const >
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Iterator.param.T.type:Class.Dequeue
+///.Metafunction.Iterator.class:Class.Dequeue
 
 template<typename TValue, typename TSpec>
 struct Iterator<Dequeue<TValue, TSpec>, Standard> 

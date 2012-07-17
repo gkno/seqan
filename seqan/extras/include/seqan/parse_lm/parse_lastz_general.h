@@ -66,6 +66,7 @@ typedef Tag<LastzGeneral_> LastzGeneral;
 
 /**
 .Function.readRecord
+..class:Class.LocalMatchStore
 ..cat:Local Match Store
 ..signature:readRecord(store, stream, LastzGeneral())
 ..summary:Read Lastz "general" format record.

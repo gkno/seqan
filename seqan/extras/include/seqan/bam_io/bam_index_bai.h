@@ -127,6 +127,7 @@ public:
 
 /**
 .Function.jumpToPos
+..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:jumpToPos(bgzfStream, hasAlignments, bamIOContext, refId, pos, bamIndex)
 ..summary:Seek in BAM BGZF stream using an index.
@@ -245,6 +246,7 @@ jumpToPos(Stream<Bgzf> & stream, bool & hasAlignments, BamIOContext<TNameStore, 
 
 /**
 .Function.getUnalignedCount
+..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:load(index, filename)
 ..summary:Query index for number of unaligned reads.
@@ -266,6 +268,7 @@ getUnalignedCount(BamIndex<Bai> const & index)
 
 /**
 .Function.load
+..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:load(index, filename)
 ..summary:Load a BAM index from a given file name.
@@ -378,6 +381,7 @@ load(BamIndex<Bai> & index, char const * filename)
 
 /*DISABLED
 .Function.BamIndex#buildIndex
+..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:buildIndex(index, filename)
 ..summary:Build index for BAM file with given filename.

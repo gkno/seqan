@@ -995,6 +995,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 ///.Function.clear.param.object.type:Class.Pool
+///.Function.clear.class:Class.Pool
 
     template < typename TValue, typename TSpec >
     inline void clear(Pool<TValue, TSpec> &me)
@@ -1011,6 +1012,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 ///.Function.length.param.object.type:Class.Pool
+///.Function.length.class:Class.Pool
 
 	template < typename TValue, typename TSpec >
     inline typename Size< Pool<TValue, TSpec> >::Type
@@ -1020,6 +1022,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 ///.Function.resize.param.object.type:Class.Pool
+///.Function.resize.class:Class.Pool
 
 	template < typename TValue, typename TSpec, typename TSize >
     inline TSize resize(Pool<TValue, TSpec> &me, TSize new_length)
@@ -1029,6 +1032,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 ///.Function.Pipelining#front.param.object.type:Class.Pool
+///.Function.Pipelining#front.class:Class.Pool
 
     template < typename TValue, typename TSpec >
 	inline typename Value< Pool<TValue, TSpec> >::Type const & front(Pool<TValue, TSpec> &me) {
@@ -1036,6 +1040,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 ///.Function.pop.param.object.type:Class.Pool
+///.Function.pop.class:Class.Pool
 
     template < typename TValue, typename TSpec >
     inline void pop(Pool<TValue, TSpec> &me) {
@@ -1049,6 +1054,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Function.push:
+..class:Class.Pool
 ..cat:Pipelining
 ..summary:Appends an item at the end of an input stream.
 ..signature:push(object, val)
@@ -1118,7 +1124,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	    }
     	
 /**
-.Function.beginWrite:
+.Function.beginWrite
+..class:Class.Pool
 ..cat:Pipelining
 ..summary:Initiates a write process.
 ..signature:beginWrite(object)
@@ -1139,6 +1146,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.endWrite:
+..class:Class.Pool
 ..cat:Pipelining
 ..summary:Terminates a write process.
 ..signature:endWrite(object)
@@ -1156,6 +1164,7 @@ SEQAN_CHECKPOINT
         }
 
 ///.Function.atEnd.param.iterator.type:Class.Pool
+///.Function.atEnd.class:Class.Pool
 // TODO(holtgrew): Documentation bug!
 
 		template < typename TValue, typename TSpec >
@@ -1210,6 +1219,7 @@ SEQAN_CHECKPOINT
     }
 
 ///.Function.assign.param.target.type:Class.Pool
+///.Function.assign.class:Class.Pool
 
     template < typename TValue,
                typename TSpec,
@@ -1230,6 +1240,7 @@ SEQAN_CHECKPOINT
 
 
 ///.Function.assign.param.source.type:Class.Pool
+///.Function.assign.class:Class.Pool
 
     // pool -> string
     template < typename TValue1,

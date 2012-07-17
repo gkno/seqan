@@ -330,6 +330,7 @@ typedef String<TDnaAlphabet> TDnaSequence;
 
 /**
 .Function.zscore:
+..class:Class.MarkovModel
 ..cat:Statistics
 ..summary:Computes the z-score index for a set of patterns w.r.t. a set of text strings and a MarkovModel
 ..signature:zscore(W, X, M, algorithmTag)
@@ -409,6 +410,7 @@ TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovMode
 
 /**
 .Function.variance:
+..class:Class.MarkovModel
 ..cat:Statistics
 ..summary:Computes the variance for a set of patterns w.r.t. a set of text strings and a MarkovModel
 ..signature:variance(W,X,M)
@@ -472,6 +474,7 @@ TFloat variance(StringSet<String<Dna> > W, StringSet<String<Dna> > &X, MarkovMod
 
 /**
 .Function.expectation:
+..class:Class.MarkovModel
 ..cat:Statistics
 ..summary:Computes the expectation for a set of patterns w.r.t. a set of text strings and a MarkovModel
 ..signature:expectation(W,X,M)

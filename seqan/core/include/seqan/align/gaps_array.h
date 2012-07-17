@@ -258,7 +258,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.clippedBeginPosition:
+.Function.clippedBeginPosition
+..class:Class.Gaps
 ..summary:Begin position of the source segment.
 ..cat:Alignments
 ..signature:clippedBeginPosition(object)
@@ -291,7 +292,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.clippedEndPosition:
+.Function.clippedEndPosition
+..class:Class.Gaps
 ..summary:Position of the end of the source segment.
 ..cat:Alignments
 ..signature:clippedEndPosition(object)
@@ -373,7 +375,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.toViewPosition:
+.Function.toViewPosition
+..class:Class.Gaps
 ..summary:Transforms source to view position.
 ..cat:Alignments
 ..signature:toViewPosition(gaps, pos)
@@ -423,7 +426,8 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 /**
-.Function.toSourcePosition:
+.Function.toSourcePosition
+..class:Class.Gaps
 ..summary:Transforms view to source position, if the view position is a gap, the original position of the next non-gap entry is returned.
 ..cat:Alignments
 ..signature:toSourcePosition(gaps, pos)

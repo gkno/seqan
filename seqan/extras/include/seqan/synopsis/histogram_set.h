@@ -89,6 +89,7 @@ public:
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T:Class.HistogramSet
+///.Metafunction.Value.class:Class.HistogramSet
 
 template <typename TValue>
 struct Value<HistogramSet<TValue> >
@@ -107,6 +108,7 @@ struct Value<HistogramSet<TValue> const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Size.param.T:Class.HotList
+///.Metafunction.Size.class:Class.HotList
 
 template <typename TValue>
 struct Size<HistogramSet<TValue> >
@@ -125,6 +127,7 @@ struct Size<HistogramSet<TValue> const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Position.param.T:Class.HotList
+///.Metafunction.Position.class:Class.HotList
 
 template <typename TValue>
 struct Position<HistogramSet<TValue> >

@@ -318,6 +318,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.matchRefinement:
+..class:Spec.Alignment Graph
 ..signature:matchRefinement(matches,annotation,stringSet,scoringScheme,refinedGraph)
 ..param.annotation:Sequence annotation data. 
 ...remarks: Additional semgent match subdivisions will be made at sequence positions at which the annotation label changes.

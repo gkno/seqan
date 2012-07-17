@@ -658,6 +658,7 @@ namespace seqan
 
 /**
 .Function.searchElement:
+..class:Class.SkipList
 ..summary:Get the leftmost SkipBaseElement element in a SkipList list, where $key(element) <= search_key$
 ..cat:SkipList
 ..signature:searchElement(list, search_key)

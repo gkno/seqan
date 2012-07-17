@@ -290,6 +290,7 @@ open(Stream<BZ2File> & stream, char const * filename, char const * mode)
 
 /**
 .Function.close
+..class:Class.Stream
 ..signature:close(stream)
 ..param.stream:Stream to close.
 ...type:Class.Stream

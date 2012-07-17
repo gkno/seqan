@@ -119,6 +119,7 @@ public:
 
 /**
 .Function.nameStore
+..class:Class.BamIOContext
 ..cat:BAM I/O
 ..summary:Return reference to name store from @Class.BamIOContext@.
 ..signature:nameStore(context)
@@ -151,6 +152,7 @@ nameStore(BamIOContext<TNameStore, TNameStoreCache> const & context)
 
 /**
 .Function.nameStoreCache
+..class:Class.BamIOContext
 ..cat:BAM I/O
 ..summary:Return reference to name store cache from @Class.BamIOContext@.
 ..signature:nameStoreCache(context)

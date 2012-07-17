@@ -105,6 +105,7 @@ struct DefaultPattern
 ..summary:Returns the haystack type of a @Class.Finder@ type.
 ..cat:Searching
 ..signature:Haystack<TFinder>::Type
+..class:Class.Finder
 ..param.TFinder:A @Class.Finder@ type.
 ...type:Class.Finder
 ..returns:The haystack type of $TFinder$, i.e. $THaystack$ for $Finder<THaystack, TSpec>$.
@@ -124,6 +125,7 @@ struct Haystack
 ..summary:Returns the needle type of a @Class.Pattern@ type.
 ..cat:Searching
 ..signature:Needle<TPattern>::Type
+..class:Class.Pattern
 ..param.TPattern:A @Class.Pattern@ type.
 ...type:Class.Pattern
 ..returns:The needle type of $TPattern$, i.e. $TNeedle$ for $Pattern<TNeedle, TSpec>$.
@@ -157,6 +159,7 @@ struct Needle<Segment<THost, TSpec> const>
 ..cat:Searching
 ..signature:find(finder, pattern)
 ..signature:find(finder, pattern, k)
+..class:Class.Finder
 ..param.finder:The @Class.Finder@ object to search through.
 ...remarks:For online-algorithm $patterns$, finder can also be an arbitrary @Concept.RootedIteratorConcept|Rooted Iterator@.
 ...type:Class.Finder
@@ -192,7 +195,9 @@ in which $hayNo$ is the haystack index and $pos$ the local position of the hit.
 */
 
 ///.Function.clear.param.object.type:Class.Finder
+///.Function.clear.class:Class.Finder
 ///.Function.position.param.iterator.type:Class.Finder
+///.Function.position.class:Class.Finder
 
 template < typename THaystack, typename TSpec = typename DefaultFinder<THaystack>::Type >
 class Finder
@@ -342,6 +347,7 @@ _setFinderLength(Finder<THaystack, TSpec> & me,
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.beginPosition.param.object.type:Class.Finder
+///.Function.beginPosition.class:Class.Finder
 
 template <typename THaystack, typename TSpec>
 inline typename Position<THaystack>::Type 
@@ -361,6 +367,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.begin.param.object.type:Class.Finder
+///.Function.begin.class:Class.Finder
 
 template <typename THaystack, typename TSpec, typename TTag>
 inline typename Iterator<THaystack, Tag<TTag> const>::Type
@@ -382,6 +389,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.endPosition.param.object.type:Class.Finder
+///.Function.endPosition.class:Class.Finder
 
 template <typename THaystack, typename TSpec>
 inline typename Position<THaystack>::Type 
@@ -401,6 +409,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.end.param.object.type:Class.Finder
+///.Function.end.class:Class.Finder
 
 template <typename THaystack, typename TSpec, typename TTag>
 inline typename Iterator<THaystack, Tag<TTag> const>::Type
@@ -422,6 +431,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.length.param.object.type:Class.Finder
+///.Function.length.class:Class.Finder
 
 template <typename THaystack, typename TSpec>
 inline typename Size<THaystack>::Type 
@@ -604,6 +614,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.goBegin
 ..signature:goBegin(finder)
+..class:Class.Finder
 ...param.finder:Finder object to go to beginning in.
 ..include:seqan/find.h
  */
@@ -619,6 +630,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.goEnd
 ..signature:goEnd(finder)
+..class:Class.Finder
 ...param.finder:Finder object to go to end in.
 ..include:seqan/find.h
  */
@@ -657,8 +669,9 @@ SEQAN_CHECKPOINT
 ..cat:Searching
 ..summary:Sets the position of a finder.
 ..signature:setPosition(finder, pos)
+..class:Class.Finder
 ..param.finder:A finder.
-...class:Class.Finder
+...type:Class.Finder
 ..param.pos:A position.
 ...metafunction:Metafunction.Position
 ..see:Function.position
@@ -764,6 +777,7 @@ SEQAN_CHECKPOINT
 ..summary:Sets the haystack of a @Class.Finder@ object.
 ..cat:Searching
 ..signature:setHaystack(finder, haystack)
+..class:Class.Finder
 ..param.finder:The @Class.Finder@ object to search with.
 ...type:Class.Finder
 ..param.haystack:The haystack object the finder searches through.
@@ -782,6 +796,7 @@ setHaystack(Finder<THaystack, TSpec> &obj, THaystack const &hstk) {
 ..summary:Returns the haystack of a @Class.Finder@ object.
 ..cat:Searching
 ..signature:haystack(finder)
+..class:Class.Finder
 ..param.finder:The @Class.Finder@ object to search through.
 ...type:Class.Finder
 ..returns:The haystack object.
@@ -806,6 +821,7 @@ haystack(TObject const &obj) {
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Container.param.T.type:Class.Finder
+///.Metafunction.Container.class:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Container< Finder<THaystack, TSpec> > {
 	typedef THaystack Type;
@@ -818,6 +834,7 @@ struct Container< Finder<THaystack, TSpec> const> {
 
 
 ///.Metafunction.Host.param.T.type:Class.Finder
+///.Metafunction.Host.class:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Host< Finder<THaystack, TSpec> > {
 	typedef THaystack Type;
@@ -830,6 +847,7 @@ struct Host< Finder<THaystack, TSpec> const> {
 
 
 ///.Metafunction.Value.param.T.type:Class.Finder
+///.Metafunction.Value.class:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Value< Finder<THaystack, TSpec> > {
 	typedef typename Value<THaystack>::Type Type;
@@ -841,6 +859,7 @@ struct Position< Finder<THaystack, TSpec> >:
 
 
 ///.Metafunction.Difference.param.T.type:Class.Finder
+///.Metafunction.Difference.class:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Difference< Finder<THaystack, TSpec> > {
 	typedef typename Difference<THaystack>::Type Type;
@@ -853,6 +872,7 @@ struct Size< Finder<THaystack, TSpec> > {
 
 
 ///.Metafunction.Iterator.param.T.type:Class.Finder
+///.Metafunction.Iterator.class:Class.Finder
 template <typename THaystack, typename TSpec, typename TIteratorSpec>
 struct Iterator< Finder<THaystack, TSpec>, TIteratorSpec >
 {

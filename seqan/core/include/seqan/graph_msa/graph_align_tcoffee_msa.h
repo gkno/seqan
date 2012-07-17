@@ -202,6 +202,7 @@ _appendSegmentMatches(StringSet<String<TValue, TStrSpec>, Dependent<TSpec> > con
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.globalMsaAlignment:
+..class:Spec.Alignment Graph
 ..summary:Computes a global multiple alignment.
 ..cat:Alignments
 ..signature:globalMsaAlignment(align, score)

@@ -159,6 +159,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 ..cat:Index
 ..summary:Default behaviour of @Function.goNext@ when no second parameter is given.
 ..signature:GetVSTreeIteratorTraits<TIterator>::Type
+..class:Class.Index
 ..param.TIterator:A @Spec.VSTree Iterator@.
 ..returns:$Tag.Postorder$ by default and $Tag.Preorder$ if $TIterator$ is $VSTree<TopDown<ParentLinks<> > >$ or $VSTree<TopDown<ParentLinks<Preorder> > >$.
 ..include:seqan/index.h
@@ -208,6 +209,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Metafunction.VertexDescriptor.param.T.type:Spec.IndexEsa
+///.Metafunction.VertexDescriptor.class:Spec.IndexEsa
 
 	template < typename TText, typename TSpec >
 	struct VertexDescriptor< Index<TText, IndexEsa<TSpec> > > {

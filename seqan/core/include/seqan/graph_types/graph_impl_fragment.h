@@ -303,7 +303,7 @@ operator<(Fragment<TSize, ExactReversableFragment<TSpec> > const & left,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.label:
+.Function.label
 ..class:Class.Fragment
 ..signature:label(f,str,seqId)
 ..param.f:A fragment.
@@ -326,8 +326,8 @@ label(Fragment<TSize, TSpec> const& f,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.sequenceId:
-..Class.Fragment
+.Function.sequenceId
+..class:Class.Fragment
 ..signature:sequenceId(f,seqNum)
 ..param.f:A fragment.
 ...type:Class.Fragment
@@ -347,7 +347,8 @@ sequenceId(Fragment<TSize, TSpec> const& f,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.fragmentBegin:
+.Function.fragmentBegin
+..class:Class.Fragment
 ..signature:fragmentBegin(f, seqId)
 ..param.f:A fragment.
 ...type:Class.Fragment
@@ -378,7 +379,7 @@ fragmentLength(Fragment<TSize, TSpec> const& f,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.fragmentLength:
+.Function.fragmentLength
 ..class:Class.Fragment
 ..signature:fragmentBegin(f)
 ..param.f:A fragment.
@@ -395,7 +396,7 @@ fragmentLength(Fragment<TSize, TSpec> const& f)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getProjectedPosition:
+.Function.getProjectedPosition
 ..cat:Alignments
 ..class:Class.Fragment
 ..signature:getProjectedPosition(f,seqId,pos,seqId2,pos2)
@@ -539,7 +540,7 @@ getProjectedPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.isReversed:
+.Function.isReversed
 ..cat:Alignments
 ..class:Class.Fragment
 ..signature:isReversed<Fragment<TSize,ExactReversableFragment<TSpec> >(f)

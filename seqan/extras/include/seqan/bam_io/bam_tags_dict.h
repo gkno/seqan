@@ -140,6 +140,7 @@ host(BamTagsDict const & bamTags)
 
 /**
 .Function.hasIndex
+..class:Class.BamTagsDict
 ..cat:Fragment Store
 ..summary:Return $true$ if @Class.BamTagsDict@ has an index.
 ..signature:hasIndex(bamTags)
@@ -170,6 +171,7 @@ hasIndex(BamTagsDict & bamTags)
 
 /**
 .Function.getBamTypeSize
+..class:Class.BamTagsDict
 ..cat:BAM I/O
 ..signature:getBamTypeSize(c)
 ..summary:Return size of the type identified by $c$.
@@ -210,6 +212,7 @@ getBamTypeSize(char c)
 
 /**
 .Function.buildIndex
+..class:Class.BamTagsDict
 ..cat:Fragment Store
 ..summary:Build index for a @Class.BamTagsDict@ object.
 ..signature:buildIndex(bamTags)
@@ -310,6 +313,7 @@ length(BamTagsDict const & tags)
 
 /**
 .Function.getTagType
+..class:Class.BamTagsDict
 ..cat:BAM I/O
 ..signature:getTagType(tagsDict, idx)
 ..summary:Get key of a tag by index.
@@ -334,6 +338,7 @@ getTagType(BamTagsDict & tags, TPos idx)
 
 /**
 .Function.getTagKey
+..class:Class.BamTagsDict
 ..cat:BAM I/O
 ..signature:getTagKey(tagsDict, idx)
 ..summary:Return key of a tag by index.
@@ -367,6 +372,7 @@ getTagKey(BamTagsDict const & tags, TPos idx)
 
 /**
 .Function.findTagKey
+..class:Class.BamTagsDict
 ..signature:findTagKey(idx, tagsDict, name)
 ..param.idx:Index of the tag with the given key.
 ...type:nolink:$unsigned$
@@ -398,6 +404,7 @@ findTagKey(unsigned & idx, BamTagsDict const & tags, CharString const & name)
 
 /**
 .Function.getTagValue
+..class:Class.BamTagsDict
 ..cat:BAM I/O
 ..signature:getTagValue(tagsDict, idx)
 ..param.tagsDict:The @Class.BamTagsDict@ to retrieve data from.
@@ -461,6 +468,7 @@ getTagValue(BamTagsDict const & tags, TPos idx)
 
 /**
 .Function.extractTagValue
+..class:Class.BamTagsDict
 ..cat:BAM I/O
 ..signature:extractTagValue(dest, tags, idx)
 ..summary:Extract and cast "atomic" value from tags string with index $idx$.
@@ -554,6 +562,7 @@ extractTagValue(TDest & dest, BamTagsDict & tags, TIdx idx)
 
 /**
 .Function.getBamTypeChar
+..class:Class.BamTagsDict
 ..cat:BAM I/O
 ..summary:Return char identifying the type of the atomic argument.
 ..signature:getBamTypeChar<T>()
@@ -596,6 +605,7 @@ inline char getBamTypeChar()
 
 /**
 .Function.setTagValue
+..class:Class.BamTagsDict
 ..cat:BAM I/O
 ..summary:Set the value of a tag through a @Class.BamTagsDict@.
 ..signature:setTagValue(tags, key, val[, typeC])
@@ -721,6 +731,7 @@ setTagValue(BamTagsDict & tags, CharString const & key, T const & val)
 
 /**
 .Function.eraseTag
+..class:Class.BamTagsDict
 ..summary:Erase tag from @Class.BamTagsDict@.
 ..cat:BAM I/O
 ..signature:eraseTag(tagsDict, key)

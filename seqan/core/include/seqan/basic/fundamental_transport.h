@@ -84,7 +84,7 @@ struct HasMoveConstructor
 // ----------------------------------------------------------------------------
 
 /**
-.Function.assign:
+.Function.assign
 ..summary:Assigns one object to another object.
 ..cat:Content Manipulation
 ..signature:assign(target, source)
@@ -146,7 +146,7 @@ assign(Proxy<TTargetSpec> & target,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.set:
+.Function.set
 ..summary:Assigns one object to another object avoiding to copy contents.
 ..cat:Content Manipulation
 ..signature:set(target, source)
@@ -199,7 +199,7 @@ set(TTarget const & target,
 // ----------------------------------------------------------------------------
 
 /**
-.Function.move:
+.Function.move
 ..summary:Hands over content from one container to another container.
 ..cat:Content Manipulation
 ..signature:move(target, source)

@@ -70,6 +70,7 @@ class MotifFinder;
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.MotifFinder
+///.Metafunction.Value.class:Class.MotifFinder
 
 template<typename TValue, typename TSpec, typename TRng>
 struct Value< MotifFinder<TValue, TSpec, TRng> >
@@ -88,7 +89,8 @@ struct Value< MotifFinder<TValue, TSpec, TRng> const>
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.findMotif:
+.Function.findMotif
+..class:Class.MotifFinder
 ..summary:Represents the main function which is used to start the search for noticeable motif patterns.
 ..cat:Motif Search
 ..signature:findMotif(finder,dataset,seq_model)
@@ -261,6 +263,7 @@ inverseHash(TType const & hash_value,
 
 /**
 .Function.displayResult:
+..class:Class.MotifFinder
 ..summary:Displays all found motif candidates. In the case of the Projection Motif Finder
           the function displays the consensus pattern of the found motif candidate.
 ..cat:Motif Search
@@ -319,6 +322,7 @@ struct Motif< MotifFinder<TValue, TSpec, TRng> >
 /////////////////////////////////////////////////////////////////////////
 /**
 .Function.getMotif:
+..class:Class.MotifFinder
 ..summary:Gets the motif out of a @Class.MotifFinder@.  If pos is given, the pos-th motif is returned, otherwise the first motif is returned.
 ..cat:Motif Search
 ..signature:getMotif(motifFinder, pos)
@@ -349,6 +353,7 @@ getMotif(MotifFinder<TValue, TSpec, TRng> & me)
 /////////////////////////////////////////////////////////////////////////
 /**
 .Function.motifCount:
+..class:Class.MotifFinder
 ..summary:Gets number of motifs in the @Class.MotifFinder@.
 ..cat:Motif Search
 ..signature:motifCount(motifFinder)

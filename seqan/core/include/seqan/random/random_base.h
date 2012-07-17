@@ -90,11 +90,15 @@ class Pdf;
 // ===========================================================================
 
 ///.Metafunction.Value.param.T.type:Class.Pdf
+///.Metafunction.Value.class:Class.Pdf
 // specification only
 
 ///.Metafunction.Value.param.T.type:Class.Rng
+///.Metafunction.Value.class:Class.Rng
 ///.Metafunction.MinValue.param.T.type:Class.Rng
+///.Metafunction.MinValue.class:Class.Rng
 ///.Metafunction.MaxValue.param.T.type:Class.Rng
+///.Metafunction.MaxValue.class:Class.Rng
 
 template <typename TSpec>
 struct MaxValue<Rng<TSpec> >
@@ -158,6 +162,8 @@ struct GetDefaultRng
 
 /**
 .Function.pickRandomNumber
+..class:Class.Rng
+..class:Class.Pdf
 ..summary:Pick a random number using a random number generator object, possibly following the given distribution.
 ..cat:Random
 ..include:seqan/random.h

@@ -66,6 +66,7 @@ struct FindBeginPatternSpec< Pattern<TNeedle, Pex<TVerification , TMultiFinder >
 ..cat:Searching
 ..summary:Determines the multiple exact string matching algorithm used by the Pex algorithm.
 ..signature:PexMultiFinder< Pattern<TNeedle,Pex<TVerification,TMultiFinder> > >::Type
+..class:Class.Pattern
 ..param.TMultiFinder:The specification for the multiple exact string matching algorithm that should be used with the Pex algorithm.
 ..returns.param.Type:Pattern type of the multiple exact string matching algorithm for the specified Pattern.
 ..see:Spec.Pex
@@ -250,6 +251,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.getScore.param.pattern.type:Spec.Pex
+///.Function.getScore.class:Spec.Pex
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
 int getScore(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me) 
@@ -260,6 +262,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.scoreLimit.param.pattern.type:Spec.Pex
+///.Function.scoreLimit.class:Spec.Pex
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
 inline int 
@@ -272,6 +275,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.setScoreLimit.param.pattern.type:Spec.Pex
+///.Function.setScoreLimit.class:Spec.Pex
 
 template <typename TNeedle, typename TScoreValue,typename TVerification, typename TMultiFinder>
 inline void 

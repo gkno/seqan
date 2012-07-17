@@ -132,6 +132,7 @@ struct Value<Holder<TValue * const, TSpec> >
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Spec.param.T.type:Class.Holder
+///.Metafunction.Spec.class:Class.Holder
 
 template <typename TValue, typename TSpec>
 struct Spec<Holder<TValue, TSpec> >
@@ -150,6 +151,7 @@ struct Spec<Holder<TValue, TSpec> const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Reference.param.T.type:Class.Holder
+///.Metafunction.Reference.class:Class.Holder
 
 template <typename TValue, typename TSpec>
 struct Reference<Holder<TValue, TSpec> >

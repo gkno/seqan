@@ -135,6 +135,7 @@ struct Size<Gaps<TSource, TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Position.param.T.type:Class.Gaps
+///.Metafunction.Position.class:Class.Gaps
 
 template <typename TSource, typename TSpec>
 struct Position<Gaps<TSource, TSpec> >:
@@ -152,7 +153,8 @@ struct Position<Gaps<TSource, TSpec> const>:
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Metafunction.Source:
+.Metafunction.Source
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:The underlying sequence for alignments or gaps data structures.
 ..signature:Source<T>::Type
@@ -172,7 +174,8 @@ struct Source<Gaps<TSource, TSpec> >
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Metafunction.GetSource:
+.Metafunction.GetSource
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:The type returned by the @Function.source@ function.
 ..signature:GetSource<T>::Type
@@ -193,6 +196,7 @@ struct GetSource
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Iterator.param.T.type:Class.Gaps
+///.Metafunction.Iterator.class:Class.Gaps
 
 template <typename TSource, typename TSpec, typename TIteratorSpec>
 struct Iterator<Gaps<TSource, TSpec>, TIteratorSpec>
@@ -208,6 +212,7 @@ struct Iterator<Gaps<TSource, TSpec> const, TIteratorSpec>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Spec.param.T.type:Class.Gaps
+///.Metafunction.Spec.class:Class.Gaps
 
 template <typename TSource, typename TSpec>
 struct Spec<Gaps<TSource, TSpec> >
@@ -225,6 +230,7 @@ struct Spec<Gaps<TSource, TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Value.param.T.type:Class.Gaps
+///.Metafunction.Value.class:Class.Gaps
 
 template <typename TSource, typename TSpec>
 struct Value<Gaps<TSource, TSpec> >:
@@ -242,6 +248,7 @@ struct Value<Gaps<TSource, TSpec> const>:
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.GetValue.param.T.type:Class.Gaps
+///.Metafunction.GetValue.class:Class.Gaps
 
 template <typename TSource, typename TSpec>
 struct GetValue<Gaps<TSource, TSpec> >:
@@ -260,6 +267,7 @@ struct GetValue<Gaps<TSource, TSpec> const>:
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Reference.param.T.type:Class.Gaps
+///.Metafunction.Reference.class:Class.Gaps
 
 template <typename TSource, typename TSpec>
 struct Reference<Gaps<TSource, TSpec> >
@@ -281,6 +289,7 @@ struct Reference<Gaps<TSource, TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.getObjectId.param.object.type:Class.Gaps
+///.Function.getObjectId.class:Class.Gaps
 
 template <typename TSource, typename TSpec>
 inline void const *
@@ -300,6 +309,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.begin.param.object.type:Class.Gaps
+///.Function.begin.class:Class.Gaps
 
 // returns iterator to left border
 template <typename TSource, typename TSpec, typename TTag>
@@ -321,6 +331,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.end.param.object.type:Class.Gaps
+///.Function.end.class:Class.Gaps
 
 // returns iterator to right border
 template <typename TSource, typename TSpec, typename TTag>
@@ -343,6 +354,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.length.param.object.type:Class.Gaps
+///.Function.length.class:Class.Gaps
 
 template <typename TSource, typename TSpec>
 inline typename Size<Gaps<TSource, TSpec> >::Type
@@ -356,7 +368,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.sourceBegin:
+.Function.sourceBegin
+..class:Class.Gaps
 ..summary:Begin of the source segment. 
 ..cat:Alignments
 ..signature:sourceBegin(object)
@@ -390,7 +403,8 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.sourceEnd:
+.Function.sourceEnd
+..class:Class.Gaps
 ..summary:End of the source segment. 
 ..cat:Alignments
 ..signature:sourceEnd(object)
@@ -425,7 +439,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.insertGap:
+.Function.insertGap
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Insert one blank into a gapped sequence. 
 ..signature:insertGap(gapped_sequence, view_position)
@@ -446,7 +461,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.insertGaps:
+.Function.insertGaps
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Insert blanks into a gapped sequence. 
 ..signature:insertGaps(gapped_sequence, view_position, count)
@@ -470,7 +486,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeGap:
+.Function.removeGap
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Removes one blank from a gapped sequence. 
 ..signature:removeGap(gapped_sequence, view_position)
@@ -493,7 +510,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.removeGaps:
+.Function.removeGaps
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Removes blanks from a gapped sequence. 
 ..signature:removeGaps(gapped_sequence, view_position, count)
@@ -522,7 +540,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.isGap:
+.Function.isGap
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Test a gapped sequence for gaps at a specific position. 
 ..signature:bool isGap(gapped_sequence, view_position)
@@ -553,7 +572,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.countGaps:
+.Function.countGaps
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Count blanks at a specific position in a gapped sequence. 
 ..signature:Size countGaps(gapped_sequence, view_position)
@@ -588,7 +608,8 @@ SEQAN_CHECKPOINT
 }
 
 /**
-.Function.countCharacters:
+.Function.countCharacters
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Count characters at a specific position in a gapped sequence.
 ..signature:Size countCharacters(gapped_sequence, view_position)
@@ -625,7 +646,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.clearGaps:
+.Function.clearGaps
+..class:Class.Gaps
 ..cat:Alignments
 ..summary:Remove blanks from a gapped sequence. 
 ..signature:clearGaps(gapped_sequence [, view_begin_pos, view_end_pos])
@@ -714,6 +736,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.getValue.param.container.type:Class.Gaps
+///.Function.getValue.class:Class.Gaps
 
 template <typename TSource, typename TSpec, typename TPosition>
 inline typename GetValue<Gaps<TSource, TSpec> >::Type
@@ -739,6 +762,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Function.value.param.container.type:Class.Gaps
+///.Function.value.class:Class.Gaps
 
 template <typename TSource, typename TSpec, typename TPosition>
 inline typename Reference<Gaps<TSource, TSpec> >::Type
@@ -763,7 +787,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.emptySource:
+.Function.emptySource
+..class:Class.Gaps
 ..summary:Test if there is a source. 
 ..cat:Alignments
 ..signature:bool emptySource(object)
@@ -794,7 +819,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.dependentSource:
+.Function.dependentSource
+..class:Class.Gaps
 ..summary:Test if object depends from it's source. 
 ..cat:Alignments
 ..signature:bool dependentSource(object)
@@ -827,7 +853,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.setSource:
+.Function.setSource
+..class:Class.Gaps
 ..summary:Let an external object be the source.
 ..cat:Alignments
 ..signature:setSource(object, source)
@@ -876,7 +903,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.createSource:
+.Function.createSource
+..class:Class.Gaps
 ..summary:Creates a new source.
 ..cat:Alignments
 ..signature:createSource(object)
@@ -903,7 +931,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.detach:
+.Function.detach
+..class:Class.Gaps
 ..cat:Alignments
 ..param.object.type:Class.Gaps
 ..include:seqan/align.h
@@ -919,7 +948,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.source:
+.Function.source
+..class:Class.Gaps
 ..summary:The source of an object. 
 ..cat:Alignments
 ..signature:source(object)
@@ -949,7 +979,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.sourceSegment:
+.Function.sourceSegment
+..class:Class.Gaps
 ..summary:The used part of the source. 
 ..cat:Alignments
 ..signature:sourceSegment(object)
@@ -982,7 +1013,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.sourceLength:
+.Function.sourceLength
+..class:Class.Gaps
 ..summary:Length of the source. 
 ..cat:Alignments
 ..signature:Size sourceLength(gaps)
@@ -1013,7 +1045,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignSource:
+.Function.assignSource
+..class:Class.Gaps
 ..summary:Assigns the source to a new value. 
 ..cat:Alignments
 ..signature:assignSource(object, source_in)
@@ -1054,7 +1087,8 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.moveSource:
+.Function.moveSource
+..class:Class.Gaps
 ..summary:Moves the source to a new value. 
 ..cat:Alignments
 ..signature:moveSource(object, source_in [, begin_pos, end_pos])

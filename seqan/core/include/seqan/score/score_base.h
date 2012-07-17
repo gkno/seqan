@@ -63,6 +63,7 @@ struct Value<Score<TValue, TSpec> > {
 
 /**
 .Function.scoreGapOpenHorizontal
+..class:Class.Score
 ..cat:Scoring
 ..signature:scoreGapOpenHorizontal(score, pos1, pos2, seq1, seq2)
 ..summary:Returns the score for opening a horizontal gap after $pos1$ in $seq1$.
@@ -83,6 +84,7 @@ scoreGapOpenHorizontal(
 
 /**
 .Function.scoreGapOpenVertical
+..class:Class.Score
 ..cat:Scoring
 ..signature:scoreGapOpenVertical(score, pos1, pos2, seq1, seq2)
 ..summary:Returns the score for opening a vertical gap after $pos2$ in $seq2$.

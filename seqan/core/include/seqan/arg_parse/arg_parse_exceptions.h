@@ -49,8 +49,8 @@ namespace seqan {
 // Class ParseException
 // ----------------------------------------------------------------------------
 
-/**
-.class.ParseException
+/*
+.Internal.Class.ParseException
 ..cat:Miscellaneous
 ..summary:General ParseException.
 */
@@ -81,8 +81,8 @@ public:
 // Class InvalidOptionException
 // ----------------------------------------------------------------------------
 
-/**
-.class.InvalidOptionException
+/*
+.Internal.Class.InvalidOptionException
 ..cat:Miscellaneous
 ..summary:Thrown if an unknown option was set on the command line.
 */
@@ -109,8 +109,8 @@ public:
 // Class MissingArgumentException
 // ----------------------------------------------------------------------------
 
-/**
-.class.MissingArgumentException
+/*
+.Internal.Class.MissingArgumentException
 ..cat:Miscellaneous
 ..summary:Thrown if an option was set on the command line but without giving the
 required arguments for this option.
@@ -134,8 +134,8 @@ public:
 // Class NotEnoughArguments
 // ----------------------------------------------------------------------------
 
-/**
-.class.NotEnoughArgumentsException
+/*
+.Internal.Class.NotEnoughArgumentsException
 ..cat:Miscellaneous
 ..summary:Thrown if an option was set on the command line but not enough arguments for
 this option were provided.

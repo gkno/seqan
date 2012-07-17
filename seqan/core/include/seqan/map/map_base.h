@@ -101,6 +101,7 @@ struct MapValueImpl_<TMap, Nothing>
 ..cat:Map
 ..summary:Type of the map value type.
 ..signature:MapValue<T>::Type
+..class:Class.Map
 ..param.T:A map type.
 ...type:Class.Map
 ..returns.param.Type:The type of the value of T.
@@ -144,6 +145,7 @@ struct ImplMapValue_<Nothing>
 ..cat:Map
 ..summary:Subscript operator $[ ]$ of maps. 
 ..signature:MapValue mapValue(map, key)
+..class:Class.Map
 ..param.map:A map.
 ...type:Class.Map
 ..param.key:A key.

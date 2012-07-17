@@ -85,6 +85,7 @@ typedef Tag<Standard_> const Standard;
 /**
 .Metafunction.DefaultIteratorSpec:
 ..hidefromindex
+..concept:Concept.Container
 ..summary:Specifies default kind of iterator.
 ..signature:DefaultIteratorSpec<T>::Type
 ..param.T:Container type for which the default iterator spec is determined.
@@ -107,6 +108,7 @@ struct DefaultIteratorSpec
 /**
 .Metafunction.DefaultGetIteratorSpec:
 ..hidefromindex
+..concept:Concept.Container
 ..summary:Specifies default kind of iterator returned by functions.
 ..signature:DefaultGetIteratorSpec<T>::Type
 ..param.T:Container type for which the spec is determined.
@@ -131,6 +133,7 @@ struct DefaultGetIteratorSpec
 
 /**
 .Metafunction.Iterator:
+..concept:Concept.Container
 ..cat:Iteration
 ..summary:Type of iterator objects that are used to traverse the container.
 ..signature:Iterator<T, TSpec>::Type
@@ -171,6 +174,7 @@ struct Iterator : Iterator_Default_Imp<T, TSpec>
 
 /**
 .Metafunction.Container:
+..class:Class.Iter
 ..cat:Iteration
 ..summary:Type of the container given an iterator.
 ..signature:Container<T>::Type
@@ -198,7 +202,8 @@ struct Container
 // ---------------------------------------------------------------------------
 
 /**
-.Function.value:
+.Function.value
+..class:Class.Iter
 ..signature:Reference value(object)
 ..param.object:An object that holds a value or an iterator that points to a value.
 ...type:Class.Iter
@@ -227,7 +232,8 @@ value(T const & me)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.getValue:
+.Function.getValue
+..class:Class.Iter
 ..cat:Iteration
 ..signature:GetValue getValue(object)
 ..param.object:An object that holds a value or points to a value.
@@ -265,7 +271,8 @@ getValue(T const & me)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.assignValue:
+.Function.assignValue
+..class:Class.Iter
 ..cat:Iteration
 ..summary:Assigns value to item.
 ..signature:assignValue(object, value)
@@ -304,7 +311,8 @@ assignValue(T const & me,
 // ---------------------------------------------------------------------------
 
 /**
-.Function.moveValue:
+.Function.moveValue
+..class:Class.Iter
 ..cat:Iteration
 ..summary:Assigns value to item.
 ..signature:moveValue(object, value)
@@ -344,6 +352,7 @@ moveValue(T const & me,
 // ---------------------------------------------------------------------------
 
 ///.Function.setValue.param.object.holder.type:Concept.BasicOutputIteratorConcept
+///.Function.setValue.concept:Concept.BasicOutputIteratorConcept
 
 template <typename T, typename TValue>
 inline void
@@ -369,7 +378,8 @@ setValue(T const * & ptr,
 // ---------------------------------------------------------------------------
 
 /**
-.Function.container:
+.Function.container
+..concept:Concept.RootedIteratorConcept
 ..cat:Iteration
 ..summary:Container of an iterator.
 ..signature:Container container(iterator)
@@ -396,7 +406,9 @@ container(T me)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.position:
+.Function.position
+..class:Class.Iter
+..concept:Concept.Container
 ..summary:Position of an iterator.
 ..cat:Iteration
 ..signature:Position position(iterator [, container])
@@ -435,7 +447,10 @@ position(TIterator const & it,
 // ---------------------------------------------------------------------------
 
 /**
-.Function.atBegin:
+.Function.atBegin
+..class:Class.Iter
+..concept:Concept.Container
+..concept:Concept.RootedIteratorConcept
 ..cat:Iteration
 ..summary:Determines whether an iterator is at the beginning position.
 ..signature:bool atBegin(iterator [, container])
@@ -496,7 +511,10 @@ atBegin(T const & it)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.atEnd:
+.Function.atEnd
+..class:Class.Iter
+..concept:Concept.Container
+..concept:Concept.RootedIteratorConcept
 ..cat:Iteration
 ..summary:Determines whether an iterator is at the end position.
 ..signature:bool atEnd(iterator [, container])
@@ -570,7 +588,10 @@ atEnd(T const & it)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.goBegin:
+.Function.goBegin
+..class:Class.Iter
+..concept:Concept.Container
+..concept:Concept.RootedIteratorConcept
 ..cat:Iteration
 ..summary:Iterates to the first position of a container.
 ..signature:goBegin(iterator [, container])
@@ -579,6 +600,7 @@ atEnd(T const & it)
 ...concept:Concept.RootedIteratorConcept
 ...text:$iterator$ is set to the position of the first item in $container$.
 ..param.container:Container of $iterator$.
+...type:Concept.Container
 ...remarks.text:If $iterator$ implements @Concept.RootedIteratorConcept@ then $container$ is optional,
 otherwise $container$ is required.
 ..remarks:This function is equivalent to $iterator = begin(container)$.
@@ -621,7 +643,10 @@ goBegin(TIterator & it)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.goEnd:
+.Function.goEnd
+..class:Class.Iter
+..concept:Concept.Container
+..concept:Concept.RootedIteratorConcept
 ..cat:Iteration
 ..summary:Iterates to the last position of a container.
 ..signature:goEnd(iterator [, container])
@@ -630,6 +655,7 @@ goBegin(TIterator & it)
 ...concept:Concept.RootedIteratorConcept
 ...text:$iterator$ is set to the position behin the last item in $container$.
 ..param.container:Container of $iterator$.
+...type:Concept.Container
 ...remarks.text:If $iterator$ implements @Concept.RootedIteratorConcept@ then $container$ is optional,
 otherwise $container$ is required.
 ..remarks:This function is equivalent to $iterator = end(container)$.
@@ -671,7 +697,8 @@ goEnd(TIterator & it)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.goNext:
+.Function.goNext
+..concept:Concept.ForwardIteratorConcept
 ..cat:Iteration
 ..summary:Iterates to next position.
 ..signature:goNext(iterator)
@@ -698,7 +725,8 @@ goNext(TIterator & it)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.goFurther:
+.Function.goFurther
+..concept:Concept.RandomAccessIteratorConcept
 ..cat:Iteration
 ..summary:Iterates some steps further.
 ..signature:goFurther(iterator, steps)
@@ -727,13 +755,14 @@ goFurther(TIterator & it,
 // ---------------------------------------------------------------------------
 
 /**
-.Function.goPrevious:
+.Function.goPrevious
+..concept:Concept.BidirectionalIteratorConcept
 ..cat:Iteration
 ..summary:Iterates to pevious position.
 ..signature:goPrevious(iterator)
 ..param.iterator:An iterator.
 ...type:Class.Iter
-...concept:Concept.Iterator
+...concept:Concept.BidirectionalIteratorConcept
 ...text:$iterator$ is set to the pevious position of an iteration through its container.
 ..remarks:This function is equivalent to $--iterator$.
 ..see:Function.goBegin
@@ -754,16 +783,17 @@ goPrevious(TIterator & it)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.difference:
+.Function.difference
+..concept:Concept.RandomAccessIteratorConcept
 ..cat:Iteration
 ..summary:The difference between two iterators.
 ..signature:difference(begin, end)
 ..param.begin:Iterator to the first position of a range.
 ...type:Class.Iter
-...Concept.RandomAccessIteratorConcept
+...concept:Concept.RandomAccessIteratorConcept
 ..param.end:Iterator behind the last position of a range.
 ...type:Class.Iter
-...Concept.RandomAccessIteratorConcept
+...concept:Concept.RandomAccessIteratorConcept
 ..returns:Length of the range between $begin$ and $end$.
 ..remarks:This function is equivalent to $end - begin$.
 ...text:Usually, $begin$ and $end$ have the same type.
@@ -788,12 +818,13 @@ difference(TIterator const & begin,
 // ---------------------------------------------------------------------------
 
 /**
-.Function.goNil:
+.Function.goNil
+..concept:Concept.RandomAccessIteratorConcept
 ..cat:Iteration
 ..summary:Moves iterator to nil position.
 ..signature:goNil(iterator)
 ..param.iterator:The iterator that will be moved.
-...type:Class.String
+...type:Concept.RandomAccessIteratorConcept
 ..remarks:$iterator$ is set to an invalid position, e.g. $NULL$ for pointer types.
 ..see:Function.clear
 ..include:seqan/basic.h
@@ -820,12 +851,13 @@ goNil(TIterator * & me)
 // ---------------------------------------------------------------------------
 
 /**
-.Function.atNil:
+.Function.atNil
+..concept:Concept.RandomAccessIteratorConcept
 ..cat:Iteration
 ..summary:Tests whether iterator is at nil position.
 ..signature:bool atNil(iterator)
 ..param.iterator:An iterator.
-...type:Class.String
+...type:Concept.RandomAccessIteratorConcept
 ..returns:$true$ if $iterator$ points to an ivalid position, e.g. $iterator$ is a $NULL$ pointer.
 $false$ otherwise.
 ..see:Function.goNil

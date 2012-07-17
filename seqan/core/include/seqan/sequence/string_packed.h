@@ -414,6 +414,7 @@ struct TempCopy_<String<TValue, Packed<THostspec> > >
 // --------------------------------------------------------------------------
 
 ///.Function.host.param.object.type:Spec.Packed String
+///.Function.host.class:Spec.Packed String
 
 template <typename TValue, typename THostspec>
 inline typename Host<String<TValue, Packed<THostspec> > >::Type &

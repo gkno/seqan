@@ -165,3 +165,4 @@ find(TFinder & finder, Pattern<TNeedle, Quasar> & me)
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_FIND_SHIFTAND_H
+

@@ -124,6 +124,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Function.refresh:
+..class:Class.NameStoreCache
 ..summary:Recreate a name store cache.
 ..cat:Fragment Store
 ..signature:refresh(cache)
@@ -371,9 +372,15 @@ struct FragmentStoreConfig
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#alignedReadStore
 ..summary:String that stores $<alignId, readId, contigId, pairMatchId, beginPos, endPos, gaps>$.
+..remarks:
+You can sort the $alignedReadStore$ using @Function.sortAlignedReads@.
+After sorting, you can use the functions @Function.lowerBoundAlignedReads@ and @Function.upperBoundAlignedReads@ to perform a binary search, e.g. for accessing only a subrange.
 ..type:Typedef.FragmentStore#TAlignedReadStore
 ..remarks:Value type is @Class.AlignedReadStoreElement@.
 ..class:Class.FragmentStore
+..see:Function.lowerBoundAlignedReads
+..see:Function.upperBoundAlignedReads
+..see:Function.sortAlignedReads
 .Memvar.FragmentStore#annotationStore
 ..summary:String that maps from $annoId$ to $<contigId, typeId, beginPos, endPos, parentId, lastChildId, nextSiblingId, values>$.
 ..type:Typedef.FragmentStore#TAnnotationStore
@@ -931,6 +938,7 @@ annotationGetValueByKey (
 
 /**
 .Function.clearReads
+..class:Class.FragmentStore
 ..summary:Removes all reads from a fragment store.
 ..cat:Fragment Store
 ..signature:clearReads(store)
@@ -951,6 +959,7 @@ clearReads(FragmentStore<TSpec, TConfig> &me)
 
 /**
 .Function.appendRead:
+..class:Class.FragmentStore
 ..summary:Appends a read to a fragment store.
 ..cat:Fragment Store
 ..signature:appendRead(store, read[, matePairId])
@@ -1057,6 +1066,7 @@ getRead(
 
 /**
 .Function.appendAlignedRead:
+..class:Class.FragmentStore
 ..summary:Appends an aligned read entry to a fragment store.
 ..cat:Fragment Store
 ..signature:appendAlignedRead(store, readId, contigId, beginPos, endPos[, pairMatchId])
@@ -1115,6 +1125,7 @@ appendAlignedRead(
 
 /**
 .Function.appendMatePair
+..class:Class.FragmentStore
 ..summary:Appends two paired-end reads to a fragment store.
 ..cat:Fragment Store
 ..signature:appendMatePair(store, readId1, readId2)
@@ -1193,6 +1204,7 @@ appendMatePair(
 
 /**
 .Function.compactAlignedReads
+..class:Class.FragmentStore
 ..summary:Removes invalid aligned reads and rename $alignId$ sequentially beginning with 0.
 ..cat:Fragment Store
 ..signature:compactAlignedReads(store)
@@ -1250,6 +1262,7 @@ compactAlignedReads(FragmentStore<TSpec, TConfig> &me)
 
 /**
 .Function.compactPairMatchIds
+..class:Class.FragmentStore
 ..summary:Renames $pairMatchId$ sequentially beginning with 0.
 ..cat:Fragment Store
 ..signature:compactPairMatchIds(store)
@@ -1427,7 +1440,6 @@ calculateMateIndices(TMateIndexString &mateIndices, FragmentStore<TSpec, TConfig
 ..summary:Stores a 2-dimensional visible layout of a multi-read alignment.
 ..cat:Fragment Store
 ..signature:AlignedReadLayout
-
 .Memvar.AlignedReadLayout#contigRows
 ..class:Class.AlignedReadLayout
 ..summary:2-D multi-read layout
@@ -1449,6 +1461,7 @@ struct AlignedReadLayout
 
 /**
 .Function.layoutAlignment
+..class:Class.AlignedReadLayout
 ..summary:Calculates a visible layout of aligned reads.
 ..cat:Fragment Store
 ..signature:layoutAlignment(layout, store)
@@ -1540,6 +1553,7 @@ inline void _printContig(
 
 /**
 .Function.printAlignment
+..class:Class.AlignedReadLayout
 ..summary:Prints a window of the visible layout of reads into a outstream.
 ..cat:Fragment Store
 ..signature:printAlignment(stream, format, layout, store, contigId, posBegin, posEnd, lineBegin, lineEnd)

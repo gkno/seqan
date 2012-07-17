@@ -109,6 +109,7 @@ enum ExtensionDirection
 ..cat:Seed Handling
 ..signature:extendSeed(seed, query, database, direction, MatchExtend)
 ..signature:extendSeed(seed, query, database, direction, scoreMatrix, scoreDropOff, {UngappedXDrop, GappedXDrop})
+..class:Class.Seed
 ..param.seed: The seed to extend.
 ...type:Class.Seed
 ..param.query: The query sequence.

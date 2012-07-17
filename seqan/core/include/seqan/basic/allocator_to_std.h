@@ -181,7 +181,8 @@ struct StdAllocator
 // ----------------------------------------------------------------------------
 
 /**
-.Function.host:
+.Function.host
+..class:Class.ToStdAllocator
 ..summary:The object a given object depends on.
 ..cat:Dependent Objects
 ..signature:host(object)

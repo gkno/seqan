@@ -263,6 +263,7 @@ registerSequenceName(TLocalMatchStore & store,
 
 /**
 .Function.appendLocalMatch
+..class:Class.LocalMatchStore
 ..summary:Append a new local match to a @Class.LocalMatchStore@
 ..cat:Local Match Store
 ..signature:appendLocalMatchStore(store, subjectId, subjectBeginPos, subjectEndPos, queryId, queryBeginPos, queryEndPos)

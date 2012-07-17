@@ -193,7 +193,7 @@ private:
 // For now we just test for convertible to bool.
 
 /**
-.Function.requireBooleanExpr:
+.Function.requireBooleanExpr
 ..summary:Tests for a boolean expression.
 ..cat:Concepts
 ..signature:requireBooleanExpr(x)

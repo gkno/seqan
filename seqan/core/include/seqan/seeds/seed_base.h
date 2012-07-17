@@ -152,6 +152,7 @@ public:
 //											Meta Functions		                                                  //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///.Metafunction.Spec.param.T.type:Class.Seed
+///.Metafunction.Spec.class:Class.Seed
 
 template <typename TPosition, typename TSpecSeed>
 struct Spec<Seed<TPosition,TSpecSeed> >
@@ -160,6 +161,7 @@ struct Spec<Seed<TPosition,TSpecSeed> >
 };
 
 ///.Metafunction.Value.param.T.type:Class.Seed
+///.Metafunction.Value.class:Class.Seed
 template <typename TPosition, typename TSpecSeed>
 struct Value<Seed<TPosition,TSpecSeed> >
 {
@@ -185,7 +187,8 @@ struct Key< Seed< TPosition, TSpec > >
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.startDiagonal:
+.Function.startDiagonal
+..class:Class.Seed
 ..summary: Returns the diagonal of the start point.
 ..cat:Seed Handling
 ..signature:startDiagonal(seed)
@@ -203,7 +206,8 @@ startDiagonal(Seed<TPosition, TSpecSeed> const &me)
 }
 
 /**
-.Function.endDiagonal:
+.Function.endDiagonal
+..class:Class.Seed
 ..summary: Returns the diagonal of the end point.
 ..cat:Seed Handling
 ..signature:endDiagonal(seed)
@@ -222,7 +226,9 @@ endDiagonal(Seed<TPosition, TSpecSeed> const &me)
 
 
 
-/**.Function.leftPosition:
+/**
+.Function.leftPosition
+..class:Class.Seed
 ..summary:The begin position of segment in a seed.
 ..cat:Seed Handling
 ..signature:leftPosition(seed, dim)
@@ -241,7 +247,9 @@ leftPosition(Seed<TPosition, TSpecSeed>  & me,
 	return (dim)? me.leftDim1 : me.leftDim0;
 }
 
-/**.Function.setLeftPosition:
+/**
+.Function.setLeftPosition
+..class:Class.Seed
 ..summary:Sets begin position of segment in a seed.
 ..cat:Seed Handling
 ..signature:setLeftPosition(seed, dim, new_pos)
@@ -263,7 +271,9 @@ setLeftPosition(Seed<TPosition, TSpecSeed>  & me,
 	else me.leftDim0 = new_pos;
 }
 
-/**.Function.rightPosition:
+/**
+.Function.rightPosition:
+..class:Class.Seed
 ..summary:The end position of segment in a seed.
 ..cat:Seed Handling
 ..signature:rightPosition(seed, dim)
@@ -284,7 +294,9 @@ rightPosition(Seed<TPosition, TSpecSeed>  & me,
 	return (dim)? me.rightDim1 : me.rightDim0;
 }
 
-/**.Function.setRightPosition:
+/**
+.Function.setRightPosition:
+..class:Class.Seed
 ..summary:Sets end position of segment in a seed.
 ..cat:Seed Handling
 ..signature:setRightPosition(seed, dim, new_pos)
@@ -307,7 +319,9 @@ setRightPosition(Seed<TPosition, TSpecSeed>  & me,
 	else me.rightDim0 = new_pos;
 }
 
-/**.Function.dimension:
+/**
+.Function.dimension:
+..class:Class.Seed
 ..summary:Dimension of a seed.
 ..cat:Seed Handling
 ..signature:dimension(seed)
@@ -323,7 +337,8 @@ dimension( Seed< TPosition, TSpec > & /*me*/ )
 }
 
 /**
-.Function.leftDim0:
+.Function.leftDim0
+..class:Class.Seed
 ..summary: Returns the first position of the seed in the query.
 ..cat:Seed Handling
 ..signature:leftDim0(seed)
@@ -341,7 +356,8 @@ leftDim0(Seed<TPosition, TSpecSeed> const &seed)
 }
 
 /**
-.Function.rightDim0:
+.Function.rightDim0
+..class:Class.Seed
 ..summary: Returns the last position of the seed in the query.
 ..cat:Seed Handling
 ..signature:rightDim0(seed)
@@ -359,7 +375,8 @@ rightDim0(Seed<TPosition,TSpecSeed> const & seed)
 }
 
 /**
-.Function.leftDim1:
+.Function.leftDim1
+..class:Class.Seed
 ..summary: Returns the first position of the seed in the database.
 ..cat:Seed Handling
 ..signature:leftDim1(seed)
@@ -377,7 +394,8 @@ leftDim1(Seed<TPosition, TSpecSeed> const &seed)
 }
 
 /**
-.Function.rightDim1:
+.Function.rightDim1
+..class:Class.Seed
 ..summary: Returns the last position of the seed in the database.
 ..cat:Seed Handling
 ..signature:rightDim1(seed)
@@ -395,7 +413,8 @@ rightDim1(Seed<TPosition,TSpecSeed> const & seed)
 }
 
 /**
-.Function.leftDiagonal:
+.Function.leftDiagonal
+..class:Class.Seed
 ..summary: Returns the most left diagonal of the seed (maximum diagonal value).
 ..cat:Seed Handling
 ..signature:leftDiagonal(seed)
@@ -413,7 +432,8 @@ leftDiagonal(Seed<TPosition, TSpecSeed> const &seed)
 }
 
 /**
-.Function.rightDiagonal:
+.Function.rightDiagonal
+..class:Class.Seed
 ..summary: Returns the most right diagonal of the seed (minimum diagonal value).
 ..cat:Seed Handling
 ..signature:rightDiagonal(seed)
@@ -430,7 +450,8 @@ rightDiagonal(Seed<TPosition,TSpecSeed> const & seed)
 	return seed.rightDiagonal;
 }
 
-///.Function.length.param.object.type:Class.Gaps
+///.Function.length.param.object.type:Class.Seed
+///.Function.length.class:Class.Seed
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
 length(Seed<TPosition, TSpecSeed> const & seed)
@@ -442,6 +463,7 @@ length(Seed<TPosition, TSpecSeed> const & seed)
 
 /**
 .Function.setLeftDim0:
+..class:Class.Seed
 ..summary: Updates the start point of the seed.
 ..cat:Seed Handling
 ..signature:setLeftDim0(seed, start)
@@ -461,6 +483,7 @@ setLeftDim0(Seed<TPosition, TSpecSeed> &me,
 
 /**
 .Function.setRightDim0:
+..class:Class.Seed
 ..summary: Updates the end point of the seed.
 ..cat:Seed Handling
 ..signature:setRightDim0(seed, end)
@@ -480,6 +503,7 @@ setRightDim0(Seed<TPosition,TSpecSeed> & me,
 
 /**
 .Function.setLeftDim1:
+..class:Class.Seed
 ..summary: Updates the start point of the seed.
 ..cat:Seed Handling
 ..signature:setLeftDim1(seed, start)
@@ -499,6 +523,7 @@ setLeftDim1(Seed<TPosition, TSpecSeed> &me,
 
 /**
 .Function.setRightDim1:
+..class:Class.Seed
 ..summary: Updates the end point of the seed.
 ..cat:Seed Handling
 ..signature:setRightDim1(seed, end)
@@ -518,6 +543,7 @@ setRightDim1(Seed<TPosition,TSpecSeed> & me,
 
 /**
 .Function.setLeftDiagonal:
+..class:Class.Seed
 ..summary: Sets a new value for the most left diagonal.
 ..cat:Seed Handling
 ..signature:setLeftDiagonal(seed, diag)
@@ -537,6 +563,7 @@ setLeftDiagonal(Seed<TPosition, TSpecSeed> &me,
 
 /**
 .Function.setRightDiagonal:
+..class:Class.Seed
 ..summary: Sets a new value for the most right diagonal.
 ..cat:Seed Handling
 ..signature:setRightDiagonal(seed, diag)
@@ -718,6 +745,7 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 
 /**
 .Function.extendSeed
+..class:Class.Seed
 ..summary:Extends a seed.
 ..cat:Seed Handling
 ..signature:extendSeed(seed, query, database, direction, tag)

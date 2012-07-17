@@ -52,9 +52,13 @@ template <typename TSpec = void>
 struct Alloc {};
 
 /**
-.Class.String:
+.Class.String
 ..cat:Sequences
-..summary:General purpose container for sequences.
+..summary:A sequence container with generic alphabet and many specializations.
+..description:
+String is at the heart of the SeqAn library (SeqAn is for SEQuence ANalaysis after all).
+There are various specializations with @Spec.Alloc String@ being the default and most widely used one.
+Strings can be used to store arbitrary values and can be used for large biologicaly sequences as well as a generic, dynamic array and replace $std::vector<>$.
 ..signature:String<TValue, TSpec>
 ..param.TValue:The value type, that is the type of the items/characters stored in the string.
 ...metafunction:Metafunction.Value
@@ -77,6 +81,7 @@ class String;
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Class.String
+///.Metafunction.Value.class:Class.String
 
 template <typename TValue, typename TSpec>
 struct Value<String<TValue, TSpec> >
@@ -94,6 +99,7 @@ struct Value<String<TValue, TSpec> const >
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Spec.param.T.type:Class.String
+///.Metafunction.Spec.class:Class.String
 
 template <typename TValue, typename TSpec>
 struct Spec<String<TValue, TSpec> >
@@ -111,6 +117,7 @@ struct Spec<String<TValue, TSpec> const>:
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.IsSequence.param.T.type:Class.String
+///.Metafunction.IsSequence.class:Class.String
 
 template <typename TValue, typename TSpec>
 struct IsSequence<String<TValue, TSpec> > {
@@ -143,8 +150,11 @@ struct TempCopy_
 // TODO(holtgrew): Where to move this documentation/specification-only stuff?
 
 ///.Function.getObjectId.param.object.type:Class.String
+///.Function.getObjectId.class:Class.String
 ///.Function.empty.param.object.type:Class.String
+///.Function.empty.class:Class.String
 ///.Function.capacity.param.object.type:Class.String
+///.Function.capacity.class:Class.String
 
 // ----------------------------------------------------------------------------
 // Function swap()
@@ -153,6 +163,7 @@ struct TempCopy_
 /**
 .Function.swap:
 ..summary:Swaps the contents of two values.
+..class:Class.String
 ..cat:Content Manipulation
 ..signature:swap(left, right)
 ..param.left:The first value.
@@ -209,7 +220,9 @@ shareResources(TValue const & obj1,
 
 // TODO(holtgrew): Where to move this documentation/specification-only stuff?
 ///.Function.begin.param.object.type:Class.String
+///.Function.begin.class:Class.String
 ///.Function.end.param.object.type:Class.String
+///.Function.end.class:Class.String
 
 // ----------------------------------------------------------------------------
 // Function value()
@@ -244,6 +257,7 @@ value(String<TValue, TSpec> const & me,
 // ----------------------------------------------------------------------------
 
 ///.Function.length.param.object.type:Class.String
+///.Function.length.class:Class.String
 
 template <typename TValue, typename TSpec>
 inline typename Size< String<TValue, TSpec> const>::Type
@@ -258,6 +272,7 @@ length(String<TValue, TSpec> const & me)
 // ----------------------------------------------------------------------------
 
 ///.Function.empty.param.object.type:Class.String
+///.Function.empty.class:Class.String
 
 template <typename TValue, typename TSpec>
 inline bool
@@ -274,6 +289,7 @@ empty(String<TValue, TSpec> const & me)
 /**
 .Function.clear:
 ..cat:Containers
+..class:Class.String
 ..summary:Resets an object.
 ..signature:clear(object)
 ..param.object:The object that will be resetted.
@@ -758,6 +774,7 @@ _clearSpace(String<TValue, TSpec> & me,
 // ----------------------------------------------------------------------------
 
 ///.Function.resizeSpace.param.object.type:Class.String
+///.Function.resizeSpace.class:Class.String
 
 template<typename TValue, typename TSpec, typename TSize, typename TBeginPosition, typename TEndPosition, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type
@@ -808,7 +825,9 @@ resizeSpace(String<TValue, TSpec> & me,
 // ----------------------------------------------------------------------------
 
 ///.Function.assign.param.target.type:Class.String
+///.Function.assign.class:Class.String
 ///.Function.assign.param.source.type:Class.String
+///.Function.assign.class:Class.String
 
 // Facade version without overflow tag.  Forwards to version with overflow
 // tag, using Metafunction.DefaultOverflowImplicity.
@@ -1059,6 +1078,7 @@ valueConstructMove(TIterator it,
 
 ///.Function.append.param.target.type:Class.String
 ///.Function.append.param.source.type:Class.String
+///.Function.append.class:Class.String
 
 template <typename TExpand>
 struct AppendString_
@@ -1219,6 +1239,7 @@ appendValue(String<TTargetValue, TTargetSpec> & me,
 
 /**
 .Function.insertValue:
+..class:Class.String
 ..include:seqan/sequence.h
 */
 
@@ -1256,6 +1277,7 @@ insertValue(String<TTargetValue, TTargetSpec> & me,
 
 ///.Function.replace.param.target.type:Class.String
 ///.Function.replace.param.source.type:Class.String
+///.Function.replace.class:Class.String
 
 template <typename TExpand>
 struct ReplaceString_
@@ -1534,6 +1556,7 @@ _reallocateStorage(
 // ----------------------------------------------------------------------------
 
 ///.Function.reserve.param.object.type:Class.String
+///.Function.reserve.class:Class.String
 
 template <typename TValue, typename TSpec, typename TSize_>
 inline void

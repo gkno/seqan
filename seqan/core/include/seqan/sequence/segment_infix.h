@@ -229,6 +229,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 ///.Function.begin.param.object.type:Class.Segment
+///.Function.begin.class:Class.Segment
 
 template <typename THost_>
 inline typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type
@@ -250,6 +251,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 ///.Function.beginPosition.param.object.type:Class.Segment
+///.Function.beginPosition.class:Class.Segment
 
 template <typename THost_>
 inline typename Position<Segment<THost_, InfixSegment> >::Type
@@ -270,6 +272,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.setBegin:
+..class:Class.Segment
 ..summary:Sets begin of object in host.
 ..cat:Dependent Objects
 ..signature:setBegin(object, new_begin)
@@ -295,6 +298,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.setBeginPosition:
+..class:Class.Segment
 ..summary:Sets begin position of object in host.
 ..cat:Dependent Objects
 ..signature:setBeginPosition(object, new_begin)
@@ -320,6 +324,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 ///.Function.begin.param.object.type:Class.Segment
+///.Function.begin.class:Class.Segment
 
 template <typename THost_>
 inline typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type
@@ -341,6 +346,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 ///.Function.endPosition.param.object.type:Class.Segment
+///.Function.endPosition.class:Class.Segment
 
 template <typename THost_>
 inline typename Position<Segment<THost_, InfixSegment> >::Type
@@ -361,6 +367,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.setEnd:
+..class:Class.Segment
 ..summary:Sets end of object in host.
 ..cat:Dependent Objects
 ..signature:setEnd(object, new_end)
@@ -389,6 +396,7 @@ setEnd(Segment<THost_, InfixSegment> & me, TIterator new_end)
 
 /**
 .Function.setEndPosition:
+..class:Class.Segment
 ..summary:Sets begin position of object in host.
 ..cat:Dependent Objects
 ..signature:setEndPosition(object, new_end)
@@ -429,6 +437,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.setHost:
+..class:Class.Segment
 ..summary:Sets the host of an object.
 ..cat:Dependent Objects
 ..signature:setHost(object, host)
@@ -463,6 +472,7 @@ SEQAN_CHECKPOINT
 /**
 .Metafunction.Infix:
 ..cat:Segments
+..class:Class.String
 ..summary:Infix sequence type.
 ..signature:Infix<T>::Type
 ..remarks:Note that an infix of a @Class.Segment@ object is an @Spec.InfixSegment@ object having the same host type.
@@ -728,6 +738,8 @@ value(Segment<THost, TSpec> const & me,
 /**
 .Function.infix:
 ..cat:Containers
+..class:Class.String
+..class:Adaption.char array
 ..summary:Creates infix object.
 ..signature:infix(host, begin, end)
 ..param.host:The complete sequence.
@@ -817,6 +829,8 @@ SEQAN_CHECKPOINT
 /**
 .Function.infixWithLength:
 ..cat:Containers
+..class:Class.String
+..class:Adaption.char array
 ..summary:Creates infix object.
 ..signature:infixWithLength(host, begin, length)
 ..param.host:The complete sequence.

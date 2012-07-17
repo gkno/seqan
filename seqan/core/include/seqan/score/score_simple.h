@@ -124,7 +124,7 @@ typedef Score<int, Simple> SimpleScore;
 ..cat:Alignments
 ..summary:Match score.
 ..signature:scoreMatch(object)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..returns:Match score.
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
@@ -144,7 +144,7 @@ scoreMatch(Score<TValue, TSpec> const & me) {
 ..cat:Alignments
 ..summary:Set match score.
 ..signature:setScoreMatch(object, value)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
@@ -164,7 +164,7 @@ setScoreMatch(Score<TValue, TSpec> & me, TValue const & value) {
 ..cat:Alignments
 ..summary:Mismatch score.
 ..signature:scoreMismatch(object)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..returns:Mismatch score.
 ...note:Usually, mismatches have negative scores.
 ..see:Function.scoreMatch
@@ -186,7 +186,7 @@ scoreMismatch(Score<TValue, TSpec> const & me) {
 ..cat:Alignments
 ..summary:Set mismatch score.
 ..signature:setScoreMismatch(object, value)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
@@ -207,7 +207,7 @@ setScoreMismatch(Score<TValue, TSpec> & me, TValue const & value) {
 ..cat:Alignments
 ..summary:Score for extending gaps.
 ..signature:scoreGapExtend(object)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..returns:Score for extending gaps.
 ...note:Usually, gaps have negative scores.
 ..see:Function.scoreMismatch
@@ -229,7 +229,7 @@ scoreGapExtend(Score<TValue, TSpec> const & me) {
 ..cat:Alignments
 ..summary:Set gap extension score.
 ..signature:setScoreGapExtend(object, value)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
@@ -250,7 +250,7 @@ setScoreGapExtend(Score<TValue, TSpec> & me, TValue const & value) {
 ..cat:Alignments
 ..summary:Score for opening a gap.
 ..signature:scoreGapOpen(object)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..returns:Score for opening a gap.
 ...note:Usually, gaps have negative scores.
 ..see:Function.scoreMismatch
@@ -272,7 +272,7 @@ scoreGapOpen(Score<TValue, TSpec> const & me) {
 ..cat:Alignments
 ..summary:Set gap opening score.
 ..signature:setScoreGapOpen(object, value)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
@@ -293,7 +293,7 @@ setScoreGapOpen(Score<TValue, TSpec> & me, TValue const & value) {
 ..cat:Alignments
 ..summary:Score for gaps.
 ..signature:scoreGapExtend(object)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..returns:Score for extending gaps.
 ...note:Usually, gaps have negative scores.
 ..remarks:This score is used for linear gap costs. For affine gap costs use @Function.scoreGapExtend@ and @Function.scoreGapOpen@ instead.
@@ -318,7 +318,7 @@ scoreGap(Score<TValue, TSpec> const & me) {
 ..cat:Alignments
 ..summary:Set gap opening and extension score.
 ..signature:setScoreGap(object, value)
-..param.object.type:Spec.Simple Score
+..param.object.type:Class.Score
 ..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend

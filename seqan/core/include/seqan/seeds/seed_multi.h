@@ -215,6 +215,7 @@ _getDiagSet(Seed<TPosition,ChainedSeed> & seed){
 
 /**
 .Function.appendDiag
+..class:Class.Seed
 ..summary: Adds diagonal to the seed.
 ..cat:Seed Handling
 ..signature:appendDiag(seed, diagonal)
@@ -562,6 +563,7 @@ _setExtendedSeedDimensions(Seed<TPosition, ChainedSeed> & seed,
 
 /**
 .Function.getAlignment:
+..class:Spec.ChainedSeed
 ..summary: Constructs a alignment from a @Spec.ChainedSeed@.
 ..cat:Seed Handling
 ..signature:getAlignment(seed, align, query, database, scoreMatrix)
@@ -710,6 +712,7 @@ getAlignment(Seed<TPosition,ChainedSeed> &seed,
 
 /**
 .Function.scoreSeed:
+..class:Spec.ChainedSeed
 ..summary: Calculates the score of a seed. 
 ..cat:Seed Handling
 ..signature:scoreSeed(seed, query, database, scoreMatrix)

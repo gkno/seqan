@@ -58,14 +58,6 @@ typedef Tag<StellarGff_> StellarGff;
 // Metafunction Value
 // ----------------------------------------------------------------------------
 
-///.Metafunction.Value.param.T.value:Class.MyClass
-
-// template <typename TSpec>
-// struct Value<MyClass<TSpec> >
-// {
-//     typedef int Type;
-// };
-
 // ============================================================================
 // Functions
 // ============================================================================
@@ -76,6 +68,7 @@ typedef Tag<StellarGff_> StellarGff;
 
 /**
 .Function.readRecord
+..class:Class.LocalMatchStore
 ..cat:Local Match Store
 ..signature:readRecord(store, stream, StellarGff())
 ..param.store:@Class.LocalMatchStore@ object to read into.

@@ -75,6 +75,7 @@ class Proxy;
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Spec.param.T.type:Class.Proxy
+///.Metafunction.Spec.class:Class.Proxy
 
 template <typename TSpec>
 struct Spec<Proxy<TSpec> >

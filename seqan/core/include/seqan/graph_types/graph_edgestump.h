@@ -283,6 +283,7 @@ class EdgeStump<void, false, true, true, TSpec>
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Cargo.param.T.type:Class.EdgeStump
+///.Metafunction.Cargo.class:Class.EdgeStump
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 struct Cargo<EdgeStump<TCargo, TList, TSource, TId, TSpec> > {
@@ -309,6 +310,7 @@ struct Cargo<EdgeStump<void, TList, TSource, TId, TSpec> const> {
 //////////////////////////////////////////////////////////////////////////////
 
 ///.Metafunction.Spec.param.T.type:Class.EdgeStump
+///.Metafunction.Spec.class:Class.EdgeStump
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
 struct Spec<EdgeStump<TCargo, TList, TSource, TId, TSpec> > 
@@ -330,7 +332,8 @@ struct Spec<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getCargo:
+.Function.getCargo
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Get method for the edge cargo.
 ..signature:getCargo(es)
@@ -387,7 +390,8 @@ getCargo(EdgeStump<void, TList, TSource, TId, TSpec>*)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.cargo:
+.Function.cargo
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Access to the cargo.
 ..signature:cargo(es)
@@ -445,7 +449,8 @@ cargo(EdgeStump<void, TList, TSource, TId, TSpec> const*)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignCargo:
+.Function.assignCargo
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Assigns a new cargo to the edge.
 ..signature:assignCargo(es, cargo)
@@ -483,7 +488,8 @@ assignCargo(EdgeStump<void, TList, TSource, TId, TSpec>*,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignTarget:
+.Function.assignTarget
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Assigns a target vertex to an edge.
 ..signature:assignTarget(es, t)
@@ -509,7 +515,8 @@ assignTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.target:
+.Function.target
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Accesses the target of an EdgeStump.
 ..signature:target(es)
@@ -542,7 +549,8 @@ target(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getTarget:
+.Function.getTarget
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Get method for the target.
 ..signature:getTarget(es)
@@ -576,7 +584,8 @@ getTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.Graph#assignSource:
+.Function.Graph#assignSource
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Assigns a source vertex to an edge.
 ..remarks:A source vertex is not required in an edge stump.
@@ -658,7 +667,8 @@ source(EdgeStump<TCargo, TList, false, TId, TSpec> const*)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getSource:
+.Function.getSource
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Get method for the source.
 ..remarks:A source vertex is not required in an edge stump.
@@ -718,7 +728,8 @@ getSource(EdgeStump<TCargo, TList, false, TId, TSpec>*)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignNextT:
+.Function.assignNextT
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Assigns another EdgeStump to the next target pointer.
 ..signature:assignNextT(es, es2)
@@ -744,7 +755,8 @@ assignNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.nextT:
+.Function.nextT
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Accesses the next target pointer.
 ..signature:nextT(es)
@@ -777,7 +789,8 @@ nextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
 
 
 /**
-.Function.getNextT:
+.Function.getNextT
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Get method for the next target pointer.
 ..signature:getNextT(es)
@@ -810,7 +823,8 @@ getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.assignNextS:
+.Function.assignNextS
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Assigns another EdgeStump to the next source pointer.
 ..signature:assignNextS(es, es2)
@@ -849,7 +863,8 @@ assignNextS(EdgeStump<TCargo, true, false, TId, TSpec>*,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.nextS:
+.Function.nextS
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Accesses the next source pointer.
 ..signature:nextS(es)
@@ -903,7 +918,8 @@ nextS(EdgeStump<TCargo, true, false, TId, TSpec> const*)
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.getNextS:
+.Function.getNextS
+..class:Class.EdgeStump
 ..cat:Graph
 ..summary:Get method for the next source pointer.
 ..remarks:EdgeStumps can be configured to have no source. Then there is no next source pointer.

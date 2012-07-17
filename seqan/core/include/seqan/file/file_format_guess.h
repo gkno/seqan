@@ -56,7 +56,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //abhaengig, und das ist so, weil sonst die Kombination von Templates mit
 //virtuellen Funktionen nicht funktionieren wuerde.
 /**
-.Function.guessFileFormat:
+.Function.guessFileFormat
 ..cat:Input/Output
 ..summary:Tries to determine the format of a file.
 ..signature:guessFileFormat(file, data)

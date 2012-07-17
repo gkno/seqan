@@ -54,6 +54,8 @@ namespace seqan {
 ..signature:ArgParseOption
 ..remarks:A @Class.ArgParseOption@ object can be added to a @Class.ArgumentParser@ via @Function.addOption@.
 ..include:seqan/arg_parse.h
+..see:Class.ArgParseArgument
+..see:Class.ArgumentParser
 */
 
 /**
@@ -86,6 +88,23 @@ Although not suggested the short-name can contain more than 1 character.
 ///.Function.isSet.param.argument.type:Class.ArgParseOption
 ///.Function.hasDefault.param.argument.type:Class.ArgParseOption
 ///.Function.numberOfAllowedValues.param.argument.type:Class.ArgParseOption
+
+///.Function.numberOfAllowedValues.class:Class.ArgParseOption
+///.Function.isListArgument.class:Class.ArgParseOption
+///.Function.isStringArgument.class:Class.ArgParseOption
+///.Function.isIntegerArgument.class:Class.ArgParseOption
+///.Function.isDoubleArgument.class:Class.ArgParseOption
+///.Function.isInputFileArgument.class:Class.ArgParseOption
+///.Function.isOutputFileArgument.class:Class.ArgParseOption
+///.Function.setMinValue.class:Class.ArgParseOption
+///.Function.setMaxValue.class:Class.ArgParseOption
+///.Function.setValidValues.class:Class.ArgParseOption
+///.Function.getArgumentValue.class:Class.ArgParseOption
+///.Function.getArgumentValues.class:Class.ArgParseOption
+///.Function.hasValue.class:Class.ArgParseOption
+///.Function.isSet.class:Class.ArgParseOption
+///.Function.hasDefault.class:Class.ArgParseOption
+///.Function.numberOfAllowedValues.class:Class.ArgParseOption
 
 class ArgParseOption :
     public ArgParseArgument
@@ -149,6 +168,7 @@ public:
 // ----------------------------------------------------------------------------
 
 ///.Function.isStringArgument.param.argument.type:Class.ArgParseOption
+///.Function.isStringArgument.class:Class.ArgParseOption
 
 inline bool isStringArgument(ArgParseOption const & me)
 {
@@ -161,6 +181,7 @@ inline bool isStringArgument(ArgParseOption const & me)
 
 /**
 .Function.isBooleanOption
+..class:Class.ArgParseOption
 ..summary:Returns whether option is a switch.
 ..cat:Miscellaneous
 ..signature:isBooleanOption(option)
@@ -181,6 +202,7 @@ inline bool isBooleanOption(ArgParseOption const & me)
 
 /**
 .Function.isVisible
+..class:Class.ArgParseOption
 ..summary:Returns whether option is visible on the help screen. Default is true.
 ..cat:Miscellaneous
 ..signature:isHiddenOption(option)
@@ -201,6 +223,7 @@ inline bool isVisible(ArgParseOption const & me)
 
 /**
 .Function.hideOption
+..class:Class.ArgParseOption
 ..summary:Hides the ArgParseOption from the help screen.
 ..cat:Miscellaneous
 ..signature:hideOption(option [, hide])
@@ -222,6 +245,7 @@ inline void hideOption(ArgParseOption & me, bool hide = true)
 
 /**
 .Function.isRequired
+..class:Class.ArgParseOption
 ..summary:Returns whether the option is mandatory.
 ..cat:Miscellaneous
 ..signature:isRequired(option)
@@ -317,6 +341,7 @@ inline void addDefaultValue(ArgParseOption & me, const TValue & value)
 
 /**
 .Function.setRequired
+..class:Class.ArgParseOption
 ..summary:Sets whether or not the option is mandatory.
 ..cat:Miscellaneous
 ..signature:setRequired(option, required)
@@ -337,6 +362,7 @@ inline void setRequired(ArgParseOption & me, bool required)
 // ----------------------------------------------------------------------------
 
 ///.Function.getArgumentLabel.param.argument.type:Class.ArgParseOption
+///.Function.getArgumentLabel.class:Class.ArgParseOption
 
 inline std::string const getArgumentLabel(ArgParseOption const & me)
 {
@@ -370,6 +396,7 @@ inline void _writeOptName(TStream & target, ArgParseOption const & me)
 
 /**
 .Function.write
+..class:Class.ArgParseOption
 ..summary:Writes the basic information about the @Class.ArgParseOption@ to the provided stream.
 ..cat:Miscellaneous
 ..signature:write(stream,option)

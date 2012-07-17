@@ -125,6 +125,7 @@ struct Accumulator<TValue, Average>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Class.Accumulator
+///.Metafunction.Value.class:Class.Accumulator
 
 template <typename TValue>
 struct Value<Accumulator<TValue, Average> >
@@ -212,6 +213,7 @@ struct Result<Accumulator<TValue, Average> const, Sum> : Result<Accumulator<TVal
 ..cat:Miscellaneous
 ..summary:Adds a value to an accumulator.
 ..signature:push(acc, x)
+..class:Class.Accumulator
 ..param.acc:The accumulator to add the value to.
 ...type:Class.Accumulator
 ..param.x:The value to push.
@@ -252,6 +254,7 @@ push(Accumulator<TValue, Average> & acc, TValue2 value)
 ..cat:Miscellaneous
 ..summary:Return average from an accumulator.
 ..signature:average(acc)
+..class:Spec.Average Accumulator
 ..param.acc:The accumulator to return the average from.
 ...type:Spec.Average Accumulator
 ..returns:nolink:$double$
@@ -277,6 +280,7 @@ average(Accumulator<TValue, Average> const & acc)
 ..cat:Miscellaneous
 ..summary:Return sum from an accumulator.
 ..signature:average(acc)
+..class:Spec.Average Accumulator
 ..param.acc:The accumulator to return the sum from.
 ...type:Spec.Average Accumulator
 ..returns:@Metafunction.Value@$<typeof(acc)>::Type$
@@ -299,6 +303,7 @@ sum(Accumulator<TValue, Average> const & acc)
 ..cat:Miscellaneous
 ..summary:Return sum from an accumulator.
 ..signature:average(acc)
+..class:Spec.Average Accumulator
 ..param.acc:The accumulator to return the sum from.
 ...type:Spec.Average Accumulator
 ..returns:@Metafunction.Value@$<typeof(acc)>::Type$

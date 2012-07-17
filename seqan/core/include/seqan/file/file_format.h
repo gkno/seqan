@@ -352,6 +352,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.Fileformat#write:
+..class:Adaption."std::iostream"
 ..cat:Input/Output
 ..summary:Writes to stream.
 ..signature:write(stream, source)

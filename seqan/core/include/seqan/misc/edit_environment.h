@@ -365,6 +365,7 @@ public:
 // --------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Class.StringEnumerator
+///.Metafunction.Value.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 struct Value<StringEnumerator<TObject, TSpec> > : Value<TObject>
@@ -375,6 +376,7 @@ struct Value<StringEnumerator<TObject, TSpec> > : Value<TObject>
 // --------------------------------------------------------------------------
 
 ///.Metafunction.Reference.param.T.type:Class.StringEnumerator
+///.Metafunction.Reference.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 struct Reference<StringEnumerator<TObject, TSpec> >
@@ -393,6 +395,7 @@ struct Reference<StringEnumerator<TObject, TSpec> const>
 // --------------------------------------------------------------------------
 
 ///.Metafunction.Size.param.T.type:Class.StringEnumerator
+///.Metafunction.Size.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 struct Size<StringEnumerator<TObject, TSpec> > : Size<TObject>
@@ -403,6 +406,7 @@ struct Size<StringEnumerator<TObject, TSpec> > : Size<TObject>
 // --------------------------------------------------------------------------
 
 ///.Metafunction.Difference.param.T.type:Class.StringEnumerator
+///.Metafunction.Difference.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 struct Difference<StringEnumerator<TObject, TSpec> > : Difference<TObject>
@@ -413,6 +417,7 @@ struct Difference<StringEnumerator<TObject, TSpec> > : Difference<TObject>
 // --------------------------------------------------------------------------
 
 ///.Metafunction.Position.param.T.type:Class.StringEnumerator
+///.Metafunction.Position.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 struct Position<StringEnumerator<TObject, TSpec> > : Position<TObject>
@@ -423,6 +428,7 @@ struct Position<StringEnumerator<TObject, TSpec> > : Position<TObject>
 // --------------------------------------------------------------------------
 
 ///.Metafunction.Iterator.param.T.type:Class.StringEnumerator
+///.Metafunction.Iterator.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 struct Iterator<StringEnumerator<TObject, TSpec>, Standard>
@@ -441,6 +447,7 @@ struct Iterator<StringEnumerator<TObject, TSpec> const, Standard>
 // --------------------------------------------------------------------------
 
 ///.Metafunction.Host.param.T.type:Class.StringEnumerator
+///.Metafunction.Host.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 struct Host<StringEnumerator<TObject, TSpec> >
@@ -481,6 +488,7 @@ _dataHost(StringEnumerator<TText, TSpec> const & enumerator)
 // --------------------------------------------------------------------------
 
 ///.Function.begin.param.object.type:Class.StringEnumerator
+///.Function.begin.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 inline Iter<StringEnumerator<TObject, TSpec>, Standard>
@@ -501,6 +509,7 @@ begin(StringEnumerator<TObject, TSpec> const & enumerator, Standard)
 // --------------------------------------------------------------------------
 
 ///.Function.end.param.object.type:Class.StringEnumerator
+///.Function.end.class:Class.StringEnumerator
 
 template <typename TObject, typename TSpec>
 inline Iter<StringEnumerator<TObject, TSpec>, Standard>
@@ -525,6 +534,7 @@ end(StringEnumerator<TObject, TSpec> const & enumerator, Standard)
 // --------------------------------------------------------------------------
 
 ///.Function.length.param.object.type:Class.StringEnumerator
+///.Function.length.class:Class.StringEnumerator
 
 template <typename TObject, unsigned DISTANCE>
 inline typename Size<StringEnumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> > >::Type
