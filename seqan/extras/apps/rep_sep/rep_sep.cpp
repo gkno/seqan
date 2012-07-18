@@ -76,7 +76,7 @@ parseCommandLine(RepSepOptions & options, int argc, char const ** argv)
     setShortDescription(parser, "Repeat Seperation Tool -- Copyright (c) 2009, Stephan Aiche");
 
     // needed input file
-    addOption(parser, ArgParseOption("a", "assembly", "input assembly filename", ArgParseArgument::INPUTFILE));
+    addOption(parser, ArgParseOption("a", "assembly", "Input assembly filename.", ArgParseArgument::INPUTFILE));
     setValidValues(parser, "assembly", "afg");
     setRequired(parser, "assembly");
 
@@ -91,7 +91,7 @@ parseCommandLine(RepSepOptions & options, int argc, char const ** argv)
     addOption(parser, ArgParseOption("", "no-clean", "Disable automatic graph cleaning."));
     addOption(parser, ArgParseOption("", "dotfile", "Write constructed graph as dotfile to visualize in Graphviz."));
 
-    addOption(parser, ArgParseOption("p", "output-prefix", "Filename prefix for the result files. Files for the ILP and the Result will be named PREFIX.(lp|rs|dot|heu)", ArgParseArgument::STRING, "PREFIX"));
+    addOption(parser, ArgParseOption("p", "output-prefix", "Filename prefix for the result files. Files for the ILP and the Result will be named PREFIX (lp|rs|dot|heu).", ArgParseArgument::STRING, "PREFIX"));
     setRequired(parser, "output-prefix");
 
     addSection(parser, "Column Detection Strategy");
@@ -100,8 +100,8 @@ parseCommandLine(RepSepOptions & options, int argc, char const ** argv)
     addOption(parser, ArgParseOption("e", "error", "Expected sequencing error.", ArgParseArgument::DOUBLE, "ERROR"));
 
     addSection(parser, "Heuristic selection");
-    addOption(parser, ArgParseOption("", "hmce", "try to solve the problem with the multi-component-expansion (mce) heuristic [DEFAULT]"));
-    addOption(parser, ArgParseOption("", "hsce", "try to solve the problem with the single-component-expansion (sce) heuristic"));
+    addOption(parser, ArgParseOption("", "hmce", "Solve the problem with the multi-component-expansion (mce) heuristic [DEFAULT]."));
+    addOption(parser, ArgParseOption("", "hsce", "Solve the problem with the single-component-expansion (sce) heuristic."));
 
     // Parse command line.
     seqan::ArgumentParser::ParseResult res = seqan::parse(parser, argc, argv);

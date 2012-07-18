@@ -277,7 +277,7 @@ inline void setVersion(ArgumentParser & me, std::string const & versionString)
 /**
 .Function.getVersion
 ..class:Class.ArgumentParser
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Get version string from @Class.ArgumentParser@ object.
 ..signature:getVersion(parser)
 ..param.parser:The @Class.ArgumentParser@ object.
@@ -466,6 +466,99 @@ inline void printVersion(ArgumentParser const & me)
 }
 
 // ----------------------------------------------------------------------------
+// Function _addNumericalRestriction()
+// ----------------------------------------------------------------------------
+
+
+inline void _addNumericalRestriction(std::string & text, ArgParseOption const & opt)
+{
+    // expand min/max restrictions
+    if (!empty(opt.minValue) || !empty(opt.maxValue))
+    {
+        append(text, " In range [");
+
+        if (empty(opt.minValue))
+            append(text, "-inf");
+        else
+            append(text, opt.minValue);
+
+        append(text, ":");
+
+        if (empty(opt.maxValue))
+            append(text, "inf");
+        else
+            append(text, opt.maxValue);
+
+        append(text, "].");
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function _expandList()
+// ----------------------------------------------------------------------------
+
+// expands the given vector as text in the form v1, v2, and v3, while respecting
+// the size with respect to the used commas and "and"s
+inline void _expandList(std::string & text, std::vector<std::string> const & list)
+{
+    for (std::vector<std::string>::size_type i = 0; i < list.size(); ++i)
+    {
+        if (i + 1 == list.size() && list.size() == 2u)
+            append(text, " and ");
+        else if (i + 1 == list.size()  && list.size() > 2u)
+            append(text, ", and ");
+        else if (i != 0)
+            append(text, ", ");
+
+        append(text, "\\fI");
+        append(text, list[i]);
+        append(text, "\\fP");
+
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function _addDefaultValues()
+// ----------------------------------------------------------------------------
+
+inline void _addDefaultValues(std::string & text, ArgParseOption const & opt)
+{
+    if (!empty(opt.defaultValue) && !isBooleanOption(opt))
+    {
+        append(text, " Default: ");
+        _expandList(text, opt.defaultValue);
+        append(text, ".");
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Function _addValidValuesRestrictions()
+// ----------------------------------------------------------------------------
+
+inline void _addValidValuesRestrictions(std::string & text, ArgParseOption const & opt)
+{
+    if (!empty(opt.validValues) && !isBooleanOption(opt))
+    {
+        if (isInputFileArgument(opt) || isOutputFileArgument(opt))
+        {
+            append(text, " Valid filetype");
+
+            if (opt.validValues.size() > 1)
+                append(text, "s are: ");
+            else
+                append(text, " is: ");
+        }
+        else
+        {
+            append(text, " One of ");
+        }
+
+        _expandList(text, opt.validValues);
+        append(text, ".");
+    }
+}
+
+// ----------------------------------------------------------------------------
 // Function printHelp()
 // ----------------------------------------------------------------------------
 
@@ -547,8 +640,19 @@ inline void printHelp(ArgumentParser const & me, std::ostream & stream, CharStri
                 }
             }
 
+            std::string helpText = opt._helpText;
+
+            // expand min/max restrictions
+            _addNumericalRestriction(helpText, opt);
+
+            // expand validValues restrictions
+            _addValidValuesRestrictions(helpText, opt);
+
+            // expand defaultValue
+            _addDefaultValues(helpText, opt);
+
             // Add list item.
-            addListItem(toolDoc, term, opt._helpText);
+            addListItem(toolDoc, term, helpText);
         }
     }
 

@@ -63,8 +63,8 @@ int main(int argc, const char * argv[])
     // Set short description, version, date.
     setShortDescription(parser, "Alignment free sequence comparison");
     setVersion(parser, "1.1");
-    setDate(parser, "Januar 5, 2012");
-    
+    setDate(parser, "January 5, 2012");
+
     // Usage line and description.
     addUsageLine(parser, "[\\fIOPTIONS\\fP] \\fB-i\\fP \\fIIN.FASTA\\fP [\\fB-o\\fP \\fIOUT.TXT\\fP]");
     addDescription(parser, "Compute pairwise similarity of sequences using alignment-free methods in \\fIIN.FASTA\\fP and write out tab-delimited matrix with pairwise scores to \\fIOUT.TXT\\fP.");
@@ -75,9 +75,9 @@ int main(int argc, const char * argv[])
     addOption(parser, seqan::ArgParseOption("i", "input-file", "Name of the multi-FASTA input file.", seqan::ArgParseArgument::INPUTFILE));
     setRequired(parser, "input-file");
     addOption(parser, seqan::ArgParseOption("o", "output-file", "Name of the file to which the tab-delimtied matrix with pairwise scores will be written to.  Default is to write to stdout.", seqan::ArgParseArgument::OUTPUTFILE));
-    
+
     addSection(parser, "General Algorithm Parameters");
-    addOption(parser, seqan::ArgParseOption("m", "method", "Select method to use.  One of \\fIN2\\fP, \\fID2\\fP, \\fID2Star\\fP, and \\fID2z\\fP.", seqan::ArgParseArgument::STRING, "METHOD"));
+    addOption(parser, seqan::ArgParseOption("m", "method", "Select method to use.", seqan::ArgParseArgument::STRING, "METHOD"));
     setValidValues(parser, "method", "N2 D2 D2Star D2z");
     setDefaultValue(parser, "method", "N2");
     addOption(parser, seqan::ArgParseOption("k", "k-mer-size", "Size of the k-mers.", seqan::ArgParseArgument::INTEGER, "K"));
@@ -86,8 +86,9 @@ int main(int argc, const char * argv[])
     setDefaultValue(parser, "bg-model-order", "1");
 
     addSection(parser, "N2 Algorithm Parameters");
-    addText(parser, "The following parameters are only used in the N2 algorithm.");
-    addOption(parser, seqan::ArgParseOption("rc", "reverse-complement", "Which strand to score, one of \\fIinput\\fP, \\fIboth_strands\\fP, \\fImean\\fP, \\fImin\\fP, \\fImax\\fP.  Use \\fIboth_strands\\fP to score both strands simultaneously.", seqan::ArgParseArgument::STRING, "MODE"));
+    // addText(parser, "The following parameters are only used in the N2 algorithm.");
+    addOption(parser, seqan::ArgParseOption("rc", "reverse-complement", "Which strand to score.  Use \\fIboth_strands\\fP to score both strands simultaneously.", seqan::ArgParseArgument::STRING, "MODE"));
+    setValidValues(parser, "reverse-complement", "input both_strands mean min max");
     setDefaultValue(parser, "reverse-complement", "input");
     addOption(parser, seqan::ArgParseOption("mm", "mismatches", "Number of mismatches, one of \\fI0\\fP and \\fI1\\fP.  When \\fI1\\fP is used, N2 uses the k-mer-neighbour with one mismatch.", seqan::ArgParseArgument::INTEGER, "MISMATCHES"));
     setDefaultValue(parser, "mismatches", "0");
