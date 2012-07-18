@@ -444,7 +444,7 @@ SEQAN_DEFINE_TEST(test_stream_bgzf_write_large_and_compare_with_file)
     const char * r = SEQAN_PATH_TO_ROOT();
     char tempPath[1000];
     strcpy(tempPath, r);
-    strcat(tempPath, "/extras/tests/stream/SRR067601_1.1k.fasta");
+    strcat(tempPath, "/core/tests/stream/SRR067601_1.1k.fasta");
     FILE * fp = fopen(tempPath, "rb");
 
     // Open BGZF stream for writing.
@@ -476,7 +476,7 @@ SEQAN_DEFINE_TEST(test_stream_bgzf_write_large_and_compare_with_file)
     // -----------------------------------------------------------------------
     char inPath1[1000];
     strcpy(inPath1, SEQAN_PATH_TO_ROOT());
-    strcat(inPath1, "/extras/tests/stream/SRR067601_1.1k.fasta.gz");
+    strcat(inPath1, "/core/tests/stream/SRR067601_1.1k.fasta.gz");
     FILE * fin1 = fopen(inPath1, "rb");
     SEQAN_ASSERT(fin1 != NULL);
     // printf("inpath:%s\n", inPath1);
@@ -505,10 +505,10 @@ SEQAN_DEFINE_TEST(test_stream_bgzf_from_file_and_compare)
     // Define paths to BGZF and FASTA file.
     char gzPath[1000];
     strcpy(gzPath, SEQAN_PATH_TO_ROOT());
-    strcat(gzPath, "/extras/tests/stream/SRR067601_1.1k.fasta.gz");
+    strcat(gzPath, "/core/tests/stream/SRR067601_1.1k.fasta.gz");
     char fastaPath[1000];
     strcpy(fastaPath, SEQAN_PATH_TO_ROOT());
-    strcat(fastaPath, "/extras/tests/stream/SRR067601_1.1k.fasta");
+    strcat(fastaPath, "/core/tests/stream/SRR067601_1.1k.fasta");
 
     // Open files.
     Stream<Bgzf> inBgzf;
