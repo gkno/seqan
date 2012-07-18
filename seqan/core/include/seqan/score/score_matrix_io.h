@@ -392,7 +392,7 @@ _sprintfValue(char * buf, double val)
 ..param.scoreMatrix:The matrix to write out.
 ...type:Spec.Score Matrix
 ..param.meta:Optional description.
-...type:Spec.CharString
+...type:Shortcut.CharString
 ..include:seqan/score.h
  */
 
