@@ -244,29 +244,27 @@ SEQAN_DEFINE_TEST(testBandedLocalAlign) {
 
 	LocalAlignmentFinder<int> finder = LocalAlignmentFinder<int>();
 
-	int score = localAlignment(align, finder, score_type, 5, WatermanEggert());
+	int score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
     SEQAN_ASSERT_EQ(score, 12);
-    std::cerr << row(align, 0) << "\n";
-    std::cerr << row(align, 1) << "\n";
-    // SEQAN_ASSERT(row(align, 0) == "cttaagct");
-    // SEQAN_ASSERT(row(align, 1) == "ctt-agct");
+    SEQAN_ASSERT(row(align, 0) == "cttaagct");
+    SEQAN_ASSERT(row(align, 1) == "ctt-agct");
 
-    score = localAlignment(align, finder, score_type, 5, WatermanEggert());
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
     SEQAN_ASSERT_EQ(score, 10);
     SEQAN_ASSERT(row(align, 0) == "aagcttgg");
     SEQAN_ASSERT(row(align, 1) == "aaacttag");
 
-    score = localAlignment(align, finder, score_type, 5, WatermanEggert());
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
     SEQAN_ASSERT_EQ(score, 10);
     SEQAN_ASSERT(row(align, 0) == "gct-taa");
     SEQAN_ASSERT(row(align, 1) == "gctctaa");
 
-    score = localAlignment(align, finder, score_type, 5, WatermanEggert());
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
     SEQAN_ASSERT_EQ(score, 5);
     SEQAN_ASSERT(row(align, 0) == "aagcttg");
     SEQAN_ASSERT(row(align, 1) == "aacttag");
 
-    score = localAlignment(align, finder, score_type, 5, WatermanEggert());
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
     SEQAN_ASSERT_EQ(score, 0);
 
 
