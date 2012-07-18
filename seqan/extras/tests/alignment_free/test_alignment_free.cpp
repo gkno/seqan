@@ -95,7 +95,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_alignment_free_comparison)
 
     unsigned kmerSize = 5;
     unsigned bgModelOrder = 1;
-    String<char>  revCom = "bothStrands";
+    String<char>  revCom = "both_strands";
     unsigned mismatches = 1;
     double mismatchWeight = 0.5;
     AFScore<N2> myScoreN2(kmerSize, bgModelOrder, revCom, mismatches, mismatchWeight);
@@ -317,7 +317,7 @@ SEQAN_DEFINE_TEST(test_alignment_free_n2_dna5)
     SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 0), 0.143021, 0.01);
     SEQAN_ASSERT_IN_DELTA(value(myMatrix, 1, 1), 1.0, 0.01);
 
-    myScoreN2.revCom = "bothStrands";
+    myScoreN2.revCom = "both_strands";
     alignmentFreeComparison(myMatrix, sequences, myScoreN2);
 
     SEQAN_ASSERT_IN_DELTA(value(myMatrix, 0, 0), 1.0, 0.01);
