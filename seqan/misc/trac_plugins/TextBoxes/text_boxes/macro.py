@@ -38,7 +38,7 @@ CLASSES = {
     'WarningBox': 'warning_box',
     'InfoBox': 'info_box',
     'ImportantBox': 'important_box',
-    'AssignmentBox': 'assignment_box',
+    'AssignmentBox': 'assignment_box'
 }
 
 ICONS = {
@@ -58,13 +58,25 @@ class TextBoxMacro(WikiMacroBase):
         yield 'InfoBox'
         yield 'ImportantBox'
         yield 'AssignmentBox'
+        yield 'TextIcon'
 
     def expand_macro(self, formatter, name, content, args):
         add_stylesheet(formatter.req, 'text_boxes/css/text_boxes.css')
         # TODO(holtgrew): Actually, we would like to add a style sheet but this does not work. Thus we use a style tag below.
         #add_stylesheet(formatter.req, 'text_boxes/css/text_boxes.css')
         className = CLASSES.get(name, 'ShellBox')
-        if name in ['WarningBox', 'InfoBox', 'ImportantBox', 'AssignmentBox']:
+        if name in ['TextIcon']:
+            args = trac.wiki.parse_args(content)
+            if not args or not args[0]:  # Handle case of empty entry.
+                return None
+            print args
+            DEFAULT = 'gray'
+            COLOR_CLASSES = ['green', 'red', 'yellow', 'black', 'gray', 'blue']
+            color_class_name = args[1].get('color', DEFAULT)
+            if not color_class_name in COLOR_CLASSES:
+                color_class_name = DEFAULT
+            return tag.span(args[0], class_=('text_icon %s' % color_class_name))
+        elif name in ['WarningBox', 'InfoBox', 'ImportantBox', 'AssignmentBox']:
             content_html = self.format_wiki(formatter, content)
             img = ''
             if name == 'AssignmentBox':

@@ -50,3 +50,54 @@ div.assignment_box img
     margin-top: 4px;
 }
 
+span.text_icon
+{
+    font-size: .8em;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px /* future proofing */
+    -khtml-border-radius: 5px; /* for old Konqueror browsers */
+    font-weight: bolder;
+}
+
+span.text_icon.green
+{
+    padding: 1px 5px;
+    background-color: #10a931;
+    color: white;
+}
+
+span.text_icon.red
+{
+    padding: 1px 5px;
+    background-color: #BB0000;
+    color: white;
+}
+
+span.text_icon.yellow
+{
+    padding: 1px 5px;
+    background-color: #FFEFA5;
+    color: black;
+}
+
+span.text_icon.black
+{
+    padding: 1px 5px;
+    background-color: black;
+    color: white;
+}
+
+span.text_icon.blue
+{
+    padding: 1px 5px;
+    background-color: blue;
+    color: white;
+}
+
+span.text_icon.gray
+{
+    padding: 1px 5px;
+    background-color: gray;
+    color: white;
+}
