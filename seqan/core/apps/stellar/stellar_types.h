@@ -55,7 +55,7 @@ struct StellarOptions {
 	unsigned maxRepeatPeriod;	// maximal period of low complexity repeats to be filtered
 	unsigned minRepeatLength;	// minimal length of low complexity repeats to be filtered
 	double qgramAbundanceCut;
-	char verbose;				// verbosity mode: 0 - low, 1 - medium (, 2 - high)
+	bool verbose;				// verbose mode
 
 
 	StellarOptions() {
@@ -78,7 +78,7 @@ struct StellarOptions {
 		maxRepeatPeriod = 1;
 		minRepeatLength = 1000;
 		qgramAbundanceCut = 1;
-		verbose = 0;
+		verbose = false;
 	}
 }; 
 

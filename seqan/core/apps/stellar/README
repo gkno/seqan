@@ -30,11 +30,11 @@ written to the output file.
 ---------------------------------------------------------------------------
 
 For precompiled executables (Windows, Linux 64, and Mac OS X) download the
-archive stellar_v1.x.zip from http://www.seqan.de/downloads/projects.html
-and extract it.
+archive stellar_v1.x.zip from http://www.seqan.de/projects/stellar and
+extract it.
 On linux, for example:
-  1) wget http://www.seqan.de/uploads/media/stellar_v1.1.zip
-  2) unzip stellar_v1.1.zip
+  1) wget http://www.seqan.de/wp-content/plugins/download-monitor/download.php?id=32 -O stellar_v1.3.zip
+  2) unzip stellar_v1.3.zip
   3) ./stellar
 
 STELLAR is distributed with SeqAn - The C++ Sequence Analysis Library (see 
@@ -53,8 +53,8 @@ with:
   1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
   2)  cd seqan/build/
   3)  cmake .. -DCMAKE_BUILD_TYPE=Release
-  5)  make stellar
-  7)  ./core/apps/stellar/stellar
+  4)  make stellar
+  5)  ./core/apps/stellar/stellar
 
 On success, an executable file stellar was build and a brief usage 
 description was dumped.
@@ -63,7 +63,7 @@ description was dumped.
 3. Usage
 ---------------------------------------------------------------------------
 
-Usage: stellar -d <FASTA sequence file> -q <FASTA sequence file> [Options]
+Usage: stellar [Options] <FASTA sequence file 1> <FASTA sequence file 2>
 
 To get a short usage description of STELLAR, you can execute stellar -h or 
 stellar --help.
@@ -72,16 +72,16 @@ stellar --help.
 3.1. Non-optional arguments
 ---------------------------------------------------------------------------
 
-STELLAR always expects the two parameters --database and --query (or -d and
--q) to be set.
+STELLAR always expects two arguments, a database and a query sequence
+file, both in Fasta format.
 
- [ -d FILE ],  [ --database FILE ]
+  <FASTA sequence file 1>
  
   Set the name of the file containing the database sequence(s) in
   (multi-)Fasta format.  Note that STELLAR expects Fasta identifiers to
   be unique before the first whitespace.
  
- [ -q FILE ],  [ --query FILE ]
+  <FASTA sequence file 2>
  
   Set the name of the file containing the query sequence(s) in (multi-)
   Fasta format. All query sequences will be compared to all database
@@ -129,13 +129,13 @@ the command line:
   
   Verbose. Print extra information and running times.
 
-  [ -V ],  [ --version ]
-  
-  Print version information.
-
   [ -h ],  [ --help ]
 
   Print a usage summary. All other options are ignored.
+
+  [ --version ]
+  
+  Print version information.
 
 ---------------------------------------------------------------------------
 3.3. Filtering Options
@@ -240,7 +240,7 @@ the command line:
   [ -of STRING ],  [ --outFormat STRING ]
 
   Set the output format for the local alignments. Currently, only the
-  optinos gff and text are available. See section 4.
+  optinos gff and txt are available. See section 4.
   
   [ -od FILE ],  [ --outDisabled FILE ]
 
@@ -255,7 +255,7 @@ STELLAR supports currently two output format selectable via the
 "--outFormat STRING" option. The following values for STRING are possible:
 
   gff = General Feature Format (GFF)
-  text = Human Readable Alignment Format
+  txt = Human Readable Alignment Format
 
 The following subsections describe the structure of these formats.
  
@@ -330,8 +330,8 @@ NC_001477.fasta and NC_001474.fasta containing the sequences of two virus
 serotypes. To compare the two sequences do the following:
 
   1)  cd seqan/cmake/
-  2)  ./apps/stellar -d ../apps/stellar/example/NC_001477.fasta \
-                     -q ../apps/stellar/example/NC_001474.fasta
+  2)  ./apps/stellar ../apps/stellar/example/NC_001477.fasta \
+                     ../apps/stellar/example/NC_001474.fasta
   3)  less stellar.gff
 
 On success, STELLAR dumped one local alignment into the file stellar.gff:
@@ -342,9 +342,9 @@ You may want to run STELLAR again with less stringent parameters to
 identify other similar regions, and write the output into a different file:
 
   1) cd seqan/cmake/
-  2)  ./apps/stellar -d ../apps/stellar/examples/NC_001477.fasta \
-                     -q ../apps/stellar/examples/NC_001474.fasta \
-                     -o virus_serotypes.gff --epsilon 0.1 --minLength 50
+  2)  ./apps/stellar -o virus_serotypes.gff --epsilon 0.1 --minLength 50 \
+                     ../apps/stellar/examples/NC_001477.fasta \
+                     ../apps/stellar/examples/NC_001474.fasta
   3) less virus_serotypes.gff
 
 Now, you should obtain 13 local alignments in the file virus_serotypes.gff.
@@ -360,9 +360,9 @@ length of a match to only 30 what allows splitting a read into up to 3
 fragments:
 
   1)  cd seqan/cmake/
-  2)  ./apps/stellar -d ../apps/stellar/examples/NC_001477.fasta \
-                     -q ../apps/stellar/examples/reads.fasta \
-                     -o mapped_reads.gff --minLength 30
+  2)  ./apps/stellar -o mapped_reads.gff --minLength 30 \
+                     ../apps/stellar/examples/NC_001477.fasta \
+                     ../apps/stellar/examples/reads.fasta
   3)  less mapped_reads.gff
 
 The output file will contain 15 matches, 6 entirely mapped reads, 3 reads

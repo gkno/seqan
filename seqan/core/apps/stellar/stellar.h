@@ -666,7 +666,7 @@ SEQAN_CHECKPOINT
 					   numMatches, databaseID, dbStrand, value(matches, pattern.curSeqNo), tag);
 	}
 
-	if (verbose > 0 && numSwiftHits > 0) {
+	if (verbose && numSwiftHits > 0) {
 		std::cout << std::endl << "    # SWIFT hits      : " << numSwiftHits;
 		std::cout << std::endl << "    Longest hit       : " << maxLength;
 		std::cout << std::endl << "    Avg hit length    : " << totalLength/numSwiftHits;

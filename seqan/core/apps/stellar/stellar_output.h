@@ -414,7 +414,7 @@ SEQAN_CHECKPOINT
 	file.close();
 
 	std::cout << "# Eps-matches     : " << numMatches << std::endl;
-	if (verbose > 0) {
+	if (verbose) {
 		if (numMatches > 0) {
 			std::cout << "Longest eps-match : " << maxLength << std::endl;
 			std::cout << "Avg match length  : " << totalLength / numMatches << std::endl;
@@ -516,7 +516,7 @@ SEQAN_CHECKPOINT
 	file.close();
 
 	std::cout << "# Eps-matches     : " << numMatches << std::endl;
-	if (verbose > 0) {
+	if (verbose) {
 		if (numMatches > 0) {
 			std::cout << "Longest eps-match : " << maxLength << std::endl;
 			std::cout << "Avg match length  : " << totalLength / numMatches << std::endl;

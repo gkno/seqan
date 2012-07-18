@@ -24,7 +24,7 @@
 #define SEQAN_PROFILE
 
 #include <seqan/index.h>
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 #include "stellar.h"
 #include "stellar_output.h"
 
@@ -381,159 +381,148 @@ _writeFileNames(TOptions & options) {
 	std::cout << std::endl;
 }
 
-inline void
-_addVersion(CommandLineParser& parser) {
-	::std::string rev = "$Revision: 11692 $";
-	addVersionLine(parser, "Version 1.2 (April 20th 2012) SeqAn Revision: " + rev.substr(11, 5) + "");
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Parses options from command line parser and writes them into options object
-template<typename TParser, typename TOptions>
-bool
-_parseOptions(TParser & parser, TOptions & options) {
-//IOREV _notio_
-    // i/o options
-	getOptionValueShort(parser, 'd', options.databaseFile);
-    getOptionValueShort(parser, 'q', options.queryFile);
-    if (isSetShort(parser, 'o')) getOptionValueShort(parser, 'o', options.outputFile);
-    if (isSetShort(parser, "od")) getOptionValueShort(parser, "od", options.disabledQueriesFile);
-	if (isSetShort(parser, "of")) getOptionValueShort(parser, "of", options.outputFormat);
-    if (isSetLong(parser, "no-rt")) options.noRT = true;
+template<typename TOptions>
+ArgumentParser::ParseResult
+_parseOptions(ArgumentParser & parser, TOptions & options)
+{
+    getArgumentValue(options.databaseFile, parser, 0);
+    getArgumentValue(options.queryFile, parser, 1);
+
+    // output options
+    getOptionValue(options.outputFile, parser, "out");
+	getOptionValue(options.outputFormat, parser, "outFormat");
+	getOptionValue(options.disabledQueriesFile, parser, "outDisabled");
+    getOptionValue(options.noRT, parser, "no-rt");
 
 	// main options
-	if (isSetLong(parser, "kmer")) getOptionValueLong(parser, "kmer", options.qGram);
-    if (isSetLong(parser, "minLength")) getOptionValueLong(parser, "minLength", options.minLength);
-	if (isSetShort(parser, 'e')) getOptionValueShort(parser, 'e', options.epsilon);
-    if (isSetShort(parser, 'x')) getOptionValueShort(parser, 'x', options.xDrop);
+	getOptionValue(options.qGram, parser, "kmer");
+    getOptionValue(options.minLength, parser, "minLength");
+	getOptionValue(options.epsilon, parser, "epsilon");
+	getOptionValue(options.xDrop, parser, "xDrop");
 
-	if (isSetShort(parser, 'f')) if (!isSetShort(parser, 'r')) options.reverse = false;
-	if (isSetShort(parser, 'r')) if (!isSetShort(parser, 'f')) options.forward = false;
+	if (isSet(parser, "forward") && !isSet(parser, "reverse"))
+		options.reverse = false;
+	if (!isSet(parser, "forward") && isSet(parser, "reverse"))
+		options.forward = false;
 
-	if (isSetShort(parser, "vs")) getOptionValueShort(parser, "vs", options.fastOption);
-	if (isSetShort(parser, "dt")) getOptionValueShort(parser, "dt", options.disableThresh);
-	if (isSetShort(parser, 'n')) getOptionValueShort(parser, 'n', options.numMatches);
-	if (isSetShort(parser, 's')) getOptionValueShort(parser, 's', options.compactThresh);
-	if (isSetShort(parser, "rp")) getOptionValueShort(parser, "rp", options.maxRepeatPeriod);
-	if (isSetShort(parser, "rl")) getOptionValueShort(parser, "rl", options.minRepeatLength);
-	if (isSetShort(parser, 'a')) getOptionValueShort(parser, 'a', options.qgramAbundanceCut);
+	getOptionValue(options.fastOption, parser, "verification");
+	getOptionValue(options.disableThresh, parser, "disableThresh");
+	getOptionValue(options.numMatches, parser, "numMatches");
+	getOptionValue(options.compactThresh, parser, "sortThresh");
+	getOptionValue(options.maxRepeatPeriod, parser, "repeatPeriod");
+	getOptionValue(options.minRepeatLength, parser, "repeatLength");
+	getOptionValue(options.qgramAbundanceCut, parser, "abundanceCut");
 
-	if (isSetShort(parser, 'v')) options.verbose = 1;
+	getOptionValue(options.verbose, parser, "verbose");
 
-	if (options.outputFormat != "gff" && options.outputFormat != "text") {
-		std::cerr << "Invalid parameter value: Unknown output format." << std::endl;
-		return 0;
-	}
-
-	if (options.fastOption != "exact" && options.fastOption != "bestLocal"
-		 && options.fastOption != "bandedGlobal") {
-		std::cerr << "Invalid parameter value: Unknown verification strategy." << std::endl;
-		return 0;
-	}
-
-	if (isSetShort(parser, 'k') && options.qGram < 1) {
-		std::cerr << "Invalid parameter value: Please choose a greater k-mer length." << std::endl;
-		return 0;
-	}
-
-	if (isSetShort(parser, 'k') && options.qGram > 32) {
-		std::cerr << "Invalid parameter value: Please choose a smaller k-mer length." << std::endl;
-		return 0;
-	}
-
-	if (options.epsilon < 0.0) {
-		std::cerr << "Invalid parameter value: Please choose a greater error rate." << std::endl;
-		return 0;
-	}
-
-	if (options.epsilon > 0.25) {
-		std::cerr << "Invalid parameter value: Please choose a smaller error rate." << std::endl;
-		return 0;
-	}
-	if (isSetShort(parser, 'k') && options.qGram >= 1/options.epsilon) {
-		std::cerr << "Invalid parameter value: Please choose q-gram length lower than 1/epsilon." << std::endl; 
-		return 0;
-	}
-
-	if (options.qgramAbundanceCut > 1 || options.qgramAbundanceCut < 0) {
-		std::cerr << "Invalid parameter value: Please choose a k-mer overabundance cut ration between 0 and 1.\n";
-		return 0;
+	if (isSet(parser, "kmer") && options.qGram >= 1/options.epsilon) {
+		std::cerr << "Invalid parameter value: Please choose q-gram length lower than 1/epsilon." << std::endl;
+		return ArgumentParser::PARSE_ERROR;
 	}
 
 	if (options.numMatches > options.compactThresh) {
 		std::cerr << "Invalid parameter values: Please choose numMatches <= sortThresh." << std::endl;
-		return 0;
+		return ArgumentParser::PARSE_ERROR;
 	}
-	return 1;
+	return ArgumentParser::PARSE_OK;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Set-Up of Command Line Parser
-template<typename TParser>
-void
-_setParser(TParser & parser) {
-	_addVersion(parser);
+// Set-Up of Argument Parser
+void _setParser(ArgumentParser & parser) {
+	setShortDescription(parser, "the SwifT Exact LocaL AligneR");
+	setDate(parser, "July 2012");
+	setVersion(parser, "1.3");
 
-    addTitleLine(parser, "*******************************************");
-	addTitleLine(parser, "* STELLAR - the SwifT Exact LocaL AligneR *");
-	addTitleLine(parser, "* (c) Copyright 2010-2012 by Birte Kehr   *");
-	addTitleLine(parser, "*******************************************");
+    addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIFASTA FILE 1\\fP> <\\fIFASTA FILE 2\\fP>");
 
-	addUsageLine(parser, "-d <FASTA sequence file> -q <FASTA sequence file> [Options]");
+    addDescription(parser,
+		           "STELLAR implements the SWIFT filter algorithm (Rasmussen et al., 2006) "
+		           "and a verification step for the SWIFT hits that applies local alignment, "
+				   "gapped X-drop extension, and extraction of the longest epsilon-match.");
+	addDescription(parser,
+				   "Input to STELLAR are two files, each containing one or more sequences "
+				   "in FASTA format. Each sequence from file 1 will be compared to each "
+				   "sequence in file 2. The sequences from file 1 are used as database, the "
+				   "sequences from file 2 as queries.");
+    addDescription(parser, "(c) 2010-2012 by Birte Kehr");
 
-	addLine(parser, "");
-    addLine(parser, "An implementation of the SWIFT filter algorithm (Rasmussen et al., 2006)");
-    addLine(parser, "and subsequent verification of the SWIFT hits using local alignment,");
-    addLine(parser, "gapped X-drop extension, and extraction of the longest epsilon-match.");
-
-	addSection(parser, "Non-optional Arguments:");
-    addOption(parser, CommandLineOption('d', "database", "Fasta file containing the database sequences",
-              (OptionType::String | OptionType::Mandatory)));
-    addOption(parser, CommandLineOption('q', "query", "Fasta file containing the query sequences", 
-              (OptionType::String | OptionType::Mandatory)));
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE, "FASTA FILE 1"));
+	setValidValues(parser, 0, "fa FA Fa fasta FASTA Fasta");  // allow only fasta files as input
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE, "FASTA FILE 2"));
+	setValidValues(parser, 1, "fa FA Fa fasta FASTA Fasta");  // allow only fasta files as input
 
 	addSection(parser, "Main Options:");
-    addOption(parser, CommandLineOption('e', "epsilon", "Maximal error rate (max 0.25)", OptionType::Double, "0.05"));
-    addOption(parser, CommandLineOption('l', "minLength", "Minimal length of epsilon-matches", OptionType::Int, 100));
-	addOption(parser, CommandLineOption('f', "forward", "Search only in forward strand of database",
-		OptionType::Boolean, "both"));
-	addOption(parser, CommandLineOption('r', "reverse", "Search only in reverse complement of database",
-		OptionType::Boolean, "both"));
-    addOption(parser, CommandLineOption('v', "verbose", "Verbosity mode.", OptionType::Bool, "false"));
+
+    addOption(parser, ArgParseOption("e", "epsilon", "Maximal error rate (max 0.25).", ArgParseArgument::DOUBLE));
+	setDefaultValue(parser, "e", "0.05");
+	setMinValue(parser, "e", "0");
+	setMaxValue(parser, "e", "0.25");
+    addOption(parser, ArgParseOption("l", "minLength", "Minimal length of epsilon-matches.", ArgParseArgument::INTEGER));
+	setDefaultValue(parser, "l", "100");
+	setMinValue(parser, "l", "0");
+	addOption(parser, ArgParseOption("f", "forward", "Search only in forward strand of database."));
+	addOption(parser, ArgParseOption("r", "reverse", "Search only in reverse complement of database."));
+	addOption(parser, ArgParseOption("v", "verbose", "Set verbosity mode."));
     
 	addSection(parser, "Filtering Options:");
-    addOption(parser, CommandLineOption('k', "kmer", "Length of the q-grams (max 32)", OptionType::Int, "smin"));
-    addOption(parser, CommandLineOption("rp", "repeatPeriod",
-		"Maximal period of low complexity repeats to be filtered", OptionType::Int, 1));
-    addOption(parser, CommandLineOption("rl", "repeatLength",
-		"Minimal length of low complexity repeats to be filtered", OptionType::Int, 1000));
-    addOption(parser, CommandLineOption('a', "abundanceCut",
-		"k-mer overabundance cut ratio", OptionType::Double, "1"));
+
+    addOption(parser, ArgParseOption("k", "kmer", "Length of the q-grams (max 32).", ArgParseArgument::INTEGER));
+	setMinValue(parser, "k", "1");
+	setMaxValue(parser, "k", "32");
+    addOption(parser, ArgParseOption("rp", "repeatPeriod",
+		                             "Maximal period of low complexity repeats to be filtered.", ArgParseArgument::INTEGER));
+	setDefaultValue(parser, "rp", "1");
+    addOption(parser, ArgParseOption("rl", "repeatLength",
+		                             "Minimal length of low complexity repeats to be filtered.", ArgParseArgument::INTEGER));
+	setDefaultValue(parser, "rl", "1000");
+    addOption(parser, ArgParseOption("a", "abundanceCut", "k-mer overabundance cut ratio.", ArgParseArgument::DOUBLE));
+	setDefaultValue(parser, "a", "1");
+	setMinValue(parser, "a", "0");
+	setMaxValue(parser, "a", "1");
 
 	addSection(parser, "Verification Options:");
-    addOption(parser, CommandLineOption('x', "xDrop", "Maximal x-drop for extension", OptionType::Double, 5));
-	addOption(parser, CommandLineOption("vs", "verification", "Verification strategy", OptionType::String, "exact"));
-	addHelpLine(parser, "exact        = compute and extend all local alignments in SWIFT hits");
-	addHelpLine(parser, "bestLocal    = compute and extend only best local alignment in SWIFT hits");
-	addHelpLine(parser, "bandedGlobal = banded global alignment on SWIFT hits");
-	addOption(parser, CommandLineOption("dt", "disableThresh",
-		"Maximal number of verified matches before disabling verification", OptionType::Int));
-	addHelpLine(parser, "for one query sequence (default infinity)");
-	addOption(parser, CommandLineOption('n', "numMatches",
-		"Maximal number of kept matches per query and database", OptionType::Int, 50));
-	addHelpLine(parser, "If there are more matches, only the longest ones are kept.");
-	addOption(parser, CommandLineOption('s', "sortThresh",
-		"Number of matches triggering removal of duplicates", OptionType::Int, 500));
-	addHelpLine(parser, "Choose a smaller value for saving space.");
+
+    addOption(parser, ArgParseOption("x", "xDrop", "Maximal x-drop for extension.", ArgParseArgument::DOUBLE));
+	setDefaultValue(parser, "x", "5");
+	addOption(parser, ArgParseOption("vs", "verification", "Verification strategy: exact or bestLocal or bandedGlobal",
+		                             ArgParseArgument::STRING));
+	//addHelpLine(parser, "exact        = compute and extend all local alignments in SWIFT hits");
+	//addHelpLine(parser, "bestLocal    = compute and extend only best local alignment in SWIFT hits");
+	//addHelpLine(parser, "bandedGlobal = banded global alignment on SWIFT hits");
+	setDefaultValue(parser, "vs", "exact");
+	setValidValues(parser, "vs", "exact bestLocal bandedGlobal");
+	addOption(parser, ArgParseOption("dt", "disableThresh",
+		                             "Maximal number of verified matches before disabling verification for one query "
+									 "sequence (default infinity).", ArgParseArgument::INTEGER));
+	setMinValue(parser, "dt", "0");
+	addOption(parser, ArgParseOption("n", "numMatches",
+		                             "Maximal number of kept matches per query and database. If STELLAR finds more matches, "
+									 "only the longest ones are kept.", ArgParseArgument::INTEGER));
+	setDefaultValue(parser, "n", "50");
+	addOption(parser, ArgParseOption("s", "sortThresh",
+		                             "Number of matches triggering removal of duplicates. Choose a smaller value for saving "
+									 "space.", ArgParseArgument::INTEGER));
+	setDefaultValue(parser, "s", "500");
 
 	addSection(parser, "Output Options:");
-    addOption(parser, CommandLineOption('o', "out", "Name of output file", OptionType::String, "stellar.gff"));
-	addOption(parser, CommandLineOption("of", "outFormat", "Output format", OptionType::String, "gff"));
-	addHelpLine(parser, "Possible formats: gff, text");
-	addOption(parser, CommandLineOption("od", "outDisabled",
-		"Name of output file containing disabled query sequences", OptionType::String));
-	addHelpLine(parser, "(default stellar.disabled.fasta)");
-    addOption(parser, CommandLineOption("t", "no-rt", "Suppress printing running time.", OptionType::Bool | OptionType::Hidden, false));
+
+    addOption(parser, ArgParseOption("o", "out", "Name of output file.", ArgParseArgument::OUTPUTFILE));
+	setDefaultValue(parser, "o", "stellar.gff");
+	addOption(parser, ArgParseOption("of", "outFormat", "Output format: GFF or TXT", ArgParseArgument::STRING));
+	setDefaultValue(parser, "of", "gff");
+	setValidValues(parser, "of", "gff Gff GFF txt Txt TXT");
+	addOption(parser, ArgParseOption("od", "outDisabled",
+	                                 "Name of output file for disabled query sequences.", ArgParseArgument::OUTPUTFILE));
+	setDefaultValue(parser, "od", "stellar.disabled.fasta");
+    addOption(parser, ArgParseOption("t", "no-rt", "Suppress printing running time."));
+	hideOption(parser, "t");
+
+    addTextSection(parser, "References");
+    addText(parser, "Kehr, B., Weese, D., Reinert, K.: STELLAR: fast and exact local alignments. BMC Bioinformatics, "
+		            "12(Suppl 9):S15, 2011.");
 }
 
 // TODO(holtgrew): Move this into a SeqAn misc module.
@@ -587,25 +576,19 @@ int main(int argc, const char *argv[]) {
 	ScientificNotationExponentOutputNormalizer scientificNotationNormalizer; 
 
     // command line parsing
-    CommandLineParser parser("stellar");
-
-    _setParser(parser);
-    if (!parse(parser, argc, argv)) {
-		if (isSetShort(parser, 'h') || isSetShort(parser, 'v')) return 0; 
-        shortHelp(parser, std::cerr);
-        return 1;
-    }
+    ArgumentParser parser("stellar");
 
 	StellarOptions options = StellarOptions();
-	if (!_parseOptions(parser, options)) {
-		return 1;
-	}
+    _setParser(parser);
+	ArgumentParser::ParseResult res = parse(parser, argc, argv);
+    
+    if (res == ArgumentParser::PARSE_OK)
+	    res = _parseOptions(parser, options);
+	
+    if (res != ArgumentParser::PARSE_OK)
+        return res == ArgumentParser::PARSE_ERROR;
 
 	typedef String<Dna5> TSequence;
-
-	// output header
-	_printTitle(parser, std::cout);
-	std::cout << std::endl;
 
 	// output file names
 	_writeFileNames(options);
@@ -650,7 +633,7 @@ int main(int argc, const char *argv[]) {
     SEQAN_PROTIMESTART(timeStellar);
 	if (!_stellarOnAll(databases, databaseIDs, queries, queryIDs, options)) return 1;
 
-    if (options.verbose > 0 && options.noRT == false) 
+    if (options.verbose && options.noRT == false) 
 		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
 
 	return 0;
