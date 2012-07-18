@@ -268,7 +268,7 @@ class SeedSet;
 
 template <typename TStream, typename TQuerySequence, typename TDatabaseSequence, typename TSeedSetSpec, typename TSeedSpec, typename TSeedConfig>
 inline void
-_write(TStream & stream,
+__write(TStream & stream,
        TQuerySequence & sequence0,
        TDatabaseSequence & sequence1,
        SeedSet<TSeedSpec, TSeedSetSpec, TSeedConfig> const & seedSet,

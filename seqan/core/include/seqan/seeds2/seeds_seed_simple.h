@@ -317,7 +317,7 @@ struct Tikz_ {};
 
 template <typename TStream, typename TConfig>
 inline void
-_write(TStream & stream, Seed<Simple, TConfig> const & seed, Tikz_ const &)
+__write(TStream & stream, Seed<Simple, TConfig> const & seed, Tikz_ const &)
 {
 //IOREV _nodoc_ specialization not documented
     stream << "\\draw[seed] (" << getBeginDim1(seed) << ", -" << getBeginDim0(seed) << ") -- (" << (getEndDim1(seed) - 1) << ", -" << (getEndDim0(seed) - 1) << ");" << std::endl;

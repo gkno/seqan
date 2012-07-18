@@ -414,7 +414,7 @@ assign(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> & source)
 
 template <typename TStream, typename TConfig>
 inline void
-_write(TStream & stream, Seed<ChainedSeed, TConfig> const & seed, Tikz_ const &)
+__write(TStream & stream, Seed<ChainedSeed, TConfig> const & seed, Tikz_ const &)
 {
 //IOREV _nodoc_ specialization not documented
     // Overall seed.

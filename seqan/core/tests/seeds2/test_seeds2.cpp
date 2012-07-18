@@ -208,22 +208,5 @@ SEQAN_BEGIN_TESTSUITE(test_seeds)
 
     // Test global chaining of seeds.
     SEQAN_CALL_TEST(test_seeds_global_chaining_sparse_length);
-
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/align_chain_banded.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/align_dynprog_affine.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/align_dynprog_banded_affine.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/align_dynprog_banded_linear.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/align_dynprog_linear.h");
-    // TODO(holtgrew): Write tests for indirect iterator and uncomment this.
-    // SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/basic_iter_indirect.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_combination.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_extension.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_global_chaining.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_seed_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_seed_chained.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_seed_diagonal.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_seed_set_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_seed_set_unordered.h");
-    SEQAN_VERIFY_CHECKPOINTS("core/include/seqan/seeds2/seeds_seed_simple.h");
 }
 SEQAN_END_TESTSUITE
