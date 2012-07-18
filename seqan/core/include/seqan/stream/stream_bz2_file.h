@@ -61,7 +61,7 @@ inline void close(Stream<BZ2File> & stream);
 /**
 .Spec.BZ2 File Stream
 ..cat:Input / Output
-..signature:Stream<BZ2Stream>
+..signature:Stream<BZ2File>
 ..general:Class.Stream
 ..summary:Wrapper for $BZFILE *$ streams from bzlib.
 ..remarks:This is only available if @Macro.SEQAN_HAS_ZLIB@ is set to 1.
