@@ -19,6 +19,8 @@ Success!
 }}}
 """
 
+import itertools
+import operator
 import StringIO
 
 from pkg_resources import resource_filename
@@ -59,6 +61,7 @@ class TextBoxMacro(WikiMacroBase):
         yield 'ImportantBox'
         yield 'AssignmentBox'
         yield 'TextIcon'
+        yield 'MenuTrace'
 
     def expand_macro(self, formatter, name, content, args):
         add_stylesheet(formatter.req, 'text_boxes/css/text_boxes.css')
@@ -69,13 +72,24 @@ class TextBoxMacro(WikiMacroBase):
             args = trac.wiki.parse_args(content)
             if not args or not args[0]:  # Handle case of empty entry.
                 return None
-            print args
             DEFAULT = 'gray'
             COLOR_CLASSES = ['green', 'red', 'yellow', 'black', 'gray', 'blue']
             color_class_name = args[1].get('color', DEFAULT)
             if not color_class_name in COLOR_CLASSES:
                 color_class_name = DEFAULT
             return tag.span(args[0], class_=('text_icon %s' % color_class_name))
+        elif name in ['MenuTrace']:
+            args = trac.wiki.parse_args(content)
+            print args
+            if not args[0]:
+                return None
+            result = tag.span(args[0][0], class_='menu_item')
+            for text in args[0][1:]:
+                #result += u' \u25B8 '
+                #result += u' \u25B7 '
+                result += tag.span(u' \u25B6 ', class_='arrow')
+                result += tag.span(text, class_='menu_item')
+            return tag.span(result, class_='menu_trace')
         elif name in ['WarningBox', 'InfoBox', 'ImportantBox', 'AssignmentBox']:
             content_html = self.format_wiki(formatter, content)
             img = ''
@@ -83,7 +97,7 @@ class TextBoxMacro(WikiMacroBase):
                 img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left;')
             elif ICONS.get(name):
                 img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left;')
-            return tag.div(img + genshi.core.Markup(content_html) + tag.br(style='clear:both;'), class_=className)
+            return tag.div(img + genshi.core.Markup(content_html), class_=className)
         else:
             return tag.pre(content, class_='wiki ' + className)
 

@@ -11,44 +11,110 @@ pre.ide_box
     border:1px solid black;
 }
 
+/* Pretty display of menu entries. */
+
+span.menu_trace
+{
+    display: inline-block;
+}
+
+span.menu_trace arrow
+{
+    display: inline-block;
+    vertical-align: text-top;
+}
+
+span.menu_trace span.menu_item
+{
+    line-height: 1.4em;
+    display: inline-block;
+    padding: 2px 4px;
+    border: 2px solid gray;
+    background: #f0f0f0;
+    border-left-color: gray;
+    border-top-color: gray;
+    border-right-color: black;
+    border-bottom-color: black;
+
+    /* CSS's take on round borders. */
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px /* future proofing */
+    -khtml-border-radius: 5px; /* for old Konqueror browsers */
+}
+
+/* Large Boxes */
+
 div.warning_box
 {
+    padding: .5em .5em .5em 70px; /* space for image */
+
     background: #fdc;
     border: 2px solid #d00;
     color: #500;
-    padding: .5em;
     margin: 1em 0;
+
+    /* CSS's take on round borders. */
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px /* future proofing */
+    -khtml-border-radius: 5px; /* for old Konqueror browsers */
 }
 
 div.important_box
 {
-    background: #ffefa5;
-    border: 2px solid #aaa072;
+    padding: .5em .5em .5em 70px; /* space for image */
+
+    background: #fff3d3;
+    border: 2px solid #efe3c3;
     color: black;
-    padding: .5em;
     margin: 1em 0;
+
+    /* CSS's take on round borders. */
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px /* future proofing */
+    -khtml-border-radius: 5px; /* for old Konqueror browsers */
 }
 
 div.info_box
 {
-    background: #ffefa5;
-    border: 2px solid #aaa072;
+    padding: .5em .5em .5em 70px; /* space for image */
+
+    background: #F0F0FF;
+    border: 2px solid #F0F0F0;
     color: black;
-    padding: .5em;
     margin: 1em 0;
+
+    /* CSS's take on round borders. */
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px /* future proofing */
+    -khtml-border-radius: 5px; /* for old Konqueror browsers */
 }
 
 div.assignment_box
 {
     padding: .5em .5em .5em 70px;
     background-color: #eed;
+
+    /* CSS's take on round borders. */
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px /* future proofing */
+    -khtml-border-radius: 5px; /* for old Konqueror browsers */
 }
 
+div.warning_box img,
+div.important_box img,
+div.info_box img,
 div.assignment_box img
 {
     margin-left: -62px;
     margin-top: 4px;
 }
+
+/* Small text boxes. */
 
 span.text_icon
 {
