@@ -18,17 +18,16 @@ span.menu_trace
     display: inline-block;
 }
 
-span.menu_trace arrow
+span.menu_trace span.arrow
 {
-    display: inline-block;
-    vertical-align: text-top;
+    position: relative;
+    top: -2.5px;
 }
 
 span.menu_trace span.menu_item
 {
-    line-height: 1.4em;
     display: inline-block;
-    padding: 2px 4px;
+    padding: 0px 4px;
     border: 2px solid gray;
     background: #f0f0f0;
     border-left-color: gray;
@@ -37,14 +36,70 @@ span.menu_trace span.menu_item
     border-bottom-color: black;
 
     /* CSS's take on round borders. */
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px /* future proofing */
-    -khtml-border-radius: 5px; /* for old Konqueror browsers */
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px /* future proofing */
+    -khtml-border-radius: 2px; /* for old Konqueror browsers */
 }
 
 /* Large Boxes */
 
+body { padding: 4em; }
+dt { font-weight: 700; }
+dd { margin-left: 1em; }
+
+.box {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #000;
+    margin: 1em;
+    padding: 0.5em 0.5em 0.5em 70px;
+    min-height: 55px;
+    background-repeat: no-repeat;
+    background-position: 10px 10px;    
+    
+  -webkit-border-radius: 3px;
+          border-radius: 3px;
+
+  -webkit-background-clip: padding-box;
+     -moz-background-clip: padding;
+          background-clip: padding-box;
+    
+    
+  -webkit-box-shadow: 0px 1px 1px 0px #a3a3a3;
+          box-shadow: 0px 1px 1px 0px #a3a3a3;
+
+
+}
+
+.warning.box
+{
+    background-color: #FFBABA;
+    border-color: #D8000C;
+    background-image: url(../dialog-warning.png);
+}
+
+.important.box
+{
+    background-color: rgba(254, 239, 179, 0.7);
+    border-color: rgba(159, 96, 0, 0.7);
+    background-image: url(../emblem-important.png);
+}
+
+.info.box
+{
+    background-color: rgba(189, 229, 248, 0.5);
+    border-color: rgba(0, 82, 155, 0.5);
+    background-image: url(../dialog-information.png);
+}
+
+.assignment.box
+{
+    background-color: #EEEEDD;
+    border-color: #CBCB99;
+    background-image: url(../Accessories-text-editor.png);
+}
+​
 div.warning_box
 {
     padding: .5em .5em .5em 70px; /* space for image */
@@ -103,15 +158,6 @@ div.assignment_box
     -webkit-border-radius: 5px;
     border-radius: 5px /* future proofing */
     -khtml-border-radius: 5px; /* for old Konqueror browsers */
-}
-
-div.warning_box img,
-div.important_box img,
-div.info_box img,
-div.assignment_box img
-{
-    margin-left: -62px;
-    margin-top: 4px;
 }
 
 /* Small text boxes. */

@@ -37,10 +37,10 @@ from genshi.builder import tag
 CLASSES = {
     'ShellBox' : 'shell_box',
     'IdeBox' : 'ide_box',
-    'WarningBox': 'warning_box',
-    'InfoBox': 'info_box',
-    'ImportantBox': 'important_box',
-    'AssignmentBox': 'assignment_box'
+    'WarningBox': 'box warning',
+    'InfoBox': 'box info',
+    'ImportantBox': 'box important',
+    'AssignmentBox': 'box assignment'
 }
 
 ICONS = {
@@ -85,19 +85,12 @@ class TextBoxMacro(WikiMacroBase):
                 return None
             result = tag.span(args[0][0], class_='menu_item')
             for text in args[0][1:]:
-                #result += u' \u25B8 '
-                #result += u' \u25B7 '
-                result += tag.span(u' \u25B6 ', class_='arrow')
+                result += tag.span(u' \u25B8 ', class_='arrow')
                 result += tag.span(text, class_='menu_item')
             return tag.span(result, class_='menu_trace')
         elif name in ['WarningBox', 'InfoBox', 'ImportantBox', 'AssignmentBox']:
             content_html = self.format_wiki(formatter, content)
-            img = ''
-            if name == 'AssignmentBox':
-                img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left;')
-            elif ICONS.get(name):
-                img = tag.img(src=formatter.href.chrome('text_boxes', '%s.png' % ICONS.get(name)), style='float: left;')
-            return tag.div(img + genshi.core.Markup(content_html), class_=className)
+            return tag.div(genshi.core.Markup(content_html), class_=className)
         else:
             return tag.pre(content, class_='wiki ' + className)
 
