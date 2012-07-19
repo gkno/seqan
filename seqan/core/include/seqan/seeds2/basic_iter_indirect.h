@@ -132,6 +132,28 @@ operator++(Iter<TContainer, Indirect<TWrappedIter> > & iter, int /*postfix*/)
 
 
 template <typename TContainer, typename TWrappedIter>
+inline Iter<TContainer, Indirect<TWrappedIter> > &
+operator--(Iter<TContainer, Indirect<TWrappedIter> > & iter)
+{
+    SEQAN_CHECKPOINT;
+    --iter._wrappedIter;
+    return iter;
+}
+
+
+template <typename TContainer, typename TWrappedIter>
+inline Iter<TContainer, Indirect<TWrappedIter> >
+operator--(Iter<TContainer, Indirect<TWrappedIter> > & iter, int /*postfix*/)
+{
+    SEQAN_CHECKPOINT;
+    typedef Iter<TContainer, Indirect<TWrappedIter> > TIter;
+    TIter tmp(iter);
+    --iter;
+    return tmp;
+}
+
+
+template <typename TContainer, typename TWrappedIter>
 inline typename Value<TWrappedIter>::Type &
 operator*(Iter<TContainer, Indirect<TWrappedIter> > & iter)
 {
