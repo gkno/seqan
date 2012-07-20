@@ -80,7 +80,6 @@ class TextBoxMacro(WikiMacroBase):
             return tag.span(args[0], class_=('text_icon %s' % color_class_name))
         elif name in ['MenuTrace']:
             args = trac.wiki.parse_args(content)
-            print args
             if not args[0]:
                 return None
             result = tag.span(args[0][0], class_='menu_item')

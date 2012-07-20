@@ -22,9 +22,11 @@ Use something like this to test the plugin:
 import urllib
 import sys
 
+from trac.core import *
 import trac.wiki
 import genshi.builder as gb
-
+import genshi
+from trac.web.chrome import ITemplateProvider, add_stylesheet
 
 def getFilename(cat, item):
     """Get the filename that dddoc would create.
@@ -86,6 +88,7 @@ def escapeFiles(text):
 class SeqanDocsSyntaxProvider(trac.core.Component):
     """Expands seqan:<Category>.<EntryName> links."""
     trac.core.implements(trac.wiki.IWikiSyntaxProvider)
+    implements(ITemplateProvider)
 
     SECTION_NAME = 'seqan_doc_links'
     DEFAULT_PREFIX = 'seqan'
@@ -122,6 +125,7 @@ class SeqanDocsSyntaxProvider(trac.core.Component):
 
         [1] http://trac.edgewall.org/wiki/TracDev/IWikiSyntaxProviderExample
         """
+        add_stylesheet(formatter.req, 'doc_links/css/doc_links.css')
         # The following is a heuristic for "no alternative label".
         if ns in label and target in label:
           if '.' in target:
@@ -134,7 +138,17 @@ class SeqanDocsSyntaxProvider(trac.core.Component):
           return target
         # Now, use dddoc's logic to generate the appropriate file name for
         file_name = getFilename(*target.split('.', 1))
-        span = [gb.tag.span(' ', class_='icon'), label]
+        span = [gb.tag.span(genshi.HTML('&nbsp;'), class_='icon'), label]
         title = ' "%s" in SeqAn documentation.' % target
-        return gb.tag.a(span, class_='ext-link',
+        return gb.tag.a(span, class_='doc-link',
                         href=self.base_url + file_name, title=title)
+
+    ### ITemplateProvider methods
+
+    def get_templates_dirs(self):
+        return []
+
+    def get_htdocs_dirs(self):
+        from pkg_resources import resource_filename
+        return [('doc_links', resource_filename(__name__, 'htdocs'))]
+
