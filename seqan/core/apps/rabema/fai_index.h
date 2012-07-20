@@ -137,6 +137,15 @@ inline __uint64 sequenceLength(FaiIndex const & index, unsigned refId)
 }
 
 // ----------------------------------------------------------------------------
+// Function numSeqs()
+// ----------------------------------------------------------------------------
+
+inline __uint64 numSeqs(FaiIndex const & index, unsigned refId)
+{
+    return return length(index.indexEntryStore[refId]);
+}
+
+// ----------------------------------------------------------------------------
 // Function getSequenceInfix()
 // ----------------------------------------------------------------------------
 

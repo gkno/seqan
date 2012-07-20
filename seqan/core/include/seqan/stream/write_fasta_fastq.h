@@ -235,7 +235,7 @@ inline int _writeRecordFastq(TStream & stream, TSequence const & seq, TQualStrin
         {
             for (unsigned long i = 0; i < length(seq); ++i)
             {
-                res = streamPut(stream, char(126));
+                res = streamPut(stream, char(33 + 40));
                 if (res)
                     return res;
             }
@@ -410,16 +410,16 @@ template <typename TStream,
           typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec>
 int write2(TStream & stream,
-         StringSet<TIdString, TIdSpec> & sequenceIds,
-         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TIdString, TIdSpec> const & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> const & sequences,
          Fasta const & /*tag*/,
          FastAQOutputOptions const options)
 {
     if (length(sequenceIds) != length(sequences))
         return -1;
 
-    typedef StringSet<TIdString, TIdSpec> TIdSet;
-    typedef StringSet<TSeqString, TSeqSpec> TSeqSet;
+    typedef StringSet<TIdString, TIdSpec> const TIdSet;
+    typedef StringSet<TSeqString, TSeqSpec> const TSeqSet;
 
     typename Iterator<TIdSet>::Type  itMeta     = begin(sequenceIds);
     typename Iterator<TIdSet>::Type  itMeta_end = end(sequenceIds);
@@ -439,8 +439,8 @@ template <typename TStream,
           typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec>
 int write2(TStream & stream,
-         StringSet<TIdString, TIdSpec> & sequenceIds,
-         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TIdString, TIdSpec> const & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> const & sequences,
          Fasta const & /*tag*/)
 {
     return write2(stream, sequenceIds, sequences, Fasta(), DEFAULT_FASTA);
@@ -457,9 +457,9 @@ template <typename TStream,
           typename TSeqString, typename TSeqSpec,
           typename TQualString, typename TQualSpec>
 int write2(TStream & stream,
-         StringSet<TIdString, TIdSpec> & sequenceIds,
-         StringSet<TSeqString, TSeqSpec> & sequences,
-         StringSet<TQualString, TQualSpec> & qualities,
+         StringSet<TIdString, TIdSpec> const & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> const & sequences,
+         StringSet<TQualString, TQualSpec> const & qualities,
          Fastq const & /*tag*/,
          FastAQOutputOptions const options)
 {
@@ -467,9 +467,9 @@ int write2(TStream & stream,
         length(qualities) != length(sequences))
         return -1;
 
-    typedef StringSet<TIdString, TIdSpec> TIdSet;
-    typedef StringSet<TSeqString, TSeqSpec> TSeqSet;
-    typedef StringSet<TQualString, TSeqSpec> TQualSet;
+    typedef StringSet<TIdString, TIdSpec> const TIdSet;
+    typedef StringSet<TSeqString, TSeqSpec> const TSeqSet;
+    typedef StringSet<TQualString, TSeqSpec> const TQualSet;
 
     typename Iterator<TIdSet>::Type   itMeta      = begin(sequenceIds);
     typename Iterator<TIdSet>::Type   itMeta_end  = end(sequenceIds);
@@ -495,9 +495,9 @@ template <typename TStream,
           typename TSeqString, typename TSeqSpec,
           typename TQualString, typename TQualSpec>
 int write2(TStream & stream,
-         StringSet<TIdString, TIdSpec> & sequenceIds,
-         StringSet<TSeqString, TSeqSpec> & sequences,
-         StringSet<TQualString, TQualSpec> & qualities,
+         StringSet<TIdString, TIdSpec> const & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> const & sequences,
+         StringSet<TQualString, TQualSpec> const & qualities,
          Fastq const & /*tag*/)
 {
     return write2(stream,
@@ -510,13 +510,13 @@ template <typename TStream,
           typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec>
 int write2(TStream & stream,
-         StringSet<TIdString, TIdSpec> & sequenceIds,
-         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TIdString, TIdSpec> const & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> const & sequences,
          Fastq const & /*tag*/,
          FastAQOutputOptions const options)
 {
-    typedef StringSet<TIdString, TIdSpec> TIdSet;
-    typedef StringSet<TSeqString, TSeqSpec> TSeqSet;
+    typedef StringSet<TIdString, TIdSpec> const TIdSet;
+    typedef StringSet<TSeqString, TSeqSpec> const TSeqSet;
 
     typename Iterator<TIdSet>::Type   itMeta      = begin(sequenceIds);
     typename Iterator<TIdSet>::Type   itMeta_end  = end(sequenceIds);
@@ -539,8 +539,8 @@ template <typename TStream,
           typename TIdString, typename TIdSpec,
           typename TSeqString, typename TSeqSpec>
 int write2(TStream & stream,
-         StringSet<TIdString, TIdSpec> & sequenceIds,
-         StringSet<TSeqString, TSeqSpec> & sequences,
+         StringSet<TIdString, TIdSpec> const & sequenceIds,
+         StringSet<TSeqString, TSeqSpec> const & sequences,
          Fastq const & /*tag*/)
 {
     return write2(stream,

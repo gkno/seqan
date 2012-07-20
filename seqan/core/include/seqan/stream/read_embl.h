@@ -72,6 +72,30 @@ enum EmblErrorCodes_
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// Function endsWith()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.endsWith
+..concept:Class.String
+..cat:Input/Output
+..signature:startsWith(str, suffix)
+..summary:Check whether a sequence ends with a given suffix.
+..param.str:The string to check.
+..param.prefix:The suffix to check for.
+..returns:$bool$
+..include:seqan/stream.h
+*/
+
+template <typename TLhs, typename TRhs>
+bool endsWith(TLhs const & lhs, TRhs const & rhs)
+{
+    if (length(lhs) < length(rhs))
+        return false;
+    return suffix(lhs, length(lhs) - length(rhs)) == rhs;
+}
+
+// ----------------------------------------------------------------------------
 // Function startsWith()
 // ----------------------------------------------------------------------------
 
@@ -94,6 +118,7 @@ bool startsWith(TLhs const & lhs, TRhs const & rhs)
         return false;
     return prefix(lhs, length(rhs)) == rhs;
 }
+
 
 // ----------------------------------------------------------------------------
 // Function splitEmblHeader()
