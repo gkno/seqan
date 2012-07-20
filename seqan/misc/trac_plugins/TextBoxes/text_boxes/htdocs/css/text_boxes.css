@@ -20,8 +20,7 @@ div.code
   -webkit-background-clip: padding-box;
      -moz-background-clip: padding;
           background-clip: padding-box;
-    
-    
+
   -webkit-box-shadow: 0px 1px 1px 0px #a3a3a3;
           box-shadow: 0px 1px 1px 0px #a3a3a3;
 }
@@ -53,7 +52,7 @@ span.menu_trace span.menu_item
     /* CSS's take on round borders. */
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
-    border-radius: 2px /* future proofing */
+    border-radius: 2px; /* future proofing */
     -khtml-border-radius: 2px; /* for old Konqueror browsers */
 }
 
@@ -69,19 +68,18 @@ dd { margin-left: 1em; }
     border: 1px solid #000;
     margin: 1em;
     text-align: justify;
-    padding: 0.5em 1.5em 0.5em 70px;    
+    padding: 0.5em 1.5em 0.5em 70px;
     min-height: 55px;
     background-repeat: no-repeat;
-    background-position: 10px 10px;    
-    
+    background-position: 10px 10px;
+
   -webkit-border-radius: 3px;
           border-radius: 3px;
 
   -webkit-background-clip: padding-box;
      -moz-background-clip: padding;
           background-clip: padding-box;
-    
-    
+
   -webkit-box-shadow: 0px 1px 1px 0px #a3a3a3;
           box-shadow: 0px 1px 1px 0px #a3a3a3;
 }
@@ -113,55 +111,56 @@ dd { margin-left: 1em; }
     border-color: #CBCB99;
     background-image: url(../Accessories-text-editor.png);
 }
-​
+
 /* Small text boxes. */
 
-span.text_icon
+.text_icon
 {
     font-size: .8em;
+    font-weight: bolder;
+
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    border-radius: 5px /* future proofing */
+    border-radius: 5px; /* future proofing */
     -khtml-border-radius: 5px; /* for old Konqueror browsers */
-    font-weight: bolder;
 }
 
-span.text_icon.green
+.text_icon.green
 {
     padding: 1px 5px;
     background-color: #10a931;
     color: white;
 }
 
-span.text_icon.red
+.text_icon.red
 {
     padding: 1px 5px;
     background-color: #BB0000;
     color: white;
 }
 
-span.text_icon.yellow
+.text_icon.yellow
 {
     padding: 1px 5px;
     background-color: #FFEFA5;
     color: black;
 }
 
-span.text_icon.black
+.text_icon.black
 {
     padding: 1px 5px;
     background-color: black;
     color: white;
 }
 
-span.text_icon.blue
+.text_icon.blue
 {
     padding: 1px 5px;
     background-color: blue;
     color: white;
 }
 
-span.text_icon.gray
+.text_icon.gray
 {
     padding: 1px 5px;
     background-color: gray;
