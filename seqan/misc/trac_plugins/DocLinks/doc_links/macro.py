@@ -131,6 +131,9 @@ class SeqanDocsSyntaxProvider(trac.core.Component):
           if '.' in target:
             category, item = tuple(target.split('.', 1))
             label = item
+            # Strip everything before and including the first hash.
+            if '#' in label:
+              label = label.split('#', 1)[1]
           else:
             label = target
         # Ignore if the target does not contain a dot.
