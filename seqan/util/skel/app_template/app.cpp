@@ -93,7 +93,7 @@ parseCommandLine(AppOptions & options, int argc, char const ** argv)
 
     // Add Examples Section.
     addTextSection(parser, "Examples");
-    addListItem(parser, "\\fB%(NAME)s\\fP \\fB-v\\fP \\ftext\\fP",
+    addListItem(parser, "\\fB%(NAME)s\\fP \\fB-v\\fP \\fItext\\fP",
                 "Call with \\fITEXT\\fP set to \"text\" with verbose output.");
 
     // Parse command line.
