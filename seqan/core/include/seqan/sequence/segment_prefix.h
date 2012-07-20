@@ -541,7 +541,7 @@ operator --(Segment<THost, PrefixSegment> & segment)
 ..param.end:Position or iterator behind the last element of the segment.
 ...type:Metafunction.Position
 ...type:Metafunction.Iterator
-..returns:The prefix of $host that begins at $begin$.
+..returns:The prefix of $host that ends at $end$.
 ...remarks:The type of the prefix is given by @Metafunction.Prefix@.
 ..remarks:Notational sugar.
 ..see:Spec.PrefixSegment
@@ -549,6 +549,11 @@ operator --(Segment<THost, PrefixSegment> & segment)
 ..see:Function.infix
 ..see:Function.suffix
 ..include:seqan/sequence.h
+..example.code:
+CharString str = "ABCDEF";
+Prefix<CharString >::Type myPrefix = prefix(str, 3);
+
+std::cout << myPrefix << std::endl;
 */
 
 template <typename T, typename TPosEnd>
