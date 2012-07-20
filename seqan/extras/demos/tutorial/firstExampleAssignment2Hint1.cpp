@@ -2,6 +2,7 @@
 // Hint: Start by implementing the generic version.
 
 #include <iostream>
+#include <seqan/file.h>
 #include <seqan/sequence.h>
 
 int computeScore(seqan::String<char> subText, seqan::String<char> pattern)
