@@ -113,70 +113,6 @@ skipHeader(RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
 }
 
 // ----------------------------------------------------------------------------
-// Function readGappedSeq()
-// ----------------------------------------------------------------------------
-
-// Fill Gaps<> object from a gapped sequence in a buffer.
-
-template <typename TAlignRow>
-bool
-readGappedSeq(TAlignRow & gapseq,
-              CharString const & buffer)
-{
-    typedef typename Source<TAlignRow>::Type TSequence;
-    typedef typename Value<TSequence>::Type TAlphabet;
-
-    typedef typename Position<TSequence>::Type TPosition;
-    typedef typename Size<TSequence>::Type TSize;
-    typedef Pair<TPosition, TSize> TGapPosAndLen;  // source position and length defining a gap
-    typedef String<TGapPosAndLen> TGapsString;
-
-    if (length(buffer) == 0)
-        return 0;
-
-    TSequence seq;
-    TGapsString gaps;
-
-    // read sequence, gap positions and gap lengths
-    TSize gapLen = 0;
-    TPosition sourcePos = 0;
-
-    typename Iterator<CharString const>::Type it = begin(buffer);
-    typename Iterator<CharString const>::Type itEnd = end(buffer);
-    for (; it != itEnd; ++it)
-    {
-        if (*it == '-')
-        {
-            ++gapLen;
-        }
-        else
-        {
-            if (gapLen > 0)
-            {
-                appendValue(gaps, TGapPosAndLen(sourcePos, gapLen));
-                gapLen = 0;
-            }
-            appendValue(seq, static_cast<TAlphabet>(*it));
-            ++sourcePos;
-        }
-    }
-
-    // set sequence
-    assignSource(gapseq, seq);
-
-    // insert gaps from back to front
-    if (length(gaps) > 0)
-    {
-        typename Iterator<TGapsString>::Type itGaps = end(gaps);
-        typename Iterator<TGapsString>::Type itGapsBegin = begin(gaps);
-        for (--itGaps; itGaps >= itGapsBegin; --itGaps)
-            insertGaps(gapseq, (*itGaps).i1, (*itGaps).i2);
-    }
-
-    return 0;
-}
-
-// ----------------------------------------------------------------------------
 // Function readRecord()                                                 [Xmfa]
 // ----------------------------------------------------------------------------
 
@@ -185,12 +121,13 @@ readGappedSeq(TAlignRow & gapseq,
 template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
 int
 readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, AlignmentBlockRow<TSize, TSize> > & idToRowMap,
+           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
            bool swapPos,
            Xmfa const &)
 {
     typedef typename Position<TSequence>::Type TPosition;
+	typedef AlignmentBlockRow<TSize, TSize> TRow;
 
     CharString buffer;
     int res = 0;
@@ -270,22 +207,18 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
+		// skip gapped sequence
         clear(buffer);
         while (value(recordReader) != '>' && value(recordReader) != '=')
         {
-            res = readLine(buffer, recordReader);
+            res = skipLine(recordReader);
             if (res)
                 return res;
         }
-        res = readGappedSeq(gapseq, buffer);
-        if (res)
-            return res;
-
-        SEQAN_ASSERT_EQ(length(source(gapseq)), endPos - startPos);
 
         if (endPos != startPos)
         {
-            idToRowMap[id] = AlignmentBlockRow<TSize, TSize>(length(rows(align)), startPos, endPos, orientation);
+            appendValue(idToRowsMap[id], TRow(length(rows(align)), startPos, endPos, orientation));
             appendValue(rows(align), gapseq);
         }
     }
@@ -301,21 +234,21 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
 int
 readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, AlignmentBlockRow<TSize, TSize> > & idToRowMap,
+           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
            Xmfa const &)
 {
-    return readRecord(align, idToRowMap, recordReader, false, Xmfa());
+    return readRecord(align, idToRowsMap, recordReader, false, Xmfa());
 }
 
 template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
 int
 readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, AlignmentBlockRow<TSize, TSize> > & idToRowMap,
+           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
            XmfaSwap const &)
 {
-    return readRecord(align, idToRowMap, recordReader, true, Xmfa());
+    return readRecord(align, idToRowsMap, recordReader, true, Xmfa());
 }
 
 // ----------------------------------------------------------------------------
@@ -327,11 +260,12 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
 int
 readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, AlignmentBlockRow<TSize, TSize> > & idToRowMap,
+           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
            Maf const &)
 {
     typedef typename Position<TSequence>::Type TPosition;
+	typedef AlignmentBlockRow<TSize, TSize> TRow;
 
     CharString buffer;
     int res = 0;
@@ -423,29 +357,15 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
-        // read gapped seq
-        clear(buffer);
-        res = readUntilWhitespace(buffer, recordReader);
-        if (res)
-            return res;
-
-        res = readGappedSeq(gapseq, buffer);
-        if (res)
-            return res;
-
-        SEQAN_ASSERT_EQ(length(source(gapseq)), len);
+        // skip gapped seq
+		skipLine(recordReader);
 
         if (!orientation)
             startPos = seqLen - (startPos + len);
 
         if (len > 0)
         {
-            if (idToRowMap.count(id) != 0)
-            {
-                std::cerr << "ERROR: Sequence " << id << " occurs twice in a block!\n";
-                return 1;
-            }
-            idToRowMap[id] = AlignmentBlockRow<TSize, TSize>(length(rows(align)), startPos, startPos + len, orientation);
+            appendValue(idToRowsMap[id], TRow(length(rows(align)), startPos, startPos + len, orientation));
             appendValue(rows(align), gapseq);
         }
 
@@ -462,14 +382,15 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 template <typename TSequence, typename TStringSet, typename TFile, typename TTag>
 int
 parseAlignment(String<Align<TSequence, ArrayGaps> > & aligns,
-               String<std::map<CharString, AlignmentBlockRow<typename Size<TStringSet>::Type, typename Size<TStringSet>::Type> > > & idToRowMaps,
+               String<std::map<CharString, String<AlignmentBlockRow<typename Size<TStringSet>::Type, typename Size<TStringSet>::Type> > > > & idToRowsMaps,
                TStringSet & /*seqs*/,
                TFile & file,
                bool verbose,
                TTag const tag)
 {
     typedef typename Size<TStringSet>::Type TSize;
-    typedef std::map<CharString, AlignmentBlockRow<TSize, TSize> > TMap;
+	typedef AlignmentBlockRow<TSize, TSize> TRow;
+    typedef std::map<CharString, String<TRow> > TMap;
 
     typedef Align<TSequence, ArrayGaps> TAlign;
 
@@ -483,13 +404,13 @@ parseAlignment(String<Align<TSequence, ArrayGaps> > & aligns,
     while (!atEnd(recordReader))
     {
         TAlign align;
-        TMap idToRow;
-        res = readRecord(align, idToRow, recordReader, tag);
+        TMap idToRows;
+        res = readRecord(align, idToRows, recordReader, tag);
         if (res)
             return res;
 
         appendValue(aligns, align);
-        appendValue(idToRowMaps, idToRow);
+        appendValue(idToRowsMaps, idToRows);
 
         skipWhitespaces(recordReader);
         while (!atEnd(recordReader) && value(recordReader) == '#')

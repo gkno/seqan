@@ -70,6 +70,8 @@ struct Options
     AlignmentFormat inputFormat;
     bool swapPositionsXmfa;
 
+	unsigned seed;
+
     Options()
     {
         // Set defaults.
@@ -81,6 +83,8 @@ struct Options
 
         inputFormat = XMFA;
         swapPositionsXmfa = false;
+
+		seed = 512;
     }
 };
 
@@ -124,6 +128,7 @@ setupCommandLineParser(ArgumentParser & parser)
                                      ArgParseArgument::STRING));
     setValidValues(parser, "f", "xmfa maf");
     addOption(parser, ArgParseOption("v", "verbose", "Turn on verbose output."));
+	addOption(parser, ArgParseOption("s", "seed", "Seed of random number generator.", ArgParseArgument::INTEGER));
     addOption(parser, ArgParseOption("x", "swapPositions",
                                      "Turn on swapping of start and end position for reverse orientation "
                                      "in XMFA format (necessary for sgEvolver output)."));
@@ -153,6 +158,7 @@ parseArgumentsAndCheck(Options & options,
         getOptionValue(options.pairwiseCount, parser, "pairwiseCount");
         getOptionValue(options.tripletCount, parser, "threewayCount");
         getOptionValue(options.swapPositionsXmfa, parser, "swapPositions");
+        getOptionValue(options.seed, parser, "seed");
 
         CharString format;
         if (isSet(parser, "f"))
@@ -184,7 +190,7 @@ int mainWithOptions(Options & options)
     typedef StringSet<TSequence> TStringSet;
 
     typedef Align<TSequence, ArrayGaps> TAlign;
-    typedef std::map<CharString, AlignmentBlockRow<TSize, TSize> > TIdRowMap;
+    typedef std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > TIdRowsMap;
 
     if (options.verbose)
     {
@@ -201,23 +207,23 @@ int mainWithOptions(Options & options)
     }
 
     String<TAlign> aligns;
-    String<TIdRowMap> idToRowMaps;
+    String<TIdRowsMap> idToRowsMaps;
     TStringSet seqs;
 
     // Parse the input alignment file
-    if (options.inputFormat == MAF && parseAlignment(aligns, idToRowMaps, seqs, inStream, options.verbose, Maf())) 
+    if (options.inputFormat == MAF && parseAlignment(aligns, idToRowsMaps, seqs, inStream, options.verbose, Maf())) 
     {
         std::cerr << "ERROR: Parsing file in MAF format failed for " << options.inputFile << "!" << std::endl;
         return 1;
     }
     else if (options.inputFormat == XMFA && options.swapPositionsXmfa &&
-             parseAlignment(aligns, idToRowMaps, seqs, inStream, options.verbose, XmfaSwap())) 
+             parseAlignment(aligns, idToRowsMaps, seqs, inStream, options.verbose, XmfaSwap())) 
     {
         std::cerr << "ERROR: Parsing file in XMFA format failed for " << options.inputFile << "!" << std::endl;
         return 1;
     }
     else if (options.inputFormat == XMFA && !options.swapPositionsXmfa &&
-             parseAlignment(aligns, idToRowMaps, seqs, inStream, options.verbose, Xmfa())) 
+             parseAlignment(aligns, idToRowsMaps, seqs, inStream, options.verbose, Xmfa())) 
     {
         std::cerr << "ERROR: Parsing file in XMFA format failed for " << options.inputFile << "!" << std::endl;
         return 1;
@@ -230,7 +236,7 @@ int mainWithOptions(Options & options)
         typedef int TBlockId;
 
         std::map<CharString, String<TBlockId> > blockSeqs;
-        sequencesOfBlocks(blockSeqs, idToRowMaps);
+        sequencesOfBlocks(blockSeqs, options.seed, idToRowsMaps);
 
         // // Debug code:
         // for (std::map<CharString, String<TBlockId> >::const_iterator it = blockSeqs.begin(); it != blockSeqs.end(); ++it)

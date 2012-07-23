@@ -24,6 +24,7 @@
 #define SANDBOX_BKEHR_APPS_BREAKPOINT_CALCULATOR_BREAKPOINT_COUNTS_H_
 
 #include <seqan/align.h>
+#include <seqan/random.h>
 
 #include <lemon/lgf_writer.h>
 #include <lemon/smart_graph.h>
@@ -65,30 +66,39 @@ struct BlockInMatchingGraph
 // Function sequencesOfBlocks()
 // ----------------------------------------------------------------------------
 
-// Thread each genome through the alignment blocks.
+// Thread each genome through the alignment blocks.  Choose only one random copy of repeats.
 
-template <typename TSeqId, typename TSize>
+template <typename TSeqId, typename TNumber, typename TSize>
 int
 sequencesOfBlocks(std::map<TSeqId, String<int> > & blockSeqs,
-                  String<std::map<CharString, AlignmentBlockRow<TSize, TSize> > > & idToRowMaps)
+                  TNumber const seed,
+                  String<std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > > & idToRowsMaps)
 {
-    typedef std::map<CharString, AlignmentBlockRow<TSize, TSize> >  TIdRowMap;
+    typedef std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > >  TIdRowsMap;
+
+	// set up random number generator
+	Rng<MersenneTwister> rng(seed);
 
     // map of seq ids to maps of start positions to block numbers
     typedef std::map<CharString, std::map<TSize, int> > TSeqMaps;
     TSeqMaps sequenceMaps;
 
-    for (TSize i = 0; i < length(idToRowMaps); ++i)
+    for (TSize i = 0; i < length(idToRowsMaps); ++i)
     {
-        TIdRowMap map = value(idToRowMaps, i);
+        TIdRowsMap map = value(idToRowsMaps, i);
 
-        typename TIdRowMap::const_iterator it = map.begin();
+        typename TIdRowsMap::const_iterator it = map.begin();
         while (it != map.end())
         {
-            if ((*it).second.orientation)
-                sequenceMaps[it->first][(*it).second.startPos] = i;
+			// pick a random copy if block is repeat
+			typename Value<Rng<MersenneTwister> >::Type randomIndex = 0;
+			if (length(it->second) > 1)
+			    randomIndex = pickRandomNumber(rng) % length(it->second);
+
+            if ((*it).second[randomIndex].orientation)
+                sequenceMaps[it->first][(*it).second[randomIndex].startPos] = i;
             else
-                sequenceMaps[it->first][(*it).second.startPos] = -static_cast<int>(i);
+                sequenceMaps[it->first][(*it).second[randomIndex].startPos] = -static_cast<int>(i);
 
             ++it;
         }
