@@ -528,7 +528,7 @@ _readAndCompareWithStr(TRecordReader & reader,
 ..class:Class.RecordReader
 ..cat:Input/Output
 ..summary:Read characters from stream into buffer until one of the given characters is encountered
-..signature:readUntilWhitespace(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, c1[, c2[, c3[, c4[, c5]]])
+..signature:readUntilOneOf(TBuffer & buffer, RecordReader<TStream, TPass> & recordReader, c1[, c2[, c3[, c4[, c5]]])
 ..param.buffer:The buffer to write to.
 ...type:Shortcut.CharString
 ...type:Shortcut.DnaString
