@@ -1114,8 +1114,7 @@ streamSeek(Stream<Bgzf> & stream, __uint64 virtualPos, int origin)
     }
 
     // Actually perform the seek.
-    if (!seek(stream._file, blockAddress, SEEK_SET))
-        return -1;  // Seek failed.
+    seek(stream._file, blockAddress, SEEK_SET);
 
     // Set the stream state such that the address of the block and the offset in the block are set appropriately but the
     // block is only loaded on the next read.
