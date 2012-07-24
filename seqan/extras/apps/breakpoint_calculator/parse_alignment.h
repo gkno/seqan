@@ -58,19 +58,21 @@ typedef Tag<Maf_> Maf;
 template <typename TPosition, typename TSize>
 struct AlignmentBlockRow
 {
-    TSize rowNum;        // row number
+    TSize rowNum;             // row number
+    CharString chromosomeId;  // chromosome identifier
 
-    TPosition startPos;  // in source seq
-    TPosition endPos;    // in source seq
+    TPosition startPos;      // in source seq
+    TPosition endPos;        // in source seq
 
     bool orientation;
     // startPos is always smaller or equal endPos also if orientation is false
 
     AlignmentBlockRow() {}
 
-    AlignmentBlockRow(TSize id, TPosition start, TPosition end, bool ori)
+    AlignmentBlockRow(TSize id, CharString chr, TPosition start, TPosition end, bool ori)
     {
         rowNum = id;
+        chromosomeId = chr;
         startPos = start;
         endPos = end;
         orientation = ori;
@@ -127,13 +129,13 @@ readRecord(Align<TSequence, ArrayGaps> & align,
            Xmfa const &)
 {
     typedef typename Position<TSequence>::Type TPosition;
-	typedef AlignmentBlockRow<TSize, TSize> TRow;
+    typedef AlignmentBlockRow<TSize, TSize> TRow;
 
     CharString buffer;
     int res = 0;
 
     TPosition startPos, endPos;
-    CharString id;
+    CharString id, chromosomeId = "";
     bool orientation;
 
     while (!skipChar(recordReader, '>'))
@@ -207,7 +209,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
-		// skip gapped sequence
+        // skip gapped sequence
         clear(buffer);
         while (value(recordReader) != '>' && value(recordReader) != '=')
         {
@@ -218,7 +220,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 
         if (endPos != startPos)
         {
-            appendValue(idToRowsMap[id], TRow(length(rows(align)), startPos, endPos, orientation));
+            appendValue(idToRowsMap[id], TRow(length(rows(align)), chromosomeId, startPos, endPos, orientation));
             appendValue(rows(align), gapseq);
         }
     }
@@ -265,13 +267,13 @@ readRecord(Align<TSequence, ArrayGaps> & align,
            Maf const &)
 {
     typedef typename Position<TSequence>::Type TPosition;
-	typedef AlignmentBlockRow<TSize, TSize> TRow;
+    typedef AlignmentBlockRow<TSize, TSize> TRow;
 
     CharString buffer;
     int res = 0;
 
     TPosition startPos, len, seqLen;
-    CharString id;
+    CharString seqId, chromosomeId = "";
     bool orientation;
 
     skipWhitespaces(recordReader);
@@ -294,11 +296,23 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 
         // read seq id
         clear(buffer);
-        res = readUntilWhitespace(buffer, recordReader);
+        res = readUntilOneOf(buffer, recordReader, '.', ' ', '\t');
         if (res)
             return res;
 
-        id = buffer;
+        seqId = buffer;
+
+        res = skipChar(recordReader, '.');
+        if (!res)
+        {
+            // read chromosome id
+            clear(buffer);
+            res = readUntilWhitespace(buffer, recordReader);
+            if (res)
+                return res;
+
+            chromosomeId = buffer;
+        }
 
         res = skipWhitespaces(recordReader);
         if (res)
@@ -358,14 +372,15 @@ readRecord(Align<TSequence, ArrayGaps> & align,
             return res;
 
         // skip gapped seq
-		skipLine(recordReader);
+        skipLine(recordReader);
 
         if (!orientation)
             startPos = seqLen - (startPos + len);
 
         if (len > 0)
         {
-            appendValue(idToRowsMap[id], TRow(length(rows(align)), startPos, startPos + len, orientation));
+            appendValue(idToRowsMap[seqId],
+                        TRow(length(rows(align)), chromosomeId, startPos, startPos + len, orientation));
             appendValue(rows(align), gapseq);
         }
 
@@ -389,7 +404,7 @@ parseAlignment(String<Align<TSequence, ArrayGaps> > & aligns,
                TTag const tag)
 {
     typedef typename Size<TStringSet>::Type TSize;
-	typedef AlignmentBlockRow<TSize, TSize> TRow;
+    typedef AlignmentBlockRow<TSize, TSize> TRow;
     typedef std::map<CharString, String<TRow> > TMap;
 
     typedef Align<TSequence, ArrayGaps> TAlign;

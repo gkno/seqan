@@ -70,19 +70,26 @@ struct BlockInMatchingGraph
 
 template <typename TSeqId, typename TNumber, typename TSize>
 int
-sequencesOfBlocks(std::map<TSeqId, String<int> > & blockSeqs,
+sequencesOfBlocks(std::map<TSeqId, StringSet<String<int> > > & blockSeqSets,
                   TNumber const seed,
                   String<std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > > & idToRowsMaps)
 {
-    typedef std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > >  TIdRowsMap;
+    typedef Pair<CharString, TSize> TPair;
+    typedef AlignmentBlockRow<TSize, TSize> TRow;
+    typedef std::map<CharString, String<TRow> >  TIdRowsMap;
 
-	// set up random number generator
-	Rng<MersenneTwister> rng(seed);
+    // set up random number generator
+    Rng<MersenneTwister> rng(seed);
 
-    // map of seq ids to maps of start positions to block numbers
-    typedef std::map<CharString, std::map<TSize, int> > TSeqMaps;
+    // map of seq ids to maps of <chromosome, start position> pairs to block numbers
+    typedef std::map<CharString, std::map<TPair, int> > TSeqMaps;
     TSeqMaps sequenceMaps;
 
+    // maps of chromosomeIds per seq id
+    typedef std::map<CharString, std::map<CharString, unsigned> > TChromosomeMaps;
+    TChromosomeMaps chromosomeMaps;
+
+    // fill sequenceMaps
     for (TSize i = 0; i < length(idToRowsMaps); ++i)
     {
         TIdRowsMap map = value(idToRowsMaps, i);
@@ -90,122 +97,55 @@ sequencesOfBlocks(std::map<TSeqId, String<int> > & blockSeqs,
         typename TIdRowsMap::const_iterator it = map.begin();
         while (it != map.end())
         {
-			// pick a random copy if block is repeat
-			typename Value<Rng<MersenneTwister> >::Type randomIndex = 0;
-			if (length(it->second) > 1)
-			    randomIndex = pickRandomNumber(rng) % length(it->second);
+            // pick a random copy if block is repeat
+            typename Value<Rng<MersenneTwister> >::Type randomIndex = 0;
+            if (length(it->second) > 1)
+                randomIndex = pickRandomNumber(rng) % length(it->second);
 
-            if ((*it).second[randomIndex].orientation)
-                sequenceMaps[it->first][(*it).second[randomIndex].startPos] = i;
+            // insert chromosomeId to chromosomeMap if not yet present
+            TRow row = (*it).second[randomIndex];
+            std::map<CharString, unsigned> & chrMap = chromosomeMaps[it->first];
+            if (chrMap.count(row.chromosomeId) == 0)
+            {
+                unsigned mapSize = chrMap.size();
+                chrMap[row.chromosomeId] = mapSize;
+            }
+
+            // append block number to sequenceMap
+            if (row.orientation)
+                sequenceMaps[it->first][TPair(row.chromosomeId, row.startPos)] = i;
             else
-                sequenceMaps[it->first][(*it).second[randomIndex].startPos] = -static_cast<int>(i);
+                sequenceMaps[it->first][TPair(row.chromosomeId, row.startPos)] = -static_cast<int>(i);
 
             ++it;
         }
     }
 
+    // initialize StringSets of genomes for corresponding number of chromosomes
+    typename TChromosomeMaps::const_iterator chrIt = chromosomeMaps.begin();
+    while (chrIt != chromosomeMaps.end())
+    {
+        resize(blockSeqSets[chrIt->first], chrIt->second.size());
+        ++chrIt;
+    }
+
+    // thread block seqs using sequenceMaps
     TSize i = 0;
     typename TSeqMaps::const_iterator mapIt = sequenceMaps.begin();
     while (mapIt != sequenceMaps.end())
     {
-        typename std::map<TSize, int>::const_iterator seqIt = (*mapIt).second.begin();
+        typename std::map<TPair, int>::const_iterator seqIt = mapIt->second.begin();
         while (seqIt != (*mapIt).second.end())
         {
-            appendValue(blockSeqs[mapIt->first], seqIt->second);
+            unsigned chrIndex = chromosomeMaps[mapIt->first][seqIt->first.i1];
+            appendValue(blockSeqSets[mapIt->first][chrIndex], seqIt->second);
             ++seqIt;
         }
         ++mapIt;
         ++i;
     }
 
-    //// Debug output
-    //for (TSize i = 0; i < length(blockSeqs); ++i)
-    //{
-    //  for (TSize j = 0; j < length(blockSeqs[i]); ++j)
-    //      std::cout << blockSeqs[i][j] << ",";
-    //  std::cout << std::endl;
-    //}
-    return 0;
-}
-
-// ----------------------------------------------------------------------------
-// Function lastOccOfChar()
-// ----------------------------------------------------------------------------
-
-Position<CharString>::Type
-lastOccOfChar(CharString const & str, char c)
-{
-    if (length(str) == 0)
-        return 0;
-
-    Iterator<CharString const, Rooted>::Type it = end(str, Rooted());
-    Iterator<CharString const>::Type itBegin = begin(str);
-
-    for (--it; it >= itBegin; --it)
-        if (*it == c)
-            return position(it);
-
-    return length(str);
-}
-
-// ----------------------------------------------------------------------------
-// Function firstOccOfChar()
-// ----------------------------------------------------------------------------
-
-Position<CharString>::Type
-firstOccOfChar(CharString const & str, char c)
-{
-    if (length(str) == 0)
-        return 0;
-
-    Iterator<CharString const, Rooted>::Type it = begin(str, Rooted());
-    Iterator<CharString const>::Type itEnd = end(str);
-
-    for (; it < itEnd; ++it)
-        if (*it == c)
-            return position(it);
-
-    return length(str);
-}
-
-// ----------------------------------------------------------------------------
-// Function collateChromosomes()
-// ----------------------------------------------------------------------------
-
-// Assign chromsomes to genomes.
-
-template <typename TBlockId>
-void
-collateChromosomes(std::map<CharString, StringSet<String<TBlockId>, Dependent<> > > & blockSeqSets,
-                   std::map<CharString, String<TBlockId> > & blockSeqs)
-{
-    typedef std::map<CharString, String<TBlockId> > TSeqMap;
-    typedef typename TSeqMap::const_iterator TIter;
-    typedef typename Position<CharString>::Type TPos;
-
-    if (length(blockSeqs) == 0)
-        return;
-
-    TIter it = blockSeqs.begin();
-    TIter itEnd = blockSeqs.end();
-
-    CharString prevGenomeId = prefix(it->first, firstOccOfChar(it->first, '.'));
-    StringSet<String<TBlockId>, Dependent<> > chromosomes;
-    appendValue(chromosomes, it->second);
-
-    CharString prev = it->first;
-    for (++it; it != itEnd; ++it)
-    {
-        CharString genomeId = prefix(it->first, firstOccOfChar(it->first, '.'));
-        if (genomeId != prevGenomeId)
-        {
-            blockSeqSets[prevGenomeId] = chromosomes;
-            clear(chromosomes);
-            prevGenomeId = genomeId;
-        }
-        appendValue(chromosomes, it->second);
-    }
-    blockSeqSets[prevGenomeId] = chromosomes;
+   return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -217,10 +157,10 @@ collateChromosomes(std::map<CharString, StringSet<String<TBlockId>, Dependent<> 
 template <typename TBlockId, typename TSize>
 void
 commonBlocks(std::map<TBlockId, TSize> & set,
-             StringSet<String<TBlockId>, Dependent<> > const & seq1,
-             StringSet<String<TBlockId>, Dependent<> > const & seq2)
+             StringSet<String<TBlockId> > const & seq1,
+             StringSet<String<TBlockId> > const & seq2)
 {
-    typedef typename Iterator<ConcatenatorManyToOne<StringSet<String<TBlockId>, Dependent<> > > >::Type TIterator;
+    typedef typename Iterator<ConcatenatorManyToOne<StringSet<String<TBlockId> > > >::Type TIterator;
 
     std::set<TBlockId> seq1Set;
 
@@ -251,11 +191,11 @@ commonBlocks(std::map<TBlockId, TSize> & set,
 template <typename TBlockId, typename TSize>
 void
 commonBlocks(std::map<TBlockId, TSize> & set,
-             StringSet<String<TBlockId>, Dependent<> > const & seq1,
-             StringSet<String<TBlockId>, Dependent<> > const & seq2,
-             StringSet<String<TBlockId>, Dependent<> > const & seq3)
+             StringSet<String<TBlockId> > const & seq1,
+             StringSet<String<TBlockId> > const & seq2,
+             StringSet<String<TBlockId> > const & seq3)
 {
-    typedef typename Iterator<ConcatenatorManyToOne<StringSet<String<TBlockId>, Dependent<> > > >::Type TIterator;
+    typedef typename Iterator<ConcatenatorManyToOne<StringSet<String<TBlockId> > > >::Type TIterator;
 
     std::set<TBlockId> seq1Set, seq2Set;
 
@@ -446,11 +386,11 @@ template <typename TGraph, typename TEdgeMap, typename TBlockId, typename TSize>
 TSize
 addSequenceToMatchingGraph(TGraph & graph,
                            TEdgeMap & eMap,
-                           StringSet<String<TBlockId>, Dependent<> > const & seq,
+                           StringSet<String<TBlockId> > const & seq,
                            String<BlockInMatchingGraph> & nMap,
                            std::map<TBlockId, TSize> & blocks)
 {
-    typedef typename Iterator<StringSet<String<TBlockId>, Dependent<> > const>::Type TIterator;
+    typedef typename Iterator<StringSet<String<TBlockId> > const>::Type TIterator;
 
     TSize weight = 0;
     for (TIterator it = begin(seq); it != end(seq); ++it)
@@ -538,10 +478,10 @@ pwCount(String<TBlockId> const & seq1, String<TBlockId> const & seq2, std::map<T
 
 template <typename TSeqId, typename TBlockId>
 typename Size<String<TBlockId> >::Type
-pairwiseCounts(std::map<TSeqId, StringSet<String<TBlockId>, Dependent<> > > & blockSeqs, bool detailed)
+pairwiseCounts(std::map<TSeqId, StringSet<String<TBlockId> > > & blockSeqs, bool detailed)
 {
     typedef typename Size<String<TBlockId> >::Type TSize;
-    typedef typename std::map<TSeqId, StringSet<String<TBlockId>, Dependent<> > >::const_iterator TSeqIterator;
+    typedef typename std::map<TSeqId, StringSet<String<TBlockId> > >::const_iterator TSeqIterator;
     typedef typename lemon::SmartGraph TGraph;
     typedef typename TGraph::EdgeMap<int> TEdgeMap;
 
@@ -607,8 +547,8 @@ pairwiseCounts(std::map<TSeqId, StringSet<String<TBlockId>, Dependent<> > > & bl
 
 template <typename TBlockId, typename TSize>
 TSize
-pairwiseWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
-                      StringSet<String<TBlockId>, Dependent<> > const & seq2,
+pairwiseWeightRemoved(StringSet<String<TBlockId> > const & seq1,
+                      StringSet<String<TBlockId> > const & seq2,
                       std::map<TBlockId, TSize> & blocks)
 {
     typedef typename lemon::SmartGraph TGraph;
@@ -647,9 +587,9 @@ pairwiseWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
 
 template <typename TBlockId, typename TSize>
 TSize
-tripletWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
-                     StringSet<String<TBlockId>, Dependent<> > const & seq2,
-                     StringSet<String<TBlockId>, Dependent<> > const & seq3,
+tripletWeightRemoved(StringSet<String<TBlockId> > const & seq1,
+                     StringSet<String<TBlockId> > const & seq2,
+                     StringSet<String<TBlockId> > const & seq3,
                      std::map<TBlockId, TSize> & blocks)
 {
     typedef typename lemon::SmartGraph TGraph;
@@ -690,9 +630,9 @@ tripletWeightRemoved(StringSet<String<TBlockId>, Dependent<> > const & seq1,
 
 template <typename TSeqId, typename TBlockId>
 double
-tripletCounts(std::map<TSeqId, StringSet<String<TBlockId>, Dependent<> > > & blockSeqs, bool detailed)
+tripletCounts(std::map<TSeqId, StringSet<String<TBlockId> > > & blockSeqs, bool detailed)
 {
-    typedef typename std::map<TSeqId, StringSet<String<TBlockId>, Dependent<> > >::const_iterator TSeqIterator;
+    typedef typename std::map<TSeqId, StringSet<String<TBlockId> > >::const_iterator TSeqIterator;
     typedef typename Size<String<TBlockId> >::Type TSize;
 
     if (blockSeqs.size() < 3)

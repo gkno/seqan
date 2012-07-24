@@ -70,7 +70,7 @@ struct Options
     AlignmentFormat inputFormat;
     bool swapPositionsXmfa;
 
-	unsigned seed;
+    unsigned seed;
 
     Options()
     {
@@ -84,7 +84,7 @@ struct Options
         inputFormat = XMFA;
         swapPositionsXmfa = false;
 
-		seed = 512;
+        seed = 512;
     }
 };
 
@@ -128,7 +128,7 @@ setupCommandLineParser(ArgumentParser & parser)
                                      ArgParseArgument::STRING));
     setValidValues(parser, "f", "xmfa maf");
     addOption(parser, ArgParseOption("v", "verbose", "Turn on verbose output."));
-	addOption(parser, ArgParseOption("s", "seed", "Seed of random number generator.", ArgParseArgument::INTEGER));
+    addOption(parser, ArgParseOption("s", "seed", "Seed of random number generator.", ArgParseArgument::INTEGER));
     addOption(parser, ArgParseOption("x", "swapPositions",
                                      "Turn on swapping of start and end position for reverse orientation "
                                      "in XMFA format (necessary for sgEvolver output)."));
@@ -235,8 +235,8 @@ int mainWithOptions(Options & options)
     {
         typedef int TBlockId;
 
-        std::map<CharString, String<TBlockId> > blockSeqs;
-        sequencesOfBlocks(blockSeqs, options.seed, idToRowsMaps);
+        std::map<CharString, StringSet<String<TBlockId> > > blockSeqSets;
+        sequencesOfBlocks(blockSeqSets, options.seed, idToRowsMaps);
 
         // // Debug code:
         // for (std::map<CharString, String<TBlockId> >::const_iterator it = blockSeqs.begin(); it != blockSeqs.end(); ++it)
@@ -247,8 +247,6 @@ int mainWithOptions(Options & options)
         //  std::cout << std::endl;
         //}
 
-        std::map<CharString, StringSet<String<TBlockId>, Dependent<> > > blockSeqSets;
-        collateChromosomes(blockSeqSets, blockSeqs);
 
         if (options.pairwiseCount) {
             if (options.verbose) std::cout << "Computing pairwise count..." << std::endl;
