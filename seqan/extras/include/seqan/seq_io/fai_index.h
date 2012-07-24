@@ -93,7 +93,8 @@ public:
 ..example.code:
 #include <seqan/seq_io.h>
 
-int res = seqan::buildIndex("path/to/file.fasta");
+seqan::FaiIndex faiIndex;
+int res = build(faiIndex, "path/to/file.fasta");
 if (res != 0)
     std::cerr << "ERROR: Could not build the index!\n";
 ..example.text:Load index, get sequence infix and a whole sequence for the sequence $chr1$ from FASTA file.
@@ -101,7 +102,7 @@ if (res != 0)
 #include <seqan/seq_io.h>
 
 sean::FaiIndex faiIndex;
-int res = load(faiIndex, "path/to/file.fasta");
+int res = read(faiIndex, "path/to/file.fasta");
 if (res != 0)
     std::cerr << "ERROR: Could not load FAI index path/to/file.fasta.fai\n";
 
@@ -111,7 +112,7 @@ if (!getIdByName(faiIndex, "chr1", idx))
 
 // Load first 1000 characters of chr1.
 seqan::CharString seqChr1Prefix;
-if (readSequenceInfix(seqChr1Prefix, faiIdx, idx, 0, 1000) != 0)
+if (readRegion(seqChr1Prefix, faiIdx, idx, 0, 1000) != 0)
     std::cerr << "ERROR: Could not load chr1.\n";
 
 // Load all of chr1.
@@ -202,7 +203,16 @@ inline void clear(FaiIndex & index)
 
 // TODO(holtgrew): Fix parameter order when getIdByName() has good parameter order.
 
-inline bool getIdByName(FaiIndex const & index, CharString const & name, unsigned & id)
+// TODO(holtgrew): Using templates here because of ambiguities hit otherwise.
+
+template <typename TName, typename TId>
+inline bool getIdByName(FaiIndex & index, TName const & name, TId & id)
+{
+    return getIdByName(index.refNameStore, name, id, index.refNameStoreCache);
+}
+
+template <typename TName, typename TId>
+inline bool getIdByName(FaiIndex const & index, TName const & name, TId & id)
 {
     return getIdByName(index.refNameStore, name, id, index.refNameStoreCache);
 }

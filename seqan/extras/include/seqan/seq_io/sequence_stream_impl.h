@@ -676,7 +676,7 @@ public:
     }
 
     template <typename TId, typename TSequence, typename TFormatTag>
-    int readRecord(TId const & id, TSequence const & seq, TFormatTag const & tag)
+    int writeRecord(TId const & id, TSequence const & seq, TFormatTag const & tag)
     {
         int res = 0;
 
@@ -694,7 +694,7 @@ public:
 #endif // #if SEQAN_HAS_ZLIB
 #if SEQAN_HAS_BZIP2
         case SeqIOFileType_::FILE_TYPE_BZ2:
-            res = seqan::writeRecord(*_bz2Reader, id, seq, tag);
+            res = seqan::writeRecord(*_bz2Stream, id, seq, tag);
             break;      // end of case
 
 #endif  // #if SEQAN_HAS_BZIP2
