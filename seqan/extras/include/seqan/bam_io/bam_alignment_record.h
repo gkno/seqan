@@ -43,6 +43,9 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+class BamAlignmentRecord;
+inline void clear(BamAlignmentRecord & record);
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -200,7 +203,7 @@ public:
     CharString qual;
     CharString tags;  // raw tags in BAM format
 
-    BamAlignmentRecord() : _qId(MaxValue<unsigned>::VALUE) {}
+    BamAlignmentRecord() : _qId(MaxValue<unsigned>::VALUE) { clear(*this); }
 };
 
 // ============================================================================
@@ -222,11 +225,18 @@ inline void
 clear(BamAlignmentRecord & record)
 {
     clear(record.qName);
+    record._qId = MaxValue<__uint32>::VALUE;
+    record.rId = BamAlignmentRecord::INVALID_REFID;
+    record.pos = BamAlignmentRecord::INVALID_POS;
+    record.mapQ = 255;
+    record.bin = 0;
     clear(record.cigar);
+    record.rNextId = BamAlignmentRecord::INVALID_REFID;
+    record.pNext = BamAlignmentRecord::INVALID_POS;
+    record.tLen = BamAlignmentRecord::INVALID_LEN;
     clear(record.seq);
     clear(record.qual);
     clear(record.tags);
-    record._qId = MaxValue<__uint32>::VALUE;
 }
 
 // ----------------------------------------------------------------------------
