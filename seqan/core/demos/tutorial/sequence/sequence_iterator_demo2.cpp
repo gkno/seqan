@@ -2,7 +2,7 @@
 // documentation system.  You can ignore them when reading this file.i
 // This is the draft for the new iterator tutorial
 // FRAGMENT(includes)
-#include <iostream>
+#include <iostream>    
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 
@@ -19,7 +19,13 @@ int main() {
 		++it;
 	}
 	std::cout << std::endl;
+// FRAGMENT(standard-iterators)
+	for (goBegin(it, genome); !atEnd(it, genome); goNext(it)){
+		std::cout << *it;
+	}
+	std::cout << std::endl;
 // FRAGMENT(rooted-iterators)
+    std::cout << "3." << std::endl;
 	Iterator<Dna5String, Rooted >::Type it2 = begin(genome);
 	for (goBegin(it2); !atEnd(it2); goNext(it2)) {
 		if (getValue(it2) == 'N')
@@ -35,6 +41,6 @@ int main() {
 // FRAGMENT(assign-value)
 	assignValue(begin(genome), 'N');
 	std::cout << genome << std::endl;
-	
+
 	return 0;
 }
