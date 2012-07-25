@@ -1,11 +1,10 @@
-// FRAGMENT(includes)
 #include <iostream>
 #include <seqan/sequence.h>
 
 using namespace seqan;
 
-// FRAGMENT(printFunction1)
 // Function to print simple alignment between two sequences with the same length
+// .. for two sequences of the same type
 template <typename TText>
 void printAlign(TText const & genomeFragment, TText const & read)
 {
@@ -21,7 +20,7 @@ void printAlign(TText const & genomeFragment, TText const & read)
         }     
         std::cout << std::endl;
 }
-// FRAGMENT(printFunction2)
+// .. for one infix and one other sequence type
 template <typename TInfix, typename TText>
 void printAlign(TInfix const & genomeFragment, TText const & read)
 {
@@ -47,11 +46,12 @@ int main()
     Dna5String read = "TGGTNTCA";
     // And the begin position of a given alignment between the read and the genome
     unsigned beginPosition = 1;
-// FRAGMENT(initInfix)
+
+    // Create Infix of type Dna5String
     Infix<Dna5String>::Type inf;       
-// FRAGMENT(useInfix)
-    unsigned end = begin + length(read);
-    inf = infix(genome, begin, end);
+    unsigned endPosition = begin + length(read);
+    // Get the corresponding infix sequence of genome
+    inf = infix(genome, begin, endPosition);
     printAlign(inf, read);
     return 0;
 }
