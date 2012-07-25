@@ -5,6 +5,7 @@
 using namespace seqan;
 
 // FRAGMENT(printFunction1)
+// Function to print simple alignment between two sequences with the same length
 template <typename TText>
 void printAlign(TText const & genomeFragment, TText const & read)
 {
@@ -40,31 +41,17 @@ void printAlign(TInfix const & genomeFragment, TText const & read)
 
 int main()
 {
-    Dna5String genome = "ATGGTTTCAACGTAATGCTGAACATGTCGCGTGTACTGACTATGCATGCATGACTG";
-
-    String<Dna5String> readList;  
-    resize(readList, 3);
-    readList[0] = "GGTTTCGACG";
-    readList[1] = "AAGATGTCGC";
-    readList[2] = "TATGCATGAT";
-
-    String<unsigned> beginPositions;
-    resize(beginPositions, 3);
-    beginPositions[0] = 2;
-    beginPositions[1] = 20;
-    beginPositions[2] = 42;
-
+    // We have given a genome sequence
+    Dna5String genome = "ATGGTTTCAACGTAATGCTGAACATGTCGCGT";
+    // A read sequence
+    Dna5String read = "TGGTNTCA";
+    // And the begin position of a given alignment between the read and the genome
+    unsigned beginPosition = 1;
 // FRAGMENT(initInfix)
-    Infix<Dna5String>::Type inf;    
-
-    for (unsigned i = 0; i < length(readList); ++i){
-        
-        unsigned begin = beginPositions[i];
-        Dna5String read = readList[i];
+    Infix<Dna5String>::Type inf;       
 // FRAGMENT(useInfix)
-        unsigned end = begin + length(read);
-        inf = infix(genome, begin, end);
-        printAlign(inf, read);
-    }
+    unsigned end = begin + length(read);
+    inf = infix(genome, begin, end);
+    printAlign(inf, read);
     return 0;
 }
