@@ -142,7 +142,7 @@ inline __uint64 sequenceLength(FaiIndex const & index, unsigned refId)
 
 inline __uint64 numSeqs(FaiIndex const & index, unsigned refId)
 {
-    return return length(index.indexEntryStore[refId]);
+    return length(index.indexEntryStore[refId]);
 }
 
 // ----------------------------------------------------------------------------
