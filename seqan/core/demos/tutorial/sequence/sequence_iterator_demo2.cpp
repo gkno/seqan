@@ -1,7 +1,7 @@
 // The comment lines containing FRAGMENT(fragment-line) are there for the
-// documentation system.  You can ignore them when reading this file.
-// FRAGMENT(includes)
+// documentation system.  You can ignore them when reading this file.i
 // This is the draft for the new iterator tutorial
+// FRAGMENT(includes)
 #include <iostream>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
