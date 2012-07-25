@@ -3,7 +3,7 @@
 
 using namespace seqan;
 
-
+// Function to print simple alignment between two sequences with the same length
 template <typename TText>
 void printAlign(TText const & genomeFragment, TText const & read)
 {
@@ -23,35 +23,20 @@ void printAlign(TText const & genomeFragment, TText const & read)
 
 int main()
 {
-    Dna5String genome = "ATGGTTTCAACGTAATGCTGAACATGTCGCGTGTACTGACTATGCATGCATGACTG";
+    // We have given a genome sequence
+    Dna5String genome = "ATGGTTTCAACGTAATGCTGAACATGTCGCGT";
+    // A read sequence
+    Dna5String read = "TGGTNTCA";
+    // And the begin position of a given alignment between the read and the genome
+    unsigned beginPosition = 1;
 
-    String<Dna5String> readList;  
-    resize(readList, 3);
-    readList[0] = "GGTTTCGACG";
-    readList[1] = "AAGATGTCGC";
-    readList[2] = "TATGCATGAT";
-
-    // Below we create a list, containing the begin positions
-    // for each read of its given alignment to the genome
-    String<unsigned> beginPositions;
-    resize(beginPositions, 3);
-    beginPositions[0] = 2;
-    beginPositions[1] = 20;
-    beginPositions[2] = 42;
-
-    Dna5String genomeFragment;
-    // For each read out of the list we want to call the printAlign function 
-    // to print the alignment between the read and the genome
-    for (unsigned i = 0; i < length(readList); ++i){
-        Dna5String read = readList[i];
-        unsigned begin = beginPositions[i];
-        clear(genomeFragment);
-        // We have to create a copy of the corresponding fragment of the genome, where the read align to
-        for (unsigned j = 0; j < length(read); ++j){
-            appendValue(genomeFragment, genome[begin+j]);
-        }
-        printAlign(genomeFragment, read);
+    Dna5String genomeFragment;       
+    // We have to create a copy of the corresponding fragment of the genome, where the read aligns to
+    for (unsigned i = 0; i < length(read); ++i){
+        appendValue(genomeFragment, genome[beginPosition+i]);
     }
-
+    // Call of our function to print the simple alignment
+    printAlign(genomeFragment, read);
+  
     return 0;
 }
