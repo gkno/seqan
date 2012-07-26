@@ -27,11 +27,6 @@ div.code
 
 /* Pretty display of menu entries. */
 
-span.menu_trace
-{
-    display: inline-block;
-}
-
 span.menu_trace span.arrow
 {
     position: relative;
