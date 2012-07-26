@@ -120,28 +120,26 @@ skipHeader(RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
 
 // Reads one collinear alignment block from a file in XMFA format
 
-template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
+template <typename TSize, typename TStream, typename TPassSpec>
 int
-readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
+readRecord(std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
+           unsigned lineId,
+           std::set<CharString> const & seqIds,
            bool swapPos,
            Xmfa const &)
 {
-    typedef typename Position<TSequence>::Type TPosition;
     typedef AlignmentBlockRow<TSize, TSize> TRow;
 
     CharString buffer;
     int res = 0;
 
-    TPosition startPos, endPos;
+    unsigned startPos, endPos;
     CharString id, chromosomeId = "";
     bool orientation;
 
     while (!skipChar(recordReader, '>'))
     {
-        typename Row<Align<TSequence, ArrayGaps> >::Type gapseq;
-
         res = skipWhitespaces(recordReader);
         if (res)
             return res;
@@ -164,7 +162,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
-        startPos = lexicalCast<TPosition>(buffer);
+        startPos = lexicalCast<unsigned>(buffer);
 
         res = skipChar(recordReader, '-');
         if (res)
@@ -176,7 +174,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
-        endPos = lexicalCast<TPosition>(buffer);
+        endPos = lexicalCast<unsigned>(buffer);
 
         res = skipWhitespaces(recordReader);
         if (res)
@@ -197,7 +195,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 
         if (swapPos && orientation == false)
         {
-            TPosition help = startPos;
+            unsigned help = startPos;
             startPos = endPos;
             endPos = help;
         }
@@ -210,7 +208,6 @@ readRecord(Align<TSequence, ArrayGaps> & align,
             return res;
 
         // skip gapped sequence
-        clear(buffer);
         while (value(recordReader) != '>' && value(recordReader) != '=')
         {
             res = skipLine(recordReader);
@@ -219,10 +216,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         }
 
         if (endPos != startPos)
-        {
-            appendValue(idToRowsMap[id], TRow(length(rows(align)), chromosomeId, startPos, endPos, orientation));
-            appendValue(rows(align), gapseq);
-        }
+            appendValue(idToRowsMap[id], TRow(lineId, chromosomeId, startPos, endPos, orientation));
     }
 
     if (value(recordReader) != '=')
@@ -233,24 +227,26 @@ readRecord(Align<TSequence, ArrayGaps> & align,
     return 0;
 }
 
-template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
+template <typename TSize, typename TStream, typename TPassSpec>
 int
-readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
+readRecord(std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
+           unsigned lineId,
+           std::set<CharString> const & seqIds,
            Xmfa const &)
 {
-    return readRecord(align, idToRowsMap, recordReader, false, Xmfa());
+    return readRecord(idToRowsMap, recordReader, lineId, seqIds, false, Xmfa());
 }
 
-template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
+template <typename TSize, typename TStream, typename TPassSpec>
 int
-readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
+readRecord(std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
+           unsigned lineId,
+           std::set<CharString> const & seqIds,
            XmfaSwap const &)
 {
-    return readRecord(align, idToRowsMap, recordReader, true, Xmfa());
+    return readRecord(idToRowsMap, recordReader, lineId, seqIds, true, Xmfa());
 }
 
 // ----------------------------------------------------------------------------
@@ -259,20 +255,20 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 
 // Reads one collinear alignment block from a file in MAF format
 
-template <typename TSequence, typename TSize, typename TStream, typename TPassSpec>
+template <typename TSize, typename TStream, typename TPassSpec>
 int
-readRecord(Align<TSequence, ArrayGaps> & align,
-           std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
+readRecord(std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > & idToRowsMap,
            RecordReader<TStream, SinglePass<TPassSpec> > & recordReader,
+           unsigned lineId,
+           std::set<CharString> const & seqIds,
            Maf const &)
 {
-    typedef typename Position<TSequence>::Type TPosition;
     typedef AlignmentBlockRow<TSize, TSize> TRow;
 
     CharString buffer;
     int res = 0;
 
-    TPosition startPos, len, seqLen;
+    unsigned startPos, len, seqLen;
     CharString seqId, chromosomeId = "";
     bool orientation;
 
@@ -288,8 +284,6 @@ readRecord(Align<TSequence, ArrayGaps> & align,
     skipWhitespaces(recordReader);
     while (!skipChar(recordReader, 's'))
     {
-        typename Row<Align<TSequence, ArrayGaps> >::Type gapseq;
-
         res = skipWhitespaces(recordReader);
         if (res)
             return res;
@@ -301,6 +295,13 @@ readRecord(Align<TSequence, ArrayGaps> & align,
             return res;
 
         seqId = buffer;
+
+        // skip line if seqId is not in set of specified seqIds
+        if (seqIds.size() != 0 && seqIds.count(seqId) == 0)
+        {
+            skipLine(recordReader);
+            continue;
+        }
 
         res = skipChar(recordReader, '.');
         if (!res)
@@ -324,7 +325,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
-        startPos = lexicalCast<TPosition>(buffer);
+        startPos = lexicalCast<unsigned>(buffer);
 
         res = skipWhitespaces(recordReader);
         if (res)
@@ -336,7 +337,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
-        len = lexicalCast<TPosition>(buffer);
+        len = lexicalCast<unsigned>(buffer);
 
         res = skipWhitespaces(recordReader);
         if (res)
@@ -365,7 +366,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
         if (res)
             return res;
 
-        seqLen = lexicalCast<TPosition>(buffer);
+        seqLen = lexicalCast<unsigned>(buffer);
 
         res = skipWhitespaces(recordReader);
         if (res)
@@ -378,11 +379,7 @@ readRecord(Align<TSequence, ArrayGaps> & align,
             startPos = seqLen - (startPos + len);
 
         if (len > 0)
-        {
-            appendValue(idToRowsMap[seqId],
-                        TRow(length(rows(align)), chromosomeId, startPos, startPos + len, orientation));
-            appendValue(rows(align), gapseq);
-        }
+            appendValue(idToRowsMap[seqId], TRow(lineId, chromosomeId, startPos, startPos + len, orientation));
 
         skipWhitespaces(recordReader);
     }
@@ -394,20 +391,16 @@ readRecord(Align<TSequence, ArrayGaps> & align,
 // Function parseAlignment()
 // ----------------------------------------------------------------------------
 
-template <typename TSequence, typename TStringSet, typename TFile, typename TTag>
+template <typename TSize, typename TFile, typename TTag>
 int
-parseAlignment(String<Align<TSequence, ArrayGaps> > & aligns,
-               String<std::map<CharString, String<AlignmentBlockRow<typename Size<TStringSet>::Type, typename Size<TStringSet>::Type> > > > & idToRowsMaps,
-               TStringSet & /*seqs*/,
+parseAlignment(String<std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > > & idToRowsMaps,
                TFile & file,
+               std::set<CharString> const & seqIds,
                bool verbose,
                TTag const tag)
 {
-    typedef typename Size<TStringSet>::Type TSize;
     typedef AlignmentBlockRow<TSize, TSize> TRow;
     typedef std::map<CharString, String<TRow> > TMap;
-
-    typedef Align<TSequence, ArrayGaps> TAlign;
 
     RecordReader<TFile, SinglePass<> > recordReader(file);
     int res = 0;
@@ -416,28 +409,30 @@ parseAlignment(String<Align<TSequence, ArrayGaps> > & aligns,
     if (res)
         return res;
 
+    unsigned lineId = 0;
+
     while (!atEnd(recordReader))
     {
-        TAlign align;
         TMap idToRows;
-        res = readRecord(align, idToRows, recordReader, tag);
+        res = readRecord(idToRows, recordReader, lineId, seqIds, tag);
         if (res)
             return res;
 
-        appendValue(aligns, align);
         appendValue(idToRowsMaps, idToRows);
 
         skipWhitespaces(recordReader);
         while (!atEnd(recordReader) && value(recordReader) == '#')
             res = skipLine(recordReader);
+        
+        ++lineId;
     }
     if (!atEnd(recordReader))
         return 1;
 
     if (verbose)
     {
-        std::cout << length(aligns) << " alignment block";
-        if (length(aligns) != 1)
+        std::cout << length(idToRowsMaps) << " alignment block";
+        if (length(idToRowsMaps) != 1)
             std::cout << "s";
         std::cout << " loaded." << std::endl;
     }

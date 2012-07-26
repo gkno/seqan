@@ -70,6 +70,7 @@ struct Options
     AlignmentFormat inputFormat;
     bool swapPositionsXmfa;
 
+    std::set<CharString> seqIds;
     unsigned seed;
 
     Options()
@@ -127,12 +128,15 @@ setupCommandLineParser(ArgumentParser & parser)
     addOption(parser, ArgParseOption("f", "inFormat", "Format of input file (xmfa or maf).",
                                      ArgParseArgument::STRING));
     setValidValues(parser, "f", "xmfa maf");
-    addOption(parser, ArgParseOption("v", "verbose", "Turn on verbose output."));
+    addOption(parser, ArgParseOption("i", "seq-id",
+                                     "Calculate breakpoint counts only for sequences specified with this option.",
+                                     ArgParseArgument::STRING, "STR", true, 1));
     addOption(parser, ArgParseOption("s", "seed", "Seed of random number generator.", ArgParseArgument::INTEGER));
     addOption(parser, ArgParseOption("x", "swapPositions",
                                      "Turn on swapping of start and end position for reverse orientation "
                                      "in XMFA format (necessary for sgEvolver output)."));
     hideOption(parser, "x");
+    addOption(parser, ArgParseOption("v", "verbose", "Turn on verbose output."));
 
     addTextSection(parser, "References");
     addText(parser, "Kehr, B., Reinert, K., Darling, A.: Hidden breakpoints in genome alignments. WABI 2012.");
@@ -159,6 +163,13 @@ parseArgumentsAndCheck(Options & options,
         getOptionValue(options.tripletCount, parser, "threewayCount");
         getOptionValue(options.swapPositionsXmfa, parser, "swapPositions");
         getOptionValue(options.seed, parser, "seed");
+
+        for (unsigned i = 0; i < getOptionValueCount(parser, "seq-id"); ++i)
+        {
+            CharString seqId;
+            getOptionValue(seqId, parser, "seq-id", i);
+            options.seqIds.insert(seqId);
+        }
 
         CharString format;
         if (isSet(parser, "f"))
@@ -187,9 +198,6 @@ int mainWithOptions(Options & options)
     typedef String<TAlphabet> TSequence;
     typedef Size<TSequence>::Type TSize;
 
-    typedef StringSet<TSequence> TStringSet;
-
-    typedef Align<TSequence, ArrayGaps> TAlign;
     typedef std::map<CharString, String<AlignmentBlockRow<TSize, TSize> > > TIdRowsMap;
 
     if (options.verbose)
@@ -206,24 +214,22 @@ int mainWithOptions(Options & options)
         return 1;
     }
 
-    String<TAlign> aligns;
     String<TIdRowsMap> idToRowsMaps;
-    TStringSet seqs;
 
     // Parse the input alignment file
-    if (options.inputFormat == MAF && parseAlignment(aligns, idToRowsMaps, seqs, inStream, options.verbose, Maf())) 
+    if (options.inputFormat == MAF && parseAlignment(idToRowsMaps, inStream, options.seqIds, options.verbose, Maf())) 
     {
         std::cerr << "ERROR: Parsing file in MAF format failed for " << options.inputFile << "!" << std::endl;
         return 1;
     }
     else if (options.inputFormat == XMFA && options.swapPositionsXmfa &&
-             parseAlignment(aligns, idToRowsMaps, seqs, inStream, options.verbose, XmfaSwap())) 
+             parseAlignment(idToRowsMaps, inStream, options.seqIds, options.verbose, XmfaSwap())) 
     {
         std::cerr << "ERROR: Parsing file in XMFA format failed for " << options.inputFile << "!" << std::endl;
         return 1;
     }
     else if (options.inputFormat == XMFA && !options.swapPositionsXmfa &&
-             parseAlignment(aligns, idToRowsMaps, seqs, inStream, options.verbose, Xmfa())) 
+             parseAlignment(idToRowsMaps, inStream, options.seqIds, options.verbose, Xmfa())) 
     {
         std::cerr << "ERROR: Parsing file in XMFA format failed for " << options.inputFile << "!" << std::endl;
         return 1;
@@ -246,7 +252,6 @@ int mainWithOptions(Options & options)
         //      std::cout << *itit << "  ";
         //  std::cout << std::endl;
         //}
-
 
         if (options.pairwiseCount) {
             if (options.verbose) std::cout << "Computing pairwise count..." << std::endl;
