@@ -15,6 +15,10 @@ int main()
     Rng<MersenneTwister> rng(SEED);
     std::cout << "pickRandomNumber(rng) == " << pickRandomNumber(rng) << std::endl;
 
+// FRAGMENT(random-number-generation-metafunction-value)
+    typedef Value<Rng<MersenneTwister> >::Type TMTValue;
+    TMTValue value = pickRandomNumber;
+
 // FRAGMENT(random-number-generation-pdf)
     Pdf<Uniform<double> > uniformDouble(0, 1);
     std::cout << "pickRandomNumber(rng, uniformDouble) == " << pickRandomNumber(rng, uniformDouble) << std::endl;
