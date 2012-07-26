@@ -58,10 +58,6 @@ span.menu_trace span.menu_item
 
 /* Large Boxes */
 
-body { padding: 4em; }
-dt { font-weight: 700; }
-dd { margin-left: 1em; }
-
 .box {
     position: relative;
     background-color: #fff;
