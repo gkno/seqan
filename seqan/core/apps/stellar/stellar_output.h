@@ -239,7 +239,8 @@ _writeMatchGff(TId const & databaseID,
               TRow const & row1,
               TFile & file) {
 //IOREV _recordreading_ unclear how this is related to GFF support from store_io
-SEQAN_CHECKPOINT    
+    typedef typename Value<typename Source<TRow>::Type>::Type TAlphabet;
+
     for (typename Position<TId>::Type i = 0; i < length(databaseID) && value(databaseID, i) > 32; ++i) {
         file << value(databaseID, i);
     }
@@ -274,8 +275,9 @@ SEQAN_CHECKPOINT
 		toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1)) + 1;
     file << "," << 
 		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1));
-
-	file << ";eValue=" << _computeEValue(row0, row1, lengthAdjustment);
+    
+    if (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)
+    	file << ";eValue=" << _computeEValue(row0, row1, lengthAdjustment);
 
     std::stringstream cigar, mutations;
     _getCigarLine(row0, row1, cigar, mutations);
@@ -296,7 +298,8 @@ _writeMatch(TId const & databaseID,
             TRow const & row1,
             TFile & file) {
 //IOREV _recordreading_ _stub_ 
-SEQAN_CHECKPOINT
+    typedef typename Value<typename Source<TRow>::Type>::Type TAlphabet;
+
 	// write database ID
 	file << "Database sequence: " << databaseID;
 	if (!databaseStrand) file << " (complement)" << std::endl;
@@ -321,9 +324,12 @@ SEQAN_CHECKPOINT
 	file << toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1));
 	file << ".." << toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1));
 	file << std::endl;
-
-	// write e-value
-	file << "E-value: " << _computeEValue(row0, row1, lengthAdjustment) << std::endl;
+    
+    if (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)
+    {
+	    // write e-value
+	    file << "E-value: " << _computeEValue(row0, row1, lengthAdjustment) << std::endl;
+    }
 
 	file << std::endl;
 
@@ -351,6 +357,7 @@ SEQAN_CHECKPOINT
 	typedef StellarMatch<TInfix, TQueryId> TMatch;
 	typedef typename Size<typename TMatch::TAlign>::Type TSize;
 	typedef typename Iterator<String<TMatch> >::Type TIterator;
+    typedef typename Value<TInfix>::Type TAlphabet;
 
 	TSize numMatches = 0;
 	TSize totalLength = 0;
@@ -370,8 +377,9 @@ SEQAN_CHECKPOINT
 		TIterator it = begin(queryMatches.matches);
 		TIterator itEnd = end(queryMatches.matches);
 
-		if (it != itEnd) {
-			queryMatches.lengthAdjustment = _computeLengthAdjustment(length(source((*it).row1)), length(source((*it).row2)));
+		if (it != itEnd && (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)) {
+			queryMatches.lengthAdjustment = _computeLengthAdjustment(length(source((*it).row1)),
+                                                                     length(source((*it).row2)));
 		}
 
 		while (it < itEnd) {
@@ -381,35 +389,40 @@ SEQAN_CHECKPOINT
 
 			if ((*it).orientation) {
 				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment,
+                                   (*it).row1, (*it).row2, file);
 				else
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment,
+                                (*it).row1, (*it).row2, file);
 			}
 
-			++it;
-		}
-	}
-		
-	reverseComplement(databases);
-
-	// output matches on negative database strand
-	for (TSize i = 0; i < length(matches); i++) {
-		QueryMatches<TMatch> &queryMatches = value(matches, i);
-
-		TIterator it = begin(queryMatches.matches);
-		TIterator itEnd = end(queryMatches.matches);
-
-		while (it < itEnd) {
-			if (!(*it).orientation) {
-				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
-				else 
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
-			}
 			++it;
 		}
 		numMatches += length(queryMatches.matches);
 	}
+
+    if (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)
+    {
+	    reverseComplement(databases);
+
+	    // output matches on negative database strand
+	    for (TSize i = 0; i < length(matches); i++) {
+		    QueryMatches<TMatch> &queryMatches = value(matches, i);
+
+		    TIterator it = begin(queryMatches.matches);
+		    TIterator itEnd = end(queryMatches.matches);
+
+		    while (it < itEnd) {
+			    if (!(*it).orientation) {
+				    if (format == "gff")
+					    _writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+				    else 
+					    _writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+			    }
+			    ++it;
+		    }
+	    }
+    }
 
 	file.close();
 
@@ -443,6 +456,7 @@ SEQAN_CHECKPOINT
 	typedef StellarMatch<TInfix, TQueryId> TMatch;
 	typedef typename Size<typename TMatch::TAlign>::Type TSize;
 	typedef typename Iterator<String<TMatch> >::Type TIterator;
+    typedef typename Value<TInfix>::Type TAlphabet;
 
     TSize maxLength = 0;
     TSize totalLength = 0;
@@ -474,8 +488,9 @@ SEQAN_CHECKPOINT
 		TIterator it = begin(queryMatches.matches);
 		TIterator itEnd = end(queryMatches.matches);
 
-		if (it != itEnd) {
-			queryMatches.lengthAdjustment = _computeLengthAdjustment(length(source((*it).row1)), length(source((*it).row2)));
+		if (it != itEnd && (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)) {
+			queryMatches.lengthAdjustment = _computeLengthAdjustment(length(source((*it).row1)),
+                                                                     length(source((*it).row2)));
 		}
 
 		while (it < itEnd) {
@@ -485,32 +500,39 @@ SEQAN_CHECKPOINT
 
 			if ((*it).orientation) {
 				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment,
+                                   (*it).row1, (*it).row2, file);
 				else 
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
-			}
-			++it;
-        }
-	}
-
-	reverseComplement(databases);
-	
-	// output matches on positive database strand
-	for (TSize i = 0; i < length(matches); i++) {
-		QueryMatches<TMatch> &queryMatches = value(matches, i);
-		TIterator it = begin(queryMatches.matches);
-		TIterator itEnd = end(queryMatches.matches);
-
-		while (it < itEnd) {
-			if (!(*it).orientation) {
-				if (format == "gff")
-					_writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
-				else 
-					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment, (*it).row1, (*it).row2, file);
+					_writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment,
+                                (*it).row1, (*it).row2, file);
 			}
 			++it;
         }
         numMatches += length(queryMatches.matches);
+	}
+
+    if (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)
+    {
+	    reverseComplement(databases);
+	
+	    // output matches on positive database strand
+	    for (TSize i = 0; i < length(matches); i++) {
+		    QueryMatches<TMatch> &queryMatches = value(matches, i);
+		    TIterator it = begin(queryMatches.matches);
+		    TIterator itEnd = end(queryMatches.matches);
+
+		    while (it < itEnd) {
+			    if (!(*it).orientation) {
+				    if (format == "gff")
+					    _writeMatchGff((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment,
+                                       (*it).row1, (*it).row2, file);
+				    else 
+					    _writeMatch((*it).id, ids[i], (*it).orientation, queryMatches.lengthAdjustment,
+                                    (*it).row1, (*it).row2, file);
+			    }
+			    ++it;
+            }
+        }
     }
 	daFile.close();
 	file.close();

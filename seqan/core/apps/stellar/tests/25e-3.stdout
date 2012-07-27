@@ -1,7 +1,9 @@
-Database file   : 512_simSeq1_25e-3.fa
-Query file      : 512_simSeq2_25e-3.fa
-Output file     : 25e-3.gff
-Output format   : gff
+I/O options:
+  database file   : 512_simSeq1_25e-3.fa
+  query file      : 512_simSeq2_25e-3.fa
+  alphabet        : dna5
+  output file     : 25e-3.gff
+  output format   : gff
 
 User specified parameters:
   minimal match length             : 50
@@ -16,11 +18,11 @@ User specified parameters:
   duplicate removal every          : 10000
 
 Calculated parameters:
-  s^min       : 25
-  threshold   : 37
-  distance cut: 57
-  delta       : 16
-  overlap     : 2
+  s^min        : 25
+  threshold    : 37
+  distance cut : 57
+  delta        : 16
+  overlap      : 2
 
 Loaded 1 query sequence.
 Loaded 1 database sequence.

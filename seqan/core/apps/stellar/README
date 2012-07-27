@@ -100,10 +100,10 @@ the command line:
 3.2. Main Options
 ---------------------------------------------------------------------------
 
-  [ -e REAL ],  [ --epsilon REAL ]
+  [ -e NUM ],  [ --epsilon NUM ]
   
-  Set the maximal error rate for local alignments. REAL must be a floating
-  point number between 0 and 0.25. The default value is 0.05. REAL is the
+  Set the maximal error rate for local alignments. NUM must be a floating
+  point number between 0 and 0.25. The default value is 0.05. NUM is the
   number of edit operations needed to transform the aligned query substring
   to the aligned database substring divided by the length of the local
   alignment. For example specify '-e 0.1' for a maximal error rate of 10%
@@ -124,7 +124,14 @@ the command line:
 
   Only compare query sequence(s) to the negative/reverse-complemented 
   database sequence(s). By default, both strands are scanned.
- 
+
+  [ -a ],  [ --alphabet STR ]
+
+  Select the alphabet type of your input sequences. Valid values are dna,
+  dna5, rna, rna5, protein, and char. Choose dna5 and rna5 for input
+  sequences containing N characters, choose protein for amino acid
+  sequences. By default, dna5 is assumed.
+
   [ -v ],  [ --verbose ]
   
   Verbose. Print extra information and running times.
@@ -170,11 +177,11 @@ the command line:
   Independently of this parameter, N characters in the genome are filtered
   out automatically.
   
-  [ -a REAL ],  [ --abundanceCut REAL ]
+  [ -c NUM ],  [ --abundanceCut NUM ]
   
-  Remove overabundant query k-mers from the k-mer index. REAL must be a 
+  Remove overabundant query k-mers from the k-mer index. NUM must be a 
   value between 0 (remove all) and 1 (remove nothing, default). k-mers with
-  a relative abundance above REAL are removed. The relative abundance is
+  a relative abundance above NUM are removed. The relative abundance is
   the absolute number of a k-mers occurences divided by the total number of
   k-mers in the query sequence(s). The total number of k-mers is about
   the total length of the query sequence(s).
@@ -192,7 +199,7 @@ the command line:
   scoring matches by 1 and errors by -1/errorRate+1. During verification
   the X-drop parameter serves as a stop criterion for gapped extension.
   
-  [ -vs STRING ],  [ --verification STRING ]
+  [ -vs STR ],  [ --verification STR ]
   
   Set the verification strategy. The default is exact verification. Options
   are exact, bestLocal, and bandedGlobal.
@@ -237,7 +244,7 @@ the command line:
   Change the output filename to FILE. The default name of the output file
   is "stellar.gff".
 
-  [ -of STRING ],  [ --outFormat STRING ]
+  [ -of STR ],  [ --outFormat STR ]
 
   Set the output format for the local alignments. Currently, only the
   optinos gff and txt are available. See section 4.

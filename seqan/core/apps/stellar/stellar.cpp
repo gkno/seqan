@@ -118,6 +118,14 @@ inline bool _qgramDisableBuckets(Index<TStringSet, IndexQGram<TShape, TSpec> > &
 	return result;
 }
 
+template <>
+struct FunctorComplement<AminoAcid> : public ::std::unary_function<AminoAcid,AminoAcid> 
+{
+    inline AminoAcid operator()(AminoAcid x) const {
+        return x;
+    }
+};
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,7 +164,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
 				return 1;
 		}
 		// negative (reverse complemented) database strand
-		if (options.reverse) {
+		if (options.reverse && options.alphabet != "protein" && options.alphabet != "char") {
 			reverseComplement(databases[i]);
 			if (!_stellarOnOne(databases[i], databaseIDs[i], swiftPattern, false, matches, options))
 				return 1;
@@ -254,6 +262,7 @@ template<typename TStringSet>
 void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases, TStringSet & queries) {
 //IOREV _notio_
 	typedef typename Size<TStringSet>::Type TSize;
+    typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
 
 	if (options.qgramAbundanceCut != 1) {
 		std::cout << "Calculated parameters:" << std::endl;
@@ -268,37 +277,40 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet & databases
 		std::cout << std::endl;
 	}
 
-	// Computation of maximal E-value for this search
+    if (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)
+    {
+	    // Computation of maximal E-value for this search
 
-	TSize maxLengthQueries = 0;
-	TSize maxLengthDatabases = 0;
+	    TSize maxLengthQueries = 0;
+	    TSize maxLengthDatabases = 0;
 
-	typename Iterator<TStringSet>::Type dbIt = begin(databases);
-	typename Iterator<TStringSet>::Type dbEnd = end(databases);
-	while (dbIt != dbEnd) {
-		if (length(*dbIt) > maxLengthDatabases) {
-			maxLengthDatabases = length(*dbIt);
-		}
-		++dbIt;
-	}
+	    typename Iterator<TStringSet>::Type dbIt = begin(databases);
+	    typename Iterator<TStringSet>::Type dbEnd = end(databases);
+	    while (dbIt != dbEnd) {
+		    if (length(*dbIt) > maxLengthDatabases) {
+			    maxLengthDatabases = length(*dbIt);
+		    }
+		    ++dbIt;
+	    }
 
-	typename Iterator<TStringSet>::Type queriesIt = begin(queries);
-	typename Iterator<TStringSet>::Type queriesEnd = end(queries);
-	while (queriesIt != queriesEnd) {
-		if (length(*queriesIt) > maxLengthQueries) {
-			maxLengthQueries = length(*queriesIt);
-		}
-		++queriesIt;
-	}
+	    typename Iterator<TStringSet>::Type queriesIt = begin(queries);
+	    typename Iterator<TStringSet>::Type queriesEnd = end(queries);
+	    while (queriesIt != queriesEnd) {
+		    if (length(*queriesIt) > maxLengthQueries) {
+			    maxLengthQueries = length(*queriesIt);
+		    }
+		    ++queriesIt;
+	    }
 
-	TSize errors = static_cast<TSize>(options.minLength * options.epsilon);
-	TSize minScore = options.minLength - 3*errors; // #matches - 2*#errors // #matches = minLenght - errors, 
+	    TSize errors = static_cast<TSize>(options.minLength * options.epsilon);
+	    TSize minScore = options.minLength - 3*errors; // #matches - 2*#errors // #matches = minLenght - errors, 
 
-	std::cout << "All matches matches resulting from your search have an E-value of: " << std::endl;
-	std::cout << "        " << _computeEValue(minScore, maxLengthQueries, maxLengthDatabases) << " or smaller";
-	std::cout << "  (match score = 1, error penalty = -2)" << std::endl;
+	    std::cout << "All matches matches resulting from your search have an E-value of: " << std::endl;
+	    std::cout << "        " << _computeEValue(minScore, maxLengthQueries, maxLengthDatabases) << " or smaller";
+	    std::cout << "  (match score = 1, error penalty = -2)" << std::endl;
 
-	std::cout << std::endl;
+	    std::cout << std::endl;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -314,7 +326,7 @@ void _writeCalculatedParams(StellarOptions & options) {
 	std::cout << "Calculated parameters:" << std::endl;
 	if (options.qGram == (unsigned)-1) {
 		options.qGram = (unsigned)_min(smin, 32u);
-		std::cout << "  k-mer length: " << options.qGram << std::endl;
+		std::cout << "  k-mer length : " << options.qGram << std::endl;
 	}
 
 	int threshold = (int) _max(1, (int) _min((n + 1) - options.qGram * (errN + 1),
@@ -324,11 +336,11 @@ void _writeCalculatedParams(StellarOptions & options) {
 	int logDelta = _max(4, (int) ceil(log((double)overlap + 1) / log(2.0)));
 	int delta = 1 << logDelta;
 
-	std::cout << "  s^min       : " << smin << std::endl;
-	std::cout << "  threshold   : " << threshold << std::endl;
-	std::cout << "  distance cut: " << distanceCut << std::endl;
-	std::cout << "  delta       : " << delta << std::endl;
-	std::cout << "  overlap     : " << overlap << std::endl;
+	std::cout << "  s^min        : " << smin << std::endl;
+	std::cout << "  threshold    : " << threshold << std::endl;
+	std::cout << "  distance cut : " << distanceCut << std::endl;
+	std::cout << "  delta        : " << delta << std::endl;
+	std::cout << "  overlap      : " << overlap << std::endl;
 	std::cout << std::endl;
 }
 
@@ -371,12 +383,14 @@ template<typename TOptions>
 void
 _writeFileNames(TOptions & options) {
 //IOREV _notio_
-	std::cout << "Database file   : " << options.databaseFile << std::endl;
-	std::cout << "Query file      : " << options.queryFile << std::endl;
-	std::cout << "Output file     : " << options.outputFile << std::endl;
-	std::cout << "Output format   : " << options.outputFormat << std::endl;
+	std::cout << "I/O options:" << std::endl;
+	std::cout << "  database file   : " << options.databaseFile << std::endl;
+	std::cout << "  query file      : " << options.queryFile << std::endl;
+    std::cout << "  alphabet        : " << options.alphabet << std::endl;
+	std::cout << "  output file     : " << options.outputFile << std::endl;
+	std::cout << "  output format   : " << options.outputFormat << std::endl;
 	if (options.disableThresh != (unsigned)-1) {
-		std::cout << "Disabled queries: " << options.disabledQueriesFile << std::endl;
+		std::cout << "  disabled queries: " << options.disabledQueriesFile << std::endl;
 	}
 	std::cout << std::endl;
 }
@@ -401,6 +415,7 @@ _parseOptions(ArgumentParser & parser, TOptions & options)
     getOptionValue(options.minLength, parser, "minLength");
 	getOptionValue(options.epsilon, parser, "epsilon");
 	getOptionValue(options.xDrop, parser, "xDrop");
+    getOptionValue(options.alphabet, parser, "alphabet");
 
 	if (isSet(parser, "forward") && !isSet(parser, "reverse"))
 		options.reverse = false;
@@ -465,6 +480,10 @@ void _setParser(ArgumentParser & parser) {
 	setMinValue(parser, "l", "0");
 	addOption(parser, ArgParseOption("f", "forward", "Search only in forward strand of database."));
 	addOption(parser, ArgParseOption("r", "reverse", "Search only in reverse complement of database."));
+    addOption(parser, ArgParseOption("a", "alphabet",
+                                     "Alphabet type of input sequences (dna, rna, dna5, rna5, protein, char).",
+                                     ArgParseArgument::STRING));
+    setValidValues(parser, "a", "dna dna5 rna rna5 protein char");
 	addOption(parser, ArgParseOption("v", "verbose", "Set verbosity mode."));
     
 	addSection(parser, "Filtering Options:");
@@ -478,10 +497,10 @@ void _setParser(ArgumentParser & parser) {
     addOption(parser, ArgParseOption("rl", "repeatLength",
 		                             "Minimal length of low complexity repeats to be filtered.", ArgParseArgument::INTEGER));
 	setDefaultValue(parser, "rl", "1000");
-    addOption(parser, ArgParseOption("a", "abundanceCut", "k-mer overabundance cut ratio.", ArgParseArgument::DOUBLE));
-	setDefaultValue(parser, "a", "1");
-	setMinValue(parser, "a", "0");
-	setMaxValue(parser, "a", "1");
+    addOption(parser, ArgParseOption("c", "abundanceCut", "k-mer overabundance cut ratio.", ArgParseArgument::DOUBLE));
+	setDefaultValue(parser, "c", "1");
+	setMinValue(parser, "c", "0");
+	setMaxValue(parser, "c", "1");
 
 	addSection(parser, "Verification Options:");
 
@@ -570,27 +589,13 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Parses and outputs parameters, calls _stellarOnAll
-int main(int argc, const char *argv[]) {
-	// Makes sure that printing doubles in scientific notation is normalized on all platforms.
-	ScientificNotationExponentOutputNormalizer scientificNotationNormalizer; 
+// Parses and outputs parameters, calls _stellarOnAll().
+template<typename TOptions, typename TAlphabet>
+int mainWithOptions(TOptions & options, String<TAlphabet>)
+{
+    typedef String<TAlphabet> TSequence;
 
-    // command line parsing
-    ArgumentParser parser("stellar");
-
-	StellarOptions options = StellarOptions();
-    _setParser(parser);
-	ArgumentParser::ParseResult res = parse(parser, argc, argv);
-    
-    if (res == ArgumentParser::PARSE_OK)
-	    res = _parseOptions(parser, options);
-	
-    if (res != ArgumentParser::PARSE_OK)
-        return res == ArgumentParser::PARSE_ERROR;
-
-	typedef String<Dna5> TSequence;
-
-	// output file names
+    // output file names
 	_writeFileNames(options);
 
 	// output parameters
@@ -637,4 +642,38 @@ int main(int argc, const char *argv[]) {
 		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
 
 	return 0;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Program entry point.
+int main(int argc, const char *argv[]) {
+	// Makes sure that printing doubles in scientific notation is normalized on all platforms.
+	ScientificNotationExponentOutputNormalizer scientificNotationNormalizer; 
+
+    // command line parsing
+    ArgumentParser parser("stellar");
+
+	StellarOptions options = StellarOptions();
+    _setParser(parser);
+	ArgumentParser::ParseResult res = parse(parser, argc, argv);
+    
+    if (res == ArgumentParser::PARSE_OK)
+	    res = _parseOptions(parser, options);
+	
+    if (res != ArgumentParser::PARSE_OK)
+        return res == ArgumentParser::PARSE_ERROR;
+
+    if (options.alphabet == "dna")
+    	mainWithOptions(options, String<Dna>());
+    else if (options.alphabet == "dna5")
+    	mainWithOptions(options, String<Dna5>());
+    else if (options.alphabet == "rna")
+    	mainWithOptions(options, String<Rna>());
+    else if (options.alphabet == "rna5")
+    	mainWithOptions(options, String<Rna5>());
+    else if (options.alphabet == "protein")
+    	mainWithOptions(options, String<AminoAcid>());
+    else if (options.alphabet == "char")
+    	mainWithOptions(options, String<char>());
 }

@@ -37,6 +37,7 @@ struct StellarOptions {
 	CharString outputFile;			// name of result file
 	CharString disabledQueriesFile;	// name of result file containing disabled queries
 	CharString outputFormat;		// Possible formats: gff, text
+    CharString alphabet;            // Possible values: dna, rna, protein, char
     bool noRT;				// suppress printing of running time if set to true
 
 	// main options
@@ -62,6 +63,7 @@ struct StellarOptions {
 		outputFile = "stellar.gff";
 		disabledQueriesFile = "stellar.disabled.fasta";
 		outputFormat = "gff";
+        alphabet = "dna5";
         noRT = false;
 
 		qGram = (unsigned)-1;
