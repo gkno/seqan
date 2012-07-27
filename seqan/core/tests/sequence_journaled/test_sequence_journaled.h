@@ -318,7 +318,7 @@ void testJournaledStringLength(TStringJournalSpec const &)
 
 // Test conversion of virtual to host position.
 template <typename TStringJournalSpec>
-void testJournaledStringVirtualToHostPosition(TStringJournalSpec const &)
+void testJournaledStringVirtualToHostPosition()
 {
     {
         CharString charStr = "test";
@@ -354,6 +354,101 @@ void testJournaledStringVirtualToHostPosition(TStringJournalSpec const &)
         SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 5u));
         SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 6u));
         SEQAN_ASSERT_EQ(5u, virtualToHostPosition(journaledString, 7u));
+    }
+}
+
+template <typename TJournaledStringSpec>
+void testJournaledStringHostToVirtualPosition()
+{
+    /*
+     * write concrete test scenario
+     * Given a JournalString with insertions and deletions
+     * if the source position of ...
+     */
+    { // test 1: insertion
+                            //01234567
+        CharString hostStr = "ACGTACGT";
+        String<char, Journaled<Alloc<>, TJournaledStringSpec> > journaledStr(hostStr);
+
+        insert(journaledStr, 2, "TTT");
+                        //ACTTTGTACGT
+        // journaled str: 01234567890
+        // host str:      01---234567
+        //              //AC   GTACGT
+
+        SEQAN_ASSERT_EQ(0u, hostToVirtualPosition(journaledStr, 0));
+        SEQAN_ASSERT_EQ(1u, hostToVirtualPosition(journaledStr, 1));
+        SEQAN_ASSERT_EQ(5u, hostToVirtualPosition(journaledStr, 2));
+        SEQAN_ASSERT_EQ(6u, hostToVirtualPosition(journaledStr, 3));
+        SEQAN_ASSERT_EQ(7u, hostToVirtualPosition(journaledStr, 4));
+        SEQAN_ASSERT_EQ(8u, hostToVirtualPosition(journaledStr, 5));
+        SEQAN_ASSERT_EQ(9u, hostToVirtualPosition(journaledStr, 6));
+        SEQAN_ASSERT_EQ(10u, hostToVirtualPosition(journaledStr, 7));
+    }
+
+    { // test 2: deletion
+                            //01234567
+        CharString hostStr = "ACGTACGT";
+        String<char, Journaled<Alloc<>, TJournaledStringSpec> > journaledStr(hostStr);
+
+        erase(journaledStr, 2, 5);
+                        //AC---CGT
+        // journaled str: 01222234
+        // host str:      01234567
+        //              //ACGTACGT
+
+        SEQAN_ASSERT_EQ(0u, hostToVirtualPosition(journaledStr, 0));
+        SEQAN_ASSERT_EQ(1u, hostToVirtualPosition(journaledStr, 1));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 2));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 3));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 4));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 5));
+        SEQAN_ASSERT_EQ(3u, hostToVirtualPosition(journaledStr, 6));
+        SEQAN_ASSERT_EQ(4u, hostToVirtualPosition(journaledStr, 7));
+    }
+
+    { // test 3: mixed
+                            //01234567
+        CharString hostStr = "ACGTACGT";
+        String<char, Journaled<Alloc<>, TJournaledStringSpec> > journaledStr(hostStr);
+
+        erase(journaledStr, 2, 5);
+        insert(journaledStr, 2, "TTT");
+        insert(journaledStr, 5, "AAA");
+
+                        //ACTTT---AAACGT
+        // journaled str: 01234555567890
+        // host str:      01---234---567
+        //              //AC---GTA---CGT
+
+        SEQAN_ASSERT_EQ(0u, hostToVirtualPosition(journaledStr, 0));
+        SEQAN_ASSERT_EQ(1u, hostToVirtualPosition(journaledStr, 1));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 2));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 3));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 4));
+        SEQAN_ASSERT_EQ(8u, hostToVirtualPosition(journaledStr, 5));
+        SEQAN_ASSERT_EQ(9u, hostToVirtualPosition(journaledStr, 6));
+        SEQAN_ASSERT_EQ(10u, hostToVirtualPosition(journaledStr, 7));
+    }
+
+    { // test 4: empty journal string
+                            //01234567
+        CharString hostStr = "ACGTACGT";
+        String<char, Journaled<Alloc<>, TJournaledStringSpec> > journaledStr(hostStr);
+
+                        //ACGTACGT
+        // journaled str: 01234567
+        // host str:      01234567
+        //              //ACGTACGT
+
+        SEQAN_ASSERT_EQ(0u, hostToVirtualPosition(journaledStr, 0));
+        SEQAN_ASSERT_EQ(1u, hostToVirtualPosition(journaledStr, 1));
+        SEQAN_ASSERT_EQ(2u, hostToVirtualPosition(journaledStr, 2));
+        SEQAN_ASSERT_EQ(3u, hostToVirtualPosition(journaledStr, 3));
+        SEQAN_ASSERT_EQ(4u, hostToVirtualPosition(journaledStr, 4));
+        SEQAN_ASSERT_EQ(5u, hostToVirtualPosition(journaledStr, 5));
+        SEQAN_ASSERT_EQ(6u, hostToVirtualPosition(journaledStr, 6));
+        SEQAN_ASSERT_EQ(7u, hostToVirtualPosition(journaledStr, 7));
     }
 }
 
@@ -893,9 +988,13 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_length) {
 
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_virtual_to_host_position) {
-    testJournaledStringVirtualToHostPosition(UnbalancedTree());
+    testJournaledStringVirtualToHostPosition<UnbalancedTree>();
 }
 
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_host_to_virtual_position)
+{
+    testJournaledStringHostToVirtualPosition<UnbalancedTree>();
+}
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_copy_constructor) {
     testJournaledStringCopyConstructor(UnbalancedTree());
@@ -995,8 +1094,14 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_length) {
 
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_virtual_to_host_position) {
-    testJournaledStringVirtualToHostPosition(SortedArray());
+    testJournaledStringVirtualToHostPosition<SortedArray>();
 }
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_host_to_virtual_position)
+{
+    testJournaledStringHostToVirtualPosition<SortedArray>();
+}
+
 
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_copy_constructor) {
