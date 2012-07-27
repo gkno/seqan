@@ -237,6 +237,23 @@ _charCompare(int const c, Tag<Dna_> const & /* tag*/)
 }
 
 inline int
+_charCompare(int const c, Tag<Rna_> const & /* tag*/)
+{
+    switch (c)
+    {
+        case 'a':
+        case 'c':
+        case 'g':
+        case 'u':
+        case 'A':
+        case 'C':
+        case 'G':
+        case 'U': return true;
+    }
+    return false;
+}
+
+inline int
 _charCompare(int const c, Tag<DnaQ_> const & /* tag*/)
 {
     return _charCompare(c, Tag<Dna_>());
@@ -255,6 +272,26 @@ _charCompare(int const c, Tag<Dna5_> const & /* tag*/)
         case 'C':
         case 'G':
         case 'T':
+        case 'n':
+        case 'N':
+            return true;
+    }
+    return false;
+}
+
+inline int
+_charCompare(int const c, Tag<Rna5_> const & /* tag*/)
+{
+    switch (c)
+    {
+        case 'a':
+        case 'c':
+        case 'g':
+        case 'u':
+        case 'A':
+        case 'C':
+        case 'G':
+        case 'U':
         case 'n':
         case 'N':
             return true;
@@ -409,7 +446,7 @@ _skipHelper(TRecordReader & reader,
 }
 
 // ----------------------------------------------------------------------------
-// Function _countHelper() [not used yet]
+// Function _countHelper()
 // ----------------------------------------------------------------------------
 
 // same as skip, but count the characters read (for doublepass-io)

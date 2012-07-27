@@ -20,6 +20,7 @@ Lesser General Public License for more details.
 #include <seqan/graph_msa.h>
 #include <seqan/modifier.h>
 #include <seqan/misc/misc_cmdparser.h>
+#include <seqan/stream.h>
 
 #include <iostream>
 
@@ -41,20 +42,16 @@ bool _loadSequences(TSeqSet& sequences,
 					TNameSet& fastaIDs,
 					const char *fileName)
 {
-	MultiFasta multiFasta;
-	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
-	AutoSeqFormat format;
-	guessFormat(multiFasta.concat, format);	
-	split(multiFasta, format);
-	unsigned seqCount = length(multiFasta);
-	resize(sequences, seqCount, Exact());
-	resize(fastaIDs, seqCount, Exact());
-	for(unsigned i = 0; i < seqCount; ++i) 
-	{
-		assignSeqId(fastaIDs[i], multiFasta[i], format);
-		assignSeq(sequences[i], multiFasta[i], format);
-	}
-	return (seqCount > 0);
+    std::fstream inF(fileName, std::ios::binary | std::ios::in);
+    if (!inF.good())
+        return false;
+    RecordReader<std::fstream, SinglePass<> > reader(inF);
+
+    clear(sequences);
+    clear(fastaIDs);
+    if (read2(fastaIDs, sequences, reader, Fasta()) != 0)
+        return false;
+    return (length(fastaIDs) > 0u);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
