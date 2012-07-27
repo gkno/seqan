@@ -60,7 +60,6 @@ void fmIndexIteratorConstuctor(TIter & /*tag*/)
 	TIndex fmIndex(text);
 
 	TIter it(fmIndex);
-    //static_cast<Nothing>(it);
 
 	SEQAN_ASSERT_EQ(isRoot(it), true);
 	SEQAN_ASSERT_EQ(repLength(it), 0u);
@@ -122,24 +121,33 @@ SEQAN_DEFINE_TEST(fm_index_iterator_constuctor)
 {
     using namespace seqan;
 
-    typedef FmIndex<WaveletTreeBased<FmiDollarSubstituted<SingleDollar<void> > >, void > TIndexSpec;
-    //typedef TopDown<ParentLinks<void> > TIterSpec;
-    typedef TopDown<ParentLinks<> > TIterSpec;
+    typedef FmIndex<WaveletTreeBased<FmiDollarSubstituted<SingleDollar<void> > >, void> TDefaultIndex;
+    typedef FmIndex<WaveletTreeBased<FmiDollarSubstituted<SingleDollar<void> > >, Compressed> TCompressedIndex;
+    typedef TopDown<> TIterSpec;
+    typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
     DnaString genome = "AAA";
-    Index<DnaString,TIndexSpec> index(genome);
-
-    typedef Iterator<Index<DnaString,TIndexSpec>, TIterSpec>::Type TIter;
-    TIter dnaTag(index);// = begin(Index<DnaString,TIndexSpec>(genome));
-//     Index<String<Dna5>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, void > > dna5Tag;
-//     Index<String<AminoAcid>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, void > > asTag;
-//     Index<String<signed char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, void > > charTag;
-//     Index<String<unsigned char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, void > > uCharTag;    
-    fmIndexIteratorConstuctor(dnaTag);
-//     fmIndexIteratorConstuctor(dna5Tag);
-//     fmIndexIteratorConstuctor(asTag);
-//     fmIndexIteratorConstuctor(uCharTag);
-//     fmIndexIteratorConstuctor(charTag);
+    
+//     {
+//         Index<DnaString,TDefaultIndex> index(genome);
+//         Iterator<Index<DnaString,TDefaultIndex>, TIterSpec>::Type dnaTag(index);
+//         fmIndexIteratorConstuctor(dnaTag);
+//     }
+//     {
+//         Index<DnaString,TCompressedIndex> index(genome);
+//         Iterator<Index<DnaString,TCompressedIndex>, TIterSpec>::Type dnaTag(index);
+//         fmIndexIteratorConstuctor(dnaTag);
+//     }
+    {
+        Index<DnaString,TDefaultIndex> index(genome);
+        Iterator<Index<DnaString,TDefaultIndex>, TParentLinksIterSpec>::Type dnaTag(index);
+        fmIndexIteratorConstuctor(dnaTag);
+    }
+    {
+        Index<DnaString,TCompressedIndex> index(genome);
+        Iterator<Index<DnaString,TCompressedIndex>, TParentLinksIterSpec>::Type dnaTag(index);
+        fmIndexIteratorConstuctor(dnaTag);
+    }
 }
 
 #endif // TEST_FM_INDEX_ITERATOR_BETA_H_

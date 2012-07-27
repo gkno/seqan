@@ -284,7 +284,7 @@ void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
         (getSeqOffset(sa) % getCompressionFactor(compressedSA) == 0) ? appendValue(indicatorString, 1) : appendValue(indicatorString, 0);
     }
 
-    completeRankSupportBitString(indicatorString);
+    updateRanks_(indicatorString);
 
     resize(sparseString.valueString, getRank(indicatorString, length(indicatorString) - 1));
 

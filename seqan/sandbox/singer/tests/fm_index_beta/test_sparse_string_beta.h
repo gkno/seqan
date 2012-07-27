@@ -42,15 +42,15 @@
 
 using namespace seqan;
 
-template <typename TSparseString>
-void sparseStringCompressionFactor(TSparseString & /*tag*/)
-{ 
-    TSparseString sparseString;
-
-    assignCompressionFactor(sparseString, 3u);
-
-    SEQAN_ASSERT_EQ(getCompressionFactor(sparseString), 3u);
-}
+// template <typename TSparseString>
+// void sparseStringCompressionFactor(TSparseString & /*tag*/)
+// { 
+//     TSparseString sparseString;
+// 
+//     assignCompressionFactor(sparseString, 3u);
+// 
+//     SEQAN_ASSERT_EQ(getCompressionFactor(sparseString), 3u);
+// }
 
 template <typename TSparseString>
 void sparseStringAssignGetValue(TSparseString & /*tag*/)
@@ -101,7 +101,7 @@ void sparseStringEmpty(TSparseString & /*tag*/)
     SEQAN_ASSERT_EQ(empty(sparseString), false);
 
     clear(sparseString);
-    SEQAN_ASSERT_EQ(empty(sparseString), false);
+    SEQAN_ASSERT_EQ(empty(sparseString), true);
 }
 
 template <typename TSparseString>

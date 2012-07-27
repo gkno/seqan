@@ -32,37 +32,23 @@
 // Author: Your Name <your.email@example.net>
 // ==========================================================================
 
-#include <seqan/sequence.h>
-
-//#include <seqan/basic.h>
-//#include <seqan/file.h>
-
-//#include "test_rsbs.h"
+#include "test_rsbs.h"
 
 using namespace seqan;
 
 SEQAN_BEGIN_TESTSUITE(test_rsbs)
 {
-
-	String<Dna> sequence;
-	resize(sequence, 100);
-	std::cerr << length(sequence) << std::endl;
-
-
-    // Call tests.
-//    SEQAN_CALL_TEST(test_rsbs_defaultConstructor);
-//    SEQAN_CALL_TEST(test_rsbs_resize);
-//    SEQAN_CALL_TEST(test_rsbs_getBuPos);
-//    SEQAN_CALL_TEST(test_rsbs_getSBuPos);
-//    SEQAN_CALL_TEST(test_rsbs_getPosInBu);
-//    SEQAN_CALL_TEST(test_rsbs_getSetBit);
-//    SEQAN_CALL_TEST(test_rsbs_append);
-//    SEQAN_CALL_TEST(test_rsbs_rank);
-//    SEQAN_CALL_TEST(test_rsbs_completeRsbs);
-//    SEQAN_CALL_TEST(test_rsbs_constructor);
-//	SEQAN_CALL_TEST(test_rsbs_equalOperator);
-//	SEQAN_CALL_TEST(test_rsbs_assignOperator);
-
-
+    SEQAN_CALL_TEST(test_rsbs_defaultConstructor);
+    SEQAN_CALL_TEST(test_rsbs_resize);
+    SEQAN_CALL_TEST(test_rsbs_getBuPos);
+    SEQAN_CALL_TEST(test_rsbs_getSBuPos);
+    SEQAN_CALL_TEST(test_rsbs_getPosInBu);
+    SEQAN_CALL_TEST(test_rsbs_getSetBit);
+    SEQAN_CALL_TEST(test_rsbs_append_value);
+    SEQAN_CALL_TEST(test_rsbs_rank);
+    SEQAN_CALL_TEST(test_rsbs_update_ranks_);
+    SEQAN_CALL_TEST(test_rsbs_constructor);
+    SEQAN_CALL_TEST(test_rsbs_equalOperator);
+    SEQAN_CALL_TEST(test_rsbs_assignOperator);
 }
 SEQAN_END_TESTSUITE

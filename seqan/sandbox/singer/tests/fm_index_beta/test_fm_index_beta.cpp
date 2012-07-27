@@ -101,23 +101,23 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
 //     SEQAN_CALL_TEST(test_wavelet_tree_get_occ);
 //     SEQAN_CALL_TEST(test_wavelet_tree_num_vertieces);
 //     SEQAN_CALL_TEST(test_wavelet_tree_fill_wavelet_tree_);
-// 
-//     SEQAN_CALL_TEST(sparse_string_compression_factor);
-//     SEQAN_CALL_TEST(sparse_string_assign_get_value);
-//     SEQAN_CALL_TEST(sparse_string_clear_length_resize);
-//     SEQAN_CALL_TEST(sparse_string_empty);
-//     SEQAN_CALL_TEST(sparse_string_value);
-//     
-//     SEQAN_CALL_TEST(compressed_sa_compression_factor);
-//     SEQAN_CALL_TEST(compressed_sa_assign_value);
-//     SEQAN_CALL_TEST(compressed_sa_clear_length_resize);
-//     SEQAN_CALL_TEST(compressed_sa_empty);
-//     SEQAN_CALL_TEST(compressed_sa_compressed_sa_create);
-//     SEQAN_CALL_TEST(compressed_sa_get_fibre);
-//     SEQAN_CALL_TEST(compressed_sa_get_next_pos_);
-//     SEQAN_CALL_TEST(compressed_sa_set_lf_table);
-//     SEQAN_CALL_TEST(compressed_sa_value_access);
-//     
+
+    SEQAN_CALL_TEST(sparse_string_compression_factor);
+    SEQAN_CALL_TEST(sparse_string_assign_get_value);
+    SEQAN_CALL_TEST(sparse_string_clear_length_resize);
+    SEQAN_CALL_TEST(sparse_string_empty);
+    SEQAN_CALL_TEST(sparse_string_value);
+    
+    SEQAN_CALL_TEST(compressed_sa_compression_factor);
+    SEQAN_CALL_TEST(compressed_sa_assign_value);
+    SEQAN_CALL_TEST(compressed_sa_clear_length_resize);
+    SEQAN_CALL_TEST(compressed_sa_empty);
+    SEQAN_CALL_TEST(compressed_sa_compressed_sa_create);
+    SEQAN_CALL_TEST(compressed_sa_get_fibre);
+    SEQAN_CALL_TEST(compressed_sa_get_next_pos_);
+    SEQAN_CALL_TEST(compressed_sa_set_lf_table);
+    SEQAN_CALL_TEST(compressed_sa_value_access);
+    
 //     SEQAN_CALL_TEST(test_lf_table_lf_mapping);
 // 
 //     SEQAN_CALL_TEST(test_fm_index_constructor);
@@ -128,21 +128,8 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
 //     SEQAN_CALL_TEST(test_fm_index_get_fibre);
 //     SEQAN_CALL_TEST(test_fm_index_search);
 
-//     SEQAN_CALL_TEST(fm_index_iterator_constuctor);
-
-    String<Dna5> genome = "ACGT";
-    Index<String<Dna5> > index_esa(genome);
-
-    Finder<Index<String<Dna5> > > finder0(index_esa);
-    find(finder0, "AC");
-
-    clear(genome);
-    std::cerr << "This is a stupid test!" << std::endl;
-    std::cerr << getFibre(index_esa, FibreText()) << std::endl;
-
-    Finder<Index<String<Dna5> > > finder1(index_esa);
-    find(finder1, "AC");
-    std::cerr << "This is a stupid test!" << std::endl;
-
+   // SEQAN_CALL_TEST(fm_index_iterator_constuctor);
 }
 SEQAN_END_TESTSUITE
+
+

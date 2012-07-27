@@ -771,7 +771,7 @@ inline void fillWaveletTree_(WaveletTree<TText, TWaveletTreeSpec> & tree,
 {
     typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreBitStrings>::Type             TFibreRankSupportBitStrings;
     typedef typename Value<TFibreRankSupportBitStrings>::Type                                       TFibreRankSupportBitString;
-    typedef typename Fibre<TFibreRankSupportBitString, FibreBitString>::Type                        TFibreBitString;
+    typedef typename Fibre<TFibreRankSupportBitString, FibreBits>::Type                        TFibreBitString;
     typedef typename Size<TFibreBitString>::Type                                                    TSize;
     typedef typename Fibre<WaveletTree<TText, TWaveletTreeSpec>, FibreWaveletTreeStructure>::Type   TWaveletTreeStructure;
 
@@ -809,7 +809,7 @@ inline void fillWaveletTree_(WaveletTree<TText, TWaveletTreeSpec> & tree,
     for (TSize i = 0; i < length(bitStrings); ++i)
     {
         TFibreRankSupportBitString & temp = bitStrings[i];
-        completeRankSupportBitString(temp);
+        updateRanks_(temp);
     }
 }
 

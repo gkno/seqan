@@ -101,7 +101,7 @@ void compressedSaEmpty(TCompressedSA & /*tag*/)
     SEQAN_ASSERT_EQ(empty(compressedSA), false);
 
     clear(compressedSA);
-    SEQAN_ASSERT_EQ(empty(compressedSA), false);
+    SEQAN_ASSERT_EQ(empty(compressedSA), true);
 }
 
 template <typename TCompressedSA>
