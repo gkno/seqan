@@ -100,6 +100,25 @@ struct JournalEntryLtByVirtualPos
     }
 };
 
+
+// TODO (rmaerker): Note that this comparison only makes sense if the nodes are sorted
+// in ascending order according to their physical position - this might be violated
+// if rearrangements are included.
+template <typename TPos, typename TSize>
+struct JournalEntryLtByPhysicalPos
+{
+    bool operator()(JournalEntry<TPos, TSize> const & a, JournalEntry<TPos, TSize> const & b) const
+    {
+        // only compare physical position of original nodes since the physical position of
+        // virtual nodes would distort the result
+        if (a.segmentSource != SOURCE_PATCH && b.segmentSource != SOURCE_PATCH)
+        {
+            return a.physicalPosition < b.physicalPosition;
+        }
+        return false;
+    }
+};
+
 // ============================================================================
 // Metafunctions
 // ============================================================================

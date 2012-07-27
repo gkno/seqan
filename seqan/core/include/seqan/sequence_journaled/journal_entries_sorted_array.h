@@ -477,6 +477,47 @@ virtualToHostPosition(JournalEntries<TNode, TJournalSpec> const & journalEntries
     return 0;
 }
 
+//---------------------------------------------------
+// function hostToVirtualPosition()
+//---------------------------------------------------
+
+template <typename TCargo, typename TPos>
+inline
+typename Position<TCargo>::Type
+hostToVirtualPosition(JournalEntries<TCargo, SortedArray> const & journalEntries, TPos const & hostPos)
+{
+    typedef JournalEntries<TCargo, SortedArray> TJournalEntries;
+    typedef typename Iterator<TJournalEntries>::Type TIterator;
+    typedef typename Position<TCargo>::Type TCargoPos;
+    typedef typename Size<TCargo>::Type TCargoSize;
+    typedef JournalEntryLtByPhysicalPos<TCargoPos, TCargoSize> TComp;
+
+    // Find upper bound based on the physical position
+    // Note that only original nodes are considered for the comparison
+    TCargo refCargo;
+    refCargo.physicalPosition = hostPos;
+    TIterator it = std::upper_bound(begin(journalEntries._journalNodes, Standard()),
+            end(journalEntries._journalNodes, Standard()), refCargo, TComp());
+
+    SEQAN_ASSERT(it != begin(journalEntries._journalNodes, Standard()));
+    it -= 1;
+    SEQAN_ASSERT(it != end(journalEntries._journalNodes, Standard()));
+
+    // go to next original node previous to the reported patch node
+    while (value(it).segmentSource != SOURCE_ORIGINAL)
+    {
+        --it;
+    }
+    SEQAN_ASSERT_EQ(value(it).segmentSource, SOURCE_ORIGINAL);
+    // Case#1: Requested position is deleted - return virtual begin postion of next node
+    if ((value(it).physicalPosition + value(it).length) <= (TCargoPos) hostPos)
+    {
+        return value(it).virtualPosition + value(it).length;
+    }
+    // Case#2: Requested position exists within the node - return correspondent virtual position of this node
+    return value(it).virtualPosition + (hostPos - value(it).physicalPosition);
+}
+
 template <typename TNode, typename TJournalSpec, typename TPos>
 inline
 bool

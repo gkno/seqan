@@ -113,7 +113,7 @@ public:
     }
 
     template <typename TString>
-    String(TString const & other)
+	String(TString const & other)
     {
         SEQAN_CHECKPOINT;
         assign(*this, other);
@@ -124,7 +124,9 @@ public:
     operator=(String const & other)
     {
         SEQAN_CHECKPOINT;
-        //TODO (10.03.2011) - rmaerker: should copy the holder, too. What is intended with the assignment - copy or set?
+        //TODO (rmaerker): should copy the holder, too. What is intended with the assignment - copy or set?
+        //TODO (rmaerker): missing self-assignment test. What happens with ptr of Holder in self-assignment
+        // assign(_holder, other._holder);
         assign(*this, other);
         return *this;
     }
@@ -752,6 +754,20 @@ virtualToHostPosition(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferS
     return virtualToHostPosition(journaledString._journalEntries, pos);
 }
 
+//---------------------------------------------------
+// function hostToVirtualPosition()
+//---------------------------------------------------
+
+template<typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
+inline
+typename Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type
+hostToVirtualPosition(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & journalString,
+                      TPos const & pos)
+{
+    SEQAN_ASSERT_LEQ(pos, (TPos) length(host(journalString)));
+    return hostToVirtualPosition(journalString._journalEntries, pos);
+}
+
 // --------------------------------------------------------------------------
 // Function isGapInHost()
 // --------------------------------------------------------------------------
@@ -918,6 +934,14 @@ isFlat(String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > const & jo
 	}
 	return false;
 }
+
+// template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBuffSpec>
+// void
+// _deallocateStorage(String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > & string,
+//				   size_t const & newCapacity)
+// {
+//	std::cout << "Now he is here but does not actually delete the contents." << std::endl;
+// }
 
 }  // namespace seqan
 

@@ -662,6 +662,51 @@ front(JournalEntries<TNode, UnbalancedTree> const & tree)
 }
 */
 
+//---------------------------------------------------
+// function hostToVirtualPosition()
+//---------------------------------------------------
+
+template <typename TCargo, typename TPos>
+inline
+typename Position<TCargo>::Type
+hostToVirtualPosition(JournalEntries<TCargo, UnbalancedTree> const & journalEntries,
+                      TPos const & hostPos)
+{
+    typedef JournalEntries<TCargo, UnbalancedTree> TJournalEntries;
+    typedef typename Iterator<TJournalEntries>::Type TIterator;
+
+    TIterator it = begin(journalEntries, Standard());
+    SEQAN_ASSERT(it != end(journalEntries, Standard()));
+    TCargo tmp;
+    while (it != end(journalEntries, Standard()))
+    {
+        // host position can only appear in orginal node
+        if (value(it).segmentSource == SOURCE_ORIGINAL)
+        {
+            // found a potential hit - investigate!
+            if (hostPos >= (TPos) value(it).physicalPosition)
+            {
+                // Case#1: Found searched position - report mapping to virtual position
+                if (hostPos < (TPos) value(it).physicalPosition + (TPos) value(it).length)
+                {
+                    return value(it).virtualPosition + (hostPos - value(it).physicalPosition);
+                }
+                // Case#2a: Searched position appears either in next node (see Case#1) or
+                // lies within a deletion (see Case#2b)
+                tmp = value(it);
+            }
+            else
+            {   // Case#2b: Searched position lies within deletion - report virtual position of next node
+                return tmp.virtualPosition + tmp.length;
+            }
+        }
+        ++it;
+    }
+    SEQAN_ASSERT_FAIL("Should never reach here!");
+    return 0;
+}
+
+
 
 template <typename TStream, typename TNode>
 void journalTreeToDotRec(TStream & stream, unsigned & nextId, TNode const & node)
