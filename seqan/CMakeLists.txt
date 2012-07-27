@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.3)
+cmake_minimum_required (VERSION 2.8.2)
 
 # ===========================================================================
 # Iff the file INST or SUA exists in the source root
