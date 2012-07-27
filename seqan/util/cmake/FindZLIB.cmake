@@ -84,6 +84,9 @@ ENDIF()
 
 # handle the QUIETLY and REQUIRED arguments and set ZLIB_FOUND to TRUE if 
 # all listed variables are TRUE
+if (NOT CMAKE_CURRENT_LIST_DIR)  # CMAKE_CURRENT_LIST_DIR only from cmake 2.8.3.
+    get_filename_component(CMAKE_CURRENT_LIST_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+endif (NOT CMAKE_CURRENT_LIST_DIR)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB REQUIRED_VARS ZLIB_LIBRARY ZLIB_INCLUDE_DIR
                                        VERSION_VAR ZLIB_VERSION_STRING)

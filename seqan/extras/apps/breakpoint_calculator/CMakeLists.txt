@@ -4,7 +4,7 @@ project (sandbox_bkehr_apps_breakpoint_calculator)
 # The FindLemon.cmake file is in the current directory.  Thus, add the latter to
 # the CMAKE_MODULE_PATH.
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_SOURCE_DIR}")
-find_package(LEMON)
+find_package(LEMON QUIET)
 
 if (LEMON_FOUND)
   # Add app tests if Python interpreter could be found.
@@ -23,5 +23,5 @@ if (LEMON_FOUND)
                                              parse_alignment.h
                                              breakpoint_counts.h)
 else (LEMON_FOUND)
-  message("LEMON library not found, not building breakpoint_calculator.")
+  message(STATUS "LEMON library not found, not building breakpoint_calculator.")
 endif (LEMON_FOUND)
