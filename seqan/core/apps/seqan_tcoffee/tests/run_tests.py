@@ -74,8 +74,8 @@ def main(source_base, binary_base):
         # Run with different segment match generation options.  We run
     # with with single values and combinations of neighbours
     for fname in ['1aab', '1ad2', '2trx']:
-        for m in ['global', 'local', 'overlap', 'lcs', 'global,local',
-                  'local,overlap', 'overlap,lcs', 'global,lcs']:
+        
+        for m in ['global', 'local', 'overlap', 'lcs']:
             conf = app_tests.TestConf(
                 program=path_to_program,
                 args=['-m', m,
@@ -84,6 +84,49 @@ def main(source_base, binary_base):
                 to_diff=[(ph.inFile('%s.m%s.out' % (fname, m)),
                           ph.outFile('%s.m%s.out' % (fname, m)))])
             conf_list.append(conf)
+        m1 = 'global'
+        m2 = 'local'
+        conf = app_tests.TestConf(
+            program=path_to_program,
+            args=['-m', m1,
+                  '-m', m2,
+                  '-s', ph.inFile('%s.fa' % fname),
+                  '-o', ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2))],
+            to_diff=[(ph.inFile('%s.m%s.m%s.out' % (fname, m1, m2)),
+                      ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2)))])
+        conf_list.append(conf)
+        m1 = 'local'
+        m2 = 'overlap'
+        conf = app_tests.TestConf(
+            program=path_to_program,
+            args=['-m', m1,
+                  '-m', m2,
+                  '-s', ph.inFile('%s.fa' % fname),
+                  '-o', ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2))],
+            to_diff=[(ph.inFile('%s.m%s.m%s.out' % (fname, m1, m2)),
+                      ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2)))])
+        conf_list.append(conf)
+        
+        m1 = 'overlap'
+        m2 = 'lcs'
+        conf = app_tests.TestConf(
+            program=path_to_program,
+            args=['-m', m1,
+                  '-m', m2,
+                  '-s', ph.inFile('%s.fa' % fname),
+                  '-o', ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2))],
+            to_diff=[(ph.inFile('%s.m%s.m%s.out' % (fname, m1, m2)),
+                      ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2)))])
+        m1 = 'global'
+        m2 = 'lcs'        
+        conf = app_tests.TestConf(
+            program=path_to_program,
+            args=['-m', m1,
+                  '-m', m2,
+                  '-s', ph.inFile('%s.fa' % fname),
+                  '-o', ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2))],
+            to_diff=[(ph.inFile('%s.m%s.m%s.out' % (fname, m1, m2)),
+                      ph.outFile('%s.m%s.m%s.out' % (fname, m1, m2)))])
 
     # Run with different match files variations.
     # TODO
