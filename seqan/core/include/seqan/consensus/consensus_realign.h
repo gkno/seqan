@@ -291,7 +291,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		if ((itGaps != itGapsEnd) && (itGaps->gapPos == 0)) {
 			old = itGaps->seqPos;
 			clippedBeginPos = old; // gaps at beginning? or really clipped?
-			std::cout << "clippedBeginPos = " << clippedBeginPos << std::endl;
+			//std::cout << "clippedBeginPos = " << clippedBeginPos << std::endl;
 			itRead += old;
 			diff -= old;
 			++itGaps;
@@ -430,7 +430,6 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		clear(alignIt->gaps);
 		diff = 0;
 		if (clippedBeginPos) {
-			std::cout << "clippedBeginPos = " << clippedBeginPos << std::endl;
 			appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos, 0), Generous() );
 			diff -= clippedBeginPos;
 		}
