@@ -61,8 +61,8 @@ namespace seqan {
 
 template <typename TStream, typename TNameStore, typename TNameStoreCache>
 int write2(TStream & stream,
-           BamHeaderRecord & header,
-           BamIOContext<TNameStore, TNameStoreCache> & /*context*/,
+           BamHeaderRecord const & header,
+           BamIOContext<TNameStore, TNameStoreCache> const & /*context*/,
            Sam const & /*tag*/)
 {
     char const * headerTypes[] = {"@HD", "@SQ", "@RG", "@PG", "@CO"};
@@ -95,15 +95,15 @@ int write2(TStream & stream,
 
 template <typename TStream, typename TNameStore, typename TNameStoreCache>
 int write2(TStream & stream,
-           BamHeader & header,
-           BamIOContext<TNameStore, TNameStoreCache> & context,
+           BamHeader const & header,
+           BamIOContext<TNameStore, TNameStoreCache> const & context,
            Sam const & tag)
 {
     std::set<CharString> writtenSeqInfos;
-    
+
     for (unsigned i = 0; i < length(header.records); ++i)
     {
-        BamHeaderRecord & record = header.records[i];
+        BamHeaderRecord const & record = header.records[i];
         if (record.type == BAM_HEADER_REFERENCE)
         {
             for (unsigned i = 0; i < length(record.tags); ++i)
@@ -115,7 +115,7 @@ int write2(TStream & stream,
                 }
             }
         }
-        
+
         int res = write2(stream, record, context, tag);
         if (res != 0)
             return res;
@@ -129,20 +129,24 @@ int write2(TStream & stream,
         int res = streamPut(stream, "@SQ\tSN:");
         if (res != 0)
             return res;
+
         res = streamPut(stream, header.sequenceInfos[i].i1);
         if (res != 0)
             return res;
+
         res = streamPut(stream, "\tLN:");
         if (res != 0)
             return res;
+
         res = streamPut(stream, header.sequenceInfos[i].i2);
         if (res != 0)
             return res;
+
         res = streamPut(stream, '\n');
         if (res != 0)
             return res;
     }
-    
+
     return 0;
 }
 
@@ -160,10 +164,11 @@ int write2(TStream & stream,
 
 #define SEQAN_PUT_TAB                           \
     do {                                        \
-            res = streamPut(stream, '\t');      \
-            if (res != 0)                       \
-                return res;                     \
-    } while (false)
+        res = streamPut(stream, '\t');      \
+        if (res != 0)                       \
+            return res;                     \
+    } \
+    while (false)
 
     res = streamPut(stream, record.qName);
     if (res != 0)
@@ -217,6 +222,7 @@ int write2(TStream & stream,
             res = streamPut(stream, record.cigar[i].count);
             if (res != 0)
                 return res;
+
             res = streamPut(stream, record.cigar[i].operation);
             if (res != 0)
                 return res;
@@ -263,7 +269,7 @@ int write2(TStream & stream,
 
     SEQAN_PUT_TAB;
 
-    
+
     if (empty(record.qual))  // Case of empty quality string / "*".
         res = streamPut(stream, '*');
     else
@@ -280,6 +286,7 @@ int write2(TStream & stream,
     }
 
     return streamPut(stream, '\n');
+
 #undef SEQAN_PUT_TAB
 }
 

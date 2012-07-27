@@ -63,8 +63,8 @@ namespace seqan {
 
 template <typename TStream, typename TNameStore, typename TNameStoreCache>
 int write2(TStream & stream,
-           BamHeader & header,
-           BamIOContext<TNameStore, TNameStoreCache> & context,
+           BamHeader const & header,
+           BamIOContext<TNameStore, TNameStoreCache> const & context,
            Bam const & /*tag*/)
 {
     int res = streamWriteBlock(stream, "BAM\1", 4);
@@ -86,6 +86,7 @@ int write2(TStream & stream,
     res = streamWriteBlock(stream, reinterpret_cast<char const *>(&lText), 4);
     if (res != 4)
         return 1;  // Error writing l_text.
+
     res = streamWriteBlock(stream, &headerBuffer[0], lText);
 
     // Write references.
@@ -93,6 +94,7 @@ int write2(TStream & stream,
     res = streamWriteBlock(stream, reinterpret_cast<char const *>(&nRef), 4);
     if (res != 4)
         return 1;  // Error writing n_ref;
+
     for (unsigned i = 0; i < length(header.sequenceInfos); ++i)
     {
         __int32 lName = length(header.sequenceInfos[i].i1) + 1;
@@ -103,17 +105,18 @@ int write2(TStream & stream,
         res = streamWriteBlock(stream, &header.sequenceInfos[i].i1[0], lName - 1);
         if (res != lName - 1)
             return 1;  // Error writing name;
+
         char const n = '\0';
         res = streamWriteBlock(stream, &n, 1);
         if (res != 1)
             return 1;  // Error writing trailing '\0'.
-        
+
         __int32 lRef = header.sequenceInfos[i].i2;
         res = streamWriteBlock(stream, reinterpret_cast<char const *>(&lRef), 4);
         if (res != 4)
             return 1;  // Error writing l_ref;
     }
-    
+
     return 0;
 }
 
@@ -123,19 +126,29 @@ int write2(TStream & stream,
 
 static inline int _reg2Bin(uint32_t beg, uint32_t end)
 {
-	--end;
-	if (beg>>14 == end>>14) return 4681 + (beg>>14);
-	if (beg>>17 == end>>17) return  585 + (beg>>17);
-	if (beg>>20 == end>>20) return   73 + (beg>>20);
-	if (beg>>23 == end>>23) return    9 + (beg>>23);
-	if (beg>>26 == end>>26) return    1 + (beg>>26);
-	return 0;
+    --end;
+    if (beg >> 14 == end >> 14)
+        return 4681 + (beg >> 14);
+
+    if (beg >> 17 == end >> 17)
+        return 585 + (beg >> 17);
+
+    if (beg >> 20 == end >> 20)
+        return 73 + (beg >> 20);
+
+    if (beg >> 23 == end >> 23)
+        return 9 + (beg >> 23);
+
+    if (beg >> 26 == end >> 26)
+        return 1 + (beg >> 26);
+
+    return 0;
 }
 
 template <typename TStream, typename TNameStore, typename TNameStoreCache>
 int write2(TStream & stream,
            BamAlignmentRecord & record,
-           BamIOContext<TNameStore, TNameStoreCache> & /*context*/,
+           BamIOContext<TNameStore, TNameStoreCache> const & /*context*/,
            Bam const & /*tag*/)
 {
     CharString buffer;
@@ -173,14 +186,19 @@ int write2(TStream & stream,
     streamWriteBlock(buffer, reinterpret_cast<char *>(&record.pNext), 4);
 
     // tlen
-    streamWriteBlock(buffer, reinterpret_cast<char *>(&record.tLen), 4);
+    __int32 zero = 0;
+    if (record.tLen == BamAlignmentRecord::INVALID_LEN)
+        streamWriteBlock(buffer, reinterpret_cast<char *>(&zero), 4);
+    else
+        streamWriteBlock(buffer, reinterpret_cast<char *>(&record.tLen), 4);
 
     // read_name
     streamWriteBlock(buffer, reinterpret_cast<char *>(&record.qName[0]), lReadName - 1);
     streamWriteChar(buffer, '\0');
 
     // cigar
-    static __uint8 const MAP[256] = {
+    static __uint8 const MAP[256] =
+    {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -207,13 +225,14 @@ int write2(TStream & stream,
     }
 
     // seq
-    static __uint8 const MAP2[256] = {
+    static __uint8 const MAP2[256] =
+    {
         15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-        15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  0, 15, 15,
-        15,  1, 14,  2, 13, 15, 15,  4, 11, 15, 15, 12, 15,  3, 15, 15,
-        15, 15,  5,  6,  8, 15,  7,  9, 15, 10, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 0, 15, 15,
+        15, 1, 14, 2, 13, 15, 15, 4, 11, 15, 15, 12, 15, 3, 15, 15,
+        15, 15, 5, 6, 8, 15, 7, 9, 15, 10, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,

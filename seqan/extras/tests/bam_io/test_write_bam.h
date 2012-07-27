@@ -48,12 +48,12 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_write_header)
     typedef typename BamHeaderRecord::TTag    TTag;
 
     // Prepare input.
-    
+
     StringSet<CharString> contigNameStore;
     appendValue(contigNameStore, "REF");
     NameStoreCache<StringSet<CharString> > contigNameStoreCache(contigNameStore);
     BamIOContext<StringSet<CharString> > bamIOContext(contigNameStore, contigNameStoreCache);
-    
+
     BamHeader header;
     appendValue(header.sequenceInfos, TSequenceInfo("REF", 10000));
 
@@ -67,7 +67,7 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_write_header)
     appendValue(firstRecord.tags, TTag("SN", "REF"));
     appendValue(firstRecord.tags, TTag("LN", "10000"));
     appendValue(header.records, seqRecord);
-    
+
     // Call code under test.
 
     char buffer[1000];
@@ -78,9 +78,9 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_write_header)
     // Compare results.
 
     char const * EXPECTED =
-            "\x42\x41\x4d\x01\x10\x00\x00\x00\x40\x48\x44\x09\x56\x4e\x3a\x31"
-            "\x2e\x30\x0a\x40\x53\x51\x0a\x00\x01\x00\x00\x00\x04\x00\x00\x00"
-            "\x52\x45\x46\x00\x10\x27\x00\x00";
+        "\x42\x41\x4d\x01\x10\x00\x00\x00\x40\x48\x44\x09\x56\x4e\x3a\x31"
+        "\x2e\x30\x0a\x40\x53\x51\x0a\x00\x01\x00\x00\x00\x04\x00\x00\x00"
+        "\x52\x45\x46\x00\x10\x27\x00\x00";
     SEQAN_ASSERT_EQ(memcmp(&buffer[0], EXPECTED, bufLen), 0);
 }
 
@@ -120,10 +120,10 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_write_alignment)
 
     // Compare results.
     char const * EXPECTED =
-            "\x3c\x00\x00\x00\x00\x00\x00\x00\x1e\x00\x00\x00\x09\x08\x49\x12"
-            "\x01\x00\x12\x00\x0a\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\x7f"
-            "\xff\xff\xff\x7f\x52\x45\x41\x44\x4e\x41\x4d\x45\x00\xa0\x00\x00"
-            "\x00\x24\x18\x24\x18\x11\x28\x28\x28\x28\x28\x28\x28\x28\x28\x28";
+        "\x3c\x00\x00\x00\x00\x00\x00\x00\x1e\x00\x00\x00\x09\x08\x49\x12"
+        "\x01\x00\x12\x00\x0a\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\x7f"
+        "\x00\x00\x00\x00\x52\x45\x41\x44\x4e\x41\x4d\x45\x00\xa0\x00\x00"
+        "\x00\x24\x18\x24\x18\x11\x28\x28\x28\x28\x28\x28\x28\x28\x28\x28";
     SEQAN_ASSERT_EQ(memcmp(&buffer[0], EXPECTED, bufLen), 0);
 }
 
