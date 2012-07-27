@@ -176,86 +176,86 @@ TStream & operator<<(TStream & stream, Options<IlluminaReads> const & options) {
 template <>
 struct ReadSimulationInstruction<IlluminaReads> : public ReadSimulationInstruction<Global> {};
 
-void setUpCommandLineParser(CommandLineParser & parser,
-                            IlluminaReads const &)
+void setUpArgumentParser(ArgumentParser & parser,
+                         IlluminaReads const &)
 {
-    setUpCommandLineParser(parser);
+    setUpArgumentParser(parser);
     addUsageLine(parser, "illumina [OPTIONS] SEQUENCE");
 
     addSection(parser, "Illumina Read Lengths");
 
-    addOption(parser, CommandLineOption("n",  "read-length", "The length of the reads to simulate.  Default: 36.", OptionType::Integer | OptionType::Label));
-    addHelpLine(parser, "All resulting reads will have the same length.");
+    addOption(parser, ArgParseOption("n",  "read-length", "The length of the reads to simulate. All resulting reads will have the same length.", ArgParseOption::INTEGER));
+    setDefaultValue(parser, "read-length", "36");
 
     addSection(parser, "Illumina Error Model");
 
-    addOption(parser, CommandLineOption("pi", "prob-insert", "Probability of an insertion.  Default: 0.001.", OptionType::Double));
-    addOption(parser, CommandLineOption("pd", "prob-delete", "Probability of a deletion.  Default: 0.001.", OptionType::Double));
-    addOption(parser, CommandLineOption("pmmf", "prob-mismatch-file", "Mismatch probability path.  If set, probability distribution is loaded from argument.  Default: not set.", OptionType::String));
-    addOption(parser, CommandLineOption("pmms", "prob-mismatch-scale", "Scale to apply for probability mismatch.  Default: 1.0", OptionType::Double));
-    addOption(parser, CommandLineOption("pmm", "prob-mismatch", "Average mismatch probability.  Default: 0.004.", OptionType::Double));
-    addOption(parser, CommandLineOption("pmmb", "prob-mismatch-begin", "Probability of a mismatch at the first base.  Default: 0.003.", OptionType::Double));
-    addOption(parser, CommandLineOption("pmme", "prob-mismatch-end", "Probability of a mismatch at the last base.  Default: 0.012.", OptionType::Double));
-    addOption(parser, CommandLineOption("pr", "position-raise", "Relative position of raise point.  Default: 0.66.", OptionType::Double));
-    addOption(parser, CommandLineOption("nN", "no-N", "If set then no Ns will be introduced in the reads.  Default: Ns can be introduced.", OptionType::Bool));
+    addOption(parser, ArgParseOption("pi", "prob-insert", "Probability of an insertion.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "prob-insert", "0.001");
+    addOption(parser, ArgParseOption("pd", "prob-delete", "Probability of a deletion.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pd", "0.001");
+    addOption(parser, ArgParseOption("pmmf", "prob-mismatch-file", "Mismatch probability path.  If set, probability distribution is loaded from argument.", ArgParseOption::STRING));
+    addOption(parser, ArgParseOption("pmms", "prob-mismatch-scale", "Scale to apply for probability mismatch.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pmms", "1.0");
+    addOption(parser, ArgParseOption("pmm", "prob-mismatch", "Average mismatch probability.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pmm", "0.004");
+    addOption(parser, ArgParseOption("pmmb", "prob-mismatch-begin", "Probability of a mismatch at the first base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pmmb", "0.002");
+    addOption(parser, ArgParseOption("pmme", "prob-mismatch-end", "Probability of a mismatch at the last base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pmme", "0.012");
+    addOption(parser, ArgParseOption("pr", "position-raise", "Relative position of raise point.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pr", "0.66");
+    addOption(parser, ArgParseOption("nN", "no-N", "If set then no Ns will be introduced in the reads."));
 
-    addOption(parser, CommandLineOption("qmb", "quality-mean-begin", "Quality mean at first base.  Default: 40.", OptionType::Double));
-    addOption(parser, CommandLineOption("qme", "quality-mean-end", "Quality mean at last base.  Default: 39.5.", OptionType::Double));
-    addOption(parser, CommandLineOption("qsdb", "quality-std-dev-begin", "Quality standard deviation at first base.  Default: 0.05.", OptionType::Double));
-    addOption(parser, CommandLineOption("qsde", "quality-std-dev-end", "Quality standard deviation at last base.  Default: 10.", OptionType::Double));
+    addOption(parser, ArgParseOption("qmb", "quality-mean-begin", "Quality mean at first base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qmb", "40");
+    addOption(parser, ArgParseOption("qme", "quality-mean-end", "Quality mean at last base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qme", "39.5");
+    addOption(parser, ArgParseOption("qsdb", "quality-std-dev-begin", "Quality standard deviation at first base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qsdb", "0.05");
+    addOption(parser, ArgParseOption("qsde", "quality-std-dev-end", "Quality standard deviation at last base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qsde", "10");
 
-    addOption(parser, CommandLineOption("mmqmb", "mismatch-quality-mean-begin", "Mismatch quality mean at first base.  Default: 39.4.", OptionType::Double));
-    addOption(parser, CommandLineOption("mmqme", "mismatch-quality-mean-end", "Mismatch quality mean at last base.  Default: 30.", OptionType::Double));
-    addOption(parser, CommandLineOption("mmqsdb", "mismatch-quality-std-dev-begin", "Mismatch quality standard deviation at first base.  Default: 3.", OptionType::Double));
-    addOption(parser, CommandLineOption("mmqsde", "mismatch-quality-std-dev-end", "Mismatch quality standard deviation at last base.  Default: 15.", OptionType::Double));
+    addOption(parser, ArgParseOption("mmqmb", "mismatch-quality-mean-begin", "Mismatch quality mean at first base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "mmqmb", "39.5");
+    addOption(parser, ArgParseOption("mmqme", "mismatch-quality-mean-end", "Mismatch quality mean at last base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "mmqme", "30");
+    addOption(parser, ArgParseOption("mmqsdb", "mismatch-quality-std-dev-begin", "Mismatch quality standard deviation at first base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "mmqsdb", "3");
+    addOption(parser, ArgParseOption("mmqsde", "mismatch-quality-std-dev-end", "Mismatch quality standard deviation at last base.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "mmqsde", "15");
 }
 
-int parseCommandLineAndCheckModelSpecific(Options<IlluminaReads> & options,
-                                          CommandLineParser & parser)
+ArgumentParser::ParseResult
+parseArgumentsAndCheckModelSpecific(Options<IlluminaReads> & options,
+                                    ArgumentParser & parser)
 {
-    if (isSetLong(parser, "read-length"))
-        getOptionValueLong(parser, "read-length", options.readLength);
+    getOptionValue(options.readLength, parser, "read-length");
 
-    if (isSetLong(parser, "prob-insert"))
-        getOptionValueLong(parser, "prob-insert", options.probabilityInsert);
-    if (isSetLong(parser, "prob-delete"))
-        getOptionValueLong(parser, "prob-delete", options.probabilityDelete);
-    if (isSetLong(parser, "prob-mismatch-file")) {
+    getOptionValue(options.probabilityInsert, parser, "prob-insert");
+    getOptionValue(options.probabilityDelete, parser, "prob-delete");
+    if (isSet(parser, "prob-mismatch-file"))
+    {
         options.probabilityMismatchFromFile = true;
-        getOptionValueLong(parser, "prob-mismatch-file", options.probabilityMismatchFile);
+        getOptionValue(options.probabilityMismatchFile, parser, "prob-mismatch-file");
     }
-    if (isSetLong(parser, "prob-mismatch-scale"))
-        getOptionValueLong(parser, "prob-mismatch-scale", options.probabilityMismatchScale);
-    if (isSetLong(parser, "prob-mismatch"))
-        getOptionValueLong(parser, "prob-mismatch", options.probabilityMismatch);
-    if (isSetLong(parser, "prob-mismatch-begin"))
-        getOptionValueLong(parser, "prob-mismatch-begin", options.probabilityMismatchBegin);
-    if (isSetLong(parser, "prob-mismatch-end"))
-        getOptionValueLong(parser, "prob-mismatch-end", options.probabilityMismatchEnd);
-    if (isSetLong(parser, "position-raise"))
-        getOptionValueLong(parser, "positio-raise", options.positionRaise);
-    if (isSetLong(parser, "no-N"))
-        options.illuminaNoN = true;
+    getOptionValue(options.probabilityMismatchScale, parser, "prob-mismatch-scale");
+    getOptionValue(options.probabilityMismatch, parser, "prob-mismatch");
+    getOptionValue(options.probabilityMismatchBegin, parser, "prob-mismatch-begin");
+    getOptionValue(options.probabilityMismatchEnd, parser, "prob-mismatch-end");
+    getOptionValue(options.positionRaise, parser, "position-raise");
+    options.illuminaNoN = isSet(parser, "no-N");
 
-    if (isSetLong(parser, "quality-mean-begin"))
-        getOptionValueLong(parser, "quality-mean-begin", options.meanQualityBegin);
-    if (isSetLong(parser, "quality-mean-end"))
-        getOptionValueLong(parser, "quality-mean-end", options.meanQualityEnd);
-    if (isSetLong(parser, "quality-std-dev-begin"))
-        getOptionValueLong(parser, "quality-std-dev-begin", options.stdDevQualityBegin);
-    if (isSetLong(parser, "quality-std-dev-end"))
-        getOptionValueLong(parser, "quality-std-dev-end", options.stdDevQualityEnd);
+    getOptionValue(options.meanQualityBegin, parser, "quality-mean-begin");
+    getOptionValue(options.meanQualityEnd, parser, "quality-mean-end");
+    getOptionValue(options.stdDevQualityBegin, parser, "quality-std-dev-begin");
+    getOptionValue(options.stdDevQualityEnd, parser, "quality-std-dev-end");
 
-    if (isSetLong(parser, "mismatch-quality-mean-begin"))
-        getOptionValueLong(parser, "mismatch-quality-mean-begin", options.meanMismatchQualityBegin);
-    if (isSetLong(parser, "mismatch-quality-mean-end"))
-        getOptionValueLong(parser, "mismatch-quality-mean-end", options.meanMismatchQualityEnd);
-    if (isSetLong(parser, "mismatch-quality-std-dev-begin"))
-        getOptionValueLong(parser, "mismatch-quality-std-dev-begin", options.stdDevMismatchQualityBegin);
-    if (isSetLong(parser, "mismatch-quality-std-dev-end"))
-        getOptionValueLong(parser, "mismatch-quality-std-dev-end", options.stdDevMismatchQualityEnd);
+    getOptionValue(options.meanMismatchQualityBegin, parser, "mismatch-quality-mean-begin");
+    getOptionValue(options.meanMismatchQualityEnd, parser, "mismatch-quality-mean-end");
+    getOptionValue(options.stdDevMismatchQualityBegin, parser, "mismatch-quality-std-dev-begin");
+    getOptionValue(options.stdDevMismatchQualityEnd, parser, "mismatch-quality-std-dev-end");
 
-    return 0;
+    return ArgumentParser::PARSE_OK;
 }
 
 // Called in simulateReads() to compute the model specific data from the options.

@@ -42,7 +42,7 @@
 
 #include <seqan/basic.h>
 #include <seqan/find.h>
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/arg_parse.h>
 #include <seqan/misc/misc_random.h>
 #include <seqan/modifier.h>
 #include <seqan/sequence.h>
@@ -105,37 +105,37 @@ int main(const int argc, const char * argv[]) {
     // appropriate function for simulation.  This if/then/else switch
     // selects the right code path.
     if (globalOptions.readsType == READS_TYPE_ILLUMINA) {
-        CommandLineParser parser;
-        setUpCommandLineParser(parser, IlluminaReads());
+        ArgumentParser parser("mason");
+        setUpArgumentParser(parser, IlluminaReads());
         Options<IlluminaReads> options;
         CharString referenceFilename;
-        int ret = parseCommandLineAndCheck(options, referenceFilename, parser, argc, argv);
-        if (options.showHelp)
-            return 0;
-        if (ret != 0)
-            return ret;
+        ArgumentParser::ParseResult res = parseArgumentsAndCheck(options, referenceFilename, parser, argc, argv);
+        // If parsing was not successful then exit with code 1 if there were errors.  Otherwise, exit with code 0
+        // (e.g. help was printed).
+        if (res != seqan::ArgumentParser::PARSE_OK)
+            return res == seqan::ArgumentParser::PARSE_ERROR;
         return simulateReads(options, referenceFilename, IlluminaReads());
     } else if (globalOptions.readsType == READS_TYPE_454) {
-        CommandLineParser parser;
-        setUpCommandLineParser(parser, LS454Reads());
+        ArgumentParser parser("mason");
+        setUpArgumentParser(parser, LS454Reads());
         Options<LS454Reads> options;
         CharString referenceFilename;
-        int ret = parseCommandLineAndCheck(options, referenceFilename, parser, argc, argv);
-        if (options.showHelp)
-            return 0;
-        if (ret != 0)
-            return ret;
+        ArgumentParser::ParseResult res = parseArgumentsAndCheck(options, referenceFilename, parser, argc, argv);
+        // If parsing was not successful then exit with code 1 if there were errors.  Otherwise, exit with code 0
+        // (e.g. help was printed).
+        if (res != seqan::ArgumentParser::PARSE_OK)
+            return res == seqan::ArgumentParser::PARSE_ERROR;
         return simulateReads(options, referenceFilename, LS454Reads());
     } else if (globalOptions.readsType == READS_TYPE_SANGER) {
-        CommandLineParser parser;
-        setUpCommandLineParser(parser, SangerReads());
+        ArgumentParser parser("mason");
+        setUpArgumentParser(parser, SangerReads());
         Options<SangerReads> options;
         CharString referenceFilename;
-        int ret = parseCommandLineAndCheck(options, referenceFilename, parser, argc, argv);
-        if (options.showHelp)
-            return 0;
-        if (ret != 0)
-            return ret;
+        ArgumentParser::ParseResult res = parseArgumentsAndCheck(options, referenceFilename, parser, argc, argv);
+        // If parsing was not successful then exit with code 1 if there were errors.  Otherwise, exit with code 0
+        // (e.g. help was printed).
+        if (res != seqan::ArgumentParser::PARSE_OK)
+            return res == seqan::ArgumentParser::PARSE_ERROR;
         return simulateReads(options, referenceFilename, SangerReads());
     } else {
         SEQAN_ASSERT_FAIL("Invalid reads type!");

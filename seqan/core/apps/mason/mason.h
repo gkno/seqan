@@ -31,6 +31,7 @@
 #include <seqan/random.h>
 #include <seqan/sequence_journaled.h>
 #include <seqan/parallel.h>
+#include <seqan/arg_parse.h>
 
 #include "store_config.h"
 #include "util.h"
@@ -69,8 +70,6 @@ struct Options;
 template <>
 struct Options<Global>
 {
-    // true iff help is to be shown.
-    bool showHelp;
     // true iff verbosity is enabled.
     bool verbose;
     // true if very verbose is enabled.
@@ -153,8 +152,7 @@ struct Options<Global>
     bool haplotypeNoN;
 
     Options()
-            : showHelp(false),
-              verbose(false),
+            : verbose(false),
               veryVerbose(false),
               allowNFromGenome(false),
               seed(0),
@@ -327,120 +325,116 @@ TStream & operator<<(TStream & stream, ReadSimulationInstruction<Global> const &
 }
 
 // Initialize the command line parser for the global options.
-void setUpCommandLineParser(CommandLineParser & parser)
+void setUpArgumentParser(ArgumentParser & parser)
 {
-    addVersionLine(parser, "0.1");
+    setShortDescription(parser, "A Read Simulator");
+    setVersion(parser, "0.1.1");
+    setDate(parser, "July 27, 2012");
 
-    addTitleLine(parser, "Mason - A Read Simulator");
-    addLine(parser, "");
-    addLine(parser, "Use 'random' for the SEQUENCE file name to generate it randomly.");
+    addDescription(parser, "Use 'random' for the SEQUENCE file name to generate it randomly.");
 
     addSection(parser, "Main Options");
     
-    addOption(parser, CommandLineOption("aNg",  "allow-N-from-genome", "Allow N from genome.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("s",  "seed", "The seed for Rng.  Default: 0.", OptionType::Integer | OptionType::Label));
-    addOption(parser, CommandLineOption("N",  "num-reads", "Number of reads (or mate pairs) to simulate.  Default: 1000.", OptionType::Integer));
-    addOption(parser, CommandLineOption("sn", "source-length", "Length of random source sequence.  Default: 1,000,000.", OptionType::Integer));
-    addOption(parser, CommandLineOption("spA", "source-probability-A", "Propabilibty for A in randomly generated sequence. Default: 0.25", OptionType::Double));
-    addOption(parser, CommandLineOption("spC", "source-probability-C", "Propabilibty for C in randomly generated sequence. Default: 0.25", OptionType::Double));
-    addOption(parser, CommandLineOption("spG", "source-probability-G", "Propabilibty for G in randomly generated sequence. Default: 0.25", OptionType::Double));
-    addOption(parser, CommandLineOption("snN", "source-no-N", "If set then no Ns are generated in the random source sequence.", OptionType::Bool));
-    addOption(parser, CommandLineOption("f",  "forward-only", "Simulate from forward strand only.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("r",  "reverse-only", "Simulate from reverse strand only.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("o",  "output-file", "Write results to PARAM.fasta file instead of SEQUENCE.reads.fasta.  Default: \"\".", OptionType::String));
-    addOption(parser, CommandLineOption("sq", "simulate-qualities", "Simulate qualities, generate FASTQ instead of FASTA.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("i", "include-read-information", "Include additional read information in reads file.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("v", "verbose", "Verbosity mode.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("vv", "very-verbose", "High verbosity mode, implies verbosity mode.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("scf", "sample-counts-file", "Path to TSV file that maps contig ids to read counts.", OptionType::String));
-    addOption(parser, CommandLineOption("vcf", "vcf-allele-file", "Path to VCF file to synthesize the haplotype from.", OptionType::String));
+    addOption(parser, ArgParseOption("aNg",  "allow-N-from-genome", "Allow N from genome.  Default: false."));
+    addOption(parser, ArgParseOption("s", "seed", "The seed for Rng.", ArgParseOption::INTEGER, "INT"));
+    setDefaultValue(parser, "seed", "0");
+    addOption(parser, ArgParseOption("N",  "num-reads", "Number of reads (or mate pairs) to simulate.", ArgParseOption::INTEGER));
+    setDefaultValue(parser, "num-reads", "1000");
+    addOption(parser, ArgParseOption("sn", "source-length", "Length of random source sequence.", ArgParseOption::INTEGER));
+    setDefaultValue(parser, "source-length", "1000000");
+    addOption(parser, ArgParseOption("spA", "source-probability-A", "Propabilibty for A in randomly generated sequence.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "source-probability-A", "0.25");
+    addOption(parser, ArgParseOption("spC", "source-probability-C", "Propabilibty for C in randomly generated sequence.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "source-probability-C", "0.25");
+    addOption(parser, ArgParseOption("spG", "source-probability-G", "Propabilibty for G in randomly generated sequence.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "source-probability-G", "0.25");
+    addOption(parser, ArgParseOption("snN", "source-no-N", "If set then no Ns are generated in the random source sequence."));
+    addOption(parser, ArgParseOption("f",  "forward-only", "Simulate from forward strand only."));
+    addOption(parser, ArgParseOption("r",  "reverse-only", "Simulate from reverse strand only."));
+    addOption(parser, ArgParseOption("o",  "output-file", "Write results to PARAM.fasta file instead of SEQUENCE.reads.fasta.", ArgParseOption::STRING));
+    addOption(parser, ArgParseOption("sq", "simulate-qualities", "Simulate qualities, generate FASTQ instead of FASTA."));
+    addOption(parser, ArgParseOption("i", "include-read-information", "Include additional read information in reads file."));
+    addOption(parser, ArgParseOption("v", "verbose", "Verbosity mode."));
+    addOption(parser, ArgParseOption("vv", "very-verbose", "High verbosity mode, implies verbosity mode."));
+    addOption(parser, ArgParseOption("scf", "sample-counts-file", "Path to TSV file that maps contig ids to read counts.", ArgParseOption::STRING));
+    addOption(parser, ArgParseOption("vcf", "vcf-allele-file", "Path to VCF file to synthesize the haplotype from.", ArgParseOption::STRING));
 
     addSection(parser, "Mate-Pair Options");
 
-    addOption(parser, CommandLineOption("ll", "library-length-mean", "Mate-pair mean library length.  Default: 1000.", OptionType::Double));
-    addOption(parser, CommandLineOption("le", "library-length-error", "Mate-pair library tolerance.  Default: 100.", OptionType::Double));
-    addOption(parser, CommandLineOption("lu", "library-length-uniform", "Mate-pair library length is uniform.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("mp", "mate-pairs", "Enable mate pair simulation.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("rn", "read-naming", "Read naming scheme in FASTQ/FASTA files, 0-2  Default: 0.", OptionType::Integer));
-	addHelpLine(parser, "Note that the suffixes will not appear in the SAM file.  In the SAM format,");
-	addHelpLine(parser, "the FLAG field is used to signify the leftmost/rightmost fragment/read.");
-	addHelpLine(parser, "0 = No suffix, left-end and right-end read will be named 'example.fastq.0000', for example.");
-	addHelpLine(parser, "1 = Add zero-based slash-suffix, i.e. names will end on '/0' and '/1'");
-	addHelpLine(parser, "2 = Add one-based slash-suffix, i.e. names will end on '/1' and '/2'");
-    addOption(parser, CommandLineOption("rnp", "read-name-prefix", "Read name prefix. Default is output file name.", OptionType::String));
+    addOption(parser, ArgParseOption("ll", "library-length-mean", "Mate-pair mean library length.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "library-length-mean", "1000");
+    addOption(parser, ArgParseOption("le", "library-length-error", "Mate-pair library tolerance.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "library-length-error", "100");
+    addOption(parser, ArgParseOption("lu", "library-length-uniform", "Mate-pair library length is uniform."));
+    addOption(parser, ArgParseOption("mp", "mate-pairs", "Enable mate pair simulation."));
+    addOption(parser, ArgParseOption("rn", "read-naming", "Read naming scheme in FASTQ/FASTA files. See section on read naming below.", ArgParseOption::INTEGER));
+    setMinValue(parser, "read-naming", "0");
+    setMaxValue(parser, "read-naming", "2");
+    setDefaultValue(parser, "read-naming", "0");
+    addOption(parser, ArgParseOption("rnp", "read-name-prefix", "Read name prefix. Default is output file name.", ArgParseOption::STRING));
 
     addSection(parser, "Haplotype Options");
 
-    addOption(parser, CommandLineOption("hn", "num-haplotypes", "Number of haplotypes to simulate.  Default: 1.", OptionType::Integer));
-    addOption(parser, CommandLineOption("hs", "haplotype-snp-rate", "Haplotype SNP rate.  Default: 0.001.", OptionType::Double));
-    addOption(parser, CommandLineOption("hi", "haplotype-indel-rate", "Haplotype indel rate.  Default: 0.001.", OptionType::Double));
-    addOption(parser, CommandLineOption("hm", "haplotype-indel-range-min", "Haplotype indel size min.  Default: 1.", OptionType::Integer));
-    addOption(parser, CommandLineOption("hM", "haplotype-indel-range-max", "Haplotype indel size max.  Default: 6.", OptionType::Integer));
-    addOption(parser, CommandLineOption("hnN", "haplotype-no-N", "Do not allow Ns to be substituted or inserted into N.  Default: Is allowed.", OptionType::Bool));
+    addOption(parser, ArgParseOption("hn", "num-haplotypes", "Number of haplotypes to simulate.", ArgParseOption::INTEGER));
+    setDefaultValue(parser, "num-haplotypes", "1");
+    addOption(parser, ArgParseOption("hs", "haplotype-snp-rate", "Haplotype SNP rate.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "haplotype-snp-rate", "0.001");
+    addOption(parser, ArgParseOption("hi", "haplotype-indel-rate", "Haplotype indel rate.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "haplotype-indel-rate", "0.001");
+    addOption(parser, ArgParseOption("hm", "haplotype-indel-range-min", "Haplotype indel size min.", ArgParseOption::INTEGER));
+    setDefaultValue(parser, "haplotype-indel-range-min", "1");
+    addOption(parser, ArgParseOption("hM", "haplotype-indel-range-max", "Haplotype indel size max.", ArgParseOption::INTEGER));
+    setDefaultValue(parser, "haplotype-indel-range-max", "6");
+    addOption(parser, ArgParseOption("hnN", "haplotype-no-N", "Do not allow Ns to be substituted or inserted into N.  Default: Is allowed."));
+
+    addTextSection(parser, "Read Naming Scheme");
+	addText(parser, "Note that the suffixes will not appear in the SAM file.  In the SAM format, the FLAG field is used to mark the leftmost/rightmost fragment/read.");
+	addListItem(parser, "0", "No suffix, left-end and right-end read will be named 'example.fastq.0000', for example.");
+	addListItem(parser, "1", "Add zero-based slash-suffix, i.e. names will end on '/0' and '/1'");
+	addListItem(parser, "2", "Add one-based slash-suffix, i.e. names will end on '/1' and '/2'");
 
     // Need reads type and {SEQUENCE.fasta, random}.
-    requiredArguments(parser, 2);
+    addArgument(parser, ArgParseArgument(ArgParseArgument::STRING));
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
 }
 
 // Parse command line for global options and perform some checks.
 template <typename TOptions>
-int parseCommandLineAndCheck(TOptions & options,
-                             CharString & referenceFilename,
-                             CommandLineParser & parser,
-                             const int argc,
-                             const char * argv[]) {
-    if (!parse(parser, argc, argv)) {
-        if (!isSetShort(parser, "h"))
-            shortHelp(parser, std::cerr);
-        return 1;
-    }
-    if (isSetShort(parser, "h")) {
-        options.showHelp = true;
-        return 0;
-    }
+ArgumentParser::ParseResult
+parseArgumentsAndCheck(TOptions & options,
+                       CharString & referenceFilename,
+                       ArgumentParser & parser,
+                       const int argc,
+                       const char * argv[]) {
+    ArgumentParser::ParseResult res = parse(parser, argc, argv);
 
-    if (isSetLong(parser, "allow-N-from-genome"))
-        options.allowNFromGenome = true;
-    if (isSetLong(parser, "seed"))
-        getOptionValueLong(parser, "seed", options.seed);
-    if (isSetLong(parser, "num-reads"))
-        getOptionValueLong(parser, "num-reads", options.numReads);
-    if (isSetLong(parser, "source-length"))
-        getOptionValueLong(parser, "source-length", options.randomSourceLength);
-    if (isSetLong(parser, "source-probability-A"))
-        getOptionValueLong(parser, "source-probability-A", options.sourceProbabilityA);
-    if (isSetLong(parser, "source-probability-C"))
-        getOptionValueLong(parser, "source-probability-C", options.sourceProbabilityC);
-    if (isSetLong(parser, "source-probability-G"))
-        getOptionValueLong(parser, "source-probability-G", options.sourceProbabilityG);
-    if (isSetLong(parser, "forward-only"))
-        options.onlyForward = true;
-    if (isSetLong(parser, "reverse-only"))
-        options.onlyReverse = true;
-    if (isSetLong(parser, "output-file"))
-        getOptionValueLong(parser, "output-file", options.outputFile);
-    if (isSetLong(parser, "simulate-qualities"))
-        options.simulateQualities = true;
-    if (isSetLong(parser, "include-read-information"))
-        options.includeReadInformation = true;
-    if (isSetLong(parser, "verbose"))
-        options.verbose = true;
-    if (isSetLong(parser, "very-verbose")) {
-        options.verbose = true;
-        options.veryVerbose = true;
-    }
+    // If parsing was not successful then exit with code 1 if there were errors.  Otherwise, exit with code 0 (e.g. help
+    // was printed).
+    if (res != ArgumentParser::PARSE_OK)
+        return res;
 
-    if (isSetLong(parser, "library-length-mean"))
-        getOptionValueLong(parser, "library-length-mean", options.libraryLengthMean);
-    if (isSetLong(parser, "library-length-error"))
-        getOptionValueLong(parser, "library-length-error", options.libraryLengthError);
-    if (isSetLong(parser, "library-length-uniform"))
-        options.libraryLengthIsUniform = true;
-    if (isSetLong(parser, "mate-pairs"))
-        options.generateMatePairs = true;
-    if (isSetLong(parser, "read-naming")) {
+    options.allowNFromGenome = isSet(parser, "allow-N-from-genome");
+    getOptionValue(options.seed, parser, "seed");
+    getOptionValue(options.numReads, parser, "num-reads");
+    getOptionValue(options.randomSourceLength, parser, "source-length");
+    getOptionValue(options.sourceProbabilityA, parser, "source-probability-A");
+    getOptionValue(options.sourceProbabilityC, parser, "source-probability-C");
+    getOptionValue(options.sourceProbabilityG, parser, "source-probability-G");
+    options.onlyForward = isSet(parser, "forward-only");
+    options.onlyReverse = isSet(parser, "reverse-only");
+    getOptionValue(options.outputFile, parser, "output-file");
+    options.simulateQualities = isSet(parser, "simulate-qualities");
+    options.includeReadInformation = isSet(parser, "include-read-information");
+    options.verbose = isSet(parser, "verbose") || isSet(parser, "very-verbose");
+    options.veryVerbose = isSet(parser, "very-verbose");
+    
+    getOptionValue(options.libraryLengthMean, parser, "library-length-mean");
+    getOptionValue(options.libraryLengthError, parser, "library-length-error");
+    options.libraryLengthIsUniform = isSet(parser, "library-length-uniform");
+    options.generateMatePairs = isSet(parser, "mate-pairs");
+    if (isSet(parser, "read-naming")) {
         int mode = 0;
-        getOptionValueLong(parser, "read-naming", mode);
+        getOptionValue(mode, parser, "read-naming");
         switch (mode) {
             case 1:
                 options.readNaming = READ_NAMING_SLASH_SUFFIX0;
@@ -452,31 +446,24 @@ int parseCommandLineAndCheck(TOptions & options,
                 options.readNaming = READ_NAMING_NOSUFFIX;
         }
     }
-    if (isSetLong(parser, "read-name-prefix"))
-        getOptionValueLong(parser, "read-name-prefix", options.readNamePrefix);
-    if (isSetLong(parser, "num-haplotypes"))
-        getOptionValueLong(parser, "num-haplotypes", options.numHaplotypes);
-    if (isSetLong(parser, "haplotype-snp-rate"))
-        getOptionValueLong(parser, "haplotype-snp-rate", options.haplotypeSnpRate);
-    if (isSetLong(parser, "haplotype-indel-rate"))
-        getOptionValueLong(parser, "haplotype-indel-rate", options.haplotypeIndelRate);
-    if (isSetLong(parser, "haplotype-indel-range-min"))
-        getOptionValueLong(parser, "haplotype-indel-range-min", options.haplotypeIndelRangeMin);
-    if (isSetLong(parser, "haplotype-indel-range-max"))
-        getOptionValueLong(parser, "haplotype-indel-range-max", options.haplotypeIndelRangeMax);
-    if (isSetLong(parser, "haplotype-no-N"))
-        options.haplotypeNoN = true;
+    getOptionValue(options.readNamePrefix, parser, "read-name-prefix");
+    getOptionValue(options.numHaplotypes, parser, "num-haplotypes");
+    getOptionValue(options.haplotypeSnpRate, parser, "haplotype-snp-rate");
+    getOptionValue(options.haplotypeIndelRate, parser, "haplotype-indel-rate");
+    getOptionValue(options.haplotypeIndelRangeMin, parser, "haplotype-indel-range-min");
+    getOptionValue(options.haplotypeIndelRangeMax, parser, "haplotype-indel-range-max");
+    options.haplotypeNoN = isSet(parser, "haplotype-no-N");
 
-    getOptionValueLong(parser, "sample-counts-file", options.sampleCountsFilename);
-    getOptionValueLong(parser, "vcf-allele-file", options.vcfFile);
+    getOptionValue(options.sampleCountsFilename, parser, "sample-counts-file");
+    getOptionValue(options.vcfFile, parser, "vcf-allele-file");
 
     // First argument is "illumina", second one name of reference file.
-    referenceFilename = getArgumentValue(parser, 1);
+    getArgumentValue(referenceFilename, parser, 1);
 
     if (referenceFilename == "random")
         options.useRandomSequence = true;
 
-    return parseCommandLineAndCheckModelSpecific(options, parser);
+    return parseArgumentsAndCheckModelSpecific(options, parser);
 }
 
 // Write a random DNA sequence of the given length to the file with the given name.

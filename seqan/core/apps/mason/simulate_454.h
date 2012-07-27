@@ -118,46 +118,45 @@ TStream & operator<<(TStream & stream, Options<LS454Reads> const & options) {
     return stream;
 }
 
-void setUpCommandLineParser(CommandLineParser & parser,
-                            LS454Reads const &)
+void setUpArgumentParser(ArgumentParser & parser,
+                         LS454Reads const &)
 {
-    setUpCommandLineParser(parser);
-    addUsageLine(parser, "454 [OPTIONS] SEQUENCE");
+    setUpArgumentParser(parser);
+    addUsageLine(parser, "454 [\\fIOPTIONS\\fP] \\fBSEQUENCE\\fP");
 
     addSection(parser, "454 Read Length Parameters");
 
-    addOption(parser, CommandLineOption("nu",  "read-length-uniform", "If set, the read lengths are simulated with a uniform distribution, with standard distribution otherwise.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("nm",  "read-length-mean", "The mean of the read lengths.  Default: 400.", OptionType::Double));
-    addOption(parser, CommandLineOption("ne",  "read-length-error", "The standard deviation (for standard distribution) and interval length (for uniform distribution) for the read length.  Default: 40.", OptionType::Double));
+    addOption(parser, ArgParseOption("nu",  "read-length-uniform", "If set, the read lengths are simulated with a uniform distribution, with standard distribution otherwise."));
+    addOption(parser, ArgParseOption("nm",  "read-length-mean", "The mean of the read lengths.", ArgParseOption::DOUBLE, "REAL"));
+    setDefaultValue(parser, "read-length-mean", "400");
+    addOption(parser, ArgParseOption("ne",  "read-length-error", "The standard deviation (for standard distribution) and interval length (for uniform distribution) for the read length.", ArgParseOption::DOUBLE, "REAL"));
+    setDefaultValue(parser, "read-length-error", "40");
 
     addSection(parser, "454 Error Model Parameters");
 
-    addOption(parser, CommandLineOption("nsq",  "no-sqrt-in-std-dev", "If set, no square root is used in error calculation.  Default: Do use sqrt.", OptionType::Bool));
-    addOption(parser, CommandLineOption("k", "proportionality-factor", "Proportionality factor for calculating standard deviation proportional to sqrt(homopolymer length).  Default: 0.15", OptionType::Double));
-    addOption(parser, CommandLineOption("bm",  "background-noise-mean", "Background noise mean.  Default: 0.2.", OptionType::Double));
-    addOption(parser, CommandLineOption("bs",  "background-noise-stddev", "Background noise std dev.  Default: 0.1.", OptionType::Double));
+    addOption(parser, ArgParseOption("nsq",  "no-sqrt-in-std-dev", "If set, no square root is used in error calculation."));
+    addOption(parser, ArgParseOption("k",    "proportionality-factor", "Proportionality factor for calculating standard deviation proportional to sqrt(homopolymer length).", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "proportionality-factor", "0.15");
+    addOption(parser, ArgParseOption("bm",  "background-noise-mean", "Background noise mean.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "background-noise-mean", "0.23");
+    addOption(parser, ArgParseOption("bs",  "background-noise-stddev", "Background noise std dev.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "background-noise-stddev", "0.15");
 }
 
-int parseCommandLineAndCheckModelSpecific(Options<LS454Reads> & options,
-                                          CommandLineParser & parser)
+seqan::ArgumentParser::ParseResult
+parseArgumentsAndCheckModelSpecific(Options<LS454Reads> & options,
+                                    ArgumentParser & parser)
 {
-    if (isSetLong(parser, "read-length-uniform"))
-        options.readLengthIsUniform = true;
-    if (isSetLong(parser, "read-length-mean"))
-        getOptionValueLong(parser, "read-length-mean", options.readLengthMean);
-    if (isSetLong(parser, "read-length-error"))
-        getOptionValueLong(parser, "read-length-error", options.readLengthError);
+    options.readLengthIsUniform = isSet(parser, "read-length-uniform");
+    getOptionValue(options.readLengthMean, parser, "read-length-mean");
+    getOptionValue(options.readLengthError, parser, "read-length-error");
 
-    if (isSetLong(parser, "no-sqrt-in-std-dev"))
-        options.sqrtInStdDev = false;
-    if (isSetLong(parser, "proportionality-factor"))
-        getOptionValueLong(parser, "proportionality-factor", options.k);
-    if (isSetLong(parser, "background-noise-mean"))
-        getOptionValueLong(parser, "background-noise-mean", options.backgroundNoiseMean);
-    if (isSetLong(parser, "background-noise-stddev"))
-        getOptionValueLong(parser, "background-noise-stddev", options.backgroundNoiseStdDev);
+    options.sqrtInStdDev = !isSet(parser, "no-sqrt-in-std-dev");
+    getOptionValue(options.k, parser, "proportionality-factor");
+    getOptionValue(options.backgroundNoiseMean, parser, "background-noise-mean");
+    getOptionValue(options.backgroundNoiseStdDev, parser, "background-noise-stddev");
 
-    return 0;
+    return seqan::ArgumentParser::PARSE_OK;
 }
 
 // For 454 reads, we do not need model specific data (yet?).

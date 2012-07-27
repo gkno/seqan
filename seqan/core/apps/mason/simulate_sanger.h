@@ -138,79 +138,81 @@ TStream & operator<<(TStream & stream, Options<SangerReads> const & options) {
     return stream;
 }
 
-void setUpCommandLineParser(CommandLineParser & parser,
-                            SangerReads const &)
+void setUpArgumentParser(ArgumentParser & parser,
+                         SangerReads const &)
 {
-    setUpCommandLineParser(parser);
+    setUpArgumentParser(parser);
     addUsageLine(parser, "sanger [OPTIONS] SEQUENCE");
 
     addSection(parser, "Sanger Read Length Parameters");
 
-    addOption(parser, CommandLineOption("nu",  "read-length-uniform", "If set, the read lengths are simulated with a uniform distribution, with standard distribution otherwise.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("nm",  "read-length-mean", "The mean of the read lengths.  Default: 400.", OptionType::Double));
-    addOption(parser, CommandLineOption("ne",  "read-length-error", "The standard deviation (for standard distribution) and interval length (for uniform distribution) for the read length.  Default: 40.", OptionType::Double));
+    addOption(parser, ArgParseOption("nu",  "read-length-uniform", "If set, the read lengths are simulated with a uniform distribution, with standard distribution otherwise."));
+    addOption(parser, ArgParseOption("nm",  "read-length-mean", "The mean of the read lengths.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "read-length-mean", "400");
+    addOption(parser, ArgParseOption("ne",  "read-length-error", "The standard deviation (for standard distribution) and interval length (for uniform distribution) for the read length.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "read-length-error", "40");
 
     addSection(parser, "Sanger Error Model Parameters");
 
-    addOption(parser, CommandLineOption("pmb",  "probability-mismatch-begin", "Probability for a mismatch at begin of read.  Default: 0.005.", OptionType::Double));
-    addOption(parser, CommandLineOption("pme",  "probability-mismatch-end", "Probability for a mismatch at end of read.  Default: 0.01.", OptionType::Double));
-    addOption(parser, CommandLineOption("pib",  "probability-insert-begin", "Probability for a insert at begin of read.  Default: 0.0025.", OptionType::Double));
-    addOption(parser, CommandLineOption("pie",  "probability-insert-end", "Probability for a insert at end of read.  Default: 0.005.", OptionType::Double));
-    addOption(parser, CommandLineOption("pdb",  "probability-delete-begin", "Probability for a delete at begin of read.  Default: 0.0025.", OptionType::Double));
-    addOption(parser, CommandLineOption("pde",  "probability-delete-end", "Probability for a delete at end of read.  Default: 0.005.", OptionType::Double));
+    addOption(parser, ArgParseOption("pmb",  "probability-mismatch-begin", "Probability for a mismatch at begin of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pmb", "0.005");
+    addOption(parser, ArgParseOption("pme",  "probability-mismatch-end", "Probability for a mismatch at end of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pme", "0.01");
+    addOption(parser, ArgParseOption("pib",  "probability-insert-begin", "Probability for a insert at begin of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pib", "0.0025");
+    addOption(parser, ArgParseOption("pie",  "probability-insert-end", "Probability for a insert at end of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pie", "0.005");
+    addOption(parser, ArgParseOption("pdb",  "probability-delete-begin", "Probability for a delete at begin of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pdb", "0.0025");
+    addOption(parser, ArgParseOption("pde",  "probability-delete-end", "Probability for a delete at end of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "pde", "0.005");
 
     addSection(parser, "Base Quality Model Parameters");
-    addOption(parser, CommandLineOption("qmsm",  "quality-match-start-mean", "Mean quality for matches at start of read.  Default: 40.", OptionType::Double));
-    addOption(parser, CommandLineOption("qmem",  "quality-match-end-mean", "Mean quality for matches at end of read.  Default: 39.", OptionType::Double));
-    addOption(parser, CommandLineOption("qmss",  "quality-match-start-std-dev", "Quality standard deviation for matches at start of read.  Default: 0.1.", OptionType::Double));
-    addOption(parser, CommandLineOption("qmes",  "quality-match-end-std-dev", "Quality standard deviation for matches at end of read.  Default: 2.", OptionType::Double));
-    addOption(parser, CommandLineOption("qesm",  "quality-error-start-mean", "Mean quality for errors at start of read.  Default: 40.", OptionType::Double));
-    addOption(parser, CommandLineOption("qeem",  "quality-error-end-mean", "Mean quality for errors at end of read.  Default: 39.", OptionType::Double));
-    addOption(parser, CommandLineOption("qess",  "quality-error-start-std-dev", "Quality standard deviation for errors at start of read.  Default: 0.1.", OptionType::Double));
-    addOption(parser, CommandLineOption("qees",  "quality-error-end-std-dev", "Quality standard deviation for errors at end of read.  Default: 2.", OptionType::Double));
+
+    addOption(parser, ArgParseOption("qmsm",  "quality-match-start-mean", "Mean quality for matches at start of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qmsm", "40");
+    addOption(parser, ArgParseOption("qmem",  "quality-match-end-mean", "Mean quality for matches at end of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qmem", "39");
+    addOption(parser, ArgParseOption("qmss",  "quality-match-start-std-dev", "Quality standard deviation for matches at start of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qmss", "0.1");
+    addOption(parser, ArgParseOption("qmes",  "quality-match-end-std-dev", "Quality standard deviation for matches at end of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qmes", "2");
+    addOption(parser, ArgParseOption("qesm",  "quality-error-start-mean", "Mean quality for errors at start of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qesm", "30");
+    addOption(parser, ArgParseOption("qeem",  "quality-error-end-mean", "Mean quality for errors at end of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qeem", "20");
+    addOption(parser, ArgParseOption("qess",  "quality-error-start-std-dev", "Quality standard deviation for errors at start of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qess", "2");
+    addOption(parser, ArgParseOption("qees",  "quality-error-end-std-dev", "Quality standard deviation for errors at end of read.", ArgParseOption::DOUBLE));
+    setDefaultValue(parser, "qees", "5");
 }
 
-int parseCommandLineAndCheckModelSpecific(Options<SangerReads> & options,
-                                          CommandLineParser & parser)
+
+ArgumentParser::ParseResult
+parseArgumentsAndCheckModelSpecific(Options<SangerReads> & options,
+                                    ArgumentParser & parser)
 {
-    if (isSetLong(parser, "read-length-uniform"))
-        options.readLengthIsUniform = true;
-    if (isSetLong(parser, "read-length-mean"))
-        getOptionValueLong(parser, "read-length-mean", options.readLengthMean);
-    if (isSetLong(parser, "read-length-error"))
-        getOptionValueLong(parser, "read-length-error", options.readLengthError);
+    options.readLengthIsUniform = isSet(parser, "read-length-uniform");
+    getOptionValue(options.readLengthMean, parser, "read-length-mean");
+    getOptionValue(options.readLengthError, parser, "read-length-error");
 
-    if (isSetLong(parser, "probability-mismatch-begin"))
-        getOptionValueLong(parser, "probability-mismatch-begin", options.probabilityMismatchBegin);
-    if (isSetLong(parser, "probability-mismatch-end"))
-        getOptionValueLong(parser, "probability-mismatch-end", options.probabilityMismatchEnd);
-    if (isSetLong(parser, "probability-insert-begin"))
-        getOptionValueLong(parser, "probability-insert-begin", options.probabilityInsertBegin);
-    if (isSetLong(parser, "probability-insert-end"))
-        getOptionValueLong(parser, "probability-insert-end", options.probabilityInsertEnd);
-    if (isSetLong(parser, "probability-delete-begin"))
-        getOptionValueLong(parser, "probability-delete-begin", options.probabilityDeleteBegin);
-    if (isSetLong(parser, "probability-delete-end"))
-        getOptionValueLong(parser, "probability-delete-end", options.probabilityDeleteEnd);
+    getOptionValue(options.probabilityMismatchBegin, parser, "probability-mismatch-begin");
+    getOptionValue(options.probabilityMismatchEnd, parser, "probability-mismatch-end");
+    getOptionValue(options.probabilityInsertBegin, parser, "probability-insert-begin");
+    getOptionValue(options.probabilityInsertEnd, parser, "probability-insert-end");
+    getOptionValue(options.probabilityDeleteBegin, parser, "probability-delete-begin");
+    getOptionValue(options.probabilityDeleteEnd, parser, "probability-delete-end");
 
-    if (isSetLong(parser, "quality-match-start-mean"))
-        getOptionValueLong(parser, "quality-match-start-mean", options.qualityMatchStartMean);
-    if (isSetLong(parser, "quality-match-end-mean"))
-        getOptionValueLong(parser, "quality-match-end-mean", options.qualityMatchEndMean);
-    if (isSetLong(parser, "quality-match-start-std-dev"))
-        getOptionValueLong(parser, "quality-match-start-std-dev", options.qualityMatchStartStdDev);
-    if (isSetLong(parser, "quality-match-end-std-dev"))
-        getOptionValueLong(parser, "quality-match-end-std-dev", options.qualityMatchEndStdDev);
-    if (isSetLong(parser, "quality-error-start-mean"))
-        getOptionValueLong(parser, "quality-error-start-mean", options.qualityErrorStartMean);
-    if (isSetLong(parser, "quality-error-end-mean"))
-        getOptionValueLong(parser, "quality-error-end-mean", options.qualityErrorEndMean);
-    if (isSetLong(parser, "quality-error-start-std-dev"))
-        getOptionValueLong(parser, "quality-error-start-std-dev", options.qualityErrorStartStdDev);
-    if (isSetLong(parser, "quality-error-end-std-dev"))
-        getOptionValueLong(parser, "quality-error-end-std-dev", options.qualityErrorEndStdDev);
+    getOptionValue(options.qualityMatchStartMean, parser, "quality-match-start-mean");
+    getOptionValue(options.qualityMatchEndMean, parser, "quality-match-end-mean");
+    getOptionValue(options.qualityMatchStartStdDev, parser, "quality-match-start-std-dev");
+    getOptionValue(options.qualityMatchEndStdDev, parser, "quality-match-end-std-dev");
+    getOptionValue(options.qualityErrorStartMean, parser, "quality-error-start-mean");
+    getOptionValue(options.qualityErrorEndMean, parser, "quality-error-end-mean");
+    getOptionValue(options.qualityErrorStartStdDev, parser, "quality-error-start-std-dev");
+    getOptionValue(options.qualityErrorEndStdDev, parser, "quality-error-end-std-dev");
 
-    return 0;
+    return seqan::ArgumentParser::PARSE_OK;
 }
 
 // No model specific data for Sanger reads.
