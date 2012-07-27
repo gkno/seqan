@@ -87,4 +87,22 @@
 
 #include <seqan/bam_io/bam_alignment_record_util.h>
 
+// ===========================================================================
+// Easy BAM / SAM I/O.
+// ===========================================================================
+
+#include <seqan/bam_io/xam_reader.h>
+#if SEQAN_HAS_ZLIB
+#include <seqan/bam_io/bam_reader.h>
+#endif  // #if SEQAN_HAS_ZLIB
+#include <seqan/bam_io/sam_reader.h>
+
+#include <seqan/bam_io/xam_writer.h>
+#if SEQAN_HAS_ZLIB
+#include <seqan/bam_io/bam_writer.h>
+#endif  // #if SEQAN_HAS_ZLIB
+#include <seqan/bam_io/sam_writer.h>
+
+#include <seqan/bam_io/bam_stream.h>
+
 #endif  // EXTRAS_INCLUDE_SEQAN_BAM_IO_H_
