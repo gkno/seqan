@@ -537,7 +537,10 @@ readRecord(TIdString & meta,
     if (res)
         return res;
 
-    return _readQualityBlock(qual, reader, length(seq), meta, Fastq());
+    res = _readQualityBlock(qual, reader, length(seq), meta, Fastq());
+    if (res == 0 || res == EOF_BEFORE_SUCCESS)
+        return 0;
+    return res;
 }
 
 // ----------------------------------------------------------------------------

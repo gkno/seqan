@@ -272,11 +272,11 @@ inline bool
 atEnd(RecordReader<TFile, DoublePass<> > & recordReader)
 {
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
-    // There is more data if the current buffer is not exhausted.
+    // There can be more data if the current buffer is not exhausted.
     if (recordReader._current != recordReader._end)
         return false;
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
-    // There is more data if the current buffer is not the last one.
+    // There can be more data if the current buffer is not the last one.
     if (recordReader._currentBuffNo + 1 < length(recordReader._usedBuffers))
         return false;
     // std::cerr << "HAS MORE " << __LINE__ << std::endl;
@@ -300,7 +300,10 @@ atEnd(RecordReader<TFile, DoublePass<> > & recordReader)
         case 1:
             return !_fillNextBuffer(recordReader);
         case 2:
-            return !_jumpToNextBuffer(recordReader);
+            if (!_jumpToNextBuffer(recordReader))
+                return !_fillNextBuffer(recordReader);
+            else
+                return false;
         default:
             SEQAN_ASSERT_FAIL("Invalid pass no: %d", recordReader._passNo);
             return true;
