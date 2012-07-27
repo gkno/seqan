@@ -19,6 +19,9 @@
 # TODO(holtgrew): Run with different match file variants.
 
 # Output was generated on 2011-10-20 (r10627).
+# Some test files were renamed manually on 2012-07-27 but not rebuild (r12420)
+# gernerate_outputs.sh reflects these name changes (r12421) 
+
 TCOFFEE=../../../../build/Debug/core/apps/seqan_tcoffee/seqan_tcoffee
 
 # ============================================================
@@ -40,10 +43,29 @@ done
 # Run with different segment match generation options.  We run with with single
 # values and combinations of neighbours
 for file in 1aab 1ad2 2trx; do
-    for m in global local overlap lcs global,local local,overlap overlap,lcs global,lcs; do
+    for m in global local overlap lcs; do
         echo ${TCOFFEE} -m ${m} -s ${file}.fa -o ${file}.m${m}.out
         ${TCOFFEE} -m ${m} -s ${file}.fa -o ${file}.m${m}.out
     done
+    m1=global
+    m2=local
+    echo ${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
+	${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
+	
+    m1=local
+    m2=overlap	
+    echo ${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
+	${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
+	
+    m1=overlap
+    m2=lcs
+    echo ${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
+	${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
+	
+    m1=global
+    m2=lcs
+    echo ${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
+	${TCOFFEE} -m ${m1} -m ${m2} -s ${file}.fa -o ${file}.m${m1}.m${m2}.out
 done
 
 # Run with different match files variations.
