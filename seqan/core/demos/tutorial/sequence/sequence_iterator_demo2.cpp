@@ -33,7 +33,7 @@ int main() {
 	}
 // FRAGMENT(iterator-reverse)
 	goEnd(it2);
-        while (!atBegin(it2)) {
+    while (!atBegin(it2)) {
 		goPrevious(it2);
 		std::cout << getValue(it2);
 	}
