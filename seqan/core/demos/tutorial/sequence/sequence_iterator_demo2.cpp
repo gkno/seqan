@@ -10,7 +10,7 @@ using namespace seqan;
 
 int main() {
 // FRAGMENT(metafunctions)
-	Dna5String genome = "TATANNNGCGCG";
+    Dna5String genome = "TATANNNGCGCG";
 	Iterator<Dna5String >::Type it = begin(genome);
 	Iterator<Dna5String >::Type itEnd = end(genome);
 // FRAGMENT(iterators)
@@ -25,12 +25,19 @@ int main() {
 	}
 	std::cout << std::endl;
 // FRAGMENT(rooted-iterators)
-    std::cout << "3." << std::endl;
-	Iterator<Dna5String, Rooted >::Type it2 = begin(genome);
+   	Iterator<Dna5String, Rooted >::Type it2 = begin(genome);
 	for (goBegin(it2); !atEnd(it2); goNext(it2)) {
-		if (getValue(it2) == 'N')
-		    value(it2) = 'A';
+		if (getValue(it2) == 'A')
+		    std::cout << 'T';
+        else if (getValue(it2) == 'T')
+            std::cout << 'A';
+        else if (getValue(it2) == 'G')
+		    std::cout << 'C';
+        else if (getValue(it2) == 'C')
+            std::cout << 'G';
+        else std::cout << 'N';
 	}
+	std::cout << std::endl;
 // FRAGMENT(iterator-reverse)
 	goEnd(it2);
     while (!atBegin(it2)) {
