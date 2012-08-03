@@ -52,39 +52,55 @@ using namespace seqan;
 //     SEQAN_ASSERT_EQ(getCompressionFactor(sparseString), 3u);
 // }
 
+// template <typename TSparseString>
+// void sparseStringAssignGetValue(TSparseString & /*tag*/)
+// { 
+//     TSparseString sparseString;
+//     resize(sparseString, 30);
+// 
+//     assignValue(sparseString, 0, 0);
+//     assignValue(sparseString, 10, 2);
+//     assignValue(sparseString, 20, 3);
+// 
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 0), 0u);
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 10), 2u);
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 20), 3u);
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 21), DefaultValue<TSparseString>::VALUE);
+// }
+
 template <typename TSparseString>
-void sparseStringAssignGetValue(TSparseString & /*tag*/)
+void sparseStringGetValue(TSparseString & /*tag*/)
 { 
     TSparseString sparseString;
-    assignCompressionFactor(sparseString, 10u);
-    resize(sparseString, 30);
+    resize(getFibre(sparseString, FibreValueString()), 3);
 
-    assignValue(sparseString, 0, 0);
-    assignValue(sparseString, 1, 2);
-    assignValue(sparseString, 2, 3);
+    assignValue(getFibre(sparseString, FibreValueString()), 0, 0);
+    assignValue(getFibre(sparseString, FibreValueString()), 1, 2);
+    assignValue(getFibre(sparseString, FibreValueString()), 2, 3);
+
+    resize(getFibre(sparseString, FibreIndicatorString()), 30);
+    setBit(getFibre(sparseString, FibreIndicatorString()), 0, 1);
+    setBit(getFibre(sparseString, FibreIndicatorString()), 10, 1);
+    setBit(getFibre(sparseString, FibreIndicatorString()), 20, 1);
+    updateRanks_(getFibre(sparseString, FibreIndicatorString()));
 
     SEQAN_ASSERT_EQ(getValue(sparseString, 0), 0u);
-    SEQAN_ASSERT_EQ(getValue(sparseString, 1), 2u);
-    SEQAN_ASSERT_EQ(getValue(sparseString, 2), 3u);
+    SEQAN_ASSERT_EQ(getValue(sparseString, 10), 2u);
+    SEQAN_ASSERT_EQ(getValue(sparseString, 20), 3u);
+    SEQAN_ASSERT_EQ(getValue(sparseString, 21), +DefaultValue<TSparseString>::VALUE);
 }
 
 template <typename TSparseString>
 void sparseStringClearLengthResize(TSparseString & /*tag*/)
 { 
     TSparseString sparseString;
-    assignCompressionFactor(sparseString, 10u);
 
     SEQAN_ASSERT_EQ(length(sparseString), 0u);
 
     resize(sparseString, 30);
-
-    // Note that we store one more element than necessary if the compression
-    // rate is a multiple of the size. Otherwise, for a compression rate of 
-    // 11 we would only store 2 values while 3 are necessary. 
-    SEQAN_ASSERT_EQ(length(sparseString), 4u);
+    SEQAN_ASSERT_EQ(length(sparseString), 30u);
 
     clear(sparseString);
-    
     SEQAN_ASSERT_EQ(length(sparseString), 0u);
 }
 
@@ -95,7 +111,6 @@ void sparseStringEmpty(TSparseString & /*tag*/)
 
     SEQAN_ASSERT_EQ(empty(sparseString), true);
 
-    assignCompressionFactor(sparseString, 10u);
     resize(sparseString, 30);
 
     SEQAN_ASSERT_EQ(empty(sparseString), false);
@@ -108,57 +123,55 @@ template <typename TSparseString>
 void sparseStringGetFibre(TSparseString & /*tag*/)
 { 
     TSparseString sparseString;
-    assignCompressionFactor(sparseString, 3u);
 
     resize(sparseString, 3);
     SEQAN_ASSERT(getFibre(sparseString, FibreValueString()) == sparseString.valueString);
     SEQAN_ASSERT(getFibre(sparseString, FibreIndicatorString()) == sparseString.indicatorString);
 }
 
-template <typename TSparseString>
-void sparseStringValue(TSparseString & /*tag*/)
-{ 
-    typedef typename Fibre<TSparseString, FibreValueString>::Type TValueString;
-    typedef typename Value<TValueString>::Type TValue;
+// template <typename TSparseString>
+// void sparseStringValue(TSparseString & /*tag*/)
+// { 
+//     typedef typename Fibre<TSparseString, FibreValueString>::Type TValueString;
+//     typedef typename Value<TValueString>::Type TValue;
+// 
+//     TSparseString sparseString;
+//     resize(sparseString, 30);
+// 
+//     assignValue(sparseString, 0, 0);
+//     assignValue(sparseString, 1, 2);
+//     assignValue(sparseString, 2, 3);
+// 
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 0), 0u);
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 1), 2u);
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 2), 3u);
+// 
+//     TValue & temp = value(sparseString, 0);
+//     temp = 5;
+//     TValue & temp2 = value(sparseString, 2);
+//     temp2 = 10;
+// 
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 0), 5u);
+//     SEQAN_ASSERT_EQ(getValue(sparseString, 2), 10u);
+// 
+// }
 
-    TSparseString sparseString;
-    assignCompressionFactor(sparseString, 10u);
-    resize(sparseString, 30);
+// SEQAN_DEFINE_TEST(sparse_string_compression_factor)
+// {
+//     using namespace seqan;
+// 
+//     SparseString<String<unsigned int> > tag;
+// 
+//     sparseStringCompressionFactor(tag);
+// }
 
-    assignValue(sparseString, 0, 0);
-    assignValue(sparseString, 1, 2);
-    assignValue(sparseString, 2, 3);
-
-    SEQAN_ASSERT_EQ(getValue(sparseString, 0), 0u);
-    SEQAN_ASSERT_EQ(getValue(sparseString, 1), 2u);
-    SEQAN_ASSERT_EQ(getValue(sparseString, 2), 3u);
-
-    TValue & temp = value(sparseString, 0);
-    temp = 5;
-    TValue & temp2 = value(sparseString, 2);
-    temp2 = 10;
-
-    SEQAN_ASSERT_EQ(getValue(sparseString, 0), 5u);
-    SEQAN_ASSERT_EQ(getValue(sparseString, 2), 10u);
-
-}
-
-SEQAN_DEFINE_TEST(sparse_string_compression_factor)
+SEQAN_DEFINE_TEST(sparse_string_get_value)
 {
     using namespace seqan;
 
     SparseString<String<unsigned int> > tag;
 
-    sparseStringCompressionFactor(tag);
-}
-
-SEQAN_DEFINE_TEST(sparse_string_assign_get_value)
-{
-    using namespace seqan;
-
-    SparseString<String<unsigned int> > tag;
-
-    sparseStringAssignGetValue(tag);
+    sparseStringGetValue(tag);
 }
 
 SEQAN_DEFINE_TEST(sparse_string_clear_length_resize)
@@ -179,14 +192,23 @@ SEQAN_DEFINE_TEST(sparse_string_empty)
     sparseStringEmpty(tag);
 }
 
-SEQAN_DEFINE_TEST(sparse_string_value)
+SEQAN_DEFINE_TEST(sparse_string_get_fibre)
 {
     using namespace seqan;
 
     SparseString<String<unsigned int>, void > tag;
 
-    sparseStringValue(tag);
+    sparseStringEmpty(tag);
 }
+
+// SEQAN_DEFINE_TEST(sparse_string_value)
+// {
+//     using namespace seqan;
+// 
+//     SparseString<String<unsigned int>, void > tag;
+// 
+//     sparseStringValue(tag);
+// }
 
 
 

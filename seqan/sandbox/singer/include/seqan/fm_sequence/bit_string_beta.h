@@ -191,6 +191,7 @@ inline void clear(RankSupportBitString<TSpec> & bitString)
     clear(bitString.bits);
     clear(bitString.blocks);
     clear(bitString.superBlocks);
+    bitString.length_ = 0;
 }
 
 // This function returns the number of bits set in a block until a specified position
@@ -280,7 +281,13 @@ getRank(RankSupportBitString<TSpec> const & bitString, TPos const pos)
 ..param.object:
 ...type:Class.RankSupportBitString
 */
-// default in sequence_interface.h
+// template <typename TSpec, typename TPos>
+// inline bool
+// empty(RankSupportBitString<TSpec> const & bitString, TPos const pos)
+// {
+//     return 
+// }
+
 
 /**
 .Function.getBit
@@ -531,12 +538,12 @@ reserve(RankSupportBitString<TSpec> & bitString, TSize const size, Tag<TExpand> 
 ..param.object:
 ...type:Class.RankSupportBitString
 */
-template <typename TSpec, typename TLength, typename TExpand>
+template <typename TSpec, typename TLength, typename TValue, typename TExpand>
 inline typename Size<RankSupportBitString<TSpec> >::Type
-resize(RankSupportBitString<TSpec> & bitString, TLength const length_, Tag<TExpand> const tag)
+resize(RankSupportBitString<TSpec> & bitString, TLength const length_, TValue const value_, Tag<TExpand> const tag)
 {
     typedef RankSupportBitString<TSpec>                                     TRankSupportBitString;
-    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type        TFibreBits;
+    typedef typename Fibre<TRankSupportBitString, FibreBits>::Type          TFibreBits;
     typedef typename Fibre<TRankSupportBitString, FibreBlocks>::Type        TFibreBlocks;
     typedef typename Fibre<TRankSupportBitString, FibreSuperBlocks>::Type   TFibreSuperBlocks;
     typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
@@ -546,11 +553,27 @@ resize(RankSupportBitString<TSpec> & bitString, TLength const length_, Tag<TExpa
     TFibreBlocksValue bitsPerBlock_ = BitsPerValue<TFibreBitsValue>::VALUE;
     TFibreSuperBlocksValue numberOfBlocks_ = (length_ + bitsPerBlock_ - 1) / bitsPerBlock_;
 
+    TLength currentLength = length(bitString);
+
     resize(bitString.bits, numberOfBlocks_, 0, tag);
     resize(bitString.blocks, numberOfBlocks_, 0, tag);
     resize(bitString.superBlocks, (numberOfBlocks_ + bitsPerBlock_ - 1) / bitsPerBlock_, 0, tag);
 
+    if (value_ != 0 && currentLength < length_)
+    {
+        for (unsigned i = currentLength; i < (typename MakeUnsigned<TLength const>::Type)length_; ++i)
+            setBit(bitString, i, 1);
+        updateRanks_(bitString, currentLength);
+    }
+
     return bitString.length_ = length_;
+}
+
+template <typename TSpec, typename TLength, typename TExpand>
+inline typename Size<RankSupportBitString<TSpec> >::Type
+resize(RankSupportBitString<TSpec> & bitString, TLength const length_, Tag<TExpand> const tag)
+{
+    return resize(bitString, length_, 0, tag);
 }
 
 /**

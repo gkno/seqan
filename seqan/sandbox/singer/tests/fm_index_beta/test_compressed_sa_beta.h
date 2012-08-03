@@ -42,50 +42,43 @@
 
 using namespace seqan;
 
-template <typename TCompressedSA>
-void compressedSaCompressionFactor(TCompressedSA & /*tag*/)
-{ 
-    TCompressedSA compressedSA;
+// template <typename TCompressedSA>
+// void compressedSaCompressionFactor(TCompressedSA & /*tag*/)
+// { 
+//     TCompressedSA compressedSA;
+// 
+//     assignCompressionFactor(compressedSA, 3u);
+// 
+//     SEQAN_ASSERT_EQ(getCompressionFactor(compressedSA), 3u);
+// }
 
-    assignCompressionFactor(compressedSA, 3u);
-
-    SEQAN_ASSERT_EQ(getCompressionFactor(compressedSA), 3u);
-}
-
-template <typename TCompressedSA>
-void compressedSaAssignValue(TCompressedSA & /*tag*/)
-{ 
-    TCompressedSA compressedSA;
-    assignCompressionFactor(compressedSA, 10u);
-    resize(compressedSA, 30);
-
-    assignValue(compressedSA, 0, 0);
-    assignValue(compressedSA, 1, 2);
-    assignValue(compressedSA, 2, 3);
-
-    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 0), 0u);
-    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 1), 2u);
-    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 2), 3u);
-}
+// template <typename TCompressedSA>
+// void compressedSaAssignValue(TCompressedSA & /*tag*/)
+// { 
+//     TCompressedSA compressedSA;
+//     assignCompressionFactor(compressedSA, 10u);
+//     resize(compressedSA, 30);
+// 
+//     assignValue(compressedSA, 0, 0);
+//     assignValue(compressedSA, 1, 2);
+//     assignValue(compressedSA, 2, 3);
+// 
+//     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 0), 0u);
+//     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 1), 2u);
+//     SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 2), 3u);
+// }
 
 template <typename TCompressedSA>
 void compressedSaClearLengthResize(TCompressedSA & /*tag*/)
 { 
     TCompressedSA compressedSA;
-    assignCompressionFactor(compressedSA, 10u);
-
-    SEQAN_ASSERT_EQ(length(getFibre(compressedSA, FibreSparseString())), 0u);
+    SEQAN_ASSERT_EQ(length(compressedSA), 0u);
 
     resize(compressedSA, 30);
-
-    // Note that we store one more element than necessary if the compression
-    // rate is a multiple of the size. Otherwise, for a compression rate of 
-    // 11 we would only store 2 values while 3 are necessary. 
-    SEQAN_ASSERT_EQ(length(getFibre(compressedSA, FibreSparseString())), 4u);
+    SEQAN_ASSERT_EQ(length(compressedSA), 30u);
 
     clear(compressedSA);
-    
-    SEQAN_ASSERT_EQ(length(getFibre(compressedSA, FibreSparseString())), 0u);
+    SEQAN_ASSERT_EQ(length(compressedSA), 0u);
 }
 
 template <typename TCompressedSA>
@@ -95,7 +88,6 @@ void compressedSaEmpty(TCompressedSA & /*tag*/)
 
     SEQAN_ASSERT_EQ(empty(compressedSA), true);
 
-    assignCompressionFactor(compressedSA, 10u);
     resize(compressedSA, 30);
 
     SEQAN_ASSERT_EQ(empty(compressedSA), false);
@@ -108,7 +100,7 @@ template <typename TCompressedSA>
 void compressedSaCompressedSaCreate(TCompressedSA & /*tag*/)
 { 
     TCompressedSA compressedSA;
-    assignCompressionFactor(compressedSA, 3u);
+
 
     String<unsigned> fullSA;
     appendValue(fullSA, 8);
@@ -122,14 +114,14 @@ void compressedSaCompressedSaCreate(TCompressedSA & /*tag*/)
     appendValue(fullSA, 7);
     appendValue(fullSA, 3);
 
-    compressedSaCreate(compressedSA, fullSA);
+    compressedSaCreate(compressedSA, fullSA, 3u);
 
-    SEQAN_ASSERT_EQ(length(getFibre(compressedSA, FibreSparseString())), 4u);
+    SEQAN_ASSERT_EQ(length(getFibre(getFibre(compressedSA, FibreSparseString()), FibreValueString())), 4u);
 
-    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 0), 6u);
-    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 1), 9u);
-    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 2), 0u);
-    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 3), 3u);
+    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 2), 6u);
+    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 5), 9u);
+    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 7), 0u);
+    SEQAN_ASSERT_EQ(getValue(getFibre(compressedSA, FibreSparseString()), 9), 3u);
 
     typedef typename Fibre<typename Fibre<TCompressedSA, FibreSparseString>::Type, FibreIndicatorString>::Type TIndicatorString;
 
@@ -151,7 +143,6 @@ template <typename TCompressedSA>
 void compressedSaGetFibre(TCompressedSA & /*tag*/)
 { 
     TCompressedSA compressedSA;
-    assignCompressionFactor(compressedSA, 3u);
 
     resize(compressedSA, 3);
     SEQAN_ASSERT(getFibre(compressedSA, FibreSparseString()) == compressedSA.sparseString);
@@ -175,7 +166,7 @@ void compressedSaGetNextPos_(TIndex & /*tag*/)
     resize(sa, length(text));
     createSuffixArray(sa, text, Skew7());
 
-    TIndex index(text);
+    TIndex index(text, 3);
 
     unsigned pos, pos2;
     TCompressedSA & compressedSA = getFibre(index, FibreSA());
@@ -189,7 +180,7 @@ void compressedSaGetNextPos_(TIndex & /*tag*/)
         {
             pos = i;
             pos2 = pos;
-            while(compressedSA[pos] % getCompressionFactor(compressedSA))
+            while(compressedSA[pos] % 3 != 0)
             {
                 SEQAN_ASSERT(getNextPos_(compressedSA, pos) == false);
                 pos2 = lfMapping(getFibre(index, FibreLfTable()), pos2);
@@ -236,23 +227,23 @@ void compressedSaValueAccess(TIndex & /*tag*/)
 
 }
 
-SEQAN_DEFINE_TEST(compressed_sa_compression_factor)
-{
-    using namespace seqan;
+// SEQAN_DEFINE_TEST(compressed_sa_compression_factor)
+// {
+//     using namespace seqan;
+// 
+//     CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+// 
+//     compressedSaCompressionFactor(tag);
+// }
 
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
-
-    compressedSaCompressionFactor(tag);
-}
-
-SEQAN_DEFINE_TEST(compressed_sa_assign_value)
-{
-    using namespace seqan;
-
-    CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
-
-    compressedSaAssignValue(tag);
-}
+// SEQAN_DEFINE_TEST(compressed_sa_assign_value)
+// {
+//     using namespace seqan;
+// 
+//     CompressedSA<SparseString<String<unsigned int>, void >, CharString, void> tag;
+// 
+//     compressedSaAssignValue(tag);
+// }
 
 SEQAN_DEFINE_TEST(compressed_sa_clear_length_resize)
 {

@@ -66,23 +66,32 @@ SEQAN_DEFINE_TEST(test_rsbs_resize)
     TRankSupportBitString bitString;
     TFibreBlocksValue const bitsPerValue_ = BitsPerValue<TFibreBitsValue>::VALUE;
 
-    resize(bitString, 0);
+    resize(bitString, 0u);
     SEQAN_ASSERT_EQ(length(bitString), 0u);
     SEQAN_ASSERT_EQ(length(getFibre(bitString, FibreBits())), 0u);
     SEQAN_ASSERT_EQ(length(getFibre(bitString, FibreBlocks())), 0u);
     SEQAN_ASSERT_EQ(length(getFibre(bitString, FibreSuperBlocks())), 0u);
     for (unsigned i = 1; i < 100000; ++i)
     {
-        //std::cerr <<"i " << i << " " << bitsPerValue_ << " " << (i + bitsPerValue_ - 1) / bitsPerValue_ << std::endl;
-
         resize(bitString, i);
         SEQAN_ASSERT_EQ(length(bitString), i);
         SEQAN_ASSERT_EQ(length(getFibre(bitString, FibreBits())), (i + bitsPerValue_ - 1) / bitsPerValue_);
         SEQAN_ASSERT_EQ(length(getFibre(bitString, FibreBlocks())), (i + bitsPerValue_ - 1) / bitsPerValue_);
         SEQAN_ASSERT_EQ(length(getFibre(bitString, FibreSuperBlocks())), ((i + bitsPerValue_ - 1) / bitsPerValue_ + bitsPerValue_ - 1) / bitsPerValue_);
-
-
     }
+
+    resize(bitString, 0);
+    SEQAN_ASSERT_EQ(length(bitString), 0u);
+
+    resize(bitString, 100000);
+    for (unsigned i = 0; i < length(bitString); ++i)
+        SEQAN_ASSERT_EQ(getRank(bitString, i), 0u);
+    
+    resize(bitString, 200000, 1);
+    for (unsigned i = 0; i < 100000; ++i)
+        SEQAN_ASSERT_EQ(getRank(bitString, i), 0u);
+    for (unsigned i = 100000; i < length(bitString); ++i)
+        SEQAN_ASSERT_EQ(getRank(bitString, i), i - 99999);
 }
 
 SEQAN_DEFINE_TEST(test_rsbs_getBuPos)
@@ -246,7 +255,6 @@ SEQAN_DEFINE_TEST(test_rsbs_update_ranks_)
     updateRanks_(bitString, 0);
     for (unsigned i = 0 / 2 ; i < length(bitString); ++i)
     {
-        //std::cerr << i << " " << getRank(bitString, i) << " " << controlRankString[i] << std::endl;
         SEQAN_ASSERT_EQ(getRank(bitString, i), controlRankString[i]);
     }
 }

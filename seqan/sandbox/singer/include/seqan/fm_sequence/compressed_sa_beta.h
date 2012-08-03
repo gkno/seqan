@@ -118,20 +118,11 @@ class CompressedSA
 {
 public:
     TSparseString   sparseString;
-    TLfTable * lfTable;
+    TLfTable *      lfTable;
 
-    CompressedSA() :
-        sparseString(),
-        lfTable()
-    {}
+    CompressedSA(){};
 
-    CompressedSA(unsigned blockSize) :
-        sparseString(blockSize),
-        lfTable()
-    {}
-
-    CompressedSA(unsigned blockSize, TLfTable & lfTable) :
-        sparseString(blockSize),
+    CompressedSA(TLfTable & lfTable) :
         lfTable(&lfTable)
     {}
 
@@ -156,8 +147,7 @@ public:
             pos = lfMapping(*lfTable, pos);
             ++counter;
         }
-        //return getValue(sparseString, getRank(indicatorString, pos) - 1) + counter;
-        return addGapDistance_(getValue(sparseString, getRank(indicatorString, pos) - 1), counter);
+        return addGapDistance_(getValue(sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
     }
 
     template <typename TPos>
@@ -170,8 +160,7 @@ public:
             pos = lfMapping(*lfTable, pos);
             ++counter;
         }
-        //return getValue(sparseString, getRank(indicatorString, pos) - 1) + counter;
-        return addGapDistance_(getValue(sparseString, getRank(indicatorString, pos) - 1), counter);
+        return addGapDistance_(getValue(sparseString.valueString, getRank(indicatorString, pos) - 1), counter);
     }
 
     inline bool operator==(const CompressedSA & other) const
@@ -198,16 +187,16 @@ Pair<TSeqId, TPos> addGapDistance_(Pair<TSeqId, TPos> const & value, TOffSet con
 // Functions
 // ==========================================================================
 
-/**
+/*
 .Function.assignCompressionFactor
 ..param.container:The container holding the entries.
 ...type:Class.CompressedSA
 */
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TValue>
-void assignCompressionFactor(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TValue value)
-{
-    assignCompressionFactor(getFibre(compressedSA, FibreSparseString()), value);
-}
+// template <typename TSparseString, typename TLfTable, typename TSpec, typename TValue>
+// void assignCompressionFactor(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TValue value)
+// {
+//     assignCompressionFactor(getFibre(compressedSA, FibreSparseString()), value);
+// }
 
 /**
 .Function.assignValue
@@ -257,8 +246,8 @@ inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
 }
 
 // This function creates a compressed suffix array using a normal one.
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA>
-void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSA const & completeSA, unsigned offSet)
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA, typename TCompression>
+void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSA const & completeSA, TCompression const compressionFactor, unsigned offSet)
 {
     typedef CompressedSA<TSparseString, TLfTable, TSpec> TCompressedSA;
     typedef typename GetValue<TSA>::Type                            TSAValue;
@@ -271,19 +260,12 @@ void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
 
     TSize n = length(completeSA);
 
-    //resize(compressedSA, n);
-
-    for (unsigned i = 0; i < offSet; ++i)
-    {
-        appendValue(indicatorString, 0);
-    }
-
+    resize(compressedSA, offSet + n);
     for (TSize i = 0; i < n; i++)
     {
         TSAValue sa = getValue(completeSA, i);
-        (getSeqOffset(sa) % getCompressionFactor(compressedSA) == 0) ? appendValue(indicatorString, 1) : appendValue(indicatorString, 0);
+        (getSeqOffset(sa) % compressionFactor == 0) ? setBit(indicatorString, i + offSet, 1) : setBit(indicatorString, i + offSet, 0);
     }
-
     updateRanks_(indicatorString);
 
     resize(sparseString.valueString, getRank(indicatorString, length(indicatorString) - 1));
@@ -293,16 +275,16 @@ void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
     {
         if (getBit(indicatorString, i + offSet))
         {
-            assignValue(compressedSA, counter, completeSA[i]);
+            assignValue(compressedSA.sparseString.valueString, counter, completeSA[i]);
             ++counter;
         }
     }
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA>
-void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSA const & completeSA)
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA, typename TCompression>
+void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSA const & completeSA, TCompression const compressionFactor)
 {
-    compressedSaCreate(compressedSA, completeSA, 0);
+    compressedSaCreate(compressedSA, completeSA, compressionFactor, 0);
 }
 
 /**
