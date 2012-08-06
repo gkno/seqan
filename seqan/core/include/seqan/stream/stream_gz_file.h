@@ -246,10 +246,25 @@ open(Stream<GZFile> & stream, char const * filename, char const * mode)
 {
     if (stream._gzFileOwned)
         close(stream);
-    stream._gzFile = gzopen(filename, mode);
+    // TODO(holtgrew): Use constants instead of 0/1 for stdin/stdout.  A bit tricky to do such that it can be ported to Windows.
+    if (CharString(filename) == "-")  // stdin/stdout
+    {
+        int fid = 0;  // stdin
+        for (char const * ptr = mode; *ptr != '\0'; ++ptr)
+            if (*ptr == 'w')
+                fid = 1;  // stdout
+        stream._gzFile = gzdopen(fid, mode);  // attach to stdout/stdin.
+    }
+    else
+    {
+        stream._gzFile = gzopen(filename, mode);
+        stream._gzFileOwned = true;
+    }
     if (stream._gzFile == 0)
+    {
+        stream._gzFileOwned = false;
         return false;
-    stream._gzFileOwned = true;
+    }
     return true;
 }
 

@@ -266,10 +266,23 @@ open(Stream<BZ2File> & stream, char const * filename, char const * mode)
         return false;
     if (modeStr == "r" || modeStr == "w")
         appendValue(modeStr, 'b');
-    stream._underlyingFile = fopen(filename, toCString(modeStr));
-    if (stream._underlyingFile == 0)
-        return false;
     stream._rw = modeStr[0];
+    if (CharString(filename) == "-")
+    {
+        stream._fileOwned = false;
+        // TODO(holtgrew): Use constants instead of 0/1 for stdin/stdout.  A bit tricky to do such that it can be ported to Windows.
+        if (stream._rw == 'r')
+            stream._underlyingFile = stdin;
+        else
+            stream._underlyingFile = stdout;
+    }
+    else
+    {
+        stream._underlyingFile = fopen(filename, toCString(modeStr));
+        if (stream._underlyingFile == 0)
+            return false;
+        stream._fileOwned = true;
+    }
     if (stream._rw == 'w')
         stream._file = BZ2_bzWriteOpen(&stream._error, stream._underlyingFile, 7, 0, 0);
     else
@@ -278,9 +291,9 @@ open(Stream<BZ2File> & stream, char const * filename, char const * mode)
     {
         stream._file = 0;
         stream._underlyingFile = 0;
+        stream._fileOwned = false;
         return false;
     }
-    stream._fileOwned = true;
     return true;
 }
 
