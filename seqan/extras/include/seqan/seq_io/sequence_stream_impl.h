@@ -58,7 +58,9 @@ struct SeqIOFileType_
     // Used for storing the file type guess.
     enum Type
     {
+        FILE_TYPE_AUTO,
         FILE_TYPE_ERROR,
+        FILE_TYPE_TEXT_STD,  // text stdin, stdout
         FILE_TYPE_TEXT,
         FILE_TYPE_GZ,
         FILE_TYPE_BZ2
@@ -73,6 +75,7 @@ struct SeqIOFileFormat_
 {
     enum Type
     {
+        FILE_FORMAT_AUTO,
         FILE_FORMAT_ERROR,
         FILE_FORMAT_FASTA,
         FILE_FORMAT_FASTQ,
@@ -109,7 +112,10 @@ public:
 #endif  // #if SEQAN_HAS_BZIP2
     std::auto_ptr<RecordReader<String<char, MMap<> >, SinglePass<Mapped> > > _mmapReaderSinglePass;
     std::auto_ptr<RecordReader<String<char, MMap<> >, DoublePass<Mapped> > > _mmapReaderDoublePass;
+    std::auto_ptr<RecordReader<std::istream, SinglePass<> > > _istreamReader;
 
+    CharString _filename;
+    SeqIOFileFormat_::Type _fileFormat;
     SeqIOFileType_::Type _fileType;
 
     // Whether or not we are at the end of the underlying file.
@@ -117,104 +123,33 @@ public:
     // Whether or not there was no error.
     bool _isGood;
     // Whether or not we open the file for reading only.
-    bool _readMode;
+    bool _isRead;
     // Whether or not to use double pass record reader.
-    bool _doublePass;
+    bool _hintDoublePass;
 
-    SequenceStreamImpl_(CharString const & filename, SeqIOFileType_::Type fileType, bool readMode, bool doublePass = false) :
-        _fileType(fileType), _atEnd(false), _isGood(true), _readMode(readMode), _doublePass(doublePass)
+    SequenceStreamImpl_(CharString const & filename,
+                        SeqIOFileFormat_::Type fileFormat,
+                        SeqIOFileType_::Type fileType,
+                        bool isRead,
+                        bool hintDoublePass = false) :
+            _filename(filename), _fileFormat(fileFormat), _fileType(fileType), _atEnd(false), _isGood(true),
+            _isRead(isRead), _hintDoublePass(hintDoublePass)
     {
-        if (!readMode)
+        // Guess file types.
+        if (_isRead)
         {
-            // Open for writing.
-            switch (fileType)
-            {
-#if SEQAN_HAS_ZLIB
-            case SeqIOFileType_::FILE_TYPE_GZ:
-            {
-                _gzStream.reset(new Stream<GZFile>());
-                if (!open(*_gzStream, toCString(filename), "w"))
-                    _isGood = false;
-            }
-            break;
-
-#endif  // #if SEQAN_HAS_ZLIB
-#if SEQAN_HAS_BZIP2
-            case SeqIOFileType_::FILE_TYPE_BZ2:
-            {
-                _bz2Stream.reset(new Stream<BZ2File>());
-                if (!open(*_bz2Stream, toCString(filename), "w"))
-                    _isGood = false;
-            }
-            break;
-
-#endif  // #if SEQAN_HAS_BZIP2
-            case SeqIOFileType_::FILE_TYPE_TEXT:
-            default:      // Error cannot appear here.
-            {
-                _mmapString.reset(new String<char, MMap<> >());
-                if (!open(*_mmapString, toCString(filename), OPEN_CREATE | OPEN_RDWR))
-                    _isGood = false;
-            }
-            break;
-            }
+            this->_guessFileTypeAndFormatForReadingAndInitialize();
         }
         else
         {
-            // Open for reading.
-
-            // Open stream or memory mapped file and create MMap reader.
-            switch (fileType)
-            {
-            case SeqIOFileType_::FILE_TYPE_TEXT:
-            {
-                _mmapString.reset(new String<char, MMap<> >());
-                if (!open(*_mmapString, toCString(filename), OPEN_RDONLY))
-                {
-                    _isGood = false;
-                }
-                else
-                {
-                    _doublePass = doublePass;          // Only enable for MMap if set so.
-                    if (!doublePass)
-                        _mmapReaderSinglePass.reset(new RecordReader<String<char, MMap<> >, SinglePass<Mapped> >(*_mmapString));
-                    else
-                        _mmapReaderDoublePass.reset(new RecordReader<String<char, MMap<> >, DoublePass<Mapped> >(*_mmapString));
-                }
-            }
-            break;
-
-#if SEQAN_HAS_ZLIB
-            case SeqIOFileType_::FILE_TYPE_GZ:
-            {
-                _gzStream.reset(new Stream<GZFile>());
-                if (!open(*_gzStream, toCString(filename), "r"))
-                    _isGood = false;
-                else
-                    _gzReader.reset(new RecordReader<Stream<GZFile>, SinglePass<> >(*_gzStream));
-            }
-            break;
-
-#endif  // #if SEQAN_HAS_ZLIB
-#if SEQAN_HAS_BZIP2
-            case SeqIOFileType_::FILE_TYPE_BZ2:
-            {
-                _bz2Stream.reset(new Stream<BZ2File>());
-                if (!open(*_bz2Stream, toCString(filename), "r"))
-                    _isGood = false;
-                else
-                    _bz2Reader.reset(new RecordReader<Stream<BZ2File>, SinglePass<> >(*_bz2Stream));
-            }
-            break;
-
-#endif  // #if SEQAN_HAS_BZIP2
-            default:
-            {
-                _isGood = false;
-            }
-            }
+            this->_guessFileTypeAndFormatForWriting();
+            this->_initializeStreamsForWriting();
         }
     }
+
+    // -----------------------------------------------------------------------
+    // Flag Query Functions.
+    // -----------------------------------------------------------------------
 
     bool atEnd()
     {
@@ -224,6 +159,253 @@ public:
     bool isGood()
     {
         return _isGood;
+    }
+
+    // -----------------------------------------------------------------------
+    // File and Format Guessing Functions.
+    // -----------------------------------------------------------------------
+
+    // Guess file type and format for reading.  This will also create the required record reader objects etc.  The
+    // reason for interweaving this so strongly here is that we have to reuse the record reader in the case of stdin for
+    // reading.
+    void _guessFileTypeAndFormatForReadingAndInitialize()
+    {
+        // We only support reading text from stdin at the moment.  It might be hard to implement robust file format
+        // guessing from stdin since the raw GZFile and BZ2 Streams use POSIX files / FILE* at the moment.  Crossing
+        // such library boundaries will probably not work with ungetc.
+        //
+        // TODO(holtgrew): Re-implement manual decompression/compression using the zlib and bzlib consistently using one interface?
+        if (_filename == "-")
+        {
+            _fileType = SeqIOFileType_::FILE_TYPE_TEXT_STD;
+        }
+        else
+        {
+            // Read magic numbers.
+            std::fstream testStream(toCString(_filename), std::ios::binary | std::ios::in);
+            if (!testStream.good())
+            {
+                _fileType = SeqIOFileType_::FILE_TYPE_ERROR;
+                return;
+            }
+
+            char buffer[4] = { '\0', '\0', '\0', '\0' };
+            testStream.get(&buffer[0], 4);
+            if (!testStream.good())
+            {
+                _fileType = SeqIOFileType_::FILE_TYPE_ERROR;
+                return;
+            }
+
+            if (buffer[0] == '\x1F' && buffer[1] == '\x8B' && buffer[2] == '\x08')
+            {
+#if SEQAN_HAS_ZLIB
+                _fileType = SeqIOFileType_::FILE_TYPE_GZ;
+#else // #if SEQAN_HAS_ZLIB
+                std::cerr << "ERROR: File looks like .gz but zlib not available!\n";
+                _fileType = SeqIOFileType_::FILE_TYPE_ERROR;
+                return;
+#endif  // #if SEQAN_HAS_ZLIB
+            }
+            else if (buffer[0] == 'B' && buffer[1] == 'Z' && buffer[2] == 'h')
+            {
+#if SEQAN_HAS_BZIP2
+                _fileType = SeqIOFileType_::FILE_TYPE_BZ2;
+#else // #if SEQAN_HAS_BZ2
+                std::cerr << "ERROR: File looks like .bz2 but libbz2 not available!\n";
+                _fileType = SeqIOFileType_::FILE_TYPE_ERROR;
+                return;
+#endif  // #if SEQAN_HAS_BZ2
+            }
+            else
+            {
+                // Fall-back is raw text.
+                _fileType = SeqIOFileType_::FILE_TYPE_TEXT;
+            }
+        }
+
+        // Open stream or memory mapped file and create MMap reader.
+        switch (_fileType)
+        {
+        case SeqIOFileType_::FILE_TYPE_TEXT:
+        {
+            _mmapString.reset(new String<char, MMap<> >());
+            if (!open(*_mmapString, toCString(_filename), OPEN_RDONLY))
+            {
+                _isGood = false;
+            }
+            else
+            {
+                if (!_hintDoublePass)
+                {
+                    _mmapReaderSinglePass.reset(new RecordReader<String<char, MMap<> >, SinglePass<Mapped> >(*_mmapString));
+                    _fileFormat = this->_checkFormat(*_mmapReaderSinglePass);
+                }
+                else
+                {
+                    _mmapReaderDoublePass.reset(new RecordReader<String<char, MMap<> >, DoublePass<Mapped> >(*_mmapString));
+                    _fileFormat = this->_checkFormat(*_mmapReaderDoublePass);
+                }
+            }
+        }
+        break;
+
+#if SEQAN_HAS_ZLIB
+        case SeqIOFileType_::FILE_TYPE_GZ:
+        {
+            _gzStream.reset(new Stream<GZFile>());
+            if (!open(*_gzStream, toCString(_filename), "r"))
+            {
+                _isGood = false;
+            }
+            else
+            {
+                _gzReader.reset(new RecordReader<Stream<GZFile>, SinglePass<> >(*_gzStream));
+                _fileFormat = this->_checkFormat(*_gzReader);
+            }
+        }
+        break;
+
+#endif  // #if SEQAN_HAS_ZLIB
+#if SEQAN_HAS_BZIP2
+        case SeqIOFileType_::FILE_TYPE_BZ2:
+        {
+            _bz2Stream.reset(new Stream<BZ2File>());
+            if (!open(*_bz2Stream, toCString(_filename), "r"))
+            {
+                _isGood = false;
+            }
+            else
+            {
+                _bz2Reader.reset(new RecordReader<Stream<BZ2File>, SinglePass<> >(*_bz2Stream));
+                _fileFormat = this->_checkFormat(*_bz2Reader);
+            }
+        }
+        break;
+
+#endif  // #if SEQAN_HAS_BZIP2
+        case SeqIOFileType_::FILE_TYPE_TEXT_STD:
+        {
+            _istreamReader.reset(new RecordReader<std::istream, SinglePass<> >(std::cin));
+            _fileFormat = this->_checkFormat(*_istreamReader);
+        }
+
+        case SeqIOFileType_::FILE_TYPE_AUTO:
+        case SeqIOFileType_::FILE_TYPE_ERROR:
+            _fileType = SeqIOFileType_::FILE_TYPE_ERROR;
+            _fileFormat = SeqIOFileFormat_::FILE_FORMAT_ERROR;
+            break;
+        }
+
+        // Update _isGood flag from format detection errors.
+        if (_fileFormat == SeqIOFileFormat_::FILE_FORMAT_ERROR)
+            _isGood = false;
+    }
+
+    // Method used in _guessFileTypeAndFormatForReadingAndInitialize() for guessing file format from record reader.
+    template <typename TStream, typename TSpec>
+    SeqIOFileFormat_::Type _checkFormat(RecordReader<TStream, TSpec> & recordReader)
+    {
+        AutoSeqStreamFormat formatTag;
+        if (!checkStreamFormat(recordReader, formatTag))
+            return SeqIOFileFormat_::FILE_FORMAT_ERROR;
+
+        switch (formatTag.tagId)
+        {
+        case 1:
+            return SeqIOFileFormat_::FILE_FORMAT_FASTA;
+
+        case 2:
+            return SeqIOFileFormat_::FILE_FORMAT_FASTQ;
+
+        default:
+            return SeqIOFileFormat_::FILE_FORMAT_ERROR;
+        }
+    }
+
+    // Guess file type and format for writing.
+    void _guessFileTypeAndFormatForWriting()
+    {
+        CharString tmp = _filename;  // copy, we'll trim .gz/.bz2 suffix.
+
+        // Guess file type from file name if requested.
+        if (_fileType == SeqIOFileType_::FILE_TYPE_AUTO)
+        {
+            if (endsWith(tmp, ".gz"))
+            {
+                _fileType = SeqIOFileType_::FILE_TYPE_GZ;
+                tmp = prefix(tmp, length(tmp) - 3);
+            }
+            else if (endsWith(tmp, ".bz2"))
+            {
+                _fileType = SeqIOFileType_::FILE_TYPE_BZ2;
+                tmp = prefix(tmp, length(tmp) - 4);
+            }
+            else if (tmp == "-")
+            {
+                _fileType = SeqIOFileType_::FILE_TYPE_TEXT_STD;
+            }
+            else
+            {
+                _fileType = SeqIOFileType_::FILE_TYPE_TEXT;
+            }
+        }
+
+        // Guess file format from file name if requested.
+        if (_fileFormat == SeqIOFileFormat_::FILE_FORMAT_AUTO)
+        {
+            if (endsWith(tmp, ".fastq") || endsWith(tmp, ".fq"))
+                _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTQ;
+            else  // must be FASTA.
+                _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTA;
+        }
+    }
+
+    // Open the stream members for writing.
+    void _initializeStreamsForWriting()
+    {
+        // Open for writing.
+        //
+        // Note that BZ2 Stream and GZFile Stream already interpret the filename "-" correctly.
+        switch (_fileType)
+        {
+#if SEQAN_HAS_ZLIB
+            case SeqIOFileType_::FILE_TYPE_GZ:
+                {
+                    _gzStream.reset(new Stream<GZFile>());
+                    if (!open(*_gzStream, toCString(_filename), "w"))
+                        _isGood = false;
+                }
+                break;
+
+#endif  // #if SEQAN_HAS_ZLIB
+#if SEQAN_HAS_BZIP2
+            case SeqIOFileType_::FILE_TYPE_BZ2:
+                {
+                    _bz2Stream.reset(new Stream<BZ2File>());
+                    if (!open(*_bz2Stream, toCString(_filename), "w"))
+                        _isGood = false;
+                }
+                break;
+
+#endif  // #if SEQAN_HAS_BZIP2
+            case SeqIOFileType_::FILE_TYPE_TEXT:
+                {
+                    _mmapString.reset(new String<char, MMap<> >());
+                    if (!open(*_mmapString, toCString(_filename), OPEN_CREATE | OPEN_RDWR))
+                        _isGood = false;
+                }
+                break;
+
+            case SeqIOFileType_::FILE_TYPE_TEXT_STD:
+                {
+                    _isGood = std::cout.good();
+                }
+                break;
+
+            default:  // No error possible here.
+                break;
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -240,7 +422,7 @@ public:
         switch (_fileType)
         {
         case SeqIOFileType_::FILE_TYPE_TEXT:
-            if (!_doublePass)
+            if (!_hintDoublePass)
             {
                 res = seqan::readRecord(id, seq, qual, *_mmapReaderSinglePass, tag);
                 _atEnd = seqan::atEnd(*_mmapReaderSinglePass);
@@ -282,7 +464,7 @@ public:
         switch (_fileType)
         {
         case SeqIOFileType_::FILE_TYPE_TEXT:
-            if (!_doublePass)
+            if (!_hintDoublePass)
             {
                 res = seqan::readRecord(id, seq, *_mmapReaderSinglePass, tag);
                 _atEnd = seqan::atEnd(*_mmapReaderSinglePass);
@@ -342,7 +524,7 @@ public:
         switch (_fileType)
         {
         case SeqIOFileType_::FILE_TYPE_TEXT:
-            if (!_doublePass)
+            if (!_hintDoublePass)
             {
                 for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_mmapReaderSinglePass); ++i)
                 {
@@ -420,7 +602,7 @@ public:
         switch (_fileType)
         {
         case SeqIOFileType_::FILE_TYPE_TEXT:
-            if (!_doublePass)
+            if (!_hintDoublePass)
             {
                 for (unsigned i = 0; (res == 0) && (i < num) && !seqan::atEnd(*_mmapReaderSinglePass); ++i)
                 {
@@ -503,7 +685,7 @@ public:
         switch (_fileType)
         {
         case SeqIOFileType_::FILE_TYPE_TEXT:
-            if (!_doublePass)
+            if (!_hintDoublePass)
             {
                 while (!seqan::atEnd(*_mmapReaderSinglePass))
                 {
@@ -580,7 +762,7 @@ public:
         switch (_fileType)
         {
         case SeqIOFileType_::FILE_TYPE_TEXT:
-            if (!_doublePass)
+            if (!_hintDoublePass)
             {
                 while (!seqan::atEnd(*_mmapReaderSinglePass))
                 {

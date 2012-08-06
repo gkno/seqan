@@ -68,7 +68,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_recognize_file_type_text_fasta)
     append(filePath, "/extras/tests/seq_io/test_dna.fa");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     SEQAN_ASSERT(isGood(seqIO));
@@ -83,7 +83,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_recognize_file_type_gz_fasta)
     append(filePath, "/extras/tests/seq_io/test_dna.fa.gz");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     SEQAN_ASSERT(isGood(seqIO));
@@ -98,7 +98,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_recognize_file_type_bz2_fasta)
     append(filePath, "/extras/tests/seq_io/test_dna.fa.bz2");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     SEQAN_ASSERT(isGood(seqIO));
@@ -117,7 +117,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_recognize_file_format_text_fasta)
     append(filePath, "/extras/tests/seq_io/test_dna.fa");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     SEQAN_ASSERT(isGood(seqIO));
@@ -132,7 +132,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_recognize_file_format_text_fastq)
     append(filePath, "/extras/tests/seq_io/test_dna.fq");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     SEQAN_ASSERT(isGood(seqIO));
@@ -151,7 +151,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_read_record_text_fasta)
     append(filePath, "/extras/tests/seq_io/test_dna.fa");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     seqan::CharString id;
@@ -180,7 +180,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_read_batch_text_fasta)
     append(filePath, "/extras/tests/seq_io/test_dna.fa");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;
@@ -209,7 +209,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_read_all_text_fasta)
     append(filePath, "/extras/tests/seq_io/test_dna.fa");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath);
+    seqan::SequenceStream seqIO(toCString(filePath));
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;
@@ -239,7 +239,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_write_record_text_fasta)
     append(filePath, ".fa");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath, seqan::SequenceStream::WRITE);
+    seqan::SequenceStream seqIO(toCString(filePath), seqan::SequenceStream::WRITE);
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;
@@ -268,7 +268,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_write_all_text_fasta)
     append(filePath, ".fa");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath, seqan::SequenceStream::WRITE);
+    seqan::SequenceStream seqIO(toCString(filePath), seqan::SequenceStream::WRITE);
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;
@@ -297,7 +297,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_write_record_text_fastq_no_qual)
     append(filePath, ".fq");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath, seqan::SequenceStream::WRITE);
+    seqan::SequenceStream seqIO(toCString(filePath), seqan::SequenceStream::WRITE);
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;
@@ -326,7 +326,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_write_record_text_fastq_with_qual)
     append(filePath, ".fq");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath, seqan::SequenceStream::WRITE);
+    seqan::SequenceStream seqIO(toCString(filePath), seqan::SequenceStream::WRITE);
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;
@@ -359,7 +359,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_write_all_text_fastq_no_qual)
     append(filePath, ".fq");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath, seqan::SequenceStream::WRITE);
+    seqan::SequenceStream seqIO(toCString(filePath), seqan::SequenceStream::WRITE);
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;
@@ -388,7 +388,7 @@ SEQAN_DEFINE_TEST(test_seq_io_sequence_stream_write_all_text_fastq_with_qual)
     append(filePath, ".fq");
 
     // Create SequenceStream object.
-    seqan::SequenceStream seqIO(filePath, seqan::SequenceStream::WRITE);
+    seqan::SequenceStream seqIO(toCString(filePath), seqan::SequenceStream::WRITE);
 
     // Check that the file type and format are set correctly.
     seqan::StringSet<seqan::CharString> ids;

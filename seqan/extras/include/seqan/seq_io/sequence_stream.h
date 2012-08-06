@@ -164,249 +164,47 @@ public:
     // Constructor
     // -----------------------------------------------------------------------
 
-    SequenceStream(CharString const & filename, OperationMode operationMode = READ, FileFormat format = AUTO_FORMAT, FileType fileType = AUTO_TYPE) :
+    SequenceStream(char const * filename, OperationMode operationMode = READ, FileFormat format = AUTO_FORMAT, FileType fileType = AUTO_TYPE) :
         filename(filename), operationMode(operationMode), _atEnd(false), _isGood(true), _fileType(SeqIOFileType_::FILE_TYPE_TEXT),
         _fileFormat(SeqIOFileFormat_::FILE_FORMAT_FASTA)
     {
-        if (operationMode == WRITE)
+        // Translate from FileFormat to SeqIOFileFormat_::Type.
+        switch (format)
         {
-            if (fileType == AUTO_TYPE)
-            {
-                // Guess from file name.
-                if (endsWith(filename, ".gz"))
-                    _fileType = SeqIOFileType_::FILE_TYPE_GZ;
-                else if (endsWith(filename, ".bz2"))
-                    _fileType = SeqIOFileType_::FILE_TYPE_BZ2;
-                else
-                    _fileType = SeqIOFileType_::FILE_TYPE_TEXT;
-            }
-            else
-            {
-                switch (fileType)
-                {
-                case GZ:
-                    _fileType = SeqIOFileType_::FILE_TYPE_GZ;
-                    break;
-
-                case BZ2:
-                    _fileType = SeqIOFileType_::FILE_TYPE_BZ2;
-                    break;
-
-                default:      // Fall-back is plain text.
-                    _fileType = SeqIOFileType_::FILE_TYPE_TEXT;
-                    break;
-                }
-            }
-
-            if (format == AUTO_FORMAT)
-            {
-                if (endsWith(filename, ".fastq") || endsWith(filename, ".fq") || endsWith(filename, ".fastq.gz") ||
-                    endsWith(filename, ".fq.gz") || endsWith(filename, ".fastq.bz2") || endsWith(filename, ".fq.bz2"))
-                    _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTQ;
-                else
-                    _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTA;
-            }
-            else
-            {
-                switch (format)
-                {
-                case FASTQ:
-                    _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTQ;
-                    break;
-
-                default:      // Fall-back is FASTA.
-                    _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTA;
-                    break;
-                }
-            }
-
-            _impl.reset(new SequenceStreamImpl_(filename, this->_fileType, false, false));
+            case FASTQ:
+                _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTQ;
+                break;
+            case FASTA:
+                _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTA;
+                break;
+            case AUTO_FORMAT:
+                _fileFormat = SeqIOFileFormat_::FILE_FORMAT_AUTO;
+                break;
         }
-        else  // READ or READ_PERSISTENT
-        {
-            if (fileType != AUTO_TYPE)
-            {
-                switch (fileType)
-                {
-                case GZ:
-                    _fileType = SeqIOFileType_::FILE_TYPE_GZ;
-                    break;
-
-                case BZ2:
-                    _fileType = SeqIOFileType_::FILE_TYPE_BZ2;
-                    break;
-
-                default:      // Fall-back is plain text.
-                    _fileType = SeqIOFileType_::FILE_TYPE_TEXT;
-                    break;
-                }
-            }
-            else
-            {
-                // Guess file type, i.e. compressed or text file.
-                this->_fileType = this->_guessFileType(this->filename);
-                if (this->_fileType == SeqIOFileType_::FILE_TYPE_ERROR)
-                {
-                    this->_isGood = false;
-                    return;
-                }
-            }
-
-            // Guess file format.
-            if (format != AUTO_FORMAT)
-            {
-                switch (format)
-                {
-                case FASTQ:
-                    _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTQ;
-                    break;
-
-                default:      // Fall-back is FASTA.
-                    _fileFormat = SeqIOFileFormat_::FILE_FORMAT_FASTA;
-                    break;
-                }
-            }
-            else
-            {
-                this->_fileFormat = this->_guessFileFormat(filename, this->_fileType);
-                if (this->_fileFormat == SeqIOFileFormat_::FILE_FORMAT_ERROR)
-                {
-                    this->_isGood = false;
-                    return;
-                }
-            }
-
-            // Create implementation object.
-            bool doublePass = (this->_fileType == SeqIOFileType_::FILE_TYPE_TEXT && operationMode == READ_PERSISTENT);
-            _impl.reset(new SequenceStreamImpl_(filename, this->_fileType, true, doublePass));
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // Functions for Guessing File Type and Format.
-    // -----------------------------------------------------------------------
-
-    // Guess file type from file with name filename.
-    //
-    // Return SeqIOFileType_::FILE_TYPE_ERROR on any error.
-
-    SeqIOFileType_::Type _guessFileType(CharString const & filename)
-    {
-        // Read magic numbers.
-        std::fstream testStream(toCString(filename), std::ios::binary | std::ios::in);
-        if (!testStream.good())
-            return SeqIOFileType_::FILE_TYPE_ERROR;
-
-        char buffer[4] = { '\0', '\0', '\0', '\0' };
-        testStream.get(&buffer[0], 4);
-        if (!testStream.good())
-            return SeqIOFileType_::FILE_TYPE_ERROR;
-
-        if (buffer[0] == '\x1F' && buffer[1] == '\x8B' && buffer[2] == '\x08')
-        {
-#if SEQAN_HAS_ZLIB
-            return SeqIOFileType_::FILE_TYPE_GZ;
-
-#else // #if SEQAN_HAS_ZLIB
-            std::cerr << "ERROR: File looks like .gz but zlib not available!\n";
-            return SeqIOFileType_::FILE_TYPE_ERROR;
-
-#endif  // #if SEQAN_HAS_ZLIB
-        }
-
-        if (buffer[0] == 'B' && buffer[1] == 'Z' && buffer[2] == 'h')
-        {
-#if SEQAN_HAS_BZIP2
-            return SeqIOFileType_::FILE_TYPE_BZ2;
-
-#else // #if SEQAN_HAS_BZ2
-            std::cerr << "ERROR: File looks like .bz2 but libbz2 not available!\n";
-            return SeqIOFileType_::FILE_TYPE_ERROR;
-
-#endif  // #if SEQAN_HAS_BZ2
-        }
-
-        // Fall-back is raw text.
-        return SeqIOFileType_::FILE_TYPE_TEXT;
-    }
-
-    // Guess file format, given the file name and type.
-
-    SeqIOFileFormat_::Type _guessFileFormat(CharString const & filename, SeqIOFileType_::Type fileType)
-    {
-        // We need to use different kinds of streams (or a memory mapped string), depending on the file type.
+        // Translate from FileFormat to SeqIOFileFormat_::Type.
         switch (fileType)
         {
-        case SeqIOFileType_::FILE_TYPE_TEXT:
-        {
-            String<char, MMap<> > mmapString;
-            if (!open(mmapString, toCString(filename), OPEN_RDONLY))
-            {
-                this->_isGood = false;
-                return SeqIOFileFormat_::FILE_FORMAT_ERROR;
-            }
-            RecordReader<String<char, MMap<> >, SinglePass<Mapped> > reader(mmapString);
-            return this->_checkFormat(reader);
+            case AUTO_TYPE:
+                _fileType = SeqIOFileType_::FILE_TYPE_AUTO;
+                break;
+            case PLAIN_TEXT:
+                _fileType = SeqIOFileType_::FILE_TYPE_TEXT;
+                break;
+            case GZ:
+                _fileType = SeqIOFileType_::FILE_TYPE_GZ;
+                break;
+            case BZ2:
+                _fileType = SeqIOFileType_::FILE_TYPE_BZ2;
+                break;
         }
-        break;
 
-#if SEQAN_HAS_ZLIB
-        case SeqIOFileType_::FILE_TYPE_GZ:
-        {
-            Stream<GZFile> gzStream;
-            if (!open(gzStream, toCString(filename), "r"))
-            {
-                this->_isGood = false;
-                return SeqIOFileFormat_::FILE_FORMAT_ERROR;
-            }
-            RecordReader<Stream<GZFile>, SinglePass<> > reader(gzStream);
-            return this->_checkFormat(reader);
-        }
-        break;
-
-#endif  // #if SEQAN_HAS_ZLIB
-#if SEQAN_HAS_BZIP2
-        case SeqIOFileType_::FILE_TYPE_BZ2:
-        {
-            Stream<BZ2File> bz2Stream;
-            if (!open(bz2Stream, toCString(filename), "r"))
-            {
-                this->_isGood = false;
-                return SeqIOFileFormat_::FILE_FORMAT_ERROR;
-            }
-            RecordReader<Stream<BZ2File>, SinglePass<> > reader(bz2Stream);
-            return this->_checkFormat(reader);
-        }
-        break;
-
-#endif  // #if SEQAN_HAS_BZIP2
-        default:
-            return SeqIOFileFormat_::FILE_FORMAT_ERROR;
-        }
+        bool isRead = (operationMode != WRITE);
+        bool hintDoublePass = (operationMode == READ_PERSISTENT);
+        _impl.reset(new SequenceStreamImpl_(filename, _fileFormat, _fileType, isRead, hintDoublePass));
+        // Copy out, possibly detected/adjusted file type and format.
+        _fileType = _impl->_fileType;
+        _fileFormat = _impl->_fileFormat;
     }
-
-    // Guess file format, given the record reader.
-
-    template <typename TStream, typename TSpec>
-    SeqIOFileFormat_::Type _checkFormat(RecordReader<TStream, TSpec> & recordReader)
-    {
-        AutoSeqStreamFormat formatTag;
-        if (!checkStreamFormat(recordReader, formatTag))
-            return SeqIOFileFormat_::FILE_FORMAT_ERROR;
-
-        switch (formatTag.tagId)
-        {
-        case 1:
-            return SeqIOFileFormat_::FILE_FORMAT_FASTA;
-
-        case 2:
-            return SeqIOFileFormat_::FILE_FORMAT_FASTQ;
-
-        default:
-            return SeqIOFileFormat_::FILE_FORMAT_ERROR;
-        }
-    }
-
 };
 
 // ============================================================================
