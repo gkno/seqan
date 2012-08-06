@@ -598,6 +598,25 @@ inline void _checkNumericArgument(ArgParseArgument const & me, std::string const
     }
 }
 
+// ----------------------------------------------------------------------------
+// Helper Function _compareExtension()
+// ----------------------------------------------------------------------------
+
+inline bool _compareExtension(std::string const & str, std::string const & ext)
+{
+    std::string str_ext = str.substr(str.size() - ext.size());
+    for (size_t i = 0; i < str_ext.size() && i < ext.size(); ++i)
+    {
+        if (tolower(str_ext[i]) != tolower(ext[i]))
+            return false;
+    }
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+// Helper Function _checkStringRestrictions()
+// ----------------------------------------------------------------------------
+
 inline void _checkStringRestrictions(ArgParseArgument const & me, std::string const & value)
 {
     typedef std::vector<std::string>::const_iterator TVectorIterator;
@@ -615,7 +634,7 @@ inline void _checkStringRestrictions(ArgParseArgument const & me, std::string co
                 if (length(*validValue) > length(value))
                     continue;
                 else
-                    isContained |= (suffix(value, length(value) - length(*validValue)) == *validValue);
+                    isContained |= _compareExtension(value, *validValue);
             }
             else
             {

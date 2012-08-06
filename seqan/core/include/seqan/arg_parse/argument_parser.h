@@ -41,8 +41,7 @@
 #include <seqan/arg_parse/arg_parse_argument.h>
 #include <seqan/arg_parse/arg_parse_option.h>
 
-#include <seqan/misc/misc_terminal.h>
-#include <seqan/misc/tool_doc.h>
+#include <seqan/arg_parse/tool_doc.h>
 
 #include <iostream>
 #include <string>

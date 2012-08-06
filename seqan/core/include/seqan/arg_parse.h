@@ -50,6 +50,8 @@
 // ===========================================================================
 
 #include <seqan/arg_parse/arg_parse_type_support.h>
+#include <seqan/arg_parse/xml_support.h>
+#include <seqan/arg_parse/tool_doc.h>
 #include <seqan/arg_parse/arg_parse_exceptions.h>
 
 #include <seqan/arg_parse/arg_parse_argument.h>

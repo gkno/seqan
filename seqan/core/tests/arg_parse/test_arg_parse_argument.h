@@ -162,6 +162,10 @@ SEQAN_DEFINE_TEST(test_argument_valid_values)
     _assignArgumentValue(filearg, "textfile.txt");
     SEQAN_ASSERT_EQ(value(filearg.value, 0), "textfile.txt");
 
+    // different case should also work
+    _assignArgumentValue(filearg, "textfile.tXT");
+    SEQAN_ASSERT_EQ(value(filearg.value, 0), "textfile.tXT");
+    
     SEQAN_TEST_EXCEPTION(ParseException,
                          _assignArgumentValue(filearg, "not-a-validfile.qxt"),
                          "the given value 'not-a-validfile.qxt' is not in the list of allowed file extensions [*.txt, *.fasta]");

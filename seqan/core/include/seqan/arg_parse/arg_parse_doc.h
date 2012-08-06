@@ -35,9 +35,8 @@
 #ifndef SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
 #define SEQAN_CORE_INCLUDE_SEQAN_ARG_PARSE_ARG_PARSE_DOC_H_
 
+#include <seqan/arg_parse/tool_doc.h>
 #include <seqan/arg_parse/argument_parser.h>
-
-#include <seqan/misc/tool_doc.h>
 
 namespace seqan {
 
@@ -231,7 +230,7 @@ inline void setAppName(ArgumentParser & me, std::string const & name)
 /**
 .Function.setShortDescription
 ..class:Class.ArgumentParser
-..summary:Sets short description test of @Class.ArgumentParser@.
+..summary:Sets short description of the @Class.ArgumentParser@ object.
 ..cat:Miscellaneous
 ..signature:setShortDescription(parser, text)
 ..param.parser:The @Class.ArgumentParser@ object.
@@ -244,6 +243,27 @@ inline void setAppName(ArgumentParser & me, std::string const & name)
 inline void setShortDescription(ArgumentParser & me, std::string const & description)
 {
     setShortDescription(me._toolDoc, description);
+}
+
+// ----------------------------------------------------------------------------
+// Function getShortDescription()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.getShortDescription
+..class:Class.ArgumentParser
+..summary:Gets short description of @Class.ArgumentParser@.
+..cat:Miscellaneous
+..signature:getShortDescription(parser)
+..param.parser:The @Class.ArgumentParser@ object.
+...type:Class.ArgumentParser
+..returns:The short description of the @Class.ArgumentParser@ object.
+..include:seqan/arg_parse.h
+*/
+
+inline CharString getShortDescription(ArgumentParser const & me)
+{
+    return getShortDescription(me._toolDoc);
 }
 
 // ----------------------------------------------------------------------------
@@ -271,7 +291,7 @@ inline void setVersion(ArgumentParser & me, std::string const & versionString)
 }
 
 // --------------------------------------------------------------------------
-// Function getVersion()                                              ToolDoc
+// Function getVersion()
 // --------------------------------------------------------------------------
 
 /**
@@ -284,12 +304,57 @@ inline void setVersion(ArgumentParser & me, std::string const & versionString)
 ...type:Class.ArgumentParser
 ..returns:Date string.
 ...type:Shortcut.CharString
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse.h
 */
 
 inline CharString const & getVersion(ArgumentParser const & me)
 {
     return getVersion(me._toolDoc);
+}
+
+// --------------------------------------------------------------------------
+// Function setCategory()
+// --------------------------------------------------------------------------
+
+/**
+.Function.setCategory
+..class:Class.ArgumentParser
+..summary:Set tool category for @Class.ArgumentParser@ object.
+..cat:Miscellaneous
+..signature:setCategory(parser, category)
+..param.parser:The @Class.ArgumentParser@ object to set the category.
+...type:Class.ArgumentParser
+..param.category:Category to set.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/arg_parse.h
+*/
+
+inline void setCategory(ArgumentParser & parser, CharString const & category)
+{
+    setCategory(parser._toolDoc, category);
+}
+
+// --------------------------------------------------------------------------
+// Function getCategory()
+// --------------------------------------------------------------------------
+
+/**
+.Function.getCategory
+..class:Class.ArgumentParser
+..summary:Get tool category of @Class.ArgumentParser@ object.
+..cat:Miscellaneous
+..signature:getCategory(parser)
+..param.paresr:The @Class.ArgumentParser@ object to get the tool category of.
+...type:Class.ArgumentParser
+..returns:Tool category of the @Class.ArgumentParser@ object.
+...type:Shortcut.CharString
+..include:seqan/arg_parse.h
+*/
+
+inline CharString const & getCategory(ArgumentParser const & parser)
+{
+    return getCategory(parser._toolDoc);
 }
 
 // ----------------------------------------------------------------------------

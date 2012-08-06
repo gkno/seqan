@@ -38,12 +38,24 @@
 
 #include <seqan/sequence.h>
 
+#include <seqan/arg_parse/xml_support.h>
 #include <seqan/arg_parse/argument_parser.h>
 #include <seqan/arg_parse/arg_parse_doc.h>
 
 #include <fstream>
 
 namespace seqan {
+
+// ----------------------------------------------------------------------------
+// Function _join()
+// ----------------------------------------------------------------------------
+template <typename TSequence>
+inline TSequence
+_toHTML(TSequence const & sequence)
+{
+    HtmlToolDocPrinter_ docPrinter;
+    return docPrinter._toHtml(sequence);
+}
 
 // ----------------------------------------------------------------------------
 // Function _join()
@@ -55,75 +67,48 @@ namespace seqan {
  * resulting CharString
  */
 template <typename TValue>
-inline CharString
-_join(StringSet<TValue> const & v, CharString const & delimiter)
+inline std::string
+_join(std::vector<TValue> const & v, std::string const & delimiter)
 {
-    typedef typename Iterator<StringSet<TValue> const, Rooted>::Type TStringSetIterator;
+    typedef typename std::vector<TValue>::const_iterator TStringSetIterator;
 
     std::stringstream joined;
-    for (TStringSetIterator it = begin(v); it != end(v); goNext(it))
+    for (TStringSetIterator it = v.begin(); it != v.end(); ++it)
     {
-        if (it != begin(v))
+        if (it != v.begin())
             joined << delimiter;
         joined << *it;
     }
-    return CharString(joined.str());
+    return joined.str();
 }
 
 // ----------------------------------------------------------------------------
-// Function _xmlEscape()
+// Function _getPrefixedOptionName()
 // ----------------------------------------------------------------------------
 
-/**
- * make sure that the text we put into the XML does not break the XML
- * candidates are
- *  " -> &quot;
- *  ' -> &apos;
- *  & -> &amp;
- *  < -> &lt;
- *  > -> &gt;
- */
-template <typename TSequence>
-inline TSequence _xmlEscape(TSequence const & original)
+inline std::string
+_getPrefixedOptionName(ArgParseOption const & opt)
 {
-    TSequence escaped;
-    for (typename Iterator<TSequence const, Rooted>::Type ch  = begin(original); ch != end(original); goNext(ch))
-    {
-        if (value(ch) == '"')
-            append(escaped, "&quot;");
-        else if (value(ch) == '\'')
-            append(escaped, "&apos;");
-        else if (value(ch) == '&')
-            append(escaped, "&amp;");
-        else if (value(ch) == '<')
-            append(escaped, "&lt;");
-        else if (value(ch) == '>')
-            append(escaped, "&gt;");
-        else
-            append(escaped, *ch);
-    }
-    return escaped;
+    std::string optName = "";
+    if (!empty(opt.longName))
+        optName = "--" + opt.longName;
+    else
+        optName = "-" + opt.shortName;
+
+    return optName;
 }
 
-inline std::string _xmlEscape(std::string const & original)
+// ----------------------------------------------------------------------------
+// Function _getOptionName()
+// ----------------------------------------------------------------------------
+
+inline std::string
+_getOptionName(ArgParseOption const & opt)
 {
-    std::string escaped;
-    for (std::string::const_iterator ch  = original.begin(); ch != original.end(); ++ch)
-    {
-        if (*ch == '"')
-            append(escaped, "&quot;");
-        else if (*ch == '\'')
-            append(escaped, "&apos;");
-        else if (*ch == '&')
-            append(escaped, "&amp;");
-        else if (*ch == '<')
-            append(escaped, "&lt;");
-        else if (*ch == '>')
-            append(escaped, "&gt;");
-        else
-            append(escaped, *ch);
-    }
-    return escaped;
+    if (!empty(opt.longName))
+        return opt.longName;
+    else
+        return opt.shortName;
 }
 
 // ----------------------------------------------------------------------------
@@ -131,7 +116,7 @@ inline std::string _xmlEscape(std::string const & original)
 // ----------------------------------------------------------------------------
 
 inline void
-_addMinMaxRestrictions(std::vector<std::string> & restrictions, ArgParseOption const & opt)
+_addMinMaxRestrictions(std::vector<std::string> & restrictions, ArgParseArgument const & opt)
 {
 
     std::string minMaxRestriction = "";
@@ -157,7 +142,7 @@ _addMinMaxRestrictions(std::vector<std::string> & restrictions, ArgParseOption c
 // ----------------------------------------------------------------------------
 
 inline void
-_addValidValuesRestrictions(std::vector<std::string> & restrictions, ArgParseOption const & opt)
+_addValidValuesRestrictions(std::vector<std::string> & restrictions, ArgParseArgument const & opt)
 {
     if (length(opt.validValues) != 0)
     {
@@ -184,20 +169,43 @@ _addValidValuesRestrictions(std::vector<std::string> & restrictions, ArgParseOpt
 // Function _includeInCTD()
 // ----------------------------------------------------------------------------
 
-/**
+/*
  * returns true if this option should be included in the ctd
  */
 inline bool
 _includeInCTD(ArgParseOption const & opt)
 {
-    return !(opt.shortName == "h" || opt.shortName == "V" || opt.longName == "write-ctd" || (opt.shortName == "" && opt.longName == ""));
+    return !(opt.longName == "help" || opt.longName == "version" || opt.longName == "write-ctd" || opt.longName == "export-help" || (opt.shortName == "" && opt.longName == ""));
+}
+
+// ----------------------------------------------------------------------------
+// Function _indent()
+// ----------------------------------------------------------------------------
+
+std::string _indent(const int currentIndent)
+{
+    std::string indent = "";
+    for (int i = 0; i < currentIndent; ++i)
+        indent += "\t";
+    return indent;
+}
+
+void _writeCLIElement(std::ofstream & ctdfile, int currentIndent, std::string const & optionIdentifier, std::string const & ref_name, bool isList)
+{
+    ctdfile << _indent(currentIndent)
+            << "<clielement optionIdentifier=\"" << optionIdentifier
+            << "\" isList=\"" << (isList ? "true" : "false") << "\">\n";
+
+    ctdfile << _indent(currentIndent + 1) << "<mapping ref_name=\"" << ref_name << "\" />\n";
+
+    ctdfile << _indent(currentIndent) << "</clielement>\n";
 }
 
 // ----------------------------------------------------------------------------
 // Function writeCTD()
 // ----------------------------------------------------------------------------
 
-/*
+/**
 .Function.writeCTD
 ..summary:Exports the app's interface description to a .ctd file.
 ..cat:Miscellaneous
@@ -210,7 +218,11 @@ _includeInCTD(ArgParseOption const & opt)
 inline void
 writeCTD(ArgumentParser const & me)
 {
-    typedef ArgumentParser::TOptionMap::const_iterator TOptionMapIterator;
+    typedef ArgumentParser::TOptionMap::const_iterator   TOptionMapIterator;
+    typedef ArgumentParser::TArgumentMap::const_iterator TArgumentMapIterator;
+    typedef ArgumentParser::TArgumentMapSize TArgumentMapSize;
+
+    HtmlToolDocPrinter_ docPrinter;
 
     // create file [appname].ctd in working directory
     std::string ctdfilename;
@@ -220,70 +232,88 @@ writeCTD(ArgumentParser const & me)
     ctdfile.open(toCString(ctdfilename));
     ctdfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     ctdfile << "<tool status=\"external\">\n";
-    ctdfile << "\t<name>" << _xmlEscape(getAppName(me)) << "</name>\n";
-    ctdfile << "\t<version>" << _xmlEscape(getVersion(me)) << "</version>\n";
-    ctdfile << "\t<description><![CDATA[" << _xmlEscape(getAppName(me)) << ".]]></description>\n";
-    ctdfile << "\t<manual><![CDATA[" << _xmlEscape(getAppName(me)) << ".]]></manual>\n"; // TODO: as soon as we have a more sophisticated documentation embedded into the CmdParser, we should at this here
-    ctdfile << "\t<docurl>Direct links in docs</docurl>\n";
-    ctdfile << "\t<category>SeqAn - Sequence Analaysis</category>\n";
-    ctdfile << "\t<mapping><![CDATA[\n";
+
+    int currentIndent = 1;
+
+    std::string toolname(toCString(xmlEscape(getAppName(me))));
+
+    ctdfile << _indent(currentIndent) << "<name>" << toolname << "</name>\n";
+    ctdfile << _indent(currentIndent) << "<version>" << xmlEscape(getVersion(me)) << "</version>\n";
+    ctdfile << _indent(currentIndent) << "<description><![CDATA[" << xmlEscape(getShortDescription(me)) << ".]]></description>\n";
+    ctdfile << _indent(currentIndent) << "<manual><![CDATA[" << xmlEscape(getAppName(me)) << ".]]></manual>\n"; // TODO(aiche): as soon as we have a more sophisticated documentation embedded into the CmdParser, we should at this here
+    ctdfile << _indent(currentIndent) << "<docurl>Direct links in docs</docurl>\n";
+    ctdfile << _indent(currentIndent) << "<category>" << xmlEscape(getCategory(me)) << "</category>\n";
+    ctdfile << _indent(currentIndent++) << "<cli>\n";
+
+    // the unix way 1st the options
+    for (TOptionMapIterator optionMapIterator = me.optionMap.begin();
+         optionMapIterator != me.optionMap.end();
+         ++optionMapIterator)
+    {
+        ArgParseOption const & opt = *optionMapIterator;
+        std::string optionIdentifier = _getPrefixedOptionName(opt);
+        std::string refName = toolname + "." + _getOptionName(opt);
+
+        if (_includeInCTD(opt))
+        {
+            _writeCLIElement(ctdfile, currentIndent, optionIdentifier, refName, isListArgument(opt));
+        }
+    }
+
+    // add a warning to the CTD that arguments are hard to interpret by the users
+    if (me.argumentList.size() > 0)
+    {
+        ctdfile << _indent(currentIndent)
+                << "<!-- Following clielements are arguments."
+                << " You should consider providing a help text to ease understanding. -->\n";
+    }
+    // then the arguments
+    for (TArgumentMapSize argIdx = 0; argIdx != me.argumentList.size(); ++argIdx)
+    {
+        std::stringstream optionIdentifier;
+        optionIdentifier << "argument-" << argIdx;
+        std::stringstream refName;
+        refName << toolname << "." << "argument-" << argIdx;
+        _writeCLIElement(ctdfile, currentIndent, optionIdentifier.str(), refName.str(), isListArgument(me.argumentList[argIdx]));
+    }
+
+    ctdfile << _indent(--currentIndent) << "</cli>\n";
+    ctdfile << _indent(currentIndent++) << "<PARAMETERS version=\"1.3\" xsi:noNamespaceSchemaLocation=\"http://open-ms.sourceforge.net/schemas/Param_1_3.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+    ctdfile << _indent(currentIndent++) << "<NODE name=\"" << toolname << "\" description=\"???\">\n";
 
     for (TOptionMapIterator optionMapIterator = me.optionMap.begin();
          optionMapIterator != me.optionMap.end();
          ++optionMapIterator)
-    {}
-
-/*
-    for (optionMapIterator = begin(me.optionMap); optionMapIterator != end(me.optionMap); optionMapIterator++)
     {
+        ArgParseOption const & opt = *optionMapIterator;
 
-        CommandLineOption const & opt = *optionMapIterator;
-        // filter help, version and ctd_export
-        if (!_includeInCTD(opt))
-            continue;
-
-        std::string optionName = (opt.shortName != "" ? opt.shortName : opt.longName);
-        std::string flagName = (opt.shortName != "" ? "-" : "--");
-        append(flagName, optionName);
-
-        ctdfile << "<mapparam CLISwitch=\"" << flagName << "\" name=\"" << _xmlEscape(me._appName) << "." << optionName << "\"/>\n";
-    }
-*/
-    ctdfile << "]]></mapping>\n";
-    ctdfile << "\t<PARAMETERS version=\"1.3\" xsi:noNamespaceSchemaLocation=\"http://open-ms.sourceforge.net/schemas/Param_1_3.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" << std::endl;
-    ctdfile << "\t\t<NODE name=\"" << _xmlEscape(getAppName(me)) << "\" description=\"???\">" << std::endl;
-/*
-    for (optionMapIterator = begin(me.optionMap); optionMapIterator != end(me.optionMap); optionMapIterator++)
-    {
-        CommandLineOption const & opt = *optionMapIterator;
-
-        // filter help, version and ctd_export
+        // exclude help, version, etc.
         if (!_includeInCTD(opt))
             continue;
 
         // prefer short name for options
-        std::string optionName = (opt.shortName != "" ? opt.shortName : opt.longName);
+        std::string optionName = _getOptionName(opt);
 
         std::string type;
 
-        if (isStringOption(opt))
+        if (isStringArgument(opt) || isBooleanOption(opt))
             type = "string";
-        else if (isIntOption(opt))
+        else if (isIntegerArgument(opt))
             type = "int";
-        else if (isDoubleOption(opt))
+        else if (isDoubleArgument(opt))
             type = "double";
 
         // set up tags
         std::vector<std::string> tags;
-        if (isInputFile(opt))
+        if (isInputFileArgument(opt))
         {
-            appendValue(tags,"input file");
+            appendValue(tags, "input file");
         }
-        if (isOutputFile(opt))
+        if (isOutputFileArgument(opt))
         {
             appendValue(tags, "output file");
         }
-        if (isMandatory(*optionMapIterator))
+        if (isRequired(opt))
         {
             appendValue(tags, "required");
         }
@@ -294,18 +324,83 @@ writeCTD(ArgumentParser const & me)
         _addMinMaxRestrictions(restrictions, opt);
 
 
-        ctdfile << "\t\t\t<ITEM " <<
-        "name=\"" << _xmlEscape(optionName) << "\" " <<
-        "value=\"" << _xmlEscape(opt.defaultValue) << "\" " <<
-        "type=\"" << type << "\" " <<
-        "description=\"" << _xmlEscape(opt.helpText) << "\" " <<
-        "tags=\"" << _xmlEscape(_join(tags, ",")) << "\" " <<
-        "restrictions=\"" << _xmlEscape(_join(restrictions, ",")) << "\"" <<
-        "/>" << std::endl;
+        if (isListArgument(opt))
+        {
+            ctdfile << _indent(currentIndent)
+                    << "<ITEMLIST " << "name=\"" << xmlEscape(optionName) << "\" "
+                    << "type=\"" << type << "\" "
+                    << "description=\"" << xmlEscape(_toHTML(opt._helpText)) << "\" "
+                    << "tags=\"" << xmlEscape(_join(tags, ",")) << "\" "
+                    << "restrictions=\"" << xmlEscape(_join(restrictions, ",")) << "\""
+                    << ">\n";
+
+            for (size_t i = 0; i < opt.defaultValue.size(); ++i)
+            {
+                ctdfile << _indent(currentIndent + 1) << "<LISTITEM value=\"" << xmlEscape(opt.defaultValue[i]) << "\"/>\n";
+            }
+            ctdfile << _indent(currentIndent) << "</ITEMLIST>\n";
+        }
+        else
+        {
+            ctdfile << _indent(currentIndent)
+                    << "<ITEM " << "name=\"" << xmlEscape(optionName) << "\" "
+                    << "value=\"" << xmlEscape(_join(opt.defaultValue, ",")) << "\" "
+                    << "type=\"" << type << "\" "
+                    << "description=\"" << xmlEscape(_toHTML(opt._helpText)) << "\" "
+                    << "tags=\"" << xmlEscape(_join(tags, ",")) << "\" "
+                    << "restrictions=\"" << xmlEscape(_join(restrictions, ",")) << "\""
+                    << "/>\n";
+        }
     }
-*/
-    ctdfile << "\t\t</NODE>" << std::endl;
-    ctdfile << "\t</PARAMETERS>" << std::endl;
+
+    for (TArgumentMapSize argIdx = 0; argIdx != me.argumentList.size(); ++argIdx)
+    {
+        ArgParseArgument arg = me.argumentList[argIdx];
+
+        // prefer short name for options
+        std::stringstream argumentNameStream;
+        argumentNameStream << "argument-" << argIdx;
+        std::string optionName = argumentNameStream.str();
+
+        std::string type;
+
+        if (isStringArgument(arg))
+            type = "string";
+        else if (isIntegerArgument(arg))
+            type = "int";
+        else if (isDoubleArgument(arg))
+            type = "double";
+
+        // set up tags
+        std::vector<std::string> tags;
+        appendValue(tags, "required");
+        if (isInputFileArgument(arg))
+        {
+            appendValue(tags, "input file");
+        }
+        if (isOutputFileArgument(arg))
+        {
+            appendValue(tags, "output file");
+        }
+
+        // set up restrictions
+        std::vector<std::string> restrictions;
+        _addValidValuesRestrictions(restrictions, arg);
+        _addMinMaxRestrictions(restrictions, arg);
+
+
+        ctdfile << _indent(currentIndent)
+                << "<ITEM" << (isListArgument(arg) ? "LIST" : "") << " name=\"" << xmlEscape(optionName) << "\" "
+                << (isListArgument(arg) ? " " : "value=\"\" ")
+                << "type=\"" << type << "\" "
+                << "description=\"" << xmlEscape(_toHTML(arg._helpText)) << "\" " // it will be "" in most cases but we try
+                << "tags=\"" << xmlEscape(_join(tags, ",")) << "\" "
+                << "restrictions=\"" << xmlEscape(_join(restrictions, ",")) << "\""
+                << "/>\n";
+    }
+
+    ctdfile << _indent(--currentIndent) << "</NODE>\n";
+    ctdfile << _indent(--currentIndent) << "</PARAMETERS>\n";
     ctdfile << "</tool>" << std::endl;
 
     ctdfile.close();

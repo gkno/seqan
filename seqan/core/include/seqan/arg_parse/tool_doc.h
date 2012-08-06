@@ -32,12 +32,13 @@
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SEQAN_CORE_INCLUDE_MISC_TOOL_DOC_H_
-#define SEQAN_CORE_INCLUDE_MISC_TOOL_DOC_H_
+#ifndef SEQAN_CORE_INCLUDE_ARG_PARSE_TOOL_DOC_H_
+#define SEQAN_CORE_INCLUDE_ARG_PARSE_TOOL_DOC_H_
 
 #include <iterator>
 
 #include <seqan/misc/misc_terminal.h>
+#include <seqan/arg_parse/xml_support.h>
 
 namespace seqan {
 
@@ -46,8 +47,6 @@ namespace seqan {
 // ==========================================================================
 
 class ToolDoc;
-template <typename TSequence>
-inline TSequence _xmlEscape(TSequence const & original);
 inline void clearEntries(ToolDoc & doc);
 inline void append(ToolDoc & a, ToolDoc const & b);
 
@@ -242,20 +241,22 @@ public:
     }
 
     // Converts formatting with \fI, \fB, and \fP to HTML.
-    CharString _toHtml(CharString const & input) const
+    template <typename TSequence>
+    TSequence _toHtml(TSequence const & input) const
     {
-        CharString buffer = _xmlEscape(input);
-        CharString result;
-        String<CharString> openTags;
+        TSequence buffer = xmlEscape(input);
+        TSequence result;
+        String<TSequence> openTags;
 
-        typedef Iterator<CharString const, Rooted>::Type TIterator;
-        for (TIterator it = begin(input, Rooted()); !atEnd(it); goNext(it))
+        typedef typename Iterator<TSequence const>::Type TIterator;
+        TIterator endIt = end(input);
+        for (TIterator it = begin(input); it != endIt; goNext(it))
         {
             if (*it == '\\')
             {
                 // Handle escape sequence, we interpret only "\-", "\fI", and "\fB".
                 goNext(it);
-                SEQAN_ASSERT_NOT(atEnd(it));
+                SEQAN_ASSERT_NOT(it == endIt);
                 if (*it == '-')
                 {
                     appendValue(result, *it);
@@ -263,7 +264,7 @@ public:
                 else if (*it == 'f')
                 {
                     goNext(it);
-                    SEQAN_ASSERT_NOT(atEnd(it));
+                    SEQAN_ASSERT_NOT(it == endIt);
                     if (*it == 'I')
                     {
                         appendValue(openTags, "em");
@@ -575,6 +576,7 @@ setName(doc, "RazerS");
 setShortDescription(doc, "Read mapping with controllable sensitivity.");
 setDate(doc, "04 March 2012");
 setVersion(doc, "1.0");
+setCategory(doc, "Read Mapping");
 setManTitle(doc, "SeqAn Apps Reference Manual");
 
 addSection(doc, "Synopsis");
@@ -600,7 +602,7 @@ addListItem(doc, "\\fB-i\\fP, \\fB--identity\\fP \\fIIDENTITY\\fP",
             "Set minimal identity of matches to find.");
 
 print(std::cout, doc, "text");
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 
 .Memfunc.ToolDoc#ToolDoc
 ..summary:constructor
@@ -616,6 +618,7 @@ public:
     CharString _date;
     CharString _version;
     CharString _manTitle;
+    CharString _category;
     unsigned _manSection;
 
     String<ToolDocEntry_ *> _entries;
@@ -628,7 +631,7 @@ public:
     ToolDoc(ToolDoc const & toolDoc) :
         _name(toolDoc._name), _shortDescription(toolDoc._shortDescription),
         _date(toolDoc._date), _version(toolDoc._version), _manTitle(toolDoc._manTitle),
-        _manSection(1)
+        _category(toolDoc._category), _manSection(1)
     {
         append(*this, toolDoc);
     }
@@ -700,7 +703,7 @@ public:
 ..param.b:This object is appended to $b$.
 ...type:Class.ToolDoc
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void append(ToolDoc & a, ToolDoc const & b)
@@ -744,7 +747,7 @@ inline void append(ToolDoc & a, ToolDoc const & b)
 ..param.name:Name to set.
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void setName(ToolDoc & doc, CharString const & name)
@@ -760,18 +763,63 @@ inline void setName(ToolDoc & doc, CharString const & name)
 .Function.getName
 ..summary:Get tool name of @Class.ToolDoc@ object.
 ..cat:Miscellaneous
-..signature:setName(doc)
+..signature:getName(doc)
 ..class:Class.ToolDoc
-..param.doc:Tool documentation object to set the tool name of.
+..param.doc:Tool documentation object to get the tool name of.
 ...type:Class.ToolDoc
 ..returns:Tool name of documentation object.
 ...type:Shortcut.CharSTring
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline CharString const & getName(ToolDoc const & doc)
 {
     return doc._name;
+}
+
+// --------------------------------------------------------------------------
+// Function setCategory()                                             ToolDoc
+// --------------------------------------------------------------------------
+
+/**
+.Function.setCategory
+..summary:Set tool category for @Class.ToolDoc@ object.
+..cat:Miscellaneous
+..signature:setCategory(doc, category)
+..class:Class.ToolDoc
+..param.doc:Tool documentation object to set the name of.
+...type:Class.ToolDoc
+..param.category:Category to set.
+...type:Shortcut.CharString
+..returns:$void$
+..include:seqan/arg_parse/tool_doc.h
+*/
+
+inline void setCategory(ToolDoc & doc, CharString const & category)
+{
+    doc._category = category;
+}
+
+// --------------------------------------------------------------------------
+// Function getCategory()                                             ToolDoc
+// --------------------------------------------------------------------------
+
+/**
+.Function.getCategory
+..summary:Get tool category of @Class.ToolDoc@ object.
+..cat:Miscellaneous
+..signature:getCategory(doc)
+..class:Class.ToolDoc
+..param.doc:Tool documentation object to get the tool category of.
+...type:Class.ToolDoc
+..returns:Tool category of documentation object.
+...type:Shortcut.CharSTring
+..include:seqan/arg_parse/tool_doc.h
+*/
+
+inline CharString const & getCategory(ToolDoc const & doc)
+{
+    return doc._category;
 }
 
 // --------------------------------------------------------------------------
@@ -789,7 +837,7 @@ inline CharString const & getName(ToolDoc const & doc)
 ..param.description:Short description to set.
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void setShortDescription(ToolDoc & doc, CharString const & shortDescription)
@@ -811,7 +859,7 @@ inline void setShortDescription(ToolDoc & doc, CharString const & shortDescripti
 ...type:Class.ToolDoc
 ..returns:Tool description of documentation object.
 ...type:Shortcut.CharString
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline CharString const & getShortDescription(ToolDoc const & doc)
@@ -834,7 +882,7 @@ inline CharString const & getShortDescription(ToolDoc const & doc)
 ..param.date:Date string to set.
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void setDate(ToolDoc & doc, CharString const & date)
@@ -856,7 +904,7 @@ inline void setDate(ToolDoc & doc, CharString const & date)
 ...type:Class.ToolDoc
 ..returns:Date string.
 ...type:Shortcut.CharString
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline CharString const & getDate(ToolDoc const & doc)
@@ -879,7 +927,7 @@ inline CharString const & getDate(ToolDoc const & doc)
 ..param.name:Version string to set.
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void setVersion(ToolDoc & doc, CharString const & version)
@@ -901,7 +949,7 @@ inline void setVersion(ToolDoc & doc, CharString const & version)
 ...type:Class.ToolDoc
 ..returns:Date string.
 ...type:Shortcut.CharString
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline CharString const & getVersion(ToolDoc const & doc)
@@ -924,7 +972,7 @@ inline CharString const & getVersion(ToolDoc const & doc)
 ..param.title:Title string to set.
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void setManTitle(ToolDoc & doc, CharString const & title)
@@ -946,7 +994,7 @@ inline void setManTitle(ToolDoc & doc, CharString const & title)
 ...type:Class.ToolDoc
 ..returns:Man title.
 ...type:Shortcut.CharString
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline CharString const & getManTitle(ToolDoc & doc)
@@ -969,7 +1017,7 @@ inline CharString const & getManTitle(ToolDoc & doc)
 ..param.title:Section title.
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void addSection(ToolDoc & doc, CharString const & title)
@@ -992,7 +1040,7 @@ inline void addSection(ToolDoc & doc, CharString const & title)
 ..param.title:Subsection title.
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void addSubSection(ToolDoc & doc, CharString const & title)
@@ -1019,7 +1067,7 @@ inline void addSubSection(ToolDoc & doc, CharString const & title)
 ..returns:$void$
 ..remarks:See @Class.ToolDoc@ for information on formatting of text.
 ..see:Class.ToolDoc
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void addText(ToolDoc & doc, CharString const & text, bool isParagraph)
@@ -1051,7 +1099,7 @@ inline void addText(ToolDoc & doc, CharString const & text)
 ..returns:$void$
 ..remarks:You can add formatting to both $key$ and $value$. See @Class.ToolDoc@ for information on formatting of text.
 ..see:Class.ToolDoc
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void addListItem(ToolDoc & doc, CharString const & key, CharString const & value)
@@ -1076,7 +1124,7 @@ inline void addListItem(ToolDoc & doc, CharString const & key, CharString const 
 ..param.format:Format to print in. One of "html", "man", "txt".
 ...type:Shortcut.CharString
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void print(std::ostream & stream, ToolDoc const & doc, CharString const & format)
@@ -1097,7 +1145,7 @@ inline void print(std::ostream & stream, ToolDoc const & doc, CharString const &
 ..param.doc:Tool documentation object to clear.
 ...type:Class.ToolDoc
 ..returns:$void$
-..include:seqan/misc/tool_doc.h
+..include:seqan/arg_parse/tool_doc.h
 */
 
 inline void clearEntries(ToolDoc & doc)
@@ -1120,7 +1168,7 @@ void HtmlToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
            << "<html lang=\"en\">\n"
            << "<head>\n"
            << "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">\n"
-           << "<title>" << _xmlEscape(doc._name) << " &mdash; " << _xmlEscape(doc._shortDescription) << "</title>\n"
+           << "<title>" << xmlEscape(doc._name) << " &mdash; " << xmlEscape(doc._shortDescription) << "</title>\n"
            << "</head>\n"
            << "<body>\n";
 

@@ -172,7 +172,7 @@ public:
 
 inline bool isStringArgument(ArgParseOption const & me)
 {
-    return isStringArgument(me) && !me._isFlag;
+    return isStringArgument(static_cast<ArgParseArgument>(me)) && !me._isFlag;
 }
 
 // ----------------------------------------------------------------------------

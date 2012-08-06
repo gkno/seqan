@@ -612,7 +612,7 @@ SEQAN_DEFINE_TEST(test_input_file_invalid_type)
     ArgumentParser parser;
     setupInputFileParser(parser);
 
-    setValidValues(parser, "in", "FASTA fa");
+    setValidValues(parser, "in", "fa");
 
     int argc = 3;
     const char * argv[3] = {A_IN_FILE_0, A_IN_FILE_2, A_IN_FILE_3};
@@ -621,7 +621,7 @@ SEQAN_DEFINE_TEST(test_input_file_invalid_type)
     std::stringstream outputStream;
 
     SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_ERROR);
-    SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'input.fasta' is not in the list of allowed file extensions [*.FASTA, *.fa]\n");
+    SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'input.fasta' is not in the list of allowed file extensions [*.fa]\n");
     SEQAN_ASSERT_EQ(outputStream.str(), "");
 }
 
@@ -708,7 +708,7 @@ SEQAN_DEFINE_TEST(test_output_file_invalid_type)
     ArgumentParser parser;
     setupOutputFileParser(parser);
 
-    setValidValues(parser, "out", "FASTA fa");
+    setValidValues(parser, "out", "fa");
 
     int argc = 3;
     const char * argv[3] = {A_OUT_FILE_0, A_OUT_FILE_2, A_OUT_FILE_3};
@@ -717,7 +717,7 @@ SEQAN_DEFINE_TEST(test_output_file_invalid_type)
     std::stringstream outputStream;
 
     SEQAN_ASSERT_EQ(parse(parser, argc, argv, outputStream, error_stream), ArgumentParser::PARSE_ERROR);
-    SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'output.fasta' is not in the list of allowed file extensions [*.FASTA, *.fa]\n");
+    SEQAN_ASSERT_EQ(error_stream.str(), "test: the given value 'output.fasta' is not in the list of allowed file extensions [*.fa]\n");
     SEQAN_ASSERT_EQ(outputStream.str(), "");
 }
 
