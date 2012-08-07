@@ -13,15 +13,16 @@ int main(int argc, char const ** argv)
     std::fstream in(argv[1], std::ios::binary | std::ios::in);
     seqan::RecordReader<std::fstream, seqan::SinglePass<> > reader(in);
 
-    // Read file in one pass.
-    seqan::StringSet<seqan::CharString> ids;
-    seqan::StringSet<seqan::Dna5String> seqs;
-    seqan::StringSet<seqan::CharString> quals;
-    if (read2(ids, seqs, quals, reader, seqan::Fastq()) != 0)
-        return 1;  // Could not read file.
+    // Read file record-wise.
+    seqan::CharString id;
+    seqan::Dna5String seq;
+    while (!atEnd(reader))
+    {
+        if (readRecord(id, seq, reader, seqan::Fasta()) != 0)
+            return 1;  // Could not record from file.
 
-    for (unsigned i = 0; i < length(ids); ++i)
-        std::cout << ids[i] << '\t' << seqs[i] << '\t' << quals[i] << '\n';
+        std::cout << id << "\t" << seq << "\n";
+    }
     
     return 0;
 }

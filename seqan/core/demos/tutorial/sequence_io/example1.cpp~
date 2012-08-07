@@ -1,0 +1,12 @@
+#include <iostream>
+#include <fstream
+
+#include <seqan/stream.h>
+#include <seqan/sequence.h>
+
+int main()
+{
+    std::fstream
+    
+    return 0;
+}

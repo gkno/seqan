@@ -15,7 +15,7 @@ int main(int argc, char const ** argv)
 
     // Read file in one pass.
     seqan::StringSet<seqan::CharString> ids;
-    seqan::StringSet<seqan::Dna5String> seqs;
+    seqan::StringSet<seqan::CharString> seqs;
     seqan::StringSet<seqan::CharString> quals;
     if (read2(ids, seqs, quals, reader, seqan::Fastq()) != 0)
         return 1;  // Could not read file.
