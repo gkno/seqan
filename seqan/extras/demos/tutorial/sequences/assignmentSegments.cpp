@@ -5,6 +5,7 @@
 using namespace seqan;
 
 // Function to print simple alignment between two sequences with the same length
+// .. for two sequences of the same type
 template <typename TText>
 void printAlign(TText const & genomeFragment, TText const & read)
 {
@@ -14,7 +15,6 @@ void printAlign(TText const & genomeFragment, TText const & read)
         std::cout << "  read   : ";
         std::cout << read << std::endl;
 }
-
 
 int main()
 {
