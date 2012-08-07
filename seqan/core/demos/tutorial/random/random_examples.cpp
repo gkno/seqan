@@ -17,7 +17,7 @@ int main()
 
 // FRAGMENT(random-number-generation-metafunction-value)
     typedef Value<Rng<MersenneTwister> >::Type TMTValue;
-    TMTValue value = pickRandomNumber;
+    TMTValue value = pickRandomNumber(rng);
 
 // FRAGMENT(random-number-generation-pdf)
     Pdf<Uniform<double> > uniformDouble(0, 1);
