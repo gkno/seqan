@@ -38,7 +38,7 @@ int main (int argc, char const ** argv)
         // Convert ascii to values from 0..62.
         // We store DNA and quality together in Dna5Q.
         for (unsigned j = 0; j < length(qual) && j < length(seq); ++j)
-            assignQualityValue(seq[j], static_cast<int>(seqan::ordValue(qual[j]) - 33));
+            assignQualityValue(seq[j], (int)(seqan::ordValue(qual[j]) - 33));
 
         // We use reserve and append, as assign is not supported by
         // StringSet<..., Owner<ConcatDirect<> > >
