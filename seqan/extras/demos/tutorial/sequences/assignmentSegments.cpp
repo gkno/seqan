@@ -1,5 +1,6 @@
 #include <iostream>
 #include <seqan/sequence.h>
+#include <seqan/file.h>
 
 using namespace seqan;
 
@@ -9,15 +10,9 @@ void printAlign(TText const & genomeFragment, TText const & read)
 {
         std::cout <<  "Alignment " << std::endl;
         std::cout << "  genome : ";
-        for (unsigned j = 0; j < length(genomeFragment); ++j){
-            std::cout << genomeFragment[j];
-        }  
-        std::cout << std::endl;
+        std::cout << genomeFragment << std::endl;
         std::cout << "  read   : ";
-        for (unsigned j = 0; j < length(read); ++j){
-            std::cout << read[j];
-        }     
-        std::cout << std::endl;
+        std::cout << read << std::endl;
 }
 
 
