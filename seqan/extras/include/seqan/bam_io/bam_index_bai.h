@@ -276,30 +276,30 @@ getUnalignedCount(BamIndex<Bai> const & index)
 ...type:Class.BamIndex
 ..param.filename:Path to file to load.
 ...type:nolink:$char const *$
-..returns:$bool$ indicating success.
+..returns:$int$ status code, $0$ indicating success.
 ..include:seqan/bam_io.h
  */
 
-inline bool
+inline int
 read(BamIndex<Bai> & index, char const * filename)
 {
     std::fstream fin(filename, std::ios::binary | std::ios::in);
     if (!fin.good())
-        return false;  // Could not open file.
+        return 1;  // Could not open file.
 
     // Read magic number.
     CharString buffer;
     resize(buffer, 4);
     fin.read(&buffer[0], 4);
     if (!fin.good())
-        return false;
+        return 1;
     if (buffer != "BAI\1")
-        return false;  // Magic number is wrong.
+        return 1;  // Magic number is wrong.
 
     __int32 nRef = 0;
     fin.read(reinterpret_cast<char *>(&nRef), 4);
     if (!fin.good())
-        return false;
+        return 1;
 
     resize(index._linearIndices, nRef);
     resize(index._binIndices, nRef);
@@ -310,7 +310,7 @@ read(BamIndex<Bai> & index, char const * filename)
         __int32 nBin = 0;
         fin.read(reinterpret_cast<char *>(&nBin), 4);
         if (!fin.good())
-            return false;
+            return 1;
         index._binIndices[i].clear();
         BaiBamIndexBinData_ data;
         for (int j = 0; j < nBin; ++j)  // For each bin.
@@ -320,12 +320,12 @@ read(BamIndex<Bai> & index, char const * filename)
             __uint32 bin = 0;
             fin.read(reinterpret_cast<char *>(&bin), 4);
             if (!fin.good())
-                return false;
+                return 1;
 
             __int32 nChunk = 0;
             fin.read(reinterpret_cast<char *>(&nChunk), 4);
             if (!fin.good())
-                return false;
+                return 1;
             reserve(data.chunkBegEnds, nChunk);
             for (int k = 0; k < nChunk; ++k)  // For each chunk;
             {
@@ -334,7 +334,7 @@ read(BamIndex<Bai> & index, char const * filename)
                 fin.read(reinterpret_cast<char *>(&chunkBeg), 8);
                 fin.read(reinterpret_cast<char *>(&chunkEnd), 8);
                 if (!fin.good())
-                    return false;
+                    return 1;
                 appendValue(data.chunkBegEnds, Pair<__uint64>(chunkBeg, chunkEnd));
             }
 
@@ -346,7 +346,7 @@ read(BamIndex<Bai> & index, char const * filename)
         __int32 nIntv = 0;
         fin.read(reinterpret_cast<char *>(&nIntv), 4);
         if (!fin.good())
-            return false;
+            return 1;
         clear(index._linearIndices[i]);
         reserve(index._linearIndices[i], nIntv);
         for (int j = 0; j < nIntv; ++j)
@@ -354,13 +354,13 @@ read(BamIndex<Bai> & index, char const * filename)
             __uint64 ioffset = 0;
             fin.read(reinterpret_cast<char *>(&ioffset), 8);
             if (!fin.good())
-                return false;
+                return 1;
             appendValue(index._linearIndices[i], ioffset);
         }
     }
 
     if (!fin.good())
-        return false;
+        return 1;
 
     // Read (optional) number of alignments without coordinate.
     __uint64 nNoCoord = 0;
@@ -372,7 +372,7 @@ read(BamIndex<Bai> & index, char const * filename)
     }
     index._unalignedCount = nNoCoord;
 
-    return true;
+    return 0;
 }
 
 // ----------------------------------------------------------------------------
