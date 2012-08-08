@@ -248,7 +248,7 @@ jumpToPos(Stream<Bgzf> & stream, bool & hasAlignments, BamIOContext<TNameStore, 
 .Function.getUnalignedCount
 ..class:Class.BamIndex
 ..cat:BAM I/O
-..signature:load(index, filename)
+..signature:getUnalignedCount(index)
 ..summary:Query index for number of unaligned reads.
 ..param.index:Index to query.
 ...type:Class.BamIndex
@@ -263,14 +263,14 @@ getUnalignedCount(BamIndex<Bai> const & index)
 }
 
 // ----------------------------------------------------------------------------
-// Function load()
+// Function read()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.load
+.Function.read
 ..class:Class.BamIndex
 ..cat:BAM I/O
-..signature:load(index, filename)
+..signature:read(index, filename)
 ..summary:Load a BAM index from a given file name.
 ..param.index:Target data structure.
 ...type:Class.BamIndex
@@ -281,7 +281,7 @@ getUnalignedCount(BamIndex<Bai> const & index)
  */
 
 inline bool
-load(BamIndex<Bai> & index, char const * filename)
+read(BamIndex<Bai> & index, char const * filename)
 {
     std::fstream fin(filename, std::ios::binary | std::ios::in);
     if (!fin.good())
