@@ -10,7 +10,7 @@ int main()
     seqan::CharString buffer;
     resize(buffer, 1000);
 
-    while (!seqan::atEnd(in) && seqan::streamError(in) == 0)
+    while (!seqan::streamEof(in) && seqan::streamError(in) == 0)
     {
         int num = seqan::streamReadBlock(&buffer[0], in, length(buffer));
         seqan::streamWriteBlock(out, &buffer[0], num);
