@@ -212,17 +212,16 @@ void _writeCLIElement(std::ofstream & ctdfile, int currentIndent, std::string co
 ..signature:writeCTD(parser)
 ..param.parser:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
+..returns:$true$ if the ctd file could be created correctly, $false$ otherwise.
 ..include:seqan/arg_parse.h
 */
 
-inline void
+inline bool
 writeCTD(ArgumentParser const & me)
 {
     typedef ArgumentParser::TOptionMap::const_iterator   TOptionMapIterator;
     typedef ArgumentParser::TArgumentMap::const_iterator TArgumentMapIterator;
     typedef ArgumentParser::TArgumentMapSize TArgumentMapSize;
-
-    HtmlToolDocPrinter_ docPrinter;
 
     // create file [appname].ctd in working directory
     std::string ctdfilename;
@@ -230,6 +229,13 @@ writeCTD(ArgumentParser const & me)
 
     std::ofstream ctdfile;
     ctdfile.open(toCString(ctdfilename));
+
+    if (!ctdfile.is_open())
+    {
+        std::cerr << getAppName(me) << ": Unable to create ctd file: " << ctdfilename << std::endl;
+        return false;
+    }
+
     ctdfile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     ctdfile << "<tool status=\"external\">\n";
 
@@ -404,6 +410,7 @@ writeCTD(ArgumentParser const & me)
     ctdfile << "</tool>" << std::endl;
 
     ctdfile.close();
+    return true;
 }
 
 } // namespace seqan

@@ -186,8 +186,10 @@ inline ArgumentParser::ParseResult parse(ArgumentParser & me,
         }
         if (hasOption(me, "write-ctd") && isSet(me, "write-ctd"))
         {
-            writeCTD(me);
-            return ArgumentParser::PARSE_WRITE_CTD;
+            if (writeCTD(me))
+                return ArgumentParser::PARSE_WRITE_CTD;
+            else
+                return ArgumentParser::PARSE_ERROR;
         }
         if (isSet(me, "help"))
         {
@@ -207,7 +209,6 @@ inline ArgumentParser::ParseResult parse(ArgumentParser & me,
             printShortHelp(me, errorStream);
             return ArgumentParser::PARSE_HELP;
         }
-
     }
     catch (ParseException & ex)
     {
