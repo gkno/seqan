@@ -490,6 +490,8 @@ _bgzfInflateBlock(Stream<Bgzf> & stream, size_t blockLength)
 // Helper Function _bgzfReadBlock()
 // ----------------------------------------------------------------------------
 
+// Returns 0 on success, -1 on error, -2 on eof.
+
 inline int
 _bgzfReadBlock(Stream<Bgzf> & stream)
 {
@@ -510,9 +512,11 @@ _bgzfReadBlock(Stream<Bgzf> & stream)
     __int64 posBefore = tell(stream._file);
     // TODO(holtgrew): Complicated reading because File<> interface is not so good.
     bool success = read(stream._file, &header[0], sizeof(header));
+    int count = tell(stream._file) - posBefore;
+    if (!success && count == 0)
+        return -2;  // EOF.
     if (!success)  // Unnecessary, could go away when file interface changes.
         return -1; // Could not read header.
-    int count = tell(stream._file) - posBefore;
 
     // If no data could be read for the header then we are at the end of the file, this is no error.
     // TODO(holtgrew): Correct with EOF?
@@ -961,9 +965,13 @@ streamEof(Stream<Bgzf> & stream)
     // We are in read mode if we reach here.
     if (stream._blockOffset < stream._blockLength)
         return false;  // There is still stuff in the read buffer.
-    if (_bgzfReadBlock(stream) != 0)
+    int res =_bgzfReadBlock(stream);
+    if (res == -2)
+        stream._atEof = true;
+    else if (res != 0)
         SEQAN_FAIL("Error reading block in streamEof().");
-    stream._atEof = (stream._blockLength == 0);
+    else
+        stream._atEof = (stream._blockLength == 0);
     return stream._atEof;
 }
 
