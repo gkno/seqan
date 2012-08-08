@@ -7,9 +7,9 @@
 
 int main(int argc, char const ** argv)
 {
-    if (argc != 3)
+    if (argc != 2)
     {
-        std::cerr << "USAGE: " << argv[0] << " IN.bam OUT.bam\n";
+        std::cerr << "USAGE: " << argv[0] << " IN.bam\n";
         return 1;
     }
 
@@ -18,14 +18,6 @@ int main(int argc, char const ** argv)
     if (!open(inStream, argv[1], "r"))
     {
         std::cerr << "ERROR: Could not open " << argv[1] << " for reading.\n";
-        return 1;
-    }
-
-    // Open BGZF Stream for writing.
-    seqan::Stream<seqan::Bgzf> outStream;
-    if (!open(outStream, argv[2], "w"))
-    {
-        std::cerr << "ERROR: Could not open " << argv[2] << " for writing.\n";
         return 1;
     }
 
@@ -46,9 +38,9 @@ int main(int argc, char const ** argv)
     }
 
     // Write out header again.
-    if (write2(outStream, header, context, seqan::Bam()) != 0)
+    if (write2(std::cout, header, context, seqan::Sam()) != 0)
     {
-        std::cerr << "ERROR: Could not write header to BAM file " << argv[2] << "\n";
+        std::cerr << "ERROR: Could not write header to stdout.\n";
         return 1;
     }
 
