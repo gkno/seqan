@@ -71,13 +71,27 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// Tag Bai
+// ----------------------------------------------------------------------------
+
 struct Bai_;
 typedef Tag<Bai_> Bai;
+
+// ----------------------------------------------------------------------------
+// Helper Class BaiBamIndexBinData_
+// ----------------------------------------------------------------------------
+
+// Store the information of a bin.
 
 struct BaiBamIndexBinData_
 {
     String<Pair<__uint64, __uint64> > chunkBegEnds;
 };
+
+// ----------------------------------------------------------------------------
+// Spec BAI BamIndex
+// ----------------------------------------------------------------------------
 
 /**
 .Spec.BAI BamIndex
@@ -126,7 +140,7 @@ public:
 // ----------------------------------------------------------------------------
 
 /**
-.Function.jumpToPos
+.Function.BamIndex#jumpToPos
 ..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:jumpToPos(bgzfStream, hasAlignments, bamIOContext, refId, pos, bamIndex)
@@ -245,7 +259,7 @@ jumpToPos(Stream<Bgzf> & stream, bool & hasAlignments, BamIOContext<TNameStore, 
 // ----------------------------------------------------------------------------
 
 /**
-.Function.getUnalignedCount
+.Function.BamIndex#getUnalignedCount
 ..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:getUnalignedCount(index)
@@ -267,7 +281,8 @@ getUnalignedCount(BamIndex<Bai> const & index)
 // ----------------------------------------------------------------------------
 
 /**
-.Function.read
+.Function
+.BamIndex#read
 ..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:read(index, filename)
