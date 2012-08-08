@@ -11,13 +11,11 @@
 #include <seqan/basic.h>
 #include <seqan/stream.h>
 
-using namespace seqan;
-
 // FRAGMENT(open-gz)
 int openGz(char const * filename)
 {
 #if SEQAN_HAS_ZLIB
-    Stream<GZFile> f;
+    seqan::Stream<seqan::GZFile> f;
     if (!open(f, filename, "rb"))
     {
         std::cerr << "ERROR: GZip file has the wrong format!" << std::endl;
@@ -47,7 +45,7 @@ int openGz(char const * filename)
 int openBz2(char const * filename)
 {
 #if SEQAN_HAS_BZIP2
-    Stream<BZ2File> f;
+    seqan::Stream<seqan::BZ2File> f;
     if (!open(f, filename, "rb"))
     {
         std::cerr << "ERROR: BZ2 file has the wrong format!" << std::endl;
