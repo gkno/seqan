@@ -172,6 +172,29 @@ struct HasStreamFeature;
 ...type:Concept.Stream
 ..param.maxLen:maximal number of characters to read.
 ...type:nolink:$size_t$
+..returns:Number of read bytes.
+..example.text:Copying data from a std::fstream into another std::fstream using SeqAn's stream adaption.
+..example.code:
+#include <fstream>
+#include <seqan/sequence.h>
+#include <seqan/stream.h>
+
+int main()
+{
+    std::fstream in("in.txt", std::ios::binary | std::ios::in);
+    std::fstream out("out.txt", std::ios::binary | std::ios::in);
+
+    seqan::CharString buffer;
+    resize(buffer, 1000);
+
+    while (!seqan::atEnd(in) && seqan::streamError(in) == 0)
+    {
+        int num = seqan::streamReadBlock(&buffer[0], in, length(buffer));
+        seqan::streamWriteBlock(out, &buffer[0], num);
+    }
+
+    return 0;
+}
 ..see:Function.streamPeek
 ..see:Function.streamReadChar
 ..include:seqan/stream.h
@@ -192,7 +215,7 @@ struct HasStreamFeature;
 .Function.streamWriteBlock
 ..concept:Concept.Stream
 ..cat:Input/Output
-..summary:Write one character to the stream.
+..summary:Write a block of bytes from a buffer into a stream.
 ..signature:streamWriteChar(stream, source, count)
 ..param.stream:The stream object to write to.
 ...type:Concept.Stream
@@ -201,6 +224,28 @@ struct HasStreamFeature;
 ..param.count:The number of bytes to write to the stream.
 ...type:nolink:$size_t$
 ..returns:$int$ with error code, 0 on success.
+..example.text:Copying data from a std::fstream into another std::fstream using SeqAn's stream adaption.
+..example.code:
+#include <fstream>
+#include <seqan/sequence.h>
+#include <seqan/stream.h>
+
+int main()
+{
+    std::fstream in("in.txt", std::ios::binary | std::ios::in);
+    std::fstream out("out.txt", std::ios::binary | std::ios::in);
+
+    seqan::CharString buffer;
+    resize(buffer, 1000);
+
+    while (!seqan::atEnd(in) && seqan::streamError(in) == 0)
+    {
+        int num = seqan::streamReadBlock(&buffer[0], in, length(buffer));
+        seqan::streamWriteBlock(out, &buffer[0], num);
+    }
+
+    return 0;
+}
 ..see:Function.streamWriteChar
 ..include:seqan/stream.h
 
