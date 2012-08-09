@@ -1,11 +1,8 @@
 #include <iostream>
 #include <fstream>
 
-#include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/stream.h>
-
-using namespace seqan;
 
 int main(int argc, char const ** argv)
 {
@@ -15,8 +12,8 @@ int main(int argc, char const ** argv)
     if (!stream.good())
         return 1;
     
-    RecordReader<std::fstream, SinglePass<> > reader(stream);
-    StringSet<CharString> result;
+    seqan::RecordReader<std::fstream, seqan::SinglePass<> > reader(stream);
+    seqan::StringSet<seqan::CharString> result;
     
     while (!atEnd(reader))
     {
