@@ -203,7 +203,7 @@ inline ArgumentParser::ParseResult parse(ArgumentParser & me,
             printHelp(me, outputStream, format);
             return ArgumentParser::PARSE_EXPORT_HELP;
         }
-        if (argc == 1 && me.argumentList.size() > 0)
+        if (argc == 1 && (me.argumentList.size() > 0 || !_allRequiredSet(me)))
         {
             // print short help and exit
             printShortHelp(me, errorStream);
