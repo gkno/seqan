@@ -821,8 +821,10 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
          RecordReader<TFile, DoublePass<TSpec> > & reader,
          Fasta const & /*tag*/)
 {
+    int res = _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fasta());
     clear(qualities);
-    return _readFastAQ(sequenceIds, sequences, qualities, reader, false, Fasta());
+    resize(qualities, length(sequences));
+    return res;
 }
 
 /**
@@ -985,8 +987,6 @@ checkStreamFormat(RecordReader<TStream, TPass> & reader, Fastq const & /*tag*/)
     }
     return true;
 }
-
-
 
 }  // namespace seqan
 
