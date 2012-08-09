@@ -215,7 +215,7 @@ template <typename TFragmentStore, typename TSpec>
 inline typename GetValue<typename TFragmentStore::TAnnotationTypeStore>::Type
 getType(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 {
-	return getAnnoType(*it.store, it._id);
+	return getAnnoType(*it.store, getAnnotation(it).typeId);
 }
 
 template <typename TFragmentStore, typename TSpec, typename TTypeName>
