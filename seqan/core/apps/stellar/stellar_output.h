@@ -117,8 +117,9 @@ SEQAN_CHECKPOINT
 
     TSize pos = 0;
 
-    TSize dbEndPos = endPosition(row0);
-    TSize queryEndPos = endPosition(row1);
+    SEQAN_ASSERT_EQ(length(row0), length(row1));
+    TSize dbEndPos = length(row0);
+    TSize queryEndPos = length(row1);
 
     bool first = true;
     TSize readBasePos = pos + clippedBeginPosition(row1);
@@ -164,8 +165,9 @@ template<typename TRow, typename TSize>
 inline void
 _analyzeAlignment(TRow const & row0, TRow const & row1, TSize & aliLen, TSize & matches) {
 	TSize pos = 0;
-    TSize end0 = endPosition(row0);
-    TSize end1 = endPosition(row1);
+    SEQAN_ASSERT_EQ(length(row0), length(row1));
+    TSize end0 = length(row0);
+    TSize end1 = length(row1);
 
 	matches = 0;
     while ((pos < end0) && (pos < end1)) {
@@ -249,15 +251,11 @@ _writeMatchGff(TId const & databaseID,
     file << "\teps-matches";
 
     if (databaseStrand) {
-        file << "\t" << 
-			toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)) + 1;
-        file << "\t" << 
-			toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+        file << "\t" << beginPosition(row0) + beginPosition(source(row0)) + 1;
+        file << "\t" << endPosition(row0) + beginPosition(source(row0));
     } else {
-        file << "\t" << length(source(row0)) - 
-            (toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0))) + 1;
-        file << "\t" << length(source(row0)) - 
-            (toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)));
+        file << "\t" << length(source(row0)) - (endPosition(row0) + beginPosition(source(row0))) + 1;
+        file << "\t" << length(source(row0)) - (beginPosition(row0) + beginPosition(source(row0)));
     }
 
     file << "\t" << _computeIdentity(row0, row1);
@@ -271,13 +269,11 @@ _writeMatchGff(TId const & databaseID,
 
 	//file << ";seq2Length=" << length(source(row1));
 
-    file << ";seq2Range=" << 
-		toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1)) + 1;
-    file << "," << 
-		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1));
-    
+    file << ";seq2Range=" << beginPosition(row1) + beginPosition(source(row1)) + 1;
+    file << "," << endPosition(row1) + beginPosition(source(row1));
+
     if (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)
-    	file << ";eValue=" << _computeEValue(row0, row1, lengthAdjustment);
+        file << ";eValue=" << _computeEValue(row0, row1, lengthAdjustment);
 
     std::stringstream cigar, mutations;
     _getCigarLine(row0, row1, cigar, mutations);
@@ -308,11 +304,11 @@ _writeMatch(TId const & databaseID,
 	// write database positions
 	file << "Database positions: ";
 	if (databaseStrand) {
-		file << toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0));
-		file << ".." << toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+		file << beginPosition(row0) + beginPosition(source(row0));
+		file << ".." << endPosition(row0) + beginPosition(source(row0));
 	} else {
-		file << length(source(row0)) - toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0));
-		file << ".." << length(source(row0)) - toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+		file << length(source(row0)) - beginPosition(row0) + beginPosition(source(row0));
+		file << ".." << length(source(row0)) - endPosition(row0) + beginPosition(source(row0));
 	}
 	file << std::endl;
 
@@ -321,8 +317,8 @@ _writeMatch(TId const & databaseID,
 
 	// write query positions
 	file << "Query positions: ";
-	file << toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1));
-	file << ".." << toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1));
+	file << beginPosition(row1) + beginPosition(source(row1));
+	file << ".." << endPosition(row1) + beginPosition(source(row1));
 	file << std::endl;
     
     if (IsSameType<TAlphabet, Dna5>::VALUE || IsSameType<TAlphabet, Rna5>::VALUE)

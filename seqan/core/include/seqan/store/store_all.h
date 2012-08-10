@@ -1613,8 +1613,8 @@ void printAlignment(
 		set(contigGaps.data_source, store.contigStore[contigId].seq);
 		set(contigGaps.data_gaps, store.contigStore[contigId].gaps);
 //		TContigGaps	contigGaps(store.contigStore[contigId].seq, store.contigStore[contigId].gaps);
-		setBeginPosition(contigGaps, posBegin);
-		setEndPosition(contigGaps, posEnd);
+		setClippedBeginPosition(contigGaps, posBegin);
+		setClippedEndPosition(contigGaps, posEnd);
 		_printContig(stream, format, layout, contigGaps, store.contigNameStore[contigId]);
 		stream << '\n';
 	} else
@@ -1630,8 +1630,7 @@ void printAlignment(
 	TRowsIter litEnd = begin(layout.contigRows[contigId], Standard()) + lineEnd;
 	TReadSeq readSeq;
 	CharString readSeqString;
-	setBeginPosition(contigGaps, 0);
-	setEndPosition(contigGaps, _unclippedLength(contigGaps));
+    clearClipping(contigGaps);
 
 	for (TNum line = 1; lit < litEnd; ++lit, ++line)
 	{
@@ -1677,13 +1676,13 @@ void printAlignment(
 				readSeqString = readSeq;
 			
 			if ((TPos)cBegin < posBegin)
-				setBeginPosition(readGaps, posBegin - (TPos)cBegin);
+				setClippedBeginPosition(readGaps, posBegin - (TPos)cBegin);
 			else
 				for (; cursor < (TPos)cBegin; ++cursor)
 					stream << ' ';
 			
 			if (posEnd < (TPos)cEnd)
-				setEndPosition(readGaps, posEnd - (TPos)cBegin);
+				setClippedEndPosition(readGaps, posEnd - (TPos)cBegin);
 			
 			_printRead(stream, format, layout, contigGaps, readGaps, align, line);
 			cursor = cEnd;
@@ -1834,8 +1833,6 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 ////        std::cout << contigGaps << std::endl;
 ////        std::cout << readGaps << std::endl;
 ////        std::cout << std::endl;
-////        std::cout << "currentAlignment:" << std::endl;
-////        std::cout << align;
 ////        std::cout << std::endl;
 ////        std::cout << std::endl;
 ////        std::cout << std::endl;
@@ -1850,13 +1847,13 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
         // If there is a shorter alignment then there are gaps in the beginning of the read alignment row.  In this
         // case, we move the current alignment further forward in the alignedReadStore and continue to work with the
         // next one.
-        if (beginPosition(row(align, 1)) > 0u)
+        if (isGap(row(align, 1), 0))
         {
 //            std::cerr << "cBegin == " << cBegin << " beginPosition(row(align, 1)) == " << beginPosition(row(align, 1)) << std::endl;
 //            std::cerr << "id == " << it->id << ", read id == " << it->readId << std::endl;
 //            std::cerr << align << std::endl;
             // Update aligned read element.
-            cBegin += beginPosition(row(align, 1));
+            cBegin += toViewPosition(row(align, 1), 0);
             bool reverse = it->beginPos > it->endPos;
             it->beginPos = cBegin;
             it->endPos = cEnd;
@@ -1880,10 +1877,9 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 //                std::cout << "MOVE ERROR2" <<std::endl;
 //                }
             }
-//            std::cerr << "  Shifting by " << itTarget - it << std::endl;
             continue;
         }
-        SEQAN_ASSERT_EQ(beginPosition(row(align, 1)), 0u);
+        SEQAN_ASSERT_EQ(toViewPosition(row(align, 1), 0), 0u);
 
 		// 2. Skip non-overlapping matches
 		cBegin = positionSeqToGap(contigGaps, cBegin);
@@ -1896,14 +1892,15 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 				++firstOverlap;
 
 		// 3. Iterate over alignment
-		setBeginPosition(contigGaps, cBegin);
+		setClippedBeginPosition(contigGaps, cBegin);
 		
 		TContigIter cIt = begin(contigGaps);
 		TReadIter rIt = begin(readGaps);
 		typename Iterator<TGaps>::Type it1 = begin(row(align, 0));
 		typename Iterator<TGaps>::Type it2 = begin(row(align, 1));
 
-        unsigned beginLocalContigGaps = beginPosition(row(align, 0));
+        unsigned beginLocalContigGaps = toViewPosition(row(align, 0), 0);
+        //std::cerr << "CONTIG\t" << contigGaps << "\n";
 		// Heuristic (hack) for gaps in the beginning, so the following 
 		// does not happen:
 		//
@@ -1924,6 +1921,10 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 				cBegin += 1;
 			}
 		}
+		
+		// We will clip off trailing gaps in the read row.
+		unsigned charsEndPos = toViewPosition(row(align, 1), length(source(row(align, 1))));
+		setClippedEndPosition(row(align, 0), charsEndPos);
 
 //        std::cerr << "firstOverlap - theIt == " << firstOverlap - theIt << std::endl;
 //        if (firstOverlap - theIt > 0)
@@ -1931,12 +1932,11 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 //            if (_min(firstOverlap->beginPos, firstOverlap->endPos) < _max(theIt->beginPos, theIt->endPos))
 //                std::cerr << "INVARIANT DOES NOT HOLD" << std::endl;
 //        }
-        
+       
 		for (; !atEnd(cIt) && !atEnd(it1); goNext(cIt), goNext(rIt))
 		{
 			bool isGapContig = isGap(cIt);
-			bool isGapLocalContig = (beginLocalContigGaps > 0) ? true : isGap(it1);
-			if (isGapContig != isGapLocalContig)
+			if (isGapContig != isGap(it1))
 			{
 				if (isGapContig)
 				{
@@ -1990,10 +1990,7 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 				// copy gaps from alignment
 				insertGaps(rIt, 1);
 			}
-            if (beginLocalContigGaps == 0)
-                goNext(it1);
-            else
-                beginLocalContigGaps -= 1;
+            goNext(it1);
 			goNext(it2);
 		}
 
@@ -2024,6 +2021,11 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 //		if (store.readNameStore[(*it).readId] == "read3305")
 //			return;
 	}
+
+    // AlignedReadLayout layout;
+    // layoutAlignment(layout, store);
+    // std::cerr << "(int)length(store.contigStore[0].gaps) == " << (int)length(store.contigStore[0].gaps) << '\n';
+    // printAlignment(std::cout, Raw(), layout, store, 0, -10, (int)(length(store.contigStore[0].seq) * 1.1), 0, 40);
 }
 
 /**
@@ -2096,6 +2098,9 @@ void convertPairWiseToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TCon
 		TContigGapsPW		contigGapsPW(/*store.contigStore[(*it).contigId].seq, */gaps[(*it).id]);
 		TReadGaps			readGaps(store.readSeqStore[(*it).readId], (*it).gaps);
 		
+        SEQAN_ASSERT(dependent(contigGapsGlobal.data_gaps));
+        SEQAN_ASSERT(dependent(readGaps.data_gaps));
+
 		// 2. Skip non-overlapping matches
 		cBegin = positionSeqToGap(contigGapsGlobal, cBegin);
 		if (lastContigId != (*it).contigId)
@@ -2107,7 +2112,7 @@ void convertPairWiseToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TCon
 				++firstOverlap;
 
 		// 3. Iterate over alignment
-		setBeginPosition(contigGapsGlobal, cBegin);
+		setClippedBeginPosition(contigGapsGlobal, cBegin);
 
 		TContigGlobalIter cIt = begin(contigGapsGlobal);
 		TContigPWIter pIt = begin(contigGapsPW);
