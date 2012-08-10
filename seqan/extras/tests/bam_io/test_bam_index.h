@@ -49,7 +49,7 @@ SEQAN_DEFINE_TEST(test_bam_io_bam_index_bai)
     append(baiFilename, "/extras/tests/bam_io/small.bam.bai");
 
     BamIndex<Bai> baiIndex;
-    SEQAN_ASSERT(load(baiIndex, toCString(baiFilename)));
+    SEQAN_ASSERT_EQ(read(baiIndex, toCString(baiFilename)), 0);
 
     SEQAN_ASSERT_EQ(length(baiIndex._binIndices), 1u);
     SEQAN_ASSERT_EQ(baiIndex._binIndices[0].size(), 2u);

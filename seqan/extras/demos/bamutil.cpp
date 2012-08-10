@@ -233,7 +233,7 @@ int _dumpRegion(TInStreamOrRecordReader & in, TOutStream & out, Bam const & /*ba
 
     // Dump each region after loading the index.
     BamIndex<Bai> bamIndex;
-    if (!load(bamIndex, toCString(options.baiFile)))
+    if (read(bamIndex, toCString(options.baiFile)) != 0)
     {
         std::cerr << "[ERROR] Could not open index file " << options.baiFile << ", required when specifying regions." << std::endl;
         return 1;

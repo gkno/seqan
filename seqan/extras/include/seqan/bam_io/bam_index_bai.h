@@ -390,6 +390,14 @@ read(BamIndex<Bai> & index, char const * filename)
     return 0;
 }
 
+// TODO(holtgrew): This is only here because of the read() function with TSequence in old file.h.
+
+inline int
+read(BamIndex<Bai> & index, char * filename)
+{
+    return read(index, static_cast<char const *>(filename));
+}
+
 // ----------------------------------------------------------------------------
 // Function buildIndex()
 // ----------------------------------------------------------------------------
