@@ -701,25 +701,6 @@ readUntilWhitespace(TBuffer & buffer,
                        Whitespace_());
 }
 
-/* OLD FUNCTION
-template<typename TFile, typename TChar>
-inline String<char>
-_parseReadWordUntilWhitespace(TFile& file, TChar& c)
-{
-    String<char> str(c);
-    if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
-        c = _streamGet(file);
-        return str;
-    }
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
-        appendValues(str, c);
-    }
-    return str;
-}*/
-
-
 /**
 .Function.readUntilBlank
 ..class:Class.RecordReader
@@ -1036,6 +1017,7 @@ skipUntilWhitespace(RecordReader<TStream, TPass> & reader)
 ..see:Enum.TokenizeResult
 ..see:Function.readUntilBlank
  */
+
 template <typename TStream, typename TPass>
 inline int
 skipUntilBlank(RecordReader<TStream, TPass> & reader)
@@ -1043,16 +1025,6 @@ skipUntilBlank(RecordReader<TStream, TPass> & reader)
     SEQAN_CHECKPOINT
     return _skipHelper(reader, Blank_());
 }
-/* OLD FUNCTION
-template <typename TIterator>
-inline bool
-_seekWhiteSpace(TIterator &it, TIterator itEnd)
-{
-    while (!_isWhiteSpace(*it))
-        if (++it == itEnd) return false;
-    return true;
-}*/
-
 
 /**
 .Function.skipUntilGraph
@@ -1079,18 +1051,6 @@ skipUntilGraph(RecordReader<TStream, TPass> & reader)
     SEQAN_CHECKPOINT
     return _skipHelper(reader, Graph_());
 }
-/* OLD FUNCTION, note that old function has wrong name -> see isgraph()
-template<typename TFile, typename TChar>
-inline void 
-_parseSkipWhitespace(TFile& file, TChar& c)
-{
-    if ((unsigned) c > 32) return;
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if ((unsigned) c > 32) break;
-    }
-}*/
-
 
 /**
 .Function.skipUntilChar
@@ -1130,49 +1090,6 @@ skipUntilChar(RecordReader<TStream, TPass> & reader,
     }
     return EOF_BEFORE_SUCCESS;
 }
-
-/* OLD FUNCTION
-template<typename TFile, typename TChar>
-inline void 
-_parseSkipUntilChar(TFile& file, const TChar &x, TChar& c)
-{
-    if (c == x) return;
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if (c == x) break;
-    }
-}
-
-2nd OLD FUNCTION
-
-template<typename TFile, typename TChar>
-inline bool
-_parseUntil(TFile & file, TChar& c, TChar x)
-{
-SEQAN_CHECKPOINT
-    typename Position<TFile>::Type pos = _streamTellG(file);
-    TChar c_before = c;
-    while (!_streamEOF(file) && c != x){
-        c = _streamGet(file);
-    }
-    if(!_streamEOF(file)) return true;
-    _streamSeekG(file,pos);
-    c = c_before;
-    return false;
-}
-
-can also replace things like:
-template <typename TIterator>
-inline bool
-_seekTab(TIterator& it, TIterator itEnd)
-{
-    for (; it != itEnd; ++it)
-        if (*it == '\t') return true;
-    return false;
-}
-
-*/
-
 
 /**
 .Function.skipUntilString
@@ -1218,26 +1135,6 @@ skipUntilString(RecordReader<TStream, TPass> & reader,
      * directly and doesnt read (and possibly discard) N charecters in a row,
      * which definitely leads to misses. */
 }
-/* OLD FUNCTION
-template<typename TFile, typename TChar, typename TSize>
-inline bool
-_parseUntil(TFile & file, TChar& c, String<TChar> & word, TSize len)
-{
-//IOREV _nodoc_ _hasCRef_ _requiresSeek_ does "reset" if word not found
-SEQAN_CHECKPOINT
-    typename Position<TFile>::Type pos = _streamTellG(file);
-    TChar c_before = c;
-    while (!_streamEOF(file)){
-        if(c == word[0])
-            if(word == _parseReadWord(file,c,len))
-                break;
-        c = _streamGet(file);
-    }
-    if(!_streamEOF(file)) return true;
-    _streamSeekG(file,pos);
-    c = c_before;
-    return false;
-}*/
 
 /**
 .Function.readUntilTabOrLineBreak
@@ -1303,20 +1200,6 @@ readLetters(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
                        Alpha_(),
                        false);
 }
-/* OLD FUNCTION, note that it has a wrong name (word is usually alphanum)
-template<typename TFile, typename TChar>
-inline String<char>
-_parseReadWord(TFile & file, TChar& c)
-{
-    // Read word
-    String<char> str(c);
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if (!_parseIsLetter(c)) break;
-        appendValue(str, c);
-    }
-    return str;
-}*/
 
 /**
 .Function.readDigits
@@ -1450,19 +1333,6 @@ readAlphaNums(TBuffer & buffer, RecordReader<TStream, TPass> & reader)
                        AlphaNum_(),
                        false);
 }
-/* OLD FUNCTION 
-template<typename TFile, typename TString, typename TChar>
-inline void
-_parseReadIdentifier(TFile & file, TString& str, TChar& c)
-{
-    // Read identifier
-    appendValue(str, c, Generous());
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if (!_parseIsAlphanumericChar(c)) break;
-        appendValue(str, c, Generous());
-    }
-}*/
 
 /**
 .Function.readIdentifier
@@ -1575,34 +1445,6 @@ skipBlanks(RecordReader<TStream, TPass> & reader)
     return _skipHelper(reader, Blank_(), false);
 }
 
-/* OLD FUNCTION, note that it has a wrong name
-template<typename TFile, typename TChar>
-inline void 
-_parseSkipSpace(TFile& file, TChar& c)
-{
-    if (c != '\t' && c != ' ') return;
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if (c != '\t' && c != ' ') break;
-    }
-}
-
-2nd OLD FUNCTION
-
-template<typename TFile, typename TChar>
-inline void 
-_parseSkipBlanks(TFile& file, TChar& c)
-{
-    if ((c != ' ') && (c != '\t')) return;
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if ((c != ' ') && (c != '\t')) break;
-    }
-}
-
-*/
-
-
 /**
 .Function.readLine
 ..class:Class.RecordReader
@@ -1686,34 +1528,6 @@ readLineStripTrailingBlanks(TBuffer & buffer,
         resize(buffer, pos+1, Exact());
     return 0;
 }
-/* OLD FUNCTION
-template<typename TFile, typename TChar>
-inline String<char>
-_parseReadFilepath(TFile& file, TChar& c)
-{
-//IOREV _nodoc_ _hasCRef_ _requiresSeek_ rename to something more generic _parseLineStripTrailingWhitespace; simplify code
-    String<char> str(c);
-    if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
-        c = _streamGet(file);
-        return str;
-    }
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
-        appendValue(str, c);
-    }
-    typename Iterator<String<char>,Rooted >::Type str_it = end(str);    
-    while(str_it != begin(str)) {
-        --str_it;
-        if(*str_it != ' ' && *str_it != '\t'){
-        ++str_it;
-        break;
-        }
-    }
-    resize(str,position(str_it));
-    return str;
-}*/
-
 
 /**
 .Function.skipLine
@@ -1747,23 +1561,6 @@ skipLine(RecordReader<TStream, TPass> & reader)
 
     return resultCode(reader);
 }
-
-/* OLD FUNCTION
-template<typename TFile, typename TChar>
-inline void 
-_parseSkipLine(TFile& file, TChar& c)
-{
-//IOREV _nodoc_ _hasCRef_ treats \n as EOL 
-    if (c == '\n') {
-        c = _streamGet(file);
-        return;
-    }
-    while (!_streamEOF(file)) {
-        c = _streamGet(file);
-        if (c == '\n') break;
-    }
-    c = _streamGet(file);
-}*/
 
 /**
 .Function.countLine
@@ -1877,29 +1674,6 @@ skipUntilLineBeginsWithChar(RecordReader<TStream, TPass> & reader,
     return r;
 }
 
-/* OLD FUNCTION
-/////////////////////////////////////////////////////////////////////////////////
-//parse until line begins with character x (skip whitespaces)
-// zeigt am ende darauf!!!
-template<typename TFile, typename TChar>
-inline bool
-_parseUntilBeginLine(TFile & file, TChar& c, TChar x)
-{
-//IOREV _nodoc_ _hasCRef_ _requiresSeek_ rename to something more understandable; does a "reset", if seek fails; unify behaviour and doc with similar functions
-SEQAN_CHECKPOINT
-    _parseSkipWhitespace(file,c);
-    typename Position<TFile>::Type pos = _streamTellG(file);
-    TChar c_before = c;
-    while (!_streamEOF(file) && c != x){
-        _parseSkipLine(file, c);
-        _parseSkipWhitespace(file,c);
-    }
-    if(!_streamEOF(file)) return true;
-    _streamSeekG(file,pos);
-    c = c_before;
-    return false;
-}*/
-
 /**
 .Function.skipUntilLineBeginsWithStr
 ..class:Class.RecordReader
@@ -1946,31 +1720,6 @@ skipUntilLineBeginsWithStr(RecordReader<TStream, TPass> & reader,
         return EOF_BEFORE_SUCCESS;
     return r;
 }
-/* OLD FUNCTION 
-/////////////////////////////////////////////////////////////////////////////////
-//parse until line begins with word
-//zeigt am ende dahinter!
-template<typename TFile, typename TChar, typename TSize>
-inline bool
-_parseUntilBeginLine(TFile & file, TChar& c, String<TChar> & word, TSize len)
-{
-//IOREV _nodoc_ _hasCRef_ _requiresSeek_ rename to something more understandable; does a "reset", if seek fails; unify behaviour and doc with similar functions
-SEQAN_CHECKPOINT
-    _parseSkipWhitespace(file,c);
-    typename Position<TFile>::Type pos = _streamTellG(file);
-    TChar c_before = c;
-    while (!_streamEOF(file)){
-        if(c == word[0])
-            if(word == _parseReadWord(file,c,len))
-                break;
-        _parseSkipLine(file, c);
-        _parseSkipWhitespace(file,c);
-    }
-    if(!_streamEOF(file)) return true;
-    _streamSeekG(file,pos);
-    c = c_before;
-    return false;
-}*/
 
 /**
 .Function.skipUntilLineBeginsWithOneCharOfStr
@@ -2019,38 +1768,6 @@ skipUntilLineBeginsWithOneCharOfStr(RecordReader<TStream, TPass> & reader,
         return EOF_BEFORE_SUCCESS;
     return r;
 }
-/* OLD FUNCTION:
-/////////////////////////////////////////////////////////////////////////////////
-//parse until line begins with one of the characters in string x (skip whitespaces)
-//zeigt am ende darauf!
-template<typename TFile, typename TChar, typename TSize>
-inline bool
-_parseUntilBeginLineOneOf(TFile & file, TChar& c, String<TChar> & x, TSize len)
-{
-//IOREV _nodoc_ _hasCRef_ _requiresSeek_ rename to something more understandable; does a "reset", if seek fails; unify behaviour and doc with similar functions
-SEQAN_CHECKPOINT
-    _parseSkipWhitespace(file,c);
-    typename Position<TFile>::Type pos = _streamTellG(file);
-    TChar c_before = c;
-    bool found = false;
-    while (!_streamEOF(file)){
-        for(int i = 0; i < len; ++i)
-            if(c == x[i])
-            {
-                found = true;
-                break;
-            }
-        if(found) break;
-        _parseSkipLine(file, c);
-        _parseSkipWhitespace(file,c);
-    }
-    if(!_streamEOF(file)) return true;
-    _streamSeekG(file,pos);
-    c = c_before;
-    return false;
-}*/
-
-
 
 // TODO missing functions from misc_parsing.h:
 // _parseUntilBeginLine with max num lines
