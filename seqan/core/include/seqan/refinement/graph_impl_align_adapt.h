@@ -364,8 +364,6 @@ _writeGraphFooter(TFile & file,
 				  Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				  DotDrawing)
 {
-//IOREV _notio_ not relevant for iorev
-	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
@@ -385,18 +383,18 @@ _writeGraphFooter(TFile & file,
 				continue;
 			}
 			if (previousVertex != nilVertex) {
-				_streamPutInt(file, previousVertex);
-				_streamWrite(file, " -- ");
-				_streamPutInt(file, nextVertex);
-				_streamWrite(file, " [");
-				_streamWrite(file, "len=3.0, arrowhead=vee");
-				_streamWrite(file, "];\n");
+				streamPut(file, previousVertex);
+				streamPut(file, " -- ");
+				streamPut(file, nextVertex);
+				streamPut(file, " [");
+				streamPut(file, "len=3.0, arrowhead=vee");
+				streamPut(file, "];\n");
 			}
 			previousVertex = nextVertex;
 			j += fragmentLength(g, nextVertex);
 		}
 	}
-	_streamPut(file, '\n');
+	streamPut(file, '\n');
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -407,9 +405,7 @@ _writeGraphType(TFile & file,
 				Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 				DotDrawing)
 {
-//IOREV _notio_ not relevant for iorev
-	SEQAN_CHECKPOINT
-	_streamWrite(file, "graph");
+    streamPut(file, "graph");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -420,11 +416,9 @@ _writeEdgeType(TFile & file,
 			   Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 			   DotDrawing)
 {
-//IOREV _notio_ not relevant for iorev
-	SEQAN_CHECKPOINT
-	_streamWrite(file, " -- ");
+    streamPut(file, " -- ");
 }
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
