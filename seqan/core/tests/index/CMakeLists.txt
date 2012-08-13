@@ -26,6 +26,9 @@ seqan_add_test_executable(test_index_shapes
                           test_index_shapes.cpp
                           test_shapes.h)
 
+seqan_add_test_executable(test_index_drawing
+                          test_index_drawing.cpp)
+
 # GCC < 4.5 segfaults when compiling the test_index_stree_iterators test.
 # Enable if the compiler is not GCC or the version is >= 4.5.
 if (NOT CMAKE_COMPILER_IS_GNUCXX OR (450 LESS _GCC_VERSION))
