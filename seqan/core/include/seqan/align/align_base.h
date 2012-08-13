@@ -458,7 +458,6 @@ write(TFile & target,
                     else
                         streamPut(target, *begin1_);
                 }
-                //_streamWriteRange(target, iter(row_, begin_), iter(row_, begin_ + windowSize_));
             }
             else
             {
