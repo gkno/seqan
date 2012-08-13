@@ -45,11 +45,6 @@
 #include <seqan/graph_algorithms.h>
 
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/blast/blast_generated_forwards.h>
-#endif
-
-
 #include <seqan/blast/blast_base.h>
 #include <seqan/blast/blast_hsp.h>
 #include <seqan/blast/blast_hit.h>

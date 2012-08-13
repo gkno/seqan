@@ -41,10 +41,6 @@
 #include <seqan/index.h>
 //____________________________________________________________________________
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/statistics/statistics_generated_forwards.h>
-#endif
-
 #include <seqan/statistics/statistics_markov_model.h>
 #include <seqan/statistics/statistics_base.h>
 

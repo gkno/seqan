@@ -36,6 +36,11 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+// Manual Forwards.
+template<typename TType, typename TIntAr>
+TType
+computeH(TType const & t, TType const & l, TType const & d, bool const & is_exact, TIntAr & n_ar);
+
 //////////////////////////////////////////////////////////////////////////////
 // EPatternBranching
 //////////////////////////////////////////////////////////////////////////////

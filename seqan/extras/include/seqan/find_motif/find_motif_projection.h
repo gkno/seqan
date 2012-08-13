@@ -36,6 +36,18 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+// Manual Forwards
+template <typename TType> TType _computeProjectionSize(TType const & alp_size, TType const & l, TType const & d,
+                                                       TType const & m_total);
+template <typename TType> TType _computeBucketThreshold(TType const & alp_size, TType const & l, TType const & d,
+                                                        TType const & m_total, TType const & k);
+template <typename TBucketAr, typename TArray, typename TType, typename TStrings, typename TPositions>
+void _filteringStep(TBucketAr & buckets, TArray & count_ar, TType & num_of_relevant_buckets, TStrings & dataset,
+                    TPositions & positions, TType const & l, TType const & s);
+template<typename TType> 
+TType _computeNumOfTrials(TType const & t, TType const & l, TType const & d, TType const & k, TType const & s,
+                          double const & prob_q);
+
 //////////////////////////////////////////////////////////////////////////////
 // Projection
 //////////////////////////////////////////////////////////////////////////////
@@ -509,6 +521,47 @@ findMotif(MotifFinder<TSeqType, Projection, TRng> & finder,
 //////////////////////////////////////////////////////////////////////////////
 
 /*
+.Function.projectLMer:
+..summary:Based on set "positions" the function uses the letters of a given l-mer at
+          chosen k positions to compute an appropriate hash value of the new k-mer.
+..cat:Motif Search
+..signature:projectLMer(positions,l,k)
+..param.positions:The set of k chosen positions.
+...remarks:$positions$ is of type $set<int>$
+..param.k:An iterator pointing to the first positions of a given sequence.
+..include:seqan/find_motif.h
+*/
+
+template<typename TValue, typename TIter>
+inline std::set<int>::value_type
+projectLMer(std::set<int> & positions, TIter it)
+{
+    SEQAN_CHECKPOINT;
+
+	typedef std::set<int>::value_type THValue;
+	THValue prev_pos; //, cur_pos;
+
+	std::set<int>::iterator positions_iter, positions_end;
+	positions_iter = positions.begin();
+	positions_end = positions.end();
+	prev_pos = *positions_iter;
+	it += prev_pos;
+	THValue hValue = ordValue(*it);
+	++positions_iter;
+	while(positions_iter!=positions_end)
+	{
+		THValue cur_pos = *positions_iter;
+		goFurther(it, (cur_pos-prev_pos));
+		hValue = hValue * ValueSize<TValue>::VALUE + ordValue(*it);
+		prev_pos = cur_pos;
+		++positions_iter;
+	}
+
+	return hValue;
+}
+//////////////////////////////////////////////////////////////////////////////
+
+/*
 .Function._filteringStep:
 ..summary:Given a position set with k different positions we compute a projection value
           for each l-mer in the input sequences and store the specific l-mer in the appropriate
@@ -974,48 +1027,6 @@ choosePositions(TAssociativeContainer & positions, TType const & l, TType const 
 		int position = pickRandomNumber(rng, positionPdf);
 		positions.insert(position);
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-/*
-.Function.projectLMer:
-..summary:Based on set "positions" the function uses the letters of a given l-mer at
-          chosen k positions to compute an appropriate hash value of the new k-mer.
-..cat:Motif Search
-..signature:projectLMer(positions,l,k)
-..param.positions:The set of k chosen positions.
-...remarks:$positions$ is of type $set<int>$
-..param.k:An iterator pointing to the first positions of a given sequence.
-..include:seqan/find_motif.h
-*/
-
-template<typename TValue, typename TIter>
-inline std::set<int>::value_type
-projectLMer(std::set<int> & positions, TIter it)
-{
-    SEQAN_CHECKPOINT;
-
-	typedef std::set<int>::value_type THValue;
-	THValue prev_pos; //, cur_pos;
-
-	std::set<int>::iterator positions_iter, positions_end;
-	positions_iter = positions.begin();
-	positions_end = positions.end();
-	prev_pos = *positions_iter;
-	it += prev_pos;
-	THValue hValue = ordValue(*it);
-	++positions_iter;
-	while(positions_iter!=positions_end)
-	{
-		THValue cur_pos = *positions_iter;
-		goFurther(it, (cur_pos-prev_pos));
-		hValue = hValue * ValueSize<TValue>::VALUE + ordValue(*it);
-		prev_pos = cur_pos;
-		++positions_iter;
-	}
-
-	return hValue;
 }
 
 

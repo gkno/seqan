@@ -51,12 +51,6 @@
 
 //____________________________________________________________________________
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/find_motif/find_motif_generated_forwards.h>
-#endif
-
-//____________________________________________________________________________
-
 #include <seqan/find_motif/sequence_model_types.h>
 
 #include <seqan/find_motif/pseudocount_base.h>
