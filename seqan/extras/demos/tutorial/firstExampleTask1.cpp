@@ -1,6 +1,7 @@
 //Adjust the code to handle Strings of type Dna, Dna5 and AminoAcid. Print the text on screen and observe how it changes depending on the type of the string.
 
 #include <iostream>
+#include <seqan/file.h>
 #include <seqan/sequence.h>
 
 int computeScore(seqan::String<seqan::Dna> subText, seqan::String<seqan::Dna> pattern)
