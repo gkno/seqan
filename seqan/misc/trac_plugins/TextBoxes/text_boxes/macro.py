@@ -35,8 +35,8 @@ import genshi.core
 from genshi.builder import tag
 
 CLASSES = {
-    'ShellBox' : 'shell_box',
-    'IdeBox' : 'ide_box',
+    'ShellBox' : 'box shell',
+    'IdeBox' : 'box ide',
     'WarningBox': 'box warning',
     'InfoBox': 'box info',
     'ImportantBox': 'box important',

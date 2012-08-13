@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='TextBoxesMacros',
-    version='0.1.6',
+    version='0.1.7',
     packages=['text_boxes'],
     package_data={'text_boxes' : ['htdocs/css/*.css',
                                   'htdocs/dialog-information.png',
