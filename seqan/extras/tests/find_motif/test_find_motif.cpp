@@ -464,21 +464,9 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
 				  is_exact)==true);
 }
 
-SEQAN_BEGIN_TESTSUITE(test_find_motif) {
+SEQAN_BEGIN_TESTSUITE(test_find_motif)
+{
     SEQAN_CALL_TEST(test_find_motif_exact_algorithms);
     SEQAN_CALL_TEST(test_find_motif_approximation_algorithms);
-
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/em_algorithm.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_epatternbranching.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_pms1.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_pmsp.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/find_motif_projection.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/frequency_distribution.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/profile.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/pseudocount_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/pseudocount_mode_c.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/pseudocount_mode_p.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/find_motif/sequence_model_types.h");
 }
 SEQAN_END_TESTSUITE

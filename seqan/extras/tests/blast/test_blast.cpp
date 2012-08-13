@@ -56,29 +56,5 @@ SEQAN_BEGIN_TESTSUITE(test_blast) {
 	SEQAN_CALL_TEST(test_blast_parsing_int_blastp);	
 	SEQAN_CALL_TEST(test_blast_parsing_basic_int_blastn);
     SEQAN_CALL_TEST(test_blast_parsing_basic_int_blastp);
-
-
-    // Verify checkpoints.
-    // @@
-    // Remove this line and accordingly add a call for each of your headers
-    // under test.  When the SeqAn testing mode is enabled, each call to
-    // SEQAN_CHECKPOINTS will be registered with the testing system.
-    // Verification of checkpoints means that we will check for each registered
-    // checkpoint to be hit.
-    // @@
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_parsing.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_report.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hit.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hsp.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_report.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_hit.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hit_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_hsp_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_hit_iterator.h");
-	SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/blast/blast_stream_hsp_iterator.h");
-	
 }
 SEQAN_END_TESTSUITE

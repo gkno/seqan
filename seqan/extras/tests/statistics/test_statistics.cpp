@@ -41,15 +41,10 @@
 #include "test_statistics_markov_model.h"
 #include "test_statistics_base.h"
 
-
-SEQAN_BEGIN_TESTSUITE(test_statistics) {
+SEQAN_BEGIN_TESTSUITE(test_statistics)
+{
     // Call Tests.
     SEQAN_CALL_TEST(test_statistics_markov_model);
     SEQAN_CALL_TEST(test_statistics_statistics);
-
-    // Verify Checkpoints.
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/statistics.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/statistics/statistics_markov_model.h");
-    SEQAN_VERIFY_CHECKPOINTS("extras/include/seqan/statistics/statistics_base.h");
 }
 SEQAN_END_TESTSUITE
