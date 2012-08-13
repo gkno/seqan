@@ -33,6 +33,13 @@
 #ifndef SEQAN_HEADER_STREAM_ALGORITHMS_H
 #define SEQAN_HEADER_STREAM_ALGORITHMS_H
 
+// These includes will go away when remainders of file module and the new stream module are merged
+#include <seqan/stream/concept_stream.h>
+#include <seqan/stream/adapt_fstream.h>
+#include <seqan/stream/adapt_iostream.h>
+#include <seqan/stream/adapt_cstdio.h>
+#include <seqan/stream/adapt_sstream.h>
+
 /* IOREV
  * _tested_
  * _doc_
@@ -171,7 +178,7 @@ _streamWriteSeq(TTarget & target,
 				False const)
 {
 //IOREV  _nodoc_
-	_streamPut(target, source);
+	streamPut(target, source);
 }
 
 //____________________________________________________________________________
@@ -230,7 +237,7 @@ _streamWriteRange(TTarget & target,
 SEQAN_CHECKPOINT
 	for (; begin_ != end_; ++begin_)
 	{
-		_streamPut(target, *begin_);
+		streamPut(target, *begin_);
 	}
 }
 

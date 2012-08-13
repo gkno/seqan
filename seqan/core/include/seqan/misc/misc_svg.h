@@ -194,7 +194,7 @@ inline bool close(SVGFile &svg)
 
 template <typename TChar>
 inline void
-_streamPut(SVGFile & svg, TChar character)
+streamPut(SVGFile & svg, TChar character)
 {
 //IOREV
 	if (convert<char>(character) == '\n')
@@ -209,7 +209,7 @@ _streamPut(SVGFile & svg, TChar character)
 		if (convert<char>(character) != ' ')
 		{
 			svg.file << "<g transform=\"translate(" << svg.cursor.i1*20+10 << ',' << svg.cursor.i2*20+10 << ")\"><text y=\"0.3em\" " << svg.style[svg.text] << '>';
-			_streamPut(svg.file, convert<char>(character));
+			streamPut(svg.file, convert<char>(character));
 			svg.file << "</text></g>" << std::endl;
 		}
 		++svg.cursor.i1;
@@ -259,7 +259,7 @@ inline void _printContig(
 			}
 		}
 	}
-	_streamPut(svg, '\n');
+	streamPut(svg, '\n');
 	
 	int savedStyle = svg.text;
 	svg.text = svg.readText;
@@ -362,7 +362,7 @@ inline void _printRead(
 			if (!inGap && convert<Dna5>(*cit) != convert<Dna5>(*it))
 			{
 				svg.file << "<g transform=\"translate(" << xEnd + 10 << ',' << line << ")\"><text y=\"0.3em\" " << svg.style[svg.readText] << '>';
-				_streamPut(svg.file, convert<char>(*it));
+				streamPut(svg.file, convert<char>(*it));
 				svg.file << "</text></g>" << std::endl;
 				x += 20;
 				arrow = 0;
