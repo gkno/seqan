@@ -1,159 +1,105 @@
-div.code
+/* Center everything below the header to a width of 58em.
+ */
+
+html #ctxtnav.nav,
+html #content.wiki
 {
-  -webkit-border-radius: 3px;
-          border-radius: 3px;
-
-  -webkit-background-clip: padding-box;
-     -moz-background-clip: padding;
-          background-clip: padding-box;
-
-  -webkit-box-shadow: 0px 1px 1px 0px #a3a3a3;
-          box-shadow: 0px 1px 1px 0px #a3a3a3;
+    width: 58em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Pretty display of menu entries. */
-
-span.menu_trace span.arrow
+html #footer,
+html #pagepath
 {
-    position: relative;
-    top: -2.5px;
+    width: 75.4em;
+    padding-left: 28px;
+    margin-left: auto;
+    margin-right: auto;
+    float: none;
 }
 
-span.menu_trace span.menu_item
-{
-    display: inline-block;
-    padding: 0px 4px;
-    border: 2px solid gray;
-    background: #f0f0f0;
-    border-left-color: gray;
-    border-top-color: gray;
-    border-right-color: black;
-    border-bottom-color: black;
+/* The teaser on the front page cannot have negative margin through style.
+ */
 
-    /* CSS's take on round borders. */
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    border-radius: 2px; /* future proofing */
-    -khtml-border-radius: 2px; /* for old Konqueror browsers */
+table.teaser
+{
+    margin-left: -112px;
 }
 
-/* Large Boxes */
+/* Gray out Attachments fold-out such that it is less confusing.
+ */
 
-.box {
+#attachments.collapsed
+{
+    /* Source: http://css-tricks.com/css-transparency-settings-for-all-broswers/ */
+    zoom: 1;
+    filter: alpha(opacity=20);
+    opacity: 0.2;
+}
+
+/* Making the wiki easier to read.
+ */
+
+html .wikipage h1, html .wikipage h2, html .wikipage h3 { margin-left: 0px }
+
+html .wikipage h1,
+html .wikipage h2,
+html .wikipage h3,
+html .wikipage h4,
+html .wikipage h5,
+html .wikipage h6 {
+    margin-left: 0;
+}
+
+html .wikipage h1 {
+    font-size: 2.5em;
+}
+
+html .wikipage h2 {
+    font-size: 2.1em;
+    margin-top: 1.5em;
+}
+
+html .wikipage h3 {
+    font-size: 1.9em;
+    font-weight: 500;
+    margin-top: 1.5em;
+}
+
+html .box {
     position: relative;
     background-color: #fff;
     border: 1px solid #000;
-    margin: 1em;
+    margin: 1em 1em;
     text-align: justify;
     padding: 0.5em 1.5em 0.5em 70px;
     min-height: 55px;
     background-repeat: no-repeat;
     background-position: 10px 10px;
-
-  -webkit-border-radius: 3px;
-          border-radius: 3px;
-
-  -webkit-background-clip: padding-box;
-     -moz-background-clip: padding;
-          background-clip: padding-box;
-
-  -webkit-box-shadow: 0px 1px 1px 0px #a3a3a3;
-          box-shadow: 0px 1px 1px 0px #a3a3a3;
+    webkit-border-radius: 3px;
+    border-radius: 3px;
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+    -webkit-box-shadow: 0px 1px 1px 0px #a3a3a3;
+    box-shadow: 0px 1px 1px 0px #a3a3a3;
 }
 
-.shell.box
-{
-    background-color: black;
-    color: lightgray;
-    font-weight: bolder;
+html pre.wiki,
+html div.code {
+    background-color: rgba(235, 235, 235, 0.7);
+    border-color: rgba(120, 120, 120, 0.7);
+    background-image: none;
+    padding-left: 0.5em;
+    margin: 1em 1em;
 }
 
-.ide.box
-{
-    background-color: white;
-    color: black;
-    border:1px solid black;
-}
-
-.warning.box
-{
-    background-color: #FFBABA;
-    border-color: #D8000C;
-    background-image: url(../dialog-warning.png);
-}
-
-.important.box
-{
-    background-color: rgba(254, 239, 179, 0.7);
-    border-color: rgba(159, 96, 0, 0.7);
-    background-image: url(../emblem-important.png);
-}
-
-.info.box
-{
-    background-color: rgba(189, 229, 248, 0.5);
-    border-color: rgba(0, 82, 155, 0.5);
-    background-image: url(../dialog-information.png);
-}
-
-.assignment.box
-{
-    background-color: #EEEEDD;
-    border-color: #CBCB99;
-    background-image: url(../Accessories-text-editor.png);
-}
-
-/* Small text boxes. */
-
-.text_icon
-{
-    font-size: .8em;
-    font-weight: bolder;
-
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    border-radius: 5px; /* future proofing */
-    -khtml-border-radius: 5px; /* for old Konqueror browsers */
-}
-
-.text_icon.green
-{
-    padding: 1px 5px;
-    background-color: #10a931;
-    color: white;
-}
-
-.text_icon.red
-{
-    padding: 1px 5px;
-    background-color: #BB0000;
-    color: white;
-}
-
-.text_icon.yellow
-{
-    padding: 1px 5px;
-    background-color: #FFEFA5;
-    color: black;
-}
-
-.text_icon.black
-{
-    padding: 1px 5px;
-    background-color: black;
-    color: white;
-}
-
-.text_icon.blue
-{
-    padding: 1px 5px;
-    background-color: blue;
-    color: white;
-}
-
-.text_icon.gray
-{
-    padding: 1px 5px;
-    background-color: gray;
-    color: white;
+html .box.shell {
+    background-color: rgba(0, 0, 0, 0.85);
+    border-color: #000000;
+    background-image: none;
+    padding-left: 0.5em;
+    font-weight: 600;
+    margin: 1em 1em;
 }
