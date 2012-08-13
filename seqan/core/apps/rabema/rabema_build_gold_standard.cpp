@@ -37,9 +37,9 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/store.h>
+#include <seqan/seq_io.h>
 
 #include "curve_smoothing.h"
-#include "fai_index.h"
 #include "find_hamming_simple_ext.h"
 #include "find_myers_ukkonen_reads.h"
 #include "io_gsi.h"
@@ -866,7 +866,7 @@ int matchesToErrorFunction(TErrorCurves & errorCurves,
                 std::cerr << "Reference sequence " << contigNameStore[record.rId] << " not known in FAI file.\n";
                 return 1;
             }
-            if (getSequence(contig, faiIndex, faiRefId) != 0)
+            if (readSequence(contig, faiIndex, faiRefId) != 0)
             {
                 std::cerr << "Could not load sequence " << contigNameStore[record.rId]
                           << " from FASTA file with FAI.\n";
@@ -1163,20 +1163,20 @@ int main(int argc, char const ** argv)
     startTime = sysTime();
     std::cerr << "Reference Index       " << options.referencePath << ".fai ...";
     FaiIndex faiIndex;
-    if (load(faiIndex, toCString(options.referencePath)) != 0)
+    if (read(faiIndex, toCString(options.referencePath)) != 0)
     {
         std::cerr << " FAILED (not fatal, we can just build it)\n";
         std::cerr << "Building Index        " << options.referencePath << ".fai ...";
-        if (buildIndex(toCString(options.referencePath), Fai()) != 0)
+        if (build(faiIndex, toCString(options.referencePath)) != 0)
         {
             std::cerr << "Could not build FAI index.\n";
             return 1;
         }
         std::cerr << " OK\n";
         std::cerr << "Reference Index       " << options.referencePath << ".fai ...";
-        if (load(faiIndex, toCString(options.referencePath)) != 0)
+        if (write(faiIndex, toCString(options.referencePath)) != 0)
         {
-            std::cerr << "Could not load FAI index we just build.\n";
+            std::cerr << "Could not write FAI index we just built.\n";
             return 1;
         }
         std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";

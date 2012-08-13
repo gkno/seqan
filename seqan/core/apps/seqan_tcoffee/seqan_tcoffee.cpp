@@ -15,13 +15,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 ==========================================================================*/
 
+#include <fstream>
+#include <iostream>
+
 #include <seqan/basic.h>
 #include <seqan/graph_msa.h>
 #include <seqan/modifier.h>
 #include <seqan/arg_parse.h>
-#include <seqan/stream.h>
-
-#include <iostream>
+#include <seqan/seq_io.h>
 
 using namespace seqan;
 

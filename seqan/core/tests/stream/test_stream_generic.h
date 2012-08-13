@@ -31,7 +31,7 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Generic test code for stream class.
+// Generic test code for stream module.
 // ==========================================================================
 
 #ifndef TEST_STREAM_TEST_STREAM_GENERIC_H_
@@ -317,121 +317,6 @@ void testStreamSeek(TStream & stream)
     res = streamPeek(c, stream);
     SEQAN_ASSERT_EQ(c, '2');
     SEQAN_ASSERT_EQ(static_cast<int>(streamTell(stream)), 2);
-}
-
-
-std::fstream* createFastAFile(seqan::CharString &tempFilename)
-{
-    using namespace seqan;
-
-    tempFilename = SEQAN_TEMP_FILENAME();
-    char filenameBuffer[1000];
-    strncpy(filenameBuffer, toCString(tempFilename), 999);
-
-    std::fstream *file = new std::fstream(filenameBuffer, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-    SEQAN_ASSERT(file->is_open());
-
-    char const * STR =
-"> sequenceID_with special chars an irregular linebreaks\n\
-AAAACGTGCGGTTGGGCAAAAAACTTTCTTATATTCTATCTATCTTGTAGCTAGCTGTAGCTAGCTAGCATCGTAGC\n\
-CCCAGAGTGTCATGCATGTCGA\n\
-ACGTGTTTTTGGGGCGGTTATATATATATATATT\n\
-\n\
->sequence2... with no linebreaks and no newline at end\n\
-ACGTNNNNNNNCGTACTTGCTAGCTAGCTAGCTAGCTAGCATCGTACGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATTTTTTTTTTACTATCATCTACTATCTACTATCATCTACTATCATTCATCGATCGATCGATCGTACGTACGATCGATCGATCGATCGTACGATCGATGCTACGTACGTACG";
-
-
-    file->write(STR, strlen(STR));
-    file->seekg(0);
-    file->seekp(0);
-    return file;
-}
-
-std::fstream* createFastAFileProtein(seqan::CharString &tempFilename)
-{
-    using namespace seqan;
-
-    tempFilename = SEQAN_TEMP_FILENAME();
-    char filenameBuffer[1000];
-    strncpy(filenameBuffer, toCString(tempFilename), 999);
-
-    std::fstream *file = new std::fstream(filenameBuffer, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-    SEQAN_ASSERT(file->is_open());
-
-    char const * STR =
-"> sequenceID_with special chars an irregular linebreaks\n\
-LCLYTHIGRNIYYGSYLYSETWNTGIMLLLITMATAFMGYVLPWGQMSFWGAT\n\
-VITNLFSAIPYIGTNLV\n\
-EWIWGGFSVDKATLNRFFAF\n\
-HFILPFTMVALAGVHLTFLHETGSNNPLGLTSDSDKIPFHPYYTIKDFLG\n\
->sequence2... with no linebreaks and no newline at end\n\
-GLMPFLHTSKHRSMMLRPLSQALFWTLTMDLLTLTWIGSQPVEYPYTIIGQMASILYFSIILAFLPIAGX";
-
-
-    file->write(STR, strlen(STR));
-    file->seekg(0);
-    file->seekp(0);
-    return file;
-}
-
-std::fstream* createFastQFile(seqan::CharString &tempFilename)
-{
-    using namespace seqan;
-
-    tempFilename = SEQAN_TEMP_FILENAME();
-    char filenameBuffer[1000];
-    strncpy(filenameBuffer, toCString(tempFilename), 999);
-
-    std::fstream *file = new std::fstream(filenameBuffer, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-    SEQAN_ASSERT(file->is_open());
-
-    char const * STR =
-"@SEQ_ID\n\
-GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT\n\
-+\n\
-!''*((((***+))%%%++)(%%%%).@***-+*''))**55CCF>>>>>>CCCCCCC65\n\
-@ 2ndSequence with formatting obscurities\n\
-GATTTGGGGTTCAAAGC\n\
-AGTATCGATCAAATAGTAAATCCATTT\n\
-GTTCAACTCACAGTTT\n\
-+ 2ndSequence with formatting obscurities\n\
-!''*((((***+))%%%\n\
-++)(%%%%).\n\
-@***-+*''))**55CCF>>>>>>CCCCCCC65";
-    // the second quality-string is line-broken at places to produce lines
-    // beginning with '+' and '@'. The new code handles this absolutely fine!
-
-    file->write(STR, strlen(STR));
-    file->seekg(0);
-    file->seekp(0);
-    return file;
-}
-
-// something that is definitely not a sequence format
-std::fstream* createBogusFile(seqan::CharString &tempFilename)
-{
-    using namespace seqan;
-
-    tempFilename = SEQAN_TEMP_FILENAME();
-    char filenameBuffer[1000];
-    strncpy(filenameBuffer, toCString(tempFilename), 999);
-
-    std::fstream *file = new std::fstream(filenameBuffer, std::ios_base::in | std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-    SEQAN_ASSERT(file->is_open());
-
-    char const * STR =
-"asd45623\n\
--.-+´adfasddsad2342asfd8ss8g9s8g9s8fags9d8ga9s\n\
-67utghjgnm\n\
-!-.,()//&%$$%§§%\n\
-e5bv56 u67 gdh g x#++++´\n\
-..\n\
-.....asdsadfasd0809809vnvbnojokjojokjokj\n\
-";
-    file->write(STR, strlen(STR));
-    file->seekg(0);
-    file->seekp(0);
-    return file;
 }
 
 #endif  // TEST_STREAM_TEST_STREAM_GENERIC_H_

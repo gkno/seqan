@@ -34,8 +34,8 @@
 // File Format detection with Stream Class.
 // ==========================================================================
 
-#ifndef SEQAN_STREAM_GUESSSTREAMFORMAT_H_
-#define SEQAN_STREAM_GUESSSTREAMFORMAT_H_
+#ifndef SEQAN_SEQ_IO_GUESSSEQ_IOFORMAT_H_
+#define SEQAN_SEQ_IO_GUESSSEQ_IOFORMAT_H_
 
 namespace seqan {
 
@@ -311,4 +311,4 @@ checkStreamFormat(TRecordReader & reader, TagSelector<TTagList> & formats)
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_STREAM_ADAPT_FSTREAM_H_
+#endif  // #ifndef SEQAN_SEQ_IO_ADAPT_FSEQ_IO_H_

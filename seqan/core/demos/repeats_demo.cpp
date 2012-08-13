@@ -44,7 +44,7 @@
 
 #include <seqan/basic.h>
 #include <seqan/index.h>
-#include <seqan/stream.h>
+#include <seqan/seq_io.h>
 
 int main(int argc, char ** argv)
 {

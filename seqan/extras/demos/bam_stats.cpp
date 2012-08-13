@@ -41,7 +41,7 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>      // For printing SeqAn Strings.
-#include <seqan/stream.h>
+#include <seqan/seq_io.h>
 #include <seqan/bam_io.h>
 #include <seqan/misc/misc_cmdparser.h>
 #include <seqan/find.h>

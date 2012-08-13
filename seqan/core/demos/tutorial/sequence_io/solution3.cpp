@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <seqan/file.h>
-#include <seqan/stream.h>
+#include <seqan/seq_io.h>
 #include <seqan/sequence.h>
 
 int main(int argc, char const ** argv)

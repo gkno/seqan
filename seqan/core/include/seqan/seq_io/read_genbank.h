@@ -31,11 +31,19 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
-// Read support for the EMBL file format.
+// Read support for the GenBank file format.
+//
+// Note: We do not want to require a lookahead because then we might need too
+// many buffers.  Thus, we heuristically only look at the first character of
+// the field name to differentiate between headers and the sequence start
+// label "ORIGIN".
+//
+// The sequence identifier for record-reading is the VERSION field.
 // ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_STREAM_READ_EMBL_H_
-#define EXTRAS_INCLUDE_SEQAN_STREAM_READ_EMBL_H_
+
+#ifndef EXTRAS_INCLUDE_SEQAN_SEQ_IO_READ_GENBANK_H_
+#define EXTRAS_INCLUDE_SEQAN_SEQ_IO_READ_GENBANK_H_
 
 namespace seqan {
 
@@ -47,20 +55,18 @@ namespace seqan {
 // Tags, Classes, Enums
 // ============================================================================
 
-/*
-struct Embl_;
-typedef Tag<Embl_> Embl;
-*/
+struct GenBank_;
+typedef Tag<GenBank_> GenBank;
 
-struct EmblHeader_;
-typedef Tag<EmblHeader_> EmblHeader;
+struct GenBankHeader_;
+typedef Tag<GenBankHeader_> GenBankHeader;
 
-struct EmblSequence_;
-typedef Tag<EmblSequence_> EmblSequence;
+struct GenBankSequence_;
+typedef Tag<GenBankSequence_> GenBankSequence;
 
-enum EmblErrorCodes_
+enum GenBankErrorCodes_
 {
-    IOERR_EMBL_WRONG_RECORD = 2048
+    IOERR_GENBANK_WRONG_RECORD = 2048
 };
 
 // ============================================================================
@@ -72,88 +78,43 @@ enum EmblErrorCodes_
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// Function endsWith()
+// Function splitGenBankHeader()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.endsWith
-..concept:Class.String
+.Function.splitGenBankHeader
 ..cat:Input/Output
-..signature:startsWith(str, suffix)
-..summary:Check whether a sequence ends with a given suffix.
-..param.str:The string to check.
-..param.prefix:The suffix to check for.
-..returns:$bool$
-..include:seqan/stream.h
-*/
-
-template <typename TLhs, typename TRhs>
-bool endsWith(TLhs const & lhs, TRhs const & rhs)
-{
-    if (length(lhs) < length(rhs))
-        return false;
-    return suffix(lhs, length(lhs) - length(rhs)) == rhs;
-}
-
-// ----------------------------------------------------------------------------
-// Function startsWith()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.startsWith
-..concept:Class.String
-..cat:Input/Output
-..signature:startsWith(str, prefix)
-..summary:Check whether a sequence starts with a given prefix.
-..param.str:The string to check.
-..param.prefix:The prefix to check for.
-..returns:$bool$
-..include:seqan/stream.h
-*/
-
-template <typename TLhs, typename TRhs>
-bool startsWith(TLhs const & lhs, TRhs const & rhs)
-{
-    if (length(lhs) < length(rhs))
-        return false;
-    return prefix(lhs, length(rhs)) == rhs;
-}
-
-
-// ----------------------------------------------------------------------------
-// Function splitEmblHeader()
-// ----------------------------------------------------------------------------
-
-/**
-.Function.splitEmblHeader
-..cat:Input/Output
-..signature:startsWith(key, value, line)
-..summary:Split an EMBL header line.
+..signature:splitGenBankHeader(key, value, lines)
+..summary:Split an GenBank header field/value.
+..remarks:You can only call this on a whole top-level field such as $SOURCE$, possibly including the following subfields! You cannot split out subfield values.
 ..param.key:The 2-character header type.
 ..param.value:The line's value.
-..param.line:The header line to split.
+..param.line:The lines with the header field to split.
 ..returns:$void$
 ..include:seqan/stream.h
+..see:Function.splitEmblHeader
 */
 
 template <typename TKey, typename TValue, typename TLine>
 inline void
-splitEmblHeader(TKey & key, TValue & value, TLine const & line)
+splitGenBankHeader(TKey & key, TValue & value, TLine const & lines)
 {
+    splitEmblHeader(key, value, lines);
     clear(key);
 
     enum State { IN_KEY, IN_SPACE, IN_VALUE };
     State state = IN_KEY;
 
     typedef typename Iterator<TLine const, Rooted>::Type TIterator;
-    TIterator it = begin(line, Rooted());
+    TIterator it = begin(lines, Rooted());
     for (; !atEnd(it); goNext(it))
     {
         if (state == IN_KEY)
         {
-            appendValue(key, *it);
-            if (length(key) == 2u)
+            if (isblank(*it))
                 state = IN_SPACE;
+            else
+                appendValue(key, *it);
         }
         else if (state == IN_SPACE && !isblank(*it))
         {
@@ -161,66 +122,88 @@ splitEmblHeader(TKey & key, TValue & value, TLine const & line)
         }
     }
 
-    value = suffix(line, position(it));
+    value = suffix(lines, position(it));
 }
 
 // ----------------------------------------------------------------------------
 // Function nextIs()
 // ----------------------------------------------------------------------------
 
-// nextIs() for EMBL header records.
+// nextIs() for GenBank header records.
 
 template <typename TStream, typename TSpec>
 inline bool
-nextIs(RecordReader<TStream, TSpec> & reader, EmblHeader const & /*tag*/)
+nextIs(RecordReader<TStream, TSpec> & reader, GenBankHeader const & /*tag*/)
 {
-    return !atEnd(reader) && !isblank(value(reader));
+    return !atEnd(reader) && value(reader) != 'O' && !isblank(value(reader));
 }
 
-// nextIs() for EMBL sequence records.
+// nextIs() for GenBank sequence records.
 
 template <typename TStream, typename TSpec>
 inline bool
-nextIs(RecordReader<TStream, TSpec> & reader, EmblSequence const & /*tag*/)
+nextIs(RecordReader<TStream, TSpec> & reader, GenBankSequence const & /*tag*/)
 {
-    return !atEnd(reader) && isblank(value(reader));
+    return !atEnd(reader) && value(reader) == 'O';
 }
 
 // ----------------------------------------------------------------------------
 // Function readRecord()
 // ----------------------------------------------------------------------------
 
-// readRecord() for EMBL header records.
+// readRecord() for GenBank header records.
+
+// Normalize in-field line endings to '\n'.
 
 template <typename TTarget, typename TStream, typename TSpec>
 inline int
-readRecord(TTarget & buffer, RecordReader<TStream, SinglePass<TSpec> > & reader,
-           EmblHeader const & tag)
+readRecord(TTarget & result, RecordReader<TStream, SinglePass<TSpec> > & reader,
+           GenBankHeader const & tag)
 {
     if (atEnd(reader))
         return EOF_BEFORE_SUCCESS;
     if (!nextIs(reader, tag))
-        return IOERR_EMBL_WRONG_RECORD;
-    clear(buffer);
+        return IOERR_GENBANK_WRONG_RECORD;
+    clear(result);
 
-    return readLine(buffer, reader);
+    int res = readLine(result, reader);
+    if (res != 0)
+        return res;
+    while (!atEnd(reader) && isblank(value(reader)))
+    {
+        appendValue(result, '\n');
+        res = readLine(result, reader);
+        if (res != 0)
+            return res;
+    }
+
+    return 0;
 }
 
-// readRecord() for EMBL sequences records.
+// readRecord() for GenBank sequences records.
 
 // Read all sequence, eat/ignore '//' line.
 
 template <typename TTarget, typename TStream, typename TSpec>
 inline int
-readRecord(TTarget & buffer, RecordReader<TStream, SinglePass<TSpec> > & reader,
-           EmblSequence const & tag)
+readRecord(TTarget & result, RecordReader<TStream, SinglePass<TSpec> > & reader,
+           GenBankSequence const & tag)
 {
     if (atEnd(reader))
         return EOF_BEFORE_SUCCESS;
     if (!nextIs(reader, tag))
-        return IOERR_EMBL_WRONG_RECORD;
-    clear(buffer);
+        return IOERR_GENBANK_WRONG_RECORD;
+    clear(result);
 
+    // Skip 'ORIGIN' line.
+    CharString buffer;
+    int res = readLine(buffer, reader);
+    if (res != 0)
+        return res;
+    if (!startsWith(buffer, "ORIGIN"))
+        return IOERR_GENBANK_WRONG_RECORD;
+
+    // Read sequence.
     for (; !atEnd(reader); goNext(reader))
     {
         if (isspace(value(reader)) || isdigit(value(reader)))
@@ -238,35 +221,35 @@ readRecord(TTarget & buffer, RecordReader<TStream, SinglePass<TSpec> > & reader,
         }
 
         // Otherwise, append the just found character to buffer.
-        appendValue(buffer, value(reader));
+        appendValue(result, value(reader));
     }
 
     return EOF_BEFORE_SUCCESS;
 }
 
-// readRecord() for EMBL id/seq pairs.
+// readRecord() for GenBank id/seq pairs.
 
 template <typename TId, typename TSequence, typename TStream, typename TSpec>
 inline int
 readRecord(TId & id,
            TSequence & sequence,
            RecordReader<TStream, SinglePass<TSpec> > & reader,
-           Embl const & /*tag*/)
+           GenBank const & /*tag*/)
 {
     CharString buffer;
-    while (nextIs(reader, EmblHeader()))
+    while (nextIs(reader, GenBankHeader()))
     {
-        int res = readRecord(buffer, reader, EmblHeader());
+        int res = readRecord(buffer, reader, GenBankHeader());
         if (res != 0)
             return res;
-        if (startsWith(buffer, "ID"))
+        if (startsWith(buffer, "VERSION"))
         {
-            CharString k, v;
-            splitEmblHeader(k, id, buffer);
+            CharString k;
+            splitGenBankHeader(k, id, buffer);
         }
     }
     clear(sequence);
-    int res = readRecord(sequence, reader, EmblSequence());
+    int res = readRecord(sequence, reader, GenBankSequence());
     if (res != 0)
         return res;
     
@@ -282,7 +265,7 @@ template <typename TIdString, typename TIdSpec, typename TSeqString, typename TS
 int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
           StringSet<TSeqString, TSeqSpec> & sequences,
           RecordReader<TStream, SinglePass<TSpec> > & reader,
-          Embl const & tag)
+          GenBank const & tag)
 {
     TIdString id;
     TSeqString seq;
@@ -301,4 +284,4 @@ int read2(StringSet<TIdString, TIdSpec> & sequenceIds,
 
 }  // namespace seqan
 
-#endif  // #ifndef EXTRAS_INCLUDE_SEQAN_STREAM_READ_EMBL_H_
+#endif  // #ifndef EXTRAS_INCLUDE_SEQAN_SEQ_IO_READ_GENBANK_H_

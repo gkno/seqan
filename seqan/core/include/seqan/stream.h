@@ -109,6 +109,8 @@
 #include <seqan/stream/record_reader_double.h>
 #include <seqan/stream/record_reader_double_mmap.h>
 
+#include <seqan/stream/read_auto_format.h>
+
 // ===========================================================================
 // Tokenizing and *is
 // ===========================================================================
@@ -116,18 +118,5 @@
 #include <seqan/stream/is.h> // currently empty
 #include <seqan/stream/tokenize.h>
 #include <seqan/stream/lexical_cast.h>
-
-// ===========================================================================
-// File Format I/O Code.
-// ===========================================================================
-
-#include <seqan/stream/guess_stream_format.h>
-#include <seqan/stream/read_fasta_fastq.h>
-#include <seqan/stream/read_embl.h>
-#include <seqan/stream/read_genbank.h>
-
-#include <seqan/stream/read_auto_format.h>
-
-#include <seqan/stream/write_fasta_fastq.h>
 
 #endif  // SEQAN_STREAM_H_

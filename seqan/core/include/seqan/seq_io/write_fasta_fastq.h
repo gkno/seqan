@@ -34,8 +34,8 @@
 // Code for writing FASTA and FASTQ files
 // ==========================================================================
 
-#ifndef SEQAN_STREAM_WRITE_H_
-#define SEQAN_STREAM_WRITE_H_
+#ifndef SEQAN_SEQ_IO_WRITE_H_
+#define SEQAN_SEQ_IO_WRITE_H_
 
 namespace seqan {
 
@@ -551,4 +551,4 @@ int write2(TStream & stream,
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_STREAM_WRITE_H_
+#endif  // #ifndef SEQAN_SEQ_IO_WRITE_H_

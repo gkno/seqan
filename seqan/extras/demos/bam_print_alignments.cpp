@@ -44,6 +44,7 @@
 #include <seqan/file.h>      // For printing SeqAn Strings.
 #include <seqan/align.h>
 #include <seqan/bam_io.h>
+#include <seqan/seq_io.h>
 
 #if SEQAN_HAS_ZLIB
 

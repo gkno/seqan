@@ -37,8 +37,8 @@
 //TODO(h4nn3s): double-check if we really want to allow EOF inside meta-line
 // and also if a fastq file is legal if a record contains no qualities
 
-#ifndef SEQAN_STREAM_READ_FASTA_FASTQ_H_
-#define SEQAN_STREAM_READ_FASTA_FASTQ_H_
+#ifndef SEQAN_SEQ_IO_READ_FASTA_FASTQ_H_
+#define SEQAN_SEQ_IO_READ_FASTA_FASTQ_H_
 
 namespace seqan {
 
@@ -990,4 +990,4 @@ checkStreamFormat(RecordReader<TStream, TPass> & reader, Fastq const & /*tag*/)
 
 }  // namespace seqan
 
-#endif  // #ifndef SEQAN_STREAM_READ_FASTA_FASTQ_H_
+#endif  // #ifndef SEQAN_SEQ_IO_READ_FASTA_FASTQ_H_

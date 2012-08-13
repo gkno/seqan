@@ -13,7 +13,6 @@ if (ZLIB_FOUND)
     # Building of GSI file from "perfect" SAM file and reference sequence.
     seqan_add_executable(rabema_build_gold_standard rabema_build_gold_standard.cpp
                          curve_smoothing.h
-                         fai_index.h
                          find_hamming_simple_ext.h
                          find_myers_ukkonen_ext.h
                          find_myers_ukkonen_reads.h
@@ -25,7 +24,6 @@ if (ZLIB_FOUND)
     # Comparison of arbitrary read mapper SAM against GSI file.
     seqan_add_executable(rabema_evaluate rabema_evaluate.cpp
                          curve_smoothing.h
-                         fai_index.h
                          find_hamming_simple_ext.h
                          find_myers_ukkonen_ext.h
                          find_myers_ukkonen_reads.h

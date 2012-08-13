@@ -5,6 +5,7 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/stream.h>
+#include <seqan/seq_io.h>
 
 int main(int argc, char const ** argv)
 {

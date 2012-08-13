@@ -31,9 +31,8 @@
 #include <seqan/find.h>
 #include <seqan/misc/misc_interval_tree.h>
 #include <seqan/store.h>
-#include <seqan/stream.h>
+#include <seqan/seq_io.h>
 
-#include "fai_index.h"
 #include "find_hamming_simple_ext.h"
 #include "find_myers_ukkonen_ext.h"
 #include "find_myers_ukkonen_reads.h"
@@ -1199,20 +1198,20 @@ int main(int argc, char const ** argv)
     // Open reference FAI index.
     std::cerr << "Reference Index           " << options.referencePath << ".fai ...";
     FaiIndex faiIndex;
-    if (load(faiIndex, toCString(options.referencePath)) != 0)
+    if (read(faiIndex, toCString(options.referencePath)) != 0)
     {
         std::cerr << " FAILED (not fatal, we can just build it)\n";
-        std::cerr << "Building Index            " << options.referencePath << ".fai ...";
-        if (buildIndex(toCString(options.referencePath), Fai()) != 0)
+        std::cerr << "Building Index        " << options.referencePath << ".fai ...";
+        if (build(faiIndex, toCString(options.referencePath)) != 0)
         {
             std::cerr << "Could not build FAI index.\n";
             return 1;
         }
         std::cerr << " OK\n";
-        std::cerr << "Reference Index           " << options.referencePath << ".fai ...";
-        if (load(faiIndex, toCString(options.referencePath)) != 0)
+        std::cerr << "Reference Index       " << options.referencePath << ".fai ...";
+        if (write(faiIndex, toCString(options.referencePath)) != 0)
         {
-            std::cerr << "Could not load FAI index we just build.\n";
+            std::cerr << "Could not write FAI index we just built.\n";
             return 1;
         }
         std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";
@@ -1228,7 +1227,7 @@ int main(int argc, char const ** argv)
     for (unsigned i = 0; i < length(faiIndex.refNameStore); ++i)
     {
         reserve(refSeqs[i], sequenceLength(faiIndex, i), Exact());
-        if (getSequence(refSeqs[i], faiIndex, i) != 0)
+        if (readSequence(refSeqs[i], faiIndex, i) != 0)
         {
             std::cerr << "ERROR: Could not read sequence " << faiIndex.refNameStore[i] << ".\n";
             return 0;

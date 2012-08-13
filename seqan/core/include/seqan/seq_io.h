@@ -45,16 +45,17 @@
 #include <seqan/stream.h>
 
 // ===========================================================================
-// Genomic Region
+// Lower-Level I/O Interface for Sequences
 // ===========================================================================
 
-#include <seqan/seq_io/genomic_region.h>
+// File Format Guessing
+#include <seqan/seq_io/guess_stream_format.h>
 
-// ===========================================================================
-// FAI Index
-// ===========================================================================
+#include <seqan/seq_io/read_fasta_fastq.h>
+#include <seqan/seq_io/read_embl.h>
+#include <seqan/seq_io/read_genbank.h>
 
-#include <seqan/seq_io/fai_index.h>
+#include <seqan/seq_io/write_fasta_fastq.h>
 
 // ===========================================================================
 // SequenceStream
@@ -68,5 +69,17 @@
 // ===========================================================================
 
 #include <seqan/seq_io/simple_read_fasta.h>
+
+// ===========================================================================
+// Genomic Region
+// ===========================================================================
+
+#include <seqan/seq_io/genomic_region.h>
+
+// ===========================================================================
+// FAI Index
+// ===========================================================================
+
+#include <seqan/seq_io/fai_index.h>
 
 #endif  // CORE_INCLUDE_SEQAN_SEQ_IO_H_

@@ -46,6 +46,7 @@
 #include <seqan/basic.h>
 #include <seqan/file.h>
 #include <seqan/stream.h>
+#include <seqan/seq_io.h>
 #include <seqan/sequence.h>
 #include <seqan/misc/misc_cmdparser.h>
 

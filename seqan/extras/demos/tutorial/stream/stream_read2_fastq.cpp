@@ -6,6 +6,7 @@
 #include <seqan/file.h>
 
 #include <seqan/stream.h>
+#include <seqan/seq_io.h>
 
 using namespace seqan;
 

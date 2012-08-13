@@ -1,4 +1,4 @@
-#include <seqan/stream.h>
+#include <seqan/seq_io.h>
 #include <iostream>
 
 int main()

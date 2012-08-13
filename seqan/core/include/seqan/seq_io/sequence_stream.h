@@ -35,8 +35,8 @@
 // TODO(holtgrew): Add EMBL support.
 // TODO(holtgrew): Add function readFasta(SEQ, FILENAME).
 
-#ifndef CORE_INCLUDE_SEQAN_SEQ_IO_SEQUENCE_STREAM_H_
-#define CORE_INCLUDE_SEQAN_SEQ_IO_SEQUENCE_STREAM_H_
+#ifndef CORE_INCLUDE_SEQAN_SEQ_IO_SEQUENCE_SEQ_IO_H_
+#define CORE_INCLUDE_SEQAN_SEQ_IO_SEQUENCE_SEQ_IO_H_
 
 #include <memory>
 
@@ -762,4 +762,4 @@ int writeAll(SequenceStream & seqIO,
 
 }  // namespace seqan
 
-#endif  // CORE_INCLUDE_SEQAN_SEQ_IO_SEQUENCE_STREAM_H_
+#endif  // CORE_INCLUDE_SEQAN_SEQ_IO_SEQUENCE_SEQ_IO_H_
