@@ -35,6 +35,7 @@
 #include <seqan/basic.h>
 #include <seqan/file.h>
 
+#include "test_align_stream.h"
 #include "test_align_gaps.h"
 #include "test_align_gaps_iterator.h"
 // TODO(holtgrew): Test Align<>, AlignCols<>!
@@ -236,5 +237,14 @@ SEQAN_BEGIN_TESTSUITE(test_align)
     // -----------------------------------------------------------------------
 
     SEQAN_CALL_TEST(test_align_integrate_align);
+
+    // -----------------------------------------------------------------------
+    // Test Printing.
+    // -----------------------------------------------------------------------
+    
+    SEQAN_CALL_TEST(test_align_stream_gaps_write);
+    SEQAN_CALL_TEST(test_align_stream_gaps_stream);
+    SEQAN_CALL_TEST(test_align_stream_align_write);
+    SEQAN_CALL_TEST(test_align_stream_align_stream);
 }
 SEQAN_END_TESTSUITE
