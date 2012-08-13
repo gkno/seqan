@@ -311,9 +311,9 @@ write(TFile & target,
 	TIter end_ = end(source);
 	for (; begin_ != end_; ++begin_) {
 		if (isGap(begin_))
-			_streamPut(target, gapValue<char>());
+			streamPut(target, gapValue<char>());
 		else 
-			_streamPut(target, *begin_);
+			streamPut(target, convert<char>(*begin_));
 	}
 }
 

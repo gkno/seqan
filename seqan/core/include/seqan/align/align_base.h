@@ -423,28 +423,28 @@ write(TFile & target,
             offset = (unsigned int) floor(log((double)baseCount) / log((double)10));
         for (unsigned int j = 0; j < leftSpace - offset; ++j)
         {
-            _streamPut(target, ' ');
+            streamPut(target, ' ');
         }
-        _streamPutInt(target, baseCount);
+        streamPut(target, (int)baseCount);
         baseCount += windowSize_;
-        _streamPut(target, ' ');
+        streamPut(target, ' ');
         for (TPosition i = 1; i <= windowSize_; ++i)
         {
             if ((i % 10) == 0)
-                _streamPut(target, ':');
+                streamPut(target, ':');
             else if ((i % 5) == 0)
-                _streamPut(target, '.');
+                streamPut(target, '.');
             else
-                _streamPut(target, ' ');
+                streamPut(target, ' ');
         }
-        _streamPut(target, ' ');
-        _streamPut(target, '\n');
+        streamPut(target, ' ');
+        streamPut(target, '\n');
 
         // Print sequences
         for (TRowsPosition i = 0; i < 2 * row_count - 1; ++i)
         {
             for (unsigned int j = 0; j < leftSpace + 2; ++j)
-                _streamPut(target, ' ');
+                streamPut(target, ' ');
             if ((i % 2) == 0)
             {
                 TRow & row_ = row(source, i / 2);
@@ -454,9 +454,9 @@ write(TFile & target,
                 for (; begin1_ != end1_; ++begin1_)
                 {
                     if (isGap(begin1_))
-                        _streamPut(target, gapValue<char>());
+                        streamPut(target, gapValue<char>());
                     else
-                        _streamPut(target, *begin1_);
+                        streamPut(target, *begin1_);
                 }
                 //_streamWriteRange(target, iter(row_, begin_), iter(row_, begin_ + windowSize_));
             }
@@ -468,20 +468,20 @@ write(TFile & target,
                         (!isGap(row(source, (i + 1) / 2), begin_ + j)) &&
                         (row(source, (i - 1) / 2)[begin_ + j] == row(source, (i + 1) / 2)[begin_ + j]))
                     {
-                        _streamPut(target, '|');
+                        streamPut(target, '|');
                     }
                     else
                     {
-                        _streamPut(target, ' ');
+                        streamPut(target, ' ');
                     }
                 }
             }
-            _streamPut(target, '\n');
+            streamPut(target, '\n');
         }
-        _streamPut(target, '\n');
+        streamPut(target, '\n');
         begin_ += 50;
     }
-    _streamPut(target, '\n');
+    streamPut(target, '\n');
 }
 
 // ----------------------------------------------------------------------------
