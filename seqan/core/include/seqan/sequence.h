@@ -112,4 +112,9 @@
 #include <seqan/sequence/adapt_std_vector.h>
 #include <seqan/sequence/adapt_array_pointer.h>
 
+
+//____________________________________________________________________________
+// Utilities
+#include <seqan/sequence/segment_utils.h>
+
 #endif //#ifndef SEQAN_HEADER_...
