@@ -480,7 +480,7 @@ findMotif(MotifFinder<TSeqType, Projection, TRng> & finder,
 				while(bucket_iter!=bucket_end)
 				{
 					TString l_mer = 
-						inverseHash<TSeqType>(*bucket_iter, ValueSize<TSeqType>::VALUE, finder.motif_size);
+						inverseHash<TSeqType>(*bucket_iter, valueSize<TSeqType>(), finder.motif_size);
 					l_mers[bucket_element] = l_mer;
 					++bucket_element;
 					++bucket_iter;

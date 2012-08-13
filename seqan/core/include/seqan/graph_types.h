@@ -42,12 +42,6 @@
 #include <seqan/sequence.h>
 #include <seqan/stream.h>
 
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/graph_types/graph_types_generated_forwards.h>
-#endif
-
-
 // Basic graph stuff
 #include <seqan/graph_types/graph_base.h>
 #include <seqan/graph_types/graph_idmanager.h>	// Id manager

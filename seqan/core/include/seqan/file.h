@@ -56,10 +56,6 @@
 
 #include <seqan/file/file_forwards.h>
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/file/file_generated_forwards.h>
-#endif
-
 #ifndef SEQAN_NEW_IO
 #include <seqan/file/cstream.h>
 #include <seqan/file/stream.h>
@@ -71,10 +67,11 @@
 //____________________________________________________________________________
 // files
 
-#include <seqan/file/file_base.h>
+#include <seqan/file/file_interface.h>
 #ifndef SEQAN_NEW_IO
 #include <seqan/file/file_cstyle.h>
 #endif
+#include <seqan/file/file_base.h>
 
 #include <seqan/system.h>	// async file (default file type of File<>)
 

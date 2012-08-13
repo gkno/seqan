@@ -1,3 +1,8 @@
+#include <seqan/sequence.h>
+#include <seqan/index.h>
+
+using namespace seqan;
+
 int main()
 {
 // One possible solution to the first sub assignment

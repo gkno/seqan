@@ -39,6 +39,11 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+// Manual Forwards
+template <typename TKey, typename TCargo, typename TCompare, typename TAlloc, typename TKey2>
+inline typename Cargo< ::std::map<TKey,TCargo, TCompare, TAlloc> >::Type &
+cargo(::std::map<TKey,TCargo, TCompare, TAlloc> & me, TKey2 const & _key);
+
 //////////////////////////////////////////////////////////////////////////////
 //insertion tags
 

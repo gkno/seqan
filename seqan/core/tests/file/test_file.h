@@ -525,6 +525,7 @@ SEQAN_DEFINE_TEST(test_file_raw)
 	str_3 = "hello you fellow";
 	stringstream ss_1;
 	write(ss_1, str_3);
+	ss_1.seekg(0);  // reset for reading
     
 	read(ss_1, str_4, Raw());
 	SEQAN_ASSERT_EQ(str_4, str_3);
@@ -533,6 +534,7 @@ SEQAN_DEFINE_TEST(test_file_raw)
 	str_3 = "gogogo dududu";
 	stringstream ss_2;
 	write(ss_2, str_3);
+	ss_2.seekg(0);  // reset for reading
 	read(ss_2, str_4, 5);
 	SEQAN_ASSERT_EQ(str_4, "gogog");
     

@@ -51,16 +51,6 @@
 #include <seqan/sequence.h>
 
 // ============================================================================
-// Forwards.
-// ============================================================================
-
-#include <seqan/sequence_journaled/sequence_journaled_forwards.h>
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/sequence_journaled/sequence_journaled_generated_forwards.h>
-#endif
-
-// ============================================================================
 // Journaled Sequences.
 // ============================================================================
 

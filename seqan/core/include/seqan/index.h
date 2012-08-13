@@ -62,7 +62,6 @@
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/index/index_manual_forwards.h>
-#include <seqan/index/index_generated_forwards.h>
 #endif
 
 #ifdef SEQAN_PARALLEL

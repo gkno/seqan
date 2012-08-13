@@ -44,10 +44,6 @@
 
 #include <seqan/sequence.h> //also include basic.h
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/modifier/modifier_generated_forwards.h>
-#endif
-
 //____________________________________________________________________________
 
 #include <seqan/modifier/modifier_alphabet.h>

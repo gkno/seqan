@@ -40,10 +40,6 @@
 #include <seqan/map.h>
 #include <seqan/modifier.h>
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-//#include <seqan/score/score_generated_forwards.h>
-#endif
-
 #include <seqan/seeds/propertyMap.h>
 #include <seqan/seeds/memoryManager_base.h>
 #include <seqan/seeds/memoryManager_int.h>

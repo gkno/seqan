@@ -57,6 +57,9 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
 
+// Manual Forward
+template <typename TTarget, typename TSource>
+inline void _streamWrite(TTarget & target, TSource const & source);
 
 /**
 .Internal._streamPutInt:
@@ -161,18 +164,6 @@ SEQAN_CHECKPOINT
 
 template <typename TTarget, typename TSource>
 inline void
-_streamWrite(TTarget & target,
-			 TSource const & source)
-{
-//IOREV _doc_
-SEQAN_CHECKPOINT
-	_streamWriteSeq(target, source, typename IsSequence<TSource const>::Type());
-}
-
-//____________________________________________________________________________
-
-template <typename TTarget, typename TSource>
-inline void
 _streamWriteSeq(TTarget & target,
 				TSource const & source,
 				False const)
@@ -214,6 +205,18 @@ SEQAN_CHECKPOINT
 	{
 		_streamWrite(target, *source);
 	}
+}
+
+//____________________________________________________________________________
+
+template <typename TTarget, typename TSource>
+inline void
+_streamWrite(TTarget & target,
+			 TSource const & source)
+{
+//IOREV _doc_
+SEQAN_CHECKPOINT
+	_streamWriteSeq(target, source, typename IsSequence<TSource const>::Type());
 }
 
 //////////////////////////////////////////////////////////////////////////////

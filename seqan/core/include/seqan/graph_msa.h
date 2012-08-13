@@ -40,20 +40,15 @@
 #include <seqan/refinement.h>
 #include <seqan/align.h>
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/graph_msa/graph_msa_generated_forwards.h>
-#endif
-
-
 //MSA
 #include <seqan/graph_msa/graph_align_tcoffee_base.h>
-#include <seqan/graph_msa/graph_align_tcoffee_msa.h>
+#include <seqan/graph_msa/graph_align_tcoffee_library.h>
 #include <seqan/graph_msa/graph_align_tcoffee_kmer.h>
 #include <seqan/graph_msa/graph_align_tcoffee_distance.h>
 #include <seqan/graph_msa/graph_align_tcoffee_guidetree.h>
 #include <seqan/graph_msa/graph_align_tcoffee_io.h>
-#include <seqan/graph_msa/graph_align_tcoffee_library.h>
 #include <seqan/graph_msa/graph_align_tcoffee_progressive.h>
 #include <seqan/graph_msa/graph_align_tcoffee_refinement.h>
+#include <seqan/graph_msa/graph_align_tcoffee_msa.h>
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -52,10 +52,6 @@
 
 #define SEQAN_NAMESPACE_PIPELINING pipe
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/pipe/pipe_generated_forwards.h>
-#endif
-
 #include <seqan/pipe/pipe_base.h>
 #include <seqan/pipe/pipe_iterator.h>
 #include <seqan/pipe/pipe_caster.h>

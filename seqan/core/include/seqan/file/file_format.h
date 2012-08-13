@@ -634,24 +634,6 @@ _streamSkipWhitespace(TFile& file, TChar& c)
 
 ////////////////////////////////////////////////////////////////////////////
 
-
-template<typename TFile, typename TChar>
-inline String<char>
-_streamReadWord(TFile & file, TChar& c)
-{
-//IOREV _nodoc_ _hasCRef_ wrong place
-	// Read word
-	String<char> str(c);
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (!_streamIsLetter(c)) break;
-		append(str, c);
-	}
-	return str;
-}
-
-////////////////////////////////////////////////////////////////////////////
-
 template<typename TChar>
 inline bool
 _streamIsLetter(TChar const c)
@@ -670,6 +652,24 @@ _streamIsLetter(TChar const c)
 			(c == 'Y') || (c == 'Z'));
 }
 
+
+////////////////////////////////////////////////////////////////////////////
+
+
+template<typename TFile, typename TChar>
+inline String<char>
+_streamReadWord(TFile & file, TChar& c)
+{
+//IOREV _nodoc_ _hasCRef_ wrong place
+	// Read word
+	String<char> str(c);
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (!_streamIsLetter(c)) break;
+		append(str, c);
+	}
+	return str;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

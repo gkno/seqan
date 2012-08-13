@@ -40,10 +40,6 @@
 
 #include <seqan/misc/misc_random.h>
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/chaining/chaining_generated_forwards.h>
-#endif
-
 #include <seqan/chaining/score_chain.h>
 #include <seqan/chaining/score_manhattan.h>
 #include <seqan/chaining/score_zero.h>

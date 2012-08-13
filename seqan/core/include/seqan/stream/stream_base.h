@@ -105,7 +105,13 @@ atEnd(Stream<TSpec> const & stream)
 // Function streamPut()
 // ----------------------------------------------------------------------------
 
-// this is generic for all specializations of Stream<> right now
+// Forward for generic case.
+
+template <typename TStream, typename TSource>
+inline int
+streamPut(TStream & stream, TSource const & source);
+
+// Important special case of char.
 
 template <typename TStream>
 inline int
@@ -114,25 +120,20 @@ streamPut(Stream<TStream> & stream, char const c)
     return streamWriteChar(stream, c);
 }
 
-template <typename TStream>
-inline int
-streamPut(Stream<TStream> & stream, char const * source)
-{
-    return (streamWriteBlock(stream, source, strlen(source))
-                == strlen(source) )  ?   0 : 1;
-}
+// Important special case of CharString.
 
 template <typename TStream, typename TSpec>
 inline int
 streamPut(Stream<TStream> & stream, String<char, TSpec> const & source)
 {
-    return (streamWriteBlock(stream, toCString(source), length(source))
-                == length(source))  ?   0 : 1;
+    return (streamWriteBlock(stream, toCString(source), length(source)) == length(source))  ?   0 : 1;
 }
+
+// Generic version, based on stringstream.
 
 template <typename TStream, typename TSource>
 inline int
-streamPut(Stream<TStream> & stream, TSource const & source)
+_streamPut(Stream<TStream> & stream, TSource const & source, False const & /*tag*/)
 {
     char buffer[1024] = "";
     ::std::stringstream s;
@@ -153,8 +154,55 @@ streamPut(Stream<TStream> & stream, TSource const & source)
 //     if (s.fail())
 //         return s.fail();
 
-    return (streamWriteBlock(stream, buffer, strlen(buffer))
-                == strlen(buffer) )  ?   0 : 1;
+    return (streamWriteBlock(stream, buffer, strlen(buffer)) == strlen(buffer)) ? 0 : 1;
+}
+
+template <typename TStream, typename TSource>
+inline int
+_streamPut(TStream & target, TSource const & source, True const & /*tag*/)
+{
+	typename Iterator<TSource const, Standard>::Type it = begin(source, Standard());
+	typename Iterator<TSource const, Standard>::Type itEnd = end(source, Standard());
+    int res = 0;
+
+	for (; it != itEnd && res == 0; ++it)
+	{
+		typename GetValue<TSource const>::Type val_ = getValue(it);
+		res = streamPut(target, val_);
+	}
+	
+	return res;
+}
+
+// Case: Character arrays.
+
+template <typename TStream>
+inline int
+_streamPut(Stream<TStream> & stream, char const * source, True const & /*tag*/)
+{
+    return (streamWriteBlock(stream, source, strlen(source)) == strlen(source)) ? 0 : 1;
+}
+
+// Case: Array.
+// TODO(holtgrew): Requires atEnd(it) <==> *it == 0. Remove?
+
+template <typename TStream, typename TSourceValue>
+inline int
+_streamPut(TStream & stream, TSourceValue const * source, True const & /*tag*/)
+{
+    int res = 0;
+	for (; !atEnd(source) && res == 0; ++source)
+		res = _streamWrite(stream, *source);
+	return res;
+}
+
+// Function entry for generic version.
+
+template <typename TStream, typename TSource>
+inline int
+streamPut(TStream & stream, TSource const & source)
+{
+	return _streamPut(stream, source, typename IsSequence<TSource const>::Type());
 }
 
 }  // namespace seqean

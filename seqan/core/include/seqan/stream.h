@@ -70,12 +70,6 @@
 #include <seqan/file.h>
 #include <seqan/sequence.h>
 
-// Currently, the stream module does not need any forwards and it would be
-// nice if we could keep it this way.
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-//#include <seqan/stream/stream_generated_forwards.h>
-#endif
-
 // ===========================================================================
 // Stream Concept, Adaptions, Stream Class and Specializations.
 // ===========================================================================

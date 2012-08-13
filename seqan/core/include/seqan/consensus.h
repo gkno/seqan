@@ -43,11 +43,6 @@
 #include <seqan/graph_msa.h>
 #include <seqan/store.h>
 
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/consensus/consensus_generated_forwards.h>
-#endif
-
 // Consensus tool
 #include <seqan/consensus/consensus_base.h>
 #include <seqan/consensus/consensus_score.h>

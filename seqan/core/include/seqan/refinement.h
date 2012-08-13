@@ -42,10 +42,6 @@
 #include <seqan/graph_algorithms.h>
 
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/refinement/refinement_generated_forwards.h>
-#endif
-
 // Alignment graph
 #include <seqan/refinement/graph_impl_align.h>
 #include <seqan/refinement/graph_impl_align_adapt.h>
@@ -59,9 +55,9 @@
 #include <seqan/refinement/graph_algorithm_refine_fragment.h>
 #include <seqan/refinement/graph_algorithm_refine_aligngraph.h>
 #include <seqan/refinement/graph_algorithm_refine_align.h>
-#include <seqan/refinement/graph_algorithm_refine_annotation.h>
 //#include <seqan/refinement/graph_algorithm_refine_exact.h>
 #include <seqan/refinement/graph_algorithm_refine_exact_iterative.h>
 #include <seqan/refinement/graph_algorithm_refine_inexact.h>
+#include <seqan/refinement/graph_algorithm_refine_annotation.h>
 
 #endif //#ifndef SEQAN_HEADER_...

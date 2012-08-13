@@ -42,13 +42,6 @@
 #include <seqan/sequence.h>
 #include <seqan/misc/misc_random.h>
 
-
-//____________________________________________________________________________
-
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/map/map_generated_forwards.h>
-#endif
-
 //____________________________________________________________________________
 
 #include <seqan/map/map_base.h>
