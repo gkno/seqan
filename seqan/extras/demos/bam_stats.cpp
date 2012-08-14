@@ -870,7 +870,7 @@ int doWork(TStreamOrReader & reader, TStreamOrReader & greader,
                         editDistance += 1;
                         continue;
                     }
-                    if (*it0 != *it1)
+                    if (convert<char>(*it0) == 'N' || convert<char>(*it1) == 'N' || *it0 != *it1)
                     {
                         unsigned len = length(stats.mismatchHisto);
                         resize(stats.mismatchHisto, std::max(len, posRead + 1), 0);
