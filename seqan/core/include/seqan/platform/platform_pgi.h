@@ -30,21 +30,68 @@
 //
 // ==========================================================================
 
-#ifndef SEQAN_PLATFORM_H
-#define SEQAN_PLATFORM_H
+//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
 
-#ifdef __MINGW32__
-	#include "platform/platform_mingw.h"
-#elif _MSC_VER
-	#include "platform/platform_windows.h"
-#elif __SUNPRO_C
-	#include "platform/platform_solaris.h"
-#elif __ICC
-	#include "platform/platform_icc.h"
-#elif __PGI
-	#include "platform/platform_pgi.h"
-#else
-	#include "platform/platform_gcc.h"
+#ifndef PLATFORM_GCC
+  #define PLATFORM_GCC
 #endif
 
+// should be set before including anything
+#ifndef _FILE_OFFSET_BITS
+  #define _FILE_OFFSET_BITS 64
+#endif
+
+#ifndef _LARGEFILE_SOURCE
+  #define _LARGEFILE_SOURCE
+#endif
+
+// The symbols SEQAN_IS_64_BIT and SEQAN_IS_32_BIT can be used to check
+// whether we are on a 32 bit or on a 64 bit machine.
+#if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
+#define SEQAN_IS_64_BIT 1
+#define SEQAN_IS_32_BIT 0
+#else  // #if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
+#define SEQAN_IS_64_BIT 0
+#define SEQAN_IS_32_BIT 1
+#endif  // #if defined(__amd64__) || defined(__x86_64__) || defined(__ia64__)
+
+//#include <unistd.h>
+#include <inttypes.h>
+
+#define finline __inline__
+
+// default 64bit type
+typedef uint64_t __uint64; // nolint
+
+// default 32bit type
+typedef int32_t __int32;   // nolint
+typedef uint32_t __uint32; // nolint
+
+// default 16bit type
+typedef int16_t __int16;   // nolint
+typedef uint16_t __uint16; // nolint
+
+// default 8bit type
+typedef int8_t __int8;     // nolint
+typedef uint8_t __uint8;   // nolint
+
+// detect gcc C++11 support
+#if defined(__GXX_EXPERIMENTAL_CXX0X__)
+#  define SEQAN_CXX11_STANDARD
+#endif
+
+// detect clang C++11 support
+#ifdef __has_feature
+#  if __has_feature(cxx_static_assert)
+#    define SEQAN_CXX11_STANDARD
+#  endif
+#endif
+
+//define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
+#define SEQAN_SWITCH_USE_FORWARDS
+
+#include <seqan/platform/platform_generated_forwards.h>
+
+#ifndef SEQAN_HEADER_PLATFORM_GENERATED_FORWARDS_H
+#error To use the SeqAn library you first have to execute 'make forwards' in the root directory
 #endif
