@@ -302,6 +302,18 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Function.empty.param.object.type:Class.Segment
+
+template <typename THost, typename TSpec>
+inline bool
+empty(Segment<THost, TSpec> const & me)
+{
+    SEQAN_CHECKPOINT;
+    return (beginPosition(me) == endPosition(me));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 ///.Function.length.param.object.type:Class.Segment
 ///.Function.length.class:Class.Segment
 
