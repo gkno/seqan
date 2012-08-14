@@ -37,8 +37,7 @@
 //  * Class String and some specializations.
 //  * Class StringSet and its specialization.
 //  * Adaptions of STL classes to the SeqAn Sequence concept.
-//  * Misc sequence-related code such as treating sequences as streams and
-//    lexical comparison helpers.
+//  * Misc sequence-related code such as lexical comparison helpers.
 // ==========================================================================
 
 #ifndef SEQAN_HEADER_SEQUENCE_H
@@ -64,13 +63,12 @@
 #include <seqan/sequence/sequence_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/sequence/sequence_generated_forwards.h>
+//#include <seqan/sequence/sequence_generated_forwards.h>
 #endif
 
 //____________________________________________________________________________
 // Miscellaneous sequence-related code.
 
-#include <seqan/sequence/sequence_stream.h>
 #include <seqan/sequence/sequence_lexical.h>
 
 //____________________________________________________________________________

@@ -43,6 +43,15 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+// Forward for tag.
+struct CStyle_;
+typedef Tag<CStyle_> CStyle;
+
+// Used in constructors.
+template <typename TValue>
+inline void
+clear(String<TValue, CStyle> & me);
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -87,7 +96,8 @@ strcmp(toCString(str), "compare it to this string");
 ..include:seqan/sequence.h
 */
 
-struct CStyle;
+struct CStyle_;
+typedef Tag<CStyle_> CStyle;
 
 #ifdef PLATFORM_WINDOWS_VS
 #pragma warning( push )

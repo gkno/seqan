@@ -31,6 +31,8 @@
 // ==========================================================================
 // Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
 // ==========================================================================
+// Adaptions for STL vectors to SeqAn sequences.
+// ==========================================================================
 
 // SEQAN_NO_GENERATED_FORWARDS: No forwards are generated for this file.
 
@@ -46,7 +48,7 @@ namespace seqan {
 /**
 .Adaption."std::list"
 ..summary:Adaption for STL list objects.
-*/
+ */
 
 // ===========================================================================
 // Metafunctions
@@ -55,115 +57,131 @@ namespace seqan {
 ///.Metafunction.IsContiguous.param.T.type:Adaption.std::list
 ///.Metafunction.IsContiguous.class:Adaption.std::list
 
-template <typename TChar, typename TAlloc>
-struct IsContiguous< ::std::basic_string<TChar, TAlloc> >
+template <typename TValue, typename TAlloc>
+struct IsContiguous< std::list<TValue, TAlloc> >
 {
     enum { VALUE = false };
 };
 
-template <typename  TChar, typename TAlloc>
-struct IsContiguous< ::std::basic_string<TChar, TAlloc> const>
-        : IsContiguous< ::std::basic_string<TChar, TAlloc> > {};
+template <typename  TValue, typename TAlloc>
+struct IsContiguous< std::list<TValue, TAlloc> const>
+        : IsContiguous< std::list<TValue, TAlloc> > {};
 
 ///.Metafunction.Value.param.T.type:Adaption.std::list
 ///.Metafunction.Value.class:Adaption.std::list
 
 template <typename TValue, typename TAlloc>
-struct Value< ::std::list<TValue, TAlloc> >
+struct Value< std::list<TValue, TAlloc> >
 {
-    typedef typename ::std::list<TValue, TAlloc>::value_type Type;
+    typedef typename std::list<TValue, TAlloc>::value_type Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct Value< ::std::list<TValue, TAlloc> const>
-        : Value< ::std::list<TValue, TAlloc> > {};
+struct Value< std::list<TValue, TAlloc> const>
+        : Value< std::list<TValue, TAlloc> > {};
 
 ///.Metafunction.GetValue.param.T.type:Adaption.std::list
+// TODO(holtgrew): GetValue is a reference?! I thought the reverse was true in respect to Value<>.
 ///.Metafunction.GetValue.class:Adaption.std::list
 
 template <typename TValue, typename TAlloc>
-struct GetValue< ::std::list<TValue, TAlloc> >
+struct GetValue< std::list<TValue, TAlloc> >
 {
-    typedef typename ::std::list<TValue, TAlloc>::reference Type;
+    typedef typename std::list<TValue, TAlloc>::reference Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct GetValue< ::std::list<TValue, TAlloc> const>
+struct GetValue< std::list<TValue, TAlloc> const>
 {
-    typedef typename ::std::list<TValue, TAlloc>::const_reference Type;
+    typedef typename std::list<TValue, TAlloc>::const_reference Type;
+};
+
+///.Metafunction.Reference.param.T.type:Adaption.std::vector
+///.Metafunction.Reference.class:Adaption.std::vector
+
+template <typename TValue, typename TAlloc>
+struct Reference< std::list<TValue, TAlloc> >
+{
+    typedef typename std::list<TValue, TAlloc>::reference Type;
+};
+
+template <typename TValue,  typename TAlloc>
+struct Reference< std::list<TValue, TAlloc> const>
+{
+    typedef typename std::list<TValue,  TAlloc>::const_reference Type;
 };
 
 ///.Metafunction.Iterator.param.T.type:Adaption.std::list
 ///.Metafunction.Iterator.class:Adaption.std::list
 
 template <typename TValue, typename TAlloc>
-struct Iterator< ::std::list<TValue, TAlloc>, Rooted>
+struct Iterator< std::list<TValue, TAlloc>, Rooted>
 {
-    typedef ::std::list<TValue, TAlloc> TString_;
+    typedef std::list<TValue, TAlloc> TString_;
     typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
     typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct Iterator< ::std::list<TValue, TAlloc> const, Rooted>
+struct Iterator< std::list<TValue, TAlloc> const, Rooted>
 {
-    typedef ::std::list<TValue, TAlloc> const TString_;
+    typedef std::list<TValue, TAlloc> const TString_;
     typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
     typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct Iterator< ::std::list<TValue, TAlloc>, Standard>
+struct Iterator< std::list<TValue, TAlloc>, Standard>
 {
-    typedef Iter< ::std::list<TValue, TAlloc>, StdIteratorAdaptor> Type;
+    typedef Iter< std::list<TValue, TAlloc>, StdIteratorAdaptor> Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct Iterator< ::std::list<TValue, TAlloc> const, Standard>
+struct Iterator< std::list<TValue, TAlloc> const, Standard>
 {
-    typedef Iter< ::std::list<TValue, TAlloc> const, StdIteratorAdaptor> Type;
+    typedef Iter< std::list<TValue, TAlloc> const, StdIteratorAdaptor> Type;
 };
 
 ///.Metafunction.Position.param.T.type:Adaption.std::list
 ///.Metafunction.Position.class:Adaption.std::list
 
 template <typename TValue, typename TAlloc>
-struct Position< ::std::list<TValue, TAlloc> >
+struct Position< std::list<TValue, TAlloc> >
 {
-    typedef typename ::std::list<TValue, TAlloc>::size_type Type;
+    typedef typename std::list<TValue, TAlloc>::size_type Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct Position< ::std::list<TValue, TAlloc> const>
-        : Position< ::std::list<TValue, TAlloc> > {};
+struct Position< std::list<TValue, TAlloc> const>
+        : Position< std::list<TValue, TAlloc> > {};
 
 ///.Metafunction.Size.param.T.type:Adaption.std::list
 ///.Metafunction.Size.class:Adaption.std::list
 
 template <typename TValue, typename TAlloc>
-struct Size< ::std::list<TValue, TAlloc> >
+struct Size< std::list<TValue, TAlloc> >
 {
-    typedef typename ::std::list<TValue, TAlloc>::size_type Type;
+    typedef typename std::list<TValue, TAlloc>::size_type Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct Size< ::std::list<TValue, TAlloc> const>
-        : Size< ::std::list<TValue, TAlloc> > {};
+struct Size< std::list<TValue, TAlloc> const>
+        : Size< std::list<TValue, TAlloc> > {};
 
 ///.Metafunction.StdContainerIterator.param.T.type:Adaption.std::list
 ///.Metafunction.StdContainerIterator.class:Adaption.std::list
 
 template <typename TValue, typename TAlloc>
-struct StdContainerIterator< ::std::list<TValue, TAlloc> >
+struct StdContainerIterator< std::list<TValue, TAlloc> >
 {
-    typedef ::std::list<TValue, TAlloc> TContainer_;
+    typedef std::list<TValue, TAlloc> TContainer_;
     typedef typename TContainer_::iterator Type;
 };
 
 template <typename TValue, typename TAlloc>
-struct StdContainerIterator< ::std::list<TValue, TAlloc> const>
+struct StdContainerIterator< std::list<TValue, TAlloc> const>
 {
-    typedef ::std::list<TValue, TAlloc> TContainer_;
+    typedef std::list<TValue, TAlloc> TContainer_;
     typedef typename TContainer_::const_iterator Type;
 };
 
