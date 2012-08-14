@@ -1,3 +1,10 @@
+project (seqan)
+
+# ===========================================================================
+# We require CMake 2.8.2.  Since it is available in the currently stable
+# Debian, it should be available everywhere else, too.
+# ===========================================================================
+
 cmake_minimum_required (VERSION 2.8.2)
 
 # ===========================================================================
@@ -52,9 +59,6 @@ if (EXISTS "$CMAKE_BINARY_DIR/CMakeLists.txt")
     message(FATAL_ERROR "Please follow the instructions above.")
   endif (EXISTS "$CMAKE_BINARY_DIR/I_WANT_IN_SOURCE_BUILDS")
 endif (EXISTS "$CMAKE_BINARY_DIR/CMakeLists.txt")
-
-cmake_minimum_required (VERSION 2.6)
-project (seqan)
 
 # ===========================================================================
 # Add contrib to CMAKE_FIND_ROOT_PATH.
