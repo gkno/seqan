@@ -203,7 +203,7 @@ endmacro (seqan_setup_global)
 function (seqan_setup_includes REL_PATH TARGET_NAME)
     set (PATH ${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH})
     set (PATH_BIN ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH})
-    file (GLOB HEADERS_TMP ${PATH}/seqan/[A-z]*/[A-z]*.h)
+    file (GLOB HEADERS ${PATH}/seqan/[A-z]*/[A-z]*.h)
     file (GLOB SUPER_HEADERS ${PATH}/seqan/[A-z]*.h)
 	
     set (SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH} CACHE INTERNAL "asdf" FORCE)
@@ -213,55 +213,11 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
 
     set (SEQAN_LIBRARY_TARGETS ${TARGET_NAME} CACHE INTERNAL "asdf" FORCE)
 
-    foreach (HEADER ${HEADERS_TMP})
-        if (NOT ${HEADER} MATCHES ".*generated.*")
-            list (APPEND HEADERS ${HEADER})
-        else (NOT ${HEADER} MATCHES ".*generated.*")
-            list (APPEND FORWARDS ${HEADER})
-        endif (NOT ${HEADER} MATCHES ".*generated.*")
-    endforeach (HEADER ${HEADERS})
-    
-    # Sort headers and forwards.
+    # Sort headers.
     if (HEADERS)
         list (SORT HEADERS)
     endif (HEADERS)
-    if (FORWARDS)
-        list (SORT FORWARDS)
-    endif (FORWARDS)
 	
-    # ---------------------------------------------------------------------------
-    # Forwards Generation.
-    # ---------------------------------------------------------------------------
-    if (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
-        file (GLOB BASE_CONTENTS RELATIVE ${PATH}/seqan ${PATH}/seqan/[A-z]*)
-        foreach (ENTRY ${BASE_CONTENTS})
-            if (IS_DIRECTORY ${PATH}/seqan/${ENTRY})
-                list (APPEND MODULES ${ENTRY})
-            endif (IS_DIRECTORY ${PATH}/seqan/${ENTRY})
-        endforeach (ENTRY ${SEQAN_BASE_CONTENTS})
-	
-        if (MODULES)
-            list (SORT MODULES)
-            list (REMOVE_DUPLICATES MODULES)
-        
-            # Build a list of generated forwards headers.  Goes into SEQAN_FORWARDS.
-            foreach (MODULE ${MODULES})
-                list (APPEND FORWARDS ${PATH_BIN}/seqan/${MODULE}/${MODULE}_generated_forwards.h)
-            endforeach (MODULE ${MODULES})
-
-            # Now tell CMake that the forward headers can be generated with
-            # build_forwards.py
-            add_custom_command (
-                OUTPUT ${FORWARDS}
-                COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/util/bin/build_forwards.py ${PATH}/seqan ${PATH_BIN}/seqan all
-                DEPENDS ${HEADERS})
-            #message(STATUS "add_custom_command (
-            #    OUTPUT ${FORWARDS}
-            #    COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_ROOT_SOURCE_DIR}/util/bin/build_forwards.py ${PATH}/seqan all
-            #    DEPENDS ${HEADERS})")
-        endif (MODULES)
-    endif (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
-
     # ---------------------------------------------------------------------------
     # GUI Setup Stuff.
     # ---------------------------------------------------------------------------
@@ -281,10 +237,8 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     add_custom_target(
         ${TARGET_NAME}
         DEPENDS ${HEADERS}
-                ${FORWARDS}
                 ${GUI_SOURCES}
     )
-    #message("add_custom_target(${TARGET_NAME} DEPENDS ${HEADERS} ${FORWARDS} ${GUI_SOURCES})")
     
     # Group library headers into modules.  The CMake documentation says this
     # is mostly (only?) used for Visual Studio Projects.
@@ -298,7 +252,7 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     # -----------------------------------------------------------------------
     # Installation
     # -----------------------------------------------------------------------
-    foreach (HEADER ${HEADERS} ${SUPER_HEADERS} ${FORWARDS})
+    foreach (HEADER ${HEADERS} ${SUPER_HEADERS})
         string(REPLACE ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH}/seqan "" NEW_PATH ${HEADER})
         string(REPLACE ${BASE_ABS} "" NEW_PATH ${NEW_PATH})
         string(REPLACE "//" "/" NEW_PATH ${NEW_PATH})
