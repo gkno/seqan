@@ -45,11 +45,11 @@
 #include <seqan/graph_algorithms.h>
 
 
+#include <seqan/blast/blast_parsing.h>
 #include <seqan/blast/blast_base.h>
 #include <seqan/blast/blast_hsp.h>
 #include <seqan/blast/blast_hit.h>
 #include <seqan/blast/blast_report.h>
-#include <seqan/blast/blast_parsing.h>
 #include <seqan/blast/blast_iterator.h>
 #include <seqan/blast/blast_hit_iterator.h>
 #include <seqan/blast/blast_hsp_iterator.h>
