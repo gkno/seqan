@@ -1,6 +1,7 @@
-//Adjust the code to handle Strings of type Dna, Dna5 and AminoAcid. Print the text on screen and observe how it changes depending on the type of the string.
+// Copy the code into your current file and encapsulate the print instructions.
 
 #include <iostream>
+#include <seqan/file.h>
 #include <seqan/sequence.h>
 
 int computeLocalScore(seqan::String<char> subText, seqan::String<char> pattern)
@@ -24,16 +25,16 @@ seqan::String<int> computeScore(seqan::String<char> text, seqan::String<char> pa
     return score;
 }
 
-void print(seqan::String<int> score)
+void print(seqan::String<int> text)
 {
-    for (unsigned i = 0; i < seqan::length(score); ++i)
-        std::cout << score[i] << " ";
+    for (unsigned i = 0; i < seqan::length(text); ++i)
+        std::cout << text[i] << " ";
     std::cout << std::endl;
 }
 
 int main()
 {
-    seqan::String<char> text = "This is an awesome tutorial to get to now the basic principles of SeqAn!";
+    seqan::String<char> text = "This is an awesome tutorial to get to now SeqAn!";
     seqan::String<char> pattern = "tutorial";
     seqan::String<int> score = computeScore(text, pattern);
 
