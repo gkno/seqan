@@ -32,28 +32,17 @@
 // to be able to swap read sequences.
 
 namespace seqan {
-struct MyFragmentStoreConfig {};
+
+struct MyFragmentStoreConfig;
 
 template<>
-struct FragmentStoreConfig<MyFragmentStoreConfig>
+struct FragmentStoreConfig<MyFragmentStoreConfig> :
+	public FragmentStoreConfig<>
 {
-	typedef String<Dna5Q>	TReadSeq;
-	typedef String<Dna5Q>	TContigSeq;
-	
-	typedef double			TMean;
-	typedef double			TStd;
-	typedef signed char		TMappingQuality;
-		
-	typedef void    TReadStoreElementSpec;
-	typedef Owner<Default> TReadSeqStoreSpec;
-	typedef void    TMatePairStoreElementSpec;
-	typedef void    TLibraryStoreElementSpec;
-	typedef void    TContigStoreElementSpec;
-	typedef void    TContigFileSpec;
-	typedef void    TAlignedReadStoreElementSpec;
+	typedef Owner<Default>	TReadSeqStoreSpec;
 	typedef Owner<Default>	TAlignedReadTagStoreSpec;
-	typedef void    TAnnotationStoreElementSpec;
 };
+
 }  // namespace seqan
 
 #endif  // #ifndef STORE_CONFIG_H_

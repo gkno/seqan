@@ -1599,7 +1599,7 @@ void dumpMatches(
 				TMatch& mR = *it;
 				unsigned readLenL = mL.mScore;
 				unsigned readLenR = mR.mScore;
-				SEQAN_ASSERT_LEQ(mL.mScore+mR.mScore,readLen);
+				SEQAN_ASSERT_LEQ(mL.mScore+mR.mScore,(int)readLen);
 				String<Dna5Q> readInfL = infix(reads[currReadNo],0,readLenL);
 				String<Dna5Q> readInfR = infix(reads[currReadNo],length(reads[currReadNo])-readLenR,length(reads[currReadNo]));
 				int offsetL = 0;

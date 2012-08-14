@@ -38,50 +38,23 @@ namespace SEQAN_NAMESPACE_MAIN
 // Default options
 
 struct SnpStoreSpec_;
-template <>
-struct FragmentStoreConfig<SnpStoreSpec_ > 
-{
-    typedef String<Dna5Q>       TReadSeq;
-    typedef String<Dna5Q>       TContigSeq;
-    
-    typedef double          TMean;
-    typedef double          TStd;
-    typedef signed char     TMappingQuality;
-        
-    typedef void            TReadStoreElementSpec;
-    typedef Owner<>         TReadSeqStoreSpec;
-    typedef void            TMatePairStoreElementSpec;
-    typedef void            TLibraryStoreElementSpec;
-    typedef void            TContigStoreElementSpec;
-    typedef void            TContigFileSpec;
-    typedef void            TAlignedReadStoreElementSpec;
-    typedef Owner<>         TAlignedReadTagStoreSpec;
-    typedef void            TAnnotationStoreElementSpec;
-};
-
-
 struct SnpStoreGroupSpec_;
-template <>
-struct FragmentStoreConfig<SnpStoreGroupSpec_ > 
+
+template<>
+struct FragmentStoreConfig<SnpStoreSpec_> :
+    public FragmentStoreConfig<>
 {
-    typedef String<Dna5Q>       TReadSeq;
-    typedef String<Dna5Q>       TContigSeq;
-    
-    typedef double          TMean;
-    typedef double          TStd;
-    typedef signed char     TMappingQuality;
-        
-    typedef void            TReadStoreElementSpec;
-    typedef Dependent<>     TReadSeqStoreSpec;
-    typedef void            TMatePairStoreElementSpec;
-    typedef void            TLibraryStoreElementSpec;
-    typedef void            TContigStoreElementSpec;
-    typedef void            TContigFileSpec;
-    typedef void            TAlignedReadStoreElementSpec;
-    typedef Owner<>         TAlignedReadTagStoreSpec;
-    typedef void            TAnnotationStoreElementSpec;
+    typedef Owner<>	TReadSeqStoreSpec;
+    typedef Owner<>	TAlignedReadTagStoreSpec;
 };
 
+template<>
+struct FragmentStoreConfig<SnpStoreGroupSpec_> :
+    public FragmentStoreConfig<>
+{
+    typedef Dependent<>	TReadSeqStoreSpec;
+    typedef Owner<>		TAlignedReadTagStoreSpec;
+};
 
 
     template <typename TGPos_>
