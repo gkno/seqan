@@ -139,6 +139,17 @@ inline void clear(StringSet<TString, Dependent<Generous> > & me)
 }
 
 // --------------------------------------------------------------------------
+// Function length()
+// --------------------------------------------------------------------------
+
+template <typename TString >
+inline typename Size<StringSet<TString, Dependent<Generous> > >::Type
+length(StringSet<TString, Dependent<Generous> > & me)
+{
+    return length(me.limits) - 1;
+}
+
+// --------------------------------------------------------------------------
 // Function value()
 // --------------------------------------------------------------------------
 

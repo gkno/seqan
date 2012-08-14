@@ -175,25 +175,11 @@ void Test_StringSetIdHolder() {
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id2), "c");
 	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
-	if (IsSameType<TStringSet, TSetTight>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 3u);
-	}
-	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 4u);
-	}
+    SEQAN_ASSERT_EQ(length(str), 3u);
 	removeValueById(str,id2);
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
-	if (IsSameType<TStringSet, TSetTight>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 2u);
-	}
-	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 4u);
-	}
+    SEQAN_ASSERT_EQ(length(str), 2u);
 
 	String<char> bla4("e");
 	TId id4 = assignValueById(str, bla4, 100);
@@ -204,14 +190,7 @@ void Test_StringSetIdHolder() {
 	removeValueById(str,id3);
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id4), "e");
-	if (IsSameType<TStringSet, TSetTight>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 2u);
-	}
-	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 101u);
-	}
+    SEQAN_ASSERT_EQ(length(str), 2u);
 	String<char> bla5("f");
 	TId id5 = assignValueById(str, bla5); 
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
@@ -224,14 +203,7 @@ void Test_StringSetIdHolder() {
 	removeValueById(str,id4);
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id5), "f");
-	if (IsSameType<TStringSet, TSetTight>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 2u);
-	}
-	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 102u);
-	}
+    SEQAN_ASSERT_EQ(length(str), 2u);
 	clear(str);
 	id1 = assignValueById(str, bla1);
 	id2 = assignValueById(str, bla2);
@@ -239,14 +211,7 @@ void Test_StringSetIdHolder() {
 	SEQAN_ASSERT_EQ(getValueById(str, id1), "b");
 	SEQAN_ASSERT_EQ(getValueById(str, id2), "c");
 	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
-	if (IsSameType<TStringSet, TSetTight>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 3u);
-	}
-	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
-	{
-		SEQAN_ASSERT_EQ(length(str), 3u);
-	}
+    SEQAN_ASSERT_EQ(length(str), 3u);
 }
 
 //____________________________________________________________________________
