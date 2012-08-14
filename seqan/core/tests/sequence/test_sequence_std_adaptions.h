@@ -171,7 +171,7 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_interface_std_vector)
     // value(str, i), getValue(str, i)
     SEQAN_ASSERT_EQ(value(vec, 0), 100);
     SEQAN_ASSERT_EQ(value(vec, 1), 100);
-      // front(), back()
+     // front(), back()
     SEQAN_ASSERT_EQ(front(vec),100);
     SEQAN_ASSERT_EQ(back(vec),100);
 	
