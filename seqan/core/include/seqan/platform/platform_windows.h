@@ -30,8 +30,6 @@
 //
 // ==========================================================================
 
-//SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
-
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_VS
 
@@ -89,11 +87,6 @@ typedef unsigned __int8 __uint8;
 // ==========================================================================
 // Define SeqAn Specific Macros.
 // ==========================================================================
-
-// Uncomment the following to use generated forwards.  This can be useful for
-// debugging order-related errors with templates.
-
-//#define SEQAN_SWITCH_USE_FORWARDS
 
 // The symbols SEQAN_IS_64_BIT and SEQAN_IS_32_BIT can be used to check
 // whether we are on a 32 bit or on a 64 bit machine.
