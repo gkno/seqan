@@ -38,12 +38,6 @@ seqan::String<int> computeScore(TText const & text, TPattern const & pattern)
     return score;
 }
 
-template <typename TText>
-void print(TText const & text)
-{
-    std::cout << text << std::endl;
-}
-
 void print(seqan::String<int> const & text)
 {
     for (unsigned i = 0; i < seqan::length(text); ++i)

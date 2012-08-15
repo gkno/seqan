@@ -51,50 +51,6 @@ void print(seqan::String<int> const & text)
     std::cout << std::endl;
 }
 
-template <typename TText, typename TSpec>
-void print(TText const & text, TSpec const & /*tag*/)
-{
-    print(text);
-}
-                            
-struct MaxOnly {};
-
-template <typename TText>
-void print(TText const & score, MaxOnly const & /*tag*/)
-{
-    int maxScore = score[0];
-    seqan::String<int> output;
-    appendValue(output, 0);
-    for (unsigned i = 1; i < seqan::length(score); ++i)
-    {
-        if (score[i] > maxScore)
-        {
-            maxScore = score[i];
-            clear(output);
-            resize(output, 1, i);
-        }
-        else if (score[i] == maxScore)
-            appendValue(output, i);
-    }
-    
-    print(output);
-}
-
-struct GreaterZero {};
-
-template <typename TText>
-void print(TText const & score, GreaterZero const & /*tag*/)
-{
-    seqan::String<seqan::Pair<int> > output;
-    for (unsigned i = 1; i < seqan::length(score); ++i)
-        if (score[i] > 0)
-            appendValue(output, seqan::Pair<int>(i, score[i]));
-    
-    for (unsigned i = 0; i < seqan::length(output); ++i)
-        std::cout << "(" << output[i].i1 << "; " << output[i].i2 << ") ";
-    std::cout << std::endl;
-}
-
 int main()
 {
     seqan::String<char> text = "This is an awesome tutorial to get to now SeqAn!";
