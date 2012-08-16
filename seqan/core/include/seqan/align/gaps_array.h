@@ -332,8 +332,15 @@ inline void createSource(Gaps<TSequence, ArrayGaps> & gaps)
 // ----------------------------------------------------------------------------
 
 template <typename TSequence>
-inline typename Source<Gaps<TSequence, ArrayGaps> >::Type &
+inline typename Source<Gaps<TSequence, ArrayGaps> const>::Type &
 source(Gaps<TSequence, ArrayGaps> const & gaps)
+{
+    return value(gaps._source);
+}
+
+template <typename TSequence>
+inline typename Source<Gaps<TSequence, ArrayGaps> >::Type &
+source(Gaps<TSequence, ArrayGaps> & gaps)
 {
     return value(gaps._source);
 }

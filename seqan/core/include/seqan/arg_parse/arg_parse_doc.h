@@ -57,7 +57,7 @@ namespace seqan {
 ..param.doc:The @Class.ArgumentParser@ object.
 ...type:Class.ArgumentParser
 ..returns:Tool name of argument parser object.
-...type:std::string
+...type:nolink:$std::string$
 ..include:seqan/arg_parse.h
 */
 

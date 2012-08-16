@@ -768,7 +768,7 @@ inline void setName(ToolDoc & doc, CharString const & name)
 ..param.doc:Tool documentation object to get the tool name of.
 ...type:Class.ToolDoc
 ..returns:Tool name of documentation object.
-...type:Shortcut.CharSTring
+...type:Shortcut.CharString
 ..include:seqan/arg_parse/tool_doc.h
 */
 
@@ -813,7 +813,7 @@ inline void setCategory(ToolDoc & doc, CharString const & category)
 ..param.doc:Tool documentation object to get the tool category of.
 ...type:Class.ToolDoc
 ..returns:Tool category of documentation object.
-...type:Shortcut.CharSTring
+...type:Shortcut.CharString
 ..include:seqan/arg_parse/tool_doc.h
 */
 

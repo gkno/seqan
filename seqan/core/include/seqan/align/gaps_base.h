@@ -62,8 +62,22 @@ typedef Tag<ArrayGaps_> ArrayGaps;
 ..implements:Concept.Sequence
 ..summary:Efficient storage of gaps for a sequence.
 ..signature:Gaps<TSequence, TSpec>
-..description
-...image:gaps_illustration|Illustration of Gaps object and positions with clipping.
+..description:
+Gaps wrap a @Concept.Sequence@ and allows to (1) insert gaps into the sequence and (2) select an infix of the gapped sequence (clipping).
+The gaps are not inserted into the underlying sequence (source) but stored separately.
+Using the clipping is optional and meant for selecting parts of the alignment as a part of the result of a local alignment algorithm.
+..description.image:gaps_illustration|Illustration of Gaps object and positions with clipping.
+..description:
+In the figure above, the source sequence has seven characters, the gapped sequence has four gaps and thus consists of eleven characters.
+The gapped sequence is clipped to start at position 0 in the gapped sequence and to end at position 8 in the gapped sequence (the positions given as half-open intervals $[begin, end)$).
+..description:
+The figure shows the three coordinate systems that are used with Gaps objects.
+The source position is the position in the underlying sequence.
+The unclipped view position is the position in the gapped sequence without gaps.
+The view position is the position in the gapped sequence but including the clipping:
+All (clipped) view positions have the clipping begin position subtracted from them.
+..description:
+
 ..param.TSequence:The type of the underlying sequence.
 ...type:Concept.Sequence
 ..param.TSpec:Specialization tag.
@@ -82,6 +96,7 @@ class Gaps;
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Value.param.T.type:Class.Gaps
+///.Metafunction.Value.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 struct Value<Gaps<TSequence, TSpec> >
@@ -99,6 +114,7 @@ struct Value<Gaps<TSequence, TSpec> const> : Value<Gaps<TSequence, TSpec> >
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Iterator.param.T.type:Class.Gaps
+///.Metafunction.Iterator.class:Class.Gaps
 
 template <typename TSequence, typename TSpec, typename TIteratorSpec>
 struct Iterator<Gaps<TSequence, TSpec>, TIteratorSpec>
@@ -117,6 +133,7 @@ struct Iterator<Gaps<TSequence, TSpec> const, TIteratorSpec>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.GetValue.param.T.type:Class.Gaps
+///.Metafunction.GetValue.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 struct GetValue<Gaps<TSequence, TSpec> > : Value<Gaps<TSequence, TSpec> >
@@ -131,6 +148,7 @@ struct GetValue<Gaps<TSequence, TSpec> const> : GetValue<Gaps<TSequence, TSpec> 
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Position.param.T.type:Class.Gaps
+///.Metafunction.Position.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 struct Position<Gaps<TSequence, TSpec> >
@@ -148,6 +166,7 @@ struct Position<Gaps<TSequence, TSpec> const> : Position<Gaps<TSequence, TSpec> 
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Reference.param.T.type:Class.Gaps
+///.Metafunction.Reference.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 struct Reference<Gaps<TSequence, TSpec> >
@@ -168,6 +187,7 @@ struct Reference<Gaps<TSequence, TSpec> const>
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.Size.param.T.type:Class.Gaps
+///.Metafunction.Size.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 struct Size<Gaps<TSequence, TSpec> >
@@ -195,6 +215,7 @@ struct Size<Gaps<TSequence, TSpec> const> : Size<Gaps<TSequence, TSpec> >
 */
 
 ///.Metafunction.Source.param.T.type:Class.Gaps
+///.Metafunction.Source.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 struct Source<Gaps<TSequence, TSpec> >
@@ -213,6 +234,7 @@ struct Source<Gaps<TSequence, TSpec> const> : Source<Gaps<TSequence, TSpec> >
 // ----------------------------------------------------------------------------
 
 ///.Metafunction.IsSequence.param.T.type:Class.Gaps
+///.Metafunction.IsSequence.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 struct IsSequence<Gaps<TSequence, TSpec> >
@@ -230,12 +252,94 @@ struct IsSequence<Gaps<TSequence, TSpec> const> : IsSequence<Gaps<TSequence, TSp
 // Functions
 // ============================================================================
 
+// TODO(holtgrew): Adding links to implemented sequence. This should be cleaned up once we have better documentation with concepts.
+///.Function.begin.class:Class.Gaps
+///.Function.end.class:Class.Gaps
+///.Function.iter.class:Class.Gaps
+
+// ----------------------------------------------------------------------------
+// Function setSource()
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// Function createSource()
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// Function clearClipping()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#clearClipping
+..class:Class.Gaps
+..summary:Clear clipping from @Class.Gaps@ object.
+..cat:Alignments
+..signature:void clearClipping(gaps)
+..param.gaps:The @Class.Gaps@ object to clear.
+...type:Class.Gaps
+..returns:$void$
+..see:Function.Gaps#clearGaps
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function clearGaps()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#clearGaps
+..class:Class.Gaps
+..summary:Clear gaps and clipping from @Class.Gaps@ object.
+..cat:Alignments
+..signature:void clearGaps(gaps)
+..param.gaps:The @Class.Gaps@ object to clear.
+...type:Class.Gaps
+..returns:$void$
+..see:Function.Gaps#clearClipping
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function length()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#length
+..class:Class.Gaps
+..summary:Return length of the gapped sequence.
+..cat:Alignments
+..signature:TSize length(gaps)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..returns:Length of the gapped sequence.
+...type:Metafunction.Size
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function unclippedLength()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#unclippedLength
+..class:Class.Gaps
+..summary:Return length of the gapped sequence without clipping.
+..cat:Alignments
+..signature:TSize unclippedLength(gaps)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..returns:Length of the gapped sequence, ignoring any clipping.
+...type:Metafunction.Size
+..include:seqan/align.h
+*/
+
 // ----------------------------------------------------------------------------
 // Function toViewPosition()
 // ----------------------------------------------------------------------------
 
 /**
-.Function.toViewPosition:
+.Function.toViewPosition
+..class:Class.Gaps
 ..summary:Transforms source to view position.
 ..cat:Alignments
 ..signature:toViewPosition(gaps, pos)
@@ -253,7 +357,8 @@ struct IsSequence<Gaps<TSequence, TSpec> const> : IsSequence<Gaps<TSequence, TSp
 // ----------------------------------------------------------------------------
 
 /**
-.Function.toSourcePosition:
+.Function.toSourcePosition
+..class:Class.Gaps
 ..summary:Transforms view to source position, if the view position is a gap, the original position of the next non-gap entry is returned.
 ..cat:Alignments
 ..signature:toSourcePosition(gaps, pos)
@@ -267,8 +372,70 @@ struct IsSequence<Gaps<TSequence, TSpec> const> : IsSequence<Gaps<TSequence, TSp
 */
 
 // ----------------------------------------------------------------------------
+// Function isGap()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#isGap
+..class:Class.Gaps
+..summary:Query whether a given clipped view position is a gap.
+..cat:Alignments
+..signature:bool isGap(gaps, clippedViewPos)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..param.clippedViewPosition:The position in the view to query.
+...type:Metafunction.Position
+..returns:Whether or not there is a gap at the given clipped view position.
+...type:nolink:$bool$
+..see:Function.insertGap
+..see:Function.removeGap
+..see:Function.removeGaps
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function insertGaps()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.insertGaps
+..class:Class.Gaps
+..summary:Insert multiple gaps into a gapped sequence.
+..cat:Alignments
+..signature:void insertGap(gaps, clippedViewPos, count)
+..param.gaps:The @Class.Gaps@ object to insert gaps into.
+...type:Class.Gaps
+..param.clippedViewPosition:The position in the view to insert gap at.
+...type:Metafunction.Position
+..param.count:The number of gaps to insert
+...type:nolink:$unsigned$
+..returns:$void$
+..see:Function.insertGap
+..see:Function.removeGap
+..see:Function.removeGaps
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
 // Function insertGap()
 // ----------------------------------------------------------------------------
+
+/**
+.Function.insertGap
+..class:Class.Gaps
+..summary:Insert one gap into a gapped sequence.
+..cat:Alignments
+..signature:void insertGap(gaps, clippedViewPos)
+..param.gaps:The @Class.Gaps@ object to insert gap into.
+...type:Class.Gaps
+..param.clippedViewPosition:The position in the view to insert gap at.
+...type:Metafunction.Position
+..returns:$void$
+..see:Function.insertGaps
+..see:Function.removeGap
+..see:Function.removeGaps
+..include:seqan/align.h
+*/
 
 // Forward to removeGaps() which has to be implemented in each subclass.
 
@@ -280,8 +447,50 @@ insertGap(Gaps<TSequence, TSpec> & gaps, TPosition clippedViewPos)
 }
 
 // ----------------------------------------------------------------------------
+// Function removeGaps()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.removeGaps
+..class:Class.Gaps
+..summary:Remove multiple gaps from a gapped sequence.
+..cat:Alignments
+..signature:TSize removeGap(gaps, clippedViewPos, count)
+..param.gaps:The @Class.Gaps@ object to remove gaps into.
+...type:Class.Gaps
+..param.clippedViewPosition:The position in the view to remove gaps from.
+...type:Metafunction.Position
+..param.count:The number of gaps to remove
+...type:nolink:$unsigned$
+..returns:The number of removed gaps.
+...type:Metafunction.Size
+..see:Function.insertGap
+..see:Function.insertGaps
+..see:Function.removeGap
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
 // Function removeGap()
 // ----------------------------------------------------------------------------
+
+/**
+.Function.removeGap
+..class:Class.Gaps
+..summary:Remove one gap from a gapped sequence.
+..cat:Alignments
+..signature:TSize removeGap(gaps, clippedViewPos)
+..param.gaps:The @Class.Gaps@ object to remove gap into.
+...type:Class.Gaps
+..param.clippedViewPosition:The position in the view to remove gap from.
+...type:Metafunction.Position
+..returns:The number of removed gaps.
+...type:Metafunction.Size
+..see:Function.insertGap
+..see:Function.insertGaps
+..see:Function.removeGaps
+..include:seqan/align.h
+*/
 
 // Forward to removeGaps() which has to be implemented in each subclass.
 
@@ -291,6 +500,241 @@ removeGap(Gaps<TSequence, TSpec> & gaps, TPosition clippedViewPos)
 {
     return removeGaps(gaps, clippedViewPos, 1u);
 }
+
+// ----------------------------------------------------------------------------
+// Function setClippedBeginPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#setClippedBeginPosition
+..class:Class.Gaps
+..summary:Sets the begin position of the clipping.
+..signature:void setClippedBeginPosition(gaps, unclippedViewPosition)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..param.unclippedViewPosition:The position in the unclipped view to set as the clipping position.
+...type:Metafunction.Position
+..returns:$void$
+..remarks:Note that the position is *not* a clipped view position but an uncliped one!
+..see:Function.Gaps#beginPosition
+..see:Function.Gaps#endPosition
+..see:Function.Gaps#setBeginPosition
+..see:Function.Gaps#setEndPosition
+..see:Function.Gaps#clippedBeginPosition
+..see:Function.Gaps#clippedEndPosition
+..see:Function.Gaps#setClippedEndPosition
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function setClippedEndPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#setClippedEndPosition
+..class:Class.Gaps
+..summary:Sets the end position of the clipping.
+..signature:void setClippedEndPosition(gaps, unclippedViewPosition)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..param.unclippedViewPosition:The position in the unclipped view to set as the clipping position.
+...type:Metafunction.Position
+..returns:$void$
+..remarks:Note that the position is *not* a clipped view position but an uncliped one!
+..see:Function.Gaps#beginPosition
+..see:Function.Gaps#endPosition
+..see:Function.Gaps#setBeginPosition
+..see:Function.Gaps#setEndPosition
+..see:Function.Gaps#clippedBeginPosition
+..see:Function.Gaps#clippedEndPosition
+..see:Function.Gaps#setClippedBeginPosition
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function clippedBeginPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#clippedBeginPosition
+..class:Class.Gaps
+..summary:Return the begin position of the clipping in the unclipped gapped sequence.
+..signature:TPosition clippedBeginPosition(gaps)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..returns:The begin position of the current clipped view in the source.
+...type:Metafunction.Position
+..see:Function.Gaps#beginPosition
+..see:Function.Gaps#endPosition
+..see:Function.Gaps#setBeginPosition
+..see:Function.Gaps#setEndPosition
+..see:Function.Gaps#clippedEndPosition
+..see:Function.Gaps#setClippedBeginPosition
+..see:Function.Gaps#setClippedEndPosition
+..example:
+In the following gaps configuration, the result of $clippedBeginPosition(gaps)$ is $2$.
+..example.code:
+clipping                   [     )
+  (half-open interval)           
+
+gapped sequence:          X--XXX-XX-
+
+source position:          0001233455
+unclipped view position:  0123456789
+clipped view position:     0123456
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function clippedEndPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#clippedEndPosition
+..class:Class.Gaps
+..summary:Return the end position of the clipping in the unclipped gapped sequence.
+..signature:TPosition clippedEndPosition(gaps)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..returns:The end position of the current clipped view in the source.
+...type:Metafunction.Position
+..see:Function.Gaps#beginPosition
+..see:Function.Gaps#endPosition
+..see:Function.Gaps#setBeginPosition
+..see:Function.Gaps#setEndPosition
+..see:Function.Gaps#clippedBeginPosition
+..see:Function.Gaps#setClippedBeginPosition
+..see:Function.Gaps#setClippedEndPosition
+..example:
+In the following gaps configuration, the result of $clippedBeginPosition(gaps)$ is $7$.
+..example.code:
+clipping                   [     )
+  (half-open interval)           
+
+gapped sequence:          X--XXX-XX-
+
+source position:          0001233455
+unclipped view position:  0123456789
+clipped view position:     0123456
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function setBeginPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#setBeginPosition
+..class:Class.Gaps
+..summary:Set the begin position of the clipped gapped sequence, given a source position.
+..signature:void setBeginPosition(gaps, sourcePosition)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..param.sourcePosition:The source position to set the clipping to.
+...type:Metafunction.Position
+..returns:$void$
+..see:Function.Gaps#beginPosition
+..see:Function.Gaps#endPosition
+..see:Function.Gaps#setEndPosition
+..see:Function.Gaps#clippedBeginPosition
+..see:Function.Gaps#clippedEndPosition
+..see:Function.Gaps#setClippedBeginPosition
+..see:Function.Gaps#setClippedEndPosition
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function setEndPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#setEndPosition
+..class:Class.Gaps
+..summary:Set the end position of the clipped gapped sequence, given a source position.
+..signature:void setEndPosition(gaps, sourcePosition)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..param.sourcePosition:The source position to set the clipping to.
+...type:Metafunction.Position
+..returns:$void$
+..see:Function.Gaps#beginPosition
+..see:Function.Gaps#endPosition
+..see:Function.Gaps#setBeginPosition
+..see:Function.Gaps#clippedBeginPosition
+..see:Function.Gaps#clippedEndPosition
+..see:Function.Gaps#setClippedBeginPosition
+..see:Function.Gaps#setClippedEndPosition
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function beginPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#beginPosition
+..class:Class.Gaps
+..summary:Return the clipping begin position as a source position.
+..signature:TPosition endPosition(gaps)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..returns:The begin position of the current clipped view in the source.
+...type:Metafunction.Position
+..see:Function.Gaps#endPosition
+..see:Function.Gaps#setBeginPosition
+..see:Function.Gaps#setEndPosition
+..see:Function.Gaps#clippedBeginPosition
+..see:Function.Gaps#clippedEndPosition
+..see:Function.Gaps#setClippedBeginPosition
+..see:Function.Gaps#setClippedEndPosition
+..example:
+In the following gaps configuration, the result of $beginPosition(gaps)$ is $0$.
+The clipping starts in a gap and the source position of the first non-gap character left of the clipping begin has source position $0$.
+..example.code:
+clipping                   [     )
+  (half-open interval)           
+
+gapped sequence:          X--XXX-XX-
+
+source position:          0001233455
+unclipped view position:  0123456789
+clipped view position:     0123456
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
+// Function endPosition()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#endPosition
+..class:Class.Gaps
+..summary:Return the clipping end position as a source position.
+..signature:TPosition endPosition(gaps)
+..param.gaps:The @Class.Gaps@ object to query.
+...type:Class.Gaps
+..returns:The end position of the current clipped view in the source.
+...type:Metafunction.Position
+..see:Function.Gaps#beginPosition
+..see:Function.Gaps#setBeginPosition
+..see:Function.Gaps#setEndPosition
+..see:Function.Gaps#clippedBeginPosition
+..see:Function.Gaps#clippedEndPosition
+..see:Function.Gaps#setClippedBeginPosition
+..see:Function.Gaps#setClippedEndPosition
+..example:
+In the following gaps configuration, the result of $endPosition(gaps)$ is $4$.
+..example.code:
+clipping                   [     )
+  (half-open interval)           
+
+gapped sequence:          X--XXX-XX-
+
+source position:          0001233455
+unclipped view position:  0123456789
+clipped view position:     0123456
+..include:seqan/align.h
+*/
 
 // ----------------------------------------------------------------------------
 // Function write()
@@ -398,11 +842,25 @@ void _pumpTraceToGaps(Gaps<TSequenceH, TGapsSpecH> & gapsH,
 
 /**
 .Function.source
-..summary:Return underlying sequence.
-..cat:Alignments
+..summary:Return underlying object.
+..cat:Bsic
 ..signature:source(obj)
 ..param.obj:The object to get underlying sequence of.
 ...type:Class.Gaps
+..returns:The underlying object.
+...type:Metafunction.Source
+..include:seqan/align.h
+*/
+
+/*
+.Function.Gaps#source
+..summary:Return underlying sequence.
+..cat:Alignments
+..signature:TSource source(gaps)
+..param.obj:The object to get underlying sequence of.
+...type:Class.Gaps
+..returns:Reference to the underlying sequence.
+...type:Metafunction.Source
 ..include:seqan/align.h
 */
 
@@ -440,6 +898,23 @@ sourceSegment(Gaps<TSequence, TSpec> & gaps)
 // Function assignSource()
 // ----------------------------------------------------------------------------
 
+/**
+.Function.Gaps#assignSource
+..class:Class.Gaps
+..summary:Assign the source of a Gaps object, copying data.
+..cat:Alignments
+..signature:void assignSource(gaps, sequence)
+..param.gaps:The @Class.Gaps@ object to assign the source of.
+...type:Class.Gaps
+..param.sequence:The @Concept.Sequence@ to assign as the source.
+...type:Metafunction.Source
+..remarks:This will copy $sequence$ into the source of $gaps$.
+..returns:$void$
+..see:Function.Gaps#setSource
+..see:Function.source
+..include:seqan/align.h
+*/
+
 // TOOD(holtgrew): Switch to Hosted Type?
 
 template <typename TSequence, typename TSpec, typename TValue>
@@ -450,8 +925,31 @@ assignSource(Gaps<TSequence, TSpec> & gaps, TValue const & value)
 }
 
 // ----------------------------------------------------------------------------
+// Function setSource()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.Gaps#setSource
+..class:Class.Gaps
+..summary:Set the source of a Gaps object, do not copy if possible.
+..cat:Alignments
+..signature:void setSource(gaps, sequence)
+..param.gaps:The @Class.Gaps@ object to set the source of.
+...type:Class.Gaps
+..param.sequence:The @Concept.Sequence@ to set as the source.
+...type:Metafunction.Source
+..remarks:This will avoid copying if possible.
+..returns:$void$
+..see:Function.Gaps#assignSource
+..see:Function.source
+..include:seqan/align.h
+*/
+
+// ----------------------------------------------------------------------------
 // Function clear()
 // ----------------------------------------------------------------------------
+
+///.Function.clear.class:Class.Gaps
 
 template <typename TSequence, typename TSpec>
 inline void clearGaps(Gaps<TSequence, TSpec> & gaps);
