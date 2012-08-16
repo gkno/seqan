@@ -68,7 +68,9 @@
 #endif //#ifdef PLATFORM_WINDOWS
 
 #include <seqan/system/system_forwards.h>
+#ifndef PLATFORM_WINDOWS
 #include <seqan/system/file_forwards.h>
+#endif  // #ifndef PLATFORM_WINDOWS
 
 //____________________________________________________________________________
 // multi-threading
