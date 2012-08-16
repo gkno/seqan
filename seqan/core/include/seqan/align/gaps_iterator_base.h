@@ -356,6 +356,17 @@ goFurther(Iter<TGaps, GapsIterator<TSpec> > & it,
             goPrevious(it);
 }
 
+// ----------------------------------------------------------------------------
+// Function isClipped()
+// ----------------------------------------------------------------------------
+
+template <typename TGaps, typename TSpec>
+inline bool
+isClipped(Iter<TGaps, GapsIterator<TSpec> > const &)
+{
+    return false;
+}
+
 }  // namespace seqan
 
 #endif  // SEQAN_CORE_INCLUDE_SEQAN_ALIGN_GAPS_ITERATOR_BASE_H_

@@ -223,7 +223,7 @@ value(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & it)
 // ----------------------------------------------------------------------------
 
 template <typename TGaps, typename TGapAnchors>
-inline bool 
+inline bool
 isGap(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 {
 	return me.current.seqPos == me.nextAnchor.seqPos;
@@ -234,7 +234,7 @@ isGap(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 // ----------------------------------------------------------------------------
 
 template <typename TGaps, typename TGapAnchors>
-inline bool 
+inline bool
 isUnknown(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 {
 	int len;
@@ -247,7 +247,7 @@ isUnknown(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 // ----------------------------------------------------------------------------
 
 template <typename TGaps, typename TGapAnchors>
-inline bool 
+inline bool
 isClipped(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 {
 	return me.current.gapPos == me.nextAnchor.gapPos;

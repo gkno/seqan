@@ -407,10 +407,12 @@ SEQAN_CONCEPT_REFINE(RootedIteratorConcept, (T), (IteratorAssociatedTypesConcept
     SEQAN_CONCEPT_USAGE(RootedIteratorConcept)
     {
         T xs;
+        ignoreUnusedVariableWarning(xs);
 
         TContainer & c = container(x);
         atBegin(x);
         atEnd(x);
+        ignoreUnusedVariableWarning(c);
     }
 };
 

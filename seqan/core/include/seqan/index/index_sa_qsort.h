@@ -186,7 +186,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// 1. Fill suffix array with a permutation (the identity)
 		TIter it = begin(SA, Standard());
-		TIter itEnd = end(SA, Standard());
 		for(unsigned j = 0; j < length(s); ++j)
 		{
 			TSize len = length(s[j]);

@@ -42,9 +42,9 @@
 #include <algorithm>
 #include <set>
 
-#ifndef SEQAN_HAS_SAMTOOLS 
+#ifndef SEQAN_HAS_SAMTOOLS
 #define SEQAN_HAS_SAMTOOLS 0
-#endif  // #ifndef SEQAN_HAS_SAMTOOLS 
+#endif  // #ifndef SEQAN_HAS_SAMTOOLS
 
 #if SEQAN_HAS_SAMTOOLS
 #include <sam.h>

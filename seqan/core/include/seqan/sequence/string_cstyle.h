@@ -702,9 +702,7 @@ struct CreateArrayString_<Insist>
     SEQAN_CHECKPOINT;
         typename Size<TTarget>::Type source_length = length(source);
         if (dependent(target))
-        {
-            TTarget * buf = _reallocateStorage(target, source_length, Exact());
-        }
+            _reallocateStorage(target, source_length, Exact());
         assign(begin(target, Standard()), source, source_length, Insist());
         _setEnd(target, begin(target, Standard()) + source_length);
     }
@@ -722,9 +720,7 @@ struct CreateArrayString_<Insist>
             copy_size = limit;
         }
         if (dependent(target))
-        {
-            TTarget * buf = _reallocateStorage(target, copy_size, Exact());
-        }
+            _reallocateStorage(target, copy_size, Exact());
         assign(begin(target, Standard()), source, copy_size, Insist());
         _setEnd(target, begin(target, Standard()) + copy_size);
     }
