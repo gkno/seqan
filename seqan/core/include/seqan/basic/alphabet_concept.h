@@ -461,7 +461,7 @@ SEQAN_CONCEPT_REFINE(AlphabetWithUnknownValueConcept, (TValue), (AlphabetConcept
 ..concept:Concept.AlphabetWithQualitiesConcept
 ..cat:Alphabets
 ..signature:getQualityValue(c)
-..summary:Returns the quality of a character from an alphabet with integrated quality.
+..summary:Returns the quality of a character from an alphabet with integrated quality, e.g. the quality associated with a specified element from a sequence.
 ..param.c:Character to retrieve the quality from.
 ...type:Concept.AlphabetWithQualitiesConcept
 ..returns:Quality value of $c$.
@@ -470,12 +470,20 @@ SEQAN_CONCEPT_REFINE(AlphabetWithUnknownValueConcept, (TValue), (AlphabetConcept
 ..see:Function.assignQualityValue
 ..see:Function.convertQuality
 ..include:seqan/basic.h
+..example.code:
+    String<Dna5Q> seq = "TATA";
+    // Assign quality value to first 'T' in sequence seq
+    assignQualityValue(seq[0], 35);
+    // Print quality value of first 'T', and default quality value of first 'A'
+    std::cout << getQualityValue(seq[0]) << std::endl; // Defined as 35
+    std::cout << getQualityValue(seq[1]) << std::endl; // Default value 60
+
 
 .Function.assignQualityValue
 ..concept:Concept.AlphabetWithQualitiesConcept
 ..cat:Alphabets
 ..signature:assignQualityValue(c, q)
-..summary:Assign quality to a character from an alphabet with integrated quality.
+..summary:Assigns quality to a character from an alphabet with integrated quality, e.g. to a specified element from a sequence.
 ..param.c:Target character to assign quality to.
 ...type:Concept.AlphabetWithQualitiesConcept
 ..param.q:Quality to assign to the character.

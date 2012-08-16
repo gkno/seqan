@@ -169,6 +169,7 @@ The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3$.
 ...text:Objects of type $DnaQ$ can be converted to various other types and vice versa. 
 ...text:$DnaQ$ is typedef for $SimpleType<char,DnaQ_>$, while $DnaQ_$ is a helper
 specialization tag class.
+...text:Note that the default quality value is set to 60.
 ..see:Metafunction.ValueSize
 ..see:Spec.Dna5Q
 */
@@ -264,6 +265,7 @@ The 'N' character ("unkown nucleotide") is encoded by 4.
 ...text:Objects of type $Dna5$ can be converted to various other types and vice versa. 
 ...text:$Dna5Q$ is typedef for $SimpleType<char,Dna5Q_>$, while $Dna5Q_$ is a helper
 specialization tag class.
+...text:Note that the default quality value is set to 60.
 ..see:Metafunction.ValueSize
 */
 
