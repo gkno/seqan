@@ -88,24 +88,10 @@
 using namespace std;
 using namespace seqan;
 
-struct MyFragStoreConfig 
+struct MyFragStoreConfig :
+    public FragmentStoreConfig<>
 {
-	typedef String<Dna5Q>	TReadSeq;
 	typedef String<Dna5>	TContigSeq;
-	
-	typedef double			TMean;
-	typedef double			TStd;
-	typedef signed char		TMappingQuality;
-		
-	typedef void					TReadStoreElementSpec;
-	typedef Owner<ConcatDirect<> >	TReadSeqStoreSpec;
-	typedef void					TMatePairStoreElementSpec;
-	typedef void					TLibraryStoreElementSpec;
-	typedef void					TContigStoreElementSpec;
-	typedef void					TContigFileSpec;
-	typedef void					TAlignedReadStoreElementSpec;
-	typedef Owner<ConcatDirect<> >	TAlignedReadTagStoreSpec;
-	typedef void					TAnnotationStoreElementSpec;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -127,13 +113,11 @@ int mapReads(
 		Shape<Dna, GenericShape> shape;
 		stringToShape(shape, options.shape);
 		shapeToString(bitmap, shape);
-		
+
 		cerr << "___SETTINGS____________" << endl;
 		cerr << "Genome file:                     \t" << genomeFileNames[0] << endl;
 		if (length(readFileNames) < 2)
-        {
 			cerr << "Read file:                       \t" << readFileNames[0] << endl;
-        } 
         else
 		{
 			cerr << "Read files:                      \t" << readFileNames[0] << endl;
