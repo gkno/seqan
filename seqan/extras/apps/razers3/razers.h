@@ -2637,6 +2637,7 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 		filterPattern.params.overlap = options.overlap;
 		_patternInit(filterPattern, options.errorRate);
 
+        if (options._debugLevel >= 2)
         SEQAN_OMP_PRAGMA(critical)
         {
             CharString str;
@@ -3097,7 +3098,7 @@ int _mapMatePairReads(
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for single/mate-pair mapping
 template <
-	typename TFSSpec, 
+	typename TFSSpec,
 	typename TFSConfig,
 	typename TCounts,
 	typename TSpec,
@@ -3111,7 +3112,7 @@ int _mapReads(
 	TRazerSMode						  const & mode)
 {
     typedef FragmentStore<TFSSpec, TFSConfig>           TFragmentStore;
-	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;	
+	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
 	typedef typename Value<TReadSeqStore>::Type			TRead;
 	typedef Pattern<TRead const, MyersUkkonen>			TMyersPattern;	// verifier
 
@@ -3128,11 +3129,10 @@ int _mapReads(
     resize(options.errorCutOff, readCount, Exact());
 
 #ifndef RAZERS_BANDED_MYERS
-	options.compMask[4] = (options.matchN)? 15: 0;
 	if (options.gapMode == RAZERS_GAPPED)
 		resize(options.forwardPatterns, readCount, Exact());
 #endif
-    
+
     // set absolute error cut-offs
     Dna5String tmp;
     SEQAN_OMP_PRAGMA(parallel for private(tmp))
@@ -3154,7 +3154,7 @@ int _mapReads(
             tmp = store.readSeqStore[i];
             reverseComplement(tmp);
             setHost(options.forwardPatterns[i], prefix(tmp, length(tmp) - 1));
-        } 
+        }
         else
             setHost(options.forwardPatterns[i], prefix(store.readSeqStore[i], length(store.readSeqStore[i]) - 1));
 #else
@@ -3163,10 +3163,10 @@ int _mapReads(
             tmp = store.readSeqStore[i];
             reverseComplement(tmp);
             setHost(options.forwardPatterns[i], tmp);
-        } 
+        }
         else
             setHost(options.forwardPatterns[i], store.readSeqStore[i]);
-#endif        
+#endif
 #endif  // #ifdef RAZERS_BANDED_MYERS
     }
 
@@ -3213,8 +3213,8 @@ int _mapReads(
 	// 2x3 SPECIALIZATION
 
 	// select best-fitting shape
-//	if (stringToShape(ungapped, options.shape))
-//		return _mapReads(store, cnts, options, ungapped, mode);
+	if (stringToShape(ungapped, options.shape))
+        return _mapReads(store, cnts, options, ungapped, mode);
 //	if (stringToShape(onegapped, options.shape))
 //		return _mapReads(store, cnts, options, onegapped, mode);
 	if (stringToShape(gapped, options.shape))
@@ -3248,7 +3248,7 @@ int _mapReads(
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options)
 {
-/*    if (options.matchN) {
+    if (options.matchN) {
         if (options.gapMode == RAZERS_GAPPED)
          {
 //             if (options.alignMode == RAZERS_LOCAL)
@@ -3265,9 +3265,9 @@ int _mapReads(
              if (options.alignMode == RAZERS_GLOBAL)
                  return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
          }
-    } 
-    else 
-*/    {
+    }
+    else
+    {
         if (options.gapMode == RAZERS_GAPPED)
         {
         //     if (options.alignMode == RAZERS_LOCAL)

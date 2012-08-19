@@ -1490,8 +1490,9 @@ int _mapMatePairReadsParallel(
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
         // Write back local stores to global stores.
-        for (unsigned i = 0; i < length(threadLocalStorages); ++i)
-            std::cerr << "thread " << i << " has " << length(threadLocalStorages[i].matches) << " aligned reads." << std::endl;
+        if (options._debugLevel >= 2)
+            for (unsigned i = 0; i < length(threadLocalStorages); ++i)
+                std::cerr << "thread " << i << " has " << length(threadLocalStorages[i].matches) << " aligned reads." << std::endl;
         // Mask duplicates and compact matches in parallel in-memory if not using external
         // matches (queried through macros) and or when using external matches and using
         // parallel compaction (!useSequentialCompaction) and using internal sorting

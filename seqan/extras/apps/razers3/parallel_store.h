@@ -1,42 +1,22 @@
 #ifndef APPS_RAZERS_PARALLEL_STORE_H
 #define APPS_RAZERS_PARALLEL_STORE_H
 
-#ifdef PLATFORM_GCC_DIS
+#if defined(PLATFORM_GCC) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 3
 #include <parallel/algorithm>
 #include <parallel/numeric>
 #else
 #include <algorithm>
 #include <numeric>
-#endif  // #ifdef PLATFORM_GCC_DIS
+#endif  // #ifdef PLATFORM_GCC
 
 using namespace seqan;
 
 struct Parallel_;
 typedef Tag<Parallel_> Parallel;
 
-#ifdef PLATFORM_GCC_DIS
+#if defined(PLATFORM_GCC) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 3
 
-/*
-template <typename TAlign, typename TSortSpec>
-inline void
-sortAlignedReads(TAlign& alignStore, Tag<TSortSpec> const &, Parallel const &) 
-{
-  __gnu_parallel::sort(
-		begin(alignStore, Standard() ), 
-		end(alignStore, Standard() ), 
-		_LessAlignedRead<typename Value<TAlign>::Type, Tag<TSortSpec> const>() );
-}
-
-template <typename TAlign, typename TSortSpec>
-inline void
-sortAlignedReads(TAlign const & alignStore, Tag<TSortSpec> const &, Parallel const &) 
-{
-  __gnu_parallel::sort(
-		begin(const_cast<TAlign&>(alignStore), Standard() ), 
-		end(const_cast<TAlign&>(alignStore), Standard() ), 
-		_LessAlignedRead<typename Value<TAlign>::Type, Tag<TSortSpec> const>() );
-}
-*/
+// use MCSTL which is part of the GCC since version 4.3
 
 template <typename TAlign, typename TFunctorLess>
 inline void
@@ -68,30 +48,16 @@ partialSum(TIntString &intString)
         begin(intString, Standard()));
 }
 
+
 #else  // #ifdef PLATFORM_GCC
 
-/*
-template <typename TAlign, typename TSortSpec>
-inline void
-sortAlignedReads(TAlign& alignStore, Tag<TSortSpec> const & tag, Parallel const &) 
-{
-  sortAlignedReads(alignStore, tag);
-}
-
-template <typename TAlign, typename TSortSpec>
-inline void
-sortAlignedReads(TAlign const & alignStore, Tag<TSortSpec> const & tag, Parallel const &) 
-{
-  sortAlignedReads(alignStore, tag);
-}
-*/
+// sequential fallback
 
 template <typename TAlign, typename TFunctorLess>
 inline void
 sortAlignedReads(TAlign & alignStore, TFunctorLess const &less, Parallel const &) 
 {
   ::std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
-//  sortAlignedReads(alignStore, less);
 }
 
 template <typename TAlign, typename TFunctorLess>
@@ -99,7 +65,6 @@ inline void
 sortAlignedReads(TAlign const & alignStore, TFunctorLess const &less, Parallel const &) 
 {
   ::std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
-//  sortAlignedReads(alignStore, less);
 }
 
 template <typename TIntString>
@@ -111,6 +76,7 @@ partialSum(TIntString &intString)
         end(intString, Standard()), 
         begin(intString, Standard()));
 }
+
 
 #endif  // #ifdef PLATFORM_GCC
 

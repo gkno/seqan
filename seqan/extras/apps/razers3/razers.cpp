@@ -32,22 +32,22 @@
 #define RAZERS_OPENADDRESSING			// enables open addressing for the k-mer index as well as the possibility to set the load factor (-lf)
 #define RAZERS_BANDED_MYERS				// uses a banded version of Myers bitvector algorithm (analogous to H. Hyyr\"o, 2001)
 //#define SEQAN_OPENADDRESSING_COMPACT	// saves some memory for the openaddressing index / faster hash table access (if undefined)s
-#define RAZERS_DEBUG_MATEPAIRS
+//#define RAZERS_DEBUG_MATEPAIRS
 #define RAZERS_DEFER_COMPACTION         // mask duplicates on the fly and defer compaction
 #define RAZERS_EXTERNAL_MATCHES         // use external memory algorithms for managing matches
 
-#ifdef _OPENMP
-#include <omp.h>
-//#define _GLIBCXX_PARALLEL               // parallel STL if available
-#else
-#pragma message("OpenMP not found! Shared-memory parallelization will be disabled in RazerS3.")
-#endif
 //#define RAZERS_PROFILE                // Extensive profiling information.
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
 #define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
+
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#pragma message("OpenMP not found! Shared-memory parallelization will be disabled in RazerS3.")
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -91,7 +91,7 @@ using namespace seqan;
 struct MyFragStoreConfig :
     public FragmentStoreConfig<>
 {
-	typedef String<Dna5>	TContigSeq;
+	typedef String<Dna5> TContigSeq;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -285,14 +285,14 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & option
     string date = "$Date$";
 
     setAppName(parser, "razers3");
-    setShortDescription(parser, "Faster, fully sensitive read mapping");
+    setShortDescription(parser, "Fast Read Mapping with Sensitivity Control");
     setCategory(parser, "Read Mapping");
     setVersion(parser, "3.1 [" + rev.substr(11, rev.size() - 13) + "]");
-    setDate(parser, date.substr(7, date.size() - 8));
+    setDate(parser, date.substr(7, _min((int)date.size() - 8, 10)));
 
     // Need genome and reads (hg18.fa reads.fq)
     addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
-    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
+    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE, "READS", true));
 
     addUsageLine(parser, "[\\fIOPTIONS\\fP] <\\fIGENOME FILE\\fP> <\\fIREADS FILE\\fP>");
 #ifdef RAZERS_MATEPAIRS
@@ -332,7 +332,6 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & option
 	addOption(parser, ArgParseOption("vv", "vverbose",          "Very verbose mode."));
 
 #ifdef RAZERS_MATEPAIRS
-    addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
     addSection(parser, "Paired-end Options");
 	addOption(parser, ArgParseOption("ll", "library-length",    "Paired-end library length.", ArgParseOption::INTEGER));
     setMinValue(parser,     "library-length", "1");
@@ -572,15 +571,15 @@ extractOptions(
         options.readNaming = 3;
 
 #ifdef RAZERS_MATEPAIRS
-    unsigned maxFiles = 3;
+    unsigned maxReadFiles = 2;
 #else
-    unsigned maxFiles = 2;
+    unsigned maxReadFiles = 1;
 #endif
-	appendValue(genomeFileNames, length(genomeFileNames) + 1);
+	resize(genomeFileNames, length(genomeFileNames) + 1);
     getArgumentValue(back(genomeFileNames), parser, 0);
-    resize(readFileNames, _min(countArguments(parser), maxFiles) - 1, Exact());
+    resize(readFileNames, _min(getArgumentValueCount(parser, 1), maxReadFiles), Exact());
 	for (unsigned i = 0; i < length(readFileNames); ++i)
-		getArgumentValue(readFileNames[i], parser, i + 1);
+		getArgumentValue(readFileNames[i], parser, 1, i);
 
     CharString filter;
     getOptionValue(filter, parser, "filter");
@@ -629,13 +628,14 @@ extractOptions(
 			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes << " '1's" << endl;
         options.delta = ones + zeros;
 	}
-	if (countArguments(parser) == 2)
+	if (getArgumentValueCount(parser, 1) == 1)
 		options.libraryLength = -1;		// only 1 readset -> disable mate-pair mapping
-	if ((countArguments(parser) > maxFiles) && (stop = true))
-		cerr << "More than " << maxFiles << " input files specified." << endl;
-	if ((countArguments(parser) < 2) && (stop = true))
-        cerr << "Less than 2 input files specified." << endl;
+	if ((getArgumentValueCount(parser, 1) > maxReadFiles) && (stop = true))
+		cerr << "More than " << maxReadFiles << " read files specified." << endl;
+	if ((getArgumentValueCount(parser, 1) == 0) && (stop = true))
+        cerr << "No read files specified." << endl;
 
+	options.compMask[4] = (options.matchN)? 15: 0;
 	options.errorRate = (100.0 - options.errorRate) / 100.0;
 	options.mutationRate = options.mutationRate / 100.0;
 	options.lossRate = pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
@@ -695,24 +695,7 @@ int main(int argc, const char *argv[])
 		cerr << "Exiting ..." << endl;
         return RAZERS_INVALID_OPTIONS;
     }
-/*
-	CommandLineParser parser;
-	string rev = "$Revision$";
-	addVersionLine(parser, "RazerS version 3.0 20120813 [" + rev.substr(11, 5) + "]");
-	addVersionLine(parser, "Build date: " __DATE__ ", " __TIME__);
 
-	//////////////////////////////////////////////////////////////////////////////
-	// Define options
-	addTitleLine(parser, "***********************************************************");
-	addTitleLine(parser, "*** RazerS - Fast Read Mapping with Sensitivity Control ***");
-	addTitleLine(parser, "***          (c) Copyright 2009 by David Weese          ***");
-	addTitleLine(parser, "***********************************************************");
-
-	{
-		cerr << "Exiting ..." << endl;
-		return RAZERS_INVALID_OPTIONS;
-	}
-*/
 #ifdef _OPENMP
     // Set maximal number of threads.
     int oldMaxThreads = omp_get_max_threads();

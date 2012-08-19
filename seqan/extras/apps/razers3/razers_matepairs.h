@@ -534,9 +534,12 @@ void compactPairMatches(
 
     options.timeCompactMatches += sysTime() - beginTime;
 
-    fprintf(stderr, "[%u reads disabled]", disabled);
-	unsigned newSize = length(matches);
-	fprintf(stderr, "[%u of %u alignments removed]", unsigned(origSize - newSize), unsigned(origSize));
+    if (options._debugLevel >= 2)
+    {
+        fprintf(stderr, "[%u reads disabled]", disabled);
+        unsigned newSize = length(matches);
+        fprintf(stderr, "[%u of %u alignments removed]", unsigned(origSize - newSize), unsigned(origSize));
+    }
 }
 
 
@@ -1063,7 +1066,7 @@ int _mapMatePairReads(
 		// (once per _mapSingleReadsToContig call)
 		lockContig(store, contigId);
 		
-		std::cout<<"contigLen: "<<length(store.contigStore[contigId].seq)<<std::endl;
+//		std::cout<<"contigLen: "<<length(store.contigStore[contigId].seq)<<std::endl;
 		
 		if (options.forward)
 			_mapMatePairReads(matches, store, contigId, filterPatternL, filterPatternR, cnts, 'F', options, mode);
