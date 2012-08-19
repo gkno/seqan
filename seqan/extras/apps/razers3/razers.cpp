@@ -244,7 +244,7 @@ int mapReads(
 #endif  // #ifdef RAZERS_PROFILE
 
 	return 0;
-}	
+}
 
 inline void whichMacros(){
 #ifdef RAZERS_OPENADDRESSING
@@ -252,7 +252,7 @@ inline void whichMacros(){
 #else
 	std::cerr << "Index:    Normal" << std::endl;
 #endif
-	
+
 #ifdef RAZERS_TIMER
 	std::cerr << "Timer:    ON" << std::endl;
 #else
@@ -276,17 +276,19 @@ inline void whichMacros(){
 #else
 	std::cerr << "Timeline: OFF" << std::endl;
 #endif
-	
 	std::cerr << std::endl;
 }
 
 void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & options, ParamChooserOptions const & pm_options)
 {
+    string rev  = "$Revision$";
+    string date = "$Date$";
+
     setAppName(parser, "razers3");
     setShortDescription(parser, "Faster, fully sensitive read mapping");
     setCategory(parser, "Read Mapping");
-    setVersion(parser, "3.1 $Rev$");
-    setDate(parser, "$Date:$");
+    setVersion(parser, "3.1 [" + rev.substr(11, rev.size() - 13) + "]");
+    setDate(parser, date.substr(7, date.size() - 8));
 
     // Need genome and reads (hg18.fa reads.fq)
     addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
@@ -377,7 +379,7 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & option
 //	addHelpLine(parser, "1 = position space");
 	addOption(parser, ArgParseOption("ga", "global-alignment",  "Compute global alignment (in SAM output)."));
     hideOption(parser, "global-alignment");
-   
+
 	addSection(parser, "Filtration Options");
 	addOption(parser, ArgParseOption("fl", "filter",            "Select k-mer filter.", ArgParseOption::STRING));
     setValidValues(parser,  "filter", "pigeonhole swift");
@@ -490,7 +492,7 @@ extractOptions(
 {
 	//////////////////////////////////////////////////////////////////////////////
 	// Extract options
-    
+
     bool stop = false;
 	getOptionValue(options.forward, parser, "forward");
 	getOptionValue(options.reverse, parser, "reverse");
@@ -545,7 +547,7 @@ extractOptions(
 
 #ifdef RAZERS_OPENADDRESSING
 	getOptionValue(options.loadFactor, parser, "load-factor");
-#endif 
+#endif
 	getOptionValue(options.trimLength, parser, "trim-reads");
 	getOptionValue(options.tabooLength, parser, "taboo-length");
 	getOptionValue(options.matchN, parser, "match-N");
@@ -594,7 +596,7 @@ extractOptions(
         if (isSet(parser, "overlap-length") && (stop = true))
             cerr << "k-mer overlap length can only be set for the pigeonhole filter (-fl pigeonhole)" << endl;
     }
-    
+
 	if (isSet(parser, "shape"))
 	{
 		unsigned ones = 0;
@@ -613,7 +615,7 @@ extractOptions(
 					stop = true;
 					i = length(options.shape);
 			}
-		if ((ones == 0 || ones > 31) && !stop) 
+		if ((ones == 0 || ones > 31) && !stop)
 		{
 			cerr << "Invalid Shape" << endl;
 			stop = true;
@@ -637,14 +639,14 @@ extractOptions(
 	options.errorRate = (100.0 - options.errorRate) / 100.0;
 	options.mutationRate = options.mutationRate / 100.0;
 	options.lossRate = pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
-    
+
     return (stop)? ArgumentParser::PARSE_ERROR : ArgumentParser::PARSE_OK;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Command line parsing and parameter choosing
-int main(int argc, const char *argv[]) 
+int main(int argc, const char *argv[])
 {
 	//whichMacros();
 
@@ -664,22 +666,20 @@ int main(int argc, const char *argv[])
     timelineAddTaskType("SORT", "Sorting.");
     timelineAddTaskType("COPY_FINDER", "Copy SWIFT Finder.");
 #endif  // #ifndef RAZERS_PROFILE
-	
+
 	RazerSOptions<>			options;
 	ParamChooserOptions		pm_options;
-
 	StringSet<CharString>	genomeFileNames;
 	StringSet<CharString>	readFileNames;
-	
 
 	// Change defaults
 	options.forward = false;
 	options.reverse = false;
-    
+
     // Set up command line parser.
     ArgumentParser argParser;
     setUpArgumentParser(argParser, options, pm_options);
-    
+
     // Parse command line.
     ArgumentParser::ParseResult res = parse(argParser, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -736,7 +736,7 @@ int main(int argc, const char *argv[])
 
 	if (options.trimLength > readLength)
 		options.trimLength = readLength;
-	
+
 #ifndef NO_PARAM_CHOOSER
 	if (options.threshold != 0 && !(isSet(argParser, "shape") || isSet(argParser, "threshold")))
 	{
@@ -765,7 +765,7 @@ int main(int argc, const char *argv[])
 				cerr << "___PARAMETER_CHOOSING__" << endl;
 			if (!chooseParams(options,pm_options))
 			{
-				if (pm_options.verbose) 
+				if (pm_options.verbose)
 					cerr << "Couldn't find preprocessed parameter files. Please configure manually (options --shape and --threshold)." << endl;
                 if (options._debugLevel >= 1)
                     cerr << "Using default configurations (shape = " << options.shape << " and k-mer lemma)." << endl;
@@ -778,7 +778,7 @@ int main(int argc, const char *argv[])
 			return RAZERS_READS_FAILED;
 		}
 	}
-#endif	
+#endif
 
 	int result = mapReads(genomeFileNames, readFileNames, options);
 	if (result != 0)
