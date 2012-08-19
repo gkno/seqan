@@ -9,8 +9,6 @@
 // #include <tr1/memory>
 // #endif  // #ifdef PLATFORM_WINDOWS
 
-#include <seqan/parallel.h>
-
 #include "parallel_misc.h"
 #include "parallel_job_queue.h"
 #include "razers_match_filter.h"
@@ -230,10 +228,10 @@ appendToVerificationResults(SingleVerificationResults<TMatches> & verificationRe
 {
     omp_set_lock(&verificationResults.lock->lock_);
 //     if (length(verificationResults.localMatches) > 0u)
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         std::cerr << "BEFORE: " << &verificationResults << " length(*front(verificationResults.localMatches).matches) == " << length(*front(verificationResults.localMatches).matches) << ", " << (void*)front(verificationResults.localMatches).matches.get() << std::endl;
     appendValue(verificationResults.localMatches, results);
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //     std::cerr << "AFTER:  " << &verificationResults << " length(*front(verificationResults.localMatches).matches) == " << length(*front(verificationResults.localMatches).matches) << ", " << (void*)front(verificationResults.localMatches).matches.get() << std::endl;
     omp_unset_lock(&verificationResults.lock->lock_);
 }
@@ -302,7 +300,7 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
 		matchVerify(tls.verifier, swiftInfix(value(it), contigSeq), absReadId, tls.globalStore->readSeqStore[absReadId], TRazerSMode());
     }
 
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //     {
 //         std::cerr << "thread " << omp_get_thread_num() << "; window " << job.windowNo << " hit group id " << job.hitGroupId << " thread id " << job.threadId << std::endl;
 //         std::cerr << "localMatches.data_begin == " << (void*)(localMatches->data_begin) << ", localMatches.data_end == " << (void*)(localMatches->data_end) << std::endl;
@@ -346,14 +344,14 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
     for (unsigned i = 0; i < length(verificationHits); ++i) 
     {
         // verificationHits[i].windowNo;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         std::cerr << "thread " << omp_get_thread_num() << " got (" << verificationHits[i].windowNo << ", " << verificationHits[i].hitGroupId << ")" << std::endl;
         tls.verificationResultBuckets[verificationHits[i].windowNo][verificationHits[i].hitGroupId] = verificationHits[i];
         tls.missingInBucket[verificationHits[i].windowNo] -= 1;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         std::cerr << "thread " << omp_get_thread_num() << " {windowNo == " << verificationHits[i].windowNo << "--(" << tls.missingInBucket[verificationHits[i].windowNo] << ")}" << std::endl;
     }
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //     std::cerr << "thread " << omp_get_thread_num() << " [wrote " << length(verificationHits) << " matches to buckets]" << std::flush;
 
     unsigned const DELTA = getMaxDeviationOfOrder(tls.filterPattern);
@@ -368,10 +366,10 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
         // (2 a) Compute new size, reserve memory, copy data.
         size_t originalSize = length(tls.matches);
         unsigned idx = tls.nextBucketToWriteBack;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         std::cerr << "\n";
         for (unsigned i = 0; i < length(tls.verificationResultBuckets[idx]); ++i) {
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //             {
 //             std::cerr << "thread " << omp_get_thread_num() << " accessing (" << idx << ", " << i << ")" << std::endl;
 //             // unsigned len = length(*tls.verificationResultBuckets[idx][i].matches);
@@ -419,14 +417,14 @@ writeBackToLocal(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore, TFi
         if (firstBeginPos == MaxValue<size_t>::VALUE)
             firstBeginPos = beginPos;
 
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         if (length(tls.matches) > 0u)
 //             std::cerr << "((MASKING FROM " << tls.matches[beginPos].beginPos << " TO " << windowBegin + tls.options.windowSize << " ~ " << back(tls.matches).beginPos << "))" << std::endl
 //                       << "  ->> " << length(tls.matches) - beginPos << " of " << length(tls.matches) << " elements , beginPos == " << beginPos << std::endl;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         if (length(tls.matches) > 0u)
 //             std::cerr << "((MASKING FROM " << tls.matches[beginPos].beginPos << " TO " << windowBegin + tls.options.windowSize << "))" << std::endl;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         std::cerr << "thread " << omp_get_thread_num() << " (masking from " << beginPos << " to end=" << length(tls.matches) << ")" << std::endl;
         // Do not mask duplicates if not in edit distance mode.
         if (!IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
@@ -634,7 +632,7 @@ void _mapSingleReadsParallelToContig(
     timelineEndTask(TASK_COPY_FINDER);
 #endif  // #ifdef RAZERS_PROFILE
 
-    #pragma omp parallel
+    SEQAN_OMP_PRAGMA(parallel)
     {
         unsigned windowsDone = 0;
 
@@ -648,7 +646,7 @@ void _mapSingleReadsParallelToContig(
             tls.filterFinder = threadLocalStorages[0].filterFinder;
         
         // wait until everyone copied the filter of thread 0 before it is changed
-        #pragma omp barrier
+        SEQAN_OMP_PRAGMA(barrier)
         
 #ifdef RAZERS_PROFILE
         timelineEndTask(TASK_COPY_FINDER);
@@ -667,7 +665,7 @@ void _mapSingleReadsParallelToContig(
         // Pre-allocate buckets.
         tls.nextBucketToWriteBack = 0;
         resize(tls.verificationResultBuckets, unsigned(ceil(1.0 * (length(contigSeq)+1000) / options.windowSize)));  // +1000 for the case where contig seq length is multiple of window size
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //         std::cerr << "window count: " << length(tls.verificationResultBuckets) << std::endl;
         clear(tls.missingInBucket);
         resize(tls.missingInBucket, length(tls.verificationResultBuckets), MaxValue<unsigned>::VALUE);
@@ -707,10 +705,10 @@ void _mapSingleReadsParallelToContig(
                 String<TVerificationJob> jobs;
                 reserve(jobs, length(splitters) - 1);
                 for (unsigned i = 1; i < length(splitters); ++i) {
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //                     std::cerr << "\n";
                     appendValue(jobs, TVerificationJob(tls.threadId, tls.verificationResults, store, contigId, windowsDone - 1, hitsPtr, i - 1, splitters[i - 1], splitters[i], *tls.globalOptions, tls.filterPattern));
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //                     std::cerr << "new job(" << tls.threadId << ", tls.verificationResults, store, " << contigId << ", " << windowsDone - 1 << ", hitsPtr, " << i - 1 << ", " << splitters[i - 1] << ", " << splitters[i] << ", *tls.globalOptions, tls.filterPattern)" << std::endl;
                 }
                 pushFront(taskQueue, jobs);
@@ -743,7 +741,7 @@ void _mapSingleReadsParallelToContig(
             // First, swap out the current set of local stores from the verification results.
             omp_set_lock(&tls.verificationResults.lock->lock_);
             String<SingleVerificationResult<TMatches> > localMatches;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //             std::cerr << "thread " << omp_get_thread_num() << " SWAPPING " << &tls.verificationResults.localMatches << "\n";
             std::swap(localMatches, tls.verificationResults.localMatches);
             omp_unset_lock(&tls.verificationResults.lock->lock_);
@@ -762,7 +760,7 @@ void _mapSingleReadsParallelToContig(
         // Finalization
         windowFindEnd(tls.filterFinder, tls.filterPattern);
 
-        #pragma omp atomic
+        SEQAN_OMP_PRAGMA(atomic)
         threadsFiltering -= 1;
 
         // Continue to try to help verify.
@@ -773,7 +771,7 @@ void _mapSingleReadsParallelToContig(
         }
 
         // After every thread is done with everything, write back once more.
-        #pragma omp barrier
+        SEQAN_OMP_PRAGMA(barrier)
         writeBackToLocal(tls, tls.verificationResults.localMatches, true);
 // #ifndef RAZERS_DEFER_COMPACTION
         clearLocalMatches(tls.verificationResults.localMatches);
@@ -811,7 +809,7 @@ void initializeThreadLocalStoragesSingle(TThreadLocalStorages & threadLocalStora
     typedef typename Position<typename TFragmentStore::TContigStore>::Type TPosition;
 
     resize(threadLocalStorages, threadCount);
-    #pragma omp parallel for schedule(static, 1)
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < threadCount; ++i) {
         TThreadLocalStorage & tls = threadLocalStorages[i];
 
@@ -1064,7 +1062,7 @@ int _mapSingleReadsParallel(
         }
     } else {
 #endif  // #ifdef RAZERS_EXTERNAL_MATCHES
-        #pragma omp parallel
+        SEQAN_OMP_PRAGMA(parallel)
         {
 // TODO(holtgrew): We would really like to stop the additional masking step, the incremental masking SHOULD have taken care of this. Thus, the following should be ifndef and not ifdef.
 #ifndef RAZERS_DEFER_COMPACTION
@@ -1073,14 +1071,14 @@ int _mapSingleReadsParallel(
 #endif  // #ifndef RAZERS_DEFER_COMPACTION
             Nothing nothing;
             // std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //             std::cerr << "BEFORE FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
             compactMatches(threadLocalStorages[omp_get_thread_num()].matches, cnts, options, mode, nothing, COMPACT_FINAL);
             // std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
-// #pragma omp critical
+// SEQAN_OMP_PRAGMA(critical)
 //             std::cerr << "AFTER FINAL COMPACTION " << length(threadLocalStorages[omp_get_thread_num()].matches) << std::endl;
         }
-        #pragma omp barrier
+        SEQAN_OMP_PRAGMA(barrier)
 #ifdef RAZERS_EXTERNAL_MATCHES
     }
 #endif // #ifdef RAZERS_EXTERNAL_MATCHES

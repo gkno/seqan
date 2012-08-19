@@ -28,7 +28,7 @@ void simulateReads(TReads &reads, TErrorDist const &errorDist, TStore const &sto
     Pdf<Uniform<unsigned> > pdfSubstitute(1, 3);
     unsigned readLen = length(errorDist);
     
-    #pragma omp parallel for
+    SEQAN_OMP_PRAGMA(parallel for)
     for (int i = 0; i < (int)length(reads); ++i)
     {
         unsigned id = 0;

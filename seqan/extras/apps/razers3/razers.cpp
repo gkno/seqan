@@ -39,7 +39,8 @@
 #ifdef _OPENMP
 #include <omp.h>
 //#define _GLIBCXX_PARALLEL               // parallel STL if available
-#define RAZERS_OPENADDRESSING
+#else
+#pragma message("OpenMP not found! Shared-memory parallelization will be disabled in RazerS3.")
 #endif
 //#define RAZERS_PROFILE                // Extensive profiling information.
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
@@ -56,7 +57,7 @@
 #include <seqan/file.h>
 #include <seqan/store.h>
 #include <seqan/arg_parse.h>
-#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/parallel.h>
 
 // For GCC.
 #include <tr1/memory>
@@ -71,12 +72,14 @@
 
 #ifdef RAZERS_MATEPAIRS
 #include "razers_matepairs.h"
+#ifdef _OPENMP
 #include "razers_matepairs_parallel.h"
 #endif
+#endif
 
+#ifdef _OPENMP
 #include "razers_parallel.h"
-
-#include "profile_timeline.h"
+#endif
 
 #ifdef RAZERS_PROFILE
 #include "profile_timeline.h"
@@ -298,8 +301,8 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & option
     setAppName(parser, "razers3");
     setShortDescription(parser, "Faster, fully sensitive read mapping");
     setCategory(parser, "Read Mapping");
-    setVersion(parser, "3.1");
-    setDate(parser, __DATE__);
+    setVersion(parser, "3.1 $Rev$");
+    setDate(parser, "$Date:$");
 
     // Need genome and reads (hg18.fa reads.fq)
     addArgument(parser, ArgParseArgument(ArgParseArgument::INPUTFILE));
@@ -438,6 +441,7 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & option
     setMaxValue(parser,     "no-compact-frac", "1");
     setDefaultValue(parser, "no-compact-frac", options.noCompactFrac);
 
+#ifdef _OPENMP
 	addSection(parser, "Parallelism Options");
 	addOption(parser, ArgParseOption("tc", "thread-count",      "Set the number of threads to use (0 to force sequential mode).", ArgParseOption::INTEGER));
     setMinValue(parser,     "thread-count", "0");
@@ -462,7 +466,7 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & option
 	addOption(parser, ArgParseOption("mhst", "match-histo-start-threshold",   "When to start histogram.", ArgParseOption::INTEGER));
     setMinValue(parser,     "match-histo-start-threshold", "1");
     setDefaultValue(parser, "match-histo-start-threshold", options.matchHistoStartThreshold);
-
+#endif
 
     addTextSection(parser, "Naming, Sorting, and Coordinate Schemes");
 	addText(parser, "By default, reads and contigs are referred by their Fasta ids given in the input files. "
@@ -543,12 +547,18 @@ extractOptions(
 	getOptionValue(options.overlap, parser, "overlap-length");
 	getOptionValue(options.abundanceCut, parser, "overabundance-cut");
 	getOptionValue(options.repeatLength, parser, "repeat-length");
+
+#ifdef _OPENMP
     getOptionValue(options.threadCount, parser, "thread-count");
     getOptionValue(options.windowSize, parser, "parallel-window-size");
     getOptionValue(options.verificationPackageSize, parser, "parallel-verification-size");
     getOptionValue(options.maxVerificationPackageCount, parser, "parallel-verification-max-package-count");
 	getOptionValue(options.availableMatchesMemorySize, parser, "available-matches-memory-size");
     getOptionValue(options.matchHistoStartThreshold, parser, "match-histo-start-threshold");
+#else
+    options.threadCount = 0;
+#endif
+
 #ifdef RAZERS_OPENADDRESSING
 	getOptionValue(options.loadFactor, parser, "load-factor");
 #endif 

@@ -337,7 +337,7 @@ void initializeThreadLocalStoragesPaired(TThreadLocalStorages & threadLocalStora
     typedef typename TThreadLocalStorage::TReadSet TReadSet;
 
     resize(threadLocalStorages, threadCount);
-    #pragma omp parallel for schedule(static, 1)
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < threadCount; ++i) {
         TThreadLocalStorage & tls = threadLocalStorages[i];
 
@@ -585,7 +585,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
         CharString s = "EAS20_8_6_1_248_1397";
         if (pref == s)
             std::cerr << "GOTCHA" << std::endl;
-        // #pragma omp critical
+        // SEQAN_OMP_PRAGMA(critical)
         // {
         //     std::cerr << tls.globalStore->readNameStore[2 * (threadIdOffset + itR->ndlSeqNo) + 1] << std::endl;
         // }
@@ -1082,7 +1082,7 @@ void _mapMatePairReadsParallel(
     // Per-contig initialization of thread local storage objects.
     // -----------------------------------------------------------------------
     // TODO(holtgrew): Maybe put into its own function?
-    #pragma omp parallel for schedule(static, 1)
+    SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
     for (int i = 0; i < static_cast<int>(options.threadCount); ++i) {
 		// Initialize verifier objects.
 		threadLocalStorages[i].verifierL.onReverseComplement = (orientation == 'R');
@@ -1124,7 +1124,7 @@ void _mapMatePairReadsParallel(
 #endif  // #ifdef RAZERS_PROFILE
 
  
-    #pragma omp parallel
+    SEQAN_OMP_PRAGMA(parallel)
     {
         unsigned windowsDone = 0;
 
@@ -1273,7 +1273,7 @@ void _mapMatePairReadsParallel(
         windowFindEnd(filterFinderL, filterPatternL);
         windowFindEnd(filterFinderR, filterPatternR);
 
-        #pragma omp atomic
+        SEQAN_OMP_PRAGMA(atomic)
         threadsFiltering -= 1;
 
         // Continue to try to help verify.
@@ -1284,7 +1284,7 @@ void _mapMatePairReadsParallel(
         }
 
         // After every thread is done with everything, write back once more.
-        #pragma omp barrier
+        SEQAN_OMP_PRAGMA(barrier)
         writeBackToLocal(tls, tls.verificationResults.localMatches, true);
         clearLocalMatches(tls.verificationResults.localMatches);
     }
@@ -1374,7 +1374,7 @@ int _mapMatePairReadsParallel(
 		resize(forwardPatternsR, pairCount, Exact());
 		String<Dna5String> tmps;
         resize(tmps, omp_get_max_threads());
-        #pragma omp parallel for schedule(static)
+        SEQAN_OMP_PRAGMA(parallel for schedule(static))
 		for (int i = 0; i < pairCount; ++i)
 		{
 #ifdef RAZERS_NOOUTERREADGAPS
@@ -1496,7 +1496,7 @@ int _mapMatePairReadsParallel(
         // matches (queried through macros) and or when using external matches and using
         // parallel compaction (!useSequentialCompaction) and using internal sorting
         // (!useExternalSort).
-#pragma omp parallel
+SEQAN_OMP_PRAGMA(parallel)
         {
             if (IsSameType<TGapMode, RazerSGapped>::VALUE)
                 maskDuplicates(threadLocalStorages[omp_get_thread_num()].matches, options, mode);
@@ -1531,7 +1531,7 @@ int _mapMatePairReadsParallel(
 #endif  // #ifdef RAZERS_PROFILE
 
 	// restore original orientation (R-reads are infixes of ConcatDirect StringSet)
-	#pragma omp parallel for schedule(static, 1)
+	SEQAN_OMP_PRAGMA(parallel for schedule(static, 1))
 	for (int i = 0; i < (int)length(threadLocalStorages); ++i)
 		reverseComplement(threadLocalStorages[i].readSetR);
 

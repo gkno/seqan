@@ -154,13 +154,13 @@ void work(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, StealO
     // Initialization.
     int maxThreads = omp_get_max_threads();
     volatile int workingCount = maxThreads;
-    #pragma omp parallel
+    SEQAN_OMP_PRAGMA(parallel)
     {
         setWorking(threadLocalStorages[omp_get_thread_num()], true);
     }
 
     // Work loop.
-    #pragma omp parallel
+    SEQAN_OMP_PRAGMA(parallel)
     {
         int p = omp_get_thread_num();
         unsigned x = 73 * p;  // LCG pseudorandomess :-O
@@ -176,10 +176,10 @@ void work(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, StealO
                 TJob stolenJob;
                 if (stealWork(stolenJob, threadLocalStorages[targetId])) {
                     // Stealing was successful, become active again.
-                    #pragma omp atomic
+                    SEQAN_OMP_PRAGMA(atomic)
                     workingCount += 1;
                     setWorking(threadLocalStorages[p], true);
-                    #pragma omp flush(workingCount)
+                    SEQAN_OMP_PRAGMA(flush(workingCount))
 
                     // fprintf(stderr, "%d could steal\n", p);
                     work(threadLocalStorages[p], stolenJob);
@@ -192,10 +192,10 @@ void work(String<ThreadLocalStorage<TJob, TSpec> > & threadLocalStorages, StealO
                 // No more work, could steal some in next
                 // iteration and become active again, though.
                 // fprintf(stderr, "Thread %d is done for now.\n", omp_get_thread_num());
-                #pragma omp atomic
+                SEQAN_OMP_PRAGMA(atomic)
                 workingCount -= 1;
                 setWorking(threadLocalStorages[p], false);
-                #pragma omp flush(workingCount)
+                SEQAN_OMP_PRAGMA(flush(workingCount))
             }
         }
     }

@@ -546,7 +546,7 @@ enum {
                 m.orientation = 'F';
             }
 						
-//#pragma omp critical
+//SEQAN_OMP_PRAGMA(critical)
 // begin of critical section
 			{
 				if (!options->spec.DONT_DUMP_RESULTS)
@@ -2507,7 +2507,7 @@ unsigned estimatePigeonholeLosses(TEstLosses &estLosses, TDelta const &delta, TO
 //		std::cout<<"p(X_"<<0<<'='<<e0<<")="<<p[( (q - 1)) * maxErrors1 + e0]<<std::endl;
 		}
 /*
-    #pragma omp critical
+    SEQAN_OMP_PRAGMA(critical)
     {
         for (unsigned e0 = 1; e0 <= maxErrors; ++e0)
             for (unsigned i = 0; i < maxLength; ++i)
@@ -2637,7 +2637,7 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 		filterPattern.params.overlap = options.overlap;
 		_patternInit(filterPattern, options.errorRate);
 
-        #pragma omp critical
+        SEQAN_OMP_PRAGMA(critical)
         {
             CharString str;
             shapeToString(str, filterPattern.shape);
@@ -2673,7 +2673,7 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 		filterPattern.params.overlap = estimatePigeonholeLosses(estLosses, delta, options);
         _patternInit(filterPattern, options.errorRate);            
 
-        #pragma omp critical
+        SEQAN_OMP_PRAGMA(critical)
         {
             std::cout << "     e | e error reads | loss ol =" << std::setw(2) << estLosses[maxErrors1 + 2];
             for (unsigned i = 2 * (maxErrors1 + 2); i < length(estLosses); i += maxErrors1 + 2)
@@ -3135,7 +3135,7 @@ int _mapReads(
     
     // set absolute error cut-offs
     Dna5String tmp;
-    #pragma omp parallel for private(tmp)
+    SEQAN_OMP_PRAGMA(parallel for private(tmp))
 	for (int i = 0; i < readCount; ++i)
     {
         unsigned err = (unsigned)(length(store.readSeqStore[i]) * options.errorRate);
@@ -3170,7 +3170,10 @@ int _mapReads(
 #endif  // #ifdef RAZERS_BANDED_MYERS
     }
 
-    if (options.threadCount == 0 || length(store.readNameStore) < MIN_PARALLEL_WORK) {
+#ifdef _OPENMP
+    if (options.threadCount == 0 || length(store.readNameStore) < MIN_PARALLEL_WORK)
+#endif
+    {
         // Sequential RazerS
         #ifdef RAZERS_MATEPAIRS
         if (options.libraryLength >= 0)
@@ -3178,7 +3181,10 @@ int _mapReads(
         else
         #endif  // #ifndef RAZERS_MATEPAIRS
             return _mapSingleReads(store, cnts, options, shape, mode);
-    } else {
+    }
+#ifdef _OPENMP
+    else
+    {
         // Parallel RazerS
         #ifdef RAZERS_MATEPAIRS
         if (options.libraryLength >= 0)
@@ -3187,6 +3193,7 @@ int _mapReads(
         #endif  // #ifndef RAZERS_MATEPAIRS
             return _mapSingleReadsParallel(store, cnts, options, shape, mode);
     }
+#endif
 }
 
 

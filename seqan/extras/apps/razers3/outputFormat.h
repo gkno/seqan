@@ -776,7 +776,7 @@ int dumpMatches(
 					chunkSize = length(store.alignedReadStore) - fromIdx;
                 //resize(fileOffsets, chunkSize + 1, 0);
 
-			    #pragma omp parallel for private(intBuf)
+			    SEQAN_OMP_PRAGMA(parallel for private(intBuf))
 			    for (TAlignedReadStoreSizeSigned i = 0; i < (TAlignedReadStoreSizeSigned)chunkSize; ++i)
                 {
                     CharString &line = lines[i];
@@ -905,7 +905,7 @@ int dumpMatches(
                 //partialSum(fileOffsets);
                 //resize(fileMM, back(fileOffsets)); 
                 //
-                //#pragma omp parallel for schedule(static)
+                //SEQAN_OMP_PRAGMA(parallel for schedule(static))
 				//for (TAlignedReadStoreSize i = 0; i < chunkSize; ++i)
 				//	infix(fileMM, fileOffsets[i], fileOffsets[i + 1]) = lines[i];
                 //
