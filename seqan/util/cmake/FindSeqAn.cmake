@@ -163,6 +163,7 @@ macro (seqan_setup_global)
         # on 32 bit either at minimal performance impact.
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer")
         set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g -fno-omit-frame-pointer")
+        set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
   
         # Pass CXX flags to flags.
         #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_CXX_FLAGS_=\"${CMAKE_CXX_FLAGS}\"")
@@ -402,7 +403,7 @@ macro (seqan_find_dependencies)
     add_definitions(-DSEQAN_HAS_ZLIB=1)
     include_directories(${ZLIB_INCLUDE_DIRS})
   endif (ZLIB_FOUND)
-  
+
   find_package (BZip2 QUIET)
   if (BZIP2_FOUND)
     include_directories(${BZIP_INCLUDE_DIRS})
