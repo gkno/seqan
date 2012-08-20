@@ -2674,6 +2674,7 @@ void _applyFilterOptions(Pattern<TIndex, Pigeonhole<TPigeonholeSpec> > &filterPa
 		filterPattern.params.overlap = estimatePigeonholeLosses(estLosses, delta, options);
         _patternInit(filterPattern, options.errorRate);            
 
+        if (options._debugLevel >= 2)
         SEQAN_OMP_PRAGMA(critical)
         {
             std::cout << "     e | e error reads | loss ol =" << std::setw(2) << estLosses[maxErrors1 + 2];

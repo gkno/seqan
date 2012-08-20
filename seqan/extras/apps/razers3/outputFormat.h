@@ -776,7 +776,7 @@ int dumpMatches(
 					chunkSize = length(store.alignedReadStore) - fromIdx;
                 //resize(fileOffsets, chunkSize + 1, 0);
 
-			    SEQAN_OMP_PRAGMA(parallel for private(intBuf))
+			    SEQAN_OMP_PRAGMA(parallel for private(intBuf) firstprivate(align))
 			    for (TAlignedReadStoreSizeSigned i = 0; i < (TAlignedReadStoreSizeSigned)chunkSize; ++i)
                 {
                     CharString &line = lines[i];
