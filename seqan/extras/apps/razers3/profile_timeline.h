@@ -73,7 +73,8 @@ struct TimelineEntry_
 };
 
 /**
-.Class.Timeline:Singlestate helper class for creating timelines for program execution.
+.Class.Timeline:
+..summary:Singlestate helper class for creating timelines for program execution.
 ..cat:Debugging
 ..signature:Timeline
 ..remarks:This is useful for a coarse-graine overview of what your program is doing.
@@ -82,7 +83,7 @@ At any given time, each thread in your program (currently only OpenMP threads ar
 Tasks can be nested, the innermost is the active ones.
 Task types are integers, 0 is reserved for "waiting".
 You can notify the beginning of a task with @Function.timelineBeginTask@ and the end with @Function.timelineEndTask@.
-Before you can use a task, you have to declare it with @timelineAddTaskType@.
+Before you can use a task, you have to declare it with @Function.timelineAddTaskType@.
 
 Note that starting and ending comes at the overhead of a @Function.sysTime@ and possibly also resizing a string.
  */
@@ -122,15 +123,16 @@ private:
 // ============================================================================
 
 /**
-.Function.initTimeline:Adds a task description
+.Function.timelineAddTaskType:
+..summary:Adds a task description.
 ..cat:Debugging
 ..signature:timelineAddTaskType(shortName [, longName])
 ..param.shortName:Short name for the task type.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.longName:Optional long name for the task type.
-...type:@Shortcut.CharString@
+...type:Shortcut.CharString
 ..param.return:The identifier of the task.
-...type:$unsigned$
+...type:nolink:$unsigned$
  */
 inline
 unsigned
@@ -148,7 +150,8 @@ timelineAddTaskType(CharString const & shortName)
 }
 
 /**
-.Function.initTimeline:Initialize creation of timeline.
+.Function.initTimeline:
+..summary:Initialize creation of timeline.
 ..cat:Debugging
 ..signature:initTimeline([threadCount])
 ..param.threadCount:Maximal number of threads, by default the result of omp_get_max_threads() is used.
@@ -174,10 +177,10 @@ initTimeline()
 }
 
 /**
-.Function.timelineBeginTask
+.Function.timelineBeginTask:
 ..signature:timelineBeginTask(taskTypeNo)
 ..param.taskTypeNo:The number of the task type that started.
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..param.result:The timestamp registered for the starting point of the task.
  */
 inline
@@ -191,10 +194,10 @@ timelineBeginTask(unsigned taskTypeNo)
 }
 
 /**
-.Function.timelineEndTask
+.Function.timelineEndTask:
 ..signature:timelineEndTask(taskTypeNo)
 ..param.taskTypeNo:The number of the task type that ended.
-...type:$unsigned$
+...type:nolink:$unsigned$
 ..param.result:The timestamp registered for the end point of the task.
  */
 inline
@@ -208,13 +211,14 @@ timelineEndTask(unsigned taskTypeNo)
 }
 
 /**
-.Function.dumpTimeline:Write out results to the given path.
+.Function.dumpTimeline:
+..summary:Write out results to the given path.
 ..cat:Debugging
 ..signature:dumpTimeline(path [, appendPid])
 ..param.path:The path to dump the timeline to.
-...type:$char const *$
+...type:nolink:$char const *$
 ..param.appendPid:Whether to append $".#pid#"$ to the filename.
-...type:$bool$
+...type:nolink:$bool$
 ...default:false
  */
 inline

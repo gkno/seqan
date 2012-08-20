@@ -674,8 +674,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << tls.globalStore->readNameStore[2 * (threadIdOffset + matePairId)] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                         ++options.countVerification;
-///                        if (i==0)
-///                        std::cout<<"here"<<std::endl;
+//                        if (i==0)
+//                        std::cout<<"here"<<std::endl;
 
                         // adjust sink position according to insert size
                         if (!rightVerified)
@@ -687,7 +687,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
-///                            std::cerr << "  Left+ " << verifierL.m.endPos << std::endl;
+//                            std::cerr << "  Left+ " << verifierL.m.endPos << std::endl;
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 						} else {

@@ -683,7 +683,7 @@ void _mapMatePairReads(
             else
                 std::cerr << "\nPOP\tL\t" << store.readNameStore[front(fifo).i2.readId & ~NOT_VERIFIED] << "\t" << front(fifo).i2.beginPos << "\t" << front(fifo).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
-///            std::cerr << "  -Left [" << front(fifo).i2.endPos << "\t" << front(fifo).i2.beginPos << ')' << std::endl;
+//            std::cerr << "  -Left [" << front(fifo).i2.endPos << "\t" << front(fifo).i2.beginPos << ')' << std::endl;
 			popFront(fifo);
 			++firstNo;
 		}
@@ -709,7 +709,7 @@ void _mapMatePairReads(
 					fL.i2.beginPos = beginPosition(filterFinderL);
 					fL.i2.endPos = gPair.i2;
 					
-///            std::cerr << "  +Left \t" << firstNo + length(fifo) << ":\t[" << fL.i2.endPos << "\t" << fL.i2.beginPos << ')' << std::endl;
+//            std::cerr << "  +Left \t" << firstNo + length(fifo) << ":\t[" << fL.i2.endPos << "\t" << fL.i2.beginPos << ')' << std::endl;
 					pushBack(fifo, fL);
 				}
 			} else {
@@ -729,7 +729,7 @@ void _mapMatePairReads(
         __int64 i;
 		for (i = lastPotMatchNo[matePairId]; firstNo <= i; last = i, i = (*it).i1)
 		{
-///            std::cout<< "\t[" << i << "]" << "\t" << fifo[3].i1 << std::endl;
+//            std::cout<< "\t[" << i << "]" << "\t" << fifo[3].i1 << std::endl;
 			it = &value(fifo, i - firstNo);
 
 			// search left mate
@@ -749,8 +749,8 @@ void _mapMatePairReads(
                         std::cerr << "\nVERIFY\tL\t" << matePairId << "\t" << store.readNameStore[2 * matePairId] << "\t" << (TSignedGPos)(*it).i2.beginPos << "\t" << (*it).i2.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
                         ++options.countVerification;
-///                        if (i==0)
-///                        std::cout<<"here"<<std::endl;
+//                        if (i==0)
+//                        std::cout<<"here"<<std::endl;
 
                         // adjust sink position according to insert size
                         if (!rightVerified)
@@ -762,7 +762,7 @@ void _mapMatePairReads(
 #ifdef RAZERS_DEBUG_MATEPAIRS
                             std::cerr << "  YES: " << verifierL.m.beginPos << "\t" << verifierL.m.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
-///                            std::cerr << "  Left+ " << verifierL.m.endPos << std::endl;
+//                            std::cerr << "  Left+ " << verifierL.m.endPos << std::endl;
 							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 							(*it).i2 = verifierL.m;
 						} else {

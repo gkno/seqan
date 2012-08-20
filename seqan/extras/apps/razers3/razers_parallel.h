@@ -95,7 +95,8 @@ template <
 struct MapSingleReads {};
 
 /**
-.Class.ThreadLocalStorage:Encapsulates the thread-local data.
+.Class.ThreadLocalStorage:
+..summary:Encapsulates the thread-local data.
 ..signature:ThreadLocalStorage<TSpec>
 ..param.TSpec:Specialization template argument.
  */
