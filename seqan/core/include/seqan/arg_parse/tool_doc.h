@@ -86,7 +86,7 @@ public:
     CharString _title;
 
     ToolDocSection_(ToolDocSection_ const & sec) :
-        _title(sec._title)
+        ToolDocEntry_(sec), _title(sec._title)
     {}
 
     ToolDocSection_(CharString const & title) :
@@ -140,7 +140,7 @@ public:
     bool _isPar;
 
     ToolDocLine_(ToolDocLine_ const & line) :
-        _text(line._text), _isPar(line._isPar)
+        ToolDocEntry_(line), _text(line._text), _isPar(line._isPar)
     {}
 
     ToolDocLine_(CharString const & text, bool isParagraph) :
@@ -173,7 +173,7 @@ public:
     CharString _description;
 
     ToolDocListItem_(ToolDocListItem_ const & item) :
-        _term(item._term), _description(item._description)
+        ToolDocEntry_(item), _term(item._term), _description(item._description)
     {}
 
     ToolDocListItem_(CharString const & term, CharString const & description) :

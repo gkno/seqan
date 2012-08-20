@@ -1390,7 +1390,7 @@ template <typename TString, typename TSpec, typename TSequence, typename TSepara
 inline void
 strSplit(StringSet<TString, TSpec> & result, TSequence const &sequence, TSeparator sep, bool allowEmptyStrings, TSize maxSplit)
 {
-    typedef typename Iterator<TSequence, Standard>::Type TIter;
+    typedef typename Iterator<TSequence const, Standard>::Type TIter;
     
     TIter itBeg = begin(sequence, Standard());
     TIter itEnd = end(sequence, Standard());

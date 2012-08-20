@@ -503,6 +503,11 @@ inline void printShortHelp(ArgumentParser const & me, std::ostream & stream)
     print(stream, shortDoc, "txt");
 }
 
+inline void printShortHelp(ArgumentParser const & me)
+{
+    printShortHelp(me, std::cerr);
+}
+
 // ----------------------------------------------------------------------------
 // Function printVersion()
 // ----------------------------------------------------------------------------
@@ -542,17 +547,17 @@ inline void _addNumericalRestriction(std::string & text, ArgParseOption const & 
     {
         append(text, " In range [");
 
-        if (empty(opt.minValue))
-            append(text, "-inf");
-        else
+        if (!empty(opt.minValue))
             append(text, opt.minValue);
-
-        append(text, ":");
-
-        if (empty(opt.maxValue))
-            append(text, "inf");
         else
+            append(text, "-inf");
+
+        append(text, "..");
+
+        if (!empty(opt.maxValue))
             append(text, opt.maxValue);
+        else
+            append(text, "inf");
 
         append(text, "].");
     }
@@ -728,6 +733,11 @@ inline void printHelp(ArgumentParser const & me, std::ostream & stream, CharStri
 inline void printHelp(ArgumentParser const & me, std::ostream & stream)
 {
     printHelp(me, stream, "txt");
+}
+
+inline void printHelp(ArgumentParser const & me)
+{
+    printHelp(me, std::cerr, "txt");
 }
 
 }  // namespace seqan

@@ -730,23 +730,23 @@ the @Class.ArgParseArgument@ is a list or can hold multiple values
 (@Memfunc.ArgParseArgument#ArgParseArgument.param.numberOfArguments@) you can specify which value
 you want to get. If not set the first value will be returned.
 ..cat:Miscellaneous
-..signature:getArgumentValue(argument [, position])
+..signature:getArgumentValue(argument [, argNo])
 ..param.argument:The @Class.ArgParseArgument@ object.
 ...type:Class.ArgParseArgument
-..param.position:A unsigned int defining the which value should be returned.
+..param.argNo:If the argument is a list,  the $argNo$-th list element is returned.
 ..returns:The value set at position $position$.
 ..include:seqan/arg_parse.h
 */
 
-inline std::string const & getArgumentValue(ArgParseArgument const & me, unsigned position)
+inline std::string const & getArgumentValue(ArgParseArgument const & me, unsigned argNo)
 {
-    SEQAN_CHECK(position < me.value.size() || position < me.defaultValue.size(),
-                "ArgParseArgument: No value set for index %d", position);
+    SEQAN_CHECK(argNo < me.value.size() || argNo < me.defaultValue.size(),
+                "ArgParseArgument: No value set for index %d", argNo);
 
-    if (position < me.value.size())
-        return me.value[position];
+    if (argNo < me.value.size())
+        return me.value[argNo];
     else
-        return me.defaultValue[position];
+        return me.defaultValue[argNo];
 }
 
 inline std::string const & getArgumentValue(ArgParseArgument const & me)

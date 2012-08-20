@@ -378,7 +378,7 @@ inline ArgParseOption const & getOption(ArgumentParser const & me, std::string c
 inline void setRequired(ArgumentParser & me, std::string const & name, bool required = true)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
-    return setRequired(getOption(me, name), required);
+    setRequired(getOption(me, name), required);
 }
 
 // ----------------------------------------------------------------------------
@@ -583,7 +583,7 @@ inline unsigned getOptionValueCount(ArgumentParser const & me, std::string const
 /**
 .Function.getArgumentValueCount:
 ..class:Class.ArgumentParser
-..summary:Retunrs the number of values stored in the specified option.
+..summary:Returns the number of values stored in the specified option.
 ..cat:Miscellaneous
 ..signature:getArgumentValueCount(parser, argumentPosition)
 ..param.parser:The @Class.ArgumentParser@ object.
@@ -623,7 +623,7 @@ inline unsigned getArgumentValueCount(ArgumentParser const & me, unsigned argume
 
 template <typename TValue>
 inline bool getArgumentValue(TValue & value,
-                             ArgumentParser & me,
+                             ArgumentParser const & me,
                              unsigned argumentPosition,
                              unsigned argNo)
 {
@@ -635,7 +635,7 @@ inline bool getArgumentValue(TValue & value,
 
 template <typename TValue>
 inline bool getArgumentValue(TValue & value,
-                             ArgumentParser & me,
+                             ArgumentParser const & me,
                              unsigned argumentPosition)
 {
     return getArgumentValue(value, me, argumentPosition, 0);
@@ -658,7 +658,7 @@ inline bool getArgumentValue(TValue & value,
 ..include:seqan/arg_parse.h
 */
 
-inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
+inline std::vector<std::string> const & getOptionValues(ArgumentParser const & me,
                                                         std::string const & name)
 {
     SEQAN_CHECK(hasOption(me, name), "Unknown option: %s", toCString(name));
@@ -682,7 +682,7 @@ inline std::vector<std::string> const & getOptionValues(ArgumentParser & me,
 ..include:seqan/arg_parse.h
 */
 
-inline std::vector<std::string> const & getArgumentValues(ArgumentParser & me,
+inline std::vector<std::string> const & getArgumentValues(ArgumentParser const & me,
                                                           unsigned argumentPosition)
 {
     SEQAN_CHECK(me.argumentList.size() > argumentPosition,
