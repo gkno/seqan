@@ -15,7 +15,7 @@ int main()
     // Create AnnotationTree iterator
     Iterator<FragmentStore<>, AnnotationTree<> >::Type it;
     it = begin(store, AnnotationTree<>());
-
+    // Move iterator one node down 
     goDown(it);
  
     return 0;
