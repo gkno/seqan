@@ -5,6 +5,7 @@
 #include <seqan/misc/misc_cmdparser.h>
 #include <seqan/store.h>
 #include <seqan/random.h>
+#include <seqan/parallel.h>
 
 #ifdef _OPENMP
 #include <omp.h>

@@ -34,6 +34,7 @@
 #include <seqan/index/find_pigeonhole.h>
 #include <seqan/store.h>
 #include <seqan/pipe.h>
+#include <seqan/parallel.h>
 
 #ifdef RAZERS_PROFILE
 #include "profile_timeline.h"
@@ -270,7 +271,7 @@ enum {
         typedef String<TMyersPattern>               TPreprocessing;
 
         static String<unsigned char>                errorCutOff;    // ignore matches with >=errorCutOff errors
-        static TPreprocessing                       forwardPattern;
+        static TPreprocessing                       forwardPatterns;
         
         StringSet<CharString, Owner<ConcatDirect<> > > outputFormatList;
 
@@ -350,7 +351,7 @@ enum {
     String<unsigned char> RazerSOptions<TSpec>::errorCutOff;
 
     template <typename TSpec>
-    typename RazerSOptions<TSpec>::TPreprocessing RazerSOptions<TSpec>::forwardPattern;
+    typename RazerSOptions<TSpec>::TPreprocessing RazerSOptions<TSpec>::forwardPatterns;
 
 //////////////////////////////////////////////////////////////////////////////
 // Typedefs
@@ -1471,6 +1472,8 @@ void compactMatches(
 	unsigned hitCountCutOff = options.maxHits;
 	int scoreCutOff = MinValue<int>::VALUE;
 	int scoreRangeBest = (IsSameType<TAlignMode, RazerSGlobal>::VALUE && !IsSameType<TScoreMode, RazerSScore>::VALUE)? -(int)options.scoreDistanceRange : MaxValue<int>::VALUE;
+    ignoreUnusedVariableWarning(scoreRangeBest);
+    ignoreUnusedVariableWarning(compactMode);
 
 #ifdef RAZERS_PROFILE
     timelineBeginTask(TASK_SORT);
@@ -1511,6 +1514,8 @@ void compactMatches(
 		if ((*it).orientation == '-') continue;
 		int score = (*it).score;
 		int errors = -(*it).score;
+        ignoreUnusedVariableWarning(errors);
+        
         //if (readNo == 643) std::cerr <<"["<<score<<","<<errors<<"] "<<::std::flush;
 		if (readNo == (*it).readId && (*it).pairMatchId == TMatch::INVALID_ID)  // Only compact unpaired matches.
 		{
@@ -1983,6 +1988,7 @@ matchVerify(
 
 	// find read match end
 	typedef Finder<TGenomeInfix>							TMyersFinder;
+    typedef typename TMatchVerifier::TOptions::TMyersPattern TMyersPattern;
 	typedef typename TMatchVerifier::TPatternState			TPatternState;
 
 	// find read match begin
@@ -2000,7 +2006,7 @@ matchVerify(
 
 	TMyersFinder myersFinder(inf);
 #ifndef RAZERS_BANDED_MYERS
-    TMyersPattern &myersPattern = verifier.options->forwardPattern[readId]; 
+    TMyersPattern &myersPattern = verifier.options->forwardPatterns[readId];
 #endif  // #ifdef RAZERS_BANDED_MYERS
 	TPatternState & state = verifier.patternState;
 	
