@@ -10,7 +10,7 @@ int main()
 {
     FragmentStore<> store;
 
-    std::ifstream file("../../seqan-trunk/extras/demos/tutorial/annotation_store/assignment_annotations.gtf", std::ios_base::in | std::ios_base::binary);
+    std::ifstream file("assignment_annotations.gtf", std::ios_base::in | std::ios_base::binary);
     read(file, store, Gtf());
     // Create AnnotationTree iterator
     Iterator<FragmentStore<>, AnnotationTree<> >::Type it;
