@@ -108,6 +108,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 	}
+
 };
 
 
@@ -166,7 +167,8 @@ SEQAN_CHECKPOINT
 		point(point), cargo(cargo)
 	{
 SEQAN_CHECKPOINT
-	}
+	}	
+    
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1741,6 +1743,152 @@ SEQAN_CHECKPOINT
 		}
 	}
 }
+
+
+template<typename TGraph, typename TPropertyMap, typename TValue, typename TCargo>
+bool
+removeInterval(TGraph & g, 
+			  TPropertyMap & pm, 
+			  typename VertexDescriptor<TGraph>::Type & act_knot, 
+			  TValue i_begin, 
+			  TValue i_end,
+              TCargo i_id)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Value<TPropertyMap>::Type TProperty;
+	typedef typename ListType<TProperty>::Type TList;
+	typedef typename Iterator<TList,Standard>::Type TListIterator;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+    if (empty(g)) return false;
+
+    TProperty act_prop = property(pm,act_knot);
+	TProperty next_prop;
+		
+	while(true)
+	{
+		TOutEdgeIterator it(g, act_knot);
+		act_prop = property(pm,act_knot);
+		//
+		if(act_prop.center < i_begin) // interval is to the right of node center
+		{
+			if(atEnd(it)) break;
+			else{
+				next_prop = property(pm,targetVertex(it));
+				if(next_prop.center <= act_prop.center)
+				{
+					goNext(it);
+					if(atEnd(it)) break;
+				}
+			}
+			act_knot = targetVertex(it);
+		}
+		else{
+			if(i_end < act_prop.center) // interval is to the left of node center
+			{
+				if(atEnd(it)) break;
+				else
+				{
+					next_prop = property(pm,targetVertex(it));
+					if(next_prop.center >= act_prop.center)
+					{
+						goNext(it);
+						if(atEnd(it)) break;
+					}
+				}
+				act_knot = targetVertex(it);
+			}
+			else{//node center is contained in interval, this is where we should find the interval to be removed
+                // remove from list1
+                TProperty& change_prop = property(pm,act_knot);
+                bool foundInLeft = false;
+                TListIterator list_it_keep = begin(change_prop.list1,Standard());
+                TListIterator list_it = begin(change_prop.list1,Standard());
+				while(list_it != end(change_prop.list1,Standard()))
+                {
+                    //std::cout << "Element: " << getLeftBoundary(*list_it) << ".." << getRightBoundary(*list_it) << " " << cargo(*list_it) << std::endl;
+                    if (getLeftBoundary(*list_it) == i_begin && cargo(*list_it) == i_id)
+                    {
+                        foundInLeft = true;
+                        ++list_it;
+                        continue;
+                    }
+                    *list_it_keep = *list_it;
+                    //std::cout << "Element keep: " << getLeftBoundary(*list_it_keep) << ".." << getRightBoundary(*list_it_keep) << " " << cargo(*list_it_keep) << std::endl;
+                    ++list_it; ++list_it_keep;
+                }
+
+	            bool foundInRight = false;
+                list_it_keep = begin(change_prop.list2,Standard());
+                list_it = begin(change_prop.list2,Standard());
+				while(list_it != end(change_prop.list2,Standard()))
+                {
+                    //std::cout << "Element: " << getLeftBoundary(*list_it) << ".." << getRightBoundary(*list_it) << " " << cargo(*list_it) << std::endl;
+                    if (getRightBoundary(*list_it) == i_end && cargo(*list_it) == i_id)
+                    {
+                        foundInRight = true;
+                        ++list_it;
+                        continue;
+                    }
+                    *list_it_keep = *list_it;
+                    //std::cout << "Element keep: " << getLeftBoundary(*list_it_keep) << ".." << getRightBoundary(*list_it_keep) << " " << cargo(*list_it_keep) << std::endl;
+                    ++list_it; ++list_it_keep;
+
+                }
+                
+
+                // TODO: if node is empty and does not have child nodes --> remove node.
+                // keeping these empty leaf nodes just takes space unnecessarily
+				if(foundInRight && foundInLeft)
+                {
+                    resize(change_prop.list2, length(change_prop.list2)-1);
+                    resize(change_prop.list1, length(change_prop.list1)-1);
+                    return true;
+                }
+
+			}
+		}
+	}
+    return false;
+}
+
+template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
+bool
+removeInterval(TGraph & g, TPropertyMap & pm, TValue i_begin, TValue i_end, TCargo i_id)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+
+	// start looking at root
+	TVertexDescriptor act_knot = 0;
+	return removeInterval(g, pm, act_knot, i_begin, i_end, i_id);
+}
+
+
+
+/**
+.Function.removeInterval
+..signature:removeInterval(intervalTree, i_begin, i_end, i_id)
+..param.i_begin:The begin position of the interval to be removed.
+..param.i_end:The end position of the interval to be removed.
+..param.i_id:The ID of the interval to be removed.
+*/
+template<typename TValue,typename TCargo>
+bool
+removeInterval(IntervalTree<TValue,TCargo> & tree, TValue i_begin, TValue i_end, TCargo i_id)
+{
+SEQAN_CHECKPOINT
+
+	return removeInterval(tree.g,tree.pm,i_begin,i_end,i_id);
+    // we do not decrease the interval_counter of tree, as it would mix up interval IDs
+
+}
+
+
+
 
 
 

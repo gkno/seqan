@@ -60,5 +60,19 @@ int main()
 	    std::cout << results[i] << ",";
 	std::cout << std::endl; 
 
+    CharString iCargo("exon");
+    bool res = removeInterval(tree, 50, 200, iCargo);
+    if(res) std::cout << "Removed exon interval 50..200.\n";
+	
+	String<TCargo> results2;
+    findIntervals(tree,snpPos,results2);		 // redo query, this time one interval less should be returned
+	std::cout << "SNP " << snpPos << " overlaps with ";
+	for(unsigned i = 0; i < length(results2); ++i)
+	    std::cout << results2[i] << ",";
+	std::cout << std::endl; 
+
+
+
+
 	return 0;
 }
