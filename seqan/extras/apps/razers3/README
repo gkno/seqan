@@ -58,11 +58,20 @@ trunk or use a precompiled binary.
 
 Follow the "Getting Started" section on http://trac.seqan.de/wiki and check
 out the latest SVN trunk. Instead of creating a project file in Debug mode,
-switch the Release mode (-DCMAKE_BUILD_MODE=Release). If RazerS 3 will be run
-on the same machine it is compiled on, you can consider to optimize for the
-given architecture. For gcc or llvm/clang compilers this can be done with:
+switch to Release mode (-DCMAKE_BUILD_TYPE=Release) and compile razers3. This
+can be done as follows:
 
-  cmake . -DCMAKE_BUILD_MODE=Release -DCMAKE_CXX_FLAGS:STRING="-march=native"
+  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan seqan-trunk
+  mkdir seqan-trunk/build
+  cd seqan-trunk/build
+  cmake .. -DCMAKE_BUILD_TYPE=Release
+  make razers3
+
+If RazerS 3 will be run on the same machine it is compiled on, you may
+consider to optimize for the given system architecture. For gcc or llvm/clang
+compilers this can be done with:
+
+  cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS:STRING="-march=native"
   make razers3
 
 ------------------------------------------------------------------------------
