@@ -74,6 +74,12 @@ compilers this can be done with:
   cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS:STRING="-march=native"
   make razers3
 
+After compilation, copy the binary to a folder in your PATH variable, e.g.
+/usr/local/bin:
+
+  sudo cp extras/apps/razers3/razers3 /usr/local/bin
+
+
 ------------------------------------------------------------------------------
 2.2. Precompiled binaries
 ------------------------------------------------------------------------------
