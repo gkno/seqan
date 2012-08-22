@@ -21,9 +21,9 @@ project (sandbox_weese_apps_razers3)
                                 parallel_misc.h
                                 parallel_store.h
                                 paramChooser.h
-								param_tabs.cpp
-								param_tabs.inc
-								param_tabs.h
+                                param_tabs.cpp
+                                param_tabs.inc
+                                param_tabs.h
                                 profile_timeline.h
                                 razers_match_filter.h
                                 razers_paired_match_filter.h
@@ -34,8 +34,6 @@ project (sandbox_weese_apps_razers3)
                                 readSimulator.h)
 
 #  seqan_add_executable (compPHSens compPHSens.cpp razers.h)
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   seqan_add_executable (simulate_reads simulate_reads.cpp)
   seqan_add_executable (quality2prob quality2prob.cpp)
 
