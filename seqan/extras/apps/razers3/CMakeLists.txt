@@ -12,6 +12,7 @@ project (sandbox_weese_apps_razers3)
   #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -fno-exceptions")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
+if (NOT MINGW)
   # Add executable for RazerS 3.
   seqan_add_executable (razers3 razers.cpp
                                 razers.h
@@ -32,6 +33,9 @@ project (sandbox_weese_apps_razers3)
                                 razers_parallel.h
                                 razers_window.h
                                 readSimulator.h)
+else (NOT MINGW)
+	message (STATUS "Not building RazerS 3: MinGW does not provide __sync_val_compare_and_swap.")
+endif (NOT MINGW)
 
 #  seqan_add_executable (compPHSens compPHSens.cpp razers.h)
   seqan_add_executable (simulate_reads simulate_reads.cpp)
