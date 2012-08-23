@@ -30,6 +30,7 @@ int main()
     TRowIterator itRow1 = begin(row1);
     TRowIterator itEndRow1 = end(row1);
     TRowIterator itRow2 = begin(row2);
+
     int gapCount = 0;
     for(;itRow1 != itEndRow1; ++itRow1, ++itRow2)
     {
