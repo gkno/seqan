@@ -78,10 +78,10 @@ namespace seqan {
 template <typename TSequence>
 TSequence xmlEscape(TSequence const & original)
 {
-    typedef typename Iterator<TSequence const>::Type TSequenceIterator;
+    typedef typename Iterator<TSequence const, Standard>::Type TSequenceIterator;
     TSequence escaped;
-    TSequenceIterator endIter = end(original);
-    for (TSequenceIterator ch  = begin(original); ch != endIter; goNext(ch))
+    TSequenceIterator endIter = end(original, Standard());
+    for (TSequenceIterator ch  = begin(original, Standard()); ch != endIter; goNext(ch))
     {
         if (value(ch) == '"')
             append(escaped, "&quot;");

@@ -248,9 +248,9 @@ public:
         TSequence result;
         String<TSequence> openTags;
 
-        typedef typename Iterator<TSequence const>::Type TIterator;
-        TIterator endIt = end(input);
-        for (TIterator it = begin(input); it != endIt; goNext(it))
+        typedef typename Iterator<TSequence const, Standard>::Type TIterator;
+        TIterator endIt = end(input, Standard());
+        for (TIterator it = begin(input, Standard()); it != endIt; goNext(it))
         {
             if (*it == '\\')
             {

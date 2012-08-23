@@ -364,7 +364,7 @@ maskPatternSequence(Pattern<TIndex, Pigeonhole<TSpec> > & pattern, TSeqNo seqNo,
     SEQAN_ASSERT_NEQ_MSG((int)Pigeonhole<TSpec>::ONE_PER_DIAGONAL, 0, "Disabling sequences in the pigeonhole filter requires the ONE_PER_DIAGONAL heuristic.");
 	
 	if (enable)
-		pattern.lastSeedDiag[seqNo] = -pattern.maxSeqLen;
+		pattern.lastSeedDiag[seqNo] = -(__int64)pattern.maxSeqLen;
 	else
 		pattern.lastSeedDiag[seqNo] = pattern.seqDisabled;
 }
@@ -438,8 +438,8 @@ inline void _patternInit(Pattern<TIndex, Pigeonhole<TSpec> > &pattern, TFloat er
 
         clear(pattern.lastSeedDiag);
         if (Pigeonhole<TSpec>::ONE_PER_DIAGONAL)
-            resize(pattern.lastSeedDiag, seqCount, -maxSeqLen);
-		pattern.seqDisabled = -maxSeqLen - 1;
+            resize(pattern.lastSeedDiag, seqCount, -(__int64)maxSeqLen);
+		pattern.seqDisabled = -(__int64)maxSeqLen - 1;
     }
 	else
 	{
