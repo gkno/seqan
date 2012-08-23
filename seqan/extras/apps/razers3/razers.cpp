@@ -59,8 +59,14 @@
 #include <seqan/arg_parse.h>
 #include <seqan/parallel.h>
 
-// For GCC.
+#ifdef PLATFORM_WINDOWS
+// TR1 for Windows
+#include <memory>
+#include <process.h>
+#else
+// TR1 for GCC
 #include <tr1/memory>
+#endif
 
 #include "razers.h"
 #include "outputFormat.h"

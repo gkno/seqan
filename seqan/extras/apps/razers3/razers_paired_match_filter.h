@@ -1,7 +1,11 @@
 #ifndef RAZERS_PAIRED_MATCH_FILTER_H_
 #define RAZERS_PAIRED_MATCH_FILTER_H_
 
+#ifdef PLATFORM_WINDOWS
+#include <unordered_map>
+#else
 #include <tr1/unordered_map>
+#endif
 
 #include <seqan/graph_types/graph_idmanager.h>
 

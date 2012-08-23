@@ -249,7 +249,7 @@ enum {
 	// misc
 	    double      noCompactFrac;      // If in last noCompactFrac of genome, don't compact.
         double      compactMult;        // Multiplicator for compaction threshold.
-		unsigned	compactThresh;		// compact match array if larger than compactThresh
+		__int64		compactThresh;		// compact match array if larger than compactThresh
 
 	// multi-threading
 
@@ -570,7 +570,7 @@ enum {
 						if (length(*matches) * 4 > oldSize) {			// the threshold should not be raised
                             // fprintf(stderr, "[raising threshold]");
 							// options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
-							options->compactThresh *= options->compactMult;
+						    options->compactThresh = (__int64)(options->compactThresh * options->compactMult);
                         }
 						
 //						if (options._debugLevel >= 2)

@@ -942,7 +942,7 @@ void _mapMatePairReads(
 							compactPairMatches(store, matches, cnts, options, filterPatternL, filterPatternR, COMPACT);
 							
 							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
-							  options.compactThresh *= options.compactMult;
+							  options.compactThresh = (__int64)(options.compactThresh * options.compactMult);
 								//options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 							
 							if (options._debugLevel >= 2)
