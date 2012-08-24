@@ -166,7 +166,7 @@ _newLimitDistRange(TMatchFilter const & filter, unsigned histogramId)
         if (max <= 0)
         {
             // do we have enough matches in [0..scoreDistanceRange) ?
-            if (filter.options.purgeAmbiguous && it - itBeg < filter.options.scoreDistanceRange)
+            if (filter.options.purgeAmbiguous && it - itBeg < (int)filter.options.scoreDistanceRange)
                 return CAN_BE_PURGED;
             else
                 return it - itBeg;
