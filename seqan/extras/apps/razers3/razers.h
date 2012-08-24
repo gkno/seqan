@@ -555,7 +555,7 @@ enum {
 //                    std::cout << "begin: "<<m.beginPos <<"\tendPos: "<<m.endPos << "\terrors: "<<m.score <<std::endl;
 					appendValue(*matches, m, Generous());
 
-					if (length(*matches) > options->compactThresh)
+					if ((__int64)length(*matches) > options->compactThresh)
 					{
                         double beginTime = sysTime();
 						typename Size<TMatches>::Type oldSize = length(*matches);

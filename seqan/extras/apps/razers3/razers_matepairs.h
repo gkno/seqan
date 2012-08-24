@@ -934,7 +934,7 @@ void _mapMatePairReads(
                         std::cerr << "\nHIT\tR\t" << mR.readId << "\t" << store.readNameStore[mR.readId] << "\t" << mR.beginPos << "\t" << mR.endPos << std::endl;
 #endif  // #ifdef RAZERS_DEBUG_MATEPAIRS
 
-						if (length(store.alignedReadStore) > options.compactThresh)
+						if ((__int64)length(store.alignedReadStore) > options.compactThresh)
 						{
 							typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
                             if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
