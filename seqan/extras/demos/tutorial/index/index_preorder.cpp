@@ -4,7 +4,6 @@
 
 using namespace seqan;
 
-// FRAGMENT(initialization)
 int main ()
 {
 	String<char> myString = "abracadabra";

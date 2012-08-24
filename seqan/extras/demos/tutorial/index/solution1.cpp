@@ -4,7 +4,6 @@
 
 using namespace seqan;
 
-// FRAGMENT(initialization)
 int main ()
 {
     StringSet<String<char> > text;
@@ -28,7 +27,6 @@ int main ()
 			infix(pattern, parentRepLength(it) + 1, endPos)) return 0;
 	}
 
-// FRAGMENT(output)
 	// if we get here the pattern was found
 	// output match positions
 	for (unsigned i = 0; i < length(getOccurrences(it)); ++i)

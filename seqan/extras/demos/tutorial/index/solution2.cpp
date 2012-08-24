@@ -1,4 +1,3 @@
-// FRAGMENT(initialization)
 #include <iostream>
 #include <seqan/index.h>
 
@@ -9,7 +8,6 @@ int main ()
 	typedef Index<CharString> TIndex;
 	TIndex index("tobeornottobe");
 	Iterator< TIndex, TopDown<ParentLinks<> > >::Type it(index);
-// FRAGMENT(iteration)
 
 	do {
 		std::cout << representative(it) << std::endl;
