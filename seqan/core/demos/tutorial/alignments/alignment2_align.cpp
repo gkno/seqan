@@ -1,8 +1,7 @@
-// FRAGMENT(include)
+// FRAGMENT(main)
 #include <iostream>
 #include <seqan/align.h>
 
-// FRAGMENT(main)
 using namespace seqan;
 
 int main()
