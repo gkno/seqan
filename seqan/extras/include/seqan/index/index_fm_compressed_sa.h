@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef COMPRESSED_SA_BETA_H_
-#define COMPRESSED_SA_BETA_H_
+#ifndef INDEX_FM_COMPRESSED_SA_H_
+#define INDEX_FM_COMPRESSED_SA_H_
 
 namespace seqan {
 
@@ -517,4 +517,4 @@ value(const CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TPos po
 //};
 
 
-#endif // COMPRESSED_SA_BETA_H_
+#endif // INDEX_FM_COMPRESSED_SA_H_

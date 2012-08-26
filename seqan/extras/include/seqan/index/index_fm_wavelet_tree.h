@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREE_H_
-#define SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREE_H_
+#ifndef INDEX_FM_WAVELET_TREE_H_
+#define INDEX_FM_WAVELET_TREE_H_
 
 namespace seqan {
 
@@ -985,4 +985,4 @@ inline bool save(
     return save(tree, fileName, DefaultOpenMode<WaveletTree<TText, TSpec> >::VALUE);
 }
 }
-#endif  // #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREE_H_
+#endif  // INDEX_FM_WAVELET_TREE_H_

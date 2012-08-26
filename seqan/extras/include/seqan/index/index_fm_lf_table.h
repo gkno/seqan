@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef FM_INDEX_LF_TABLE_H_
-#define FM_INDEX_LF_TABLE_H_
+#ifndef INDEX_FM_LF_TABLE_H_
+#define INDEX_FM_LF_TABLE_H_
 
 namespace seqan {
 
@@ -320,4 +320,4 @@ inline bool save(
 }
 
 }
-#endif /* FM_INDEX_LF_TABLE_H_ */
+#endif // INDEX_FM_LF_TABLE_H_

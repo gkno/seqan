@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREESTRUCTURE_BETA_H_
-#define SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREESTRUCTURE_BETA_H_
+#ifndef INDEX_FM_RIGHT_ARRAY_BINARY_TREE_H
+#define INDEX_FM_RIGHT_ARRAY_BINARY_TREE_H
 
 namespace seqan {
 
@@ -605,4 +605,4 @@ inline bool save(
 
 }
 
-#endif // SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELETTREESTRUCTURE_BETA_H_
+#endif // INDEX_FM_RIGHT_ARRAY_BINARY_TREE_H

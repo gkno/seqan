@@ -35,15 +35,15 @@
 #include <seqan/basic.h>
 #include <seqan/file.h>
 
-#include "test_fm_index_beta.h"
-#include "test_rank_support_bit_string_beta.h"
-#include "test_prefix_sum_table_beta.h"
-#include "test_wavelet_tree_structure_beta.h"
-#include "test_wavelet_tree_structure_iterator_beta.h"
-#include "test_wavelet_tree_beta.h"
-#include "test_sparse_string_beta.h"
-#include "test_compressed_sa_beta.h"
-#include "test_fm_index_iterator_beta.h"
+#include "test_index_fm.h"
+#include "test_index_fm_rank_support_bit_string.h"
+#include "test_index_fm_prefix_sum_table.h"
+#include "test_index_fm_right_array_binary_tree.h"
+#include "test_index_fm_right_array_binary_tree_iterator.h"
+#include "test_index_fm_wavelet_tree.h"
+#include "test_index_fm_sparse_string.h"
+#include "test_index_fm_compressed_sa.h"
+#include "test_index_fm_stree.h"
 
 
 SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)

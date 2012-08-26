@@ -29,13 +29,13 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <your.email@example.net>
+// Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_PREFIX_SUM_TABLE_H_
-#define SANDBOX_MY_SANDBOX_APPS_FMINDEX_PREFIX_SUM_TABLE_H_
+#ifndef INDEX_FM_PREFIX_SUM_TABLE_H_
+#define INDEX_FM_PREFIX_SUM_TABLE_H_
 
-#include <seqan/fm_index/fm_index_beta.h>
+//#include <seqan/fm_index/fm_index_beta.h>
 
 namespace seqan {
 

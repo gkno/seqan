@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_SPARSE_STRING_H_
-#define SANDBOX_MY_SANDBOX_APPS_FMINDEX_SPARSE_STRING_H_
+#ifndef INDEX_FM_SPARSE_STRING_H_
+#define INDEX_FM_SPARSE_STRING_H_
 
 namespace seqan {
 
@@ -479,4 +479,4 @@ inline bool save(
 // TODO(singer): setValue function
 
 }
-#endif // SANDBOX_MY_SANDBOX_APPS_FMINDEX_COMPRESSEDSA_H_
+#endif // INDEX_FM_SPARSE_STRING_H_

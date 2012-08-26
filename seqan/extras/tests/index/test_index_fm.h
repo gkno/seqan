@@ -38,8 +38,6 @@
 #include <seqan/basic.h>
 #include <seqan/index.h>
 #include <seqan/sequence.h>
-#include <seqan/fm_index.h>
-
 #include <seqan/random.h>
 
 using namespace seqan;

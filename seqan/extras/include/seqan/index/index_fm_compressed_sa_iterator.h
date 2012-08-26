@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef COMPRESSED_SA_ITERATOR_BETA_H_
-#define COMPRESSED_SA_ITERATOR_BETA_H_
+#ifndef INDEX_FM_COMPRESSED_SA_ITERATOR_H_
+#define INDEX_FM_COMPRESSED_SA_ITERATOR_H_
 
 namespace seqan {
 
@@ -86,4 +86,4 @@ end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
 }
 
 }
-#endif // COMPRESSED_SA_ITERATOR_BETA_H_
+#endif // INDEX_FM_COMPRESSED_SA_ITERATOR_H_

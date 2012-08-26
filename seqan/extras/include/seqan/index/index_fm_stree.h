@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef FM_INDEX_FM_INDEX_ITERATOR_H_
-#define FM_INDEX_FM_INDEX_ITERATOR_H_
+#ifndef INDEX_FM_STREE_H_
+#define INDEX_FM_STREE_H_
 
 #include <algorithm>
 
@@ -595,4 +595,4 @@ repLength(TIndex const & /*tag*/, VertexFmi<TAlphabet, TSize> const &vDesc)
 	return vDesc.repLen;
 }
 }
-#endif  // #ifndef FM_INDEX_FM_INDEX_ITERATOR_H_
+#endif  // INDEX_FM_STREE_H_

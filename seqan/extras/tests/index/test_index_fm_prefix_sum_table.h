@@ -37,8 +37,8 @@
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/fm_sequence.h>
-#include "test_fm_index_beta.h"
+#include <seqan/index.h>
+#include "test_index_fm.h"
 
 using namespace seqan;
 template <typename TPrefixSumTable>

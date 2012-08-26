@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef FM_INDEX_BETA_H_
-#define FM_INDEX_BETA_H_
+#ifndef INDEX_FM_H_
+#define INDEX_FM_H_
 
 namespace seqan {
 
@@ -97,6 +97,19 @@ typedef Tag<FibreSaLfTable_> const          FmiSaLfTable;       typedef FmiSaLfT
 
 // ==========================================================================
 // Metafunctions
+// ==========================================================================
+// Wavelet tree based FM index fibres
+template <typename TText, typename TWaveletTreeSpec, typename TSpec>
+struct Fibre<Index<TText, FMIndex<WT<TWaveletTreeSpec>, TSpec> >, FibreOccTable>
+{
+	typedef WaveletTree<TText, FmiDollarSubstituted<SingleDollar<void> > > Type;
+};
+
+template <typename TText, typename TStringSetSpec, typename TWaveletTreeSpec, typename TSpec>
+struct Fibre<Index<StringSet<TText, TStringSetSpec>, FMIndex<WT<TWaveletTreeSpec>, TSpec > >, FibreOccTable>
+{
+     typedef WaveletTree<TText, FmiDollarSubstituted<MultiDollar<void> > > Type;
+};
 // ==========================================================================
 
 template <typename TText, typename TOccSpec, typename TSpec>
@@ -259,44 +272,6 @@ class Index<TText, FMIndex<TOccSpec, TSpec> >
     }
 };
 
-// template <typename TText, typename TOccSpec, typename TextVerificationSpec>
-// class Index<TText, FMIndex<TOccSpec, TextVerification<TextVerificationSpec> > > : 
-// 	public Index<TText, FMIndex<TOccSpec, void> >
-// {
-//     public:
-// 	typedef Index<TText, FMIndex<TOccSpec, void> > 	TBase;
-// 
-// 	TText 			text;
-// 
-// 	Index() :
-// 		TBase(),
-// 		text()
-// 	{}
-// 
-// 	Index(TText & text, unsigned saBlockSize = 10) :
-// 		TBase(text, saBlockSize),
-// 		text(text)
-// 	{}
-// 
-// 	template <typename TSA>
-// 	Index(TText & text, TSA & sa, unsigned saBlockSize = 10) :
-// 		TBase(text, sa, saBlockSize),
-// 		text(text)
-// 	{}
-// };
-
-// ==========================================================================
-// Functions
-// ==========================================================================
-
-// documented in index_esa_base.h
-// template <typename TText, typename TOccSpec, typename TSpec>
-// inline void clear(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
-// {
-//     clear(getFibre(index, FibreLfTable()));
-//     clear(getFibre(index, FibreSA()));
-// }
-
 template <typename TText, typename TOccSpec, typename TSpec>
 inline void clear(Index<TText, FMIndex<TOccSpec, TSpec> > & index)
 {
@@ -428,11 +403,9 @@ _findFirstIndex(
 		TPattern const & pattern,
 		FinderFMIndex const &)
 {
-	typedef Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > 			TIndex;
-	typedef typename Fibre<TIndex, FibreSA>::Type TCompressedSA;
-	typedef typename Iterator<TCompressedSA const>::Type 	TIterator;
-// 	typedef typename Alphabet<TText>::Type TChar;
-// 	typedef typename MakeUnsigned<TChar>::Type TUChar;
+	typedef Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > TIndex;
+	typedef typename Fibre<TIndex, FibreSA>::Type 			TCompressedSA;
+	typedef typename Iterator<TCompressedSA const>::Type 		TIterator;
 
 	TIndex & index = haystack(finder);
 
@@ -526,19 +499,6 @@ inline void getFrequencies_(TFreq & freq,
 		    ++freq[getCharacterPosition(freq, text[i][j])];
 }
 
-// // This function determines the number of the different characters in the text.
-// template <typename TText, typename TFreq>
-// inline void getFrequenciesImpl_(TFreq & freq,
-// 							   TText const & text)
-// {
-//     // Initialising freq with 0s is done in getFrequencies_
-// 	typedef typename Size<TText>::Type TSize;
-// 	for (TSize i = 0; i < length(text); ++i)
-// 	{
-// 		++freq[getCharacterPosition(freq, text[i])];
-// 	}
-// }
-
 /*
  * This function determines the number of the different characters in the text.
  * In order to do so 'getNumCharsImpl' is called
@@ -555,6 +515,13 @@ inline void getFrequencies_(TFreq & freq,
     typedef typename Size<TText>::Type TSize;
 	for (TSize i = 0; i < length(text); ++i)
 		++freq[getCharacterPosition(freq, text[i])];
+}
+
+template <typename TText, typename TWaveletTreeSpec, typename TPrefixSumTable, typename TText2, typename TChar, typename TPos>
+inline bool createOccurrenceTable(LfTable<WaveletTree<TText, TWaveletTreeSpec>, TPrefixSumTable> & lfTable, TText2 & text, TChar dollarSub, TPos const & dollarPos)
+{
+	waveletTreeCreate(lfTable, text, dollarSub, dollarPos);
+	return true;
 }
 
 // This function computes the full and compressed suffix array. 

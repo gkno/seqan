@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_BITSTRING_BETA_H_
-#define SANDBOX_MY_SANDBOX_APPS_FMINDEX_BITSTRING_BETA_H_
+#ifndef INDEX_FM_BRANK_SUPPORT_BIT_STRING_H_
+#define INDEX_FM_BRANK_SUPPORT_BIT_STRING_H_
 
 namespace seqan {
 
@@ -1108,4 +1108,4 @@ inline void resize(RankSupportBitString<TSpec> & rankSupportBitString, TSize siz
 }
 
 
-#endif  // #ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_BITSTRING_BETA_H_
+#endif  // INDEX_FM_BRANK_SUPPORT_BIT_STRING_H_

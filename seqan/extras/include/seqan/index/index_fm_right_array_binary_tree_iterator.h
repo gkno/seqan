@@ -32,8 +32,8 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELET_TREE_STRUCTURE_ITERATOR_BETA_H_
-#define SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELET_TREE_STRUCTURE_ITERATOR_BETA_H_
+#ifndef INDEX_FM_RIGHT_ARRAY_BINARY_TREE_ITERATOR_H
+#define INDEX_FM_RIGHT_ARRAY_BINARY_TREE_ITERATOR_H
 
 namespace seqan {
 
@@ -1124,4 +1124,4 @@ inline void writeGraph(RightArrayBinaryTree<TChar, TSpec> & treeStructure)
 }
 
 }
-#endif // SANDBOX_MY_SANDBOX_APPS_FMINDEX_WAVELET_TREE_STRUCTURE_ITERATOR_BETA_H_
+#endif // INDEX_FM_RIGHT_ARRAY_BINARY_TREE_ITERATOR_H
