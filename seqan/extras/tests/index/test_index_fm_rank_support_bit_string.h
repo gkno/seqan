@@ -32,16 +32,15 @@
 // Author: Your Name <your.email@example.net>
 // ==========================================================================
 
-#ifndef SANDBOX_SINGER_TESTS_RSBS_TEST_RSBS_H_
-#define SANDBOX_SINGER_TESTS_RSBS_TEST_RSBS_H_
+#ifndef TEST_INDEX_FM_RANK_SUPPORT_BIT_STRING_H_
+#define TEST_INDEX_FM_RANK_SUPPORT_BIT_STRING_H_
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/random.h>
-#include <seqan/fm_sequence.h>
+#include <seqan/index.h>
 
 using namespace seqan;
-const int SEED = 42;
 
 // A test for strings.
 SEQAN_DEFINE_TEST(test_rsbs_defaultConstructor)
@@ -331,4 +330,4 @@ SEQAN_DEFINE_TEST(test_rsbs_assignOperator)
 	SEQAN_ASSERT(bitString == otherBitString);
 }
 
-#endif  // SANDBOX_SINGER_TESTS_RSBS_TEST_RSBS_H_
+#endif  // TEST_INDEX_FM_RANK_SUPPORT_BIT_STRING_H_

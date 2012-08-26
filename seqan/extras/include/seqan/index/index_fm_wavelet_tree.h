@@ -969,7 +969,7 @@ inline bool save(
     int openMode)
 {
     String<char> name;
-    name = fileName;    append(name, ".wtc");   std::cerr << save(getFibre(tree, FibreBitStrings()), toCString(name), openMode) << std::endl;
+    name = fileName;    append(name, ".wtc");   save(getFibre(tree, FibreBitStrings()), toCString(name), openMode);
     
     name = fileName;    append(name, ".wts");   save(getFibre(tree, FibreWaveletTreeStructure()), toCString(name), openMode);
     saveDollarInformation(tree, fileName, openMode);

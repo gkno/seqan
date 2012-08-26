@@ -772,16 +772,12 @@ inline bool save(
 // 		--i;
 // 	}
 // 
-//     //std::cerr << "i: " << i << " sp: " << sp << " ep: " << ep << std::endl;
-// 
 // 	if(sp > ep || i == -1)
 //     {
 //     	range.i1 = sp;
 // 	    range.i2 = ep;
 // 	    return;
 //     }
-// 
-//     //std::cerr << "i: " << i << " sp: " << sp << " ep: " << ep << std::endl;
 // 
 //     bool match = true;
 //     //bool posEntryStored = entryStored(index.compressedSA, sp);

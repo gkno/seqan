@@ -32,8 +32,10 @@
 // Author: Jochen Singer <jochen.singer@fu-berlin.de>
 // ==========================================================================
 
-#ifndef INDEX_FM_BRANK_SUPPORT_BIT_STRING_H_
-#define INDEX_FM_BRANK_SUPPORT_BIT_STRING_H_
+#ifndef INDEX_FM_RANK_SUPPORT_BIT_STRING_H_
+#define INDEX_FM_RANK_SUPPORT_BIT_STRING_H_
+
+#include <seqan/index_fm.h>
 
 namespace seqan {
 
@@ -1013,13 +1015,13 @@ inline void printBits(TValue entrie)
 {
     unsigned bitsPerValue = BitsPerValue<TValue>::VALUE;
     TValue one = 1;
-    std::cerr << "entrie: " << entrie << std::endl;
-    std::cerr << bitsPerValue << std::endl;
+    std::cout << "entrie: " << entrie << std::endl;
+    std::cout << bitsPerValue << std::endl;
     for (TValue i = 0; i < bitsPerValue; ++i)
     {
-        std::cerr << ((entrie >> i) & one);
+        std::cout << ((entrie >> i) & one);
     }
-    std::cerr << std::endl;
+    std::cout << std::endl;
 }
 
 

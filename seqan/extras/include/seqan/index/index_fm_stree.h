@@ -304,7 +304,7 @@ _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec,TIndexSpec> >, VSTree<TSpec> >
 
 template < typename TText, typename TOccSpec, typename TSpec, typename TIndexSpec, typename TChar >
 void _storeCharacter(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > /*tag*/,
-                     TChar const /*tag*/) {};
+                     TChar const /*tag*/) {}
 
 template < typename TText, typename TOccSpec, typename TSpec, typename TChar >
 void _storeCharacter(Iter<Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree<TopDown<TSpec> > > &it,
@@ -492,7 +492,6 @@ void _eraseCharacter(Iter<Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree<T
 template < typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
 bool _goUp(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > &it)
 {
-    std::cerr << "ERROR" << std::endl;
 	if(!isRoot(it))
 	{
 	    _eraseCharacter(it);

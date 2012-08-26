@@ -39,6 +39,7 @@
 #include <seqan/index.h>
 #include <seqan/sequence.h>
 #include <seqan/random.h>
+#include <seqan/index_fm.h>
 
 using namespace seqan;
 
@@ -442,9 +443,6 @@ void fmIndexOpenSave(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
     TIndex indexOpen;
     open(indexOpen, "index-test");
 
-    std::cerr << (indexSave.n == indexOpen.n) << std::endl;
-    std::cerr << (indexSave.lfTable == indexOpen.lfTable) << std::endl;
-    std::cerr << (indexSave.compressedSA == indexOpen.compressedSA) << std::endl;
     SEQAN_ASSERT(indexOpen == indexSave);
 }
 

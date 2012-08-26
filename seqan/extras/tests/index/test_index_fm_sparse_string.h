@@ -37,7 +37,7 @@
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/findex.h>
+#include <seqan/index.h>
 #include "test_index_fm.h"
 
 using namespace seqan;

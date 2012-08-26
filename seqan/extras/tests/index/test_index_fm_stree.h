@@ -93,7 +93,7 @@ void fmIndexIteratorGoDown(TIter & /*tag*/)
     typedef typename Fibre<TIndex, FibreText>::Type TText;
 
 	TText text;
-	appendValue(text, "ACGACG");
+	text = "ACGACG";
 	TIndex fmIndex(text);
 	
     {
@@ -258,7 +258,6 @@ void fmIndexIteratorCountOccurrences(TIter & /*tag*/)
         if (_goDown)
         {
             SEQAN_ASSERT_EQ(countOccurrences(it), countOccurrences(esaIt));
-            std::cerr << countOccurrences(it) << std::endl;
         }
         goRoot(it);
         goRoot(esaIt);
@@ -341,40 +340,40 @@ SEQAN_DEFINE_TEST(fm_index_iterator_go_down)
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
-//     {
-//         DnaString genome;
-//         Index<DnaString,TDefaultIndex> index(genome);
-//         Iterator<Index<DnaString,TDefaultIndex>, TIterSpec>::Type dnaTag(index);
-//         fmIndexIteratorGoDown(dnaTag);
-//     }
-//     {
+    {
+        DnaString genome;
+        Index<DnaString,TDefaultIndex> index(genome);
+        Iterator<Index<DnaString,TDefaultIndex>, TIterSpec>::Type dnaTag(index);
+        fmIndexIteratorGoDown(dnaTag);
+    }
+    {
 //                 DnaString genome;
 // 
 //         Index<DnaString,TCompressedIndex> index(genome);
 //         Iterator<Index<DnaString,TCompressedIndex>, TIterSpec>::Type dnaTag(index);
 //         fmIndexIteratorGoDown(dnaTag);
-//     }
-//     {
-//                 DnaString genome;
-// 
-//         Index<DnaString,TDefaultIndex> index(genome);
-//         Iterator<Index<DnaString,TDefaultIndex>, TParentLinksIterSpec>::Type dnaTag(index);
-//         fmIndexIteratorGoDown(dnaTag);
-//     }
-//     {
+    }
+    {
+                DnaString genome;
+
+        Index<DnaString,TDefaultIndex> index(genome);
+        Iterator<Index<DnaString,TDefaultIndex>, TParentLinksIterSpec>::Type dnaTag(index);
+        fmIndexIteratorGoDown(dnaTag);
+    }
+    {
 //                 DnaString genome;
 // 
 //         Index<DnaString,TCompressedIndex> index(genome);
 //         Iterator<Index<DnaString,TCompressedIndex>, TParentLinksIterSpec>::Type dnaTag(index);
 //         fmIndexIteratorGoDown(dnaTag);
-//     }
-    {        
-        StringSet<DnaString> genome;
-
-        Index<StringSet<DnaString>,TDefaultIndex> index(genome);
-        Iterator<Index<StringSet<DnaString>,TDefaultIndex>, TParentLinksIterSpec>::Type dnaTag(index);
-        fmIndexIteratorGoDown(dnaTag);
     }
+//     {        
+//         StringSet<DnaString> genome;
+// 
+//         Index<StringSet<DnaString>,TDefaultIndex> index(genome);
+//         Iterator<Index<StringSet<DnaString>,TDefaultIndex>, TParentLinksIterSpec>::Type dnaTag(index);
+//         fmIndexIteratorGoDown(dnaTag);
+//     }
 }
 
 SEQAN_DEFINE_TEST(fm_index_iterator_is_leaf)
