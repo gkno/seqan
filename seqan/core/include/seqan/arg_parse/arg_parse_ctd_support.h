@@ -276,11 +276,11 @@ writeCTD(ArgumentParser const & me)
     // then the arguments
     for (TArgumentMapSize argIdx = 0; argIdx != me.argumentList.size(); ++argIdx)
     {
-        std::stringstream optionIdentifier;
-        optionIdentifier << "argument-" << argIdx;
+        // arguments do not have an option identifier
+        std::string optionIdentifier = "";
         std::stringstream refName;
         refName << toolname << "." << "argument-" << argIdx;
-        _writeCLIElement(ctdfile, currentIndent, optionIdentifier.str(), refName.str(), isListArgument(me.argumentList[argIdx]));
+        _writeCLIElement(ctdfile, currentIndent, optionIdentifier, refName.str(), isListArgument(me.argumentList[argIdx]));
     }
 
     ctdfile << _indent(--currentIndent) << "</cli>\n";
