@@ -197,7 +197,8 @@ inline bool _findHammingSimpleCharsEqual(Dna5Q const & a, Dna5Q const & b, Patte
 
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder &finder, 
-                 Pattern<TNeedle, HammingSimple> &me) {
+                 Pattern<TNeedle, HammingSimple> &me,
+                 int minScore) {
     SEQAN_CHECKPOINT;
 
     typedef typename Haystack<TFinder>::Type THaystack;
@@ -228,7 +229,7 @@ inline bool find(TFinder &finder,
     // TODO(holtgrew): Switch from indices to iterators to improve performance.
 
     // Perform a naive search for the needle in the haystack such that
-    // the difference is <= me.maxDistance.
+    // the difference is <= -minScore.
     //
     // If a special behaviour is enabled for N then we use a different case.
     TSize i;
@@ -238,10 +239,10 @@ inline bool find(TFinder &finder,
             me.distance = 0;  // Reset mismatch count.
             for (TSize j = 0; j < length(ndl); ++j) {
                 me.distance += (ndl[j] != hstk[i + j]);
-                if (me.distance > me.maxDistance)
+                if (me.distance > -minScore)
                     break;
             }
-            if (me.distance <= me.maxDistance)
+            if (me.distance <= -minScore)
                 break;
         }
     } else {
@@ -250,10 +251,10 @@ inline bool find(TFinder &finder,
             me.distance = 0;  // Reset mismatch count.
             for (TSize j = 0; j < length(ndl); ++j) {
                 me.distance += !(_findHammingSimpleCharsEqual(ndl[j], hstk[i + j], me));
-                if (me.distance > me.maxDistance)
+                if (me.distance > -minScore)
                     break;
             }
-            if (me.distance <= me.maxDistance)
+            if (me.distance <= -minScore)
                 break;
         }
     }
@@ -268,6 +269,12 @@ inline bool find(TFinder &finder,
     return true; 
 }
 
+template <typename TFinder, typename TNeedle>
+inline bool find(TFinder &finder, 
+                 Pattern<TNeedle, HammingSimple> &me)
+{
+    return find(finder, me, -me.maxDistance);
+}
 }  // namespace SEQAN_NAMESPACE_MAIN
 
 #endif  // SEQAN_FIND_FIND_SIMPLE_H_
