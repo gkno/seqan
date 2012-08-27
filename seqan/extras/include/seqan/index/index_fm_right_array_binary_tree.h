@@ -85,10 +85,6 @@ struct Fibre<RightArrayBinaryTree<TChar, TSpec>, FibreTreeVertieces>
     typedef typename IfC < BitsPerValue<TChar>::VALUE<17,
                                                       unsigned short,
                                                       unsigned int>::Type TPos;
-
-//     typedef typename IfC< BitsPerValue<TChar>::VALUE < 17,
-//             typename BitVector_<ValueSize<TChar>::VALUE>::Type,
-//             unsigned int>::Type TPos;
     typedef String<Pair<TChar, TPos> > Type;
 };
 

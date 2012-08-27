@@ -292,7 +292,7 @@ inline TChar getCharacter(Iter<const RightArrayBinaryTree<TChar, TSpec>, TIterSp
 ..summary:Returns the position in @Class.RightArrayBinaryTree@ of the left child vertex.
 ..signature:getLeftChildPos(it)
 ..param.it:The iterator.
-...type:Spec.RightArrayBinaryTreeIterator.
+...type:Spec.RightArrayBinaryTree Iterator.
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec, typename TIterSpec>
@@ -398,7 +398,7 @@ inline unsigned getNumChildVertiecesConstruction(Iter<RightArrayBinaryTree<TChar
 ..summary:Returns the number of vertices in the subtree starting at the position an iterator points to.
 ..signature:getNumChildVertieces(it)
 ..param.it:The iterator.
-...type:Spec.RightArrayBinaryTreeIterator.
+...type:Spec.RightArrayBinaryTree Iterator.
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec, typename TIterSpec>
@@ -419,7 +419,7 @@ inline unsigned getNumChildVertieces(Iter<RightArrayBinaryTree<TChar, TSpec>, TI
 ..summary:Returns the position of the iterator in the host.
 ..signature:getPosition(it)
 ..param.it:The iterator.
-...type:Spec.RightArrayBinaryTreeIterator.
+...type:Spec.RightArrayBinaryTree Iterator.
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec, typename TIterSpec>
@@ -451,7 +451,7 @@ inline unsigned int getPosition(Iter<RightArrayBinaryTree<TChar, TSpec> const, R
 ..summary:Returns the position in @Class.RightArrayBinaryTree@ of the right child vertex.
 ..signature:getLeftChildPos(it)
 ..param.it:The iterator.
-...type:Spec.RightArrayBinaryTreeIterator.
+...type:Spec.RightArrayBinaryTree Iterator.
 ..include:seqan/index.h
 */
 template <typename TChar, typename TSpec, typename TIterSpec>
@@ -884,7 +884,6 @@ inline bool setAndGoRight_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> &
 ..param.iterator:An iterator of a wavelet tree structure.
 ...type:Spec.TopDown Iterator
 ..param.character:The character to be assigned to a node.
-...type:TChar
 ..remarks:$setCharacter(iterator, character)$ sets the character of the node the iterator points to to character.
 ..include:seqan/index.h
 ..example.code:

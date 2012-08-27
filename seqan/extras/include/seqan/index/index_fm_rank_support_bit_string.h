@@ -46,7 +46,7 @@ struct RankSupportBitString;
 // FM index fibres
 
 /**
-.Tag.Rank Support Bit String Index Fibres
+.Tag.RankSupportBitString Fibres
 ..summary:Tag to select a specific fibre (e.g. table, object, ...) of a @Class.RankSupportBitString@.
 ..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of a rank support bit string.
 ..cat:Index
@@ -342,7 +342,7 @@ getBlockPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
 ..param.container:
 ...type:Class.RankSupportBitString
 ..param.fibreTag:
-...type:Tag.Rank Support Bit String Fibres
+...type:Tag.RankSupportBitString Fibres
 */
 template <typename TSpec>
 inline typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type &

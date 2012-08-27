@@ -507,7 +507,7 @@ std::cerr << getAlphabet(waveletTree) << std::endl; // AGT
 /**
 .Function.getFibre:
 ..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
-...type:Tag.Wavelet Tree Fibres
+...type:Tag.WaveletTree Fibres
 */
 template <typename TText, typename TSpec>
 inline typename Fibre<WaveletTree<TText, TSpec>, FibreBitStrings>::Type &
