@@ -1,4 +1,4 @@
-// FRAGMENT(all)
+// FRAGMENT(result)
 
 #include <iostream>
 #include <seqan/file.h>
