@@ -45,6 +45,7 @@ public:
     {
         omp_destroy_lock(&lock_);
     }
+
 };
 
 // template <typename TJob, typename TSpec>
@@ -66,12 +67,11 @@ struct JobQueue;
 
 template <typename T>
 inline
-bool 
+bool
 predicateTrue(T const &)
 {
     return true;
 }
-
 
 // Class TaskQueue.
 
@@ -115,7 +115,8 @@ bool
 popFront(TJob & job, TaskQueue<TJob, OmpLock> & queue)
 {
     omp_set_lock(&queue.lock_);
-    if (queue.queue_.size() == 0u) {
+    if (queue.queue_.size() == 0u)
+    {
         omp_unset_lock(&queue.lock_);
         return false;
     }
@@ -131,12 +132,14 @@ bool
 popFront(TJob & job, TaskQueue<TJob, OmpLock> & queue, TPredicate const & predicate)
 {
     omp_set_lock(&queue.lock_);
-    if (queue.queue_.size() == 0u) {
+    if (queue.queue_.size() == 0u)
+    {
         omp_unset_lock(&queue.lock_);
         return false;
     }
     job = queue.queue_.front();
-    if (!predicate(job)) {
+    if (!predicate(job))
+    {
         omp_unset_lock(&queue.lock_);
         return false;
     }
@@ -174,7 +177,8 @@ bool
 popBack(TJob & job, TaskQueue<TJob, OmpLock> & queue)
 {
     omp_set_lock(&queue.lock_);
-    if (queue.queue_.size() == 0u) {
+    if (queue.queue_.size() == 0u)
+    {
         omp_unset_lock(&queue.lock_);
         return false;
     }
@@ -190,12 +194,14 @@ bool
 popBack(TJob & job, TaskQueue<TJob, OmpLock> & queue, TPredicate const & predicate)
 {
     omp_set_lock(&queue.lock_);
-    if (queue.queue_.size() == 0u) {
+    if (queue.queue_.size() == 0u)
+    {
         omp_unset_lock(&queue.lock_);
         return false;
     }
     job = queue.queue_.back();
-    if (!predicate(job)) {
+    if (!predicate(job))
+    {
         omp_unset_lock(&queue.lock_);
         return false;
     }
@@ -290,7 +296,7 @@ popBack(TJob & job, TaskQueue<TJob, OmpLock> & queue, TPredicate const & predica
 //                 }
 //                 continue;  // Next iteration.
 //             }
-            
+
 //             bool res = work(threadLocalStorages[p], p);
 //             if (!res) {
 //                 // No more work, could steal some in next

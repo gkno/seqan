@@ -1,19 +1,19 @@
 /*==========================================================================
   SeqAn - The Library for Sequence Analysis
-  http://www.seqan.de 
+  http://www.seqan.de
   ===========================================================================
   Copyright (C) 2010
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 3 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
-  
+
   ===========================================================================
   Author: @@Your Name@@ <@@Your Email@@>
   ===========================================================================
@@ -40,15 +40,16 @@
 #include "test_razers3_others.h"
 
 
-SEQAN_BEGIN_TESTSUITE(test_razers3) {
+SEQAN_BEGIN_TESTSUITE(test_razers3)
+{
     // Call tests.
-	SEQAN_CALL_TEST(test_split_algorithm);
+    SEQAN_CALL_TEST(test_split_algorithm);
 
-	SEQAN_CALL_TEST(test_to_bucket);
-	
-	SEQAN_CALL_TEST(test_radix_pass);
-	
-		SEQAN_CALL_TEST(test_radix_sort);
+    SEQAN_CALL_TEST(test_to_bucket);
+
+    SEQAN_CALL_TEST(test_radix_pass);
+
+    SEQAN_CALL_TEST(test_radix_sort);
 
     // Verify checkpoints.
     // @@

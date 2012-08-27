@@ -55,12 +55,13 @@ public:
     // The options object.
     RazerSOptions<TOptionsSpec> const & options;
 
-    PairedMatchFilter(unsigned readCount_, unsigned matchThreshold_, double frac_, TCallback & callback_, unsigned readOffset_, TReadSeqSet const & readSeqs_, RazerSOptions<TOptionsSpec> const & options_)
-            : readCount(readCount_), matchThreshold(matchThreshold_), frac(frac_), callback(callback_), readOffset(readOffset_), readSeqs(readSeqs_), options(options_)
+    PairedMatchFilter(unsigned readCount_, unsigned matchThreshold_, double frac_, TCallback & callback_, unsigned readOffset_, TReadSeqSet const & readSeqs_, RazerSOptions<TOptionsSpec> const & options_) :
+        readCount(readCount_), matchThreshold(matchThreshold_), frac(frac_), callback(callback_), readOffset(readOffset_), readSeqs(readSeqs_), options(options_)
     {
         resize(hitCount, readCount, 0, Exact());
         reserve(histograms, unsigned(frac * readCount));
     }
+
 };
 
 // ============================================================================
@@ -90,6 +91,7 @@ registerRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, u
     // std::cerr << "registering read " << pairId << std::endl;
     if (filter.hitCount[pairId - filter.readOffset] == MaxValue<unsigned>::VALUE)
         return;
+
     if (++filter.hitCount[pairId - filter.readOffset] < filter.matchThreshold)
         return;
 
@@ -97,7 +99,8 @@ registerRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, u
 
     // Get histogram id, insert new histogram if necessary, exit if no histogram yet.
     unsigned histogramId = 0;
-    if (filter.hitCount[pairId - filter.readOffset] == filter.matchThreshold) {
+    if (filter.hitCount[pairId - filter.readOffset] == filter.matchThreshold)
+    {
         // std::cerr << "new histogram for read " << pairId << std::endl;
         histogramId = _createHistogram(filter, pairId);
         filter.pairIdToHistogramId[pairId] = histogramId;
@@ -124,48 +127,51 @@ processRead(PairedMatchFilter<TOptionsSpec, TReadSeqSet, TCallback> & filter, un
     if (filter.hitCount[pairId - filter.readOffset] < filter.matchThreshold)
         return false;
 
-     // std::cerr << "processing read " << pairId << std::endl;
+    // std::cerr << "processing read " << pairId << std::endl;
     // Get histogram id, insert new histogram if necessary, exit if no histogram yet.
     TIterator it = filter.pairIdToHistogramId.find(pairId);
     if (it == filter.pairIdToHistogramId.end())
         return false;  // Must have been disabled before.
+
     unsigned histogramId = it->second;
 
     // Perform actions.
     int newLimit;
-    
+
     if (filter.options.scoreDistanceRange == 0)
     {
         newLimit = _newLimit(filter, histogramId);
-        if (newLimit == NO_NEW_LIMIT) return false;
+        if (newLimit == NO_NEW_LIMIT)
+            return false;
+
         if (filter.options.purgeAmbiguous)
         {
-//            std::cerr << "PURGED " << pairId << std::endl;            
+//            std::cerr << "PURGED " << pairId << std::endl;
             appendValue(filter.purgedPairIds, pairId);
             newLimit = 0;
         }
-    } 
+    }
     else
     {
         newLimit = _newLimitDistRange(filter, histogramId);
         if (newLimit == CAN_BE_PURGED)
         {
-            // std::cerr << "PURGED " << pairId << std::endl;            
+            // std::cerr << "PURGED " << pairId << std::endl;
             appendValue(filter.purgedPairIds, pairId);
             newLimit = 0;
         }
     }
-    
+
 //    std::cerr << "LIMITING " << pairId << "\t" << filter.histograms[histogramId][0] << "\t" << filter.hitCount[pairId - filter.readOffset] << "\t" << newLimit << std::endl;
     FilterPatternLSetMaxErrorsWrapper<TCallback> wrapperL(value(filter.callback));
     FilterPatternRSetMaxErrorsWrapper<TCallback> wrapperR(value(filter.callback));
-    setMaxErrors(wrapperL, pairId, newLimit-1);
-    setMaxErrors(wrapperR, pairId, newLimit-1);
-    if (filter.options.errorCutOff[2*pairId] > newLimit)
-        filter.options.errorCutOff[2*pairId] = newLimit;
-    if (filter.options.errorCutOff[2*pairId+1] > newLimit)
-        filter.options.errorCutOff[2*pairId+1] = newLimit;
-    
+    setMaxErrors(wrapperL, pairId, newLimit - 1);
+    setMaxErrors(wrapperR, pairId, newLimit - 1);
+    if (filter.options.errorCutOff[2 * pairId] > newLimit)
+        filter.options.errorCutOff[2 * pairId] = newLimit;
+    if (filter.options.errorCutOff[2 * pairId + 1] > newLimit)
+        filter.options.errorCutOff[2 * pairId + 1] = newLimit;
+
     if (newLimit == 0)
     {
         _freeHistogram(filter, histogramId);

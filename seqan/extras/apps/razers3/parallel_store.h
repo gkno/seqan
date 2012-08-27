@@ -20,34 +20,33 @@ typedef Tag<Parallel_> Parallel;
 
 template <typename TAlign, typename TFunctorLess>
 inline void
-sortAlignedReads(TAlign & alignStore, TFunctorLess const &less, Parallel const &) 
+sortAlignedReads(TAlign & alignStore, TFunctorLess const & less, Parallel const &)
 {
-  __gnu_parallel::sort(
-		begin(alignStore, Standard()), 
-		end(alignStore, Standard()), 
-		less);
+    __gnu_parallel::sort(
+        begin(alignStore, Standard()),
+        end(alignStore, Standard()),
+        less);
 }
 
 template <typename TAlign, typename TFunctorLess>
 inline void
-sortAlignedReads(TAlign const & alignStore, TFunctorLess const &less, Parallel const &) 
+sortAlignedReads(TAlign const & alignStore, TFunctorLess const & less, Parallel const &)
 {
-  __gnu_parallel::sort(
-		begin(const_cast<TAlign&>(alignStore), Standard()), 
-		end(const_cast<TAlign&>(alignStore), Standard()), 
-		less);
+    __gnu_parallel::sort(
+        begin(const_cast<TAlign &>(alignStore), Standard()),
+        end(const_cast<TAlign &>(alignStore), Standard()),
+        less);
 }
 
 template <typename TIntString>
 inline void
-partialSum(TIntString &intString)
+partialSum(TIntString & intString)
 {
     __gnu_parallel::partial_sum(
-        begin(intString, Standard()), 
-        end(intString, Standard()), 
+        begin(intString, Standard()),
+        end(intString, Standard()),
         begin(intString, Standard()));
 }
-
 
 #else  // #ifdef PLATFORM_GCC
 
@@ -55,30 +54,28 @@ partialSum(TIntString &intString)
 
 template <typename TAlign, typename TFunctorLess>
 inline void
-sortAlignedReads(TAlign & alignStore, TFunctorLess const &less, Parallel const &) 
+sortAlignedReads(TAlign & alignStore, TFunctorLess const & less, Parallel const &)
 {
-  ::std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
+    std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
 }
 
 template <typename TAlign, typename TFunctorLess>
 inline void
-sortAlignedReads(TAlign const & alignStore, TFunctorLess const &less, Parallel const &) 
+sortAlignedReads(TAlign const & alignStore, TFunctorLess const & less, Parallel const &)
 {
-  ::std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
+    std::sort(begin(alignStore, Standard()), end(alignStore, Standard()), less);
 }
 
 template <typename TIntString>
 inline void
-partialSum(TIntString &intString)
+partialSum(TIntString & intString)
 {
-    ::std::partial_sum(
-        begin(intString, Standard()), 
-        end(intString, Standard()), 
+    std::partial_sum(
+        begin(intString, Standard()),
+        end(intString, Standard()),
         begin(intString, Standard()));
 }
-
 
 #endif  // #ifdef PLATFORM_GCC
 
 #endif  // ifndef APPS_RAZERS_PARALLEL_STORE_H
-

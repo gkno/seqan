@@ -24,7 +24,8 @@
 #include "param_tabs.h"
 
 // The 68k lines of parameters are included from another file.
-static GappedParamsRecord RECORDS[] = {
+static GappedParamsRecord RECORDS[] =
+{
      #include "param_tabs.inc"
 };
 
@@ -34,6 +35,7 @@ bool getGappedParamsRecords(seqan::String<GappedParamsRecord> & records,
 {
     if (n < 15u || n > 75u)
         return false;  // We do not have parameter for these settings.
+
     if (errorModel != 'L' && errorModel != 'H')
         return false;  // Invalid error model.
 
@@ -43,6 +45,6 @@ bool getGappedParamsRecords(seqan::String<GappedParamsRecord> & records,
     for (unsigned i = 0; RECORDS[i].readLength != 0; ++i)
         if (RECORDS[i].readLength == n && RECORDS[i].type == errorModel)
             appendValue(records, RECORDS[i]);
-    
+
     return true;
 }

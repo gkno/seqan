@@ -65,11 +65,11 @@ struct TimelineEntry_
     bool isBegin;
     double timestamp;
 
-    TimelineEntry_()
-            : entryType(0), isBegin(false), timestamp(-1) {}
+    TimelineEntry_() :
+        entryType(0), isBegin(false), timestamp(-1) {}
 
-    TimelineEntry_(bool isBegin_, unsigned entryType_, double timestamp_)
-            : entryType(entryType_), isBegin(isBegin_), timestamp(timestamp_) {}
+    TimelineEntry_(bool isBegin_, unsigned entryType_, double timestamp_) :
+        entryType(entryType_), isBegin(isBegin_), timestamp(timestamp_) {}
 };
 
 /**
@@ -90,7 +90,8 @@ Note that starting and ending comes at the overhead of a @Function.sysTime@ and 
 class Timeline
 {
 public:
-    enum {
+    enum
+    {
         INITIAL_SIZE = 1024
     };
 
@@ -107,7 +108,8 @@ public:
 
 private:
     // Can only construct in instance()!
-    Timeline() : initTimestamp(sysTime()) {}
+    Timeline() :
+        initTimestamp(sysTime()) {}
 
     // No copy-construction, no assignment, we are a Singleton!
     Timeline(Timeline const &);
@@ -228,7 +230,8 @@ dumpTimeline(char const * path, bool appendPid)
     const double gapIgnore = 0.0001;
     char * pathBuffer = new char[strlen(path) + 30];
     strcpy(pathBuffer, path);
-    if (appendPid) {
+    if (appendPid)
+    {
 #ifdef PLATFORM_WINDOWS
         int pid = _getpid();
 #else // #ifdef PLATFORM_WINDOWS
@@ -247,19 +250,25 @@ dumpTimeline(char const * path, bool appendPid)
     // Dump event types;
     for (unsigned i = 0; i < length(timeline._taskTypeNames); ++i)
         fprintf(fp, "@EVENT\t%u\t%s\t%s\n", i, toCString(timeline._taskTypeNames[i].i1), toCString(timeline._taskTypeNames[i].i2));
-    
+
     // Dump events.
     const char * arr[] = {"END", "BEGIN"};
-    for (unsigned threadId = 0; threadId < length(timeline._entries); ++threadId) {
-        for (unsigned i = 0; i < length(timeline._entries[threadId]); ++i) {
-            while (true) {
+    for (unsigned threadId = 0; threadId < length(timeline._entries); ++threadId)
+    {
+        for (unsigned i = 0; i < length(timeline._entries[threadId]); ++i)
+        {
+            while (true)
+            {
                 if (i + 1 < length(timeline._entries[threadId]) &&
                     !timeline._entries[threadId][i].isBegin &&
                     timeline._entries[threadId][i + 1].isBegin &&
                     timeline._entries[threadId][i].entryType == timeline._entries[threadId][i + 1].entryType &&
-                    fabs(timeline._entries[threadId][i + 1].timestamp - timeline._entries[threadId][i].timestamp) < gapIgnore) {
+                    fabs(timeline._entries[threadId][i + 1].timestamp - timeline._entries[threadId][i].timestamp) < gapIgnore)
+                {
                     i += 2;
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
@@ -268,7 +277,7 @@ dumpTimeline(char const * path, bool appendPid)
     }
 
     fclose(fp);
-    delete [] pathBuffer;
+    delete[] pathBuffer;
 }
 
 inline
