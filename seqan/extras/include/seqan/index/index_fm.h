@@ -47,6 +47,12 @@ class PrefixSumTable;
 template <typename TSpec>
 struct FmiDollarSubstitutedDefault_;
 
+// WT = WaveletTree
+/**
+.Tag.WT
+..summary:Tag that specifies the @Spec.FMIndex@ to use a wavelet tree as the occurrence table.
+..cat:Index
+*/
 template <typename TSpec = void>
 class WT;
 
@@ -228,10 +234,10 @@ not ncessary to store the text after index constuction.
 ..param.TText:The text type.
 ...type:Class.String
 ..param.TOccSpec:FM index specialisation. 
-...type:WaveletTree<FmiDollarSubstituted>
+...type:Tag.WT
 ...default.Class:WaveletTree<FmiDollarSubstituted>
 ..param.TSpec:Speed optimization method.
-...type:Tag.TextVerification
+...type:Tag.Compressed
 ...default:void
 ..include:seqan/index.h
 */
