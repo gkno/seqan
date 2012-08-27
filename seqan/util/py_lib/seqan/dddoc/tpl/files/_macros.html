@@ -224,36 +224,16 @@
   <div class="section return_section @!key!@">
     <h3>@!tree.find(['globals', 'sections', key]).text()!@</h3>
     <!--(if tree.find([cat, subcat, key, 'summary']))-->
-    <p>$!' '.join([html.translateMarkup(txt) for txt in tree.find([cat, subcat, key, 'summary']).texts])!$</p>
+    <p>
+    $!' '.join([html.translateMarkup(txt) for txt in tree.find([cat, subcat, key, 'summary']).texts])!$
     <!--(end)-->
     <!--(if tree.find([cat, subcat, key, 'metafunction']))-->
-    <div><strong>Metafunction:</strong> $!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key, 'metafunction'])) for txt in tree.find([cat, subcat, key, 'metafunction']).texts])!$</div>
+    <br /><span><strong>Metafunction:</strong> $!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key, 'metafunction'])) for txt in tree.find([cat, subcat, key, 'metafunction']).texts])!$</span>
     <!--(end)-->
-    <!--(if tree.find([cat, subcat, key, 'param']))-->
-    <table>
-      <tbody>
-        <!--(for i, node in enumerate(tree.find([cat, subcat, key, 'param']).children.itervalues()))-->
-        <tr class="@!{0: 'even', 1: 'odd'}[i % 2]!@">
-          <td class="signature">@!node.key!@</td>
-          <td class="summary">
-            $!html.translateMarkup(default("' '.join(node.children['summary'].texts)", 'none'))!$
-            <!--(if 'metafunction' in node.children)-->
-            <br/><strong>Metafunction:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['metafunction']) for txt in node.children['metafunction'].texts])!$
-            <!--(end)-->
-            <!--(if 'type' in node.children)-->
-            <br/><strong>Types:</strong> $!', '.join([html.pageLink(txt=txt, node=node.children['type']) for txt in node.children['type'].texts])!$
-            <!--(end)-->
-            <!--(if 'remark' in node.children)-->
-              <!--(for remark in node.children['remark'].texts)-->
-              <br/><strong>Remark:</strong> $!html.translateMarkup(remark)!$
-              <!--(end)-->
-            <!--(end)-->
-          </td>
-        </tr>
-        <!--(end)-->
-      </tbody>
-    </table>
+    <!--(if tree.find([cat, subcat, key, 'type']))-->
+    <br /><span><strong>Type:</strong> $!', '.join([html.pageLink(txt=txt, node=tree.find([cat, subcat, key, 'type'])) for txt in tree.find([cat, subcat, key, 'type']).texts])!$</span>
     <!--(end)-->
+    </p>
   </div>
   <!--(end)-->
 <!--(end)-->
