@@ -991,7 +991,7 @@ parseCommandLine(BuildGoldStandardOptions & options, int argc, char const ** arg
                  "\\fB--in-bam\\fP \\fIPERFECT.bam\\fP");
     addDescription(parser,
                    "This program allows to build a RABEMA gold standard.  The input is a reference FASTA file "
-                   "and a perfect SAM/BAM map (e.g. created using RazerS 2 in full-sensitivity mode).");
+                   "and a perfect SAM/BAM map (e.g. created using RazerS 3 in full-sensitivity mode).");
     addDescription(parser,
                    "The input SAM/BAM file must be \\fIsorted by coordinate\\fP.  The program will create a "
                    "FASTA index file \\fIREF.fa.fai\\fP for fast random access to the reference.");
