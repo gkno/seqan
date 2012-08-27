@@ -1,4 +1,4 @@
-// FRAGMENT(all)
+// Provide a print function that prints pairs of positions and their score if the score is greater than 0.
 
 #include <iostream>
 #include <seqan/file.h>
