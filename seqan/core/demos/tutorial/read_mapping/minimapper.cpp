@@ -81,7 +81,9 @@ int main(int argc, char *argv[]) {
             Finder<TContigSeq> verifyFinder(fragStore.contigStore[i].seq);
             setPosition(verifyFinder, beginPosition(finder));
             Pattern<TReadSeq, HammingSimple> verifyPattern(fragStore.readSeqStore[position(pattern).i1]);
-            while (find(verifyFinder, verifyPattern) && position(verifyFinder) < endPosition(infix(finder))) {
+            unsigned readLength = length(fragStore.readSeqStore[position(pattern).i1]);
+            int minScore = -static_cast<int>(EPSILON * readLength);
+            while (find(verifyFinder, verifyPattern, minScore) && position(verifyFinder) < endPosition(infix(finder))) {
                 TAlignedRead match(length(fragStore.alignedReadStore), position(pattern).i1, i,
                                    beginPosition(verifyFinder), endPosition(verifyFinder));
                 appendValue(fragStore.alignedReadStore, match);
