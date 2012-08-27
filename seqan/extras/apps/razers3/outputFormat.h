@@ -1266,7 +1266,10 @@ int dumpMatches(
 //			write(file, store, Sam());
 
        		_writeHeader(file, store, Sam());
-       		_writeAlignments(file, store, Sam(), True());
+            if (options.dontShrinkAlignments)
+                _writeAlignments(file, store, Sam(), False());
+            else
+                _writeAlignments(file, store, Sam(), True());
 
 			break;
 		case 5: // AFG

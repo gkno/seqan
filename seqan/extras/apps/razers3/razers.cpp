@@ -382,6 +382,7 @@ void setUpArgumentParser(ArgumentParser & parser, RazerSOptions<> const & option
     setDefaultValue(parser, "position-format", options.sortOrder);
 //	addHelpLine(parser, "0 = gap space");
 //	addHelpLine(parser, "1 = position space");
+    addOption(parser, ArgParseOption("ds", "dont-shrink-alignments", "Disable alignment shrinking in SAM.  This is required for full sensitivity, otherwise not recommended."));
 	addOption(parser, ArgParseOption("ga", "global-alignment",  "Compute global alignment (in SAM output)."));
     hideOption(parser, "global-alignment");
 
@@ -531,6 +532,7 @@ extractOptions(
 	getOptionValue(options.readNaming, parser, "read-naming");
 	getOptionValue(options.fullFastaId, parser, "full-readid");
 	getOptionValue(options.positionFormat, parser, "position-format");
+    if (isSet(parser, "dont-shrink-alignments")) options.dontShrinkAlignments = true;
 	getOptionValue(options.compactMult, parser, "compact-mult");
 	getOptionValue(options.noCompactFrac, parser, "no-compact-frac");
 	if (isSet(parser, "global-alignment")) options.computeGlobal = true;

@@ -194,6 +194,7 @@ enum {
 		int			positionFormat;		// 0..gap space
 										// 1..position space
 		const char	*runID;				// runID needed for gff output
+        bool        dontShrinkAlignments;  // Required when used for building gold Rabema mapping.
         bool        computeGlobal;      // compute global alignment in SAM output
 
 	// filtration parameters
@@ -302,6 +303,7 @@ enum {
 			sortOrder = 0;
 			positionFormat = 0;
 			runID = "s"; 	//
+            dontShrinkAlignments = false;
             computeGlobal = false;
 
 			matchN = false;
