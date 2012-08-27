@@ -1173,8 +1173,10 @@ int main(int argc, char const ** argv)
             return 1;
         }
         std::cerr << " OK\n";
-        std::cerr << "Reference Index       " << options.referencePath << ".fai ...";
-        if (write(faiIndex, toCString(options.referencePath)) != 0)
+        seqan::CharString faiPath = options.referencePath;
+        append(faiPath, ".fai");
+        std::cerr << "Reference Index       " << faiPath << " ...";
+        if (write(faiIndex, toCString(faiPath)) != 0)
         {
             std::cerr << "Could not write FAI index we just built.\n";
             return 1;
@@ -1185,6 +1187,7 @@ int main(int argc, char const ** argv)
     {
         std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";
     }
+    std::cerr << "{{{" << sequenceName(faiIndex, 0) << "}}}\n";
 
     // Open SAM file and read in header.
     TNameStore refNameStore;
