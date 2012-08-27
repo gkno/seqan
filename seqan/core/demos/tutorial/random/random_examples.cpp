@@ -19,6 +19,10 @@ int main()
     typedef Value<Rng<MersenneTwister> >::Type TMTValue;
     TMTValue value = pickRandomNumber(rng);
 
+// FRAGMENT(ignore-variable-value)
+    // This fragment is not included from the tutorial.
+    (void) value;  // Suppress unused variable warning.
+
 // FRAGMENT(random-number-generation-pdf)
     Pdf<Uniform<double> > uniformDouble(0, 1);
     std::cout << "pickRandomNumber(rng, uniformDouble) == " << pickRandomNumber(rng, uniformDouble) << std::endl;
