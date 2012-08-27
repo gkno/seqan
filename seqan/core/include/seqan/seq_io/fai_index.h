@@ -720,7 +720,11 @@ inline int build(FaiIndex & index, char const * seqFilename, char const * faiFil
         entry.lineLength = lineLength;
         entry.overallLineLength = lineSize;
         appendValue(index.indexEntryStore, entry);
+        appendValue(index.refNameStore, entry.name);
     }
+
+    // Refresh name store cache.
+    refresh(index.refNameStoreCache);
 
     return 0;
 }
