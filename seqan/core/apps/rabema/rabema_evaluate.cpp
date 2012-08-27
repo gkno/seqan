@@ -575,6 +575,10 @@ int benchmarkReadResult(RabemaStats & result,
                 __int32 beginPos = samRecord.pos - bandwidth;
                 __int32 endPos = (beginPos + getAlignmentLengthInRef(samRecord) -
                                   countPaddings(samRecord.cigar) + 2 * bandwidth);
+                if (beginPos < 0)
+                    beginPos = 0;
+                if (endPos > (int)length(refSeqs[seqId]))
+                    endPos = length(refSeqs[seqId]);
                 contigSeq = infix(refSeqs[seqId], beginPos, endPos);
                 if (hasFlagRC(samRecord))
                     reverseComplement(contigSeq);
