@@ -1254,8 +1254,11 @@ void TextToolDocPrinter_::print(std::ostream & stream, ToolDoc const & doc)
 {
     std::ostream_iterator<char> out(stream);
 
-    stream << doc._name << " - " << doc._shortDescription << "\n";
-    unsigned len = _textWidth(doc._name) + 3 + _textWidth(doc._shortDescription);
+    stream << doc._name;
+    if (!empty(doc._shortDescription))
+        stream << " - " << doc._shortDescription;
+    stream << "\n";
+    unsigned len = _textWidth(doc._name) + (empty(doc._shortDescription) ? 0 : 3) + _textWidth(doc._shortDescription);
     std::fill_n(out, len, '=');
     stream << '\n';
 
