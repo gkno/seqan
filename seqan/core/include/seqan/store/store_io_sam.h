@@ -382,9 +382,13 @@ getCigarString(
 //////////////////////////////////////////////////////////////////////////////
 // _alignAndGetCigarString
 
-template <typename TCigar, typename TMDString, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
+template <
+    typename TCigar, typename TMDString, typename TContig, typename TReadSeq,
+    typename TAlignedRead, typename TErrors, typename TAlignFunctor>
 inline void
-alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors &errors, True)
+alignAndGetCigarString(
+    TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq,
+    TAlignedRead &alignedRead, TErrors &errors, TAlignFunctor const & functor)
 {
     typedef Align<TReadSeq, ArrayGaps> TAlign;
 
@@ -399,7 +403,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
     assignSource(row(align, 1), readSeq);
     
     if (!(errors == 0 || (errors == 1 && length(readSeq) == length(source(row(align, 0))))))
-        errors = -globalAlignment(align, Score<short, EditDistance>());
+        errors = functor.align(align);
 
     getCigarString(cigar, row(align, 0), row(align, 1));
     getMDString(md, row(align, 0), row(align, 1));
@@ -407,7 +411,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
 
 template <typename TCigar, typename TMDString, typename TContig, typename TReadSeq, typename TErrors, typename TAlignedRead>
 inline void
-alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors &, False)
+alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &readSeq, TAlignedRead &alignedRead, TErrors &, Nothing const &)
 {
     typedef typename TContig::TContigSeq                                    TContigSeq;
     typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >    TContigGaps;
@@ -1264,11 +1268,11 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
 //////////////////////////////////////////////////////////////////////////////
 // _writeAlignments
 
-    template<typename TFile, typename TSpec, typename TConfig, typename TDoAlign>
+    template<typename TFile, typename TSpec, typename TConfig, typename TAlignFunctor>
     inline void _writeAlignments(TFile & target,
                                  FragmentStore<TSpec, TConfig> & store,
                                  Sam,
-                                 TDoAlign doAlign)
+                                 TAlignFunctor const & alignFunctor)
     {
 //IOREV
         typedef FragmentStore<TSpec, TConfig>                           TFragmentStore;
@@ -1412,7 +1416,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
             if (alignedId < length(store.alignQualityStore))
                 errors = store.alignQualityStore[alignedId].errors;
             // std::cout << store.readNameStore[readId] << "\n";
-            alignAndGetCigarString(cigar, md, store.contigStore[(*it).contigId], readSeq, *it, errors, doAlign);
+            alignAndGetCigarString(cigar, md, store.contigStore[(*it).contigId], readSeq, *it, errors, alignFunctor);
             _streamWrite(target, cigar);
 			// _streamWrite(std::cout, cigar);
             // std::cout << "\n";
@@ -1564,7 +1568,7 @@ alignAndGetCigarString(TCigar &cigar, TMDString &md, TContig &contig, TReadSeq &
                                  FragmentStore<TSpec, TConfig> & store,
                                  Sam)
     {
-        _writeAlignments(target, store, Sam(), False());
+        _writeAlignments(target, store, Sam(), Nothing());
     }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -601,6 +601,32 @@ void appendIntNumber(TString & str, long i)
     append(str, buf);
 }
 
+struct FunctorGlobalEditDistAlign
+{
+    template <typename TAlign>
+    static inline int
+    align(TAlign & align_)
+    {
+        return -globalAlignment(align_, Score<short, EditDistance>());
+    }
+};
+
+struct FunctorSemiGlobalGotohAlign
+{
+    Score<int> score;
+    
+    FunctorSemiGlobalGotohAlign(Score<int> score_) :
+        score(score_)
+    {}
+    
+    template <typename TAlign>
+    inline int
+    align(TAlign & align_) const
+    {
+        return globalAlignment(align_, score, AlignConfig<true, false, false, true>(), Gotoh()) / scoreMismatch(score);
+    }
+};
+
 //////////////////////////////////////////////////////////////////////////////
 // Output matches
 template <typename TFSSpec,
@@ -1305,9 +1331,9 @@ int dumpMatches(
 
         _writeHeader(file, store, Sam());
         if (options.dontShrinkAlignments)
-            _writeAlignments(file, store, Sam(), False());
+            _writeAlignments(file, store, Sam(), FunctorGlobalEditDistAlign());
         else
-            _writeAlignments(file, store, Sam(), True());
+            _writeAlignments(file, store, Sam(), FunctorSemiGlobalGotohAlign(scoreType));
 
         break;
 
