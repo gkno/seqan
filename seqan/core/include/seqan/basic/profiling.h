@@ -176,7 +176,7 @@
 
 /**
 .Function.cpuTime
-..cat:Misc
+..cat:Miscellaneous
 ..summary:Returns the cpu time in seconds.
 ..signature:cpuTime()
 ..returns:A $double$, cpu time stamp in seconds.
@@ -206,7 +206,7 @@ Wall clock time is returned by @Function.sysTime@.
 
 /**
 .Function.sysTime
-..cat:Misc
+..cat:Miscellaneous
 ..summary:Returns the system time in seconds.
 ..signature:sysTime()
 ..returns:A $double$, system time stamp in seconds.

@@ -60,7 +60,7 @@ struct EditEnvironment;
 
 /**
 .Class.StringEnumerator
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Class to enumerate all strings within a given edit/Hamming distance.
 ..signature:StringEnumerator<TString, TSpec>
 ..param.TString:Type of the string to enumerate the environment of.
@@ -89,7 +89,7 @@ Patterns with substitutions in the first base would also be found
 
 .Spec.Hamming StringEnumerator
 ..general:Class.StringEnumerator
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Enumerate all strings within a given edit distance of a "center string".
 ..signature:StringEnumerator<TString, EditEnvironment<HammingDistance, DISTANCE> >
 ..param.TString:Type of the string to enumerate the environment of.
@@ -100,7 +100,7 @@ Patterns with substitutions in the first base would also be found
 
 .Spec.Levenshtein StringEnumerator
 ..general:Class.StringEnumerator
-..cat:Miscalleneous
+..cat:Miscellaneous
 ..summary:Enumerate all strings within a given edit distance of a "center string".
 ..signature:StringEnumerator<TString, EditEnvironment<LevenshteinDistance, DISTANCE> >
 ..param.TString:Type of the string to enumerate the environment of.

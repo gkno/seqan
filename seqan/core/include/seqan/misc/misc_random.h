@@ -95,7 +95,7 @@ bool MersenneBuffer_<T>::is_initialized = false;
 .Function.mtRandInit:
 ..status:deprecated, use @Class.Rng@ and @Class.Pdf@ from $<seqan/random.h>$ instead
 ..summary:Initialize the Mersenne-Twister random number generator.
-..cat:Misc
+..cat:Random
 ..signature:mtRandInit()
 ..signature:mtRandInit(doSRand)
 ..param.doSRand:If $true$, the Mersenne-Twister is initialized with a random number from $std::rand$.
@@ -142,7 +142,7 @@ mtRandInit()
 .Function.mtRand:
 ..status:deprecated, use @Class.Rng@ and @Class.Pdf@ from $<seqan/random.h>$ instead
 ..summary:Return a Mersenne-Twister random number.
-..cat:Misc
+..cat:Random
 ..signature:mtRand()
 ..returns:A random number between 0 and $MaxValue<unsigned>::VALUE$.
 ...type:nolink:unsigned
@@ -181,7 +181,7 @@ mtRand()
 
 /**
 .Function.mtRandDouble:
-..cat:Miscellaneous
+..cat:Random
 ..status:deprecated, use @Class.Rng@ and @Class.Pdf@ from $<seqan/random.h>$ instead
 ..summary:Return a random number between 0 and 1 using mtRand.
 ..see:Function.mtRand
