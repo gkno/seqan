@@ -81,7 +81,7 @@ int main(int, char const **)
         unsigned beginPosition = alignPosList[i];
         unsigned endPosition = beginPosition + length(value(it2));
         // Build Infix
-        Infix<DnaString>::Type genomeFragment = infix(bsChr1, beginPosition, endPosition);
+        Infix<DnaString>::Type genomeFragment = infix(chr1, beginPosition, endPosition);
         // Call of our function to print the simple alignment
         printAlign(genomeFragment, value(it2));
     }
@@ -89,11 +89,12 @@ int main(int, char const **)
     // StringSets
     // Build StringSet of readList: Build a StringSet of DnaQString and append the reads from readList.
     // Reuse the Rooted Iterator from above.
-    StringSet<DnaString> readStringSet;
+    typedef StringSet<DnaString> DnaListSet;
+    DnaListSet readStringSet;
     goBegin(it2);
     for(; !atEnd(it2); goNext(it2))
         appendValue(readStringSet, value(it2));
-  
+
     // Iterate over StringSet
     Iterator<DnaListSet, Rooted>::Type it3 = begin(readStringSet);
     
