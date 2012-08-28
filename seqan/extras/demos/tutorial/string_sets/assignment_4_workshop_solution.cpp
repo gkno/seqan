@@ -89,11 +89,18 @@ int main(int, char const **)
     // StringSets
     // Build StringSet of readList: Build a StringSet of DnaQString and append the reads from readList.
     // Reuse the Rooted Iterator from above.
-    typedef String<DnaQ> DnaQString;
-    StringSet<DnaQString> readStringSet;
+    StringSet<DnaString> readStringSet;
     goBegin(it2);
     for(; !atEnd(it2); goNext(it2))
         appendValue(readStringSet, value(it2));
+  
+    // Iterate over StringSet
+    Iterator<DnaListSet, Rooted>::Type it3 = begin(readStringSet);
     
+    std::cout << " \n Print alignment using Rooted Iterators: " << std::endl;
+    for(; !atEnd(it3); goNext(it3))
+    {
+        std::cout << value(it3) << std::endl;
+    }  
     return 1;
 }
