@@ -711,6 +711,22 @@ _storeCreateAnnoBackLinks(TAnnotationStore & me)
 	}
 }
 
+template <typename TPos, typename TSpec>
+inline std::ostream &
+operator << (std::ostream & out, AnnotationStoreElement<TPos, TSpec> const & anno)
+{
+    out << "parentId:     \t" << anno.parentId << std::endl;
+    out << "contigId:     \t" << anno.contigId << std::endl;
+    out << "countId:      \t" << anno.countId << std::endl;
+    out << "typeId:       \t" << anno.typeId << std::endl;
+    out << "beginPos:     \t" << anno.beginPos << std::endl;
+    out << "endPos:       \t" << anno.endPos << std::endl;
+    out << "lastChildId:  \t" << anno.lastChildId << std::endl;
+    out << "nextSiblingId:\t" << anno.nextSiblingId << std::endl;
+    
+    return out;
+}
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...

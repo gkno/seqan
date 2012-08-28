@@ -390,6 +390,11 @@ _storeOneAnnotation (
 	// if we have a parent transcript, get/add the parent transcript then
 	if (!empty(ctx.parentName))
 	{
+        // if gene and transcript names are equal (like in some strange gtf files)
+        // try to make the transcript name unique
+        if (ctx.gtfGeneId == ctx.parentName)
+            append(ctx.parentName, "_1");
+        
 		_storeAppendAnnotationName(fragStore, ctx.annotation.parentId, ctx.parentName);
 		if (maxId < ctx.annotation.parentId)
 			maxId = ctx.annotation.parentId;
