@@ -99,5 +99,6 @@ int main()
             ::std::cout << *it;
     }
     ::std::cout << ::std::endl;
+
     return 0;
 }
