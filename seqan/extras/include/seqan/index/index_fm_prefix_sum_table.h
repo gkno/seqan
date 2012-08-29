@@ -279,9 +279,9 @@ unsigned getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos be
 
     if (direction == -1)
     {
-        while ((pivotPos >= realBeginPos) && abs((pst[pivotPos] - tooSmallValues) - (pst[realEndPos] - pst[pivotPos])) <= currentMin)
+        while ((pivotPos >= realBeginPos) && std::abs((long)(pst[pivotPos] - tooSmallValues) - (long)((pst[realEndPos] - pst[pivotPos]))) <= currentMin)
         {
-            currentMin = abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
+            currentMin = std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
             --pivotPos;
         }
         ++pivotPos;
@@ -290,7 +290,7 @@ unsigned getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos be
     {
         while (std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos]))) < currentMin && (pivotPos < realEndPos))
         {
-            currentMin = abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
+            currentMin = std::abs((long)((pst[pivotPos] - tooSmallValues)) - (long)((pst[realEndPos] - pst[pivotPos])));
             ++pivotPos;
         }
         --pivotPos;
