@@ -110,9 +110,46 @@ while (!atEnd(seqIO)))
 
 .Memfunc.SequenceStream#SequenceStream
 ..summary:Constructor
+..description:See documentation of @Class.SequenceStream@ for more information.
 ..class:Class.SequenceStream
+..signature:SequenceStream()
+..signature:SequenceStream(fileName[, operationMode[, format[, fileType]]])
+..param.fileName:Path to the file to open.
+...type:nolink:$char const *$
+..param.operationMode:Mode to open the file in. Optional.
+...default:@Enum.SequenceStream\colon\colonOperationMode.value.READ@
+...type:Enum.SequenceStream\colon\colonOperationMode
+..param.format:Mode to open the file in. Optional.
+...type:Enum.SequenceStream\colon\colonFileFormat
+...default:@Enum.SequenceStream\colon\colonFileFormat.value.AUTO_FORMAT@
+..param.fileType:Mode to open the file in. Optional.
+...type:Enum.SequenceStream\colon\colonFileType
+...default:@Enum.SequenceStream\colon\colonFileType.value.AUTO_TYPE@
+
+.Enum.SequenceStream\colon\colonOperationMode
+..summary:Select the operation mode of a @Class.SequenceStream@.
+..value.READ:Open stream for reading.
+..value.READ_PERSISTENT:Open stream for reading, mark as "persisent reading". See @Class.SequenceStream@ for more information on the difference between normal and persistent reading.
+..value.WRITE:Open stream for writing.
+..include:seqan/seq_io.h
+
+.Enum.SequenceStream\colon\colonFileFormat
+..summary:Select the file format to read/write.
+..description:The file format is the format of the possibly compressed content.
+..value.AUTO_FORMAT:Auto-detect format from file content on reading and from the file name on writing. If Auto-detection fails, FASTA is used.
+..value.FASTA:Force reading/writing of FASTA.
+..value.FASTQ:Force reading/writing of FASTQ.
+..include:seqan/seq_io.h
+
+.Enum.SequenceStream\colon\colonFileType
+..summary:Select the file type to read/write.
+..description:The file type is the type of the file itself, i.e. plain text or compressed.
+..value.AUTO_TYPE:Auto-detect format from file content on reading and from the file name on writing. If Auto-detection fails, $PLAIN_TEXT$ is used.
+..value.PLAIN_TEXT:Force reading/writing of plain text.
+..value.GZ:Force reading/writing with gzip compression.
+..value.BZ2:Force reading/writing with bzip compression.
+..include:seqan/seq_io.h
 */
-// TODO(holtgrew): Document constructor.
 
 class SequenceStream
 {

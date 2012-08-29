@@ -528,7 +528,9 @@ class HtmlHelper(object):
         i = txt.find('|');
         if (i >= 0):
             txt = txt[i + 1:]
-        return self.markup_parser.toHtml(self.markup_parser.parse(txt))
+        res = self.markup_parser.toHtml(self.markup_parser.parse(txt))
+        res = translate(res)
+        return res
 
     def imageFilename(self, text):
         if '|' in text:
