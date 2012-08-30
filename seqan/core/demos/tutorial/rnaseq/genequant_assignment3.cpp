@@ -7,6 +7,7 @@
 using namespace seqan;
 
 
+// FRAGMENT(definitions)
 // define used types
 typedef FragmentStore<>                         TStore;
 typedef Value<TStore::TAnnotationStore>::Type   TAnnotation;
@@ -14,6 +15,7 @@ typedef TAnnotation::TId                        TId;
 typedef TAnnotation::TId                        TPos;
 typedef IntervalAndCargo<TPos, TId>             TInterval;
 typedef IntervalTree<TPos, TId>                 TIntervalTree;
+// FRAGMENT(definitions_end)
 
 // define options
 struct Options

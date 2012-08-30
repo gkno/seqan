@@ -7,12 +7,14 @@
 using namespace seqan;
 
 
+// FRAGMENT(definitions)
 // define used types
 typedef FragmentStore<>                         TStore;
 typedef Value<TStore::TAnnotationStore>::Type   TAnnotation;
 typedef TAnnotation::TId                        TId;
 typedef TAnnotation::TId                        TPos;
 typedef IntervalAndCargo<TPos, TId>             TInterval;
+// FRAGMENT(definitions_end)
 
 // define options
 struct Options
@@ -79,6 +81,7 @@ bool loadFiles(TStore & store, Options const & options)
     return true;
 }
 
+// FRAGMENT(yourcode)
 //
 // 3. Extract intervals from gene annotations (grouped by contigId)
 //
@@ -87,7 +90,7 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
     // INSERT YOUR CODE HERE ...
     //
 }
-
+// FRAGMENT(yourcode_end)
 
 int main(int argc, char const * argv[])
 {
@@ -99,10 +102,12 @@ int main(int argc, char const * argv[])
     if (res != ArgumentParser::PARSE_OK)
         return res == ArgumentParser::PARSE_ERROR;
 
+// FRAGMENT(main)
     if (!loadFiles(store, options))
         return 1;
 
     extractGeneIntervals(intervals, store);
+// FRAGMENT(main_end)
 
     return 0;
 }
