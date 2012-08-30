@@ -8,16 +8,15 @@
 
 using namespace seqan;
 
+
 // define used types
 typedef FragmentStore<>                         TStore;
 typedef Value<TStore::TAnnotationStore>::Type   TAnnotation;
 typedef TAnnotation::TId                        TId;
 typedef TAnnotation::TId                        TPos;
-
 typedef IntervalAndCargo<TPos, TId>             TInterval;
 typedef IntervalTree<TPos, TId>                 TIntervalTree;
 typedef Value<TStore::TAlignedReadStore>::Type  TAlignedRead;
-
 
 // define options
 struct Options
@@ -53,6 +52,7 @@ ArgumentParser::ParseResult parseOptions(Options & options, int argc, char const
 
     return res;
 }
+
 
 //
 // 2. Load annotations and alignments from files
@@ -119,7 +119,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 {
     resize(intervalTrees, length(intervals));
 
-//    SEQAN_OMP_PRAGMA(parallel for private(result))
+    SEQAN_OMP_PRAGMA(parallel for private(result))
     for (unsigned i = 0; i < length(intervals); ++i)
         createIntervalTree(intervalTrees[i], intervals[i]);
 }
@@ -133,7 +133,7 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
     String<TId> result;
 
     // iterate aligned reads and get search their begin and end positions
-//    SEQAN_OMP_PRAGMA(parallel for private(result))
+    SEQAN_OMP_PRAGMA(parallel for private(result))
     for (unsigned i = 0; i < length(store.alignedReadStore); ++i)
     {
         TAlignedRead const & ar = store.alignedReadStore[i];
@@ -149,45 +149,6 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
     }
 }
 
-//
-// 6. Output gene counts
-//
-void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const & store)
-{
-    // output abundances for covered genes
-    Iterator<TStore const, AnnotationTree<> >::Type transIt = begin(store, AnnotationTree<>());
-    Iterator<TStore const, AnnotationTree<> >::Type exonIt;
-
-    std::cout << "#gene\tcoverage" << std::endl;
-    for (unsigned j = 0; j < length(readBasesPerGene); ++j)
-    {
-        if (readBasesPerGene[j] == 0)
-            continue;
-
-        unsigned mRNALengthMax = 0;
-        goTo(transIt, j);
-
-        // determine maximal mRNA length
-        SEQAN_ASSERT(goDown(transIt));
-        do
-        {
-            exonIt = nodeDown(transIt);
-            unsigned mRNALength = 0;
-
-            do
-            {
-                mRNALength += abs(getAnnotation(exonIt).beginPos - getAnnotation(exonIt).endPos);
-            }
-            while (goRight(exonIt));
-
-            if (mRNALengthMax < mRNALength)
-                mRNALengthMax = mRNALength;
-        }
-        while (goRight(transIt));
-
-        std::cout << store.annotationNameStore[j] << '\t' << readBasesPerGene[j] / (double)mRNALengthMax << std::endl;
-    }
-}
 
 int main(int argc, char const * argv[])
 {
@@ -198,8 +159,8 @@ int main(int argc, char const * argv[])
     String<unsigned> readBasesPerGene;
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
-    if (res != seqan::ArgumentParser::PARSE_OK)
-        return res == seqan::ArgumentParser::PARSE_ERROR;
+    if (res != ArgumentParser::PARSE_OK)
+        return res == ArgumentParser::PARSE_ERROR;
 
     if (!loadFiles(store, options))
         return 1;
@@ -207,7 +168,6 @@ int main(int argc, char const * argv[])
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
     countReadsPerGene(readBasesPerGene, intervalTrees, store);
-    outputGeneCoverage(readBasesPerGene, store);
 
     return 0;
 }

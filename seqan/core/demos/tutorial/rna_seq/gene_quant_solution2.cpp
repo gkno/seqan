@@ -10,8 +10,11 @@ using namespace seqan;
 
 
 // define used types
-typedef FragmentStore<> TStore;
-
+typedef FragmentStore<>                         TStore;
+typedef Value<TStore::TAnnotationStore>::Type   TAnnotation;
+typedef TAnnotation::TId                        TId;
+typedef TAnnotation::TId                        TPos;
+typedef IntervalAndCargo<TPos, TId>             TInterval;
 
 // define options
 struct Options
@@ -78,11 +81,41 @@ bool loadFiles(TStore & store, Options const & options)
     return true;
 }
 
+//
+// 3. Extract intervals from gene annotations (grouped by contigId)
+//
+void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const & store)
+{
+    // extract intervals from gene annotations (grouped by contigId)
+    resize(intervals, length(store.contigStore));
+
+    Iterator<TStore const, AnnotationTree<> >::Type it = begin(store, AnnotationTree<>());
+
+    SEQAN_ASSERT(goDown(it));
+    do
+    {
+        SEQAN_ASSERT_EQ(getType(it), "gene");
+
+        TPos beginPos = getAnnotation(it).beginPos;
+        TPos endPos = getAnnotation(it).endPos;
+        TId contigId = getAnnotation(it).contigId;
+
+        if (beginPos > endPos)
+            std::swap(beginPos, endPos);
+
+        // insert forward-strand interval of the gene and its annotation id
+        appendValue(intervals[contigId], TInterval(beginPos, endPos, value(it)));
+
+    }
+    while (goRight(it));
+}
+
 
 int main(int argc, char const * argv[])
 {
     Options options;
     TStore store;
+    String<String<TInterval> > intervals;
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -90,6 +123,8 @@ int main(int argc, char const * argv[])
 
     if (!loadFiles(store, options))
         return 1;
+
+    extractGeneIntervals(intervals, store);
 
     return 0;
 }
