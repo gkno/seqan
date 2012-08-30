@@ -281,8 +281,7 @@ getUnalignedCount(BamIndex<Bai> const & index)
 // ----------------------------------------------------------------------------
 
 /**
-.Function
-.BamIndex#read
+.Function.BamIndex#read
 ..class:Class.BamIndex
 ..cat:BAM I/O
 ..signature:read(index, filename)
