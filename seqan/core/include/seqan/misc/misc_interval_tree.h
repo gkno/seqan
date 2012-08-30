@@ -898,10 +898,9 @@ SEQAN_CHECKPOINT
     if (length(intervals) > 0u) {
         TValue center =	_calcIntervalTreeRootCenter(intervals);
 
-        std::sort(begin(intervals),end(intervals),_less_compI1_ITree<TInterval>);
+        std::sort(begin(intervals, Standard()),end(intervals, Standard()),_less_compI1_ITree<TInterval>);
 
         String<TInterval*> interval_pointers;
-        resize(interval_pointers,length(intervals));
         // interval tree stores pointers to intervals, not original intervals
         _makePointerInterval(intervals,interval_pointers);
 
@@ -942,13 +941,11 @@ SEQAN_CHECKPOINT
 	
     if (length(intervals) > 0u) {
 	    TInterval a;
-	    typename Iterator<TIntervals, Standard>::Type begin_ = begin(intervals);
-	    typename Iterator<TIntervals, Standard>::Type end_ = end(intervals);
+	    typename Iterator<TIntervals, Standard>::Type begin_ = begin(intervals, Standard());
+	    typename Iterator<TIntervals, Standard>::Type end_ = end(intervals, Standard());
 	    std::sort(begin_, end_ ,_less_compI1_ITree<TInterval>);
 
 	    String<TInterval*> interval_pointers;
-	    resize(interval_pointers,length(intervals));
-
 	    _makePointerInterval(intervals,interval_pointers);
 
 	    if(length(intervals)==1) // if there is just one interval ->  center = center of this interval
@@ -1180,21 +1177,23 @@ SEQAN_CHECKPOINT
 // this is done to avoid copying and passing the whole IntervalAndCargo objects during interval tree construction
 template<typename TIntervals, typename TIntervalPointers>
 void
-_makePointerInterval(TIntervals & intervals,TIntervalPointers & interval_pointers)
+_makePointerInterval(TIntervals & intervals, TIntervalPointers & interval_pointers)
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<TIntervalPointers>::Type TIntervalPointer;
-	typedef typename Iterator<TIntervalPointers, Rooted>::Type TIntervalPointerIterator;
+	typedef typename Iterator<TIntervals, Standard>::Type TIntervalIterator;
+	typedef typename Iterator<TIntervalPointers, Standard>::Type TIntervalPointerIterator;
 
-	TIntervalPointer it;
-	TIntervalPointerIterator iit = begin(interval_pointers);
-	if(length(intervals)>0)
-		for(it = &intervals[0]; it <= &intervals[length(intervals)-1]; ++it)
-		{
-			*iit = it;	
-			++iit;
-		}
+    resize(interval_pointers, length(intervals));
+	if (empty(intervals))
+        return;
 
+	TIntervalIterator it = begin(intervals, Standard());
+	TIntervalIterator itEnd = end(intervals, Standard());
+	TIntervalPointerIterator iit = begin(interval_pointers, Standard());
+
+    for (; it != itEnd; ++it, ++iit)
+        *iit = it;
 }
 
 
@@ -1435,15 +1434,20 @@ SEQAN_CHECKPOINT
 ..param.query:A query point.
 ..include:seqan/misc/misc_interval_tree.h
 */
-template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
-void
-findIntervals(TGraph & g, TPropertyMap & pm, TValue query, String<TCargo> & result)
+template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>
+inline void
+findIntervals(
+    Graph<TSpec> const & g,
+    TPropertyMap const & pm,
+    TValue query,
+    String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
 
+    typedef Graph<TSpec> const TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TPropertyMap>::Type TProperty;
-	typedef typename Value<TProperty>::Type    TPropertyValue;
+	typedef typename Value<TProperty>::Type TPropertyValue;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
     
     resize(result,0);
@@ -1456,6 +1460,9 @@ SEQAN_CHECKPOINT
 		
 	while(true)
 	{
+        typename Iterator<Graph<TSpec> , OutEdgeIterator>::Type it7;
+        Iter<Graph<TSpec>, GraphIterator<InternalOutEdgeIterator<OutEdgeIterator> > > it5(g,act_knot);
+        TOutEdgeIterator it4;
 		TOutEdgeIterator it(g, act_knot);
 		act_prop = property(pm,act_knot);
 		if(act_prop.center < (TPropertyValue)query) // look in current node and right subtree
@@ -1515,14 +1522,15 @@ SEQAN_CHECKPOINT
 ..param.intervalTree:An interval tree
 ...type:Class.IntervalTree
 */
-template<typename TValue,typename TCargo>
-void
-findIntervals(IntervalTree<TValue,TCargo> & it, TValue query, String<TCargo> & result)
+template <typename TValue, typename TCargo>
+inline void
+findIntervals(
+    IntervalTree<TValue,TCargo> const & it,
+    TValue query,
+    String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
-
 	findIntervals(it.g,it.pm,query,result);
-
 }
 
 
@@ -1539,12 +1547,17 @@ SEQAN_CHECKPOINT
 ...remark:Should be a string of TCargo.
 ..include:seqan/misc/misc_interval_tree.h
  */
-template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
-void
-findIntervalsExcludeTouching(TGraph & g, TPropertyMap & pm, TValue query, String<TCargo> & result)
+template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>
+inline void
+findIntervalsExcludeTouching(
+    Graph<TSpec> const & g,
+    TPropertyMap const & pm,
+    TValue query,
+    String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
 
+    typedef Graph<TSpec> const TGraph;
 	typedef typename Iterator<TGraph, OutEdgeIterator >::Type TOutEdgeIterator;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TPropertyMap>::Type TProperty;
@@ -1622,14 +1635,15 @@ SEQAN_CHECKPOINT
 ..param.intervalTree:An interval tree
 ...type:Class.IntervalTree
 */
-template<typename TValue,typename TCargo>
-void
-findIntervalsExcludeTouching(IntervalTree<TValue,TCargo> & tree, TValue query, String<TCargo> & result)
+template <typename TValue, typename TCargo>
+inline void
+findIntervalsExcludeTouching(
+    IntervalTree<TValue,TCargo> const & tree,
+    TValue query,
+    String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
-
 	findIntervalsExcludeTouching(tree.g,tree.pm,query,result);
-
 }
 
 
@@ -1641,24 +1655,32 @@ SEQAN_CHECKPOINT
 ..param.query_begin:The begin position of the query interval.
 ..param.query_end:The end position of the query interval.
 */
-template<typename TValue,typename TCargo>
-void
-findIntervals(IntervalTree<TValue,TCargo> & tree, TValue query_begin, TValue query_end, String<TCargo> & result)
+template <typename TValue, typename TCargo>
+inline void
+findIntervals(
+    IntervalTree<TValue,TCargo> const & tree,
+    TValue query_begin,
+    TValue query_end,
+    String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
-
 	findIntervals(tree.g,tree.pm,query_begin,query_end,result);
-
 }
 
 
 
-template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
-void
-findIntervals(TGraph & g, TPropertyMap & pm, TValue query_begin, TValue query_end, String<TCargo> & result)
+template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>
+inline void
+findIntervals(
+    Graph<TSpec> const & g,
+    TPropertyMap const & pm,
+    TValue query_begin,
+    TValue query_end,
+    String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
 
+    typedef Graph<TSpec> const TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TPropertyMap>::Type TProperty;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
@@ -1671,20 +1693,25 @@ SEQAN_CHECKPOINT
 }
 
 
-template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
-void
-findIntervals(TGraph & g, 
-			  TPropertyMap & pm, 
-			  typename VertexDescriptor<TGraph>::Type & act_knot, 
-			  TValue query_begin, 
-			  TValue query_end, 
-			  String<TCargo> & result)
+template <
+    typename TSpec,
+    typename TPropertyMap,
+    typename TVertexDescriptor,
+    typename TValue,
+    typename TCargo >
+inline void
+findIntervals(
+    Graph<TSpec> const & g,
+    TPropertyMap const & pm,
+    TVertexDescriptor & act_knot,
+    TValue query_begin, 
+    TValue query_end, 
+    String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
 
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TPropertyMap>::Type TProperty;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 
     if (empty(g)) return;
 
@@ -1754,22 +1781,27 @@ SEQAN_CHECKPOINT
 	}
 }
 
-template<typename TGraph, typename TPropertyMap, typename TValue, typename TCargo>
-bool
-removeInterval(TGraph & g, 
-			  TPropertyMap & pm, 
-			  typename VertexDescriptor<TGraph>::Type & act_knot, 
-			  TValue i_begin, 
-			  TValue i_end,
-              TCargo i_id)
+template <
+    typename TSpec,
+    typename TPropertyMap,
+    typename TVertexDescriptor,
+    typename TValue,
+    typename TCargo >
+inline bool
+removeInterval(
+    Graph<TSpec> & g,
+    TPropertyMap & pm, 
+    TVertexDescriptor & act_knot, 
+    TValue i_begin, 
+    TValue i_end,
+    TCargo i_id)
 {
 SEQAN_CHECKPOINT
 
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TPropertyMap>::Type TProperty;
 	typedef typename ListType<TProperty>::Type TList;
-	typedef typename Iterator<TList,Standard>::Type TListIterator;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+	typedef typename Iterator<TList, Standard>::Type TListIterator;
+	typedef typename Iterator<Graph<TSpec>, OutEdgeIterator>::Type TOutEdgeIterator;
 
     if (empty(g)) return false;
 
@@ -1863,13 +1895,22 @@ SEQAN_CHECKPOINT
     return false;
 }
 
-template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
-bool
-removeInterval(TGraph & g, TPropertyMap & pm, TValue i_begin, TValue i_end, TCargo i_id)
+template <
+    typename TSpec,
+    typename TPropertyMap,
+    typename TValue,
+    typename TCargo >
+inline bool
+removeInterval(
+    Graph<TSpec> & g,
+    TPropertyMap & pm,
+    TValue i_begin,
+    TValue i_end,
+    TCargo i_id)
 {
 SEQAN_CHECKPOINT
 
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename VertexDescriptor<Graph<TSpec> >::Type TVertexDescriptor;
 
 	// start looking at root
 	TVertexDescriptor act_knot = 0;
@@ -1885,15 +1926,18 @@ SEQAN_CHECKPOINT
 ..param.i_end:The end position of the interval to be removed.
 ..param.i_id:The ID of the interval to be removed.
 */
-template<typename TValue,typename TCargo>
-bool
-removeInterval(IntervalTree<TValue,TCargo> & tree, TValue i_begin, TValue i_end, TCargo i_id)
+template <typename TValue, typename TCargo>
+inline bool
+removeInterval(
+    IntervalTree<TValue,TCargo> & tree,
+    TValue i_begin,
+    TValue i_end,
+    TCargo i_id)
 {
 SEQAN_CHECKPOINT
 
-	return removeInterval(tree.g,tree.pm,i_begin,i_end,i_id);
+	return removeInterval(tree.g, tree.pm, i_begin, i_end, i_id);
     // we do not decrease the interval_counter of tree, as it would mix up interval IDs
-
 }
 
 

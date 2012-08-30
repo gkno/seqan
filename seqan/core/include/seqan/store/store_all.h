@@ -647,21 +647,21 @@ _storeRemoveTempAnnoNames(FragmentStore<TSpec, TConfig> & me)
 
 template <typename TSpec, typename TConfig, typename TId>
 inline typename GetValue<typename FragmentStore<TSpec, TConfig>::TAnnotationNameStore>::Type
-getAnnoName(FragmentStore<TSpec, TConfig> & store, TId id)
+getAnnoName(FragmentStore<TSpec, TConfig> const & store, TId id)
 {
 	return store.annotationNameStore[id];
 }
 
 template <typename TSpec, typename TConfig, typename TId>
 inline typename GetValue<typename FragmentStore<TSpec, TConfig>::TAnnotationTypeStore>::Type
-getAnnoType(FragmentStore<TSpec, TConfig> & store, TId id)
+getAnnoType(FragmentStore<TSpec, TConfig> const & store, TId id)
 {
 	return store.annotationTypeStore[id];
 }
 
 template <typename TSpec, typename TConfig, typename TId>
 inline CharString
-getAnnoUniqueName(FragmentStore<TSpec, TConfig> & store, TId id)
+getAnnoUniqueName(FragmentStore<TSpec, TConfig> const & store, TId id)
 {
 	if (id < length(store.annotationNameStore) && !empty(getAnnoName(store, id)))
 		return getAnnoName(store, id);

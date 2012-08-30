@@ -174,10 +174,17 @@ container(Iter< TFragmentStore, AnnotationTree<TSpec> > const &it) {
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFragmentStore, typename TSpec>
+inline typename GetValue<typename TFragmentStore::TAnnotationStore>::Type
+getAnnotation(Iter<TFragmentStore const, AnnotationTree<TSpec> > const & it)
+{
+	return getValue(it.store->annotationStore, it._id);
+}
+
+template <typename TFragmentStore, typename TSpec>
 inline typename Reference<typename TFragmentStore::TAnnotationStore>::Type
 getAnnotation(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 {
-	return it.store->annotationStore[it._id];
+	return value(it.store->annotationStore, it._id);
 }
 
 template <typename TFragmentStore, typename TSpec>
@@ -418,7 +425,7 @@ goRight(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 	typedef typename TAnnotation::TId					TId;
 	
-	TAnnotation &anno = getAnnotation(it);
+	TAnnotation const &anno = getAnnotation(it);
 	TId nextSiblingId = anno.nextSiblingId;
 	if (nextSiblingId != TAnnotation::INVALID_ID)
 	{
@@ -646,7 +653,7 @@ isLastChild(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
 	typedef typename TAnnotation::TId					TId;
 
-	TAnnotation &anno = getAnnotation(it);
+	TAnnotation const &anno = getAnnotation(it);
 	TId nextSiblingId = anno.nextSiblingId;
 	if (nextSiblingId != TAnnotation::INVALID_ID)
 	{
