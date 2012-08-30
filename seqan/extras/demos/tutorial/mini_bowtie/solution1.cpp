@@ -1,9 +1,6 @@
 // ==========================================================================
 //                                mini_bowtie
 // ==========================================================================
-// Copyright (c) 2006-2012, Knut Reinert, FU Berlin
-// All rights reserved.
-
 
 #include <iostream>
 #include <seqan/basic.h>
