@@ -20,7 +20,6 @@ void search(TIter & it, TStringSet const & pattern)
     for (TPatternIter patternIt = begin(pattern, Standard()); patternIt != end(pattern, Standard()); ++patternIt)
     {
         // exact search on pattern half
-        std::cerr << "Pattern: " << value(patternIt) << std::endl;
         unsigned startApproxSearch = length(value(patternIt)) / 2;
         if (goDown(it, infix(value(patternIt), startApproxSearch + 1, length(value(patternIt)))))
         {
