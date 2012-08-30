@@ -200,6 +200,161 @@ isBitSet(TWord const & word, unsigned index)
     return (word & (1u << index)) != static_cast<TWord>(0);
 }
 
+// ----------------------------------------------------------------------------
+// Function popCount()
+// ----------------------------------------------------------------------------
+
+/**
+.Function.popCount
+..cat:Bit Twiddling
+..summary:Returns number of set bits in an integer.
+..signature:popCount(word)
+..param.word:The number.
+..returns:The number of set bits (1s) in an integer.
+...type:nolink:$unsigned$
+..include:seqan/misc/misc_bit_twiddling.h
+ */
+
+// Implementing this platform-independent is tricky.  There are two points to platform independentness. First, the
+// choice of compiler and second the used CPU.  Currently, we do not perform any checks for the CPU and assume that
+// the Intel intrinsic POPCNT is available.  The function is implemented to work on the supported compilers GCC/MINGW,
+// CLANG (which has the same interface as GCC here) and Visual C++.
+//
+// GCC, MINGW and CLANG provide the intrinsics __builtin_popcount, __builtin_popcountl, and __builtin_popcountll for
+// the types unsigned, unsigned long, and unsigned long long.  Starting with version 2008, Visual C++ provides the
+// intrinsics __popcnt16, __popcnt, and __popcnt64 for 16, 32, and 64 bit words.
+//
+// The functions below are implemented as follows.  _popCountImplGeneric() is used if there are no intrinsics provided
+// by the compiler (the case for Visual C++ 2008).  Otherwise, we define different overloads of the function
+// _popCountImpl() that are given the length of the word as a template argument.  If necessary, we copy the word in a
+// variable of next largest size and call the best suited builtin on this copy.
+
+// Generic implementation of counting bits.  Taken from http://graphics.stanford.edu/~seander/bithacks.html
+//
+// Brian Kernighan's method goes through as many iterations as there are set bits. So if we have a 32-bit word with
+// only the high bit set, then it will only go once through the loop.
+//
+// Published in 1988, the C Programming Language 2nd Ed. (by Brian W. Kernighan and Dennis M. Ritchie) mentions this
+// in exercise 2-9. On April 19, 2006 Don Knuth pointed out to me that this method "was first published by Peter
+// Wegner in CACM 3 (1960), 322. (Also discovered independently by Derrick Lehmer and published in 1964 in a book
+// edited by Beckenbach.)"
+
+template <typename TWord>
+inline unsigned
+_popCountImplGeneric(TWord word)  // Note that word is copied!
+{
+	unsigned int c = 0;  // c accumulates the total bits set in v
+	for (c = 0; word; c++)
+		word &= word - 1;  // clear the least significant bit set
+	return c;
+}
+
+// This parametrized tag is used for selecting a _popCountImpl() implementation.
+
+template <unsigned int NUM_BITS>
+struct WordSize_ {};
+
+// The compiler-dependent implementations of _popCountImpl() follow.
+
+#if defined(_MSC_VER) && (_MSC_VER <= 1400)  // MSVC <= 2005, no intrinsic.
+
+template <typename TWord, unsigned NUM_BITS>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<NUM_BITS> const & /*tag*/)
+{
+    return _popCountImplGeneric(word);
+}
+
+#endif  // #if defined(_MSC_VER) && (_MSC_VER <= 1400)  // MSVC <= 2005, no intrinsic.
+
+#if defined(_MSC_VER) && (_MSC_VER > 1400)  // MSVC >= 2008, has intrinsic
+
+#if defined(_WIN64)
+
+// 64-bit Windows, 64 bit intrinsic available
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<64> const & /*tag*/)
+{
+    return __popcnt64(static_cast<__uint64>(word));
+}
+
+#else  // #if defined(_WIN64)
+
+// 32-bit Windows, 64 bit intrinsic not available
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<64> const & /*tag*/)
+{
+	return __popcnt(static_cast<__uint32>(word & 0x00000000FFFFFFFFi64)) + __popcnt(static_cast<__uint32>(word >> 32));
+}
+
+#endif  // #if defined(_WIN64)
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<32> const & /*tag*/)
+{
+    return __popcnt(static_cast<__uint32>(word));
+}
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<16> const & /*tag*/)
+{
+    return __popcnt16(static_cast<__uint16>(word));
+}
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<8> const & /*tag*/)
+{
+    return _popCountImpl(static_cast<const __uint16>(word), WordSize_<16>());
+}
+
+#endif  // #if defined(_MSC_VER) && (_MSC_VER <= 1400)
+
+#if !defined(_MSC_VER)  // GCC or CLANG
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<64> const & /*tag*/)
+{
+    return __builtin_popcountll(static_cast<unsigned long long>(word));
+}
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<32> const & /*tag*/)
+{
+    return __builtin_popcount(static_cast<unsigned int>(word));
+}
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<16> const & /*tag*/)
+{
+    return _popCountImpl(static_cast<__uint32>(word), WordSize_<32>());
+}
+
+template <typename TWord>
+inline unsigned
+_popCountImpl(TWord const & word, WordSize_<8> const & /*tag*/)
+{
+    return _popCountImpl(static_cast<__uint32>(word), WordSize_<32>());
+}
+
+#endif    // GCC or CLANG
+
+template <typename TWord>
+inline unsigned
+popCount(TWord word)
+{
+    return _popCountImpl(word, WordSize_<BitsPerValue<TWord>::VALUE>());
+}
+
 }  // namespace seqan
 
 #endif // #ifndef SEQAN_MISC_MISC_BIT_TWIDDLING_H_

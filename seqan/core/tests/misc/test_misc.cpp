@@ -59,6 +59,7 @@
 #include "test_misc_interval_tree.h"
 #include "test_misc_accumulators.h"
 #include "test_misc_edit_environment.h"
+#include "test_misc_bit_twiddling.h"
 
 using namespace std;
 using namespace seqan;
@@ -99,6 +100,31 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
     SEQAN_CALL_TEST(test_misc_long_word_dynamic_interface);
 
     SEQAN_CALL_TEST(test_misc_terminal_get_terminal_size);
+
+    // Test Bit Twiddling.
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_char);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_signed_char);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_unsigned_char);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_short);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_signed_short);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_unsigned_short);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_int);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_signed_int);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_unsigned_int);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_long);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_signed_long);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_unsigned_long);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_long_long);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_signed_long_long);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_unsigned_long_long);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_int8);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_uint8);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_int16);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_uint16);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_int32);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_uint32);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_int64);
+    SEQAN_CALL_TEST(test_misc_bit_twiddling_pop_count_uint64);
 
     // Test IntervalTree class
     SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_IntervalTree__int);

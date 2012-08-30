@@ -36,6 +36,7 @@
 #define INDEX_FM_RANK_SUPPORT_BIT_STRING_H_
 
 #include <seqan/index_fm.h>
+#include <seqan/misc/misc_bit_twiddling.h>
 
 namespace seqan {
 
@@ -200,13 +201,13 @@ inline void clear(RankSupportBitString<TSpec> & bitString)
 template <typename TValue>
 inline unsigned getRankInBlock_(TValue const value, False)
 {
-    return __builtin_popcount(static_cast<int32_t>(value));
+    return popCount(value);
 }
 
 template <typename TValue>
 inline unsigned getRankInBlock_(TValue const value, True)
 {
-    return __builtin_popcountll(static_cast<int64_t>(value));
+    return popCount(value);
 }
 
 template <typename TValue>
