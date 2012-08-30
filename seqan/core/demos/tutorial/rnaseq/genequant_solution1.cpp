@@ -1,6 +1,4 @@
-// FRAGMENT(includes)
 #include <iostream>
-
 #include <seqan/store.h>
 #include <seqan/arg_parse.h>
 #include <seqan/misc/misc_interval_tree.h>
@@ -48,7 +46,7 @@ ArgumentParser::ParseResult parseOptions(Options & options, int argc, char const
     return res;
 }
 
-
+// FRAGMENT(solution)
 //
 // 2. Load annotations and alignments from files
 //
@@ -78,7 +76,7 @@ bool loadFiles(TStore & store, Options const & options)
     return true;
 }
 
-
+// FRAGMENT(main)
 int main(int argc, char const * argv[])
 {
     Options options;
