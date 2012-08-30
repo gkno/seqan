@@ -25,9 +25,6 @@ int main()
     // @HD header, tag/value: VN:1.4.
     header.records[0].tags[0].i1 = "VN";
     header.records[0].tags[0].i2 = "1.4";
-    // @HD header, tag/value: VN:1.4.
-    header.records[0].tags[0].i1 = "VN";
-    header.records[0].tags[0].i2 = "1.4";
     // @SQ header.
     header.records[1].type = seqan::BAM_HEADER_REFERENCE;
     resize(header.records[1].tags, 2);
