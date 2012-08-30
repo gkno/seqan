@@ -241,11 +241,12 @@ isBitSet(TWord const & word, unsigned index)
 
 template <typename TWord>
 inline unsigned
-_popCountImplGeneric(TWord word)  // Note that word is copied!
+_popCountImplGeneric(TWord const & word)  // Note that word is copied!
 {
+    typename MakeUnsigned<TWord>::Type x = word;
 	unsigned int c = 0;  // c accumulates the total bits set in v
-	for (c = 0; word; c++)
-		word &= word - 1;  // clear the least significant bit set
+	for (c = 0; x; c++)
+		x &= x - 1;  // clear the least significant bit set
 	return c;
 }
 
@@ -288,7 +289,7 @@ template <typename TWord>
 inline unsigned
 _popCountImpl(TWord const & word, WordSize_<64> const & /*tag*/)
 {
-	return __popcnt(static_cast<__uint32>(word & 0x00000000FFFFFFFFi64)) + __popcnt(static_cast<__uint32>(word >> 32));
+	return __popcnt(static_cast<__uint32>(word)) + __popcnt(static_cast<__uint32>(word >> 32));
 }
 
 #endif  // #if defined(_WIN64)
