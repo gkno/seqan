@@ -91,7 +91,9 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
 
     Iterator<TStore const, AnnotationTree<> >::Type it = begin(store, AnnotationTree<>());
 
-    SEQAN_ASSERT(goDown(it));
+    if (!goDown(it))
+        return;
+
     do
     {
         SEQAN_ASSERT_EQ(getType(it), "gene");
@@ -105,7 +107,6 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
 
         // insert forward-strand interval of the gene and its annotation id
         appendValue(intervals[contigId], TInterval(beginPos, endPos, value(it)));
-
     }
     while (goRight(it));
 }

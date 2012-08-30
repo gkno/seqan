@@ -155,41 +155,8 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
 //
 void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const & store)
 {
-    // output abundances for covered genes
-    Iterator<TStore const, AnnotationTree<> >::Type transIt = begin(store, AnnotationTree<>());
-    Iterator<TStore const, AnnotationTree<> >::Type exonIt;
-
-    std::cout << "#gene\tcoverage" << std::endl;
-    for (unsigned j = 0; j < length(readBasesPerGene); ++j)
-    {
-        if (readBasesPerGene[j] == 0)
-            continue;
-
-        unsigned mRNALengthMax = 0;
-        goTo(transIt, j);
-
-        // determine maximal mRNA length
-        SEQAN_ASSERT_NOT(isLeaf(transIt));
-        goDown(transIt);
-
-        do
-        {
-            exonIt = nodeDown(transIt);
-            unsigned mRNALength = 0;
-
-            do
-            {
-                mRNALength += abs(getAnnotation(exonIt).beginPos - getAnnotation(exonIt).endPos);
-            }
-            while (goRight(exonIt));
-
-            if (mRNALengthMax < mRNALength)
-                mRNALengthMax = mRNALength;
-        }
-        while (goRight(transIt));
-
-        std::cout << store.annotationNameStore[j] << '\t' << readBasesPerGene[j] / (double)mRNALengthMax << std::endl;
-    }
+    // INSERT YOUR CODE HERE ...
+    //
 }
 
 

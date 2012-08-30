@@ -15,8 +15,6 @@ typedef Value<TStore::TAnnotationStore>::Type   TAnnotation;
 typedef TAnnotation::TId                        TId;
 typedef TAnnotation::TId                        TPos;
 typedef IntervalAndCargo<TPos, TId>             TInterval;
-typedef IntervalTree<TPos, TId>                 TIntervalTree;
-typedef Value<TStore::TAlignedReadStore>::Type  TAlignedRead;
 
 // define options
 struct Options
@@ -88,66 +86,8 @@ bool loadFiles(TStore & store, Options const & options)
 //
 void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const & store)
 {
-    // extract intervals from gene annotations (grouped by contigId)
-    resize(intervals, length(store.contigStore));
-
-    Iterator<TStore const, AnnotationTree<> >::Type it = begin(store, AnnotationTree<>());
-
-    if (!goDown(it))
-        return;
-
-    do
-    {
-        SEQAN_ASSERT_EQ(getType(it), "gene");
-
-        TPos beginPos = getAnnotation(it).beginPos;
-        TPos endPos = getAnnotation(it).endPos;
-        TId contigId = getAnnotation(it).contigId;
-
-        if (beginPos > endPos)
-            std::swap(beginPos, endPos);
-
-        // insert forward-strand interval of the gene and its annotation id
-        appendValue(intervals[contigId], TInterval(beginPos, endPos, value(it)));
-    }
-    while (goRight(it));
-}
-
-//
-// 4. Construct interval trees
-//
-void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String<TInterval> > const & intervals)
-{
-    resize(intervalTrees, length(intervals));
-
-    SEQAN_OMP_PRAGMA(parallel for private(result))
-    for (unsigned i = 0; i < length(intervals); ++i)
-        createIntervalTree(intervalTrees[i], intervals[i]);
-}
-
-//
-// 5. Count reads per gene
-//
-void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
-{
-    resize(readBasesPerGene, length(store.annotationStore), 0);
-    String<TId> result;
-
-    // iterate aligned reads and get search their begin and end positions
-    SEQAN_OMP_PRAGMA(parallel for private(result))
-    for (unsigned i = 0; i < length(store.alignedReadStore); ++i)
-    {
-        TAlignedRead const & ar = store.alignedReadStore[i];
-        TPos queryBegin = _min(ar.beginPos, ar.endPos);
-        TPos queryEnd = _max(ar.beginPos, ar.endPos);
-
-        // search read-overlapping genes
-        findIntervals(intervalTrees[ar.contigId], queryBegin, queryEnd, result);
-
-        // increase read counter for each overlapping annotation given the id in the interval tree
-        for (unsigned j = 0; j < length(result); ++j)
-            readBasesPerGene[result[j]] += length(store.readSeqStore[ar.readId]);
-    }
+    // INSERT YOUR CODE HERE ...
+    //
 }
 
 
@@ -156,8 +96,6 @@ int main(int argc, char const * argv[])
     Options options;
     TStore store;
     String<String<TInterval> > intervals;
-    String<TIntervalTree> intervalTrees;
-    String<unsigned> readBasesPerGene;
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -167,8 +105,6 @@ int main(int argc, char const * argv[])
         return 1;
 
     extractGeneIntervals(intervals, store);
-    constructIntervalTrees(intervalTrees, intervals);
-    countReadsPerGene(readBasesPerGene, intervalTrees, store);
 
     return 0;
 }
