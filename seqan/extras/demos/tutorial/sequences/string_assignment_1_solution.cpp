@@ -16,8 +16,8 @@ int main(int, char const **)
     // Build reads and genomes
     DnaString chr1 = "TATAATATTGCTATCGCGATATCGCTAGCTAGCTACGGATTATGCGCTCTGCGATATATCGCGCTAGATGTGCAGCTCGATCGAATGCACGTGTGTGCGATCGATTAGCGTCGATCATCGATCTATATTAGCGCGCGGTATCGGACGATCATATTAGCGGTCTAGCATTTAG";
     // Build List containing all reads
-    typedef String<DnaString> DnaList;
-    DnaList readList;
+    typedef String<DnaString> TDnaList;
+    TDnaList readList;
     resize(readList, 4);
     readList[0] = "TTGCTATCGCGATATCGCTAGCTAGCTACGGATTATGCGCTCTGCGATATATCGCGCT";
     readList[1] = "TCGATTAGCGTCGATCATCGATCTATATTAGCGCGCGGTATCGGACGATCATATTAGCGGTCTAGCATT";
@@ -31,7 +31,7 @@ int main(int, char const **)
     for(unsigned i = 0; i < length(readList); ++i)
         std::cout << readList[i] << std::endl;
     // Assume we have mapped the 4 reads to chr1 (and chr2) and now have the mapping start positions (no gaps).
-    // Store the start position in a String: 7, 100, 172, 272
+    // Store the start position in a String alignPosList: 7, 100, 172, 272
     String<unsigned> alignPosList;
     resize(alignPosList, 4);
     alignPosList[0] = 7;
@@ -47,7 +47,7 @@ int main(int, char const **)
         if(bsChr1[i] == 'C')
             bsChr1[i] = 'T';
     // Print alignments of the reads with chr1 (or bsChr1) sequence using the function printAlign
-    // and the positions in alignPos.
+    // and the positions in alignPosList.
     // To do that, you have to create a copy of the fragment in chr1 (bsChr1) that is aligned to the read.
     std::cout << " \n Print alignment: " << std::endl;
     for(unsigned i = 0; i < length(readList); ++i)
