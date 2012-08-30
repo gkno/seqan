@@ -125,6 +125,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
         createIntervalTree(intervalTrees[i], intervals[i]);
 }
 
+// FRAGMENT(solution)
 //
 // 5. Count reads per gene
 //
@@ -151,6 +152,7 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
 }
 
 
+// FRAGMENT(main)
 int main(int argc, char const * argv[])
 {
     Options options;

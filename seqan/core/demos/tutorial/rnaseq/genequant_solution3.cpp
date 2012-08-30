@@ -112,6 +112,7 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
     while (goRight(it));
 }
 
+// FRAGMENT(solution)
 //
 // 4. Construct interval trees
 //
@@ -125,6 +126,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 }
 
 
+// FRAGMENT(main)
 int main(int argc, char const * argv[])
 {
     Options options;

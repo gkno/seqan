@@ -150,6 +150,7 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
     }
 }
 
+// FRAGMENT(solution)
 //
 // 6. Output gene counts
 //
@@ -193,6 +194,7 @@ void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const 
 }
 
 
+// FRAGMENT(main)
 int main(int argc, char const * argv[])
 {
     Options options;

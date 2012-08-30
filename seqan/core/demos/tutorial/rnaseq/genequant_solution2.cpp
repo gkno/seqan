@@ -81,6 +81,7 @@ bool loadFiles(TStore & store, Options const & options)
     return true;
 }
 
+// FRAGMENT(solution)
 //
 // 3. Extract intervals from gene annotations (grouped by contigId)
 //
@@ -112,6 +113,7 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
 }
 
 
+// FRAGMENT(main)
 int main(int argc, char const * argv[])
 {
     Options options;
