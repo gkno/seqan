@@ -586,6 +586,13 @@ namespace SEQAN_NAMESPACE_MAIN
 #endif
 	}
 
+	template < typename TSequence >
+	inline void
+	reverse(TSequence const & sequence) 
+	{
+	    reverse(const_cast<TSequence &>(sequence));
+    }
+
 	template < typename TSequence, typename TSpec >
 	inline void
 	reverse(StringSet<TSequence, TSpec> & stringSet) 
