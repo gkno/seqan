@@ -16,8 +16,8 @@ int main(int, char const **)
     // Build reads and genomes
     DnaString chr1 = "TATAATATTGCTATCGCGATATCGCTAGCTAGCTACGGATTATGCGCTCTGCGATATATCGCGCTAGATGTGCAGCTCGATCGAATGCACGTGTGTGCGATCGATTAGCGTCGATCATCGATCTATATTAGCGCGCGGTATCGGACGATCATATTAGCGGTCTAGCATTTAG";
     // Build List containing all reads
-    typedef String<DnaString> DnaList;
-    DnaList readList;
+    typedef String<DnaString> TDnaList;
+    TDnaList readList;
     resize(readList, 4);
     readList[0] = "TTGCTATCGCGATATCGCTAGCTAGCTACGGATTATGCGCTCTGCGATATATCGCGCT";
     readList[1] = "TCGATTAGCGTCGATCATCGATCTATATTAGCGCGCGGTATCGGACGATCATATTAGCGGTCTAGCATT";
@@ -31,7 +31,7 @@ int main(int, char const **)
     for(unsigned i = 0; i < length(readList); ++i)
         std::cout << readList[i] << std::endl;
     // Assume we have mapped the 4 reads to chr1 (and chr2) and now have the mapping start positions (no gaps).
-    // Store the start position in a String: 7, 100, 172, 272
+    // Store the start position in a String alignPosList: 7, 100, 172, 272
     String<unsigned> alignPosList;
     resize(alignPosList, 4);
     alignPosList[0] = 7;
@@ -42,7 +42,8 @@ int main(int, char const **)
     std::cout << " \n Print alignment using Segment: " << std::endl;
     for(unsigned i = 0; i < length(readList); ++i)
     {
-        // Begin and end position of a given alignment between the read and the genome
+        // Temporary copy of begin and end position (beginPosition) from alignPosList
+        // of a given alignment between the read and the genome        
         unsigned beginPosition = alignPosList[i];
         unsigned endPosition = beginPosition + length(readList[i]);
         // Build infix
@@ -53,15 +54,16 @@ int main(int, char const **)
     // Iterators :)
     // Print alignments using Iterators: Do the same as above, but use Iterators to iterate over the read list.
     // First, use Standard Iterators.
-    Iterator<DnaList>::Type it = begin(readList);
-    Iterator<DnaList, Standard>::Type itEnd = end(readList); //same Iterator as above
+    Iterator<TDnaList>::Type it = begin(readList);
+    Iterator<TDnaList, Standard>::Type itEnd = end(readList); //same Iterator as above
 
     std::cout << " \n Print alignment using Standard Iterators: " << std::endl;
     for(; it != itEnd; goNext(it))
     {
         // Get the right index for alignPosList
         int i = position(it, readList);
-        // Begin and end position of a given alignment between the read and the genome
+        // Temporary copy of begin and end position (beginPosition) from alignPosList
+        // of a given alignment between the read and the genome        
         unsigned beginPosition = alignPosList[i];
         unsigned endPosition = beginPosition + length(value(it));
         // Build Infix
@@ -70,12 +72,13 @@ int main(int, char const **)
         printAlign(genomeFragment, value(it));
     }
     // Now, use Rooted Iterators.
-    Iterator<DnaList, Rooted>::Type it2 = begin(readList);
+    Iterator<TDnaList, Rooted>::Type it2 = begin(readList);
     std::cout << " \n Print alignment using Rooted Iterators: " << std::endl;
     for(; !atEnd(it2); goNext(it2))
     {
         int i = position(it2);
-        // Begin and end position of a given alignment between the read and the genome
+        // Temporary copy of begin and end position (beginPosition) from alignPosList
+        // of a given alignment between the read and the genome        
         unsigned beginPosition = alignPosList[i];
         unsigned endPosition = beginPosition + length(value(it2));
         // Build Infix
