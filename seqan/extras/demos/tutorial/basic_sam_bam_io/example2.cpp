@@ -3,7 +3,7 @@
 
 int main()
 {
-    seqan::BamStream bamInStream("example.sam");
+    seqan::BamStream bamInStream("example.bam");
 
     for (unsigned i = 0; i < length(bamInStream.header.sequenceInfos); ++i)
         std::cout << bamInStream.header.sequenceInfos[i].i1 << '\t'
