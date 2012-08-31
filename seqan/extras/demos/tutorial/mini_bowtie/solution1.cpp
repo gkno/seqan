@@ -12,7 +12,7 @@
 
 using namespace seqan;
 
-void search() {};
+void search() {}
 
 int main(int argc, char *argv[]) 
 {
