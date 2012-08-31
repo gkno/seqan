@@ -344,7 +344,6 @@ class TplDocsCreator(object):
         # Get category types to index from DddocTree tree and build the index
         # data for this.
         for cat_type in self.tree.find('globals.indexes').children.keys():
-            ## print ' ', cat_type
             self._registerCategories(cat_type, search_index, long_search_index, info)
         ## print search_index, long_search_index, info
         with open(destPath, 'wb') as f:
@@ -360,7 +359,7 @@ class TplDocsCreator(object):
         print >>sys.stderr, 'Creating Panel Tree'
         # Translate cat/element type from internal to user-readable.
         node = self.tree.find('globals.indexes')
-        cats = [(k, v.text(), v) for k, v in node.children.iteritems()]
+        cats = [(k, v.text(), v) for k, v in node.children.iteritems() if not v.children.has_key('hidefromindex')]
         def getLocation(x):
             return (self.tree.entries[x[2].entry[0]].filename,
                     self.tree.entries[x[2].entry[0]].line_no_begin)
@@ -368,7 +367,7 @@ class TplDocsCreator(object):
         ## print cats
         trees_data = []
         index = core.buildByTypeAndCatIndex(self.tree)
-        for cat, cat_title, _ in cats:
+        for cat, cat_title, cat_node in cats:
             ## print 'XXX', cat, cat_title
             ## if cat not in cats:
             ##     continue  # Skip if not in globals.indexes.
@@ -402,6 +401,8 @@ class TplDocsCreator(object):
                 subcat_nodes.append(subcat_node)
             filename = getIndexPagePath(self.tree, cat, 'files')
             trees_data.append([cat_title, filename, '', subcat_nodes])
+            if cat_node.children.has_key('hidefromindex'):
+                continue
         # Write out tree as JavaScript/JSON.
         ## print 'trees_data =', trees_data
         if not os.path.exists(os.path.join(self.out_path, 'panel')):
@@ -735,7 +736,7 @@ class DocsCreator(object):
         self.error_logger = error_logger
         self.tpl_path = tpl_path
         page_tpl_filename = os.path.join(self.tpl_path, 'files', 'page.html')
-        print page_tpl_filename
+        ##print page_tpl_filename
         self.page_template = pyratemp.Template(filename=page_tpl_filename)
         index_page_tpl_filename = os.path.join(self.tpl_path, 'files', 'index_page.html')
         self.index_page_template = pyratemp.Template(filename=index_page_tpl_filename)
@@ -751,6 +752,8 @@ class DocsCreator(object):
         index = core.buildByTypeAndCatIndex(self.tree)
         cat_nodes = self.tree.find('globals.indexes').children
         for cat, node in cat_nodes.iteritems():
+            if node.children.has_key('hidefromindex'):
+                continue
             print >>sys.stderr, 'Indexes for ' + node.text()
             filename = getIndexPagePath(self.tree, cat, self.out_path)
             with open(filename, 'wb') as f:
