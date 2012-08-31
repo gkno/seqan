@@ -887,7 +887,7 @@ write(TFile & file,
 		streamPut(file,"PileUp\n");
 		streamPut(file, '\n');
 		streamPut(file," MSF: ");
-		streamPut(file, colLen);
+		streamPut(file, (unsigned)colLen);
 		streamPut(file," Type: P");
 		streamPut(file," Check: 0 ..");
 		streamPut(file, '\n');
@@ -899,7 +899,7 @@ write(TFile & file,
 			streamPut(file," oo  Len:  ");
 			TSize len = length(names[i]);
 			if (len > offset) offset = len;
-			streamPut(file, colLen);
+			streamPut(file, (unsigned)colLen);
 			streamPut(file," Check: 0");
 			streamPut(file," Weight: 1.00");
 			streamPut(file, '\n');
