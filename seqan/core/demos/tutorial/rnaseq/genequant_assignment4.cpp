@@ -7,6 +7,7 @@
 using namespace seqan;
 
 
+// FRAGMENT(definitions)
 // define used types
 typedef FragmentStore<>                         TStore;
 typedef Value<TStore::TAnnotationStore>::Type   TAnnotation;
@@ -15,6 +16,7 @@ typedef TAnnotation::TId                        TPos;
 typedef IntervalAndCargo<TPos, TId>             TInterval;
 typedef IntervalTree<TPos, TId>                 TIntervalTree;
 typedef Value<TStore::TAlignedReadStore>::Type  TAlignedRead;
+// FRAGMENT(definitions_end)
 
 // define options
 struct Options
@@ -123,6 +125,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
         createIntervalTree(intervalTrees[i], intervals[i]);
 }
 
+// FRAGMENT(yourcode)
 //
 // 5. Count reads per gene
 //
@@ -131,7 +134,7 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
     // INSERT YOUR CODE HERE ...
     //
 }
-
+// FRAGMENT(yourcode_end)
 
 int main(int argc, char const * argv[])
 {
@@ -148,9 +151,11 @@ int main(int argc, char const * argv[])
     if (!loadFiles(store, options))
         return 1;
 
+// FRAGMENT(main)
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
     countReadsPerGene(readBasesPerGene, intervalTrees, store);
+// FRAGMENT(main_end)
 
     return 0;
 }

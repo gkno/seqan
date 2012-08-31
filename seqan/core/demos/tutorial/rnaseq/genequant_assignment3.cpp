@@ -112,6 +112,7 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
     while (goRight(it));
 }
 
+// FRAGMENT(yourcode)
 //
 // 4. Construct interval trees
 //
@@ -120,7 +121,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
     // INSERT YOUR CODE HERE ...
     //
 }
-
+// FRAGMENT(yourcode_end)
 
 int main(int argc, char const * argv[])
 {
@@ -136,8 +137,10 @@ int main(int argc, char const * argv[])
     if (!loadFiles(store, options))
         return 1;
 
+// FRAGMENT(main)
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
+// FRAGMENT(main_end)
 
     return 0;
 }
