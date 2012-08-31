@@ -297,84 +297,94 @@ struct FragmentStoreConfig
 ...default:$void$
 ..param.TConfig:The configuration struct.
 ...default:$FragmentStoreConfig<TSpec>$
+..include:seqan/store.h
+..example:
+...image:FragmentStore|Stores that are involved in the representation of a multiple read alignment.
+...image:AnnotationStore|Stores that are involved in the representation of a genome alignment.
 
 .Typedef.FragmentStore#TReadStore
-..summary:Type of the $readStore$ member.
+..summary:Type of the @Memvar.FragmentStore#readStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TReadSeqStore
-..summary:Type of the $readSeqStore$ member.
+..summary:Type of the @Memvar.FragmentStore#readSeqStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TMatePairStore
-..summary:Type of the $matePairStore$ member.
+..summary:Type of the @Memvar.FragmentStore#matePairStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TLibraryStore
-..summary:Type of the $libraryStore$ member.
+..summary:Type of the @Memvar.FragmentStore#libraryStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TContigFileStore
-..summary:Type of the $contigFileStore$ member.
+..summary:Type of the @Memvar.FragmentStore#contigFileStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TContigStore
-..summary:Type of the $contigStore$ member.
+..summary:Type of the @Memvar.FragmentStore#contigStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TAlignedReadStore
-..summary:Type of the $alignedReadStore$ member.
+..summary:Type of the @Memvar.FragmentStore#alignedReadStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TAnnotationStore
-..summary:Type of the $annotationStore$ member.
+..summary:Type of the @Memvar.FragmentStore#annotationStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TAlignQualityStore
-..summary:Type of the $alignQualityStore$ member.
+..summary:Type of the @Memvar.FragmentStore#alignQualityStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TAlignedReadTagStore
-..summary:Type of the $alignedReadTagStore$ member.
+..summary:Type of the @Memvar.FragmentStore#alignedReadTagStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TReadNameStore
-..summary:Type of the $readNameStore$ member.
+..summary:Type of the @Memvar.FragmentStore#readNameStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TMatePairNameStore
-..summary:Type of the $matePairNameStore$ member.
+..summary:Type of the @Memvar.FragmentStore#matePairNameStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TLibraryNameStore
-..summary:Type of the $libraryNameStore$ member.
+..summary:Type of the @Memvar.FragmentStore#libraryNameStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TContigNameStore
-..summary:Type of the $contigNameStore$ member.
+..summary:Type of the @Memvar.FragmentStore#contigNameStore@ member.
 ..class:Class.FragmentStore
 .Typedef.FragmentStore#TAnnotationNameStore
-..summary:Type of the $annotationNameStore$ member.
+..summary:Type of the @Memvar.FragmentStore#annotationNameStore@ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TAnnotationTypeStore
+..summary:Type of the @Memvar.FragmentStore#annotationTypeStore@ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TAnnotationKeyStore
+..summary:Type of the @Memvar.FragmentStore#annotationKeyStore@ member.
 ..class:Class.FragmentStore
 
 .Memvar.FragmentStore#readStore
-..summary:String that maps from $readId$ to $<matePairId>$.
+..summary:@Class.String@ that maps from $readId$ to $<matePairId>$.
 ..remarks:Value type is @Class.ReadStoreElement@.
 ..type:Typedef.FragmentStore#TReadStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#readSeqStore
-..summary:String that maps from $readId$ to $readSeq$.
+..summary:@Class.StringSet@ that maps from $readId$ to $readSeq$.
 ..type:Typedef.FragmentStore#TReadSeqStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#matePairStore
-..summary:String that maps from $matePairId$ to $<readId[2], libId>$.
+..summary:@Class.String@ that maps from $matePairId$ to $<readId[2], libId>$.
 ..type:Typedef.FragmentStore#TMatePairStore
 ..remarks:Value type is @Class.MatePairStoreElement@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#libraryStore
-..summary:String that maps from $libId$ to $<mean, std>$.
+..summary:@Class.String@ that maps from $libId$ to $<mean, std>$.
 ..type:Typedef.FragmentStore#TLibraryStore
 ..remarks:Value type is @Class.LibraryStoreElement@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#contigFileStore
-..summary:String that maps from $contigFileId$ to $<fileName, firstContigId>$.
+..summary:@Class.String@ that maps from $contigFileId$ to $<fileName, firstContigId>$.
 ..type:Typedef.FragmentStore#TContigFileStore
 ..remarks:Value type is @Class.ContigFile@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#contigStore
-..summary:String that maps from $contigId$ to $<contigSeq, contigGaps, contigFileId>$.
+..summary:@Class.String@ that maps from $contigId$ to $<contigSeq, contigGaps, contigFileId>$.
 ..type:Typedef.FragmentStore#TContigStore
 ..remarks:Value type is @Class.ContigStoreElement@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#alignedReadStore
-..summary:String that stores $<alignId, readId, contigId, pairMatchId, beginPos, endPos, gaps>$.
+..summary:@Class.String@ that stores $<alignId, readId, contigId, pairMatchId, beginPos, endPos, gaps>$.
 ..remarks:
 You can sort the $alignedReadStore$ using @Function.sortAlignedReads@.
 After sorting, you can use the functions @Function.lowerBoundAlignedReads@ and @Function.upperBoundAlignedReads@ to perform a binary search, e.g. for accessing only a subrange.
@@ -385,39 +395,49 @@ After sorting, you can use the functions @Function.lowerBoundAlignedReads@ and @
 ..see:Function.upperBoundAlignedReads
 ..see:Function.sortAlignedReads
 .Memvar.FragmentStore#annotationStore
-..summary:String that maps from $annoId$ to $<contigId, typeId, beginPos, endPos, parentId, lastChildId, nextSiblingId, values>$.
+..summary:@Class.String@ that maps from $annoId$ to $<contigId, typeId, beginPos, endPos, parentId, lastChildId, nextSiblingId, values>$.
 ..type:Typedef.FragmentStore#TAnnotationStore
+..remarks:Value type is @Class.AnnotationStoreElement@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#alignQualityStore
-..summary:String that maps from $alignId$ to $<pairScore, score, errors>$.
+..summary:@Class.String@ that maps from $alignId$ to $<pairScore, score, errors>$.
 ..type:Typedef.FragmentStore#TAlignQualityStore
 ..remarks:Value type is @Class.AlignQualityStoreElement@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#alignedReadTagStore
-..summary:String that maps from $alignId$ to $alignTag$.
+..summary:@Class.StringSet@ that maps from $alignId$ to $alignTag$.
 ..type:Typedef.FragmentStore#TAlignedReadTagStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#readNameStore
-..summary:String that maps from $readId$ to $readName$.
+..summary:@Class.StringSet@ that maps from $readId$ to $readName$.
 ..type:Typedef.FragmentStore#TReadNameStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#matePairNameStore
-..summary:String that maps from $contigId$ to $contigName$.
+..summary:@Class.StringSet@ that maps from $contigId$ to $contigName$.
 ..type:Typedef.FragmentStore#TMatePairNameStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#libraryNameStore
-..summary:String that maps from $libId$ to $libName$.
+..summary:@Class.StringSet@ that maps from $libId$ to $libName$.
 ..type:Typedef.FragmentStore#TLibraryNameStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#contigNameStore
-..summary:String that maps from $contigId$ to $contigName$.
+..summary:@Class.StringSet@ that maps from $contigId$ to $contigName$.
 ..type:Typedef.FragmentStore#TContigNameStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#annotationNameStore
-..summary:String that maps from $annoId$ to $annoName$.
+..summary:@Class.StringSet@ that maps from $annoId$ to $annoName$.
 ..type:Typedef.FragmentStore#TAnnotationNameStore
 ..class:Class.FragmentStore
-..include:seqan/store.h
+.Memvar.FragmentStore#annotationTypeStore
+..summary:@Class.StringSet@ that maps from $typeId$ to the type name of an annotation, e.g. "gene" or "exon". $typeId$ is a member of the @Class.AnnotationStoreElement@.
+..type:Typedef.FragmentStore#TAnnotationTypeStore
+..class:Class.FragmentStore
+..remarks:There are predefined type ids for commonly used types: $ANNO_ROOT$, $ANNO_DELETED$, $ANNO_GENE$, $ANNO_MRNA$, $ANNO_CDS$, $ANNO_EXON$, $ANNO_FIVE_PRIME_UTR$, $ANNO_INTRON$, $ANNO_THREE_PRIME_UTR$, $ANNO_PREDEFINED$ are
+the type ids of the following types: annotation tree root node, a deleted node, "gene", "mRNA", "CDS", "exon", "five_prime_UTR", "intron", "three_prime_UTR".
+.Memvar.FragmentStore#annotationKeyStore
+..summary:@Class.StringSet@ that maps from $keyId$ to the name of a key. The $keyId$ is used to address @Memvar.AnnotationStoreElement#values@ of an annotation.
+..type:Typedef.FragmentStore#TAnnotationKeyStore
+..class:Class.FragmentStore
 */
 
 

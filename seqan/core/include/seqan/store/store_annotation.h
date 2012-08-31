@@ -42,6 +42,74 @@ namespace SEQAN_NAMESPACE_MAIN
 // Annotation Store
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.AnnotationStoreElement
+..summary:Represents an annotation of a contig feature.
+..cat:Fragment Store
+..signature:AnnotationStoreElement<>
+..signature:AnnotationStoreElement<TPos[, TSpec]>
+..param.TPos:Type to store (gap-space) positions.
+..param.TSpec:The specialization type.
+...default:$void$
+..remarks:Value type of the @Memvar.FragmentStore#annotationStore@ string.
+
+.Typedef.AnnotationStoreElement#TPos
+..summary:Type of the $beginPos$ and $endPos$ members.
+..class:Class.AnnotationStoreElement
+.Typedef.AnnotationStoreElement#TValues
+..summary:@Class.StringSet@ type of the $values$ member.
+..class:Class.AnnotationStoreElement
+
+.Memfunc.AnnotationStoreElement#AnnotationStoreElement
+..summary:Constructor
+..signature:AnnotationStoreElement()
+..remarks:The default constructor sets all members to $INVALID_ID$ and $beginPos$ and $endPos$ to $INVALID_POS$.
+
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#contigId
+..summary:Refers to the contig in the @Memvar.FragmentStore#contigStore@ the annotation is part of.
+..type:Metafunction.Id
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#typeId
+..summary:Refers to an entry in the @Memvar.FragmentStore#annotationTypeStore@. 
+There are some type ids predefined for commonly used types, e.g. $ANNO_GENE$. See @Memvar.FragmentStore#annotationTypeStore@.
+..type:Metafunction.Id
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#beginPos
+..summary:Begin position of the annotation in gap-space.
+..type:Typedef.AnnotationStoreElement#TPos
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#endPos
+..summary:End position of the annotation in gap-space. If $end<begin$, the annotated feature is located on the reverse strand, where $begin$ and $end$ are the corresponding addresses on the forward strand.
+..type:Typedef.AnnotationStoreElement#TPos
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#values
+..summary:@Class.StringSet@ that stores additional annotation values addressed by $keyId$. The GFF/GTF file format allows to define user-specific key-value pairs. The set of all keys addressed by $keyId$ are stored in the @Memvar.FragmentStore#annotationKeyStore@.
+..type:Typedef.AnnotationStoreElement#TValues
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#parentId
+..summary:The $id$ of the parent annotation.
+..type:Metafunction.Id
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#nextSiblingId
+..summary:The $id$ of the right sibling annotation.
+..type:Metafunction.Id
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#lastChildId
+..summary:The $id$ of the rightmost child annotation.
+..type:Metafunction.Id
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#INVALID_ID
+..summary:Constant to represent an invalid id.
+..type:Metafunction.Id
+..class:Class.AnnotationStoreElement
+.Memvar.AnnotationStoreElement#INVALID_POS
+..summary:Constant to represent an invalid position.
+..type:Typedef.AnnotationStoreElement#TPos
+..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+*/
+
 template <typename TPos_, typename TSpec = void>
 struct AnnotationStoreElement
 {
@@ -57,8 +125,8 @@ struct AnnotationStoreElement
 	TId					countId;
 	TId					typeId;			// gene, intron, ...
 
-	TPos				beginPos;		// begin position of the gapped sequence in gapped contig sequence
-	TPos				endPos;			// end position of ..., for reverse aligned reads holds end < begin
+	TPos				beginPos;		// begin position of the annotation in the gapped contig sequence (i.e. in gap-space)
+	TPos				endPos;			// end position of ..., for annotations on the reverse strand holds end < begin
 	
 	TId					lastChildId;	// generated back links to child
 	TId					nextSiblingId;	// and sibling

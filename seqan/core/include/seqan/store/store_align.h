@@ -48,7 +48,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Fragment Store
 ..signature:AlignedReadStoreElement<>
 ..signature:AlignedReadStoreElement<TPos[, TGapAnchor[, TSpec]]>
-..param.TPos:Type to store gap-space positions.
+..param.TPos:Type to store (gap-space) positions.
 ..param.TGapAnchor:Type of a read gap anchor.
 ...type:Class.GapAnchor
 ..param.TSpec:The specialization type.
@@ -67,9 +67,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 .Memfunc.AlignedReadStoreElement#AlignedReadStoreElement
 ..summary:Constructor
-..signature:AlignedReadStoreElement<> ()
-..signature:AlignedReadStoreElement<TPos[, TGapAnchor[, TSpec]]> ()
-..signature:AlignedReadStoreElement<TPos[, TGapAnchor[, TSpec]]> (id, readId, contigId, beginPos, endPos[, gaps])
+..signature:AlignedReadStoreElement()
+..signature:AlignedReadStoreElement(id, readId, contigId, beginPos, endPos[, gaps])
 ..param.id:The alignment id refers to associated alignment information in @Memvar.FragmentStore#alignQualityStore@ or @Memvar.FragmentStore#alignedReadTagStore@.
 ..param.readId:Refers to the aligned read in the @Memvar.FragmentStore#readStore@.
 ..param.contigId:Refers to the contig in the @Memvar.FragmentStore#contigStore@ the read is aligned with.
@@ -93,7 +92,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#pairMatchId
 ..summary:Two read alignments having the same $pairMatchId$ form a valid pair match.
-If $INVALID_ID$ the read is either not paired or could not be aligned as part of a pair match.
+If it equals $INVALID_ID$, the read is either not paired or could not be aligned as part of a pair match.
 ..type:Metafunction.Id
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#beginPos
@@ -101,7 +100,7 @@ If $INVALID_ID$ the read is either not paired or could not be aligned as part of
 ..type:Typedef.AlignedReadStoreElement#TPos
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#endPos
-..summary:End position of the alignment in gap-space.
+..summary:End position of the alignment in gap-space. If $end<begin$, the read is aligned to the reverse strand, where $begin$ and $end$ are the corresponding addresses on the forward strand.
 ..type:Typedef.AlignedReadStoreElement#TPos
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#gaps
