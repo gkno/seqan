@@ -9,6 +9,8 @@ int main ()
 	String<char> myString = "abracadabra";
 
 	typedef Index< String<char> > TMyIndex;
+    
+// FRAGMENT(iterator)
 	TMyIndex myIndex(myString);
 
 // FRAGMENT(iteration)
