@@ -43,6 +43,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Index
 ..summary:Abstract iterator for suffix trees.
 ..signature:Iter<TContainer, VSTree<TSpec> >
+..general:Class.Iter
 ..param.TContainer:Type of the container that can be iterated.
 ...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container

@@ -54,6 +54,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specialization type.
 ...default:$void$
 ..remarks:Value type of the @Memvar.FragmentStore#alignedReadStore@ string.
+..include:seqan/store.h
 
 .Typedef.AlignedReadStoreElement#TPos
 ..summary:Type of the $beginPos$ and $endPos$ members.
@@ -111,7 +112,6 @@ If it equals $INVALID_ID$, the read is either not paired or could not be aligned
 ..summary:Constant to represent an invalid id.
 ..type:Metafunction.Id
 ..class:Class.AlignedReadStoreElement
-..include:seqan/store.h
 */
 
 template <typename TPos_, typename TGapAnchor_, typename TSpec_ = void>

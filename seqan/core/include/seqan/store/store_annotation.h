@@ -52,6 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specialization type.
 ...default:$void$
 ..remarks:Value type of the @Memvar.FragmentStore#annotationStore@ string.
+..include:seqan/store.h
 
 .Typedef.AnnotationStoreElement#TPos
 ..summary:Type of the $beginPos$ and $endPos$ members.
@@ -107,7 +108,6 @@ There are some type ids predefined for commonly used types, e.g. $ANNO_GENE$. Se
 ..summary:Constant to represent an invalid position.
 ..type:Typedef.AnnotationStoreElement#TPos
 ..class:Class.AnnotationStoreElement
-..include:seqan/store.h
 */
 
 template <typename TPos_, typename TSpec = void>
@@ -154,6 +154,20 @@ AnnotationStoreElement<TPos, TSpec>::INVALID_POS = MaxValue<TPos>::VALUE;
 template <typename TSpec = void>
 struct AnnotationTree {};
 
+/**
+.Spec.AnnotationTree Iterator:
+..cat:FragmentStore
+..summary:Iterator of the annotation tree represented by a @Class.FragmentStore@.
+..remarks:This iterator can move down, right, and up in the tree and supports a preorder dfs traversal via the functions @Function.goBegin@, @Function.goNext@, and @Function.atEnd@.
+Preorder means that the iterator visits a node before its children.
+..signature:Iter<TFragmentStore, AnnotationTree<> >
+..signature:Iterator<TFragmentStore, AnnotationTree<> >::Type
+..general:Class.Iter
+..implements:Concept.RootedIteratorConcept
+..param.TFragmentStore:A FragmentStore class.
+...type:Class.FragmentStore
+..include:seqan/store.h
+*/
 template <typename TFragmentStore, typename TSpec>
 class Iter<TFragmentStore, AnnotationTree<TSpec> >
 {
@@ -240,6 +254,18 @@ container(Iter< TFragmentStore, AnnotationTree<TSpec> > const &it) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.getAnnotation
+..class:Spec.AnnotationTree Iterator
+..summary:Returns the current annotation.
+..cat:Fragment Store
+..signature:getAnnotation(iter)
+..param.iter:The annotation tree iterator.
+...type:Spec.AnnotationTree Iterator
+..returns:A reference to the @Class.AnnotationStoreElement@ the iterator points at.
+..include:seqan/store.h
+*/
 
 template <typename TFragmentStore, typename TSpec>
 inline typename GetValue<typename TFragmentStore::TAnnotationStore>::Type
