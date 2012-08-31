@@ -180,7 +180,7 @@ void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const 
 
             do
             {
-                mRNALength += abs(getAnnotation(exonIt).beginPos - getAnnotation(exonIt).endPos);
+                mRNALength += abs((int)getAnnotation(exonIt).beginPos - (int)getAnnotation(exonIt).endPos);
             }
             while (goRight(exonIt));
 
