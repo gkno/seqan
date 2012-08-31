@@ -402,10 +402,10 @@ struct IsSequence<Gaps<TSequence, TSpec> const> : IsSequence<Gaps<TSequence, TSp
 ..class:Class.Gaps
 ..summary:Insert multiple gaps into a gapped sequence.
 ..cat:Alignments
-..signature:void insertGap(gaps, clippedViewPos, count)
+..signature:void insertGaps(gaps, clippedViewPos, count)
 ..param.gaps:The @Class.Gaps@ object to insert gaps into.
 ...type:Class.Gaps
-..param.clippedViewPosition:The position in the view to insert gap at.
+..param.clippedViewPosition:The position in the view to insert gaps at.
 ...type:Metafunction.Position
 ..param.count:The number of gaps to insert
 ...type:nolink:$unsigned$
@@ -455,7 +455,7 @@ insertGap(Gaps<TSequence, TSpec> & gaps, TPosition clippedViewPos)
 ..class:Class.Gaps
 ..summary:Remove multiple gaps from a gapped sequence.
 ..cat:Alignments
-..signature:TSize removeGap(gaps, clippedViewPos, count)
+..signature:TSize removeGaps(gaps, clippedViewPos, count)
 ..param.gaps:The @Class.Gaps@ object to remove gaps into.
 ...type:Class.Gaps
 ..param.clippedViewPosition:The position in the view to remove gaps from.
@@ -512,7 +512,7 @@ removeGap(Gaps<TSequence, TSpec> & gaps, TPosition clippedViewPos)
 ..signature:void setClippedBeginPosition(gaps, unclippedViewPosition)
 ..param.gaps:The @Class.Gaps@ object to query.
 ...type:Class.Gaps
-..param.unclippedViewPosition:The position in the unclipped view to set as the clipping position.
+..param.unclippedViewPosition:The position in the unclipped view to set as the clipping begin position.
 ...type:Metafunction.Position
 ..returns:$void$
 ..remarks:Note that the position is *not* a clipped view position but an uncliped one!
@@ -537,7 +537,7 @@ removeGap(Gaps<TSequence, TSpec> & gaps, TPosition clippedViewPos)
 ..signature:void setClippedEndPosition(gaps, unclippedViewPosition)
 ..param.gaps:The @Class.Gaps@ object to query.
 ...type:Class.Gaps
-..param.unclippedViewPosition:The position in the unclipped view to set as the clipping position.
+..param.unclippedViewPosition:The position in the unclipped view to set as the clipping end position.
 ...type:Metafunction.Position
 ..returns:$void$
 ..remarks:Note that the position is *not* a clipped view position but an uncliped one!
@@ -562,7 +562,7 @@ removeGap(Gaps<TSequence, TSpec> & gaps, TPosition clippedViewPos)
 ..signature:TPosition clippedBeginPosition(gaps)
 ..param.gaps:The @Class.Gaps@ object to query.
 ...type:Class.Gaps
-..returns:The begin position of the current clipped view in the source.
+..returns:The begin position of the current clipped view in the unclipped gapped sequence.
 ...type:Metafunction.Position
 ..see:Function.Gaps#beginPosition
 ..see:Function.Gaps#endPosition
@@ -572,7 +572,7 @@ removeGap(Gaps<TSequence, TSpec> & gaps, TPosition clippedViewPos)
 ..see:Function.Gaps#setClippedBeginPosition
 ..see:Function.Gaps#setClippedEndPosition
 ..example:
-In the following gaps configuration, the result of $clippedBeginPosition(gaps)$ is $2$.
+In the following gaps configuration, the result of $clippedBeginPosition(gaps)$ is $1$.
 ..example.code:
 clipping                   [     )
   (half-open interval)           
@@ -596,7 +596,7 @@ clipped view position:     0123456
 ..signature:TPosition clippedEndPosition(gaps)
 ..param.gaps:The @Class.Gaps@ object to query.
 ...type:Class.Gaps
-..returns:The end position of the current clipped view in the source.
+..returns:The end position of the current clipped view in the unclipped gapped sequence.
 ...type:Metafunction.Position
 ..see:Function.Gaps#beginPosition
 ..see:Function.Gaps#endPosition
@@ -606,7 +606,7 @@ clipped view position:     0123456
 ..see:Function.Gaps#setClippedBeginPosition
 ..see:Function.Gaps#setClippedEndPosition
 ..example:
-In the following gaps configuration, the result of $clippedBeginPosition(gaps)$ is $7$.
+In the following gaps configuration, the result of $clippedEndPosition(gaps)$ is $7$.
 ..example.code:
 clipping                   [     )
   (half-open interval)           
@@ -630,7 +630,7 @@ clipped view position:     0123456
 ..signature:void setBeginPosition(gaps, sourcePosition)
 ..param.gaps:The @Class.Gaps@ object to query.
 ...type:Class.Gaps
-..param.sourcePosition:The source position to set the clipping to.
+..param.sourcePosition:The source position to set the clipping begin to.
 ...type:Metafunction.Position
 ..returns:$void$
 ..see:Function.Gaps#beginPosition
@@ -654,7 +654,7 @@ clipped view position:     0123456
 ..signature:void setEndPosition(gaps, sourcePosition)
 ..param.gaps:The @Class.Gaps@ object to query.
 ...type:Class.Gaps
-..param.sourcePosition:The source position to set the clipping to.
+..param.sourcePosition:The source position to set the clipping end to.
 ...type:Metafunction.Position
 ..returns:$void$
 ..see:Function.Gaps#beginPosition
@@ -675,7 +675,7 @@ clipped view position:     0123456
 .Function.Gaps#beginPosition
 ..class:Class.Gaps
 ..summary:Return the clipping begin position as a source position.
-..signature:TPosition endPosition(gaps)
+..signature:TPosition beginPosition(gaps)
 ..param.gaps:The @Class.Gaps@ object to query.
 ...type:Class.Gaps
 ..returns:The begin position of the current clipped view in the source.
@@ -688,8 +688,8 @@ clipped view position:     0123456
 ..see:Function.Gaps#setClippedBeginPosition
 ..see:Function.Gaps#setClippedEndPosition
 ..example:
-In the following gaps configuration, the result of $beginPosition(gaps)$ is $0$.
-The clipping starts in a gap and the source position of the first non-gap character left of the clipping begin has source position $0$.
+In the following gaps configuration, the result of $beginPosition(gaps)$ is $1$.
+The clipping starts in a gap and the source position of the first non-gap character right of the clipping begin has source position $1$.
 ..example.code:
 clipping                   [     )
   (half-open interval)           
