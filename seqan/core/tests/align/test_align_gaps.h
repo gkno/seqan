@@ -775,10 +775,10 @@ void testAlignGapsSourceViewPositionUngapped(TGapsSpec const & /*spec*/)
     TString seq("ACGT");
     TGaps gaps(seq);
 
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 2u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 3u);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 2);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 3);
 
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 0), 0u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 1), 1u);
@@ -802,10 +802,10 @@ void testAlignGapsSourceViewPositionGapsCenter(TGapsSpec const & /*spec*/)
 
     insertGap(gaps, 2);
 
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 3u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 4u);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 3);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 4);
 
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 0), 0u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 1), 1u);
@@ -830,10 +830,10 @@ void testAlignGapsSourceViewPositionGapsLeading(TGapsSpec const & /*spec*/)
 
     insertGap(gaps, 0);
 
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 1u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 2u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 3u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 4u);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 1);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 2);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 3);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 4);
 
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 0), 0u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 1), 0u);
@@ -861,10 +861,10 @@ void testAlignGapsSourceViewPositionGapsTrailing(TGapsSpec const & /*spec*/)
     // 01234
     // ACGT-
 
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 2u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 3u);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 2);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 3), 3);
 
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 0), 0u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 1), 1u);
@@ -910,8 +910,8 @@ void testAlignGapsClippingUngapped(TGapsSpec const & /*spec*/)
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 0), 1u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 1), 2u);
 
-    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 1u);
-    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 3u);
+    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 1);
+    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 3);
 
     SEQAN_ASSERT_EQ(beginPosition(gaps), 1u);
     SEQAN_ASSERT_EQ(endPosition(gaps), 3u);
@@ -936,7 +936,7 @@ void testAlignGapsClippingGapsCenter(TGapsSpec const & /*spec*/)
     // 01234
     // AC-GT
     //  XXX
-    
+
     setClippedBeginPosition(gaps, 1);
     setClippedEndPosition(gaps, 4);
 
@@ -952,8 +952,8 @@ void testAlignGapsClippingGapsCenter(TGapsSpec const & /*spec*/)
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 1), 2u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 2), 2u);
 
-    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 1u);
-    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 4u);
+    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 1);
+    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 4);
 
     SEQAN_ASSERT_EQ(beginPosition(gaps), 1u);
     SEQAN_ASSERT_EQ(endPosition(gaps), 3u);
@@ -995,11 +995,11 @@ void testAlignGapsClippingGapsLeading(TGapsSpec const & /*spec*/)
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 2), 2u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 3), 3u);
 
-    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 2u);
-    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 6u);
+    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 2);
+    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 6);
 
-    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 2u);
-    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 6u);
+    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 2);
+    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 6);
 
     SEQAN_ASSERT_EQ(beginPosition(gaps), 1u);
     SEQAN_ASSERT_EQ(endPosition(gaps), 4u);
@@ -1022,7 +1022,7 @@ void testAlignGapsClippingGapsTrailing(TGapsSpec const & /*spec*/)
     // 012345
     // ACG--T
     // XXXX
-    
+
     insertGaps(gaps, 3, 2);
 
     setClippedBeginPosition(gaps, 0);
@@ -1031,17 +1031,17 @@ void testAlignGapsClippingGapsTrailing(TGapsSpec const & /*spec*/)
     SEQAN_ASSERT_EQ(length(gaps), 4u);
     SEQAN_ASSERT_EQ(unclippedLength(gaps), 6u);
 
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 2u);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 0), 0);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 1), 1);
+    SEQAN_ASSERT_EQ(toViewPosition(gaps, 2), 2);
 
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 0), 0u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 1), 1u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 2), 2u);
     SEQAN_ASSERT_EQ(toSourcePosition(gaps, 3), 3u);
 
-    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 0u);
-    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 4u);
+    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps), 0);
+    SEQAN_ASSERT_EQ(clippedEndPosition(gaps), 4);
 
     SEQAN_ASSERT_EQ(beginPosition(gaps), 0u);
     SEQAN_ASSERT_EQ(endPosition(gaps), 3u);

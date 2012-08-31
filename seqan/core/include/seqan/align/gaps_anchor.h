@@ -515,33 +515,33 @@ end(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, Rooted)
 
 // TODO(holtgrew): We would rather like to have the const version only :(
 template <typename TSource, typename TGapAnchors>
-inline typename Position<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type
+inline typename Position<TSource>::Type
 beginPosition(Gaps<TSource, AnchorGaps<TGapAnchors> > & gaps)
 {
     return toSourcePosition(gaps, 0);
 }
 
 template <typename TSource, typename TGapAnchors>
-inline typename Position<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type
+inline typename Position<TSource>::Type
 beginPosition(Gaps<TSource, AnchorGaps<TGapAnchors> > const & gaps)
 {
     return toSourcePosition(gaps, 0);
 }
 
 // ----------------------------------------------------------------------------
-// Function toPosition()
+// Function endPosition()
 // ----------------------------------------------------------------------------
 
 // TODO(holtgrew): We would rather like to have the const version only :(
 template <typename TSource, typename TGapAnchors>
-inline typename Position<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type
+inline typename Position<TSource>::Type
 endPosition(Gaps<TSource, AnchorGaps<TGapAnchors> > & gaps)
 {
     return toSourcePosition(gaps, _unclippedLength(gaps) - (gaps.data_viewCutEnd + gaps.data_viewCutBegin));
 }
 
 template <typename TSource, typename TGapAnchors>
-inline typename Position<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type
+inline typename Position<TSource>::Type
 endPosition(Gaps<TSource, AnchorGaps<TGapAnchors> > const & gaps)
 {
     return toSourcePosition(gaps, _unclippedLength(gaps) - (gaps.data_viewCutEnd + gaps.data_viewCutBegin));

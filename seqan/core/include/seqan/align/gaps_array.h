@@ -789,14 +789,14 @@ setEndPosition(Gaps<TSequence, ArrayGaps> & gaps, TPosition sourcePosition)
 
 // TODO(holtgrew): We would rather like to have the const version only :(
 template <typename TSequence>
-inline typename Position<Gaps<TSequence, ArrayGaps> >::Type
+inline typename Position<TSequence>::Type
 beginPosition(Gaps<TSequence, ArrayGaps> const & gaps)
 {
     return gaps._sourceBeginPos;
 }
 
 template <typename TSequence>
-inline typename Position<Gaps<TSequence, ArrayGaps> >::Type
+inline typename Position<TSequence>::Type
 beginPosition(Gaps<TSequence, ArrayGaps> & gaps)
 {
     return gaps._sourceBeginPos;
