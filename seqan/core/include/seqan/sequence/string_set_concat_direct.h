@@ -328,6 +328,7 @@ length(StringSet<TString, Owner<ConcatDirect<TDelimiter> > > const & me)
 // Function resize()
 // --------------------------------------------------------------------------
 
+// TODO(rmaerker): This belongs to string_set_base.h. Move it!
 template <typename TString, typename TSpec, typename TSize, typename TExpand >
 inline typename Size<StringSet<TString, TSpec > >::Type
 resize(StringSet<TString, TSpec > & me, TSize new_size, Tag<TExpand> const & tag)
