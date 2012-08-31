@@ -579,7 +579,7 @@ clipping                   [     )
 
 gapped sequence:          X--XXX-XX-
 
-source position:          0001233455
+source position:          0111234456
 unclipped view position:  0123456789
 clipped view position:     0123456
 ..include:seqan/align.h
@@ -613,7 +613,7 @@ clipping                   [     )
 
 gapped sequence:          X--XXX-XX-
 
-source position:          0001233455
+source position:          0111234456
 unclipped view position:  0123456789
 clipped view position:     0123456
 ..include:seqan/align.h
@@ -696,7 +696,7 @@ clipping                   [     )
 
 gapped sequence:          X--XXX-XX-
 
-source position:          0001233455
+source position:          0111234456
 unclipped view position:  0123456789
 clipped view position:     0123456
 ..include:seqan/align.h
@@ -730,7 +730,7 @@ clipping                   [     )
 
 gapped sequence:          X--XXX-XX-
 
-source position:          0001233455
+source position:          0111234456
 unclipped view position:  0123456789
 clipped view position:     0123456
 ..include:seqan/align.h
