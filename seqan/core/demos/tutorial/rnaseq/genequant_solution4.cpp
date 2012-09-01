@@ -120,7 +120,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 {
     resize(intervalTrees, length(intervals));
 
-    SEQAN_OMP_PRAGMA(parallel for private(result))
+    SEQAN_OMP_PRAGMA(parallel for)
     for (unsigned i = 0; i < length(intervals); ++i)
         createIntervalTree(intervalTrees[i], intervals[i]);
 }

@@ -127,8 +127,10 @@ int main(int argc, char const * argv[])
 {
     Options options;
     TStore store;
+// FRAGMENT(main)
     String<String<TInterval> > intervals;
     String<TIntervalTree> intervalTrees;
+// FRAGMENT(main_end)
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -137,10 +139,10 @@ int main(int argc, char const * argv[])
     if (!loadFiles(store, options))
         return 1;
 
-// FRAGMENT(main)
+// FRAGMENT(main2)
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
-// FRAGMENT(main_end)
+// FRAGMENT(main2_end)
 
     return 0;
 }

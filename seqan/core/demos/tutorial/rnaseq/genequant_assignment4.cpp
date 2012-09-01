@@ -120,7 +120,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 {
     resize(intervalTrees, length(intervals));
 
-    SEQAN_OMP_PRAGMA(parallel for private(result))
+    SEQAN_OMP_PRAGMA(parallel for)
     for (unsigned i = 0; i < length(intervals); ++i)
         createIntervalTree(intervalTrees[i], intervals[i]);
 }
@@ -141,8 +141,10 @@ int main(int argc, char const * argv[])
     Options options;
     TStore store;
     String<String<TInterval> > intervals;
+// FRAGMENT(main)
     String<TIntervalTree> intervalTrees;
     String<unsigned> readBasesPerGene;
+// FRAGMENT(main_end)
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -151,11 +153,11 @@ int main(int argc, char const * argv[])
     if (!loadFiles(store, options))
         return 1;
 
-// FRAGMENT(main)
+// FRAGMENT(main2)
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
     countReadsPerGene(readBasesPerGene, intervalTrees, store);
-// FRAGMENT(main_end)
+// FRAGMENT(main2_end)
 
     return 0;
 }

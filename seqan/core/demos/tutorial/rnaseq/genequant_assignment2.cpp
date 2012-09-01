@@ -95,19 +95,21 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
 int main(int argc, char const * argv[])
 {
     Options options;
+// FRAGMENT(main)
     TStore store;
     String<String<TInterval> > intervals;
+// FRAGMENT(main_end)
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
         return res == ArgumentParser::PARSE_ERROR;
 
-// FRAGMENT(main)
+// FRAGMENT(main2)
     if (!loadFiles(store, options))
         return 1;
 
     extractGeneIntervals(intervals, store);
-// FRAGMENT(main_end)
+// FRAGMENT(main2_end)
 
     return 0;
 }
