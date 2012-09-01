@@ -147,7 +147,10 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
 
         // increase read counter for each overlapping annotation given the id in the interval tree
         for (unsigned j = 0; j < length(result); ++j)
+        {
+            SEQAN_OMP_PRAGMA(atomic)
             readBasesPerGene[result[j]] += length(store.readSeqStore[ar.readId]);
+        }
     }
 }
 
