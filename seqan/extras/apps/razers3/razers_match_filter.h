@@ -146,7 +146,7 @@ _newLimitDistRange(TMatchFilter const & filter, unsigned histogramId)
         while (it != itEnd && *it == 0)
             ++it;
 
-        return _min((it - itBeg) + filter.options.scoreDistanceRange, itEnd - itBeg);
+        return _min((it - itBeg) + (int)filter.options.scoreDistanceRange, itEnd - itBeg);
     }
 
     // we need at least one more than max before we can purge
