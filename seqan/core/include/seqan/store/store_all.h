@@ -398,6 +398,7 @@ After sorting, you can use the functions @Function.lowerBoundAlignedReads@ and @
 ..summary:@Class.String@ that maps from $annoId$ to $<contigId, typeId, beginPos, endPos, parentId, lastChildId, nextSiblingId, values>$.
 ..type:Typedef.FragmentStore#TAnnotationStore
 ..remarks:Value type is @Class.AnnotationStoreElement@.
+..remarks:Instead of accesing this store directly, consider to use a high-level interface like the @Spec.AnnotationTree Iterator@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#alignQualityStore
 ..summary:@Class.String@ that maps from $alignId$ to $<pairScore, score, errors>$.

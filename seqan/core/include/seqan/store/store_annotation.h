@@ -52,19 +52,25 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specialization type.
 ...default:$void$
 ..remarks:Value type of the @Memvar.FragmentStore#annotationStore@ string.
+The id of an annotation (aka annotationId) is not stored explicitly, as it is implicitly given by the position in the @Memvar.FragmentStore#annotationStore@.
 ..include:seqan/store.h
 
+.Typedef.AnnotationStoreElement#TId
+..summary:Type of annotationId and @Memvar.AnnotationStoreElement#contigId@.
+..remarks:$TId$ equals the result of $Id<AnnotationStoreElement<> >::Type$, see @Metafunction.Id@.
+..class:Class.AnnotationStoreElement
 .Typedef.AnnotationStoreElement#TPos
-..summary:Type of the $beginPos$ and $endPos$ members.
+..summary:Type of the @Memvar.AnnotationStoreElement#beginPos@ and @Memvar.AnnotationStoreElement#endPos@ members.
 ..class:Class.AnnotationStoreElement
 .Typedef.AnnotationStoreElement#TValues
-..summary:@Class.StringSet@ type of the $values$ member.
+..summary:@Class.StringSet@ type of the @Memvar.AnnotationStoreElement#values@ member.
 ..class:Class.AnnotationStoreElement
 
 .Memfunc.AnnotationStoreElement#AnnotationStoreElement
 ..summary:Constructor
 ..signature:AnnotationStoreElement()
-..remarks:The default constructor sets all members to $INVALID_ID$ and $beginPos$ and $endPos$ to $INVALID_POS$.
+..remarks:The default constructor sets all members to @Memvar.AnnotationStoreElement#INVALID_ID@ and 
+@Memvar.AnnotationStoreElement#beginPos@ and @Memvar.AnnotationStoreElement#endPos@ to @Memvar.AnnotationStoreElement#INVALID_POS@.
 
 ..class:Class.AnnotationStoreElement
 .Memvar.AnnotationStoreElement#contigId
@@ -81,7 +87,9 @@ There are some type ids predefined for commonly used types, e.g. $ANNO_GENE$. Se
 ..type:Typedef.AnnotationStoreElement#TPos
 ..class:Class.AnnotationStoreElement
 .Memvar.AnnotationStoreElement#endPos
-..summary:End position of the annotation in gap-space. If $end<begin$, the annotated feature is located on the reverse strand, where $begin$ and $end$ are the corresponding addresses on the forward strand.
+..summary:End position of the annotation in gap-space. If @Memvar.AnnotationStoreElement#endPos@ < @Memvar.AnnotationStoreElement#beginPos@, 
+the annotated feature is located on the reverse strand, where @Memvar.AnnotationStoreElement#beginPos@ and @Memvar.AnnotationStoreElement#endPos@
+are the corresponding addresses on the forward strand.
 ..type:Typedef.AnnotationStoreElement#TPos
 ..class:Class.AnnotationStoreElement
 .Memvar.AnnotationStoreElement#values
@@ -89,15 +97,15 @@ There are some type ids predefined for commonly used types, e.g. $ANNO_GENE$. Se
 ..type:Typedef.AnnotationStoreElement#TValues
 ..class:Class.AnnotationStoreElement
 .Memvar.AnnotationStoreElement#parentId
-..summary:The $id$ of the parent annotation.
+..summary:The id of the parent annotation.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
 .Memvar.AnnotationStoreElement#nextSiblingId
-..summary:The $id$ of the right sibling annotation.
+..summary:The id of the right sibling annotation.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
 .Memvar.AnnotationStoreElement#lastChildId
-..summary:The $id$ of the rightmost child annotation.
+..summary:The id of the rightmost child annotation.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
 .Memvar.AnnotationStoreElement#INVALID_ID
@@ -167,6 +175,30 @@ Preorder means that the iterator visits a node before its children.
 ..param.TFragmentStore:A FragmentStore class.
 ...type:Class.FragmentStore
 ..include:seqan/store.h
+..example:
+...image:AnnotationTree|Typical annotation tree hierarchy.
+..example:
+...text:A new annotation tree iterator can be instantiated as follows:
+...code:
+Iterator<FragmentStore<>, AnnotationTree<> >::Type it;
+it = begin(store, AnnotationTree<>());
+...text:Or shorter (see @Memfunc.AnnotationTree Iterator#AnnotationTree Iterator@):
+...code:
+Iterator<FragmentStore<>, AnnotationTree<> >::Type it(store);
+
+.Memfunc.AnnotationTree Iterator#AnnotationTree Iterator
+..summary:Constructor
+..signature:Iter()
+..signature:Iter(store [, startInNode])
+..class:Spec.AnnotationTree Iterator
+..param.store:A @Class.FragmentStore@ object.
+...type:Class.FragmentStore
+..param.startInNode:Annotation id of the node the iterator should start at.
+...default:$0$, the id of the root node.
+..remarks:The @Function.begin@ function can also be used to create a tree iterator that starts in the root node:
+...code:
+Iterator<FragmentStore<>, AnnotationTree<> >::Type it;
+it = begin(store, AnnotationTree<>());
 */
 template <typename TFragmentStore, typename TSpec>
 class Iter<TFragmentStore, AnnotationTree<TSpec> >

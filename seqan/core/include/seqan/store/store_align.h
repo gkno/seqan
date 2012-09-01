@@ -54,13 +54,19 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specialization type.
 ...default:$void$
 ..remarks:Value type of the @Memvar.FragmentStore#alignedReadStore@ string.
+In contrast to all other @Class.FragmentStore@ stores, the @Memvar.AlignedReadStoreElement#id@ of an aligned read is explicitly stored
+as a member to allow for random reordering of the @Memvar.FragmentStore#alignedReadStore@, e.g. sorting by genomic position via @Function.sortAlignedReads@.
 ..include:seqan/store.h
 
+.Typedef.AlignedReadStoreElement#TId
+..summary:Type of all stored ids.
+..remarks:$TId$ equals the result of $Id<AlignedReadStoreElement<> >::Type$, see @Metafunction.Id@.
+..class:Class.AlignedReadStoreElement
 .Typedef.AlignedReadStoreElement#TPos
-..summary:Type of the $beginPos$ and $endPos$ members.
+..summary:Type of the @Memvar.AlignedReadStoreElement#beginPos@ and @Memvar.AlignedReadStoreElement#endPos@ members.
 ..class:Class.AlignedReadStoreElement
 .Typedef.AlignedReadStoreElement#TGapAnchors
-..summary:Type of the $gaps$ member.
+..summary:Type of the @Memvar.AlignedReadStoreElement#gaps@ member.
 ..class:Class.AlignedReadStoreElement
 .Typedef.AlignedReadStoreElement#TSpec
 ..summary:The specialization type.
@@ -76,9 +82,10 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.beginPos:Begin position of the alignment in gap-space.
 ..param.endPos:End position of the alignment in gap-space.
 ..param.gaps:Read gap anchors.
-..remarks:The default constructor sets all ids to $INVALID_ID$ and $beginPos$ and $endPos$ to $0$.
-
+..remarks:The default constructor sets all ids to @Memvar.AlignedReadStoreElement#INVALID_ID@ and
+@Memvar.AlignedReadStoreElement#beginPos@ and @Memvar.AlignedReadStoreElement#endPos@ to $0$.
 ..class:Class.AlignedReadStoreElement
+
 .Memvar.AlignedReadStoreElement#id
 ..summary:The alignment id refers to associated alignment information in @Memvar.FragmentStore#alignQualityStore@ or @Memvar.FragmentStore#alignedReadTagStore@.
 ..type:Metafunction.Id
@@ -92,8 +99,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..type:Metafunction.Id
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#pairMatchId
-..summary:Two read alignments having the same $pairMatchId$ form a valid pair match.
-If it equals $INVALID_ID$, the read is either not paired or could not be aligned as part of a pair match.
+..summary:Two read alignments having the same @Memvar.AlignedReadStoreElement#pairMatchId@ form a valid pair match.
+If it equals @Memvar.AlignedReadStoreElement#INVALID_ID@, the read is either not paired or could not be aligned as part of a pair match.
 ..type:Metafunction.Id
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#beginPos
@@ -101,11 +108,13 @@ If it equals $INVALID_ID$, the read is either not paired or could not be aligned
 ..type:Typedef.AlignedReadStoreElement#TPos
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#endPos
-..summary:End position of the alignment in gap-space. If $end<begin$, the read is aligned to the reverse strand, where $begin$ and $end$ are the corresponding addresses on the forward strand.
+..summary:End position of the alignment in gap-space. If @Memvar.AlignedReadStoreElement#endPos@ < @Memvar.AlignedReadStoreElement#beginPos@, the read is aligned to the reverse strand, 
+where @Memvar.AlignedReadStoreElement#beginPos@ and @Memvar.AlignedReadStoreElement#endPos@ are the corresponding addresses
+on the forward strand.
 ..type:Typedef.AlignedReadStoreElement#TPos
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#gaps
-..summary:String of read gap anchors. Can be used to create a $Spec.AnchorGaps$ alignment row.
+..summary:String of read gap anchors. Can be used to create a @Spec.AnchorGaps@ alignment row.
 ..type:Typedef.AlignedReadStoreElement#TGapAnchors
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#INVALID_ID
@@ -247,22 +256,22 @@ struct AlignQualityStoreElement
 ..see:Function.lowerBoundAlignedReads
 ..see:Function.upperBoundAlignedReads
 ..tag.SortContigId:
-...summary:Sort alignedReads by $contigId$.
+...summary:Sort alignedReads by @Memvar.AlignedReadStoreElement#contigId@.
 ...signature:SortContigId
 ..tag.SortId:
-...summary:Sort alignedReads by $id$.
+...summary:Sort alignedReads by @Memvar.AlignedReadStoreElement#id@.
 ...signature:SortId
 ..tag.SortBeginPos:
-...summary:Sort alignedReads by $beginPos$.
+...summary:Sort alignedReads by @Memvar.AlignedReadStoreElement#beginPos@.
 ...signature:SortBeginPos
 ..tag.SortEndPos:
-...summary:Sort alignedReads by $endPos$.
+...summary:Sort alignedReads by @Memvar.AlignedReadStoreElement#endPos@.
 ...signature:SortEndPos
 ..tag.SortPairMatchId:
-...summary:Sort alignedReads by $pairMatchId$.
+...summary:Sort alignedReads by @Memvar.AlignedReadStoreElement#pairMatchId@.
 ...signature:SortPairMatchId
 ..tag.SortReadId:
-...summary:Sort alignedReads by $readId$.
+...summary:Sort alignedReads by @Memvar.AlignedReadStoreElement#readId@.
 ...signature:SortReadId
 ..include:seqan/store.h
 */
@@ -387,7 +396,7 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 ..param.sortTag:Selects the field to sort by.
 ...type:Tag.sortAlignedRead Tags
 ..param.lessFunctor:STL-less functor to compare two @Class.AlignedReadStoreElement.AlignedReadStoreElements@.
-..remarks:This function calls $std::stable_sort$ to sort $alignStore$.
+..remarks:This function calls $std::stable_sort$ to sort the @Memvar.FragmentStore#alignedReadStore@.
 ..include:seqan/store.h
 ..see:Function.lowerBoundAlignedReads
 ..see:Function.upperBoundAlignedReads
@@ -403,7 +412,7 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 ..param.value:The value to use for the comparison.
 ..param.sortTag:Selects the field for the comparison in the binary search.
 ...type:Tag.sortAlignedRead Tags
-..remarks:This is equivalent to calling $std::lower_bound$ on $alignStore$ with according parameters.
+..remarks:This is equivalent to calling $std::lower_bound$ on @Memvar.FragmentStore#alignedReadStore@ with according parameters.
 ..include:seqan/store.h
 ..see:Function.sortAlignedReads
 ..see:Function.upperBoundAlignedReads
@@ -419,7 +428,7 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 ..param.value:The value to use for the comparison.
 ..param.sortTag:Selects the field for the comparison in the binary search.
 ...type:Tag.sortAlignedRead Tags
-..remarks:This is equivalent to calling $std::upper_bound$ on $alignStore$ with according parameters.
+..remarks:This is equivalent to calling $std::upper_bound$ on @Memvar.FragmentStore#alignedReadStore@ with according parameters.
 ..include:seqan/store.h
 ..see:Function.sortAlignedReads
 ..see:Function.lowerBoundAlignedReads
