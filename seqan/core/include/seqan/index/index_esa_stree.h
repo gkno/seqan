@@ -1374,6 +1374,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ...type:Class.Segment
 ..remarks:$goDown(iterator)$ goes down the leftmost edge in the suffix tree, i.e. the edge beginning with the lexicographically smallest character.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
+...type:nolink:bool
 ..include:seqan/index.h
 */
 
@@ -1614,6 +1615,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..class:Spec.TopDownHistory Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
+..returns:$true$ if the iterator could be moved, otherwise $false$.
+...type:nolink:bool
 ..include:seqan/index.h
 */
 
@@ -1700,6 +1703,8 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 ..class:Spec.TopDown Iterator
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
+..returns:$true$ if the iterator could be moved, otherwise $false$.
+...type:nolink:bool
 ..include:seqan/index.h
 */
 
