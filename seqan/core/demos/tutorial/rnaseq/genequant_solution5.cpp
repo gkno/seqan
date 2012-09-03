@@ -171,7 +171,7 @@ void outputGeneCoverage(String<unsigned> const & readsPerGene, TStore const & st
         unsigned mRNALengthMax = 0;
         goTo(transIt, j);
 
-        // determine maximal exon length
+        // determine maximal mRNA length (which we use as gene length)
         SEQAN_ASSERT_NOT(isLeaf(transIt));
         goDown(transIt);
 
@@ -180,7 +180,7 @@ void outputGeneCoverage(String<unsigned> const & readsPerGene, TStore const & st
             exonIt = nodeDown(transIt);
             unsigned mRNALength = 0;
 
-            // determine exon length
+            // determine mRNA length, sum up the lengths of its exons
             do
             {
                 if (getAnnotation(exonIt).typeId == store.ANNO_EXON)
@@ -193,7 +193,7 @@ void outputGeneCoverage(String<unsigned> const & readsPerGene, TStore const & st
         }
         while (goRight(transIt));
 
-        // RPKM is number of reads mapped to a gene divided by its exon length in kbps
+        // RPKM is number of reads mapped to a gene divided by its gene length in kbps
         // and divided by millions of total mapped reads
         std::cout << store.annotationNameStore[j] << '\t';
         std::cout << readsPerGene[j] / (mRNALengthMax / 1000.0) / millionMappedReads << std::endl;
