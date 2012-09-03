@@ -1944,13 +1944,14 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 /**
 .Function.isRoot:
-..summary:Test whether iterator points to the root node.
+..summary:Test whether a tree iterator points to the root node.
 ..cat:Index
 ..signature:bool isRoot(iterator)
 ..class:Spec.VSTree Iterator
-..param.iterator:An iterator of a suffix tree.
+..param.iterator:An iterator of a tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the root of the tree, otherwise $false$.
+...type:nolink:bool
 ..include:seqan/index.h
 */
 
@@ -1982,6 +1983,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the node representing a suffix, otherwise $false$.
+...type:nolink:bool
 ..remarks:Every leaf is also a right terminal (see @Function.isLeaf@), but not vice versa.
 ..include:seqan/index.h
 */
@@ -2007,6 +2009,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
+...type:nolink:bool
 ..see:Function.getOccurrences
 ..include:seqan/index.h
 */
@@ -2111,6 +2114,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
+...type:nolink:bool
 ..see:Function.getOccurrences
 ..include:seqan/index.h
 */
@@ -2220,13 +2224,14 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 /**
 .Function.isLeaf:
-..summary:Test whether iterator points to a leaf.
+..summary:Test whether a tree iterator points to a leaf.
 ..cat:Index
 ..signature:bool isLeaf(iterator)
 ..class:Spec.VSTree Iterator
-..param.iterator:An iterator of a suffix tree.
+..param.iterator:An iterator of a tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to a leaf of the tree, otherwise $false$.
+...type:nolink:bool
 ..include:seqan/index.h
 */
 

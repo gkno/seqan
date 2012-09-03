@@ -37,6 +37,7 @@
 #include <seqan/sequence.h>
 #include <seqan/align.h>
 #include <seqan/file.h>
+#include <seqan/parallel.h>
 
 #include <sstream>
 #include <algorithm>

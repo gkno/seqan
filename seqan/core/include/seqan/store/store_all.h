@@ -187,7 +187,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 	
     template <typename TNameStore, typename TName, typename TPos, typename TContext>
-    inline bool 
+    inline bool
     getIdByName(TNameStore const & store, TName const & name, TPos & pos, TContext const & /*not a cache*/)
 	{
 		return getIdByName(store, name, pos);
@@ -202,10 +202,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef NameStoreCache<TCNameStore, TCName> const TNameStoreCache;
 		typedef typename TNameStoreCache::TSet TSet;
 		
-		TSet const &set = context.nameSet;	
-		context.name = name;
-		
-		typename TSet::const_iterator it = set.find(maxValue<TId>());
+		TSet const &set = context.nameSet;
+        typename TSet::const_iterator it;
+
+        // (weese:)
+        // To avoid local variables to copy the name into we use a member in context.
+        // However, changing the NameStoreCache per query is not thread-safe and the user might not notice it.
+        // To avoid pitfalls, we introduce a critical section.
+        SEQAN_OMP_PRAGMA(critical)
+        {
+            context.name = name;
+            it = set.find(maxValue<TId>());
+        }
+        
 		if (it != set.end())
 		{
 			pos = *it;
