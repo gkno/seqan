@@ -90,6 +90,32 @@ class JournalEntries<TCargo_, UnbalancedTree>
     {
         _copyJournalEntriesNodes(_root, _nodeAllocator, other._root);
     }
+
+    JournalEntries &
+    operator=(JournalEntries const & other)
+
+    {
+        if (this != &other)
+        {
+            _originalStringLength = other._originalStringLength;
+            _copyJournalEntriesNodes(_root, _nodeAllocator, other._root);
+        }
+        return *this;
+
+    }
+    
+    JournalEntries &
+    operator=(JournalEntries const & other) const
+
+    {
+        if (this != &other)
+        {
+            _originalStringLength = other._originalStringLength;
+            _copyJournalEntriesNodes(_root, _nodeAllocator, other._root);
+        }
+        return *this;
+
+    }
 };
 
 // ============================================================================
