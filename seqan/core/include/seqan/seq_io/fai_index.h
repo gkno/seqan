@@ -575,7 +575,7 @@ inline int read(FaiIndex & index)
 .Function.FaiIndex#write
 ..cat:Input / Output
 ..class:Class.FaiIndex
-..signature:read(faiIndex[, faiFileName])
+..signature:write(faiIndex[, faiFileName])
 ..summary:Write out an @Class.FaiIndex@ object.
 ..param.faiIndex:The @Class.FaiIndex@ object to write out.
 ...type:Class.FaiIndex
@@ -635,7 +635,7 @@ inline int write(FaiIndex & index)
 ..class:Class.FaiIndex
 ..summary:Create @Class.FaiIndex@ from FASTA file.
 ..signature:build(faiIndex, fastaFilename[, faiFilename])
-..description:The index can later be written out with @Function.FaiIndex#write@ and be loaded again using @Function.FaiIndex#read.
+..description:The index can later be written out with @Function.FaiIndex#write@ and be loaded again using @Function.FaiIndex#read@.
 ..param.faiIndex:@Class.FaiIndex@ to write index to.
 ...type:Class.FaiIndex
 ..param.fastaFilename:Name of FASTA file to build an index for.
