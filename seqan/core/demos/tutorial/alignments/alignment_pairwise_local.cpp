@@ -26,7 +26,7 @@ int main()
 
 //FRAGMENT(ali2)
 	Score<int> scoring(2, -1, -2, 0);
-    LocalAlignmentEnumerator<Score<int>, Unbanded> enumerator(scoring, 4);
+    LocalAlignmentEnumerator<Score<int>, Unbanded> enumerator(scoring, 5);
     while (nextLocalAlignment(ali2, enumerator))
     {
 		::std::cout << "Score = " << getScore(enumerator) << ::std::endl;
