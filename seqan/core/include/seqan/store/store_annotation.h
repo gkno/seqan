@@ -321,7 +321,9 @@ getAnnotation(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 ..signature:getName(iter)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..returns:A reference to the corresponding position in the @Memvar.FragmentStore#annotationNameStore@. 
+..returns:The name of the current annotation.
+...remarks:This a reference to the corresponding position in the @Memvar.FragmentStore#annotationNameStore@.
+...type:Concept.Sequence
 ..see:Function.AnnotationTree#setName
 ..include:seqan/store.h
 */
@@ -341,8 +343,8 @@ getName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 ..signature:setName(iter, name)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..param.name:The new identifier the annotation element should be set to.
-...type:Shortcut.CharString or similar.
+..param.name:The new identifier of the current annotation element.
+...type:Concept.Sequence
 ..see:Function.AnnotationTree#getName
 ..include:seqan/store.h
 */
@@ -364,7 +366,9 @@ setName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it, TName & name)
 ..signature:getParentName(iter)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..returns:A reference to the corresponding position in the @Memvar.FragmentStore#annotationNameStore@. 
+..returns:The name of the parent of the current annotation.
+...remarks:This a reference to the corresponding position in the @Memvar.FragmentStore#annotationNameStore@.
+...type:Concept.Sequence
 ..see:Function.AnnotationTree#getName
 ..include:seqan/store.h
 */
@@ -386,12 +390,14 @@ getParentName(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 /**
 .Function.getType
 ..class:Spec.AnnotationTree Iterator
-..summary:Returns the name of the annotation type of the current annotation.
+..summary:Returns the type name of the current annotation.
 ..cat:Fragment Store
 ..signature:getType(iter)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..returns:A reference to an entry in the @Memvar.FragmentStore#annotationTypeStore@. 
+..returns:The type name of the current annotation, e.g. "exon" or "mRNA".
+...remarks:This a reference to an entry in the @Memvar.FragmentStore#annotationTypeStore@.
+...type:Concept.Sequence
 ..see:Function.setType
 ..include:seqan/store.h
 */
@@ -406,12 +412,13 @@ getType(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 /**
 .Function.setType
 ..class:Spec.AnnotationTree Iterator
-..summary:Sets the name of the annotation type of the current annotation, e.g. "exon".
+..summary:Sets the type name of the current annotation.
 ..cat:Fragment Store
 ..signature:setType(iter, typeName)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..param.typeName: The new type name.
+..param.typeName:The new type name, e.g. "exon" or "mRNA".
+...type:Concept.Sequence
 ..see:Function.getType
 ..include:seqan/store.h
 */
@@ -432,8 +439,10 @@ setType(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it, TTypeName & typ
 ..signature:getUniqueName(iter)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-...returns:A reference to the corresponding position in the @Memvar.FragmentStore#annotationNameStore@.
-..remarks: As some annotation file formats don't give every annotation a name, the function returns the name if non-empty or generates one using the type and id.
+..returns:A unique name of the current annotation.
+...type:Shortcut.CharString
+..remarks:Some annotation file formats doesn't require that every annotation has a non-empty name.
+This function returns the name if non-empty and otherwise generates one using the type and id.
 ..see:Function.AnnotationTree#getName
 ..include:seqan/store.h
 */
@@ -474,10 +483,10 @@ clearValues(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 ..signature:assignValueByKey(iter, key, value)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..param.key:The key whose value should be change.
-...type:Spec.String
+..param.key:The key whose value should be changed.
+...type:Concept.Sequence
 ..param.value:The new value of the key.
-...type:Spec.String
+...type:Concept.Sequence
 ..see:Function.clearValues
 ..see:Function.getValueByKey
 ..include:seqan/store.h
@@ -498,15 +507,20 @@ assignValueByKey(
 ..class:Spec.AnnotationTree Iterator
 ..summary:Given a key, retrieve its value of the current annotation.
 ..cat:Fragment Store
+..signature:getValueByKey(iter, key)
 ..signature:getValueByKey(iter, key, value)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
 ..param.key:The key to retrieve the value from.
-...type:Spec.String
-..param.value:A reference for the returned value.
-...type:Spec.String
+...type:Concept.Sequence
+..param.value:The sequence where the return value should be wrote to.
+...type:Concept.Sequence
+..returns:The three-parameter function returns a boolean indicating whether a non-empty value was returned.
+..returns:The two-parameter function returns the value for the given key.
+...type:nolink:bool
+...type:Shortcut.CharString
 ..see:Function.clearValues
-..see:Function.getValueByKey
+..see:Function.assignValueByKey
 ..include:seqan/store.h
 */
 
@@ -627,7 +641,7 @@ goNext(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
 ..see:Function.goNext
-..see:Function.goNextUp
+..see:Function.AnnotationTree#goNextUp
 ..include:seqan/store.h
 */
 
@@ -653,7 +667,7 @@ goNextRight(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
 ..see:Function.goNext
-..see:Function.goNextRight
+..see:Function.AnnotationTree#goNextRight
 ..include:seqan/store.h
 */
 
@@ -680,7 +694,7 @@ goNextUp(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
 ..see:Function.goNext
-..see:Function.goNextRight
+..see:Function.AnnotationTree#goNextRight
 ..include:seqan/store.h
 */
 
@@ -946,12 +960,12 @@ _cyclicListRemove(TAnnotationStore & annotationStore, TId _id, TId lastChildId)
 /**
 .Function.createLeftChild
 ..class:Spec.AnnotationTree Iterator
-..summary:Creates a new left child of the current node and returns an iterator to it.
+..summary:Creates a new left-most child of the current node and returns an iterator to it.
 ..cat:Fragment Store
 ..signature:createLeftChild(iter)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..returns: Iterator to the new left child.
+..returns: Iterator to the new left-most child.
 ....type:Spec.AnnotationTree Iterator
 ..see:Function.createRightChild
 ..see:Function.createSibling
@@ -984,12 +998,12 @@ createLeftChild(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 /**
 .Function.createRightChild
 ..class:Spec.AnnotationTree Iterator
-..summary:Creates a new right child of the current node and returns an iterator to it.
+..summary:Creates a new right-most child of the current node and returns an iterator to it.
 ..cat:Fragment Store
 ..signature:createRightChild(iter)
 ..param.iter:An annotation tree iterator.
 ...type:Spec.AnnotationTree Iterator
-..returns: Iterator to the new right child.
+..returns: Iterator to the new right-most child.
 ....type:Spec.AnnotationTree Iterator
 ..see:Function.createLeftChild
 ..see:Function.createSibling

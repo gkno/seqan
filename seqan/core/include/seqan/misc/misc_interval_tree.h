@@ -327,6 +327,21 @@ public:
 ..class:Class.IntervalTree
 ..summary:Constructor
 ..signature:IntervalTree()
+..signature:IntervalTree(String<TInterval> intervals)
+..signature:IntervalTree(String<TInterval> intervals, TValue center)
+..signature:IntervalTree(String<TInterval> intervals, Tag<TTagSpec> const tag)
+..signature:IntervalTree(intervalBegins, intervalEnds, len)
+..signature:IntervalTree(intervalBegins, intervalEnds, intervalCargos, len)
+..param.intervals:Container of intervals.
+...type:Spec.Alloc String
+...remarks:A string of $IntervalAndCargo<TValue, TCargo>$ objects, see @Class.IntervalAndCargo@.
+..param.intervalBegins:Iterator pointing to begin position of first interval.
+..param.intervalEnds:Iterator pointing to end position of first interval.
+..param.intervalCargos:Iterator pointing to cargos/ids for intervals.
+..param.len:Number of intervals to store in tree.
+..param.tag:Tag for tree construction method. @Tag.IntervalTree Centers.tag.RandomCenter@ or @Tag.IntervalTree Centers.tag.ComputeCenter@
+...default:@Tag.IntervalTree Centers.tag.ComputeCenter@
+..remarks:center of root node is computed by _calcIntervalTreeRootCenter
 */
 	
 	IntervalTree()
@@ -335,16 +350,6 @@ SEQAN_CHECKPOINT
 		interval_counter = 0;
 	}
 	
-/**
-.Memfunc.IntervalTree#IntervalTree
-..class:Class.IntervalTree
-..summary:Constructor
-..signature:IntervalTree(intervalBegins, intervalEnds, intervalCargos, len)
-..param.intervalBegins:Iterator pointing to begin position of first interval.
-..param.intervalEnds:Iterator pointing to end position of first interval.
-..param.intervalCargos:Iterator pointing to cargos/ids for intervals.
-..param.len:Number of intervals to store in tree.
-*/
 	template<typename TIterator,typename TCargoIterator>
 	IntervalTree(TIterator interval_begins,
 				 TIterator interval_ends, 
@@ -368,9 +373,6 @@ SEQAN_CHECKPOINT
 		createIntervalTree(*this, intervals);
 	}
 
-	/**
-..signature:IntervalTree(intervalBegins, intervalEnds, len)
-     */
 	template<typename TIterator>
 	IntervalTree(TIterator interval_begins,
 				 TIterator interval_ends,
@@ -392,18 +394,12 @@ SEQAN_CHECKPOINT
 		createIntervalTree(*this, intervals);
 	}
 	
-	/**
-..signature:IntervalTree(String<TInterval> intervals)
-     */
 	IntervalTree(String<TInterval> intervals)	
 	{
 SEQAN_CHECKPOINT
 		createIntervalTree(*this, intervals);
 	}
 
-	/**
-..signature:IntervalTree(String<TInterval> intervals, Tag<TTagSpec> const tag)
-     */
 	template <typename TTagSpec>
 	IntervalTree(String<TInterval> intervals, Tag<TTagSpec> const tag)
 	{
@@ -412,9 +408,6 @@ SEQAN_CHECKPOINT
 		createIntervalTree(g,pm,intervals,tag);
 	}
 
-    /**
-..signature:IntervalTree(String<TInterval> intervals, TValue center)
-    */
 	IntervalTree(String<TInterval> intervals, TValue center)	
 	{
 SEQAN_CHECKPOINT
@@ -869,8 +862,8 @@ struct ListType<IntervalTreeNode<TInterval,StoreIntervals> >
 ..param.pm:Property map to use for the created interval tree.
 ...type:Class.PropertyMap
 ..param.intervals:Container of intervals.
-...type:Class.String
-...remarks:Should be a String of @Class.IntervalAndCargo@ or @Class.IntervalAndCargo@ objects.
+...type:Spec.Alloc String
+...remarks:A string of $IntervalAndCargo<TValue, TCargo>$ objects, see @Class.IntervalAndCargo@.
 ..param.tag:Tag for tree construction method. @Tag.IntervalTree Centers.tag.RandomCenter@ or @Tag.IntervalTree Centers.tag.ComputeCenter@
 ...default:@Tag.IntervalTree Centers.tag.ComputeCenter@
 ..remarks:center of root node is computed by _calcIntervalTreeRootCenter
