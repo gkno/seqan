@@ -315,6 +315,205 @@ void testJournaledStringLength(TStringJournalSpec const &)
     SEQAN_ASSERT_EQ(length("teXXt"), length(journaledString));
 }
 
+// Test flatten().
+template <typename TStringJournalSpec>
+void testJournalStringFlatten(TStringJournalSpec const &)
+{
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+
+    {  // Test insertion at beginning.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 0, "XX");
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "XXtest");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 2u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_PATCH);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "XXtest");
+        SEQAN_ASSERT_EQ(journaledString, "XXtest");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("XXtest"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test insertion in middle part.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 2, "XX");
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "teXXst");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 2u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "teXXst");
+        SEQAN_ASSERT_EQ(journaledString, "teXXst");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("teXXst"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test insertion at end part.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 4, "XX");
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "testXX");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 4u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "testXX");
+        SEQAN_ASSERT_EQ(journaledString, "testXX");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("testXX"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test deletion at beginning.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        erase(journaledString, 0, 2);
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "st");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 2u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 2u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "st");
+        SEQAN_ASSERT_EQ(journaledString, "st");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("st"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test deletion in middle part.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        erase(journaledString, 1, 3);
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "tt");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 1u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "tt");
+        SEQAN_ASSERT_EQ(journaledString, "tt");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("tt"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test deletion at end part.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        erase(journaledString, 2, 4);
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "te");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 2u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "te");
+        SEQAN_ASSERT_EQ(journaledString, "te");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("te"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test insertion/deletion at beginning.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 0, "XX");
+        erase(journaledString, 2, 4);
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "XXst");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 2u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_PATCH);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "XXst");
+        SEQAN_ASSERT_EQ(journaledString, "XXst");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("XXst"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test insertion/deletion in middle part.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        erase(journaledString, 1, 3);
+        insert(journaledString, 1, "XX");
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "tXXt");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 1u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "tXXt");
+        SEQAN_ASSERT_EQ(journaledString, "tXXt");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("tXXt"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+
+    {  // Test insertion/deletion at end part.
+        CharString charStr = "test";
+        TJournaledString journaledString(charStr);
+        insert(journaledString, 4, "XX");
+        erase(journaledString, 2, 4);
+        SEQAN_ASSERT_EQ(host(journaledString), "test");
+        SEQAN_ASSERT_EQ(journaledString, "teXX");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, 2u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+
+        flatten(journaledString);
+
+        SEQAN_ASSERT_EQ(host(journaledString), "teXX");
+        SEQAN_ASSERT_EQ(journaledString, "teXX");
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).virtualPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).physicalPosition, 0u);
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).length, length("teXX"));
+        SEQAN_ASSERT_EQ(value(begin(journaledString._journalEntries)).segmentSource, SOURCE_ORIGINAL);
+    }
+}
+
 
 // Test conversion of virtual to host position.
 template <typename TStringJournalSpec>
@@ -1030,7 +1229,6 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_segments_read_write) {
     testJournaledStringSegmentsReadWrite(UnbalancedTree());
 }
 
-
 // Tag: SortedArray()
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_assign) {
@@ -1136,6 +1334,11 @@ SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_segments_read_only) {
 
 SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_segments_read_write) {
     testJournaledStringSegmentsReadWrite(SortedArray());
+}
+
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_flatten)
+{
+    testJournalStringFlatten(SortedArray());
 }
 
 #endif  // TEST_SEQUENCE_JOURNALED_TEST_SEQUENCE_JOURNALED_H_

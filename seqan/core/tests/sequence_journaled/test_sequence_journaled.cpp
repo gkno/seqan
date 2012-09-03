@@ -91,6 +91,7 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_journaled) {
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_fuzzying);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_segments_read_only);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_segments_read_write);
+    SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_flatten);
 
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_iterator_sum);
     SEQAN_CALL_TEST(test_sequence_journaled_sorted_array_iterator_difference);
