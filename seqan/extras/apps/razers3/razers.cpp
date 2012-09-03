@@ -43,10 +43,15 @@
 #define RAZERS_MATEPAIRS                // enable paired-end matching
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
+// Warn the user about missing OpenMP.  This can be suppressed by setting the
+// CXX flag "SEQAN_IGNORE_MISSING_OPENMP=1".
+
 #ifdef _OPENMP
 #include <omp.h>
 #else
+#if !defined(SEQAN_IGNORE_MISSING_OPENMP) || (SEQAN_IGNORE_MISSING_OPENMP == 0)
 #pragma message("OpenMP not found! Shared-memory parallelization will be disabled in RazerS3.")
+#endif  // #if !defined(SEQAN_IGNORE_MISSING_OPENMP) || (SEQAN_IGNORE_MISSING_OPENMP == 0)
 #endif
 
 #include <iostream>
