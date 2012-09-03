@@ -207,10 +207,9 @@ function (seqan_setup_includes REL_PATH TARGET_NAME)
     file (GLOB HEADERS ${PATH}/seqan/[A-z]*/[A-z]*.h)
     file (GLOB SUPER_HEADERS ${PATH}/seqan/[A-z]*.h)
 	
-    set (SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH} CACHE INTERNAL "asdf" FORCE)
+    set (SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH} CACHE INTERNAL "asdf" FORCE)
     # message("SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME} <- ${SEQAN_INCLUDE_DIR_FOR_${TARGET_NAME}}")
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${REL_PATH})
-    include_directories(${CMAKE_CURRENT_BINARY_DIR}/${REL_PATH})
 
     set (SEQAN_LIBRARY_TARGETS ${TARGET_NAME} CACHE INTERNAL "asdf" FORCE)
 
@@ -396,7 +395,6 @@ endmacro (seqan_setup_demos)
 
 macro (seqan_find_dependencies)
   # Register external include directory.
-  include_directories(${SEQAN_ROOT_SOURCE_DIR}/external/include)
 
   find_package (ZLIB QUIET)
   if (ZLIB_FOUND)
