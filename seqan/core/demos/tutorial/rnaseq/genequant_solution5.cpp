@@ -1,6 +1,4 @@
-// FRAGMENT(includes)
 #include <iostream>
-
 #include <seqan/store.h>
 #include <seqan/arg_parse.h>
 #include <seqan/misc/misc_interval_tree.h>
@@ -128,9 +126,9 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 //
 // 5. Count reads per gene
 //
-void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
+void countReadsPerGene(String<unsigned> & readsPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
 {
-    resize(readBasesPerGene, length(store.annotationStore), 0);
+    resize(readsPerGene, length(store.annotationStore), 0);
     String<TId> result;
 
     // iterate aligned reads and get search their begin and end positions
@@ -148,31 +146,32 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
         for (unsigned j = 0; j < length(result); ++j)
         {
             SEQAN_OMP_PRAGMA(atomic)
-            readBasesPerGene[result[j]] += length(store.readSeqStore[ar.readId]);
+            readsPerGene[result[j]] += 1;
         }
     }
 }
 
 // FRAGMENT(solution)
 //
-// 6. Output gene counts
+// 6. Output RPKM values
 //
-void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const & store)
+void outputGeneCoverage(String<unsigned> const & readsPerGene, TStore const & store)
 {
     // output abundances for covered genes
     Iterator<TStore const, AnnotationTree<> >::Type transIt = begin(store, AnnotationTree<>());
     Iterator<TStore const, AnnotationTree<> >::Type exonIt;
-
-    std::cout << "#gene\tcoverage" << std::endl;
-    for (unsigned j = 0; j < length(readBasesPerGene); ++j)
+    double millionMappedReads = length(store.alignedReadStore) / 1000000.0;
+    
+    std::cout << "#gene name\tRPKM value" << std::endl;
+    for (unsigned j = 0; j < length(readsPerGene); ++j)
     {
-        if (readBasesPerGene[j] == 0)
+        if (readsPerGene[j] == 0)
             continue;
 
         unsigned mRNALengthMax = 0;
         goTo(transIt, j);
 
-        // determine maximal mRNA length
+        // determine maximal exon length
         SEQAN_ASSERT_NOT(isLeaf(transIt));
         goDown(transIt);
 
@@ -181,9 +180,11 @@ void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const 
             exonIt = nodeDown(transIt);
             unsigned mRNALength = 0;
 
+            // determine exon length
             do
             {
-                mRNALength += abs((int)getAnnotation(exonIt).beginPos - (int)getAnnotation(exonIt).endPos);
+                if (getAnnotation(exonIt).typeId == store.ANNO_EXON)
+                    mRNALength += abs((int)getAnnotation(exonIt).beginPos - (int)getAnnotation(exonIt).endPos);
             }
             while (goRight(exonIt));
 
@@ -192,7 +193,10 @@ void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const 
         }
         while (goRight(transIt));
 
-        std::cout << store.annotationNameStore[j] << '\t' << readBasesPerGene[j] / (double)mRNALengthMax << std::endl;
+        // RPKM is number of reads mapped to a gene divided by its exon length in kbps
+        // and divided by millions of total mapped reads
+        std::cout << store.annotationNameStore[j] << '\t';
+        std::cout << readsPerGene[j] / (mRNALengthMax / 1000.0) / millionMappedReads << std::endl;
     }
 }
 
@@ -204,7 +208,7 @@ int main(int argc, char const * argv[])
     TStore store;
     String<String<TInterval> > intervals;
     String<TIntervalTree> intervalTrees;
-    String<unsigned> readBasesPerGene;
+    String<unsigned> readsPerGene;
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -215,8 +219,8 @@ int main(int argc, char const * argv[])
 
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
-    countReadsPerGene(readBasesPerGene, intervalTrees, store);
-    outputGeneCoverage(readBasesPerGene, store);
+    countReadsPerGene(readsPerGene, intervalTrees, store);
+    outputGeneCoverage(readsPerGene, store);
 
     return 0;
 }

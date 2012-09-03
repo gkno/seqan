@@ -1,6 +1,4 @@
-// FRAGMENT(includes)
 #include <iostream>
-
 #include <seqan/store.h>
 #include <seqan/arg_parse.h>
 #include <seqan/misc/misc_interval_tree.h>
@@ -129,9 +127,9 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 //
 // 5. Count reads per gene
 //
-void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
+void countReadsPerGene(String<unsigned> & readsPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
 {
-    resize(readBasesPerGene, length(store.annotationStore), 0);
+    resize(readsPerGene, length(store.annotationStore), 0);
     String<TId> result;
 
     // iterate aligned reads and get search their begin and end positions
@@ -149,7 +147,7 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
         for (unsigned j = 0; j < length(result); ++j)
         {
             SEQAN_OMP_PRAGMA(atomic)
-            readBasesPerGene[result[j]] += length(store.readSeqStore[ar.readId]);
+            readsPerGene[result[j]] += 1;
         }
     }
 }
@@ -162,7 +160,7 @@ int main(int argc, char const * argv[])
     TStore store;
     String<String<TInterval> > intervals;
     String<TIntervalTree> intervalTrees;
-    String<unsigned> readBasesPerGene;
+    String<unsigned> readsPerGene;
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -173,7 +171,7 @@ int main(int argc, char const * argv[])
 
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
-    countReadsPerGene(readBasesPerGene, intervalTrees, store);
+    countReadsPerGene(readsPerGene, intervalTrees, store);
 
     return 0;
 }

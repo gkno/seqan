@@ -128,9 +128,9 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 //
 // 5. Count reads per gene
 //
-void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
+void countReadsPerGene(String<unsigned> & readsPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
 {
-    resize(readBasesPerGene, length(store.annotationStore), 0);
+    resize(readsPerGene, length(store.annotationStore), 0);
     String<TId> result;
 
     // iterate aligned reads and get search their begin and end positions
@@ -148,16 +148,16 @@ void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree
         for (unsigned j = 0; j < length(result); ++j)
         {
             SEQAN_OMP_PRAGMA(atomic)
-            readBasesPerGene[result[j]] += length(store.readSeqStore[ar.readId]);
+            readsPerGene[result[j]] += 1;
         }
     }
 }
 
 // FRAGMENT(yourcode)
 //
-// 6. Output gene counts
+// 6. Output RPKM values
 //
-void outputGeneCoverage(String<unsigned> const & readBasesPerGene, TStore const & store)
+void outputGeneCoverage(String<unsigned> const & readsPerGene, TStore const & store)
 {
     // INSERT YOUR CODE HERE ...
     //
@@ -170,7 +170,7 @@ int main(int argc, char const * argv[])
     TStore store;
     String<String<TInterval> > intervals;
     String<TIntervalTree> intervalTrees;
-    String<unsigned> readBasesPerGene;
+    String<unsigned> readsPerGene;
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
@@ -182,8 +182,8 @@ int main(int argc, char const * argv[])
 // FRAGMENT(main)
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
-    countReadsPerGene(readBasesPerGene, intervalTrees, store);
-    outputGeneCoverage(readBasesPerGene, store);
+    countReadsPerGene(readsPerGene, intervalTrees, store);
+    outputGeneCoverage(readsPerGene, store);
 // FRAGMENT(main_end)
 
     return 0;

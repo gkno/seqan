@@ -129,7 +129,7 @@ void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String
 //
 // 5. Count reads per gene
 //
-void countReadsPerGene(String<unsigned> & readBasesPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
+void countReadsPerGene(String<unsigned> & readsPerGene, String<TIntervalTree> const & intervalTrees, TStore const & store)
 {
     // INSERT YOUR CODE HERE ...
     //
@@ -143,7 +143,7 @@ int main(int argc, char const * argv[])
     String<String<TInterval> > intervals;
 // FRAGMENT(main)
     String<TIntervalTree> intervalTrees;
-    String<unsigned> readBasesPerGene;
+    String<unsigned> readsPerGene;
 // FRAGMENT(main_end)
 
     ArgumentParser::ParseResult res = parseOptions(options, argc, argv);
@@ -156,7 +156,7 @@ int main(int argc, char const * argv[])
 // FRAGMENT(main2)
     extractGeneIntervals(intervals, store);
     constructIntervalTrees(intervalTrees, intervals);
-    countReadsPerGene(readBasesPerGene, intervalTrees, store);
+    countReadsPerGene(readsPerGene, intervalTrees, store);
 // FRAGMENT(main2_end)
 
     return 0;
