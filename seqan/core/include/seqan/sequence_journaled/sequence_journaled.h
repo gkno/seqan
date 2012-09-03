@@ -109,7 +109,7 @@ public:
     {
         SEQAN_CHECKPOINT;
         assign(_holder, other._holder);
-        assign(*this, other);
+        set(*this, other);
     }
 
     template <typename TString>
@@ -512,7 +512,48 @@ clear(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 ...type:Spec.Journaled String
 ..include:seqan/sequence_journaled.h
  */
-// TODO(holtgrew): Write me! What about non-destructive version that creates a new copy and sets holder to it?
+// TODO(holtgrew): What about non-destructive version that creates a new copy and sets holder to it?
+// TODO(rmaerker): Only supported by SortedArray, since there is a bug in the UnbalancedTree iterator. Is not fixed since UT is deprecated.
+template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
+inline void
+flatten(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journaledString)
+{
+    typedef String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > TJournalString;
+    typedef typename Host<TJournalString>::Type THost;
+    typedef typename Position<TJournalString>::Type TPosition;
+    typedef typename JournalType<TJournalString>::Type TJournalEntries;
+    typedef typename Iterator<TJournalEntries>::Type TEntriesIterator;
+
+    TEntriesIterator it = end(journaledString._journalEntries);
+    TEntriesIterator itBegin = begin(journaledString._journalEntries);
+
+    TPosition lastRefPos = length(host(journaledString));
+    while (it != itBegin)
+    {
+        --it;
+        if (value(it).segmentSource == SOURCE_ORIGINAL)
+        {
+            // Check for a deletion and if there is one then erase this part from reference.
+            if ((value(it).physicalPosition + value(it).length) < lastRefPos)
+                erase(host(journaledString), value(it).physicalPosition + value(it).length, lastRefPos);
+            lastRefPos = value(it).physicalPosition;
+        }
+        else if (value(it).segmentSource == SOURCE_PATCH)
+        {
+            insert(host(journaledString),
+                   lastRefPos,
+                   THost(infix(journaledString._insertionBuffer, value(it).physicalPosition,
+                               value(it).physicalPosition + value(it).length)));
+        }
+    }
+    // Handle deletion at beginning of reference.
+    SEQAN_ASSERT_GEQ(lastRefPos, (TPosition) 0);
+    if (0 != lastRefPos)
+        erase(host(journaledString), (TPosition) 0, lastRefPos);
+    // After transmitting the journaled differences to the reference clear the insertion buffer and reset everything.
+    clear(journaledString);
+}
+
 
 // ----------------------------------------------------------------------------
 // Function erase
