@@ -10,7 +10,7 @@ using namespace seqan;
 template <typename TJournalEntriesIterator, typename TJournal, typename TPattern>
 void _searchAtBorder(String<int> & hitTarget,
                     TJournalEntriesIterator & entriesIt,
-                    TJournal & journal,
+                    TJournal const & journal,
                     TPattern const & needle)
 {
     typedef typename Position<TJournal>::Type TPosition;
@@ -20,7 +20,7 @@ void _searchAtBorder(String<int> & hitTarget,
     TPosition infixEnd = _min(length(journal),entriesIt->virtualPosition + entriesIt->length + length(needle) - 1);
 
     TPattern tmpInsBuffer = infix(journal, infixBegin, infixEnd);
-    Finder<TPattern> finder(tmpInsBuffer);
+    Finder<TPattern const> finder(tmpInsBuffer);
     Pattern<TPattern, Horspool> pattern(needle);
     while (find(finder, pattern))
     {
@@ -32,7 +32,7 @@ void _searchAtBorder(String<int> & hitTarget,
 template <typename TJournalEntriesIterator, typename TJournal, typename TPattern>
 void _findInPatchNode(String<int> & hitTarget,
                       TJournalEntriesIterator & entriesIt,
-                      TJournal & journal,
+                      TJournal const & journal,
                       TPattern const & needle)
 {
     typedef typename Position<TJournal>::Type TPosition;
@@ -41,7 +41,7 @@ void _findInPatchNode(String<int> & hitTarget,
     TPosition infixEnd = entriesIt->virtualPosition + entriesIt->length;
 
     TPattern tmpInsBuffer = infix(journal, infixBegin, infixEnd);
-    Finder<TPattern> finder(tmpInsBuffer);
+    Finder<TPattern const> finder(tmpInsBuffer);
     Pattern<TPattern, Horspool> pattern(needle);
 
     while (find(finder, pattern))
@@ -111,14 +111,14 @@ void findPatternInJournalString(String<int> & hitTarget,
 // FRAGMENT(findPatternInReference)
 template <typename TString>
 void findPatternInReference(String<int> & hits,
-                            TString & reference,
+                            TString const & reference,
                             TString const & needle)
 {
     // Check whether the pattern fits into the sequence.
     if (length(needle) > length(reference))
         return;
 
-    Finder<TString> finder(reference);
+    Finder<TString const> finder(reference);
     Pattern<TString, Horspool> pattern(needle);
     while (find(finder, pattern))
         appendValue(hits, beginPosition(finder));
@@ -206,7 +206,8 @@ int main()
     typedef StringSet< TJournal, Owner<JournaledSet> > TJournaledSet;
 
     // Open the stream to the file containing the sequences.
-    String<char> seqDatabasePath =  "/path/to/your/fasta/file/sequences.fasta";
+    String<char> seqDatabasePath = "/Users/rmaerker/Development/workspace_seqan_trunk/build/debug/sandbox/rmaerker/apps/seqGen/sequences.fasta";
+//    String<char> seqDatabasePath =  "/path/to/your/fasta/file/sequences.fasta";
     std::ifstream databaseFile(toCString(seqDatabasePath), std::ios_base::in);
     if(!databaseFile.good())
     {
