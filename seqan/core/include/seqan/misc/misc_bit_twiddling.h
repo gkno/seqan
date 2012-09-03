@@ -38,8 +38,6 @@
 #ifndef SEQAN_MISC_MISC_BIT_TWIDDLING_H_
 #define SEQAN_MISC_MISC_BIT_TWIDDLING_H_
 
-#include <intrin.h>
-
 #ifdef PLATFORM_WINDOWS_VS
 // Make intrinsics visible.  It appears that this is not necessary with VS 10
 // any more, for VS 9, it must be included.
