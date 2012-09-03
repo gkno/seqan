@@ -968,8 +968,9 @@ def printMemberOut(fl, data, category, lines, derivedfrom, highlight, showheadli
         fl.write('<table class="value_tab" cellspacing="0" cellpadding="0">')
 
         # Sort lines by their display link text and iterate over them.
-        keyed_lines = [(translateLinkDisplaytext(line.text()).lower(), line) for line in lines]
-        for key, line in sorted(keyed_lines):
+        keyed_lines = dict([(translateLinkDisplaytext(line.text()).lower(), line) for line in lines])
+        for key in sorted(keyed_lines.keys()):
+            line = keyed_lines[key]
             text = line.text()
             origin = ''
             do_highlight = highlight

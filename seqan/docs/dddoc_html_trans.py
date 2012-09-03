@@ -15,6 +15,7 @@ def translate(text):
     text = text.replace("\\ss", "&szlig;")
 
 #escapen spezieller Zeichen
+    text = text.replace("\\colon", ":")
     text = text.replace("\\dot", ".")
     text = text.replace("\\at", "@")
     text = text.replace("\\pipe", "|")
