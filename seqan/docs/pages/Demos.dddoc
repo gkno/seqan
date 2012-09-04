@@ -1046,8 +1046,8 @@ TCAG
 
 .Demo.Interval Tree:
 ..cat:Miscellaneous
-..summary:Parsing the output of BLAST call.
-..file:../core/demos/interval_core.cpp
+..summary:Construction and usage demo of the interval tree.
+..file:../core/demos/interval_tree.cpp
 ..demofor:Class.IntervalTree
 ..demofor:Class.IntervalAndCargo
 ..demofor:Function.createIntervalTree
