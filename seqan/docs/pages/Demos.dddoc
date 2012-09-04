@@ -1046,7 +1046,7 @@ TCAG
 
 .Demo.Interval Tree:
 ..cat:Miscellaneous
-..summary:Construction and usage demo of the interval tree.
+..summary:Construction and usage demo for the interval tree.
 ..file:../core/demos/interval_tree.cpp
 ..demofor:Class.IntervalTree
 ..demofor:Class.IntervalAndCargo
