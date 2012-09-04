@@ -1043,3 +1043,15 @@ TCAG
 ..demofor:Function.getQueryName
 ..demofor:Function.getDatabaseName
 .
+
+.Demo.Interval Tree:
+..cat:Miscellaneous
+..summary:Parsing the output of BLAST call.
+..file:../core/demos/interval_core.cpp
+..demofor:Class.IntervalTree
+..demofor:Class.IntervalAndCargo
+..demofor:Function.createIntervalTree
+..demofor:Function.findIntervals
+..demofor:Function.addIntervals
+..demofor:Function.removeIntervals
+.
