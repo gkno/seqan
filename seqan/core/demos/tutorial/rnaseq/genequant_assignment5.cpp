@@ -12,7 +12,7 @@ using namespace seqan;
 typedef FragmentStore<>                         TStore;
 typedef Value<TStore::TAnnotationStore>::Type   TAnnotation;
 typedef TAnnotation::TId                        TId;
-typedef TAnnotation::TId                        TPos;
+typedef TAnnotation::TPos                       TPos;
 typedef IntervalAndCargo<TPos, TId>             TInterval;
 typedef IntervalTree<TPos, TId>                 TIntervalTree;
 typedef Value<TStore::TAlignedReadStore>::Type  TAlignedRead;
