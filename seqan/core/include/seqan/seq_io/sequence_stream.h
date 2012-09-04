@@ -241,6 +241,8 @@ public:
         // Copy out, possibly detected/adjusted file type and format.
         _fileType = _impl->_fileType;
         _fileFormat = _impl->_fileFormat;
+        _isGood = _impl->_isGood && (_fileType != SeqIOFileType_::FILE_TYPE_ERROR) &&
+                (_fileFormat != SeqIOFileFormat_::FILE_FORMAT_ERROR);
     }
 };
 
