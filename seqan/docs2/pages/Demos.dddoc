@@ -866,7 +866,7 @@ TCAG
 ..demofor:Class.IntervalAndCargo
 ..demofor:Function.createIntervalTree
 ..demofor:Function.findIntervals
-..demofor:Function.addIntervals
-..demofor:Function.removeIntervals
+..demofor:Function.addInterval
+..demofor:Function.removeInterval
 .
 
