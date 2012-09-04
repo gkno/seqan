@@ -1,4 +1,4 @@
-///An example for using interval trees
+///An example for using interval trees.
 #include <iostream>
 #include <seqan/refinement.h>
 
@@ -16,7 +16,7 @@ int main()
     String<TInterval> intervals;
     resize(intervals, 5);
 
-    // store gene annotation in intervals
+///Store gene annotation in intervals.
     intervals[0].i1 = 5;   intervals[0].i2 = 1000;
     intervals[0].cargo = "gene";
 
@@ -34,26 +34,28 @@ int main()
 
     TIntervalTree tree(intervals);
 
-    // add another interval
+///Add another interval.
     TInterval interval;
     interval.i1 = 200; interval.i2 = 600;
     interval.cargo = "intron";
 
     addInterval(tree, interval);
 
+///Query a genomic region.
     TValue delBegin = 300;
     TValue delEnd   = 500;
     String<TCargo> results;
 
-    findIntervals(tree, delBegin, delEnd, results);     // query a genomic region
+    findIntervals(tree, delBegin, delEnd, results);
 
     std::cout << "Deletion " << delBegin << ".." << delEnd << " overlaps with ";
     for (unsigned i = 0; i < length(results); ++i)
         std::cout << results[i] << ",";
     std::cout << std::endl;
 
+///Query a single position.
     TValue snpPos = 150;
-    findIntervals(tree, snpPos, results);      // query a single position
+    findIntervals(tree, snpPos, results);
 
     std::cout << "SNP " << snpPos << " overlaps with ";
     for (unsigned i = 0; i < length(results); ++i)
@@ -65,10 +67,10 @@ int main()
     if (res)
         std::cout << "Removed exon interval 50..200.\n";
 
+///Now, redo the query. This time one interval less should be returned.
     String<TCargo> results2;
     findIntervals(tree, snpPos, results2);
 
-///Now, redo the query. This time one interval less should be returned
     std::cout << "SNP " << snpPos << " overlaps with ";
     for (unsigned i = 0; i < length(results2); ++i)
         std::cout << results2[i] << ",";
