@@ -58,6 +58,7 @@ i += 1;
  */
 
 #ifdef _OPENMP
+  #include <omp.h>
   #if defined(PLATFORM_WINDOWS_MINGW) || defined(PLATFORM_GCC)
     // GCC _Pragma operator
     #define SEQAN_DO_PRAGMA(x) _Pragma(#x)
