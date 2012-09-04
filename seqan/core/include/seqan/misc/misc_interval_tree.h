@@ -323,7 +323,7 @@ public:
 	size_t interval_counter;
 	
 /**
-.Memfunc.IntervalTree#IntervalTree
+.Memfunc.IntervalTree#IntervalTree:
 ..class:Class.IntervalTree
 ..summary:Constructor
 ..signature:IntervalTree()
@@ -458,7 +458,7 @@ typedef Tag<TagRandomCenter_> const RandomCenter;
 
 
 /**
-.Function.leftBoundary:
+.Function.leftBoundary
 ..cat:Miscellaneous
 ..summary:Access to the left boundary.
 ..signature:leftBoundary(interval)
@@ -480,7 +480,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.rightBoundary:
+.Function.rightBoundary
 ..cat:Miscellaneous
 ..summary:Access to the right boundary.
 ..signature:leftBoundary(interval)
@@ -502,7 +502,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.getLeftBoundary:
+.Function.getLeftBoundary
 ..cat:Miscellaneous
 ..summary:Get method for the left boundary.
 ..signature:leftBoundary(interval)
@@ -524,7 +524,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.getRightBoundary:
+.Function.getRightBoundary
 ..cat:Miscellaneous
 ..summary:Get method for the right boundary.
 ..signature:leftBoundary(interval)
@@ -546,7 +546,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.cargo:
+.Function.cargo
 ..signature:cargo(me)
 ..class:Class.IntervalAndCargo
 ..param.me:
@@ -562,7 +562,7 @@ SEQAN_CHECKPOINT
 }
 
 /**
-.Function.getCargo:
+.Function.getCargo
 ..signature:getCargo(me)
 ..class:Class.IntervalAndCargo
 ..param.me:
@@ -603,7 +603,7 @@ struct Cargo<IntervalAndCargo<TValue,TCargo> >
 ///////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.leftBoundary:
+.Function.leftBoundary
 ..signature:leftBoundary(point)
 ..class:Class.PointAndCargo
 ..param.point.type:Class.PointAndCargo
@@ -618,7 +618,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.rightBoundary:
+.Function.rightBoundary
 ..signature:rightBoundary(point)
 ..class:Class.PointAndCargo
 ..param.point.type:Class.PointAndCargo
@@ -633,7 +633,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.getLeftBoundary:
+.Function.getLeftBoundary
 ..signature:getLeftBoundary(point)
 ..class:Class.PointAndCargo
 ..param.point.type:Class.PointAndCargo
@@ -648,7 +648,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.getRightBoundary:
+.Function.getRightBoundary
 ..signature:getRightBoundary(point)
 ..class:Class.PointAndCargo
 ..param.point.type:Class.PointAndCargo
@@ -663,7 +663,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.cargo:
+.Function.cargo
 ..signature:cargo(point)
 ..class:Class.PointAndCargo
 ..param.point.type:Class.PointAndCargo
@@ -678,7 +678,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.cargo:
+.Function.cargo
 ..signature:getCargo(point)
 ..class:Class.IntervalAndCargo
 ..param.point:
@@ -857,6 +857,8 @@ struct ListType<IntervalTreeNode<TInterval,StoreIntervals> >
 ..signature:createIntervalTree(intervalTree, intervals [, tag])
 ..signature:createIntervalTree(g, pm, intervals [, tag])
 ..signature:createIntervalTree(g, pm, intervals, center [, tag]])
+..param.intervalTree:An interval tree
+...type:Class.IntervalTree
 ..param.g:DirectedGraph to create interval tree in.
 ...type:Class.Graph
 ..param.pm:Property map to use for the created interval tree.
@@ -1256,15 +1258,25 @@ _calcIntervalTreeRootCenter(TIntervals & intervals)
 
 /**
 .Function.addInterval
+..summary:Adds an interval to an interval tree.
 ..cat:Miscellaneous
 ..class:Class.IntervalTree
+..signature:addInterval(intervalTree, interval)
+..signature:addInterval(intervalTree, begin, end)
+..signature:addInterval(intervalTree, begin, end, cargo)
 ..signature:addInterval(graph, propertyMap, interval)
+..param.intervalTree:The interval tree to add the interval to.
+...type:Class.IntervalTree
+..param.interval:The interval to be added to the interval tree.
+..param.begin:Begin position of interval of type TValue.
+..param.end:End position of interval of type TValue.
+..param.cargo:Cargo to attach to the interval.
+...type:Class.IntervalAndCargo
 ..param.graph:The directed graph that contains the topography of the interval tree.
 ..param.propertyMap:The property map containing the node properties of the interval tree.
-..param.interval:The interval to be added to the interval tree.
-..summary:Adds an interval to an interval tree.
 ..include:seqan/misc/misc_interval_tree.h
 */
+
 template<typename TGraph, typename TPropertyMap, typename TInterval>
 void
 addInterval(TGraph & g, TPropertyMap & pm, TInterval interval)
@@ -1359,12 +1371,6 @@ SEQAN_CHECKPOINT
 
 }
 
-
-/**
-..signature:addInterval(intervalTree, interval)
-..param.intervalTree:The interval tree to add the interval to.
-...type:Class.IntervalTree
- */
 template<typename TValue, typename TCargo, typename TInterval>
 void
 addInterval(IntervalTree<TValue,TCargo> & itree, TInterval interval)
@@ -1376,14 +1382,6 @@ SEQAN_CHECKPOINT
 
 }
 
-
-// TODO(holtgrewe): Is this begin/end in C++ style or is it first/last?
-/**
-..signature:addInterval(intervalTree, begin, end, cargo)
-..param.begin:Begin position of interval of type TValue.
-..param.end:End position of interval of type TValue.
-..param.cargo:Cargo to attach to the interval.
- */
 template<typename TValue, typename TCargo>
 void
 addInterval(IntervalTree<TValue,TCargo> & itree, TValue begin, TValue end, TCargo cargo)
@@ -1399,10 +1397,6 @@ SEQAN_CHECKPOINT
 
 }
 
-
-/**
-..signature:addInterval(intervalTree, begin, end)
- */
 template<typename TValue, typename TCargo>
 void
 addInterval(IntervalTree<TValue,TCargo> & itree, TValue begin, TValue end)
@@ -1418,13 +1412,22 @@ SEQAN_CHECKPOINT
 
 }
 
-
 /**
 .Function.findIntervals
-..cat:Miscellaneous
 ..summary:Find all intervals that contain the query point or overlap with the query interval.
+..cat:Miscellaneous
+..class:Class.IntervalTree
+..signature:findIntervals(intervalTree, query, result)
+..signature:findIntervals(intervalTree, query_begin, query_end, result)
 ..signature:findIntervals(graph, propertyMap, query, result)
+..param.intervalTree:An interval tree
+...type:Class.IntervalTree
 ..param.query:A query point.
+..param.query_begin:The begin position of the query interval.
+..param.query_end:The end position of the query interval.
+..param.result:
+...type:Class.String
+...remarks:A reference to the result string of $TCargo$ objects.
 ..include:seqan/misc/misc_interval_tree.h
 */
 template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>
@@ -1508,13 +1511,6 @@ SEQAN_CHECKPOINT
 
 }
 
-
-/**
-..signature:findIntervals(intervalTree, query, result)
-..class:Class.IntervalTree
-..param.intervalTree:An interval tree
-...type:Class.IntervalTree
-*/
 template <typename TValue, typename TCargo>
 inline void
 findIntervals(
@@ -1526,128 +1522,6 @@ SEQAN_CHECKPOINT
 	findIntervals(it.g,it.pm,query,result);
 }
 
-
-/**
-.Function.findIntervalsExcludeTouching
-..cat:Miscellaneous
-..summary:Find all intervals that contain the query point, exclude intervals that touch the query, i.e. where the query point equals the start or end point.
-..signature:findIntervalsExcludeTouching(graph, propertyMap, query, result)
-..param.graph:The directed graph that contains the topography of the interval tree.
-..param.propertyMap:The property map containing the node properties of the interval tree
-..param.query:The TValue to query here.
-..param.result:The resulting string of cargos/ids of the intervals that contain the query point.
-...type:Class.String
-...remark:Should be a string of TCargo.
-..include:seqan/misc/misc_interval_tree.h
- */
-template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>
-inline void
-findIntervalsExcludeTouching(
-    Graph<TSpec> const & g,
-    TPropertyMap const & pm,
-    TValue query,
-    String<TCargo> & result)
-{
-SEQAN_CHECKPOINT
-
-    typedef Graph<TSpec> const TGraph;
-	typedef typename Iterator<TGraph, OutEdgeIterator >::Type TOutEdgeIterator;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Value<TPropertyMap>::Type TProperty;
-	
-	resize(result,0);
-    if (empty(g)) return;
-
-	// start at root
-	TVertexDescriptor act_knot = 0;
-	TProperty act_prop = property(pm,act_knot);
-	TProperty next_prop;
-		
-	while(true)
-	{
-		TOutEdgeIterator it(g, act_knot);
-		act_prop = property(pm,act_knot);
-		if( (TValue) act_prop.center < query) // look in current node and right subtree
-		{
-			int i = 0;
-			while(i < (int) length(act_prop.list2) && (TValue) rightBoundary(value(act_prop.list2,i)) > query)
-			{
-				appendValue(result,cargo(value(act_prop.list2,i)), Generous());
-				++i;	
-			}
-			if(atEnd(it)) break;
-			else{
-				next_prop = property(pm,targetVertex(it));
-				if(next_prop.center <= act_prop.center)
-				{
-					goNext(it);
-					if(atEnd(it)) break;
-				}
-			}
-			act_knot = targetVertex(it);
-		}
-		else{
-			if(query < (TValue) act_prop.center) // look in current node and left subtree
-			{
-				int i = 0;
-				while(i < (int) length(act_prop.list1) && (TValue) leftBoundary(value(act_prop.list1,i)) < query)
-				{
-					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
-					++i;
-				}
-				if(atEnd(it)) break;
-				else
-				{
-					next_prop = property(pm,targetVertex(it));
-					if(next_prop.center >= act_prop.center)
-					{
-						goNext(it);
-						if(atEnd(it)) break;
-					}
-				}
-				act_knot = targetVertex(it);
-			}
-			else{ // look in current node only
-				int i = 0;
-				while(i < (int) length(act_prop.list1) && (TValue) leftBoundary(value(act_prop.list1,i)) < query)
-				{
-					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
-					++i;
-				}
-				break;
-			}
-		}
-	}
-
-}
-
-
-/**
-..signature:findIntervalsExcludeTouching(intervalTree, query, result)
-..class:Class.IntervalTree
-..param.intervalTree:An interval tree
-...type:Class.IntervalTree
-*/
-template <typename TValue, typename TCargo>
-inline void
-findIntervalsExcludeTouching(
-    IntervalTree<TValue,TCargo> const & tree,
-    TValue query,
-    String<TCargo> & result)
-{
-SEQAN_CHECKPOINT
-	findIntervalsExcludeTouching(tree.g,tree.pm,query,result);
-}
-
-
-
-
-/**
-.Function.findIntervals
-..signature:findIntervals(intervalTree, query_begin, query_end, result)
-..param.query_begin:The begin position of the query interval.
-..param.query_end:The end position of the query interval.
-*/
 template <typename TValue, typename TCargo>
 inline void
 findIntervals(
@@ -1659,8 +1533,6 @@ findIntervals(
 SEQAN_CHECKPOINT
 	findIntervals(tree.g,tree.pm,query_begin,query_end,result);
 }
-
-
 
 template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>
 inline void
@@ -1773,6 +1645,130 @@ SEQAN_CHECKPOINT
 		}
 	}
 }
+
+
+/**
+.Function.findIntervalsExcludeTouching
+..summary:Find all intervals that contain the query point, exclude intervals that touch the query, i.e. where the query point equals the start or end point.
+..signature:findIntervalsExcludeTouching(intervalTree, query, result)
+..signature:findIntervalsExcludeTouching(graph, propertyMap, query, result)
+..cat:Miscellaneous
+..class:Class.IntervalTree
+..param.intervalTree:An interval tree
+...type:Class.IntervalTree
+..param.graph:The directed graph that contains the topography of the interval tree.
+..param.propertyMap:The property map containing the node properties of the interval tree
+..param.query:The TValue to query here.
+..param.result:The resulting string of cargos/ids of the intervals that contain the query point.
+...type:Class.String
+...remarks:Should be a string of TCargo.
+..include:seqan/misc/misc_interval_tree.h
+*/
+template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>
+inline void
+findIntervalsExcludeTouching(
+    Graph<TSpec> const & g,
+    TPropertyMap const & pm,
+    TValue query,
+    String<TCargo> & result)
+{
+SEQAN_CHECKPOINT
+
+    typedef Graph<TSpec> const TGraph;
+	typedef typename Iterator<TGraph, OutEdgeIterator >::Type TOutEdgeIterator;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Value<TPropertyMap>::Type TProperty;
+	
+	resize(result,0);
+    if (empty(g)) return;
+
+	// start at root
+	TVertexDescriptor act_knot = 0;
+	TProperty act_prop = property(pm,act_knot);
+	TProperty next_prop;
+		
+	while(true)
+	{
+		TOutEdgeIterator it(g, act_knot);
+		act_prop = property(pm,act_knot);
+		if( (TValue) act_prop.center < query) // look in current node and right subtree
+		{
+			int i = 0;
+			while(i < (int) length(act_prop.list2) && (TValue) rightBoundary(value(act_prop.list2,i)) > query)
+			{
+				appendValue(result,cargo(value(act_prop.list2,i)), Generous());
+				++i;	
+			}
+			if(atEnd(it)) break;
+			else{
+				next_prop = property(pm,targetVertex(it));
+				if(next_prop.center <= act_prop.center)
+				{
+					goNext(it);
+					if(atEnd(it)) break;
+				}
+			}
+			act_knot = targetVertex(it);
+		}
+		else{
+			if(query < (TValue) act_prop.center) // look in current node and left subtree
+			{
+				int i = 0;
+				while(i < (int) length(act_prop.list1) && (TValue) leftBoundary(value(act_prop.list1,i)) < query)
+				{
+					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
+					++i;
+				}
+				if(atEnd(it)) break;
+				else
+				{
+					next_prop = property(pm,targetVertex(it));
+					if(next_prop.center >= act_prop.center)
+					{
+						goNext(it);
+						if(atEnd(it)) break;
+					}
+				}
+				act_knot = targetVertex(it);
+			}
+			else{ // look in current node only
+				int i = 0;
+				while(i < (int) length(act_prop.list1) && (TValue) leftBoundary(value(act_prop.list1,i)) < query)
+				{
+					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
+					++i;
+				}
+				break;
+			}
+		}
+	}
+
+}
+
+template <typename TValue, typename TCargo>
+inline void
+findIntervalsExcludeTouching(
+    IntervalTree<TValue,TCargo> const & tree,
+    TValue query,
+    String<TCargo> & result)
+{
+SEQAN_CHECKPOINT
+	findIntervalsExcludeTouching(tree.g,tree.pm,query,result);
+}
+
+
+/**
+.Function.removeInterval
+..summary:Removes an interval from the interval tree.
+..signature:removeInterval(intervalTree, i_begin, i_end, i_id)
+..cat:Miscellaneous
+..class:Class.IntervalTree
+..param.intervalTree:An interval tree
+...type:Class.IntervalTree
+..param.i_begin:The begin position of the interval to be removed.
+..param.i_end:The end position of the interval to be removed.
+..param.i_id:The ID of the interval to be removed.
+*/
 
 template <
     typename TSpec,
@@ -1910,15 +1906,6 @@ SEQAN_CHECKPOINT
 	return removeInterval(g, pm, act_knot, i_begin, i_end, i_id);
 }
 
-
-
-/**
-.Function.removeInterval
-..signature:removeInterval(intervalTree, i_begin, i_end, i_id)
-..param.i_begin:The begin position of the interval to be removed.
-..param.i_end:The end position of the interval to be removed.
-..param.i_id:The ID of the interval to be removed.
-*/
 template <typename TValue, typename TCargo>
 inline bool
 removeInterval(
