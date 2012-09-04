@@ -828,8 +828,11 @@ inline bool goUpStructureConstruction_(Iter<RightArrayBinaryTree<TChar, TSpec>, 
 
 /**
 .Function.isLeaf
-..param.iterator:An iterator of a wavelet tree structure.
-..example.code:
+..class:Spec.RightArrayBinaryTree Iterator
+..param.iterator.type:Spec.RightArrayBinaryTree Iterator
+..example:
+...text:Code example for the @Spec.RightArrayBinaryTree Iterator@:
+...code:
 String<Dna5> genome = "ACGTACGT";
 RightArrayBinaryTree<Dna5> waveletTreeStructure(genome);
 
@@ -1024,9 +1027,11 @@ inline void setRightChildPosOnly_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIter
 
 /**
 .Function.isRoot
-..param.iterator:An iterator of a wavelet tree structure.
-...type:Spec.TopDown Iterator
-..example.code:
+..class:Spec.RightArrayBinaryTree Iterator
+..param.iterator.type:Spec.RightArrayBinaryTree Iterator
+..example
+...text:Code example for the @Spec.RightArrayBinaryTree Iterator@:
+...code:
 String<Dna5> genome = "ACGTACGT";
 RightArrayBinaryTree<Dna5> waveletTreeStructure(genome);
 
