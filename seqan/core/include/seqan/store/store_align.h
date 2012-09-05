@@ -109,8 +109,7 @@ If it equals @Memvar.AlignedReadStoreElement#INVALID_ID@, the read is either not
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#endPos
 ..summary:End position of the alignment in gap-space. If @Memvar.AlignedReadStoreElement#endPos@ < @Memvar.AlignedReadStoreElement#beginPos@, the read is aligned to the reverse strand, 
-where @Memvar.AlignedReadStoreElement#beginPos@ and @Memvar.AlignedReadStoreElement#endPos@ are the corresponding addresses
-on the forward strand.
+where @Memvar.AlignedReadStoreElement#beginPos@ and @Memvar.AlignedReadStoreElement#endPos@ are the corresponding positions on the forward strand.
 ..type:Typedef.AlignedReadStoreElement#TPos
 ..class:Class.AlignedReadStoreElement
 .Memvar.AlignedReadStoreElement#gaps

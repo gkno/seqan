@@ -59,63 +59,89 @@ The id of an annotation (aka annotationId) is not stored explicitly, as it is im
 ..summary:Type of annotationId and @Memvar.AnnotationStoreElement#contigId@.
 ..remarks:$TId$ equals the result of $Id<AnnotationStoreElement<> >::Type$, see @Metafunction.Id@.
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Typedef.AnnotationStoreElement#TPos
 ..summary:Type of the @Memvar.AnnotationStoreElement#beginPos@ and @Memvar.AnnotationStoreElement#endPos@ members.
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Typedef.AnnotationStoreElement#TValues
 ..summary:@Class.StringSet@ type of the @Memvar.AnnotationStoreElement#values@ member.
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 
 .Memfunc.AnnotationStoreElement#AnnotationStoreElement
 ..summary:Constructor
 ..signature:AnnotationStoreElement()
 ..remarks:The default constructor sets all members to @Memvar.AnnotationStoreElement#INVALID_ID@ and 
 @Memvar.AnnotationStoreElement#beginPos@ and @Memvar.AnnotationStoreElement#endPos@ to @Memvar.AnnotationStoreElement#INVALID_POS@.
-
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#contigId
 ..summary:Refers to the contig in the @Memvar.FragmentStore#contigStore@ the annotation is part of.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#typeId
 ..summary:Refers to an entry in the @Memvar.FragmentStore#annotationTypeStore@. 
-There are some type ids predefined for commonly used types, e.g. $ANNO_GENE$. See @Memvar.FragmentStore#annotationTypeStore@.
+There are some type ids predefined for commonly used types, e.g. $ANNO_GENE$. See @Enum.Predefined Annotation Types@.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#beginPos
 ..summary:Begin position of the annotation in gap-space.
 ..type:Typedef.AnnotationStoreElement#TPos
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#endPos
 ..summary:End position of the annotation in gap-space. If @Memvar.AnnotationStoreElement#endPos@ < @Memvar.AnnotationStoreElement#beginPos@, 
 the annotated feature is located on the reverse strand, where @Memvar.AnnotationStoreElement#beginPos@ and @Memvar.AnnotationStoreElement#endPos@
-are the corresponding addresses on the forward strand.
+are the corresponding positions on the forward strand.
 ..type:Typedef.AnnotationStoreElement#TPos
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#values
 ..summary:@Class.StringSet@ that stores additional annotation values addressed by $keyId$. The GFF/GTF file format allows to define user-specific key-value pairs. The set of all keys addressed by $keyId$ are stored in the @Memvar.FragmentStore#annotationKeyStore@.
 ..type:Typedef.AnnotationStoreElement#TValues
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#parentId
 ..summary:The id of the parent annotation.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#nextSiblingId
 ..summary:The id of the right sibling annotation.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#lastChildId
 ..summary:The id of the rightmost child annotation.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#INVALID_ID
 ..summary:Constant to represent an invalid id.
 ..type:Metafunction.Id
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
+
 .Memvar.AnnotationStoreElement#INVALID_POS
 ..summary:Constant to represent an invalid position.
 ..type:Typedef.AnnotationStoreElement#TPos
 ..class:Class.AnnotationStoreElement
+..include:seqan/store.h
 */
 
 template <typename TPos_, typename TSpec = void>
@@ -166,8 +192,9 @@ struct AnnotationTree {};
 .Spec.AnnotationTree Iterator:
 ..cat:FragmentStore
 ..summary:Iterator of the annotation tree represented by a @Class.FragmentStore@.
-..remarks:This iterator can move down, right, and up in the tree and supports a preorder dfs traversal via the functions @Function.goBegin@, @Function.goNext@, and @Function.atEnd@.
+..remarks:This iterator can move @Function.AnnotationTree#goDown|down@, @Function.AnnotationTree#goRight|right@, and @Function.AnnotationTree#goUp|up@ in the tree and supports a preorder dfs traversal via the functions @Function.goBegin@, @Function.goNext@, and @Function.atEnd@.
 Preorder means that the iterator visits a node before its children.
+..remarks:To access the annotation, the iterator points to, use @Function.getAnnotation@. The annotation id is returned by @Function.value@.
 ..signature:Iter<TFragmentStore, AnnotationTree<> >
 ..signature:Iterator<TFragmentStore, AnnotationTree<> >::Type
 ..general:Class.Iter
@@ -182,7 +209,7 @@ Preorder means that the iterator visits a node before its children.
 ...code:
 Iterator<FragmentStore<>, AnnotationTree<> >::Type it;
 it = begin(store, AnnotationTree<>());
-...text:Or shorter (see @Memfunc.AnnotationTree Iterator#AnnotationTree Iterator@):
+...text:Or shorter (see @Memfunc.AnnotationTree Iterator#AnnotationTree Iterator|AnnotationTree Iterator constructor@):
 ...code:
 Iterator<FragmentStore<>, AnnotationTree<> >::Type it(store);
 
@@ -195,11 +222,13 @@ Iterator<FragmentStore<>, AnnotationTree<> >::Type it(store);
 ...type:Class.FragmentStore
 ..param.startInNode:Annotation id of the node the iterator should start at.
 ...default:$0$, the id of the root node.
+..include:seqan/store.h
 ..remarks:The @Function.begin@ function can also be used to create a tree iterator that starts in the root node:
 ...code:
 Iterator<FragmentStore<>, AnnotationTree<> >::Type it;
 it = begin(store, AnnotationTree<>());
 */
+
 template <typename TFragmentStore, typename TSpec>
 class Iter<TFragmentStore, AnnotationTree<TSpec> >
 {

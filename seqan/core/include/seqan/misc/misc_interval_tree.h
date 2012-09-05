@@ -1425,9 +1425,8 @@ SEQAN_CHECKPOINT
 ..param.query:A query point.
 ..param.query_begin:The begin position of the query interval.
 ..param.query_end:The end position of the query interval.
-..param.result:
+..param.result:A reference to the result string of $TCargo$ objects
 ...type:Class.String
-...remarks:A reference to the result string of $TCargo$ objects.
 ..include:seqan/misc/misc_interval_tree.h
 */
 template <typename TSpec, typename TPropertyMap, typename TValue, typename TCargo>

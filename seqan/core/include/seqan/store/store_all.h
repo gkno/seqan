@@ -314,51 +314,83 @@ struct FragmentStoreConfig
 .Typedef.FragmentStore#TReadStore
 ..summary:Type of the @Memvar.FragmentStore#readStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TReadSeqStore
 ..summary:Type of the @Memvar.FragmentStore#readSeqStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TMatePairStore
 ..summary:Type of the @Memvar.FragmentStore#matePairStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TLibraryStore
 ..summary:Type of the @Memvar.FragmentStore#libraryStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TContigFileStore
 ..summary:Type of the @Memvar.FragmentStore#contigFileStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TContigStore
 ..summary:Type of the @Memvar.FragmentStore#contigStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TAlignedReadStore
 ..summary:Type of the @Memvar.FragmentStore#alignedReadStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TAnnotationStore
 ..summary:Type of the @Memvar.FragmentStore#annotationStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TAlignQualityStore
 ..summary:Type of the @Memvar.FragmentStore#alignQualityStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TAlignedReadTagStore
 ..summary:Type of the @Memvar.FragmentStore#alignedReadTagStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TReadNameStore
 ..summary:Type of the @Memvar.FragmentStore#readNameStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TMatePairNameStore
 ..summary:Type of the @Memvar.FragmentStore#matePairNameStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TLibraryNameStore
 ..summary:Type of the @Memvar.FragmentStore#libraryNameStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TContigNameStore
 ..summary:Type of the @Memvar.FragmentStore#contigNameStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TAnnotationNameStore
 ..summary:Type of the @Memvar.FragmentStore#annotationNameStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TAnnotationTypeStore
 ..summary:Type of the @Memvar.FragmentStore#annotationTypeStore@ member.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Typedef.FragmentStore#TAnnotationKeyStore
 ..summary:Type of the @Memvar.FragmentStore#annotationKeyStore@ member.
 ..class:Class.FragmentStore
@@ -368,30 +400,42 @@ struct FragmentStoreConfig
 ..remarks:Value type is @Class.ReadStoreElement@.
 ..type:Typedef.FragmentStore#TReadStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#readSeqStore
 ..summary:@Class.StringSet@ that maps from $readId$ to $readSeq$.
 ..type:Typedef.FragmentStore#TReadSeqStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#matePairStore
 ..summary:@Class.String@ that maps from $matePairId$ to $<readId[2], libId>$.
 ..type:Typedef.FragmentStore#TMatePairStore
 ..remarks:Value type is @Class.MatePairStoreElement@.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#libraryStore
 ..summary:@Class.String@ that maps from $libId$ to $<mean, std>$.
 ..type:Typedef.FragmentStore#TLibraryStore
 ..remarks:Value type is @Class.LibraryStoreElement@.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#contigFileStore
 ..summary:@Class.String@ that maps from $contigFileId$ to $<fileName, firstContigId>$.
 ..type:Typedef.FragmentStore#TContigFileStore
 ..remarks:Value type is @Class.ContigFile@.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#contigStore
 ..summary:@Class.String@ that maps from $contigId$ to $<contigSeq, contigGaps, contigFileId>$.
 ..type:Typedef.FragmentStore#TContigStore
 ..remarks:Value type is @Class.ContigStoreElement@.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#alignedReadStore
 ..summary:@Class.String@ that stores $<alignId, readId, contigId, pairMatchId, beginPos, endPos, gaps>$.
 ..remarks:
@@ -403,51 +447,88 @@ After sorting, you can use the functions @Function.lowerBoundAlignedReads@ and @
 ..see:Function.lowerBoundAlignedReads
 ..see:Function.upperBoundAlignedReads
 ..see:Function.sortAlignedReads
+..include:seqan/store.h
+
 .Memvar.FragmentStore#annotationStore
 ..summary:@Class.String@ that maps from $annoId$ to $<contigId, typeId, beginPos, endPos, parentId, lastChildId, nextSiblingId, values>$.
 ..type:Typedef.FragmentStore#TAnnotationStore
 ..remarks:Value type is @Class.AnnotationStoreElement@.
 ..remarks:Instead of accesing this store directly, consider to use a high-level interface like the @Spec.AnnotationTree Iterator@.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#alignQualityStore
 ..summary:@Class.String@ that maps from $alignId$ to $<pairScore, score, errors>$.
 ..type:Typedef.FragmentStore#TAlignQualityStore
 ..remarks:Value type is @Class.AlignQualityStoreElement@.
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#alignedReadTagStore
 ..summary:@Class.StringSet@ that maps from $alignId$ to $alignTag$.
 ..type:Typedef.FragmentStore#TAlignedReadTagStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#readNameStore
 ..summary:@Class.StringSet@ that maps from $readId$ to $readName$.
 ..type:Typedef.FragmentStore#TReadNameStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#matePairNameStore
 ..summary:@Class.StringSet@ that maps from $contigId$ to $contigName$.
 ..type:Typedef.FragmentStore#TMatePairNameStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#libraryNameStore
 ..summary:@Class.StringSet@ that maps from $libId$ to $libName$.
 ..type:Typedef.FragmentStore#TLibraryNameStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#contigNameStore
 ..summary:@Class.StringSet@ that maps from $contigId$ to $contigName$.
 ..type:Typedef.FragmentStore#TContigNameStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#annotationNameStore
 ..summary:@Class.StringSet@ that maps from $annoId$ to $annoName$.
 ..type:Typedef.FragmentStore#TAnnotationNameStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
 .Memvar.FragmentStore#annotationTypeStore
 ..summary:@Class.StringSet@ that maps from $typeId$ to the type name of an annotation, e.g. "gene" or "exon". $typeId$ is a member of the @Class.AnnotationStoreElement@.
 ..type:Typedef.FragmentStore#TAnnotationTypeStore
 ..class:Class.FragmentStore
-..remarks:There are predefined type ids for commonly used types: $ANNO_ROOT$, $ANNO_DELETED$, $ANNO_GENE$, $ANNO_MRNA$, $ANNO_CDS$, $ANNO_EXON$, $ANNO_FIVE_PRIME_UTR$, $ANNO_INTRON$, $ANNO_THREE_PRIME_UTR$, $ANNO_PREDEFINED$ are
-the type ids of the following types: annotation tree root node, a deleted node, "gene", "mRNA", "CDS", "exon", "five_prime_UTR", "intron", "three_prime_UTR".
+..include:seqan/store.h
+
+..remarks:There are @Enum.Predefined Annotation Types|predefined type ids@ for commonly used types, e.g. $ANNO_GENE$ or $ANNO_EXON$,
+which can be used to set the @Memvar.AnnotationStoreElement#typeId@ directly as a fast alternative to @Function.getType@ and @Function.setType@.
 .Memvar.FragmentStore#annotationKeyStore
 ..summary:@Class.StringSet@ that maps from $keyId$ to the name of a key. The $keyId$ is used to address @Memvar.AnnotationStoreElement#values@ of an annotation.
 ..type:Typedef.FragmentStore#TAnnotationKeyStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
+
+.Enum.Predefined Annotation Types
+..class:Class.FragmentStore
+..cat:Fragment Store
+..summary:Predefined annotation type ids.
+..remarks:The @Class.FragmentStore@ predefines some commonly used @Memvar.AnnotationStoreElement#typeId@ values.
+They can be used to compare or set the @Memvar.AnnotationStoreElement#typeId@ directly as a fast alternative to @Function.getType@ and @Function.setType@.
+..value.ANNO_ROOT:The root node ("<root>").
+..value.ANNO_GENE:A gene ("gene").
+..value.ANNO_MRNA:An mRNA sequence, aka transcript ("mRNA").
+..value.ANNO_CDS:A coding region ("CDS").
+..value.ANNO_EXON:An exon ("exon").
+..value.ANNO_FIVE_PRIME_UTR:A 5' untranslated region ("five_prime_UTR").
+..value.ANNO_INTRON:An intron ("intron").
+..value.ANNO_THREE_PRIME_UTR:A 3' untranslated region ("three_prime_UTR").
+..include:seqan/store.h
 */
 
 
