@@ -118,10 +118,11 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
 //
 void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String<TInterval> > const & intervals)
 {
-    resize(intervalTrees, length(intervals));
+    int numContigs = length(intervals);
+    resize(intervalTrees, numContigs);
 
     SEQAN_OMP_PRAGMA(parallel for)
-    for (unsigned i = 0; i < length(intervals); ++i)
+    for (int i = 0; i < numContigs; ++i)
         createIntervalTree(intervalTrees[i], intervals[i]);
 }
 

@@ -116,10 +116,11 @@ void extractGeneIntervals(String<String<TInterval> > & intervals, TStore const &
 //
 void constructIntervalTrees(String<TIntervalTree> & intervalTrees, String<String<TInterval> > const & intervals)
 {
-    resize(intervalTrees, length(intervals));
+    int numContigs = length(intervals);
+    resize(intervalTrees, numContigs);
 
     SEQAN_OMP_PRAGMA(parallel for)
-    for (unsigned i = 0; i < length(intervals); ++i)
+    for (int i = 0; i < numContigs; ++i)
         createIntervalTree(intervalTrees[i], intervals[i]);
 }
 
@@ -130,10 +131,11 @@ void countReadsPerGene(String<unsigned> & readsPerGene, String<TIntervalTree> co
 {
     resize(readsPerGene, length(store.annotationStore), 0);
     String<TId> result;
+    int numAlignments = length(store.alignedReadStore);
 
     // iterate aligned reads and get search their begin and end positions
     SEQAN_OMP_PRAGMA(parallel for private(result))
-    for (unsigned i = 0; i < length(store.alignedReadStore); ++i)
+    for (int i = 0; i < numAlignments; ++i)
     {
         TAlignedRead const & ar = store.alignedReadStore[i];
         TPos queryBegin = _min(ar.beginPos, ar.endPos);
