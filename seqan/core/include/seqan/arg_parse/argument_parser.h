@@ -267,9 +267,9 @@ inline void addOption(ArgumentParser & me, ArgParseOption const & opt)
     appendValue(me.optionMap, opt);
 
     if (!empty(opt.shortName))
-        me.shortNameMap.insert(std::make_pair<std::string, ArgumentParser::TOptionMapSize>(opt.shortName, length(me.optionMap) - 1));
+        me.shortNameMap.insert(std::make_pair(opt.shortName, length(me.optionMap) - 1));
     if (!empty(opt.longName))
-        me.longNameMap.insert(std::make_pair<std::string, ArgumentParser::TOptionMapSize>(opt.longName, length(me.optionMap) - 1));
+        me.longNameMap.insert(std::make_pair(opt.longName, length(me.optionMap) - 1));
 }
 
 // ----------------------------------------------------------------------------

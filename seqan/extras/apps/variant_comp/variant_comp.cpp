@@ -103,7 +103,7 @@ bool loadGenomes(const char* fileName,
 			}
 		}
 		genomeIDs[i] = temp;
-		gIdStringToIdNumMap.insert(::std::make_pair<CharString,unsigned>(temp,i)); 
+		gIdStringToIdNumMap.insert(::std::make_pair(temp,i)); 
 	}
 	return (seqCount > 0);
 }

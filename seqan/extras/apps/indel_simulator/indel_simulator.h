@@ -174,7 +174,7 @@ bool loadGenomes(const char* fileName,
 			}
 		}
 		genomeIDs[i] = temp;
-		gIdStringToIdNumMap.insert(::std::make_pair<CharString,unsigned>(temp,i)); 
+		gIdStringToIdNumMap.insert(::std::make_pair(temp,i));
 	}
 	return (seqCount > 0);
 }
@@ -658,7 +658,7 @@ simulateIndelsFromRanges( ::std::map<int,IndelInfo>	&indelMap,
 		info.indelSize = indelSize;
 		info.duplication = duplication; 
 		
-		indelMap.insert(std::make_pair<int,IndelInfo>(randPos,info));
+		indelMap.insert(std::make_pair(randPos,info));
 		++count;
 		if(options._debugLevel > 1 && count%100==0) std::cout << "." << std::flush;
 		if(options._debugLevel > 1 && count%1000==0) std::cout << count<< std::flush;
@@ -746,7 +746,7 @@ simulateIndelsFromGff( ::std::map<int,IndelInfo> &indelMap,
 		
 		
 		if(options._debugLevel > 1) std::cout << "randPos = " << randPos << std::endl;
-		indelMap.insert(std::make_pair<int,IndelInfo>(randPos,indelSet[indelsetPos]));
+		indelMap.insert(std::make_pair(randPos,indelSet[indelsetPos]));
 		++count;
 
 		if(options._debugLevel > 1 && count%100==0) std::cout << "." << std::flush;

@@ -97,7 +97,7 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList, ::std
                     break;
                 }
             }
-            gIdStringToIdNumMap.insert(::std::make_pair<CharString,unsigned>(temp,gSeqNo+i)); //TODO shortID
+            gIdStringToIdNumMap.insert(::std::make_pair(temp,gSeqNo+i)); //TODO shortID
             appendValue(genomeNames,temp);
         }
         gSeqNo += seqCount;

@@ -5314,9 +5314,8 @@ void dumpShortIndelPolymorphismsBatch(
                     readLen - (readInserts[i].i2).i1);
                 if((*matchIt).beginPos > (*matchIt).endPos) reverseComplement(rInf);
                 
-                indels.insert(std::make_pair<Pair<unsigned,int>,Pair<unsigned,TReadInf> >
-                    (Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),
-                     Pair<unsigned,TReadInf>(1,rInf)));
+                indels.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),
+                                             Pair<unsigned,TReadInf>(1,rInf)));
                 
     //          if(extraV)std::cout << rInf << " <-" << (*matchIt).id<<std::endl;
             }
@@ -5348,8 +5347,7 @@ void dumpShortIndelPolymorphismsBatch(
                 splitCountIt = splitCounts.find(Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2));
                 if(splitCountIt == splitCounts.end())
                 {
-                    splitCounts.insert(std::make_pair<Pair<unsigned,int>,unsigned>
-                    (Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),1));
+                    splitCounts.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),1));
                 
                 }
                 else
@@ -5373,8 +5371,7 @@ void dumpShortIndelPolymorphismsBatch(
             indelIt = indels.find(Pair<unsigned,int>(indelCandPos,(int)(readDeletes[i].i2).i2));
             if(indelIt == indels.end())
             {
-                indels.insert(std::make_pair<Pair<unsigned,int>,Pair<unsigned,TReadInf> >
-                    (Pair<unsigned,int>(indelCandPos,(int)(readDeletes[i].i2).i2),
+                indels.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,(int)(readDeletes[i].i2).i2),
                      Pair<unsigned,TReadInf>(1,dummyInf)));
             }
             else
