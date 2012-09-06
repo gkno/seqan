@@ -99,7 +99,7 @@ if (WIN32)
     #else (NOT DEFINED SEQAN_CONTRIB_BASE)
     #	message("SEQAN_CONTRIB_BASE is ${SEQAN_CONTRIB_BASE}")
     #endif (NOT DEFINED SEQAN_CONTRIB_BASE)
-	
+
 	# Try to figure out the generator.
 	if (IS_DIRECTORY ${SEQAN_CONTRIB_BASE})
 		if (CMAKE_GENERATOR MATCHES "^Visual Studio .*")
@@ -108,7 +108,7 @@ if (WIN32)
 		elseif (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
 			set (SEQAN_CONTRIB_VARIANT mingw)
 		endif (CMAKE_GENERATOR MATCHES "^Visual Studio .*")
-		
+
         #message(STATUS "SEQAN_CONTRIB_BASE    is ${SEQAN_CONTRIB_BASE}")
         #message(STATUS "SEQAN_CONTRIB_VARIANT is ${SEQAN_CONTRIB_VARIANT}")
 
@@ -150,7 +150,7 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH})
 
 #message (STATUS "CMAKE_MODULE_PATH is ${CMAKE_MODULE_PATH}")
-	
+
 include(CTest)
 
 find_package (PythonInterp)

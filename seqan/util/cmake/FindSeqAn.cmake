@@ -121,11 +121,11 @@ macro (seqan_setup_global)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
       set (COMPILER_IS_CLANG TRUE)
     endif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-		
+
     # -----------------------------------------------------------------------
     # Fix CMAKE_COMPILER_IS_GNUCXX for MinGW.
     # -----------------------------------------------------------------------
-		
+
     if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       set (CMAKE_COMPILER_IS_GNUCXX TRUE)
     endif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -164,7 +164,7 @@ macro (seqan_setup_global)
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer")
         set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g -fno-omit-frame-pointer")
         set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fomit-frame-pointer")
-  
+
         # Pass CXX flags to flags.
         #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_CXX_FLAGS_=\"${CMAKE_CXX_FLAGS}\"")
     endif (CMAKE_COMPILER_IS_GNUCXX OR COMPILER_IS_CLANG)
@@ -408,7 +408,11 @@ macro (seqan_find_dependencies)
     add_definitions(-DSEQAN_HAS_BZIP2=1)
   endif (BZIP2_FOUND)
 
-  find_package (OpenMP QUIET)
+  # search OpenMP flags for only non-clang compilers
+  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    find_package (OpenMP QUIET)
+  endif (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+
   find_package (CUDA QUIET)
   find_package (Boost)
   if (Boost_FOUND)
