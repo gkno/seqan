@@ -195,13 +195,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
     // skew7 class
-    template < typename TInput, typename TPair, typename TLimitsString >
-    struct Pipe< TInput, Multi<Skew7, TPair, TLimitsString> >
+    template < typename TInput, typename TPair_, typename TLimitsString >
+    struct Pipe< TInput, Multi<Skew7, TPair_, TLimitsString> >
     {
   
         // *** SPECIALIZATION ***
 
         // use compression if lessorequal 16 different values per char
+        typedef typename MakeCompressed<TPair_>::Type TPair;
         typedef typename IfC< 
             (BitsPerValue<TypeOf_(TInput)>::VALUE > 0) && 
             (BitsPerValue<TypeOf_(TInput)>::VALUE <= 4), 

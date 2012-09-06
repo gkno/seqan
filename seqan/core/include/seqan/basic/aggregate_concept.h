@@ -72,6 +72,12 @@ namespace seqan {
 struct Compressed_;
 typedef Tag<Compressed_> Compressed;
 
+template <typename T>
+struct MakeCompressed
+{
+    typedef T Type;
+};
+
 /**
 .Tag.BitCompressed
 ..cat:Aggregates

@@ -115,6 +115,12 @@ struct Triple<T1_, T2_, T3_, Compressed>
 // Metafunctions
 // ============================================================================
 
+template <typename T1, typename T2, typename T3>
+struct MakeCompressed< Triple<T1, T2, T3> >
+{
+    typedef Triple<T1, T2, T3, Compressed> Type;
+};
+
 // ============================================================================
 // Functions
 // ============================================================================
