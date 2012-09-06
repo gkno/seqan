@@ -304,6 +304,7 @@ inline __uint64 numSeqs(FaiIndex const & index)
 ..signature:readRegion(str, faiIndex, refId, beginPos, endPos)
 ..signature:readRegion(str, faiIndex, region);
 ..summary:Load the infix of a sequence from a @Class.FaiIndex@.
+..description:The given region is loaded from the indexed FASTA file.
 ..param.str:The sequence infix is written into this string.
 ...type:Class.String
 ..param.faiIndex:The @Class.FaiIndex@ to query.
@@ -332,6 +333,12 @@ inline int readRegion(String<TValue, TSpec> & str,
     if (!open(mmapString, toCString(index.fastaFilename), OPEN_RDONLY))
         return 1;  // Could not open file.
 
+    // Limit region to the infix, make sure that beginPos < endPos, compute character to read.
+    unsigned seqLen = index.indexEntryStore[refId].sequenceLength;;
+    beginPos = std::min(beginPos, seqLen);
+    endPos = std::min(std::max(beginPos, endPos), seqLen);
+    unsigned toRead = endPos - beginPos;
+
     typedef typename Iterator<String<char, MMap<> >, Standard>::Type TSourceIter;
     typedef typename Iterator<String<TValue, TSpec>, Standard>::Type TTargetIter;
     TSourceIter itSource = begin(mmapString, Standard());
@@ -344,9 +351,6 @@ inline int readRegion(String<TValue, TSpec> & str,
     offset += numBytes;
     // Advance iterator in MMap file.
     itSource += offset;
-
-    // Give target string appropriate size.
-    unsigned toRead = endPos - beginPos;
 
     // Copy out the characters from FASTA file and convert via iterator assignment to target string's type.
     resize(str, toRead, TValue());

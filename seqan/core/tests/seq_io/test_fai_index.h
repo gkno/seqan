@@ -45,9 +45,11 @@ SEQAN_DEFINE_TEST(test_seq_io_genomic_fai_index_build)
     seqan::FaiIndex faiIndex;
     SEQAN_ASSERT_EQ(build(faiIndex, toCString(filePath)), 0);
 
-    SEQAN_ASSERT_EQ(numSeqs(faiIndex), 1u);
+    SEQAN_ASSERT_EQ(numSeqs(faiIndex), 2u);
     SEQAN_ASSERT_EQ(sequenceLength(faiIndex, 0), 4718u);
     SEQAN_ASSERT_EQ(sequenceName(faiIndex, 0), "gi|9632547|ref|NC_002077.1|");
+    SEQAN_ASSERT_EQ(sequenceLength(faiIndex, 1), 8u);
+    SEQAN_ASSERT_EQ(sequenceName(faiIndex, 1), "sequence");
 }
 
 SEQAN_DEFINE_TEST(test_seq_io_genomic_fai_index_write)
@@ -75,9 +77,11 @@ SEQAN_DEFINE_TEST(test_seq_io_genomic_fai_index_read)
     seqan::FaiIndex faiIndex;
     SEQAN_ASSERT_EQ(read(faiIndex, toCString(filePath)), 0);
 
-    SEQAN_ASSERT_EQ(numSeqs(faiIndex), 1u);
+    SEQAN_ASSERT_EQ(numSeqs(faiIndex), 2u);
     SEQAN_ASSERT_EQ(sequenceLength(faiIndex, 0), 4718u);
     SEQAN_ASSERT_EQ(sequenceName(faiIndex, 0), "gi|9632547|ref|NC_002077.1|");
+    SEQAN_ASSERT_EQ(sequenceLength(faiIndex, 1), 8u);
+    SEQAN_ASSERT_EQ(sequenceName(faiIndex, 1), "sequence");
 }
 
 SEQAN_DEFINE_TEST(test_seq_io_genomic_fai_index_read_sequence)
@@ -107,6 +111,18 @@ SEQAN_DEFINE_TEST(test_seq_io_genomic_fai_index_read_region)
         seqan::Dna5String str;
         SEQAN_ASSERT_EQ(readRegion(str, faiIndex, 0, 100, 110), 0);
         SEQAN_ASSERT_EQ(str, "GAGCGCGCAG");
+    }
+    // From integers, over the end of the sequence.
+    {
+        seqan::CharString filePath = SEQAN_PATH_TO_ROOT();
+        append(filePath, "/core/tests/seq_io/adeno_genome.fa");
+        
+        seqan::FaiIndex faiIndex;
+        SEQAN_ASSERT_EQ(read(faiIndex, toCString(filePath)), 0);
+        
+        seqan::Dna5String str;
+        SEQAN_ASSERT_EQ(readRegion(str, faiIndex, 0, 4708, 10000), 0);
+        SEQAN_ASSERT_EQ(str, "GAGTGGGCAA");
     }
     // From GenomicRegion.
     {
