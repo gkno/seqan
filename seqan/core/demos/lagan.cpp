@@ -96,7 +96,7 @@ void laganChaining(std::list<TSeed> & chain,
 int main(int argc, const char *argv[])
 {
 	if (argc < 3) {	
-		::std::cerr << "Usage: ./lagan lagan1.fasta lagan2.fasta" << std::endl; 
+		std::cerr << "Usage: ./lagan lagan1.fasta lagan2.fasta" << std::endl; 
 		return -1; 
 	}
 
@@ -104,12 +104,12 @@ int main(int argc, const char *argv[])
 	typedef String<Dna> TString;
 	TString a;
 	TString b;
-	::std::fstream fstrm1;
-	fstrm1.open(argv[1], ::std::ios_base::in | ::std::ios_base::binary);
+	std::fstream fstrm1;
+	fstrm1.open(argv[1], std::ios_base::in | std::ios_base::binary);
 	read(fstrm1, a, Fasta());
 	fstrm1.close();
-	::std::fstream fstrm2;
-	fstrm2.open(argv[2], ::std::ios_base::in | ::std::ios_base::binary);
+	std::fstream fstrm2;
+	fstrm2.open(argv[2], std::ios_base::in | std::ios_base::binary);
 	read(fstrm2, b, Fasta());
 	fstrm2.close();
 

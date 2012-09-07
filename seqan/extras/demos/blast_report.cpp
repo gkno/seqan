@@ -36,8 +36,8 @@ void read_blast_report(TFile & strm)
 	{
 ///Get the current Blast report (there can be multiple reports in one file).
 		read(strm,blast,Blast());
-		::std::cout << "Query: "<<getQueryName(blast) <<"\n";
-		::std::cout << "Database: "<<getDatabaseName(blast) <<"\n\n";
+		std::cout << "Query: "<<getQueryName(blast) <<"\n";
+		std::cout << "Database: "<<getDatabaseName(blast) <<"\n\n";
 
 ///Iterate over hits
 		THitIterator hit_it(blast); 
@@ -45,7 +45,7 @@ void read_blast_report(TFile & strm)
 		{
 			++hitcount;
 			TBlastHit hit = getValue(strm,hit_it);
-			::std::cout << " Hit: " <<name(hit) <<"\n\n";
+			std::cout << " Hit: " <<name(hit) <<"\n\n";
 
 			/// iterate over alignments (HSPs)
 			THspIterator hsp_it(hit);
@@ -56,8 +56,8 @@ void read_blast_report(TFile & strm)
 				
 ///Do something with the alignment, e.g.
 ///output score and length of alignment.
-				::std::cout << "  Score  = " << getBitScore(hsp) << "\n";
-				::std::cout << "  Length = " << length(hsp) << "\n\n";
+				std::cout << "  Score  = " << getBitScore(hsp) << "\n";
+				std::cout << "  Length = " << length(hsp) << "\n\n";
 ///Count alignments with highly significant e-values.
 				if(getEValue(hsp)<0.01)
 					++highsignif;
@@ -65,17 +65,17 @@ void read_blast_report(TFile & strm)
 			}
 		}
 	}
-	::std::cout <<"Total number of Hits: "<< hitcount<<::std::endl;
-	::std::cout <<"Total number of HSPs: "<< hspcount<<::std::endl;
-	::std::cout <<"Number of highly significant HSPs: "<< highsignif<<::std::endl;
+	std::cout <<"Total number of Hits: "<< hitcount<<std::endl;
+	std::cout <<"Total number of HSPs: "<< hspcount<<std::endl;
+	std::cout <<"Number of highly significant HSPs: "<< highsignif<<std::endl;
 
 }
 
 
 int main()
 {
-	::std::fstream strm;
-	strm.open("ecoln.out", ::std::ios_base::in | ::std::ios_base::binary);
+	std::fstream strm;
+	strm.open("ecoln.out", std::ios_base::in | std::ios_base::binary);
 	read_blast_report(strm);
 	return 0;
 }

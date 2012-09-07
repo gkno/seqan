@@ -15,7 +15,7 @@ int main() {
 	appendValue(string_set, seq2);
 	Graph<Alignment<TStringSet> > alignment_graph(string_set);
 ///Compute the longest common subsequence
-	::std::cout << "Score = " << globalAlignment(alignment_graph, stringSet(alignment_graph), Lcs()) << ::std::endl;
-	::std::cout << alignment_graph << ::std::endl;
+	std::cout << "Score = " << globalAlignment(alignment_graph, stringSet(alignment_graph), Lcs()) << std::endl;
+	std::cout << alignment_graph << std::endl;
 	return 0;
 }

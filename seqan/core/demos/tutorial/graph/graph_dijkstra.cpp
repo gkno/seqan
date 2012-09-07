@@ -52,7 +52,7 @@ int main ()
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator itV(g);
 	for(;!atEnd(itV);goNext(itV)) {
-		::std::cout << value(itV) << ':' << getProperty(cityNames, value(itV)) << ::std::endl;
+		std::cout << value(itV) << ':' << getProperty(cityNames, value(itV)) << std::endl;
 	}
 
 
@@ -67,8 +67,8 @@ int main ()
 // FRAGMENT(dijkstra-output)
 	TVertexIterator itV2(g);
 	while(!atEnd(itV2)) {
-		::std::cout << "Shortest path from " << property(cityNames, vertHannover) << " to " << property(cityNames, value(itV2)) << ": ";
-		::std::cout << property(distMap, value(itV2)) << ::std::endl;
+		std::cout << "Shortest path from " << property(cityNames, vertHannover) << " to " << property(cityNames, value(itV2)) << ": ";
+		std::cout << property(distMap, value(itV2)) << std::endl;
 		goNext(itV2);
 	}
 

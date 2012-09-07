@@ -18,7 +18,7 @@ int main()
 //FRAGMENT(alignment)
 	Graph<Alignment<StringSet<TSequence, Dependent<> > > > aliG(seq);
 	globalMsaAlignment(aliG, Blosum62(-1, -11));
-	::std::cout << aliG << ::std::endl;
+	std::cout << aliG << std::endl;
 	
 	return 0;
 }

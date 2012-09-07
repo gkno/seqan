@@ -12,8 +12,8 @@ int main(int argc, const char *argv[])
 	
 	if(argc < 3)
 	{
-		::std::cout << "\nAt least two Fasta sequence files need to be specified.\n\n";
-		::std::cout << "Usage: ./segmentalignment <seq1.fa> <seq2.fa> ...\n\n";
+		std::cout << "\nAt least two Fasta sequence files need to be specified.\n\n";
+		std::cout << "Usage: ./segmentalignment <seq1.fa> <seq2.fa> ...\n\n";
 		return 1;
 	}
 	

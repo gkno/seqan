@@ -22,8 +22,8 @@ int main()
 
 // FRAGMENT(alignment)
 	int score = globalAlignment(align,Score<int>(1,-1,-1,-1), Hirschberg());
-	::std::cout << "Score = " << score << ::std::endl;
-	::std::cout << align;
+	std::cout << "Score = " << score << std::endl;
+	std::cout << align;
 	
 //FRAGMENT(iterate)
 	unsigned aliLength = _max(length(row(align, 0)), length(row(align, 1)));

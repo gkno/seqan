@@ -14,11 +14,11 @@ int main ()
 
 ///A reverse complemented string.
 	TMyReverseComplement myReverseComplement(myString);
-	::std::cout << myString << ::std::endl;
-	::std::cout << myReverseComplement << ::std::endl;
+	std::cout << myString << std::endl;
+	std::cout << myReverseComplement << std::endl;
 	infix(myString, 1, 1) = "cgt";
-	::std::cout << myString << ::std::endl;
-	::std::cout << myReverseComplement << ::std::endl;
-	::std::cout << DnaStringReverseComplement(myString) << ::std::endl;
+	std::cout << myString << std::endl;
+	std::cout << myReverseComplement << std::endl;
+	std::cout << DnaStringReverseComplement(myString) << std::endl;
 	return 0;
 }

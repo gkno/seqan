@@ -17,7 +17,7 @@ int main()
 
 //FRAGMENT(alignment)
 	globalMsaAlignment(align, Blosum80(-1, -11));
-	::std::cout << align << ::std::endl;
+	std::cout << align << std::endl;
 	
 	return 0;
 }

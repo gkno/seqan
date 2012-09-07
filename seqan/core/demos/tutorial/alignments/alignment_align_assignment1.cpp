@@ -53,5 +53,5 @@ int main()
         }
     }
     // Print the result.
-    ::std::cout << "Number of gaps: " << gapCount << ::std::endl;
+    std::cout << "Number of gaps: " << gapCount << std::endl;
 }

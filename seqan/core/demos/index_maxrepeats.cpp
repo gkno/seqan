@@ -28,15 +28,15 @@ int main ()
 ///The @Spec.MaxRepeats Iterator@ can be seen as a container and be iterated for itself.
 		Iterator<TMaxRepeatIterator>::Type myRepeatPair(myRepeatIterator);
 		while (!atEnd(myRepeatPair)) {
-			::std::cout << *myRepeatPair << ", ";
+			std::cout << *myRepeatPair << ", ";
 			++myRepeatPair;
 		}
 
 ///@Function.repLength@ returns the length of the repeat string.
-		::std::cout << repLength(myRepeatIterator) << "   ";
+		std::cout << repLength(myRepeatIterator) << "   ";
 
 ///The repeat string itself can be determined with @Function.representative@
-		::std::cout << "\t\"" << representative(myRepeatIterator) << '\"' << ::std::endl;
+		std::cout << "\t\"" << representative(myRepeatIterator) << '\"' << std::endl;
 
 		++myRepeatIterator;
 	}

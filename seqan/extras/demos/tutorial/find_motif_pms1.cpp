@@ -28,7 +28,7 @@ int main()
 	findMotif(finder_pms1, dataset, Omops());
 
 	for (int i = 0; i < (int) motifCount(finder_pms1); ++i)
-		std::cout << i << ": " << getMotif(finder_pms1, i) << ::std::endl;
+		std::cout << i << ": " << getMotif(finder_pms1, i) << std::endl;
 
 	return 0;
 }

@@ -22,7 +22,7 @@ int main ()
     TIndex myIndex(mySet);
 
 /// Now we output how often $"be"$ occurs in each sequence.
-    std::cout << "Number of sequences: " << countSequences(myIndex) << ::std::endl;  
+    std::cout << "Number of sequences: " << countSequences(myIndex) << std::endl;  
     hash(indexShape(myIndex), "be");
     TCounts cnts = countOccurrencesMultiple(myIndex, indexShape(myIndex));
     for (unsigned i = 0; i < length(cnts); ++i)
@@ -34,8 +34,8 @@ int main ()
     getKmerSimilarityMatrix(myIndex,distMat);
     
     for( unsigned i=0; i < length(distMat); ++i)
-        ::std::cout << distMat[i] << " ";
-    ::std::cout << ::std::endl;
+        std::cout << distMat[i] << " ";
+    std::cout << std::endl;
     
     return 0;
 }

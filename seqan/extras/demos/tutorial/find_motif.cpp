@@ -19,7 +19,7 @@ int main()
     TSize seqCount = length(dataset);
 
 // FRAGMENT(initialization)
-	::std::srand((unsigned) time(NULL));
+	std::srand((unsigned) time(NULL));
 
     TSize seqLength = length(dataset[0]); // length of sequences
 	TSize motifLength = 3;		          // length of motif
@@ -33,7 +33,7 @@ int main()
 	findMotif(finder_proj, dataset, Oops());
 
 	for (int i = 0; i < (int) motifCount(finder_proj); ++i)
-		std::cout << i << ": " << getMotif(finder_proj, i) << ::std::endl;
+		std::cout << i << ": " << getMotif(finder_proj, i) << std::endl;
 
 	return 0;
 }

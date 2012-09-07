@@ -74,10 +74,10 @@ int main ()
 	{
 
 ///@Function.countOccurrences@ returns the number of hits of the representative.
-		::std::cout << countOccurrences(myConstrainedIterator) << "x  ";
+		std::cout << countOccurrences(myConstrainedIterator) << "x  ";
 
 ///The representative string can be determined with @Function.representative@
-		::std::cout << "\t\"" << representative(myConstrainedIterator) << '\"' << ::std::endl;
+		std::cout << "\t\"" << representative(myConstrainedIterator) << '\"' << std::endl;
 
 		goNext(myConstrainedIterator);
 	}

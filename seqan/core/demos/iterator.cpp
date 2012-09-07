@@ -11,10 +11,10 @@ int main()
 	seqan::Iterator<seqan::String<char> >::Type itEnd = end(str);
 ///We can use iterators to iterate over the elements of a container.
 	while (it != itEnd) {
-		::std::cout << *it;
+		std::cout << *it;
 		++it;
 	}
-	::std::cout << ::std::endl;
+	std::cout << std::endl;
 ///Rooted iterators know their container (@Concept.RootedIteratorConcept|Rooted Iterator@).
 ///Hence, the functions @Function.goBegin@ and @Function.atEnd@ do
 ///not get $str$ as an argument.
@@ -31,12 +31,12 @@ int main()
 	while (!atBegin(it2))              
 	{
 		goPrevious(it2);
-		::std::cout << getValue(it2);
+		std::cout << getValue(it2);
 	}
-	::std::cout << ::std::endl;
+	std::cout << std::endl;
 ///@Function.assignValue@ can be used to change the value of an iterator.
 	assignValue(begin(str), 'X');
-	::std::cout << str << ::std::endl;
+	std::cout << str << std::endl;
 	
 	return 0;
 }

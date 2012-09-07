@@ -29,6 +29,6 @@ int main()
 	globalMsaAlignment(align, sc);
 
 /// Output of the MSA
-	::std::cout << align << ::std::endl;
+	std::cout << align << std::endl;
 	return 0;
 }

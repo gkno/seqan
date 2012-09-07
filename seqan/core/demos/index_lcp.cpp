@@ -26,7 +26,7 @@ int main ()
 
     for ( Size<TMyIndex>::Type i=0; i<length(myIndex); ++i){
         SAValue<TMyIndex>::Type p = saAt(i,myIndex);
-        ::std::cout << i << " " << lcpAt(i,myIndex) << " " << p << " " << suffix(mySet,p) << ::std::endl;
+        std::cout << i << " " << lcpAt(i,myIndex) << " " << p << " " << suffix(mySet,p) << std::endl;
     }
 
 	return 0;

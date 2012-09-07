@@ -14,9 +14,9 @@ void printAllOccs(String<char>& haystack,
 	Pattern<String<char>, TAlgorithm> pattern(needle);
 	while (find(finder, pattern)) 
 	{
-		::std::cout << position(finder) << ", ";
+		std::cout << position(finder) << ", ";
 	}
-	::std::cout << ::std::endl;
+	std::cout << std::endl;
 }
 
 ///The main function calls $printAllOccs$ for different exact string matching algorithms.

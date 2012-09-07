@@ -14,18 +14,18 @@ int main() {
 	TVertexDescriptor edges[] = {3,0, 1,2, 2,1, 1,3, 3,2};
 	TGraph g;
 	addEdges(g, edges, numEdges);
-	::std::cout << g << ::std::endl;
+	std::cout << g << std::endl;
 ///Out-parameter: Closure matrix
 	String<bool> closure;
 ///Transitive-Closure 
 	transitiveClosure(g,closure);
 ///Console output
-	TSize len = (TSize) ::std::sqrt((double) length(closure));
+	TSize len = (TSize) std::sqrt((double) length(closure));
 	for (TSize row=0;row < len;++row) {
 		for (TSize col=0;col < len;++col) {
-			::std::cout << getValue(closure, row*len+col) << ",";
+			std::cout << getValue(closure, row*len+col) << ",";
 		}
-		::std::cout << ::std::endl;
+		std::cout << std::endl;
 	}
 	return 0;
 }

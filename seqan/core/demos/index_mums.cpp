@@ -31,13 +31,13 @@ int main ()
 		orderOccurrences(occs);
 		
 		for(unsigned i = 0; i < length(occs); ++i)
-			::std::cout << getValueI2(occs[i]) << ", ";
+			std::cout << getValueI2(occs[i]) << ", ";
 
 ///@Function.repLength@ returns the length of the match.
-		::std::cout << repLength(myMUMiterator) << "   ";
+		std::cout << repLength(myMUMiterator) << "   ";
 
 ///The match string itself can be determined with @Function.representative@.
-		::std::cout << "\t\"" << representative(myMUMiterator) << '\"' << ::std::endl;
+		std::cout << "\t\"" << representative(myMUMiterator) << '\"' << std::endl;
 
 		++myMUMiterator;
 	}

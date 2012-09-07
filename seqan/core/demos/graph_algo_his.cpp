@@ -18,13 +18,13 @@ int main() {
 	unsigned int w = heaviestIncreasingSubsequence(seq, weights, pos);
 ///Console Output
 	for(int i = 0; i< (int) length(seq); ++i) {
-		::std::cout << seq[i] << "(Weight=" << getProperty(weights, i) << "),";
+		std::cout << seq[i] << "(Weight=" << getProperty(weights, i) << "),";
 	}
-	::std::cout << ::std::endl;
-	::std::cout << "His: " << ::std::endl;
+	std::cout << std::endl;
+	std::cout << "His: " << std::endl;
 	for(int i = length(pos)-1; i>=0; --i) {
-		::std::cout << seq[pos[i]] <<  ',';
+		std::cout << seq[pos[i]] <<  ',';
 	}
-	::std::cout << "(Weight=" << w << ')' << ::std::endl;
+	std::cout << "(Weight=" << w << ')' << std::endl;
 	return 0;
 }

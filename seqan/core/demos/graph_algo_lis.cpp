@@ -18,13 +18,13 @@ int main() {
 	longestIncreasingSubsequence(seq,pos);
 ///Output the longest increasing subsequence
 	for(int i = 0; i<(int) length(seq); ++i) {
-		::std::cout << seq[i] << ',';
+		std::cout << seq[i] << ',';
 	}
-	::std::cout << ::std::endl;
-	::std::cout << "Lis: " << ::std::endl;
+	std::cout << std::endl;
+	std::cout << "Lis: " << std::endl;
 	for(int i = length(pos)-1; i>=0; --i) {
-		::std::cout << seq[pos[i]] <<  ',';
+		std::cout << seq[pos[i]] <<  ',';
 	}
-	::std::cout << ::std::endl;
+	std::cout << std::endl;
 	return 0;
 }

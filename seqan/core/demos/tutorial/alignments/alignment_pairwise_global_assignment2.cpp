@@ -20,8 +20,8 @@ int main()
 // FRAGMENT(alignment)
 	AlignConfig<true,false,false,true> ac;
 	int score = globalAlignment(alignG, Score<int>(1,-1,-1,-1), ac, Gotoh());
-	::std::cout << "Score = " << score << ::std::endl;
-	::std::cout << alignG;
+	std::cout << "Score = " << score << std::endl;
+	std::cout << alignG;
 	
 	return 0;
 }

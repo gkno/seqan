@@ -18,8 +18,8 @@ int main()
     LocalAlignmentEnumerator<Score<int>, Unbanded> enumerator(sc);
     while (nextLocalAlignment(ali, enumerator) && count < 3)
     {
-        ::std::cout << "Score = " << getScore(enumerator) << ::std::endl;
-        ::std::cout << ali;
+        std::cout << "Score = " << getScore(enumerator) << std::endl;
+        std::cout << ali;
         ++count;
     }
     return 0;

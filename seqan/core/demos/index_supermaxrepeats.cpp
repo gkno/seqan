@@ -24,13 +24,13 @@ int main ()
 ///The length of this sequence, i.e. the repeat abundance can be obtained 
 ///from @Function.countOccurrences@.
 		for(unsigned i = 0; i < countOccurrences(myRepeatIterator); ++i)
-			::std::cout << getOccurrences(myRepeatIterator)[i] << ", ";
+			std::cout << getOccurrences(myRepeatIterator)[i] << ", ";
 
 ///@Function.repLength@ returns the length of the repeat string.
-		::std::cout << repLength(myRepeatIterator) << "   ";
+		std::cout << repLength(myRepeatIterator) << "   ";
 
 ///The repeat string itself can be determined with @Function.representative@.
-		::std::cout << "\t\"" << representative(myRepeatIterator) << '\"' << ::std::endl;
+		std::cout << "\t\"" << representative(myRepeatIterator) << '\"' << std::endl;
 
 		++myRepeatIterator;
 	}

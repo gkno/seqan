@@ -12,10 +12,10 @@ int main ()
 	Index< String<char> > index_esa("tobeornottobe");
 	Finder< Index< String<char> > > finder_esa(index_esa);
 
-	::std::cout << "hit at ";
+	std::cout << "hit at ";
 	while (find(finder_esa, "be"))
-		::std::cout << position(finder_esa) << " ";
-	::std::cout << ::std::endl;
+		std::cout << position(finder_esa) << " ";
+	std::cout << std::endl;
 
 ///Now we explicitly create a q-gram index using an ungapped 2-gram and do the same.
 ///Instead of this @Spec.UngappedShape.fixed-size shape@ you can use arbitrary 
@@ -24,10 +24,10 @@ int main ()
 	TQGramIndex index_2gram("tobeornottobe");
 	Finder< TQGramIndex > finder_2gram(index_2gram);
 
-	::std::cout << "hit at ";
+	std::cout << "hit at ";
 	while (find(finder_2gram, "be"))
-		::std::cout << position(finder_2gram) << " ";
-	::std::cout << ::std::endl;
+		std::cout << position(finder_2gram) << " ";
+	std::cout << std::endl;
 
 	return 0;
 }

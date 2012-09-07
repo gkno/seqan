@@ -19,10 +19,10 @@ int main ()
 	Finder< Index<StringSet<String<char> > > > myFinder(myIndex);
 
 ///Finally we search for the string $"be"$ and output all occurences
-	::std::cout << "hit at ";
+	std::cout << "hit at ";
 	while (find(myFinder, "be")) 
-		::std::cout << position(myFinder) << "  ";
-	::std::cout << ::std::endl;
+		std::cout << position(myFinder) << "  ";
+	std::cout << std::endl;
 	
 	return 0;
 }

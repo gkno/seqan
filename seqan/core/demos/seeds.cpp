@@ -12,19 +12,19 @@ int main()
 
 	Seed<> seed1(0, 0, 4);          //left=0; length=4
 	extendSeed(seed1, a, b, 1, MatchExtend());
-	::std::cout << rightPosition(seed1, 0) << ::std::endl;  //output: 6
-	::std::cout << rightPosition(seed1, 1) << ::std::endl;  //output: 6
+	std::cout << rightPosition(seed1, 0) << std::endl;  //output: 6
+	std::cout << rightPosition(seed1, 1) << std::endl;  //output: 6
 
 	Seed<> seed2(0, 0, 4);          //left=0; length=4
 	Score<> scoring(1, -1, -1);
 	extendSeed(seed2, 2, scoring, a, b, 1, UngappedXDrop());
-	::std::cout << rightPosition(seed2, 0) << ::std::endl;  //output: 9
-	::std::cout << rightPosition(seed2, 1) << ::std::endl;  //output: 9
+	std::cout << rightPosition(seed2, 0) << std::endl;  //output: 9
+	std::cout << rightPosition(seed2, 1) << std::endl;  //output: 9
 
 	Seed<> seed3(0, 0, 4);          //left=0; length=4
 	extendSeed(seed3, 2, scoring, a, b, 1, GappedXDrop());
-	::std::cout << rightPosition(seed3, 0) << ::std::endl;  //output: 12
-	::std::cout << rightPosition(seed3, 1) << ::std::endl;  //output: 11
+	std::cout << rightPosition(seed3, 0) << std::endl;  //output: 12
+	std::cout << rightPosition(seed3, 1) << std::endl;  //output: 11
 
 ///Example 2: global chaining.
 	String< Seed<int, MultiSeed> > fragments;
@@ -43,7 +43,7 @@ int main()
 	String< Seed<int, MultiSeed> > global_chain;
 	Score<int, Manhattan> scoring2;
 	int chain_score = globalChaining(fragments, global_chain, scoring2);
-	::std::cout << chain_score << "\n";
+	std::cout << chain_score << "\n";
 
 	return 0;
 }

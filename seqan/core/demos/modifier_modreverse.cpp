@@ -12,10 +12,10 @@ int main ()
 	String<char> myString = "A man, a plan, a canal-Panama";
 	ModifiedString< String<char>, ModReverse > myModifier(myString);
 
-	::std::cout << myString << ::std::endl;
-	::std::cout << myModifier << ::std::endl;
+	std::cout << myString << std::endl;
+	std::cout << myModifier << std::endl;
 	infix(myString, 9, 9) = "master ";
-	::std::cout << myString << ::std::endl;
-	::std::cout << myModifier << ::std::endl;
+	std::cout << myString << std::endl;
+	std::cout << myModifier << std::endl;
 	return 0;
 }

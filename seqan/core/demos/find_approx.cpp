@@ -18,7 +18,7 @@ int main()
 ///Note that @Function.position@ returns the position of the last found occurrence.
 	setScoreLimit(pat, -1);
 	while (find(fnd, pat)) {
-		::std::cout << position(fnd) << ": " << getScore(pat) << "\n";
+		std::cout << position(fnd) << ": " << getScore(pat) << "\n";
 	}
 
 ///Example 2: Finding all start and endpositions
@@ -28,14 +28,14 @@ int main()
 	Pattern<String<char>, Myers<FindInfix> > pattern(p);
 ///Instead of using @Function.setScoreLimit@, we pass the score limit $-2$ as a third argument to find
 	while (find(finder, pattern, -2)) {
-		::std::cout << "end: " << endPosition(finder) << ::std::endl;
+		std::cout << "end: " << endPosition(finder) << std::endl;
 ///In order to find the begin position, we have to call @Function.findBegin@.
 ///Note that the third argument of @Function.findBegin@ is optional.
 ///The default is the score limit that was used during the last call of @Function.find@ (i.e. -2 in this example).
 		while (findBegin(finder, pattern, getScore(pattern))) {
-			::std::cout << "begin: " << beginPosition(finder) << ::std::endl;
-			::std::cout << infix(finder) << " matches with score ";
-			::std::cout << getBeginScore(pattern) << ::std::endl;
+			std::cout << "begin: " << beginPosition(finder) << std::endl;
+			std::cout << infix(finder) << " matches with score ";
+			std::cout << getBeginScore(pattern) << std::endl;
 		}
 	}
 	return 0;

@@ -45,7 +45,7 @@ void searchPattern(StringSet<String<int> > & hitSet,
     // Check for valid initial state.
     if (empty(globalReference(journalSet)))
     {
-        ::std::cout << "No reference set. Aborted search!" << std::endl;
+        std::cout << "No reference set. Aborted search!" << std::endl;
         return;
     }
 
@@ -135,21 +135,21 @@ int main()
     // Define a pattern and start search.
     StringSet<String<int> > hitSet;
     TSequence pattern = "GTGGT";
-    ::std::cout << "Search for: " << pattern << ":\n";
+    std::cout << "Search for: " << pattern << ":\n";
     searchPattern(hitSet, journalSet, pattern);
 
     // FRAGMENT(printResult)
     if (empty(hitSet[0]))
     {
-        ::std::cout << "No hit in reference " << ::std::endl;
+        std::cout << "No hit in reference " << std::endl;
     }
     else
     {
-        ::std::cout << "Hit in reference " << " at ";
+        std::cout << "Hit in reference " << " at ";
         for (unsigned j = 0; j < length(hitSet[0]); ++j)
-            ::std::cout << hitSet[0][j] << ": " << infix(globalReference(journalSet), hitSet[0][j],hitSet[0][j] + length(pattern)) << "\t";
+            std::cout << hitSet[0][j] << ": " << infix(globalReference(journalSet), hitSet[0][j],hitSet[0][j] + length(pattern)) << "\t";
     }
-    ::std::cout << ::std::endl;
+    std::cout << std::endl;
 
     return 0;
 }

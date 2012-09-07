@@ -12,7 +12,7 @@ void _findInOriginalNode(String<int> & hitTarget,
 {
     // [A] Check if hits exist in the reference.
 
-    // [B] Find upper bound to current physical position in sorted refHits using ::std::upper_bound.
+    // [B] Find upper bound to current physical position in sorted refHits using std::upper_bound.
 
     // [C] Make sure we do not miss hits that begin at physical position of current node.
 

@@ -50,7 +50,7 @@ int main()
 	
     swap(numbers,1,7,2);
 	for (TIntIterator it=begin(numbers); !atEnd(it); goNext(it)) {
-		::std::cout << *it;
+		std::cout << *it;
 	}
 	cout << endl;
 	

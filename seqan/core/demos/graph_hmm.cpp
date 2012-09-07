@@ -60,34 +60,34 @@ int main() {
 	addEdge(hmm, intronState, eState, 0.1);
 
 ///Print the whole model
-	::std::cout << hmm << ::std::endl;
+	std::cout << hmm << std::endl;
 
 ///Viterbi algorithm
 	String<Dna> sequence = "CTTCATGTGAAAGCAGACGTAAGTCA";
 	String<TVertexDescriptor> path;
 	TProbability p = viterbiAlgorithm(hmm, sequence, path);
-	::std::cout << "Viterbi algorithm" << ::std::endl;
-	::std::cout << "Probability of best path: " << p << ::std::endl;
-	::std::cout << "Sequence: " << ::std::endl;
-	for(TSize i = 0; i<length(sequence); ++i) ::std::cout << sequence[i] << ',';
-	::std::cout << ::std::endl;
-	::std::cout << "State path: " << ::std::endl;
+	std::cout << "Viterbi algorithm" << std::endl;
+	std::cout << "Probability of best path: " << p << std::endl;
+	std::cout << "Sequence: " << std::endl;
+	for(TSize i = 0; i<length(sequence); ++i) std::cout << sequence[i] << ',';
+	std::cout << std::endl;
+	std::cout << "State path: " << std::endl;
 	for(TSize i = 0; i<length(path); ++i) {
-		::std::cout << path[i];
-		if (isSilent(hmm, path[i])) ::std::cout << " (Silent)";
-		if (i < length(path) - 1) ::std::cout << ',';
+		std::cout << path[i];
+		if (isSilent(hmm, path[i])) std::cout << " (Silent)";
+		if (i < length(path) - 1) std::cout << ',';
 	}
-	::std::cout << ::std::endl;
+	std::cout << std::endl;
 
 ///Forward algorithm
-	::std::cout << "Forward algorithm" << ::std::endl;
+	std::cout << "Forward algorithm" << std::endl;
 	p = forwardAlgorithm(hmm, sequence);
-	::std::cout << "Probability that the HMM generated the sequence: " << p << ::std::endl;
+	std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
 
 ///Backward algorithm
-	::std::cout << "Backward algorithm" << ::std::endl;
+	std::cout << "Backward algorithm" << std::endl;
 	p = backwardAlgorithm(hmm, sequence);
-	::std::cout << "Probability that the HMM generated the sequence: " << p << ::std::endl;
+	std::cout << "Probability that the HMM generated the sequence: " << p << std::endl;
 
 	return 0;
 }

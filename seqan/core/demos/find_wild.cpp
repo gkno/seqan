@@ -15,7 +15,7 @@ int main()
 	Pattern<String<char>, WildShiftAnd> pattern(ndl);
 
 	while (find(finder, pattern)) {
-		::std::cout << position(finder) << "\n";
+		std::cout << position(finder) << "\n";
 	}
 	return 0;
 }

@@ -20,8 +20,8 @@ int main ()
 
 ///Output the suffix indices, i.e. the occurrences of the pattern.
 	for(unsigned i = hitRange.i1; i < hitRange.i2; ++i)
-		::std::cout << sa[i] << " ";
-	::std::cout << ::std::endl;
+		std::cout << sa[i] << " ";
+	std::cout << std::endl;
  
 	return 0;
 }

@@ -10,13 +10,13 @@ void printMotifs(TMotifFinder & finder)
 {
 	for (int i = 0; i < (int) motifCount(finder); ++i)
 	{
-		::std::cout << i << ": " << getMotif(finder, i) << ::std::endl;
+		std::cout << i << ": " << getMotif(finder, i) << std::endl;
 	}
 }
 
 int main() 
 {
-	::std::srand((unsigned) time(NULL));
+	std::srand((unsigned) time(NULL));
 
 ///Motif search on a small set of nucleotide sequences.
 	unsigned int t = 3;		//number of input sequences
@@ -34,12 +34,12 @@ int main()
 ///Application of ePatternBranching (h=0)
 	MotifFinder<Dna, EPatternBranching> finder_epb1(t,l,d,is_exact,h);
 	findMotif(finder_epb1,dataset,Omops());
-	::std::cout << getMotif(finder_epb1) << ::std::endl;
+	std::cout << getMotif(finder_epb1) << std::endl;
 
 ///Application of ePatternBranching (h=0)
 	MotifFinder<Dna, EPatternBranching> finder_epb2(t,l,d,is_exact,h);
 	findMotif(finder_epb2,dataset,Oops());
-	::std::cout << getMotif(finder_epb2) << ::std::endl;
+	std::cout << getMotif(finder_epb2) << std::endl;
 
 ///Application of Pms1-Zoops 
 	MotifFinder<Dna, Pms1> finder_pms1(l,d,is_exact);

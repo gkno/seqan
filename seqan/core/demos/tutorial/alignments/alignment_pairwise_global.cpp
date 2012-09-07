@@ -22,8 +22,8 @@ int main()
 
 // FRAGMENT(alignment)
 	int score = globalAlignment(align,Score<int>(1,-1,-1,-1), Hirschberg());
-	::std::cout << "Score = " << score << ::std::endl;
-	::std::cout << align;
+	std::cout << "Score = " << score << std::endl;
+	std::cout << align;
 	
 //FRAGMENT(iterate)
 	TIterator it1 = begin(row(align,0));

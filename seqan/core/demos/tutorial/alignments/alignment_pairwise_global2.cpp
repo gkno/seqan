@@ -20,8 +20,8 @@ int main()
 
 // FRAGMENT(alignment)
 	int score = globalAlignment(align,Score<int>(1,-1,-1,-1), Hirschberg());
-	::std::cout << "Score = " << score << ::std::endl;
-	::std::cout << align;
+	std::cout << "Score = " << score << std::endl;
+	std::cout << align;
 	
 //FRAGMENT(typedef2)
 	StringSet<TSequence> sequences;
@@ -33,8 +33,8 @@ int main()
 	
 //FRAGMENT(alignment2)
 	score = globalAlignment(alignG,Score<int>(1,-1,-1,-1), NeedlemanWunsch());
-	::std::cout << "Score = " << score << ::std::endl;
-	::std::cout << alignG;
+	std::cout << "Score = " << score << std::endl;
+	std::cout << alignG;
 	
 	return 0;
 }

@@ -24,13 +24,13 @@ int main() {
 ///Dijkstra from vertex 0
 	dijkstra(g,0,weightMap,predMap,distMap);
 ///Console Output
-	::std::cout << "Single-Source Shortest Paths: " << ::std::endl;
+	std::cout << "Single-Source Shortest Paths: " << std::endl;
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
-		::std::cout << "Path from 0 to " << getValue(it) << ": ";
+		std::cout << "Path from 0 to " << getValue(it) << ": ";
 		_printPath(g,predMap,(TVertexDescriptor) 0, getValue(it));
-		::std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
+		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << std::endl;
 		goNext(it);
 	}
 ///We can achieve the same thing using an internal map that is edge cargos.
@@ -49,13 +49,13 @@ int main() {
 ///Dijkstra from vertex 0 using an internal map
 	dijkstra(cargo_g,0,intMap,predMap,distMap);
 ///Console Output
-	::std::cout << "Single-Source Shortest Paths: " << ::std::endl;
+	std::cout << "Single-Source Shortest Paths: " << std::endl;
 	typedef Iterator<TCargoGraph, VertexIterator>::Type TCargoVertexIterator;
 	TCargoVertexIterator itC(cargo_g);
 	while(!atEnd(itC)) {
-		::std::cout << "Path from 0 to " << getValue(itC) << ": ";
+		std::cout << "Path from 0 to " << getValue(itC) << ": ";
 		_printPath(cargo_g,predMap,(TVertexDescriptor) 0, getValue(itC));
-		::std::cout << " (Distance: " << getProperty(distMap, getValue(itC)) << ")" << ::std::endl;
+		std::cout << " (Distance: " << getProperty(distMap, getValue(itC)) << ")" << std::endl;
 		goNext(itC);
 	}
 	return 0;

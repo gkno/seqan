@@ -16,7 +16,7 @@ int main() {
 	TVertexDescriptor edges[] = {0,3, 0,1, 1,2, 3,2, 5,7, 5,6, 6,7, 6,3, 8,7};
 	TGraph g;
 	addEdges(g, edges, numEdges);
-	::std::cout << g << ::std::endl;
+	std::cout << g << std::endl;
 ///One external property map: Vertex names	
 	String<std::string> nameMap;
 	std::string names[] = {"shirt", "tie", "jacket", "belt", "watch", "undershorts", "pants", "shoes", "socks"};
@@ -26,14 +26,14 @@ int main() {
 ///Topological sort
 	topologicalSort(g, order);
 ///Console output
-	::std::cout << "Topological sort: " << ::std::endl;
+	std::cout << "Topological sort: " << std::endl;
 	typedef Iterator<String<TVertexDescriptor> >::Type TStringIterator;
 	TStringIterator it = begin(order);
 	TStringIterator itEnd = end(order);
 	while(it != itEnd) {
-		::std::cout << getProperty(nameMap, getValue(it)) << ",";
+		std::cout << getProperty(nameMap, getValue(it)) << ",";
 		goNext(it);
 	}
-	::std::cout << ::std::endl;
+	std::cout << std::endl;
 	return 0;
 }

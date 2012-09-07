@@ -14,7 +14,7 @@ int main() {
 	TVertexDescriptor edges[] = {0,2, 0,1, 1,3, 1,2, 2,5, 2,4, 2,3, 3,5, 3,4, 4,5};
 	TGraph g;
 	addEdges(g, edges, numEdges);
-	::std::cout << g << ::std::endl;
+	std::cout << g << std::endl;
 ///One external property map: Weight map
 	int weights[] =             {3,   5,   6,   2,   2,   4,   7,   1,   -1,  -2};
 	String<int> weightMap;
@@ -25,13 +25,13 @@ int main() {
 ///DAG-Shortest path from vertex 1
 	dagShortestPath(g,1,weightMap,predMap,distMap);
 ///Console Output
-	::std::cout << "Single-Source Shortest Paths in DAG: " << ::std::endl;
+	std::cout << "Single-Source Shortest Paths in DAG: " << std::endl;
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
-		::std::cout << "Path from 1 to " << getValue(it) << ": ";
+		std::cout << "Path from 1 to " << getValue(it) << ": ";
 		_printPath(g,predMap,(TVertexDescriptor) 1, getValue(it));
-		::std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
+		std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << std::endl;
 		goNext(it);
 	}
 	return 0;

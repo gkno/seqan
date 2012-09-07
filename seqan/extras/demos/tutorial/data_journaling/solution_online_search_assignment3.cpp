@@ -18,7 +18,7 @@ void _findInOriginalNode(String<int> & hitTarget,
     // [A] Check if hits exist in the reference.
     if(!empty(refHits))
     {
-        // [B] Find upper bound to current physical position in sorted refHits using ::std::upper_bound.
+        // [B] Find upper bound to current physical position in sorted refHits using std::upper_bound.
         THitIterator itHit = std::upper_bound(begin(refHits),end(refHits),entriesIt->physicalPosition);
         // [C] Make sure we do not miss hits that begin at physical position of current node.
         if(itHit != begin(refHits) && *(itHit - 1) >= (int)entriesIt->physicalPosition)
@@ -106,7 +106,7 @@ void searchPattern(StringSet<String<int> > & hitSet,
     // Check for valid initial state.
     if (empty(globalReference(journalSet)))
     {
-        ::std::cout << "No reference set. Aborted search!" << std::endl;
+        std::cout << "No reference set. Aborted search!" << std::endl;
         return;
     }
 
@@ -193,37 +193,37 @@ int main()
     // Define a pattern and start search.
     StringSet<String<int> > hitSet;
     TSequence pattern = "GTGGT";
-    ::std::cout << "Search for: " << pattern << ":\n";
+    std::cout << "Search for: " << pattern << ":\n";
     searchPattern(hitSet, journalSet, pattern);
 
 
     // FRAGMENT(printResultReference)
     if (empty(hitSet[0]))
     {
-        ::std::cout << "No hit in reference " << ::std::endl;
+        std::cout << "No hit in reference " << std::endl;
     }
     else
     {
-        ::std::cout << "Hit in reference " << " at ";
+        std::cout << "Hit in reference " << " at ";
         for (unsigned j = 0; j < length(hitSet[0]); ++j)
-            ::std::cout << hitSet[0][j] << ": " << infix(globalReference(journalSet), hitSet[0][j],hitSet[0][j] + length(pattern)) << "\t";
+            std::cout << hitSet[0][j] << ": " << infix(globalReference(journalSet), hitSet[0][j],hitSet[0][j] + length(pattern)) << "\t";
     }
-    ::std::cout << ::std::endl;
+    std::cout << std::endl;
 
     // FRAGMENT(printResultJournalSequence)
     for (unsigned i = 1; i < length(hitSet); ++i)
     {
         if (empty(hitSet[i]))
         {
-            ::std::cout << "No hit in sequence " << i - 1 << ::std::endl;
+            std::cout << "No hit in sequence " << i - 1 << std::endl;
         }
         else
         {
-            ::std::cout << "Hit in sequence " << i - 1 << " at ";
+            std::cout << "Hit in sequence " << i - 1 << " at ";
             for (unsigned j = 0; j < length(hitSet[i]); ++j)
-                ::std::cout << hitSet[i][j] << ": " << infix(value(journalSet,i-1), hitSet[i][j],hitSet[i][j] + length(pattern)) << "\t";
+                std::cout << hitSet[i][j] << ": " << infix(value(journalSet,i-1), hitSet[i][j],hitSet[i][j] + length(pattern)) << "\t";
         }
-        ::std::cout << ::std::endl;
+        std::cout << std::endl;
     }
     return 0;
 }

@@ -16,7 +16,7 @@ int main()
 	TVertexDescriptor edges[] = {0,3, 0,1, 1,4, 2,4, 2,5, 3,1, 4,3, 5,5};
 	TGraph g;
 	addEdges(g, edges, numEdges);
-	::std::cout << g << ::std::endl;
+	std::cout << g << std::endl;
 ///One external property map: Vertex names
 	char names[] = {'u', 'v', 'w', 'x', 'y', 'z'};
 	String<char> nameMap;
@@ -28,19 +28,19 @@ int main()
 ///Depth-frist search
 	depthFirstSearch(g, predMap, discoveryTimeMap, finishingTimeMap);
 ///Console output
-	::std::cout << "Depth-First search: " << ::std::endl;
+	std::cout << "Depth-First search: " << std::endl;
 	typedef Iterator<Graph<>, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
-		::std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
-		::std::cout << "Discovery time = " << getProperty(discoveryTimeMap, getValue(it)) << ",";
-		::std::cout << "Finishing time = " << getProperty(finishingTimeMap, getValue(it)) << ",";
+		std::cout << "Vertex " << getProperty(nameMap, getValue(it)) << ": ";
+		std::cout << "Discovery time = " << getProperty(discoveryTimeMap, getValue(it)) << ",";
+		std::cout << "Finishing time = " << getProperty(finishingTimeMap, getValue(it)) << ",";
 		typedef Value<String<unsigned int> >::Type TPredVal;
 		TPredVal pre = getProperty(predMap, getValue(it));
 		if (pre != getNil<TVertexDescriptor>()) {
-			::std::cout << "Predecessor = " << getProperty(nameMap, pre) << ::std::endl;
+			std::cout << "Predecessor = " << getProperty(nameMap, pre) << std::endl;
 		} else {
-			::std::cout << "Predecessor = nil" << ::std::endl;
+			std::cout << "Predecessor = nil" << std::endl;
 		}
 		goNext(it);
 	}
