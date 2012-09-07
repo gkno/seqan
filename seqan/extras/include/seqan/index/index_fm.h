@@ -173,19 +173,18 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibreSA const>
 template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
-	typedef Pair<unsigned, unsigned>                                                                        TSAValue;
-	typedef SparseString<String<TSAValue>, void>                                                            TSparseString;
+    // TODO(singer): Note that we use a pair of unsigned values here at the moment instead of using SAValue to force using 32 bit integers. Is this what we ultimately want?
+	typedef Pair<unsigned, unsigned, Compressed>                                                   TSAValue;
+	typedef SparseString<String<TSAValue>, void>                                                   TSparseString;
 	typedef typename Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type TLfTable;
-	typedef CompressedSA<TSparseString, TLfTable, void>                                                     Type;
+	typedef CompressedSA<TSparseString, TLfTable, void>                                            Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> > const, FibreSA const>
 {
-	typedef Pair<unsigned, unsigned>                                                                        TSAValue;
-	typedef SparseString<String<TSAValue>, void>                                                            TSparseString;
-	typedef typename Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type TLfTable;
-	typedef CompressedSA<TSparseString, TLfTable, void> const                                               Type;
+    typedef Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >   TNonConstIndex_;
+    typedef typename Fibre<TNonConstIndex_, FibreSA>::Type const Type;
 };
 
 // ==========================================================================
@@ -570,12 +569,12 @@ inline bool indexCreateLfTables_(Index<TText, FMIndex<TIndexSpec, TSpec> > & ind
 
 	createPrefixSumTable(index.lfTable.prefixSumTable, text);
 
-	TAlphabet dollarSub;
+	TAlphabet dollarSub(0);
 	determineDollarSubstitute_(index.lfTable.prefixSumTable, dollarSub);
 
 	String<TAlphabet> bwt;
 	resize(bwt, index.n);
-	TDollarPosition dollarPos;
+	TDollarPosition dollarPos = 0;
 	createBwTable_(bwt, dollarPos, text, sa, dollarSub);
 
 	clear(sa);

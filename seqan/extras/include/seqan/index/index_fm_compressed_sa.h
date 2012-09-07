@@ -177,8 +177,8 @@ TPos addGapDistance_(TPos const & value, TOffSet const & offSet)
     return value + offSet;
 }
 
-template <typename TSeqId, typename TPos, typename TOffSet>
-Pair<TSeqId, TPos> addGapDistance_(Pair<TSeqId, TPos> const & value, TOffSet const & offSet)
+template <typename TSeqId, typename TSpec, typename TPos, typename TOffSet>
+Pair<TSeqId, TPos> addGapDistance_(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet)
 {
     return Pair<TSeqId, TPos>(value.i1, value.i2 + offSet);
 }
