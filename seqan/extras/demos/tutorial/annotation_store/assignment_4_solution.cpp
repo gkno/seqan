@@ -24,7 +24,7 @@ int main()
         else if (getType(it) == "mRNA") ++countmRNAs;
         else if (getType(it) == "exon") {
             ++countExons;
-            length += getAnnotation(it).endPos - getAnnotation(it).beginPos;
+            length += abs((int)getAnnotation(it).endPos - (int)getAnnotation(it).beginPos);
         }
         goNext(it);
     }
