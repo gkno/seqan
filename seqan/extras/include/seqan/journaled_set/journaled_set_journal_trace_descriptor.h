@@ -415,8 +415,8 @@ _alignTracePrint(JournalTraceDescriptor<String<TValue, Journaled<THostSpec, TJou
     typedef typename Value<JournalTraceDescriptor<TString> >::Type TEntryString;
     typedef typename Value<TEntryString>::Type TJournalEntry;
 
-    enum SegmentSource segmentSrc;
-    TPos physicalPos;
+    enum SegmentSource segmentSrc = SOURCE_NULL;
+    TPos physicalPos = 0;
 
     if (segLen == 0)
     {
