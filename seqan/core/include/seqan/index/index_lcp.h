@@ -55,7 +55,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Size<TTextInput>::Type Type;
     };
 
-	template <typename InType, typename Result = typename InType::T2::T>
+	template <typename InType, typename Result = typename Value< typename Value<InType, 2>::Type>::Type>
 	struct _mapInverse : public std::unary_function<InType,Result> {
         inline Result operator()(const InType& x) const
         { return x.i2[0]; }

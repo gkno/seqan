@@ -102,7 +102,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_> :
         unsigned    positionFormat;     // 0..gap space
                                         // 1..position space
 
-        // for compring nucleotides
+        // for comparing nucleotides
         unsigned char compMask[5];
         String<char> toIupac;
 

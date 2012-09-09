@@ -48,7 +48,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pair<
 			typename Value<TInput>::Type,
 			typename Size<TInput>::Type,
-			Compressed
+			Pack
 		> Type;
 	};
 

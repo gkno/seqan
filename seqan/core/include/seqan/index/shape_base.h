@@ -445,22 +445,22 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 //____________________________________________________________________________
 // Tuple -> fixed ungapped shapes
 
-	template <typename THValue, typename TValue, typename TTValue, unsigned SIZE, typename TCompressed>
+	template <typename THValue, typename TValue, typename TTValue, unsigned SIZE, typename TPack>
 	inline THValue
 	_hashTuple2FixedShape(
 		THValue const, 
-		Tuple<TTValue, SIZE, TCompressed> const &tuple,
+		Tuple<TTValue, SIZE, TPack> const &tuple,
 		TValue const,
 		UngappedShape<1> const) 
 	{
 		return ordValue(tuple[0]);
 	}
 
-	template <typename THValue, typename TValue, typename TTValue, unsigned SIZE, typename TCompressed, unsigned q>
+	template <typename THValue, typename TValue, typename TTValue, unsigned SIZE, typename TPack, unsigned q>
 	inline THValue
 	_hashTuple2FixedShape(
 		THValue const, 
-		Tuple<TTValue, SIZE, TCompressed> const &tuple,
+		Tuple<TTValue, SIZE, TPack> const &tuple,
 		TValue const,
 		UngappedShape<q> const) 
 	{
@@ -477,7 +477,7 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 	typename Value< Shape<TValue, UngappedShape<q> > >::Type
 	hash(
 		Shape<TValue, UngappedShape<q> > &me, 
-		Tuple<TTValue, SIZE, Compressed> const &tuple)
+		Tuple<TTValue, SIZE, Pack> const &tuple)
 	{
 	SEQAN_CHECKPOINT
 		if (ValueSize<TValue>::VALUE == (1 << BitsPerValue<TTValue>::VALUE))
@@ -493,12 +493,12 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		typename TValue,
 		typename TTValue, 
 		unsigned SIZE, 
-		typename TCompressed, 
+		typename TPack, 
 		unsigned q>
 	typename Value< Shape<TValue, UngappedShape<q> > >::Type
 	hash(
 		Shape<TValue, UngappedShape<q> > &me, 
-		Tuple<TTValue, SIZE, TCompressed> const &tuple)
+		Tuple<TTValue, SIZE, TPack> const &tuple)
 	{
 	SEQAN_CHECKPOINT
 		return me.hValue = _hashTuple2FixedShape(me.hValue, tuple, TValue(), UngappedShape<q>());

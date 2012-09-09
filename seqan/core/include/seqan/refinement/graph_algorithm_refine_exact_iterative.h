@@ -214,7 +214,7 @@ _createTreesForAllSequences(String<TGraph> & gs,
 SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlignment;
 //	typedef TAlignment* TCargo;
-	typedef Pair<unsigned,unsigned,BitCompressed<31,1> > TCargo;
+	typedef Pair<unsigned,unsigned,BitPacked<31,1> > TCargo;
 	typedef IntervalAndCargo<int,TCargo> TInterval;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
@@ -495,8 +495,8 @@ SEQAN_CHECKPOINT
 	typedef typename Iterator<TAlignmentString, Rooted>::Type TAliIterator;
 	typedef typename Size<TAlign>::Type TValue;
 //	typedef TValue TCargo;
-//	typedef Pair<unsigned,unsigned,BitCompressed<31,1> > TCargo;
-	typedef Pair<unsigned,unsigned,BitCompressed<31,1> > TCargo;
+//	typedef Pair<unsigned,unsigned,BitPacked<31,1> > TCargo;
+	typedef Pair<unsigned,unsigned,BitPacked<31,1> > TCargo;
 	typedef IntervalAndCargo<int,TCargo> TInterval;
 	typedef Graph<Directed<void,WithoutEdgeId> > TGraph;
 	typedef IntervalTreeNode<TInterval> TNode;

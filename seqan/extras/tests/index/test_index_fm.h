@@ -575,12 +575,12 @@ SEQAN_DEFINE_TEST(test_fm_index_search)
         //fmIndexSearch(charTag);
     }    
     {
-        Index<DnaString, FMIndex<WT<FmiDollarSubstituted<> >, Compressed> > dnaTag;
-        Index<String<Dna5>, FMIndex<WT<FmiDollarSubstituted<> >, Compressed > > dna5Tag;
-        Index<String<AminoAcid>, FMIndex<WT<FmiDollarSubstituted<> >,Compressed> > asTag;
-        //Index<String<signed char>, FMIndex<WT<FmiDollarSubstituted<> >, Compressed > > sCharTag;
-        //Index<String<unsigned char>, FMIndex<WT<FmiDollarSubstituted<> >, Compressed > > uCharTag;
-       // Index<String<char>, FMIndex<WT<FmiDollarSubstituted<> >, Compressed > > charTag;
+        Index<DnaString, FMIndex<WT<FmiDollarSubstituted<> >, CompressText> > dnaTag;
+        Index<String<Dna5>, FMIndex<WT<FmiDollarSubstituted<> >, CompressText > > dna5Tag;
+        Index<String<AminoAcid>, FMIndex<WT<FmiDollarSubstituted<> >,CompressText> > asTag;
+        //Index<String<signed char>, FMIndex<WT<FmiDollarSubstituted<> >, CompressedText > > sCharTag;
+        //Index<String<unsigned char>, FMIndex<WT<FmiDollarSubstituted<> >, CompressedText > > uCharTag;
+       // Index<String<char>, FMIndex<WT<FmiDollarSubstituted<> >, CompressedText > > charTag;
         fmIndexSearch(dnaTag);
         fmIndexSearch(dna5Tag);
         fmIndexSearch(asTag);

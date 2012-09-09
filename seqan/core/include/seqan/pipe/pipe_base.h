@@ -687,18 +687,21 @@ SEQAN_CHECKPOINT
 	// for generating pairs (seqNo, seqOffs)
 
 	template <typename TPair, typename TLimits>
-	struct PairIncrementer_ {
+	struct PairIncrementer_
+    {
 		typename Iterator<TLimits const, Standard>::Type			it, itEnd;
 		typename RemoveConst_<typename Value<TLimits>::Type>::Type	old;
 		typename Value<TPair, 2>::Type								localEnd;
 
 		TPair pos;
-		inline operator TPair () const {
+		inline operator TPair () const
+        {
 			return pos;
 		}
 
-		inline TPair const & operator++ () {
-			typename TPair::T2 i2 = getValueI2(pos) + 1;
+		inline TPair const & operator++ ()
+        {
+			typename Value<TPair, 2>::Type i2 = getValueI2(pos) + 1;
 			if (i2 >= localEnd) {
 				i2 = 0;
 				localEnd = 0;

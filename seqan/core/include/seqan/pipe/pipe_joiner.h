@@ -71,7 +71,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TInput1:The type of the first pipeline module this module reads from.
 ..param.TInput2:The type of the second pipeline module this module reads from.
 ..param.TInput3:The type of the third pipeline module this module reads from.
-..remarks: The output type is a compressed @Class.Pair@ or @Class.Triple@ of the input types $Value<TInputX>::Type$.
+..remarks: The output type is a packed @Class.Pair@ or @Class.Triple@ of the input types $Value<TInputX>::Type$.
 ..include:seqan/pipe.h
 */
 

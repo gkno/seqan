@@ -45,11 +45,12 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Namer;
 
 	template < typename TInput, typename TCompare >
-    struct Value< Pipe< TInput, Namer<TCompare> > > {
+    struct Value< Pipe< TInput, Namer<TCompare> > >
+    {
         typedef Pair<
-            typename Value<TInput>::Type::T1,
+            typename Value<typename Value<TInput>::Type, 1>::Type,
 			typename Size<TInput>::Type,
-			Compressed
+			Pack
 		> Type;
     };
 
@@ -95,12 +96,14 @@ namespace SEQAN_NAMESPACE_MAIN
             in(_in),
             C(tmpC) {}
         
-        inline typename Value<Pipe>::Type const & operator*() {
+        inline typename Value<Pipe>::Type const & operator*()
+        {
             tmp.i1 = getValueI1(*in);
             return tmp;
         }
 
-        inline Pipe& operator++() {
+        inline Pipe& operator++()
+        {
             ++in;
             if (!eof(in) && C(last, *in) != 0) {
                 #ifdef SEQAN_TEST
@@ -112,7 +115,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			return *this;
         }
 
-        bool unique() const {
+        bool unique() const
+        {
             return tmp.i2 == (length(in) - 1);
         }
     };
@@ -121,9 +125,11 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
     template < typename TInput, typename TCompare >
-	inline bool control(Pipe< TInput, Namer<TCompare> > &me, ControlBeginRead const &command) {
+	inline bool control(Pipe< TInput, Namer<TCompare> > &me, ControlBeginRead const &command)
+    {
         if (!control(me.in, command)) return false;
-        if (!eof(me.in)) {
+        if (!eof(me.in))
+        {
             me.last = *me.in;
             me.tmp.i1 = me.last.i1;
         }

@@ -47,20 +47,19 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Pipe< Bundle2< TTextInput, TNameInput >, Extender3 >
     {
 		enum { maxShift = 2 };
-		typedef typename Size<Pipe>::Type           SizeType;
-        typedef typename Value<TTextInput>::Type    TextInType;
-        typedef typename Value<TNameInput>::Type    NameInType;
+        typedef typename Size<Pipe>::Type                   TSize;
+        typedef typename Value<TTextInput>::Type            TValue;
+        typedef typename Value<TNameInput>::Type            TNameInputValue;
+        typedef typename Value<TNameInputValue, 2>::Type    TName;
 
-        typedef Tuple<TextInType, maxShift> XTuple;
-        typedef Tuple<typename NameInType::T2, maxShift> NTuple;
-        typedef Triple<SizeType, NTuple, XTuple, Compressed> OutType0;
-        typedef Triple<SizeType, NTuple, XTuple, Compressed> OutType12;
+        typedef Tuple<TValue, maxShift>             XTuple;
+        typedef Tuple<TName, maxShift>              NTuple;
+        typedef Triple<TSize, NTuple, XTuple, Pack> OutType0;
+        typedef Triple<TSize, NTuple, XTuple, Pack> OutType12;
 
         // pipeline interfaces to ease specialization
-        typedef Pipe< void, AbstractSource< OutType0, SizeType > > Out0;
-        typedef Pipe< void, AbstractSource< OutType12, SizeType > > Out12;
-        //Out0 out0;
-        //Out12 out12;
+        typedef Pipe< void, AbstractSource< OutType0, TSize > > Out0;
+        typedef Pipe< void, AbstractSource< OutType12, TSize > > Out12;
     };
         
     template < typename TTextInput, typename TNameInput, typename TOut0, typename TOut12 >
@@ -80,31 +79,37 @@ namespace SEQAN_NAMESPACE_MAIN
 
         unsigned r = (unsigned)(length(textIn) % 3);
         bool filled = (r != 0);
-        if (r == 2) {
+        
+        if (r == 2)
+        {
             o2.i1 = (*nameIn).i1;
             o2.i2[0] = (*nameIn).i2; ++nameIn;
             o2.i3[0] = *textIn; ++textIn;
         }
             
-        if (r >= 1) {
+        if (r >= 1)
+        {
             o1.i1 = (*nameIn).i1;
             o1.i2[0] = (*nameIn).i2; ++nameIn;
             o1.i3[0] = *textIn; ++textIn;
         }
         
-        if (r == 2) {
+        if (r == 2)
+        {
             o2.i2[1] = o1.i2[0];
             o2.i3[1] = o1.i3[0];
             push(out12, o2);
         }
         
-        while (!eof(nameIn)) {
+        while (!eof(nameIn))
+        {
             o1.i3[1] = o0.i3[0] = *textIn; ++textIn;
             o2.i3[0] = o0.i3[1] = *textIn; ++textIn;
             
             o2.i1 = (*nameIn).i1;
             o0.i2[0] = o2.i2[0] = o1.i2[1] = (*nameIn).i2; ++nameIn;
             o2.i3[1] = *textIn; ++textIn;
+            
             if (filled)
                 push(out12, o1);
             else

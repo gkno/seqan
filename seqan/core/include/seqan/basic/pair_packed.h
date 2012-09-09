@@ -29,12 +29,10 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
-// Packed Pair specialization.
+// Packed pair specialization.
 // ==========================================================================
-
-// Should this be called Packed and the tag be Packed?
 
 #ifndef SEQAN_CORE_INCLUDE_SEQAN_BASIC_PAIR_PACKED_H_
 #define SEQAN_CORE_INCLUDE_SEQAN_BASIC_PAIR_PACKED_H_
@@ -58,7 +56,7 @@ namespace seqan {
 ..cat:Aggregates
 ..general:Class.Pair
 ..summary:Stores two arbitrary objects. Saves memory by disabling memory alignment.
-..signature:Pair<T1, T2, Compressed>
+..signature:Pair<T1, T2, Pack>
 ..param.T1:The type of the first object.
 ..param.T2:The type of the second object.
 ..notes:Useful for external storage.
@@ -73,32 +71,29 @@ namespace seqan {
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
 #endif
-template <typename T1_, typename T2_>
-struct Pair<T1_, T2_, Compressed>
+template <typename T1, typename T2>
+struct Pair<T1, T2, Pack>
 {
-    typedef T1_ T1;
-    typedef T2_ T2;
-
     // ------------------------------------------------------------------------
     // Members
     // ------------------------------------------------------------------------
 
-    T1_ i1;
-    T2_ i2;
+    T1 i1;
+    T2 i2;
 
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
 
-    inline Pair() : i1(T1_()), i2(T2_()) {}
+    inline Pair() : i1(T1()), i2(T2()) {}
 
     inline Pair(Pair const &_p) : i1(_p.i1), i2(_p.i2) {}
 
-    inline Pair(T1_ const & _i1, T2_ const & _i2) : i1(_i1), i2(_i2) {}
+    inline Pair(T1 const & _i1, T2 const & _i2) : i1(_i1), i2(_i2) {}
 
-    template <typename T1__, typename T2__, typename TSpec__>
+    template <typename T1_, typename T2_, typename TSpec__>
     // TODO(holtgrew): explicit?
-    inline Pair(Pair<T1__, T2__, TSpec__> const &_p)
+    inline Pair(Pair<T1_, T2_, TSpec__> const &_p)
             : i1(getValueI1(_p)), i2(getValueI2(_p)) {}
 }
 #ifndef PLATFORM_WINDOWS
@@ -114,9 +109,9 @@ struct Pair<T1_, T2_, Compressed>
 // ============================================================================
 
 template <typename T1, typename T2>
-struct MakeCompressed< Pair<T1, T2> >
+struct MakePacked< Pair<T1, T2> >
 {
-    typedef Pair<T1, T2, Compressed> Type;
+    typedef Pair<T1, T2, Pack> Type;
 };
 
 // ============================================================================
@@ -129,9 +124,9 @@ struct MakeCompressed< Pair<T1, T2> >
 
 // References to members to packed structs do not work.  Always copy.
 
-template <typename T1_, typename T2_>
+template <typename T1, typename T2>
 inline void
-set(Pair<T1_, T2_, Compressed> & p1, Pair<T1_, T2_, Compressed> & p2)
+set(Pair<T1, T2, Pack> & p1, Pair<T1, T2, Pack> & p2)
 {
     p1 = p2;
 }
@@ -142,9 +137,9 @@ set(Pair<T1_, T2_, Compressed> & p1, Pair<T1_, T2_, Compressed> & p2)
 
 // References to members to packed structs do not work.  Always copy.
 
-template <typename T1_, typename T2_>
+template <typename T1, typename T2>
 inline void
-move(Pair<T1_, T2_, Compressed> & p1, Pair<T1_, T2_, Compressed> & p2)
+move(Pair<T1, T2, Pack> & p1, Pair<T1, T2, Pack> & p2)
 {
     p1 = p2;
 }
@@ -156,13 +151,13 @@ move(Pair<T1_, T2_, Compressed> & p1, Pair<T1_, T2_, Compressed> & p2)
 // References to members to packed structs do not work.  Always copy.
 
 template <typename T1, typename T2, typename T>
-inline void setValueI1(Pair<T1, T2, Compressed> & pair, T const & _i)
+inline void setValueI1(Pair<T1, T2, Pack> & pair, T const & _i)
 {
     pair.i1 = _i;
 }
 
 template <typename T1, typename T2, typename T>
-inline void setValueI2(Pair<T1, T2, Compressed> & pair, T const & _i)
+inline void setValueI2(Pair<T1, T2, Pack> & pair, T const & _i)
 {
     pair.i2 = _i;
 }
@@ -174,13 +169,13 @@ inline void setValueI2(Pair<T1, T2, Compressed> & pair, T const & _i)
 // References to members to packed structs do not work.  Always copy.
 
 template <typename T1, typename T2, typename T>
-inline void moveValueI1(Pair<T1, T2, Compressed> & pair, T & _i)
+inline void moveValueI1(Pair<T1, T2, Pack> & pair, T & _i)
 {
     pair.i1 = _i;
 }
 
 template <typename T1, typename T2, typename T>
-inline void moveValueI2(Pair<T1, T2, Compressed> & pair, T & _i)
+inline void moveValueI2(Pair<T1, T2, Pack> & pair, T & _i)
 {
     pair.i2 = _i;
 }

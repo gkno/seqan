@@ -574,12 +574,12 @@ SEQAN_DEFINE_TEST(test_fm_index_search)
         //fmIndexSearch(charTag);
     }    
     {
-        Index<DnaString, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, Compressed> > dnaTag;
-        Index<String<Dna5>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, Compressed > > dna5Tag;
-        Index<String<AminoAcid>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >,Compressed> > asTag;
-        //Index<String<signed char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, Compressed > > sCharTag;
-        //Index<String<unsigned char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, Compressed > > uCharTag;
-       // Index<String<char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, Compressed > > charTag;
+        Index<DnaString, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, CompressText> > dnaTag;
+        Index<String<Dna5>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, CompressText> > dna5Tag;
+        Index<String<AminoAcid>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >,CompressText> > asTag;
+        //Index<String<signed char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, CompressText> > sCharTag;
+        //Index<String<unsigned char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, CompressText> > uCharTag;
+       // Index<String<char>, FmIndex<WaveletTreeBased<FmiDollarSubstituted<> >, CompressText> > charTag;
         fmIndexSearch(dnaTag);
         fmIndexSearch(dna5Tag);
         fmIndexSearch(asTag);

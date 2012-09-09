@@ -41,19 +41,31 @@ namespace SEQAN_NAMESPACE_MAIN
 //namespace SEQAN_NAMESPACE_PIPELINING
 //{
     
-    template <typename InType, typename Result = typename InType::T1>
-    struct filterI1 : public ::std::unary_function<InType,Result> {
-        inline Result operator()(const InType& x) const { return x.i1; }
+    template <typename TValue, typename TResult = typename Value<TValue, 1>::Type>
+    struct filterI1 : public ::std::unary_function<TValue, TResult>
+    {
+        inline TResult operator() (const TValue & x) const
+        {
+            return x.i1;
+        }
     };
 
-    template <typename InType, typename Result = typename InType::T2>
-    struct filterI2 : public ::std::unary_function<InType,Result> {
-        inline Result operator()(const InType& x) const { return x.i2; }
+    template <typename TValue, typename TResult = typename Value<TValue, 2>::Type>
+    struct filterI2 : public ::std::unary_function<TValue, TResult>
+    {
+        inline TResult operator() (const TValue & x) const
+        {
+            return x.i2;
+        }
     };
 
-    template <typename InType, typename Result = typename InType::T3>
-    struct filterI3 : public ::std::unary_function<InType,Result> {
-        inline Result operator()(const InType& x) const { return x.i3; }
+    template <typename TValue, typename TResult = typename Value<TValue, 3>::Type>
+    struct filterI3 : public ::std::unary_function<TValue, TResult>
+    {
+        inline TResult operator() (const TValue & x) const
+        {
+            return x.i3;
+        }
     };
 
 
@@ -61,7 +73,8 @@ namespace SEQAN_NAMESPACE_MAIN
     struct Filter;
 
 	template < typename TInput, typename TFunctor >
-    struct Value< Pipe< TInput, Filter<TFunctor> > > {
+    struct Value< Pipe< TInput, Filter<TFunctor> > >
+    {
 		typedef typename TFunctor::result_type Type;
 	};
 
@@ -103,11 +116,13 @@ namespace SEQAN_NAMESPACE_MAIN
             in(_in),
             F(F_) {}
         
-        inline typename Value<Pipe>::Type const operator*() const {
+        inline typename Value<Pipe>::Type const operator*() const
+        {
             return F(*in);
         }
 
-        Pipe& operator++() {
+        Pipe & operator++()
+        {
             ++in;
             return *this;
         }

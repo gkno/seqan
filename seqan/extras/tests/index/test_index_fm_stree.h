@@ -303,7 +303,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_constuctor)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
@@ -336,7 +336,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_go_down)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<> >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<> >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<> >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
@@ -381,7 +381,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_is_leaf)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
@@ -414,7 +414,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_go_right)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
@@ -447,7 +447,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_go_up)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
@@ -470,7 +470,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_is_root)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
@@ -503,7 +503,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_count_occurrences)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<> >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<> >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<> >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 
@@ -547,7 +547,7 @@ SEQAN_DEFINE_TEST(fm_index_iterator_range)
     using namespace seqan;
 
     typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, void> TDefaultIndex;
-    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, Compressed> TCompressedIndex;
+    typedef FMIndex<WT<FmiDollarSubstituted<SingleDollar<void> > >, CompressText> TCompressedIndex;
     typedef TopDown<> TIterSpec;
     typedef TopDown<ParentLinks<> > TParentLinksIterSpec;
 

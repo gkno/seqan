@@ -124,11 +124,11 @@ struct HistoryStackEntry_< Iter< Index<TText, FMIndex<TOccSpec, TSpec> >, VSTree
 
 // ==========================================================================
 template <typename TText, typename TOccSpec, typename TIterSpec>
-class Iter<Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree<TopDown<TIterSpec> > >
+class Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TIterSpec> > >
 {
 public:
    
-    typedef Index<TText, FMIndex<TOccSpec, Compressed> >    TIndex;
+    typedef Index<TText, FMIndex<TOccSpec, CompressText> >    TIndex;
     typedef typename VertexDescriptor<TIndex>::Type	        TVertexDesc;
 
     //TODO(singer): What is this
@@ -150,12 +150,12 @@ public:
 
 // ==========================================================================
 template <typename TText, typename TOccSpec, typename TIterSpec>
-class Iter< Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree< TopDown< ParentLinks<TIterSpec> > > >:
-    public Iter< Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree< TopDown<> > >
+class Iter< Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree< TopDown< ParentLinks<TIterSpec> > > >:
+    public Iter< Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree< TopDown<> > >
 {
 public:
 
-    typedef Index<TText, FMIndex<TOccSpec, Compressed> >    TIndex;
+    typedef Index<TText, FMIndex<TOccSpec, CompressText> >  TIndex;
     typedef Iter< TIndex, VSTree< TopDown<> > >		        TBase;
     typedef	typename HistoryStackEntry_<Iter>::Type         TStackEntry;
     typedef String<TStackEntry, Block<> >			        TStack;
@@ -207,7 +207,7 @@ begin(Index<TText, FMIndex<TOccSpec, TSpeedSpec> > & index, TSpec const /*Tag*/)
 
 // ==========================================================================
 template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec>
-inline void clear(Iter<Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree<TSpec> > &it)
+inline void clear(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &it)
 {
     _clear(it);
     clear(it.representative);
@@ -307,7 +307,7 @@ void _storeCharacter(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<T
                      TChar const /*tag*/) {}
 
 template < typename TText, typename TOccSpec, typename TSpec, typename TChar >
-void _storeCharacter(Iter<Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree<TopDown<TSpec> > > &it,
+void _storeCharacter(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it,
                      TChar const c)
 {
     appendValue(it.representative, c);
@@ -342,10 +342,10 @@ inline bool _goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<To
 
 // ==========================================================================
 template < typename TText, typename TOccSpec, typename TSpec, typename TChar>
-inline bool _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree<TopDown<TSpec> > > &it,
+inline bool _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it,
                         TChar const & character)
 {
-    typedef Index<TText, FMIndex<TOccSpec, Compressed> > TIndex;
+    typedef Index<TText, FMIndex<TOccSpec, CompressText> > TIndex;
     typedef typename Value<TText>::Type                         TAlphabet;
 
     if (isLeaf(it)) return false;
@@ -380,9 +380,9 @@ template < typename TText, typename TOccSpec, typename TIndexSpec, typename TSpe
 inline bool _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > &it,
                         TString const & string)
 {
-    typedef Index<TText, FMIndex<TOccSpec, Compressed> >    TIndex;
-    typedef typename Value<TText>::Type                     TAlphabet;
-    typedef typename Iterator<TString const, Standard>::Type      TStringIter;
+    typedef Index<TText, FMIndex<TOccSpec, CompressText> >      TIndex;
+    typedef typename Value<TText>::Type                         TAlphabet;
+    typedef typename Iterator<TString const, Standard>::Type    TStringIter;
 
     TStringIter stringIt = end(string);
     while(begin(string, Standard()) != stringIt)
@@ -483,7 +483,7 @@ void _eraseCharacter(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<T
 {} 
 
 template < typename TText, typename TOccSpec, typename TSpec>
-void _eraseCharacter(Iter<Index<TText, FMIndex<TOccSpec, Compressed> >, VSTree<TopDown<TSpec> > > &it)
+void _eraseCharacter(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it)
 {
     resize(it.representative, value(it).repLen - 1);
 } 

@@ -363,7 +363,7 @@ struct SAValue< StringSet<TString, TSpec> > {
 	typedef Pair<
 		typename Size< StringSet<TString, TSpec> >::Type,
 		typename SAValue<TString>::Type,
-		Compressed
+		Pack
 	> Type;
 };
 ..remarks.note:SAValue is the return type of various function, e.g. @Function.position@ for the @Class.Index@ @Class.Finder@ class, @Function.getOccurrence@, @Function.getOccurrences@ etc.
@@ -388,7 +388,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 		typedef Pair<
 			typename Size< StringSet<TString, TSpec> >::Type,
 			typename SAValue<TString>::Type,
-			Compressed
+			Pack
 		> Type;
 	};
 
@@ -398,7 +398,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 		typedef Pair<
 			typename Size< StringSet<TString, TSpec> >::Type,
 			typename SAValue<TString>::Type,
-			BitCompressed<2,30>						// max. 4 sequences 
+			BitPacked<2,30>						    // max. 4 sequences 
 		> Type;										// max. 2^30 characters each
 	};
 */

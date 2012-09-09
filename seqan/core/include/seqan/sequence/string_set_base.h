@@ -381,15 +381,15 @@ getSeqNo(TPosition const &)
 }
 
 // n sequences (position type is Pair)
-template <typename T1, typename T2, typename TCompression, typename TLimitsString>
-inline T1 getSeqNo(Pair<T1, T2, TCompression> const & pos, TLimitsString const &)
+template <typename T1, typename T2, typename TPack, typename TLimitsString>
+inline T1 getSeqNo(Pair<T1, T2, TPack> const & pos, TLimitsString const &)
 {
     return getValueI1(pos);
 }
 
 // n sequences (position type is Pair)
-template <typename T1, typename T2, typename TCompression>
-inline T1 getSeqNo(Pair<T1, T2, TCompression> const & pos)
+template <typename T1, typename T2, typename TPack>
+inline T1 getSeqNo(Pair<T1, T2, TPack> const & pos)
 {
     return getValueI1(pos);
 }
@@ -441,14 +441,14 @@ getSeqOffset(TPosition const & pos)
 }
 
 // n sequences (position type is Pair)
-template <typename T1, typename T2, typename TCompression, typename TLimitsString>
-inline T2 getSeqOffset(Pair<T1, T2, TCompression> const & pos, TLimitsString const &) {
+template <typename T1, typename T2, typename TPack, typename TLimitsString>
+inline T2 getSeqOffset(Pair<T1, T2, TPack> const & pos, TLimitsString const &) {
     return getValueI2(pos);
 }
 
 // n sequences (position type is Pair)
-template <typename T1, typename T2, typename TCompression>
-inline T1 getSeqOffset(Pair<T1, T2, TCompression> const & pos) {
+template <typename T1, typename T2, typename TPack>
+inline T1 getSeqOffset(Pair<T1, T2, TPack> const & pos) {
     return getValueI2(pos);
 }
 
@@ -488,8 +488,8 @@ inline TPosition posGlobalize(TPosition const & pos, Nothing const &)
 }
 
 // local_position (0,x) and no limits_string -> global_position x
-template <typename T1, typename T2, typename TCompression>
-inline T2 posGlobalize(Pair<T1, T2, TCompression> const & pos, Nothing const &)
+template <typename T1, typename T2, typename TPack>
+inline T2 posGlobalize(Pair<T1, T2, TPack> const & pos, Nothing const &)
 {
     return getSeqOffset(pos);
 }
@@ -502,9 +502,9 @@ inline TPosition posGlobalize(TPosition const & pos, TLimitsString const &)
 }
 
 // local_position and limits_string -> global_position
-template <typename TLimitsString, typename T1, typename T2, typename TCompression>
+template <typename TLimitsString, typename T1, typename T2, typename TPack>
 inline typename Value<TLimitsString>::Type
-posGlobalize(Pair<T1, T2, TCompression> const & pos, TLimitsString const & limits)
+posGlobalize(Pair<T1, T2, TPack> const & pos, TLimitsString const & limits)
 {
     return limits[getSeqNo(pos, limits)] + getSeqOffset(pos, limits);
 }
@@ -526,16 +526,16 @@ posGlobalize(Pair<T1, T2, TCompression> const & pos, TLimitsString const & limit
 ..include:seqan/sequence.h
 */
 
-template <typename TDest, typename TLimitsString, typename T1, typename T2, typename TCompression>
+template <typename TDest, typename TLimitsString, typename T1, typename T2, typename TPack>
 inline void
-posLocalToX(TDest & dst, Pair<T1, T2, TCompression> const & localPos, TLimitsString const & limits)
+posLocalToX(TDest & dst, Pair<T1, T2, TPack> const & localPos, TLimitsString const & limits)
 {
     dst = posGlobalize(localPos, limits);
 }
 
-template <typename TD1, typename TD2, typename TDCompression, typename TLimitsString, typename T1, typename T2, typename TCompression>
+template <typename TD1, typename TD2, typename TDPack, typename TLimitsString, typename T1, typename T2, typename TPack>
 inline void
-posLocalToX(Pair<TD1, TD2, TDCompression> & dst, Pair<T1, T2, TCompression> const & localPos, TLimitsString const &)
+posLocalToX(Pair<TD1, TD2, TDPack> & dst, Pair<T1, T2, TPack> const & localPos, TLimitsString const &)
 {
     dst = localPos;
 }
@@ -565,8 +565,8 @@ inline void posLocalize(TResult & result, TPosition const & pos, Nothing const &
     result = pos;
 }
 
-template <typename T1, typename T2, typename TCompression, typename TPosition>
-inline void posLocalize(Pair<T1, T2, TCompression> & result, TPosition const & pos, Nothing const &) {
+template <typename T1, typename T2, typename TPack, typename TPosition>
+inline void posLocalize(Pair<T1, T2, TPack> & result, TPosition const & pos, Nothing const &) {
     result.i1 = 0;
     result.i2 = pos;
 }
@@ -582,8 +582,8 @@ inline void posLocalize(TResult & result, TPosition const & pos, String<TSize, T
 }
 
 // local_position -> local_position
-template <typename TResult, typename TSize, typename TSpec, typename T1, typename T2, typename TCompression>
-inline void posLocalize(TResult & result, Pair<T1, T2, TCompression> const & pos, String<TSize, TSpec> const &/*limits*/) {
+template <typename TResult, typename TSize, typename TSpec, typename T1, typename T2, typename TPack>
+inline void posLocalize(TResult & result, Pair<T1, T2, TPack> const & pos, String<TSize, TSpec> const &/*limits*/) {
     result = pos;
 }
 
@@ -601,7 +601,7 @@ prefix(StringSet< TString, TSpec > & me, TPosition pos)
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair lPos;
     posLocalize(lPos, pos, stringSetLimits(me));
@@ -615,7 +615,7 @@ prefix(StringSet< TString, TSpec > const & me, TPosition pos)
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair lPos;
     posLocalize(lPos, pos, stringSetLimits(me));
@@ -636,7 +636,7 @@ suffix(StringSet< TString, TSpec > & me, TPosition pos)
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair lPos;
     posLocalize(lPos, pos, stringSetLimits(me));
@@ -650,7 +650,7 @@ suffix(StringSet< TString, TSpec > const & me, TPosition pos)
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair lPos;
     posLocalize(lPos, pos, stringSetLimits(me));
@@ -671,7 +671,7 @@ infixWithLength(StringSet< TString, TSpec > & me, TPosition pos, TSize length)
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair lPos;
     posLocalize(lPos, pos, stringSetLimits(me));
@@ -685,7 +685,7 @@ infixWithLength(StringSet< TString, TSpec > const & me, TPosition pos, TSize len
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair lPos;
     posLocalize(lPos, pos, stringSetLimits(me));
@@ -706,7 +706,7 @@ infix(StringSet< TString, TSpec > & me, TPosBegin posBegin, TPosEnd posEnd)
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair localPosBegin, localPosEnd;
     posLocalize(localPosBegin, posBegin, stringSetLimits(me));
@@ -721,7 +721,7 @@ infix(StringSet< TString, TSpec > const & me, TPosBegin posBegin, TPosEnd posEnd
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
     typedef typename Size<TString>::Type            TStringSize;
-    typedef Pair<TSetSize, TStringSize, Compressed> TPair;
+    typedef Pair<TSetSize, TStringSize, Pack> TPair;
 
     TPair localPosBegin, localPosEnd;
     posLocalize(localPosBegin, posBegin, stringSetLimits(me));
@@ -746,8 +746,8 @@ inline bool posAtFirstLocal(TPos pos) {
 // Function posAtEnd()
 // --------------------------------------------------------------------------
 
-template <typename T1, typename T2, typename TCompression, typename TSequence, typename TSpec>
-inline bool posAtEnd(Pair<T1, T2, TCompression> const & pos, StringSet<TSequence, TSpec> const & stringSet) {
+template <typename T1, typename T2, typename TPack, typename TSequence, typename TSpec>
+inline bool posAtEnd(Pair<T1, T2, TPack> const & pos, StringSet<TSequence, TSpec> const & stringSet) {
     return pos.i2 == sequenceLength(pos.i1, stringSet);
 }
 template <typename TPos, typename TSequence, typename TSpec>
@@ -768,9 +768,9 @@ inline TPos posPrev(TPos pos) {
     return pos - 1;
 }
 
-template <typename T1, typename T2, typename TCompression>
-inline Pair<T1, T2, TCompression> posPrev(Pair<T1, T2, TCompression> const & pos) {
-    return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) - 1);
+template <typename T1, typename T2, typename TPack>
+inline Pair<T1, T2, TPack> posPrev(Pair<T1, T2, TPack> const & pos) {
+    return Pair<T1, T2, TPack>(getValueI1(pos), getValueI2(pos) - 1);
 }
 
 // --------------------------------------------------------------------------
@@ -782,10 +782,10 @@ inline TPos posNext(TPos pos) {
     return pos + 1;
 }
 
-template <typename T1, typename T2, typename TCompression>
-inline Pair<T1, T2, TCompression>
-posNext(Pair<T1, T2, TCompression> const & pos) {
-    return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) + 1);
+template <typename T1, typename T2, typename TPack>
+inline Pair<T1, T2, TPack>
+posNext(Pair<T1, T2, TPack> const & pos) {
+    return Pair<T1, T2, TPack>(getValueI1(pos), getValueI2(pos) + 1);
 }
 
 // --------------------------------------------------------------------------
@@ -797,10 +797,10 @@ inline TPos posAdd(TPos pos, TDelta delta) {
     return pos + delta;
 }
 
-template <typename T1, typename T2, typename TCompression, typename TDelta>
-inline Pair<T1, T2, TCompression>
-posAdd(Pair<T1, T2, TCompression> const & pos, TDelta delta) {
-    return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) + delta);
+template <typename T1, typename T2, typename TPack, typename TDelta>
+inline Pair<T1, T2, TPack>
+posAdd(Pair<T1, T2, TPack> const & pos, TDelta delta) {
+    return Pair<T1, T2, TPack>(getValueI1(pos), getValueI2(pos) + delta);
 }
 
 
@@ -831,9 +831,9 @@ inline TPos posAddAndCheck(TPos & pos, TDelta delta, StringSet<TSequence, TSpec>
         return false;
 }
 
-template <typename T1, typename T2, typename TCompression, typename TDelta, typename TSequence, typename TSpec>
+template <typename T1, typename T2, typename TPack, typename TDelta, typename TSequence, typename TSpec>
 inline bool
-posAddAndCheck(Pair<T1, T2, TCompression> & pos, TDelta delta, StringSet<TSequence, TSpec> const & stringSet) {
+posAddAndCheck(Pair<T1, T2, TPack> & pos, TDelta delta, StringSet<TSequence, TSpec> const & stringSet) {
     return (pos.i2 += delta) < length(stringSet[pos.i1]);
 }
 
@@ -847,11 +847,11 @@ inline TA posSub(TA a, TB b) {
 }
 
 template <
-    typename TA1, typename TA2, typename TACompression,
-    typename TB1, typename TB2, typename TBCompression
+    typename TA1, typename TA2, typename TAPack,
+    typename TB1, typename TB2, typename TBPack
 >
 inline TA2
-posSub(Pair<TA1, TA2, TACompression> const & a, Pair<TB1, TB2, TBCompression> const & b) {
+posSub(Pair<TA1, TA2, TAPack> const & a, Pair<TB1, TB2, TBPack> const & b) {
     return getValueI2(a) - getValueI2(b);
 }
 
@@ -864,8 +864,8 @@ inline bool posLess(TPos const & a, TPos const & b) {
     return a < b;
 }
 
-template <typename T1, typename T2, typename TCompression>
-inline bool posLess(Pair<T1, T2, TCompression> const & a, Pair<T1, T2, TCompression> const & b) {
+template <typename T1, typename T2, typename TPack>
+inline bool posLess(Pair<T1, T2, TPack> const & a, Pair<T1, T2, TPack> const & b) {
     return
          (getValueI1(a) <  getValueI1(b)) ||
         ((getValueI1(a) == getValueI1(b)) && (getValueI2(a) < getValueI2(b)));
@@ -882,8 +882,8 @@ inline int posCompare(TPos const & a, TPos const & b) {
     return 0;
 }
 
-template <typename T1, typename T2, typename TCompression>
-inline int posCompare(Pair<T1, T2, TCompression> const & a, Pair<T1, T2, TCompression> const & b) {
+template <typename T1, typename T2, typename TPack>
+inline int posCompare(Pair<T1, T2, TPack> const & a, Pair<T1, T2, TPack> const & b) {
     if (getValueI1(a) < getValueI1(b)) return -1;
     if (getValueI1(a) > getValueI1(b)) return 1;
     return posCompare(getValueI2(a), getValueI2(b));

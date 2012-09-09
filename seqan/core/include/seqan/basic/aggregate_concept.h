@@ -37,8 +37,6 @@
 
 namespace seqan {
 
-// TODO(holtgrew): What about empty base class optimization as does Boost's compressed_pair? Not useful?
-
 // ============================================================================
 // Forwards
 // ============================================================================
@@ -62,27 +60,21 @@ namespace seqan {
  */
 
 /**
-.Tag.Compressed
+.Tag.Pack
 ..cat:Aggregates
-..summary:Tag to marke a "compressed" specialization.
-..signature:Compressed
+..summary:Tag to mark a packed specialization that disables address alignment for members.
+..signature:Pack
 ..include:seqan/basic.h
  */
 
-struct Compressed_;
-typedef Tag<Compressed_> Compressed;
-
-template <typename T>
-struct MakeCompressed
-{
-    typedef T Type;
-};
+struct Pack_;
+typedef Tag<Pack_> Pack;
 
 /**
-.Tag.BitCompressed
+.Tag.BitPacked
 ..cat:Aggregates
-..summary:Tag to marke a "compressed" specialization.
-..signature:Compressed<BITSIZE1, BITSIZE2>
+..summary:Tag to mark a bit-packed specialization that avoids to waste bits.
+..signature:BitPacked<BITSIZE1, BITSIZE2>
 ..param.BITSIZE1:Number of bits used for first element.
 ...type:nolink:$unsigned$
 ..param.BITSIZE2:Number of bits used for second element.
@@ -91,11 +83,27 @@ struct MakeCompressed
  */
 
 template <unsigned BITSIZE1 = 16, unsigned BITSIZE2 = 16>
-struct BitCompressed;
+struct BitPacked;
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+/**
+.MakePacked
+..cat:Aggregates
+..summary:Return the corresponding packed type of a type.
+..signature:MakePacked<TAggregate>
+..param.TAggregate:An aggregate type.
+..returns:The corresponding packed aggregate.
+..include:seqan/basic.h
+ */
+
+template <typename T>
+struct MakePacked
+{
+    typedef T Type;
+};
 
 // ============================================================================
 // Functions

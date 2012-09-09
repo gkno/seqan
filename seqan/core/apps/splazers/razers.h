@@ -305,7 +305,7 @@ struct MicroRNA{};
 //	typedef String<Pair<unsigned,MakeSigned_<Difference<TGenome>::Type>::Type > >	TReadRegions;
 
 	typedef MakeSigned_<Difference<TGenome>::Type>::Type TSignedPos;
-	typedef Pair<unsigned,TSignedPos,BitCompressed<2,BitsPerValue<TSignedPos>::VALUE> > TFlagPos;
+	typedef Pair<unsigned,TSignedPos,BitPacked<2,BitsPerValue<TSignedPos>::VALUE> > TFlagPos;
 
 	//chrNo, flag to remember flag, startPos of mate
 	typedef String<Pair<unsigned,TFlagPos > >	TReadRegions;
@@ -336,7 +336,7 @@ struct MicroRNA{};
 		typedef Pair<
 			unsigned,				
 			unsigned,
-			BitCompressed<24, 8>	// max. 16M reads of length < 256
+			BitPacked<24, 8>	// max. 16M reads of length < 256
 		> Type;
 	};
 	//454 
@@ -345,7 +345,7 @@ struct MicroRNA{};
 //		typedef Pair<
 //			unsigned,				
 //			unsigned,
-//			BitCompressed<22, 10>	// max. 4M reads of length < 1024
+//			BitPacked<22, 10>	// max. 4M reads of length < 1024
 //		> Type;
 //	};
 	
@@ -356,7 +356,7 @@ struct MicroRNA{};
 		typedef Pair<
 			unsigned,			// many reads
 			unsigned,			// of arbitrary length
-			Compressed
+			Pack
 		> Type;
 	};
 

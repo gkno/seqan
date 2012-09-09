@@ -183,7 +183,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_base_constructors)
 
     // Conversion constructor from other pair.
     {
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p2(1, 2);
         TPair p(p2);
 
         SEQAN_ASSERT_EQ(p.i1, 1);
@@ -418,8 +418,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_base_comparison_same_spec)
 SEQAN_DEFINE_TEST(test_basic_aggregates_pair_base_comparison_different_spec)
 {
     Pair<int, __int64> p00(0, 0);
-    Pair<int, __int64, Compressed> p01(0, 1);
-    Pair<int, short int, BitCompressed<20, 12> > p10(1, 0);
+    Pair<int, __int64, Pack> p01(0, 1);
+    Pair<int, short int, BitPacked<20, 12> > p10(1, 0);
 
     SEQAN_ASSERT(p00 == p00);
     SEQAN_ASSERT_NOT(p01 == p10);
@@ -448,12 +448,12 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_base_stream_output)
 }
 
 // --------------------------------------------------------------------------
-// Tests for Packed Pair.
+// Tests for Pack Pair.
 // --------------------------------------------------------------------------
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_metafunctions)
 {
-    typedef Pair<int, unsigned, Compressed> TPair;
+    typedef Pair<int, unsigned, Pack> TPair;
     // Metafunction LENGTH
     unsigned l = LENGTH<TPair>::VALUE;
     SEQAN_ASSERT_EQ(l, 2u);
@@ -463,7 +463,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_metafunctions)
     b = IsSameType<typename Value<TPair, 2>::Type, unsigned>::VALUE;
     SEQAN_ASSERT_EQ(b, true);
     // Metafunction Spec
-    b = IsSameType<typename Spec<TPair>::Type, Compressed>::VALUE;
+    b = IsSameType<typename Spec<TPair>::Type, Pack>::VALUE;
     SEQAN_ASSERT_EQ(b, true);
     // // Metafunction Key
     // b = IsSameType<typename Key<TPair>::Type, int>::VALUE;
@@ -475,7 +475,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_metafunctions)
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_constructors)
 {
-    typedef Pair<int, unsigned, Compressed> TPair;
+    typedef Pair<int, unsigned, Pack> TPair;
     
     // Default constructor.
     {
@@ -513,8 +513,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_assign)
 {
     // Test with ints.
     {
-        Pair<int, int, Compressed> p1;
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p1;
+        Pair<int, int, Pack> p2(1, 2);
         assign(p1, p2);
         SEQAN_ASSERT_EQ(p1.i1, p2.i1);
         SEQAN_ASSERT_EQ(p1.i2, p2.i2);
@@ -525,8 +525,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_set)
 {
     // Test with ints.
     {
-        Pair<int, int, Compressed> p1;
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p1;
+        Pair<int, int, Pack> p2(1, 2);
         set(p1, p2);
         SEQAN_ASSERT_EQ(p1.i1, p2.i1);
         SEQAN_ASSERT_EQ(p1.i2, p2.i2);
@@ -537,8 +537,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_move)
 {
     // Test with ints.
     {
-        Pair<int, int, Compressed> p1;
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p1;
+        Pair<int, int, Pack> p2(1, 2);
         move(p1, p2);
         SEQAN_ASSERT_EQ(p1.i1, p2.i1);
         SEQAN_ASSERT_EQ(p1.i2, p2.i2);
@@ -548,7 +548,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_move)
 SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_stream_output)
 {
     std::stringstream s;
-    Pair<int, int, Compressed> p(-1, 1);
+    Pair<int, int, Pack> p(-1, 1);
     s << p;
     SEQAN_ASSERT_EQ(s.str(), "< -1 , 1 >");
 
@@ -558,7 +558,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_stream_output)
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_get_value)
 {
-    Pair<int, int, Compressed> p(-1, 1);
+    Pair<int, int, Pack> p(-1, 1);
     SEQAN_ASSERT_EQ(getValueI1(p), -1);
     SEQAN_ASSERT_EQ(getValueI2(p), 1);
 }
@@ -568,8 +568,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_assign_value)
 {
     // Test with ints.
     {
-        Pair<int, int, Compressed> p1;
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p1;
+        Pair<int, int, Pack> p2(1, 2);
 
         assignValueI1(p1, p2.i1);
         assignValueI2(p1, p2.i2);
@@ -583,8 +583,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_set_value)
 {
     // Test with ints.
     {
-        Pair<int, int, Compressed> p1;
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p1;
+        Pair<int, int, Pack> p2(1, 2);
 
         setValueI1(p1, p2.i1);
         setValueI2(p1, p2.i2);
@@ -598,8 +598,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_move_value)
 {
     // Test with ints.
     {
-        Pair<int, int, Compressed> p1;
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p1;
+        Pair<int, int, Pack> p2(1, 2);
 
         int i1 = p2.i1;
         int i2 = p2.i2;
@@ -614,9 +614,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_move_value)
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_comparison_same_spec)
 {
-    Pair<int, int, Compressed> p00(0, 0);
-    Pair<int, int, Compressed> p01(0, 1);
-    Pair<int, int, Compressed> p10(1, 0);
+    Pair<int, int, Pack> p00(0, 0);
+    Pair<int, int, Pack> p01(0, 1);
+    Pair<int, int, Pack> p10(1, 0);
 
     SEQAN_ASSERT(p00 == p00);
     SEQAN_ASSERT_NOT(p01 == p10);
@@ -639,8 +639,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_comparison_same_spec)
 SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_comparison_different_spec)
 {
     Pair<int, __int64> p00(0, 0);
-    Pair<int, __int64, Compressed> p01(0, 1);
-    Pair<int, short int, BitCompressed<20, 12> > p10(1, 0);
+    Pair<int, __int64, Pack> p01(0, 1);
+    Pair<int, short int, BitPacked<20, 12> > p10(1, 0);
 
     SEQAN_ASSERT(p00 == p00);
     SEQAN_ASSERT_NOT(p01 == p10);
@@ -661,12 +661,12 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_packed_comparison_different_spec)
 }
 
 // --------------------------------------------------------------------------
-// Tests for Bit Compressed Pair.
+// Tests for Bit Pack Pair.
 // --------------------------------------------------------------------------
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_metafunctions)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_metafunctions)
 {
-    typedef BitCompressed<16, 16> TSpec;
+    typedef BitPacked<16, 16> TSpec;
     typedef Pair<int, unsigned, TSpec> TPair;
     // Metafunction LENGTH
     unsigned l = LENGTH<TPair>::VALUE;
@@ -687,9 +687,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_metafunctions)
     // SEQAN_ASSERT_EQ(b, true);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_constructors)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_constructors)
 {
-    typedef Pair<int, unsigned, BitCompressed<16, 16> > TPair;
+    typedef Pair<int, unsigned, BitPacked<16, 16> > TPair;
     
     // Default constructor.
     {
@@ -715,7 +715,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_constructors)
 
     // Conversion constructor from other pair.
     {
-        Pair<int, int, Compressed> p2(1, 2);
+        Pair<int, int, Pack> p2(1, 2);
         TPair p(p2);
 
         SEQAN_ASSERT_EQ(p.i1, 1);
@@ -723,24 +723,24 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_constructors)
     }
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_assign)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_assign)
 {
     // Test with ints.
     {
-        Pair<int, int, BitCompressed<16, 16> > p1;
-        Pair<int, int, BitCompressed<16, 16> > p2(1, 2);
+        Pair<int, int, BitPacked<16, 16> > p1;
+        Pair<int, int, BitPacked<16, 16> > p2(1, 2);
         assign(p1, p2);
         SEQAN_ASSERT_EQ(p1.i1, p2.i1);
         SEQAN_ASSERT_EQ(p1.i2, p2.i2);
     }
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_set)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_set)
 {
     // Test with ints.
     {
-        Pair<int, int, BitCompressed<16, 16> > p1;
-        Pair<int, int, BitCompressed<16, 16> > p2(1, 2);
+        Pair<int, int, BitPacked<16, 16> > p1;
+        Pair<int, int, BitPacked<16, 16> > p2(1, 2);
         set(p1, p2);
         SEQAN_ASSERT_EQ(p1.i1, p2.i1);
         SEQAN_ASSERT_EQ(p1.i2, p2.i2);
@@ -748,33 +748,33 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_set)
 
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_move)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_move)
 {
     // Test with ints.
     {
-        Pair<int, int, BitCompressed<16, 16> > p1;
-        Pair<int, int, BitCompressed<16, 16> > p2(1, 2);
+        Pair<int, int, BitPacked<16, 16> > p1;
+        Pair<int, int, BitPacked<16, 16> > p2(1, 2);
         move(p1, p2);
         SEQAN_ASSERT_EQ(p1.i1, p2.i1);
         SEQAN_ASSERT_EQ(p1.i2, p2.i2);
     }
 }
 
-// SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_value)
+// SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_value)
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_get_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_get_value)
 {
-    Pair<int, int, BitCompressed<16, 16> > p(-1, 1);
+    Pair<int, int, BitPacked<16, 16> > p(-1, 1);
     SEQAN_ASSERT_EQ(getValueI1(p), -1);
     SEQAN_ASSERT_EQ(getValueI2(p), 1);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_assign_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_assign_value)
 {
     // Test with ints.
     {
-        Pair<int, int, BitCompressed<16, 16> > p1;
-        Pair<int, int, BitCompressed<16, 16> > p2(1, 2);
+        Pair<int, int, BitPacked<16, 16> > p1;
+        Pair<int, int, BitPacked<16, 16> > p2(1, 2);
 
         assignValueI1(p1, p2.i1);
         assignValueI2(p1, p2.i2);
@@ -784,12 +784,12 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_assign_value)
     }
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_set_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_set_value)
 {
     // Test with ints.
     {
-        Pair<int, int, BitCompressed<16, 16> > p1;
-        Pair<int, int, BitCompressed<16, 16> > p2(1, 2);
+        Pair<int, int, BitPacked<16, 16> > p1;
+        Pair<int, int, BitPacked<16, 16> > p2(1, 2);
 
         setValueI1(p1, p2.i1);
         setValueI2(p1, p2.i2);
@@ -799,12 +799,12 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_set_value)
     }
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_move_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_move_value)
 {
     // Test with ints.
     {
-        Pair<int, int, BitCompressed<16, 16> > p1;
-        Pair<int, int, BitCompressed<16, 16> > p2(1, 2);
+        Pair<int, int, BitPacked<16, 16> > p1;
+        Pair<int, int, BitPacked<16, 16> > p2(1, 2);
 
         int i1 = p2.i1;
         int i2 = p2.i2;
@@ -817,11 +817,11 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_move_value)
     }
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_comparison_same_spec)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_comparison_same_spec)
 {
-    Pair<int, int, BitCompressed<16, 16> > p00(0, 0);
-    Pair<int, int, BitCompressed<16, 16> > p01(0, 1);
-    Pair<int, int, BitCompressed<16, 16> > p10(1, 0);
+    Pair<int, int, BitPacked<16, 16> > p00(0, 0);
+    Pair<int, int, BitPacked<16, 16> > p01(0, 1);
+    Pair<int, int, BitPacked<16, 16> > p10(1, 0);
 
     SEQAN_ASSERT(p00 == p00);
     SEQAN_ASSERT_NOT(p01 == p10);
@@ -841,11 +841,11 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_comparison_same_spec
     SEQAN_ASSERT_NOT(p10 <= p01);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_comparison_different_spec)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_comparison_different_spec)
 {
     Pair<int, __int64> p00(0, 0);
-    Pair<int, __int64, Compressed> p01(0, 1);
-    Pair<int, short int, BitCompressed<20, 12> > p10(1, 0);
+    Pair<int, __int64, Pack> p01(0, 1);
+    Pair<int, short int, BitPacked<20, 12> > p10(1, 0);
 
     SEQAN_ASSERT(p00 == p00);
     SEQAN_ASSERT_NOT(p01 == p10);
@@ -865,7 +865,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_comparison_different
     SEQAN_ASSERT_NOT(p10 <= p01);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_compressed_stream_output)
+SEQAN_DEFINE_TEST(test_basic_aggregates_pair_bit_packed_stream_output)
 {
     std::stringstream s;
     Pair<int, int> p(-1, 1);
@@ -897,7 +897,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_metafunctions)
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_constructors)
 {
-    typedef Triple<int, unsigned, double, Compressed> TTriple;
+    typedef Triple<int, unsigned, double, Pack> TTriple;
     
     // Default constructor.
     {
@@ -938,8 +938,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_assign)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
         assign(t1, t2);
         SEQAN_ASSERT_EQ(t1.i1, t2.i1);
         SEQAN_ASSERT_EQ(t1.i2, t2.i2);
@@ -951,8 +951,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_set)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
         set(t1, t2);
         SEQAN_ASSERT_EQ(t1.i1, t2.i1);
         SEQAN_ASSERT_EQ(t1.i2, t2.i2);
@@ -963,8 +963,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_move)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
         move(t1, t2);
         SEQAN_ASSERT_EQ(t1.i1, t2.i1);
         SEQAN_ASSERT_EQ(t1.i2, t2.i2);
@@ -1058,7 +1058,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_comparison_same_spec)
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_comparison_different_spec)
 {
     Triple<int, __int64, char> t001(0, 0, 1);
-    Triple<int, __int64, char, Compressed> t010(0, 1, 0);
+    Triple<int, __int64, char, Pack> t010(0, 1, 0);
     Triple<int, short int, char > t100(1, 0, 0);
 
     SEQAN_ASSERT(t001 == t001);
@@ -1088,12 +1088,12 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_base_stream_output)
 }
 
 // --------------------------------------------------------------------------
-// Tests for Packed Triple.
+// Tests for Pack Triple.
 // --------------------------------------------------------------------------
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_metafunctions)
 {
-    typedef Triple<int, unsigned, double, Compressed> TTriple;
+    typedef Triple<int, unsigned, double, Pack> TTriple;
     // Metafunction LENGTH
     unsigned l = LENGTH<TTriple>::VALUE;
     SEQAN_ASSERT_EQ(l, 3u);
@@ -1105,13 +1105,13 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_metafunctions)
     b = IsSameType<typename Value<TTriple, 3>::Type, double>::VALUE;
     SEQAN_ASSERT_EQ(b, true);
     // Metafunction Spec
-    b = IsSameType<typename Spec<TTriple>::Type, Compressed>::VALUE;
+    b = IsSameType<typename Spec<TTriple>::Type, Pack>::VALUE;
     SEQAN_ASSERT_EQ(b, true);
 }
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_constructors)
 {
-    typedef Triple<int, unsigned, double, Compressed> TTriple;
+    typedef Triple<int, unsigned, double, Pack> TTriple;
     
     // Default constructor.
     {
@@ -1152,8 +1152,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_assign)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
         assign(t1, t2);
         SEQAN_ASSERT_EQ(t1.i1, t2.i1);
         SEQAN_ASSERT_EQ(t1.i2, t2.i2);
@@ -1165,8 +1165,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_set)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
         set(t1, t2);
         SEQAN_ASSERT_EQ(t1.i1, t2.i1);
         SEQAN_ASSERT_EQ(t1.i2, t2.i2);
@@ -1178,8 +1178,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_move)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
         move(t1, t2);
         SEQAN_ASSERT_EQ(t1.i1, t2.i1);
         SEQAN_ASSERT_EQ(t1.i2, t2.i2);
@@ -1190,7 +1190,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_move)
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_stream_output)
 {
     std::stringstream s;
-    Triple<int, int, int, Compressed> p(-1, 1, 0);
+    Triple<int, int, int, Pack> p(-1, 1, 0);
     s << p;
     SEQAN_ASSERT_EQ(s.str(), "< -1 , 1 , 0 >");
 
@@ -1200,7 +1200,7 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_stream_output)
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_get_value)
 {
-    Triple<int, int, int, Compressed> t(-1, 1, 0);
+    Triple<int, int, int, Pack> t(-1, 1, 0);
     SEQAN_ASSERT_EQ(getValueI1(t), -1);
     SEQAN_ASSERT_EQ(getValueI2(t), 1);
     SEQAN_ASSERT_EQ(getValueI3(t), 0);
@@ -1211,8 +1211,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_assign_value)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
 
         assignValueI1(t1, t2.i1);
         assignValueI2(t1, t2.i2);
@@ -1228,8 +1228,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_set_value)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
 
         setValueI1(t1, t2.i1);
         setValueI2(t1, t2.i2);
@@ -1245,8 +1245,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_move_value)
 {
     // Test with ints.
     {
-        Triple<int, int, int, Compressed> t1;
-        Triple<int, int, int, Compressed> t2(1, 2, 3);
+        Triple<int, int, int, Pack> t1;
+        Triple<int, int, int, Pack> t2(1, 2, 3);
 
         int i1 = t2.i1;
         int i2 = t2.i2;
@@ -1263,9 +1263,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_move_value)
 
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_comparison_same_spec)
 {
-    Triple<int, int, int, Compressed> t001(0, 0, 1);
-    Triple<int, int, int, Compressed> t010(0, 1, 0);
-    Triple<int, int, int, Compressed> t100(1, 0, 0);
+    Triple<int, int, int, Pack> t001(0, 0, 1);
+    Triple<int, int, int, Pack> t010(0, 1, 0);
+    Triple<int, int, int, Pack> t100(1, 0, 0);
 
     SEQAN_ASSERT(t001 == t001);
     SEQAN_ASSERT_NOT(t010 == t100);
@@ -1288,8 +1288,8 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_comparison_same_spec)
 SEQAN_DEFINE_TEST(test_basic_aggregates_triple_packed_comparison_different_spec)
 {
     Triple<int, __int64, char> t001(0, 0, 1);
-    Triple<int, __int64, char, Compressed> t010(0, 1, 0);
-    Triple<int, short int, char, BitCompressed<20, 12> > t100(1, 0, 0);
+    Triple<int, __int64, char, Pack> t010(0, 1, 0);
+    Triple<int, short int, char, BitPacked<20, 12> > t100(1, 0, 0);
 
     SEQAN_ASSERT(t001 == t001);
     SEQAN_ASSERT_NOT(t010 == t100);
@@ -1656,12 +1656,12 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_base_stream_output)
 }
 
 // --------------------------------------------------------------------------
-// Tests for Bit-Compressed Tuple.
+// Tests for Bit-Pack Tuple.
 // --------------------------------------------------------------------------
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_metafunctions)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_metafunctions)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     // Metafunction LENGTH
     unsigned l = LENGTH<TTuple>::VALUE;
     SEQAN_ASSERT_EQ(l, 2u);
@@ -1669,20 +1669,20 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_metafunctions)
     bool b = IsSameType<typename Value<TTuple>::Type, char>::VALUE;
     SEQAN_ASSERT_EQ(b, true);
     // Metafunction Spec
-    b = IsSameType<typename Spec<TTuple>::Type, Compressed>::VALUE;
+    b = IsSameType<typename Spec<TTuple>::Type, BitPacked<> >::VALUE;
     SEQAN_ASSERT_EQ(b, true);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_constructors)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_constructors)
 {
     // Default constructor.
-    Tuple<char, 2, Compressed> t;
+    Tuple<char, 2, BitPacked<> > t;
     (void)t;
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_assign)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_assign)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     TTuple t1;
     TTuple t2;
 
@@ -1695,9 +1695,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_assign)
     SEQAN_ASSERT_EQ(getValue(t2, 1), 2);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_set)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_set)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     TTuple t1;
     TTuple t2;
 
@@ -1710,9 +1710,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_set)
     SEQAN_ASSERT_EQ(getValue(t2, 1), 2);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_move)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_move)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     TTuple t1;
     TTuple t2;
 
@@ -1725,11 +1725,11 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_move)
     SEQAN_ASSERT_EQ(getValue(t2, 1), 2);
 }
 
-// SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_value);  // TODO(holtgrew): Need proxy for this.
+// SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_value);  // TODO(holtgrew): Need proxy for this.
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_get_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_get_value)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     TTuple t1;
 
     assignValue(t1, 0, 1);
@@ -1739,9 +1739,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_get_value)
     SEQAN_ASSERT_EQ(getValue(t1, 1), 2);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_assign_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_assign_value)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     TTuple t1;
 
     assignValue(t1, 0, 1);
@@ -1751,9 +1751,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_assign_value)
     SEQAN_ASSERT_EQ(getValue(t1, 1), 2);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_set_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_set_value)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     TTuple t1;
 
     setValue(t1, 0, 1);
@@ -1763,9 +1763,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_set_value)
     SEQAN_ASSERT_EQ(getValue(t1, 1), 2);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_move_value)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_move_value)
 {
-    typedef Tuple<char, 2, Compressed> TTuple;
+    typedef Tuple<char, 2, BitPacked<> > TTuple;
     TTuple t1;
 
     moveValue(t1, 0, 1);
@@ -1775,9 +1775,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_move_value)
     SEQAN_ASSERT_EQ(getValue(t1, 1), 2);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_shift_left)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_shift_left)
 {
-    Tuple<char, 2, Compressed> t1;
+    Tuple<char, 2, BitPacked<> > t1;
     assignValue(t1, 0, 1);
     assignValue(t1, 1, 2);
 
@@ -1787,9 +1787,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_shift_left)
     SEQAN_ASSERT_EQ(getValue(t1, 1), 0);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_shift_right)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_shift_right)
 {
-    Tuple<char, 2, Compressed> t1;
+    Tuple<char, 2, BitPacked<> > t1;
     assignValue(t1, 0, 1);
     assignValue(t1, 1, 2);
 
@@ -1799,9 +1799,9 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_shift_right)
     SEQAN_ASSERT_EQ(getValue(t1, 1), 1);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_clear)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_clear)
 {
-    Tuple<char, 2, Compressed> t1;
+    Tuple<char, 2, BitPacked<> > t1;
     assignValue(t1, 0, 1);
     assignValue(t1, 1, 2);
 
@@ -1811,17 +1811,17 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_clear)
     SEQAN_ASSERT_EQ(getValue(t1, 1), 0);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_length)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_length)
 {
-    Tuple<char, 2, Compressed> t1;
+    Tuple<char, 2, BitPacked<> > t1;
     SEQAN_ASSERT_EQ(length(t1), 2u);
 }
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_same_spec)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_comparison_same_spec)
 {
-    Tuple<char, 2, Compressed> t00; assignValue(t00, 0, 0); assignValue(t00, 1, 0);
-    Tuple<char, 2, Compressed> t01; assignValue(t01, 0, 0); assignValue(t01, 1, 1);
-    Tuple<char, 2, Compressed> t10; assignValue(t10, 0, 1); assignValue(t10, 1, 0);
+    Tuple<char, 2, BitPacked<> > t00; assignValue(t00, 0, 0); assignValue(t00, 1, 0);
+    Tuple<char, 2, BitPacked<> > t01; assignValue(t01, 0, 0); assignValue(t01, 1, 1);
+    Tuple<char, 2, BitPacked<> > t10; assignValue(t10, 0, 1); assignValue(t10, 1, 0);
 
     SEQAN_ASSERT(t00 == t00);
     SEQAN_ASSERT_NOT(t01 == t10);
@@ -1841,11 +1841,11 @@ SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_same_spe
     SEQAN_ASSERT_NOT(t10 <= t01);
 }
 
-// SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_different_spec)  // Not worth the bother, probably.
+// SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_comparison_different_spec)  // Not worth the bother, probably.
 
-SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_compressed_stream_output)
+SEQAN_DEFINE_TEST(test_basic_aggregates_tuple_bit_packed_stream_output)
 {
-    Tuple<char, 2, Compressed> t1;
+    Tuple<char, 2, BitPacked<> > t1;
     assignValue(t1, 0, 'a');
     assignValue(t1, 1, 'b');
 

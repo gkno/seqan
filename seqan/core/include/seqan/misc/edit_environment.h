@@ -273,7 +273,7 @@ public:
                 _mod.errorPos = pos;
                 _mod.skipChar = (unsigned) orig[posOrig];
                 _mod.character = (0 == _mod.skipChar) ? 1 : 0;
-                assignValueAt(tmp, pos, (TValue) _mod.character);
+                assignValue(tmp, pos, (TValue) _mod.character);
                 ++pos;
                 ++posOrig;
                 break;
@@ -612,7 +612,7 @@ goBegin(Iter<StringEnumerator<TObject, EditEnvironment<HammingDistance, DISTANCE
         it.mod[0].errorPos = 0;
         it.mod[0].skipChar = -1;
         it.mod[0].character = 0;
-        assignValueAt(it.tmp, 0, (TValue) 0);
+        assignValue(it.tmp, 0, (TValue) 0);
         i = 1;
     }
     else
@@ -622,7 +622,7 @@ goBegin(Iter<StringEnumerator<TObject, EditEnvironment<HammingDistance, DISTANCE
             mod.errorPos = (mDist - 1) - i;
             mod.skipChar = (unsigned) it.orig[mod.errorPos];
             mod.character = (0 == mod.skipChar) ? 1 : 0;
-            assignValueAt(it.tmp, mod.errorPos, (TValue) mod.character);
+            assignValue(it.tmp, mod.errorPos, (TValue) mod.character);
         }
     for (; i < DISTANCE; ++i)
     {
@@ -723,11 +723,11 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<HammingDistance, DISTA
             // output the original tuple only once
             if (mod->character == mod->skipChar)
                 continue;
-            assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+            assignValue(it.tmp, mod->errorPos, (TValue) mod->character);
             break;
         }
         mod->character = (0 == mod->skipChar) ? 1 : 0;
-        assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+        assignValue(it.tmp, mod->errorPos, (TValue) mod->character);
 
         if (++i == DISTANCE || (mod + 1)->errorPos == (TSignedSize) - 1)
         {
@@ -739,7 +739,7 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<HammingDistance, DISTA
                 if (mod->errorPos >= 0)
                 {
                     // std::cout << "org" << it.orig << "  tmp" << it.tmp << " ___  ";
-                    assignValueAt(it.tmp, mod->errorPos, it.orig[mod->errorPos]);
+                    assignValue(it.tmp, mod->errorPos, it.orig[mod->errorPos]);
                     // std::cout << "org" << it.orig << "  tmp" << it.tmp << std::endl;
                 }
 
@@ -748,7 +748,7 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<HammingDistance, DISTA
                 {
                     mod->skipChar = (unsigned) it.orig[mod->errorPos];
                     mod->character = (0 == mod->skipChar) ? 1 : 0;
-                    assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+                    assignValue(it.tmp, mod->errorPos, (TValue) mod->character);
 
                     for (; i > 0; )
                     {
@@ -757,7 +757,7 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<HammingDistance, DISTA
                         --i;
                         mod->skipChar = (unsigned) it.orig[mod->errorPos];
                         mod->character = (0 == mod->skipChar) ? 1 : 0;
-                        assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+                        assignValue(it.tmp, mod->errorPos, (TValue) mod->character);
                     }
                     return it;
                 }
@@ -882,7 +882,7 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<LevenshteinDistance, D
             if (mod->character == mod->skipChar)
                 continue;
             if (mod->errorPos >= 0)
-                assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+                assignValue(it.tmp, mod->errorPos, (TValue) mod->character);
             return it;
         }
 
@@ -891,7 +891,7 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<LevenshteinDistance, D
         {
             mod->character = (0 == mod->skipChar) ? 1 : 0;
             if (mod->errorPos >= 0)
-                assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+                assignValue(it.tmp, mod->errorPos, (TValue) mod->character);
         }
 
         // next modifier
@@ -905,7 +905,7 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<LevenshteinDistance, D
     {
         // restore char at old position
         if (mod->errorPos >= 0 && static_cast<unsigned>(mod->errorPos) < length(it.tmp))
-            assignValueAt(it.tmp, mod->errorPos, it.orig[mod->errorPosOrig]);
+            assignValue(it.tmp, mod->errorPos, it.orig[mod->errorPosOrig]);
 
 //					int iMax = (TSignedSize)(length(it.tmp) - i);
 //					if (mod->state == mod->INSERT_) ++iMax;
@@ -925,7 +925,7 @@ operator++(Iter<StringEnumerator<TObject, EditEnvironment<LevenshteinDistance, D
                     else
                         mod->skipChar = -1;
                     mod->character = (0 == mod->skipChar) ? 1 : 0;
-                    assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
+                    assignValue(it.tmp, mod->errorPos, (TValue) mod->character);
                 }
             }
             else if (!it._reinit(mod->errorPos, mod->errorPosOrig))

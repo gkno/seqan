@@ -43,32 +43,33 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-    template <typename TCompression = void>
+    template <typename TPack = void>
     struct Extender7;
 
-	template <typename TTextInput, typename TNameInput, typename TCompression >
-    struct Pipe< Bundle2< TTextInput, TNameInput >, Extender7<TCompression> >
+	template <typename TTextInput, typename TNameInput, typename TPack >
+    struct Pipe< Bundle2< TTextInput, TNameInput >, Extender7<TPack> >
     {
-        typedef typename Size<Pipe>::Type           SizeType;
-        typedef typename Value<TTextInput>::Type    TextInType;
-        typedef typename Value<TNameInput>::Type    NameInType;
+        typedef typename Size<Pipe>::Type                   TSize;
+        typedef typename Value<TTextInput>::Type            TValue;
+        typedef typename Value<TNameInput>::Type            TNameInputValue;
+        typedef typename Value<TNameInputValue, 2>::Type    TName;
 
-        typedef Tuple<TextInType, 4, TCompression>  X4Tuple;
-        typedef Tuple<TextInType, 5, TCompression>  X5Tuple;
-        typedef Tuple<TextInType, 6, TCompression>  X6Tuple;
-        typedef Tuple<typename NameInType::T2, 3>   NTuple;
-        typedef Triple<SizeType, NTuple, X6Tuple, Compressed>   OutType0;
-        typedef Triple<SizeType, NTuple, X6Tuple, Compressed>   OutType3;
-        typedef Triple<SizeType, NTuple, X4Tuple, Compressed>   OutType5;
-        typedef Triple<SizeType, NTuple, X5Tuple, Compressed>   OutType6;
-        typedef Triple<SizeType, NTuple, X6Tuple, Compressed>   OutType124;
+        typedef Tuple<TValue, 4, TPack>                 X4Tuple;
+        typedef Tuple<TValue, 5, TPack>                 X5Tuple;
+        typedef Tuple<TValue, 6, TPack>                 X6Tuple;
+        typedef Tuple<TName, 3>                         NTuple;
+        typedef Triple<TSize, NTuple, X6Tuple, Pack>    OutType0;
+        typedef Triple<TSize, NTuple, X6Tuple, Pack>    OutType3;
+        typedef Triple<TSize, NTuple, X4Tuple, Pack>    OutType5;
+        typedef Triple<TSize, NTuple, X5Tuple, Pack>    OutType6;
+        typedef Triple<TSize, NTuple, X6Tuple, Pack>    OutType124;
 
         // pipeline interfaces to ease specialization
-        typedef Pipe< void, AbstractSource< OutType0, SizeType > > Out0;
-        typedef Pipe< void, AbstractSource< OutType3, SizeType > > Out3;
-        typedef Pipe< void, AbstractSource< OutType5, SizeType > > Out5;
-        typedef Pipe< void, AbstractSource< OutType6, SizeType > > Out6;
-        typedef Pipe< void, AbstractSource< OutType124, SizeType > > Out124;
+        typedef Pipe< void, AbstractSource< OutType0, TSize > > Out0;
+        typedef Pipe< void, AbstractSource< OutType3, TSize > > Out3;
+        typedef Pipe< void, AbstractSource< OutType5, TSize > > Out5;
+        typedef Pipe< void, AbstractSource< OutType6, TSize > > Out6;
+        typedef Pipe< void, AbstractSource< OutType124, TSize > > Out124;
     };
 
 
@@ -79,7 +80,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// which is needed for bitpacked structs (no =sign possible)
 	template <typename Dest, typename Ofs, typename Src>
 	static finline Src const cp___(Dest &dst, Ofs const ofs, Src const src) {
-		return dst.i3.assignValueAt(ofs, src);
+		return dst.i3.assignValue(ofs, src);
 	}
         
     template < typename TTextInput, typename TNameInput,
@@ -255,32 +256,33 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-    template <typename TPair, typename TCompression = void>
+    template <typename TPair, typename TPack = void>
     struct Extender7Multi;
 
-    template <typename TTextInput, typename TNameInput, typename TPair, typename TCompression >
-    struct Pipe< Bundle2< TTextInput, TNameInput >, Extender7Multi<TPair, TCompression> >
+    template <typename TTextInput, typename TNameInput, typename TPair, typename TPack >
+    struct Pipe< Bundle2< TTextInput, TNameInput >, Extender7Multi<TPair, TPack> >
     {
-        typedef typename Size<Pipe>::Type           SizeType;
-        typedef typename Value<TTextInput>::Type    TextInType;
-        typedef typename Value<TNameInput>::Type    NameInType;
+        typedef typename Size<Pipe>::Type                   TSize;
+        typedef typename Value<TTextInput>::Type            TValue;
+        typedef typename Value<TNameInput>::Type            TNameInputValue;
+        typedef typename Value<TNameInputValue, 2>::Type    TName;
 
-        typedef Tuple<TextInType, 4, TCompression>  X4Tuple;
-        typedef Tuple<TextInType, 5, TCompression>  X5Tuple;
-        typedef Tuple<TextInType, 6, TCompression>  X6Tuple;
-        typedef Tuple<typename NameInType::T2, 3>   NTuple;
-        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType0;
-        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType3;
-        typedef Triple<TPair, NTuple, X4Tuple, Compressed>	OutType5;
-        typedef Triple<TPair, NTuple, X5Tuple, Compressed>	OutType6;
-        typedef Triple<TPair, NTuple, X6Tuple, Compressed>	OutType124;
+        typedef Tuple<TValue, 4, TPack>                 X4Tuple;
+        typedef Tuple<TValue, 5, TPack>                 X5Tuple;
+        typedef Tuple<TValue, 6, TPack>                 X6Tuple;
+        typedef Tuple<TName, 3>                         NTuple;
+        typedef Triple<TPair, NTuple, X6Tuple, Pack>    OutType0;
+        typedef Triple<TPair, NTuple, X6Tuple, Pack>    OutType3;
+        typedef Triple<TPair, NTuple, X4Tuple, Pack>    OutType5;
+        typedef Triple<TPair, NTuple, X5Tuple, Pack>    OutType6;
+        typedef Triple<TPair, NTuple, X6Tuple, Pack>    OutType124;
 
         // pipeline interfaces to ease specialization
-        typedef Pipe< void, AbstractSource< OutType0, SizeType > > Out0;
-        typedef Pipe< void, AbstractSource< OutType3, SizeType > > Out3;
-        typedef Pipe< void, AbstractSource< OutType5, SizeType > > Out5;
-        typedef Pipe< void, AbstractSource< OutType6, SizeType > > Out6;
-        typedef Pipe< void, AbstractSource< OutType124, SizeType > > Out124;
+        typedef Pipe< void, AbstractSource< OutType0, TSize > > Out0;
+        typedef Pipe< void, AbstractSource< OutType3, TSize > > Out3;
+        typedef Pipe< void, AbstractSource< OutType5, TSize > > Out5;
+        typedef Pipe< void, AbstractSource< OutType6, TSize > > Out6;
+        typedef Pipe< void, AbstractSource< OutType124, TSize > > Out124;
     };
 
 
@@ -373,7 +375,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize rounds, cur;
 		TSize old = *it; ++it;
 
-		typedef typename Value<TOut0>::Type::T1 TPair;
+		typedef typename Value<TOut0>::Type         TOutValue0;
+        typedef typename Value<TOutValue0, 1>::Type TPair;
+        
 		PairIncrementer_<TPair, TLimitsString> p;
 		setHost(p, limits);
 

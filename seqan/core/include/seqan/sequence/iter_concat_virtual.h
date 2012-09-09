@@ -336,9 +336,9 @@ operator+(Iter<TStringSet, ConcatVirtual<TSpec> > const & me, TDelta delta)
     return Iter<TStringSet, ConcatVirtual<TSpec> > (*me.host, getValueI1(pos), getValueI2(pos));
 }
 
-template <typename TStringSet, typename TSpec, typename T1, typename T2, typename TCompression>
+template <typename TStringSet, typename TSpec, typename T1, typename T2, typename TPack>
 inline Iter<TStringSet, ConcatVirtual<TSpec> >
-operator+(Iter<TStringSet, ConcatVirtual<TSpec> > const & me, Pair<T1, T2, TCompression> delta)
+operator+(Iter<TStringSet, ConcatVirtual<TSpec> > const & me, Pair<T1, T2, TPack> delta)
 {
     Pair<unsigned, typename Size<typename Value<TStringSet>::Type>::Type> pos;
     posLocalize(pos, _tell(me) + delta, stringSetLimits(*me.host));

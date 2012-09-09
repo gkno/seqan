@@ -44,7 +44,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Merger3;
 
     template < typename TInput0, typename TInput12 >
-    struct Value< Pipe< Bundle2< TInput0, TInput12 >, Merger3 > > {
+    struct Value< Pipe< Bundle2< TInput0, TInput12 >, Merger3 > >
+    {
         typedef typename Size<TInput0>::Type Type;
     };
 
@@ -56,12 +57,12 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         typedef typename Value<TInput0>::Type   InType0;
         typedef typename Value<TInput12>::Type  InType12;
-        typedef typename Size<Pipe>::Type       SizeType;
+        typedef typename Size<Pipe>::Type       TSize;
 
         Bundle2 <
             TInput0,
             TInput12 >  in;
-        SizeType        N, tmp;
+        TSize           N, tmp;
         int             minStream;
         bool            twoStreams;
 

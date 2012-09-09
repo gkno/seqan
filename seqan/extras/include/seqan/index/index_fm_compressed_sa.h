@@ -95,9 +95,8 @@ struct Value<CompressedSA<TSparseString, TLfTable, TSpec> const>
 template <typename TPos, typename TOffSet>
 TPos addGapDistance_(TPos const & value, TOffSet const & offSet);
 
-template <typename TSeqId, typename TPos, typename TOffSet>
-Pair<TSeqId, TPos> addGapDistance_(Pair<TSeqId, TPos> const & value, TOffSet const & offSet);
-
+template <typename TSeqId, typename TSpec, typename TPos, typename TOffSet>
+Pair<TSeqId, TPos> addGapDistance_(Pair<TSeqId, TPos, TSpec> const & value, TOffSet const & offSet);
 
 /**
 .Class.CompressedSA:

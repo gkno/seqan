@@ -86,14 +86,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			do {
 				if (++character < ValueSize<TValue>::VALUE)
 					// next replacement value
-					assignValueAt(tmp.i2, errorPos, (TValue) character);
+					assignValue(tmp.i2, errorPos, (TValue) character);
 				else {
 					// next error position					
-					assignValueAt(tmp.i2, errorPos, orig.i2[errorPos]);
+					assignValue(tmp.i2, errorPos, orig.i2[errorPos]);
 					character = 0;
 					if (++errorPos < length(tmp.i2)) {
 						skipChar = (unsigned) orig.i2[errorPos];
-						assignValueAt(tmp.i2, errorPos, (TValue) 0);
+						assignValue(tmp.i2, errorPos, (TValue) 0);
 					} else {
 						// next tuple
 						errorPos = 0;
@@ -102,7 +102,7 @@ namespace SEQAN_NAMESPACE_MAIN
 							++in;
 						if (!eof(in)) {
 							tmp = orig = *in;
-							assignValueAt(tmp.i2, 0, (TValue) 0);
+							assignValue(tmp.i2, 0, (TValue) 0);
 						}
 					}
 				}
@@ -146,14 +146,14 @@ namespace SEQAN_NAMESPACE_MAIN
 				do {
 					if (++character < ValueSize<TValue>::VALUE) {
 						// next replacement value
-						assignValueAt(tmp.i2, errorPos, (TValue) character);
+						assignValue(tmp.i2, errorPos, (TValue) character);
 					} else {
 						// next substitution position
-						assignValueAt(tmp.i2, errorPos, orig.i2[errorPos]);
+						assignValue(tmp.i2, errorPos, orig.i2[errorPos]);
 						character = 0;
 						if (++errorPos < length(tmp.i2)) {
 							skipChar = (unsigned) orig.i2[errorPos];
-							assignValueAt(tmp.i2, errorPos, (TValue) 0);
+							assignValue(tmp.i2, errorPos, (TValue) 0);
 						} else {
 							// NEXT TUPLE
 							// now (tmp == orig) holds
@@ -164,8 +164,8 @@ namespace SEQAN_NAMESPACE_MAIN
 								prev = orig;
 								orig = *in;
 								tmp.i2 = orig.i2;
-								assignValueAt(tmp.i2, 0, prev.i2[0]);
-								assignValueAt(tmp.i2, 1, prev.i2[1]);
+								assignValue(tmp.i2, 0, prev.i2[0]);
+								assignValue(tmp.i2, 1, prev.i2[1]);
 								if (length(tmp.i2) >= 4) {
 									errorPos = 2;
 									state = DELETE_;
@@ -175,8 +175,8 @@ namespace SEQAN_NAMESPACE_MAIN
 							} else {
 								// LAST TUPLE
 								shiftLeft(orig.i2);
-								assignValueAt(tmp.i2, 0, orig.i2[0]);
-								assignValueAt(tmp.i2, 1, (TValue) 0);
+								assignValue(tmp.i2, 0, orig.i2[0]);
+								assignValue(tmp.i2, 1, (TValue) 0);
 								character = 0;
 								errorPos = 1;
 								state = INSERT_LAST_;
@@ -190,11 +190,11 @@ namespace SEQAN_NAMESPACE_MAIN
 				break;
 			case DELETE_:
 				// before DELETE_ (prev=orig, ++in; tmp=orig=*in) holds
-				assignValueAt(tmp.i2, errorPos, prev.i2[errorPos]);
+				assignValue(tmp.i2, errorPos, prev.i2[errorPos]);
 				if (++errorPos >= length(tmp.i2) - 1) {
-					assignValueAt(tmp.i2, length(tmp.i2)-1, prev.i2[length(tmp.i2)-1]);
-					assignValueAt(tmp.i2, 0, orig.i2[0]);
-					assignValueAt(tmp.i2, 1, (TValue) 0);
+					assignValue(tmp.i2, length(tmp.i2)-1, prev.i2[length(tmp.i2)-1]);
+					assignValue(tmp.i2, 0, orig.i2[0]);
+					assignValue(tmp.i2, 1, (TValue) 0);
 					character = 0;
 					errorPos = 1;
 					state = INSERT_;
@@ -209,17 +209,17 @@ namespace SEQAN_NAMESPACE_MAIN
 				// before INSERT_ (prev=orig, ++in; tmp=prev) holds
 				if (++character < ValueSize<TValue>::VALUE)
 					// next replacement value
-					assignValueAt(tmp.i2, errorPos, (TValue) character);
+					assignValue(tmp.i2, errorPos, (TValue) character);
 				else {
 					// next insert position					
-					assignValueAt(tmp.i2, errorPos, orig.i2[errorPos]);
+					assignValue(tmp.i2, errorPos, orig.i2[errorPos]);
 					character = 0;
 					if (++errorPos >= length(tmp.i2) - 1 && state == INSERT_) {
 						tmp = orig;
 						state = SUBST_;
 						//::std::cerr << ::std::endl << "_REPLACEMENTS_" << ::std::endl;
 						errorPos = 0;
-						assignValueAt(tmp.i2, 0, (TValue) 0);
+						assignValue(tmp.i2, 0, (TValue) 0);
 						break;
 					}
 					if (errorPos >= length(tmp.i2)) {
@@ -230,14 +230,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 							// begin to insert the first char at position 0
 							shiftRight(tmp.i2);
-							assignValueAt(tmp.i2, 1, (TValue) 0);
+							assignValue(tmp.i2, 1, (TValue) 0);
 							errorPos = 0;
 							state = INSERT_EOS_;
 							//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 						}
 						break;
 					}
-					assignValueAt(tmp.i2, errorPos, (TValue) 0);
+					assignValue(tmp.i2, errorPos, (TValue) 0);
 				}
 			default:;
 			}			
@@ -283,7 +283,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// begin to insert the first char at position 0
 		shiftRight(me.tmp.i2);
-		assignValueAt(me.tmp.i2, 0, (TValue) 0);
+		assignValue(me.tmp.i2, 0, (TValue) 0);
 		me.character = 0;
 		me.errorPos = 0;
 		me.state = me.INSERT_;

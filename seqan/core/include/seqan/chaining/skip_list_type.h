@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 */
 		// default for Pair
-	template < typename T1_, typename T2_, typename Compressed >
+	template < typename T1_, typename T2_, typename Pack >
     struct Pair;
 
 	// auxiliary functions for Objects that are plugged into the 

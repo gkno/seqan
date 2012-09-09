@@ -221,7 +221,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size<TTextInput>::Type				TSize;
 		typedef typename BufReadHandler<TTextInput>::Type	TBufReader;
 
-		typedef typename Value<TInvertedSAInput>::Type::T2::T	TPair;
+		typedef typename Value<typename Value<typename Value<TInvertedSAInput>::Type, 2>::Type>::Type TPair;
 
         SEQAN_PROSET(SEQAN_PRODEPTH, 0);
 		TSize rest = length(textIn);

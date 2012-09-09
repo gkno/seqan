@@ -59,7 +59,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TLCPInput>::Type				TValue;
 		typedef typename Size<TLCPInput>::Type				TSize;
 
-		typedef Pair<TSize, TValue, Compressed>				TPair;		// (i, lcptab[i])
+		typedef Pair<TSize, TValue, Pack>				TPair;		// (i, lcptab[i])
 		typedef ::std::stack<TPair> 						TStack;
 
 		TStack stack_updown;
@@ -141,7 +141,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TLCPInput>::Type		TValue;
 		typedef typename Size<TLCPInput>::Type		TSize;
 
-		typedef Pair<TSize, TValue, Compressed>		TCoreType;		// (i, lcptab[i])
+		typedef Pair<TSize, TValue, Pack>		TCoreType;		// (i, lcptab[i])
 
 		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;

@@ -41,7 +41,7 @@ struct SAValue<Index<TMPReadSet, IndexQGram<TShape> > >
     typedef Pair<
         unsigned,
         unsigned,
-        BitCompressed<24, 8>        // max. 16M reads of length < 256
+        BitCompressed<24, 8>    // max. 16M reads of length < 256
         > Type;
 };
 
@@ -52,8 +52,7 @@ struct SAValue<Index<TMPReadSet, IndexQGram<TShape> > >
 {
     typedef Pair<
         unsigned,               // many reads
-        unsigned,               // of arbitrary length
-        Compressed
+        unsigned                // of arbitrary length
         > Type;
 };
 

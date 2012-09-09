@@ -43,13 +43,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-    template < unsigned tupleLen, bool omitLast = false, typename TCompression = void >
+    template < unsigned tupleLen, bool omitLast = false, typename TPack = void >
     struct Tupler;
 
-    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
-    struct Value< Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > > {
-        typedef Tuple<typename Value<TInput>::Type, tupleLen, TCompression>	TTuple;
-        typedef Pair<typename Size<TInput>::Type, TTuple, Compressed>		Type;
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TPack >
+    struct Value< Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > >
+    {
+        typedef Tuple<typename Value<TInput>::Type, tupleLen, TPack>	TTuple;
+        typedef Pair<typename Size<TInput>::Type, TTuple, Pack>         Type;
     };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,12 +59,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput, 
 		unsigned tupleLen, 
 		bool omitLast, 
-		typename TCompression,
+		typename TPack,
 		typename TPair, 
 		typename TLimitsString >
-    struct Value< Pipe< TInput, Multi< Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString > > > {
-        typedef Tuple<typename Value<TInput>::Type, tupleLen, TCompression>	TTuple;
-        typedef Pair<TPair, TTuple, Compressed>								Type;
+    struct Value< Pipe< TInput, Multi< Tupler< tupleLen, omitLast, TPack >, TPair, TLimitsString > > >
+    {
+        typedef Tuple<typename Value<TInput>::Type, tupleLen, TPack>	TTuple;
+        typedef Pair<TPair, TTuple, Pack>								Type;
     };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -76,8 +78,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	// output tupleLen-1 half filled tuples at the end
-    template < typename TInput, unsigned tupleLen, typename TCompression >
-	struct TuplerLastTuples_< Pipe< TInput, Tupler<tupleLen, false, TCompression> > > {
+    template < typename TInput, unsigned tupleLen, typename TPack >
+	struct TuplerLastTuples_< Pipe< TInput, Tupler<tupleLen, false, TPack> > > {
 		enum { VALUE = tupleLen };
 	};
 
@@ -107,8 +109,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
     // tupler class
-    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
-    struct Pipe< TInput, Tupler<tupleLen, omitLast, TCompression> >
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TPack >
+    struct Pipe< TInput, Tupler<tupleLen, omitLast, TPack> >
     {
 		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
@@ -155,7 +157,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TInput, unsigned tupleLen, bool omitLast >
-    struct Pipe< TInput, Tupler<tupleLen, omitLast, Compressed> >
+    struct Pipe< TInput, Tupler<tupleLen, omitLast, BitPacked<> > >
     {
         TInput                      &in;
         typename Value<Pipe>::Type	tmp;
@@ -164,25 +166,30 @@ namespace SEQAN_NAMESPACE_MAIN
         Pipe(TInput& _in):
             in(_in) {}
 
-        inline typename Value<Pipe>::Type const & operator*() const {
+        inline typename Value<Pipe>::Type const & operator*() const
+        {
             return tmp;
         }
 
-        inline Pipe& operator++() {
+        inline Pipe& operator++()
+        {
             if (eof(in)) --lastTuples;
 			tmp.i2 <<= 1;
 			++tmp.i1;
-			if (lastTuples == TuplerLastTuples_<Pipe>::VALUE) {
+			if (lastTuples == TuplerLastTuples_<Pipe>::VALUE)
+            {
 				tmp.i2 |= *in;
 				++in;
 			}
             return *this;
         }
 
-        inline void fill() {
+        inline void fill()
+        {
             unsigned i;
             clear(tmp.i2);
-			for(i = 0; i < tupleLen && !eof(in); ++i, ++in) {
+			for(i = 0; i < tupleLen && !eof(in); ++i, ++in)
+            {
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;
 			}
@@ -202,10 +209,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput, 
 		unsigned tupleLen, 
 		bool omitLast, 
-		typename TCompression, 
+		typename TPack, 
 		typename TPair, 
 		typename TLimitsString >
-    struct Pipe< TInput, Multi<Tupler<tupleLen, omitLast, TCompression>, TPair, TLimitsString> >
+    struct Pipe< TInput, Multi<Tupler<tupleLen, omitLast, TPack>, TPair, TLimitsString> >
     {
 		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
@@ -223,14 +230,17 @@ namespace SEQAN_NAMESPACE_MAIN
             in(_in),
 			limits(_limits) {}
 
-        inline typename Value<Pipe>::Type const & operator*() const {
+        inline typename Value<Pipe>::Type const & operator*() const
+        {
             return tmp;
         }
 
-        inline Pipe& operator++() {
+        inline Pipe& operator++()
+        {
 			// process next sequence
 			if (eos())
-				if (--lastTuples == 0) {
+				if (--lastTuples == 0)
+                {
 					assignValueI1(tmp.i1, getValueI1(tmp.i1) + 1);
 					fill();
 					return *this;
@@ -240,9 +250,11 @@ namespace SEQAN_NAMESPACE_MAIN
             Loop<ShiftLeftWorker_, tupleLen - 1>::run(this->tmp);
 			assignValueI2(tmp.i1, getValueI2(tmp.i1) + 1);
 
-			if (lastTuples < TuplerLastTuples_<Pipe>::VALUE) {
+			if (lastTuples < TuplerLastTuples_<Pipe>::VALUE)
+            {
 	            tmp.i2[tupleLen - 1] = TValue();
-			} else {
+			} else
+            {
 				tmp.i2[tupleLen - 1] = *in;
 				++localPos;
 				++in;
@@ -250,7 +262,8 @@ namespace SEQAN_NAMESPACE_MAIN
             return *this;
         }
 
-        inline void fill() {
+        inline void fill()
+        {
 			do {
 				unsigned i = 0;
 				if (!eof(in))
@@ -280,7 +293,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			assignValueI2(tmp.i1, 0);
 		}
 
-		inline bool eos() {
+		inline bool eos()
+        {
 			return (getValueI1(localPos) > 0) && (getValueI2(localPos) == 0);
 		}
 	};
@@ -294,7 +308,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool omitLast, 
 		typename TPair, 
 		typename TLimitsString >
-    struct Pipe< TInput, Multi<Tupler<tupleLen, omitLast, Compressed>, TPair, TLimitsString> >
+    struct Pipe< TInput, Multi<Tupler<tupleLen, omitLast, BitPacked<> >, TPair, TLimitsString> >
     {
 		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
@@ -312,7 +326,8 @@ namespace SEQAN_NAMESPACE_MAIN
             in(_in),
 			limits(_limits) {}
 
-        inline typename Value<Pipe>::Type const & operator*() const {
+        inline typename Value<Pipe>::Type const & operator*() const
+        {
             return tmp;
         }
 
@@ -336,11 +351,14 @@ namespace SEQAN_NAMESPACE_MAIN
             return *this;
         }
 
-        inline void fill() {
-			do {
+        inline void fill()
+        {
+			do
+            {
 				unsigned i = 0;
 				if (!eof(in))
-					do {
+					do
+                    {
 						tmp.i2 <<= 1;
 						tmp.i2 |= *in;
 						++in;
@@ -366,7 +384,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			assignValueI2(tmp.i1, 0);
         }
 
-		inline bool eos() {
+		inline bool eos()
+        {
 			return (getValueI1(value(localPos)) > 0) && (getValueI2(value(localPos)) == 0);
 		}
 	};
@@ -374,10 +393,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
     // global pipe functions
-    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TPack >
 	inline bool 
 	control(
-		Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > &me, 
+		Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > &me, 
 		ControlBeginRead const &command) 
 	{
         if (!control(me.in, command)) return false;
@@ -389,12 +408,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput,
 		unsigned tupleLen,
 		bool omitLast,
-		typename TCompression,
+		typename TPack,
 		typename TPair, 
 		typename TLimitsString >
 	inline bool 
 	control(
-		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > &me, 
+		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me, 
 		ControlBeginRead const &command) 
 	{
         if (!control(me.in, command)) return false;
@@ -404,10 +423,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
     
-    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TPack >
 	inline bool 
 	control(
-		Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > &me, 
+		Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > &me, 
 		ControlEof const &)
 	{
 		return me.lastTuples == 0;
@@ -417,21 +436,21 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput,
 		unsigned tupleLen,
 		bool omitLast,
-		typename TCompression,
+		typename TPack,
 		typename TPair, 
 		typename TLimitsString >
 	inline bool 
 	control(
-		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > &me, 
+		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me, 
 		ControlEof const &) 
 	{
 		return me.lastTuples == 0;
 	}
 
-    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TPack >
 	inline bool 
 	control(
-		Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > &me, 
+		Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > &me, 
 		ControlEos const &) 
 	{
 		return control(me, ControlEof());
@@ -441,22 +460,22 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput,
 		unsigned tupleLen,
 		bool omitLast,
-		typename TCompression,
+		typename TPack,
 		typename TPair, 
 		typename TLimitsString >
 	inline bool 
 	control(
-		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > &me, 
+		Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TPack >, TPair, TLimitsString> > &me, 
 		ControlEos const &) 
 	{
 		return (getValueI1(me.tmp.i1) > 0) && (getValueI2(me.tmp.i1) == 0);
 	}
 
-    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
-    inline typename Size< Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > >::Type
-    length(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) 
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TPack >
+    inline typename Size< Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > >::Type
+    length(Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > const &me) 
 	{
-		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > >	TPipe;
+		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TPack > >	TPipe;
 		if (length(me.in) >= (tupleLen - TuplerLastTuples_<TPipe>::VALUE))
 			return length(me.in) - (tupleLen - TuplerLastTuples_<TPipe>::VALUE);
 		else
@@ -467,13 +486,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput,
 		unsigned tupleLen,
 		bool omitLast,
-		typename TCompression,
+		typename TPack,
 		typename TPair, 
 		typename TLimitsString >
-    inline typename Size< Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > >::Type
-    length(Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > const &me)
+    inline typename Size< Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TPack >, TPair, TLimitsString> > >::Type
+    length(Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TPack >, TPair, TLimitsString> > const &me)
 	{
-		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > >	TPipe;
+		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TPack > >	TPipe;
 		unsigned seqs = countSequences(me);
 		
 		if (length(me.in) >= seqs * (tupleLen - TuplerLastTuples_<TPipe>::VALUE))
@@ -482,9 +501,10 @@ namespace SEQAN_NAMESPACE_MAIN
 			return 0;
     }
 
-    template < typename TInput, unsigned tupleLen, bool omitLast, typename TCompression >
+    template < typename TInput, unsigned tupleLen, bool omitLast, typename TPack >
     inline unsigned
-    countSequences(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &) {
+    countSequences(Pipe< TInput, Tupler< tupleLen, omitLast, TPack > > const &)
+    {
 		return 1;
 	}
 
@@ -492,11 +512,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput,
 		unsigned tupleLen,
 		bool omitLast,
-		typename TCompression,
+		typename TPack,
 		typename TPair, 
 		typename TLimitsString >
     inline unsigned
-	countSequences(Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TCompression >, TPair, TLimitsString> > const &me) {
+	countSequences(Pipe< TInput, Multi<Tupler< tupleLen, omitLast, TPack >, TPair, TLimitsString> > const &me)
+    {
 		return length(me.limits) - 1;
 	}
 

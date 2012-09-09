@@ -49,7 +49,8 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 
 	template <typename T>
-	struct SkewDC_<3, T> {
+	struct SkewDC_<3, T>
+    {
 		static const unsigned VALUE[];
 	};
 
@@ -59,78 +60,110 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// *** COMPARATORS & MAPS ***
 
-    template <typename InType, typename Result = int>
-    struct _skew3NComp : public ::std::binary_function<InType,InType,Result> {
-        inline Result operator()(const InType &a, const InType &b) const
+    template <typename TValue, typename TResult = int>
+    struct _skew3NComp :
+        public std::binary_function<TValue, TValue, TResult>
+    {
+        inline TResult operator() (const TValue &a, const TValue &b) const
         {
-			typedef typename InType::T1 SizeType;
-            typedef typename InType::T2 Triplet;
-            const typename Triplet::T *sa = a.i2.i;
-            const typename Triplet::T *sb = b.i2.i;
+			typedef typename Value<TValue, 1>::Type                 TSize;
+            typedef typename Value<TValue, 2>::Type                 TTriplet;
+            typedef typename Value<TTriplet>::Type                  TTripletValue;
+            typedef typename StoredTupleValue_<TTripletValue>::Type TStoredValue;
 
-            SizeType n = Triplet::SIZE;
+            const TStoredValue *sa = a.i2.i;
+            const TStoredValue *sb = b.i2.i;
+            
+            TSize n = LENGTH<TTriplet>::VALUE;
             if (a.i1 < n) n = a.i1;
             if (b.i1 < n) n = b.i1;
-            for(SizeType i = 0; i < n; i++, ++sa, ++sb) {
+            
+            // compare the overlap of septets (the first n bases)
+            for (TSize i = 0; i < n; i++, ++sa, ++sb)
+            {
                 if (*sa == *sb) continue;
                 return (*sa < *sb)? -1 : 1;
             }
-            if (n < Triplet::SIZE) {
+
+            // overlap is equal, now suffix lengths decide
+            if (n < LENGTH<TTriplet>::VALUE)
                 return (a.i1 < b.i1)? -1 : 1;
-            } else
+            else
                 return 0;
         }
     };
 
-    template <typename InType, typename Result = typename InType::T1>
-    struct _skew3NMapLinear : public ::std::unary_function<InType,Result> {
-        Result BN;
-        _skew3NMapLinear(Result BN_):BN(BN_) { }
-        inline Result operator()(const InType& x) const
-        { Result i = x.i1; return BN - (i - i / 3); }
+    template <typename TValue, typename TResult = typename Value<TValue, 1>::Type>
+    struct _skew3NMapLinear :
+        public std::unary_function<TValue, TResult>
+    {
+        TResult BN;
+
+        _skew3NMapLinear(TResult BN_) : BN(BN_) {}
+
+        inline TResult operator() (const TValue & x) const
+        {
+            TResult i = x.i1; return BN - (i - i / 3);
+        }
     };
 
-    template <typename InType, typename Result = typename InType::T1>
-    struct _skew3NMapSliced : public ::std::unary_function<InType,Result> {
-        Result BN, BN2;
-        _skew3NMapSliced(Result BN_):BN(BN_-1),BN2(BN_/2-1) { }
-        inline Result operator()(const InType& x) const
-        { return (x.i1 % 3 == 1)? BN - x.i1/3 : BN2 - x.i1/3; }
+    template <typename TValue, typename TResult = typename Value<TValue, 1>::Type>
+    struct _skew3NMapSliced :
+        public std::unary_function<TValue, TResult>
+    {
+        TResult BN, BN2;
+
+        _skew3NMapSliced(TResult BN_) : BN(BN_-1), BN2(BN_/2-1) {}
+
+        inline TResult operator() (const TValue & x) const
+        {
+            return (x.i1 % 3 == 1)? BN - x.i1/3 : BN2 - x.i1/3;
+        }
     };
 
 
-    template <typename InType, typename Result = InType>
-    struct _skew3UnslicerFunc : public ::std::unary_function<InType,Result> {
-        Result o1, o2, n2;
-        _skew3UnslicerFunc(Result N):
+    template <typename TValue, typename TResult = TValue>
+    struct _skew3UnslicerFunc :
+        public std::unary_function<TValue, TResult>
+    {
+        TResult o1, o2, n2;
+
+        _skew3UnslicerFunc(TResult N) :
             o1(N - (N + 2) % 3),
             o2(N - (N + 1) % 3),
             n2((N + 1) / 3) { }
 
-        inline Result operator()(const InType& x) const
-        { return (x < n2) ? o2 - x * 3 : o1 - (x - n2) * 3; }
+        inline TResult operator() (const TValue & x) const
+        {
+            return (x < n2) ? o2 - x * 3 : o1 - (x - n2) * 3;
+        }
     };
 
-    template <typename InType, typename Result = typename InType::T2::T>
-    struct _skew3NMapExtended : public ::std::unary_function<InType,Result> {
-        inline Result operator()(const InType& x) const
-        { return x.i2[0]; }
+    template <typename TValue, typename TResult = typename Value<typename Value<TValue, 2>::Type>::Type>
+    struct _skew3NMapExtended :
+        public std::unary_function<TValue, TResult>
+    {
+        inline TResult operator() (const TValue & x) const
+        {
+            return x.i2[0];
+        }
     };
 
-    template <typename InType, typename Result = int>
-    struct _skew3ExtendComp : public ::std::binary_function<InType,InType,Result> {
-        inline Result operator()(const InType &a, const InType &b) const
+    template <typename TValue, typename TResult = int>
+    struct _skew3ExtendComp :
+        public std::binary_function<TValue, TValue, TResult>
+    {
+        inline TResult operator() (const TValue &a, const TValue &b) const
         {
             return (a.i3[0] <  b.i3[0] ||
-                    (a.i3[0] == b.i3[0] && a.i2[0] < b.i2[0])) ? -1 : 1;
+                   (a.i3[0] == b.i3[0] && a.i2[0] < b.i2[0])) ? -1 : 1;
         }
     };
 
 
     template < typename TInput >
-    struct Value< Pipe< TInput, Skew3 > > {
-        typedef typename Size<TInput>::Type Type;
-    };
+    struct Value< Pipe< TInput, Skew3 > > :
+        public Size<TInput> {};
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -186,12 +219,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 	    template < typename TInput_ >
-        bool process(TInput_ &textIn) {
+        bool process(TInput_ &textIn)
+        {
 
             SEQAN_PROADD(SEQAN_PRODEPTH, 1);
             SEQAN_PROMARK("Rekursionsabstieg");
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "enter level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << ::std::endl;
+                std::cerr << "enter level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << std::endl;
             #endif
             {
 
@@ -202,7 +236,7 @@ namespace SEQAN_NAMESPACE_MAIN
             TSamplerDC3                 sampler(textIn);
             TSortTuples                 sorter;
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "  sort names (" << length(sampler)<< ")" << ::std::endl;
+                std::cerr << "  sort names (" << length(sampler)<< ")" << std::endl;
             #endif
             sorter << sampler;
             SEQAN_PROMARK("Sorter (2) - Triplets sortieren");
@@ -212,11 +246,12 @@ namespace SEQAN_NAMESPACE_MAIN
             nmap_linear_t               map_linear(length(namer));
             TNames_Sliced               names_sliced(map_sliced);
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "  slice names" << ::std::endl;
+                std::cerr << "  slice names" << std::endl;
             #endif
             names_sliced << namer;
 
-            if (namer.unique() || empty(names_sliced)) {
+            if (namer.unique() || empty(names_sliced))
+            {
                 // unique names
 
                 clear(sorter);
@@ -224,7 +259,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 TNames_Linear_Unique        names_linear(map_linear);
 
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cerr << "  make names linear" << ::std::endl;
+                    std::cerr << "  make names linear" << std::endl;
                 #endif
                 names_linear << names_sliced;
 				clear(names_sliced);
@@ -233,7 +268,9 @@ namespace SEQAN_NAMESPACE_MAIN
                 // step 2
                 _skew3Extend(textIn, names_linear, sortedS0, sortedS12);
 
-            } else {
+            }
+            else
+            {
                 // non-unique names
 
                 clear(sorter);
@@ -257,7 +294,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
                 TNames_Linear               names_linear(map_linear);
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cerr << "  rename names" << ::std::endl;
+                    std::cerr << "  rename names" << std::endl;
                 #endif
                 names_linear << renamer;
 				clear(renamer);
@@ -265,7 +302,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
                 // step 2
                 #ifdef SEQAN_DEBUG_INDEX
-                    ::std::cerr << "  prepare merge" << ::std::endl;
+                    std::cerr << "  prepare merge" << std::endl;
                 #endif
 				_skew3Extend(textIn, names_linear, sortedS0, sortedS12);
                 SEQAN_PROMARK("Mapper (12), Sorter (13) - SA12 und SA0 verschmelzen");
@@ -275,18 +312,20 @@ namespace SEQAN_NAMESPACE_MAIN
             // ... is done on-demand by merger
             }
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "left level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << ::std::endl;
+                std::cerr << "left level " << SEQAN_PROVAL(SEQAN_PRODEPTH) << std::endl;
             #endif
             SEQAN_PROMARK("Rekursionsaufstieg");
             SEQAN_PROSUB(SEQAN_PRODEPTH, 1);
             return true;
         }
 
-        inline typename Value<Pipe>::Type const & operator*() {
+        inline typename Value<Pipe>::Type const & operator*()
+        {
             return *in;
         }
 
-        inline Pipe& operator++() {
+        inline Pipe& operator++()
+        {
             ++in;
             return *this;
         }
@@ -296,7 +335,8 @@ namespace SEQAN_NAMESPACE_MAIN
     // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
     // for the first we would need no _in member
 	template < typename TInput, typename TObject >
-    inline bool operator<<(Pipe< TInput, Skew3 > &me, TObject &textIn) {
+    inline bool operator<<(Pipe< TInput, Skew3 > &me, TObject &textIn)
+    {
         return me.process(textIn);
     }
 
@@ -372,7 +412,7 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROSET(SEQAN_PROEXTRA1, K);
         SEQAN_PROMARK("Rekursionsabstieg");
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cerr << "enter level " << depth << " (" << n << ")" << ::std::endl;
+			std::cerr << "enter level " << depth << " (" << n << ")" << std::endl;
         #endif
 
         String<TSize, Alloc<> > s12;
@@ -385,7 +425,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			//for (TSize i=0, j=0;  i < n;  i++) if ((n-i)%3) s12[j++] = i;
 			s12[0] = o1;
-			for (TSize i=o2, j=n1-n2;  i < n;  i++) {
+			for (TSize i=o2, j=n1-n2;  i < n;  i++)
+            {
 				s12[j++] = i++;
 				s12[j++] = i++;
 			}
@@ -408,13 +449,18 @@ namespace SEQAN_NAMESPACE_MAIN
 
         bool differ = true;
 		TValue c0 = TValue(), c1 = TValue(), c2 = TValue();
-		for (TSize i = 0, clip = _max(n, (TSize)2) - 2, l;  i < n12;  i++) {
-			if ((l = SA12[i]) < clip) {
-				if (differ || s[l] != c0 || s[l+1] != c1 || s[l+2] != c2) {
+		for (TSize i = 0, clip = _max(n, (TSize)2) - 2, l;  i < n12;  i++)
+        {
+			if ((l = SA12[i]) < clip)
+            {
+				if (differ || s[l] != c0 || s[l+1] != c1 || s[l+2] != c2)
+                {
 					name++;  c0 = s[l];  c1 = s[l+1];  c2 = s[l+2];
 					differ = false;
 				}
-			} else {
+			}
+            else
+            {
 				name++;
 				differ = true;  // the last 2 triples always differ from the rest
 			}
@@ -423,7 +469,8 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROMARK("s12 konstruiert");
 
 		// recurse if names are not yet unique
-		if (name < n12) {
+		if (name < n12)
+        {
             if (depth != maxdepth)
             {
 			    createSuffixArray(SA12, s12, Skew3(), name, maxdepth, depth + 1);
@@ -433,7 +480,8 @@ namespace SEQAN_NAMESPACE_MAIN
             }
 			// store unique names in s12 using the suffix array
 			for (TSize i = 0;  i < n12;  i++) s12[SA12[i]] = i;
-		} else // generate the suffix array of s12 directly
+		}
+        else // generate the suffix array of s12 directly
 			for (TSize i = 0;  i < n12;  i++) SA12[s12[i]] = i;
 
 
@@ -463,7 +511,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			#define SEQAN_GET_ISKEW3(ii) (ii < n2 ? ii * 3 + o2 : (ii - n2) * 3 + o1)
 			if (n0)
 			{
-				for (TSize p=0,  t=0,  k=0,  clip = n - 1;  k < n;  k++) {
+				for (TSize p=0,  t=0,  k=0,  clip = n - 1;  k < n;  k++)
+                {
 					TSize ii = SA12[t];					// pos of current interleave offset 12 suffix
 					TSize i  = SEQAN_GET_ISKEW3(ii);	// pos of current offset 12 suffix
 					TSize j  = SA0[p];					// pos of current offset 0  suffix
@@ -477,7 +526,9 @@ namespace SEQAN_NAMESPACE_MAIN
 						SA[k] = i;
 						if (++t == n12) // done --- only SA0 suffixes left
 							for (;  p < n0;  p++) SA[++k] = SA0[p];
-					} else {
+					}
+                    else
+                    {
 						SA[k] = j;
 						if (++p == n0)  // done --- only SA12 suffixes left
 							for (;  t < n12;  t++) { ii = SA12[t]; SA[++k] = SEQAN_GET_ISKEW3(ii); }
@@ -489,7 +540,7 @@ namespace SEQAN_NAMESPACE_MAIN
         SEQAN_PROMARK("SA12 und SA0 verschmolzen");
 
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cerr << "left level " << depth << ::std::endl;
+            std::cerr << "left level " << depth << std::endl;
         #endif
         SEQAN_PROMARK("Rekursionsaufstieg");
         SEQAN_PROSUB(SEQAN_PRODEPTH, 1);

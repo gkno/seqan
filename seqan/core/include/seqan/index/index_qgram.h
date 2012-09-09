@@ -1691,14 +1691,14 @@ The resulting tables must have appropriate size before calling this function.
 
     // optimized for bitvectors
     template <typename T1, typename TValue, unsigned _size, typename Result>
-    struct _qgramComp< Pair<T1, Tuple<TValue, _size, Compressed>, Compressed >, Result > :
+    struct _qgramComp< Pair<T1, Tuple<TValue, _size, BitPacked<> >, Pack >, Result > :
         public ::std::binary_function<
-            Pair<T1, Tuple<TValue, _size, Compressed>, Compressed >,
-            Pair<T1, Tuple<TValue, _size, Compressed>, Compressed >,
+            Pair<T1, Tuple<TValue, _size, BitPacked<> >, Pack >,
+            Pair<T1, Tuple<TValue, _size, BitPacked<> >, Pack >,
             Result> {       
         inline Result operator()(
-            const Pair<T1, Tuple<TValue, _size, Compressed>, Compressed > &a,
-            const Pair<T1, Tuple<TValue, _size, Compressed>, Compressed > &b) const
+            const Pair<T1, Tuple<TValue, _size, BitPacked<> >, Pack > &a,
+            const Pair<T1, Tuple<TValue, _size, BitPacked<> >, Pack > &b) const
         {
             if (a.i2 < b.i2) return -1;
             if (a.i2 > b.i2) return 1;
@@ -1838,7 +1838,7 @@ The resulting tables must have appropriate size before calling this function.
 		typedef Shape<TValue, UngappedShape<q> >						TShape;
         typedef typename MakeUnsigned_<TValue>::Type					TUValue;
 		typedef Multi<
-			Tupler<q, true, Compressed>, 
+			Tupler<q, true, BitPacked<> >, 
 			typename Value<TSA>::Type,
 			typename StringSetLimits< StringSet<TString, TSpec> >::Type >		TTuplerSpec;
 

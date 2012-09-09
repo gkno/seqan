@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 // Pair base class.
 // ==========================================================================
@@ -59,7 +59,7 @@ namespace seqan {
 ..param.T2:The type of the second object.
 ...default:$T1$
 ..param.TSpec:The specializing type.
-...default:$void$, no compression (faster access).
+...default:$void$, no packing (faster access).
 .Memfunc.Pair#Pair:
 ..class:Class.Pair
 ..summary:Constructor
@@ -81,35 +81,31 @@ namespace seqan {
 // TODO(holtgrew): Should default specs be specialized with void or Default?
 // TODO(holtgrew): Move construction, will be a bit tricky, either with enable_if or with 4 base classes and all constructors are forwarded there.
 
-template <typename T1_, typename T2_ = T1_, typename TSpec = void>
+template <typename T1, typename T2 = T1, typename TSpec = void>
 struct Pair
 {
-    // TODO(holtgrew): T1 and T2 should not be public but have underscore postfix?
-    typedef T1_ T1;
-    typedef T2_ T2;
-
     // ------------------------------------------------------------------------
     // Members
     // ------------------------------------------------------------------------
 
-    T1_ i1;
-    T2_ i2;
+    T1 i1;
+    T2 i2;
 
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
 
-    Pair() : i1(T1_()), i2(T2_()) {}
+    Pair() : i1(T1()), i2(T2()) {}
 
-    template <typename T3_, typename T4_>
-    Pair(Pair<T3_, T4_> const & _p) : i1(_p.i1), i2(_p.i2) {}
+    template <typename T1_, typename T2_>
+    Pair(Pair<T1_, T2_> const & _p) : i1(_p.i1), i2(_p.i2) {}
 
     inline
-    Pair(T1_ const & _i1, T2_ const & _i2) : i1(_i1), i2(_i2) {}
+    Pair(T1 const & _i1, T2 const & _i2) : i1(_i1), i2(_i2) {}
 
-    template <typename T1__, typename T2__, typename TSpec__>
+    template <typename T1_, typename T2_, typename TSpec__>
     // TODO(holtgrew): explicit?
-    inline Pair(Pair<T1__, T2__, TSpec__> const &_p)
+    inline Pair(Pair<T1_, T2_, TSpec__> const &_p)
             : i1(getValueI1(_p)), i2(getValueI2(_p))
     {}
 };
@@ -184,9 +180,9 @@ struct Spec<Pair<T1, T2, TSpec> >
 // Function set().
 // ----------------------------------------------------------------------------
 
-template <typename T1_, typename T2_, typename TSpec>
+template <typename T1, typename T2, typename TSpec>
 inline void
-set(Pair<T1_, T2_, TSpec> & p1, Pair<T1_, T2_, TSpec> & p2)
+set(Pair<T1, T2, TSpec> & p1, Pair<T1, T2, TSpec> & p2)
 {
     set(p1.i1, p2.i1);
     set(p1.i2, p2.i2);
@@ -196,9 +192,9 @@ set(Pair<T1_, T2_, TSpec> & p1, Pair<T1_, T2_, TSpec> & p2)
 // Function move().
 // ----------------------------------------------------------------------------
 
-template <typename T1_, typename T2_, typename TSpec>
+template <typename T1, typename T2, typename TSpec>
 inline void
-move(Pair<T1_, T2_, TSpec> & p1, Pair<T1_, T2_, TSpec> & p2)
+move(Pair<T1, T2, TSpec> & p1, Pair<T1, T2, TSpec> & p2)
 {
     move(p1.i1, p2.i1);
     move(p1.i2, p2.i2);
@@ -208,9 +204,9 @@ move(Pair<T1_, T2_, TSpec> & p1, Pair<T1_, T2_, TSpec> & p2)
 // Function operator<<();  Stream Output.
 // ----------------------------------------------------------------------------
 
-template <typename T1_, typename T2_, typename TSpec>
+template <typename T1, typename T2, typename TSpec>
 inline
-std::ostream & operator<<(std::ostream & out, Pair<T1_, T2_, TSpec> const & p)
+std::ostream & operator<<(std::ostream & out, Pair<T1, T2, TSpec> const & p)
 {
     // TODO(holtgrew): Incorporate this into new stream concept? Adapt from stream module?
     out << "< " << getValueI1(p) << " , " << getValueI2(p) << " >";
@@ -293,10 +289,10 @@ inline void moveValueI2(Pair<T1, T2, TSpec> & pair, T & _i)
 // Function operator<()
 // -----------------------------------------------------------------------
 
-template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+template <typename L1, typename L2, typename LPack, typename R1, typename R2, typename RPack>
 inline bool
-operator<(Pair<L1, L2, LCompression> const & _left,
-          Pair<R1, R2, RCompression> const & _right)
+operator<(Pair<L1, L2, LPack> const & _left,
+          Pair<R1, R2, RPack> const & _right)
 {
     return (_left.i1 < _right.i1) || (_left.i1 == _right.i1 && _left.i2 < _right.i2);
 }
@@ -305,10 +301,10 @@ operator<(Pair<L1, L2, LCompression> const & _left,
 // Function operator>()
 // -----------------------------------------------------------------------
 
-template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+template <typename L1, typename L2, typename LPack, typename R1, typename R2, typename RPack>
 inline bool
-operator>(Pair<L1, L2, LCompression> const & _left,
-          Pair<R1, R2, RCompression> const & _right)
+operator>(Pair<L1, L2, LPack> const & _left,
+          Pair<R1, R2, RPack> const & _right)
 {
     return (_left.i1 > _right.i1) || (_left.i1 == _right.i1 && _left.i2 > _right.i2);
 }
@@ -317,10 +313,10 @@ operator>(Pair<L1, L2, LCompression> const & _left,
 // Function operator==()
 // -----------------------------------------------------------------------
 
-template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+template <typename L1, typename L2, typename LPack, typename R1, typename R2, typename RPack>
 inline bool
-operator==(Pair<L1, L2, LCompression> const & _left,
-           Pair<R1, R2, RCompression> const & _right)
+operator==(Pair<L1, L2, LPack> const & _left,
+           Pair<R1, R2, RPack> const & _right)
 {
     return _left.i1 == _right.i1 && _left.i2 == _right.i2;
 }
@@ -329,10 +325,10 @@ operator==(Pair<L1, L2, LCompression> const & _left,
 // Function operator<=()
 // -----------------------------------------------------------------------
 
-template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+template <typename L1, typename L2, typename LPack, typename R1, typename R2, typename RPack>
 inline bool
-operator<=(Pair<L1, L2, LCompression> const & _left,
-           Pair<R1, R2, RCompression> const & _right)
+operator<=(Pair<L1, L2, LPack> const & _left,
+           Pair<R1, R2, RPack> const & _right)
 {
     return !operator>(_left, _right);
 }
@@ -341,10 +337,10 @@ operator<=(Pair<L1, L2, LCompression> const & _left,
 // Function operator>=()
 // -----------------------------------------------------------------------
 
-template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+template <typename L1, typename L2, typename LPack, typename R1, typename R2, typename RPack>
 inline bool
-operator>=(Pair<L1, L2, LCompression> const & _left,
-           Pair<R1, R2, RCompression> const & _right)
+operator>=(Pair<L1, L2, LPack> const & _left,
+           Pair<R1, R2, RPack> const & _right)
 {
     return !operator<(_left, _right);
 }
@@ -353,10 +349,10 @@ operator>=(Pair<L1, L2, LCompression> const & _left,
 // Function operator!=()
 // -----------------------------------------------------------------------
 
-template <typename L1, typename L2, typename LCompression, typename R1, typename R2, typename RCompression>
+template <typename L1, typename L2, typename LPack, typename R1, typename R2, typename RPack>
 inline bool
-operator!=(Pair<L1, L2, LCompression> const & _left,
-           Pair<R1, R2, RCompression> const & _right)
+operator!=(Pair<L1, L2, LPack> const & _left,
+           Pair<R1, R2, RPack> const & _right)
 {
     return !operator==(_left, _right);
 }

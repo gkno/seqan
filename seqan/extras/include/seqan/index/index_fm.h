@@ -91,15 +91,18 @@ struct FibreSA_;
 struct FibreText_;
 struct FibreLfTable_;
 struct FibreSaLfTable_;
+struct CompressText_;
 
 // ==========================================================================
 // Tags, Classes, Enums
 // ==========================================================================
+
 typedef Tag<FibrePrefixSumTable_> const     FmiPrefixSumTable;  typedef FmiPrefixSumTable   FibrePrefixSumTable;
 typedef Tag<FibreSA_> const                 FmiCompressedSA;    typedef FmiCompressedSA     FibreSA;
 typedef Tag<FibreText_> const               FmiText;            typedef FmiText             FibreText;
 typedef Tag<FibreLfTable_> const            FmiLfTable;         typedef FmiLfTable          FibreLfTable;
 typedef Tag<FibreSaLfTable_> const          FmiSaLfTable;       typedef FmiSaLfTable        FibreSaLfTable;
+typedef Tag<CompressText_> const            CompressText;
 
 // ==========================================================================
 // Metafunctions
@@ -157,7 +160,7 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreSA const>
 {
 	typedef unsigned int                                                                            TSAValue;
 	typedef SparseString<String<TSAValue>, void>                                                    TSparseString;
-	typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type    TLfTable;
+	typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type             TLfTable;
 	typedef CompressedSA<TSparseString, TLfTable, void>                                             Type;
 };
 
@@ -166,7 +169,7 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibreSA const>
 {
 	typedef unsigned int                                                                            TSAValue;
 	typedef SparseString<String<TSAValue>, void>                                                    TSparseString;
-	typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type    TLfTable;
+	typedef typename Fibre<Index<TText, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type             TLfTable;
 	typedef CompressedSA<TSparseString, TLfTable, void> const                                       Type;
 };
 
@@ -174,10 +177,10 @@ template <typename TText, typename TOccSpec, typename TSpec>
 struct Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
     // TODO(singer): Note that we use a pair of unsigned values here at the moment instead of using SAValue to force using 32 bit integers. Is this what we ultimately want?
-	typedef Pair<unsigned, unsigned, Compressed>                                                   TSAValue;
-	typedef SparseString<String<TSAValue>, void>                                                   TSparseString;
-	typedef typename Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type TLfTable;
-	typedef CompressedSA<TSparseString, TLfTable, void>                                            Type;
+	typedef Pair<unsigned, unsigned>                                                                TSAValue;
+	typedef SparseString<String<TSAValue>, void>                                                    TSparseString;
+	typedef typename Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type  TLfTable;
+	typedef CompressedSA<TSparseString, TLfTable, void>                                             Type;
 };
 
 template <typename TText, typename TOccSpec, typename TSpec>
@@ -218,7 +221,7 @@ struct Size<Index<TText, FMIndex<TOccSpec, TSpec> > const>
 // ==========================================================================
 
 /**
-.Tag.Compressed
+.Tag.CompressText
 ..summary:Tag to select an FM index variant that can be used such that it is 
 not ncessary to store the text after index constuction. 
 */
@@ -236,7 +239,7 @@ not ncessary to store the text after index constuction.
 ...type:Tag.WT
 ...default.Class:WaveletTree<FmiDollarSubstituted>
 ..param.TSpec:Speed optimization method.
-...type:Tag.Compressed
+...type:Tag.CompressText
 ...default:void
 ..include:seqan/index.h
 */
@@ -263,7 +266,7 @@ class Index<TText, FMIndex<TOccSpec, TSpec> >
 		n(computeBwtLength_(text)),
 		compressionFactor(compressionFactor)
 	{
-	    if (IsSameType<TSpec, Compressed>::VALUE)
+	    if (IsSameType<TSpec, CompressText>::VALUE)
     		indexCreate_(*this, text);
 	}
 
@@ -408,9 +411,9 @@ _findFirstIndex(
 		TPattern const & pattern,
 		FinderFMIndex const &)
 {
-	typedef Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > TIndex;
-	typedef typename Fibre<TIndex, FibreSA>::Type 			TCompressedSA;
-	typedef typename Iterator<TCompressedSA const>::Type 		TIterator;
+	typedef Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> >    TIndex;
+	typedef typename Fibre<TIndex, FibreSA>::Type                       TCompressedSA;
+	typedef typename Iterator<TCompressedSA const>::Type                TIterator;
 
 	TIndex & index = haystack(finder);
 
@@ -478,14 +481,14 @@ getFibre(Index<TText, FMIndex<TIndexSpec, TFMISpeedEnhancement> > const & index,
 
 template <typename TText, typename TIndexSpec, typename TSpecSpec>
 Nothing
-getFibre(Index<TText, FMIndex<TIndexSpec, Compressed> > & /*tag*/, FibreText /*tag*/)
+getFibre(Index<TText, FMIndex<TIndexSpec, CompressText> > & /*tag*/, FibreText /*tag*/)
 {
 	return Nothing(); 
 }
 
 template <typename TText, typename TIndexSpec, typename TSpecSpec>
 Nothing
-getFibre(Index<TText, FMIndex<TIndexSpec, Compressed> > const & /*tag*/, FibreText /*tag*/)
+getFibre(Index<TText, FMIndex<TIndexSpec, CompressText> > const & /*tag*/, FibreText /*tag*/)
 {
 	return Nothing(); 
 }
@@ -632,7 +635,7 @@ inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, TSpec> > & index)
 // TODO (singer): this needs to be documented. In addition, indexCreate should be extended
 // to the different fibres.
 template <typename TText, typename TIndexSpec>
-inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, Compressed> > & /*tag*/, FibreSaLfTable const)
+inline bool indexCreate(Index<TText, FMIndex<TIndexSpec, CompressText> > & /*tag*/, FibreSaLfTable const)
 {
     SEQAN_FAIL("Logic error. It is not possible to create this index without a text");
     return false;

@@ -43,7 +43,7 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 		typedef Pair<
 			unsigned,
 			unsigned,
-			BitCompressed<24, 8>	// max. 16M reads of length < 256
+			BitPacked<24, 8>	// max. 16M reads of length < 256
 		> Type;
 	};
 
@@ -54,7 +54,7 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 		typedef Pair<
 			unsigned,			// many reads
 			unsigned,			// of arbitrary length
-			Compressed
+			Pack
 		> Type;
 	};
 

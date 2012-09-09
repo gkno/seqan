@@ -113,7 +113,7 @@ template<typename TMerger>
 inline bool
 _negativeMerge(String<TMerger> & queue) {
 SEQAN_CHECKPOINT
-    typedef typename TMerger::T1 TPos;
+    typedef typename Value<TMerger, 1>::Type TPos;
     TPos len = length(queue);
     if (len < 3) return false;
 
@@ -138,7 +138,7 @@ template<typename TMerger>
 inline bool
 _positiveMerge(String<TMerger> & queue) {
 SEQAN_CHECKPOINT
-    typedef typename TMerger::T1 TPos;
+    typedef typename Value<TMerger, 1>::Type TPos;
     TPos len = length(queue);
     if (len < 5) return false;
 

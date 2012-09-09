@@ -518,11 +518,11 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 	struct SAValueLess_:
 		public ::std::less<TOccValue> {};
 
-	template <typename T1, typename T2, typename TCompression>
-	struct SAValueLess_< Pair<T1,T2,TCompression> >:
-		public ::std::binary_function< Pair<T1,T2,TCompression>, Pair<T1,T2,TCompression>, bool> 
+	template <typename T1, typename T2, typename TPack>
+	struct SAValueLess_< Pair<T1,T2,TPack> >:
+		public ::std::binary_function< Pair<T1,T2,TPack>, Pair<T1,T2,TPack>, bool> 
 	{
-		inline bool operator()(Pair<T1,T2,TCompression> const &a, Pair<T1,T2,TCompression> const &b) const {
+		inline bool operator()(Pair<T1,T2,TPack> const &a, Pair<T1,T2,TPack> const &b) const {
 			return	(getValueI1(a) < getValueI1(b)) ||
 					((getValueI1(a) == getValueI1(b)) && (getValueI2(a) < getValueI2(b)));
 		}

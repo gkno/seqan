@@ -29,7 +29,7 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Andres Gogol-Döring <andreas.doering@mdc-berlin.de>
+// Author: David Weese <david.weese@fu-berlin.de>
 // ==========================================================================
 // Triple base class.
 // ==========================================================================
@@ -61,7 +61,7 @@ namespace seqan {
 ..param.T3:The type of the third object.
 ...default:$T2$
 ..param.TSpec:The specializing type.
-...default:$void$, no compression (faster access).
+...default:$void$, no packing (faster access).
 
 .Memfunc.Triple#Triple:
 ..class:Class.Triple
@@ -88,35 +88,31 @@ namespace seqan {
 ..include:seqan/basic.h
 */
 
-template <typename T1_, typename T2_ = T1_, typename T3_ = T1_, typename TSpec = void>
+template <typename T1, typename T2 = T1, typename T3 = T1, typename TSpec = void>
 struct Triple
 {
-    typedef T1_ T1;
-    typedef T2_ T2;
-    typedef T3_ T3;
-
     // ------------------------------------------------------------------------
     // Members
     // ------------------------------------------------------------------------
 
-    T1_ i1;
-    T2_ i2;
-    T3_ i3;
+    T1 i1;
+    T2 i2;
+    T3 i3;
 
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
 
-    inline Triple() : i1(T1_()), i2(T2_()), i3(T3_()) {}
+    inline Triple() : i1(T1()), i2(T2()), i3(T3()) {}
     
     inline Triple(Triple const & _p)
             : i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
     
-    inline Triple(T1_ const & _i1, T2_ const & _i2, T3_ const & _i3)
+    inline Triple(T1 const & _i1, T2 const & _i2, T3 const & _i3)
             : i1(_i1), i2(_i2), i3(_i3) {}
     
-    template <typename T1__, typename T2__, typename T3__, typename TSpec__>
-    inline Triple(Triple<T1__, T2__, T3__, TSpec__> const & _p)
+    template <typename T1_, typename T2_, typename T3_, typename TSpec__>
+    inline Triple(Triple<T1_, T2_, T3_, TSpec__> const & _p)
             : i1(getValueI1(_p)), i2(getValueI2(_p)), i3(getValueI3(_p)) {}
 
     // TODO(holtgrew): Move comparison operators to global functions?
@@ -204,8 +200,8 @@ struct Spec<Triple<T1, T2, T3, TSpec> >
 // Function operator<<();  Stream Output.
 // -----------------------------------------------------------------------
 
-template <typename T1_, typename T2_, typename T3_, typename TSpec>
-std::ostream & operator<<(std::ostream & out, Triple<T1_,T2_,T3_,TSpec> const & t)
+template <typename T1, typename T2, typename T3, typename TSpec>
+std::ostream & operator<<(std::ostream & out, Triple<T1,T2,T3,TSpec> const & t)
 {
     out << "< " << getValueI1(t) << " , " << getValueI2(t) << " , " << getValueI3(t) << " >";
     return out;
@@ -307,11 +303,11 @@ inline void moveValueI3(Triple<T1, T2, T3, TSpec> & triple, T const & _i)
 // -----------------------------------------------------------------------
 
 template <
-    typename L1, typename L2, typename L3, typename LCompression, 
-    typename R1, typename R2, typename R3, typename RCompression>
+    typename L1, typename L2, typename L3, typename LPack, 
+    typename R1, typename R2, typename R3, typename RPack>
 inline bool
-operator<(Triple<L1, L2, L3, LCompression> const & _left,
-          Triple<R1, R2, R3, RCompression> const & _right)
+operator<(Triple<L1, L2, L3, LPack> const & _left,
+          Triple<R1, R2, R3, RPack> const & _right)
 {
     return _left.i1 < _right.i1 || (_left.i1 == _right.i1 && _left.i2 < _right.i2) || (_left.i1 == _right.i1 && _left.i2 == _right.i2 && _left.i3 < _right.i3);
 }
@@ -321,11 +317,11 @@ operator<(Triple<L1, L2, L3, LCompression> const & _left,
 // -----------------------------------------------------------------------
 
 template <
-    typename L1, typename L2, typename L3, typename LCompression, 
-    typename R1, typename R2, typename R3, typename RCompression>
+    typename L1, typename L2, typename L3, typename LPack, 
+    typename R1, typename R2, typename R3, typename RPack>
 inline bool
-operator>(Triple<L1, L2, L3, LCompression> const & _left,
-          Triple<R1, R2, R3, RCompression> const & _right)
+operator>(Triple<L1, L2, L3, LPack> const & _left,
+          Triple<R1, R2, R3, RPack> const & _right)
 {
     return _left.i1 > _right.i1 || (_left.i1 == _right.i1 && _left.i2 > _right.i2) || (_left.i1 == _right.i1 && _left.i2 == _right.i2 && _left.i3 > _right.i3);
 }
@@ -335,11 +331,11 @@ operator>(Triple<L1, L2, L3, LCompression> const & _left,
 // -----------------------------------------------------------------------
 
 template <
-    typename L1, typename L2, typename L3, typename LCompression, 
-    typename R1, typename R2, typename R3, typename RCompression>
+    typename L1, typename L2, typename L3, typename LPack, 
+    typename R1, typename R2, typename R3, typename RPack>
 inline bool
-operator<=(Triple<L1, L2, L3, LCompression> const & _left,
-           Triple<R1, R2, R3, RCompression> const & _right)
+operator<=(Triple<L1, L2, L3, LPack> const & _left,
+           Triple<R1, R2, R3, RPack> const & _right)
 {
     return !operator>(_left, _right);
 }
@@ -349,11 +345,11 @@ operator<=(Triple<L1, L2, L3, LCompression> const & _left,
 // -----------------------------------------------------------------------
 
 template <
-    typename L1, typename L2, typename L3, typename LCompression, 
-    typename R1, typename R2, typename R3, typename RCompression>
+    typename L1, typename L2, typename L3, typename LPack, 
+    typename R1, typename R2, typename R3, typename RPack>
 inline bool
-operator==(Triple<L1, L2, L3, LCompression> const & _left,
-           Triple<R1, R2, R3, RCompression> const & _right)
+operator==(Triple<L1, L2, L3, LPack> const & _left,
+           Triple<R1, R2, R3, RPack> const & _right)
 {
     return _left.i1 == _right.i1 && _left.i2 == _right.i2 && _left.i3 == _right.i3;
 }
@@ -363,11 +359,11 @@ operator==(Triple<L1, L2, L3, LCompression> const & _left,
 // -----------------------------------------------------------------------
 
 template <
-    typename L1, typename L2, typename L3, typename LCompression, 
-    typename R1, typename R2, typename R3, typename RCompression>
+    typename L1, typename L2, typename L3, typename LPack, 
+    typename R1, typename R2, typename R3, typename RPack>
 inline bool
-operator>=(Triple<L1, L2, L3, LCompression> const & _left,
-           Triple<R1, R2, R3, RCompression> const & _right)
+operator>=(Triple<L1, L2, L3, LPack> const & _left,
+           Triple<R1, R2, R3, RPack> const & _right)
 {
     return !operator<(_left, _right);
 }
@@ -377,11 +373,11 @@ operator>=(Triple<L1, L2, L3, LCompression> const & _left,
 // -----------------------------------------------------------------------
 
 template <
-    typename L1, typename L2, typename L3, typename LCompression, 
-    typename R1, typename R2, typename R3, typename RCompression>
+    typename L1, typename L2, typename L3, typename LPack, 
+    typename R1, typename R2, typename R3, typename RPack>
 inline bool
-operator!=(Triple<L1, L2, L3, LCompression> const & _left,
-           Triple<R1, R2, R3, RCompression> const & _right)
+operator!=(Triple<L1, L2, L3, LPack> const & _left,
+           Triple<R1, R2, R3, RPack> const & _right)
 {
     return !operator==(_left, _right);
 }

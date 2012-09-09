@@ -73,19 +73,19 @@ SEQAN_BEGIN_TESTSUITE(test_basic_aggregate)
     SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_comparison_different_spec);
     SEQAN_CALL_TEST(test_basic_aggregates_pair_packed_stream_output);
 
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_metafunctions);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_constructors);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_assign);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_set);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_move);
-    // SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_value);  // TODO(holtgrew): Need proxy for this.
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_get_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_assign_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_set_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_move_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_comparison_same_spec);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_comparison_different_spec);
-    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_compressed_stream_output);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_value);  // TODO(holtgrew): Need proxy for this.
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_comparison_same_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_comparison_different_spec);
+    SEQAN_CALL_TEST(test_basic_aggregates_pair_bit_packed_stream_output);
 
     // -----------------------------------------------------------------------
     // Tests for Triples
@@ -141,23 +141,23 @@ SEQAN_BEGIN_TESTSUITE(test_basic_aggregate)
     // SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
     SEQAN_CALL_TEST(test_basic_aggregates_tuple_base_stream_output);
 
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_metafunctions);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_constructors);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_assign);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_set);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_move);
-    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_value);  // TODO(holtgrew): Need proxy for this.
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_get_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_assign_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_set_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_move_value);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_shift_left);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_shift_right);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_clear);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_length);
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_same_spec);
-    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
-    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_compressed_stream_output);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_metafunctions);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_constructors);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_assign);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_set);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_move);
+    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_value);  // TODO(holtgrew): Need proxy for this.
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_get_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_assign_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_set_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_move_value);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_shift_left);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_shift_right);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_clear);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_length);
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_comparison_same_spec);
+    // SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_comparison_different_spec);  // TODO(holtgrew): Could be added for completeness case, not supported right now.
+    SEQAN_CALL_TEST(test_basic_aggregates_tuple_bit_packed_stream_output);
 }
 SEQAN_END_TESTSUITE
 

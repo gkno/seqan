@@ -228,7 +228,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pair<
 			unsigned,				
 			unsigned,
-			BitCompressed<22, 10>	// max. 4M reads of length < 1024
+			BitPacked<22, 10>	// max. 4M reads of length < 1024
 		> Type;
 	};
 	
@@ -240,7 +240,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pair<
 			unsigned,			// many reads
 			unsigned,			// of arbitrary length
-			Compressed
+			Pack
 		> Type;
 	};
 

@@ -126,10 +126,10 @@ _streamPutFloat(TStream & target,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTarget, typename T1, typename T2, typename TCompression>
+template <typename TTarget, typename T1, typename T2, typename TPack>
 inline void
 _streamWrite(TTarget & target,
-			 Pair<T1, T2, TCompression> const & source)
+			 Pair<T1, T2, TPack> const & source)
 {
 //IOREV _nodoc_
 SEQAN_CHECKPOINT
@@ -137,10 +137,10 @@ SEQAN_CHECKPOINT
 	_streamWrite(target, getValueI2(source));
 }
 
-template <typename TTarget, typename T1, typename T2, typename T3, typename TCompression>
+template <typename TTarget, typename T1, typename T2, typename T3, typename TPack>
 inline void
 _streamWrite(TTarget & target,
-			 Triple<T1, T2, T3, TCompression> const & source)
+			 Triple<T1, T2, T3, TPack> const & source)
 {
 //IOREV _nodoc_
 SEQAN_CHECKPOINT
