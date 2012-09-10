@@ -1814,11 +1814,16 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 			1)[0];
 	}
 
+    template < typename TIndex, class TSpec >
+	inline void _clear(Iter<TIndex, VSTree<TSpec> > &it) 
+	{
+		value(it) = typename VertexDescriptor<TIndex>::Type(MinimalCtor());
+    }
 
 	template < typename TIndex, class TSpec >
 	inline void clear(Iter<TIndex, VSTree<TSpec> > &it) 
 	{
-		value(it) = typename VertexDescriptor<TIndex>::Type(MinimalCtor());
+		_clear(it);
     }
 
 	template < typename TIndex, class TSpec >

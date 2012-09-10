@@ -623,11 +623,12 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 .Function.indexSupplied:
 ..summary:Returns whether a specific @Metafunction.Fibre@ is present.
 ..cat:Index
-..signature:indexSupplied(index, fibre_tag)
+..signature:indexSupplied(index, fibreTag)
 ..class:Class.Index
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
+..param.fibreTag:A tag that identifies the @Metafunction.Fibre@.
+...type:Tag.ESA Index Fibres
 ..returns:A $bool$ which is $true$, iff the fibre is present.
 ..include:seqan/index.h
 */
@@ -751,8 +752,8 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	// ATTENTION:
 	// This implementation of open doesn't work with external memory StringSets (External<>, MMap<>)
 	// If you need a persistent external StringSet you have to use a Owner<ConcatDirect<> > StringSet.
-	template < typename TValue, typename TSpec, typename TSSSpec >
-	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName, int openMode) {
+	template < typename TString, typename TSSSpec >
+	inline bool open(StringSet<TString, TSSSpec> &multi, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
 		char id[12]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
@@ -767,7 +768,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 				resize(multi, i + 1);
 				if (!open(multi[i], toCString(name), (openMode & ~OPEN_CREATE) | OPEN_QUIET))
 				{
-					resize(multi, i - 1);
+					resize(multi, i);
 					break;
 				}
 			}
@@ -776,15 +777,15 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return i > 1;
 	}
 
-    template < typename TValue, typename TSpec, typename TSSSpec >
-    inline bool open(StringSet<String<TValue, TSpec>, Dependent<TSSSpec> > &, const char *, int) {
+	template < typename TValue, typename TSpec, typename TSSSpec >
+        inline bool open(StringSet<String<TValue, TSpec>, Dependent<TSSSpec> > &, const char *, int) {
         SEQAN_CHECKPOINT
         // Do nothing for dependent string sets
         return true;
     }
 
-	template < typename TValue, typename TSpec, typename TSSSpec >
-	inline bool open(StringSet<String<TValue, TSpec>, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
+	template < typename TString, typename TSSSpec >
+	inline bool open(StringSet<TString, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
 		CharString name;
 		name = fileName;
@@ -844,8 +845,8 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return save(string, fileName, OPEN_WRONLY | OPEN_CREATE);
 	}
 
-	template < typename TValue, typename TSpec, typename TSSSpec>
-	inline bool save(StringSet<String<TValue, TSpec>, TSSSpec> const &multi, const char *fileName, int openMode) {
+	template < typename TString, typename TSSSpec>
+	inline bool save(StringSet<TString, TSSSpec> const &multi, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
 		if (length(multi) == 0) return true;
 		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
@@ -861,15 +862,15 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return true;
 	}
 
-    template < typename TValue, typename TSpec, typename TSSSpec >
-    inline bool save(StringSet<String<TValue, TSpec>, Dependent<TSSSpec> > &, const char *, int) {
+	template < typename TValue, typename TSpec, typename TSSSpec >
+        inline bool save(StringSet<String<TValue, TSpec>, Dependent<TSSSpec> > &, const char *, int) {
         SEQAN_CHECKPOINT
         // Do nothing for dependent string sets
         return true;
     }
 
-	template < typename TValue, typename TSpec, typename TSSSpec >
-	inline bool save(StringSet<String<TValue, TSpec>, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
+	template < typename TString, typename TSSSpec >
+	inline bool save(StringSet<TString, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
 		CharString name;
 		name = fileName;
