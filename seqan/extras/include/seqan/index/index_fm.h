@@ -173,20 +173,20 @@ struct Fibre<Index<TText, FMIndex<TOccSpec, TSpec> > const, FibreSA const>
 	typedef CompressedSA<TSparseString, TLfTable, void> const                                       Type;
 };
 
-template <typename TText, typename TOccSpec, typename TSpec>
-struct Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreSA>
+template <typename TText, typename TSetSpec, typename TOccSpec, typename TSpec>
+struct Fibre<Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TSpec> >, FibreSA>
 {
     // TODO(singer): Note that we use a pair of unsigned values here at the moment instead of using SAValue to force using 32 bit integers. Is this what we ultimately want?
 	typedef Pair<unsigned, unsigned>                                                                TSAValue;
 	typedef SparseString<String<TSAValue>, void>                                                    TSparseString;
-	typedef typename Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type  TLfTable;
+	typedef typename Fibre<Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TSpec> >, FibreLfTable>::Type  TLfTable;
 	typedef CompressedSA<TSparseString, TLfTable, void>                                             Type;
 };
 
-template <typename TText, typename TOccSpec, typename TSpec>
-struct Fibre<Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> > const, FibreSA const>
+template <typename TText, typename TSetSpec, typename TOccSpec, typename TSpec>
+struct Fibre<Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TSpec> > const, FibreSA>
 {
-    typedef Index<StringSet<TText>, FMIndex<TOccSpec, TSpec> >   TNonConstIndex_;
+    typedef Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TSpec> >   TNonConstIndex_;
     typedef typename Fibre<TNonConstIndex_, FibreSA>::Type const Type;
 };
 
@@ -294,8 +294,8 @@ unsigned computeBwtLength_(TText const & text)
     return(length(text) + 1);
 }
 
-template <typename TText>
-unsigned computeBwtLength_(StringSet<TText> const & text)
+template <typename TText, typename TSetSpec>
+unsigned computeBwtLength_(StringSet<TText, TSetSpec> const & text)
 {
     return(lengthSum(text) + countSequences(text));
 }
@@ -332,11 +332,11 @@ inline void createBwTable_(
 
 // This function computes the BWT of a text. Note that the dollar sign is substituted and its position stored.
 // The function is tested implicitly in lfTableLfMapping() in test_fm_index.h
-template <typename TBwt, typename TDollarPosition, typename TText, typename TSA, typename TDollarSub>
+template <typename TBwt, typename TDollarPosition, typename TText, typename TSetSpec, typename TSA, typename TDollarSub>
 inline void createBwTable_(
 		TBwt & bwt,
 		TDollarPosition & dollarPos,
-		StringSet<TText> const & text,
+		StringSet<TText, TSetSpec> const & text,
 		TSA const & SA,
 		TDollarSub const dollarSub)
 {
@@ -493,9 +493,9 @@ getFibre(Index<TText, FMIndex<TIndexSpec, CompressText> > const & /*tag*/, Fibre
 	return Nothing(); 
 }
 
-template <typename TText, typename TFreq>
+template <typename TText, typename TSetSpec, typename TFreq>
 inline void getFrequencies_(TFreq & freq,
-						    StringSet<TText> const & text)
+						    StringSet<TText, TSetSpec> const & text)
 {
 	typedef typename Value<TText>::Type TChar;
 	typedef typename Value<TFreq>::Type TFreqValue;

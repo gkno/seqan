@@ -251,18 +251,6 @@ getCharacter(PrefixSumTable<TChar, TSpec> const & /*tag*/, TPos const pos)
     return static_cast<TChar>(pos);
 }
 
-template <typename TText>
-unsigned getNumSequences(TText const & /*tag*/)
-{
-    return 1;
-}
-
-template <typename TSequence>
-unsigned getNumSequences(StringSet<TSequence> const & stringSet)
-{
-    return length(stringSet);
-}
-
 template <typename TChar, typename TSpec, typename TBeginPos, typename TEndPos>
 unsigned getPivotPosition(PrefixSumTable<TChar, TSpec> const & pst, TBeginPos beginPos, TEndPos endPos)
 {

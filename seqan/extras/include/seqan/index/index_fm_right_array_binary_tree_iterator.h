@@ -482,24 +482,13 @@ inline unsigned int getRightChildPos(Iter<const RightArrayBinaryTree<TChar, TSpe
     return 0;
 }
 
+/*
+.Function.goDown
+..param.iterator
+...type:Spec.RightArrayBinaryTree Iterator
+*/
 /**
-.Function.RightArrayBinaryTree#goDown
-..signature:bool goDown(iterator)
-..param.iterator:An iterator of a wavelet tree structure.
-...type:Spec.TopDown Iterator
-..param.char:$iterator$ goes down the edge beginning with $char$.
-...type:Class.RightArrayBinaryTree
-..remarks:$goDown(iterator)$ goes down the left edge if it exist, the right edge otherwise.
-..returns:$true$ if the edge or path to go down exists, otherwise $false$.
-..include:seqan/index.h
-..example.code:
-String<Dna5> genome = "ACGTACGT";
-RightArrayBinaryTree<Dna5> waveletTreeStructure(genome);
-
-Iterator<RightArrayBinaryTree<Dna5>, TopDown<> >::Type it;
-it = begin(waveletTreeStructure); // go to root node
-
-goDown(it); // go to left child of root node
+.Function.goDown.param.iterator.type:Spec.RightArrayBinaryTree Iterator
 */
 template <typename TChar, typename TSpec, typename TIterSpec>
 inline bool goDown(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & iter)
@@ -548,7 +537,7 @@ inline bool goDownConstruction(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpe
 ..signature:bool goLeftChild(iterator)
 ..param.iterator:An iterator of a wavelet tree structure.
 ...type:Spec.TopDown Iterator
-...type:Class.RightArrayBinaryTree
+...type:Spwc.RightArrayBinaryTree Iterator
 ..remarks:$goLeftChild(iterator)$ goes down the left edge if it exist.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
 ..include:seqan/index.h
@@ -608,7 +597,7 @@ inline bool goLeftChild(Iter<RightArrayBinaryTree<TChar, TSpec> const, RightArra
 /**
 .Function.goRight
 ..param.iterator:
-...type:Class.RightArrayBinaryTree
+...type:Spec.RightArrayBinaryTree Iterator
 ..example.code:
 String<Dna5> genome = "ACGTACGT";
 RightArrayBinaryTree<Dna5> waveletTreeStructure(genome);
@@ -665,8 +654,7 @@ inline bool goRight(Iter<RightArrayBinaryTree<TChar, TSpec> const, TIterSpec> & 
 .Function.goRightChild
 ..signature:bool goRightChild(iterator)
 ..param.iterator:An iterator of a wavelet tree structure.
-...type:Spec.TopDown Iterator
-...type:Class.RightArrayBinaryTree
+...type:Spec.RightArrayBinaryTree Iterator
 ..remarks:$goRightChild(iterator)$ goes down the right edge if it exist.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
 ..include:seqan/index.h
@@ -727,7 +715,7 @@ inline bool goRightChild(Iter<const RightArrayBinaryTree<TChar, TSpec>, RightArr
 .Function.goToPosition
 ..signature:bool goToPosition(iterator, pos)
 ..param.iterator:An iterator of a wavelet tree structure.
-...type:Spec.TopDown Iterator
+...type:Spec.RightArrayBinaryTree Iterator
 ..param.pos:A position.
 ..remarks:$goToPosition(iterator)$ goes to position pos if it exist.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
@@ -763,11 +751,9 @@ inline bool goToPosition(Iter<RightArrayBinaryTree<TChar, TSpec>, RightArrayBina
 }
 
 /**
-.Function.RightArrayBinaryTree#goUp
-..signature:goUp(iterator)
-..param.iterator:An iterator of a wavelet tree structure.
-...type:Spec.TopDownHistory Iterator
-..remarks:$goUp(iterator)$ goes to the parent node.
+.Function.goUp.param.iterator.type:Spec.TopDownHistory Iterator
+*/
+/*
 ..returns:$true$ if the current node is not the root node.
 ..include:seqan/index.h
 ..example.code:
@@ -780,7 +766,6 @@ it = begin(waveletTreeStructure); // go to root node
 goRightChild(it); // go to right child of root node
 goUp(it); // go to root node
 */
-
 template <typename TChar, typename TSpec, typename TIterSpec>
 inline bool goUp(Iter<RightArrayBinaryTree<TChar, TSpec>, RightArrayBinaryTreeIterator<TopDown<ParentLinks<TIterSpec> > > > & it)
 {
@@ -885,7 +870,7 @@ inline bool setAndGoRight_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> &
 .Function.setCharacter
 ..signature:bool setCharacter(iterator, character)
 ..param.iterator:An iterator of a wavelet tree structure.
-...type:Spec.TopDown Iterator
+...type:Spec.RightArrayBinaryTree Iterator
 ..param.character:The character to be assigned to a node.
 ..remarks:$setCharacter(iterator, character)$ sets the character of the node the iterator points to to character.
 ..include:seqan/index.h

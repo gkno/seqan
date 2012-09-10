@@ -858,51 +858,9 @@ inline bool open(
     return open(string, fileName, OPEN_RDONLY);
 }
 
-// // ATTENTION:
-// // This implementation of open doesn't work with external memory StringSets (External<>, MMap<>)
-// // If you need a persistent external StringSet you have to use a Owner<ConcatDirect<> > StringSet.
-// template <typename TSpec>
-// inline bool open(StringSet<RankSupportBitString<TSpec> > & multi, const char * fileName, int openMode)
-// {
-//     SEQAN_CHECKPOINT
-// 
-//     typedef typename Size<RankSupportBitString<TSpec> >::Type TSize;
-//     typedef String<TSize> TSizeString;
-//     TSizeString sizeString;
-//     resize(sizeString, length(multi));
-//     CharString name = fileName;
-//     name = fileName;    append(name, ".ssize"); open(sizeString, toCString(name), openMode);
-// 
-//     char id[12];     // 2^32 has 10 decimal digits + 1 (0x00)
-//     unsigned i = 0;
-//     clear(multi);
-//     while (true)
-//     {
-//         sprintf(id, ".%u", i);
-//         name = fileName;
-//         append(name, id);
-//         {
-//             resize(multi, i + 1);
-//             if (!open(multi[i], toCString(name), (openMode & ~OPEN_CREATE) | OPEN_QUIET))
-//             {
-//                 resize(multi, i);
-//                 break;
-//             }
-//         }
-//         ++i;
-//     }
-// 
-//     for (TSize i = 0; i < length(multi); ++i)
-//     {
-//         multi[i].length = sizeString[i];
-//     }
-// 
-//     return i > 1;
-// }
-
-template <typename TSpec>
+template <typename TSpec, typename TSetSpec>
 inline bool open(
-    StringSet<RankSupportBitString<TSpec> > & strings,
+    StringSet<RankSupportBitString<TSpec>, TSetSpec> & strings,
     const char * fileName)
 {
     return open(strings, fileName, OPEN_RDONLY);
@@ -934,82 +892,13 @@ inline bool save(
     return save(string, fileName, DefaultOpenMode<RankSupportBitString<TSpec> >::VALUE);
 }
 
-template <typename TSpec>
+template <typename TSpec, typename TSetSpec>
 inline bool save(
-    StringSet<RankSupportBitString<TSpec> >const & strings,
+    StringSet<RankSupportBitString<TSpec>, TSetSpec>const & strings,
     const char * fileName)
 {
     return save(strings, fileName, DefaultOpenMode<RankSupportBitString<TSpec> >::VALUE);
 }
-
-// template <typename TSpec>
-// inline bool save(StringSet<RankSupportBitString<TSpec> > const & multi, const char * fileName, int openMode)
-// {
-//     SEQAN_CHECKPOINT
-// 
-//     typedef typename Size<RankSupportBitString<TSpec> >::Type TSize;
-//     typedef String<TSize> TSizeString;
-//     TSizeString sizeString;
-//     resize(sizeString, length(multi));
-//     for (TSize i = 0; i < length(multi); ++i)
-//     {
-//         sizeString[i] = length(multi[i]);
-//     }
-// 
-//     CharString name;
-//     name = fileName;    append(name, ".ssize"); save(sizeString, toCString(name), openMode);
-//     if (length(multi) == 0) return true;
-// 
-//     char id[12];     // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
-//     for (unsigned i = 0; i < length(multi); ++i)
-//     {
-//         sprintf(id, ".%u", i);
-//         name = fileName;
-//         append(name, &(id[0]));
-//         if (!save(multi[i], toCString(name), openMode))
-//             return false;
-//     }
-//     return true;
-// }
-// 
-// template <typename TSpec>
-// inline bool save(
-//     StringSet<RankSupportBitString<TSpec> > const & strings,
-//     const char * fileName)
-// {
-//     return save(strings, fileName, OPEN_RDONLY);
-// }
-
-
-/*    template <typename TPos>
-    inline typename Value<TSuperBlockString>::Type const operator[](TPos pos)
-    {
-        unsigned const bitsPerBlock = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
-        return bits[pos / bitsPerBlock];
-    }
-*/
-
-
-/*    template <typename TText>
-    RankSupportBitString(TText & text) :
-        bits(),
-        butString(),
-        sBlocktString(),
-        length_(length(text))
-    {
-        unsigned const bitsPerBlock = BitsPerValue<typename Value<TBitString>::Type>::VALUE;
-
-        TSuperBlockString textLength = length(text);
-        (length(text) % bitsPerBlock == 0) ? resize(bits, textLength / bitsPerBlock) : resize(bits, textLength / bitsPerBlock + 1);
-
-        unsigned const bitsPerBlockStringEntrie = BitsPerValue<TBlockString>::VALUE;
-        resize(blockString, length(bits) / bitsPerBlockStringEntrie);
-
-        unsigned const bitsPerSuperBlockStringEntrie = bitsPerBlockStringEntrie * bitsPerBlockStringEntrie;
-        resize(superBlocks, length(blockString) / bitsPerSuperBlockStringEntrie);
-    }
-*/
-
 
 template <typename TValue>
 inline void printBits(TValue entrie)

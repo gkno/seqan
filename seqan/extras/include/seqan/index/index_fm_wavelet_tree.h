@@ -158,8 +158,8 @@ struct Value<WaveletTree<TText, TSpec> >
     typedef typename Value<TText>::Type Type;
 };
 
-template <typename TText, typename TSpec>
-struct Value<WaveletTree<StringSet<TText>, TSpec> >
+template <typename TText, typename TSetSpec, typename TSpec>
+struct Value<WaveletTree<StringSet<TText, TSetSpec>, TSpec> >
 {
     typedef typename Value<TText>::Type Type;
 };
@@ -167,13 +167,13 @@ struct Value<WaveletTree<StringSet<TText>, TSpec> >
 template <typename TText, typename TSpec>
 struct Value<WaveletTree<TText, TSpec> const>
 {
-    typedef typename Value<TText>::Type Type;
+    typedef typename Value<WaveletTree<TText, TSpec> >::Type const Type;
 };
 
-template <typename TText, typename TSpec>
-struct Value<WaveletTree<StringSet<TText> const, TSpec> >
+template <typename TText, typename TSetSpec, typename TSpec>
+struct Value<WaveletTree<StringSet<TText, TSetSpec> const, TSpec> >
 {
-    typedef typename Value<TText>::Type Type;
+    typedef typename Value<WaveletTree<StringSet<TText, TSetSpec>, TSpec> >::Type const Type;
 };
 
 

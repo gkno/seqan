@@ -141,7 +141,7 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(test_fm_index_find_first_index_);
     SEQAN_CALL_TEST(test_fm_index_get_fibre);
     SEQAN_CALL_TEST(test_fm_index_search);
-//     SEQAN_CALL_TEST(test_fm_index_open_save);
+    SEQAN_CALL_TEST(test_fm_index_open_save);
 
     SEQAN_CALL_TEST(fm_index_iterator_constuctor);
     SEQAN_CALL_TEST(fm_index_iterator_go_down);
@@ -151,55 +151,6 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(fm_index_iterator_is_root);
     SEQAN_CALL_TEST(fm_index_iterator_count_occurrences);
     SEQAN_CALL_TEST(fm_index_iterator_range);
-// 
-// 
-//     String<Dna> text = "ACGACG";
-//     Index<String<Dna>, FmIndex<WaveletTreeBased<void>, void > > fm(text);
-//     Finder< Index<String<Dna>, FmIndex<WaveletTreeBased<void>, void > > > finder(fm);
-//     while(find(finder, "ACG"))
-//         std::cerr << position(finder) << std::endl;
-
-
-//     CharString text = "MISSISSIPPI";
-//     Index<CharString> esa(text);
-//     typedef Iterator<Index<CharString>, TopDown<ParentLinks<Preorder> > >::Type TTopDownPreIter;
-// 
-//     TTopDownPreIter topDownPre(esa);
-//     //while(topDownPre != end(esa, TopDown<>()))
-//     do {
-//         std::cout << representative(topDownPre) << std::endl;
-//         if (!goDown(topDownPre) && !goRight(topDownPre))
-//             while (goUp(topDownPre) && !goRight(topDownPre)) ;
-//     } while (!isRoot(topDownPre));    
-// 
-//     typedef Iterator<Index<CharString>, TopDown<ParentLinks<Postorder> > >::Type TTopDownPostIter;
-//     TTopDownPostIter topDownPost(esa);
-//     do {
-//         std::cout << representative(topDownPost) << std::endl;
-//         if (!goDown(topDownPost) && !goRight(topDownPost))
-//             while (goUp(topDownPost) && !goRight(topDownPost)) ;
-//     } while (!isRoot(topDownPost)); 
-
-//     String<unsigned> string1;
-//     appendValue(string1, 8);
-//     appendValue(string1, 1);
-//     appendValue(string1, 2);
-//     
-//     String<unsigned> string2;
-//     appendValue(string2, 5);
-//     appendValue(string2, 6);
-//     appendValue(string2, 7);
-// 
-//     std::cerr << (string1 < string2) << std::endl;
-// 
-//     StringSet<String<unsigned> > set;
-//     appendValue(set, string1);
-//     appendValue(set, string2);
-// 
-//     std::sort(begin(set), end(set));
-// 
-//     std::cerr << set[0][0] << std::endl;
-
 }
 SEQAN_END_TESTSUITE
 

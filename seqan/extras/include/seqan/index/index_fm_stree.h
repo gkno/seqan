@@ -243,15 +243,15 @@ inline bool _isLeaf(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TS
                 value(it).range.i1 == getDollarPosition(container(it).lfTable.occTable));
 }
 
-template < typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder >
-inline bool _isLeaf(Iter<Index<StringSet<TText>, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const &it,
+template < typename TText, typename TSetSpec, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder >
+inline bool _isLeaf(Iter<Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const &it,
                     VSTreeIteratorTraits<TDfsOrder, False> const)
 {
     return _isLeaf(it, VSTreeIteratorTraits<TDfsOrder, True>());
 }
 
-template < typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder >
-inline bool _isLeaf(Iter<Index<StringSet<TText>, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const &it,
+template < typename TText, typename TSetSpec, typename TOccSpec, typename TIndexSpec, typename TSpec, typename TDfsOrder >
+inline bool _isLeaf(Iter<Index<StringSet<TText, TSetSpec>, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TSpec> > const &it,
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     return (value(it).range.i1 == value(it).range.i2 &&
@@ -326,7 +326,7 @@ inline bool _goDown(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<To
                     VSTreeIteratorTraits<TDfsOrder, True> const)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> >    TIndex;
-    typedef typename Value<TText>::Type                     TAlphabet;
+    typedef typename Value<TIndex>::Type                     TAlphabet;
 
     if (isLeaf(it)) return false;
 
@@ -346,7 +346,7 @@ inline bool _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VST
                         TChar const & character)
 {
     typedef Index<TText, FMIndex<TOccSpec, CompressText> > TIndex;
-    typedef typename Value<TText>::Type                         TAlphabet;
+    typedef typename Value<TIndex>::Type                         TAlphabet;
 
     if (isLeaf(it)) return false;
 
@@ -363,7 +363,7 @@ inline bool _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTre
                         TChar const & character)
 {
     typedef Index<TText, FMIndex<TOccSpec, TIndexSpec> > TIndex;
-    typedef typename Value<TText>::Type                         TAlphabet;
+    typedef typename Value<TIndex>::Type                         TAlphabet;
     
     if (isLeaf(it)) return false;
 
@@ -381,7 +381,7 @@ inline bool _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VST
                         TString const & string)
 {
     typedef Index<TText, FMIndex<TOccSpec, CompressText> >      TIndex;
-    typedef typename Value<TText>::Type                         TAlphabet;
+    typedef typename Value<TIndex>::Type                         TAlphabet;
     typedef typename Iterator<TString const, Standard>::Type    TStringIter;
 
     TStringIter stringIt = end(string);
