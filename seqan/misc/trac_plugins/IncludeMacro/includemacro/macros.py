@@ -28,7 +28,9 @@ class IncludeMacro(WikiMacroBase):
     }
     
     # IWikiMacroProvider methods
-    def render_macro(self, req, name, content):
+    def expand_macro(self, formatter, name, content):
+        req = formatter.req   # Shortcut.
+        safe_content = False  # Whether or not to disable cleaning HTML.
         args = [x.strip() for x in content.split(',')]
         if len(args) == 1:
             args.append(None)
@@ -117,10 +119,13 @@ class IncludeMacro(WikiMacroBase):
             
         # If we have a preview format, use it
         if dest_format:
-            out = Mimeview(self.env).render(ctxt, dest_format, out)
+            # We can trust the output and do not need to call the HTML sanitizer
+            # below.  The HTML sanitization leads to whitespace being stripped.
+            safe_content = True
+            out = Mimeview(self.env).render(ctxt, dest_format, out, force_source=True)
         
         # Escape if needed
-        if not self.config.getbool('wiki', 'render_unsafe_content', False):
+        if not safe_content and not self.config.getbool('wiki', 'render_unsafe_content', False):
             try:
                 out = HTMLParser(StringIO(out)).parse() | HTMLSanitizer()
             except ParseError:
