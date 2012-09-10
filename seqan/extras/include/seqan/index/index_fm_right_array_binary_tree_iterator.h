@@ -858,7 +858,8 @@ inline bool setAndGoRight_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> &
 
     resize(container(it).treeVertieces, length(container(it).treeVertieces) + 1);
     TChar pivot = getCharacter(it);
-    SEQAN_ASSERT_MSG(setRightChildPos_(it, length(container(it).treeVertieces) - 1), "You just deleted inserted vertieves!");
+    // SEQAN_ASSERT_MSG(setRightChildPos_(it, length(container(it).treeVertieces) - 1), "You just deleted inserted vertieves!");
+    setRightChildPos_(it, length(container(it).treeVertieces) - 1);
     goRightChild(it);
     borderString[length(borderString) - 1].i1 = getCharacterPosition(pst, pivot);
     borderString[length(borderString) - 1].i2 = borderString[length(borderString) - 2].i2;
@@ -912,10 +913,8 @@ void setChildVertieces_(Iter<RightArrayBinaryTree<TChar, TSpec>, TIterSpec> & it
         return;
     }
 
-    //static_cast<Nothing>(it.waveletTreeStructure->treeVertieces[getPosition(it)].i2);
-
-    //std::cerr << "it: " << (int)it.waveletTreeStructure->treeVertieces[getPosition(it)].i2 << " " << getPosition(it) << std::endl;
-    SEQAN_ASSERT_MSG(setLeftChildPos_(it), "The right child has just been deleted!");
+//     SEQAN_ASSERT_MSG(setLeftChildPos_(it), "The right child has just been deleted!");
+    setLeftChildPos_(it);
 
     appendValue(borderString, TBorderStringValue(borderString[length(borderString) - 1].i1, pivotPosition - 1));
 }
