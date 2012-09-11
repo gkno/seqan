@@ -59,7 +59,7 @@ namespace seqan {
 ..param.T2:The type of the second object.
 ...default:$T1$
 ..param.T3:The type of the third object.
-...default:$T2$
+...default:$T1$
 ..param.TSpec:The specializing type.
 ...default:$void$, no packing (faster access).
 

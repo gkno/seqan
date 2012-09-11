@@ -48,7 +48,7 @@ namespace seqan {
 // ============================================================================
 
 /**
-.Spec.Bit BitPacked<> Tuple:
+.Spec.Bit Packed Tuple:
 ..cat:Aggregates
 ..general:Class.Tuple
 ..summary:A plain fixed-length string. Saves memory by packing bits.
