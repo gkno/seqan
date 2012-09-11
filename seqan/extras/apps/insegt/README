@@ -26,7 +26,7 @@ Briefly it searches the intervals of the read alignments in the intervals
 of the given annotations. It counts the mapped reads for each annotation and 
 its parent annotation and stores the mapped annotations for each read.
 INSEGT produces tree output files:
-The first contains the expression levels of the given annotions.
+The first contains the expression levels of the given annotations.
 The second contains for each given read the mapped annotations.
 If the read mapped in not annotated regions, an UNKNOWN_REGION in the output will mark
 this.
