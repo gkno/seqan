@@ -19,7 +19,7 @@ void _findInOriginalNode(String<int> & hitTarget,
     if(!empty(refHits))
     {
         // [B] Find upper bound to current physical position in sorted refHits using std::upper_bound.
-        THitIterator itHit = std::upper_bound(begin(refHits),end(refHits),entriesIt->physicalPosition);
+        THitIterator itHit = std::upper_bound(begin(refHits),end(refHits),(int)entriesIt->physicalPosition);
         // [C] Make sure we do not miss hits that begin at physical position of current node.
         if(itHit != begin(refHits) && *(itHit - 1) >= (int)entriesIt->physicalPosition)
             --itHit;
