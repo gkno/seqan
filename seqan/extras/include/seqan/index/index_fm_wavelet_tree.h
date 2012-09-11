@@ -906,6 +906,25 @@ inline bool openDollarInformation(
 
 template <typename TText, typename TSpec>
 inline bool openDollarInformation(
+    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<> > > const & tree,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+
+    typedef typename Value<WaveletTree<TText, FmiDollarSubstituted<TSpec> > >::Type TChar;
+    typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<TSpec> >, FibreDollarPosition>::Type TDollarString;
+
+    String<TChar> dollarSub;
+    name = fileName;    append(name, ".drs"); open(dollarSub, toCString(name), openMode);
+    name = fileName;    append(name, ".drp"); open(tree.dollarPosition, toCString(name), openMode);
+    tree.dollarSubstitute = dollarSub[0];
+    return true;
+}
+
+
+template <typename TText, typename TSpec>
+inline bool openDollarInformation(
     WaveletTree<TText, TSpec> & /*tag*/,
     char const * /*tag*/,
     int const/*tag*/)
@@ -943,7 +962,6 @@ inline bool saveDollarInformation(
 {
 	return true;
 }
-
 template <typename TText, typename TSpec>
 inline bool saveDollarInformation(
     WaveletTree<TText, FmiDollarSubstituted<TSpec> > const & tree,
@@ -959,6 +977,25 @@ inline bool saveDollarInformation(
     append(dollarValues, Pair<TChar, TDollarString>(tree.dollarSubstitute, tree.dollarPosition));
 
     name = fileName;    append(name, ".dr"); save(dollarValues, toCString(name), openMode);
+    return true;
+}
+
+template <typename TText, typename TSpec>
+inline bool saveDollarInformation(
+    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<> > > const & tree,
+    const char * fileName,
+    int openMode)
+{
+    String<char> name;
+
+    typedef typename Value<WaveletTree<TText, FmiDollarSubstituted<TSpec> > >::Type TChar;
+    typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<TSpec> >, FibreDollarPosition>::Type TDollarString;
+
+    String<TChar> dollarSub;
+    append(dollarChar, tree.dollarSubstitute);
+
+    name = fileName;    append(name, ".drs"); save(dollarSub, toCString(name), openMode);
+    name = fileName;    append(name, ".drp"); save(tree.dollarPosition, toCString(name), openMode);
     return true;
 }
 
