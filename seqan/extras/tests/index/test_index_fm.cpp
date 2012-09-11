@@ -43,6 +43,7 @@
 #include "test_index_fm_wavelet_tree.h"
 #include "test_index_fm_sparse_string.h"
 #include "test_index_fm_compressed_sa.h"
+#include "test_index_fm_compressed_sa_iterator.h"
 #include "test_index_fm_stree.h"
 
 
@@ -131,6 +132,9 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(compressed_sa_get_next_pos_);
     SEQAN_CALL_TEST(compressed_sa_set_lf_table);
     SEQAN_CALL_TEST(compressed_sa_value_access);
+    
+    SEQAN_CALL_TEST(compressed_sa_iterator_begin);
+    SEQAN_CALL_TEST(compressed_sa_iterator_end);
     
     SEQAN_CALL_TEST(test_lf_table_lf_mapping);
 

@@ -246,7 +246,10 @@ inline bool entryStored(CompressedSA<TSparseString, TLfTable, TSpec> & compresse
 
 // This function creates a compressed suffix array using a normal one.
 template <typename TSparseString, typename TLfTable, typename TSpec, typename TSA, typename TCompression>
-void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TSA const & completeSA, TCompression const compressionFactor, unsigned offSet)
+void compressedSaCreate(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, 
+        TSA const & completeSA, 
+        TCompression const compressionFactor, 
+        unsigned offSet)
 {
     typedef CompressedSA<TSparseString, TLfTable, TSpec> TCompressedSA;
     typedef typename GetValue<TSA>::Type                            TSAValue;

@@ -906,7 +906,7 @@ inline bool openDollarInformation(
 
 template <typename TText, typename TSpec>
 inline bool openDollarInformation(
-    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<> > > const & tree,
+    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<TSpec> > > const & tree,
     const char * fileName,
     int openMode)
 {
@@ -982,7 +982,7 @@ inline bool saveDollarInformation(
 
 template <typename TText, typename TSpec>
 inline bool saveDollarInformation(
-    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<> > > const & tree,
+    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<TSpec> > > const & tree,
     const char * fileName,
     int openMode)
 {
@@ -992,7 +992,7 @@ inline bool saveDollarInformation(
     typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<TSpec> >, FibreDollarPosition>::Type TDollarString;
 
     String<TChar> dollarSub;
-    append(dollarChar, tree.dollarSubstitute);
+    append(dollarSub, tree.dollarSubstitute);
 
     name = fileName;    append(name, ".drs"); save(dollarSub, toCString(name), openMode);
     name = fileName;    append(name, ".drp"); save(tree.dollarPosition, toCString(name), openMode);

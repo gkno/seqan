@@ -224,9 +224,6 @@ getRankInBlock_(RankSupportBitString<TSpec> const & bitString, TPos const pos)
     typedef typename Fibre<RankSupportBitString<TSpec>, FibreBits>::Type    TFibreBits;
     typedef typename Value<TFibreBits>::Type                                TFibreBitsValue;
 
-    //TFibreBlocksValue const bitsPerValue = BitsPerValue<TFibreBitsValue>::VALUE;
-    //TFibreBitsValue const one = -1;
-    //TFibreBitsValue const mask = one >> (bitsPerValue - posInBlock - 1);
     TFibreBitsValue const mask = ((TFibreBitsValue)2u << getPosInBlock_(bitString, pos)) - 1;
     return getRankInBlock_(bitString.bits[getBlockPos_(bitString, pos)] & mask);
 }
@@ -256,18 +253,6 @@ getSuperBlockPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const 
 ..returns:Value type of the super block fibre (default unsigned long).
 ..include:seqan/index.h
 ..example.code:
-String<Dna5> genome = "ACGTACGT";
-
-RankSupportBitString<> bitString;
-resize(bitString, length(genome));
-
-    ...
-    mark all 'a's
-    ...
-
-for (unsigned i = 0; i < length(bitString); ++i)
-    if(getBit(bitString, i))
-        std::cout << "found the << getRank(bitString, i) << " a at: " << i << std::endl;
 */
 template <typename TSpec, typename TPos>
 inline typename Value<typename Fibre<RankSupportBitString<TSpec>, FibreSuperBlocks>::Type>::Type
@@ -334,7 +319,6 @@ getBlockPos_(RankSupportBitString<TSpec> const & /*bitString*/, TPos const pos)
     typedef typename Fibre<TRankSupportBitString, FibreBits>::Type  TFibreBits;
     typedef typename Value<TFibreBits>::Type                        TFibreBitsValue;
 
-    //TFibreSuperBlocksValue const bitsPerValue_ = BitsPerValue<TFibreBitsValue>::VALUE;
     return pos / BitsPerValue<TFibreBitsValue>::VALUE;
 }
 
