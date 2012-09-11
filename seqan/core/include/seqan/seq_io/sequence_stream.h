@@ -192,7 +192,13 @@ public:
     bool _atEnd;
     bool _isGood;
 
+#if __cplusplus <= 199711L
+    // C++98
     std::auto_ptr<SequenceStreamImpl_> _impl;
+#else  // #if __cplusplus <= 199711L
+    // C++11
+    std::unique_ptr<SequenceStreamImpl_> _impl;
+#endif  // #if __cplusplus <= 199711L
 
     SeqIOFileType_::Type _fileType;
     SeqIOFileFormat_::Type _fileFormat;

@@ -57,8 +57,15 @@ public:
     std::ifstream _fstream;
     // The file stream to read from if we do not read from stdout.  Pointed to by _stream.
     std::istream * _stream;
+
     // Record reader to use for parsing.
+#if __cplusplus <= 199711L
+    // C++98
     std::auto_ptr<RecordReader<std::istream, SinglePass<> > > _reader;
+#else  // #if __cplusplus <= 199711L
+    // C++11
+    std::unique_ptr<RecordReader<std::istream, SinglePass<> > > _reader;
+#endif  // #if __cplusplus <= 199711L
 
     SamReader_() :
         XamReader_(), _stream(0), _reader(0)
