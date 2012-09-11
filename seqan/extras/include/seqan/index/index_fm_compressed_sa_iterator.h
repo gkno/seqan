@@ -71,18 +71,18 @@ template <typename TSparseString, typename TLfTable, typename TSpec>
 struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Rooted>:
     Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Standard>{};
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >
-begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TIteratorSpec>
+inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, TIteratorSpec>::Type
+begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TIteratorSpec const & /* dummy */)
 {
-    return Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >(compressedSA, 0);
+    return Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, TIteratorSpec>(compressedSA, 0);
 }
 
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >
-end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
+template <typename TSparseString, typename TLfTable, typename TSpec, typename TIteratorSpec>
+inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, TIteratorSpec>::Type
+end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TIteratorSpec const & /* dummy */)
 {
-    return Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >(compressedSA, length(compressedSA.compressedSA));
+    return Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, TIteratorSpec>(compressedSA, length(compressedSA.compressedSA));
 }
 
 }
