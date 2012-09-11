@@ -142,6 +142,9 @@ struct StringEnumeratorHammingModifier_
     TSize       errorPos;           // position of substitution
     unsigned    character;          // replacement character
     unsigned    skipChar;           // skip the original character
+
+    StringEnumeratorHammingModifier_() : errorPos(0), character(0), skipChar(0)
+    {}
 };
 
 template <typename TObject, unsigned DISTANCE>
@@ -200,6 +203,10 @@ struct StringEnumeratorLevenshteinModifier_
     unsigned    character;          // replacement character
     unsigned    skipChar;           // skip the original character
     TState      state;              // current state subst/insert before/delete
+
+    StringEnumeratorLevenshteinModifier_() :
+            errorPosOrig(0), errorPos(0), errorPosEnd(0), character(0), skipChar(0), state(DISABLED_)
+    {}
 };
 
 template <typename TObject, unsigned DISTANCE>
