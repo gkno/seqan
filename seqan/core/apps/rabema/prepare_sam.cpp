@@ -138,12 +138,18 @@ int main(int argc, char const ** argv)
 {
     using namespace seqan;
 
+    // Whether or not to check sanity check when sorting.
+    bool dontCheckSorting = false;
+
     // Check arguments.
-    if (argc != 2)
+    if (argc < 2 || argc > 3)
     {
-        std::cerr << "USAGE: parepare_sam IN.sam > FIXED.sam\n";
+        std::cerr << "USAGE: parepare_sam IN.sam [--dont-check-sorting] > FIXED.sam\n";
         return 1;
     }
+
+    if (argc == 3 && seqan::CharString(argv[2]) == seqan::CharString("--dont-check-sorting"))
+        dontCheckSorting = true;
 
     // Open SAM file for reading.
     std::ifstream inSam(argv[1], std::ios::in | std::ios::binary);
@@ -184,10 +190,13 @@ int main(int argc, char const ** argv)
 
         if (!empty(records) && record.qName != back(records).qName)
         {
-            if (!empty(record) && lessThanSamtoolsQueryName(record.qName, back(records).qName))
+            // Sanity check for sorting.
+            if (!dontCheckSorting && !empty(record) && lessThanSamtoolsQueryName(record.qName, back(records).qName))
             {
-                std::cerr << "ERROR: " << record.qName << " succeeds " << back(records).qName << " in SAM file.\n";
-                std::cerr << "File must be sorted by query name.\n";
+                std::cerr << "ERROR: " << record.qName << " succeeds " << back(records).qName << " in SAM file.\n"
+                          << "File must be sorted by query name.\n"
+                          << "If your input FASTQ file was not sorted by query name then you can disable this \n"
+                          << "sanity check using the --dont-check-sorting parameter.\n";
                 return 1;
             }
             if (fixRecords(records) != 0)
