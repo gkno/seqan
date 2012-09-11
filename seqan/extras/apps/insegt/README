@@ -32,7 +32,7 @@ If the read mapped in not annotated regions, an UNKNOWN_REGION in the output wil
 this.
 And the third file contains exon tuple and their expression levels.  
 (For further informations see: 
-http://www.inf.fu-berlin.de/en/groups/abi/theses/bachelor/krakau/bsc_thesis_krakau.pdf)
+http://www.inf.fu-berlin.de/en/groups/abi/theses/bachelor/finished/krakau/bsc_thesis_krakau.pdf)
 
 ---------------------------------------------------------------------------
 2. Installation
