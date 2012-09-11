@@ -108,13 +108,13 @@ parseCommandLine(InsegtOptions & options, int argc, char const ** argv)
     // Add Examples Section.
     addTextSection(parser, "Examples");
     addListItem(parser,
-                "\\fBinsegt\\fP  \\fBexample/accepted_hits.sam\\fP \\fBexample/test.gff\\fP",
+                "\\fBinsegt\\fP  \\fBexample/alignments.sam\\fP \\fBexample/annotations.gff\\fP",
                 "Run INSEGT on example files with default parameters.");
     addListItem(parser,
-                "\\fBinsegt\\fP \\fB-m\\fP \\fBexample/accepted_hits.sam\\fP \\fBexample/test.gff\\fP",
+                "\\fBinsegt\\fP \\fB-m\\fP \\fBexample/alignments.sam\\fP \\fBexample/annotations.gff\\fP",
                 "Run INSEGT on example files and only compute maxTuple.");
     addListItem(parser,
-                "\\fBinsegt\\fP \\fB-c\\fP \\fB2\\fP \\fBexample/accepted_hits.sam\\fP \\fBexample/test.gff\\fP",
+                "\\fBinsegt\\fP \\fB-c\\fP \\fB2\\fP \\fBexample/alignments.sam\\fP \\fBexample/annotations.gff\\fP",
                 "Run INSEGT on example files and only output tuple with a min. count of 2.");
 
 

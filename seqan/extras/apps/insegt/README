@@ -41,31 +41,30 @@ http://www.inf.fu-berlin.de/en/groups/abi/theses/bachelor/krakau/bsc_thesis_krak
 INSEGT is distributed with SeqAn - The C++ Sequence Analysis Library (see 
 http://www.seqan.de). To build INSEGT do the following:
 
-  1)  Download the latest snapshot of SeqAn
-  2)  Unzip it to a directory of your choice (e.g. snapshot)
-  3)  cd snapshot/apps
-  4)  make insegt
-  5)  cd insegt
+Follow the "Getting Started" section on http://trac.seqan.de/wiki and check
+out the latest SVN trunk. Instead of creating a project file in Debug mode,
+switch to Release mode (-DCMAKE_BUILD_TYPE=Release) and compile insegt. This
+can be done as follows:
 
-Alternatively you can check out the latest SVN version of INSEGT and SeqAn
-with:
+  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan seqan-trunk
+  mkdir seqan-trunk-build
+  mkdir seqan-trunk-build/release
+  cd seqan-trunk-build/release
+  cmake ../../seqan-trunk -DCMAKE_BUILD_TYPE=Release
+  make insegt
 
-  1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
-  2)  cd seqan
-  3)  make forwards
-  4)  cd projects/library/apps
-  5)  make insegt
-  6)  cd insegt
 
 ---------------------------------------------------------------------------
 3. Usage
 ---------------------------------------------------------------------------
 
-Usage: insegt [OPTION]... -s <ALIGNMENTS FILE> -g <ANNOTATIONS FILE> 
+Usage: insegt [OPTIONS] <ALIGNMENTS-FILE> <ANNOTATIONS-FILE> 
 
-INSEGT expects at least three files:
+INSEGT expects at least two files:
 A SAM file which contains the alignments of the reads and a GFF file which 
-contains the gene-annotations. 
+contains the gene-annotations (annotations can be also given in the
+GTF format, but this has would have to be specified additionally with the 
+option -z).
 Without any additional parameters INSEGT would compute all tuple up to the 
 length 2. That means that it builds only 2-tuple, whose exons are connected 
 by matepairs.  
@@ -76,56 +75,56 @@ the command line:
 3.1. Options
 ---------------------------------------------------------------------------
 
-  [ -p PATH ],  [ --outputPath PATH ]
+  [ -p PATH ],  [ --output-path TEXT ]
 
   Path to the directory, where the output files should be stored. 
   The default value is the insegt-directory.
 
-  [ -n NUM ],  [ --nTuple NUM ]
+  [ -n NUM ],  [ --ntuple INT ]
 
   Tuple length parameter. By default it is 2.	
 
-  [ -o NUM ],  [ --offsetInterval NUM ]
+  [ -o NUM ],  [ --offset-interval INT ]
 
   The offset-parameter to short alignment-intervals to search them in the
   given annotation-regions. The default value is 5.
 
-  [ -t NUM ],  [ --thresholdGaps NUM ]
+  [ -t NUM ],  [ --threshold-gaps INT ]
 
   The number of gaps, which are allowed in the read-alignments, for which 
   the gaps are not interpreted as introns. The default value is 5.
 
-  [ -c NUM ],  [ --thresholdCount NUM ]
+  [ -c NUM ],  [ --threshold-count INT ]
 
   Threshold for min. count of tuple, for which the tuple are given out.
   The default value is 1. 
   
-  [ -r NUM ],  [ --thresholdRPKM NUM ]
+  [ -r NUM ],  [ --threshold-rpkm DOUBLE ]
   
   Threshold for min. RPKM-value of tuple, for which the tuple are given out.
   The default value is 0.0.
   
-  [ -m],  [ --maxTuple ]
+  [ -m],  [ --max-tuple ]
 
   Only maximal tuple are computed, which are spanned by the whole read. 
 
-  [ -e ],  [ --exact_nTuple ]
+  [ -e ],  [ --exact-ntuple ]
   
   Only tuple of the given length are computed. By default all tuple up to 
   the given length are computed. (If -m is set, -e will be ignored) 
   
-  [ -u ],  [ --unknown_orientation ]
+  [ -u ],  [ --unknown-orientation ]
   
   Read-orientations are unknown. The alignment-intervals are searched in the 
   annotations of both strands. By default they're just searched in the 
   annotations corresponding to the given orientation of the read.
 
-  [ -f],   [ --fusion_genes ]
+  [ -f],   [ --fusion-genes ]
 
   Check for fusion genes. A separate output for matepair tupel, which map in 
   different genes, is created. By default there is no check for fusion genes.
 
-  [ -z],   [ --gtf ]
+  [ -z],   [ --gtf-format ]
 
   The gene-annotations are given in a GTF file (instead of GFF).
   By default INSEGT expects a GFF file.
@@ -226,7 +225,28 @@ Example:
 
 
 ---------------------------------------------------------------------------
-6. Contact
+6. Example
+---------------------------------------------------------------------------
+
+There are small example files in the folder 
+seqan-trunk/extras/apps/insegt/example/ containing alignments and 
+annotations. In the following you can see how to use INSEGT with default 
+paramters to analyze the alignments of the reads using the given annotations:
+
+ 1) ./extras/apps/insegt/insegt \
+        ../../seqan-trunk/extras/apps/insegt/example/alignments.sam \
+        ../../seqan-trunk/extras/apps/insegt/example/annotations.gff 
+
+This computes all tuple up to the length 2 and outputs them. To only output 
+tuple with a min. count of 2 you can use the option -c:
+
+ 2) ./extras/apps/insegt/insegt -c 2 \
+        ../../seqan-trunk/extras/apps/insegt/example/alignments.sam \
+        ../../seqan-trunk/extras/apps/insegt/example/annotations.gff 
+
+
+---------------------------------------------------------------------------
+7. Contact
 ---------------------------------------------------------------------------
 
 For questions or comments, contact:
