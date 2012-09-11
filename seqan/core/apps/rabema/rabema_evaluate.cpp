@@ -382,6 +382,8 @@ int benchmarkReadResult(RabemaStats & result,
     //
     // Start with picking the smallest distance if *-best mode.
     int smallestDistance = options.oracleMode ? maxValue<int>() : options.maxError;
+    // Note that smallestDistance (as bestDistance defined below) is expressed as percent of read length ceiled
+    // and cat to an int value.
     if (options.oracleMode || options.benchmarkCategory == CATEGORY_ANY_BEST ||
         options.benchmarkCategory == CATEGORY_ALL_BEST)
         for (unsigned i = 0; i < length(gsiRecords); ++i)
@@ -542,6 +544,8 @@ int benchmarkReadResult(RabemaStats & result,
         // about the alignment's end position in this case.
         Dna5String readSeq;
         int bestDistance = minValue<int>();  // Marker for "not set yet".
+        // Note that bestDistance expresses the distance in percent error, relative to the read length, ceiled up
+        // and converted to an int value.
         if (!options.oracleMode)
         {
             // Get best distance from NM tag if set and we are to trust it.
@@ -626,7 +630,9 @@ int benchmarkReadResult(RabemaStats & result,
             // additional hit.  In case of all-best and any-best, this is only one if its distance is better than the
             // best distance for this read.  In the case of all, it is one if its distance is less than the allowed
             // maximal distance.  If it is not an additional hit then it is an invalid one.
-            int allowedDistance = static_cast<int>(0.01 * options.maxError * length(readSeq));
+            //
+            // Note that all distances including allowedDistance are percent of read length, ceiled up.
+            int allowedDistance = options.maxError;
             if ((options.benchmarkCategory == CATEGORY_ALL_BEST || options.benchmarkCategory == CATEGORY_ANY_BEST) &&
                 (smallestDistance != maxValue<int>()))
                 allowedDistance = smallestDistance;
