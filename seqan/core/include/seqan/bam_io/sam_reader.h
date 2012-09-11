@@ -68,7 +68,7 @@ public:
 #endif  // #if __cplusplus <= 199711L
 
     SamReader_() :
-        XamReader_(), _stream(0), _reader(0)
+        XamReader_(), _stream(0),
 #if __cplusplus <= 199711L
         // C++98
         _reader(0)
