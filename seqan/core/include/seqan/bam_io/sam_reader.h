@@ -69,6 +69,13 @@ public:
 
     SamReader_() :
         XamReader_(), _stream(0), _reader(0)
+#if __cplusplus <= 199711L
+        // C++98
+        _reader(0)
+#else  // #if __cplusplus <= 199711L
+        // C++11
+        _reader(nullptr)
+#endif  // #if __cplusplus <= 199711L
     {}
 
     SamReader_(CharString const & filename);
