@@ -15,22 +15,22 @@ Table of Contents
 ---------------------------------------------------------------------------
 
 INSEGT is a tool to analyse alignments of RNA-Seq reads (single-end or 
-paired-end) by using gene-annotations.
-It can measure exon-, transcript- and gene-expression levels of given 
-annotations. If read-alignments span more than one exon, INSEGT can also 
-compute possible exon-combinations (tuple) and their expression levels.
+paired-end) by using gene annotations.
+It can measure exon, transcript and gene expression levels of given 
+annotations. If read alignments span more than one exon, INSEGT can also 
+compute possible exon combinations (tuple) and their expression levels.
 According to requirements it computes maximal tuple or tuple with a certain 
-length. For paired-end-reads INSEGT builds also tuple, whose exons are 
+length. For paired-end reads INSEGT builds also tuple, whose exons are 
 connected by matepairs.
-Briefly it searches the intervals of the read-alignments in the intervals 
+Briefly it searches the intervals of the read alignments in the intervals 
 of the given annotations. It counts the mapped reads for each annotation and 
-its parent-annotation and stores the mapped annotations for each read.
+its parent annotation and stores the mapped annotations for each read.
 INSEGT produces tree output files:
 The first contains the expression levels of the given annotions.
 The second contains for each given read the mapped annotations.
 If the read mapped in not annotated regions, an UNKNOWN_REGION in the output will mark
 this.
-And the third file contains exon-tuple and their expression levels.  
+And the third file contains exon tuple and their expression levels.  
 (For further informations see: 
 http://www.inf.fu-berlin.de/en/groups/abi/theses/bachelor/krakau/bsc_thesis_krakau.pdf)
 
@@ -62,7 +62,7 @@ Usage: insegt [OPTIONS] <ALIGNMENTS-FILE> <ANNOTATIONS-FILE>
 
 INSEGT expects at least two files:
 A SAM file which contains the alignments of the reads and a GFF file which 
-contains the gene-annotations (annotations can be also given in the
+contains the gene annotations (annotations can be also given in the
 GTF format, but this has would have to be specified additionally with the 
 option -z).
 Without any additional parameters INSEGT would compute all tuple up to the 
@@ -78,7 +78,7 @@ the command line:
   [ -p PATH ],  [ --output-path TEXT ]
 
   Path to the directory, where the output files should be stored. 
-  The default value is the insegt-directory.
+  The default value is the insegt directory.
 
   [ -n NUM ],  [ --ntuple INT ]
 
@@ -86,12 +86,12 @@ the command line:
 
   [ -o NUM ],  [ --offset-interval INT ]
 
-  The offset-parameter to short alignment-intervals to search them in the
-  given annotation-regions. The default value is 5.
+  The offset-parameter to short alignment intervals to search them in the
+  given annotation regions. The default value is 5.
 
   [ -t NUM ],  [ --threshold-gaps INT ]
 
-  The number of gaps, which are allowed in the read-alignments, for which 
+  The number of gaps, which are allowed in the read alignments, for which 
   the gaps are not interpreted as introns. The default value is 5.
 
   [ -c NUM ],  [ --threshold-count INT ]
@@ -115,7 +115,7 @@ the command line:
   
   [ -u ],  [ --unknown-orientation ]
   
-  Read-orientations are unknown. The alignment-intervals are searched in the 
+  Read-orientations are unknown. The alignment intervals are searched in the 
   annotations of both strands. By default they're just searched in the 
   annotations corresponding to the given orientation of the read.
 
@@ -126,14 +126,14 @@ the command line:
 
   [ -z],   [ --gtf-format ]
 
-  The gene-annotations are given in a GTF file (instead of GFF).
+  The gene annotations are given in a GTF file (instead of GFF).
   By default INSEGT expects a GFF file.
 
 ---------------------------------------------------------------------------
 4. Input General Feature Format
 ---------------------------------------------------------------------------
 
-INSEGT expects a GFF file which contains the gene-annotations.
+INSEGT expects a GFF file which contains the gene annotations.
 
 The General Feature Format (GFF) is specified by the Sanger Institute as a tab-
 delimited text format with the following columns:
@@ -157,18 +157,18 @@ Example:
 
 The order of the row-entries doesn't matter.
 If no entry exists for the parent of an exon, INSEGT generates it automatically.
-Moreover parent-entries don't need start- and end-positions.
+Moreover parent entries don't need start- and end-positions.
 
 
 ---------------------------------------------------------------------------
 5. Output Formats
 ---------------------------------------------------------------------------
 
-INSEGT output-files are GFF files. The first output-file contains the annotations 
-similar to the GFF-input and additionally the counts of the mapped 
+INSEGT output files are GFF files. The first output file contains the annotations 
+similar to the GFF input and additionally the counts of the mapped 
 reads and the normalized expression levels in RPKM (reads per kilobase of 
 exon model per million mapped reads).
-The two other output-files have different specifications.
+The two other output files have different specifications.
 
 
 ---------------------------------------------------------------------------
@@ -191,10 +191,10 @@ Example:
 ---------------------------------------------------------------------------
 
 The read-output of INSEGT contains the mapped annotations followed by their 
-parent-annotation. If the read mapped in annotations of different parents,
+parent annotation. If the read mapped in annotations of different parents,
 the annotations are presented one after another corresponding to their parents.
 Consecutive mapped annotations are separated by ":".
-Overlapping annotations which are mapped by the same read-interval are separated by ";". 
+Overlapping annotations which are mapped by the same read interval are separated by ";". 
 
 Output columns:
 
