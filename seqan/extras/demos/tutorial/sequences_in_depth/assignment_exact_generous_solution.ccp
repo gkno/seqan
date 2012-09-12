@@ -2,7 +2,7 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 
-#include <time.h>  // For omp_get_wtime() only.
+#include <time.h>  
 
 using namespace seqan;
 
