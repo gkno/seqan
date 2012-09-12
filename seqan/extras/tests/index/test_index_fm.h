@@ -587,13 +587,13 @@ SEQAN_DEFINE_TEST(test_fm_index_search)
         Index<String<Dna5>, FMIndex<WT<FmiDollarSubstituted<> >, void > > dna5Tag;
         Index<String<AminoAcid>, FMIndex<WT<FmiDollarSubstituted<> >, void > > asTag;
         Index<String<signed char>, FMIndex<WT<FmiDollarSubstituted<> >, void > > sCharTag;
-        Index<String<unsigned char>, FMIndex<WT<FmiDollarSubstituted<> >, void > > uCharTag;
+        //Index<String<unsigned char>, FMIndex<WT<FmiDollarSubstituted<> >, void > > uCharTag;
         //Index<String<char>, FMIndex<WT<FmiDollarSubstituted<> >, void > > charTag;
         fmIndexSearch(dnaTag);
         fmIndexSearch(dna5Tag);
         fmIndexSearch(asTag);
         fmIndexSearch(uCharTag);
-        fmIndexSearch(sCharTag);
+        //fmIndexSearch(sCharTag);
         //fmIndexSearch(charTag);
     }
     {
