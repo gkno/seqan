@@ -330,4 +330,28 @@ SEQAN_DEFINE_TEST(test_rsbs_assignOperator)
 	SEQAN_ASSERT(bitString == otherBitString);
 }
 
+SEQAN_DEFINE_TEST(test_rsbs_open_save)
+{
+    unsigned length_ = 100000;
+    RankSupportBitString<> bitString;
+
+    String<bool> controlBitString;
+    resize(controlBitString, length_);
+
+    Rng<MersenneTwister> rng(SEED);
+    for (unsigned i = 0; i < length_; ++i)
+    {
+    	controlBitString[i] = pickRandomNumber(rng) % 2;
+    	appendValue(bitString, controlBitString[i]);
+    }
+
+    CharString tempFilename = SEQAN_TEMP_FILENAME();
+    save(bitString, toCString(tempFilename));
+
+    RankSupportBitString<> openRsbs;
+    open(openRsbs, toCString(tempFilename));
+
+    SEQAN_ASSERT(bitString == openRsbs);
+}
+
 #endif  // TEST_INDEX_FM_RANK_SUPPORT_BIT_STRING_H_

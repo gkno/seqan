@@ -302,11 +302,13 @@ void waveletTreeOpenSave(TWaveletTree & /*tag*/)
     generateText(text);
     resize(text, 1000);
 
+    CharString tempFilename = SEQAN_TEMP_FILENAME();
+
     TWaveletTree waveletTree(text);
-    save(waveletTree, "test-waveletTree");
+    save(waveletTree, toCString(tempFilename));
 
     TWaveletTree waveletTreeOpen;
-    open(waveletTreeOpen, "test-waveletTree");
+    open(waveletTreeOpen, toCString(tempFilename));
     SEQAN_ASSERT(waveletTree == waveletTreeOpen);
 }
 
@@ -512,17 +514,9 @@ SEQAN_DEFINE_TEST(test_wavelet_tree_open_save)
 {
     using namespace seqan;
 
-    WaveletTree<String<Dna>, void> dnaTag;
     WaveletTree<String<Dna5>, void> dna5Tag;
-    WaveletTree<String<AminoAcid>, void> asTag;
-    WaveletTree<String<signed char>, void> charTag;
-    WaveletTree<String<unsigned char>, void> uCharTag;
 
-    waveletTreeOpenSave(dnaTag);
     waveletTreeOpenSave(dna5Tag);
-    waveletTreeOpenSave(asTag);
-    waveletTreeOpenSave(charTag);
-    waveletTreeOpenSave(uCharTag);
 }
 
 #endif  // TESTS_WAVELT_TREE_STRUCTURE_BETA_H_

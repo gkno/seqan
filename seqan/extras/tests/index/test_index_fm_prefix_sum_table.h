@@ -317,6 +317,25 @@ void prefixSumTableValue(TPrefixSumTable & /*tag*/)
     SEQAN_ASSERT_EQ(getPrefixSum(pst, 0), 11u);
 }
 
+template <typename TPrefixSumTable>
+void prefixSumTableOpenSave(TPrefixSumTable & /*tag*/)
+{
+    typedef typename CharacterValue<TPrefixSumTable>::Type TChar;
+    typedef typename MakeUnsigned<TChar>::Type TUChar;
+    typedef String<TChar> TText;
+
+    TText text = "ACGT";
+    TPrefixSumTable pst(text);
+
+    CharString tempFilename = SEQAN_TEMP_FILENAME();
+    save(pst, toCString(tempFilename));
+
+    TPrefixSumTable openPst;
+    open(openPst, toCString(tempFilename));
+
+    SEQAN_ASSERT(pst == openPst);
+}
+
 SEQAN_DEFINE_TEST(prefix_sum_table_constructor)
 {
     using namespace seqan;
@@ -443,6 +462,14 @@ SEQAN_DEFINE_TEST(prefix_sum_table_value)
 
     PrefixSumTable<Dna5, void> tag;
     prefixSumTableValue(tag);
+}
+
+SEQAN_DEFINE_TEST(prefix_sum_table_open_save)
+{
+    using namespace seqan;
+
+    PrefixSumTable<Dna5, void> tag;
+    prefixSumTableOpenSave(tag);
 }
 
 #endif  // TEST_PREFIX_SUM_TABLE_BETA_H_

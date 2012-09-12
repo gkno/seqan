@@ -629,10 +629,10 @@ SEQAN_DEFINE_TEST(test_fm_index_search)
 SEQAN_DEFINE_TEST(test_fm_index_open_save)
 {
     using namespace seqan;
-//     {
-//         Index<DnaString, FMIndex<WT<FmiDollarSubstituted<> >, void > > dnaTag;
-//         fmIndexOpenSave(dnaTag);
-//     }
+    {
+        Index<DnaString, FMIndex<WT<FmiDollarSubstituted<> >, void > > dnaTag;
+        fmIndexOpenSave(dnaTag);
+    }
     {
         Index<StringSet<DnaString>, FMIndex<WT<FmiDollarSubstituted<> >, void > > dnaTag;
         fmIndexOpenSave(dnaTag);

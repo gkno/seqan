@@ -218,6 +218,30 @@ void compressedSaValueAccess(TIndex & /*tag*/)
     }
 }
 
+template <typename TIndex>
+void compressedSaOpenSave(TIndex & /*tag*/)
+{
+    typedef typename Fibre<TIndex, FibreText>::Type TText;
+    typedef typename SAValue<TText>::Type TSAValue;
+
+    typedef String<TSAValue> TSAString;
+
+    TText text;
+    generateText(text, 1000);
+
+    TIndex index(text);
+    indexCreate(index);    
+
+    CharString tempFilename = SEQAN_TEMP_FILENAME();
+    save(getFibre(index, FibreSA()), toCString(tempFilename));
+
+    typename Fibre<TIndex, FibreSA>::Type openSA;
+    open(openSA, toCString(tempFilename));
+
+    SEQAN_ASSERT(openSA.sparseString == getFibre(index, FibreSA()).sparseString);
+}
+
+
 // SEQAN_DEFINE_TEST(compressed_sa_assign_value)
 // {
 //     using namespace seqan;
@@ -294,6 +318,19 @@ SEQAN_DEFINE_TEST(compressed_sa_value_access)
     Index<TText, FMIndex<WT<FmiDollarSubstituted<> >, void > > tag;
 
     compressedSaValueAccess(tag);
+
+}
+
+SEQAN_DEFINE_TEST(compressed_sa_open_save)
+{
+    using namespace seqan;
+
+    typedef Dna TChar;
+    typedef String<TChar> TText;
+
+    Index<TText, FMIndex<WT<FmiDollarSubstituted<> >, void > > tag;
+
+    compressedSaOpenSave(tag);
 
 }
 

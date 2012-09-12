@@ -889,8 +889,8 @@ inline bool openDollarInformation(
 {
     String<char> name;
 
-    typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<TSpec> >, FibreDollarPosition>::Type TDollarString;
-    typedef typename Value<WaveletTree<TText, FmiDollarSubstituted<TSpec> > >::Type TChar;
+    typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<SingleDollar<TSpec> > >, FibreDollarPosition>::Type TDollarString;
+    typedef typename Value<WaveletTree<TText, FmiDollarSubstituted<SingleDollar<TSpec> > > >::Type TChar;
 
     String<Pair<TChar, TDollarString> > dollarValues;
 
@@ -970,8 +970,8 @@ inline bool saveDollarInformation(
 {
     String<char> name;
 
-    typedef typename Value<WaveletTree<TText, FmiDollarSubstituted<TSpec> > >::Type TChar;
-    typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<TSpec> >, FibreDollarPosition>::Type TDollarString;
+    typedef typename Value<WaveletTree<TText, FmiDollarSubstituted<SingleDollar<TSpec> > > >::Type TChar;
+    typedef typename Fibre<WaveletTree<TText, FmiDollarSubstituted<SingleDollar<TSpec> > >, FibreDollarPosition>::Type TDollarString;
 
     String<Pair<TChar, TDollarString> > dollarValues;
     append(dollarValues, Pair<TChar, TDollarString>(tree.dollarSubstitute, tree.dollarPosition));

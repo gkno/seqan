@@ -250,6 +250,29 @@ void waveletTreeStructureResize(TRightArrayBinaryTree & /*tag*/)
 
 }
 
+template <typename TRightArrayBinaryTree>
+void waveletTreeStructureOpenSave(TRightArrayBinaryTree & /*tag*/)
+{
+	typedef typename Fibre<TRightArrayBinaryTree, FibreTreeVertieces>::Type TWaveletTreeVertieces;
+	typedef typename Value<TWaveletTreeVertieces>::Type TWaveletTreeVertex;
+	typedef typename Value<TWaveletTreeVertex, 1>::Type TChar;
+	typedef typename Value<TWaveletTreeVertex, 2>::Type TPos;
+
+	
+    TRightArrayBinaryTree waveletTreeStructure;
+    resize(waveletTreeStructure, 10);
+
+    CharString tempFilename = SEQAN_TEMP_FILENAME();
+
+    save(waveletTreeStructure, toCString(tempFilename));
+    
+    TRightArrayBinaryTree openWaveletTreeStructure;
+    open(openWaveletTreeStructure, toCString(tempFilename));
+
+    SEQAN_ASSERT(waveletTreeStructure == openWaveletTreeStructure); 
+
+}
+
 SEQAN_DEFINE_TEST(wavelet_tree_structure_constructor)
 {
     using namespace seqan;
@@ -344,6 +367,14 @@ SEQAN_DEFINE_TEST(wavelet_tree_structure_resize)
     waveletTreeStructureResize(asTag);
     waveletTreeStructureResize(charTag);
     waveletTreeStructureResize(uCharTag);
+}
+
+SEQAN_DEFINE_TEST(wavelet_tree_structure_open_save)
+{
+    using namespace seqan;
+
+    RightArrayBinaryTree<AminoAcid, void> asTag;
+    waveletTreeStructureOpenSave(asTag);
 }
 
 
