@@ -47,11 +47,11 @@ using namespace seqan;
 unsigned const SEED = 41;
 
 template< typename TText>
-void generateText(TText & text)
+void generateText(TText & text, unsigned num)
 {
 
     typedef typename Value<TText>::Type TChar;
-    unsigned textLength = 100000;
+    unsigned textLength = num;
 
     int minChar = MinValue<TChar>::VALUE;
     unsigned alphabetSize = ValueSize<TChar>::VALUE;
@@ -65,11 +65,17 @@ void generateText(TText & text)
         text[i] = pickRandomNumber(rng) % alphabetSize - minChar;
 }
 
-void generateText(String<char> & text)
+template< typename TText>
+void generateText(TText & text)
+{
+    generateText(text, 100000);
+}
+
+void generateText(String<char> & text, unsigned num)
 {
 
     typedef char TChar;
-    unsigned textLength = 100000;
+    unsigned textLength = num;
 
     int minChar = -128;
     unsigned alphabetSize = ValueSize<TChar>::VALUE;
@@ -82,12 +88,17 @@ void generateText(String<char> & text)
         text[i] = pickRandomNumber(rng) % alphabetSize - minChar;
 }
 
+void generateText(String<char> & text)
+{
+    generateText(text, 100000);
+}
+
 template< typename TText>
-void generateText(StringSet<TText> & text)
+void generateText(StringSet<TText> & text, unsigned num)
 {
 
     typedef typename Value<TText>::Type TChar;
-    unsigned numSeq = 1000;
+    unsigned numSeq = num;
     unsigned seqLength = 2000;
 
     int minChar = MinValue<TChar>::VALUE;
@@ -103,6 +114,12 @@ void generateText(StringSet<TText> & text)
         for (unsigned j = 0; j < length(text[i]); ++j)
             text[i][j] = pickRandomNumber(rng) % alphabetSize - minChar;
     }
+}
+
+template< typename TText>
+void generateText(StringSet<TText> & text)
+{
+    generateText(text, 1000);
 }
 
 template< typename TText>
@@ -422,7 +439,6 @@ void fmIndexSearch(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
             SEQAN_ASSERT(find(esaFinder, localPattern));
             SEQAN_ASSERT_EQ(position(fmiFinder), position(esaFinder));
         }
-        if(find(esaFinder, localPattern))
         SEQAN_ASSERT_NOT(find(esaFinder, localPattern));
     }
 }
@@ -432,18 +448,38 @@ void fmIndexOpenSave(Index<TText, FMIndex<TIndexSpec, TOptimization> > /*tag*/)
 {
 	typedef Index<TText, FMIndex<TIndexSpec, TOptimization> > TIndex;
 	typedef Index<TText, IndexEsa<> > TIndexEsa;
+	typedef typename Value<TIndex>::Type TAlphabet;
+    typedef String<TAlphabet> TString;
 
 	TText text;
-	generateText(text);
+	generateText(text, 1000);
+
+	CharString tempFilename = SEQAN_TEMP_FILENAME();
 
     TIndex indexSave(text);
     indexCreate(indexSave);
-    save(indexSave, "index-test");
+    save(indexSave, toCString(tempFilename));
 
     TIndex indexOpen;
-    open(indexOpen, "index-test");
+    open(indexOpen, toCString(tempFilename));
 
-    SEQAN_ASSERT(indexOpen == indexSave);
+    Finder<TIndex> saveFinder(indexSave);
+    Finder<TIndex> openFinder(indexOpen);
+
+    TString pattern = "C";
+
+    for(unsigned i = 0; i < length(pattern); ++i)
+    {  
+        clear(saveFinder);
+        clear(openFinder);
+
+        while(find(saveFinder, pattern))
+        {
+            SEQAN_ASSERT(find(openFinder, pattern));
+            SEQAN_ASSERT_EQ(position(openFinder), position(saveFinder));
+        }
+        SEQAN_ASSERT_NOT(find(openFinder, pattern));
+    }
 }
 
 // A test for strings.
@@ -593,10 +629,10 @@ SEQAN_DEFINE_TEST(test_fm_index_search)
 SEQAN_DEFINE_TEST(test_fm_index_open_save)
 {
     using namespace seqan;
-    {
-        Index<DnaString, FMIndex<WT<FmiDollarSubstituted<> >, void > > dnaTag;
-        fmIndexOpenSave(dnaTag);
-    }
+//     {
+//         Index<DnaString, FMIndex<WT<FmiDollarSubstituted<> >, void > > dnaTag;
+//         fmIndexOpenSave(dnaTag);
+//     }
     {
         Index<StringSet<DnaString>, FMIndex<WT<FmiDollarSubstituted<> >, void > > dnaTag;
         fmIndexOpenSave(dnaTag);
