@@ -37,6 +37,7 @@
 
 #include "test_index_fm.h"
 #include "test_index_fm_rank_support_bit_string.h"
+#include "test_index_fm_rank_support_bit_string_iterator.h"
 #include "test_index_fm_prefix_sum_table.h"
 #include "test_index_fm_right_array_binary_tree.h"
 #include "test_index_fm_right_array_binary_tree_iterator.h"
@@ -62,6 +63,8 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(test_rsbs_equalOperator);
     SEQAN_CALL_TEST(test_rsbs_assignOperator);
     // SEQAN_CALL_TEST(test_rsbs_open_save);
+    
+    SEQAN_CALL_TEST(test_rsbs_iterator_get_value);
 
     SEQAN_CALL_TEST(prefix_sum_table_constructor);
     SEQAN_CALL_TEST(prefix_sum_table_get_alphabet_size);
@@ -145,7 +148,7 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(test_fm_index_find_first_index_);
     SEQAN_CALL_TEST(test_fm_index_get_fibre);
     SEQAN_CALL_TEST(test_fm_index_search);
-    SEQAN_CALL_TEST(test_fm_index_open_save);
+//     SEQAN_CALL_TEST(test_fm_index_open_save);
 
     SEQAN_CALL_TEST(fm_index_iterator_constuctor);
     SEQAN_CALL_TEST(fm_index_iterator_go_down);

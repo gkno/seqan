@@ -1,5 +1,5 @@
 // ==========================================================================
-//                                  fm_index
+//                                    rsbs
 // ==========================================================================
 // Copyright (c) 2006-2011, Knut Reinert, FU Berlin
 // All rights reserved.
@@ -29,37 +29,39 @@
 // DAMAGE.
 //
 // ==========================================================================
-// Author: Jochen Singer <jochen.singer@fu-berlin.de>
-// ==========================================================================
-// Facade header for module sequence.
+// Author: Your Name <your.email@example.net>
 // ==========================================================================
 
-#ifndef EXTRAS_INCLUDE_SEQAN_INDEX_H_
-#define EXTRAS_INCLUDE_SEQAN_INDEX_H_
+#ifndef TEST_INDEX_FM_RANK_SUPPORT_BIT_STRING_ITERATOR_H_
+#define TEST_INDEX_FM_RANK_SUPPORT_BIT_STRING_ITERATOR_H_
 
-// ===========================================================================
-// Prerequisites.
-// ===========================================================================
+using namespace seqan;
 
-#include <seqan/basic.h>
-#include <seqan/file.h>
-#include <seqan/index.h>
+SEQAN_DEFINE_TEST(test_rsbs_iterator_get_value)
+{
+    unsigned length_ = 1000;
+    String<unsigned> controlString;
+    resize(controlString, length_);
 
-// ===========================================================================
-// First Header Group.
-// ===========================================================================
+    Rng<MersenneTwister> rng(SEED);
+    controlString[0] = pickRandomNumber(rng) % 2;
 
-#include <seqan/index/index_fm_rank_support_bit_string.h>
-#include <seqan/index/index_fm_rank_support_bit_string_iterator.h>
-#include <seqan/index/index_fm_sparse_string.h>
-#include <seqan/index/index_fm_compressed_sa.h>
-#include <seqan/index/index_fm_compressed_sa_iterator.h>
-#include <seqan/index/index_fm_prefix_sum_table.h>
-#include <seqan/index/index_fm_lf_table.h>
-#include <seqan/index/index_fm_right_array_binary_tree.h>
-#include <seqan/index/index_fm_right_array_binary_tree_iterator.h>
-#include <seqan/index/index_fm_wavelet_tree.h>
-#include <seqan/index/index_fm.h>
-#include <seqan/index/index_fm_stree.h>
+    for (unsigned i = 1; i < length_; ++i)
+    {
+        controlString[i] = pickRandomNumber(rng) % 2;
+    }
 
-#endif  // SANDBOX_SINGER_INCLUDE_SEQAN_FM_INDEX_H_
+    typedef RankSupportBitString<void> TRankSupportBitString;
+    TRankSupportBitString bitString(controlString);
+    Iterator<RankSupportBitString<void> >::Type defaultIt = begin(bitString);
+
+    for (unsigned i = 0; i < length(bitString); ++i)
+    {
+        SEQAN_ASSERT(getBit(bitString, i) == getValue(defaultIt));
+        SEQAN_ASSERT(getBit(bitString, i) == getValue(defaultIt, Bit()));
+        SEQAN_ASSERT(getRank(bitString, i) == getValue(defaultIt, Rank()));
+        ++defaultIt;
+    }
+}
+
+#endif  // TEST_INDEX_FM_RANK_SUPPORT_BIT_STRING_H_

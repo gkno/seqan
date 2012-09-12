@@ -166,50 +166,17 @@ struct SparseString
 
     TFibreValueString_              	valueString;
     TFibreIndicatorString               indicatorString;
-    // TODO(singer): get rid of compressionFactor
-    //typename Size<TValueString>::Type   compressionFactor;
 
-    // TODO(singer): get rid of compressionFactor
-//    SparseString(unsigned compressionFactor = 0) :
-      //  compressionFactor(compressionFactor)
-  //  {}
-
-//    inline SparseString & operator=(SparseString const & other)
-//    {
-//        valueString = other.valueString;
-//        indicatorString = other.indicatorString;
-//        compressionFactor = other.compressionFactor;
-//        return *this;
-//    }
-
-   inline bool operator==(const SparseString & b) const
-   {
-       return valueString == b.valueString &&
-              indicatorString == b.indicatorString;// &&
-              //compressionFactor == b.compressionFactor);
-   }
+    inline bool operator==(const SparseString & b) const
+    {
+        return valueString == b.valueString &&
+            indicatorString == b.indicatorString;
+    }
 };
 
 // ==========================================================================
 // Functions
 // ==========================================================================
-
-// TODO(singer): get rid of compressionFactor
-/*
-.Function.assignCompressionFactor
-..summary:Assings the compression factor of the container.
-..signature:assignCompressionFactor(container, value)
-..param.container:The container holding the entries.
-...type:Class.SparseString
-..param.value.
-..include:seqan/index.h
-*/
-// template <typename TFibreValueString, typename TSpec, typename TValue>
-// inline void assignCompressionFactor(SparseString<TFibreValueString, TSpec> & string, TValue value)
-// {
-//     SEQAN_ASSERT_GT_MSG(value, 0u, "The compresssion factor is not acceptable!");
-//     string.compressionFactor = value;
-// }
 
 /*
 .Function.assignValueInValueString_
@@ -252,23 +219,6 @@ inline bool isContained_(SparseString<TFibreValueString, TSpec> const & string, 
     return getBit(getFibre(string, FibreIndicatorString()), pos);
 }
 
-// TODO(singer): remove
-/**
-.Function.getCompressionFactor
-..summary:Returns the compression factor of the container.
-..signature:getCompressionFactor(container)
-..param.container:The container holding the entries.
-...type:Class.SparseString
-..include:seqan/index.h
-*/
-template <typename TFibreValueString, typename TSpec>
-inline typename Size<typename Fibre<SparseString<TFibreValueString, TSpec>, FibreValueString>::Type>::Type
-getCompressionFactor(SparseString<TFibreValueString, TSpec> & string)
-{
-    return length(getFibre(string, FibreIndicatorString())) 
-        / length(getFibre(string, FibreValueString()));
-}
-
 /**
 .Function.getValue
 ..param.object:
@@ -278,16 +228,6 @@ template <typename TFibreValueString, typename TSpec, typename TPos, typename TV
 inline void
 assignValue(SparseString<TFibreValueString, TSpec> & string, TPos pos, TValue value)
 {
-//     if (DefaultValue<SparseString<TFibreValueString, TSpec> >::VALUE)
-//     {
-//         if (isContained_(string, pos))
-//         {
-//             setBit(getFibre(string, FibreIndicatorString()), pos, 0);
-//             updateRanks_(getFibre(string, FibreIndicatorString()), pos);
-//         }
-//         return;
-//     }
-
     if (!isContained_(string, pos))
     {
         setBit(getFibre(string, FibreIndicatorString()), pos, 0);    

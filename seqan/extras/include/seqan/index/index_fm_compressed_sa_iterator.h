@@ -72,20 +72,6 @@ struct Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Rooted>:
     Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Standard>{};
 
 // ==========================================================================
-// template <typename TSparseString, typename TLfTable, typename TSpec, typename TIterSpec>
-// inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, TIterSpec>::Type
-// begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, TIterSpec const & /* dummy */)
-// {
-//     return typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, TIterSpec>::Type(compressedSA, 0);
-// }
-// 
-// template <typename TSparseString, typename TLfTable, typename TSpec, typename TIterSpec>
-// inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, TIterSpec>::Type
-// begin(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, TIterSpec const &/* dummy */)
-// {
-//     return typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, TIterSpec>::Type(compressedSA, 0);
-// }
-
 template <typename TSparseString, typename TLfTable, typename TSpec>
 inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec>, Standard>::Type
 begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA, Standard const & /* dummy */)
@@ -112,20 +98,6 @@ inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Roo
 begin(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, Rooted/* dummy */)
 {
     return typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Rooted>::Type(compressedSA, 0);
-}
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >::Type
-begin(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
-{
-    return begin(compressedSA, Standard());
-}
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const>::Type
-begin(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA)
-{
-     return begin(compressedSA, Standard());
 }
 
 // ==========================================================================
@@ -156,21 +128,6 @@ end(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA, Standard/
 {
     return typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const, Standard>::Type(compressedSA, length(compressedSA));
 }
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> >::Type
-end(CompressedSA<TSparseString, TLfTable, TSpec> & compressedSA)
-{
-    return end(compressedSA, Standard());
-}
-
-template <typename TSparseString, typename TLfTable, typename TSpec>
-inline typename Iterator<CompressedSA<TSparseString, TLfTable, TSpec> const>::Type
-end(CompressedSA<TSparseString, TLfTable, TSpec> const & compressedSA)
-{
-     return end(compressedSA, Standard());
-}
-
 
 }
 #endif // INDEX_FM_COMPRESSED_SA_ITERATOR_H_
