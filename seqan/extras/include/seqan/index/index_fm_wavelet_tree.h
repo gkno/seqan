@@ -883,7 +883,7 @@ inline void waveletTreeCreate(LfTable<WaveletTree<TText, TWaveletTreeSpec>, TPre
 
 template <typename TText, typename TSpec>
 inline bool openDollarInformation(
-    WaveletTree<TText, FmiDollarSubstituted<TSpec> > & tree,
+    WaveletTree<TText, FmiDollarSubstituted<SingleDollar<TSpec> > > & tree,
     const char * fileName,
     int openMode)
 {
@@ -906,7 +906,7 @@ inline bool openDollarInformation(
 
 template <typename TText, typename TSpec>
 inline bool openDollarInformation(
-    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<TSpec> > > const & tree,
+    WaveletTree<TText, FmiDollarSubstituted<MultiDollar<TSpec> > > & tree,
     const char * fileName,
     int openMode)
 {
@@ -964,7 +964,7 @@ inline bool saveDollarInformation(
 }
 template <typename TText, typename TSpec>
 inline bool saveDollarInformation(
-    WaveletTree<TText, FmiDollarSubstituted<TSpec> > const & tree,
+    WaveletTree<TText, FmiDollarSubstituted<SingleDollar<TSpec> > > const & tree,
     const char * fileName,
     int openMode)
 {
