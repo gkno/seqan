@@ -74,7 +74,7 @@ public:
         _reader(0)
 #else  // #if __cplusplus <= 199711L
         // C++11
-        _reader(nullptr)
+        _reader()
 #endif  // #if __cplusplus <= 199711L
     {}
 
