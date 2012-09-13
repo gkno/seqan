@@ -283,6 +283,8 @@ void workVerification(ThreadLocalStorage<MapSingleReads<TMatches, TFragmentStore
 #endif
 
     std::tr1::shared_ptr<TMatches> localMatches(new TMatches());
+    resize(*localMatches, 1);
+    clear(*localMatches);
 
     // Initialize verifier.
     tls.verifier.matches = localMatches.get();
@@ -705,7 +707,10 @@ void _mapSingleReadsParallelToContig(
             atomicMax(leaderWindowsDone, windowsDone);
 
             std::tr1::shared_ptr<THitString> hitsPtr(new THitString()); //TODO (weese:) Could we reuse memory here?
-            std::swap(*hitsPtr, getWindowFindHits(tls.filterFinder));
+            resize(*hitsPtr, 1);
+            clear(*hitsPtr);
+            using std::swap;
+            swap(*hitsPtr, getWindowFindHits(tls.filterFinder));
             THitString & hits = *hitsPtr;
             tls.options.countFiltration += length(hits);
             // std::cerr << "  HITS: " << length(hits) << std::endl;
@@ -767,7 +772,7 @@ void _mapSingleReadsParallelToContig(
             String<SingleVerificationResult<TMatches> > localMatches;
 // SEQAN_OMP_PRAGMA(critical)
 //             std::cerr << "thread " << omp_get_thread_num() << " SWAPPING " << &tls.verificationResults.localMatches << "\n";
-            std::swap(localMatches, tls.verificationResults.localMatches);
+            swap(localMatches, tls.verificationResults.localMatches);
             omp_unset_lock(&tls.verificationResults.lock->lock_);
             // Don't compact matches if in configured 'block fraction' of genome.
             size_t hstckLen = tls.filterFinder.endPos - tls.filterFinder.startPos;
@@ -921,8 +926,9 @@ writeBackToGlobalStore(
         TMatchesIterator itEnd = end(threadLocalStorages[i].matches, Standard());
         for (; it != itEnd; ++it, ++oldSize)
         {
+            using std::swap;
             if (isSingleEnd && it->orientation == 'R')
-                std::swap(it->beginPos, it->endPos);
+                swap(it->beginPos, it->endPos);
             target.alignedReadStore[oldSize] = TAlignedReadStoreElem(oldSize, it->readId, it->contigId, it->beginPos, it->endPos);
             if (!isSingleEnd)
                 SEQAN_ASSERT_NEQ(it->pairMatchId, Value<TMatches>::Type::INVALID_ID);

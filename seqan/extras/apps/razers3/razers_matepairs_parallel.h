@@ -227,6 +227,7 @@ buildHitSplittersAndPartitionHits(String<size_t> & splitters, THitString & hitSt
     }
 
     // Finally, write out results.
+    using std::swap;
     swap(hitString, buffer);
 
     // std::cout << "SPLITTERS: ";
@@ -482,6 +483,8 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
 
     // Allocate fragmentstore for job's results.
     TMatches * localMatches = new TMatches();
+    resize(*localMatches, 1);
+    clear(*localMatches);
 
     // Thread-wide offset for reads.
     unsigned threadIdOffset = splitters[job.threadId];
@@ -871,6 +874,7 @@ void workVerification(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore
             {
                 appendValue(*localMatches, fL.i2, Generous());
                 appendValue(*localMatches, mR, Generous());
+                SEQAN_ASSERT_EQ(length(*localMatches) % 2, 0u);
 //                        if (pref == s) {
 //                            std::cerr << "ADDED" << std::endl;
 //                            std::cerr << "  (" << mR.beginPos << ", " << mR.endPos << ")" << std::endl;
@@ -914,14 +918,17 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFi
 
     for (unsigned i = 0; i < length(verificationHits); ++i)
     {
+        SEQAN_ASSERT_EQ(length(*verificationHits[i]) % 2, 0u);
         TMatches * bucket = verificationHits[i];
         newSize += length(*bucket);
     }
 
     // Write back all matches from verification to the block local store.
     reserve(tls.matches, newSize, Generous());
+    SEQAN_ASSERT_EQ(length(tls.matches) % 2, 0u);
     for (unsigned i = 0; i < length(verificationHits); ++i)
         append(tls.matches, *verificationHits[i]);
+    SEQAN_ASSERT_EQ(length(tls.matches) % 2, 0u);
 
 #ifdef RAZERS_DEFER_COMPACTION
     (void) dontCompact;
@@ -933,9 +940,11 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFi
     TIterator it = itBegin;
     for (; it != itEnd; ++it)
     {
-        // if (it->orientation == '-') continue;  // Skip masked reads.
-        // if (it->isRegistered) continue;
-        // it->isRegistered = true;
+        if (it->orientation == '-')
+            continue;  // Skip masked reads.
+        if (it->isRegistered)
+            continue;
+        it->isRegistered = true;
         registerRead(*tls.matchFilter, it->readId / 2, it->pairScore);
 
 #if SEQAN_ENABLE_DEBUG
@@ -948,7 +957,8 @@ writeBackToLocal(ThreadLocalStorage<MapPairedReads<TMatches, TFragmentStore, TFi
     unsigned disabled = 0;
     for (it = itBegin; it != itEnd; ++it, ++it)
     {
-        // if (it->orientation == '-') continue;  // Skip masked reads.
+        if (it->orientation == '-')
+            continue;  // Skip masked reads.
         disabled += processRead(*tls.matchFilter, it->readId / 2);
     }
     if (tls.options._debugLevel >= 2)
@@ -1243,6 +1253,7 @@ void _mapMatePairReadsParallel(
             //     std::cerr << "\nPOSITION       \t" << tls.filterFinderL.curPos << "\t" << tls.filterFinderR.curPos << std::endl;
             if (length(getWindowFindHits(tls.filterFinderL)) > 0u || length(getWindowFindHits(tls.filterFinderR)) > 0u)
             {
+                using std::swap;
                 String<TVerificationJob> jobs;
 
                 // Update previous left hits and splitters.
@@ -1250,10 +1261,12 @@ void _mapMatePairReadsParallel(
                 swap(previousLeftHitsSplitters, leftHitsSplitters);
                 // Update new left hits and splitters.
                 leftHits.reset(new THitString());
-                std::swap(*leftHits, getWindowFindHits(tls.filterFinderL));
+                resize(*leftHits, 1);
+                clear(*leftHits);
+                swap(*leftHits, getWindowFindHits(tls.filterFinderL));
                 buildHitSplittersAndPartitionHits(leftHitsSplitters, *leftHits, options.maxVerificationPackageCount, length(indexText(host(filterPatternL))));
                 rightHits.reset(new THitString());
-                std::swap(*rightHits, getWindowFindHits(tls.filterFinderR));
+                swap(*rightHits, getWindowFindHits(tls.filterFinderR));
                 buildHitSplittersAndPartitionHits(rightHitsSplitters, *rightHits, options.maxVerificationPackageCount, length(host(filterPatternL)));
 
                 for (unsigned i = 0; i < options.maxVerificationPackageCount; ++i)
@@ -1289,7 +1302,8 @@ void _mapMatePairReadsParallel(
             // First, swap out the current set of local stores from the verification results.
             omp_set_lock(&tls.verificationResults.lock->lock_);
             String<TMatches *> localMatches;
-            std::swap(localMatches, tls.verificationResults.localMatches);
+            using std::swap;
+            swap(localMatches, tls.verificationResults.localMatches);
             omp_unset_lock(&tls.verificationResults.lock->lock_);
             // Don't compact matches if in configured 'block fraction' of genome.
             size_t hstckLen = filterFinderR.endPos - filterFinderR.startPos;
