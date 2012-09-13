@@ -380,7 +380,7 @@ getName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 
 template <typename TFragmentStore, typename TSpec, typename TName>
 inline typename GetValue<typename TFragmentStore::TAnnotationNameStore>::Type
-setName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it, TName & name)
+setName(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it, TName const & name)
 {
 	if (length(it.store->annotationNameStore) <= it._id)
 		resize(it.store->annotationNameStore, it._id + 1);
