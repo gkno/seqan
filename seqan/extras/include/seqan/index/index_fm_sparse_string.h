@@ -58,7 +58,7 @@ struct Value<SparseString<TFibreValueString, TSpec> >
 template <typename TFibreValueString, typename TSpec>
 struct Value<SparseString<TFibreValueString, TSpec> const>
 {
-    typedef typename Value<TFibreValueString>::Type const Type;
+    typedef typename Value<TFibreValueString>::Type Type;
 };
 
 template <typename TFibreValueString, typename TSpec>

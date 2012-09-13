@@ -66,13 +66,15 @@ struct Fibre<CompressedSA<TSparseString, TLfTable, TSpec> const, FibreSparseStri
 template <typename TSparseString, typename TLfTable, typename TSpec>
 struct Reference<CompressedSA<TSparseString, TLfTable, TSpec> >
 {
+    // TODO(singer): We actually need a proxy here.
     typedef typename Value<CompressedSA<TSparseString, TLfTable, TSpec> >::Type Type;
 };
 
 template <typename TSparseString, typename TLfTable, typename TSpec>
 struct Reference<const CompressedSA<TSparseString, TLfTable, TSpec> >
 {
-    typedef typename Value<CompressedSA<TSparseString, TLfTable, TSpec> >::Type const Type;
+    // TODO(singer): We actually need a proxy here.
+    typedef typename Value<CompressedSA<TSparseString, TLfTable, TSpec> >::Type /*const*/ Type;
 };
 
 template <typename TSparseString, typename TLfTable, typename TSpec>

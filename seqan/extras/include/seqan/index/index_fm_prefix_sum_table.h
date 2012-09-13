@@ -106,7 +106,7 @@ template <typename TChar, typename TSpec>
 struct CharacterValue<PrefixSumTable<TChar, TSpec> const>
 {
     typedef typename MakeUnsigned<TChar>::Type TUChar;
-    typedef TUChar const Type;
+    typedef TUChar Type;
 };
 
 template <typename TChar, typename TSpec>
