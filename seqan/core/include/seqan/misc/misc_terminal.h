@@ -179,6 +179,9 @@ inline bool getTerminalSize(unsigned & cols, unsigned & rows)
 inline bool getTerminalSize(unsigned & cols, unsigned & rows)
 {
     struct winsize w;
+    w.ws_row = 0;
+    w.ws_col = 0;
+
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
     rows = w.ws_row;
