@@ -103,7 +103,7 @@ public:
 // ----------------------------------------------------------------------------
 
 SamReader_::SamReader_(CharString const & filename) :
-    XamReader_(filename), _stream(0), _reader(0)
+    XamReader_(filename), _stream(0), _reader()
 {
     this->open(_filename);
 }
