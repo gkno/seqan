@@ -87,9 +87,9 @@ struct VertexFmi
 template < typename TText, typename TOccSpec, typename TIndexSpec>
 struct VertexDescriptor<Index<TText, FMIndex<TOccSpec, TIndexSpec> > >
 {
-	typedef typename Value<TText>::Type                                                     TAlphabet;
-    typedef Index<TText,FMIndex<TOccSpec, TIndexSpec> >    TIndex;
-    typedef typename Size<TIndex>::Type                                                     TSize;
+    typedef Index<TText,FMIndex<TOccSpec, TIndexSpec> >     TIndex;
+	typedef typename Value<TIndex>::Type                    TAlphabet;
+    typedef typename Size<TIndex>::Type                     TSize;
 
     typedef VertexFmi<TAlphabet, TSize> Type;
 };
