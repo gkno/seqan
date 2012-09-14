@@ -2,13 +2,13 @@
 #
 # Output generation script for snp_store
 
-SNP_STORE=../../../../build/Debug/core/apps/snp_store/snp_store
+SNP_STORE=../../../../build/Release/core/apps/snp_store/snp_store
 
 # ============================================================
 # First Section
 # ============================================================
 
-genome=human-chr22-inf2.fa 
+genome=human-chr22-inf2.fa
 readsGff=human-reads2.gff
 readsSam=human-reads2.sam
 

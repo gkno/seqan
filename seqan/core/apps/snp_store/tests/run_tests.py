@@ -46,6 +46,15 @@ def main(source_base, binary_base):
     # was generated in generate_outputs.sh.
     conf_list = []
 
+    # We prepare a list of transforms to apply to the output files.  This is
+    # used to strip the input/output paths from the programs' output to
+    # make it more canonical and host independent.
+    ph.outFile('-')  # To ensure that the out path is set.
+    transforms = [
+        app_tests.RegexpReplaceTransform("#\.\./.*snp_store", "snp_store"),
+        app_tests.RegexpReplaceTransform("#/.*snp_store", "snp_store"),
+        ]
+
     # ============================================================
     # First Section.
     # ============================================================
@@ -62,12 +71,13 @@ def main(source_base, binary_base):
               '-o', ph.outFile('snps_default.out')],
         to_diff=[(ph.inFile('snp_store_default.stdout'),
                   ph.outFile('snp_store_default.stdout')),
-#                 (ph.inFile('snps_default.out'),
-#                  ph.outFile('snps_default.out')),
+                 (ph.inFile('snps_default.out'),
+                  ph.outFile('snps_default.out'),
+                  transforms),
                  (ph.inFile('indels_default.out'),
-                  ph.outFile('indels_default.out'))])
+                  ph.outFile('indels_default.out',))])
     conf_list.append(conf)
-    
+
     # test 2
     conf = app_tests.TestConf(
         program=path_to_program,
@@ -78,9 +88,10 @@ def main(source_base, binary_base):
               '-id', ph.outFile('indels_realign.out'),
               '-o', ph.outFile('snps_realign.out')],
         to_diff=[(ph.inFile('snp_store_realign.stdout'),
-                 ph.outFile('snp_store_realign.stdout')),
-#                 (ph.inFile('snps_realign.out'),
-#                  ph.outFile('snps_realign.out')),
+                  ph.outFile('snp_store_realign.stdout')),
+                 (ph.inFile('snps_realign.out'),
+                  ph.outFile('snps_realign.out'),
+                  transforms),
                  (ph.inFile('indels_realign.out'),
                   ph.outFile('indels_realign.out'))])
     conf_list.append(conf)
@@ -96,13 +107,12 @@ def main(source_base, binary_base):
               '-o', ph.outFile('snps_realign_m0mp1oa.out')],
         to_diff=[(ph.inFile('snp_store_realign_m0mp1oa.stdout'),
                   ph.outFile('snp_store_realign_m0mp1oa.stdout')),
-#                 (ph.inFile('snps_realign_m0mp1oa.out'),
-#                  ph.outFile('snps_realign_m0mp1oa.out')),
+                 (ph.inFile('snps_realign_m0mp1oa.out'),
+                  ph.outFile('snps_realign_m0mp1oa.out'),
+                  transforms),
                  (ph.inFile('indels_realign_m0mp1oa.out'),
                   ph.outFile('indels_realign_m0mp1oa.out'))])
     conf_list.append(conf)
-
-
 
     # ============================================================
     # Execute the tests.
