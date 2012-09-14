@@ -2579,6 +2579,7 @@ void dumpVariantsRealignBatchWrap(
         TContigPos groupEndPos = _max((*matchIt).endPos,(*matchIt).beginPos);
         TContigPos groupStartPos = _min((*matchIt).endPos,(*matchIt).beginPos);
 
+        // Translate coordinates to group-local ones.
         TContigPos groupStartCoordLocal = _max(0,(int)groupStartPos-options.realignAddBorder);
     
         int indelReadCount = 0; // how many reads have indels in the current group

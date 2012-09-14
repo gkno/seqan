@@ -863,9 +863,9 @@ int detectSNPs(
                 ::std::cout << "Sequence number " << i << " window " << currentWindowBegin << ".." << currentWindowEnd << "\n";
             
             TFragmentStore fragmentStore;  
-            TReadCounts readCounts;
-            TReadClips readClips;
-            TReadCigars readCigars; // currently only stored for split-mapped reads
+            TReadCounts readCounts;  // Count number of reads that are identical to the given one. Useful for micro RNA data where there were millions of identical reads. Must be in GFF input, not supported for SAM input.
+            TReadClips readClips;  // Soft clipping information and/or clipping information from GFF/SAM tag. Clipping is postponed after pileup correction.
+            TReadCigars readCigars; // Currently only stored for split-mapped reads. Split-mapped reads need special handling, especially for realignment.
             
             // add the matches that were overlapping with this and the last window (copied in order to avoid 2 x makeGlobal)
             if(!empty(tmpMatches))
@@ -932,7 +932,7 @@ int detectSNPs(
                 // store average quality of each read
                 addReadQualityToMatches(fragmentStore,sizeBefore,(unsigned)length(fragmentStore.alignedReadStore),options);
                 
-                // do pile up correction if lane-based
+                // do pile up correction if lane-based. lane-specific pileup correction not really used
                 if(options.maxPile != 0 && options.laneSpecificMaxPile) 
                     applyPileupCorrection(fragmentStore,sizeBefore,(unsigned)length(fragmentStore.alignedReadStore),options);
                 
