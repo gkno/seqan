@@ -381,22 +381,12 @@ inline bool _goDownString(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VST
                         TString const & string)
 {
     typedef Index<TText, FMIndex<TOccSpec, CompressText> >      TIndex;
-    typedef typename Value<TIndex>::Type                         TAlphabet;
+    typedef typename Value<TIndex>::Type                        TAlphabet;
     typedef typename Iterator<TString const, Standard>::Type    TStringIter;
 
-    TStringIter stringIt = end(string);
-    while(begin(string, Standard()) != stringIt)
-    {
-        --stringIt;
+    for (TStringIter stringIt = begin(string, Standard()); stringIt != end(string, Standard()); ++stringIt)
         if (!goDown(it, value(stringIt)))
             return false;
-    }
-    
-//     for (TStringIter stringIt = --end(string, Standard()); stringIt != --begin(stringIt); --stringIt)
-//     {
-//         if (!goDown(it, value(stringIt)))
-//             return false;
-//     }
 
     return true;
 }
@@ -593,5 +583,13 @@ repLength(TIndex const & /*tag*/, VertexFmi<TAlphabet, TSize> const &vDesc)
 {
 	return vDesc.repLen;
 }
+
+template < typename TText, typename TOccSpec, typename TSpec>
+inline typename Infix< typename Fibre<Index<TText, FMIndex<TOccSpec, CompressText> >, FibreText>::Type const >::Type
+representative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it)
+{
+    return infixWithLength(it.representative, 0, repLength(it));
+}
+
 }
 #endif  // INDEX_FM_STREE_H_
