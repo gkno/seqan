@@ -50,7 +50,6 @@
 
 SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
 {
-    
     SEQAN_CALL_TEST(test_rsbs_defaultConstructor);
     SEQAN_CALL_TEST(test_rsbs_resize);
     SEQAN_CALL_TEST(test_rsbs_getBuPos);
@@ -153,14 +152,14 @@ SEQAN_BEGIN_TESTSUITE(test_fm_index_beta)
     SEQAN_CALL_TEST(test_fm_index_search);
     SEQAN_CALL_TEST(test_fm_index_open_save);
 
-    SEQAN_CALL_TEST(fm_index_iterator_constuctor);
-    SEQAN_CALL_TEST(fm_index_iterator_go_down);
-    SEQAN_CALL_TEST(fm_index_iterator_is_leaf);
-    SEQAN_CALL_TEST(fm_index_iterator_go_right);
-    SEQAN_CALL_TEST(fm_index_iterator_go_up);
-    SEQAN_CALL_TEST(fm_index_iterator_is_root);
-    SEQAN_CALL_TEST(fm_index_iterator_count_occurrences);
-    SEQAN_CALL_TEST(fm_index_iterator_range);
+//     SEQAN_CALL_TEST(fm_index_iterator_constuctor);
+//     SEQAN_CALL_TEST(fm_index_iterator_go_down);
+//     SEQAN_CALL_TEST(fm_index_iterator_is_leaf);
+//     SEQAN_CALL_TEST(fm_index_iterator_go_right);
+//     SEQAN_CALL_TEST(fm_index_iterator_go_up);
+//     SEQAN_CALL_TEST(fm_index_iterator_is_root);
+//     SEQAN_CALL_TEST(fm_index_iterator_count_occurrences);
+//     SEQAN_CALL_TEST(fm_index_iterator_range);
 }
 SEQAN_END_TESTSUITE
 
