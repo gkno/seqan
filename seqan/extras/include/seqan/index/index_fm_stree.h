@@ -144,6 +144,7 @@ public:
         index(&_index)
     {
         _indexRequireTopDownIteration(_index);
+        _initRepresentative(*this);
         goRoot(*this);
     }
 };
@@ -210,7 +211,7 @@ template <typename TText, typename TOccSpec, typename TIndexSpec, typename TSpec
 inline void clear(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &it)
 {
     _clear(it);
-    clear(it.representative);
+    clear(_getRepresentative(it));
 }
 
 // ==========================================================================
@@ -302,6 +303,29 @@ _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec,TIndexSpec> >, VSTree<TSpec> >
     return true;
 }
 
+template < typename TText, typename TOccSpec, typename TSpec >
+inline void _initRepresentative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &) {}
+
+template < typename TText, typename TStringSetSpec, typename TOccSpec, typename TIndexSpec, typename TSpec >
+inline void _initRepresentative(Iter<Index<StringSet<TText, TStringSetSpec>, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &it)
+{
+    appendValue(it.representative, TText());
+}
+
+template < typename TText, typename TOccSpec, typename TSpec >
+inline typename Reference<TText>::Type
+_getRepresentative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > const &it)
+{
+    return it.representative;
+}
+
+template < typename TText, typename TStringSetSpec, typename TOccSpec, typename TSpec >
+inline typename Reference<TText>::Type
+_getRepresentative(Iter<Index<StringSet<TText, TStringSetSpec>, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > const &it)
+{
+    return back(it.representative);
+}
+
 template < typename TText, typename TOccSpec, typename TSpec, typename TIndexSpec, typename TChar >
 void _storeCharacter(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<TopDown<TSpec> > > /*tag*/,
                      TChar const /*tag*/) {}
@@ -310,7 +334,7 @@ template < typename TText, typename TOccSpec, typename TSpec, typename TChar >
 void _storeCharacter(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it,
                      TChar const c)
 {
-    appendValue(it.representative, c);
+    appendValue(_getRepresentative(it), c);
 }
 
 // ==========================================================================
@@ -352,7 +376,7 @@ inline bool _goDownChar(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VST
 
     if (_getNodeByChar(it, character))
     {
-        appendValue(it.representative, character);
+        _storeCharacter(it, character);
         return true;
     }
     return false;
@@ -475,7 +499,7 @@ void _eraseCharacter(Iter<Index<TText, FMIndex<TOccSpec, TIndexSpec> >, VSTree<T
 template < typename TText, typename TOccSpec, typename TSpec>
 void _eraseCharacter(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it)
 {
-    resize(it.representative, value(it).repLen - 1);
+    resize(_getRepresentative(it), value(it).repLen - 1);
 } 
 
 // ==========================================================================
@@ -588,7 +612,7 @@ template < typename TText, typename TOccSpec, typename TSpec>
 inline typename Infix< typename Fibre<Index<TText, FMIndex<TOccSpec, CompressText> >, FibreText>::Type const >::Type
 representative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it)
 {
-    return infixWithLength(it.representative, 0, repLength(it));
+    return infixWithLength(_getRepresentative(it), 0, repLength(it));
 }
 
 }
