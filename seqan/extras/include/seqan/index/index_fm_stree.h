@@ -306,22 +306,22 @@ _getNodeByChar(Iter<Index<TText, FMIndex<TOccSpec,TIndexSpec> >, VSTree<TSpec> >
 template < typename TText, typename TOccSpec, typename TSpec >
 inline void _initRepresentative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &) {}
 
-template < typename TText, typename TStringSetSpec, typename TOccSpec, typename TIndexSpec, typename TSpec >
+template < typename TText, typename TStringSetSpec, typename TOccSpec, typename TSpec >
 inline void _initRepresentative(Iter<Index<StringSet<TText, TStringSetSpec>, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &it)
 {
-    appendValue(it.representative, TText());
+    appendValue(it.representative, TText(), Exact());
 }
 
 template < typename TText, typename TOccSpec, typename TSpec >
-inline typename Reference<TText>::Type
-_getRepresentative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > const &it)
+inline TText &
+_getRepresentative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &it)
 {
     return it.representative;
 }
 
 template < typename TText, typename TStringSetSpec, typename TOccSpec, typename TSpec >
-inline typename Reference<TText>::Type
-_getRepresentative(Iter<Index<StringSet<TText, TStringSetSpec>, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > const &it)
+inline TText &
+_getRepresentative(Iter<Index<StringSet<TText, TStringSetSpec>, FMIndex<TOccSpec, CompressText> >, VSTree<TSpec> > &it)
 {
     return back(it.representative);
 }
