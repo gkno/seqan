@@ -608,6 +608,20 @@ repLength(TIndex const & /*tag*/, VertexFmi<TAlphabet, TSize> const &vDesc)
 	return vDesc.repLen;
 }
 
+template < typename TText, typename TOccSpec, typename TCompression, typename TSpec>
+inline ModifiedString<typename Fibre<Index<TText, FMIndex<TOccSpec, TCompression> >, FibreText>::Type, ModReverse>
+pathLabel(Iter<Index<TText, FMIndex<TOccSpec, TCompression> >, VSTree<TopDown<TSpec> > > &it)
+{
+    return ModifiedString<typename Fibre<Index<TText, FMIndex<TOccSpec, TCompression> >, FibreText>::Type, ModReverse >(representative(it));
+}
+
+template < typename TText, typename TOccSpec, typename TSpec>
+inline typename Infix< typename Fibre<Index<TText, FMIndex<TOccSpec, CompressText> >, FibreText>::Type const >::Type
+pathLabel(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it)
+{
+    return infixWithLength(it.representative, 0, repLength(it));
+}
+
 template < typename TText, typename TOccSpec, typename TSpec>
 inline typename Infix< typename Fibre<Index<TText, FMIndex<TOccSpec, CompressText> >, FibreText>::Type const >::Type
 representative(Iter<Index<TText, FMIndex<TOccSpec, CompressText> >, VSTree<TopDown<TSpec> > > &it)
