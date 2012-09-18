@@ -190,7 +190,7 @@ inline bool createLfTable(LfTable<WaveletTree<TText, FmiDollarSubstituted<TDolla
     determineDollarSubstitute_(lfTable.prefixSumTable, dollarSub);
 
     String<TAlphabet> bwt;
-    TDollarPos dollarPos;
+    TDollarPos dollarPos = 0;
     resize(bwt, computeBwtLength_(text));
     createBwTable_(bwt, dollarPos, text, sa, dollarSub);
 
