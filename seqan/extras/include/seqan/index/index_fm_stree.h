@@ -140,6 +140,8 @@ public:
     // pseudo history stack (to go up at most one node)
     TVertexDesc		_parentDesc;
 
+    Iter() {}
+    
     Iter(TIndex &_index):
         index(&_index)
     {
@@ -164,6 +166,8 @@ public:
 
     TStack			history;	// contains all previously visited intervals (allows to go up)
 
+    Iter() {}
+    
     Iter(TIndex &_index):
         TBase(_index) {}
 
