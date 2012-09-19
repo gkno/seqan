@@ -90,6 +90,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename Set<TValue>::Type	charSet;
 //____________________________________________________________________________
 
+        Iter() {}
+        
 		Iter(TSTree &_tree):
 			TBase(_tree),
 			minLength(1)
@@ -180,6 +182,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename Set<TValue>::Type	charSet;
 //____________________________________________________________________________
 
+        Iter() {}
+        
 		Iter(TIndex &_index):
 			TBase(_index),
 			minLength(1),
@@ -384,6 +388,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool			canMerge;	// is false, if parent node appears after its first child on stack
 //____________________________________________________________________________
 
+        Iter() {}
+        
 		Iter(TSTree &_index):
 			TBase(_index, MinimalCtor()),
 			minLength(1),
@@ -727,6 +733,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		Iter<TSTree, VSTree<BottomUp<MaxRepeats> > > const *maxIt;
 
+        Iter() {}
+        
 		inline Iter():
 			childPtr(0), parentPtr(0),
 			_atEnd(true),

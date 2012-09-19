@@ -116,6 +116,8 @@ The iterator starts in the root node by default.
 
 //____________________________________________________________________________
 
+        Iter() {}
+        
 		Iter(TIndex &_index):
 			index(&_index)
 		{
@@ -216,6 +218,8 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 //____________________________________________________________________________
 
+        Iter() {}
+
 		Iter(TIndex &_index):
 			TBase(_index) {}
 
@@ -287,6 +291,8 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 		TStack			history;		// contains all left borders of current l-intervals (== left borders of history intervals)
 
 //____________________________________________________________________________
+
+        Iter() {}
 
 		Iter(TIndex &_index):
 			index(&_index),
