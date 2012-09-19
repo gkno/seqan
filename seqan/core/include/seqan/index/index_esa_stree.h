@@ -2271,19 +2271,13 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		TIndex const &index = container(it);
 
 		// get representative length (see repLength)
-		typename Size<TIndex>::Type lval = _getUp(value(it).range.i2, index);
-		if (!(value(it).range.i1 < lval && lval < value(it).range.i2))
-			lval = _getDown(value(it).range.i1, index);
-		typename Size<TIndex>::Type lcp = lcpAt(lval - 1, index);
-
-		// test suffices in range for empty edges
+		typename Size<TIndex>::Type lcp = repLength(it);
+        
+		// if the last suffix in the interval is larger than the lcp,
+        // not all outgoing edges are empty (uses lex. sorting)
 		TOccs occs = getOccurrences(it);
-		TIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
-		for (; oc != ocEnd; ++oc)
-			if (getSeqOffset(*oc, stringSetLimits(index)) + lcp != 
-				sequenceLength(getSeqNo(*oc, stringSetLimits(index)), index))
-				return false;
-		return true;
+		TIter oc = begin(occs, Standard()) + length(occs) - 1;
+        return getSeqOffset(*oc, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(*oc, stringSetLimits(index)), index);
 	}
 
 	template < typename TIndex, class TSpec >
