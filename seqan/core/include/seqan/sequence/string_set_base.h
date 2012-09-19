@@ -596,7 +596,7 @@ inline void posLocalize(TResult & result, Pair<T1, T2, TPack> const & pos, Strin
 
 template < typename TString, typename TSpec, typename TPosition >
 inline typename Prefix<TString>::Type
-prefix(StringSet< TString, TSpec > & me, TPosition pos)
+prefix(StringSet< TString, TSpec > & me, TPosition const & pos)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -610,7 +610,7 @@ prefix(StringSet< TString, TSpec > & me, TPosition pos)
 
 template < typename TString, typename TSpec, typename TPosition >
 inline typename Prefix<TString const>::Type
-prefix(StringSet< TString, TSpec > const & me, TPosition pos)
+prefix(StringSet< TString, TSpec > const & me, TPosition const & pos)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -631,7 +631,7 @@ prefix(StringSet< TString, TSpec > const & me, TPosition pos)
 
 template < typename TString, typename TSpec, typename TPosition >
 inline typename Suffix<TString>::Type
-suffix(StringSet< TString, TSpec > & me, TPosition pos)
+suffix(StringSet< TString, TSpec > & me, TPosition const & pos)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -645,7 +645,7 @@ suffix(StringSet< TString, TSpec > & me, TPosition pos)
 
 template < typename TString, typename TSpec, typename TPosition >
 inline typename Suffix<TString const>::Type
-suffix(StringSet< TString, TSpec > const & me, TPosition pos)
+suffix(StringSet< TString, TSpec > const & me, TPosition const & pos)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -666,7 +666,7 @@ suffix(StringSet< TString, TSpec > const & me, TPosition pos)
 
 template < typename TString, typename TSpec, typename TPosition, typename TSize >
 inline typename Infix<TString>::Type
-infixWithLength(StringSet< TString, TSpec > & me, TPosition pos, TSize length)
+infixWithLength(StringSet< TString, TSpec > & me, TPosition const & pos, TSize length)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -680,7 +680,7 @@ infixWithLength(StringSet< TString, TSpec > & me, TPosition pos, TSize length)
 
 template < typename TString, typename TSpec, typename TPosition, typename TSize >
 inline typename Infix<TString const>::Type
-infixWithLength(StringSet< TString, TSpec > const & me, TPosition pos, TSize length)
+infixWithLength(StringSet< TString, TSpec > const & me, TPosition const & pos, TSize length)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -701,7 +701,7 @@ infixWithLength(StringSet< TString, TSpec > const & me, TPosition pos, TSize len
 
 template < typename TString, typename TSpec, typename TPosBegin, typename TPosEnd >
 inline typename Infix<TString>::Type
-infix(StringSet< TString, TSpec > & me, TPosBegin posBegin, TPosEnd posEnd)
+infix(StringSet< TString, TSpec > & me, TPosBegin const & posBegin, TPosEnd const & posEnd)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -716,7 +716,7 @@ infix(StringSet< TString, TSpec > & me, TPosBegin posBegin, TPosEnd posEnd)
 
 template < typename TString, typename TSpec, typename TPosBegin, typename TPosEnd >
 inline typename Infix<TString const>::Type
-infix(StringSet< TString, TSpec > const & me, TPosBegin posBegin, TPosEnd posEnd)
+infix(StringSet< TString, TSpec > const & me, TPosBegin const & posBegin, TPosEnd const & posEnd)
 {
     typedef StringSet<TString, TSpec>               TStringSet;
     typedef typename Size<TStringSet>::Type         TSetSize;
@@ -734,11 +734,11 @@ infix(StringSet< TString, TSpec > const & me, TPosBegin posBegin, TPosEnd posEnd
 // --------------------------------------------------------------------------
 
 template <typename TPos, typename TLimitsString>
-inline bool posAtFirstLocal(TPos pos, TLimitsString const & limits) {
+inline bool posAtFirstLocal(TPos const & pos, TLimitsString const & limits) {
     return getSeqOffset(pos, limits) == 0;
 }
 template <typename TPos>
-inline bool posAtFirstLocal(TPos pos) {
+inline bool posAtFirstLocal(TPos const & pos) {
     return getSeqOffset(pos) == 0;
 }
 
