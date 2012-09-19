@@ -80,7 +80,16 @@ namespace SEQAN_NAMESPACE_MAIN
 			_mid = first;
 			goFurther(_mid, count2);
 		}
-			
+
+        inline SearchTreeIterator(TIterator &first, TSize count):
+            first(first),
+            count(count)
+		{
+			count2 = count / 2;
+			_mid = first;
+			goFurther(_mid, count2);
+		}
+
         inline const TValue& operator*() const {
 			return *_mid;
 		}
@@ -508,7 +517,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_lowerBoundSANaive(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
-		TQuery &query)
+		TQuery &query,
+        typename Difference<TText>::Type parentRepLen = 0)
 	{	// find first element not before query, using operator<
 		typedef typename Difference<TText>::Type			TDiff;
 		typedef typename Suffix<TText>::Type				TSuffix;
@@ -528,6 +538,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	t = begin(suf, Standard());
 			TTextIter	tEnd = end(suf, Standard());
 			TQueryIter	q = qBegin;
+            
+            goFurther(t, parentRepLen);
 			while (t != tEnd && q != qEnd && *t == *q) {
 				++t;
 				++q;
@@ -553,7 +565,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_lowerBoundSA(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
-		TQuery &query)
+		TQuery &query,
+        typename Difference<TText>::Type parentRepLen = 0)
 	{	// find first element not before query, using operator<
 		typedef typename Difference<TText>::Type			TDiff;
 		typedef typename Suffix<TText>::Type				TSuffix;
@@ -578,7 +591,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
             TDiff		lcp = _min(lcpLower, lcpUpper);
 
-			goFurther(t, lcp);
+			goFurther(t, lcp + parentRepLen);
 			goFurther(q, lcp);
 			while (t != tEnd && q != qEnd && *t == *q) {
 				++t;
@@ -610,7 +623,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_upperBoundSANaive(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
-		TQuery &query)
+		TQuery &query,
+        typename Difference<TText>::Type parentRepLen = 0)
 	{	// find first element that query is before, using operator<
 		typedef typename Difference<TText>::Type			TDiff;
 		typedef typename Suffix<TText>::Type				TSuffix;
@@ -631,6 +645,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	tEnd = end(suf, Standard());
 			TQueryIter	q = qBegin;
 
+            goFurther(t, parentRepLen);
 			while (t != tEnd && q != qEnd && *t == *q) {
 				++t;
 				++q;
@@ -656,7 +671,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_upperBoundSA(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
-		TQuery &query)
+		TQuery &query,
+        typename Difference<TText>::Type parentRepLen = 0)
 	{	// find first element that query is before, using operator<
 		typedef typename Difference<TText>::Type			TDiff;
 		typedef typename Suffix<TText>::Type				TSuffix;
@@ -680,7 +696,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
             TDiff		lcp = _min(lcpLower, lcpUpper);
 
-			goFurther(t, lcp);
+			goFurther(t, lcp + parentRepLen);
 			goFurther(q, lcp);
 			while (t != tEnd && q != qEnd && *t == *q) {
 				++t;
@@ -712,7 +728,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_equalRangeSANaive(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
-		TQuery &query)
+		TQuery &query,
+        typename Difference<TText>::Type parentRepLen = 0)
 	{	// find range equivalent to query, using operator<
 		typedef typename Difference<TText>::Type			TDiff;
 		typedef typename Suffix<TText>::Type				TSuffix;
@@ -732,6 +749,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TTextIter	t = begin(suf, Standard());
 			TTextIter	tEnd = end(suf, Standard());
 			TQueryIter	q = qBegin;
+            
+            goFurther(t, parentRepLen);
 			while (t != tEnd && q != qEnd && *t == *q) {
 				++t;
 				++q;
@@ -750,8 +769,8 @@ namespace SEQAN_NAMESPACE_MAIN
             // is text == query ?
 			{	// range straddles mid, find each end and return
 				return Pair<TSAIter> (
-					_lowerBoundSANaive(text, treeIter.leftChild(), query),
-					_upperBoundSANaive(text, treeIter.rightChild(), query)
+					_lowerBoundSANaive(text, treeIter.leftChild(), query, parentRepLen),
+					_upperBoundSANaive(text, treeIter.rightChild(), query, parentRepLen)
 				);
 			}
 		}
@@ -770,7 +789,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_equalRangeSA(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
-		TQuery &query)
+		TQuery &query,
+        typename Difference<TText>::Type parentRepLen = 0)
 	{	// find range equivalent to query, using operator<
 		typedef typename Difference<TText>::Type			TDiff;
 		typedef typename Suffix<TText>::Type				TSuffix;
@@ -795,7 +815,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
             TDiff		lcp = _min(lcpLower, lcpUpper);
 
-			goFurther(t, lcp);
+			goFurther(t, lcp + parentRepLen);
 			goFurther(q, lcp);
 			while (t != tEnd && q != qEnd && *t == *q) {
 				++t;
@@ -818,8 +838,8 @@ namespace SEQAN_NAMESPACE_MAIN
             // is text == query ?
 			{	// range straddles mid, find each end and return
 				return Pair<TSAIter> (
-					_lowerBoundSA(text, treeIter.leftChild(), query),
-					_upperBoundSA(text, treeIter.rightChild(), query)
+					_lowerBoundSA(text, treeIter.leftChild(), query, parentRepLen),
+					_upperBoundSA(text, treeIter.rightChild(), query, parentRepLen)
 				);
 			}
 		}
