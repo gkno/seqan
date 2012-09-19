@@ -524,9 +524,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
-		typedef typename Value<TText>::Type                 TValue;
-		typedef typename MakeUnsigned<TValue>::Type         TUValue;
-
 
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
@@ -546,7 +543,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			
             // is text < query ?
-			if (q != qEnd && (t == tEnd || (TUValue)*t < (TUValue)*q)) {
+			if (q != qEnd && (t == tEnd || lessLex(*t, *q))) {
 				treeIter.right();
 			} else {
 				treeIter.left();
@@ -572,9 +569,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
-		typedef typename Value<TText>::Type                 TValue;
-		typedef typename MakeUnsigned<TValue>::Type         TUValue;
-
 
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
@@ -600,7 +594,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			
             // is text < query ?
-			if (q != qEnd && (t == tEnd || (TUValue)*t < (TUValue)*q)) {
+			if (q != qEnd && (t == tEnd || lexLess(*t, *q))) {
 				treeIter.right();
 				lcpLower = lcp;
 			} else {
@@ -630,9 +624,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
-		typedef typename Value<TText>::Type                 TValue;
-		typedef typename MakeUnsigned<TValue>::Type         TUValue;
-
 
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
@@ -652,7 +643,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !((TUValue)*q < (TUValue)*t)) {
+			if (q == qEnd || t == tEnd || !(lexLess(*q, *t))) {
 				treeIter.right();
 			} else {
 				treeIter.left();
@@ -678,8 +669,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
-		typedef typename Value<TText>::Type                 TValue;
-		typedef typename MakeUnsigned<TValue>::Type         TUValue;
 
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
@@ -705,7 +694,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !((TUValue)*q < (TUValue)*t)) {
+			if (q == qEnd || t == tEnd || !(lexLess(*q, *t))) {
 				treeIter.right();
 				lcpLower = lcp;
 			} else {
@@ -736,8 +725,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
 		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
-		typedef typename Value<TText>::Type                 TValue;
-		typedef typename MakeUnsigned<TValue>::Type         TUValue;
 
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
@@ -757,12 +744,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			
             // is text < query ?
-			if (q != qEnd && (t == tEnd || (TUValue)*t < (TUValue)*q))
+			if (q != qEnd && (t == tEnd || lexLess(*t, *q)))
 			{	// range begins above mid, loop
 				treeIter.right();
 			}
             // is text > query ?
-			else if (q != qEnd && (t != tEnd && (TUValue)*q < (TUValue)*t))
+			else if (q != qEnd && (t != tEnd && lexLess(*q, *t)))
 			{	// range in first half, loop
 				treeIter.left();
 			} else
@@ -797,8 +784,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
 		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
-	    typedef typename Value<TText>::Type                 TValue;
-		typedef typename MakeUnsigned<TValue>::Type         TUValue;
 
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
@@ -824,13 +809,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			
             // is text < query ?
-			if (q != qEnd && (t == tEnd || (TUValue)*t < (TUValue)*q))
+			if (q != qEnd && (t == tEnd || lexLess(*t, *q)))
 			{	// range begins above mid, loop
 				treeIter.right();
 				lcpLower = lcp;
 			}
             // is text > query ?
-			else if (q != qEnd && (t != tEnd && (TUValue)*q < (TUValue)*t))
+			else if (q != qEnd && (t != tEnd && lexLess(*q, *t)))
 			{	// range in first half, loop
 				treeIter.left();
 				lcpUpper = lcp;
@@ -1293,7 +1278,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				--i, ++t, ++q, ++lcp) ;
 
             // is text < query ?
-			if (q != qEnd && (t == tEnd || *t < *q)) 
+			if (q != qEnd && (t == tEnd || lexLess(*t, *q))) 
 			{
 				// second half
 				lcpLower = lcp;
@@ -1332,7 +1317,7 @@ namespace SEQAN_NAMESPACE_MAIN
             	 --i, ++t, ++q) ;
 
             // is text < query ?
-			if (q != qEnd && (t == tEnd || *t < *q)) {
+			if (q != qEnd && (t == tEnd || lexLess(*t < *q))) {
 				// second half
 				++first;
 				if (!delta) return first;
@@ -1471,7 +1456,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			lcp += max - i;
 
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !(*q < *t)) 
+			if (q == qEnd || t == tEnd || !(lexxLess(*q, *t))) 
 			{
 				// second half
 				lcpLower = lcp;
@@ -1505,7 +1490,7 @@ namespace SEQAN_NAMESPACE_MAIN
             for(; i && *t == *q; --i, ++t, ++q) ;
 
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !(*q < *t)) {
+			if (q == qEnd || t == tEnd || !(lexLess(*q, *t))) {
 				// second half
 				++first;
 				if (!delta) return first;
@@ -1644,7 +1629,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			lcp += max - i;
 
             // is text < query ?
-			if (q != qEnd && (t == tEnd || !(*q < *t))) {
+			if (q != qEnd && (t == tEnd || !(lexLess(*q, *t)))) {
 				// second half
 				lcpLower = lcp;
 				first = mid;
@@ -1655,7 +1640,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				}
 			} else
             // is text > query ?
-			if (q != qEnd && t != tEnd && (*q < *t)) {
+			if (q != qEnd && t != tEnd && (lexLess(*q, *t))) {
 				// first half
 				lcpUpper = lcp;
 				treeIter.left();
