@@ -774,7 +774,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 			}
 			++i;
 		}
-		return i > 1;
+		return i > 0;
 	}
 
 	template < typename TValue, typename TSpec, typename TSSSpec >
