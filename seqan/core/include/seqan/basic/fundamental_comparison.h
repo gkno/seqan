@@ -109,11 +109,17 @@ struct CompareType
 
 // TODO(holtgrew): What does this do / extend / complement?
 
-template <typename T_>
-inline bool lexLess(const T_& _Left, const T_& Right_)
-{
-    typedef typename MakeUnsigned_<T_>::Type TUnsigned;
-    return (TUnsigned)_Left < (TUnsigned)Right_;
+template <typename TValue>
+inline bool lexLess(TValue const & left, TValue const & right)
+{   // return lexicographical left < right
+    return ordValue(left) < ordValue(right);
+}
+
+template <typename TValue1, typename TValue2>
+inline bool lexLess(TValue1 const & left, TValue2 const & right)
+{   // return lexicographical left < right
+    typedef typename CompareType<TValue1, TValue2>::Type TValue;
+    return lexLess(static_cast<TValue>(left), static_cast<TValue>(right));
 }
 
 }  // namespace seqan

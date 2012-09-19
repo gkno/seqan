@@ -962,13 +962,12 @@ operator>=(SimpleType<TValue, TSpec2> const & left_,
 // ----------------------------------------------------------------------------
 
 // TODO(holtgrew): Remove auto-sequence feature.
-template<typename T_, typename TSpec> 
-inline bool
-lexLess(SimpleType<T_, TSpec> const &_Left, SimpleType<T_, TSpec> const &Right_)
-{   // return lexicographical _Left < Right_
-    typedef typename MakeUnsigned_<T_>::Type TUnsigned;
-    return (TUnsigned)(_Left.value) < (TUnsigned)(Right_.value);
-}
+//template<typename TValue, typename TSpec> 
+//inline bool
+//lexLess(SimpleType<TValue, TSpec> const & left, SimpleType<TValue, TSpec> const & right)
+//{   // return lexicographical left < right
+//    return ordValue(left) < ordValue(right);
+//}
 
 // ----------------------------------------------------------------------------
 // Function operator++()
