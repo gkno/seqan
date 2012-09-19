@@ -65,17 +65,17 @@ namespace seqan
 	{
         SEQAN_ASSERT_MSG(me._coords != NULL, "point not initialized");
         //SEQAN_ASSERT_LEQ_MSG(dim, me._dim, "dim corrupted");
-// Array bounds checking is broken in GCC 4.7.0.  We disable this check here
-// locally for the broken compiler version.  Also see the GCC bug tracker:
+// Array bounds checking is broken in GCC 4.7.0 and at least the current (2012-09-18) 4.8 trunk.  We disable this check
+// here locally for the broken compiler versions.  Also see the GCC bug tracker:
 // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53198
-#if (__GNUC__ == 4) && (__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0)
+#if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-#endif  // #if (__GNUC__ == 4) && (__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0)
+#endif  // #if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
 		return me._coords[ dim ];
-#if (__GNUC__ == 4) && (__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0)
+#if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
 #pragma GCC diagnostic pop
-#endif  // #if (__GNUC__ == 4) && (__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0)
+#endif  // #if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
 	}
 
 	template< typename TFragType, typename TSpec, typename TSize > inline 
