@@ -218,7 +218,9 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 //____________________________________________________________________________
 
-        Iter() {}
+        Iter() :
+            TBase()
+        {}
 
 		Iter(TIndex &_index):
 			TBase(_index) {}
@@ -292,7 +294,9 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 
 //____________________________________________________________________________
 
-        Iter() {}
+        Iter() :
+            lValue(0)
+        {}
 
 		Iter(TIndex &_index):
 			index(&_index),
