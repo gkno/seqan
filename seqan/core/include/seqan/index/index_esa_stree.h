@@ -116,7 +116,7 @@ The iterator starts in the root node by default.
 
 //____________________________________________________________________________
 
-        Iter() {}
+        Iter() : index() {}
         
 		Iter(TIndex &_index):
 			index(&_index)
@@ -295,6 +295,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 //____________________________________________________________________________
 
         Iter() :
+            index(),
             lValue(0)
         {}
 

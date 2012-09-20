@@ -89,6 +89,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSeqSet		seqSet;
 //____________________________________________________________________________
 
+        Iter() :
+            TBase(),
+            minLength(0),
+            seqCount(0)
+        {}
+        
 		Iter(TSTree &_tree):
 			TBase(_tree),
 			minLength(1),
@@ -199,6 +205,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool			canMerge;	// is false, if parent node appears after its first child on stack
 //____________________________________________________________________________
 
+        Iter() :
+            TBase(),
+            minLength(0),
+            minSupport(0),
+            maxSupport(0),
+            canMerge(0)
+        {}
+        
 		Iter(TSTree &_index):
 			TBase(_index, MinimalCtor()),
 			minSupport(countSequences(_index)),
@@ -593,7 +607,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		String<SubState>	subState;
 
-
+        Iter() :
+            mmemIt(),
+            _atEnd(true),
+            seqCount(0)
+        {}
+        
 		inline Iter(Iter<TSTree, VSTree<BottomUp<MultiMems> > > const &_maxIt):
 			mmemIt(&_maxIt),
 			seqCount(countSequences(container(_maxIt)))
