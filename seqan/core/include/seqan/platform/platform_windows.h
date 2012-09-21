@@ -88,9 +88,9 @@ typedef unsigned __int8 __uint8;
 #if _MSC_VER >= 1600
 #include <stdint.h>
 #else
-#if !defined(SEQAN_INCLUDE_BUNDLED_STDINT) || !SEQAN_INCLUDE_BUNDLED_STDINT
+#if !defined(SEQAN_INCLUDE_BUNDLED_STDINT) || SEQAN_INCLUDE_BUNDLED_STDINT
 #include "seqan/platform/windows_stdint.h"
-#endif  //  !defined(SEQAN_INCLUDE_BUNDLED_STDINT) || !SEQAN_INCLUDE_BUNDLED_STDINT
+#endif  // #if !defined(SEQAN_INCLUDE_BUNDLED_STDINT) || SEQAN_INCLUDE_BUNDLED_STDINT
 #endif  // #if _MSC_VER >= 1600
 
 // ==========================================================================
