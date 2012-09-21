@@ -80,9 +80,18 @@ typedef unsigned __int16 __uint16;
 typedef unsigned __int8 __uint8;
 
 // Define ISO C9x compliant integers.
-// TODO(holtgrew): Unconditional inclusion can be dangerous if someone else also has this header.
+//
+// For Visual Studio versions more current than 2010, we can use <stdint.h>.  Otherwise,
+// we have provide our own bundled stdint.h header.  Using this header can be disabled
+// by defining the precompiler variable SEQAN_INCLUDE_BUNDLED_STDINT as 0.
 
+#if _MSC_VER >= 1600
+#include <stdint.h>
+#else
+#if !defined(SEQAN_INCLUDE_BUNDLED_STDINT) || !SEQAN_INCLUDE_BUNDLED_STDINT
 #include "seqan/platform/windows_stdint.h"
+#endif  //  !defined(SEQAN_INCLUDE_BUNDLED_STDINT) || !SEQAN_INCLUDE_BUNDLED_STDINT
+#endif  // #if _MSC_VER >= 1600
 
 // ==========================================================================
 // Define SeqAn Specific Macros.
