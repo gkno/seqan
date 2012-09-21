@@ -524,6 +524,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
@@ -537,7 +538,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
             
             goFurther(t, parentRepLen);
-			while (t != tEnd && q != qEnd && *t == *q) {
+			while (t != tEnd && q != qEnd && ordEqual(*t, convert<TTextAlphabet>(*q))) {
 				++t;
 				++q;
 			}
@@ -569,6 +570,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
@@ -587,14 +589,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			goFurther(t, lcp + parentRepLen);
 			goFurther(q, lcp);
-			while (t != tEnd && q != qEnd && *t == *q) {
+			while (t != tEnd && q != qEnd && ordEqual(*t, convert<TTextAlphabet>(*q))) {
 				++t;
 				++q;
 				++lcp;
 			}
 			
             // is text < query ?
-			if (q != qEnd && (t == tEnd || lexLess(*t, *q))) {
+			if (q != qEnd && (t == tEnd || ordLess(*t, convert<TTextAlphabet>(*q)))) {
 				treeIter.right();
 				lcpLower = lcp;
 			} else {
@@ -624,6 +626,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
@@ -637,13 +640,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
 
             goFurther(t, parentRepLen);
-			while (t != tEnd && q != qEnd && *t == *q) {
+			while (t != tEnd && q != qEnd && ordEqual(*t, convert<TTextAlphabet>(*q))) {
 				++t;
 				++q;
 			}
 			
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !(lexLess(*q, *t))) {
+			if (q == qEnd || t == tEnd || !(ordLess(convert<TTextAlphabet>(*q), *t))) {
 				treeIter.right();
 			} else {
 				treeIter.left();
@@ -669,6 +672,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Suffix<TText>::Type				TSuffix;
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
@@ -687,14 +691,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			goFurther(t, lcp + parentRepLen);
 			goFurther(q, lcp);
-			while (t != tEnd && q != qEnd && *t == *q) {
+			while (t != tEnd && q != qEnd && ordEqual(*t, convert<TTextAlphabet>(*q))) {
 				++t;
 				++q;
 				++lcp;
 			}
 			
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !(lexLess(*q, *t))) {
+			if (q == qEnd || t == tEnd || !(ordLess(convert<TTextAlphabet>(*q), *t))) {
 				treeIter.right();
 				lcpLower = lcp;
 			} else {
@@ -725,6 +729,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
 		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
@@ -738,18 +743,18 @@ namespace SEQAN_NAMESPACE_MAIN
 			TQueryIter	q = qBegin;
             
             goFurther(t, parentRepLen);
-			while (t != tEnd && q != qEnd && *t == *q) {
+			while (t != tEnd && q != qEnd && ordEqual(*t, convert<TTextAlphabet>(*q))) {
 				++t;
 				++q;
 			}
 			
             // is text < query ?
-			if (q != qEnd && (t == tEnd || lexLess(*t, *q)))
+			if (q != qEnd && (t == tEnd || ordLess(*t, convert<TTextAlphabet>(*q))))
 			{	// range begins above mid, loop
 				treeIter.right();
 			}
             // is text > query ?
-			else if (q != qEnd && (t != tEnd && lexLess(*q, *t)))
+			else if (q != qEnd && (t != tEnd && ordLess(convert<TTextAlphabet>(*q), *t)))
 			{	// range in first half, loop
 				treeIter.left();
 			} else
@@ -784,6 +789,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
 		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
@@ -802,20 +808,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			goFurther(t, lcp + parentRepLen);
 			goFurther(q, lcp);
-			while (t != tEnd && q != qEnd && *t == *q) {
+			while (t != tEnd && q != qEnd && ordEqual(*t, convert<TTextAlphabet>(*q))) {
 				++t;
 				++q;
 				++lcp;
 			}
 			
             // is text < query ?
-			if (q != qEnd && (t == tEnd || lexLess(*t, *q)))
+			if (q != qEnd && (t == tEnd || ordLess(*t, convert<TTextAlphabet>(*q))))
 			{	// range begins above mid, loop
 				treeIter.right();
 				lcpLower = lcp;
 			}
             // is text > query ?
-			else if (q != qEnd && (t != tEnd && lexLess(*q, *t)))
+			else if (q != qEnd && (t != tEnd && ordLess(convert<TTextAlphabet>(*q), *t)))
 			{	// range in first half, loop
 				treeIter.left();
 				lcpUpper = lcp;
@@ -1172,6 +1178,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
 		typedef SearchTreeIterator< TLCP, TSpec >			TLCPTreeIt;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TDiff delta = length(sa) - 1;
 		TDiff lcp;
@@ -1274,11 +1281,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			goFurther(t, lcp);
 			goFurther(q, lcp);
 			for(TDiff i = _min(difference(t, tEnd), difference(q, qEnd)); 
-				i && *t == *q;
+				i && ordEqual(*t, convert<TTextAlphabet>(*q));
 				--i, ++t, ++q, ++lcp) ;
 
             // is text < query ?
-			if (q != qEnd && (t == tEnd || lexLess(*t, *q))) 
+			if (q != qEnd && (t == tEnd || ordLess(*t, convert<TTextAlphabet>(*q))))
 			{
 				// second half
 				lcpLower = lcp;
@@ -1313,11 +1320,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			goFurther(t, lcp);
 			for(TDiff i = _min(difference(t, tEnd), difference(q, qEnd)); 
-            	i && *t == *q;
+            	i && ordEqual(*t, convert<TTextAlphabet>(*q));
             	 --i, ++t, ++q) ;
 
             // is text < query ?
-			if (q != qEnd && (t == tEnd || lexLess(*t < *q))) {
+			if (q != qEnd && (t == tEnd || ordLess(*t, convert<TTextAlphabet>(*q)))) {
 				// second half
 				++first;
 				if (!delta) return first;
@@ -1372,6 +1379,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
 		typedef SearchTreeIterator< TLCP, TSpec >			TLCPTreeIt;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TDiff delta = length(sa) - 1;
 
@@ -1452,7 +1460,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			goFurther(q, lcp);
 			TDiff max = _min(difference(t, tEnd), difference(q, qEnd));
             TDiff i = max;
-			for(; i && *t == *q; --i, ++t, ++q) ;
+			for(; i && ordEqual(*t, convert<TTextAlphabet>(*q)); --i, ++t, ++q) ;
 			lcp += max - i;
 
             // is text <= query ?
@@ -1487,10 +1495,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			goFurther(t, lcp);
 			TDiff i = _min(difference(t, tEnd), difference(q, qEnd));
-            for(; i && *t == *q; --i, ++t, ++q) ;
+            for(; i && ordEqual(*t, convert<TTextAlphabet>(*q)); --i, ++t, ++q) ;
 
             // is text <= query ?
-			if (q == qEnd || t == tEnd || !(lexLess(*q, *t))) {
+			if (q == qEnd || t == tEnd || !(ordLess(convert<TTextAlphabet>(*q), *t))) {
 				// second half
 				++first;
 				if (!delta) return first;
@@ -1542,6 +1550,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
 		typedef SearchTreeIterator< TLCP, TSpec >			TLCPTreeIt;
 		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+        typedef typename Value<TSuffix>::Type               TTextAlphabet;
 
 		TDiff lcpLower = 0;
 		TDiff lcpUpper = 0;
@@ -1625,11 +1634,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			goFurther(q, lcp);
 			TDiff max = _min(difference(t, tEnd), difference(q, qEnd));
             TDiff i = max;
-			for(; i && *t == *q; --i, ++t, ++q) ;
+			for(; i && ordEqual(*t, convert<TTextAlphabet>(*q)); --i, ++t, ++q) ;
 			lcp += max - i;
 
             // is text < query ?
-			if (q != qEnd && (t == tEnd || !(lexLess(*q, *t)))) {
+			if (q != qEnd && (t == tEnd || !(ordLess(convert<TTextAlphabet>(*q), *t)))) {
 				// second half
 				lcpLower = lcp;
 				first = mid;
@@ -1640,7 +1649,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				}
 			} else
             // is text > query ?
-			if (q != qEnd && t != tEnd && (lexLess(*q, *t))) {
+			if (q != qEnd && t != tEnd && (ordLess(convert<TTextAlphabet>(*q), *t))) {
 				// first half
 				lcpUpper = lcp;
 				treeIter.left();

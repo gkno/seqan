@@ -65,14 +65,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			TIter itB = _begin + b;
 			if (a <= b) {
 				for(; itB != _end; ++itB, ++itA) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return false;
 			} else {
 				for(; itA != _end; ++itA, ++itB) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return true;
 			}
@@ -106,14 +106,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			TIter itBEnd = end(getValue(_text, getSeqNo(b)), Standard());
 			if (itAEnd - itA <= itBEnd - itB) {
 				for(; itA != itAEnd; ++itA, ++itB) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return false;
 			} else {
 				for(; itB != itBEnd; ++itB, ++itA) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return true;
 			}

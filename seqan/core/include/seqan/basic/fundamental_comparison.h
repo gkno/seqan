@@ -43,6 +43,12 @@ namespace seqan {
 // Forwards
 // ============================================================================
 
+// Forwards for Metafunctions and Functions.
+template <typename T> struct ValueSize;
+template <typename T> typename ValueSize<T>::Type valueSize();
+// Forwards for Metafunctions and Functions.
+template <typename TValue> typename ValueSize<TValue>::Type ordValue(TValue const & c);
+
 // ============================================================================
 // Tags, Classes, Enums
 // ============================================================================
@@ -109,17 +115,19 @@ struct CompareType
 
 // TODO(holtgrew): What does this do / extend / complement?
 
+// These functions are shortcuts to provide comparisons based on the same order
+// that is imposed by ordValue
+
 template <typename TValue>
-inline bool lexLess(TValue const & left, TValue const & right)
-{   // return lexicographical left < right
+inline bool ordLess(TValue const & left, TValue const & right)
+{
     return ordValue(left) < ordValue(right);
 }
 
-template <typename TValue1, typename TValue2>
-inline bool lexLess(TValue1 const & left, TValue2 const & right)
-{   // return lexicographical left < right
-    typedef typename CompareType<TValue1, TValue2>::Type TValue;
-    return lexLess(static_cast<TValue>(left), static_cast<TValue>(right));
+template <typename TValue>
+inline bool ordEqual(TValue const & left, TValue const & right)
+{
+    return ordValue(left) == ordValue(right);
 }
 
 }  // namespace seqan

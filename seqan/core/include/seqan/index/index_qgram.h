@@ -604,8 +604,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 				if (itEnd > _end)
 					itEnd = _end;
 				for(; itB != itEnd; ++itB, ++itA) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return false;
 			} else {
@@ -613,8 +613,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 				if (itEnd > _end)
 					itEnd = _end;
 				for(; itA != itEnd; ++itA, ++itB) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return true;
 			}
@@ -652,8 +652,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
                 TIter itQEnd = itA + _q;
                 TIter itEnd = _min(itQEnd, itAEnd);
                 for(; itA < itEnd; ++itA, ++itB) {
-                    if (lexLess(*itA, *itB)) return true;
-                    if (lexLess(*itB, *itA)) return false;
+                    if (ordLess(*itA, *itB)) return true;
+                    if (ordLess(*itB, *itA)) return false;
                 }
                 // if qgram a is shorter than b => a < b
                 if (itA != itQEnd) return true;
@@ -663,8 +663,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
                 TIter itQEnd = itB + _q;
                 TIter itEnd = _min(itQEnd, itBEnd);
                 for(; itB < itEnd; ++itA, ++itB) {
-                    if (lexLess(*itA, *itB)) return true;
-                    if (lexLess(*itB, *itA)) return false;
+                    if (ordLess(*itA, *itB)) return true;
+                    if (ordLess(*itB, *itA)) return false;
                 }
                 // if qgram b is shorter or equal than a => a >= b
                 if (itB != itQEnd) return false;
@@ -723,8 +723,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
                 TIter itQEnd = itA + _q;
                 TIter itEnd = _min(itQEnd, itAEnd);
                 for(; itA < itEnd; ++itA, ++itB) {
-                    if (lexLess(*itA, *itB)) return true;
-                    if (lexLess(*itB, *itA)) return false;
+                    if (ordLess(*itA, *itB)) return true;
+                    if (ordLess(*itB, *itA)) return false;
                 }
                 // if qgram a is shorter than b => a < b
                 if (itA != itQEnd) return true;
@@ -736,8 +736,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
                 TIter itQEnd = itB + _q;
                 TIter itEnd = _min(itQEnd, itBEnd);
                 for(; itB < itEnd; ++itA, ++itB) {
-                    if (lexLess(*itA, *itB)) return true;
-                    if (lexLess(*itB, *itA)) return false;
+                    if (ordLess(*itA, *itB)) return true;
+                    if (ordLess(*itB, *itA)) return false;
                 }
                 // if qgram b is shorter or equal than a => a >= b
                 if (itB != itQEnd) return false;
@@ -780,8 +780,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 
             TIter itEnd = itA + _q;
             for(; itA != itEnd; ++itA, ++itB) {
-                if (lexLess(*itA, *itB)) return true;
-                if (lexLess(*itB, *itA)) return false;
+                if (ordLess(*itA, *itB)) return true;
+                if (ordLess(*itB, *itA)) return false;
             }
 			return a < b;
 		}
@@ -813,8 +813,8 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
             
             TIter itEnd = itA + _q;
             for(; itA != itEnd; ++itA, ++itB) {
-                if (lexLess(*itA, *itB)) return true;
-                if (lexLess(*itB, *itA)) return false;
+                if (ordLess(*itA, *itB)) return true;
+                if (ordLess(*itB, *itA)) return false;
             }
             if (seqNoA < seqNoB) return true;
             if (seqNoA > seqNoB) return false;
@@ -857,15 +857,15 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 			if (a <= b) {
 				TIter itEnd = itB + _q;
 				for(; itB != itEnd; ++itB, ++itA) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return false;
 			} else {
 				TIter itEnd = itA + _q;
 				for(; itA != itEnd; ++itA, ++itB) {
-					if (lexLess(*itA, *itB)) return true;
-					if (lexLess(*itB, *itA)) return false;
+					if (ordLess(*itA, *itB)) return true;
+					if (ordLess(*itB, *itA)) return false;
 				}
 				return true;
 			}

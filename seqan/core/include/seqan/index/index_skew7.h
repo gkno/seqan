@@ -464,8 +464,8 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         // lexic. order for n-tupels
         for (; n != 0; --n, ++a1, ++b1) {
-            if (lexLess(*a1, *b1)) return true;
-            if (lexLess(*b1, *a1)) return false;
+            if (ordLess(*a1, *b1)) return true;
+            if (ordLess(*b1, *a1)) return false;
         }
         return (a2 <= b2);
     }
@@ -475,8 +475,8 @@ namespace SEQAN_NAMESPACE_MAIN
     bool _leqSkew7(TTextIter a,   TTextIter b,   TSize n)
     { // lexic. order for n-tupels
         for (; n != 0; --n, ++a, ++b) {
-            if (lexLess(*a, *b)) return true;
-            if (lexLess(*b, *a)) return false;
+            if (ordLess(*a, *b)) return true;
+            if (ordLess(*b, *a)) return false;
         }
         return true;	// a is shorter than b
     }

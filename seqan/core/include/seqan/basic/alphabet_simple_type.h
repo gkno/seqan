@@ -958,18 +958,6 @@ operator>=(SimpleType<TValue, TSpec2> const & left_,
 }
 
 // ----------------------------------------------------------------------------
-// Function lexLess()
-// ----------------------------------------------------------------------------
-
-// TODO(holtgrew): Remove auto-sequence feature.
-//template<typename TValue, typename TSpec> 
-//inline bool
-//lexLess(SimpleType<TValue, TSpec> const & left, SimpleType<TValue, TSpec> const & right)
-//{   // return lexicographical left < right
-//    return ordValue(left) < ordValue(right);
-//}
-
-// ----------------------------------------------------------------------------
 // Function operator++()
 // ----------------------------------------------------------------------------
 
