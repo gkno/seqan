@@ -171,9 +171,9 @@ template <typename TIt, typename ST>
 bool sleq__(TIt s1, TIt s2, ST n1, ST n2) {
 	ST n = _min(n1, n2);
 	for(ST i = 0; i < n; i++, ++s1, ++s2) {
-		if (lexLess(*s1,*s2)) return 1;
-		if (lexLess(*s2,*s1)) {
-			::std::cerr<<(lexLess(*s2,*s1));
+		if (ordLess(*s1,*s2)) return 1;
+		if (ordLess(*s2,*s1)) {
+			::std::cerr<<(ordLess(*s2,*s1));
 			::std::cerr<<*s1;
 			::std::cerr<<*s2;
 			::std::cerr << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
@@ -234,8 +234,8 @@ template <typename TIt, typename ST>
 bool sleqLcp__(TIt s1, TIt s2, ST n1, ST n2, ST lcp) {
 	ST n = _min(n1, n2);
 	for(ST i = 0; i < n; i++, ++s1, ++s2) {
-		if (lexLess(*s1,*s2)) return (i == lcp);
-		if (lexLess(*s2,*s1)) {
+		if (ordLess(*s1,*s2)) return (i == lcp);
+		if (ordLess(*s2,*s1)) {
 			::std::cerr << "after " << i << " compares not " << (unsigned)*s1 << " leq " << (unsigned)*s2 << ::std::endl;
 			return false;
 		}
