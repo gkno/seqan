@@ -90,7 +90,7 @@ class RecordReader;
 .Function.resultCode
 ..class:Class.RecordReader
 ..cat:Input/Output
-..summary:Returns $true$ if there is more data to read.
+..summary:Returns $int$ current status code for reader (0 on success).
 ..signature:resultCode(recordReader)
 ..param.recordReader:The @Class.RecordReader@ to query the state of.
 ...type:Class.RecordReader
