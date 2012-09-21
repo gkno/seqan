@@ -101,7 +101,7 @@ _countSequenceFastAQ(unsigned int & count,
                      TRecordReader & reader,
                      char const & /* Alphabet type */)
 {
-    return _countHelper(count, reader, Alpha_(), Whitespace_(), false);
+    return _countHelper(count, reader, FastaFastqGraph_(), Whitespace_(), false);
 }
 
 // allow fine-grained alphabet-checking for DnaString etc
