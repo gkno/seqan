@@ -59,6 +59,7 @@ struct InsegtOptions
         gtf(false)
         {}
 };
+ 
 
 ArgumentParser::ParseResult
 parseCommandLine(InsegtOptions & options, int argc, char const ** argv)
