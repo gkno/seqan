@@ -144,8 +144,12 @@ public:
     // A cache for fast access to the reference name store.
     NameStoreCache<StringSet<CharString> > refNameStoreCache;
 
+    // We use this memory mapped string (opened read-only) to read from the file.
+    String<char, MMap<> > mmapString;
+    bool mmapStringOpen;
+
     FaiIndex() :
-        refNameStoreCache(refNameStore)
+        refNameStoreCache(refNameStore), mmapStringOpen(false)
     {}
 };
 
@@ -328,11 +332,6 @@ inline int readRegion(String<TValue, TSpec> & str,
                       unsigned beginPos,
                       unsigned endPos)
 {
-    // TODO(holtgrew): Keep file open?
-    String<char, MMap<> > mmapString;
-    if (!open(mmapString, toCString(index.fastaFilename), OPEN_RDONLY))
-        return 1;  // Could not open file.
-
     // Limit region to the infix, make sure that beginPos < endPos, compute character to read.
     unsigned seqLen = index.indexEntryStore[refId].sequenceLength;;
     beginPos = std::min(beginPos, seqLen);
@@ -341,7 +340,7 @@ inline int readRegion(String<TValue, TSpec> & str,
 
     typedef typename Iterator<String<char, MMap<> >, Standard>::Type TSourceIter;
     typedef typename Iterator<String<TValue, TSpec>, Standard>::Type TTargetIter;
-    TSourceIter itSource = begin(mmapString, Standard());
+    TSourceIter itSource = begin(index.mmapString, Standard());
     __uint64 offset = index.indexEntryStore[refId].offset;
     // First, compute offset of the completely filled lines.
     unsigned numLines = beginPos / index.indexEntryStore[refId].lineLength;
@@ -448,6 +447,12 @@ inline int read(FaiIndex & index, char const * fastaFilename, char const * faiFi
     clear(index);  // Also clears filename, thus backup above and restore below.
     index.fastaFilename = fastaFilename;
     index.faiFilename = faiFilename;
+
+    if (index.mmapStringOpen)
+        close(index.mmapString);
+    if (!open(index.mmapString, toCString(fastaFilename), OPEN_RDONLY))
+        return 1;  // Could not open file.
+    index.mmapStringOpen = true;
 
     // Open file.
     std::ifstream faiStream(toCString(index.faiFilename), std::ios::binary | std::ios::in);
@@ -656,13 +661,14 @@ inline int build(FaiIndex & index, char const * seqFilename, char const * faiFil
     index.fastaFilename = seqFilename;
     index.faiFilename = faiFilename;
     
-    // Open sequence file and create RecordReader.
-    typedef String<char, MMap<> > TMMapString;
-    TMMapString mmapString;
-    if (!open(mmapString, seqFilename, OPEN_RDONLY))
+    if (index.mmapStringOpen)
+        close(index.mmapString);
+    if (!open(index.mmapString, toCString(seqFilename), OPEN_RDONLY))
         return 1;  // Could not open file.
+    index.mmapStringOpen = true;
 
-    RecordReader<TMMapString, SinglePass<Mapped> > reader(mmapString);
+    typedef String<char, MMap<> > TMMapString;
+    RecordReader<TMMapString, SinglePass<Mapped> > reader(index.mmapString);
     // Get file format, must be FASTA for FAI.
     AutoSeqStreamFormat tagSelector;
     if (!checkStreamFormat(reader, tagSelector))
