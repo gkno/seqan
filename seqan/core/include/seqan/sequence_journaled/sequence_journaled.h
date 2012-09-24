@@ -56,6 +56,7 @@ namespace seqan {
 /**
 .Spec.Journaled String
 ..cat:Sequences
+..general:Class.String
 ..summary:Journaled versions of arbitrary underlying string.
 ..signature:String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 ..include:seqan/sequence_journaled.h
@@ -782,6 +783,18 @@ getValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const 
 // Function virtualToHostPosition()
 // --------------------------------------------------------------------------
 
+/**
+.Function.Journaled String#virtualToHostPosition
+..class:Spec.Journaled String
+..summary:Translates virtual (view) position to position in host.
+..signature:virtualToHostPosition(journaledString, pos)
+..param.journaledString:The journaled string to translate for.
+...type:Spec.Journaled String
+..param.pos:The position to translate.
+..returns:Corresponding host position.
+...type:Metafunction.Position
+*/
+
 // Note that if pos is in a gap, we return the position of the entry
 // after the gap in the host.
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
@@ -798,6 +811,18 @@ virtualToHostPosition(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferS
 //---------------------------------------------------
 // function hostToVirtualPosition()
 //---------------------------------------------------
+
+/**
+.Function.Journaled String#hostToVirtualPosition
+..class:Spec.Journaled String
+..summary:Translates position in host to virtual (view) position.
+..signature:hostToVirtualPosition(journaledString, pos)
+..param.journaledString:The journaled string to translate for.
+...type:Spec.Journaled String
+..param.pos:The position to translate.
+..returns:Corresponding virtual (view) position.
+...type:Metafunction.Position
+*/
 
 template<typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
 inline
@@ -936,6 +961,22 @@ getObjectId(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > con
     return getObjectId(value(journaledString._holder));
 }
 
+// --------------------------------------------------------------------------
+// Function isFlat()
+// --------------------------------------------------------------------------
+
+/**
+.Function.Journaled String#isFlat
+..class:Spec.Journaled String
+..cat:Sequences
+..summary:Returns whether journaled string has modifications.
+..signature:isFlat(journaledString)
+..param.journaledString:The journaled string to query.
+...type:Spec.Journaled String
+..returns:$bool$ indicating whether the string has been modfieid.
+*/
+
+// TODO(holtgrew): Is the non-const version necessary?
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBuffSpec>
 inline bool
 isFlat(String<TValue, Journaled<THostSpec, TJournalSpec, TBuffSpec> > & journaledString)
