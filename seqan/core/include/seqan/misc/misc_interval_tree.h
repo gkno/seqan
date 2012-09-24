@@ -247,6 +247,9 @@ public:
 	TValue center;
 	String<TInterval> list1;
 	String<TInterval> list2;
+
+    IntervalTreeNode() : center()
+    {}
 };
 
 
@@ -275,7 +278,7 @@ public:
 ..summary:Default constructor.
 ..signature:IntervalTreeNode()
      */
-    IntervalTreeNode()
+    IntervalTreeNode() : center()
     {
 SEQAN_CHECKPOINT
     }
