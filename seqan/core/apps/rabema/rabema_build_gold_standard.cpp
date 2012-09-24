@@ -1187,7 +1187,6 @@ int main(int argc, char const ** argv)
     {
         std::cerr << " OK (" << length(faiIndex.indexEntryStore) << " seqs)\n";
     }
-    std::cerr << "{{{" << sequenceName(faiIndex, 0) << "}}}\n";
 
     // Open SAM file and read in header.
     TNameStore refNameStore;
