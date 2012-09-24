@@ -59,37 +59,45 @@ namespace seqan
 	};
 
 	template< typename TFragType, typename TSpec, typename TSize > inline
-	typename Key< TFragType >::Type 
+	typename Key< TFragType >::Type
 	key( ChainPoint_< TFragType, TSpec > & me,
 			TSize dim )
 	{
         SEQAN_ASSERT_MSG(me._coords != NULL, "point not initialized");
-        //SEQAN_ASSERT_LEQ_MSG(dim, me._dim, "dim corrupted");
-// Array bounds checking is broken in GCC 4.7.0 and at least the current (2012-09-18) 4.8 trunk.  We disable this check
-// here locally for the broken compiler versions.  Also see the GCC bug tracker:
-// http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53198
-#if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
-#endif  // #if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
+        SEQAN_ASSERT_LT_MSG((int)dim, (int)me._dim, "dim corrupted");
 		return me._coords[ dim ];
-#if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
-#pragma GCC diagnostic pop
-#endif  // #if (__GNUC__ == 4) && ((__GNUC_MINOR__ == 7) && (__GNUC_PATCHLEVEL__ == 0) || (__GNUC_MINOR__ == 8) && (__GNUC_PATCHLEVEL__ == 0))
 	}
 
-	template< typename TFragType, typename TSpec, typename TSize > inline 
-	typename Key< TFragType >::Type 
+	template< typename TFragType, typename TSpec, typename TSize > inline
+	typename Key< TFragType >::Type
 	key( const ChainPoint_< TFragType, TSpec > & me,
 			TSize dim )
 	{
         SEQAN_ASSERT_NEQ_MSG(me._coords, NULL, "point not initialized");
-        //SEQAN_ASSERT_LEQ(dim, me._dim);
+        SEQAN_ASSERT_LT((int)dim, (int)me._dim);
 		return me._coords[ dim ];
 	}
 
-	template< typename TFragType, typename TSpec, typename TSize, typename TKey > inline 
-	void 
+	template< typename TFragType, unsigned int ISize, typename TSize > inline
+	typename Key< TFragType >::Type
+	key( ChainPoint_< TFragType, Array< ISize> > & me,
+			TSize dim )
+	{
+	    SEQAN_ASSERT_LT((int)dim, (int)ISize);
+	    return me._coords[ dim ];
+    }
+
+	template< typename TFragType, unsigned ISize, typename TSize > inline
+	typename Key< TFragType >::Type
+	key( ChainPoint_< TFragType, Array< ISize> > const & me,
+			TSize dim )
+	{
+	    SEQAN_ASSERT_LT((int)dim, (int)ISize);
+	    return me._coords[ dim ];
+    }
+
+	template< typename TFragType, typename TSpec, typename TSize, typename TKey > inline
+	void
 	setKey( ChainPoint_< TFragType, TSpec > & me,
 			TSize dim,
 			TKey val )
