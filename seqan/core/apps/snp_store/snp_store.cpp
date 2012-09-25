@@ -13,21 +13,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-//#define RAZERS_DUMP_SNPS
-//#define COVBASED_INDELCALLING
 
-//#define SNP_STORE_RTTEST
+// switches on corrected heterozygote variance in allele ratios (higher sensitivity for hets, at the cost of more false positive snp calls)
+#define CORRECTED_HET  // requires boost library
 
-//#define CORRECTED_HET
-#define TRACE_PIPELINE
+
+// for longer reads such as 454 data (will use different scoring scheme)
 //#define READS_454
 
+
+///// switch on extreme debug output 
 //#define SNPSTORE_DEBUG
 //#define SNPSTORE_DEBUG_CANDPOS
 
-//#ifdef SNPSTORE_DEBUG
-//#define SNPSTORE_DEBUG_CANDPOS
-//#endif
 
 #include <seqan/platform.h>
 #include <seqan/sequence.h>
@@ -37,7 +35,6 @@
 #include <seqan/consensus.h>
 #include <seqan/stream.h>
 #include <seqan/bam_io.h>
-//#include "snp_store_underconstruction.h"
 
 
 #ifdef PLATFORM_WINDOWS
@@ -46,17 +43,14 @@
 #define SEQAN_DEFAULT_TMPDIR "./"
 #endif
 
-//#include "/home/takifugu2/emde/seqan/seqan-trunk/projects/library/apps/razers/outputFormat.h"
 
 //#include "../../../extras/apps/rep_sep/utils.h"
 //#include "../../../extras/apps/rep_sep/assembly_parser.h"
 //#include "../../../extras/apps/rep_sep/column_scanner.h"
 //#include "../../../extras/apps/rep_sep/rgraph.h"
+//#include "../../../extras/apps/rep_sep/rep_sep.h"
 
-//#include "/home/takifugu2/emde/seqanRestructured/seqan-trunk/extras/apps/rep_sep/rep_sep.h"
 #include "snp_store.h"
-
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -97,7 +91,7 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList, ::std
                     break;
                 }
             }
-            gIdStringToIdNumMap.insert(::std::make_pair(temp,gSeqNo+i)); //TODO shortID
+            gIdStringToIdNumMap.insert(::std::make_pair(temp,gSeqNo+i)); // keeps the whole fasta ID including white spaces
             appendValue(genomeNames,temp);
         }
         gSeqNo += seqCount;
@@ -660,7 +654,7 @@ int detectSNPs(
         {
             ::std::cerr << "MinMappingQuality:                       \t" << options.minMapQual << ::std::endl;
         }
-        if(options.doIndelCalling && *options.outputIndel != 0)
+        if(*options.outputIndel != 0)
         {
             ::std::cerr << "IndelCountThreshold:                     \t" << options.indelCountThreshold << ::std::endl;
             ::std::cerr << "IndelPercentageThreshold:                \t" << options.indelPercentageT << ::std::endl;
@@ -1089,9 +1083,9 @@ int writeLogFile(
     for(unsigned i = 1; i < length(readFNames); ++i)
         logfile << " " << readFNames[i] << ::std::endl;
     logfile << "\"" << std::endl;
-    if(*options.output != 0)
+    if(*options.outputSNP != 0)
     {
-        logfile << "OutputSnp=\"" << CharString(options.output) << "\"" << ::std::endl;
+        logfile << "OutputSnp=\"" << CharString(options.outputSNP) << "\"" << ::std::endl;
     }
     if(*options.outputIndel != 0)
     {
@@ -1247,17 +1241,6 @@ int main(int argc, const char *argv[])
                     ++arg;
                     istringstream istr(argv[arg]);
                     istr >> options.minMutT;
-                    if (!istr.fail())
-                        continue;
-                }
-                printHelp(argc, argv, options, true);
-                return 0;
-            }
-            if (strcmp(argv[arg], "-fl") == 0 || strcmp(argv[arg], "--force-length") == 0) {
-                if (arg + 1 < argc) {
-                    ++arg;
-                    istringstream istr(argv[arg]);
-                    istr >> options.forceReadLength;
                     if (!istr.fail())
                         continue;
                 }
@@ -1752,9 +1735,6 @@ int main(int argc, const char *argv[])
     
     if (*options.outputLog != 0)
         writeLogFile(argc, argv, genomeFName, readFNames, qualityFNames, options);
-    
-    // TODO: is forceReadLength still needed?
-    if(options.inputFormat == 0 )  options.forceReadLength = 0; // for now this is safer
     
     if(options.runID == "")
     {

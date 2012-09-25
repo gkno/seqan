@@ -46,6 +46,7 @@ struct FragmentStoreConfig<SnpStoreSpec_> :
 {
     typedef Owner<>	TReadSeqStoreSpec;
     typedef Owner<>	TAlignedReadTagStoreSpec;
+    typedef Owner<> TReadNameStoreSpec;
 };
 
 template<>
@@ -54,6 +55,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_> :
 {
     typedef Dependent<>	TReadSeqStoreSpec;
     typedef Owner<>		TAlignedReadTagStoreSpec;
+    typedef Dependent<> TReadNameStoreSpec;
 };
 
 
@@ -85,255 +87,213 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_> :
     template < typename TSpec = SNPCallingSpec<> >
     struct SNPCallingOptions
     {
-        // main options
+        
         TSpec       spec;
-        const char  *output;        // name of snp output file
-        int     _debugLevel;        // level of verbosity
-        bool        printVersion;       // print version number
-        bool        hammingOnly;        // no indels
-        std::stringstream   programCall;
+        int         _debugLevel;                // level of verbosity
+        bool        printVersion;               // print version number
+        std::stringstream   programCall;        // stores snpstore program call
+        std::string runID;                      // runID needed for gff output
     
-        // output format options
-        unsigned    outputFormat;       // 0 (detailed output of all candidate positios) 
-                            // or 1 (only successful candidates)
-        unsigned    inputFormat;        // 0 = razers, 1=eland, 2 = maq
-        unsigned    sortOrder;          // 0..sort keys: 1. read number, 2. genome position
-                                        // 1..           1. genome pos50ition, 2. read number
-        unsigned    positionFormat;     // 0..gap space
-                                        // 1..position space
+        // input output options
+        unsigned    outputFormat;               // 0 (detailed output of all snp candidate positios) 
+                                                // or 1 (only successful candidates)
+        unsigned    inputFormat;                // 0 = razers, 1=eland, 2 = maq
+        unsigned    positionFormat;             // position format of mapped read input
+                                                // 1..position space
+        const char  *outputSNP;                 // name of snp result file
+        const char  *outputIndel;               // name of indel result file
+        const char  *outputLog;                 // name of log output file
 
-        // for comparing nucleotides
-        unsigned char compMask[5];
-        String<char> toIupac;
+        const char  *inputPositionFile;         // name of position analysis input file
+        const char  *outputPosition;            // name of position analysis output file
+        const char  *outputCNV;                 // name of cnv result file
+ 
+        bool        showQualityStrings;         // output ascii qualities in SNP output
+ 
+        // general parameters/options
+        unsigned    maxPile;                    // keep at most maxPile many reads mapped to exact same position
+        bool        laneSpecificMaxPile;        // do pile up correction on file by file basis (instead of on merged read set)
+        bool        orientationAware;           // do pile up correction orientation aware
 
-        // statistics
-        double      timeLoadFiles;      // time for loading input files
-        double      timeDumpResults;    // time for dumping the results
+        bool        storeReadNames;             // store read names
 
-        unsigned    forceReadLength;    // specify read length, trim reads even if they are longer in mapped read file and 
-                            // 
-        unsigned    readLength;     // specify read length, for direct trimming
-        std::string runID;          // runID needed for gff output
+        int         minMapQual;                 // min. mapping quality of reads parsed from SAM file
+        bool        keepCigars;                 // remember cigar string of each match
+        bool        keepSuboptimalReads;        // keep suboptimal read matches
+        bool        keepMultiReads;             // keep multiply mapped reads
+        bool        dontClip;                   // dont apply clip tags
+ 
+        bool        realign;                    // do realignment
+        int         realignAddBorder;           // add flanking bases to reference in realignment (0 seems to work best) 
+        int         minClippedLength;           // discard read if it is not at least minClippedLength bases long after clipping
+        bool        clipTagsInFile;             // helper to remember whether there were clip tags in file
+        bool        softClipTagsInFile;         // helper to remember whether there was soft clipping in file
 
-        const char  *inputPositionFile;
-        const char  *outputPosition;
-        const char  *outputCNV;         // name of result file
+        int         asciiQualOffset;            // how to get quality values from ascii, usually subtract 33
+        unsigned char compMask[5];              // for comparing nucleotides
+        String<char> toIupac;                   // IUPAC code for het snp calls
+
+       
+         // SNP calling related
+        unsigned    method;                     // 0 = threshold method, 1 = Maq method
+        bool        useBaseQuality;             // use base quality instead of min{base quality,mapping,avg read quality}
+        unsigned    minCoverage;                // min depth at variant calling positions
+        int         forceCallCount;             // force variant call if there are at least this many mutationas observed at the candidate site
+        double      newQualityCalibrationFactor;  // experimental.. downweighting read quality if mapped with many errors.. 
+        double      minExplainedColumn;         // if two most frequent bases don't make up at least this fraction of the alignment column --> discard snp, most likely noise
+        unsigned    minDifferentReadPos;        // number of different read positions that need to support the variant call
+        unsigned    excludeBorderPos;           // exclude this many read positions at read borders when looking at minDifferentReadPos
     
-        unsigned    method;
-        unsigned    maxPile;
-        bool        laneSpecificMaxPile;            // 
-        const char  *outputSNP;         // name of result file
-        const char  *errorPrbFileName;          // name of result file
-        const char  *outputCompletePositionAnalysis;
-        bool        ocp_SuperCompact;
-        const char  *coverageFile;          // name of coverage file (wiggle format)
-        unsigned    stepInterval;           //step size for coverage file
+ 
+        // threshold method related
+        float       avgQualT;                   // min. average quality value of variant read base
+        float       percentageT;                // min. percentage of variant read base in alignment column
+        unsigned    minMutT;                    // min. count of variant read base
+        float       snpHetMax;                  // SNP is called as homozygote if variant percentage in alignment column is greater than snpHetMax
 
-        bool        qualityFile;            // name of .qual input file
-        const char  *tabFile;           // name of .tab.txt result file
-        const char  *regionFile;            //
-        const char  *regionCoverageFile;            //
-        
-        bool        storeReadNames;
-        bool        useBaseQuality;     // use base quality instead of min{base,mapping}
-        float       avgQualT;
-        float       percentageT;
-        unsigned    minMutT;
-#ifdef RAZERS_MAQ_MAPPING
-        bool        maqMapping;
-#endif
-        bool        keepCigars;
-        bool        keepSuboptimalReads;
-        bool        keepMultiReads;
-        bool        dontClip;
-        double      hetRate;
-        int     numHaplotypes;
-        int     minMapQual;
-        double      theta;
-        double      eta;
-        String<long double> cnks;
-        String<long double> fks;
-        String<long double> hetTable;
-        String<long double> hetTable2;
-        double      priorHetQ;
-        bool        realign;
-        int         forceCallCount;
-        int     realignAddBorder;
-        int     indelDepthMinOverlap;
-        int         maxPolymerRun;
-
-    // misc
-        unsigned    compactThresh;      // compact match array if larger than compactThresh
-        unsigned    maxHitLength;
-        unsigned    minCoord;
-        unsigned    maxCoord;
-
-        unsigned    minCoverage;
-        unsigned    extractMinCov;
-        unsigned    extractMaxCov;
-        float       snpHetMax;
-        
-        bool        orientationAware;
-        bool        showQualityStrings;
+        // Maq-method related
+        double      hetRate;                    // heterozygote rate
+        int         numHaplotypes;              // number of haplotypes (always two..)
+        double      theta;                      // theta parameter modeling error dependency in Maq model
+        double      eta;                        // eta parameter of Maq model
+        String<long double> cnks;               // precomputed table needed for homozygote prob computation
+        String<long double> fks;                // precomputed table needed for homozygote prob computation
+        String<long double> hetTable;           // precomputed table needed for heterozygote prob computation
+        double      priorHetQ;                  // het. rate transformed to quality value
         
         // branching process corrected allele distribution (Heinrich, Krawitz, 2011)
-        int         amplificationCycles;
-        double      amplificationEfficiency;
-        int         initialN;
-        double      meanAlleleFrequency;
-        bool        correctedHetTable;
-        bool        printHetTable;
-        double      newQualityCalibrationFactor;
-        double      minExplainedColumn; // if two best alleles dont make up at least this fraction of the alignment col --> discard snp, most likely segmental duplication
-    
-        const char  *outputIndel;           // name of result file
-        bool        doIndelCalling;
+        int         amplificationCycles;        // number of cycles during DNA amplification
+        double      amplificationEfficiency;    // efficiency of amplification
+        int         initialN;                   // number of DNA fragments in initial pool
+        double      meanAlleleFrequency;        // mean allele frequency of reference allele at het SNP positions
+        String<long double> hetTable2;          // same as hetTable but with corrected variance for amplification bias
+        bool        correctedHetTable;          // use corrected het table
+        bool        printHetTable;              // print corrected het table
         
-        // int     maxIndelLen;
-        // int     slopeSmooth;
-        // double      slopeTolerance;
         
-        bool        bothIndelStrands;
-        int         indelQualityThreshold;
-        float       indelPercentageT;
-        unsigned    indelCountThreshold;
-        unsigned    indelWindow;
-        unsigned    rLen; //temporary
-        float       indelHetMax;
-        
-        unsigned    minDifferentReadPos;
-        unsigned    excludeBorderPos;
-                
-        unsigned    windowSize;
-        unsigned    windowBuff;
-        unsigned    expectedReadsPerBin;
+        // indel calling related
+        int         indelDepthMinOverlap;       // min. overlap of a read with a candidate indel to be considered 
+        int         maxPolymerRun;              // max. length of homopolymer run for indel to be callable
+        bool        bothIndelStrands;           // indel needs to be observed on reads of both strands
+        int         indelQualityThreshold;      // min. average quality of indel-neighboring read bases
+        float       indelPercentageT;           // min. percentage of indel in alignment columns
+        unsigned    indelCountThreshold;        // min. count of indels
+        unsigned    indelWindow;                // heuristic to merge neighboring indels in non-realigned data
+        float       indelHetMax;                // max percentage of indel-supporting reads for indel to be called heterozygous
+ 
+        // misc/helpers
+        unsigned    maxHitLength;               // helper to remember max. alignment length
+        unsigned    minCoord;                   // current min. read mapping coordinate observed
+        unsigned    maxCoord;                   // current max. read mapping coordinate observed
+
+        unsigned    windowSize;                 // genomic window size for read parsing
+        unsigned    windowBuff;                 // reads within windowBuff base pairs of current window are also kept (-> overlapping windows)
+
+        // cnv calling related // not in use
+        unsigned    expectedReadsPerBin;        
         unsigned    expectedReadsSD;
         unsigned    cnvWindowSize;
-        int         minClippedLength;
-        bool        clipTagsInFile;
-        bool        softClipTagsInFile;
-
-        int         asciiQualOffset;
-        const char  *outputLog;
-                        
+                       
         SNPCallingOptions() 
         {
-            output = "";
-            qualityFile = false;
-            tabFile = "";
-            regionFile = "";
-            regionCoverageFile = "";
-            programCall << "";
     
             _debugLevel = 0;
             printVersion = false;
-            hammingOnly = true;
-            
+            programCall << "";
+            runID = ""; //
+ 
             outputFormat = 0;
-            sortOrder = 0;
+            inputFormat = 0;
             positionFormat = 1;
-            dontClip = false;
+            showQualityStrings = true;
+            outputSNP = "";
+            inputPositionFile = "";
+            outputPosition = "";
+            outputLog = "";
+            outputIndel = "";
+            outputCNV = "";
             
+            dontClip = false;
             keepCigars = false;
             keepSuboptimalReads = false;
             keepMultiReads = false;
+            minMapQual = 1;
+
+            asciiQualOffset = 33;
+            storeReadNames = false; 
             
+            maxPile = 1;
+            laneSpecificMaxPile = true;
+            orientationAware = false;
+            realign = false;
+            realignAddBorder = 0;
+ 
+           
             for (unsigned i = 0; i < 5; ++i)
                 compMask[i] = 1 << i;
             //compMask[4] = 0;
             toIupac = "AMRWMCSYRSGKWYKT";
             
-            windowSize = 1000000;
-            windowBuff = 70;
-
-            forceReadLength = 0;
-            readLength = 0; //-> use entire read length
-            runID = ""; //
-            storeReadNames = false;
-
-            rLen = 32;
-            method = 1;
-            outputSNP = "";
-            inputPositionFile = "";
-            outputPosition = "";
-            errorPrbFileName = "";
-            inputFormat = 0;
-            outputCompletePositionAnalysis = "";
-            ocp_SuperCompact = false;
+            minClippedLength = 10;       
+            clipTagsInFile = false;      
+            softClipTagsInFile = false;  
             
-            forceCallCount = 10;
-            maxPile = 1;
-            laneSpecificMaxPile = true;
+            // SNP calling related
+            method = 1;                 // Maq-method is default
+            forceCallCount = 10;        
+            minCoverage = 5;
+            minDifferentReadPos = 0;
+            excludeBorderPos = 0;
+            minExplainedColumn = 0.8;   // 
+
+
+            // threshold-method related
             avgQualT = 10;
             percentageT = (float)0.25;
             minMutT = 3;
             snpHetMax = (float)0.8;
-            useBaseQuality = true; /// XXXXXXXXXX
-            asciiQualOffset = 33;
+            useBaseQuality = true;      // 
 
-            minCoverage = 5;
-            extractMinCov = 0;
-            extractMaxCov = 1024*4; //sollte reichen
-            orientationAware = false;
-            minMapQual = 1;
-            priorHetQ = 0;
-            realign = false;
-            realignAddBorder = 0;
-            indelDepthMinOverlap = 0;
+            // Maq-method related
+            hetRate = 0.001;            // Maq default values
+            theta = 0.85;
+            eta = 0.03;
+            priorHetQ = 0;              // will be set during het table computation
+            numHaplotypes = 2;          // only 2 works...
             
             // amplification bias distribution
-            printHetTable = false;
+            printHetTable = false;              
             correctedHetTable = false;
-            amplificationCycles = 18;
+            amplificationCycles = 18;           // realistic values (pers. communication Krawitz)
             amplificationEfficiency = 0.3;
             initialN = 10;
             meanAlleleFrequency = 0.51;
-            newQualityCalibrationFactor = 0.0; // off
-//            minExplainedColumn = 0.0;  //off
-            minExplainedColumn = 0.8;  /// XXXXXXXXXX
-            maxPolymerRun = 100;  //off
-            bothIndelStrands = false;
-            indelQualityThreshold = 1; //
+            newQualityCalibrationFactor = 0.0;  // off.. 
+            
+            // indel-calling related
+            maxPolymerRun = 100;        // off
+            bothIndelStrands = false;   
+            indelQualityThreshold = 1;  // basically off.. doesn't seem to be very helpful anyway (room for improvement)
         
-            stepInterval = 1;
-            coverageFile = "";
-            maxHitLength = 1;           
-
-            hetRate = 0.001;
-            numHaplotypes = 2;
-            theta = 0.85;
-            showQualityStrings = true;
-            eta = 0.03;
-#ifdef RAZERS_MAQ_MAPPING
-
-            maqMapping = false;
-#endif
-
+            indelDepthMinOverlap = 0;
             indelPercentageT = (float) 0.25;
             indelCountThreshold = 3;
-            indelWindow = 0;
-            outputIndel = "";
-            outputCNV = "";
-            doIndelCalling = true;
+            indelWindow = 0;            // off
             indelHetMax = 0.70;
-            // maxIndelLen = 10; // names are misleading, needs to be rethought
-            // slopeSmooth = 32; // both are < rLen-2
-            // slopeTolerance = 10.0;
             
-            minDifferentReadPos = 0;
-            excludeBorderPos = 0;
-
+            windowSize = 1000000;
+            windowBuff = 70;
+            minCoord = 3000000000;
+            maxCoord = 0;
+            maxHitLength = 1;           
+ 
             // unused cnv options
-            expectedReadsPerBin = 125;
+            expectedReadsPerBin = 125;  // unused anyway..
             expectedReadsSD = 25;
             cnvWindowSize = 1000;
 
-            // clipping options
-            minClippedLength = 10; //20;
-            clipTagsInFile = false;
-            softClipTagsInFile = false;
-            outputLog = "";
-        }
+
+       }
     };
     
         
@@ -929,7 +889,7 @@ int readMatchesFromGFF_Batch(
             if(options._debugLevel > 1) 
                 ::std::cout << current_tag << " in features\n";
 #endif
-            if(!options.qualityFile && current_tag=="quality")
+            if(current_tag=="quality")
             {
                 // add the quality to the read
                 qualityFound = true;
@@ -1054,7 +1014,6 @@ int readMatchesFromGFF_Batch(
                                 append(temp_read,'A');  // will be replaced with correct base in "mutations" loop
                             c = _streamGet(*file);
                             rLen += pos2;
-                            options.hammingOnly = false;
                             hasIndel = true;
                             first = false;
                 //            if(maxIndelLen < pos2) maxIndelLen = pos2;
@@ -1073,7 +1032,6 @@ int readMatchesFromGFF_Batch(
                             alignLength += pos2;
                             pos += pos2;
                             rLen -= pos2;
-                            options.hammingOnly = false;
                             c = _streamGet(*file);
                             hasIndel = true;
                             first = false;
@@ -1083,25 +1041,9 @@ int readMatchesFromGFF_Batch(
                         if(c=='S')
                         {
                             if(first) 
-                            {
-//                                gInf = infix(genome, _max(0,(int)beginPos-pos2), endPos);
-//                                if (orientation == 'R')
-//                                    reverseComplement(gInf);
-//                                readTemplate = gInf;
                                 softClippedLeft = pos2;
-//                                alignLength += _min((int)beginPos,pos2);
-                                //beginPos = _max(0,(int)beginPos-pos2);
-                            }
                             else
-                            {
-//                                gInf = infix(genome, endPos, _min(endPos+pos2,length(genome)));
-//                                if (orientation == 'R')
-//                                    reverseComplement(gInf);
-//                                append(temp_read,gInf);
                                 softClippedRight = pos2;
-                                //endPos = _min(endPos+pos2,length(genome));
-//                                alignLength += _min(pos2,length(genome)-endPos);
-                            }
                             unsigned k= 0;
                             while(k<pos2)
                             {
@@ -1303,10 +1245,6 @@ interpretBamTags(TBamTags & tags, int & editDist, bool & multi,
                 int & clipLeft, int & clipRight, TOptions & options, Sam)
 {
     BamTagsDict bamTags(tags);
-    //std::cerr << length(bamTags) << std::endl;  // #=> "2"
-    //for (unsigned i = 0; i < length(bamTags)-1; ++i)
-    //    std::cerr << getTagKey(bamTags, i) << " -> " << getTagValue(bamTags, i) << std::endl;
-    // editDistance
     unsigned editDistIndex = 0;
     bool res1 = findTagKey(editDistIndex, bamTags, "NM");
     if(res1)
@@ -1334,31 +1272,13 @@ interpretBamTags(TBamTags & tags, int & editDist, bool & multi,
         if('Z' == getTagValue(bamTags, clipIndex)[0])
         {
             CharString clipLeftRight = getTagValue(bamTags, clipIndex);
-//            extractTagValue(clipLeftRight, bamTags, clipIndex);
-//            std::cout << "clipLeftRight= " << clipLeftRight << std::endl;
             unsigned x=1;
             clipLeft = _parseReadNumber(clipLeftRight, x);
-//            std::cout << "clipLeft= " << clipLeft << std::endl;
             clipRight = _parseReadNumber(clipLeftRight, ++x);
-//            std::cout << "clipRight= " << clipRight << std::endl;
             options.clipTagsInFile = true;
         }
     }
         
-//  CharString editDistTag;
-//  //CharString const nmTag = "NM";
-//  getTagValue(editDistTag, "NM", record);
-//  istringstream istr(editDistTag);
-    //istr >> editDist;
-
-//  // multi or unique?
-//  CharString numAlternativeBestTag;
-//  getTagValue(numAlternativeBestTag, "X0", record); // bwa tag
-//  istringstream istr2(numAlternativeBestTag);
-    //int numAlternativeBest = 0;
-//  istr2 >> numAlternativeBest;
-//  if(numAlternativeBest > 0) multi = true;
-
     // split read?
         
     // clip tags?
@@ -1368,7 +1288,7 @@ interpretBamTags(TBamTags & tags, int & editDist, bool & multi,
 }
     
 
-// TODO: implement this, currently bam tags are not considered when parsing .bam files
+// TODO: implement this as in interpretSamTags, currently bam tags are not considered when parsing .bam files
 template<typename TBamTags, typename TOptions, typename TTag>
 int
 interpretBamTags(TBamTags & /*tags*/, int & /*editDist*/, bool & /*multi*/, 
@@ -1376,69 +1296,7 @@ interpretBamTags(TBamTags & /*tags*/, int & /*editDist*/, bool & /*multi*/,
 {
     
 //    char* bamTags = reinterpret_cast<char *>(toCString(tags));
-    //std::cout << "->" << bamTags << "<-" << std::endl;
-//    //std::cerr << length(bamTags) << std::endl;  // #=> "2"
-//    //for (unsigned i = 0; i < length(bamTags)-1; ++i)
-//    //    std::cerr << getTagKey(bamTags, i) << " -> " << getTagValue(bamTags, i) << std::endl;
-//    // editDistance
-//    unsigned editDistIndex = 0;
-//    bool res1 = findTagKey(editDistIndex, bamTags, "NM");
-//    if(res1)
-//    {
-//        SEQAN_ASSERT_EQ('i', getTagValue(bamTags, editDistIndex)[0]);
-//        extractTagValue(editDist, bamTags, editDistIndex);
-//    }
-//    else editDist = 1; // we dont know whether there are errors in the alignment, we assume there are..
 //
-//    int numBest = 0;
-//    unsigned numBestIndex = 0;
-//    res1 = findTagKey(numBestIndex, bamTags, "X0");
-//    if(res1)
-//    {
-//        SEQAN_ASSERT_EQ('i', getTagValue(bamTags, numBestIndex)[0]);
-//        extractTagValue(numBest, bamTags, numBestIndex);
-//        if(numBest > 1) multi = true;
-//    }
-//
-//    unsigned clipIndex = 0;
-//    res1 = findTagKey(clipIndex, bamTags, "XC");
-//    if(res1)
-//    {
-////      SEQAN_ASSERT_EQ('Z', getTagValue(bamTags, clipIndex)[0]);  // XC is also used by BWA, also for clipping, but different fron ours
-//        if('Z' == getTagValue(bamTags, clipIndex)[0])
-//        {
-//            CharString clipLeftRight = getTagValue(bamTags, clipIndex);
-////            extractTagValue(clipLeftRight, bamTags, clipIndex);
-////            std::cout << "clipLeftRight= " << clipLeftRight << std::endl;
-//            unsigned x=1;
-//            clipLeft = _parseReadNumber(clipLeftRight, x);
-////            std::cout << "clipLeft= " << clipLeft << std::endl;
-//            clipRight = _parseReadNumber(clipLeftRight, ++x);
-////            std::cout << "clipRight= " << clipRight << std::endl;
-//
-//            options.clipTagsInFile = true;
-//        }
-//    }
-//        
-////  CharString editDistTag;
-////  //CharString const nmTag = "NM";
-////  getTagValue(editDistTag, "NM", record);
-////  istringstream istr(editDistTag);
-//    //istr >> editDist;
-//
-////  // multi or unique?
-////  CharString numAlternativeBestTag;
-////  getTagValue(numAlternativeBestTag, "X0", record); // bwa tag
-////  istringstream istr2(numAlternativeBestTag);
-//    //int numAlternativeBest = 0;
-////  istr2 >> numAlternativeBest;
-////  if(numAlternativeBest > 0) multi = true;
-//
-//    // split read?
-//        
-//    // clip tags?
-//
-//    // count tag?
     return 0;
 
 }
@@ -1656,10 +1514,6 @@ int readMatchesFromSamBam_Batch(
                 {
                     softClippedLeft = record.cigar[j].count;
                  // dont apply tags yet, wait until after pile up correction
-                 //   arrayMove(iter(record.seq, record.cigar[j].count, Standard()), end(record.seq, Standard()), begin(record.seq, Standard()));
-                 //   arrayMove(iter(record.qual, record.cigar[j].count, Standard()), end(record.qual, Standard()), begin(record.qual, Standard()));
-                 //   resize(record.seq,length(record.seq)-record.cigar[j].count);
-                 //   resize(record.qual,length(record.qual)-record.cigar[j].count);
                  // instead act as if clipped positions were matched characters --> change mapping cooridnates (will be adjusted again in clipReads function)
                     beginPos = _max(0,beginPos-softClippedLeft);
                 }
@@ -1667,8 +1521,6 @@ int readMatchesFromSamBam_Batch(
                 {
                     softClippedRight = record.cigar[j].count;
                  // dont apply tags yet, wait until after pile up correction
-                 //   resize(record.seq,length(record.seq)-record.cigar[j].count);
-                 //   resize(record.qual,length(record.qual)-record.cigar[j].count);
                  // instead act as if clipped positions were matched characters --> change mapping cooridnates (will be adjusted again in clipReads function)
                     endPos += (TContigPos) record.cigar[j].count;
                 }
@@ -1686,14 +1538,8 @@ int readMatchesFromSamBam_Batch(
             continue;
         }
         
-        //int gMatchLen = endPos - beginPos;    
-        //int rLen = gMatchLen;
         if(endPos > genomeLen)
-        {
-//          streamSeek(reader,lineStart);
-//            (reader._file).seekp(lineStart);
             break;  
-        }
         
         // must be parsed from tag
         mScore = (int)record.mapQ; 
@@ -1724,10 +1570,6 @@ int readMatchesFromSamBam_Batch(
         if (orientation == 'R')
             reverseComplement(curr_read);
 
-        // parse other tags
-        //int i = 0;
-        //char* tags = reinterpret_cast<char *>(toCString(host(bamTags)));
-
         
         interpretBamTags(record.tags,editDist,multi,clipLeft,clipRight,options,TTag());
          
@@ -1742,8 +1584,6 @@ int readMatchesFromSamBam_Batch(
             clipRight = _max(clipRight,softClippedRight);
             clipLeft = _max(clipLeft,softClippedLeft);
         }
-//        if(softClippedRight > 0) clipRight = _max(0,clipRight-softClippedRight); // this is for if soft clipping is applied directly
-//        if(softClippedLeft > 0) clipLeft = _max(0,clipLeft-softClippedLeft);
         if (orientation == 'R') 
         {
             int temp = clipLeft;
@@ -2124,12 +1964,8 @@ double computeHetTable(THeteroTable & hetTable, TOptions & options)
             double corrected = 0.0;
             if(n1+n2 != 0)
                 corrected = cdf(distributions[n1+n2],n2+0.5) - cdf(distributions[n1+n2],n2-0.5);
-            //double corrected = 0.3; //cdf(distributions[n1+n2],n2+1) - cdf(distributions[n1+n2],n2);
-            //double corrected = cdf(distributions[n1+n2],n2+1) - cdf(distributions[n1+n2],n2);
             hetTable[n1<<8|n2] = logl(corrected); 
-//          sum += pk * 0.5 * (expl(log1*n2) * expl(log2*n1) + expl(log1*n1) * expl(log2*n2));
 
-    //      hetTable[n1<<8|n2] = lC + logl(sum);
         }
     }
 
@@ -2226,7 +2062,7 @@ getHomoProbs(THomoTable & cnks,
         for(unsigned j = 0; j < length(qualitiesForward[i]); ++j)
         {
             qual = static_cast<double>(ordValue(qualitiesForward[i][j])-33);
-            if(qual > 30.0) qual = 30.0; /// XXXXXXXXXX
+            if(qual > 30.0) qual = 30.0; /// snp rate 1 in a 1000
             //qual = rescale into regular log
             if(j>=256) fk = fks[255];
             else fk = fks[j];
@@ -2247,7 +2083,7 @@ getHomoProbs(THomoTable & cnks,
         for(unsigned j = 0; j < length(qualitiesReverse[i]); ++j)
         {
             qual = static_cast<double>(ordValue(qualitiesReverse[i][j])-33);
-            if(qual > 30.0) qual = 30.0; /// XXXXXXXXXX
+            if(qual > 30.0) qual = 30.0; 
             if(j>=256) fk = fks[255];
             else fk = fks[j];
             sumE[i] += fk * qual;
@@ -2605,10 +2441,9 @@ void dumpVariantsRealignBatchWrap(
             //FragmentStore<SnpStoreGroupSpec_> fragStoreGroup;
             //copyFragmentStore(fragStoreGroup,fragmentStore,matchItBatchBegin,matchItBatchEnd,groupStartPos,groupEndPos);
 
-            TFragmentStore fragStoreGroup = fragmentStore; //clear(fragStoreGroup.alignedReadStore); resize; arrayCopy(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
+            TFragmentStore fragStoreGroup = fragmentStore; 
             resize(fragStoreGroup.alignedReadStore,numMatches,Exact());
             arrayMoveForward(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
-//          fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartPos,groupEndPos);
             fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartCoordLocal,groupEndCoordLocal);
     
 #ifdef SNPSTORE_DEBUG
@@ -2621,7 +2456,6 @@ void dumpVariantsRealignBatchWrap(
 #endif
             groupStartPos += startCoord;
             groupEndPos += startCoord;
-            //groupStartCoord = groupStartPos;
             TContigPos groupStartCoord = startCoord + groupStartCoordLocal;
             groupStartPos = _max(groupStartPos,currWindowBegin);
             groupEndPos = _min(groupEndPos,currWindowEnd);
@@ -2637,7 +2471,7 @@ void dumpVariantsRealignBatchWrap(
             }
             else
             {
-                // todo: switch between with or without realignment in dumpSNPsBatch.. make global in any case
+                // todo: switch between with or without realignment in dumpVariantsRealignBatch.. problem: split reads
 /*              dumpVariantsRealignBatch(fragStoreGroup,readCigars,
                     readCounts,genomeID,
                     groupStartCoord,groupStartPos,groupEndPos,
@@ -3314,6 +3148,7 @@ realignReferenceToReadProfile(TFragmentStore & fragmentStore,
 
     //Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > consScore;
     Score<int, ConsensusScore>  consScore;
+  
     // TODO: Score<int, WeightedConsensusScore<Score<int, AffineFractionalScore>, Score<int, AffineConsensusScore> > > consScore;
     // or: quality fractional score! x/n where n=sum(q(read)) and x = sum(q(reads with base x))
     // consScore.verticalGapOpen = 10; bzw dependent on read depth? or read quality? --> higher quality --> higher penalty?
@@ -3330,8 +3165,6 @@ realignReferenceToReadProfile(TFragmentStore & fragmentStore,
     if(length(refProfile) < length(multiReadProfile)) rightDiag +=  length(multiReadProfile) - length(refProfile);
     if(length(refProfile) > length(multiReadProfile)) leftDiag -=  length(refProfile) - length(multiReadProfile);
 
-    //globalAlignment(fragments, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
- //   globalAlignment(fragments, pairSet, consScore, AlignConfig<false,true,true,false>(), leftDiag, rightDiag, Gotoh());
     
     //// Debug code
 //  Graph<Alignment<TStringSet, void, WithoutEdgeId> > g1(pairSet);
@@ -3423,11 +3256,6 @@ realignReferenceToReadProfile(TFragmentStore & fragmentStore,
     //std::cout << "..............." << std::endl;
 
     Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > consScore3;
-    // Score<int, ConsensusScore>  consScore3;
-    // TODO: Score<int, WeightedConsensusScore<Score<int, AffineFractionalScore>, Score<int, AffineConsensusScore> > > consScore;
-    // or: quality fractional score! x/n where n=sum(q(read)) and x = sum(q(reads with base x))
-    // consScore.verticalGapOpen = 10; bzw dependent on read depth? or read quality? --> higher quality --> higher penalty?
-    // consScore.horizontalGapOpen = 10;
     assignProfile(consScore3, diploidConsensus);
 
     bandWidth = 30;     // set somewhere else
@@ -3686,11 +3514,6 @@ realignReferenceToDiploidConsensusProfile(TFragmentStore & fragmentStore,
 
     SEQAN_CONSENSUS_OPEN_PENALTY_FACTOR = 2;
     Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > consScore;
-    // Score<int, ConsensusScore>  consScore3;
-    // TODO: Score<int, WeightedConsensusScore<Score<int, AffineFractionalScore>, Score<int, AffineConsensusScore> > > consScore;
-    // or: quality fractional score! x/n where n=sum(q(read)) and x = sum(q(reads with base x))
-    // consScore.verticalGapOpen = 10; bzw dependent on read depth? or read quality? --> higher quality --> higher penalty?
-    // consScore.horizontalGapOpen = 10;
     assignProfile(consScore, diploidConsensus);
 
     TReadPos bandWidth = 30;     // set somewhere else
@@ -3713,9 +3536,6 @@ realignReferenceToDiploidConsensusProfile(TFragmentStore & fragmentStore,
     // reference can be aligned to gaps at the ends, diploidConsensus needs to be fully aligned
     globalAlignment(fragments, pairSet, consScore, AlignConfig<false,false,false,false>(), _max(leftDiag, -1 * (int) length(refProfile)), _min(rightDiag, (int) length(diploidConsensus)), Gotoh());
     
-    //if(options.realignAddBorder == 0)
-    //    globalAlignment(fragments, pairSet, consScore, AlignConfig<false,false,false,false>(), leftDiag, rightDiag, Gotoh());
-
     // now use removeState string to retrieve reference<->multiReadProfile alignment
     // use oldPosLimits string to retrieve positions wrt multiReadProfile
     
@@ -4060,12 +3880,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
     }
 
 
-#ifndef TRACE_PIPELINE
-    bandWidth = 25; // allow for some more bandWidth in general
-#endif
-
 #ifdef READS_454
-        bandWidth = 25;
     reAlign(fragmentStore,consScore,0,1,bandWidth,true);
 #else
     reAlign(fragmentStore,consScore,0,1,bandWidth,true);
@@ -4100,14 +3915,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
 //  
 #ifndef  READS_454
     reAlign(fragmentStore,consScore,0,1,/*bandWidth*/5,false);
-    //reAlign(fragmentStore,consScore,0,1,/*bandWidth*/5,true);
-    //++numReads;
-    //realignReferenceToReadProfile(fragmentStore,refId,options);
-    //realignReferenceToDiploidConsensusProfileDeleteSeqErrors(fragmentStore,refId,options);
-    //realignReferenceToDiploidConsensusProfile(fragmentStore,refId,options);
 #else
 //  reAlign(fragmentStore,consScore,0,1,/*bandWidth*/5,false);
-//    realignReferenceToDiploidConsensusProfileDeleteSeqErrors(fragmentStore,refId,options);
+//  realignReferenceToDiploidConsensusProfileDeleteSeqErrors(fragmentStore,refId,options);
     realignReferenceToDiploidConsensusProfile(fragmentStore,refId,options);
 //    realignReferenceToDiploidConsensusProfileDeleteSeqErrors(fragmentStore,refId,options);
 #endif
@@ -4553,11 +4363,9 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
         }
     }
 
-    CharString chrPrefix = "";
+    //CharString chrPrefix = ""; 
+    CharString chrPrefix = "chr"; // should check if "chr" is already part of chromosome names (usually not)
 
-#ifdef TRACE_PIPELINE
-    chrPrefix = "chr";
-#endif
 
     ::std::string runID = options.runID;
 
@@ -4635,6 +4443,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     indelfile << "\t" << percentage;
                     indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat ;
                     indelfile << ";size=" << indelSize;
+                    indelfile << ";count=" << (int)(percentage*depth);
                     indelfile << ";depth=" << depth;
                     indelfile << ";quality=" << indelQ;
                     indelfile << ";homorun=" << homoLength;
@@ -4695,6 +4504,7 @@ convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
                     indelfile << "\t" << percentage;
                     indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat;
                     indelfile << ";size=" << indelSize;
+                    indelfile << ";count=" << (int)(percentage*depth);
                     indelfile << ";seq="<< insertionSeq;
                     indelfile << ";depth=" << depth;
                     indelfile << ";quality=" << indelQ;
@@ -5159,20 +4969,24 @@ void dumpShortIndelPolymorphismsBatch(
     typedef typename TIndelMap::iterator TIndelIt;
     typedef typename std::map<TPosLen,unsigned,LessPosLen<TPosLen> >  TSplitMap;
     typedef typename TSplitMap::iterator TSplitIt;
+    typedef typename std::map<TPosLen,Pair<bool,bool>, LessPosLen<TPosLen> > THelperStrandMap;
+    typedef typename THelperStrandMap::iterator TStrandIt; // for each indel candidate, store whether both strinds were seen
+
     
     // position,length and count,sequence
     TIndelMap indels; //readinf empty for deletions
+    THelperStrandMap indelStrandHelper; 
+
 
     //remember how many split reads supported the indel
     TSplitMap splitCounts;
     
     TIndelIt indelIt;
+    TStrandIt strandIt;
     TSplitIt splitCountIt;
-    CharString chrPrefix = "";
+    //CharString chrPrefix = "";
+    CharString chrPrefix = "chr"; // should check if "chr" is already part of chromosome names (usually not)
 
-#ifdef TRACE_PIPELINE
-    chrPrefix = "chr";
-#endif
 
     TReadInf dummyInf;
 
@@ -5306,14 +5120,22 @@ void dumpShortIndelPolymorphismsBatch(
 
                 TReadInf rInf;
                 if((*matchIt).beginPos < (*matchIt).endPos)
+                {
                     rInf = infix(read,
                     (readInserts[i].i2).i1,
                     (readInserts[i].i2).i1+(readInserts[i].i2).i2);
+                    indelStrandHelper.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),
+                         Pair<bool,bool>(true,false)));
+                }
                 else
+                {
                     rInf = infix(read,
                     readLen - (readInserts[i].i2).i1-(readInserts[i].i2).i2,
                     readLen - (readInserts[i].i2).i1);
-                if((*matchIt).beginPos > (*matchIt).endPos) reverseComplement(rInf);
+                    reverseComplement(rInf);
+                    indelStrandHelper.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),
+                         Pair<bool,bool>(false,true)));
+                }
                 
                 indels.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),
                                              Pair<unsigned,TReadInf>(1,rInf)));
@@ -5324,6 +5146,16 @@ void dumpShortIndelPolymorphismsBatch(
             {
     //          if(extraV) ::std::cout << "increase counter ins pos" << std::endl;
                 ++(indelIt->second.i1);
+                strandIt = indelStrandHelper.find(TPosLen((unsigned)indelCandPos,-(int)(readInserts[i].i2).i2));
+                //                SEQAN_ASSERT_NEQ(strandIt, indelStrandHelper.end());
+
+                if((*matchIt).beginPos < (*matchIt).endPos)
+                    strandIt->second.i1 = true;
+                else
+                    strandIt->second.i2 = true;
+
+
+
 /*              if (storeall insertion sequences)
                 {
                     
@@ -5374,9 +5206,32 @@ void dumpShortIndelPolymorphismsBatch(
             {
                 indels.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,(int)(readDeletes[i].i2).i2),
                      Pair<unsigned,TReadInf>(1,dummyInf)));
+
+                if((*matchIt).beginPos < (*matchIt).endPos)
+                {
+                    indelStrandHelper.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,(int)(readDeletes[i].i2).i2),
+                         Pair<bool,bool>(true,false)));
+                }
+                else
+                {
+                    indelStrandHelper.insert(std::make_pair(Pair<unsigned,int>(indelCandPos,(int)(readDeletes[i].i2).i2),
+                         Pair<bool,bool>(false,true)));
+                }
+
+
             }
             else
+            {
                 ++(indelIt->second.i1);
+                strandIt = indelStrandHelper.find(Pair<unsigned,int>(indelCandPos,(int)(readDeletes[i].i2).i2));
+                //                SEQAN_ASSERT_NEQ(strandIt,indelStrandHelper.end());
+
+                if((*matchIt).beginPos < (*matchIt).endPos)
+                   strandIt->second.i1 = true;
+                else
+                    strandIt->second.i2 = true;
+
+            }
             if(!empty(readCigars[(*matchIt).readId]))// if this is a split read --> increase counter
             {
                 splitCountIt = splitCounts.find(Pair<unsigned,int>(indelCandPos,(readDeletes[i].i2).i2));
@@ -5408,6 +5263,7 @@ void dumpShortIndelPolymorphismsBatch(
         
         matchIt = currSeqMatchItBegin;
         indelIt = indels.begin();
+        strandIt = indelStrandHelper.begin();
         splitCountIt = splitCounts.begin();
         TIndelIt endIt = indels.end();
         TSplitIt splitEndIt = splitCounts.end();
@@ -5477,6 +5333,17 @@ void dumpShortIndelPolymorphismsBatch(
                 if(debug)::std::cout << "indel: pos outside range "<<indelIt->first.i1<<"\n";
                 continue;
             }
+            bool bsi = false;
+            if(strandIt->second.i1 == true && strandIt->second.i2 == true)
+                bsi = true;
+            if(options.bothIndelStrands && !bsi)
+            {
+                if(debug)::std::cout << "indel: not supported by both strands \n";
+                continue;
+            }
+            SEQAN_ASSERT_EQ(strandIt->first.i1,indelIt->first.i1);
+            SEQAN_ASSERT_EQ(strandIt->first.i2,indelIt->first.i2);
+
             unsigned candidatePos = indelIt->first.i1;
             while(matchIt != currSeqMatchItEnd && _max((*matchIt).endPos,(*matchIt).beginPos) <= (TContigPos) candidatePos)
                 ++matchIt;
@@ -5559,10 +5426,12 @@ void dumpShortIndelPolymorphismsBatch(
                 indelfile << "\t" << (float)indelIt->second.i1/depth;
                 indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat;
                 indelfile << ";size=" << indelSize;
+                indelfile << ";count=" << indelIt->second.i1;
                 if(indelSize < 0)indelfile << ";seq="<<indelIt->second.i2;
                 indelfile << ";ebiDepth=" << depth << ";depth=" << covF+covR;
                 if(splitSupport>0) indelfile << ";splitSupport=" << splitSupport;
                 if(homoLength > 1) indelfile << ";homorun=" << homoLength;
+                if(bsi) indelfile << ";bsi;";
                 if( (float)indelIt->second.i1/depth <= options.indelHetMax) indelfile << ";geno=het";
                 else indelfile << ";geno=hom";
                 indelfile << std::endl;
@@ -5773,10 +5642,9 @@ void dumpPositionsRealignBatchWrap(
             //FragmentStore<SnpStoreGroupSpec_> fragStoreGroup;
             //copyFragmentStore(fragStoreGroup,fragmentStore,matchItBatchBegin,matchItBatchEnd,groupStartPos,groupEndPos);
 
-            TFragmentStore fragStoreGroup = fragmentStore; //clear(fragStoreGroup.alignedReadStore); resize; arrayCopy(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
+            TFragmentStore fragStoreGroup = fragmentStore; 
             resize(fragStoreGroup.alignedReadStore,numMatches,Exact());
             arrayMoveForward(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
-//          fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartPos,groupEndPos);
             fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartCoordLocal,groupEndCoordLocal);
     
 #ifdef SNPSTORE_DEBUG
@@ -5894,18 +5762,14 @@ void dumpPositionsRealignBatch(
 
     // TODO: check out if a different scoring scheme makes more sense
     Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > consScore;
-    int bandWidth = 10; // ad hoc
+    int bandWidth = 10; // ad hoc, but seems good, increasing is not necessarily better 
 
     if(options._debugLevel > 1)
         ::std::cout << "Realigning "<< length(matches)<<" reads to genome of length " <<genomeLen << std::flush;
 
 
-#ifndef TRACE_PIPELINE
-    bandWidth = 25; // allow for some more bandWidth in general
-#endif
 
 #ifdef READS_454
-        bandWidth = 25;
     reAlign(fragmentStore,consScore,0,1,bandWidth,true);
 #else
     reAlign(fragmentStore,consScore,0,1,bandWidth,true);
