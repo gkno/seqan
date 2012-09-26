@@ -847,12 +847,26 @@ String<char> & text = getFibre(indexEsa, EsaText());
 	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, TSpec> &index) {
 		return value(getFibre(index, FibreRawText()), posGlobalize(i, stringSetLimits(index)));
 	}
+	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
+	inline typename Reference<typename Fibre< Index< StringSet<TString, TSSetSpec>, TSpec> const, FibreRawText>::Type>::Type 
+	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, TSpec> const &index) {
+		return value(getFibre(index, FibreRawText()), posGlobalize(i, stringSetLimits(index)));
+	}
 	template <typename TPos, typename TString, typename TSpec>
 	inline typename Reference<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec>, FibreRawText>::Type>::Type 
 	textAt(TPos i, Index< StringSet<TString, Owner<Default> >, TSpec> &index) {
 		Pair <
 			typename Size< StringSet<TString, Owner<Default> > >::Type,
 			typename Size< TString >::Type > locPos;
+		posLocalize(locPos, i, stringSetLimits(index));
+		return value(value(getFibre(index, FibreText()), getValueI1(locPos)), getValueI2(locPos));
+	}
+	template <typename TPos, typename TString, typename TSpec>
+	inline typename Reference<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec> const, FibreRawText>::Type>::Type 
+	textAt(TPos i, Index< StringSet<TString, Owner<Default> >, TSpec> const &index) {
+		Pair <
+        typename Size< StringSet<TString, Owner<Default> > >::Type,
+        typename Size< TString >::Type > locPos;
 		posLocalize(locPos, i, stringSetLimits(index));
 		return value(value(getFibre(index, FibreText()), getValueI1(locPos)), getValueI2(locPos));
 	}
